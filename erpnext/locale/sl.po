@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-16 09:35+0000\n"
-"PO-Revision-Date: 2025-11-22 22:59\n"
+"PO-Revision-Date: 2025-11-23 23:33\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Slovenian\n"
 "MIME-Version: 1.0\n"
@@ -232,61 +232,61 @@ msgstr "% Vrnjenih"
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #, python-format
 msgid "% of materials billed against this Sales Order"
-msgstr ""
+msgstr "% materialov, zaračunanih za to Prodajno Naročilo"
 
 #. Description of the '% Delivered' (Percent) field in DocType 'Pick List'
 #: erpnext/stock/doctype/pick_list/pick_list.json
 #, python-format
 msgid "% of materials delivered against this Pick List"
-msgstr ""
+msgstr "% materialov, dostavljenih v skladu s tem Izbirnim Seznamom"
 
 #. Description of the '%  Delivered' (Percent) field in DocType 'Sales Order'
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #, python-format
 msgid "% of materials delivered against this Sales Order"
-msgstr ""
+msgstr "% dobavljenih materialov po tem Prodajnem Naročilu"
 
 #: erpnext/controllers/accounts_controller.py:2295
 msgid "'Account' in the Accounting section of Customer {0}"
-msgstr ""
+msgstr "»Račun« v razdelku Računovodstvo Stranke {0}"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:346
 msgid "'Allow Multiple Sales Orders Against a Customer's Purchase Order'"
-msgstr ""
+msgstr "»Dovoli več Prodajnih Naročil za Kupolno Naročilo Stranke«"
 
 #: erpnext/controllers/trends.py:56
 msgid "'Based On' and 'Group By' can not be same"
-msgstr ""
+msgstr "'Na podlagi' in 'Po skupini' ne moreta biti enaka"
 
 #: erpnext/selling/report/inactive_customers/inactive_customers.py:18
 msgid "'Days Since Last Order' must be greater than or equal to zero"
-msgstr ""
+msgstr "\"Dnevi od zadnjega Naročila\" morajo biti večji ali enaki nič"
 
 #: erpnext/controllers/accounts_controller.py:2300
 msgid "'Default {0} Account' in Company {1}"
-msgstr ""
+msgstr "\"Privzet Račun {0} \" v Podjetju {1}"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1283
 msgid "'Entries' cannot be empty"
-msgstr ""
+msgstr "'Vnosi' ne morejo biti prazni"
 
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:24
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:127
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:313
 msgid "'From Date' is required"
-msgstr ""
+msgstr "\"Od Datuma\" je obvezno"
 
 #: erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py:18
 msgid "'From Date' must be after 'To Date'"
-msgstr ""
+msgstr "\"Od Datuma\" mora biti za \"Do Datuma\""
 
 #: erpnext/stock/doctype/item/item.py:397
 msgid "'Has Serial No' can not be 'Yes' for non-stock item"
-msgstr ""
+msgstr "\"Ima serijsko številko\" ne more biti \"Da\" za artikel, ki ni na zalogi"
 
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:139
 msgid "'Inspection Required before Delivery' has disabled for the item {0}, no need to create the QI"
-msgstr ""
+msgstr "'Pregled Obvezen pred Dostavo' je onemogočen za artikel {0}, zato ni treba ustvariti Nadzor Kakovosti"
 
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:130
 msgid "'Inspection Required before Purchase' has disabled for the item {0}, no need to create the QI"
@@ -604,7 +604,22 @@ msgid "<br>\n"
 "<pre><code>Hello {{ customer.customer_name }},<br>PFA your Statement Of Accounts from {{ doc.from_date }} to {{ doc.to_date }}.</code> </pre></li>\n"
 "</ul>\n"
 "<!-- {% endraw %} -->"
-msgstr ""
+msgstr "<br>\n"
+"<h4>Opomba</h4>\n"
+"<ul>\n"
+"<li>\n"
+"Za dinamične vrednosti lahko uporabite oznake <a href=\"https://jinja.palletsprojects.com/en/2.11.x/\" target=\"_blank\">Jinja</a> v poljih <b>Zadeva</b> in <b>Telo</b> .\n"
+"</li><li>\n"
+"    Vsa polja v tem dokumentu tipa dokumenta so na voljo v okviru objekta <b>doc</b> , vsa polja za stranko, ki ji bo poslana pošta, pa so na voljo v okviru objekta  <b>customer</b> .\n"
+"</li></ul>\n"
+"<h4> Primeri</h4>\n"
+"<!-- {% raw %} -->\n"
+"<ul>\n"
+"    <li><b>Zadeva</b>:<br><br><pre><code>Izpisek računov za {{ customer.customer_name }}</code></pre><br></li>\n"
+"    <li><b>Telo</b>: <br><br>\n"
+"<pre><code>Pozdravljeni, {{ customer.customer_name }},<br>PFA vaš izpisek računa od {{ doc.from_date }} do {{ doc.to_date }}.</code> </pre></li>\n"
+"</ul>\n"
+"<!-- {% endraw %} -->"
 
 #. Content of the 'Other Details' (HTML) field in DocType 'Purchase Receipt'
 #. Content of the 'Other Details' (HTML) field in DocType 'Subcontracting
@@ -612,24 +627,26 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "<div class=\"columnHeading\">Other Details</div>"
-msgstr ""
+msgstr "<div class=\"columnHeading\">Druge Podrobnosti</div>"
 
 #. Content of the 'no_bank_transactions' (HTML) field in DocType 'Bank
 #. Reconciliation Tool'
 #: erpnext/accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.json
 msgid "<div class=\"text-muted text-center\">No Matching Bank Transactions Found</div>"
-msgstr ""
+msgstr "<div class=\"text-muted text-center\">Ni najdenih Ustreznih Bančnih Transakcij</div>"
 
 #: erpnext/public/js/bank_reconciliation_tool/dialog_manager.js:262
 msgid "<div class=\"text-muted text-center\">{0}</div>"
-msgstr ""
+msgstr "<div class=\"text-muted text-center\">{0}</div>"
 
 #. Content of the 'settings' (HTML) field in DocType 'Cheque Print Template'
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.json
 msgid "<div>\n"
 "<h3> All dimensions in centimeter only </h3>\n"
 "</div>"
-msgstr ""
+msgstr "<div>\n"
+"<h3> Vse dimenzije so samo v centimetrih </h3>\n"
+"</div>"
 
 #. Content of the 'about' (HTML) field in DocType 'Product Bundle'
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
@@ -691,30 +708,30 @@ msgstr ""
 #. Template'
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.json
 msgid "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Account Number Settings</label>"
-msgstr ""
+msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Nastavitve Številke Računa</label>"
 
 #. Content of the 'html_19' (HTML) field in DocType 'Cheque Print Template'
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.json
 msgid "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Amount In Words</label>"
-msgstr ""
+msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Znesek v Besedah</label>"
 
 #. Content of the 'Date Settings' (HTML) field in DocType 'Cheque Print
 #. Template'
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.json
 msgid "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Date Settings</label>"
-msgstr ""
+msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Nastavitve Datuma</label>"
 
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:123
 msgid "<li>Clearance date must be after cheque date for row(s): {0}</li>"
-msgstr ""
+msgstr "<li>Datum odobritve mora biti po datumu čeka za vrstico(e): {0}</li>"
 
 #: erpnext/controllers/accounts_controller.py:2188
 msgid "<li>Item {0} in row(s) {1} billed more than {2}</li>"
-msgstr ""
+msgstr "<li>Artikel {0} v vrstici(ah) {1} je bila zaračunana več kot {2}</li>"
 
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:118
 msgid "<li>Payment document required for row(s): {0}</li>"
-msgstr ""
+msgstr "<li>Plačilni dokument, potreben za vrstico(e): {0}</li>"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:163
 msgid "<li>{}</li>"
@@ -750,7 +767,26 @@ msgid "<p>In your <b>Email Template</b>, you can use the following special varia
 "    </ul>\n"
 "<p></p>\n"
 "<p>Apart from these, you can access all values in this RFQ, like <code>{{ message_for_supplier }}</code> or <code>{{ terms }}</code>.</p>"
-msgstr ""
+msgstr "<p>V vaši <b>Predlog E-pošte</b>lahko uporabite naslednje posebne spremenljivke:\n"
+"</p>\n"
+"<ul>\n"
+"        <li>\n"
+"            <code>{{ update_password_link }}</code>: Povezava, kjer lahko vaš dobavitelj nastavi novo geslo za prijavo v vaš portal.\n"
+"        </li>\n"
+"        <li>\n"
+"            <code>{{ portal_link }}</code>: Povezava do tega povpraševanja po ponudbi na vašem dobaviteljskem portalu.\n"
+"        </li>\n"
+"        <li>\n"
+"            <code>{{ supplier_name }}</code>: Ime podjetja vašega dobavitelja.\n"
+"        </li>\n"
+"        <li>\n"
+"            <code>{{ contact.salutation }} {{ contact.last_name }}</code>: Kontaktna oseba vašega dobavitelja.\n"
+"        </li><li>\n"
+"            <code>{{ user_fullname }}</code>: Vaše polno ime.\n"
+"        </li>\n"
+"    </ul>\n"
+"<p></p>\n"
+"<p>Poleg teh lahko dostopate do vseh vrednosti v tem RFQ, kot so <code>{{ message_for_supplier }}</code> ali <code>{{ terms }}</code>.</p>"
 
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:116
 msgid "<p>Please correct the following row(s):</p><ul>"
@@ -758,15 +794,15 @@ msgstr "<p>Popravite naslednje vrstice:</p><ul>"
 
 #: erpnext/controllers/buying_controller.py:108
 msgid "<p>Posting Date {0} cannot be before Purchase Order date for the following:</p><ul>"
-msgstr ""
+msgstr "<p>Datum knjiženja {0} ne sme biti pred datumom naročila za naslednje primere:</p><ul>"
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.js:69
 msgid "<p>Price List Rate has not been set as editable in Selling Settings. In this scenario, setting <strong>Update Price List Based On</strong> to <strong>Price List Rate</strong> will prevent auto-updation of Item Price.</p>Are you sure you want to continue?"
-msgstr ""
+msgstr "<p>Cenik v nastavitvah prodaje ni bil nastavljen kot urejevalni. V tem primeru bo nastavitev <strong>Posodobi cenik na podlagi</strong> na <strong>Cenik</strong> preprečila samodejno posodabljanje cene artikla.</p>Ali ste prepričani, da želite nadaljevati?"
 
 #: erpnext/controllers/accounts_controller.py:2197
 msgid "<p>To allow over-billing, please set allowance in Accounts Settings.</p>"
-msgstr ""
+msgstr "<p>Če želite dovoliti preplačilo, nastavite dovoljeno vrednost v Nastavitvah Računovodstva.</p>"
 
 #. Content of the 'Message Examples' (HTML) field in DocType 'Payment Gateway
 #. Account'
@@ -777,7 +813,12 @@ msgid "<pre><h5>Message Example</h5>\n\n"
 "&lt;p&gt; We don't want you to be spending time running around in order to pay for your Bill.<br>After all, life is beautiful and the time you have in hand should be spent to enjoy it!<br>So here are our little ways to help you get more time for life! &lt;/p&gt;\n\n"
 "&lt;a href=\"{{ payment_url }}\"&gt; click here to pay &lt;/a&gt;\n\n"
 "</pre>\n"
-msgstr ""
+msgstr "<pre><h5>Primer Sporočila</h5>\n\n"
+"&lt;p&gt; Hvala, ker ste del {{ doc.company }}! Upamo, da uživate v storitvi.&lt;/p&gt;\n\n"
+"&lt;p&gt; V prilogi je izpisek e-računa. Neporavnani znesek je {{ doc.grand_total }}.&lt;/p&gt;\n\n"
+"&lt;p&gt; Nočemo, da bi morali teči naokoli, da bi plačali svoj račun.<br>Navsezadnje je življenje lepo in čas, ki ga imate na voljo, bi morali porabiti za uživanje!<br>Tukaj so naši majhni načini, kako si boste lahko privoščili več časa za življenje! &lt;/p&gt;\n\n"
+"&lt;a href=\"{{ payment_url }}\"&gt; kliknite tukaj za plačilo &lt;/a&gt;\n\n"
+"</pre>\n"
 
 #. Content of the 'Message Examples' (HTML) field in DocType 'Payment Request'
 #: erpnext/accounts/doctype/payment_request/payment_request.json
@@ -786,7 +827,11 @@ msgid "<pre><h5>Message Example</h5>\n\n"
 "&lt;p&gt;Requesting payment for {{ doc.doctype }}, {{ doc.name }} for {{ doc.grand_total }}.&lt;/p&gt;\n\n"
 "&lt;a href=\"{{ payment_url }}\"&gt; click here to pay &lt;/a&gt;\n\n"
 "</pre>\n"
-msgstr ""
+msgstr "<pre><h5>Primer Sporočila</h5>\n\n"
+"&lt;p&gt;Spoštovani {{ doc.contact_person }},&lt;/p&gt;\n\n"
+"&lt;p&gt;Zahtevam plačilo za {{ doc.doctype }}, {{ doc.name }} za {{ doc.grand_total }}.&lt;/p&gt;\n\n"
+"&lt;a href=\"{{ payment_url }}\"&gt; Kliknite tukaj za plačilo &lt;/a&gt;\n\n"
+"</pre>\n"
 
 #. Header text in the Stock Workspace
 #: erpnext/stock/workspace/stock/stock.json
@@ -1066,7 +1111,7 @@ msgstr ""
 #. Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgid "API Details"
-msgstr ""
+msgstr "API Podrobnosti"
 
 #. Label of the awb_number (Data) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
@@ -1076,7 +1121,7 @@ msgstr "AWB Številka"
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Abampere"
-msgstr ""
+msgstr "Abampere"
 
 #. Label of the abbr (Data) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -1090,15 +1135,15 @@ msgstr "Okrajšava"
 
 #: erpnext/setup/doctype/company/company.py:194
 msgid "Abbreviation already used for another company"
-msgstr ""
+msgstr "Okrajšava se že uporablja za drugo podjetje"
 
 #: erpnext/setup/doctype/company/company.py:191
 msgid "Abbreviation is mandatory"
-msgstr ""
+msgstr "Okrajšava je obvezna"
 
 #: erpnext/stock/doctype/item_attribute/item_attribute.py:113
 msgid "Abbreviation: {0} must appear only once"
-msgstr ""
+msgstr "Okrajšava: {0} se lahko pojavi samo enkrat"
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1281
 msgid "Above"
@@ -1121,7 +1166,7 @@ msgstr "Akademski Uporabnik"
 #: erpnext/stock/doctype/item_quality_inspection_parameter/item_quality_inspection_parameter.json
 #: erpnext/stock/doctype/quality_inspection_reading/quality_inspection_reading.json
 msgid "Acceptance Criteria Formula"
-msgstr ""
+msgstr "Formula Meril Sprejemljivosti"
 
 #. Label of the value (Data) field in DocType 'Item Quality Inspection
 #. Parameter'
@@ -1141,7 +1186,7 @@ msgstr "Sprejeta Količina"
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Accepted Qty in Stock UOM"
-msgstr ""
+msgstr "Sprejeta Količina na Enoti Zaloge"
 
 #. Label of the qty (Float) field in DocType 'Purchase Receipt Item'
 #. Label of the qty (Float) field in DocType 'Subcontracting Receipt Item'
@@ -1149,7 +1194,7 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Accepted Quantity"
-msgstr ""
+msgstr "Sprejeta Količina"
 
 #. Label of the warehouse (Link) field in DocType 'Purchase Invoice Item'
 #. Label of the set_warehouse (Link) field in DocType 'Purchase Receipt'
@@ -1162,7 +1207,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Accepted Warehouse"
-msgstr ""
+msgstr "Sprejeto Skladišče"
 
 #. Label of the access_key (Data) field in DocType 'Currency Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
@@ -1376,11 +1421,11 @@ msgstr ""
 #: erpnext/accounts/report/account_balance/account_balance.js:34
 #: erpnext/setup/doctype/party_type/party_type.json
 msgid "Account Type"
-msgstr ""
+msgstr "Tip Računa"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:125
 msgid "Account Value"
-msgstr ""
+msgstr "Vrednost Računa"
 
 #: erpnext/accounts/doctype/account/account.py:326
 msgid "Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"
@@ -2014,7 +2059,7 @@ msgstr ""
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Accounts Receivable/Payable"
-msgstr ""
+msgstr "Račun Terjatve/Obveznosti"
 
 #. Name of a DocType
 #. Label of a Link in the Accounting Workspace
@@ -2024,21 +2069,21 @@ msgstr ""
 #: erpnext/accounts/workspace/accounting/accounting.json
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Accounts Settings"
-msgstr ""
+msgstr "Nastavitve Računovodstva"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1382
 msgid "Accounts table cannot be blank."
-msgstr ""
+msgstr "Tabela računov ne more biti prazna."
 
 #. Label of the merge_accounts (Table) field in DocType 'Ledger Merge'
 #: erpnext/accounts/doctype/ledger_merge/ledger_merge.json
 msgid "Accounts to Merge"
-msgstr ""
+msgstr "Računi za združitev"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:158
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:264
 msgid "Accrued Expenses"
-msgstr ""
+msgstr "Načrtovani Stroški"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
@@ -2046,7 +2091,7 @@ msgstr ""
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:112
 #: erpnext/accounts/report/account_balance/account_balance.js:37
 msgid "Accumulated Depreciation"
-msgstr ""
+msgstr "Akumulirana Amortizacija"
 
 #. Label of the accumulated_depreciation_account (Link) field in DocType 'Asset
 #. Category Account'
@@ -2055,7 +2100,7 @@ msgstr ""
 #: erpnext/assets/doctype/asset_category_account/asset_category_account.json
 #: erpnext/setup/doctype/company/company.json
 msgid "Accumulated Depreciation Account"
-msgstr ""
+msgstr "Račun Akumulirane Amortizacije"
 
 #. Label of the accumulated_depreciation_amount (Currency) field in DocType
 #. 'Depreciation Schedule'
@@ -2063,16 +2108,16 @@ msgstr ""
 #: erpnext/assets/doctype/asset/asset.js:289
 #: erpnext/assets/doctype/depreciation_schedule/depreciation_schedule.json
 msgid "Accumulated Depreciation Amount"
-msgstr ""
+msgstr "Znesek Akumulirane Amortizacije"
 
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:635
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:653
 msgid "Accumulated Depreciation as on"
-msgstr ""
+msgstr "Akumulirana amortizacija na dan"
 
 #: erpnext/accounts/doctype/budget/budget.py:253
 msgid "Accumulated Monthly"
-msgstr ""
+msgstr "Akumulirani Mesečno"
 
 #: erpnext/controllers/budget_controller.py:422
 msgid "Accumulated Monthly Budget for Account {0} against {1} {2} is {3}. It will be collectively ({4}) exceeded by {5}"
@@ -2094,22 +2139,22 @@ msgstr ""
 
 #: erpnext/selling/report/sales_partner_target_variance_based_on_item_group/item_group_wise_sales_target_variance.py:111
 msgid "Achieved ({})"
-msgstr ""
+msgstr "Doseženo ({})"
 
 #. Label of the acquisition_date (Date) field in DocType 'Vehicle'
 #: erpnext/setup/doctype/vehicle/vehicle.json
 msgid "Acquisition Date"
-msgstr ""
+msgstr "Datum Pridobitve"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Acre"
-msgstr ""
+msgstr "Acre"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Acre (US)"
-msgstr ""
+msgstr "Acre (ZDA)"
 
 #. Label of the action_if_quality_inspection_is_not_submitted (Select) field in
 #. DocType 'Stock Settings'
@@ -2131,7 +2176,7 @@ msgstr ""
 
 #: erpnext/quality_management/doctype/quality_review/quality_review_list.js:7
 msgid "Action Initialised"
-msgstr ""
+msgstr "Dejanje Inicializirano"
 
 #. Label of the action_if_accumulated_monthly_budget_exceeded (Select) field in
 #. DocType 'Budget'
@@ -2208,12 +2253,12 @@ msgstr ""
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.py:55
 msgid "Active Leads"
-msgstr ""
+msgstr "Aktivne Potencialne Stranke"
 
 #. Label of the on_status_image (Attach Image) field in DocType 'Workstation'
 #: erpnext/manufacturing/doctype/workstation/workstation.json
 msgid "Active Status"
-msgstr ""
+msgstr "Aktivno Stanje"
 
 #. Label of the activities_tab (Tab Break) field in DocType 'Lead'
 #. Label of the activities_tab (Tab Break) field in DocType 'Opportunity'
@@ -2222,14 +2267,14 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "Activities"
-msgstr ""
+msgstr "Dejavnosti"
 
 #. Name of a DocType
 #. Label of a Link in the Projects Workspace
 #: erpnext/projects/doctype/activity_cost/activity_cost.json
 #: erpnext/projects/workspace/projects/projects.json
 msgid "Activity Cost"
-msgstr ""
+msgstr "Stroški Dejavnosti"
 
 #: erpnext/projects/doctype/activity_cost/activity_cost.py:51
 msgid "Activity Cost exists for Employee {0} against Activity Type - {1}"
@@ -2254,7 +2299,7 @@ msgstr ""
 #: erpnext/public/js/projects/timer.js:9
 #: erpnext/templates/pages/timelog_info.html:25
 msgid "Activity Type"
-msgstr ""
+msgstr "Tip Dejavnosti"
 
 #. Option for the 'Type' (Select) field in DocType 'Advance Taxes and Charges'
 #. Option for the 'Type' (Select) field in DocType 'Purchase Taxes and Charges'
@@ -2265,38 +2310,38 @@ msgstr ""
 #: erpnext/accounts/report/budget_variance_report/budget_variance_report.py:100
 #: erpnext/accounts/report/budget_variance_report/budget_variance_report.py:110
 msgid "Actual"
-msgstr ""
+msgstr "Dejansko"
 
 #: erpnext/stock/report/incorrect_balance_qty_after_transaction/incorrect_balance_qty_after_transaction.py:125
 msgid "Actual Balance Qty"
-msgstr ""
+msgstr "Dejanska Bilanca Količina"
 
 #. Label of the actual_batch_qty (Float) field in DocType 'Packed Item'
 #: erpnext/stock/doctype/packed_item/packed_item.json
 msgid "Actual Batch Quantity"
-msgstr ""
+msgstr "Dejanska Količina Šarže"
 
 #: erpnext/buying/report/procurement_tracker/procurement_tracker.py:101
 msgid "Actual Cost"
-msgstr ""
+msgstr "Dejanski Stroški"
 
 #. Label of the actual_date (Date) field in DocType 'Maintenance Schedule
 #. Detail'
 #: erpnext/maintenance/doctype/maintenance_schedule_detail/maintenance_schedule_detail.json
 msgid "Actual Date"
-msgstr ""
+msgstr "Dejanski Datum"
 
 #: erpnext/buying/report/procurement_tracker/procurement_tracker.py:121
 #: erpnext/stock/report/delayed_item_report/delayed_item_report.py:141
 #: erpnext/stock/report/delayed_order_report/delayed_order_report.py:66
 msgid "Actual Delivery Date"
-msgstr ""
+msgstr "Dejanski Datum Dobave"
 
 #. Label of the section_break_cmgo (Section Break) field in DocType 'Master
 #. Production Schedule'
 #: erpnext/manufacturing/doctype/master_production_schedule/master_production_schedule.json
 msgid "Actual Demand"
-msgstr ""
+msgstr "Dejansko Povpraševanje"
 
 #. Label of the actual_end_date (Datetime) field in DocType 'Job Card'
 #. Label of the actual_end_date (Datetime) field in DocType 'Work Order'
@@ -2305,7 +2350,7 @@ msgstr ""
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:254
 #: erpnext/projects/report/delayed_tasks_summary/delayed_tasks_summary.py:115
 msgid "Actual End Date"
-msgstr ""
+msgstr "Dejanski Končni Datum"
 
 #. Label of the actual_end_date (Date) field in DocType 'Project'
 #. Label of the act_end_date (Date) field in DocType 'Task'
@@ -2348,7 +2393,7 @@ msgstr ""
 
 #: erpnext/accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.py:430
 msgid "Actual Posting"
-msgstr ""
+msgstr "Dejansko Knjiženje"
 
 #. Label of the actual_qty (Float) field in DocType 'Production Plan Sub
 #. Assembly Item'
@@ -2363,27 +2408,27 @@ msgstr ""
 #: erpnext/stock/report/product_bundle_balance/product_bundle_balance.py:96
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:141
 msgid "Actual Qty"
-msgstr ""
+msgstr "Dejanska Količina"
 
 #. Label of the actual_qty (Float) field in DocType 'Stock Entry Detail'
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Actual Qty (at source/target)"
-msgstr ""
+msgstr "Dejanska Količina (pri viru/cilju)"
 
 #. Label of the actual_qty (Float) field in DocType 'Asset Capitalization Stock
 #. Item'
 #: erpnext/assets/doctype/asset_capitalization_stock_item/asset_capitalization_stock_item.json
 msgid "Actual Qty in Warehouse"
-msgstr ""
+msgstr "Dejanska Količina v Skladišču"
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:198
 msgid "Actual Qty is mandatory"
-msgstr ""
+msgstr "Dejanska Količina je obvezna"
 
 #: erpnext/manufacturing/doctype/plant_floor/stock_summary_template.html:37
 #: erpnext/stock/dashboard/item_dashboard_list.html:28
 msgid "Actual Qty {0} / Waiting Qty {1}"
-msgstr ""
+msgstr "Dejanska Količina {0} / Čakalna Količina {1}"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:179
 msgid "Actual Qty: Quantity available in the warehouse."
@@ -2443,21 +2488,21 @@ msgstr ""
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.py:1005
 msgid "Ad-hoc Qty"
-msgstr ""
+msgstr "Namen Količina"
 
 #: erpnext/stock/doctype/item/item.js:557
 #: erpnext/stock/doctype/price_list/price_list.js:8
 msgid "Add / Edit Prices"
-msgstr ""
+msgstr "Dodaj/Uredi Cene"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.js:207
 msgid "Add Columns in Transaction Currency"
-msgstr ""
+msgstr "Dodaj stolpce v valuti transakcije"
 
 #: erpnext/templates/pages/task_info.html:94
 #: erpnext/templates/pages/task_info.html:96
 msgid "Add Comment"
-msgstr ""
+msgstr "Dodaj komentar"
 
 #. Label of the add_corrective_operation_cost_in_finished_good_valuation
 #. (Check) field in DocType 'Manufacturing Settings'
@@ -2467,16 +2512,16 @@ msgstr ""
 
 #: erpnext/public/js/event.js:24
 msgid "Add Customers"
-msgstr ""
+msgstr "Dodaj Stranke"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:92
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:442
 msgid "Add Discount"
-msgstr ""
+msgstr "Dodaj Popust"
 
 #: erpnext/public/js/event.js:40
 msgid "Add Employees"
-msgstr ""
+msgstr "Dodaj Osebje"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:234
 #: erpnext/selling/doctype/sales_order/sales_order.js:277
@@ -2491,15 +2536,15 @@ msgstr "Dodaj Artikle"
 
 #: erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py:56
 msgid "Add Items in the Purpose Table"
-msgstr ""
+msgstr "Dodaj Artikle v Tabelo Namenov"
 
 #: erpnext/crm/doctype/lead/lead.js:84
 msgid "Add Lead to Prospect"
-msgstr ""
+msgstr "Dodaj Potencialne Stranke k Priložnosti"
 
 #: erpnext/public/js/event.js:16
 msgid "Add Leads"
-msgstr ""
+msgstr "Dodaj Potencialne Stranke"
 
 #. Label of the add_local_holidays (Section Break) field in DocType 'Holiday
 #. List'
@@ -2510,36 +2555,36 @@ msgstr ""
 #. Label of the add_manually (Check) field in DocType 'Repost Payment Ledger'
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
 msgid "Add Manually"
-msgstr ""
+msgstr "Dodaj Ročno"
 
 #: erpnext/projects/doctype/task/task_tree.js:49
 msgid "Add Multiple Tasks"
-msgstr ""
+msgstr "Dodaj več Opravil"
 
 #. Label of the add_deduct_tax (Select) field in DocType 'Advance Taxes and
 #. Charges'
 #: erpnext/accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 msgid "Add Or Deduct"
-msgstr ""
+msgstr "Dodaj ali Odštej"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:280
 msgid "Add Order Discount"
-msgstr ""
+msgstr "Dodaj Popust za Naročilo"
 
 #. Label of the add_quote (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "Add Quote"
-msgstr ""
+msgstr "Dodaj Ponudbo"
 
 #. Label of the add_raw_materials (Button) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom/bom.js:973
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "Add Raw Materials"
-msgstr ""
+msgstr "Dodaj Surovine"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:82
 msgid "Add Safety Stock"
-msgstr ""
+msgstr "Dodaj Varnostno Zalogo"
 
 #: erpnext/public/js/event.js:48
 msgid "Add Sales Partners"
@@ -3103,12 +3148,12 @@ msgstr ""
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 #: erpnext/selling/doctype/sales_order/sales_order.json
 msgid "Advance Paid"
-msgstr ""
+msgstr "Predplačilo"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order_list.js:75
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:122
 msgid "Advance Payment"
-msgstr ""
+msgstr "Predplačilo"
 
 #. Option for the 'Reconciliation Takes Effect On' (Select) field in DocType
 #. 'Company'
@@ -3180,7 +3225,7 @@ msgstr ""
 #. Advance'
 #: erpnext/accounts/doctype/sales_invoice_advance/sales_invoice_advance.json
 msgid "Advance amount"
-msgstr ""
+msgstr "Znesek Predplačila"
 
 #: erpnext/controllers/taxes_and_totals.py:868
 msgid "Advance amount cannot be greater than {0} {1}"
@@ -3212,7 +3257,7 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Advances"
-msgstr ""
+msgstr "Predplačila"
 
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:3
 msgid "Advertisement"
@@ -3428,19 +3473,19 @@ msgstr ""
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:35
 #: erpnext/stock/report/stock_ageing/stock_ageing.js:58
 msgid "Ageing Range"
-msgstr ""
+msgstr "Starostno Obdobje"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:104
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:352
 msgid "Ageing Report based on {0} up to {1}"
-msgstr ""
+msgstr "Poročilo o staranju na podlagi {0} do {1}"
 
 #. Label of the agenda (Table) field in DocType 'Quality Meeting'
 #. Label of the agenda (Text Editor) field in DocType 'Quality Meeting Agenda'
 #: erpnext/quality_management/doctype/quality_meeting/quality_meeting.json
 #: erpnext/quality_management/doctype/quality_meeting_agenda/quality_meeting_agenda.json
 msgid "Agenda"
-msgstr ""
+msgstr "Dnevni red"
 
 #: erpnext/setup/setup_wizard/data/sales_partner_type.txt:4
 msgid "Agent"
@@ -3459,13 +3504,13 @@ msgstr ""
 #. 'Appointment Booking Settings'
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.json
 msgid "Agent Details"
-msgstr ""
+msgstr "Podrobnosti Agenta"
 
 #. Label of the agent_group (Link) field in DocType 'Incoming Call Handling
 #. Schedule'
 #: erpnext/telephony/doctype/incoming_call_handling_schedule/incoming_call_handling_schedule.json
 msgid "Agent Group"
-msgstr ""
+msgstr "Skupina Agentov"
 
 #. Label of the agent_unavailable_message (Data) field in DocType 'Incoming
 #. Call Settings'
@@ -3480,7 +3525,7 @@ msgstr ""
 #. Booking Settings'
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.json
 msgid "Agents"
-msgstr ""
+msgstr "Agenti"
 
 #. Description of a DocType
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
@@ -3489,7 +3534,7 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:4
 msgid "Agriculture"
-msgstr ""
+msgstr "Kmetijstvo"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:5
 msgid "Airline"
@@ -3499,14 +3544,14 @@ msgstr ""
 #. Statements'
 #: erpnext/accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 msgid "Algorithm"
-msgstr ""
+msgstr "Algoritem"
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:165
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:185
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:166
 #: erpnext/accounts/utils.py:1483 erpnext/public/js/setup_wizard.js:184
 msgid "All Accounts"
-msgstr ""
+msgstr "Kontni Načrt"
 
 #. Label of the all_activities_section (Section Break) field in DocType 'Lead'
 #. Label of the all_activities_section (Section Break) field in DocType
@@ -3517,7 +3562,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "All Activities"
-msgstr ""
+msgstr "Vse Dejavnosti"
 
 #. Label of the all_activities_html (HTML) field in DocType 'Lead'
 #. Label of the all_activities_html (HTML) field in DocType 'Opportunity'
@@ -3526,7 +3571,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "All Activities HTML"
-msgstr ""
+msgstr "Vse Dejavnosti HTML"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:303
 msgid "All BOMs"
@@ -3535,7 +3580,7 @@ msgstr "Vse Kosovnice"
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
 msgid "All Contact"
-msgstr ""
+msgstr "Vsi Stiki"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -3572,7 +3617,7 @@ msgstr ""
 #: erpnext/setup/doctype/company/company.py:467
 #: erpnext/setup/doctype/company/company.py:473
 msgid "All Departments"
-msgstr ""
+msgstr "Vsi Oddelki"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -3592,7 +3637,7 @@ msgstr ""
 
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:25
 msgid "All Items"
-msgstr ""
+msgstr "Vsi Artikli"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -3601,17 +3646,17 @@ msgstr ""
 
 #: erpnext/accounts/report/general_ledger/general_ledger.html:68
 msgid "All Parties "
-msgstr ""
+msgstr "Vse Stranke "
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
 msgid "All Sales Partner Contact"
-msgstr ""
+msgstr "Vsi Kontakti Prodajnih Partnerjev"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
 msgid "All Sales Person"
-msgstr ""
+msgstr "Vsi Prodajni Predstavniki"
 
 #. Description of a DocType
 #: erpnext/setup/doctype/sales_person/sales_person.json
@@ -3636,7 +3681,7 @@ msgstr ""
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:236
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:242
 msgid "All Supplier Groups"
-msgstr ""
+msgstr "Vse Skupine Dobaviteljev"
 
 #: erpnext/patches/v13_0/remove_bad_selling_defaults.py:12
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:145
@@ -3644,11 +3689,11 @@ msgstr ""
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:154
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:160
 msgid "All Territories"
-msgstr ""
+msgstr "Vsa Ozemlja"
 
 #: erpnext/setup/doctype/company/company.py:338
 msgid "All Warehouses"
-msgstr ""
+msgstr "Vsa Skladišča"
 
 #. Description of the 'Reconciled' (Check) field in DocType 'Process Payment
 #. Reconciliation Log'
@@ -3842,7 +3887,7 @@ msgstr ""
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Allow Alternative Item"
-msgstr ""
+msgstr "Dovoli Alternativni Artikel"
 
 #: erpnext/stock/doctype/item_alternative/item_alternative.py:65
 msgid "Allow Alternative Item must be checked on Item {}"
@@ -4032,7 +4077,7 @@ msgstr ""
 #. Label of the is_sales_item (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Allow Sales"
-msgstr ""
+msgstr "Dovoli Prodajo"
 
 #. Label of the dn_required (Check) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
@@ -4620,27 +4665,27 @@ msgstr "Zneski"
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ampere"
-msgstr ""
+msgstr "Amper"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Hour"
-msgstr ""
+msgstr "Amper-ura"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Minute"
-msgstr ""
+msgstr "Amper-minuta"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Second"
-msgstr ""
+msgstr "Amper-sekunda"
 
 #: erpnext/controllers/trends.py:269 erpnext/controllers/trends.py:281
 #: erpnext/controllers/trends.py:290
 msgid "Amt"
-msgstr ""
+msgstr "Znesek"
 
 #. Description of a DocType
 #: erpnext/setup/doctype/item_group/item_group.json
@@ -4666,11 +4711,11 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/data/designation.txt:4
 msgid "Analyst"
-msgstr ""
+msgstr "Analitik"
 
 #: erpnext/public/js/utils.js:93
 msgid "Annual Billing: {0}"
-msgstr ""
+msgstr "Letni Obračun: {0}"
 
 #: erpnext/controllers/budget_controller.py:446
 msgid "Annual Budget for Account {0} against {1} {2} is {3}. It will be collectively ({4}) exceeded by {5}"
@@ -4721,7 +4766,7 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:6
 msgid "Apparel & Accessories"
-msgstr ""
+msgstr "Oblačila & Dodatki"
 
 #. Label of the applicable_charges (Currency) field in DocType 'Landed Cost
 #. Item'
@@ -4730,13 +4775,13 @@ msgstr ""
 #: erpnext/stock/doctype/landed_cost_item/landed_cost_item.json
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.json
 msgid "Applicable Charges"
-msgstr ""
+msgstr "Veljavni Stroški"
 
 #. Label of the dimensions (Table) field in DocType 'Accounting Dimension
 #. Filter'
 #: erpnext/accounts/doctype/accounting_dimension_filter/accounting_dimension_filter.json
 msgid "Applicable Dimension"
-msgstr ""
+msgstr "Veljavna Dimenzija"
 
 #. Description of the 'Holiday List' (Link) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -5113,7 +5158,7 @@ msgstr ""
 #. Label of the area_uom (Link) field in DocType 'Location'
 #: erpnext/assets/doctype/location/location.json
 msgid "Area UOM"
-msgstr ""
+msgstr "Območna Enota"
 
 #: erpnext/manufacturing/report/production_planning_report/production_planning_report.py:430
 msgid "Arrival Quantity"
@@ -5122,7 +5167,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Arshin"
-msgstr ""
+msgstr "Aršin"
 
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.js:57
 #: erpnext/stock/report/stock_ageing/stock_ageing.js:16
@@ -5815,7 +5860,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Atmosphere"
-msgstr ""
+msgstr "Atmosfera"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:244
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:73
@@ -5898,7 +5943,7 @@ msgstr "Atributi"
 #: erpnext/regional/doctype/south_africa_vat_settings/south_africa_vat_settings.json
 #: erpnext/setup/doctype/company/company.json
 msgid "Auditor"
-msgstr ""
+msgstr "Revizor"
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_connector.py:68
 msgid "Authentication Failed"
@@ -7122,20 +7167,20 @@ msgstr ""
 #: erpnext/accounts/workspace/accounting/accounting.json
 #: erpnext/setup/setup_wizard/data/industry_type.txt:8
 msgid "Banking"
-msgstr ""
+msgstr "Bančništvo"
 
 #. Label of the barcode_type (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 msgid "Barcode Type"
-msgstr ""
+msgstr "Tip Črtne Kode"
 
 #: erpnext/stock/doctype/item/item.py:456
 msgid "Barcode {0} already used in Item {1}"
-msgstr ""
+msgstr "Črtna koda {0} je že uporabljena v artiklu {1}"
 
 #: erpnext/stock/doctype/item/item.py:471
 msgid "Barcode {0} is not a valid {1} code"
-msgstr ""
+msgstr "Črtna koda {0} ni veljavna koda {1}"
 
 #. Label of the sb_barcodes (Section Break) field in DocType 'Item'
 #. Label of the barcodes (Table) field in DocType 'Item'
@@ -7297,7 +7342,7 @@ msgstr ""
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:80
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Batch"
-msgstr "Serija"
+msgstr "Šarža"
 
 #. Label of the description (Small Text) field in DocType 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
@@ -7307,7 +7352,7 @@ msgstr "Opis Serije"
 #. Label of the sb_batch (Section Break) field in DocType 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
 msgid "Batch Details"
-msgstr "Podrobnosti Serije"
+msgstr "Podrobnosti Šarže"
 
 #: erpnext/stock/doctype/batch/batch.py:210
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:465
@@ -7317,18 +7362,18 @@ msgstr "Datum izteka veljavnosti Serije"
 #. Label of the batch_id (Data) field in DocType 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
 msgid "Batch ID"
-msgstr "ID Serije"
+msgstr "ID Šarže"
 
 #: erpnext/stock/doctype/batch/batch.py:129
 msgid "Batch ID is mandatory"
-msgstr "ID Serije je obvezen"
+msgstr "ID Šarže je obvezan"
 
 #. Name of a report
 #. Label of a Link in the Stock Workspace
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Batch Item Expiry Status"
-msgstr "Stanje izteka veljavnosti Artikla Serije"
+msgstr "Stanje izteka veljavnosti Artikla Šarže"
 
 #. Label of the batch_no (Link) field in DocType 'POS Invoice Item'
 #. Label of the batch_no (Link) field in DocType 'Purchase Invoice Item'
@@ -7389,15 +7434,15 @@ msgstr "Stanje izteka veljavnosti Artikla Serije"
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgid "Batch No"
-msgstr "Številka Serije"
+msgstr "Številke Šarže"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1080
 msgid "Batch No is mandatory"
-msgstr "Številka Serije je obvezna"
+msgstr "Številka Šarže je obvezna"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2994
 msgid "Batch No {0} does not exists"
-msgstr "Številka Serije {0} ne obstaja"
+msgstr "Številka Šarže {0} ne obstaja"
 
 #: erpnext/stock/utils.py:640
 msgid "Batch No {0} is linked with Item {1} which has serial no. Please scan serial no instead."
@@ -7410,13 +7455,13 @@ msgstr ""
 #. Label of the batch_no (Int) field in DocType 'BOM Update Batch'
 #: erpnext/manufacturing/doctype/bom_update_batch/bom_update_batch.json
 msgid "Batch No."
-msgstr "Številka Serije."
+msgstr "Številke Šarže."
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:16
 #: erpnext/public/js/utils/serial_no_batch_selector.js:190
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:50
 msgid "Batch Nos"
-msgstr ""
+msgstr "Številke Šarže"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1658
 msgid "Batch Nos are created successfully"
@@ -7433,7 +7478,7 @@ msgstr ""
 
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.py:161
 msgid "Batch Qty"
-msgstr ""
+msgstr "Količina Šarže"
 
 #: erpnext/stock/doctype/batch/batch.py:170
 msgid "Batch Qty updated to {0}"
@@ -7454,12 +7499,12 @@ msgstr ""
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Batch Size"
-msgstr ""
+msgstr "Velikost Šarže"
 
 #. Label of the stock_uom (Link) field in DocType 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
 msgid "Batch UOM"
-msgstr ""
+msgstr "Šaržna Enota"
 
 #. Label of the batch_and_serial_no_section (Section Break) field in DocType
 #. 'Asset Capitalization Stock Item'
@@ -7499,7 +7544,7 @@ msgstr ""
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:183
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:86
 msgid "Batchwise Valuation"
-msgstr ""
+msgstr "Vrednotenje Šarže"
 
 #. Label of the section_break_3 (Section Break) field in DocType 'Stock
 #. Reconciliation Item'
@@ -7573,7 +7618,7 @@ msgstr ""
 #: erpnext/selling/report/sales_order_analysis/sales_order_analysis.py:209
 #: erpnext/selling/report/sales_order_analysis/sales_order_analysis.py:298
 msgid "Billed Amount"
-msgstr ""
+msgstr "Znesek Fakture"
 
 #. Label of the billed_amt (Currency) field in DocType 'Sales Order Item'
 #. Label of the billed_amt (Currency) field in DocType 'Delivery Note Item'
@@ -7665,7 +7710,7 @@ msgstr ""
 #: erpnext/projects/report/timesheet_billing_summary/timesheet_billing_summary.py:73
 #: erpnext/selling/report/territory_wise_sales/territory_wise_sales.py:50
 msgid "Billing Amount"
-msgstr ""
+msgstr "Znesek Fakture"
 
 #. Label of the billing_city (Data) field in DocType 'Tax Rule'
 #: erpnext/accounts/doctype/tax_rule/tax_rule.json
@@ -7711,7 +7756,7 @@ msgstr ""
 #: erpnext/projects/doctype/timesheet_detail/timesheet_detail.json
 #: erpnext/projects/report/timesheet_billing_summary/timesheet_billing_summary.py:67
 msgid "Billing Hours"
-msgstr ""
+msgstr "Ure Fakture"
 
 #. Label of the billing_interval (Select) field in DocType 'Subscription Plan'
 #: erpnext/accounts/doctype/subscription_plan/subscription_plan.json
@@ -7750,7 +7795,7 @@ msgstr ""
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/selling/doctype/sales_order/sales_order_calendar.js:31
 msgid "Billing Status"
-msgstr ""
+msgstr "Stanje Fakture"
 
 #. Label of the billing_zipcode (Data) field in DocType 'Tax Rule'
 #: erpnext/accounts/doctype/tax_rule/tax_rule.json
@@ -7778,7 +7823,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Biot"
-msgstr ""
+msgstr "Biot"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:9
 msgid "Biotechnology"
@@ -8017,7 +8062,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Box"
-msgstr ""
+msgstr "Škatla"
 
 #. Label of the branch (Link) field in DocType 'SMS Center'
 #. Name of a DocType
@@ -14387,7 +14432,7 @@ msgstr ""
 #. Label of the stock_uom (Link) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Default Stock UOM"
-msgstr ""
+msgstr "Privzeta Enota Zaloge"
 
 #. Label of the default_supplier (Link) field in DocType 'Item Default'
 #: erpnext/stock/doctype/item_default/item_default.json
@@ -15894,7 +15939,7 @@ msgstr ""
 #. Label of the uom (Link) field in DocType 'Delivery Trip'
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.json
 msgid "Distance UOM"
-msgstr ""
+msgstr "Enota Razdalja"
 
 #. Label of the acc_pay_dist_from_left_edge (Float) field in DocType 'Cheque
 #. Print Template'
@@ -20296,7 +20341,7 @@ msgstr ""
 #. Label of the gross_weight_uom (Link) field in DocType 'Packing Slip'
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
 msgid "Gross Weight UOM"
-msgstr ""
+msgstr "Bruto Teža Enota"
 
 #. Name of a report
 #: erpnext/accounts/report/gross_and_net_profit_report/gross_and_net_profit_report.json
@@ -21889,7 +21934,7 @@ msgstr ""
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:108
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.js:51
 msgid "Include UOM"
-msgstr ""
+msgstr "Vključi Enoto"
 
 #: erpnext/stock/report/stock_balance/stock_balance.js:131
 msgid "Include Zero Stock Items"
@@ -24718,7 +24763,7 @@ msgstr ""
 #. Label of the uom (Link) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Item UOM"
-msgstr ""
+msgstr "Artikel Enota"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:410
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:417
@@ -35645,7 +35690,7 @@ msgstr ""
 #. Label of the price_not_uom_dependent (Check) field in DocType 'Price List'
 #: erpnext/stock/doctype/price_list/price_list.json
 msgid "Price Not UOM Dependent"
-msgstr ""
+msgstr "Cena ni Odvisna od Enote"
 
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:251
 msgid "Price Per Unit ({0})"
@@ -35881,7 +35926,7 @@ msgstr ""
 
 #: erpnext/setup/install.py:104
 msgid "Print UOM after Quantity"
-msgstr ""
+msgstr "Izpis Enote po Količini"
 
 #. Label of the print_without_amount (Check) field in DocType 'Delivery Note'
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
@@ -38492,7 +38537,7 @@ msgstr ""
 #: erpnext/templates/form_grid/item_grid.html:8
 #: erpnext/templates/pages/order.html:100 erpnext/templates/pages/rfq.html:43
 msgid "Rate"
-msgstr ""
+msgstr "Cena"
 
 #. Label of the rate_amount_section (Section Break) field in DocType 'BOM Item'
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
@@ -38518,7 +38563,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Rate (Company Currency)"
-msgstr ""
+msgstr "Cena (Valuta Podjetja)"
 
 #. Label of the rm_cost_as_per (Select) field in DocType 'BOM'
 #. Label of the rm_cost_as_per (Select) field in DocType 'BOM Creator'
@@ -38563,7 +38608,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Rate With Margin"
-msgstr ""
+msgstr "Cena z Maržo"
 
 #. Label of the base_rate_with_margin (Currency) field in DocType 'POS Invoice
 #. Item'
@@ -38590,7 +38635,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Rate With Margin (Company Currency)"
-msgstr ""
+msgstr "Cena z Maržo (Valuta Podjetja)"
 
 #. Label of the rate_and_amount (Section Break) field in DocType 'Purchase
 #. Receipt Item'
@@ -38690,7 +38735,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Rate of Stock UOM"
-msgstr ""
+msgstr "Cena Enote Zaloge"
 
 #. Label of the rate_or_discount (Select) field in DocType 'Pricing Rule'
 #. Label of the rate_or_discount (Data) field in DocType 'Pricing Rule Detail'
@@ -39550,7 +39595,7 @@ msgstr ""
 #: erpnext/projects/doctype/timesheet/timesheet_dashboard.py:7
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgid "References"
-msgstr ""
+msgstr "Reference"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:387
 msgid "References to Sales Invoices are Incomplete"
@@ -42616,11 +42661,11 @@ msgstr ""
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:297
 #: erpnext/stock/doctype/item/item.json
 msgid "Sales"
-msgstr ""
+msgstr "Prodaja"
 
 #: erpnext/setup/doctype/company/company.py:599
 msgid "Sales Account"
-msgstr ""
+msgstr "Prodajni Račun"
 
 #. Label of a shortcut in the CRM Workspace
 #. Name of a report
@@ -42630,7 +42675,7 @@ msgstr ""
 #: erpnext/selling/report/sales_analytics/sales_analytics.json
 #: erpnext/selling/workspace/selling/selling.json
 msgid "Sales Analytics"
-msgstr ""
+msgstr "Prodajna Analitika"
 
 #. Label of the sales_team (Table) field in DocType 'Sales Invoice'
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
@@ -42641,12 +42686,12 @@ msgstr ""
 #. Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Sales Defaults"
-msgstr ""
+msgstr "Privzete Prodaje"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:126
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:212
 msgid "Sales Expenses"
-msgstr ""
+msgstr "Prodajni Stroški"
 
 #. Label of the sales_forecast (Link) field in DocType 'Master Production
 #. Schedule'
@@ -42656,7 +42701,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/sales_forecast/sales_forecast.json
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
 msgid "Sales Forecast"
-msgstr ""
+msgstr "Napoved Prodaje"
 
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/sales_forecast_item/sales_forecast_item.json
@@ -42670,7 +42715,7 @@ msgstr ""
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:46
 #: erpnext/selling/workspace/selling/selling.json
 msgid "Sales Funnel"
-msgstr ""
+msgstr "Prodajni Lijak"
 
 #. Label of the sales_incoming_rate (Currency) field in DocType 'Purchase
 #. Invoice Item'
@@ -42730,12 +42775,12 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note/delivery_note_list.js:65
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.json
 msgid "Sales Invoice"
-msgstr ""
+msgstr "Prodajna Faktura"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/sales_invoice_advance/sales_invoice_advance.json
 msgid "Sales Invoice Advance"
-msgstr ""
+msgstr "Predplačilo Prodajne Fakture"
 
 #. Label of the sales_invoice_item (Data) field in DocType 'Purchase Invoice
 #. Item'
@@ -42744,12 +42789,12 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgid "Sales Invoice Item"
-msgstr ""
+msgstr "Artikel Prodajne Fakture"
 
 #. Label of the sales_invoice_no (Link) field in DocType 'Stock Entry'
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Sales Invoice No"
-msgstr ""
+msgstr "Številka Prodajne Fakture"
 
 #. Label of the payments (Table) field in DocType 'POS Invoice'
 #. Label of the payments (Table) field in DocType 'Sales Invoice'
@@ -42758,7 +42803,7 @@ msgstr ""
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/accounts/doctype/sales_invoice_payment/sales_invoice_payment.json
 msgid "Sales Invoice Payment"
-msgstr ""
+msgstr "Plačilo Prodajne Fakture"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/sales_invoice_reference/sales_invoice_reference.json
@@ -42905,7 +42950,7 @@ msgstr ""
 #: erpnext/stock/report/delayed_order_report/delayed_order_report.js:30
 #: erpnext/stock/report/delayed_order_report/delayed_order_report.py:74
 msgid "Sales Order"
-msgstr ""
+msgstr "Prodajno Naročilo"
 
 #. Label of a Link in the Receivables Workspace
 #. Name of a report
@@ -43024,21 +43069,21 @@ msgstr ""
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.js:42
 msgid "Sales Orders"
-msgstr ""
+msgstr "Prodajna Naročila"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:341
 msgid "Sales Orders Required"
-msgstr ""
+msgstr "Zahtevana Prodajna Naročila"
 
 #. Label of the sales_orders_to_bill (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "Sales Orders to Bill"
-msgstr ""
+msgstr "Prodajna Naročila za Fakturiranje"
 
 #. Label of the sales_orders_to_deliver (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "Sales Orders to Deliver"
-msgstr ""
+msgstr "Prodajna Naročila za Dostavo"
 
 #. Label of the sales_partner (Link) field in DocType 'POS Invoice'
 #. Option for the 'Applicable For' (Select) field in DocType 'Pricing Rule'
@@ -43079,12 +43124,12 @@ msgstr ""
 #: erpnext/setup/doctype/sales_partner/sales_partner.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "Sales Partner"
-msgstr ""
+msgstr "Prodajni Partner"
 
 #. Label of the sales_partner (Link) field in DocType 'Sales Partner Item'
 #: erpnext/accounts/doctype/sales_partner_item/sales_partner_item.json
 msgid "Sales Partner "
-msgstr ""
+msgstr "Prodajni Partner "
 
 #. Name of a report
 #: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.json
@@ -43463,7 +43508,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.json
 msgid "Scan Barcode"
-msgstr ""
+msgstr "Skeniraj Črtno Kodo"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:160
 msgid "Scan Batch No"
@@ -43771,7 +43816,7 @@ msgstr ""
 
 #: erpnext/selling/doctype/quotation/quotation.js:325
 msgid "Select Alternative Items for Sales Order"
-msgstr ""
+msgstr "Izberi Alternativne Artikle za Prodajno Naročilo"
 
 #: erpnext/stock/doctype/item/item.js:689
 msgid "Select Attribute Values"
@@ -43779,11 +43824,11 @@ msgstr ""
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1251
 msgid "Select BOM"
-msgstr ""
+msgstr "Izberi Kosovnico"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1232
 msgid "Select BOM and Qty for Production"
-msgstr ""
+msgstr "Izberi Kosovnico in Količino za Proizvodnjo"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1383
 msgid "Select BOM, Qty and For Warehouse"
@@ -46854,7 +46899,7 @@ msgstr ""
 #: erpnext/stock/doctype/warehouse_type/warehouse_type.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Stock Manager"
-msgstr ""
+msgstr "Vodja Zaloge"
 
 #: erpnext/stock/doctype/item/item_dashboard.py:34
 msgid "Stock Movement"
@@ -47045,7 +47090,7 @@ msgstr ""
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 #: erpnext/stock/doctype/pick_list_item/pick_list_item.json
 msgid "Stock Reserved Qty (in Stock UOM)"
-msgstr ""
+msgstr "Zaloga Rezervirana Količina (na Enoti Zaloge)"
 
 #. Label of the auto_accounting_for_stock_settings (Section Break) field in
 #. DocType 'Company'
@@ -47172,13 +47217,13 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgid "Stock UOM"
-msgstr ""
+msgstr "Enota Zaloga"
 
 #. Label of the conversion_factor_section (Section Break) field in DocType
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Stock UOM Quantity"
-msgstr ""
+msgstr "Količina Enote Zaloga"
 
 #: erpnext/public/js/stock_reservation.js:230
 #: erpnext/selling/doctype/sales_order/sales_order.js:451
@@ -47193,7 +47238,7 @@ msgstr ""
 #: erpnext/buying/doctype/purchase_order_item_supplied/purchase_order_item_supplied.json
 #: erpnext/buying/doctype/purchase_receipt_item_supplied/purchase_receipt_item_supplied.json
 msgid "Stock Uom"
-msgstr ""
+msgstr "Enota Zaloga"
 
 #. Name of a role
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.json
@@ -47246,7 +47291,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Stock User"
-msgstr ""
+msgstr "Uporabnik Zaloge"
 
 #. Label of the stock_validations_tab (Tab Break) field in DocType 'Stock
 #. Settings'
@@ -52474,17 +52519,17 @@ msgstr ""
 #: erpnext/templates/emails/reorder_item.html:11
 #: erpnext/templates/includes/rfq/rfq_items.html:17
 msgid "UOM"
-msgstr ""
+msgstr "Enota"
 
 #. Name of a DocType
 #: erpnext/stock/doctype/uom_category/uom_category.json
 msgid "UOM Category"
-msgstr ""
+msgstr "Kategorija Enote"
 
 #. Name of a DocType
 #: erpnext/stock/doctype/uom_conversion_detail/uom_conversion_detail.json
 msgid "UOM Conversion Detail"
-msgstr ""
+msgstr "Podrobnosti o Pretvorbi Enote"
 
 #. Label of the conversion_factor (Float) field in DocType 'POS Invoice Item'
 #. Label of the conversion_factor (Float) field in DocType 'Purchase Invoice
@@ -52518,7 +52563,7 @@ msgstr ""
 #: erpnext/stock/doctype/pick_list_item/pick_list_item.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "UOM Conversion Factor"
-msgstr ""
+msgstr "Faktor Pretvorbe Enote"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1424
 msgid "UOM Conversion factor ({0} -> {1}) not found for item: {2}"
@@ -52531,7 +52576,7 @@ msgstr ""
 #. Label of the uom_name (Data) field in DocType 'UOM'
 #: erpnext/setup/doctype/uom/uom.json
 msgid "UOM Name"
-msgstr ""
+msgstr "Ime Enote"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:3507
 msgid "UOM conversion factor required for UOM: {0} in Item: {1}"
@@ -52539,12 +52584,12 @@ msgstr ""
 
 #: erpnext/stock/doctype/item_price/item_price.py:61
 msgid "UOM {0} not found in Item {1}"
-msgstr ""
+msgstr "Enota {0} ni bila najdena v artiklu {1}"
 
 #. Label of the uoms (Table) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "UOMs"
-msgstr ""
+msgstr "Enote"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -52657,7 +52702,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Unit"
-msgstr ""
+msgstr "Enota"
 
 #: erpnext/controllers/accounts_controller.py:3930
 msgid "Unit Price"
@@ -52672,7 +52717,7 @@ msgstr ""
 #: erpnext/setup/workspace/home/home.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Unit of Measure (UOM)"
-msgstr ""
+msgstr "Enota"
 
 #: erpnext/stock/doctype/item/item.py:383
 msgid "Unit of Measure {0} has been entered more than once in Conversion Factor Table"
