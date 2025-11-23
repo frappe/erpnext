@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-16 09:35+0000\n"
-"PO-Revision-Date: 2025-11-18 22:13\n"
+"PO-Revision-Date: 2025-11-23 23:33\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Serbian (Cyrillic)\n"
 "MIME-Version: 1.0\n"
@@ -1265,13 +1265,13 @@ msgstr "Стање рачуна"
 #: erpnext/accounts/doctype/account/account.json
 #: erpnext/accounts/doctype/account_category/account_category.json
 msgid "Account Category"
-msgstr ""
+msgstr "Категорија рачуна"
 
 #. Label of the account_category_name (Data) field in DocType 'Account
 #. Category'
 #: erpnext/accounts/doctype/account_category/account_category.json
 msgid "Account Category Name"
-msgstr ""
+msgstr "Назив категорије рачуна"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/account_closing_balance/account_closing_balance.json
@@ -1327,14 +1327,14 @@ msgstr "Валута рачуна (ка)"
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Account Data"
-msgstr ""
+msgstr "Подаци о рачуну"
 
 #: erpnext/accounts/report/balance_sheet/balance_sheet.js:20
 #: erpnext/accounts/report/cash_flow/cash_flow.js:29
 #: erpnext/accounts/report/custom_financial_statement/custom_financial_statement.js:21
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.js:20
 msgid "Account Detail Level"
-msgstr ""
+msgstr "Ниво детаља рачуна"
 
 #. Label of the account_details_section (Section Break) field in DocType 'Bank
 #. Account'
@@ -1997,7 +1997,7 @@ msgstr "Рачуни су закључани до датума"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:192
 msgid "Accounts Included in Report"
-msgstr ""
+msgstr "Рачуни укључени у извештај"
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:348
 msgid "Accounts Missing Error"
@@ -2006,7 +2006,7 @@ msgstr "Грешка због недостајућег рачуна"
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:166
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:191
 msgid "Accounts Missing from Report"
-msgstr ""
+msgstr "Рачуни недостају у извештају"
 
 #. Option for the 'Write Off Based On' (Select) field in DocType 'Journal
 #. Entry'
@@ -2111,7 +2111,7 @@ msgstr "Рачуни за спајање"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:158
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:264
 msgid "Accrued Expenses"
-msgstr ""
+msgstr "Обрачунати трошкови"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
@@ -2879,7 +2879,7 @@ msgstr "Висина додатног попуста (валута компан�
 
 #: erpnext/controllers/taxes_and_totals.py:731
 msgid "Additional Discount Amount ({discount_amount}) cannot exceed the total before such discount ({total_before_discount})"
-msgstr ""
+msgstr "Додатни износ попуста ({discount_amount}) не може премашити укупан износ пре таквог попуста ({total_before_discount})"
 
 #. Label of the additional_discount_percentage (Float) field in DocType 'POS
 #. Invoice'
@@ -3280,7 +3280,7 @@ msgstr "Авансне уплате распоређене према наруџ
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Advanced Filtering"
-msgstr ""
+msgstr "Напредно филтрирање"
 
 #. Label of the advances (Table) field in DocType 'POS Invoice'
 #. Label of the advances (Table) field in DocType 'Purchase Invoice'
@@ -5843,7 +5843,7 @@ msgstr "Мора бити изабран барем један од продај
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:25
 msgid "At least one row is required for a financial report template"
-msgstr ""
+msgstr "Потребан је најмање један ред у шаблону финансијског извештаја"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:704
 msgid "At least one warehouse is mandatory"
@@ -6886,7 +6886,7 @@ msgstr "Стање вредности залиха"
 #. Label of the balance_type (Select) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Balance Type"
-msgstr ""
+msgstr "Врста салда"
 
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:174
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:86
@@ -7913,7 +7913,7 @@ msgstr "Црна"
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Blank Line"
-msgstr ""
+msgstr "Празан ред"
 
 #. Label of the blanket_order (Link) field in DocType 'Purchase Order Item'
 #. Name of a DocType
@@ -7997,13 +7997,13 @@ msgstr "Помоћ за текст и закључак текста"
 #. Label of the bold_text (Check) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Bold Text"
-msgstr ""
+msgstr "Подебљан текст"
 
 #. Description of the 'Bold Text' (Check) field in DocType 'Financial Report
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Bold text for emphasis (totals, major headings)"
-msgstr ""
+msgstr "Подебљан текст за наглашавање (укупни износи, главни наслови)"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:282
 msgid "Book Advance Payments as Liability option is chosen. Paid From account changed from {0} to {1}."
@@ -8518,7 +8518,7 @@ msgstr "Израчунај цену пакета производа на осн�
 #. DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Calculate but don't show on final report"
-msgstr ""
+msgstr "Израчунати, али не приказивати у коначном извештају"
 
 #. Label of the calculate_depr_using_total_days (Check) field in DocType
 #. 'Accounts Settings'
@@ -8530,7 +8530,7 @@ msgstr "Израчунај дневну амортизацију користе�
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Calculated Amount"
-msgstr ""
+msgstr "Израчунати износ"
 
 #: erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:53
 msgid "Calculated Bank Statement balance"
@@ -9931,7 +9931,7 @@ msgstr "Листа кодова"
 #. Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Code to reference this line in formulas (e.g., REV100, EXP200, ASSET100)"
-msgstr ""
+msgstr "Шифра за референцирање овог реда у формулама (нпр. REV100, EXP200, ASSET100)"
 
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:4
 msgid "Cold Calling"
@@ -9965,7 +9965,7 @@ msgstr "Ниво колекције"
 #. Description of the 'Color' (Color) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Color to highlight values (e.g., red for exceptions)"
-msgstr ""
+msgstr "Боја за истицање вредности (нпр. црвена за изузетке)"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:280
 msgid "Colour"
@@ -12729,7 +12729,7 @@ msgstr "Валута не може бити промењена након што
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:226
 msgid "Currency filters are currently unsupported in Custom Financial Report."
-msgstr ""
+msgstr "Филтери по валути тренутно нису подржани у прилагођеном финансијском извештају."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1665
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1733
@@ -12908,7 +12908,7 @@ msgstr "Надзор"
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Custom API"
-msgstr ""
+msgstr "Прилагођени API"
 
 #. Option for the 'Report Type' (Select) field in DocType 'Financial Report
 #. Template'
@@ -12916,7 +12916,7 @@ msgstr ""
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.json
 #: erpnext/accounts/report/custom_financial_statement/custom_financial_statement.json
 msgid "Custom Financial Statement"
-msgstr ""
+msgstr "Прилагођени финансијски извештај"
 
 #. Label of the custom_remarks (Check) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
@@ -13166,7 +13166,7 @@ msgstr "Адресе и контакт купца"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:159
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:268
 msgid "Customer Advances"
-msgstr ""
+msgstr "Аванси купца"
 
 #. Label of the customer_code (Small Text) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -13718,7 +13718,7 @@ msgstr "Увоз података и подешавања"
 #. Label of the data_source (Select) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Data Source"
-msgstr ""
+msgstr "Извор података"
 
 #. Label of the date (Date) field in DocType 'Bulk Transaction Log Detail'
 #: erpnext/bulk_transaction/doctype/bulk_transaction_log_detail/bulk_transaction_log_detail.json
@@ -15291,7 +15291,7 @@ msgstr "Опис садржаја"
 #. Template'
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.json
 msgid "Descriptive name for your template (e.g., 'Standard P&L', 'Detailed Balance Sheet')"
-msgstr ""
+msgstr "Описни назив Вашег шаблона (нпр. 'Стандардни биланс успеха', 'Детаљан биланс стања')"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:14
 msgid "Designer"
@@ -15558,7 +15558,7 @@ msgstr "Онемогући број серије и селектор шарже"
 #. Template'
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.json
 msgid "Disable template to prevent use in reports"
-msgstr ""
+msgstr "Онемогућите шаблон да бисте спречили његово коришћење у извештајима"
 
 #: erpnext/accounts/general_ledger.py:149
 msgid "Disabled Account Selected"
@@ -15954,7 +15954,7 @@ msgstr "Поставке отпреме"
 #. Label of the display_name (Data) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Display Name"
-msgstr ""
+msgstr "Назив за приказ"
 
 #. Label of the disposal_date (Date) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -16858,7 +16858,7 @@ msgstr "Аванси запосленог лица"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:184
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:321
 msgid "Employee Benefits Obligation"
-msgstr ""
+msgstr "Обавезе по основу бенефиција запосленим лицима"
 
 #. Label of the employee_detail (Section Break) field in DocType 'Timesheet'
 #: erpnext/projects/doctype/timesheet/timesheet.json
@@ -18368,20 +18368,20 @@ msgstr "Финансијски показатељи"
 #. Name of a DocType
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Financial Report Row"
-msgstr ""
+msgstr "Ред финансијског извештаја"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.json
 msgid "Financial Report Template"
-msgstr ""
+msgstr "Шаблон финансијског извештаја"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:242
 msgid "Financial Report Template {0} is disabled"
-msgstr ""
+msgstr "Шаблон финансијског извештаја {0} је онемогућен"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:239
 msgid "Financial Report Template {0} not found"
-msgstr ""
+msgstr "Шаблон финансијског извештаја {0} није пронађен"
 
 #. Name of a Workspace
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
@@ -19092,7 +19092,7 @@ msgstr "Критеријуми засновани на формули"
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Formula or Account Filter"
-msgstr ""
+msgstr "Формула или филтер рачуна"
 
 #: erpnext/templates/pages/help.html:35
 msgid "Forum Activity"
@@ -19110,7 +19110,7 @@ msgstr "URL форума"
 
 #: erpnext/setup/install.py:200
 msgid "Frappe School"
-msgstr ""
+msgstr "Frappe School"
 
 #. Title of an incoterm
 #: erpnext/setup/doctype/incoterm/incoterms.csv:4
@@ -20736,7 +20736,7 @@ msgstr "Здраво,"
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Hidden Line (Internal Use Only)"
-msgstr ""
+msgstr "Скривени ред (само за интерну употребу)"
 
 #. Description of the 'Contact List' (Code) field in DocType 'Shareholder'
 #: erpnext/accounts/doctype/shareholder/shareholder.json
@@ -20757,7 +20757,7 @@ msgstr "Сакриј порески број купца из продајних 
 #. Label of the hide_when_empty (Check) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Hide If Zero"
-msgstr ""
+msgstr "Сакриј уколико је нула"
 
 #. Label of the hide_images (Check) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
@@ -20777,7 +20777,7 @@ msgstr "Сакриј недоступне ставке"
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Hide this line if amount is zero"
-msgstr ""
+msgstr "Сакриј овај ред уколико је износ нула"
 
 #. Label of the hide_timesheets (Check) field in DocType 'Project User'
 #: erpnext/projects/doctype/project_user/project_user.json
@@ -20915,13 +20915,13 @@ msgstr "Колико често треба ажурирати пројекат �
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "How this line gets its data"
-msgstr ""
+msgstr "На који начин овај ред добија своје податке"
 
 #. Description of the 'Value Type' (Select) field in DocType 'Financial Report
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "How to format and present values in the financial report (only if different from column fieldtype)"
-msgstr ""
+msgstr "Како форматирати и приказати вредности у финансијском извештају (само уколико се разликује од врсте поља колона)"
 
 #. Label of the hours (Float) field in DocType 'Timesheet Detail'
 #: erpnext/projects/doctype/timesheet_detail/timesheet_detail.json
@@ -21193,7 +21193,7 @@ msgstr "Уколико је омогућено, цена ставке неће �
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "If enabled, the source and target warehouse in the Material Transfer Stock Entry must be different else an error will be thrown. If inventory dimensions are present, same source and target warehouse can be allowed but atleast any one of the inventory dimension fields must be different."
-msgstr ""
+msgstr "Уколико је омогућено, изворно и циљно складиште у уносу залиха преноса материјала морају бити различити, иначе ће бити пријављена грешка. Уколико постоје димензије залиха, исто изворно и циљно складиште може бити дозвољено, али барем једно од поља димензија залиха мора бити различито."
 
 #. Description of the 'Allow UOM with Conversion Rate Defined in Item' (Check)
 #. field in DocType 'Stock Settings'
@@ -21235,7 +21235,7 @@ msgstr "Уколико је омогућено, систем ће само ва�
 #. Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "If enabled, this row's values will be displayed on financial charts"
-msgstr ""
+msgstr "Уколико је омогућено, вредности овог реда биће приказани на финансијским дијаграмима"
 
 #. Description of the 'Confirm before resetting posting date' (Check) field in
 #. DocType 'Accounts Settings'
@@ -21986,7 +21986,7 @@ msgstr "Укључи ставке које имају вредност нула 
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Include in Charts"
-msgstr ""
+msgstr "Укључити у дијаграме"
 
 #. Label of the include_in_gross (Check) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
@@ -22204,13 +22204,13 @@ msgstr "Захтев"
 #. Label of the indentation_level (Int) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Indent Level"
-msgstr ""
+msgstr "Ниво увлачења"
 
 #. Description of the 'Indent Level' (Int) field in DocType 'Financial Report
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Indentation level: 0 = Main heading, 1 = Sub-category, 2 = Individual accounts, etc."
-msgstr ""
+msgstr "Ниво увлачења: 0 = Главни наслов, 1 = Поткатегорија, 2 = Појединачни рачуни, итд."
 
 #. Description of the 'Delivery Note' (Link) field in DocType 'Packing Slip'
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -22529,12 +22529,12 @@ msgstr "Камата"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:132
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:218
 msgid "Interest Expense"
-msgstr ""
+msgstr "Трошак камата"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:146
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:242
 msgid "Interest Income"
-msgstr ""
+msgstr "Приход од камата"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:3052
 msgid "Interest and/or dunning fee"
@@ -22543,7 +22543,7 @@ msgstr "Камата и/или накнада за опомену"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:147
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:243
 msgid "Interest on Fixed Deposits"
-msgstr ""
+msgstr "Камата на орочење депозите"
 
 #. Option for the 'Status' (Select) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
@@ -22695,7 +22695,7 @@ msgstr "Неважећи попуст"
 
 #: erpnext/controllers/taxes_and_totals.py:738
 msgid "Invalid Discount Amount"
-msgstr ""
+msgstr "Неважећи износ попуста"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:122
 msgid "Invalid Document"
@@ -22832,7 +22832,7 @@ msgstr "Неважећи израз услова"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:93
 msgid "Invalid filter formula. Please check the syntax."
-msgstr ""
+msgstr "Неважећа формула филтера. Молимо Вас да проверите синтаксу."
 
 #: erpnext/selling/doctype/quotation/quotation.py:272
 msgid "Invalid lost reason {0}, please create a new lost reason"
@@ -23743,13 +23743,13 @@ msgstr "Није могуће равномерно расподелити тро
 #. Label of the italic_text (Check) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Italic Text"
-msgstr ""
+msgstr "Курзивни текст"
 
 #. Description of the 'Italic Text' (Check) field in DocType 'Financial Report
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Italic text for subtotals or notes"
-msgstr ""
+msgstr "Курзивни текст за међузбирове или напомене"
 
 #. Label of the item_code (Link) field in DocType 'POS Invoice Item'
 #. Label of the item_code (Link) field in DocType 'Purchase Invoice Item'
@@ -25426,7 +25426,7 @@ msgstr "Контакт извршиоца посла"
 #. Order'
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "Job Worker Currency"
-msgstr ""
+msgstr "Валута извршиоца посла"
 
 #. Label of the supplier_delivery_note (Data) field in DocType 'Subcontracting
 #. Receipt'
@@ -26220,7 +26220,7 @@ msgstr "Ограничења се не примењују на"
 #. Label of the reference_code (Data) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Line Reference"
-msgstr ""
+msgstr "Референца реда"
 
 #. Label of the amt_in_words_line_spacing (Float) field in DocType 'Cheque
 #. Print Template'
@@ -26398,7 +26398,7 @@ msgstr "Логотип"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:183
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:317
 msgid "Long-term Provisions"
-msgstr ""
+msgstr "Дугорочна резервисања"
 
 #. Label of the longitude (Float) field in DocType 'Location'
 #. Label of the lng (Float) field in DocType 'Delivery Stop'
@@ -26652,7 +26652,7 @@ msgstr "Главни трошковни центар {0} не може бити 
 #. Item'
 #: erpnext/manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgid "Main Item Code"
-msgstr ""
+msgstr "Главна шифра ставке"
 
 #: erpnext/assets/doctype/asset/asset.js:136
 msgid "Maintain Asset"
@@ -28214,7 +28214,7 @@ msgstr "Минимална количина треба да буде већа о
 
 #: erpnext/stock/doctype/item/item.js:827
 msgid "Min Value: {0}, Max Value: {1}, in Increments of: {2}"
-msgstr ""
+msgstr "Минимална вредност: {0}, максимална вредност: {1}, у корацима од: {2}"
 
 #. Label of the minimum_invoice_amount (Currency) field in DocType 'Payment
 #. Reconciliation'
@@ -28352,7 +28352,7 @@ msgstr "Недостаје имејл шаблон за слање. Молимо
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:223
 msgid "Missing required filter: {0}"
-msgstr ""
+msgstr "Недостаје обавезни филтер: {0}"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1098
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1447
@@ -28458,7 +28458,7 @@ msgstr "Измењено дана"
 #. Label of the module (Link) field in DocType 'Financial Report Template'
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.json
 msgid "Module (for Export)"
-msgstr ""
+msgstr "Модул (за извоз)"
 
 #. Label of a Card Break in the Settings Workspace
 #: erpnext/setup/workspace/settings/settings.json
@@ -29276,7 +29276,7 @@ msgstr "Следећи имејл ће бити послат на:"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:161
 msgid "No <strong>Account Data</strong> row found"
-msgstr ""
+msgstr "Није пронађен ниједан ред у <strong>подацима рачуна</strong>"
 
 #: erpnext/setup/doctype/company/test_company.py:99
 msgid "No Account matched these filters: {}"
@@ -29683,7 +29683,7 @@ msgstr "Ставке ван залиха"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:182
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:316
 msgid "Non-Current Liabilities"
-msgstr ""
+msgstr "Дугорочне обавезе"
 
 #: erpnext/selling/report/sales_analytics/sales_analytics.js:95
 msgid "Non-Zeros"
@@ -30460,7 +30460,7 @@ msgstr "Почетно стање"
 #. Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Opening Balance = Start of period, Closing Balance = End of period, Period Movement = Net change during period"
-msgstr ""
+msgstr "Почетно стање = почетак периода, завршно стање = крај периода, кретање у периоду = нето промена током периода"
 
 #. Label of the balance_details (Table) field in DocType 'POS Opening Entry'
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.json
@@ -31659,7 +31659,7 @@ msgstr "Профил малопродаје је неопходан за уно�
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:113
 msgid "POS Profile {0} cannot be disabled as there are ongoing POS sessions."
-msgstr ""
+msgstr "Профил малопродаје {0} не може бити онемогућен јер постоје активне малопродајне сесије."
 
 #: erpnext/accounts/doctype/mode_of_payment/mode_of_payment.py:63
 msgid "POS Profile {} contains Mode of Payment {}. Please remove them to disable this mode."
@@ -31667,15 +31667,15 @@ msgstr "Профил малопродаје {} садржи начин плаћ�
 
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:58
 msgid "POS Profile {} does not belong to company {}"
-msgstr ""
+msgstr "Профил малопродаје {} не припада компанији {}"
 
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:47
 msgid "POS Profile {} does not exist."
-msgstr ""
+msgstr "Профил малопродаје {} не постоји."
 
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:54
 msgid "POS Profile {} is disabled."
-msgstr ""
+msgstr "Профил малопродаје {} је онемогућен."
 
 #. Name of a report
 #: erpnext/accounts/report/pos_register/pos_register.json
@@ -33453,11 +33453,11 @@ msgstr "Документ за затварање периода"
 
 #: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:499
 msgid "Period Closing Voucher {0} GL Entry Cancellation Failed"
-msgstr ""
+msgstr "Отказивање уноса у главну књигу за документ за затварање периода {0} није успело"
 
 #: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:478
 msgid "Period Closing Voucher {0} GL Entry Processing Failed"
-msgstr ""
+msgstr "Обрада уноса у главну књигу за документ за затварање периода {0} није успела"
 
 #. Label of the period_details_section (Section Break) field in DocType 'POS
 #. Closing Entry'
@@ -33483,7 +33483,7 @@ msgstr "Датум завршетка периода не може бити ве
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Period Movement (Debits - Credits)"
-msgstr ""
+msgstr "Кретање у периоду (Дугује - Потражује)"
 
 #. Label of the period_name (Data) field in DocType 'Accounting Period'
 #: erpnext/accounts/doctype/accounting_period/accounting_period.json
@@ -34431,7 +34431,7 @@ msgstr "Молимо Вас да прво сачувате"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:859
 msgid "Please save the Sales Order before adding a delivery schedule."
-msgstr ""
+msgstr "Сачувајте продајну поруџбину пре додавања распореда испоруке."
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:79
 msgid "Please select <b>Template Type</b> to download template"
@@ -34878,7 +34878,7 @@ msgstr "Молимо Вас да поставите рачун у складиш
 
 #: erpnext/manufacturing/doctype/master_production_schedule/master_production_schedule.js:58
 msgid "Please set actual demand or sales forecast to generate Material Requirements Planning Report."
-msgstr ""
+msgstr "Молимо Вас подесите стварну потражњу или прогнозу продаје да бисте генерисали извештај о планирању потреба за материјалом."
 
 #: erpnext/regional/italy/utils.py:247
 #, python-format
@@ -35431,7 +35431,7 @@ msgstr "Преферирани имејл"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:34
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:51
 msgid "Prepaid Expenses"
-msgstr ""
+msgstr "Унапред плаћени расходи"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:24
 msgid "President"
@@ -40036,14 +40036,14 @@ msgstr "Грешка у извештају"
 #. Label of the rows (Table) field in DocType 'Financial Report Template'
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.json
 msgid "Report Line Items"
-msgstr ""
+msgstr "Ставке реда извештаја"
 
 #: erpnext/accounts/report/balance_sheet/balance_sheet.js:13
 #: erpnext/accounts/report/cash_flow/cash_flow.js:22
 #: erpnext/accounts/report/custom_financial_statement/custom_financial_statement.js:13
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.js:13
 msgid "Report Template"
-msgstr ""
+msgstr "Шаблон извештаја"
 
 #: erpnext/accounts/doctype/account/account.py:460
 msgid "Report Type is mandatory"
@@ -41113,7 +41113,7 @@ msgstr "Поништавање налога књижења"
 #. Label of the reverse_sign (Check) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Reverse Sign"
-msgstr ""
+msgstr "Обрнути знак"
 
 #. Label of the review (Link) field in DocType 'Quality Action'
 #. Group in Quality Goal's connections
@@ -45763,12 +45763,12 @@ msgstr "Кратка биографија за веб-сајт и друге п�
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:35
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:55
 msgid "Short-term Investments"
-msgstr ""
+msgstr "Краткорочна улагања"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:175
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:295
 msgid "Short-term Provisions"
-msgstr ""
+msgstr "Краткорочна резервисања"
 
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:225
 msgid "Shortage Qty"
@@ -45973,7 +45973,7 @@ msgstr "Прикажи на веб-сајту"
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Show negative values as positive (for expenses in P&L)"
-msgstr ""
+msgstr "Прикажи негативне вредности као позитивне (за расходе у билансу стања)"
 
 #: erpnext/accounts/report/trial_balance/trial_balance.js:111
 msgid "Show net values in opening and closing columns"
@@ -47093,7 +47093,7 @@ msgstr "Уноси резервације залиха креирани"
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.py:445
 msgid "Stock Reservation Entries created"
-msgstr ""
+msgstr "Креирани уноси резервације залиха"
 
 #. Name of a DocType
 #: erpnext/public/js/stock_reservation.js:309
@@ -47480,7 +47480,7 @@ msgstr "Шифра ставке подсклопа"
 #. Request Plan Item'
 #: erpnext/manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgid "Sub Assembly Item Reference"
-msgstr ""
+msgstr "Референца ставке подсклопа"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:403
 msgid "Sub Assembly Item is mandatory"
@@ -47526,7 +47526,7 @@ msgstr "Међузбир"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:600
 msgid "Sub assembly item references are missing. Please fetch the sub assemblies and raw materials again."
-msgstr ""
+msgstr "Недостају референце ставки подсклопа. Молимо Вас да поново учитате подсклопе и сировине."
 
 #: erpnext/manufacturing/report/bom_operations_time/bom_operations_time.py:127
 msgid "Sub-assembly BOM Count"
@@ -49144,7 +49144,7 @@ msgstr "Пореска категорија је промењена на \"Ук�
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:136
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:230
 msgid "Tax Expense"
-msgstr ""
+msgstr "Порески расход"
 
 #. Label of the tax_id (Data) field in DocType 'Supplier'
 #. Label of the tax_id (Data) field in DocType 'Customer'
@@ -49850,7 +49850,7 @@ msgstr "Тесла"
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Text displayed on the financial statement (e.g., 'Total Revenue', 'Cash and Cash Equivalents')"
-msgstr ""
+msgstr "Текст приказан у финансијском извештају (нпр. 'Укупни приходи', 'Готовина и готовински еквиваленти')"
 
 #: erpnext/stock/doctype/packing_slip/packing_slip.py:91
 msgid "The 'From Package No.' field must neither be empty nor it's value less than 1."
@@ -52436,7 +52436,7 @@ msgstr "Врста документа који треба преименоват
 #. Template'
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.json
 msgid "Type of financial statement this template generates"
-msgstr ""
+msgstr "Врста финансијског извештаја коју овај шаблон генерише"
 
 #: erpnext/config/projects.py:61
 msgid "Types of activities for Time Logs"
@@ -53197,7 +53197,7 @@ msgstr "Ажурирано путем 'Запис времена' (у минут
 
 #: erpnext/accounts/doctype/account_category/account_category.py:54
 msgid "Updated {0} Financial Report Row(s) with new category name"
-msgstr ""
+msgstr "Ажурирано {0} редова финансијског извештаја са новим називом категорије"
 
 #: erpnext/projects/doctype/project/project.js:137
 msgid "Updating Costing and Billing fields against this Project..."
@@ -53256,7 +53256,7 @@ msgstr "Користи дугме 'Поновна обрада као позад
 #. Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Use <strong>Python</strong> filters to get Accounts"
-msgstr ""
+msgstr "Користите <strong>Python</strong> филтере да добијете рачуне"
 
 #. Label of the use_batchwise_valuation (Check) field in DocType 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
@@ -53416,7 +53416,7 @@ msgstr "Искоришћено за план производње"
 #. Description of the 'Account Category' (Link) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
 msgid "Used with Financial Report Template"
-msgstr ""
+msgstr "Користи се уз шаблон финансијског извештаја"
 
 #: erpnext/setup/install.py:194
 msgid "User Forum"
@@ -53630,7 +53630,7 @@ msgstr "Проверите компоненте и количине компон
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Validate Material Transfer Warehouses"
-msgstr ""
+msgstr "Провери складишта за пренос материјала"
 
 #. Label of the validate_negative_stock (Check) field in DocType 'Inventory
 #. Dimension'
@@ -53837,7 +53837,7 @@ msgstr "Предлог вредности"
 #. Label of the fieldtype (Select) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Value Type"
-msgstr ""
+msgstr "Врста вредности"
 
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:599
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:629
@@ -54068,7 +54068,7 @@ msgstr "Видео подешавање"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:7
 msgid "View Account Coverage"
-msgstr ""
+msgstr "Приказ покривености рачуна"
 
 #: erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.js:25
 msgid "View BOM Update Log"
@@ -54664,7 +54664,7 @@ msgstr "Упозорење: Продајна поруџбина {0} већ по�
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_validation.py:77
 msgid "Warnings"
-msgstr ""
+msgstr "Упозорења"
 
 #. Label of a Card Break in the Support Workspace
 #: erpnext/support/workspace/support/support.json
@@ -56305,7 +56305,7 @@ msgstr "{0} варијанти је креирано."
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:232
 msgid "{0} view is currently unsupported in Custom Financial Report."
-msgstr ""
+msgstr "Приказ {0} тренутно није подржан у прилагођеном финансијском извештају."
 
 #: erpnext/accounts/doctype/payment_term/payment_term.js:19
 msgid "{0} will be given as discount."
