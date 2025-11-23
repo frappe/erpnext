@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-16 09:35+0000\n"
-"PO-Revision-Date: 2025-11-19 22:23\n"
+"PO-Revision-Date: 2025-11-23 23:34\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Croatian\n"
 "MIME-Version: 1.0\n"
@@ -2091,7 +2091,7 @@ msgstr "Račun Potraživanja/Obveza"
 #: erpnext/accounts/workspace/accounting/accounting.json
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Accounts Settings"
-msgstr "Postavke Kjnigovodstva"
+msgstr "Postavke Knjigovodstva"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1382
 msgid "Accounts table cannot be blank."
@@ -2510,7 +2510,7 @@ msgstr "Stvarni tip PDV-a ne može se uključiti u cijenu Artikla u redu {0}"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.py:1005
 msgid "Ad-hoc Qty"
-msgstr "Ad-hoc Količina"
+msgstr "Namjenska Količina"
 
 #: erpnext/stock/doctype/item/item.js:557
 #: erpnext/stock/doctype/price_list/price_list.js:8
