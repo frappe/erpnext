@@ -505,7 +505,7 @@ class SubcontractingController(StockController):
 		if item.get("serial_and_batch_bundle"):
 			frappe.delete_doc("Serial and Batch Bundle", item.serial_and_batch_bundle, force=True)
 
-	def __get_materials_from_bom(self, item_code, bom_no, exploded_item=0):
+	def _get_materials_from_bom(self, item_code, bom_no, exploded_item=0):
 		doctype = "BOM Item" if not exploded_item else "BOM Explosion Item"
 		fields = [f"`tab{doctype}`.`stock_qty` / `tabBOM`.`quantity` as qty_consumed_per_unit"]
 
