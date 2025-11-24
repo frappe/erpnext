@@ -529,34 +529,11 @@ class TaxWithholdingController:
 		if not self.doc.base_net_total:
 			return
 
-		# one category for all items
-		if len(self.category_details.keys()) == 1 and all(item.apply_tds for item in self.doc.get("items")):
-			self._update_amount_for_doc()
-
-		else:
-			self._update_amount_for_item()
-
-	def _update_amount_for_doc(self):
-		# only single category
-		category = self.category_details[next(iter(self.category_details))]
-
-		# Net Total
-		if category.tax_deduction_basis != "Gross Total":
-			category["taxable_amount"] = self.doc.base_net_total
-			return
-
-		# Gross Total
-		tax_withheld = 0
-		for row in self.doc.taxes:
-			if row.is_tax_withholding_account:
-				tax_withheld += row.base_tax_amount_after_discount_amount
-
-		precision = self.doc.precision("base_net_total")
-		category["taxable_amount"] = flt(self.doc.base_grand_total - tax_withheld, precision)
+		self._update_amount_for_item()
 
 	def _update_amount_for_item(self):
 		precision = self.doc.precision("base_net_rate", "items")
-		filters = {"is_tax_withholding_account": 0}
+		self._update_item_wise_tax_amount()
 
 		for item in self.doc.get("items"):
 			if not (item.apply_tds and item.tax_withholding_category):
@@ -567,9 +544,30 @@ class TaxWithholdingController:
 			if category.tax_deduction_basis != "Gross Total":
 				taxable_amount = item.base_net_amount
 			else:
-				taxable_amount = item.base_net_amount + ItemTax.get(self.doc, item, filters)
+				taxable_amount = item.base_net_amount + item._item_total_tax_amount
+
+			taxable_amount = flt(taxable_amount, precision)
+
+			item._base_tax_withholding_net_total = taxable_amount
 
 			category["taxable_amount"] += flt(taxable_amount, precision)
+
+	def _update_item_wise_tax_amount(self):
+		"""Update item wise tax amounts based on filters"""
+		for item in self.doc.get("items"):
+			item._item_total_tax_amount = 0
+
+		precision = self.doc.precision("tax_amount", "taxes")
+		for row in self.doc.get("_item_wise_tax_details", []):
+			item = row.item
+
+			if not (item.apply_tds and item.tax_withholding_category):
+				continue
+
+			if row.tax.is_tax_withholding_account:
+				continue
+
+			item._item_total_tax_amount = flt(item._item_total_tax_amount + row.amount, precision)
 
 	def _evaluate_thresholds(self):
 		"""
@@ -718,36 +716,111 @@ class TaxWithholdingController:
 	def update_tax_rows(self):
 		"""Update tax rows in the parent document based on withholding entries"""
 		account_amount_map = self._calculate_account_wise_amount()
+		category_withholding_map = self._get_category_withholding_map()
 		existing_taxes = {row.account_head: row for row in self.doc.taxes if row.is_tax_withholding_account}
 		precision = self.doc.precision("tax_amount", "taxes")
 		conversion_rate = self.get_conversion_rate()
 
-		for account_head, amount in account_amount_map.items():
-			tax_amount = flt(amount / conversion_rate, precision)
+		for account_head, base_amount in account_amount_map.items():
+			tax_amount = flt(base_amount / conversion_rate, precision)
 			if not tax_amount:
 				continue
 
+			# Update existing tax row or create new one
 			if existing_tax := existing_taxes.get(account_head):
 				existing_tax.tax_amount = tax_amount
-
+				tax_row = existing_tax
+				for_update = True
 			else:
-				cost_center = self.doc.cost_center or erpnext.get_default_cost_center(self.doc.company)
-				self.doc.append(
-					"taxes",
-					{
-						"is_tax_withholding_account": 1,
-						"category": "Total",
-						"charge_type": "Actual",
-						"account_head": account_head,
-						"description": account_head,
-						"cost_center": cost_center,
-						"add_deduct_tax": "Deduct",
-						"tax_amount": tax_amount,
-					},
-				)
+				tax_row = self._create_tax_row(account_head, tax_amount)
+				for_update = False
+
+			# Set item-wise tax breakup for this tax row
+			self._set_item_wise_tax_for_tds(
+				tax_row, account_head, category_withholding_map, for_update=for_update
+			)
 
 		self._remove_zero_tax_rows()
 		self.calculate_taxes_and_totals()
+
+	def _create_tax_row(self, account_head, tax_amount):
+		"""Create a new tax withholding row"""
+		cost_center = self.doc.cost_center or erpnext.get_default_cost_center(self.doc.company)
+		return self.doc.append(
+			"taxes",
+			{
+				"is_tax_withholding_account": 1,
+				"category": "Total",
+				"charge_type": "Actual",
+				"account_head": account_head,
+				"description": account_head,
+				"cost_center": cost_center,
+				"add_deduct_tax": "Deduct",
+				"tax_amount": tax_amount,
+				"dont_recompute_tax": 1,
+			},
+		)
+
+	def _set_item_wise_tax_for_tds(self, tax_row, account_head, category_withholding_map, for_update=False):
+		"""Set item-wise tax breakup for TDS tax rows"""
+		# Get all categories for this account (multiple categories can share same account)
+		categories_for_account = [
+			cat for cat in self.category_details.values() if cat.account_head == account_head
+		]
+
+		if not categories_for_account:
+			return
+
+		# Clear existing entries for this tax row if updating
+		if for_update:
+			self.doc._item_wise_tax_details = [
+				d for d in self.doc._item_wise_tax_details if d.get("tax") != tax_row
+			]
+
+		# Process each item and calculate its share of tax
+		precision = self.doc.precision("tax_amount", "taxes")
+
+		for item in self.doc.get("items", []):
+			if not (item.apply_tds and item.tax_withholding_category):
+				continue
+
+			category = self.category_details.get(item.tax_withholding_category)
+			if not category or category.account_head != account_head:
+				continue
+
+			item_base_taxable = item.get("_base_tax_withholding_net_total") or 0
+
+			if not category.taxable_amount or not item_base_taxable:
+				continue
+
+			# Calculate item's proportion within the category
+			item_proportion = item_base_taxable / category.taxable_amount
+
+			# Get category's total withholding amount
+			category_withholding_amount = category_withholding_map.get(category.name, 0)
+
+			# Calculate item's share of tax
+			item_tax_amount = flt(category_withholding_amount * item_proportion, precision)
+
+			# Append to _item_wise_tax_details
+			self.doc._item_wise_tax_details.append(
+				frappe._dict(
+					item=item,
+					tax=tax_row,
+					rate=category.tax_rate,
+					amount=item_tax_amount * -1,  # Negative because it's a deduction
+					taxable_amount=item_base_taxable,
+				)
+			)
+
+	def _get_category_withholding_map(self):
+		"""Calculate total withholding amount for each category"""
+		category_withholding_map = defaultdict(float)
+
+		for entry in self.doc.tax_withholding_entries:
+			category_withholding_map[entry.tax_withholding_category] += entry.withholding_amount
+
+		return category_withholding_map
 
 	def _calculate_account_wise_amount(self):
 		"""Calculate total withholding amounts by account"""
@@ -1032,59 +1105,6 @@ class TaxWithholdingController:
 		"""Validate and calculate tax withholding for sales transactions"""
 		if self._is_tax_withholding_applicable():
 			self.calculate()
-
-
-class ItemTax:
-	def get(self, doc, item, filters=None):
-		# NOTE: Its important to apportion taxes based on item tax rate
-		# (instead of amount / qty proportion) to get correct tax amount
-
-		tax_amount = 0
-		item_proportion = item.base_net_amount / doc.base_net_total
-
-		for tax_row in doc.taxes:
-			if tax_row.is_tax_withholding_account or not tax_row.base_tax_amount_after_discount_amount:
-				continue
-
-			charge_type = tax_row.charge_type
-			if tax_row.item_wise_tax_detail:
-				# tax rate
-				tax_rate = self._get_item_tax_rate(item, tax_row)
-
-				# tax amount
-				if tax_rate:
-					multiplier = item.qty if charge_type == "On Item Quantity" else item.base_net_amount / 100
-					tax_amount += multiplier * tax_rate
-					continue
-
-				# eg: charge_type == actual
-				item_key = item.item_code or item.name
-				item_tax_detail = self._get_item_tax_details(tax_row).get(item_key, {})
-
-				tax_amount += item_tax_detail.get("tax_amount", 0) * item_proportion
-
-			elif charge_type == "Actual":
-				tax_amount += tax_row.base_tax_amount_after_discount_amount * item_proportion
-
-		return tax_amount
-
-	def _get_item_tax_details(self, tax_row):
-		# temp cache
-		if not getattr(tax_row, "__tax_details", None):
-			tax_row.__tax_details = frappe.parse_json(tax_row.get("item_wise_tax_detail") or "{}")
-
-		return tax_row.__tax_details
-
-	def _get_item_tax_rate(self, item, tax_row):
-		# NOTE: Use item tax rate as same item code
-		# could have different tax rates in same invoice
-
-		item_tax_rates = frappe.parse_json(item.item_tax_rate)
-
-		if tax_row.account_head in item_tax_rates:
-			return item_tax_rates[tax_row.account_head]
-
-		return tax_row.rate
 
 
 class PurchaseTaxWithholding(TaxWithholdingController):
