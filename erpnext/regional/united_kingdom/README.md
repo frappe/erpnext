@@ -64,55 +64,49 @@ the Company Administrator.
         <th>Description</th>
         <th>Amount &rarr; Box</th>
     </tr>
+    <!-- Row 1 -->
     <tr>
-        <td>UK VAT Standard Rated</td>
-        <td>20%</td>
-        <td>Standard VAT Rate of 20%</td>
-        <td>
-            <table>
-                <tr><td>VAT at 20% &rarr; box 4</td></tr>
-                <tr><td>Net Purchase &rarr; box 7</td></tr>
-            </table>
-        </td>
+        <td rowspan="2">UK VAT Standard Rated</td>
+        <td rowspan="2">20%</td>
+        <td rowspan="2">Standard VAT Rate of 20%</td>
+        <td>VAT at 20% &rarr; box 4</td>
     </tr>
     <tr>
-        <td>UK VAT Reduced Rate</td>
-        <td>5%</td>
-        <td>UK Reduced Rate</td>
-        <td>
-            <table>
-                <tr><td>VAT at 5% &rarr; box 4</td></tr>
-                <tr><td>Net Purchase &rarr; box 7</td></tr>
-            </table>
-        </td>
+        <td>Net Purchase &rarr; box 7</td>
+    </tr>
+    <!-- Row 2 -->
+    <tr>
+        <td rowspan="2">UK VAT Reduced Rate</td>
+        <td rowspan="2">5%</td>
+        <td rowspan="2">UK Reduced Rate</td>
+        <td>VAT at 5% &rarr; box 4</td>
     </tr>
     <tr>
-        <td>UK VAT Zero-Rated</td>
-        <td>0%</td>
-        <td>Some items can be Zero Rated in the UK. Their net sales still need to be reported however.</td>
-        <td>
-            <table>
-                <tr><td>VAT at 0% &rarr; box 4</td></tr>
-                <tr><td>Net Purchase &rarr; box 7</td></tr>
-            </table>
-        </td>
+        <td>Net Purchase &rarr; box 7</td>
+    </tr>
+    <!-- Row 3 -->
+    <tr>
+        <td rowspan="2">UK VAT Zero-Rated</td>
+        <td rowspan="2">0%</td>
+        <td rowspan="2">Some items can be Zero Rated in the UK. Their net sales still need to be reported however.</td>
+        <td>VAT at 0% &rarr; box 4</td>
     </tr>
     <tr>
-        <td>UK VAT Reverse Charge</td>
-        <td>+20%/-20%</td>
-        <td>
+        <td>Net Purchase &rarr; box 7</td>
+    </tr>
+    <!-- Row 4 -->
+    <tr>
+        <td rowspan="4">UK VAT Reverse Charge</td>
+        <td rowspan="4">+20%/-20%</td>
+        <td rowspan="4">
             <p>Reverse charges are applied to special categories of goods, and/or services in the UK.
             These are applied as 20% to both the Input and Output VAT simultaneously.</p>
         </td>
-        <td>
-            <table>
-                <tr><td>(Output) VAT &rarr; box 1</td></tr>
-                <tr><td>Input VAT at 0% &rarr; box 4</td></tr>
-                <tr><td>Net Sales &rarr; box 6</td></tr>
-                <tr><td>Net Purchase &rarr; box 7</td></tr>
-            </table>
-        </td>
+        <td>(Output) VAT &rarr; box 1</td>
     </tr>
+    <tr><td>Input VAT at 0% &rarr; box 4</td></tr>
+    <tr><td>Net Sales &rarr; box 6</td></tr>
+    <tr><td>Net Purchase &rarr; box 7</td></tr>
 </table>
 
 Another Purchase Category in the UK is for VAT Exempt Sales. These are purchases
@@ -131,39 +125,37 @@ Tax and Charge Template.
         <th>Description</th>
         <th>Amount &rarr; Box</th>
     </tr>
+    <!-- Row 1 -->
     <tr>
-        <td>UK VAT Standard Rated</td>
-        <td>20%</td>
-        <td>Standard Rated Sales. Default Selling Rate.</td>
-        <td>
-            <table>
-                <tr><td>VAT at 20% &rarr; box 1</td></tr>
-                <tr><td>Net Sale &rarr; box 6</td></tr>
-            </table>
-        </td>
+        <td rowspan="2">UK VAT Standard Rated</td>
+        <td rowspan="2">20%</td>
+        <td rowspan="2">Standard Rated Sales. Default Selling Rate.</td>
+        <td>VAT at 20% &rarr; box 1</td>
     </tr>
     <tr>
-        <td>UK VAT Reduced Rate</td>
-        <td>5%</td>
-        <td>Reduced Rate Sales.</td>
-        <td>
-            <table>
-                <tr><td>VAT at 5% &rarr; box 1</td></tr>
-                <tr><td>Net Sale &rarr; box 6</td></tr>
-            </table>
-        </td>
+        <td>Net Sale &rarr; box 6</td></tr>
+    </tr>
+    <!-- Row 2 -->
+    <tr>
+        <td rowspan="2">UK VAT Reduced Rate</td>
+        <td rowspan="2">5%</td>
+        <td rowspan="2">Reduced Rate Sales.</td>
+        <td>VAT at 5% &rarr; box 1</td>
     </tr>
     <tr>
-        <td>UK VAT Zero-Rated</td>
-        <td>0%</td>
-        <td>The net revenue from Zero-rated sales needs to be reported.</td>
-        <td>
-            <table>
-                <tr><td>VAT at 0% &rarr; box 1</td></tr>
-                <tr><td>Net Sale &rarr; box 6</td></tr>
-            </table>
-        </td>
+        <td>Net Sale &rarr; box 6</td>
     </tr>
+    <!-- Row 3 -->
+    <tr>
+        <td rowspan="2">UK VAT Zero-Rated</td>
+        <td rowspan="2">0%</td>
+        <td rowspan="2">The net revenue from Zero-rated sales needs to be reported.</td>
+        <td>VAT at 0% &rarr; box 1</td>
+    </tr>
+    <tr>
+        <td>Net Sale &rarr; box 6</td></tr>
+    </tr>
+    <!-- Row 4 -->
     <tr>
         <td>UK VAT Exempt</td>
         <td>0%</td>
@@ -210,7 +202,7 @@ applied Item Tax Templates:-
   - Item
   - Direct Item Group
   - Parent Item Group
-  - ...
+  - [Ancestor Item Groups]
   - Root Item Group
 
 If no Item Tax Template is found, then we fall back to the default tax rate
@@ -218,7 +210,13 @@ defined in the selected Sales Tax and Charge Template.
 
 ## <a name="tr"></a> Tax Rules
 
-With the above in place, Tax Rules are created to 
+With the above in place, Tax Rules are created to Match against a Document, and
+then Apply a Sales or Purchase Tax Template.
+
+We show in the below table the Matching Rules and corresponding Sales or
+Purchase Tax Template that is then applied. By default, the Tax Template with
+the highest Priority (lowest number) is applied.
+
 
 <table>
     <thead>
@@ -226,8 +224,8 @@ With the above in place, Tax Rules are created to
             <th>Transaction Type</th>
             <th>Rule Name</th>
             <th>Priority</th>
-            <th>Sales/Purchase Tax Template</th>
-            <th>Rules</th>
+            <th>Matching Rules</th>
+            <th>Applied Tax Template</th>
         </tr>
     </thead>
     <tbody>
@@ -235,67 +233,65 @@ With the above in place, Tax Rules are created to
             <td>Purchase</td>
             <td>UK Standard Rated Purchases</td>
             <td>10</td>
+            <td>Company name</td>
             <td>UK VAT Standard Rated</td>
-            <td>Match Company</td>
         </tr>
         <tr>
             <td>Purchase</td>
             <td>UK Reduced Rate Purchases</td>
             <td>20</td>
+            <td>Company name</td>
             <td>UK VAT Reduced Rate</td>
-            <td>Match Company</td>
         </tr>
         <tr>
             <td>Purchase</td>
             <td>UK Zero Rated Purchases</td>
             <td>30</td>
+            <td>Company name</td>
             <td>UK VAT Zero-Rated</td>
-            <td>Match Company</td>
         </tr>
         <tr>
             <td>Sale</td>
             <td>UK Standard Rated Sales</td>
             <td>10</td>
+            <td>Company name</td>
             <td>UK VAT Standard Rated</td>
-            <td>Match Company</td>
         </tr>
         <tr>
             <td>Sale</td>
             <td>UK Reduced Rate Sales</td>
             <td>20</td>
+            <td>Company name</td>
             <td>UK VAT Reduced Rate</td>
-            <td>Match Company</td>
         </tr>
         <tr>
             <td>Sale</td>
             <td>UK Zero Rated Sales</td>
             <td>30</td>
+            <td>Company name</td>
             <td>UK VAT Zero-Rated</td>
+        </tr>
+        <!-- Penultimate Row -->
+        <tr>
+            <td rowspan="2">Sale</td>
+            <td rowspan="2">UK to EU Sales</td>
+            <td rowspan="2">40</td>
+            <td>Company name</td>
+            <td rowspan="2">UK VAT Outside Scope</td>
+        </tr>
+        <tr>
+            <td>Tax Category &rarr; UK Export Customer - EU</td>
+        </tr>
+        <!-- Last Row -->
+        <tr>
+            <td rowspan="2">Sale</td>
+            <td rowspan="2">UK to Rest of World Sales</td>
+            <td rowspan="2">50</td>
             <td>Match Company</td>
+            <td rowspan="2">UK VAT Outside Scope</td>
         </tr>
         <tr>
-            <td>Sale</td>
-            <td>UK to EU Sales</td>
-            <td>40</td>
-            <td>UK VAT Outside Scope</td>
-            <td>
-                <table>
-                    <tr><td>Match Company</td></tr>
-                    <tr><td>Tax Category &rarr; UK Export Customer - EU</td></tr>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td>Sale</td>
-            <td>UK to Rest of World Sales</td>
-            <td>50</td>
-            <td>UK VAT Outside Scope</td>
-            <td>
-                <table>
-                    <tr><td>Match Company</td></tr>
-                    <tr><td>Tax Category &rarr; UK Export Customer - Rest of World</td></tr>
-                </table>
-            </td>
+            <td>Tax Category &rarr; UK Export Customer - Rest of World</td>
         </tr>
     </tbody>
 </table>
@@ -305,7 +301,7 @@ With the above in place, Tax Rules are created to
 Tax Categories can be applied to a number of different and unrelated DocTypes.
 They have no inherent functionality, but Tax Rules and internal calculation
 logic can use them to produce correct general ledger entries and VAT return
-calculcations.
+calculations.
 
 In the context of ERPNext and UK VAT, Tax Categories can be used to help
 determine two key pieces of information:
@@ -323,16 +319,64 @@ These defaults seem sensible, as:
 Tax Categories can be applied to Quotations, Orders, Invoices etc. in a trivial
 manner, to override these assumed defaults.
 
-| Category Type | Category Name       | Apply To DocTypes           | Meaning                                 |
-|---------------|---------------------|-----------------------------|-----------------------------------------|
-| Party         | European Party      | Address (Dispatch)          | Shipping from Europe (Imports)          |
-| Party         | European Party      | Address (Shipping)          | Shipping to Europe (Exports)            |
-| Party         | European Party      | Address (Billing)           | Billing to Europe                       |
-| Party         | European Party      | Customer / Supplier         | Party is European                       |
-| Party         | Rest of World Party | Customer / Supplier         | Party is outside UK / EU                | 
-| Party         | European Party      | Address (Dispatch)          | Shipping from Europe (Imports)          |
-| Item Type     | Goods / Services    | Quotation / Order / Invoice | Item / Child Items are Goods / Services |
-| Item Type     | Goods / Services    | Item / Item Group           | Item / Child Items are Goods / Services |
+<table>
+<tr>
+    <th>Tax Category</th>
+    <th>Apply To</th>
+</tr>
+<!-- Row 1 -->
+<tr>
+    <td rowspan="3">UK VAT - EU Party</td>
+    <td>Customer</td>
+</tr>
+<tr>
+    <td>Supplier</td>
+</tr>
+<tr>
+    <td>Address</td>
+</tr>
+<!-- Row 2 -->
+<tr>
+    <td rowspan="3">UK VAT - Rest of World Party</td>
+    <td>Customer</td>
+</tr>
+<tr>
+    <td>Supplier</td>
+</tr>
+<tr>
+    <td>Address</td>
+</tr>
+<!-- Row 3 -->
+<tr>
+    <td rowspan="3">Goods</td>
+    <td>Item</td>
+</tr>
+<tr>
+    <td>Item Group</td>
+</tr>
+<tr>
+    <td>Accounts Controller</td>
+</tr>
+<!-- Row 4 -->
+<tr>
+    <td rowspan="3">Services</td>
+    <td>Item</td>
+</tr>
+<tr>
+    <td>Item Group</td>
+</tr>
+<tr>
+    <td>Accounts Controller</td>
+</tr>
+</table>
+
+
+Accounts Controller documents include Documents in the Buying and Selling
+Workspaces, including but not limited to RFQs, Quotations, Purchase Orders,
+Sales Orders, Purchase Invoices and Sales Invoices. Of course, it is only the
+Invoices that hit the General Ledger, so those are used for calculating VAT
+returns, but we still want the other related Documents to be correct.
+
 
 ### Place of Supply
 
