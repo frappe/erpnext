@@ -81,6 +81,7 @@ class TestProcessStatementOfAccounts(AccountsTestMixin, IntegrationTestCase):
 		process_soa = create_process_soa(
 			name="_Test Process SOA", enable_auto_email=1, report="Accounts Receivable"
 		)
+
 		send_emails(process_soa.name, from_scheduler=True)
 		process_soa.load_from_db()
 		self.assertEqual(process_soa.posting_date, getdate(add_days(today(), 7)))

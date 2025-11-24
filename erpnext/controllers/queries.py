@@ -318,7 +318,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	if filters:
 		if filters.get("customer"):
 			qb_filter_and_conditions.append(
-				(proj.customer == filters.get("customer")) | proj.customer.isnull() | proj.customer == ""
+				(proj.customer == filters.get("customer")) | (proj.customer.isnull()) | (proj.customer == "")
 			)
 
 		if filters.get("company"):

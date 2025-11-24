@@ -452,7 +452,7 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 					get_pricing_rule_items(pricing_rule, other_items=fetch_other_item) or []
 				)
 
-			if pricing_rule.coupon_code_based == 1:
+			if pricing_rule.get("coupon_code_based") == 1:
 				if not args.coupon_code:
 					continue
 				coupon_code = frappe.db.get_value(
@@ -713,6 +713,7 @@ def get_item_uoms(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.get_all(
 		"UOM Conversion Detail",
 		filters={"parent": ("in", items), "uom": ("like", f"{txt}%")},
-		fields=["distinct uom"],
+		fields=["uom"],
 		as_list=1,
+		distinct=True,
 	)

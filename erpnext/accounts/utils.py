@@ -11,8 +11,8 @@ import frappe.defaults
 from frappe import _, qb, throw
 from frappe.desk.reportview import build_match_conditions
 from frappe.model.meta import get_field_precision
-from frappe.query_builder import AliasedQuery, Case, Criterion, Table
-from frappe.query_builder.functions import Count, Max, Round, Sum
+from frappe.query_builder import AliasedQuery, Case, Criterion, Field, Table
+from frappe.query_builder.functions import Count, IfNull, Max, Round, Sum
 from frappe.query_builder.utils import DocType
 from frappe.utils import (
 	add_days,
@@ -27,6 +27,7 @@ from frappe.utils import (
 	now,
 	nowdate,
 )
+from frappe.utils.caching import site_cache
 from pypika import Order
 from pypika.functions import Coalesce
 from pypika.terms import ExistsCriterion
@@ -593,7 +594,11 @@ def check_if_advance_entry_modified(args):
 				q.inner_join(payment_ref)
 				.on(payment_entry.name == payment_ref.parent)
 				.where(payment_ref.name == args.get("voucher_detail_no"))
-				.where(payment_ref.reference_doctype.isin(("", "Sales Order", "Purchase Order")))
+				.where(
+					payment_ref.reference_doctype.isin(
+						("", "Sales Order", "Purchase Order", "Employee Advance")
+					)
+				)
 				.where(payment_ref.allocated_amount == args.get("unreconciled_amount"))
 			)
 		else:
@@ -963,19 +968,28 @@ def update_accounting_ledgers_after_reference_removal(
 	adv_ple.run()
 
 
-def remove_ref_from_advance_section(ref_doc: object = None):
+def remove_ref_from_advance_section(ref_doc: object = None, payment_name: str | None = None):
 	# TODO: this might need some testing
 	if ref_doc.doctype in ("Sales Invoice", "Purchase Invoice"):
-		ref_doc.set("advances", [])
-		adv_type = qb.DocType(f"{ref_doc.doctype} Advance")
-		qb.from_(adv_type).delete().where(adv_type.parent == ref_doc.name).run()
+		row_names = []
+		for adv in ref_doc.get("advances") or []:
+			if adv.get("reference_name", None) == payment_name:
+				row_names.append(adv.name)
+
+		if not row_names:
+			return
+
+		child_table = (
+			"Sales Invoice Advance" if ref_doc.doctype == "Sales Invoice" else "Purchase Invoice Advance"
+		)
+		frappe.db.delete(child_table, {"name": ("in", row_names)})
 
 
 def unlink_ref_doc_from_payment_entries(ref_doc: object = None, payment_name: str | None = None):
 	remove_ref_doc_link_from_jv(ref_doc.doctype, ref_doc.name, payment_name)
 	remove_ref_doc_link_from_pe(ref_doc.doctype, ref_doc.name, payment_name)
 	update_accounting_ledgers_after_reference_removal(ref_doc.doctype, ref_doc.name, payment_name)
-	remove_ref_from_advance_section(ref_doc)
+	remove_ref_from_advance_section(ref_doc, payment_name)
 
 
 def remove_ref_doc_link_from_jv(
@@ -1042,7 +1056,6 @@ def remove_ref_doc_link_from_pe(
 		query = query.where(per.parent == payment_name)
 
 	reference_rows = query.run(as_dict=True)
-
 	if not reference_rows:
 		return
 
@@ -1145,6 +1158,29 @@ def get_currency_precision():
 		precision = get_number_format_info(number_format)[2]
 
 	return precision
+
+
+def get_fraction_units(currency: str) -> int:
+	"""Returns the number of fraction units for a currency."""
+	fraction_units = frappe.db.get_value("Currency", currency, "fraction_units")
+
+	if fraction_units is None:
+		fraction_units = 100
+
+	return fraction_units
+
+
+@site_cache()
+def get_zero_cutoff(currency: str) -> float:
+	"""Returns the zero cutoff for a currency.
+
+	For example, if the Fraction Units for a currency are set to 100, then the zero cutoff is 0.005.
+	We don't want to display values less than the zero cutoff.
+	This value was chosen for compatibility with the previous hard-coded value of 0.005.
+	"""
+	fraction_units = get_fraction_units(currency)
+
+	return 0.5 / (fraction_units or 1)
 
 
 def get_held_invoices(party_type, party):
@@ -1275,7 +1311,10 @@ def get_children(doctype, parent, company, is_root=False, include_disabled=False
 	if frappe.db.has_column(doctype, "disabled") and not include_disabled:
 		filters.append(["disabled", "=", False])
 
-	filters.append([f'ifnull(`{parent_fieldname}`,"")', "=", "" if is_root else parent])
+	if is_root:
+		filters.append(IfNull(Field(parent_fieldname), "") == "")
+	else:
+		filters.append([parent_fieldname, "=", parent])
 
 	if is_root:
 		fields += ["root_type", "report_type", "account_currency"] if doctype == "Account" else []
@@ -1499,7 +1538,8 @@ def repost_gle_for_stock_vouchers(
 			voucher_obj = frappe.get_lazy_doc(voucher_type, voucher_no)
 			# Some transactions post credit as negative debit, this is handled while posting GLE
 			# but while comparing we need to make sure it's flipped so comparisons are accurate
-			expected_gle = toggle_debit_credit_if_negative(voucher_obj.get_gl_entries(warehouse_account))
+			inventory_account_map = voucher_obj.get_inventory_account_map()
+			expected_gle = toggle_debit_credit_if_negative(voucher_obj.get_gl_entries(inventory_account_map))
 			if expected_gle:
 				if not existing_gle or not compare_existing_and_expected_gle(
 					existing_gle, expected_gle, precision
@@ -1753,24 +1793,22 @@ def check_and_delete_linked_reports(report):
 			frappe.delete_doc("Desktop Icon", icon)
 
 
-def create_err_and_its_journals(companies: list | None = None) -> None:
-	if companies:
-		for company in companies:
-			err = frappe.new_doc("Exchange Rate Revaluation")
-			err.company = company.name
-			err.posting_date = nowdate()
-			err.rounding_loss_allowance = 0.0
+def create_err_and_its_journals(company: dict) -> None:
+	err = frappe.new_doc("Exchange Rate Revaluation")
+	err.company = company.name
+	err.posting_date = nowdate()
+	err.rounding_loss_allowance = 0.0
 
-			err.fetch_and_calculate_accounts_data()
-			if err.accounts:
-				err.save().submit()
-				response = err.make_jv_entries()
+	err.fetch_and_calculate_accounts_data()
+	if err.accounts:
+		err.save().submit()
+		response = err.make_jv_entries()
 
-				if company.submit_err_jv:
-					jv = response.get("revaluation_jv", None)
-					jv and frappe.get_doc("Journal Entry", jv).submit()
-					jv = response.get("zero_balance_jv", None)
-					jv and frappe.get_doc("Journal Entry", jv).submit()
+		if company.submit_err_jv:
+			jv = response.get("revaluation_jv", None)
+			jv and frappe.get_doc("Journal Entry", jv).submit()
+			jv = response.get("zero_balance_jv", None)
+			jv and frappe.get_doc("Journal Entry", jv).submit()
 
 
 def _auto_create_exchange_rate_revaluation_for(frequency: str) -> None:
@@ -1783,7 +1821,14 @@ def _auto_create_exchange_rate_revaluation_for(frequency: str) -> None:
 		filters={"auto_exchange_rate_revaluation": 1, "auto_err_frequency": frequency},
 		fields=["name", "submit_err_jv"],
 	)
-	create_err_and_its_journals(companies)
+
+	if companies:
+		for company in companies:
+			frappe.enqueue(
+				"erpnext.accounts.utils.create_err_and_its_journals",
+				company=company,
+				queue="long",
+			)
 
 
 def auto_create_exchange_rate_revaluation_daily() -> None:
@@ -1882,8 +1927,19 @@ def get_payment_ledger_entries(gl_entries, cancel=0):
 
 				if gle.advance_voucher_no:
 					# create advance entry
+					base_amount, exchange_rate = (
+						(dr_or_cr, gle.transaction_exchange_rate)
+						if gle.advance_voucher_type == "Employee Advance"
+						else (None, None)
+					)
 					adv = get_advance_ledger_entry(
-						gle, against_voucher_type, against_voucher_no, dr_or_cr_account_currency, cancel
+						gle,
+						against_voucher_type,
+						against_voucher_no,
+						dr_or_cr_account_currency,
+						cancel,
+						base_amount,
+						exchange_rate,
 					)
 
 					ple_map.append(adv)
@@ -1893,13 +1949,15 @@ def get_payment_ledger_entries(gl_entries, cancel=0):
 	return ple_map
 
 
-def get_advance_ledger_entry(gle, against_voucher_type, against_voucher_no, amount, cancel):
+def get_advance_ledger_entry(
+	gle, against_voucher_type, against_voucher_no, amount, cancel, base_amount=None, exchange_rate=None
+):
 	event = (
 		"Submit"
 		if (against_voucher_type == gle.voucher_type and against_voucher_no == gle.voucher_no)
 		else "Adjustment"
 	)
-	return frappe._dict(
+	aple = frappe._dict(
 		doctype="Advance Payment Ledger Entry",
 		company=gle.company,
 		voucher_type=gle.voucher_type,
@@ -1912,6 +1970,12 @@ def get_advance_ledger_entry(gle, against_voucher_type, against_voucher_no, amou
 		event=event,
 		delinked=cancel,
 	)
+
+	if base_amount is not None:
+		aple.base_amount = base_amount
+	if exchange_rate is not None:
+		aple.exchange_rate = exchange_rate
+	return aple
 
 
 def create_payment_ledger_entry(
@@ -2482,6 +2546,10 @@ def build_qb_match_conditions(doctype, user=None) -> list:
 		for filter in match_filters:
 			for link_option, allowed_values in filter.items():
 				fieldnames = link_fields_map.get(link_option, [])
+				cond = None
+
+				if link_option == doctype:
+					cond = _dt["name"].isin(allowed_values)
 
 				for fieldname in fieldnames:
 					field = _dt[fieldname]
@@ -2490,6 +2558,7 @@ def build_qb_match_conditions(doctype, user=None) -> list:
 					if not apply_strict_user_permissions:
 						cond = (Coalesce(field, "") == "") | cond
 
+				if cond:
 					criterion.append(cond)
 
 	return criterion

@@ -56,6 +56,7 @@ class SubcontractingReceiptItem(Document):
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.SmallText | None
 		service_cost_per_qty: DF.Currency
+		service_expense_account: DF.Link | None
 		stock_uom: DF.Link
 		subcontracting_order: DF.Link | None
 		subcontracting_order_item: DF.Data | None

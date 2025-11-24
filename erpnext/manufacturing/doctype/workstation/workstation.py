@@ -390,10 +390,18 @@ def get_time_logs(job_cards):
 
 
 @frappe.whitelist()
-def get_default_holiday_list():
-	return frappe.get_cached_value(
-		"Company", frappe.defaults.get_user_default("Company"), "default_holiday_list"
-	)
+def get_default_holiday_list(company=None):
+	if company:
+		if not frappe.has_permission("Company", "read"):
+			return []
+
+		if not frappe.db.exists("Company", company):
+			return []
+
+	if not company:
+		company = frappe.defaults.get_user_default("Company")
+
+	return frappe.get_cached_value("Company", company, "default_holiday_list")
 
 
 def check_if_within_operating_hours(workstation, operation, from_datetime, to_datetime):

@@ -409,7 +409,7 @@ def start_auto_reconcile(
 	for transaction in bank_transactions:
 		linked_payments = get_linked_payments(
 			transaction.name,
-			["payment_entry", "journal_entry"],
+			["payment_entry", "journal_entry", "sales_invoice"],
 			from_date,
 			to_date,
 			filter_by_reference_date,
@@ -666,7 +666,7 @@ def get_matching_queries(
 		queries.append(query)
 
 	if transaction.deposit > 0.0 and "sales_invoice" in document_types:
-		query = get_si_matching_query(exact_match, currency, common_filters)
+		query = get_si_matching_query(exact_match, currency, common_filters, transaction)
 		queries.append(query)
 
 	if transaction.withdrawal > 0.0:
@@ -854,10 +854,13 @@ def get_je_matching_query(
 	return query
 
 
-def get_si_matching_query(exact_match, currency, common_filters):
+def get_si_matching_query(exact_match, currency, common_filters, transaction):
 	# get matching sales invoice query
 	si = frappe.qb.DocType("Sales Invoice")
 	sip = frappe.qb.DocType("Sales Invoice Payment")
+
+	ref_condition = sip.reference_no == transaction.reference_number
+	ref_rank = frappe.qb.terms.Case().when(ref_condition, 1).else_(0)
 
 	amount_equality = sip.amount == common_filters.amount
 	amount_rank = frappe.qb.terms.Case().when(amount_equality, 1).else_(0)
@@ -871,11 +874,11 @@ def get_si_matching_query(exact_match, currency, common_filters):
 		.join(si)
 		.on(sip.parent == si.name)
 		.select(
-			(party_rank + amount_rank + 1).as_("rank"),
+			(ref_rank + party_rank + amount_rank + 1).as_("rank"),
 			ConstantColumn("Sales Invoice").as_("doctype"),
 			si.name,
 			sip.amount.as_("paid_amount"),
-			ConstantColumn("").as_("reference_no"),
+			sip.reference_no,
 			ConstantColumn("").as_("reference_date"),
 			si.customer.as_("party"),
 			ConstantColumn("Customer").as_("party_type"),
@@ -888,6 +891,9 @@ def get_si_matching_query(exact_match, currency, common_filters):
 		.where(amount_condition)
 		.where(si.currency == currency)
 	)
+
+	if frappe.flags.auto_reconcile_vouchers is True:
+		query = query.where(ref_condition)
 
 	return query
 

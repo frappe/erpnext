@@ -70,6 +70,7 @@
   "taxes",
   "sec_tax_breakup",
   "other_charges_calculation",
+  "item_wise_tax_details",
   "section_break_43",
   "base_total_taxes_and_charges",
   "column_break_47",
@@ -1602,6 +1603,14 @@
    "fieldtype": "Data",
    "is_virtual": 1,
    "label": "Last Scanned Warehouse"
+  },
+  {
+   "fieldname": "item_wise_tax_details",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Item Wise Tax Details",
+   "no_copy": 1,
+   "options": "Item Wise Tax Detail"
   }
  ],
  "icon": "fa fa-file-text",

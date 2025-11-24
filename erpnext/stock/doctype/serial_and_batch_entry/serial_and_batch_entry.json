@@ -19,7 +19,13 @@
   "is_outward",
   "stock_queue",
   "section_break_gmim",
-  "reference_for_reservation"
+  "reference_for_reservation",
+  "voucher_type",
+  "voucher_no",
+  "column_break_eykr",
+  "posting_datetime",
+  "type_of_transaction",
+  "voucher_detail_no"
  ],
  "fields": [
   {
@@ -73,6 +79,7 @@
    "fieldtype": "Float",
    "label": "Valuation Rate",
    "no_copy": 1,
+   "non_negative": 1,
    "read_only": 1,
    "read_only_depends_on": "eval:parent.type_of_transaction == \"Outward\""
   },
@@ -134,17 +141,54 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "posting_datetime",
+   "fieldtype": "Datetime",
+   "label": "Posting Datetime",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Data",
+   "label": "Voucher Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Data",
+   "label": "Voucher No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "Voucher Detail No",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "type_of_transaction",
+   "fieldtype": "Data",
+   "label": "Type of Transaction",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_eykr",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-01-02 21:51:52.528916",
+ "modified": "2025-11-09 23:28:35.191959",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Entry",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

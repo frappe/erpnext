@@ -69,6 +69,7 @@
   "addtional_info",
   "mode_of_payment",
   "payment_order",
+  "party_not_required",
   "column_break3",
   "is_opening",
   "stock_entry",
@@ -582,6 +583,14 @@
    "fieldname": "get_balance_for_periodic_accounting",
    "fieldtype": "Button",
    "label": "Get Balance"
+  },
+  {
+   "default": "0",
+   "fieldname": "party_not_required",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Party Not Required",
+   "no_copy": 1
   },
   {
    "collapsible": 1,

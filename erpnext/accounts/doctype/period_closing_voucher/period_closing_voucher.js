@@ -4,6 +4,8 @@
 frappe.ui.form.on("Period Closing Voucher", {
 	onload: function (frm) {
 		if (!frm.doc.transaction_date) frm.doc.transaction_date = frappe.datetime.obj_to_str(new Date());
+
+		frm.ignore_doctypes_on_cancel_all = ["Process Period Closing Voucher"];
 	},
 
 	setup: function (frm) {

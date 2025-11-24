@@ -8,6 +8,7 @@ from frappe.utils import flt, nowdate
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import StockAccountInvalidTransaction
 from erpnext.exceptions import InvalidAccountCurrency
+from erpnext.selling.doctype.customer.test_customer import make_customer, set_credit_limit
 
 
 class TestJournalEntry(IntegrationTestCase):
@@ -590,6 +591,15 @@ class TestJournalEntry(IntegrationTestCase):
 		jv.submit()
 
 		self.assertEqual(jv.pay_to_recd_from, "_Test Receiver 2")
+
+	def test_credit_limit_for_customer(self):
+		customer = make_customer("_Test New Customer")
+		set_credit_limit("_Test New Customer", "_Test Company", 50)
+		jv = make_journal_entry(account1="Debtors - _TC", account2="_Test Cash - _TC", amount=100, save=False)
+		jv.accounts[0].party_type = "Customer"
+		jv.accounts[0].party = customer
+		jv.save()
+		self.assertRaises(frappe.ValidationError, jv.submit)
 
 
 def make_journal_entry(

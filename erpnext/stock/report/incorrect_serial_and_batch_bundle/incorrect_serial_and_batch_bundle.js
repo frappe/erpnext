@@ -24,24 +24,26 @@ frappe.query_reports["Incorrect Serial and Batch Bundle"] = {
 	},
 
 	onload(report) {
-		report.page.add_inner_button(__("Remove SABB Entry"), () => {
-			let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
-			let selected_rows = indexes.map((i) => frappe.query_report.data[i]);
+		report.page
+			.add_inner_button(__("Fix SABB Entry"), () => {
+				let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
+				let selected_rows = indexes.map((i) => frappe.query_report.data[i]);
 
-			if (!selected_rows.length) {
-				frappe.throw(__("Please select a row to create a Reposting Entry"));
-			} else {
-				frappe.call({
-					method: "erpnext.stock.report.incorrect_serial_and_batch_bundle.incorrect_serial_and_batch_bundle.remove_sabb_entry",
-					freeze: true,
-					args: {
-						selected_rows: selected_rows,
-					},
-					callback: function (r) {
-						frappe.query_report.refresh();
-					},
-				});
-			}
-		});
+				if (!selected_rows.length) {
+					frappe.throw(__("Please select at least one row to fix"));
+				} else {
+					frappe.call({
+						method: "erpnext.stock.report.incorrect_serial_and_batch_bundle.incorrect_serial_and_batch_bundle.fix_sabb_entries",
+						freeze: true,
+						args: {
+							selected_rows: selected_rows,
+						},
+						callback: function (r) {
+							frappe.query_report.refresh();
+						},
+					});
+				}
+			})
+			.addClass("btn-primary");
 	},
 };

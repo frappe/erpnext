@@ -649,6 +649,7 @@
    "label": "Raw Materials Actions"
   },
   {
+   "description": "Click this button if you encounter a negative stock error for a serial or batch item. The system will fetch the available serials or batches automatically.",
    "fieldname": "reset_raw_materials_table",
    "fieldtype": "Button",
    "label": "Reset Raw Materials Table"
@@ -678,7 +679,7 @@
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-12-06 15:24:38.384232",
+ "modified": "2025-10-08 21:43:27.065640",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt",
@@ -739,6 +740,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "status, posting_date, supplier",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

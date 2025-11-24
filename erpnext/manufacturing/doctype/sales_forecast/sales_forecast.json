@@ -1,0 +1,251 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-08-12 17:20:16.012501",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "company",
+  "posting_date",
+  "forecasting_method",
+  "column_break_xdcy",
+  "from_date",
+  "frequency",
+  "demand_number",
+  "section_break_rrrx",
+  "column_break_klws",
+  "selected_items",
+  "column_break_mtqw",
+  "parent_warehouse",
+  "section_break_cmgo",
+  "generate_demand",
+  "items",
+  "section_break_kuzf",
+  "amended_from",
+  "column_break_laqr",
+  "status",
+  "connections_tab"
+ ],
+ "fields": [
+  {
+   "default": "SF.YY.-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "SF.YY.-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_xdcy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_rrrx",
+   "fieldtype": "Section Break",
+   "label": "Item and Warehouse"
+  },
+  {
+   "fieldname": "column_break_klws",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "selected_items",
+   "fieldtype": "Table MultiSelect",
+   "label": "Select Items",
+   "options": "Sales Forecast Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_mtqw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "For projected and forecast quantities, the system will consider all child warehouses under the selected parent warehouse.",
+   "fieldname": "parent_warehouse",
+   "fieldtype": "Link",
+   "label": "Parent Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_cmgo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Sales Forecast Item"
+  },
+  {
+   "default": "Today",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "generate_demand",
+   "fieldtype": "Button",
+   "label": "Generate Demand"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sales Forecast",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "6",
+   "fieldname": "demand_number",
+   "fieldtype": "Int",
+   "label": "Number of Weeks / Months",
+   "reqd": 1
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
+  },
+  {
+   "fieldname": "section_break_kuzf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_laqr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Planned\nMPS Generated",
+   "read_only": 1
+  },
+  {
+   "default": "Holt-Winters",
+   "fieldname": "forecasting_method",
+   "fieldtype": "Select",
+   "label": "Forecasting Method",
+   "options": "Holt-Winters\nManual"
+  },
+  {
+   "default": "Monthly",
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "label": "Frequency",
+   "options": "Weekly\nMonthly",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-11-13 16:33:49.682684",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Sales Forecast",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -195,6 +195,7 @@ $.extend(erpnext.stock_reservation, {
 				args: {
 					doc: frm.doc,
 					items: data.items,
+					is_transfer: 0,
 					table_name: table_name,
 					notify: true,
 				},

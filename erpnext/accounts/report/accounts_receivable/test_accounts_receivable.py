@@ -199,6 +199,81 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		row = report[1]
 		self.assertTrue(len(row) == 0)
 
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1},
+	)
+	def test_allow_multi_currency_invoices_against_single_party_account(self):
+		filters = {
+			"company": self.company,
+			"based_on_payment_terms": 1,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"show_remarks": True,
+			"in_party_currency": 1,
+		}
+
+		# CASE 1: Company currency and party account currency are the same
+		si = self.create_sales_invoice(qty=1, no_payment_schedule=True, do_not_submit=True)
+		si.currency = "USD"
+		si.conversion_rate = 80
+		si.save().submit()
+
+		filters.update(
+			{
+				"party_type": "Customer",
+				"party": [self.customer],
+			}
+		)
+		report = execute(filters)
+		row = report[1][0]
+
+		expected_data = [8000, 8000, "No Remarks"]  # Data in company currency
+
+		self.assertEqual(expected_data, [row.invoice_grand_total, row.invoiced, row.remarks])
+
+		# CASE 2: Transaction currency and party account currency are the same
+		self.create_customer(
+			"USD Customer", currency="USD", default_account=self.debtors_usd, company=self.company
+		)
+		si = create_sales_invoice(
+			item=self.item,
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debtors_usd,
+			posting_date=today(),
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
+			rate=100,
+			currency="USD",
+			conversion_rate=80,
+			price_list_rate=100,
+			do_not_save=1,
+		)
+		si.save().submit()
+
+		filters.update(
+			{
+				"party_type": "Customer",
+				"party": [self.customer],
+			}
+		)
+		report = execute(filters)
+		row = report[1][0]
+
+		expected_data = [100, 100, "No Remarks"]  # Data in Part Account Currency
+
+		self.assertEqual(expected_data, [row.invoice_grand_total, row.invoiced, row.remarks])
+
+		# View in Company currency
+		filters.pop("in_party_currency")
+		report = execute(filters)
+		row = report[1][0]
+
+		expected_data = [8000, 8000, "No Remarks"]  # Data in Company Currency
+
+		self.assertEqual(expected_data, [row.invoice_grand_total, row.invoiced, row.remarks])
+
 	def test_accounts_receivable_with_partial_payment(self):
 		filters = {
 			"company": self.company,

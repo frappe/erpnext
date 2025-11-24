@@ -72,6 +72,7 @@ def execute(filters=None):
 					batch_balance_dict[sle.batch_no] = [0, 0]
 
 				batch_balance_dict[sle.batch_no][0] += sle.actual_qty
+				batch_balance_dict[sle.batch_no][1] += stock_value
 
 			if filters.get("segregate_serial_batch_bundle"):
 				actual_qty = batch_balance_dict[sle.batch_no][0]
@@ -545,7 +546,10 @@ def get_opening_balance_from_batch(filters, columns, sl_entries):
 
 	opening_data = frappe.get_all(
 		"Stock Ledger Entry",
-		fields=["sum(actual_qty) as qty_after_transaction", "sum(stock_value_difference) as stock_value"],
+		fields=[
+			{"SUM": "actual_qty", "as": "qty_after_transaction"},
+			{"SUM": "stock_value_difference", "as": "stock_value"},
+		],
 		filters=query_filters,
 	)[0]
 

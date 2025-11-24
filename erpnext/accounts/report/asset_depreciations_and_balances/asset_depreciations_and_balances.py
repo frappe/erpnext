@@ -87,7 +87,7 @@ def get_asset_categories_for_grouped_by_category(filters):
 		SELECT a.asset_category,
 			   ifnull(sum(case when a.purchase_date < %(from_date)s then
 							   case when ifnull(a.disposal_date, 0) = 0 or a.disposal_date >= %(from_date)s then
-									a.gross_purchase_amount
+									a.net_purchase_amount
 							   else
 									0
 							   end
@@ -95,7 +95,7 @@ def get_asset_categories_for_grouped_by_category(filters):
 								0
 						   end), 0) as value_as_on_from_date,
 			   ifnull(sum(case when a.purchase_date >= %(from_date)s then
-			   						a.gross_purchase_amount
+			   						a.net_purchase_amount
 			   				   else
 			   				   		0
 			   				   end), 0) as value_of_new_purchase,
@@ -103,7 +103,7 @@ def get_asset_categories_for_grouped_by_category(filters):
 			   						and a.disposal_date >= %(from_date)s
 			   						and a.disposal_date <= %(to_date)s then
 							   case when a.status = "Sold" then
-							   		a.gross_purchase_amount
+							   		a.net_purchase_amount
 							   else
 							   		0
 							   end
@@ -114,7 +114,7 @@ def get_asset_categories_for_grouped_by_category(filters):
 			   						and a.disposal_date >= %(from_date)s
 			   						and a.disposal_date <= %(to_date)s then
 							   case when a.status = "Scrapped" then
-							   		a.gross_purchase_amount
+							   		a.net_purchase_amount
 							   else
 							   		0
 							   end
@@ -125,7 +125,7 @@ def get_asset_categories_for_grouped_by_category(filters):
 			   						and a.disposal_date >= %(from_date)s
 			   						and a.disposal_date <= %(to_date)s then
 							   case when a.status = "Capitalized" then
-							   		a.gross_purchase_amount
+							   		a.net_purchase_amount
 							   else
 							   		0
 							   end
@@ -273,6 +273,7 @@ def get_asset_value_adjustment_map_by_category(filters):
 			AND a.company = %(company)s
 			AND a.purchase_date <= %(to_date)s
 			AND gle.account = aca.fixed_asset_account
+			AND gle.is_opening = 'No'
 		GROUP BY a.asset_category
 	""",
 		{"from_date": filters.from_date, "to_date": filters.to_date, "company": filters.company},
@@ -354,10 +355,10 @@ def get_asset_details_for_grouped_by_category(filters):
 	# nosemgrep
 	return frappe.db.sql(
 		f"""
-		SELECT a.name,
+		SELECT a.name, a.asset_name,
 			   ifnull(sum(case when a.purchase_date < %(from_date)s then
 							   case when ifnull(a.disposal_date, 0) = 0 or a.disposal_date >= %(from_date)s then
-									a.gross_purchase_amount
+									a.net_purchase_amount
 							   else
 									0
 							   end
@@ -365,7 +366,7 @@ def get_asset_details_for_grouped_by_category(filters):
 								0
 						   end), 0) as value_as_on_from_date,
 			   ifnull(sum(case when a.purchase_date >= %(from_date)s then
-			   						a.gross_purchase_amount
+			   						a.net_purchase_amount
 			   				   else
 			   				   		0
 			   				   end), 0) as value_of_new_purchase,
@@ -373,7 +374,7 @@ def get_asset_details_for_grouped_by_category(filters):
 			   						and a.disposal_date >= %(from_date)s
 			   						and a.disposal_date <= %(to_date)s then
 							   case when a.status = "Sold" then
-							   		a.gross_purchase_amount
+							   		a.net_purchase_amount
 							   else
 							   		0
 							   end
@@ -384,7 +385,7 @@ def get_asset_details_for_grouped_by_category(filters):
 			   						and a.disposal_date >= %(from_date)s
 			   						and a.disposal_date <= %(to_date)s then
 							   case when a.status = "Scrapped" then
-							   		a.gross_purchase_amount
+							   		a.net_purchase_amount
 							   else
 							   		0
 							   end
@@ -395,7 +396,7 @@ def get_asset_details_for_grouped_by_category(filters):
 			   						and a.disposal_date >= %(from_date)s
 			   						and a.disposal_date <= %(to_date)s then
 							   case when a.status = "Capitalized" then
-							   		a.gross_purchase_amount
+							   		a.net_purchase_amount
 							   else
 							   		0
 							   end
@@ -543,6 +544,7 @@ def get_asset_value_adjustment_map(filters):
 			AND a.company = %(company)s
 			AND a.purchase_date <= %(to_date)s
 			AND gle.account = aca.fixed_asset_account
+			AND gle.is_opening = 'No'
 		GROUP BY a.name
 	""",
 		{"from_date": filters.from_date, "to_date": filters.to_date, "company": filters.company},
@@ -581,6 +583,14 @@ def get_columns(filters):
 				"fieldtype": "Link",
 				"options": "Asset",
 				"width": 120,
+			}
+		)
+		columns.append(
+			{
+				"label": _("Asset Name"),
+				"fieldname": "asset_name",
+				"fieldtype": "Data",
+				"width": 140,
 			}
 		)
 

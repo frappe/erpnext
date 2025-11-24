@@ -65,7 +65,7 @@
  "icon": "fa fa-compass",
  "idx": 1,
  "links": [],
- "modified": "2024-03-27 13:10:57.375141",
+ "modified": "2025-08-21 18:59:27.900209",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "UOM",
@@ -98,9 +98,28 @@
    "read": 1,
    "report": 1,
    "role": "Stock User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "ASC",

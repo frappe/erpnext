@@ -1,6 +1,7 @@
 import json
 
 import frappe
+from frappe.query_builder.functions import Timestamp
 from frappe.tests import IntegrationTestCase
 
 from erpnext.stock.utils import scan_barcode
@@ -20,11 +21,23 @@ class StockTestMixin:
 		filters = {"voucher_no": doc.name, "voucher_type": doc.doctype, "is_cancelled": 0}
 		if sle_filters:
 			filters.update(sle_filters)
-		sles = frappe.get_all(
-			"Stock Ledger Entry",
-			fields=["*"],
-			filters=filters,
-			order_by="timestamp(posting_date, posting_time), creation",
+
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		query = (
+			frappe.qb.from_(sle)
+			.select("*")
+			.where(sle.voucher_no == doc.name)
+			.where(sle.voucher_type == doc.doctype)
+			.where(sle.is_cancelled == 0)
+		)
+		if sle_filters:
+			for key, value in sle_filters.items():
+				query = query.where(sle[key] == value)
+
+		sles = (
+			query.orderby(Timestamp(sle.posting_date, sle.posting_time))
+			.orderby(sle.creation)
+			.run(as_dict=True)
 		)
 		self.assertGreaterEqual(len(sles), len(expected_sles))
 

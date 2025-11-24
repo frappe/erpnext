@@ -111,6 +111,7 @@
   "column_break_vwhb",
   "pos_invoice",
   "pos_invoice_item",
+  "scio_detail",
   "internal_transfer_section",
   "purchase_order",
   "column_break_92",
@@ -982,6 +983,13 @@
    "search_index": 1
   },
   {
+   "fieldname": "scio_detail",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "SCIO Detail",
+   "read_only": 1
+  },
+  {
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
@@ -1001,7 +1009,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-20 07:30:14.622707",
+ "modified": "2025-09-04 11:08:25.583561",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

@@ -10,9 +10,7 @@ from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
 from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate, nowdate, nowtime
 
 import erpnext
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	get_available_serial_nos,
-)
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_available_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
@@ -139,8 +137,7 @@ def get_stock_balance(
 					{
 						"item_code": item_code,
 						"warehouse": warehouse,
-						"posting_date": posting_date,
-						"posting_time": posting_time,
+						"posting_datetime": get_combine_datetime(posting_date, posting_time),
 						"ignore_warehouse": 1,
 					}
 				)
@@ -247,6 +244,9 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 	if isinstance(args, str):
 		args = json.loads(args)
 
+	if not args.get("posting_datetime") and args.get("posting_date"):
+		args["posting_datetime"] = get_combine_datetime(args.get("posting_date"), args.get("posting_time"))
+
 	in_rate = None
 
 	item_details = frappe.get_cached_value(
@@ -302,7 +302,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 
 		return batch_obj.get_incoming_rate()
 	else:
-		valuation_method = get_valuation_method(args.get("item_code"))
+		valuation_method = get_valuation_method(args.get("item_code"), args.get("company"))
 		previous_sle = get_previous_sle(args)
 		if valuation_method in ("FIFO", "LIFO"):
 			if previous_sle:
@@ -373,11 +373,16 @@ def get_avg_purchase_rate(serial_nos):
 	)
 
 
-def get_valuation_method(item_code):
+@frappe.request_cache
+def get_valuation_method(item_code, company=None):
 	"""get valuation method from item or default"""
 	val_method = frappe.get_cached_value("Item", item_code, "valuation_method")
 	if not val_method:
-		val_method = frappe.get_cached_doc("Stock Settings").valuation_method or "FIFO"
+		val_method = (
+			frappe.get_cached_value("Company", company, "valuation_method")
+			if company
+			else frappe.get_single_value("Stock Settings", "valuation_method") or "FIFO"
+		)
 	return val_method
 
 

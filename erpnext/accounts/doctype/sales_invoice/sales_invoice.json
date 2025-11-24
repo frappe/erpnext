@@ -32,6 +32,7 @@
   "amended_from",
   "is_created_using_pos",
   "pos_closing_entry",
+  "has_subcontracted",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -106,6 +107,7 @@
   "discount_amount",
   "sec_tax_breakup",
   "other_charges_calculation",
+  "item_wise_tax_details",
   "pricing_rule_details",
   "pricing_rules",
   "packing_list",
@@ -281,6 +283,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "customer.tax_id",
    "fieldname": "tax_id",
    "fieldtype": "Data",
    "hide_days": 1,
@@ -2237,6 +2240,22 @@
   },
   {
    "default": "0",
+   "fieldname": "has_subcontracted",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Subcontracted",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_wise_tax_details",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Item Wise Tax Details",
+   "no_copy": 1,
+   "options": "Item Wise Tax Detail"
+  },
+  {
+   "default": "0",
    "fieldname": "apply_tds",
    "fieldtype": "Check",
    "label": "Consider for Tax Withholding",
@@ -2287,7 +2306,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2025-08-04 19:20:28.732039",
+ "modified": "2025-10-09 14:48:59.472826",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

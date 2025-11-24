@@ -17,7 +17,7 @@ class LandedCostItem(Document):
 		amount: DF.Currency
 		applicable_charges: DF.Currency
 		cost_center: DF.Link | None
-		description: DF.TextEditor
+		description: DF.TextEditor | None
 		is_fixed_asset: DF.Check
 		item_code: DF.Link
 		parent: DF.Data

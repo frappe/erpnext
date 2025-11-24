@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "autoname": "hash",
  "creation": "2022-01-11 15:03:38.273179",
  "doctype": "DocType",
@@ -16,6 +17,8 @@
   "column_break_5",
   "status",
   "company",
+  "reposting_reference",
+  "repost_only_accounting_ledgers",
   "allow_negative_stock",
   "via_landed_cost_voucher",
   "allow_zero_rate",
@@ -228,13 +231,28 @@
    "fieldname": "recreate_stock_ledgers",
    "fieldtype": "Check",
    "label": "Recreate Stock Ledgers"
+  },
+  {
+   "depends_on": "repost_only_accounting_ledgers",
+   "fieldname": "reposting_reference",
+   "fieldtype": "Data",
+   "label": "Reposting Reference",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.based_on === \"Transaction\"",
+   "description": "Stock Ledgers won\u2019t be reposted.",
+   "fieldname": "repost_only_accounting_ledgers",
+   "fieldtype": "Check",
+   "label": "Repost Only Accounting Ledgers"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-03-31 12:38:20.566196",
+ "modified": "2025-11-20 18:24:48.808526",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",

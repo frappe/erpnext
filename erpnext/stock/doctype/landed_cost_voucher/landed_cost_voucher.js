@@ -5,31 +5,6 @@ frappe.provide("erpnext.stock");
 
 erpnext.landed_cost_taxes_and_charges.setup_triggers("Landed Cost Voucher");
 erpnext.stock.LandedCostVoucher = class LandedCostVoucher extends erpnext.stock.StockController {
-	setup() {
-		var me = this;
-		this.frm.fields_dict.purchase_receipts.grid.get_field("receipt_document").get_query = function (
-			doc,
-			cdt,
-			cdn
-		) {
-			var d = locals[cdt][cdn];
-
-			var filters = [
-				[d.receipt_document_type, "docstatus", "=", "1"],
-				[d.receipt_document_type, "company", "=", me.frm.doc.company],
-			];
-
-			if (d.receipt_document_type == "Purchase Invoice") {
-				filters.push(["Purchase Invoice", "update_stock", "=", "1"]);
-			}
-
-			if (!me.frm.doc.company) frappe.msgprint(__("Please enter company first"));
-			return {
-				filters: filters,
-			};
-		};
-	}
-
 	refresh() {
 		var help_content = `<br><br>
 			<table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
@@ -158,15 +133,19 @@ frappe.ui.form.on("Landed Cost Voucher", {
 	setup_queries(frm) {
 		frm.set_query("receipt_document", "purchase_receipts", (doc, cdt, cdn) => {
 			var d = locals[cdt][cdn];
-			if (d.receipt_document_type === "Stock Entry") {
-				return {
-					filters: {
-						docstatus: 1,
-						company: frm.doc.company,
-						purpose: ["in", ["Manufacture", "Repack"]],
-					},
-				};
+			var filters = [
+				[d.receipt_document_type, "docstatus", "=", 1],
+				[d.receipt_document_type, "company", "=", frm.doc.company],
+			];
+
+			if (d.receipt_document_type === "Purchase Invoice") {
+				filters.push(["Purchase Invoice", "update_stock", "=", 1]);
+			} else if (d.receipt_document_type === "Stock Entry") {
+				filters.push(["Stock Entry", "purpose", "in", ["Manufacture", "Repack"]]);
 			}
+			return {
+				filters: filters,
+			};
 		});
 
 		frm.set_query("vendor_invoice", "vendor_invoices", (doc, cdt, cdn) => {

@@ -4,6 +4,9 @@ import frappe
 def execute():
 	# Update the reference_name, reference_doctype fields for Serial No where it is null
 
+	if not frappe.db.has_column("Serial and Batch Bundle", "posting_date"):
+		return
+
 	sabb = frappe.qb.DocType("Serial and Batch Bundle")
 	sabb_entry = frappe.qb.DocType("Serial and Batch Entry")
 	serial_no = frappe.qb.DocType("Serial No").as_("sn")

@@ -34,6 +34,7 @@ frappe.ui.form.on("Production Plan", {
 				query: "erpnext.manufacturing.doctype.production_plan.production_plan.sales_order_query",
 				filters: {
 					company: frm.doc.company,
+					item_code: frm.doc.item_code,
 				},
 			};
 		});
@@ -115,6 +116,8 @@ frappe.ui.form.on("Production Plan", {
 				__("View")
 			);
 
+			let has_create_buttons = false;
+
 			if (frm.doc.status !== "Completed") {
 				if (frm.doc.status === "Closed") {
 					frm.add_custom_button(
@@ -144,6 +147,7 @@ frappe.ui.form.on("Production Plan", {
 						},
 						__("Create")
 					);
+					has_create_buttons = true;
 				}
 
 				if (
@@ -158,10 +162,11 @@ frappe.ui.form.on("Production Plan", {
 						},
 						__("Create")
 					);
+					has_create_buttons = true;
 				}
 			}
 
-			if (frm.doc.status !== "Closed") {
+			if (has_create_buttons && frm.doc.status !== "Closed") {
 				frm.page.set_inner_btn_group_as_primary(__("Create"));
 			}
 		}

@@ -190,7 +190,10 @@ frappe.ui.form.on("Customer", {
 				__("Actions")
 			);
 
-			if (cint(frappe.defaults.get_default("enable_common_party_accounting"))) {
+			if (
+				cint(frappe.defaults.get_default("enable_common_party_accounting")) &&
+				frappe.model.can_create("Party Link")
+			) {
 				frm.add_custom_button(
 					__("Link with Supplier"),
 					function () {

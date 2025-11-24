@@ -1,0 +1,21 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-17 13:19:04.269805",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "organization",
+ "icon_type": "Link",
+ "idx": 5,
+ "label": "Manufacturing",
+ "link_to": "Manufacturing",
+ "link_type": "Workspace",
+ "logo_url": "/assets/erpnext/desktop_icons/manufacturing.svg",
+ "modified": "2025-11-17 17:40:14.207766",
+ "modified_by": "Administrator",
+ "name": "Manufacturing",
+ "owner": "Administrator",
+ "parent_icon": "",
+ "roles": [],
+ "standard": 1
+}

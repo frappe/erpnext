@@ -29,6 +29,7 @@
   "column_break_jash",
   "stock_reserved_qty",
   "is_additional_item",
+  "is_customer_provided_item",
   "voucher_detail_reference"
  ],
  "fields": [
@@ -52,7 +53,8 @@
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Source Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "read_only_depends_on": "eval:parent.subcontracting_inward_order && doc.is_customer_provided_item"
   },
   {
    "fieldname": "column_break_3",
@@ -91,6 +93,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!parent.subcontracting_inward_order",
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
    "label": "Allow Alternative Item"
@@ -190,12 +193,20 @@
    "label": "Voucher Detail Reference",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.is_customer_provided_item",
+   "fieldname": "is_customer_provided_item",
+   "fieldtype": "Check",
+   "label": "Is Customer Provided Item",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "istable": 1,
  "links": [],
- "modified": "2025-05-12 17:36:00.115181",
+ "modified": "2025-10-12 14:27:16.721532",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Item",

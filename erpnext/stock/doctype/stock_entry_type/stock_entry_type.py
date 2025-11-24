@@ -21,7 +21,6 @@ class StockEntryType(Document):
 		add_to_transit: DF.Check
 		is_standard: DF.Check
 		purpose: DF.Literal[
-			"",
 			"Material Issue",
 			"Material Receipt",
 			"Material Transfer",
@@ -31,6 +30,10 @@ class StockEntryType(Document):
 			"Repack",
 			"Send to Subcontractor",
 			"Disassemble",
+			"Receive from Customer",
+			"Return Raw Material to Customer",
+			"Subcontracting Delivery",
+			"Subcontracting Return",
 		]
 	# end: auto-generated types
 
@@ -50,6 +53,10 @@ class StockEntryType(Document):
 			"Repack",
 			"Send to Subcontractor",
 			"Disassemble",
+			"Receive from Customer",
+			"Return Raw Material to Customer",
+			"Subcontracting Delivery",
+			"Subcontracting Return",
 		]:
 			frappe.throw(f"Stock Entry Type {self.name} cannot be set as standard")
 

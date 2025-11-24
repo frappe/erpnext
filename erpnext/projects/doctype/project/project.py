@@ -401,8 +401,6 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 
 	meta = frappe.get_meta(doctype)
 
-	fields = "distinct *"
-
 	or_filters = []
 
 	if txt:
@@ -424,13 +422,14 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 
 	return frappe.get_list(
 		doctype,
-		fields=fields,
+		fields="*",
 		filters=filters,
 		or_filters=or_filters,
 		limit_start=limit_start,
 		limit_page_length=limit_page_length,
 		order_by=order_by,
 		ignore_permissions=ignore_permissions,
+		distinct=True,
 	)
 
 

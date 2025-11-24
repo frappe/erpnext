@@ -36,7 +36,7 @@ class BankTransaction(Document):
 		party: DF.DynamicLink | None
 		party_type: DF.Link | None
 		payment_entries: DF.Table[BankTransactionPayments]
-		reference_number: DF.Data | None
+		reference_number: DF.SmallText | None
 		status: DF.Literal["", "Pending", "Settled", "Unreconciled", "Reconciled", "Cancelled"]
 		transaction_id: DF.Data | None
 		transaction_type: DF.Data | None

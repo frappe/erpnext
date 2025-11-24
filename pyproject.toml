@@ -23,7 +23,9 @@ dependencies = [
     "pypng~=0.20220715.0",
 
     # MT940 parser for bank statements
-    "mt-940>=4.26.0"
+    "mt-940>=4.26.0",
+    "pandas~=2.2.2",
+    "statsmodels~=0.14.5",
 ]
 
 [build-system]

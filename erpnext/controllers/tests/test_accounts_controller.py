@@ -2262,3 +2262,173 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertRaises(frappe.ValidationError, si.save)
 		si.contact_person = customer_contact.name
 		si.save()
+
+	def test_discount_amount_not_mapped_repeatedly_for_sales_transactions(self):
+		"""
+		Test that additional discount amount is not copied repeatedly
+		when creating multiple delivery notes from a single sales order with discount_amount set
+		"""
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		# Create a sales order with discount amount
+		so = make_sales_order(qty=10, rate=100, do_not_submit=True)
+		so.apply_discount_on = "Net Total"
+		so.discount_amount = 100
+		so.save()
+		so.submit()
+
+		# Create first delivery note from sales order (partial qty)
+		dn1 = make_delivery_note(so.name)
+		dn1.items[0].qty = 5
+		dn1.save()
+		dn1.submit()
+
+		# First delivery note should have full discount amount
+		self.assertEqual(dn1.discount_amount, 100)
+		self.assertEqual(dn1.grand_total, 400)
+
+		# Create second delivery note from the same sales order (remaining qty)
+		dn2 = make_delivery_note(so.name)
+		dn2.items[0].qty = 5
+		dn2.save()
+		dn2.submit()
+
+		# Second delivery note should have discount_amount set to 0
+		# because discount was already fully applied in first delivery note
+		self.assertEqual(dn2.discount_amount, 0)
+		self.assertEqual(dn2.grand_total, 500)
+
+	def test_discount_amount_not_mapped_repeatedly_for_purchase_transactions(self):
+		"""
+		Test that additional discount amount is not copied repeatedly
+		when creating multiple purchase receipts from a single purchase order with discount_amount set
+		"""
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		# Create a purchase order with discount amount
+		po = create_purchase_order(qty=10, rate=100, do_not_submit=True)
+		po.apply_discount_on = "Net Total"
+		po.discount_amount = 100
+		po.save()
+		po.submit()
+
+		# Create first purchase receipt from purchase order (partial qty)
+		pr1 = make_purchase_receipt(po.name)
+		pr1.items[0].qty = 5
+		pr1.save()
+		pr1.submit()
+
+		# First purchase receipt should have full discount amount
+		self.assertEqual(pr1.discount_amount, 100)
+		self.assertEqual(pr1.grand_total, 400)
+
+		# Create second purchase receipt from the same purchase order (remaining qty)
+		pr2 = make_purchase_receipt(po.name)
+		pr2.items[0].qty = 5
+		pr2.save()
+		pr2.submit()
+
+		# Second purchase receipt should have discount_amount set to 0
+		# because discount was already fully applied in first purchase receipt
+		self.assertEqual(pr2.discount_amount, 0)
+		self.assertEqual(pr2.grand_total, 500)
+
+	def test_discount_amount_partial_application_in_mapped_transactions(self):
+		"""
+		Test that discount amount is partially applied when some discount
+		has already been used in previous mapped transactions
+		"""
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		# Create a sales order with discount amount
+		so = make_sales_order(qty=10, rate=100, do_not_submit=True)
+		so.apply_discount_on = "Net Total"
+		so.discount_amount = 200
+		so.save()
+		so.submit()
+
+		self.assertEqual(so.discount_amount, 200)
+		self.assertEqual(so.grand_total, 800)
+
+		# Create first invoice with partial discount (manually set lower discount)
+		si1 = make_sales_invoice(so.name)
+		si1.items[0].qty = 5
+		si1.discount_amount = 50  # Partial discount application
+		si1.save()
+		si1.submit()
+
+		self.assertEqual(si1.discount_amount, 50)
+		self.assertEqual(si1.grand_total, 450)
+
+		# Create second invoice from the same sales order
+		si2 = make_sales_invoice(so.name)
+		si2.items[0].qty = 5
+		si2.save()
+		si2.submit()
+
+		# Second invoice should have remaining discount (200 - 50 = 150)
+		self.assertEqual(si2.discount_amount, 150)
+		self.assertEqual(si2.grand_total, 350)
+
+	def test_discount_amount_not_mapped_when_percentage_is_set(self):
+		"""
+		Test that discount amount is not adjusted when additional_discount_percentage
+		is set in the source document (as it will be recalculated based on percentage)
+		"""
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		# Create a sales order with discount percentage instead of amount
+		so = make_sales_order(qty=10, rate=100, do_not_submit=True)
+		so.apply_discount_on = "Net Total"
+		so.additional_discount_percentage = 10  # 10% discount
+		so.save()
+		so.submit()
+
+		self.assertEqual(so.discount_amount, 100)  # 10% of 1000
+		self.assertEqual(so.grand_total, 900)
+
+		# Create delivery note from sales order
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 5
+		dn.save()
+
+		# Delivery note should have discount amount recalculated based on percentage
+		# and not affected by the repeated mapping logic
+		self.assertEqual(dn.additional_discount_percentage, 10)
+		self.assertEqual(dn.discount_amount, 50)  # 10% of 500
+
+	def test_discount_amount_for_multiple_returns(self):
+		"""
+		Test that discount amount is correctly adjusted when multiple return invoices
+		are created against the same original invoice to prevent over-returning discount
+		"""
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+
+		# Create original sales invoice with discount
+		si = create_sales_invoice(qty=10, rate=100, do_not_submit=True)
+		si.apply_discount_on = "Net Total"
+		si.discount_amount = 100
+		si.save()
+		si.submit()
+
+		# Create first return - Frappe will copy full discount by default, we need to adjust it
+		return_si_1 = make_sales_return(si.name)
+		return_si_1.items[0].qty = -6  # Return 6 out of 10 items
+		# Manually set discount to match the proportion (60% of discount)
+		return_si_1.discount_amount = -60
+		return_si_1.save()
+		return_si_1.submit()
+
+		self.assertEqual(return_si_1.discount_amount, -60)
+
+		# Create second return for remaining items
+		return_si_2 = make_sales_return(si.name)
+		return_si_2.items[0].qty = -4  # Return remaining 4 out of 10 items
+		return_si_2.save()
+
+		# Second return should only get remaining discount (100 - 60 = 40)
+		self.assertEqual(return_si_2.discount_amount, -40)

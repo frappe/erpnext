@@ -1,11 +1,12 @@
 {
+ "app": "erpnext",
  "charts": [
   {
    "chart_name": "Profit and Loss",
    "label": "Profit and Loss"
   }
  ],
- "content": "[{\"id\":\"MmUf9abwxg\",\"type\":\"onboarding\",\"data\":{\"onboarding_name\":\"Accounts\",\"col\":12}},{\"id\":\"nDhfcJYbKH\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Profit and Loss\",\"col\":12}},{\"id\":\"VVvJ1lUcfc\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Outgoing Bills\",\"col\":3}},{\"id\":\"Vlj2FZtlHV\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Incoming Bills\",\"col\":3}},{\"id\":\"VVVjQVAhPf\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Incoming Payment\",\"col\":3}},{\"id\":\"DySNdlysIW\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Outgoing Payment\",\"col\":3}},{\"id\":\"9k1rDm2C0l\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"vikWSkNm6_\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Shortcuts</b></span>\",\"col\":12}},{\"id\":\"pMywM0nhlj\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Chart of Accounts\",\"col\":3}},{\"id\":\"_pRdD6kqUG\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"id\":\"G984SgVRJN\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Invoice\",\"col\":3}},{\"id\":\"1ArNvt9qhz\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Journal Entry\",\"col\":3}},{\"id\":\"F9f4I1viNr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Entry\",\"col\":3}},{\"id\":\"4IBBOIxfqW\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Accounts Receivable\",\"col\":3}},{\"id\":\"El2anpPaFY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"General Ledger\",\"col\":3}},{\"id\":\"1nwcM9upJo\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Trial Balance\",\"col\":3}},{\"id\":\"OF9WOi1Ppc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":3}},{\"id\":\"iAwpe-Chra\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Learn Accounting\",\"col\":3}},{\"id\":\"B7-uxs8tkU\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"tHb3yxthkR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"DnNtsmxpty\",\"type\":\"card\",\"data\":{\"card_name\":\"Accounting Masters\",\"col\":4}},{\"id\":\"nKKr6fjgjb\",\"type\":\"card\",\"data\":{\"card_name\":\"Payments\",\"col\":4}},{\"id\":\"KlqilF5R_V\",\"type\":\"card\",\"data\":{\"card_name\":\"Tax Masters\",\"col\":4}},{\"id\":\"jTUy8LB0uw\",\"type\":\"card\",\"data\":{\"card_name\":\"Cost Center and Budgeting\",\"col\":4}},{\"id\":\"Wn2lhs7WLn\",\"type\":\"card\",\"data\":{\"card_name\":\"Multi Currency\",\"col\":4}},{\"id\":\"PAQMqqNkBM\",\"type\":\"card\",\"data\":{\"card_name\":\"Banking\",\"col\":4}},{\"id\":\"kxhoaiqdLq\",\"type\":\"card\",\"data\":{\"card_name\":\"Opening and Closing\",\"col\":4}},{\"id\":\"q0MAlU2j_Z\",\"type\":\"card\",\"data\":{\"card_name\":\"Subscription Management\",\"col\":4}},{\"id\":\"ptm7T6Hwu-\",\"type\":\"card\",\"data\":{\"card_name\":\"Share Management\",\"col\":4}}]",
+ "content": "[{\"id\":\"nDhfcJYbKH\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Profit and Loss\",\"col\":12}},{\"id\":\"VVvJ1lUcfc\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Outgoing Bills\",\"col\":3}},{\"id\":\"Vlj2FZtlHV\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Incoming Bills\",\"col\":3}},{\"id\":\"VVVjQVAhPf\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Incoming Payment\",\"col\":3}},{\"id\":\"DySNdlysIW\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Outgoing Payment\",\"col\":3}},{\"id\":\"tHb3yxthkR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"DnNtsmxpty\",\"type\":\"card\",\"data\":{\"card_name\":\"Accounting Masters\",\"col\":4}},{\"id\":\"nKKr6fjgjb\",\"type\":\"card\",\"data\":{\"card_name\":\"Payments\",\"col\":4}},{\"id\":\"KlqilF5R_V\",\"type\":\"card\",\"data\":{\"card_name\":\"Tax Masters\",\"col\":4}},{\"id\":\"jTUy8LB0uw\",\"type\":\"card\",\"data\":{\"card_name\":\"Cost Center and Budgeting\",\"col\":4}},{\"id\":\"Wn2lhs7WLn\",\"type\":\"card\",\"data\":{\"card_name\":\"Multi Currency\",\"col\":4}},{\"id\":\"PAQMqqNkBM\",\"type\":\"card\",\"data\":{\"card_name\":\"Banking\",\"col\":4}},{\"id\":\"kxhoaiqdLq\",\"type\":\"card\",\"data\":{\"card_name\":\"Opening and Closing\",\"col\":4}},{\"id\":\"q0MAlU2j_Z\",\"type\":\"card\",\"data\":{\"card_name\":\"Subscription Management\",\"col\":4}},{\"id\":\"ptm7T6Hwu-\",\"type\":\"card\",\"data\":{\"card_name\":\"Share Management\",\"col\":4}}]",
  "creation": "2020-03-02 15:41:59.515192",
  "custom_blocks": [],
  "docstatus": 0,
@@ -586,7 +587,7 @@
    "type": "Link"
   }
  ],
- "modified": "2024-01-18 22:15:40.941711",
+ "modified": "2025-11-17 14:35:00.910131",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
@@ -615,59 +616,7 @@
  "restrict_to_domain": "",
  "roles": [],
  "sequence_id": 2.0,
- "shortcuts": [
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Learn Accounting",
-   "type": "URL",
-   "url": "https://school.frappe.io/lms/courses/erpnext-accounting?utm_source=in_app"
-  },
-  {
-   "label": "Chart of Accounts",
-   "link_to": "Account",
-   "type": "DocType"
-  },
-  {
-   "label": "Sales Invoice",
-   "link_to": "Sales Invoice",
-   "type": "DocType"
-  },
-  {
-   "label": "Purchase Invoice",
-   "link_to": "Purchase Invoice",
-   "type": "DocType"
-  },
-  {
-   "label": "Journal Entry",
-   "link_to": "Journal Entry",
-   "type": "DocType"
-  },
-  {
-   "label": "Payment Entry",
-   "link_to": "Payment Entry",
-   "type": "DocType"
-  },
-  {
-   "label": "Accounts Receivable",
-   "link_to": "Accounts Receivable",
-   "type": "Report"
-  },
-  {
-   "label": "General Ledger",
-   "link_to": "General Ledger",
-   "type": "Report"
-  },
-  {
-   "label": "Trial Balance",
-   "link_to": "Trial Balance",
-   "type": "Report"
-  },
-  {
-   "label": "Dashboard",
-   "link_to": "Accounts",
-   "type": "Dashboard"
-  }
- ],
- "title": "Accounting"
+ "shortcuts": [],
+ "title": "Accounting",
+ "type": "Workspace"
 }

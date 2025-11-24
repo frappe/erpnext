@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.utils import formatdate, get_link_to_form
 
-from erpnext.controllers.taxes_and_totals import ItemWiseTaxDetail
+from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import get_tax_details_query
 
 
 def execute(filters=None):
@@ -80,93 +80,54 @@ class VATAuditReport:
 
 	def get_invoice_items(self, doctype):
 		self.invoice_items = frappe._dict()
-
-		items = frappe.db.sql(
-			"""
-			SELECT
-				item_code, parent, base_net_amount, is_zero_rated
-			FROM
-				`tab{} Item`
-			WHERE
-				parent in ({})
-			""".format(doctype, ", ".join(["%s"] * len(self.invoices))),
-			tuple(self.invoices),
-			as_dict=1,
+		item_doctype = frappe.qb.DocType(doctype + " Item")
+		self.invoice_items = frappe._dict(
+			frappe.qb.from_(item_doctype)
+			.select(
+				item_doctype.name,
+				item_doctype.is_zero_rated,
+			)
+			.where(item_doctype.parent.isin(list(self.invoices.keys())))
+			.run(as_list=1)
 		)
-		for d in items:
-			self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, {"net_amount": 0.0})
-			self.invoice_items[d.parent][d.item_code]["net_amount"] += d.get("base_net_amount", 0)
-			self.invoice_items[d.parent][d.item_code]["is_zero_rated"] = d.is_zero_rated
 
 	def get_items_based_on_tax_rate(self, doctype):
 		self.items_based_on_tax_rate = frappe._dict()
-		self.item_tax_rate = frappe._dict()
 		self.tax_doctype = (
 			"Purchase Taxes and Charges" if doctype == "Purchase Invoice" else "Sales Taxes and Charges"
 		)
 
-		self.tax_details = frappe.db.sql(
-			"""
-			SELECT
-				parent, account_head, item_wise_tax_detail
-			FROM
-				`tab{}`
-			WHERE
-				parenttype = {} and docstatus = 1
-				and parent in ({})
-			ORDER BY
-				account_head
-			""".format(self.tax_doctype, "%s", ", ".join(["%s"] * len(self.invoices.keys()))),
-			tuple([doctype, *list(self.invoices.keys())]),
+		taxes_and_charges = frappe.qb.DocType(self.tax_doctype)
+		item_wise_tax = frappe.qb.DocType("Item Wise Tax Detail")
+		invoice_names = list(self.invoices.keys())
+		if not invoice_names:
+			return
+
+		tax_details = (
+			get_tax_details_query(doctype, self.tax_doctype)
+			.where(item_wise_tax.parent.isin(invoice_names))
+			.where(taxes_and_charges.account_head.isin(self.sa_vat_accounts))
+			.run(as_dict=True)
 		)
 
-		for parent, account, item_wise_tax_detail in self.tax_details:
-			if item_wise_tax_detail:
-				try:
-					if account in self.sa_vat_accounts:
-						item_wise_tax_detail = json.loads(item_wise_tax_detail)
-					else:
-						continue
-					for item_code, tax_data in item_wise_tax_detail.items():
-						tax_data = ItemWiseTaxDetail(**tax_data)
-						is_zero_rated = self.invoice_items.get(parent).get(item_code).get("is_zero_rated")
-						# to skip items with non-zero tax rate in multiple rows
-						if tax_data.tax_rate == 0 and not is_zero_rated:
-							continue
-						tax_rate = self.get_item_amount_map(parent, item_code, tax_data)
+		for row in tax_details:
+			parent = row.parent
+			item = row.item_row
+			is_zero_rated = self.invoice_items.get(item)
+			if row.rate == 0 and not is_zero_rated:
+				continue
 
-						if tax_rate is not None:
-							rate_based_dict = self.items_based_on_tax_rate.setdefault(parent, {}).setdefault(
-								tax_rate, []
-							)
-							if item_code not in rate_based_dict:
-								rate_based_dict.append(item_code)
-				except ValueError:
-					continue
-
-	# TODO: now that tax_data holds net_amount, this method seems almost obsolete and can be removactored,
-	# gross_amount can be calculated on the file as a list comprehension
-	def get_item_amount_map(self, parent, item_code, tax_data):
-		net_amount = self.invoice_items.get(parent).get(item_code).get("net_amount")
-		tax_rate = tax_data.tax_rate
-		tax_amount = tax_data.tax_amount
-		gross_amount = net_amount + tax_amount
-
-		self.item_tax_rate.setdefault(parent, {}).setdefault(
-			item_code,
-			{
-				"tax_rate": tax_rate,
-				"gross_amount": 0.0,
-				"tax_amount": 0.0,
-				"net_amount": 0.0,
-			},
-		)
-
-		self.item_tax_rate[parent][item_code]["net_amount"] += net_amount
-		self.item_tax_rate[parent][item_code]["tax_amount"] += tax_amount
-		self.item_tax_rate[parent][item_code]["gross_amount"] += gross_amount
-
-		return tax_rate
+			self.items_based_on_tax_rate.setdefault(parent, {}).setdefault(
+				row.rate,
+				{
+					"gross_amount": 0.0,
+					"tax_amount": 0.0,
+					"net_amount": 0.0,
+				},
+			)
+			self.items_based_on_tax_rate[parent][row.rate]["tax_amount"] += row.amount
+			self.items_based_on_tax_rate[parent][row.rate]["net_amount"] += row.taxable_amount
+			self.items_based_on_tax_rate[parent][row.rate]["gross_amount"] += row.amount + row.taxable_amount
 
 	def get_conditions(self):
 		conditions = ""
@@ -209,25 +170,30 @@ class VATAuditReport:
 	def get_consolidated_data(self, doctype):
 		consolidated_data_map = {}
 		for inv, inv_data in self.invoices.items():
-			if self.items_based_on_tax_rate.get(inv):
-				for rate, items in self.items_based_on_tax_rate.get(inv).items():
-					row = {"tax_amount": 0.0, "gross_amount": 0.0, "net_amount": 0.0}
+			rate_details = self.items_based_on_tax_rate.get(inv, {})
+			if not rate_details:
+				continue
 
-					consolidated_data_map.setdefault(rate, {"data": []})
-					for item in items:
-						item_details = self.item_tax_rate.get(inv).get(item)
-						row["account"] = inv_data.get("account")
-						row["posting_date"] = formatdate(inv_data.get("posting_date"), "dd-mm-yyyy")
-						row["voucher_type"] = doctype
-						row["voucher_no"] = inv
-						row["party_type"] = "Customer" if doctype == "Sales Invoice" else "Supplier"
-						row["party"] = inv_data.get("party")
-						row["remarks"] = inv_data.get("remarks")
-						row["gross_amount"] += item_details.get("gross_amount")
-						row["tax_amount"] += item_details.get("tax_amount")
-						row["net_amount"] += item_details.get("net_amount")
+			for rate, item_details in rate_details.items():
+				row = {
+					"tax_amount": 0.0,
+					"gross_amount": 0.0,
+					"net_amount": 0.0,
+				}
 
-					consolidated_data_map[rate]["data"].append(row)
+				row["account"] = inv_data.get("account")
+				row["posting_date"] = formatdate(inv_data.get("posting_date"), "dd-mm-yyyy")
+				row["voucher_type"] = doctype
+				row["voucher_no"] = inv
+				row["party_type"] = "Customer" if doctype == "Sales Invoice" else "Supplier"
+				row["party"] = inv_data.get("party")
+				row["remarks"] = inv_data.get("remarks")
+				row["gross_amount"] += item_details.get("gross_amount")
+				row["tax_amount"] += item_details.get("tax_amount")
+				row["net_amount"] += item_details.get("net_amount")
+
+				consolidated_data_map.setdefault(rate, {"data": []})
+				consolidated_data_map[rate]["data"].append(row)
 
 		return consolidated_data_map
 

@@ -129,7 +129,13 @@ class PaymentRequest(Document):
 
 			existing_payment_request_amount = flt(get_existing_payment_request_amount(ref_doc))
 
-			if existing_payment_request_amount + flt(self.grand_total) > ref_amount:
+			if (
+				flt(
+					existing_payment_request_amount + flt(self.grand_total, self.precision("grand_total")),
+					get_currency_precision(),
+				)
+				> ref_amount
+			):
 				frappe.throw(
 					_("Total Payment Request amount cannot be greater than {0} amount").format(
 						self.reference_doctype

@@ -33,6 +33,7 @@ class PurchaseReceipt(BuyingController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.accounts.doctype.item_wise_tax_detail.item_wise_tax_detail import ItemWiseTaxDetail
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
 		from erpnext.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import (
 			PurchaseTaxesandCharges,
@@ -84,6 +85,7 @@ class PurchaseReceipt(BuyingController):
 		is_old_subcontracting_flow: DF.Check
 		is_return: DF.Check
 		is_subcontracted: DF.Check
+		item_wise_tax_details: DF.Table[ItemWiseTaxDetail]
 		items: DF.Table[PurchaseReceiptItem]
 		language: DF.Data | None
 		letter_head: DF.Link | None
@@ -117,7 +119,15 @@ class PurchaseReceipt(BuyingController):
 		shipping_address_display: DF.TextEditor | None
 		shipping_rule: DF.Link | None
 		status: DF.Literal[
-			"", "Draft", "Partly Billed", "To Bill", "Completed", "Return Issued", "Cancelled", "Closed"
+			"",
+			"Draft",
+			"Partly Billed",
+			"To Bill",
+			"Completed",
+			"Return",
+			"Return Issued",
+			"Cancelled",
+			"Closed",
 		]
 		subcontracting_receipt: DF.Link | None
 		supplied_items: DF.Table[PurchaseReceiptItemSupplied]
@@ -470,18 +480,19 @@ class PurchaseReceipt(BuyingController):
 		for item in self.items:
 			item.amount_difference_with_purchase_invoice = 0
 
-	def get_gl_entries(self, warehouse_account=None, via_landed_cost_voucher=False):
+	def get_gl_entries(self, inventory_account_map=None, via_landed_cost_voucher=False):
 		from erpnext.accounts.general_ledger import process_gl_map
 
 		gl_entries = []
 
-		self.make_item_gl_entries(gl_entries, warehouse_account=warehouse_account)
+		self.make_item_gl_entries(gl_entries, inventory_account_map=inventory_account_map)
 		self.make_tax_gl_entries(gl_entries, via_landed_cost_voucher)
+		self.set_gl_entry_for_purchase_expense(gl_entries)
 		update_regional_gl_entries(gl_entries, self)
 
 		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
 
-	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
+	def make_item_gl_entries(self, gl_entries, inventory_account_map=None):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			get_purchase_document_details,
 		)
@@ -523,9 +534,11 @@ class PurchaseReceipt(BuyingController):
 			):
 				return 0.0
 
-			account = (
-				warehouse_account[item.from_warehouse]["account"] if item.from_warehouse else stock_asset_rbnb
-			)
+			account = stock_asset_rbnb
+			if item.from_warehouse:
+				_inv_dict = self.get_inventory_account_dict(item, inventory_account_map, "from_warehouse")
+				account = _inv_dict["account"]
+
 			account_currency = get_account_currency(account)
 
 			# GL Entry for from warehouse or Stock Received but not billed
@@ -650,7 +663,7 @@ class PurchaseReceipt(BuyingController):
 
 		def make_sub_contracting_gl_entries(item):
 			# sub-contracting warehouse
-			if flt(item.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
+			if flt(item.rm_supp_cost) and supplier_warehouse_account:
 				self.add_gl_entry(
 					gl_entries=gl_entries,
 					account=supplier_warehouse_account,
@@ -745,22 +758,25 @@ class PurchaseReceipt(BuyingController):
 					stock_value_diff = (
 						flt(d.base_net_amount) + flt(d.item_tax_amount) + flt(d.landed_cost_voucher_amount)
 					)
-				elif warehouse_account.get(d.warehouse):
+				elif inventory_account := self.get_inventory_account_dict(d, inventory_account_map):
 					stock_value_diff = get_stock_value_difference(self.name, d.name, d.warehouse)
-					stock_asset_account_name = warehouse_account[d.warehouse]["account"]
-					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get(
-						"account"
-					)
-					supplier_warehouse_account_currency = warehouse_account.get(
-						self.supplier_warehouse, {}
-					).get("account_currency")
+					stock_asset_account_name = inventory_account["account"]
+
+					supplier_warehouse_account = None
+					supplier_warehouse_account_currency = None
+					if self.supplier_warehouse:
+						if _inv_dict := self.get_inventory_account_dict(
+							d, inventory_account_map, "supplier_warehouse"
+						):
+							supplier_warehouse_account = _inv_dict["account"]
+							supplier_warehouse_account_currency = _inv_dict["account_currency"]
 
 					# If PR is sub-contracted and fg item rate is zero
 					# in that case if account for source and target warehouse are same,
 					# then GL entries should not be posted
 					if (
 						flt(stock_value_diff) == flt(d.rm_supp_cost)
-						and warehouse_account.get(self.supplier_warehouse)
+						and supplier_warehouse_account
 						and stock_asset_account_name == supplier_warehouse_account
 					):
 						continue
@@ -792,7 +808,9 @@ class PurchaseReceipt(BuyingController):
 				)
 
 				stock_value_diff = get_stock_value_difference(self.name, d.name, d.rejected_warehouse)
-				stock_asset_account_name = warehouse_account[d.rejected_warehouse]["account"]
+				_inv_dict = self.get_inventory_account_dict(d, inventory_account_map, "rejected_warehouse")
+
+				stock_asset_account_name = _inv_dict["account"]
 
 				make_item_asset_inward_gl_entry(d, stock_value_diff, stock_asset_account_name)
 				if not d.qty:
@@ -928,7 +946,7 @@ class PurchaseReceipt(BuyingController):
 				"Asset",
 				asset.name,
 				{
-					"gross_purchase_amount": purchase_amount,
+					"net_purchase_amount": purchase_amount,
 					"purchase_amount": purchase_amount,
 				},
 			)
@@ -1212,7 +1230,7 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 	buying_settings = frappe.get_single("Buying Settings")
 	over_billing_allowance = frappe.get_single_value("Accounts Settings", "over_billing_allowance")
 
-	total_amount, total_billed_amount = 0, 0
+	total_amount, total_billed_amount, pi_landed_cost_amount = 0, 0, 0
 	item_wise_returned_qty = get_item_wise_returned_qty(pr_doc)
 
 	if adjust_incoming_rate:
@@ -1252,6 +1270,7 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 				) * item.qty
 
 			adjusted_amt = flt(adjusted_amt * flt(pr_doc.conversion_rate), item.precision("amount"))
+			pi_landed_cost_amount += adjusted_amt
 			item.db_set("amount_difference_with_purchase_invoice", adjusted_amt, update_modified=False)
 		elif amount and item.billed_amt > amount:
 			per_over_billed = (flt(item.billed_amt / amount, 2) * 100) - 100
@@ -1261,6 +1280,9 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 						item.name, frappe.bold(item.item_code), per_over_billed - over_billing_allowance
 					)
 				)
+
+	if pi_landed_cost_amount < 0:
+		total_billed_amount += abs(pi_landed_cost_amount)
 
 	percent_billed = round(100 * (total_billed_amount / (total_amount or 1)), 6)
 	pr_doc.db_set("per_billed", percent_billed)
@@ -1309,7 +1331,7 @@ def get_item_wise_returned_qty(pr_doc):
 			"Purchase Receipt",
 			fields=[
 				"`tabPurchase Receipt Item`.purchase_receipt_item",
-				"sum(abs(`tabPurchase Receipt Item`.qty)) as qty",
+				{"SUM": [{"ABS": "`tabPurchase Receipt Item`.qty"}], "as": "qty"},
 			],
 			filters=[
 				["Purchase Receipt", "docstatus", "=", 1],
@@ -1345,7 +1367,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 		doc.run_method("set_missing_values")
 
 		if args and args.get("merge_taxes"):
-			merge_taxes(source.get("taxes") or [], doc)
+			merge_taxes(source, doc)
 
 		doc.run_method("calculate_taxes_and_totals")
 		doc.set_payment_schedule()
@@ -1358,6 +1380,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 			target_doc.conversion_factor, target_doc.precision("conversion_factor")
 		)
 		returned_qty_map[source_doc.name] = returned_qty
+		target_doc._old_name = source_doc.name
 
 	def get_pending_qty(item_row):
 		qty = item_row.qty

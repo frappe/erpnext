@@ -40,6 +40,12 @@ class TestPOSOpeningEntry(IntegrationTestCase):
 		self.assertEqual(opening_entry.status, "Open")
 		self.assertNotEqual(opening_entry.docstatus, 0)
 
+	def test_pos_opening_entry_on_disabled_pos(self):
+		test_user, pos_profile = self.init_user_and_profile(disabled=1)
+
+		with self.assertRaises(frappe.ValidationError):
+			create_opening_entry(pos_profile, test_user.name)
+
 	def test_multiple_pos_opening_entries_for_same_pos_profile(self):
 		test_user, pos_profile = self.init_user_and_profile()
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
