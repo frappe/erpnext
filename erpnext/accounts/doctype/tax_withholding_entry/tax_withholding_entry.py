@@ -729,6 +729,7 @@ class TaxWithholdingController:
 			# Update existing tax row or create new one
 			if existing_tax := existing_taxes.get(account_head):
 				existing_tax.tax_amount = tax_amount
+				existing_tax.dont_recompute_tax = 1
 				tax_row = existing_tax
 				for_update = True
 			else:
