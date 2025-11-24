@@ -164,20 +164,36 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 		inv.load_from_db()
 
 		consolidated_invoice = frappe.get_doc("Sales Invoice", inv.consolidated_invoice)
-		item_wise_tax_detail = json.loads(consolidated_invoice.get("taxes")[0].item_wise_tax_detail)
-		expected_item_wise_tax_detail = {
-			"_Test Item": {
-				"tax_rate": 9,
-				"tax_amount": 9,
-				"net_amount": 100,
+
+		expected_item_wise_tax_details = [
+			{
+				"item_row": consolidated_invoice.items[0].name,
+				"tax_row": consolidated_invoice.taxes[0].name,
+				"rate": 9.0,
+				"amount": 9.0,
+				"taxable_amount": 100.0,
 			},
-			"_Test Item 2": {
-				"tax_rate": 5,
-				"tax_amount": 5,
-				"net_amount": 100,
+			{
+				"item_row": consolidated_invoice.items[1].name,
+				"tax_row": consolidated_invoice.taxes[0].name,
+				"rate": 5.0,
+				"amount": 5.0,
+				"taxable_amount": 100.0,
 			},
-		}
-		self.assertEqual(item_wise_tax_detail, expected_item_wise_tax_detail)
+		]
+
+		actual = [
+			{
+				"item_row": d.item_row,
+				"tax_row": d.tax_row,
+				"rate": d.rate,
+				"amount": d.amount,
+				"taxable_amount": d.taxable_amount,
+			}
+			for d in consolidated_invoice.get("item_wise_tax_details")
+		]
+
+		self.assertEqual(actual, expected_item_wise_tax_details)
 
 	def test_consolidation_round_off_error_1(self):
 		"""

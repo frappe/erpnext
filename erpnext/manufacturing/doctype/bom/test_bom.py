@@ -794,7 +794,7 @@ def level_order_traversal(node):
 	return traversal
 
 
-def create_nested_bom(tree, prefix="_Test bom ", submit=True):
+def create_nested_bom(tree, prefix="_Test bom ", submit=True, phantom_items=None):
 	"""Helper function to create a simple nested bom from tree describing item names. (along with required items)"""
 
 	def create_items(bom_tree):
@@ -805,6 +805,9 @@ def create_nested_bom(tree, prefix="_Test bom ", submit=True):
 					doctype="Item", item_code=bom_item_code, item_group="_Test Item Group"
 				).insert()
 			create_items(subtree)
+
+	if not phantom_items:
+		phantom_items = []
 
 	create_items(tree)
 
@@ -824,7 +827,7 @@ def create_nested_bom(tree, prefix="_Test bom ", submit=True):
 		child_items = dfs(tree, item)
 		if child_items:
 			bom_item_code = prefix + item
-			bom = frappe.get_doc(doctype="BOM", item=bom_item_code)
+			bom = frappe.get_doc(doctype="BOM", item=bom_item_code, is_phantom_bom=item in phantom_items)
 			for child_item in child_items.keys():
 				bom.append("items", {"item_code": prefix + child_item})
 			bom.company = "_Test Company"
@@ -906,3 +909,15 @@ def create_process_loss_bom_item(item_tuple):
 		return make_item(item_code, {"stock_uom": stock_uom, "valuation_rate": 100})
 	else:
 		return frappe.get_doc("Item", item_code)
+
+
+def create_tree_for_phantom_bom_tests():  # returns expected explosion result
+	bom_tree_1 = {
+		"Top Level Parent": {
+			"Sub Assembly Level 1-1": {"Phantom Item Level 1-2": {"Item Level 1-3": {}}},
+			"Phantom Item Level 2-1": {"Phantom Item Level 2-2": {"Item Level 2-3": {}}},
+		}
+	}
+	phantom_list = ["Phantom Item Level 1-2", "Phantom Item Level 2-1", "Phantom Item Level 2-2"]
+	create_nested_bom(bom_tree_1, prefix="", phantom_items=phantom_list)
+	return ["Sub Assembly Level 1-1", "Item Level 2-3"]

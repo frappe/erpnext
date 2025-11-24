@@ -59,6 +59,7 @@ class SalesOrder(SellingController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.accounts.doctype.item_wise_tax_detail.item_wise_tax_detail import ItemWiseTaxDetail
 		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
 		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import (
@@ -121,6 +122,7 @@ class SalesOrder(SellingController):
 		inter_company_order_reference: DF.Link | None
 		is_internal_customer: DF.Check
 		is_subcontracted: DF.Check
+		item_wise_tax_details: DF.Table[ItemWiseTaxDetail]
 		items: DF.Table[SalesOrderItem]
 		language: DF.Link | None
 		letter_head: DF.Link | None
@@ -632,9 +634,6 @@ class SalesOrder(SellingController):
 		for item_code, warehouse in item_wh_list:
 			update_bin_qty(item_code, warehouse, {"reserved_qty": get_reserved_qty(item_code, warehouse)})
 
-	def on_update(self):
-		pass
-
 	def on_update_after_submit(self):
 		self.calculate_commission()
 		self.calculate_contribution()
@@ -993,7 +992,11 @@ def get_requested_item_qty(sales_order):
 	for d in frappe.db.get_all(
 		"Material Request Item",
 		filters={"docstatus": 1, "sales_order": sales_order},
-		fields=["sales_order_item", "sum(qty) as qty", "sum(received_qty) as received_qty"],
+		fields=[
+			"sales_order_item",
+			{"SUM": "qty", "as": "qty"},
+			{"SUM": "received_qty", "as": "received_qty"},
+		],
 		group_by="sales_order_item",
 	):
 		result[d.sales_order_item] = frappe._dict({"qty": d.qty, "received_qty": d.received_qty})

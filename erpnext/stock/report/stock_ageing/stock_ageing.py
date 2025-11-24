@@ -52,7 +52,7 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 		range_values = get_range_age(filters, fifo_queue, to_date, item_dict)
 
 		check_and_replace_valuations_if_moving_average(
-			range_values, details.valuation_method, details.valuation_rate
+			range_values, details.valuation_method, details.valuation_rate, filters.get("company")
 		)
 
 		row = [details.name, details.item_name, details.description, details.item_group, details.brand]
@@ -76,10 +76,12 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 	return data
 
 
-def check_and_replace_valuations_if_moving_average(range_values, item_valuation_method, valuation_rate):
+def check_and_replace_valuations_if_moving_average(
+	range_values, item_valuation_method, valuation_rate, company
+):
 	if item_valuation_method == "Moving Average" or (
 		not item_valuation_method
-		and frappe.db.get_single_value("Stock Settings", "valuation_method") == "Moving Average"
+		and frappe.get_cached_value("Company", company, "valuation_method") == "Moving Average"
 	):
 		for i in range(0, len(range_values), 2):
 			range_values[i + 1] = range_values[i] * valuation_rate

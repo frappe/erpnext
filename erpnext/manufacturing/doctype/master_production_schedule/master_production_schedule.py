@@ -4,7 +4,7 @@
 import math
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
@@ -64,6 +64,22 @@ class MasterProductionSchedule(Document):
 
 	def validate(self):
 		self.set_to_date()
+		self.validate_company()
+
+	def validate_company(self):
+		if self.sales_forecast:
+			sales_forecast_company = frappe.db.get_value("Sales Forecast", self.sales_forecast, "company")
+			if sales_forecast_company != self.company:
+				frappe.throw(
+					_(
+						"The Company {0} of Sales Forecast {1} does not match with the Company {2} of Master Production Schedule {3}."
+					).format(
+						bold(sales_forecast_company),
+						bold(self.sales_forecast),
+						bold(self.company),
+						bold(self.name),
+					)
+				)
 
 	def set_to_date(self):
 		self.to_date = None

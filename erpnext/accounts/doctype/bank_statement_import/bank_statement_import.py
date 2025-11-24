@@ -14,6 +14,7 @@ import openpyxl
 from frappe import _
 from frappe.core.doctype.data_import.data_import import DataImport
 from frappe.core.doctype.data_import.importer import Importer, ImportFile
+from frappe.query_builder.functions import Count
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.file_manager import get_file, save_file
 from frappe.utils.xlsxutils import ILLEGAL_CHARACTERS_RE, handle_html
@@ -371,7 +372,7 @@ def get_import_status(docname):
 
 	logs = frappe.get_all(
 		"Data Import Log",
-		fields=["count(*) as count", "success"],
+		fields=[{"COUNT": "*", "as": "count"}, "success"],
 		filters={"data_import": docname},
 		group_by="success",
 	)

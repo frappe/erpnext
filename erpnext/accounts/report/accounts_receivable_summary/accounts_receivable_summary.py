@@ -210,7 +210,7 @@ def get_gl_balance(report_date, company):
 	return frappe._dict(
 		frappe.db.get_all(
 			"GL Entry",
-			fields=["party", "sum(debit -  credit)"],
+			fields=["party", {"SUM": [{"SUB": ["debit", "credit"]}], "as": "balance"}],
 			filters={"posting_date": ("<=", report_date), "is_cancelled": 0, "company": company},
 			group_by="party",
 			as_list=1,

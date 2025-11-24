@@ -126,7 +126,7 @@ class SalesForecast(Document):
 			_sales_data = pd_sales_data.set_index("date").resample(resample_val).sum()["qty"]
 
 			model = ExponentialSmoothing(
-				_sales_data, trend="add", seasonal="mul", seasonal_periods=seasonal_periods
+				_sales_data, trend="add", seasonal="add", seasonal_periods=seasonal_periods
 			)
 
 			fit = model.fit()
@@ -135,8 +135,6 @@ class SalesForecast(Document):
 			forecast_data = forecast.to_dict()
 			if forecast_data:
 				self.add_sales_forecast_item(item_code, forecast_data)
-
-		self.save()
 
 	def add_sales_forecast_item(self, item_code, forecast_data):
 		item_details = frappe.db.get_value(

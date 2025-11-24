@@ -1437,6 +1437,7 @@ class PaymentEntry(AccountsController):
 						else allocated_amount_in_company_currency / self.transaction_exchange_rate,
 						"advance_voucher_type": d.advance_voucher_type,
 						"advance_voucher_no": d.advance_voucher_no,
+						"transaction_exchange_rate": self.target_exchange_rate,
 					},
 					item=self,
 				)
@@ -1873,7 +1874,7 @@ class PaymentEntry(AccountsController):
 				else:
 					self.total_taxes_and_charges += current_tax_amount
 
-			self.base_total_taxes_and_charges += tax.base_tax_amount
+			self.base_total_taxes_and_charges += current_tax_amount
 
 		if self.get("taxes"):
 			self.paid_amount_after_tax = self.get("taxes")[-1].base_total

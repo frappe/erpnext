@@ -1,6 +1,8 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import json
+
 import frappe
 from frappe import _
 from frappe.desk.form.load import get_attachments
@@ -48,7 +50,9 @@ class RepostItemValuation(Document):
 		posting_date: DF.Date
 		posting_time: DF.Time | None
 		recreate_stock_ledgers: DF.Check
+		repost_only_accounting_ledgers: DF.Check
 		reposting_data_file: DF.Attach | None
+		reposting_reference: DF.Data | None
 		status: DF.Literal["Queued", "In Progress", "Completed", "Skipped", "Failed"]
 		total_reposting_count: DF.Int
 		via_landed_cost_voucher: DF.Check
@@ -70,6 +74,7 @@ class RepostItemValuation(Document):
 		)
 
 	def validate(self):
+		self.reset_repost_only_accounting_ledgers()
 		self.set_company()
 		self.validate_period_closing_voucher()
 		self.set_status(write=False)
@@ -77,6 +82,10 @@ class RepostItemValuation(Document):
 		self.validate_accounts_freeze()
 		self.reset_recreate_stock_ledgers()
 		self.validate_recreate_stock_ledgers()
+
+	def reset_repost_only_accounting_ledgers(self):
+		if self.repost_only_accounting_ledgers and self.based_on != "Transaction":
+			self.repost_only_accounting_ledgers = 0
 
 	def validate_recreate_stock_ledgers(self):
 		if not self.recreate_stock_ledgers:
@@ -242,11 +251,39 @@ class RepostItemValuation(Document):
 		self.distinct_item_and_warehouse = None
 		self.items_to_be_repost = None
 		self.gl_reposting_index = 0
+		self.total_reposting_count = 0
 		self.clear_attachment()
 		self.db_update()
 
+	def skipped_similar_reposts(self):
+		repost_entries = frappe.get_all(
+			"Repost Item Valuation",
+			filters={
+				"based_on": "Transaction",
+				"voucher_type": self.voucher_type,
+				"voucher_no": self.voucher_no,
+				"docstatus": 1,
+				"repost_only_accounting_ledgers": 1,
+				"status": "Queued",
+				"reposting_reference": ("is", "set"),
+			},
+			fields=["name", "reposting_reference"],
+		)
+
+		for entry in repost_entries:
+			if (
+				frappe.db.get_value("Repost Item Valuation", entry.reposting_reference, "status")
+				== "Completed"
+			):
+				frappe.db.set_value("Repost Item Valuation", entry.name, "status", "Skipped")
+
 	def deduplicate_similar_repost(self):
 		"""Deduplicate similar reposts based on item-warehouse-posting combination."""
+
+		if self.repost_only_accounting_ledgers:
+			self.skipped_similar_reposts()
+			return
+
 		if self.based_on != "Item and Warehouse":
 			return
 
@@ -284,6 +321,19 @@ class RepostItemValuation(Document):
 			doc.update_stock_ledger(allow_negative_stock=True)
 
 
+@frappe.whitelist()
+def bulk_restart_reposting(names):
+	names = json.loads(names)
+	for name in names:
+		doc = frappe.get_doc("Repost Item Valuation", name)
+		if doc.status != "Failed":
+			continue
+
+		doc.restart_reposting()
+
+	frappe.msgprint(_("Repost Item Valuation restarted for selected failed records."))
+
+
 def on_doctype_update():
 	frappe.db.add_index("Repost Item Valuation", ["warehouse", "item_code"], "item_warehouse")
 
@@ -304,7 +354,9 @@ def repost(doc):
 		if doc.recreate_stock_ledgers:
 			doc.recreate_stock_ledger_entries()
 
-		repost_sl_entries(doc)
+		if not doc.repost_only_accounting_ledgers:
+			repost_sl_entries(doc)
+
 		repost_gl_entries(doc)
 
 		doc.set_status("Completed")
@@ -393,15 +445,34 @@ def repost_gl_entries(doc):
 	if not cint(erpnext.is_perpetual_inventory_enabled(doc.company)):
 		return
 
+	if doc.repost_only_accounting_ledgers and doc.based_on == "Transaction":
+		transactions = [(doc.voucher_type, doc.voucher_no)]
+		repost_gle_for_stock_vouchers(
+			transactions,
+			doc.posting_date,
+			doc.company,
+			repost_doc=doc,
+		)
+		return
+
 	# directly modified transactions
 	directly_dependent_transactions = _get_directly_dependent_vouchers(doc)
 	repost_affected_transaction = get_affected_transactions(doc)
-	repost_gle_for_stock_vouchers(
-		directly_dependent_transactions + list(repost_affected_transaction),
-		doc.posting_date,
-		doc.company,
-		repost_doc=doc,
-	)
+
+	transactions = directly_dependent_transactions + list(repost_affected_transaction)
+	if doc.based_on == "Item and Warehouse" and not doc.repost_only_accounting_ledgers:
+		make_reposting_for_accounting_ledgers(
+			transactions,
+			doc.company,
+			repost_doc=doc,
+		)
+	else:
+		repost_gle_for_stock_vouchers(
+			transactions,
+			doc.posting_date,
+			doc.company,
+			repost_doc=doc,
+		)
 
 
 def _get_directly_dependent_vouchers(doc):
@@ -477,13 +548,16 @@ def repost_entries():
 
 	for row in riv_entries:
 		doc = frappe.get_doc("Repost Item Valuation", row.name)
+		if (
+			doc.repost_only_accounting_ledgers
+			and doc.reposting_reference
+			and frappe.db.get_value("Repost Item Valuation", doc.reposting_reference, "status") != "Completed"
+		):
+			continue
+
 		if doc.status in ("Queued", "In Progress"):
 			repost(doc)
 			doc.deduplicate_similar_repost()
-
-	riv_entries = get_repost_item_valuation_entries()
-	if riv_entries:
-		return
 
 
 def get_repost_item_valuation_entries():
@@ -529,3 +603,28 @@ def execute_repost_item_valuation():
 		"name",
 	):
 		frappe.get_doc("Scheduled Job Type", name).enqueue(force=True)
+
+
+def make_reposting_for_accounting_ledgers(transactions, company, repost_doc):
+	for voucher_type, voucher_no in transactions:
+		if frappe.db.exists(
+			"Repost Item Valuation",
+			{
+				"voucher_type": voucher_type,
+				"voucher_no": voucher_no,
+				"docstatus": 1,
+				"reposting_reference": repost_doc.name,
+				"repost_only_accounting_ledgers": 1,
+				"status": "Queued",
+			},
+		):
+			continue
+
+		new_repost_doc = frappe.new_doc("Repost Item Valuation")
+		new_repost_doc.company = company
+		new_repost_doc.voucher_type = voucher_type
+		new_repost_doc.voucher_no = voucher_no
+		new_repost_doc.repost_only_accounting_ledgers = 1
+		new_repost_doc.reposting_reference = repost_doc.name
+		new_repost_doc.flags.ignore_permissions = True
+		new_repost_doc.submit()

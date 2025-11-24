@@ -1,0 +1,20 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-17 20:56:42.739124",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 1,
+ "icon": "home",
+ "icon_type": "Link",
+ "idx": 0,
+ "label": "Home",
+ "link_to": "Home",
+ "link_type": "Workspace",
+ "modified": "2025-11-20 16:09:28.269913",
+ "modified_by": "Administrator",
+ "name": "Home",
+ "owner": "Administrator",
+ "parent_icon": "",
+ "roles": [],
+ "standard": 1
+}

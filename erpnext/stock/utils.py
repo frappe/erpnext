@@ -302,7 +302,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 
 		return batch_obj.get_incoming_rate()
 	else:
-		valuation_method = get_valuation_method(args.get("item_code"))
+		valuation_method = get_valuation_method(args.get("item_code"), args.get("company"))
 		previous_sle = get_previous_sle(args)
 		if valuation_method in ("FIFO", "LIFO"):
 			if previous_sle:
@@ -374,11 +374,15 @@ def get_avg_purchase_rate(serial_nos):
 
 
 @frappe.request_cache
-def get_valuation_method(item_code):
+def get_valuation_method(item_code, company=None):
 	"""get valuation method from item or default"""
 	val_method = frappe.get_cached_value("Item", item_code, "valuation_method")
 	if not val_method:
-		val_method = frappe.get_cached_doc("Stock Settings").valuation_method or "FIFO"
+		val_method = (
+			frappe.get_cached_value("Company", company, "valuation_method")
+			if company
+			else frappe.get_single_value("Stock Settings", "valuation_method") or "FIFO"
+		)
 	return val_method
 
 

@@ -30,6 +30,7 @@ class DeliveryNote(SellingController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.accounts.doctype.item_wise_tax_detail.item_wise_tax_detail import ItemWiseTaxDetail
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
 		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import (
 			SalesTaxesandCharges,
@@ -87,6 +88,7 @@ class DeliveryNote(SellingController):
 		is_internal_customer: DF.Check
 		is_return: DF.Check
 		issue_credit_note: DF.Check
+		item_wise_tax_details: DF.Table[ItemWiseTaxDetail]
 		items: DF.Table[DeliveryNoteItem]
 		language: DF.Link | None
 		letter_head: DF.Link | None
@@ -853,7 +855,7 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 			frappe.throw(_("All these items have already been Invoiced/Returned"))
 
 		if args and args.get("merge_taxes"):
-			merge_taxes(source.get("taxes") or [], target)
+			merge_taxes(source, target)
 
 		target.run_method("calculate_taxes_and_totals")
 
@@ -869,6 +871,7 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = to_make_invoice_qty_map[source_doc.name]
+		target_doc._old_name = source_doc.name
 
 	def get_pending_qty(item_row):
 		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0)

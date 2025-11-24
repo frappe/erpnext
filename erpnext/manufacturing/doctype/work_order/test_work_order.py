@@ -976,8 +976,9 @@ class TestWorkOrder(IntegrationTestCase):
 
 		job_cards = frappe.get_all(
 			"Job Card Time Log",
-			fields=["distinct parent as name", "docstatus"],
+			fields=["parent as name", "docstatus"],
 			order_by="creation asc",
+			distinct=True,
 		)
 
 		for job_card in job_cards:
@@ -3269,6 +3270,14 @@ class TestWorkOrder(IntegrationTestCase):
 			"Manufacturing Settings", "backflush_raw_materials_based_on", original_backflush
 		)
 		frappe.db.set_single_value("Stock Settings", "auto_reserve_serial_and_batch", original_auto_reserve)
+
+	def test_phantom_bom_explosion(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_tree_for_phantom_bom_tests
+
+		expected = create_tree_for_phantom_bom_tests()
+
+		wo = make_wo_order_test_record(item="Top Level Parent")
+		self.assertEqual([item.item_code for item in wo.required_items], expected)
 
 
 def get_reserved_entries(voucher_no, warehouse=None):

@@ -546,7 +546,10 @@ def get_opening_balance_from_batch(filters, columns, sl_entries):
 
 	opening_data = frappe.get_all(
 		"Stock Ledger Entry",
-		fields=["sum(actual_qty) as qty_after_transaction", "sum(stock_value_difference) as stock_value"],
+		fields=[
+			{"SUM": "actual_qty", "as": "qty_after_transaction"},
+			{"SUM": "stock_value_difference", "as": "stock_value"},
+		],
 		filters=query_filters,
 	)[0]
 

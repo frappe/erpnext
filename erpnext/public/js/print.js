@@ -1,6 +1,16 @@
 let beforePrintHandled = false;
 
 frappe.realtime.on("sales_invoice_before_print", (data) => {
+	let print_format = $('input[data-fieldname="print_format"]').val();
+	let letterhead = $('input[data-fieldname="letterhead"]').val();
+
+	let allowed_print_formats = ["Sales Invoice Standard", "Sales Invoice with Item Image"];
+	let allowed_letterheads = ["Company Letterhead", "Company Letterhead - Grey"];
+
+	if (!allowed_print_formats.includes(print_format) && !allowed_letterheads.includes(letterhead)) {
+		return;
+	}
+
 	const route = frappe.get_route();
 
 	if (!beforePrintHandled && route[0] === "print" && route[1] === "Sales Invoice") {

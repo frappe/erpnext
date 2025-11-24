@@ -12,7 +12,8 @@
   "col_break3",
   "amount",
   "base_amount",
-  "has_corrective_cost"
+  "has_corrective_cost",
+  "has_operating_cost"
  ],
  "fields": [
   {
@@ -70,13 +71,20 @@
    "fieldtype": "Check",
    "label": "Has Corrective Cost",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "has_operating_cost",
+   "fieldtype": "Check",
+   "label": "Has Operating Cost",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-09 10:22:20.286641",
+ "modified": "2025-07-16 15:27:59.175530",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Taxes and Charges",

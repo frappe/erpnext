@@ -669,7 +669,7 @@ class PaymentReconciliation(Document):
 						"party": self.party,
 					},
 					fields=[
-						"parent as `name`",
+						"parent as name",
 						"exchange_rate",
 					],
 					as_list=1,

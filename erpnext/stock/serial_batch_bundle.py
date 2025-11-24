@@ -268,7 +268,7 @@ class SerialBatchBundle:
 			and not self.sle.serial_and_batch_bundle
 			and self.item_details.has_batch_no == 1
 			and (
-				self.item_details.create_new_batch
+				(self.item_details.create_new_batch and self.sle.actual_qty > 0)
 				or (
 					frappe.get_single_value(
 						"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"
@@ -861,9 +861,9 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 		self.batchwise_valuation_batches = []
 		self.non_batchwise_valuation_batches = []
 
-		if get_valuation_method(self.sle.item_code) == "Moving Average" and frappe.get_single_value(
-			"Stock Settings", "do_not_use_batchwise_valuation"
-		):
+		if get_valuation_method(
+			self.sle.item_code, self.sle.company
+		) == "Moving Average" and frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation"):
 			self.non_batchwise_valuation_batches = self.batches
 			return
 
@@ -1511,7 +1511,7 @@ def get_batchwise_qty(voucher_type, voucher_no):
 	batches = frappe.get_all(
 		"Serial and Batch Entry",
 		filters={"parent": ("in", bundles), "batch_no": ("is", "set")},
-		fields=["batch_no", "SUM(qty) as qty"],
+		fields=["batch_no", {"SUM": "qty", "as": "qty"}],
 		group_by="batch_no",
 		as_list=1,
 	)

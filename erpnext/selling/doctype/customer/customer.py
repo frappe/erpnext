@@ -14,6 +14,7 @@ from frappe.contacts.address_and_contact import (
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
+from frappe.query_builder import Field, functions
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
 
@@ -234,7 +235,7 @@ class Customer(TransactionBase):
 			self.update_lead_status()
 
 		if self.flags.is_new_doc:
-			self.link_lead_address_and_contact()
+			self.link_address_and_contact()
 			self.copy_communication()
 
 		self.update_customer_groups()
@@ -278,15 +279,23 @@ class Customer(TransactionBase):
 		if self.lead_name:
 			frappe.db.set_value("Lead", self.lead_name, "status", "Converted")
 
-	def link_lead_address_and_contact(self):
-		if self.lead_name:
-			# assign lead address and contact to customer (if already not set)
+	def link_address_and_contact(self):
+		linked_documents = {
+			"Lead": self.lead_name,
+			"Opportunity": self.opportunity_name,
+			"Prospect": self.prospect_name,
+		}
+		for doctype, docname in linked_documents.items():
+			# assign lead, opportunity and prospect address and contact to customer (if already not set)
+			if not docname:
+				continue
+
 			linked_contacts_and_addresses = frappe.get_all(
 				"Dynamic Link",
 				filters=[
 					["parenttype", "in", ["Contact", "Address"]],
-					["link_doctype", "=", "Lead"],
-					["link_name", "=", self.lead_name],
+					["link_doctype", "=", doctype],
+					["link_name", "=", docname],
 				],
 				fields=["parent as name", "parenttype as doctype"],
 			)
@@ -503,11 +512,11 @@ def get_loyalty_programs(doc):
 	loyalty_programs = frappe.get_all(
 		"Loyalty Program",
 		fields=["name", "customer_group", "customer_territory"],
-		filters={
-			"auto_opt_in": 1,
-			"from_date": ["<=", today()],
-			"ifnull(to_date, '2500-01-01')": [">=", today()],
-		},
+		filters=[
+			["auto_opt_in", "=", 1],
+			["from_date", "<=", today()],
+			[functions.IfNull(Field("to_date"), "2500-01-01"), ">=", today()],
+		],
 	)
 
 	for loyalty_program in loyalty_programs:

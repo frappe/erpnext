@@ -166,9 +166,10 @@ class WorkOrder(Document):
 		operation_details = frappe._dict(
 			frappe.get_all(
 				"Job Card",
-				fields=["operation", "for_quantity"],
+				fields=["operation", {"SUM": "for_quantity"}],
 				filters={"docstatus": ("<", 2), "work_order": self.name},
 				as_list=1,
+				group_by="operation_id",
 			)
 		)
 
@@ -453,9 +454,9 @@ class WorkOrder(Document):
 
 	def set_default_warehouse(self):
 		if not self.wip_warehouse and not self.skip_transfer:
-			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
+			self.wip_warehouse = frappe.get_cached_value("Company", self.company, "default_wip_warehouse")
 		if not self.fg_warehouse:
-			self.fg_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
+			self.fg_warehouse = frappe.get_cached_value("Company", self.company, "default_fg_warehouse")
 
 	def check_wip_warehouse_skip(self):
 		if self.skip_transfer and not self.from_wip_warehouse:
@@ -717,7 +718,7 @@ class WorkOrder(Document):
 		if self.production_plan_item:
 			total_qty = frappe.get_all(
 				"Work Order",
-				fields="sum(produced_qty) as produced_qty",
+				fields=[{"SUM": "produced_qty", "as": "produced_qty"}],
 				filters={
 					"docstatus": 1,
 					"production_plan": self.production_plan,
@@ -1346,7 +1347,7 @@ class WorkOrder(Document):
 		else:
 			data = frappe.get_all(
 				"Stock Entry",
-				fields=["timestamp(posting_date, posting_time) as posting_datetime"],
+				fields=[{"TIMESTAMP": ["posting_date", "posting_time"], "as": "posting_datetime"}],
 				filters={
 					"work_order": self.name,
 					"purpose": ("in", ["Material Transfer for Manufacture", "Manufacture"]),
@@ -2318,13 +2319,14 @@ def make_stock_entry(
 
 
 @frappe.whitelist()
-def get_default_warehouse():
-	doc = frappe.get_cached_doc("Manufacturing Settings")
-
+def get_default_warehouse(company):
+	wip, fg, scrap = frappe.get_cached_value(
+		"Company", company, ["default_wip_warehouse", "default_fg_warehouse", "default_scrap_warehouse"]
+	)
 	return {
-		"wip_warehouse": doc.default_wip_warehouse,
-		"fg_warehouse": doc.default_fg_warehouse,
-		"scrap_warehouse": doc.default_scrap_warehouse,
+		"wip_warehouse": wip,
+		"fg_warehouse": fg,
+		"scrap_warehouse": scrap,
 	}
 
 

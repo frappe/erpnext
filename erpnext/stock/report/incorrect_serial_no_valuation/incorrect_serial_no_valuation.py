@@ -115,7 +115,7 @@ def get_stock_ledger_entries(report_filters):
 		"posting_time",
 		"company",
 		"warehouse",
-		"(stock_value_difference / actual_qty) as valuation_rate",
+		{"DIV": ["stock_value_difference", "actual_qty"], "as": "valuation_rate"},
 	]
 
 	filters = {"is_cancelled": 0}

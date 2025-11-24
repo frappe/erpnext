@@ -91,6 +91,7 @@
   "discount_amount",
   "sec_tax_breakup",
   "other_charges_calculation",
+  "item_wise_tax_details",
   "packing_list",
   "packed_items",
   "pricing_rule_details",
@@ -1696,6 +1697,14 @@
    "fieldtype": "Check",
    "label": "Is Subcontracted",
    "print_hide": 1
+  },
+  {
+   "fieldname": "item_wise_tax_details",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Item Wise Tax Details",
+   "no_copy": 1,
+   "options": "Item Wise Tax Detail"
   }
  ],
  "grid_page_length": 50,

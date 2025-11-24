@@ -59,10 +59,8 @@ class BudgetValidation:
 		_obj.update(
 			{
 				"accumulated_monthly_budget": get_accumulated_monthly_budget(
-					self.budget_map[key].monthly_distribution,
+					self.budget_map[key].name,
 					self.doc_date,
-					self.fiscal_year,
-					self.budget_map[key].budget_amount,
 				)
 			}
 		)
@@ -164,16 +162,19 @@ class BudgetValidation:
 
 	def get_budget_records(self) -> list:
 		bud = qb.DocType("Budget")
-		bud_acc = qb.DocType("Budget Account")
+
 		query = (
 			qb.from_(bud)
-			.inner_join(bud_acc)
-			.on(bud.name == bud_acc.parent)
 			.select(
 				bud.name,
 				bud.budget_against,
 				bud.company,
-				bud.monthly_distribution,
+				bud.account,
+				bud.budget_amount,
+				bud.from_fiscal_year,
+				bud.to_fiscal_year,
+				bud.budget_start_date,
+				bud.budget_end_date,
 				bud.applicable_on_material_request,
 				bud.action_if_annual_budget_exceeded_on_mr,
 				bud.action_if_accumulated_monthly_budget_exceeded_on_mr,
@@ -186,13 +187,15 @@ class BudgetValidation:
 				bud.applicable_on_cumulative_expense,
 				bud.action_if_annual_exceeded_on_cumulative_expense,
 				bud.action_if_accumulated_monthly_exceeded_on_cumulative_expense,
-				bud_acc.account,
-				bud_acc.budget_amount,
 			)
-			.where(bud.docstatus.eq(1) & bud.fiscal_year.eq(self.fiscal_year) & bud.company.eq(self.company))
+			.where(
+				(bud.docstatus == 1)
+				& (bud.company == self.company)
+				& (bud.budget_start_date <= self.doc_date)
+				& (bud.budget_end_date >= self.doc_date)
+			)
 		)
 
-		# add dimension fields
 		for x in self.dimensions:
 			query = query.select(bud[x.get("fieldname")])
 
@@ -314,8 +317,8 @@ class BudgetValidation:
 					frappe.bold(key[2]),
 					frappe.bold(frappe.unscrub(key[0])),
 					frappe.bold(key[1]),
-					frappe.bold(fmt_money(annual_diff, currency=currency)),
 					frappe.bold(fmt_money(budget_amt, currency=currency)),
+					frappe.bold(fmt_money(annual_diff, currency=currency)),
 				)
 				self.execute_action(config.action_for_annual, _msg)
 
@@ -425,7 +428,7 @@ class BudgetValidation:
 				frappe.bold(key[2]),
 				frappe.bold(frappe.unscrub(key[0])),
 				frappe.bold(key[1]),
-				frappe.bold(fmt_money(v_map.accumulated_montly_budget, currency=currency)),
+				frappe.bold(fmt_money(v_map.accumulated_monthly_budget, currency=currency)),
 				self.budget_applicable_for(v_map, current_amt),
 				frappe.bold(fmt_money(monthly_diff, currency=currency)),
 			)

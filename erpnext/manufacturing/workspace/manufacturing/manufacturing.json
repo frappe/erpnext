@@ -438,7 +438,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-11-03 17:02:26.882516",
+ "modified": "2025-11-24 11:11:28.343568",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
@@ -456,7 +456,7 @@
    "doc_view": "List",
    "label": "Learn Manufacturing",
    "type": "URL",
-   "url": "https://school.frappe.io/lms/courses/manufacturing?utm_source=in_app"
+   "url": "https://school.frappe.io/lms/courses/production-planning-and-execution"
   },
   {
    "color": "Grey",

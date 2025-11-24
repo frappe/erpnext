@@ -4,7 +4,9 @@
 
 import frappe
 from frappe import _
-from frappe.utils import getdate
+from frappe.utils import flt, getdate
+
+from erpnext.accounts.utils import get_currency_precision
 
 
 def execute(filters=None):
@@ -43,6 +45,7 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 	party_map = get_party_pan_map(filters.get("party_type"))
 	tax_rate_map = get_tax_rate_map(filters)
 	gle_map = get_gle_map(tds_docs)
+	precision = get_currency_precision()
 
 	out = []
 	entries = {}
@@ -72,17 +75,28 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 					tax_withholding_category = party_map.get(party, {}).get("tax_withholding_category")
 
 				rate = get_tax_withholding_rates(tax_rate_map.get(tax_withholding_category, []), posting_date)
-			if net_total_map.get((voucher_type, name)):
+
+			values = net_total_map.get((voucher_type, name))
+
+			if values:
 				if voucher_type == "Journal Entry" and tax_amount and rate:
-					# back calcalute total amount from rate and tax_amount
-					base_total = min(tax_amount / (rate / 100), net_total_map.get((voucher_type, name))[0])
+					# back calculate total amount from rate and tax_amount
+					base_total = min(flt(tax_amount / (rate / 100), precision=precision), values[0])
 					total_amount = grand_total = base_total
-				elif voucher_type == "Purchase Invoice":
-					total_amount, grand_total, base_total, bill_no, bill_date = net_total_map.get(
-						(voucher_type, name)
-					)
+
 				else:
-					total_amount, grand_total, base_total = net_total_map.get((voucher_type, name))
+					if tax_amount and rate:
+						# back calculate total amount from rate and tax_amount
+						total_amount = flt((tax_amount * 100) / rate, precision=precision)
+					else:
+						total_amount = values[0]
+
+					grand_total = values[1]
+					base_total = values[2]
+
+					if voucher_type == "Purchase Invoice":
+						bill_no = values[3]
+						bill_date = values[4]
 			else:
 				total_amount += entry.credit
 

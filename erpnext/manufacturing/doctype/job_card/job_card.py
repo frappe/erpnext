@@ -207,7 +207,7 @@ class JobCard(Document):
 
 		job_card_qty = frappe.get_all(
 			"Job Card",
-			fields=["sum(for_quantity)"],
+			fields=[{"SUM": "for_quantity"}],
 			filters={
 				"work_order": self.work_order,
 				"operation_id": self.operation_id,
@@ -933,9 +933,9 @@ class JobCard(Document):
 		return frappe.get_all(
 			"Job Card",
 			fields=[
-				"sum(total_time_in_mins) as time_in_mins",
-				"sum(total_completed_qty) as completed_qty",
-				"sum(process_loss_qty) as process_loss_qty",
+				{"SUM": "total_time_in_mins", "as": "time_in_mins"},
+				{"SUM": "total_completed_qty", "as": "completed_qty"},
+				{"SUM": "process_loss_qty", "as": "process_loss_qty"},
 			],
 			filters={
 				"docstatus": 1,
@@ -1085,7 +1085,7 @@ class JobCard(Document):
 
 	def set_wip_warehouse(self):
 		if not self.wip_warehouse:
-			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
+			self.wip_warehouse = frappe.get_cached_value("Company", self.company, "default_wip_warehouse")
 
 	def validate_operation_id(self):
 		if (
@@ -1423,11 +1423,12 @@ def get_operations(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.get_all(
 		"Work Order Operation",
 		filters=args,
-		fields=["distinct operation as operation"],
+		fields=["operation"],
 		limit_start=start,
 		limit_page_length=page_len,
 		order_by="idx asc",
 		as_list=1,
+		distinct=True,
 	)
 
 

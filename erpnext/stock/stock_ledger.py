@@ -563,7 +563,7 @@ class update_entries_after:
 
 		self.company = frappe.get_cached_value("Warehouse", self.args.warehouse, "company")
 		self.set_precision()
-		self.valuation_method = get_valuation_method(self.item_code)
+		self.valuation_method = get_valuation_method(self.item_code, self.company)
 
 		self.new_items_found = False
 		self.distinct_item_warehouses = args.get("distinct_item_warehouses", frappe._dict())
@@ -1087,7 +1087,7 @@ class update_entries_after:
 		avg_rate = 0.0
 
 		for d in sabb_data:
-			incoming_rate = get_incoming_rate_for_serial_and_batch(self.item_code, d, sn_obj)
+			incoming_rate = get_incoming_rate_for_serial_and_batch(self.item_code, d, sn_obj, self.company)
 			amount = incoming_rate * flt(d.qty)
 			tot_amt += flt(amount)
 			total_qty += flt(d.qty)
@@ -2398,7 +2398,7 @@ def get_serial_from_sabb(serial_and_batch_bundle):
 	)
 
 
-def get_incoming_rate_for_serial_and_batch(item_code, row, sn_obj):
+def get_incoming_rate_for_serial_and_batch(item_code, row, sn_obj, company):
 	if row.serial_no:
 		return abs(sn_obj.serial_no_incoming_rate.get(row.serial_no, 0.0))
 	else:
@@ -2406,7 +2406,7 @@ def get_incoming_rate_for_serial_and_batch(item_code, row, sn_obj):
 		if hasattr(sn_obj, "stock_queue") and sn_obj.stock_queue:
 			stock_queue = parse_json(sn_obj.stock_queue)
 
-		val_method = get_valuation_method(item_code)
+		val_method = get_valuation_method(item_code, company)
 
 		actual_qty = row.qty
 		if stock_queue and val_method == "FIFO" and row.batch_no in sn_obj.non_batchwise_valuation_batches:

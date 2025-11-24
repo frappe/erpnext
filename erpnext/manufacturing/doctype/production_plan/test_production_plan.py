@@ -73,9 +73,10 @@ class TestProductionPlan(IntegrationTestCase):
 
 		material_requests = frappe.get_all(
 			"Material Request Item",
-			fields=["distinct parent"],
+			fields=["parent"],
 			filters={"production_plan": pln.name},
 			as_list=1,
+			distinct=True,
 		)
 
 		self.assertTrue(len(material_requests), 2)
@@ -1944,11 +1945,17 @@ class TestProductionPlan(IntegrationTestCase):
 
 		mr_items = get_items_for_material_requests(plan.as_dict())
 
+		from collections import defaultdict
+
+		mr_items_dict = defaultdict(float)
+		for item in mr_items:
+			mr_items_dict[item.get("item_code")] += item.get("quantity")
+
 		# RM Item 1 (FG1 (100 + 100) + FG2 (50) + FG3 (10) - 90 in stock - 80 sub assembly stock)
-		self.assertEqual(mr_items[0].get("quantity"), 90)
+		self.assertEqual(mr_items_dict["RM Item 1"], 90)
 
 		# RM Item 2 (FG1 (100) + FG2 (50) + FG4 (10) - 80 sub assembly stock)
-		self.assertEqual(mr_items[1].get("quantity"), 80)
+		self.assertEqual(mr_items_dict["RM Item 2"], 80)
 
 	def test_stock_reservation_against_production_plan(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
@@ -2362,11 +2369,7 @@ class TestProductionPlan(IntegrationTestCase):
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
 	def test_production_plan_for_partial_sub_assembly_items(self):
-		from erpnext.controllers.status_updater import OverAllowanceError
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-		from erpnext.subcontracting.doctype.subcontracting_bom.test_subcontracting_bom import (
-			create_subcontracting_bom,
-		)
 
 		frappe.flags.test_print = False
 
@@ -2418,6 +2421,43 @@ class TestProductionPlan(IntegrationTestCase):
 		for row in plan.sub_assembly_items:
 			self.assertEqual(row.ordered_qty, 10.0)
 
+	def test_phantom_bom_explosion(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		bom_tree_1 = {
+			"Top Level Parent": {
+				"Sub Assembly Level 1-1": {"Phantom Item Level 1-2": {"Item Level 1-3": {}}},
+				"Phantom Item Level 2-1": {"Sub Assembly Level 2-2": {"Item Level 2-3": {}}},
+				"Item Level 3-1": {},
+			}
+		}
+		phantom_list = ["Phantom Item Level 1-2", "Phantom Item Level 2-1"]
+		create_nested_bom(bom_tree_1, prefix="", phantom_items=phantom_list)
+
+		plan = create_production_plan(
+			item_code="Top Level Parent",
+			planned_qty=10,
+			use_multi_level_bom=0,
+			do_not_submit=True,
+			company="_Test Company",
+			skip_getting_mr_items=True,
+		)
+		plan.get_sub_assembly_items()
+		plan.submit()
+
+		plan.set("mr_items", [])
+		mr_items = get_items_for_material_requests(plan.as_dict())
+		for d in mr_items:
+			plan.append("mr_items", d)
+
+		self.assertEqual(
+			[item.production_item for item in plan.sub_assembly_items],
+			["Sub Assembly Level 1-1", "Sub Assembly Level 2-2"],
+		)
+		self.assertEqual(
+			[item.item_code for item in plan.mr_items], ["Item Level 1-3", "Item Level 2-3", "Item Level 3-1"]
+		)
+
 
 def create_production_plan(**args):
 	"""
@@ -2440,6 +2480,7 @@ def create_production_plan(**args):
 			"skip_available_sub_assembly_item": args.skip_available_sub_assembly_item or 0,
 			"sub_assembly_warehouse": args.sub_assembly_warehouse,
 			"reserve_stock": args.reserve_stock or 0,
+			"for_warehouse": args.for_warehouse or None,
 		}
 	)
 

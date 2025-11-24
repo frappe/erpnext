@@ -44,6 +44,7 @@ class PurchaseOrder(BuyingController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.accounts.doctype.item_wise_tax_detail.item_wise_tax_detail import ItemWiseTaxDetail
 		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
 		from erpnext.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import (
@@ -105,6 +106,7 @@ class PurchaseOrder(BuyingController):
 		is_internal_supplier: DF.Check
 		is_old_subcontracting_flow: DF.Check
 		is_subcontracted: DF.Check
+		item_wise_tax_details: DF.Table[ItemWiseTaxDetail]
 		items: DF.Table[PurchaseOrderItem]
 		language: DF.Data | None
 		letter_head: DF.Link | None
@@ -523,6 +525,9 @@ class PurchaseOrder(BuyingController):
 		if self.is_against_so():
 			self.update_status_updater()
 
+		if self.is_against_pp():
+			self.update_status_updater_if_from_pp()
+
 		if self.has_drop_ship_item():
 			self.update_delivered_qty_in_sales_order()
 
@@ -543,9 +548,6 @@ class PurchaseOrder(BuyingController):
 		self.update_blanket_order()
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
-
-	def on_update(self):
-		pass
 
 	def update_status_updater(self):
 		self.status_updater.append(
@@ -1006,6 +1008,13 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 				target_doc.supplier_warehouse = frappe.get_cached_value(
 					"Job Card", item.job_card, "wip_warehouse"
 				)
+
+		production_plan = set([item.production_plan for item in source_doc.items if item.production_plan])
+		if production_plan:
+			target_doc.production_plan = production_plan.pop()
+		target_doc.reserve_stock = frappe.get_single_value(
+			"Stock Settings", "auto_reserve_stock"
+		) or frappe.get_value("Production Plan", target_doc.production_plan, "reserve_stock")
 
 	if target_doc and isinstance(target_doc, str):
 		target_doc = json.loads(target_doc)

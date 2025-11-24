@@ -15,6 +15,7 @@
   "sourced_by_supplier",
   "bom_created",
   "is_subcontracted",
+  "is_phantom_item",
   "operation_section",
   "operation",
   "column_break_cbnk",
@@ -159,8 +160,8 @@
    "fieldname": "amount",
    "fieldtype": "Currency",
    "label": "Amount",
-   "read_only": 1,
-   "options": "currency"
+   "options": "currency",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_yuca",
@@ -229,6 +230,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval:!doc.is_phantom_item",
    "fieldname": "operation_section",
    "fieldtype": "Section Break",
    "label": "Operation"
@@ -245,21 +247,30 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.is_phantom_item",
    "fieldname": "is_subcontracted",
    "fieldtype": "Check",
    "label": "Is Subcontracted",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_phantom_item",
+   "fieldtype": "Check",
+   "label": "Is Phantom Item",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-11-25 18:13:34.542391",
+ "modified": "2025-11-05 21:15:55.187671",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator Item",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

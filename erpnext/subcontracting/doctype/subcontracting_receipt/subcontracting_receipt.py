@@ -1,6 +1,8 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
@@ -16,6 +18,10 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_default_cost_center, get_default_expense_account
 from erpnext.stock.stock_ledger import get_valuation_rate
+
+
+class BOMQuantityError(frappe.ValidationError):
+	pass
 
 
 class SubcontractingReceipt(SubcontractingController):
@@ -157,6 +163,7 @@ class SubcontractingReceipt(SubcontractingController):
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
 		self.validate_available_qty_for_consumption()
+		self.validate_bom_required_qty()
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.set_subcontracting_order_status(update_bin=False)
@@ -164,6 +171,8 @@ class SubcontractingReceipt(SubcontractingController):
 
 		for table_name in ["items", "supplied_items"]:
 			self.make_bundle_using_old_serial_batch_fields(table_name)
+
+		self.update_stock_reservation_entries()
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
@@ -189,6 +198,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_consumed_qty_in_subcontract_order()
 		self.set_subcontracting_order_status(update_bin=False)
 		self.update_stock_ledger()
+		self.update_stock_reservation_entries()
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
 		self.update_status()
@@ -199,7 +209,7 @@ class SubcontractingReceipt(SubcontractingController):
 	def reset_raw_materials(self):
 		self.supplied_items = []
 		self.flags.reset_raw_materials = True
-		self.create_raw_materials_supplied()
+		self.create_raw_materials_supplied_or_received()
 
 	def validate_closed_subcontracting_order(self):
 		for item in self.items:
@@ -537,12 +547,60 @@ class SubcontractingReceipt(SubcontractingController):
 				item.available_qty_for_consumption
 				and flt(item.available_qty_for_consumption, precision) - flt(item.consumed_qty, precision) < 0
 			):
-				msg = f"""Row {item.idx}: Consumed Qty {flt(item.consumed_qty, precision)}
-					must be less than or equal to Available Qty For Consumption
-					{flt(item.available_qty_for_consumption, precision)}
-					in Consumed Items Table."""
+				msg = _(
+					"""Row {0}: Consumed Qty {1} {2} must be less than or equal to Available Qty For Consumption
+					{3} {4} in Consumed Items Table."""
+				).format(
+					item.idx,
+					flt(item.consumed_qty, precision),
+					item.stock_uom,
+					flt(item.available_qty_for_consumption, precision),
+					item.stock_uom,
+				)
 
-				frappe.throw(_(msg))
+				frappe.throw(msg)
+
+	def validate_bom_required_qty(self):
+		if (
+			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
+			== "Material Transferred for Subcontract"
+		) and not (frappe.db.get_single_value("Buying Settings", "validate_consumed_qty")):
+			return
+
+		rm_consumed_dict = self.get_rm_wise_consumed_qty()
+
+		for row in self.items:
+			precision = row.precision("qty")
+			for bom_item in self._get_materials_from_bom(
+				row.item_code, row.bom, row.get("include_exploded_items")
+			):
+				required_qty = flt(
+					bom_item.qty_consumed_per_unit * row.qty * row.conversion_factor, precision
+				)
+				consumed_qty = rm_consumed_dict.get(bom_item.rm_item_code, 0)
+				diff = flt(consumed_qty, precision) - flt(required_qty, precision)
+
+				if diff < 0:
+					msg = _(
+						"""Additional {0} {1} of item {2} required as per BOM to complete this transaction"""
+					).format(
+						frappe.bold(abs(diff)),
+						frappe.bold(bom_item.stock_uom),
+						frappe.bold(bom_item.rm_item_code),
+					)
+
+					frappe.throw(
+						msg,
+						exc=BOMQuantityError,
+					)
+
+	def get_rm_wise_consumed_qty(self):
+		rm_dict = defaultdict(float)
+
+		for row in self.supplied_items:
+			rm_dict[row.rm_item_code] += row.consumed_qty
+
+		return rm_dict
 
 	def update_status_updater_args(self):
 		if cint(self.is_return):
@@ -852,6 +910,17 @@ class SubcontractingReceipt(SubcontractingController):
 	def auto_create_purchase_receipt(self):
 		if frappe.db.get_single_value("Buying Settings", "auto_create_purchase_receipt"):
 			make_purchase_receipt(self, save=True, notify=True)
+
+	def has_reserved_stock(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_details_for_voucher,
+		)
+
+		for item in self.supplied_items:
+			if get_sre_details_for_voucher("Subcontracting Order", item.subcontracting_order):
+				return True
+
+		return False
 
 
 @frappe.whitelist()

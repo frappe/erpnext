@@ -8,12 +8,16 @@
   "item_code",
   "from_warehouse",
   "warehouse",
-  "item_name",
   "material_request_type",
   "column_break_4",
+  "item_name",
   "uom",
   "conversion_factor",
   "section_break_azee",
+  "from_bom",
+  "column_break_scnz",
+  "main_item_code",
+  "section_break_qnpt",
   "required_bom_qty",
   "projected_qty",
   "column_break_wack",
@@ -25,6 +29,7 @@
   "min_order_qty",
   "section_break_8",
   "sales_order",
+  "sub_assembly_item_reference",
   "bin_qty_section",
   "actual_qty",
   "requested_qty",
@@ -220,12 +225,48 @@
    "label": "Stock Reserved Qty",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "from_bom",
+   "fieldname": "from_bom",
+   "fieldtype": "Link",
+   "label": "From BOM",
+   "mandatory_depends_on": "eval:parent.reserve_stock",
+   "no_copy": 1,
+   "options": "BOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sub_assembly_item_reference",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Sub Assembly Item Reference",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_qnpt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "main_item_code",
+   "fieldname": "main_item_code",
+   "fieldtype": "Link",
+   "label": "Main Item Code",
+   "mandatory_depends_on": "eval:parent.reserve_stock",
+   "no_copy": 1,
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_scnz",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "istable": 1,
  "links": [],
- "modified": "2025-05-01 14:50:55.805442",
+ "modified": "2025-10-30 17:01:25.996352",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Request Plan Item",

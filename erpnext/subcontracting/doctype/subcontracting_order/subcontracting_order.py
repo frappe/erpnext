@@ -8,6 +8,10 @@ from frappe.utils import flt
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	StockReservation,
+	has_reserved_stock,
+)
 from erpnext.stock.stock_balance import update_bin_qty
 from erpnext.stock.utils import get_bin
 
@@ -50,8 +54,10 @@ class SubcontractingOrder(SubcontractingController):
 		letter_head: DF.Link | None
 		naming_series: DF.Literal["SC-ORD-.YYYY.-"]
 		per_received: DF.Percent
+		production_plan: DF.Data | None
 		project: DF.Link | None
 		purchase_order: DF.Link
+		reserve_stock: DF.Check
 		schedule_date: DF.Date | None
 		select_print_heading: DF.Link | None
 		service_items: DF.Table[SubcontractingOrderServiceItem]
@@ -72,6 +78,7 @@ class SubcontractingOrder(SubcontractingController):
 		supplied_items: DF.Table[SubcontractingOrderSuppliedItem]
 		supplier: DF.Link
 		supplier_address: DF.Link | None
+		supplier_currency: DF.Link | None
 		supplier_name: DF.Data
 		supplier_warehouse: DF.Link
 		title: DF.Data | None
@@ -104,6 +111,13 @@ class SubcontractingOrder(SubcontractingController):
 			frappe.db.get_single_value("Buying Settings", "over_transfer_allowance"),
 		)
 
+		if self.reserve_stock:
+			if self.has_unreserved_stock():
+				self.set_onload("has_unreserved_stock", True)
+
+			if has_reserved_stock(self.doctype, self.name):
+				self.set_onload("has_reserved_stock", True)
+
 	def before_validate(self):
 		super().before_validate()
 
@@ -120,6 +134,7 @@ class SubcontractingOrder(SubcontractingController):
 		self.update_prevdoc_status()
 		self.update_status()
 		self.update_subcontracted_quantity_in_po()
+		self.reserve_raw_materials()
 
 	def on_cancel(self):
 		self.update_prevdoc_status()
@@ -187,7 +202,7 @@ class SubcontractingOrder(SubcontractingController):
 		for item in self.get("items"):
 			bom = frappe.get_doc("BOM", item.bom)
 			rm_cost = sum(flt(rm_item.amount) for rm_item in bom.items)
-			item.rm_cost_per_qty = rm_cost / flt(bom.quantity)
+			item.rm_cost_per_qty = flt(rm_cost / flt(bom.quantity), item.precision("rm_cost_per_qty"))
 
 	def calculate_items_qty_and_amount(self):
 		total_qty = total = 0
@@ -252,10 +267,10 @@ class SubcontractingOrder(SubcontractingController):
 			if si.fg_item:
 				item = frappe.get_doc("Item", si.fg_item)
 
-				qty, subcontracted_qty, fg_item_qty = frappe.db.get_value(
+				qty, subcontracted_qty, fg_item_qty, production_plan_sub_assembly_item = frappe.db.get_value(
 					"Purchase Order Item",
 					si.purchase_order_item,
-					["qty", "subcontracted_qty", "fg_item_qty"],
+					["qty", "subcontracted_qty", "fg_item_qty", "production_plan_sub_assembly_item"],
 				)
 				available_qty = flt(qty) - flt(subcontracted_qty)
 
@@ -291,6 +306,7 @@ class SubcontractingOrder(SubcontractingController):
 						"purchase_order_item": si.purchase_order_item,
 						"material_request": si.material_request,
 						"material_request_item": si.material_request_item,
+						"production_plan_sub_assembly_item": production_plan_sub_assembly_item,
 					}
 				)
 			else:
@@ -360,6 +376,90 @@ class SubcontractingOrder(SubcontractingController):
 				"subcontracted_qty",
 				subcontracted_qty,
 			)
+
+	@frappe.whitelist()
+	def reserve_raw_materials(self, items=None, stock_entry=None):
+		if self.reserve_stock:
+			item_dict = {}
+
+			if items:
+				item_dict = {d["name"]: d for d in items}
+				items = [item for item in self.supplied_items if item.name in item_dict]
+
+			reservation_items = []
+			is_transfer = False
+			for item in items or self.supplied_items:
+				data = frappe._dict(
+					{
+						"voucher_no": self.name,
+						"voucher_type": self.doctype,
+						"voucher_detail_no": item.name,
+						"item_code": item.rm_item_code,
+						"warehouse": item_dict.get(item.name, {}).get("warehouse", item.reserve_warehouse),
+						"stock_qty": item_dict.get(item.name, {}).get("qty_to_reserve", item.required_qty),
+					}
+				)
+
+				if stock_entry:
+					data.update(
+						{
+							"from_voucher_no": stock_entry,
+							"from_voucher_type": "Stock Entry",
+							"from_voucher_detail_no": item_dict[item.name]["reference_voucher_detail_no"],
+							"serial_and_batch_bundles": item_dict[item.name]["serial_and_batch_bundles"],
+						}
+					)
+				elif self.production_plan:
+					fg_item = next(i for i in self.items if i.name == item.reference_name)
+					if production_plan_sub_assembly_item := fg_item.production_plan_sub_assembly_item:
+						from_voucher_detail_no, reserved_qty = frappe.get_value(
+							"Material Request Plan Item",
+							{
+								"parent": self.production_plan,
+								"item_code": item.rm_item_code,
+								"warehouse": item.reserve_warehouse,
+								"sub_assembly_item_reference": production_plan_sub_assembly_item,
+								"docstatus": 1,
+							},
+							["name", "stock_reserved_qty"],
+						)
+						if flt(item.stock_reserved_qty) < reserved_qty:
+							is_transfer = True
+							data.update(
+								{
+									"from_voucher_no": self.production_plan,
+									"from_voucher_type": "Production Plan",
+									"from_voucher_detail_no": from_voucher_detail_no,
+								}
+							)
+
+				reservation_items.append(data)
+
+			sre = StockReservation(self, items=reservation_items, notify=True)
+			if is_transfer:
+				sre.transfer_reservation_entries_to(
+					self.production_plan, from_doctype="Production Plan", to_doctype="Subcontracting Order"
+				)
+			else:
+				if sre.make_stock_reservation_entries():
+					frappe.msgprint(_("Stock Reservation Entries created"), alert=True, indicator="blue")
+
+	def has_unreserved_stock(self) -> bool:
+		for item in self.get("supplied_items"):
+			if item.required_qty - flt(item.supplied_qty) - flt(item.stock_reserved_qty) > 0:
+				return True
+
+		return False
+
+	@frappe.whitelist()
+	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			cancel_stock_reservation_entries,
+		)
+
+		cancel_stock_reservation_entries(
+			voucher_type=self.doctype, voucher_no=self.name, sre_list=sre_list, notify=notify
+		)
 
 
 @frappe.whitelist()

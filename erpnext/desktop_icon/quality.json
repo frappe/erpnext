@@ -1,0 +1,21 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-17 13:19:04.281193",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "quality",
+ "icon_type": "Link",
+ "idx": 9,
+ "label": "Quality",
+ "link_to": "Quality",
+ "link_type": "Workspace",
+ "logo_url": "/assets/erpnext/desktop_icons/quality.svg",
+ "modified": "2025-11-17 17:42:48.371889",
+ "modified_by": "Administrator",
+ "name": "Quality",
+ "owner": "Administrator",
+ "parent_icon": "",
+ "roles": [],
+ "standard": 1
+}

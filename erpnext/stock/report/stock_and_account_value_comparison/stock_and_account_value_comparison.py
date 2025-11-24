@@ -61,7 +61,7 @@ def get_stock_ledger_data(report_filters, filters):
 			"name",
 			"voucher_type",
 			"voucher_no",
-			"sum(stock_value_difference) as stock_value",
+			{"SUM": "stock_value_difference", "as": "stock_value"},
 			"posting_date",
 			"posting_time",
 		],
@@ -88,7 +88,10 @@ def get_gl_data(report_filters, filters):
 			"name",
 			"voucher_type",
 			"voucher_no",
-			"sum(debit_in_account_currency) - sum(credit_in_account_currency) as account_value",
+			{
+				"SUB": [{"SUM": "debit_in_account_currency"}, {"SUM": "credit_in_account_currency"}],
+				"as": "account_value",
+			},
 		],
 		group_by="voucher_type, voucher_no",
 	)

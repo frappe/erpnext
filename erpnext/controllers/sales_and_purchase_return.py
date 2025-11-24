@@ -12,7 +12,6 @@ from frappe.utils import cint, flt, format_datetime, get_datetime
 
 import erpnext
 from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
-from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
 from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_valuation_method
 
 
@@ -145,7 +144,7 @@ def validate_returned_items(doc):
 					ref.rate
 					and flt(d.rate) > ref.rate
 					and doc.doctype in ("Delivery Note", "Sales Invoice")
-					and get_valuation_method(ref.item_code) != "Moving Average"
+					and get_valuation_method(ref.item_code, doc.company) != "Moving Average"
 				):
 					frappe.throw(
 						_("Row # {0}: Rate cannot be greater than the rate used in {1} {2}").format(
@@ -324,22 +323,24 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 		party_type = "customer"
 
 	fields = [
-		f"sum(abs(`tab{child_doctype}`.qty)) as qty",
+		{"SUM": [{"ABS": f"`tab{child_doctype}`.qty"}], "as": "qty"},
 	]
 
 	if doctype != "Subcontracting Receipt":
 		fields += [
-			f"sum(abs(`tab{child_doctype}`.stock_qty)) as stock_qty",
+			{"SUM": [{"ABS": f"`tab{child_doctype}`.stock_qty"}], "as": "stock_qty"},
 		]
 
 	if doctype in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 		fields += [
-			f"sum(abs(`tab{child_doctype}`.rejected_qty)) as rejected_qty",
-			f"sum(abs(`tab{child_doctype}`.received_qty)) as received_qty",
+			{"SUM": [{"ABS": f"`tab{child_doctype}`.rejected_qty"}], "as": "rejected_qty"},
+			{"SUM": [{"ABS": f"`tab{child_doctype}`.received_qty"}], "as": "received_qty"},
 		]
 
 		if doctype == "Purchase Receipt":
-			fields += [f"sum(abs(`tab{child_doctype}`.received_stock_qty)) as received_stock_qty"]
+			fields += [
+				{"SUM": [{"ABS": f"`tab{child_doctype}`.received_stock_qty"}], "as": "received_stock_qty"}
+			]
 
 	# Used retrun against and supplier and is_retrun because there is an index added for it
 	data = frappe.get_all(

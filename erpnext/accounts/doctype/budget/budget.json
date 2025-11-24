@@ -12,10 +12,19 @@
   "company",
   "cost_center",
   "project",
-  "fiscal_year",
+  "account",
   "column_break_3",
-  "monthly_distribution",
   "amended_from",
+  "from_fiscal_year",
+  "to_fiscal_year",
+  "budget_start_date",
+  "budget_end_date",
+  "distribution_frequency",
+  "budget_amount",
+  "section_break_nwug",
+  "distribute_equally",
+  "section_break_fpdt",
+  "budget_distribution",
   "section_break_6",
   "applicable_on_material_request",
   "action_if_annual_budget_exceeded_on_mr",
@@ -32,8 +41,8 @@
   "applicable_on_cumulative_expense",
   "action_if_annual_exceeded_on_cumulative_expense",
   "action_if_accumulated_monthly_exceeded_on_cumulative_expense",
-  "section_break_21",
-  "accounts"
+  "section_break_kkan",
+  "revision_of"
  ],
  "fields": [
   {
@@ -44,6 +53,7 @@
    "in_standard_filter": 1,
    "label": "Budget Against",
    "options": "\nCost Center\nProject",
+   "read_only_depends_on": "eval: doc.revision_of",
    "reqd": 1
   },
   {
@@ -53,6 +63,7 @@
    "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
+   "read_only_depends_on": "eval: doc.revision_of",
    "reqd": 1
   },
   {
@@ -62,7 +73,8 @@
    "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Cost Center",
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "read_only_depends_on": "eval: doc.revision_of"
   },
   {
    "depends_on": "eval:doc.budget_against == 'Project'",
@@ -70,27 +82,12 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Project",
-   "options": "Project"
-  },
-  {
-   "fieldname": "fiscal_year",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Fiscal Year",
-   "options": "Fiscal Year",
-   "reqd": 1
+   "options": "Project",
+   "read_only_depends_on": "eval: doc.revision_of"
   },
   {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:in_list([\"Stop\", \"Warn\"], doc.action_if_accumulated_monthly_budget_exceeded_on_po || doc.action_if_accumulated_monthly_budget_exceeded_on_mr || doc.action_if_accumulated_monthly_budget_exceeded_on_actual)",
-   "fieldname": "monthly_distribution",
-   "fieldtype": "Link",
-   "label": "Monthly Distribution",
-   "options": "Monthly Distribution"
   },
   {
    "fieldname": "amended_from",
@@ -187,22 +184,12 @@
    "options": "\nStop\nWarn\nIgnore"
   },
   {
-   "fieldname": "section_break_21",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "accounts",
-   "fieldtype": "Table",
-   "label": "Budget Accounts",
-   "options": "Budget Account",
-   "reqd": 1
-  },
-  {
+   "default": "BUDGET-.########",
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
    "no_copy": 1,
-   "options": "BUDGET-.YYYY.-",
+   "options": "BUDGET-.########",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -232,13 +219,97 @@
    "fieldtype": "Select",
    "label": "Action if Accumulative Monthly Budget Exceeded on Cumulative Expense",
    "options": "\nStop\nWarn\nIgnore"
+  },
+  {
+   "fieldname": "section_break_fpdt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "budget_distribution",
+   "fieldtype": "Table",
+   "label": "Budget Distribution",
+   "options": "Budget Distribution"
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Account",
+   "options": "Account",
+   "read_only_depends_on": "eval: doc.revision_of",
+   "reqd": 1
+  },
+  {
+   "fieldname": "budget_amount",
+   "fieldtype": "Currency",
+   "label": "Budget Amount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_kkan",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "revision_of",
+   "fieldtype": "Data",
+   "label": "Revision Of",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "distribute_equally",
+   "fieldtype": "Check",
+   "label": "Distribute Equally"
+  },
+  {
+   "fieldname": "section_break_nwug",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "from_fiscal_year",
+   "fieldtype": "Link",
+   "label": "From Fiscal Year",
+   "options": "Fiscal Year",
+   "read_only_depends_on": "eval: doc.revision_of",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_fiscal_year",
+   "fieldtype": "Link",
+   "label": "To Fiscal Year",
+   "options": "Fiscal Year",
+   "read_only_depends_on": "eval: doc.revision_of",
+   "reqd": 1
+  },
+  {
+   "fieldname": "budget_start_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Budget Start Date"
+  },
+  {
+   "fieldname": "budget_end_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Budget End Date"
+  },
+  {
+   "default": "Monthly",
+   "fieldname": "distribution_frequency",
+   "fieldtype": "Select",
+   "label": "Distribution Frequency",
+   "options": "Monthly\nQuarterly\nHalf-Yearly\nYearly",
+   "read_only_depends_on": "eval: doc.revision_of",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-16 15:57:13.114981",
+ "modified": "2025-11-19 17:00:00.648224",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Budget",

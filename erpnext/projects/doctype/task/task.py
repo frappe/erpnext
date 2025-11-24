@@ -409,7 +409,9 @@ def get_children(doctype, parent, task=None, project=None, is_root=False):
 		# via expand child
 		filters.append(["parent_task", "=", parent])
 	else:
-		filters.append(['ifnull(`parent_task`, "")', "=", ""])
+		from frappe.query_builder import Field, functions
+
+		filters.append(functions.IfNull(Field("parent_task"), "") == "")
 
 	if project:
 		filters.append(["project", "=", project])

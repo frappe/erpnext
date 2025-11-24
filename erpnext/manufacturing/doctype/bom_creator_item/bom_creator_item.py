@@ -25,6 +25,7 @@ class BOMCreatorItem(Document):
 		fg_reference_id: DF.Data | None
 		instruction: DF.SmallText | None
 		is_expandable: DF.Check
+		is_phantom_item: DF.Check
 		is_subcontracted: DF.Check
 		item_code: DF.Link
 		item_group: DF.Link | None

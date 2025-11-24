@@ -7,6 +7,8 @@ import json
 import frappe
 from frappe import _, throw
 from frappe.contacts.address_and_contact import load_address_and_contact
+from frappe.query_builder import Field
+from frappe.query_builder.functions import IfNull
 from frappe.utils import cint
 from frappe.utils.caching import request_cache
 from frappe.utils.nestedset import NestedSet
@@ -197,10 +199,12 @@ def get_children(doctype, parent=None, company=None, is_root=False, include_disa
 		include_disabled = json.loads(include_disabled)
 
 	fields = ["name as value", "is_group as expandable"]
+
 	filters = [
-		["ifnull(`parent_warehouse`, '')", "=", parent],
+		[IfNull(Field("parent_warehouse"), ""), "=", parent],
 		["company", "in", (company, None, "")],
 	]
+
 	if frappe.db.has_column(doctype, "disabled") and not include_disabled:
 		filters.append(["disabled", "=", False])
 
@@ -236,7 +240,9 @@ def get_child_warehouses(warehouse):
 
 def get_warehouses_based_on_account(account, company=None):
 	warehouses = []
-	for d in frappe.get_all("Warehouse", fields=["name", "is_group"], filters={"account": account}):
+	for d in frappe.get_all(
+		"Warehouse", fields=["name", "is_group"], filters={"account": account, "disabled": 0}
+	):
 		if d.is_group:
 			warehouses.extend(get_child_warehouses(d.name))
 		else:

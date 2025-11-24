@@ -328,7 +328,7 @@ class TestItemWiseInventoryAccount(IntegrationTestCase):
 					"voucher_no": pr.name,
 					"item_code": ("in", items),
 				},
-				fields=["sum(stock_value_difference) as value"],
+				fields=[{"SUM": "stock_value_difference", "as": "value"}],
 			)
 
 			gl_value = frappe.db.get_value(
@@ -435,7 +435,7 @@ class TestItemWiseInventoryAccount(IntegrationTestCase):
 			sle_value = frappe.get_all(
 				"Stock Ledger Entry",
 				filters={"voucher_type": "Delivery Note", "voucher_no": dn.name, "item_code": ("in", items)},
-				fields=["sum(stock_value_difference) as value"],
+				fields=[{"SUM": "stock_value_difference", "as": "value"}],
 			)
 
 			gl_value = (

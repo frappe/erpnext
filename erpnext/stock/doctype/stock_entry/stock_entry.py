@@ -202,6 +202,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 		for item in self.get("items"):
 			item.update(get_bin_details(item.item_code, item.s_warehouse))
 
+	def before_insert(self):
+		if self.subcontracting_order and frappe.get_cached_value(
+			"Subcontracting Order", self.subcontracting_order, "reserve_stock"
+		):
+			self.set_serial_batch_from_reserved_entry()
+
 	def before_validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
 
@@ -274,9 +280,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_work_order()
 		self.update_disassembled_order()
 		self.adjust_stock_reservation_entries_for_return()
-		self.update_sre_for_subcontracting_delivery()
+		self.update_stock_reservation_entries()
 		self.update_stock_ledger()
 		self.make_stock_reserve_for_wip_and_fg()
+		self.reserve_stock_for_subcontracting()
 
 		self.update_subcontract_order_supplied_items()
 		self.update_subcontracting_order_status()
@@ -324,7 +331,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_transferred_qty()
 		self.update_quality_inspection()
 		self.adjust_stock_reservation_entries_for_return()
-		self.update_sre_for_subcontracting_delivery()
+		self.update_stock_reservation_entries()
 		self.delete_auto_created_batches()
 		self.delete_linked_stock_entry()
 
@@ -1215,7 +1222,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 				).update_serial_and_batch_entries(
 					serial_nos=serial_nos.get(row.name), batch_nos=batch_nos.get(row.name)
 				)
-			elif not row.serial_and_batch_bundle:
+			elif not row.serial_and_batch_bundle and frappe.get_single_value(
+				"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"
+			):
 				bundle_doc = SerialBatchCreation(
 					{
 						"item_code": row.item_code,
@@ -1889,6 +1898,30 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			pro_doc.set_reserved_qty_for_wip_and_fg(self)
 
+	def reserve_stock_for_subcontracting(self):
+		if self.purpose == "Send to Subcontractor" and frappe.get_value(
+			"Subcontracting Order", self.subcontracting_order, "reserve_stock"
+		):
+			items = {}
+			for item in self.items:
+				if item.sco_rm_detail in items:
+					items[item.sco_rm_detail].qty_to_reserve += item.transfer_qty
+					items[item.sco_rm_detail].serial_and_batch_bundles.append(item.serial_and_batch_bundle)
+				else:
+					items[item.sco_rm_detail] = frappe._dict(
+						{
+							"name": item.sco_rm_detail,
+							"qty_to_reserve": item.transfer_qty,
+							"warehouse": item.t_warehouse,
+							"reference_voucher_detail_no": item.name,
+							"serial_and_batch_bundles": [item.serial_and_batch_bundle],
+						}
+					)
+
+			frappe.get_doc("Subcontracting Order", self.subcontracting_order).reserve_raw_materials(
+				items=items.values(), stock_entry=self.name
+			)
+
 	def cancel_stock_reserve_for_wip_and_fg(self):
 		if self.is_stock_reserve_for_work_order():
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
@@ -2230,21 +2263,16 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.calculate_rate_and_amount(raise_error_if_no_rate=False)
 
 	def set_serial_batch_from_reserved_entry(self):
-		if not self.work_order:
-			return
+		if self.work_order and frappe.get_cached_value("Work Order", self.work_order, "reserve_stock"):
+			skip_transfer = frappe.get_cached_value("Work Order", self.work_order, "skip_transfer")
 
-		if not frappe.get_cached_value("Work Order", self.work_order, "reserve_stock"):
-			return
-
-		skip_transfer = frappe.get_cached_value("Work Order", self.work_order, "skip_transfer")
-
-		if (
-			self.purpose not in ["Material Transfer for Manufacture"]
-			and frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")
-			!= "BOM"
-			and not skip_transfer
-		):
-			return
+			if (
+				self.purpose not in ["Material Transfer for Manufacture"]
+				and frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")
+				!= "BOM"
+				and not skip_transfer
+			):
+				return
 
 		reservation_entries = self.get_available_reserved_materials()
 		if not reservation_entries:
@@ -2252,6 +2280,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		new_items_to_add = []
 		for d in self.items:
+			if d.serial_and_batch_bundle or d.serial_no or d.batch_no:
+				continue
+
 			key = (d.item_code, d.s_warehouse)
 			if details := reservation_entries.get(key):
 				original_qty = d.qty
@@ -2363,7 +2394,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			)
 			.where(
 				(doctype.docstatus == 1)
-				& (doctype.voucher_no == self.work_order)
+				& (doctype.voucher_no == (self.work_order or self.subcontracting_order))
 				& (serial_batch_doc.delivered_qty < serial_batch_doc.qty)
 			)
 			.orderby(serial_batch_doc.idx)
@@ -2389,7 +2420,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			data = frappe.get_all(
 				"Work Order Operation",
 				filters={"parent": self.work_order},
-				fields=["max(process_loss_qty) as process_loss_qty"],
+				fields=[{"MAX": "process_loss_qty", "as": "process_loss_qty"}],
 			)
 
 			if data and data[0].process_loss_qty is not None:
@@ -3114,7 +3145,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				stock_entries_child_list.append(d.ste_detail)
 				transferred_qty = frappe.get_all(
 					"Stock Entry Detail",
-					fields=["sum(qty) as qty"],
+					fields=[{"SUM": "qty", "as": "qty"}],
 					filters={
 						"against_stock_entry": d.against_stock_entry,
 						"ste_detail": d.ste_detail,
@@ -3386,6 +3417,26 @@ def get_work_order_details(work_order, company):
 	}
 
 
+def get_consumed_operating_cost(wo_name, bom_no):
+	table = frappe.qb.DocType("Stock Entry")
+	child_table = frappe.qb.DocType("Landed Cost Taxes and Charges")
+	query = (
+		frappe.qb.from_(child_table)
+		.join(table)
+		.on(child_table.parent == table.name)
+		.select(Sum(child_table.amount).as_("consumed_cost"))
+		.where(
+			(table.docstatus == 1)
+			& (table.work_order == wo_name)
+			& (table.purpose == "Manufacture")
+			& (table.bom_no == bom_no)
+			& (child_table.has_operating_cost == 1)
+		)
+	)
+	cost = query.run(pluck="consumed_cost")
+	return cost[0] if cost and cost[0] else 0
+
+
 def get_operating_cost_per_unit(work_order=None, bom_no=None):
 	operating_cost_per_unit = 0
 	if work_order:
@@ -3403,7 +3454,9 @@ def get_operating_cost_per_unit(work_order=None, bom_no=None):
 
 		for d in work_order.get("operations"):
 			if flt(d.completed_qty):
-				operating_cost_per_unit += flt(d.actual_operating_cost) / flt(d.completed_qty)
+				operating_cost_per_unit += flt(
+					d.actual_operating_cost - get_consumed_operating_cost(work_order.name, bom_no)
+				) / flt(d.completed_qty - work_order.produced_qty)
 			elif work_order.qty:
 				operating_cost_per_unit += flt(d.planned_operating_cost) / flt(work_order.qty)
 

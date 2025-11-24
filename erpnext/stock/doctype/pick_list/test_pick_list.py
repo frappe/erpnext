@@ -593,7 +593,7 @@ class TestPickList(IntegrationTestCase):
 		for dn in frappe.get_all(
 			"Delivery Note",
 			filters={"against_pick_list": pick_list.name, "customer": "_Test Customer"},
-			fields={"name"},
+			fields=["name"],
 		):
 			for dn_item in frappe.get_doc("Delivery Note", dn.name).get("items"):
 				self.assertEqual(dn_item.item_code, "_Test Item")
@@ -604,7 +604,7 @@ class TestPickList(IntegrationTestCase):
 		for dn in frappe.get_all(
 			"Delivery Note",
 			filters={"against_pick_list": pick_list.name, "customer": "_Test Customer 1"},
-			fields={"name"},
+			fields=["name"],
 		):
 			for dn_item in frappe.get_doc("Delivery Note", dn.name).get("items"):
 				self.assertEqual(dn_item.item_code, "_Test Item 2")
@@ -637,7 +637,7 @@ class TestPickList(IntegrationTestCase):
 		pick_list_1.submit()
 		create_delivery_note(pick_list_1.name)
 		for dn in frappe.get_all(
-			"Delivery Note", filters={"against_pick_list": pick_list_1.name}, fields={"name"}
+			"Delivery Note", filters={"against_pick_list": pick_list_1.name}, fields=["name"]
 		):
 			for dn_item in frappe.get_doc("Delivery Note", dn.name).get("items"):
 				if dn_item.item_code == "_Test Item":

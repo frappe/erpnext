@@ -552,42 +552,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			current_tax_amount = tax_rate * item.qty;
 		}
 
-		if (!tax.dont_recompute_tax) {
-			this.set_item_wise_tax(item, tax, tax_rate, current_tax_amount, current_net_amount);
-		}
-
 		return current_tax_amount;
-	}
-
-	set_item_wise_tax(item, tax, tax_rate, current_tax_amount, current_net_amount) {
-		// store tax breakup for each item
-		let tax_detail = tax.item_wise_tax_detail;
-		let key = item.item_code || item.item_name;
-
-		if (typeof tax_detail == "string") {
-			tax.item_wise_tax_detail = JSON.parse(tax.item_wise_tax_detail);
-			tax_detail = tax.item_wise_tax_detail;
-		}
-
-		let item_wise_tax_amount = current_tax_amount * this.frm.doc.conversion_rate;
-		let item_wise_net_amount = current_net_amount * this.frm.doc.conversion_rate;
-		if (frappe.flags.round_row_wise_tax) {
-			item_wise_tax_amount = flt(item_wise_tax_amount, precision("tax_amount", tax));
-			item_wise_net_amount = flt(item_wise_net_amount, precision("net_amount", tax));
-			if (tax_detail && tax_detail[key]) {
-				item_wise_tax_amount += flt(tax_detail[key].tax_amount, precision("tax_amount", tax));
-				item_wise_net_amount += flt(tax_detail[key].net_amount, precision("net_amount", tax));
-			}
-		} else if (tax_detail && tax_detail[key]) {
-			item_wise_tax_amount += tax_detail[key].tax_amount;
-			item_wise_net_amount += tax_detail[key].net_amount;
-		}
-
-		tax_detail[key] = {
-			tax_rate: tax_rate,
-			tax_amount: flt(item_wise_tax_amount, precision("base_tax_amount", tax)),
-			net_amount: flt(item_wise_net_amount, precision("base_net_amount", tax)),
-		};
 	}
 
 	round_off_totals(tax) {
@@ -787,10 +752,6 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				$.each(temporary_fields, function (i, fieldname) {
 					delete tax[fieldname];
 				});
-
-				if (!tax.dont_recompute_tax) {
-					tax.item_wise_tax_detail = JSON.stringify(tax.item_wise_tax_detail);
-				}
 			});
 		}
 	}
