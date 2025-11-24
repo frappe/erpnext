@@ -548,12 +548,14 @@ class SubcontractingReceipt(SubcontractingController):
 				and flt(item.available_qty_for_consumption, precision) - flt(item.consumed_qty, precision) < 0
 			):
 				msg = _(
-					"""Row {0}: Consumed Qty {1} must be less than or equal to Available Qty For Consumption
-					{2} in Consumed Items Table."""
+					"""Row {0}: Consumed Qty {1} {2} must be less than or equal to Available Qty For Consumption
+					{3} {4} in Consumed Items Table."""
 				).format(
 					item.idx,
 					flt(item.consumed_qty, precision),
+					item.stock_uom,
 					flt(item.available_qty_for_consumption, precision),
+					item.stock_uom,
 				)
 
 				frappe.throw(msg)
@@ -580,8 +582,12 @@ class SubcontractingReceipt(SubcontractingController):
 
 				if diff < 0:
 					msg = _(
-						"""Additional {0} item {1} required as per BOM to complete this transaction"""
-					).format(frappe.bold(abs(diff)), frappe.bold(bom_item.rm_item_code))
+						"""Additional {0} {1} of item {2} required as per BOM to complete this transaction"""
+					).format(
+						frappe.bold(abs(diff)),
+						frappe.bold(bom_item.stock_uom),
+						frappe.bold(bom_item.rm_item_code),
+					)
 
 					frappe.throw(
 						msg,
