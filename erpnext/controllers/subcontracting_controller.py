@@ -505,13 +505,7 @@ class SubcontractingController(StockController):
 		if item.get("serial_and_batch_bundle"):
 			frappe.delete_doc("Serial and Batch Bundle", item.serial_and_batch_bundle, force=True)
 
-<<<<<<< HEAD
 	def __get_materials_from_bom(self, item_code, bom_no, exploded_item=0):
-=======
-	def _get_materials_from_bom(self, item_code, bom_no, exploded_item=0):
-		data = []
-
->>>>>>> d01c4b68fe (fix: add validation for FG Items as per BOM qty (#50579))
 		doctype = "BOM Item" if not exploded_item else "BOM Explosion Item"
 		fields = [f"`tab{doctype}`.`stock_qty` / `tabBOM`.`quantity` as qty_consumed_per_unit"]
 
@@ -539,23 +533,7 @@ class SubcontractingController(StockController):
 			[doctype, "sourced_by_supplier", "=", 0],
 		]
 
-<<<<<<< HEAD
 		return frappe.get_all("BOM", fields=fields, filters=filters, order_by=f"`tab{doctype}`.`idx`") or []
-=======
-		data = frappe.get_all("BOM", fields=fields, filters=filters, order_by=f"`tab{doctype}`.`idx`") or []
-		to_remove = []
-		for item in data:
-			if item.is_phantom_item:
-				data += self._get_materials_from_bom(
-					item.rm_item_code, item.bom_no, exploded_item=exploded_item
-				)
-				to_remove.append(item)
-
-		for item in to_remove:
-			data.remove(item)
-
-		return data
->>>>>>> d01c4b68fe (fix: add validation for FG Items as per BOM qty (#50579))
 
 	def __update_reserve_warehouse(self, row, item):
 		if self.doctype == self.subcontract_data.order_doctype:
