@@ -815,40 +815,28 @@ def make_address(args, is_primary_address=1, is_shipping_address=1):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, filters):
+def get_customer_primary(doctype, txt, searchfield, start, page_len, filters):
 	customer = filters.get("customer")
-
-	con = qb.DocType("Contact")
+	type = filters.get("type")
+	type_doctype = qb.DocType(type)
 	dlink = qb.DocType("Dynamic Link")
 
-	return (
-		qb.from_(con)
+	query = (
+		qb.from_(type_doctype)
 		.join(dlink)
-		.on(con.name == dlink.parent)
-		.select(con.name, con.email_id)
-		.where((dlink.link_name == customer) & (con.name.like(f"%{txt}%")))
-		.run()
-	)
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def get_customer_primary_address(doctype, txt, searchfield, start, page_len, filters):
-	customer = filters.get("customer")
-
-	addr = qb.DocType("Address")
-	dlink = qb.DocType("Dynamic Link")
-
-	return (
-		qb.from_(addr)
-		.join(dlink)
-		.on(addr.name == dlink.parent)
-		.select(addr.name)
+		.on(type_doctype.name == dlink.parent)
+		.select(type_doctype.name)
 		.where(
-			(dlink.link_name == customer) & (addr.name.like(f"%{txt}%")) & (dlink.link_doctype == "Customer")
+			(dlink.link_name == customer)
+			& (type_doctype.name.like(f"%{txt}%"))
+			& (dlink.link_doctype == "Customer")
 		)
-		.run()
 	)
+
+	if type == "Contact":
+		query = query.select(type_doctype.email_id)
+
+	return query.run()
 
 
 def parse_full_name(full_name: str) -> tuple[str, str | None, str | None]:
