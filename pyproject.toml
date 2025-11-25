@@ -15,6 +15,8 @@ dependencies = [
     "rapidfuzz~=3.12.2",
     "holidays~=0.28",
 
+    "pandas~=2.3.3",
+
     # integration dependencies
     "googlemaps",
     "plaid-python~=7.2.1",
