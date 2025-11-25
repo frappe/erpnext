@@ -1800,7 +1800,7 @@ class PaymentEntry(AccountsController):
 				else:
 					self.total_taxes_and_charges += current_tax_amount
 
-			self.base_total_taxes_and_charges += tax.base_tax_amount
+			self.base_total_taxes_and_charges += current_tax_amount
 
 		if self.get("taxes"):
 			self.paid_amount_after_tax = self.get("taxes")[-1].base_total

@@ -259,7 +259,7 @@ class SerialBatchBundle:
 			and not self.sle.serial_and_batch_bundle
 			and self.item_details.has_batch_no == 1
 			and (
-				self.item_details.create_new_batch
+				(self.item_details.create_new_batch and self.sle.actual_qty > 0)
 				or (
 					frappe.db.get_single_value(
 						"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"

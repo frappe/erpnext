@@ -332,6 +332,9 @@ frappe.ui.form.on("Material Request", {
 					label: __("For Warehouse"),
 					options: "Warehouse",
 					reqd: 1,
+					get_query: function () {
+						return { filters: { company: frm.doc.company } };
+					},
 				},
 				{ fieldname: "qty", fieldtype: "Float", label: __("Quantity"), reqd: 1, default: 1 },
 				{

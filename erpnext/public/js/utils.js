@@ -420,25 +420,36 @@ $.extend(erpnext.utils, {
 		if (!frappe.boot.setup_complete) {
 			return;
 		}
+		const today = frappe.datetime.get_today();
 		if (!date) {
-			date = frappe.datetime.get_today();
+			date = today;
 		}
 
 		let fiscal_year = "";
-		frappe.call({
-			method: "erpnext.accounts.utils.get_fiscal_year",
-			args: {
-				date: date,
-				boolean: boolean,
-			},
-			async: false,
-			callback: function (r) {
-				if (r.message) {
-					if (with_dates) fiscal_year = r.message;
-					else fiscal_year = r.message[0];
-				}
-			},
-		});
+		if (
+			frappe.boot.current_fiscal_year &&
+			date >= frappe.boot.current_fiscal_year[1] &&
+			date <= frappe.boot.current_fiscal_year[2]
+		) {
+			if (with_dates) fiscal_year = frappe.boot.current_fiscal_year;
+			else fiscal_year = frappe.boot.current_fiscal_year[0];
+		} else if (today != date) {
+			frappe.call({
+				method: "erpnext.accounts.utils.get_fiscal_year",
+				type: "GET", // make it cacheable
+				args: {
+					date: date,
+					boolean: boolean,
+				},
+				async: false,
+				callback: function (r) {
+					if (r.message) {
+						if (with_dates) fiscal_year = r.message;
+						else fiscal_year = r.message[0];
+					}
+				},
+			});
+		}
 		return fiscal_year;
 	},
 

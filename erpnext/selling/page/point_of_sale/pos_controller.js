@@ -759,12 +759,16 @@ erpnext.PointOfSale.Controller = class {
 		const resp = (await this.get_available_stock(item_row.item_code, warehouse)).message;
 		const available_qty = resp[0];
 		const is_stock_item = resp[1];
+		const is_negative_stock_allowed = resp[2];
 
 		frappe.dom.unfreeze();
 		const bold_uom = item_row.stock_uom.bold();
 		const bold_item_code = item_row.item_code.bold();
 		const bold_warehouse = warehouse.bold();
 		const bold_available_qty = available_qty.toString().bold();
+
+		if (is_negative_stock_allowed) return;
+
 		if (!(available_qty > 0)) {
 			if (is_stock_item) {
 				frappe.model.clear_doc(item_row.doctype, item_row.name);

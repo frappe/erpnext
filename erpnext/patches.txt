@@ -426,3 +426,4 @@ erpnext.patches.v15_0.set_asset_status_if_not_already_set
 erpnext.patches.v15_0.toggle_legacy_controller_for_period_closing
 execute:frappe.db.set_single_value("Accounts Settings", "show_party_balance", 1)
 execute:frappe.db.set_single_value("Accounts Settings", "show_account_balance", 1)
+erpnext.patches.v16_0.update_currency_exchange_settings_for_frankfurter

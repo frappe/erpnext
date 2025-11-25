@@ -60,6 +60,17 @@ class AssetRepair(AccountsController):
 		if self.get("stock_items"):
 			self.set_stock_items_cost()
 		self.calculate_total_repair_cost()
+		self.validate_purchase_invoice_status()
+
+	def validate_purchase_invoice_status(self):
+		if self.purchase_invoice:
+			docstatus = frappe.db.get_value("Purchase Invoice", self.purchase_invoice, "docstatus")
+			if docstatus == 0:
+				frappe.throw(
+					_("{0} is still in Draft. Please submit it before saving the Asset Repair.").format(
+						get_link_to_form("Purchase Invoice", self.purchase_invoice)
+					)
+				)
 
 	def validate_asset(self):
 		if self.asset_doc.status in ("Sold", "Fully Depreciated", "Scrapped"):
@@ -305,7 +316,6 @@ class AssetRepair(AccountsController):
 					"cost_center": self.cost_center,
 					"posting_date": self.completion_date,
 					"against_voucher_type": "Purchase Invoice",
-					"against_voucher": self.purchase_invoice,
 					"company": self.company,
 				},
 				item=self,
