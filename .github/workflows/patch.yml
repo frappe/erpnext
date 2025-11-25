@@ -8,6 +8,9 @@ on:
       - '**.md'
       - '**.html'
       - '**.csv'
+      - 'crowdin.yml'
+      - '.coderabbit.yml'
+      - '.mergify.yml'
   workflow_dispatch:
 
 permissions:
@@ -82,7 +85,7 @@ jobs:
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
 
       - uses: actions/cache@v4
         id: yarn-cache

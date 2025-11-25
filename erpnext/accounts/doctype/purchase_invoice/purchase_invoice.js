@@ -12,6 +12,7 @@ erpnext.buying.setup_buying_controller();
 
 erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.BuyingController {
 	setup(doc) {
+		this.setup_accounting_dimension_triggers();
 		this.setup_posting_date_time_check();
 		super.setup(doc);
 
@@ -35,7 +36,10 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		this.frm.set_query("expense_account", "items", function () {
 			return {
 				query: "erpnext.controllers.queries.get_expense_account",
-				filters: { company: doc.company },
+				filters: {
+					company: doc.company,
+					disabled: 0,
+				},
 			};
 		});
 	}
@@ -68,14 +72,6 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		if (this.frm.doc.supplier && this.frm.doc.__islocal) {
 			this.frm.trigger("supplier");
 		}
-
-		this.frm.set_query("supplier", function () {
-			return {
-				filters: {
-					is_transporter: 0,
-				},
-			};
-		});
 	}
 
 	refresh(doc) {
@@ -162,6 +158,9 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 							per_billed: ["<", 99.99],
 							company: me.frm.doc.company,
 						},
+						allow_child_item_selection: true,
+						child_fieldname: "items",
+						child_columns: ["item_code", "item_name", "qty", "amount", "billed_amt"],
 					});
 				},
 				__("Get Items From")
@@ -184,6 +183,9 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 							company: me.frm.doc.company,
 							is_return: 0,
 						},
+						allow_child_item_selection: true,
+						child_fieldname: "items",
+						child_columns: ["item_code", "item_name", "qty", "amount", "billed_amt"],
 					});
 				},
 				__("Get Items From")
@@ -647,7 +649,7 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	add_custom_buttons: function (frm) {
-		if (frm.doc.docstatus == 1 && frm.doc.per_received < 100) {
+		if (frm.doc.docstatus == 1 && frm.doc.per_received < 100 && frm.doc.update_stock == 0) {
 			frm.add_custom_button(
 				__("Purchase Receipt"),
 				() => {

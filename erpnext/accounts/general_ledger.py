@@ -20,7 +20,7 @@ from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_f
 )
 from erpnext.accounts.doctype.accounting_period.accounting_period import ClosedAccountingPeriod
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
-from erpnext.accounts.utils import create_payment_ledger_entry
+from erpnext.accounts.utils import create_payment_ledger_entry, is_immutable_ledger_enabled
 from erpnext.controllers.budget_controller import BudgetValidation
 from erpnext.exceptions import InvalidAccountDimensionError, MandatoryAccountDimensionError
 
@@ -35,7 +35,7 @@ def make_gl_entries(
 ):
 	if gl_map:
 		if (
-			frappe.get_single_value("Accounts Settings", "use_new_budget_controller")
+			not cint(frappe.get_single_value("Accounts Settings", "use_legacy_budget_controller"))
 			and gl_map[0].voucher_type != "Period Closing Voucher"
 		):
 			bud_val = BudgetValidation(gl_map=gl_map)
@@ -159,6 +159,7 @@ def validate_accounting_period(gl_map):
 		WHERE
 			ap.name = cd.parent
 			AND ap.company = %(company)s
+			AND ap.disabled = 0
 			AND cd.closed = 1
 			AND cd.document_type = %(voucher_type)s
 			AND %(date)s between ap.start_date and ap.end_date
@@ -196,6 +197,15 @@ def process_gl_map(gl_map, merge_entries=True, precision=None, from_repost=False
 
 
 def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_repost=False):
+	round_off_account, default_currency = frappe.get_cached_value(
+		"Company", gl_map[0].company, ["round_off_account", "default_currency"]
+	)
+	if not precision:
+		precision = get_field_precision(
+			frappe.get_meta("GL Entry").get_field("debit"),
+			currency=default_currency,
+		)
+
 	new_gl_map = []
 	for d in gl_map:
 		cost_center = d.get("cost_center")
@@ -210,6 +220,11 @@ def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_r
 			gl_map[0]["company"], gl_map[0]["posting_date"], cost_center
 		)
 		if not cost_center_allocation:
+			new_gl_map.append(d)
+			continue
+
+		if d.account == round_off_account:
+			d.cost_center = cost_center_allocation[0][0]
 			new_gl_map.append(d)
 			continue
 
@@ -645,6 +660,7 @@ def make_reverse_gl_entries(
 	adv_adj=False,
 	update_outstanding="Yes",
 	partial_cancel=False,
+	posting_date=None,
 ):
 	"""
 	Get original gl entries of the voucher
@@ -742,6 +758,8 @@ def make_reverse_gl_entries(
 			if immutable_ledger_enabled:
 				new_gle["is_cancelled"] = 0
 				new_gle["posting_date"] = frappe.form_dict.get("posting_date") or getdate()
+			elif posting_date:
+				new_gle["posting_date"] = posting_date
 
 			if new_gle["debit"] or new_gle["credit"]:
 				make_entry(new_gle, adv_adj, "Yes")
@@ -835,7 +853,3 @@ def validate_allowed_dimensions(gl_entry, dimension_filter_map):
 						),
 						InvalidAccountDimensionError,
 					)
-
-
-def is_immutable_ledger_enabled():
-	return frappe.get_single_value("Accounts Settings", "enable_immutable_ledger")

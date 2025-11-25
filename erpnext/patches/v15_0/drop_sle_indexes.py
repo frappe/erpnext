@@ -4,7 +4,7 @@ import frappe
 
 def execute():
 	table = "tabStock Ledger Entry"
-	index_list = ["posting_datetime_creation_index", "item_warehouse"]
+	index_list = ["posting_datetime_creation_index", "item_warehouse", "batch_no_item_code_warehouse_index"]
 
 	for index in index_list:
 		if not frappe.db.has_index(table, index):

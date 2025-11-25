@@ -61,10 +61,10 @@ frappe.query_reports["Stock Balance"] = {
 					},
 				});
 
-				data = data.map(({ name, description }) => {
+				data = data.map(({ name, ...rest }) => {
 					return {
 						value: name,
-						description: description,
+						description: Object.values(rest),
 					};
 				});
 

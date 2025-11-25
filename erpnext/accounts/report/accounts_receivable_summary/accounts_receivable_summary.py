@@ -171,7 +171,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			self.add_column(_("Difference"), fieldname="diff")
 
 		self.setup_ageing_columns()
-		self.add_column(label="Total Amount Due", fieldname="total_due")
+		self.add_column(label=_("Total Amount Due"), fieldname="total_due")
 
 		if self.filters.show_future_payments:
 			self.add_column(label=_("Future Payment Amount"), fieldname="future_amount")
@@ -210,7 +210,7 @@ def get_gl_balance(report_date, company):
 	return frappe._dict(
 		frappe.db.get_all(
 			"GL Entry",
-			fields=["party", "sum(debit -  credit)"],
+			fields=["party", {"SUM": [{"SUB": ["debit", "credit"]}], "as": "balance"}],
 			filters={"posting_date": ("<=", report_date), "is_cancelled": 0, "company": company},
 			group_by="party",
 			as_list=1,

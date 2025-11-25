@@ -77,7 +77,6 @@
    "options": "Work Order"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "locations",
    "fieldtype": "Table",
    "label": "Item Locations",
@@ -247,7 +246,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-23 08:34:32.099673",
+ "modified": "2025-10-03 18:36:52.282355",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

@@ -61,6 +61,22 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				},
 			};
 		});
+		this.frm.set_query("cost_center", "payments", () => {
+			return {
+				filters: {
+					company: this.frm.doc.company,
+					is_group: 0,
+				},
+			};
+		});
+		this.frm.set_query("cost_center", "allocation", () => {
+			return {
+				filters: {
+					company: this.frm.doc.company,
+					is_group: 0,
+				},
+			};
+		});
 	}
 
 	refresh() {
@@ -384,6 +400,16 @@ frappe.ui.form.on("Payment Reconciliation Allocation", {
 		let invoice = frm.doc.invoices.filter((x) => x.invoice_number == row.invoice_number);
 		// filter payment
 		let payment = frm.doc.payments.filter((x) => x.reference_name == row.reference_name);
+
+		let amount = payment[0].amount;
+		for (const d of frm.doc.allocation) {
+			if (row.reference_name == d.reference_name && amount) {
+				if (d.allocated_amount <= amount) {
+					d.amount = amount;
+					amount -= d.allocated_amount;
+				}
+			}
+		}
 
 		frm.call({
 			doc: frm.doc,

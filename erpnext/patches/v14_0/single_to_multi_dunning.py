@@ -48,6 +48,7 @@ def execute():
 		dunning.validate()
 
 		dunning.flags.ignore_validate_update_after_submit = True
+		dunning.flags.ignore_links = True
 		dunning.save()
 
 		# Reverse entries only if dunning is submitted and not resolved

@@ -164,6 +164,12 @@
 				{% } %}
 			</tr>
 		</thead>
+		<div class="show-filters">
+			{% if subtitle %}
+				{{ subtitle }}
+				<hr>
+			{% endif %}
+		</div>
 		<tbody>
 			{% for(var i=0, l=data.length; i<l; i++) { %}
 				<tr>

@@ -577,6 +577,8 @@ frappe.ui.form.on("Payment Entry", {
 	paid_from: function (frm) {
 		if (frm.set_party_account_based_on_party) return;
 
+		frm.events.set_company_bank_account(frm);
+
 		frm.events.set_account_currency_and_balance(
 			frm,
 			frm.doc.paid_from,
@@ -585,12 +587,15 @@ frappe.ui.form.on("Payment Entry", {
 				if (frm.doc.payment_type == "Pay") {
 					frm.events.paid_amount(frm);
 				}
+				frm.events.paid_from_account_currency(frm);
 			}
 		);
 	},
 
 	paid_to: function (frm) {
 		if (frm.set_party_account_based_on_party) return;
+
+		frm.events.set_company_bank_account(frm);
 
 		frm.events.set_account_currency_and_balance(
 			frm,
@@ -607,6 +612,7 @@ frappe.ui.form.on("Payment Entry", {
 						frm.events.received_amount(frm);
 					}
 				}
+				frm.events.paid_to_account_currency(frm);
 			}
 		);
 	},
@@ -1323,6 +1329,8 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	bank_account: function (frm) {
+		if (frm.set_company_bank_account_based_on_coa) return;
+
 		const field = frm.doc.payment_type == "Pay" ? "paid_from" : "paid_to";
 		if (frm.doc.bank_account && ["Pay", "Receive"].includes(frm.doc.payment_type)) {
 			frappe.call({
@@ -1359,6 +1367,34 @@ frappe.ui.form.on("Payment Entry", {
 				},
 			});
 		}
+	},
+
+	set_company_bank_account: function (frm) {
+		if (!["Pay", "Receive"].includes(frm.doc.payment_type)) return;
+
+		const field = frm.doc.payment_type == "Pay" ? "paid_from" : "paid_to";
+
+		if (!frm.doc.company || !frm.doc[field]) return;
+
+		frm.set_company_bank_account_based_on_coa = true;
+
+		frappe.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: "Bank Account",
+				filters: {
+					company: frm.doc.company,
+					account: frm.doc[field],
+					disabled: 0,
+				},
+				fieldname: ["name"],
+			},
+			callback: async function (r) {
+				if (r.message) await frm.set_value("bank_account", r.message.name);
+
+				frm.set_company_bank_account_based_on_coa = false;
+			},
+		});
 	},
 
 	sales_taxes_and_charges_template: function (frm) {
@@ -1419,7 +1455,6 @@ frappe.ui.form.on("Payment Entry", {
 		$.each(frm.doc["taxes"] || [], function (i, tax) {
 			frm.events.validate_taxes_and_charges(tax);
 			frm.events.validate_inclusive_tax(tax);
-			tax.item_wise_tax_detail = {};
 			let tax_fields = [
 				"total",
 				"tax_fraction_for_current_item",

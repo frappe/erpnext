@@ -618,3 +618,11 @@ body[data-route="pos"] {
 .frappe-control[data-fieldname="company_address_display"] .ql-editor {
 	white-space: normal;
 }
+
+.btn-clear-last-scanned-warehouse {
+	position: absolute;
+	right: 8px;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 1;
+}

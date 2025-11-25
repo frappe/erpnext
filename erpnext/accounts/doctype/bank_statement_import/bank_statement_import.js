@@ -252,7 +252,7 @@ frappe.ui.form.on("Bank Statement Import", {
 
 		open_url_post(method, {
 			doctype: "Bank Transaction",
-			export_records: "5_records",
+			export_records: "blank_template",
 			export_fields: {
 				"Bank Transaction": [
 					"date",

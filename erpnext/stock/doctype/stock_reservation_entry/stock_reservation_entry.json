@@ -84,7 +84,7 @@
    "no_copy": 1,
    "oldfieldname": "voucher_type",
    "oldfieldtype": "Data",
-   "options": "\nSales Order\nWork Order\nProduction Plan",
+   "options": "\nSales Order\nWork Order\nSubcontracting Inward Order\nProduction Plan\nSubcontracting Order",
    "print_width": "150px",
    "read_only": 1,
    "width": "150px"
@@ -172,7 +172,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nPartially Reserved\nReserved\nPartially Delivered\nDelivered\nCancelled\nClosed",
+   "options": "Draft\nPartially Reserved\nReserved\nPartially Delivered\nPartially Used\nDelivered\nCancelled\nClosed",
    "read_only": 1
   },
   {
@@ -288,7 +288,7 @@
    "fieldtype": "Select",
    "label": "From Voucher Type",
    "no_copy": 1,
-   "options": "\nPick List\nPurchase Receipt\nStock Entry\nWork Order\nProduction Plan",
+   "options": "\nPick List\nPurchase Receipt\nStock Entry\nWork Order\nProduction Plan\nSubcontracting Inward Order",
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
@@ -315,8 +315,7 @@
   },
   {
    "fieldname": "production_section",
-   "fieldtype": "Section Break",
-   "label": "Production"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "column_break_qdwj",
@@ -335,7 +334,7 @@
   {
    "fieldname": "transferred_qty",
    "fieldtype": "Float",
-   "label": "Qty in WIP Warehouse"
+   "label": "Transferred Qty"
   }
  ],
  "grid_page_length": 50,
@@ -344,7 +343,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-24 00:24:40.394164",
+ "modified": "2025-11-10 16:09:10.380024",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",

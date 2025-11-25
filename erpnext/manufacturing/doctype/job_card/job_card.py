@@ -23,6 +23,7 @@ from frappe.utils import (
 	time_diff_in_hours,
 )
 
+from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
@@ -157,6 +158,9 @@ class JobCard(Document):
 		self.validate_sequence_id()
 		self.set_sub_operations()
 		self.update_sub_operation_status()
+		if self.sub_operations:
+			self.set_total_completed_qty_from_sub_operations()
+
 		self.validate_work_order()
 
 	def on_update(self):
@@ -203,7 +207,7 @@ class JobCard(Document):
 
 		job_card_qty = frappe.get_all(
 			"Job Card",
-			fields=["sum(for_quantity)"],
+			fields=[{"SUM": "for_quantity"}],
 			filters={
 				"work_order": self.work_order,
 				"operation_id": self.operation_id,
@@ -280,8 +284,13 @@ class JobCard(Document):
 					}
 				)
 
+	def set_total_completed_qty_from_sub_operations(self):
+		sub_op_total_qty = []
 		for row in self.sub_operations:
-			self.total_completed_qty += row.completed_qty
+			sub_op_total_qty.append(flt(row.completed_qty))
+
+		if sub_op_total_qty:
+			self.total_completed_qty = min(sub_op_total_qty)
 
 	def get_overlap_for(self, args, open_job_cards=None):
 		time_logs = []
@@ -613,7 +622,7 @@ class JobCard(Document):
 			self.save()
 
 	def update_sub_operation_status(self):
-		if not (self.sub_operations and self.time_logs):
+		if not self.sub_operations:
 			return
 
 		operation_wise_completed_time = {}
@@ -634,7 +643,7 @@ class JobCard(Document):
 			op_row.employee.append(time_log.employee)
 			if time_log.time_in_mins:
 				op_row.completed_time += time_log.time_in_mins
-				op_row.completed_qty += time_log.completed_qty
+				op_row.completed_qty += flt(time_log.completed_qty)
 
 		for row in self.sub_operations:
 			operation_deatils = operation_wise_completed_time.get(row.sub_operation)
@@ -809,9 +818,6 @@ class JobCard(Document):
 			)
 
 	def update_work_order(self):
-		if self.track_semi_finished_goods:
-			return
-
 		if not self.work_order:
 			return
 
@@ -841,9 +847,9 @@ class JobCard(Document):
 
 	def update_semi_finished_good_details(self):
 		if self.operation_id:
-			frappe.db.set_value(
-				"Work Order Operation", self.operation_id, "completed_qty", self.manufactured_qty
-			)
+			qty = max(flt(self.manufactured_qty), flt(self.total_completed_qty))
+
+			frappe.db.set_value("Work Order Operation", self.operation_id, "completed_qty", qty)
 			if (
 				self.finished_good
 				and frappe.get_cached_value("Work Order", self.work_order, "production_item")
@@ -917,15 +923,19 @@ class JobCard(Document):
 		wo.update_operation_status()
 		wo.calculate_operating_cost()
 		wo.set_actual_dates()
+
+		if wo.track_semi_finished_goods and time_data:
+			wo.status = "In Process"
+
 		wo.save()
 
 	def get_current_operation_data(self):
 		return frappe.get_all(
 			"Job Card",
 			fields=[
-				"sum(total_time_in_mins) as time_in_mins",
-				"sum(total_completed_qty) as completed_qty",
-				"sum(process_loss_qty) as process_loss_qty",
+				{"SUM": "total_time_in_mins", "as": "time_in_mins"},
+				{"SUM": "total_completed_qty", "as": "completed_qty"},
+				{"SUM": "process_loss_qty", "as": "process_loss_qty"},
 			],
 			filters={
 				"docstatus": 1,
@@ -1075,7 +1085,7 @@ class JobCard(Document):
 
 	def set_wip_warehouse(self):
 		if not self.wip_warehouse:
-			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
+			self.wip_warehouse = frappe.get_cached_value("Company", self.company, "default_wip_warehouse")
 
 	def validate_operation_id(self):
 		if (
@@ -1218,6 +1228,8 @@ class JobCard(Document):
 
 					row.to_time = kwargs.to_time
 					row.time_in_mins = time_diff_in_minutes(row.to_time, row.from_time)
+					if kwargs.get("sub_operation"):
+						row.operation = kwargs.get("sub_operation")
 
 					if kwargs.employees[-1].get("employee") == row.employee:
 						row.completed_qty = kwargs.completed_qty
@@ -1270,7 +1282,12 @@ class JobCard(Document):
 			kwargs = frappe._dict(kwargs)
 
 		if kwargs.end_time:
-			self.add_time_logs(to_time=kwargs.end_time, completed_qty=kwargs.qty, employees=self.employee)
+			self.add_time_logs(
+				to_time=kwargs.end_time,
+				completed_qty=kwargs.qty,
+				employees=self.employee,
+				sub_operation=kwargs.get("sub_operation"),
+			)
 
 			if kwargs.for_quantity:
 				self.for_quantity = kwargs.for_quantity
@@ -1314,6 +1331,9 @@ class JobCard(Document):
 
 		ste.make_stock_entry()
 		ste.stock_entry.flags.ignore_mandatory = True
+		wo_doc = frappe.get_doc("Work Order", self.work_order)
+		add_additional_cost(ste.stock_entry, wo_doc, self)
+
 		ste.stock_entry.save()
 
 		if auto_submit:
@@ -1403,11 +1423,12 @@ def get_operations(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.get_all(
 		"Work Order Operation",
 		filters=args,
-		fields=["distinct operation as operation"],
+		fields=["operation"],
 		limit_start=start,
 		limit_page_length=page_len,
 		order_by="idx asc",
 		as_list=1,
+		distinct=True,
 	)
 
 

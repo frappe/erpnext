@@ -8,6 +8,7 @@ from uuid import uuid4
 import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.query_builder.functions import Timestamp
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_to_date, flt, today
 
@@ -1281,12 +1282,16 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 			item=item, from_warehouse=source_warehouse, to_warehouse=target_warehouse, qty=1_728.0
 		)
 
-		filters = {"voucher_no": transfer.name, "voucher_type": transfer.doctype, "is_cancelled": 0}
-		sles = frappe.get_all(
-			"Stock Ledger Entry",
-			fields=["*"],
-			filters=filters,
-			order_by="timestamp(posting_date, posting_time), creation",
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		sles = (
+			frappe.qb.from_(sle)
+			.select("*")
+			.where(sle.voucher_no == transfer.name)
+			.where(sle.voucher_type == transfer.doctype)
+			.where(sle.is_cancelled == 0)
+			.orderby(Timestamp(sle.posting_date, sle.posting_time))
+			.orderby(sle.creation)
+			.run(as_dict=True)
 		)
 		self.assertEqual(abs(sles[0].stock_value_difference), sles[1].stock_value_difference)
 

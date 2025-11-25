@@ -121,7 +121,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		gl_entries = frappe.db.get_all(
 			"GL Entry",
 			filters={"voucher_no": pi.name},
-			fields=["account", "sum(debit) as debit", "sum(credit) as credit"],
+			fields=["account", {"SUM": "debit", "as": "debit"}, {"SUM": "credit", "as": "credit"}],
 			group_by="account",
 		)
 		self.assertEqual(len(gl_entries), 3)

@@ -329,12 +329,16 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 
 @frappe.whitelist()
 def get_timesheet_detail_rate(timelog, currency):
-	timelog_detail = frappe.db.sql(
-		f"""SELECT tsd.billing_amount as billing_amount,
-		ts.currency as currency FROM `tabTimesheet Detail` tsd
-		INNER JOIN `tabTimesheet` ts ON ts.name=tsd.parent
-		WHERE tsd.name = '{timelog}'""",
-		as_dict=1,
+	ts = frappe.qb.DocType("Timesheet")
+	ts_detail = frappe.qb.DocType("Timesheet Detail")
+
+	timelog_detail = (
+		frappe.qb.from_(ts_detail)
+		.inner_join(ts)
+		.on(ts.name == ts_detail.parent)
+		.select(ts_detail.billing_amount.as_("billing_amount"), ts.currency.as_("currency"))
+		.where(ts_detail.name == timelog)
+		.run(as_dict=1)
 	)[0]
 
 	if timelog_detail.currency:

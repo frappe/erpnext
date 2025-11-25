@@ -12,6 +12,7 @@ from erpnext.accounts.report.financial_statements import (
 	filter_out_zero_value_rows,
 )
 from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
+from erpnext.accounts.utils import get_zero_cutoff
 
 value_fields = ("income", "expense", "gross_profit_loss")
 
@@ -149,7 +150,7 @@ def prepare_data(accounts, filters, total_row, parent_children_map, based_on):
 		for key in value_fields:
 			row[key] = flt(d.get(key, 0.0), 3)
 
-			if abs(row[key]) >= 0.005:
+			if abs(row[key]) >= get_zero_cutoff(company_currency):
 				# ignore zero values
 				has_value = True
 

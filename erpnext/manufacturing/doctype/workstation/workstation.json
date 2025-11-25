@@ -27,11 +27,8 @@
   "column_break_etmc",
   "off_status_image",
   "over_heads",
-  "hour_rate_electricity",
-  "hour_rate_consumable",
-  "column_break_11",
-  "hour_rate_rent",
-  "hour_rate_labour",
+  "section_break_auzm",
+  "workstation_costs",
   "section_break_11",
   "hour_rate",
   "workstaion_description",
@@ -67,50 +64,6 @@
    "fieldtype": "Tab Break",
    "label": "Operating Costs",
    "oldfieldtype": "Section Break"
-  },
-  {
-   "bold": 1,
-   "description": "per hour",
-   "fieldname": "hour_rate_electricity",
-   "fieldtype": "Currency",
-   "label": "Electricity Cost",
-   "non_negative": 1,
-   "oldfieldname": "hour_rate_electricity",
-   "oldfieldtype": "Currency"
-  },
-  {
-   "bold": 1,
-   "description": "per hour",
-   "fieldname": "hour_rate_consumable",
-   "fieldtype": "Currency",
-   "label": "Consumable Cost",
-   "non_negative": 1,
-   "oldfieldname": "hour_rate_consumable",
-   "oldfieldtype": "Currency"
-  },
-  {
-   "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
-  },
-  {
-   "bold": 1,
-   "description": "per hour",
-   "fieldname": "hour_rate_rent",
-   "fieldtype": "Currency",
-   "label": "Rent Cost",
-   "non_negative": 1,
-   "oldfieldname": "hour_rate_rent",
-   "oldfieldtype": "Currency"
-  },
-  {
-   "bold": 1,
-   "description": "Wages per hour",
-   "fieldname": "hour_rate_labour",
-   "fieldtype": "Currency",
-   "label": "Wages",
-   "non_negative": 1,
-   "oldfieldname": "hour_rate_labour",
-   "oldfieldtype": "Currency"
   },
   {
    "description": "per hour",
@@ -252,6 +205,17 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "fieldname": "section_break_auzm",
+   "fieldtype": "Section Break",
+   "label": "Operating Costs (Per Hour)"
+  },
+  {
+   "fieldname": "workstation_costs",
+   "fieldtype": "Table",
+   "label": "Operating Components Cost",
+   "options": "Workstation Cost"
   }
  ],
  "hide_toolbar": 1,
@@ -259,7 +223,7 @@
  "idx": 1,
  "image_field": "on_status_image",
  "links": [],
- "modified": "2025-07-13 16:02:13.615001",
+ "modified": "2025-08-19 12:07:05.374386",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation",

@@ -64,9 +64,9 @@ class TestAsset(AssetSetup):
 
 		self.assertEqual(asset.asset_category, "Computers")
 
-	def test_gross_purchase_amount_is_mandatory(self):
+	def test_net_purchase_amount_is_mandatory(self):
 		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
-		asset.gross_purchase_amount = 0
+		asset.net_purchase_amount = 0
 
 		self.assertRaises(frappe.MandatoryError, asset.save)
 
@@ -213,8 +213,8 @@ class TestAsset(AssetSetup):
 		asset.load_from_db()
 
 		accumulated_depr_amount = flt(
-			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
-			asset.precision("gross_purchase_amount"),
+			asset.net_purchase_amount - asset.finance_books[0].value_after_depreciation,
+			asset.precision("net_purchase_amount"),
 		)
 		self.assertEqual(accumulated_depr_amount, 18000.0)
 
@@ -252,8 +252,8 @@ class TestAsset(AssetSetup):
 		self.assertEqual(first_asset_depr_schedule.status, "Cancelled")
 
 		accumulated_depr_amount = flt(
-			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
-			asset.precision("gross_purchase_amount"),
+			asset.net_purchase_amount - asset.finance_books[0].value_after_depreciation,
+			asset.precision("net_purchase_amount"),
 		)
 
 		second_asset_depr_schedule.depreciation_amount = 9006.17
@@ -266,10 +266,10 @@ class TestAsset(AssetSetup):
 			date,
 			original_schedule_date=get_last_day(date),
 		)
-		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
+		pro_rata_amount = flt(pro_rata_amount, asset.precision("net_purchase_amount"))
 		self.assertEqual(
 			accumulated_depr_amount,
-			flt(18000.0 + pro_rata_amount, asset.precision("gross_purchase_amount")),
+			flt(18000.0 + pro_rata_amount, asset.precision("net_purchase_amount")),
 		)
 
 		self.assertEqual(asset.status, "Scrapped")
@@ -278,13 +278,13 @@ class TestAsset(AssetSetup):
 		expected_gle = (
 			(
 				"_Test Accumulated Depreciations - _TC",
-				flt(18000.0 + pro_rata_amount, asset.precision("gross_purchase_amount")),
+				flt(18000.0 + pro_rata_amount, asset.precision("net_purchase_amount")),
 				0.0,
 			),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
 			(
 				"_Test Gain/Loss on Asset Disposal - _TC",
-				flt(82000.0 - pro_rata_amount, asset.precision("gross_purchase_amount")),
+				flt(82000.0 - pro_rata_amount, asset.precision("net_purchase_amount")),
 				0.0,
 			),
 		)
@@ -304,8 +304,8 @@ class TestAsset(AssetSetup):
 		self.assertEqual(asset.status, "Partially Depreciated")
 
 		accumulated_depr_amount = flt(
-			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
-			asset.precision("gross_purchase_amount"),
+			asset.net_purchase_amount - asset.finance_books[0].value_after_depreciation,
+			asset.precision("net_purchase_amount"),
 		)
 		this_month_depr_amount = 9000.0 if is_last_day_of_the_month(date) else 0
 
@@ -347,21 +347,21 @@ class TestAsset(AssetSetup):
 
 		asset.load_from_db()
 		accumulated_depr_amount = flt(
-			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
-			asset.precision("gross_purchase_amount"),
+			asset.net_purchase_amount - asset.finance_books[0].value_after_depreciation,
+			asset.precision("net_purchase_amount"),
 		)
 		pro_rata_amount = flt(accumulated_depr_amount - 18000)
 
 		expected_gle = (
 			(
 				"_Test Accumulated Depreciations - _TC",
-				flt(accumulated_depr_amount, asset.precision("gross_purchase_amount")),
+				flt(accumulated_depr_amount, asset.precision("net_purchase_amount")),
 				0.0,
 			),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
 			(
 				"_Test Gain/Loss on Asset Disposal - _TC",
-				flt(57000.0 - pro_rata_amount, asset.precision("gross_purchase_amount")),
+				flt(57000.0 - pro_rata_amount, asset.precision("net_purchase_amount")),
 				0.0,
 			),
 			("Debtors - _TC", 25000.0, 0.0),
@@ -385,7 +385,7 @@ class TestAsset(AssetSetup):
 			frequency_of_depreciation=12,
 			depreciation_start_date="2023-03-31",
 			opening_accumulated_depreciation=24000,
-			gross_purchase_amount=60000,
+			net_purchase_amount=60000,
 			submit=1,
 		)
 
@@ -483,7 +483,7 @@ class TestAsset(AssetSetup):
 			frequency_of_depreciation=12,
 			depreciation_start_date="2024-03-31",
 			opening_accumulated_depreciation=493.15,
-			gross_purchase_amount=12000,
+			net_purchase_amount=12000,
 			submit=1,
 		)
 
@@ -493,7 +493,7 @@ class TestAsset(AssetSetup):
 		post_depreciation_entries(date="2024-03-31")
 
 		self.assertEqual(asset.asset_quantity, 10)
-		self.assertEqual(asset.gross_purchase_amount, 12000)
+		self.assertEqual(asset.net_purchase_amount, 12000)
 		self.assertEqual(asset.opening_accumulated_depreciation, 493.15)
 
 		new_asset = split_asset(asset.name, 2)
@@ -510,14 +510,14 @@ class TestAsset(AssetSetup):
 		depr_schedule_of_new_asset = first_asset_depr_schedule_of_new_asset.get("depreciation_schedule")
 
 		self.assertEqual(new_asset.asset_quantity, 2)
-		self.assertEqual(new_asset.gross_purchase_amount, 2400)
+		self.assertEqual(new_asset.net_purchase_amount, 2400)
 		self.assertEqual(new_asset.opening_accumulated_depreciation, 98.63)
 		self.assertEqual(new_asset.split_from, asset.name)
 		self.assertEqual(depr_schedule_of_new_asset[0].depreciation_amount, 400)
 		self.assertEqual(depr_schedule_of_new_asset[1].depreciation_amount, 400)
 
 		self.assertEqual(asset.asset_quantity, 8)
-		self.assertEqual(asset.gross_purchase_amount, 9600)
+		self.assertEqual(asset.net_purchase_amount, 9600)
 		self.assertEqual(asset.opening_accumulated_depreciation, 394.52)
 		self.assertEqual(depr_schedule_of_asset[0].depreciation_amount, 1600)
 		self.assertEqual(depr_schedule_of_asset[1].depreciation_amount, 1600)
@@ -603,7 +603,7 @@ class TestAsset(AssetSetup):
 		asset_doc.available_for_use_date = (
 			nowdate() if nowdate() != month_end_date else add_days(nowdate(), -15)
 		)
-		self.assertEqual(asset_doc.gross_purchase_amount, 5250.0)
+		self.assertEqual(asset_doc.net_purchase_amount, 5250.0)
 
 		asset_doc.append(
 			"finance_books",
@@ -732,7 +732,7 @@ class TestDepreciationMethods(AssetSetup):
 			calculate_depreciation=1,
 			available_for_use_date="2023-01-01",
 			purchase_date="2023-01-01",
-			gross_purchase_amount=12000,
+			net_purchase_amount=12000,
 			depreciation_start_date="2023-01-31",
 			total_number_of_depreciations=12,
 			frequency_of_depreciation=1,
@@ -935,7 +935,7 @@ class TestDepreciationMethods(AssetSetup):
 			available_for_use_date="2022-02-15",
 			purchase_date="2022-02-15",
 			depreciation_method="Written Down Value",
-			gross_purchase_amount=10000,
+			net_purchase_amount=10000,
 			expected_value_after_useful_life=5000,
 			depreciation_start_date="2022-02-28",
 			total_number_of_depreciations=5,
@@ -1123,7 +1123,7 @@ class TestDepreciationBasics(AssetSetup):
 		self.assertTrue(depr_schedule_doc.has_pro_rata)
 
 	def test_expected_value_after_useful_life_greater_than_purchase_amount(self):
-		"""Tests if an error is raised when expected_value_after_useful_life(110,000) > gross_purchase_amount(100,000)."""
+		"""Tests if an error is raised when expected_value_after_useful_life(110,000) > net_purchase_amount(100,000)."""
 
 		asset = create_asset(
 			item_code="Macbook Pro",
@@ -1151,7 +1151,7 @@ class TestDepreciationBasics(AssetSetup):
 		self.assertRaises(frappe.ValidationError, asset.save)
 
 	def test_opening_accumulated_depreciation(self):
-		"""Tests if an error is raised when opening_accumulated_depreciation > (gross_purchase_amount - expected_value_after_useful_life)."""
+		"""Tests if an error is raised when opening_accumulated_depreciation > (net_purchase_amount - expected_value_after_useful_life)."""
 
 		asset = create_asset(
 			item_code="Macbook Pro",
@@ -1489,7 +1489,7 @@ class TestDepreciationBasics(AssetSetup):
 			d.accumulated_depreciation_amount for d in get_depr_schedule(asset.name, "Draft")
 		)
 
-		asset_value_after_full_schedule = flt(asset.gross_purchase_amount) - flt(
+		asset_value_after_full_schedule = flt(asset.net_purchase_amount) - flt(
 			accumulated_depreciation_after_full_schedule
 		)
 
@@ -1739,7 +1739,7 @@ def create_asset(**args):
 			"calculate_depreciation": args.calculate_depreciation or 0,
 			"opening_accumulated_depreciation": args.opening_accumulated_depreciation or 0,
 			"opening_number_of_booked_depreciations": args.opening_number_of_booked_depreciations or 0,
-			"gross_purchase_amount": args.gross_purchase_amount or 100000,
+			"net_purchase_amount": args.net_purchase_amount or 100000,
 			"purchase_amount": args.purchase_amount or 100000,
 			"maintenance_required": args.maintenance_required or 0,
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
@@ -1771,7 +1771,7 @@ def create_asset(**args):
 		)
 
 	if asset.is_composite_asset:
-		asset.gross_purchase_amount = 0
+		asset.net_purchase_amount = 0
 		asset.purchase_amount = 0
 
 	if not args.do_not_save:

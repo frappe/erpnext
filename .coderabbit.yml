@@ -1,0 +1,12 @@
+reviews:
+  auto_review:
+    ignore_title_keywords:
+      - "sync translations"
+      - "update POT file"
+      - "style: "
+  review_status: false
+  poem: false
+  collapse_walkthrough: true
+  sequence_diagrams: false
+  changed_files_summary: false
+  high_level_summary: false

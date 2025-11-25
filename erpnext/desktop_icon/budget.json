@@ -1,0 +1,20 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-10 16:54:04.780644",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "expenses",
+ "icon_type": "Link",
+ "idx": 4,
+ "label": "Budget",
+ "link_to": "Budget",
+ "link_type": "DocType",
+ "modified": "2025-11-17 13:34:13.514949",
+ "modified_by": "Administrator",
+ "name": "Budget",
+ "owner": "Administrator",
+ "parent_icon": "Accounts",
+ "roles": [],
+ "standard": 1
+}

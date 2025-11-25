@@ -129,7 +129,13 @@ class PaymentRequest(Document):
 
 			existing_payment_request_amount = flt(get_existing_payment_request_amount(ref_doc))
 
-			if existing_payment_request_amount + flt(self.grand_total) > ref_amount:
+			if (
+				flt(
+					existing_payment_request_amount + flt(self.grand_total, self.precision("grand_total")),
+					get_currency_precision(),
+				)
+				> ref_amount
+			):
 				frappe.throw(
 					_("Total Payment Request amount cannot be greater than {0} amount").format(
 						self.reference_doctype
@@ -534,7 +540,8 @@ def make_payment_request(**args):
 		frappe.throw(_("Payment Requests cannot be created against: {0}").format(frappe.bold(args.dt)))
 
 	ref_doc = args.ref_doc or frappe.get_doc(args.dt, args.dn)
-
+	if not args.get("company"):
+		args.company = ref_doc.company
 	gateway_account = get_gateway_details(args) or frappe._dict()
 
 	grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
@@ -781,7 +788,7 @@ def get_gateway_details(args):  # nosemgrep
 	"""
 	Return gateway and payment account of default payment gateway
 	"""
-	gateway_account = args.get("payment_gateway_account", {"is_default": 1})
+	gateway_account = args.get("payment_gateway_account", {"is_default": 1, "company": args.company})
 	return get_payment_gateway_account(gateway_account)
 
 

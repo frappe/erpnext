@@ -182,6 +182,7 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "Total Completed Qty",
+   "non_negative": 1,
    "read_only": 1
   },
   {
@@ -624,7 +625,7 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-03-30 18:53:38.206399",
+ "modified": "2025-08-04 15:47:54.514290",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

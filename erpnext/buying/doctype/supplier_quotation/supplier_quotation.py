@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import json
+
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
@@ -22,6 +24,7 @@ class SupplierQuotation(BuyingController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.accounts.doctype.item_wise_tax_detail.item_wise_tax_detail import ItemWiseTaxDetail
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
 		from erpnext.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import (
 			PurchaseTaxesandCharges,
@@ -65,6 +68,7 @@ class SupplierQuotation(BuyingController):
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
 		is_subcontracted: DF.Check
+		item_wise_tax_details: DF.Table[ItemWiseTaxDetail]
 		items: DF.Table[SupplierQuotationItem]
 		language: DF.Data | None
 		letter_head: DF.Link | None
@@ -235,7 +239,12 @@ def get_list_context(context=None):
 
 
 @frappe.whitelist()
-def make_purchase_order(source_name, target_doc=None):
+def make_purchase_order(source_name, target_doc=None, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
+
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 		target.run_method("get_schedule_dates")
@@ -243,6 +252,11 @@ def make_purchase_order(source_name, target_doc=None):
 
 	def update_item(obj, target, source_parent):
 		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
+
+	def select_item(d):
+		filtered_items = args.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
 
 	doclist = get_mapped_doc(
 		"Supplier Quotation",
@@ -265,6 +279,7 @@ def make_purchase_order(source_name, target_doc=None):
 					["sales_order", "sales_order"],
 				],
 				"postprocess": update_item,
+				"condition": select_item,
 			},
 			"Purchase Taxes and Charges": {
 				"doctype": "Purchase Taxes and Charges",

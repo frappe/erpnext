@@ -284,6 +284,9 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 			this.frm.set_value("currency", frappe.defaults.get_user_default("Currency"));
 		}
 
+		if (this.frm.is_new() && this.frm.doc.opportunity_type === undefined) {
+			this.frm.doc.opportunity_type = __("Sales");
+		}
 		this.setup_queries();
 	}
 

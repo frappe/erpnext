@@ -799,7 +799,7 @@ class EmailDigest(Document):
 				"status": ["not in", ("Cancelled")],
 				"company": self.company,
 			},
-			fields=["count(*) as count", "sum(grand_total) as grand_total"],
+			fields=[{"COUNT": "*", "as": "count"}, {"SUM": "grand_total", "as": "grand_total"}],
 		)
 
 	def get_from_to_date(self):

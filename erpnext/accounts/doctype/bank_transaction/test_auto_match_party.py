@@ -7,6 +7,9 @@ from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.bank_transaction.test_bank_transaction import create_bank_account
 
+IBAN_1 = "DE02000000003716541159"
+IBAN_2 = "DE02500105170137075030"
+
 
 class TestAutoMatchParty(IntegrationTestCase):
 	@classmethod
@@ -22,24 +25,24 @@ class TestAutoMatchParty(IntegrationTestCase):
 		frappe.db.set_single_value("Accounts Settings", "enable_fuzzy_matching", 0)
 
 	def test_match_by_account_number(self):
-		create_supplier_for_match(account_no="000000003716541159")
+		create_supplier_for_match(account_no=IBAN_1[11:])
 		doc = create_bank_transaction(
 			withdrawal=1200,
 			transaction_id="562213b0ca1bf838dab8f2c6a39bbc3b",
-			account_no="000000003716541159",
-			iban="DE02000000003716541159",
+			account_no=IBAN_1[11:],
+			iban=IBAN_1,
 		)
 
 		self.assertEqual(doc.party_type, "Supplier")
 		self.assertEqual(doc.party, "John Doe & Co.")
 
 	def test_match_by_iban(self):
-		create_supplier_for_match(iban="DE02000000003716541159")
+		create_supplier_for_match(iban=IBAN_1)
 		doc = create_bank_transaction(
 			withdrawal=1200,
 			transaction_id="c5455a224602afaa51592a9d9250600d",
-			account_no="000000003716541159",
-			iban="DE02000000003716541159",
+			account_no=IBAN_1[11:],
+			iban=IBAN_1,
 		)
 
 		self.assertEqual(doc.party_type, "Supplier")
@@ -51,7 +54,7 @@ class TestAutoMatchParty(IntegrationTestCase):
 			withdrawal=1200,
 			transaction_id="1f6f661f347ff7b1ea588665f473adb1",
 			party_name="Ella Jackson",
-			iban="DE04000000003716545346",
+			iban=IBAN_2,
 		)
 		self.assertEqual(doc.party_type, "Supplier")
 		self.assertEqual(doc.party, "Jackson Ella W.")

@@ -292,7 +292,7 @@ def create_quality_inspection(**args):
 
 	if not args.readings:
 		create_quality_inspection_parameter("Size")
-		readings = {"specification": "Size", "min_value": 0, "max_value": 10}
+		readings = {"specification": "Size", "min_value": 0, "max_value": 10, "reading_1": "5"}
 		if args.status == "Rejected":
 			readings["reading_1"] = "12"  # status is auto set in child on save
 	else:

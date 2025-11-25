@@ -150,7 +150,11 @@ frappe.ui.form.on("Purchase Receipt", {
 							docstatus: 1,
 							per_received: ["<", 100],
 							company: frm.doc.company,
+							update_stock: 0,
 						},
+						allow_child_item_selection: true,
+						child_fieldname: "items",
+						child_columns: ["item_code", "item_name", "qty", "received_qty"],
 					});
 				},
 				__("Get Items From")
@@ -191,18 +195,9 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 	erpnext.buying.BuyingController
 ) {
 	setup(doc) {
+		this.setup_accounting_dimension_triggers();
 		this.setup_posting_date_time_check();
 		super.setup(doc);
-	}
-
-	onload() {
-		this.frm.set_query("supplier", function () {
-			return {
-				filters: {
-					is_transporter: 0,
-				},
-			};
-		});
 	}
 
 	refresh() {
@@ -265,6 +260,9 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 								per_received: ["<", 99.99],
 								company: me.frm.doc.company,
 							},
+							allow_child_item_selection: true,
+							child_fieldname: "items",
+							child_columns: ["item_code", "item_name", "qty", "received_qty"],
 						});
 					},
 					__("Get Items From")

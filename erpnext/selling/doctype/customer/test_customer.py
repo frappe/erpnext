@@ -433,3 +433,14 @@ def create_internal_customer(customer_name=None, represents_company=None, allowe
 		customer_name = frappe.db.get_value("Customer", customer_name)
 
 	return customer_name
+
+
+def make_customer(customer_name):
+	if not frappe.db.exists("Customer", customer_name):
+		customer = frappe.new_doc("Customer")
+		customer.customer_name = customer_name
+		customer.customer_type = "Individual"
+		customer.insert()
+		return customer.name
+	else:
+		return customer_name

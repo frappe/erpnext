@@ -37,7 +37,7 @@ def get_site_info(site_info):
 	if company:
 		domain = frappe.get_cached_value("Company", cstr(company), "domain")
 
-	return {"company": company, "domain": domain, "activation": get_level()}
+	return {"company": company, "domain": domain, "activation": get_level(site_info)}
 
 
 @contextmanager

@@ -457,7 +457,8 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 							(["Purchase Receipt", "Purchase Invoice"].includes(this.frm.doc.doctype) &&
 								!this.frm.doc.is_return) ||
 							(this.frm.doc.doctype === "Stock Entry" &&
-								this.frm.doc.purpose === "Material Receipt")
+								(this.frm.doc.purpose === "Material Receipt" ||
+									(this.frm.doc.purpose === "Manufacture" && this.item.is_finished_item)))
 						) {
 							is_inward = true;
 						}
@@ -542,6 +543,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 					based_on: based_on,
 					posting_date: this.frm.doc.posting_date,
 					posting_time: this.frm.doc.posting_time,
+					scio_detail: this.item.scio_detail,
 				},
 				callback: (r) => {
 					if (r.message) {

@@ -19,7 +19,7 @@ class RenameTool(Document):
 		from frappe.types import DF
 
 		file_to_rename: DF.Attach | None
-		select_doctype: DF.Literal
+		select_doctype: DF.Literal[None]
 	# end: auto-generated types
 
 	pass

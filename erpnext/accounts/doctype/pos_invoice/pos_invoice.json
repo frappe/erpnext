@@ -43,6 +43,7 @@
   "items_section",
   "update_stock",
   "scan_barcode",
+  "last_scanned_warehouse",
   "items",
   "pricing_rule_details",
   "pricing_rules",
@@ -69,6 +70,7 @@
   "taxes",
   "sec_tax_breakup",
   "other_charges_calculation",
+  "item_wise_tax_details",
   "section_break_43",
   "base_total_taxes_and_charges",
   "column_break_47",
@@ -296,6 +298,7 @@
    "search_index": 1
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -1593,12 +1596,27 @@
    "fieldname": "more_info_tab",
    "fieldtype": "Tab Break",
    "label": "More Info"
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
+  },
+  {
+   "fieldname": "item_wise_tax_details",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Item Wise Tax Details",
+   "no_copy": 1,
+   "options": "Item Wise Tax Detail"
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-18 16:50:30.516162",
+ "modified": "2025-08-04 22:22:31.471752",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

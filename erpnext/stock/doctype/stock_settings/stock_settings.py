@@ -68,6 +68,7 @@ class StockSettings(Document):
 		update_price_list_based_on: DF.Literal["Rate", "Price List Rate"]
 		use_naming_series: DF.Check
 		use_serial_batch_fields: DF.Check
+		validate_material_transfer_warehouses: DF.Check
 		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO"]
 	# end: auto-generated types
 
@@ -106,6 +107,7 @@ class StockSettings(Document):
 		self.validate_clean_description_html()
 		self.validate_pending_reposts()
 		self.validate_stock_reservation()
+		self.validate_auto_insert_price_list_rate_if_missing()
 		self.change_precision_for_for_sales()
 		self.change_precision_for_purchase()
 
@@ -189,26 +191,6 @@ class StockSettings(Document):
 						)
 					)
 
-				else:
-					# Don't allow if there are negative stock
-					from frappe.query_builder.functions import Round
-
-					precision = frappe.db.get_single_value("System Settings", "float_precision") or 3
-					bin = frappe.qb.DocType("Bin")
-					bin_with_negative_stock = (
-						frappe.qb.from_(bin)
-						.select(bin.name)
-						.where(Round(bin.actual_qty, precision) < 0)
-						.limit(1)
-					).run()
-
-					if bin_with_negative_stock:
-						frappe.throw(
-							_("As there are negative stock, you can not enable {0}.").format(
-								frappe.bold(_("Stock Reservation"))
-							)
-						)
-
 			# Enable -> Disable
 			else:
 				# Don't allow if there are open Stock Reservation Entries
@@ -222,6 +204,23 @@ class StockSettings(Document):
 							frappe.bold(_("Stock Reservation"))
 						)
 					)
+
+	def validate_auto_insert_price_list_rate_if_missing(self):
+		if (
+			self.auto_insert_price_list_rate_if_missing
+			and self.has_value_changed("auto_insert_price_list_rate_if_missing")
+			and frappe.get_single_value("Selling Settings", "fallback_to_default_price_list")
+		):
+			selling_meta = frappe.get_meta("Selling Settings")
+			frappe.msgprint(
+				_(
+					"You have enabled {0} and {1} in {2}. This can lead to prices from the default price list being inserted in the transaction price list."
+				).format(
+					"<i>{}</i>".format(_(self.meta.get_label("auto_insert_price_list_rate_if_missing"))),
+					"<i>{}</i>".format(_(selling_meta.get_label("fallback_to_default_price_list"))),
+					frappe.bold(_("Selling Settings")),
+				)
+			)
 
 	def on_update(self):
 		self.toggle_warehouse_field_for_inter_warehouse_transfer()

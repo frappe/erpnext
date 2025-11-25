@@ -61,7 +61,7 @@
   },
   {
    "default": "0",
-   "description": "Even invoices with apply tax withholding unchecked will be considered for checking cumulative threshold breach",
+   "description": "Only payment entries with apply tax withholding unchecked will be considered for checking cumulative threshold breach",
    "fieldname": "consider_party_ledger_amount",
    "fieldtype": "Check",
    "label": "Consider Entire Party Ledger Amount"
@@ -83,10 +83,11 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 13:10:52.531436",
+ "modified": "2025-07-30 07:13:51.785735",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Category",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {
@@ -126,6 +127,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

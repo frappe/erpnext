@@ -252,6 +252,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				lead: this.frm.doc.party_name,
 				posting_date: this.frm.doc.transaction_date,
 				company: this.frm.doc.company,
+				doctype: this.frm.doc.doctype,
 			},
 			callback: function (r) {
 				if (r.message) {

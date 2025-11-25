@@ -1,0 +1,21 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-17 13:19:04.304517",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "stock",
+ "icon_type": "Link",
+ "idx": 4,
+ "label": "Stock",
+ "link_to": "Stock",
+ "link_type": "Workspace",
+ "logo_url": "/assets/erpnext/desktop_icons/stock.svg",
+ "modified": "2025-11-17 17:38:40.957627",
+ "modified_by": "Administrator",
+ "name": "Stock",
+ "owner": "Administrator",
+ "parent_icon": "",
+ "roles": [],
+ "standard": 1
+}

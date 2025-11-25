@@ -102,6 +102,7 @@ def get_expected_data(bom, qty_to_make):
 			[
 				bom.items[idx].item_code,
 				bom.items[idx].item_code,
+				bom.name,
 				"",
 				"",
 				float(bom.items[idx].stock_qty / bom.quantity),

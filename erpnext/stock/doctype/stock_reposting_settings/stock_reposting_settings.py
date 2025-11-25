@@ -84,7 +84,7 @@ def get_reposting_entries():
 def get_stock_ledgers(vouchers):
 	return frappe.get_all(
 		"Stock Ledger Entry",
-		fields=["item_code", "warehouse", "posting_date"],
+		fields=["item_code", "warehouse", "posting_date", "posting_time", "posting_datetime"],
 		filters={"voucher_no": ("in", vouchers)},
 	)
 

@@ -32,7 +32,8 @@ frappe.ui.form.on("Customer", {
 					method: "erpnext.selling.doctype.customer.customer.make_payment_entry",
 					frm: frm,
 				}),
-			"Pricing Rule": () => erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name),
+			"Pricing Rule": () => frm.trigger("make_pricing_rule"),
+			"Bank Account": () => erpnext.utils.make_bank_account(frm.doc.doctype, frm.doc.name),
 		};
 
 		frm.add_fetch("lead_name", "company_name", "customer_name");
@@ -73,17 +74,20 @@ frappe.ui.form.on("Customer", {
 
 		frm.set_query("customer_primary_contact", function (doc) {
 			return {
-				query: "erpnext.selling.doctype.customer.customer.get_customer_primary_contact",
+				query: "erpnext.selling.doctype.customer.customer.get_customer_primary",
 				filters: {
 					customer: doc.name,
+					type: "Contact",
 				},
 			};
 		});
+
 		frm.set_query("customer_primary_address", function (doc) {
 			return {
+				query: "erpnext.selling.doctype.customer.customer.get_customer_primary",
 				filters: {
-					link_doctype: "Customer",
-					link_name: doc.name,
+					customer: doc.name,
+					type: "Address",
 				},
 			};
 		});
@@ -189,7 +193,10 @@ frappe.ui.form.on("Customer", {
 				__("Actions")
 			);
 
-			if (cint(frappe.defaults.get_default("enable_common_party_accounting"))) {
+			if (
+				cint(frappe.defaults.get_default("enable_common_party_accounting")) &&
+				frappe.model.can_create("Party Link")
+			) {
 				frm.add_custom_button(
 					__("Link with Supplier"),
 					function () {
@@ -262,5 +269,12 @@ frappe.ui.form.on("Customer", {
 			primary_action_label: __("Create Link"),
 		});
 		dialog.show();
+	},
+	make_pricing_rule: function (frm) {
+		frappe.new_doc("Pricing Rule", {
+			applicable_for: "Customer",
+			customer: frm.doc.name,
+			selling: 1,
+		});
 	},
 });

@@ -41,18 +41,20 @@ frappe.ui.form.on("Supplier", {
 
 		frm.set_query("supplier_primary_contact", function (doc) {
 			return {
-				query: "erpnext.buying.doctype.supplier.supplier.get_supplier_primary_contact",
+				query: "erpnext.buying.doctype.supplier.supplier.get_supplier_primary",
 				filters: {
 					supplier: doc.name,
+					type: "Contact",
 				},
 			};
 		});
 
 		frm.set_query("supplier_primary_address", function (doc) {
 			return {
+				query: "erpnext.buying.doctype.supplier.supplier.get_supplier_primary",
 				filters: {
-					link_doctype: "Supplier",
-					link_name: doc.name,
+					supplier: doc.name,
+					type: "Address",
 				},
 			};
 		});
@@ -64,6 +66,11 @@ frappe.ui.form.on("Supplier", {
 				},
 			};
 		});
+
+		frm.make_methods = {
+			"Bank Account": () => erpnext.utils.make_bank_account(frm.doc.doctype, frm.doc.name),
+			"Pricing Rule": () => frm.trigger("make_pricing_rule"),
+		};
 	},
 
 	refresh: function (frm) {
@@ -105,22 +112,6 @@ frappe.ui.form.on("Supplier", {
 			);
 
 			frm.add_custom_button(
-				__("Bank Account"),
-				function () {
-					erpnext.utils.make_bank_account(frm.doc.doctype, frm.doc.name);
-				},
-				__("Create")
-			);
-
-			frm.add_custom_button(
-				__("Pricing Rule"),
-				function () {
-					erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
-				},
-				__("Create")
-			);
-
-			frm.add_custom_button(
 				__("Get Supplier Group Details"),
 				function () {
 					frm.trigger("get_supplier_group_details");
@@ -128,7 +119,10 @@ frappe.ui.form.on("Supplier", {
 				__("Actions")
 			);
 
-			if (cint(frappe.defaults.get_default("enable_common_party_accounting"))) {
+			if (
+				cint(frappe.defaults.get_default("enable_common_party_accounting")) &&
+				frappe.model.can_create("Party Link")
+			) {
 				frm.add_custom_button(
 					__("Link with Customer"),
 					function () {
@@ -224,5 +218,12 @@ frappe.ui.form.on("Supplier", {
 			primary_action_label: __("Create Link"),
 		});
 		dialog.show();
+	},
+	make_pricing_rule: function (frm) {
+		frappe.new_doc("Pricing Rule", {
+			applicable_for: "Supplier",
+			supplier: frm.doc.name,
+			buying: 1,
+		});
 	},
 });

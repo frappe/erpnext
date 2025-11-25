@@ -317,6 +317,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 	erpnext.buying.BuyingController
 ) {
 	setup() {
+		this.setup_accounting_dimension_triggers();
 		this.frm.custom_make_buttons = {
 			"Purchase Receipt": "Purchase Receipt",
 			"Purchase Invoice": "Purchase Invoice",
@@ -435,7 +436,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 									);
 								}
 							} else {
-								if (!doc.items.every((item) => item.qty == item.subcontracted_quantity)) {
+								if (!doc.items.every((item) => item.qty == item.subcontracted_qty)) {
 									this.frm.add_custom_button(
 										__("Subcontracting Order"),
 										() => {
@@ -481,8 +482,8 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 						if (internal) {
 							let button_label =
 								me.frm.doc.company === me.frm.doc.represents_company
-									? "Internal Sales Order"
-									: "Inter Company Sales Order";
+									? __("Internal Sales Order")
+									: __("Inter Company Sales Order");
 
 							me.frm.add_custom_button(
 								button_label,
@@ -500,16 +501,6 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 		} else if (doc.docstatus === 0) {
 			this.frm.cscript.add_from_mappers();
 		}
-	}
-
-	onload() {
-		this.frm.set_query("supplier", function () {
-			return {
-				filters: {
-					is_transporter: 0,
-				},
-			};
-		});
 	}
 
 	get_items_from_open_material_requests() {
@@ -606,7 +597,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					},
 					allow_child_item_selection: true,
 					child_fieldname: "items",
-					child_columns: ["item_code", "qty", "ordered_qty"],
+					child_columns: ["item_code", "item_name", "qty", "ordered_qty"],
 				});
 			},
 			__("Get Items From")
@@ -627,6 +618,9 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 						docstatus: 1,
 						status: ["not in", ["Stopped", "Expired"]],
 					},
+					allow_child_item_selection: true,
+					child_fieldname: "items",
+					child_columns: ["item_code", "item_name", "qty", "rate", "amount"],
 				});
 			},
 			__("Get Items From")

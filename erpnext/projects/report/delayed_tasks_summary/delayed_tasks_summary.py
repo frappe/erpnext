@@ -23,6 +23,7 @@ def get_data(filters):
 		fields=[
 			"name",
 			"subject",
+			"project",
 			"exp_start_date",
 			"exp_end_date",
 			"status",
@@ -56,7 +57,7 @@ def get_data(filters):
 
 def get_conditions(filters):
 	conditions = frappe._dict()
-	keys = ["priority", "status"]
+	keys = ["priority", "status", "project"]
 	for key in keys:
 		if filters.get(key):
 			conditions[key] = filters.get(key)
@@ -89,6 +90,13 @@ def get_columns():
 	columns = [
 		{"fieldname": "name", "fieldtype": "Link", "label": _("Task"), "options": "Task", "width": 150},
 		{"fieldname": "subject", "fieldtype": "Data", "label": _("Subject"), "width": 200},
+		{
+			"fieldname": "project",
+			"fieldtype": "Link",
+			"label": _("Project"),
+			"options": "Project",
+			"width": 150,
+		},
 		{"fieldname": "status", "fieldtype": "Data", "label": _("Status"), "width": 100},
 		{"fieldname": "priority", "fieldtype": "Data", "label": _("Priority"), "width": 80},
 		{"fieldname": "progress", "fieldtype": "Data", "label": _("Progress (%)"), "width": 120},

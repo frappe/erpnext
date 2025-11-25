@@ -23,6 +23,24 @@ frappe.ui.form.on("Job Card", {
 			};
 		});
 
+		frm.set_query("item_code", "scrap_items", () => {
+			return {
+				filters: {
+					disabled: 0,
+				},
+			};
+		});
+
+		frm.set_query("operation", "time_logs", () => {
+			let operations = (frm.doc.sub_operations || []).map((d) => d.sub_operation);
+			return {
+				filters: {
+					name: ["in", operations],
+				},
+			};
+		});
+
+		frm.events.set_company_filters(frm, "target_warehouse");
 		frm.events.set_company_filters(frm, "source_warehouse");
 		frm.events.set_company_filters(frm, "wip_warehouse");
 		frm.set_query("source_warehouse", "items", () => {
@@ -39,6 +57,15 @@ frappe.ui.form.on("Job Card", {
 			} else {
 				return doc.status === "Complete" ? "green" : "orange";
 			}
+		});
+
+		frm.set_query("employee", () => {
+			return {
+				filters: {
+					company: frm.doc.company,
+					status: "Active",
+				},
+			};
 		});
 	},
 
@@ -176,7 +203,15 @@ frappe.ui.form.on("Job Card", {
 				!frm.doc.finished_good ||
 				!has_items?.length)
 		) {
-			if (!frm.doc.time_logs?.length) {
+			let last_row = {};
+			if (frm.doc.sub_operations?.length && frm.doc.time_logs?.length) {
+				last_row = get_last_row(frm.doc.time_logs);
+			}
+
+			if (
+				(!frm.doc.time_logs?.length || (frm.doc.sub_operations?.length && last_row?.to_time)) &&
+				!frm.doc.is_paused
+			) {
 				frm.add_custom_button(__("Start Job"), () => {
 					let from_time = frappe.datetime.now_datetime();
 					if ((frm.doc.employee && !frm.doc.employee.length) || !frm.doc.employee) {
@@ -304,8 +339,33 @@ frappe.ui.form.on("Job Card", {
 			},
 		];
 
+		if (frm.doc.sub_operations?.length) {
+			fields.push({
+				fieldtype: "Link",
+				label: __("Sub Operation"),
+				fieldname: "sub_operation",
+				options: "Operation",
+				get_query() {
+					let non_completed_operations = frm.doc.sub_operations.filter(
+						(d) => d.status === "Pending"
+					);
+					return {
+						filters: {
+							name: ["in", non_completed_operations.map((d) => d.sub_operation)],
+						},
+					};
+				},
+				reqd: 1,
+			});
+		}
+
 		let last_completed_row = get_last_completed_row(frm.doc.time_logs);
-		if (!last_completed_row || !last_completed_row.to_time) {
+		let last_row = {};
+		if (frm.doc.sub_operations?.length && frm.doc.time_logs?.length) {
+			last_row = get_last_row(frm.doc.time_logs);
+		}
+
+		if (!last_completed_row || !last_completed_row.to_time || !last_row.to_time) {
 			fields.push({
 				fieldtype: "Datetime",
 				label: __("End Time"),
@@ -328,6 +388,7 @@ frappe.ui.form.on("Job Card", {
 						qty: data.completed_qty,
 						for_quantity: data.for_quantity,
 						end_time: data.end_time,
+						sub_operation: data.sub_operation,
 					},
 					callback: function (r) {
 						frm.reload_doc();
@@ -574,6 +635,7 @@ frappe.ui.form.on("Job Card", {
 
 	make_dashboard: function (frm) {
 		if (frm.doc.__islocal) return;
+		var section = "";
 
 		function setCurrentIncrement() {
 			currentIncrement += 1;
@@ -583,7 +645,7 @@ frappe.ui.form.on("Job Card", {
 		function updateStopwatch(increment) {
 			var hours = Math.floor(increment / 3600);
 			var minutes = Math.floor((increment - hours * 3600) / 60);
-			var seconds = flt(increment - hours * 3600 - minutes * 60, 2);
+			var seconds = Math.floor(flt(increment - hours * 3600 - minutes * 60, 2));
 
 			$(section)
 				.find(".hours")
@@ -614,7 +676,13 @@ frappe.ui.form.on("Job Card", {
 				<span class="seconds">00</span>
 			</div>`;
 
-		var section = frm.toolbar.page.add_inner_message(timer);
+		if (frappe.utils.is_xs()) {
+			frm.dashboard.add_comment(timer, "white", true);
+			section = frm.layout.wrapper.find(".form-message-container");
+		} else {
+			section = frm.toolbar.page.add_inner_message(timer);
+		}
+
 		let currentIncrement = frm.events.get_current_time(frm);
 		if (frm.doc.time_logs?.length && frm.doc.time_logs[cint(frm.doc.time_logs.length) - 1].to_time) {
 			updateStopwatch(currentIncrement);
@@ -749,4 +817,8 @@ function get_last_completed_row(time_logs) {
 		let last_completed_row = completed_rows[completed_rows.length - 1];
 		return last_completed_row;
 	}
+}
+
+function get_last_row(time_logs) {
+	return time_logs[time_logs.length - 1] || {};
 }

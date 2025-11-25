@@ -127,6 +127,7 @@ class Item(Document):
 		opening_stock: DF.Float
 		over_billing_allowance: DF.Float
 		over_delivery_receipt_allowance: DF.Float
+		production_capacity: DF.Int
 		purchase_uom: DF.Link | None
 		quality_inspection_template: DF.Link | None
 		reorder_levels: DF.Table[ItemReorder]
@@ -183,9 +184,6 @@ class Item(Document):
 	def validate(self):
 		if not self.item_name:
 			self.item_name = self.item_code
-
-		if not strip_html(cstr(self.description)).strip():
-			self.description = self.item_name
 
 		self.validate_uom()
 		self.validate_description()
@@ -577,25 +575,6 @@ class Item(Document):
 			self.set_last_purchase_rate(new_name)
 			self.recalculate_bin_qty(new_name)
 
-		for dt in ("Sales Taxes and Charges", "Purchase Taxes and Charges"):
-			for d in frappe.db.sql(
-				f"""select name, item_wise_tax_detail from `tab{dt}`
-					where ifnull(item_wise_tax_detail, '') != ''""",
-				as_dict=1,
-			):
-				item_wise_tax_detail = json.loads(d.item_wise_tax_detail)
-				if isinstance(item_wise_tax_detail, dict) and old_name in item_wise_tax_detail:
-					item_wise_tax_detail[new_name] = item_wise_tax_detail[old_name]
-					item_wise_tax_detail.pop(old_name)
-
-					frappe.db.set_value(
-						dt,
-						d.name,
-						"item_wise_tax_detail",
-						json.dumps(item_wise_tax_detail),
-						update_modified=False,
-					)
-
 	def delete_old_bins(self, old_name):
 		frappe.db.delete("Bin", {"item_code": old_name})
 
@@ -954,7 +933,12 @@ class Item(Document):
 		if self.is_new():
 			return
 
-		restricted_fields = ("has_serial_no", "is_stock_item", "valuation_method", "has_batch_no")
+		restricted_fields = (
+			"has_serial_no",
+			"is_stock_item",
+			"valuation_method",
+			"has_batch_no",
+		)
 
 		values = frappe.db.get_value("Item", self.name, restricted_fields, as_dict=True)
 		if not values:
@@ -1277,7 +1261,7 @@ def get_item_defaults(item_code, company):
 
 	for d in item.item_defaults:
 		if d.company == company:
-			row = copy.deepcopy(d.as_dict())
+			row = d.as_dict(no_private_properties=True)
 			row.pop("name")
 			out.update(row)
 	return out

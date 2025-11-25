@@ -139,6 +139,64 @@ class TestDunning(IntegrationTestCase):
 		self.assertEqual(sales_invoice.status, "Overdue")
 		self.assertEqual(dunning.status, "Unresolved")
 
+	def test_dunning_resolution_from_credit_note(self):
+		"""
+		Test that dunning is resolved when a credit note is issued against the original invoice.
+		"""
+		sales_invoice = create_sales_invoice_against_cost_center(
+			posting_date=add_days(today(), -10), qty=1, rate=100
+		)
+		dunning = create_dunning_from_sales_invoice(sales_invoice.name)
+		dunning.submit()
+
+		self.assertEqual(dunning.status, "Unresolved")
+
+		credit_note = frappe.copy_doc(sales_invoice)
+		credit_note.is_return = 1
+		credit_note.return_against = sales_invoice.name
+		credit_note.update_outstanding_for_self = 0
+
+		for item in credit_note.items:
+			item.qty = -item.qty
+
+		credit_note.save()
+		credit_note.submit()
+
+		dunning.reload()
+		self.assertEqual(dunning.status, "Resolved")
+
+		credit_note.cancel()
+		dunning.reload()
+		self.assertEqual(dunning.status, "Unresolved")
+
+	def test_dunning_not_affected_by_standalone_credit_note(self):
+		"""
+		Test that dunning is NOT resolved when a credit note has update_outstanding_for_self checked.
+		"""
+		sales_invoice = create_sales_invoice_against_cost_center(
+			posting_date=add_days(today(), -10), qty=1, rate=100
+		)
+		dunning = create_dunning_from_sales_invoice(sales_invoice.name)
+		dunning.submit()
+
+		self.assertEqual(dunning.status, "Unresolved")
+
+		credit_note = frappe.copy_doc(sales_invoice)
+		credit_note.is_return = 1
+		credit_note.return_against = sales_invoice.name
+		credit_note.update_outstanding_for_self = 1
+
+		for item in credit_note.items:
+			item.qty = -item.qty
+
+		credit_note.save()
+
+		credit_note = frappe.get_doc("Sales Invoice", credit_note.name)
+		credit_note.submit()
+
+		dunning.reload()
+		self.assertEqual(dunning.status, "Unresolved")
+
 
 def create_dunning(overdue_days, dunning_type_name=None):
 	posting_date = add_days(today(), -1 * overdue_days)

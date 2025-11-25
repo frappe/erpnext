@@ -15,7 +15,9 @@ class PickListItem(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		actual_qty: DF.Float
 		batch_no: DF.Link | None
+		company_total_stock: DF.Float
 		conversion_factor: DF.Float
 		delivered_qty: DF.Float
 		description: DF.Text | None

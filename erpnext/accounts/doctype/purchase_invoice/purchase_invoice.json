@@ -48,6 +48,7 @@
   "ignore_pricing_rule",
   "sec_warehouse",
   "scan_barcode",
+  "last_scanned_warehouse",
   "col_break_warehouse",
   "update_stock",
   "set_warehouse",
@@ -111,6 +112,7 @@
   "tax_withheld_vouchers",
   "sec_tax_breakup",
   "other_charges_calculation",
+  "item_wise_tax_details",
   "pricing_rule_details",
   "pricing_rules",
   "raw_materials_supplied",
@@ -322,6 +324,7 @@
    "search_index": 1
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -1654,6 +1657,13 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
+   },
+  {
    "fieldname": "claimed_landed_cost_amount",
    "fieldtype": "Currency",
    "label": "Claimed Landed Cost Amount (Company Currency)",
@@ -1661,6 +1671,14 @@
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "item_wise_tax_details",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Item Wise Tax Details",
+   "no_copy": 1,
+   "options": "Item Wise Tax Detail"
   }
  ],
  "grid_page_length": 50,
@@ -1668,7 +1686,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-30 23:16:05.722875",
+ "modified": "2025-08-04 19:19:11.380664",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

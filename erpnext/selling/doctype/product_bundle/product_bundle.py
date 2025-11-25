@@ -32,6 +32,7 @@ class ProductBundle(Document):
 	def validate(self):
 		self.validate_main_item()
 		self.validate_child_items()
+		self.validate_child_items_qty_non_zero()
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 		validate_uom_is_integer(self, "uom", "qty")
@@ -85,6 +86,15 @@ class ProductBundle(Document):
 				frappe.throw(
 					_(
 						"Row #{0}: Child Item should not be a Product Bundle. Please remove Item {1} and Save"
+					).format(item.idx, frappe.bold(item.item_code))
+				)
+
+	def validate_child_items_qty_non_zero(self):
+		for item in self.items:
+			if item.qty <= 0:
+				frappe.throw(
+					_(
+						"Row #{0}: Quantity cannot be a non-positive number. Please increase the quantity or remove the Item {1}"
 					).format(item.idx, frappe.bold(item.item_code))
 				)
 

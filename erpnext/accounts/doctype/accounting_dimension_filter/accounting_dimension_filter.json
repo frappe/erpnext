@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "accounting_dimension",
+  "fieldname",
   "disabled",
   "column_break_2",
   "company",
@@ -90,11 +91,17 @@
    "fieldname": "apply_restriction_on_values",
    "fieldtype": "Check",
    "label": "Apply restriction on dimension values"
+  },
+  {
+   "fieldname": "fieldname",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Fieldname"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 13:05:57.199186",
+ "modified": "2025-08-08 14:13:22.203011",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension Filter",
@@ -139,6 +146,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

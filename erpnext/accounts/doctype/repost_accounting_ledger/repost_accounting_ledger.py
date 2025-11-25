@@ -5,6 +5,7 @@ import inspect
 
 import frappe
 from frappe import _, qb
+from frappe.desk.form.linked_with import get_child_tables_of_doctypes
 from frappe.model.document import Document
 from frappe.utils.data import comma_and
 
@@ -100,8 +101,8 @@ class RepostAccountingLedger(Document):
 			if doc.doctype in ["Payment Entry", "Journal Entry"]:
 				gle_map = doc.build_gl_map()
 			elif doc.doctype == "Purchase Receipt":
-				warehouse_account_map = get_warehouse_account_map(doc.company)
-				gle_map = doc.get_gl_entries(warehouse_account_map)
+				inventory_account_map = doc.get_inventory_account_map()
+				gle_map = doc.get_gl_entries(inventory_account_map)
 			else:
 				gle_map = doc.get_gl_entries()
 
@@ -177,7 +178,7 @@ def start_repost(account_repost_doc=str) -> None:
 				if doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
 					if not repost_doc.delete_cancelled_entries:
 						doc.docstatus = 2
-						doc.make_gl_entries_on_cancel()
+						doc.make_gl_entries_on_cancel(from_repost=True)
 
 					doc.docstatus = 1
 					if doc.doctype == "Sales Invoice":
@@ -189,7 +190,7 @@ def start_repost(account_repost_doc=str) -> None:
 				elif doc.doctype == "Purchase Receipt":
 					if not repost_doc.delete_cancelled_entries:
 						doc.docstatus = 2
-						doc.make_gl_entries_on_cancel()
+						doc.make_gl_entries_on_cancel(from_repost=True)
 
 					doc.docstatus = 1
 					doc.make_gl_entries(from_repost=True)
@@ -208,13 +209,32 @@ def start_repost(account_repost_doc=str) -> None:
 						doc.make_gl_entries()
 
 
-def get_allowed_types_from_settings():
-	return [
+def get_allowed_types_from_settings(child_doc: bool = False):
+	repost_docs = [
 		x.document_type
 		for x in frappe.db.get_all(
-			"Repost Allowed Types", filters={"allowed": True}, fields=["distinct(document_type)"]
+			"Repost Allowed Types",
+			filters={"allowed": True},
+			fields=["document_type"],
+			distinct=True,
 		)
 	]
+	result = repost_docs
+
+	if repost_docs and child_doc:
+		result.extend(get_child_docs(repost_docs))
+
+	return result
+
+
+def get_child_docs(doc: list) -> list:
+	child_doc = []
+	doc = get_child_tables_of_doctypes(doc)
+	for child_list in doc.values():
+		for child in child_list:
+			if child.get("child_table"):
+				child_doc.append(child["child_table"])
+	return child_doc
 
 
 def validate_docs_for_deferred_accounting(sales_docs, purchase_docs):
@@ -270,7 +290,11 @@ def get_repost_allowed_types(doctype, txt, searchfield, start, page_len, filters
 		filters.update({"document_type": ("like", f"%{txt}%")})
 
 	if allowed_types := frappe.db.get_all(
-		"Repost Allowed Types", filters=filters, fields=["distinct(document_type)"], as_list=1
+		"Repost Allowed Types",
+		filters=filters,
+		fields=["document_type"],
+		as_list=1,
+		distinct=True,
 	):
 		return allowed_types
 	return []

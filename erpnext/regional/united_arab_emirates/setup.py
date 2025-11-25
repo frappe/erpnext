@@ -20,6 +20,7 @@ def make_custom_fields():
 		label="Is Zero Rated",
 		fieldtype="Check",
 		fetch_from="item_code.is_zero_rated",
+		fetch_if_empty=1,
 		insert_after="description",
 		print_hide=1,
 	)

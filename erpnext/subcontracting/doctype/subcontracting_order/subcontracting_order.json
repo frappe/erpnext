@@ -14,6 +14,7 @@
   "supplier",
   "supplier_name",
   "supplier_warehouse",
+  "supplier_currency",
   "column_break_7",
   "company",
   "transaction_date",
@@ -35,6 +36,7 @@
   "service_items",
   "raw_materials_supplied_section",
   "set_reserve_warehouse",
+  "reserve_stock",
   "supplied_items",
   "tab_address_and_contact",
   "supplier_address",
@@ -61,7 +63,8 @@
   "select_print_heading",
   "column_break_43",
   "letter_head",
-  "tab_connections"
+  "tab_connections",
+  "production_plan"
  ],
  "fields": [
   {
@@ -460,12 +463,38 @@
    "fieldtype": "Tab Break",
    "label": "Connections",
    "show_dashboard": 1
+  },
+  {
+   "fetch_from": "purchase_order.currency",
+   "fieldname": "supplier_currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Job Worker Currency",
+   "no_copy": 1,
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "reserve_stock",
+   "fieldtype": "Check",
+   "label": "Reserve Stock",
+   "no_copy": 1,
+   "show_on_timeline": 1
+  },
+  {
+   "fieldname": "production_plan",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Production Plan",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2024-12-06 15:21:49.924146",
+ "modified": "2025-11-14 10:31:40.682892",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order",
@@ -512,6 +541,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "status, transaction_date, supplier",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

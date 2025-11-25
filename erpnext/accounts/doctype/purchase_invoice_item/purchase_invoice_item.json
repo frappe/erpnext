@@ -912,7 +912,8 @@
    "label": "Rejected Serial and Batch Bundle",
    "no_copy": 1,
    "options": "Serial and Batch Bundle",
-   "print_hide": 1
+   "print_hide": 1,
+   "search_index": 1
   },
   {
    "fieldname": "wip_composite_asset",
@@ -984,7 +985,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-03-07 10:21:59.960021",
+ "modified": "2025-10-14 13:00:54.441511",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

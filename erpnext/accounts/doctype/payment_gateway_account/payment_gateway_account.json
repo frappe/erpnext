@@ -7,6 +7,7 @@
  "field_order": [
   "payment_gateway",
   "payment_channel",
+  "company",
   "is_default",
   "column_break_4",
   "payment_account",
@@ -71,11 +72,21 @@
    "fieldtype": "Select",
    "label": "Payment Channel",
    "options": "\nEmail\nPhone\nOther"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "print_hide": 1,
+   "remember_last_selected_value": 1,
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-29 18:53:09.836254",
+ "modified": "2025-07-14 16:49:55.210352",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Gateway Account",
@@ -94,6 +105,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

@@ -84,6 +84,10 @@ frappe.ui.form.on("Warehouse", {
 		}
 
 		frm.toggle_enable(["is_group", "company"], false);
+
+		if (frm.doc.customer) {
+			frm.set_df_property("customer", "read_only", frm.doc.__onload.stock_exists);
+		}
 	},
 });
 

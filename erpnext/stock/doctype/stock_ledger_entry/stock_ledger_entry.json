@@ -73,7 +73,8 @@
    "label": "Batch No",
    "oldfieldname": "batch_no",
    "oldfieldtype": "Data",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "warehouse",
@@ -360,7 +361,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-22 12:37:41.304109",
+ "modified": "2025-10-04 09:59:15.546556",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

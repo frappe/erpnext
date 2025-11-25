@@ -75,6 +75,17 @@ class PeriodClosingVoucher(AccountsController):
 			return
 
 		previous_fiscal_year_start_date = previous_fiscal_year[0][1]
+		previous_fiscal_year_closed = frappe.db.exists(
+			"Period Closing Voucher",
+			{
+				"period_end_date": ("between", [previous_fiscal_year_start_date, last_year_closing]),
+				"docstatus": 1,
+				"company": self.company,
+			},
+		)
+		if previous_fiscal_year_closed:
+			return
+
 		gle_exists_in_previous_year = frappe.db.exists(
 			"GL Entry",
 			{
@@ -86,16 +97,7 @@ class PeriodClosingVoucher(AccountsController):
 		if not gle_exists_in_previous_year:
 			return
 
-		previous_fiscal_year_closed = frappe.db.exists(
-			"Period Closing Voucher",
-			{
-				"period_end_date": ("between", [previous_fiscal_year_start_date, last_year_closing]),
-				"docstatus": 1,
-				"company": self.company,
-			},
-		)
-		if not previous_fiscal_year_closed:
-			frappe.throw(_("Previous Year is not closed, please close it first"))
+		frappe.throw(_("Previous Year is not closed, please close it first"))
 
 	def block_if_future_closing_voucher_exists(self):
 		future_closing_voucher = self.get_future_closing_voucher()
@@ -130,7 +132,11 @@ class PeriodClosingVoucher(AccountsController):
 
 	def on_submit(self):
 		self.db_set("gle_processing_status", "In Progress")
-		self.make_gl_entries()
+		if frappe.get_single_value("Accounts Settings", "use_legacy_controller_for_pcv"):
+			self.make_gl_entries()
+		else:
+			ppcv = frappe.get_doc({"doctype": "Process Period Closing Voucher", "parent_pcv": self.name})
+			ppcv.save().submit()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
@@ -138,10 +144,28 @@ class PeriodClosingVoucher(AccountsController):
 			"Stock Ledger Entry",
 			"Payment Ledger Entry",
 			"Account Closing Balance",
+			"Process Period Closing Voucher",
 		)
 		self.block_if_future_closing_voucher_exists()
+
+		if not frappe.get_single_value("Accounts Settings", "use_legacy_controller_for_pcv"):
+			self.cancel_process_pcv_docs()
+
 		self.db_set("gle_processing_status", "In Progress")
 		self.cancel_gl_entries()
+
+	def cancel_process_pcv_docs(self):
+		ppcvs = frappe.db.get_all("Process Period Closing Voucher", {"parent_pcv": self.name, "docstatus": 1})
+		for x in ppcvs:
+			frappe.get_doc("Process Period Closing Voucher", x.name).cancel()
+
+	def on_trash(self):
+		super().on_trash()
+		ppcvs = frappe.db.get_all(
+			"Process Period Closing Voucher", {"parent_pcv": self.name, "docstatus": ["in", [1, 2]]}
+		)
+		for x in ppcvs:
+			frappe.delete_doc("Process Period Closing Voucher", x.name, force=True, ignore_permissions=True)
 
 	def make_gl_entries(self):
 		if frappe.db.estimate_count("GL Entry") > 100_000:
@@ -451,8 +475,15 @@ def process_gl_and_closing_entries(doc):
 		frappe.db.set_value(doc.doctype, doc.name, "gle_processing_status", "Completed")
 	except Exception as e:
 		frappe.db.rollback()
-		frappe.log_error(e)
-		frappe.db.set_value(doc.doctype, doc.name, "gle_processing_status", "Failed")
+		frappe.log_error(title=_("Period Closing Voucher {0} GL Entry Processing Failed").format(doc.name))
+		frappe.db.set_value(
+			doc.doctype,
+			doc.name,
+			{
+				"error_message": str(e),
+				"gle_processing_status": "Failed",
+			},
+		)
 
 
 def process_cancellation(voucher_type, voucher_no):
@@ -464,8 +495,17 @@ def process_cancellation(voucher_type, voucher_no):
 		frappe.db.set_value("Period Closing Voucher", voucher_no, "gle_processing_status", "Completed")
 	except Exception as e:
 		frappe.db.rollback()
-		frappe.log_error(e)
-		frappe.db.set_value("Period Closing Voucher", voucher_no, "gle_processing_status", "Failed")
+		frappe.log_error(
+			title=_("Period Closing Voucher {0} GL Entry Cancellation Failed").format(voucher_no)
+		)
+		frappe.db.set_value(
+			voucher_type,
+			voucher_no,
+			{
+				"error_message": str(e),
+				"gle_processing_status": "Failed",
+			},
+		)
 
 
 def delete_closing_entries(voucher_no):

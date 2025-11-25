@@ -51,7 +51,9 @@ doctype_list_js = {
 	],
 }
 
-override_doctype_class = {"Address": "erpnext.accounts.custom.address.ERPNextAddress"}
+page_js = {"print": "public/js/print.js"}
+
+extend_doctype_class = {"Address": "erpnext.accounts.custom.address.ERPNextAddress"}
 
 override_whitelisted_methods = {"frappe.www.contact.send_message": "erpnext.templates.utils.send_message"}
 
@@ -357,10 +359,11 @@ doc_events = {
 	},
 	"Sales Invoice": {
 		"on_submit": [
-			"erpnext.regional.create_transaction_log",
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
 		],
-		"on_cancel": ["erpnext.regional.italy.utils.sales_invoice_on_cancel"],
+		"on_cancel": [
+			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
+		],
 		"on_trash": "erpnext.regional.check_deletion_permission",
 	},
 	"Purchase Invoice": {
@@ -370,11 +373,6 @@ doc_events = {
 		]
 	},
 	"Payment Entry": {
-		"on_submit": [
-			"erpnext.regional.create_transaction_log",
-			"erpnext.accounts.doctype.dunning.dunning.resolve_dunning",
-		],
-		"on_cancel": ["erpnext.accounts.doctype.dunning.dunning.resolve_dunning"],
 		"on_trash": "erpnext.regional.check_deletion_permission",
 	},
 	"Address": {
@@ -604,6 +602,7 @@ user_privacy_documents = [
 	},
 ]
 
+
 # ERPNext doctypes for Global Search
 global_search_doctypes = {
 	"Default": [
@@ -664,6 +663,11 @@ default_log_clearing_doctypes = {
 export_python_type_annotations = True
 
 fields_for_group_similar_items = ["qty", "amount"]
+
+# Translation
+# ------------
+# List of apps whose translatable strings should be excluded from this app's translations.
+ignore_translatable_strings_from = ["frappe"]
 
 link_formatters = {
 	"Item": {"item_code": "item_name"},

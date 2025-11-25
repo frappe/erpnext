@@ -562,7 +562,7 @@ class TestLandedCostVoucher(IntegrationTestCase):
 			self.assertEqual(entry.credit_in_account_currency, amounts[1])
 
 	def test_asset_lcv(self):
-		"Check if LCV for an Asset updates the Assets Gross Purchase Amount correctly."
+		"Check if LCV for an Asset updates the Assets Net Purchase Amount correctly."
 		frappe.db.set_value(
 			"Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC"
 		)
@@ -591,7 +591,7 @@ class TestLandedCostVoucher(IntegrationTestCase):
 		lcv.submit()
 
 		# lcv updates amount in draft asset
-		self.assertEqual(frappe.db.get_value("Asset", assets[0].name, "gross_purchase_amount"), 50080)
+		self.assertEqual(frappe.db.get_value("Asset", assets[0].name, "net_purchase_amount"), 50080)
 
 		# tear down
 		lcv.cancel()

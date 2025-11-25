@@ -17,12 +17,27 @@ class PaymentSchedule(Document):
 		base_outstanding: DF.Currency
 		base_paid_amount: DF.Currency
 		base_payment_amount: DF.Currency
+		credit_days: DF.Int
+		credit_months: DF.Int
 		description: DF.SmallText | None
 		discount: DF.Float
 		discount_date: DF.Date | None
 		discount_type: DF.Literal["Percentage", "Amount"]
+		discount_validity: DF.Int
+		discount_validity_based_on: DF.Literal[
+			"",
+			"Day(s) after invoice date",
+			"Day(s) after the end of the invoice month",
+			"Month(s) after the end of the invoice month",
+		]
 		discounted_amount: DF.Currency
 		due_date: DF.Date
+		due_date_based_on: DF.Literal[
+			"",
+			"Day(s) after invoice date",
+			"Day(s) after the end of the invoice month",
+			"Month(s) after the end of the invoice month",
+		]
 		invoice_portion: DF.Percent
 		mode_of_payment: DF.Link | None
 		outstanding: DF.Currency

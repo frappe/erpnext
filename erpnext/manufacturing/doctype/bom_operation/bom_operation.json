@@ -43,6 +43,7 @@
  ],
  "fields": [
   {
+   "columns": 2,
    "fieldname": "operation",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -53,9 +54,11 @@
    "reqd": 1
   },
   {
+   "columns": 2,
    "depends_on": "eval:!doc.workstation_type",
    "fieldname": "workstation",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Workstation",
    "oldfieldname": "workstation",
    "oldfieldtype": "Link",
@@ -83,7 +86,7 @@
    "precision": "2"
   },
   {
-   "columns": 1,
+   "columns": 3,
    "description": "In minutes",
    "fetch_from": "operation.total_operation_time",
    "fetch_if_empty": 1,
@@ -191,7 +194,7 @@
    "label": "Set Operating Cost Based On BOM Quantity"
   },
   {
-   "columns": 1,
+   "columns": 3,
    "fieldname": "workstation_type",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -199,26 +202,31 @@
    "options": "Workstation Type"
   },
   {
+   "columns": 3,
+   "depends_on": "eval:parent.track_semi_finished_goods === 1",
    "fieldname": "finished_good",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Finished Goods / Semi Finished Goods Item",
+   "label": "FG / Semi FG Item",
    "options": "Item"
   },
   {
-   "columns": 1,
+   "columns": 2,
+   "depends_on": "eval:parent.track_semi_finished_goods === 1",
    "fieldname": "bom_no",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "BOM No",
    "options": "BOM"
   },
   {
-   "columns": 1,
+   "columns": 2,
    "default": "1",
+   "depends_on": "eval:parent.track_semi_finished_goods === 1",
    "fieldname": "finished_good_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Finished Goods Qty"
+   "label": "Qty to Produce"
   },
   {
    "default": "0",
@@ -264,7 +272,7 @@
    "label": "Is Subcontracted"
   },
   {
-   "depends_on": "eval:!doc.bom_no",
+   "depends_on": "eval:!doc.bom_no && parent.track_semi_finished_goods === 1",
    "fieldname": "add_raw_materials",
    "fieldtype": "Button",
    "label": "Add Raw Materials"
@@ -287,7 +295,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-31 16:17:47.287117",
+ "modified": "2025-08-12 19:27:20.682797",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",

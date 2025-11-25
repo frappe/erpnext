@@ -131,7 +131,12 @@ def apply_putaway_rule(doctype, items, company, sync=None, purpose=None):
 		at_capacity, rules = get_ordered_putaway_rules(item_code, company, source_warehouse=source_warehouse)
 
 		if not rules:
-			warehouse = source_warehouse or item.get("warehouse")
+			warehouse = (
+				(source_warehouse or item.get("warehouse"))
+				if not item.get("t_warehouse")
+				else item.get("t_warehouse")
+			)
+
 			if at_capacity:
 				# rules available, but no free space
 				items_not_accomodated.append([item_code, pending_qty])
