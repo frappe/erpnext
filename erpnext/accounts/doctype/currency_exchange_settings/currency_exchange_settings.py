@@ -9,6 +9,34 @@ from frappe.utils import nowdate
 
 
 class CurrencyExchangeSettings(Document):
+<<<<<<< HEAD
+=======
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.currency_exchange_settings_details.currency_exchange_settings_details import (
+			CurrencyExchangeSettingsDetails,
+		)
+		from erpnext.accounts.doctype.currency_exchange_settings_result.currency_exchange_settings_result import (
+			CurrencyExchangeSettingsResult,
+		)
+
+		access_key: DF.Data | None
+		api_endpoint: DF.Data
+		disabled: DF.Check
+		req_params: DF.Table[CurrencyExchangeSettingsDetails]
+		result_key: DF.Table[CurrencyExchangeSettingsResult]
+		service_provider: DF.Literal["frankfurter.dev", "exchangerate.host", "Custom"]
+		url: DF.Data | None
+		use_http: DF.Check
+	# end: auto-generated types
+
+>>>>>>> f1f68ead7d (chore: switched frankfurter api domain from api.frankfurter.app to api.frankfurter.dev)
 	def validate(self):
 		self.set_parameters_and_result()
 		if frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard:
@@ -35,7 +63,7 @@ class CurrencyExchangeSettings(Document):
 			self.append("req_params", {"key": "date", "value": "{transaction_date}"})
 			self.append("req_params", {"key": "from", "value": "{from_currency}"})
 			self.append("req_params", {"key": "to", "value": "{to_currency}"})
-		elif self.service_provider == "frankfurter.app":
+		elif self.service_provider == "frankfurter.dev":
 			self.set("result_key", [])
 			self.set("req_params", [])
 
@@ -80,11 +108,11 @@ class CurrencyExchangeSettings(Document):
 
 @frappe.whitelist()
 def get_api_endpoint(service_provider: str | None = None, use_http: bool = False):
-	if service_provider and service_provider in ["exchangerate.host", "frankfurter.app"]:
+	if service_provider and service_provider in ["exchangerate.host", "frankfurter.dev"]:
 		if service_provider == "exchangerate.host":
 			api = "api.exchangerate.host/convert"
-		elif service_provider == "frankfurter.app":
-			api = "api.frankfurter.app/{transaction_date}"
+		elif service_provider == "frankfurter.dev":
+			api = "api.frankfurter.dev/v1/{transaction_date}"
 
 		protocol = "https://"
 		if use_http:

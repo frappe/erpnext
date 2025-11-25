@@ -78,7 +78,7 @@
    "fieldname": "service_provider",
    "fieldtype": "Select",
    "label": "Service Provider",
-   "options": "frankfurter.app\nexchangerate.host\nCustom",
+   "options": "frankfurter.dev\nexchangerate.host\nCustom",
    "reqd": 1
   },
   {
@@ -104,7 +104,11 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-03-18 08:32:26.895076",
+=======
+ "modified": "2025-11-25 13:03:41.896424",
+>>>>>>> f1f68ead7d (chore: switched frankfurter api domain from api.frankfurter.app to api.frankfurter.dev)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Currency Exchange Settings",
@@ -141,7 +145,12 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "sort_field": "modified",
+=======
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+>>>>>>> f1f68ead7d (chore: switched frankfurter api domain from api.frankfurter.app to api.frankfurter.dev)
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
