@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import UnitTestCase
 from frappe.utils import today
 
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -10,27 +10,12 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.regional.report.hmrc_vat.hmrc_vat import UKVatReport, execute
 
-# from erpnext.stock.doctype.item.test_item import create_item
 
-EXTRA_TEST_RECORD_DEPENDENCIES = [
-	"Account",
-	"Company",
-	"Customer",
-	"Customer Group",
-	"Warehouse",
-	"Item",
-	"Item Group",
-	"Supplier Group",
-	"User",
-]
-# IGNORE_TEST_RECORD_DEPENDENCIES = ["User"]
+class TestHMRCVAT(UnitTestCase):
+	def setUp(self):
+		super().setUp()
 
-
-class TestHMRCVAT(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		# frappe.set_user("Administrator")
+		frappe.set_user("Administrator")
 		make_company("_Test Company UK VAT", "_TCUV")
 
 		create_account(
@@ -46,9 +31,6 @@ class TestHMRCVAT(IntegrationTestCase):
 			company="_Test Company UK VAT",
 		)
 
-		ensure_item_groups()
-		ensure_party_groups()
-
 		make_item("_Test UK VAT Item")
 		make_item("_Test UK VAT Zero Rated Item")
 
@@ -61,15 +43,14 @@ class TestHMRCVAT(IntegrationTestCase):
 	def tearDown(self):
 		frappe.db.sql("delete from `tabSales Invoice` where company='_Test Company UK VAT'")
 		frappe.db.sql("delete from `tabPurchase Invoice` where company='_Test Company UK VAT'")
-		frappe.delete_doc("Company", "_Test Company UK VAT")
 		super().tearDown()
 
 	def test_get_accounts(self):
 		filters = {"company": "_Test Company UK VAT", "from_date": today(), "to_date": today()}
 		vat_report = UKVatReport(filters)
 		vat_accounts = vat_report.get_vat_accounts()
-		self.assertIn("VAT - _TCUV", vat_accounts)
-		self.assertIn("Input VAT - _TCUV", vat_accounts)
+		self.assertEqual("VAT - _TCUV", vat_accounts["Liability"]["name"])
+		self.assertEqual("Input VAT - _TCUV", vat_accounts["Asset"]["name"])
 
 	def test_hmrc_vat(self):
 		filters = {"company": "_Test Company UK VAT", "from_date": today(), "to_date": today()}
@@ -78,13 +59,13 @@ class TestHMRCVAT(IntegrationTestCase):
 		total_row_tax = 0
 		for row in data:
 			keys = row.keys()
-			# skips total row tax_amount in if.. and skips section header in elif..
-			if "voucher_no" in keys:
+			# skips total_row_tax amount in if.. and skips section header in elif..
+			if "invoice" in keys:
 				total_tax_amount = total_tax_amount + row["tax_amount"]
 			elif "tax_amount" in keys:
 				total_row_tax = total_row_tax + row["tax_amount"]
 
-		self.assertEqual(len(data), 2)
+		self.assertEqual(len(data), 12)
 		self.assertEqual(total_tax_amount, total_row_tax)
 
 
@@ -142,22 +123,6 @@ def make_supplier():
 				"supplier_group": "All Supplier Groups",
 			}
 		).insert()
-
-
-def ensure_item_groups():
-	if not frappe.db.exists("Item Group", "All Item Groups"):
-		make_item_group("All Item Groups", is_group=1, parent_item_group=None)
-
-	if not frappe.db.exists("Item Group", "Products"):
-		make_item_group("Products", is_group=0)
-
-
-def ensure_party_groups():
-	if not frappe.db.exists("Customer Group", "All Customer Groups"):
-		make_customer_group("All Customer Groups", is_group=1, parent_customer_group=None)
-
-	if not frappe.db.exists("Supplier Group", "All Supplier Groups"):
-		make_supplier_group("All Supplier Groups", is_group=1, parent_supplier_group=None)
 
 
 def make_item_group(item_group_name, is_group=0, parent_item_group="All Item Groups", properties=None):
@@ -224,6 +189,7 @@ def make_item(item_code, properties=None):
 				"item_name": item_code,
 				"description": item_code,
 				"item_group": "Products",
+				"stock_uom": "Nos",
 			}
 		)
 

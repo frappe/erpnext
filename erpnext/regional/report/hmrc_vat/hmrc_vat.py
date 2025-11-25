@@ -41,36 +41,50 @@ class UKVatReport:
 		data = []
 		vat_accounts = self.get_vat_accounts()
 		vat_account_names = [vat_accounts[acc]["name"] for acc in vat_accounts]
-		doctype_party = [("Sales Invoice", "Customer"), ("Purchase Invoice", "Supplier")]
-		for doctype, party in doctype_party:
-			invoices = self.get_invoices(doctype, party)
-			invoice_items = self.get_invoice_items(doctype, invoices)
-			grouped_invoice_items = self.get_items_based_on_tax_rate(doctype, invoices, vat_account_names)
-
-			invoice_item_data = self._get_data(doctype, invoices, invoice_items, grouped_invoice_items)
+		for doctype in ["Sales Invoice", "Purchase Invoice"]:
+			invoice_item_data = self._get_data(doctype, vat_account_names)
 
 			data.extend(invoice_item_data)
+			# data.extend({})
+		for d in data:
+			print(d)
 		return data
 
-	def _get_data(self, doctype, invoices, invoice_items, items_based_on_tax_rate=None):
+	def _get_data(self, doctype, vat_account_names):
+		party = "Supplier" if doctype == "Purchase Invoice" else "Customer"
+		invoices = self.get_invoices(doctype, party)
+		invoice_items = self.get_invoice_items(doctype, invoices)
+		grouped_invoice_items = self.get_items_based_on_tax_rate(doctype, invoices, vat_account_names)
+
 		consolidated_data = self.get_consolidated_data(
-			doctype, invoices, invoice_items, items_based_on_tax_rate
+			doctype, invoices, invoice_items, grouped_invoice_items
 		)
 
 		data = []
-		for __, details in consolidated_data.items():
-			for row in details["data"]:
-				data.append(
-					[
-						row.get("invoice_type"),
-						row.get("party_type"),
-						row.get("voucher_no"),
-						row.get("party"),
-						row.get("posting_date"),
-						row.get("gross_amount"),
-						row.get("tax_amount"),
-					]
-				)
+
+		# Create section header
+		section_name = _("Purchases") if doctype == "Purchase Invoice" else _("Sales")
+
+		# fields = [col["fieldname"] for col in get_columns() if not col.get("hidden", False)]
+		for rate, details in consolidated_data.items():
+			label = frappe.bold(section_name + "- " + "Rate" + " " + str(rate) + "%")
+			section_head = {"invoice": label}
+			data.append(section_head)
+
+			total_gross = total_tax = total_net = 0
+			for row in details:
+				data.append(row)
+				total_gross += row["gross_amount"]
+				total_tax += row["tax_amount"]
+				total_net += row["net_amount"]
+			total = {
+				"invoice": frappe.bold(_("Total")),
+				"gross_amount": total_gross,
+				"tax_amount": total_tax,
+				"net_amount": total_net,
+			}
+			data.append(total)
+			data.append({})
 		return data
 
 	def get_consolidated_data(self, doctype, invoices, invoice_items, items_based_on_tax_rate):
@@ -90,8 +104,8 @@ class UKVatReport:
 
 				row["account"] = inv_data.get("account")
 				row["posting_date"] = formatdate(inv_data.get("posting_date"), "dd-mm-yyyy")
-				row["voucher_type"] = doctype
-				row["voucher_no"] = inv
+				row["invoice_type"] = doctype
+				row["invoice"] = inv
 				row["party_type"] = "Customer" if doctype == "Sales Invoice" else "Supplier"
 				row["party"] = inv_data.get("party")
 				row["remarks"] = inv_data.get("remarks")
@@ -99,8 +113,8 @@ class UKVatReport:
 				row["tax_amount"] += item_details.get("tax_amount")
 				row["net_amount"] += item_details.get("net_amount")
 
-				consolidated_data_map.setdefault(rate, {"data": []})
-				consolidated_data_map[rate]["data"].append(row)
+				consolidated_data_map.setdefault(rate, [])
+				consolidated_data_map[rate].append(row)
 
 		return consolidated_data_map
 
@@ -157,8 +171,8 @@ class UKVatReport:
 				dt.name.as_("invoice"),
 				getattr(dt, party_type.lower()).as_("party"),
 				dt.posting_date.as_("posting_date"),
-				dt.grand_total.as_("invoice_amount"),
-				dt.total_taxes_and_charges.as_("tax_total"),
+				dt.grand_total.as_("net_amount"),
+				dt.total_taxes_and_charges.as_("tax_amount"),
 			)
 			.where(dt.docstatus == 1)
 			.where(dt.company == self.company)
@@ -252,6 +266,7 @@ def get_columns() -> list[dict]:
 			"fieldtype": "Dynamic Link",
 			"options": "invoice_type",
 		},
+		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 120},
 		{
 			"label": _("Party"),
 			"fieldname": "party",
@@ -259,15 +274,7 @@ def get_columns() -> list[dict]:
 			"options": "party_type",
 			"width": 120,
 		},
-		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 80},
-		{
-			"label": _("Invoice Amount"),
-			"fieldname": "invoice_amount",
-			"fieldtype": "Currency",
-		},
-		{
-			"label": _("Tax Total"),
-			"fieldname": "tax_total",
-			"fieldtype": "Currency",
-		},
+		{"fieldname": "net_amount", "label": "Net Amount", "fieldtype": "Currency", "width": 130},
+		{"fieldname": "tax_amount", "label": "Tax Amount", "fieldtype": "Currency", "width": 130},
+		{"fieldname": "gross_amount", "label": "Gross Amount", "fieldtype": "Currency", "width": 130},
 	]
