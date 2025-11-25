@@ -248,7 +248,7 @@ def get_supplier_primary_address(doctype, txt, searchfield, start, page_len, fil
 		frappe.qb.from_(address)
 		.join(dynamic_link)
 		.on(address.name == dynamic_link.parent)
-		.select(address.name, address.email_id)
+		.select(address.name)
 		.where(
 			(dynamic_link.link_name == supplier)
 			& (dynamic_link.link_doctype == "Supplier")

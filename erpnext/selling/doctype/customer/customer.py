@@ -847,7 +847,7 @@ def get_customer_primary_address(doctype, txt, searchfield, start, page_len, fil
 		.where(
 			(dlink.link_name == customer) & (addr.name.like(f"%{txt}%")) & (dlink.link_doctype == "Customer")
 		)
-		.run(debug=1)
+		.run()
 	)
 
 
