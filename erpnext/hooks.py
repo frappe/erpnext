@@ -665,4 +665,8 @@ export_python_type_annotations = True
 
 fields_for_group_similar_items = ["qty", "amount"]
 
-link_formatters = ["Item", "Employee", "Project"]
+link_formatters = {
+	"Item": {"item_code": "item_name"},
+	"Employee": {"employee": "employee_name"},
+	"Project": {"project": "project_name"},
+}
