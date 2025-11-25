@@ -235,3 +235,23 @@ def get_supplier_primary_contact(doctype, txt, searchfield, start, page_len, fil
 			& (contact.name.like(f"%{txt}%"))
 		)
 	).run(as_dict=False)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_supplier_primary_address(doctype, txt, searchfield, start, page_len, filters):
+	supplier = filters.get("supplier")
+	address = frappe.qb.DocType("Address")
+	dynamic_link = frappe.qb.DocType("Dynamic Link")
+
+	return (
+		frappe.qb.from_(address)
+		.join(dynamic_link)
+		.on(address.name == dynamic_link.parent)
+		.select(address.name, address.email_id)
+		.where(
+			(dynamic_link.link_name == supplier)
+			& (dynamic_link.link_doctype == "Supplier")
+			& (address.name.like(f"%{txt}%"))
+		)
+	).run(as_dict=False)
