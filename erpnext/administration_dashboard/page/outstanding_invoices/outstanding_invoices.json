@@ -1,0 +1,20 @@
+{
+ "content": null,
+ "creation": "2025-09-01 21:28:23.211407",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2025-09-01 21:28:23.211407",
+ "modified_by": "Administrator",
+ "module": "Administration Dashboard",
+ "name": "outstanding-invoices",
+ "owner": "Administrator",
+ "page_name": "outstanding-invoices",
+ "roles": [],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Outstanding Invoices",
+ "has_controller": 1
+}

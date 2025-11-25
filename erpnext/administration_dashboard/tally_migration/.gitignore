@@ -1,0 +1,5 @@
+*.pyc
+sources/~$*.*
+output/**/*
+*Zone.Identifier
+venv/
