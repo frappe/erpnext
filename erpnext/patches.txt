@@ -377,37 +377,4 @@ execute:frappe.db.set_single_value("Accounts Settings", "receivable_payable_fetc
 erpnext.patches.v14_0.set_update_price_list_based_on
 erpnext.patches.v14_0.rename_group_by_to_categorize_by_in_custom_reports
 erpnext.patches.v14_0.update_full_name_in_contract
-<<<<<<< HEAD
-=======
-erpnext.patches.v15_0.drop_sle_indexes #2025-09-18
-erpnext.patches.v15_0.update_pick_list_fields
-execute:frappe.db.set_single_value("Accounts Settings", "confirm_before_resetting_posting_date", 1)
-erpnext.patches.v15_0.rename_pos_closing_entry_fields #2025-06-13
-erpnext.patches.v15_0.update_pegged_currencies
-erpnext.patches.v15_0.set_status_cancelled_on_cancelled_pos_opening_entry_and_pos_closing_entry
-erpnext.patches.v15_0.set_company_on_pos_inv_merge_log
-erpnext.patches.v15_0.update_payment_ledger_entries_against_advance_doctypes
-erpnext.patches.v15_0.rename_price_list_to_buying_price_list
-erpnext.patches.v15_0.repost_gl_entries_with_no_account_subcontracting #2025-08-04
-erpnext.patches.v15_0.patch_missing_buying_price_list_in_material_request
-erpnext.patches.v15_0.remove_sales_partner_from_consolidated_sales_invoice
-erpnext.patches.v15_0.update_uae_zero_rated_fetch
-erpnext.patches.v15_0.add_company_payment_gateway_account
-erpnext.patches.v16_0.set_invoice_type_in_pos_settings
-erpnext.patches.v15_0.update_fieldname_in_accounting_dimension_filter
-erpnext.patches.v16_0.make_workstation_operating_components #1
-erpnext.patches.v16_0.set_reporting_currency
-erpnext.patches.v16_0.set_posting_datetime_for_sabb_and_drop_indexes
-erpnext.patches.v16_0.update_serial_no_reference_name
-erpnext.patches.v16_0.update_account_categories_for_existing_accounts
-erpnext.patches.v16_0.rename_subcontracted_quantity
-erpnext.patches.v16_0.add_new_stock_entry_types
-erpnext.patches.v15_0.set_asset_status_if_not_already_set
-erpnext.patches.v15_0.toggle_legacy_controller_for_period_closing
-erpnext.patches.v16_0.update_serial_batch_entries
-erpnext.patches.v16_0.set_company_wise_warehouses
-erpnext.patches.v16_0.set_valuation_method_on_companies
-erpnext.patches.v15_0.migrate_old_item_wise_tax_detail_data_to_table
-erpnext.patches.v16_0.migrate_budget_records_to_new_structure
 erpnext.patches.v16_0.update_currency_exchange_settings_for_frankfurter
->>>>>>> f1f68ead7d (chore: switched frankfurter api domain from api.frankfurter.app to api.frankfurter.dev)
