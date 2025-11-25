@@ -80,11 +80,12 @@ frappe.ui.form.on("Customer", {
 				},
 			};
 		});
+
 		frm.set_query("customer_primary_address", function (doc) {
 			return {
+				query: "erpnext.selling.doctype.customer.customer.get_customer_primary_address",
 				filters: {
-					link_doctype: "Customer",
-					link_name: doc.name,
+					customer: doc.name,
 				},
 			};
 		});

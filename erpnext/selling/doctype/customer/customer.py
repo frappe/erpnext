@@ -831,6 +831,26 @@ def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, fil
 	)
 
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_customer_primary_address(doctype, txt, searchfield, start, page_len, filters):
+	customer = filters.get("customer")
+
+	addr = qb.DocType("Address")
+	dlink = qb.DocType("Dynamic Link")
+
+	return (
+		qb.from_(addr)
+		.join(dlink)
+		.on(addr.name == dlink.parent)
+		.select(addr.name)
+		.where(
+			(dlink.link_name == customer) & (addr.name.like(f"%{txt}%")) & (dlink.link_doctype == "Customer")
+		)
+		.run(debug=1)
+	)
+
+
 def parse_full_name(full_name: str) -> tuple[str, str | None, str | None]:
 	"""Parse full name into first name, middle name and last name"""
 	names = full_name.split()
