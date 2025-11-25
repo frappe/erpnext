@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-23 09:35+0000\n"
-"PO-Revision-Date: 2025-11-24 23:43\n"
+"PO-Revision-Date: 2025-11-25 23:49\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -64,7 +64,7 @@ msgstr " نام"
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:144
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:185
 msgid " Phantom Item"
-msgstr ""
+msgstr " آیتم فانتوم"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:594
 msgid " Rate"
@@ -1395,7 +1395,7 @@ msgstr "حساب برای تغییر مبلغ"
 
 #: erpnext/accounts/doctype/budget/budget.py:149
 msgid "Account is mandatory"
-msgstr ""
+msgstr "حساب الزامی است"
 
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:46
 msgid "Account is mandatory to get payment entries"
@@ -1444,7 +1444,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/budget/budget.py:158
 msgid "Account {0} does not belong to company {1}"
-msgstr ""
+msgstr "حساب {0} متعلق به شرکت {1} نیست"
 
 #: erpnext/setup/doctype/company/company.py:272
 msgid "Account {0} does not belong to company: {1}"
@@ -2519,7 +2519,7 @@ msgstr "افزودن تخفیف سفارش"
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:281
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:416
 msgid "Add Phantom Item"
-msgstr ""
+msgstr "اضافه کردن آیتم فانتوم"
 
 #. Label of the add_quote (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -6578,7 +6578,7 @@ msgstr "درخت BOM"
 
 #: erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py:27
 msgid "BOM UOM"
-msgstr ""
+msgstr "واحد اندازه گیری BOM"
 
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/bom_update_batch/bom_update_batch.json
@@ -6813,7 +6813,7 @@ msgstr "تراز ارزش موجودی"
 #. Label of the balance_type (Select) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Balance Type"
-msgstr ""
+msgstr "نوع تراز"
 
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:174
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:86
@@ -8151,7 +8151,7 @@ msgstr "مبلغ بودجه"
 
 #: erpnext/accounts/doctype/budget/budget.py:83
 msgid "Budget Amount can not be {0}."
-msgstr ""
+msgstr "مبلغ بودجه نمی‌تواند {0} باشد."
 
 #. Label of the budget_detail (Section Break) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -8168,7 +8168,7 @@ msgstr ""
 #. Label of the budget_end_date (Date) field in DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "Budget End Date"
-msgstr ""
+msgstr "تاریخ پایان بودجه"
 
 #: erpnext/accounts/doctype/budget/budget.py:538
 #: erpnext/accounts/doctype/budget/budget.py:540
@@ -8188,7 +8188,7 @@ msgstr "لیست بودجه"
 #. Label of the budget_start_date (Date) field in DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "Budget Start Date"
-msgstr ""
+msgstr "تاریخ شروع بودجه"
 
 #. Name of a report
 #. Label of a Link in the Accounting Workspace
@@ -13107,7 +13107,7 @@ msgstr "آدرس‌ها و اطلاعات تماس مشتری"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:159
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:268
 msgid "Customer Advances"
-msgstr ""
+msgstr "پیش‌پرداخت‌های مشتری"
 
 #. Label of the customer_code (Small Text) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -13659,7 +13659,7 @@ msgstr "درون‌بُرد داده‌ها و تنظیمات"
 #. Label of the data_source (Select) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Data Source"
-msgstr ""
+msgstr "منبع داده"
 
 #. Label of the date (Date) field in DocType 'Bulk Transaction Log Detail'
 #: erpnext/bulk_transaction/doctype/bulk_transaction_log_detail/bulk_transaction_log_detail.json
@@ -14366,7 +14366,7 @@ msgstr "حساب دریافتنی پیش‌فرض"
 #. Label of the default_sales_contact (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Default Sales Contact"
-msgstr ""
+msgstr "مخاطب فروش پیش‌فرض"
 
 #. Label of the sales_uom (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -14415,7 +14415,7 @@ msgstr "UOM پیش‌فرض موجودی"
 #. Label of the valuation_method (Select) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Default Stock Valuation Method"
-msgstr ""
+msgstr "روش ارزش‌گذاری موجودی پیش‌فرض"
 
 #. Label of the default_supplier (Link) field in DocType 'Item Default'
 #: erpnext/stock/doctype/item_default/item_default.json
@@ -15228,7 +15228,7 @@ msgstr "شرح محتوا"
 #. Template'
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.json
 msgid "Descriptive name for your template (e.g., 'Standard P&L', 'Detailed Balance Sheet')"
-msgstr ""
+msgstr "نام توصیفی برای الگوی شما (مثلاً «سود و زیان استاندارد»، «ترازنامه تفصیلی»)"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:14
 msgid "Designer"
@@ -15495,7 +15495,7 @@ msgstr "غیرفعال کردن انتخاب‌گر شماره سریال و د�
 #. Template'
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.json
 msgid "Disable template to prevent use in reports"
-msgstr ""
+msgstr "غیرفعال کردن الگو برای جلوگیری از استفاده در گزارش‌ها"
 
 #: erpnext/accounts/general_ledger.py:149
 msgid "Disabled Account Selected"
@@ -15891,7 +15891,7 @@ msgstr "تنظیمات ارسال"
 #. Label of the display_name (Data) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Display Name"
-msgstr ""
+msgstr "نام نمایشی"
 
 #. Label of the disposal_date (Date) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -15965,7 +15965,7 @@ msgstr "توزیع هزینه ها بر اساس"
 #. Label of the distribute_equally (Check) field in DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "Distribute Equally"
-msgstr ""
+msgstr "توزیع به طور مساوی"
 
 #. Option for the 'Distribute Charges Based On' (Select) field in DocType
 #. 'Landed Cost Voucher'
@@ -16006,7 +16006,7 @@ msgstr "مبلغ تخفیف توزیع شده"
 #. Label of the distribution_frequency (Select) field in DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "Distribution Frequency"
-msgstr ""
+msgstr "فراوانی توزیع"
 
 #. Label of the distribution_id (Data) field in DocType 'Monthly Distribution'
 #: erpnext/accounts/doctype/monthly_distribution/monthly_distribution.json
@@ -16800,7 +16800,7 @@ msgstr "پیش‌پرداخت‌ های کارمند"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:184
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:321
 msgid "Employee Benefits Obligation"
-msgstr ""
+msgstr "تعهدات مزایای کارکنان"
 
 #. Label of the employee_detail (Section Break) field in DocType 'Timesheet'
 #: erpnext/projects/doctype/timesheet/timesheet.json
@@ -18312,12 +18312,12 @@ msgstr "نسبت های مالی"
 #. Name of a DocType
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Financial Report Row"
-msgstr ""
+msgstr "ردیف گزارش مالی"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.json
 msgid "Financial Report Template"
-msgstr ""
+msgstr "الگوی گزارش مالی"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:242
 msgid "Financial Report Template {0} is disabled"
@@ -18619,7 +18619,7 @@ msgstr "سال مالی {0} وجود ندارد"
 
 #: erpnext/accounts/doctype/budget/budget.py:96
 msgid "Fiscal Year {0} is not available for Company {1}."
-msgstr ""
+msgstr "سال مالی {0} برای شرکت {1} در دسترس نیست."
 
 #: erpnext/accounts/report/trial_balance/trial_balance.py:43
 msgid "Fiscal Year {0} is required"
@@ -19133,7 +19133,7 @@ msgstr "از BOM"
 #: erpnext/manufacturing/report/bom_stock_calculated/bom_stock_calculated.py:63
 #: erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py:25
 msgid "From BOM No"
-msgstr ""
+msgstr "از شماره BOM"
 
 #. Label of the from_company (Data) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
@@ -19247,7 +19247,7 @@ msgstr "از سال مالی"
 
 #: erpnext/accounts/doctype/budget/budget.py:109
 msgid "From Fiscal Year cannot be greater than To Fiscal Year"
-msgstr ""
+msgstr "از سال مالی نمی‌تواند بزرگتر از تا سال مالی باشد"
 
 #. Label of the from_folio_no (Data) field in DocType 'Share Transfer'
 #: erpnext/accounts/doctype/share_transfer/share_transfer.json
@@ -20530,7 +20530,7 @@ msgstr "آیتم اسکن شده است"
 #. and Charges'
 #: erpnext/stock/doctype/landed_cost_taxes_and_charges/landed_cost_taxes_and_charges.json
 msgid "Has Operating Cost"
-msgstr ""
+msgstr "هزینه عملیاتی دارد"
 
 #. Label of the has_print_format (Check) field in DocType 'Cheque Print
 #. Template'
@@ -22162,7 +22162,7 @@ msgstr "تورفتگی"
 #. Label of the indentation_level (Int) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Indent Level"
-msgstr ""
+msgstr "سطح تورفتگی"
 
 #. Description of the 'Indent Level' (Int) field in DocType 'Financial Report
 #. Row'
@@ -22790,7 +22790,7 @@ msgstr "عبارت شرط نامعتبر است"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:93
 msgid "Invalid filter formula. Please check the syntax."
-msgstr ""
+msgstr "فرمول فیلتر نامعتبر است. لطفاً syntax را بررسی کنید."
 
 #: erpnext/selling/doctype/quotation/quotation.py:274
 msgid "Invalid lost reason {0}, please create a new lost reason"
@@ -23328,7 +23328,7 @@ msgstr "انبار گروه است"
 #: erpnext/setup/doctype/holiday/holiday.json
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 msgid "Is Half Day"
-msgstr ""
+msgstr "نیم روز است"
 
 #. Label of the is_internal_customer (Check) field in DocType 'Sales Invoice'
 #. Label of the is_internal_customer (Check) field in DocType 'Customer'
@@ -23427,7 +23427,7 @@ msgstr "ثبت سند مالی پایان دوره است"
 #. Label of the is_phantom_bom (Check) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Is Phantom BOM"
-msgstr ""
+msgstr "BOM فانتوم است"
 
 #. Label of the is_phantom_item (Check) field in DocType 'BOM Creator Item'
 #. Label of the is_phantom_item (Check) field in DocType 'BOM Item'
@@ -23435,7 +23435,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
 #: erpnext/manufacturing/report/bom_explorer/bom_explorer.py:68
 msgid "Is Phantom Item"
-msgstr ""
+msgstr "آیتم فانتوم است"
 
 #. Label of the po_required (Select) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
@@ -24675,7 +24675,7 @@ msgstr "سفارش مجدد آیتم"
 #. Label of the item_row (Data) field in DocType 'Item Wise Tax Detail'
 #: erpnext/accounts/doctype/item_wise_tax_detail/item_wise_tax_detail.json
 msgid "Item Row"
-msgstr ""
+msgstr "ردیف آیتم"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:145
 msgid "Item Row {0}: {1} {2} does not exist in above '{1}' table"
@@ -26655,7 +26655,7 @@ msgstr "مرکز هزینه اصلی {0} را نمی‌توان در جدول ف
 #. Item'
 #: erpnext/manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgid "Main Item Code"
-msgstr ""
+msgstr "کد آیتم اصلی"
 
 #: erpnext/assets/doctype/asset/asset.js:136
 msgid "Maintain Asset"
@@ -28215,7 +28215,7 @@ msgstr "Min Qty باید بیشتر از Recurse Over Qty باشد"
 
 #: erpnext/stock/doctype/item/item.js:827
 msgid "Min Value: {0}, Max Value: {1}, in Increments of: {2}"
-msgstr ""
+msgstr "حداقل مقدار: {0}، حداکثر مقدار: {1}، با گام‌های: {2}"
 
 #. Label of the minimum_invoice_amount (Currency) field in DocType 'Payment
 #. Reconciliation'
@@ -28353,7 +28353,7 @@ msgstr "الگوی ایمیل برای ارسال وجود ندارد. لطفا�
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:223
 msgid "Missing required filter: {0}"
-msgstr ""
+msgstr "فیلتر مورد نیاز موجود نیست: {0}"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1111
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1448
@@ -28459,7 +28459,7 @@ msgstr "اصلاح شده در"
 #. Label of the module (Link) field in DocType 'Financial Report Template'
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.json
 msgid "Module (for Export)"
-msgstr ""
+msgstr "ماژول (برای برون‌بُرد)"
 
 #. Label of the monitor_progress (Section Break) field in DocType 'Project'
 #: erpnext/projects/doctype/project/project.json
@@ -40829,7 +40829,7 @@ msgstr "راه‌اندازی مجدد"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation_list.js:23
 msgid "Restart Failed Entries"
-msgstr ""
+msgstr "شروع مجدد ثبت‌های ناموفق"
 
 #: erpnext/accounts/doctype/subscription/subscription.js:54
 msgid "Restart Subscription"
@@ -41184,16 +41184,16 @@ msgstr "بررسی ها"
 
 #: erpnext/accounts/doctype/budget/budget.js:37
 msgid "Revise Budget"
-msgstr ""
+msgstr "بازنگری بودجه"
 
 #. Label of the revision_of (Data) field in DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "Revision Of"
-msgstr ""
+msgstr "بازنگری"
 
 #: erpnext/accounts/doctype/budget/budget.js:92
 msgid "Revision cancelled"
-msgstr ""
+msgstr "بازنگری لغو شد"
 
 #. Label of the rgt (Int) field in DocType 'Account'
 #. Label of the rgt (Int) field in DocType 'Company'
@@ -50026,7 +50026,7 @@ msgstr "مقدار {0} تنظیم شده در این درخواست پرداخت
 
 #: erpnext/controllers/stock_controller.py:1240
 msgid "The batch {0} is already reserved in {1} {2}. So, cannot proceed with the {3} {4}, which is created against the {5} {6}."
-msgstr ""
+msgstr "دسته {0} از قبل در {1} {2} رزرو شده است. بنابراین، نمی‌توان با {3} {4} که به ازای {5} {6} ایجاد شده است، ادامه داد."
 
 #: erpnext/accounts/doctype/dunning/dunning.py:87
 msgid "The currency of invoice {} ({}) is different from the currency of this dunning ({})."
@@ -52020,11 +52020,11 @@ msgstr "درصد کل مشارکت باید برابر با 100 باشد"
 
 #: erpnext/accounts/doctype/budget/budget.py:331
 msgid "Total distributed amount {0} must be equal to Budget Amount {1}"
-msgstr ""
+msgstr "مبلغ توزیع کل {0} باید برابر با مبلغ بودجه {1} باشد"
 
 #: erpnext/accounts/doctype/budget/budget.py:338
 msgid "Total distribution percent must equal 100 (currently {0})"
-msgstr ""
+msgstr "درصد توزیع کل باید برابر با ۱۰۰ باشد (در حال حاضر {0})"
 
 #: erpnext/projects/doctype/project/project_dashboard.html:2
 msgid "Total hours: {0}"
@@ -53719,7 +53719,7 @@ msgstr "اعتبارسنجی مقادیر و اجزاء در هر BOM"
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Validate Material Transfer Warehouses"
-msgstr ""
+msgstr "اعتبارسنجی انبارهای انتقال مواد"
 
 #. Label of the validate_negative_stock (Check) field in DocType 'Inventory
 #. Dimension'
@@ -53926,7 +53926,7 @@ msgstr "گزاره ارزش"
 #. Label of the fieldtype (Select) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Value Type"
-msgstr ""
+msgstr "نوع مقدار"
 
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:599
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:629
@@ -54157,7 +54157,7 @@ msgstr "تنظیمات ویدیو"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:7
 msgid "View Account Coverage"
-msgstr ""
+msgstr "مشاهده پوشش حساب"
 
 #: erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.js:25
 msgid "View BOM Update Log"
@@ -54753,7 +54753,7 @@ msgstr "هشدار: سفارش فروش {0} در مقابل سفارش خرید 
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_validation.py:77
 msgid "Warnings"
-msgstr ""
+msgstr "هشدارها"
 
 #. Label of a Card Break in the Support Workspace
 #: erpnext/support/workspace/support/support.json
@@ -56390,7 +56390,7 @@ msgstr "{0} گونه ایجاد شد."
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:232
 msgid "{0} view is currently unsupported in Custom Financial Report."
-msgstr ""
+msgstr "نمای {0} در حال حاضر در گزارش مالی سفارشی پشتیبانی نمی‌شود."
 
 #: erpnext/accounts/doctype/payment_term/payment_term.js:19
 msgid "{0} will be given as discount."
