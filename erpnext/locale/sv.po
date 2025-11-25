@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-23 09:35+0000\n"
-"PO-Revision-Date: 2025-11-24 23:44\n"
+"PO-Revision-Date: 2025-11-25 23:50\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -6045,7 +6045,7 @@ msgstr "Automatiskt Skapa Inköp Följesedel"
 #. in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Auto Create Serial and Batch Bundle For Outward"
-msgstr "Automatiskt Skapa Serie Nummer och Parti Paket för Utleverans"
+msgstr "Automatiskt Skapa Serie Nummer och Parti Paket för Extern"
 
 #. Label of the auto_create_subcontracting_order (Check) field in DocType
 #. 'Buying Settings'
@@ -20177,7 +20177,7 @@ msgstr "Överförd"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2072
 msgid "Goods are already received against the outward entry {0}"
-msgstr "Artiklarna redan mottagna mot utleverans post {0}"
+msgstr "Artiklarna redan mottagna mot extern post {0}"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:190
 msgid "Government"
@@ -23179,7 +23179,7 @@ msgstr "Fakturering Funktioner"
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.json
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgid "Inward"
-msgstr "Inleverans"
+msgstr "Intern"
 
 #. Label of the is_account_payable (Check) field in DocType 'Cheque Print
 #. Template'
@@ -23498,7 +23498,7 @@ msgstr "Är Öppning Post"
 #. Label of the is_outward (Check) field in DocType 'Serial and Batch Entry'
 #: erpnext/stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 msgid "Is Outward"
-msgstr "Är Utleverans"
+msgstr "Är Extern"
 
 #. Label of the is_packed (Check) field in DocType 'Serial and Batch Bundle'
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
@@ -31351,7 +31351,7 @@ msgstr "Utstående för {0} kan inte vara mindre än noll ({1})"
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.json
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgid "Outward"
-msgstr "Utleverans"
+msgstr "Extern"
 
 #. Label of the over_billing_allowance (Currency) field in DocType 'Accounts
 #. Settings'
@@ -46950,7 +46950,7 @@ msgstr "Lager Post"
 #. Label of the outgoing_stock_entry (Link) field in DocType 'Stock Entry'
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Stock Entry (Outward GIT)"
-msgstr "Lager Post (Utleverans GIT)"
+msgstr "Lager Post (Extern GIT)"
 
 #. Label of the ste_detail (Data) field in DocType 'Stock Entry Detail'
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -47817,7 +47817,7 @@ msgstr "Underleverantörer Leverans"
 #: erpnext/selling/doctype/sales_order/sales_order_dashboard.py:33
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Subcontracting Inward"
-msgstr "Underleverantör Inleverans"
+msgstr "Intern Underleverantör"
 
 #. Label of the subcontracting_inward_order (Link) field in DocType 'Work
 #. Order'
@@ -50050,7 +50050,7 @@ msgstr "Stycklista före"
 
 #: erpnext/stock/serial_batch_bundle.py:1495
 msgid "The Batch {0} has negative batch quantity {1}. To fix this, go to the batch and click on Recalculate Batch Qty. If the issue still persists, create an inward entry."
-msgstr "Parti {0} har negativ parti kvantitet {1}. För att åtgärda detta, gå till Parti Inställningar och aktivera Räkna om Parti Kvantitet. Om problemet kvarstår, skapa inleverans post."
+msgstr "Parti {0} har negativ parti kvantitet {1}. För att åtgärda detta, gå till Parti Inställningar och aktivera Räkna om Parti Kvantitet. Om problemet kvarstår, skapa intern post."
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:71
 msgid "The Campaign '{0}' already exists for the {1} '{2}'"
@@ -50106,7 +50106,7 @@ msgstr "Serienummer {0} är reserverad för {1} {2} och får inte användas för
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1597
 msgid "The Serial and Batch Bundle {0} is not valid for this transaction. The 'Type of Transaction' should be 'Outward' instead of 'Inward' in Serial and Batch Bundle {0}"
-msgstr "Serie och Parti Paket {0} är inte giltigt för denna transaktion. \"Typ av Transaktion\" ska vara \"Utleverans\" istället för \"Inleverans\" i Serie och Parti Paket {0}"
+msgstr "Serie och Parti Paket {0} är inte giltigt för denna transaktion. \"Typ av Transaktion\" ska vara \"Extern\" istället för \"Intern\" i Serie och Parti Paket {0}"
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:17
 msgid "The Stock Entry of type 'Manufacture' is known as backflush. Raw materials being consumed to manufacture finished goods is known as backflushing. <br><br> When creating Manufacture Entry, raw-material items are backflushed based on BOM of production item. If you want raw-material items to be backflushed based on Material Transfer entry made against that Work Order instead, then you can set it under this field."
@@ -55675,7 +55675,7 @@ msgstr "Du kan inte göra några ändringar i Jobbkort eftersom Arbetsorder är 
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:189
 msgid "You can't process the serial number {0} as it has already been used in the SABB {1}. {2} if you want to inward same serial number multiple times then enabled 'Allow existing Serial No to be Manufactured/Received again' in the {3}"
-msgstr "Du kan inte behandla serienummer {0} eftersom det redan har använts i Serienummer och Parti Paket {1}. {2} För att skapa inleverans av samma serienummer flera gånger aktivera \"Tillåt att befintligt serienummer Produceras/Tas Emot igen\" i {3}"
+msgstr "Du kan inte behandla serienummer {0} eftersom det redan har använts i Serienummer och Parti Paket {1}. {2} För att skapa intern serienummer flera gånger aktivera \"Tillåt att befintligt serienummer Produceras/Tas Emot igen\" i {3}"
 
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.py:192
 msgid "You can't redeem Loyalty Points having more value than the Total Amount."
