@@ -263,13 +263,16 @@ class JobCard(Document):
 					)
 
 				if d.from_time and d.to_time:
-					d.time_in_mins = time_diff_in_hours(d.to_time, d.from_time) * 60
+					d.time_in_mins = flt(
+						time_diff_in_hours(d.to_time, d.from_time) * 60, d.precision("time_in_mins")
+					)
 					self.total_time_in_mins += d.time_in_mins
 
 				if d.completed_qty and not self.sub_operations:
 					self.total_completed_qty += d.completed_qty
 
 			self.total_completed_qty = flt(self.total_completed_qty, self.precision("total_completed_qty"))
+			self.total_time_in_mins = flt(self.total_time_in_mins, self.precision("total_time_in_mins"))
 
 			if save and self.docstatus == 1:
 				self.db_set(
