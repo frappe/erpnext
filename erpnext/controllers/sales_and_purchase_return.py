@@ -186,7 +186,7 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 		frappe.get_meta(doc.doctype + " Item").get_field(
 			"stock_qty" if doc.get("update_stock", "") else "qty"
 		),
-		company_currency,
+		currency=company_currency,
 	)
 
 	for column in fields:

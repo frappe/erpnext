@@ -442,7 +442,7 @@ def update_against_account(voucher_type, voucher_no):
 	if not entries:
 		return
 	company_currency = erpnext.get_company_currency(entries[0].company)
-	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"), company_currency)
+	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"), currency=company_currency)
 
 	accounts_debited, accounts_credited = [], []
 	for d in entries:
