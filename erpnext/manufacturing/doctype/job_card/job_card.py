@@ -18,6 +18,7 @@ from frappe.utils import (
 	get_datetime,
 	get_link_to_form,
 	get_time,
+	get_user_time_format,
 	getdate,
 	time_diff,
 	time_diff_in_hours,
@@ -668,8 +669,8 @@ class JobCard(Document):
 		self.append(
 			"scheduled_time_logs",
 			{
-				"from_time": row.planned_start_time,
-				"to_time": row.planned_end_time,
+				"from_time": normalize_datetime(row.planned_start_time),
+				"to_time": normalize_datetime(row.planned_end_time),
 				"completed_qty": 0,
 				"time_in_mins": time_diff_in_minutes(row.planned_end_time, row.planned_start_time),
 			},
@@ -1613,3 +1614,27 @@ def make_corrective_job_card(source_name, operation=None, for_operation=None, ta
 	)
 
 	return doclist
+
+
+def normalize_datetime(dt):
+	"""
+	Normalize datetime to match the UI time format precision.
+
+	Strips microseconds always, and strips seconds if the user's time format
+	doesn't include seconds. This prevents the "Not Saved" dirty flag issue
+	caused by datetime precision mismatch between server and client.
+	"""
+	if not dt:
+		return None
+
+	dt = get_datetime(dt)
+	time_format = get_user_time_format()
+
+	# Always strip microseconds
+	dt = dt.replace(microsecond=0)
+
+	# Strip seconds if time format is HH:mm (not HH:mm:ss)
+	if time_format == "HH:mm":
+		dt = dt.replace(second=0)
+
+	return dt
