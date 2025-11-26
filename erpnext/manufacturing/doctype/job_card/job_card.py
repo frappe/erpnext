@@ -443,7 +443,7 @@ class JobCard(Document):
 			op_row.employee.append(time_log.employee)
 			if time_log.time_in_mins:
 				op_row.completed_time += time_log.time_in_mins
-				op_row.completed_qty += time_log.completed_qty
+				op_row.completed_qty += flt(time_log.completed_qty)
 
 		for row in self.sub_operations:
 			operation_deatils = operation_wise_completed_time.get(row.sub_operation)
