@@ -252,7 +252,7 @@ class ExchangeRateRevaluation(Document):
 		company_currency = erpnext.get_company_currency(company)
 		precision = get_field_precision(
 			frappe.get_meta("Exchange Rate Revaluation Account").get_field("new_balance_in_base_currency"),
-			company_currency,
+			currency=company_currency,
 		)
 
 		if account_details:
