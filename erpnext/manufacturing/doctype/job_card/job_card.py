@@ -649,17 +649,27 @@ class JobCard(Document):
 				if row.status != "Complete":
 					row.status = operation_deatils.status
 
-				row.completed_time = operation_deatils.completed_time
+				completed_time = flt(operation_deatils.completed_time, row.precision("completed_time"))
 				if operation_deatils.employee:
-					row.completed_time = row.completed_time / len(set(operation_deatils.employee))
+					completed_time = flt(
+						operation_deatils.completed_time / len(set(operation_deatils.employee)),
+						row.precision("completed_time"),
+					)
 
 					if operation_deatils.completed_qty:
-						row.completed_qty = operation_deatils.completed_qty / len(
-							set(operation_deatils.employee)
+						row.completed_qty = flt(
+							operation_deatils.completed_qty / len(set(operation_deatils.employee)),
+							row.precision("completed_qty"),
 						)
+
+				# Only update completed_time if value actually changed.
+				# completed_time is a Data (string) field, so compare as floats
+				if flt(row.completed_time) != completed_time:
+					row.completed_time = completed_time
 			else:
 				row.status = "Pending"
-				row.completed_time = 0.0
+				if flt(row.completed_time) != 0.0:
+					row.completed_time = 0.0
 				row.completed_qty = 0.0
 
 	def update_time_logs(self, row):
