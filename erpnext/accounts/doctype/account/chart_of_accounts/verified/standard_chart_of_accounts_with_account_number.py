@@ -228,7 +228,6 @@ def get():
 				},
 				_("Impairment"): {"account_number": "5224", "account_category": "Operating Expenses"},
 				_("Tax Expense"): {"account_number": "5225", "account_category": "Tax Expense"},
-				"account_number": "5200",
 			},
 			"root_type": "Expense",
 			"account_number": "5000",
