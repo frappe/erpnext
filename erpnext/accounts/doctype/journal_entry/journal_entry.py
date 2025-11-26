@@ -1720,7 +1720,7 @@ def get_account_details_and_party_type(account, date, company, debit=None, credi
 		"account_type": account_details.account_type,
 		"account_currency": account_details.account_currency or company_currency,
 		"bank_account": (
-			frappe.db.get_value("Bank Account", {"account": account, "company": company}, ["name"]) or ""
+			frappe.db.get_value("Bank Account", {"account": account, "company": company}) or None
 		),
 		# The date used to retreive the exchange rate here is the date passed in
 		# as an argument to this function. It is assumed to be the date on which the balance is sought
