@@ -20,6 +20,8 @@ LEDGER_ENTRY_DOCTYPES = frozenset(
 	)
 )
 
+DELETION_CACHE_TTL = 4 * 60 * 60  # 4 hours in seconds
+
 PROTECTED_CORE_DOCTYPES = frozenset(
 	(
 		# Core Meta
@@ -58,6 +60,9 @@ PROTECTED_CORE_DOCTYPES = frozenset(
 		"Workspace",
 		"Dashboard",
 		"Access Log",
+		# Transaction Deletion
+		"Transaction Deletion Record",
+		"Company",
 	)
 )
 
@@ -252,16 +257,13 @@ class TransactionDeletionRecord(Document):
 	def before_submit(self):
 		if queued_docs := frappe.db.get_all(
 			"Transaction Deletion Record",
-			filters={"company": self.company, "status": ("in", ["Running", "Queued"]), "docstatus": 1},
+			filters={"status": ("in", ["Running", "Queued"]), "docstatus": 1},
 			pluck="name",
 		):
 			frappe.throw(
 				_(
-					"Cannot enqueue multi docs for one company. {0} is already queued/running for company: {1}"
-				).format(
-					comma_and([get_link_to_form("Transaction Deletion Record", x) for x in queued_docs]),
-					frappe.bold(self.company),
-				)
+					"Cannot start deletion. Another deletion {0} is already queued/running. Please wait for it to complete."
+				).format(comma_and([get_link_to_form("Transaction Deletion Record", x) for x in queued_docs]))
 			)
 
 		if not self.doctypes_to_delete and not self.doctypes_to_be_ignored:
@@ -289,6 +291,21 @@ class TransactionDeletionRecord(Document):
 
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
+		self._clear_deletion_cache()
+
+	def _set_deletion_cache(self):
+		"""Set Redis cache flags for per-doctype validation"""
+		for item in self.doctypes_to_delete:
+			frappe.cache.set_value(
+				f"deletion_running_doctype:{item.doctype_name}",
+				self.name,
+				expires_in_sec=DELETION_CACHE_TTL,
+			)
+
+	def _clear_deletion_cache(self):
+		"""Clear Redis cache flags"""
+		for item in self.doctypes_to_delete:
+			frappe.cache.delete_value(f"deletion_running_doctype:{item.doctype_name}")
 
 	def _get_child_tables(self, doctype_name):
 		"""Get list of child table DocType names for a given DocType
@@ -581,6 +598,7 @@ class TransactionDeletionRecord(Document):
 						message = "Traceback: <br>" + traceback
 						frappe.db.set_value(self.doctype, self.name, "error_log", message)
 					frappe.db.set_value(self.doctype, self.name, "status", "Failed")
+					self._clear_deletion_cache()
 
 	def delete_notifications(self):
 		self.validate_doc_status()
@@ -620,6 +638,7 @@ class TransactionDeletionRecord(Document):
 	def start_deletion_tasks(self):
 		# This method is the entry point for the chain of events that follow
 		self.db_set("status", "Running")
+		self._set_deletion_cache()
 		self.enqueue_task(task="Delete Bins")
 
 	def delete_bins(self):
@@ -827,6 +846,7 @@ class TransactionDeletionRecord(Document):
 				self.db_set("status", "Completed")
 				self.db_set("delete_transactions_status", "Completed")
 				self.db_set("error_log", None)
+				self._clear_deletion_cache()
 
 	def get_doctypes_to_be_ignored_list(self):
 		doctypes_to_be_ignored_list = frappe.get_all(
@@ -1058,12 +1078,13 @@ def process_import_template(transaction_deletion_record_name, file_url):
 @frappe.whitelist()
 @request_cache
 def is_deletion_doc_running(company: str | None = None, err_msg: str | None = None):
-	if not company:
-		return
+	"""Check if any deletion is running globally
 
+	The company parameter is kept for backwards compatibility but is now ignored.
+	"""
 	running_deletion_job = frappe.db.get_value(
 		"Transaction Deletion Record",
-		{"docstatus": 1, "company": company, "status": "Running"},
+		{"docstatus": 1, "status": ("in", ["Running", "Queued"])},
 		"name",
 	)
 
@@ -1072,18 +1093,28 @@ def is_deletion_doc_running(company: str | None = None, err_msg: str | None = No
 
 	frappe.throw(
 		title=_("Deletion in Progress!"),
-		msg=_("Transaction Deletion Document: {0} is running for this Company. {1}").format(
+		msg=_("Transaction Deletion Record {0} is already running. {1}").format(
 			get_link_to_form("Transaction Deletion Record", running_deletion_job), err_msg or ""
 		),
 	)
 
 
 def check_for_running_deletion_job(doc, method=None):
-	# Hook function called on document validate - method parameter required by Frappe
-	# Check if DocType has 'company' field
-	if doc.doctype in LEDGER_ENTRY_DOCTYPES or not doc.meta.has_field("company"):
+	"""Hook function called on document validate - checks Redis cache for running deletions"""
+	if doc.doctype in LEDGER_ENTRY_DOCTYPES:
 		return
 
-	is_deletion_doc_running(
-		doc.company, _("Cannot make any transactions until the deletion job is completed")
-	)
+	if doc.doctype in PROTECTED_CORE_DOCTYPES:
+		return
+
+	deletion_name = frappe.cache.get_value(f"deletion_running_doctype:{doc.doctype}")
+
+	if deletion_name:
+		frappe.throw(
+			title=_("Deletion in Progress!"),
+			msg=_(
+				"Transaction Deletion Record {0} is currently deleting {1}. Cannot save documents until deletion completes."
+			).format(
+				get_link_to_form("Transaction Deletion Record", deletion_name), frappe.bold(doc.doctype)
+			),
+		)

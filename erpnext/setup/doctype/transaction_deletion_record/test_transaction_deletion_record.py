@@ -8,14 +8,34 @@ from frappe.tests import IntegrationTestCase
 
 class TestTransactionDeletionRecord(IntegrationTestCase):
 	def setUp(self):
+		# Clear all deletion cache flags from previous tests
+		self._clear_all_deletion_cache_flags()
 		create_company("Dunder Mifflin Paper Co")
 
 	def tearDown(self):
+		# Clean up all deletion cache flags after each test
+		self._clear_all_deletion_cache_flags()
 		frappe.db.rollback()
+
+	def _clear_all_deletion_cache_flags(self):
+		"""Clear all deletion_running_doctype:* cache keys"""
+		# Get all keys matching the pattern
+		cache_keys = frappe.cache.get_keys("deletion_running_doctype:*")
+		if cache_keys:
+			for key in cache_keys:
+				# Decode bytes to string if needed
+				key_str = key.decode() if isinstance(key, bytes) else key
+				# Extract just the key name (remove site prefix if present)
+				# Keys are in format: site_prefix|deletion_running_doctype:DocType
+				if "|" in key_str:
+					key_name = key_str.split("|")[1]
+				else:
+					key_name = key_str
+				frappe.cache.delete_value(key_name)
 
 	def test_doctypes_contain_company_field(self):
 		"""Test that all DocTypes in To Delete list have a valid company link field"""
-		tdr = create_transaction_deletion_doc("Dunder Mifflin Paper Co")
+		tdr = create_and_submit_transaction_deletion_doc("Dunder Mifflin Paper Co")
 		for doctype_row in tdr.doctypes_to_delete:
 			# If company_field is specified, verify it's a valid Company link field
 			if doctype_row.company_field:
@@ -38,7 +58,7 @@ class TestTransactionDeletionRecord(IntegrationTestCase):
 		"""Test that document counts are calculated correctly in To Delete list"""
 		for _ in range(5):
 			create_task("Dunder Mifflin Paper Co")
-		tdr = create_transaction_deletion_doc("Dunder Mifflin Paper Co")
+		tdr = create_and_submit_transaction_deletion_doc("Dunder Mifflin Paper Co")
 		tdr.reload()
 
 		# Check To Delete list has correct count
@@ -53,7 +73,7 @@ class TestTransactionDeletionRecord(IntegrationTestCase):
 	def test_deletion_is_successful(self):
 		"""Test that deletion actually removes documents"""
 		create_task("Dunder Mifflin Paper Co")
-		create_transaction_deletion_doc("Dunder Mifflin Paper Co")
+		create_and_submit_transaction_deletion_doc("Dunder Mifflin Paper Co")
 		tasks_containing_company = frappe.get_all("Task", filters={"company": "Dunder Mifflin Paper Co"})
 		self.assertEqual(tasks_containing_company, [])
 
@@ -154,7 +174,7 @@ class TestTransactionDeletionRecord(IntegrationTestCase):
 		company = "Dunder Mifflin Paper Co"
 		create_task(company)
 
-		tdr = create_transaction_deletion_doc(company)
+		tdr = create_and_submit_transaction_deletion_doc(company)
 		tdr.reload()
 
 		# After deletion, Task should be marked as deleted in To Delete list
@@ -256,13 +276,119 @@ class TestTransactionDeletionRecord(IntegrationTestCase):
 			TransactionDeletionRecord.get_naming_series_prefix("JUSTPREFIX", "Task"), "JUSTPREFIX"
 		)
 
+	def test_cache_flag_management(self):
+		"""Test that cache flags can be set and cleared correctly"""
+		company = "Dunder Mifflin Paper Co"
+		create_task(company)
+
+		tdr = frappe.new_doc("Transaction Deletion Record")
+		tdr.company = company
+		tdr.insert()
+		tdr.generate_to_delete_list()
+		tdr.reload()
+
+		# Test _set_deletion_cache
+		tdr._set_deletion_cache()
+
+		# Verify flag is set for Task specifically
+		cached_value = frappe.cache.get_value("deletion_running_doctype:Task")
+		self.assertEqual(cached_value, tdr.name, "Cache flag should be set for Task")
+
+		# Test _clear_deletion_cache
+		tdr._clear_deletion_cache()
+
+		# Verify flag is cleared
+		cached_value = frappe.cache.get_value("deletion_running_doctype:Task")
+		self.assertIsNone(cached_value, "Cache flag should be cleared for Task")
+
+	def test_check_for_running_deletion_blocks_save(self):
+		"""Test that check_for_running_deletion_job blocks saves when cache flag exists"""
+		from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
+			check_for_running_deletion_job,
+		)
+
+		company = "Dunder Mifflin Paper Co"
+
+		# Manually set cache flag to simulate running deletion
+		frappe.cache.set_value("deletion_running_doctype:Task", "TDR-00001", expires_in_sec=60)
+
+		try:
+			# Try to validate a new Task
+			new_task = frappe.new_doc("Task")
+			new_task.company = company
+			new_task.subject = "Should be blocked"
+
+			# Should throw error when cache flag exists
+			with self.assertRaises(frappe.ValidationError) as context:
+				check_for_running_deletion_job(new_task)
+
+			error_message = str(context.exception)
+			self.assertIn("currently deleting", error_message)
+			self.assertIn("TDR-00001", error_message)
+		finally:
+			# Cleanup: clear the manually set flag
+			frappe.cache.delete_value("deletion_running_doctype:Task")
+
+	def test_check_for_running_deletion_allows_save_when_no_flag(self):
+		"""Test that documents can be saved when no deletion is running"""
+		company = "Dunder Mifflin Paper Co"
+
+		# Ensure no cache flag exists
+		frappe.cache.delete_value("deletion_running_doctype:Task")
+
+		# Try to create and save a new Task
+		new_task = frappe.new_doc("Task")
+		new_task.company = company
+		new_task.subject = "Should be allowed"
+
+		# Should NOT throw error when no cache flag - actually save it
+		try:
+			new_task.insert()
+			# Cleanup
+			frappe.delete_doc("Task", new_task.name)
+		except frappe.ValidationError as e:
+			self.fail(f"Should allow save when no deletion is running, but got: {e}")
+
+	def test_only_one_deletion_allowed_globally(self):
+		"""Test that only one deletion can be submitted at a time (global enforcement)"""
+		company1 = "Dunder Mifflin Paper Co"
+		company2 = "Sabre Corporation"
+
+		create_company(company2)
+
+		# Create and submit first deletion (but don't start it)
+		tdr1 = frappe.new_doc("Transaction Deletion Record")
+		tdr1.company = company1
+		tdr1.insert()
+		tdr1.append("doctypes_to_delete", {"doctype_name": "Task", "company_field": "company"})
+		tdr1.save()
+		tdr1.submit()  # Status becomes "Queued"
+
+		try:
+			# Try to submit second deletion for different company
+			tdr2 = frappe.new_doc("Transaction Deletion Record")
+			tdr2.company = company2  # Different company!
+			tdr2.insert()
+			tdr2.append("doctypes_to_delete", {"doctype_name": "Lead", "company_field": "company"})
+			tdr2.save()
+
+			# Should throw error - only one deletion allowed globally
+			with self.assertRaises(frappe.ValidationError) as context:
+				tdr2.submit()
+
+			self.assertIn("already", str(context.exception).lower())
+			self.assertIn(tdr1.name, str(context.exception))
+		finally:
+			# Cleanup
+			tdr1.cancel()
+
 
 def create_company(company_name):
 	company = frappe.get_doc({"doctype": "Company", "company_name": company_name, "default_currency": "INR"})
 	company.insert(ignore_if_duplicate=True)
 
 
-def create_transaction_deletion_doc(company):
+def create_and_submit_transaction_deletion_doc(company):
 	"""Create and execute a transaction deletion record"""
 	tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": company})
 	tdr.insert()
