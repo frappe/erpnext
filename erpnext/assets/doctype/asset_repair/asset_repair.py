@@ -11,7 +11,6 @@ from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.assets.doctype.asset.asset import get_asset_account
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	get_depr_schedule,
 	reschedule_depreciation,
 )
 from erpnext.controllers.accounts_controller import AccountsController
@@ -56,7 +55,7 @@ class AssetRepair(AccountsController):
 	# end: auto-generated types
 
 	def validate(self):
-		self.asset_doc = frappe.get_doc("Asset", self.asset)
+		self.asset_doc = frappe.get_lazy_doc("Asset", self.asset)
 		self.validate_asset()
 		self.validate_dates()
 		self.validate_purchase_invoices()
@@ -81,35 +80,62 @@ class AssetRepair(AccountsController):
 			)
 
 	def validate_purchase_invoices(self):
+		invoices = self.get_invoice_data()
+		if not invoices:
+			return
+
 		for d in self.invoices:
-			self.validate_purchase_invoice_status(d.purchase_invoice)
-			invoice_items = self.get_invoice_items(d.purchase_invoice)
+			invoice = invoices.get(d.purchase_invoice) or {}
+			invoice_items = invoice.get("items") or []
+			self.validate_purchase_invoice_status(invoice)
 			self.validate_service_purchase_invoice(d.purchase_invoice, invoice_items)
 			self.validate_expense_account(d, invoice_items)
 			self.validate_purchase_invoice_repair_cost(d, invoice_items)
 
-	def validate_purchase_invoice_status(self, purchase_invoice):
-		docstatus = frappe.db.get_value("Purchase Invoice", purchase_invoice, "docstatus")
-		if docstatus == 0:
-			frappe.throw(
-				_("{0} is still in Draft. Please submit it before saving the Asset Repair.").format(
-					get_link_to_form("Purchase Invoice", purchase_invoice)
-				)
-			)
+	def get_invoice_data(self):
+		pi_names = [d.purchase_invoice for d in self.invoices]
+		if not pi_names:
+			return {}
 
-	def get_invoice_items(self, pi):
-		invoice_items = frappe.get_all(
-			"Purchase Invoice Item",
-			filters={"parent": pi},
-			fields=["item_code", "expense_account", "base_net_amount"],
+		pi_data = frappe.get_all(
+			"Purchase Invoice",
+			filters={"name": ("in", pi_names)},
+			fields=["name", "docstatus"],
 		)
 
-		return invoice_items
+		pi_item_data = frappe.get_all(
+			"Purchase Invoice Item",
+			filters={"parent": ("in", pi_names)},
+			fields=["parent", "item_code", "expense_account", "base_net_amount"],
+		)
+
+		invoice_data = frappe._dict()
+		for pi in pi_data:
+			invoice_data[pi.name] = frappe._dict(
+				{
+					"name": pi.name,  # Add this line
+					"docstatus": pi.docstatus,
+					"items": [],
+				}
+			)
+
+		for item in pi_item_data:
+			invoice_data[item.parent]["items"].append(item)
+
+		return invoice_data
+
+	def validate_purchase_invoice_status(self, purchase_invoice):
+		if purchase_invoice.docstatus == 0:
+			frappe.throw(
+				_("{0} is still in Draft. Please submit it before saving the Asset Repair.").format(
+					get_link_to_form("Purchase Invoice", purchase_invoice.name)
+				)
+			)
 
 	def validate_service_purchase_invoice(self, purchase_invoice, invoice_items):
 		service_item_exists = False
 		for item in invoice_items:
-			if frappe.db.get_value("Item", item.item_code, "is_stock_item") == 0:
+			if frappe.get_cached_value("Item", item.item_code, "is_stock_item") == 0:
 				service_item_exists = True
 				break
 
@@ -196,7 +222,7 @@ class AssetRepair(AccountsController):
 		self.cancel_sabb()
 
 	def after_delete(self):
-		frappe.get_doc("Asset", self.asset).set_status()
+		frappe.get_lazy_doc("Asset", self.asset).set_status()
 
 	def check_repair_status(self):
 		if self.repair_status == "Pending" and self.docstatus == 1:
@@ -332,7 +358,10 @@ class AssetRepair(AccountsController):
 			return
 
 		# creating GL Entries for each row in Stock Items based on the Stock Entry created for it
-		stock_entry = frappe.get_doc("Stock Entry", {"asset_repair": self.name})
+		stock_entry_name = frappe.db.get_value("Stock Entry", {"asset_repair": self.name}, "name")
+		stock_entry_items = frappe.get_all(
+			"Stock Entry Detail", filters={"parent": stock_entry_name}, fields=["expense_account", "amount"]
+		)
 
 		default_expense_account = None
 		if not erpnext.is_perpetual_inventory_enabled(self.company):
@@ -342,7 +371,7 @@ class AssetRepair(AccountsController):
 			if not default_expense_account:
 				frappe.throw(_("Please set default Expense Account in Company {0}").format(self.company))
 
-		for item in stock_entry.items:
+		for item in stock_entry_items:
 			if flt(item.amount) > 0:
 				gl_entries.append(
 					self.get_gl_dict(
@@ -373,7 +402,7 @@ class AssetRepair(AccountsController):
 							"cost_center": self.cost_center,
 							"posting_date": self.completion_date,
 							"against_voucher_type": "Stock Entry",
-							"against_voucher": stock_entry.name,
+							"against_voucher": stock_entry_name,
 							"company": self.company,
 						},
 						item=self,
