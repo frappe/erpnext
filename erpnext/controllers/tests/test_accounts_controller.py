@@ -16,8 +16,12 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_pay
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
-from erpnext.buying.doctype.purchase_order.test_purchase_order import prepare_data_for_internal_transfer
+from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+	create_purchase_order,
+	prepare_data_for_internal_transfer,
+)
 from erpnext.projects.doctype.project.test_project import make_project
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item
 
 
@@ -2227,6 +2231,11 @@ class TestAccountsController(IntegrationTestCase):
 		)
 		supplier_shipping.append("links", {"link_doctype": "Supplier", "link_name": "_Test Supplier"})
 		supplier_shipping.save()
+		company_address = make_address(
+			address_title="test", address_type="Billing", address_line1="100", city="Mumbai"
+		)
+		company_address.append("links", {"link_doctype": "User", "link_name": "Administrator"})
+		company_address.save()
 
 		si = create_sales_invoice(do_not_save=True)
 		si.customer_address = supplier_billing.name
@@ -2245,6 +2254,22 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertRaises(frappe.ValidationError, pi.save)
 		pi.supplier_address = supplier_shipping.name
 		pi.save()
+
+		so = make_sales_order(do_not_save=True)
+		so.company_address = company_address.name
+		self.assertRaises(frappe.ValidationError, so.save)
+
+		si = create_sales_invoice(do_not_save=True)
+		si.company_address = company_address.name
+		self.assertRaises(frappe.ValidationError, si.save)
+
+		pi = make_purchase_invoice(do_not_save=True)
+		pi.billing_address = company_address.name
+		self.assertRaises(frappe.ValidationError, pi.save)
+
+		po = create_purchase_order(do_not_save=True)
+		po.billing_address = company_address.name
+		self.assertRaises(frappe.ValidationError, po.save)
 
 	def test_party_contact(self):
 		from frappe.contacts.doctype.contact.test_contact import create_contact
