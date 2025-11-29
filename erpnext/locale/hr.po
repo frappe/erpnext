@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-23 09:35+0000\n"
-"PO-Revision-Date: 2025-11-24 23:44\n"
+"PO-Revision-Date: 2025-11-29 00:29\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Croatian\n"
 "MIME-Version: 1.0\n"
@@ -4256,7 +4256,7 @@ msgstr "Dozvoljena dimenzija"
 #. Ledger Settings'
 #: erpnext/accounts/doctype/repost_accounting_ledger_settings/repost_accounting_ledger_settings.json
 msgid "Allowed Doctypes"
-msgstr "Dozvoljeni Tipovi Dokumenata"
+msgstr "Dopušteni Doctypes"
 
 #. Group in Supplier's connections
 #. Group in Customer's connections
