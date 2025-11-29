@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-23 09:35+0000\n"
-"PO-Revision-Date: 2025-11-25 23:50\n"
+"PO-Revision-Date: 2025-11-29 00:29\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -4209,7 +4209,7 @@ msgstr "Tillåt Noll Pris"
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 #: erpnext/stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgid "Allow Zero Valuation Rate"
-msgstr "Tillåt Noll Värderingssats"
+msgstr "Tillåt Noll Grund Pris"
 
 #. Label of the allow_existing_serial_no (Check) field in DocType 'Stock
 #. Settings'
@@ -4262,7 +4262,7 @@ msgstr "Tillåten Dimension"
 #. Ledger Settings'
 #: erpnext/accounts/doctype/repost_accounting_ledger_settings/repost_accounting_ledger_settings.json
 msgid "Allowed Doctypes"
-msgstr "Tillåtna Dokument"
+msgstr "Tillåtna Doctypes"
 
 #. Group in Supplier's connections
 #. Group in Customer's connections
@@ -17671,7 +17671,7 @@ msgstr "Punktskatt Sida Nummer"
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "Excluded DocTypes"
-msgstr "Exkluderade DocTyper"
+msgstr "Exkluderade DocTypes"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:265
 msgid "Execution"
@@ -18444,7 +18444,7 @@ msgstr "Bokföringsår Start Datum"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Financial reports will be generated using GL Entry doctypes (should be enabled if Period Closing Voucher is not posted for all years sequentially or missing) "
-msgstr "Finansiella Rapporter kommer att genereras med hjälp av Bokföring Poster (ska vara aktiverat om Period Stängning Verifikat inte publiceras för alla år i följd eller saknas) "
+msgstr "Finansiella Rapporter kommer att genereras med hjälp av Bokföring Poster Doctypes (ska vara aktiverat om Period Stängning Verifikat inte publiceras för alla år i följd eller saknas) "
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:843
 #: erpnext/manufacturing/doctype/work_order/work_order.js:858
