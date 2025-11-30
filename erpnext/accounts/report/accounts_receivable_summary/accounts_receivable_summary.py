@@ -53,7 +53,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		)
 
 		if self.filters.show_gl_balance:
-			gl_balance_map = get_gl_balance(self.filters.report_date, self.filters.company)
+			gl_balance_map = get_gl_balance(self.filters.report_date, self.filters.company, self.account_type)
 
 		for party, party_dict in self.party_total.items():
 			if flt(party_dict.outstanding, self.currency_precision) == 0:
@@ -206,11 +206,15 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		)
 
 
-def get_gl_balance(report_date, company):
+def get_gl_balance(report_date, company, account_type):
+	if account_type == "Payable":
+		balance_calc_fields = ["party", {"SUM": [{"SUB": ["credit", "debit"]}], "as": "balance"}]
+	else:
+		balance_calc_fields = ["party", {"SUM": [{"SUB": ["debit", "credit"]}], "as": "balance"}]
 	return frappe._dict(
 		frappe.db.get_all(
 			"GL Entry",
-			fields=["party", {"SUM": [{"SUB": ["debit", "credit"]}], "as": "balance"}],
+			fields=balance_calc_fields,
 			filters={"posting_date": ("<=", report_date), "is_cancelled": 0, "company": company},
 			group_by="party",
 			as_list=1,

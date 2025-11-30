@@ -1249,11 +1249,12 @@
    "label": "Named Place"
   },
   {
-   "depends_on": "eval: (doc.is_subcontracted && !doc.is_old_subcontracting_flow)",
+   "depends_on": "subcontracting_receipt",
    "fieldname": "subcontracting_receipt",
    "fieldtype": "Link",
    "label": "Subcontracting Receipt",
    "options": "Subcontracting Receipt",
+   "read_only": 1,
    "search_index": 1
   },
   {
@@ -1309,7 +1310,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-12 19:53:48.173096",
+ "modified": "2025-11-27 16:46:30.210628",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
@@ -1380,4 +1381,3 @@
  "title_field": "title",
  "track_changes": 1
 }
-

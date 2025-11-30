@@ -1038,7 +1038,7 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 	def test_drop_shipping(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 		from erpnext.selling.doctype.sales_order.sales_order import (
-			make_purchase_order_for_default_supplier,
+			make_purchase_order,
 		)
 		from erpnext.selling.doctype.sales_order.sales_order import update_status as so_update_status
 
@@ -1071,7 +1071,7 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		so = make_sales_order(item_list=so_items, do_not_submit=True)
 		so.submit()
 
-		po = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])[0]
+		po = make_purchase_order(so.name, selected_items=[so_items[0]])[0]
 		po.submit()
 
 		dn = create_dn_against_so(so.name, delivered_qty=2)
@@ -1129,7 +1129,7 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 
 	def test_drop_shipping_partial_order(self):
 		from erpnext.selling.doctype.sales_order.sales_order import (
-			make_purchase_order_for_default_supplier,
+			make_purchase_order,
 		)
 		from erpnext.selling.doctype.sales_order.sales_order import update_status as so_update_status
 
@@ -1165,7 +1165,7 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		so.submit()
 
 		# create po for only one item
-		po1 = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])[0]
+		po1 = make_purchase_order(so.name, selected_items=[so_items[0]])[0]
 		po1.submit()
 
 		self.assertEqual(so.customer, po1.customer)
@@ -1175,7 +1175,7 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(len(po1.items), 1)
 
 		# create po for remaining item
-		po2 = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[1]])[0]
+		po2 = make_purchase_order(so.name, selected_items=[so_items[1]])[0]
 		po2.submit()
 
 		# teardown
@@ -1189,7 +1189,7 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 	def test_drop_shipping_full_for_default_suppliers(self):
 		"""Test if multiple POs are generated in one go against different default suppliers."""
 		from erpnext.selling.doctype.sales_order.sales_order import (
-			make_purchase_order_for_default_supplier,
+			make_purchase_order,
 		)
 
 		if not frappe.db.exists("Item", "_Test Item for Drop Shipping 1"):
@@ -1221,11 +1221,11 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		so = make_sales_order(item_list=so_items, do_not_submit=True)
 		so.submit()
 
-		purchase_orders = make_purchase_order_for_default_supplier(so.name, selected_items=so_items)
+		purchase_orders = make_purchase_order(so.name, selected_items=so_items)
 
 		self.assertEqual(len(purchase_orders), 2)
-		self.assertEqual(purchase_orders[0].supplier, "_Test Supplier")
-		self.assertEqual(purchase_orders[1].supplier, "_Test Supplier 1")
+		supplier_list = sorted([purchase_orders[0].supplier, purchase_orders[1].supplier])
+		self.assertEqual(supplier_list, ["_Test Supplier", "_Test Supplier 1"])
 
 	def test_product_bundles_in_so_are_replaced_with_bundle_items_in_po(self):
 		"""
@@ -1253,7 +1253,7 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 
 		so = make_sales_order(item_list=so_items)
 
-		purchase_order = make_purchase_order(so.name, selected_items=so_items)
+		purchase_order = make_purchase_order(so.name, selected_items=so_items)[0]
 
 		self.assertEqual(purchase_order.items[0].item_code, "_Test Bundle Item 1")
 		self.assertEqual(purchase_order.items[1].item_code, "_Test Bundle Item 2")
@@ -1283,7 +1283,7 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 
 		so = make_sales_order(item_list=so_items)
 
-		purchase_order = make_purchase_order(so.name, selected_items=so_items)
+		purchase_order = make_purchase_order(so.name, selected_items=so_items)[0]
 		purchase_order.supplier = "_Test Supplier"
 		purchase_order.set_warehouse = "_Test Warehouse - _TC"
 		purchase_order.save()
@@ -2559,7 +2559,7 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		)
 		so.submit()
 
-		po = make_purchase_order(so.name, selected_items=so.items)
+		po = make_purchase_order(so.name, selected_items=so.items)[0]
 		po.supplier = "_Test Supplier"
 		po.items[0].rate = 100
 		po.submit()

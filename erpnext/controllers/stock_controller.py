@@ -25,6 +25,7 @@ from erpnext.controllers.sales_and_purchase_return import (
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import get_warehouse_account_map
+from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	get_evaluated_inventory_dimension,
 )
@@ -1216,6 +1217,12 @@ class StockController(AccountsController):
 			],
 		}.get(self.doctype)
 
+		qty_field = {
+			"Sales Invoice": "qty",
+			"Delivery Note": "qty",
+			"Stock Entry": "fg_completed_qty",
+		}.get(self.doctype)
+
 		reserved_batches_data = self.get_reserved_batches(batches)
 		items = self.items
 		if self.doctype == "Stock Entry":
@@ -1234,6 +1241,17 @@ class StockController(AccountsController):
 						continue
 
 					if row.voucher_no == value:
+						continue
+
+					batch_qty = get_batch_qty(
+						row.batch_no,
+						row.warehouse,
+						posting_date=self.posting_date,
+						posting_time=self.posting_time,
+						consider_negative_batches=True,
+					)
+
+					if item.get(qty_field) < batch_qty:
 						continue
 
 					frappe.throw(
@@ -1264,6 +1282,7 @@ class StockController(AccountsController):
 				doctype.voucher_type,
 				doctype.voucher_no,
 				doctype.item_code,
+				doctype.warehouse,
 			)
 			.where((doctype.docstatus == 1) & (child_doc.batch_no.isin(batches)))
 		).run(as_dict=True)

@@ -74,17 +74,20 @@ frappe.ui.form.on("Customer", {
 
 		frm.set_query("customer_primary_contact", function (doc) {
 			return {
-				query: "erpnext.selling.doctype.customer.customer.get_customer_primary_contact",
+				query: "erpnext.selling.doctype.customer.customer.get_customer_primary",
 				filters: {
 					customer: doc.name,
+					type: "Contact",
 				},
 			};
 		});
+
 		frm.set_query("customer_primary_address", function (doc) {
 			return {
+				query: "erpnext.selling.doctype.customer.customer.get_customer_primary",
 				filters: {
-					link_doctype: "Customer",
-					link_name: doc.name,
+					customer: doc.name,
+					type: "Address",
 				},
 			};
 		});
