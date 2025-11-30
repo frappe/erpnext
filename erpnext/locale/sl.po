@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-23 09:35+0000\n"
-"PO-Revision-Date: 2025-11-29 00:29\n"
+"PO-Revision-Date: 2025-11-30 00:27\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Slovenian\n"
 "MIME-Version: 1.0\n"
@@ -2623,7 +2623,7 @@ msgstr ""
 #: erpnext/selling/doctype/sales_order/sales_order.js:649
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Add Schedule"
-msgstr ""
+msgstr "Dodaj Urnik"
 
 #. Label of the add_serial_batch_bundle (Button) field in DocType
 #. 'Subcontracting Receipt Item'
@@ -2660,12 +2660,12 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:200
 msgid "Add Stock"
-msgstr ""
+msgstr "Dodaj Zalogo"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:281
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:416
 msgid "Add Sub Assembly"
-msgstr ""
+msgstr "Dodaj Podsklop"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:503
 #: erpnext/public/js/event.js:32
@@ -2680,7 +2680,7 @@ msgstr "Dodaj Časovne Liste"
 #. List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 msgid "Add Weekly Holidays"
-msgstr ""
+msgstr "Dodaj Tedenske Praznike"
 
 #: erpnext/public/js/utils/crm_activities.js:144
 msgid "Add a Note"
@@ -3128,7 +3128,7 @@ msgstr ""
 
 #: erpnext/assets/doctype/asset/asset.js:146
 msgid "Adjust Asset Value"
-msgstr ""
+msgstr "Prilagodi Vrednost Sredstva"
 
 #. Label of the adjust_qty (Float) field in DocType 'Sales Forecast Item'
 #: erpnext/manufacturing/doctype/sales_forecast_item/sales_forecast_item.json
