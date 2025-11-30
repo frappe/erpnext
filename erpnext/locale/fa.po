@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-23 09:35+0000\n"
-"PO-Revision-Date: 2025-11-26 23:56\n"
+"PO-Revision-Date: 2025-11-30 00:27\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -5829,7 +5829,7 @@ msgstr "پیوست فایل CSV"
 #. Description of the 'File to Rename' (Attach) field in DocType 'Rename Tool'
 #: erpnext/utilities/doctype/rename_tool/rename_tool.json
 msgid "Attach a comma separated .csv file with two columns, one for the old name and one for the new name."
-msgstr ""
+msgstr "یک فایل .csv جدا شده با کاما با دو ستون، یکی برای نام قدیمی و دیگری برای نام جدید، پیوست کنید."
 
 #. Label of the import_file (Attach) field in DocType 'Chart of Accounts
 #. Importer'
@@ -7830,7 +7830,7 @@ msgstr "برش تا"
 #. Accounts'
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgid "Biweekly"
-msgstr ""
+msgstr "دو هفته یک بار"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:285
 msgid "Black"
@@ -16575,7 +16575,7 @@ msgstr "«فروش» یا «خرید» باید انتخاب شود"
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:290
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:441
 msgid "Either Workstation or Workstation Type is mandatory"
-msgstr ""
+msgstr "انتخاب ایستگاه کاری یا نوع ایستگاه کاری الزامی است"
 
 #: erpnext/setup/doctype/territory/territory.py:40
 msgid "Either target qty or target amount is mandatory"
@@ -18673,7 +18673,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/bom/bom.py:679
 msgid "Fixed Asset item {0} cannot be used in BOMs."
-msgstr ""
+msgstr "آیتم دارایی ثابت {0} را نمی‌توان در BOMها استفاده کرد."
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:43
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:76
@@ -26301,7 +26301,7 @@ msgstr "پیوند به تامین کننده انجام نشد. لطفا دوب
 #: erpnext/accounts/report/financial_ratios/financial_ratios.js:55
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:150
 msgid "Liquidity Ratios"
-msgstr ""
+msgstr "نسبت‌های نقدینگی"
 
 #. Description of the 'Items' (Section Break) field in DocType 'Product Bundle'
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
@@ -27812,7 +27812,7 @@ msgstr "حداکثر نمره"
 #. Label of the max_producible_qty (Float) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Max Producible Qty"
-msgstr ""
+msgstr "حداکثر مقدار قابل تولید"
 
 #. Label of the max_qty (Float) field in DocType 'Promotional Scheme Price
 #. Discount'
@@ -28756,7 +28756,7 @@ msgstr "مقدار منفی مجاز نیست"
 
 #: erpnext/stock/serial_batch_bundle.py:1498
 msgid "Negative Stock Error"
-msgstr ""
+msgstr "خطای موجودی منفی"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:625
 msgid "Negative Valuation Rate is not allowed"
@@ -45184,7 +45184,7 @@ msgstr "تامین کننده پیش‌فرض را تنظیم کنید"
 #. Inward Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Set Delivery Warehouse"
-msgstr ""
+msgstr "تنظیم انبار تحویل"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:400
 #: erpnext/manufacturing/doctype/job_card/job_card.js:469
