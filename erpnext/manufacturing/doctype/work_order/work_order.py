@@ -151,7 +151,6 @@ class WorkOrder(Document):
 
 	def onload(self):
 		ms = frappe.get_doc("Manufacturing Settings")
-		self.set_onload("allow_editing_items", ms.allow_editing_of_items_and_quantities_in_work_order)
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
