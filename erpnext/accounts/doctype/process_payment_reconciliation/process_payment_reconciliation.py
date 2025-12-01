@@ -413,7 +413,7 @@ def reconcile(doc: None | str = None) -> None:
 						pr.append("allocation", x)
 
 					# reconcile
-					pr.reconcile_allocations(skip_ref_details_update_for_pe=True)
+					pr.reconcile_allocations()
 
 					# If Payment Entry, update details only for newly linked references
 					# This is for performance
