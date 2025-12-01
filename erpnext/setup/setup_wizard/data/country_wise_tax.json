@@ -4981,10 +4981,19 @@
 	"United Kingdom": {
 		"tax_categories": [
 			{
-				"title" : "UK Export Customer - EU"
+				"title" : "VAT - Goods"
 			},
 			{
-				"title" : "UK Export Customer - Rest of World"
+				"title" : "VAT - Services"
+			},
+			{
+				"title" : "VAT - EU Address"
+			},
+			{
+				"title" : "VAT - Rest of World Address"
+			},
+			{
+				"title" : "VAT - Out of Scope"
 			}
 		],
 		"chart_of_accounts": {

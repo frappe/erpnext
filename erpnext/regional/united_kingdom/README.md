@@ -208,7 +208,7 @@ applied Item Tax Templates:-
 If no Item Tax Template is found, then we fall back to the default tax rate
 defined in the selected Sales Tax and Charge Template.
 
-## <a name="tr"></a> Tax Rules
+## <a name="tax_rules"></a> Tax Rules
 
 With the above in place, Tax Rules are created to Match against a Document, and
 then Apply a Sales or Purchase Tax Template.
@@ -280,7 +280,7 @@ the highest Priority (lowest number) is applied.
             <td rowspan="2">UK VAT Outside Scope</td>
         </tr>
         <tr>
-            <td>Tax Category &rarr; UK Export Customer - EU</td>
+            <td>Tax Category &rarr; VAT - EU Address</td>
         </tr>
         <!-- Last Row -->
         <tr>
@@ -291,12 +291,12 @@ the highest Priority (lowest number) is applied.
             <td rowspan="2">UK VAT Outside Scope</td>
         </tr>
         <tr>
-            <td>Tax Category &rarr; UK Export Customer - Rest of World</td>
+            <td>Tax Category &rarr; VAT - Rest of World Address</td>
         </tr>
     </tbody>
 </table>
 
-## <a name="tc"></a> Tax Categories
+## <a name="tax_categories"></a> Tax Categories
 
 Tax Categories can be applied to a number of different and unrelated DocTypes.
 They have no inherent functionality, but Tax Rules and internal calculation
@@ -326,8 +326,8 @@ manner, to override these assumed defaults.
 </tr>
 <!-- Row 1 -->
 <tr>
-    <td rowspan="3">UK VAT - EU Party</td>
-    <td>Customer</td>
+    <td rowspan="3">VAT - EU Address</td>
+    <td>Buying Document Address</td>
 </tr>
 <tr>
     <td>Supplier</td>

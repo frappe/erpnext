@@ -6,7 +6,7 @@ from frappe.desk.page.setup_wizard.setup_wizard import make_records
 
 
 def setup(company=None, patch=True):
-	pass
+	add_custom_roles_for_reports()
 
 
 def update_regional_tax_settings(country=None, company=None):
@@ -106,7 +106,7 @@ def update_regional_tax_settings(country=None, company=None):
 				{"title": "UK VAT Outside Scope", "company": company},
 			),
 			"use_for_shopping_cart": "1",
-			"tax_category": "UK Export Customer - EU",
+			"tax_category": "VAT - EU Address",
 			"priority": "40",
 			"company": company,
 		},
@@ -119,7 +119,7 @@ def update_regional_tax_settings(country=None, company=None):
 				{"title": "UK VAT Outside Scope", "company": company},
 			),
 			"use_for_shopping_cart": "1",
-			"tax_category": "UK Export Customer - Rest of World",
+			"tax_category": "VAT - Rest of World Address",
 			"priority": "50",
 			"company": company,
 		},
@@ -130,3 +130,15 @@ def update_regional_tax_settings(country=None, company=None):
 		make_records(tax_rules)
 	finally:
 		frappe.flags.in_import = False
+
+
+def add_custom_roles_for_reports():
+	"""Add Access Control to HMRC VAT Report."""
+	if not frappe.db.get_value("Custom Role", dict(report="HMRC VAT")):
+		frappe.get_doc(
+			dict(
+				doctype="Custom Role",
+				report="HMRC VAT",
+				roles=[dict(role="Accounts User"), dict(role="Accounts Manager"), dict(role="Auditor")],
+			)
+		).insert()
