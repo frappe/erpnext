@@ -12552,3 +12552,285 @@ quotation_item,teklif_kalemi,
 {0} {1} is allocated twice in this Bank Transaction,{0} {1} bu Banka İşleminde iki kez tahsis edilmiştir,
 {0} {1} is already linked to Common Code {2}.,{0} {1} zaten Ortak Kod {2} ile bağlantılıdır.,
 {0}: {1} does not belong to the Company: {2},{0}: {1} Şirketine ait değildir: {2},
+% Delivered,% Teslim Edildi,
+"<h4>Contract Template Example</h4>
+
+<pre>Contract for Customer {{ party_name }}
+
+-Valid From : {{ start_date }} 
+-Valid To : {{ end_date }}
+</pre>
+
+<h4>How to get fieldnames</h4>
+
+<p>The field names you can use in your Contract Template are the fields in the Contract for which you are creating the template. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Contract)</p>
+
+<h4>Templating</h4>
+
+<p>Templates are compiled using the Jinja Templating Language. To learn more about Jinja, <a class=""strong"" href=""http://jinja.pocoo.org/docs/dev/templates/"">read this documentation.</a></p>","<h4>Sözleşme Şablonu Örneği</h4>
+
+<pre>Müşteri için Sözleşme {{ party_name }}
+
+-Geçerli Başlangıç : {{ start_date }} 
+-Geçerli Bitiş : {{ end_date }}
+</pre>
+
+<h4>Alan adları nasıl alınır</h4>
+
+<p>Sözleşme Şablonunuzda kullanabileceğiniz alan adları, şablonunu oluşturduğunuz Sözleşmedeki alanlardır. Herhangi bir belgenin alanlarını Kurulum &gt; Form Görünümünü Özelleştir aracılığıyla ve belge türünü (örneğin Sözleşme) seçerek öğrenebilirsiniz</p>
+
+<h4>Şablonlama</h4>
+
+<p>Şablonlar Jinja Templating Language kullanılarak derlenir. Jinja hakkında daha fazla bilgi edinmek için <a class=""strong"" href=""http://jinja.pocoo.org/docs/dev/templates/"">bu belgeyi okuyun</a>.</p>",
+"<h4>Standard Terms and Conditions Example</h4>
+
+<pre>Delivery Terms for Order number {{ name }}
+
+-Order Date : {{ transaction_date }} 
+-Expected Delivery Date : {{ delivery_date }}
+</pre>
+
+<h4>How to get fieldnames</h4>
+
+<p>The fieldnames you can use in your email template are the fields in the document from which you are sending the email. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Sales Invoice)</p>
+
+<h4>Templating</h4>
+
+<p>Templates are compiled using the Jinja Templating Language. To learn more about Jinja, <a class=""strong"" href=""http://jinja.pocoo.org/docs/dev/templates/"">read this documentation.</a></p>","<h4>Standart Şartlar ve Koşullar Örneği</h4>
+
+<pre>Sipariş numarası için Teslimat Koşulları {{ name }}
+
+-Sipariş Tarihi: {{ transaction_date }} 
+-Beklenen Teslimat Tarihi: {{ delivery_date }}
+</pre>
+
+<h4>Alan adları nasıl alınır</h4>
+
+<p>E-posta şablonunuzda kullanabileceğiniz alan adları, e-postayı gönderdiğiniz belgedeki alanlardır. Herhangi bir belgenin alanlarını Kurulum &gt; Form Görünümünü Özelleştir ve belge türünü (örneğin Satış Faturası) seçerek bulabilirsiniz</p>
+
+<h4>Şablonlama</h4>
+
+<p>Şablonlar Jinja Şablonlama Dili kullanılarak derlenir. Jinja hakkında daha fazla bilgi edinmek için <a class=""strong"" href=""http://jinja.pocoo.org/docs/dev/templates/"">bu dokümanı okuyun.</a></p>",
+<li>Item {0} in row(s) {1} billed more than {2}</li>,<li> {1} satır(lar) ındaki {0} öğesi {2} öğesinden daha fazla faturalandırılmıştır </li>,
+<p>Cannot overbill for the following Items:</p>,<p>Aşağıdaki kalemler için faturalandırma limitinizi aşamazsınız:</p>,
+"<span class=""h4""><b>Your Shortcuts
+			
+		
+			
+		
+			
+		</b></span>","<span class=""h4""><b>Kısayollar
+			
+		
+			
+		
+			
+		</b></span>",
+"<table class=""table table-bordered table-condensed"">
+<thead>
+  <tr>
+         <th class=""table-sr"" style=""width: 50%;"">Child Document</th>
+         <th class=""table-sr"" style=""width: 50%;"">Non Child Document</th>
+   </tr>
+</thead>
+<tbody>
+<tr>
+         <td>
+                  <p> To access parent document field use parent.fieldname and to access child table document field use doc.fieldname </p>
+
+         </td>
+         <td>
+                    <p>To access document field use doc.fieldname </p>
+         </td>
+</tr>
+<tr>
+        <td>
+                   <p><b>Example: </b> parent.doctype == ""Stock Entry"" and doc.item_code == ""Test"" </p>
+
+        </td>
+         <td>
+                   <p><b>Example: </b> doc.doctype == ""Stock Entry"" and doc.purpose == ""Manufacture""</p>    
+          </td>
+</tr>
+
+</tbody>
+</table>
+
+
+
+
+
+
+","<table class=""table table-bordered table-condensed"">
+<thead>
+  <tr>
+         <th class=""table-sr"" style=""width: 50%;"">Çocuk Belgesi</th>
+         <th class=""table-sr"" style=""width: 50%;"">Çocuk Olmayan Belge</th>
+   </tr>
+</thead>
+<tbody>
+<tr>
+         <td>
+                  <p> Üst belge alanına erişmek için parent.fieldname ve alt tablo belge alanına erişmek için doc.fieldname kullanın </p>
+
+         </td>
+         <td>
+                    <p>Belge alanına erişmek için doc.fieldname kullanın </p>
+         </td>
+</tr>
+<tr>
+        <td>
+                   <p><b>Örnek: </b> parent.doctype == ""Stok Girişi"" ve doc.item_code == ""Test"" </p>
+
+        </td>
+         <td>
+                   <p><b>Örnek: </b> doc.doctype == ""Stok Girişi"" ve doc.purpose == ""Üretim""</p>    
+          </td>
+</tr>
+
+</tbody>
+</table>
+
+
+
+
+
+
+",
+Accounts Receivable / Payable Tuning,Alacaklar / Borçlar Ayarlaması,
+Action if Same Rate is Not Maintained Throughout  Internal Transaction,Dahili İşlem Boyunca Aynı Oran Korunmazsa Yapılacak İşlem,
+Against Pick List,Seçim Listesine Karşı,
+Allow Implicit Pegged Currency Conversion,Gizli Sabitlenmiş Para Birimi Dönüşümüne İzin Ver,
+Allow Partial Payment,Parçalı Ödemeye İzin Ver,
+Allow Purchase Order with Zero Quantity,Sıfır Miktarlı Satın Alma Emrine İzin Ver,
+Allow Quotation with Zero Quantity,Sıfır Miktarla Fiyat Teklifine İzin Ver,
+Allow Request for Quotation with Zero Quantity,Sıfır Miktarlı Fiyat Teklifi Talebine İzin Ver,
+Allow Sales Order with Zero Quantity,Sıfır Miktarlı Satış Siparişine İzin Ver,
+Allow Supplier Quotation with Zero Quantity,Sıfır Miktarla Tedarikçi Teklifine İzin Ver,
+Allow UOM with Conversion Rate Defined in Item,Üründe Dönüşüm Oranı Tanımlı UOM'ye İzin Ver,
+Allow to Make Quality Inspection after Purchase / Delivery,Satın Alma / Teslimat Sonrası Kalite Kontrolü Yapılmasına İzin Verin,
+Allows users to submit Purchase Orders with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.,Kullanıcıların sıfır miktarlı Satınalma Siparişleri göndermesine olanak tanır. Oranların sabit olduğu ancak miktarların sabit olmadığı durumlarda kullanışlıdır. Örnek Fiyat Sözleşmeleri.,
+Allows users to submit Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.,Kullanıcıların sıfır miktarlı Teklifler göndermesine olanak tanır. Fiyatların sabit olduğu ancak miktarların sabit olmadığı durumlarda kullanışlıdır. Örnek Fiyat Sözleşmeleri.,
+Allows users to submit Request for Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.,Kullanıcıların Teklif Taleplerini sıfır miktarla göndermelerine olanak tanır. Fiyatların sabit olduğu ancak miktarların sabit olmadığı durumlarda kullanışlıdır. Örn. Fiyat Sözleşmeleri.,
+Allows users to submit Sales Orders with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.,Kullanıcıların sıfır miktarlı Satış Siparişleri göndermesine izin verir. Oranların sabit olduğu ancak miktarların sabit olmadığı durumlarda kullanışlıdır. Örn. Fiyat Sözleşmeleri.,
+Allows users to submit Supplier Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.,Kullanıcıların Tedarikçi Tekliflerini sıfır miktarla göndermelerine olanak tanır. Fiyatların sabit olduğu ancak miktarların sabit olmadığı durumlarda kullanışlıdır. Örn. Fiyat Sözleşmeleri.,
+Also you can't switch back to FIFO after setting the valuation method to Moving Average for this item.,"Ayrıca, bu öğe için değerleme yöntemini Hareketli Ortalama olarak ayarladıktan sonra FIFO'ya geri dönemezsiniz.",
+Amount Difference with Purchase Invoice,Satın Alma Faturası ile Fiyat Farkı,
+Amount in Words,Yazı ile Tutar,
+Analysis Chart,Analiz Grafiği,
+Asset cannot be scrapped before the last depreciation entry.,"Varlık, son amortisman girişinden önce hurdaya çıkarılamaz.",
+Auto Fetch Serial Numbers,Seri Numaralarını Otomatik Getir,
+Auto Reconciliation has started in the background,Otomatik Mutabakat arka planda başladı,
+Auto Tax Settings Error,Otomatik Vergi Ayarları Hatası,
+Available Serial No,Mevcut Seri No,
+Bank Account {} in Bank Transaction {} is not matching with Bank Account {},"Banka İşlemi {}'ndeki Banka Hesabı {}, Banka Hesabı {} ile eşleşmiyor",
+Billing Address does not belong to the {0},Fatura Adresi {0}'a ait değil,
+Bin Qty Recalculated,Bin Miktarı Yeniden Hesaplandı,
+Buffered Cursor,Tamponlu İmleç,
+Bulk Rename Jobs,Toplu Yeniden Adlandırma İşleri,
+Calculate Ageing With,İle Yaşlanmayı Hesaplayın,
+Calculated Discount Mismatch,Hesaplanan İskonto Uyuşmazlığı,
+Cannot Create Return,İade Oluşturulamıyor,
+Cannot create return for consolidated invoice {0}.,Konsolide fatura için iade oluşturulamıyor {0}.,
+Cannot disassemble more than produced quantity.,Üretilen miktardan fazla parça sökülemez.,
+Cannot find Item or Warehouse with this Barcode,Bu Barkod ile Ürün veya Depo Bulunamıyor,
+Categorize By,Kategorize Et,
+Categorize by,Kategorize Et,
+Categorize by Account,Hesaba Göre Kategorilendir,
+Categorize by Item,Ürüne Göre,
+Categorize by Party,Cariye Göre,
+Categorize by Supplier,Tedarikçiye Göre,
+Categorize by Voucher,Faturaya Göre,
+Categorize by Voucher (Consolidated),Faturaya Göre (Konsolide),
+"Changing the valuation method to Moving Average will affect new transactions. If backdated entries are added, earlier FIFO-based entries will be reposted, which may change closing balances.","Değerleme yönteminin Hareketli Ortalama olarak değiştirilmesi yeni işlemleri etkileyecektir. Geçmişe dönük kayıtlar eklenirse, daha önceki FIFO tabanlı kayıtlar yeniden kaydedilecek ve bu da kapanış bakiyelerini değiştirebilir.",
+Company {0} added multiple times,{0} şirketi birden fazla kez eklendi,
+Consider Process Loss,İşlem Kaybını Göz Önünde Bulundurun,
+Contact Person does not belong to the {0},İrtibat Kişisi {0}'a ait değil,
+Conversion rate cannot be 0,Dönüşüm oranı 0 olamaz,
+"Conversion rate is 1.00, but document currency is different from company currency","Dönüşüm oranı 1.00, ancak belge para birimi şirket para biriminden farklı",
+Conversion rate must be 1.00 if document currency is same as company currency,"Belge para birimi şirket para birimi ile aynıysa dönüşüm oranı 1,00 olmalıdır",
+Cost Center for Item rows has been updated to {0},Ürün satırları için Maliyet Merkezi {0} olarak güncellendi,
+Cost of Goods Sold Account in Items Table,Kalemler Tablosunda Satılan Malların Maliyet Hesabı,
+Costing and Billing fields has been updated,Maliyetlendirme ve Faturalama alanları güncellendi,
+Create Delivery Note,Teslimat Notu Oluştur,
+Data Fetch Method,Veri Alma Yöntemi,
+Delivered Qty (in Stock UOM),Teslim Edilen Miktar (Stokta Mevcut),
+Depreciation eliminated via reversal,Ters işlemle giderilen amortisman,
+Difference Account in Items Table,Kalemler Tablosundaki Fark Hesabı,
+"Difference Account must be a Asset/Liability type account (Temporary Opening), since this Stock Entry is an Opening Entry",Bu Stok Mutabakatı bir Hesap Açılış Kaydı olduğundan farklı hesabının aktif ya da pasif bir hesap tipi olması gerekmektedir,
+Discount Amount in Transaction,İşlemdeki İndirim Tutarı,
+Discount Percentage in Transaction,İşlemdeki İndirim Yüzdesi,
+Dispatch Address Details,Gönderim Adresi Ayrıntıları,
+Dispatch Address Template,Gönderim Adresi Şablonu,
+Distributed Discount Amount,Dağıtılan İndirim Tutarı,
+Do you want to change valuation method?,Değerleme yöntemini değiştirmek istiyor musunuz?,
+Don't Enforce Free Item Qty,Ücretsiz Ürün Miktarını Zorunlu Tutma,
+Drop Procedures,Prosedürleri Kaldır,
+Drops existing SQL Procedures and Function setup by Accounts Receivable report,Alacak Hesapları raporuna göre mevcut SQL Prosedürlerini ve Fonksiyonlarının kurulumunu kaldırır,
+Employee Exit,Çalışan Çıkışı,
+Employee {0} is currently working on another workstation. Please assign another employee.,Çalışan {0} şu anda başka bir iş istasyonunda çalışıyor. Lütfen başka bir çalışan atayın.,
+Enabling this checkbox will force each Job Card Time Log to have From Time and To Time,"Bu onay kutusunun etkinleştirilmesi, her İş Kartı Zaman Günlüğünün Şu Zamandan ve Şu Zamana sahip olmasını zorunlu kılar",
+Enforce Time Logs,Zaman Günlüklerini Uygula,
+Enter date to scrap asset,Varlığın hurdaya çıkarılacağı tarihi girin,
+Fetch Latest Exchange Rate,Son Döviz Kurunu Getir,
+Fetch Timesheet in Sales Invoice,Satış Faturasında Zaman Çizelgesini Getir,
+Fetch Valuation Rate for Internal Transaction,Dahili İşlem için Değerleme Oranını Getir,
+"For the new {0} to take effect, would you like to clear the current {1}?",Yeni {0} ' in etkili olması için mevcut {1}' i temizlemek ister misiniz?,Clear payment terms template and/or payment schedule when due date is changed
+Future date is not allowed,Gelecek tarihe izin verilmiyor,
+Hide timesheets,Zaman çizelgelerini gizle,
+"If enabled, do not update serial / batch values in the stock transactions on creation of auto Serial 
+ / Batch Bundle. ","Etkinleştirildiğinde, otomatik Seri 
+ / Toplu Paket oluşturulması durumunda stok hareketlerindeki seri / toplu değerleri güncellemez. ",
+"If enabled, the system will allow selecting UOMs in sales and purchase transactions only if the conversion rate is set in the item master.","Etkinleştirildiğinde, sistem yalnızca öğe ana kaydında dönüşüm oranı ayarlandığında satış ve satın alma işlemlerinde ölçü birimlerinin seçilmesine izin verir.",
+"If enabled, the system will generate an accounting entry for materials rejected in the Purchase Receipt.","Etkinleştirilirse, sistem Satın Alma Makbuzunda reddedilen malzemeler için bir muhasebe girişi oluşturacaktır.",
+"If no taxes are set, and Taxes and Charges Template is selected, the system will automatically apply the taxes from the chosen template.","Herhangi bir vergi ayarlanmamışsa ve Vergiler ve Ücretler Şablonu seçilmişse, sistem seçilen şablonda ki vergileri otomatik olarak uygulayacaktır.",
+Incompatible Setting Detected,Uyumsuz Ayar Algılandı,
+Inter Company Purchase Order,Şirketler Arası Satınalma Siparişi,
+Inter Company Sales Order,Şirketler Arası Satış Siparişi,
+Internal Purchase Order,Dahili Satınalma Siparişi,
+Internal Sales Order,Dahili Satış Siparişi,
+Invalid amount in accounting entries of {} {} for Account {}: {},Hesap {} için {} {} muhasebe girişlerinde geçersiz tutar: {},
+Invoice ID,Fatura No,
+Last GL Entry update was done {}. This operation is not allowed while system is actively being used. Please wait for 5 minutes before retrying.,Son GL Girişi güncellemesi {} 'da yapıldı. Sistem aktif olarak kullanılırken bu işleme izin verilmez. Lütfen tekrar denemeden önce 5 dakika bekleyin.,
+Last Scanned Warehouse,Son Taranan Depo,
+Legacy Fields,Eski Alanlar,
+Maintain Same Rate Throughout Internal Transaction,Dahili İşlem Boyunca Aynı Oranı Koruyun,
+Naming Series is mandatory,Seri İsimlendirme zorunludur,
+Net Purchase Amount,Net Satın Alma Tutarı,
+No Purchase Orders were created,Hiçbir Satın Alma Siparişi oluşturulmadı,
+No Selection,Seçim Yok,
+No open POS Opening Entry found for POS Profile {0}.,POS Profili {0} için açık POS Açılış Girişi bulunamadı.,
+Non Depreciable Category,Amortismana Tabi Olmayan Kategori,
+Not able to find the earliest Fiscal Year for the given company.,Belirtilen şirket için en erken Mali Yıl bulunamadı.,
+Only payment entries with apply tax withholding unchecked will be considered for checking cumulative threshold breach,Kümülatif eşik ihlalinin kontrolü için yalnızca vergi stopajı uygula seçeneği işaretlenmemiş ödeme girişleri dikkate alınacaktır,
+Outstanding (Company Currency),Ödenmemiş (Şirket Para Birimi),
+POS Closed,POS Kapalı,
+POS has been closed at {0}. Please refresh the page.,POS {0}'da kapatıldı. Lütfen sayfayı yenileyin.,
+Party Full Name,Cari Tam Ünvan,
+Payment Status,Ödeme Durumu,
+Please set Customer Address to determine if the transaction is an export.,İşlemin bir ihracat olup olmadığını belirlemek için lütfen Müşteri Adresini ayarlayın.,
+Please set both the Tax ID and Fiscal Code on Company {0},Lütfen {0} Şirketi için hem Vergi Kimlik Numarasını hem de Muhasebe Kodunu ayarlayın,
+Raw SQL,Ham SQL,
+Recreate Stock Ledgers,Stok Defterlerini Yeniden Oluştur,
+Scheduling...,Zamanlama...,
+Scrap date cannot be before purchase date,Hurdaya çıkarma tarihi satın alma tarihinden önce olamaz,
+Select Dispatch Address ,Sevkiyat Adresini Seçin ,
+Select the date,Tarihi seçin,
+Serial No (In/Out),Seri No (Giriş/Çıkış),
+Set Serial and Batch Bundle Naming Based on Naming Series,Seri ve Toplu Paket Adlandırmasını Adlandırma Serisine Göre Ayarlama,
+Set Valuation Rate for Rejected Materials,Reddedilen Malzemeler için Değerleme Oranı Belirleyin,
+Shipping Address does not belong to the {0},Gönderim Adresi {0}'a ait değil,
+Show Opening and Closing Balance,Açılış ve Kapanış Bakiyesini Göster,
+Sub Total,Ara Toplam,
+Subcontracted Purchase Order,Alt Yüklenici Satın Alma Emri,
+Subcontracting Conversion Factor,Alt Sözleşme Dönüşüm Faktörü,
+Suspected Discount Amount,Şüpheli İndirim Tutarı,
+System In Use,Sistem Kullanımda,
+"System will do an implicit conversion using the pegged currency. <br>
+Ex: Instead of AED -&gt; INR, system will do AED -&gt; USD -&gt; INR using the pegged exchange rate of AED against USD.","Sistem, sabitlenmiş para birimini kullanarak örtük bir dönüştürme yapacaktır. <br>
+Örn: AED -&gt; INR yerine, sistem AED -&gt; USD -&gt; INR işlemini AED'nin USD'ye karşı sabitlenmiş döviz kurunu kullanarak yapacaktır.",
+"The following batches are expired, please restock them: <br> {0}","Aşağıdaki partilerin son kullanma tarihi geçmiştir, lütfen yeniden stoklayın: <br> {0}",
+Total Weight (kg),Toplam Ağırlık (kg),
+Transaction Name,İşlem Adı,
+UOM {0} not found in Item {1},{1} Ürünü için {0} Ölçü Birimi bulunamadı,
+UnReconcile Allocations,Karşılıksız Tahsisler,
