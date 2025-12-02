@@ -62,7 +62,7 @@ frappe.query_reports["HMRC VAT"] = {
 
 		const styles = {
 			0: "font-weight-bold", // bold box rows
-			1: "font-italic", // bold and italic rate rows
+			1: "font-italic", // italic rate rows
 			2: "font-weight-normal", // normal invoice rows
 			3: "small", // small item rows
 		};

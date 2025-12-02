@@ -89,7 +89,72 @@ class UKVatReport:
 	def run(self):
 		columns = get_columns(periods=self.periods)
 		data = self.get_data()
-		return columns, data
+		message = self.get_message()
+		chart = self.get_chart()
+		summary = self.get_summary()
+		return columns, data, message, chart, summary
+
+	def get_chart(self) -> dict:
+		"""Return chart data for the report."""
+		datasets = []
+		dataset_names = {3: "Output VAT", 4: "Input VAT"}
+		for box_id, box_name in dataset_names.items():
+			dataset = {
+				"name": box_name,
+			}
+			values = []
+			for _, _, label in self.periods:
+				# Get summary box data from summary boxes  3 and 4
+				if self.box_data[box_id]:
+					box_totals = self.get_box_totals(box_id)
+					values.append(box_totals.get(label, 0))
+			dataset["values"] = values
+			datasets.append(dataset)
+
+		chart = {
+			"data": {
+				"labels": [label for _, _, label in self.periods],
+				"datasets": datasets,
+			},
+			"type": "bar",
+		}
+		return chart
+
+	def get_summary(self) -> list[dict]:
+		"""Return summary data for the report."""
+		summary = []
+		def add_to_summary(value, label=None, indicator=None):
+			summary.append(
+				{
+					"value": value,
+					"label": label,
+					"indicator": indicator,
+					"datatype": "Currency",
+					"currency": "GBP",
+				}
+			)
+		last_period = self.periods[-1][2]
+		dataset_names = ((3, "Output VAT"), (4, "Input VAT"), (5, "Net VAT owed to or from HMRC"))
+		for box_id, dataset_name in dataset_names:
+			last_period_box_amount = self.get_box_amount(box_id, last_period)
+			add_to_summary(
+				last_period_box_amount,
+				label=f"Box {box_id}: {dataset_name}",
+				indicator="green" if last_period_box_amount >= 0 else "red"
+			)
+		return summary
+
+	def get_message(self) -> str | None:
+		"""Return a message for the report based on the summary data."""
+		from frappe.utils import fmt_money
+		last_period = self.periods[-1][2]
+		last_period_box_amount = self.get_box_amount(5, last_period)
+		if last_period_box_amount > 0:
+			return _("You owe £{0} to HMRC.").format(fmt_money(last_period_box_amount, currency="GBP"))
+		elif last_period_box_amount < 0:
+			return _("HMRC owes you £{0}.").format(fmt_money(-last_period_box_amount, currency="GBP"))
+		else:
+			return _("No VAT payment is due.")
 
 	def get_data(self) -> list[list]:
 		"""Return data for the report.
@@ -148,9 +213,15 @@ class UKVatReport:
 			self._eu_sales_data = self.filter_tax_rated_data(self.sales_data, "place_of_supply", "EU")
 		return self._eu_sales_data
 
-	def get_box_totals(self, box_id):
-		header = self.box_data.get(box_id, [])[0] if self.box_data.get(box_id) else {}
-		return {label: header.get(f"box_contribution_{label}", 0) for _, _, label in self.periods}
+	def get_box_amount(self, box_id: int, period_label: str) -> float:
+		"""Return the amount for the given VAT box and period label or None if not found."""
+		box_data = self.box_data.get(box_id, [])[0] if self.box_data.get(box_id) else {}
+		return box_data.get(period_label, 0.0)
+
+	def get_box_totals(self, box_id: int) -> dict[str, float]:
+		"""Return total amounts for each period label in the given VAT box."""
+		box_data = self.box_data.get(box_id, [])[0] if self.box_data.get(box_id) else {}
+		return {label: box_data.get(label, 0.0) for _, _, label in self.periods}
 
 	def calc_box_3(self):
 		totals_1 = self.get_box_totals(1)
@@ -172,7 +243,8 @@ class UKVatReport:
 
 		row = {"row_head": _(f"Box 5: {self.box_descriptions[5]}"), "indent": 0}
 		for label in totals_3:
-			row[f"box_contribution_{label}"] = abs(totals_4.get(label, 0) - totals_3.get(label, 0))
+			# Box 5 is Net VAT to be Reclaimed = Box 4 - Box 3
+			row[label] = totals_4.get(label, 0) - totals_3.get(label, 0)
 		return [row]
 
 	def calculate_boxes(self):
@@ -283,8 +355,7 @@ class UKVatReport:
 				"indent": 1,
 			}
 			for label, value in period_totals.items():
-				field = f"box_contribution_{label}"
-				rate_subheader[field] = value
+				rate_subheader[label] = value
 				box_period_totals[label] += value
 
 			section_data.append(rate_subheader)
@@ -295,7 +366,7 @@ class UKVatReport:
 			section_data.extend(subsection_data)
 
 		for label, total in box_period_totals.items():
-			box_header[f"box_contribution_{label}"] = total
+			box_header[label] = total
 
 		# Update box header with total
 		section_data[0].update(box_header)
@@ -369,7 +440,7 @@ class UKVatReport:
 
 				if output_list is not None:
 					row_copy = row.copy()
-					box_label = f"box_contribution_{period_label}"
+					box_label = period_label
 					row_copy[box_label] = amount
 					output_list.append(row_copy)
 			return period_totals
@@ -780,8 +851,8 @@ def get_columns(periods: list[tuple]) -> list[dict]:
 	for __, __, period_label in periods:
 		columns.append(
 			{
-				"fieldname": f"box_contribution_{period_label}",
-				"label": f"{period_label}",
+				"fieldname": period_label,
+				"label": period_label,
 				"fieldtype": "Currency",
 			},
 		)
