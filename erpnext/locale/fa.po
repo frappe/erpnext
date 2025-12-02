@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-30 09:36+0000\n"
-"PO-Revision-Date: 2025-12-01 00:22\n"
+"PO-Revision-Date: 2025-12-02 00:28\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -45229,7 +45229,7 @@ msgstr "تنظیم انبار منبع"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1594
 msgid "Set Supplier"
-msgstr ""
+msgstr "تنظیم تامین کننده"
 
 #. Label of the set_target_warehouse (Link) field in DocType 'Sales Invoice'
 #. Label of the set_warehouse (Link) field in DocType 'Purchase Order'
@@ -48936,7 +48936,7 @@ msgstr "آدرس انبار هدف"
 #. Label of the target_warehouse_address (Link) field in DocType 'Stock Entry'
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Target Warehouse Address Link"
-msgstr ""
+msgstr "لینک آدرس انبار هدف"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:237
 msgid "Target Warehouse Reservation Error"
