@@ -153,71 +153,71 @@ def get_opening_lp(customer):
     return olp
 
 # new method
-# @frappe.whitelist()
-# def get_loyalty_details(customer, loyalty_program,expiry_date=None, company=None, include_expired_entry=False):
-# 	from cstm_erpnext.custom_selling.report.customer_loyalty_point_report.customer_loyalty_point_report import get_data as get_customer_lp
-# 	filters = {
-# 		"customer": customer,
-# 		"loyalty_program": loyalty_program,
-# 		"only_lp": 1
-# 	}
-# 	data = get_customer_lp(filters)
-# 	return {"loyalty_points": data[0]["actual_lp"] if data else 0}
+@frappe.whitelist()
+def get_loyalty_details(customer, loyalty_program,expiry_date=None, company=None, include_expired_entry=False):
+	from cstm_erpnext.custom_selling.report.customer_loyalty_point_report.customer_loyalty_point_report import get_data as get_customer_lp
+	filters = {
+		"customer": customer,
+		"loyalty_program": loyalty_program,
+		"only_lp": 1
+	}
+	data = get_customer_lp(filters)
+	return {"loyalty_points": data[0]["actual_lp"] if data else 0}
 
 
 # old method
 
-@frappe.whitelist()
-def get_loyalty_details(customer, loyalty_program,expiry_date=None, company=None, include_expired_entry=False):
+# @frappe.whitelist()
+# def get_loyalty_details(customer, loyalty_program,expiry_date=None, company=None, include_expired_entry=False):
 
-    # expire_date=today()
-    acquired_list=[]
-    used_list=[]
-    expired_list=[]
-    loyalty_points = 0
+#     # expire_date=today()
+#     acquired_list=[]
+#     used_list=[]
+#     expired_list=[]
+#     loyalty_points = 0
 
-    # invoice_list = get_customer_invoices(customer)
+#     # invoice_list = get_customer_invoices(customer)
 
-    lp_entries = frappe.get_all('Loyalty Point Entry',
-                                filters={'customer': customer,
-                                         'loyalty_program': loyalty_program,
-                                        #  'expiry_date':[">=",expire_date],
-                                        #  'invoice':["!=",""]
-                                         },
-                                fields=['loyalty_points', 'invoice','posting_date','expiry_date'])
+#     lp_entries = frappe.get_all('Loyalty Point Entry',
+#                                 filters={'customer': customer,
+#                                          'loyalty_program': loyalty_program,
+#                                         #  'expiry_date':[">=",expire_date],
+#                                         #  'invoice':["!=",""]
+#                                          },
+#                                 fields=['loyalty_points', 'invoice','posting_date','expiry_date'])
 
-    # loyalty_points_list = []
-    duration = frappe.get_doc('Custom Selling Settings')
+#     # loyalty_points_list = []
+#     duration = frappe.get_doc('Custom Selling Settings')
 
-    for lpe in lp_entries:
-        if date_diff(today(), lpe.posting_date) >= duration.lp_duration or lpe.loyalty_points < 0:
+#     for lpe in lp_entries:
+#         if date_diff(today(), lpe.posting_date) >= duration.lp_duration or lpe.loyalty_points < 0:
 
-            if lpe.loyalty_points>0:
-                acquired_list.append(lpe.loyalty_points)
-            elif lpe.loyalty_points>0 and datetime.now().date()>lpe.expiry_date:
-                expired_list.append(lpe.loyalty_points)
-            elif lpe.loyalty_points<0:
-                used_list.append(abs(lpe.loyalty_points))
+#             if lpe.loyalty_points>0:
+#                 acquired_list.append(lpe.loyalty_points)
+#             elif lpe.loyalty_points>0 and datetime.now().date()>lpe.expiry_date:
+#                 expired_list.append(lpe.loyalty_points)
+#             elif lpe.loyalty_points<0:
+#                 used_list.append(abs(lpe.loyalty_points))
 
-        # if (lpe.invoice in invoice_list) or (lpe.loyalty_points < 0):
-            # loyalty_points_list.append(lpe.loyalty_points)
+#         # if (lpe.invoice in invoice_list) or (lpe.loyalty_points < 0):
+#             # loyalty_points_list.append(lpe.loyalty_points)
 
-    # loyalty_points_list.append(get_opening_lp(customer))
-    if sum(used_list)>sum(expired_list):
-        loyalty_points=sum(acquired_list)-sum(used_list)
-    else:
-        loyalty_points=sum(acquired_list)-sum(expired_list)
+#     # loyalty_points_list.append(get_opening_lp(customer))
+#     if sum(used_list)>sum(expired_list):
+#         loyalty_points=sum(acquired_list)-sum(used_list)
+#     else:
+#         loyalty_points=sum(acquired_list)-sum(expired_list)
 
-    # loyalty_points = 0
-    # if loyalty_points_list:
-    #     loyalty_points = sum(loyalty_points_list)
-    #     if loyalty_points < 0:
-    #         loyalty_points = 0
-    total_lp=loyalty_points
-	# +get_opening_lp(customer)
-    if total_lp<0:
-        return {"loyalty_points":0}
-    return {"loyalty_points":total_lp}
+#     # loyalty_points = 0
+#     # if loyalty_points_list:
+#     #     loyalty_points = sum(loyalty_points_list)
+#     #     if loyalty_points < 0:
+#     #         loyalty_points = 0
+#     total_lp=loyalty_points
+# 	# +get_opening_lp(customer)
+#     if total_lp<0:
+#         return {"loyalty_points":0}
+#     return {"loyalty_points":total_lp}
 
 
 def get_server_type():
