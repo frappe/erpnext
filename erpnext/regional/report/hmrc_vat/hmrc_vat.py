@@ -359,10 +359,10 @@ class UKVatReport:
 				amount = row.get(amount_field, 0)
 				if posting_date := row.get("posting_date"):
 					period_label = get_period_label(posting_date)
-				elif period_label is None:
-					# Shouldn't get here.
-					frappe.throw(f"Could not determine period, for row {row}")
 				elif "parent" in row:
+					if period_label is None:
+						# Shouldn't get here.
+						frappe.throw(f"Could not determine period, for row {row}")
 					# Items have a "parent", Invoices do not.
 					# Don't double-count Invoice rows
 					period_totals[period_label] += amount
@@ -589,7 +589,8 @@ class UKVatReport:
 			# Return the last 4 fiscal years
 			fiscal_years = get_fiscal_years(company=self.company)
 			return [
-				(year["year_start_date"], year["year_end_date"], year["name"]) for year in fiscal_years[-4:]
+				(year["year_start_date"], year["year_end_date"], year["name"])
+				for year in sorted(fiscal_years[-4:], key=lambda x: x["name"])
 			]
 
 		def get_quarterly_period(start_date, end_date, period=None):
