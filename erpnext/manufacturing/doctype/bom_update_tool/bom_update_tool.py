@@ -40,9 +40,13 @@ def enqueue_replace_bom(boms: dict | str | None = None, args: dict | str | None 
 
 
 @frappe.whitelist()
-def enqueue_update_cost() -> "BOMUpdateLog":
+def enqueue_update_cost(boms: dict | str | None = None) -> "BOMUpdateLog":
 	"""Returns a BOM Update Log (that queues a job) for BOM Cost Updation."""
-	update_log = create_bom_update_log(update_type="Update Cost")
+
+	if isinstance(boms, str):
+		boms = json.loads(boms)
+
+	update_log = create_bom_update_log(boms=boms, update_type="Update Cost")
 	return update_log
 
 

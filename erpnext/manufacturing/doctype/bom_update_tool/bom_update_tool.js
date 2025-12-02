@@ -21,6 +21,7 @@ frappe.ui.form.on("BOM Update Tool", {
 	refresh: function (frm) {
 		frm.disable_save();
 		frm.events.disable_button(frm, "replace");
+		frm.events.disable_button(frm, "update_latest_price_in_all_boms");
 
 		frm.add_custom_button(__("View BOM Update Log"), () => {
 			frappe.set_route("List", "BOM Update Log");
@@ -34,12 +35,14 @@ frappe.ui.form.on("BOM Update Tool", {
 	current_bom: (frm) => {
 		if (frm.doc.current_bom && frm.doc.new_bom) {
 			frm.events.disable_button(frm, "replace", false);
+			frm.events.disable_button(frm, "update_latest_price_in_all_boms", false);
 		}
 	},
 
 	new_bom: (frm) => {
 		if (frm.doc.current_bom && frm.doc.new_bom) {
 			frm.events.disable_button(frm, "replace", false);
+			frm.events.disable_button(frm, "update_latest_price_in_all_boms", false);
 		}
 	},
 
@@ -64,15 +67,23 @@ frappe.ui.form.on("BOM Update Tool", {
 	},
 
 	update_latest_price_in_all_boms: (frm) => {
-		frappe.call({
-			method: "erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.enqueue_update_cost",
-			freeze: true,
-			callback: (result) => {
-				if (result && result.message && !result.exc) {
-					frm.events.confirm_job_start(frm, result.message);
-				}
-			},
-		});
+		if (frm.doc.current_bom && frm.doc.new_bom) {
+			frappe.call({
+				method: "erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.enqueue_update_cost",
+				freeze: true,
+				args: {
+					boms: {
+						current_bom: frm.doc.current_bom,
+						new_bom: frm.doc.new_bom,
+					},
+				},
+				callback: (result) => {
+					if (result && result.message && !result.exc) {
+						frm.events.confirm_job_start(frm, result.message);
+					}
+				},
+			});
+		}
 	},
 
 	confirm_job_start: (frm, log_data) => {
