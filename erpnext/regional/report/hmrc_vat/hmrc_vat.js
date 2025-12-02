@@ -31,6 +31,7 @@ frappe.query_reports["HMRC VAT"] = {
 			fieldtype: "Link",
 			options: "Fiscal Year",
 			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
+			depends_on: "eval:doc.reporting_period != 'Annually'",
 			reqd: 1,
 		},
 		{
@@ -38,21 +39,21 @@ frappe.query_reports["HMRC VAT"] = {
 			label: __("Period Start Month"),
 			fieldtype: "Select",
 			options: [
-				"January",
-				"February",
-				"March",
-				"April",
-				"May",
-				"June",
-				"July",
-				"August",
-				"September",
-				"October",
-				"November",
-				"December",
+				__("January"),
+				__("February"),
+				__("March"),
+				__("April"),
+				__("May"),
+				__("June"),
+				__("July"),
+				__("August"),
+				__("September"),
+				__("October"),
+				__("November"),
+				__("December"),
 			],
-			default: "January",
-			width: "80",
+			default: __("January"),
+			depends_on: "eval:doc.reporting_period != 'Annually'",
 		},
 	],
 
@@ -61,7 +62,7 @@ frappe.query_reports["HMRC VAT"] = {
 
 		const styles = {
 			0: "font-weight-bold", // bold box rows
-			1: "font-weight-bold font-italic", // bold and italic rate rows
+			1: "font-italic", // bold and italic rate rows
 			2: "font-weight-normal", // normal invoice rows
 			3: "small", // small item rows
 		};
@@ -75,7 +76,7 @@ frappe.query_reports["HMRC VAT"] = {
 	},
 
 	tree: true,
-	initial_depth: 2,
+	initial_depth: 1,
 	name_field: "row_id",
 	parent_field: "parent_row_id",
 };

@@ -1,15 +1,20 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from collections.abc import Callable, Iterable
+from collections.abc import Callable
 from functools import cached_property
 
 import frappe
+import frappe.defaults
 from frappe import _
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.utils import DocType
 from frappe.utils import get_link_to_form
-from frappe.utils.data import add_months, get_first_day
+from frappe.utils.data import add_days, add_months
+
+from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (
+	get_tax_details_query,
+)
 
 
 def execute(filters: dict | None = None):
@@ -25,10 +30,12 @@ def execute(filters: dict | None = None):
 
 class UKVatReport:
 	def __init__(self, filters=None):
-		self.company = filters.get("company")
+		if not filters:
+			filters = {}
+		self.company = filters.get("company", frappe.defaults.get_user_default("Company"))
 		self.fiscal_year = filters.get("fiscal_year")
-		self.period_start_month = filters.get("period_start_month")
-		self.reporting_period = filters.get("reporting_period")
+		self.period_start_month = filters.get("period_start_month", _("January"))
+		self.reporting_period = filters.get("reporting_period", "Quarterly")
 
 		self._sales_data = None
 		self._purchase_data = None
@@ -77,8 +84,10 @@ class UKVatReport:
 			9: net_accumulator,
 		}
 
+		self.periods = self.build_date_period()
+
 	def run(self):
-		columns = get_columns()
+		columns = get_columns(periods=self.periods)
 		data = self.get_data()
 		return columns, data
 
@@ -139,34 +148,32 @@ class UKVatReport:
 			self._eu_sales_data = self.filter_tax_rated_data(self.sales_data, "place_of_supply", "EU")
 		return self._eu_sales_data
 
+	def get_box_totals(self, box_id):
+		header = self.box_data.get(box_id, [])[0] if self.box_data.get(box_id) else {}
+		return {label: header.get(f"box_contribution_{label}", 0) for _, _, label in self.periods}
+
 	def calc_box_3(self):
-		box_1_value = self.box_data[1][0].get("box_contribution", None)
-		if self.box_data[2]:
-			box_2_value = self.box_data[2][0].get("box_contribution", None)
-		else:
-			box_2_value = 0
-		if box_1_value is None:  # or box_2_value is None:
-			frappe.throw(_("Box 1 and Box 2 must be calculated before Box 3"))
-		return [
-			{
-				"row_head": "Box 3: " + self.box_descriptions[3],
-				"box_contribution": box_1_value + box_2_value,
-				"party_type": None,
-			}
-		]
+		totals_1 = self.get_box_totals(1)
+		totals_2 = self.get_box_totals(2)
+		if not totals_1 or not totals_2:
+			frappe.throw(_("Box 1 and 2 must be calculated before Box 3"))
+
+		row = {"row_head": _(f"Box 3: {self.box_descriptions[3]}"), "indent": 0}
+		for label in totals_1:
+			row[f"box_contribution_{label}"] = totals_1.get(label, 0) + totals_2.get(label, 0)
+		return [row]
 
 	def calc_box_5(self):
-		box_3_value = self.box_data[3][0].get("box_contribution", None)
-		box_4_value = self.box_data[4][0].get("box_contribution", None)
-		if box_3_value is None or box_4_value is None:
+		totals_3 = self.get_box_totals(3)
+		totals_4 = self.get_box_totals(4)
+
+		if not (totals_3 and totals_4):
 			frappe.throw(_("Box 3 and Box 4 must be calculated before Box 5"))
-		return [
-			{
-				"row_head": "Box 5: " + self.box_descriptions[5],
-				"box_contribution": abs(box_4_value - box_3_value),
-				"party_type": None,
-			}
-		]
+
+		row = {"row_head": _(f"Box 5: {self.box_descriptions[5]}"), "indent": 0}
+		for label in totals_3:
+			row[f"box_contribution_{label}"] = abs(totals_4.get(label, 0) - totals_3.get(label, 0))
+		return [row]
 
 	def calculate_boxes(self):
 		"""Calculate data for each VAT box.
@@ -227,7 +234,7 @@ class UKVatReport:
 		box_id,
 		box_description,
 		data_by_rate,
-		calculator: Callable[[Iterable, Iterable | None], float],
+		calculator: Callable[[list, list | None], dict[str, float]],
 		show_details=True,
 	):
 		"""Format a VAT box section with its invoices grouped by rate.
@@ -255,19 +262,18 @@ class UKVatReport:
 			"indent": 0,
 		}
 
+		# Calculate totals across all rates and periods
+		box_period_totals = {label: 0.0 for _, _, label in self.periods}
 		section_data = [box_header]
 
-		# Calculate totals across all rates
-		box_total = 0
-
 		# Add data for each rate
-		for rate in sorted(data_by_rate.keys()):
+		for rate in sorted(data_by_rate):
 			details = data_by_rate[rate]
 			rate_row_id = f"{box_row_id}::rate_{rate}"
 			subsection_data = []
 
 			# Calculate rate totals and optionally show invoice details
-			box_contribution = calculator(details, subsection_data if show_details else None)
+			period_totals = calculator(details, subsection_data if show_details else None)
 
 			# Add rate subtotal
 			rate_subheader = {
@@ -275,8 +281,12 @@ class UKVatReport:
 				"row_id": rate_row_id,
 				"parent_row_id": box_row_id,
 				"indent": 1,
-				"box_contribution": box_contribution,
 			}
+			for label, value in period_totals.items():
+				field = f"box_contribution_{label}"
+				rate_subheader[field] = value
+				box_period_totals[label] += value
+
 			section_data.append(rate_subheader)
 
 			# Add row_id, parent_row_id, indent to each detail row
@@ -284,10 +294,11 @@ class UKVatReport:
 
 			section_data.extend(subsection_data)
 
-			box_total += box_contribution
+		for label, total in box_period_totals.items():
+			box_header[f"box_contribution_{label}"] = total
 
 		# Update box header with total
-		section_data[0].update({"box_contribution": box_total})
+		section_data[0].update(box_header)
 		return section_data
 
 	def update_invoice_item_row_ids(self, data: list[dict], rate_row_id: str):
@@ -322,7 +333,7 @@ class UKVatReport:
 				)
 		return
 
-	def get_accumulator(self, amount_field: str) -> Callable[[Iterable, Iterable | None], float]:
+	def get_accumulator(self, amount_field: str) -> Callable[[list[dict], list | None], dict[str, float]]:
 		"""Return an accumulator function for the specified amount field.
 
 		Args:
@@ -335,18 +346,33 @@ class UKVatReport:
 		        appended.
 		"""
 
-		def accumulator(data: Iterable, output_list: Iterable | None = None) -> float:
-			total = 0.0
+		def get_period_label(posting_date):
+			for start, end, label in self.periods:
+				if start <= posting_date <= end:
+					return label
+			return None
+
+		def accumulator(data: list[dict], output_list: list | None = None) -> dict[str, float]:
+			period_totals = {label: 0.0 for _, _, label in self.periods}
+			period_label = None
 			for row in data:
-				box_contribution = row.get(amount_field, 0)
+				amount = row.get(amount_field, 0)
+				if posting_date := row.get("posting_date"):
+					period_label = get_period_label(posting_date)
+				elif period_label is None:
+					# Shouldn't get here.
+					frappe.throw(f"Could not determine period, for row {row}")
+				elif "parent" in row:
+					# Items have a "parent", Invoices do not.
+					# Don't double-count Invoice rows
+					period_totals[period_label] += amount
+
 				if output_list is not None:
-					# Do not modify the original row dict
-					out = row | {"box_contribution": box_contribution}
-					output_list.append(out)
-				if row.get("is_summary_row"):
-					continue
-				total += box_contribution
-			return total
+					row_copy = row.copy()
+					box_label = f"box_contribution_{period_label}"
+					row_copy[box_label] = amount
+					output_list.append(row_copy)
+			return period_totals
 
 		return accumulator
 
@@ -379,9 +405,7 @@ class UKVatReport:
 					{
 						"name": invoice_id,
 						"account": invoice.get("account"),
-						"posting_date": invoice.get(
-							"posting_date"
-						),  # formatdate(invoice.get("posting_date"), "dd-mm-yyyy"),
+						"posting_date": invoice.get("posting_date"),
 						"doctype": doctype,
 						"party_type": party_type,
 						"party": invoice.get("party"),
@@ -396,7 +420,6 @@ class UKVatReport:
 					"net_amount": 0,
 					"gross_amount": 0,
 				}
-				# for item in items_based_on_tax_rate[rate][invoice.name]:
 				for item in items:
 					tax_amount = item.get("amount")
 					net_amount = item.get("taxable_amount")
@@ -427,10 +450,6 @@ class UKVatReport:
 		return consolidated_data_map
 
 	def get_items_based_on_tax_rate(self, doctype, invoices):
-		from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (
-			get_tax_details_query,
-		)
-
 		if doctype == "Sales Invoice":
 			tax_doctype = "Sales Taxes and Charges"
 			item_doctype = "Sales Invoice Item"
@@ -543,26 +562,62 @@ class UKVatReport:
 
 	def filter_date_range(self, query, dt):
 		"""Filter the query by the reporting period, start year and month."""
-		from datetime import datetime
-
-		n_months = {
-			_("Annually"): 12,
-			_("Quarterly"): 3,
-			_("Bi-Monthly"): 2,
-			_("Monthly"): 1,
-		}.get(self.reporting_period, 3)  # Default to Quarterly
-
-		start_month = self.period_start_month
-		fiscal_year = self.fiscal_year
-		_date = datetime.strptime(f"{fiscal_year} {start_month}", "%Y %B")
-		start_date = get_first_day(_date)
-
+		start_date, _, _ = self.periods[0]
+		_, end_date, _ = self.periods[-1]
 		if start_date:
 			from_date = start_date.strftime("%Y-%m-%d")
-			to_date = add_months(start_date, n_months).strftime("%Y-%m-%d")
+			to_date = end_date.strftime("%Y-%m-%d")
 			date_filter = dt.posting_date[from_date:to_date]
 			query = query.where(date_filter)
+
 		return query
+
+	def build_date_period(self):
+		"""Return the start and end dates for the reporting period."""
+		from datetime import datetime
+
+		from erpnext.accounts.utils import get_fiscal_year, get_fiscal_years
+
+		n_months = {
+			"Annually": 12,
+			"Quarterly": 3,
+			"Bi-Monthly": 2,
+			"Monthly": 1,
+		}.get(self.reporting_period, 3)  # Default to Quarterly
+
+		if n_months == 12:
+			# Return the last 4 fiscal years
+			fiscal_years = get_fiscal_years(company=self.company)
+			return [
+				(year["year_start_date"], year["year_end_date"], year["name"]) for year in fiscal_years[-4:]
+			]
+
+		def get_quarterly_period(start_date, end_date, period=None):
+			# quarter = ((end_date.month - 1) // 3 + 1)
+			start_month = start_date.strftime("%b")
+			end_month = end_date.strftime("%b")
+			return f"Q{period} ({start_month} - {end_month})"
+
+		def get_bimonthly_period(start_date, end_date, period=None):
+			start_month = start_date.strftime("%b")
+			end_month = end_date.strftime("%b")
+			return f"{start_month} - {end_month}"
+
+		reporters = {
+			3: get_quarterly_period,
+			2: get_bimonthly_period,
+			1: lambda _, end_date, __: end_date.strftime("%b"),
+		}
+
+		year = self.fiscal_year or get_fiscal_year(company=self.company)["name"]
+		start_date = datetime.strptime(f"{year} {self.period_start_month}", "%Y %B").date()
+		periods = []
+		for period_number in range(1, 12 // n_months + 1):
+			end_date = add_days(add_months(start_date, n_months), -1)
+			period_label = reporters[n_months](start_date, end_date, period_number)
+			periods.append((start_date, end_date, period_label))
+			start_date = add_days(end_date, 1)
+		return periods
 
 	def get_sales_invoices(self):
 		invoice_query = self.get_sales_invoices_query()
@@ -627,7 +682,7 @@ class UKVatReport:
 		Returns: "Goods" or "Services"
 		"""
 		# Use invoice-level tax category - this is set explicitly by the user
-		invoice_tax_category = invoice_data.get("tax_category", "")
+		invoice_tax_category = invoice_data.get("tax_category", "Goods")
 		if "Goods" in invoice_tax_category:
 			return "Goods"
 		elif "Services" in invoice_tax_category:
@@ -671,12 +726,12 @@ class UKVatReport:
 		return accounts
 
 
-def get_columns() -> list[dict]:
+def get_columns(periods: list[tuple]) -> list[dict]:
 	"""Return columns for the report.
 
 	One field definition per column, just like a DocType field definition.
 	"""
-	return [
+	columns = [
 		{
 			"label": _("Row DocType"),
 			"fieldname": "doctype",
@@ -720,5 +775,13 @@ def get_columns() -> list[dict]:
 			"options": "Item Tax Template",
 			"width": 100,
 		},
-		{"fieldname": "box_contribution", "label": "Contribution", "fieldtype": "Currency", "width": 130},
 	]
+	for __, __, period_label in periods:
+		columns.append(
+			{
+				"fieldname": f"box_contribution_{period_label}",
+				"label": f"{period_label}",
+				"fieldtype": "Currency",
+			},
+		)
+	return columns
