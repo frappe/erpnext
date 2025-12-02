@@ -200,15 +200,15 @@ class UKVatReport:
 		}
 
 	@cached_property
-	def eu_purchase_data(self):
-		"""Get EU purchase invoice data grouped by tax rate."""
+	def eu_purchase_data(self) -> dict[str | float, list[dict]]:
+		"""EU purchase invoice data grouped by tax rate."""
 		if self._eu_purchase_data is None:
 			self._eu_purchase_data = self.filter_tax_rated_data(self.purchase_data, "place_of_supply", "EU")
 		return self._eu_purchase_data
 
 	@cached_property
-	def eu_sales_data(self):
-		"""Get EU sales invoice data grouped by tax rate."""
+	def eu_sales_data(self) -> dict[str | float, list[dict]]:
+		"""EU sales invoice data grouped by tax rate."""
 		if self._eu_sales_data is None:
 			self._eu_sales_data = self.filter_tax_rated_data(self.sales_data, "place_of_supply", "EU")
 		return self._eu_sales_data
@@ -223,7 +223,7 @@ class UKVatReport:
 		box_data = self.box_data.get(box_id, [])[0] if self.box_data.get(box_id) else {}
 		return {label: box_data.get(label, 0.0) for _, _, label in self.periods}
 
-	def calc_box_3(self):
+	def calc_box_3(self) -> list[dict]:
 		totals_1 = self.get_box_totals(1)
 		totals_2 = self.get_box_totals(2)
 		if not totals_1 or not totals_2:
@@ -231,10 +231,10 @@ class UKVatReport:
 
 		row = {"row_head": _(f"Box 3: {self.box_descriptions[3]}"), "indent": 0}
 		for label in totals_1:
-			row[f"box_contribution_{label}"] = totals_1.get(label, 0) + totals_2.get(label, 0)
+			row[label] = totals_1.get(label, 0) + totals_2.get(label, 0)
 		return [row]
 
-	def calc_box_5(self):
+	def calc_box_5(self) -> list[dict]:
 		totals_3 = self.get_box_totals(3)
 		totals_4 = self.get_box_totals(4)
 
@@ -247,7 +247,7 @@ class UKVatReport:
 			row[label] = totals_4.get(label, 0) - totals_3.get(label, 0)
 		return [row]
 
-	def calculate_boxes(self):
+	def calculate_boxes(self) -> None:
 		"""Calculate data for each VAT box.
 		Iterates through self.box_calculators and populates self.box_data with the result
 		of self._format_box_section for each box.
@@ -284,31 +284,31 @@ class UKVatReport:
 		}
 		return self.data_by_rate.get(box_id, [])
 
-	def _get_invoice_data(self, invoices, doctype):
+	def group_invoices_by_tax_rate(self, invoices: list[dict], doctype: str) -> dict[str | float, list[dict]]:
 		"""Get invoice data grouped by tax rate."""
 		tax_rated_invoice_items = self.get_items_based_on_tax_rate(doctype, invoices)
 
 		consolidated_data = self.get_consolidated_data(doctype, invoices, tax_rated_invoice_items)
 		return consolidated_data
 
-	def get_purchase_invoice_data(self):
+	def get_purchase_invoice_data(self) -> dict[str | float, list[dict]]:
 		"""Get purchase invoice data grouped by tax rate."""
 		invoices = self.get_purchase_invoices()
-		return self._get_invoice_data(invoices, "Purchase Invoice")
+		return self.group_invoices_by_tax_rate(invoices, "Purchase Invoice")
 
-	def get_sales_invoice_data(self):
+	def get_sales_invoice_data(self) -> dict[str | float, list[dict]]:
 		"""Get sales invoice data grouped by tax rate."""
 		invoices = self.get_sales_invoices()
-		return self._get_invoice_data(invoices, "Sales Invoice")
+		return self.group_invoices_by_tax_rate(invoices, "Sales Invoice")
 
 	def _format_box_section(
 		self,
-		box_id,
-		box_description,
-		data_by_rate,
+		box_id: int,
+		box_description: str,
+		data_by_rate: dict[str | float, list[dict]],
 		calculator: Callable[[list, list | None], dict[str, float]],
 		show_details=True,
-	):
+	) -> list[dict]:
 		"""Format a VAT box section with its invoices grouped by rate.
 		:param box_number: The VAT box number (e.g., "Box 1")
 		:param box_description: Description of the VAT box
@@ -372,7 +372,7 @@ class UKVatReport:
 		section_data[0].update(box_header)
 		return section_data
 
-	def update_invoice_item_row_ids(self, data: list[dict], rate_row_id: str):
+	def update_invoice_item_row_ids(self, data: list[dict], rate_row_id: str) -> None:
 		"""Add row_id and parent_row_id to each row in data.
 		:param data: List of invoice/item rows
 		:param rate_row_id: The row_id of the parent rate row.
@@ -447,11 +447,16 @@ class UKVatReport:
 
 		return accumulator
 
-	def get_consolidated_data(self, doctype, invoices, items_based_on_tax_rate):
-		"""Here we want to arrange the data hierarchically>-
-		1. Group by tax rate
-		2. List invoices under each tax rate
-		3. List Items in each Invoice at that tax rate.
+	def get_consolidated_data(
+		self,
+		doctype: str,
+		invoices: list[dict],
+		items_based_on_tax_rate: dict[float, dict[str, list[dict]]]
+	) -> dict[str | float, list[dict]]:
+		"""Here we want to arrange the data hierarchically:
+			1. Group by tax rate
+			2. List invoices under each tax rate
+			3. List Items in each Invoice at that tax rate.
 		"""
 		consolidated_data_map = {}
 		if doctype == "Sales Invoice":
@@ -460,7 +465,7 @@ class UKVatReport:
 		else:
 			item_doctype = "Purchase Invoice Item"
 			party_type = "Supplier"
-		invoices_dict = {inv.name: inv for inv in invoices}
+		invoices_dict = {inv["name"]: inv for inv in invoices}
 		for rate, rate_invoices in items_based_on_tax_rate.items():
 			for invoice_id, items in rate_invoices.items():
 				invoice = invoices_dict.get(invoice_id)
@@ -469,8 +474,8 @@ class UKVatReport:
 					continue
 				place_of_supply = self.get_place_of_supply(invoice)
 				consolidated_data_map.setdefault(rate, [])
-				if invoice.name not in items_based_on_tax_rate[rate]:
-					continue
+				if invoice["name"] not in items_based_on_tax_rate[rate]:
+					continue  # Shouldn't get here.
 
 				invoice_data = [
 					{
@@ -492,11 +497,11 @@ class UKVatReport:
 					"gross_amount": 0,
 				}
 				for item in items:
-					tax_amount = item.get("amount")
-					net_amount = item.get("taxable_amount")
+					tax_amount = item.get("amount", 0.)
+					net_amount = item.get("taxable_amount", 0.)
 					gross_amount = tax_amount + net_amount
 					item_tax_template = item.get("item_tax_template")
-					category = self.get_item_category(invoice, item)
+					category = self.get_item_category(invoice)
 					item.update(
 						{
 							"doctype": item_doctype,
@@ -520,7 +525,11 @@ class UKVatReport:
 
 		return consolidated_data_map
 
-	def get_items_based_on_tax_rate(self, doctype, invoices):
+	def get_items_based_on_tax_rate(
+		self,
+		doctype: str,
+		invoices: list[dict]
+	) -> dict[str | float, dict[str, list[dict]]]:
 		if doctype == "Sales Invoice":
 			tax_doctype = "Sales Taxes and Charges"
 			item_doctype = "Sales Invoice Item"
@@ -643,7 +652,7 @@ class UKVatReport:
 
 		return query
 
-	def build_date_period(self):
+	def build_date_period(self) -> list[tuple]:
 		"""Return the start and end dates for the reporting period."""
 		from datetime import datetime
 
@@ -691,17 +700,17 @@ class UKVatReport:
 			start_date = add_days(end_date, 1)
 		return periods
 
-	def get_sales_invoices(self):
+	def get_sales_invoices(self) -> list[dict]:
 		invoice_query = self.get_sales_invoices_query()
 		invoices = invoice_query.run(as_dict=True)
 		return invoices
 
-	def get_purchase_invoices(self):
+	def get_purchase_invoices(self) -> list[dict]:
 		invoice_query = self.get_purchase_invoices_query()
 		invoices = invoice_query.run(as_dict=True)
 		return invoices
 
-	def get_place_of_supply(self, invoice_data):
+	def get_place_of_supply(self, invoice_data: dict) -> str:
 		"""Determine place of supply based on tax category and address.
 
 		Logic from README:
@@ -739,7 +748,7 @@ class UKVatReport:
 		# Everything else should default to UK
 		return "UK"
 
-	def get_item_category(self, invoice_data, item_data):
+	def get_item_category(self, invoice_data: dict) -> str:
 		"""Determine if item is Goods or Services based on tax category.
 
 		In ERPNext's design:
@@ -748,8 +757,8 @@ class UKVatReport:
 		- Items have a taxes child table where rows can specify which item_tax_template
 		  to use for a given tax_category
 
-		For UK VAT purposes, we primarily use the invoice's tax_category.
-		If not specified, we default to "Goods" as per UK README.md.
+		For UK VAT purposes, we use the invoice's tax_category.  If not
+		specified, we default to "Goods" as per UK README.md.
 
 		Returns: "Goods" or "Services"
 		"""
