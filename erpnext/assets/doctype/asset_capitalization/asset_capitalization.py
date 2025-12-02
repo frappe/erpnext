@@ -139,6 +139,7 @@ class AssetCapitalization(StockController):
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.restore_consumed_asset_items()
+		self.update_target_asset()
 
 	def set_title(self):
 		self.title = self.target_asset_name or self.target_item_name or self.target_item_code
@@ -607,8 +608,12 @@ class AssetCapitalization(StockController):
 		total_target_asset_value = flt(self.total_value, self.precision("total_value"))
 
 		asset_doc = frappe.get_doc("Asset", self.target_asset)
-		asset_doc.gross_purchase_amount += total_target_asset_value
-		asset_doc.purchase_amount += total_target_asset_value
+		if self.docstatus == 2:
+			asset_doc.gross_purchase_amount -= total_target_asset_value
+			asset_doc.purchase_amount -= total_target_asset_value
+		else:
+			asset_doc.gross_purchase_amount += total_target_asset_value
+			asset_doc.purchase_amount += total_target_asset_value
 		asset_doc.set_status("Work In Progress")
 		asset_doc.flags.ignore_validate = True
 		asset_doc.save()
