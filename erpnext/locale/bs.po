@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-30 09:36+0000\n"
-"PO-Revision-Date: 2025-12-01 00:23\n"
+"PO-Revision-Date: 2025-12-03 00:38\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -274,7 +274,7 @@ msgstr "'Dana od posljednje narudžbe' mora biti veći ili jednako nuli"
 
 #: erpnext/controllers/accounts_controller.py:2308
 msgid "'Default {0} Account' in Company {1}"
-msgstr "'Standard {0} račun' u Kompaniji {1}"
+msgstr "'Standard {0} račun' u {1}"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1283
 msgid "'Entries' cannot be empty"
@@ -336,7 +336,7 @@ msgstr "'{0}' je već dodan."
 #: erpnext/setup/doctype/company/company.py:290
 #: erpnext/setup/doctype/company/company.py:301
 msgid "'{0}' should be in company currency {1}."
-msgstr "'{0}' bi trebao biti u valuti kompanije {1}."
+msgstr "'{0}' bi trebao biti u valuti {1}."
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:174
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:203
@@ -781,7 +781,7 @@ msgstr "<p>Ne može se fakturisati više od predviđenog iznosa za sljedeće art
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:157
 msgid "<p>Following {0}s doesn't belong to Company {1} :</p>"
-msgstr "<p>Slijedeći {0} ne pripada kompaniji {1} :</p>"
+msgstr "<p>Slijedeći {0} ne pripada {1} :</p>"
 
 #. Content of the 'html_llwp' (HTML) field in DocType 'Request for Quotation'
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.json
@@ -1164,7 +1164,7 @@ msgstr "Skraćenica"
 
 #: erpnext/setup/doctype/company/company.py:225
 msgid "Abbreviation already used for another company"
-msgstr "Skraćenica se već koristi za drugu kompaniju"
+msgstr "Skraćenica se već koristi za drugo poduzeće"
 
 #: erpnext/setup/doctype/company/company.py:222
 msgid "Abbreviation is mandatory"
@@ -1526,11 +1526,11 @@ msgstr "Račun {0} ne može biti onemogućen jer je već postavljen kao {1} za {
 
 #: erpnext/accounts/doctype/budget/budget.py:158
 msgid "Account {0} does not belong to company {1}"
-msgstr "Račun {0} ne pripada kompaniji {1}"
+msgstr "Račun {0} ne pripada {1}"
 
 #: erpnext/setup/doctype/company/company.py:272
 msgid "Account {0} does not belong to company: {1}"
-msgstr "Račun {0} ne pripada kompaniji: {1}"
+msgstr "Račun {0} ne pripada: {1}"
 
 #: erpnext/accounts/doctype/account/account.py:585
 msgid "Account {0} does not exist"
@@ -1546,19 +1546,19 @@ msgstr "Račun {0} ne postoji na grafikonu nadzorne ploče {1}"
 
 #: erpnext/accounts/doctype/mode_of_payment/mode_of_payment.py:48
 msgid "Account {0} does not match with Company {1} in Mode of Account: {2}"
-msgstr "Račun {0} se ne podudara sa kompanijom {1} u Kontnom Planu: {2}"
+msgstr "Račun {0} se ne podudara sa {1} u Kontnom Planu: {2}"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:138
 msgid "Account {0} doesn't belong to Company {1}"
-msgstr "Račun {0} ne pripada kompaniji {1}"
+msgstr "Račun {0} ne pripada {1}"
 
 #: erpnext/accounts/doctype/account/account.py:542
 msgid "Account {0} exists in parent company {1}."
-msgstr "Račun {0} postoji u matičnoj kompaniji {1}."
+msgstr "Račun {0} postoji u matičnom poduzeću {1}."
 
 #: erpnext/accounts/doctype/account/account.py:409
 msgid "Account {0} is added in the child company {1}"
-msgstr "Račun {0} je dodan u podređenu kompaniju {1}"
+msgstr "Račun {0} je dodan u podređeno poduzeće {1}"
 
 #: erpnext/setup/doctype/company/company.py:261
 msgid "Account {0} is disabled."
@@ -1582,7 +1582,7 @@ msgstr "Račun {0}: Nadređeni račun {1} ne može biti registar"
 
 #: erpnext/accounts/doctype/account/account.py:156
 msgid "Account {0}: Parent account {1} does not belong to company: {2}"
-msgstr "Račun {0}: Nadređeni račun {1} ne pripada kompaniji: {2}"
+msgstr "Račun {0}: Nadređeni račun {1} ne pripada: {2}"
 
 #: erpnext/accounts/doctype/account/account.py:144
 msgid "Account {0}: Parent account {1} does not exist"
@@ -2879,7 +2879,7 @@ msgstr "Iznos dodatnog popusta"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Additional Discount Amount (Company Currency)"
-msgstr "Dodatni iznos popusta (valuta kompanije)"
+msgstr "Dodatni iznos popusta (Valuta Poduzeća)"
 
 #: erpnext/controllers/taxes_and_totals.py:785
 msgid "Additional Discount Amount ({discount_amount}) cannot exceed the total before such discount ({total_before_discount})"
@@ -3574,7 +3574,7 @@ msgstr "Poljoprivreda"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:5
 msgid "Airline"
-msgstr "Aviokompanija"
+msgstr "Aviopoduzeće"
 
 #. Label of the algorithm (Select) field in DocType 'Bisect Accounting
 #. Statements'
@@ -3904,7 +3904,7 @@ msgstr "Alocirana količina"
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:68
 #: erpnext/setup/doctype/company/company.json
 msgid "Allow Account Creation Against Child Company"
-msgstr "Dozvoli stvaranje računa naspram podređene kompanije"
+msgstr "Dozvoli stvaranje računa naspram podređenog poduzeća"
 
 #. Label of the allow_alternative_item (Check) field in DocType 'BOM'
 #. Label of the allow_alternative_item (Check) field in DocType 'BOM Item'
@@ -4612,7 +4612,7 @@ msgstr "Iznos (AED)"
 #: erpnext/stock/doctype/landed_cost_vendor_invoice/landed_cost_vendor_invoice.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Amount (Company Currency)"
-msgstr "Iznos (Valuta Kompanije)"
+msgstr "Iznos (Valuta Poduzeća)"
 
 #: erpnext/selling/report/sales_order_analysis/sales_order_analysis.py:314
 msgid "Amount Delivered"
@@ -5541,7 +5541,7 @@ msgstr "Vlasnik Imovine"
 #. Label of the asset_owner_company (Link) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Asset Owner Company"
-msgstr "Kompanija Vlasnik Imovine"
+msgstr "Poduzeće Vlasnik Imovine"
 
 #. Label of the asset_quantity (Int) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -5724,7 +5724,7 @@ msgstr "Imovina {0} ne pripada Artiklu {1}"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:44
 msgid "Asset {0} does not belong to company {1}"
-msgstr "Imovina {0} ne pripada kompaniji {1}"
+msgstr "Imovina {0} ne pripada {1}"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:92
 msgid "Asset {0} does not belong to the custodian {1}"
@@ -6282,7 +6282,7 @@ msgstr "Dostupna količina za Potrošnju"
 #. Item'
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 msgid "Available Qty at Company"
-msgstr "Dostupna količina u Kompaniji"
+msgstr "Dostupna količina u Poduzeću"
 
 #. Label of the available_qty_at_source_warehouse (Float) field in DocType
 #. 'Work Order Item'
@@ -7204,7 +7204,7 @@ msgstr "Bankovni/Gotovinski Račun"
 
 #: erpnext/accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:57
 msgid "Bank/Cash Account {0} doesn't belong to company {1}"
-msgstr "Bankovni/Gotovinski Račun {0} ne pripada kompaniji {1}"
+msgstr "Bankovni/Gotovinski Račun {0} ne pripada {1}"
 
 #. Label of the banking_tab (Tab Break) field in DocType 'Accounts Settings'
 #. Label of a Card Break in the Accounting Workspace
@@ -7256,14 +7256,14 @@ msgstr "Osnovni Iznos"
 #. Label of the base_amount (Currency) field in DocType 'Sales Invoice Payment'
 #: erpnext/accounts/doctype/sales_invoice_payment/sales_invoice_payment.json
 msgid "Base Amount (Company Currency)"
-msgstr "Osnovni Iznos (Valuta Kompanije)"
+msgstr "Osnovni Iznos (Valuta Poduzeća)"
 
 #. Label of the base_change_amount (Currency) field in DocType 'POS Invoice'
 #. Label of the base_change_amount (Currency) field in DocType 'Sales Invoice'
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Base Change Amount (Company Currency)"
-msgstr "Osnovni Kusur Iznos (Valuta Kompanije)"
+msgstr "Osnovni Kusur Iznos (Valuta Poduzeća)"
 
 #. Label of the base_cost_per_unit (Float) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
@@ -7273,7 +7273,7 @@ msgstr "Osnovni Trošak po Jedinici"
 #. Label of the base_hour_rate (Currency) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "Base Hour Rate(Company Currency)"
-msgstr "Osnovna Cijena po Satu (Valuta Kompanije)"
+msgstr "Osnovna Cijena po Satu (Valuta Poduzeća)"
 
 #. Label of the base_rate (Currency) field in DocType 'BOM Creator Item'
 #: erpnext/manufacturing/doctype/bom_creator_item/bom_creator_item.json
@@ -7360,7 +7360,7 @@ msgstr "Osnovni Iznos"
 #. Label of the base_amount (Currency) field in DocType 'BOM Scrap Item'
 #: erpnext/manufacturing/doctype/bom_scrap_item/bom_scrap_item.json
 msgid "Basic Amount (Company Currency)"
-msgstr "Osnovni Iznos (Valuta Kompanije)"
+msgstr "Osnovni Iznos (Valuta Poduzeća)"
 
 #. Label of the base_rate (Currency) field in DocType 'BOM Item'
 #. Label of the base_rate (Currency) field in DocType 'BOM Scrap Item'
@@ -7369,7 +7369,7 @@ msgstr "Osnovni Iznos (Valuta Kompanije)"
 #: erpnext/manufacturing/doctype/bom_scrap_item/bom_scrap_item.json
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Basic Rate (Company Currency)"
-msgstr "Osnovna Cijena(Valuta Kompanije)"
+msgstr "Osnovna Cijena(Valuta Poduzeća)"
 
 #. Label of the basic_rate (Currency) field in DocType 'Stock Entry Detail'
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -7610,7 +7610,7 @@ msgstr "Početak trenutnog perioda pretplate"
 
 #: erpnext/accounts/doctype/subscription/subscription.py:320
 msgid "Below Subscription Plans are of different currency to the party default billing currency/Company currency: {0}"
-msgstr "Planovi Pretplate u nastavku imaju različite valute u odnosu na standard valutu fakturisanja/valutu kompanije: {0}"
+msgstr "Planovi Pretplate u nastavku imaju različite valute u odnosu na standard valutu fakturisanja/valutu poduzeča: {0}"
 
 #. Label of the bill_date (Date) field in DocType 'Journal Entry'
 #. Label of the bill_date (Date) field in DocType 'Subcontracting Receipt'
@@ -7849,7 +7849,7 @@ msgstr "Faktura Poštanski Broj"
 
 #: erpnext/accounts/party.py:610
 msgid "Billing currency must be equal to either default company's currency or party account currency"
-msgstr "Faktura Valuta mora biti jednaka ili standard valuti kompanije ili valuti računa stranke"
+msgstr "Faktura Valuta mora biti jednaka ili standard valuti poduzeća ili valuti računa stranke"
 
 #. Name of a DocType
 #: erpnext/stock/doctype/bin/bin.json
@@ -8090,7 +8090,7 @@ msgstr "Oba"
 
 #: erpnext/setup/doctype/supplier_group/supplier_group.py:57
 msgid "Both Payable Account: {0} and Advance Account: {1} must be of same currency for company: {2}"
-msgstr "Račun Obaveza: {0} i Račun Predujma: {1} moraju biti u istoj valuti za kompaniju: {2}"
+msgstr "Račun Obaveza: {0} i Račun Predujma: {1} moraju biti u istoj valuti za: {2}"
 
 #: erpnext/setup/doctype/customer_group/customer_group.py:62
 msgid "Both Receivable Account: {0} and Advance Account: {1} must be of same currency for company: {2}"
@@ -8102,7 +8102,7 @@ msgstr "Datum početka probnog perioda i datum završetka probnog perioda moraju
 
 #: erpnext/utilities/transaction_base.py:230
 msgid "Both {0} Account: {1} and Advance Account: {2} must be of same currency for company: {3}"
-msgstr "{0} Račun: {1} i Račun Predujma: {2} moraju biti u istoj valuti za kompaniju: {3}"
+msgstr "{0} Račun: {1} i Račun Predujma: {2} moraju biti u istoj valuti za: {3}"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -8925,7 +8925,7 @@ msgstr "Ne mogu promijeniti svojstva varijante nakon transakcije zaliha. Morat �
 
 #: erpnext/setup/doctype/company/company.py:317
 msgid "Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."
-msgstr "Nije moguće promijeniti standard valutu kompanije, jer postoje postojeće transakcije. Transakcije se moraju otkazati da bi se promijenila zadana valuta."
+msgstr "Nije moguće promijeniti standard valutu poduzeća, jer postoje postojeće transakcije. Transakcije se moraju otkazati da bi se promijenila standard valuta."
 
 #: erpnext/projects/doctype/task/task.py:144
 msgid "Cannot complete task {0} as its dependant task {1} are not completed / cancelled."
@@ -8987,7 +8987,7 @@ msgstr "Ne može se izbrisati serijski broj {0}, jer se koristi u transakcijama 
 
 #: erpnext/setup/doctype/company/company.py:547
 msgid "Cannot disable perpetual inventory, as there are existing Stock Ledger Entries for the company {0}. Please cancel the stock transactions first and try again."
-msgstr "Ne može se onemogućiti trajna inventura, jer postoje postojeći unosi u glavnu knjigu zaliha za kompaniju {0}. Molimo vas da prvo otkažete transakcije zaliha i pokušate ponovo."
+msgstr "Ne može se onemogućiti trajna inventura, jer postoje postojeći unosi u glavnu knjigu zaliha za {0}. Molimo vas da prvo otkažete transakcije zaliha i pokušate ponovo."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:682
 msgid "Cannot disassemble more than produced quantity."
@@ -8995,11 +8995,11 @@ msgstr "Ne može se rastaviti više od proizvedene količine."
 
 #: erpnext/setup/doctype/company/company.py:209
 msgid "Cannot enable Item-wise Inventory Account, as there are existing Stock Ledger Entries for the company {0} with Warehouse-wise Inventory Account. Please cancel the stock transactions first and try again."
-msgstr "Nije moguće omogućiti račun zaliha po artiklima, jer postoje postojeći unosi u glavnu knjigu zaliha za kompaniju {0} sa računom zaliha po skladištu. Molimo vas da prvo otkažete transakcije zaliha i pokušate ponovo."
+msgstr "Nije moguće omogućiti račun zaliha po artiklima, jer postoje postojeći unosi u glavnu knjigu zaliha za {0} sa računom zaliha po skladištu. Molimo vas da prvo otkažete transakcije zaliha i pokušate ponovo."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:110
 msgid "Cannot enqueue multi docs for one company. {0} is already queued/running for company: {1}"
-msgstr "Nije moguće staviti u red više dokumenata za jednu kompaniju. {0} je već u redu čekanja/pokreće se za kompaniju: {1}"
+msgstr "Nije moguće staviti u red više dokumenata za jedno poduzeća. {0} je već u redu čekanja/pokreće se za: {1}"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:771
 #: erpnext/selling/doctype/sales_order/sales_order.py:794
@@ -9071,7 +9071,7 @@ msgstr "Nije moguće postaviti autorizaciju na osnovu Popusta za {0}"
 
 #: erpnext/stock/doctype/item/item.py:699
 msgid "Cannot set multiple Item Defaults for a company."
-msgstr "Nije moguće postaviti više Standard Artikal Postavki za kompaniju."
+msgstr "Nije moguće postaviti više Standard Artikal Postavki za poduzeće."
 
 #: erpnext/controllers/accounts_controller.py:3808
 msgid "Cannot set quantity less than delivered quantity"
@@ -9743,7 +9743,7 @@ msgstr "Greška Kružne Reference"
 #. 'Purchase Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 msgid "Claimed Landed Cost Amount (Company Currency)"
-msgstr "Zatraženi Iznos Kupovne Vrijednosti (Valuta Kompanije)"
+msgstr "Zatraženi Iznos Kupovne Vrijednosti (Valuta Poduzeća)"
 
 #. Label of the class_per (Data) field in DocType 'Employee Education'
 #: erpnext/setup/doctype/employee_education/employee_education.json
@@ -10022,7 +10022,7 @@ msgstr "Kombinovani dio Fakture mora biti 100%"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:178
 msgid "Commercial"
-msgstr "Kompanija"
+msgstr "Poduzeće"
 
 #. Label of the sales_team_section_break (Section Break) field in DocType 'POS
 #. Invoice'
@@ -10113,7 +10113,7 @@ msgstr "Sažet Ispis Arikla"
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.json
 #: erpnext/accounts/doctype/ledger_health_monitor/ledger_health_monitor.json
 msgid "Companies"
-msgstr "Kompanije"
+msgstr "Poduzeća"
 
 #. Label of the company (Link) field in DocType 'Account'
 #. Label of the company (Link) field in DocType 'Account Closing Balance'
@@ -10555,20 +10555,20 @@ msgstr "Kompanije"
 #: erpnext/support/report/issue_analytics/issue_analytics.js:8
 #: erpnext/support/report/issue_summary/issue_summary.js:8
 msgid "Company"
-msgstr "Kompanija"
+msgstr "Poduzeće"
 
 #: erpnext/public/js/setup_wizard.js:36
 msgid "Company Abbreviation"
-msgstr "Skraćenica Kompanije"
+msgstr "Skraćenica Poduzeća"
 
 #: erpnext/public/js/setup_wizard.js:174
 msgid "Company Abbreviation cannot have more than 5 characters"
-msgstr "Skraćenica kompanije ne može imati više od 5 znakova"
+msgstr "Skraćenica Poduzeća ne može imati više od 5 znakova"
 
 #. Label of the account (Link) field in DocType 'Bank Account'
 #: erpnext/accounts/doctype/bank_account/bank_account.json
 msgid "Company Account"
-msgstr "Račun Kompanije"
+msgstr "Račun Poduzeća"
 
 #. Label of the company_address (Link) field in DocType 'Dunning'
 #. Label of the company_address_display (Text Editor) field in DocType 'POS
@@ -10597,13 +10597,13 @@ msgstr "Račun Kompanije"
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "Company Address"
-msgstr "Adresa Kompanije"
+msgstr "Adresa Poduzeća"
 
 #. Label of the company_address_display (Text Editor) field in DocType
 #. 'Dunning'
 #: erpnext/accounts/doctype/dunning/dunning.json
 msgid "Company Address Display"
-msgstr "Prikaz Adrese Kompanije"
+msgstr "Prikaz Adrese Poduzeća"
 
 #. Label of the company_address (Link) field in DocType 'POS Invoice'
 #. Label of the company_address (Link) field in DocType 'Sales Invoice'
@@ -10616,18 +10616,18 @@ msgstr "Prikaz Adrese Kompanije"
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "Company Address Name"
-msgstr "Naziv Adrese Kompanije"
+msgstr "Naziv Adrese Poduzeća"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:310
 msgid "Company Address is missing. You don't have permission to update it. Please contact your System Manager."
-msgstr "Nedostaje adresa kompanije. Nemate dozvolu da je ažurirate. Kontaktiraj Odgovornog Sistema."
+msgstr "Nedostaje adresa poduzeća. Nemate dozvolu da je ažurirate. Kontaktiraj Odgovornog Sistema."
 
 #. Label of the bank_account (Link) field in DocType 'Payment Entry'
 #. Label of the company_bank_account (Link) field in DocType 'Payment Order'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 #: erpnext/accounts/doctype/payment_order/payment_order.json
 msgid "Company Bank Account"
-msgstr "Bankovni Račun Kompanije"
+msgstr "Bankovni Račun Poduzeća"
 
 #. Label of the company_billing_address_section (Section Break) field in
 #. DocType 'Purchase Invoice'
@@ -10648,7 +10648,7 @@ msgstr "Bankovni Račun Kompanije"
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "Company Billing Address"
-msgstr "Faktura Adresa Kompanije"
+msgstr "Faktura Adresa Poduzeća"
 
 #. Label of the company_contact_person (Link) field in DocType 'POS Invoice'
 #. Label of the company_contact_person (Link) field in DocType 'Sales Invoice'
@@ -10661,81 +10661,81 @@ msgstr "Faktura Adresa Kompanije"
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "Company Contact Person"
-msgstr "Kontakt Osoba Kompaniju"
+msgstr "Kontakt Osoba Poduzeća"
 
 #. Label of the company_description (Text Editor) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Company Description"
-msgstr "Opis Kompanije"
+msgstr "Opis Poduzeća"
 
 #. Label of the company_details_section (Section Break) field in DocType
 #. 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Company Details"
-msgstr "Detalji o Kompaniji"
+msgstr "Detalji o Poduzeću"
 
 #. Option for the 'Preferred Contact Email' (Select) field in DocType
 #. 'Employee'
 #. Label of the company_email (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Company Email"
-msgstr "E-pošta Kompanije"
+msgstr "E-pošta Poduzeća"
 
 #. Label of the company_logo (Attach Image) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Company Logo"
-msgstr "Logo Kompanije"
+msgstr "Logo Poduzeća"
 
 #: erpnext/public/js/setup_wizard.js:77
 msgid "Company Name cannot be Company"
-msgstr "Naziv Kompanije ne može biti Kompanija"
+msgstr "Naziv Poduzeća ne može biti Poduzeće"
 
 #: erpnext/accounts/custom/address.py:36
 msgid "Company Not Linked"
-msgstr "Kompanija nije povezana"
+msgstr "Poduzeće nije povezano"
 
 #. Label of the shipping_address (Link) field in DocType 'Subcontracting Order'
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "Company Shipping Address"
-msgstr "Dostavna Adresa Kompanije"
+msgstr "Dostavna Adresa Poduzeća"
 
 #. Label of the company_tax_id (Data) field in DocType 'Sales Invoice'
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Company Tax ID"
-msgstr "Fiskalni Broj Kompanije"
+msgstr "Fiskalni Broj Poduzeća"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:620
 msgid "Company and Posting Date is mandatory"
-msgstr "Kompanija i Datum Knjiženja su obavezni"
+msgstr "Poduzeće i Datum Knjiženja su obavezni"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2549
 msgid "Company currencies of both the companies should match for Inter Company Transactions."
-msgstr "Valute obje kompanije treba da se podudaraju za međukompanijske transakcije."
+msgstr "Valute oba poduzeća treba da se podudaraju za transakcije između poduzeća."
 
 #: erpnext/stock/doctype/material_request/material_request.js:365
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:704
 msgid "Company field is required"
-msgstr "Polje Kompanije je obavezno"
+msgstr "Poduzeće je obavezno"
 
 #: erpnext/accounts/report/invalid_ledger_entries/invalid_ledger_entries.py:77
 msgid "Company is mandatory"
-msgstr "Kompanija je obavezna"
+msgstr "Poduzeće je obavezno"
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:72
 msgid "Company is mandatory for company account"
-msgstr "Kompanija je obavezna za Račun Kompanije"
+msgstr "Poduzeće je obavezno za Račun Poduzeća"
 
 #: erpnext/accounts/doctype/subscription/subscription.py:392
 msgid "Company is mandatory for generating an invoice. Please set a default company in Global Defaults."
-msgstr "Kompanija je obavezna za generisanje fakture. Molimo postavite standard kompaniju u Globalnim Postavkama."
+msgstr "Poduzeće je obavezno za generisanje fakture. Postavi standard poduzeće u Standardnim Postavkama."
 
 #: erpnext/setup/doctype/company/company.js:222
 msgid "Company name not same"
-msgstr "Naziv Kompanije nije isti"
+msgstr "Naziv Poduzeća nije isti"
 
 #: erpnext/assets/doctype/asset/asset.py:265
 msgid "Company of asset {0} and purchase document {1} doesn't matches."
-msgstr "Kompanija imovine {0} i dokument o kupovini {1} se ne poklapaju."
+msgstr "Poduzeće imovine {0} i dokument o kupovini {1} se ne poklapaju."
 
 #. Description of the 'Registration Details' (Code) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -10746,40 +10746,40 @@ msgstr "Registracijski brojevi Društva za vašu referencu. Poreski brojevi itd.
 #. Invoice'
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Company which internal customer represents"
-msgstr "Kompanija koju predstavlja interni Klijent"
+msgstr "Poduzeće koju predstavlja interni Klijent"
 
 #. Description of the 'Represents Company' (Link) field in DocType 'Delivery
 #. Note'
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "Company which internal customer represents."
-msgstr "Kompanija koju predstavlja interni Klijent."
+msgstr "Poduzeće koju predstavlja interni Klijent."
 
 #. Description of the 'Represents Company' (Link) field in DocType 'Purchase
 #. Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 msgid "Company which internal supplier represents"
-msgstr "Kompanija koju predstavlja interni Dobavljač"
+msgstr "Poduzeće koju predstavlja interni Dobavljač"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:62
 msgid "Company {0} added multiple times"
-msgstr "Kompanija {0} dodana više puta"
+msgstr "Poduzeće {0} dodana više puta"
 
 #: erpnext/accounts/doctype/account/account.py:507
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.py:1289
 msgid "Company {0} does not exist"
-msgstr "Kompanija {0} ne postoji"
+msgstr "Poduzeće {0} ne postoji"
 
 #: erpnext/accounts/doctype/accounting_dimension/accounting_dimension.py:83
 msgid "Company {0} is added more than once"
-msgstr "Kompanija {0} je dodana više puta"
+msgstr "Poduzeće {0} je dodana više puta"
 
 #: erpnext/setup/setup_wizard/operations/taxes_setup.py:14
 msgid "Company {} does not exist yet. Taxes setup aborted."
-msgstr "Kompanija {} još ne postoji. Postavljanje poreza je prekinuto."
+msgstr "Poduzeće {} još ne postoji. Postavljanje poreza je prekinuto."
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:534
 msgid "Company {} does not match with POS Profile Company {}"
-msgstr "Kompanija {} se ne podudara s Kasa Profilom Kompanije {}"
+msgstr "Poduzeće {} se ne podudara s Kasa Profilom {}"
 
 #. Name of a DocType
 #. Label of the competitor (Link) field in DocType 'Competitor Detail'
@@ -11065,7 +11065,7 @@ msgstr "Konsolidovani Bruto Bilans"
 
 #: erpnext/accounts/report/consolidated_trial_balance/consolidated_trial_balance.py:71
 msgid "Consolidated Trial Balance can be generated for Companies having same root Company."
-msgstr "Konsolidovani Bruto Bilans može se generirati za kompanije koje imaju istu matičnu kompaniju."
+msgstr "Konsolidovani Bruto Bilans može se generirati za poduzeća koje imaju isto matično poduzeće."
 
 #: erpnext/accounts/report/consolidated_trial_balance/consolidated_trial_balance.py:153
 msgid "Consolidated Trial balance could not be generated as Exchange Rate from {0} to {1} is not available for {2}."
@@ -11494,11 +11494,11 @@ msgstr "Stopa konverzije ne može biti 0"
 
 #: erpnext/controllers/accounts_controller.py:2895
 msgid "Conversion rate is 1.00, but document currency is different from company currency"
-msgstr "Stopa konverzije je 1,00, ali valuta dokumenta se razlikuje od valute kompanije"
+msgstr "Stopa konverzije je 1,00, ali valuta dokumenta se razlikuje od valute poduzeća"
 
 #: erpnext/controllers/accounts_controller.py:2891
 msgid "Conversion rate must be 1.00 if document currency is same as company currency"
-msgstr "Stopa konverzije mora biti 1,00 ako je valuta dokumenta ista kao valuta kompanije"
+msgstr "Stopa konverzije mora biti 1,00 ako je valuta dokumenta ista kao valuta poduzeća"
 
 #. Label of the clean_description_html (Check) field in DocType 'Stock
 #. Settings'
@@ -11822,7 +11822,7 @@ msgstr "Centar Troškova {0} ne može se koristiti za dodjelu jer se koristi kao
 
 #: erpnext/assets/doctype/asset/asset.py:293
 msgid "Cost Center {} doesn't belong to Company {}"
-msgstr "Centar Troškova {} ne pripada Kompaniji {}"
+msgstr "Centar Troškova {} ne pripada {}"
 
 #: erpnext/assets/doctype/asset/asset.py:300
 msgid "Cost Center {} is a group cost center and group cost centers cannot be used in transactions"
@@ -11953,7 +11953,7 @@ msgstr "Nije moguće automatski kreirati Kreditnu Fakturu, poništi oznaku \"Izd
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:353
 msgid "Could not detect the Company for updating Bank Accounts"
-msgstr "Nije moguće otkriti kompaniju za ažuriranje Bankovnih Računa"
+msgstr "Nije moguće otkriti poduzeće za ažuriranje Bankovnih Računa"
 
 #: erpnext/assets/doctype/asset_shift_allocation/asset_shift_allocation.py:129
 msgid "Could not find a suitable shift to match the difference: {0}"
@@ -12070,7 +12070,7 @@ msgstr "Kreiraj Grupiranu Imovinu"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.js:105
 msgid "Create Inter Company Journal Entry"
-msgstr "Kreiraj Naloga Knjiženja za Inter Kompaniju"
+msgstr "Kreiraj Naloga Knjiženja za Inter Poduzeće"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:54
 msgid "Create Invoices"
@@ -12574,7 +12574,7 @@ msgstr "Kredit Za"
 #. Label of the credit (Currency) field in DocType 'Journal Entry Account'
 #: erpnext/accounts/doctype/journal_entry_account/journal_entry_account.json
 msgid "Credit in Company Currency"
-msgstr "Kredit u Valuti Kompanije"
+msgstr "Kredit u Valuti Poduzeća"
 
 #: erpnext/selling/doctype/customer/customer.py:559
 #: erpnext/selling/doctype/customer/customer.py:614
@@ -12583,7 +12583,7 @@ msgstr "Kreditno ograničenje je premašeno za klijenta {0} ({1}/{2})"
 
 #: erpnext/selling/doctype/customer/customer.py:352
 msgid "Credit limit is already defined for the Company {0}"
-msgstr "Kreditno ograničenje je već definisano za Kompaniju {0}"
+msgstr "Kreditno ograničenje je već definisano za {0}"
 
 #: erpnext/selling/doctype/customer/customer.py:613
 msgid "Credit limit reached for customer {0}"
@@ -14045,7 +14045,7 @@ msgstr "Debit i Kredit nisu isti za {0} #{1}. Razlika je {2}."
 #. Label of the debit (Currency) field in DocType 'Journal Entry Account'
 #: erpnext/accounts/doctype/journal_entry_account/journal_entry_account.json
 msgid "Debit in Company Currency"
-msgstr "Debit u Valuti Kompanije"
+msgstr "Debit u Valuti Poduzeća"
 
 #. Label of the debit_to (Link) field in DocType 'Discounted Invoice'
 #: erpnext/accounts/doctype/discounted_invoice/discounted_invoice.json
@@ -14239,14 +14239,14 @@ msgstr "Standard Zajednički Kod"
 #. Label of the default_company (Link) field in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "Default Company"
-msgstr "Standard Kompanija"
+msgstr "Standard Poduzeće"
 
 #. Label of the default_bank_account (Link) field in DocType 'Supplier'
 #. Label of the default_bank_account (Link) field in DocType 'Customer'
 #: erpnext/buying/doctype/supplier/supplier.json
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Default Company Bank Account"
-msgstr "Standard Bankovni Račun Kompanije"
+msgstr "Standard Bankovni Račun Poduzeća"
 
 #. Label of the cost_center (Link) field in DocType 'Project'
 #. Label of the cost_center (Link) field in DocType 'Company'
@@ -14752,7 +14752,7 @@ msgstr "Izbriši Transakcije"
 
 #: erpnext/setup/doctype/company/company.js:237
 msgid "Delete all the Transactions for this Company"
-msgstr "Izbrišite sve transakcije za ovu kompaniju"
+msgstr "Izbrišite sve transakcije za ovo Poduzeće"
 
 #. Label of a Link in the Settings Workspace
 #: erpnext/setup/workspace/settings/settings.json
@@ -15107,7 +15107,7 @@ msgstr "Demo Bankovni Račun"
 #. Label of the demo_company (Link) field in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "Demo Company"
-msgstr "Demo Kompanija"
+msgstr "Demo Poduzeće"
 
 #: erpnext/public/js/utils/demo.js:28
 msgid "Demo data cleared"
@@ -15419,7 +15419,7 @@ msgstr "Iznos Razlike"
 #. Label of the difference_amount (Currency) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Difference Amount (Company Currency)"
-msgstr "Iznos Razlike (Valuta Kompanije)"
+msgstr "Iznos Razlike (Valuta Poduzeća)"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:201
 msgid "Difference Amount must be zero"
@@ -16410,7 +16410,7 @@ msgstr "Iznos Opomene"
 #. Label of the base_dunning_amount (Currency) field in DocType 'Dunning'
 #: erpnext/accounts/doctype/dunning/dunning.json
 msgid "Dunning Amount (Company Currency)"
-msgstr "Iznos Opomene (Valuta Kompanije)"
+msgstr "Iznos Opomene (Valuta Poduzeća)"
 
 #. Label of the dunning_fee (Currency) field in DocType 'Dunning'
 #. Label of the dunning_fee (Currency) field in DocType 'Dunning Type'
@@ -17161,7 +17161,7 @@ msgstr "Omogućavanje ove opcije omogućit će vam zapisivanje - <br><br> 1. Pre
 #. account ' (Check) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enabling this will allow creation of multi-currency invoices against single party account in company currency"
-msgstr "Omogućavanje će omogućiti kreiranje viševalutnih faktura naspram računa jedne stranke u valuti kompanije"
+msgstr "Omogućavanje će omogućiti kreiranje viševalutnih faktura na račun jedne stranke u valuti poduzeća"
 
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.js:11
 msgid "Enabling this will change the way how cancelled transactions are handled."
@@ -17702,12 +17702,12 @@ msgstr "Izložba"
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Existing Company"
-msgstr "Postojeća Kompanija"
+msgstr "Postojeće Poduzeće"
 
 #. Label of the existing_company (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Existing Company "
-msgstr "Postojeća Kompanija "
+msgstr "Postojeće Poduzeće "
 
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:1
 msgid "Existing Customer"
@@ -18081,7 +18081,7 @@ msgstr "Provjera autentičnosti API ključa nije uspjela."
 
 #: erpnext/setup/demo.py:54
 msgid "Failed to erase demo data, please delete the demo company manually."
-msgstr "Brisanje demo podataka nije uspjelo, izbrišite demo kompaniju ručno."
+msgstr "Brisanje demo podataka nije uspjelo, izbrišite demo poduzeće ručno."
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:25
 #: erpnext/setup/setup_wizard/setup_wizard.py:26
@@ -18106,7 +18106,7 @@ msgstr "Neuspješan unos amortizacije"
 #: erpnext/setup/setup_wizard/setup_wizard.py:30
 #: erpnext/setup/setup_wizard/setup_wizard.py:31
 msgid "Failed to setup company"
-msgstr "Neuspješno postavljanje kompanije"
+msgstr "Neuspješno postavljanje poduzeća"
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:37
 msgid "Failed to setup defaults"
@@ -18656,7 +18656,7 @@ msgstr "Vrijeme prvog odgovora za Priliku"
 
 #: erpnext/regional/italy/utils.py:229
 msgid "Fiscal Regime is mandatory, kindly set the fiscal regime in the company {0}"
-msgstr "Fiskalni režim je obavezan, ljubazno postavite fiskalni režim u kompaniji {0}"
+msgstr "Fiskalni režim je obavezan, ljubazno postavite fiskalni režim za {0}"
 
 #. Name of a DocType
 #. Label of the fiscal_year (Link) field in DocType 'GL Entry'
@@ -18694,7 +18694,7 @@ msgstr "Fiskalna Godina"
 #. Name of a DocType
 #: erpnext/accounts/doctype/fiscal_year_company/fiscal_year_company.json
 msgid "Fiscal Year Company"
-msgstr "Fiskalnu Godina Kompanije"
+msgstr "Fiskalnu Godina Poduzeća"
 
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.py:65
 msgid "Fiscal Year End Date should be one year after Fiscal Year Start Date"
@@ -18714,7 +18714,7 @@ msgstr "Fiskalna Godina {0} nema u sistemu"
 
 #: erpnext/accounts/doctype/budget/budget.py:96
 msgid "Fiscal Year {0} is not available for Company {1}."
-msgstr "Fiskalna godina {0} nije dostupna za kompaniju {1}."
+msgstr "Fiskalna godina {0} nije dostupna za {1}."
 
 #: erpnext/accounts/report/trial_balance/trial_balance.py:43
 msgid "Fiscal Year {0} is required"
@@ -18894,7 +18894,7 @@ msgstr "Za Kupovinu"
 #. Label of the company (Link) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "For Company"
-msgstr "Za Kompaniju"
+msgstr "Za Poduzeće"
 
 #: erpnext/stock/doctype/material_request/material_request.js:400
 msgid "For Default Supplier (Optional)"
@@ -19233,7 +19233,7 @@ msgstr "Od Sastavnice Broj"
 #. Label of the from_company (Data) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "From Company"
-msgstr "Iz Kompanije"
+msgstr "Iz Poduzeća"
 
 #. Description of the 'Corrective Operation Cost' (Currency) field in DocType
 #. 'Work Order'
@@ -20338,7 +20338,7 @@ msgstr "Ukupni Iznos"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Grand Total (Company Currency)"
-msgstr "Ukupni Iznos (Valuta Kompanije)"
+msgstr "Ukupni Iznos (Valuta Poduzeća)"
 
 #. Label of the grant_commission (Check) field in DocType 'POS Invoice Item'
 #. Label of the grant_commission (Check) field in DocType 'Sales Invoice Item'
@@ -20848,7 +20848,7 @@ msgstr "Što je veći broj, veći je prioritet"
 #. Label of the history_in_company (Section Break) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "History In Company"
-msgstr "Istorija u Kompaniji"
+msgstr "Istorija u Poduzeću"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:380
 #: erpnext/selling/doctype/sales_order/sales_order.js:989
@@ -20959,7 +20959,7 @@ msgstr "Koliko Često?"
 #. field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "How often should Project and Company be updated based on Sales Transactions?"
-msgstr "Koliko često treba ažurirati Projekat i Kompaniju na osnovu prodajnih transakcija?"
+msgstr "Koliko često treba ažurirati Projekat i Poduzeću na osnovu prodajnih transakcija?"
 
 #. Description of the 'Update frequency of Project' (Select) field in DocType
 #. 'Buying Settings'
@@ -21104,7 +21104,7 @@ msgstr "Ako je operacija podijeljena na podoperacije, one se mogu dodati ovdje."
 #. Description of the 'Account' (Link) field in DocType 'Warehouse'
 #: erpnext/stock/doctype/warehouse/warehouse.json
 msgid "If blank, parent Warehouse Account or company default will be considered in transactions"
-msgstr "Ako je prazno, u transakcijama će se uzeti u obzir Nadređeni Račun Sladišta ili Standard Skladište kompanije"
+msgstr "Ako je prazno, u transakcijama će se uzeti u obzir Nadređeni Račun Skladišta ili Standard Skladište poduzeća"
 
 #. Description of the 'Bill for Rejected Quantity in Purchase Invoice' (Check)
 #. field in DocType 'Buying Settings'
@@ -21796,7 +21796,7 @@ msgstr "U Rječima"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "In Words (Company Currency)"
-msgstr "U Riječima (Valuta Kompanije)"
+msgstr "U Riječima (Valuta Poduzeća)"
 
 #. Description of the 'In Words' (Data) field in DocType 'Delivery Note'
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
@@ -21852,7 +21852,7 @@ msgstr "U slučaju višeslojnog programa, klijenti će biti automatski raspoređ
 
 #: erpnext/stock/doctype/item/item.js:1060
 msgid "In this section, you can define Company-wide transaction-related defaults for this Item. Eg. Default Warehouse, Default Price List, Supplier, etc."
-msgstr "U ovoj sekciji možete definirati zadane postavke transakcije koje se odnose na cijelu kompaniju za ovaj artikal. Npr. Standard Skladište, Standard Cijenovnik, Dobavljač itd."
+msgstr "U ovoj sekciji možete definirati zadane postavke transakcije koje se odnose na cijelo poduzeće za ovaj artikal. Npr. Standard Skladište, Standard Cjenovnik, Dobavljač itd."
 
 #. Label of a Link in the CRM Workspace
 #. Name of a report
@@ -22525,7 +22525,7 @@ msgstr "ID Integracije"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Inter Company Invoice Reference"
-msgstr "Referenca Fakture među Kompanijama"
+msgstr "Referenca Fakture među Poduzećima"
 
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #. Option for the 'Journal Entry Type' (Select) field in DocType 'Journal Entry
@@ -22533,13 +22533,13 @@ msgstr "Referenca Fakture među Kompanijama"
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.json
 msgid "Inter Company Journal Entry"
-msgstr "Naloga Knjiženja za Inter Kompaniju"
+msgstr "Naloga Knjiženja za Inter Poduzeće"
 
 #. Label of the inter_company_journal_entry_reference (Link) field in DocType
 #. 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 msgid "Inter Company Journal Entry Reference"
-msgstr "Referenca Naloga Knjiženja za Inter Kompaniju"
+msgstr "Referenca Naloga Knjiženja za Inter Poduzeće"
 
 #. Label of the inter_company_order_reference (Link) field in DocType 'Purchase
 #. Order'
@@ -22548,11 +22548,11 @@ msgstr "Referenca Naloga Knjiženja za Inter Kompaniju"
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 #: erpnext/selling/doctype/sales_order/sales_order.json
 msgid "Inter Company Order Reference"
-msgstr "Referenca Naloga za Inter Kompaniju"
+msgstr "Referenca Naloga za Inter Poduzeće"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1137
 msgid "Inter Company Purchase Order"
-msgstr "Inter Kompanijski Kupovni Nalog"
+msgstr "Kupovni Nalog Inter Poduzeća"
 
 #. Label of the inter_company_reference (Link) field in DocType 'Delivery Note'
 #. Label of the inter_company_reference (Link) field in DocType 'Purchase
@@ -22560,23 +22560,23 @@ msgstr "Inter Kompanijski Kupovni Nalog"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Inter Company Reference"
-msgstr "Referenca Inter Kompanija"
+msgstr "Referenca Inter Poduzeća"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:486
 msgid "Inter Company Sales Order"
-msgstr "Inter Kompanijski Prodajni Nalog"
+msgstr "Prodajni Nalog Inter Poduzeća"
 
 #. Label of the inter_transfer_reference_section (Section Break) field in
 #. DocType 'Sales Order Item'
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Inter Transfer Reference"
-msgstr "Referenca Prenosa Inter Kompanija"
+msgstr "Referenca Prenosa Inter Poduzeća"
 
 #. Label of the inter_warehouse_transfer_settings_section (Section Break) field
 #. in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Inter Warehouse Transfer Settings"
-msgstr "Postavke prijenosa Skladišta Inter Kompanija"
+msgstr "Postavke prijenosa Skladišta Inter Poduzeća"
 
 #. Label of the interest (Currency) field in DocType 'Overdue Payment'
 #: erpnext/accounts/doctype/overdue_payment/overdue_payment.json
@@ -22620,7 +22620,7 @@ msgstr "Interni Klijent"
 
 #: erpnext/selling/doctype/customer/customer.py:224
 msgid "Internal Customer for company {0} already exists"
-msgstr "Interni Klijent za kompaniju {0} već postoji"
+msgstr "Interni Klijent za {0} već postoji"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1136
 msgid "Internal Purchase Order"
@@ -22646,7 +22646,7 @@ msgstr "Interni Dobavljač"
 
 #: erpnext/buying/doctype/supplier/supplier.py:180
 msgid "Internal Supplier for company {0} already exists"
-msgstr "Interni Dobavljač za kompaniju {0} već postoji"
+msgstr "Interni Dobavljač za {0} već postoji"
 
 #. Option for the 'Payment Type' (Select) field in DocType 'Payment Entry'
 #. Option for the 'Status' (Select) field in DocType 'Purchase Invoice'
@@ -22680,7 +22680,7 @@ msgstr "Interna Radna Istorija"
 
 #: erpnext/controllers/stock_controller.py:1507
 msgid "Internal transfers can only be done in company's default currency"
-msgstr "Interni prenosi se mogu vršiti samo u standard valuti kompanije"
+msgstr "Interni prenosi se mogu vršiti samo u standard valuti poduzeća"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:28
 msgid "Internet Publishing"
@@ -22734,7 +22734,7 @@ msgstr "Nevažeća Podređena Procedura"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2328
 msgid "Invalid Company for Inter Company Transaction."
-msgstr "Nevažeća kompanija za međukompanijsku transakciju."
+msgstr "Nevažeće poduzeće za transakcije među poduzećima."
 
 #: erpnext/assets/doctype/asset/asset.py:296
 #: erpnext/assets/doctype/asset/asset.py:303
@@ -22924,7 +22924,7 @@ msgstr "Nevažeći {0}"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2326
 msgid "Invalid {0} for Inter Company Transaction."
-msgstr "Nevažeći {0} za međukompanijsku transakciju."
+msgstr "Nevažeći {0} za transakcije među poduzećima."
 
 #: erpnext/accounts/report/general_ledger/general_ledger.py:101
 #: erpnext/controllers/sales_and_purchase_return.py:34
@@ -23262,12 +23262,12 @@ msgstr "Gotovinski ili Netrgovčki Popust"
 #: erpnext/accounts/doctype/share_balance/share_balance.json
 #: erpnext/accounts/doctype/shareholder/shareholder.json
 msgid "Is Company"
-msgstr "Kompanija"
+msgstr "Je Poduzeće"
 
 #. Label of the is_company_account (Check) field in DocType 'Bank Account'
 #: erpnext/accounts/doctype/bank_account/bank_account.json
 msgid "Is Company Account"
-msgstr "Račun Kompanije"
+msgstr "Račun Poduzeća"
 
 #. Label of the is_composite_asset (Check) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -23675,7 +23675,7 @@ msgstr "Dobavljač"
 #. Label of the is_your_company_address (Check) field in DocType 'Address'
 #: erpnext/accounts/custom/address.json
 msgid "Is Your Company Address"
-msgstr "Adresa Vaše Kompanije"
+msgstr "Je Adresa Vašeg Poduzeća"
 
 #. Label of the is_a_subscription (Check) field in DocType 'Payment Request'
 #: erpnext/accounts/doctype/payment_request/payment_request.json
@@ -24842,7 +24842,7 @@ msgstr "Artikal PDV Red {0} mora imati račun tipa PDV ili Prihod ili Trošak il
 
 #: erpnext/accounts/doctype/item_tax_template/item_tax_template.py:48
 msgid "Item Tax Row {0}: Account must belong to Company - {1}"
-msgstr "Artikal PDV Red {0}: Račun mora pripadati kompaniji - {1}"
+msgstr "Artikal Pdv Red {0}: Račun mora pripadati - {1}"
 
 #. Name of a DocType
 #. Label of the item_tax_template (Link) field in DocType 'POS Invoice Item'
@@ -25697,7 +25697,7 @@ msgstr "Otkaži Unose Proizvodnje naspram Radnog Naloga {0}."
 
 #: erpnext/public/js/utils/party.js:268
 msgid "Kindly select the company first"
-msgstr "Najprije odaberi kompaniju"
+msgstr "Najprije odaberi poduzeće"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -26106,7 +26106,7 @@ msgstr "Prati Status Registra"
 #. Name of a DocType
 #: erpnext/accounts/doctype/ledger_health_monitor_company/ledger_health_monitor_company.json
 msgid "Ledger Health Monitor Company"
-msgstr "Kompanija Praćenja Statusa Registra"
+msgstr "Poduzeće Praćenja Statusa Registra"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/ledger_merge/ledger_merge.json
@@ -28001,7 +28001,7 @@ msgstr "Spojeno"
 
 #: erpnext/accounts/doctype/account/account.py:599
 msgid "Merging is only possible if following properties are same in both records. Is Group, Root Type, Company and Account Currency"
-msgstr "Spajanje je moguće samo ako su sljedeća svojstva ista u oba zapisa. Grupa, Tip Klase, Kompanija i Valuta Računa"
+msgstr "Spajanje je moguće samo ako su sljedeća svojstva ista u oba zapisa. Grupa, Tip Klase, Poduzeće i Valuta Računa"
 
 #: erpnext/accounts/doctype/ledger_merge/ledger_merge.js:16
 msgid "Merging {0} of {1}"
@@ -28331,7 +28331,7 @@ msgstr "Nedostaje Centar Troškova"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1213
 msgid "Missing Default in Company"
-msgstr "Nedostaju Standard Postavke u kompaniji"
+msgstr "Nedostaju Standard Postavke u Poduzeću"
 
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:44
 msgid "Missing Filters"
@@ -28638,7 +28638,7 @@ msgstr "Više Skladišnih Računa"
 
 #: erpnext/controllers/accounts_controller.py:1234
 msgid "Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year"
-msgstr "Za datum {0} postoji više fiskalnih godina. Molimo postavite kompaniju u Fiskalnoj Godini"
+msgstr "Za datum {0} postoji više fiskalnih godina. Molimo postavite poduzeće u Fiskalnoj Godini"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1600
 msgid "Multiple items cannot be marked as finished item"
@@ -28848,7 +28848,7 @@ msgstr "Neto Iznos"
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Net Amount (Company Currency)"
-msgstr "Neto Iznos (Valuta Kompanije)"
+msgstr "Neto Iznos (Valuta Poduzeća)"
 
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:665
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:671
@@ -28978,7 +28978,7 @@ msgstr "Neto Cijena"
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Net Rate (Company Currency)"
-msgstr "Neto Cijena (Valuta Kompanije)"
+msgstr "Neto Cijena (Valuta Poduzeća)"
 
 #. Label of the net_total (Currency) field in DocType 'POS Closing Entry'
 #. Label of the net_total (Currency) field in DocType 'POS Invoice'
@@ -29058,7 +29058,7 @@ msgstr "Neto Ukupno"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Net Total (Company Currency)"
-msgstr "Neto Ukupno (Valuta Kompanije)"
+msgstr "Neto Ukupno (Valuta Poduzeća)"
 
 #. Option for the 'Calculate Based On' (Select) field in DocType 'Shipping
 #. Rule'
@@ -29125,7 +29125,7 @@ msgstr "Nova Šarža Količina"
 #: erpnext/accounts/doctype/cost_center/cost_center_tree.js:18
 #: erpnext/setup/doctype/company/company_tree.js:23
 msgid "New Company"
-msgstr "Nova Kompanija"
+msgstr "Novo Poduzeće"
 
 #: erpnext/accounts/doctype/cost_center/cost_center_tree.js:26
 msgid "New Cost Center Name"
@@ -29312,7 +29312,7 @@ msgstr "Bez Odgovora"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2495
 msgid "No Customer found for Inter Company Transactions which represents company {0}"
-msgstr "Nije pronađen Klijent za Transakcije Inter Kompanije koji predstavlja kompaniju {0}"
+msgstr "Nije pronađen Klijent za Transakcije Inter Poduzeća koji predstavlja {0}"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:164
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:430
@@ -29402,7 +29402,7 @@ msgstr "Nema Sažetak"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2479
 msgid "No Supplier found for Inter Company Transactions which represents company {0}"
-msgstr "Nije pronađen Dobavljač za Transakcije Inter Kompanije koji predstavlja kompaniju {0}"
+msgstr "Nije pronađen Dobavljač za Transakcije Inter Poduzeća koji predstavlja {0}"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:221
 msgid "No Tax Withholding data found for the current posting date."
@@ -29658,11 +29658,11 @@ msgstr "Bez Vrijednosti"
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:361
 msgid "No {0} Accounts found for this company."
-msgstr "Nisu pronađeni {0} računi za ovu kompaniju."
+msgstr "Nisu pronađeni {0} računi za ovo poduzeće."
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2543
 msgid "No {0} found for Inter Company Transactions."
-msgstr "Nije pronađen {0} za transakcije među kompanijama."
+msgstr "Nije pronađen {0} za transakcije među poduzećima."
 
 #: erpnext/assets/doctype/asset/asset.js:286
 msgid "No."
@@ -29777,7 +29777,7 @@ msgstr "Nije Započeto"
 
 #: erpnext/accounts/report/cash_flow/cash_flow.py:405
 msgid "Not able to find the earliest Fiscal Year for the given company."
-msgstr "Nije moguće pronaći najraniju Fiskalnu Godinu za datu kompaniju."
+msgstr "Nije moguće pronaći najraniju Fiskalnu Godinu za dato poduzeće."
 
 #: erpnext/stock/doctype/item_alternative/item_alternative.py:33
 msgid "Not allow to set alternative item for the item {0}"
@@ -30541,7 +30541,7 @@ msgstr "Početni Artikal Fakture"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1644
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1963
 msgid "Opening Invoice has rounding adjustment of {0}.<br><br> '{1}' account is required to post these values. Please set it in Company: {2}.<br><br> Or, '{3}' can be enabled to not post any rounding adjustment."
-msgstr "Početna Faktura ima podešavanje zaokruživanja od {0}.<br><br> '{1}' račun je potreban za postavljanje ovih vrijednosti. Molimo postavite ga u kompaniji: {2}.<br><br> Ili, '{3}' se može omogućiti da se ne objavljuje nikakvo podešavanje zaokruživanja."
+msgstr "Početna Faktura ima podešavanje zaokruživanja od {0}.<br><br> '{1}' račun je potreban za postavljanje ovih vrijednosti. Postavi je u: {2}.<br><br> Ili, '{3}' se može omogućiti da se ne objavljuje nikakvo podešavanje zaokruživanja."
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html:8
 msgid "Opening Invoices"
@@ -30619,7 +30619,7 @@ msgstr "Operativni Trošak"
 #. Label of the base_operating_cost (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Operating Cost (Company Currency)"
-msgstr "Operativni Trošak (Valuta Kompanije)"
+msgstr "Operativni Trošak (Valuta Poduzeća)"
 
 #. Label of the operating_cost_per_bom_quantity (Currency) field in DocType
 #. 'BOM'
@@ -30634,7 +30634,7 @@ msgstr "Operativni Trošak prema Radnom Nalogu / Sastavnici"
 #. Label of the base_operating_cost (Currency) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "Operating Cost(Company Currency)"
-msgstr "Operativni Trošak (Valuta Kompanije)"
+msgstr "Operativni Trošak (Valuta Poduzeća)"
 
 #. Label of the over_heads (Tab Break) field in DocType 'Workstation'
 #: erpnext/manufacturing/doctype/workstation/workstation.json
@@ -30827,7 +30827,7 @@ msgstr "Iznos Prilike"
 #. 'Opportunity'
 #: erpnext/crm/doctype/opportunity/opportunity.json
 msgid "Opportunity Amount (Company Currency)"
-msgstr "Iznos Prilike (Valuta Kompanije)"
+msgstr "Iznos Prilike (Valuta Poduzeća)"
 
 #. Label of the transaction_date (Date) field in DocType 'Opportunity'
 #: erpnext/crm/doctype/opportunity/opportunity.json
@@ -30912,7 +30912,7 @@ msgstr "Optimiziraj Rutu"
 
 #: erpnext/accounts/doctype/account/account_tree.js:182
 msgid "Optional. Sets company's default currency, if not specified."
-msgstr "Opcija. Postavlja standard valutu kompanije, ako nije navedena."
+msgstr "Opcija. Postavlja standard valutu poduzeća, ako nije navedena."
 
 #: erpnext/accounts/doctype/account/account_tree.js:161
 msgid "Optional. This setting will be used to filter in various transactions."
@@ -31881,7 +31881,7 @@ msgstr "Plaćeni Iznos"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Paid Amount (Company Currency)"
-msgstr "Plaćeni Iznos (Valuta Kompanije)"
+msgstr "Plaćeni Iznos (Valuta Poduzeća)"
 
 #. Label of the paid_amount_after_tax (Currency) field in DocType 'Payment
 #. Entry'
@@ -31893,7 +31893,7 @@ msgstr "Plaćeni Iznos nakon Oporezivanja"
 #. Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Paid Amount After Tax (Company Currency)"
-msgstr "Plaćeni Iznos nakon Oporezivanja (Valuta Kompanije)"
+msgstr "Plaćeni Iznos nakon Oporezivanja (Valuta Poduzeća)"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:2006
 msgid "Paid Amount cannot be greater than total negative outstanding amount {0}"
@@ -31998,11 +31998,11 @@ msgstr "Nadređena Šarža"
 #. Label of the parent_company (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Parent Company"
-msgstr "Matična Kompanija"
+msgstr "Matično Poduzeće"
 
 #: erpnext/setup/doctype/company/company.py:590
 msgid "Parent Company must be a group company"
-msgstr "Matična Kompanija mora biti kompanija grupe"
+msgstr "Matično Poduzeće mora biti poduzeće grupe"
 
 #. Label of the parent_cost_center (Link) field in DocType 'Cost Center'
 #: erpnext/accounts/doctype/cost_center/cost_center.json
@@ -32687,7 +32687,7 @@ msgstr "Iznos Plaćanja"
 #. Schedule'
 #: erpnext/accounts/doctype/payment_schedule/payment_schedule.json
 msgid "Payment Amount (Company Currency)"
-msgstr "Iznos Plaćanja (Valuta Kompanije)"
+msgstr "Iznos Plaćanja (Valuta Poduzeća)"
 
 #. Label of the payment_channel (Select) field in DocType 'Payment Gateway
 #. Account'
@@ -33575,7 +33575,7 @@ msgstr "Periodični Knjigovodstveni Unos"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:244
 msgid "Periodic Accounting Entry is not allowed for company {0} with perpetual inventory enabled"
-msgstr "Periodični Knjigovodstveni Unos nije dozvoljen za kompaniju {0} kod koje je omogućeno stalno praćenje zaliha"
+msgstr "Periodični Knjigovodstveni Unos nije dozvoljen za {0} kod koje je omogućeno stalno praćenje zaliha"
 
 #. Label of the periodic_entry_difference_account (Link) field in DocType
 #. 'Journal Entry'
@@ -33611,7 +33611,7 @@ msgstr "Stalna Adresa Je"
 #: erpnext/stock/report/incorrect_stock_value_report/incorrect_stock_value_report.py:19
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:18
 msgid "Perpetual inventory required for the company {0} to view this report."
-msgstr "Stalni Inventar Zaliha je obavezan za kompaniju {0} da vidi ovaj izvještaj."
+msgstr "Stalni Inventar Zaliha je obavezan za {0} da vidi ovaj izvještaj."
 
 #. Label of the personal_details (Tab Break) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -34005,11 +34005,11 @@ msgstr "Popuni Zalihe Artikala i ažuriraj Listu Odabira da nastavite. Za prekid
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.py:18
 msgid "Please Select a Company"
-msgstr "Odaberite Kompaniju"
+msgstr "Odaberi Poduzeće"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:111
 msgid "Please Select a Company."
-msgstr "Odaberi Kompaniju."
+msgstr "Odaberi Poduzeće."
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:166
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:208
@@ -34064,11 +34064,11 @@ msgstr "Dodaj kolonu Bankovni Račun"
 
 #: erpnext/accounts/doctype/account/account_tree.js:243
 msgid "Please add the account to root level Company - {0}"
-msgstr "Dodaj Račun Matičnoj Kompaniji - {0}"
+msgstr "Dodaj Račun Matičnom Poduzeću - {0}"
 
 #: erpnext/accounts/doctype/account/account.py:231
 msgid "Please add the account to root level Company - {}"
-msgstr "Dodaj Račun Matičnoj Kompaniji - {}"
+msgstr "Dodaj Račun Matičnom Poduzeću - {}"
 
 #: erpnext/controllers/website_list_for_contact.py:298
 msgid "Please add {1} role to user {0}."
@@ -34601,7 +34601,7 @@ msgstr "Odaberi Sastavnicu"
 #: erpnext/accounts/party.py:430
 #: erpnext/stock/doctype/pick_list/pick_list.py:1588
 msgid "Please select a Company"
-msgstr "Odaberi Kompaniju"
+msgstr "Odaberi Poduzeće"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:267
 #: erpnext/manufacturing/doctype/bom/bom.js:639
@@ -34744,7 +34744,7 @@ msgstr "Odaberi redove da kreirate unose za ponovno knjiženje"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:92
 msgid "Please select the Company"
-msgstr "Odaberi Kompaniju"
+msgstr "Odaberi Poduzeće"
 
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.js:65
 msgid "Please select the Multiple Tier Program type for more than one collection rules."
@@ -34823,7 +34823,7 @@ msgstr "Postavi Knjigovodstvenu Dimenziju {} u {}"
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:78
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:781
 msgid "Please set Company"
-msgstr "Postavi Kompaniju"
+msgstr "Postavi Poduzeće"
 
 #: erpnext/regional/united_arab_emirates/utils.py:26
 msgid "Please set Customer Address to determine if the transaction is an export."
@@ -34887,7 +34887,7 @@ msgstr "Postavi PDV Račune za Kompaniju: \"{0}\" u postavkama PDV-a UAE"
 
 #: erpnext/accounts/doctype/account/account_tree.js:19
 msgid "Please set a Company"
-msgstr "Postavi Kompaniju"
+msgstr "Postavi Poduzeće"
 
 #: erpnext/assets/doctype/asset/asset.py:309
 msgid "Please set a Cost Center for the Asset or set an Asset Depreciation Cost Center for the Company {}"
@@ -37645,7 +37645,7 @@ msgstr "Količina "
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/pick_list_item/pick_list_item.json
 msgid "Qty (Company)"
-msgstr "Količina (Kompanija)"
+msgstr "Količina (Poduzeće)"
 
 #. Label of the actual_qty (Float) field in DocType 'Sales Invoice Item'
 #. Label of the actual_qty (Float) field in DocType 'Quotation Item'
@@ -38634,7 +38634,7 @@ msgstr "Cijena & Iznos"
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Rate (Company Currency)"
-msgstr "Cijena (Valuta Kompanije)"
+msgstr "Cijena (Valuta Poduzeća)"
 
 #. Label of the rm_cost_as_per (Select) field in DocType 'BOM'
 #. Label of the rm_cost_as_per (Select) field in DocType 'BOM Creator'
@@ -38706,7 +38706,7 @@ msgstr "Cijena s Maržom"
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Rate With Margin (Company Currency)"
-msgstr "Cijena s Maržom (Valuta Kompanije)"
+msgstr "Cijena s Maržom (Valuta Poduzeća)"
 
 #. Label of the rate_and_amount (Section Break) field in DocType 'Purchase
 #. Receipt Item'
