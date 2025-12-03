@@ -471,3 +471,4 @@ erpnext.patches.v16_0.update_order_qty_and_requested_qty_based_on_mr_and_po
 erpnext.patches.v16_0.complete_onboarding_steps_for_older_sites #2
 erpnext.patches.v16_0.enable_serial_batch_setting
 erpnext.patches.v16_0.co_by_product_patch
+erpnext.patches.v15_0.rename_italy_customer_name_fields
