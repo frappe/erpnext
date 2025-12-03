@@ -12,7 +12,7 @@ frappe.listview_settings["Delivery Note"] = {
 		"currency",
 	],
 	get_indicator: function (doc) {
-		if (cint(doc.is_return) == 1) {
+		if (cint(doc.is_return) == 1 && doc.status == "Return") {
 			return [__("Return"), "gray", "is_return,=,Yes"];
 		} else if (doc.status === "Closed") {
 			return [__("Closed"), "green", "status,=,Closed"];
