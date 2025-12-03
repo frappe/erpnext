@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -54,14 +55,18 @@ class Letter(Document):
 
 
 @frappe.whitelist()
-def get_recipient_details(recipient_type, recipient):
+def get_recipient_details(recipient_type: str, recipient: str):
 	if not recipient_type or not recipient:
 		return {}
 
 	if not frappe.db.exists(recipient_type, recipient):
-		frappe.throw(f"{recipient_type} {recipient} does not exist")
+		frappe.throw(_("{0} {1} does not exist").format(recipient_type, recipient))
 
-	frappe.has_permission(recipient_type, doc=recipient, throw=True)
+	if not frappe.has_permission(recipient_type, doc=recipient):
+		frappe.throw(
+			_("Not permitted to access {0} {1}").format(recipient_type, recipient),
+			frappe.PermissionError,
+		)
 
 	name_field = (
 		"title"
