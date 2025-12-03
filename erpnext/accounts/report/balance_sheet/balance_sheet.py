@@ -8,6 +8,7 @@ from frappe.utils import cint, flt
 
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	FinancialReportEngine,
+	get_export_xlsx_cell_style,
 )
 from erpnext.accounts.report.financial_statements import (
 	compute_growth_view_data,
@@ -264,3 +265,27 @@ def get_chart_data(filters, columns, asset, liability, equity, currency):
 	chart["currency"] = currency
 
 	return chart
+
+
+# ============================================================================
+# EXCEL EXPORT CELL STYLING
+# ============================================================================
+
+
+def get_xlsx_cell_style(
+	cell_value,
+	column: dict,
+	row: dict,
+	filters: dict,
+	is_total_row=False,
+) -> dict | None:
+	if not filters.report_template:
+		return
+
+	return get_export_xlsx_cell_style(
+		cell_value,
+		column,
+		row,
+		filters,
+		is_total_row,
+	)

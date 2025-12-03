@@ -1800,3 +1800,18 @@ class GrowthViewTransformer:
 			return 0.0
 		else:
 			return flt(((current_value - previous_value) / abs(previous_value)) * 100, 2)
+
+
+# ============================================================================
+# EXCEL EXPORT CELL STYLING
+# ============================================================================
+
+
+def get_export_xlsx_cell_style(
+	cell_value,
+	column: dict,
+	row: dict,
+	filters: dict,
+	is_total_row=False,
+) -> dict | None:
+	pass

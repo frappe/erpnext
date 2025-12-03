@@ -12,6 +12,7 @@ from pypika import Order
 
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	FinancialReportEngine,
+	get_export_xlsx_cell_style,
 )
 from erpnext.accounts.report.financial_statements import (
 	get_columns,
@@ -436,3 +437,27 @@ def get_chart_data(columns, data, currency):
 	chart["currency"] = currency
 
 	return chart
+
+
+# ============================================================================
+# EXCEL EXPORT CELL STYLING
+# ============================================================================
+
+
+def get_xlsx_cell_style(
+	cell_value,
+	column: dict,
+	row: dict,
+	filters: dict,
+	is_total_row=False,
+) -> dict | None:
+	if not filters.report_template:
+		return
+
+	return get_export_xlsx_cell_style(
+		cell_value,
+		column,
+		row,
+		filters,
+		is_total_row,
+	)
