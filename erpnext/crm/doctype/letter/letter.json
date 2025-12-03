@@ -1,211 +1,211 @@
 {
- "actions": [],
- "allow_rename": 1,
- "autoname": "naming_series:",
- "creation": "2025-12-03 20:35:18.414308",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "section_break_letter",
-  "naming_series",
-  "recipient_type",
-  "recipient",
-  "recipient_name",
-  "recipient_address",
-  "address_display",
-  "column_break_pmit",
-  "letter_type",
-  "date",
-  "company",
-  "company_address",
-  "company_address_display",
-  "amended_from",
-  "letter_details_section",
-  "letter_template",
-  "subject",
-  "content",
-  "printing_settings_section",
-  "letter_head",
-  "column_break_ksdg",
-  "language"
- ],
- "fields": [
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Letter",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "recipient_type",
-   "fieldtype": "Select",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "label": "Recipient Type",
-   "options": "Customer\nSupplier\nEmployee\nShareholder\nContact",
-   "reqd": 1
-  },
-  {
-   "fieldname": "recipient_address",
-   "fieldtype": "Link",
-   "label": "Recipient Address",
-   "options": "Address"
-  },
-  {
-   "fieldname": "column_break_pmit",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "recipient",
-   "fieldtype": "Dynamic Link",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "label": "Recipient",
-   "options": "recipient_type",
-   "reqd": 1
-  },
-  {
-   "fieldname": "recipient_name",
-   "fieldtype": "Data",
-   "label": "Recipient Name",
-   "read_only": 1
-  },
-  {
-   "fieldname": "address_display",
-   "fieldtype": "Text Editor",
-   "label": "Recipient Address Details",
-   "read_only": 1
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Company",
-   "options": "Company",
-   "reqd": 1
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "no_copy": 1,
-   "options": "L-.YY.-",
-   "print_hide": 1,
-   "reqd": 1,
-   "set_only_once": 1
-  },
-  {
-   "fieldname": "company_address",
-   "fieldtype": "Link",
-   "label": "Company Address",
-   "options": "Address"
-  },
-  {
-   "fieldname": "company_address_display",
-   "fieldtype": "Text Editor",
-   "label": "Company Address Details",
-   "read_only": 1
-  },
-  {
-   "fieldname": "letter_type",
-   "fieldtype": "Link",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "label": "Letter Type",
-   "options": "Letter Type",
-   "reqd": 1
-  },
-  {
-   "default": "Today",
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Date",
-   "reqd": 1
-  },
-  {
-   "fieldname": "letter_details_section",
-   "fieldtype": "Section Break",
-   "label": "Letter Details"
-  },
-  {
-   "fieldname": "letter_template",
-   "fieldtype": "Link",
-   "label": "Letter Template",
-   "link_filters": "[[\"Letter Template\",\"letter_type\",\"=\",\"eval:doc.letter_type\"]]",
-   "options": "Letter Template"
-  },
-  {
-   "fieldname": "subject",
-   "fieldtype": "Data",
-   "label": "Subject"
-  },
-  {
-   "fieldname": "content",
-   "fieldtype": "Text Editor",
-   "label": "Content"
-  },
-  {
-   "fieldname": "section_break_letter",
-   "fieldtype": "Section Break"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "printing_settings_section",
-   "fieldtype": "Section Break",
-   "label": "Printing Settings"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "letter_head",
-   "fieldtype": "Link",
-   "label": "Letter Head",
-   "options": "Letter Head",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "column_break_ksdg",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "language",
-   "fieldtype": "Data",
-   "label": "Print Language",
-   "print_hide": 1
-  }
- ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
- "is_submittable": 1,
- "links": [],
- "modified": "2025-12-03 23:40:09.332016",
- "modified_by": "Administrator",
- "module": "CRM",
- "name": "Letter",
- "naming_rule": "By \"Naming Series\" field",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "submit": 1,
-   "write": 1
-  }
- ],
- "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
- "sort_field": "creation",
- "sort_order": "DESC",
- "states": []
+  "actions": [],
+  "allow_rename": 1,
+  "autoname": "naming_series:",
+  "creation": "2025-12-03 20:35:18.414308",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "section_break_letter",
+    "naming_series",
+    "recipient_type",
+    "recipient",
+    "recipient_name",
+    "recipient_address",
+    "address_display",
+    "column_break_pmit",
+    "letter_type",
+    "date",
+    "company",
+    "company_address",
+    "company_address_display",
+    "amended_from",
+    "letter_details_section",
+    "letter_template",
+    "subject",
+    "content",
+    "printing_settings_section",
+    "letter_head",
+    "column_break_ksdg",
+    "language"
+  ],
+  "fields": [
+    {
+      "fieldname": "amended_from",
+      "fieldtype": "Link",
+      "label": "Amended From",
+      "no_copy": 1,
+      "options": "Letter",
+      "print_hide": 1,
+      "read_only": 1,
+      "search_index": 1
+    },
+    {
+      "fieldname": "recipient_type",
+      "fieldtype": "Select",
+      "in_filter": 1,
+      "in_list_view": 1,
+      "label": "Recipient Type",
+      "options": "Customer\nSupplier\nEmployee\nShareholder\nContact",
+      "reqd": 1
+    },
+    {
+      "fieldname": "recipient_address",
+      "fieldtype": "Link",
+      "label": "Recipient Address",
+      "options": "Address"
+    },
+    {
+      "fieldname": "column_break_pmit",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "recipient",
+      "fieldtype": "Dynamic Link",
+      "in_filter": 1,
+      "in_list_view": 1,
+      "label": "Recipient",
+      "options": "recipient_type",
+      "reqd": 1
+    },
+    {
+      "fieldname": "recipient_name",
+      "fieldtype": "Data",
+      "label": "Recipient Name",
+      "read_only": 1
+    },
+    {
+      "fieldname": "address_display",
+      "fieldtype": "Text Editor",
+      "label": "Recipient Address Details",
+      "read_only": 1
+    },
+    {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Company",
+      "options": "Company",
+      "reqd": 1
+    },
+    {
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "no_copy": 1,
+      "options": "L-.YY.-",
+      "print_hide": 1,
+      "reqd": 1,
+      "set_only_once": 1
+    },
+    {
+      "fieldname": "company_address",
+      "fieldtype": "Link",
+      "label": "Company Address",
+      "options": "Address"
+    },
+    {
+      "fieldname": "company_address_display",
+      "fieldtype": "Text Editor",
+      "label": "Company Address Details",
+      "read_only": 1
+    },
+    {
+      "fieldname": "letter_type",
+      "fieldtype": "Link",
+      "in_filter": 1,
+      "in_list_view": 1,
+      "label": "Letter Type",
+      "options": "Letter Type",
+      "reqd": 1
+    },
+    {
+      "default": "Today",
+      "fieldname": "date",
+      "fieldtype": "Date",
+      "in_list_view": 1,
+      "label": "Date",
+      "reqd": 1
+    },
+    {
+      "fieldname": "letter_details_section",
+      "fieldtype": "Section Break",
+      "label": "Letter Details"
+    },
+    {
+      "fieldname": "letter_template",
+      "fieldtype": "Link",
+      "label": "Letter Template",
+      "link_filters": "[[\"Letter Template\",\"letter_type\",\"=\",\"eval:doc.letter_type\"]]",
+      "options": "Letter Template"
+    },
+    {
+      "fieldname": "subject",
+      "fieldtype": "Data",
+      "label": "Subject"
+    },
+    {
+      "fieldname": "content",
+      "fieldtype": "Text Editor",
+      "label": "Content"
+    },
+    {
+      "fieldname": "section_break_letter",
+      "fieldtype": "Section Break"
+    },
+    {
+      "collapsible": 1,
+      "fieldname": "printing_settings_section",
+      "fieldtype": "Section Break",
+      "label": "Printing Settings"
+    },
+    {
+      "allow_on_submit": 1,
+      "fieldname": "letter_head",
+      "fieldtype": "Link",
+      "label": "Letter Head",
+      "options": "Letter Head",
+      "print_hide": 1
+    },
+    {
+      "fieldname": "column_break_ksdg",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "language",
+      "fieldtype": "Data",
+      "label": "Print Language",
+      "print_hide": 1
+    }
+  ],
+  "grid_page_length": 50,
+  "index_web_pages_for_search": 1,
+  "is_submittable": 1,
+  "links": [],
+  "modified": "2025-12-03 23:40:09.332016",
+  "modified_by": "Administrator",
+  "module": "CRM",
+  "name": "Letter",
+  "naming_rule": "By \"Naming Series\" field",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "submit": 1,
+      "write": 1
+    }
+  ],
+  "row_format": "Dynamic",
+  "rows_threshold_for_grid_search": 20,
+  "sort_field": "creation",
+  "sort_order": "DESC",
+  "states": []
 }

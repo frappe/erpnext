@@ -13,8 +13,8 @@ frappe.ui.form.on("Letter", {
 				query: "frappe.contacts.doctype.address.address.address_query",
 				filters: {
 					link_doctype: frm.doc.recipient_type,
-					link_name: frm.doc.recipient
-				}
+					link_name: frm.doc.recipient,
+				},
 			};
 		});
 
@@ -28,8 +28,8 @@ frappe.ui.form.on("Letter", {
 				query: "frappe.contacts.doctype.address.address.address_query",
 				filters: {
 					link_doctype: "Company",
-					link_name: frm.doc.company
-				}
+					link_name: frm.doc.company,
+				},
 			};
 		});
 	},
@@ -40,16 +40,16 @@ frappe.ui.form.on("Letter", {
 				method: "erpnext.crm.doctype.letter.letter.get_recipient_details",
 				args: {
 					recipient_type: frm.doc.recipient_type,
-					recipient: frm.doc.recipient
+					recipient: frm.doc.recipient,
 				},
-				callback: function(r) {
+				callback: function (r) {
 					if (r.message) {
 						frm.set_value("recipient_name", r.message.recipient_name);
 						if (r.message.language) {
 							frm.set_value("language", r.message.language);
 						}
 					}
-				}
+				},
 			});
 		} else {
 			frm.set_value("recipient_name", "");
@@ -71,13 +71,13 @@ frappe.ui.form.on("Letter", {
 			frappe.call({
 				method: "frappe.contacts.doctype.address.address.get_address_display",
 				args: {
-					address_dict: frm.doc.recipient_address
+					address_dict: frm.doc.recipient_address,
 				},
-				callback: function(r) {
+				callback: function (r) {
 					if (r.message) {
 						frm.set_value("address_display", r.message);
 					}
-				}
+				},
 			});
 		} else {
 			frm.set_value("address_display", "");
@@ -97,13 +97,13 @@ frappe.ui.form.on("Letter", {
 			frappe.call({
 				method: "frappe.contacts.doctype.address.address.get_address_display",
 				args: {
-					address_dict: frm.doc.company_address
+					address_dict: frm.doc.company_address,
 				},
-				callback: function(r) {
+				callback: function (r) {
 					if (r.message) {
 						frm.set_value("company_address_display", r.message);
 					}
-				}
+				},
 			});
 		} else {
 			frm.set_value("company_address_display", "");
@@ -116,9 +116,9 @@ frappe.ui.form.on("Letter", {
 				method: "erpnext.crm.doctype.letter_template.letter_template.get_letter_template",
 				args: {
 					template_name: frm.doc.letter_template,
-					doc: frm.doc
+					doc: frm.doc,
 				},
-				callback: function(r) {
+				callback: function (r) {
 					if (r && r.message) {
 						if (r.message.subject) {
 							frm.set_value("subject", r.message.subject);
@@ -127,8 +127,8 @@ frappe.ui.form.on("Letter", {
 							frm.set_value("content", r.message.content);
 						}
 					}
-				}
+				},
 			});
 		}
-	}
+	},
 });
