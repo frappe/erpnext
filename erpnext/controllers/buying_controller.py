@@ -18,6 +18,7 @@ from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.controllers.taxes_and_totals import NOT_APPLICABLE_TAX
 from erpnext.stock.get_item_details import get_conversion_factor, get_item_defaults
 from erpnext.stock.utils import get_incoming_rate
 
@@ -522,6 +523,8 @@ class BuyingController(SubcontractingController):
 			for account, rate in tax_details.items():
 				if account not in tax_accounts:
 					continue
+
+				rate = flt(rate)
 
 				net_rate = item.base_net_amount
 				if item.sales_incoming_rate:

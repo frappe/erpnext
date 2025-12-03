@@ -64,6 +64,7 @@ from erpnext.controllers.print_settings import (
 	set_print_templates_for_taxes,
 )
 from erpnext.controllers.sales_and_purchase_return import validate_return
+from erpnext.controllers.taxes_and_totals import NOT_APPLICABLE_TAX
 from erpnext.exceptions import InvalidCurrency
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
