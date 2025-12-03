@@ -63,7 +63,11 @@ def get_recipient_details(recipient_type, recipient):
 
 	frappe.has_permission(recipient_type, doc=recipient, throw=True)
 
-	name_field = "title" if recipient_type == "Shareholder" else ("full_name" if recipient_type == "Contact" else recipient_type.lower() + "_name")
+	name_field = (
+		"title"
+		if recipient_type == "Shareholder"
+		else ("full_name" if recipient_type == "Contact" else recipient_type.lower() + "_name")
+	)
 
 	if frappe.db.has_column(recipient_type, name_field):
 		recipient_name = frappe.db.get_value(recipient_type, recipient, name_field)
@@ -75,7 +79,4 @@ def get_recipient_details(recipient_type, recipient):
 	if frappe.db.has_column(recipient_type, "language"):
 		language = frappe.db.get_value(recipient_type, recipient, "language")
 
-	return {
-		"recipient_name": recipient_name,
-		"language": language
-	}
+	return {"recipient_name": recipient_name, "language": language}

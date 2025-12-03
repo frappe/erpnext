@@ -49,7 +49,4 @@ def get_letter_template(template_name, doc):
 	if template.content:
 		content = frappe.render_template(template.content, doc)
 
-	return {
-		"subject": subject,
-		"content": content
-	}
+	return {"subject": subject, "content": content}
