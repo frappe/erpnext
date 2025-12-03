@@ -216,6 +216,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.get("items") and apply_rule:
 			apply_putaway_rule(self.doctype, self.get("items"), self.company, purpose=self.purpose)
 
+		self.set_fg_item_qty()
+
+	def set_fg_item_qty(self):
+		fg_item = next(iter(d for d in self.items if d.is_finished_item), None)
+		if fg_item and self.fg_completed_qty and self.process_loss_qty:
+			fg_item.qty = self.fg_completed_qty - self.process_loss_qty
+
 	def validate(self):
 		self.pro_doc = frappe._dict()
 		if self.work_order:
