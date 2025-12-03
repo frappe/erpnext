@@ -34,9 +34,11 @@ def execute():
 	if is_italy_last_name:
 		frappe.delete_doc("Custom Field", "Customer-last_name", force=True)
 
-	# Step 2: Create the new fields
+	# Step 2: Create the new fields and sync database schema
 	from erpnext.regional.italy.setup import make_custom_fields
 	make_custom_fields(update=True)
+	frappe.db.commit()
+	frappe.db.updatedb("Customer")
 
 	# Step 3: Migrate data from old columns to new columns (if old columns still exist in DB)
 	if is_italy_first_name and frappe.db.has_column("Customer", "first_name"):
