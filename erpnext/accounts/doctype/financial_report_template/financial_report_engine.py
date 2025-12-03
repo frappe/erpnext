@@ -1814,4 +1814,44 @@ def get_export_xlsx_cell_style(
 	filters: dict,
 	is_total_row=False,
 ) -> dict | None:
-	pass
+	if not cell_value or not isinstance(column, dict) or not isinstance(row, dict):
+		return None
+
+	if is_total_row:
+		return {"bold": True}
+
+	fieldname = column.get("fieldname")
+
+	formatting: dict = row
+	segment_values = row.get("segment_values")
+
+	# getting segment specific formatting if applicable
+	if fieldname and isinstance(segment_values, dict):
+		# match names like seg_0_<field> and select corresponding segment bucket
+		# example fieldnames: seg_0_account, seg_1_opening, etc.
+		if fieldname.startswith("seg_"):
+			try:
+				seg_idx = int(fieldname.split("_", 2)[1])
+				formatting = segment_values.get(f"seg_{seg_idx}", formatting) or formatting
+			except Exception:
+				pass
+
+	# determine styles based on formatting rules
+	style: dict = {}
+
+	# different than own column on cell level
+	fieldtype = formatting.get("fieldtype") or column.get("fieldtype")
+
+	if fieldtype == "Currency":
+		style["currency"] = formatting.get("currency")
+	elif fieldtype == "Percent":
+		style["percent"] = True
+
+	if formatting.get("warn_if_negative") and isinstance(cell_value, (int | float)) and cell_value < 0:
+		style["color"] = "#cb2929"  # red
+
+	for key in ("color", "background", "bold", "italic", "strike", "underline", "font-family"):
+		if key in formatting and formatting.get(key) is not None:
+			style[key] = formatting.get(key)
+
+	return style
