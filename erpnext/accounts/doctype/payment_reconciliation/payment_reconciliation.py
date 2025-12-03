@@ -765,6 +765,14 @@ class PaymentReconciliation(Document):
 
 def reconcile_dr_cr_note(dr_cr_notes, company, active_dimensions=None):
 	for inv in dr_cr_notes:
+		if (
+			abs(frappe.db.get_value(inv.voucher_type, inv.voucher_no, "outstanding_amount"))
+			< inv.allocated_amount
+		):
+			frappe.throw(
+				_("{0} has been modified after you pulled it. Please pull it again.").format(inv.voucher_type)
+			)
+
 		voucher_type = "Credit Note" if inv.voucher_type == "Sales Invoice" else "Debit Note"
 
 		reconcile_dr_or_cr = (

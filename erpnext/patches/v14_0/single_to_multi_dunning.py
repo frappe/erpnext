@@ -1,4 +1,5 @@
 import frappe
+from pypika.terms import ValueWrapper
 
 from erpnext.accounts.general_ledger import make_reverse_gl_entries
 
@@ -39,7 +40,7 @@ def execute():
 				"payment_amount",
 				# at the time of creating this dunning, the full amount was outstanding
 				"payment_amount as outstanding",
-				"'0' as paid_amount",
+				ValueWrapper(0).as_("paid_amount"),
 				"discounted_amount",
 			],
 		)

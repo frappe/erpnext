@@ -1024,6 +1024,84 @@ class TestPOSInvoice(IntegrationTestCase):
 			frappe.db.rollback(save_point="before_test_delivered_serial_no_case")
 			frappe.set_user("Administrator")
 
+	def test_bundle_stock_availability_validation(self):
+		from erpnext.accounts.doctype.pos_invoice.pos_invoice import ProductBundleStockValidationError
+		from erpnext.accounts.doctype.pos_invoice_merge_log.test_pos_invoice_merge_log import (
+			init_user_and_profile,
+		)
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.item.test_item import create_item
+
+		init_user_and_profile()
+
+		frappe.set_user("Administrator")
+
+		warehouse = "_Test Warehouse - _TC"
+		company = "_Test Company"
+
+		# Create stock sub-items
+		sub_item_a = "_Test Bundle SubA"
+		if not frappe.db.exists("Item", sub_item_a):
+			create_item(
+				item_code=sub_item_a,
+				is_stock_item=1,
+			)
+
+		sub_item_b = "_Test Bundle SubB"
+		if not frappe.db.exists("Item", sub_item_b):
+			create_item(
+				item_code=sub_item_b,
+				is_stock_item=1,
+			)
+
+		# Add initial stock: SubA=5, SubB=2
+		make_stock_entry(item_code=sub_item_a, target=warehouse, qty=5, company=company)
+		make_stock_entry(item_code=sub_item_b, target=warehouse, qty=2, company=company)
+
+		# Create Product Bundle: Test Bundle (SubA x2 + SubB x1)
+		bundle_item = "_Test Bundle"
+		if not frappe.db.exists("Item", bundle_item):
+			create_item(
+				item_code=bundle_item,
+				is_stock_item=0,
+			)
+
+		if not frappe.db.exists("Product Bundle", bundle_item):
+			make_product_bundle(parent=bundle_item, items=[sub_item_a, sub_item_b])
+
+		# Test Case 1: Sufficient stock (bundle qty=1: requires SubA=2 (<=5), SubB=1 (<=2)) -> No error
+		pos_inv_sufficient = create_pos_invoice(
+			item=bundle_item,
+			qty=1,
+			rate=100,
+			warehouse=warehouse,
+			pos_profile=self.pos_profile.name,
+			do_not_save=1,
+		)
+		pos_inv_sufficient.append("payments", {"mode_of_payment": "Cash", "amount": 100, "default": 1})
+		pos_inv_sufficient.insert()
+		pos_inv_sufficient.submit()
+
+		pos_inv_sufficient.cancel()
+		pos_inv_sufficient.delete()
+
+		# Test Case 2: Insufficient stock (reduce SubB to 1, bundle qty=2: requires SubB=2 >1) -> Error with details
+		make_stock_entry(item_code=sub_item_b, from_warehouse=warehouse, qty=1, company=company)
+
+		pos_inv_insufficient = create_pos_invoice(
+			item=bundle_item,
+			qty=2,
+			rate=100,
+			warehouse=warehouse,
+			pos_profile=self.pos_profile.name,
+			do_not_save=1,
+		)
+		pos_inv_insufficient.append("payments", {"mode_of_payment": "Cash", "amount": 200, "default": 1})
+		pos_inv_insufficient.save()
+		self.assertRaises(ProductBundleStockValidationError, pos_inv_insufficient.submit)
+
+		frappe.set_user("test@example.com")
+
 
 def create_pos_invoice(**args):
 	args = frappe._dict(args)

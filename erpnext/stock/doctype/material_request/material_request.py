@@ -39,6 +39,7 @@ class MaterialRequest(BuyingController):
 		from erpnext.stock.doctype.material_request_item.material_request_item import MaterialRequestItem
 
 		amended_from: DF.Link | None
+		auto_created_via_reorder: DF.Check
 		buying_price_list: DF.Link | None
 		company: DF.Link
 		customer: DF.Link | None
@@ -303,6 +304,9 @@ class MaterialRequest(BuyingController):
 				)
 				.groupby(doctype.material_request_item)
 			)
+
+			if self.material_request_type == "Manufacture":
+				query = query.where(doctype.status != "Closed")
 
 			mr_items_ordered_qty = frappe._dict(query.run())
 

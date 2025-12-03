@@ -7,6 +7,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold, qb, throw
+from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
 from frappe.query_builder import Criterion, DocType
 from frappe.query_builder.custom import ConstantColumn
@@ -310,6 +311,31 @@ class AccountsController(TransactionBase):
 		self.set_default_letter_head()
 		self.validate_company_in_accounting_dimension()
 		self.validate_party_address_and_contact()
+		self.validate_company_linked_addresses()
+
+	def validate_company_linked_addresses(self):
+		address_fields = []
+		if self.doctype in ("Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
+			address_fields = ["dispatch_address_name", "company_address"]
+		elif self.doctype in ("Purchase Order", "Purchase Receipt", "Purchase Invoice", "Supplier Quotation"):
+			address_fields = ["billing_address", "shipping_address"]
+
+		for field in address_fields:
+			address = self.get(field)
+			if address and not frappe.db.exists(
+				"Dynamic Link",
+				{
+					"parent": address,
+					"parenttype": "Address",
+					"link_doctype": "Company",
+					"link_name": self.company,
+				},
+			):
+				frappe.throw(
+					_("{0} does not belong to the {1}.").format(
+						_(self.meta.get_label(field)), bold(self.company)
+					)
+				)
 
 	def set_default_letter_head(self):
 		if hasattr(self, "letter_head") and not self.letter_head:
@@ -364,6 +390,24 @@ class AccountsController(TransactionBase):
 
 		for _doctype in repost_doctypes:
 			dt = frappe.qb.DocType(_doctype)
+
+			cancelled_entries = (
+				frappe.qb.from_(dt)
+				.select(dt.parent, dt.parenttype)
+				.where((dt.voucher_type == self.doctype) & (dt.voucher_no == self.name) & (dt.docstatus == 2))
+				.run(as_dict=True)
+			)
+
+			if cancelled_entries:
+				entries = "<br>".join([get_link_to_form(d.parenttype, d.parent) for d in cancelled_entries])
+
+				frappe.throw(
+					_(
+						"The following cancelled repost entries exist for <b>{0}</b>:<br><br>{1}<br><br>"
+						"Kindly delete these entries before continuing."
+					).format(self.name, entries)
+				)
+
 			rows = (
 				frappe.qb.from_(dt)
 				.select(dt.name, dt.parent, dt.parenttype)
@@ -4167,3 +4211,130 @@ def update_gl_dict_with_regional_fields(doc, gl_dict):
 def update_gl_dict_with_app_based_fields(doc, gl_dict):
 	for method in frappe.get_hooks("update_gl_dict_with_app_based_fields", default=[]):
 		frappe.get_attr(method)(doc, gl_dict)
+
+
+@frappe.whitelist()
+def get_missing_company_details(doctype, docname):
+	from frappe.contacts.doctype.address.address import get_address_display_list
+
+	company = frappe.db.get_value(doctype, docname, "company")
+	if doctype == "Purchase Order":
+		company_address = frappe.db.get_value(doctype, docname, "billing_address")
+	else:
+		company_address = frappe.db.get_value(doctype, docname, "company_address")
+
+	company_details = frappe.get_value(
+		"Company", company, ["company_logo", "website", "phone_no", "email"], as_dict=True
+	)
+
+	required_fields = [
+		company_details.get("company_logo"),
+		company_details.get("phone_no"),
+		company_details.get("email"),
+	]
+
+	if not all(required_fields) and not frappe.has_permission("Company", "write", throw=False):
+		frappe.msgprint(
+			_(
+				"Some required Company details are missing. You don't have permission to update them. Please contact your System Manager."
+			)
+		)
+		return
+
+	if not company_address and not frappe.has_permission(doctype, "write", throw=False):
+		frappe.msgprint(
+			_(
+				"Company Address is missing. You don't have permission to update it. Please contact your System Manager."
+			)
+		)
+		return
+
+	address_display_list = get_address_display_list("Company", company)
+	address_line = address_display_list[0].get("address_line1") if address_display_list else ""
+
+	required_fields.append(company_address)
+	required_fields.append(address_line)
+
+	if all(required_fields):
+		return False
+	return {
+		"company_logo": company_details.get("company_logo"),
+		"website": company_details.get("website"),
+		"phone_no": company_details.get("phone_no"),
+		"email": company_details.get("email"),
+		"address_line": address_line,
+		"company": company,
+		"company_address": company_address,
+		"name": docname,
+	}
+
+
+@frappe.whitelist()
+def update_company_master_and_address(current_doctype, name, company, details):
+	from frappe.utils import validate_email_address
+
+	if isinstance(details, str):
+		details = frappe.parse_json(details)
+
+	if details.get("email"):
+		validate_email_address(details.get("email"), throw=True)
+
+	company_fields = ["company_logo", "website", "phone_no", "email"]
+	company_fields_to_update = {field: details.get(field) for field in company_fields if details.get(field)}
+
+	if company_fields_to_update:
+		frappe.db.set_value("Company", company, company_fields_to_update)
+
+	company_address = details.get("company_address")
+	if details.get("address_line1"):
+		address_doc = frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": details.get("address_title"),
+				"address_type": details.get("address_type"),
+				"address_line1": details.get("address_line1"),
+				"address_line2": details.get("address_line2"),
+				"city": details.get("city"),
+				"state": details.get("state"),
+				"pincode": details.get("pincode"),
+				"country": details.get("country"),
+				"is_your_company_address": 1,
+				"links": [{"link_doctype": "Company", "link_name": company}],
+			}
+		)
+		address_doc.insert()
+		company_address = address_doc.name
+
+	update_doc_company_address(current_doctype, name, company_address, details)
+
+
+def update_doc_company_address(current_doctype, docname, company_address, details):
+	if not company_address:
+		return
+
+	address_field_map = {
+		"Purchase Order": ("billing_address", "billing_address_display"),
+		"Sales Invoice": ("company_address", "company_address_display"),
+		"Delivery Note": ("company_address", "company_address_display"),
+		"POS Invoice": ("company_address", "company_address_display"),
+	}
+
+	address_field, display_field = address_field_map.get(
+		current_doctype, ("company_address", "company_address_display")
+	)
+
+	current_display = frappe.db.get_value(current_doctype, docname, display_field)
+
+	if current_display and not details.get("address_line1"):
+		return
+
+	from frappe.query_builder import DocType
+
+	DocType = DocType(current_doctype)
+
+	(
+		frappe.qb.update(DocType)
+		.set(getattr(DocType, address_field), company_address)
+		.set(getattr(DocType, display_field), get_address_display(company_address))
+		.where(DocType.name == docname)
+	).run()

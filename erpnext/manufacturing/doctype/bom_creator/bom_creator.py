@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt, sbool
+from pypika.terms import ValueWrapper
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
 
@@ -373,7 +374,7 @@ def get_children(doctype=None, parent=None, **kwargs):
 		"parent as parent_id",
 		"qty",
 		"idx",
-		"'BOM Creator Item' as doctype",
+		ValueWrapper("BOM Creator Item").as_("doctype"),
 		"name",
 		"uom",
 		"rate",

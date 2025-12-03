@@ -44,10 +44,13 @@ class MaterialRequestItem(Document):
 		price_list_rate: DF.Currency
 		production_plan: DF.Link | None
 		project: DF.Link | None
+		projected_on_hand: DF.Float
 		projected_qty: DF.Float
 		qty: DF.Float
 		rate: DF.Currency
 		received_qty: DF.Float
+		reorder_level: DF.Float
+		reorder_qty: DF.Float
 		sales_order: DF.Link | None
 		sales_order_item: DF.Data | None
 		schedule_date: DF.Date

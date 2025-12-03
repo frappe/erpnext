@@ -383,7 +383,7 @@ def get_timesheet_data(name, project):
 		data = frappe.get_all(
 			"Timesheet",
 			fields=[
-				"(total_billable_amount - total_billed_amount) as billing_amt",
+				{"SUB": ["total_billable_amount", "total_billed_amount"], "as": "billing_amt"},
 				"total_billable_hours as billing_hours",
 			],
 			filters={"name": name},

@@ -816,7 +816,10 @@ def get_sre_reserved_qty_for_items_and_warehouses(
 			Sum(sre.reserved_qty - sre.delivered_qty).as_("reserved_qty"),
 		)
 		.where(
-			(sre.docstatus == 1) & sre.item_code.isin(item_code_list) & (sre.delivered_qty < sre.reserved_qty)
+			(sre.docstatus == 1)
+			& sre.item_code.isin(item_code_list)
+			& (sre.delivered_qty < sre.reserved_qty)
+			& (sre.status.notin(["Closed", "Delivered"]))
 		)
 		.groupby(sre.item_code, sre.warehouse)
 	)

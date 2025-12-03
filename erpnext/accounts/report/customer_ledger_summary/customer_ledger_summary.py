@@ -69,12 +69,18 @@ class PartyLedgerSummaryReport:
 		party_type = self.filters.party_type
 
 		doctype = qb.DocType(party_type)
+
+		party_details_fields = [
+			doctype.name.as_("party"),
+			f"{scrub(party_type)}_name",
+			f"{scrub(party_type)}_group",
+		]
+
+		if party_type == "Customer":
+			party_details_fields.append(doctype.territory)
+
 		conditions = self.get_party_conditions(doctype)
-		query = (
-			qb.from_(doctype)
-			.select(doctype.name.as_("party"), f"{scrub(party_type)}_name")
-			.where(Criterion.all(conditions))
-		)
+		query = qb.from_(doctype).select(*party_details_fields).where(Criterion.all(conditions))
 
 		from frappe.desk.reportview import build_match_conditions
 
@@ -153,6 +159,31 @@ class PartyLedgerSummaryReport:
 
 		credit_or_debit_note = "Credit Note" if self.filters.party_type == "Customer" else "Debit Note"
 
+		if self.filters.party_type == "Customer":
+			columns += [
+				{
+					"label": _("Customer Group"),
+					"fieldname": "customer_group",
+					"fieldtype": "Link",
+					"options": "Customer Group",
+				},
+				{
+					"label": _("Territory"),
+					"fieldname": "territory",
+					"fieldtype": "Link",
+					"options": "Territory",
+				},
+			]
+		else:
+			columns += [
+				{
+					"label": _("Supplier Group"),
+					"fieldname": "supplier_group",
+					"fieldtype": "Link",
+					"options": "Supplier Group",
+				}
+			]
+
 		columns += [
 			{
 				"label": _("Opening Balance"),
@@ -213,35 +244,6 @@ class PartyLedgerSummaryReport:
 				"hidden": 1,
 			},
 		]
-
-		# Hidden columns for handling 'User Permissions'
-		if self.filters.party_type == "Customer":
-			columns += [
-				{
-					"label": _("Territory"),
-					"fieldname": "territory",
-					"fieldtype": "Link",
-					"options": "Territory",
-					"hidden": 1,
-				},
-				{
-					"label": _("Customer Group"),
-					"fieldname": "customer_group",
-					"fieldtype": "Link",
-					"options": "Customer Group",
-					"hidden": 1,
-				},
-			]
-		else:
-			columns += [
-				{
-					"label": _("Supplier Group"),
-					"fieldname": "supplier_group",
-					"fieldtype": "Link",
-					"options": "Supplier Group",
-					"hidden": 1,
-				}
-			]
 
 		columns.append({"label": _("Dr/Cr"), "fieldname": "dr_or_cr", "fieldtype": "Data", "width": 100})
 		return columns

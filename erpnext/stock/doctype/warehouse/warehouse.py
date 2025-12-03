@@ -295,3 +295,25 @@ def apply_warehouse_filter(query, sle, filters):
 	query = query.where(ExistsCriterion(child_query))
 
 	return query
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_warehouses_for_reorder(doctype, txt, searchfield, start, page_len, filters):
+	filters = frappe._dict(filters or {})
+
+	if filters.warehouse and not frappe.db.exists("Warehouse", filters.warehouse):
+		frappe.throw(_("Warehouse {0} does not exist").format(filters.warehouse))
+
+	doctype = frappe.qb.DocType("Warehouse")
+
+	warehouses = (
+		frappe.qb.from_(doctype)
+		.select(doctype.name)
+		.where(doctype.disabled == 0)
+		.where((doctype.is_group == 1) | (doctype.name == filters.warehouse))
+		.orderby(doctype.name)
+		.run(as_list=True)
+	)
+
+	return warehouses

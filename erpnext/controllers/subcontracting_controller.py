@@ -11,6 +11,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, flt, get_link_to_form
 
 from erpnext.controllers.stock_controller import StockController
+from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	combine_datetime,
 	get_auto_batch_nos,
@@ -758,7 +759,11 @@ class SubcontractingController(StockController):
 					serial_nos = get_filtered_serial_nos(serial_nos, self, "supplied_items")
 					row.serial_no = "\n".join(serial_nos)
 
-			elif item_details.has_batch_no and not row.serial_and_batch_bundle and not row.batch_no:
+			elif (
+				item_details.has_batch_no
+				and not row.serial_and_batch_bundle
+				and (not row.batch_no or self.batch_has_not_available(row.batch_no, row.consumed_qty))
+			):
 				batches = get_auto_batch_nos(kwargs)
 				if batches:
 					consumed_qty = row.consumed_qty
@@ -782,6 +787,11 @@ class SubcontractingController(StockController):
 								}
 							)
 							consumed_qty -= d.get("qty")
+
+	def batch_has_not_available(self, batch_no, qty_required):
+		batch_qty = get_batch_qty(batch_no, self.supplier_warehouse, consider_negative_batches=True)
+
+		return batch_qty < qty_required
 
 	def update_rate_for_supplied_items(self):
 		if self.doctype != "Subcontracting Receipt":
