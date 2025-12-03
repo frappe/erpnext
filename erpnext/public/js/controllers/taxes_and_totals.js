@@ -379,9 +379,6 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 
 			$.each(item_tax_map, function (tax, rate) {
-				if (rate === NOT_APPLICABLE_TAX) {
-					return;
-				}
 				let found = (me.frm.doc.taxes || []).find((d) => d.account_head === tax);
 				if (!found) {
 					let child = frappe.model.add_child(me.frm.doc, "taxes");
