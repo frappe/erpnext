@@ -20,7 +20,6 @@ from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
 	get_pricing_rule_for_item,
 	set_transaction_type,
 )
-from erpnext.controllers.taxes_and_totals import NOT_APPLICABLE_TAX
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.utils import get_exchange_rate
@@ -835,6 +834,8 @@ def is_within_valid_range(ctx: ItemDetailsCtx, tax) -> bool:
 
 @frappe.whitelist()
 def get_item_tax_map(*, doc: str | dict | Document, tax_template: str | None = None, as_json: bool = True):
+	from erpnext.controllers.taxes_and_totals import NOT_APPLICABLE_TAX
+
 	doc = parse_json(doc)
 	item_tax_map = {}
 	for t in (t for t in (doc.get("taxes") or []) if not t.get("set_by_item_tax_template")):
