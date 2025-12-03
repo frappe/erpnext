@@ -33,7 +33,10 @@ class LetterTemplate(Document):
 @frappe.whitelist()
 def get_letter_template(template_name, doc):
 	if isinstance(doc, str):
-		doc = json.loads(doc)
+		try:
+			doc = json.loads(doc)
+		except json.JSONDecodeError:
+			frappe.throw(frappe._("Invalid document data"))
 
 	template = frappe.get_doc("Letter Template", template_name)
 

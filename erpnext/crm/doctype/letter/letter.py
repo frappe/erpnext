@@ -61,6 +61,8 @@ def get_recipient_details(recipient_type, recipient):
 	if not frappe.db.exists(recipient_type, recipient):
 		frappe.throw(f"{recipient_type} {recipient} does not exist")
 
+	frappe.has_permission(recipient_type, doc=recipient, throw=True)
+
 	name_field = "title" if recipient_type == "Shareholder" else ("full_name" if recipient_type == "Contact" else recipient_type.lower() + "_name")
 
 	if frappe.db.has_column(recipient_type, name_field):
