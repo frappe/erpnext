@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-30 09:36+0000\n"
-"PO-Revision-Date: 2025-12-01 00:22\n"
+"PO-Revision-Date: 2025-12-04 00:41\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Slovenian\n"
 "MIME-Version: 1.0\n"
@@ -2575,7 +2575,7 @@ msgstr "Dodaj Potencialne Stranke"
 #. List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 msgid "Add Local Holidays"
-msgstr ""
+msgstr "Dodaj Lokalne Praznike"
 
 #. Label of the add_manually (Check) field in DocType 'Repost Payment Ledger'
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
@@ -2599,7 +2599,7 @@ msgstr "Dodaj Popust za Naročilo"
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:281
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:416
 msgid "Add Phantom Item"
-msgstr ""
+msgstr "Dodaj Fantomski Artikel"
 
 #. Label of the add_quote (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -2618,7 +2618,7 @@ msgstr "Dodaj Varnostno Zalogo"
 
 #: erpnext/public/js/event.js:48
 msgid "Add Sales Partners"
-msgstr ""
+msgstr "Dodaj Prodajne Partnerje"
 
 #. Label of the add_schedule (Button) field in DocType 'Sales Order Item'
 #: erpnext/selling/doctype/sales_order/sales_order.js:649
@@ -2633,7 +2633,7 @@ msgstr "Dodaj Urnik"
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgid "Add Serial / Batch Bundle"
-msgstr ""
+msgstr "Dodaj Serijski/Šaržni Paket"
 
 #. Label of the add_serial_batch_bundle (Button) field in DocType 'Purchase
 #. Invoice Item'
@@ -2648,7 +2648,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 #: erpnext/stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgid "Add Serial / Batch No"
-msgstr ""
+msgstr "Dodaj Serijsko/Šaržno Številko"
 
 #. Label of the add_serial_batch_for_rejected_qty (Button) field in DocType
 #. 'Purchase Receipt Item'
@@ -2657,7 +2657,7 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Add Serial / Batch No (Rejected Qty)"
-msgstr ""
+msgstr "Dodaj Serijsko/ Šaržno Številko (Zavrnjena Količina)"
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:200
 msgid "Add Stock"
@@ -4914,7 +4914,7 @@ msgstr ""
 
 #: erpnext/templates/includes/order/order_taxes.html:70
 msgid "Applied Coupon Code"
-msgstr ""
+msgstr "Uporabljena Koda Kupona"
 
 #. Description of the 'Minimum Value' (Float) field in DocType 'Quality
 #. Inspection Reading'
@@ -4922,16 +4922,16 @@ msgstr ""
 #. Inspection Reading'
 #: erpnext/stock/doctype/quality_inspection_reading/quality_inspection_reading.json
 msgid "Applied on each reading."
-msgstr ""
+msgstr "Uporabljeno pri vsakem branju."
 
 #: erpnext/stock/doctype/putaway_rule/putaway_rule.py:188
 msgid "Applied putaway rules."
-msgstr ""
+msgstr "Uporabljena pravila skladiščenja."
 
 #. Label of the applies_to (Table) field in DocType 'Common Code'
 #: erpnext/edi/doctype/common_code/common_code.json
 msgid "Applies To"
-msgstr ""
+msgstr "Velja za"
 
 #. Label of the apply_discount_on (Select) field in DocType 'POS Invoice'
 #. Label of the apply_discount_on (Select) field in DocType 'Purchase Invoice'
@@ -4956,27 +4956,27 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Apply Additional Discount On"
-msgstr ""
+msgstr "Uveljavi dodatni popust na"
 
 #. Label of the apply_discount_on (Select) field in DocType 'POS Profile'
 #. Label of the apply_discount_on (Select) field in DocType 'Pricing Rule'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 msgid "Apply Discount On"
-msgstr ""
+msgstr "Uveljavi popust na"
 
 #. Label of the apply_discount_on_rate (Check) field in DocType 'Pricing Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:190
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:199
 msgid "Apply Discount on Discounted Rate"
-msgstr ""
+msgstr "Uveljavi popust na znižano ceno"
 
 #. Label of the apply_discount_on_rate (Check) field in DocType 'Promotional
 #. Scheme Price Discount'
 #: erpnext/accounts/doctype/promotional_scheme_price_discount/promotional_scheme_price_discount.json
 msgid "Apply Discount on Rate"
-msgstr ""
+msgstr "Uveljavi popust na ceno"
 
 #. Label of the apply_multiple_pricing_rules (Check) field in DocType 'Pricing
 #. Rule'
@@ -4988,7 +4988,7 @@ msgstr ""
 #: erpnext/accounts/doctype/promotional_scheme_price_discount/promotional_scheme_price_discount.json
 #: erpnext/accounts/doctype/promotional_scheme_product_discount/promotional_scheme_product_discount.json
 msgid "Apply Multiple Pricing Rules"
-msgstr ""
+msgstr "Uporabi več pravil za določanje cen"
 
 #. Label of the apply_on (Select) field in DocType 'Pricing Rule'
 #. Label of the apply_on (Select) field in DocType 'Promotional Scheme'
@@ -4997,14 +4997,14 @@ msgstr ""
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.json
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
 msgid "Apply On"
-msgstr ""
+msgstr "Uporabi na"
 
 #. Label of the apply_putaway_rule (Check) field in DocType 'Purchase Receipt'
 #. Label of the apply_putaway_rule (Check) field in DocType 'Stock Entry'
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Apply Putaway Rule"
-msgstr ""
+msgstr "Uporabi pravilo skladiščenja"
 
 #. Label of the apply_recursion_over (Float) field in DocType 'Pricing Rule'
 #. Label of the apply_recursion_over (Float) field in DocType 'Promotional
@@ -5012,22 +5012,22 @@ msgstr ""
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 #: erpnext/accounts/doctype/promotional_scheme_product_discount/promotional_scheme_product_discount.json
 msgid "Apply Recursion Over (As Per Transaction UOM)"
-msgstr ""
+msgstr "Uporabi rekurzijo (glede na transakcijsko enoto)"
 
 #. Label of the brands (Table) field in DocType 'Pricing Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 msgid "Apply Rule On Brand"
-msgstr ""
+msgstr "Uporabi pravilo za blagovno znamko"
 
 #. Label of the items (Table) field in DocType 'Pricing Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 msgid "Apply Rule On Item Code"
-msgstr ""
+msgstr "Uporabi pravilo za kodo artikla"
 
 #. Label of the item_groups (Table) field in DocType 'Pricing Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 msgid "Apply Rule On Item Group"
-msgstr ""
+msgstr "Uporabi pravilo za skupino artiklov"
 
 #. Label of the apply_rule_on_other (Select) field in DocType 'Pricing Rule'
 #. Label of the apply_rule_on_other (Select) field in DocType 'Promotional
@@ -5035,7 +5035,7 @@ msgstr ""
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.json
 msgid "Apply Rule On Other"
-msgstr ""
+msgstr "Uporabi pravilo na druge"
 
 #. Label of the apply_sla_for_resolution (Check) field in DocType 'Service
 #. Level Agreement'
@@ -5050,7 +5050,7 @@ msgstr ""
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Apply TDS"
-msgstr ""
+msgstr "Uporabi DDV"
 
 #. Label of the apply_tax_withholding_amount (Check) field in DocType 'Payment
 #. Entry'
@@ -5089,7 +5089,7 @@ msgstr ""
 #: erpnext/crm/doctype/appointment/appointment.json
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Appointment"
-msgstr ""
+msgstr "Sestanek"
 
 #. Name of a DocType
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.json
@@ -5165,7 +5165,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Are"
-msgstr ""
+msgstr "Are"
 
 #: erpnext/public/js/utils/demo.js:20
 msgid "Are you sure you want to clear all demo data?"
@@ -5192,7 +5192,7 @@ msgstr ""
 #: erpnext/assets/doctype/location/location.json
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Area"
-msgstr ""
+msgstr "Območje"
 
 #. Label of the area_uom (Link) field in DocType 'Location'
 #: erpnext/assets/doctype/location/location.json
@@ -5212,19 +5212,19 @@ msgstr "Aršin"
 #: erpnext/stock/report/stock_ageing/stock_ageing.js:16
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.js:30
 msgid "As On Date"
-msgstr ""
+msgstr "Na dan"
 
 #: erpnext/accounts/report/billed_items_to_be_received/billed_items_to_be_received.js:15
 #: erpnext/accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.js:15
 #: erpnext/accounts/report/received_items_to_be_billed/received_items_to_be_billed.js:15
 msgid "As on Date"
-msgstr ""
+msgstr "Na dan"
 
 #. Description of the 'Finished Good Quantity ' (Float) field in DocType 'Stock
 #. Entry'
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "As per Stock UOM"
-msgstr ""
+msgstr "Kot na Enoto Zaloge"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:189
 msgid "As the field {0} is enabled, the field {1} is mandatory."
@@ -5258,7 +5258,7 @@ msgstr ""
 #. Label of the po_items (Table) field in DocType 'Production Plan'
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 msgid "Assembly Items"
-msgstr ""
+msgstr "Artikli Montaže"
 
 #. Option for the 'Root Type' (Select) field in DocType 'Account'
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
@@ -5364,17 +5364,17 @@ msgstr ""
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Asset Category"
-msgstr ""
+msgstr "Kategorija Sredstva"
 
 #. Name of a DocType
 #: erpnext/assets/doctype/asset_category_account/asset_category_account.json
 msgid "Asset Category Account"
-msgstr ""
+msgstr "Račun Kategorije Sredstev"
 
 #. Label of the asset_category_name (Data) field in DocType 'Asset Category'
 #: erpnext/assets/doctype/asset_category/asset_category.json
 msgid "Asset Category Name"
-msgstr ""
+msgstr "Ime Kategorije Sredstva"
 
 #: erpnext/stock/doctype/item/item.py:305
 msgid "Asset Category is mandatory for Fixed Asset item"
@@ -5449,7 +5449,7 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Asset Location"
-msgstr ""
+msgstr "Lokacija Sredstva"
 
 #. Name of a DocType
 #. Label of the asset_maintenance (Link) field in DocType 'Asset Maintenance
@@ -5462,19 +5462,19 @@ msgstr ""
 #: erpnext/assets/report/asset_maintenance/asset_maintenance.json
 #: erpnext/assets/workspace/assets/assets.json
 msgid "Asset Maintenance"
-msgstr ""
+msgstr "Vzdrževanje Sredstva"
 
 #. Name of a DocType
 #. Label of a Link in the Assets Workspace
 #: erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.json
 #: erpnext/assets/workspace/assets/assets.json
 msgid "Asset Maintenance Log"
-msgstr ""
+msgstr "Dnevnik Vzdrževanja Sredstva"
 
 #. Name of a DocType
 #: erpnext/assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 msgid "Asset Maintenance Task"
-msgstr ""
+msgstr "Naloga Vzdrževanja Sredstva"
 
 #. Name of a DocType
 #. Label of a Link in the Assets Workspace
@@ -5520,12 +5520,12 @@ msgstr ""
 #: erpnext/assets/doctype/asset_repair/asset_repair.json
 #: erpnext/assets/report/fixed_asset_register/fixed_asset_register.py:483
 msgid "Asset Name"
-msgstr ""
+msgstr "Ime Sredstva"
 
 #. Label of the asset_naming_series (Select) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Asset Naming Series"
-msgstr ""
+msgstr "Serija Poimenovanja Sredstva"
 
 #. Label of the asset_owner (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -5562,7 +5562,7 @@ msgstr ""
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Asset Repair"
-msgstr ""
+msgstr "Popravilo Sredstev"
 
 #. Name of a DocType
 #: erpnext/assets/doctype/asset_repair_consumed_item/asset_repair_consumed_item.json
@@ -5578,7 +5578,7 @@ msgstr ""
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Asset Settings"
-msgstr ""
+msgstr "Nastavitve Sredstva"
 
 #. Name of a DocType
 #: erpnext/assets/doctype/asset_shift_allocation/asset_shift_allocation.json
@@ -5813,7 +5813,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:110
 msgid "At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} for the batch {4} in the warehouse {5}. Please restock the item."
-msgstr ""
+msgstr "V vrstici #{0}: Izbrana količina {1} za artikel {2} je večja od razpoložljive zaloge {3} za šaržo {4} v skladišču {5}. Prosimo, da artikel ponovno naložite."
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:135
 msgid "At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} in the warehouse {4}."
@@ -5870,7 +5870,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1077
 msgid "At row {0}: Batch No is mandatory for Item {1}"
-msgstr ""
+msgstr "V vrstici {0}: Številka Šarže je obvezna za artikel {1}"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:94
 msgid "At row {0}: Parent Row No cannot be set for item {1}"
@@ -5878,11 +5878,11 @@ msgstr ""
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1062
 msgid "At row {0}: Qty is mandatory for the batch {1}"
-msgstr ""
+msgstr "V vrstici {0}: Količina je obvezna za šaržo {1}"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1069
 msgid "At row {0}: Serial No is mandatory for Item {1}"
-msgstr ""
+msgstr "V vrstici {0}: Za artikel {1}je obvezna številka šarže."
 
 #: erpnext/controllers/stock_controller.py:631
 msgid "At row {0}: Serial and Batch Bundle {1} has already created. Please remove the values from the serial no or batch no fields."
@@ -5904,7 +5904,7 @@ msgstr "Atmosfera"
 #: erpnext/public/js/utils/serial_no_batch_selector.js:244
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:73
 msgid "Attach CSV File"
-msgstr ""
+msgstr "Priloži Datoteko CSV"
 
 #. Description of the 'File to Rename' (Attach) field in DocType 'Rename Tool'
 #: erpnext/utilities/doctype/rename_tool/rename_tool.json
@@ -6061,7 +6061,7 @@ msgstr ""
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:368
 msgid "Auto Fetch"
-msgstr ""
+msgstr "Samodejno Pridobivanje"
 
 #: erpnext/selling/page/point_of_sale/pos_item_details.js:225
 msgid "Auto Fetch Serial Numbers"
@@ -8436,7 +8436,7 @@ msgstr ""
 
 #: erpnext/buying/doctype/buying_settings/buying_settings.js:13
 msgid "By default, the Supplier Name is set as per the Supplier Name entered. If you want Suppliers to be named by a <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>Naming Series</a> choose the 'Naming Series' option."
-msgstr ""
+msgstr "Privzeto je ime dobavitelja nastavljeno kot vneseno ime dobavitelja. Če želite, da se dobavitelji poimenujejo po <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>seriji poimenovanj</a>, izberite možnost \"Serija poimenovanj\"."
 
 #. Label of the bypass_credit_limit_check (Check) field in DocType 'Customer
 #. Credit Limit'
@@ -17497,7 +17497,7 @@ msgstr ""
 #. Description of the 'Batch Number Series' (Data) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings."
-msgstr ""
+msgstr "Primer: ABCD.#####. Če je serija nastavljena in številka šarže ni omenjena v transakcijah, bo na podlagi te šarže ustvarjena samodejna številka serije. Če želite za ta artikel vedno izrecno navesti številko šarže, pustite to polje prazno. Opomba: ta nastavitev bo imela prednost pred predpono poimenovanja serije v nastavitvah zaloge."
 
 #: erpnext/stock/stock_ledger.py:2274
 msgid "Example: Serial No {0} reserved in {1}."
@@ -17929,7 +17929,7 @@ msgstr ""
 #: erpnext/stock/doctype/pick_list/pick_list.py:256
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:385
 msgid "Expired Batches"
-msgstr ""
+msgstr "Potekle Šarže"
 
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:291
 msgid "Expires in a week or less"
@@ -17943,11 +17943,11 @@ msgstr ""
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Expiry"
-msgstr ""
+msgstr "Poteče"
 
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:38
 msgid "Expiry (In Days)"
-msgstr ""
+msgstr "Poteče (V Dneh)"
 
 #. Label of the expiry_date (Date) field in DocType 'Loyalty Point Entry'
 #. Label of the expiry_date (Date) field in DocType 'Driver'
@@ -17959,11 +17959,11 @@ msgstr ""
 #: erpnext/stock/doctype/batch/batch.json
 #: erpnext/stock/report/available_batch_report/available_batch_report.py:58
 msgid "Expiry Date"
-msgstr ""
+msgstr "Datum Poteka"
 
 #: erpnext/stock/doctype/batch/batch.py:212
 msgid "Expiry Date Mandatory"
-msgstr ""
+msgstr "Datum Poteka Obvezno"
 
 #. Label of the expiry_duration (Int) field in DocType 'Loyalty Program'
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.json
@@ -18028,7 +18028,7 @@ msgstr ""
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "FIFO"
-msgstr ""
+msgstr "FIFO"
 
 #. Label of the fifo_queue (Long Text) field in DocType 'Stock Closing Balance'
 #: erpnext/stock/doctype/stock_closing_balance/stock_closing_balance.json
@@ -18046,7 +18046,7 @@ msgstr ""
 #: erpnext/stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgid "FIFO Stock Queue (qty, rate)"
-msgstr ""
+msgstr "FIFO čakalna vrsta zalog (količina, stopnja)"
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:179
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:218
@@ -20673,7 +20673,7 @@ msgstr ""
 #. Label of the use_naming_series (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Have Default Naming Series for Batch ID?"
-msgstr ""
+msgstr "Ali imate privzeto serijo poimenovanj za ID Šarže?"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:19
 msgid "Head of Marketing and Sales"
@@ -22881,7 +22881,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/item/item.py:407
 msgid "Invalid naming series (. missing) for {0}"
-msgstr ""
+msgstr "Nepravilno poimenovanje serije (. manjka) za {0}"
 
 #: erpnext/utilities/transaction_base.py:68
 msgid "Invalid reference {0} {1}"
@@ -23233,7 +23233,7 @@ msgstr "Je Faktura Kontakt"
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 #: erpnext/stock/report/incorrect_serial_and_batch_bundle/incorrect_serial_and_batch_bundle.py:57
 msgid "Is Cancelled"
-msgstr ""
+msgstr "Je Preklican"
 
 #. Label of the is_cash_or_non_trade_discount (Check) field in DocType 'Sales
 #. Invoice'
@@ -23489,7 +23489,7 @@ msgstr ""
 #. Label of the is_packed (Check) field in DocType 'Serial and Batch Bundle'
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgid "Is Packed"
-msgstr ""
+msgstr "Je Zapakiran"
 
 #. Label of the is_paid (Check) field in DocType 'Purchase Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -23546,7 +23546,7 @@ msgstr ""
 #. Label of the is_rejected (Check) field in DocType 'Serial and Batch Bundle'
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgid "Is Rejected"
-msgstr ""
+msgstr "Je Zavrnjeno"
 
 #. Label of the is_rejected_warehouse (Check) field in DocType 'Warehouse'
 #: erpnext/stock/doctype/warehouse/warehouse.json
@@ -25704,7 +25704,7 @@ msgstr ""
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "LIFO"
-msgstr ""
+msgstr "LIFO"
 
 #. Label of the taxes (Table) field in DocType 'Landed Cost Voucher'
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.json
@@ -28701,17 +28701,17 @@ msgstr ""
 #. Label of the naming_series_prefix (Data) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Naming Series Prefix"
-msgstr ""
+msgstr "Predpona Poimenovanja Serije"
 
 #. Label of the supplier_and_price_defaults_section (Tab Break) field in
 #. DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Naming Series and Price Defaults"
-msgstr ""
+msgstr "Poimenovanje Serij & Privzete Cene"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:94
 msgid "Naming Series is mandatory"
-msgstr ""
+msgstr "Poimenovanje Serije je obvezno"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -30550,7 +30550,7 @@ msgstr ""
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:81
 #: erpnext/stock/report/stock_balance/stock_balance.py:457
 msgid "Opening Qty"
-msgstr ""
+msgstr "Začetna Količina"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:33
 msgid "Opening Sales Invoices have been created."
@@ -37853,7 +37853,7 @@ msgstr ""
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Quality"
-msgstr ""
+msgstr "Kakovost"
 
 #. Name of a DocType
 #. Option for the 'Document Type' (Select) field in DocType 'Quality Meeting
@@ -38634,7 +38634,7 @@ msgstr ""
 #. Batch Entry'
 #: erpnext/stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 msgid "Rate Section"
-msgstr ""
+msgstr "Cena"
 
 #. Label of the rate_with_margin (Currency) field in DocType 'POS Invoice Item'
 #. Label of the rate_with_margin (Currency) field in DocType 'Purchase Invoice
@@ -39089,7 +39089,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/batch/batch.js:26
 msgid "Recalculate Batch Qty"
-msgstr ""
+msgstr "Preračunaj Količino Šarže"
 
 #: erpnext/stock/doctype/bin/bin.js:10
 msgid "Recalculate Bin Qty"
@@ -42554,7 +42554,7 @@ msgstr ""
 
 #: erpnext/controllers/buying_controller.py:1019
 msgid "Row {idx}: Asset Naming Series is mandatory for the auto creation of assets for item {item_code}."
-msgstr ""
+msgstr "Vrstica {idx}: Serija Poimenovanj Sredstva je obvezna za samodejno ustvarjanje sredstev za artikel {item_code}."
 
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.py:84
 msgid "Row({0}): Outstanding Amount cannot be greater than actual Outstanding Amount {1} in {2}"
@@ -44277,7 +44277,7 @@ msgstr ""
 #: erpnext/stock/doctype/batch/batch_dashboard.py:9
 #: erpnext/stock/doctype/item/item_dashboard.py:20
 msgid "Sell"
-msgstr ""
+msgstr "Prodaja"
 
 #: erpnext/assets/doctype/asset/asset.js:106
 msgid "Sell Asset"
@@ -46424,7 +46424,7 @@ msgstr ""
 #: erpnext/stock/doctype/batch/batch.js:183
 #: erpnext/support/doctype/issue/issue.js:114
 msgid "Split"
-msgstr ""
+msgstr "Razdeli"
 
 #: erpnext/assets/doctype/asset/asset.js:122
 #: erpnext/assets/doctype/asset/asset.js:541
@@ -46433,7 +46433,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/batch/batch.js:182
 msgid "Split Batch"
-msgstr ""
+msgstr "Razdeli Šaržo"
 
 #. Description of the 'Book Tax Loss on Early Payment Discount' (Check) field
 #. in DocType 'Accounts Settings'
@@ -48874,7 +48874,7 @@ msgstr ""
 #. Label of the target_batch_no (Link) field in DocType 'Asset Capitalization'
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.json
 msgid "Target Batch No"
-msgstr ""
+msgstr "Ciljna Številka Šarže"
 
 #. Name of a DocType
 #: erpnext/setup/doctype/target_detail/target_detail.json
@@ -51103,7 +51103,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:224
 #: erpnext/stock/doctype/batch/batch.js:114
 msgid "To Warehouse"
-msgstr ""
+msgstr "V Skladišče"
 
 #. Label of the target_warehouse (Link) field in DocType 'Packed Item'
 #: erpnext/stock/doctype/packed_item/packed_item.json
@@ -52551,7 +52551,7 @@ msgstr ""
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 #: erpnext/stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 msgid "Type of Transaction"
-msgstr ""
+msgstr "Tip Transakcije"
 
 #. Description of the 'Select DocType' (Select) field in DocType 'Rename Tool'
 #: erpnext/utilities/doctype/rename_tool/rename_tool.json
@@ -53387,7 +53387,7 @@ msgstr ""
 #. Label of the use_batchwise_valuation (Check) field in DocType 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
 msgid "Use Batch-wise Valuation"
-msgstr ""
+msgstr "Uporabite Šaržno Vrednotenje"
 
 #. Label of the use_csv_sniffer (Check) field in DocType 'Bank Statement
 #. Import'
@@ -53873,7 +53873,7 @@ msgstr ""
 #: erpnext/stock/report/stock_balance/stock_balance.py:487
 #: erpnext/stock/report/stock_ledger/stock_ledger.py:298
 msgid "Valuation Rate"
-msgstr ""
+msgstr "Stopnja Vrednotenja"
 
 #: erpnext/stock/report/incorrect_serial_no_valuation/incorrect_serial_no_valuation.py:197
 msgid "Valuation Rate (In / Out)"
@@ -54586,7 +54586,7 @@ msgstr ""
 #: erpnext/stock/report/stock_ageing/stock_ageing.js:23
 #: erpnext/stock/report/stock_balance/stock_balance.js:94
 msgid "Warehouse Type"
-msgstr ""
+msgstr "Tip Skladišča"
 
 #. Name of a report
 #. Label of a Link in the Stock Workspace
@@ -55156,7 +55156,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.js:142
 #: erpnext/templates/pages/material_request_info.html:45
 msgid "Work Order"
-msgstr ""
+msgstr "Delovni Nalog"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:144
 msgid "Work Order / Subcontract PO"
