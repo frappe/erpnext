@@ -39,6 +39,12 @@ from erpnext.accounts.report.financial_statements import (
 from erpnext.accounts.utils import get_children, get_currency_precision
 
 # ============================================================================
+# CONSTANTS
+# ============================================================================
+
+DEFAULT_BULLET_PREFIX = "• "
+
+# ============================================================================
 # DATA MODELS
 # ============================================================================
 
@@ -1367,7 +1373,8 @@ class FormattingEngine:
 				condition=lambda rd: getattr(rd.row, "italic_text", False), format_properties={"italic": True}
 			),
 			FormattingRule(
-				condition=lambda rd: rd.is_detail_row, format_properties={"is_detail": True, "prefix": "• "}
+				condition=lambda rd: rd.is_detail_row,
+				format_properties={"is_detail": True, "prefix": DEFAULT_BULLET_PREFIX},
 			),
 			FormattingRule(
 				condition=lambda rd: getattr(rd.row, "warn_if_negative", False),
