@@ -6,8 +6,7 @@ frappe.ui.form.on("Letter", {
 		// Filter for recipient address
 		frm.set_query("recipient_address", () => {
 			if (!frm.doc.recipient_type || !frm.doc.recipient) {
-				frappe.msgprint(__("Please select Recipient Type and Recipient first"));
-				return;
+				return { filters: { name: "" } }; 
 			}
 			return {
 				query: "frappe.contacts.doctype.address.address.address_query",
@@ -21,8 +20,7 @@ frappe.ui.form.on("Letter", {
 		// Filter for company address
 		frm.set_query("company_address", () => {
 			if (!frm.doc.company) {
-				frappe.msgprint(__("Please select Company first"));
-				return;
+				return { filters: { name: "" } }; 
 			}
 			return {
 				query: "frappe.contacts.doctype.address.address.address_query",
