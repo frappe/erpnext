@@ -805,10 +805,13 @@ class POSInvoice(SalesInvoice):
 def get_stock_availability(item_code, warehouse):
 	if frappe.db.get_value("Item", item_code, "is_stock_item"):
 		is_stock_item = True
+		is_negative_stock = is_negative_stock_allowed(item_code=item_code)
+		if is_negative_stock:
+			return 0, is_stock_item, is_negative_stock
 		bin_qty = get_bin_qty(item_code, warehouse)
 		pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
 
-		return bin_qty - pos_sales_qty, is_stock_item, is_negative_stock_allowed(item_code=item_code)
+		return bin_qty - pos_sales_qty, is_stock_item, is_negative_stock
 	else:
 		is_stock_item = True
 		if frappe.db.exists("Product Bundle", {"name": item_code, "disabled": 0}):
@@ -823,6 +826,10 @@ def get_product_bundle_stock_availability(item_code, warehouse, item_qty):
 	is_stock_item = True
 	bundle = frappe.get_doc("Product Bundle", item_code)
 	availabilities = []
+	is_negative_stock = is_negative_stock_allowed(item_code=item_code)
+	if is_negative_stock:
+		return availabilities, is_stock_item, is_negative_stock
+
 	for bundle_item in bundle.items:
 		if frappe.get_value("Item", bundle_item.item_code, "is_stock_item"):
 			bin_qty = get_bin_qty(bundle_item.item_code, warehouse)
@@ -836,7 +843,7 @@ def get_product_bundle_stock_availability(item_code, warehouse, item_qty):
 				}
 			)
 
-	return availabilities, is_stock_item, is_negative_stock_allowed(item_code=item_code)
+	return availabilities, is_stock_item, is_negative_stock
 
 
 def get_bundle_availability(bundle_item_code, warehouse):
