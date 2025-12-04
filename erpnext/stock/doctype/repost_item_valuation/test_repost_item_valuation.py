@@ -356,6 +356,7 @@ class TestRepostItemValuation(IntegrationTestCase, StockTestMixin):
 		riv = frappe.get_doc(
 			doctype="Repost Item Valuation",
 			item_code="_Test Item",
+			company="_Test Company",
 			warehouse="_Test Warehouse - _TC",
 			based_on="Item and Warehouse",
 			posting_date=today,
@@ -363,15 +364,15 @@ class TestRepostItemValuation(IntegrationTestCase, StockTestMixin):
 		)
 		riv.flags.dont_run_in_test = True  # keep it queued
 
-		accounts_settings = frappe.get_doc("Accounts Settings")
-		accounts_settings.acc_frozen_upto = today
-		accounts_settings.frozen_accounts_modifier = ""
-		accounts_settings.save()
+		company = frappe.get_doc("Company", "_Test Company")
+		company.accounts_frozen_till_date = today
+		company.role_allowed_for_frozen_entries = ""
+		company.save()
 
 		self.assertRaises(frappe.ValidationError, riv.save)
 
-		accounts_settings.acc_frozen_upto = ""
-		accounts_settings.save()
+		company.accounts_frozen_till_date = ""
+		company.save()
 
 	@IntegrationTestCase.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_create_repost_entry_for_cancelled_document(self):

@@ -595,6 +595,14 @@ frappe.ui.form.on("Stock Entry", {
 		}
 	},
 
+	set_rate_and_fg_qty: function (frm, cdt, cdn) {
+		frm.events.set_basic_rate(frm, cdt, cdn);
+		let item = frappe.get_doc(cdt, cdn);
+		if (item.is_finished_item) {
+			frm.events.set_fg_completed_qty(frm);
+		}
+	},
+
 	get_warehouse_details: function (frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		if (!child.bom_no) {
@@ -854,7 +862,7 @@ frappe.ui.form.on("Stock Entry", {
 
 		frm.doc.items.forEach((item) => {
 			if (item.is_finished_item) {
-				fg_completed_qty += flt(item.qty);
+				fg_completed_qty += flt(item.transfer_qty);
 			}
 		});
 
@@ -884,15 +892,11 @@ frappe.ui.form.on("Stock Entry Detail", {
 	},
 
 	qty(frm, cdt, cdn) {
-		frm.events.set_basic_rate(frm, cdt, cdn);
-		let item = frappe.get_doc(cdt, cdn);
-		if (item.is_finished_item) {
-			frm.events.set_fg_completed_qty(frm);
-		}
+		frm.events.set_rate_and_fg_qty(frm, cdt, cdn);
 	},
 
 	conversion_factor(frm, cdt, cdn) {
-		frm.events.set_basic_rate(frm, cdt, cdn);
+		frm.events.set_rate_and_fg_qty(frm, cdt, cdn);
 	},
 
 	s_warehouse(frm, cdt, cdn) {

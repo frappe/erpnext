@@ -220,17 +220,12 @@ class JobCard(Document):
 
 		if job_card_qty and ((job_card_qty - completed_qty) > wo_qty):
 			form_link = get_link_to_form("Manufacturing Settings", "Manufacturing Settings")
-
-			msg = f"""
-				Qty To Manufacture in the job card
-				cannot be greater than Qty To Manufacture in the
-				work order for the operation {bold(self.operation)}.
-				<br><br><b>Solution: </b> Either you can reduce the
-				Qty To Manufacture in the job card or set the
-				'Overproduction Percentage For Work Order'
-				in the {form_link}."""
-
-			frappe.throw(_(msg), title=_("Extra Job Card Quantity"))
+			frappe.throw(
+				_(
+					"Qty To Manufacture in the job card cannot be greater than Qty To Manufacture in the work order for the operation {0}. <br><br><b>Solution: </b> Either you can reduce the Qty To Manufacture in the job card or set the 'Overproduction Percentage For Work Order' in the {1}."
+				).format(bold(self.operation), form_link),
+				title=_("Extra Job Card Quantity"),
+			)
 
 	def set_sub_operations(self):
 		if not self.sub_operations and self.operation:
@@ -1170,14 +1165,16 @@ class JobCard(Document):
 				)
 
 			if row.completed_qty < current_operation_qty:
-				msg = f"""The completed quantity {bold(current_operation_qty)}
-					of an operation {bold(self.operation)} cannot be greater
-					than the completed quantity {bold(row.completed_qty)}
-					of a previous operation
-					{bold(row.operation)}.
-				"""
-
-				frappe.throw(_(msg))
+				frappe.throw(
+					_(
+						"The completed quantity {0} of an operation {1} cannot be greater than the completed quantity {2} of a previous operation {3}."
+					).format(
+						bold(current_operation_qty),
+						bold(self.operation),
+						bold(row.completed_qty),
+						bold(row.operation),
+					)
+				)
 
 	def validate_work_order(self):
 		if self.is_work_order_closed():

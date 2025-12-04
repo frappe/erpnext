@@ -11,7 +11,6 @@ from frappe.model.document import Document
 from frappe.utils import cint
 
 from erpnext.accounts.utils import sync_auto_reconcile_config
-from erpnext.stock.utils import check_pending_reposting
 
 
 class AccountsSettings(Document):
@@ -23,7 +22,6 @@ class AccountsSettings(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		acc_frozen_upto: DF.Date | None
 		add_taxes_from_item_tax_template: DF.Check
 		add_taxes_from_taxes_and_charges_template: DF.Check
 		allow_multi_currency_invoices_against_single_party_account: DF.Check
@@ -50,7 +48,6 @@ class AccountsSettings(Document):
 		enable_party_matching: DF.Check
 		exchange_gain_loss_posting_date: DF.Literal["Invoice", "Payment", "Reconciliation Date"]
 		fetch_valuation_rate_for_internal_transaction: DF.Check
-		frozen_accounts_modifier: DF.Link | None
 		general_ledger_remarks_length: DF.Int
 		ignore_account_closing_balance: DF.Check
 		ignore_is_opening_check_for_reporting: DF.Check
@@ -64,6 +61,7 @@ class AccountsSettings(Document):
 		receivable_payable_remarks_length: DF.Int
 		reconciliation_queue_size: DF.Int
 		role_allowed_to_over_bill: DF.Link | None
+		role_to_notify_on_depreciation_failure: DF.Link | None
 		role_to_override_stop_action: DF.Link | None
 		round_row_wise_tax: DF.Check
 		show_balance_in_coa: DF.Check
@@ -100,9 +98,6 @@ class AccountsSettings(Document):
 		if old_doc.show_payment_schedule_in_print != self.show_payment_schedule_in_print:
 			self.enable_payment_schedule_in_print()
 
-		if old_doc.acc_frozen_upto != self.acc_frozen_upto:
-			self.validate_pending_reposts()
-
 		if clear_cache:
 			frappe.clear_cache()
 
@@ -128,10 +123,6 @@ class AccountsSettings(Document):
 				"Check",
 				validate_fields_for_doctype=False,
 			)
-
-	def validate_pending_reposts(self):
-		if self.acc_frozen_upto:
-			check_pending_reposting(self.acc_frozen_upto)
 
 	def validate_and_sync_auto_reconcile_config(self):
 		if self.has_value_changed("auto_reconciliation_job_trigger"):

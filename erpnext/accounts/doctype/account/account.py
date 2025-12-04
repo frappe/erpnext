@@ -93,8 +93,10 @@ class Account(NestedSet):
 			super().on_update()
 
 	def onload(self):
-		frozen_accounts_modifier = frappe.get_single_value("Accounts Settings", "frozen_accounts_modifier")
-		if not frozen_accounts_modifier or frozen_accounts_modifier in frappe.get_roles():
+		role_allowed_for_frozen_entries = frappe.db.get_value(
+			"Company", self.company, "role_allowed_for_frozen_entries"
+		)
+		if not role_allowed_for_frozen_entries or role_allowed_for_frozen_entries in frappe.get_roles():
 			self.set_onload("can_freeze_account", True)
 
 	def autoname(self):
@@ -303,10 +305,10 @@ class Account(NestedSet):
 		if not doc_before_save or doc_before_save.freeze_account == self.freeze_account:
 			return
 
-		frozen_accounts_modifier = frappe.get_cached_value(
-			"Accounts Settings", "Accounts Settings", "frozen_accounts_modifier"
+		role_allowed_for_frozen_entries = frappe.get_cached_value(
+			"Company", self.company, "role_allowed_for_frozen_entries"
 		)
-		if not frozen_accounts_modifier or frozen_accounts_modifier not in frappe.get_roles():
+		if not role_allowed_for_frozen_entries or role_allowed_for_frozen_entries not in frappe.get_roles():
 			throw(_("You are not authorized to set Frozen value"))
 
 	def validate_balance_must_be_debit_or_credit(self):

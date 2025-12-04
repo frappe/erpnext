@@ -168,16 +168,19 @@ class RepostItemValuation(Document):
 		return query[0][0] if query and query[0][0] else None
 
 	def validate_accounts_freeze(self):
-		acc_settings = frappe.get_cached_doc("Accounts Settings")
-		if not acc_settings.acc_frozen_upto:
+		acc_frozen_till_date = frappe.db.get_value("Company", self.company, "accounts_frozen_till_date")
+		frozen_accounts_modifier = frappe.db.get_value(
+			"Company", self.company, "role_allowed_for_frozen_entries"
+		)
+		if not acc_frozen_till_date:
 			return
-		if getdate(self.posting_date) <= getdate(acc_settings.acc_frozen_upto):
-			if acc_settings.frozen_accounts_modifier and frappe.session.user in get_users_with_role(
-				acc_settings.frozen_accounts_modifier
+		if getdate(self.posting_date) <= getdate(acc_frozen_till_date):
+			if frozen_accounts_modifier and frappe.session.user in get_users_with_role(
+				frozen_accounts_modifier
 			):
 				frappe.msgprint(_("Caution: This might alter frozen accounts."))
 				return
-			frappe.throw(_("You cannot repost item valuation before {}").format(acc_settings.acc_frozen_upto))
+			frappe.throw(_("You cannot repost item valuation before {}").format(acc_frozen_till_date))
 
 	def reset_field_values(self):
 		if self.based_on == "Transaction":
