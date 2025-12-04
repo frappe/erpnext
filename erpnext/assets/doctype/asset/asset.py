@@ -151,9 +151,9 @@ class Asset(AccountsController):
 			if not schedule_doc:
 				schedule_doc = frappe.new_doc("Asset Depreciation Schedule")
 				schedule_doc.asset = self.name
-			schedule_doc.create_depreciation_schedule(row)
-			schedule_doc.save()
-			schedules.append(schedule_doc.name)
+				schedule_doc.create_depreciation_schedule(row)
+				schedule_doc.save()
+				schedules.append(schedule_doc.name)
 
 		self.show_schedule_creation_message(schedules)
 

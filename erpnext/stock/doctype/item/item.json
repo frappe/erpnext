@@ -247,8 +247,7 @@
    "default": "0",
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
-   "label": "Is Fixed Asset",
-   "set_only_once": 1
+   "label": "Is Fixed Asset"
   },
   {
    "allow_in_quick_entry": 1,
@@ -917,7 +916,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2025-11-03 17:01:24.555003",
+ "modified": "2025-12-04 09:11:56.029567",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

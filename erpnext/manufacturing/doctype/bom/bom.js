@@ -460,10 +460,12 @@ frappe.ui.form.on("BOM", {
 		);
 
 		has_template_rm.forEach((d) => {
+			let bom_qty = dialog.fields_dict.qty?.value || 1;
+
 			dialog.fields_dict.items.df.data.push({
 				item_code: d.item_code,
 				variant_item_code: "",
-				qty: (d.qty / frm.doc.quantity) * (dialog.fields_dict.qty.value || 1),
+				qty: flt(d.qty / frm.doc.quantity) * flt(bom_qty),
 				source_warehouse: d.source_warehouse,
 				operation: d.operation,
 			});

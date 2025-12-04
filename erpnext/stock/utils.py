@@ -560,7 +560,7 @@ def is_reposting_item_valuation_in_progress():
 		)
 
 
-def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool:
+def check_pending_reposting(posting_date: str, company: str | None = None, throw_error: bool = True) -> bool:
 	"""Check if there are pending reposting job till the specified posting date."""
 
 	filters = {
@@ -568,6 +568,8 @@ def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool
 		"status": ["in", ["Queued", "In Progress"]],
 		"posting_date": ["<=", posting_date],
 	}
+	if company:
+		filters["company"] = company
 
 	reposting_pending = frappe.db.exists("Repost Item Valuation", filters)
 	if reposting_pending and throw_error:

@@ -795,7 +795,7 @@ def get_payment_terms_template(party_name, party_type, company=None):
 	return template
 
 
-def validate_party_frozen_disabled(party_type, party_name):
+def validate_party_frozen_disabled(company, party_type, party_name):
 	if frappe.flags.ignore_party_validation:
 		return
 
@@ -805,10 +805,10 @@ def validate_party_frozen_disabled(party_type, party_name):
 			if party.disabled:
 				frappe.throw(_("{0} {1} is disabled").format(party_type, party_name), PartyDisabled)
 			elif party.get("is_frozen"):
-				frozen_accounts_modifier = frappe.get_single_value(
-					"Accounts Settings", "frozen_accounts_modifier"
+				role_allowed_for_frozen_entries = frappe.get_cached_value(
+					"Company", company, "role_allowed_for_frozen_entries"
 				)
-				if frozen_accounts_modifier not in frappe.get_roles():
+				if role_allowed_for_frozen_entries not in frappe.get_roles():
 					frappe.throw(_("{0} {1} is frozen").format(party_type, party_name), PartyFrozen)
 
 		elif party_type == "Employee":

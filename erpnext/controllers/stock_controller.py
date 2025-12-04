@@ -1645,7 +1645,7 @@ class StockController(AccountsController):
 				rule = frappe.db.get_value(
 					"Putaway Rule",
 					{"item_code": item.get("item_code"), "warehouse": item.get(warehouse_field)},
-					["name", "disable"],
+					["stock_capacity", "name", "disable"],
 					as_dict=True,
 				)
 				if rule:
@@ -1664,7 +1664,11 @@ class StockController(AccountsController):
 						rule_map[rule_name]["warehouse"] = item.get(warehouse_field)
 						rule_map[rule_name]["item"] = item.get("item_code")
 						rule_map[rule_name]["qty_put"] = 0
-						rule_map[rule_name]["capacity"] = get_available_putaway_capacity(rule_name)
+						rule_map[rule_name]["capacity"] = (
+							rule.stock_capacity
+							if self.doctype == "Stock Reconciliation"
+							else get_available_putaway_capacity(rule_name)
+						)
 					rule_map[rule_name]["qty_put"] += flt(stock_qty)
 
 			for rule, values in rule_map.items():

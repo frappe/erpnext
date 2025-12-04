@@ -95,6 +95,11 @@
   "depreciation_cost_center",
   "capital_work_in_progress_account",
   "asset_received_but_not_billed",
+  "accounts_closing_tab",
+  "accounts_closing_section",
+  "accounts_frozen_till_date",
+  "column_break_tawz",
+  "role_allowed_for_frozen_entries",
   "buying_and_selling_tab",
   "sales_settings",
   "default_buying_terms",
@@ -930,8 +935,36 @@
    "fieldtype": "Link",
    "label": "Default Sales Contact",
    "options": "Contact"
+  },
+  {
+   "description": "Accounting entries are frozen up to this date. Only users with the specified role can create or modify entries before this date.",
+   "fieldname": "accounts_frozen_till_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Accounts Frozen Till Date"
+  },
+  {
+   "fieldname": "accounts_closing_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounts Closing"
+  },
+  {
+   "fieldname": "column_break_tawz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "role_allowed_for_frozen_entries",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Roles Allowed to Set and Edit Frozen Account Entries",
+   "options": "Role"
+  },
+  {
+   "fieldname": "accounts_closing_section",
+   "fieldtype": "Section Break"
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-building",
  "idx": 1,
  "image_field": "company_logo",

@@ -2357,7 +2357,7 @@ class AccountsController(TransactionBase):
 
 	def validate_party(self):
 		party_type, party = self.get_party()
-		validate_party_frozen_disabled(party_type, party)
+		validate_party_frozen_disabled(self.company, party_type, party)
 
 	def get_party(self):
 		party_type = None

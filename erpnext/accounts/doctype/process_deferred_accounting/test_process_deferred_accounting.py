@@ -16,7 +16,7 @@ from erpnext.stock.doctype.item.test_item import create_item
 class TestProcessDeferredAccounting(IntegrationTestCase):
 	def test_creation_of_ledger_entry_on_submit(self):
 		"""test creation of gl entries on submission of document"""
-		change_acc_settings(acc_frozen_upto="2023-05-31", book_deferred_entries_based_on="Months")
+		change_acc_settings(acc_frozen_till_date="2023-05-31", book_deferred_entries_based_on="Months")
 
 		deferred_account = create_account(
 			account_name="Deferred Revenue for Accounts Frozen",
@@ -92,8 +92,10 @@ class TestProcessDeferredAccounting(IntegrationTestCase):
 		pda.cancel()
 
 
-def change_acc_settings(acc_frozen_upto="", book_deferred_entries_based_on="Days"):
+def change_acc_settings(
+	company="_Test Company", acc_frozen_till_date=None, book_deferred_entries_based_on="Days"
+):
 	acc_settings = frappe.get_doc("Accounts Settings", "Accounts Settings")
-	acc_settings.acc_frozen_upto = acc_frozen_upto
 	acc_settings.book_deferred_entries_based_on = book_deferred_entries_based_on
+	frappe.db.set_value("Company", company, "accounts_frozen_till_date", acc_frozen_till_date)
 	acc_settings.save()

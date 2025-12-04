@@ -2177,6 +2177,13 @@ def make_work_order(bom_no, item, qty=0, project=None, variant_items=None, use_m
 
 	item_details = get_item_details(item, project)
 
+	if frappe.db.get_value("Item", item, "variant_of"):
+		if variant_bom := frappe.db.get_value(
+			"BOM",
+			{"item": item, "is_default": 1, "docstatus": 1},
+		):
+			bom_no = variant_bom
+
 	wo_doc = frappe.new_doc("Work Order")
 	wo_doc.track_semi_finished_goods = frappe.db.get_value("BOM", bom_no, "track_semi_finished_goods")
 	wo_doc.production_item = item
