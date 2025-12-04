@@ -1819,34 +1819,34 @@ def get_export_xlsx_cell_style(
 	column: dict,
 	row: dict,
 	filters: dict,
-	is_total_row=False,
+	is_total_row: bool = False,
 ) -> dict | None:
-	if not cell_value or not isinstance(column, dict) or not isinstance(row, dict):
-		return None
+	if cell_value in ("", None) or not isinstance(column, dict) or not isinstance(row, dict):
+		return
 
 	if is_total_row:
 		return {"bold": True}
 
 	fieldname = column.get("fieldname")
-
-	formatting: dict = row
 	segment_values = row.get("segment_values")
+	formatting: dict = row  # default formatting bucket
 
-	# getting segment specific formatting if applicable
-	if fieldname and isinstance(segment_values, dict):
-		# match names like seg_0_<field> and select corresponding segment bucket
-		# example fieldnames: seg_0_account, seg_1_opening, etc.
-		if fieldname.startswith("seg_"):
-			try:
-				seg_idx = int(fieldname.split("_", 2)[1])
-				formatting = segment_values.get(f"seg_{seg_idx}", formatting) or formatting
-			except Exception:
-				pass
+	# resolve segment-specific formatting (seg_<idx>_<field>)
+	is_account_column = False
 
-	# determine styles based on formatting rules
+	if fieldname.startswith("seg_") and isinstance(segment_values, dict):
+		parts = fieldname.split("_", 2)
+
+		if len(parts) == 3 and parts[1].isdigit():
+			seg_idx = int(parts[1])
+			is_account_column = parts[2] == "account"
+			formatting = segment_values.get(f"seg_{seg_idx}", formatting) or formatting
+
+	# determine styles
 	style: dict = {}
+	update_value: str | None = None
 
-	# different than own column on cell level
+	# fieldtype specific styles
 	fieldtype = formatting.get("fieldtype") or column.get("fieldtype")
 
 	if fieldtype == "Currency":
@@ -1854,11 +1854,24 @@ def get_export_xlsx_cell_style(
 	elif fieldtype == "Percent":
 		style["percent"] = True
 
-	if formatting.get("warn_if_negative") and isinstance(cell_value, (int | float)) and cell_value < 0:
-		style["color"] = "#cb2929"  # red
+	# account column extras: bullet prefix and indentation
+	if is_account_column:
+		if formatting.get("prefix"):
+			update_value = f"{DEFAULT_BULLET_PREFIX}{cell_value}"
+
+		seg_info = row.get("_segment_info") or {}
+
+		if (seg_info.get("total_segments", 1) > 1) and (indent := formatting.get("indent")):
+			if indent > 0:
+				update_value = f"{' ' * (indent * 4)}{update_value or cell_value}"
 
 	for key in ("color", "background", "bold", "italic", "strike", "underline", "font-family"):
-		if key in formatting and formatting.get(key) is not None:
-			style[key] = formatting.get(key)
+		style[key] = formatting.get(key)
+
+	if formatting.get("warn_if_negative") and isinstance(cell_value, (int | float)) and cell_value < 0:
+		style["color"] = "#cb2929"
+
+	if update_value:
+		style["update_value"] = update_value
 
 	return style
