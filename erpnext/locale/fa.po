@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-30 09:36+0000\n"
-"PO-Revision-Date: 2025-12-02 00:28\n"
+"PO-Revision-Date: 2025-12-04 00:41\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -4956,7 +4956,7 @@ msgstr "Rule On Item Group را اعمال کنید"
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.json
 msgid "Apply Rule On Other"
-msgstr "اعمال قانون در مورد دیگر"
+msgstr "اعمال قانون روی موارد دیگر"
 
 #. Label of the apply_sla_for_resolution (Check) field in DocType 'Service
 #. Level Agreement'
@@ -17215,7 +17215,7 @@ msgstr "مبلغی را برای بازخرید وارد کنید."
 
 #: erpnext/stock/doctype/item/item.js:1015
 msgid "Enter an Item Code, the name will be auto-filled the same as Item Code on clicking inside the Item Name field."
-msgstr "یک کد مورد را وارد کنید، نام با کلیک کردن در داخل قسمت نام مورد، به طور خودکار مانند کد مورد پر می‌شود."
+msgstr "یک کد آیتم را وارد کنید، نام با کلیک کردن در داخل قسمت نام مورد، به طور خودکار مانند کد آیتم پر می‌شود."
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:942
 msgid "Enter customer's email"
@@ -18966,7 +18966,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:178
 msgid "For the 'Apply Rule On Other' condition the field {0} is mandatory"
-msgstr "برای شرط \"اعمال قانون در مورد دیگر\" فیلد {0} اجباری است"
+msgstr "برای شرط «اعمال قانون روی موارد دیگر» فیلد {0} اجباری است"
 
 #. Description of a DocType
 #: erpnext/stock/doctype/item_customer_detail/item_customer_detail.json
@@ -34163,11 +34163,11 @@ msgstr "لطفا حساب هزینه را وارد کنید"
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.js:86
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:87
 msgid "Please enter Item Code to get Batch Number"
-msgstr "لطفا کد مورد را برای دریافت شماره دسته وارد کنید"
+msgstr "لطفا کد آیتم را برای دریافت شماره دسته وارد کنید"
 
 #: erpnext/public/js/controllers/transaction.js:2940
 msgid "Please enter Item Code to get batch no"
-msgstr "لطفا کد مورد را برای دریافت شماره دسته وارد کنید"
+msgstr "لطفا کد آیتم را برای دریافت شماره دسته وارد کنید"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:85
 msgid "Please enter Item first"
@@ -34443,7 +34443,7 @@ msgstr "لطفاً آیتم کالای تمام شده را برای آیتم س
 #: erpnext/assets/doctype/asset/asset.js:619
 #: erpnext/assets/doctype/asset/asset.js:634
 msgid "Please select Item Code first"
-msgstr "لطفا ابتدا کد مورد را انتخاب کنید"
+msgstr "لطفا ابتدا کد آیتم را انتخاب کنید"
 
 #: erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py:55
 msgid "Please select Maintenance Status as Completed or remove Completion Date"
@@ -34626,7 +34626,7 @@ msgstr ""
 
 #: erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py:228
 msgid "Please select item code"
-msgstr "لطفا کد مورد را انتخاب کنید"
+msgstr "لطفا کد آیتم را انتخاب کنید"
 
 #: erpnext/public/js/stock_reservation.js:212
 #: erpnext/selling/doctype/sales_order/sales_order.js:419
@@ -34904,7 +34904,7 @@ msgstr "لطفاً مرکز هزینه پیش‌فرض را در شرکت {0} ت
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:624
 msgid "Please set the Item Code first"
-msgstr "لطفا ابتدا کد مورد را تنظیم کنید"
+msgstr "لطفا ابتدا کد آیتم را تنظیم کنید"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1480
 msgid "Please set the Target Warehouse in the Job Card"
@@ -35757,7 +35757,7 @@ msgstr "راهنمای قانون قیمت گذاری"
 #: erpnext/accounts/doctype/pricing_rule_item_code/pricing_rule_item_code.json
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.json
 msgid "Pricing Rule Item Code"
-msgstr "کد مورد قانون قیمت گذاری"
+msgstr "کد آیتم قانون قیمت گذاری"
 
 #. Name of a DocType
 #. Label of the item_groups (Table) field in DocType 'Promotional Scheme'
@@ -36716,7 +36716,7 @@ msgstr "شناسه طرح تبلیغاتی"
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.json
 #: erpnext/accounts/doctype/promotional_scheme_price_discount/promotional_scheme_price_discount.json
 msgid "Promotional Scheme Price Discount"
-msgstr "طرح تبلیغاتی تخفیف قیمت"
+msgstr "تخفیف قیمت طرح تبلیغاتی"
 
 #. Label of the product_discount_slabs (Table) field in DocType 'Promotional
 #. Scheme'
@@ -39553,7 +39553,7 @@ msgstr "شماره مرجع فاکتور از سیستم قبلی"
 
 #: erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py:142
 msgid "Reference: {0}, Item Code: {1} and Customer: {2}"
-msgstr "مرجع: {0}، کد مورد: {1} و مشتری: {2}"
+msgstr "مرجع: {0}، کد آیتم: {1} و مشتری: {2}"
 
 #. Label of the edit_references (Section Break) field in DocType 'POS Invoice
 #. Item'
@@ -42101,7 +42101,7 @@ msgstr "ردیف #{}: دفتر مالی نباید خالی باشد زیرا ا
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:412
 msgid "Row #{}: Item Code: {} is not available under warehouse {}."
-msgstr "ردیف #{}: کد مورد: {} در انبار {} موجود نیست."
+msgstr "ردیف #{}: کد آیتم: {} در انبار {} موجود نیست."
 
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:92
 msgid "Row #{}: POS Invoice {} has been {}"
@@ -47394,7 +47394,7 @@ msgstr "موجودی برای کالای {0} در انبار {1} موجود نی
 
 #: erpnext/selling/page/point_of_sale/pos_controller.js:859
 msgid "Stock quantity not enough for Item Code: {0} under warehouse {1}. Available quantity {2} {3}."
-msgstr "مقدار موجودی برای کد مورد کافی نیست: {0} در انبار {1}. مقدار موجود {2} {3}."
+msgstr "مقدار موجودی برای کد آیتم کافی نیست: {0} در انبار {1}. مقدار موجود {2} {3}."
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:252
 msgid "Stock transactions before {0} are frozen"
