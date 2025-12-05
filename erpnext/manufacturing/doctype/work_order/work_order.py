@@ -979,9 +979,7 @@ class WorkOrder(Document):
 
 		for d in self.get("operations"):
 			precision = d.precision("completed_qty")
-			qty = flt(
-				flt(d.completed_qty, precision) + flt(d.process_loss_qty, precision), precision
-			)
+			qty = flt(flt(d.completed_qty, precision) + flt(d.process_loss_qty, precision), precision)
 			if not qty:
 				d.status = "Pending"
 			elif qty < flt(self.qty, precision):
