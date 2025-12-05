@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _, scrub
 from frappe.model.document import Document, bulk_insert
+from frappe.query_builder import functions
 from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 
 import erpnext
@@ -775,6 +776,22 @@ class calculate_taxes_and_totals:
 
 		discount_amount = self.doc.discount_amount or 0
 		grand_total = self.doc.grand_total
+
+		if self.doc.get("is_return") and self.doc.get("return_against"):
+			doctype = frappe.qb.DocType(self.doc.doctype)
+
+			result = (
+				frappe.qb.from_(doctype)
+				.select(functions.Sum(doctype.discount_amount).as_("total_return_discount"))
+				.where(
+					(doctype.return_against == self.doc.return_against)
+					& (doctype.is_return == 1)
+					& (doctype.docstatus == 1)
+				)
+			).run(as_dict=True)
+
+			total_return_discount = abs(result[0].get("total_return_discount") or 0)
+			discount_amount += total_return_discount
 
 		# validate that discount amount cannot exceed the total before discount
 		if (
