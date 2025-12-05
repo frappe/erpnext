@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-30 09:36+0000\n"
-"PO-Revision-Date: 2025-12-01 00:23\n"
+"PO-Revision-Date: 2025-12-05 00:38\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -6792,28 +6792,28 @@ msgstr "Bakdaterad Lager Post"
 #: erpnext/manufacturing/doctype/work_order/work_order.js:362
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Backflush Materials From WIP Warehouse"
-msgstr "Backspola material från Pågående Arbete Lager"
+msgstr "Retroaktivt hämta material från Pågående Arbete Lager"
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:16
 msgid "Backflush Raw Materials"
-msgstr "Backspola Råmaterial"
+msgstr "Retroaktivt hämta Råmaterial"
 
 #. Label of the backflush_raw_materials_based_on (Select) field in DocType
 #. 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Backflush Raw Materials Based On"
-msgstr "Backspola Råmaterial Baserad På"
+msgstr "Retroaktivt hämta Råmaterial Baserad På"
 
 #. Label of the from_wip_warehouse (Check) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Backflush Raw Materials From Work-in-Progress Warehouse"
-msgstr "Backspola Råmaterial från Bearbetning Lager"
+msgstr "Retroaktivt hämta Råmaterial från Pågående Arbete Lager"
 
 #. Label of the backflush_raw_materials_of_subcontract_based_on (Select) field
 #. in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Backflush Raw Materials of Subcontract Based On"
-msgstr "Backspola Råmaterial från Underleverantör baserat på"
+msgstr "Retroaktivt hämta Råmaterial från Underleverantör baserat på"
 
 #: erpnext/accounts/report/account_balance/account_balance.py:36
 #: erpnext/accounts/report/general_ledger/general_ledger.html:94
@@ -50060,7 +50060,7 @@ msgstr "Serie och Parti Paket {0} är inte giltigt för denna transaktion. \"Typ
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:17
 msgid "The Stock Entry of type 'Manufacture' is known as backflush. Raw materials being consumed to manufacture finished goods is known as backflushing. <br><br> When creating Manufacture Entry, raw-material items are backflushed based on BOM of production item. If you want raw-material items to be backflushed based on Material Transfer entry made against that Work Order instead, then you can set it under this field."
-msgstr "Lager Post av typ 'Produktion' kallas backspolning. Råmaterial som förbrukas för att producera färdiga artiklar kallas backspolning.<br><br> När man skapar Produktion Post backspolas Råmaterial Artiklar baserat på Produktion Artikel Stycklista. Om Råmaterial Artiklar ska backspolas baserat på Överföring Poster som skapas mot Arbetsorder istället, ange det under detta fält."
+msgstr "Lager Post av typ 'Produktion' kallas retroaktivt hämtning. Råmaterial som förbrukas för att producera färdiga artiklar kallas retroaltivt hämtning.<br><br> När man skapar Produktion Post hämtas Råmaterial Artiklar retroaktivt baserat på Produktion Artikel Stycklista. Om Råmaterial Artiklar ska retroaktivt hämtas baserat på Överföring Poster som skapas mot Arbetsorder istället, ange det under detta fält."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2151
 msgid "The Work Order is mandatory for Disassembly Order"
