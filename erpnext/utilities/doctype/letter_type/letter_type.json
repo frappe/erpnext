@@ -24,7 +24,7 @@
  "links": [],
  "modified": "2025-12-03 22:17:49.048251",
  "modified_by": "Administrator",
- "module": "CRM",
+ "module": "Utilities",
  "name": "Letter Type",
  "naming_rule": "By fieldname",
  "owner": "Administrator",

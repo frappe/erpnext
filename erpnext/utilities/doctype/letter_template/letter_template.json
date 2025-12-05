@@ -55,7 +55,7 @@
  "links": [],
  "modified": "2025-12-03 22:53:35.112258",
  "modified_by": "Administrator",
- "module": "CRM",
+ "module": "Utilities",
  "name": "Letter Template",
  "naming_rule": "By fieldname",
  "owner": "Administrator",

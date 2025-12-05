@@ -184,7 +184,7 @@
   "links": [],
   "modified": "2025-12-03 23:40:09.332016",
   "modified_by": "Administrator",
-  "module": "CRM",
+  "module": "Utilities",
   "name": "Letter",
   "naming_rule": "By \"Naming Series\" field",
   "owner": "Administrator",

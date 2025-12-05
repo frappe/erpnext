@@ -35,7 +35,7 @@ frappe.ui.form.on("Letter", {
 	recipient(frm) {
 		if (frm.doc.recipient_type && frm.doc.recipient) {
 			frappe.call({
-				method: "erpnext.crm.doctype.letter.letter.get_recipient_details",
+				method: "erpnext.utilities.doctype.letter.letter.get_recipient_details",
 				args: {
 					recipient_type: frm.doc.recipient_type,
 					recipient: frm.doc.recipient,
@@ -111,7 +111,7 @@ frappe.ui.form.on("Letter", {
 	letter_template(frm) {
 		if (frm.doc.letter_template) {
 			frappe.call({
-				method: "erpnext.crm.doctype.letter_template.letter_template.get_letter_template",
+				method: "erpnext.utilities.doctype.letter_template.letter_template.get_letter_template",
 				args: {
 					template_name: frm.doc.letter_template,
 					doc: frm.doc,
