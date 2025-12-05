@@ -1,0 +1,29 @@
+{
+ "add_total_row": 0,
+ "add_translate_data": 0,
+ "columns": [],
+ "creation": "2025-09-12 16:21:08.244103",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2025-09-12 16:21:08.244103",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Weekly Receivables Due",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "SELECT \r\n    name,\r\n    grand_total,\r\n    outstanding_amount,\r\n    due_date,\r\n    status,\r\n    creation\r\nFROM \r\n    `tabSales Invoice`\r\nWHERE \r\n    docstatus = 1\r\n    AND status != 'Paid'\r\n    AND due_date BETWEEN \r\n        DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)  -- Monday of this week\r\n        AND DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 6 DAY)  -- Sunday of this week\r\nORDER BY \r\n    due_date ASC;\r\n",
+ "ref_doctype": "Bank",
+ "report_name": "Weekly Receivables Due",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ],
+ "timeout": 0
+}

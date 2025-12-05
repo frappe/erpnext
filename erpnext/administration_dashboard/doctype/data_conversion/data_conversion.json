@@ -1,0 +1,101 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-17 11:48:54.921394",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "file",
+  "accounts_dictionary",
+  "download_converted_data",
+  "missing_accounts",
+  "missing_items",
+  "processed_zip_file",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "file",
+   "fieldtype": "Attach",
+   "in_list_view": 1,
+   "label": "File",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accounts_dictionary",
+   "fieldtype": "Attach",
+   "label": "Accounts Dictionary"
+  },
+  {
+   "fieldname": "download_converted_data",
+   "fieldtype": "Button",
+   "label": "Download Converted Data"
+  },
+  {
+   "fieldname": "missing_accounts",
+   "fieldtype": "Long Text",
+   "label": "Missing Accounts",
+   "read_only": 1
+  },
+  {
+   "fieldname": "missing_items",
+   "fieldtype": "Long Text",
+   "label": "Missing Items",
+   "read_only": 1
+  },
+  {
+   "fieldname": "processed_zip_file",
+   "fieldtype": "Long Text",
+   "label": "Processed ZIP File",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Data Conversion",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-11-17 16:17:29.469527",
+ "modified_by": "Administrator",
+ "module": "Administration Dashboard",
+ "name": "Data Conversion",
+ "naming_rule": "By script",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

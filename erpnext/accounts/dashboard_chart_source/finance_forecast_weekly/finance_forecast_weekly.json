@@ -1,0 +1,13 @@
+{
+ "creation": "2025-09-09 10:51:43.468441",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart Source",
+ "idx": 0,
+ "modified": "2025-09-09 10:51:43.468441",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Finance Forecast Weekly",
+ "owner": "Administrator",
+ "source_name": "Finance Forecast Weekly",
+ "timeseries": 0
+}

@@ -1,0 +1,13 @@
+{
+ "creation": "2025-09-09 11:17:21.131363",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart Source",
+ "idx": 0,
+ "modified": "2025-09-09 11:17:21.131363",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Total Finance Forecast",
+ "owner": "Administrator",
+ "source_name": "Total Finance Forecast",
+ "timeseries": 0
+}

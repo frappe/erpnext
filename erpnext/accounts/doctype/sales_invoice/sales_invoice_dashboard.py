@@ -1,5 +1,6 @@
+import frappe
 from frappe import _
-
+from datetime import datetime, timedelta
 
 def get_data():
 	return {
@@ -37,3 +38,47 @@ def get_data():
 			{"label": _("Internal Transfers"), "items": ["Purchase Invoice"]},
 		],
 	}
+
+
+@frappe.whitelist()
+def get_total_receivables_due():
+    """Returns total outstanding amount for Sales Invoices where status != 'Paid'"""
+    total_due = frappe.db.sql("""
+        SELECT SUM(outstanding_amount)
+        FROM `tabSales Invoice`
+        WHERE docstatus = 1 AND status != 'Paid'
+    """)[0][0] or 0
+
+    return {
+        "value": total_due,
+        "fieldtype": "Currency",
+        "route": ["List", "Sales Invoice"],
+        "route_options": {
+            "status": ["!=", "Paid"]
+        }
+    }
+
+
+@frappe.whitelist()
+def get_weekly_receivables_due():
+    """Returns total outstanding amount for Sales Invoices where status != 'Paid' in the current week"""
+    today = datetime.today().date()
+    start_of_week = today - timedelta(days=today.weekday())  
+    end_of_week = start_of_week + timedelta(days=6)  
+    total_due = frappe.db.sql("""
+        SELECT SUM(outstanding_amount)
+        FROM `tabSales Invoice`
+        WHERE docstatus = 1
+        AND status != 'Paid'
+        AND due_date BETWEEN %s AND %s
+    """, (start_of_week, end_of_week))[0][0] or 0
+
+    return {
+        "value": total_due,
+        "fieldtype": "Currency",
+        "route": ["List", "Sales Invoice"],
+        "route_options": {
+            "status": ["!=", "Paid"],
+            "due_date": ["between", [str(start_of_week), str(end_of_week)]]
+        }
+    }

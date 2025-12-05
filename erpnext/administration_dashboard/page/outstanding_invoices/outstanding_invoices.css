@@ -1,0 +1,17 @@
+.title-text {
+	max-width: 35vw !important;
+}
+
+.filter-button-container .filter-button {
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.dt-cell[data-col-index="0"],
+.dt-head[data-col-index="0"] {
+    width: 40px !important; 
+    min-width: 40px !important;
+    max-width: 50px !important;
+    text-align: center;
+} 
