@@ -7,10 +7,13 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "is_monthly_production_plan",
+  "monthly_production_plan",
   "company",
   "get_items_from",
   "column_break1",
   "posting_date",
+  "is_parent_plan",
   "filters",
   "item_code",
   "customer",
@@ -28,10 +31,26 @@
   "material_request_detail",
   "get_material_request",
   "material_requests",
-  "select_items_to_manufacture_section",
-  "get_items",
-  "combine_items",
-  "po_items",
+  "select_items_to_manufacture_in_line_1_section",
+  "get_items_line_1",
+  "combine_items_line_1",
+  "po_items_line_1",
+  "select_items_to_manufacture_in_line_2_section",
+  "get_items_line_2",
+  "combine_items_line_2",
+  "po_items_line_2",
+  "select_items_to_manufacture_in_line_3_section",
+  "get_items_line_3",
+  "combine_items_line_3",
+  "po_items_line_3",
+  "select_items_to_manufacture_in_mono_line_section",
+  "get_items_mono_line",
+  "combine_items_mono_line",
+  "po_items_mono_line",
+  "select_items_to_manufacture_in_multi_line_section",
+  "get_items_multi_line",
+  "combine_items_multi_line",
+  "po_items_multi_line",
   "section_break_25",
   "prod_plan_references",
   "section_break_24",
@@ -67,10 +86,11 @@
  ],
  "fields": [
   {
+   "default": "MFG-MPP-.YYYY.-",
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Naming Series",
-   "options": "MFG-PP-.YYYY.-",
+   "options": "MFG-MPP-.YYYY.-\nMFG-DPP-.YYYY.-",
    "reqd": 1
   },
   {
@@ -191,25 +211,6 @@
    "label": "Material Requests",
    "no_copy": 1,
    "options": "Production Plan Material Request"
-  },
-  {
-   "fieldname": "select_items_to_manufacture_section",
-   "fieldtype": "Section Break",
-   "label": "Select Items to Manufacture"
-  },
-  {
-   "depends_on": "eval:doc.get_items_from && doc.docstatus == 0",
-   "fieldname": "get_items",
-   "fieldtype": "Button",
-   "label": "Get Finished Goods for Manufacture"
-  },
-  {
-   "fieldname": "po_items",
-   "fieldtype": "Table",
-   "label": "Assembly Items",
-   "no_copy": 1,
-   "options": "Production Plan Item",
-   "reqd": 1
   },
   {
    "fieldname": "material_request_planning",
@@ -338,13 +339,6 @@
    "label": "Include Safety Stock in Required Qty Calculation"
   },
   {
-   "default": "0",
-   "depends_on": "eval:doc.get_items_from == 'Sales Order'",
-   "fieldname": "combine_items",
-   "fieldtype": "Check",
-   "label": "Consolidate Sales Order Items"
-  },
-  {
    "fieldname": "section_break_25",
    "fieldtype": "Section Break"
   },
@@ -368,7 +362,7 @@
    "options": "Production Plan Sub Assembly Item"
   },
   {
-   "depends_on": "eval:doc.po_items && doc.po_items.length && doc.docstatus == 0",
+   "depends_on": "eval: (doc.po_items_line_1 && doc.po_items_line_1.length) || (doc.po_items_line_2 && doc.po_items_line_2.length) || (doc.po_items_multi_line && doc.po_items_multi_line.length) && doc.docstatus == 0",
    "fieldname": "get_sub_assembly_items",
    "fieldtype": "Button",
    "label": "Get Sub Assembly Items"
@@ -433,13 +427,164 @@
    "fieldname": "consider_minimum_order_qty",
    "fieldtype": "Check",
    "label": "Consider Minimum Order Qty"
+  },
+  {
+   "depends_on": "eval:doc.get_items_from && doc.docstatus == 0",
+   "fieldname": "get_items_line_1",
+   "fieldtype": "Button",
+   "label": "Get Finished Goods for Manufacture in Line1"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.get_items_from == 'Sales Order'",
+   "fieldname": "combine_items_line_1",
+   "fieldtype": "Check",
+   "label": "Consolidate Sales Order Items"
+  },
+  {
+   "fieldname": "po_items_line_1",
+   "fieldtype": "Table",
+   "label": "Assembly Items",
+   "no_copy": 1,
+   "options": "Production Plan Item"
+  },
+  {
+   "depends_on": "eval:doc.get_items_from && doc.docstatus == 0",
+   "fieldname": "get_items_line_2",
+   "fieldtype": "Button",
+   "label": "Get Finished Goods for Manufacture in Line2"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.get_items_from == 'Sales Order'",
+   "fieldname": "combine_items_line_2",
+   "fieldtype": "Check",
+   "label": "Consolidate Sales Order Items"
+  },
+  {
+   "fieldname": "po_items_line_2",
+   "fieldtype": "Table",
+   "label": "Assembly Items",
+   "no_copy": 1,
+   "options": "Production Plan Item"
+  },
+  {
+   "fieldname": "select_items_to_manufacture_in_multi_line_section",
+   "fieldtype": "Section Break",
+   "label": "Select Items to Manufacture in Multi Line"
+  },
+  {
+   "depends_on": "eval:doc.get_items_from && doc.docstatus == 0",
+   "fieldname": "get_items_multi_line",
+   "fieldtype": "Button",
+   "label": "Get Finished Goods for Manufacture in Multi Line"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.get_items_from == 'Sales Order'",
+   "fieldname": "combine_items_multi_line",
+   "fieldtype": "Check",
+   "label": "Consolidate Sales Order Items"
+  },
+  {
+   "fieldname": "po_items_multi_line",
+   "fieldtype": "Table",
+   "label": "Assembly Items",
+   "options": "Production Plan Item"
+  },
+  {
+   "fieldname": "select_items_to_manufacture_in_line_3_section",
+   "fieldtype": "Section Break",
+   "label": "Select Items to Manufacture in Line 3"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.get_items_from == 'Sales Order'",
+   "fieldname": "combine_items_line_3",
+   "fieldtype": "Check",
+   "label": "Consolidate Sales Order Items"
+  },
+  {
+   "fieldname": "po_items_line_3",
+   "fieldtype": "Table",
+   "label": "Assembly Items",
+   "no_copy": 1,
+   "options": "Production Plan Item"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.get_items_from == 'Sales Order'",
+   "fieldname": "combine_items_mono_line",
+   "fieldtype": "Check",
+   "label": "Consolidate Sales Order Items"
+  },
+  {
+   "fieldname": "po_items_mono_line",
+   "fieldtype": "Table",
+   "label": "Assembly Items",
+   "no_copy": 1,
+   "options": "Production Plan Item"
+  },
+  {
+   "depends_on": "eval:doc.get_items_from && doc.docstatus == 0",
+   "fieldname": "get_items_line_3",
+   "fieldtype": "Button",
+   "label": "Get Finished Goods for Manufacture in Line 3"
+  },
+  {
+   "depends_on": "eval:doc.get_items_from && doc.docstatus == 0",
+   "fieldname": "get_items_mono_line",
+   "fieldtype": "Button",
+   "label": "Get Finished Goods for Manufacture in Mono Line"
+  },
+  {
+   "fieldname": "select_items_to_manufacture_in_line_1_section",
+   "fieldtype": "Section Break",
+   "label": "Select Items to Manufacture in Line 1"
+  },
+  {
+   "fieldname": "select_items_to_manufacture_in_line_2_section",
+   "fieldtype": "Section Break",
+   "label": "Select Items to Manufacture in Line 2"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_parent_plan == 0",
+   "description": "This will define the production plan as the monthly production plan",
+   "fieldname": "is_monthly_production_plan",
+   "fieldtype": "Check",
+   "label": "Is Monthly Production Plan",
+   "read_only": 1,
+   "read_only_depends_on": "eval:doc.monthly_production_plan"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.parent_production_plan",
+   "fieldname": "is_parent_plan",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "is parent plan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "select_items_to_manufacture_in_mono_line_section",
+   "fieldtype": "Section Break",
+   "label": "Select Items to Manufacture in Mono Line"
+  },
+  {
+   "fieldname": "monthly_production_plan",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Monthly Production Plan",
+   "options": "Production Plan",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-12-04 11:55:03.108971",
+ "modified": "2025-12-05 15:35:57.198640",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
@@ -460,6 +605,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "ASC",
  "states": []
