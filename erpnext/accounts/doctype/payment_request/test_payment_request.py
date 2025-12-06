@@ -851,3 +851,71 @@ class TestPaymentRequest(IntegrationTestCase):
 		pr.load_from_db()
 
 		self.assertEqual(pr.grand_total, pi.outstanding_amount)
+
+	def test_payment_schedule_row_selection(self):
+		from frappe.utils import add_days, nowdate
+
+		po = create_purchase_order(do_not_save=1, currency="INR", qty=1, rate=86)
+
+		po.payment_schedule = []
+
+		po.append("payment_schedule", {"due_date": nowdate(), "payment_amount": 33})
+		po.append("payment_schedule", {"due_date": add_days(nowdate(), 1), "payment_amount": 33})
+		po.append("payment_schedule", {"due_date": add_days(nowdate(), 2), "payment_amount": 20})
+
+		po.save()
+		po.submit()
+
+		pr1 = make_payment_request(
+			dt="Purchase Order",
+			dn=po.name,
+			mute_email=1,
+			submit_doc=False,
+			return_doc=True,
+		)
+		pr1.payment_reference[0].manually_selected = 1
+		pr1.payment_reference[1].auto_selected = 0
+		pr1.payment_reference[2].manually_selected = 1
+		pr1.grand_total = 53
+		pr1.submit()
+
+		pr2 = make_payment_request(
+			dt="Purchase Order",
+			dn=po.name,
+			mute_email=1,
+			submit_doc=False,
+			return_doc=True,
+		)
+
+		self.assertEqual(len(pr2.payment_reference), 1)
+		self.assertEqual(pr2.payment_reference[0].amount, 33)
+
+	def test_auto_selected_rows_are_not_reused(self):
+		from frappe.utils import add_days, nowdate
+
+		po = create_purchase_order(do_not_save=1, currency="INR", qty=1, rate=80)
+		po.payment_schedule = []
+		po.append("payment_schedule", {"due_date": nowdate(), "payment_amount": 40})
+		po.append("payment_schedule", {"due_date": add_days(nowdate(), 1), "payment_amount": 10})
+		po.append("payment_schedule", {"due_date": add_days(nowdate(), 2), "payment_amount": 30})
+		po.save()
+		po.submit()
+
+		pr1 = make_payment_request(
+			dt="Purchase Order",
+			dn=po.name,
+			mute_email=1,
+			submit_doc=False,
+			return_doc=True,
+		)
+
+		pr1.submit()
+
+		with self.assertRaises(frappe.ValidationError):
+			make_payment_request(
+				dt="Purchase Order",
+				dn=po.name,
+				mute_email=1,
+				submit_doc=False,
+				return_doc=True,
+			)

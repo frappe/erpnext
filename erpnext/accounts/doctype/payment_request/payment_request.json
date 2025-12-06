@@ -19,6 +19,9 @@
   "column_break_4",
   "reference_doctype",
   "reference_name",
+  "payment_reference_section",
+  "payment_reference",
+  "calculate_total_amount_by_selected_rows",
   "transaction_details",
   "grand_total",
   "currency",
@@ -457,6 +460,21 @@
    "fieldname": "phone_number",
    "fieldtype": "Data",
    "label": "Phone Number"
+  },
+  {
+   "fieldname": "payment_reference_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "calculate_total_amount_by_selected_rows",
+   "fieldtype": "Button",
+   "label": "Calculate Total Amount by Selected Rows"
+  },
+  {
+   "fieldname": "payment_reference",
+   "fieldtype": "Table",
+   "label": "Payment Reference",
+   "options": "Payment Reference"
   }
  ],
  "grid_page_length": 50,
@@ -464,7 +482,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-29 11:52:48.555415",
+ "modified": "2025-12-05 11:27:51.406257",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",

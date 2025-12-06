@@ -45,6 +45,7 @@ class PaymentRequest(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.accounts.doctype.payment_reference.payment_reference import PaymentReference
 		from erpnext.accounts.doctype.subscription_plan_detail.subscription_plan_detail import (
 			SubscriptionPlanDetail,
 		)
@@ -78,6 +79,7 @@ class PaymentRequest(Document):
 		payment_gateway: DF.ReadOnly | None
 		payment_gateway_account: DF.Link | None
 		payment_order: DF.Link | None
+		payment_reference: DF.Table[PaymentReference]
 		payment_request_type: DF.Literal["Outward", "Inward"]
 		payment_url: DF.Data | None
 		phone_number: DF.Data | None
@@ -587,6 +589,8 @@ def make_payment_request(**args):
 			"Payment Request", draft_payment_request, "grand_total", grand_total, update_modified=False
 		)
 		pr = frappe.get_doc("Payment Request", draft_payment_request)
+
+		set_payment_references(pr, ref_doc)
 	else:
 		bank_account = (
 			get_party_bank_account(args.get("party_type"), args.get("party"))
@@ -606,6 +610,8 @@ def make_payment_request(**args):
 		if not party_account_currency:
 			party_account = get_party_account(party_type, ref_doc.get(party_type.lower()), ref_doc.company)
 			party_account_currency = get_account_currency(party_account)
+
+		set_payment_references(pr, ref_doc)
 
 		pr.update(
 			{
@@ -1007,3 +1013,59 @@ def get_irequests_of_payment_request(doc: str | None = None) -> list:
 			},
 		)
 	return res
+
+
+def set_payment_references(payment_request, ref_doc):
+	if not hasattr(ref_doc, "payment_schedule") or not ref_doc.payment_schedule:
+		return
+
+	existing_refs = get_existing_payment_references(ref_doc.name)
+
+	existing_map = {make_key(r.payment_term, r.due_date, r.amount): r for r in existing_refs}
+
+	payment_request.reference = []
+
+	for row in ref_doc.payment_schedule:
+		key = make_key(row.payment_term, row.due_date, row.payment_amount)
+
+		existing = existing_map.get(key)
+		if existing and (existing.manually_selected or existing.auto_selected):
+			continue
+
+		payment_request.append(
+			"payment_reference",
+			{
+				"payment_term": row.payment_term,
+				"description": row.description,
+				"due_date": row.due_date,
+				"amount": row.payment_amount,
+			},
+		)
+
+
+def make_key(payment_term, due_date, amount):
+	return (payment_term, due_date, flt(amount))
+
+
+def get_existing_payment_references(reference_name):
+	PR = frappe.qb.DocType("Payment Request")
+	PRF = frappe.qb.DocType("Payment Reference")
+
+	result = (
+		frappe.qb.from_(PR)
+		.join(PRF)
+		.on(PR.name == PRF.parent)
+		.select(
+			PRF.payment_term,
+			PRF.due_date,
+			PRF.amount,
+			PRF.manually_selected,
+			PRF.auto_selected,
+			PRF.parent,
+		)
+		.where(PR.reference_name == reference_name)
+		.where(PR.docstatus == 1)
+		.where(PR.status.isin(["Initiated", "Partially Paid", "Payment Ordered", "Paid"]))
+	).run(as_dict=True)
+
+	return result
