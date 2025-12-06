@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-30 09:36+0000\n"
-"PO-Revision-Date: 2025-12-04 00:42\n"
+"PO-Revision-Date: 2025-12-06 00:33\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -6786,28 +6786,28 @@ msgstr "Unos Zaliha Unazad"
 #: erpnext/manufacturing/doctype/work_order/work_order.js:362
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Backflush Materials From WIP Warehouse"
-msgstr "Povrat Materijala iz Skladišta za Posao u Toku"
+msgstr "Retroaktivno Preuzmi Materijal iz Skladišta za Posao u Toku"
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:16
 msgid "Backflush Raw Materials"
-msgstr "Povrati Sirovine"
+msgstr "Retroaktivno Preuzmi Sirovine"
 
 #. Label of the backflush_raw_materials_based_on (Select) field in DocType
 #. 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Backflush Raw Materials Based On"
-msgstr "Povrati Sirovine na osnovu"
+msgstr "Retroaktivno Preuzmi Sirovine na osnovu"
 
 #. Label of the from_wip_warehouse (Check) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Backflush Raw Materials From Work-in-Progress Warehouse"
-msgstr "Povrat Sirovine iz Skladišta za Posao U Toku"
+msgstr "Retroaktivno Preuzmi Sirovine iz Skladišta za Posao U Toku"
 
 #. Label of the backflush_raw_materials_of_subcontract_based_on (Select) field
 #. in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Backflush Raw Materials of Subcontract Based On"
-msgstr "Povrati Sirovina od Podizvođača na osnovu"
+msgstr "Retroaktivno Preuzmi Sirovina od Podizvođača na osnovu"
 
 #: erpnext/accounts/report/account_balance/account_balance.py:36
 #: erpnext/accounts/report/general_ledger/general_ledger.html:94
@@ -50054,7 +50054,7 @@ msgstr "Serijski i Šaržni Paket {0} ne važi za ovu transakciju. 'Tip transakc
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:17
 msgid "The Stock Entry of type 'Manufacture' is known as backflush. Raw materials being consumed to manufacture finished goods is known as backflushing. <br><br> When creating Manufacture Entry, raw-material items are backflushed based on BOM of production item. If you want raw-material items to be backflushed based on Material Transfer entry made against that Work Order instead, then you can set it under this field."
-msgstr "Unos Zaliha tipa 'Proizvodnja' poznat je kao povrat. Sirovine koje se troše za proizvodnju gotovih proizvoda poznato je kao povrat. <br><br> Prilikom kreiranja unosa proizvodnje, artikli sirovina se vraćaju nazad na osnovu Sastavnice proizvodne jedinice. Ako želite da se artikli sirovog materijala vraćaju natrag na osnovu unosa prijenosa materijala napravljenog naspram tog radnog naloga umjesto toga, možete ga postaviti ispod ovog polja."
+msgstr "Unos Zaliha tipa 'Proizvodnja' poznat je kao Retroaktivno Preuzimanje. Sirovine koje se troše za proizvodnju gotovih proizvoda poznate su kao Retroaktivno Preuzimanje. <br><br> Prilikom kreiranja unosa proizvodnje, artikli sirovina se vraćaju nazad na osnovu Sastavnice proizvodne jedinice. Ako želite da se artikli sirovog materijala vraćaju natrag na osnovu unosa prijenosa materijala napravljenog naspram tog radnog naloga umjesto toga, možete ga postaviti ispod ovog polja."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2151
 msgid "The Work Order is mandatory for Disassembly Order"
