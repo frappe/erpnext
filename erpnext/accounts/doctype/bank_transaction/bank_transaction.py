@@ -333,13 +333,12 @@ class BankTransaction(Document):
 				_("Only one of Deposit or Withdrawal should be non-zero when applying an Excluded Fee.")
 			)
 
-		if self.excluded_fee and self.excluded_fee > 0:
-			if flt(self.deposit) > 0:
-				self.deposit = flt(self.deposit) - excluded_fee
-			elif flt(self.withdrawal) > 0:
-				self.withdrawal = flt(self.withdrawal) + excluded_fee
-			self.included_fee = flt(self.included_fee) + excluded_fee
-			self.excluded_fee = 0
+		if flt(self.deposit) > 0:
+			self.deposit = flt(self.deposit) - excluded_fee
+		elif flt(self.withdrawal) > 0:
+			self.withdrawal = flt(self.withdrawal) + excluded_fee
+		self.included_fee = flt(self.included_fee) + excluded_fee
+		self.excluded_fee = 0
 
 
 @frappe.whitelist()
