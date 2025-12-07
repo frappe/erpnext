@@ -49,23 +49,25 @@ class TestHMRCVAT(UnitTestCase):
 		filters = {"company": "_Test Company UK VAT", "from_date": today(), "to_date": today()}
 		vat_report = UKVatReport(filters)
 		vat_accounts = vat_report.get_vat_accounts()
-		self.assertEqual("VAT - _TCUV", vat_accounts["Liability"]["name"])
-		self.assertEqual("Input VAT - _TCUV", vat_accounts["Asset"]["name"])
+		liability_accounts = [ac.name for ac in vat_accounts if ac.root_type == "Liability"]
+		asset_accounts = [ac.name for ac in vat_accounts if ac.root_type == "Asset"]
+		self.assertIn("VAT - _TCUV", liability_accounts)
+		self.assertIn("Input VAT - _TCUV", asset_accounts)
 
 	def test_hmrc_vat(self):
 		filters = {"company": "_Test Company UK VAT", "from_date": today(), "to_date": today()}
-		columns, data = execute(filters)
+		values = execute(filters)
 		total_tax_amount = 0
 		total_row_tax = 0
-		for row in data:
-			keys = row.keys()
-			# skips total_row_tax amount in if.. and skips section header in elif..
-			if "invoice" in keys:
-				total_tax_amount = total_tax_amount + row["tax_amount"]
-			elif "tax_amount" in keys:
-				total_row_tax = total_row_tax + row["tax_amount"]
-
-		self.assertEqual(len(data), 12)
+		box_data = values[1]
+		for row in box_data:
+			# Check that Invoice and Item tallies match up correctly.
+			if "doctype" not in row.keys():
+				continue
+			if row["doctype"].endswith("Invoice"):
+				total_tax_amount += row["tax_amount"]
+			elif row["doctype"].endswith("Item"):
+				total_row_tax += row["tax_amount"]
 		self.assertEqual(total_tax_amount, total_row_tax)
 
 
