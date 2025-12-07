@@ -47,11 +47,11 @@ class BankTransaction(Document):
 	# end: auto-generated types
 
 	def before_validate(self):
-		self.handle_included_fee()
 		self.handle_excluded_fee()
 		self.update_allocated_amount()
 
 	def validate(self):
+		self.validate_included_fee()
 		self.validate_duplicate_references()
 		self.validate_currency()
 
@@ -125,7 +125,7 @@ class BankTransaction(Document):
 		self.allocate_payment_entries()
 		self.set_status()
 
-		if frappe.db.get_single_value("Accounts Settings", "enable_party_matching"):
+		if frappe.get_single_value("Accounts Settings", "enable_party_matching"):
 			self.auto_set_party()
 
 	def before_update_after_submit(self):
@@ -311,7 +311,7 @@ class BankTransaction(Document):
 
 		self.party_type, self.party = result
 
-	def handle_included_fee(self):
+	def validate_included_fee(self):
 		"""
 		The included_fee is only handled for withdrawals. An included_fee for a deposit, is not credited to the account and is
 		therefore outside of the deposit value and can be larger than the deposit itself.
@@ -323,12 +323,22 @@ class BankTransaction(Document):
 
 	def handle_excluded_fee(self):
 		# Include the excluded fee on validate to handle all further processing the same
+		excluded_fee = flt(self.excluded_fee)
+		if excluded_fee <= 0:
+			return
+
+		# Enforce directionality
+		if flt(self.deposit) > 0 and flt(self.withdrawal) > 0:
+			frappe.throw(
+				_("Only one of Deposit or Withdrawal should be non-zero when applying an Excluded Fee.")
+			)
+
 		if self.excluded_fee and self.excluded_fee > 0:
-			if self.deposit > 0:
-				self.deposit = self.deposit - self.excluded_fee
-			if self.withdrawal > 0:
-				self.withdrawal = self.withdrawal + self.excluded_fee
-			self.included_fee = self.included_fee + self.excluded_fee
+			if flt(self.deposit) > 0:
+				self.deposit = flt(self.deposit) - excluded_fee
+			elif flt(self.withdrawal) > 0:
+				self.withdrawal = flt(self.withdrawal) + excluded_fee
+			self.included_fee = flt(self.included_fee) + excluded_fee
 			self.excluded_fee = 0
 
 
