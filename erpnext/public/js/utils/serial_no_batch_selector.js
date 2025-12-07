@@ -547,6 +547,9 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				},
 				callback: (r) => {
 					if (r.message) {
+						r.message.forEach((row) => {
+							frappe.utils.add_link_title("Batch", row.batch_no, row.batch_no_display);
+						});
 						this.dialog.fields_dict.entries.df.data = r.message;
 						this.dialog.fields_dict.entries.grid.refresh();
 					}
