@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-30 09:36+0000\n"
-"PO-Revision-Date: 2025-12-05 00:37\n"
+"PO-Revision-Date: 2025-12-07 00:46\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Slovenian\n"
 "MIME-Version: 1.0\n"
@@ -1422,7 +1422,7 @@ msgstr "V Račun"
 
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.py:118
 msgid "Account Pay Only"
-msgstr ""
+msgstr "Samo plačilo na račun"
 
 #. Label of the account_subtype (Link) field in DocType 'Bank Account'
 #. Label of the account_subtype (Data) field in DocType 'Bank Account Subtype'
@@ -1457,11 +1457,11 @@ msgstr "Vrednost Računa"
 
 #: erpnext/accounts/doctype/account/account.py:326
 msgid "Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"
-msgstr ""
+msgstr "Stanje na računu je že v kreditu, možnosti »Stanje mora biti« ne smete nastaviti kot »Debet«"
 
 #: erpnext/accounts/doctype/account/account.py:320
 msgid "Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'"
-msgstr ""
+msgstr "Stanje na računu je že debetno, možnosti »Stanje mora biti« ne smete nastaviti na »Kredit«"
 
 #. Label of the account_for_change_amount (Link) field in DocType 'POS Invoice'
 #. Label of the account_for_change_amount (Link) field in DocType 'POS Profile'
@@ -1479,11 +1479,11 @@ msgstr "Račun je obvezen"
 
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:46
 msgid "Account is mandatory to get payment entries"
-msgstr ""
+msgstr "Račun je obvezen za pridobitev vnosov plačil"
 
 #: erpnext/accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.py:44
 msgid "Account is not set for the dashboard chart {0}"
-msgstr ""
+msgstr "Račun ni nastavljen za grafikon nadzorne plošče {0}"
 
 #: erpnext/assets/doctype/asset/asset.py:776
 msgid "Account not Found"
@@ -1491,24 +1491,24 @@ msgstr "Račun ni najden"
 
 #: erpnext/accounts/doctype/account/account.py:425
 msgid "Account with child nodes cannot be converted to ledger"
-msgstr ""
+msgstr "Račun s podrejenimi vozlišči ni mogoče pretvoriti v glavno knjigo"
 
 #: erpnext/accounts/doctype/account/account.py:277
 msgid "Account with child nodes cannot be set as ledger"
-msgstr ""
+msgstr "Račun s podrejenimi vozlišči ni mogoče nastaviti kot glavno knjigo"
 
 #: erpnext/accounts/doctype/account/account.py:436
 msgid "Account with existing transaction can not be converted to group."
-msgstr ""
+msgstr "Račun z obstoječo transakcijo ni mogoče pretvoriti v skupino."
 
 #: erpnext/accounts/doctype/account/account.py:465
 msgid "Account with existing transaction can not be deleted"
-msgstr ""
+msgstr "Računa z obstoječo transakcijo ni mogoče izbrisati"
 
 #: erpnext/accounts/doctype/account/account.py:271
 #: erpnext/accounts/doctype/account/account.py:427
 msgid "Account with existing transaction cannot be converted to ledger"
-msgstr ""
+msgstr "Račun z obstoječo transakcijo ni mogoče pretvoriti v glavno knjigo"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:67
 msgid "Account {0} added multiple times"
@@ -1516,11 +1516,11 @@ msgstr "Račun {0} je bil dodan večkrat"
 
 #: erpnext/accounts/doctype/account/account.py:289
 msgid "Account {0} cannot be converted to Group as it is already set as {1} for {2}."
-msgstr ""
+msgstr "Račun {0} ni mogoče pretvoriti v skupino, ker je že nastavljen kot {1} za {2}."
 
 #: erpnext/accounts/doctype/account/account.py:286
 msgid "Account {0} cannot be disabled as it is already set as {1} for {2}."
-msgstr ""
+msgstr "Račun {0} ni mogoče onemogočiti, ker je že nastavljen kot {1} za {2}."
 
 #: erpnext/accounts/doctype/budget/budget.py:158
 msgid "Account {0} does not belong to company {1}"
@@ -1540,23 +1540,23 @@ msgstr "Račun {0} ne obstaja"
 
 #: erpnext/accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.py:51
 msgid "Account {0} does not exists in the dashboard chart {1}"
-msgstr ""
+msgstr "Račun {0} ne obstaja v grafikonu nadzorne plošče {1}"
 
 #: erpnext/accounts/doctype/mode_of_payment/mode_of_payment.py:48
 msgid "Account {0} does not match with Company {1} in Mode of Account: {2}"
-msgstr ""
+msgstr "Račun {0} se ne ujema s Podjetjem {1} v načinu računa: {2}"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:138
 msgid "Account {0} doesn't belong to Company {1}"
-msgstr ""
+msgstr "Račun {0} ne pripada Podjetju {1}"
 
 #: erpnext/accounts/doctype/account/account.py:542
 msgid "Account {0} exists in parent company {1}."
-msgstr ""
+msgstr "Račun {0} obstaja v matičnem podjetju {1}."
 
 #: erpnext/accounts/doctype/account/account.py:409
 msgid "Account {0} is added in the child company {1}"
-msgstr ""
+msgstr "Račun {0} je dodan v podrejeno podjetje {1}"
 
 #: erpnext/setup/doctype/company/company.py:261
 msgid "Account {0} is disabled."
@@ -6684,15 +6684,15 @@ msgstr "Orodje za posodobitev Kosovnice"
 #. Description of a DocType
 #: erpnext/manufacturing/doctype/bom_update_log/bom_update_log.json
 msgid "BOM Update Tool Log with job status maintained"
-msgstr ""
+msgstr "Dnevnik orodja za posodobitev kosovnice z vzdrževanim stanjem opravila"
 
 #: erpnext/manufacturing/doctype/bom_update_log/bom_update_log.py:99
 msgid "BOM Updation already in progress. Please wait until {0} is complete."
-msgstr ""
+msgstr "Posodobitev kosovnice je že v teku. Počakajte, da se {0} zaključi."
 
 #: erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.js:81
 msgid "BOM Updation is queued and may take a few minutes. Check {0} for progress."
-msgstr ""
+msgstr "Posodobitev kosovnice je v čakalni vrsti in lahko traja nekaj minut. Preverite napredek {0}."
 
 #. Name of a report
 #: erpnext/manufacturing/report/bom_variance_report/bom_variance_report.json
@@ -6707,34 +6707,34 @@ msgstr "Artikel Spletnega Mesta Kosovnice"
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/bom_website_operation/bom_website_operation.json
 msgid "BOM Website Operation"
-msgstr ""
+msgstr "Delovanje spletne strani Kosovnice"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:1297
 msgid "BOM and Manufacturing Quantity are required"
-msgstr ""
+msgstr "Zahtevana sta kosovnica in proizvodna količina"
 
 #. Label of the bom_and_work_order_tab (Tab Break) field in DocType
 #. 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "BOM and Production"
-msgstr ""
+msgstr "Kosovnica & Proizvodnja"
 
 #: erpnext/stock/doctype/material_request/material_request.js:371
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:710
 msgid "BOM does not contain any stock item"
-msgstr ""
+msgstr "Kosovnica ne vsebuje nobenega artikla na zalogi"
 
 #: erpnext/manufacturing/doctype/bom_update_log/bom_updation_utils.py:85
 msgid "BOM recursion: {0} cannot be child of {1}"
-msgstr ""
+msgstr "Rekurzija Kosovnice: {0} ne more biti podrejena od {1}"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:688
 msgid "BOM recursion: {1} cannot be parent or child of {0}"
-msgstr ""
+msgstr "Rekurzija Kosovnice: {1} ne more biti nadrejena ali podrejena artiklu {0}"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1412
 msgid "BOM {0} does not belong to Item {1}"
-msgstr ""
+msgstr "Kosovnica {0} ne spada v artikel {1}"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1394
 msgid "BOM {0} must be active"
@@ -6755,19 +6755,19 @@ msgstr "Kosovnica Posodobljena"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:275
 msgid "BOMs created successfully"
-msgstr ""
+msgstr "Kosovnice so uspešno ustvarjeni"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:285
 msgid "BOMs creation failed"
-msgstr ""
+msgstr "Ustvarjanje Kosovnica ni uspelo"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:225
 msgid "BOMs creation has been enqueued, kindly check the status after some time"
-msgstr ""
+msgstr "Ustvarjanje Kosovnica je bilo dodano v čakalno vrsto, prosim preverite stanje čez nekaj časa."
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:340
 msgid "Backdated Stock Entry"
-msgstr ""
+msgstr "Vnos zalog z retroaktivnim datumom"
 
 #. Label of the backflush_from_wip_warehouse (Check) field in DocType 'BOM
 #. Operation'
@@ -6780,28 +6780,28 @@ msgstr ""
 #: erpnext/manufacturing/doctype/work_order/work_order.js:362
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Backflush Materials From WIP Warehouse"
-msgstr ""
+msgstr "Retroaktivno Pridobi Material iz zaloge nedokončane proizvodnje"
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:16
 msgid "Backflush Raw Materials"
-msgstr ""
+msgstr "Retroaktivno Pridobi Surovin"
 
 #. Label of the backflush_raw_materials_based_on (Select) field in DocType
 #. 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Backflush Raw Materials Based On"
-msgstr ""
+msgstr "Retroaktivno Pridobi Surovine na osnovi"
 
 #. Label of the from_wip_warehouse (Check) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Backflush Raw Materials From Work-in-Progress Warehouse"
-msgstr ""
+msgstr "Retroaktivno Pridobi Material iz zaloge nedokončane proizvodnje"
 
 #. Label of the backflush_raw_materials_of_subcontract_based_on (Select) field
 #. in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Backflush Raw Materials of Subcontract Based On"
-msgstr ""
+msgstr "Retroaktivno Pridobi Material podizvajalske pogodbe na podlagi"
 
 #: erpnext/accounts/report/account_balance/account_balance.py:36
 #: erpnext/accounts/report/general_ledger/general_ledger.html:94
@@ -6990,7 +6990,7 @@ msgstr "Podrobnosti Bančnega Računu"
 #. Guarantee'
 #: erpnext/accounts/doctype/bank_guarantee/bank_guarantee.json
 msgid "Bank Account Info"
-msgstr ""
+msgstr "Podatki Bančnega Računa"
 
 #. Label of the bank_account_no (Data) field in DocType 'Bank Account'
 #. Label of the bank_account_no (Data) field in DocType 'Bank Guarantee'
@@ -7986,7 +7986,7 @@ msgstr "Krvna Skupina"
 #. Accounts'
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgid "Body"
-msgstr ""
+msgstr "Vsebina"
 
 #. Label of the body_text (Text Editor) field in DocType 'Dunning'
 #. Label of the body_text (Text Editor) field in DocType 'Dunning Letter Text'
@@ -8004,7 +8004,7 @@ msgstr ""
 #. Label of the bold_text (Check) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Bold Text"
-msgstr ""
+msgstr "Krepko Besedilo"
 
 #. Description of the 'Bold Text' (Check) field in DocType 'Financial Report
 #. Row'
@@ -8061,12 +8061,12 @@ msgstr ""
 #: erpnext/stock/doctype/shipment/shipment.json
 #: erpnext/stock/doctype/shipment/shipment_list.js:5
 msgid "Booked"
-msgstr ""
+msgstr "Rezervirano"
 
 #. Label of the booked_fixed_asset (Check) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Booked Fixed Asset"
-msgstr ""
+msgstr "Knjiženo osnovno sredstvo"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:146
 msgid "Booking stock value across multiple accounts will make it harder to track stock and account value."
@@ -8080,7 +8080,7 @@ msgstr ""
 #. Dimension'
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.json
 msgid "Both"
-msgstr ""
+msgstr "Oba"
 
 #: erpnext/setup/doctype/supplier_group/supplier_group.py:57
 msgid "Both Payable Account: {0} and Advance Account: {1} must be of same currency for company: {2}"
@@ -8146,7 +8146,7 @@ msgstr "Ime Znamke"
 #. Visit'
 #: erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.json
 msgid "Breakdown"
-msgstr ""
+msgstr "Razčlenitev"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:10
 msgid "Broadcasting"
@@ -8154,7 +8154,7 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:11
 msgid "Brokerage"
-msgstr ""
+msgstr "Posredništvo"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:164
 msgid "Browse BOM"
