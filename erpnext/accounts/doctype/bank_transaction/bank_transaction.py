@@ -327,9 +327,11 @@ class BankTransaction(Document):
 		if excluded_fee <= 0:
 			return
 
-		# Ensure there's a transaction amount to apply the fee to
-		if flt(self.deposit) <= 0 and flt(self.withdrawal) <= 0:
-			frappe.throw(_("Cannot apply an Excluded Fee without a Deposit or Withdrawal amount."))
+		# Suppress a negative deposit (aka withdrawal), likely not intendend
+		if flt(self.deposit) > 0 and (flt(self.deposit) - excluded_fee) < 0:
+			frappe.throw(
+				_("The Excluded Fee is bigger than the Deposit it is deducted from.")
+			)
 
 		# Enforce directionality
 		if flt(self.deposit) > 0 and flt(self.withdrawal) > 0:
@@ -339,7 +341,8 @@ class BankTransaction(Document):
 
 		if flt(self.deposit) > 0:
 			self.deposit = flt(self.deposit) - excluded_fee
-		elif flt(self.withdrawal) > 0:
+		# A fee applied to deposit and withdrawal equal 0 become a withdrawal
+		elif flt(self.withdrawal) >= 0:
 			self.withdrawal = flt(self.withdrawal) + excluded_fee
 		self.included_fee = flt(self.included_fee) + excluded_fee
 		self.excluded_fee = 0
