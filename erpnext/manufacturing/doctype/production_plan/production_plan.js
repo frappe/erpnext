@@ -209,13 +209,13 @@ frappe.ui.form.on("Production Plan", {
 		}
 		frm.trigger("material_requirement");
 
-		if (frm.doc.is_parent_plan && frm.doc.docstatus == 1) 
-		{
-			frm.add_custom_query_report("DPP", {
-				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_dpp_list",
-				args: { mpp_name: frm.doc.name }
-			});
-		}
+		// if (frm.doc.is_parent_plan && frm.doc.docstatus == 1) 
+		// {
+		// 	frm.add_custom_query_report("DPP", {
+		// 		method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_dpp_list",
+		// 		args: { mpp_name: frm.doc.name }
+		// 	});
+		// }
 
 		const projected_qty_formula = ` <table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 			<tr><td style="padding-left:25px">

@@ -2208,11 +2208,11 @@ def refresh_mpp_progress(mpp_name):
     
     return {"planned": total_planned, "produced": total_produced}
 
-@frappe.whitelist()
-def get_dpp_list(mpp_name):
-    """DPPs for Connections panel"""
-    return frappe.get_all("Production Plan", 
-        filters={"monthly_production_plan": mpp_name},
-        fields=["name", "posting_date", "status"],
-        order_by="posting_date desc"
-    )
+# @frappe.whitelist()
+# def get_dpp_list(mpp_name):
+#     """DPPs for Connections panel"""
+#     return frappe.get_all("Production Plan", 
+#         filters={"monthly_production_plan": mpp_name},
+#         fields=["name", "posting_date", "status"],
+#         order_by="posting_date desc"
+#     )
