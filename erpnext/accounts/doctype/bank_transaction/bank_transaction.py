@@ -329,9 +329,7 @@ class BankTransaction(Document):
 
 		# Suppress a negative deposit (aka withdrawal), likely not intendend
 		if flt(self.deposit) > 0 and (flt(self.deposit) - excluded_fee) < 0:
-			frappe.throw(
-				_("The Excluded Fee is bigger than the Deposit it is deducted from.")
-			)
+			frappe.throw(_("The Excluded Fee is bigger than the Deposit it is deducted from."))
 
 		# Enforce directionality
 		if flt(self.deposit) > 0 and flt(self.withdrawal) > 0:
