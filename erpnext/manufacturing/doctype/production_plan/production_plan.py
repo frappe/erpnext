@@ -2084,20 +2084,20 @@ def get_reserved_qty_for_sub_assembly(item_code, warehouse):
 
 
 @frappe.whitelist()
-def create_daily_production_plan(parent_name, child_date=None):
+def create_daily_production_plan(parent_name, dpp_date=None):
     parent = frappe.get_doc("Production Plan", parent_name)
     if not parent.get("is_parent_plan"):
         frappe.throw("Daily Production Plan can only be created from a parent (monthly) Production Plan.")
 
     child = frappe.new_doc("Production Plan")
     child.company = parent.company
-    child.posting_date = child_date or parent.posting_date
+    child.posting_date = dpp_date or parent.posting_date
     child.naming_series = "MFG-DPP-.YYYY.-"
     child.is_parent_plan = 0
     child.monthly_production_plan = parent.name
     # child.is_monthly_production_plan = 0
 
-    copy_line_items(parent, child, child_date)
+    copy_line_items(parent, child, dpp_date)
     child.insert(ignore_permissions=True)
 
     if parent.status in ("Not Started", "Submitted"):
@@ -2207,3 +2207,12 @@ def refresh_mpp_progress(mpp_name):
     })
     
     return {"planned": total_planned, "produced": total_produced}
+
+@frappe.whitelist()
+def get_dpp_list(mpp_name):
+    """DPPs for Connections panel"""
+    return frappe.get_all("Production Plan", 
+        filters={"monthly_production_plan": mpp_name},
+        fields=["name", "posting_date", "status"],
+        order_by="posting_date desc"
+    )

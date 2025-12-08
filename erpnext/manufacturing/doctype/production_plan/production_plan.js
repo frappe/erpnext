@@ -6,11 +6,9 @@ frappe.ui.form.on("Production Plan", {
         if (frm.doc.is_monthly_production_plan) {
             frm.set_value("naming_series", "MFG-MPP-.YYYY.-");
 			frm.set_value("is_parent_plan", 1);
-			console.log(is_parent_plan);
         } else {
             frm.set_value("naming_series", "MFG-DPP-.YYYY.-");
 			frm.set_value("is_parent_plan", 0);
-			console.log(is_parent_plan);
         }
     },
 
@@ -20,12 +18,10 @@ frappe.ui.form.on("Production Plan", {
             if (frm.doc.is_monthly_production_plan) {
                 frm.set_value("naming_series", "MFG-MPP-.YYYY.-");
 				frm.set_value("is_parent_plan", 1);
-				console.log(is_parent_plan);
 
             } else {
                 frm.set_value("naming_series", "MFG-DPP-.YYYY.-");
 				frm.set_value("is_parent_plan", 0);
-				console.log(is_parent_plan);
             }
         }
     },
@@ -212,6 +208,14 @@ frappe.ui.form.on("Production Plan", {
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 		frm.trigger("material_requirement");
+
+		if (frm.doc.is_parent_plan && frm.doc.docstatus == 1) 
+		{
+			frm.add_custom_query_report("DPP", {
+				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_dpp_list",
+				args: { mpp_name: frm.doc.name }
+			});
+		}
 
 		const projected_qty_formula = ` <table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 			<tr><td style="padding-left:25px">

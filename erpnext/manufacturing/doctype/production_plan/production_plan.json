@@ -8,11 +8,11 @@
  "field_order": [
   "naming_series",
   "is_monthly_production_plan",
-  "monthly_production_plan",
   "company",
   "get_items_from",
   "column_break1",
   "posting_date",
+  "monthly_production_plan",
   "is_parent_plan",
   "filters",
   "item_code",
@@ -549,7 +549,6 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.is_parent_plan == 0",
    "description": "This will define the production plan as the monthly production plan",
    "fieldname": "is_monthly_production_plan",
    "fieldtype": "Check",
@@ -572,9 +571,9 @@
    "label": "Select Items to Manufacture in Mono Line"
   },
   {
+   "depends_on": "eval:doc.is_parent_plan == 0",
    "fieldname": "monthly_production_plan",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Monthly Production Plan",
    "options": "Production Plan",
    "read_only": 1
@@ -584,7 +583,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-05 15:35:57.198640",
+ "modified": "2025-12-08 15:27:03.209270",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
