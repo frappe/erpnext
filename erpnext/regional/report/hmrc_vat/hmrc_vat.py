@@ -150,9 +150,9 @@ class UKVatReport:
 		last_period = self.periods[-1][2]
 		last_period_box_amount = self.get_box_amount(5, last_period)
 		if last_period_box_amount > 0:
-			return _("You owe £{0} to HMRC.").format(fmt_money(last_period_box_amount, currency="GBP"))
+			return _("You owe {0} to HMRC.").format(fmt_money(last_period_box_amount, currency="GBP"))
 		elif last_period_box_amount < 0:
-			return _("HMRC owes you £{0}.").format(fmt_money(-last_period_box_amount, currency="GBP"))
+			return _("HMRC owes you {0}.").format(fmt_money(-last_period_box_amount, currency="GBP"))
 		else:
 			return _("No VAT payment is due.")
 
