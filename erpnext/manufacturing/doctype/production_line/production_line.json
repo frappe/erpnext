@@ -1,0 +1,88 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:line_code",
+ "creation": "2025-12-08 17:25:11.779858",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_2xm0",
+  "line_name",
+  "line_code",
+  "amended_from",
+  "column_break_muqg",
+  "is_active"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_2xm0",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Production Line",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "line_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Line Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "line_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Line Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_muqg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-08 17:46:51.861542",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Production Line",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
