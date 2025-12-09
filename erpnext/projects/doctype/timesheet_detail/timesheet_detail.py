@@ -92,6 +92,11 @@ class TimesheetDetail(Document):
 		self.billing_amount = self.billing_rate * (self.billing_hours or 0)
 		self.costing_amount = self.costing_rate * (self.hours or 0)
 
+		exchange_rate = frappe.get_value("Timesheet", self.parent, "exchange_rate") or 1.0
+		fields = ["base_billing_rate", "base_costing_rate", "base_billing_amount", "base_costing_amount"]
+		for field in fields:
+			self.set(field, flt(self.get(field.replace("base_", "")) * exchange_rate, self.precision(field)))
+
 	def validate_dates(self):
 		"""Validate that to_time is not before from_time."""
 		if self.from_time and self.to_time and time_diff_in_hours(self.to_time, self.from_time) < 0:
