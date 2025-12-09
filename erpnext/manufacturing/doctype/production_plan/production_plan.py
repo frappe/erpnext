@@ -306,17 +306,17 @@ class ProductionPlan(Document):
 			self.set("po_items_multi_line", [])
 			for item in items:
 				self.append("po_items_line_1", item)
-			# self.add_items(items)
+			self.add_items(items)
 		else:
 			self.get_items()
 
 	@frappe.whitelist()
 	def get_items(self):
-		self.set("po_items_line_1", [])
-		self.set("po_items_line_2", [])
-		self.set("po_items_line_3", [])
-		self.set("po_items_mono_line", [])
-		self.set("po_items_multi_line", [])
+		# self.set("po_items_line_1", [])
+		# self.set("po_items_line_2", [])
+		# self.set("po_items_line_3", [])
+		# self.set("po_items_mono_line", [])
+		# self.set("po_items_multi_line", [])
 		if self.get_items_from == "Sales Order":
 			self.get_so_items()
 
@@ -473,8 +473,22 @@ class ProductionPlan(Document):
 		self.add_items(items)
 		self.calculate_total_planned_qty()
 
+	def get_target_childfield(self) -> str:
+		if self.combine_items_line_1:
+			return "po_items_line_1"
+		if self.combine_items_line_2:
+			return "po_items_line_2"
+		if self.combine_items_line_3:
+			return "po_items_line_3"
+		if self.combine_items_mono_line:
+			return "po_items_mono_line"
+		if self.combine_items_multi_line:
+			return "po_items_multi_line"
+		return "po_items_line_1"
+
 	def add_items(self, items):
 		refs = {}
+		target_childfield = self.get_target_childfield()
 		for data in items:
 			if not data.pending_qty:
 				continue
@@ -507,7 +521,7 @@ class ProductionPlan(Document):
 				continue
 
 			pi = self.append(
-				"po_items_line_1",
+				target_childfield,
 				{
 					"warehouse": data.warehouse,
 					"item_code": data.item_code,
@@ -2216,3 +2230,34 @@ def refresh_mpp_progress(mpp_name):
 #         fields=["name", "posting_date", "status"],
 #         order_by="posting_date desc"
 #     )
+
+# @frappe.whitelist()
+# def get_items_for_line(self, target_childfield, line_name):
+#     if self.get_items_from == "Sales Order":
+#         so_list = self.get_so_mr_list("sales_order", "sales_orders")
+#         if not so_list:
+#             frappe.throw(_("Please fill the Sales Orders table"), title=_("Sales Orders Required"))
+
+#         items = self._get_so_items_base(so_list)  # refactor of your items_query + packed_items
+
+#         # 3. Filter items by line_name (if line info exists on SO Item)
+#         # or just send all into that line for now
+
+#         # 4. Clear only that line's table
+#         self.set(target_childfield, [])
+
+#         # 5. Append into that specific child table
+#         for it in items:
+#             self.append(target_childfield, {
+#                 "sales_order": it.parent,
+#                 "item_code": it.item_code,
+#                 "warehouse": it.warehouse,
+#                 "pending_qty": it.pending_qty,
+#                 "planned_qty": it.pending_qty,
+#                 "description": it.description,
+#                 "bom_no": it.bom_no,
+#             })
+
+#         self.calculate_total_planned_qty()
+#         self.save()
+#         return self.name
