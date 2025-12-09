@@ -14,6 +14,7 @@
   "column_break_6",
   "warehouse",
   "qty",
+  "stock_uom",
   "valuation_rate",
   "amount",
   "allow_zero_valuation_rate",
@@ -85,6 +86,16 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Quantity"
+  },
+  {
+   "columns": 2,
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
   },
   {
    "columns": 2,

@@ -138,15 +138,15 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 			frappe.run_serially([
 				() => this.set_selector_trigger_flag(data),
-				() =>
-					this.set_item(row, item_code, barcode, batch_no, serial_no).then((qty) => {
-						this.show_scan_message(row.idx, !is_new_row, qty);
-					}),
 				() => this.set_barcode_uom(row, uom),
 				() => this.set_serial_no(row, serial_no),
 				() => this.set_batch_no(row, batch_no),
 				() => this.set_barcode(row, barcode),
 				() => this.set_warehouse(row),
+				() =>
+					this.set_item(row, item_code, barcode, batch_no, serial_no).then((qty) => {
+						this.show_scan_message(row.idx, !is_new_row, qty);
+					}),
 				() => this.clean_up(),
 				() => this.revert_selector_flag(),
 				() => resolve(row),

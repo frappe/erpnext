@@ -6,6 +6,9 @@ from frappe import _
 from frappe.utils import add_months, cint, flt, get_link_to_form, getdate, time_diff_in_hours
 
 import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.assets.doctype.asset.asset import get_asset_account
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
@@ -246,6 +249,12 @@ class AssetRepair(AccountsController):
 		)
 		stock_entry.asset_repair = self.name
 
+		accounting_dimensions = {
+			"cost_center": self.cost_center,
+			"project": self.project,
+			**{dimension: self.get(dimension) for dimension in get_accounting_dimensions()},
+		}
+
 		for stock_item in self.get("stock_items"):
 			self.validate_serial_no(stock_item)
 
@@ -257,8 +266,7 @@ class AssetRepair(AccountsController):
 					"qty": stock_item.consumed_quantity,
 					"basic_rate": stock_item.valuation_rate,
 					"serial_and_batch_bundle": stock_item.serial_and_batch_bundle,
-					"cost_center": self.cost_center,
-					"project": self.project,
+					**accounting_dimensions,
 				},
 			)
 
@@ -315,8 +323,8 @@ class AssetRepair(AccountsController):
 					"voucher_no": self.name,
 					"cost_center": self.cost_center,
 					"posting_date": self.completion_date,
-					"against_voucher_type": "Purchase Invoice",
-					"against_voucher": self.purchase_invoice,
+					"against_voucher_type": "Asset",
+					"against_voucher": self.asset,
 					"company": self.company,
 				},
 				item=self,
