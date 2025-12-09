@@ -1809,11 +1809,7 @@ def get_exchange_rate(
 
 		# The date used to retreive the exchange rate here is the date passed
 		# in as an argument to this function.
-<<<<<<< HEAD
-		elif (not exchange_rate or flt(exchange_rate) == 1) and account_currency and posting_date:
-=======
 		elif (not flt(exchange_rate) or flt(exchange_rate) == 1) and account_currency and posting_date:
->>>>>>> 40b787827a (fix: use alias for get_exchange_rate function in JournalEntry)
 			exchange_rate = _get_exchange_rate(account_currency, company_currency, posting_date)
 	else:
 		exchange_rate = 1
