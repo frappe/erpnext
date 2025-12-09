@@ -1544,7 +1544,6 @@ class RowFormatterBase(ABC):
 		pass
 
 	def _get_values(self, row_data: RowData) -> dict[str, Any]:
-		# TODO: can be commonify COA? @abdeali
 		child_accounts = []
 
 		if row_data.account_details:
