@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-07 09:36+0000\n"
-"PO-Revision-Date: 2025-12-08 01:10\n"
+"PO-Revision-Date: 2025-12-09 01:08\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -44168,7 +44168,7 @@ msgstr "ابتدا شرکت را انتخاب کنید"
 #. Person'
 #: erpnext/setup/doctype/sales_person/sales_person.json
 msgid "Select company name first."
-msgstr "ابتدا نام شرکت را انتخاب کنید"
+msgstr "ابتدا نام شرکت را انتخاب کنید."
 
 #: erpnext/controllers/accounts_controller.py:2950
 msgid "Select finance book for the item {0} at row {1}"
