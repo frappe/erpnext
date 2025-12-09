@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-07 09:36+0000\n"
-"PO-Revision-Date: 2025-12-08 01:11\n"
+"PO-Revision-Date: 2025-12-09 01:09\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Russian\n"
 "MIME-Version: 1.0\n"
@@ -592,7 +592,7 @@ msgstr "Больше 90"
 
 #: erpnext/assets/doctype/asset/asset.py:474
 msgid "<b>Cannot create asset.</b><br><br>You're trying to create <b>{0} asset(s)</b> from {2} {3}.<br>However, only <b>{1} item(s)</b> were purchased and <b>{4} asset(s)</b> already exist against {5}."
-msgstr ""
+msgstr "<b>Невозможно создать актив.</b><br><br>Вы пытаетесь создать <b>{0} актив(ы)</b> из {2} {3}.<br>Однако были куплены только <b>{1} товар(ов)</b> и <b>{4} актив(ы)</b> уже существуют против {5}."
 
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.py:61
 msgid "<b>From Time</b> cannot be later than <b>To Time</b> for {0}"
@@ -600,7 +600,7 @@ msgstr "<b>Начальное время</b> не может быть позже
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:432
 msgid "<b>Row #{0}:</b> Bundle {1} in warehouse {2} has insufficient packed items:<br><div style='margin-top: 15px;'><ul style='line-height: 0.8;'>{3}</ul></div>"
-msgstr ""
+msgstr "<b>Строка #{0}:</b> В упаковке {1} на складе {2} недостаточно упакованных товаров:<br><div style='margin-top: 15px;'><ul style='line-height: 0.8;'>{3}</ul></div>"
 
 #. Content of the 'Help Text' (HTML) field in DocType 'Process Statement Of
 #. Accounts'
@@ -777,7 +777,7 @@ msgstr "<li>Товар {0} в строке(ах) {1} выставлен счет
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:423
 msgid "<li>Packed Item {0}: Required {1}, Available {2}</li>"
-msgstr ""
+msgstr "<li>Упакованный предмет {0}: Требуется {1}, Доступно {2}</li>"
 
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:118
 msgid "<li>Payment document required for row(s): {0}</li>"
@@ -1971,7 +1971,7 @@ msgstr "Отчетный период перекрывается с {0}"
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Accounting entries are frozen up to this date. Only users with the specified role can create or modify entries before this date."
-msgstr ""
+msgstr "Бухгалтерские записи заморожены до этой даты. Создавать или изменять записи до этой даты могут только пользователи с указанной ролью."
 
 #. Label of the applicable_on_account (Link) field in DocType 'Applicable On
 #. Account'
@@ -6079,7 +6079,7 @@ msgstr "Автоматически создано"
 #. Request'
 #: erpnext/stock/doctype/material_request/material_request.json
 msgid "Auto Created (Reorder)"
-msgstr ""
+msgstr "Автоматически создано (переупорядочено)"
 
 #. Label of the auto_created_serial_and_batch_bundle (Check) field in DocType
 #. 'Stock Ledger Entry'
@@ -9612,7 +9612,7 @@ msgstr "Номер шасси"
 #. Label of the warehouse_group (Link) field in DocType 'Item Reorder'
 #: erpnext/stock/doctype/item_reorder/item_reorder.json
 msgid "Check Availability in Warehouse"
-msgstr ""
+msgstr "Проверить наличие на складе"
 
 #. Label of the check_supplier_invoice_uniqueness (Check) field in DocType
 #. 'Accounts Settings'
@@ -11209,7 +11209,7 @@ msgstr "Общая стоимость потребленных запасов"
 
 #: erpnext/stock/doctype/stock_entry_type/stock_entry_type.py:118
 msgid "Consumed quantity of item {0} exceeds transferred quantity."
-msgstr ""
+msgstr "Потребленное количество товара {0} превышает переданное количество."
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:15
 msgid "Consumer Products"
@@ -17292,7 +17292,7 @@ msgstr "Введите ключ API в настройках Google."
 
 #: erpnext/public/js/print.js:51
 msgid "Enter Company Details"
-msgstr ""
+msgstr "Введите данные компании"
 
 #: erpnext/setup/doctype/employee/employee.js:102
 msgid "Enter First and Last name of Employee, based on Which Full Name will be updated. IN transactions, it will be Full Name which will be fetched."
@@ -21404,7 +21404,7 @@ msgstr "Если в этой записи предмет используетс�
 #. Request Item'
 #: erpnext/stock/doctype/material_request_item/material_request_item.json
 msgid "If the reorder check is set at the Group warehouse level, the available quantity becomes the sum of the projected quantities of all its child warehouses."
-msgstr ""
+msgstr "Если проверка повторного заказа установлена на уровне склада группы, доступное количество становится суммой прогнозируемых количеств всех его дочерних складов."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1181
 msgid "If the selected BOM has Operations mentioned in it, the system will fetch all Operations from BOM, these values can be changed."
@@ -22510,7 +22510,7 @@ msgstr "Недостаточно запасов для партии"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:440
 msgid "Insufficient Stock for Product Bundle Items"
-msgstr ""
+msgstr "Недостаточный запас для комплектов товаров"
 
 #. Label of the insurance_details_tab (Tab Break) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -24744,7 +24744,7 @@ msgstr "Наименование товара по"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:451
 msgid "Item Out of Stock"
-msgstr ""
+msgstr "Товар отсутствует на складе"
 
 #. Label of a Link in the Buying Workspace
 #. Label of the item_price_tab (Tab Break) field in DocType 'Selling Settings'
@@ -34802,7 +34802,7 @@ msgstr "Выберите несколько типов программ для �
 
 #: erpnext/stock/doctype/item/item.js:316
 msgid "Please select the Warehouse first"
-msgstr ""
+msgstr "Пожалуйста, сначала выберите склад"
 
 #: erpnext/accounts/doctype/coupon_code/coupon_code.py:48
 msgid "Please select the customer."
@@ -36767,7 +36767,7 @@ msgstr "Данные проекта не доступны для предлож�
 #. Item'
 #: erpnext/stock/doctype/material_request_item/material_request_item.json
 msgid "Projected On Hand"
-msgstr ""
+msgstr "Прогнозируемое на руки"
 
 #. Label of the projected_qty (Float) field in DocType 'Material Request Plan
 #. Item'
@@ -37774,7 +37774,7 @@ msgstr "Количество для производства ({0}) не може
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:224
 msgid "Qty To Manufacture in the job card cannot be greater than Qty To Manufacture in the work order for the operation {0}. <br><br><b>Solution: </b> Either you can reduce the Qty To Manufacture in the job card or set the 'Overproduction Percentage For Work Order' in the {1}."
-msgstr ""
+msgstr "Количество к производству в карточке задания не может быть больше, чем Количество к производству в заказе на работу для операции {0}. <br><br><b>Решение: </b> Вы можете либо уменьшить Количество к производству в карточке задания, либо установить «Процент перепроизводства для заказа на работу» в {1}."
 
 #. Label of the qty_to_produce (Float) field in DocType 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
@@ -41360,13 +41360,13 @@ msgstr "Роль, разрешающая обойти кредитный лим�
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Role to Notify on Depreciation Failure"
-msgstr ""
+msgstr "Роль уведомления о сбое амортизации"
 
 #. Label of the role_allowed_for_frozen_entries (Link) field in DocType
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Roles Allowed to Set and Edit Frozen Account Entries"
-msgstr ""
+msgstr "Роли, которым разрешено устанавливать и редактировать замороженные записи учетных записей"
 
 #. Label of the root (Link) field in DocType 'Bisect Nodes'
 #: erpnext/accounts/doctype/bisect_nodes/bisect_nodes.json
@@ -41883,7 +41883,7 @@ msgstr "Строка #{0}: выбран товар {1}, пожалуйста, з
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:448
 msgid "Row #{0}: Item {1} has no stock in warehouse {2}."
-msgstr ""
+msgstr "Строка #{0}: Товар {1} отсутствует на складе {2}."
 
 #: erpnext/controllers/stock_controller.py:109
 msgid "Row #{0}: Item {1} has zero rate but 'Allow Zero Valuation Rate' is not enabled."
@@ -41891,7 +41891,7 @@ msgstr "Строка #{0}: У товара {1} нулевая ставка, но
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:455
 msgid "Row #{0}: Item {1} in warehouse {2}: Available {3}, Needed {4}."
-msgstr ""
+msgstr "Строка #{0}: Товар {1} на складе {2}: Доступно {3}, Требуется {4}."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:63
 msgid "Row #{0}: Item {1} is not a Customer Provided Item."
@@ -44059,7 +44059,7 @@ msgstr "Выберите компанию"
 
 #: erpnext/public/js/print.js:102
 msgid "Select Company Address"
-msgstr ""
+msgstr "Выберите адрес компании"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:532
 msgid "Select Corrective Operation"
@@ -46754,7 +46754,7 @@ msgstr "Время начала"
 
 #: erpnext/utilities/bulk_transaction.py:44
 msgid "Started a background job to create {1} {0}. {2}"
-msgstr ""
+msgstr "Запущено фоновое задание по созданию {1} {0}. {2}"
 
 #. Label of the date_dist_from_left_edge (Float) field in DocType 'Cheque Print
 #. Template'
@@ -50151,7 +50151,7 @@ msgstr "Пакет {0} уже зарезервирован в {1} {2}, поэт�
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1199
 msgid "The completed quantity {0} of an operation {1} cannot be greater than the completed quantity {2} of a previous operation {3}."
-msgstr ""
+msgstr "Выполненное количество {0} операции {1} не может быть больше, чем выполненное количество {2} предыдущей операции {3}."
 
 #: erpnext/accounts/doctype/dunning/dunning.py:87
 msgid "The currency of invoice {} ({}) is different from the currency of this dunning ({})."
@@ -50212,7 +50212,7 @@ msgstr "Срок годности следующих партий истек, п
 
 #: erpnext/controllers/accounts_controller.py:405
 msgid "The following cancelled repost entries exist for <b>{0}</b>:<br><br>{1}<br><br>Kindly delete these entries before continuing."
-msgstr ""
+msgstr "Существуют следующие отмененные записи о репостах для <b>{0}</b>:<br><br>{1}<br><br>Пожалуйста, удалите эти записи перед продолжением."
 
 #: erpnext/stock/doctype/item/item.py:823
 msgid "The following deleted attributes exist in Variants but not in the Template. You can either delete the Variants or keep the attribute(s) in template."
@@ -53731,7 +53731,7 @@ msgstr "Пользователи с данной ролью могут пост�
 #. DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Users with this role will be notified if the asset depreciation gets failed"
-msgstr ""
+msgstr "Пользователи с этой ролью будут уведомлены, если амортизация активов не будет выполнена"
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.js:38
 msgid "Using negative stock disables FIFO/Moving average valuation when inventory is negative."
@@ -54771,7 +54771,7 @@ msgstr "Склад {0} не принадлежит компания {1}"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:306
 msgid "Warehouse {0} does not exist"
-msgstr ""
+msgstr "Склад {0} не существует"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:234
 msgid "Warehouse {0} is not allowed for Sales Order {1}, it should be {2}"
@@ -56339,7 +56339,7 @@ msgstr "{0} создано"
 
 #: erpnext/utilities/bulk_transaction.py:31
 msgid "{0} creation for the following records will be skipped."
-msgstr ""
+msgstr "Создание {0} для следующих записей будет пропущено."
 
 #: erpnext/setup/doctype/company/company.py:283
 msgid "{0} currency must be same as company's default currency. Please select another account."
@@ -56359,7 +56359,7 @@ msgstr "{0} не принадлежит компании {1}"
 
 #: erpnext/controllers/accounts_controller.py:335
 msgid "{0} does not belong to the {1}."
-msgstr ""
+msgstr "{0} не принадлежит {1}."
 
 #: erpnext/accounts/doctype/item_tax_template/item_tax_template.py:67
 msgid "{0} entered twice in Item Tax"
@@ -56381,7 +56381,7 @@ msgstr "Для {0} включено распределение на основе
 
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:773
 msgid "{0} has been modified after you pulled it. Please pull it again."
-msgstr ""
+msgstr "{0} был изменён после того, как вы его перетащили. Пожалуйста, перетащите его ещё раз."
 
 #: erpnext/setup/default_success_action.py:15
 msgid "{0} has been submitted successfully"
@@ -56415,7 +56415,7 @@ msgstr "{0} заблокирован, поэтому эта транзакция
 
 #: erpnext/assets/doctype/asset/asset.py:438
 msgid "{0} is in Draft. Submit it before creating the Asset."
-msgstr ""
+msgstr "{0} находится в стадии черновика. Отправьте его перед созданием актива."
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1107
 msgid "{0} is mandatory for Item {1}"
@@ -56528,7 +56528,7 @@ msgstr "{0} единиц товара {1} выбрано в другом спи�
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:145
 msgid "{0} units of {1} are required in {2} with the inventory dimension: {3} on {4} {5} for {6} to complete the transaction."
-msgstr ""
+msgstr "{0} Единицы {1} требуются на {2} с размером запаса: {3} на {4} {5} для {6} чтобы завершить операцию."
 
 #: erpnext/stock/stock_ledger.py:1678 erpnext/stock/stock_ledger.py:2182
 #: erpnext/stock/stock_ledger.py:2196
