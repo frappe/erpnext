@@ -23,6 +23,7 @@
   "disassembled_qty",
   "process_loss_qty",
   "project",
+  "production_line",
   "section_break_ndpq",
   "required_items",
   "work_order_configuration",
@@ -44,7 +45,6 @@
   "has_batch_no",
   "column_break_18",
   "batch_size",
-  "required_items_section",
   "materials_and_operations_tab",
   "operations_section",
   "transfer_material_against",
@@ -270,11 +270,6 @@
    "fieldtype": "Link",
    "label": "Scrap Warehouse",
    "options": "Warehouse"
-  },
-  {
-   "fieldname": "required_items_section",
-   "fieldtype": "Section Break",
-   "label": "Required Items"
   },
   {
    "fieldname": "required_items",
@@ -595,6 +590,13 @@
    "label": "Disassembled Qty",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.production_item",
+   "fieldname": "production_line",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Production Line"
   }
  ],
  "icon": "fa fa-cogs",
@@ -602,7 +604,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-21 00:55:45.916224",
+ "modified": "2025-12-09 15:51:23.106029",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
@@ -632,6 +634,7 @@
    "role": "Stock User"
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "ASC",
  "states": [],

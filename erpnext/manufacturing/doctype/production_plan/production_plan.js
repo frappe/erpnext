@@ -374,23 +374,91 @@ frappe.ui.form.on("Production Plan", {
 		});
 	},
 
-	get_items(frm) {
-		frm.clear_table("prod_plan_references");
+	get_items_line_1(frm) {
+        frm.set_value("combine_items_line_1", 1);
+        frm.set_value("combine_items_line_2", 0);
+        frm.set_value("combine_items_line_3", 0);
+        frm.set_value("combine_items_mono_line", 0);
+        frm.set_value("combine_items_multi_line", 0);
 
-		frappe.call({
+		frm.call({
 			method: "get_items",
 			freeze: true,
 			doc: frm.doc,
 			callback: function () {
-				// refresh_field("po_items");
 				frm.refresh_field("po_items_line_1");
+			},
+		});
+    },
+
+	get_items_line_2(frm) {
+        frm.set_value("combine_items_line_1", 0);
+        frm.set_value("combine_items_line_2", 1);
+        frm.set_value("combine_items_line_3", 0);
+        frm.set_value("combine_items_mono_line", 0);
+        frm.set_value("combine_items_multi_line", 0);
+
+		frm.call({
+			method: "get_items",
+			freeze: true,
+			doc: frm.doc,
+			callback: function () {
 				frm.refresh_field("po_items_line_2");
+			},
+		});
+    },
+
+	get_items_line_3(frm) {
+        frm.set_value("combine_items_line_1", 0);
+        frm.set_value("combine_items_line_2", 0);
+        frm.set_value("combine_items_line_3", 1);
+        frm.set_value("combine_items_mono_line", 0);
+        frm.set_value("combine_items_multi_line", 0);
+
+		frm.call({
+			method: "get_items",
+			freeze: true,
+			doc: frm.doc,
+			callback: function () {
 				frm.refresh_field("po_items_line_3");
+			},
+		});
+    },	
+
+	get_items_mono_line(frm) {
+        frm.set_value("combine_items_line_1", 0);
+        frm.set_value("combine_items_line_2", 0);
+        frm.set_value("combine_items_line_3", 0);
+        frm.set_value("combine_items_mono_line", 1);
+        frm.set_value("combine_items_multi_line", 0);
+
+		frm.call({
+			method: "get_items",
+			freeze: true,
+			doc: frm.doc,
+			callback: function () {
 				frm.refresh_field("po_items_mono_line");
+			},
+		});
+    },
+
+	get_items_multi_line(frm) {
+        frm.set_value("combine_items_line_1", 0);
+        frm.set_value("combine_items_line_2", 0);
+        frm.set_value("combine_items_line_3", 0);
+        frm.set_value("combine_items_mono_line", 0);
+        frm.set_value("combine_items_multi_line", 1);
+
+		frm.call({
+			method: "get_items",
+			freeze: true,
+			doc: frm.doc,
+			callback: function () {
 				frm.refresh_field("po_items_multi_line");
 			},
 		});
-	},
+    },
+
 	combine_items(frm) {
 		frm.clear_table("prod_plan_references");
 
@@ -755,14 +823,41 @@ frappe.tour["Production Plan"] = [
 		description: __("Click on Get Sales Orders to fetch sales orders based on the above filters."),
 	},
 	{
-		fieldname: "get_items",
-		title: "Get Finished Goods for Manufacture",
+		fieldname: "get_items_line_1",
+		title: "Get Finished Goods for Manufacture in Line1",
 		description: __(
-			"Click on 'Get Finished Goods for Manufacture' to fetch the items from the above Sales Orders. Items only for which a BOM is present will be fetched."
+			"Click on 'Get Finished Goods for Manufacture in Line1' to fetch the items from the above Sales Orders. Items only for which a BOM is present will be fetched."
 		),
 	},
 	{
-        // UPDATED: replaced single po_items with multiple lines
+		fieldname: "get_items_line_2",
+		title: "Get Finished Goods for Manufacture in Line2",
+		description: __(
+			"Click on 'Get Finished Goods for Manufacture in Line2' to fetch the items from the above Sales Orders. Items only for which a BOM is present will be fetched."
+		),
+	},
+	{
+		fieldname: "get_items_line_3",
+		title: "Get Finished Goods for Manufacture in Line3",
+		description: __(
+			"Click on 'Get Finished Goods for Manufacture in Line3' to fetch the items from the above Sales Orders. Items only for which a BOM is present will be fetched."
+		),
+	},
+	{
+		fieldname: "get_items_mono_line",
+		title: "Get Finished Goods for Manufacture in Mono Line",
+		description: __(
+			"Click on 'Get Finished Goods for Manufacture in Mono Line' to fetch the items from the above Sales Orders. Items only for which a BOM is present will be fetched."
+		),
+	},
+	{
+		fieldname: "get_items_multi_line",
+		title: "Get Finished Goods for Manufacture in Multi Line",
+		description: __(
+			"Click on 'Get Finished Goods for Manufacture in Multi Line' to fetch the items from the above Sales Orders. Items only for which a BOM is present will be fetched."
+		),
+	},
+	{
         fieldname: "po_items_line_1",
         title: "Finished Goods Line 1",
         description: __(
