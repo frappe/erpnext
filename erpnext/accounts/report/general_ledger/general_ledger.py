@@ -419,6 +419,8 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 	# Opening for filtered account
 	add_total_to_data(totals, "opening")
 
+	show_total_row = filters.get("show_total_row")
+
 	if filters.get("categorize_by") != "Categorize by Voucher (Consolidated)":
 		set_opening_closing = (not filters.get("categorize_by") and not filters.get("voucher_no")) or (
 			filters.get("categorize_by") and filters.get("categorize_by") != "Categorize by Voucher"
@@ -437,7 +439,7 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 			data += acc_dict.entries
 
 			# totals
-			if set_total:
+			if set_total and show_total_row:
 				add_total_to_data(acc_dict.totals, "total")
 
 			# closing
@@ -448,8 +450,9 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 	else:
 		data += entries
 
-	# totals
-	add_total_to_data(totals, "total")
+	if show_total_row:
+		# totals
+		add_total_to_data(totals, "total")
 
 	# closing
 	add_total_to_data(totals, "closing")

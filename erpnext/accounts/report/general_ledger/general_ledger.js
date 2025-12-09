@@ -222,6 +222,12 @@ frappe.query_reports["General Ledger"] = {
 			label: __("Ignore System Generated Credit / Debit Notes"),
 			fieldtype: "Check",
 		},
+		{
+			fieldname: "show_total_row",
+			label: __("Show Total Row"),
+			fieldtype: "Check",
+			default: 1,
+		},
 	],
 	collapsible_filters: true,
 	seperate_check_filters: true,
