@@ -3704,7 +3704,7 @@ def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child
 	return child_item
 
 
-def validate_child_on_delete(row, parent):
+def validate_child_on_delete(row, parent, ordered_item=None):
 	"""Check if partially transacted item (row) is being deleted."""
 	if parent.doctype == "Sales Order":
 		if flt(row.delivered_qty):
@@ -3732,13 +3732,17 @@ def validate_child_on_delete(row, parent):
 				row.idx, row.item_code
 			)
 		)
-
-	if flt(row.billed_amt):
-		frappe.throw(
-			_("Row #{0}: Cannot delete item {1} which has already been billed.").format(
-				row.idx, row.item_code
+	if parent.doctype in ["Purchase Order", "Sales Order"]:
+		if flt(row.billed_amt):
+			frappe.throw(
+				_("Row #{0}: Cannot delete item {1} which has already been billed.").format(
+					row.idx, row.item_code
+				)
 			)
-		)
+
+	if parent.doctype == "Quotation":
+		if ordered_item.get(row.name):
+			frappe.throw(_("Cannot delete an item which has been ordered"))
 
 
 def update_bin_on_delete(row, doctype):
@@ -3764,7 +3768,7 @@ def update_bin_on_delete(row, doctype):
 		update_bin_qty(row.item_code, row.warehouse, qty_dict)
 
 
-def validate_and_delete_children(parent, data) -> bool:
+def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 	deleted_children = []
 	updated_item_names = [d.get("docname") for d in data]
 	for item in parent.items:
@@ -3772,7 +3776,7 @@ def validate_and_delete_children(parent, data) -> bool:
 			deleted_children.append(item)
 
 	for d in deleted_children:
-		validate_child_on_delete(d, parent)
+		validate_child_on_delete(d, parent, ordered_item)
 		d.cancel()
 		d.delete()
 
@@ -3781,16 +3785,18 @@ def validate_and_delete_children(parent, data) -> bool:
 
 	# need to update ordered qty in Material Request first
 	# bin uses Material Request Items to recalculate & update
-	parent.update_prevdoc_status()
-
-	for d in deleted_children:
-		update_bin_on_delete(d, parent.doctype)
+	if parent.doctype != "Quotation":
+		parent.update_prevdoc_status()
+		for d in deleted_children:
+			update_bin_on_delete(d, parent.doctype)
 
 	return bool(deleted_children)
 
 
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
+	from erpnext.selling.doctype.quotation.quotation import get_ordered_items
+
 	def check_doc_permissions(doc, perm_type="create"):
 		try:
 			doc.check_permission(perm_type)
@@ -3829,7 +3835,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			)
 
 	def get_new_child_item(item_row):
-		child_doctype = "Sales Order Item" if parent_doctype == "Sales Order" else "Purchase Order Item"
+		child_doctype = parent_doctype + " Item"
 		return set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child_docname, item_row)
 
 	def is_allowed_zero_qty():
@@ -3853,6 +3859,15 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 		if parent_doctype == "Purchase Order" and flt(new_data.get("qty")) < flt(child_item.received_qty):
 			frappe.throw(_("Cannot set quantity less than received quantity"))
+
+		if parent_doctype == "Quotation":
+			if not ordered_items:
+				return
+
+			qty_to_check = ordered_items.get(child_item.name)
+			if qty_to_check:
+				if flt(new_data.get("qty")) < qty_to_check:
+					frappe.throw(_("Cannot reduce quantity than ordered quantity"))
 
 	def should_update_supplied_items(doc) -> bool:
 		"""Subcontracted PO can allow following changes *after submit*:
@@ -3896,7 +3911,6 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			frappe.throw(_("Finished Good Item {0} Qty can not be zero").format(new_data["fg_item"]))
 
 	data = json.loads(trans_items)
-
 	any_qty_changed = False  # updated to true if any item's qty changes
 	items_added_or_removed = False  # updated to true if any new item is added or removed
 	any_conversion_factor_changed = False
@@ -3904,7 +3918,13 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 
 	check_doc_permissions(parent, "write")
-	_removed_items = validate_and_delete_children(parent, data)
+
+	if parent_doctype in ["Quotation", "Supplier Quotation"]:
+		ordered_items = get_ordered_items(parent.name)
+		_removed_items = validate_and_delete_children(parent, data, ordered_items)
+	else:
+		_removed_items = validate_and_delete_children(parent, data)
+
 	items_added_or_removed |= _removed_items
 
 	for d in data:
@@ -3944,7 +3964,9 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			conversion_factor_unchanged = prev_con_fac == new_con_fac
 			any_conversion_factor_changed |= not conversion_factor_unchanged
 			date_unchanged = (
-				prev_date == getdate(new_date) if prev_date and new_date else False
+				(prev_date == getdate(new_date) if prev_date and new_date else False)
+				if parent_doctype != "Quotation"
+				else None
 			)  # in case of delivery note etc
 			if (
 				rate_unchanged
@@ -3957,6 +3979,10 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 				continue
 
 		validate_quantity(child_item, d)
+		if parent_doctype == "Quotation":
+			if not rate_unchanged:
+				frappe.throw(_("Rates cannot be modified for quoted items"))
+
 		if flt(child_item.get("qty")) != flt(d.get("qty")):
 			any_qty_changed = True
 
@@ -3980,18 +4006,21 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		rate_unchanged = prev_rate == new_rate
 		if not rate_unchanged and not child_item.get("qty") and is_allowed_zero_qty():
 			frappe.throw(_("Rate of '{}' items cannot be changed").format(frappe.bold(_("Unit Price"))))
-
 		# Amount cannot be lesser than billed amount, except for negative amounts
 		row_rate = flt(d.get("rate"), rate_precision)
-		amount_below_billed_amt = flt(child_item.billed_amt, rate_precision) > flt(
-			row_rate * flt(d.get("qty"), qty_precision), rate_precision
-		)
-		if amount_below_billed_amt and row_rate > 0.0:
-			frappe.throw(
-				_(
-					"Row #{0}: Cannot set Rate if the billed amount is greater than the amount for Item {1}."
-				).format(child_item.idx, child_item.item_code)
+
+		if parent_doctype in ["Purchase Order", "Sales Order"]:
+			amount_below_billed_amt = flt(child_item.billed_amt, rate_precision) > flt(
+				row_rate * flt(d.get("qty"), qty_precision), rate_precision
 			)
+			if amount_below_billed_amt and row_rate > 0.0:
+				frappe.throw(
+					_(
+						"Row #{0}: Cannot set Rate if the billed amount is greater than the amount for Item {1}."
+					).format(child_item.idx, child_item.item_code)
+				)
+			else:
+				child_item.rate = row_rate
 		else:
 			child_item.rate = row_rate
 
@@ -4019,26 +4048,27 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		if d.get("bom_no") and parent_doctype == "Sales Order":
 			child_item.bom_no = d.get("bom_no")
 
-		if flt(child_item.price_list_rate):
-			if flt(child_item.rate) > flt(child_item.price_list_rate):
-				#  if rate is greater than price_list_rate, set margin
-				#  or set discount
-				child_item.discount_percentage = 0
-				child_item.margin_type = "Amount"
-				child_item.margin_rate_or_amount = flt(
-					child_item.rate - child_item.price_list_rate,
-					child_item.precision("margin_rate_or_amount"),
-				)
-				child_item.rate_with_margin = child_item.rate
-			else:
-				child_item.discount_percentage = flt(
-					(1 - flt(child_item.rate) / flt(child_item.price_list_rate)) * 100.0,
-					child_item.precision("discount_percentage"),
-				)
-				child_item.discount_amount = flt(child_item.price_list_rate) - flt(child_item.rate)
-				child_item.margin_type = ""
-				child_item.margin_rate_or_amount = 0
-				child_item.rate_with_margin = 0
+		if parent_doctype in ["Sales Order", "Purchase Order"]:
+			if flt(child_item.price_list_rate):
+				if flt(child_item.rate) > flt(child_item.price_list_rate):
+					#  if rate is greater than price_list_rate, set margin
+					#  or set discount
+					child_item.discount_percentage = 0
+					child_item.margin_type = "Amount"
+					child_item.margin_rate_or_amount = flt(
+						child_item.rate - child_item.price_list_rate,
+						child_item.precision("margin_rate_or_amount"),
+					)
+					child_item.rate_with_margin = child_item.rate
+				else:
+					child_item.discount_percentage = flt(
+						(1 - flt(child_item.rate) / flt(child_item.price_list_rate)) * 100.0,
+						child_item.precision("discount_percentage"),
+					)
+					child_item.discount_amount = flt(child_item.price_list_rate) - flt(child_item.rate)
+					child_item.margin_type = ""
+					child_item.margin_rate_or_amount = 0
+					child_item.rate_with_margin = 0
 
 		child_item.flags.ignore_validate_update_after_submit = True
 		if new_child_flag:
@@ -4066,7 +4096,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		parent.validate_budget()
 		if parent.is_against_so():
 			parent.update_status_updater()
-	else:
+	elif parent_doctype == "Sales Order":
 		parent.check_credit_limit()
 
 	# reset index of child table
@@ -4099,7 +4129,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 							"Items cannot be updated as Subcontracting Order is created against the Purchase Order {0}."
 						).format(frappe.bold(parent.name))
 					)
-	else:  # Sales Order
+	elif parent_doctype == "Sales Order":  # Sales Order
 		if parent.is_subcontracted and not parent.can_update_items():
 			frappe.throw(
 				_(
@@ -4117,9 +4147,10 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	parent.reload()
 	validate_workflow_conditions(parent)
 
-	parent.update_blanket_order()
-	parent.update_billing_percentage()
-	parent.set_status()
+	if parent_doctype in ["Purchase Order", "Sales Order"]:
+		parent.update_blanket_order()
+		parent.update_billing_percentage()
+		parent.set_status()
 
 	parent.validate_uom_is_integer("uom", "qty")
 	parent.validate_uom_is_integer("stock_uom", "stock_qty")
