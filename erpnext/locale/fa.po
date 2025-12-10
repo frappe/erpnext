@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-07 09:36+0000\n"
-"PO-Revision-Date: 2025-12-09 01:08\n"
+"PO-Revision-Date: 2025-12-10 01:04\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -17201,7 +17201,7 @@ msgstr "کلید API را در تنظیمات Google وارد کنید."
 
 #: erpnext/public/js/print.js:51
 msgid "Enter Company Details"
-msgstr ""
+msgstr "جزئیات شرکت را وارد کنید"
 
 #: erpnext/setup/doctype/employee/employee.js:102
 msgid "Enter First and Last name of Employee, based on Which Full Name will be updated. IN transactions, it will be Full Name which will be fetched."
