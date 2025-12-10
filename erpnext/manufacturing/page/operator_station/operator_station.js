@@ -15,6 +15,7 @@ erpnext.mfg.OperatorStation = class OperatorStation {
 		this.$wrapper = $(page.body);
 		this.timer = null;
 		this.elapsed_seconds = 0;
+		this.alarms = [];
 		this.make_layout();
 	}
 
@@ -164,6 +165,16 @@ erpnext.mfg.OperatorStation = class OperatorStation {
 			],
 			primary_action_label: __('Submit'),
 			primary_action: (values) => {
+				const now = frappe.datetime.now_time(); 	
+				this.alarms.unshift({
+					station: __('Mixer'),
+					type: values.issue_type.toUpperCase(),
+					description: values.description,
+					time: now,
+					tone: 'warning'
+				});
+
+				this.render_alarms();  
 				frappe.msgprint(__('Alarm submitted'));
 				d.hide();
 			}
@@ -234,11 +245,10 @@ erpnext.mfg.OperatorStation = class OperatorStation {
 	}
 
 
-	render_dummy_alarms() 
-	{
-		const alarms = [
+	render_dummy_alarms() {
+		this.alarms = [
 			{
-				station: __('Polishing 1'),
+				station: 'Polishing 1',
 				type: __('QUALITY ISSUE'),
 				description: __('Surface defect detected on SLB-2025-00425'),
 				time: '14:23:15',
@@ -252,10 +262,12 @@ erpnext.mfg.OperatorStation = class OperatorStation {
 				tone: 'warning'
 			}
 		];
+		this.render_alarms();
+	}
 
+	render_alarms() {
 		const $list = this.$wrapper.find('.alarms-list').empty();
-
-		alarms.forEach(a => {
+		this.alarms.forEach(a => {
 			const bg = a.tone === 'danger' ? '#ffecec' : '#fff9e6';
 			$list.append(`
 				<div class="alarm-card mb-2" style="background:${bg};border-radius:8px;padding:12px 16px;">
@@ -268,8 +280,7 @@ erpnext.mfg.OperatorStation = class OperatorStation {
 				</div>
 			`);
 		});
-
-		this.$wrapper.find('.alarms-count').text(alarms.length);
+		this.$wrapper.find('.alarms-count').text(this.alarms.length);
 	}
 };
 
