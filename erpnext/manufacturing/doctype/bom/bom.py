@@ -382,9 +382,6 @@ class BOM(WebsiteGenerator):
 		for item in self.get("items"):
 			self.validate_bom_currency(item)
 
-			if item.do_not_explode:
-				item.bom_no = ""
-
 			ret = self.get_bom_material_detail(
 				{
 					"company": self.company,
@@ -463,9 +460,6 @@ class BOM(WebsiteGenerator):
 
 		if ret_item["is_phantom_item"]:
 			ret_item["do_not_explode"] = 0
-
-		if args.get("do_not_explode"):
-			ret_item["bom_no"] = ""
 
 		return ret_item
 
