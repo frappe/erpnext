@@ -1,6 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
@@ -21,10 +20,10 @@ class TestTask(ERPNextTestSuite):
 		from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
 		from erpnext.setup.doctype.employee.test_employee import make_employee
 
-		project_name = "Test Project costing"
-		employee = make_employee("test_employee_6@salary.com")
+		project_name = "Test Project Costing"
+		employee = make_employee("employee@frappe.io")
 		project = make_project({"project_name": project_name})
-		task = create_task("_Test task 1")
+		task = create_task("_Test Task 1")
 		task.project = project.name
 		task.save()
 		timesheet = make_timesheet(
