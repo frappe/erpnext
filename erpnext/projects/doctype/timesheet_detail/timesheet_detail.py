@@ -91,11 +91,6 @@ class TimesheetDetail(Document):
 
 		self.billing_amount = self.billing_rate * (self.billing_hours or 0)
 		self.costing_amount = self.costing_rate * (self.hours or 0)
-		exchange_rate = flt(frappe.get_value("Timesheet", self.parent, "exchange_rate")) or 1.0
-		self.base_billing_rate = flt(self.billing_rate) * exchange_rate
-		self.base_costing_rate = flt(self.costing_rate) * exchange_rate
-		self.base_billing_amount = flt(self.billing_amount) * exchange_rate
-		self.base_costing_amount = flt(self.costing_amount) * exchange_rate
 
 		exchange_rate = frappe.get_value("Timesheet", self.parent, "exchange_rate") or 1.0
 		fields = ["base_billing_rate", "base_costing_rate", "base_billing_amount", "base_costing_amount"]

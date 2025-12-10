@@ -22,6 +22,15 @@ class TestTimesheet(ERPNextTestSuite):
 	def setUp(self):
 		frappe.db.delete("Timesheet")
 
+	def test_timesheet_base_amount(self):
+		emp = make_employee("test_employee_6@salary.com")
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
+
+		self.assertEqual(timesheet.time_logs[0].base_billing_rate, 50)
+		self.assertEqual(timesheet.time_logs[0].base_costing_rate, 20)
+		self.assertEqual(timesheet.time_logs[0].base_billing_amount, 100)
+		self.assertEqual(timesheet.time_logs[0].base_costing_amount, 40)
+
 	def test_timesheet_billing_amount(self):
 		emp = make_employee("test_employee_6@salary.com")
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
@@ -241,4 +250,5 @@ def make_timesheet(
 def update_activity_type(activity_type):
 	activity_type = frappe.get_doc("Activity Type", activity_type)
 	activity_type.billing_rate = 50.0
+	activity_type.costing_rate = 20.0
 	activity_type.save(ignore_permissions=True)
