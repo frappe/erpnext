@@ -80,6 +80,7 @@ class BOMCreator(Document):
 		self.validate_items()
 
 	def validate_items(self):
+		dict_items = {}
 		for row in self.items:
 			if row.is_expandable and row.item_code == self.item_code:
 				frappe.throw(_("Item {0} cannot be added as a sub-assembly of itself").format(row.item_code))
@@ -95,6 +96,19 @@ class BOMCreator(Document):
 					_("At row {0}: Parent Row No cannot be set for item {1}").format(row.idx, row.item_code),
 					title=_("Remove Parent Row No in Items Table"),
 				)
+
+			if row.fg_item not in dict_items:
+				dict_items[row.fg_item] = []
+
+			if row.item_code in dict_items[row.fg_item]:
+				frappe.throw(
+					_("Row #{0}: Duplicate entry in Item {1} under {2}").format(
+						frappe.bold(row.idx), frappe.bold(row.item_code), frappe.bold(row.fg_item)
+					)
+				)
+
+			else:
+				dict_items[row.fg_item].append(row.item_code)
 
 	def set_status(self, save=False):
 		self.status = {

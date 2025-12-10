@@ -284,6 +284,19 @@ class BOM(WebsiteGenerator):
 		self.set_process_loss_qty()
 		self.validate_scrap_items()
 		self.set_default_uom()
+		self.validate_duplicate_item()
+
+	def validate_duplicate_item(self):
+		item_list = []
+		for row in self.items:
+			if row.item_code in item_list:
+				frappe.throw(
+					_("Row #{0}: Duplicate entry in Item {1}").format(
+						frappe.bold(row.idx), frappe.bold(row.item_code)
+					)
+				)
+			else:
+				item_list.append(row.item_code)
 
 	def set_default_uom(self):
 		if not self.get("items"):
