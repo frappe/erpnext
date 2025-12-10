@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+
 import frappe
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, getdate, nowdate
@@ -19,6 +20,26 @@ class TestProject(ERPNextTestSuite):
 	def setUpClass(cls):
 		super().setUpClass()
 		cls.make_projects()
+
+	def test_project_total_costing_and_billing_amount(self):
+		from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
+		from erpnext.setup.doctype.employee.test_employee import make_employee
+
+		project_name = "Test Project costing"
+		employee = make_employee("test_employee_6@salary.com")
+		project = make_project({"project_name": project_name})
+		timesheet = make_timesheet(
+			employee=employee,
+			is_billable=1,
+			currency="USD",
+			project=project.name,
+			simulate=True,
+			exchange_rate=80,
+		)
+		timesheet.reload()
+		project.reload()
+		self.assertEqual(project.total_costing_amount, 3200)
+		self.assertEqual(project.total_billable_amount, 8000)
 
 	def test_project_with_template_having_no_parent_and_depend_tasks(self):
 		project_name = "Test Project with Template - No Parent and Dependend Tasks"

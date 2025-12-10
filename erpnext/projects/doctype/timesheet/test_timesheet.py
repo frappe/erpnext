@@ -216,11 +216,14 @@ def make_timesheet(
 	project=None,
 	task=None,
 	company=None,
+	currency=None,
+	exchange_rate=None,
 ):
 	update_activity_type(activity_type)
 	timesheet = frappe.new_doc("Timesheet")
 	timesheet.employee = employee
 	timesheet.company = company or "_Test Company"
+	timesheet.exchange_rate = exchange_rate
 	timesheet_detail = timesheet.append("time_logs", {})
 	timesheet_detail.is_billable = is_billable
 	timesheet_detail.activity_type = activity_type
@@ -229,6 +232,7 @@ def make_timesheet(
 	timesheet_detail.to_time = timesheet_detail.from_time + datetime.timedelta(hours=timesheet_detail.hours)
 	timesheet_detail.project = project
 	timesheet_detail.task = task
+	timesheet_detail.currency = currency
 
 	for data in timesheet.get("time_logs"):
 		if simulate:
