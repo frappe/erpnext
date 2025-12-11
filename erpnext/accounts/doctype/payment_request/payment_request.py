@@ -427,6 +427,7 @@ class PaymentRequest(Document):
 		context = {
 			"doc": frappe.get_doc(self.reference_doctype, self.reference_name),
 			"payment_url": self.payment_url,
+			"payment_request": self,
 		}
 
 		if self.message:
@@ -889,22 +890,22 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 
 
 def get_dummy_message(doc):
-	return frappe.render_template(
-		"""{% if doc.contact_person -%}
-<p>Dear {{ doc.contact_person }},</p>
-{%- else %}<p>Hello,</p>{% endif %}
+	return """
+		{% if doc.contact_person -%}
+		<p>Dear {{ doc.contact_person }},</p>
+		{%- else %}<p>Hello,</p>{% endif %}
 
-<p>{{ _("Requesting payment against {0} {1} for amount {2}").format(doc.doctype,
-	doc.name, doc.get_formatted("grand_total")) }}</p>
+		<p>
+			Requesting payment against {{ doc.doctype }} {{ doc.name }} for amount
+			<strong>{{ payment_request.get_formatted("grand_total") }}</strong>
+		</p>
 
-<a href="{{ payment_url }}">{{ _("Make Payment") }}</a>
+		<a href="{{ payment_url }}">Make Payment</a>
 
-<p>{{ _("If you have any questions, please get back to us.") }}</p>
+		<p>If you have any questions, please get back to us.</p>
 
-<p>{{ _("Thank you for your business!") }}</p>
-""",
-		dict(doc=doc, payment_url="{{ payment_url }}"),
-	)
+		<p>Thank you for your business!</p>
+	"""
 
 
 @frappe.whitelist()
