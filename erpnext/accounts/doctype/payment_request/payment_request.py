@@ -896,15 +896,18 @@ def get_dummy_message(doc):
 		{%- else %}<p>Hello,</p>{% endif %}
 
 		<p>
-			Requesting payment against {{ doc.doctype }} {{ doc.name }} for amount
-			<strong>{{ payment_request.get_formatted("grand_total") }}</strong>
+			{{ _("Requesting payment against {0} {1} for amount {2}").format(
+				doc.doctype,
+				doc.name,
+				payment_request.get_formatted("grand_total")
+			) }}
 		</p>
 
-		<a href="{{ payment_url }}">Make Payment</a>
+		<a href="{{ payment_url }}">{{ _("Make Payment") }}</a>
 
-		<p>If you have any questions, please get back to us.</p>
+		<p>{{ _("If you have any questions, please get back to us.") }}</p>
 
-		<p>Thank you for your business!</p>
+		<p>{{ _("Thank you for your business!") }}</p>
 	"""
 
 
