@@ -15,7 +15,7 @@ EXTRA_TEST_RECORD_DEPENDENCIES = ["Product Bundle"]
 
 
 class TestQuotation(IntegrationTestCase):
-	def test_update_child_add_new_item(self):
+	def test_update_child_quotation_add_item(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		item_1 = make_item("_Test Item")

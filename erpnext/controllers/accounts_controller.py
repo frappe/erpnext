@@ -3686,7 +3686,7 @@ def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child
 	conversion_factor = flt(get_conversion_factor(item.item_code, child_item.uom).get("conversion_factor"))
 	child_item.conversion_factor = flt(trans_item.get("conversion_factor")) or conversion_factor
 
-	if child_doctype == "Purchase Order Item":
+	if child_doctype in ["Purchase Order Item", "Supplier Quotation Item"]:
 		# Initialized value will update in parent validation
 		child_item.base_rate = 1
 		child_item.base_amount = 1
@@ -3785,7 +3785,7 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 
 	# need to update ordered qty in Material Request first
 	# bin uses Material Request Items to recalculate & update
-	if parent.doctype != "Quotation":
+	if parent.doctype not in ["Quotation", "Supplier Quotation"]:
 		parent.update_prevdoc_status()
 		for d in deleted_children:
 			update_bin_on_delete(d, parent.doctype)
@@ -3795,6 +3795,7 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
+	from erpnext.buying.doctype.supplier_quotation.supplier_quotation import get_purchased_items
 	from erpnext.selling.doctype.quotation.quotation import get_ordered_items
 
 	def check_doc_permissions(doc, perm_type="create"):
@@ -3860,14 +3861,20 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		if parent_doctype == "Purchase Order" and flt(new_data.get("qty")) < flt(child_item.received_qty):
 			frappe.throw(_("Cannot set quantity less than received quantity"))
 
-		if parent_doctype == "Quotation":
-			if not ordered_items:
+		if parent_doctype in ["Quotation", "Supplier Quotation"]:
+			if (parent_doctype == "Quotation" and not ordered_items) or (
+				parent_doctype == "Supplier Quotation" and not purchased_items
+			):
 				return
 
-			qty_to_check = ordered_items.get(child_item.name)
+			qty_to_check = (
+				ordered_items.get(child_item.name)
+				if parent_doctype == "Quotation"
+				else purchased_items.get(child_item.name)
+			)
 			if qty_to_check:
 				if flt(new_data.get("qty")) < qty_to_check:
-					frappe.throw(_("Cannot reduce quantity than ordered quantity"))
+					frappe.throw(_("Cannot reduce quantity than ordered or purchased quantity"))
 
 	def should_update_supplied_items(doc) -> bool:
 		"""Subcontracted PO can allow following changes *after submit*:
@@ -3919,9 +3926,12 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 	check_doc_permissions(parent, "write")
 
-	if parent_doctype in ["Quotation", "Supplier Quotation"]:
+	if parent_doctype == "Quotation":
 		ordered_items = get_ordered_items(parent.name)
 		_removed_items = validate_and_delete_children(parent, data, ordered_items)
+	elif parent_doctype == "Supplier Quotation":
+		purchased_items = get_purchased_items(parent.name)
+		_removed_items = validate_and_delete_children(parent, data, purchased_items)
 	else:
 		_removed_items = validate_and_delete_children(parent, data)
 
@@ -3965,7 +3975,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			any_conversion_factor_changed |= not conversion_factor_unchanged
 			date_unchanged = (
 				(prev_date == getdate(new_date) if prev_date and new_date else False)
-				if parent_doctype != "Quotation"
+				if parent_doctype not in ["Quotation", "Supplier Quotation"]
 				else None
 			)  # in case of delivery note etc
 			if (
@@ -3979,7 +3989,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 				continue
 
 		validate_quantity(child_item, d)
-		if parent_doctype == "Quotation":
+		if parent_doctype in ["Quotation", "Supplier Quotation"]:
 			if not rate_unchanged:
 				frappe.throw(_("Rates cannot be modified for quoted items"))
 
@@ -4090,7 +4100,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		parent.doctype, parent.company, parent.base_grand_total
 	)
 
-	parent.set_payment_schedule()
+	if parent_doctype != "Supplier Quotation":
+		parent.set_payment_schedule()
 	if parent_doctype == "Purchase Order":
 		parent.validate_minimum_order_qty()
 		parent.validate_budget()
