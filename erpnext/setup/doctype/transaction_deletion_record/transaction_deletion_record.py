@@ -348,7 +348,8 @@ class TransactionDeletionRecord(Document):
 
 	def get_doctypes_to_be_ignored_list(self):
 		singles = frappe.get_all("DocType", filters={"issingle": 1}, pluck="name")
-		doctypes_to_be_ignored_list = singles
+		virtuals = frappe.get_all("DocType", filters={"is_virtual": 1}, pluck="name")
+		doctypes_to_be_ignored_list = singles + virtuals
 		for doctype in self.doctypes_to_be_ignored:
 			doctypes_to_be_ignored_list.append(doctype.doctype_name)
 
