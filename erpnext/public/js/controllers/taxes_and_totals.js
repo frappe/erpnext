@@ -336,6 +336,15 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	calculate_taxes() {
+<<<<<<< HEAD
+=======
+		// reset value from earlier calculations
+		this.grand_total_diff = 0;
+
+		const doc = this.frm.doc;
+		if (!doc.taxes?.length) return;
+
+>>>>>>> b3fdef8d19 (fix: ensure fresh `grand_total_diff` is used for each calculation)
 		var me = this;
 		this.grand_total_diff = 0;
 		var actual_tax_dict = {};
@@ -548,6 +557,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 				if ( diff && Math.abs(diff) <= (5.0 / Math.pow(10, precision("tax_amount", last_tax))) ) {
 					me.grand_total_diff = diff;
+				} else {
+					me.grand_total_diff = 0;
 				}
 			}
 		}
@@ -555,11 +566,17 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 	calculate_totals() {
 		// Changing sequence can cause rounding_adjustmentng issue and on-screen discrepency
+<<<<<<< HEAD
 		var me = this;
 		var tax_count = this.frm.doc["taxes"] ? this.frm.doc["taxes"].length : 0;
 		this.frm.doc.grand_total = flt(tax_count
 			? this.frm.doc["taxes"][tax_count - 1].total + this.grand_total_diff
 			: this.frm.doc.net_total);
+=======
+		const me = this;
+		const tax_count = this.frm.doc.taxes?.length;
+		const grand_total_diff = this.grand_total_diff;
+>>>>>>> b3fdef8d19 (fix: ensure fresh `grand_total_diff` is used for each calculation)
 
 		if(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "POS Invoice"].includes(this.frm.doc.doctype)) {
 			this.frm.doc.base_grand_total = (this.frm.doc.total_taxes_and_charges) ?

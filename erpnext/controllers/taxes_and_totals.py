@@ -373,7 +373,16 @@ class calculate_taxes_and_totals:
 			self._calculate()
 
 	def calculate_taxes(self):
+<<<<<<< HEAD
 		self.grand_total_diff = 0
+=======
+		# reset value from earlier calculations
+		self.grand_total_diff = 0
+
+		doc = self.doc
+		if not doc.get("taxes"):
+			return
+>>>>>>> b3fdef8d19 (fix: ensure fresh `grand_total_diff` is used for each calculation)
 
 		# maintain actual tax rate based on idx
 		actual_tax_dict = dict(
@@ -549,6 +558,11 @@ class calculate_taxes_and_totals:
 				self.grand_total_diff = diff
 
 	def calculate_totals(self):
+<<<<<<< HEAD
+=======
+		grand_total_diff = self.grand_total_diff
+
+>>>>>>> b3fdef8d19 (fix: ensure fresh `grand_total_diff` is used for each calculation)
 		if self.doc.get("taxes"):
 			self.doc.grand_total = flt(self.doc.get("taxes")[-1].total) + self.grand_total_diff
 		else:
