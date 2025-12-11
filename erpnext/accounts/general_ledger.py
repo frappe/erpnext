@@ -289,7 +289,9 @@ def merge_similar_entries(gl_map, precision=None):
 	company_currency = erpnext.get_company_currency(company)
 
 	if not precision:
-		precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"), company_currency)
+		precision = get_field_precision(
+			frappe.get_meta("GL Entry").get_field("debit"), currency=company_currency
+		)
 
 	# filter zero debit and credit entries
 	merged_gl_map = filter(
@@ -648,6 +650,7 @@ def make_reverse_gl_entries(
 	adv_adj=False,
 	update_outstanding="Yes",
 	partial_cancel=False,
+	posting_date=None,
 ):
 	"""
 	Get original gl entries of the voucher
@@ -745,6 +748,8 @@ def make_reverse_gl_entries(
 			if immutable_ledger_enabled:
 				new_gle["is_cancelled"] = 0
 				new_gle["posting_date"] = frappe.form_dict.get("posting_date") or getdate()
+			elif posting_date:
+				new_gle["posting_date"] = posting_date
 
 			if new_gle["debit"] or new_gle["credit"]:
 				make_entry(new_gle, adv_adj, "Yes")

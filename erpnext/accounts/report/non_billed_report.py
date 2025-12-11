@@ -21,6 +21,7 @@ def get_ordered_to_be_billed_data(args, filters=None):
 
 	doctype = frappe.qb.DocType(doctype)
 	child_doctype = frappe.qb.DocType(child_tab)
+	item = frappe.qb.DocType("Item")
 
 	docname = filters.get(args.get("reference_field"), None)
 	project_field = get_project_field(doctype, child_doctype, party)
@@ -29,6 +30,8 @@ def get_ordered_to_be_billed_data(args, filters=None):
 		frappe.qb.from_(doctype)
 		.inner_join(child_doctype)
 		.on(doctype.name == child_doctype.parent)
+		.join(item)
+		.on(item.name == child_doctype.item_code)
 		.select(
 			doctype.name,
 			doctype[args.get("date")].as_("date"),
@@ -54,6 +57,7 @@ def get_ordered_to_be_billed_data(args, filters=None):
 			& (doctype.company == filters.get("company"))
 			& (doctype.posting_date <= filters.get("posting_date"))
 			& (child_doctype.amount > 0)
+			& (item.is_stock_item == 1)
 			& (
 				child_doctype.base_amount
 				- Round(child_doctype.billed_amt * IfNull(doctype.conversion_rate, 1), precision)

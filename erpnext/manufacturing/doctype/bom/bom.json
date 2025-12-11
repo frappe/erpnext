@@ -279,6 +279,7 @@
    "oldfieldtype": "Section Break"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
@@ -547,12 +548,14 @@
   {
    "fieldname": "process_loss_percentage",
    "fieldtype": "Percent",
-   "label": "% Process Loss"
+   "label": "% Process Loss",
+   "non_negative": 1
   },
   {
    "fieldname": "process_loss_qty",
    "fieldtype": "Float",
    "label": "Process Loss Qty",
+   "non_negative": 1,
    "read_only": 1
   },
   {
@@ -638,7 +641,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-16 16:13:22.497695",
+ "modified": "2025-11-19 16:17:15.925156",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

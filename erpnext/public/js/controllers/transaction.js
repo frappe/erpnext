@@ -558,6 +558,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		item.weight_per_unit = 0;
 		item.weight_uom = '';
+		item.uom = null // make UOM blank to update the existing UOM when item changes
 		item.conversion_factor = 0;
 
 		if(['Sales Invoice', 'Purchase Invoice'].includes(this.frm.doc.doctype)) {
@@ -1090,6 +1091,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			row[field] = "";
 		});
 		this.frm.refresh_field("payment_schedule");
+	}
+
+	cost_center(doc) {
+		this.frm.doc.items.forEach((item) => {
+			item.cost_center = doc.cost_center;
+		});
+
+		this.frm.refresh_field("items");
 	}
 
 	due_date(doc, cdt, cdn) {
@@ -2747,6 +2756,23 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				() => this.frm._last_coupon_code = this.frm.doc.coupon_code
 			]);
 		}
+	}
+
+	setup_accounting_dimension_triggers() {
+		frappe.call({
+			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
+			callback: function (r) {
+				if (r.message && r.message[0]) {
+					let dimensions = r.message[0].map((d) => d.fieldname);
+					dimensions.forEach((dim) => {
+						// nosemgrep: frappe-semgrep-rules.rules.frappe-cur-frm-usage
+						cur_frm.cscript[dim] = function (doc, cdt, cdn) {
+							erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", dim);
+						};
+					});
+				}
+			},
+		});
 	}
 };
 

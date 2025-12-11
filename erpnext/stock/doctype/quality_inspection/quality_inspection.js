@@ -9,7 +9,7 @@ frappe.ui.form.on("Quality Inspection", {
 	},
 
 	set_default_company(frm) {
-		if (!frm.doc.company) {
+		if (frm.doc.docstatus === 0 && !frm.doc.company) {
 			frm.set_value("company", frappe.defaults.get_default("company"));
 		}
 	},

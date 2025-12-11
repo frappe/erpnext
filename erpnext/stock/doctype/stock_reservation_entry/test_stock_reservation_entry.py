@@ -678,6 +678,36 @@ class TestStockReservationEntry(FrappeTestCase):
 		# Test - 1: ValidationError should be thrown as the inwarded stock is reserved.
 		self.assertRaises(frappe.ValidationError, se.cancel)
 
+	@change_settings("Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1})
+	def test_reserved_stock_validation_for_batch_item(self):
+		item_properties = {
+			"is_stock_item": 1,
+			"valuation_rate": 100,
+			"has_batch_no": 1,
+			"create_new_batch": 1,
+			"batch_number_series": "SRBV-.#####.",
+		}
+		sr_item = make_item(item_code="Test Reserve Item", properties=item_properties)
+		# inward 100 qty of stock
+		create_material_receipt(items={sr_item.name: sr_item}, warehouse=self.warehouse, qty=100)
+
+		# reserve 80 qty from sales order
+		so = make_sales_order(item_code=sr_item.name, warehouse=self.warehouse, qty=80)
+		so.create_stock_reservation_entries()
+
+		# create a material issue entry including the reserved qty 10
+		se = make_stock_entry(
+			item_code=sr_item.name,
+			qty=30,
+			from_warehouse=self.warehouse,
+			rate=100,
+			purpose="Material Issue",
+			do_not_submit=True,
+		)
+
+		# validation for reserved stock should be thrown
+		self.assertRaises(frappe.ValidationError, se.submit)
+
 	def tearDown(self) -> None:
 		cancel_all_stock_reservation_entries()
 		return super().tearDown()

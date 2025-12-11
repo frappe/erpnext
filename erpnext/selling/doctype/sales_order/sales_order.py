@@ -1465,7 +1465,8 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 						"pricing_rules",
 					],
 					"postprocess": update_item_for_packed_item,
-					"condition": lambda doc: doc.parent_item in items_to_map,
+					"condition": lambda doc: doc.parent_item in items_to_map
+					and flt(doc.ordered_qty) < flt(doc.qty),
 				},
 			},
 			target_doc,
@@ -1603,7 +1604,8 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 					"pricing_rules",
 				],
 				"postprocess": update_item_for_packed_item,
-				"condition": lambda doc: doc.parent_item in items_to_map,
+				"condition": lambda doc: doc.parent_item in items_to_map
+				and flt(doc.ordered_qty) < flt(doc.qty),
 			},
 		},
 		target_doc,

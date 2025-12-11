@@ -26,7 +26,6 @@ def get_exploded_items(bom, data, indent=0, qty=1):
 	)
 
 	for item in exploded_items:
-		print(item.bom_no, indent)
 		item["indent"] = indent
 		data.append(
 			{

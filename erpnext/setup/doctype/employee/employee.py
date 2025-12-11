@@ -10,6 +10,7 @@ from frappe.permissions import (
 	remove_user_permission,
 )
 from frappe.utils import cstr, getdate, today, validate_email_address
+from frappe.utils.deprecations import deprecated
 from frappe.utils.nestedset import NestedSet
 
 from erpnext.utilities.transaction_base import delete_events
@@ -86,9 +87,6 @@ class Employee(NestedSet):
 
 	def update_user_permissions(self):
 		if not self.has_value_changed("user_id") and not self.has_value_changed("create_user_permission"):
-			return
-
-		if not has_permission("User Permission", ptype="write", raise_exception=False):
 			return
 
 		employee_user_permission_exists = frappe.db.exists(
@@ -251,8 +249,9 @@ def validate_employee_role(doc, method=None, ignore_emp_check=False):
 		doc.get("roles").remove(doc.get("roles", {"role": "Employee Self Service"})[0])
 
 
+@deprecated
 def update_user_permissions(doc, method):
-	# called via User hook
+	# formerly called via User hook
 	if "Employee" in [d.role for d in doc.get("roles")]:
 		if not has_permission("User Permission", ptype="write", raise_exception=False):
 			return

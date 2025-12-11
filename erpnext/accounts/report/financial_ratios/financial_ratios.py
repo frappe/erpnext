@@ -174,7 +174,7 @@ def add_solvency_ratios(
 	return_on_equity_ratio = {"ratio": _("Return on Equity Ratio")}
 
 	for year in years:
-		profit_after_tax = flt(total_income.get(year)) + flt(total_expense.get(year))
+		profit_after_tax = flt(total_income.get(year)) - flt(total_expense.get(year))
 		share_holder_fund = flt(total_asset.get(year)) - flt(total_liability.get(year))
 
 		debt_equity_ratio[year] = calculate_ratio(total_liability.get(year), share_holder_fund, precision)
@@ -199,7 +199,7 @@ def add_turnover_ratios(data, years, period_list, filters, total_asset, net_sale
 
 	avg_data = {}
 	for d in ["Receivable", "Payable", "Stock"]:
-		avg_data[frappe.scrub(d)] = avg_ratio_balance("Receivable", period_list, precision, filters)
+		avg_data[frappe.scrub(d)] = avg_ratio_balance(d, period_list, precision, filters)
 
 	avg_debtors, avg_creditors, avg_stock = (
 		avg_data.get("receivable"),

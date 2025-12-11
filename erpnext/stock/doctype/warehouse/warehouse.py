@@ -221,7 +221,9 @@ def get_child_warehouses(warehouse):
 
 def get_warehouses_based_on_account(account, company=None):
 	warehouses = []
-	for d in frappe.get_all("Warehouse", fields=["name", "is_group"], filters={"account": account}):
+	for d in frappe.get_all(
+		"Warehouse", fields=["name", "is_group"], filters={"account": account, "disabled": 0}
+	):
 		if d.is_group:
 			warehouses.extend(get_child_warehouses(d.name))
 		else:

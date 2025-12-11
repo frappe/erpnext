@@ -72,7 +72,7 @@ class PaymentReconciliation(Document):
 		self.common_filter_conditions = []
 		self.accounting_dimension_filter_conditions = []
 		self.ple_posting_date_filter = []
-		self.dimensions = get_dimensions()[0]
+		self.dimensions = get_dimensions(with_cost_center_and_project=True)[0]
 
 	def load_from_db(self):
 		# 'modified' attribute is required for `run_doc_method` to work properly.
@@ -765,6 +765,14 @@ class PaymentReconciliation(Document):
 
 def reconcile_dr_cr_note(dr_cr_notes, company, active_dimensions=None):
 	for inv in dr_cr_notes:
+		if (
+			abs(frappe.db.get_value(inv.voucher_type, inv.voucher_no, "outstanding_amount"))
+			< inv.allocated_amount
+		):
+			frappe.throw(
+				_("{0} has been modified after you pulled it. Please pull it again.").format(inv.voucher_type)
+			)
+
 		voucher_type = "Credit Note" if inv.voucher_type == "Sales Invoice" else "Debit Note"
 
 		reconcile_dr_or_cr = (

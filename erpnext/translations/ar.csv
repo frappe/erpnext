@@ -8858,3 +8858,632 @@ CANCELLED,ملغي,
 Mobile: ,المحمول: ,
 Sending...,إرسال...,
 {0} is a mandatory field.,{0} حقل إلزامي.,
+ Address, العنوان,
+ Amount, مبلغ,
+ Is Child Table, جدول تابع,
+ Name, الاسم,
+ Rate, سعر السلعة المفردة,
+ Summary, الملخص,
+# In Stock,# في المخزن,
+# Req'd Items,# السلع المطلوبة,
+% Delivered,% تسليم,
+% Finished Item Quantity,% كمية المنتج النهائي,
+% Occupied,محجوز,
+% Picked,مختار,
+'Account' in the Accounting section of Customer {0},'الحساب' في قسم المحاسبة الخاص بالعميل {0},
+'Allow Multiple Sales Orders Against a Customer's Purchase Order','السماح بإنشاء طلبات مبيعات متعددة مقابل طلب الشراء الخاص بالعميل',
+'Default {0} Account' in Company {1},'حساب {0} الافتراضي' في شركة {1},
+"'Inspection Required before Delivery' has disabled for the item {0}, no need to create the QI",'الفحص المطلوب قبل التسليم' للعنصر {0} تم تعطيله، لذا لا داعي لإنشاء فحص الجودة,
+"'Inspection Required before Purchase' has disabled for the item {0}, no need to create the QI",'الفحص المطلوب قبل الشراء' للعنصر {0} قد تم تعطيله، لذا لا داعي لإنشاء فحص الجودة,
+'To Package No.' cannot be less than 'From Package No.',لا يمكن أن يكون 'الطرد إلى' أقل من 'الطرد من',
+'{0}' account is already used by {1}. Use another account.,{0} الحساب مستخدم بواسطة{1} استخدم حساب آخر.,
+'{0}' should be in company currency {1}.,يجب أن يكون '{0}' بعملة الشركة {1}.,
+(A) Qty After Transaction,الكَمَيَّة بعد العملية (أ).,
+(B) Expected Qty After Transaction,(ب) الكَمَيَّة المتوقعة بعد العملية,
+(C) Total Qty in Queue,(ج) إجمالي الكمية في قائمة الانتظار,
+(C) Total qty in queue,(ج) إجمالي الكمية في قائمة الانتظار,
+(D) Balance Stock Value,(د) قيمة المخزون المتبقي,
+(E) Balance Stock Value in Queue,(هـ) قيمة المخزون المتبقي في الطابور,
+(F) Change in Stock Value,(و) التغيير في قيمة المخزون,
+(G) Sum of Change in Stock Value,(ز) مجموع التغير في قيمة الأسهم,
+(H) Change in Stock Value (FIFO Queue),(ح) التغيير في قيمة المخزون (طابور FIFO),
+(H) Valuation Rate,(ح) معدل التقييم,
+(I) Valuation Rate,(ط) معدل التقييم,
+(J) Valuation Rate as per FIFO,(ي) معدل التقييم حسب FIFO,
+(K) Valuation = Value (D) ÷ Qty (A),(ك) التقييم = القيمة (د) ÷ الكَمَيَّة (أ),
+0-30 Days,0-30 يوماً,
+11-50,١١-٥٠,
+201-500,٢٠١-٥٠٠,
+30-60,٣٠-٦٠,
+30-60 Days,30-60 يوماً,
+60-90,٦٠-٩٠,
+60-90 Days,60-90 يوماً,
+90 Above,أكثر من 90,
+"<br>
+<h4>Note</h4>
+<ul>
+<li>
+You can use <a href=""https://jinja.palletsprojects.com/en/2.11.x/"" target=""_blank"">Jinja tags</a> in <b>Subject</b> and <b>Body</b> fields for dynamic values.
+</li><li>
+    All fields in this doctype are available under the <b>doc</b> object and all fields for the customer to whom the mail will go to is available under the  <b>customer</b> object.
+</li></ul>
+<h4> Examples</h4>
+<!-- {% raw %} -->
+<ul>
+    <li><b>Subject</b>:<br><br><pre><code>Statement Of Accounts for {{ customer.customer_name }}</code></pre><br></li>
+    <li><b>Body</b>: <br><br>
+<pre><code>Hello {{ customer.customer_name }},<br>PFA your Statement Of Accounts from {{ doc.from_date }} to {{ doc.to_date }}.</code> </pre></li>
+</ul>
+<!-- {% endraw %} -->","<br>
+<h4>ملاحظة</h4>
+<ul>
+<li>
+يمكنك استخدام <a href=""https://jinja.palletsprojects.com/en/2.11.x/"" target=""_blank"">علامات جينجا</a> في حقول <b>الموضوع</b> و <b>المحتوى</b> للقيم الديناميكية.
+</li><li>
+    جميع الحقول في هذا النوع من الوثائق متاحة ضمن كائن <b>doc</b> وجميع الحقول الخاصة بالعميل الذي سيصل إليه البريد متاحة ضمن كائن <b>customer</b>.
+</li></ul>
+<h4> أمثلة</h4>
+<!-- {% raw %} -->
+<ul>
+    <li><b>الموضوع</b>:<br><br><pre><code>كشف حسابات لـ {{ customer.customer_name }}</code></pre><br></li>
+    <li><b>المحتوى</b>: <br><br>
+<pre><code>مرحبًا {{ customer.customer_name }},<br>يرجى ملاحظة كشف حساباتك من {{ doc.from_date }} إلى {{ doc.to_date }}.</code> </pre></li>
+</ul>
+<!-- {% endraw %} -->",
+"<div class=""columnHeading"">Other Details</div>","<div class=""columnHeading"">تفاصيل أخرى</div>",
+"<div class=""text-muted text-center"">No Matching Bank Transactions Found</div>","<div class=""text-muted text-center"">لم يتم العثور على معاملات مصرفية مطابقة</div>",
+"<div>
+<h3> All dimensions in centimeter only </h3>
+</div>","<div>
+<h3>كل الأبعاد تقاس بالسنتيمتر فقط</h3>
+</div>",
+"<h3>About Product Bundle</h3>
+
+<p>Aggregate group of <b>Items</b> into another <b>Item</b>. This is useful if you are bundling a certain <b>Items</b> into a package and you maintain stock of the packed <b>Items</b> and not the aggregate <b>Item</b>.</p>
+<p>The package <b>Item</b> will have <code>Is Stock Item</code> as <b>No</b> and <code>Is Sales Item</code> as <b>Yes</b>.</p>
+<h4>Example:</h4>
+<p>If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Product Bundle Item.</p>","<h3>حول حزمة المنتج</h3>
+
+<p>مجموعة مجمعة من <b>عناصر</b> في عنصر <b>آخر</b>. يكون هذا مفيدًا إذا كنت تقوم بتجميع <b>عناصر</b> معينة في حزمة وتحتفظ بمخزون من <b>عناصر معبأة</b> وليس مجموع <b>عنصر</b>.</p>
+<p>ستحتوي الحزمة <b>العنصر</b> على <code>هو عنصر مخزون</code> مثل <b>لا</b> و <code>هو عنصر مبيعات</code> مثل <b>نعم</b>.</p>
+<h4>مثال:</h4>
+<p>إذا كنت تبيع أجهزة الكمبيوتر المحمولة وحقائب الظهر بشكل منفصل ولديك سعر خاص إذا اشترى العميل كليهما، فسيكون الكمبيوتر المحمول + حقيبة الظهر عنصرًا جديدًا في حزمة المنتج.</p>",
+"<h3>Currency Exchange Settings Help</h3>
+<p>There are 3 variables that could be used within the endpoint, result key and in values of the parameter.</p>
+<p>Exchange rate between {from_currency} and {to_currency} on {transaction_date} is fetched by the API.</p>
+<p>Example: If your endpoint is exchange.com/2021-08-01, then, you will have to input exchange.com/{transaction_date}</p>","<h3>تعليمات إعدادات صرف العملات</h3>
+<p>هناك 3 متغيرات يمكن استخدامها داخل نقطة النهاية ومفتاح النتيجة وفي قيم المعلمة.</p>
+<p>يتم جلب سعر الصرف بين {from_currency} و {to_currency} في {transaction_date} بواسطة واجهة برمجة التطبيقات.</p>
+<p>مثال: إذا كانت نقطة النهاية الخاصة بك هي exchange.com/2021-08-01، فسيتعين عليك إدخال exchange.com/{transaction_date}</p>",
+"<h4>Body Text and Closing Text Example</h4>
+
+<div>We have noticed that you have not yet paid invoice {{sales_invoice}} for {{frappe.db.get_value(""Currency"", currency, ""symbol"")}} {{outstanding_amount}}. This is a friendly reminder that the invoice was due on {{due_date}}. Please pay the amount due immediately to avoid any further dunning cost.</div>
+
+<h4>How to get fieldnames</h4>
+
+<p>The fieldnames you can use in your template are the fields in the document. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Sales Invoice)</p>
+
+<h4>Templating</h4>
+
+<p>Templates are compiled using the Jinja Templating Language. To learn more about Jinja, <a class=""strong"" href=""http://jinja.pocoo.org/docs/dev/templates/"">read this documentation.</a></p>","<h4>مثال على نص الجسم والنص الختامي</h4>
+
+<div>لاحظنا أنك لم تدفع الفاتورة {{sales_invoice}} بعد عن {{frappe.db.get_value(""Currency"", currency, ""symbol"")}} {{outstanding_amount}}. هذا تذكير ودي بأن الفاتورة كانت مستحقة في {{due_date}}. يرجى سداد المبلغ المستحق على الفور لتجنب أي تكاليف مطالبة أخرى.</div>
+
+<h4>كيفية الحصول على أسماء الحقول</h4>
+
+<p>أسماء الحقول التي يمكنك استخدامها في القالب الخاص بك هي الحقول الموجودة في المستند. يمكنك معرفة حقول أي مستند عبر الإعداد &gt; تخصيص عرض النموذج واختيار نوع المستند (على سبيل المثال فاتورة المبيعات)</p>
+
+<h4>القوالب</h4>
+
+<p>يتم تجميع القوالب باستخدام لغة قوالب Jinja. لمعرفة المزيد عن Jinja، اقرأ هذه الوثائق <a class=""strong"" href=""http://jinja.pocoo.org/docs/dev/templates/""></a></p>",
+"<h4>Contract Template Example</h4>
+
+<pre>Contract for Customer {{ party_name }}
+
+-Valid From : {{ start_date }} 
+-Valid To : {{ end_date }}
+</pre>
+
+<h4>How to get fieldnames</h4>
+
+<p>The field names you can use in your Contract Template are the fields in the Contract for which you are creating the template. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Contract)</p>
+
+<h4>Templating</h4>
+
+<p>Templates are compiled using the Jinja Templating Language. To learn more about Jinja, <a class=""strong"" href=""http://jinja.pocoo.org/docs/dev/templates/"">read this documentation.</a></p>","<h4>مثال على قالب العقد</h4>
+
+<pre>عقد للعميل {{ party_name }}
+
+-صالح من: {{ start_date }} 
+-صالح إلى: {{ end_date }}
+</pre>
+
+<h4>كيفية الحصول على أسماء الحقول</h4>
+
+<p>أسماء الحقول التي يمكنك استخدامها في قالب العقد الخاص بك هي الحقول الموجودة في العقد الذي تقوم بإنشاء القالب له. يمكنك معرفة حقول أي مستند عبر الإعداد &gt; تخصيص عرض النموذج واختيار نوع المستند (على سبيل المثال العقد)</p>
+
+<h4>القوالب</h4>
+
+<p>يتم تجميع القوالب باستخدام لغة قوالب Jinja. لمعرفة المزيد عن Jinja، اقرأ هذه الوثائق <a class=""strong"" href=""http://jinja.pocoo.org/docs/dev/templates/""></a></p>",
+"<h4>Standard Terms and Conditions Example</h4>
+
+<pre>Delivery Terms for Order number {{ name }}
+
+-Order Date : {{ transaction_date }} 
+-Expected Delivery Date : {{ delivery_date }}
+</pre>
+
+<h4>How to get fieldnames</h4>
+
+<p>The fieldnames you can use in your email template are the fields in the document from which you are sending the email. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Sales Invoice)</p>
+
+<h4>Templating</h4>
+
+<p>Templates are compiled using the Jinja Templating Language. To learn more about Jinja, <a class=""strong"" href=""http://jinja.pocoo.org/docs/dev/templates/"">read this documentation.</a></p>","<h4>مثال على الشروط والأحكام القياسية</h4>
+
+<pre>شروط التسليم لرقم الطلب {{ name }}
+
+-تاريخ الطلب: {{ transaction_date }} 
+-تاريخ التسليم المتوقع: {{ delivery_date }}
+</pre>
+
+<h4>كيفية الحصول على أسماء الحقول</h4>
+
+<p>أسماء الحقول التي يمكنك استخدامها في قالب البريد الإلكتروني الخاص بك هي الحقول الموجودة في المستند الذي ترسل منه البريد الإلكتروني. يمكنك معرفة حقول أي مستند عبر الإعداد &gt; تخصيص عرض النموذج واختيار نوع المستند (على سبيل المثال فاتورة المبيعات)</p>
+
+<h4>القوالب</h4>
+
+<p>يتم تجميع القوالب باستخدام لغة قوالب Jinja. لمعرفة المزيد عن Jinja، اقرأ هذه الوثائق <a class=""strong"" href=""http://jinja.pocoo.org/docs/dev/templates/""></a></p>",
+"<label class=""control-label"" style=""margin-bottom: 0px;"">Account Number Settings</label>","<label class=""control-label"" style=""margin-bottom: 0px;"">إعدادات رقم الحساب</label>",
+"<label class=""control-label"" style=""margin-bottom: 0px;"">Amount In Words</label>","<label class=""control-label"" style=""margin-bottom: 0px;"">المبلغ بالكلمات</label>",
+"<label class=""control-label"" style=""margin-bottom: 0px;"">Date Settings</label>","<label class=""control-label"" style=""margin-bottom: 0px;"">إعدادات التاريخ</label>",
+<li>Item {0} in row(s) {1} billed more than {2}</li>,<li>المادة {0} في الصف (الصفوف) {1} تمت فوترته أكثر من {2}</li>,
+<p>Cannot overbill for the following Items:</p>,<p/>لا يمكن زيادة الفاتورة للعناصر التالية:<p>,
+<p>Following {0}s doesn't belong to Company {1} :</p>,<p>:ال{0} التالية لا تنتمى إلي الشركة {1}</p>,
+"<p>In your <b>Email Template</b>, you can use the following special variables:
+</p>
+<ul>
+        <li>
+            <code>{{ update_password_link }}</code>: A link where your supplier can set a new password to log into your portal.
+        </li>
+        <li>
+            <code>{{ portal_link }}</code>: A link to this RFQ in your supplier portal.
+        </li>
+        <li>
+            <code>{{ supplier_name }}</code>: The company name of your supplier.
+        </li>
+        <li>
+            <code>{{ contact.salutation }} {{ contact.last_name }}</code>: The contact person of your supplier.
+        </li><li>
+            <code>{{ user_fullname }}</code>: Your full name.
+        </li>
+    </ul>
+<p></p>
+<p>Apart from these, you can access all values in this RFQ, like <code>{{ message_for_supplier }}</code> or <code>{{ terms }}</code>.</p>","<p>في قالب البريد الإلكتروني <b></b>، يمكنك استخدام المتغيرات الخاصة التالية:
+</p>
+<ul>
+        <li>
+            <code>{{ update_password_link }}</code>: رابط يمكن لموردك من خلاله تعيين كلمة مرور جديدة لتسجيل الدخول إلى البوابة الخاصة بك.
+        </li>
+        <li>
+            <code>{{ portal_link }}</code>: رابط لهذا الطلب على الأسعار في بوابة المورد الخاص بك.
+        </li>
+        <li>
+            <code>{{ supplier_name }}</code>: اسم شركة المورد الخاص بك.
+        </li>
+        <li>
+            <code>{{ contact.salutation }} {{ contact.last_name }}</code>: جهة الاتصال الخاصة بموردك.
+        </li><li>
+            <code>{{ user_fullname }}</code>: اسمك الكامل.
+        </li>
+    </ul>
+<p></p>
+<p>وبصرف النظر عن ذلك، يمكنك الوصول إلى جميع القيم في طلب عرض الأسعار هذا، مثل <code>{{ message_for_supplier }}</code> أو <code>{{ terms }}</code>.</p>",
+"<p>Price List Rate has not been set as editable in Selling Settings. In this scenario, setting <strong>Update Price List Based On</strong> to <strong>Price List Rate</strong> will prevent auto-updation of Item Price.</p>Are you sure you want to continue?",<p>معدل قائمة الأسعار غير قابل للتعديل بحسب إعدادات البيع. وفي هذه الحاله فإن<strong>تحديث قائمة الأسعار بناء</strong> على <strong>معدل قائمة الأسعار</strong> سيمنع التحديث التلقائي لسعر المنتج.</p>هل أنت متأكد أنك تريد المتابعة؟,
+"<p>To allow over-billing, please set allowance in Accounts Settings.</p>",<p>للسماح بإصدار الفواتير الزائدة، يُرجى ضبط الحد المسموح به في إعدادات الحسابات.</p>,
+"<pre><h5>Message Example</h5>
+
+&lt;p&gt; Thank You for being a part of {{ doc.company }}! We hope you are enjoying the service.&lt;/p&gt;
+
+&lt;p&gt; Please find enclosed the E Bill statement. The outstanding amount is {{ doc.grand_total }}.&lt;/p&gt;
+
+&lt;p&gt; We don't want you to be spending time running around in order to pay for your Bill.<br>After all, life is beautiful and the time you have in hand should be spent to enjoy it!<br>So here are our little ways to help you get more time for life! &lt;/p&gt;
+
+&lt;a href=""{{ payment_url }}""&gt; click here to pay &lt;/a&gt;
+
+</pre>
+","<pre><h5>مثال الرسالة</h5>
+
+&lt;p&gt; نشكرك على كونك جزءًا من {{ doc.company }}! نأمل أن تستمتع بالخدمة.&lt;/p&gt;
+
+&lt;p&gt; يُرجى إيجاد كشف حساب الفاتورة الإلكترونية المرفق. المبلغ المستحق هو {{ doc.grand_total }}.&lt;/p&gt;
+
+&lt;p&gt; لا نريدك أن تقضي وقتك في الجري من أجل دفع فاتورتك.<br>بعد كل شيء، الحياة جميلة والوقت الذي بين يديك يجب أن تقضيه للاستمتاع بها!<br>لذا، إليك طرقنا الصغيرة لمساعدتك في الحصول على مزيد من الوقت مدى الحياة! &lt;/p&gt;
+
+&lt;a href=""{{ payment_url }}""&gt; انقر هنا للدفع &lt;/a&gt;
+
+</pre>
+",
+"<pre><h5>Message Example</h5>
+
+&lt;p&gt;Dear {{ doc.contact_person }},&lt;/p&gt;
+
+&lt;p&gt;Requesting payment for {{ doc.doctype }}, {{ doc.name }} for {{ doc.grand_total }}.&lt;/p&gt;
+
+&lt;a href=""{{ payment_url }}""&gt; click here to pay &lt;/a&gt;
+
+</pre>
+","<pre><h5>مثال الرسالة</h5>
+
+&lt;p&gt;عزيزي {{ doc.contact_person }}،&lt;/p&gt;
+
+&lt;p&gt;أطلب الدفع مقابل {{ doc.doctype }}، {{ doc.name }} مقابل {{ doc.grand_total }}.&lt;/p&gt;
+
+&lt;a href=""{{ payment_url }}""&gt; انقر هنا للدفع &lt;/a&gt;
+
+</pre>
+",
+"<span class=""h4""><b>Masters &amp; Reports</b></span>","<span class=""h4""><b>المعاملات &amp; التقارير</b></span>",
+"<span class=""h4""><b>Quick Access</b></span>","<span class=""h4""><b>الوصول السريع</b></span>",
+"<span class=""h4""><b>Shortcuts</b></span>","<span class=""h4""><b>الاختصارات</b></span>",
+"<span class=""h4""><b>Your Shortcuts
+			
+		
+			
+		
+			
+		</b></span>","<span class=""h4""><b>اختصاراتك
+			
+		
+			
+		
+			
+		</b></span>",
+<strong>Grand Total:</strong> {0},المجموع الكلي: {0},
+<strong>Outstanding Amount:</strong> {0},<strong>المبلغ المستحِقّ:</strong> {0},
+"<table class=""table table-bordered table-condensed"">
+<thead>
+  <tr>
+         <th class=""table-sr"" style=""width: 50%;"">Child Document</th>
+         <th class=""table-sr"" style=""width: 50%;"">Non Child Document</th>
+   </tr>
+</thead>
+<tbody>
+<tr>
+         <td>
+                  <p> To access parent document field use parent.fieldname and to access child table document field use doc.fieldname </p>
+
+         </td>
+         <td>
+                    <p>To access document field use doc.fieldname </p>
+         </td>
+</tr>
+<tr>
+        <td>
+                   <p><b>Example: </b> parent.doctype == ""Stock Entry"" and doc.item_code == ""Test"" </p>
+
+        </td>
+         <td>
+                   <p><b>Example: </b> doc.doctype == ""Stock Entry"" and doc.purpose == ""Manufacture""</p>    
+          </td>
+</tr>
+
+</tbody>
+</table>
+
+
+
+
+
+
+","<table class=""table table-bordered table-condensed"">
+<thead>
+  <tr>
+         <th class=""table-sr"" style=""width: 50%;"">Child Document</th>
+         <th class=""table-sr"" style=""width: 50%;"">Non Child Document</th>
+   </tr>
+</thead>
+<tbody>
+<tr>
+         <td>
+                  <p> للوصول إلى الوالد في حقل المستند الأصل. اسم ieldname والوصول إلى ملف استخدام حقل ملف جدول الأطفال. الاسم </p>
+
+         </td>
+         <td>
+                    <p>للوصول إلى وثيقة استخدام الحقل الإسم </p>
+         </td>
+</tr>
+<tr>
+        <td>
+                   <p><b>مثال: </b> والد. octype == ""Stock إدخال"" و doc. tem_code == ""اختبار </p>
+
+        </td>
+         <td>
+                   <p><b>مثال: </b> doc. octype == ""Stock إدخال"" و doc. urposed == ""الصناعة""</p>    
+          </td>
+</tr>
+
+</tbody>
+</table>
+
+
+
+
+
+
+",
+A - B,أ - ب,
+A - C,أ - ج,
+A Holiday List can be added to exclude counting these days for the Workstation.,يمكن إضافة قائمة الإجازات لحساب هذه الأيام لمحطة العمل.,
+A Packing Slip can only be created for Draft Delivery Note.,لا يمكن إنشاء إيصال التعبئة إلا لمذكرة التسليم المُسَوَّدَة.,
+"A Price List is a collection of Item Prices either Selling, Buying, or both",قائمة الأسعار هي مجموعة من أسعار العناصر إما البيع أو الشراء أو كليهما,
+A Reconciliation Job {0} is running for the same filters. Cannot reconcile now,يتم تشغيل {0} مهمة التسوية لنفس عوامل التصفية. لا يمكن التصالح الآن,
+A Transaction Deletion Document: {0} is triggered for {0},مستند حذف المعاملة: يتم تشغيل {0} ل {0},
+A customer must have primary contact email.,يجب أن يكون لدى العميل بريد إلكتروني أساسي للاتصال.,
+A driver must be set to submit.,يجب تعيين برنامَج التشغيل للإرسال.,
+A template with tax category {0} already exists. Only one template is allowed with each tax category,يوجد بالفعل قالب مع فئة الضريبة {0} . يسمح بقالب واحد فقط مع كل فئة ضريبية,
+API Details,تفاصيل واجهة برمجة التطبيقات,
+Abbreviation: {0} must appear only once,الاختصار: يجب أن يظهر {0} مرة واحدة فقط,
+Acceptance Criteria Formula,معادلة معايير القبول,
+Acceptance Criteria Value,قيمة معايير القبول,
+Accepted Qty in Stock UOM,الكَمَيَّة المقبولة بوحدة قياس المخزون,
+Access Key,مفتاح الوصول,
+Access Key is required for Service Provider: {0},مفتاح الوصول مطلوب لموفر الخدمة: {0},
+"According to the BOM {0}, the Item '{1}' is missing in the stock entry.",وفقًا لقائمة المواد {0}، فإن العنصر '{1}' مفقود في إدخال المخزون.,
+Account Closing Balance,رصيد إغلاق الحساب,
+Account Currency (From),عملة الحساب (من),
+Account Currency (To),عملة الحساب (إلى),
+Account Opening Balance,رصيد فتح الحساب,
+Account not Found,تعذر العثور على الحساب,
+Account {0} added multiple times,تمت إضافة الحساب {0} عدة مرات,
+Account {0} cannot be converted to Group as it is already set as {1} for {2}.,لا يمكن تحويل الحساب {0} إلى مجموعة لأنه تم تعيينه على أنه {1} لـ {2}.,
+Account {0} cannot be disabled as it is already set as {1} for {2}.,لا يمكن تعطيل الحساب {0} لأنه تم تعيينه بالفعل على أنه {1} لـ {2}.,
+Account {0} doesn't belong to Company {1},الحساب {0} لا ينتمي إلى الشركة {1},
+Account {0} is disabled.,تم تعطيل الحساب {0}.,
+Accounting Dimension Filter,تحديد الأبعاد المحاسبيه,
+Accounting Dimensions Filter,فلتر الأبعاد المحاسبية,
+Accounting Entry for {0},القيد المحاسبي لـ {0},
+Accounts Closing,إغلاق الحسابات,
+Accounts Missing Error,خطأ في الحسابات مفقودة,
+Accounts Receivable / Payable Tuning,ضبط الحسابات المدينة/الدائنة,
+Accounts Receivable/Payable,حسابات القبض / الدائنة,
+Accounts to Merge,الحسابات المراد دمجها,
+Action If Quality Inspection Is Rejected,الإجراء إذا تم رفض فحص الجودة,
+Action If Same Rate is Not Maintained,الإجراء إذا لم يتم الحفاظ على نفس السعر,
+Action if Same Rate is Not Maintained Throughout  Internal Transaction,الإجراء في حالة عدم الحفاظ على نفس المعدل طوال المعاملة الداخلية,
+Action if Same Rate is Not Maintained Throughout Sales Cycle,الإجراء إذا لم يتم الحفاظ على نفس السعر طوال دورة المبيعات,
+Active Status,الحالة النشطة,
+Actual Balance Qty,كَمَيَّة الرصيد الفعلي,
+Actual Expense,المصروفات الفعلية,
+Actual Posting,النشر الفعلي,
+Actual Time,الوقت الفعلي,
+Add Columns in Transaction Currency,إضافة أعمدة في عملة المعاملات,
+Add Corrective Operation Cost in Finished Good Valuation,إضافة تكلفة العملية التصحيحية في التقييم الجيد النهائي,
+Add Discount,إضافة خصم,
+Add Items in the Purpose Table,إضافة عناصر في جدول الأغراض,
+Add Lead to Prospect,تحويل العميل المحتمل إلى عميل مؤهل,
+Add Local Holidays,إضافة العطل المحلية,
+Add Manually,أضف يدويّاً,
+Add Or Deduct,إضافة أو خَصْم,
+Add Serial / Batch Bundle,إضافة حزمة تسلسلية / دفعية,
+Add Serial / Batch No,إضافة الرَّقْم التسلسلي / رَقْم الدفعة,
+Add Serial / Batch No (Rejected Qty),إضافة الرَّقْم تسلسلي / دفعة (الكَمَيَّة المرفوضة),
+Add Stock,إضافة مخزونا,
+Add Sub Assembly,إضافة مجموعة فرعية,
+Add a Note,إضافة ملاحظة,
+Add details,إضافة تفاصيل,
+Add to Prospect,أضف إلى احتمال,
+Added On,تمت إضافته في,
+Added Supplier Role to User {0}.,تمت إضافة دور المورد إلى المستخدم {0}.,
+Added {1} Role to User {0}.,تمت إضافة دور {1} إلى المستخدم {0}.,
+Adding Lead to Prospect...,جاري تحويل العميل المحتمل إلى عميل مؤهل...,
+Additional,الإضافية,
+Additional Data,بيانات إضافية,
+Additional Info,معلومات اضافية,
+Address And Contacts,العنوان و جهات الاتصال,
+Adjust Asset Value,تعديل قيمة الأصول,
+Adjustment Against,التعديل ضد,
+Adjustment based on Purchase Invoice rate,التعديل بناءً على سعر وَرقة الحساب,
+Advance Account: {0} must be in either customer billing currency: {1} or Company default currency: {2},حساب الدفع المقدم: {0} يجب أن يكون إما بعملة فواتير العميل: {1} أو بعملة الشركة الافتراضية: {2},
+Advance Payment,الدفع المسبق,
+Advance Payment Date,تاريخ الدفع المسبق,
+Advance Tax,الضريبة المسبقة,
+Advance Taxes and Charges,الضرائب والرسوم المسبقة,
+Advance paid against {0} {1} cannot be greater than Grand Total {2},لا يمكن أن يكون المبلغ المدفوع مقدمًا مقابل {0} {1} أكبر من الإجمالي الكلي {2},
+Advance payments allocated against orders will only be fetched,سيتم جلب الدفعات المقدمة المخصصة للطلبات فقط,
+Affected Transactions,المعاملات المتأثرة,
+Against Customer Order {0},مقابل طلب العميل {0},
+Against Pick List,مقابل قائمة الاختيار,
+Against Supplier Invoice {0},مقابل فاتورة المورد {0},
+Against Voucher No,مقابل القسيمة رَقْم,
+Age ({0}),السن ({0}),
+Agent Busy Message,رسالة الوكيل مشغول,
+Agent Group,مجموعة الوكيل,
+Agent Unavailable Message,رسالة عدم توفر الوكيل,
+Aggregate a group of Items into another Item. This is useful if you are maintaining the stock of the packed items and not the bundled item,تجميع مجموعة من العناصر في عنصر آخر. يكون هذا مفيداً إذا كنت تحتفظ بمخزون العناصر المُجمَّعة وليس العنصر المضاف,
+Algorithm,الخوارزمية,
+All Activities,جميع الأنشطة,
+All Activities HTML,جميع الأنشطة HTML,
+All Items,جميع العناصر,
+All Sales Transactions can be tagged against multiple Sales Persons so that you can set and monitor targets.,يمكن وضع علامة على جميع معاملات المبيعات ضد عدة مندوبي مبيعات حتى تتمكن من تعيين الأهداف ومراقبتها.,
+All allocations have been successfully reconciled,تمت تسوية جميع المخصصات بنجاح,
+All items have already been received,تم استلام جميع العناصر مسبقاً,
+All items in this document already have a linked Quality Inspection.,جميع العناصر في هذا المستند مرتبطة بفحص جودة.,
+All the Comments and Emails will be copied from one document to another newly created document(Lead -> Opportunity -> Quotation) throughout the CRM documents.,سيتم نسخ جميع التعليقات ورسائل البريد الإلكتروني من مستند إلى مستند آخر تم إنشاؤه حديثًا (العميل المحتمل -> الفرصة -> عرض الأسعار) في جميع مستندات إدارة علاقات العملاء.,
+"All the required items (raw materials) will be fetched from BOM and populated in this table. Here you can also change the Source Warehouse for any item. And during the production, you can track transferred raw materials from this table.",عميل محتمل,
+Allocate Payment Request,تخصيص طلب السداد,
+Allocated Entries,الإدخالات المخصصة,
+Allocated To:,المخصصة ل:,
+Allocations,المخصصات,
+Allow Alternative Item must be checked on Item {},يجب تحديد خيار السماح بالعنصر البديل في العنصر {},
+Allow Continuous Material Consumption,السماح بالاستهلاك المستمر للمواد,
+Allow Excess Material Transfer,السماح بنقل المواد الزائدة,
+Allow Implicit Pegged Currency Conversion,السماح بتحويل العملة الضمني,
+Allow Item to be Added Multiple Times in a Transaction,السماح بإضافة الصنف أكثر من مرة في نفس المعاملة,
+Allow Lead Duplication based on Emails,السماح بتكرار العملاء المحتملين بناءً على رسائل البريد الإلكتروني,
+Allow Or Restrict Dimension,السماح أو تقييد البعد,
+Allow Partial Payment,السماح بتسديد جزئي,
+Allow Partial Reservation,السماح بالحجز الجزئي,
+Allow Purchase,السماح بالشراء,
+Allow Purchase Order with Zero Quantity,السماح بأمر الشراء بكمية صفر,
+Allow Quotation with Zero Quantity,السماح بعرض سعر المورد بكمية صفرية,
+Allow Request for Quotation with Zero Quantity,السماح بعرض سعر المورد بكمية صفرية,
+Allow Sales,السماح بالمبيعات,
+Allow Sales Order Creation For Expired Quotation,السماح بإنشاء أمر بيع لأمر شراء منتهي الصلاحية,
+Allow Sales Order with Zero Quantity,السماح بطلب المبيعات بكمية صفر,
+Allow Supplier Quotation with Zero Quantity,السماح بعرض سعر المورد بكمية صفرية,
+Allow UOM with Conversion Rate Defined in Item,السماح بوحدة القياس مع معدل التحويل المحدد في العنصر,
+Allow User to Edit Discount,السماح للمستخدم بتعديل الخصم,
+Allow User to Edit Rate,السماح للمستخدم بتحرير السعر,
+Allow Zero Rate,السماح بمعدل صفري,
+Allow existing Serial No to be Manufactured/Received again,السماح بتصنيع/استلام الرقم التسلسلي الحالي مرة أخرى,
+Allow material consumptions without immediately manufacturing finished goods against a Work Order,السماح باستهلاك المواد دون تصنيع السلع النهائية فورًا بموجب أمر العمل,
+Allow multi-currency invoices against single party account ,السماح بفواتير متعددة العملات مقابل حساب طرف واحد ,
+Allow to Edit Stock UOM Qty for Purchase Documents,السماح بتعديل كمية وحدة قياس المخزون لمستندات الشراء,
+Allow to Edit Stock UOM Qty for Sales Documents,السماح بتعديل كمية وحدة قياس المخزون لمستندات المبيعات,
+Allow to Make Quality Inspection after Purchase / Delivery,السماح بإجراء فحص الجودة بعد الشراء/التسليم,
+Allow transferring raw materials even after the Required Quantity is fulfilled,السماح بنقل المواد الخام حتى بعد استيفاء الكمية المطلوبة,
+Allowed Dimension,البُعد المسموح به,
+Allowed Doctypes,أنواع المستندات المسموح بها,
+Allowed Items,الأصناف المسموح بها,
+Allowed primary roles are 'Customer' and 'Supplier'. Please select one of these roles only.,"الأدوار الأساسية المسموح بها هي ""العميل"" و""المورد"". يرجى تحديد أحد هذه الأدوار فقط.",
+Allows to keep aside a specific quantity of inventory for a particular order.,يسمح بالاحتفاظ بكمية محددة من المخزون جانباً لطلب معين.,
+Allows users to submit Purchase Orders with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.,يسمح للمستخدمين بتقديم طلبات الشراء بكمية صفرية. مفيد عندما تكون الأسعار ثابتة ولكن الكميات ليست كذلك. مثل عقود الأسعار.,
+Allows users to submit Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.,يسمح للمستخدمين بتقديم عروض الأسعار بكمية صفرية. مفيد عندما تكون الأسعار ثابتة ولكن الكميات ليست كذلك. مثل عقود الأسعار.,
+Allows users to submit Request for Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.,يسمح للمستخدمين بتقديم طلب عروض الأسعار بكمية صفرية. مفيد عندما تكون الأسعار ثابتة ولكن الكميات ليست ثابتة. مثل عقود الأسعار.,
+Allows users to submit Sales Orders with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.,يسمح للمستخدمين بتقديم طلبات المبيعات بكمية صفرية. مفيد عندما تكون الأسعار ثابتة ولكن الكميات ليست كذلك. مثل عقود الأسعار.,
+Allows users to submit Supplier Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.,يسمح للمستخدمين بتقديم عروض أسعار الموردين بكمية صفرية. مفيد عندما تكون الأسعار ثابتة ولكن الكميات غير ثابتة. مثل عقود الأسعار.,
+Already Picked,تم اختياره بالفعل,
+Also you can't switch back to FIFO after setting the valuation method to Moving Average for this item.,أيضًا لا يمكنك العودة إلى FIFO بعد ضبط طريقة التقييم على المتوسط المتحرك لهذا العنصر.,
+Alternative Items,العناصر البديلة,
+"Alternatively, you can download the template and fill your data in.",..,
+Amount (AED),المبلغ (بالدرهم الإماراتي),
+Amount Difference with Purchase Invoice,فرق المبلغ مع فاتورة الشراء,
+Amount Eligible for Commission,المبلغ المؤهل للعمولة,
+Amount in Account Currency,المبلغ المدين بعملة الحساب,
+Amount in Words,المبلغ بالكلمات,
+Amount in party's bank account currency,المبلغ في عملة الحساب المصرفي للطرف,
+Amount in transaction currency,المبلغ بعملة المعاملة,
+Amounts,المبالغ,
+An Item Group is a way to classify items based on types.,مجموعة العناصر هي طريقة لتصنيف العناصر بناءً على الأنواع.,
+Analysis Chart,الرسم البياني التحليلي,
+Annual Revenue,الإيراد السنوي,
+Applicable Dimension,البُعد المطبق,
+Applicable On Account,ينطبق على الحساب,
+Apply Tax Withholding Amount ,تطبيق مبلغ الاستقطاع الضريبي ,
+Appointment Scheduling has been disabled for this site,تم تعطيل جدولة المواعيد لهذا الموقع,
+Appointment was created. But no lead was found. Please check the email to confirm,تم تحديد موعد، ولكن لم يتم العثور على أي عميل محتمل. يُرجى مراجعة البريد الإلكتروني للتأكيد,
+Approximately match the description/party name against parties,مطابقة الوصف/اسم الطرف تقريبًا مع الأطراف,
+Are you sure you want to clear all demo data?,هل أنت متأكد أنك تريد مسح كافة بيانات العرض التوضيحي؟,
+Are you sure you want to delete this Item?,هل أنت متأكد أنك تريد حذف هذه المادة؟,
+Assembly Items,عناصر التجميع,
+Asset Activity,نشاط الأصل,
+Asset Depreciation Schedule,جدول استهلاك الأصول,
+Asset Depreciation Schedule for Asset {0} and Finance Book {1} is not using shift based depreciation,جدول استهلاك الأصول للأصل {0} ودفتر التمويل {1} لا يستخدم الاستهلاك القائم على الوردية,
+Asset ID,معرّف الأصل,
+Asset Quantity,كَمَيَّة الأصول,
+Asset scrapped,الأصول الملغاة,
+Attendance & Leaves,الحضور والانصراف,
+Batch No.,رقم دفعة.,
+Call Again,معاودة الاتصال,
+Call Ended,انتهت المكالمة,
+Call Received By,استلمت المكالمة من قبل,
+Call Type,نوع المكالمة,
+Cannot produce more item for {0},لا يمكن إنتاج المزيد من العناصر لـ {0},
+Cannot produce more than {0} items for {1},لا يمكن إنتاج أكثر من {0} عنصرًا لـ {1},
+Cannot receive from customer against negative outstanding,لا يمكن الاستلام من العميل مقابل مستحقات سالبة,
+Checked On,تم التحقق منه,
+Competitors,المنافسون,
+Completed On,اكتمل في,
+Completed Tasks,المهام المكتملة,
+Completed Time,وقت التنفيذ,
+Conditional Rule,القاعدة الشرطية,
+Conditional Rule Examples,أمثلة على القواعد الشرطية,
+Consumed Stock Total Value,القيمة الإجمالية للمخزون المستهلك,
+Contact Mobile,رقم الهاتف المحمول,
+Contact Person does not belong to the {0},جهة الاتصال لا تنتمي إلى {0},
+Contribution Qty,كمية المساهمة,
+Conversion rate cannot be 0,لا يمكن أن يكون معدل التحويل 0,
+Costing Details,تفاصيل التكلفة,
+Create Journal Entries,إنشاء قيد الدفتر اليومي,
+Create Link,إنشاء رابط,
+Create New Customer,إنشاء عميل جديد,
+Create in Draft Status,إنشاء في حالة المسودة,
+Create {0} {1} ?,إنشاء {0} {1}؟,
+Creating Journal Entries...,جاري إنشاء قيد الدفتر اليومي...,
+Creating Purchase Invoices ...,جاري إنشاء فاتورة شراء ...,
+Creating Purchase Receipt ...,جاري إنشاء فاتورة شراء ...,
+Creating Sales Invoices ...,جاري إنشاء فاتورة المبيعات ...,
+Creating User...,جاري إنشاء المستخدم...,
+Current Liability,خصوم متداولة,
+Customer ,العميل ,
+Customer Name: ,اسم العميل: ,
+Customer: ,العميل: ,
+Date ,التاريخ ,
+Dates,التواريخ,
+Debit (Transaction),مدين (معاملة),
+Debit Amount in Transaction Currency,المبلغ المدين بعملة المعاملة,
+Debit-Credit Mismatch,عدم تطابق الرصيد الدائن,
+Default Discount Account,حساب الخصم الافتراضي,
+Delay (In Days),التأخير (بالأيام),
+Delete Dimension,حذف البُعد المحاسبي,
+Delivery Manager,مدير التوصيل,
+Delivery User,مستخدم التوصيل,
+Delivery to,التوصيل إلى,
+Demo Company,شركة تجريبية,
+Demo data cleared,مُسحت البيانات التجريبية,
+Difference Qty,كمية الفرق,
+Discount Account,حساب الخصم,
+Discount Date,تاريخ الخصم,
+Discount Settings,إعدادات الخصم,
+DocTypes should not be added manually to the 'Excluded DocTypes' table. You are only allowed to remove entries from it.,"لا يُنصح بإضافة أنواع المستندات يدويًا إلى جدول ""أنواع المستندات المستثناة"". يُسمح فقط بإزالة المستندات منه.",
+Document Type already used as a dimension,نوع المستند مستخدم بالفعل كبُعد محاسبي,
+Email Address (required),عنوان البريد الإلكتروني (إجباري),
+Email Digest: {0},ملخص البريد الإلكتروني: {0},
+Email or Phone/Mobile of the Contact are mandatory to continue.,البريد الإلكتروني أو الهاتف/الهاتف المحمول لجهة الاتصال إلزامي للمتابعة.,
+Email verification failed.,فشل التحقق من البريد الإلكتروني.,
+Employee Exit,إنهاء خدمة الموظف,
+Enter Manually,أدخل يدويًا,
+Enter Serial Nos,أدخل الأرقام التسلسلية,
+Enter Visit Details,أدخل تفاصيل الزيارة,
+Enter a name for this Holiday List.,أدخل اسمًا لقائمة العطلات هذه.,
+Error during caller information update,حدث خطأ أثناء تحديث معلومات المتصل,
+Example: Serial No {0} reserved in {1}.,مثال: الرقم التسلسلي {0} محجوز في {1}.,
+Failed Entries,الإدخالات الفاشلة,
+"Failed to erase demo data, please delete the demo company manually.",فشل مسح البيانات التجريبية، يرجى حذف الشركة التجريبية يدوياً.,
+Financial Reports,التقارير المالية,
+Full and Final Statement,البيان الكامل والنهائي,
+Generated,تم إنشاؤه,
+Goals,الأهداف,
+Goods,البضائع,
+Internal Transfers,التحويلات الداخلية,
+Invoice Portion (%),جزء الفاتورة (%),
+Items Catalogue,كتالوج العناصر,
+No Stock Available Currently,لا يوجد مخزون متوفر حالياً,
+No primary email found for customer: {0},لم يتم العثور على بريد إلكتروني أساسي للعميل: {0},
+No.,لا.,
+Opening Balances,الأرصدة الافتتاحية,
+Percentage (%),النسبة المئوية (%),
+Please make sure the file you are using has 'Parent Account' column present in the header.,"يرجى التأكد من أن الملف الذي تستخدمه يحتوي على عمود ""الحساب الأب"" في رأس الملف.",
+Qty ,الكمية ,
+Recent Orders,الطلبات الأخيرة,
+Reference No,رقم المرجع,
+Reserved Stock,المخزون المحجوز,
+Returned Qty ,عاد الكمية ,
+Salary Currency,عملة الراتب,
+Sales Partner ,شريك المبيعات ,
+Select an invoice to load summary data,حدد فاتورة لتحميل ملخص البيانات,
+Service Expenses,مصاريف الخدمة,
+Service Item,بند الخدمة,
+Time in mins.,الوقت بالدقائق.,
+Total Items,إجمالي السلع,
+Total Time (in Mins),الوقت الإجمالي (بالدقائق),
+Transaction Name,اسم المعاملة,
+Voucher,سند,
+Warning!,تحذير!,
+description,وصف,
+doctype,dOCTYPE,
+fieldname,اسم الحقل,
+variance,فرق,
+{0} is added multiple times on rows: {1},{0} تمت إضافته عدة مرات في السطور: {1},
+{} Open,{} مفتوحة,

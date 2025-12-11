@@ -85,6 +85,12 @@ frappe.query_reports["Gross Profit"] = {
 				});
 			},
 		},
+		{
+			fieldname: "include_returned_invoices",
+			label: __("Include Returned Invoices (Stand-alone)"),
+			fieldtype: "Check",
+			default: 1,
+		},
 	],
 	tree: true,
 	name_field: "parent",

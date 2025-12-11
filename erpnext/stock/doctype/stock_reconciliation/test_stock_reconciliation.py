@@ -45,6 +45,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 	def test_reco_for_moving_average(self):
 		self._test_reco_sle_gle("Moving Average")
 
+	@change_settings("Stock Settings", {"allow_negative_stock": 1})
 	def _test_reco_sle_gle(self, valuation_method):
 		item_code = self.make_item(properties={"valuation_method": valuation_method}).name
 

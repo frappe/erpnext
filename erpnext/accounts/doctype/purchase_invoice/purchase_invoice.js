@@ -12,6 +12,7 @@ erpnext.buying.setup_buying_controller();
 
 erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.BuyingController {
 	setup(doc) {
+		this.setup_accounting_dimension_triggers();
 		this.setup_posting_date_time_check();
 		super.setup(doc);
 
@@ -125,8 +126,8 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			}
 		}
 
-		if (doc.outstanding_amount > 0 && !cint(doc.is_return) && !doc.on_hold) {
-			cur_frm.add_custom_button(
+		if (doc.docstatus == 1 && doc.outstanding_amount > 0 && !cint(doc.is_return) && !doc.on_hold) {
+			this.frm.add_custom_button(
 				__("Payment Request"),
 				function () {
 					me.make_payment_request();

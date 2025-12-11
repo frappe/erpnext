@@ -285,7 +285,7 @@ class Timesheet(Document):
 			if data.activity_type or data.is_billable:
 				rate = get_activity_cost(self.employee, data.activity_type)
 				hours = data.billing_hours or 0
-				costing_hours = data.billing_hours or data.hours or 0
+				costing_hours = data.hours or 0
 				if rate:
 					data.billing_rate = (
 						flt(rate.get("billing_rate")) if flt(data.billing_rate) == 0 else data.billing_rate

@@ -82,10 +82,53 @@ frappe.ui.form.on("Subcontracting Receipt", {
 			frm.add_custom_button(
 				__("Subcontract Return"),
 				() => {
-					frappe.model.open_mapped_doc({
-						method: "erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_subcontract_return",
-						frm: frm,
+					const make_standard_return = () => {
+						frappe.model.open_mapped_doc({
+							method: "erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_subcontract_return",
+							frm: frm,
+						});
+					};
+
+					let has_rejected_items = frm.doc.items.filter((item) => {
+						if (item.rejected_qty > 0) {
+							return true;
+						}
 					});
+
+					if (has_rejected_items && has_rejected_items.length > 0) {
+						frappe.prompt(
+							[
+								{
+									label: __("Return Qty from Rejected Warehouse"),
+									fieldtype: "Check",
+									fieldname: "return_for_rejected_warehouse",
+									default: 1,
+								},
+							],
+							function (values) {
+								if (values.return_for_rejected_warehouse) {
+									frappe.call({
+										method: "erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_subcontract_return_against_rejected_warehouse",
+										args: {
+											source_name: frm.doc.name,
+										},
+										callback: function (r) {
+											if (r.message) {
+												frappe.model.sync(r.message);
+												frappe.set_route("Form", r.message.doctype, r.message.name);
+											}
+										},
+									});
+								} else {
+									make_standard_return();
+								}
+							},
+							__("Return Qty"),
+							__("Make Return Entry")
+						);
+					} else {
+						make_standard_return();
+					}
 				},
 				__("Create")
 			);

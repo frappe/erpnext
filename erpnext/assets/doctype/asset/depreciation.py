@@ -537,6 +537,7 @@ def modify_depreciation_schedule_for_asset_repairs(asset, notes):
 	for repair in asset_repairs:
 		if repair.increase_in_asset_life:
 			asset_repair = frappe.get_doc("Asset Repair", repair.name)
+			asset_repair.asset_doc = asset
 			asset_repair.modify_depreciation_schedule()
 			make_new_active_asset_depr_schedules_and_cancel_current_ones(asset, notes)
 

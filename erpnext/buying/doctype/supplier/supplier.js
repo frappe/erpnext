@@ -41,18 +41,20 @@ frappe.ui.form.on("Supplier", {
 
 		frm.set_query("supplier_primary_contact", function (doc) {
 			return {
-				query: "erpnext.buying.doctype.supplier.supplier.get_supplier_primary_contact",
+				query: "erpnext.buying.doctype.supplier.supplier.get_supplier_primary",
 				filters: {
 					supplier: doc.name,
+					type: "Contact",
 				},
 			};
 		});
 
 		frm.set_query("supplier_primary_address", function (doc) {
 			return {
+				query: "erpnext.buying.doctype.supplier.supplier.get_supplier_primary",
 				filters: {
-					link_doctype: "Supplier",
-					link_name: doc.name,
+					supplier: doc.name,
+					type: "Address",
 				},
 			};
 		});
@@ -137,6 +139,14 @@ frappe.ui.form.on("Supplier", {
 			// indicators
 			erpnext.utils.set_party_dashboard_indicators(frm);
 		}
+
+		frm.set_query("supplier_group", () => {
+			return {
+				filters: {
+					is_group: 0,
+				},
+			};
+		});
 	},
 	get_supplier_group_details: function (frm) {
 		frappe.call({
