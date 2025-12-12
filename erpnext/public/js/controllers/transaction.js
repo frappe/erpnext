@@ -1216,6 +1216,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						party:
 							me.frm.doc.doctype == "Sales Invoice" ? me.frm.doc.customer : me.frm.doc.supplier,
 						company: me.frm.doc.company,
+						template_name: me.frm.doc.payment_terms_template,
+
 					},
 					callback: function (r, rt) {
 						if (r.message) {
