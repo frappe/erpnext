@@ -329,12 +329,10 @@ class DataCollector:
 		self.account_fields = {field.fieldname for field in frappe.get_meta("Account").fields}
 
 	def add_account_request(self, row):
-		accounts = self._parse_account_filter(self.company, row)
-
 		self.account_requests.append(
 			{
 				"row": row,
-				"accounts": accounts,
+				"accounts": self._parse_account_filter(self.company, row),
 				"balance_type": row.balance_type,
 				"reference_code": row.reference_code,
 				"reverse_sign": row.reverse_sign,
@@ -348,7 +346,7 @@ class DataCollector:
 		# Get all unique accounts
 		all_accounts = set()
 		for request in self.account_requests:
-			all_accounts.update(request["accounts"])
+			all_accounts.update([acc.name for acc in request["accounts"]])
 
 		all_accounts = list(all_accounts)
 		if not all_accounts:
@@ -373,7 +371,9 @@ class DataCollector:
 			total_values = [0.0] * len(self.periods)
 			request_account_details = {}
 
-			for account_name in accounts:
+			for account in accounts:
+				account_name = account.name
+
 				if account_name not in account_data:
 					continue
 
@@ -396,20 +396,21 @@ class DataCollector:
 		return {"account_data": account_data, "summary": summary, "account_details": account_details}
 
 	@staticmethod
-	def _parse_account_filter(company, report_row) -> list[str]:
+	def _parse_account_filter(company, report_row) -> list[dict]:
 		"""
 		Find accounts matching filter criteria.
 
 		Example:
-		                Input: '["account_type", "=", "Cash"]'
-		                Output: ["Cash - COMP", "Petty Cash - COMP", "Bank - COMP"]
+
+		- Input: '["account_type", "=", "Cash"]'
+		- Output: [{"name": "Cash - COMP", "account_name": "Cash", "account_number": "1001"}]
 		"""
 		filter_parser = FilterExpressionParser()
 
 		account = frappe.qb.DocType("Account")
 		query = (
 			frappe.qb.from_(account)
-			.select(account.name)
+			.select(account.name, account.account_name, account.account_number)
 			.where(account.disabled == 0)
 			.where(account.is_group == 0)
 		)
@@ -423,8 +424,8 @@ class DataCollector:
 
 		query = query.where(where_condition)
 		query = query.orderby(account.name)
-		result = query.run(as_dict=True)
-		return [row.name for row in result]
+
+		return query.run(as_dict=True)
 
 	@staticmethod
 	def get_filtered_accounts(company: str, account_rows: list) -> list[str]:
