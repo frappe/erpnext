@@ -1519,18 +1519,24 @@ def get_batchwise_qty(voucher_type, voucher_no):
 	if not bundles:
 		return
 
-	batches = frappe.get_all(
-		"Serial and Batch Entry",
-		filters={"parent": ("in", bundles), "batch_no": ("is", "set")},
-		fields=["batch_no", {"SUM": "qty", "as": "qty"}],
-		group_by="batch_no",
-		as_list=1,
-	)
+	# Use query builder for aggregation
+	entry_table = frappe.qb.DocType("Serial and Batch Entry")
+	
+	batches = (
+		frappe.qb.from_(entry_table)
+		.select(entry_table.batch_no, Sum(entry_table.qty).as_("qty"))
+		.where(
+			(entry_table.parent.isin(bundles))
+			& (entry_table.batch_no.isnotnull())
+		)
+		.groupby(entry_table.batch_no)
+	).run(as_dict=True)
 
 	if not batches:
 		return frappe._dict({})
 
-	return frappe._dict(batches)
+	# Convert to dict format: {batch_no: qty}
+	return frappe._dict([(b.batch_no, b.qty) for b in batches])
 
 
 def get_serial_batch_list_from_item(item):

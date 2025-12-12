@@ -200,7 +200,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def onload(self):
 		for item in self.get("items"):
-			item.update(get_bin_details(item.item_code, item.s_warehouse))
+			# For Material Receipt, use t_warehouse; for others, use s_warehouse
+			warehouse = item.t_warehouse if self.purpose == "Material Receipt" else item.s_warehouse
+			if warehouse:
+				item.update(get_bin_details(item.item_code, warehouse))
 
 	def before_insert(self):
 		if self.subcontracting_order and frappe.get_cached_value(

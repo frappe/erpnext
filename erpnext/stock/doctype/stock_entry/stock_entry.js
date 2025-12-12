@@ -228,6 +228,19 @@ frappe.ui.form.on("Stock Entry", {
 	refresh: function (frm) {
 		frm.trigger("get_items_from_transit_entry");
 
+		// Refresh actual_qty for Material Receipt items (both draft and submitted)
+		if (frm.doc.purpose === "Material Receipt" && frm.doc.items?.length) {
+			frappe.after_ajax(() => {
+				setTimeout(() => {
+					frm.doc.items.forEach((row) => {
+						if (row.item_code && row.t_warehouse) {
+							frm.events.fetch_actual_qty_for_material_receipt(frm, row);
+						}
+					});
+				}, 100);
+			});
+		}
+
 		if (!frm.doc.docstatus && !frm.doc.subcontracting_inward_order) {
 			frm.trigger("validate_purpose_consumption");
 			frm.add_custom_button(
@@ -643,6 +656,39 @@ frappe.ui.form.on("Stock Entry", {
 				},
 			});
 		}
+	},
+
+	fetch_actual_qty_for_material_receipt: function (frm, row) {
+		if (!row.item_code || !row.t_warehouse) return;
+
+		frappe.call({
+			method: "erpnext.stock.doctype.stock_entry.stock_entry.get_warehouse_details",
+			args: {
+				args: {
+					item_code: row.item_code,
+					warehouse: row.t_warehouse,
+					transfer_qty: row.transfer_qty,
+					serial_and_batch_bundle: row.serial_and_batch_bundle,
+					qty: row.transfer_qty,
+					posting_date: frm.doc.posting_date,
+					posting_time: frm.doc.posting_time,
+					company: frm.doc.company,
+					voucher_type: frm.doc.doctype,
+					voucher_no: row.name,
+					allow_zero_valuation: 1,
+				},
+			},
+			callback: function (r) {
+				if (!r.exc && r.message && r.message.actual_qty !== undefined) {
+					// Directly update the row without triggering form dirty state
+					row.actual_qty = r.message.actual_qty || 0;
+					// Only refresh the field if form is already loaded
+					if (frm.fields_dict.items && frm.fields_dict.items.grid) {
+						frm.fields_dict.items.grid.refresh_field("actual_qty");
+					}
+				}
+			},
+		});
 	},
 
 	show_bom_custom_button: function (frm) {
