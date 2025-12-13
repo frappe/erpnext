@@ -485,8 +485,11 @@ class FinancialQueryBuilder:
 		Returns:
 		    dict: {account: AccountData}
 		"""
-		account_names = [acc.name for acc in accounts]
-		self.account_meta = {acc.pop("name"): acc for acc in accounts}
+		account_names = list({acc.name for acc in accounts})
+		# NOTE: do not change accounts list as it is used in caller function
+		self.account_meta = {
+			acc.name: {"acc_name": acc.acc_name, "acc_number": acc.acc_number} for acc in accounts
+		}
 
 		balances_data = self._get_opening_balances(account_names)
 		gl_data = self._get_gl_movements(account_names)
