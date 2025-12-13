@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-07 09:36+0000\n"
-"PO-Revision-Date: 2025-12-08 01:11\n"
+"PO-Revision-Date: 2025-12-13 01:36\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Hungarian\n"
 "MIME-Version: 1.0\n"
@@ -21544,7 +21544,7 @@ msgstr ""
 #: erpnext/setup/workspace/home/home.json
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Import Data"
-msgstr ""
+msgstr "Adatok Importálása"
 
 #: erpnext/edi/doctype/code_list/code_list.js:7
 #: erpnext/edi/doctype/code_list/code_list_list.js:3
@@ -26215,7 +26215,7 @@ msgstr ""
 #. 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
 msgid "Linked Documents"
-msgstr ""
+msgstr "Kapcsolódó Dokumentumok"
 
 #. Label of the section_break_12 (Section Break) field in DocType 'POS Closing
 #. Entry'
@@ -41154,7 +41154,7 @@ msgstr ""
 #: erpnext/quality_management/doctype/quality_procedure/quality_procedure.json
 #: erpnext/quality_management/doctype/quality_review/quality_review.json
 msgid "Reviews"
-msgstr ""
+msgstr "Vélemények"
 
 #: erpnext/accounts/doctype/budget/budget.js:37
 msgid "Revise Budget"
@@ -45778,7 +45778,7 @@ msgstr ""
 #. Label of the short_name (Data) field in DocType 'Manufacturer'
 #: erpnext/stock/doctype/manufacturer/manufacturer.json
 msgid "Short Name"
-msgstr ""
+msgstr "Rövid Név"
 
 #. Label of the short_term_loan (Link) field in DocType 'Invoice Discounting'
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.json
@@ -51238,7 +51238,7 @@ msgstr ""
 #: erpnext/setup/doctype/email_digest/email_digest.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Tools"
-msgstr ""
+msgstr "Eszközök"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
