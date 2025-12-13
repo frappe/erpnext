@@ -1,7 +1,7 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 import frappe
 from frappe import _
@@ -10,6 +10,7 @@ from frappe.utils import cint, flt, sbool
 from pypika.terms import ValueWrapper
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
+from erpnext.projects.doctype.activity_cost.activity_cost import DuplicationError
 
 BOM_FIELDS = [
 	"company",
@@ -80,7 +81,7 @@ class BOMCreator(Document):
 		self.validate_items()
 
 	def validate_items(self):
-		dict_items = {}
+		dict_items = defaultdict(list)
 		for row in self.items:
 			if row.is_expandable and row.item_code == self.item_code:
 				frappe.throw(_("Item {0} cannot be added as a sub-assembly of itself").format(row.item_code))
@@ -97,18 +98,14 @@ class BOMCreator(Document):
 					title=_("Remove Parent Row No in Items Table"),
 				)
 
-			if row.fg_item not in dict_items:
-				dict_items[row.fg_item] = []
-
 			if row.item_code in dict_items[row.fg_item]:
 				frappe.throw(
 					_("Row #{0}: Duplicate entry in Item {1} under {2}").format(
 						frappe.bold(row.idx), frappe.bold(row.item_code), frappe.bold(row.fg_item)
-					)
+					),
+					DuplicationError,
 				)
-
-			else:
-				dict_items[row.fg_item].append(row.item_code)
+			dict_items[row.fg_item].append(row.item_code)
 
 	def set_status(self, save=False):
 		self.status = {

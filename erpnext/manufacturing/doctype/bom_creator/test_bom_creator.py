@@ -10,6 +10,8 @@ from erpnext.manufacturing.doctype.bom_creator.bom_creator import (
 	add_item,
 	add_sub_assembly,
 )
+from erpnext.projects.doctype.activity_cost.activity_cost import DuplicationError
+from erpnext.stock.doctype.item.item import get_item_details
 from erpnext.stock.doctype.item.test_item import make_item
 
 
@@ -115,6 +117,48 @@ class TestBOMCreator(IntegrationTestCase):
 				self.assertEqual(row.fg_reference_id, doc.name)
 
 		self.assertEqual(doc.raw_material_cost, fg_valuation_rate)
+
+	def test_bom_duplicate_raw_material(self):
+		final_product = "Bicycle"
+		make_item(
+			final_product,
+			{
+				"item_group": "Raw Material",
+				"stock_uom": "Nos",
+			},
+		)
+
+		doc = make_bom_creator(
+			name="Bicycle Test",
+			company="_Test Company",
+			item_code=final_product,
+			qty=1,
+			rm_cosy_as_per="Valuation Rate",
+			currency="INR",
+			plc_conversion_rate=1,
+			conversion_rate=1,
+		)
+
+		ls_item = ["Pedal Assembly", "Pedal Assembly"]
+
+		for item in ls_item:
+			item_info = get_item_details(item)
+
+			doc.append(
+				"items",
+				{
+					"parent": doc.name,
+					"fg_item": final_product,
+					"fg_reference_id": doc.name,
+					"item_code": item,
+					"qty": 2,
+					"uom": item_info.stock_uom,
+					"stock_uom": item_info.stock_uom,
+					"conversion_factor": 1,
+				},
+			)
+
+		self.assertRaises(DuplicationError, doc.save)
 
 	def test_convert_to_sub_assembly(self):
 		final_product = "Bicycle"

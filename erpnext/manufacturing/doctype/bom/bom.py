@@ -16,6 +16,7 @@ from frappe.utils import cint, cstr, flt, get_link_to_form, parse_json, today
 from frappe.website.website_generator import WebsiteGenerator
 
 import erpnext
+from erpnext.projects.doctype.activity_cost.activity_cost import DuplicationError
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_item_details
 from erpnext.stock.get_item_details import ItemDetailsCtx, get_conversion_factor, get_price_list_rate
@@ -293,10 +294,10 @@ class BOM(WebsiteGenerator):
 				frappe.throw(
 					_("Row #{0}: Duplicate entry in Item {1}").format(
 						frappe.bold(row.idx), frappe.bold(row.item_code)
-					)
+					),
+					DuplicationError,
 				)
-			else:
-				item_list.append(row.item_code)
+			item_list.append(row.item_code)
 
 	def set_default_uom(self):
 		if not self.get("items"):

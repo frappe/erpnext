@@ -16,6 +16,7 @@ from erpnext.manufacturing.doctype.bom.bom import BOMRecursionError, item_query,
 from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
 	update_cost_in_all_boms_in_test,
 )
+from erpnext.projects.doctype.activity_cost.activity_cost import DuplicationError
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
@@ -418,6 +419,17 @@ class TestBOM(IntegrationTestCase):
 		with self.assertRaises(BOMRecursionError):
 			bom1.save()
 			bom2.save()
+
+	@timeout
+	def test_bom_duplicate_item(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+
+		bom = frappe.new_doc("BOM")
+		bom.item = item
+		bom.append("items", frappe._dict(item_code=item))
+		bom.append("items", frappe._dict(item_code=item))
+
+		self.assertRaises(DuplicationError, bom.save)
 
 	@timeout
 	def test_bom_with_process_loss_item(self):
