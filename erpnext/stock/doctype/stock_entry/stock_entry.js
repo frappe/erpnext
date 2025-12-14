@@ -162,6 +162,11 @@ frappe.ui.form.on("Stock Entry", {
 				};
 			});
 		}
+
+		if (frm.doc.job_card && frm.doc.purpose === "Manufacture") {
+			frm.set_df_property("fg_completed_qty", "read_only", 1);
+			frm.set_df_property("get_items", "hidden", 1);
+		}
 	},
 
 	setup_quality_inspection: function (frm) {

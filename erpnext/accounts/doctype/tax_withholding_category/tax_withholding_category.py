@@ -85,6 +85,9 @@ def get_party_details(inv):
 	if inv.doctype == "Sales Invoice":
 		party_type = "Customer"
 		party = inv.customer
+	elif inv.doctype == "Journal Entry":
+		party_type = inv.party_type
+		party = inv.party
 	else:
 		party_type = "Supplier"
 		party = inv.supplier
@@ -155,7 +158,7 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 		party_type, parties, inv, tax_details, posting_date, pan_no
 	)
 
-	if party_type == "Supplier":
+	if party_type == "Supplier" or inv.doctype == "Journal Entry":
 		tax_row = get_tax_row_for_tds(tax_details, tax_amount)
 	else:
 		tax_row = get_tax_row_for_tcs(inv, tax_details, tax_amount, tax_deducted)
@@ -346,7 +349,10 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 	elif party_type == "Customer":
 		if tax_deducted:
 			# if already TCS is charged, then amount will be calculated based on 'Previous Row Total'
-			tax_amount = 0
+			if inv.doctype == "Sales Invoice":
+				tax_amount = 0
+			else:
+				tax_amount = inv.base_tax_withholding_net_total * tax_details.rate / 100
 		else:
 			#  if no TCS has been charged in FY,
 			# then chargeable value is "prev invoices + advances - advance_adjusted" value which cross the threshold
@@ -718,7 +724,7 @@ def get_advance_adjusted_in_invoice(inv):
 
 
 def get_invoice_total_without_tcs(inv, tax_details):
-	tcs_tax_row = [d for d in inv.taxes if d.account_head == tax_details.account_head]
+	tcs_tax_row = [d for d in inv.get("taxes") or [] if d.account_head == tax_details.account_head]
 	tcs_tax_row_amount = tcs_tax_row[0].base_tax_amount if tcs_tax_row else 0
 
 	return inv.grand_total - tcs_tax_row_amount

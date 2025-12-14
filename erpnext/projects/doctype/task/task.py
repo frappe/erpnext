@@ -8,6 +8,7 @@ import frappe
 from frappe import _, throw
 from frappe.desk.form.assign_to import clear, close_all_assignments
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import add_days, add_to_date, cstr, date_diff, flt, get_link_to_form, getdate, today
 from frappe.utils.data import format_date
 from frappe.utils.nestedset import NestedSet
@@ -218,15 +219,22 @@ class Task(NestedSet):
 			clear(self.doctype, self.name)
 
 	def update_time_and_costing(self):
-		tl = frappe.db.sql(
-			"""select min(from_time) as start_date, max(to_time) as end_date,
-			sum(billing_amount) as total_billing_amount, sum(costing_amount) as total_costing_amount,
-			sum(hours) as time from `tabTimesheet Detail` where task = %s and docstatus=1""",
-			self.name,
-			as_dict=1,
-		)[0]
-		self.total_costing_amount = tl.total_costing_amount
-		self.total_billing_amount = tl.total_billing_amount
+		TimesheetDetail = frappe.qb.DocType("Timesheet Detail")
+		tl = (
+			frappe.qb.from_(TimesheetDetail)
+			.select(
+				Min(TimesheetDetail.from_time).as_("start_date"),
+				Max(TimesheetDetail.to_time).as_("end_date"),
+				Sum(TimesheetDetail.billing_amount).as_("total_billing_amount"),
+				Sum(TimesheetDetail.costing_amount).as_("total_costing_amount"),
+				Sum(TimesheetDetail.hours).as_("time"),
+				Sum(TimesheetDetail.base_costing_amount).as_("base_costing_amount"),
+				Sum(TimesheetDetail.base_billing_amount).as_("base_billing_amount"),
+			)
+			.where((TimesheetDetail.task == self.name) & (TimesheetDetail.docstatus == 1))
+		).run(as_dict=True)[0]
+		self.total_costing_amount = tl.base_costing_amount
+		self.total_billing_amount = tl.base_billing_amount
 		self.actual_time = tl.time
 		self.act_start_date = tl.start_date
 		self.act_end_date = tl.end_date

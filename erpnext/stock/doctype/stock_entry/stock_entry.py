@@ -216,6 +216,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.get("items") and apply_rule:
 			apply_putaway_rule(self.doctype, self.get("items"), self.company, purpose=self.purpose)
 
+		if self.project:
+			for item in self.items:
+				if not item.project:
+					item.project = self.project
+
 	def validate(self):
 		self.pro_doc = frappe._dict()
 		if self.work_order:
@@ -525,15 +530,16 @@ class StockEntry(StockController, SubcontractingInwardController):
 		):
 			return
 
-		if self.project:
+		projects = set(item.project for item in self.items if item.project)
+		for project in projects:
 			amount = frappe.db.sql(
-				""" select ifnull(sum(sed.amount), 0)
+				""" select ifnull(sum(amount), 0)
 				from
-					`tabStock Entry` se, `tabStock Entry Detail` sed
+					`tabStock Entry Detail`
 				where
-					se.docstatus = 1 and se.project = %s and sed.parent = se.name
-					and (sed.t_warehouse is null or sed.t_warehouse = '')""",
-				self.project,
+					docstatus = 1 and project = %s
+					and (t_warehouse is null or t_warehouse = '')""",
+				project,
 				as_list=1,
 			)
 
@@ -545,14 +551,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 				where
 					se.docstatus = 1 and se.project = %s and sed.parent = se.name
 					and se.purpose = 'Manufacture'""",
-				self.project,
+				project,
 				as_list=1,
 			)
 
 			additional_cost_amt = additional_costs[0][0] if additional_costs else 0
 
 			amount += additional_cost_amt
-			project = frappe.get_doc("Project", self.project)
+			project = frappe.get_doc("Project", project)
 			project.total_consumed_material_cost = amount
 			project.save()
 
@@ -1920,6 +1926,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				job_doc.set_transferred_qty(update_status=True)
 				job_doc.set_transferred_qty_in_job_card_item(self)
 			else:
+				job_doc.set_consumed_qty_in_job_card_item(self)
 				job_doc.set_manufactured_qty()
 
 		if self.work_order:
@@ -1953,6 +1960,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if (
 				self.purpose == "Manufacture"
 				and not pro_doc.sales_order
+				and not self.job_card
 				and not pro_doc.production_plan_sub_assembly_item
 				and not pro_doc.subcontracting_inward_order
 			):
@@ -2150,7 +2158,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 					},
 				)
 
-	def get_items_for_disassembly(self, disassemble_qty, production_item):
+	def get_items_for_disassembly(self):
 		"""Get items for Disassembly Order"""
 
 		if not self.work_order:
@@ -2163,7 +2171,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		items_dict = get_bom_items_as_dict(
 			self.bom_no,
 			self.company,
-			disassemble_qty,
+			self.fg_completed_qty,
 			fetch_exploded=self.use_multi_level_bom,
 			fetch_qty_in_stock_uom=False,
 		)
@@ -2180,8 +2188,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 				child_row.qty = bom_items.get("qty", child_row.qty)
 				child_row.amount = bom_items.get("amount", child_row.amount)
 
-			if row.item_code == production_item:
-				child_row.qty = disassemble_qty
+			if row.is_finished_item:
+				child_row.qty = self.fg_completed_qty
 
 			child_row.s_warehouse = (self.from_warehouse or s_warehouse) if row.is_finished_item else ""
 			child_row.t_warehouse = row.s_warehouse
@@ -2217,12 +2225,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 		)
 
 	@frappe.whitelist()
-	def get_items(self, qty=None, production_item=None):
+	def get_items(self):
 		self.set("items", [])
 		self.validate_work_order()
 
-		if self.purpose == "Disassemble" and qty is not None:
-			return self.get_items_for_disassembly(qty, production_item)
+		if self.purpose == "Disassemble":
+			return self.get_items_for_disassembly()
 
 		if not self.posting_date or not self.posting_time:
 			frappe.throw(_("Posting date and posting time is mandatory"))

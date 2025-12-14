@@ -214,6 +214,9 @@ class OpeningInvoiceCreationTool(Document):
 			}
 		)
 
+		if self.invoice_type == "Purchase" and row.supplier_invoice_date:
+			invoice.update({"bill_date": row.supplier_invoice_date})
+
 		accounting_dimension = get_accounting_dimensions()
 		for dimension in accounting_dimension:
 			invoice.update({dimension: self.get(dimension) or item.get(dimension)})

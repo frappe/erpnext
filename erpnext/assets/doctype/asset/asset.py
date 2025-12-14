@@ -7,6 +7,7 @@ import math
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import (
 	cint,
 	flt,
@@ -121,7 +122,7 @@ class Asset(AccountsController):
 	def validate(self):
 		self.validate_category()
 		self.validate_precision()
-		self.validate_linked_purchase_docs()
+		self.validate_linked_purchase_documents()
 		self.set_purchase_doc_row_item()
 		self.validate_asset_values()
 		self.validate_asset_and_reference()
@@ -422,20 +423,67 @@ class Asset(AccountsController):
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(self.purchase_date):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
 
-	def validate_linked_purchase_docs(self):
-		for doctype_field, doctype_name in [
+	def validate_linked_purchase_documents(self):
+		for fieldname, doctype in [
 			("purchase_receipt", "Purchase Receipt"),
 			("purchase_invoice", "Purchase Invoice"),
 		]:
-			linked_doc = getattr(self, doctype_field, None)
-			if linked_doc:
-				docstatus = frappe.db.get_value(doctype_name, linked_doc, "docstatus")
-				if docstatus == 0:
-					frappe.throw(
-						_("{0} is still in Draft. Please submit it before saving the Asset.").format(
-							get_link_to_form(doctype_name, linked_doc)
-						)
+			purchase_doc = getattr(self, fieldname, None)
+
+			if not purchase_doc:
+				continue
+
+			if frappe.db.get_value(doctype, purchase_doc, "docstatus") == 0:
+				frappe.throw(
+					_("{0} is in Draft. Submit it before creating the Asset.").format(
+						get_link_to_form(doctype, purchase_doc)
 					)
+				)
+
+			self.validate_asset_qty_with_purchase_doc(doctype, purchase_doc)
+
+	def validate_asset_qty_with_purchase_doc(self, doctype, purchase_doc):
+		Asset = frappe.qb.DocType("Asset")
+
+		if doctype == "Purchase Invoice":
+			asset_filter = Asset.purchase_invoice == purchase_doc
+		else:
+			asset_filter = Asset.purchase_receipt == purchase_doc
+
+		existing_asset_qty = (
+			frappe.qb.from_(Asset)
+			.select(IfNull(Sum(Asset.asset_quantity), 0))
+			.where((Asset.item_code == self.item_code) & (Asset.name != self.name) & (Asset.docstatus != 2))
+			.where(asset_filter)
+		).run()[0][0]
+
+		PurchaseDoc = frappe.qb.DocType(doctype)
+		PurchaseDocItems = frappe.qb.DocType(f"{doctype} Item")
+
+		purchased_qty = (
+			frappe.qb.from_(PurchaseDoc)
+			.join(PurchaseDocItems)
+			.on(PurchaseDoc.name == PurchaseDocItems.parent)
+			.select(IfNull(Sum(PurchaseDocItems.qty), 0))
+			.where(PurchaseDoc.name == purchase_doc)
+			.where(PurchaseDocItems.item_code == self.item_code)
+		).run()[0][0]
+
+		if (existing_asset_qty + self.asset_quantity) > purchased_qty:
+			frappe.throw(
+				_(
+					"<b>Cannot create asset.</b><br><br>"
+					"You're trying to create <b>{0} asset(s)</b> from {2} {3}.<br>"
+					"However, only <b>{1} item(s)</b> were purchased and <b>{4} asset(s)</b> already exist against {5}."
+				).format(
+					self.asset_quantity,
+					purchased_qty,
+					doctype,
+					get_link_to_form(doctype, purchase_doc),
+					existing_asset_qty,
+					purchase_doc,
+				)
+			)
 
 	def validate_gross_and_purchase_amount(self):
 		if self.is_existing_asset:

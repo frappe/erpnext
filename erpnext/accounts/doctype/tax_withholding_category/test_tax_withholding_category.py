@@ -849,6 +849,90 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.assertEqual(payment.taxes[0].tax_amount, 6000)
 		self.assertEqual(payment.taxes[0].allocated_amount, 6000)
 
+	def test_tds_on_journal_entry_for_supplier(self):
+		"""Test TDS deduction for Supplier in Debit Note"""
+		frappe.db.set_value(
+			"Supplier", "Test TDS Supplier", "tax_withholding_category", "Cumulative Threshold TDS"
+		)
+
+		jv = make_journal_entry_with_tax_withholding(
+			party_type="Supplier",
+			party="Test TDS Supplier",
+			voucher_type="Debit Note",
+			amount=50000,
+			save=False,
+		)
+		jv.apply_tds = 1
+		jv.tax_withholding_category = "Cumulative Threshold TDS"
+		jv.save()
+
+		# Again saving should not change tds amount
+		jv.user_remark = "Test TDS on Journal Entry for Supplier"
+		jv.save()
+		jv.submit()
+
+		# TDS = 50000 * 10% = 5000
+		self.assertEqual(len(jv.accounts), 3)
+
+		# Find TDS account row
+		tds_row = None
+		supplier_row = None
+		for row in jv.accounts:
+			if row.account == "TDS - _TC":
+				tds_row = row
+			elif row.party == "Test TDS Supplier":
+				supplier_row = row
+
+		self.assertEqual(tds_row.credit, 5000)
+		self.assertEqual(tds_row.debit, 0)
+
+		# Supplier amount should be reduced by TDS
+		self.assertEqual(supplier_row.credit, 45000)
+		jv.cancel()
+
+	def test_tcs_on_journal_entry_for_customer(self):
+		"""Test TCS collection for Customer in Credit Note"""
+		frappe.db.set_value(
+			"Customer", "Test TCS Customer", "tax_withholding_category", "Cumulative Threshold TCS"
+		)
+
+		# Create Credit Note with amount exceeding threshold
+		jv = make_journal_entry_with_tax_withholding(
+			party_type="Customer",
+			party="Test TCS Customer",
+			voucher_type="Credit Note",
+			amount=50000,
+			save=False,
+		)
+		jv.apply_tds = 1
+		jv.tax_withholding_category = "Cumulative Threshold TCS"
+		jv.save()
+
+		# Again saving should not change tds amount
+		jv.user_remark = "Test TCS on Journal Entry for Customer"
+		jv.save()
+		jv.submit()
+
+		# Assert TCS calculation (10% on amount above threshold of 30000)
+		self.assertEqual(len(jv.accounts), 3)
+
+		# Find TCS account row
+		tcs_row = None
+		customer_row = None
+		for row in jv.accounts:
+			if row.account == "TCS - _TC":
+				tcs_row = row
+			elif row.party == "Test TCS Customer":
+				customer_row = row
+
+		# TCS should be credited (liability to government)
+		self.assertEqual(tcs_row.credit, 2000)  # above threshold 20000*10%
+		self.assertEqual(tcs_row.debit, 0)
+
+		# Customer amount should be increased by TCS
+		self.assertEqual(customer_row.debit, 52000)
+		jv.cancel()
+
 
 def cancel_invoices():
 	purchase_invoices = frappe.get_all(
@@ -995,6 +1079,88 @@ def create_payment_entry(**args):
 
 	pe.save()
 	return pe
+
+
+def make_journal_entry_with_tax_withholding(
+	party_type,
+	party,
+	voucher_type,
+	amount,
+	cost_center=None,
+	posting_date=None,
+	save=True,
+	submit=False,
+):
+	"""Helper function to create Journal Entry for tax withholding"""
+	if not cost_center:
+		cost_center = "_Test Cost Center - _TC"
+
+	jv = frappe.new_doc("Journal Entry")
+	jv.posting_date = posting_date or today()
+	jv.company = "_Test Company"
+	jv.voucher_type = voucher_type
+	jv.multi_currency = 0
+
+	if party_type == "Supplier":
+		# Debit Note: Expense Dr, Supplier Cr
+		expense_account = "Stock Received But Not Billed - _TC"
+		party_account = "Creditors - _TC"
+
+		jv.append(
+			"accounts",
+			{
+				"account": expense_account,
+				"cost_center": cost_center,
+				"debit_in_account_currency": amount,
+				"exchange_rate": 1,
+			},
+		)
+
+		jv.append(
+			"accounts",
+			{
+				"account": party_account,
+				"party_type": party_type,
+				"party": party,
+				"cost_center": cost_center,
+				"credit_in_account_currency": amount,
+				"exchange_rate": 1,
+			},
+		)
+	else:  # Customer
+		# Credit Note: Customer Dr, Income Cr
+		party_account = "Debtors - _TC"
+		income_account = "Sales - _TC"
+
+		jv.append(
+			"accounts",
+			{
+				"account": party_account,
+				"party_type": party_type,
+				"party": party,
+				"cost_center": cost_center,
+				"debit_in_account_currency": amount,
+				"exchange_rate": 1,
+			},
+		)
+
+		jv.append(
+			"accounts",
+			{
+				"account": income_account,
+				"cost_center": cost_center,
+				"credit_in_account_currency": amount,
+				"exchange_rate": 1,
+			},
+		)
+
+	if save or submit:
+		jv.insert()
+
+		if submit:
+			jv.submit()
+
+	return jv
 
 
 def create_records():

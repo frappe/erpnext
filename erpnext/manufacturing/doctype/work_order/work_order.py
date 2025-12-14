@@ -1326,14 +1326,14 @@ class WorkOrder(Document):
 
 		for d in self.get("operations"):
 			precision = d.precision("completed_qty")
-			qty = flt(d.completed_qty, precision) + flt(d.process_loss_qty, precision)
+			qty = flt(flt(d.completed_qty, precision) + flt(d.process_loss_qty, precision), precision)
 			if not qty:
 				d.status = "Pending"
-			elif flt(qty) < flt(self.qty):
+			elif qty < flt(self.qty, precision):
 				d.status = "Work in Progress"
-			elif flt(qty) == flt(self.qty):
+			elif qty == flt(self.qty, precision):
 				d.status = "Completed"
-			elif flt(qty) <= max_allowed_qty_for_wo:
+			elif qty <= flt(max_allowed_qty_for_wo, precision):
 				d.status = "Completed"
 			else:
 				frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))
@@ -1461,13 +1461,15 @@ class WorkOrder(Document):
 		update bin reserved_qty_for_production
 		called from Stock Entry for production, after submit, cancel
 		"""
+		if self.docstatus == 1:
+			self.update_returned_qty()
+
 		# calculate consumed qty based on submitted stock entries
 		self.update_consumed_qty_for_required_items()
 
 		if self.docstatus == 1:
 			# calculate transferred qty based on submitted stock entries
 			self.update_transferred_qty_for_required_items()
-			self.update_returned_qty()
 
 			# update in bin
 			self.update_reserved_qty_for_production()
@@ -1663,7 +1665,7 @@ class WorkOrder(Document):
 			wip_warehouse = None
 
 		for item in self.required_items:
-			consumed_qty = get_consumed_qty(self.name, item.item_code)
+			consumed_qty = get_consumed_qty(self.name, item.item_code) + item.returned_qty
 			item.db_set("consumed_qty", flt(consumed_qty), update_modified=False)
 
 			if not self.reserve_stock:
@@ -1680,6 +1682,7 @@ class WorkOrder(Document):
 			"warehouse": wip_warehouse,
 			"docstatus": 1,
 		}
+
 		if not self.skip_transfer:
 			filters["from_voucher_no"] = ("is", "set")
 
@@ -1743,11 +1746,17 @@ class WorkOrder(Document):
 		return bom
 
 	def set_reserved_qty_for_wip_and_fg(self, stock_entry):
+		if stock_entry.is_return:
+			return
+
 		items = frappe._dict()
 
 		stock_entry.reload()
 		if stock_entry.purpose == "Manufacture" and (
-			self.sales_order or self.production_plan_sub_assembly_item or self.subcontracting_inward_order
+			self.sales_order
+			or self.production_plan_sub_assembly_item
+			or self.subcontracting_inward_order
+			or stock_entry.job_card
 		):
 			items = self.get_finished_goods_for_reservation(stock_entry)
 		elif stock_entry.purpose == "Material Transfer for Manufacture":
@@ -1794,6 +1803,27 @@ class WorkOrder(Document):
 			item_details = self.get_wo_details()
 		elif self.subcontracting_inward_order:
 			item_details = self.get_scio_details()
+		elif stock_entry.job_card:
+			# Reserve the final product for the job card.
+			finished_good = frappe.db.get_value("Job Card", stock_entry.job_card, "finished_good")
+
+			for row in stock_entry.items:
+				if row.item_code == finished_good:
+					item_details = [
+						frappe._dict(
+							{
+								"item_code": row.item_code,
+								"stock_qty": row.qty,
+								"stock_reserved_qty": 0,
+								"warehouse": row.t_warehouse,
+								"voucher_no": stock_entry.work_order,
+								"voucher_type": "Work Order",
+								"name": row.name,
+								"delivered_qty": 0,
+							}
+						)
+					]
+					break
 		else:
 			# Reserve the final product for the sales order.
 			item_details = self.get_so_details()
@@ -2319,7 +2349,7 @@ def make_stock_entry(
 
 	stock_entry.set_stock_entry_type()
 	stock_entry.is_additional_transfer_entry = is_additional_transfer_entry
-	stock_entry.get_items(qty, work_order.production_item)
+	stock_entry.get_items()
 
 	if purpose != "Disassemble":
 		stock_entry.set_serial_no_batch_for_finished_good()

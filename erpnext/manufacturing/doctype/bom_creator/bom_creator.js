@@ -24,6 +24,7 @@ frappe.ui.form.on("BOM Creator", {
 	build_tree(frm) {
 		let $parent = $(frm.fields_dict["bom_creator"].wrapper);
 		$parent.empty();
+		$parent.closest(".section-body").css("max-width", "1100px");
 		frm.toggle_enable("item_code", false);
 
 		frappe.require("bom_configurator.bundle.js").then(() => {

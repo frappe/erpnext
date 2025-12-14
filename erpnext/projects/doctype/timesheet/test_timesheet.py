@@ -22,6 +22,15 @@ class TestTimesheet(ERPNextTestSuite):
 	def setUp(self):
 		frappe.db.delete("Timesheet")
 
+	def test_timesheet_base_amount(self):
+		emp = make_employee("test_employee_6@salary.com")
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
+
+		self.assertEqual(timesheet.time_logs[0].base_billing_rate, 50)
+		self.assertEqual(timesheet.time_logs[0].base_costing_rate, 20)
+		self.assertEqual(timesheet.time_logs[0].base_billing_amount, 100)
+		self.assertEqual(timesheet.time_logs[0].base_costing_amount, 40)
+
 	def test_timesheet_billing_amount(self):
 		emp = make_employee("test_employee_6@salary.com")
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
@@ -207,11 +216,14 @@ def make_timesheet(
 	project=None,
 	task=None,
 	company=None,
+	currency=None,
+	exchange_rate=None,
 ):
 	update_activity_type(activity_type)
 	timesheet = frappe.new_doc("Timesheet")
 	timesheet.employee = employee
 	timesheet.company = company or "_Test Company"
+	timesheet.exchange_rate = exchange_rate
 	timesheet_detail = timesheet.append("time_logs", {})
 	timesheet_detail.is_billable = is_billable
 	timesheet_detail.activity_type = activity_type
@@ -220,6 +232,7 @@ def make_timesheet(
 	timesheet_detail.to_time = timesheet_detail.from_time + datetime.timedelta(hours=timesheet_detail.hours)
 	timesheet_detail.project = project
 	timesheet_detail.task = task
+	timesheet_detail.currency = currency
 
 	for data in timesheet.get("time_logs"):
 		if simulate:
@@ -241,4 +254,5 @@ def make_timesheet(
 def update_activity_type(activity_type):
 	activity_type = frappe.get_doc("Activity Type", activity_type)
 	activity_type.billing_rate = 50.0
+	activity_type.costing_rate = 20.0
 	activity_type.save(ignore_permissions=True)

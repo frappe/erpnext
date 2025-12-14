@@ -116,7 +116,7 @@ frappe.ui.form.on("Customer", {
 					address_dict: frm.doc.customer_primary_address,
 				},
 				callback: function (r) {
-					frm.set_value("primary_address", r.message);
+					frm.set_value("primary_address", frappe.utils.html2text(r.message));
 				},
 			});
 		}

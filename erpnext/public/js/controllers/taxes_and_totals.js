@@ -380,6 +380,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	calculate_taxes() {
+		// reset value from earlier calculations
+		this.grand_total_diff = 0;
+
 		const doc = this.frm.doc;
 		if (!doc.taxes?.length) return;
 
@@ -617,6 +620,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 				if (diff && Math.abs(diff) <= 5.0 / Math.pow(10, precision("tax_amount", last_tax))) {
 					me.grand_total_diff = diff;
+				} else {
+					me.grand_total_diff = 0;
 				}
 			}
 		}
@@ -626,7 +631,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		// Changing sequence can cause rounding_adjustmentng issue and on-screen discrepency
 		const me = this;
 		const tax_count = this.frm.doc.taxes?.length;
-		const grand_total_diff = this.grand_total_diff || 0;
+		const grand_total_diff = this.grand_total_diff;
 
 		this.frm.doc.grand_total = flt(
 			tax_count ? this.frm.doc["taxes"][tax_count - 1].total + grand_total_diff : this.frm.doc.net_total

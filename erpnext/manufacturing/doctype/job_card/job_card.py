@@ -940,6 +940,36 @@ class JobCard(Document):
 			},
 		)
 
+	def set_consumed_qty_in_job_card_item(self, ste_doc):
+		jc_item_names = [row.job_card_item for row in ste_doc.get("items") if row.get("job_card_item")]
+
+		if not jc_item_names:
+			return
+
+		se = frappe.qb.DocType("Stock Entry")
+		sed = frappe.qb.DocType("Stock Entry Detail")
+
+		query = (
+			frappe.qb.from_(sed)
+			.join(se)
+			.on(sed.parent == se.name)
+			.select(sed.job_card_item, Sum(sed.qty))
+			.where(
+				(sed.job_card_item.isin(jc_item_names)) & (se.docstatus == 1) & (se.purpose == "Manufacture")
+			)
+			.groupby(sed.job_card_item)
+		)
+
+		itemwise_consumed_qty = frappe._dict(query.run(as_list=True))
+
+		for row in ste_doc.items:
+			if not row.get("job_card_item"):
+				continue
+
+			consumed_qty = flt(itemwise_consumed_qty.get(row.job_card_item, 0.0))
+
+			frappe.db.set_value("Job Card Item", row.job_card_item, "consumed_qty", consumed_qty)
+
 	def set_transferred_qty_in_job_card_item(self, ste_doc):
 		def _get_job_card_items_transferred_qty(ste_doc):
 			from frappe.query_builder.functions import Sum

@@ -1432,7 +1432,18 @@ class SerialBatchCreation:
 				"batch_no",
 			]
 
-			frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
+			try:
+				frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
+			except Exception as e:
+				if e and len(e.args) > 1 and "Duplicate" in e.args[1]:
+					frappe.throw(
+						_(
+							"A naming series conflict occurred while creating serial numbers. Please change the naming series for the item {0}."
+						).format(bold(self.item_code)),
+						title=_("Duplicate Serial Number Error"),
+					)
+				else:
+					raise e
 
 		obj.update_counter(current_value)
 

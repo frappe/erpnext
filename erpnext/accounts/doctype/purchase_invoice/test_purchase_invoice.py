@@ -2931,6 +2931,29 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		pi.save()
 		self.assertEqual(pi.discount_amount, discount_amount)
 
+	def test_returned_item_purchase_receipt(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
+			make_purchase_receipt as make_purchase_receipt_from_pi,
+		)
+
+		item = create_item("_Test Returned Item Purchase Receipt", is_stock_item=1)
+
+		pi = make_purchase_invoice(item_code=item.name, qty=5, rate=100)
+
+		return_pi = make_purchase_invoice(
+			item_code=item.name,
+			is_return=1,
+			return_against=pi.name,
+			qty=-5,
+			do_not_submit=True,
+		)
+
+		return_pi.items[0].purchase_invoice_item = pi.items[0].name
+		return_pi.submit()
+
+		pr = make_purchase_receipt_from_pi(pi.name)
+		self.assertFalse(pr.items)
+
 
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(
