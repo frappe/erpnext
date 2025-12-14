@@ -41,13 +41,14 @@ frappe.ui.form.on("BOM", {
 			};
 		});
 
+		frm.phantom_bom_filters = {
+			query: "erpnext.manufacturing.doctype.bom.bom.item_query",
+			filters: {
+				is_stock_item: !frm.doc.is_phantom_bom,
+			},
+		};
 		frm.set_query("item", function () {
-			return {
-				query: "erpnext.manufacturing.doctype.bom.bom.item_query",
-				filters: {
-					is_stock_item: !frm.doc.is_phantom_bom,
-				},
-			};
+			return frm.phantom_bom_filters;
 		});
 
 		frm.set_query("project", function () {
@@ -247,6 +248,12 @@ frappe.ui.form.on("BOM", {
 			frm.$wrapper.find(".variants-intro").on("click", () => {
 				frappe.set_route("List", "Item", { variant_of: frm.doc.item });
 			});
+		}
+
+		if (frm.doc.is_phantom_bom) {
+			frm.phantom_bom_filters.filters.is_fixed_asset = 0;
+		} else {
+			delete frm.phantom_bom_filters.filters.is_fixed_asset;
 		}
 	},
 

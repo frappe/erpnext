@@ -126,10 +126,6 @@ class BOMCreator(Document):
 	def on_cancel(self):
 		self.set_status(True)
 
-	def set_conversion_factor(self):
-		for row in self.items:
-			row.conversion_factor = 1.0
-
 	def before_submit(self):
 		self.validate_fields()
 		self.set_status()
@@ -160,10 +156,11 @@ class BOMCreator(Document):
 		amount = self.get_raw_material_cost()
 		self.raw_material_cost = amount
 
-	def get_raw_material_cost(self, fg_item=None, amount=0):
+	def get_raw_material_cost(self, fg_item=None):
 		if not fg_item:
 			fg_item = self.item_code
 
+		amount = 0
 		for row in self.items:
 			if row.fg_item != fg_item:
 				continue
@@ -182,14 +179,10 @@ class BOMCreator(Document):
 					},
 					self,
 				)
-
-				row.amount = flt(row.rate) * flt(row.qty)
-
 			else:
-				row.amount = 0.0
-				row.amount = self.get_raw_material_cost(row.item_code, row.amount)
-				row.rate = flt(row.amount) / (flt(row.qty) * flt(row.conversion_factor))
+				row.rate = flt(self.get_raw_material_cost(row.item_code) * row.conversion_factor)
 
+			row.amount = flt(row.rate * row.qty)
 			amount += flt(row.amount)
 
 		return amount
@@ -200,6 +193,11 @@ class BOMCreator(Document):
 			row.is_expandable = 0
 			if row.item_code in fg_items:
 				row.is_expandable = 1
+
+	def set_conversion_factor(self):
+		for row in self.items:
+			if not row.conversion_factor:
+				row.conversion_factor = 1.0
 
 	def validate_fields(self):
 		fields = {

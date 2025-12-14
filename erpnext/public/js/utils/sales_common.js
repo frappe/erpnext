@@ -410,7 +410,10 @@ erpnext.sales_common = {
 						args: { address_dict: this.frm.doc.company_address },
 						callback: function (r) {
 							if (r.message) {
-								me.frm.set_value("company_address_display", r.message);
+								me.frm.set_value(
+									"company_address_display",
+									frappe.utils.html2text(r.message)
+								);
 							}
 						},
 					});

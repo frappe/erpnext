@@ -554,7 +554,8 @@ def repost_entries():
 		if (
 			doc.repost_only_accounting_ledgers
 			and doc.reposting_reference
-			and frappe.db.get_value("Repost Item Valuation", doc.reposting_reference, "status") != "Completed"
+			and frappe.db.get_value("Repost Item Valuation", doc.reposting_reference, "status")
+			not in ["Completed", "Skipped"]
 		):
 			continue
 

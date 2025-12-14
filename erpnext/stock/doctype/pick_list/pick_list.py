@@ -736,7 +736,10 @@ class PickList(TransactionBase):
 				pi_item.serial_no,
 				(
 					Case()
-					.when((pi_item.picked_qty > 0) & (pi_item.docstatus == 1), pi_item.picked_qty)
+					.when(
+						(pi_item.picked_qty > 0) & (pi_item.docstatus == 1),
+						pi_item.picked_qty - pi_item.delivered_qty,
+					)
 					.else_(pi_item.stock_qty)
 				).as_("picked_qty"),
 			)

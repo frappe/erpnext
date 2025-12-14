@@ -315,13 +315,30 @@ class AccountsController(TransactionBase):
 
 	def validate_company_linked_addresses(self):
 		address_fields = []
-		if self.doctype in ("Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
+		sales_doctypes = ("Quotation", "Sales Order", "Delivery Note", "Sales Invoice")
+		purchase_doctypes = ("Purchase Order", "Purchase Receipt", "Purchase Invoice", "Supplier Quotation")
+
+		if self.doctype in sales_doctypes:
 			address_fields = ["dispatch_address_name", "company_address"]
-		elif self.doctype in ("Purchase Order", "Purchase Receipt", "Purchase Invoice", "Supplier Quotation"):
+		elif self.doctype in purchase_doctypes:
 			address_fields = ["billing_address", "shipping_address"]
+
+		if not address_fields:
+			return
+
+		# Determine if drop ship applies
+		is_drop_ship = self.doctype in {
+			"Purchase Order",
+			"Sales Order",
+			"Sales Invoice",
+		} and self.is_drop_ship(self.items)
 
 		for field in address_fields:
 			address = self.get(field)
+
+			if (field in ["dispatch_address_name", "shipping_address"]) and is_drop_ship:
+				continue
+
 			if address and not frappe.db.exists(
 				"Dynamic Link",
 				{
@@ -332,10 +349,14 @@ class AccountsController(TransactionBase):
 				},
 			):
 				frappe.throw(
-					_("{0} does not belong to the {1}.").format(
+					_("{0} does not belong to the Company {1}.").format(
 						_(self.meta.get_label(field)), bold(self.company)
 					)
 				)
+
+	@staticmethod
+	def is_drop_ship(items):
+		return any(item.delivered_by_supplier for item in items)
 
 	def set_default_letter_head(self):
 		if hasattr(self, "letter_head") and not self.letter_head:

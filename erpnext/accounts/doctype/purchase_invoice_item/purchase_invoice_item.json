@@ -228,7 +228,6 @@
    "reqd": 1
   },
   {
-   "default": "1",
    "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
@@ -985,7 +984,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-14 13:00:54.441511",
+ "modified": "2025-12-13 14:10:02.379392",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

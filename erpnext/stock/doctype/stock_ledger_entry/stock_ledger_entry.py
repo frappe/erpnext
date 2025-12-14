@@ -113,17 +113,15 @@ class StockLedgerEntry(Document):
 			return
 
 		flt_precision = cint(frappe.db.get_default("float_precision")) or 2
-		for dimension, values in dimensions.items():
-			dimension_value = values.get("value")
-			available_qty = self.get_available_qty_after_prev_transaction(dimension, dimension_value)
+		available_qty = self.get_available_qty_after_prev_transaction(dimensions)
 
-			diff = flt(available_qty + flt(self.actual_qty), flt_precision)  # qty after current transaction
-			if diff < 0 and abs(diff) > 0.0001:
-				self.throw_validation_error(diff, dimension, dimension_value)
+		diff = flt(available_qty + flt(self.actual_qty), flt_precision)  # qty after current transaction
+		if diff < 0 and abs(diff) > 0.0001:
+			self.throw_validation_error(diff, dimensions)
 
-	def get_available_qty_after_prev_transaction(self, dimension, dimension_value):
+	def get_available_qty_after_prev_transaction(self, dimensions):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
-		available_qty = (
+		available_qty_query = (
 			frappe.qb.from_(sle)
 			.select(Sum(sle.actual_qty))
 			.where(
@@ -132,21 +130,27 @@ class StockLedgerEntry(Document):
 				& (sle.posting_datetime < self.posting_datetime)
 				& (sle.company == self.company)
 				& (sle.is_cancelled == 0)
-				& (sle[dimension] == dimension_value)
 			)
-		).run()
+		)
+
+		for dimension, values in dimensions.items():
+			dimension_value = values.get("value")
+			available_qty_query = available_qty_query.where(sle[dimension] == dimension_value)
+
+		available_qty = available_qty_query.run()
 
 		return available_qty[0][0] or 0
 
-	def throw_validation_error(self, diff, dimension, dimension_value):
+	def throw_validation_error(self, diff, dimensions):
 		msg = _(
-			"{0} units of {1} are required in {2} with the inventory dimension: {3} ({4}) on {5} {6} for {7} to complete the transaction."
+			"{0} units of {1} are required in {2} with the inventory dimension: {3} on {4} {5} for {6} to complete the transaction."
 		).format(
 			abs(diff),
 			frappe.get_desk_link("Item", self.item_code),
 			frappe.get_desk_link("Warehouse", self.warehouse),
-			frappe.bold(dimension),
-			frappe.bold(dimension_value),
+			frappe.bold(
+				", ".join([f"{dimension}: {values.get('value')}" for dimension, values in dimensions.items()])
+			),
 			self.posting_date,
 			self.posting_time,
 			frappe.get_desk_link(self.voucher_type, self.voucher_no),

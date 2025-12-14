@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
+from frappe.model.naming import NamingSeries
 from frappe.query_builder import Interval
 from frappe.query_builder.functions import Count, CurDate, UnixTimestamp
 from frappe.utils import (
@@ -408,6 +409,24 @@ class Item(Document):
 						frappe.bold(self.meta.get_field(field).label)
 					)
 				)
+
+			if self.is_new() and series:
+				obj = NamingSeries(series)
+				prefix = obj.get_prefix()
+				doctype = frappe.qb.DocType("Series")
+
+				query = frappe.qb.from_(doctype).select(doctype.name).where(doctype.name.like(f"{prefix}%"))
+
+				prefix_exists = query.run(as_dict=True)
+				if prefix_exists:
+					frappe.msgprint(
+						_(
+							"The {0} prefix '{1}' already exists. Please change the Serial No Series, otherwise you will get a Duplicate Entry error."
+						).format(bold(frappe.unscrub(field)), bold(prefix)),
+						title=_("Serial No Series Overlap"),
+						indicator="yellow",
+						alert=True,
+					)
 
 	def check_for_active_boms(self):
 		if self.default_bom:

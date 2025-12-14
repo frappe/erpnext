@@ -282,6 +282,8 @@ class Project(Document):
 				Min(TimesheetDetail.from_time).as_("start_date"),
 				Max(TimesheetDetail.to_time).as_("end_date"),
 				Sum(TimesheetDetail.hours).as_("time"),
+				Sum(TimesheetDetail.base_costing_amount).as_("base_costing_amount"),
+				Sum(TimesheetDetail.base_billing_amount).as_("base_billing_amount"),
 			)
 			.where((TimesheetDetail.project == self.name) & (TimesheetDetail.docstatus == 1))
 		).run(as_dict=True)[0]
@@ -289,8 +291,8 @@ class Project(Document):
 		self.actual_start_date = from_time_sheet.start_date
 		self.actual_end_date = from_time_sheet.end_date
 
-		self.total_costing_amount = from_time_sheet.costing_amount
-		self.total_billable_amount = from_time_sheet.billing_amount
+		self.total_costing_amount = from_time_sheet.base_costing_amount
+		self.total_billable_amount = from_time_sheet.base_billing_amount
 		self.actual_time = from_time_sheet.time
 
 		self.update_purchase_costing()

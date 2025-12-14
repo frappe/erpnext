@@ -25,6 +25,10 @@
   "distribute_equally",
   "section_break_fpdt",
   "budget_distribution",
+  "section_break_wkqb",
+  "column_break_paum",
+  "column_break_nwor",
+  "budget_distribution_total",
   "section_break_6",
   "applicable_on_material_request",
   "action_if_annual_budget_exceeded_on_mr",
@@ -222,7 +226,8 @@
   },
   {
    "fieldname": "section_break_fpdt",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hide_border": 1
   },
   {
    "fieldname": "budget_distribution",
@@ -303,13 +308,32 @@
    "options": "Monthly\nQuarterly\nHalf-Yearly\nYearly",
    "read_only_depends_on": "eval: doc.revision_of",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_break_wkqb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_paum",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_nwor",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "budget_distribution_total",
+   "fieldtype": "Currency",
+   "label": "Budget Distribution Total",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-19 17:00:00.648224",
+ "modified": "2025-12-10 02:35:01.197613",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Budget",

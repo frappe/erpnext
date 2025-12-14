@@ -156,7 +156,7 @@ erpnext.utils.get_address_display = function (frm, address_field, display_field,
 			args: { address_dict: frm.doc[address_field] },
 			callback: function (r) {
 				if (r.message) {
-					frm.set_value(display_field, r.message);
+					frm.set_value(display_field, frappe.utils.html2text(r.message));
 				}
 			},
 		});

@@ -934,6 +934,33 @@ class TestMaterialRequest(IntegrationTestCase):
 		self.assertEqual(mr.per_ordered, 100)
 		self.assertEqual(mr.status, "Ordered")
 
+	def test_customer_provided_received_status(self):
+		create_item("CUST-0989", is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0)
+
+		mr = make_material_request(item_code="CUST-0989", material_request_type="Customer Provided")
+		se = make_stock_entry(mr.name)
+		se.insert()
+		se.submit()
+
+		mr.reload()
+
+		self.assertEqual(mr.per_ordered, 100)
+		self.assertEqual(mr.status, "Received")
+
+	def test_customer_provided_partially_received_status(self):
+		create_item("CUST-0990", is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0)
+
+		mr = make_material_request(item_code="CUST-0990", qty=10, material_request_type="Customer Provided")
+		se = make_stock_entry(mr.name)
+		se.get("items")[0].qty = 5
+		se.insert()
+		se.submit()
+
+		mr.reload()
+
+		self.assertEqual(mr.per_ordered, 50)
+		self.assertEqual(mr.status, "Partially Received")
+
 	def test_material_request_qty_over_sales_order_limit(self):
 		from erpnext.controllers.status_updater import OverAllowanceError
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order

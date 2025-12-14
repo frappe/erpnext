@@ -21,7 +21,8 @@ frappe.listview_settings["Material Request"] = {
 		} else if (
 			doc.docstatus == 1 &&
 			flt(doc.per_ordered, precision) < 100 &&
-			doc.material_request_type == "Material Transfer"
+			(doc.material_request_type == "Material Transfer" ||
+				doc.material_request_type == "Customer Provided")
 		) {
 			return [__("Partially Received"), "yellow", "per_ordered,<,100"];
 		} else if (doc.docstatus == 1 && flt(doc.per_ordered, precision) < 100) {
