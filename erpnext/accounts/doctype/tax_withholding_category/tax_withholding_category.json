@@ -79,7 +79,7 @@
    "default": "Net Total",
    "fieldname": "tax_deduction_basis",
    "fieldtype": "Select",
-   "label": "Deduct Tax On Basis\t",
+   "label": "Deduct Tax On Basis",
    "options": "\nGross Total\nNet Total",
    "reqd": 1
   },

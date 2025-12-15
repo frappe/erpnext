@@ -203,7 +203,7 @@
    "fieldname": "dont_recompute_tax",
    "fieldtype": "Check",
    "hidden": 1,
-   "label": "Dont Recompute tax",
+   "label": "Don't Recompute Tax",
    "print_hide": 1,
    "read_only": 1
   },
