@@ -469,7 +469,8 @@ class TaxWithholdingController:
 		self._categorize_historical_entries(entries, linked_payments, open_entries)
 
 		# Add current document as under withheld
-		current_entry = self._create_default_entry(category).update(
+		current_entry = self._create_default_entry(category)
+		current_entry.update(
 			{
 				"taxable_amount": category.taxable_amount,
 				"withholding_doctype": "",
