@@ -2753,6 +2753,145 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 		self.validate_tax_withholding_entries("Payment Entry", pe.name, expected_entries)
 
+	def test_tds_on_journal_entry_for_supplier(self):
+		"""Test TDS deduction for Supplier in Debit Note"""
+		frappe.db.set_value(
+			"Supplier", "Test TDS Supplier", "tax_withholding_category", "Cumulative Threshold TDS"
+		)
+
+		jv = make_journal_entry_with_tax_withholding(
+			party_type="Supplier",
+			party="Test TDS Supplier",
+			voucher_type="Debit Note",
+			amount=50000,
+			save=False,
+		)
+		jv.apply_tds = 1
+		jv.tax_withholding_category = "Cumulative Threshold TDS"
+		jv.save()
+
+		# Again saving should not change tds amount
+		jv.user_remark = "Test TDS on Journal Entry for Supplier"
+		jv.save()
+		jv.submit()
+
+		# TDS = 50000 * 10% = 5000
+		self.assertEqual(len(jv.accounts), 3)
+
+		# Find TDS account row
+		tds_row = None
+		supplier_row = None
+		for row in jv.accounts:
+			if row.get("is_tax_withholding_account"):
+				tds_row = row
+			elif row.party_type == "Supplier":
+				supplier_row = row
+
+		self.assertIsNotNone(tds_row, "TDS account row should be created")
+		self.assertIsNotNone(supplier_row, "Supplier account row should exist")
+
+		# TDS should be credited (liability to government)
+		self.assertEqual(tds_row.credit, 5000)
+		self.assertEqual(tds_row.debit, 0)
+
+		# Supplier credit should be reduced by TDS amount
+		self.assertEqual(supplier_row.credit, 45000)  # 50000 - 5000
+
+		# Validate tax withholding entries
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TDS",
+				party_type="Supplier",
+				party="Test TDS Supplier",
+				tax_rate=10.0,
+				taxable_amount=50000.0,
+				withholding_amount=5000.0,
+				status="Settled",
+				taxable_doctype="Journal Entry",
+				taxable_name=jv.name,
+				withholding_doctype="Journal Entry",
+				withholding_name=jv.name,
+			)
+		]
+		self.validate_tax_withholding_entries("Journal Entry", jv.name, expected_entries)
+
+	def test_tcs_on_journal_entry_for_customer(self):
+		"""Test TCS collection for Customer in Credit Note"""
+		frappe.db.set_value(
+			"Customer", "Test TCS Customer", "tax_withholding_category", "Cumulative Threshold TCS"
+		)
+
+		# Create Credit Note with amount exceeding threshold
+		jv = make_journal_entry_with_tax_withholding(
+			party_type="Customer",
+			party="Test TCS Customer",
+			voucher_type="Credit Note",
+			amount=50000,
+			save=False,
+		)
+		jv.apply_tds = 1
+		jv.tax_withholding_category = "Cumulative Threshold TCS"
+		jv.save()
+
+		# Again saving should not change tds amount
+		jv.user_remark = "Test TCS on Journal Entry for Customer"
+		jv.save()
+		jv.submit()
+
+		# Assert TCS calculation (10% on amount above threshold of 30000)
+		self.assertEqual(len(jv.accounts), 3)
+
+		# Find TCS account row
+		tcs_row = None
+		customer_row = None
+		for row in jv.accounts:
+			if row.get("is_tax_withholding_account"):
+				tcs_row = row
+			elif row.party_type == "Customer":
+				customer_row = row
+
+		self.assertIsNotNone(tcs_row, "TCS account row should be created")
+		self.assertIsNotNone(customer_row, "Customer account row should exist")
+
+		# TCS should be credited (liability to government)
+		self.assertEqual(tcs_row.credit, 2000)  # (50000 - 30000) * 10%
+		self.assertEqual(tcs_row.debit, 0)
+
+		# Customer debit should be increased by TCS amount
+		self.assertEqual(customer_row.debit, 52000)  # 50000 + 2000
+
+		# Validate tax withholding entries - system creates two entries for threshold processing
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TCS",
+				party_type="Customer",
+				party="Test TCS Customer",
+				tax_rate=10.0,
+				taxable_amount=20000.0,  # Excess amount above threshold (50000 - 30000)
+				withholding_amount=2000.0,  # 10% of 20000
+				status="Settled",
+				taxable_doctype="Journal Entry",
+				taxable_name=jv.name,
+				withholding_doctype="Journal Entry",
+				withholding_name=jv.name,
+			),
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TCS",
+				party_type="Customer",
+				party="Test TCS Customer",
+				tax_rate=10.0,
+				taxable_amount=30000.0,  # Threshold exemption amount
+				withholding_amount=0.0,  # No tax on threshold portion
+				status="Settled",
+				taxable_doctype="Journal Entry",
+				taxable_name=jv.name,
+				withholding_doctype="Journal Entry",
+				withholding_name=jv.name,
+				under_withheld_reason="Threshold Exemption",
+			),
+		]
+		self.validate_tax_withholding_entries("Journal Entry", jv.name, expected_entries)
+
 
 def create_purchase_invoice(**args):
 	# return sales invoice doc object

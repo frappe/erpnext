@@ -1211,28 +1211,51 @@ class JournalTaxWithholding(TaxWithholdingController):
 
 	def __init__(self, doc):
 		super().__init__(doc)
+		self.party = None
+		self.party_type = None
+		self.party_account = None
+		self.party_row = None
+		self.existing_tds_rows = []
+		self.precision = None
+		self.has_multiple_parties = False
+
+		self.party_field = None
+		self.reverse_field = None
+
 		self._setup_party_info()
 
 	def _setup_party_info(self):
 		"""Get party information for tax withholding calculation"""
-
-		party = None
-		party_type = None
-		party_row = None
-
 		for row in self.doc.get("accounts"):
 			if row.party_type in ("Customer", "Supplier") and row.party:
-				if party and row.party != party:
-					frappe.throw(_("Cannot apply TDS against multiple parties in one entry"))
+				if self.party and row.party != self.party:
+					self.has_multiple_parties = True
 
-				if not party:
-					party = row.party
-					party_type = row.party_type
-					party_row = row
+				if not self.party:
+					self.party = row.party
+					self.party_type = row.party_type
+					self.party_account = row.account
+					self.party_row = row
 
-		self.party = party
-		self.party_type = party_type
-		self.party_row = party_row
+			if row.get("is_tax_withholding_account"):
+				self.existing_tds_rows.append(row)
+
+		if self.party_type:
+			self._setup_direction_fields()
+
+	def _setup_direction_fields(self):
+		"""
+		For Supplier (TDS): party has credit, TDS reduces credit
+		For Customer (TCS): party has debit, TCS increases debit
+		"""
+		if self.party_type == "Supplier":
+			self.party_field = "credit"
+			self.reverse_field = "debit"
+		else:  # Customer
+			self.party_field = "debit"
+			self.reverse_field = "credit"
+
+		self.precision = self.doc.precision(self.party_field, self.party_row)
 
 	def _get_category_names(self):
 		"""Get tax withholding category names for journal entries"""
@@ -1246,33 +1269,26 @@ class JournalTaxWithholding(TaxWithholdingController):
 		if not self.category_details:
 			return
 
-		net_amount = self.get_party_net_amount()
-		# Set the net total for the single category
+		net_amount = self._calculate_net_total()
 		category = next(iter(self.category_details.values()))
 		category["taxable_amount"] = net_amount
 
-	def get_party_net_amount(self):
-		from erpnext.accounts.report.general_ledger.general_ledger import (
-			get_account_type_map,
-		)
+	def _calculate_net_total(self):
+		"""Calculate net taxable amount using PR #49963 logic"""
+		from erpnext.accounts.report.general_ledger.general_ledger import get_account_type_map
 
-		# Calculate net total
 		account_type_map = get_account_type_map(self.doc.company)
-		dr_cr = "credit" if self.party_type == "Supplier" else "debit"
-		rev_dr_cr = "debit" if self.party_type == "Supplier" else "credit"
-		precision = self.doc.precision(dr_cr, self.party_row)
-		party_account = self.party_row.account
 
-		net_total = flt(
+		return flt(
 			sum(
-				d.get(rev_dr_cr) - d.get(dr_cr)
+				d.get(self.reverse_field) - d.get(self.party_field)
 				for d in self.doc.get("accounts")
-				if account_type_map.get(d.account) not in ("Tax", "Chargeable") and d.account != party_account
+				if account_type_map.get(d.account) not in ("Tax", "Chargeable")
+				and d.account != self.party_account
+				and not d.get("is_tax_withholding_account")
 			),
-			precision,
+			self.precision,
 		)
-
-		return net_total
 
 	def get_conversion_rate(self):
 		"""Get conversion rate from party account row's exchange rate"""
@@ -1285,130 +1301,161 @@ class JournalTaxWithholding(TaxWithholdingController):
 		self.doc.set_against_account()
 
 	def update_tax_rows(self):
-		"""Update Journal Entry accounts based on withholding entries"""
+		"""Update Journal Entry accounts using PR #49963 approach"""
+		if not self._should_apply_tds():
+			self._cleanup_duplicate_tds_rows(None)
+			return
+
+		if self.has_multiple_parties:
+			frappe.throw(_("Cannot apply TDS against multiple parties in one entry"))
+
 		account_amount_map = self._calculate_account_wise_amount()
 
 		if not account_amount_map:
 			return
 
-		# Process each tax account
+		self._reset_existing_tds()
+
 		for account_head, tax_amount in account_amount_map.items():
 			if not tax_amount:
 				continue
 
-			self._update_or_create_tax_account(account_head, tax_amount)
-			self._adjust_party_account(tax_amount)
+			self._create_or_update_tds_row(account_head, tax_amount)
+			self._update_party_amount(tax_amount, is_reversal=False)
 
-		# Remove duplicate tax rows
-		self._remove_duplicate_tax_rows(account_amount_map.keys())
+		self._recalculate_totals()
 
-		# Recalculate totals
-		self.calculate_taxes_and_totals()
+	def _should_apply_tds(self):
+		"""Check if TDS should be applied using PR #49963 logic"""
+		return self.doc.apply_tds and self.doc.voucher_type in ("Debit Note", "Credit Note")
 
-	def _update_or_create_tax_account(self, account_head, tax_amount):
-		"""Update existing tax account row or create new one"""
-		from erpnext.accounts.utils import get_account_currency
+	def _reset_existing_tds(self):
+		"""Reset existing TDS rows using PR #49963 logic"""
+		for row in self.existing_tds_rows:
+			# TDS amount is always in credit (liability to government)
+			tds_amount = flt(row.get("credit") - row.get("debit"), self.precision)
+			if not tds_amount:
+				continue
 
-		tax_row = None
-		acc_currency = get_account_currency(account_head)
+			self._update_party_amount(tds_amount, is_reversal=True)
 
-		# Use the get_exchange_rate function available in the journal entry module
-		from erpnext.accounts.doctype.journal_entry.journal_entry import (
-			get_exchange_rate,
+			# zero_out_tds_row
+			row.update(
+				{
+					"credit": 0,
+					"credit_in_account_currency": 0,
+					"debit": 0,
+					"debit_in_account_currency": 0,
+				}
+			)
+
+	def _update_party_amount(self, amount, is_reversal=False):
+		"""Update party amount using PR #49963 logic"""
+		amount = flt(amount, self.precision)
+		amount_in_party_currency = flt(amount / self.party_row.get("exchange_rate", 1), self.precision)
+
+		# Determine which field the party amount is in
+		active_field = self.party_field if self.party_row.get(self.party_field) else self.reverse_field
+
+		# If amount is in reverse field, flip the signs
+		if active_field == self.reverse_field:
+			amount = -amount
+			amount_in_party_currency = -amount_in_party_currency
+
+		# Direction multiplier based on party type:
+		# Customer (TCS): +1 (add to debit)
+		# Supplier (TDS): -1 (subtract from credit)
+		direction = 1 if self.party_type == "Customer" else -1
+
+		# Reversal inverts the direction
+		if is_reversal:
+			direction = -direction
+
+		adjustment = amount * direction
+		adjustment_in_party_currency = amount_in_party_currency * direction
+
+		active_field_account_currency = f"{active_field}_in_account_currency"
+
+		self.party_row.update(
+			{
+				active_field: flt(self.party_row.get(active_field) + adjustment, self.precision),
+				active_field_account_currency: flt(
+					self.party_row.get(active_field_account_currency) + adjustment_in_party_currency,
+					self.precision,
+				),
+			}
 		)
 
-		exchange_rate = get_exchange_rate(self.doc.posting_date, account_head, acc_currency, self.doc.company)
+	def _create_or_update_tds_row(self, account_head, tax_amount):
+		"""Create or update TDS row using PR #49963 logic"""
+		from erpnext.accounts.utils import get_account_currency
+		from erpnext.setup.utils import get_exchange_rate as _get_exchange_rate
 
-		tax_amount_in_acc_currency = flt(tax_amount / exchange_rate, self.precision)
+		account_currency = get_account_currency(account_head)
+		company_currency = frappe.get_cached_value("Company", self.doc.company, "default_currency")
+		exchange_rate = _get_exchange_rate(account_currency, company_currency, self.doc.posting_date)
 
-		# Find existing tax row
+		tax_amount = flt(tax_amount, self.precision)
+		tax_amount_in_account_currency = flt(tax_amount / exchange_rate, self.precision)
+
+		tax_row = None
 		for row in self.doc.get("accounts"):
-			if row.account == account_head:
+			if row.account == account_head and row.get("is_tax_withholding_account"):
 				tax_row = row
 				break
 
 		if not tax_row:
-			# Create new tax row
-			cost_center = self.doc.get("cost_center") or erpnext.get_default_cost_center(self.doc.company)
 			tax_row = self.doc.append(
 				"accounts",
 				{
 					"account": account_head,
-					"account_currency": acc_currency,
+					"account_currency": account_currency,
 					"exchange_rate": exchange_rate,
-					"cost_center": cost_center,
+					"cost_center": self.doc.get("cost_center")
+					or erpnext.get_default_cost_center(self.doc.company),
+					"credit": 0,
+					"credit_in_account_currency": 0,
+					"debit": 0,
+					"debit_in_account_currency": 0,
+					"is_tax_withholding_account": 1,
 				},
 			)
 
-		# TDS is always credit for Journal Entry
+		# TDS/TCS is always credited (liability to government)
 		tax_row.update(
 			{
 				"credit": tax_amount,
-				"credit_in_account_currency": tax_amount_in_acc_currency,
+				"credit_in_account_currency": tax_amount_in_account_currency,
 				"debit": 0,
 				"debit_in_account_currency": 0,
 			}
 		)
 
-	def _adjust_party_account(self, tax_amount):
-		"""Adjust party account for tax deduction"""
-		# Determine debit/credit based on party type
-		dr_cr = "credit" if self.party_row.party_type == "Supplier" else "debit"
-		rev_dr_cr = "debit" if self.party_row.party_type == "Supplier" else "credit"
+		self._cleanup_duplicate_tds_rows(tax_row)
 
-		# Find the field with non-zero amount
-		party_field = dr_cr
-		if not self.party_row.get(party_field):
-			party_field = rev_dr_cr
-			tax_amount *= -1
+	def _cleanup_duplicate_tds_rows(self, current_tax_row):
+		"""Remove duplicate TDS rows"""
+		rows_to_remove = [
+			row
+			for row in self.doc.get("accounts")
+			if row.get("is_tax_withholding_account") and row != current_tax_row
+		]
 
-		# For customer, amount will be added (opposite sign)
-		if dr_cr == "debit":
-			tax_amount *= -1
-
-		# Calculate new amounts
-		party_field_in_acc_curr = f"{party_field}_in_account_currency"
-		precision = self.doc.precision(party_field, self.party_row)
-
-		party_exchange_rate = self.get_conversion_rate()
-		tax_amount_in_party_curr = flt(tax_amount / party_exchange_rate, precision)
-
-		new_party_amount = flt(self.party_row.get(party_field) - tax_amount, precision)
-		new_party_amount_in_curr = flt(
-			self.party_row.get(party_field_in_acc_curr) - tax_amount_in_party_curr,
-			precision,
-		)
-
-		self.party_row.update(
-			{
-				party_field: new_party_amount,
-				party_field_in_acc_curr: new_party_amount_in_curr,
-			}
-		)
-
-	def _remove_duplicate_tax_rows(self, tax_accounts):
-		"""Remove duplicate tax account rows"""
-		accounts_to_remove = []
-		seen_accounts = set()
-
-		for row in self.doc.get("accounts"):
-			if row.account in tax_accounts:
-				if row.account in seen_accounts:
-					accounts_to_remove.append(row)
-				else:
-					seen_accounts.add(row.account)
-
-		for row in accounts_to_remove:
+		for row in rows_to_remove:
 			self.doc.remove(row)
+
+	def _recalculate_totals(self):
+		"""Recalculate totals using PR #49963 logic"""
+		self.doc.set_amounts_in_company_currency()
+		self.doc.set_total_debit_credit()
+		self.doc.set_against_account()
 
 	def _is_tax_withholding_applicable(self):
 		"""Check if tax withholding should be applied to this document"""
-		# Check basic conditions
-		if not (self.doc.apply_tds or self.doc.voucher_type not in ("Debit Note", "Credit Note")):
+		if not self._should_apply_tds():
 			self.doc.tax_withholding_entries = []
 			return False
 
-		# Check if we have tax withholding category
 		if not self.doc.tax_withholding_category:
 			self.doc.tax_withholding_entries = []
 			return False
