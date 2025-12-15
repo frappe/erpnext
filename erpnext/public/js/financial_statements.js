@@ -85,7 +85,7 @@ erpnext.financial_statements = {
 				account:
 					Array.isArray(formatting.child_accounts) && formatting.child_accounts.length
 						? formatting.child_accounts
-						: formatting.account_name ?? value,
+						: formatting._account ?? value,
 				from_date: formatting.from_date || formatting.period_start_date,
 				to_date: formatting.to_date || formatting.period_end_date,
 				account_type: formatting.account_type,

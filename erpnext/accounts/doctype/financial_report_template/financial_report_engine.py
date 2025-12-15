@@ -71,9 +71,9 @@ class PeriodValue:
 class AccountData:
 	"""Account data across all periods"""
 
-	account_name: str  # docname
-	acc_name: str = ""  # actual account name
-	acc_number: str = ""
+	account: str  # docname
+	account_name: str = ""  # account name
+	account_number: str = ""
 	period_values: dict[str, PeriodValue] = field(default_factory=dict)
 
 	def add_period(self, period_value: PeriodValue) -> None:
@@ -106,9 +106,9 @@ class AccountData:
 
 	def copy(self):
 		copied = AccountData(
+			account=self.account,
 			account_name=self.account_name,
-			acc_name=self.acc_name,
-			acc_number=self.acc_number,
+			account_number=self.account_number,
 		)
 		copied.period_values = {k: v.copy() for k, v in self.period_values.items()}
 		return copied
@@ -409,16 +409,14 @@ class DataCollector:
 		Example:
 
 		- Input: '["account_type", "=", "Cash"]'
-		- Output: [{"name": "Cash - COMP", "acc_name": "Cash", "acc_number": "1001"}]
+		- Output: [{"name": "Cash - COMP", "account_name": "Cash", "account_number": "1001"}]
 		"""
 		filter_parser = FilterExpressionParser()
 
 		account = frappe.qb.DocType("Account")
 		query = (
 			frappe.qb.from_(account)
-			.select(
-				account.name, account.account_name.as_("acc_name"), account.account_number.as_("acc_number")
-			)
+			.select(account.name, account.account_name, account.account_number)
 			.where(account.disabled == 0)
 			.where(account.is_group == 0)
 		)
@@ -465,7 +463,7 @@ class FinancialQueryBuilder:
 		self.filters = filters
 		self.periods = periods
 		self.company = filters.get("company")
-		self.account_meta = {}  # {name: {acc_name, acc_number}}
+		self.account_meta = {}  # {name: {account_name, account_number}}
 
 	def fetch_account_balances(self, accounts: list[dict]) -> dict[str, AccountData]:
 		"""
@@ -477,8 +475,8 @@ class FinancialQueryBuilder:
 		```
 		{
 		    "name": "Cash - COMP",
-		    "acc_name": "Cash",
-		    "acc_number": "1001",
+		    "account_name": "Cash",
+		    "account_number": "1001",
 		}
 		```
 
@@ -488,7 +486,8 @@ class FinancialQueryBuilder:
 		account_names = list({acc.name for acc in accounts})
 		# NOTE: do not change accounts list as it is used in caller function
 		self.account_meta = {
-			acc.name: {"acc_name": acc.acc_name, "acc_number": acc.acc_number} for acc in accounts
+			acc.name: {"account_name": acc.account_name, "account_number": acc.account_number}
+			for acc in accounts
 		}
 
 		balances_data = self._get_opening_balances(account_names)
@@ -569,7 +568,7 @@ class FinancialQueryBuilder:
 			gap_movement = gap_movements.get(account, 0.0)
 			opening_balance = closing_balance + gap_movement
 
-			account_data = AccountData(account_name=account, **self.account_meta.get(account, {}))
+			account_data = AccountData(account=account, **self._get_account_meta(account))
 
 			account_data.add_period(PeriodValue(first_period_key, opening_balance, 0, 0))
 			balances_data[account] = account_data
@@ -640,9 +639,7 @@ class FinancialQueryBuilder:
 		for row in gl_data:
 			account = row["account"]
 			if account not in balances_data:
-				balances_data[account] = AccountData(
-					account_name=account, **self.account_meta.get(account, {})
-				)
+				balances_data[account] = AccountData(account=account, **self._get_account_meta(account))
 
 			account_data: AccountData = balances_data[account]
 
@@ -1576,27 +1573,34 @@ class RowFormatterBase(ABC):
 		pass
 
 	def _get_values(self, row_data: RowData) -> dict[str, Any]:
+		def _get_row_data(key: str, default: Any = "") -> Any:
+			return getattr(row_data.row, key, default) or default
+
+		def _get_filter_value(key: str, default: Any = "") -> Any:
+			return getattr(self.context.filters, key, default) or default
+
 		child_accounts = []
 
 		if row_data.account_details:
 			child_accounts = list(row_data.account_details.keys())
 
-		account = getattr(row_data.row, "display_name", "") or ""
-		acc_name = getattr(row_data.row, "account_name", "") or ""
-		acc_number = getattr(row_data.row, "account_number", "") or ""
+		account = _get_row_data("display_name", "")
+		acc_name = _get_row_data("account_name", "")
+		acc_number = _get_row_data("account_number", "")
 
 		account_name = (f"{_(acc_number)} - {_(acc_name)}" if acc_number else _(acc_name)) or account
 
 		values = {
-			"account": account,  # account docname or display name of the row
-			"account_name": account_name,  # formatted account name with number
-			"child_accounts": child_accounts,
-			"acc_name": acc_name,  # account name only
+			"_account": _get_row_data("account", ""),  # account docname
+			"account": account,  # display name of the row or account name
+			"account_name": account_name,  # formatted account name
+			"acc_name": acc_name,
 			"acc_number": acc_number,
+			"child_accounts": child_accounts,
 			"currency": self.context.currency or "",
-			"indent": getattr(row_data.row, "indentation_level", 0),
-			"period_start_date": getattr(self.context.filters, "period_start_date", "") or "",
-			"period_end_date": getattr(self.context.filters, "period_end_date", "") or "",
+			"indent": _get_row_data("indentation_level", 0),
+			"period_start_date": _get_filter_value("period_start_date", ""),
+			"period_end_date": _get_filter_value("period_end_date", ""),
 			"total": 0,
 		}
 
@@ -1731,10 +1735,10 @@ class DetailRowBuilder:
 			"DetailRow",
 			(),
 			{
-				"account": account_data.account_name,
-				"display_name": account_data.acc_name,
-				"account_name": account_data.acc_name,
-				"account_number": account_data.acc_number,
+				"account": account_data.account,
+				"display_name": account_data.account_name,
+				"account_name": account_data.account_name,
+				"account_number": account_data.account_number,
 				"data_source": "Account Detail",
 				"indentation_level": getattr(parent_row, "indentation_level", 0) + 1,
 				"fieldtype": getattr(parent_row, "fieldtype", None),
