@@ -27,7 +27,7 @@ class TestSubscription(IntegrationTestCase):
 		make_plans()
 		create_parties()
 		reset_settings()
-		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
+		frappe.db.set_value("Company", "_Test Company", "accounts_frozen_till_date", None)
 
 	def tearDown(self):
 		frappe.db.rollback()

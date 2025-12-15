@@ -39,6 +39,7 @@ class MaterialRequest(BuyingController):
 		from erpnext.stock.doctype.material_request_item.material_request_item import MaterialRequestItem
 
 		amended_from: DF.Link | None
+		auto_created_via_reorder: DF.Check
 		buying_price_list: DF.Link | None
 		company: DF.Link
 		customer: DF.Link | None
@@ -303,6 +304,9 @@ class MaterialRequest(BuyingController):
 				)
 				.groupby(doctype.material_request_item)
 			)
+
+			if self.material_request_type == "Manufacture":
+				query = query.where(doctype.status != "Closed")
 
 			mr_items_ordered_qty = frappe._dict(query.run())
 
@@ -841,7 +845,10 @@ def raise_work_orders(material_request, company):
 
 	for d in mr.items:
 		if (d.stock_qty - d.ordered_qty) > 0:
-			if frappe.db.exists("BOM", {"item": d.item_code, "is_default": 1}):
+			if frappe.db.exists("BOM", {"item": d.item_code, "is_default": 1, "is_active": 1}) or (
+				(variant_of := frappe.get_value("Item", d.item_code, "variant_of"))
+				and frappe.db.exists("BOM", {"item": variant_of, "is_default": 1, "is_active": 1})
+			):
 				wo_order = frappe.new_doc("Work Order")
 				wo_order.update(
 					{

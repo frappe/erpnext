@@ -230,8 +230,15 @@ frappe.ui.form.on("Item", {
 		].forEach((fieldname) => {
 			frm.set_df_property(fieldname, "read_only", stock_exists);
 		});
-
+		frm.set_df_property("is_fixed_asset", "read_only", frm.doc.__onload?.asset_exists ? 1 : 0);
 		frm.toggle_reqd("customer", frm.doc.is_customer_provided_item ? 1 : 0);
+		frm.set_query("item_group", () => {
+			return {
+				filters: {
+					is_group: 0,
+				},
+			};
+		});
 	},
 
 	validate: function (frm) {
@@ -300,6 +307,14 @@ frappe.ui.form.on("Item Reorder", {
 		var row = frappe.get_doc(cdt, cdn);
 		var type = frm.doc.default_material_request_type;
 		row.material_request_type = type == "Material Transfer" ? "Transfer" : type;
+	},
+
+	warehouse_group(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+
+		if (!row.warehouse_group) {
+			frappe.throw(__("Please select the Warehouse first"));
+		}
 	},
 });
 
@@ -474,8 +489,12 @@ $.extend(erpnext.item, {
 			cdt,
 			cdn
 		) {
+			let row = locals[cdt][cdn];
 			return {
-				filters: { is_group: 1 },
+				query: "erpnext.stock.doctype.warehouse.warehouse.get_warehouses_for_reorder",
+				filters: {
+					warehouse: row.warehouse,
+				},
 			};
 		};
 

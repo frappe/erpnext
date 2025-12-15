@@ -220,17 +220,12 @@ class JobCard(Document):
 
 		if job_card_qty and ((job_card_qty - completed_qty) > wo_qty):
 			form_link = get_link_to_form("Manufacturing Settings", "Manufacturing Settings")
-
-			msg = f"""
-				Qty To Manufacture in the job card
-				cannot be greater than Qty To Manufacture in the
-				work order for the operation {bold(self.operation)}.
-				<br><br><b>Solution: </b> Either you can reduce the
-				Qty To Manufacture in the job card or set the
-				'Overproduction Percentage For Work Order'
-				in the {form_link}."""
-
-			frappe.throw(_(msg), title=_("Extra Job Card Quantity"))
+			frappe.throw(
+				_(
+					"Qty To Manufacture in the job card cannot be greater than Qty To Manufacture in the work order for the operation {0}. <br><br><b>Solution: </b> Either you can reduce the Qty To Manufacture in the job card or set the 'Overproduction Percentage For Work Order' in the {1}."
+				).format(bold(self.operation), form_link),
+				title=_("Extra Job Card Quantity"),
+			)
 
 	def set_sub_operations(self):
 		if not self.sub_operations and self.operation:
@@ -945,6 +940,36 @@ class JobCard(Document):
 			},
 		)
 
+	def set_consumed_qty_in_job_card_item(self, ste_doc):
+		jc_item_names = [row.job_card_item for row in ste_doc.get("items") if row.get("job_card_item")]
+
+		if not jc_item_names:
+			return
+
+		se = frappe.qb.DocType("Stock Entry")
+		sed = frappe.qb.DocType("Stock Entry Detail")
+
+		query = (
+			frappe.qb.from_(sed)
+			.join(se)
+			.on(sed.parent == se.name)
+			.select(sed.job_card_item, Sum(sed.qty))
+			.where(
+				(sed.job_card_item.isin(jc_item_names)) & (se.docstatus == 1) & (se.purpose == "Manufacture")
+			)
+			.groupby(sed.job_card_item)
+		)
+
+		itemwise_consumed_qty = frappe._dict(query.run(as_list=True))
+
+		for row in ste_doc.items:
+			if not row.get("job_card_item"):
+				continue
+
+			consumed_qty = flt(itemwise_consumed_qty.get(row.job_card_item, 0.0))
+
+			frappe.db.set_value("Job Card Item", row.job_card_item, "consumed_qty", consumed_qty)
+
 	def set_transferred_qty_in_job_card_item(self, ste_doc):
 		def _get_job_card_items_transferred_qty(ste_doc):
 			from frappe.query_builder.functions import Sum
@@ -1170,14 +1195,16 @@ class JobCard(Document):
 				)
 
 			if row.completed_qty < current_operation_qty:
-				msg = f"""The completed quantity {bold(current_operation_qty)}
-					of an operation {bold(self.operation)} cannot be greater
-					than the completed quantity {bold(row.completed_qty)}
-					of a previous operation
-					{bold(row.operation)}.
-				"""
-
-				frappe.throw(_(msg))
+				frappe.throw(
+					_(
+						"The completed quantity {0} of an operation {1} cannot be greater than the completed quantity {2} of a previous operation {3}."
+					).format(
+						bold(current_operation_qty),
+						bold(self.operation),
+						bold(row.completed_qty),
+						bold(row.operation),
+					)
+				)
 
 	def validate_work_order(self):
 		if self.is_work_order_closed():

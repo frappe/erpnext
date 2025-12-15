@@ -3,6 +3,8 @@
 import unittest
 
 import frappe
+from frappe import qb
+from frappe.query_builder.functions import Sum
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_months, flt, get_first_day, nowdate, nowtime, today
 
@@ -173,6 +175,39 @@ class TestAssetRepair(IntegrationTestCase):
 		)
 		self.assertTrue(asset_repair.invoices)
 
+	def test_repair_cost_exceeds_available_amount(self):
+		"""Test that repair cost cannot exceed available amount from Purchase Invoice."""
+		asset_repair1 = create_asset_repair(
+			capitalize_repair_cost=1,
+			item="_Test Non Stock Item",
+			submit=1,
+		)
+
+		pi_name = asset_repair1.invoices[0].purchase_invoice
+		expense_account = asset_repair1.invoices[0].expense_account
+
+		asset_repair2 = frappe.new_doc("Asset Repair")
+		asset_repair2.update(
+			{
+				"asset": asset_repair1.asset,
+				"asset_name": asset_repair1.asset_name,
+				"failure_date": nowdate(),
+				"description": "Second Repair",
+				"company": asset_repair1.company,
+				"capitalize_repair_cost": 1,
+			}
+		)
+		asset_repair2.append(
+			"invoices",
+			{
+				"purchase_invoice": pi_name,
+				"expense_account": expense_account,
+				"repair_cost": 10,  # PI already fully used, so this should fail
+			},
+		)
+
+		self.assertRaises(frappe.ValidationError, asset_repair2.save)
+
 	def test_gl_entries_with_perpetual_inventory(self):
 		set_depreciation_settings_in_company(company="_Test Company with perpetual inventory")
 
@@ -321,6 +356,31 @@ class TestAssetRepair(IntegrationTestCase):
 		asset_repair = create_asset_repair(asset=asset, stock_consumption=1, submit=1)
 		stock_entry = frappe.get_last_doc("Stock Entry")
 		self.assertEqual(stock_entry.asset_repair, asset_repair.name)
+
+	def test_gl_entries_with_capitalized_asset_repair(self):
+		asset = create_asset(is_existing_asset=1, calculate_depreciation=1, submit=1)
+		asset_repair = create_asset_repair(
+			asset=asset, capitalize_repair_cost=1, item="_Test Non Stock Item", submit=1
+		)
+		asset.reload()
+
+		GLEntry = qb.DocType("GL Entry")
+		res = (
+			qb.from_(GLEntry)
+			.select(Sum(GLEntry.debit_in_account_currency).as_("total_debit"))
+			.where(
+				(GLEntry.voucher_type == "Asset Repair")
+				& (GLEntry.voucher_no == asset_repair.name)
+				& (GLEntry.against_voucher_type == "Asset")
+				& (GLEntry.against_voucher == asset.name)
+				& (GLEntry.company == asset.company)
+				& (GLEntry.is_cancelled == 0)
+			)
+		).run(as_dict=True)
+		booked_value = res[0].total_debit if res else 0
+
+		self.assertEqual(asset.additional_asset_cost, asset_repair.repair_cost)
+		self.assertEqual(booked_value, asset_repair.repair_cost)
 
 
 def num_of_depreciations(asset):

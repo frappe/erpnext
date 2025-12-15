@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
+from frappe.model.naming import NamingSeries
 from frappe.query_builder import Interval
 from frappe.query_builder.functions import Count, CurDate, UnixTimestamp
 from frappe.utils import (
@@ -158,6 +159,7 @@ class Item(Document):
 		self.set_onload("stock_exists", self.stock_ledger_created())
 		self.set_onload("asset_naming_series", get_asset_naming_series())
 		self.set_onload("current_valuation_method", get_valuation_method(self.name))
+		self.set_onload("asset_exists", self.has_submitted_assets())
 
 	def autoname(self):
 		if frappe.db.get_default("item_naming_by") == "Naming Series":
@@ -310,8 +312,7 @@ class Item(Document):
 				frappe.throw(_("Cannot be a fixed asset item as Stock Ledger is created."))
 
 		if not self.is_fixed_asset and not self.is_new():
-			asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
-			if asset:
+			if self.has_submitted_assets():
 				frappe.throw(
 					_('"Is Fixed Asset" cannot be unchecked, as Asset record exists against the item')
 				)
@@ -410,6 +411,24 @@ class Item(Document):
 						frappe.bold(self.meta.get_field(field).label)
 					)
 				)
+
+			if self.is_new() and series:
+				obj = NamingSeries(series)
+				prefix = obj.get_prefix()
+				doctype = frappe.qb.DocType("Series")
+
+				query = frappe.qb.from_(doctype).select(doctype.name).where(doctype.name.like(f"{prefix}%"))
+
+				prefix_exists = query.run(as_dict=True)
+				if prefix_exists:
+					frappe.msgprint(
+						_(
+							"The {0} prefix '{1}' already exists. Please change the Serial No Series, otherwise you will get a Duplicate Entry error."
+						).format(bold(frappe.unscrub(field)), bold(prefix)),
+						title=_("Serial No Series Overlap"),
+						indicator="yellow",
+						alert=True,
+					)
 
 	def check_for_active_boms(self):
 		if self.default_bom:
@@ -525,6 +544,9 @@ class Item(Document):
 				)
 			)
 		return self._stock_ledger_created
+
+	def has_submitted_assets(self):
+		return bool(frappe.db.exists("Asset", {"item_code": self.name, "docstatus": 1}))
 
 	def update_item_price(self):
 		if self.is_new():

@@ -2884,6 +2884,88 @@ def create_payment_entry(**args):
 	return pe
 
 
+def make_journal_entry_with_tax_withholding(
+	party_type,
+	party,
+	voucher_type,
+	amount,
+	cost_center=None,
+	posting_date=None,
+	save=True,
+	submit=False,
+):
+	"""Helper function to create Journal Entry for tax withholding"""
+	if not cost_center:
+		cost_center = "_Test Cost Center - _TC"
+
+	jv = frappe.new_doc("Journal Entry")
+	jv.posting_date = posting_date or today()
+	jv.company = "_Test Company"
+	jv.voucher_type = voucher_type
+	jv.multi_currency = 0
+
+	if party_type == "Supplier":
+		# Debit Note: Expense Dr, Supplier Cr
+		expense_account = "Stock Received But Not Billed - _TC"
+		party_account = "Creditors - _TC"
+
+		jv.append(
+			"accounts",
+			{
+				"account": expense_account,
+				"cost_center": cost_center,
+				"debit_in_account_currency": amount,
+				"exchange_rate": 1,
+			},
+		)
+
+		jv.append(
+			"accounts",
+			{
+				"account": party_account,
+				"party_type": party_type,
+				"party": party,
+				"cost_center": cost_center,
+				"credit_in_account_currency": amount,
+				"exchange_rate": 1,
+			},
+		)
+	else:  # Customer
+		# Credit Note: Customer Dr, Income Cr
+		party_account = "Debtors - _TC"
+		income_account = "Sales - _TC"
+
+		jv.append(
+			"accounts",
+			{
+				"account": party_account,
+				"party_type": party_type,
+				"party": party,
+				"cost_center": cost_center,
+				"debit_in_account_currency": amount,
+				"exchange_rate": 1,
+			},
+		)
+
+		jv.append(
+			"accounts",
+			{
+				"account": income_account,
+				"cost_center": cost_center,
+				"credit_in_account_currency": amount,
+				"exchange_rate": 1,
+			},
+		)
+
+	if save or submit:
+		jv.insert()
+
+		if submit:
+			jv.submit()
+
+	return jv
+
+
 def create_records():
 	# create a new suppliers
 	for name in [

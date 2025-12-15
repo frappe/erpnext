@@ -447,7 +447,7 @@ def prepare_data(accounts, filters, parent_children_map, company_currency):
 		}
 
 		for key in value_fields:
-			row[key] = flt(d.get(key, 0.0), 3)
+			row[key] = flt(d.get(key, 0.0))
 
 			if abs(row[key]) >= get_zero_cutoff(company_currency):
 				# ignore zero values

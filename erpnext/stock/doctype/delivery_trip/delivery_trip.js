@@ -208,7 +208,12 @@ frappe.ui.form.on("Delivery Stop", {
 				args: { address_dict: row.address },
 				callback: function (r) {
 					if (r.message) {
-						frappe.model.set_value(cdt, cdn, "customer_address", r.message);
+						frappe.model.set_value(
+							cdt,
+							cdn,
+							"customer_address",
+							frappe.utils.html2text(r.message)
+						);
 					}
 				},
 			});

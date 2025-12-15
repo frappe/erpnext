@@ -94,6 +94,7 @@ status_map = {
 		["To Bill", "eval:self.per_billed < 100 and self.docstatus == 1"],
 		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],
 		["Return Issued", "eval:self.per_returned == 100 and self.docstatus == 1"],
+		["Return", "eval:self.is_return == 1 and self.per_billed == 0 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed' and self.docstatus != 2"],
 	],
@@ -129,7 +130,7 @@ status_map = {
 		],
 		[
 			"Received",
-			"eval:self.status != 'Stopped' and self.per_received == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'",
+			"eval:self.status != 'Stopped' and self.docstatus == 1 and ((self.per_received == 100 and self.material_request_type == 'Purchase') or (self.per_ordered == 100 and self.material_request_type == 'Customer Provided'))",
 		],
 		[
 			"Partially Received",
@@ -137,11 +138,11 @@ status_map = {
 		],
 		[
 			"Partially Received",
-			"eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1 and self.material_request_type == 'Material Transfer'",
+			"eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1 and self.material_request_type in ['Material Transfer', 'Customer Provided']",
 		],
 		[
 			"Partially Ordered",
-			"eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1 and self.material_request_type != 'Material Transfer'",
+			"eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1 and self.material_request_type not in ['Material Transfer', 'Customer Provided']",
 		],
 	],
 	"POS Opening Entry": [

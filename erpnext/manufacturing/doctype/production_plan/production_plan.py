@@ -352,7 +352,7 @@ class ProductionPlan(Document):
 				so_item.parent,
 				so_item.item_code,
 				so_item.warehouse,
-				so_item.qty,
+				(so_item.stock_qty - so_item.stock_reserved_qty).as_("qty"),
 				so_item.work_order_qty,
 				so_item.delivered_qty,
 				so_item.conversion_factor,
@@ -364,7 +364,7 @@ class ProductionPlan(Document):
 			.where(
 				(so_item.parent.isin(so_list))
 				& (so_item.docstatus == 1)
-				& (so_item.qty > so_item.work_order_qty)
+				& ((so_item.stock_qty - so_item.stock_reserved_qty) > so_item.work_order_qty)
 			)
 		)
 
@@ -1998,22 +1998,14 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 	return reserved_qty_for_production_plan - reserved_qty_for_production
 
 
-@frappe.request_cache
 def get_non_completed_production_plans():
 	table = frappe.qb.DocType("Production Plan")
-	child = frappe.qb.DocType("Production Plan Item")
 
 	return (
 		frappe.qb.from_(table)
-		.inner_join(child)
-		.on(table.name == child.parent)
 		.select(table.name)
 		.distinct()
-		.where(
-			(table.docstatus == 1)
-			& (table.status.notin(["Completed", "Closed"]))
-			& (child.planned_qty > child.ordered_qty)
-		)
+		.where((table.docstatus == 1) & (table.status.notin(["Completed", "Closed"])))
 	).run(pluck="name")
 
 

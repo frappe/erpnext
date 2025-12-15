@@ -96,33 +96,34 @@ def get_depreciable_assets_data(date):
 		.orderby(a.creation, order=Order.desc)
 	)
 
-	acc_frozen_upto = get_acc_frozen_upto()
-	if acc_frozen_upto:
-		res = res.where(ds.schedule_date > acc_frozen_upto)
+	companies_with_frozen_limits = get_companies_with_frozen_limits()
 
-	res = res.run()
+	for company, frozen_upto in companies_with_frozen_limits.items():
+		res = res.where((a.company != company) | (ds.schedule_date > frozen_upto))
 
-	return res
+	return res.run()
+
+
+def get_companies_with_frozen_limits():
+	companies_with_frozen_limits = {}
+	for d in frappe.get_all(
+		"Company", fields=["name", "accounts_frozen_till_date", "role_allowed_for_frozen_entries"]
+	):
+		if not d.accounts_frozen_till_date:
+			continue
+
+		if (
+			d.role_allowed_for_frozen_entries not in frappe.get_roles()
+			and frappe.session.user != "Administrator"
+		):
+			companies_with_frozen_limits[d.name] = getdate(d.accounts_frozen_till_date)
+	return companies_with_frozen_limits
 
 
 def make_depreciation_entry_on_disposal(asset_doc, disposal_date=None):
 	for row in asset_doc.get("finance_books"):
 		depr_schedule_name = get_asset_depr_schedule_name(asset_doc.name, "Active", row.finance_book)
 		make_depreciation_entry(depr_schedule_name, disposal_date)
-
-
-def get_acc_frozen_upto():
-	acc_frozen_upto = frappe.get_single_value("Accounts Settings", "acc_frozen_upto")
-
-	if not acc_frozen_upto:
-		return
-
-	frozen_accounts_modifier = frappe.get_single_value("Accounts Settings", "frozen_accounts_modifier")
-
-	if frozen_accounts_modifier not in frappe.get_roles() or frappe.session.user == "Administrator":
-		return getdate(acc_frozen_upto)
-
-	return
 
 
 def get_credit_debit_accounts_for_asset(asset_category, company):
@@ -307,7 +308,8 @@ def set_depr_entry_posting_status_for_failed_assets(failed_asset_names):
 
 
 def notify_depr_entry_posting_error(failed_asset_names, error_log_names):
-	recipients = get_users_with_role("Accounts Manager")
+	user_role = frappe.db.get_single_value("Accounts Settings", "role_to_notify_on_depreciation_failure")
+	recipients = get_users_with_role(user_role or "Accounts Manager")
 
 	if not recipients:
 		recipients = get_users_with_role("System Manager")

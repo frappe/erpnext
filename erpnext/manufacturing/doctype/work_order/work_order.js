@@ -205,7 +205,7 @@ frappe.ui.form.on("Work Order", {
 				if (frm.doc.__onload?.show_create_job_card_button) {
 					frm.add_custom_button(__("Create Job Card"), () => {
 						frm.trigger("make_job_card");
-					}).addClass("btn-primary");
+					});
 				}
 			}
 		}
@@ -225,7 +225,8 @@ frappe.ui.form.on("Work Order", {
 		if (
 			frm.doc.docstatus === 1 &&
 			["Closed", "Completed"].includes(frm.doc.status) &&
-			frm.doc.produced_qty > 0
+			frm.doc.produced_qty > 0 &&
+			frm.doc.produced_qty > frm.doc.disassembled_qty
 		) {
 			frm.add_custom_button(
 				__("Disassemble Order"),
@@ -243,7 +244,13 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	toggle_items_editable(frm) {
-		frm.toggle_enable("required_items", frm.doc.__onload?.allow_editing_items === 1 ? 1 : 0);
+		if (!frm.doc.__onload?.allow_editing_items) {
+			frm.set_df_property("required_items", "cannot_delete_rows", true);
+			frm.set_df_property("required_items", "cannot_add_rows", true);
+			frm.fields_dict["required_items"].grid.update_docfield_property("item_code", "read_only", 1);
+			frm.fields_dict["required_items"].grid.update_docfield_property("required_qty", "read_only", 1);
+			frm.fields_dict["required_items"].grid.refresh();
+		}
 	},
 
 	hide_reserve_stock_button(frm) {
@@ -276,7 +283,7 @@ frappe.ui.form.on("Work Order", {
 			if (non_consumed_items && non_consumed_items.length) {
 				frm.add_custom_button(__("Return Components"), function () {
 					frm.trigger("create_stock_return_entry");
-				}).addClass("btn-primary");
+				});
 			}
 		}
 	},
@@ -432,11 +439,14 @@ frappe.ui.form.on("Work Order", {
 		erpnext.work_order
 			.show_prompt_for_qty_input(frm, "Disassemble")
 			.then((data) => {
+				if (flt(data.qty) <= 0) {
+					frappe.msgprint(__("Disassemble Qty cannot be less than or equal to <b>0</b>."));
+					return;
+				}
 				return frappe.xcall("erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry", {
 					work_order_id: frm.doc.name,
 					purpose: "Disassemble",
 					qty: data.qty,
-					target_warehouse: data.target_warehouse,
 				});
 			})
 			.then((stock_entry) => {
@@ -989,24 +999,6 @@ erpnext.work_order = {
 					} else {
 						frm.qty_prompt.set_value("qty", max);
 					}
-				},
-			});
-		}
-
-		if (purpose === "Disassemble") {
-			fields.push({
-				fieldtype: "Link",
-				options: "Warehouse",
-				fieldname: "target_warehouse",
-				label: __("Target Warehouse"),
-				default: frm.doc.source_warehouse || frm.doc.wip_warehouse,
-				get_query() {
-					return {
-						filters: {
-							company: frm.doc.company,
-							is_group: 0,
-						},
-					};
 				},
 			});
 		}

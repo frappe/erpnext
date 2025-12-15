@@ -1661,7 +1661,11 @@ class SalesInvoice(SellingController):
 		)
 
 		for item in self.get("items"):
-			if flt(item.base_net_amount, item.precision("base_net_amount")) or item.is_fixed_asset:
+			if (
+				flt(item.base_net_amount, item.precision("base_net_amount"))
+				or item.is_fixed_asset
+				or enable_discount_accounting
+			):
 				# Do not book income for transfer within same company
 				if self.is_internal_transfer():
 					continue
@@ -2929,59 +2933,6 @@ def get_loyalty_programs(customer):
 		return lp_details
 	else:
 		return lp_details
-
-
-@frappe.whitelist()
-def save_company_master_details(name, company, details):
-	from frappe.utils import validate_email_address
-
-	if isinstance(details, str):
-		details = frappe.parse_json(details)
-
-	if details.get("email"):
-		validate_email_address(details.get("email"), throw=True)
-
-	company_fields = ["company_logo", "website", "phone_no", "email"]
-	company_fields_to_update = {field: details.get(field) for field in company_fields if details.get(field)}
-
-	if company_fields_to_update:
-		frappe.db.set_value("Company", company, company_fields_to_update)
-
-	company_address = details.get("company_address")
-	if details.get("address_line1"):
-		address_doc = frappe.get_doc(
-			{
-				"doctype": "Address",
-				"address_title": details.get("address_title"),
-				"address_type": details.get("address_type"),
-				"address_line1": details.get("address_line1"),
-				"address_line2": details.get("address_line2"),
-				"city": details.get("city"),
-				"state": details.get("state"),
-				"pincode": details.get("pincode"),
-				"country": details.get("country"),
-				"is_your_company_address": 1,
-				"links": [{"link_doctype": "Company", "link_name": company}],
-			}
-		)
-		address_doc.insert()
-		company_address = address_doc.name
-
-	if company_address:
-		company_address_display = frappe.db.get_value("Sales Invoice", name, "company_address_display")
-		if not company_address_display or details.get("address_line1"):
-			from frappe.query_builder import DocType
-
-			SalesInvoice = DocType("Sales Invoice")
-
-			(
-				frappe.qb.update(SalesInvoice)
-				.set(SalesInvoice.company_address, company_address)
-				.set(SalesInvoice.company_address_display, get_address_display(company_address))
-				.where(SalesInvoice.name == name)
-			).run()
-
-	return True
 
 
 @frappe.whitelist()

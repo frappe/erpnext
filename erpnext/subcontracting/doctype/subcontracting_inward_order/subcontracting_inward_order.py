@@ -51,7 +51,9 @@ class SubcontractingInwardOrder(SubcontractingController):
 		scrap_items: DF.Table[SubcontractingInwardOrderScrapItem]
 		service_items: DF.Table[SubcontractingInwardOrderServiceItem]
 		set_delivery_warehouse: DF.Link | None
-		status: DF.Literal["Draft", "Open", "Ongoing", "Produced", "Delivered", "Cancelled", "Closed"]
+		status: DF.Literal[
+			"Draft", "Open", "Ongoing", "Produced", "Delivered", "Returned", "Cancelled", "Closed"
+		]
 		title: DF.Data | None
 		transaction_date: DF.Date
 	# end: auto-generated types
@@ -111,6 +113,8 @@ class SubcontractingInwardOrder(SubcontractingController):
 			if self.docstatus == 1:
 				if self.status == "Draft":
 					status = "Open"
+				elif self.per_returned == 100:
+					status = "Returned"
 				elif self.per_delivered == 100:
 					status = "Delivered"
 				elif self.per_produced == 100:

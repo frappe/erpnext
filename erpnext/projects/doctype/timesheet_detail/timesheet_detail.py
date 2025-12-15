@@ -92,6 +92,16 @@ class TimesheetDetail(Document):
 		self.billing_amount = self.billing_rate * (self.billing_hours or 0)
 		self.costing_amount = self.costing_rate * (self.hours or 0)
 
+		exchange_rate = flt(frappe.get_value("Timesheet", self.parent, "exchange_rate")) or 1.0
+		self.base_billing_rate = flt(self.billing_rate * exchange_rate, self.precision("base_billing_rate"))
+		self.base_costing_rate = flt(self.costing_rate * exchange_rate, self.precision("base_costing_rate"))
+		self.base_billing_amount = flt(
+			self.billing_amount * exchange_rate, self.precision("base_billing_amount")
+		)
+		self.base_costing_amount = flt(
+			self.costing_amount * exchange_rate, self.precision("base_costing_amount")
+		)
+
 	def validate_dates(self):
 		"""Validate that to_time is not before from_time."""
 		if self.from_time and self.to_time and time_diff_in_hours(self.to_time, self.from_time) < 0:

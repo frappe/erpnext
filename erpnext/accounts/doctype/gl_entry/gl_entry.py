@@ -100,7 +100,7 @@ class GLEntry(Document):
 			self.validate_account_details(adv_adj)
 			self.validate_dimensions_for_pl_and_bs()
 			validate_balance_type(self.account, adv_adj)
-			validate_frozen_account(self.account, adv_adj)
+			validate_frozen_account(self.company, self.account, adv_adj)
 
 			if (
 				self.voucher_type == "Journal Entry"
@@ -276,7 +276,7 @@ class GLEntry(Document):
 			)
 
 	def validate_party(self):
-		validate_party_frozen_disabled(self.party_type, self.party)
+		validate_party_frozen_disabled(self.company, self.party_type, self.party)
 		validate_account_party_type(self)
 
 	def validate_currency(self):
@@ -419,16 +419,16 @@ def update_outstanding_amt(
 		ref_doc.set_status(update=True)
 
 
-def validate_frozen_account(account, adv_adj=None):
+def validate_frozen_account(company, account, adv_adj=None):
 	frozen_account = frappe.get_cached_value("Account", account, "freeze_account")
 	if frozen_account == "Yes" and not adv_adj:
-		frozen_accounts_modifier = frappe.get_cached_value(
-			"Accounts Settings", None, "frozen_accounts_modifier"
+		role_allowed_for_frozen_entries = frappe.get_cached_value(
+			"Company", company, "role_allowed_for_frozen_entries"
 		)
 
-		if not frozen_accounts_modifier:
+		if not role_allowed_for_frozen_entries:
 			frappe.throw(_("Account {0} is frozen").format(account))
-		elif frozen_accounts_modifier not in frappe.get_roles():
+		elif role_allowed_for_frozen_entries not in frappe.get_roles():
 			frappe.throw(_("Not authorized to edit frozen Account {0}").format(account))
 
 
@@ -442,7 +442,7 @@ def update_against_account(voucher_type, voucher_no):
 	if not entries:
 		return
 	company_currency = erpnext.get_company_currency(entries[0].company)
-	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"), company_currency)
+	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"), currency=company_currency)
 
 	accounts_debited, accounts_credited = [], []
 	for d in entries:

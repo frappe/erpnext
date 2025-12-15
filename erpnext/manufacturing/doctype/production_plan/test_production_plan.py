@@ -1143,7 +1143,7 @@ class TestProductionPlan(IntegrationTestCase):
 		for item_code in mr_items:
 			self.assertTrue(item_code in validate_mr_items)
 
-	def test_resered_qty_for_production_plan_for_material_requests(self):
+	def test_reserved_qty_for_production_plan_for_material_requests(self):
 		from erpnext.stock.utils import get_or_make_bin
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
@@ -1165,7 +1165,7 @@ class TestProductionPlan(IntegrationTestCase):
 		self.assertEqual(pln.docstatus, 2)
 		self.assertEqual(after_qty, before_qty)
 
-	def test_resered_qty_for_production_plan_for_work_order(self):
+	def test_reserved_qty_for_production_plan_for_work_order(self):
 		from erpnext.stock.utils import get_or_make_bin
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
@@ -1218,7 +1218,7 @@ class TestProductionPlan(IntegrationTestCase):
 
 			self.assertEqual(after_qty, before_qty)
 
-	def test_resered_qty_for_production_plan_for_less_rm_qty(self):
+	def test_reserved_qty_for_production_plan_for_less_rm_qty(self):
 		from erpnext.stock.utils import get_or_make_bin
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
@@ -1256,11 +1256,12 @@ class TestProductionPlan(IntegrationTestCase):
 		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
 
 		self.assertEqual(after_qty, before_qty)
-		completed_plans = get_non_completed_production_plans()
-		for plan in plans:
-			self.assertFalse(plan in completed_plans)
+		non_completed_plans = get_non_completed_production_plans()
 
-	def test_resered_qty_for_production_plan_for_material_requests_with_multi_UOM(self):
+		for plan in plans:
+			self.assertTrue(plan in non_completed_plans)
+
+	def test_reserved_qty_for_production_plan_for_material_requests_with_multi_UOM(self):
 		from erpnext.stock.utils import get_or_make_bin
 
 		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name

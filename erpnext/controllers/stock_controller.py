@@ -25,6 +25,7 @@ from erpnext.controllers.sales_and_purchase_return import (
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import get_warehouse_account_map
+from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	get_evaluated_inventory_dimension,
 )
@@ -1216,6 +1217,12 @@ class StockController(AccountsController):
 			],
 		}.get(self.doctype)
 
+		qty_field = {
+			"Sales Invoice": "qty",
+			"Delivery Note": "qty",
+			"Stock Entry": "fg_completed_qty",
+		}.get(self.doctype)
+
 		reserved_batches_data = self.get_reserved_batches(batches)
 		items = self.items
 		if self.doctype == "Stock Entry":
@@ -1234,6 +1241,17 @@ class StockController(AccountsController):
 						continue
 
 					if row.voucher_no == value:
+						continue
+
+					batch_qty = get_batch_qty(
+						row.batch_no,
+						row.warehouse,
+						posting_date=self.posting_date,
+						posting_time=self.posting_time,
+						consider_negative_batches=True,
+					)
+
+					if item.get(qty_field) < batch_qty:
 						continue
 
 					frappe.throw(
@@ -1264,6 +1282,7 @@ class StockController(AccountsController):
 				doctype.voucher_type,
 				doctype.voucher_no,
 				doctype.item_code,
+				doctype.warehouse,
 			)
 			.where((doctype.docstatus == 1) & (child_doc.batch_no.isin(batches)))
 		).run(as_dict=True)
@@ -1626,7 +1645,7 @@ class StockController(AccountsController):
 				rule = frappe.db.get_value(
 					"Putaway Rule",
 					{"item_code": item.get("item_code"), "warehouse": item.get(warehouse_field)},
-					["name", "disable"],
+					["stock_capacity", "name", "disable"],
 					as_dict=True,
 				)
 				if rule:
@@ -1645,7 +1664,11 @@ class StockController(AccountsController):
 						rule_map[rule_name]["warehouse"] = item.get(warehouse_field)
 						rule_map[rule_name]["item"] = item.get("item_code")
 						rule_map[rule_name]["qty_put"] = 0
-						rule_map[rule_name]["capacity"] = get_available_putaway_capacity(rule_name)
+						rule_map[rule_name]["capacity"] = (
+							rule.stock_capacity
+							if self.doctype == "Stock Reconciliation"
+							else get_available_putaway_capacity(rule_name)
+						)
 					rule_map[rule_name]["qty_put"] += flt(stock_qty)
 
 			for rule, values in rule_map.items():

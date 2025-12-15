@@ -655,9 +655,31 @@ class update_entries_after:
 
 				if sle.dependant_sle_voucher_detail_no:
 					entries_to_fix = self.get_dependent_entries_to_fix(entries_to_fix, sle)
+					if sle.voucher_type == "Stock Entry" and is_repack_entry(sle.voucher_no):
+						# for repack entries, we need to repost both source and target warehouses
+						self.update_distinct_item_warehouses_for_repack(sle)
 
 		if self.exceptions:
 			self.raise_exceptions()
+
+	def update_distinct_item_warehouses_for_repack(self, sle):
+		sles = (
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={
+					"voucher_type": "Stock Entry",
+					"voucher_no": sle.voucher_no,
+					"actual_qty": (">", 0),
+					"is_cancelled": 0,
+					"voucher_detail_no": ("!=", sle.dependant_sle_voucher_detail_no),
+				},
+				fields=["*"],
+			)
+			or []
+		)
+
+		for dependant_sle in sles:
+			self.update_distinct_item_warehouses(dependant_sle)
 
 	def has_stock_reco_with_serial_batch(self, sle):
 		if (
@@ -702,6 +724,13 @@ class update_entries_after:
 			{"item_code": self.item_code, "warehouse": self.args.warehouse}
 		)
 
+		key = (self.item_code, self.args.warehouse)
+		if key in self.distinct_item_warehouses and self.distinct_item_warehouses[key].get(
+			"transfer_entry_to_repost"
+		):
+			# only repost stock entries
+			args["filter_voucher_type"] = "Stock Entry"
+
 		return list(self.get_sle_after_datetime(args))
 
 	def get_dependent_entries_to_fix(self, entries_to_fix, sle):
@@ -735,8 +764,10 @@ class update_entries_after:
 			if getdate(existing_sle.get("posting_date")) > getdate(dependant_sle.posting_date):
 				self.distinct_item_warehouses[key] = val
 				self.new_items_found = True
-			elif dependant_sle.voucher_type == "Stock Entry" and is_transfer_stock_entry(
-				dependant_sle.voucher_no
+			elif (
+				dependant_sle.actual_qty > 0
+				and dependant_sle.voucher_type == "Stock Entry"
+				and is_transfer_stock_entry(dependant_sle.voucher_no)
 			):
 				if self.distinct_item_warehouses[key].get("transfer_entry_to_repost"):
 					return
@@ -1162,7 +1193,11 @@ class update_entries_after:
 
 	def get_dynamic_incoming_outgoing_rate(self, sle):
 		# Get updated incoming/outgoing rate from transaction
-		if sle.recalculate_rate or self.has_landed_cost_based_on_pi(sle):
+		if (
+			sle.recalculate_rate
+			or self.has_landed_cost_based_on_pi(sle)
+			or (sle.voucher_type == "Stock Entry" and sle.actual_qty > 0 and is_repack_entry(sle.voucher_no))
+		):
 			rate = self.get_incoming_outgoing_rate_from_transaction(sle)
 
 			if flt(sle.actual_qty) >= 0:
@@ -1828,6 +1863,9 @@ def get_stock_ledger_entries(
 	if operator in (">", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"
 
+	if previous_sle.get("filter_voucher_type"):
+		conditions += " and voucher_type = %(filter_voucher_type)s"
+
 	if extra_cond:
 		conditions += f"{extra_cond}"
 
@@ -1923,8 +1961,7 @@ def get_valuation_rate(
 				& (table.warehouse == warehouse)
 				& (table.batch_no == batch_no)
 				& (table.is_cancelled == 0)
-				& (table.voucher_no != voucher_no)
-				& (table.voucher_type != voucher_type)
+				& ((table.voucher_no != voucher_no) | (table.voucher_type != voucher_type))
 			)
 		)
 
@@ -2428,3 +2465,8 @@ def get_incoming_rate_for_serial_and_batch(item_code, row, sn_obj, company):
 			incoming_rate = abs(flt(sn_obj.batch_avg_rate.get(row.batch_no)))
 
 	return incoming_rate
+
+
+@frappe.request_cache
+def is_repack_entry(stock_entry_id):
+	return frappe.get_cached_value("Stock Entry", stock_entry_id, "purpose") == "Repack"

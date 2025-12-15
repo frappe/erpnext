@@ -339,7 +339,7 @@ def update_product_bundle_rate(parent_items_price, pi_row, item_row):
 	"""
 	Update the price dict of Product Bundles based on the rates of the Items in the bundle.
 
-	Stucture:
+	Structure:
 	{(Bundle Item 1, ae56fgji): 150.0, (Bundle Item 2, bc78fkjo): 200.0}
 	"""
 	key = (pi_row.parent_item, pi_row.parent_detail_docname)

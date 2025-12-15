@@ -260,8 +260,13 @@
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2025-11-04 23:06:43.644846",
+ "links": [
+  {
+   "link_doctype": "Stock Entry",
+   "link_fieldname": "asset_repair"
+  }
+ ],
+ "modified": "2025-11-28 13:04:34.921098",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",

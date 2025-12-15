@@ -17,6 +17,7 @@
   "required_qty",
   "column_break_9",
   "transferred_qty",
+  "consumed_qty",
   "allow_alternative_item"
  ],
  "fields": [
@@ -100,18 +101,26 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "consumed_qty",
+   "fieldtype": "Float",
+   "label": "Consumed Qty",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:09:56.943741",
+ "modified": "2025-12-04 14:30:19.472294",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card Item",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

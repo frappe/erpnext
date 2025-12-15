@@ -13,6 +13,7 @@
   "material_request_type",
   "customer",
   "company",
+  "auto_created_via_reorder",
   "column_break_2",
   "transaction_date",
   "schedule_date",
@@ -362,13 +363,19 @@
    "fieldtype": "Data",
    "is_virtual": 1,
    "label": "Last Scanned Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_created_via_reorder",
+   "fieldtype": "Check",
+   "label": "Auto Created (Reorder)"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-31 17:19:01.166208",
+ "modified": "2025-12-02 13:56:33.001436",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",

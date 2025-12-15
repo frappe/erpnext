@@ -210,18 +210,19 @@ def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_r
 	for d in gl_map:
 		cost_center = d.get("cost_center")
 
+		cost_center_allocation = get_cost_center_allocation_data(
+			gl_map[0]["company"], gl_map[0]["posting_date"], cost_center
+		)
+
+		if not cost_center_allocation:
+			new_gl_map.append(d)
+			continue
+
 		# Validate budget against main cost center
 		if not from_repost:
 			validate_expense_against_budget(
 				d, expense_amount=flt(d.debit, precision) - flt(d.credit, precision)
 			)
-
-		cost_center_allocation = get_cost_center_allocation_data(
-			gl_map[0]["company"], gl_map[0]["posting_date"], cost_center
-		)
-		if not cost_center_allocation:
-			new_gl_map.append(d)
-			continue
 
 		if d.account == round_off_account:
 			d.cost_center = cost_center_allocation[0][0]
@@ -301,7 +302,9 @@ def merge_similar_entries(gl_map, precision=None):
 	company_currency = erpnext.get_company_currency(company)
 
 	if not precision:
-		precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"), company_currency)
+		precision = get_field_precision(
+			frappe.get_meta("GL Entry").get_field("debit"), currency=company_currency
+		)
 
 	# filter zero debit and credit entries
 	merged_gl_map = filter(
@@ -404,7 +407,7 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 
 	dimension_filter_map = get_dimension_filter_map()
 	if gl_map:
-		check_freezing_date(gl_map[0]["posting_date"], adv_adj)
+		check_freezing_date(gl_map[0]["posting_date"], gl_map[0]["company"], adv_adj)
 		is_opening = any(d.get("is_opening") == "Yes" for d in gl_map)
 		if gl_map[0]["voucher_type"] != "Period Closing Voucher":
 			validate_against_pcv(is_opening, gl_map[0]["posting_date"], gl_map[0]["company"])
@@ -424,7 +427,11 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.flags.notify_update = False
 	gle.submit()
 
-	if not from_repost and gle.voucher_type != "Period Closing Voucher":
+	if (
+		not from_repost
+		and gle.voucher_type != "Period Closing Voucher"
+		and (gle.is_cancelled == 0 or gle.voucher_type == "Journal Entry")
+	):
 		validate_expense_against_budget(args)
 
 
@@ -765,7 +772,7 @@ def make_reverse_gl_entries(
 				make_entry(new_gle, adv_adj, "Yes")
 
 
-def check_freezing_date(posting_date, adv_adj=False):
+def check_freezing_date(posting_date, company, adv_adj=False):
 	"""
 	Nobody can do GL Entries where posting date is before freezing date
 	except authorized person
@@ -774,17 +781,17 @@ def check_freezing_date(posting_date, adv_adj=False):
 	Hence stop admin to bypass if accounts are freezed
 	"""
 	if not adv_adj:
-		acc_frozen_upto = frappe.get_single_value("Accounts Settings", "acc_frozen_upto")
-		if acc_frozen_upto:
-			frozen_accounts_modifier = frappe.get_single_value(
-				"Accounts Settings", "frozen_accounts_modifier"
+		acc_frozen_till_date = frappe.db.get_value("Company", company, "accounts_frozen_till_date")
+		if acc_frozen_till_date:
+			frozen_accounts_modifier = frappe.db.get_value(
+				"Company", company, "role_allowed_for_frozen_entries"
 			)
-			if getdate(posting_date) <= getdate(acc_frozen_upto) and (
+			if getdate(posting_date) <= getdate(acc_frozen_till_date) and (
 				frozen_accounts_modifier not in frappe.get_roles() or frappe.session.user == "Administrator"
 			):
 				frappe.throw(
 					_("You are not authorized to add or update entries before {0}").format(
-						formatdate(acc_frozen_upto)
+						formatdate(acc_frozen_till_date)
 					)
 				)
 

@@ -31,6 +31,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	get_depr_schedule,
 )
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.setup.utils import get_exchange_rate as _get_exchange_rate
 
 
 class StockAccountInvalidTransaction(frappe.ValidationError):
@@ -1638,6 +1639,9 @@ def get_account_details_and_party_type(account, date, company, debit=None, credi
 		"party_type": party_type,
 		"account_type": account_details.account_type,
 		"account_currency": account_details.account_currency or company_currency,
+		"bank_account": (
+			frappe.db.get_value("Bank Account", {"account": account, "company": company}) or None
+		),
 		# The date used to retreive the exchange rate here is the date passed in
 		# as an argument to this function. It is assumed to be the date on which the balance is sought
 		"exchange_rate": get_exchange_rate(
@@ -1670,8 +1674,6 @@ def get_exchange_rate(
 	credit=None,
 	exchange_rate=None,
 ):
-	from erpnext.setup.utils import get_exchange_rate
-
 	account_details = frappe.get_cached_value(
 		"Account", account, ["account_type", "root_type", "account_currency", "company"], as_dict=1
 	)
@@ -1694,7 +1696,7 @@ def get_exchange_rate(
 		# The date used to retreive the exchange rate here is the date passed
 		# in as an argument to this function.
 		elif (not flt(exchange_rate) or flt(exchange_rate) == 1) and account_currency and posting_date:
-			exchange_rate = get_exchange_rate(account_currency, company_currency, posting_date)
+			exchange_rate = _get_exchange_rate(account_currency, company_currency, posting_date)
 	else:
 		exchange_rate = 1
 
