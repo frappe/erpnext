@@ -130,7 +130,6 @@
   "only_include_allocated_payments",
   "get_advances",
   "advances",
-  "advance_tax",
   "write_off",
   "write_off_amount",
   "base_write_off_amount",
@@ -1448,14 +1447,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "advance_tax",
-   "fieldtype": "Table",
-   "hidden": 1,
-   "label": "Advance Tax",
-   "options": "Advance Tax",
-   "read_only": 1
-  },
-  {
    "fieldname": "subscription",
    "fieldtype": "Link",
    "label": "Subscription",
@@ -1676,7 +1667,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-09 03:51:22.292050",
+ "modified": "2025-12-15 06:41:38.237728",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

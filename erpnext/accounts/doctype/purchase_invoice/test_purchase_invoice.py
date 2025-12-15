@@ -1591,12 +1591,26 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 			self.assertEqual(expected_gle[i][1], gle.amount)
 
 		payment_entry.load_from_db()
-		self.assertEqual(payment_entry.taxes[0].allocated_amount, 3000)
+		tax_allocated = sum(
+			[
+				entry.withholding_amount
+				for entry in payment_entry.get("tax_withholding_entries", [])
+				if entry.taxable_name
+			]
+		)
+		self.assertEqual(tax_allocated, 3000)
 
 		purchase_invoice.cancel()
 
 		payment_entry.load_from_db()
-		self.assertEqual(payment_entry.taxes[0].allocated_amount, 0)
+		tax_allocated = sum(
+			[
+				entry.withholding_amount
+				for entry in payment_entry.get("tax_withholding_entries", [])
+				if entry.taxable_name
+			]
+		)
+		self.assertEqual(tax_allocated, 0)
 
 	def test_purchase_gl_with_tax_withholding_tax(self):
 		company = "_Test Company"

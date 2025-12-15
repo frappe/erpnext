@@ -59,7 +59,6 @@ class PurchaseInvoice(BuyingController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.advance_tax.advance_tax import AdvanceTax
 		from erpnext.accounts.doctype.item_wise_tax_detail.item_wise_tax_detail import ItemWiseTaxDetail
 		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
@@ -77,7 +76,6 @@ class PurchaseInvoice(BuyingController):
 
 		additional_discount_percentage: DF.Float
 		address_display: DF.TextEditor | None
-		advance_tax: DF.Table[AdvanceTax]
 		advances: DF.Table[PurchaseInvoiceAdvance]
 		against_expense_account: DF.SmallText | None
 		allocate_advances_automatically: DF.Check
@@ -789,7 +787,6 @@ class PurchaseInvoice(BuyingController):
 			self.update_project()
 
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
-		self.update_advance_tax_references()
 
 		self.process_common_party_accounting()
 
@@ -1724,7 +1721,6 @@ class PurchaseInvoice(BuyingController):
 			"Serial and Batch Bundle",
 			"Tax Withholding Entry",
 		)
-		self.update_advance_tax_references(cancel=1)
 
 	def update_project(self):
 		projects = frappe._dict()
@@ -1846,19 +1842,6 @@ class PurchaseInvoice(BuyingController):
 	def unblock_invoice(self):
 		self.db_set("on_hold", 0)
 		self.db_set("release_date", None)
-
-	def update_advance_tax_references(self, cancel=0):
-		for tax in self.get("advance_tax"):
-			at = frappe.qb.DocType("Advance Taxes and Charges").as_("at")
-
-			if cancel:
-				frappe.qb.update(at).set(
-					at.allocated_amount, at.allocated_amount - tax.allocated_amount
-				).where(at.name == tax.reference_detail).run()
-			else:
-				frappe.qb.update(at).set(
-					at.allocated_amount, at.allocated_amount + tax.allocated_amount
-				).where(at.name == tax.reference_detail).run()
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():

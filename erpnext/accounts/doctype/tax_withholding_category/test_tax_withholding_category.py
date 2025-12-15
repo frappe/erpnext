@@ -706,7 +706,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		)
 		pe.paid_from = "Debtors - _TC"
 		pe.paid_to = "Cash - _TC"
-		pe.apply_tds = 1  # Fixed field name from apply_tax_withholding_amount
+		pe.apply_tds = 1
 		pe.tax_withholding_category = "Cumulative Threshold TCS"
 		pe.submit()
 		vouchers.append(pe)
@@ -720,7 +720,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 				tax_rate=10.0,
 				taxable_amount=30000.0,
 				withholding_amount=3000.0,  # Always Over Withheld
-				status="Over Withheld",  # Settled because it's a threshold exemption
+				status="Over Withheld",
 				taxable_doctype="",
 				taxable_name="",
 				withholding_doctype="Payment Entry",

@@ -836,6 +836,8 @@ class TaxWithholdingController:
 		category_withholding_map = defaultdict(float)
 
 		for entry in self.doc.tax_withholding_entries:
+			if entry.withholding_name != self.doc.name:
+				continue
 			category_withholding_map[entry.tax_withholding_category] += entry.withholding_amount
 
 		return category_withholding_map
@@ -845,6 +847,8 @@ class TaxWithholdingController:
 		account_amount_map = defaultdict(float)
 
 		for entry in self.doc.tax_withholding_entries:
+			if entry.withholding_name != self.doc.name:
+				continue
 			category = self.category_details.get(entry.tax_withholding_category)
 			account_amount_map[category.account_head] += entry.withholding_amount
 
