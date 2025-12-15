@@ -84,6 +84,36 @@ class TestBankTransaction(UnitTestCase):
 		self.assertEqual(bt.included_fee, 7)
 		self.assertEqual(bt.excluded_fee, 0)
 
+	def test_excluded_fee_can_reduce_an_incoming_payment_to_zero(self):
+		"""A separately-deducted fee may reduce an incoming payment to zero, while still tracking the fee."""
+		bt = frappe.new_doc("Bank Transaction")
+		bt.deposit = 5
+		bt.withdrawal = 0
+		bt.included_fee = 0
+		bt.excluded_fee = 5
+
+		bt.handle_excluded_fee()
+
+		self.assertEqual(bt.deposit, 0)
+		self.assertEqual(bt.withdrawal, 0)
+		self.assertEqual(bt.included_fee, 5)
+		self.assertEqual(bt.excluded_fee, 0)
+
+	def test_excluded_fee_increases_outgoing_payment(self):
+		"""When a separately-deducted fee is provided for an outgoing payment, the total money leaving increases and the fee is tracked."""
+		bt = frappe.new_doc("Bank Transaction")
+		bt.deposit = 0
+		bt.withdrawal = 100
+		bt.included_fee = 2
+		bt.excluded_fee = 5
+
+		bt.handle_excluded_fee()
+
+		self.assertEqual(bt.deposit, 0)
+		self.assertEqual(bt.withdrawal, 105)
+		self.assertEqual(bt.included_fee, 7)
+		self.assertEqual(bt.excluded_fee, 0)
+
 	def test_excluded_fee_turns_zero_amount_into_withdrawal(self):
 		"""If only an excluded fee is provided, it should be treated as an
 		outgoing payment and the fee is then tracked as included."""
