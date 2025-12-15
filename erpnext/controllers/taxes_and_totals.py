@@ -560,17 +560,9 @@ class calculate_taxes_and_totals:
 			current_net_amount = item.net_amount
 			# distribute the tax amount proportionally to each item row
 			actual = flt(tax.tax_amount, tax.precision("tax_amount"))
-
-			# TODO: details for tax_withholding
-			if tax.get("is_tax_withholding_account") and item.meta.get_field("apply_tds"):
-				if not item.get("apply_tds"):
-					current_tax_amount = 0.0
-				else:
-					current_tax_amount = actual
-			else:
-				current_tax_amount = (
-					item.net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
-				)
+			current_tax_amount = (
+				item.net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
+			)
 
 		elif tax.charge_type == "On Net Total":
 			if tax.account_head in item_tax_map:
