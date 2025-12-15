@@ -81,47 +81,43 @@ def get_columns(filters):
 			"options": "party_type",
 			"width": 180,
 		},
+		{
+			"label": _(f"{filters.get('party_type', 'Party')} Name"),
+			"fieldname": "party_name",
+			"fieldtype": "Data",
+			"width": 180,
+		},
+		{
+			"label": _("Section Code"),
+			"options": "Tax Withholding Category",
+			"fieldname": "section_code",
+			"fieldtype": "Link",
+			"width": 180,
+		},
+		{
+			"label": _("Entity Type"),
+			"fieldname": "entity_type",
+			"fieldtype": "Data",
+			"width": 180,
+		},
+		{
+			"label": _("Tax Rate %"),
+			"fieldname": "rate",
+			"fieldtype": "Percent",
+			"width": 120,
+		},
+		{
+			"label": _("Total Amount"),
+			"fieldname": "total_amount",
+			"fieldtype": "Float",
+			"width": 120,
+		},
+		{
+			"label": _("Tax Amount"),
+			"fieldname": "tax_amount",
+			"fieldtype": "Float",
+			"width": 120,
+		},
 	]
-
-	if filters.naming_series == "Naming Series":
-		columns.append(
-			{
-				"label": _(filters.party_type + " Name"),
-				"fieldname": "party_name",
-				"fieldtype": "Data",
-				"width": 180,
-			}
-		)
-
-	columns.extend(
-		[
-			{
-				"label": _("Section Code"),
-				"options": "Tax Withholding Category",
-				"fieldname": "section_code",
-				"fieldtype": "Link",
-				"width": 180,
-			},
-			{"label": _("Entity Type"), "fieldname": "entity_type", "fieldtype": "Data", "width": 180},
-			{
-				"label": _("Tax Rate %"),
-				"fieldname": "rate",
-				"fieldtype": "Percent",
-				"width": 120,
-			},
-			{
-				"label": _("Total Amount"),
-				"fieldname": "total_amount",
-				"fieldtype": "Float",
-				"width": 120,
-			},
-			{
-				"label": _("Tax Amount"),
-				"fieldname": "tax_amount",
-				"fieldtype": "Float",
-				"width": 120,
-			},
-		]
-	)
 
 	return columns
