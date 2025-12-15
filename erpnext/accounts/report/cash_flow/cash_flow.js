@@ -44,3 +44,5 @@ frappe.query_reports[CF_REPORT_NAME]["filters"].push(
 		fieldtype: "Check",
 	}
 );
+
+frappe.query_reports[CF_REPORT_NAME]["export_hidden_cols"] = true;
