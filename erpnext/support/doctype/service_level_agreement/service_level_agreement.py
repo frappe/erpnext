@@ -888,6 +888,11 @@ def set_response_by(doc, start_date_time, priority):
 
 def set_resolution_by(doc, start_date_time, priority):
 	if doc.meta.has_field("sla_resolution_by"):
+		if doc.meta.has_field("total_hold_time") and doc.get("total_hold_time"):
+			start_date_time = add_to_date(
+				start_date_time, seconds=round(doc.get("total_hold_time")), as_datetime=True
+			)
+
 		doc.sla_resolution_by = get_expected_time_for(
 			parameter="resolution", service_level=priority, start_date_time=start_date_time
 		)
