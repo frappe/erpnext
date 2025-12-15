@@ -2041,6 +2041,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 				withholding_name=pi1.name,
 			),
 		]
+		self.validate_tax_withholding_entries("Purchase Invoice", pi1.name, expected_entries)
 		self.cleanup_invoices(invoices)
 
 	@IntegrationTestCase.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
