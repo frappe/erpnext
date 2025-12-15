@@ -333,9 +333,8 @@ class TaxWithholdingEntry(Document):
 			new_entry.update(values_to_update)
 			new_entry.insert()
 
-			docs_needing_reindex.add((entry.parent, entry.parenttype))
+			docs_needing_reindex.add((entry.parenttype, entry.parent))
 
-		# Reset idx for documents that had new entries added (like _adjust_against_old_entries does)
 		_reset_idx(docs_needing_reindex)
 
 
