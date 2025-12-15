@@ -772,16 +772,25 @@ class TaxWithholdingController:
 		if not categories_for_account:
 			return
 
-		# Clear existing entries for this tax row if updating
+		if not hasattr(self.doc, "_item_wise_tax_details"):
+			self.doc._item_wise_tax_details = []
+
 		if for_update:
 			self.doc._item_wise_tax_details = [
 				d for d in self.doc._item_wise_tax_details if d.get("tax") != tax_row
 			]
 
-		# Process each item and calculate its share of tax
-		precision = self.doc.precision("tax_amount", "taxes")
+		items = self.doc.get("items") or []
+		category_totals = {}
+		for item in items:
+			if item.apply_tds and item.tax_withholding_category:
+				item_taxable = item.get("_base_tax_withholding_net_total", 0)
+				category_totals[item.tax_withholding_category] = (
+					category_totals.get(item.tax_withholding_category, 0) + item_taxable
+				)
 
-		for item in self.doc.get("items", []):
+		precision = self.doc.precision("tax_amount", "taxes")
+		for item in items:
 			if not (item.apply_tds and item.tax_withholding_category):
 				continue
 
@@ -794,16 +803,24 @@ class TaxWithholdingController:
 			if not category.taxable_amount or not item_base_taxable:
 				continue
 
-			# Calculate item's proportion within the category
-			item_proportion = item_base_taxable / category.taxable_amount
+			total_taxable_amount = category_totals.get(category.name, 0)
 
-			# Get category's total withholding amount
-			category_withholding_amount = category_withholding_map.get(category.name, 0)
+			if category.unused_threshold and total_taxable_amount:
+				# Proportionately deduct unused threshold from item's base taxable
+				item_threshold_deduction = (
+					item_base_taxable / total_taxable_amount
+				) * category.unused_threshold
+				item_effective_taxable = max(0, item_base_taxable - item_threshold_deduction)
+			else:
+				item_effective_taxable = item_base_taxable
 
-			# Calculate item's share of tax
-			item_tax_amount = flt(category_withholding_amount * item_proportion, precision)
+			withholding_amount = category_withholding_map.get(category.name, 0)
+			if withholding_amount and category.taxable_amount:
+				item_proportion = item_effective_taxable / category.taxable_amount
+				item_tax_amount = flt(abs(withholding_amount) * item_proportion, precision)
+			else:
+				item_tax_amount = 0
 
-			# Append to _item_wise_tax_details
 			self.doc._item_wise_tax_details.append(
 				frappe._dict(
 					item=item,
@@ -861,7 +878,9 @@ class TaxWithholdingController:
 
 			# Calculate tax amount for this taxable amount
 			tax_amount = self.compute_withheld_amount(
-				under.taxable_amount, tax_rate, round_off_tax_amount=category.round_off_tax_amount
+				under.taxable_amount,
+				tax_rate,
+				round_off_tax_amount=category.round_off_tax_amount,
 			)
 
 			tax_amount = flt(min(tax_amount, over.withholding_amount), self.precision)
@@ -953,7 +972,9 @@ class TaxWithholdingController:
 				{
 					"taxable_amount": flt(amount_to_process, self.precision),
 					"withholding_amount": self.compute_withheld_amount(
-						amount_to_process, tax_rate, round_off_tax_amount=category.round_off_tax_amount
+						amount_to_process,
+						tax_rate,
+						round_off_tax_amount=category.round_off_tax_amount,
 					),
 					"withholding_doctype": self.doc.doctype,
 					"withholding_name": self.doc.name,
@@ -995,7 +1016,9 @@ class TaxWithholdingController:
 				{
 					"taxable_amount": flt(amount_to_process, self.precision),
 					"withholding_amount": self.compute_withheld_amount(
-						amount_to_process, tax_rate, round_off_tax_amount=category.round_off_tax_amount
+						amount_to_process,
+						tax_rate,
+						round_off_tax_amount=category.round_off_tax_amount,
 					),
 					"withholding_doctype": entry.withholding_doctype,
 					"withholding_name": entry.withholding_name,
@@ -1084,16 +1107,10 @@ class TaxWithholdingController:
 
 	def _clear_existing_tax_amounts(self):
 		"""Clear existing tax withholding amounts from tax rows"""
-		recalculate = False
 		for row in self.doc.taxes:
 			if row.is_tax_withholding_account and row.tax_amount:
 				row.tax_amount = 0
 				row.base_tax_amount_after_discount_amount = 0
-				recalculate = True
-
-		if recalculate:
-			# Recalculate taxes and totals if any tax row was cleared
-			self.calculate_taxes_and_totals()
 
 	def calculate_taxes_and_totals(self):
 		self.doc.calculate_taxes_and_totals()
@@ -1235,7 +1252,9 @@ class JournalTaxWithholding(TaxWithholdingController):
 		category["taxable_amount"] = net_amount
 
 	def get_party_net_amount(self):
-		from erpnext.accounts.report.general_ledger.general_ledger import get_account_type_map
+		from erpnext.accounts.report.general_ledger.general_ledger import (
+			get_account_type_map,
+		)
 
 		# Calculate net total
 		account_type_map = get_account_type_map(self.doc.company)
@@ -1294,7 +1313,9 @@ class JournalTaxWithholding(TaxWithholdingController):
 		acc_currency = get_account_currency(account_head)
 
 		# Use the get_exchange_rate function available in the journal entry module
-		from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
+		from erpnext.accounts.doctype.journal_entry.journal_entry import (
+			get_exchange_rate,
+		)
 
 		exchange_rate = get_exchange_rate(self.doc.posting_date, account_head, acc_currency, self.doc.company)
 
@@ -1354,7 +1375,8 @@ class JournalTaxWithholding(TaxWithholdingController):
 
 		new_party_amount = flt(self.party_row.get(party_field) - tax_amount, precision)
 		new_party_amount_in_curr = flt(
-			self.party_row.get(party_field_in_acc_curr) - tax_amount_in_party_curr, precision
+			self.party_row.get(party_field_in_acc_curr) - tax_amount_in_party_curr,
+			precision,
 		)
 
 		self.party_row.update(
