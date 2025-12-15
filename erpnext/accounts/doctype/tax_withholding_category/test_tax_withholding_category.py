@@ -719,7 +719,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 				party="Test TCS Customer",
 				tax_rate=10.0,
 				taxable_amount=30000.0,
-				withholding_amount=3000.0,  # Always Over Withheld
+				withholding_amount=3000.0,
 				status="Over Withheld",
 				taxable_doctype="",
 				taxable_name="",
@@ -743,10 +743,12 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		si.submit()
 		vouchers.append(si)
 
-		# assert tax collection on total invoice ,advance payment adjusted should be excluded.
+		# Validate TCS charged on Sales Invoice
+		# Since PE already collected 3000 TCS (over-withheld), and total required is 5000,
+		# the remaining 2000 is settled from PE's over-withheld amount.
+		# No new TCS is deducted on SI - the taxes row should be 0.
 		tcs_charged = sum([d.base_tax_amount for d in si.taxes if d.account_head == "TCS - _TC"])
-		# tcs = (inv amt)50000+(adv amt)30000-(adv adj) 30000 - threshold(30000) * rate 10%
-		self.assertEqual(tcs_charged, 2000)
+		self.assertEqual(tcs_charged, 0)
 
 		# Validate invoice tax withholding entries
 		invoice_expected_entries = [
