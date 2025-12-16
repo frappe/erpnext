@@ -3157,16 +3157,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 				if d.docstatus == 1:
 					transfer_qty = frappe.get_value("Stock Entry Detail", d.ste_detail, "transfer_qty")
 
-					if (
-						transfer_qty < transferred_qty[0].qty
-						if transferred_qty and transferred_qty[0]
-						else 0.0
-					):
-						frappe.throw(
-							_(
-								"Row {0}: Transferred quantity cannot be greater than the requested quantity."
-							).format(d.idx)
-						)
+					if transferred_qty and transferred_qty[0]:
+						if transferred_qty[0].qty > transfer_qty:
+							frappe.throw(
+								_(
+									"Row {0}: Transferred quantity cannot be greater than the requested quantity."
+								).format(d.idx)
+							)
 
 				stock_entries[(d.against_stock_entry, d.ste_detail)] = (
 					transferred_qty[0].qty if transferred_qty and transferred_qty[0] else 0.0
