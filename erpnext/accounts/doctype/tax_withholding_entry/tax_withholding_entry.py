@@ -671,9 +671,7 @@ class TaxWithholdingController:
 			.where(entry.docstatus == 1)
 		)
 
-		over_withheld_query = base_query.where(entry.status == "Over Withheld").where(
-			entry.withholding_date.between(category.from_date, category.to_date)
-		)
+		over_withheld_query = base_query.where(entry.status == "Over Withheld")
 
 		return (
 			base_query.where(entry.status == "Under Withheld")
