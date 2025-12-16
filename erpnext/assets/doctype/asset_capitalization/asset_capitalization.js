@@ -197,6 +197,13 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 		}
 	}
 
+	serial_and_batch_bundle(doc, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		if (cdt === "Asset Capitalization Stock Item") {
+			this.get_warehouse_details(row);
+		}
+	}
+
 	asset(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		if (cdt === "Asset Capitalization Asset Item") {
@@ -410,6 +417,7 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 						voucher_type: me.frm.doc.doctype,
 						voucher_no: me.frm.doc.name,
 						allow_zero_valuation: 1,
+						serial_and_batch_bundle: item.serial_and_batch_bundle,
 					},
 				},
 				callback: function (r) {
