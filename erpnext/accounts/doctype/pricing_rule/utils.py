@@ -153,6 +153,7 @@ def _get_pricing_rules(apply_on, args, values):
 	# dont not apply rule for the main item in pricing rule for POS Page, this will be managed from POS Page
 	if len(pricing_rules) >= 1:
 		pr_r = pricing_rules[0]
+		usable_count_ok = 1
 		if pr_r.get('apply_rule_on_other', None):
 			if pr_r.get(apply_on_field) == args.get(apply_on_field) or args.get('parenttype') == 'POS Invoice':
 				pricing_rules = []
@@ -163,11 +164,13 @@ def _get_pricing_rules(apply_on, args, values):
 					used_count = get_pr_usage_count(pr_r.get("name"), args.get('customer'), args.get('item_code'), args.get('uom'))
 					if used_count >= pr_r.get('usable_count', 0):
 						pricing_rules = []
+					else:
+						usable_count_ok = 1
 				else:
 					pricing_rules = []
 
 			if pr_r.get('app_users_only', 0):
-				if cint(args.get('from_app_user', 0)) != 1:
+				if cint(args.get('from_app_user', 0)) != 1 or not usable_count_ok:
 					pricing_rules = []
 
 	return pricing_rules
