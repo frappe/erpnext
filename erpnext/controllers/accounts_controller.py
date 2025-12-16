@@ -2521,6 +2521,7 @@ class AccountsController(TransactionBase):
 		base_grand_total = flt(self.get("base_rounded_total") or self.base_grand_total)
 		grand_total = flt(self.get("rounded_total") or self.grand_total)
 		automatically_fetch_payment_terms = 0
+		payment_term_advace_amount = None
 
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 			base_grand_total = base_grand_total - flt(self.base_write_off_amount)
@@ -2531,6 +2532,7 @@ class AccountsController(TransactionBase):
 			)
 
 		if self.get("total_advance"):
+			payment_term_advace_amount = self.get_advance_payment_terms()
 			if party_account_currency == self.company_currency:
 				base_grand_total -= self.get("total_advance")
 				grand_total = flt(
@@ -2578,25 +2580,59 @@ class AccountsController(TransactionBase):
 			and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
 		):
 			for d in self.get("payment_schedule"):
-				if d.invoice_portion:
-					d.payment_amount = flt(
-						grand_total * flt(d.invoice_portion) / 100, d.precision("payment_amount")
-					)
-					d.base_payment_amount = flt(
-						base_grand_total * flt(d.invoice_portion) / 100, d.precision("base_payment_amount")
-					)
-					d.outstanding = d.payment_amount
-					d.base_outstanding = d.base_payment_amount
-				elif not d.invoice_portion:
-					d.base_payment_amount = flt(
-						d.payment_amount * self.get("conversion_rate"), d.precision("base_payment_amount")
-					)
-					d.base_outstanding = d.base_payment_amount
+				if payment_term_advace_amount:
+					if amount := payment_term_advace_amount.get(d.payment_term):
+						d.payment_amount -= flt(
+							flt(amount) / self.conversion_rate, d.precision("payment_amount")
+						)
+						d.base_payment_amount -= flt(amount)
+						d.outstanding = d.payment_amount
+						d.base_outstanding = d.base_payment_amount
+				else:
+					if d.invoice_portion:
+						d.payment_amount = flt(
+							grand_total * flt(d.invoice_portion) / 100, d.precision("payment_amount")
+						)
+						d.base_payment_amount = flt(
+							base_grand_total * flt(d.invoice_portion) / 100,
+							d.precision("base_payment_amount"),
+						)
+						d.outstanding = d.payment_amount
+						d.base_outstanding = d.base_payment_amount
+					elif not d.invoice_portion:
+						d.base_payment_amount = flt(
+							d.payment_amount * self.get("conversion_rate"), d.precision("base_payment_amount")
+						)
+						d.base_outstanding = d.base_payment_amount
 		else:
 			self.fetch_payment_terms_from_order(
 				po_or_so, doctype, grand_total, base_grand_total, automatically_fetch_payment_terms
 			)
 			self.ignore_default_payment_terms_template = 1
+
+	def get_advance_payment_terms(self):
+		payment_entry_names = [
+			adv.reference_name
+			for adv in self.get("advances", [])
+			if adv.reference_type == "Payment Entry" and adv.reference_name
+		]
+
+		if not payment_entry_names:
+			return None
+
+		PER = frappe.qb.DocType("Payment Entry Reference")
+		results = (
+			frappe.qb.from_(PER)
+			.select(PER.payment_term, Sum(PER.allocated_amount).as_("allocated_amount"))
+			.where(PER.parent.isin(payment_entry_names))
+			.where(PER.payment_term.isnotnull())
+			.groupby(PER.payment_term)
+		).run(as_dict=True)
+		advance_allocations = frappe._dict(
+			{row["payment_term"]: flt(row["allocated_amount"]) for row in results if row.get("payment_term")}
+		)
+
+		return advance_allocations if advance_allocations else None
 
 	def get_order_details(self):
 		if not self.get("items"):
