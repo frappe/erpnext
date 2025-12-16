@@ -164,8 +164,7 @@ def _get_pricing_rules(apply_on, args, values):
 					used_count = get_pr_usage_count(pr_r.get("name"), args.get('customer'), args.get('item_code'), args.get('uom'))
 					if used_count >= pr_r.get('usable_count', 0):
 						pricing_rules = []
-					else:
-						usable_count_ok = 1
+						usable_count_ok = 0
 				else:
 					pricing_rules = []
 
