@@ -863,6 +863,7 @@ def get_wdv_or_dd_depr_amount(
 		asset,
 		fb_row,
 		depreciable_value,
+		yearly_opening_wdv,
 		schedule_idx,
 		prev_depreciation_amount,
 		has_wdv_or_dd_non_yearly_pro_rata,
@@ -875,6 +876,7 @@ def get_default_wdv_or_dd_depr_amount(
 	asset,
 	fb_row,
 	depreciable_value,
+	yearly_opening_wdv,
 	schedule_idx,
 	prev_depreciation_amount,
 	has_wdv_or_dd_non_yearly_pro_rata,
@@ -886,6 +888,7 @@ def get_default_wdv_or_dd_depr_amount(
 			asset,
 			fb_row,
 			depreciable_value,
+			yearly_opening_wdv,
 			schedule_idx,
 			prev_depreciation_amount,
 			has_wdv_or_dd_non_yearly_pro_rata,
@@ -896,6 +899,7 @@ def get_default_wdv_or_dd_depr_amount(
 			asset,
 			fb_row,
 			depreciable_value,
+			yearly_opening_wdv,
 			schedule_idx,
 			prev_depreciation_amount,
 			has_wdv_or_dd_non_yearly_pro_rata,
@@ -904,10 +908,35 @@ def get_default_wdv_or_dd_depr_amount(
 		)
 
 
+def _is_fiscal_year_start(depreciable_value, yearly_opening_wdv, schedule_idx):
+	"""
+	Detect if current depreciation period is at a fiscal year boundary.
+
+	The caller (_make_depr_schedule) resets yearly_opening_wdv = value_after_depreciation
+	whenever schedule_date crosses fiscal year end. At fiscal year start, both values
+	will be equal (within tolerance). Mid-year, yearly_opening_wdv > depreciable_value
+	as the asset value has depreciated.
+
+	Args:
+	        depreciable_value: Current asset value
+	        yearly_opening_wdv: Asset value at start of current fiscal year
+	        schedule_idx: Current period index (0-based)
+
+	Returns:
+	        bool: True if at fiscal year start, False otherwise
+	"""
+	if schedule_idx == 0:
+		return True
+
+	# Use tolerance for floating point comparison
+	return abs(flt(yearly_opening_wdv) - flt(depreciable_value)) < 0.01
+
+
 def _get_default_wdv_or_dd_depr_amount(
 	asset,
 	fb_row,
 	depreciable_value,
+	yearly_opening_wdv,
 	schedule_idx,
 	prev_depreciation_amount,
 	has_wdv_or_dd_non_yearly_pro_rata,
@@ -916,21 +945,25 @@ def _get_default_wdv_or_dd_depr_amount(
 	if cint(fb_row.frequency_of_depreciation) == 12:
 		return flt(depreciable_value) * (flt(fb_row.rate_of_depreciation) / 100)
 	else:
+		# Detect fiscal year start by comparing yearly_opening_wdv with depreciable_value
+		# The caller resets yearly_opening_wdv = value_after_depreciation at fiscal year boundary
+		is_fiscal_year_start = _is_fiscal_year_start(depreciable_value, yearly_opening_wdv, schedule_idx)
+
 		if has_wdv_or_dd_non_yearly_pro_rata:
 			if schedule_idx == 0:
 				return flt(depreciable_value) * (flt(fb_row.rate_of_depreciation) / 100)
-			elif schedule_idx % (12 / cint(fb_row.frequency_of_depreciation)) == 1:
+			elif is_fiscal_year_start:
 				return (
-					flt(depreciable_value)
+					flt(yearly_opening_wdv)
 					* flt(fb_row.frequency_of_depreciation)
 					* (flt(fb_row.rate_of_depreciation) / 1200)
 				)
 			else:
 				return prev_depreciation_amount
 		else:
-			if schedule_idx % (12 / cint(fb_row.frequency_of_depreciation)) == 0:
+			if is_fiscal_year_start:
 				return (
-					flt(depreciable_value)
+					flt(yearly_opening_wdv)
 					* flt(fb_row.frequency_of_depreciation)
 					* (flt(fb_row.rate_of_depreciation) / 1200)
 				)
@@ -942,23 +975,27 @@ def _get_daily_prorata_based_default_wdv_or_dd_depr_amount(
 	asset,
 	fb_row,
 	depreciable_value,
+	yearly_opening_wdv,
 	schedule_idx,
 	prev_depreciation_amount,
 	has_wdv_or_dd_non_yearly_pro_rata,
 	asset_depr_schedule,
 	prev_per_day_depr,
 ):
-	if has_wdv_or_dd_non_yearly_pro_rata:  # If applicable days for ther first month is less than full month
+	# Detect fiscal year start by comparing yearly_opening_wdv with depreciable_value
+	is_fiscal_year_start = _is_fiscal_year_start(depreciable_value, yearly_opening_wdv, schedule_idx)
+
+	if has_wdv_or_dd_non_yearly_pro_rata:  # If applicable days for the first month is less than full month
 		if schedule_idx == 0:
 			return flt(depreciable_value) * (flt(fb_row.rate_of_depreciation) / 100), None
 
-		elif schedule_idx % (12 / cint(fb_row.frequency_of_depreciation)) == 1:  # Year changes
-			return get_monthly_depr_amount(fb_row, schedule_idx, depreciable_value)
+		elif is_fiscal_year_start:
+			return get_monthly_depr_amount(fb_row, schedule_idx, yearly_opening_wdv)
 		else:
 			return get_monthly_depr_amount_based_on_prev_per_day_depr(fb_row, schedule_idx, prev_per_day_depr)
 	else:
-		if schedule_idx % (12 / cint(fb_row.frequency_of_depreciation)) == 0:  # year changes
-			return get_monthly_depr_amount(fb_row, schedule_idx, depreciable_value)
+		if is_fiscal_year_start:
+			return get_monthly_depr_amount(fb_row, schedule_idx, yearly_opening_wdv)
 		else:
 			return get_monthly_depr_amount_based_on_prev_per_day_depr(fb_row, schedule_idx, prev_per_day_depr)
 
