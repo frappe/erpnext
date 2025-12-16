@@ -494,7 +494,10 @@ class TaxWithholdingController:
 			if key in linked_payments:
 				# Calculate proportion for linked payments
 				# TODO: whether it should be entry.taxable_amount only or do we need proportion
-				proportion = linked_payments[key] / (entry.taxable_amount - entry.withholding_amount)
+				total_value = entry.taxable_amount - entry.withholding_amount
+				if not total_value:
+					continue
+				proportion = linked_payments[key] / total_value
 
 				# for handling rounding adjustments
 				proportion = min(proportion, 1)
@@ -699,7 +702,7 @@ class TaxWithholdingController:
 				"tax_withholding_category": category.name,
 				"tax_withholding_group": category.tax_withholding_group,
 				"tax_rate": category.tax_rate,
-				"conversion_rate": self.get_conversion_rate() or 1,
+				"conversion_rate": self.get_conversion_rate(),
 				"taxable_doctype": self.doc.doctype,
 				"taxable_name": self.doc.name,
 				"taxable_date": self.doc.posting_date,
@@ -1119,7 +1122,7 @@ class TaxWithholdingController:
 
 	def get_conversion_rate(self):
 		"""Get conversion rate for the document"""
-		return self.doc.get("conversion_rate")
+		return self.doc.get("conversion_rate") or 1
 
 	def on_validate(self):
 		"""Validate and calculate tax withholding for sales transactions"""
@@ -1176,7 +1179,7 @@ class PaymentTaxWithholding(TaxWithholdingController):
 		category["taxable_amount"] = taxable_amount
 
 	def get_conversion_rate(self):
-		return self.doc.source_exchange_rate
+		return self.doc.source_exchange_rate or 1
 
 	def calculate_taxes_and_totals(self):
 		self.doc.apply_taxes()
