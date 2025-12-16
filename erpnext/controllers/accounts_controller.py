@@ -2521,7 +2521,9 @@ class AccountsController(TransactionBase):
 		base_grand_total = flt(self.get("base_rounded_total") or self.base_grand_total)
 		grand_total = flt(self.get("rounded_total") or self.grand_total)
 		automatically_fetch_payment_terms = 0
-		payment_term_advance_amount = None
+		advance_payment = None
+		effective_grand_total = grand_total
+		effective_base_grand_total = base_grand_total
 
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 			base_grand_total = base_grand_total - flt(self.base_write_off_amount)
@@ -2532,16 +2534,16 @@ class AccountsController(TransactionBase):
 			)
 
 		if self.get("total_advance"):
-			payment_term_advance_amount = self.get_advance_payment_terms()
+			advance_payment = self.get_advance_payment()
 			if party_account_currency == self.company_currency:
-				base_grand_total -= self.get("total_advance")
-				grand_total = flt(
-					base_grand_total / self.get("conversion_rate"), self.precision("grand_total")
+				effective_base_grand_total -= self.get("total_advance")
+				effective_grand_total = flt(
+					effective_base_grand_total / self.get("conversion_rate"), self.precision("grand_total")
 				)
 			else:
-				grand_total -= self.get("total_advance")
-				base_grand_total = flt(
-					grand_total * self.get("conversion_rate"), self.precision("base_grand_total")
+				effective_grand_total -= self.get("total_advance")
+				effective_base_grand_total = flt(
+					effective_grand_total * self.get("conversion_rate"), self.precision("base_grand_total")
 				)
 
 		if not self.get("payment_schedule"):
@@ -2551,13 +2553,21 @@ class AccountsController(TransactionBase):
 				and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
 			):
 				self.fetch_payment_terms_from_order(
-					po_or_so, doctype, grand_total, base_grand_total, automatically_fetch_payment_terms
+					po_or_so,
+					doctype,
+					grand_total,
+					base_grand_total,
+					automatically_fetch_payment_terms,
+					advance_payment,
 				)
 				if self.get("payment_terms_template"):
 					self.ignore_default_payment_terms_template = 1
 			elif self.get("payment_terms_template"):
 				data = get_payment_terms(
-					self.payment_terms_template, posting_date, grand_total, base_grand_total
+					self.payment_terms_template,
+					posting_date,
+					effective_grand_total,
+					effective_base_grand_total,
 				)
 				for item in data:
 					self.append("payment_schedule", item)
@@ -2565,8 +2575,8 @@ class AccountsController(TransactionBase):
 				data = dict(
 					due_date=due_date,
 					invoice_portion=100,
-					payment_amount=grand_total,
-					base_payment_amount=base_grand_total,
+					payment_amount=effective_grand_total,
+					base_payment_amount=effective_base_grand_total,
 				)
 				self.append("payment_schedule", data)
 
@@ -2579,77 +2589,117 @@ class AccountsController(TransactionBase):
 			and allocate_payment_based_on_payment_terms
 			and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
 		):
+			advance_map = advance_payment or {}
+			unassigned_advance = flt(advance_map.get("unassigned", 0))
+
 			for d in self.get("payment_schedule"):
-				if payment_term_advance_amount:
-					if amount := payment_term_advance_amount.get(d.payment_term):
-						d.payment_amount -= flt(
-							flt(amount) / self.conversion_rate, d.precision("payment_amount")
-						)
-						d.base_payment_amount -= flt(amount, d.precision("base_payment_amount"))
-						d.outstanding = d.payment_amount
-						d.base_outstanding = d.base_payment_amount
-				else:
-					if d.invoice_portion:
-						d.payment_amount = flt(
-							grand_total * flt(d.invoice_portion) / 100, d.precision("payment_amount")
-						)
-						d.base_payment_amount = flt(
-							base_grand_total * flt(d.invoice_portion) / 100,
-							d.precision("base_payment_amount"),
-						)
-						d.outstanding = d.payment_amount
-						d.base_outstanding = d.base_payment_amount
-					elif not d.invoice_portion:
-						d.base_payment_amount = flt(
-							d.payment_amount * self.get("conversion_rate"), d.precision("base_payment_amount")
-						)
-						d.base_outstanding = d.base_payment_amount
+				term_advance = flt(advance_map.get(d.payment_term))
+
+				advance = term_advance or 0
+				if not term_advance and unassigned_advance:
+					advance = unassigned_advance
+					unassigned_advance = 0
+
+				if d.invoice_portion:
+					d.payment_amount = flt(
+						(grand_total * flt(d.invoice_portion) / 100) - (advance / self.conversion_rate),
+						d.precision("payment_amount"),
+					)
+					d.base_payment_amount = flt(
+						(base_grand_total * flt(d.invoice_portion) / 100) - advance,
+						d.precision("base_payment_amount"),
+					)
+
+					d.outstanding = d.payment_amount
+					d.base_outstanding = d.base_payment_amount
+
+				elif not d.invoice_portion:
+					d.base_payment_amount = flt(
+						d.payment_amount * self.get("conversion_rate"),
+						d.precision("base_payment_amount"),
+					)
+					d.base_outstanding = d.base_payment_amount
+
 		else:
 			self.fetch_payment_terms_from_order(
-				po_or_so, doctype, grand_total, base_grand_total, automatically_fetch_payment_terms
+				po_or_so,
+				doctype,
+				grand_total,
+				base_grand_total,
+				automatically_fetch_payment_terms,
+				advance_payment,
 			)
 			self.ignore_default_payment_terms_template = 1
 
-	def get_advance_payment_terms(self):
-		payment_entry_names = [
-			adv.reference_name
-			for adv in self.get("advances", [])
-			if adv.reference_type == "Payment Entry" and adv.reference_name
-		]
-
-		if not payment_entry_names:
-			return None
+	def get_advance_payment(self):
+		advance_allocations = frappe._dict()
+		unallocated_advance = 0
 
 		PER = frappe.qb.DocType("Payment Entry Reference")
 		PE = frappe.qb.DocType("Payment Entry")
+		JEA = frappe.qb.DocType("Journal Entry Account")
 
-		results = (
-			frappe.qb.from_(PER)
-			.join(PE)
-			.on(PE.name == PER.parent)
-			.select(
-				PER.payment_term,
-				PER.allocated_amount,
-				PE.payment_type,
-				PE.source_exchange_rate,
-				PE.target_exchange_rate,
-			)
-			.where(PER.parent.isin(payment_entry_names))
-			.where(PER.payment_term.isnotnull())
-		).run(as_dict=True)
+		for adv in self.get("advances", []):
+			if not adv.reference_name:
+				continue
 
-		advance_allocations = frappe._dict()
-		for row in results:
-			allocated_amount = flt(row.allocated_amount)
+			if adv.reference_type == "Payment Entry":
+				results = (
+					frappe.qb.from_(PER)
+					.join(PE)
+					.on(PE.name == PER.parent)
+					.select(
+						PER.payment_term,
+						PER.allocated_amount,
+						PE.payment_type,
+						PE.source_exchange_rate,
+						PE.target_exchange_rate,
+					)
+					.where(PER.parent == adv.reference_name)
+				).run(as_dict=True)
 
-			if row.payment_type == "Pay":
-				allocated_amount *= flt(row.target_exchange_rate or 1)
-			elif row.payment_type == "Receive":
-				allocated_amount *= flt(row.source_exchange_rate or 1)
+				for row in results:
+					allocated_amount = flt(row.allocated_amount)
 
-			advance_allocations[row.payment_term] = (
-				advance_allocations.get(row.payment_term, 0) + allocated_amount
-			)
+					if row.payment_type == "Pay":
+						allocated_amount *= flt(row.target_exchange_rate or 1)
+					elif row.payment_type == "Receive":
+						allocated_amount *= flt(row.source_exchange_rate or 1)
+
+					if row.payment_term:
+						advance_allocations[row.payment_term] = (
+							advance_allocations.get(row.payment_term, 0) + allocated_amount
+						)
+					else:
+						unallocated_advance += allocated_amount
+
+			elif adv.reference_type == "Journal Entry":
+				rows = (
+					frappe.qb.from_(JEA)
+					.select(
+						JEA.debit,
+						JEA.credit,
+						JEA.party_type,
+						JEA.party,
+						JEA.exchange_rate,
+					)
+					.where(JEA.parent == adv.reference_name)
+					.where(JEA.party_type == self.party_type)
+					.where(JEA.party == self.get(self.party_type.lower()))
+				).run(as_dict=True)
+
+				for row in rows:
+					cr = flt(row.exchange_rate) or 1
+					if self.party_type == "Customer":
+						amount = flt(row.debit) * cr
+					else:
+						amount = flt(row.credit) * cr
+
+					if amount:
+						unallocated_advance += amount
+
+		if unallocated_advance:
+			advance_allocations["unassigned"] = unallocated_advance
 
 		return advance_allocations if advance_allocations else None
 
@@ -2691,7 +2741,13 @@ class AccountsController(TransactionBase):
 		return frappe.get_all("Payment Schedule", filters={"parent": po_or_so})
 
 	def fetch_payment_terms_from_order(
-		self, po_or_so, po_or_so_doctype, grand_total, base_grand_total, automatically_fetch_payment_terms
+		self,
+		po_or_so,
+		po_or_so_doctype,
+		grand_total,
+		base_grand_total,
+		automatically_fetch_payment_terms,
+		advance_payment=None,
 	):
 		"""
 		Fetch Payment Terms from Purchase/Sales Order on creating a new Purchase/Sales Invoice.
@@ -2701,6 +2757,8 @@ class AccountsController(TransactionBase):
 		self.payment_schedule = []
 		self.payment_terms_template = po_or_so.payment_terms_template
 		posting_date = self.get("bill_date") or self.get("posting_date") or self.get("transaction_date")
+		advance_map = advance_payment or {}
+		unassigned_advance = flt(advance_map.get("unassigned", 0))
 
 		for schedule in po_or_so.payment_schedule:
 			payment_schedule = {
@@ -2724,12 +2782,18 @@ class AccountsController(TransactionBase):
 					payment_schedule["discount_validity_based_on"] = schedule.discount_validity_based_on
 					payment_schedule["discount_validity"] = cint(schedule.discount_validity)
 
+				term_advance = flt(advance_map.get(schedule.payment_term))
+				advance = term_advance or 0
+
+				if not term_advance and unassigned_advance:
+					advance = unassigned_advance
+					unassigned_advance = 0
 				payment_schedule["payment_amount"] = flt(
-					grand_total * flt(payment_schedule["invoice_portion"]) / 100,
+					(grand_total * flt(schedule.invoice_portion) / 100) - (advance / self.conversion_rate),
 					schedule.precision("payment_amount"),
 				)
 				payment_schedule["base_payment_amount"] = flt(
-					base_grand_total * flt(payment_schedule["invoice_portion"]) / 100,
+					(base_grand_total * flt(schedule.invoice_portion) / 100) - advance,
 					schedule.precision("base_payment_amount"),
 				)
 				payment_schedule["outstanding"] = payment_schedule["payment_amount"]
