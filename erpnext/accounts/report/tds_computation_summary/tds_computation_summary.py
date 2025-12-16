@@ -38,7 +38,6 @@ def group_by_party_and_category(data, filters):
 		party_category_wise_map.setdefault(
 			(row.get("party"), row.get("section_code")),
 			{
-				"pan": row.get("pan"),
 				"tax_id": row.get("tax_id"),
 				"party": row.get("party"),
 				"party_name": row.get("party_name"),
