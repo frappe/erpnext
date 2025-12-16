@@ -2569,13 +2569,18 @@ class AccountsController(TransactionBase):
 				self.append("payment_schedule", data)
 		elif (not self.is_new()) and posting_date:
 			doc_before_save = self.get_doc_before_save()
-			old_posting_date = (
-				doc_before_save.get("bill_date")
-				or doc_before_save.get("transaction_date")
-				or doc_before_save.get("posting_date")
-			)
-			if getdate(old_posting_date) != getdate(posting_date):
-				recalculate_payment_due_date(posting_date, self.payment_schedule)
+
+			if doc_before_save:
+				old_posting_date = (
+					doc_before_save.get("bill_date")
+					or doc_before_save.get("transaction_date")
+					or doc_before_save.get("posting_date")
+				)
+
+				if getdate(old_posting_date) != getdate(posting_date) and any(
+					[term.payment_term for term in self.payment_schedule]
+				):
+					recalculate_payment_due_date(posting_date, self.payment_schedule)
 
 		allocate_payment_based_on_payment_terms = frappe.db.get_value(
 			"Payment Terms Template", self.payment_terms_template, "allocate_payment_based_on_payment_terms"

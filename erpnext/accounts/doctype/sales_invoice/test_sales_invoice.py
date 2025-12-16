@@ -112,40 +112,31 @@ class TestSalesInvoice(ERPNextTestSuite):
 	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
 
-	def test_payment_date_recalculate(self):
+	def test_payment_date_recalculation(self):
 		posting_date = getdate()
 		new_posting_date = add_days(posting_date, 5)
+		payment_term = frappe.new_doc("Payment Term")
+		payment_term.payment_term_name = "Test Term 2 Days"
+		payment_term.invoice_portion = 100
+		payment_term.credit_days = 2
+		payment_term.save()
 
-		payment_term = frappe.get_doc(
-			{
-				"doctype": "Payment Term",
-				"payment_term_name": "Test Term 2 Days",
-				"invoice_portion": 100,
-				"credit_days": 2,
-			}
-		).insert()
-
-		ptt = frappe.get_doc(
-			{
-				"doctype": "Payment Terms Template",
-				"template_name": "Test Template Recalc",
-				"terms": [{"payment_term": payment_term.name, "invoice_portion": 100, "credit_days": 2}],
-			}
-		).insert()
+		payment_term_template = frappe.new_doc("Payment Terms Template")
+		payment_term_template.template_name = "Test Template Recalc"
+		payment_term_template.append(
+			"terms", {"payment_term": payment_term.name, "invoice_portion": 100, "credit_days": 2}
+		)
+		payment_term_template.save()
 
 		si = create_sales_invoice(do_not_save=1)
+		si.set_posting_time = 1
 		si.posting_date = posting_date
-		si.payment_terms_template = ptt.name
-		si.set_missing_values()
-		si.set_payment_schedule()
-		si.set_due_date()
-		si.insert()
-
+		si.payment_terms_template = payment_term_template.name
+		si.save()
 		self.assertEqual(si.payment_schedule[0].due_date, add_days(posting_date, 2))
 
-		si = frappe.get_doc("Sales Invoice", si.name)
-
-		recalculate_payment_due_date(new_posting_date, si.payment_schedule)
+		si.update({"posting_date": new_posting_date})
+		si.save()
 
 		self.assertEqual(si.payment_schedule[0].due_date, add_days(new_posting_date, 2))
 
