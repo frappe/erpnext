@@ -195,7 +195,7 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 	}
 
 	serial_and_batch_bundle(doc, cdt, cdn) {
-		let row = locals[cdt][cdn];
+		var row = frappe.get_doc(cdt, cdn);
 		if (cdt === "Asset Capitalization Stock Item") {
 			this.get_warehouse_details(row);
 		}
