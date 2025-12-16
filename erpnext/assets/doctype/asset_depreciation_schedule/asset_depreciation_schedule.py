@@ -989,7 +989,9 @@ def _get_daily_prorata_based_default_wdv_or_dd_depr_amount(
 		if schedule_idx == 0:
 			return flt(depreciable_value) * (flt(fb_row.rate_of_depreciation) / 100), None
 
-		elif is_fiscal_year_start:
+		elif is_fiscal_year_start or prev_per_day_depr is None:
+			# Recalculate at fiscal year boundary or when per_day_depr not yet established
+			# (prev_per_day_depr is None after first pro-rated period)
 			return get_monthly_depr_amount(fb_row, schedule_idx, yearly_opening_wdv)
 		else:
 			return get_monthly_depr_amount_based_on_prev_per_day_depr(fb_row, schedule_idx, prev_per_day_depr)
