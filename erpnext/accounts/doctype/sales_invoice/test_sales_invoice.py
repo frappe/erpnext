@@ -27,7 +27,11 @@ from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_d
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_depr_schedule,
 )
-from erpnext.controllers.accounts_controller import InvalidQtyError, update_invoice_status
+from erpnext.controllers.accounts_controller import (
+	InvalidQtyError,
+	recalculate_payment_due_date,
+	update_invoice_status,
+)
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
@@ -107,6 +111,43 @@ class TestSalesInvoice(ERPNextTestSuite):
 	@classmethod
 	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
+
+	def test_payment_date_recalculate(self):
+		posting_date = getdate()
+		new_posting_date = add_days(posting_date, 5)
+
+		payment_term = frappe.get_doc(
+			{
+				"doctype": "Payment Term",
+				"payment_term_name": "Test Term 2 Days",
+				"invoice_portion": 100,
+				"credit_days": 2,
+			}
+		).insert()
+
+		ptt = frappe.get_doc(
+			{
+				"doctype": "Payment Terms Template",
+				"template_name": "Test Template Recalc",
+				"terms": [{"payment_term": payment_term.name, "invoice_portion": 100, "credit_days": 2}],
+			}
+		).insert()
+
+		si = create_sales_invoice(do_not_save=1)
+		si.posting_date = posting_date
+		si.payment_terms_template = ptt.name
+		si.set_missing_values()
+		si.set_payment_schedule()
+		si.set_due_date()
+		si.insert()
+
+		self.assertEqual(si.payment_schedule[0].due_date, add_days(posting_date, 2))
+
+		si = frappe.get_doc("Sales Invoice", si.name)
+
+		recalculate_payment_due_date(new_posting_date, si.payment_schedule)
+
+		self.assertEqual(si.payment_schedule[0].due_date, add_days(new_posting_date, 2))
 
 	def test_sales_invoice_qty(self):
 		si = create_sales_invoice(qty=0, do_not_save=True)
