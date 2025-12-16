@@ -2521,7 +2521,7 @@ class AccountsController(TransactionBase):
 		base_grand_total = flt(self.get("base_rounded_total") or self.base_grand_total)
 		grand_total = flt(self.get("rounded_total") or self.grand_total)
 		automatically_fetch_payment_terms = 0
-		payment_term_advace_amount = None
+		payment_term_advance_amount = None
 
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 			base_grand_total = base_grand_total - flt(self.base_write_off_amount)
@@ -2532,7 +2532,7 @@ class AccountsController(TransactionBase):
 			)
 
 		if self.get("total_advance"):
-			payment_term_advace_amount = self.get_advance_payment_terms()
+			payment_term_advance_amount = self.get_advance_payment_terms()
 			if party_account_currency == self.company_currency:
 				base_grand_total -= self.get("total_advance")
 				grand_total = flt(
@@ -2580,12 +2580,12 @@ class AccountsController(TransactionBase):
 			and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
 		):
 			for d in self.get("payment_schedule"):
-				if payment_term_advace_amount:
-					if amount := payment_term_advace_amount.get(d.payment_term):
+				if payment_term_advance_amount:
+					if amount := payment_term_advance_amount.get(d.payment_term):
 						d.payment_amount -= flt(
 							flt(amount) / self.conversion_rate, d.precision("payment_amount")
 						)
-						d.base_payment_amount -= flt(amount)
+						d.base_payment_amount -= flt(amount, d.precision("base_payment_amount"))
 						d.outstanding = d.payment_amount
 						d.base_outstanding = d.base_payment_amount
 				else:
@@ -2621,16 +2621,35 @@ class AccountsController(TransactionBase):
 			return None
 
 		PER = frappe.qb.DocType("Payment Entry Reference")
+		PE = frappe.qb.DocType("Payment Entry")
+
 		results = (
 			frappe.qb.from_(PER)
-			.select(PER.payment_term, Sum(PER.allocated_amount).as_("allocated_amount"))
+			.join(PE)
+			.on(PE.name == PER.parent)
+			.select(
+				PER.payment_term,
+				PER.allocated_amount,
+				PE.payment_type,
+				PE.source_exchange_rate,
+				PE.target_exchange_rate,
+			)
 			.where(PER.parent.isin(payment_entry_names))
 			.where(PER.payment_term.isnotnull())
-			.groupby(PER.payment_term)
 		).run(as_dict=True)
-		advance_allocations = frappe._dict(
-			{row["payment_term"]: flt(row["allocated_amount"]) for row in results if row.get("payment_term")}
-		)
+
+		advance_allocations = frappe._dict()
+		for row in results:
+			allocated_amount = flt(row.allocated_amount)
+
+			if row.payment_type == "Pay":
+				allocated_amount *= flt(row.target_exchange_rate or 1)
+			elif row.payment_type == "Receive":
+				allocated_amount *= flt(row.source_exchange_rate or 1)
+
+			advance_allocations[row.payment_term] = (
+				advance_allocations.get(row.payment_term, 0) + allocated_amount
+			)
 
 		return advance_allocations if advance_allocations else None
 
