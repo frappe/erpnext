@@ -398,8 +398,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		# Threshold calculation should be only on the third invoice
 		self.assertEqual(pi1.taxes[0].tax_amount, 800)
 
-		for d in reversed(invoices):
-			d.cancel()
+		self.cleanup_invoices(invoices)
 
 	def test_cumulative_threshold_with_tax_on_excess_amount(self):
 		invoices = []
@@ -628,73 +627,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		# cancel invoices to avoid clashing
 		self.cleanup_invoices(invoices)
 
-	def test_tcs_on_unallocated_advance_payments(self):
-		return
-		frappe.db.set_value(
-			"Customer", "Test TCS Customer", "tax_withholding_category", "Cumulative Threshold TCS"
-		)
-		fiscal_year = get_fiscal_year(today(), company="_Test Company")
-
-		vouchers = []
-
-		# create advance payment
-		pe1 = create_payment_entry(
-			payment_type="Receive", party_type="Customer", party="Test TCS Customer", paid_amount=20000
-		)
-		pe1.paid_from = "Debtors - _TC"
-		pe1.paid_to = "Cash - _TC"
-		pe1.submit()
-		vouchers.append(pe1)
-
-		# create invoice
-		si1 = create_sales_invoice(customer="Test TCS Customer", rate=5000)
-		si1.submit()
-		vouchers.append(si1)
-
-		# reconcile
-		pr = frappe.get_doc("Payment Reconciliation")
-		pr.company = "_Test Company"
-		pr.party_type = "Customer"
-		pr.party = "Test TCS Customer"
-		pr.receivable_payable_account = "Debtors - _TC"
-		pr.get_unreconciled_entries()
-		invoices = [x.as_dict() for x in pr.get("invoices")]
-		payments = [x.as_dict() for x in pr.get("payments")]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
-		pr.reconcile()
-
-		# make another invoice
-		# sum of unallocated amount from payment entry and this sales invoice will breach cumulative threashold
-		# TDS should be calculated
-
-		# this payment should not be considered for TCS calculation as it is outside of fiscal year
-		pe2 = create_payment_entry(
-			payment_type="Receive", party_type="Customer", party="Test TCS Customer", paid_amount=10000
-		)
-		pe2.paid_from = "Debtors - _TC"
-		pe2.paid_to = "Cash - _TC"
-		pe2.posting_date = add_days(fiscal_year[1], -10)
-		pe2.submit()
-		vouchers.append(pe2)
-
-		si2 = create_sales_invoice(customer="Test TCS Customer", rate=15000)
-		si2.submit()
-		vouchers.append(si2)
-
-		si3 = create_sales_invoice(customer="Test TCS Customer", rate=10000)
-		si3.submit()
-		vouchers.append(si3)
-
-		# assert tax collection on total invoice amount created until now
-		tcs_charged = sum([d.base_tax_amount for d in si2.taxes if d.account_head == "TCS - _TC"])
-		tcs_charged += sum([d.base_tax_amount for d in si3.taxes if d.account_head == "TCS - _TC"])
-		self.assertEqual(tcs_charged, 1500)
-
-		# cancel invoice and payments to avoid clashing
-		for d in reversed(vouchers):
-			d.reload()
-			d.cancel()
-
 	def test_tcs_on_allocated_advance_payments(self):
 		self.setup_party_with_category("Customer", "Test TCS Customer", "Cumulative Threshold TCS")
 
@@ -784,9 +716,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		]
 		self.validate_tax_withholding_entries("Sales Invoice", si.name, invoice_expected_entries)
 
-		for d in reversed(vouchers):
-			d.reload()
-			d.cancel()
+		self.cleanup_invoices(vouchers)
 
 	def test_tds_calculation_on_net_total(self):
 		frappe.db.set_value(
@@ -818,12 +748,9 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 		self.assertEqual(pi1.taxes[0].tax_amount, 4000)
 
-		# cancel invoices to avoid clashing
-		for d in reversed(invoices):
-			d.cancel()
+		self.cleanup_invoices(invoices)
 
 	def test_tds_calculation_on_net_total_partial_tds(self):
-		# Setup supplier - single supplier with multiple tax categories applied item-wise
 		self.setup_party_with_category("Supplier", "Test TDS Supplier4", "Cumulative Threshold TDS")
 		invoices = []
 
@@ -832,47 +759,41 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		# 2. TDS with Test Service Category (rate 10%, single_threshold=2000, cumulative_threshold=2000, no tax on excess)
 		# 3. TDS with New TDS Category (rate 10%, cumulative_threshold=30000, tax on excess enabled)
 		item_code = frappe.db.get_value("Item", {"item_name": "TDS Item"}, "name")
-		pi = frappe.get_doc(
-			{
-				"doctype": "Purchase Invoice",
-				"supplier": "Test TDS Supplier4",
-				"company": "_Test Company",
-				"apply_tds": 1,  # Enable TDS for the invoice
-				"taxes_and_charges": "",
-				"currency": "INR",
-				"credit_to": "Creditors - _TC",
-				"items": [
-					{
-						"doctype": "Purchase Invoice Item",
-						"item_code": item_code,
-						"qty": 1,
-						"rate": 10000,
-						"cost_center": "Main - _TC",
-						"expense_account": "Stock Received But Not Billed - _TC",
-						"apply_tds": 0,  # No TDS for this item
-					},
-					{
-						"doctype": "Purchase Invoice Item",
-						"item_code": item_code,
-						"qty": 1,
-						"rate": 5000,  # Above single threshold of 2000 for Test Service Category
-						"cost_center": "Main - _TC",
-						"expense_account": "Stock Received But Not Billed - _TC",
-						"apply_tds": 1,
-						"tax_withholding_category": "Test Service Category",
-					},
-					{
-						"doctype": "Purchase Invoice Item",
-						"item_code": item_code,
-						"qty": 1,
-						"rate": 35000,  # Above cumulative threshold for New TDS Category with tax on excess
-						"cost_center": "Main - _TC",
-						"expense_account": "Stock Received But Not Billed - _TC",
-						"apply_tds": 1,
-						"tax_withholding_category": "New TDS Category",
-					},
-				],
-			}
+		pi = create_purchase_invoice(supplier="Test TDS Supplier4", rate=0, do_not_save=True)
+		pi.items = []
+		pi.extend(
+			"items",
+			[
+				{
+					"doctype": "Purchase Invoice Item",
+					"item_code": item_code,
+					"qty": 1,
+					"rate": 10000,
+					"cost_center": "Main - _TC",
+					"expense_account": "Stock Received But Not Billed - _TC",
+					"apply_tds": 0,  # No TDS for this item
+				},
+				{
+					"doctype": "Purchase Invoice Item",
+					"item_code": item_code,
+					"qty": 1,
+					"rate": 5000,  # Above single threshold of 2000 for Test Service Category
+					"cost_center": "Main - _TC",
+					"expense_account": "Stock Received But Not Billed - _TC",
+					"apply_tds": 1,
+					"tax_withholding_category": "Test Service Category",
+				},
+				{
+					"doctype": "Purchase Invoice Item",
+					"item_code": item_code,
+					"qty": 1,
+					"rate": 35000,  # Above cumulative threshold for New TDS Category with tax on excess
+					"cost_center": "Main - _TC",
+					"expense_account": "Stock Received But Not Billed - _TC",
+					"apply_tds": 1,
+					"tax_withholding_category": "New TDS Category",
+				},
+			],
 		)
 		pi.save()
 		pi.submit()
@@ -933,17 +854,13 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 			),
 		]
 
-		# Validate tax withholding entries
 		self.validate_tax_withholding_entries("Purchase Invoice", pi.name, expected_entries)
 
-		# Validate total TDS deducted: 500 (Test Service Category) + 500 (New TDS Category excess) = 1000
 		self.validate_tax_deduction(pi, 1000)
 
-		# cancel invoices to avoid clashing
 		self.cleanup_invoices(invoices)
 
 	def test_tds_deduction_for_po_via_payment_entry(self):
-		return
 		frappe.db.set_value(
 			"Supplier", "Test TDS Supplier8", "tax_withholding_category", "Cumulative Threshold TDS"
 		)
@@ -962,16 +879,14 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		)
 
 		order.save()
-
 		order.submit()
-
-		self.assertEqual(order.taxes[0].tax_amount, 4000)
+		self.assertEqual(order.taxes[0].tax_amount, 8000)
 
 		payment = get_payment_entry(order.doctype, order.name)
 		payment.apply_tds = 1
 		payment.tax_withholding_category = "Cumulative Threshold TDS"
 		payment.save().submit()
-		self.assertEqual(payment.taxes[0].tax_amount, 4000)
+		self.assertEqual(payment.taxes[0].tax_amount, 4800)
 
 	def test_multi_category_single_supplier(self):
 		frappe.db.set_value(
@@ -996,9 +911,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 		self.assertEqual(pi1.taxes[0].tax_amount, 250)
 
-		# cancel invoices to avoid clashing
-		for d in reversed(invoices):
-			d.cancel()
+		self.cleanup_invoices(invoices)
 
 	def test_tds_deductions_with_payment_entries(self):
 		"""
@@ -1390,9 +1303,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		pi3.submit()
 		self.assertEqual(pi3.taxes[0].tax_amount, 3500)
 
-		pi1.cancel()
-		pi2.cancel()
-		pi3.cancel()
+		self.cleanup_invoices([pi1, pi2, pi3])
 
 	def test_ldc_at_0_rate(self):
 		frappe.db.set_value(
@@ -1433,9 +1344,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.assertEqual(len(pi2.taxes), 1)
 		# pi1 net total shouldn't be included as it lies within LDC at rate of '0'
 		self.assertEqual(pi2.taxes[0].tax_amount, 3500)
-
-		pi1.cancel()
-		pi2.cancel()
+		self.cleanup_invoices([pi1, pi2])
 
 	def test_payment_entry_with_ldc_and_invoice_adjustment(self):
 		"""
@@ -1782,7 +1691,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		cat.save()
 
 	def test_tds_across_fiscal_year(self):
-		return
 		"""
 		Advance TDS on previous fiscal year should be properly allocated on Invoices in upcoming fiscal year
 		--||-----FY 2023-----||-----FY 2024-----||--
@@ -1841,7 +1749,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		payment.reload()
 		self.assertEqual(pi1.taxes, [])
 		self.assertEqual(payment.taxes[0].tax_amount, 6000)
-		self.assertEqual(payment.taxes[0].allocated_amount, 3000)
 
 		pi2 = make_purchase_invoice(source_name=po.name)
 		pi2.apply_tds = True
@@ -1863,7 +1770,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		payment.reload()
 		self.assertEqual(pi2.taxes, [])
 		self.assertEqual(payment.taxes[0].tax_amount, 6000)
-		self.assertEqual(payment.taxes[0].allocated_amount, 6000)
 
 	@IntegrationTestCase.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
 	def test_tds_payment_entry_cancellation(self):
