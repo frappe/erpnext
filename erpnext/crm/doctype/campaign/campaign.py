@@ -26,19 +26,15 @@ class Campaign(Document):
 	# end: auto-generated types
 
 	def after_insert(self):
-		try:
-			mc = frappe.get_doc("UTM Campaign", self.campaign_name)
-		except frappe.DoesNotExistError:
-			mc = frappe.new_doc("UTM Campaign")
-			mc.name = self.campaign_name
-		mc.campaign_description = self.description
-		mc.crm_campaign = self.campaign_name
-		mc.save(ignore_permissions=True)
+		self.update_utm_campaign_description()
 
-	def on_change(self):
-		try:
+	def on_update(self):
+		self.update_utm_campaign_description()
+
+	def update_utm_campaign_description(self):
+		if frappe.db.exists("UTM Campaign", self.campaign_name):
 			mc = frappe.get_doc("UTM Campaign", self.campaign_name)
-		except frappe.DoesNotExistError:
+		else:
 			mc = frappe.new_doc("UTM Campaign")
 			mc.name = self.campaign_name
 		mc.campaign_description = self.description
