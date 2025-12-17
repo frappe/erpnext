@@ -718,6 +718,237 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 		self.cleanup_invoices(vouchers)
 
+	def test_tds_multiple_payments_adjust_only_linked(self):
+		"""
+		Test that when multiple advance payment entries exist for the same supplier,
+		only the payment entry that is linked/allocated to the invoice is adjusted.
+		"""
+		self.setup_party_with_category("Supplier", "Test TDS Supplier", "Cumulative Threshold TDS")
+
+		vouchers = []
+
+		pe1 = create_payment_entry(
+			payment_type="Pay", party_type="Supplier", party="Test TDS Supplier", paid_amount=5000
+		)
+		pe1.apply_tds = 1
+		pe1.tax_withholding_category = "Cumulative Threshold TDS"
+		pe1.save()
+		pe1.submit()
+		vouchers.append(pe1)
+
+		pe1_expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TDS",
+				party_type="Supplier",
+				party="Test TDS Supplier",
+				tax_rate=10.0,
+				taxable_amount=5000.0,
+				withholding_amount=500.0,
+				status="Over Withheld",
+				taxable_doctype="",
+				taxable_name="",
+				withholding_doctype="Payment Entry",
+				withholding_name=pe1.name,
+			)
+		]
+		self.validate_tax_withholding_entries("Payment Entry", pe1.name, pe1_expected_entries)
+
+		pe2 = create_payment_entry(
+			payment_type="Pay", party_type="Supplier", party="Test TDS Supplier", paid_amount=3000
+		)
+		pe2.apply_tds = 1
+		pe2.tax_withholding_category = "Cumulative Threshold TDS"
+		pe2.save()
+		pe2.submit()
+		vouchers.append(pe2)
+
+		pe2_expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TDS",
+				party_type="Supplier",
+				party="Test TDS Supplier",
+				tax_rate=10.0,
+				taxable_amount=3000.0,
+				withholding_amount=300.0,
+				status="Over Withheld",
+				taxable_doctype="",
+				taxable_name="",
+				withholding_doctype="Payment Entry",
+				withholding_name=pe2.name,
+			)
+		]
+		self.validate_tax_withholding_entries("Payment Entry", pe2.name, pe2_expected_entries)
+
+		pi = create_purchase_invoice(supplier="Test TDS Supplier", rate=40000)
+		pi.append(
+			"advances",
+			{
+				"reference_type": pe1.doctype,
+				"reference_name": pe1.name,
+				"advance_amount": 5000,
+				"allocated_amount": 5000,
+			},
+		)
+		pi.submit()
+		vouchers.append(pi)
+
+		invoice_expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TDS",
+				party_type="Supplier",
+				party="Test TDS Supplier",
+				tax_rate=10.0,
+				taxable_amount=35000.0,
+				withholding_amount=3500.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi.name,
+			),
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TDS",
+				party_type="Supplier",
+				party="Test TDS Supplier",
+				tax_rate=10.0,
+				taxable_amount=5000.0,
+				withholding_amount=500.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Payment Entry",
+				withholding_name=pe1.name,
+			),
+		]
+		self.validate_tax_withholding_entries("Purchase Invoice", pi.name, invoice_expected_entries)
+		self.cleanup_invoices(vouchers)
+
+	def test_tds_multiple_payments_with_unused_threshold(self):
+		"""
+		Test multiple payment entries with unused threshold (tax_on_excess_amount enabled).
+		Only the linked payment entry should be adjusted, and threshold exemption should apply.
+		"""
+		self.setup_party_with_category("Supplier", "Test TDS Supplier3", "New TDS Category")
+
+		vouchers = []
+
+		pe1 = create_payment_entry(
+			payment_type="Pay", party_type="Supplier", party="Test TDS Supplier3", paid_amount=5000
+		)
+		pe1.apply_tds = 1
+		pe1.tax_withholding_category = "New TDS Category"
+		pe1.save()
+		pe1.submit()
+		vouchers.append(pe1)
+
+		pe1_expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="New TDS Category",
+				party_type="Supplier",
+				party="Test TDS Supplier3",
+				tax_rate=10.0,
+				taxable_amount=5000.0,
+				withholding_amount=500.0,
+				status="Over Withheld",
+				taxable_doctype="",
+				taxable_name="",
+				withholding_doctype="Payment Entry",
+				withholding_name=pe1.name,
+			)
+		]
+		self.validate_tax_withholding_entries("Payment Entry", pe1.name, pe1_expected_entries)
+
+		pe2 = create_payment_entry(
+			payment_type="Pay", party_type="Supplier", party="Test TDS Supplier3", paid_amount=3000
+		)
+		pe2.apply_tds = 1
+		pe2.tax_withholding_category = "New TDS Category"
+		pe2.save()
+		pe2.submit()
+		vouchers.append(pe2)
+
+		pe2_expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="New TDS Category",
+				party_type="Supplier",
+				party="Test TDS Supplier3",
+				tax_rate=10.0,
+				taxable_amount=3000.0,
+				withholding_amount=300.0,
+				status="Over Withheld",
+				taxable_doctype="",
+				taxable_name="",
+				withholding_doctype="Payment Entry",
+				withholding_name=pe2.name,
+			)
+		]
+		self.validate_tax_withholding_entries("Payment Entry", pe2.name, pe2_expected_entries)
+
+		pi = create_purchase_invoice(supplier="Test TDS Supplier3", rate=40000)
+		pi.append(
+			"advances",
+			{
+				"reference_type": pe1.doctype,
+				"reference_name": pe1.name,
+				"advance_amount": 5000,
+				"allocated_amount": 5000,
+			},
+		)
+		pi.submit()
+		vouchers.append(pi)
+
+		# Expected entries:
+		# 1. Threshold Exemption for first 30000 (no TDS)
+		# 2. Remaining 5000 (40000-30000-5000 from PE1) from invoice
+		# 3. PE1's 5000 adjusted
+		invoice_expected_entries = [
+			# Threshold exemption for first 30000
+			self.get_tax_withholding_entry(
+				tax_withholding_category="New TDS Category",
+				party_type="Supplier",
+				party="Test TDS Supplier3",
+				tax_rate=10.0,
+				taxable_amount=30000.0,
+				withholding_amount=0.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi.name,
+				under_withheld_reason="Threshold Exemption",
+			),
+			# Remaining 5000 from invoice (40000 - 30000 threshold - 5000 PE1)
+			self.get_tax_withholding_entry(
+				tax_withholding_category="New TDS Category",
+				party_type="Supplier",
+				party="Test TDS Supplier3",
+				tax_rate=10.0,
+				taxable_amount=5000.0,
+				withholding_amount=500.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi.name,
+			),
+			# PE1's over-withheld adjustment (5000)
+			self.get_tax_withholding_entry(
+				tax_withholding_category="New TDS Category",
+				party_type="Supplier",
+				party="Test TDS Supplier3",
+				tax_rate=10.0,
+				taxable_amount=5000.0,
+				withholding_amount=500.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Payment Entry",
+				withholding_name=pe1.name,
+			),
+		]
+		self.validate_tax_withholding_entries("Purchase Invoice", pi.name, invoice_expected_entries)
+		self.cleanup_invoices(vouchers)
+
 	def test_tds_calculation_on_net_total(self):
 		frappe.db.set_value(
 			"Supplier", "Test TDS Supplier4", "tax_withholding_category", "Cumulative Threshold TDS"
