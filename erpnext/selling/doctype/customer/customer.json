@@ -517,7 +517,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2021-09-06 17:38:54.196663",
+ "modified": "2024-03-09 16:04:08.616966",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -593,6 +593,18 @@
    "read": 1,
    "report": 1,
    "role": "Accounts Manager"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Customer",
+   "share": 1,
+   "write": 1
   }
  ],
  "quick_entry": 1,
