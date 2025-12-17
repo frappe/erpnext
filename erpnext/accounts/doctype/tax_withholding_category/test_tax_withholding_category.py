@@ -3310,6 +3310,177 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.cleanup_invoices(invoices)
 		frappe.db.set_value("Supplier", "_Test Supplier USD", "tax_withholding_category", "")
 
+	def test_journal_entry_with_adjustment_in_invoice(self):
+		"""Test Journal Entry with amount below threshold creates Under Withheld entry
+		and gets settled when a new Purchase Invoice crosses the threshold"""
+		invoices = []
+		frappe.db.set_value(
+			"Supplier", "Test TDS Supplier", "tax_withholding_category", "Cumulative Threshold TDS"
+		)
+
+		# Create Debit Note with amount below threshold (30000)
+		jv = make_journal_entry_with_tax_withholding(
+			party_type="Supplier",
+			party="Test TDS Supplier",
+			voucher_type="Debit Note",
+			amount=20000,  # Below cumulative threshold of 30000
+			save=False,
+		)
+		jv.apply_tds = 1
+		jv.tax_withholding_category = "Cumulative Threshold TDS"
+		jv.save()
+		jv.submit()
+		invoices.append(jv)
+
+		# Validate tax withholding entries - should have Under Withheld status
+		jv_expected = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TDS",
+				party_type="Supplier",
+				party="Test TDS Supplier",
+				tax_rate=10.0,
+				taxable_amount=20000.0,
+				withholding_amount=0.0,  # No tax withheld
+				status="Under Withheld",
+				taxable_doctype="Journal Entry",
+				taxable_name=jv.name,
+				withholding_doctype="",
+				withholding_name="",
+			)
+		]
+		self.validate_tax_withholding_entries("Journal Entry", jv.name, jv_expected)
+
+		pi = create_purchase_invoice(supplier="Test TDS Supplier", rate=20000)
+		pi.submit()
+		invoices.append(pi)
+
+		pi_expected = [
+			# Entry for JV's under-withheld amount (now settled via PI)
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TDS",
+				party_type="Supplier",
+				party="Test TDS Supplier",
+				tax_rate=10.0,
+				taxable_amount=20000.0,  # JV's taxable amount
+				withholding_amount=2000.0,  # TDS on JV's amount
+				status="Settled",
+				taxable_doctype="Journal Entry",
+				taxable_name=jv.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi.name,
+			),
+			# Entry for PI's own amount
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TDS",
+				party_type="Supplier",
+				party="Test TDS Supplier",
+				tax_rate=10.0,
+				taxable_amount=20000.0,  # PI's taxable amount
+				withholding_amount=2000.0,  # TDS on PI's amount
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi.name,
+			),
+		]
+		self.validate_tax_withholding_entries("Purchase Invoice", pi.name, pi_expected)
+
+		self.cleanup_invoices(invoices)
+
+	def test_journal_entry_negative_amount_debit_note(self):
+		"""Test Journal Entry with negative amount (reversal of Debit Note)"""
+		invoices = []
+		frappe.db.set_value(
+			"Supplier", "Test TDS Supplier", "tax_withholding_category", "Cumulative Threshold TDS"
+		)
+
+		# First create a regular Debit Note to cross threshold
+		jv1 = make_journal_entry_with_tax_withholding(
+			party_type="Supplier",
+			party="Test TDS Supplier",
+			voucher_type="Debit Note",
+			amount=50000,
+			save=False,
+		)
+		jv1.apply_tds = 1
+		jv1.tax_withholding_category = "Cumulative Threshold TDS"
+		jv1.save()
+		jv1.submit()
+		invoices.append(jv1)
+
+		# Validate first JV entries
+		jv1_expected = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TDS",
+				party_type="Supplier",
+				party="Test TDS Supplier",
+				tax_rate=10.0,
+				taxable_amount=50000.0,
+				withholding_amount=5000.0,
+				status="Settled",
+				taxable_doctype="Journal Entry",
+				taxable_name=jv1.name,
+				withholding_doctype="Journal Entry",
+				withholding_name=jv1.name,
+			)
+		]
+		self.validate_tax_withholding_entries("Journal Entry", jv1.name, jv1_expected)
+
+		jv2 = frappe.new_doc("Journal Entry")
+		jv2.posting_date = today()
+		jv2.company = "_Test Company"
+		jv2.voucher_type = "Debit Note"
+		jv2.multi_currency = 0
+		jv2.apply_tds = 1
+		jv2.tax_withholding_category = "Cumulative Threshold TDS"
+
+		jv2.append(
+			"accounts",
+			{
+				"account": "Stock Received But Not Billed - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"credit_in_account_currency": 50000,  # Credit (reversal of expense)
+				"exchange_rate": 1,
+			},
+		)
+
+		# Supplier account: Debit 50000 (instead of normal Credit)
+		# This reduces supplier liability (refund/reversal)
+		jv2.append(
+			"accounts",
+			{
+				"account": "Creditors - _TC",
+				"party_type": "Supplier",
+				"party": "Test TDS Supplier",
+				"cost_center": "_Test Cost Center - _TC",
+				"debit_in_account_currency": 50000,  # Debit (reversal)
+				"exchange_rate": 1,
+			},
+		)
+
+		jv2.save()
+		jv2.submit()
+		invoices.append(jv2)
+
+		jv2_expected = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TDS",
+				party_type="Supplier",
+				party="Test TDS Supplier",
+				tax_rate=10.0,
+				taxable_amount=-50000.0,  # Negative taxable amount
+				withholding_amount=-5000.0,  # Negative withholding (reversal)
+				status="Settled",
+				taxable_doctype="Journal Entry",
+				taxable_name=jv2.name,
+				withholding_doctype="Journal Entry",
+				withholding_name=jv2.name,
+			)
+		]
+		self.validate_tax_withholding_entries("Journal Entry", jv2.name, jv2_expected)
+		self.cleanup_invoices(invoices)
+
 
 def create_purchase_invoice(**args):
 	# return sales invoice doc object
