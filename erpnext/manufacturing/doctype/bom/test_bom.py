@@ -432,6 +432,23 @@ class TestBOM(IntegrationTestCase):
 		self.assertRaises(DuplicationError, bom.save)
 
 	@timeout
+	def test_bom_duplicate_item_with_operation(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+		item = make_item(properties={"is_stock_item": 1}).name
+
+		op1 = make_operation(operation="Assembly")
+
+		bom = frappe.new_doc("BOM")
+		bom.item = item
+		bom.with_operation = 1
+
+		bom.append("items", frappe._dict(item_code=item, operation=op1.name))
+		bom.append("items", frappe._dict(item_code=item, operation=op1.name))
+
+		self.assertRaises(DuplicationError, bom.save)
+
+	@timeout
 	def test_bom_with_process_loss_item(self):
 		fg_item_non_whole, fg_item_whole, bom_item = create_process_loss_bom_items()
 
