@@ -166,7 +166,9 @@ class Batch(Document):
 			for row in batches:
 				batch_qty += row.get("qty")
 
-		self.db_set("batch_qty", batch_qty)
+		if self.batch_qty != batch_qty:
+			self.db_set("batch_qty", batch_qty)
+
 		frappe.msgprint(_("Batch Qty updated to {0}").format(batch_qty), alert=True)
 
 	def set_batchwise_valuation(self):
