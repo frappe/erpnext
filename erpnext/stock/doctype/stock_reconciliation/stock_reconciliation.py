@@ -1227,15 +1227,14 @@ class StockReconciliation(StockController):
 def get_batch_qty_for_stock_reco(
 	item_code, warehouse, batch_no, posting_date, posting_time, voucher_no, sle_creation
 ):
-	posting_datetime = get_combine_datetime(posting_date, posting_time)
-
 	qty = (
 		get_batch_qty(
 			batch_no,
 			warehouse,
 			item_code,
 			creation=sle_creation,
-			posting_datetime=posting_datetime,
+			posting_date=posting_date,
+			posting_time=posting_time,
 			ignore_voucher_nos=[voucher_no],
 			for_stock_levels=True,
 			consider_negative_batches=True,
