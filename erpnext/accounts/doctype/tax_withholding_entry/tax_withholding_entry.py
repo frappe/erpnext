@@ -1174,18 +1174,23 @@ class PaymentTaxWithholding(TaxWithholdingController):
 		"""Calculate taxable amounts for payment entries"""
 		category = next(iter(self.category_details.values()))
 
-		# Calculate total taxable amount including unallocated and advance payments
-		taxable_amount = self.doc.unallocated_amount
-		taxable_amount += sum(
+		taxable_amount_in_party_currency = self.doc.unallocated_amount
+		taxable_amount_in_party_currency += sum(
 			flt(d.allocated_amount)
 			for d in self.doc.references
 			if d.reference_doctype in get_advance_payment_doctypes()
 		)
 
+		exchange_rate = self.get_conversion_rate()
+		taxable_amount = flt(taxable_amount_in_party_currency * exchange_rate, self.precision)
+
 		category["taxable_amount"] = taxable_amount
 
 	def get_conversion_rate(self):
-		return self.doc.source_exchange_rate or 1
+		if self.doc.payment_type == "Receive":
+			return self.doc.source_exchange_rate or 1
+		else:
+			return self.doc.target_exchange_rate or 1
 
 	def calculate_taxes_and_totals(self):
 		self.doc.apply_taxes()

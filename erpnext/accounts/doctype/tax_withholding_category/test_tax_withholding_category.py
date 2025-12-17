@@ -3204,6 +3204,112 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		]
 		self.validate_tax_withholding_entries("Journal Entry", jv.name, expected_entries)
 
+	def test_tds_with_multi_currency_invoice(self):
+		"""Test TDS calculation with multi-currency purchase invoice and payment"""
+		invoices = []
+
+		frappe.db.set_value(
+			"Supplier", "_Test Supplier USD", "tax_withholding_category", "Cumulative Threshold TDS"
+		)
+
+		pe = frappe.get_doc(
+			{
+				"doctype": "Payment Entry",
+				"posting_date": today(),
+				"payment_type": "Pay",
+				"party_type": "Supplier",
+				"party": "_Test Supplier USD",
+				"company": "_Test Company",
+				"paid_from": "Cash - _TC",
+				"paid_to": "_Test Payable USD - _TC",
+				"paid_amount": 40000,  # INR
+				"received_amount": 500,  # USD
+				"source_exchange_rate": 1,
+				"target_exchange_rate": 80,
+				"reference_no": "USD-TDS-001",
+				"reference_date": today(),
+				"paid_from_account_currency": "INR",
+				"paid_to_account_currency": "USD",
+				"apply_tds": 1,
+				"tax_withholding_category": "Cumulative Threshold TDS",
+			}
+		)
+		pe.save()
+		pe.submit()
+		invoices.append(pe)
+
+		pe_expected = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TDS",
+				party_type="Supplier",
+				party="_Test Supplier USD",
+				tax_rate=10.0,
+				taxable_amount=40000.0,  # Base currency: 500 USD * 80 = 40000 INR
+				withholding_amount=4000.0,  # 10% of 40000 INR
+				status="Over Withheld",
+				taxable_doctype="",
+				taxable_name="",
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+			)
+		]
+		self.validate_tax_withholding_entries("Payment Entry", pe.name, pe_expected)
+
+		pi = frappe.get_doc(
+			{
+				"doctype": "Purchase Invoice",
+				"supplier": "_Test Supplier USD",
+				"company": "_Test Company",
+				"apply_tds": 1,
+				"currency": "USD",
+				"conversion_rate": 80,
+				"credit_to": "_Test Payable USD - _TC",
+				"taxes": [],
+				"items": [
+					{
+						"doctype": "Purchase Invoice Item",
+						"item_code": frappe.db.get_value("Item", {"item_name": "TDS Item"}, "name"),
+						"qty": 1,
+						"rate": 500,  # 500 USD = 40000 INR
+						"cost_center": "Main - _TC",
+						"expense_account": "_Test Account Cost for Goods Sold - _TC",
+					}
+				],
+				"advances": [
+					{
+						"doctype": "Purchase Invoice Advance",
+						"reference_type": "Payment Entry",
+						"reference_name": pe.name,
+						"advance_amount": 500,  # USD
+						"allocated_amount": 500,  # USD (full allocation)
+						"ref_exchange_rate": 80,
+					}
+				],
+			}
+		)
+		pi.save()
+		pi.submit()
+		invoices.append(pi)
+
+		pi_expected = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TDS",
+				party_type="Supplier",
+				party="_Test Supplier USD",
+				tax_rate=10.0,
+				taxable_amount=40000.0,  # Base currency: 500 USD * 80 = 40000 INR
+				withholding_amount=4000.0,  # 10% of 40000 INR (settled from PE)
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+			),
+		]
+		self.validate_tax_withholding_entries("Purchase Invoice", pi.name, pi_expected)
+		self.cleanup_invoices(invoices)
+		frappe.db.set_value("Supplier", "_Test Supplier USD", "tax_withholding_category", "")
+
 
 def create_purchase_invoice(**args):
 	# return sales invoice doc object
