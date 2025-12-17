@@ -2442,6 +2442,22 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 		self.cleanup_invoices(invoices)
 
+	def test_tds_deduction_in_purchase_return(self):
+		self.setup_party_with_category("Supplier", "Test TDS Supplier", "Cumulative Threshold TDS")
+
+		pi = create_purchase_invoice(supplier="Test TDS Supplier", rate=40000)
+		pi.submit()
+
+		self.assertEqual(pi.taxes_and_charges_deducted, 4000)
+
+		pi_return = create_purchase_invoice(supplier="Test TDS Supplier", is_return=1, qty=-1, rate=40000)
+		pi_return.return_against = pi.name
+		pi_return.save()
+		pi_return.submit()
+
+		self.assertEqual(pi_return.taxes_and_charges_deducted, -4000)
+		self.cleanup_invoices([pi, pi_return])
+
 	def test_tds_purchase_invoice_cancellation_and_adjustment(self):
 		invoices = []
 		self.setup_party_with_category("Supplier", "Test TDS Supplier8", "Test Multi Invoice Category")

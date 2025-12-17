@@ -824,7 +824,7 @@ class TaxWithholdingController:
 			withholding_amount = category_withholding_map.get(category.name, 0)
 			if withholding_amount and category.taxable_amount:
 				item_proportion = item_effective_taxable / category.taxable_amount
-				item_tax_amount = flt(abs(withholding_amount) * item_proportion, precision)
+				item_tax_amount = flt(withholding_amount * item_proportion, precision)
 			else:
 				item_tax_amount = 0
 
