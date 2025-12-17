@@ -151,6 +151,7 @@ class TaxWithholdingEntry(Document):
 		value_direction = -1 if self.get(amount_field) < 0 else 1
 		remaining_amount = abs(self.get(amount_field))
 		docs_needing_reindex = set()
+		precision = self.precision("taxable_amount")
 
 		# update
 		for old_entry_data in old_entries:
@@ -184,11 +185,16 @@ class TaxWithholdingEntry(Document):
 				values_to_update["withholding_amount"] = old_entry.withholding_amount * proportion
 				values_to_update["taxable_amount"] = old_entry.taxable_amount * proportion
 
-				# If tax rate has changed, recalculate taxable amount based on new rate
+				# If tax rate has changed, recalculate based on new rate
 				if self.tax_rate != old_entry.tax_rate:
-					values_to_update["taxable_amount"] = flt(
-						values_to_update["withholding_amount"] * 100 / self.tax_rate, 2
-					)
+					if not self.tax_rate:
+						# Zero rate means no withholding
+						values_to_update["withholding_amount"] = 0
+					else:
+						values_to_update["taxable_amount"] = flt(
+							values_to_update["withholding_amount"] * 100 / self.tax_rate,
+							precision,
+						)
 
 				new_entry = frappe.copy_doc(old_entry)
 				new_entry.update(values_to_update)

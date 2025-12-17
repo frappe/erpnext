@@ -2958,6 +2958,113 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 		self.validate_tax_withholding_entries("Payment Entry", pe.name, expected_entries)
 
+	def test_manual_tax_adjustment_with_zero_rate(self):
+		"""Test manual tax adjustment where tax rate is changed to zero during adjustment"""
+		self.setup_party_with_category("Supplier", "Test TDS Supplier8", "Test Multi Invoice Category")
+
+		pe = create_payment_entry(
+			payment_type="Pay", party_type="Supplier", party="Test TDS Supplier8", paid_amount=100000
+		)
+		pe.apply_tds = 1
+		pe.tax_withholding_category = "Test Multi Invoice Category"
+		pe.save().submit()
+
+		pe_expected = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=10.0,
+				taxable_amount=100000.0,
+				withholding_amount=10000.0,
+				status="Over Withheld",
+				taxable_doctype="",
+				taxable_name="",
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+			)
+		]
+		self.validate_tax_withholding_entries("Payment Entry", pe.name, pe_expected)
+
+		pi = create_purchase_invoice(supplier="Test TDS Supplier8", rate=50000, do_not_save=True)
+		pi.tax_withholding_category = "Test Multi Invoice Category"
+		pi.override_tax_withholding_entries = 1
+		pi.tax_withholding_entries = []
+
+		pi.append(
+			"tax_withholding_entries",
+			{
+				"tax_withholding_category": "Test Multi Invoice Category",
+				"party_type": "Supplier",
+				"party": "Test TDS Supplier8",
+				"tax_rate": 0.0,  # Zero rate
+				"taxable_amount": 50000.0,
+				"withholding_amount": 0.0,  # No withholding at zero rate
+				"taxable_doctype": "Purchase Invoice",
+				"taxable_name": pi.name,
+				"withholding_doctype": "Payment Entry",
+				"withholding_name": pe.name,
+				"conversion_rate": 1.0,
+			},
+		)
+
+		pi.save()
+		pi.submit()
+
+		# Step 3: Verify the tax withholding entries on invoice
+		pi_expected = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=0.0,
+				taxable_amount=50000.0,
+				withholding_amount=0.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+			)
+		]
+		self.validate_tax_withholding_entries("Purchase Invoice", pi.name, pi_expected)
+
+		# Verify Payment Entry entries after adjustment
+		# PE should have:
+		# 1. Duplicate entry (adjusted 50000 portion with zero rate)
+		# 2. Over Withheld entry (remaining 50000 portion at 10%)
+		pe_expected_after = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=0.0,  # Updated to zero rate
+				taxable_amount=50000.0,  # Preserved from manual entry
+				withholding_amount=0.0,  # Zero because rate is zero
+				status="Duplicate",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+			),
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=10.0,  # Original rate
+				taxable_amount=50000.0,  # Adjusted taxable
+				withholding_amount=10000.0,  # Original amount (not split)
+				status="Over Withheld",  # Still over withheld
+				taxable_doctype="",
+				taxable_name="",
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+			),
+		]
+		self.validate_tax_withholding_entries("Payment Entry", pe.name, pe_expected_after)
+
+		self.cleanup_invoices([pe, pi])
+
 	def test_tds_on_journal_entry_for_supplier(self):
 		"""Test TDS deduction for Supplier in Debit Note"""
 		frappe.db.set_value(
