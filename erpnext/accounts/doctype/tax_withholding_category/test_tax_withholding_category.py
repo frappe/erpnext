@@ -949,6 +949,71 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.validate_tax_withholding_entries("Purchase Invoice", pi.name, invoice_expected_entries)
 		self.cleanup_invoices(vouchers)
 
+	def test_tds_withholding_group_different_rates(self):
+		"""
+		Test that Tax Withholding Group applies different rates for different groups
+		within the same Tax Withholding Category.
+		"""
+		for group_name in ["Individual", "Company"]:
+			if not frappe.db.exists("Tax Withholding Group", group_name):
+				frappe.get_doc({"doctype": "Tax Withholding Group", "group_name": group_name}).insert()
+
+		fiscal_year = get_fiscal_year(today(), company="_Test Company")
+		from_date = fiscal_year[1]
+		to_date = fiscal_year[2]
+
+		# Single category with BOTH groups at different rates
+		if not frappe.db.exists("Tax Withholding Category", "TDS Group Rate Category"):
+			frappe.get_doc(
+				{
+					"doctype": "Tax Withholding Category",
+					"name": "TDS Group Rate Category",
+					"category_name": "TDS Group Rate Category",
+					"tax_deduction_basis": "Net Total",
+					"rates": [
+						{
+							"from_date": from_date,
+							"to_date": to_date,
+							"tax_withholding_group": "Individual",
+							"tax_withholding_rate": 1,  # 1% for Individual
+							"single_threshold": 0,
+							"cumulative_threshold": 0,
+						},
+						{
+							"from_date": from_date,
+							"to_date": to_date,
+							"tax_withholding_group": "Company",
+							"tax_withholding_rate": 2,  # 2% for Company
+							"single_threshold": 0,
+							"cumulative_threshold": 0,
+						},
+					],
+					"accounts": [{"company": "_Test Company", "account": "TDS - _TC"}],
+				}
+			).insert()
+
+		invoices = []
+
+		self.setup_party_with_category("Supplier", "Test TDS Supplier5", "TDS Group Rate Category")
+		frappe.db.set_value("Supplier", "Test TDS Supplier5", "tax_withholding_group", "Individual")
+		pi1 = create_purchase_invoice(supplier="Test TDS Supplier5", rate=100000)
+		pi1.submit()
+		invoices.append(pi1)
+
+		total = sum([d.base_tax_amount for d in pi1.taxes if d.account_head == "TDS - _TC"])
+		self.assertEqual(abs(total), 1000, "Individual rate should be 1% (1000 on 100000)")
+
+		self.setup_party_with_category("Supplier", "Test TDS Supplier6", "TDS Group Rate Category")
+		frappe.db.set_value("Supplier", "Test TDS Supplier6", "tax_withholding_group", "Company")
+		pi2 = create_purchase_invoice(supplier="Test TDS Supplier6", rate=100000)
+		pi2.submit()
+		invoices.append(pi2)
+
+		total = sum([d.base_tax_amount for d in pi2.taxes if d.account_head == "TDS - _TC"])
+		self.assertEqual(abs(total), 2000, "Company rate should be 2% (2000 on 100000)")
+
+		self.cleanup_invoices(invoices)
+
 	def test_tds_calculation_on_net_total(self):
 		frappe.db.set_value(
 			"Supplier", "Test TDS Supplier4", "tax_withholding_category", "Cumulative Threshold TDS"

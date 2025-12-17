@@ -1,6 +1,7 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from collections import defaultdict
 
 import frappe
 from frappe import _
@@ -43,18 +44,26 @@ class TaxWithholdingCategory(Document):
 		self.validate_thresholds()
 
 	def validate_dates(self):
-		last_to_date = None
-		rates = sorted(self.get("rates"), key=lambda d: getdate(d.from_date))
-
-		for d in rates:
+		group_rates = defaultdict(list)
+		for d in self.get("rates"):
 			if getdate(d.from_date) >= getdate(d.to_date):
 				frappe.throw(_("Row #{0}: From Date cannot be before To Date").format(d.idx))
+			group_rates[d.tax_withholding_group].append(d)
 
-			# validate overlapping of dates
-			if last_to_date and getdate(d.from_date) < getdate(last_to_date):
-				frappe.throw(_("Row #{0}: Dates overlapping with other row").format(d.idx))
+		# Validate overlapping dates within each group
+		for group, rates in group_rates.items():
+			rates = sorted(rates, key=lambda d: getdate(d.from_date))
+			last_to_date = None
 
-			last_to_date = d.to_date
+			for d in rates:
+				if last_to_date and getdate(d.from_date) < getdate(last_to_date):
+					frappe.throw(
+						_("Row #{0}: Dates overlapping with other row in group {1}").format(
+							d.idx, group or "Default"
+						)
+					)
+
+				last_to_date = d.to_date
 
 	def validate_companies_and_accounts(self):
 		existing_accounts = set()
