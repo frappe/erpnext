@@ -3,7 +3,7 @@
 
 import functools
 import re
-from collections import deque
+from collections import defaultdict, deque
 from operator import itemgetter
 
 import frappe
@@ -288,16 +288,16 @@ class BOM(WebsiteGenerator):
 		self.validate_duplicate_item()
 
 	def validate_duplicate_item(self):
-		item_list = []
+		item_dict = defaultdict(list)
 		for row in self.items:
-			if row.item_code in item_list:
+			if row.operation in item_dict[row.item_code]:
 				frappe.throw(
 					_("Row #{0}: Duplicate entry in Item {1}").format(
 						frappe.bold(row.idx), frappe.bold(row.item_code)
 					),
 					DuplicationError,
 				)
-			item_list.append(row.item_code)
+			item_dict[row.item_code].append(row.operation)
 
 	def set_default_uom(self):
 		if not self.get("items"):
