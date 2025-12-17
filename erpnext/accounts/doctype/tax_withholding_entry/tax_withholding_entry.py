@@ -1285,7 +1285,6 @@ class JournalTaxWithholding(TaxWithholdingController):
 		category["taxable_amount"] = net_amount
 
 	def _calculate_net_total(self):
-		"""Calculate net taxable amount using PR #49963 logic"""
 		from erpnext.accounts.report.general_ledger.general_ledger import get_account_type_map
 
 		account_type_map = get_account_type_map(self.doc.company)
@@ -1312,7 +1311,6 @@ class JournalTaxWithholding(TaxWithholdingController):
 		self.doc.set_against_account()
 
 	def update_tax_rows(self):
-		"""Update Journal Entry accounts using PR #49963 approach"""
 		if not self._should_apply_tds():
 			self._cleanup_duplicate_tds_rows(None)
 			return
@@ -1337,11 +1335,9 @@ class JournalTaxWithholding(TaxWithholdingController):
 		self._recalculate_totals()
 
 	def _should_apply_tds(self):
-		"""Check if TDS should be applied using PR #49963 logic"""
 		return self.doc.apply_tds and self.doc.voucher_type in ("Debit Note", "Credit Note")
 
 	def _reset_existing_tds(self):
-		"""Reset existing TDS rows using PR #49963 logic"""
 		for row in self.existing_tds_rows:
 			# TDS amount is always in credit (liability to government)
 			tds_amount = flt(row.get("credit") - row.get("debit"), self.precision)
@@ -1361,7 +1357,6 @@ class JournalTaxWithholding(TaxWithholdingController):
 			)
 
 	def _update_party_amount(self, amount, is_reversal=False):
-		"""Update party amount using PR #49963 logic"""
 		amount = flt(amount, self.precision)
 		amount_in_party_currency = flt(amount / self.party_row.get("exchange_rate", 1), self.precision)
 
@@ -1398,7 +1393,6 @@ class JournalTaxWithholding(TaxWithholdingController):
 		)
 
 	def _create_or_update_tds_row(self, account_head, tax_amount):
-		"""Create or update TDS row using PR #49963 logic"""
 		from erpnext.accounts.utils import get_account_currency
 		from erpnext.setup.utils import get_exchange_rate as _get_exchange_rate
 
@@ -1456,7 +1450,6 @@ class JournalTaxWithholding(TaxWithholdingController):
 			self.doc.remove(row)
 
 	def _recalculate_totals(self):
-		"""Recalculate totals using PR #49963 logic"""
 		self.doc.set_amounts_in_company_currency()
 		self.doc.set_total_debit_credit()
 		self.doc.set_against_account()
