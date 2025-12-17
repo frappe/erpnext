@@ -614,6 +614,7 @@ def handle_mandatory_error(e, customer, lead_name):
 	frappe.throw(message, title=_("Mandatory Missing"))
 
 
+@frappe.whitelist()
 def get_ordered_items(quotation: str):
 	return frappe._dict(
 		frappe.get_all(
