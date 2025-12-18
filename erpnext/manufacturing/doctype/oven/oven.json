@@ -1,0 +1,100 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:code",
+ "creation": "2025-12-18 21:00:07.559289",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_1vrs",
+  "oven_name",
+  "code",
+  "column_break_nly3",
+  "line",
+  "configuration_section",
+  "top_plate_temp",
+  "column_break_trid",
+  "bottom_plate_temp"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_1vrs",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "oven_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "line",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Line",
+   "options": "Production Line",
+   "reqd": 1
+  },
+  {
+   "fieldname": "configuration_section",
+   "fieldtype": "Section Break",
+   "label": "Configuration"
+  },
+  {
+   "fieldname": "top_plate_temp",
+   "fieldtype": "Float",
+   "label": "Top Plate Temperature (in \u00b0C)"
+  },
+  {
+   "fieldname": "bottom_plate_temp",
+   "fieldtype": "Float",
+   "label": "Bottom Plate Temperature (in \u00b0C)"
+  },
+  {
+   "fieldname": "column_break_nly3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_trid",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-18 21:04:53.629428",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Oven",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
