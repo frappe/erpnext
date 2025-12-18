@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{colour_code}-{size}-{thickness}",
+ "creation": "2025-12-17 22:26:56.070084",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_yns5",
+  "colour_code",
+  "thickness",
+  "size"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_yns5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "colour_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Colour",
+   "options": "Slab Colour",
+   "reqd": 1
+  },
+  {
+   "fieldname": "thickness",
+   "fieldtype": "Link",
+   "label": "Thickness",
+   "options": "Slab Thickness",
+   "reqd": 1
+  },
+  {
+   "fieldname": "size",
+   "fieldtype": "Link",
+   "label": "Size",
+   "options": "Slab Size",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-18 12:36:02.173088",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Slab Template",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
