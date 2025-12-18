@@ -79,8 +79,8 @@ frappe.query_reports["Batch-Wise Balance History"] = {
 		},
 	],
 	formatter: function (value, row, column, data, default_formatter) {
-		if (column.fieldname == "Batch" && data && !!data["Batch"]) {
-			value = data["Batch"];
+		if (column.fieldname == "batch" && data && !!data["batch"]) {
+			value = data["batch"];
 			column.link_onclick =
 				"frappe.query_reports['Batch-Wise Balance History'].set_batch_route_to_stock_ledger(" +
 				JSON.stringify(data) +
@@ -92,7 +92,7 @@ frappe.query_reports["Batch-Wise Balance History"] = {
 	},
 	set_batch_route_to_stock_ledger: function (data) {
 		frappe.route_options = {
-			batch_no: data["Batch"],
+			batch_no: data["batch_id"],
 		};
 
 		frappe.set_route("query-report", "Stock Ledger");
