@@ -8,10 +8,19 @@
   "section_break_bop4",
   "amended_from",
   "template",
-  "current_stage",
+  "column_break_mfbp",
   "line",
+  "current_stage",
+  "quality_section",
   "grade",
-  "quality_assessment"
+  "column_break_e1da",
+  "quality_assessment",
+  "export_section",
+  "consignment_number",
+  "column_break_il7r",
+  "shipping_date",
+  "slab_history_section",
+  "slab_history"
  ],
  "fields": [
   {
@@ -68,13 +77,56 @@
    "fieldtype": "Data",
    "label": "Quality Assessment",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_mfbp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "quality_section",
+   "fieldtype": "Section Break",
+   "label": "Quality"
+  },
+  {
+   "fieldname": "column_break_e1da",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "export_section",
+   "fieldtype": "Section Break",
+   "label": "Export"
+  },
+  {
+   "fieldname": "consignment_number",
+   "fieldtype": "Data",
+   "label": "Consignment Number"
+  },
+  {
+   "fieldname": "shipping_date",
+   "fieldtype": "Date",
+   "label": "Shipping Date"
+  },
+  {
+   "fieldname": "slab_history_section",
+   "fieldtype": "Section Break",
+   "label": "Slab History"
+  },
+  {
+   "fieldname": "slab_history",
+   "fieldtype": "Table",
+   "options": "Slab History",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_il7r",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-18 20:24:00.734945",
+ "modified": "2025-12-18 20:47:20.016362",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",

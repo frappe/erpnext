@@ -12,13 +12,17 @@ class Slab(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
+		from erpnext.manufacturing.doctype.slab_history.slab_history import SlabHistory
 		from frappe.types import DF
 
 		amended_from: DF.Link | None
+		consignment_number: DF.Data | None
 		current_stage: DF.Literal["Distribution", "Pressing", "Heating", "Cooling", "Trimming", "Calibration 1", "Calibration 2", "Polishing 1", "Polishing 2", "Quality", "Finished"]
 		grade: DF.Data | None
 		line: DF.Link
 		quality_assessment: DF.Data | None
+		shipping_date: DF.Date | None
+		slab_history: DF.Table[SlabHistory]
 		template: DF.Link
 	# end: auto-generated types
 	pass
