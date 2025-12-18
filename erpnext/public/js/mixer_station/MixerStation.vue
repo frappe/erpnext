@@ -1,17 +1,15 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
-const batchNo = ref('SLB-2024-8844');
+const jobCard = ref(null);
+const batchNo = ref('');
 const colour = ref('Carrara White');
 const phase = ref('Preparation Phase');
 
-// ingredients (dummy data; later from server)
-const ingredients = ref([
-  { name: 'Quartz Aggregate (Fine)', standard: '450 kg', unit: 'kg', qty: 450 },
-  { name: 'Quartz Aggregate (Coarse)', standard: '850 kg', unit: 'kg', qty: 850 },
-  { name: 'Polyester Resin', standard: '120 kg', unit: 'kg', qty: 120 },
-  { name: 'White Pigment', standard: '45 g', unit: 'g', qty: 45 },
-]);
+const ingredients = ref([]);
+const loadingIngredients = ref(true);
+const error = ref(null);
+const additionalIngredients = ['silane', 'catalyst', 'hardener'];
 
 // downstream alerts (dummy)
 const alerts = ref([
@@ -38,7 +36,6 @@ const mixingStartTime = ref(null);
 const mixingElapsed = ref(0);
 const mixingTimerHandle = ref(null);
 const mixingReady = ref(false);
-const canStartMixing = computed(() => !mixingStarted.value);
 const inputsReadonly = computed(() => mixingReady.value || mixingStarted.value);
 
 const formattedMixingTime = computed(() => {
@@ -54,12 +51,80 @@ const startedAtLabel = computed(() =>
         : ''
 );
 
+const allAdditionalIngredientsAdded = computed(() => {
+    return ingredients.value
+        .filter(ing => isAdditionalIngredient(ing.name))
+        .every(ing => ing.is_added);
+});
+
 // actions
+onMounted(async () => {
+    const route = frappe.get_route();
+    jobCard.value = route[1] || null;
+    console.log('jobCard in Mixer:', jobCard.value);
+
+    if (!jobCard.value) {
+        error.value = __('No Job Card found in route');
+        loadingIngredients.value = false;
+        return;
+    }
+
+    try {
+        loadingIngredients.value = true;
+        error.value = null;
+
+        if (jobCard.value) {
+            const jc = await frappe.db.get_doc('Job Card', jobCard.value);
+            if (jc.bom_no) {
+                batchNo.value = jc.bom_no;  
+            }
+        }
+        
+        const r = await frappe.call({
+            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_ingredients',
+            args: { 
+                job_card: jobCard.value 
+            }
+        });
+        
+        ingredients.value = (r.message || []).map(item => {
+            const name = item.item_name || '';
+            const lower = name.toLowerCase();
+            const is_additional = additionalIngredients.some(s => lower.includes(s));
+
+            return {
+                name,
+                standard: `${item.stock_uom_qty} ${item.stock_uom}`,
+                unit: item.stock_uom,
+                qty: item.stock_uom_qty,
+                item_code: item.item_code,
+                is_added: is_additional ? false : true
+            };
+        });
+    } 
+    catch (e) {
+        error.value = e.message || e;
+        frappe.msgprint(__('Failed to load BOM ingredients: {0}', [error.value]));
+    } 
+    finally {
+        loadingIngredients.value = false;
+    }
+});
+
 function toggleReady() {
     if (mixingStarted.value) {
         return;
     } 
-    mixingReady.value = !mixingReady.value;
+    frappe.confirm(
+        __('Do you want to confirm the materials?'),
+        () => {
+            mixingReady.value = true;
+            frappe.msgprint(__('Materials are confirmed to start mixing'));
+        },
+        () => {
+            frappe.msgprint(__('Materials are not confirmed.'));
+        }
+    );
 }
 
 function startMixing() {
@@ -70,7 +135,6 @@ function startMixing() {
     frappe.confirm(
         __('Start mixing now?'),
         () => {
-            // YES
             mixingStarted.value = true;
             mixingStartTime.value = frappe.datetime.now_datetime();
 
@@ -104,11 +168,19 @@ function finishAndDischarge() {
 }
 
 function haltFromAlert(alert) {
-  frappe.msgprint(__('Production halted due to alert: {0}', [alert.title]));
+    frappe.msgprint(__('Production halted due to alert: {0}', [alert.title]));
 }
 
-function ignoreAlert(alert) {
-  frappe.msgprint(__('Alert ignored: {0}', [alert.title]));
+function ignoreAlert(index) {
+    const alert = alerts.value[index];
+    frappe.msgprint(__('Alert ignored: {0}', [alert.title]));
+    alerts.value.splice(index, 1);
+}
+
+function isAdditionalIngredient(name) {
+  if (!name) return false;
+  const ing = name.toString().toLowerCase();
+  return additionalIngredients.some(s => ing.includes(s));
 }
 </script>
 
@@ -138,32 +210,71 @@ function ignoreAlert(alert) {
 
             <div class="d-flex">
                 <!-- Left: Raw Material Inputs -->
-                <div class="flex-fill mr-4">
+                <div class="flex-fill mr-4" style="font-size: medium;">
                     <div class="mb-3">
-                        <h5 class="mb-1">{{ __('Raw Material Inputs') }}</h5>
+                        <h3 class="mb-1">{{ __('Raw Material Inputs') }}</h3>
                         <div class="text-muted small">
                             {{ __('Review and adjust calculated quantities before mixing.') }}
                         </div>
                     </div>
 
-                    <div v-for="(ing, idx) in ingredients" :key="idx" class="mb-3 pb-2 border-bottom">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="font-weight-bold">{{ ing.name }}</div>
-                                <div class="text-muted small">
-                                    {{ __('Standard: {0}', [ing.standard]) }}
+                    <div v-if="loadingIngredients" class="text-center py-4">
+                        <div class="spinner-border spinner-border-sm mr-2" role="status"></div>
+                        {{ __('Loading BOM ingredients...') }}
+                    </div>
+
+                    <!-- Error -->
+                    <div v-else-if="error" class="alert alert-danger">
+                        {{ error }}
+                    </div>
+
+                    <div v-else>
+                        <div v-for="(ing, idx) in ingredients" :key="idx" class="mb-3 pb-2 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="font-weight-bold">{{ ing.name }}</div>
+                                    <div class="text-muted small">
+                                        {{ __('Standard: {0}', [ing.standard]) }}
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <input type="number"
-                                    class="form-control text-right"
-                                    :readonly="inputsReadonly"
-                                    :class="inputsReadonly ? 'bg-light' : ''"
-                                    style="width:120px;"
-                                    v-model.number="ing.qty" />
-                                <span class="ml-2 text-muted">{{ ing.unit }}</span>
+                                <template v-if="isAdditionalIngredient(ing.name)">
+                                    <div class="d-flex flex-column align-items-end">
+                                        <label class="added-checkbox mb-1">
+                                            <input type="checkbox" v-model="ing.is_added">
+                                            <span
+                                            class="added-text"
+                                            :class="ing.is_added ? 'added' : 'not-added'"
+                                            >
+                                            {{ ing.is_added ? 'Added' : 'Not Added' }}
+                                            </span>
+                                        </label>
+                                        <div v-if="ing.is_added" class="d-flex align-items-center">
+                                            <input
+                                            type="number"
+                                            class="form-control text-right"
+                                            :readonly="inputsReadonly"
+                                            :class="inputsReadonly ? 'bg-light' : ''"
+                                            style="width:120px;"
+                                            v-model.number="ing.qty"
+                                            />
+                                            <span class="ml-2 text-muted">{{ ing.unit }}</span>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template v-else>
+                                    <div class="d-flex align-items-center">
+                                        <input type="number"
+                                            class="form-control text-right"
+                                            :readonly="inputsReadonly"
+                                            :class="inputsReadonly ? 'bg-light' : ''"
+                                            style="width:120px;"
+                                            v-model.number="ing.qty" />
+                                        <span class="ml-2 text-muted">{{ ing.unit }}</span>
+                                    </div>
+                                </template>
                             </div>
                         </div>
+
                     </div>
                 </div> <!-- /left column -->
 
@@ -179,16 +290,16 @@ function ignoreAlert(alert) {
                         </div>
 
                         <div class="mb-3">
-                            <button class="btn btn-sm border" :class="mixingReady ? 'text-success' : 'btn-outline-secondary'"
-                                @click="toggleReady">
-                                {{ mixingReady ? __('Materials Confirmed') : __('Confirm Materials') }}
+                            <button v-if="!mixingReady" :disabled="!allAdditionalIngredientsAdded" :class="!allAdditionalIngredientsAdded ? 'btn-disabled-pointer' : ''" class="btn btn-sm border border-success" @click="toggleReady">
+                                <span class="fa fa-check mr-1"></span>
+                                {{ __('Confirm Materials') }}
+                            </button>
+
+                            <button v-else class="btn btn-success btn-block py-2" :disabled="mixingStarted" @click="startMixing">
+                                <span class="fa fa-play mr-1"></span>
+                                {{ __('Start Mixing') }}
                             </button>
                         </div>
-
-                        <button class="btn btn-success btn-block py-2" :disabled="mixingStarted" @click="startMixing">
-                            <span class="fa fa-play mr-1"></span>
-                            {{ __('Start Mixing') }}
-                        </button>
                     </div>
 
                     <!-- Mixing in Progress state -->
@@ -201,10 +312,17 @@ function ignoreAlert(alert) {
                         <div class="display-4 font-weight-bold mb-3" style="font-size:2.5rem;">
                             {{ formattedMixingTime }}
                         </div>
-                        <button class="btn btn-success btn-block py-2" @click="finishAndDischarge">
-                            <span class="fa fa-check mr-1"></span>
-                            {{ __('Finish & Discharge') }}
-                        </button>
+                        <div>
+                            <button class="btn btn-success btn-block py-2" @click="finishAndDischarge">
+                                <span class="fa fa-check mr-1"></span>
+                                {{ __('Finish & Discharge') }}
+                            </button>
+                            <button>
+                                <span class="fa fa-check mr-1"></span>
+                                {{ __('Finish & Discharge') }}
+                            </button>
+                        </div>
+                        
                         <div class="text-muted small mt-2">
                             {{ __('Started at {0}', [startedAtLabel]) }}
                         </div>
@@ -231,11 +349,14 @@ function ignoreAlert(alert) {
         <!-- Right: Downstream Alerts -->
         <div style="width:400px;">
             <div class="mb-2 d-flex align-items-center">
-                <span class="fa fa-bell text-danger mr-2"></span>
                 <div>
-                    <div class="font-weight-bold">
-                        {{ __('Downstream Alerts') }}
+                    <div class="d-flex align-items-center">
+                        <span class="fa fa-exclamation-circle text-danger mr-2"></span>
+                        <div class="text-danger font-weight-bold">
+                            {{ __('Downstream Alerts') }}
+                        </div>
                     </div>
+                    
                     <div class="text-muted small">
                         {{ __('Real-time alerts from Presser, Cooler & Polishing stations.') }}
                     </div>
@@ -265,7 +386,7 @@ function ignoreAlert(alert) {
                     <button class="btn btn-danger btn-sm mr-2" @click="haltFromAlert(a)">
                         {{ __('Halt Prod.') }}
                     </button>
-                    <button class="btn btn-light btn-sm" @click="ignoreAlert(a)">
+                    <button class="btn btn-light btn-sm" @click="ignoreAlert(idx)">
                         {{ __('Ignore') }}
                     </button>
                 </div>
@@ -274,3 +395,25 @@ function ignoreAlert(alert) {
 
     </div> <!-- /root -->
 </template>
+
+<style scoped>
+.added-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.added-text.added {
+  color: #16a34a;      /* green for Added */
+  font-weight: 600;
+}
+
+.added-text.not-added {
+  color: #6b7280;      /* grey for Not Added */
+}
+
+.btn-disabled-pointer {
+    cursor: not-allowed;
+}
+</style>
