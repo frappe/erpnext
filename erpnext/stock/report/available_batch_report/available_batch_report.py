@@ -61,6 +61,7 @@ def get_columns(filters):
 				"width": 120,
 			},
 			{"label": _("Balance Qty"), "fieldname": "balance_qty", "fieldtype": "Float", "width": 150},
+			{"label": _("UOM"), "fieldname": "stock_uom", "fieldtype": "Data", "width": 60},
 		]
 	)
 
@@ -94,6 +95,7 @@ def get_batchwise_data_from_stock_ledger(filters):
 
 	table = frappe.qb.DocType("Stock Ledger Entry")
 	batch = frappe.qb.DocType("Batch")
+	title_field = frappe.get_meta("Batch", cached=True).get_title_field()
 
 	query = (
 		frappe.qb.from_(table)
@@ -101,9 +103,11 @@ def get_batchwise_data_from_stock_ledger(filters):
 		.on(table.batch_no == batch.name)
 		.select(
 			table.item_code,
-			table.batch_no,
+			table.batch_no.as_("batch_id"),
 			table.warehouse,
 			batch.expiry_date,
+			batch[title_field].as_("batch_no"),
+			batch.stock_uom,
 			Sum(table.actual_qty).as_("balance_qty"),
 		)
 		.where(table.is_cancelled == 0)
@@ -123,6 +127,7 @@ def get_batchwise_data_from_serial_batch_bundle(batchwise_data, filters):
 	table = frappe.qb.DocType("Stock Ledger Entry")
 	ch_table = frappe.qb.DocType("Serial and Batch Entry")
 	batch = frappe.qb.DocType("Batch")
+	title_field = frappe.get_meta("Batch", cached=True).get_title_field()
 
 	query = (
 		frappe.qb.from_(table)
@@ -132,9 +137,11 @@ def get_batchwise_data_from_serial_batch_bundle(batchwise_data, filters):
 		.on(ch_table.batch_no == batch.name)
 		.select(
 			table.item_code,
-			ch_table.batch_no,
+			ch_table.batch_no.as_("batch_id"),
 			table.warehouse,
 			batch.expiry_date,
+			batch[title_field].as_("batch_no"),
+			batch.stock_uom,
 			Sum(ch_table.qty).as_("balance_qty"),
 		)
 		.where((table.is_cancelled == 0) & (table.docstatus == 1))
