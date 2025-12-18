@@ -29,31 +29,47 @@ def validate_filters(filters):
 
 def get_columns():
 	return [
-		_("Item") + ":Link/Item:150",
-		_("Item Name") + "::150",
-		_("Batch") + ":Link/Batch:150",
-		_("Stock UOM") + ":Link/UOM:100",
-		_("Quantity") + ":Float:100",
-		_("Expires On") + ":Date:100",
-		_("Expiry (In Days)") + ":Int:130",
+		{"label": _("Item"), "fieldname": "item", "fieldtype": "Link", "options": "Item", "width": 150},
+		{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 150},
+		{"label": _("Batch"), "fieldname": "batch", "fieldtype": "Link", "options": "Batch", "width": 150},
+		{"label": _("Quantity"), "fieldname": "quantity", "fieldtype": "Float", "width": 100},
+		{
+			"label": _("Stock UOM"),
+			"fieldname": "stock_uom",
+			"fieldtype": "Link",
+			"options": "UOM",
+			"width": 100,
+		},
+		{"label": _("Expires On"), "fieldname": "expires_on", "fieldtype": "Date", "width": 100},
+		{"label": _("Expiry (In Days)"), "fieldname": "expiry_in_days", "fieldtype": "Int", "width": 130},
+		{
+			"label": _("Batch ID"),
+			"fieldname": "batch_id",
+			"fieldtype": "Link",
+			"options": "Batch",
+			"width": 100,
+			"hidden": 1,
+		},
 	]
 
 
 def get_data(filters):
 	data = []
+	title_field = frappe.get_meta("Batch", cached=True).get_title_field()
 
 	for batch in get_batch_details(filters):
 		data.append(
 			[
 				batch.item,
 				batch.item_name,
-				batch.name,
-				batch.stock_uom,
+				batch[title_field],
 				batch.batch_qty,
+				batch.stock_uom,
 				batch.expiry_date,
 				max((batch.expiry_date - frappe.utils.datetime.date.today()).days, 0)
 				if batch.expiry_date
 				else None,
+				batch.name,
 			]
 		)
 
@@ -62,6 +78,7 @@ def get_data(filters):
 
 def get_batch_details(filters):
 	batch = frappe.qb.DocType("Batch")
+	title_field = frappe.get_meta("Batch", cached=True).get_title_field()
 	query = (
 		frappe.qb.from_(batch)
 		.select(
@@ -72,6 +89,7 @@ def get_batch_details(filters):
 			batch.item_name,
 			batch.stock_uom,
 			batch.batch_qty,
+			batch[title_field],
 		)
 		.where(
 			(batch.disabled == 0)

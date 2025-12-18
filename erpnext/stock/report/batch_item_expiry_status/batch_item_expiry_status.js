@@ -32,4 +32,13 @@ frappe.query_reports["Batch Item Expiry Status"] = {
 			},
 		},
 	],
+	formatter: function (value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+
+		if (column.fieldname === "batch" && data && !!data["batch"]) {
+			value = `<a href="/app/batch/${data["batch_id"]}">${frappe.utils.escape_html(data["batch"])}</a>`;
+		}
+
+		return value;
+	},
 };
