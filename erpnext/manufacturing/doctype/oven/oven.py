@@ -14,10 +14,10 @@ class Oven(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		bottom_plate_temp: DF.Float
 		code: DF.Data
 		line: DF.Link
 		oven_name: DF.Data
-		top_plate_temp: DF.Float
+		slab_bottom_temp: DF.Float
+		slab_top_temp: DF.Float
 	# end: auto-generated types
 	pass

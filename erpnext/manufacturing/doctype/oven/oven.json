@@ -12,9 +12,9 @@
   "column_break_nly3",
   "line",
   "configuration_section",
-  "top_plate_temp",
+  "slab_top_temp",
   "column_break_trid",
-  "bottom_plate_temp"
+  "slab_bottom_temp"
  ],
  "fields": [
   {
@@ -51,28 +51,28 @@
    "label": "Configuration"
   },
   {
-   "fieldname": "top_plate_temp",
-   "fieldtype": "Float",
-   "label": "Top Plate Temperature (in \u00b0C)"
-  },
-  {
-   "fieldname": "bottom_plate_temp",
-   "fieldtype": "Float",
-   "label": "Bottom Plate Temperature (in \u00b0C)"
-  },
-  {
    "fieldname": "column_break_nly3",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "column_break_trid",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "slab_top_temp",
+   "fieldtype": "Float",
+   "label": "Slab Top Temperature (in \u00b0C)"
+  },
+  {
+   "fieldname": "slab_bottom_temp",
+   "fieldtype": "Float",
+   "label": "Slab Bottom Temperature (in \u00b0C)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-18 21:04:53.629428",
+ "modified": "2025-12-18 23:22:07.226295",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Oven",
