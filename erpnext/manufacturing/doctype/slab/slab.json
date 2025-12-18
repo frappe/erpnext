@@ -8,6 +8,7 @@
   "section_break_bop4",
   "amended_from",
   "template",
+  "batch_number",
   "column_break_mfbp",
   "line",
   "current_stage",
@@ -120,13 +121,19 @@
   {
    "fieldname": "column_break_il7r",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "batch_number",
+   "fieldtype": "Data",
+   "label": "Batch Number",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-18 21:17:56.977993",
+ "modified": "2025-12-18 23:14:11.378009",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",

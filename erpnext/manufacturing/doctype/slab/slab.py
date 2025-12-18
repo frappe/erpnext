@@ -16,6 +16,7 @@ class Slab(Document):
 		from frappe.types import DF
 
 		amended_from: DF.Link | None
+		batch_number: DF.Data | None
 		consignment_number: DF.Data | None
 		current_stage: DF.Literal["Distribution", "Pressing", "Heating", "Cooling", "Trimming", "Calibration 1", "Calibration 2", "Polishing 1", "Polishing 2", "Quality", "Finished"]
 		grade: DF.Data | None
