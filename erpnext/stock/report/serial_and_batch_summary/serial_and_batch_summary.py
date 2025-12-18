@@ -13,58 +13,62 @@ def execute(filters=None):
 
 
 def get_data(filters):
-	filter_conditions = get_filter_conditions(filters)
+	SerialBatchBundle = frappe.qb.DocType("Serial and Batch Bundle")
+	SerialBatchEntry = frappe.qb.DocType("Serial and Batch Entry")
+	Batch = frappe.qb.DocType("Batch")
+	title_field = frappe.get_meta("Batch", cached=True).get_title_field()
 
-	return frappe.get_all(
-		"Serial and Batch Bundle",
-		fields=[
-			"`tabSerial and Batch Bundle`.`voucher_type`",
-			"`tabSerial and Batch Bundle`.`posting_datetime` as posting_date",
-			"`tabSerial and Batch Bundle`.`name`",
-			"`tabSerial and Batch Bundle`.`company`",
-			"`tabSerial and Batch Bundle`.`voucher_no`",
-			"`tabSerial and Batch Bundle`.`item_code`",
-			"`tabSerial and Batch Bundle`.`item_name`",
-			"`tabSerial and Batch Entry`.`serial_no`",
-			"`tabSerial and Batch Entry`.`batch_no`",
-			"`tabSerial and Batch Entry`.`warehouse`",
-			"`tabSerial and Batch Entry`.`incoming_rate`",
-			"`tabSerial and Batch Entry`.`stock_value_difference`",
-			"`tabSerial and Batch Entry`.`qty`",
-		],
-		filters=filter_conditions,
-		order_by="posting_datetime",
+	query = (
+		frappe.qb.from_(SerialBatchBundle)
+		.join(SerialBatchEntry)
+		.on(SerialBatchBundle.name == SerialBatchEntry.parent)
+		.left_join(Batch)
+		.on(SerialBatchEntry.batch_no == Batch.name)
+		.select(
+			SerialBatchBundle.voucher_type,
+			SerialBatchBundle.posting_datetime.as_("posting_date"),
+			SerialBatchBundle.name,
+			SerialBatchBundle.company,
+			SerialBatchBundle.voucher_no,
+			SerialBatchBundle.item_code,
+			SerialBatchBundle.item_name,
+			SerialBatchEntry.serial_no,
+			SerialBatchEntry.batch_no.as_("batch_id"),
+			SerialBatchEntry.warehouse,
+			SerialBatchEntry.incoming_rate,
+			SerialBatchEntry.stock_value_difference,
+			SerialBatchEntry.qty,
+			Batch[title_field].as_("batch_no"),
+		)
 	)
 
+	query = apply_filters(query, filters)
+	query = query.orderby(SerialBatchBundle.posting_datetime)
 
-def get_filter_conditions(filters):
-	filter_conditions = [
-		["Serial and Batch Bundle", "docstatus", "=", 1],
-		["Serial and Batch Bundle", "is_cancelled", "=", 0],
-	]
+
+def apply_filters(query, filters):
+	SerialBatchBundle = frappe.qb.DocType("Serial and Batch Bundle")
+	SerialBatchEntry = frappe.qb.DocType("Serial and Batch Entry")
+
+	query = query.where((SerialBatchBundle.docstatus == 1) & (SerialBatchBundle.is_cancelled == 0))
 
 	for field in ["voucher_type", "voucher_no", "item_code", "warehouse", "company"]:
 		if filters.get(field):
 			if field == "voucher_no":
-				filter_conditions.append(["Serial and Batch Bundle", field, "in", filters.get(field)])
+				query = query.where(SerialBatchBundle.voucher_no.isin(filters[field]))
 			else:
-				filter_conditions.append(["Serial and Batch Bundle", field, "=", filters.get(field)])
+				query = query.where(SerialBatchBundle[field] == filters[field])
 
 	if filters.get("from_date") and filters.get("to_date"):
-		filter_conditions.append(
-			[
-				"Serial and Batch Bundle",
-				"posting_datetime",
-				"between",
-				[filters.get("from_date"), filters.get("to_date")],
-			]
+		query = query.where(
+			SerialBatchBundle.posting_datetime.between(filters["from_date"], filters["to_date"])
 		)
 
 	for field in ["serial_no", "batch_no"]:
 		if filters.get(field):
-			filter_conditions.append(["Serial and Batch Entry", field, "=", filters.get(field)])
+			query = query.where(SerialBatchEntry[field] == filters[field])
 
-	return filter_conditions
+	return query
 
 
 def get_columns(filters, data):
@@ -225,29 +229,59 @@ def get_serial_nos(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_batch_nos(doctype, txt, searchfield, start, page_len, filters):
-	query_filters = {}
+	Batch = frappe.qb.DocType("Batch")
+	SerialBatchEntry = frappe.qb.DocType("Serial and Batch Entry")
+	meta = frappe.get_meta(doctype, cached=True)
+	title_field = meta.get_title_field()
 
-	if filters.get("voucher_no") and txt:
-		query_filters["batch_no"] = ["like", f"%{txt}%"]
+	conditions = []
 
 	if filters.get("voucher_no"):
-		serial_batch_bundle = frappe.get_cached_value(
-			"Serial and Batch Bundle",
-			{"voucher_no": ("in", filters.get("voucher_no")), "docstatus": 1, "is_cancelled": 0},
-			"name",
+		sbb_filters = {"voucher_no": ("in", filters.get("voucher_no")), "docstatus": 1, "is_cancelled": 0}
+
+		if filters.get("item_code"):
+			sbb_filters["item_code"] = filters.get("item_code")
+
+		serial_batch_bundles = frappe.get_list("Serial and Batch Bundle", filters=sbb_filters, pluck="name")
+
+		if not serial_batch_bundles:
+			return []
+
+		query = (
+			frappe.qb.from_(SerialBatchEntry)
+			.join(Batch)
+			.on(Batch.name == SerialBatchEntry.batch_no)
+			.select(SerialBatchEntry.batch_no, Batch[title_field])
+			.distinct()
 		)
 
-		query_filters["parent"] = serial_batch_bundle
-		if not txt:
-			query_filters["batch_no"] = ("is", "set")
+		conditions.append(SerialBatchEntry.parent.isin(serial_batch_bundles))
 
-		return frappe.get_all(
-			"Serial and Batch Entry", filters=query_filters, fields=["batch_no"], as_list=True
-		)
+		if filters.get("item_code"):
+			conditions.append(Batch.item == filters.get("item_code"))
+
+		if txt:
+			conditions.append(SerialBatchEntry.batch_no.like(f"%{txt}%"))
+		else:
+			conditions.append(SerialBatchEntry.batch_no.isnotnull())
+
+		for condition in conditions:
+			query = query.where(condition)
+
+		return query.run(as_list=True)
 
 	else:
-		if txt:
-			query_filters["name"] = ["like", f"%{txt}%"]
+		if not filters.get("item_code"):
+			return []
 
-		query_filters["item"] = filters.get("item_code")
-		return frappe.get_all("Batch", filters=query_filters, as_list=True)
+		query = frappe.qb.from_(Batch).select(Batch.name, Batch[title_field])
+
+		conditions.append(Batch.item == filters.get("item_code"))
+
+		if txt:
+			conditions.append(Batch.name.like(f"%{txt}%"))
+
+		for condition in conditions:
+			query = query.where(condition)
+
+		return query.run(as_list=True)
