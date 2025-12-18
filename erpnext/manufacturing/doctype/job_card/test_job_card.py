@@ -128,7 +128,7 @@ class TestJobCard(ERPNextTestSuite):
 		jc1 = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
 		jc2 = frappe.get_last_doc("Job Card", {"work_order": wo2.name})
 
-		employee = "_T-Employee-00001"  # from test records
+		employee = self.employees[0].name
 
 		jc1.append(
 			"time_logs",
