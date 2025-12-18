@@ -70,6 +70,7 @@
   "relation",
   "attendance_and_leave_details",
   "attendance_device_id",
+  "attendance_shift",
   "column_break_44",
   "holiday_list",
   "salary_information",
@@ -816,6 +817,12 @@
    "fieldtype": "Data",
    "label": "IBAN",
    "options": "IBAN"
+  },
+  {
+   "fieldname": "attendance_shift",
+   "fieldtype": "Link",
+   "label": "Attendance Shift",
+   "options": "Attendance Shift"
   }
  ],
  "icon": "fa fa-user",
@@ -823,7 +830,7 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2025-08-29 11:52:12.819878",
+ "modified": "2025-12-19 00:08:28.433657",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",

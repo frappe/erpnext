@@ -1,0 +1,162 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-18 23:41:15.954193",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_j2cv",
+  "shift_name",
+  "code",
+  "column_break_pivo",
+  "is_active",
+  "time_configuration_section",
+  "start_time",
+  "does_span_next_day",
+  "column_break_l14a",
+  "end_time",
+  "column_break_l6tm",
+  "column_break_bhsl",
+  "break_configuration_section",
+  "is_break_enabled",
+  "break_start_time",
+  "break_end_time",
+  "column_break_vyju",
+  "column_break_mqhp",
+  "column_break_iyto"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_j2cv",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "shift_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Code",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_pivo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active",
+   "reqd": 1
+  },
+  {
+   "fieldname": "time_configuration_section",
+   "fieldtype": "Section Break",
+   "label": "Time Configuration"
+  },
+  {
+   "fieldname": "start_time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Start Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "end_time",
+   "fieldtype": "Time",
+   "label": "End Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_l14a",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "does_span_next_day",
+   "fieldtype": "Check",
+   "label": "Spans Next Day",
+   "reqd": 1
+  },
+  {
+   "fieldname": "break_configuration_section",
+   "fieldtype": "Section Break",
+   "label": "Break Configuration"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_break_enabled",
+   "fieldtype": "Check",
+   "label": "Enable Break"
+  },
+  {
+   "depends_on": "is_break_enabled",
+   "fieldname": "break_start_time",
+   "fieldtype": "Time",
+   "label": "Break Start Time",
+   "mandatory_depends_on": "is_break_enabled"
+  },
+  {
+   "depends_on": "is_break_enabled",
+   "fieldname": "break_end_time",
+   "fieldtype": "Time",
+   "label": "Break End Time",
+   "mandatory_depends_on": "is_break_enabled"
+  },
+  {
+   "fieldname": "column_break_vyju",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_mqhp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_l6tm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_bhsl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_iyto",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-19 00:04:52.133149",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Attendance Shift",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
