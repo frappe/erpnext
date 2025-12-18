@@ -126,7 +126,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-18 20:47:20.016362",
+ "modified": "2025-12-18 21:17:56.977993",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",
@@ -150,5 +150,50 @@
  "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [
+  {
+   "color": "Gray",
+   "title": "Distribution"
+  },
+  {
+   "color": "Cyan",
+   "title": "Pressing"
+  },
+  {
+   "color": "Orange",
+   "title": "Heating"
+  },
+  {
+   "color": "Light Blue",
+   "title": "Cooling"
+  },
+  {
+   "color": "Pink",
+   "title": "Trimming"
+  },
+  {
+   "color": "Purple",
+   "title": "Calibration"
+  },
+  {
+   "color": "Blue",
+   "title": "Polishing"
+  },
+  {
+   "color": "Yellow",
+   "title": "Quality Check"
+  },
+  {
+   "color": "Green",
+   "title": "Finished"
+  },
+  {
+   "color": "Green",
+   "title": "Shipped"
+  },
+  {
+   "color": "Red",
+   "title": "Discarded"
+  }
+ ]
 }
