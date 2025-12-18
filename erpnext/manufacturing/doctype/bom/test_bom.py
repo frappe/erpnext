@@ -441,7 +441,7 @@ class TestBOM(IntegrationTestCase):
 
 		bom = frappe.new_doc("BOM")
 		bom.item = item
-		bom.with_operation = 1
+		bom.with_operations = 1
 
 		bom.append("items", frappe._dict(item_code=item, operation=op1.name))
 		bom.append("items", frappe._dict(item_code=item, operation=op1.name))
