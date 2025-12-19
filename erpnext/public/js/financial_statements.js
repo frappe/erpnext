@@ -78,14 +78,15 @@ erpnext.financial_statements = {
 
 		// Link to open ledger
 		const should_link_to_ledger =
-			formatting.is_detail || (formatting.account_filters && formatting.child_accounts);
+			formatting.is_detail ||
+			(formatting.account_filters && formatting.child_accounts && formatting.child_accounts.length);
 
 		if (should_link_to_ledger) {
 			const glData = {
 				account:
 					Array.isArray(formatting.child_accounts) && formatting.child_accounts.length
 						? formatting.child_accounts
-						: formatting._account ?? value,
+						: formatting.account ?? value,
 				from_date: formatting.from_date || formatting.period_start_date,
 				to_date: formatting.to_date || formatting.period_end_date,
 				account_type: formatting.account_type,

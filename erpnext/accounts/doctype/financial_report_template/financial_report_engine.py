@@ -1584,18 +1584,11 @@ class RowFormatterBase(ABC):
 		if row_data.account_details:
 			child_accounts = list(row_data.account_details.keys())
 
-		account = _get_row_data("display_name", "")
-		acc_name = _get_row_data("account_name", "")
-		acc_number = _get_row_data("account_number", "")
-
-		account_name = (f"{_(acc_number)} - {_(acc_name)}" if acc_number else _(acc_name)) or account
-
 		values = {
-			"_account": _get_row_data("account", ""),  # account docname
-			"account": account,  # display name of the row or account name
-			"account_name": account_name,  # formatted account name
-			"acc_name": acc_name,
-			"acc_number": acc_number,
+			"account": _get_row_data("account", ""),
+			"account_name": _get_row_data("display_name", ""),
+			"acc_name": _get_row_data("account_name", ""),
+			"acc_number": _get_row_data("account_number", ""),
 			"child_accounts": child_accounts,
 			"currency": self.context.currency or "",
 			"indent": _get_row_data("indentation_level", 0),
@@ -1731,14 +1724,19 @@ class DetailRowBuilder:
 		return detail_rows
 
 	def _create_detail_row_object(self, account_data: AccountData, parent_row):
+		acc_name = account_data.account_name or ""
+		acc_number = account_data.account_number or ""
+
+		display_name = f"{_(acc_number)} - {_(acc_name)}" if acc_number else _(acc_name)
+
 		return type(
 			"DetailRow",
 			(),
 			{
 				"account": account_data.account,
-				"display_name": account_data.account_name,
-				"account_name": account_data.account_name,
-				"account_number": account_data.account_number,
+				"display_name": display_name,
+				"account_name": acc_name,
+				"account_number": acc_number,
 				"data_source": "Account Detail",
 				"indentation_level": getattr(parent_row, "indentation_level", 0) + 1,
 				"fieldtype": getattr(parent_row, "fieldtype", None),
