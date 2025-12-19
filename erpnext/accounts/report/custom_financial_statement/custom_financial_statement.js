@@ -9,22 +9,11 @@ erpnext.utils.add_dimensions(CFS_REPORT_NAME, 10);
 
 frappe.query_reports[CFS_REPORT_NAME]["filters"].push(
 	{
-		fieldname: "report_type",
-		label: __("Report Type"),
-		fieldtype: "Select",
-		options: ["Profit and Loss Statement", "Balance Sheet", "Cash Flow", "Custom Financial Statement"],
-		reqd: 1,
-	},
-	{
 		fieldname: "report_template",
 		label: __("Report Template"),
 		fieldtype: "Link",
 		options: "Financial Report Template",
-		depends_on: "eval:doc.report_type",
-		get_query: () => {
-			const report_type = frappe.query_report.get_filter_value("report_type");
-			return { filters: { report_type, disabled: 0 } };
-		},
+		get_query: { filters: { disabled: 0 } },
 		reqd: 1,
 	},
 	{
@@ -33,7 +22,7 @@ frappe.query_reports[CFS_REPORT_NAME]["filters"].push(
 		fieldtype: "Select",
 		options: ["Summary", "Account Breakdown"],
 		default: "Summary",
-		depends_on: "eval:doc.report_template && doc.report_type",
+		depends_on: "eval:doc.report_template",
 	},
 	{
 		fieldname: "include_default_book_entries",
