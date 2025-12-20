@@ -1,0 +1,263 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2017-10-16 16:45:48.293335",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "company",
+  "column_break_2",
+  "email_notification_sent",
+  "section_break_3",
+  "driver",
+  "driver_name",
+  "driver_email",
+  "driver_address",
+  "total_distance",
+  "uom",
+  "column_break_4",
+  "vehicle",
+  "departure_time",
+  "employee",
+  "delivery_service_stops",
+  "delivery_stops",
+  "calculate_arrival_time",
+  "optimize_route",
+  "section_break_15",
+  "status",
+  "cb_more_info",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "MAT-DT-.YYYY.-"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "email_notification_sent",
+   "fieldtype": "Check",
+   "label": "Initial Email Notification Sent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break",
+   "label": "Delivery Details"
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "label": "Driver",
+   "options": "Driver"
+  },
+  {
+   "fetch_from": "driver.full_name",
+   "fieldname": "driver_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Driver Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_distance",
+   "fieldtype": "Float",
+   "label": "Total Estimated Distance",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.total_distance",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "Distance UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Vehicle",
+   "options": "Vehicle",
+   "reqd": 1
+  },
+  {
+   "fieldname": "departure_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Departure Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "delivery_service_stops",
+   "fieldtype": "Section Break",
+   "label": "Delivery Stops"
+  },
+  {
+   "fieldname": "delivery_stops",
+   "fieldtype": "Table",
+   "label": "Delivery Stop",
+   "options": "Delivery Stop",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "description": "Use Google Maps Direction API to calculate estimated arrival times",
+   "fieldname": "calculate_arrival_time",
+   "fieldtype": "Button",
+   "label": "Calculate Estimated Arrival Times"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "description": "Use Google Maps Direction API to optimize route",
+   "fieldname": "optimize_route",
+   "fieldtype": "Button",
+   "label": "Optimize Route"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nScheduled\nIn Transit\nCompleted\nCancelled",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_more_info",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Delivery Trip",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "driver.address",
+   "fetch_if_empty": 1,
+   "fieldname": "driver_address",
+   "fieldtype": "Link",
+   "label": "Driver Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "driver_email",
+   "fieldtype": "Data",
+   "label": "Driver Email",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "driver.employee",
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:50.643296",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Delivery Trip",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fulfillment User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Delivery User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Delivery Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "driver_name"
+}

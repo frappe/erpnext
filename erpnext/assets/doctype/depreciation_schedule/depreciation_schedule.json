@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2016-03-02 15:11:01.278862",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "schedule_date",
+  "depreciation_amount",
+  "column_break_3",
+  "accumulated_depreciation_amount",
+  "journal_entry",
+  "shift",
+  "make_depreciation_entry"
+ ],
+ "fields": [
+  {
+   "fieldname": "schedule_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Schedule Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "depreciation_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Depreciation Amount",
+   "options": "Company:company:default_currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accumulated_depreciation_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Accumulated Depreciation Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Journal Entry",
+   "options": "Journal Entry",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:(doc.docstatus==1 && !doc.journal_entry && doc.schedule_date <= frappe.datetime.now_date())",
+   "fieldname": "make_depreciation_entry",
+   "fieldtype": "Button",
+   "label": "Make Depreciation Entry"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "label": "Shift",
+   "options": "Asset Shift Factor"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:51.227001",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Depreciation Schedule",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

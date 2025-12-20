@@ -1,0 +1,20 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-12 15:05:54.474218",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "book-text",
+ "icon_type": "Link",
+ "idx": 3,
+ "label": "Taxes",
+ "link_to": "Item Tax Template",
+ "link_type": "DocType",
+ "modified": "2025-11-19 15:58:21.226664",
+ "modified_by": "Administrator",
+ "name": "Taxes",
+ "owner": "Administrator",
+ "parent_icon": "Accounts",
+ "roles": [],
+ "standard": 1
+}

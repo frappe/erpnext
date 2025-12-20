@@ -1,0 +1,261 @@
+{
+ "actions": [],
+ "autoname": "ACC-BG-.YYYY.-.#####",
+ "creation": "2016-12-17 10:43:35.731631",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "bg_type",
+  "reference_doctype",
+  "reference_docname",
+  "customer",
+  "supplier",
+  "project",
+  "column_break_6",
+  "amount",
+  "start_date",
+  "validity",
+  "end_date",
+  "bank_account_info",
+  "bank",
+  "bank_account",
+  "account",
+  "bank_account_no",
+  "column_break_17",
+  "iban",
+  "branch_code",
+  "swift_number",
+  "section_break_14",
+  "more_information",
+  "margin_details",
+  "bank_guarantee_number",
+  "name_of_beneficiary",
+  "column_break_19",
+  "margin_money",
+  "charges",
+  "fixed_deposit_number",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "bg_type",
+   "fieldtype": "Select",
+   "label": "Bank Guarantee Type",
+   "options": "\nReceiving\nProviding",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Reference Document Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_docname",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Document Name",
+   "options": "reference_doctype"
+  },
+  {
+   "depends_on": "eval: doc.bg_type == \"Receiving\"",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval: doc.bg_type == \"Providing\"",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "validity",
+   "fieldtype": "Int",
+   "label": "Validity in Days"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_account_info",
+   "fieldtype": "Section Break",
+   "label": "Bank Account Info"
+  },
+  {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "label": "Bank",
+   "options": "Bank"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account"
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_account_no",
+   "fieldtype": "Data",
+   "label": "Bank Account No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "iban",
+   "fieldtype": "Data",
+   "label": "IBAN",
+   "options": "IBAN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch_code",
+   "fieldtype": "Data",
+   "label": "Branch Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "swift_number",
+   "fieldtype": "Data",
+   "label": "SWIFT number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "more_information",
+   "fieldtype": "Text Editor",
+   "label": "Clauses and Conditions"
+  },
+  {
+   "fieldname": "margin_details",
+   "fieldtype": "Section Break",
+   "label": "Other Details"
+  },
+  {
+   "fieldname": "bank_guarantee_number",
+   "fieldtype": "Data",
+   "label": "Bank Guarantee Number",
+   "unique": 1
+  },
+  {
+   "fieldname": "name_of_beneficiary",
+   "fieldtype": "Data",
+   "label": "Name of Beneficiary"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "margin_money",
+   "fieldtype": "Currency",
+   "label": "Margin Money"
+  },
+  {
+   "fieldname": "charges",
+   "fieldtype": "Currency",
+   "label": "Charges Incurred"
+  },
+  {
+   "fieldname": "fixed_deposit_number",
+   "fieldtype": "Data",
+   "label": "Fixed Deposit Number"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Bank Guarantee",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-08-29 11:52:33.550847",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Guarantee",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "row_format": "Dynamic",
+ "search_fields": "customer",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "customer"
+}

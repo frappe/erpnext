@@ -1,0 +1,157 @@
+{
+ "actions": [],
+ "creation": "2017-10-20 07:10:55.903571",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "maintenance_task",
+  "maintenance_type",
+  "column_break_2",
+  "maintenance_status",
+  "section_break_2",
+  "start_date",
+  "periodicity",
+  "column_break_4",
+  "end_date",
+  "certificate_required",
+  "section_break_9",
+  "assign_to",
+  "column_break_10",
+  "assign_to_name",
+  "section_break_10",
+  "next_due_date",
+  "column_break_14",
+  "last_completion_date",
+  "section_break_7",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "maintenance_task",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Maintenance Task",
+   "reqd": 1
+  },
+  {
+   "fieldname": "maintenance_type",
+   "fieldtype": "Select",
+   "label": "Maintenance Type",
+   "options": "Preventive Maintenance\nCalibration"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "maintenance_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Maintenance Status",
+   "options": "Planned\nOverdue\nCancelled",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "periodicity",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Periodicity",
+   "options": "\nDaily\nWeekly\nMonthly\nQuarterly\nHalf-yearly\nYearly\n2 Yearly\n3 Yearly",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "certificate_required",
+   "fieldtype": "Check",
+   "label": "Certificate Required",
+   "search_index": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "assign_to",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Assign To",
+   "options": "User"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "assign_to.full_name",
+   "fieldname": "assign_to_name",
+   "fieldtype": "Read Only",
+   "label": "Assign to Name"
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "next_due_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Next Due Date"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_completion_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Last Completion Date"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:34.835687",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Asset Maintenance Task",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

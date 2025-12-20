@@ -1,0 +1,135 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:price_list_name",
+ "creation": "2013-01-25 11:35:09",
+ "description": "A Price List is a collection of Item Prices either Selling, Buying, or both",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "sb_1",
+  "price_list_name",
+  "currency",
+  "buying",
+  "selling",
+  "price_not_uom_dependent",
+  "column_break_3",
+  "countries"
+ ],
+ "fields": [
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "sb_1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "price_list_name",
+   "fieldtype": "Data",
+   "label": "Price List Name",
+   "no_copy": 1,
+   "oldfieldname": "price_list_name",
+   "oldfieldtype": "Data",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "buying",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Buying"
+  },
+  {
+   "default": "0",
+   "fieldname": "selling",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Selling"
+  },
+  {
+   "default": "0",
+   "fieldname": "price_not_uom_dependent",
+   "fieldtype": "Check",
+   "label": "Price Not UOM Dependent"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "countries",
+   "fieldtype": "Table",
+   "label": "Applicable for Countries",
+   "options": "Price List Country"
+  }
+ ],
+ "icon": "fa fa-tags",
+ "idx": 1,
+ "links": [],
+ "max_attachments": 1,
+ "modified": "2024-08-16 19:41:19.591111",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Price List",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales User"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "import": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Master Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Master Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Manufacturing User"
+  }
+ ],
+ "search_fields": "currency",
+ "show_name_in_global_search": 1,
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": [],
+ "translated_doctype": 1
+}

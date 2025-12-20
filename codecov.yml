@@ -1,0 +1,26 @@
+codecov:
+  require_ci_to_pass: yes
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 0.5%
+
+    patch:
+      default:
+        target: 85%
+        threshold: 0%
+        base: auto
+        branches:
+          - develop
+        if_ci_failed: ignore
+        only_pulls: true
+
+comment:
+  layout: "diff, files"
+  require_changes: true
+
+ignore:
+  - "erpnext/demo"

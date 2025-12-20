@@ -1,0 +1,71 @@
+{
+ "actions": [],
+ "creation": "2016-03-07 15:55:18.806409",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company_name",
+  "fixed_asset_account",
+  "accumulated_depreciation_account",
+  "depreciation_expense_account",
+  "capital_work_in_progress_account"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "company_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "fixed_asset_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Fixed Asset Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "accumulated_depreciation_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Accumulated Depreciation Account",
+   "options": "Account"
+  },
+  {
+   "columns": 2,
+   "fieldname": "depreciation_expense_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Depreciation Expense Account",
+   "options": "Account"
+  },
+  {
+   "columns": 2,
+   "fieldname": "capital_work_in_progress_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Capital Work In Progress Account",
+   "options": "Account"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:34.012854",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Asset Category Account",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

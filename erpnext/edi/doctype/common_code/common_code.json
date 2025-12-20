@@ -1,0 +1,112 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2024-09-29 07:01:18.133067",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "code_list",
+  "canonical_uri",
+  "title",
+  "common_code",
+  "description",
+  "column_break_wxsw",
+  "additional_data",
+  "section_break_rhgh",
+  "applies_to"
+ ],
+ "fields": [
+  {
+   "fieldname": "code_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Code List",
+   "options": "Code List",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Title",
+   "length": 300,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_wxsw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_rhgh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "applies_to",
+   "fieldtype": "Table",
+   "label": "Applies To",
+   "options": "Dynamic Link"
+  },
+  {
+   "fieldname": "common_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Common Code",
+   "length": 300,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "additional_data",
+   "fieldtype": "Code",
+   "label": "Additional Data",
+   "max_height": "190px",
+   "read_only": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Description",
+   "max_height": "60px"
+  },
+  {
+   "fetch_from": "code_list.canonical_uri",
+   "fieldname": "canonical_uri",
+   "fieldtype": "Data",
+   "label": "Canonical URI"
+  }
+ ],
+ "grid_page_length": 50,
+ "links": [],
+ "modified": "2025-10-04 17:22:28.176155",
+ "modified_by": "Administrator",
+ "module": "EDI",
+ "name": "Common Code",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "common_code,description",
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "title"
+}

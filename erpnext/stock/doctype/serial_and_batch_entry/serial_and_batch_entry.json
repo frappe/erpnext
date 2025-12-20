@@ -1,0 +1,195 @@
+{
+ "actions": [],
+ "creation": "2022-09-29 14:55:15.909881",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "serial_no",
+  "batch_no",
+  "column_break_2",
+  "qty",
+  "warehouse",
+  "delivered_qty",
+  "section_break_6",
+  "incoming_rate",
+  "column_break_8",
+  "outgoing_rate",
+  "stock_value_difference",
+  "is_outward",
+  "stock_queue",
+  "section_break_gmim",
+  "reference_for_reservation",
+  "voucher_type",
+  "voucher_no",
+  "column_break_eykr",
+  "posting_datetime",
+  "type_of_transaction",
+  "voucher_detail_no"
+ ],
+ "fields": [
+  {
+   "depends_on": "eval:parent.has_serial_no == 1",
+   "fieldname": "serial_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Serial No",
+   "options": "Serial No",
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:parent.has_batch_no == 1",
+   "fieldname": "batch_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Batch No",
+   "options": "Batch",
+   "search_index": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break",
+   "label": "Rate Section"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "incoming_rate",
+   "fieldtype": "Float",
+   "label": "Valuation Rate",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1,
+   "read_only_depends_on": "eval:parent.type_of_transaction == \"Outward\""
+  },
+  {
+   "fieldname": "outgoing_rate",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Outgoing Rate",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "stock_value_difference",
+   "fieldtype": "Float",
+   "label": "Change in Stock Value",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_outward",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Outward",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_queue",
+   "fieldtype": "Small Text",
+   "label": "FIFO Stock Queue (qty, rate)",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: parent.doctype == \"Stock Reservation Entry\"",
+   "fieldname": "delivered_qty",
+   "fieldtype": "Float",
+   "label": "Delivered Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "section_break_gmim",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "reference_for_reservation",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Reference for Reservation",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "posting_datetime",
+   "fieldtype": "Datetime",
+   "label": "Posting Datetime",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Data",
+   "label": "Voucher Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Data",
+   "label": "Voucher No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "Voucher Detail No",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "type_of_transaction",
+   "fieldtype": "Data",
+   "label": "Type of Transaction",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_eykr",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-09 23:28:35.191959",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Serial and Batch Entry",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

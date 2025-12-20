@@ -1,0 +1,129 @@
+{
+ "actions": [],
+ "creation": "2017-05-29 01:36:22.697234",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "standing_name",
+  "column_break_2",
+  "standing_color",
+  "section_break_4",
+  "min_grade",
+  "max_grade",
+  "actions",
+  "warn_rfqs",
+  "warn_pos",
+  "prevent_rfqs",
+  "prevent_pos",
+  "column_break_10",
+  "notify_supplier",
+  "notify_employee",
+  "employee_link"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "standing_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Standing Name",
+   "options": "Supplier Scorecard Standing"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "standing_color",
+   "fieldtype": "Select",
+   "label": "Color",
+   "options": "Blue\nPurple\nGreen\nYellow\nOrange\nRed"
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "min_grade",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Min Grade"
+  },
+  {
+   "columns": 2,
+   "fieldname": "max_grade",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Max Grade"
+  },
+  {
+   "fieldname": "actions",
+   "fieldtype": "Section Break",
+   "label": "Actions"
+  },
+  {
+   "default": "0",
+   "fieldname": "warn_rfqs",
+   "fieldtype": "Check",
+   "label": "Warn RFQs"
+  },
+  {
+   "default": "0",
+   "fieldname": "warn_pos",
+   "fieldtype": "Check",
+   "label": "Warn Purchase Orders"
+  },
+  {
+   "default": "0",
+   "fieldname": "prevent_rfqs",
+   "fieldtype": "Check",
+   "label": "Prevent RFQs"
+  },
+  {
+   "default": "0",
+   "fieldname": "prevent_pos",
+   "fieldtype": "Check",
+   "label": "Prevent Purchase Orders"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "notify_supplier",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Notify Supplier"
+  },
+  {
+   "default": "0",
+   "fieldname": "notify_employee",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Notify Employee"
+  },
+  {
+   "fieldname": "employee_link",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Employee ",
+   "options": "Employee"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:50.322056",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Supplier Scorecard Scoring Standing",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

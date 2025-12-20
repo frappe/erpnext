@@ -1,0 +1,75 @@
+{
+ "actions": [],
+ "creation": "2019-02-01 13:07:49.073255",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "pricing_rule",
+  "item_code",
+  "margin_type",
+  "rate_or_discount",
+  "child_docname",
+  "rule_applied"
+ ],
+ "fields": [
+  {
+   "fieldname": "pricing_rule",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Pricing Rule",
+   "options": "Pricing Rule",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "margin_type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Margin Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate_or_discount",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Rate or Discount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "child_docname",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Child Docname",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "rule_applied",
+   "fieldtype": "Check",
+   "label": "Rule Applied",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:17.968137",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Pricing Rule Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,17 @@
+[
+    {
+        "doctype": "Supplier",
+        "supplier_group": "Demo Supplier Group",
+        "supplier_name": "Zuckerman Security Ltd."
+    },
+    {
+        "doctype": "Supplier",
+        "supplier_group": "Demo Supplier Group",
+        "supplier_name": "MA Inc."
+    },
+    {
+        "doctype": "Supplier",
+        "supplier_group": "Demo Supplier Group",
+        "supplier_name": "Summit Traders Ltd."
+    }
+]

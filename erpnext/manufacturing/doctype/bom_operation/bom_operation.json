@@ -1,0 +1,308 @@
+{
+ "actions": [],
+ "creation": "2013-02-22 01:27:49",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "operation",
+  "sequence_id",
+  "finished_good",
+  "finished_good_qty",
+  "bom_no",
+  "add_raw_materials",
+  "col_break1",
+  "workstation_type",
+  "workstation",
+  "time_in_mins",
+  "fixed_time",
+  "is_subcontracted",
+  "is_final_finished_good",
+  "set_cost_based_on_bom_qty",
+  "warehouse_section",
+  "skip_material_transfer",
+  "backflush_from_wip_warehouse",
+  "source_warehouse",
+  "column_break_lbhy",
+  "wip_warehouse",
+  "fg_warehouse",
+  "costing_section",
+  "hour_rate",
+  "base_hour_rate",
+  "batch_size",
+  "column_break_11",
+  "cost_per_unit",
+  "base_cost_per_unit",
+  "operating_cost",
+  "base_operating_cost",
+  "more_information_section",
+  "description",
+  "column_break_18",
+  "image"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Operation",
+   "oldfieldname": "operation_no",
+   "oldfieldtype": "Data",
+   "options": "Operation",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "depends_on": "eval:!doc.workstation_type",
+   "fieldname": "workstation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Workstation",
+   "oldfieldname": "workstation",
+   "oldfieldtype": "Link",
+   "options": "Workstation"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description",
+   "oldfieldname": "opn_description",
+   "oldfieldtype": "Text"
+  },
+  {
+   "fieldname": "col_break1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hour_rate",
+   "fieldtype": "Currency",
+   "label": "Hour Rate",
+   "non_negative": 1,
+   "oldfieldname": "hour_rate",
+   "oldfieldtype": "Currency",
+   "options": "currency",
+   "precision": "2"
+  },
+  {
+   "columns": 3,
+   "description": "In minutes",
+   "fetch_from": "operation.total_operation_time",
+   "fetch_if_empty": 1,
+   "fieldname": "time_in_mins",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Operation Time",
+   "non_negative": 1,
+   "oldfieldname": "time_in_mins",
+   "oldfieldtype": "Currency",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Operation time does not depend on quantity to produce",
+   "fieldname": "fixed_time",
+   "fieldtype": "Check",
+   "label": "Fixed Time"
+  },
+  {
+   "fieldname": "operating_cost",
+   "fieldtype": "Currency",
+   "label": "Operating Cost",
+   "oldfieldname": "operating_cost",
+   "oldfieldtype": "Currency",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:parent.doctype == 'BOM'",
+   "fieldname": "base_hour_rate",
+   "fieldtype": "Currency",
+   "label": "Base Hour Rate(Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:parent.doctype == 'BOM'",
+   "fieldname": "base_operating_cost",
+   "fieldtype": "Currency",
+   "label": "Operating Cost(Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach",
+   "label": "Image"
+  },
+  {
+   "fetch_from": "operation.batch_size",
+   "fetch_if_empty": 1,
+   "fieldname": "batch_size",
+   "fieldtype": "Int",
+   "label": "Batch Size"
+  },
+  {
+   "depends_on": "eval:doc.parenttype == \"Routing\"",
+   "fieldname": "sequence_id",
+   "fieldtype": "Int",
+   "label": "Sequence ID"
+  },
+  {
+   "depends_on": "eval:doc.batch_size > 0 && doc.set_cost_based_on_bom_qty",
+   "fieldname": "cost_per_unit",
+   "fieldtype": "Float",
+   "label": "Cost Per Unit",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_cost_per_unit",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Base Cost Per Unit",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "costing_section",
+   "fieldtype": "Section Break",
+   "label": "Costing"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "set_cost_based_on_bom_qty",
+   "fieldtype": "Check",
+   "label": "Set Operating Cost Based On BOM Quantity"
+  },
+  {
+   "columns": 3,
+   "fieldname": "workstation_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Workstation Type",
+   "options": "Workstation Type"
+  },
+  {
+   "columns": 3,
+   "depends_on": "eval:parent.track_semi_finished_goods === 1",
+   "fieldname": "finished_good",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "FG / Semi FG Item",
+   "options": "Item"
+  },
+  {
+   "columns": 2,
+   "depends_on": "eval:parent.track_semi_finished_goods === 1",
+   "fieldname": "bom_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "BOM No",
+   "options": "BOM"
+  },
+  {
+   "columns": 2,
+   "default": "1",
+   "depends_on": "eval:parent.track_semi_finished_goods === 1",
+   "fieldname": "finished_good_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty to Produce"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_final_finished_good",
+   "fieldtype": "Check",
+   "label": "Is Final Finished Good"
+  },
+  {
+   "fieldname": "warehouse_section",
+   "fieldtype": "Section Break",
+   "label": "Warehouse"
+  },
+  {
+   "depends_on": "eval:!doc.skip_material_transfer || doc.backflush_from_wip_warehouse",
+   "fieldname": "wip_warehouse",
+   "fieldtype": "Link",
+   "label": "WIP Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_lbhy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "fg_warehouse",
+   "fieldtype": "Link",
+   "label": "Finished Goods Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "columns": 1,
+   "depends_on": "eval:doc.skip_material_transfer && !doc.backflush_from_wip_warehouse",
+   "fieldname": "source_warehouse",
+   "fieldtype": "Link",
+   "label": "Source Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_subcontracted",
+   "fieldtype": "Check",
+   "label": "Is Subcontracted"
+  },
+  {
+   "depends_on": "eval:!doc.bom_no && parent.track_semi_finished_goods === 1",
+   "fieldname": "add_raw_materials",
+   "fieldtype": "Button",
+   "label": "Add Raw Materials"
+  },
+  {
+   "default": "0",
+   "fieldname": "skip_material_transfer",
+   "fieldtype": "Check",
+   "label": " Skip Material Transfer"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.skip_material_transfer",
+   "fieldname": "backflush_from_wip_warehouse",
+   "fieldtype": "Check",
+   "label": "Backflush Materials From WIP Warehouse"
+  }
+ ],
+ "idx": 1,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-08-12 19:27:20.682797",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM Operation",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

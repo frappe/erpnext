@@ -1,0 +1,2881 @@
+{
+    "country_code": "hr", 
+    "name": "Croatia - RRIF-ov ra\u010dunski plan za poduzetnike", 
+    "tree": {
+        "FINANCIJSKI REZULTAT POSLOVANJA": {
+            "DOBITAK ILI GUBITAK RAZDOBLJA": {
+                "Dobitak ili gubitak razdoblja": {
+                    "Dobitak razdoblja (poslije poreza)": {}, 
+                    "Gubitak razdoblja": {}
+                }, 
+                "Dobitak prije oporezivanja": {
+                    "Dobitak prije oporezivanja-a1": {}
+                }, 
+                "Gubitak prije oporezivanja": {
+                    "Gubitak prije oporezivanja-a1": {}
+                }, 
+                "Porez na dobitak (gubitak)": {
+                    "Porez na dobitak (gubitak)-a1": {}
+                }
+            }, 
+            "DOBITAK ILI GUBITAK RAZDOBLJA KOJI PRIPADA DRUGIMA": {
+                "Dobitak pripisan imateljima kapitala matice": {
+                    "Dobitak pripisan imateljima kapitala matice-a1": {}
+                }, 
+                "Dobitak pripisan manjinskom interesu": {
+                    "Dobitak pripisan manjinskom interesu-a1": {}
+                }, 
+                "Gubitak koji tereti imatelje kapitala matice": {
+                    "Gubitak koji tereti imatelje kapitala matice-a1": {}
+                }, 
+                "Gubitak koji tereti manjinski interes": {
+                    "Gubitak koji tereti manjinski interes-a1": {}
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "KAPITAL I PRI\u010cUVE TE IZVANBILAN\u010cNI ZAPISI": {
+            "DOBITAK ILI GUBITAK POSLOVNE GODINE": {
+                "Dobitak poslovne godine": {
+                    "Dobitak - dividenda financijske godine (analitika prema \u010dlanovima dru\u0161tva - dioni\u010darima)": {}, 
+                    "Dobitak financijske godine (neraspore\u0111en)": {}, 
+                    "Dobitak iz privremenih razlika (odgo\u0111eni porezi)": {}, 
+                    "Dobitak koji se privremeno ne ispla\u0107uje po prijedlogu uprave i N.O.": {}, 
+                    "Dobitak za isplate i izuzimanja u tijeku godine (analitika po \u010dlanovima)": {}, 
+                    "Dobitak za manjinske \u010dlanove dru\u0161tva": {}, 
+                    "Dobitak za nagrade zaposlenicima": {}, 
+                    "Dobitak za tajnog \u010dlana dru\u0161tva": {}
+                }, 
+                "Gubitak poslovne godine (analitika po \u010dlanovima)": {
+                    "Gubitak iz privremenih razlika": {}, 
+                    "Gubitak koji se pokriva": {}, 
+                    "Nepokriveni gubitak": {}
+                }
+            }, 
+            "IZVANBILAN\u010cNI ZAPISI": {
+                "Imovina - materijalna u optjecaju": {
+                    "Ambala\u017ea na kori\u0161tenju (tu\u0111a)": {}, 
+                    "Materijal i roba u doradi (tu\u0111a)": {}, 
+                    "Materijali za doradne - lohn-poslove": {}, 
+                    "Pozajmica strojeva i alata": {}, 
+                    "Primljena roba u komisiju i konsignaciju (tu\u0111a)": {}, 
+                    "Roba u izvozu": {}, 
+                    "Roba u skladi\u0161tu (tu\u0111a)": {}, 
+                    "Vlasni\u0161tvo orta\u010dke zajednice": {}, 
+                    "Za\u0161titna odje\u0107a i obu\u0107a na kori\u0161tenju": {}, 
+                    "Zgrade i zemlji\u0161ta u zakupu": {}
+                }, 
+                "Izvori materijalne imovine": {
+                    "Obveze prema vlasnicima robe u komisiji i konsignaciji (tu\u0111a sredstva)": {}, 
+                    "Obveze za materijale u doradi - lohnu": {}, 
+                    "Obveze za robu u izvozu (tu\u0111a roba)": {}, 
+                    "Ortaci - vlasni\u0161tvo orta\u010dke zajednice": {}, 
+                    "Skladi\u0161te za\u0161titne odje\u0107e i obu\u0107e": {}, 
+                    "Vlasnici ambala\u017ee u kori\u0161tenju": {}, 
+                    "Vlasnici materijala i robe u doradi": {}, 
+                    "Vlasnici pozajmljenih strojeva i alata": {}, 
+                    "Vlasnici robe u na\u0161im skladi\u0161tima": {}, 
+                    "Vlasnici zemlji\u0161ta i zgrada u zakupu": {}
+                }, 
+                "Izvori prava": {
+                    "Du\u017enici po hipoteci": {}, 
+                    "Izvor prava na kori\u0161tenje": {}, 
+                    "Izvori prava loro-akreditiva (doma\u0107i partneri)": {}, 
+                    "Izvori prava loro-akreditiva (inozemni partneri)": {}, 
+                    "Krediti odobreni": {}, 
+                    "Obveze zastupnika iz prodaje prema nalogodavcu": {}, 
+                    "Ratne reparacije i nadoknade \u0161teta": {}, 
+                    "Ulaga\u010di u materijalna prava": {}
+                }, 
+                "Obra\u010dun dobitka investicijskog pothvata": {
+                    "Dobitak": {}, 
+                    "Investicija - ulaganje - rashodi": {}, 
+                    "Porezi i druga davanja": {}, 
+                    "Prihod - priljev": {}, 
+                    "Tro\u0161ak kamata budu\u0107eg razdoblja": {}, 
+                    "\u010cisti dobitak": {}
+                }, 
+                "Obveze s osnove investicijskog pothvata": {
+                    "Izvori prihoda - priljeva": {}, 
+                    "Obveze iz planiranog \u010distog dobitka": {}, 
+                    "Obveze prema ulaga\u010dima": {}, 
+                    "Obveze za porez i druga javna davanja": {}, 
+                    "Ukalkulirani - planirani dobitak": {}
+                }, 
+                "Obveze za izdane vrijednosnice u manipulaciji": {
+                    "Kamate sadr\u017eane u vrijednosnicama ili obra\u010dunima": {}, 
+                    "Obveznice i druge vrijednosnice": {}, 
+                    "Prodajna mjesta za izdane obveznice": {}, 
+                    "Vrijednosni papiri (obveznice, dionice)": {}, 
+                    "Vrijednost zalihe blokova ulaznica": {}
+                }, 
+                "Obveze za vrijednosne papire koji nisu stavljeni u optjecaj": {
+                    "Jamstva od du\u017enika kao instrument pla\u0107anja": {}, 
+                    "Obveze za izdane mjenice": {}, 
+                    "Obveze za izdane zadu\u017enice": {}, 
+                    "Obveze za kori\u0161tene garancije u tijeku": {}, 
+                    "Obveze za primljene zadu\u017enice": {}, 
+                    "Obveze za \u010dekove i mjenice za osiguranje otplate anuiteta za robne i financijske kredite": {}, 
+                    "Ostali vrijednosni papiri koji nisu stavljeni u optjecaj": {}
+                }, 
+                "Prava": {
+                    "Hipoteka na tu\u0111oj imovini": {}, 
+                    "Krediti ugovoreni": {}, 
+                    "Materijalna prava": {}, 
+                    "Prava na kori\u0161tenja": {}, 
+                    "Prava na ratne reparacije i \u0161tete od oduzete imovine": {}, 
+                    "Prava po loro akreditivima (doma\u0107i partneri)": {}, 
+                    "Prava po loro akreditivima (inozemni partneri)": {}
+                }, 
+                "Vrijednosni papiri": {
+                    "Izdane mjenice": {}, 
+                    "Izdane zadu\u017enice": {}, 
+                    "Kori\u0161tene garancije u tijeku": {}, 
+                    "Ostali vrijednosni papiri koji nisu stavljeni u optjecaj": {}, 
+                    "Primljena jamstva vjerovnika kao instrumenata pla\u0107anja": {}, 
+                    "Primljene zadu\u017enice": {}, 
+                    "Primljeni \u010dekovi, mjenice za osiguranje otplate anuiteta za dobivene robne i financijske kredite": {}, 
+                    "Tra\u017ebine od kupaca iz zastupni\u010dke prodaje": {}
+                }, 
+                "Vrijednosnice u manipulaciji": {
+                    "Blokovi ulaznica": {}, 
+                    "Obveznice i druge vrijednosti na skladi\u0161tu (blagajni)": {}, 
+                    "Prodajna mjesta za izdane obveznice": {}, 
+                    "Vrijednosni papiri na \u010duvanju (obveznice, dionice)": {}
+                }
+            }, 
+            "KAPITALNE PRI\u010cUVE": {
+                "Kapital iz ulaganja obrtnika dobita\u0161a": {
+                    "Kapital iz ulaganja obrtnika dobita\u0161a-a1": {}
+                }, 
+                "Kapitalne pri\u010duve iz dodatnih uplata radi stjecanja posebnih prava u dru\u0161tvu(ili zamjenjivih obveznica)": {
+                    "Kapitalne pri\u010duve iz dodatnih uplata radi stjecanja posebnih prava u dru\u0161tvu(ili zamjenjivih obveznica)-a1": {}
+                }, 
+                "Kapitalne pri\u010duve iz drugih izvora": {
+                    "Kapitalne pri\u010duve iz drugih izvora-a1": {}
+                }, 
+                "Kapitalne pri\u010duve iz ostatka pri smanjenju temeljnog kapitala": {
+                    "Kapitalne pri\u010duve iz ostatka pri smanjenju temeljnog kapitala-a1": {}
+                }, 
+                "Kapitalne pri\u010duve iz ulaganja tajnog \u010dlana dru\u0161tva (\u010dl. 148. ZTD-a)": {
+                    "Kapitalne pri\u010duve iz ulaganja tajnog \u010dlana dru\u0161tva (\u010dl. 148. ZTD-a)-a1": {}
+                }, 
+                "Kapitalne pri\u010duve iz uplata dodatnih \u010dinidbi": {
+                    "Kapitalne pri\u010duve iz uplata dodatnih \u010dinidbi-a1": {}
+                }, 
+                "Kapitalni dobitak iz prodaje vlastitih udjela - dionica": {
+                    "Kapitalni dobitak iz prodaje vlastitih udjela - dionica-a1": {}
+                }, 
+                "Kapitalni dobitak na prodane emitirane dionice": {
+                    "Kapitalni dobitak na prodane emitirane dionice-a1": {}
+                }, 
+                "Upla\u0107eni udjeli - dionice iznad svote temeljnog kapitala": {
+                    "Upla\u0107eni udjeli - dionice iznad svote temeljnog kapitala-a1": {}
+                }
+            }, 
+            "MANJINSKI INTERES": {
+                "Manjinski interes": {
+                    "Kapital manjinskog dru\u0161tva (privremeno u postupku konsolidacije kao dio koji nije pod kontrolom matice)": {}
+                }
+            }, 
+            "PRI\u010cUVE IZ DOBITKA": {
+                "Ostale pri\u010duve": {
+                    "Pri\u010duve za nagrade i sl.": {}, 
+                    "Pri\u010duve za nerealizirane dobitke iz udjela": {}, 
+                    "Pri\u010duve za pokri\u0107e gubitka u poslovanju": {}, 
+                    "Slobodne pri\u010duve iz neraspore\u0111enog dobitka": {}
+                }, 
+                "Pri\u010duve za vlastite dionice i udjele (\u010dl. 233. i 406.a ZTD-a)": {
+                    "Pri\u010duve za opcijske dionice za zaposlenike": {}, 
+                    "Pri\u010duve za otkup dionica da bi se sprije\u010dila \u0161teta i dr.": {}, 
+                    "Pri\u010duve za otkupljene dionice radi obe\u0161te\u0107enja dioni\u010dara": {}, 
+                    "Pri\u010duve za vlastite (trezorske) dionice i udjele": {}
+                }, 
+                "Statutarne pri\u010duve": {
+                    "Pri\u010duve radi odr\u017eavanja boniteta strukture izvora financiranja": {}, 
+                    "Pri\u010duve za odr\u017eavanje financijske stabilnosti dru\u0161tva, za razvojne aktivnosti i sl.": {}, 
+                    "Pri\u010duve za restrukturiranje": {}
+                }, 
+                "Vlastite dionice i udjeli (odbitna- dugovna stavka)": {
+                    "Otkupljene vlastite dionice": {}, 
+                    "Otkupljeni vlastiti udjeli": {}, 
+                    "Vlastite dionice za opcijsku namjenu": {}
+                }, 
+                "Zakonske pri\u010duve (u d.d.)": {
+                    "Pri\u010duve prema ZTD": {}, 
+                    "Pri\u010duve za pokri\u0107e gubitka": {}, 
+                    "Pri\u010duve za pove\u0107anje temeljnog kapitala": {}
+                }
+            }, 
+            "REVALORIZACIJSKE PRI\u010cUVE": {
+                "Dobitci/gubitci iz za\u0161tite nov\u010danog toka do reklasifikacije (MRS 1. t. 95. i MRS 39. t. 100.)": {
+                    "Dobitci/gubitci iz za\u0161tite nov\u010danog toka do reklasifikacije (MRS 1. t. 95. i MRS 39. t. 100.)-a1": {}
+                }, 
+                "Dobitci/gubitci od udjela u kapitalu do prestanka priznavanja (MRS 1. t. 95. i MRS 39. 55.b)": {
+                    "Dobitci/gubitci od udjela u kapitalu do prestanka priznavanja (MRS 1. t. 95. i MRS 39. 55.b)-a1": {}
+                }, 
+                "Ostali akumulirani sveobuhvatni dobitci/gubitci - pri\u010duve (MRS 1. t. 96.)": {
+                    "Ostali akumulirani sveobuhvatni dobitci/gubitci - pri\u010duve (MRS 1. t. 96.)-a1": {}
+                }, 
+                "Pri\u010duve iz te\u010dajnih razlika od ulaganja u inozemno poslovanje (MRS 21. t. 39.)": {
+                    "Pri\u010duve iz te\u010dajnih razlika od ulaganja u inozemno poslovanje (MRS 21. t. 39.)-a1": {}
+                }, 
+                "Revalorizacijske pri\u010duve": {
+                    "Ostale revalorizacijske pri\u010duve": {}, 
+                    "Pri\u010duve iz revalorizacije financijske imovine": {}, 
+                    "Revalorizacijske pri\u010duve iz procjene dug. nemat. i mat. imovine (HSFIt.6.36.iMRS16,t.39.iMRS38,t.85)": {}
+                }, 
+                "Revalorizacijske pri\u010duve ranijih godina": {
+                    "Revalorizacijske pri\u010duve iz razdoblja od 2001. do 2004.": {}, 
+                    "Revalorizacijske pri\u010duve nastale do kraja 2000.": {}
+                }
+            }, 
+            "TEMELJNI - (UPISANI) KAPITAL": {
+                "Dr\u017eavni kapital u udjelima": {
+                    "Dr\u017eavni kapital u udjelima-a1": {}
+                }, 
+                "Kapital (ulozi) komanditora komanditnog dru\u0161tva": {
+                    "Kapital (ulozi) komanditora komanditnog dru\u0161tva-a1": {}
+                }, 
+                "Kapital (ulozi) \u010dlanova javnog trgova\u010dkog dru\u0161tva": {
+                    "Kapital (ulozi) \u010dlanova javnog trgova\u010dkog dru\u0161tva-a1": {}
+                }, 
+                "Kapital \u010dlanova zadruge": {
+                    "Kapital \u010dlanova zadruge-a1": {}
+                }, 
+                "Upisani kapital koji nije pla\u0107en": {
+                    "Upisani temeljni kapital koji je pozvan za uplatu (analitika po upisnicima)": {}
+                }, 
+                "Upisani temeljni kapital koji je pla\u0107en": {
+                    "Temeljni dioni\u010dki kapital (obi\u010dne dionice)": {}, 
+                    "Temeljni dioni\u010dki kapital (povla\u0161tene dionice)": {}, 
+                    "Upisani temeljni kapital \u010dlanova d.o.o. (analitika po \u010dlanovima)": {}
+                }, 
+                "Upisani temeljni kapital manjinskih \u010dlanova": {
+                    "Upisani temeljni kapital manjinskih \u010dlanova-a1": {}
+                }
+            }, 
+            "ZADR\u017dANI DOBITAK ILI PRENESENI GUBITAK": {
+                "Preneseni gubitak (kumuliran u prethodnim godinama - analitika po \u010dlanovima)": {
+                    "Gubitak (dio) koji je iznad kapitala": {}, 
+                    "Preneseni gubitak (iz godine 200_.)": {}, 
+                    "Preneseni gubitak (iz godine 201_.)": {}
+                }, 
+                "Zadr\u017eani dobitak (iz prethodnih godina)": {
+                    "Zadr\u017eani dobitak iz 2001. do 2004.": {
+                        "Neraspore\u0111eni zadr\u017eani dobitak": {}, 
+                        "Zadr\u017eani dobitak - neispl. dividende": {}, 
+                        "Zadr\u017eani dobitak izuzet od isplate (npr. za investicije u imovinu)": {}, 
+                        "Zadr\u017eani dobitak \u010dlanova dru\u0161tva (analitika po \u010dlanovima)": {}
+                    }, 
+                    "Zadr\u017eani dobitak iz negativnog goodwilla": {}, 
+                    "Zadr\u017eani dobitak oblikovan iz realizirane rev. pri\u010duve": {}, 
+                    "Zadr\u017eani dobitak od 2005. i poslije": {
+                        "Neraspore\u0111eni zadr\u017eani dobitak": {}, 
+                        "Zadr\u017eani dobitak - neispl. dividenda": {}, 
+                        "Zadr\u017eani dobitak izuzet od isplate (npr. za investicije u imovinu)": {}, 
+                        "Zadr\u017eani dobitak \u010dlanova dru\u0161tva (analitika po \u010dlanovima)": {}
+                    }, 
+                    "Zadr\u017eani dobitak po prijedlogu uprave i N.O.": {}, 
+                    "Zadr\u017eani dobitci ostvareni do kraja 2000.": {
+                        "Zadr\u017eani dobitak - neispla\u0107ena dividenda": {}, 
+                        "Zadr\u017eani dobitak koji se izuzima od isplate (npr. za investicije u imovinu)": {}, 
+                        "Zadr\u017eani dobitak koji \u010deka raspored": {}, 
+                        "Zadr\u017eani dobitak tajnog \u010dlana dru\u0161tva": {}, 
+                        "Zadr\u017eani dobitak za manjinske \u010dlanove dru\u0161tva": {}, 
+                        "Zadr\u017eani dobitak za privatne tro\u0161kove \u010dlanova dru\u0161tva": {}, 
+                        "Zadr\u017eani dobitak \u010dlanova dru\u0161tva (analitika po \u010dlanovima)": {}
+                    }
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "KRATKORO\u010cNE I DUGORO\u010cNE OBVEZE, DUGORO\u010cNA REZERVIRANJA, ODGO\u0110ENA PLA\u0106ANJA I PRIHODI BUDU\u0106EG RAZDOBLJA": {
+            "DUGORO\u010cNA REZERVIRANJA ZA RIZIKE I TRO\u0160KOVE": {
+                "Druga rezerviranja": {
+                    "Dugor. rezerv. za obnovu prirodnog bogatstva-dug. rezer. za neiskor. g.o.(MRS19.t14.,HSFI13) -vidi 298": {}, 
+                    "Dugoro\u010dna rezerviranja za gubitke po zapo\u010detim sudskim sporovima": {}, 
+                    "Dugoro\u010dna rezerviranja za tro\u0161kove izdanih jamstava za prodana dobra": {}, 
+                    "Dugoro\u010dno rezerviranje za restrukturiranje (MRS 37 i HSFI t. 16.22.)": {}, 
+                    "Ostala dugoro\u010dna rezerviranja za rizike i dr.": {}, 
+                    "Rezerviranje za ugovore s pote\u0161ko\u0107ama (MRS 37, t. 66. i HSFI t. 16.21.)": {}
+                }, 
+                "Rezerviranja za otpremnine i mirovine": {
+                    "Rezerviranja za mirovine": {}, 
+                    "Rezerviranja za otpremnine": {}
+                }, 
+                "Rezerviranja za porezne obveze": {
+                    "Dugor. rezerv. za odg. pla\u0107. poreza i dopr.": {}
+                }
+            }, 
+            "DUGORO\u010cNE OBVEZE (za du\u017ee od jedne godine)": {
+                "Dugoro\u010dne obveze iz financijskog lizinga": {
+                    "Financijski najam vozila, brodova i dr.": {}, 
+                    "Povratni financijski najam (npr. nekretnina brodova, tramvaja, vlakova i dr.)": {}
+                }, 
+                "Obveze po vrijednosnim papirima (dugoro\u010dnim)": {
+                    "Diskont na vrijednosne papire (kao razlika do nominalne vrijednosti)": {}, 
+                    "Obveze po ostalim dugoro\u010d. vrijednos. papirima": {}, 
+                    "Obveze za dugoro\u010dne komercijalne vrijednosne papire": {}, 
+                    "Obveze za dugoro\u010dne mjenice": {}, 
+                    "Obveze za izdane dugoro\u010dne obveznice": {}, 
+                    "Obveze za kamate iz obveznica": {}
+                }, 
+                "Obveze prema Dr\u017eavi (realizirana jamstva, krediti)": {
+                    "Obveze prema Dr\u017eavi (realizirana jamstva, krediti)-a1": {}
+                }, 
+                "Obveze prema bankama i dr. financijskim institucijama": {
+                    "Dugoro\u010dne obveze za kamate": {}, 
+                    "Dugoro\u010dni financijski krediti banaka (analitika po bankama, pa po sklopljenim ugovorima o kreditu)": {}, 
+                    "Dugoro\u010dni krediti od inozemnih banaka i drugih inozemnih kreditnih institucija": {}, 
+                    "Dugoro\u010dni krediti od osiguravaju\u0107ih dru\u0161tava (analitika po dru\u0161tvima, pa po sklopljenim ugovorima)": {}, 
+                    "Dugoro\u010dni krediti od ostalih doma\u0107ih kreditnih institucija (fonda, i dr.)": {}
+                }, 
+                "Obveze prema dobavlja\u010dima (neispla\u0107ene dugoro\u010dne obveze prema vjerovnicima s osnove poslovanja)": {
+                    "Obveze prema dobavlja\u010dima iz inozemstva (dugoro\u010dne)": {}, 
+                    "Obveze prema dobavlja\u010dima s rokom pla\u0107anja duljim od godine dana (npr. kod izgradnje)": {}, 
+                    "Obveze prema dobavlja\u010dima za zadr\u017eani dio iz jamstva": {}, 
+                    "Obveze prema vjerovnicima iz ostalih poslovnih aktivnosti": {}
+                }, 
+                "Obveze prema poduzetnicima u kojima postoje sudjeluju\u0107i interesi (do 20% udjela)": {
+                    "Obveze prema poduzetnicima u kojima postoje sudjeluju\u0107i interesi (do 20% udjela)-a1": {}
+                }, 
+                "Obveze prema povezanim poduzetnicima": {
+                    "Obveze za kori\u0161tenje zajmova": {}, 
+                    "Obveze za primljena dobra i usluge": {}
+                }, 
+                "Obveze za predujmove": {
+                    "Obveze za dugoro\u010dne predujmove (avanse) za izgradnju objekata i postrojenja (bez PDV-a)": {}, 
+                    "Obveze za dugoro\u010dne predujmove za isporuke zaliha": {}, 
+                    "Ostale dugoro\u010dne obveze za predujmove": {}
+                }, 
+                "Obveze za zajmove, depozite i sl.": {
+                    "Obveze s osnove jamstva (realiziranih)": {}, 
+                    "Obveze za depozite": {}, 
+                    "Obveze za dugoro\u010dne financijske zajmove": {}, 
+                    "Obveze za dugoro\u010dne hipotekarne zajmove": {}, 
+                    "Obveze za dugoro\u010dne zajmove iz inozemstva": {}, 
+                    "Obveze za dugoro\u010dne zajmove prema gra\u0111anima": {}, 
+                    "Obveze za dugoro\u010dne zajmove \u010dlanovima dru\u0161tva": {}, 
+                    "Obveze za kapare": {}, 
+                    "Ostale obveze za dugoro\u010dne zajmove": {}
+                }, 
+                "Ostale dugoro\u010dne obveze": {
+                    "Dugoro\u010dne obveze za porez": {}, 
+                    "Dugoro\u010dne obveze za socijalno osiguranje": {}, 
+                    "Obveze prema zakladama, komorama i sl.": {}, 
+                    "Obveze za dugoro\u010dne jam\u010devine": {}, 
+                    "Ostale dugoro\u010dne obveze": {}
+                }
+            }, 
+            "KRATKORO\u010cNE FINANCIJSKE OBVEZE": {
+                "Obveze iz eskontnih poslova": {
+                    "Obveze iz otkupa tra\u017ebina": {}, 
+                    "Obveze s temelja eskontiranih mjenica": {}, 
+                    "Ostale obveze iz eskonta vrijednosnih papira": {}
+                }, 
+                "Obveze po izdanim vrijednosnim papirima": {
+                    "Obveze po izdanim komercijalnim zapisima": {}, 
+                    "Obveze po izdanim obveznicama": {}, 
+                    "Obveze po izdanim zadu\u017enicama": {}, 
+                    "Obveze po ostalim kratkoro\u010dnim vrijednosnim papirima": {}, 
+                    "Obveze za kamate sadr\u017eane u vrijed. papirima": {}
+                }, 
+                "Obveze prema bankama i drugim financijskim institucijama": {
+                    "Obveze po ispla\u0107enom akreditivu": {}, 
+                    "Obveze prema bankama po napla\u0107enim garancijama": {}, 
+                    "Obveze prema kreditnim institucijama i bankama u inozemstvu": {}, 
+                    "Obveze prema ostalim kreditnim institucijama (\u0161tedionicama, mirovinskom fondu i dr.)": {}, 
+                    "Obveze za kamate prema bankama": {}, 
+                    "Obveze za kamate prema financ. institucijama": {}, 
+                    "Obveze za kratkoro\u010dne kredite u banci (analitika po bankama a unutar banke po ugovorima o kreditu)": {}, 
+                    "Obveze za kratkoro\u010dne kredite u osiguravaju\u0107im dru\u0161tvima (analitika po dru\u0161tvima i kreditima)": {}, 
+                    "Obveze za prekora\u010denje na ra\u010dunu (okvirni kredit)": {}, 
+                    "Ostale obveze prema kreditnim institucijama": {}
+                }, 
+                "Obveze prema izdavateljima kreditnih kartica (analitika prema karti\u010darima)": {
+                    "Obveze prema izdavateljima kreditnih kartica (analitika prema karti\u010darima)-a1": {}
+                }, 
+                "Obveze prema poduzetnicima u kojima postoje sudjeluju\u0107i interesi (do 20% udjela)": {
+                    "Obveze prema poduzetnicima u kojima postoje sudjeluju\u0107i interesi (do 20% udjela)-a1": {}
+                }, 
+                "Obveze s osnove dugotrajne imovine namijenjene prodaji (analitika prema izvorima)": {
+                    "Obveze s osnove dugotrajne imovine namijenjene prodaji (analitika prema izvorima)-a1": {}
+                }, 
+                "Obveze s osnove zajmova, depozita i sl.": {
+                    "Obveze po kontokorentnom ra\u010dunu": {}, 
+                    "Obveze za depozite, jam\u010devine i kapare": {}, 
+                    "Obveze za dio dospjelih dugoro\u010dnih zajmova koji se trebaju platiti u roku 12 mj.": {}, 
+                    "Obveze za financijske zajmove od dru\u0161tava": {}, 
+                    "Obveze za kaucije": {}, 
+                    "Obveze za kratkoro\u010dne zajmove iz inozemstva": {}, 
+                    "Obveze za zajmove od ustanova, zadruga i sl.": {}, 
+                    "Obveze za zajmove prema gra\u0111anima": {}, 
+                    "Obveze za zajmove \u010dlanova dru\u0161tva": {}, 
+                    "Ostali kratkoro\u010dni zajmovi i sl.": {}
+                }, 
+                "Obveze za izdane mjenice": {
+                    "Obveze za dane mjenice": {}, 
+                    "Obveze za dane mjeni\u010dne akcepte": {}
+                }, 
+                "Obveze za izdane \u010dekove": {
+                    "Obveze za izdane \u010dekove-a1": {}
+                }
+            }, 
+            "KRATKORO\u010cNE OBVEZE PREMA POVEZANIM PODUZETNICIMA I S OSNOVE UDJELA U REZULTATU (do jedne godine)": {
+                "Obveze prema povezanim poduzetnicima": {
+                    "Obveze prema osnovanim ustanovama, zadrugama i sl.": {}, 
+                    "Obveze prema podru\u017enicama": {}, 
+                    "Obveze prema povezanim dru\u0161tvima za zalihe (poluproizvoda, robe i sl.)": {}, 
+                    "Obveze za kamate prema povezanim dru\u0161tvima": {}, 
+                    "Obveze za predujmove od povezanih dru\u0161tvima": {}, 
+                    "Obveze za raspore\u0111eni dobitak iz poslovanja prema povezanim dru\u0161tvima": {}, 
+                    "Obveze za zajmove prema povezanim dru\u0161tvima": {}, 
+                    "Ostale kratkoro\u010dne obveze prema povezanim dru\u0161tvima": {}
+                }, 
+                "Obveze s osnove udjela u rezultatu": {
+                    "Obveze iz dobitka prema tajnim \u010dlanovima": {}, 
+                    "Obveze prema zadrugarima iz rezultata": {}, 
+                    "Obveze s osnove udjela u dobitku (analitika prema \u010dlanovima)": {}, 
+                    "Obveze za dividende dioni\u010darima": {}, 
+                    "Obveze za sudjeluju\u0107e dobitke u rezultatu iz zajedni\u010dkog pothvata": {}, 
+                    "Ostale obveze s osnove udjela u dobitku": {}
+                }
+            }, 
+            "KRATKORO\u010cNE OBVEZE ZA POREZE, DOPRINOSE I SLI\u010cNA DAVANJA": {
+                "Obveze za carinu i carinske pristojbe": {
+                    "Obveze za carinske pristojbe i takse": {}, 
+                    "Obveze za carinu": {}, 
+                    "Obveze za carinu prema mjernoj jedinici (prelevmani)": {}, 
+                    "Ostale obveze prema carini (za PDV i dr.)": {}
+                }, 
+                "Obveze za doprinose za osiguranja": {
+                    "Doprinos HZZO-u na slu\u017ebena putovanja u inozemstvo": {}, 
+                    "Doprinos za MO iz pla\u0107a (I. stup)": {}, 
+                    "Doprinos za MO iz pla\u0107a (II. stup - analitika prema fondovima)": {}, 
+                    "Doprinos za MO za beneficirani sta\u017e (I. i II. stup)": {}, 
+                    "Doprinos za zapo\u0161ljavanje na pla\u0107u": {}, 
+                    "Doprinos za zdravstveno osiguranje na pla\u0107e": {}, 
+                    "Doprinosi za osiguranja na druge dohotke": {
+                        "Doprinos za MO I. stup": {}, 
+                        "Doprinos za MO II. stup": {}, 
+                        "Doprinos za zdravstveno osiguranje na honorar": {}
+                    }, 
+                    "Obveze za ostale nespomenute doprinose koji se pla\u0107aju na dohotke": {}, 
+                    "Poseban doprinos za zdravstveno osiguranje na pla\u0107e za ozljede na radu i prof. bolesti": {}
+                }, 
+                "Obveze za porez i prirez na dohodak": {
+                    "Obveze za porez i prirez iz stipendija i nagrada u\u010denika na praksi": {}, 
+                    "Obveze za porez i prirez na drugi dohodak (autorski honorari, ug. o djelu, doh. \u010dlanova nadz.i dr.)": {}, 
+                    "Obveze za porez i prirez za ostale dohotke": {}, 
+                    "Obveze za porez na dohodak iz pla\u0107a i primitaka izjedna\u010denih s pla\u0107om": {}, 
+                    "Obveze za prirez iz pla\u0107a i primitaka izjedna\u010denih s pla\u0107ama": {}
+                }, 
+                "Obveze za porez na dobitak, dohodak od kapitala i porez po odbitku": {
+                    "Obveza za PD po rje\u0161enju poreznog nadzora": {}, 
+                    "Obveze za porez na dobitak": {}, 
+                    "Obveze za porez na dohotke od kapitala": {
+                        "Porez na dohodak od kapitala na isplate dobitka i dividendi (iz 2001. do 2004. = 12% + prirez)": {}, 
+                        "Porez na dohodak od kapitala na izuzimanja ili privatni \u017eivot \u010dlanova dru\u0161tva i dioni\u010dara (40%+prirez)": {}, 
+                        "Porez na dohodak od kapitala na kamate (na zajmove fizi\u010dkih osoba = 40% + prirez)": {}, 
+                        "Porez na dohodak od kapitala s osnove opcijskih dionica (25% + prirez)": {}
+                    }, 
+                    "Obveze za porez po odbitku (-15% -\u010dl.31.Zakona o porezu na dobit -na ino usluge intelek. vlas. i dr.)": {}
+                }, 
+                "Obveze za porez na dodanu vrijednost": {
+                    "Obra\u010dunana a nedospjela obveza za PDV": {}, 
+                    "Obveza za PDV koje se ne izvje\u0161tavaju u obrascu PDV": {
+                        "Obveza za PDV na inozemne usluge": {}, 
+                        "Obveza za PDV po Rje\u0161enju PU": {}
+                    }, 
+                    "Obveza za PDV po isporukama": {
+                        "Obveza za PDV - 10%": {}, 
+                        "Obveza za PDV - 22%": {}, 
+                        "Obveza za PDV - 23%": {}, 
+                        "Obveza za PDV - 25%": {}
+                    }, 
+                    "Obveza za PDV po kona\u010dnom obra\u010dunu": {}, 
+                    "Obveza za PDV po nezara\u010dunanim isporukama": {
+                        "Obveza za PDV po nezara\u010dunanim isporukama - 10%": {}, 
+                        "Obveza za PDV po nezara\u010dunanim isporukama - 22%": {}, 
+                        "Obveza za PDV po nezara\u010dunanim isporukama - 23%": {}, 
+                        "Obveza za PDV po nezara\u010dunanim isporukama - 25%": {}
+                    }, 
+                    "Obveza za PDV-a prema ra\u010dunu za predujam": {
+                        "Obveza za PDV za predujam - 10%": {}, 
+                        "Obveza za PDV za predujam - 22%": {}, 
+                        "Obveza za PDV za predujam - 23%": {}, 
+                        "Obveza za PDV za predujam - 25%": {}
+                    }, 
+                    "Obveza za razliku poreza i pretporeza u obra\u010dunskom razdoblju": {}, 
+                    "Obveze za PDV s osnove vlastite potro\u0161nje - 23% (za proizv. za reprez. te za o.auto. nab. do 2010.)": {}, 
+                    "Obveze za ispravljeni PDV zbog prenamjene dobara": {
+                        "Obveza za PDV zbog promjene postotka priznavanja PDV-a": {}
+                    }, 
+                    "Povrat PDV-a iz putni\u010dkog prometa": {}
+                }, 
+                "Obveze za posebne poreze (tro\u0161arine - akcize) i dr. poreze dr\u017eavi": {
+                    "Obveza za 5% poreza na promet nekretnina": {}, 
+                    "Obveza za posebni porez na alkohol": {}, 
+                    "Obveza za posebni porez na bezalkoholna pi\u0107a": {}, 
+                    "Obveza za posebni porez na kavu": {}, 
+                    "Obveza za posebni porez na naftne derivate": {
+                        "Obveze za naknade za Hrvatske autoceste": {}, 
+                        "Obveze za naknade za Hrvatske ceste": {}
+                    }, 
+                    "Obveza za posebni porez na pivo": {}, 
+                    "Obveza za posebni porez pri uvozu automobila, plovila i zrakoplova": {}, 
+                    "Obveze za 5% poreza na promet mot. vozila i plovila": {}, 
+                    "Obveze za posebni porez na duhanske proizvode": {}, 
+                    "Obveze za posebni porez na luksuzne proizvode": {}
+                }, 
+                "Obveze za \u010dlanarinu komori": {
+                    "Obveza za HGK za javnu funkciju": {}, 
+                    "Obveza za HGK za pau\u0161alnu naknadu": {}, 
+                    "Obveza za \u010dlanarinu Obrtni\u010dkoj komori": {}, 
+                    "Obveze za pau\u0161al HOK-u": {}, 
+                    "Obveze za \u010dlanarinu granskoj ili strukovnoj komori": {}
+                }, 
+                "Obveze za \u010dlanarinu turist. zajednicama": {
+                    "Obveze za \u010dlanarinu turist. zajednicama-a1": {}
+                }, 
+                "Obveze za \u017eupanijske (gradske) i op\u0107inske poreze": {
+                    "Obveza za porez na potro\u0161nju alkoholnih i bezalkoholnih pi\u0107a i piva u ugostiteljstvu": {}, 
+                    "Obveze za imovinski porez na ku\u0107e za odmor i porez na kori\u0161tenje javnih povr\u0161ina": {}, 
+                    "Obveze za imovinski porez na motorna vozila i plovne objekte": {}, 
+                    "Obveze za ostale poreze \u017eupaniji, gradu ili op\u0107ini": {}, 
+                    "Obveze za porez na istaknutu reklamu": {}, 
+                    "Obveze za porez na nasljedstva i darove": {}, 
+                    "Obveze za porez na tvrtku ili naziv": {}, 
+                    "Obveze za porez na zabavne i \u0161portske priredbe": {}
+                }, 
+                "Ostale obveze javnih davanja": {
+                    "Obveze prema lokalnoj samoupravi za financiranje komunalne izgradnje (Zakon o komunalnom gospodarstvu)": {}, 
+                    "Obveze za boravi\u0161nu pristojbu": {}, 
+                    "Obveze za koncesije": {}, 
+                    "Obveze za nadoknadu za \u0161ume": {}, 
+                    "Obveze za naknade za ambala\u017eu": {}, 
+                    "Obveze za naknade za iskori\u0161tav. mineral. sirovina": {}, 
+                    "Obveze za spomeni\u010dku rentu": {}, 
+                    "Obveze za zakonske kazne": {}, 
+                    "Ostale obveze za ostala javna davanja": {}
+                }
+            }, 
+            "OBVEZE PREMA DOBAVLJA\u010cIMA, ZA PREDUJMOVE I OSTALE OBVEZE": {
+                "Dobavlja\u010di fizi\u010dke osobe": {
+                    "Dobavlja\u010di fizi\u010dke osobe (za isporu\u010dene osnovne proizvode poljodjelstva, ribarstva i \u0161umarstva)": {}, 
+                    "Dobavlja\u010di kooperanti - fizi\u010dke osobe": {}, 
+                    "Dobavlja\u010di za isporu\u010denu osobnu imovinu": {}, 
+                    "Dobavlja\u010di, obrtnici i slobodna zanimanja": {}, 
+                    "Obveze prema studentima i u\u010denicima za rad preko studentskog servisa": {}, 
+                    "Obveze s osnove autorskih prava, inovacija, patenata i sl.": {}, 
+                    "Obveze s osnove ugovora o djelu i akviziterstva": {}, 
+                    "Ostali dobavlja\u010di - fizi\u010dke osobe": {}
+                }, 
+                "Dobavlja\u010di iz inozemstva (analitika prema dobavlja\u010dima)": {
+                    "Dobavlja\u010di dobara iz inozemstva": {}, 
+                    "Dobavlja\u010di prava intelektualnog vlasni\u0161tva, istra\u017eivanja tr\u017ei\u0161ta i dr.": {}, 
+                    "Dobavlja\u010di prava na fran\u0161izu, uporabu imena i sl.": {}, 
+                    "Dobavlja\u010di usluga iz inozemstva": {}
+                }, 
+                "Dobavlja\u010di komunalnih usluga": {
+                    "Obveze za energetske isporuke": {}, 
+                    "Obveze za ostale komunalne usluge": {}, 
+                    "Obveze za usluge odvodnje i odvoza sme\u0107a": {}
+                }, 
+                "Obveze prema dobavlja\u010dima u zemlji (analitika prema dobavlja\u010dima)": {
+                    "Dobavlja\u010di dobara": {}, 
+                    "Dobavlja\u010di iz operativnog lizinga (za najmove)": {}, 
+                    "Dobavlja\u010di iz orta\u010dkog ugovora": {}, 
+                    "Dobavlja\u010di nematerijalne imovine": {}, 
+                    "Dobavlja\u010di opreme, postrojenja i nekretnina": {}, 
+                    "Dobavlja\u010di usluga": {}, 
+                    "Dobavlja\u010di zadruge, ustanove i dr.": {}
+                }, 
+                "Obveze za nefakturirane a preuzete isporuke robe i usluge": {
+                    "Obveze za nefakturirane a preuzete isporuke robe i usluge-a1": {}
+                }, 
+                "Obveze za predujmove": {
+                    "Obveze za predujmove gra\u0111ana": {}, 
+                    "Primljeni predujmovi iz inozemstva": {}, 
+                    "Primljeni predujmovi koji nisu pod PDV-om": {}, 
+                    "Primljeni predujmovi za koje su izdani ra\u010duni s PDV-om": {}
+                }
+            }, 
+            "OBVEZE PREMA ZAPOSLENIMA I OSTALE OBVEZE": {
+                "Kratkoro\u010dne obveze iz nabava i potpora": {
+                    "Obveze prema vanjskim \u010dlanovima uprave, nadzornog odbora, prokuristima, ste\u010dajnim upraviteljima i sl.": {}, 
+                    "Obveze s temelja teku\u0107e nabave u gotovini": {}, 
+                    "Obveze za darovanja (do 2% od ukupnog prihoda)": {}, 
+                    "Obveze za nadoknadu tro\u0161kova (refundacije)": {}, 
+                    "Obveze za naknadno odobrene bonifikacije, casasconte i druge popuste": {}, 
+                    "Obveze za preuzeta pla\u0107anja temeljem ugovora o cesiji, asignaciji i preuzimanjem duga": {}, 
+                    "Obveze za primljene potpore (nisu za prihod)": {}, 
+                    "Obveze za stipendije": {}, 
+                    "Obveze za ugovorene penale, kazne i sl.": {}, 
+                    "Ostale kratkoro\u010dne obveze (npr. prema vanjskim suradnicima)": {}
+                }, 
+                "Obveze iz poslovanja u slobodnoj zoni": {
+                    "Obveze iz poslovanja u slobodnoj zoni-a1": {}
+                }, 
+                "Obveze iz stjecanja udjela": {
+                    "Obveze za kupnju poslovnog udjela": {}, 
+                    "Obveze za upla\u0107eni a neupisani temeljni kapital": {}
+                }, 
+                "Obveze iz vanjskotrgova\u010dkog poslovanja": {
+                    "Obveze po poslovima izvoza za tu\u0111i ra\u010dun": {}, 
+                    "Obveze prema uvozniku (ili naru\u010ditelju)": {}
+                }, 
+                "Obveze po obra\u010dunu prodanih dobara primljenih u komisiju ili konsignaciju": {
+                    "Obveze po obra\u010dunu za prodana dobra": {}, 
+                    "Obveze prema nalogodavatelju iz zastupni\u010dke prodaje": {}, 
+                    "Obveze za isplatu komitentu": {}
+                }, 
+                "Obveze prema osiguravaju\u0107im dru\u0161tvima": {
+                    "Obveze iz osiguranja imovine i osoba": {}, 
+                    "Obveze za III. stupu mirovinskog osiguranja": {}, 
+                    "Obveze za dopunsko zdravstveno osiguranje": {}, 
+                    "Obveze za premije zdravstvenog osiguranja": {}, 
+                    "Obveze za \u017eivotna osiguranja": {}
+                }, 
+                "Obveze prema poslovnim jedinicama u inozemstvu": {
+                    "Obveze prema P.J. u inozemstvu": {}, 
+                    "Obveze prema podru\u017enicama u inozemstvu": {}
+                }, 
+                "Obveze prema zaposlenicima": {
+                    "Nadoknade pla\u0107a koje se refundiraju (od dr\u017eavnih institucija, od HZZO, od lokalne samoupr.)": {}, 
+                    "Obveza prema zaposlenima za naknadu \u0161teta: zbog ozljede na radu, neiskori\u0161tenog godi\u0161njeg odmora i sl.": {}, 
+                    "Obveze prema zaposlenima za primitke koji se smatraju dohotkom (prehrana, davanja u naravi i sl.)": {}, 
+                    "Obveze prema zaposlenima za zatezne kamate i sl.": {}, 
+                    "Obveze prema zaposlenima zbog otpremnine, jubilarne, odvojeni \u017eivot, pomo\u0107 obitelji umrlog posloprimca": {}, 
+                    "Obveze za darove i potpore (bo\u017ei\u0107nica, dar djeci, potpora zbog bolesti, regres za g. o. i sl.)": {}, 
+                    "Obveze za nadoknade tro\u0161kova (dnevnice, terenski dod.,tro\u0161kovi sl. puta, km,dolazak na posao i dr.)": {}, 
+                    "Obveze za neto-pla\u0107e": {}, 
+                    "Obveze za obra\u010dunanu bruto-pla\u0107u iz pro\u0161le poslovne godine (koje nisu ispla\u0107ene i XIII. pla\u0107a)": {}, 
+                    "Obveze za obustave iz neto-pla\u0107a i nadoknada pla\u0107a": {
+                        "Obveze iz ovrha na neto-pla\u0107i": {}, 
+                        "Obveze za obustave iz neto-pla\u0107a i nadoknada pla\u0107a za \u010dlanarine, i dr.": {}, 
+                        "Obveze za obustave iz neto-pla\u0107a i nadoknada za sudske zabrane, kazne i sl.": {}, 
+                        "Obveze za obustave iz neto-pla\u0107e za isplate kredita i pozajmica": {}
+                    }
+                }, 
+                "Obveze za kamate (analitika prema du\u017enicima i vrstama obveza prema nepovezanim dru\u0161tvima)": {
+                    "Obveze za kamate na zajmove prema poduzetnicima": {}, 
+                    "Obveze za kamate po sudskim sporovima": {}, 
+                    "Obveze za ugovorenu kamatu": {}, 
+                    "Obveze za zateznu kamatu": {}
+                }, 
+                "Ostale kratkoro\u010dne obveze": {
+                    "Obveze iz orta\u0161tva": {}, 
+                    "Obveze iz primjene valutne klauzule": {}, 
+                    "Obveze prema brokerima za kupljene vrijednosne papire": {}, 
+                    "Obveze prema inozemnom poduzet. za PDV": {}, 
+                    "Obveze prema od\u0161tetnim zahtjevima": {}, 
+                    "Obveze s osnove sudskih presuda": {}, 
+                    "Obveze za PDV iz poslovnih odnosa": {}, 
+                    "Obveze za doprinos za komunalnu infrastrukturu": {}, 
+                    "Obveze za tu\u0111a sredstva": {}, 
+                    "Ostale nespomenute obveze": {}
+                }
+            }, 
+            "ODGO\u0110ENI POREZI": {
+                "Odgo\u0111ena porezna obveza": {
+                    "Odgo\u0111ena privremena razlika porezne obveze (analitika po godinama - HSFI t. 12.22. i MRS 12 t. 5.)": {}
+                }
+            }, 
+            "ODGO\u0110ENO PLA\u0106ANJE TRO\u0160KOVA I PRIHOD BUDU\u0106EG RAZDOBLJA": {
+                "Nerealizirani dobitci iz financijske imovine (HSFI 9 i MRS 39)": {
+                    "Nerealizirani dobitci iz financijske imovine (HSFI 9 i MRS 39)-a1": {}
+                }, 
+                "Obra\u010dunani prihodi budu\u0107eg razdoblja": {
+                    "Obra\u010dunane (anticipativne) kamate na dane zajmove i zatezne kamate (za budu\u0107e razdoblje)": {}, 
+                    "Obra\u010dunani prihodi budu\u0107eg razdoblja koji su rezultat primjene ra\u010dunovodstvene politike": {}, 
+                    "Odgo\u0111eni prihodi iz operativnog lizinga": {}, 
+                    "Odgo\u0111eni prihodi iz orta\u0161tva": {}, 
+                    "Odgo\u0111eni prihodi iz otkupa tra\u017ebine (faktoring koji nije zara\u0111en)": {}, 
+                    "Odgo\u0111eni prihodi od kamata iz financijskog lizinga": {}, 
+                    "Odgo\u0111eni prihodi radi neizvjesnih tro\u0161kova": {}, 
+                    "Odgo\u0111eno priznavanje prihoda kad se predvi\u0111a povrat robe": {}, 
+                    "Ostali odgo\u0111eni prihodi budu\u0107eg razdoblja": {}, 
+                    "Unaprijed obra\u010dunane ili napla\u0107ene \u0161kolarine": {}
+                }, 
+                "Obra\u010dunani tro\u0161kovi kori\u0161tenih prava": {
+                    "Obra\u010dunani tro\u0161kovi autorskih prava": {}, 
+                    "Obra\u010dunani tro\u0161kovi fran\u0161iza, kori\u0161tenih trgova\u010dkih znakova, prava i sl.": {}, 
+                    "Obra\u010dunani tro\u0161kovi licencija": {}, 
+                    "Odgo\u0111eno pla\u0107anje tro\u0161kova za ostala prava": {}
+                }, 
+                "Obra\u010dunani tro\u0161kovi nabave dobara": {
+                    "Obra\u010dunani ovisni tro\u0161kovi nabave (za koje nisu primljeni ra\u010duni)-prijevoz, osiguranje, \u0161pedicija i dr.": {}
+                }, 
+                "Odgo\u0111eni prihod s osnove nefakturiranih isporuka dobara i usluga": {
+                    "Odgo\u0111eni prihod s osnove nefakturiranih isporuka dobara i usluga-a1": {}
+                }, 
+                "Odgo\u0111eno pla\u0107anje tro\u0161kova": {
+                    "Obra\u010dunana najamnina iz operativnog (poslovnog) najma": {}, 
+                    "Obra\u010dunane a nepla\u0107ene usluge kori\u0161tene u obra\u010dunskom razdoblju": {}, 
+                    "Obra\u010dunani kalo, rastep, kvar i lom": {}, 
+                    "Obra\u010dunani ostali tro\u0161kovi poslovanja (prijevoz, bankovne usluge i platni promet, reprez. i dr.)": {}, 
+                    "Obra\u010dunani rad po ugovoru o djelu, autor. hon.": {}, 
+                    "Obra\u010dunani tro\u0161kovi premije osiguranja": {}, 
+                    "Obra\u010dunani tro\u0161kovi reklame, propagande i sajmova": {}, 
+                    "Obra\u010dunani tro\u0161kovi teku\u0107eg odr\u017eavanja": {}, 
+                    "Obra\u010dunani tro\u0161kovi za koje nije primljena faktura (telefon, grijanje, el. energija, plin, voda i sl.)": {}, 
+                    "Ura\u010dunani tro\u0161kovi slu\u017ebenih glasila i stru\u010dnih \u010dasopisa": {}
+                }, 
+                "Odgo\u0111eno priznavanje prihoda": {
+                    "Odgo\u0111eni prihodi zbog rizika naplate (HSFI t. 15.71 u svezi s t. 15.24)": {}, 
+                    "Razgrani\u010deni vi\u0161ak prihoda od prodaje i povratnog financijskog najma (MRS 17, t. 59.)": {}
+                }, 
+                "Odgo\u0111eno priznavanje prihoda iz dr\u017eavnih potpora (HSFI t. 15.37 i MRS 20, t. 12. i 24.)": {
+                    "Odgo\u0111eni prihodi iz potpora za dug. nemat. i mat. imovinu (analitike po primitcima, investicijama)": {}, 
+                    "Odgo\u0111eni prihodi iz potpora za zapo\u0161ljavanje": {}, 
+                    "Odgo\u0111eni prihodi ostalih potpora": {}, 
+                    "Odgo\u0111eno priznavanje prihoda za unaprijed napla\u0107ene subvencije i potpore": {}
+                }, 
+                "Ostala pasivna vremenska razgrani\u010denja": {
+                    "Ostala pasivna vremenska razgrani\u010denja tro\u0161kova": {}
+                }, 
+                "Rezerviranje tro\u0161ka za neiskori\u0161tene godi\u0161nje odmore": {
+                    "Rezerviranje tro\u0161ka za neiskori\u0161tene godi\u0161nje odmore-a1": {}
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "NOVAC, KRATKOTRAJNA FINANCIJSKA IMOVINA, KRATKOTRAJNA POTRA\u017dIVANJA, TRO\u0160KOVI I PRIHOD BUDU\u0106EG RAZDOBLJA": {
+            "KRATKOTRAJNA FINANCIJSKA IMOVINA (do jedne godine)": {
+                "Dani zajmovi povezanim poduzetnicima": {
+                    "Kratkoro\u010dni zajam povezanom dru\u0161tvu": {}, 
+                    "Kratkoro\u010dni zajam povezanom dru\u0161tvu u inozemstvu": {}, 
+                    "Zajmovi dani ustanovama i \u0161kolama (kojih je dru\u0161tvo osniva\u010d)": {}, 
+                    "Zajmovi dani vlastitim podru\u017enicama": {}
+                }, 
+                "Dani zajmovi, depoziti i sl.": {
+                    "Dani kratkotrajni zajmovi": {
+                        "Dospjeli anuiteti dugotrajnih zajmova (napla\u0107uju se u roku od 12 mjeseci - analitika po korisnicima)": {}, 
+                        "Ostali kratkotrajni zajmovi": {}, 
+                        "Zajmovi dani poljoprivrednicima ili zadrugarima": {}, 
+                        "Zajmovi dani u inozemstvo": {}, 
+                        "Zajmovi obrtnicima": {}, 
+                        "Zajmovi ortacima": {}, 
+                        "Zajmovi podru\u017enicama": {}, 
+                        "Zajmovi poduzetnicima": {}, 
+                        "Zajmovi ustanovama": {}, 
+                        "Zajmovi \u010dlanovima uprave i zaposlenicima": {}
+                    }, 
+                    "Depoziti (do jedne godine)": {
+                        "Depoziti u bankama": {}, 
+                        "Depoziti u inozemnim financijskim institucijama": {}, 
+                        "Depoziti u osiguravaju\u0107im dru\u0161tvima": {}, 
+                        "Depoziti za ostale poslovne aktivnosti": {}
+                    }, 
+                    "Kaucije i jam\u010devine (do jedne godine)": {
+                        "Dane jam\u010devine za natje\u010daje": {}, 
+                        "Kaucije na aukcijama (dra\u017ebama)": {}, 
+                        "Kaucije za ambala\u017eu": {}, 
+                        "Kaucije za robu": {}, 
+                        "Polozi gotovine za ostale poslovne aktivnosti": {}, 
+                        "Potra\u017eivanja za kapare (\u010dl. 303. ZOO-a)": {}
+                    }
+                }, 
+                "Ostala financijska imovina": {
+                    "Otkup kratkoro\u010dnih potra\u017eivanja (faktoring)": {}, 
+                    "Potra\u017eivanja iz preuzetog duga (\u010dl. 96. ZOO)": {}, 
+                    "Potra\u017eivanja po ispla\u0107enim garancijama": {}, 
+                    "Potra\u017eivanja za isplate avaliranih ili indosiranih mjenica": {}, 
+                    "Potra\u017eivanja za vi\u0161e upla\u0107eno po kreditnoj kartici": {}, 
+                    "Potra\u017eivanje po asignacijama, novacijama i sl.": {}, 
+                    "Ulaganje u kratkotrajne eskontne poslove": {}
+                }, 
+                "Potra\u017eivanja iz ulaganja u investicijske fondove": {
+                    "Kratkotrajno ulaganje u nov\u010dane fondove": {}, 
+                    "Kratkotrajno ulaganje u ostale investicijske fondove": {}
+                }, 
+                "Potra\u017eivanja u sporu (npr. utu\u017eena, u ste\u010daju i sl. iz fin. imovine)": {
+                    "Potra\u017eivanja u sporu (npr. utu\u017eena, u ste\u010daju i sl. iz fin. imovine)-a1": {}
+                }, 
+                "Sudjeluju\u0107i interesi (udjeli)": {
+                    "Udjeli (do 20%) u dru\u0161tvima kapitala": {}, 
+                    "Udjeli (do 20%) u ustanovama, zadrugama i dr.": {}, 
+                    "Udjeli - dionice u bankama": {}
+                }, 
+                "Udjeli (dionice) u povezanim poduzetnicima": {
+                    "Dioni\u010dki udio u d.d. (s vi\u0161e od 20%)": {}, 
+                    "Udjeli u povezanim dru\u0161tvima (s vi\u0161e od 20%)": {}, 
+                    "Ulaganje u dionice radi preprodaje (iz udjela vi\u0161e od 20%)": {}
+                }, 
+                "Ulaganja u vrijednosne papire": {
+                    "Blagajni\u010dki zapisi (izdani od banaka)": {}, 
+                    "Komercijalni zapisi": {}, 
+                    "Kratkotrajne obveze poduzetnika": {}, 
+                    "Mjenice": {
+                        "Mjenice na naplati": {}, 
+                        "Mjenice u portfelju": {}, 
+                        "Mjenice u protestu": {}, 
+                        "Utu\u017eene mjenice": {}
+                    }, 
+                    "Ostali brzounov\u010divi vrijednosni papiri (robni papiri, ostale obveznice)": {}, 
+                    "Predani vrijednosni papiri na naplatu": {}, 
+                    "Ulaganje u obveznice": {}, 
+                    "Ulaganje u vrijednosne papire (namjenjene za trgovanje)": {}, 
+                    "Zadu\u017enice (iskupljene)-tra\u0111bina s temelja jamstva": {}, 
+                    "\u010cekovi": {}
+                }, 
+                "Vrijednosno uskla\u0111ivanje financijske imovine - kratkotrajne (analitika po otpisima iz ove skupine rn)": {
+                    "Vrijednosno uskla\u0111ivanje financijske imovine - kratkotrajne (analitika po otpisima iz ove skupine rn)-a1": {}
+                }, 
+                "Zajmovi dani poduzetnicima u kojima postoje sudjeluju\u0107i interesi (do 20% udjela)": {
+                    "Ostali zajmovi dru\u0161tvima u kojima se dr\u017ei udjel do 20%": {}, 
+                    "Zajmovi iz dospjelih anuiteta u razdoblju do 12 mj. od dospije\u0107a": {}, 
+                    "Zajmovi iz preuzetog duga": {}, 
+                    "Zajmovi u novcu": {}
+                }
+            }, 
+            "NOVAC U BANKAMA I BLAGAJNAMA": {
+                "Blagajne": {
+                    "Blagajna prodavaonice": {}, 
+                    "Blagajna radne jedinice": {}, 
+                    "Blagajna recepcije (\u0161anka)": {}, 
+                    "Blagajna servisa": {}, 
+                    "Blagajna vrijednosnica (po\u0161tanskih, taksenih maraka i dr. vrijednosnica)": {}, 
+                    "Blagajna za ostalo": {}, 
+                    "Glavna blagajna (uklju\u010divo i plemenitih metala)": {}, 
+                    "Prijelazni ra\u010dun blagajne prodavaonice": {}
+                }, 
+                "Devizna blagajna": {
+                    "Devizna blagajna za mjenja\u010dke poslove": {}, 
+                    "Devizna blagajna za razne isplate": {}, 
+                    "Devizna blagajna za slu\u017ebena putovanja u inozemstvo": {}, 
+                    "Devizna blagajna za tro\u0161kove prijevoza robe u inozemstvo": {}, 
+                    "Glavna devizna blagajna": {}
+                }, 
+                "Devizni ra\u010duni": {
+                    "Devizni ra\u010dun investicijskih radova": {}, 
+                    "Devizni ra\u010dun poslovne jedinice u inozemstvu": {}, 
+                    "Devizni ra\u010dun reeksportnih poslova": {}, 
+                    "Devizni ra\u010dun terminskih poslova": {}, 
+                    "Devizni ra\u010dun u doma\u0107oj banci (analitika po devizama)": {}, 
+                    "Devizni ra\u010dun u inozemnoj banci (u EU)": {}, 
+                    "Devizni ra\u010dun u slobodnoj zoni": {}, 
+                    "Nerezidentski devizni ra\u010dun": {}, 
+                    "Prijelazni devizni ra\u010dun": {}
+                }, 
+                "Novac za kupnju deviza": {
+                    "Novac za kupnju deviza-a1": {}
+                }, 
+                "Ostala nov\u010dana sredstva": {
+                    "Ostala nov\u010dana sredstva-a1": {}
+                }, 
+                "Otvoreni akreditiv u doma\u0107oj banci": {
+                    "Otvoreni akreditiv u doma\u0107oj banci-a1": {}
+                }, 
+                "Otvoreni akreditiv u stranim valutama": {
+                    "Ecsrow ra\u010dun": {}, 
+                    "Otvoreni akreditiv u inozemnoj banci": {}, 
+                    "Otvoreni devizni akreditiv u doma\u0107oj banci": {}
+                }, 
+                "Transakcijski ra\u010duni u bankama": {
+                    "Podra\u010dun dru\u0161tva": {}, 
+                    "Ra\u010dun dru\u0161tva u osnivanju": {}, 
+                    "Transakcijski u banci (analitika po ra\u010dunima u bankama i \u0161tedionicama)": {}, 
+                    "\u017diro-ra\u010dun prijelazni konto": {}
+                }, 
+                "Vrijednosno uskla\u0111enje depozita u bankama": {
+                    "Vrijednosno uskla\u0111enje depozita u bankama-a1": {}
+                }
+            }, 
+            "OSTALA POTRA\u017dIVANJA OD DR\u017dAVNIH I DRUGIH INSTITUCIJA": {
+                "Ostala potra\u017eivanja od dr\u017eavnih institucija": {
+                    "Ostala potra\u017eivanja od dr\u017eavnih institucija-a1": {}
+                }, 
+                "Potra\u017eiv. za regrese, premije, stimulac. i dr\u017eav. potpore": {
+                    "Potra\u017eiv. za regrese, premije, stimulac. i dr\u017eav. potpore-a1": {}
+                }, 
+                "Potra\u017eivanja od lokalne samouprave": {
+                    "Potra\u017eivanja od lokalne samouprave-a1": {}
+                }, 
+                "Potra\u017eivanja od mirovinskog osiguranja": {
+                    "Potra\u017eivanja od mirovinskog osiguranja-a1": {}
+                }, 
+                "Potra\u017eivanje od Fonda za otkupljenu ambala\u017eu": {
+                    "Potra\u017eivanje od Fonda za otkupljenu ambala\u017eu-a1": {}
+                }, 
+                "Potra\u017eivanje za nadoknade bolovanja od HZZO": {
+                    "Potra\u017eivanje za nadoknade bolovanja od HZZO-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111enje potra\u017eivanja od dr\u017eave i drugih institucija": {
+                    "Vrijednosno uskla\u0111enje potra\u017eivanja od dr\u017eave i drugih institucija-a1": {}
+                }
+            }, 
+            "PLA\u0106ENI TRO\u0160KOVI BUDU\u0106EG RAZDOBLJA I OBRA\u010cUNANI PRIHODI": {
+                "Obra\u010dunani prihodi (budu\u0107eg razdoblja)": {
+                    "Obra\u010dunani prihodi (budu\u0107eg razdoblja)-a1": {}
+                }, 
+                "Ostali pla\u0107eni tro\u0161kovi budu\u0107eg razdoblja": {
+                    "Ostala aktivna vremenska razgrani\u010denja": {}
+                }, 
+                "Tro\u0161kovi kamata iz budu\u0107eg razdoblja": {
+                    "Tro\u0161kovi kamata iz budu\u0107eg razdoblja-a1": {}
+                }, 
+                "Unaprijed pla\u0107ene fran\u0161ize, trgova\u010dko znakovlje, prava i sl. (do 12 mj.)": {
+                    "Unaprijed pla\u0107ene fran\u0161ize, trgova\u010dko znakovlje, prava i sl. (do 12 mj.)-a1": {}
+                }, 
+                "Unaprijed pla\u0107ene licencije i patenti (do 12 mj.)": {
+                    "Unaprijed pla\u0107ene licencije i patenti (do 12 mj.)-a1": {}
+                }, 
+                "Unaprijed pla\u0107eni ovisni tro\u0161kovi nabave (koji nisu na 651)": {
+                    "Unaprijed pla\u0107eni ovisni tro\u0161kovi nabave (koji nisu na 651)-a1": {}
+                }, 
+                "Unaprijed pla\u0107eni tro\u0161kovi": {
+                    "Unaprijed ispla\u0107ene pla\u0107e za budu\u0107e razdoblje": {}, 
+                    "Unaprijed pla\u0107ena zakupnina iz operativnog - poslovnog najma": {
+                        "Unaprijed pla\u0107ena zakupnina": {}, 
+                        "Unaprijed pla\u0107eni a nepriznati PDV na zakupninu (npr. 30% od leasinga osob. aut.)": {}
+                    }, 
+                    "Unaprijed pla\u0107ene kamate na bankovna jamstava i sl.": {}, 
+                    "Unaprijed pla\u0107ene pretplate na slu\u017ebena glasila i stru\u010dne \u010dasopise": {}, 
+                    "Unaprijed pla\u0107eni ostali tro\u0161kovi posl.(prijevoza, bank. usluge, zdr. za\u0161tita,autorski,rad po ug. i sl)": {}, 
+                    "Unaprijed pla\u0107eni tro\u0161kovi energije za sljede\u0107e razdoblje": {}, 
+                    "Unaprijed pla\u0107eni tro\u0161kovi odr\u017eavanja, opreme, postrojenja i gra\u0111evina": {}, 
+                    "Unaprijed pla\u0107eni tro\u0161kovi osig. imovine i osoba na opasnim poslovima ili putnika u prometu i sl.": {}, 
+                    "Unaprijed pla\u0107eni tro\u0161kovi reklame, propagande i sajmova": {}, 
+                    "Unaprijed pla\u0107eni tro\u0161kovi reprezentacije": {}
+                }, 
+                "Unaprijed pla\u0107eni tro\u0161kovi koncesija (za razdoblje do 12 mj.)": {
+                    "Unaprijed pla\u0107eni tro\u0161kovi koncesija (za razdoblje do 12 mj.)-a1": {}
+                }
+            }, 
+            "POTRA\u017dIVANJA (KRATKOTRAJNA)": {
+                "Kupci u inozemstvu": {
+                    "Kupci dobara iz inozemstva": {}, 
+                    "Kupci prava iz inozemstva": {}, 
+                    "Kupci usluga iz inozemstva": {}
+                }, 
+                "Ostala kratkoro\u010dna potra\u017eivanja": {
+                    "Ostala potra\u017eivanja": {}, 
+                    "Potra\u017eivanja iz od\u0161tetnih zahtjeva (od osiguravaju\u0107ih dru\u0161tava)": {}, 
+                    "Potra\u017eivanja od kooperanata, zadrugara, ustanove": {}, 
+                    "Potra\u017eivanja od \u010dlanova dru\u0161tva za pokri\u0107e gubitka": {}, 
+                    "Potra\u017eivanja ste\u010dena cesijom, asignacijom i preuzimanjem duga od prodaje": {}, 
+                    "Potra\u017eivanja za dana jamstva i \u010dinidbe": {}, 
+                    "Potra\u017eivanja za nadoknadu tro\u0161kova iz jamstva": {}, 
+                    "Potra\u017eivanja za poreze iz poslovnih odnosa": {}, 
+                    "Potra\u017eivanja za tantijeme (nadoknade za kori\u0161tenje patenta, znaka i autorskih prava)": {}, 
+                    "Potra\u017eivanja za udjel u dobitku - prihodu u investicijskom fondu": {}
+                }, 
+                "Potra\u017eivanja iz vanjskotrgova\u010dkog poslovanja (s osnove uvoza odnosno izvoza za tu\u0111i ra\u010dun)": {
+                    "Potra\u017eivanja od izvoznika": {}, 
+                    "Potra\u017eivanja po poslovima uvoza za tu\u0111i ra\u010dun": {}
+                }, 
+                "Potra\u017eivanja od kupaca": {
+                    "Kupci gra\u0111ani i prodaja na potro\u0161a\u010dki kredit": {}, 
+                    "Kupci imovinskih sredstava, inventara, materijala, otpadaka i sl.": {}, 
+                    "Kupci zastupni\u010dke i fran\u0161izne prodaje": {}, 
+                    "Potra\u017eivanja od kupaca dobara": {}, 
+                    "Potra\u017eivanja od kupaca usluga (servisne, najmovi, ustupanje radne snage, kapaciteta i dr.)": {}, 
+                    "Potra\u017eivanja od kupaca za prodanu robu iz komisije": {}, 
+                    "Potra\u017eivanja od ostalih prodaja": {}, 
+                    "Potra\u017eivanja za nefakturiranu isporuku dobara ili usluga": {}, 
+                    "Potra\u017eivanja za prodaju na kreditne kartice": {}, 
+                    "Potra\u017eivanja za prodaju prava": {}
+                }, 
+                "Potra\u017eivanja od povezanih poduzetnika (s vi\u0161e od 20% udjela - ovisni poduzet.)": {
+                    "Ostala kratkoro\u010dna potra\u017eivanja od povezanih poduzetnika": {}, 
+                    "Potra\u017eivanja iz ulaganja radi pove\u0107anja udjela (do upisa u t.k.)": {}, 
+                    "Potra\u017eivanja od podru\u017enica": {}, 
+                    "Potra\u017eivanja za dividende od povezanih dru\u0161tava": {}, 
+                    "Potra\u017eivanja za isporuke povezanim dru\u0161tvima u inozemstvu": {}, 
+                    "Potra\u017eivanja za kamate od povezanih dru\u0161tava": {}, 
+                    "Potra\u017eivanja za nadoknadu gubitka od povezanih dru\u0161tava (\u010dl. 489. ZTD)": {}, 
+                    "Potra\u017eivanja za prodaju - isporuku povezanim dru\u0161tvima": {}, 
+                    "Potra\u017eivanja za udio u dobitku d.o.o.-a": {}
+                }, 
+                "Potra\u017eivanja od sudjeluju\u0107ih poduzetnika (u kojima se dr\u017ei manje od 20% udjela)": {
+                    "Ostala potra\u017eivanja od sudjeluju\u0107ih dru\u0161tava": {}, 
+                    "Potra\u017eivanja za dividendu - dobitak": {}, 
+                    "Potra\u017eivanja za isporuke dobara i usluga": {}, 
+                    "Potra\u017eivanja za kamate": {}
+                }, 
+                "Potra\u017eivanja s osnove ostalih aktivnosti": {
+                    "Potra\u017eivanja od komisionara": {}, 
+                    "Potra\u017eivanja s osnove prodaje udjela i dionica": {}, 
+                    "Potra\u017eivanja za nakladno odobrene popuste (bonifikacije, casa-sconto, rabat i sl.)": {}, 
+                    "Potra\u017eivanja za predujam za kupnju dionica i udjela": {}
+                }, 
+                "Potra\u017eivanja za kamate": {
+                    "Kamate iz ostalih tra\u0111bina": {}, 
+                    "Potra\u017eivanja od kupaca za ugovorene kamate (koje nisu pripisane glavnici)": {}, 
+                    "Potra\u017eivanja za kamate po nagodbama": {}, 
+                    "Potra\u017eivanja za zatezne kamate (koje nisu pripisane glavnici)": {}, 
+                    "Potra\u017eivanje za kamatu iz danih zajmova": {}
+                }, 
+                "Potra\u017eivanja za predujmove za usluge (koje nisu u svezi sa zalihama i dugotr. imov.)": {
+                    "Potra\u017eivanja za predujmove za usluge (koje nisu u svezi sa zalihama i dugotr. imov.)-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111enje potra\u017eivanja": {
+                    "Vrijednosno uskla\u0111enje kamata": {}, 
+                    "Vrijednosno uskla\u0111enje od poduzetnika iz sudjeluju\u0107ih interesa": {}, 
+                    "Vrijednosno uskla\u0111enje ostalih potra\u017eivanja (ra\u010duni 126 do 128)": {}, 
+                    "Vrijednosno uskla\u0111enje potra\u017eivanja od kupaca": {}, 
+                    "Vrijednosno uskla\u0111enje potra\u017eivanja od povezanih dru\u0161tava": {}, 
+                    "Vrijednosno uskla\u0111enje za dane predujmove za usluge": {}
+                }
+            }, 
+            "POTRA\u017dIVANJA OD DR\u017dAVE ZA POREZE, CARINU I DOPRINOSE": {
+                "Porez na dodanu vrijednost": {
+                    "Ispravci pretporeza zbog prenamjene dobara": {
+                        "Ispravak pretporeza zbog promjene postotka priznavanja PDV-a": {}
+                    }, 
+                    "Pla\u0107eni PDV na usluge inozemnih poduzetnika": {
+                        "Pla\u0107eni PDV na usluge inozemnih poduzetnika - 10%": {}, 
+                        "Pla\u0107eni PDV na usluge inozemnih poduzetnika - 22%": {}, 
+                        "Pla\u0107eni PDV na usluge inozemnih poduzetnika - 23%": {}, 
+                        "Pla\u0107eni PDV na usluge inozemnih poduzetnika - 25%": {}
+                    }, 
+                    "Pla\u0107eni PDV pri uvozu dobara": {
+                        "Pla\u0107eni PDV pri uvozu dobara - 10%": {}, 
+                        "Pla\u0107eni PDV pri uvozu dobara - 22%": {}, 
+                        "Pla\u0107eni PDV pri uvozu dobara - 23%": {}, 
+                        "Pla\u0107eni PDV pri uvozu dobara - 25%": {}
+                    }, 
+                    "Potra\u017eivanja za razliku ve\u0107eg pretporeza od obveze u obra\u010dunskom razdoblju": {}, 
+                    "Potra\u017eivanja za vi\u0161e pla\u0107eni PDV po kona\u010dnom obra\u010dunu": {}, 
+                    "Pretporez iz predujmova": {
+                        "Pretporez iz predujmova - 22%": {}, 
+                        "Pretporez iz predujmova - 23%": {}, 
+                        "Pretporez iz predujmova - 25%": {}, 
+                        "Pretporez iz predujmova -10%": {}
+                    }, 
+                    "Pretporez koji jo\u0161 nije priznan (uklju\u010divo i nepla\u0107eni R-2)": {}, 
+                    "Pretporez po ulaznim ra\u010dunima": {
+                        "Pretporez - 10%": {}, 
+                        "Pretporez - 22%": {}, 
+                        "Pretporez - 23%": {}, 
+                        "Pretporez - 25%": {}
+                    }, 
+                    "Pretporez ste\u010den po ugovoru o asignaciji ili iz preknji\u017eavanja": {}
+                }, 
+                "Potra\u017eivanja za carinu i vi\u0161e pla\u0107ene carinske pristojbe": {
+                    "Potra\u017eivanja za carinu i vi\u0161e pla\u0107ene carinske pristojbe-a1": {}
+                }, 
+                "Potra\u017eivanja za ostale nespomenute poreze, doprinose, takse i pristojbe": {
+                    "Potra\u017eivanja za ostala pla\u0107ena davanja dr\u017eavi i dr\u017eavnim institucijama": {}, 
+                    "Potra\u017eivanja za spomeni\u010dku rentu": {}, 
+                    "Potra\u017eivanja za vi\u0161e pla\u0107ene kazne i sl.": {}, 
+                    "Potra\u017eivanja za vi\u0161e pla\u0107ene naknade za koncesije": {}, 
+                    "Potra\u017eivanja za vi\u0161e pla\u0107enu nadoknadu za \u0161ume": {}, 
+                    "Potra\u017eivanja za vi\u0161e upla\u0107ene naknade za iskori\u0161tavanje mineralnih sirovina": {}, 
+                    "Potra\u017eivanje od Fonda za razvoj i sl.": {}
+                }, 
+                "Potra\u017eivanja za pla\u0107enu \u010dlanarinu turisti\u010dkim zajed.": {
+                    "Potra\u017eivanja za pla\u0107enu \u010dlanarinu turisti\u010dkim zajed.-a1": {}
+                }, 
+                "Potra\u017eivanja za porez i prirez na dohodak iz pla\u0107a i drugih primanja": {
+                    "Potra\u017eivanja za porez i prirez na stipendije i nagrade u\u010denika i studenta": {}, 
+                    "Potra\u017eivanja za porez na dohodak iz autorskih prava, ugovora o djelu, \u010dlanova nadz. odbora i dr.doh.": {}, 
+                    "Potra\u017eivanja za porez na dohodak iz pla\u0107a": {}, 
+                    "Potra\u017eivanja za poreze iz drugih dohodaka": {}, 
+                    "Potra\u017eivanja za prirez iz pla\u0107a": {}, 
+                    "Potra\u017eivanja za vi\u0161e pla\u0107eni porez na dohodak od kapitala": {}
+                }, 
+                "Potra\u017eivanja za porez na dobitak i po odbitku": {
+                    "Porez na dobitak pla\u0107en u inozemstvu": {}, 
+                    "Potra\u017eivanja za pla\u0107ene predujmove poreza na dobitak": {}, 
+                    "Potra\u017eivanja za porez na dobitak ste\u010den po ugovoru o cesiji ili iz preknji\u017eavanja": {}, 
+                    "Potra\u017eivanja za vi\u0161e pla\u0107eni porez po odbitku (na inozemne usluge)": {}
+                }, 
+                "Potra\u017eivanja za posebne poreze (akcize - tro\u0161arine) i dr. poreze od dr\u017eave": {
+                    "Potra\u017eivanja za 5% poreza na promet motornih vozila i plovila": {}, 
+                    "Potra\u017eivanja za porez na promet nekretnina": {}, 
+                    "Potra\u017eivanja za poseban porez na alkoholna pi\u0107a": {}, 
+                    "Potra\u017eivanja za poseban porez na bezalkoholna pi\u0107a": {}, 
+                    "Potra\u017eivanja za poseban porez na duhanske proizvode": {}, 
+                    "Potra\u017eivanja za poseban porez na kavu": {}, 
+                    "Potra\u017eivanja za poseban porez na luksuzne proizvode": {}, 
+                    "Potra\u017eivanja za poseban porez na naftne derivate i naknade za ceste": {}, 
+                    "Potra\u017eivanja za poseban porez na osobne automobile, motocikle, ostala mot. vozila, plovila i zrakop.": {}, 
+                    "Potra\u017eivanja za poseban porez na pivo": {}
+                }, 
+                "Potra\u017eivanja za vi\u0161e pla\u0107ene doprinose iz pla\u0107a i na pla\u0107e": {
+                    "Potra\u017eivanja od MO za vi\u0161e pla\u0107eni doprinos za beneficirani sta\u017e": {}, 
+                    "Potra\u017eivanja za ostale nespomenute doprinose": {}, 
+                    "Potra\u017eivanja za vi\u0161e pla\u0107ene doprinose za MO iz pla\u0107e": {}, 
+                    "Potra\u017eivanja za vi\u0161e pla\u0107eni dopr. za zdrav. osigur. za slu\u010daj ozljede na radu i prof. bolesti": {}, 
+                    "Potra\u017eivanja za vi\u0161e pla\u0107eni doprinos za zapo\u0161ljavanje na pla\u0107e": {}, 
+                    "Potra\u017eivanja za vi\u0161e pla\u0107eni doprinos za zdravstveno osiguranje na pla\u0107e": {}
+                }, 
+                "Potra\u017eivanja za \u010dlanarine komori (HGK ili HOK)": {
+                    "Potra\u017eivanja za \u010dlanarine komori (HGK ili HOK)-a1": {}
+                }, 
+                "Potra\u017eivanja za \u017eupanijski i op\u0107inski (gradski) porez": {
+                    "Potra\u017eivanja za ostale poreze \u017eupanije (grada), op\u0107ine": {}, 
+                    "Potra\u017eivanja za pla\u0107eni porez na nasljedstva i darove": {}, 
+                    "Potra\u017eivanja za pla\u0107eni porez na prire\u0111ivanje zabavnih i \u0161portskih priredbi": {}, 
+                    "Potra\u017eivanja za porez na ku\u0107e za odmor i kori\u0161tenje javnih povr\u0161ina": {}, 
+                    "Potra\u017eivanja za porez na potro\u0161nju u ugostiteljstvu": {}, 
+                    "Potra\u017eivanja za porez na reklamu": {}, 
+                    "Potra\u017eivanja za porez na tvrtku ili naziv": {}, 
+                    "Potra\u017eivanja za vi\u0161e pla\u0107eni porez na motorna vozila i plovne objekte": {}, 
+                    "Potra\u017eivanja za vi\u0161e pla\u0107eni porez na neiskori\u0161tene nekretnine": {}
+                }
+            }, 
+            "POTRA\u017dIVANJA OD ZAPOSLENIH I OSTALA POTRA\u017dIVANJA (kratkotrajna)": {
+                "Ostala poslovna potra\u017eivanja": {
+                    "Ostala poslovna potra\u017eivanja": {}, 
+                    "Potra\u017eivanja od ortaka": {}, 
+                    "Potra\u017eivanja od zastupnika": {}, 
+                    "Potra\u017eivanja za naknadne popuste": {}
+                }, 
+                "Potra\u017eivanja od banaka za prodaju na potro\u0161a\u010dki kredit": {
+                    "Potra\u017eivanja od banaka za prodaju na potro\u0161a\u010dki kredit-a1": {}
+                }, 
+                "Potra\u017eivanja od poslovnih jedinica u inozemstvu": {
+                    "Potra\u017eivanja za doznake novca, za dobitak i dr.": {}, 
+                    "Potra\u017eivanja za isporu\u010dena dobra i usluge": {}
+                }, 
+                "Potra\u017eivanja od vanjskih suradnika": {
+                    "Ostala potra\u017eivanja od vanjskih suradnika": {}, 
+                    "Ostala potra\u017eivanja od zaposlenih": {}, 
+                    "Potra\u017eivanja od zaposlenih za manje pla\u0107ene poreze i doprinose": {}, 
+                    "Potra\u017eivanja od zaposlenih za vi\u0161e ispla\u0107enu pla\u0107u": {}, 
+                    "Potra\u017eivanja od zaposlenika za pla\u0107ene privatne tro\u0161kove (npr. po slu\u017ebenoj kred. kartici)": {}, 
+                    "Potra\u017eivanja od zaposlenika za primitak u naravi": {}, 
+                    "Potra\u017eivanja za dane nov\u010dane svote za nabave u gotovini (za tr\u017ei\u0161ni nakup, za karnete i dr.)": {}, 
+                    "Potra\u017eivanja za ispla\u0107ene svote": {}, 
+                    "Potra\u017eivanja za ispla\u0107eni predujam za slu\u017ebeni put": {}, 
+                    "Potra\u017eivanja za manjkove i u\u010dinjene \u0161tete (s PDV-om)": {}, 
+                    "Potra\u017eivanja za predujmljene honorare": {}, 
+                    "Potra\u017eivanja za prehranu, kazne, za kori\u0161tenje odmarali\u0161ta i sl.": {}
+                }, 
+                "Potra\u017eivanja od \u010dlanova poduzetnika": {
+                    "Potra\u017eivanja od \u010dlanova dru\u0161tva za predujmljeni dobitak - dividendu": {}, 
+                    "Potra\u017eivanja od \u010dlanova dru\u0161tva za privatne tro\u0161kove": {}, 
+                    "Potra\u017eivanja od \u010dlanova ustanove": {}, 
+                    "Potra\u017eivanja od \u010dlanova zadruge": {}
+                }, 
+                "Potra\u017eivanja u sporu i rizi\u010dna potra\u017eivanja (iz skupine 12 i 13)": {
+                    "Potra\u017eivanja u sporu i rizi\u010dna potra\u017eivanja (iz skupine 12 i 13)-a1": {}
+                }, 
+                "Potra\u017eivanja za sredstva u slobodnoj zoni": {
+                    "Potra\u017eivanja za sredstva u slobodnoj zoni-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111enje potra\u017eivanja od zaposlenih \u010dlanova dru\u0161tva i ostalih potra\u017eivanja": {
+                    "Vrijednosno uskla\u0111enje potra\u017eivanja od zaposlenih \u010dlanova dru\u0161tva i ostalih potra\u017eivanja-a1": {}
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "POKRI\u0106E RASHODA I PRIHODI RAZDOBLJA": {
+            "FINANCIJSKI PRIHODI": {
+                "Dio prihoda od pridru\u017eenih poduzetnika i sudjeluju\u0107ih interesa": {
+                    "Financijski prihodi (dividende, dobitci) iz udjela u dru\u0161tvima do 20%": {}, 
+                    "Prihodi od kamata, te\u010d. razlika i dr. fin. prihoda iz odnosa s pridru\u017eenim poduz. i od udjela do 20%": {}
+                }, 
+                "Kamate, te\u010dajne razlike, dividende i sl. prihodi iz odnosa s povezanim poduzetnicima": {
+                    "Dobitci od prodaje udjela i dionica od povezanih poduzetnika": {}, 
+                    "Ostali financijski prihodi od povez. poduzetnika": {}, 
+                    "Ostali financijski prihodi od povezanih poduzet": {}, 
+                    "Prihodi od dividende (dobitka) iz udjela u povezanim poduzetnicima": {}, 
+                    "Prihodi od kamata od povezanih poduzetnika": {}, 
+                    "Prihodi od te\u010dajnih razlika od povez. poduzet.": {}, 
+                    "Prihodi od valutne (indeksne) klauzule iz odnosa s povezanim poduzetnicima": {}
+                }, 
+                "Nerealizirani dobitci (prihodi) od financijske imovine": {
+                    "Dobitci iz promjene fer vrijednosti ulaganja u nekretnine (HSFI 7. i MRS 40)": {}, 
+                    "Dobitci iz promjene vrijednosti ostale imovine": {}, 
+                    "Prihodi iz procjene fin. imovine namijenjene za trgovanje (HSFI 15. t. 15.52. i MRS 39. t. 55a. i dr.)": {}
+                }, 
+                "Ostali financijski prihodi": {
+                    "Dobitci od prodaje dionica i udjela (s nepovez. dru\u0161tvima) i dr. vrijed. papira": {}, 
+                    "Ostali financijski prihodi iz odnosa s nepovezanim poduzetnicima i dr. osobama": {}, 
+                    "Prihodi iz udjela u investicijskim i dr. fondovima": {}, 
+                    "Prihodi od primjene valutne (indeksne) klauzule": {}, 
+                    "Prihodi od prodaje ostale financijske imovine": {}
+                }, 
+                "Prihodi negativnog goodwilla": {
+                    "Prihodi negativnog goodwilla-a1": {}
+                }, 
+                "Prihodi od dividende i dobitaka iz udjela": {
+                    "Prihodi od dividendi": {}, 
+                    "Prihodi od udjela u dobitku u d.o.o. i dr.": {}
+                }, 
+                "Prihodi od kamata": {
+                    "Kamate na depozite i jam\u010devine": {}, 
+                    "Prihodi od kamata iz financijske imovine i dr.": {}, 
+                    "Prihodi od redovnih kamata": {}, 
+                    "Prihodi od zateznih kamata": {}
+                }, 
+                "Prihodi od te\u010dajnih razlika": {
+                    "Pozitivne te\u010dajne razlike iz ni\u017eih obveza prema inozemstvu": {}, 
+                    "Pozitivne te\u010dajne razlike iz tra\u017ebina i stanja deviza na ra\u010dunu": {}, 
+                    "Prihodi od ostalih te\u010dajnih razlika": {}
+                }
+            }, 
+            "IZVANREDNI - OSTALI RASHODI": {
+                "Gubitci od procjene biolo\u0161ke imovine": {
+                    "Gubitci od procjene biolo\u0161ke imovine-a1": {}
+                }, 
+                "Gubitci zbog izvla\u0161tenja ili zbog prirodnih katastrofa na va\u017enom dijelu imovine": {
+                    "Gubitci zbog izvla\u0161tenja ili zbog prirodnih katastrofa na va\u017enom dijelu imovine-a1": {}
+                }, 
+                "Izvanredne kazne, penali, od\u0161tete, naknadno utvr\u0111. obveze i sl.": {
+                    "Izvanredne kazne, penali, od\u0161tete, naknadno utvr\u0111. obveze i sl.-a1": {}
+                }, 
+                "Izvanredni otpisi od otu\u0111enja imovine, nastali neo\u010dekivano i u visokoj vrijednosti (HSFt4.7. i MRS10t9)": {
+                    "Izvanredni otpisi od otu\u0111enja imovine, nastali neo\u010dekivano i u visokoj vrijednosti (HSFt4.7. i MRS10t9)-a1": {}
+                }, 
+                "Izvanredni rashodi iz ostalih rijetkih i neobi\u010dnih doga\u0111aja ili transakcija": {
+                    "Izvanredni rashodi iz ostalih rijetkih i neobi\u010dnih doga\u0111aja ili transakcija-a1": {}
+                }, 
+                "Izvanredni rashodi od prodaje dugotrajne imovine (HSFI t. 8.35.)": {
+                    "Izvanredni rashodi od prodaje dugotrajne imovine (HSFI t. 8.35.)-a1": {}
+                }, 
+                "Nerealizirani gubitci": {
+                    "Nerealizirani gubitci-a1": {}
+                }
+            }, 
+            "OSTALI POSLOVNI I IZVANREDNI PRIHODI": {
+                "Dobitci od procjene poljoprivrednih proizvoda i biolo\u0161ke imovine (HSFI 17, t. 17.12 i MRS 41)": {
+                    "Dobitci od prirasta biolo\u0161ke imovine": {}, 
+                    "Dobitci od procjene biolo\u0161ke imovine": {}, 
+                    "Dobitci od procjene poljoprivrednih proizvoda": {}
+                }, 
+                "Izvanredni - ostali prihodi (npr. veliki besplatni primitak, prihod koji nije proiza\u0161ao iz redovitog poslovanja)": {
+                    "Ostali nepredvi\u0111eni prihodi": {}, 
+                    "Prihod od dugotrajne materijalne imovine namijenjene prodaji": {}, 
+                    "Prihod od izvanredne prodaje zna\u010dajnog dijela imovine": {}, 
+                    "Prihod od izvansudskih nagodbi": {}
+                }, 
+                "Ostali poslovni prihodi": {
+                    "Prihodi od (nevra\u0107enih) kaucija i depozita": {}, 
+                    "Prihodi od financ. in\u017eenjeringa(projekt., financ. i izgr., kupoprodaja poduze\u0107a i sl.) i provizija": {}, 
+                    "Prihodi od kapara, odustatnina i sl.": {}, 
+                    "Prihodi od nagrada za proizvod, uslugu, oblik i sl.": {}, 
+                    "Prihodi od naplate \u0161teta po sudskim procesima (zbog oduzete imovine,zlouporabe znaka,imena,prava i dr.)": {}, 
+                    "Prihodi od naplate \u0161teta uni\u0161tene imovine (po\u017earom, poplavom i dr. vi\u0161om silom)": {}, 
+                    "Prihodi od prodaje prava (patenata, licencija, koncesija, rente, imena, znaka i sl.)": {}, 
+                    "Prihodi od ugovorenih i napla\u0107enih penala zbog neizvr\u0161enja roka u isporuci": {}, 
+                    "Prihodi od vra\u0107enih premija osiguranja": {}, 
+                    "Prihodi s osnove povrata poreza na promet": {}
+                }, 
+                "Prihodi od dr\u017eavnih potpora (HSFI 15 i MRS 20)": {
+                    "Prihodi (odgo\u0111eni) od dr\u017eavnih potpora za investicije (sredstva)": {}, 
+                    "Prihodi od dr\u017eavnih potpora za ostale odre\u0111ene namjene": {}, 
+                    "Prihodi od dr\u017eavnih potpora za pokri\u0107e tro\u0161kova": {}
+                }, 
+                "Prihodi od otpisa obveza i popusta": {
+                    "Otpis obveza prema kreditorima": {}, 
+                    "Otpis obveza prema zaposlenicima": {}, 
+                    "Otpis ostalih obveza": {}, 
+                    "Otpisi obveza prema dobavlja\u010dima, obveza za primljene predujmove i sl.": {}, 
+                    "Prihodi od naknadnih odobrenja - sni\u017eenja i popusta od dobavlja\u010da i dr.": {}, 
+                    "Prihodi od zastare obveza": {}
+                }, 
+                "Prihodi od refundac., dotacija, subvencija i nadoknada": {
+                    "Prihodi od dotacija i pomo\u0107i": {}, 
+                    "Prihodi od naknada za jamstva": {}, 
+                    "Prihodi od naknada \u0161teta iz teku\u0107eg poslovanja": {}, 
+                    "Prihodi od ostalih nadoknada iz poslovanja": {}, 
+                    "Prihodi od prefakturiranih tro\u0161kova (npr. komunalnih, premija osiguranja i dr.)": {}, 
+                    "Prihodi od refundacije za rad radnika": {}, 
+                    "Prihodi od subvencija": {}, 
+                    "Prihodi s osnove basplatnog primitka opreme, nekretnina, zaliha i potra\u017eivanja": {}, 
+                    "Prihodi za manjkove od odgovornih osoba": {}, 
+                    "Prihodi za pokri\u0107e gubitka": {}
+                }, 
+                "Prihodi od revalorizacije - procjene": {
+                    "Prihodi od procjene ostale imovine": {}, 
+                    "Prihodi od procjene zaliha i dr. imovine": {}, 
+                    "Prihodi od revalorizacije financijske imovine raspolo\u017eive za prodaju": {}, 
+                    "Prihodi od revalorizacije zaliha": {}, 
+                    "Prihodi od ukidanja gubitka (MRS 36)": {}
+                }, 
+                "Prihodi od rezidualnih imovinskih stavki, vi\u0161kova i procjena": {
+                    "Inventurni vi\u0161kovi na robi, proizvodima i zalihama sirovina, materijala, dijelova i dugotrajne imovine": {}, 
+                    "Prihodi od ostalih primitaka bez nadoknade": {}, 
+                    "Prihodi od procjene prometa (utr\u0161ka) po nalazu poreznog nadzora": {}, 
+                    "Prihodi od prodaje  ulaganja u nekretnine (MRS 40. t. 69.)": {}, 
+                    "Prihodi od prodaje dugotr. nemater. imovine (trgov. znak, patent i dr.) - iz uporabe": {}, 
+                    "Prihodi od prodaje dugotrajne materijalne imovine (iz uporabe a amortizirane)": {}, 
+                    "Prihodi od prodaje otpisanih i rashodovanih sredstava rada (alata, opreme i sl.)": {}, 
+                    "Prihodi od ranije otpisanih zaliha po novoj procjeni (HSFI t. 10.38. i MRS 2, t. 33.)": {}, 
+                    "Vi\u0161kovi iz neidentificiranih nov\u010danih doznaka u teku\u0107em poslovanju": {}, 
+                    "Vi\u0161kovi u blagajni (novac, vrijed. papiri i dr.)": {}
+                }, 
+                "Prihodi od ukidanja rezerviranja i naknadno napla\u0107eni prihodi": {
+                    "Naknadno utvr\u0111eni prihodi": {}, 
+                    "Prihodi od naknadno napla\u0107enih jamstava - garancija": {}, 
+                    "Prihodi od naknadno napla\u0107enih potra\u017eivanja iz prethodnih godina": {}, 
+                    "Prihodi od naknadno napla\u0107enih reklamacija": {}, 
+                    "Prihodi od naplate iz ugovora po naknadnim priznanjima iz pro\u0161lih godina": {}, 
+                    "Prihodi od ukidanja tro\u0161kova od kojih se odustalo": {}, 
+                    "Prihodi od zaprimanja dobara koja su prodana u prethodnom obra\u010d. razdoblju": {}, 
+                    "Prihodovanje dugoro\u010dnih rezerviranja": {}, 
+                    "Ukidanje pasiv. vrem. razgrani\u010denja": {}
+                }, 
+                "Prihodi uporabe vlastitih proizvoda": {
+                    "Prihodi od uporabe vlastitih proizvoda i usluga za dugotrajnu imovinu": {}, 
+                    "Prihodi uporabe vlastitih proizvoda i usluga za tro\u0161kove": {}
+                }
+            }, 
+            "PRIHODI OD PRODAJE PROIZVODA I USLUGA": {
+                "Ostali prihodi od prodaje u\u010dinaka": {
+                    "Ostali prihodi od prodaje u\u010dinaka-a1": {}
+                }, 
+                "Prihodi iz orta\u0161tva": {
+                    "Prihodi iz orta\u0161tva-a1": {}
+                }, 
+                "Prihodi od graditeljskih usluga - iz ugovora o izgradnji (gra\u0111evina, postrojenja, brodova i sl.)": {
+                    "Prihodi od graditeljskih usluga - iz ugovora o izgradnji (gra\u0111evina, postrojenja, brodova i sl.)-a1": {}
+                }, 
+                "Prihodi od najmova i zakupa": {
+                    "Prihodi od najmova i zakupa-a1": {}
+                }, 
+                "Prihodi od prodaje dobara u inozemstvo (mogu\u0107a analitika po vrstama proizvoda i zemljama)": {
+                    "Prihodi od prodaje dobara u inozemstvo (mogu\u0107a analitika po vrstama proizvoda i zemljama)-a1": {}
+                }, 
+                "Prihodi od prodaje proizvoda (analitika po proizvodima ili profitnim centrima)": {
+                    "Prihod od povratne naknade za ambala\u017eu (bez PDV-a)": {}, 
+                    "Prihod od prodaje otpadaka iz proizvodnje": {}, 
+                    "Prihodi od prodaje poluproizvoda i nedovr\u0161enih proizvoda": {}, 
+                    "Prihodi od prodaje proizvoda na kredit ili otplatu": {}, 
+                    "Prihodi od prodaje proizvoda od redovne prodaje": {}, 
+                    "Prihodi od prodaje stanova i dr. gra\u0111evina": {}, 
+                    "Prihodi ostvareni u posl. jed. na podru\u010dju posebne dr\u017eav. skrbi i u Vukovaru": {}, 
+                    "Prihodi ostvareni u slobodnoj zoni": {}, 
+                    "Prodaja u vlastitim prodavaonicama": {}
+                }, 
+                "Prihodi od prodaje proizvoda i usluga ovisnim dru\u0161tvima (analitika po dru\u0161tvima)": {
+                    "Prihodi od prodaje proizvoda i usluga ovisnim dru\u0161tvima (analitika po dru\u0161tvima)-a1": {}
+                }, 
+                "Prihodi od prodaje proizvoda i usluga poduzet. u kojima postoje sudjeluju\u0107i interesi (do 20% udjela)": {
+                    "Prihodi od prodaje proizvoda i usluga poduzet. u kojima postoje sudjeluju\u0107i interesi (do 20% udjela)-a1": {}
+                }, 
+                "Prihodi od prodaje usluga": {
+                    "Prihodi od hotela i no\u0107enja": {}, 
+                    "Prihodi od knjigovodstvenih, usluga poreznog savjetovanja, revizorskih, konzultantskih i dr. usluga": {}, 
+                    "Prihodi od komunalnih usluga": {}, 
+                    "Prihodi od prodaje ostalih usluga": {}, 
+                    "Prihodi od programskih usluga": {}, 
+                    "Prihodi od promid\u017ebenih usluga": {}, 
+                    "Prihodi od restorana i gostionica": {}, 
+                    "Prihodi od servisnih usluga, usluga popravaka i sl. usluga": {}, 
+                    "Prihodi od usluga prijevoza": {}, 
+                    "Prihodi od usluga za\u0161tite i istra\u017eivanja": {}
+                }, 
+                "Prihodi od prodaje usluga u inozemstvo (mogu\u0107a analitika po vrstama usluga i zemljama kupcima)": {
+                    "Prihodi iz me\u0111unarodne plovidbe brodovima (\u010dl. 26., st. 10. ZoPD)": {}, 
+                    "Prihodi od internetskih usluga za inozemstvo": {}, 
+                    "Prihodi od poslovnih jedinica u inozemstvu": {}, 
+                    "Prihodi od prodaje turisti\u010dkih usluga u inozem.": {}
+                }
+            }, 
+            "PRIHODI OD PRODAJE TRGOVA\u010cKE ROBE": {
+                "Ostali prihodi od prodaje roba i trgova\u010dkih usluga": {
+                    "Prihodi od prikupljanja ambala\u017ee": {}, 
+                    "Prihodi od prodaje korisnog otpada": {}, 
+                    "Prihodi od zbrinjavanja otpada": {}
+                }, 
+                "Prihodi od dane (prodane) robe u financijski lizing (najam)": {
+                    "Prihodi od dane (prodane) robe u financijski lizing (najam)-a1": {}
+                }, 
+                "Prihodi od preprodaje nekretnina i umjetnina": {
+                    "Prihodi od preprodaje nekretnina i umjetnina-a1": {}
+                }, 
+                "Prihodi od prodaje nekurentne robe (robe u kvaru, o\u0161te-\u0107enju, demodirana i sl.)": {
+                    "Prihodi od prodaje nekurentne robe (robe u kvaru, o\u0161te-\u0107enju, demodirana i sl.)-a1": {}
+                }, 
+                "Prihodi od prodaje robe": {
+                    "Prihodi od povratne naknade za ambala\u017eu (bez PDV-a)": {}, 
+                    "Prihodi od prodaje robe dane u komisiju ili konsignaciju": {}, 
+                    "Prihodi od prodaje robe na malo (analitika po prodav.)": {}, 
+                    "Prihodi od prodaje robe na veliko (analitika po prodajnim mjestima)": {}, 
+                    "Prihodi od prodaje robe u povezanim dru\u0161tvima": {}, 
+                    "Prihodi od prodaje robe u tranzitu": {}, 
+                    "Prihodi od prodaje u poslov. jed. na podru\u010dju posebne dr\u017eav. skrbi i Vukovaru": {}, 
+                    "Prihodi od prodaje uvezene robe na veliko": {}, 
+                    "Prihodi od prometa nekretnina": {}
+                }, 
+                "Prihodi od prodaje robe na inozemnom tr\u017ei\u0161tu": {
+                    "Prihodi od prodaje robe na inozemnom tr\u017ei\u0161tu-a1": {}
+                }, 
+                "Prihodi od prodaje robe na kredit": {
+                    "Prihodi od prodaje robe na potro\u0161a\u010dki kredit": {}, 
+                    "Prihodi od prodaje robe na robni kredit": {}
+                }, 
+                "Prihodi od prodaje robe ovisnim dru\u0161tvima": {
+                    "Prihodi od prodaje robe ovisnim dru\u0161tvima-a1": {}
+                }, 
+                "Prihodi od prodaje robe poduzetnicima u kojima postoje sudjeluju\u0107i interesi (do 20% udjela)": {
+                    "Prihodi od prodaje robe poduzetnicima u kojima postoje sudjeluju\u0107i interesi (do 20% udjela)-a1": {}
+                }, 
+                "Prihodi od trgova\u010dkih usluga": {
+                    "Prihodi od davanja mi\u0161ljenja": {}, 
+                    "Prihodi od fran\u0161iza i robnih znakova": {}, 
+                    "Prihodi od provizija": {}, 
+                    "Prihodi od usluge posredovanja": {}
+                }
+            }, 
+            "RAZLIKA PRIHODA I RASHODA FINANCIJSKE GODINE": {
+                "Razlika prihoda i rashoda (iz cjelokupnog poslovanja)": {
+                    "Razlika prihoda i rashoda (iz cjelokupnog poslovanja)-a1": {}
+                }
+            }, 
+            "TRO\u0160KOVI ADMINISTRACIJE I OSTALI RASHODI": {
+                "Ostali poslovni rashodi - nespomenuti": {
+                    "Ostali poslovni rashodi - nespomenuti-a1": {}
+                }, 
+                "Tro\u0161kovi uprave, prodaje, administracije (491)": {
+                    "Tro\u0161kovi uprave, prodaje, administracije (491)-a1": {}
+                }
+            }, 
+            "TRO\u0160KOVI PRODANE ROBE": {
+                "Gre\u0161kom neiskazani rashodi prodane robe u proteklim razdobljima u trgovini": {
+                    "Gre\u0161kom neiskazani rashodi prodane robe u proteklim razdobljima u trgovini-a1": {}
+                }, 
+                "Nabavna vrijednost prodane robe": {
+                    "Tro\u0161ak prodane robe u inozemstvu": {}, 
+                    "Tro\u0161ak prodane robe u poslov. jed.": {}, 
+                    "Tro\u0161ak prodane robe u tuzemstvu": {}, 
+                    "Tro\u0161kovi prodane robe u tranzitu": {}
+                }, 
+                "Nabavna vrijednost prodanih nekretnina i umjetnina": {
+                    "Nabavna vrijednost prodanih nekretnina i umjetnina-a1": {}
+                }, 
+                "Tro\u0161kovi dugotr. imov. namijenjeni prodaji": {
+                    "Tro\u0161kovi dugotr. imov. namijenjeni prodaji-a1": {}
+                }, 
+                "Tro\u0161kovi kala, rastepa, kvara i loma na robi i otpisi robe": {
+                    "Kalo, rastep, kvar i lom u dopu\u0161tenoj visini prema Pravilniku HGK - porezno priznati": {}, 
+                    "Manjak robe na teret odgovorne osobe": {}, 
+                    "Manjkovi i otpisi trgova\u010dke robe po o\u010devidu PU i sl. - porezno priznati": {}, 
+                    "Manjkovi uslijed vi\u0161e sile (provalne kra\u0111e, poplava, po\u017ear, potres i sl.) - porezno priznati": {}, 
+                    "Prekomjerni kalo, rastep, kvar i lom + PDV - porezno nepriznati": {}
+                }, 
+                "Tro\u0161kovi vrijednosnog uskla\u0111enja dugotrajne imovine namijenjene prodaji (699)": {
+                    "Tro\u0161kovi vrijednosnog uskla\u0111enja dugotrajne imovine namijenjene prodaji (699)-a1": {}
+                }, 
+                "Tro\u0161kovi vrijednosnog uskla\u0111enja trgova\u010dke robe i predujmova (669, 679, 689)": {
+                    "Tro\u0161kovi vrijednosnog uskla\u0111enja trgova\u010dke robe i predujmova (669, 679, 689)-a1": {}
+                }, 
+                "Tro\u0161kovi zamjene robe u jamstvenom roku": {
+                    "Tro\u0161kovi zamjene robe u jamstvenom roku-a1": {}
+                }
+            }, 
+            "TRO\u0160KOVI PRODANIH ZALIHA PROIZVODA I USLUGA": {
+                "Gre\u0161kom neiskazani rashodi proteklih razdoblja": {
+                    "Gre\u0161kom neiskazani rashodi proteklih razdoblja-a1": {}
+                }, 
+                "Gubitci iz ugovora o izgradnj (MRS 11, t. 36.)": {
+                    "Gubitci iz ugovora o izgradnj (MRS 11, t. 36.)-a1": {}
+                }, 
+                "Rashodi zaliha proizvodnje (HSFI 10 i MRS 2)": {
+                    "Dopu\u0161teni manjkovi -porezno priznati- tehnolo\u0161ki KRL i \u0161kart u proizvodnji (sa skupina 60, 62, 63 i 64)": {}, 
+                    "Prekomjerni manjkovi proizvoda (HSFI t. 10.2. i MRS 2, t. 16.) - porezno nepriznati": {}, 
+                    "Prekomjerni manjkovi-porezno priznati teh.KRL i \u0161kart u proiz.(60,62,63i64 -HSFI t10.21. i MRS2,t14)": {}, 
+                    "Razlika vi\u0161eg tro\u0161ka proizvodnje od neto-vrij. koja se mo\u017ee realizirati (HSFIt.10.35. i MRS2t.28.-33.)": {}, 
+                    "Tro\u0161kovi isporu\u010denih proizvoda u jamstvenom roku (zamjena)": {}
+                }, 
+                "Tro\u0161ak zaliha prodanih proizvoda (60, 62, 63 i 64)": {
+                    "Tro\u0161ak zaliha prodanih proizvoda (60, 62, 63 i 64)-a1": {}
+                }, 
+                "Tro\u0161kovi iz ugovora o orta\u0161tvu": {
+                    "Tro\u0161kovi iz ugovora o orta\u0161tvu-a1": {}
+                }, 
+                "Tro\u0161kovi neiskori\u0161tenog kapaciteta (HSFI t. 10.18. i MRS 2 t. 13)": {
+                    "Tro\u0161kovi neiskori\u0161tenog kapaciteta (HSFI t. 10.18. i MRS 2 t. 13)-a1": {}
+                }, 
+                "Tro\u0161kovi prodanih zaliha materijala i otpadaka (31, 32, 35 i 36)": {
+                    "Tro\u0161kovi manjkova materijala, dijelova i inventara kojom se tereti odgovorna osoba": {}, 
+                    "Tro\u0161kovi nabavne vrijednosti materijala, dijelova, inventara i otpadaka": {}
+                }, 
+                "Tro\u0161kovi realiziranih usluga (490 i 601)": {
+                    "Tro\u0161kovi realiziranih usluga (490 i 601)-a1": {}
+                }, 
+                "Tro\u0161kovi vrijed. uskl. proizvod. u tijeku(609), poluproizvoda(629) i zaliha got. proizvoda (639 i 649)": {
+                    "Tro\u0161kovi vrijed. uskl. proizvod. u tijeku(609), poluproizvoda(629) i zaliha got. proizvoda (639 i 649)-a1": {}
+                }
+            }, 
+            "UDIO U GUBITKU I DOBITKU PRIDRU\u017dENIH PODUZETNIKA": {
+                "Udio u dobitku od pridru\u017eenih poduzetnika": {
+                    "Udio u dobitku orta\u0161tva": {}, 
+                    "Udio u dobitku povezanih dru\u0161tava": {}
+                }, 
+                "Udio u gubitku pridru\u017eenih poduzetnika": {
+                    "Udio u gubitku ortaka": {}, 
+                    "Udio u gubitku povezanih dru\u0161tava": {}
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "POTRA\u017dIVANJA ZA UPISANI KAPITAL I DUGOTRAJNA IMOVINA": {
+            "BIOLO\u0160KA IMOVINA": {
+                "Akumulirana amortizacija biolo\u0161ke imovine": {
+                    "Akumulirana amortiz. vi\u0161egodi\u0161njih nasada": {}, 
+                    "Akumulirana amortiz. \u017eivotinja (osnovnog stada)": {}
+                }, 
+                "Biolo\u0161ka imovina - bilje - vi\u0161egodi\u0161nji nasadi": {
+                    "Maslinici": {}, 
+                    "Parkovi, zelenila, nasadi i cvije\u0107e": {}, 
+                    "Planta\u017ee drve\u0107a i bilja (\u0161ume)": {}, 
+                    "Ulaganja u ostale vi\u0161egodi\u0161nje nasade": {}, 
+                    "Vinogradi": {}, 
+                    "Vo\u0107njaci": {}
+                }, 
+                "Biolo\u0161ka imovina - \u017eivotinje - osnovno stado": {
+                    "Goveda": {}, 
+                    "Konji": {}, 
+                    "Mazge, magarci i mule": {}, 
+                    "Ostale nespomenute \u017eivotinje (psi, ptice i dr.)": {}, 
+                    "Ovce i koze": {}, 
+                    "Perad": {}, 
+                    "P\u010delinja dru\u0161tva": {}, 
+                    "Ribe": {}, 
+                    "Stado divlja\u010di": {}, 
+                    "Svinje": {}
+                }, 
+                "Biolo\u0161ka imovina u pripremi": {
+                    "Vi\u0161egodi\u0161nji nasadi u pripremi": {}, 
+                    "\u017divotinje (osnovno stado) u nabavi": {}
+                }, 
+                "Predujmovi za biolo\u0161ku imovinu": {
+                    "Predujmovi na nabavu \u017eivotinja": {}, 
+                    "Predujmovi za vi\u0161egodi\u0161nje nasade": {}
+                }, 
+                "Vrijednosno uskla\u0111enje biolo\u0161ke imovine": {
+                    "Vrijednosno uskla\u0111enje vi\u0161egodi\u0161njih nasada": {}, 
+                    "Vrijednosno uskla\u0111enje \u017eivotinja (osnovnog stada)": {}
+                }
+            }, 
+            "DUGOTRAJNA FINANCIJSKA IMOVINA (s povratom du\u017eim od jedne godine)": {
+                "Dani zajmovi povezanim poduzetnicima (analitika po dru\u0161tvima u kojima se ima vi\u0161e od 20% udjela)": {
+                    "Dani zajmovi povezanim poduzetnicima (analitika po dru\u0161tvima u kojima se ima vi\u0161e od 20% udjela)-a1": {}
+                }, 
+                "Dani zajmovi, depoziti i sl.": {
+                    "Dani dugotrajni zajmovi": {
+                        "Dani zajmovi direktoru, ortacima, menad\u017eerima, zaposlenicima": {}, 
+                        "Dani zajmovi kooperantima": {}, 
+                        "Dani zajmovi vanjskim fizi\u010dkim osobama - obrtnicima": {}, 
+                        "Dani zajmovi vanjskim pravnim osobama (nepovezanim)": {}, 
+                        "Financijski zajmovi dani u inozemstvo": {}, 
+                        "Oro\u010denja u bankama": {}, 
+                        "Ostali dugotrajni zajmovi": {}
+                    }, 
+                    "Depoziti dugotrajni": {
+                        "Depoziti iz poslovnih aktivnosti": {}, 
+                        "Depoziti kod osiguravaju\u0107ih dru\u0161tava": {}, 
+                        "Depoziti na carini (garancija \u0161peditera)": {}, 
+                        "Depoziti u poslovnim bankama": {}, 
+                        "Sudski depoziti": {}
+                    }, 
+                    "Kaucije i kapare": {
+                        "Dane kapare i osiguranja": {}, 
+                        "Kaucije iz kupoprodajnih poslova": {}, 
+                        "Kaucije za obveze": {}, 
+                        "Kaucije za pla\u0107anja": {}
+                    }
+                }, 
+                "Nezara\u0111ene kamate u kreditima i sl.": {
+                    "Nezara\u0111ene kamate u kreditima i sl.-a1": {}
+                }, 
+                "Ostala dugotrajna financijska imovina": {
+                    "Ostala nespomenuta dugoro\u010dna ulaganja": {}, 
+                    "Ulaganja u investicijske fondove (s rokom du\u017eim od 1 god.)": {}
+                }, 
+                "Sudjeluju\u0107i interesi (udjeli)": {
+                    "Potra\u017eivanja za udio u dobitku (analitika po udjelima)": {}, 
+                    "Udjel u dioni\u010dkom kapitalu (do 20% udjela - analitika po dru\u0161tvima)": {}, 
+                    "Udjel u kapitalu d.o.o. (do 20% udjela)": {}, 
+                    "Udjeli u dru\u0161tvima u inozemstvu (do 20% udjela)": {}, 
+                    "Ulaganje u dionice i udjele radi preprodaje": {}
+                }, 
+                "Udjeli (dionice) kod povezanih poduzetnika (s vi\u0161e od 20% udjela)": {
+                    "Osniva\u010dki udjeli u ustanovama": {}, 
+                    "Udio u dru\u0161tvu s uzajamnim udjelima": {}, 
+                    "Udjel u dionicama (s vi\u0161e od 20%)": {}, 
+                    "Udjel u kapitalu d.o.o.-a (s vi\u0161e od 20%)": {}, 
+                    "Udjeli u dru\u0161tvima u inozemstvu (s vi\u0161e od 20%)": {}, 
+                    "Udjeli u komanditnom dru\u0161tvu": {}, 
+                    "Udjeli u zadrugama": {}, 
+                    "Ulaganje u kapitalne pri\u010duve (neupisani kapital)": {}
+                }, 
+                "Ulaganja koja se obra\u010dunavaju metodom udjela": {
+                    "Ulaganja (udjeli) koji su raspolo\u017eivi za prodaju (dugotrajno ulaganje -MRS28.t.11. i 13. te MRS39.t.9.)": {}
+                }, 
+                "Ulaganja u vrijednosne papire (dugotrajne)": {
+                    "Dugotrajna ulaganja u blagajni\u010dke zapise": {}, 
+                    "Dugotrajna ulaganja u obveznice dru\u0161tva": {}, 
+                    "Dugotrajna ulaganja u opcije, certifikate i sl.": {}, 
+                    "Nezara\u0111eni prihodi u financijskim instrumentima": {}, 
+                    "Ulaganja u dr\u017eavne obveznice": {}, 
+                    "Ulaganja u mjenice, zadu\u017enice (kupljene)": {}, 
+                    "Ulaganja u ostale vrijednosne papire": {
+                        "Ulaganja u vrijednosne papire po fer vrijednosti": {}, 
+                        "Vrijednosni papiri namijenjeni prodaji (do dospije\u0107a)": {}
+                    }, 
+                    "Ulaganja u robne ugovore": {}, 
+                    "Ulaganje u vrijed. pap. raspolo\u017eive za prodaju": {}
+                }, 
+                "Vrijednosno uskla\u0111enje financijske imovine - dugotrajne (analitika prema oblicima imovine u uskla\u0111enju)": {
+                    "Vrijednosno uskla\u0111enje financijske imovine - dugotrajne (analitika prema oblicima imovine u uskla\u0111enju)-a1": {}
+                }, 
+                "Zajmovi dani poduzetnicima u kojima postoje sudjeluju\u0107i interesi (do 20% udjela u T.K.)": {
+                    "Zajmovi dani poduzetnicima u kojima postoje sudjeluju\u0107i interesi (do 20% udjela u T.K.)-a1": {}
+                }
+            }, 
+            "MATERIJALNA IMOVINA - NEKRETNINE": {
+                "Akumulirana amortizacija gra\u0111evina": {
+                    "Akumulirana amortizacija gra\u0111evina (analitika prema pojedinim gra\u0111evinama)": {}, 
+                    "Akumulirana amortizacija odlagali\u0161ta otpada, kamenoloma i sl. (MRS 16. t. 58.)": {}
+                }, 
+                "Gra\u0111evinski objekti (za vlastite potrebe)": {
+                    "Cjevovodi, vodospremnici, utvr\u0111ene obale, kanali, kanalizacija, dalekovodi": {}, 
+                    "Objekti poljoprivrede i ribarstva": {}, 
+                    "Ograde, izlozi, potporni zidovi -brane, \u0161portski tereni,\u0161atori,\u017ei\u010dare i sl.": {}, 
+                    "Ostali nespomenuti gra\u0111evinski objekti (rudnici, brane) i objekti izvan uporabe": {}, 
+                    "Poslovne zgrade": {}, 
+                    "Putovi, parkirali\u0161ta, staze i dr. gra\u0111evine (rampe i sl.), nadvo\u017enjaci i dr. bet. ili met. konstruk.": {}, 
+                    "Skladi\u0161ta, silosi, nadstre\u0161nice i gara\u017ee, staklenici, su\u0161ionice, hladnja\u010de": {}, 
+                    "Tvorni\u010dke zgrade, hale i radionice": {}, 
+                    "Zgrade monta\u017ene, barake, mostovi, drvene konstrukcije i sl.": {}, 
+                    "Zgrade trgovine, hotela, motela, restorana": {}
+                }, 
+                "Nekretnine u pripremi": {
+                    "Gra\u0111evine u pripremi": {}, 
+                    "Zemlji\u0161ta u pripremi": {}
+                }, 
+                "Predujmovi za nabavu nekretnina": {
+                    "Predujmovi za gra\u0111evine u nabavi": {}, 
+                    "Predujmovi za nabavu zemlji\u0161ta": {}
+                }, 
+                "Stanovi za vlastite zaposlenike": {
+                    "Stanovi za vlastite zaposlenike-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111enje nekretnina": {
+                    "Vrijednosno uskla\u0111enje gra\u0111evina": {}, 
+                    "Vrijednosno uskla\u0111enje zemlji\u0161ta": {}
+                }, 
+                "Zemlji\u0161na prava (vi\u0161egodi\u0161nja)": {
+                    "Pravo slu\u017enosti na zemlji\u0161tu (unaprijed pla\u0107ena)": {}, 
+                    "Zemlji\u0161ta u zakupu (unaprijed pla\u0107ena)": {}, 
+                    "Zemlji\u0161te s upisanim pravom gra\u0111enja (unaprijed pla\u0107ena)": {}
+                }, 
+                "Zemlji\u0161ta": {
+                    "Gra\u0111evinsko zemlji\u0161te (bez zgrada)": {}, 
+                    "Pobolj\u0161anja na zemlji\u0161tu (ulaganja u odvodnjavanje, ure\u0111ivanje prilaza i sl.)": {}, 
+                    "Poljoprivredno zemlji\u0161te": {}, 
+                    "Zemlji\u0161ta ispod gra\u0111evina": {}, 
+                    "Zemlji\u0161ta pod dugogodi\u0161njim nasadama, parkovima, vrtovima i sl.": {}, 
+                    "Zemlji\u0161te pod prometnicama, dvori\u0161tima, parkirali\u0161tima i sl.": {}, 
+                    "Zemlji\u0161te sa supstancijalnom potro\u0161njom ili odlagali\u0161ta": {}, 
+                    "Zemlji\u0161te za deponije sme\u0107a i otpada": {}, 
+                    "Zemlji\u0161te za eksploataciju kamena, gline, \u0161ljunka i pijeska,": {}, 
+                    "\u010cista neobra\u0111ena i nezasa\u0111ena zemlji\u0161ta i kamenjari": {}
+                }
+            }, 
+            "NEMATERIJALNA IMOVINA": {
+                "Akumulirana amortizacija nematerijalne imovine": {
+                    "Akumulirana amort. ostale nematerijalne imovine": {}, 
+                    "Akumulirana amort. robne i uslu\u017ene marke": {}, 
+                    "Akumulirana amortizacija godwilla (v. napom. 3.)": {}, 
+                    "Akumulirana amortizacija izdataka za razvoj": {}, 
+                    "Akumulirana amortizacija koncesija, patenata, licencija i sl.": {}, 
+                    "Akumulirana amortizacija softwera": {}
+                }, 
+                "Goodwill": {
+                    "Goodwill": {}
+                }, 
+                "Izdatci za razvoj": {
+                    "Izdatci za istra\u017eivanje mineralnih blaga (MSFI 6)": {}, 
+                    "Izdatci za razvoj proizvoda (uzorci, recepture, tro\u0161kovi pronalazaka i sl.).": {}, 
+                    "Izdatci za razvoj projekta (konstruiranje i test. prototipova i modela,alata,naprava i kalupa i sl.": {}
+                }, 
+                "Koncesije, patenti, licencije, robne i uslu\u017ene marke": {
+                    "Robne marke, trgova\u010dko ime, lista kupaca, industrijska prava, marketin\u0161ka prava, usl. marke i sl.prava": {}, 
+                    "Ulaganje u koncesije idozvole(za resurse, ceste, ribarenje, linije, sirovine, itd.)": {}, 
+                    "Ulaganje u licenciju i fren\u010dajz (Franchising)": {}, 
+                    "Ulaganje u patente i tehnologiju, inovacije, teh.dokumentaciju za proizv. proizvoda ili pru\u017eanje usluga": {}, 
+                    "Ulaganje u tr\u017ei\u0161ni udio (otkup prava distribucije za neko podru\u010dje)": {}
+                }, 
+                "Nematerijalna imovina u pripremi (analitika prema vrsti ra\u010duna skupine 01)": {
+                    "Nematerijalna imovina u pripremi (analitika prema vrsti ra\u010duna skupine 01)-a1": {}
+                }, 
+                "Ostala nematerijalna imovina": {
+                    "Dugogodi\u0161nje naknade pla\u0107ene za pravo gra\u0111enja, pravo prolaza i sl.": {}, 
+                    "Filmovi, glazbeni zapisi": {}, 
+                    "Ostala nematerijalna imovina": {}
+                }, 
+                "Predujmovi za nabavu nematerijalne imovine": {
+                    "Predujmovi za koncesije": {}, 
+                    "Predujmovi za nabavu ostalih prava uporabe": {}, 
+                    "Predujmovi za nabavu softwera": {}, 
+                    "Predujmovi za ostalu nematerijalnu imovinu": {}, 
+                    "Predujmovi za patente, licencije i dr.": {}, 
+                    "Predujmovi za razvoj": {}, 
+                    "Predujmovi za robne ili uslu\u017ene marke": {}
+                }, 
+                "Softver i ostala prava": {
+                    "Ostala dugotrajna prava": {
+                        "Ulaganja na tu\u0111oj imovini radi uporabe ili pobolj\u0161anja (nekretnina, opreme i sl.)": {}, 
+                        "Ulaganje u autorska i dr. prava kori\u0161tenja": {}, 
+                        "Ulaganje u dugogodi\u0161nje pravo uporabe (prema ugovoru)": {}, 
+                        "Ulaganje u pravo reproduciranja (npr. filmova), pravo objave u izdava\u0161tvu i sl.": {}, 
+                        "Ulaganje u pravo suvlasni\u0161tva opreme": {}, 
+                        "Ulaganje u znanje (know how), dizajn": {}
+                    }, 
+                    "Ostala prava": {
+                        "Ostala dugogodi\u0161nja prava": {}, 
+                        "Zalo\u017eno pravo i hipoteke (realizirane)": {}
+                    }, 
+                    "Softwer": {
+                        "Ulaganje u internetske stranice": {}, 
+                        "Ulaganje u ra\u010dunalni softwer": {}
+                    }
+                }, 
+                "Vrijednosno uskla\u0111enje nematerijalne imovine (analitika prema vrsti ra\u010duna skupine 01)": {
+                    "Vrijednosno uskla\u0111enje nematerijalne imovine (analitika prema vrsti ra\u010duna skupine 01)-a1": {}
+                }
+            }, 
+            "ODGO\u0110ENA POREZNA IMOVINA": {
+                "Odgo\u0111ena porezna imovina s osnove poreznog gubitka": {
+                    "Odgo\u0111ena porezna imovina s osnove poreznog gubitka-a1": {}
+                }, 
+                "Ostala odgo\u0111ena porezna imovina": {
+                    "Odgo\u0111ena porezna imovina s osnove pove\u0107ane amortizacije-a1": {}, 
+                    "Ostala odgo\u0111ena porezna imovina-a1": {}
+                }
+            }, 
+            "POSTROJENJA, OPREMA, ALATI, INVENTAR I TRANSPORTNA SREDSTVA": {
+                "Akumulirana amortizacija postrojenja i opreme": {
+                    "Akum. amortiz.30% i 100% pretporeza od brodova, jahti i dr. sred. za os. prijevoz(NV preko 400000,00kn)": {}, 
+                    "Akumulirana amortiz. 30% i 100% pretporeza od osob. automobila (n. v. ve\u0107e od 400.000,00 kn)": {}, 
+                    "Akumulirana amortiz. 30% od pretporeza od brodova, jahti i dr. sred. za osobni prijevoz": {}, 
+                    "Akumulirana amortiz. 30% pretporeza od osob. automobila": {}, 
+                    "Akumulirana amortiz. alata, pogonskog inventara i transportne imovine": {}, 
+                    "Akumulirana amortiz. opreme": {}, 
+                    "Akumulirana amortiz. ostale mat. imovine": {}, 
+                    "Akumulirana amortiz. poljoprivredne opreme": {}, 
+                    "Akumulirana amortiz. postrojenja": {}, 
+                    "Ostala akumulirana amortizacija": {}
+                }, 
+                "Alati, pogonski inventar i transportna imovina": {
+                    "Alati, inventar i vozila izvan uporabe": {}, 
+                    "Alati, mjerni i kontrolni instrumenti i pomo\u0107na oprema": {}, 
+                    "Audio i video aparati, kamere, parkir. rampe i sl.": {}, 
+                    "Inventar ustanova (aparati, kreveti i sl.)": {}, 
+                    "Ostali pogonski inventar,": {}, 
+                    "Pogonski i skladi\u0161ni inventar (stala\u017ee, zatvoreni ormari, skele, oplate, protupo\u017earni aparati i sl.)": {}, 
+                    "Poku\u0107stvo - inventar": {
+                        "Inventar trgovine (police, pregrade, pultovi)": {}, 
+                        "Ostalo poku\u0107stvo i inventar": {}, 
+                        "Ugostiteljsko i hotelsko poku\u0107stvo i inventar": {}, 
+                        "Uredsko poku\u0107stvo, sagovi, zavjese i sl.": {}
+                    }, 
+                    "Reklame (svjetle\u0107e), stupovi i sl.": {}, 
+                    "Transportna imovina": {
+                        "Auto mje\u0161alice, auto crpke za beton, auto dizalice i sl.": {}, 
+                        "Autobusi": {}, 
+                        "Brodice, jahte i ost. plovila": {}, 
+                        "Brodovi (ve\u0107i od 1000 BRT)": {}, 
+                        "Ostala transportna sredstva i ure\u0111aji (gusjeni\u010dari, el. vozila, vilju\u0161kari, vagoni bicikli i dr.)": {}, 
+                        "Priklju\u010dna transportna sredstva (prikolice)": {}, 
+                        "Putni\u010dka vozila (osobna i putni\u010dki kombi) i motor kota\u010di": {}, 
+                        "Teretna i vu\u010dna vozila, teglja\u010di i kamioni": {}, 
+                        "Teretna vozila (dostavna i kombi) i hladnja\u010de, cisterne": {}, 
+                        "Zrakoplovi": {}
+                    }, 
+                    "Vi\u0161egodi\u0161nja ambala\u017ea": {}
+                }, 
+                "Materijalna imovina u pripremi": {
+                    "Alati, pogonski inventar u pripremi": {}, 
+                    "Oprema u pripremi": {}, 
+                    "Osobni automobili i transportna sredstva u pripremi": {}, 
+                    "Ostala imovina u pripremi": {}, 
+                    "Poljoprivredna oprema u pripremi": {}, 
+                    "Postrojenja u pripremi": {}
+                }, 
+                "Oprema": {
+                    "Oprema grijanja i hla\u0111enja": {}, 
+                    "Oprema servisa (dizalice, ispitni ure\u0111aji, aparati i dr.)": {}, 
+                    "Oprema trgovine (police, blagajne, hladnjaci, i dr.)": {}, 
+                    "Oprema ugostiteljstva, hotela i sl. (aparati, \u0161tednjaci, hladnjaci, poku\u0107stvo i sl.)": {}, 
+                    "Oprema za graditeljstvo i monta\u017eu(kranovi, bageri, skele, oplate, mje\u0161alice, dizalice, valjci i sl.)": {}, 
+                    "Oprema za\u0161tite na radu i protupo\u017earne za\u0161tite": {}, 
+                    "Ostala oprema i oprema izvan uporabe": {}, 
+                    "Ra\u010dunalna oprema": {}, 
+                    "Telekomunikacijska oprema (mobiteli, tel. centrale, antene i sl.)": {}, 
+                    "Uredska oprema (fotokopirni, telefoni, telefaxi, blagajne, alarmi, klima, hladnjaci, televizori, i dr.)": {}
+                }, 
+                "Ostala materijalna imovina": {
+                    "Arhivski predmeti, makete i sl.": {}, 
+                    "Knjige, karte, fotografije i sl.": {}, 
+                    "Oldtimeri (automobili, brodovi i dr.)": {}, 
+                    "Ostala materijalna imovina": {}, 
+                    "Umjetnine, slike i sl.": {}
+                }, 
+                "Poljoprivredna oprema i mehanizacija": {
+                    "Oprema mlinova": {}, 
+                    "Oprema ribarstva (kavezi, mre\u017ee, \u010damci i brodovi, pakirnice)": {}, 
+                    "Oprema sto\u010darstva i p\u0107elarstva": {}, 
+                    "Oprema vinogradarstva (ba\u010dve, filteri, pre\u0161e, punionica)": {}, 
+                    "Oprema vo\u010darstva i maslinarstva": {}, 
+                    "Oprema za mljekarstvo (muzilice, separatori, police, spremnici i sl.)": {}, 
+                    "Ostala oprema poljoprivrede, sto\u010darstva i ribarstva": {}, 
+                    "Radni priklju\u010dci (plugovi, bera\u010dice, freze, prskalice, sabira\u010de i sl.)": {}, 
+                    "Traktori, kombajni, prikolice, kosilice i sl.": {}
+                }, 
+                "Postrojenja": {
+                    "Energetska postrojenja (kotlovnice, generatori,solarne \u0107elije, vjetro-elektrane, toplinske crpke i dr.)": {}, 
+                    "Mlinska postrojenja": {}, 
+                    "Ostala postrojenja i postrojenja izvan uporabe": {}, 
+                    "Pobolj\u0161anje na postrojenjima": {}, 
+                    "Postrojenje za pakiranje, ambala\u017eu i sl.": {}, 
+                    "Prijenosna postrojenja (dizala, pokretne stepenice, elevatori, pokretne trake i sl.)": {}, 
+                    "Rashladna postrojenja": {}, 
+                    "Strojevi i alati u svezi sa strojevima u pogonima i radionicama za obradu i preradu": {}, 
+                    "Tehni\u010dka postrojenja, ure\u0111aji, spremnici, pogonski motori, platforme i dr.": {}
+                }, 
+                "Predujmovi za materijalnu imovinu": {
+                    "Predujam za ostalu imovinu": {}, 
+                    "Predujmovi za alate, pogonski inventar i transportnu imovinu": {}, 
+                    "Predujmovi za postrojenja i opremu": {}
+                }, 
+                "Pretporez koji se ne mo\u017ee odbiti (kao dio vrijed. os. aut.)": {
+                    "30% i 100% pretporeza od brodova, jahti i dr. (n.v. ve\u0107e od 400.000,00 kn)": {}, 
+                    "30% i 100% pretporeza od osobnih automobila (n. v. ve\u0107e od 400.000,00 kn)": {}, 
+                    "30% pretporeza od brodova, jahti i dr. (n.v. do 400.000,00 kn)": {}, 
+                    "30% pretporeza od osobnih automobila (n. v. do 400.000,00 kn)": {}
+                }, 
+                "Vrijednosno uskla\u0111enje postrojenja i opreme": {
+                    "Vrijednosno uskla\u0111enje alata, pogonskog inventara i transportne imovine": {}, 
+                    "Vrijednosno uskla\u0111enje opreme": {}, 
+                    "Vrijednosno uskla\u0111enje ostale mat. imovine": {}, 
+                    "Vrijednosno uskla\u0111enje poljoprivredne opreme": {}, 
+                    "Vrijednosno uskla\u0111enje postrojenja": {}
+                }
+            }, 
+            "POTRA\u017dIVANJA (dulja od jedne godine)": {
+                "Ostala potra\u017eivanja - dugotrajna": {
+                    "Potra\u017eivanja iz orta\u0161tva": {}, 
+                    "Potra\u017eivanja od radnika": {}, 
+                    "Potra\u017eivanja od \u010dlanova dru\u0161tva": {}
+                }, 
+                "Potra\u017eivanja iz faktoringa": {
+                    "Potra\u017eivanja iz faktoringa-a1": {}
+                }, 
+                "Potra\u017eivanja od povezanih poduzetnika": {
+                    "Potra\u017eivanja od povezanih dru\u0161tava za dana sredstva na dugoro\u010dnu posudbu (osim novca)": {}, 
+                    "Potra\u017eivanja od povezanih dru\u0161tava za isporuke dobara i usluga": {}, 
+                    "Potra\u017eivanja od zadrugara, kooperanata i sl.": {}
+                }, 
+                "Potra\u017eivanja s osnove prodaje na kredit": {
+                    "Ostala potra\u017eivanja iz prodaje na kredit": {}, 
+                    "Potra\u017eivanja s osnove prodaje na robni kredit": {}, 
+                    "Potra\u017eivanja s osnove prodaje na robni kredit u inozemstvu": {}, 
+                    "Potra\u017eivanja za prodaju na potro\u0161a\u010dki kredit": {}, 
+                    "Potra\u017eivanja za prodaju u financijskom lizingu": {}, 
+                    "Potra\u017eivanja za prodane usluge na kredit": {}, 
+                    "Potra\u017eivanja za prodani udjel na kredit": {}, 
+                    "Potra\u017eivanje za dugotr. imovinu prodanu na kredit": {}
+                }, 
+                "Potra\u017eivanja u sporu i rizi\u010dna potra\u017eivanja": {
+                    "Potra\u017eivanja u sporu i rizi\u010dna potra\u017eivanja-a1": {}
+                }, 
+                "Potra\u017eivanja za jam\u010devine": {
+                    "Jamstvo za dobro izvedene radove": {}, 
+                    "Jam\u010devine iz natje\u010daja": {}, 
+                    "Jam\u010devine za \u0161tete": {}, 
+                    "Potra\u017eivanja za jam\u010devine iz operativnog lizinga": {}
+                }, 
+                "Potra\u017eivanja za nezara\u0111enu kamatu": {
+                    "Potra\u017eivanja za nezara\u0111enu kamatu-a1": {}
+                }, 
+                "Potra\u017eivanja za predujmove za usluge": {
+                    "Potra\u017eivanja za predujmove za usluge-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111ivanje dugotrajnih potra\u017eivanja": {
+                    "Vrijednosno uskla\u0111ivanje dugotrajnih potra\u017eivanja-a1": {}
+                }
+            }, 
+            "POTRA\u017dIVANJA ZA UPISANI A NEUPLA\u0106ENI KAPITAL": {
+                "Potra\u017eivanja iz ponovljene emisije dionica za upisane a neupla\u0107ene svote kapitala po emisijama dionica": {
+                    "Potra\u017eivanja iz ponovljene emisije dionica za upisane a neupla\u0107ene svote kapitala po emisijama dionica-a1": {}
+                }, 
+                "Potra\u017eivanja za temeljni ulog komanditora": {
+                    "Potra\u017eivanja za temeljni ulog komanditora-a1": {}
+                }, 
+                "Potra\u017eivanja za upisani a neupla\u0107eni dioni\u010dki kapital (analitika po upisnicima)": {
+                    "Potra\u017eivanja za upisani a neupla\u0107eni dioni\u010dki kapital (analitika po upisnicima)-a1": {}
+                }, 
+                "Potra\u017eivanja za upisani a neupla\u0107eni kapital u d.o.o. (analitika po \u010dlanovima dru\u0161tva)": {
+                    "Potra\u017eivanja za upisani a neupla\u0107eni kapital u d.o.o. (analitika po \u010dlanovima dru\u0161tva)-a1": {}
+                }, 
+                "Potra\u017eivanje za ostale uloge u kapital": {
+                    "Potra\u017eivanje za ostale uloge u kapital-a1": {}
+                }
+            }, 
+            "ULAGANJA U NEKRETNINE": {
+                "Akumulirana amortizacija ulaganja u gra\u0111evine": {
+                    "Akumulirana amortizacija ulaganja u gra\u0111evine-a1": {}
+                }, 
+                "Predujmovi za ulaganja u nekretnine": {
+                    "Predujam za ulaganja u zemlji\u0161te": {}, 
+                    "Predujam za ulaganje u gra\u0111evine": {}
+                }, 
+                "Ulaganja u nekretnine - gra\u0111evine": {
+                    "Gra\u0111evine izvan uporabe (zgrade, stanovi, apartmani, ku\u0107e)": {}, 
+                    "Gra\u0111evine u najmovima (poslovne zgrade, stanovi, apartmani, ku\u0107e)": {}
+                }, 
+                "Ulaganja u nekretnine - zemlji\u0161ta": {
+                    "Ulaganja u nekretnine - zemlji\u0161ta-a1": {}
+                }, 
+                "Ulaganja u nekretnine u pripremi": {
+                    "Ulaganja u gra\u0111evine u izgradnji": {}, 
+                    "Ulaganja u gra\u0111evine u nabavi": {}, 
+                    "Ulaganja u zemlji\u0161ta u nabavi": {}
+                }, 
+                "Vrijednosno uskla\u0111enje ulaganja u nekretnine": {
+                    "Vrijednosno uskla\u0111enje ulaganja u gra\u0111evine": {}, 
+                    "Vrijednosno uskla\u0111enje ulaganja u zemlji\u0161te": {}
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "PROIZVODNJA, BIOLO\u0160KA IMOVINA, GOTOVI PROIZVODI, ROBA I DUGOTRAJNA IMOVINA NAMIJENJENA PRODAJI": {
+            "BIOLO\u0160KA IMOVINA": {
+                "Vrijednosno uskla\u0111ivanje bilo\u0161ke imovine": {
+                    "Vrijednosno uskla\u0111ivanje bilo\u0161ke imovine-a1": {}
+                }, 
+                "Zaliha bilo\u0161ke imovine za prodaju": {
+                    "Bilo\u0161ka imovina za prodaju-a1": {}
+                }, 
+                "Zalihe biolo\u0161ke proizvodnje u toku": {
+                    "Zalihe biolo\u0161ke proizvodnje u toku-a1": {}
+                }
+            }, 
+            "DUGOTRAJNA IMOVINA NAMIJENJENA PRODAJI": {
+                "Materijalna imovina namijenjena za prodaju": {
+                    "Skupina imovine za prodaju (npr. pogon, poslov. jedinica i sl. )": {}
+                }, 
+                "Nematerijalna imovina namijenjena prodaji": {
+                    "Nematerijalna imovina namijenjena prodaji-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111enje dugotrajne imovine namijenjena prodaji": {
+                    "Vrijednosno uskla\u0111enje dugotrajne imovine namijenjena prodaji-a1": {}
+                }
+            }, 
+            "GOTOVI PROIZVODI U VLASTITIM PRODAVAONICAMA": {
+                "Gotovi proizvodi u prodaji u vlastitim prodavaonicama (analitika po prodavaonicama)": {
+                    "Gotovi proizvodi u prodaji u vlastitim prodavaonicama (analitika po prodavaonicama)-a1": {}
+                }, 
+                "Ura\u010dunana mar\u017ea u prodajnoj cijeni gotovih proizvoda": {
+                    "Ura\u010dunana mar\u017ea u prodajnoj cijeni gotovih proizvoda-a1": {}
+                }, 
+                "Ura\u010dunani PDV u vrijednosti proizvoda": {
+                    "Ura\u010dunani PDV u vrijednosti proizvoda-a1": {}
+                }, 
+                "Ura\u010dunani porez na luksuz": {
+                    "Ura\u010dunani porez na luksuz-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111ivanje gotovih proizvoda u prodavaonicama": {
+                    "Vrijednosno uskla\u0111ivanje gotovih proizvoda u prodavaonicama-a1": {}
+                }
+            }, 
+            "NEDOVR\u0160ENI PROIZVODI I POLUPROIZVODI": {
+                "Nedovr\u0161eni proizvodi i poluproizvodi (analitika po vrstama proizvoda)": {
+                    "Nedovr\u0161eni proizvodi i poluproizvodi (analitika po vrstama proizvoda)-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111ivanje nedovr\u0161enih proizvoda i poluproizvoda": {
+                    "Vrijednosno uskla\u0111ivanje nedovr\u0161enih proizvoda i poluproizvoda-a1": {}
+                }, 
+                "Zalihe poluproizvoda (analitika prema osnovnim skupinama ili po stupnju dovr\u0161enosti)": {
+                    "Zalihe poluproizvoda (analitika prema osnovnim skupinama ili po stupnju dovr\u0161enosti)-a1": {}
+                }
+            }, 
+            "NEKRETNINE I UMJETNINE ZA TRGOVANJE": {
+                "Nabavna vrijednost nekretnina za preprodaju (s porezom na promet)": {
+                    "Nabavna vrijednost nekretnina za preprodaju (s porezom na promet)-a1": {}
+                }, 
+                "Nekretnine za prodaju (ure\u0111ene)": {
+                    "Nekretnine za prodaju (ure\u0111ene)-a1": {}
+                }, 
+                "Predujmovi za kupnju nekretnina radi daljnje prodaje": {
+                    "Predujmovi za kupnju nekretnina radi daljnje prodaje-a1": {}
+                }, 
+                "Tro\u0161kovi dodatnog ure\u0111enja - dorade": {
+                    "Tro\u0161kovi dodatnog ure\u0111enja - dorade-a1": {}
+                }, 
+                "Umjetnine u prodaji": {
+                    "Umjetnine u prodaji-a1": {}
+                }, 
+                "Ura\u010dunana razlika u cijeni nekretnina i umjetnina za daljnju prodaju": {
+                    "Ura\u010dunana razlika u cijeni nekretnina i umjetnina za daljnju prodaju-a1": {}
+                }, 
+                "Ura\u010dunani PDV u umjetnine": {
+                    "Ura\u010dunani PDV u umjetnine-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111ivanje nekretnina i umjetnina u prometu i predujmova": {
+                    "Vrijednosno uskla\u0111ivanje nekretnina i umjetnina u prometu i predujmova-a1": {}
+                }
+            }, 
+            "OBRA\u010cUN TRO\u0160KOVA NABAVE ROBE - TRO\u0160KOVI KUPNJE": {
+                "Carina i druge uvozne pristojbe za robu": {
+                    "Carina i druge uvozne pristojbe za robu-a1": {}
+                }, 
+                "Kupovna cijena robe od dobavlja\u010da": {
+                    "Kupovna cijena robe od dobavlja\u010da-a1": {}
+                }, 
+                "Obra\u010dun nabave - tro\u0161ak kupnje": {
+                    "Obra\u010dun nabave - tro\u0161ak kupnje-a1": {}
+                }, 
+                "Ostali tro\u0161kovi nabave u svezi s dovo\u0111enjem robe na zalihu": {
+                    "Nadoknada uvozniku za uslugu uvoza": {}, 
+                    "Ostali tro\u0161kovi kupnje (pregledi, atesti i tro\u0161kovi u svezi s dovo\u0111enjem robe na zalihu -HSFI10 i MRS2)": {}, 
+                    "Transportno osiguranje": {}, 
+                    "Tro\u0161kovi oblikovanja za posebne kupce": {}, 
+                    "Tro\u0161kovi posebnog pakiranja - ambala\u017ee": {}, 
+                    "Tro\u0161kovi transporta": {}, 
+                    "Tro\u0161kovi ukrcaja i iskrcaja (fakturirani)": {}, 
+                    "Tro\u0161kovi vlastitog transporta (ne vi\u0161e od tarife javnog prijevoza) dovo\u0111enja robe na prodajnu lokaciju": {}, 
+                    "Tro\u0161kovi \u010duvanja i rukovanja (u fazi nabave)": {}, 
+                    "\u0160pediterski i bankarski tro\u0161kovi": {}
+                }, 
+                "Posebni porezi (tro\u0161arine)": {
+                    "Posebni porezi (tro\u0161arine)-a1": {}
+                }
+            }, 
+            "PREDUJMOVI ZA NABAVU ROBE": {
+                "Dani predujmovi uvozniku za nabavu robe": {
+                    "Dani predujmovi uvozniku za nabavu robe-a1": {}
+                }, 
+                "Dani predujmovi za nabavu robe": {
+                    "Dani predujmovi za nabavu robe-a1": {}
+                }, 
+                "Dani predujmovi za robu povezanom dru\u0161tvu": {
+                    "Dani predujmovi za robu povezanom dru\u0161tvu-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111enje danih predujmova za robu": {
+                    "Vrijednosno uskla\u0111enje danih predujmova za robu-a1": {}
+                }
+            }, 
+            "PROIZVODNJA - TRO\u0160KOVI KONVERZIJE": {
+                "Obustavljena proizvodnja": {
+                    "Obustavljena proizvodnja-a1": {}
+                }, 
+                "Proizvodnja u doradi i manipulaciji": {
+                    "Proizvodnja u doradi i manipulaciji-a1": {}
+                }, 
+                "Proizvodnja u slobodnoj zoni": {
+                    "Proizvodnja u slobodnoj zoni-a1": {}
+                }, 
+                "Proizvodnja u tijeku (po serijama, nositeljima, mjestima, radnim nalozima i sl.)": {
+                    "Proizvodnja u tijeku (po serijama, nositeljima, mjestima, radnim nalozima i sl.)-a1": {}
+                }, 
+                "Proizvodnja u tijeku iz orta\u010dkog ugovora": {
+                    "Proizvodnja u tijeku iz orta\u010dkog ugovora-a1": {}
+                }, 
+                "Vanjska proizvodnja (kooperacija i dr.)": {
+                    "Vanjska proizvodnja (kooperacija i dr.)-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111ivanje proizvodnje - usluga": {
+                    "Vrijednosno uskla\u0111ivanje proizvodnje - usluga-a1": {}
+                }, 
+                "Vrijednost usluga (u tijeku ili nedovr\u0161enih na datum bilance - MRS 2, t. 16.)": {
+                    "Vrijednost usluga (u tijeku ili nedovr\u0161enih na datum bilance - MRS 2, t. 16.)-a1": {}
+                }
+            }, 
+            "ROBA": {
+                "Roba dana u komisijsku ili konsignacijsku prodaju": {
+                    "Roba dana u komisijsku ili konsignacijsku prodaju-a1": {}
+                }, 
+                "Roba na putu": {
+                    "Roba na putu-a1": {}
+                }, 
+                "Roba u carinskom skladi\u0161tu \"D\" ili u slobodnoj zoni": {
+                    "Roba u slobodnoj zoni": {}, 
+                    "Vlastita roba u carinskom skladi\u0161tu tipa \"D\"": {}
+                }, 
+                "Roba u doradi, obradi i manipulaciji": {
+                    "Tro\u0161kovi u svezi s doradom": {}, 
+                    "Vrijednost robe u doradi": {}
+                }, 
+                "Roba u prodavaonicama": {
+                    "Roba u prodavaonici (po prodajnoj cijeni -analitika po prodavaonicama), ili": {
+                        "Roba u prodavaonici A s PDV-om 0%, itd.": {}, 
+                        "Roba u prodavaonici A s PDV-om 10%": {}, 
+                        "Roba u prodavaonici A s PDV-om 23%": {}
+                    }
+                }, 
+                "Roba u skladi\u0161tu": {
+                    "Roba u vlastitom veleprodajnom skladi\u0161tu (analitika po skladi\u0161tima)": {}, 
+                    "Zaliha otpadaka od robe": {}
+                }, 
+                "Roba u tu\u0111em skladi\u0161tu i izlozima": {
+                    "Roba u izlo\u017ebenim prostorima": {}, 
+                    "Roba u tu\u0111em skladi\u0161tu": {}, 
+                    "Roba u tu\u0111im silosima, hladnja\u010dama i sl.": {}
+                }, 
+                "Ura\u010dunana razlika u cijeni robe": {
+                    "Razlika u cijeni robe na skladi\u0161tu (analiti\u010dki po skupinama robe s istom mar\u017eom)": {}, 
+                    "Ura\u010dunana mar\u017ea robe u prodavaonici": {}
+                }, 
+                "Ura\u010dunani porezi u robi": {
+                    "Ura\u010dunani PDV (analitika po prodajnim mjestima i poreznim stopama)": {}, 
+                    "Ura\u010dunani porez na luksuz": {}
+                }, 
+                "Vrijednosno uskla\u0111ivanje zaliha robe": {
+                    "Prepravljene cijene robe zbog monetarnih oscilacija": {}, 
+                    "Vrijednosno uskla\u0111enje zbog pada cijena, smanjenja uporabljivosti i sl.": {}
+                }
+            }, 
+            "ZALIHE GOTOVIH PROIZVODA": {
+                "Gotovi proizvodi dani u komisijsku prodaju": {
+                    "Gotovi proizvodi dani u komisijsku prodaju-a1": {}
+                }, 
+                "Gotovi proizvodi dani u konsignacijsku prodaju": {
+                    "Gotovi proizvodi dani u konsignacijsku prodaju-a1": {}
+                }, 
+                "Gotovi proizvodi iz orta\u0161tava": {
+                    "Gotovi proizvodi iz orta\u0161tava-a1": {}
+                }, 
+                "Gotovi proizvodi na skladi\u0161tu (razrada za svako skladi\u0161te, pa po skupinama, tipovima, vrstama i sl.)": {
+                    "Gotovi proizvodi na skladi\u0161tu (razrada za svako skladi\u0161te, pa po skupinama, tipovima, vrstama i sl.)-a1": {}
+                }, 
+                "Gotovi proizvodi u doradi, obradi i manipulaciji": {
+                    "Gotovi proizvodi u doradi, obradi i manipulaciji-a1": {}
+                }, 
+                "Gotovi proizvodi u izlo\u017ebenim prostorima": {
+                    "Gotovi proizvodi u izlo\u017ebenim prostorima-a1": {}
+                }, 
+                "Gotovi proizvodi u javnom skladi\u0161tu, silosu, i dr.": {
+                    "Gotovi proizvodi u javnom skladi\u0161tu, silosu, i dr.-a1": {}
+                }, 
+                "Gotovi proizvodi u slobodnoj zoni": {
+                    "Gotovi proizvodi u slobodnoj zoni-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111ivanje zaliha gotovih proizvoda": {
+                    "Vrijednosno uskla\u0111ivanje zaliha gotovih proizvoda-a1": {}
+                }, 
+                "Zalihe nekurentnih proizvoda i otpadaka": {
+                    "Zalihe nekurentnih proizvoda i otpadaka-a1": {}
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "TRO\u0160KOVI PREMA VRSTAMA, FINANCIJSKI I OSTALI RASHODI": {
+            "AMORTIZACIJA": {
+                "Amortizacija biolo\u0161ke imovine (vinogradi, vo\u0107njaci, osnovno stado i sl.)": {
+                    "Amortizacija biolo\u0161ke imovine (vinogradi, vo\u0107njaci, osnovno stado i sl.)-a1": {}
+                }, 
+                "Amortizacija iznad porezno dopu\u0161tene": {
+                    "Amortizacija iznad porezno dopu\u0161tene-a1": {}
+                }, 
+                "Amortizacija materijalne imovine": {
+                    "Amortizacija alata i inventara": {}, 
+                    "Amortizacija brodova": {}, 
+                    "Amortizacija gra\u0111evina": {}, 
+                    "Amortizacija opreme": {}, 
+                    "Amortizacija ostale mater. imovine": {}, 
+                    "Amortizacija poljoprivredne opreme": {}, 
+                    "Amortizacija postrojenja": {}, 
+                    "Amortizacija transportnih sredstava": {}
+                }, 
+                "Amortizacija nematerijalne imovine": {
+                    "Amortizacija goodwila": {}, 
+                    "Amortizacija izdataka za razvoj": {}, 
+                    "Amortizacija koncesije, patenata i dr. prava": {}, 
+                    "Amortizacija ostale nematerijalne imovine": {}, 
+                    "Amortizacija softvera i ost. prava": {}
+                }, 
+                "Amortizacija objekata i opreme uprave i prodaje": {
+                    "Amortizacija gra\u0111ev. objekata": {}, 
+                    "Amortizacija osobnih automobila": {}, 
+                    "Amortizacija ostale opreme (poku\u0107stvo, telefonija i dr.)": {}, 
+                    "Amortizacija ra\u010dunala, ra\u010dunalne opreme i programa te ra\u010dunalne mre\u017ee": {}
+                }, 
+                "Amortizacija osobnih automobila i dr. sredstava za osobni prijevoz": {
+                    "30% amortizacije osob. aut. i dr. sred. prijevoza": {}, 
+                    "70% amortizacije osob. aut. i dr. sred. prijevoza": {}, 
+                    "Amortiz. osob. aut. za slu\u010d. pla\u0107e (neto + nepriz. PDV)": {}, 
+                    "Amortizacija (otpis) nepriznatog PDV-a": {}, 
+                    "Dio amortizacije osob. aut. i dr. sred. prijevoza u vrijednosti iznad 400.000,00 kn": {}
+                }, 
+                "Pove\u0107ana amortizacija s temelja revalorizacije": {
+                    "Pove\u0107ana amortizacija s temelja revalorizacije-a1": {}
+                }
+            }, 
+            "FINANCIJSKI RASHODI": {
+                "Gubitci iz ulaganja u dionice, udjele i dr. vrij. papire (prodane ispod tro\u0161ka nabave - \u010dl. 10. ZoPD": {
+                    "Gubitci iz ulaganja u dionice, udjele i dr. vrij. papire (prodane ispod tro\u0161ka nabave - \u010dl. 10. ZoPD-a1": {}
+                }, 
+                "Kamate iz odnosa s nepovezanim dru\u0161tvima": {
+                    "Diskontne kamate po mjenicama i dr. vrijednosnim papirima": {}, 
+                    "Kamata na pozajmice \u010dlanova dru\u0161tva i dioni\u010dara": {}, 
+                    "Kamate iz lizing poslova": {}, 
+                    "Kamate na kredite banaka": {}, 
+                    "Kamate na zajmove od fizi\u010dkih osoba": {}, 
+                    "Kamate na zajmove pravnih osoba": {}
+                }, 
+                "Kamate od povezanih dru\u0161tava": {
+                    "Kamate - porezno nepriznate": {}, 
+                    "Kamate koje se ura\u010dunavaju u zalihe (MRS 23. t.11. i HSFI t. 10.22.)": {}, 
+                    "Ugovorene kamate": {}, 
+                    "Zatezne kamate (\u010dl. 7., st. 1., t. 9. ZoPD)": {}
+                }, 
+                "Nerealizirani gubitci (rashodi) od financ. imovine": {
+                    "Gubitci od smanjenja vrijednosti ostale financ. imov.": {}, 
+                    "Gubitci od smanjenja \u2013 vrijed. uskla\u0111enja fin. imovine za trgovanje (MRS 39. t. 55a. i HSFI t. 9.22b)": {}, 
+                    "Tro\u0161kovi smanjenja fin. imovine zbog ugovora o pote\u0161ko\u0107ama (HSFI t. 9.22a i MRS 39. t. 55b.)": {}
+                }, 
+                "Ostali financijski tro\u0161kovi": {
+                    "Ostali nespomenuti financijski tro\u0161kovi": {}, 
+                    "Rashodi s osnove uskla\u0111enja obveza zbog valutne i sl. klauzule (dobavlja\u010di, za predujmove i sl.)": {}, 
+                    "Rashodi s osnove valutne klauzule po obvezama i kreditima": {}, 
+                    "Tro\u0161kovi burzovnih usluga, emisije vrijednosnih papira i sl.": {}, 
+                    "Tro\u0161kovi carine inozemnog financijskog i operativnog lizinga": {}, 
+                    "Tro\u0161kovi valutne klauzule iz tra\u017ebina ili obveza": {}
+                }, 
+                "Ostali tro\u0161kovi iz odnosa s povezanim poduzetnicima": {
+                    "Rashodi financiranja, tro\u0161kovi popusta i naknadnih odobrenja s povezanim poduzetnicima": {}, 
+                    "Tro\u0161kovi usluga uprave koncerna i sl.": {}
+                }, 
+                "Te\u010dajne razlike iz odnosa s nepovezanim dru\u0161tvima": {
+                    "Negativne te\u010d. razlike za ostalo (npr. iz blagajni\u010dkog, razlika kupovnog i srednjeg te\u010daja banke i dr.)": {}, 
+                    "Negativne te\u010dajne razlike iz kreditnih obveza": {}, 
+                    "Negativne te\u010dajne razlike iz obveza za nabave u inozemstvu": {}, 
+                    "Negativne te\u010dajne razlike iz potra\u017eivanja u inozemstvu": {}, 
+                    "Negativne te\u010dajne razlike nastale na stanjima deviznog ra\u010duna i devizne blagajne": {}
+                }, 
+                "Te\u010dajne razlike iz odnosa s povezanim dru\u0161tvima": {
+                    "Te\u010dajne razlike iz odnosa s povezanim dru\u0161tvima-a1": {}
+                }, 
+                "Tro\u0161kovi diskonta i nagodbi": {
+                    "Ostali tro\u0161kovi": {}, 
+                    "Tro\u0161kovi diskonta pri prodaji potra\u017eivanja (faktoring)": {}, 
+                    "Tro\u0161kovi iz financijskih nagodbi": {}
+                }, 
+                "Zatezne kamate": {
+                    "Ostale zatezne kamate": {}, 
+                    "Zatezne kamate iz trgova\u010dkih ugovora": {}, 
+                    "Zatezne kamate izme\u0111u povezanih osoba (por. neprizn.)": {}, 
+                    "Zatezne kamate na poreze, doprinose i dr. davanja": {}, 
+                    "Zatezne kamate po sudskim presudama": {}
+                }
+            }, 
+            "MATERIJALNI TRO\u0160KOVI": {
+                "Materijalni tro\u0161kovi administracije, uprave i prodaje": {
+                    "Ambala\u017eni materijal, vrpce za blagajne, blokovi papira, pisa\u010di, naljepnice, etikete i dr.": {}, 
+                    "Materijal i sredstva za \u010di\u0161\u0107enje i odr\u017eavanje": {}, 
+                    "Ostali materijalni tro\u0161kovi trgovine": {}, 
+                    "Tro\u0161kovi opomena": {}, 
+                    "Tro\u0161kovi otpisa sitnog inventara": {}, 
+                    "Tro\u0161kovi ukrasnog bilja": {}, 
+                    "Uniformirana radna odje\u0107a i obu\u0107a": {}, 
+                    "Uredski materijal (papir, registratori, olovke, tiskanice, toneri, ulo\u0161ci, kalendari, rokovnici i sl.)": {}, 
+                    "Voda (izvorska) za pi\u0107e": {}
+                }, 
+                "Odstupanja od standardnog tro\u0161ka": {
+                    "Odstupanja od standardnog tro\u0161ka-a1": {}
+                }, 
+                "Potro\u0161ena energija u administraciji, upravi i prodaji": {
+                    "30% goriva za osobni prijevoz +30% PDV-a": {}, 
+                    "70% tro\u0161kova goriva za pogon automobila za osobni prijevoz(i automobila u najmu)": {}, 
+                    "Gorivo za osob. aut. (neto + 30% PDV) za slu\u010d. pla\u0107e": {}, 
+                    "Ostali tro\u0161kovi energije": {}, 
+                    "Plin, toplinska energija, briketi, drva": {}, 
+                    "Tro\u0161ak elektri\u010dne energije": {}, 
+                    "Tro\u0161ak goriva za teretna vozila, strojeve i brodove": {}
+                }, 
+                "Potro\u0161ena energija u proizvodnji dobara i usluga": {
+                    "Dizelsko gorivo, benzin i motorno ulje (za stroj. i sl.)": {}, 
+                    "Elektri\u010dna energija": {}, 
+                    "Mazut i ulje za lo\u017eenje": {}, 
+                    "Ostali tro\u0161kovi energije u proizvodnji": {}, 
+                    "Plin, para, briketi i drva": {}, 
+                    "Tro\u0161ak goriva za teretna vozila (kamione, autobuse, strojeve, brodove i sl.)": {}
+                }, 
+                "Potro\u0161eni rezervni dijelovi i materijal za odr\u017eavanje": {
+                    "30% tro\u0161ka rezervnih dijelova i materijala za odr\u017eavanje automobila i dr. za osobni prijevoz +30% PDV-a": {}, 
+                    "70% tro\u0161kova rez. dijelova i mat. za automob., plovila i zrakopl.za prijevoz(\u010dl.7.,st.1.,t.4.ZoPD)": {}, 
+                    "Materijal za odr\u017eavanje opreme i objekata": {}, 
+                    "Ostali tro\u0161kovi rezervnih dijelova": {}, 
+                    "Potro\u0161eni rezervni dijelovi za popravak vlastite opreme": {}, 
+                    "Potro\u0161eni vlastiti proizvodi i roba za odr\u017eavanje": {}, 
+                    "Tro\u0161ak rez. dijelova (neto + 30% PDV) za slu\u010daj pla\u0107e": {}, 
+                    "Tro\u0161kovi zamjene u jamstvenom roku": {}
+                }, 
+                "Tro\u0161ak sitnog inventara, ambala\u017ee i autoguma": {
+                    "30% tro\u0161ka inventara i autoguma za osobne automobile +30% PDV-a": {}, 
+                    "70% tro\u0161ka autoguma za os. automobile i dr. sredstva prijevoza za potrebe administr., uprave i prodaje": {}, 
+                    "Trok\u0161. auto guma (neto + 30% PDV) za slu\u010daj pla\u0107e": {}, 
+                    "Tro\u0161kovi ambala\u017ee (povratne, posebne) - otpis": {}, 
+                    "Tro\u0161kovi autoguma (za kamione, autobuse, teretna vozila i strojeve)": {}, 
+                    "Tro\u0161kovi sitnog inventara,": {}
+                }, 
+                "Tro\u0161kovi ambala\u017ee": {
+                    "Tro\u0161kovi neodvojive ambala\u017ee u proizvodnji (boce, limenke, kutije i dr.)": {}, 
+                    "Tro\u0161kovi paleta, gajbi i sl.": {}
+                }, 
+                "Tro\u0161kovi energije na pomo\u0107nim mjestima u proizvodnji": {
+                    "Tro\u0161kovi energije na pomo\u0107nim mjestima u proizvodnji-a1": {}
+                }, 
+                "Tro\u0161kovi istra\u017eivanja i razvoja (Zak. o znan - Nn. br. 46/07.)": {
+                    "Tro\u0161kovi projekta za temeljna istra\u017eivanja proizvoda": {}
+                }, 
+                "Tro\u0161kovi sirovina i materijala (za proizvodnju dobara i usluga)": {
+                    "Dijelovi i sklopovi": {}, 
+                    "Materijal pogonske administracije i menad\u017ementa (uredski potro\u0161ni i sl.)": {}, 
+                    "Materijal za HTZ za\u0161titu, radna i za\u0161titna odje\u0107a i obu\u0107a": {}, 
+                    "Materijali u pomo\u0107noj djelatnosti (za restoran i dr.)": {}, 
+                    "Osnovni materijali i sirovine": {}, 
+                    "Ostali izravni i op\u0107i tro\u0161kovi pogona - uslu\u017ene jedinice (HSFI t. 10.17 i MRS 2, t. 10. do 19.)": {}, 
+                    "Poluproizvodi za ugradnju": {}, 
+                    "Pomo\u0107ni materijali (mazivo, ljepila, svrdla, pile, no\u017eevi, brusne plo\u010de i dr.)": {}, 
+                    "Potro\u0161ni materijal za \u010di\u0161\u0107enje i odr\u017eavanje": {}, 
+                    "Tro\u0161kovi oblikovanja proizvoda za posebne kupce": {}
+                }
+            }, 
+            "OSTALI POSLOVNI RASHODI": {
+                "Darovanja iznad 2% od UP i dr. darovanja": {
+                    "Darovanje politi\u010dkih stranaka i nezavisnih kandidata": {}, 
+                    "Darovi bez protu\u010dinidbe prim. i izdatci nisu u svezi s ostv.dobitka+PDV,osim na novac-\u010dl7,st1.,t13ZoPD": {}, 
+                    "Porezno nepriznata darovanja iznad 2% UP (iznad dop. s 486) i ino. udruga i sl. (\u010dl.7.st.1.t.10 ZoPD)": {}
+                }, 
+                "Darovanje do 2% od ukupnog prihoda": {
+                    "Darovanje za op\u0107ekorisne namjene (u novcu ili naravi do 2% od UP pr.god.  - \u010dl. 7., st. 7. ZoPD)": {}, 
+                    "Darovanje za zdrav.potrebe (vanjskih osoba do 2% UPpr.god. a nije pokriveno osig.-\u010dl.7.,st.8.ZoPD)": {}
+                }, 
+                "Kazne, penali, nadoknade \u0161teta i tro\u0161kovi iz ugovora": {
+                    "Kazne za parkiranje": {}, 
+                    "Nadoknade \u0161teta iz radnog odnosa (npr. za godi\u0161nji odmor, ozljede na radu, od\u0161tetne rente i sl.)": {}, 
+                    "Nadoknade \u0161tete - tro\u0161kovi po nagodbama i sudskim presudama - tu\u017ebama": {}, 
+                    "Ostali izdatci za \u0161tete": {}, 
+                    "Penali, le\u017earine, dangubnine": {}, 
+                    "Tro\u0161kovi kazni za prijestupe i prekr\u0161aje i sl. (\u010dl. 7., st. 1., t. 7. ZoPD)": {}, 
+                    "Tro\u0161kovi preuzetih obveza iz ugovora": {}, 
+                    "Tro\u0161kovi prisilne naplate poreza i dr. davanja (\u010dl. 7., st. 1., t. 6. ZoPD)": {}, 
+                    "Ugovorene kazne i penali zbog neizvr\u0161enja, propusta i sl.": {}
+                }, 
+                "Manjkovi i provalne kra\u0111e na zalihama i drugim sredstvima": {
+                    "Dopu\u0161teni manjkovi - kalo, rastep, kvar i lom na zalihama prema odlukama HGK, HOK ili internim aktima": {}, 
+                    "Manjkovi novca i vrijednosnih papira": {}, 
+                    "Manjkovi uslijed vi\u0161e sile (provalna kra\u0111a, elementarna nepogoda)": {}, 
+                    "Ostali manjkovi iz imovine": {}, 
+                    "Prekomjerni manjkovi na zalihama (KRL) iznad normativa+PDV, prema HGK,(\u010dl.7.,st.5.ZoPD)": {}
+                }, 
+                "Naknadno utvr\u0111eni tro\u0161kovi poslovanja": {
+                    "Ispravak pogre\u0161aka prethodnih razdoblja": {}, 
+                    "Naknadno utvr\u0111eni tro\u0161kovi - ra\u010duni iz prethodnih godina": {}, 
+                    "Tro\u0161kovi naknadnih razlika iz nabava": {}
+                }, 
+                "Ostali tro\u0161kovi - rashodi (\u010dl. 7. ZoPD)": {
+                    "Ostali nespomenuti poslovni rashodi": {}, 
+                    "Rashodi utvr\u0111eni u postupku nadzora (\u010dl. 7. st. 1. t. 11. ZoPD) - skrivene isplate dobitka": {}, 
+                    "Tro\u0161kovi -porezno nepriznati- koji nisu u svezi s ostvarivanjem dobitka(\u010dl7, st1,t13.ZoPD-red.br.24PD)": {}, 
+                    "Tro\u0161kovi povalstica i dr. oblici imovinskih koristi (\u010dl. 7., st.1. t.10. ZoPD) - porezno nepriznati": {}
+                }, 
+                "Otpisi vrijednosno neuskla\u0111enih potra\u017eivanja": {
+                    "Izravni otpisi nenapla\u0107enih potra\u017eivanja od kupaca i drugih koja nisu vrijednosno uskla\u0111ena": {}, 
+                    "Otpisi nenapla\u0107enih jamstava i drugih osiguranja": {}, 
+                    "Tro\u0161kovi ostalih otpisa": {}
+                }, 
+                "Rashodi - otpisi nematerijalne i materijalne imovine": {
+                    "Gubitak od prodaje ost. dug. mat. i nemat. imovine": {}, 
+                    "Gubitak od prodane dug. imov. koja se ne amortizira": {}, 
+                    "Neamortizirana vrijednost rashodovane, uni\u0161tene ili otu\u0111ene dugotrajne imovine": {}, 
+                    "Otpisi imovine izvan uporabe - rashod": {}, 
+                    "Otpisi materijala i robe - rashod": {}
+                }, 
+                "Tro\u0161ak naknadnih popusta, sni\u017eenja, reklamacija i tro\u0161kovi uzoraka": {
+                    "Naknadno odobreni popusti i odobrenja": {}, 
+                    "Tro\u0161kovi nagodbe (razlike iz sni\u017eenja)": {}, 
+                    "Tro\u0161kovi naknadnih reklamacija": {}, 
+                    "Tro\u0161kovi nenadokna\u0111enih jamstava za prodana dobra": {}, 
+                    "Tro\u0161kovi uzoraka zbog kontrole i pregleda, izlaganje radi prodaje i sl.": {}
+                }, 
+                "Tro\u0161kovi iz drugih aktivnosti (izvan osnovne djelatnosti)": {
+                    "Tro\u0161kovi iz orta\u010dkog ugovora": {}, 
+                    "Tro\u0161kovi iz posredovanja": {}
+                }
+            }, 
+            "OSTALI TRO\u0160KOVI POSLOVANJA": {
+                "Bankovne usluge i tro\u0161kovi platnog prometa": {
+                    "Bankovne usluge (za inozemni platni promet, te\u010dajnu mar\u017eu i sl.)": {}, 
+                    "Ostali bankovni tro\u0161kovi": {}, 
+                    "Tro\u0161kovi akreditiva": {}, 
+                    "Tro\u0161kovi bankovne garancije": {}, 
+                    "Tro\u0161kovi obrade kredita": {}, 
+                    "Tro\u0161kovi platnog prometa": {}, 
+                    "Tro\u0161kovi provizija (pri kupnji deviza, brokeru i dr.)": {}, 
+                    "Tro\u0161kovi provizija izdavatelja kreditnih kartica": {}
+                }, 
+                "Dnevnice za slu\u017ebena putovanja i putni tro\u0161kovi": {
+                    "Dnevnice za slu\u017ebena putovanja i tro\u0161kovi no\u0107enja u Hrvatskoj": {}, 
+                    "Dnevnice za slu\u017ebena putovanja u inozemstvu": {}, 
+                    "Doprinos za zdravstveno osiguranje na slu\u017ebena putovanja u inozemstvo": {}, 
+                    "Ostali tro\u0161kovi na slu\u017ebenom putu (tro\u0161ak autoceste, tunela, parkiranja, trajekta i dr.)": {}, 
+                    "Terenski dodatak - pomorski dodatak": {}, 
+                    "Tro\u0161kovi no\u0107enja (po ra\u010dunu hotela i dr.)": {}, 
+                    "Tro\u0161kovi slu\u017ebenog puta vanjskih suradnika (bruto s porezima i doprinosima)": {}, 
+                    "Tro\u0161kovi uporabe vlastitog automobila na slu\u017ebenom putu": {}
+                }, 
+                "Nadoknade tro\u0161kova, darovi i potpore": {
+                    "Darovi djeci i sli\u010dne potpore (ako nisu dohodak)": {}, 
+                    "Loko vo\u017enja - Nadoknada za uporabu privatnog automobila u poslovne svrhe za lokalnu vo\u017enju": {}, 
+                    "Nadoknade za odvojeni \u017eivot": {}, 
+                    "Ostali tro\u0161kovi zaposlenika": {}, 
+                    "Otpremnine (odlazak u mirovinu, otkaz i teh.vi\u0161ka-\u010dl.119.ZOR-a,ozljeda ili prof.bolesti (\u010dl.80.ZOR-a)": {}, 
+                    "Potpora zbog bolesti, invalidnosti, smrti, elementarnih nepogoda i sl.": {}, 
+                    "Potpore i pomo\u0107i iznad neoporezivih svota": {}, 
+                    "Prigodne nagrade (bo\u017ei\u0107nice,uskrsnice,u naravi do 400kn, regres, jubilarne i sl., do 2500kn god.)": {}, 
+                    "Stipendije, nagrade u\u010denicima i studentima": {
+                        "Stipendije i nagrade u\u010denicima i studentima do neoporezivih svota": {}, 
+                        "Stipendije i nagrade u\u010denicima i studentima iznad neoporezivih svota": {}
+                    }, 
+                    "Tro\u0161kovi prijevoza na posao i s posla": {}
+                }, 
+                "Ostali tro\u0161kovi poslovanja - nematerijalni": {
+                    "Ostali nespomenuti nematerijalni tro\u0161kovi (ulaznice za sajmove i dr.)": {}, 
+                    "Sudski tro\u0161kovi i pristojbe": {}, 
+                    "Tro\u0161kovi licenciranja, certifikata i sl.": {}, 
+                    "Tro\u0161kovi obrazovanja zaposlenika (stru\u010dno, seminari, stru\u010dni ispiti,prekval., fakulteti, jezici i sl.)": {
+                        "Op\u0107e obrazovanje": {}, 
+                        "Posebno obrazovanje": {}
+                    }, 
+                    "Tro\u0161kovi obveznih lije\u010dni\u010dkih pregleda": {}, 
+                    "Tro\u0161kovi osnivanja (bilje\u017enik, sud, oglasi, odvjetnik)": {}, 
+                    "Tro\u0161kovi sistematskih kontrolnih lije\u010dni\u010dkih pregleda zaposlenika": {}, 
+                    "Tro\u0161kovi slu\u017ebenih glasila": {}, 
+                    "Tro\u0161kovi za priru\u010dnike, \u010dasopise i stru\u010dnu literaturu": {}, 
+                    "Tro\u0161kovi zdravstvenog nadzora i kontrola proizvoda, robe, usluge i sl.": {}
+                }, 
+                "Porezi koji ne ovise o dobitku i pristojbe": {
+                    "Naknade Fondu za ambala\u017eu (prema materijalu, po jed. proizv., povratna i poticajna ambala\u017ea)": {}, 
+                    "Ostali porezi i pristojbe": {
+                        "Porez i carina pri izvozu": {}
+                    }, 
+                    "Porez (imovinski) na cestovna vozila, plovne objekte i zrakoplove": {}, 
+                    "Porez na ku\u0107e za odmor": {}, 
+                    "Porez na reklame koje se isti\u010du na javnim mjestima": {}, 
+                    "Porez na tvrtku odnosno naziv": {}, 
+                    "Porez po odbitku": {}, 
+                    "Tro\u0161ak PDV-a koji se ne mo\u017ee priznati": {
+                        "30% PDV-a na osobne automobile i dr. sredstva osobnog prijevoza": {}, 
+                        "PDV na osobne automobile i dr. sred. prijevoza na dio n. v. iznad 400.000,00 kn": {}, 
+                        "Tro\u0161ak PDV-a iz vlastite potro\u0161nje (ako ve\u0107 nije sadr\u017ean u tro\u0161ku)": {}, 
+                        "Tro\u0161ak PDV-a za koji je prestalo pravo na pretporez": {}
+                    }, 
+                    "Tro\u0161ak poreza koji je ugovorno preuzet pri prodaji (npr. 5% p.p.n.)": {}, 
+                    "Tro\u0161kovi naknadno utvr\u0111enih poreza (npr. PDV, posebni i dr. porezi, osim poreza na dobitak)": {}
+                }, 
+                "Premije osiguranja": {
+                    "Premije dobrovoljnog mirov. osig. (do 6000kn god. po radniku-\u010dl.10.Zak. o porezu na dohodak -NN80/10)": {}, 
+                    "Premije osiguranja osoba (opasni poslovi, preno\u0161enje novca, putnici i sl.)": {}, 
+                    "Premije osiguranja prometnih sredstava (uklju\u010divo i kasko)": {}, 
+                    "Premije za dokup mirovine zaposlenicima (III. stup) MRS 19 t. 43. i 44.": {}, 
+                    "Premije za ostale oblike osiguranja": {}, 
+                    "Premije za zdravstveno osiguranje": {}, 
+                    "Transportno osiguranje dobara": {}, 
+                    "Tro\u0161kovi osiguranja dugotrajne materijalne i nematerijalne imovine": {}, 
+                    "Tro\u0161kovi premija \u017eivotnog osiguranja (ugovaratelj i korisnik je trgova\u010dko dru\u0161tvo)": {}
+                }, 
+                "Tro\u0161kovi prava kori\u0161tenja (osim najmova)": {
+                    "Ostali tro\u0161kovi prava kori\u0161tenja": {}, 
+                    "Tro\u0161ak HRT pretplate": {}, 
+                    "Tro\u0161ak prava na model, nacrt, formulu, plan, iskustvo i sl.": {}, 
+                    "Tro\u0161kovi fran\u0161iza, know howa, patenata, uporabe imena, znaka i dr.": {}, 
+                    "Tro\u0161kovi koncesije": {}, 
+                    "Tro\u0161kovi licenciranih prava": {}, 
+                    "Tro\u0161kovi prava na proizvodni i sl. postupak": {}, 
+                    "Tro\u0161kovi prava uporabe ra\u010dunalnih programa": {}
+                }, 
+                "Tro\u0161kovi reprezentacije i promid\u017ebe (interne)": {
+                    "30% od svih neto-tro\u0161kova reprezentacije (vlastitih)": {}, 
+                    "70% tro\u0161kova reprezentacije od uporabe vlastitih brodova, automobila, nekretnina i sl. + 70% PDV-a": {}, 
+                    "70% tro\u0161kova reprezentacije u darovima (robi i proizvodima + 70% PDV-a": {}, 
+                    "70% tro\u0161kova vlastitih usluga za reprezentaciju + 70% PDV-a": {}, 
+                    "Tro\u0161kovi promid\u017ebe (u katalozima, letcima, nagradne igre)": {}, 
+                    "Tro\u0161kovi promid\u017ebe u proizvodima ili robi (\"nije za prodaju\" do 80,00 kn )": {}
+                }, 
+                "Tro\u0161kovi \u010dlanova uprave": {
+                    "Godi\u0161nje nagrade \u010dlanovima uprave": {}, 
+                    "Nadoknade prokuristima, \u010dlanovima skup\u0161tine dru\u0161tva i dr.": {}, 
+                    "Nadoknade ste\u010dajnim upraviteljima": {}, 
+                    "Nadoknade vanjskim \u010dlanovima uprave": {}, 
+                    "Nadoknade \u010dlanovima nadzornog odbora": {}, 
+                    "Tro\u0161kovi honorara vanjskim \u010dlanovima uprave": {}, 
+                    "Tro\u0161kovi usluga vanjske uprave (po ra\u010dunu)": {}
+                }, 
+                "\u010clanarine, nadoknade i sli\u010dna davanja": {
+                    "Dozvole za kori\u0161tenje autocesta, atesta, certifikata i sl.": {}, 
+                    "Nadoknada za kori\u0161tenje mineralnih sirovina": {}, 
+                    "Nadoknada za op\u0107ekorisnu funkciju \u0161uma (0,0525%)": {}, 
+                    "Ostala davanja": {}, 
+                    "Pri\u010duva za odr\u017eavanje zgrade (Zakon o vlasni\u0161tvu - Nar. nov., br. 91/96. do 38/09.)": {}, 
+                    "Spomeni\u010dka renta": {}, 
+                    "\u010clanarina turisti\u010dkoj zajednici": {}, 
+                    "\u010clanarina za kreditne i potro\u0161a\u010dke kartice": {}, 
+                    "\u010clanarine komori (HGK ili HOK) i dopr. za javne ovlasti": {}, 
+                    "\u010clanarine udrugama i strukovnim komorama": {}
+                }
+            }, 
+            "OSTALI VANJSKI TRO\u0160KOVI (TRO\u0160KOVI USLUGA)": {
+                "Intelektualne i osobne usluge": {
+                    "Autorski honorari (pisana, govorna, prijevodi i dr.)": {}, 
+                    "Knjigovodstvene usluge": {}, 
+                    "Konzultantske i savjetni\u010dke usluge": {}, 
+                    "Naknade za kori\u0161tenje prava intelektualnog vlasni\u0161tva (licencije, ind. prava., robni znak i sl.)": {}, 
+                    "Odvjetni\u010dke, bilje\u017eni\u010dke i usluge izrade pravnih akata": {}, 
+                    "Tro\u0161kovi drugih dohodaka (ugovora o djelu, akvizitera, trgov. putnika, konzultanata)": {}, 
+                    "Usluge poreznih savjetnika": {}, 
+                    "Usluge revizije i procjene vrijednosti poduze\u0107a": {}, 
+                    "Usluge specijalisti\u010dkog obrazovanja, znanstvenoistra\u017eiva\u010dke usluge, usluge informacija i sl.": {}, 
+                    "Usluge vje\u0161ta\u010denja, administracijske usluge, i dr. intelektualne usluge": {}
+                }, 
+                "Tro\u0161kovi komunalnih i sli\u010dnih usluga": {
+                    "Deratizacija i dezinfekcijske usluge": {}, 
+                    "Dimnja\u010darske i ekolo\u0161ke usluge": {}, 
+                    "Gara\u017eiranje i parkiranje vozila": {}, 
+                    "Komunalna naknada (za financ. izgradnje)": {}, 
+                    "Odr\u017eavanje zelenila": {}, 
+                    "Odvoz sme\u0107a i fekalija": {}, 
+                    "Ostale komunalne i ekolo\u0161ke usluge": {}, 
+                    "Usluge tr\u017enica": {}, 
+                    "Veterinarske, sanitarne i usluge zbrinjavanja otpada": {}, 
+                    "Voda i odvodnja": {}
+                }, 
+                "Tro\u0161kovi ostalih vanjskih usluga": {
+                    "Hotelske usluge (u agencijskim poslovima)": {}, 
+                    "Ostali nespomenuti vanjski tro\u0161kovi - usluge": {}, 
+                    "Tro\u0161ak autoputa, tunela i mostarina": {}, 
+                    "Tro\u0161kovi fotokopiranja, prijepisa, izrade naljepnica i fotografija i sl.": {}, 
+                    "Tro\u0161kovi kori\u0161tenja javnih skladi\u0161ta, luka, pristani\u0161ta, hla\u0111enja i sl.": {}, 
+                    "Tro\u0161kovi ogla\u0161avanja u tisku za slobodna radna mjesta, objava fin. izvje\u0161\u0107a i sl. (osim promid\u017ebe)": {}, 
+                    "Usluge kontrole kakvo\u0107e i atestiranja dobara": {}, 
+                    "Usluge studentskog servisa": {}, 
+                    "Vanjskotrgova\u010dke usluge": {}, 
+                    "\u0160pediterske usluge pri izvozu i sl.": {}
+                }, 
+                "Tro\u0161kovi telefona, prijevoza i sl.": {
+                    "Ostale usluge prijevoza": {}, 
+                    "Po\u0161tanski tro\u0161kovi": {}, 
+                    "Prijevozne usluge brodara": {}, 
+                    "Prijevozne usluge u cestovnom prometu": {}, 
+                    "Prijevozne usluge zrakoplova": {}, 
+                    "Prijevozne usluge \u017eeljeznicom": {}, 
+                    "Tro\u0161kovi specijalnih prijevoza": {}, 
+                    "Tro\u0161kovi telefona, interneta i sl.": {}, 
+                    "Usluge dostave i logistike": {}, 
+                    "Usluge taksi- prijevoza": {}
+                }, 
+                "Tro\u0161kovi vanjskih usluga pri izradi dobara i obavljanju usluga": {
+                    "Grafi\u010dke usluge tiska i uveza": {}, 
+                    "Ostale vanjske usluge na izradi dobara i proizvodnih usluga": {}, 
+                    "Usluge dorade (oplemenjivanja), izrade, prerade i sl. u proizvodnji i izgradnji": {}, 
+                    "Usluge hotela i smje\u0161taja radnika na terenu": {}, 
+                    "Usluge izrade ili popravka po ugovoru o djelu": {}, 
+                    "Usluge kooperanata na zajedni\u010dkim uslugama prema tre\u0107ima": {}, 
+                    "Usluge pripreme teksta za tisak, za web. i sl.": {}, 
+                    "Usluge rada vanjskog osoblja": {}, 
+                    "Usluge studentskog i omladinskog servisa i na izradi proizvoda": {}, 
+                    "Usluge za iznajmljeni kapacitet": {}
+                }, 
+                "Usluge odr\u017eavanja i za\u0161tite (servisne usluge)": {
+                    "30% usluga odr\u017eavanja prijevoznih sredstava za osobni prijevoz + 30% PDV-a": {}, 
+                    "70% usluga servisa za odr\u017eavanje automobila za osobni prijevoz poduzetnika i zaposlenih": {}, 
+                    "Nabavljene usluge teku\u0107eg odr\u017eavanja (bez vlastitog materijala i dijelova)": {}, 
+                    "Nabavljene usluge za investicijsko odr\u017eavanje i popravke (bez vlastitog materijala i dijelova)": {}, 
+                    "Ostale servisne usluge i usluge osoba": {}, 
+                    "Usluge odr\u017eavanja softvera i web stranica": {}, 
+                    "Usluge za\u0161titara na \u010duvanju imovine i osoba": {}, 
+                    "Usluge za\u0161tite na radu i odr\u017eavanja okoli\u0161a": {}, 
+                    "Usluge \u010di\u0161\u0107enja i pranja": {}, 
+                    "Vanjske usluge popravka prodanih a neispravnih dobara u jamstvenom roku": {
+                        "Servis osob. automob. (neto + 30% PDV) za slu\u010daj pla\u0107e u naravi": {}
+                    }
+                }, 
+                "Usluge promid\u017ebe, sponzorstva i tro\u0161kovi sajmova": {
+                    "Ostali tro\u0161kovi promid\u017ebe (osim reprezentacije, dnevnica na slu\u017ebenom putu i sl.)": {}, 
+                    "Tro\u0161ak sponzoriranja \u0161porta i kulture u cilju promid\u017ebe": {}, 
+                    "Tro\u0161kovi promid\u017ebe najmom medija (stranica portala i sl.)": {}, 
+                    "Tro\u0161kovi promid\u017ebe putem tiskovina, TV, plakata i sl.": {}, 
+                    "Tro\u0161kovi promid\u017ebe u inozemstvu": {}, 
+                    "Usluge istra\u017eivanja tr\u017ei\u0161ta": {}, 
+                    "Usluge oblikovanja i ure\u0111enja izlo\u017ebenog i prodajnog prostora": {}, 
+                    "Usluge promid\u017ebenih agencija": {}, 
+                    "Usluge sajmova (nadoknada za prostor)": {}, 
+                    "Usluge unapre\u0111enja prodaje": {}
+                }, 
+                "Usluge registracije prijevoznih sredstava i tro\u0161kovi dozvola": {
+                    "30% tro\u0161ka registracije sred. za osobni prijevoz + 30% PDV-a (osim tro\u0161kova osiguranja)": {
+                        "Tro\u0161kovi registr. (neto + 30% PDV) - pla\u0107a": {}
+                    }, 
+                    "70% tro\u0161ka registracije automobila, plovila i zrakoplova za prijevoz osoba poduz. (osim osiguranja)": {}, 
+                    "Ostali tro\u0161kovi registracije prometala": {}, 
+                    "Tro\u0161ak registracije dostavnih i teret. vozila i autobusa (sveuk.) i automob. bez poreznog ograni\u010denja": {}, 
+                    "Tro\u0161kovi dozvola za prometne smjerove": {}, 
+                    "Tro\u0161kovi koncesija, licencija i dr. prava na prijevoz": {}, 
+                    "Tro\u0161kovi nadoknada za ceste, takse i sl.": {}, 
+                    "Tro\u0161kovi registracije plovila": {}, 
+                    "Tro\u0161kovi registracije zrakoplova": {}
+                }, 
+                "Usluge reprezentacije - ugo\u0161\u0107ivanja i posredovanja": {
+                    "30% vanjskih usluga ugo\u0161\u0107enja (reprezentacije)": {}, 
+                    "70% vanjskih usluga ugo\u0161\u0107enja (reprezentacije) + 70% PDV-a": {}, 
+                    "Tro\u0161kovi provizija za usluge": {}, 
+                    "Usluge agenata i detektiva": {}, 
+                    "Usluge posredovanja pri nabavi dobara i usluga": {}, 
+                    "Usluge posredovanja pri prodaji dobara i usluga": {}
+                }, 
+                "Usluge zakupa - lizinga": {
+                    "30% rent-\u00e1-car usluga prijevoza osoba + 30% PDV-a": {}, 
+                    "30% usluga operativnog lizinga sred. za osobni prijevoz + 30% PDV-a": {}, 
+                    "70% rent-\u00e1-car usluge prijevoza osoba": {}, 
+                    "70% usluga operativnog lizinga automobila, brodova i zrakoplova za osobni prijevoz osoba poduzetnika": {}, 
+                    "Rent-\u00e1-car za prijevoz tereta": {}, 
+                    "Usluge najma informati\u010dke opreme": {}, 
+                    "Usluge operat. najma osob. automob. (neto + 30% PDV) za slu\u010daj pla\u0107e": {}, 
+                    "Usluge operativnog (poslovnog) lizinga opreme": {}, 
+                    "Zakupnine - najamnine nekretnina": {}, 
+                    "Zakupnine opreme": {}
+                }
+            }, 
+            "RASPORED TRO\u0160KOVA": {
+                "Raspored tro\u0161kova za obra\u010dun proiz. i usluga (HSFI10, MRS2, MRS11)-uskladi\u0161tivi tro\u0161kovi (na 60,62i63)": {
+                    "Raspored tro\u0161kova za obra\u010dun proiz. i usluga (HSFI10, MRS2, MRS11)-uskladi\u0161tivi tro\u0161kovi (na 60,62i63)-a1": {}
+                }, 
+                "Raspored tro\u0161kova za pokri\u0107e upravnih, administrativnih, prodajnih i drugih tro\u0161kova (na rn 70 i 71)": {
+                    "Raspored tro\u0161kova za pokri\u0107e upravnih, administrativnih, prodajnih i drugih tro\u0161kova (na rn 70 i 71)-a1": {}
+                }
+            }, 
+            "REZERVIRANJA (v. skupinu 28)": {
+                "Tro\u0161kovi dugoro\u010d. rez. za neiskori\u0161teni godi\u0161nji odmor (\u010dl. 11., st. 5. ZoPD i MRS 19) - vidi ra\u010d. 298": {
+                    "Tro\u0161kovi dugoro\u010d. rez. za neiskori\u0161teni godi\u0161nji odmor (\u010dl. 11., st. 5. ZoPD i MRS 19) - vidi ra\u010d. 298-a1": {}
+                }, 
+                "Tro\u0161kovi dugoro\u010dnog rezerviranja za gubitke po zapo\u010detim sudskim sporovima (\u010dl. 11., st. 2. ZoPD)": {
+                    "Tro\u0161kovi dugoro\u010dnog rezerviranja za gubitke po zapo\u010detim sudskim sporovima (\u010dl. 11., st. 2. ZoPD)-a1": {}
+                }, 
+                "Tro\u0161kovi dugoro\u010dnog rezerviranja za mirovine i sli\u010dne tro\u0161kove - obveze (MRS 19)": {
+                    "Tro\u0161kovi dugoro\u010dnog rezerviranja za mirovine i sli\u010dne tro\u0161kove - obveze (MRS 19)-a1": {}
+                }, 
+                "Tro\u0161kovi dugoro\u010dnog rezerviranja za obnovu prirodnog bogatstva (\u010dl. 11., st. 2. ZoPD)": {
+                    "Tro\u0161kovi dugoro\u010dnog rezerviranja za obnovu prirodnog bogatstva (\u010dl. 11., st. 2. ZoPD)-a1": {}
+                }, 
+                "Tro\u0161kovi dugoro\u010dnog rezerviranja za otpremnine (\u010dl. 11., st. 2. ZoPD)": {
+                    "Tro\u0161kovi dugoro\u010dnog rezerviranja za otpremnine (\u010dl. 11., st. 2. ZoPD)-a1": {}
+                }, 
+                "Tro\u0161kovi dugoro\u010dnog rezerviranja za restrukturiranje poduze\u0107a (MRS 37, t. 72. i HSFI t. 16.22)": {
+                    "Tro\u0161kovi dugoro\u010dnog rezerviranja za restrukturiranje poduze\u0107a (MRS 37, t. 72. i HSFI t. 16.22)-a1": {}
+                }, 
+                "Tro\u0161kovi dugoro\u010dnog rezerviranja za rizike u jamstvenom (garancijskom) roku (\u010dl. 11., st. 2. ZoPD)": {
+                    "Tro\u0161kovi dugoro\u010dnog rezerviranja za rizike u jamstvenom (garancijskom) roku (\u010dl. 11., st. 2. ZoPD)-a1": {}
+                }, 
+                "Tro\u0161kovi ostalih dugoro\u010dnih rezerviranja i tro\u0161kovi rizika": {
+                    "Tro\u0161kovi ostalih dugoro\u010dnih rezerviranja i tro\u0161kovi rizika-a1": {}
+                }, 
+                "Tro\u0161kovi rezerviranja po \u0161tetnim ugovorima (HSFI 16.21.)": {
+                    "Tro\u0161kovi rezerviranja po \u0161tetnim ugovorima (HSFI 16.21.)-a1": {}
+                }
+            }, 
+            "TRO\u0160KOVI OSOBLJA - PLA\u0106E": {
+                "Bruto pla\u0107e (privremeno v. napom. 2)": {
+                    "Bruto pla\u0107e (privremeno v. napom. 2)-a1": {}
+                }, 
+                "Doprinosi na pla\u0107e": {
+                    "Doprinosi za beneficirani radni sta\u017e": {}, 
+                    "Ostali povremeni primitci": {}, 
+                    "Proizvodnja": {}, 
+                    "Uprava i prodaja": {}
+                }, 
+                "Neto pla\u0107e i nadoknade": {
+                    "Ostali povremeni primitci": {}, 
+                    "Tro\u0161kovi neto pla\u0107a proizvodnje": {}, 
+                    "Tro\u0161kovi neto pla\u0107a uprave i prodaje": {}
+                }, 
+                "Tro\u0161kovi doprinosa iz pla\u0107a": {
+                    "Ostali povremeni primitci": {}, 
+                    "Proizvodnja": {}, 
+                    "Uprava i prodaja": {}
+                }, 
+                "Tro\u0161kovi poreza i prireza": {
+                    "Ostali povremeni primitci": {}, 
+                    "Proizvodnja": {}, 
+                    "Uprava i prodaja": {}
+                }
+            }, 
+            "VRIJEDNOSNO USKLA\u0110ENJE DUGOTRAJNE I KRATKOTRAJNE IMOVINE": {
+                "Vrijednosno uskla\u0111enje danih predujmova (veza s 379)": {
+                    "Vrijednosno uskla\u0111enje danih predujmova (veza s 379)-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111enje depozita u bankama, mjenica, \u010dekova i sl. (109 i dio 119)": {
+                    "Vrijednosno uskla\u0111enje depozita u bankama, mjenica, \u010dekova i sl. (109 i dio 119)-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111enje dugotrajne materijalne imovine": {
+                    "Vrijednosno uskla\u0111enje biolo\u0161ke imovine (048)": {}, 
+                    "Vrijednosno uskla\u0111enje nekretnina (028)": {}, 
+                    "Vrijednosno uskla\u0111enje ostale mater. imovine": {}, 
+                    "Vrijednosno uskla\u0111enje postrojenja, opreme, alata, pogonskog inventara i transportne imovine (038)": {}, 
+                    "Vrijednosno uskla\u0111enje ulaganja u nekretnine (058)": {}
+                }, 
+                "Vrijednosno uskla\u0111enje dugotrajne nematerijalne imovine (018)": {
+                    "Vrijednosno uskla\u0111enje goodwill": {}, 
+                    "Vrijednosno uskla\u0111enje ostale nemat. imov.": {}, 
+                    "Vrijednosno uskla\u0111enje prava i dr.": {}
+                }, 
+                "Vrijednosno uskla\u0111enje dugotrajnih potra\u017eivanja (veza sa 078)": {
+                    "Vrijednosno uskla\u0111enje dugotrajnih potra\u017eivanja (veza sa 078)-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111enje kratkotrajnih potra\u017eivanja": {
+                    "Vrijed. uskla\u0111enja utu\u017eenih kratk. pot. do 5000,00kn (prije zastare,ovr\u0161ni,ste\u010daj i sl.-dio129,139i159)": {}, 
+                    "Vrijednosna uskla\u0111enja potra\u017eivanja od kupaca nenapla\u0107ena dulje od 120 dana od dospije\u0107a (veza s 129)": {}, 
+                    "Vrijednosna uskla\u0111enja zastarjelih potra\u017eivanja (dio sa 129, 139 i 159) - porezno nepriznata": {}
+                }, 
+                "Vrijednosno uskla\u0111enje zaliha (veza s 319, 329, 359 i 369)": {
+                    "Vrijednosno uskla\u0111enje zaliha (veza s 319, 329, 359 i 369)-a1": {}
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "ZALIHE SIROVINA I MATERIJALA, REZERVNIH DIJELOVA I SITNOG INVENTARA": {
+            "OBRA\u010cUN TRO\u0160KOVA KUPNJE ZALIHA": {
+                "Carina i druge uvozne pristojbe": {
+                    "Carina i druge uvozne pristojbe-a1": {}
+                }, 
+                "Kupovna cijena dobavlja\u010da": {
+                    "Fakturna cijena rezervnih dijelova": {}, 
+                    "Fakturna cijena sirovina i materijala": {}, 
+                    "Fakturna cijena sirovina i materijala na putu": {}, 
+                    "Fakturna cijena sitnog inventara, autoguma i ambala\u017ee": {}, 
+                    "Materijal i dijelovi u preuzimanju (nema dokumentacije)": {}
+                }, 
+                "Obra\u010dun tro\u0161kova kupnje": {
+                    "Obra\u010dun nabave sirovina i materijala i dijelova koji izravno terete tro\u0161kove": {}, 
+                    "Obra\u010dun nabave sirovina i materijala, dijelova i sitnog inventara koji se skladi\u0161ti": {}
+                }, 
+                "Ovisni tro\u0161kovi nabave (u svezi s dovo\u0111enjem na zalihu)": {
+                    "Ostali ovisni tro\u0161kovi nabave": {}, 
+                    "Posebni tro\u0161kovi pakiranja - ambala\u017ee": {}, 
+                    "Transportno osiguranje i \u010duvanje": {}, 
+                    "Tro\u0161kovi atesta i kontrole": {}, 
+                    "Tro\u0161kovi dorade i oplemenjivanja za vrijeme dovo\u0111enja na zalihu": {}, 
+                    "Tro\u0161kovi transporta": {}, 
+                    "Tro\u0161kovi ukrcaja i iskrcaja (fakturirani)": {}, 
+                    "Tro\u0161kovi vlastitog transporta": {}, 
+                    "Tro\u0161kovi vlastitog ukrcaja i iskrcaja": {}, 
+                    "Tro\u0161kovi \u0161peditera": {}
+                }, 
+                "Posebni porezi (tro\u0161arine) koji se ne mogu odbiti": {
+                    "Posebni porezi (tro\u0161arine) koji se ne mogu odbiti-a1": {}
+                }
+            }, 
+            "PREDUJMOVI DOBAVLJA\u010cIMA SIROVINA I MATERIJALA, REZERVNIH DIJELOVA, SITNOG INVENTARA I AUTOGUMA": {
+                "Predujmovi dani uvozniku za nabavu sirovina i materijala, dijelova i inventara": {
+                    "Predujmovi dani uvozniku za nabavu sirovina i materijala, dijelova i inventara-a1": {}
+                }, 
+                "Predujmovi dobavlja\u010dima materijala": {
+                    "Predujmovi dobavlja\u010dima materijala-a1": {}
+                }, 
+                "Predujmovi dobavlja\u010dima rezervnih dijelova": {
+                    "Predujmovi dobavlja\u010dima rezervnih dijelova-a1": {}
+                }, 
+                "Predujmovi dobavlja\u010dima sitnog inventara": {
+                    "Predujmovi dobavlja\u010dima sitnog inventara-a1": {}
+                }, 
+                "Predujmovi inozemnim dobavlja\u010dima": {
+                    "Predujmovi inozemnim dobavlja\u010dima-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111enje danih predujmova": {
+                    "Vrijednosno uskla\u0111enje danih predujmova-a1": {}
+                }
+            }, 
+            "SIROVINE I MATERIJAL NA ZALIHI": {
+                "Materijal na doradi kod ortaka": {
+                    "Materijal na doradi kod ortaka-a1": {}
+                }, 
+                "Materijal u doradi, obradi i manipulaciji": {
+                    "Materijal u doradi, obradi i oplemenjivanju": {}, 
+                    "Materijal u manipulaciji i na putu": {}, 
+                    "Tro\u0161kovi dorade, obrade i oplemenjivanja": {}
+                }, 
+                "Odstupanje od cijene zaliha": {
+                    "Odstupanje od cijene zaliha-a1": {}
+                }, 
+                "Sirovine i materijal u skladi\u0161tu": {
+                    "Materijal na zalihi u javnom ili drugom skladi\u0161tu": {}, 
+                    "Poluproizvodi za ugradnju ili proizvodnju": {}, 
+                    "Uredski materijal i pribor": {}, 
+                    "Zalihe ambala\u017enog materijala": {}, 
+                    "Zalihe goriva i maziva": {}, 
+                    "Zalihe materijala kod kooperanata": {}, 
+                    "Zalihe materijala s temelja povezane proizvodnje": {}, 
+                    "Zalihe otpadnog i rashodovanog materijala": {}, 
+                    "Zalihe pi\u0107a, hrane i dr. u ugostiteljstvu i hotelijerstvu": {}, 
+                    "Zalihe sirovina i materijala": {}
+                }, 
+                "Vrijednosno uskla\u0111enje zaliha sirovina i materijala": {
+                    "Vrijednosno uskla\u0111enje zaliha sirovina i materijala-a1": {}
+                }, 
+                "Zalihe materijala za poljoprivredu": {
+                    "Zalihe komponenti za proizvodnju": {}, 
+                    "Zalihe sjemena i sadnog materijala": {}
+                }
+            }, 
+            "ZALIHE REZERVNIH DIJELOVA": {
+                "Odstupanje od cijene dijelova na zalihi": {
+                    "Odstupanje od cijene dijelova na zalihi-a1": {}
+                }, 
+                "Rezervni dijelovi na zalihi": {
+                    "Dijelovi i sklopovi za ugradnju (u proizvode)": {}, 
+                    "Rezervni dijelovi za servisne usluge": {}, 
+                    "Rezervni dijelovi za teku\u0107e i investicijsko odr\u017eavanje": {}, 
+                    "Zalihe otpadaka rezervnih dijelova": {}, 
+                    "Zalihe polovnih rezervnih dijelova": {}
+                }, 
+                "Vrijednosno uskla\u0111enje zaliha rezervnih dijelova": {
+                    "Vrijednosno uskla\u0111enje zaliha rezervnih dijelova-a1": {}
+                }
+            }, 
+            "ZALIHE SITNOG INVENTARA": {
+                "Ambala\u017ea na zalihi (samo vlastita i vi\u0161ekratna, analitika prema vrstama)": {
+                    "Ambala\u017ea na zalihi (samo vlastita i vi\u0161ekratna, analitika prema vrstama)-a1": {}
+                }, 
+                "Autogume na zalihi": {
+                    "Autogume na zalihi-a1": {}
+                }, 
+                "Odstupanje od cijene": {
+                    "Odstupanje od cijene-a1": {}
+                }, 
+                "Sitan inventar na zalihi": {
+                    "Sitan inventar na zalihi (analitika prema vrstama: alati, mjerni instrumenti, pribori,odje\u0107a, i dr.)": {}
+                }, 
+                "Vrijednosno uskla\u0111enje zaliha": {
+                    "Vrijednosno uskla\u0111enje zaliha-a1": {}
+                }
+            }, 
+            "ZALIHE SITNOG INVENTARA U UPORABI": {
+                "Ambala\u017ea u uporabi": {
+                    "Ambala\u017ea u uporabi-a1": {}
+                }, 
+                "Autogume u uporabi": {
+                    "Autogume u uporabi-a1": {}
+                }, 
+                "Otpis ambala\u017ee": {
+                    "Otpis ambala\u017ee-a1": {}
+                }, 
+                "Otpis autoguma": {
+                    "Otpis autoguma-a1": {}
+                }, 
+                "Otpis sitnog inventara": {
+                    "Otpis sitnog inventara-a1": {}
+                }, 
+                "Sitan inventar u uporabi": {
+                    "Sitan inventar u uporabi-a1": {}
+                }, 
+                "Vrijednosno uskla\u0111enje sitnog inventara, ambala\u017ee i autoguma": {
+                    "Vrijednosno uskla\u0111enje sitnog inventara, ambala\u017ee i autoguma-a1": {}
+                }
+            }, 
+            "root_type": ""
+        }
+    }
+}

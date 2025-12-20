@@ -1,0 +1,151 @@
+{
+ "actions": [],
+ "creation": "2018-05-16 21:15:21.207007",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "source_name",
+  "source_type",
+  "api_sb",
+  "base_url",
+  "query_options_sb",
+  "query_route",
+  "cb_1",
+  "search_term_param_name",
+  "response_options_sb",
+  "response_result_key_path",
+  "post_route",
+  "post_route_key_list",
+  "response_post_cb",
+  "post_title_key",
+  "post_description_key",
+  "link_options_sb",
+  "source_doctype",
+  "result_title_field",
+  "result_preview_field",
+  "result_route_field"
+ ],
+ "fields": [
+  {
+   "fieldname": "source_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Source Name"
+  },
+  {
+   "fieldname": "source_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Source Type",
+   "options": "API\nLink",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.source_type==\"API\"",
+   "fieldname": "api_sb",
+   "fieldtype": "Section Break",
+   "label": "API"
+  },
+  {
+   "fieldname": "base_url",
+   "fieldtype": "Data",
+   "label": "Base URL"
+  },
+  {
+   "depends_on": "eval:doc.source_type==\"API\"",
+   "fieldname": "query_options_sb",
+   "fieldtype": "Section Break",
+   "label": "Query Options"
+  },
+  {
+   "fieldname": "query_route",
+   "fieldtype": "Data",
+   "label": "Query Route String"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "search_term_param_name",
+   "fieldtype": "Data",
+   "label": "Search Term Param Name"
+  },
+  {
+   "depends_on": "eval:doc.source_type==\"API\"",
+   "fieldname": "response_options_sb",
+   "fieldtype": "Section Break",
+   "label": "Response Options"
+  },
+  {
+   "fieldname": "response_result_key_path",
+   "fieldtype": "Data",
+   "label": "Response Result Key Path"
+  },
+  {
+   "fieldname": "post_route",
+   "fieldtype": "Data",
+   "label": "Post Route String"
+  },
+  {
+   "fieldname": "post_route_key_list",
+   "fieldtype": "Data",
+   "label": "Post Route Key List"
+  },
+  {
+   "fieldname": "response_post_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "post_title_key",
+   "fieldtype": "Data",
+   "label": "Post Title Key"
+  },
+  {
+   "fieldname": "post_description_key",
+   "fieldtype": "Data",
+   "label": "Post Description Key"
+  },
+  {
+   "depends_on": "eval:doc.source_type==\"Link\"",
+   "fieldname": "link_options_sb",
+   "fieldtype": "Section Break",
+   "label": "Link Options"
+  },
+  {
+   "fieldname": "source_doctype",
+   "fieldtype": "Link",
+   "label": "Source DocType",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "result_title_field",
+   "fieldtype": "Data",
+   "label": "Result Title Field"
+  },
+  {
+   "fieldname": "result_preview_field",
+   "fieldtype": "Data",
+   "label": "Result Preview Field"
+  },
+  {
+   "fieldname": "result_route_field",
+   "fieldtype": "Data",
+   "label": "Result Route Field"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:50.849602",
+ "modified_by": "Administrator",
+ "module": "Support",
+ "name": "Support Search Source",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

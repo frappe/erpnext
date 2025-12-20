@@ -1,0 +1,1 @@
+- Update Clearance date via Upload and Download like Stock Reconciliation. Sponsored by [AG Techologies, Singapore](http://agtech.com.sg)

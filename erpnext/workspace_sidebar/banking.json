@@ -1,0 +1,121 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-12 14:55:28.092635",
+ "docstatus": 0,
+ "doctype": "Workspace Sidebar",
+ "header_icon": "circle-dollar-sign",
+ "idx": 0,
+ "items": [
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "organization",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Bank",
+   "link_to": "Bank",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "accounting",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Bank Account",
+   "link_to": "Bank Account",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "book-open-check",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Bank Clearance",
+   "link_to": "Bank Clearance",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "tool",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Bank Reconciliation",
+   "link_to": "Bank Reconciliation Tool",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "clipboard-check",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Reconciliation Report",
+   "link_to": "Bank Reconciliation Statement",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "settings",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Plaid Settings",
+   "link_to": "Plaid Settings",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "scroll-text",
+   "indent": 1,
+   "keep_closed": 1,
+   "label": "Dunning",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Section Break"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Dunning",
+   "link_to": "Dunning",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Dunning Type",
+   "link_to": "Dunning Type",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-11-25 10:46:09.274779",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Banking",
+ "owner": "Administrator",
+ "title": "Banking"
+}

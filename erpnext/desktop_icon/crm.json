@@ -1,0 +1,21 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-17 13:19:04.340610",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "crm",
+ "icon_type": "Link",
+ "idx": 7,
+ "label": "CRM",
+ "link_to": "CRM",
+ "link_type": "Workspace",
+ "logo_url": "/assets/erpnext/desktop_icons/crm.svg",
+ "modified": "2025-11-17 19:39:59.734778",
+ "modified_by": "Administrator",
+ "name": "CRM",
+ "owner": "Administrator",
+ "parent_icon": "",
+ "roles": [],
+ "standard": 1
+}

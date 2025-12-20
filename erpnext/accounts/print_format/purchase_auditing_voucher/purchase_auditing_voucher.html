@@ -1,0 +1,106 @@
+{%- from "templates/print_formats/standard_macros.html" import add_header -%}
+<div>
+    {% set gl = frappe.get_list(doctype="GL Entry",  fields=["account", "party_type", "party", "debit", "credit", "remarks"], filters={"voucher_type": doc.doctype, "voucher_no": doc.name}) %}
+    {%- if not doc.get("print_heading") and not doc.get("select_print_heading")
+        and doc.set("select_print_heading", _("Purchase Invoice")) -%}{%- endif -%}
+    {{ add_header(0, 1, doc, letter_head, no_letterhead, print_settings) }}
+    <div class="row margin-bottom">
+        <div class="col-xs-6">
+            <table>
+            <tr><td><strong>Supplier Name: </strong></td><td>{{ doc.supplier }}</td></tr>
+            <tr><td><strong>Due Date: </strong></td><td>{{ frappe.utils.format_date(doc.due_date) }}</td></tr>
+            <tr><td><strong>Address: </strong></td><td>{{doc.address_display}}</td></tr>
+            <tr><td><strong>Contact: </strong></td><td>{{doc.contact_display}}</td></tr>
+            <tr><td><strong>Mobile no: </strong> </td><td>{{doc.contact_mobile}}</td></tr>
+            </table>
+        </div>
+        <div class="col-xs-6">
+            <table>
+                <tr><td><strong>Voucher No: </strong></td><td>{{ doc.name }}</td></tr>
+                <tr><td><strong>Date: </strong></td><td>{{ frappe.utils.format_date(doc.creation) }}</td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="margin-top margin-bottom">
+        <table class="table table-bordered table-condensed">
+            <tr>
+                <th>SL</th>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th>UOM</th>
+                <th>Received Qty.</th>
+                <th>Rejected Qty</th>
+                <th>Qty</th>
+                <th>Basic Rate</th>
+                <th>Amount</th>
+            </tr>
+            {% for item in doc.items %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ item.item_code }}</td>
+                <td>{{ item.item_name }}</td>
+                <td>{{ item.uom }}</td>
+                <td>{{ item.received_qty }}</td>
+                <td>{{ item.rejected_qty }}</td>
+                <td>{{ item.qty}}</td>
+                <td>{{ item.rate }}</td>
+                <td>{{ item.amount }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div class="row margin-bottom">
+        <div class="col-xs-6">
+            <table>
+            <tr><td><strong>Total Quantity: </strong></td><td>{{ doc.total_qty }}</td></tr>
+            <tr><td><strong>Total: </strong></td><td>{{doc.total}}</td></tr>
+            <tr><td><strong>Net Weight: </strong></td><td>{{ doc.total_net_weight }}</td></tr>
+        </table>
+    </div>
+    <div class="col-xs-6">
+        <table>
+                <tr><td><strong>Tax and Charges: </strong></td><td>{{doc.taxes_and_charges}}</td></tr>
+                {% for tax in doc.taxes %}
+                {% if tax.tax_amount_after_discount_amount!= 0 %}
+                    <tr><td><strong>{{ tax.account_head }}: </strong></td><td>{{ tax.tax_amount_after_discount_amount }}</td></tr>
+                {% endif %}
+                {% endfor %}
+                {% if doc.taxes_and_charges_added!= 0 %}
+                <tr><td><strong> Taxes and Charges Added: </strong></td><td>{{ doc.taxes_and_charges_added }}</td></tr>
+                {% endif %}
+                {% if doc.taxes_and_charges_deducted!= 0 %}
+                <tr><td><strong> Taxes and Charges Deducted: </strong></td><td>{{ doc.taxes_and_charges_deducted }}</td></tr>
+                {% endif %}
+                <tr><td><strong> Total Taxes and Charges: </strong></td><td>{{ doc.total_taxes_and_charges }}</td></tr>
+                <tr><td><strong> Net Payable: </strong></td><td>{{ doc.grand_total }}</td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="margin-top">
+        <table class='table table-bordered table-condensed'>
+            <tr>
+                <th>SL</th>
+                <th>Account</th>
+                <th>Party Type</th>
+                <th>Party</th>
+                <th>Debit Amount</th>
+                <th>Credit Amount</th>
+            </tr>
+            {% for entries in gl %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ entries.account }}</td>
+                <td>{{ entries.party_type }}</td>
+                <td>{{ entries.party }}</td>
+                <td>{{ entries.debit }}</td>
+                <td>{{ entries.credit }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="4"><strong>Total</strong></td>
+                <td>{{ doc.grand_total|flt }}</td>
+                <td>{{ doc.grand_total|flt }}</td>
+            </tr>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,268 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "creation": "2014-07-09 12:04:51.681583",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "party_type",
+  "column_break_4",
+  "party",
+  "receivable_payable_account",
+  "default_advance_account",
+  "col_break1",
+  "from_invoice_date",
+  "from_payment_date",
+  "minimum_invoice_amount",
+  "minimum_payment_amount",
+  "column_break_11",
+  "to_invoice_date",
+  "to_payment_date",
+  "maximum_invoice_amount",
+  "maximum_payment_amount",
+  "column_break_13",
+  "invoice_limit",
+  "payment_limit",
+  "bank_cash_account",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "project",
+  "sec_break1",
+  "invoice_name",
+  "invoices",
+  "column_break_15",
+  "payment_name",
+  "payments",
+  "sec_break2",
+  "allocation"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "label": "Party Type",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.party_type",
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Party",
+   "options": "party_type",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.company && doc.party",
+   "fieldname": "receivable_payable_account",
+   "fieldtype": "Link",
+   "label": "Receivable / Payable Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "description": "This filter will be applied to Journal Entry.",
+   "fieldname": "bank_cash_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bank / Cash Account",
+   "options": "Account"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.invoices.length == 0",
+   "depends_on": "eval:doc.receivable_payable_account",
+   "fieldname": "col_break1",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "depends_on": "eval:(doc.payments).length || (doc.invoices).length",
+   "description": "If you need to reconcile particular transactions against each other, then please select accordingly. If not, all the transactions will be allocated in FIFO order.",
+   "fieldname": "sec_break1",
+   "fieldtype": "Section Break",
+   "label": "Unreconciled Entries"
+  },
+  {
+   "fieldname": "payments",
+   "fieldtype": "Table",
+   "label": "Payments",
+   "options": "Payment Reconciliation Payment"
+  },
+  {
+   "depends_on": "allocation",
+   "fieldname": "sec_break2",
+   "fieldtype": "Section Break",
+   "label": "Allocated Entries"
+  },
+  {
+   "fieldname": "invoices",
+   "fieldtype": "Table",
+   "label": "Invoices",
+   "options": "Payment Reconciliation Invoice"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "allocation",
+   "fieldtype": "Table",
+   "label": "Allocation",
+   "options": "Payment Reconciliation Allocation"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_invoice_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "From Invoice Date"
+  },
+  {
+   "fieldname": "to_invoice_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "To Invoice Date"
+  },
+  {
+   "fieldname": "minimum_invoice_amount",
+   "fieldtype": "Currency",
+   "label": "Minimum Invoice Amount"
+  },
+  {
+   "default": "50",
+   "description": "System will fetch all the entries if limit value is zero.",
+   "fieldname": "invoice_limit",
+   "fieldtype": "Int",
+   "label": "Invoice Limit"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_payment_date",
+   "fieldtype": "Date",
+   "label": "From Payment Date"
+  },
+  {
+   "fieldname": "to_payment_date",
+   "fieldtype": "Date",
+   "label": "To Payment Date"
+  },
+  {
+   "fieldname": "minimum_payment_amount",
+   "fieldtype": "Currency",
+   "label": "Minimum Payment Amount"
+  },
+  {
+   "fieldname": "maximum_payment_amount",
+   "fieldtype": "Currency",
+   "label": "Maximum Payment Amount"
+  },
+  {
+   "default": "50",
+   "description": "System will fetch all the entries if limit value is zero.",
+   "fieldname": "payment_limit",
+   "fieldtype": "Int",
+   "label": "Payment Limit"
+  },
+  {
+   "fieldname": "maximum_invoice_amount",
+   "fieldtype": "Currency",
+   "label": "Maximum Invoice Amount"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+    "fieldname": "project",
+    "fieldtype": "Link",
+    "label": "Project",
+    "options": "Project"
+  },
+  {
+   "depends_on": "eval:doc.party",
+   "description": "Only 'Payment Entries' made against this advance account are supported.",
+   "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/advance-in-separate-party-account",
+   "fieldname": "default_advance_account",
+   "fieldtype": "Link",
+   "label": "Default Advance Account",
+   "mandatory_depends_on": "doc.party_type",
+   "options": "Account"
+  },
+  {
+   "fieldname": "invoice_name",
+   "fieldtype": "Data",
+   "label": "Filter on Invoice"
+  },
+  {
+   "fieldname": "payment_name",
+   "fieldtype": "Data",
+   "label": "Filter on Payment"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.invoices.length == 0",
+   "depends_on": "eval:doc.receivable_payable_account",
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions Filter"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "hide_toolbar": 1,
+ "icon": "icon-resize-horizontal",
+ "is_virtual": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-04-23 12:38:29.557315",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Payment Reconciliation",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

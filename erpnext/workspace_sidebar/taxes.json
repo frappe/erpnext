@@ -1,0 +1,100 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-12 15:03:06.180114",
+ "docstatus": 0,
+ "doctype": "Workspace Sidebar",
+ "header_icon": "money-coins-1",
+ "idx": 0,
+ "items": [
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "panel-bottom-close",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Sales Template",
+   "link_to": "Sales Taxes and Charges",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "panel-top-close",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Purchase Template",
+   "link_to": "Purchase Taxes and Charges Template",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "triangle",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Tax Category",
+   "link_to": "Tax Category",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "book-open-text",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Tax Rule",
+   "link_to": "Tax Rule",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "stock",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Item Tax Template",
+   "link_to": "Item Tax Template",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "book-text",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Tax Withholding",
+   "link_to": "Tax Withholding Category",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "notebook-text",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Deduction Certificate",
+   "link_to": "Lower Deduction Certificate",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-11-25 10:46:09.268703",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Taxes",
+ "owner": "Administrator",
+ "title": "Taxes"
+}

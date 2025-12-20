@@ -1,0 +1,155 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:quality_procedure_name",
+ "creation": "2018-10-06 00:06:29.756804",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "quality_procedure_name",
+  "process_owner",
+  "process_owner_full_name",
+  "section_break_3",
+  "processes",
+  "sb_00",
+  "parent_quality_procedure",
+  "is_group",
+  "rgt",
+  "lft",
+  "old_parent"
+ ],
+ "fields": [
+  {
+   "fieldname": "parent_quality_procedure",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Parent Procedure",
+   "options": "Quality Procedure"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Left Index",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Right Index",
+   "read_only": 1
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "old_parent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break",
+   "label": "Parent"
+  },
+  {
+   "fieldname": "processes",
+   "fieldtype": "Table",
+   "label": "Processes",
+   "options": "Quality Procedure Process"
+  },
+  {
+   "fieldname": "quality_procedure_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Quality Procedure",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "process_owner",
+   "fieldtype": "Link",
+   "label": "Process Owner",
+   "options": "User"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "process_owner.full_name",
+   "fieldname": "process_owner_full_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Process Owner Full Name",
+   "print_hide": 1
+  }
+ ],
+ "is_tree": 1,
+ "links": [
+  {
+   "group": "Reviews",
+   "link_doctype": "Quality Review",
+   "link_fieldname": "procedure"
+  },
+  {
+   "group": "Goals",
+   "link_doctype": "Quality Goal",
+   "link_fieldname": "procedure"
+  },
+  {
+   "group": "Actions",
+   "link_doctype": "Quality Action",
+   "link_fieldname": "procedure"
+  },
+  {
+   "group": "Actions",
+   "link_doctype": "Non Conformance",
+   "link_fieldname": "procedure"
+  }
+ ],
+ "modified": "2024-03-27 13:10:29.849511",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Procedure",
+ "nsm_parent_field": "parent_quality_procedure",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Desk User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

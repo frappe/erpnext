@@ -1,0 +1,25 @@
+[
+	{
+		"doctype": "Item Attribute",
+		"attribute_name": "Test Size",
+		"priority": 1,
+		"item_attribute_values": [
+			{"attribute_value": "Extra Small", "abbr": "XSL"},
+			{"attribute_value": "Small", "abbr": "S"},
+			{"attribute_value": "Medium", "abbr": "M"},
+			{"attribute_value": "Large", "abbr": "L"},
+			{"attribute_value": "Extra Large", "abbr": "XL"},
+			{"attribute_value": "2XL", "abbr": "2XL"}
+		]
+	},
+	{
+		"doctype": "Item Attribute",
+		"attribute_name": "Test Colour",
+		"priority": 2,
+		"item_attribute_values": [
+			{"attribute_value": "Red", "abbr": "R"},
+			{"attribute_value": "Green", "abbr": "G"},
+			{"attribute_value": "Blue", "abbr": "B"}
+		]
+	}
+]

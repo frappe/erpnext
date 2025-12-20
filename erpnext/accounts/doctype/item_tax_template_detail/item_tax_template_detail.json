@@ -1,0 +1,40 @@
+{
+ "actions": [],
+ "creation": "2018-11-22 23:47:02.804568",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "tax_type",
+  "tax_rate"
+ ],
+ "fields": [
+  {
+   "fieldname": "tax_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Tax",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tax_rate",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Tax Rate"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:09:55.735360",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Item Tax Template Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

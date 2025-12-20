@@ -1,0 +1,1436 @@
+{
+    "country_code": "ma", 
+    "name": "Morocco - Compta Kazacube", 
+    "tree": {
+        "COMPTES DE BILAN": {
+            "COMPTES D'ACTIF CIRCULANT (HORS TRESORERIE)": {
+                "CREANCES DE L'ACTIF CIRCULANT": {
+                    "Autres d\u00e9biteurs": {
+                        "Cr\u00e9ances rattach\u00e9es aux autres d\u00e9biteurs": {}, 
+                        "Cr\u00e9ances sur cessions d'immobilisations": {}, 
+                        "Cr\u00e9ances sur cessions d'\u00e9l\u00e9ments d'actif circulant": {}, 
+                        "Divers d\u00e9biteurs": {}
+                    }, 
+                    "Clients et comptes rattach\u00e9s": {
+                        "Autres clients et comptes rattach\u00e9s": {}, 
+                        "Clients": {
+                            "Clients - cat\u00e9gorie A": {}, 
+                            "Clients - cat\u00e9gorie B": {}
+                        }, 
+                        "Clients - effets \u00e0\u00a0 recevoir": {}, 
+                        "Clients - factures \u00e0\u00a0 \u00e9tablir et cr\u00e9ances sur travaux non encore factur\u00e9s": {
+                            "Clients - factures \u00e0\u00a0 \u00e9tablir": {}, 
+                            "Cr\u00e9ances sur travaux non encore factur\u00e9s": {}
+                        }, 
+                        "Clients - retenues de garantie": {}, 
+                        "Clients douteux ou litigieux": {}
+                    }, 
+                    "Comptes d'associ\u00e9s - d\u00e9biteurs": {
+                        "Actionnaires - capital souscrit et appel\u00e9 non vers\u00e9": {}, 
+                        "Associ\u00e9s - comptes d'apport en soci\u00e9t\u00e9": {}, 
+                        "Associ\u00e9s - op\u00e9rations faites en commun": {}, 
+                        "Autres comptes d'associ\u00e9s d\u00e9biteurs": {}, 
+                        "Comptes courants des associ\u00e9s d\u00e9biteurs": {}, 
+                        "Cr\u00e9ances rattach\u00e9es aux comptes d'associ\u00e9s": {}
+                    }, 
+                    "Comptes de r\u00e9gularisation - actif": {
+                        "Charges constat\u00e9es d'avance": {}, 
+                        "Comptes de r\u00e9partition p\u00e9riodique des charges": {}, 
+                        "Comptes transitoires ou d'attente - d\u00e9biteurs": {}, 
+                        "Int\u00e9r\u00eats courus et non \u00e9chus \u00e0\u00a0 percevoir": {}
+                    }, 
+                    "Etat ? d\u00e9biteur": {
+                        "Acomptes sur imp\u00f4ts sur les r\u00e9sultats": {}, 
+                        "Etat - TVA r\u00e9cup\u00e9rable": {
+                            "Etat - TVA r\u00e9cup\u00e9rable sur charges": {
+                                "Etat - TVA r\u00e9cup\u00e9rable sur charges 10%": {
+                                    "account_type": "Tax"
+                                }, 
+                                "Etat - TVA r\u00e9cup\u00e9rable sur charges 14%": {
+                                    "account_type": "Tax"
+                                }, 
+                                "Etat - TVA r\u00e9cup\u00e9rable sur charges 20%": {
+                                    "account_type": "Tax"
+                                }, 
+                                "Etat - TVA r\u00e9cup\u00e9rable sur charges 7%": {
+                                    "account_type": "Tax"
+                                }
+                            }, 
+                            "Etat - TVA r\u00e9cup\u00e9rable sur immobilisations": {
+                                "account_type": "Tax"
+                            }
+                        }, 
+                        "Etat - autres comptes d\u00e9biteurs": {
+                            "account_type": "Tax"
+                        }, 
+                        "Etat - cr\u00e9dit de TVA (suivant d\u00e9claration)": {
+                            "account_type": "Tax"
+                        }, 
+                        "Subventions \u00e0\u00a0 recevoir": {
+                            "Subventions d'exploitation \u00e0\u00a0 recevoir": {}, 
+                            "Subventions d'investissement \u00e0\u00a0 recevoir": {}, 
+                            "Subventions d'\u00e9quilibre \u00e0\u00a0 recevoir": {}
+                        }
+                    }, 
+                    "Fournisseurs d\u00e9biteurs, avances et acomptes": {
+                        "Autres fournisseurs d\u00e9biteurs": {}, 
+                        "Fournisseurs - avances et acomptes vers\u00e9s sur commandes d'exploitation": {}, 
+                        "Fournisseurs - cr\u00e9ances pour emballages et mat\u00e9riel \u00e0\u00a0 rendre": {}, 
+                        "Rabais, remises et ristournes \u00e0\u00a0 obtenir - avoirs non encore re\u00e7us": {}
+                    }, 
+                    "Personnel - d\u00e9biteur": {
+                        "Avances et acomptes au personnel": {}, 
+                        "Personnel - autres d\u00e9biteurs": {}
+                    }
+                }, 
+                "ECART DE CONVERSION - ACTIF (\u00c9l\u00e9ments circulants)": {
+                    "\u00c9cart de conversion - Actif (\u00e9l\u00e9ments circulant)": {
+                        "Augmentation des dettes circulantes": {}, 
+                        "Diminution des cr\u00e9ances circulantes": {}
+                    }
+                }, 
+                "PROVISIONS POUR DEPRECIATION DES COMPTES DE L'ACTIF CIRCULANT": {
+                    "Provisions pour d\u00e9pr\u00e9ciation des cr\u00e9ances de l'actif circulant": {
+                        "Provisions pour d\u00e9pr\u00e9ciation - fournisseurs d\u00e9biteurs, avances et acomptes": {}, 
+                        "Provisions pour d\u00e9pr\u00e9ciation des autres d\u00e9biteurs": {}, 
+                        "Provisions pour d\u00e9pr\u00e9ciation des clients et comptes rattach\u00e9s": {}, 
+                        "Provisions pour d\u00e9pr\u00e9ciation des comptes d'associ\u00e9s d\u00e9biteurs": {}, 
+                        "Provisions pour d\u00e9pr\u00e9ciation du personnel - d\u00e9biteur": {}
+                    }, 
+                    "Provisions pour d\u00e9pr\u00e9ciation des stocks": {
+                        "Provisions pour d\u00e9pr\u00e9ciation des marchandises": {}, 
+                        "Provisions pour d\u00e9pr\u00e9ciation des mati\u00e8res et fournitures": {}, 
+                        "Provisions pour d\u00e9pr\u00e9ciation des produits en cours": {}, 
+                        "Provisions pour d\u00e9pr\u00e9ciation des produits finis": {}, 
+                        "Provisions pour d\u00e9pr\u00e9ciation des produits interm\u00e9diaires": {}
+                    }, 
+                    "Provisions pour d\u00e9pr\u00e9ciation des titres et valeurs de placement": {
+                        "Provisions pour d\u00e9pr\u00e9ciation des titres et valeurs de placement": {}
+                    }
+                }, 
+                "STOCKS": {
+                    "Marchandises": {
+                        "Autres marchandises": {
+                            "account_type": "Stock"
+                        }, 
+                        "Marchandises (groupe A)": {
+                            "account_type": "Stock"
+                        }, 
+                        "Marchandises (groupe B)": {
+                            "account_type": "Stock"
+                        }, 
+                        "Marchandises en cours de route": {
+                            "account_type": "Stock"
+                        }
+                    }, 
+                    "Mati\u00e8res et fournitures consommables": {
+                        "Autres mati\u00e8res et fournitures consommables": {
+                            "account_type": "Stock"
+                        }, 
+                        "Emballages": {
+                            "Emballages perdus": {
+                                "account_type": "Stock"
+                            }, 
+                            "Emballages r\u00e9cup\u00e9rables non identifiables": {
+                                "account_type": "Stock"
+                            }, 
+                            "Emballages \u00e0\u00a0 usage mixte": {
+                                "account_type": "Stock"
+                            }
+                        }, 
+                        "Mati\u00e8res et fournitures consommables": {
+                            "Combustibles": {
+                                "account_type": "Stock"
+                            }, 
+                            "Fournitures d'atelier et d'usine": {
+                                "account_type": "Stock"
+                            }, 
+                            "Fournitures de bureau": {
+                                "account_type": "Stock"
+                            }, 
+                            "Fournitures de magasin": {
+                                "account_type": "Stock"
+                            }, 
+                            "Mati\u00e8res consommables (groupe A)": {
+                                "account_type": "Stock"
+                            }, 
+                            "Mati\u00e8res consommables (groupe B)": {
+                                "account_type": "Stock"
+                            }, 
+                            "Produits d'entretien": {
+                                "account_type": "Stock"
+                            }
+                        }, 
+                        "Mati\u00e8res et fournitures consommables en cours de route": {
+                            "account_type": "Stock"
+                        }, 
+                        "Mati\u00e8res premi\u00e8res": {
+                            "Mati\u00e8res premi\u00e8res (groupe A)": {
+                                "account_type": "Stock"
+                            }, 
+                            "Mati\u00e8res premi\u00e8res (groupe B)": {
+                                "account_type": "Stock"
+                            }
+                        }
+                    }, 
+                    "Produits en cours": {
+                        "Autres produits en cours": {
+                            "account_type": "Stock"
+                        }, 
+                        "Biens en cours": {
+                            "Biens interm\u00e9diaires en cours": {
+                                "account_type": "Stock"
+                            }, 
+                            "Biens produits en cours": {
+                                "account_type": "Stock"
+                            }, 
+                            "Biens r\u00e9siduels en cours": {
+                                "account_type": "Stock"
+                            }
+                        }, 
+                        "Services en cours": {
+                            "Prestations en cours": {
+                                "account_type": "Stock"
+                            }, 
+                            "Travaux en cours": {
+                                "account_type": "Stock"
+                            }, 
+                            "\u00c9tudes en cours": {
+                                "account_type": "Stock"
+                            }
+                        }
+                    }, 
+                    "Produits finis": {
+                        "Autres produits finis": {
+                            "account_type": "Stock"
+                        }, 
+                        "Produits finis (groupe A)": {
+                            "account_type": "Stock"
+                        }, 
+                        "Produits finis (groupe B)": {
+                            "account_type": "Stock"
+                        }, 
+                        "Produits finis en cours de route": {
+                            "account_type": "Stock"
+                        }
+                    }, 
+                    "Produits interm\u00e9diaires et produits r\u00e9siduels": {
+                        "Autres produits interm\u00e9diaires et produits r\u00e9siduels": {
+                            "account_type": "Stock"
+                        }, 
+                        "Produits interm\u00e9diaires": {
+                            "Produits interm\u00e9diaires (groupe A)": {
+                                "account_type": "Stock"
+                            }, 
+                            "Produits interm\u00e9diaires (groupe B)": {
+                                "account_type": "Stock"
+                            }
+                        }, 
+                        "Produits r\u00e9siduels (ou mati\u00e8res de r\u00e9cup\u00e9ration)": {
+                            "D\u00e9chets": {
+                                "account_type": "Stock"
+                            }, 
+                            "Mati\u00e8res de r\u00e9cup\u00e9ration": {
+                                "account_type": "Stock"
+                            }, 
+                            "Rebuts": {
+                                "account_type": "Stock"
+                            }
+                        }
+                    }
+                }, 
+                "TITRES ET VALEURS DE PLACEMENT": {
+                    "Titres et valeurs de placement": {
+                        "Actions, partie lib\u00e9r\u00e9e": {}, 
+                        "Actions, partie non lib\u00e9r\u00e9e": {}, 
+                        "Autres titres et valeurs de placement similaires": {}, 
+                        "Bons de caisse et bons de tr\u00e9sor": {
+                            "Bons de caisse": {}, 
+                            "Bons de tr\u00e9sor": {}
+                        }, 
+                        "Obligations": {}
+                    }
+                }
+            }, 
+            "COMPTES D'ACTIF IMMOBILISE": {
+                "AMORTISSEMENTS DES IMMOBILISATIONS": {
+                    "Amortissements des immobilisations corporelles": {
+                        "Amortissements des autres immobilisations corporelles": {}, 
+                        "Amortissements des constructions": {
+                            "Amortissements des autres constructions": {}, 
+                            "Amortissements des b\u00e2timents": {}, 
+                            "Amortissements des constructions sur terrains d'autrui": {}, 
+                            "Amortissements des installations, agencements et am\u00e9nagements des constructions": {}, 
+                            "Amortissements des ouvrages d'infrastructure": {}
+                        }, 
+                        "Amortissements des installations techniques, mat\u00e9riel et outillage": {
+                            "Amortissements des autres installations techniques, mat\u00e9riel et outillage": {}, 
+                            "Amortissements des emballages r\u00e9cup\u00e9rables identifiables": {}, 
+                            "Amortissements des installations techniques": {}, 
+                            "Amortissements du mat\u00e9riel et outillage": {}
+                        }, 
+                        "Amortissements des terrains": {
+                            "Amortissements des agencements et am\u00e9nagements de terrains": {}, 
+                            "Amortissements des autres terrains": {}, 
+                            "Amortissements des terrains am\u00e9nag\u00e9s": {}, 
+                            "Amortissements des terrains b\u00e2tis": {}, 
+                            "Amortissements des terrains de gisement": {}, 
+                            "Amortissements des terrains nus": {}
+                        }, 
+                        "Amortissements du mat\u00e9riel de transport": {}, 
+                        "Amortissements du mobilier, mat\u00e9riel de bureau et am\u00e9nagements divers": {
+                            "Amortissements des agencements, installations et am\u00e9nagements divers": {}, 
+                            "Amortissements des autres mobilier, mat\u00e9riel de bureau et am\u00e9nagements divers": {}, 
+                            "Amortissements du mat\u00e9riel de bureau": {}, 
+                            "Amortissements du mat\u00e9riel informatique": {}, 
+                            "Amortissements du mobilier de bureau": {}
+                        }
+                    }, 
+                    "Amortissements des immobilisations incorporelles": {
+                        "Amortissements de l'immobilisation en recherche et d\u00e9veloppement": {}, 
+                        "Amortissements des autres immobilisations incorporelles": {}, 
+                        "Amortissements des brevets, marques, droits et valeurs similaires": {}, 
+                        "Amortissements du fonds commercial": {}
+                    }, 
+                    "Amortissements des non-valeurs": {
+                        "Amortissements des charges \u00e0\u00a0 r\u00e9partir": {
+                            "Amortissements des autres charges \u00e0\u00a0 r\u00e9partir": {}, 
+                            "Amortissements des frais d'acquisition des immobilisations": {}, 
+                            "Amortissements des frais d'\u00e9mission des emprunts": {}
+                        }, 
+                        "Amortissements des frais pr\u00e9liminaires": {
+                            "Amortissements des autres frais pr\u00e9liminaires": {}, 
+                            "Amortissements des frais d'augmentation du capital": {}, 
+                            "Amortissements des frais de constitution": {}, 
+                            "Amortissements des frais de prospection": {}, 
+                            "Amortissements des frais de publicit\u00e9": {}, 
+                            "Amortissements des frais pr\u00e9liminaires au d\u00e9marrage": {}, 
+                            "Amortissements des frais sur op\u00e9rations de fusions, scissions, et transformations": {}
+                        }, 
+                        "Amortissements des primes de remboursement des obligations": {}
+                    }
+                }, 
+                "ECARTS DE CONVERSION - ACTIF": {
+                    "Augmentation des dettes de financement": {
+                        "Augmentation des dettes de financement": {}
+                    }, 
+                    "Diminution des cr\u00e9ances immobilis\u00e9es": {
+                        "Diminution des cr\u00e9ances immobilis\u00e9es": {}
+                    }
+                }, 
+                "IMMOBILISATIONS CORPORELLES": {
+                    "Autres immobilisations corporelles": {
+                        "Autres immobilisations corporelles": {}
+                    }, 
+                    "Constructions": {
+                        "Agencements et am\u00e9nagements des constructions": {}, 
+                        "Autres constructions": {}, 
+                        "B\u00e2timents": {
+                            "Autres b\u00e2timents": {}, 
+                            "B\u00e2timents Administratifs et commerciaux": {}, 
+                            "B\u00e2timents industriels (A,B,,,)": {}
+                        }, 
+                        "Constructions sur terrains d'autrui": {}, 
+                        "Ouvrages d'infrastructure": {}
+                    }, 
+                    "Immobilisations corporelles en cours": {
+                        "Autres immobilisations corporelles en cours": {}, 
+                        "Avances et acomptes vers\u00e9s sur commandes d'immobilisations corporelles": {}, 
+                        "Immobilisations corporelles en cours de mat\u00e9riel de transport": {}, 
+                        "Immobilisations corporelles en cours de mobilier, mat\u00e9riel de bureau et am\u00e9nagements divers": {}, 
+                        "Immobilisations corporelles en cours des installations techniques, mat\u00e9riel et outillage": {}, 
+                        "Immobilisations corporelles en cours des terrains et constructions": {}
+                    }, 
+                    "Installations techniques, mat\u00e9riel et outillage": {
+                        "Autres installations techniques, mat\u00e9riel et outillage": {}, 
+                        "Emballages r\u00e9cup\u00e9rables identifiables": {}, 
+                        "Installations techniques": {}, 
+                        "Mat\u00e9riel et outillage": {
+                            "Mat\u00e9riel": {}, 
+                            "Outillage": {}
+                        }
+                    }, 
+                    "Mat\u00e9riel de transport": {
+                        "Mat\u00e9riel de transport": {}
+                    }, 
+                    "Mobilier, mat\u00e9riel de bureau et am\u00e9nagements divers": {
+                        "Agencements, installations et am\u00e9nagements divers (biens n'appartenant pas \u00e0\u00a0 l'entreprise)": {}, 
+                        "Autres mobilier, mat\u00e9riel de bureau et am\u00e9nagements divers": {}, 
+                        "Mat\u00e9riel de bureau": {}, 
+                        "Mat\u00e9riel informatique": {}, 
+                        "Mobilier de bureau": {}
+                    }, 
+                    "Terrains": {
+                        "Agencements et am\u00e9nagements de terrains": {}, 
+                        "Autres terrains": {}, 
+                        "Terrains am\u00e9nag\u00e9s": {}, 
+                        "Terrains b\u00e2tis": {}, 
+                        "Terrains de gisement": {}, 
+                        "Terrains nus": {}
+                    }
+                }, 
+                "IMMOBILISATIONS EN NON-VALEURS": {
+                    "Charges \u00e0\u00a0 r\u00e9partir sur plusieurs exercices": {
+                        "Autres charges \u00e0\u00a0 r\u00e9partir": {}, 
+                        "Frais d acquisition des immobilisations": {}, 
+                        "Frais d'\u00e9mission des emprunts": {}
+                    }, 
+                    "Frais pr\u00e9liminaires": {
+                        "Autres frais pr\u00e9liminaires": {}, 
+                        "Frais d'augmentation du capital": {}, 
+                        "Frais de constitution": {}, 
+                        "Frais de prospection": {}, 
+                        "Frais de publicit\u00e9": {}, 
+                        "Frais pr\u00e9alables au d\u00e9marrage": {}, 
+                        "Frais sur op\u00e9rations de fusions, scissions et transformations": {}
+                    }, 
+                    "Primes de remboursement des obligations": {
+                        "Primes de remboursement des obligations": {}
+                    }
+                }, 
+                "IMMOBILISATIONS FINANCIERES 1": {
+                    "Autres cr\u00e9ances financi\u00e8res": {
+                        "Cr\u00e9ances financi\u00e8res diverses": {}, 
+                        "Cr\u00e9ances immobilis\u00e9es": {}, 
+                        "Cr\u00e9ances rattach\u00e9es \u00e0\u00a0 des participations": {}, 
+                        "D\u00e9p\u00f4ts et cautionnements vers\u00e9s": {
+                            "Cautionnements": {}, 
+                            "D\u00e9p\u00f4ts": {}
+                        }, 
+                        "Titres immobilis\u00e9s (droits de cr\u00e9ance)": {
+                            "Bons d'\u00e9quipement": {}, 
+                            "Bons divers": {}, 
+                            "Obligations": {}
+                        }
+                    }, 
+                    "Pr\u00eats immobilis\u00e9s": {
+                        "Autres pr\u00eats": {}, 
+                        "Billets de fonds": {}, 
+                        "Pr\u00eats au personnel": {}, 
+                        "Pr\u00eats aux associ\u00e9s": {}
+                    }
+                }, 
+                "IMMOBILISATIONS FINANCIERES 2": {
+                    "Autres titres immobilis\u00e9s": {
+                        "Actions": {}, 
+                        "Titres divers": {}
+                    }, 
+                    "Titres de participation": {
+                        "Titres de participation": {}
+                    }
+                }, 
+                "IMMOBILISATIONS INCORPORELLES": {
+                    "Autres immobilisations incorporelles": {
+                        "Autres immobilisations incorporelles": {}
+                    }, 
+                    "Brevets, marques, droits et valeurs similaires": {
+                        "Brevets, marques, droits et valeurs similaires": {}
+                    }, 
+                    "Fonds commercial": {
+                        "Fonds commercial": {}
+                    }, 
+                    "Immobilisation en recherche et d\u00e9veloppement": {
+                        "Immobilisation en recherche et d\u00e9veloppement": {}
+                    }
+                }, 
+                "PROVISIONS POUR DEPRECIATION DES IMMOBILISATIONS": {
+                    "Provisions pour d\u00e9pr\u00e9ciation des immobilisations corporelles": {
+                        "Provisions pour d\u00e9pr\u00e9ciation des immobilisations corporelles": {}
+                    }, 
+                    "Provisions pour d\u00e9pr\u00e9ciation des immobilisations financi\u00e8res-pr\u00eats": {
+                        "Provisions pour d\u00e9pr\u00e9ciation des autres cr\u00e9ances financi\u00e8res": {}, 
+                        "Provisions pour d\u00e9pr\u00e9ciation des pr\u00eats immobilis\u00e9s": {}
+                    }, 
+                    "Provisions pour d\u00e9pr\u00e9ciation des immobilisations financi\u00e8res-titres": {
+                        "Provisions pour d\u00e9pr\u00e9ciation des autres titres immobilis\u00e9s": {}, 
+                        "Provisions pour d\u00e9pr\u00e9ciation des titres de participation": {}
+                    }, 
+                    "Provisions pour d\u00e9pr\u00e9ciation des immobilisations incorporelles": {
+                        "Provisions pour d\u00e9pr\u00e9ciation des immobilisations incorporelles": {}
+                    }
+                }
+            }, 
+            "COMPTES DE FINANCEMENT PERMANENT": {
+                "CAPITAUX PROPRES": {
+                    "Autres r\u00e9serves": {
+                        "R\u00e9serves facultatives": {
+                            "account_type": "Equity"
+                        }, 
+                        "R\u00e9serves r\u00e9glement\u00e9es": {
+                            "account_type": "Equity"
+                        }, 
+                        "R\u00e9serves statutaires ou contractuelles": {
+                            "account_type": "Equity"
+                        }
+                    }, 
+                    "Capital social ou personnel": {
+                        "Actionnaires, capital souscrit-non appel\u00e9": {
+                            "account_type": "Equity"
+                        }, 
+                        "Capital personnel": {
+                            "Capital individuel": {
+                                "account_type": "Equity"
+                            }, 
+                            "Compte de l'exploitant": {
+                                "account_type": "Equity"
+                            }
+                        }, 
+                        "Capital social": {
+                            "account_type": "Equity"
+                        }, 
+                        "Fonds de dotation": {
+                            "account_type": "Equity"
+                        }
+                    }, 
+                    "Primes d'\u00e9mission, de fusion et d'apport": {
+                        "Primes d'apport": {
+                            "account_type": "Equity"
+                        }, 
+                        "Primes d'\u00e9mission": {
+                            "account_type": "Equity"
+                        }, 
+                        "Primes de fusion": {
+                            "account_type": "Equity"
+                        }
+                    }, 
+                    "Report \u00e0\u00a0 nouveau": {
+                        "Report \u00e0\u00a0 nouveau (solde cr\u00e9diteur)": {
+                            "account_type": "Equity"
+                        }, 
+                        "Report \u00e0\u00a0 nouveau (solde d\u00e9biteur)": {
+                            "account_type": "Equity"
+                        }
+                    }, 
+                    "R\u00e9serve l\u00e9gale": {
+                        "R\u00e9serve l\u00e9gale": {
+                            "account_type": "Equity"
+                        }
+                    }, 
+                    "R\u00e9sultat net de l'exercice": {
+                        "R\u00e9sultat net de l'exercice (solde cr\u00e9diteur)": {
+                            "account_type": "Equity"
+                        }, 
+                        "R\u00e9sultat net de l'exercice (solde d\u00e9biteur)": {
+                            "account_type": "Equity"
+                        }
+                    }, 
+                    "R\u00e9sultats nets en instance d'affectation": {
+                        "R\u00e9sultats nets en instance d'affectation (solde cr\u00e9diteur)": {
+                            "account_type": "Equity"
+                        }, 
+                        "R\u00e9sultats nets en instance d'affectation (solde d\u00e9biteur)": {
+                            "account_type": "Equity"
+                        }
+                    }, 
+                    "\u00c9carts de r\u00e9\u00e9valuation": {
+                        "\u00c9carts de r\u00e9\u00e9valuation": {
+                            "account_type": "Equity"
+                        }
+                    }
+                }, 
+                "CAPITAUX PROPRES ASSIMILES": {
+                    "Provisions r\u00e9glement\u00e9es": {
+                        "Autres provisions r\u00e9glement\u00e9es": {
+                            "account_type": "Equity"
+                        }, 
+                        "Provisions pour acquisition et construction de logements": {
+                            "account_type": "Equity"
+                        }, 
+                        "Provisions pour amortissements d\u00e9rogatoires": {
+                            "account_type": "Equity"
+                        }, 
+                        "Provisions pour investissements": {
+                            "account_type": "Equity"
+                        }, 
+                        "Provisions pour plus-values en instance d'imposition": {
+                            "account_type": "Equity"
+                        }, 
+                        "Provisions pour reconstitution des gisements": {
+                            "account_type": "Equity"
+                        }
+                    }, 
+                    "Subventions d'investissement": {
+                        "Subventions d'investissement inscrites au CPC": {
+                            "account_type": "Equity"
+                        }, 
+                        "Subventions d'investissement re\u00e7ues": {
+                            "account_type": "Equity"
+                        }
+                    }, 
+                    "account_type": "Equity"
+                }, 
+                "COMPTES DE LIAISON DES ETABLISSEMENTS ET SUCCURSALES": {
+                    "Comptes de liaison des \u00e9tablissements et succursales": {
+                        "Comptes de liaison des \u00e9tablissements": {}, 
+                        "Comptes de liaison du si\u00e8ge": {}
+                    }
+                }, 
+                "DETTES DE FINANCEMENT": {
+                    "Autres dettes de financement": {
+                        "Avances de l'Etat": {}, 
+                        "Avances re\u00e7ues et comptes courants bloqu\u00e9s": {}, 
+                        "Billets de fonds": {}, 
+                        "Dettes de financement diverses": {}, 
+                        "Dettes rattach\u00e9es \u00e0\u00a0 des participations": {}, 
+                        "D\u00e9p\u00f4ts et cautionnements re\u00e7ues": {}, 
+                        "Emprunts aupr\u00e8s des \u00e9tablissements de cr\u00e9dit": {}, 
+                        "Fournisseurs d'immobilisation": {}
+                    }, 
+                    "Emprunts obligataires": {
+                        "Emprunts obligataires": {}
+                    }
+                }, 
+                "Provisions durables pour risques et charges": {
+                    "Provisions pour charges": {
+                        "Autres provisions pour charges": {}, 
+                        "Provisions pour charges \u00e0\u00a0 r\u00e9partir sur plusieurs exercices": {}, 
+                        "Provisions pour imp\u00f4ts": {}, 
+                        "Provisions pour pensions de retraite et obligations similaires": {}
+                    }, 
+                    "Provisions pour risques": {
+                        "Autres provisions pour risques": {}, 
+                        "Provision pour pertes sur march\u00e9s \u00e0\u00a0 terme": {}, 
+                        "Provisions pour amendes, double droits, p\u00e9nalit\u00e9s": {}, 
+                        "Provisions pour garanties donn\u00e9es aux clients": {}, 
+                        "Provisions pour litiges": {}, 
+                        "Provisions pour pertes de change": {}, 
+                        "Provisions pour propre assureur": {}
+                    }
+                }, 
+                "\u00c9carts de conversion - Passif": {
+                    "Augmentation des cr\u00e9ances immobilis\u00e9es": {
+                        "Augmentation des cr\u00e9ances immobilis\u00e9es": {}
+                    }, 
+                    "Diminution des dettes de financement": {
+                        "Diminution des dettes de financement": {}
+                    }
+                }
+            }, 
+            "COMPTES DE TRESORERIE": {
+                "PROVISIONS POUR DEPRECIATION DES COMPTES DE TRESORERIE": {
+                    "Autres charges financi\u00e8res des exercices ant\u00e9rieurs": {}, 
+                    "Charges nettes sur cession de titres et valeurs de placement": {}, 
+                    "Escomptes accord\u00e9s": {}, 
+                    "Pertes sur cr\u00e9ances li\u00e9es \u00e0\u00a0 des participations": {}, 
+                    "Provisions pour d\u00e9pr\u00e9ciation des comptes de tr\u00e9sorerie": {
+                        "Provisions pour d\u00e9pr\u00e9ciation des comptes de tr\u00e9sorerie": {
+                            "account_type": "Cash"
+                        }
+                    }
+                }, 
+                "TRESORERIE - ACTIF": {
+                    "Banques, Tr\u00e9sorerie G\u00e9n\u00e9rale et ch\u00e8ques postaux d\u00e9biteurs": {
+                        "Autres \u00e9tablissements financiers et assimil\u00e9s (soldes d\u00e9biteurs)": {
+                            "account_type": "Cash"
+                        }, 
+                        "Banques (solde d\u00e9biteur)": {
+                            "account_type": "Cash"
+                        }, 
+                        "Ch\u00e8ques postaux": {
+                            "account_type": "Cash"
+                        }, 
+                        "Tr\u00e9sorerie G\u00e9n\u00e9rale": {
+                            "account_type": "Cash"
+                        }
+                    }, 
+                    "Caisses, r\u00e9gies d'avances et accr\u00e9ditifs": {
+                        "Caisses": {
+                            "Caisse (succursale ou agence A)": {
+                                "account_type": "Cash"
+                            }, 
+                            "Caisse (succursale ou agence B)": {
+                                "account_type": "Cash"
+                            }, 
+                            "Caisse Centrale": {
+                                "account_type": "Cash"
+                            }
+                        }, 
+                        "R\u00e9gies d'avances et accr\u00e9ditifs": {
+                            "account_type": "Cash"
+                        }
+                    }, 
+                    "Ch\u00e8ques et valeurs \u00e0\u00a0 encaisser": {
+                        "Autres valeurs \u00e0\u00a0 encaisser": {
+                            "account_type": "Cash"
+                        }, 
+                        "Ch\u00e8ques \u00e0\u00a0 encaisser ou \u00e0\u00a0 l'encaissement": {
+                            "Ch\u00e8ques en portefeuille": {
+                                "account_type": "Cash"
+                            }, 
+                            "Ch\u00e8ques \u00e0\u00a0 l'encaissement": {
+                                "account_type": "Cash"
+                            }
+                        }, 
+                        "Effets \u00e0\u00a0 encaisser ou \u00e0\u00a0 l'encaissement": {
+                            "Effets \u00e0\u00a0 l'encaissement": {
+                                "account_type": "Cash"
+                            }, 
+                            "Effets \u00e9chus \u00e0\u00a0 encaisser": {
+                                "account_type": "Cash"
+                            }
+                        }, 
+                        "Virement de fonds": {
+                            "account_type": "Cash"
+                        }
+                    }
+                }, 
+                "TRESORERIE - PASSIF": {
+                    "Banques (solde cr\u00e9diteur)": {
+                        "Autres \u00e9tablissements financiers et assimil\u00e9s (soldes cr\u00e9diteurs)": {
+                            "account_type": "Cash"
+                        }, 
+                        "Banques (solde cr\u00e9diteur)": {
+                            "account_type": "Cash"
+                        }
+                    }, 
+                    "Cr\u00e9dits d'escompte": {
+                        "Cr\u00e9dits d'escompte": {
+                            "account_type": "Cash"
+                        }
+                    }, 
+                    "Cr\u00e9dits de tr\u00e9sorerie": {
+                        "Cr\u00e9dits de tr\u00e9sorerie": {
+                            "account_type": "Cash"
+                        }
+                    }, 
+                    "account_type": "Cash"
+                }
+            }, 
+            "COMPTES DU PASSIF CIRCULANT (HORS TRESORERIE)": {
+                "AUTRES PROVISIONS POUR RISQUES ET CHARGES": {
+                    "Autres provisions pour risques et charges": {
+                        "Autres provisions pour risques et charges": {}, 
+                        "Provisions pour amendes, doubles droits et p\u00e9nalit\u00e9s": {}, 
+                        "Provisions pour garanties donn\u00e9es aux clients": {}, 
+                        "Provisions pour imp\u00f4ts": {}, 
+                        "Provisions pour litiges": {}, 
+                        "Provisions pour pertes de change": {}
+                    }
+                }, 
+                "DETTES DU PASSIF CIRCULANT": {
+                    "Autres cr\u00e9anciers": {
+                        "Dettes rattach\u00e9es aux autres cr\u00e9anciers": {
+                            "account_type": "Payable"
+                        }, 
+                        "Dettes sur acquisitions d'immobilisations": {
+                            "account_type": "Payable"
+                        }, 
+                        "Dettes sur acquisitions de titres et valeurs de placement": {
+                            "account_type": "Payable"
+                        }, 
+                        "Divers cr\u00e9anciers": {
+                            "account_type": "Payable"
+                        }, 
+                        "Obligations \u00e9chues \u00e0\u00a0 rembourser": {
+                            "account_type": "Payable"
+                        }, 
+                        "Obligations, coupons \u00e0\u00a0 payer": {
+                            "account_type": "Payable"
+                        }
+                    }, 
+                    "Clients cr\u00e9diteurs, avances et acomptes": {
+                        "Autres clients cr\u00e9diteurs": {
+                            "account_type": "Payable"
+                        }, 
+                        "Clients - avances et acomptes re\u00e7us sur commandes en cours": {
+                            "account_type": "Payable"
+                        }, 
+                        "Clients - dettes pour emballages et mat\u00e9riel consign\u00e9s": {
+                            "account_type": "Payable"
+                        }, 
+                        "Rabais, remises et ristournes \u00e0\u00a0 accorder - avoirs \u00e0\u00a0 \u00e9tablir": {
+                            "account_type": "Payable"
+                        }
+                    }, 
+                    "Comptes d'associ\u00e9s - cr\u00e9diteurs": {
+                        "Associ\u00e9s - capital \u00e0\u00a0 rembourser": {
+                            "account_type": "Payable"
+                        }, 
+                        "Associ\u00e9s - dividendes \u00e0\u00a0 payer": {
+                            "account_type": "Payable"
+                        }, 
+                        "Associ\u00e9s - op\u00e9rations faites en commun": {
+                            "account_type": "Payable"
+                        }, 
+                        "Associ\u00e9s - versements re\u00e7us sur augmentation de capital": {
+                            "account_type": "Payable"
+                        }, 
+                        "Autres comptes d'associ\u00e9s - cr\u00e9diteurs": {
+                            "account_type": "Payable"
+                        }, 
+                        "Comptes courants des associ\u00e9s cr\u00e9diteurs": {
+                            "account_type": "Payable"
+                        }
+                    }, 
+                    "Comptes de r\u00e9gularisation - passif": {
+                        "Comptes de r\u00e9partition p\u00e9riodique des produits": {}, 
+                        "Comptes transitoires ou d'attente - cr\u00e9diteurs": {}, 
+                        "Int\u00e9r\u00eats courus et non \u00e9chus \u00e0 payer": {}, 
+                        "Produits constat\u00e9s d'avance": {}
+                    }, 
+                    "Etat - cr\u00e9diteur": {
+                        "Etat - autres comptes cr\u00e9diteurs": {
+                            "account_type": "Tax"
+                        }, 
+                        "Etat Imp\u00f4ts, taxes et assimil\u00e9s": {
+                            "Etat, IR": {
+                                "account_type": "Tax"
+                            }, 
+                            "Etat, Taxe professionnelle (ex patente)": {
+                                "account_type": "Tax"
+                            }, 
+                            "Etat, taxe urbaine et taxe d'\u00e9dilit\u00e9": {
+                                "account_type": "Tax"
+                            }
+                        }, 
+                        "Etat, TVA due (suivant d\u00e9clarations)": {
+                            "account_type": "Tax"
+                        }, 
+                        "Etat, TVA factur\u00e9e": {
+                            "Etat, TVA factur\u00e9e 10%": {
+                                "account_type": "Tax"
+                            }, 
+                            "Etat, TVA factur\u00e9e 14%": {
+                                "account_type": "Tax"
+                            }, 
+                            "Etat, TVA factur\u00e9e 20%": {
+                                "account_type": "Tax"
+                            }, 
+                            "Etat, TVA factur\u00e9e 7%": {
+                                "account_type": "Tax"
+                            }
+                        }, 
+                        "Etat, imp\u00f4ts et taxes \u00e0\u00a0 payer": {
+                            "account_type": "Tax"
+                        }, 
+                        "Etat, imp\u00f4ts sur les r\u00e9sultats": {
+                            "account_type": "Tax"
+                        }
+                    }, 
+                    "Fournisseurs et comptes rattach\u00e9s": {
+                        "Autres fournisseurs et comptes rattach\u00e9s": {
+                            "account_type": "Payable"
+                        }, 
+                        "Fournisseurs": {
+                            "account_type": "Payable"
+                        }, 
+                        "Fournisseurs - effets \u00e0\u00a0 payer": {
+                            "account_type": "Payable"
+                        }, 
+                        "Fournisseurs - factures non parvenues": {
+                            "account_type": "Payable"
+                        }, 
+                        "Fournisseurs - retenues de garantie": {
+                            "account_type": "Payable"
+                        }
+                    }, 
+                    "Organismes sociaux": {
+                        "Autres organismes sociaux": {
+                            "account_type": "Payable"
+                        }, 
+                        "Caisse Nationale de la S\u00e9curit\u00e9 Sociale": {
+                            "ALLOCATION FAMILIALES": {
+                                "account_type": "Payable"
+                            }
+                        }, 
+                        "Caisses de retraite": {
+                            "account_type": "Payable"
+                        }, 
+                        "Charges sociales \u00e0\u00a0 payer": {
+                            "account_type": "Payable"
+                        }, 
+                        "Mutuelles": {
+                            "account_type": "Payable"
+                        }
+                    }, 
+                    "Personnel - cr\u00e9diteur": {
+                        "Charges du personnel \u00e0\u00a0 payer": {
+                            "account_type": "Payable"
+                        }, 
+                        "D\u00e9p\u00f4ts du personnel cr\u00e9diteurs": {
+                            "account_type": "Payable"
+                        }, 
+                        "Oppositions sur salaires": {
+                            "account_type": "Payable"
+                        }, 
+                        "Personnel - autres cr\u00e9diteurs": {
+                            "account_type": "Payable"
+                        }, 
+                        "R\u00e9mun\u00e9rations dues au personnel": {
+                            "account_type": "Payable"
+                        }
+                    }
+                }, 
+                "Ecarts de conversion - passif (El\u00e9ments circulants)": {
+                    "Ecarts de conversion - passif (El\u00e9ments circulants)": {
+                        "Augmentation des cr\u00e9ances circulantes": {}, 
+                        "Diminution des dettes circulantes": {}
+                    }
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "COMPTES DE GESTION": {
+            "COMPTES DE CHARGES": {
+                "CHARGES D'EXPLOITATION": {
+                    "Achats consomm\u00e9s de mati\u00e8res et fournitures": {
+                        "Achats d'emballages": {
+                            "Achats d'emballages perdus": {}, 
+                            "Achats d'emballages r\u00e9cup\u00e9rables non identifiables": {}, 
+                            "Achats d'emballages \u00e0\u00a0 usage mixte": {}
+                        }, 
+                        "Achats de mati\u00e8res et de fournitures des exercices ant\u00e9rieurs": {}, 
+                        "Achats de mati\u00e8res et fournitures consommables": {
+                            "Achats de combustibles": {}, 
+                            "Achats de fournitures d'atelier et d'usine": {}, 
+                            "Achats de fournitures de bureau": {}, 
+                            "Achats de fournitures de magasin": {}, 
+                            "Achats de mati\u00e8res et fournitures A": {}, 
+                            "Achats de mati\u00e8res et fournitures B": {}, 
+                            "Achats de produits d'entretien": {}
+                        }, 
+                        "Achats de mati\u00e8res premi\u00e8res": {
+                            "Achats de mati\u00e8res premi\u00e8res A": {}, 
+                            "Achats de mati\u00e8res premi\u00e8res B": {}
+                        }, 
+                        "Achats de travaux, \u00e9tudes et prestations de service": {
+                            "Achats des prestations de service": {}, 
+                            "Achats des travaux": {}, 
+                            "Achats des \u00e9tudes": {}
+                        }, 
+                        "Achats non stock\u00e9s de mati\u00e8res et fournitures": {
+                            "Achats de fournitures d'entretien": {}, 
+                            "Achats de fournitures de bureau": {}, 
+                            "Achats de fournitures non stockables (eau, \u00e9lectricit\u00e9,,)": {}, 
+                            "Achats de petit outillage et petit \u00e9quipement": {}
+                        }, 
+                        "Rabais, remises et ristournes obtenus sur achats consomm\u00e9s de mati\u00e8res et fournitures": {
+                            "Rabais, remises et ristournes obtenus sur achats de mati\u00e8res et fournitures consommables": {}, 
+                            "Rabais, remises et ristournes obtenus sur achats de mati\u00e8res et fournitures des exercices ant\u00e9rieurs": {}, 
+                            "Rabais, remises et ristournes obtenus sur achats de mati\u00e8res premi\u00e8res": {}, 
+                            "Rabais, remises et ristournes obtenus sur achats de travaux, \u00e9tudes et prestations de service": {}, 
+                            "Rabais, remises et ristournes obtenus sur achats des emballages": {}, 
+                            "Rabais, remises et ristournes obtenus sur achats non stock\u00e9s": {}
+                        }, 
+                        "Variation des stocks de mati\u00e8res et fournitures": {
+                            "Variation des stocks de mati\u00e8res et fournitures consommables": {}, 
+                            "Variation des stocks de mati\u00e8res premi\u00e8res": {}, 
+                            "Variation des stocks des emballages": {}
+                        }
+                    }, 
+                    "Achats revendus de marchandises": {
+                        "Achats de marchandises \"groupe A\"": {}, 
+                        "Achats de marchandises \"groupe B\"": {}, 
+                        "Achats revendus de marchandises des exercices ant\u00e9rieurs": {}, 
+                        "Rabais, remises et ristournes obtenus sur achats de marchandises": {}, 
+                        "Variation de stocks de marchandises": {}
+                    }, 
+                    "Autres charges d'exploitation": {
+                        "Autres charges d'exploitation des exercices ant\u00e9rieurs": {}, 
+                        "Jetons de pr\u00e9sence": {}, 
+                        "Pertes sur cr\u00e9ances irr\u00e9couvrables": {}, 
+                        "Pertes sur op\u00e9rations faites en commun": {}, 
+                        "Transfert de profits sur op\u00e9rations faites en commun": {}
+                    }, 
+                    "Autres charges externes 1": {
+                        "Entretien et r\u00e9parations": {
+                            "Entretien et r\u00e9parations des biens immobiliers": {}, 
+                            "Entretien et r\u00e9parations des biens mobiliers": {}, 
+                            "Maintenance": {}
+                        }, 
+                        "Locations et charges locatives": {
+                            "Locations de constructions": {}, 
+                            "Locations de mat\u00e9riel de transport": {}, 
+                            "Locations de mat\u00e9riel et d'outillage": {}, 
+                            "Locations de mat\u00e9riel informatique": {}, 
+                            "Locations de mobilier et de mat\u00e9riel de bureau": {}, 
+                            "Locations de terrains": {}, 
+                            "Locations et charges locatives diverses": {}, 
+                            "Malis sur emballages rendus": {}
+                        }, 
+                        "Primes d'assurances": {
+                            "Assurances - Mat\u00e9riel de transport": {}, 
+                            "Assurances - risques d'exploitation": {}, 
+                            "Assurances multirisque (vol, incendie,R,C,)": {}, 
+                            "Autres assurances": {}
+                        }, 
+                        "Redevances de cr\u00e9dit-bail": {
+                            "Redevances de cr\u00e9dit-bail - mobilier et mat\u00e9riel": {}
+                        }, 
+                        "Redevances pour brevets, marques, droits et valeurs similaires": {
+                            "Autres redevances": {}, 
+                            "Redevances pour brevets": {}
+                        }, 
+                        "R\u00e9mun\u00e9rations d'interm\u00e9diaires et honoraires": {
+                            "Commissions et courtages": {}, 
+                            "Frais d'actes et de contentieux": {}, 
+                            "Honoraires": {}
+                        }, 
+                        "R\u00e9mun\u00e9rations du personnel ext\u00e9rieur \u00e0\u00a0 l'entreprise": {
+                            "R\u00e9mun\u00e9rations du personnel d\u00e9tach\u00e9 ou pr\u00eat\u00e9 \u00e0\u00a0 l'entreprise": {}, 
+                            "R\u00e9mun\u00e9rations du personnel int\u00e9rimaire": {}, 
+                            "R\u00e9mun\u00e9rations du personnel occasionnel": {}
+                        }
+                    }, 
+                    "Autres charges externes 2": {
+                        "Autres charges externes des exercices ant\u00e9rieurs": {}, 
+                        "Cotisations et dons": {
+                            "Cotisations": {}, 
+                            "Dons": {}
+                        }, 
+                        "D\u00e9placements, missions et r\u00e9ceptions": {
+                            "Frais de d\u00e9m\u00e9nagement": {}, 
+                            "Missions": {}, 
+                            "R\u00e9ceptions": {}, 
+                            "Voyages et d\u00e9placements": {}
+                        }, 
+                        "Frais postaux et frais de t\u00e9l\u00e9communication": {
+                            "Frais de t\u00e9lex et de t\u00e9l\u00e9grammes": {}, 
+                            "Frais de t\u00e9l\u00e9phone": {}, 
+                            "Frais postaux": {}
+                        }, 
+                        "Publicit\u00e9, publications et relations publiques": {
+                            "Annonces et insertions": {}, 
+                            "Autres charges de publicit\u00e9 et relations publiques": {}, 
+                            "Cadeaux \u00e0\u00a0 la client\u00e8le": {}, 
+                            "Foires et expositions": {}, 
+                            "Primes de publicit\u00e9": {}, 
+                            "Publications": {}, 
+                            "\u00c9chantillons, catalogues et imprim\u00e9s publicitaires": {}
+                        }, 
+                        "Rabais, remises et ristournes obtenus sur autres charges externes": {}, 
+                        "Services bancaires": {
+                            "Frais d'achat et de vente des titres": {}, 
+                            "Frais et commissions sur services bancaires": {}, 
+                            "Frais sur effets de commerce": {}
+                        }, 
+                        "Transports": {
+                            "Autres transports": {}, 
+                            "Transports du personnel": {}, 
+                            "Transports sur achats": {}, 
+                            "Transports sur ventes": {}
+                        }, 
+                        "\u00c9tudes, recherches et documentation": {
+                            "Documentation g\u00e9n\u00e9rale": {}, 
+                            "Documentation technique": {}, 
+                            "Recherches": {}, 
+                            "\u00c9tudes g\u00e9n\u00e9rales": {}
+                        }
+                    }, 
+                    "Charges de personnel": {
+                        "Charges du personnel des exercices ant\u00e9rieurs": {
+                            "account_type": "Chargeable"
+                        }, 
+                        "Charges sociales": {
+                            "Assurances accidents de travail": {
+                                "account_type": "Chargeable"
+                            }, 
+                            "Cotisations aux caisses de retraite": {
+                                "account_type": "Chargeable"
+                            }, 
+                            "Cotisations aux mutuelles": {
+                                "account_type": "Chargeable"
+                            }, 
+                            "Cotisations de s\u00e9curit\u00e9 sociale": {
+                                "account_type": "Chargeable"
+                            }, 
+                            "Prestations familiales": {
+                                "account_type": "Chargeable"
+                            }
+                        }, 
+                        "Charges sociales diverses": {
+                            "Allocations aux oeuvres sociales": {
+                                "account_type": "Chargeable"
+                            }, 
+                            "Assurances groupe": {
+                                "account_type": "Chargeable"
+                            }, 
+                            "Autres charges sociales diverses": {
+                                "account_type": "Chargeable"
+                            }, 
+                            "Habillement et v\u00eatements de travail": {
+                                "account_type": "Chargeable"
+                            }, 
+                            "Indemnit\u00e9s de pr\u00e9avis et de licenciement": {
+                                "account_type": "Chargeable"
+                            }, 
+                            "M\u00e9decine de travail, pharmacie": {
+                                "account_type": "Chargeable"
+                            }, 
+                            "Prestations de retraites": {
+                                "account_type": "Chargeable"
+                            }
+                        }, 
+                        "R\u00e9mun\u00e9ration de l'exploitant": {
+                            "Appointements et salaires": {
+                                "account_type": "Chargeable"
+                            }, 
+                            "Charges sociales sur appointements et salaires de l'exploitant": {
+                                "account_type": "Chargeable"
+                            }
+                        }, 
+                        "R\u00e9mun\u00e9rations du personnel": {
+                            "Appointements et salaires": {
+                                "account_type": "Chargeable"
+                            }, 
+                            "Commissions au personnel": {
+                                "account_type": "Chargeable"
+                            }, 
+                            "Indemnit\u00e9s de d\u00e9placement": {
+                                "account_type": "Chargeable"
+                            }, 
+                            "Indemnit\u00e9s et avantages divers": {}, 
+                            "Primes de repr\u00e9sentation": {
+                                "account_type": "Chargeable"
+                            }, 
+                            "Primes et gratifications": {}, 
+                            "R\u00e9mun\u00e9rations des administrateurs, g\u00e9rants et associ\u00e9s": {
+                                "account_type": "Chargeable"
+                            }
+                        }
+                    }, 
+                    "Dotations d'exploitation": {
+                        "Dotations d'exploitation aux amortissements de l'immobilisation en non valeur": {
+                            "D.E.A. des charges \u00e0\u00a0 r\u00e9partir": {}, 
+                            "D.E.A. des frais pr\u00e9liminaires": {}
+                        }, 
+                        "Dotations d'exploitation aux amortissements des immobilisations corporelles": {
+                            "D.E.A. des autres immobilisations corporelles": {}, 
+                            "D.E.A. des constructions": {}, 
+                            "D.E.A. des installations techniques, mat\u00e9riel et outillage": {}, 
+                            "D.E.A. des mobiliers, mat\u00e9riels de bureau et am\u00e9nagements divers": {}, 
+                            "D.E.A. des terrains": {}, 
+                            "D.E.A. du mat\u00e9riel de transport": {}
+                        }, 
+                        "Dotations d'exploitation aux amortissements des immobilisations incorporelles": {
+                            "D.E.A. de l'immobilisation en recherche et d\u00e9veloppement": {}, 
+                            "D.E.A. des autres immobilisations incorporelles": {}, 
+                            "D.E.A. des brevets, marques, droits et valeurs similaires": {}, 
+                            "D.E.A. du fonds commercial": {}
+                        }, 
+                        "Dotations d'exploitation aux provisions pour d\u00e9pr\u00e9ciation des immobilisations": {
+                            "D.E.P. pour d\u00e9pr\u00e9ciation des immobilisations corporelles": {}, 
+                            "D.E.P. pour d\u00e9pr\u00e9ciation des immobilisations incorporelles": {}
+                        }, 
+                        "Dotations d'exploitation aux provisions pour d\u00e9pr\u00e9ciations de l'actif circulant": {
+                            "D.E.P. pour d\u00e9pr\u00e9ciation des cr\u00e9ances de l'actif circulant": {}, 
+                            "D.E.P. pour d\u00e9pr\u00e9ciation des stocks": {}
+                        }, 
+                        "Dotations d'exploitation aux provisions pour risques et charges": {
+                            "D.E.P. pour risques et charges durables": {}, 
+                            "D.E.P. pour risques et charges momentan\u00e9s": {}
+                        }, 
+                        "Dotations d'exploitation des exercices ant\u00e9rieurs": {
+                            "D.E. aux amortissements des exercices ant\u00e9rieurs": {}, 
+                            "D.E. aux provisions des exercices ant\u00e9rieurs": {}
+                        }
+                    }, 
+                    "Imp\u00f4ts et taxes": {
+                        "Imp\u00f4ts et taxes des exercices ant\u00e9rieurs": {}, 
+                        "Imp\u00f4ts et taxes directs": {}, 
+                        "Imp\u00f4ts, taxes et droits assimil\u00e9s": {
+                            "Autres imp\u00f4ts, taxes et droits assimil\u00e9s": {}, 
+                            "Droits d'enregistrement et de timbre": {}, 
+                            "La vignette": {}, 
+                            "Taxes sur les v\u00e9hicules": {}
+                        }
+                    }
+                }, 
+                "CHARGES FINANCIERES": {
+                    "Autres charges financi\u00e8res": {}, 
+                    "Charges d'int\u00e9r\u00eats": {
+                        "Charges d'int\u00e9r\u00eats des exercices ant\u00e9rieurs": {}, 
+                        "Int\u00e9r\u00eats des emprunts et dettes": {
+                            "Autres int\u00e9r\u00eats des emprunts et dettes": {}, 
+                            "Int\u00e9r\u00eats bancaires et sur op\u00e9rations de financement": {}, 
+                            "Int\u00e9r\u00eats des comptes courants et d\u00e9p\u00f4ts cr\u00e9diteurs": {}, 
+                            "Int\u00e9r\u00eats des dettes rattach\u00e9es \u00e0\u00a0 des participations": {}, 
+                            "Int\u00e9r\u00eats des emprunts": {}
+                        }
+                    }, 
+                    "Dotations financi\u00e8res": {
+                        "Dotation aux provisions pour d\u00e9pr\u00e9ciation des titres et valeurs de placement": {}, 
+                        "Dotations aux amortissements des primes de remboursement des obligations": {}, 
+                        "Dotations aux provisions pour d\u00e9pr\u00e9ciation des comptes de tr\u00e9sorerie": {}, 
+                        "Dotations aux provisions pour d\u00e9pr\u00e9ciations des immobilisations financi\u00e8res": {}, 
+                        "Dotations aux provisions pour risques et charges financi\u00e8res": {}, 
+                        "Dotations financi\u00e8res des exercices ant\u00e9rieurs": {}
+                    }, 
+                    "Pertes de change": {
+                        "Pertes de change des exercices ant\u00e9rieurs": {}, 
+                        "Pertes de change propres \u00e0\u00a0 l'exercice": {}
+                    }
+                }, 
+                "CHARGES NON COURANTES": {
+                    "Autres charges non courantes": {
+                        "Autres charges non courantes des exercices ant\u00e9rieurs": {}, 
+                        "Cr\u00e9ances devenues irr\u00e9couvrables": {}, 
+                        "Dons, lib\u00e9ralit\u00e9s et lots": {
+                            "Dons": {}, 
+                            "Lib\u00e9ralit\u00e9s": {}, 
+                            "Lots": {}
+                        }, 
+                        "P\u00e9nalit\u00e9s et amendes fiscales ou p\u00e9nales": {
+                            "P\u00e9nalit\u00e9s et amendes fiscales": {}, 
+                            "P\u00e9nalit\u00e9s et amendes p\u00e9nales": {}
+                        }, 
+                        "P\u00e9nalit\u00e9s sur march\u00e9s et d\u00e9dits": {
+                            "D\u00e9dits": {}, 
+                            "P\u00e9nalit\u00e9s sur march\u00e9s": {}
+                        }, 
+                        "Rappels d'imp\u00f4ts (autres que l'imp\u00f4t sur les r\u00e9sultats)": {}
+                    }, 
+                    "Dotations non courantes": {
+                        "Dotations aux amortissements exceptionnels des immobilisations": {
+                            "D.A.E. de l'immobilisation en non-valeurs": {}, 
+                            "D.A.E. des immobilisations corporelles": {}, 
+                            "D.A.E. des immobilisations incorporelles": {}
+                        }, 
+                        "Dotations non courantes aux provisions pour d\u00e9pr\u00e9ciation": {
+                            "D.N.C. aux provisions pour d\u00e9pr\u00e9ciation de l'actif circulant": {}, 
+                            "D.N.C. aux provisions pour d\u00e9pr\u00e9ciation de l'actif immobilis\u00e9": {}
+                        }, 
+                        "Dotations non courantes aux provisions pour risques et charges": {
+                            "D.N.C. aux provisions pour risques et charges durables": {}, 
+                            "D.N.C. aux provisions pour risques et charges momentan\u00e9s": {}
+                        }, 
+                        "Dotations non courantes aux provisions r\u00e9glement\u00e9es": {
+                            "D.N.C. pour acquisition et construction de logements": {}, 
+                            "D.N.C. pour amortissements d\u00e9rogatoires": {}, 
+                            "D.N.C. pour investissements": {}, 
+                            "D.N.C. pour plus-values en instance d'imposition": {}, 
+                            "D.N.C. pour reconstitution de gisements": {}
+                        }, 
+                        "Dotations non courantes des exercices ant\u00e9rieurs": {}
+                    }, 
+                    "Subventions accord\u00e9es": {
+                        "Subventions accord\u00e9es de l'exercice": {}, 
+                        "Subventions accord\u00e9es des exercices ant\u00e9rieurs": {}
+                    }, 
+                    "Valeurs nettes d'amortissements des immobilisations c\u00e9d\u00e9es ( V.N.A )": {
+                        "VNA des immobilisations corporelles c\u00e9d\u00e9es": {}, 
+                        "VNA des immobilisations c\u00e9d\u00e9es des exercices ant\u00e9rieurs": {}, 
+                        "VNA des immobilisations incorporelles c\u00e9d\u00e9es": {}, 
+                        "VNA provisions des immobilisations financi\u00e8res c\u00e9d\u00e9es (droits de propri\u00e9t\u00e9)": {}
+                    }
+                }, 
+                "IMPOTS SUR LES RESULTATS": {
+                    "Imp\u00f4ts sur les r\u00e9sultats": {
+                        "Imposition minimale annuelle des soci\u00e9t\u00e9s": {}, 
+                        "Imp\u00f4ts sur les b\u00e9n\u00e9fices": {}, 
+                        "Rappels et d\u00e9gr\u00e8vements d'imp\u00f4ts sur les r\u00e9sultats": {}
+                    }
+                }
+            }, 
+            "COMPTES DE PRODUITS": {
+                "PRODUITS D'EXPLOITATION": {
+                    "Autres produits d'exploitation": {
+                        "Autres produits d'exploitation des exercices ant\u00e9rieurs": {}, 
+                        "Jetons de pr\u00e9sence re\u00e7us": {}, 
+                        "Profits sur op\u00e9rations faites en commun": {}, 
+                        "Revenus des immeubles non affect\u00e9s \u00e0\u00a0 l'exploitation": {}, 
+                        "Transfert de pertes sur op\u00e9rations faites en commun": {}
+                    }, 
+                    "Immobilisations produites par l'entreprise pour elle m\u00eame": {
+                        "Immobilisation en non valeurs produite": {}, 
+                        "Immobilisations corporelles produites": {}, 
+                        "Immobilisations incorporelles produites": {}, 
+                        "Immobilisations produites des exercices ant\u00e9rieurs": {}
+                    }, 
+                    "Reprise d'exploitation, transferts de charges": {
+                        "Reprises sur amortissements de l'immobilisation en non valeurs": {}, 
+                        "Reprises sur amortissements des immobilisations corporelles": {}, 
+                        "Reprises sur amortissements des immobilisations incorporelles": {}, 
+                        "Reprises sur amortissements et provisions des exercices ant\u00e9rieurs": {
+                            "Reprises sur amortissements des exercices ant\u00e9rieurs": {}, 
+                            "Reprises sur provisions des exercices ant\u00e9rieurs": {}
+                        }, 
+                        "Reprises sur provisions pour d\u00e9pr\u00e9ciation de l'actif circulant": {}, 
+                        "Reprises sur provisions pour d\u00e9pr\u00e9ciation des immobilisations": {}, 
+                        "Reprises sur provisions pour risques et charges": {}, 
+                        "Transferts des charges d'exploitation": {
+                            "T,C,E - Achats consomm\u00e9s de mati\u00e8res et fournitures": {}, 
+                            "T,C,E - Achats de marchandises": {}, 
+                            "T,C,E - Autres charges d'exploitation": {}, 
+                            "T,C,E - Charges de personnel": {}, 
+                            "T,C,E - Imp\u00f4ts et taxes": {}, 
+                            "T,C,E-Autres charges externes": {}
+                        }
+                    }, 
+                    "Subventions d'exploitation": {
+                        "Subventions d'exploitation re\u00e7ues des exercices ant\u00e9rieurs": {}, 
+                        "Subventions d'exploitations re\u00e7ues de l'exercice": {}
+                    }, 
+                    "Variation des stocks de produits": {
+                        "Variation des stocks de biens produits": {
+                            "Variation des stocks de produits finis": {}, 
+                            "Variation des stocks de produits interm\u00e9diaires": {}, 
+                            "Variation des stocks de produits r\u00e9siduels": {}
+                        }, 
+                        "Variation des stocks de produits en cours": {
+                            "Variation des stocks de biens produits en cours": {}, 
+                            "Variation des stocks de produits interm\u00e9diaires en cours": {}, 
+                            "Variation des stocks de produits r\u00e9siduels en cours": {}
+                        }, 
+                        "Variation des stocks de services en cours": {
+                            "Variation des stocks d'\u00e9tudes en cours": {}, 
+                            "Variation des stocks de prestations en cours": {}, 
+                            "Variation des stocks de travaux en cours": {}
+                        }
+                    }, 
+                    "Ventes de biens et services produits": {
+                        "Rabais, remises et ristournes accord\u00e9s par l'entreprise": {
+                            "R,R,R accord\u00e9es sur ventes au Maroc des biens produits": {}, 
+                            "R,R,R accord\u00e9es sur ventes au Maroc des services produits": {}, 
+                            "R,R,R accord\u00e9es sur ventes \u00e0\u00a0 l'\u00e9tranger des biens produits": {}, 
+                            "R,R,R accord\u00e9es sur ventes \u00e0\u00a0 l'\u00e9tranger des services produits": {}, 
+                            "Rabais, remises et ristournes accord\u00e9s sur ventes de B et S produits des exercices ant\u00e9rieurs": {}
+                        }, 
+                        "Redevances pour brevets, marques, droits et valeurs similaires": {}, 
+                        "Ventes de biens et services produits des exercices ant\u00e9rieurs": {}, 
+                        "Ventes de biens produits au Maroc": {
+                            "Ventes de produits finis": {}, 
+                            "Ventes de produits interm\u00e9diaires": {}, 
+                            "Ventes de produits r\u00e9siduels": {}
+                        }, 
+                        "Ventes de biens produits \u00e0\u00a0 l'\u00e9tranger": {
+                            "Ventes de produits finis": {}, 
+                            "Ventes de produits interm\u00e9diaires": {}
+                        }, 
+                        "Ventes de produits accessoires": {
+                            "Autres ventes et produits accessoires": {}, 
+                            "Bonis sur reprises d'emballages consign\u00e9s": {}, 
+                            "Commissions et courtages re\u00e7us": {}, 
+                            "Locations divers es re\u00e7ues": {}, 
+                            "Ports et frais accessoires factur\u00e9s": {}, 
+                            "Produits de services exploit\u00e9s dans l'int\u00e9r\u00eat du personnel": {}
+                        }, 
+                        "Ventes de services produits au Maroc": {
+                            "Etudes": {}, 
+                            "Prestations de services": {}, 
+                            "Travaux": {}
+                        }, 
+                        "Ventes de services produits \u00e0\u00a0 l'\u00e9tranger": {
+                            "Etudes": {}, 
+                            "Prestations de services": {}, 
+                            "Travaux": {}
+                        }
+                    }, 
+                    "Ventes de marchandises": {
+                        "Rabais, remises et ristournes accord\u00e9s par l'entreprise": {}, 
+                        "Ventes de marchandises au Maroc": {}, 
+                        "Ventes de marchandises des exercices ant\u00e9rieurs": {}, 
+                        "Ventes de marchandises \u00e0\u00a0 l'\u00e9tranger": {}
+                    }
+                }, 
+                "PRODUITS FINANCIERS": {
+                    "Gains de change": {
+                        "Gains de change des exercices ant\u00e9rieurs": {}, 
+                        "Gains de change propres \u00e0\u00a0 l'exercice": {}
+                    }, 
+                    "Int\u00e9r\u00eats et autres produits financiers": {
+                        "Escomptes obtenus": {}, 
+                        "Int\u00e9r\u00eats et autres produits financiers des exercices ant\u00e9rieurs": {}, 
+                        "Int\u00e9r\u00eats et produits assimil\u00e9s": {
+                            "Int\u00e9r\u00eats des pr\u00eats": {}, 
+                            "Revenus des autres cr\u00e9ances financi\u00e8res": {}
+                        }, 
+                        "Produits nets sur cessions de titres et valeurs de placement": {}, 
+                        "Revenus des cr\u00e9ances rattach\u00e9es \u00e0\u00a0 des participations": {}, 
+                        "Revenus des titres et valeurs de placement": {}
+                    }, 
+                    "Produits des titres de participation et des autres titres immobilis\u00e9s": {
+                        "Produits des titres de participation et des autres titres immobilis\u00e9s des exercices ant\u00e9rieurs": {}, 
+                        "Revenus des titres de participation": {}, 
+                        "Revenus des titres immobilis\u00e9s": {}
+                    }, 
+                    "Reprises financi\u00e8res, transferts de charges": {
+                        "Reprise sur provisions pour d\u00e9pr\u00e9ciation des titres et valeurs de placement": {}, 
+                        "Reprises sur amortissements des primes de remboursement des obligations": {}, 
+                        "Reprises sur dotations financi\u00e8res des exercices ant\u00e9rieurs": {}, 
+                        "Reprises sur provisions pour d\u00e9pr\u00e9ciation des comptes de tr\u00e9sorerie": {}, 
+                        "Reprises sur provisions pour d\u00e9pr\u00e9ciation des immobilisations financi\u00e8res": {}, 
+                        "Reprises sur provisions pour risques et charges financi\u00e8res": {}, 
+                        "Transfert de charges financi\u00e8res": {
+                            "Transfert - Autres charges financi\u00e8res": {}, 
+                            "Transfert - Charges d'int\u00e9r\u00eats": {}, 
+                            "Transfert - Pertes de change": {}
+                        }
+                    }
+                }, 
+                "PRODUITS NON COURANTS": {
+                    "Autres produits non courants": {
+                        "Autres produits non courants des exercices ant\u00e9rieurs": {}, 
+                        "Dons, lib\u00e9ralit\u00e9s et lots re\u00e7us": {
+                            "Dons": {}, 
+                            "Lib\u00e9ralit\u00e9s": {}, 
+                            "Lots": {}
+                        }, 
+                        "D\u00e9gr\u00e8vement d'imp\u00f4ts (autres que l'imp\u00f4t sur les r\u00e9sultats)": {}, 
+                        "P\u00e9nalit\u00e9s et d\u00e9dits re\u00e7us": {
+                            "D\u00e9dits re\u00e7us": {}, 
+                            "P\u00e9nalit\u00e9s re\u00e7ues sur march\u00e9s": {}
+                        }, 
+                        "Rentr\u00e9es sur cr\u00e9ances sold\u00e9es": {}
+                    }, 
+                    "Produits des cessions d'immobilisations": {
+                        "Produits des cessions des immobilisations corporelles": {}, 
+                        "Produits des cessions des immobilisations des exercices ant\u00e9rieurs": {}, 
+                        "Produits des cessions des immobilisations financi\u00e8res (droits de propri\u00e9t\u00e9)": {}, 
+                        "Produits des cessions des immobilisations incorporelles": {}
+                    }, 
+                    "Reprise sur subventions d'investissements": {
+                        "Reprises sur subventions d'investissement de l'exercice": {}, 
+                        "Reprises sur subventions d'investissement des exercices ant\u00e9rieurs": {}
+                    }, 
+                    "Reprises non courantes": {
+                        "Reprises non courantes des exercices ant\u00e9rieurs.": {}, 
+                        "Reprises non courantes sur amortissements exceptionnels des immobilisations": {
+                            "R,A,E des immobilisations corporelles": {}, 
+                            "R,A,E des immobilisations en non valeur": {}, 
+                            "R,A,E des immobilisations incorporelles": {}
+                        }, 
+                        "Reprises non courantes sur provisions pour d\u00e9pr\u00e9ciation": {
+                            "R,N,C sur provisions pour d\u00e9pr\u00e9ciation de l'actif circulant": {}, 
+                            "R,N,C sur provisions pour d\u00e9pr\u00e9ciation de l'actif immobilis\u00e9": {}
+                        }, 
+                        "Reprises non courantes sur provisions pour risques et charges": {
+                            "Reprises sur provisions pour risques et charges durables": {}, 
+                            "Reprises sur provisions pour risques et charges momentan\u00e9s": {}
+                        }, 
+                        "Reprises non courantes sur provisions r\u00e9glement\u00e9es": {
+                            "Reprises sur amortissements d\u00e9rogatoires": {}, 
+                            "Reprises sur plus-values en instance d'imposition": {}, 
+                            "Reprises sur provisions pour acquisition et construction de logements": {}, 
+                            "Reprises sur provisions pour investissements": {}, 
+                            "Reprises sur provisions pour reconstitution de gisements": {}
+                        }, 
+                        "Transferts de charges non courantes": {}
+                    }, 
+                    "Subventions d'\u00e9quilibre": {
+                        "Subventions d'\u00e9quilibre re\u00e7ues de l'exercice": {}, 
+                        "Subventions d'\u00e9quilibre re\u00e7ues des exercices ant\u00e9rieurs": {}
+                    }
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "COMPTES DE RESULTATS": {
+            "RESULTAT APRES IMPOTS": {}, 
+            "RESULTAT AVANT IMPOTS": {}, 
+            "RESULTAT COURANT": {}, 
+            "RESULTAT D'EXPLOITATION": {
+                "Exc\u00e9dent brut d'exploitation": {
+                    "Exc\u00e9dent brut d'exploitation (cr\u00e9diteur)": {}, 
+                    "Insuffisance brute d'exploitation (d\u00e9biteur)": {}
+                }, 
+                "Marge brute": {}, 
+                "R\u00e9sultat d'exploitation": {}, 
+                "Valeur ajout\u00e9e": {}
+            }, 
+            "RESULTAT FINANCIER": {}, 
+            "RESULTAT NON COURANT": {}, 
+            "root_type": ""
+        }
+    }
+}

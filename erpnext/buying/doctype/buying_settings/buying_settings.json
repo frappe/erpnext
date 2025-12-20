@@ -1,0 +1,341 @@
+{
+ "actions": [],
+ "creation": "2013-06-25 11:04:03",
+ "doctype": "DocType",
+ "document_type": "Other",
+ "engine": "InnoDB",
+ "field_order": [
+  "supplier_and_price_defaults_section",
+  "supp_master_name",
+  "supplier_group",
+  "buying_price_list",
+  "column_break_4",
+  "maintain_same_rate_action",
+  "role_to_override_stop_action",
+  "section_break_xmlt",
+  "po_required",
+  "blanket_order_allowance",
+  "column_break_sbwq",
+  "pr_required",
+  "project_update_frequency",
+  "transaction_settings_section",
+  "column_break_fcyl",
+  "set_landed_cost_based_on_purchase_invoice_rate",
+  "allow_zero_qty_in_supplier_quotation",
+  "use_transaction_date_exchange_rate",
+  "allow_zero_qty_in_request_for_quotation",
+  "column_break_12",
+  "maintain_same_rate",
+  "allow_multiple_items",
+  "bill_for_rejected_quantity_in_purchase_invoice",
+  "set_valuation_rate_for_rejected_materials",
+  "disable_last_purchase_rate",
+  "show_pay_button",
+  "allow_zero_qty_in_purchase_order",
+  "subcontract",
+  "backflush_raw_materials_of_subcontract_based_on",
+  "column_break_11",
+  "over_transfer_allowance",
+  "validate_consumed_qty",
+  "section_break_xcug",
+  "auto_create_subcontracting_order",
+  "column_break_izrr",
+  "auto_create_purchase_receipt",
+  "request_for_quotation_tab",
+  "fixed_email"
+ ],
+ "fields": [
+  {
+   "default": "Supplier Name",
+   "fieldname": "supp_master_name",
+   "fieldtype": "Select",
+   "label": "Supplier Naming By",
+   "options": "Supplier Name\nNaming Series\nAuto Name"
+  },
+  {
+   "fieldname": "supplier_group",
+   "fieldtype": "Link",
+   "label": "Default Supplier Group",
+   "options": "Supplier Group"
+  },
+  {
+   "fieldname": "buying_price_list",
+   "fieldtype": "Link",
+   "label": "Default Buying Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "po_required",
+   "fieldtype": "Select",
+   "label": "Is Purchase Order Required for Purchase Invoice & Receipt Creation?",
+   "options": "No\nYes"
+  },
+  {
+   "fieldname": "pr_required",
+   "fieldtype": "Select",
+   "label": "Is Purchase Receipt Required for Purchase Invoice Creation?",
+   "options": "No\nYes"
+  },
+  {
+   "default": "0",
+   "fieldname": "maintain_same_rate",
+   "fieldtype": "Check",
+   "label": "Maintain Same Rate Throughout the Purchase Cycle"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_multiple_items",
+   "fieldtype": "Check",
+   "label": "Allow Item To Be Added Multiple Times in a Transaction"
+  },
+  {
+   "fieldname": "subcontract",
+   "fieldtype": "Tab Break",
+   "label": "Subcontracting Settings"
+  },
+  {
+   "default": "BOM",
+   "fieldname": "backflush_raw_materials_of_subcontract_based_on",
+   "fieldtype": "Select",
+   "label": "Backflush Raw Materials of Subcontract Based On",
+   "options": "BOM\nMaterial Transferred for Subcontract"
+  },
+  {
+   "depends_on": "eval:doc.backflush_raw_materials_of_subcontract_based_on == \"BOM\"",
+   "description": "Percentage you are allowed to transfer more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to transfer 110 units.",
+   "fieldname": "over_transfer_allowance",
+   "fieldtype": "Float",
+   "label": "Over Transfer Allowance (%)"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Stop",
+   "depends_on": "maintain_same_rate",
+   "description": "Configure the action to stop the transaction or just warn if the same rate is not maintained.",
+   "fieldname": "maintain_same_rate_action",
+   "fieldtype": "Select",
+   "label": "Action If Same Rate is Not Maintained",
+   "mandatory_depends_on": "maintain_same_rate",
+   "options": "Stop\nWarn"
+  },
+  {
+   "depends_on": "eval:doc.maintain_same_rate_action == 'Stop'",
+   "fieldname": "role_to_override_stop_action",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Override Stop Action",
+   "options": "Role"
+  },
+  {
+   "default": "1",
+   "description": "If checked, Rejected Quantity will be included while making Purchase Invoice from Purchase Receipt.",
+   "fieldname": "bill_for_rejected_quantity_in_purchase_invoice",
+   "fieldtype": "Check",
+   "label": "Bill for Rejected Quantity in Purchase Invoice"
+  },
+  {
+   "fieldname": "supplier_and_price_defaults_section",
+   "fieldtype": "Tab Break",
+   "label": "Naming Series and Price Defaults"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transaction_settings_section",
+   "fieldtype": "Tab Break",
+   "label": "Transaction Settings"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_last_purchase_rate",
+   "fieldtype": "Check",
+   "label": "Disable Last Purchase Rate"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval: frappe.boot.versions && frappe.boot.versions.payments",
+   "fieldname": "show_pay_button",
+   "fieldtype": "Check",
+   "label": "Show Pay Button in Purchase Order Portal"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: !doc.maintain_same_rate",
+   "description": "Users can enable the checkbox If they want to adjust the incoming rate (set using purchase receipt) based on the purchase invoice rate.",
+   "fieldname": "set_landed_cost_based_on_purchase_invoice_rate",
+   "fieldtype": "Check",
+   "label": "Set Landed Cost Based on Purchase Invoice Rate"
+  },
+  {
+   "default": "0",
+   "description": "While making Purchase Invoice from Purchase Order, use Exchange Rate on Invoice's transaction date rather than inheriting it from Purchase Order. Only applies for Purchase Invoice.",
+   "fieldname": "use_transaction_date_exchange_rate",
+   "fieldtype": "Check",
+   "label": "Use Transaction Date Exchange Rate"
+  },
+  {
+   "default": "0",
+   "description": "Percentage you are allowed to order beyond the Blanket Order quantity.",
+   "fieldname": "blanket_order_allowance",
+   "fieldtype": "Float",
+   "label": "Blanket Order Allowance (%)"
+  },
+  {
+   "fieldname": "section_break_xcug",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_izrr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Subcontracting Order (Draft) will be auto-created on submission of Purchase Order.",
+   "fieldname": "auto_create_subcontracting_order",
+   "fieldtype": "Check",
+   "label": "Auto Create Subcontracting Order"
+  },
+  {
+   "default": "0",
+   "description": "Purchase Receipt (Draft) will be auto-created on submission of Subcontracting Receipt.",
+   "fieldname": "auto_create_purchase_receipt",
+   "fieldtype": "Check",
+   "label": "Auto Create Purchase Receipt"
+  },
+  {
+   "default": "Each Transaction",
+   "description": "How often should Project be updated of Total Purchase Cost ?",
+   "fieldname": "project_update_frequency",
+   "fieldtype": "Select",
+   "label": "Update frequency of Project",
+   "options": "Each Transaction\nManual"
+  },
+  {
+   "default": "0",
+   "description": "Allows users to submit Purchase Orders with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.",
+   "fieldname": "allow_zero_qty_in_purchase_order",
+   "fieldtype": "Check",
+   "label": "Allow Purchase Order with Zero Quantity"
+  },
+  {
+   "default": "0",
+   "description": "Allows users to submit Request for Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.",
+   "fieldname": "allow_zero_qty_in_request_for_quotation",
+   "fieldtype": "Check",
+   "label": "Allow Request for Quotation with Zero Quantity"
+  },
+  {
+   "default": "0",
+   "description": "Allows users to submit Supplier Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.",
+   "fieldname": "allow_zero_qty_in_supplier_quotation",
+   "fieldtype": "Check",
+   "label": "Allow Supplier Quotation with Zero Quantity"
+  },
+  {
+   "fieldname": "section_break_xmlt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_sbwq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_fcyl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "bill_for_rejected_quantity_in_purchase_invoice",
+   "description": "If enabled, the system will generate an accounting entry for materials rejected in the Purchase Receipt.",
+   "fieldname": "set_valuation_rate_for_rejected_materials",
+   "fieldtype": "Check",
+   "label": "Set Valuation Rate for Rejected Materials"
+  },
+  {
+   "fieldname": "request_for_quotation_tab",
+   "fieldtype": "Tab Break",
+   "label": "Request for Quotation"
+  },
+  {
+   "description": "If set, the system does not use the user's Email or the standard outgoing Email account for sending request for quotations.",
+   "fieldname": "fixed_email",
+   "fieldtype": "Link",
+   "label": "Fixed Outgoing Email Account",
+   "link_filters": "[[\"Email Account\",\"enable_outgoing\",\"=\",1]]",
+   "options": "Email Account"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.backflush_raw_materials_of_subcontract_based_on == \"Material Transferred for Subcontract\"",
+   "description": "Raw materials consumed qty will be validated based on FG BOM required qty",
+   "fieldname": "validate_consumed_qty",
+   "fieldtype": "Check",
+   "label": "Validate Consumed Qty (as per BOM)"
+  }
+ ],
+ "grid_page_length": 50,
+ "icon": "fa fa-cog",
+ "idx": 1,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-11-20 12:59:09.925862",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Buying Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Purchase Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Accounts User"
+  },
+  {
+   "read": 1,
+   "role": "Accounts Manager"
+  },
+  {
+   "read": 1,
+   "role": "Stock Manager"
+  },
+  {
+   "read": 1,
+   "role": "Stock User"
+  },
+  {
+   "read": 1,
+   "role": "Purchase User"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

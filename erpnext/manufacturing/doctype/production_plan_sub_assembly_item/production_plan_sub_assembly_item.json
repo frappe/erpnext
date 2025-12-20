@@ -1,0 +1,261 @@
+{
+ "actions": [],
+ "creation": "2020-12-27 16:08:36.127199",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "production_item",
+  "item_name",
+  "fg_warehouse",
+  "parent_item_code",
+  "column_break_3",
+  "bom_no",
+  "bom_level",
+  "type_of_manufacturing",
+  "section_break_4rxf",
+  "required_qty",
+  "column_break_xfhm",
+  "projected_qty",
+  "qty",
+  "subcontracting_section",
+  "supplier",
+  "purchase_order",
+  "work_order_details_section",
+  "production_plan_item",
+  "wo_produced_qty",
+  "stock_reserved_qty",
+  "column_break_7",
+  "ordered_qty",
+  "received_qty",
+  "indent",
+  "section_break_19",
+  "schedule_date",
+  "uom",
+  "stock_uom",
+  "actual_qty",
+  "column_break_22",
+  "description"
+ ],
+ "fields": [
+  {
+   "fetch_from": "sub_assembly_item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.type_of_manufacturing == \"In House\"",
+   "fieldname": "work_order_details_section",
+   "fieldtype": "Section Break",
+   "label": "Manufacturing"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty to Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "label": "Purchase Order",
+   "options": "Purchase Order",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "received_qty",
+   "fieldtype": "Float",
+   "label": "Received Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "bom_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "BOM No",
+   "options": "BOM"
+  },
+  {
+   "fieldname": "production_plan_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Production Plan Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "parent_item_code",
+   "fieldtype": "Link",
+   "label": "Finished Good",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "bom_level",
+   "fieldtype": "Int",
+   "label": "Level (BOM)",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_19",
+   "fieldtype": "Section Break",
+   "label": "Item Details"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "description",
+   "read_only": 1
+  },
+  {
+   "fieldname": "production_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sub Assembly Item Code",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "indent",
+   "fieldtype": "Int",
+   "label": "Indent"
+  },
+  {
+   "columns": 2,
+   "fieldname": "fg_warehouse",
+   "fieldtype": "Link",
+   "label": "Target Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "default": "In House",
+   "fieldname": "type_of_manufacturing",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Manufacturing Type",
+   "options": "In House\nSubcontract\nMaterial Request"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier",
+   "mandatory_depends_on": "eval:doc.type_of_manufacturing == 'Subcontract' && doc.qty > 0",
+   "options": "Supplier"
+  },
+  {
+   "columns": 2,
+   "fieldname": "schedule_date",
+   "fieldtype": "Datetime",
+   "label": "Schedule Date"
+  },
+  {
+   "fieldname": "section_break_4rxf",
+   "fieldtype": "Section Break",
+   "label": "Quantity"
+  },
+  {
+   "columns": 2,
+   "fieldname": "actual_qty",
+   "fieldtype": "Float",
+   "label": "Actual Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_xfhm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "projected_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Projected Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "wo_produced_qty",
+   "fieldtype": "Float",
+   "label": "Produced Qty",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "required_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Required Qty"
+  },
+  {
+   "fieldname": "subcontracting_section",
+   "fieldtype": "Section Break",
+   "label": "Subcontracting"
+  },
+  {
+   "fieldname": "stock_reserved_qty",
+   "fieldtype": "Float",
+   "label": "Stock Reserved Qty",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "ordered_qty",
+   "fieldtype": "Float",
+   "label": "Ordered Qty",
+   "no_copy": 1,
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-03 14:33:50.677717",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Production Plan Sub Assembly Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

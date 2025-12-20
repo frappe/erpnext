@@ -1,0 +1,167 @@
+name: Patch
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**.js'
+      - '**.css'
+      - '**.md'
+      - '**.html'
+      - '**.csv'
+      - 'crowdin.yml'
+      - '.coderabbit.yml'
+      - '.mergify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: patch-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    name: Patch Test
+
+    services:
+      mysql:
+        image: mariadb:10.6
+        env:
+          MARIADB_ROOT_PASSWORD: 'root'
+        ports:
+          - 3306:3306
+        options: --health-cmd="mariadb-admin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+
+      - name: Check for valid Python & Merge Conflicts
+        run: |
+          python -m compileall -fq "${GITHUB_WORKSPACE}"
+          if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
+              then echo "Found merge conflicts"
+              exit 1
+          fi
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          check-latest: true
+
+      - name: Add to Hosts
+        run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            ${{ runner.os }}-
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v4
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install
+        run: |
+          pip install frappe-bench
+          bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
+        env:
+          DB: mariadb
+          TYPE: server
+
+      - name: Run Patch Tests
+        run: |
+          cd ~/frappe-bench/
+          bench remove-app payments --force
+          jq 'del(.install_apps)' ~/frappe-bench/sites/test_site/site_config.json > tmp.json
+          mv tmp.json ~/frappe-bench/sites/test_site/site_config.json
+
+          wget https://erpnext.com/files/v13-erpnext.sql.gz
+          bench --site test_site --force restore ~/frappe-bench/v13-erpnext.sql.gz
+
+          git -C "apps/frappe" remote set-url upstream https://github.com/frappe/frappe.git
+          git -C "apps/erpnext" remote set-url upstream https://github.com/frappe/erpnext.git
+
+
+          function update_to_version() {
+            version=$1
+
+            branch_name="version-$version-hotfix"
+            echo "Updating to v$version"
+
+            # Fetch and checkout branches
+            git -C "apps/frappe" fetch --depth 1 upstream $branch_name:$branch_name
+            git -C "apps/erpnext" fetch --depth 1 upstream $branch_name:$branch_name
+            git -C "apps/frappe" checkout -q -f $branch_name
+            git -C "apps/erpnext" checkout -q -f $branch_name
+
+            # Resetup env and install apps
+            pgrep honcho | xargs kill
+            rm -rf ~/frappe-bench/env
+            bench -v setup env
+            bench pip install -e ./apps/erpnext
+            bench start &>> ~/frappe-bench/bench_start.log &
+
+            bench --site test_site migrate
+          }
+
+          update_to_version 14
+          update_to_version 15
+
+          echo "Updating to latest version"
+          git -C "apps/frappe" fetch --depth 1 upstream "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
+          git -C "apps/frappe" checkout -q -f FETCH_HEAD
+          git -C "apps/erpnext" checkout -q -f "$GITHUB_SHA"
+
+          pgrep honcho | xargs kill
+          rm -rf ~/frappe-bench/env
+          bench -v setup env
+          bench pip install -e ./apps/erpnext
+          bench start &>> ~/frappe-bench/bench_start.log &
+
+          bench --site test_site migrate
+
+      - name: Show bench output
+        if: ${{ always() }}
+        run: |
+          cd ~/frappe-bench
+          cat bench_start.log || true
+          cd logs
+          for f in ./*.log*; do
+            echo "Printing log: $f";
+            cat $f
+          done

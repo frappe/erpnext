@@ -1,0 +1,59 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-10 16:49:07.269956",
+ "docstatus": 0,
+ "doctype": "Workspace Sidebar",
+ "header_icon": "",
+ "idx": 0,
+ "items": [
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Shareholder",
+   "link_to": "Shareholder",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Share Transfer",
+   "link_to": "Share Transfer",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Share Ledger",
+   "link_to": "Share Ledger",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Share Balance",
+   "link_to": "Share Balance",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-11-25 10:46:09.287187",
+ "modified_by": "Administrator",
+ "name": "Share Management",
+ "owner": "Administrator",
+ "title": "Share Management"
+}

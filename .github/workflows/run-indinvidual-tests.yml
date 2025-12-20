@@ -1,0 +1,133 @@
+name: Individual
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: server-individual-tests-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+    - name: Clone
+      uses: actions/checkout@v4
+    - id: set-matrix
+      run: |
+        # Use grep and find to get the list of test files
+        matrix=$(find . -path '*/doctype/*/test_*.py' | xargs grep -l 'def test_' | awk '{
+            # Remove ./ prefix, file extension, and replace / with .
+            gsub(/^\.\//, "", $0)
+            gsub(/\.py$/, "", $0)
+            gsub(/\//, ".", $0)
+            # Add to array
+            tests[NR] = $0
+        }
+        END {
+            # Start JSON array
+            printf "{\n  \"include\": [\n"
+            # Loop through array and create JSON objects
+            for (i=1; i<=NR; i++) {
+                printf "    {\"test\": \"%s\"}", tests[i]
+                if (i < NR) printf ","
+                printf "\n"
+            }
+            # Close JSON array
+            printf "  ]\n}"
+        }')
+
+        # Output the matrix
+        echo "matrix=$(echo "$matrix" | jq -c)" >> $GITHUB_OUTPUT
+
+        # For debugging (optional)
+        echo "Generated matrix:"
+        echo "$matrix"
+  test:
+    needs: discover
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      NODE_ENV: "production"
+
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.discover.outputs.matrix)}}
+
+    name: Test
+
+    services:
+      mysql:
+        image: mariadb:10.6
+        env:
+          MARIADB_ROOT_PASSWORD: 'root'
+        ports:
+          - 3306:3306
+        options: --health-cmd="mariadb-admin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          check-latest: true
+
+      - name: Add to Hosts
+        run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            ${{ runner.os }}-
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v4
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install
+        run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
+        env:
+          DB: mariadb
+          TYPE: server
+          FRAPPE_USER: ${{ github.event.inputs.user }}
+          FRAPPE_BRANCH: ${{ github.event.inputs.branch }}
+
+      - name: Run Tests
+        run: 'cd ~/frappe-bench/ && bench --site test_site run-tests --app erpnext --module ${{ matrix.test }}'

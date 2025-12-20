@@ -1,0 +1,77 @@
+{
+ "actions": [],
+ "creation": "2018-02-26 06:13:37.910139",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "grace_period",
+  "cancel_after_grace",
+  "prorate"
+ ],
+ "fields": [
+  {
+   "default": "1",
+   "description": "Number of days after invoice date has elapsed before canceling subscription or marking subscription as unpaid",
+   "fieldname": "grace_period",
+   "fieldtype": "Int",
+   "label": "Grace Period"
+  },
+  {
+   "default": "0",
+   "fieldname": "cancel_after_grace",
+   "fieldtype": "Check",
+   "label": "Cancel Subscription After Grace Period"
+  },
+  {
+   "default": "1",
+   "fieldname": "prorate",
+   "fieldtype": "Check",
+   "label": "Prorate"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:48.283833",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Subscription Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

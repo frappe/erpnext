@@ -1,0 +1,35 @@
+# Configuration for probot-stale - https://github.com/probot/stale
+
+# Label to use when marking as stale
+staleLabel: inactive
+
+# Limit the number of actions per hour, from 1-30. Default is 30
+limitPerRun: 10
+
+# Set to true to ignore issues in a project (defaults to false)
+exemptProjects: true
+
+# Set to true to ignore issues in a milestone (defaults to false)
+exemptMilestones: true
+
+# Skip the stale action for draft PRs
+exemptDraftPr: true
+
+# Issues or Pull Requests with these labels will never be considered stale. Set to `[]` to disable
+exemptLabels:
+  - hotfix
+  - no-stale
+
+pulls:
+  daysUntilStale: 15
+  daysUntilClose: 3
+  exemptLabels:
+    - hotfix
+  markComment: >
+    This pull request has been automatically marked as inactive because it has
+    not had recent activity. It will be closed within 3 days if no further
+    activity occurs, but it only takes a comment to keep a contribution alive
+    :) Also, even if it is closed, you can always reopen the PR when you're
+    ready. Thank you for contributing.
+
+only: pulls

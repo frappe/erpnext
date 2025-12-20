@@ -1,0 +1,22 @@
+{
+ "aggregate_function_based_on": "base_net_total",
+ "creation": "2020-07-20 20:17:16.568132",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Sales Order",
+ "dynamic_filters_json": "[[\"Sales Order\",\"company\",\"=\",\"frappe.defaults.get_user_default(\\\"Company\\\")\"]]",
+ "filters_json": "[[\"Sales Order\",\"status\",\"not in\",[\"Draft\",\"Cancelled\",\"Closed\",null]],[\"Sales Order\",\"docstatus\",\"=\",\"1\"],[\"Sales Order\",\"modified\",\"Timespan\",\"this year\"]]",
+ "function": "Sum",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Annual Sales",
+ "modified": "2024-12-05 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Annual Sales",
+ "owner": "Administrator",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Monthly",
+ "type": "Document Type"
+}

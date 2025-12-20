@@ -1,0 +1,41 @@
+{
+ "chart_name": "Warehouse wise Stock Value",
+ "chart_type": "Custom",
+ "creation": "2022-03-30 00:58:02.018824",
+ "custom_options": "{\n    \"fieldtype\": \"Currency\"\n}",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "filters_json": "{}",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "last_synced_on": "2025-04-25 11:38:43.644402",
+ "modified": "2025-04-25 11:39:12.585542",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Warehouse wise Stock Value",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "roles": [
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ],
+ "source": "Warehouse wise Stock Value",
+ "timeseries": 0,
+ "type": "Bar",
+ "use_report_chart": 0,
+ "y_axis": []
+}

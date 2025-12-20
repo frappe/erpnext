@@ -1,0 +1,52 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-10 16:08:50.904116",
+ "docstatus": 0,
+ "doctype": "Workspace Sidebar",
+ "header_icon": "accounting",
+ "idx": 0,
+ "items": [
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "circle-dollar-sign",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Subscription",
+   "link_to": "Subscription",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "receipt-text",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Subscription Plan",
+   "link_to": "Subscription Plan",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "settings",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Subscription Settings",
+   "link_to": "Subscription Settings",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-11-25 10:46:09.340108",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Subscription",
+ "owner": "Administrator",
+ "title": "Subscription"
+}

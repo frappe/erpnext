@@ -1,0 +1,265 @@
+{
+ "actions": [],
+ "creation": "2014-11-27 14:12:07.542534",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "engine": "InnoDB",
+ "field_order": [
+  "bom_and_work_order_tab",
+  "raw_materials_consumption_section",
+  "material_consumption",
+  "get_rm_cost_from_consumption_entry",
+  "column_break_3",
+  "backflush_raw_materials_based_on",
+  "validate_components_quantities_per_bom",
+  "bom_section",
+  "update_bom_costs_automatically",
+  "column_break_lhyt",
+  "allow_editing_of_items_and_quantities_in_work_order",
+  "over_production_for_sales_and_work_order_section",
+  "overproduction_percentage_for_sales_order",
+  "column_break_16",
+  "overproduction_percentage_for_work_order",
+  "section_break_xhtl",
+  "transfer_extra_materials_percentage",
+  "column_break_kemp",
+  "job_card_section",
+  "add_corrective_operation_cost_in_finished_good_valuation",
+  "enforce_time_logs",
+  "column_break_24",
+  "job_card_excess_transfer",
+  "capacity_planning",
+  "disable_capacity_planning",
+  "allow_overtime",
+  "allow_production_on_holidays",
+  "column_break_5",
+  "capacity_planning_for_days",
+  "mins_between_operations",
+  "other_settings_section",
+  "set_op_cost_and_scrap_from_sub_assemblies",
+  "column_break_23",
+  "make_serial_no_batch_from_work_order"
+ ],
+ "fields": [
+  {
+   "fieldname": "capacity_planning",
+   "fieldtype": "Section Break",
+   "label": "Capacity Planning"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.disable_capacity_planning",
+   "description": "Plan time logs outside Workstation working hours",
+   "fieldname": "allow_overtime",
+   "fieldtype": "Check",
+   "label": "Allow Overtime"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.disable_capacity_planning",
+   "fieldname": "allow_production_on_holidays",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Allow Production on Holidays"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "30",
+   "depends_on": "eval:!doc.disable_capacity_planning",
+   "description": "Plan operations X days in advance",
+   "fieldname": "capacity_planning_for_days",
+   "fieldtype": "Int",
+   "label": "Capacity Planning For (Days)"
+  },
+  {
+   "depends_on": "eval:!doc.disable_capacity_planning",
+   "description": "Default: 10 mins",
+   "fieldname": "mins_between_operations",
+   "fieldtype": "Int",
+   "label": "Time Between Operations (Mins)"
+  },
+  {
+   "fieldname": "overproduction_percentage_for_sales_order",
+   "fieldtype": "Percent",
+   "label": "Overproduction Percentage For Sales Order"
+  },
+  {
+   "fieldname": "overproduction_percentage_for_work_order",
+   "fieldtype": "Percent",
+   "label": "Overproduction Percentage For Work Order"
+  },
+  {
+   "default": "BOM",
+   "fieldname": "backflush_raw_materials_based_on",
+   "fieldtype": "Select",
+   "label": "Backflush Raw Materials Based On",
+   "options": "BOM\nMaterial Transferred for Manufacture"
+  },
+  {
+   "default": "0",
+   "description": "Allow material consumptions without immediately manufacturing finished goods against a Work Order",
+   "fieldname": "material_consumption",
+   "fieldtype": "Check",
+   "label": "Allow Continuous Material Consumption"
+  },
+  {
+   "default": "0",
+   "description": "Update BOM cost automatically via scheduler, based on the latest Valuation Rate/Price List Rate/Last Purchase Rate of raw materials",
+   "fieldname": "update_bom_costs_automatically",
+   "fieldtype": "Check",
+   "label": "Update BOM Cost Automatically"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_capacity_planning",
+   "fieldtype": "Check",
+   "label": "Disable Capacity Planning"
+  },
+  {
+   "fieldname": "over_production_for_sales_and_work_order_section",
+   "fieldtype": "Section Break",
+   "label": "Overproduction for Sales and Work Order"
+  },
+  {
+   "fieldname": "raw_materials_consumption_section",
+   "fieldtype": "Section Break",
+   "label": "Raw Materials Consumption"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "other_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Other Settings"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "System will automatically create the serial numbers / batch for the Finished Good on submission of work order",
+   "fieldname": "make_serial_no_batch_from_work_order",
+   "fieldtype": "Check",
+   "label": "Make Serial No / Batch from Work Order"
+  },
+  {
+   "default": "0",
+   "fieldname": "add_corrective_operation_cost_in_finished_good_valuation",
+   "fieldtype": "Check",
+   "label": "Add Corrective Operation Cost in Finished Good Valuation"
+  },
+  {
+   "fieldname": "job_card_section",
+   "fieldtype": "Tab Break",
+   "label": "Job Card and Capacity Planning"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Allow transferring raw materials even after the Required Quantity is fulfilled",
+   "fieldname": "job_card_excess_transfer",
+   "fieldtype": "Check",
+   "label": "Allow Excess Material Transfer"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.material_consumption",
+   "fieldname": "get_rm_cost_from_consumption_entry",
+   "fieldtype": "Check",
+   "label": "Get Raw Materials Cost from Consumption Entry"
+  },
+  {
+   "fieldname": "bom_and_work_order_tab",
+   "fieldtype": "Tab Break",
+   "label": "BOM and Production"
+  },
+  {
+   "fieldname": "bom_section",
+   "fieldtype": "Section Break",
+   "label": "BOM"
+  },
+  {
+   "fieldname": "column_break_lhyt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.backflush_raw_materials_based_on == \"BOM\"",
+   "fieldname": "validate_components_quantities_per_bom",
+   "fieldtype": "Check",
+   "label": "Validate Components and Quantities Per BOM"
+  },
+  {
+   "default": "0",
+   "description": "To include sub-assembly costs and scrap items in Finished Goods on a work order without using a job card, when the 'Use Multi-Level BOM' option is enabled.",
+   "fieldname": "set_op_cost_and_scrap_from_sub_assemblies",
+   "fieldtype": "Check",
+   "label": "Set Operating Cost / Scrap Items From Sub-assemblies"
+  },
+  {
+   "default": "0",
+   "description": "Enabling this checkbox will force each Job Card Time Log to have From Time and To Time",
+   "fieldname": "enforce_time_logs",
+   "fieldtype": "Check",
+   "label": "Enforce Time Logs"
+  },
+  {
+   "fieldname": "section_break_xhtl",
+   "fieldtype": "Section Break",
+   "label": "Extra Material Transfer"
+  },
+  {
+   "fieldname": "column_break_kemp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The user will be able to transfer additional materials from the store to the Work in Progress (WIP) warehouse.",
+   "fieldname": "transfer_extra_materials_percentage",
+   "fieldtype": "Percent",
+   "label": "Transfer Extra Raw Materials to WIP (%)"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the system will allow users to edit the raw materials and their quantities in the Work Order. The system will not reset the quantities as per the BOM, if the user has changed them.",
+   "fieldname": "allow_editing_of_items_and_quantities_in_work_order",
+   "fieldtype": "Check",
+   "label": "Allow Editing of Items and Quantities in Work Order"
+  }
+ ],
+ "icon": "icon-wrench",
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-11-13 12:30:29.006822",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Manufacturing Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Manufacturing Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

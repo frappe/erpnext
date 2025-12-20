@@ -1,0 +1,150 @@
+{% extends "templates/web.html" %}
+{% block title %} {{ doc.name }} {% endblock %}
+{% block breadcrumbs %}
+<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+	<ul class="breadcrumb">
+		<li>
+			<span class="fa fa-angle-left"></span>
+			<a href="/projects?project={{ doc.project }}">{{ doc.project }}</a>
+		</li>
+	</ul>
+</div>
+{% endblock %}
+{% block page_content %}
+<div class="row">
+	<div class=" col-sm-8 ">
+		<h1> {{ doc.subject }} </h1>
+    </div>
+
+	<div class="col-sm-4">
+		<div class="page-header-actions-block" data-html-block="header-actions">
+			<button type="submit" class="btn btn-primary btn-sm btn-form-submit">
+	    		{{ __("Update") }}</button>
+	    		<a href="tasks" class="btn btn-light btn-sm">
+	    		{{ __("Cancel") }}</a>
+		</div>
+    </div>
+</div>
+
+<div class="page-content-block">
+	<form role="form" data-web-form="tasks">
+
+		<input type="hidden" name="web_form" value="tasks">
+		<input type="hidden" name="doctype" value="Task">
+		<input type="hidden" name="name" value="TASK00056">
+
+		<div class="row">
+			<div class="col-sm-12" style="max-width: 500px;">
+				<div class="form-group">
+					<label for="project" class="control-label text-muted small">{{ __("Project") }}</label>
+						<input type="text" class="form-control" name="project" readonly value= "{{ doc.project }}">
+				</div>
+
+				<div class="form-group">
+					<label for="subject" class="control-label text-muted small">{{ __("Subject") }}</label>
+					<input type="text" class="form-control" name="subject" readonly value="{{ doc.subject }}">
+				</div>
+
+				<div class="form-group">
+					<label for="description" class="control-label text-muted small">{{ __("Details") }}</label>
+					<textarea class="form-control" style="height: 200px;" name="description">{{ doc.description }}</textarea>
+				</div>
+
+				<div class="form-group">
+					<label for="priority" class="control-label text-muted small">{{ __("Priority") }}</label>
+					<input type="text" class="form-control" name="priority" readonly value="{{ doc.priority }}">
+				</div>
+
+				<div class="form-group">
+					<label for="exp_start_date" class="control-label text-muted small">{{ __("Expected Start Date") }}</label>
+					<input type="text" class="form-control hasDatepicker" name="exp_start_date" readonly value="{{ doc.exp_start_date }}">
+				</div>
+
+				<div class="form-group">
+					<label for="exp_end_date" class="control-label text-muted small">{{ __("Expected End Date") }}</label>
+					<input type="text" class="form-control hasDatepicker" name="exp_end_date" readonly value="{{ doc.exp_end_date }}">
+				</div>
+
+				<div class="form-group">
+					<label for="status" class="control-label text-muted small">{{ __("Status") }}</label>
+					<select class="form-control" name="status" id="status" data-label="Status" data-fieldtype="Select">
+						<option value="Open" selected="selected">
+							{{ __("Open") }}</option><option value="Working">
+							{{ __("Working") }}</option><option value="Pending Review">
+							{{ __("Pending Review") }}</option><option value="Overdue">
+							{{ __("Overdue") }}</option><option value="Closed">
+							{{ __("Closed") }}</option><option value="Cancelled">
+							{{ __("Cancelled") }}</option>
+					</select>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>
+
+<div class="comments">
+	<h3>{{ __("Comments") }}</h3>
+	<div class="no-comment">
+		{% for comment in comments %}
+			<p class="text-muted">{{comment.sender_full_name}}:
+				{{comment.subject}} {{ __("on") }} 									   				{{comment.creation.strftime('%Y-%m-%d')}}</p>
+		{% endfor %}
+	</div>
+	<div class="comment-form-wrapper">
+		<a class="add-comment btn btn-light btn-sm">{{ __("Add Comment") }}</a>
+		<div style="display: none;" id="comment-form">
+			<p>{{ __("Add Comment") }}</p>
+			<form>
+				<fieldset>
+					<textarea class="form-control" name="comment" rows="5" placeholder="Comment"></textarea>
+					<p>
+						<button class="btn btn-primary btn-sm" id="submit-comment">{{ __("Submit") }}</button>
+					</p>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+</div>
+				<script>
+					frappe.ready(function() {
+						var n_comments = $(".comment-row").length;
+						$(".add-comment").click(function() {
+							$(this).toggle(false);
+							$("#comment-form").toggle();
+							$("#comment-form textarea").val("");
+						})
+						$("#submit-comment").click(function() {
+							var args = {
+								comment_by_fullname: "test",
+								comment_by: "admin@localhost.com",
+								comment: $("[name='comment']").val(),
+								reference_doctype: "Task",
+								reference_name: "TASK00069",
+								comment_type: "Comment",
+								route: "tasks",
+							}
+
+							frappe.call({
+								btn: this,
+								type: "POST",
+								method: "frappe.templates.includes.comments.comments.add_comment",
+								args: args,
+								callback: function(r) {
+									if(r.exc) {
+										if(r._server_messages)
+											frappe.msgprint(r._server_messages);
+									} else {
+										$(r.message).appendTo("#comment-list");
+										$(".no-comment, .add-comment").toggle(false);
+										$("#comment-form")
+											.replaceWith('<div class="text-muted">Thank you for your comment!</div>')
+									}
+								}
+							})
+
+							return false;
+						})
+					});
+				</script>
+
+{% endblock %}

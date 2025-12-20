@@ -1,0 +1,41 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2014-10-06 15:19:31.578162", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 2, 
+ "is_standard": "Yes", 
+ "modified": "2017-02-24 20:12:08.631210", 
+ "modified_by": "Administrator", 
+ "module": "Selling", 
+ "name": "Customer Credit Balance", 
+ "owner": "Administrator", 
+ "ref_doctype": "Customer", 
+ "report_name": "Customer Credit Balance", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Sales User"
+  }, 
+  {
+   "role": "Sales Manager"
+  }, 
+  {
+   "role": "Sales Master Manager"
+  }, 
+  {
+   "role": "Stock User"
+  }, 
+  {
+   "role": "Stock Manager"
+  }, 
+  {
+   "role": "Accounts User"
+  }, 
+  {
+   "role": "Accounts Manager"
+  }
+ ]
+}

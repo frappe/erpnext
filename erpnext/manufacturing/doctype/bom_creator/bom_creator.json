@@ -1,0 +1,344 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "prompt",
+ "creation": "2023-07-18 14:56:34.477800",
+ "default_view": "List",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "tab_2_tab",
+  "bom_creator",
+  "details_tab",
+  "section_break_ylsl",
+  "item_code",
+  "item_name",
+  "item_group",
+  "column_break_ikj7",
+  "qty",
+  "project",
+  "uom",
+  "section_break_xvld",
+  "routing",
+  "raw_materials_tab",
+  "currency_detail",
+  "rm_cost_as_per",
+  "set_rate_based_on_warehouse",
+  "buying_price_list",
+  "price_list_currency",
+  "plc_conversion_rate",
+  "column_break_ivyw",
+  "currency",
+  "conversion_rate",
+  "section_break_zcfg",
+  "default_warehouse",
+  "column_break_tzot",
+  "company",
+  "materials_section",
+  "items",
+  "costing_detail",
+  "raw_material_cost",
+  "remarks_tab",
+  "remarks",
+  "section_break_yixm",
+  "status",
+  "column_break_irab",
+  "error_log",
+  "connections_tab",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "currency_detail",
+   "fieldtype": "Section Break",
+   "label": "Costing"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Valuation Rate",
+   "fieldname": "rm_cost_as_per",
+   "fieldtype": "Select",
+   "label": "Rate Of Materials Based On",
+   "options": "Valuation Rate\nLast Purchase Rate\nPrice List",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.rm_cost_as_per===\"Price List\"",
+   "fieldname": "buying_price_list",
+   "fieldtype": "Link",
+   "label": "Price List",
+   "options": "Price List"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.rm_cost_as_per=='Price List'",
+   "fieldname": "price_list_currency",
+   "fieldtype": "Link",
+   "label": "Price List Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.rm_cost_as_per=='Price List'",
+   "fieldname": "plc_conversion_rate",
+   "fieldtype": "Float",
+   "label": "Price List Exchange Rate"
+  },
+  {
+   "fieldname": "column_break_ivyw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "label": "Conversion Rate",
+   "precision": "9"
+  },
+  {
+   "fieldname": "materials_section",
+   "fieldtype": "Section Break",
+   "oldfieldtype": "Section Break"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "oldfieldname": "bom_materials",
+   "oldfieldtype": "Table",
+   "options": "BOM Creator Item"
+  },
+  {
+   "fieldname": "costing_detail",
+   "fieldtype": "Section Break",
+   "label": "Costing Details"
+  },
+  {
+   "fieldname": "raw_material_cost",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Cost",
+   "no_copy": 1,
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text Editor",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "column_break_ikj7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Finished Good",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Quantity",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name"
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "tab_2_tab",
+   "fieldtype": "Tab Break",
+   "label": "BOM Tree"
+  },
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Final Product"
+  },
+  {
+   "fieldname": "raw_materials_tab",
+   "fieldtype": "Tab Break",
+   "label": "Sub Assemblies & Raw Materials"
+  },
+  {
+   "fieldname": "remarks_tab",
+   "fieldtype": "Tab Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "BOM Creator",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_zcfg",
+   "fieldtype": "Section Break",
+   "label": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_tzot",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Source Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "bom_creator",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_break_ylsl",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.rm_cost_as_per === \"Valuation Rate\"",
+   "fieldname": "set_rate_based_on_warehouse",
+   "fieldtype": "Check",
+   "label": "Set Valuation Rate Based on Source Warehouse"
+  },
+  {
+   "fieldname": "section_break_yixm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nSubmitted\nIn Progress\nCompleted\nFailed\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_irab",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "error_log",
+   "fieldtype": "Text",
+   "label": "Error Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_xvld",
+   "fieldtype": "Section Break",
+   "label": "Operations Routing"
+  },
+  {
+   "fieldname": "routing",
+   "fieldtype": "Link",
+   "label": "Routing",
+   "options": "Routing"
+  }
+ ],
+ "hide_toolbar": 1,
+ "icon": "fa fa-sitemap",
+ "is_submittable": 1,
+ "links": [
+  {
+   "link_doctype": "BOM",
+   "link_fieldname": "bom_creator"
+  }
+ ],
+ "modified": "2024-11-25 16:41:03.047835",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM Creator",
+ "naming_rule": "Set by user",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

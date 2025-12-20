@@ -1,0 +1,194 @@
+{
+ "actions": [],
+ "autoname": "format:ACC-PPR-{#####}",
+ "creation": "2023-03-30 21:28:39.793927",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "party_type",
+  "column_break_io6c",
+  "party",
+  "receivable_payable_account",
+  "default_advance_account",
+  "filter_section",
+  "from_invoice_date",
+  "to_invoice_date",
+  "column_break_kegk",
+  "from_payment_date",
+  "to_payment_date",
+  "column_break_uj04",
+  "cost_center",
+  "bank_cash_account",
+  "section_break_2n02",
+  "status",
+  "error_log",
+  "section_break_a8yx",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nQueued\nRunning\nPaused\nCompleted\nPartially Reconciled\nFailed\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Party Type",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_io6c",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Party",
+   "options": "party_type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "receivable_payable_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Receivable/Payable Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "filter_section",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "fieldname": "from_invoice_date",
+   "fieldtype": "Date",
+   "label": "From Invoice Date"
+  },
+  {
+   "fieldname": "to_invoice_date",
+   "fieldtype": "Date",
+   "label": "To Invoice Date"
+  },
+  {
+   "fieldname": "column_break_kegk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_payment_date",
+   "fieldtype": "Date",
+   "label": "From Payment Date"
+  },
+  {
+   "fieldname": "to_payment_date",
+   "fieldtype": "Date",
+   "label": "To Payment Date"
+  },
+  {
+   "fieldname": "column_break_uj04",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "bank_cash_account",
+   "fieldtype": "Link",
+   "label": "Bank/Cash Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "section_break_2n02",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "depends_on": "eval:doc.error_log",
+   "fieldname": "error_log",
+   "fieldtype": "Long Text",
+   "label": "Error Log"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Process Payment Reconciliation",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_a8yx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.party",
+   "description": "Only 'Payment Entries' made against this advance account are supported.",
+   "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/advance-in-separate-party-account",
+   "fieldname": "default_advance_account",
+   "fieldtype": "Link",
+   "label": "Default Advance Account",
+   "mandatory_depends_on": "doc.party_type",
+   "options": "Account",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-01-08 08:22:14.798085",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Process Payment Reconciliation",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "company"
+}

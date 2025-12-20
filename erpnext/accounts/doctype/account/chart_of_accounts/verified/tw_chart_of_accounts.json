@@ -1,0 +1,1354 @@
+{
+    "country_code": "tw", 
+    "name": "Taiwan - Chart of Accounts", 
+    "tree": {
+        "\u6240\u5f97\u7a05\u8cbb\u7528(\u5229\u76ca)": {
+            "account_number": "8", 
+            "root_type": "Expense", 
+            "\u6240\u5f97\u7a05\u8cbb\u7528(\u5229\u76ca)": {
+                "account_number": "81", 
+                "\u6240\u5f97\u7a05\u8cbb\u7528(\u5229\u76ca) ": {
+                    "account_number": "811", 
+                    "\u6240\u5f97\u7a05\u8cbb\u7528(\u5229\u76ca) ": {
+                        "account_number": "8111"
+                    }
+                }
+            }
+        }, 
+        "\u696d\u4e3b\u6b0a\u76ca": {
+            "account_number": "3", 
+            "root_type": "Equity", 
+            "\u4fdd\u7559\u76c8\u9918(\u7d2f\u7a4d\u8667\u640d)": {
+                "account_number": "33", 
+                "\u672a\u5206\u914d\u76c8\u9918(\u7d2f\u7a4d\u8667\u640d) ": {
+                    "account_number": "335", 
+                    "is_group": 1
+                }, 
+                "\u6cd5\u5b9a\u76c8\u9918\u516c\u7a4d": {
+                    "account_number": "331", 
+                    "\u6cd5\u5b9a\u76c8\u9918\u516c\u7a4d": {
+                        "account_number": "3311"
+                    }
+                }, 
+                "\u7279\u5225\u76c8\u9918\u516c\u7a4d": {
+                    "account_number": "332", 
+                    "\u511f\u50b5\u6e96\u5099": {
+                        "account_number": "3323"
+                    }, 
+                    "\u5176\u4ed6\u7279\u5225\u76c8\u9918\u516c\u7a4d": {
+                        "account_number": "3328"
+                    }, 
+                    "\u610f\u5916\u640d\u5931\u6e96\u5099": {
+                        "account_number": "3321"
+                    }, 
+                    "\u6539\u826f\u64f4\u5145\u6e96\u5099": {
+                        "account_number": "3322"
+                    }
+                }
+            }, 
+            "\u5c11\u6578\u80a1\u6b0a": {
+                "account_number": "36", 
+                "\u5c11\u6578\u80a1\u6b0a": {
+                    "account_number": "361", 
+                    "\u5c11\u6578\u80a1\u6b0a": {
+                        "account_number": "3611"
+                    }
+                }
+            }, 
+            "\u5eab\u85cf\u80a1": {
+                "account_number": "35", 
+                "\u5eab\u85cf\u80a1": {
+                    "account_number": "351", 
+                    "\u5eab\u85cf\u80a1": {
+                        "account_number": "3511"
+                    }
+                }
+            }, 
+            "\u6b0a\u76ca\u8abf\u6574": {
+                "account_number": "34", 
+                "\u672a\u8a8d\u5217\u70ba\u9000\u4f11\u91d1\u6210\u672c\u4e4b\u6de8\u640d\u5931": {
+                    "account_number": "343", 
+                    "\u672a\u8a8d\u5217\u70ba\u9000\u4f11\u91d1\u6210\u672c\u4e4b\u6de8\u640d\u5931": {
+                        "account_number": "3431"
+                    }
+                }, 
+                "\u7d2f\u7a4d\u63db\u7b97\u8abf\u6574\u6578": {
+                    "account_number": "342", 
+                    "\u7d2f\u7a4d\u63db\u7b97\u8abf\u6574\u6578": {
+                        "account_number": "3421"
+                    }
+                }, 
+                "\u9577\u671f\u80a1\u6b0a\u6295\u8cc7\u672a\u5be6\u73fe\u8dcc\u50f9\u640d\u5931": {
+                    "account_number": "341", 
+                    "\u9577\u671f\u80a1\u6b0a\u6295\u8cc7\u672a\u5be6\u73fe\u8dcc\u50f9\u640d\u5931": {
+                        "account_number": "3411"
+                    }
+                }
+            }, 
+            "\u8cc7\u672c": {
+                "account_number": "31", 
+                "\u8cc7\u672c\uff08\u80a1\u672c\uff09 ": {
+                    "account_number": "311", 
+                    "\u5f85\u5206\u914d\u80a1\u7968\u80a1\u5229": {
+                        "account_number": "3114"
+                    }, 
+                    "\u666e\u901a\u80a1\u80a1\u672c": {
+                        "account_number": "3111"
+                    }, 
+                    "\u7279\u5225\u80a1\u80a1\u672c": {
+                        "account_number": "3112"
+                    }, 
+                    "\u8cc7\u672c": {
+                        "account_number": "3115"
+                    }, 
+                    "\u9810\u6536\u80a1\u672c": {
+                        "account_number": "3113"
+                    }
+                }
+            }, 
+            "\u8cc7\u672c\u516c\u7a4d": {
+                "account_number": "32", 
+                "\u5176\u4ed6\u8cc7\u672c\u516c\u7a4d": {
+                    "account_number": "328", 
+                    "\u6b0a\u76ca\u6cd5\u9577\u671f\u80a1\u6b0a\u6295\u8cc7\u8cc7\u672c\u516c\u7a4d": {
+                        "account_number": "3281"
+                    }, 
+                    "\u8cc7\u672c\u516c\u7a4d\u2014 \u5eab\u85cf\u80a1\u7968\u4ea4\u6613": {
+                        "account_number": "3282"
+                    }
+                }, 
+                "\u53d7\u8d08\u516c\u7a4d": {
+                    "account_number": "326", 
+                    "\u53d7\u8d08\u516c\u7a4d": {
+                        "account_number": "3261"
+                    }
+                }, 
+                "\u5408\u4f75\u516c\u7a4d": {
+                    "account_number": "325", 
+                    "\u5408\u4f75\u516c\u7a4d": {
+                        "account_number": "3251"
+                    }
+                }, 
+                "\u80a1\u7968\u6ea2\u50f9": {
+                    "account_number": "321", 
+                    "\u666e\u901a\u80a1\u80a1\u7968\u6ea2\u50f9": {
+                        "account_number": "3211"
+                    }, 
+                    "\u7279\u5225\u80a1\u80a1\u7968\u6ea2\u50f9": {
+                        "account_number": "3212"
+                    }
+                }, 
+                "\u8655\u5206\u8cc7\u7522\u6ea2\u50f9\u516c\u7a4d": {
+                    "account_number": "324", 
+                    "\u8655\u5206\u8cc7\u7522\u6ea2\u50f9\u516c\u7a4d": {
+                        "account_number": "3241"
+                    }
+                }, 
+                "\u8cc7\u7522\u91cd\u4f30\u589e\u503c\u6e96\u5099": {
+                    "account_number": "323", 
+                    "\u8cc7\u7522\u91cd\u4f30\u589e\u503c\u6e96\u5099": {
+                        "account_number": "3231"
+                    }
+                }
+            }
+        }, 
+        "\u71df\u696d\u5916\u6536\u5165\u53ca\u8cbb\u7528": {
+            "account_number": "7", 
+            "root_type": "Income", 
+            "\u71df\u696d\u5916\u6536\u5165": {
+                "account_number": "71~74", 
+                "\u514c\u63db\u5229\u76ca": {
+                    "account_number": "713", 
+                    "\u514c\u63db\u5229\u76ca": {
+                        "account_number": "7131"
+                    }
+                }, 
+                "\u5176\u4ed6\u71df\u696d\u5916\u6536\u5165": {
+                    "account_number": "748", 
+                    "\u4f63\u91d1\u6536\u5165": {
+                        "account_number": "7483"
+                    }, 
+                    "\u5176\u4ed6\u71df\u696d\u5916\u6536\u5165\u2014\u5176\u4ed6": {
+                        "account_number": "7488"
+                    }, 
+                    "\u51fa\u552e\u4e0b\u8173\u53ca\u5ee2\u6599\u6536\u5165": {
+                        "account_number": "7484"
+                    }, 
+                    "\u58de\u5e33\u8f49\u56de\u5229\u76ca": {
+                        "account_number": "7487"
+                    }, 
+                    "\u5b58\u8ca8\u76e4\u76c8": {
+                        "account_number": "7485"
+                    }, 
+                    "\u5b58\u8ca8\u8dcc\u50f9\u56de\u5347\u5229\u76ca": {
+                        "account_number": "7486"
+                    }, 
+                    "\u6350\u8d08\u6536\u5165": {
+                        "account_number": "7481"
+                    }, 
+                    "\u79df\u91d1\u6536\u5165": {
+                        "account_number": "7482"
+                    }
+                }, 
+                "\u5229\u606f\u6536\u5165": {
+                    "account_number": "711", 
+                    "\u5229\u606f\u6536\u5165": {
+                        "account_number": "7111"
+                    }
+                }, 
+                "\u6295\u8cc7\u6536\u76ca": {
+                    "account_number": "712", 
+                    "\u6b0a\u76ca\u6cd5\u8a8d\u5217\u4e4b\u6295\u8cc7\u6536\u76ca": {
+                        "account_number": "7121"
+                    }, 
+                    "\u77ed\u671f\u6295\u8cc7\u5e02\u50f9\u56de\u5347\u5229\u76ca": {
+                        "account_number": "7123"
+                    }, 
+                    "\u80a1\u5229\u6536\u5165": {
+                        "account_number": "7122"
+                    }
+                }, 
+                "\u8655\u5206\u6295\u8cc7\u6536\u76ca": {
+                    "account_number": "714", 
+                    "\u8655\u5206\u6295\u8cc7\u6536\u76ca": {
+                        "account_number": "7141"
+                    }
+                }, 
+                "\u8655\u5206\u8cc7\u7522\u6ea2\u50f9\u6536\u5165": {
+                    "account_number": "715", 
+                    "\u8655\u5206\u8cc7\u7522\u6ea2\u50f9\u6536\u5165": {
+                        "account_number": "7151"
+                    }
+                }
+            }, 
+            "\u71df\u696d\u5916\u8cbb\u7528": {
+                "account_number": "75~78", 
+                "\u514c\u63db\u640d\u5931": {
+                    "account_number": "753", 
+                    "\u514c\u63db\u640d\u5931": {
+                        "account_number": "7531"
+                    }
+                }, 
+                "\u5176\u4ed6\u71df\u696d\u5916\u8cbb\u7528": {
+                    "account_number": "788", 
+                    "\u505c\u5de5\u640d\u5931": {
+                        "account_number": "7881"
+                    }, 
+                    "\u5176\u4ed6\u71df\u696d\u5916\u8cbb\u7528\u2014\u5176\u4ed6": {
+                        "account_number": "7888"
+                    }, 
+                    "\u5b58\u8ca8\u76e4\u640d": {
+                        "account_number": "7885"
+                    }, 
+                    "\u5b58\u8ca8\u8dcc\u50f9\u53ca\u5446\u6eef\u640d\u5931": {
+                        "account_number": "7886"
+                    }, 
+                    "\u707d\u5bb3\u640d\u5931": {
+                        "account_number": "7882"
+                    }
+                }, 
+                "\u5229\u606f\u8cbb\u7528": {
+                    "account_number": "751", 
+                    "\u5229\u606f\u8cbb\u7528": {
+                        "account_number": "7511"
+                    }
+                }, 
+                "\u6295\u8cc7\u640d\u5931": {
+                    "account_number": "752", 
+                    "\u6b0a\u76ca\u6cd5\u8a8d\u5217\u4e4b\u6295\u8cc7\u640d\u5931": {
+                        "account_number": "7521"
+                    }, 
+                    "\u77ed\u671f\u6295\u8cc7\u672a\u5be6\u73fe\u8dcc\u50f9\u640d\u5931": {
+                        "account_number": "7523"
+                    }
+                }, 
+                "\u8655\u5206\u6295\u8cc7\u640d\u5931": {
+                    "account_number": "754", 
+                    "\u8655\u5206\u6295\u8cc7\u640d\u5931": {
+                        "account_number": "7541"
+                    }
+                }, 
+                "\u8655\u5206\u8cc7\u7522\u640d\u5931": {
+                    "account_number": "755", 
+                    "\u8655\u5206\u8cc7\u7522\u640d\u5931 ": {
+                        "account_number": "7551"
+                    }
+                }
+            }
+        }, 
+        "\u71df\u696d\u6210\u672c": {
+            "Stock Adjustment": {
+                "account_type": "Stock Adjustment"
+            }, 
+            "account_number": "5", 
+            "root_type": "Expense", 
+            "\u5176\u4ed6\u71df\u696d\u6210\u672c": {
+                "account_number": "58", 
+                "\u5176\u4ed6\u71df\u696d\u6210\u672c\u2014\u5176\u4ed6 ": {
+                    "account_number": "588", 
+                    "\u5176\u4ed6\u71df\u696d\u6210\u672c\u2014\u5176\u4ed6": {
+                        "account_number": "5888"
+                    }
+                }
+            }, 
+            "\u52de\u52d9\u6210\u672c\u88fd": {
+                "account_number": "56", 
+                "\u52de\u52d9\u6210\u672c": {
+                    "account_number": "561", 
+                    "\u52de\u52d9\u6210\u672c": {
+                        "account_number": "5611"
+                    }
+                }
+            }, 
+            "\u696d\u52d9\u6210\u672c": {
+                "account_number": "57", 
+                "\u696d\u52d9\u6210\u672c": {
+                    "account_number": "571", 
+                    "\u696d\u52d9\u6210\u672c": {
+                        "account_number": "5711"
+                    }
+                }
+            }, 
+            "\u92b7\u8ca8\u6210\u672c": {
+                "Expenses Included In Valuation": {
+                    "account_type": "Expenses Included In Valuation"
+                }, 
+                "account_number": "51", 
+                "account_type": "Cost of Goods Sold", 
+                "\u76f4\u63a5\u4eba\u5de5": {
+                    "account_number": "514", 
+                    "\u76f4\u63a5\u4eba\u5de5": {
+                        "account_number": "5141"
+                    }
+                }, 
+                "\u88fd\u9020\u8cbb\u7528": {
+                    "account_number": "515~518", 
+                    "\u4f19\u98df\u8cbb": {
+                        "account_number": "5172"
+                    }, 
+                    "\u4fdd\u96aa\u8cbb": {
+                        "account_number": "5162"
+                    }, 
+                    "\u4fee\u7e55\u8cbb": {
+                        "account_number": "5157"
+                    }, 
+                    "\u5176\u4ed6\u88fd\u9020\u8cbb\u7528": {
+                        "account_number": "5188"
+                    }, 
+                    "\u52a0\u5de5\u8cbb": {
+                        "account_number": "5163"
+                    }, 
+                    "\u5305\u88dd\u8cbb": {
+                        "account_number": "5158"
+                    }, 
+                    "\u5404\u9805\u8017\u7aed\u53ca\u6524\u63d0": {
+                        "account_number": "5169"
+                    }, 
+                    "\u6298\u820a ": {
+                        "account_number": "5168", 
+                        "account_type": "Depreciation"
+                    }, 
+                    "\u6587\u5177\u7528\u54c1": {
+                        "account_number": "5153"
+                    }, 
+                    "\u65c5\u8cbb": {
+                        "account_number": "5154"
+                    }, 
+                    "\u6c34\u96fb\u74e6\u65af\u8cbb": {
+                        "account_number": "5161"
+                    }, 
+                    "\u79df\u91d1\u652f\u51fa": {
+                        "account_number": "5152"
+                    }, 
+                    "\u7a05\u6350": {
+                        "account_number": "5166", 
+                        "account_type": "Tax", 
+                        "tax_rate": 5.0
+                    }, 
+                    "\u8077\u5de5\u798f\u5229": {
+                        "account_number": "5173"
+                    }, 
+                    "\u8a13\u7df4\u8cbb": {
+                        "account_number": "5176"
+                    }, 
+                    "\u904b\u8cbb": {
+                        "account_number": "5155"
+                    }, 
+                    "\u90f5\u96fb\u8cbb": {
+                        "account_number": "5156"
+                    }, 
+                    "\u9593\u63a5\u4eba\u5de5": {
+                        "account_number": "5151"
+                    }, 
+                    "\u9593\u63a5\u6750\u6599": {
+                        "account_number": "5177"
+                    }
+                }, 
+                "\u9032\u6599": {
+                    "account_number": "513", 
+                    "\u9032\u6599": {
+                        "account_number": "5131"
+                    }, 
+                    "\u9032\u6599\u6298\u8b93": {
+                        "account_number": "5134"
+                    }, 
+                    "\u9032\u6599\u8cbb\u7528": {
+                        "account_number": "5132"
+                    }, 
+                    "\u9032\u6599\u9000\u51fa": {
+                        "account_number": "5133"
+                    }
+                }, 
+                "\u9032\u8ca8": {
+                    "account_number": "512", 
+                    "\u9032\u8ca8": {
+                        "account_number": "5121"
+                    }, 
+                    "\u9032\u8ca8\u6298\u8b93": {
+                        "account_number": "5124"
+                    }, 
+                    "\u9032\u8ca8\u8cbb\u7528": {
+                        "account_number": "5122"
+                    }, 
+                    "\u9032\u8ca8\u9000\u51fa": {
+                        "account_number": "5123"
+                    }
+                }, 
+                "\u92b7\u8ca8\u6210\u672c": {
+                    "account_number": "511", 
+                    "account_type": "Cost of Goods Sold", 
+                    "\u5206\u671f\u4ed8\u6b3e\u92b7\u8ca8\u6210\u672c": {
+                        "account_number": "5112", 
+                        "account_type": "Cost of Goods Sold"
+                    }, 
+                    "\u92b7\u8ca8\u6210\u672c": {
+                        "account_number": "5111", 
+                        "account_type": "Cost of Goods Sold"
+                    }
+                }
+            }
+        }, 
+        "\u71df\u696d\u6536\u5165": {
+            "account_number": "4", 
+            "root_type": "Income", 
+            "\u5176\u4ed6\u71df\u696d\u6536\u5165": {
+                "account_number": "48", 
+                "\u5176\u4ed6\u71df\u696d\u6536\u5165\u2014\u5176\u4ed6": {
+                    "account_number": "488", 
+                    "\u5176\u4ed6\u71df\u696d\u6536\u5165\u2014\u5176\u4ed6": {
+                        "account_number": "4888"
+                    }
+                }
+            }, 
+            "\u52de\u52d9\u6536\u5165": {
+                "account_number": "46", 
+                "\u52de\u52d9\u6536\u5165": {
+                    "account_number": "461", 
+                    "\u52de\u52d9\u6536\u5165": {
+                        "account_number": "4611"
+                    }
+                }
+            }, 
+            "\u696d\u52d9\u6536\u5165": {
+                "account_number": "47", 
+                "\u696d\u52d9\u6536\u5165": {
+                    "account_number": "471", 
+                    "\u696d\u52d9\u6536\u5165": {
+                        "account_number": "4711"
+                    }
+                }
+            }, 
+            "\u92b7\u8ca8\u6536\u5165": {
+                "account_number": "41", 
+                "\u92b7\u8ca8\u6298\u8b93": {
+                    "account_number": "419", 
+                    "\u92b7\u8ca8\u6298\u8b93": {
+                        "account_number": "4191"
+                    }
+                }, 
+                "\u92b7\u8ca8\u6536\u5165": {
+                    "account_number": "411", 
+                    "\u5206\u671f\u4ed8\u6b3e\u92b7\u8ca8\u6536\u5165": {
+                        "account_number": "4112"
+                    }, 
+                    "\u92b7\u8ca8\u6536\u5165": {
+                        "account_number": "4111"
+                    }
+                }, 
+                "\u92b7\u8ca8\u9000\u56de": {
+                    "account_number": "417", 
+                    "\u92b7\u8ca8\u9000\u56de": {
+                        "account_number": "4171"
+                    }
+                }
+            }
+        }, 
+        "\u71df\u696d\u8cbb\u7528": {
+            "account_number": "6", 
+            "root_type": "Expense", 
+            "\u63a8\u92b7\u8cbb\u7528": {
+                "account_number": "61", 
+                "\u63a8\u92b7\u8cbb\u7528": {
+                    "account_number": "615~618", 
+                    "\u4ea4\u969b\u8cbb": {
+                        "account_number": "6164"
+                    }, 
+                    "\u4f19\u98df\u8cbb": {
+                        "account_number": "6172"
+                    }, 
+                    "\u4f63\u91d1\u652f\u51fa": {
+                        "account_number": "6175"
+                    }, 
+                    "\u4fdd\u96aa\u8cbb": {
+                        "account_number": "6162"
+                    }, 
+                    "\u4fee\u7e55\u8cbb": {
+                        "account_number": "6157"
+                    }, 
+                    "\u5176\u4ed6\u63a8\u92b7\u8cbb\u7528": {
+                        "account_number": "6188"
+                    }, 
+                    "\u5404\u9805\u8017\u7aed\u53ca\u6524\u63d0": {
+                        "account_number": "6169"
+                    }, 
+                    "\u5446\u5e33\u640d\u5931": {
+                        "account_number": "6167"
+                    }, 
+                    "\u5ee3\u544a\u8cbb": {
+                        "account_number": "6159"
+                    }, 
+                    "\u6298\u820a ": {
+                        "account_number": "6168", 
+                        "account_type": "Depreciation"
+                    }, 
+                    "\u6350\u8d08": {
+                        "account_number": "6165"
+                    }, 
+                    "\u6587\u5177\u7528\u54c1": {
+                        "account_number": "6153"
+                    }, 
+                    "\u65c5\u8cbb": {
+                        "account_number": "6154"
+                    }, 
+                    "\u6c34\u96fb\u74e6\u65af\u8cbb": {
+                        "account_number": "6161"
+                    }, 
+                    "\u79df\u91d1\u652f\u51fa": {
+                        "account_number": "6152"
+                    }, 
+                    "\u7a05\u6350": {
+                        "account_number": "6166", 
+                        "account_type": "Tax", 
+                        "tax_rate": 5.0
+                    }, 
+                    "\u8077\u5de5\u798f\u5229": {
+                        "account_number": "6173"
+                    }, 
+                    "\u85aa\u8cc7\u652f\u51fa": {
+                        "account_number": "6151"
+                    }, 
+                    "\u8a13\u7df4\u8cbb": {
+                        "account_number": "6176"
+                    }, 
+                    "\u904b\u8cbb": {
+                        "account_number": "6155"
+                    }, 
+                    "\u90f5\u96fb\u8cbb": {
+                        "account_number": "6156"
+                    }
+                }
+            }, 
+            "\u7814\u7a76\u767c\u5c55\u8cbb\u7528": {
+                "account_number": "63", 
+                "\u7814\u7a76\u767c\u5c55\u8cbb\u7528": {
+                    "account_number": "635~638", 
+                    "\u4ea4\u969b\u8cbb": {
+                        "account_number": "6364"
+                    }, 
+                    "\u4f19\u98df\u8cbb": {
+                        "account_number": "6372"
+                    }, 
+                    "\u4fdd\u96aa\u8cbb": {
+                        "account_number": "6362"
+                    }, 
+                    "\u4fee\u7e55\u8cbb": {
+                        "account_number": "6357"
+                    }, 
+                    "\u5176\u4ed6\u7814\u7a76\u767c\u5c55\u8cbb\u7528": {
+                        "account_number": "6378"
+                    }, 
+                    "\u5404\u9805\u8017\u7aed\u53ca\u6524\u63d0": {
+                        "account_number": "6369"
+                    }, 
+                    "\u6298\u820a": {
+                        "account_number": "6368", 
+                        "account_type": "Depreciation"
+                    }, 
+                    "\u6587\u5177\u7528\u54c1": {
+                        "account_number": "6353"
+                    }, 
+                    "\u65c5\u8cbb": {
+                        "account_number": "6354"
+                    }, 
+                    "\u6c34\u96fb\u74e6\u65af\u8cbb": {
+                        "account_number": "6361"
+                    }, 
+                    "\u79df\u91d1\u652f\u51fa": {
+                        "account_number": "6352"
+                    }, 
+                    "\u7a05\u6350": {
+                        "account_number": "6366", 
+                        "account_type": "Tax", 
+                        "tax_rate": 5.0
+                    }, 
+                    "\u8077\u5de5\u798f\u5229": {
+                        "account_number": "6373"
+                    }, 
+                    "\u85aa\u8cc7\u652f\u51fa": {
+                        "account_number": "6351"
+                    }, 
+                    "\u8a13\u7df4\u8cbb": {
+                        "account_number": "6376"
+                    }, 
+                    "\u904b\u8cbb": {
+                        "account_number": "6355"
+                    }, 
+                    "\u90f5\u96fb\u8cbb": {
+                        "account_number": "6356"
+                    }
+                }
+            }, 
+            "\u7ba1\u7406\u53ca\u7e3d\u52d9\u8cbb\u7528": {
+                "account_number": "62", 
+                "\u7ba1\u7406\u53ca\u7e3d\u52d9\u8cbb\u7528": {
+                    "account_number": "625~628", 
+                    "\u4ea4\u969b\u8cbb": {
+                        "account_number": "6264"
+                    }, 
+                    "\u4f19\u98df\u8cbb": {
+                        "account_number": "6272"
+                    }, 
+                    "\u4f63\u91d1\u652f\u51fa": {
+                        "account_number": "6275"
+                    }, 
+                    "\u4fdd\u96aa\u8cbb": {
+                        "account_number": "6262"
+                    }, 
+                    "\u4fee\u7e55\u8cbb": {
+                        "account_number": "6257"
+                    }, 
+                    "\u5176\u4ed6\u7ba1\u7406\u53ca\u7e3d\u52d9\u8cbb\u7528": {
+                        "account_number": "6288"
+                    }, 
+                    "\u52de\u52d9\u8cbb": {
+                        "account_number": "6278"
+                    }, 
+                    "\u5404\u9805\u8017\u7aed\u53ca\u6524\u63d0": {
+                        "account_number": "6269"
+                    }, 
+                    "\u5446\u5e33\u640d\u5931": {
+                        "account_number": "6267"
+                    }, 
+                    "\u5916\u92b7\u640d\u5931": {
+                        "account_number": "6271"
+                    }, 
+                    "\u5ee3\u544a\u8cbb": {
+                        "account_number": "6259"
+                    }, 
+                    "\u6298\u820a": {
+                        "account_number": "6268", 
+                        "account_type": "Depreciation"
+                    }, 
+                    "\u6350\u8d08": {
+                        "account_number": "6265"
+                    }, 
+                    "\u6587\u5177\u7528\u54c1": {
+                        "account_number": "6253"
+                    }, 
+                    "\u65c5\u8cbb": {
+                        "account_number": "6254"
+                    }, 
+                    "\u6c34\u96fb\u74e6\u65af\u8cbb": {
+                        "account_number": "6261"
+                    }, 
+                    "\u7814\u7a76\u767c\u5c55\u8cbb\u7528": {
+                        "account_number": "6274"
+                    }, 
+                    "\u79df\u91d1\u652f\u51fa": {
+                        "account_number": "6252"
+                    }, 
+                    "\u7a05\u6350": {
+                        "account_number": "6266", 
+                        "account_type": "Tax", 
+                        "tax_rate": 5.0
+                    }, 
+                    "\u8077\u5de5\u798f\u5229": {
+                        "account_number": "6273"
+                    }, 
+                    "\u85aa\u8cc7\u652f\u51fa": {
+                        "account_number": "6251"
+                    }, 
+                    "\u8a13\u7df4\u8cbb": {
+                        "account_number": "6276"
+                    }, 
+                    "\u904b\u8cbb": {
+                        "account_number": "6255"
+                    }, 
+                    "\u90f5\u96fb\u8cbb": {
+                        "account_number": "6256"
+                    }
+                }
+            }
+        }, 
+        "\u8ca0\u50b5": {
+            "Stock Received But Not Billed": {
+                "account_type": "Stock Received But Not Billed"
+            }, 
+            "account_number": "2", 
+            "root_type": "Liability", 
+            "\u5176\u4ed6\u8ca0\u50b5": {
+                "account_number": "28", 
+                "\u5b58\u5165\u4fdd\u8b49\u91d1": {
+                    "account_number": "286", 
+                    "\u5b58\u5165\u4fdd\u8b49\u91d1": {
+                        "account_number": "2861"
+                    }
+                }, 
+                "\u905e\u5ef6\u8ca0\u50b5": {
+                    "account_number": "281", 
+                    "\u5176\u4ed6\u905e\u5ef6\u8ca0\u50b5": {
+                        "account_number": "2818"
+                    }, 
+                    "\u905e\u5ef6\u6240\u5f97\u7a05\u8ca0\u50b5": {
+                        "account_number": "2814"
+                    }, 
+                    "\u905e\u5ef6\u6536\u5165": {
+                        "account_number": "2811"
+                    }
+                }, 
+                "\u96dc\u9805\u8ca0\u50b5": {
+                    "account_number": "288", 
+                    "\u96dc\u9805\u8ca0\u50b5 \u2014\u5176\u4ed6": {
+                        "account_number": "2888"
+                    }
+                }
+            }, 
+            "\u6d41\u52d5\u8ca0\u50b5": {
+                "account_number": "21~22", 
+                "\u4e00\u5e74\u6216\u4e00\u71df\u696d\u9031\u671f\u5167\u5230\u671f\u9577\u671f\u8ca0\u50b5": {
+                    "account_number": "227", 
+                    "is_group": 1
+                }, 
+                "\u5176\u4ed6\u61c9\u4ed8\u6b3e": {
+                    "account_number": "218~219", 
+                    "\u61c9\u4ed8\u571f\u5730\u623f\u5c4b\u6b3e": {
+                        "account_number": "2184"
+                    }, 
+                    "\u61c9\u4ed8\u80a1\u5229": {
+                        "account_number": "2192"
+                    }, 
+                    "\u61c9\u4ed8\u8a2d\u5099\u6b3e": {
+                        "account_number": "2185"
+                    }
+                }, 
+                "\u5176\u4ed6\u6d41\u52d5\u8ca0\u50b5": {
+                    "account_number": "228~229", 
+                    "\u4ee3\u6536\u6b3e": {
+                        "account_number": "2284"
+                    }, 
+                    "\u4f30\u8a08\u552e\u5f8c\u670d\u52d9/\u4fdd\u56fa\u8ca0\u50b5": {
+                        "account_number": "2285"
+                    }, 
+                    "\u66ab\u6536\u6b3e ": {
+                        "account_number": "2283"
+                    }, 
+                    "\u905e\u5ef6\u514c\u63db\u5229\u76ca": {
+                        "account_number": "2292"
+                    }, 
+                    "\u905e\u5ef6\u6240\u5f97\u7a05\u8ca0\u50b5": {
+                        "account_number": "2291"
+                    }, 
+                    "\u92b7\u9805\u7a05\u984d": {
+                        "account_number": "2281"
+                    }
+                }, 
+                "\u61c9\u4ed8\u5e33\u6b3e": {
+                    "account_number": "214", 
+                    "account_type": "Payable", 
+                    "\u61c9\u4ed8\u5e33\u6b3e": {
+                        "account_number": "2141", 
+                        "account_type": "Payable"
+                    }
+                }, 
+                "\u61c9\u4ed8\u6240\u5f97\u7a05": {
+                    "account_number": "216", 
+                    "account_type": "Tax", 
+                    "tax_rate": 5.0, 
+                    "\u61c9\u4ed8\u6240\u5f97\u7a05": {
+                        "account_number": "2161", 
+                        "account_type": "Tax", 
+                        "tax_rate": 5.0
+                    }
+                }, 
+                "\u61c9\u4ed8\u77ed\u671f\u7968\u5238": {
+                    "account_number": "212", 
+                    "account_type": "Payable", 
+                    "\u61c9\u4ed8\u5546\u696d\u672c\u7968": {
+                        "account_number": "2121", 
+                        "account_type": "Payable"
+                    }, 
+                    "\u9280\u884c\u627f\u514c\u532f\u7968": {
+                        "account_number": "2122", 
+                        "account_type": "Payable"
+                    }
+                }, 
+                "\u61c9\u4ed8\u7968\u64da": {
+                    "account_number": "213", 
+                    "account_type": "Payable", 
+                    "\u61c9\u4ed8\u7968\u64da": {
+                        "account_number": "2131", 
+                        "account_type": "Payable"
+                    }
+                }, 
+                "\u61c9\u4ed8\u8cbb\u7528": {
+                    "account_number": "217", 
+                    "\u5176\u4ed6\u61c9\u4ed8\u8cbb\u7528": {
+                        "account_number": "2178"
+                    }, 
+                    "\u61c9\u4ed8\u5229\u606f": {
+                        "account_number": "2173"
+                    }, 
+                    "\u61c9\u4ed8\u71df\u696d\u7a05": {
+                        "account_number": "2174"
+                    }, 
+                    "\u61c9\u4ed8\u79df\u91d1": {
+                        "account_number": "2172"
+                    }, 
+                    "\u61c9\u4ed8\u7a05\u6350 \u2014\u5176\u4ed6": {
+                        "account_number": "2175", 
+                        "account_type": "Tax", 
+                        "tax_rate": 5.0
+                    }, 
+                    "\u61c9\u4ed8\u85aa\u5de5": {
+                        "account_number": "2171"
+                    }
+                }, 
+                "\u77ed\u671f\u501f\u6b3e": {
+                    "account_number": "211", 
+                    "\u9280\u884c\u501f\u6b3e": {
+                        "account_number": "2112"
+                    }, 
+                    "\u9280\u884c\u900f\u652f": {
+                        "account_number": "2111"
+                    }
+                }, 
+                "\u9810\u6536\u6b3e\u9805": {
+                    "account_number": "226", 
+                    "\u5176\u4ed6\u9810\u6536\u6b3e": {
+                        "account_number": "2268"
+                    }, 
+                    "\u9810\u6536\u6536\u5165": {
+                        "account_number": "2262"
+                    }, 
+                    "\u9810\u6536\u8ca8\u6b3e": {
+                        "account_number": "2261"
+                    }
+                }
+            }, 
+            "\u9577\u671f\u8ca0\u50b5": {
+                "account_number": "23", 
+                "\u4f30\u8a08\u61c9\u4ed8\u571f\u5730\u589e\u503c\u7a05": {
+                    "account_number": "234", 
+                    "\u4f30\u8a08\u61c9\u4ed8\u571f\u5730\u589e\u503c\u7a05": {
+                        "account_number": "2341"
+                    }
+                }, 
+                "\u5176\u4ed6\u9577\u671f\u8ca0\u50b5": {
+                    "account_number": "238", 
+                    "\u5176\u4ed6\u9577\u671f\u8ca0\u50b5\u2014\u5176\u4ed6": {
+                        "account_number": "2388"
+                    }
+                }, 
+                "\u61c9\u4ed8\u516c\u53f8\u50b5": {
+                    "account_number": "231", 
+                    "\u61c9\u4ed8\u516c\u53f8\u50b5": {
+                        "account_number": "2311"
+                    }, 
+                    "\u61c9\u4ed8\u516c\u53f8\u50b5\u6ea2(\u6298)\u50f9": {
+                        "account_number": "2319"
+                    }
+                }, 
+                "\u61c9\u8a08\u9000\u4f11\u91d1\u8ca0\u50b5": {
+                    "account_number": "235", 
+                    "\u61c9\u8a08\u9000\u4f11\u91d1\u8ca0\u50b5": {
+                        "account_number": "2351"
+                    }
+                }, 
+                "\u9577\u671f\u501f\u6b3e": {
+                    "account_number": "232", 
+                    "\u9577\u671f\u501f\u6b3e \u2014\u5176\u4ed6": {
+                        "account_number": "2328"
+                    }, 
+                    "\u9577\u671f\u501f\u6b3e \u2014\u54e1\u5de5": {
+                        "account_number": "2325"
+                    }, 
+                    "\u9577\u671f\u501f\u6b3e \u2014\u696d\u4e3b": {
+                        "account_number": "2324"
+                    }, 
+                    "\u9577\u671f\u501f\u6b3e \u2014\u95dc\u4fc2\u4eba": {
+                        "account_number": "2327"
+                    }, 
+                    "\u9577\u671f\u9280\u884c\u501f\u6b3e": {
+                        "account_number": "2321"
+                    }
+                }, 
+                "\u9577\u671f\u61c9\u4ed8\u7968\u64da\u53ca\u6b3e\u9805": {
+                    "account_number": "233", 
+                    "account_type": "Payable", 
+                    "\u9577\u671f\u61c9\u4ed8\u5e33\u6b3e": {
+                        "account_number": "2332", 
+                        "account_type": "Payable"
+                    }, 
+                    "\u9577\u671f\u61c9\u4ed8\u7968\u64da": {
+                        "account_number": "2331", 
+                        "account_type": "Payable"
+                    }, 
+                    "\u9577\u671f\u61c9\u4ed8\u79df\u8cc3\u8ca0\u50b5": {
+                        "account_number": "2333", 
+                        "account_type": "Payable"
+                    }
+                }
+            }
+        }, 
+        "\u8cc7\u7522": {
+            "Temporary Accounts": {
+                "Temporary Opening": {
+                    "account_type": "Temporary"
+                }, 
+                "account_type": "Temporary"
+            }, 
+            "account_number": "1", 
+            "root_type": "Asset", 
+            "\u5176\u4ed6\u8cc7\u7522": {
+                "account_number": "18", 
+                "\u51fa\u79df\u8cc7\u7522": {
+                    "account_number": "185", 
+                    "\u51fa\u79df\u8cc7\u7522": {
+                        "account_number": "1851"
+                    }, 
+                    "\u51fa\u79df\u8cc7\u7522 \u2014\u91cd\u4f30\u589e\u503c": {
+                        "account_number": "1858"
+                    }, 
+                    "\u7d2f\u7a4d\u6298\u820a \u2014\u51fa\u79df\u8cc7\u7522": {
+                        "account_number": "1859", 
+                        "account_type": "Accumulated Depreciation"
+                    }
+                }, 
+                "\u5b58\u51fa\u4fdd\u8b49\u91d1": {
+                    "account_number": "186", 
+                    "\u5b58\u51fa\u4fdd\u8b49\u91d1": {
+                        "account_number": "1861"
+                    }
+                }, 
+                "\u905e\u5ef6\u8cc7\u7522": {
+                    "account_number": "181", 
+                    "\u50b5\u5238\u767c\u884c\u6210\u672c": {
+                        "account_number": "1811"
+                    }, 
+                    "\u5176\u4ed6\u905e\u5ef6\u8cc7\u7522": {
+                        "account_number": "1818"
+                    }, 
+                    "\u905e\u5ef6\u6240\u5f97\u7a05\u8cc7\u7522": {
+                        "account_number": "1814"
+                    }, 
+                    "\u9577\u671f\u9810\u4ed8\u4fdd\u96aa\u8cbb": {
+                        "account_number": "1813"
+                    }, 
+                    "\u9577\u671f\u9810\u4ed8\u79df\u91d1": {
+                        "account_number": "1812"
+                    }, 
+                    "\u9810\u4ed8\u9000\u4f11\u91d1": {
+                        "account_number": "1815"
+                    }
+                }, 
+                "\u9577\u671f\u61c9\u6536\u7968\u64da\u53ca\u6b3e\u9805\u8207\u50ac\u6536\u5e33\u6b3e": {
+                    "account_number": "184", 
+                    "account_type": "Receivable", 
+                    "\u5099\u62b5\u5446\u5e33\u2014\u9577\u671f\u61c9\u6536\u7968\u64da\u53ca\u6b3e\u9805\u8207\u50ac\u6536\u5e33\u6b3e": {
+                        "account_number": "1849", 
+                        "account_type": "Receivable"
+                    }, 
+                    "\u50ac\u6536\u5e33\u6b3e": {
+                        "account_number": "1843", 
+                        "account_type": "Receivable"
+                    }, 
+                    "\u5176\u4ed6\u9577\u671f\u61c9\u6536\u6b3e\u9805": {
+                        "account_number": "1848", 
+                        "account_type": "Receivable"
+                    }, 
+                    "\u9577\u671f\u61c9\u6536\u5e33\u6b3e": {
+                        "account_number": "1842", 
+                        "account_type": "Receivable"
+                    }, 
+                    "\u9577\u671f\u61c9\u6536\u7968\u64da": {
+                        "account_number": "1841", 
+                        "account_type": "Receivable"
+                    }
+                }, 
+                "\u9592\u7f6e\u8cc7\u7522": {
+                    "account_number": "182", 
+                    "\u9592\u7f6e\u8cc7\u7522": {
+                        "account_number": "1821"
+                    }
+                }, 
+                "\u96dc\u9805\u8cc7\u7522": {
+                    "account_number": "188", 
+                    "\u53d7\u9650\u5236\u5b58\u6b3e": {
+                        "account_number": "1881"
+                    }, 
+                    "\u96dc\u9805\u8cc7\u7522 \u2014\u5176\u4ed6": {
+                        "account_number": "1888"
+                    }
+                }
+            }, 
+            "\u56fa\u5b9a\u8cc7\u7522": {
+                "account_number": "14~15", 
+                "account_type": "Fixed Asset", 
+                "\u571f\u5730": {
+                    "account_number": "141", 
+                    "account_type": "Fixed Asset", 
+                    "\u571f\u5730": {
+                        "account_number": "1411", 
+                        "account_type": "Fixed Asset"
+                    }
+                }, 
+                "\u571f\u5730\u6539\u826f\u7269": {
+                    "account_number": "142", 
+                    "account_type": "Fixed Asset", 
+                    "\u571f\u5730\u6539\u826f\u7269": {
+                        "account_number": "1421", 
+                        "account_type": "Fixed Asset"
+                    }
+                }, 
+                "\u623f\u5c4b\u53ca\u5efa\u7269": {
+                    "account_number": "143", 
+                    "account_type": "Fixed Asset", 
+                    "\u623f\u5c4b\u53ca\u5efa\u7269": {
+                        "account_number": "1431", 
+                        "account_type": "Fixed Asset"
+                    }
+                }, 
+                "\u672a\u5b8c\u5de5\u7a0b\u53ca\u9810\u4ed8\u8cfc\u7f6e\u8a2d\u5099\u6b3e": {
+                    "account_number": "156", 
+                    "account_type": "Fixed Asset", 
+                    "\u672a\u5b8c\u5de5\u7a0b": {
+                        "account_number": "1561", 
+                        "account_type": "Fixed Asset"
+                    }
+                }, 
+                "\u6a5f(\u5668)\u5177\u53ca\u8a2d\u5099": {
+                    "account_number": "144~146", 
+                    "account_type": "Fixed Asset", 
+                    "\u6a5f(\u5668)\u5177": {
+                        "account_number": "1441", 
+                        "account_type": "Fixed Asset"
+                    }
+                }, 
+                "\u79df\u8cc3\u6b0a\u76ca\u6539\u826f": {
+                    "account_number": "152", 
+                    "account_type": "Fixed Asset", 
+                    "\u79df\u8cc3\u6b0a\u76ca\u6539\u826f": {
+                        "account_number": "1521", 
+                        "account_type": "Fixed Asset"
+                    }
+                }, 
+                "\u79df\u8cc3\u8cc7\u7522": {
+                    "account_number": "151", 
+                    "account_type": "Fixed Asset", 
+                    "\u79df\u8cc3\u8cc7\u7522": {
+                        "account_number": "1511", 
+                        "account_type": "Fixed Asset"
+                    }
+                }, 
+                "\u96dc\u9805\u56fa\u5b9a\u8cc7\u7522": {
+                    "account_number": "158", 
+                    "account_type": "Fixed Asset", 
+                    "\u96dc\u9805\u56fa\u5b9a\u8cc7\u7522": {
+                        "account_number": "1581", 
+                        "account_type": "Fixed Asset"
+                    }
+                }
+            }, 
+            "\u57fa\u91d1\u53ca\u9577\u671f\u6295\u8cc7": {
+                "account_number": "13", 
+                "\u57fa\u91d1": {
+                    "account_number": "131", 
+                    "\u511f\u50b5\u57fa\u91d1": {
+                        "account_number": "1311"
+                    }, 
+                    "\u5176\u4ed6\u57fa\u91d1": {
+                        "account_number": "1318"
+                    }, 
+                    "\u610f\u5916\u640d\u5931\u6e96\u5099\u57fa\u91d1": {
+                        "account_number": "1313"
+                    }, 
+                    "\u9000\u4f11\u57fa\u91d1": {
+                        "account_number": "1314"
+                    }
+                }, 
+                "\u9577\u671f\u6295\u8cc7": {
+                    "account_number": "132", 
+                    "\u5176\u4ed6\u9577\u671f\u6295\u8cc7": {
+                        "account_number": "1328"
+                    }, 
+                    "\u9577\u671f\u4e0d\u52d5\u7522\u6295\u8cc7": {
+                        "account_number": "1323"
+                    }, 
+                    "\u9577\u671f\u50b5\u5238\u6295\u8cc7": {
+                        "account_number": "1322"
+                    }, 
+                    "\u9577\u671f\u80a1\u6b0a\u6295\u8cc7": {
+                        "account_number": "1321"
+                    }
+                }
+            }, 
+            "\u6d41\u52d5\u8cc7\u7522": {
+                "account_number": "11~12", 
+                "\u5176\u4ed6\u61c9\u6536\u6b3e": {
+                    "account_number": "118", 
+                    "account_type": "Receivable", 
+                    "\u5099\u62b5\u5446\u5e33 \u2014 \u5176\u4ed6\u61c9\u6536\u6b3e ": {
+                        "account_number": "1189", 
+                        "account_type": "Receivable"
+                    }, 
+                    "\u61c9\u6536\u6536\u76ca": {
+                        "account_number": "1184", 
+                        "account_type": "Receivable"
+                    }, 
+                    "\u61c9\u6536\u9000\u7a05\u6b3e": {
+                        "account_number": "1185", 
+                        "account_type": "Receivable"
+                    }
+                }, 
+                "\u5176\u4ed6\u6d41\u52d5\u8cc7\u7522": {
+                    "account_number": "128~129", 
+                    "\u4ee3\u4ed8\u6b3e": {
+                        "account_number": "1284"
+                    }, 
+                    "\u54e1\u5de5\u501f\u652f": {
+                        "account_number": "1285"
+                    }, 
+                    "\u66ab\u4ed8\u6b3e": {
+                        "account_number": "1283"
+                    }, 
+                    "\u7559\u62b5\u7a05\u984d": {
+                        "account_number": "1282"
+                    }, 
+                    "\u9032\u9805\u7a05\u984d": {
+                        "account_number": "1281"
+                    }
+                }, 
+                "\u5b58\u8ca8": {
+                    "account_number": "121~122", 
+                    "account_type": "Stock", 
+                    "is_group": 1, 
+                    "\u5099\u62b5\u5b58\u8ca8\u8dcc\u50f9\u640d\u5931": {
+                        "account_number": "1229"
+                    }
+                }, 
+                "\u61c9\u6536\u5e33\u6b3e": {
+                    "account_number": "114", 
+                    "account_type": "Receivable", 
+                    "\u5099\u62b5\u5446\u5e33 \uff0d\u61c9\u6536\u5e33\u6b3e ": {
+                        "account_number": "1149", 
+                        "account_type": "Receivable"
+                    }, 
+                    "\u61c9\u6536\u5206\u671f\u5e33\u6b3e ": {
+                        "account_number": "1142", 
+                        "account_type": "Receivable"
+                    }, 
+                    "\u61c9\u6536\u5e33\u6b3e ": {
+                        "account_number": "1141", 
+                        "account_type": "Receivable"
+                    }
+                }, 
+                "\u61c9\u6536\u7968\u64da": {
+                    "account_number": "113", 
+                    "account_type": "Receivable", 
+                    "\u5099\u62b5\u5446\u5e33 \uff0d\u61c9\u6536\u7968\u64da ": {
+                        "account_number": "1139", 
+                        "account_type": "Receivable"
+                    }, 
+                    "\u5176\u4ed6\u61c9\u6536\u7968\u64da ": {
+                        "account_number": "1138", 
+                        "account_type": "Receivable"
+                    }, 
+                    "\u61c9\u6536\u7968\u64da": {
+                        "account_number": "1131", 
+                        "account_type": "Receivable"
+                    }, 
+                    "\u61c9\u6536\u7968\u64da\u8cbc\u73fe ": {
+                        "account_number": "1132", 
+                        "account_type": "Receivable"
+                    }
+                }, 
+                "\u73fe\u91d1\u53ca\u7d04\u7576\u73fe\u91d1": {
+                    "account_number": "111", 
+                    "account_type": "Cash", 
+                    "\u5176\u4ed6\u73fe\u91d1\u53ca\u7d04\u7576\u73fe\u91d1": {
+                        "account_number": "1118", 
+                        "account_type": "Cash"
+                    }, 
+                    "\u5728\u9014\u73fe\u91d1": {
+                        "account_number": "1116", 
+                        "account_type": "Cash"
+                    }, 
+                    "\u5eab\u5b58\u73fe\u91d1": {
+                        "account_number": "1111", 
+                        "account_type": "Cash"
+                    }, 
+                    "\u7d04\u7576\u73fe\u91d1": {
+                        "account_number": "1117", 
+                        "account_type": "Cash"
+                    }, 
+                    "\u9280\u884c\u5b58\u6b3e": {
+                        "account_number": "1113", 
+                        "account_type": "Bank", 
+                        "\u4e2d\u570b\u4fe1\u8a17": {
+                            "account_type": "Bank"
+                        }, 
+                        "\u53f0\u5317\u5bcc\u90a6": {
+                            "account_type": "Bank"
+                        }
+                    }, 
+                    "\u96f6\u7528\u91d1/\u9031\u8f49\u91d1": {
+                        "account_number": "1112", 
+                        "account_type": "Cash"
+                    }
+                }, 
+                "\u77ed\u671f\u6295\u8cc7": {
+                    "account_number": "112", 
+                    "\u77ed\u671f\u6295\u8cc7 \u2014\u80a1\u7968": {
+                        "account_number": "1121"
+                    }
+                }, 
+                "\u9810\u4ed8\u6b3e\u9805": {
+                    "account_number": "126", 
+                    "\u5176\u4ed6\u9810\u4ed8\u6b3e\u9805": {
+                        "account_number": "1268"
+                    }, 
+                    "\u9810\u4ed8\u8ca8\u6b3e": {
+                        "account_number": "1261"
+                    }
+                }, 
+                "\u9810\u4ed8\u8cbb\u7528": {
+                    "account_number": "125", 
+                    "\u5176\u4ed6\u9810\u4ed8\u8cbb\u7528": {
+                        "account_number": "1258"
+                    }, 
+                    "\u7528\u54c1\u76e4\u5b58": {
+                        "account_number": "1254"
+                    }, 
+                    "\u9810\u4ed8\u4fdd\u96aa\u8cbb": {
+                        "account_number": "1253"
+                    }, 
+                    "\u9810\u4ed8\u6240\u5f97\u7a05": {
+                        "account_number": "1255"
+                    }, 
+                    "\u9810\u4ed8\u79df\u91d1": {
+                        "account_number": "1252"
+                    }, 
+                    "\u9810\u4ed8\u85aa\u8cc7": {
+                        "account_number": "1251"
+                    }
+                }
+            }, 
+            "\u7121\u5f62\u8cc7\u7522": {
+                "account_number": "17", 
+                "\u5176\u4ed6\u7121\u5f62\u8cc7\u7522": {
+                    "account_number": "178", 
+                    "\u905e\u5ef6\u9000\u4f11\u91d1\u6210\u672c": {
+                        "account_number": "1781"
+                    }
+                }, 
+                "\u5546\u6a19\u6b0a": {
+                    "account_number": "171", 
+                    "\u5546\u6a19\u6b0a": {
+                        "account_number": "1711"
+                    }
+                }, 
+                "\u5546\u8b7d": {
+                    "account_number": "176", 
+                    "\u5546\u8b7d": {
+                        "account_number": "1761"
+                    }
+                }, 
+                "\u5c08\u5229\u6b0a": {
+                    "account_number": "172", 
+                    "\u5c08\u5229\u6b0a": {
+                        "account_number": "1721"
+                    }
+                }, 
+                "\u958b\u8fa6\u8cbb": {
+                    "account_number": "177", 
+                    "\u958b\u8fa6\u8cbb": {
+                        "account_number": "1771"
+                    }
+                }
+            }, 
+            "\u905e\u8017\u8cc7\u7522": {
+                "account_number": "16", 
+                "\u905e\u8017\u8cc7\u7522": {
+                    "account_number": "161", 
+                    "is_group": 1
+                }
+            }
+        }, 
+        "\u975e\u7d93\u5e38\u71df\u696d\u640d\u76ca": {
+            "account_number": "9", 
+            "root_type": "Expense", 
+            "\u505c\u696d\u90e8\u9580\u640d\u76ca": {
+                "account_number": "91", 
+                "\u505c\u696d\u90e8\u9580\u640d\u76ca\u2014\u505c\u696d\u524d\u71df\u696d\u640d\u76ca": {
+                    "account_number": "911", 
+                    "\u505c\u696d\u90e8\u9580\u640d\u76ca\u2014\u505c\u696d\u524d\u71df\u696d\u640d\u76ca": {
+                        "account_number": "9111"
+                    }
+                }, 
+                "\u505c\u696d\u90e8\u9580\u640d\u76ca\u2014\u8655\u5206\u640d\u76ca": {
+                    "account_number": "912", 
+                    "\u505c\u696d\u90e8\u9580\u640d\u76ca\u2014\u8655\u5206\u640d\u76ca": {
+                        "account_number": "9121"
+                    }
+                }
+            }, 
+            "\u5c11\u6578\u80a1\u6b0a\u6de8\u5229": {
+                "account_number": "94", 
+                "\u5c11\u6578\u80a1\u6b0a\u6de8\u5229": {
+                    "account_number": "941", 
+                    "\u5c11\u6578\u80a1\u6b0a\u6de8\u5229": {
+                        "account_number": "9411"
+                    }
+                }
+            }, 
+            "\u6703\u8a08\u539f\u5247\u8b8a\u52d5\u7d2f\u7a4d\u5f71\u97ff\u6578": {
+                "account_number": "93", 
+                "\u6703\u8a08\u539f\u5247\u8b8a\u52d5\u7d2f\u7a4d\u5f71\u97ff\u6578": {
+                    "account_number": "931", 
+                    "\u6703\u8a08\u539f\u5247\u8b8a\u52d5\u7d2f\u7a4d\u5f71\u97ff\u6578": {
+                        "account_number": "9311"
+                    }
+                }
+            }, 
+            "\u975e\u5e38\u640d\u76ca": {
+                "account_number": "92", 
+                "\u975e\u5e38\u640d\u76ca": {
+                    "account_number": "921", 
+                    "\u975e\u5e38\u640d\u76ca": {
+                        "account_number": "9211"
+                    }
+                }
+            }
+        }
+    }
+}

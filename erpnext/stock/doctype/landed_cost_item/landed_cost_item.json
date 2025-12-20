@@ -1,0 +1,157 @@
+{
+ "actions": [],
+ "creation": "2013-02-22 01:28:02",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "description",
+  "receipt_document_type",
+  "receipt_document",
+  "col_break2",
+  "qty",
+  "rate",
+  "amount",
+  "is_fixed_asset",
+  "applicable_charges",
+  "purchase_receipt_item",
+  "stock_entry_item",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "read_only": 1,
+   "reqd": 1,
+   "width": "100px"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Description",
+   "oldfieldname": "description",
+   "oldfieldtype": "Data",
+   "print_width": "300px",
+   "read_only": 1,
+   "width": "120px"
+  },
+  {
+   "fieldname": "receipt_document_type",
+   "fieldtype": "Select",
+   "label": "Receipt Document Type",
+   "no_copy": 1,
+   "options": "Purchase Invoice\nPurchase Receipt\nStock Entry\nSubcontracting Receipt",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "receipt_document",
+   "fieldtype": "Dynamic Link",
+   "label": "Receipt Document",
+   "no_copy": 1,
+   "options": "receipt_document_type",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "label": "Rate",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "oldfieldname": "amount",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "applicable_charges",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Applicable Charges",
+   "options": "Company:company:default_currency",
+   "read_only_depends_on": "eval:parent.distribute_charges_based_on != 'Distribute Manually'"
+  },
+  {
+   "fieldname": "purchase_receipt_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Purchase Receipt Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.is_fixed_asset",
+   "fieldname": "is_fixed_asset",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Fixed Asset",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_entry_item",
+   "fieldtype": "Data",
+   "label": "Stock Entry Item",
+   "no_copy": 1,
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "idx": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-12 18:12:47.107898",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Landed Cost Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

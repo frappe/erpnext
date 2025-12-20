@@ -1,0 +1,101 @@
+<style>
+	.job-card-link {
+		min-height: 60px;
+	}
+
+	.section-head-job-card {
+		margin-bottom: 0px;
+		padding-bottom: 0px;
+	}
+</style>
+
+<div>
+
+<div class="form-dashboard-section qrcode-fields col-sm-12 section-body" style="padding-left: 0px;padding-right: 25px;"></div>
+
+{% $.each(data, (idx, d) => { %}
+	<div class="row form-dashboard-section job-card-link form-links border-gray-200" data-name="{{d.name}}">
+		<div class="row form-section" style="width:100%;margin-top:10px">
+			<div class="form-column col-sm-2">
+				<div class="frappe-control bold indicator  {{d.status_colour}}" data-doctype="Job Card" data-name="{{d.name}}" title="{{__(d.status)}}">
+					{{ d.job_card_link }}
+				</div>
+			</div>
+			<div class="form-column col-sm-2">
+				<div class="frappe-control" title="{{__('Item')}}">{{ d.finished_good || d.production_item }}</div>
+			</div>
+			<div class="form-column col-sm-1">
+				<div class="frappe-control" title="{{__('Qty')}}">{{ d.for_quantity }} {{ d.fg_uom }}</div>
+			</div>
+			<div class="form-column col-sm-2 ellipsis">
+				<div class="frappe-control" title="{{__('Operation')}}">
+					{{ d.operation_link }}
+				</div>
+			</div>
+			<div class="form-column col-sm-2">
+				<div class="frappe-control timer" title="{{__('Timer')}}" style="font-size:14px;" data-job-card = {{escape(d.name)}}>
+					<span class="hours">00</span>
+					<span class="colon">:</span>
+					<span class="minutes">00</span>
+					<span class="colon">:</span>
+					<span class="seconds">00</span>
+				</div>
+
+				<!-- {% if(d.status === "Open") { %}
+					<div class="frappe-control" title="{{__('Expected Start Date')}}" style="text-align:center;font-size:11px;padding-top: 4px;">
+						{{ frappe.format(d.expected_start_date, { fieldtype: 'Datetime' }) }}
+					</div>
+				{% } else { %}
+					<div class="frappe-control" title="{{__('Expected End Date')}}" style="text-align:center;font-size:11px;padding-top: 4px;">
+						{{ frappe.format(d.expected_end_date, { fieldtype: 'Datetime' }) }}
+					</div>
+				{% } %} -->
+
+			</div>
+			<div class="form-column col-sm-1 btn-start" data-job-card="{{d.name}}">
+				<button class="btn btn-default">
+					<span class="menu-item-label" data-label="Start">{{ __('Start') }}</span>
+				</button>
+
+			</div>
+			<div class="form-column col-sm-1 btn-resume" data-job-card="{{d.name}}">
+				<button class="btn btn-default ">
+					<span class="menu-item-label" data-label="Start">{{ __('Resume') }}</span>
+				</button>
+			</div>
+			<div class="form-column col-sm-1 btn-pause" data-job-card="{{d.name}}">
+				<button class="btn btn-default">
+					<span class="menu-item-label" data-label="Start">{{ __('Pause') }}</span>
+				</button>
+			</div>
+			<div class="form-column col-sm-1 btn-complete" data-job-card="{{d.name}}" data-qty="{{d.for_quantity}}">
+				<button class="btn btn-default">
+					<span class="menu-item-label" data-label="Start">{{ __('Complete') }}</span>
+				</button>
+			</div>
+
+			<div class="form-column col-sm-1">
+				<div class="menu-btn-group" style="margin-left: 15px;">
+					<button type="button" class="btn btn-default icon-btn" data-toggle="dropdown" aria-expanded="false" aria-label="{{ __("Menu") }}">
+						<span>
+							<span class="menu-btn-group-label">
+								<svg class="icon icon-sm">
+									<use href="#icon-dot-vertical">
+									</use>
+								</svg>
+							</span>
+						</span>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right menu-actions" role="menu" data-job-card="{{d.name}}">
+						<li>
+							<a class="grey-link dropdown-item btn-transfer-materials" href="#" onclick="return false;">
+								<span class="menu-item-label" data-label="Transfer Materials">{{ __('Transfer Materials') }}</span>
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+{% }); %}
+</div>

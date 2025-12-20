@@ -1,0 +1,152 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2018-06-18 16:51:49.994750",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "user",
+  "date",
+  "from_time",
+  "time",
+  "expense",
+  "custody",
+  "returns",
+  "outstanding_amount",
+  "payments",
+  "net_amount",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "default": "POS-CLO-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_standard_filter": 1,
+   "label": "Series",
+   "options": "POS-CLO-",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "User",
+   "options": "User",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_filter": 1,
+   "in_standard_filter": 1,
+   "label": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "from_time",
+   "fieldtype": "Time",
+   "in_filter": 1,
+   "in_standard_filter": 1,
+   "label": "From Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "time",
+   "fieldtype": "Time",
+   "in_filter": 1,
+   "in_standard_filter": 1,
+   "label": "To Time",
+   "reqd": 1
+  },
+  {
+   "default": "0.00",
+   "fieldname": "expense",
+   "fieldtype": "Float",
+   "in_filter": 1,
+   "label": "Expense"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "custody",
+   "fieldtype": "Float",
+   "in_filter": 1,
+   "label": "Custody"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "returns",
+   "fieldtype": "Float",
+   "in_filter": 1,
+   "label": "Returns",
+   "precision": "2"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Float",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payments",
+   "fieldtype": "Table",
+   "in_filter": 1,
+   "label": "Payments",
+   "options": "Cashier Closing Payments"
+  },
+  {
+   "fieldname": "net_amount",
+   "fieldtype": "Float",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Net Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Cashier Closing",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:44.260440",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Cashier Closing",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

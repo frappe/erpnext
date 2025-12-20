@@ -1,0 +1,277 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-07-18 14:35:50.307386",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "item_name",
+  "item_group",
+  "column_break_f63f",
+  "fg_item",
+  "is_expandable",
+  "sourced_by_supplier",
+  "bom_created",
+  "is_subcontracted",
+  "is_phantom_item",
+  "operation_section",
+  "operation",
+  "column_break_cbnk",
+  "description_section",
+  "description",
+  "quantity_and_rate_section",
+  "qty",
+  "rate",
+  "uom",
+  "column_break_bgnb",
+  "stock_qty",
+  "conversion_factor",
+  "stock_uom",
+  "amount_section",
+  "amount",
+  "column_break_yuca",
+  "base_rate",
+  "base_amount",
+  "section_break_wtld",
+  "do_not_explode",
+  "parent_row_no",
+  "fg_reference_id",
+  "column_break_sulm",
+  "instruction"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fetch_if_empty": 1,
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name"
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "column_break_f63f",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "fg_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Finished Goods Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "is_expandable",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Expandable",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "description_section",
+   "fieldtype": "Section Break",
+   "label": "Description"
+  },
+  {
+   "fetch_from": "item_code.description",
+   "fetch_if_empty": 1,
+   "fieldname": "description",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "quantity_and_rate_section",
+   "fieldtype": "Section Break",
+   "label": "Quantity and Rate"
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty"
+  },
+  {
+   "columns": 2,
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate",
+   "options": "currency"
+  },
+  {
+   "columns": 1,
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "column_break_bgnb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stock_qty",
+   "fieldtype": "Float",
+   "label": "Stock Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "Conversion Factor"
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "no_copy": 1,
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount_section",
+   "fieldtype": "Section Break",
+   "label": "Amount"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_yuca",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "do_not_explode",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Do Not Explode"
+  },
+  {
+   "fieldname": "instruction",
+   "fieldtype": "Small Text",
+   "label": "Instruction"
+  },
+  {
+   "fieldname": "base_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Base Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "base_rate",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Base Rate",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "default": "0",
+   "fieldname": "sourced_by_supplier",
+   "fieldtype": "Check",
+   "label": "Sourced by Supplier"
+  },
+  {
+   "fieldname": "section_break_wtld",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "fg_reference_id",
+   "fieldtype": "Data",
+   "label": "Finished Goods Reference",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_sulm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "parent_row_no",
+   "fieldtype": "Data",
+   "label": "Parent Row No",
+   "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "bom_created",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "BOM Created",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:!doc.is_phantom_item",
+   "fieldname": "operation_section",
+   "fieldtype": "Section Break",
+   "label": "Operation"
+  },
+  {
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "label": "Operation",
+   "options": "Operation"
+  },
+  {
+   "fieldname": "column_break_cbnk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.is_phantom_item",
+   "fieldname": "is_subcontracted",
+   "fieldtype": "Check",
+   "label": "Is Subcontracted",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_phantom_item",
+   "fieldtype": "Check",
+   "label": "Is Phantom Item",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-05 21:15:55.187671",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM Creator Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

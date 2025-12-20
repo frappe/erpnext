@@ -1,0 +1,458 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "autoname": "MAT-SRE-.YYYY.-.#####",
+ "creation": "2023-06-06 15:20:48.016846",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_xt4m",
+  "voucher_type",
+  "voucher_no",
+  "voucher_detail_no",
+  "column_break_grdt",
+  "voucher_qty",
+  "available_qty",
+  "column_break_o6ex",
+  "reserved_qty",
+  "delivered_qty",
+  "item_information_section",
+  "item_code",
+  "warehouse",
+  "column_break_elik",
+  "stock_uom",
+  "has_serial_no",
+  "has_batch_no",
+  "column_break_7dxj",
+  "from_voucher_type",
+  "from_voucher_no",
+  "from_voucher_detail_no",
+  "production_section",
+  "transferred_qty",
+  "column_break_qdwj",
+  "consumed_qty",
+  "serial_and_batch_reservation_section",
+  "reservation_based_on",
+  "sb_entries",
+  "section_break_3vb3",
+  "company",
+  "column_break_jbyr",
+  "project",
+  "status",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Item Code",
+   "no_copy": 1,
+   "oldfieldname": "item_code",
+   "oldfieldtype": "Link",
+   "options": "Item",
+   "print_width": "100px",
+   "read_only": 1,
+   "search_index": 1,
+   "width": "100px"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Warehouse",
+   "no_copy": 1,
+   "oldfieldname": "warehouse",
+   "oldfieldtype": "Link",
+   "options": "Warehouse",
+   "print_width": "100px",
+   "read_only": 1,
+   "search_index": 1,
+   "width": "100px"
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "label": "Voucher Type",
+   "no_copy": 1,
+   "oldfieldname": "voucher_type",
+   "oldfieldtype": "Data",
+   "options": "\nSales Order\nWork Order\nSubcontracting Inward Order\nProduction Plan\nSubcontracting Order",
+   "print_width": "150px",
+   "read_only": 1,
+   "width": "150px"
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_filter": 1,
+   "in_standard_filter": 1,
+   "label": "Voucher No",
+   "no_copy": 1,
+   "oldfieldname": "voucher_no",
+   "oldfieldtype": "Data",
+   "options": "voucher_type",
+   "print_width": "150px",
+   "read_only": 1,
+   "search_index": 1,
+   "width": "150px"
+  },
+  {
+   "fieldname": "voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "Voucher Detail No",
+   "no_copy": 1,
+   "oldfieldname": "voucher_detail_no",
+   "oldfieldtype": "Data",
+   "print_width": "150px",
+   "read_only": 1,
+   "search_index": 1,
+   "width": "150px"
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "no_copy": 1,
+   "oldfieldname": "stock_uom",
+   "oldfieldtype": "Data",
+   "options": "UOM",
+   "print_width": "150px",
+   "read_only": 1,
+   "width": "150px"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "no_copy": 1,
+   "options": "Project",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "label": "Company",
+   "no_copy": 1,
+   "oldfieldname": "company",
+   "oldfieldtype": "Data",
+   "options": "Company",
+   "print_width": "150px",
+   "read_only": 1,
+   "search_index": 1,
+   "width": "150px"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "reserved_qty",
+   "fieldtype": "Float",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "label": "Reserved Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "oldfieldname": "actual_qty",
+   "oldfieldtype": "Currency",
+   "print_width": "150px",
+   "read_only_depends_on": "eval: ((doc.reservation_based_on == \"Serial and Batch\") || (doc.from_voucher_type == \"Pick List\") || (doc.delivered_qty > 0))",
+   "width": "150px"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nPartially Reserved\nReserved\nPartially Delivered\nPartially Used\nDelivered\nCancelled\nClosed",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "delivered_qty",
+   "fieldtype": "Float",
+   "label": "Delivered Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Stock Reservation Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "available_qty",
+   "fieldtype": "Float",
+   "label": "Available Qty to Reserve",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "voucher_qty",
+   "fieldtype": "Float",
+   "label": "Voucher Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_elik",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_xt4m",
+   "fieldtype": "Section Break",
+   "label": "Transaction Information"
+  },
+  {
+   "fieldname": "column_break_o6ex",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_3vb3",
+   "fieldtype": "Tab Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "column_break_jbyr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.has_serial_no",
+   "fieldname": "has_serial_no",
+   "fieldtype": "Check",
+   "label": "Has Serial No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.has_batch_no",
+   "fieldname": "has_batch_no",
+   "fieldtype": "Check",
+   "label": "Has Batch No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval: (doc.has_serial_no || doc.has_batch_no) && doc.reservation_based_on == \"Serial and Batch\"",
+   "fieldname": "sb_entries",
+   "fieldtype": "Table",
+   "options": "Serial and Batch Entry",
+   "read_only_depends_on": "eval: (doc.delivered_qty > 0)"
+  },
+  {
+   "fieldname": "serial_and_batch_reservation_section",
+   "fieldtype": "Tab Break",
+   "label": "Serial and Batch Reservation"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Qty",
+   "depends_on": "eval: parent.has_serial_no || parent.has_batch_no",
+   "fieldname": "reservation_based_on",
+   "fieldtype": "Select",
+   "label": "Reservation Based On",
+   "no_copy": 1,
+   "options": "Qty\nSerial and Batch",
+   "read_only_depends_on": "eval: (doc.delivered_qty > 0 || doc.from_voucher_type == \"Pick List\")"
+  },
+  {
+   "fieldname": "column_break_7dxj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_grdt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_voucher_type",
+   "fieldtype": "Select",
+   "label": "From Voucher Type",
+   "no_copy": 1,
+   "options": "\nPick List\nPurchase Receipt\nStock Entry\nWork Order\nProduction Plan\nSubcontracting Inward Order",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "from_voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "From Voucher Detail No",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "from_voucher_no",
+   "fieldtype": "Dynamic Link",
+   "label": "From Voucher No",
+   "no_copy": 1,
+   "options": "from_voucher_type",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "production_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_qdwj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "consumed_qty",
+   "fieldtype": "Float",
+   "label": "Consumed Qty"
+  },
+  {
+   "fieldname": "item_information_section",
+   "fieldtype": "Section Break",
+   "label": "Item Information"
+  },
+  {
+   "fieldname": "transferred_qty",
+   "fieldtype": "Float",
+   "label": "Transferred Qty"
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-11-10 16:09:10.380024",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Reservation Entry",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "voucher_no",
+ "track_changes": 1
+}

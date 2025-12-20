@@ -1,0 +1,45 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2013-02-22 01:28:04",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "uom",
+  "conversion_factor"
+ ],
+ "fields": [
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "oldfieldname": "uom",
+   "oldfieldtype": "Link",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Conversion Factor",
+   "non_negative": 1,
+   "oldfieldname": "conversion_factor",
+   "oldfieldtype": "Float"
+  }
+ ],
+ "idx": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-19 21:27:13.968771",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "UOM Conversion Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

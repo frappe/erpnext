@@ -1,0 +1,51 @@
+[
+    {
+        "buying": 1,
+        "currency": "INR",
+        "doctype": "Price List",
+        "enabled": 1,
+        "price_not_uom_dependant": 1,
+        "price_list_name": "_Test Price List",
+        "selling": 1
+    },
+    {
+        "buying": 1,
+        "currency": "INR",
+        "doctype": "Price List",
+        "enabled": 1,
+        "price_list_name": "_Test Price List 2",
+        "selling": 1
+    },
+    {
+        "buying": 1,
+        "currency": "INR",
+        "doctype": "Price List",
+        "enabled": 1,
+        "price_list_name": "_Test Price List India",
+        "selling": 1
+    },
+    {
+        "buying": 1,
+        "currency": "USD",
+        "doctype": "Price List",
+        "enabled": 1,
+        "price_list_name": "_Test Price List Rest of the World",
+        "selling": 1
+    },
+    {
+        "buying": 0,
+        "currency": "USD",
+        "doctype": "Price List",
+        "enabled": 1,
+        "price_list_name": "_Test Selling Price List",
+        "selling": 1
+    },
+    {
+        "buying": 1,
+        "currency": "USD",
+        "doctype": "Price List",
+        "enabled": 1,
+        "price_list_name": "_Test Buying Price List",
+        "selling": 0
+    }
+]

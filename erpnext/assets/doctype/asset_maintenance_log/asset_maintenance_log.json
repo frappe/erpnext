@@ -1,0 +1,211 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2017-10-23 16:58:44.424309",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "asset_maintenance",
+  "naming_series",
+  "asset_name",
+  "column_break_2",
+  "item_code",
+  "item_name",
+  "section_break_5",
+  "task",
+  "task_name",
+  "maintenance_type",
+  "periodicity",
+  "has_certificate",
+  "certificate_attachement",
+  "column_break_6",
+  "maintenance_status",
+  "assign_to_name",
+  "task_assignee_email",
+  "due_date",
+  "completion_date",
+  "description",
+  "column_break_9",
+  "actions_performed",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "asset_maintenance",
+   "fieldtype": "Link",
+   "label": "Asset Maintenance",
+   "options": "Asset Maintenance"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "ACC-AML-.YYYY.-",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "asset_maintenance.asset_name",
+   "fieldname": "asset_name",
+   "fieldtype": "Read Only",
+   "label": "Asset Name"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "asset_maintenance.item_code",
+   "fieldname": "item_code",
+   "fieldtype": "Read Only",
+   "label": "Item Code"
+  },
+  {
+   "fetch_from": "asset_maintenance.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Read Only",
+   "label": "Item Name"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break",
+   "label": "Maintenance Details"
+  },
+  {
+   "fieldname": "task",
+   "fieldtype": "Link",
+   "label": "Task",
+   "options": "Asset Maintenance Task"
+  },
+  {
+   "fetch_from": "task.maintenance_type",
+   "fieldname": "maintenance_type",
+   "fieldtype": "Read Only",
+   "label": "Maintenance Type"
+  },
+  {
+   "fetch_from": "task.periodicity",
+   "fieldname": "periodicity",
+   "fieldtype": "Data",
+   "label": "Periodicity",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "task.assign_to_name",
+   "fieldname": "assign_to_name",
+   "fieldtype": "Read Only",
+   "label": "Assign To"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "task.next_due_date",
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Due Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "completion_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Completion Date"
+  },
+  {
+   "fieldname": "maintenance_status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Maintenance Status",
+   "options": "Planned\nCompleted\nCancelled\nOverdue",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "task.certificate_required",
+   "fieldname": "has_certificate",
+   "fieldtype": "Check",
+   "label": "Has Certificate "
+  },
+  {
+   "depends_on": "eval:doc.has_certificate",
+   "fieldname": "certificate_attachement",
+   "fieldtype": "Attach",
+   "label": "Certificate"
+  },
+  {
+   "fetch_from": "task.description",
+   "fieldname": "description",
+   "fieldtype": "Read Only",
+   "label": "Description",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "actions_performed",
+   "fieldtype": "Text Editor",
+   "label": "Actions performed"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Asset Maintenance Log",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "task.maintenance_task",
+   "fieldname": "task_name",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Task Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "task_assignee_email",
+   "fieldtype": "Data",
+   "label": "Task Assignee Email",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-09-24 15:12:37.497853",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Asset Maintenance Log",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
+}

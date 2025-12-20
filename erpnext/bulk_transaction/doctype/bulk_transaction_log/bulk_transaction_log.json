@@ -1,0 +1,84 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "creation": "2023-11-09 20:14:45.139593",
+ "default_view": "List",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "date",
+  "column_break_bsan",
+  "log_entries",
+  "section_break_mdmv",
+  "succeeded",
+  "column_break_qryp",
+  "failed"
+ ],
+ "fields": [
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "log_entries",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Log Entries",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_bsan",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_mdmv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "succeeded",
+   "fieldtype": "Int",
+   "label": "Succeeded",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_qryp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "failed",
+   "fieldtype": "Int",
+   "label": "Failed",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "is_virtual": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:43.111628",
+ "modified_by": "Administrator",
+ "module": "Bulk Transaction",
+ "name": "Bulk Transaction Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "date"
+}

@@ -1,0 +1,655 @@
+{
+ "actions": [],
+ "allow_auto_repeat": 1,
+ "allow_import": 1,
+ "autoname": "naming_series:",
+ "creation": "2022-01-25 10:29:58.717206",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "engine": "InnoDB",
+ "field_order": [
+  "entry_type_and_date",
+  "is_system_generated",
+  "title",
+  "voucher_type",
+  "naming_series",
+  "process_deferred_accounting",
+  "reversal_of",
+  "column_break1",
+  "from_template",
+  "company",
+  "posting_date",
+  "finance_book",
+  "apply_tds",
+  "tax_withholding_category",
+  "section_break_tcvw",
+  "for_all_stock_asset_accounts",
+  "column_break_wpau",
+  "stock_asset_account",
+  "periodic_entry_difference_account",
+  "get_balance_for_periodic_accounting",
+  "2_add_edit_gl_entries",
+  "accounts",
+  "section_break99",
+  "cheque_no",
+  "cheque_date",
+  "user_remark",
+  "column_break99",
+  "total_debit",
+  "total_credit",
+  "difference",
+  "get_balance",
+  "multi_currency",
+  "total_amount_currency",
+  "total_amount",
+  "total_amount_in_words",
+  "reference",
+  "clearance_date",
+  "remark",
+  "inter_company_journal_entry_reference",
+  "column_break98",
+  "bill_no",
+  "bill_date",
+  "due_date",
+  "write_off",
+  "write_off_based_on",
+  "get_outstanding_invoices",
+  "column_break_30",
+  "write_off_amount",
+  "printing_settings",
+  "pay_to_recd_from",
+  "column_break_35",
+  "letter_head",
+  "select_print_heading",
+  "addtional_info",
+  "mode_of_payment",
+  "payment_order",
+  "party_not_required",
+  "column_break3",
+  "is_opening",
+  "stock_entry",
+  "subscription_section",
+  "auto_repeat",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "entry_type_and_date",
+   "fieldtype": "Section Break",
+   "options": "fa fa-flag"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "default": "Journal Entry",
+   "fieldname": "voucher_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Entry Type",
+   "oldfieldname": "voucher_type",
+   "oldfieldtype": "Select",
+   "options": "Journal Entry\nInter Company Journal Entry\nBank Entry\nCash Entry\nCredit Card Entry\nDebit Note\nCredit Note\nContra Entry\nExcise Entry\nWrite Off Entry\nOpening Entry\nDepreciation Entry\nAsset Disposal\nPeriodic Accounting Entry\nExchange Rate Revaluation\nExchange Gain Or Loss\nDeferred Revenue\nDeferred Expense",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "oldfieldname": "naming_series",
+   "oldfieldtype": "Select",
+   "options": "ACC-JV-.YYYY.-",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "column_break1",
+   "fieldtype": "Column Break",
+   "oldfieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "no_copy": 1,
+   "oldfieldname": "posting_date",
+   "oldfieldtype": "Date",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "oldfieldname": "company",
+   "oldfieldtype": "Link",
+   "options": "Company",
+   "print_hide": 1,
+   "remember_last_selected_value": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "finance_book",
+   "fieldtype": "Link",
+   "label": "Finance Book",
+   "options": "Finance Book",
+   "read_only": 1
+  },
+  {
+   "fieldname": "2_add_edit_gl_entries",
+   "fieldtype": "Section Break",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-table"
+  },
+  {
+   "fieldname": "accounts",
+   "fieldtype": "Table",
+   "label": "Accounting Entries",
+   "oldfieldname": "entries",
+   "oldfieldtype": "Table",
+   "options": "Journal Entry Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break99",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "cheque_no",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "label": "Reference Number",
+   "mandatory_depends_on": "eval:doc.voucher_type == \"Bank Entry\"",
+   "no_copy": 1,
+   "oldfieldname": "cheque_no",
+   "oldfieldtype": "Data",
+   "search_index": 1
+  },
+  {
+   "fieldname": "cheque_date",
+   "fieldtype": "Date",
+   "label": "Reference Date",
+   "mandatory_depends_on": "eval:doc.voucher_type == \"Bank Entry\"",
+   "no_copy": 1,
+   "oldfieldname": "cheque_date",
+   "oldfieldtype": "Date",
+   "search_index": 1
+  },
+  {
+   "fieldname": "user_remark",
+   "fieldtype": "Small Text",
+   "label": "User Remark",
+   "no_copy": 1,
+   "oldfieldname": "user_remark",
+   "oldfieldtype": "Small Text",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break99",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_debit",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Debit",
+   "no_copy": 1,
+   "oldfieldname": "total_debit",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_credit",
+   "fieldtype": "Currency",
+   "label": "Total Credit",
+   "no_copy": 1,
+   "oldfieldname": "total_credit",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "difference",
+   "fieldname": "difference",
+   "fieldtype": "Currency",
+   "label": "Difference (Dr - Cr)",
+   "no_copy": 1,
+   "oldfieldname": "difference",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "difference",
+   "fieldname": "get_balance",
+   "fieldtype": "Button",
+   "label": "Make Difference Entry",
+   "oldfieldtype": "Button"
+  },
+  {
+   "default": "0",
+   "fieldname": "multi_currency",
+   "fieldtype": "Check",
+   "label": "Multi Currency",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "total_amount_currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Total Amount Currency",
+   "no_copy": 1,
+   "options": "Currency",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Total Amount",
+   "no_copy": 1,
+   "options": "total_amount_currency",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "total_amount_in_words",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Total Amount in Words",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "reference",
+   "fieldtype": "Section Break",
+   "label": "Reference",
+   "options": "fa fa-pushpin"
+  },
+  {
+   "fieldname": "clearance_date",
+   "fieldtype": "Date",
+   "label": "Clearance Date",
+   "no_copy": 1,
+   "oldfieldname": "clearance_date",
+   "oldfieldtype": "Date",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "remark",
+   "fieldtype": "Small Text",
+   "in_global_search": 1,
+   "label": "Remark",
+   "no_copy": 1,
+   "oldfieldname": "remark",
+   "oldfieldtype": "Small Text",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.voucher_type== \"Inter Company Journal Entry\"",
+   "fieldname": "inter_company_journal_entry_reference",
+   "fieldtype": "Link",
+   "label": "Inter Company Journal Entry Reference",
+   "options": "Journal Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break98",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bill_no",
+   "fieldtype": "Data",
+   "label": "Bill No",
+   "oldfieldname": "bill_no",
+   "oldfieldtype": "Data",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "bill_date",
+   "fieldtype": "Date",
+   "label": "Bill Date",
+   "oldfieldname": "bill_date",
+   "oldfieldtype": "Date",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date",
+   "oldfieldname": "due_date",
+   "oldfieldtype": "Date"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:doc.voucher_type == 'Write Off Entry'",
+   "fieldname": "write_off",
+   "fieldtype": "Section Break",
+   "label": "Write Off"
+  },
+  {
+   "default": "Accounts Receivable",
+   "depends_on": "eval:doc.voucher_type == 'Write Off Entry'",
+   "fieldname": "write_off_based_on",
+   "fieldtype": "Select",
+   "label": "Write Off Based On",
+   "options": "Accounts Receivable\nAccounts Payable",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.voucher_type == 'Write Off Entry'",
+   "fieldname": "get_outstanding_invoices",
+   "fieldtype": "Button",
+   "label": "Get Outstanding Invoices",
+   "options": "get_outstanding_invoices",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_30",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.voucher_type == 'Write Off Entry'",
+   "fieldname": "write_off_amount",
+   "fieldtype": "Currency",
+   "label": "Write Off Amount",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "printing_settings",
+   "fieldtype": "Section Break",
+   "label": "Printing Settings"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "pay_to_recd_from",
+   "fieldtype": "Data",
+   "label": "Pay To / Recd From",
+   "no_copy": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "column_break_35",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "letter_head",
+   "fieldtype": "Link",
+   "label": "Letter Head",
+   "options": "Letter Head"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "select_print_heading",
+   "fieldtype": "Link",
+   "label": "Print Heading",
+   "no_copy": 1,
+   "oldfieldname": "select_print_heading",
+   "oldfieldtype": "Link",
+   "options": "Print Heading",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "addtional_info",
+   "fieldtype": "Section Break",
+   "label": "More Information",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-file-text"
+  },
+  {
+   "fieldname": "mode_of_payment",
+   "fieldtype": "Link",
+   "label": "Mode of Payment",
+   "options": "Mode of Payment"
+  },
+  {
+   "fieldname": "payment_order",
+   "fieldtype": "Link",
+   "label": "Payment Order",
+   "no_copy": 1,
+   "options": "Payment Order",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break3",
+   "fieldtype": "Column Break",
+   "oldfieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "default": "No",
+   "fieldname": "is_opening",
+   "fieldtype": "Select",
+   "label": "Is Opening",
+   "oldfieldname": "is_opening",
+   "oldfieldtype": "Select",
+   "options": "No\nYes",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:in_list([\"Credit Note\", \"Debit Note\"], doc.voucher_type)",
+   "fieldname": "stock_entry",
+   "fieldtype": "Link",
+   "label": "Stock Entry",
+   "options": "Stock Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "subscription_section",
+   "fieldtype": "Section Break",
+   "label": "Subscription Section"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "auto_repeat",
+   "fieldtype": "Link",
+   "label": "Auto Repeat",
+   "no_copy": 1,
+   "options": "Auto Repeat",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Amended From",
+   "no_copy": 1,
+   "oldfieldname": "amended_from",
+   "oldfieldtype": "Link",
+   "options": "Journal Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "from_template",
+   "fieldtype": "Link",
+   "label": "From Template",
+   "no_copy": 1,
+   "options": "Journal Entry Template",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.apply_tds",
+   "fieldname": "tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Category",
+   "mandatory_depends_on": "eval:doc.apply_tds",
+   "options": "Tax Withholding Category"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:['Credit Note', 'Debit Note'].includes(doc.voucher_type)",
+   "fieldname": "apply_tds",
+   "fieldtype": "Check",
+   "label": "Apply Tax Withholding Amount "
+  },
+  {
+   "depends_on": "eval:doc.docstatus",
+   "fieldname": "reversal_of",
+   "fieldtype": "Link",
+   "label": "Reversal Of",
+   "options": "Journal Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "process_deferred_accounting",
+   "fieldtype": "Link",
+   "label": "Process Deferred Accounting",
+   "options": "Process Deferred Accounting",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_system_generated == 1;",
+   "fieldname": "is_system_generated",
+   "fieldtype": "Check",
+   "label": "Is System Generated",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.voucher_type === \"Periodic Accounting Entry\"",
+   "fieldname": "periodic_entry_difference_account",
+   "fieldtype": "Link",
+   "label": "Periodic Entry Difference Account",
+   "mandatory_depends_on": "eval:doc.voucher_type === \"Periodic Accounting Entry\"",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.voucher_type === \"Periodic Accounting Entry\"",
+   "fieldname": "section_break_tcvw",
+   "fieldtype": "Section Break",
+   "label": "Periodic Accounting"
+  },
+  {
+   "default": "1",
+   "fieldname": "for_all_stock_asset_accounts",
+   "fieldtype": "Check",
+   "label": "For All Stock Asset Accounts"
+  },
+  {
+   "depends_on": "eval:doc.for_all_stock_asset_accounts === 0",
+   "fieldname": "stock_asset_account",
+   "fieldtype": "Link",
+   "label": "Stock Asset Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_wpau",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "get_balance_for_periodic_accounting",
+   "fieldtype": "Button",
+   "label": "Get Balance"
+  },
+  {
+   "default": "0",
+   "fieldname": "party_not_required",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Party Not Required",
+   "no_copy": 1
+  }
+ ],
+ "icon": "fa fa-file-text",
+ "idx": 176,
+ "is_submittable": 1,
+ "links": [
+  {
+   "is_child_table": 1,
+   "link_doctype": "Bank Transaction Payments",
+   "link_fieldname": "payment_entry",
+   "parent_doctype": "Bank Transaction",
+   "table_fieldname": "payment_entries"
+  }
+ ],
+ "modified": "2025-09-29 13:05:46.982277",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Journal Entry",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "voucher_type,posting_date, due_date, cheque_no",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "title",
+ "track_changes": 1
+}

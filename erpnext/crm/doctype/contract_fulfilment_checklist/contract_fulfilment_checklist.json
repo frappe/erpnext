@@ -1,0 +1,69 @@
+{
+ "actions": [],
+ "creation": "2018-04-16 06:51:33.320037",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "fulfilled",
+  "cb_notes",
+  "requirement",
+  "sb_notes",
+  "notes",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "fulfilled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Fulfilled"
+  },
+  {
+   "fieldname": "cb_notes",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "requirement",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Requirement"
+  },
+  {
+   "fieldname": "sb_notes",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "notes",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "label": "Notes"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Contract Fulfilment Checklist",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:46.377767",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Contract Fulfilment Checklist",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

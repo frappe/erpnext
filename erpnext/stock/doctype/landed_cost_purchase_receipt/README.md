@@ -1,0 +1,1 @@
+Purchase Receipt where the expense is to be added.

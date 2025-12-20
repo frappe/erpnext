@@ -1,0 +1,155 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:SB-{####}",
+ "creation": "2023-08-29 12:43:20.417184",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "is_active",
+  "section_break_dsjm",
+  "finished_good",
+  "finished_good_qty",
+  "column_break_quoy",
+  "finished_good_uom",
+  "finished_good_bom",
+  "section_break_qdw9",
+  "service_item",
+  "service_item_qty",
+  "column_break_uzmw",
+  "service_item_uom",
+  "conversion_factor"
+ ],
+ "fields": [
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Is Active",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "section_break_dsjm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "finished_good",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Finished Good",
+   "options": "Item",
+   "reqd": 1,
+   "search_index": 1,
+   "set_only_once": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "finished_good_qty",
+   "fieldtype": "Float",
+   "label": "Finished Good Qty",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "finished_good.default_bom",
+   "fetch_if_empty": 1,
+   "fieldname": "finished_good_bom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Finished Good BOM",
+   "options": "BOM",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_break_qdw9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "service_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Service Item",
+   "options": "Item",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "service_item_qty",
+   "fieldtype": "Float",
+   "label": "Service Item Qty",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "service_item.stock_uom",
+   "fetch_if_empty": 1,
+   "fieldname": "service_item_uom",
+   "fieldtype": "Link",
+   "label": "Service Item UOM",
+   "options": "UOM",
+   "reqd": 1
+  },
+  {
+   "description": "Service Item Qty / Finished Good Qty",
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "Conversion Factor",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_quoy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "finished_good.stock_uom",
+   "fieldname": "finished_good_uom",
+   "fieldtype": "Link",
+   "label": "Finished Good UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_uzmw",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:45.904619",
+ "modified_by": "Administrator",
+ "module": "Subcontracting",
+ "name": "Subcontracting BOM",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,36 @@
+# This workflow is agnostic to branches. Only maintain on develop branch.
+# To add/remove versions just modify the matrix.
+
+name: Create weekly release pull requests
+
+permissions:
+  contents: read
+
+on:
+  schedule:
+    # 9:30 UTC => 3 PM IST Tuesday
+    - cron: "30 9 * * 2"
+  workflow_dispatch:
+
+jobs:
+  stable-release:
+    name: Release
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ["14", "15"]
+
+    steps:
+      - uses: octokit/request-action@v2.x
+        with:
+          route: POST /repos/{owner}/{repo}/pulls
+          owner: frappe
+          repo: erpnext
+          title: |-
+            "chore: release v${{ matrix.version }}"
+          body: "Automated weekly release."
+          base: version-${{ matrix.version }}
+          head: version-${{ matrix.version }}-hotfix
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}

@@ -1,0 +1,78 @@
+{
+ "actions": [],
+ "creation": "2017-08-28 16:46:41.732676",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "invoice_type",
+  "section_break_gyos",
+  "invoice_fields",
+  "pos_search_fields"
+ ],
+ "fields": [
+  {
+   "fieldname": "invoice_fields",
+   "fieldtype": "Table",
+   "label": "POS Additional Fields",
+   "options": "POS Field"
+  },
+  {
+   "fieldname": "pos_search_fields",
+   "fieldtype": "Table",
+   "label": "POS Search Fields",
+   "options": "POS Search Fields"
+  },
+  {
+   "default": "Sales Invoice",
+   "description": "The system will create a Sales Invoice or a POS Invoice from the POS interface based on this setting. For high-volume transactions, it is recommended to use POS Invoice.",
+   "fieldname": "invoice_type",
+   "fieldtype": "Select",
+   "label": "Invoice Type Created via POS Screen",
+   "options": "Sales Invoice\nPOS Invoice"
+  },
+  {
+   "fieldname": "section_break_gyos",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-06-06 11:36:44.885353",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "POS Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

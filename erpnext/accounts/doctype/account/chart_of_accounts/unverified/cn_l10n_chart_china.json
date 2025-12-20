@@ -1,0 +1,274 @@
+{
+    "country_code": "cn",
+    "name": "China - \u4e2d\u56fd\u4f1a\u8ba1\u79d1\u76ee\u8868  \uff08\u8d22\u4f1a[2006]3\u53f7\u300a\u4f01\u4e1a\u4f1a\u8ba1\u51c6\u5219\u300b\uff09",
+    "tree": {
+        "\u4e3b\u8425\u4e1a\u52a1\u6210\u672c": {
+            "root_type": ""
+        },
+        "\u4e3b\u8425\u4e1a\u52a1\u6536\u5165": {
+            "root_type": ""
+        },
+        "\u4ea4\u6613\u6027\u91d1\u878d\u8d1f\u503a": {
+            "root_type": ""
+        },
+        "\u4ea4\u6613\u6027\u91d1\u878d\u8d44\u4ea7": {
+            "root_type": ""
+        },
+        "\u4ee5\u524d\u5e74\u5ea6\u635f\u76ca\u8c03\u6574": {
+            "root_type": ""
+        },
+        "\u516c\u5141\u4ef7\u503c\u53d8\u52a8\u635f\u76ca": {
+            "root_type": ""
+        },
+        "\u5176\u4ed6\u4e1a\u52a1\u652f\u51fa": {
+            "root_type": ""
+        },
+        "\u5176\u4ed6\u4e1a\u52a1\u6536\u5165": {
+            "root_type": ""
+        },
+        "\u5176\u4ed6\u5e94\u4ed8\u6b3e": {
+            "root_type": ""
+        },
+        "\u5176\u4ed6\u5e94\u6536\u6b3e": {
+            "root_type": ""
+        },
+        "\u5176\u4ed6\u8d27\u5e01\u8d44\u91d1": {
+            "root_type": ""
+        },
+        "\u5229\u6da6\u5206\u914d": {
+            "root_type": ""
+        },
+        "\u5236\u9020\u8d39\u7528": {
+            "root_type": ""
+        },
+        "\u52b3\u52a1\u6210\u672c": {
+            "root_type": ""
+        },
+        "\u5305\u88c5\u7269\u53ca\u4f4e\u503c\u6613\u8017\u54c1": {
+            "root_type": ""
+        },
+        "\u539f\u6750\u6599": {
+            "root_type": ""
+        },
+        "\u53d1\u51fa\u5546\u54c1": {
+            "root_type": ""
+        },
+        "\u5546\u54c1\u8fdb\u9500\u5dee\u4ef7": {
+            "root_type": ""
+        },
+        "\u5546\u8a89": {
+            "root_type": ""
+        },
+        "\u56fa\u5b9a\u8d44\u4ea7": {
+            "root_type": ""
+        },
+        "\u56fa\u5b9a\u8d44\u4ea7\u51cf\u503c\u51c6\u5907": {
+            "root_type": ""
+        },
+        "\u56fa\u5b9a\u8d44\u4ea7\u6e05\u7406": {
+            "root_type": ""
+        },
+        "\u5728\u5efa\u5de5\u7a0b": {
+            "root_type": ""
+        },
+        "\u5728\u9014\u7269\u8d44": {
+            "root_type": ""
+        },
+        "\u574f\u8d26\u51c6\u5907": {
+            "root_type": ""
+        },
+        "\u5957\u671f\u5de5\u5177": {
+            "root_type": ""
+        },
+        "\u59d4\u6258\u52a0\u5de5\u7269\u8d44": {
+            "root_type": ""
+        },
+        "\u5b58\u8d27\u8dcc\u4ef7\u51c6\u5907": {
+            "root_type": ""
+        },
+        "\u5b9e\u6536\u8d44\u672c": {
+            "root_type": ""
+        },
+        "\u5de5\u7a0b\u7269\u8d44": {
+            "root_type": ""
+        },
+        "\u5e93\u5b58\u5546\u54c1": {
+            "root_type": ""
+        },
+        "\u5e93\u5b58\u80a1": {
+            "root_type": ""
+        },
+        "\u5e94\u4ea4\u7a0e\u8d39": {
+            "root_type": "",
+            "\u5e94\u4ea4\u4e2a\u4eba\u6240\u5f97\u7a0e": {},
+            "\u5e94\u4ea4\u571f\u5730\u4f7f\u7528\u7a0e": {},
+            "\u5e94\u4ea4\u571f\u5730\u589e\u503c\u7a0e": {},
+            "\u5e94\u4ea4\u57ce\u5e02\u7ef4\u62a4\u5efa\u8bbe\u7a0e": {},
+            "\u5e94\u4ea4\u589e\u503c\u7a0e": {
+                "\u51cf\u514d\u7a0e\u6b3e": {},
+                "\u51fa\u53e3\u62b5\u51cf\u5185\u9500\u4ea7\u54c1\u5e94\u7eb3\u7a0e\u989d": {},
+                "\u51fa\u53e3\u9000\u7a0e": {},
+                "\u5df2\u4ea4\u7a0e\u91d1": {},
+                "\u672a\u4ea4\u589e\u503c\u7a0e": {},
+                "\u8f6c\u51fa\u591a\u4ea4\u589e\u503c\u7a0e": {},
+                "\u8f6c\u51fa\u672a\u4ea4\u589e\u503c\u7a0e": {},
+                "\u8fdb\u9879\u7a0e\u989d": {},
+                "\u8fdb\u9879\u7a0e\u989d\u8f6c\u51fa": {},
+                "\u9500\u9879\u7a0e\u989d": {}
+            },
+            "\u5e94\u4ea4\u623f\u4ea7\u7a0e": {},
+            "\u5e94\u4ea4\u6240\u5f97\u7a0e": {},
+            "\u5e94\u4ea4\u6d88\u8d39\u7a0e": {},
+            "\u5e94\u4ea4\u8425\u4e1a\u7a0e": {},
+            "\u5e94\u4ea4\u8d44\u6e90\u7a0e": {},
+            "\u5e94\u4ea4\u8f66\u8239\u4f7f\u7528\u7a0e": {}
+        },
+        "\u5e94\u4ed8\u5229\u606f": {
+            "root_type": ""
+        },
+        "\u5e94\u4ed8\u7968\u636e": {
+            "root_type": ""
+        },
+        "\u5e94\u4ed8\u804c\u5de5\u85aa\u916c": {
+            "root_type": ""
+        },
+        "\u5e94\u4ed8\u80a1\u5229": {
+            "root_type": ""
+        },
+        "\u5e94\u4ed8\u8d26\u6b3e": {
+            "root_type": ""
+        },
+        "\u5e94\u6536\u5229\u606f": {
+            "root_type": ""
+        },
+        "\u5e94\u6536\u7968\u636e": {
+            "root_type": ""
+        },
+        "\u5e94\u6536\u80a1\u5229": {
+            "root_type": ""
+        },
+        "\u5e94\u6536\u8d26\u6b3e": {
+            "root_type": ""
+        },
+        "\u5f85\u5904\u7406\u8d22\u4ea7\u635f\u6ea2": {
+            "root_type": ""
+        },
+        "\u5f85\u644a\u8d39\u7528": {
+            "root_type": ""
+        },
+        "\u6240\u5f97\u7a0e": {
+            "root_type": ""
+        },
+        "\u6295\u8d44\u6536\u76ca": {
+            "root_type": ""
+        },
+        "\u6301\u6709\u81f3\u5230\u671f\u6295\u8d44": {
+            "root_type": ""
+        },
+        "\u6301\u6709\u81f3\u5230\u671f\u6295\u8d44\u51cf\u503c\u51c6\u5907": {
+            "root_type": ""
+        },
+        "\u65e0\u5f62\u8d44\u4ea7": {
+            "root_type": ""
+        },
+        "\u65e0\u5f62\u8d44\u4ea7\u51cf\u503c\u51c6\u5907": {
+            "root_type": ""
+        },
+        "\u672c\u5e74\u5229\u6da6": {
+            "root_type": ""
+        },
+        "\u6750\u6599\u6210\u672c\u5dee\u5f02": {
+            "root_type": ""
+        },
+        "\u6750\u6599\u91c7\u8d2d": {
+            "root_type": ""
+        },
+        "\u73b0\u91d1": {
+            "root_type": ""
+        },
+        "\u751f\u4ea7\u6210\u672c": {
+            "root_type": ""
+        },
+        "\u76c8\u4f59\u516c\u79ef": {
+            "root_type": ""
+        },
+        "\u77ed\u671f\u501f\u6b3e": {
+            "root_type": ""
+        },
+        "\u7814\u53d1\u652f\u51fa": {
+            "root_type": ""
+        },
+        "\u7ba1\u7406\u8d39\u7528": {
+            "root_type": ""
+        },
+        "\u7d2f\u8ba1\u6298\u65e7": {
+            "root_type": ""
+        },
+        "\u8425\u4e1a\u5916\u652f\u51fa": {
+            "root_type": ""
+        },
+        "\u8425\u4e1a\u5916\u6536\u5165": {
+            "root_type": ""
+        },
+        "\u8425\u4e1a\u7a0e\u91d1\u53ca\u9644\u52a0": {
+            "root_type": ""
+        },
+        "\u884d\u751f\u5de5\u5177": {
+            "root_type": ""
+        },
+        "\u88ab\u5957\u671f\u9879\u76ee": {
+            "root_type": ""
+        },
+        "\u8d22\u52a1\u8d39\u7528": {
+            "root_type": ""
+        },
+        "\u8d44\u4ea7\u51cf\u503c\u635f\u5931": {
+            "root_type": ""
+        },
+        "\u8d44\u672c\u516c\u79ef": {
+            "root_type": ""
+        },
+        "\u9012\u5ef6\u6240\u5f97\u7a0e\u8d1f\u503a": {
+            "root_type": ""
+        },
+        "\u9012\u5ef6\u6240\u5f97\u7a0e\u8d44\u4ea7": {
+            "root_type": ""
+        },
+        "\u94f6\u884c\u5b58\u6b3e": {
+            "root_type": ""
+        },
+        "\u9500\u552e\u8d39\u7528": {
+            "root_type": ""
+        },
+        "\u957f\u671f\u501f\u6b3e": {
+            "root_type": ""
+        },
+        "\u957f\u671f\u503a\u5238": {
+            "root_type": ""
+        },
+        "\u957f\u671f\u5e94\u4ed8\u6b3e": {
+            "root_type": ""
+        },
+        "\u957f\u671f\u5e94\u6536\u6b3e": {
+            "root_type": ""
+        },
+        "\u957f\u671f\u5f85\u644a\u8d39\u7528": {
+            "root_type": ""
+        },
+        "\u957f\u671f\u6295\u8d44\u51cf\u503c\u51c6\u5907": {
+            "root_type": ""
+        },
+        "\u957f\u671f\u80a1\u6743\u6295\u8d44": {
+            "root_type": ""
+        },
+        "\u9884\u4ed8\u8d26\u6b3e": {
+            "root_type": ""
+        },
+        "\u9884\u63d0\u8d39\u7528": {
+            "root_type": ""
+        },
+        "\u9884\u6536\u8d26\u6b3e": {
+            "root_type": ""
+        }
+    }
+}

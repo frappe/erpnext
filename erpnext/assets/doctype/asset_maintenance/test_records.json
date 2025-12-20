@@ -1,0 +1,68 @@
+[
+  {
+     "doctype": "Asset Category",
+     "asset_category_name": "Equipment",
+     "total_number_of_depreciations": 3,
+     "frequency_of_depreciation": 3,
+     "accounts": [
+        {
+	  "company_name": "_Test Company",
+	  "fixed_asset_account": "_Test Fixed Asset - _TC",
+	  "accumulated_depreciation_account": "_Test Accumulated Depreciations - _TC",
+	  "depreciation_expense_account": "_Test Depreciations - _TC"
+	}
+     ]
+  },
+  {
+     "doctype": "Location",
+     "location_name": "Test Location"
+  },
+  {
+     "doctype": "Role",
+     "role_name": "Technician"
+  },
+  {
+    "doctype": "User",
+    "email": "marcus@abc.com",
+    "first_name": "marcus@abc.com",
+    "new_password": "password",
+    "roles": [{"doctype": "Has Role", "role": "Technician"}]
+  },
+  {
+    "doctype": "User",
+    "email": "thalia@abc.com",
+    "first_name": "thalia@abc.com",
+    "new_password": "password",
+    "roles": [{"doctype": "Has Role", "role": "Technician"}]
+  },
+  {
+    "doctype": "User",
+    "email": "mathias@abc.com",
+    "first_name": "mathias@abc.com",
+    "new_password": "password",
+    "roles": [{"doctype": "Has Role", "role": "Technician"}]
+  },
+  {
+    "doctype": "Asset Maintenance Team",
+    "maintenance_manager": "marcus@abc.com",
+    "maintenance_team_name": "Team Awesome",
+    "company": "_Test Company",
+    "maintenance_team_members": [
+      {"team_member": "marcus@abc.com", "full_name": "marcus@abc.com", "maintenance_role": "Technician"},
+      {"team_member": "thalia@abc.com", "full_name": "thalia@abc.com", "maintenance_role": "Technician"},
+      {"team_member": "mathias@abc.com", "full_name": "mathias@abc.com", "maintenance_role": "Technician"}
+    ]
+  },
+  {
+    "doctype": "Item",
+    "item_code": "Photocopier",
+    "item_name": "Photocopier",
+    "item_group": "All Item Groups",
+    "company": "_Test Company",
+    "is_fixed_asset": 1,
+    "is_stock_item": 0,
+    "asset_category": "Equipment",
+    "auto_create_assets": 1,
+    "asset_naming_series": "ABC.###"
+  }
+]

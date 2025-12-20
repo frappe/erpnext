@@ -1,0 +1,21 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-17 13:19:04.293376",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "project",
+ "icon_type": "Link",
+ "idx": 9,
+ "label": "Projects",
+ "link_to": "Projects",
+ "link_type": "Workspace",
+ "logo_url": "/assets/erpnext/desktop_icons/projects.svg",
+ "modified": "2025-11-17 17:42:29.470661",
+ "modified_by": "Administrator",
+ "name": "Projects",
+ "owner": "Administrator",
+ "parent_icon": "",
+ "roles": [],
+ "standard": 1
+}

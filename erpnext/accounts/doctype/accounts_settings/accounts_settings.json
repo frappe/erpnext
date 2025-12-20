@@ -1,0 +1,690 @@
+{
+ "actions": [],
+ "creation": "2013-06-24 15:49:57",
+ "doctype": "DocType",
+ "document_type": "Other",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "invoice_and_billing_tab",
+  "enable_features_section",
+  "unlink_payment_on_cancellation_of_invoice",
+  "unlink_advance_payment_on_cancelation_of_order",
+  "column_break_13",
+  "delete_linked_ledger_entries",
+  "enable_immutable_ledger",
+  "invoicing_features_section",
+  "check_supplier_invoice_uniqueness",
+  "automatically_fetch_payment_terms",
+  "column_break_17",
+  "enable_common_party_accounting",
+  "allow_multi_currency_invoices_against_single_party_account",
+  "confirm_before_resetting_posting_date",
+  "journals_section",
+  "merge_similar_account_heads",
+  "deferred_accounting_settings_section",
+  "book_deferred_entries_based_on",
+  "column_break_18",
+  "automatically_process_deferred_accounting_entry",
+  "book_deferred_entries_via_journal_entry",
+  "submit_journal_entries",
+  "tax_settings_section",
+  "determine_address_tax_category_from",
+  "column_break_19",
+  "add_taxes_from_item_tax_template",
+  "add_taxes_from_taxes_and_charges_template",
+  "book_tax_discount_loss",
+  "round_row_wise_tax",
+  "print_settings",
+  "show_inclusive_tax_in_print",
+  "show_taxes_as_table_in_print",
+  "column_break_12",
+  "show_payment_schedule_in_print",
+  "item_price_settings_section",
+  "maintain_same_internal_transaction_rate",
+  "fetch_valuation_rate_for_internal_transaction",
+  "column_break_feyo",
+  "maintain_same_rate_action",
+  "role_to_override_stop_action",
+  "currency_exchange_section",
+  "allow_stale",
+  "allow_pegged_currencies_exchange_rates",
+  "column_break_yuug",
+  "stale_days",
+  "section_break_jpd0",
+  "auto_reconcile_payments",
+  "auto_reconciliation_job_trigger",
+  "reconciliation_queue_size",
+  "column_break_resa",
+  "exchange_gain_loss_posting_date",
+  "invoicing_settings_tab",
+  "accounts_transactions_settings_section",
+  "over_billing_allowance",
+  "column_break_11",
+  "role_allowed_to_over_bill",
+  "credit_controller",
+  "make_payment_via_journal_entry",
+  "pos_tab",
+  "pos_setting_section",
+  "post_change_gl_entries",
+  "column_break_xrnd",
+  "assets_tab",
+  "asset_settings_section",
+  "calculate_depr_using_total_days",
+  "column_break_gjcc",
+  "book_asset_depreciation_entry_automatically",
+  "role_to_notify_on_depreciation_failure",
+  "closing_settings_tab",
+  "period_closing_settings_section",
+  "ignore_account_closing_balance",
+  "use_legacy_controller_for_pcv",
+  "column_break_25",
+  "tab_break_dpet",
+  "show_balance_in_coa",
+  "banking_tab",
+  "enable_party_matching",
+  "enable_fuzzy_matching",
+  "reports_tab",
+  "remarks_section",
+  "general_ledger_remarks_length",
+  "column_break_lvjk",
+  "receivable_payable_remarks_length",
+  "accounts_receivable_payable_tuning_section",
+  "receivable_payable_fetch_method",
+  "column_break_ntmi",
+  "drop_ar_procedures",
+  "legacy_section",
+  "ignore_is_opening_check_for_reporting",
+  "payment_request_settings",
+  "create_pr_in_draft_status",
+  "budget_settings",
+  "use_legacy_budget_controller"
+ ],
+ "fields": [
+  {
+   "default": "Billing Address",
+   "description": "Address used to determine Tax Category in transactions",
+   "fieldname": "determine_address_tax_category_from",
+   "fieldtype": "Select",
+   "label": "Determine Address Tax Category From",
+   "options": "Billing Address\nShipping Address"
+  },
+  {
+   "fieldname": "credit_controller",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Role allowed to bypass Credit Limit",
+   "options": "Role"
+  },
+  {
+   "default": "0",
+   "description": "Enabling this ensures each Purchase Invoice has a unique value in Supplier Invoice No. field within a particular fiscal year",
+   "fieldname": "check_supplier_invoice_uniqueness",
+   "fieldtype": "Check",
+   "label": "Check Supplier Invoice Number Uniqueness"
+  },
+  {
+   "default": "0",
+   "fieldname": "make_payment_via_journal_entry",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Make Payment via Journal Entry"
+  },
+  {
+   "default": "1",
+   "fieldname": "unlink_payment_on_cancellation_of_invoice",
+   "fieldtype": "Check",
+   "label": "Unlink Payment on Cancellation of Invoice"
+  },
+  {
+   "default": "1",
+   "fieldname": "unlink_advance_payment_on_cancelation_of_order",
+   "fieldtype": "Check",
+   "label": "Unlink Advance Payment on Cancellation of Order"
+  },
+  {
+   "default": "1",
+   "fieldname": "book_asset_depreciation_entry_automatically",
+   "fieldtype": "Check",
+   "label": "Book Asset Depreciation Entry Automatically"
+  },
+  {
+   "default": "1",
+   "fieldname": "add_taxes_from_item_tax_template",
+   "fieldtype": "Check",
+   "label": "Automatically Add Taxes and Charges from Item Tax Template"
+  },
+  {
+   "fieldname": "print_settings",
+   "fieldtype": "Section Break",
+   "label": "Print Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_inclusive_tax_in_print",
+   "fieldtype": "Check",
+   "label": "Show Inclusive Tax in Print"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_payment_schedule_in_print",
+   "fieldtype": "Check",
+   "label": "Show Payment Schedule in Print"
+  },
+  {
+   "fieldname": "currency_exchange_section",
+   "fieldtype": "Section Break",
+   "label": "Currency Exchange Settings"
+  },
+  {
+   "default": "1",
+   "fieldname": "allow_stale",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Allow Stale Exchange Rates"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.allow_stale==0",
+   "fieldname": "stale_days",
+   "fieldtype": "Int",
+   "label": "Stale Days"
+  },
+  {
+   "default": "0",
+   "description": "Payment Terms from orders will be fetched into the invoices as is",
+   "fieldname": "automatically_fetch_payment_terms",
+   "fieldtype": "Check",
+   "label": "Automatically Fetch Payment Terms from Order"
+  },
+  {
+   "description": "The percentage you are allowed to bill more against the amount ordered. For example, if the order value is $100 for an item and tolerance is set as 10%, then you are allowed to bill up to $110 ",
+   "fieldname": "over_billing_allowance",
+   "fieldtype": "Currency",
+   "label": "Over Billing Allowance (%)"
+  },
+  {
+   "default": "1",
+   "fieldname": "automatically_process_deferred_accounting_entry",
+   "fieldtype": "Check",
+   "label": "Automatically Process Deferred Accounting Entry"
+  },
+  {
+   "fieldname": "deferred_accounting_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Deferred Accounting Settings"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If this is unchecked, direct GL entries will be created to book deferred revenue or expense",
+   "fieldname": "book_deferred_entries_via_journal_entry",
+   "fieldtype": "Check",
+   "label": "Book Deferred Entries Via Journal Entry"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.book_deferred_entries_via_journal_entry",
+   "description": "If this is unchecked Journal Entries will be saved in a Draft state and will have to be submitted manually",
+   "fieldname": "submit_journal_entries",
+   "fieldtype": "Check",
+   "label": "Submit Journal Entries"
+  },
+  {
+   "default": "Days",
+   "description": "If \"Months\" is selected, a fixed amount will be booked as deferred revenue or expense for each month irrespective of the number of days in a month. It will be prorated if deferred revenue or expense is not booked for an entire month",
+   "fieldname": "book_deferred_entries_based_on",
+   "fieldtype": "Select",
+   "label": "Book Deferred Entries Based On",
+   "options": "Days\nMonths"
+  },
+  {
+   "default": "0",
+   "fieldname": "delete_linked_ledger_entries",
+   "fieldtype": "Check",
+   "label": "Delete Accounting and Stock Ledger Entries on deletion of Transaction"
+  },
+  {
+   "description": "Users with this role are allowed to over bill above the allowance percentage",
+   "fieldname": "role_allowed_to_over_bill",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Over Bill ",
+   "options": "Role"
+  },
+  {
+   "fieldname": "period_closing_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Period Closing Settings"
+  },
+  {
+   "fieldname": "accounts_transactions_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Credit Limit Settings"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tax_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Tax Settings"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "description": "If enabled, ledger entries will be posted for change amount in POS transactions",
+   "fieldname": "post_change_gl_entries",
+   "fieldtype": "Check",
+   "label": "Create Ledger Entries for Change Amount"
+  },
+  {
+   "default": "0",
+   "description": "Learn about <a href=\"https://docs.erpnext.com/docs/v13/user/manual/en/accounts/articles/common_party_accounting#:~:text=Common%20Party%20Accounting%20in%20ERPNext,Invoice%20against%20a%20primary%20Supplier.\">Common Party</a>",
+   "fieldname": "enable_common_party_accounting",
+   "fieldtype": "Check",
+   "label": "Enable Common Party Accounting"
+  },
+  {
+   "fieldname": "enable_features_section",
+   "fieldtype": "Section Break",
+   "label": "Invoice Cancellation"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "asset_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Asset Settings"
+  },
+  {
+   "fieldname": "invoicing_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Credit Limits"
+  },
+  {
+   "fieldname": "assets_tab",
+   "fieldtype": "Tab Break",
+   "label": "Assets"
+  },
+  {
+   "fieldname": "closing_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounts Closing"
+  },
+  {
+   "fieldname": "pos_setting_section",
+   "fieldtype": "Section Break",
+   "label": "POS Setting"
+  },
+  {
+   "fieldname": "invoice_and_billing_tab",
+   "fieldtype": "Tab Break",
+   "label": "Invoice and Billing"
+  },
+  {
+   "fieldname": "invoicing_features_section",
+   "fieldtype": "Section Break",
+   "label": "Invoicing Features"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pos_tab",
+   "fieldtype": "Tab Break",
+   "label": "POS"
+  },
+  {
+   "default": "0",
+   "description": "Enabling this will allow creation of multi-currency invoices against single party account in company currency",
+   "fieldname": "allow_multi_currency_invoices_against_single_party_account",
+   "fieldtype": "Check",
+   "label": "Allow multi-currency invoices against single party account "
+  },
+  {
+   "fieldname": "tab_break_dpet",
+   "fieldtype": "Tab Break",
+   "label": "Chart Of Accounts"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_balance_in_coa",
+   "fieldtype": "Check",
+   "label": "Show Balances in Chart Of Accounts"
+  },
+  {
+   "default": "0",
+   "description": "Split Early Payment Discount Loss into Income and Tax Loss",
+   "fieldname": "book_tax_discount_loss",
+   "fieldtype": "Check",
+   "label": "Book Tax Loss on Early Payment Discount"
+  },
+  {
+   "fieldname": "journals_section",
+   "fieldtype": "Section Break",
+   "label": "Journals"
+  },
+  {
+   "default": "0",
+   "description": "Rows with Same Account heads will be merged on Ledger",
+   "fieldname": "merge_similar_account_heads",
+   "fieldtype": "Check",
+   "label": "Merge Similar Account Heads"
+  },
+  {
+   "fieldname": "section_break_jpd0",
+   "fieldtype": "Section Break",
+   "label": "Payment Reconciliation Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_reconcile_payments",
+   "fieldtype": "Check",
+   "label": "Auto Reconcile Payments"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_taxes_as_table_in_print",
+   "fieldtype": "Check",
+   "label": "Show Taxes as Table in Print"
+  },
+  {
+   "fieldname": "banking_tab",
+   "fieldtype": "Tab Break",
+   "label": "Banking"
+  },
+  {
+   "default": "0",
+   "description": "Auto match and set the Party in Bank Transactions",
+   "fieldname": "enable_party_matching",
+   "fieldtype": "Check",
+   "label": "Enable Automatic Party Matching"
+  },
+  {
+   "default": "0",
+   "depends_on": "enable_party_matching",
+   "description": "Approximately match the description/party name against parties",
+   "fieldname": "enable_fuzzy_matching",
+   "fieldtype": "Check",
+   "label": "Enable Fuzzy Matching"
+  },
+  {
+   "default": "0",
+   "description": "Financial reports will be generated using GL Entry doctypes (should be enabled if Period Closing Voucher is not posted for all years sequentially or missing) ",
+   "fieldname": "ignore_account_closing_balance",
+   "fieldtype": "Check",
+   "label": "Ignore Account Closing Balance"
+  },
+  {
+   "default": "0",
+   "description": "Tax Amount will be rounded on a row(items) level",
+   "fieldname": "round_row_wise_tax",
+   "fieldtype": "Check",
+   "label": "Round Tax Amount Row-wise"
+  },
+  {
+   "fieldname": "reports_tab",
+   "fieldtype": "Tab Break",
+   "label": "Reports"
+  },
+  {
+   "default": "0",
+   "description": "Truncates 'Remarks' column to set character length",
+   "fieldname": "general_ledger_remarks_length",
+   "fieldtype": "Int",
+   "label": "General Ledger"
+  },
+  {
+   "default": "0",
+   "description": "Truncates 'Remarks' column to set character length",
+   "fieldname": "receivable_payable_remarks_length",
+   "fieldtype": "Int",
+   "label": "Accounts Receivable/Payable"
+  },
+  {
+   "fieldname": "column_break_lvjk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "remarks_section",
+   "fieldtype": "Section Break",
+   "label": "Remarks Column Length"
+  },
+  {
+   "default": "0",
+   "description": "On enabling this cancellation entries will be posted on the actual cancellation date and reports will consider cancelled entries as well",
+   "fieldname": "enable_immutable_ledger",
+   "fieldtype": "Check",
+   "label": "Enable Immutable Ledger"
+  },
+  {
+   "fieldname": "column_break_gjcc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Enable this option to calculate daily depreciation by considering the total number of days in the entire depreciation period, (including leap years) while using daily pro-rata based depreciation",
+   "fieldname": "calculate_depr_using_total_days",
+   "fieldtype": "Check",
+   "label": "Calculate daily depreciation using total days in depreciation period"
+  },
+  {
+   "description": "Payment Request created from Sales Order or Purchase Order will be in Draft status. When disabled document will be in unsaved state.",
+   "fieldname": "payment_request_settings",
+   "fieldtype": "Tab Break",
+   "label": "Payment Request"
+  },
+  {
+   "default": "1",
+   "fieldname": "create_pr_in_draft_status",
+   "fieldtype": "Check",
+   "label": "Create in Draft Status"
+  },
+  {
+   "fieldname": "column_break_yuug",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_resa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "15",
+   "description": "Interval should be between 1 to 59 MInutes",
+   "fieldname": "auto_reconciliation_job_trigger",
+   "fieldtype": "Int",
+   "label": "Auto Reconciliation Job Trigger"
+  },
+  {
+   "default": "5",
+   "description": "Documents Processed on each trigger. Queue Size should be between 5 and 100",
+   "fieldname": "reconciliation_queue_size",
+   "fieldtype": "Int",
+   "label": "Reconciliation Queue Size"
+  },
+  {
+   "default": "0",
+   "description": "Ignores legacy Is Opening field in GL Entry that allows adding opening balance post the system is in use while generating reports",
+   "fieldname": "ignore_is_opening_check_for_reporting",
+   "fieldtype": "Check",
+   "label": "Ignore Is Opening check for reporting"
+  },
+  {
+   "default": "Payment",
+   "description": "Only applies for Normal Payments",
+   "fieldname": "exchange_gain_loss_posting_date",
+   "fieldtype": "Select",
+   "label": "Posting Date Inheritance for Exchange Gain / Loss",
+   "options": "Invoice\nPayment\nReconciliation Date"
+  },
+  {
+   "fieldname": "column_break_xrnd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Buffered Cursor",
+   "fieldname": "receivable_payable_fetch_method",
+   "fieldtype": "Select",
+   "label": "Data Fetch Method",
+   "options": "Buffered Cursor\nUnBuffered Cursor\nRaw SQL"
+  },
+  {
+   "fieldname": "accounts_receivable_payable_tuning_section",
+   "fieldtype": "Section Break",
+   "label": "Accounts Receivable / Payable Tuning"
+  },
+  {
+   "fieldname": "legacy_section",
+   "fieldtype": "Section Break",
+   "label": "Legacy Fields"
+  },
+  {
+   "default": "0",
+   "fieldname": "maintain_same_internal_transaction_rate",
+   "fieldtype": "Check",
+   "label": "Maintain Same Rate Throughout Internal Transaction"
+  },
+  {
+   "default": "Stop",
+   "depends_on": "maintain_same_internal_transaction_rate",
+   "fieldname": "maintain_same_rate_action",
+   "fieldtype": "Select",
+   "label": "Action if Same Rate is Not Maintained Throughout  Internal Transaction",
+   "mandatory_depends_on": "maintain_same_internal_transaction_rate",
+   "options": "Stop\nWarn"
+  },
+  {
+   "depends_on": "eval: doc.maintain_same_internal_transaction_rate && doc.maintain_same_rate_action == 'Stop'",
+   "fieldname": "role_to_override_stop_action",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Override Stop Action",
+   "options": "Role"
+  },
+  {
+   "fieldname": "budget_settings",
+   "fieldtype": "Tab Break",
+   "label": "Budget"
+  },
+  {
+   "default": "1",
+   "description": "If enabled, user will be alerted before resetting posting date to current date in relevant transactions",
+   "fieldname": "confirm_before_resetting_posting_date",
+   "fieldtype": "Check",
+   "label": "Confirm before resetting posting date"
+  },
+  {
+   "fieldname": "item_price_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Item Price Settings"
+  },
+  {
+   "fieldname": "column_break_feyo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "System will do an implicit conversion using the pegged currency. <br>\nEx: Instead of AED -&gt; INR, system will do AED -&gt; USD -&gt; INR using the pegged exchange rate of AED against USD.",
+   "documentation_url": "/app/pegged-currencies/Pegged Currencies",
+   "fieldname": "allow_pegged_currencies_exchange_rates",
+   "fieldtype": "Check",
+   "label": "Allow Implicit Pegged Currency Conversion"
+  },
+  {
+   "default": "0",
+   "description": "If no taxes are set, and Taxes and Charges Template is selected, the system will automatically apply the taxes from the chosen template.",
+   "fieldname": "add_taxes_from_taxes_and_charges_template",
+   "fieldtype": "Check",
+   "label": "Automatically Add Taxes from Taxes and Charges Template"
+  },
+  {
+   "fieldname": "column_break_ntmi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.receivable_payable_fetch_method == \"Raw SQL\"",
+   "description": "Drops existing SQL Procedures and Function setup by Accounts Receivable report",
+   "fieldname": "drop_ar_procedures",
+   "fieldtype": "Button",
+   "label": "Drop Procedures"
+  },
+  {
+   "default": "0",
+   "fieldname": "fetch_valuation_rate_for_internal_transaction",
+   "fieldtype": "Check",
+   "label": "Fetch Valuation Rate for Internal Transaction"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_legacy_budget_controller",
+   "fieldtype": "Check",
+   "label": "Use Legacy Budget Controller"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_legacy_controller_for_pcv",
+   "fieldtype": "Check",
+   "label": "Use Legacy Controller For Period Closing Voucher"
+  },
+  {
+   "description": "Users with this role will be notified if the asset depreciation gets failed",
+   "fieldname": "role_to_notify_on_depreciation_failure",
+   "fieldtype": "Link",
+   "label": "Role to Notify on Depreciation Failure",
+   "options": "Role"
+  }
+ ],
+ "grid_page_length": 50,
+ "icon": "icon-cog",
+ "idx": 1,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-12-03 20:42:13.238050",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Accounts Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Sales User"
+  },
+  {
+   "read": 1,
+   "role": "Purchase User"
+  }
+ ],
+ "quick_entry": 1,
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,76 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-12 15:14:26.244306",
+ "docstatus": 0,
+ "doctype": "Workspace Sidebar",
+ "header_icon": "lock-keyhole-open",
+ "idx": 0,
+ "items": [
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "accounting",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "COA Importer",
+   "link_to": "Chart of Accounts Importer",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "tool",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Opening Invoice Tool",
+   "link_to": "Opening Invoice Creation Tool",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "folder-clock",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Accounting Period",
+   "link_to": "Accounting Period",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "expand-alt",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "FX Revaluation",
+   "link_to": "Exchange Rate Revaluation",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "calendar-check",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Period Closing Voucher",
+   "link_to": "Period Closing Voucher",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-11-25 10:46:09.262478",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Opening & Closing",
+ "owner": "Administrator",
+ "title": "Opening & Closing"
+}

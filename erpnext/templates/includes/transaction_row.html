@@ -1,0 +1,29 @@
+<div class="web-list-item transaction-list-item">
+	<div class="row align-items-center">
+		<div class="col-sm-4">
+			<span class="list-item-name font-weight-bold">{{ doc.name }}</span>
+			<div class="small text-muted transaction-time"
+				title="{{ frappe.utils.format_datetime(doc.modified, "medium") }}">
+				{{ frappe.utils.global_date_format(doc.modified) }}
+			</div>
+		</div>
+		<div class="col-sm-3">
+			<span class="indicator-pill {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "gray") }} list-item-status">{{ _(doc.status) }}</span>
+		</div>
+		<div class="col-sm-2">
+			<div class="small text-muted items-preview ellipsis ellipsis-width">
+				{{ doc.items_preview }}
+			</div>
+		</div>
+		{% if doc.is_rounded_total_disabled() and doc.get('grand_total') %}
+			<div class="col-sm-3 text-right font-weight-bold item-total">
+				{{ doc.get_formatted("grand_total") }}
+			</div>
+		{% elif doc.get('rounded_total') %}
+			<div class="col-sm-3 text-right font-weight-bold item-total">
+				{{ doc.get_formatted("rounded_total") }}
+			</div>
+		{% endif %}
+	</div>
+	<a class="transaction-item-link" href="/{{ pathname }}/{{ doc.name }}">Link</a>
+</div>
