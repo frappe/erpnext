@@ -147,6 +147,10 @@ class Timesheet(Document):
 	def on_submit(self):
 		self.validate_mandatory_fields()
 		self.update_task_and_project()
+	
+	def on_update_after_submit(self):
+		self.update_task_and_project()
+
 
 	def validate_mandatory_fields(self):
 		for data in self.time_logs:
