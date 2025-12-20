@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_rename": 1,
  "autoname": "field:market_segment",
  "creation": "2018-10-01 09:59:14.479509",
  "doctype": "DocType",
@@ -17,10 +18,11 @@
   }
  ],
  "links": [],
- "modified": "2024-08-16 19:24:55.811760",
+ "modified": "2025-12-17 12:09:34.687368",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Market Segment",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -37,6 +39,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

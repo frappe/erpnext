@@ -9,6 +9,18 @@
   {
    "child": 0,
    "collapsible": 1,
+   "icon": "home",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Home",
+   "link_to": "Quality",
+   "link_type": "Workspace",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
    "icon": "quality",
    "indent": 0,
    "keep_closed": 0,
@@ -222,7 +234,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-11-25 10:46:09.454532",
+ "modified": "2025-12-19 17:41:55.193229",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",

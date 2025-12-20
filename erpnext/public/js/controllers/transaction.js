@@ -1241,12 +1241,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.frm.refresh_field("payment_schedule");
 	}
 
-	cost_center(doc) {
-		this.frm.doc.items.forEach((item) => {
-			item.cost_center = doc.cost_center;
-		});
-
-		this.frm.refresh_field("items");
+	cost_center(doc, cdt, cdn) {
+		erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "cost_center");
 	}
 
 	due_date(doc, cdt, cdn) {

@@ -76,6 +76,7 @@ frappe.ui.form.ContactAddressQuickEntryForm = class ContactAddressQuickEntryForm
 				label: __("Address Line 1"),
 				fieldname: "address_line1",
 				fieldtype: "Data",
+				mandatory_depends_on: "eval:doc.city || doc.country",
 			},
 			{
 				label: __("Address Line 2"),
@@ -94,6 +95,7 @@ frappe.ui.form.ContactAddressQuickEntryForm = class ContactAddressQuickEntryForm
 				label: __("City"),
 				fieldname: "city",
 				fieldtype: "Data",
+				mandatory_depends_on: "eval:doc.country || doc.address_line1",
 			},
 			{
 				label: __("State/Province"),
@@ -105,6 +107,7 @@ frappe.ui.form.ContactAddressQuickEntryForm = class ContactAddressQuickEntryForm
 				fieldname: "country",
 				fieldtype: "Link",
 				options: "Country",
+				mandatory_depends_on: "eval:doc.city || doc.address_line1",
 			},
 			{
 				label: __("Customer POS Id"),

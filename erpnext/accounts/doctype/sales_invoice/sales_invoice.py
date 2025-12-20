@@ -2326,6 +2326,7 @@ def get_list_context(context=None):
 			"show_search": True,
 			"no_breadcrumbs": True,
 			"title": _("Invoices"),
+			"list_template": "templates/includes/list/list.html",
 		}
 	)
 	return list_context

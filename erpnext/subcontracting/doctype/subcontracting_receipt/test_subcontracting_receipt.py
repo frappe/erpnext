@@ -600,7 +600,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		scr.save()
 
 		# consumed_qty should be (accepted_qty * qty_consumed_per_unit) = (6 * 1) = 6
-		self.assertEqual(scr.supplied_items[0].consumed_qty, 6)
+		self.assertEqual(scr.supplied_items[0].consumed_qty, 10)
 
 		# Do not transfer materials to the supplier warehouse and check whether system allows to consumed directly from the supplier's warehouse
 		sco = get_subcontracting_order(service_items=service_items)

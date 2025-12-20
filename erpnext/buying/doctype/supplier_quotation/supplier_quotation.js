@@ -32,6 +32,13 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 				this.make_purchase_order.bind(this),
 				__("Create")
 			);
+			this.frm.add_custom_button(__("Update Items"), () => {
+				erpnext.utils.update_child_items({
+					frm: this.frm,
+					child_docname: "items",
+					cannot_add_row: false,
+				});
+			});
 			this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 			this.frm.add_custom_button(__("Quotation"), this.make_quotation.bind(this), __("Create"));
 		} else if (this.frm.doc.docstatus === 0) {

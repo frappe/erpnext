@@ -579,17 +579,6 @@ cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function 
 	};
 };
 
-cur_frm.cscript.cost_center = function (doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if (d.cost_center) {
-		var cl = doc.items || [];
-		for (var i = 0; i < cl.length; i++) {
-			if (!cl[i].cost_center) cl[i].cost_center = d.cost_center;
-		}
-	}
-	refresh_field("items");
-};
-
 cur_frm.fields_dict["items"].grid.get_field("project").get_query = function (doc, cdt, cdn) {
 	return {
 		filters: [["Project", "status", "not in", "Completed, Cancelled"]],

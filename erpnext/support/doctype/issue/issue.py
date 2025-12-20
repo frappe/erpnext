@@ -199,7 +199,7 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, ord
 		customer = contact_doc.get_link_for("Customer")
 
 	ignore_permissions = False
-	if is_website_user():
+	if is_website_user() and user != "Guest":
 		if not filters:
 			filters = {}
 

@@ -94,7 +94,7 @@
    "options": "No\nYes"
   },
   {
-   "default": "Each Transaction",
+   "default": "Daily",
    "description": "How often should Project and Company be updated based on Sales Transactions?",
    "fieldname": "sales_update_frequency",
    "fieldtype": "Select",
@@ -296,7 +296,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-10-12 16:08:48.865885",
+ "modified": "2025-12-17 16:08:48.865885",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

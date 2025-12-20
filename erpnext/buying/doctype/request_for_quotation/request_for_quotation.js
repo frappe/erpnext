@@ -551,7 +551,10 @@ erpnext.buying.RequestforQuotationController = class RequestforQuotationControll
 				} else if (args.supplier_group) {
 					frappe.db
 						.get_list("Supplier", {
-							filters: { supplier_group: args.supplier_group },
+							filters: {
+								supplier_group: args.supplier_group,
+								disabled: 0,
+							},
 							limit: 100,
 							order_by: "name",
 						})
