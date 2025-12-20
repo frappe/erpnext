@@ -29,6 +29,7 @@
   "qty_info_sec_break",
   "min_order_qty",
   "projected_qty",
+  "picked_qty",
   "qty_info_col_break",
   "actual_qty",
   "ordered_qty",
@@ -518,13 +519,22 @@
    "fieldtype": "Float",
    "label": "Projected On Hand",
    "read_only": 1
+  },
+  {
+   "fieldname": "picked_qty",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Picked Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-02 14:14:45.972664",
+ "modified": "2025-12-17 13:47:27.317226",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

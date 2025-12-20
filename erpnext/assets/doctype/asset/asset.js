@@ -80,6 +80,12 @@ frappe.ui.form.on("Asset", {
 		}
 	},
 
+	before_submit: function (frm) {
+		if (frm.doc.is_composite_asset && !frm.has_active_capitalization) {
+			frappe.throw(__("Please capitalize this asset before submitting."));
+		}
+	},
+
 	refresh: function (frm) {
 		frappe.ui.form.trigger("Asset", "is_existing_asset");
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
@@ -196,9 +202,10 @@ frappe.ui.form.on("Asset", {
 						asset: frm.doc.name,
 					},
 					callback: function (r) {
+						frm.has_active_capitalization = r.message;
+
 						if (!r.message) {
-							$(".primary-action").prop("hidden", true);
-							$(".form-message").text(__("Capitalize this asset to confirm"));
+							$(".form-message").text(__("Capitalize this asset before submitting."));
 
 							frm.add_custom_button(__("Capitalize Asset"), function () {
 								frm.trigger("create_asset_capitalization");
@@ -270,8 +277,14 @@ frappe.ui.form.on("Asset", {
 			const row = [
 				sch["idx"],
 				frappe.format(sch["schedule_date"], { fieldtype: "Date" }),
-				frappe.format(sch["depreciation_amount"], { fieldtype: "Currency" }),
-				frappe.format(sch["accumulated_depreciation_amount"], { fieldtype: "Currency" }),
+				frappe.format(sch["depreciation_amount"], {
+					fieldtype: "Currency",
+					options: "Company:company:default_currency",
+				}),
+				frappe.format(sch["accumulated_depreciation_amount"], {
+					fieldtype: "Currency",
+					options: "Company:company:default_currency",
+				}),
 				sch["journal_entry"] || "",
 			];
 
@@ -464,7 +477,6 @@ frappe.ui.form.on("Asset", {
 	is_composite_asset: function (frm) {
 		if (frm.doc.is_composite_asset) {
 			frm.set_value("net_purchase_amount", 0);
-			frm.set_df_property("net_purchase_amount", "read_only", 1);
 		} else {
 			frm.set_df_property("net_purchase_amount", "read_only", 0);
 		}
@@ -532,7 +544,6 @@ frappe.ui.form.on("Asset", {
 			callback: function (r) {
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-				$(".primary-action").prop("hidden", false);
 			},
 		});
 	},

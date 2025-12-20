@@ -447,6 +447,7 @@ def get_list_context(context=None):
 			"title": _("Projects"),
 			"get_list": get_project_list,
 			"row_template": "templates/includes/projects/project_row.html",
+			"list_template": "templates/includes/list/list.html",
 		}
 	)
 
