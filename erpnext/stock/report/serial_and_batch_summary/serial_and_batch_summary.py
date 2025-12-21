@@ -45,6 +45,8 @@ def get_data(filters):
 	query = apply_filters(query, filters)
 	query = query.orderby(SerialBatchBundle.posting_datetime)
 
+	return query.run(as_dict=True)
+
 
 def apply_filters(query, filters):
 	SerialBatchBundle = frappe.qb.DocType("Serial and Batch Bundle")
