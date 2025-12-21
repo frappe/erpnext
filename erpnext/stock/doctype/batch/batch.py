@@ -135,6 +135,8 @@ class Batch(Document):
 		"""Generate unique ID for batch if not specified"""
 
 		if self.batch_id:
+			if frappe.db.exists("Batch", {"batch_id": self.batch_id, "item": self.item}):
+				frappe.throw(f"Batch Number {self.batch_id} already exists for Item {self.item}")
 			return
 
 		create_new_batch, batch_number_series = frappe.db.get_value(
