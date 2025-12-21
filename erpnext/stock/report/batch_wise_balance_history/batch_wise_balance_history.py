@@ -57,12 +57,12 @@ def execute(filters=None):
 								flt(qty_dict.in_qty, float_precision),
 								flt(qty_dict.out_qty, float_precision),
 								flt(qty_dict.bal_qty, float_precision),
+								item_map[item]["stock_uom"],
 								flt(
 									(qty_dict.bal_value / qty_dict.bal_qty) if qty_dict.bal_qty else 0,
 									float_precision,
 								),
 								flt(qty_dict.bal_value, float_precision),
-								item_map[item]["stock_uom"],
 								qty_dict.batch_id,
 							]
 						)
@@ -96,7 +96,9 @@ def get_columns(filters):
 		{"label": _("In Qty"), "fieldname": "in_qty", "fieldtype": "Float", "width": 80},
 		{"label": _("Out Qty"), "fieldname": "out_qty", "fieldtype": "Float", "width": 80},
 		{"label": _("Balance Qty"), "fieldname": "bal_qty", "fieldtype": "Float", "width": 90},
-		{"label": _("UOM"), "fieldname": "stock_uom", "width": 90},
+		{"label": _("UOM"), "fieldname": "stock_uom", "width": 60},
+		{"label": _("Valuation Rate"), "fieldname": "val_rate", "fieldtype": "Float", "width": 120},
+		{"label": _("Balance Value"), "fieldname": "bal_val", "fieldtype": "Currency", "width": 140},
 		{
 			"label": _("Batch ID"),
 			"fieldname": "batch_id",
