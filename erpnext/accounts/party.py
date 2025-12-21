@@ -685,22 +685,17 @@ def validate_due_date_with_template(posting_date, due_date, bill_date, template_
 	if not template_name:
 		return
 
+	# Calculate default due date from the Payment Terms Template
 	default_due_date = format(get_due_date_from_template(template_name, posting_date, bill_date))
 
 	if not default_due_date:
 		return
 
-	if default_due_date != posting_date and getdate(due_date) > getdate(default_due_date):
-		if frappe.get_single_value("Accounts Settings", "credit_controller") in frappe.get_roles():
-			party_type = "supplier" if doctype == "Purchase Invoice" else "customer"
-
-			msgprint(
-				_("Note: Due Date exceeds allowed {0} credit days by {1} day(s)").format(
-					party_type, date_diff(due_date, default_due_date)
-				)
-			)
-		else:
-			frappe.throw(_("Due Date cannot be after {0}").format(formatdate(default_due_date)))
+	# Enforce strict equality: when a payment terms template is set,
+	# the document due_date must exactly match the calculated template date.
+	# If it does not, raise a ValidationError to prevent manual overrides.
+	if getdate(due_date) != getdate(default_due_date):
+		raise frappe.ValidationError("You cannot manually change Due Date. It is locked by Payment Terms")
 
 
 @frappe.whitelist()
