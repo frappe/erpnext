@@ -11,9 +11,6 @@ erpnext.financial_statements = {
 
 		if (frappe.query_report.get_filter_value("report_template"))
 			return erpnext.financial_statements._format_custom_report(...report_params);
-
-		if (frappe.query_report.get_filter_value("report_template"))
-			return erpnext.financial_statements._format_custom_report(...report_params);
 		else return erpnext.financial_statements._format_standard_report(...report_params);
 	},
 
