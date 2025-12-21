@@ -114,11 +114,27 @@ class Batch(Document):
 		use_batchwise_valuation: DF.Check
 	# end: auto-generated types
 
-	def autoname(self):
-		"""Generate random ID for batch if not specified"""
+	def before_insert(self):
+		self.set_batch_id()
+
+	def onload(self):
+		self.image = frappe.db.get_value("Item", self.item, "image")
+
+	def after_delete(self):
+		revert_series_if_last(get_batch_naming_series(), self.name)
+
+	def validate(self):
+		self.item_has_batch_enabled()
+		self.set_batchwise_valuation()
+
+	def item_has_batch_enabled(self):
+		if frappe.db.get_value("Item", self.item, "has_batch_no") == 0:
+			frappe.throw(_("The selected item cannot have Batch"))
+
+	def set_batch_id(self):
+		"""Generate unique ID for batch if not specified"""
 
 		if self.batch_id:
-			self.name = self.batch_id
 			return
 
 		create_new_batch, batch_number_series = frappe.db.get_value(
@@ -139,22 +155,6 @@ class Batch(Document):
 			# User might have manually created a batch with next number
 			if frappe.db.exists("Batch", self.batch_id):
 				self.batch_id = None
-
-		self.name = self.batch_id
-
-	def onload(self):
-		self.image = frappe.db.get_value("Item", self.item, "image")
-
-	def after_delete(self):
-		revert_series_if_last(get_batch_naming_series(), self.name)
-
-	def validate(self):
-		self.item_has_batch_enabled()
-		self.set_batchwise_valuation()
-
-	def item_has_batch_enabled(self):
-		if frappe.db.get_value("Item", self.item, "has_batch_no") == 0:
-			frappe.throw(_("The selected item cannot have Batch"))
 
 	@frappe.whitelist()
 	def recalculate_batch_qty(self):
