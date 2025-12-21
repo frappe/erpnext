@@ -53,7 +53,7 @@ erpnext.financial_statements = {
 		const isPeriodColumn = periodKeys.includes(baseName);
 
 		return {
-			isAccount: baseName === "account",
+			isAccount: baseName === erpnext.financial_statements.name_field,
 			isPeriod: isPeriodColumn,
 			segmentIndex: valueMatch && valueMatch[1] ? parseInt(valueMatch[1]) : null,
 			fieldname: baseName,
@@ -71,6 +71,8 @@ erpnext.financial_statements = {
 	},
 
 	_format_custom_account_column: function (value, data, formatting, column, default_formatter, row) {
+		value = data.section_name || data.account_name || value;
+
 		if (!value) return "";
 
 		// Link to open ledger
@@ -92,9 +94,9 @@ erpnext.financial_statements = {
 
 			column.link_onclick =
 				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(glData) + ")";
-
-			value = default_formatter(value, row, column, data);
 		}
+
+		value = default_formatter(value, row, column, data);
 
 		let formattedValue = String(value);
 
