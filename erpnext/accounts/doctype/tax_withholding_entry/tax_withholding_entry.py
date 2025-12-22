@@ -1104,6 +1104,7 @@ class TaxWithholdingController:
 		for entry in self.doc.tax_withholding_entries:
 			entry: TaxWithholdingEntry
 			entry._clear_old_references()
+			entry.set_status()
 
 	def _is_tax_withholding_applicable(self):
 		"""Check if tax withholding should be applied to this document"""
