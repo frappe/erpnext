@@ -1584,9 +1584,11 @@ class RowFormatterBase(ABC):
 		if row_data.account_details:
 			child_accounts = list(row_data.account_details.keys())
 
+		display_name = _get_row_data("display_name", "")
+
 		values = {
-			"account": _get_row_data("account", ""),
-			"account_name": _get_row_data("display_name", ""),
+			"account": _get_row_data("account", "") or display_name,
+			"account_name": display_name,
 			"acc_name": _get_row_data("account_name", ""),
 			"acc_number": _get_row_data("account_number", ""),
 			"child_accounts": child_accounts,
