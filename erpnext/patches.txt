@@ -452,5 +452,6 @@ erpnext.patches.v16_0.update_currency_exchange_settings_for_frankfurter #2025-12
 erpnext.patches.v16_0.migrate_account_freezing_settings_to_company
 erpnext.patches.v16_0.populate_budget_distribution_total
 erpnext.patches.v16_0.set_mr_picked_qty
-erpnext.patches.v15_0.update_tax_withholding_field_in_payment_entry
+erpnext.patches.v16_0.update_tax_withholding_field_in_payment_entry
+erpnext.patches.v16_0.migrate_tax_withholding_data
 

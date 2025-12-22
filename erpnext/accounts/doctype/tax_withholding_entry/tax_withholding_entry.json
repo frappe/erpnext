@@ -32,7 +32,8 @@
   "column_break_dahw",
   "section_break_ggna",
   "status",
-  "column_break_jfjf"
+  "column_break_jfjf",
+  "created_by_migration"
  ],
  "fields": [
   {
@@ -207,6 +208,14 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
+  },
+  {
+   "default": "0",
+   "fieldname": "created_by_migration",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Created By Migration",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

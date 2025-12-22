@@ -27,6 +27,7 @@ class TaxWithholdingEntry(Document):
 
 		company: DF.Link | None
 		conversion_rate: DF.Float
+		created_by_migration: DF.Check
 		currency: DF.Link | None
 		lower_deduction_certificate: DF.Link | None
 		parent: DF.Data
