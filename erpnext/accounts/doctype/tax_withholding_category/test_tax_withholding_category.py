@@ -3497,6 +3497,18 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.validate_tax_withholding_entries("Journal Entry", jv2.name, jv2_expected)
 		self.cleanup_invoices(invoices)
 
+	def test_delete_draft_pi_with_tax_withholding_entries(self):
+		"""
+		Test that draft Purchase Invoice with Tax Withholding Entries can be deleted.
+		"""
+		self.setup_party_with_category("Supplier", "Test TDS Supplier", "Cumulative Threshold TDS")
+
+		pi = create_purchase_invoice(supplier="Test TDS Supplier", rate=50000, do_not_save=True)
+		pi.save()
+
+		self.assertTrue(len(pi.tax_withholding_entries) > 0)
+		pi.delete()
+
 
 def create_purchase_invoice(**args):
 	# return sales invoice doc object
