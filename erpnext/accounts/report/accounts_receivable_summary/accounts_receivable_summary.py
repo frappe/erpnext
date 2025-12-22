@@ -208,9 +208,9 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 def get_gl_balance(report_date, company, account_type):
 	if account_type == "Payable":
-		balance_calc_fields = ["party", {"SUM": [{"SUB": ["credit", "debit"]}], "as": "balance"}]
+		balance_calc_fields = ["party", "SUM(credit - debit) AS balance"]
 	else:
-		balance_calc_fields = ["party", {"SUM": [{"SUB": ["debit", "credit"]}], "as": "balance"}]
+		balance_calc_fields = ["party", "SUM(debit - credit) AS balance"]
 	return frappe._dict(
 		frappe.db.get_all(
 			"GL Entry",
