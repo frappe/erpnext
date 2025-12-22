@@ -364,7 +364,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			function () {
 				me.apply_pricing_rule();
 				me.frm.doc.apply_tds = me.frm.tax_withholding_category ? 1 : 0;
-				me.frm.set_df_property("apply_tds", "read_only", me.frm.tax_withholding_category ? 0 : 1);
+				me.frm.clear_table("tax_withholding_entries");
 
 				// while duplicating, don't change payment terms
 				if (me.frm.doc.__run_link_triggers === false) {
@@ -377,7 +377,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 	apply_tds(frm) {
 		var me = this;
-		me.frm.set_value("tax_withholding_entries", []);
+		me.frm.clear_table("tax_withholding_entries");
 	}
 
 	credit_to() {
@@ -672,9 +672,6 @@ frappe.ui.form.on("Purchase Invoice", {
 			if (frm.is_new()) {
 				frm.doc.apply_tds = frm.doc.__onload.tax_withholding_category ? 1 : 0;
 			}
-			if (!frm.doc.__onload.tax_withholding_category) {
-				frm.set_df_property("apply_tds", "read_only", 1);
-			}
 		}
 
 		erpnext.queries.setup_queries(frm, "Warehouse", function () {
@@ -709,6 +706,7 @@ frappe.ui.form.on("Purchase Invoice", {
 
 	company: function (frm) {
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		frm.clear_table("tax_withholding_entries");
 
 		if (frm.doc.company) {
 			frappe.call({

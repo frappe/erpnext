@@ -25,6 +25,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 	company() {
 		super.company();
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+		this.frm.clear_table("tax_withholding_entries");
 	}
 	onload() {
 		var me = this;
@@ -384,6 +385,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			function () {
 				me.frm.doc.apply_tds = me.frm.tax_withholding_category ? 1 : 0;
 				me.frm.set_df_property("apply_tds", "read_only", me.frm.tax_withholding_category ? 0 : 1);
+				me.frm.clear_table("tax_withholding_entries");
 				me.apply_pricing_rule();
 			}
 		);
@@ -599,6 +601,10 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		}
 
 		this.calculate_taxes_and_totals();
+	}
+
+	apply_tds(frm) {
+		this.frm.clear_table("tax_withholding_entries");
 	}
 };
 
@@ -816,6 +822,16 @@ frappe.ui.form.on("Sales Invoice", {
 	},
 	onload: function (frm) {
 		frm.redemption_conversion_factor = null;
+
+		if (frm.doc.__onload && frm.doc.customer) {
+			if (frm.is_new()) {
+				frm.doc.apply_tds = frm.doc.__onload.tax_withholding_category ? 1 : 0;
+			}
+		}
+
+		if (frm.is_new()) {
+			frm.clear_table("tax_withholding_entries");
+		}
 	},
 
 	update_stock: function (frm, dt, dn) {
