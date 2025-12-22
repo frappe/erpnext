@@ -352,6 +352,7 @@ class AssetCapitalization(StockController):
 				"voucher_no": self.name,
 				"company": self.company,
 				"allow_zero_valuation": cint(item.get("allow_zero_valuation_rate")),
+				"serial_and_batch_bundle": item.serial_and_batch_bundle,
 			}
 		)
 
@@ -723,6 +724,7 @@ def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 				"company": ctx.company,
 				"serial_no": ctx.serial_no,
 				"batch_no": ctx.batch_no,
+				"serial_and_batch_bundle": ctx.serial_and_batch_bundle,
 			}
 		)
 		out.update(get_warehouse_details(incoming_rate_args))

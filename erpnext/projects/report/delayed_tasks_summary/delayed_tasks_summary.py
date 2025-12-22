@@ -75,13 +75,27 @@ def get_chart_data(data):
 			delay = delay + 1
 		else:
 			on_track = on_track + 1
+
+	labels = []
+	datasets = []
+	colors = []
+
+	if on_track:
+		labels.append(_("On Track"))
+		datasets.append(on_track)
+		colors.append("#84D5BA")
+	if delay:
+		labels.append(_("Delayed"))
+		datasets.append(delay)
+		colors.append("#CB4B5F")
+
 	charts = {
 		"data": {
-			"labels": [_("On Track"), _("Delayed")],
-			"datasets": [{"name": _("Delayed"), "values": [on_track, delay]}],
+			"labels": labels,
+			"datasets": [{"name": _("Delayed"), "values": datasets}],
 		},
 		"type": "percentage",
-		"colors": ["#84D5BA", "#CB4B5F"],
+		"colors": colors,
 	}
 	return charts
 

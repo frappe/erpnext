@@ -282,8 +282,20 @@ def update_pegged_currencies():
 		{"source_currency": "SAR", "pegged_against": "USD", "pegged_exchange_rate": 3.75},
 	]
 
+	# Add items on pegged_currency_item if source_currency and pegged_against currency doc exist.
+
+	currencies_exist = frappe.db.get_list(
+		"Currency", {"name": ["in", ["AED", "BHD", "JOD", "OMR", "QAR", "SAR", "USD"]]}, pluck="name"
+	)
+
+	if "USD" not in currencies_exist:
+		return
+
 	for currency in currencies_to_add:
-		if currency["source_currency"] not in existing_sources:
+		if (
+			currency["source_currency"] in currencies_exist
+			and currency["source_currency"] not in existing_sources
+		):
 			doc.append("pegged_currency_item", currency)
 
 	doc.save()

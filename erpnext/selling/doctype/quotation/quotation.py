@@ -345,6 +345,7 @@ def get_list_context(context=None):
 			"show_search": True,
 			"no_breadcrumbs": True,
 			"title": _("Quotations"),
+			"list_template": "templates/includes/list/list.html",
 		}
 	)
 
@@ -612,6 +613,7 @@ def handle_mandatory_error(e, customer, lead_name):
 	frappe.throw(message, title=_("Mandatory Missing"))
 
 
+@frappe.whitelist()
 def get_ordered_items(quotation: str):
 	"""
 	Returns a dict of ordered items with their total qty based on quotation row name.

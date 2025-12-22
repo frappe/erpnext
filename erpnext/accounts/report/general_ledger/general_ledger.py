@@ -500,7 +500,7 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 
 	immutable_ledger = frappe.get_single_value("Accounts Settings", "enable_immutable_ledger")
 
-	def update_value_in_dict(data, key, gle):
+	def update_value_in_dict(data, key, gle, show_net_values=False):
 		data[key].debit += gle.debit
 		data[key].credit += gle.credit
 
@@ -511,10 +511,14 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 			data[key].debit_in_transaction_currency += gle.debit_in_transaction_currency
 			data[key].credit_in_transaction_currency += gle.credit_in_transaction_currency
 
-		if filters.get("show_net_values_in_party_account") and account_type_map.get(data[key].account) in (
-			"Receivable",
-			"Payable",
-		):
+		if (
+			filters.get("show_net_values_in_party_account")
+			and account_type_map.get(data[key].account)
+			in (
+				"Receivable",
+				"Payable",
+			)
+		) or show_net_values:
 			net_value = data[key].debit - data[key].credit
 			net_value_in_account_currency = (
 				data[key].debit_in_account_currency - data[key].credit_in_account_currency
@@ -548,11 +552,11 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 
 		if gle.posting_date < from_date or (cstr(gle.is_opening) == "Yes" and not show_opening_entries):
 			if not group_by_voucher_consolidated:
-				update_value_in_dict(gle_map[group_by_value].totals, "opening", gle)
-				update_value_in_dict(gle_map[group_by_value].totals, "closing", gle)
+				update_value_in_dict(gle_map[group_by_value].totals, "opening", gle, True)
+				update_value_in_dict(gle_map[group_by_value].totals, "closing", gle, True)
 
-			update_value_in_dict(totals, "opening", gle)
-			update_value_in_dict(totals, "closing", gle)
+			update_value_in_dict(totals, "opening", gle, True)
+			update_value_in_dict(totals, "closing", gle, True)
 
 		elif gle.posting_date <= to_date or (cstr(gle.is_opening) == "Yes" and show_opening_entries):
 			if not group_by_voucher_consolidated:

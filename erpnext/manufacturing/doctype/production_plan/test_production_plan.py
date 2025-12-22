@@ -151,6 +151,73 @@ class TestProductionPlan(IntegrationTestCase):
 		sr2.cancel()
 		pln.cancel()
 
+	def test_projected_qty_cascading_across_multiple_sales_orders(self):
+		rm_item = make_item(
+			"_Test RM For Cascading",
+			{"is_stock_item": 1, "valuation_rate": 100},
+		).name
+
+		fg_item_a = make_item(
+			"_Test FG A For Cascading",
+			{"is_stock_item": 1, "valuation_rate": 200},
+		).name
+
+		if not frappe.db.exists("BOM", {"item": fg_item_a, "docstatus": 1}):
+			make_bom(item=fg_item_a, raw_materials=[rm_item], rm_qty=1)
+
+		# Stock for RM
+		sr = create_stock_reconciliation(item_code=rm_item, target="_Test Warehouse - _TC", qty=1, rate=100)
+
+		# Sales orders
+		so1 = make_sales_order(item_code=fg_item_a, qty=1)
+		so2 = make_sales_order(item_code=fg_item_a, qty=1)
+
+		# Production plan
+		pln = frappe.get_doc(
+			{
+				"doctype": "Production Plan",
+				"company": "_Test Company",
+				"posting_date": nowdate(),
+				"get_items_from": "Sales Order",
+				"ignore_existing_ordered_qty": 1,
+			}
+		)
+		pln.append(
+			"sales_orders",
+			{
+				"sales_order": so1.name,
+				"sales_order_date": so1.transaction_date,
+				"customer": so1.customer,
+				"grand_total": so1.grand_total,
+			},
+		)
+		pln.append(
+			"sales_orders",
+			{
+				"sales_order": so2.name,
+				"sales_order_date": so2.transaction_date,
+				"customer": so2.customer,
+				"grand_total": so2.grand_total,
+			},
+		)
+
+		pln.get_items()
+		pln.insert()
+
+		mr_items = get_items_for_material_requests(pln.as_dict())
+		quantities = [d["quantity"] for d in mr_items]
+		rm_qty = sum(quantities)
+
+		self.assertEqual(len(mr_items), 2)  # one for each SO
+		self.assertEqual(rm_qty, 1, "Cascading failed: total MR qty should be 1 (2 needed - 1 in stock)")
+		self.assertEqual(
+			quantities,
+			[0, 1],
+			"Cascading failed: first item should consume stock (qty=0), second should need procurement (qty=1)",
+		)
+
+		sr.cancel()
+
 	def test_production_plan_with_non_stock_item(self):
 		"Test if MR Planning table includes Non Stock RM."
 		pln = create_production_plan(item_code="Test Production Item 1", include_non_stock_items=1)

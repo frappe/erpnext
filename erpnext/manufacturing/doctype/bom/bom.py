@@ -257,6 +257,18 @@ class BOM(WebsiteGenerator):
 
 		return index
 
+	def before_validate(self):
+		for item in self.items:
+			if not item.conversion_factor:
+				item.conversion_factor = (
+					frappe.get_value(
+						"UOM Conversion Detail",
+						{"parent": item.item_code, "uom": item.uom},
+						"conversion_factor",
+					)
+					or 1
+				)
+
 	def validate(self):
 		self.route = frappe.scrub(self.name).replace("_", "-")
 
@@ -1110,7 +1122,7 @@ class BOM(WebsiteGenerator):
 	def validate_transfer_against(self):
 		if not self.with_operations:
 			self.transfer_material_against = "Work Order"
-		if not self.transfer_material_against and not self.is_new():
+		if not self.transfer_material_against and not self.track_semi_finished_goods and not self.is_new():
 			frappe.throw(
 				_("Setting {0} is required").format(_(self.meta.get_label("transfer_material_against"))),
 				title=_("Missing value"),

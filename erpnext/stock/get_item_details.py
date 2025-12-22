@@ -694,7 +694,7 @@ def get_item_tax_info(doc, tax_category, item_codes, item_rates=None, item_tax_t
 
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
-def get_item_tax_template(ctx: ItemDetailsCtx, item=None, out: ItemDetails | None = None):
+def get_item_tax_template(ctx, item=None, out: ItemDetails | None = None):
 	"""
 	Determines item_tax template from item or parent item groups.
 
@@ -1488,7 +1488,7 @@ def get_batch_qty(batch_no, warehouse, item_code):
 
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
-def apply_price_list(ctx: ItemDetailsCtx, as_doc=False, doc=None):
+def apply_price_list(ctx, as_doc=False, doc=None):
 	"""Apply pricelist on a document-like dict object and return as
 	{'parent': dict, 'children': list}
 

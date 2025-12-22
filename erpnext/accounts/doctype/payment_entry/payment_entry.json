@@ -589,9 +589,9 @@
    "options": "Tax Withholding Category"
   },
   {
-   "collapsible": 1,
    "fieldname": "taxes_and_charges_section",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "label": "Taxes and Charges"
   },
   {
@@ -682,8 +682,7 @@
   },
   {
    "fieldname": "section_break_60",
-   "fieldtype": "Section Break",
-   "hide_border": 1
+   "fieldtype": "Section Break"
   },
   {
    "depends_on": "eval:doc.docstatus==0",
@@ -794,7 +793,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2025-07-14 07:35:49.163950",
+ "modified": "2025-12-18 13:56:40.206038",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

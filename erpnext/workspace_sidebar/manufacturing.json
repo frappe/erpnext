@@ -14,6 +14,18 @@
    "keep_closed": 0,
    "label": "Home",
    "link_to": "Manufacturing",
+   "link_type": "Workspace",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "chart",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Dashboard",
+   "link_to": "Manufacturing",
    "link_type": "Dashboard",
    "show_arrow": 0,
    "type": "Link"
@@ -425,7 +437,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-11-25 10:46:09.349984",
+ "modified": "2025-12-15 11:48:11.189441",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",

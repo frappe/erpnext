@@ -559,4 +559,5 @@ def get_list_context(context=None):
 		"title": _("Timesheets"),
 		"get_list": get_timesheets_list,
 		"row_template": "templates/includes/timesheet/timesheet_row.html",
+		"list_template": "templates/includes/list/list.html",
 	}

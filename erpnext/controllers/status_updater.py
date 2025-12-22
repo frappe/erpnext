@@ -393,12 +393,16 @@ class StatusUpdater(Document):
 			self.item_allowance,
 			self.global_qty_allowance,
 			self.global_amount_allowance,
-		) = get_allowance_for(
-			item["item_code"],
-			self.item_allowance,
-			self.global_qty_allowance,
-			self.global_amount_allowance,
-			qty_or_amount,
+		) = (
+			get_allowance_for(
+				item["item_code"],
+				self.item_allowance,
+				self.global_qty_allowance,
+				self.global_amount_allowance,
+				qty_or_amount,
+			)
+			if args["source_dt"] != "Pick List Item"
+			else (0, {}, None, None)
 		)
 
 		role_allowed_to_over_deliver_receive = frappe.get_single_value(
@@ -436,14 +440,17 @@ class StatusUpdater(Document):
 		):
 			return
 
-		if qty_or_amount == "qty":
-			action_msg = _(
-				'To allow over receipt / delivery, update "Over Receipt/Delivery Allowance" in Stock Settings or the Item.'
-			)
+		if args["source_dt"] != "Pick List Item":
+			if qty_or_amount == "qty":
+				action_msg = _(
+					'To allow over receipt / delivery, update "Over Receipt/Delivery Allowance" in Stock Settings or the Item.'
+				)
+			else:
+				action_msg = _(
+					'To allow over billing, update "Over Billing Allowance" in Accounts Settings or the Item.'
+				)
 		else:
-			action_msg = _(
-				'To allow over billing, update "Over Billing Allowance" in Accounts Settings or the Item.'
-			)
+			action_msg = None
 
 		frappe.throw(
 			_(
@@ -455,8 +462,7 @@ class StatusUpdater(Document):
 				frappe.bold(_(self.doctype)),
 				frappe.bold(item.get("item_code")),
 			)
-			+ "<br><br>"
-			+ action_msg,
+			+ ("<br><br>" + action_msg if action_msg else ""),
 			OverAllowanceError,
 			title=_("Limit Crossed"),
 		)

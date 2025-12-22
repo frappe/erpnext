@@ -221,7 +221,7 @@ class SubcontractingController(StockController):
 			and self._doc_before_save
 		):
 			for row in self._doc_before_save.get("items"):
-				item_dict[row.name] = (row.item_code, row.qty)
+				item_dict[row.name] = (row.item_code, row.qty + (row.get("rejected_qty") or 0))
 
 		return item_dict
 
@@ -245,7 +245,10 @@ class SubcontractingController(StockController):
 
 		for row in self.items:
 			self.__reference_name.append(row.name)
-			if (row.name not in item_dict) or (row.item_code, row.qty) != item_dict[row.name]:
+			if (row.name not in item_dict) or (
+				row.item_code,
+				row.qty + (row.get("rejected_qty") or 0),
+			) != item_dict[row.name]:
 				self.__changed_name.append(row.name)
 
 			if item_dict.get(row.name):
@@ -934,7 +937,11 @@ class SubcontractingController(StockController):
 				for bom_item in self._get_materials_from_bom(
 					row.item_code, row.bom, row.get("include_exploded_items")
 				):
-					qty = flt(bom_item.qty_consumed_per_unit) * flt(row.qty) * row.conversion_factor
+					qty = (
+						flt(bom_item.qty_consumed_per_unit)
+						* flt(row.qty + (row.get("rejected_qty") or 0))
+						* row.conversion_factor
+					)
 					bom_item.main_item_code = row.item_code
 					self.__update_reserve_warehouse(bom_item, row)
 					self.__set_alternative_item(bom_item)

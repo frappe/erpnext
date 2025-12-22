@@ -556,7 +556,8 @@
    "fieldtype": "Currency",
    "label": "Net Purchase Amount",
    "mandatory_depends_on": "eval:(!doc.is_composite_asset || doc.docstatus==1)",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only_depends_on": "eval: doc.is_composite_asset"
   }
  ],
  "idx": 72,
@@ -600,7 +601,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2025-11-04 22:39:00.817405",
+ "modified": "2025-12-18 16:36:40.904246",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
