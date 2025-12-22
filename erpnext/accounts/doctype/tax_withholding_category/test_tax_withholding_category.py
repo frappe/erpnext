@@ -3489,6 +3489,76 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.assertTrue(len(pi.tax_withholding_entries) > 0)
 		pi.delete()
 
+	def test_tds_rounding_with_decimal_amounts(self):
+		"""Test TDS rounding when round_off_tax_amount is enabled in category"""
+		self.setup_party_with_category("Supplier", "Test TDS Supplier3", "New TDS Category")
+
+		pi = create_purchase_invoice(supplier="Test TDS Supplier3", rate=35555)
+		pi.submit()
+
+		tds_row = next(e for e in pi.tax_withholding_entries if e.withholding_amount > 0)
+		self.assertEqual(tds_row.withholding_amount, 556)
+
+		self.cleanup_invoices([pi])
+
+	def test_tax_withholding_entry_status_determination(self):
+		"""Test that Tax Withholding Entry status is correctly determined"""
+		from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import (
+			TaxWithholdingEntry,
+		)
+
+		# Entry with only taxable fields (Under Withheld)
+		entry = frappe._dict(
+			docstatus=1,
+			withholding_name="",
+			under_withheld_reason="",
+			taxable_name="PI-001",
+		)
+		self.assertEqual(TaxWithholdingEntry.get_status(entry), "Under Withheld")
+
+		# Entry with withholding but no taxable (Over Withheld)
+		entry = frappe._dict(
+			docstatus=1,
+			withholding_name="PE-001",
+			under_withheld_reason="",
+			taxable_name="",
+		)
+		self.assertEqual(TaxWithholdingEntry.get_status(entry), "Over Withheld")
+
+		# Entry with both (Settled)
+		entry = frappe._dict(
+			docstatus=1,
+			withholding_name="PE-001",
+			under_withheld_reason="",
+			taxable_name="PI-001",
+		)
+		self.assertEqual(TaxWithholdingEntry.get_status(entry), "Settled")
+
+		# Entry with under withheld reason (considered matched/settled)
+		entry = frappe._dict(
+			docstatus=1,
+			withholding_name="",
+			under_withheld_reason="Threshold Exemption",
+			taxable_name="PI-001",
+		)
+		self.assertEqual(TaxWithholdingEntry.get_status(entry), "Settled")
+
+		# Cancelled entry
+		entry = frappe._dict(docstatus=2, withholding_name="", under_withheld_reason="", taxable_name="")
+		self.assertEqual(TaxWithholdingEntry.get_status(entry), "Cancelled")
+
+	def test_invalid_withholding_amount_validation(self):
+		"""Test that mismatched withholding amounts throw validation error on save"""
+		self.setup_party_with_category("Supplier", "Test TDS Supplier", "Cumulative Threshold TDS")
+		pi = create_purchase_invoice(supplier="Test TDS Supplier", rate=50000)
+
+		self.assertTrue(len(pi.tax_withholding_entries) > 0)
+		pi.override_tax_withholding_entries = 1
+
+		entry = pi.tax_withholding_entries[0]
+		entry.withholding_amount = 5001  # Should be 5000 (10% of 50000)
+		self.assertRaisesRegex(frappe.ValidationError, "Withholding Amount.*does not match", pi.save)
+
 
 def create_purchase_invoice(**args):
 	# return sales invoice doc object
