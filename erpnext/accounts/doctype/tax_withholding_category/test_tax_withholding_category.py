@@ -340,7 +340,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 	def test_tax_withholding_category_checks(self):
 		invoices = []
-		frappe.db.set_value("Supplier", "Test TDS Supplier3", "tax_withholding_category", "New TDS Category")
+		self.setup_party_with_category("Supplier", "Test TDS Supplier3", "New TDS Category")
 
 		# First Invoice with no tds check
 		pi = create_purchase_invoice(supplier="Test TDS Supplier3", rate=20000, do_not_save=True)
@@ -363,9 +363,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 	def test_cumulative_threshold_with_party_ledger_amount_on_net_total(self):
 		invoices = []
-		frappe.db.set_value(
-			"Supplier", "Test TDS Supplier3", "tax_withholding_category", "Advance TDS Category"
-		)
+		self.setup_party_with_category("Supplier", "Test TDS Supplier3", "Advance TDS Category")
 
 		# Invoice with tax and without exceeding single and cumulative thresholds
 		for _ in range(2):
@@ -402,7 +400,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 	def test_cumulative_threshold_with_tax_on_excess_amount(self):
 		invoices = []
-		frappe.db.set_value("Supplier", "Test TDS Supplier3", "tax_withholding_category", "New TDS Category")
+		self.setup_party_with_category("Supplier", "Test TDS Supplier3", "New TDS Category")
 
 		# Invoice with tax and without exceeding single and cumulative thresholds
 		for _ in range(2):
@@ -493,9 +491,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.cleanup_invoices(invoices)
 
 	def test_cumulative_threshold_tcs_on_gross_amount(self):
-		frappe.db.set_value(
-			"Customer", "Test TCS Customer", "tax_withholding_category", "Cumulative Threshold TCS"
-		)
+		self.setup_party_with_category("Customer", "Test TCS Customer", "Cumulative Threshold TCS")
 		invoices = []
 
 		# First two invoices - below threshold, should be settled with zero TCS
@@ -1015,9 +1011,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.cleanup_invoices(invoices)
 
 	def test_tds_calculation_on_net_total(self):
-		frappe.db.set_value(
-			"Supplier", "Test TDS Supplier4", "tax_withholding_category", "Cumulative Threshold TDS"
-		)
+		self.setup_party_with_category("Supplier", "Test TDS Supplier4", "Cumulative Threshold TDS")
 		invoices = []
 
 		pi = create_purchase_invoice(supplier="Test TDS Supplier4", rate=20000, do_not_save=True)
@@ -1157,9 +1151,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.cleanup_invoices(invoices)
 
 	def test_tds_deduction_for_po_via_payment_entry(self):
-		frappe.db.set_value(
-			"Supplier", "Test TDS Supplier8", "tax_withholding_category", "Cumulative Threshold TDS"
-		)
+		self.setup_party_with_category("Supplier", "Test TDS Supplier8", "Cumulative Threshold TDS")
 		order = create_purchase_order(supplier="Test TDS Supplier8", rate=40000, do_not_save=True)
 		order.append(
 			"taxes",
@@ -1185,9 +1177,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.assertEqual(payment.taxes[0].tax_amount, 4800)
 
 	def test_multi_category_single_supplier(self):
-		frappe.db.set_value(
-			"Supplier", "Test TDS Supplier5", "tax_withholding_category", "Test Service Category"
-		)
+		self.setup_party_with_category("Supplier", "Test TDS Supplier5", "Test Service Category")
 		invoices = []
 
 		pi = create_purchase_invoice(supplier="Test TDS Supplier5", rate=500, do_not_save=True)
@@ -3083,9 +3073,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 	def test_tds_on_journal_entry_for_supplier(self):
 		"""Test TDS deduction for Supplier in Debit Note"""
-		frappe.db.set_value(
-			"Supplier", "Test TDS Supplier", "tax_withholding_category", "Cumulative Threshold TDS"
-		)
+		self.setup_party_with_category("Supplier", "Test TDS Supplier", "Cumulative Threshold TDS")
 
 		jv = make_journal_entry_with_tax_withholding(
 			party_type="Supplier",
@@ -3145,9 +3133,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 	def test_tcs_on_journal_entry_for_customer(self):
 		"""Test TCS collection for Customer in Credit Note"""
-		frappe.db.set_value(
-			"Customer", "Test TCS Customer", "tax_withholding_category", "Cumulative Threshold TCS"
-		)
+		self.setup_party_with_category("Customer", "Test TCS Customer", "Cumulative Threshold TCS")
 
 		# Create Credit Note with amount exceeding threshold
 		jv = make_journal_entry_with_tax_withholding(
@@ -3224,9 +3210,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		"""Test TDS calculation with multi-currency purchase invoice and payment"""
 		invoices = []
 
-		frappe.db.set_value(
-			"Supplier", "_Test Supplier USD", "tax_withholding_category", "Cumulative Threshold TDS"
-		)
+		self.setup_party_with_category("Supplier", "_Test Supplier USD", "Cumulative Threshold TDS")
 
 		pe = frappe.get_doc(
 			{
@@ -3330,9 +3314,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		"""Test Journal Entry with amount below threshold creates Under Withheld entry
 		and gets settled when a new Purchase Invoice crosses the threshold"""
 		invoices = []
-		frappe.db.set_value(
-			"Supplier", "Test TDS Supplier", "tax_withholding_category", "Cumulative Threshold TDS"
-		)
+		self.setup_party_with_category("Supplier", "Test TDS Supplier", "Cumulative Threshold TDS")
 
 		# Create Debit Note with amount below threshold (30000)
 		jv = make_journal_entry_with_tax_withholding(
@@ -3407,9 +3389,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 	def test_journal_entry_negative_amount_debit_note(self):
 		"""Test Journal Entry with negative amount (reversal of Debit Note)"""
 		invoices = []
-		frappe.db.set_value(
-			"Supplier", "Test TDS Supplier", "tax_withholding_category", "Cumulative Threshold TDS"
-		)
+		self.setup_party_with_category("Supplier", "Test TDS Supplier", "Cumulative Threshold TDS")
 
 		# First create a regular Debit Note to cross threshold
 		jv1 = make_journal_entry_with_tax_withholding(
