@@ -306,12 +306,14 @@
   {
    "fieldname": "insurer",
    "fieldtype": "Data",
-   "label": "Insurer"
+   "label": "Insurer",
+   "mandatory_depends_on": "eval: doc.insurance_start_date"
   },
   {
    "fieldname": "insured_value",
    "fieldtype": "Data",
-   "label": "Insured value"
+   "label": "Insured value",
+   "mandatory_depends_on": "eval: doc.insurer"
   },
   {
    "fieldname": "column_break_48",
@@ -320,12 +322,14 @@
   {
    "fieldname": "insurance_start_date",
    "fieldtype": "Date",
-   "label": "Insurance Start Date"
+   "label": "Insurance Start Date",
+   "mandatory_depends_on": "eval: doc.insurer || doc.insurance_end_date"
   },
   {
    "fieldname": "insurance_end_date",
    "fieldtype": "Date",
-   "label": "Insurance End Date"
+   "label": "Insurance End Date",
+   "mandatory_depends_on": "eval: doc.insurer || doc.insurance_start_date"
   },
   {
    "fieldname": "comprehensive_insurance",
@@ -556,8 +560,7 @@
    "fieldtype": "Currency",
    "label": "Net Purchase Amount",
    "mandatory_depends_on": "eval:(!doc.is_composite_asset || doc.docstatus==1)",
-   "options": "Company:company:default_currency",
-   "read_only_depends_on": "eval: doc.is_composite_asset"
+   "options": "Company:company:default_currency"
   }
  ],
  "idx": 72,
@@ -601,7 +604,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2025-12-18 16:36:40.904246",
+ "modified": "2025-12-22 16:00:37.276742",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

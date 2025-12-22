@@ -131,6 +131,7 @@ class Asset(AccountsController):
 		self.set_missing_values()
 		self.validate_gross_and_purchase_amount()
 		self.validate_finance_books()
+		self.validate_insurance_details()
 
 	def before_save(self):
 		self.total_asset_cost = self.net_purchase_amount + self.additional_asset_cost
@@ -416,6 +417,16 @@ class Asset(AccountsController):
 					_("Row #{}: Finance Book should not be empty since you're using multiple.").format(d.idx),
 					title=_("Missing Finance Book"),
 				)
+
+	def validate_insurance_details(self):
+		start_date = self.get("insurance_start_date")
+		end_date = self.get("insurance_end_date")
+		if start_date and end_date and start_date > end_date:
+			frappe.throw(_("Insurance End Date must be after Insurance Start Date"))
+
+		if self.get("insured_value"):
+			if flt(self.insured_value) <= 0:
+				frappe.throw(_("Insured Value must be greater than zero"))
 
 	def validate_category(self):
 		non_depreciable_category = frappe.db.get_value(
