@@ -57,18 +57,16 @@ class JobCard(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from frappe.types import DF
-
 		from erpnext.manufacturing.doctype.job_card_item.job_card_item import JobCardItem
 		from erpnext.manufacturing.doctype.job_card_operation.job_card_operation import JobCardOperation
-		from erpnext.manufacturing.doctype.job_card_scheduled_time.job_card_scheduled_time import (
-			JobCardScheduledTime,
-		)
+		from erpnext.manufacturing.doctype.job_card_scheduled_time.job_card_scheduled_time import JobCardScheduledTime
 		from erpnext.manufacturing.doctype.job_card_scrap_item.job_card_scrap_item import JobCardScrapItem
 		from erpnext.manufacturing.doctype.job_card_time_log.job_card_time_log import JobCardTimeLog
+		from frappe.types import DF
 
 		actual_end_date: DF.Datetime | None
 		actual_start_date: DF.Datetime | None
+		additional_ingredients_added: DF.Check
 		amended_from: DF.Link | None
 		barcode: DF.Barcode | None
 		batch_no: DF.Link | None
@@ -104,15 +102,7 @@ class JobCard(Document):
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.SmallText | None
 		started_time: DF.Datetime | None
-		status: DF.Literal[
-			"Open",
-			"Work In Progress",
-			"Material Transferred",
-			"On Hold",
-			"Submitted",
-			"Cancelled",
-			"Completed",
-		]
+		status: DF.Literal["Open", "Work In Progress", "Material Transferred", "On Hold", "Submitted", "Cancelled", "Completed"]
 		sub_operations: DF.Table[JobCardOperation]
 		time_logs: DF.Table[JobCardTimeLog]
 		time_required: DF.Float

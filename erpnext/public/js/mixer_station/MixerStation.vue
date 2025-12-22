@@ -61,12 +61,40 @@ const allAdditionalIngredientsAdded = computed(() => {
 onMounted(async () => {
     const route = frappe.get_route();
     jobCard.value = route[1] || null;
-    console.log('jobCard in Mixer:', jobCard.value);
 
     if (!jobCard.value) {
         error.value = __('No Job Card found in route');
         loadingIngredients.value = false;
         return;
+    }
+
+    const stateRes = await frappe.call({
+        method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_state',
+        args: { job_card: jobCard.value },
+    });
+
+    const s = stateRes.message || {};
+    mixingReady.value = !!s.mixer_materials_confirmed;
+    mixingStarted.value = !!s.mixer_started;
+    mixingStartTime.value = s.mixer_start_time;
+
+    if (mixingStarted.value && mixingStartTime.value) {
+        const start = frappe.datetime.str_to_obj(mixingStartTime.value);
+        const now = frappe.datetime.now_datetime();
+        const diffSeconds = (new Date(now) - new Date(start)) / 1000;
+        mixingElapsed.value = Math.max(0, Math.floor(diffSeconds));
+
+        if (mixingTimerHandle.value) clearInterval(mixingTimerHandle.value);
+        mixingTimerHandle.value = setInterval(() => {
+            mixingElapsed.value += 1;
+        }, 1000);
+    } 
+    else {
+        mixingElapsed.value = 0;
+        if (mixingTimerHandle.value) {
+            clearInterval(mixingTimerHandle.value);
+            mixingTimerHandle.value = null;
+        }
     }
 
     try {
@@ -98,7 +126,7 @@ onMounted(async () => {
                 unit: item.stock_uom,
                 qty: item.stock_uom_qty,
                 item_code: item.item_code,
-                is_added: is_additional ? false : true
+                is_added: !!item.additional_ingredients_added,
             };
         });
     } 
@@ -111,15 +139,42 @@ onMounted(async () => {
     }
 });
 
-function toggleReady() {
+async function toggleReady() {
     if (mixingStarted.value) {
         return;
     } 
+    if (!allAdditionalIngredientsAdded.value) {
+        frappe.msgprint(__('Mark all additional ingredients as Added first.'));
+        return;
+    }
     frappe.confirm(
         __('Do you want to confirm the materials?'),
-        () => {
-            mixingReady.value = true;
-            frappe.msgprint(__('Materials are confirmed to start mixing'));
+        async () => {
+            try {
+                const payload = ingredients.value.map(ing => ({
+                    item_code: ing.item_code,
+                    qty: ing.qty,
+                    unit: ing.unit,
+                    is_added: ing.is_added,
+                }));
+
+                const r = await frappe.call({
+                    method: 'erpnext.manufacturing.page.mixer_station.mixer_station.confirm_materials',
+                    args: {
+                        job_card: jobCard.value,
+                        ingredients: JSON.stringify(payload),
+                    }
+                });
+
+                mixingReady.value = true;
+                frappe.msgprint(
+                    __('Materials confirmed. Stock Entry {0} created.', [r.message.stock_entry])
+                );
+            } catch (e) {
+                frappe.msgprint(
+                    __('Failed to confirm materials: {0}', [e.message || e])
+                );
+            }
         },
         () => {
             frappe.msgprint(__('Materials are not confirmed.'));
@@ -127,26 +182,35 @@ function toggleReady() {
     );
 }
 
-function startMixing() {
+async function startMixing() {
     if (!mixingReady.value) {
         frappe.msgprint(__('Confirm materials before starting mixing.'));
         return;
     }
     frappe.confirm(
         __('Start mixing now?'),
-        () => {
-            mixingStarted.value = true;
-            mixingStartTime.value = frappe.datetime.now_datetime();
+        async () => {
+            try {
+                await frappe.call({
+                    method: 'erpnext.manufacturing.page.mixer_station.mixer_station.start_mixing',
+                    args: { job_card: jobCard.value }
+                });
+                mixingStarted.value = true;
+                mixingStartTime.value = frappe.datetime.now_datetime();
 
-            mixingElapsed.value = 0;
-            if (mixingTimerHandle.value) {
-                clearInterval(mixingTimerHandle.value);
+                mixingElapsed.value = 0;
+                if (mixingTimerHandle.value) {
+                    clearInterval(mixingTimerHandle.value);
+                }
+                mixingTimerHandle.value = setInterval(() => {
+                    mixingElapsed.value += 1;
+                }, 1000);
+    
+                frappe.msgprint(__('Mixing started'));
             }
-            mixingTimerHandle.value = setInterval(() => {
-                mixingElapsed.value += 1;
-            }, 1000);
-
-            frappe.msgprint(__('Mixing started'));
+            catch (e) {
+                frappe.msgprint(__('Failed to start Job Card: {0}', [e.message || e]));
+            }
         },
         () => {
             frappe.msgprint(__('Mixing was not started.'));
@@ -154,17 +218,31 @@ function startMixing() {
     );
 }
 
-function finishAndDischarge() {
+async function finishAndDischarge() {
     if (mixingTimerHandle.value) {
         clearInterval(mixingTimerHandle.value);
         mixingTimerHandle.value = null;
     }
-    mixingStarted.value = false;
-    mixingStartTime.value = null;
-    mixingElapsed.value = 0;
-    mixingReady.value = false;
+    try {
+        const jc = await frappe.db.get_doc('Job Card', jobCard.value);
+        const completed_qty = jc.for_quantity || 0;
 
-    frappe.msgprint(__('Mixing finished and discharged'));
+        await frappe.call({
+            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.finish_mixing',
+            args: {
+                job_card: jobCard.value,
+                completed_qty,
+            }
+        });
+        mixingStarted.value = false;
+        mixingStartTime.value = null;
+        mixingElapsed.value = 0;
+        mixingReady.value = false;
+        frappe.msgprint(__('Mixing finished and discharged'));
+    }
+    catch (e) {
+        frappe.msgprint(__('Failed to complete Job Card: {0}', [e.message || e]));
+    }
 }
 
 function haltFromAlert(alert) {
@@ -178,9 +256,9 @@ function ignoreAlert(index) {
 }
 
 function isAdditionalIngredient(name) {
-  if (!name) return false;
-  const ing = name.toString().toLowerCase();
-  return additionalIngredients.some(s => ing.includes(s));
+    if (!name) return false;
+    const ing = name.toString().toLowerCase();
+    return additionalIngredients.some(s => ing.includes(s));
 }
 </script>
 
@@ -314,10 +392,6 @@ function isAdditionalIngredient(name) {
                         </div>
                         <div>
                             <button class="btn btn-success btn-block py-2" @click="finishAndDischarge">
-                                <span class="fa fa-check mr-1"></span>
-                                {{ __('Finish & Discharge') }}
-                            </button>
-                            <button>
                                 <span class="fa fa-check mr-1"></span>
                                 {{ __('Finish & Discharge') }}
                             </button>
