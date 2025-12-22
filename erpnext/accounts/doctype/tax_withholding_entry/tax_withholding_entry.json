@@ -84,7 +84,8 @@
    "fieldname": "taxable_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Base Taxable Amount"
+   "label": "Base Taxable Amount",
+   "options": "Company:company:default_currency"
   },
   {
    "description": "Transaction from which tax is withheld",
@@ -192,6 +193,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Base Tax Withheld",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -222,7 +224,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-03 05:34:58.898549",
+ "modified": "2025-12-22 09:07:26.701207",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Entry",

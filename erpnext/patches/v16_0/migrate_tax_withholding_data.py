@@ -1191,7 +1191,7 @@ def copy_category_to_items_for_purchase(column_cache):
 		return
 
 	parent = frappe.qb.DocType(parent_doctype)
-	item = frappe.qb.DocType(item_doctype)
+	item = frappe.qb.DocType(item_doctype, alias="item")
 
 	(
 		frappe.qb.update(item)
@@ -1216,8 +1216,8 @@ def copy_category_to_items_for_sales(column_cache):
 		return
 
 	parent = frappe.qb.DocType(parent_doctype)
-	item = frappe.qb.DocType(item_doctype)
-	customer = frappe.qb.DocType("Customer")
+	item = frappe.qb.DocType(item_doctype, alias="item")
+	customer = frappe.qb.DocType("Customer", alias="customer")
 
 	(
 		frappe.qb.update(item)
