@@ -71,7 +71,12 @@ erpnext.financial_statements = {
 	},
 
 	_format_custom_account_column: function (value, data, formatting, column, default_formatter, row) {
-		value = data.section_name || data.account_name || value;
+		// account name to display in the report
+		// 1. section_name for sections
+		// 2. account_name for accounts
+		// 3. formatting.account_name for segments
+		// 4. value as last fallback
+		value = data.section_name || data.account_name || formatting.account_name || value;
 
 		if (!value) return "";
 
@@ -94,9 +99,9 @@ erpnext.financial_statements = {
 
 			column.link_onclick =
 				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(glData) + ")";
-		}
 
-		value = default_formatter(value, row, column, data);
+			value = default_formatter(value, row, column, data);
+		}
 
 		let formattedValue = String(value);
 
