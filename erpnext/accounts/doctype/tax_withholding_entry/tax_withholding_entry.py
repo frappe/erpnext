@@ -86,11 +86,11 @@ class TaxWithholdingEntry(Document):
 			return
 
 		precision = self.precision("withholding_amount")
-		precision_allowance = 1 / (10**precision)
+		allowance = 0.5
 
 		tax_to_withheld = flt(self.taxable_amount * (self.tax_rate / 100), precision)
 		diff = abs(tax_to_withheld - self.withholding_amount)
-		if diff > precision_allowance:
+		if diff > allowance:
 			frappe.throw(
 				_("Row #{0}: Withholding Amount {1} does not match calculated amount {2}.").format(
 					self.idx, self.withholding_amount, tax_to_withheld
