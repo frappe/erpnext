@@ -24,22 +24,30 @@
 	<h3 class="text-center">{%= filters.cost_center %}</h3>
 {% endif %}
 
-<h3 class="text-center">{%= filters.fiscal_year %}</h3>
+{% if (filters.fiscal_year) %}
+	<h3 class="text-center">{%= filters.fiscal_year %}</h3>
+{% endif %}
+
 <h5 class="text-center">
-	{%=  __("Currency") %} : {%= filters.presentation_currency || erpnext.get_currency(filters.company) %}
+	<strong>{%=  __("Currency") %}:</strong> {%= filters.presentation_currency || erpnext.get_currency(filters.company) %}
 </h5>
+
 {% if (filters.from_date) { %}
 	<h5 class="text-center">
 		{%= frappe.datetime.str_to_user(filters.from_date) %} - {%= frappe.datetime.str_to_user(filters.to_date) %}
 	</h5>
 {% } %}
+
 <hr>
-<div class="show-filters">
-			{% if subtitle %}
-				{{ subtitle }}
-				<hr>
-			{% endif %}
-</div>
+
+{% if subtitle %}
+	<div class="show-filters">
+		{{ subtitle }}
+		<hr>
+	</div>
+{% endif %}
+
+
 <table class="table table-bordered">
 	<thead>
 		<tr>
@@ -58,7 +66,7 @@
 			%}
 			<tr class="{%= row_class %}">
 				<td>
-					<span style="padding-left: {%= cint(data[j].indent) * 2 %}em">{%= row.account_name || row.section || row.seg_0_account %}</span>
+					<span style="padding-left: {%= cint(data[j].indent) * 2 %}em">{%= row.account_name || row.section %}</span>
 				</td>
 				{% for(let i=1, l=report_columns.length; i<l; i++) { %}
 					<td class="text-right">
@@ -72,6 +80,7 @@
 		{% } %}
 	</tbody>
 </table>
+
 <p class="text-right text-muted">
 	{%= __("Printed on {0}", [frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string())]) %}
 </p>
