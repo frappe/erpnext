@@ -32,12 +32,6 @@
 	<strong>{%=  __("Currency") %}:</strong> {%= filters.presentation_currency || erpnext.get_currency(filters.company) %}
 </h5>
 
-{% if (filters.from_date) { %}
-	<h5 class="text-center">
-		{%= frappe.datetime.str_to_user(filters.from_date) %} - {%= frappe.datetime.str_to_user(filters.to_date) %}
-	</h5>
-{% } %}
-
 <hr>
 
 {% if subtitle %}
