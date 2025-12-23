@@ -9,7 +9,9 @@
   "amended_from",
   "template",
   "batch_number",
+  "serial_number",
   "column_break_mfbp",
+  "created_on",
   "line",
   "current_stage",
   "quality_section",
@@ -126,6 +128,20 @@
    "fieldname": "batch_number",
    "fieldtype": "Data",
    "label": "Batch Number",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "serial_number",
+   "fieldtype": "Int",
+   "label": "Serial Number",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "created_on",
+   "fieldtype": "Datetime",
+   "label": "Created On",
    "read_only": 1
   }
  ],
@@ -133,7 +149,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-18 23:14:11.378009",
+ "modified": "2025-12-23 21:38:13.170950",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",
