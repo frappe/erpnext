@@ -52,14 +52,12 @@ class TaxWithholdingEntry(Document):
 	# end: auto-generated types
 
 	def set_status(self, status=None):
-		"""Update the status of this entry based on its current state"""
 		if not status:
 			status = self.get_status()
 
 		self.status = status
 
 	def get_status(self):
-		"""Get the current status of this entry"""
 		if self.docstatus == 2:
 			return "Cancelled"
 
@@ -299,7 +297,6 @@ class TaxWithholdingEntry(Document):
 				)
 
 	def _handle_return_invoice_cancellation(self, filters):
-		"""Handle return invoice cancellation"""
 		# Get old entries that need adjustment - inspired by _adjust_against_old_entries
 		old_entries = frappe.get_all(
 			DOCTYPE,
@@ -380,7 +377,6 @@ class TaxWithholdingController:
 		return category_names
 
 	def calculate(self):
-		"""Main orchestrator for tax withholding calculation"""
 		# Always get category details first for account mapping
 		self.category_details = self._get_category_details()
 
@@ -408,7 +404,6 @@ class TaxWithholdingController:
 		self.doc.extend("tax_withholding_entries", self.entries)
 
 	def _create_entries_for_category(self, category):
-		"""Create tax withholding entries for a specific category"""
 		entries = []
 
 		if not category.taxable_amount:
@@ -519,7 +514,6 @@ class TaxWithholdingController:
 			open_entries["over_withheld"].append(entry)
 
 	def _process_ldc_entries(self, under_entries, over_entries, category):
-		"""Process entries with Lower Deduction Certificate"""
 		ldc_config = {
 			"under_withheld_reason": "Lower Deduction Certificate",
 			"lower_deduction_certificate": category.ldc_certificate,
@@ -535,7 +529,6 @@ class TaxWithholdingController:
 		)
 
 	def _update_taxable_amounts(self):
-		"""Calculate taxable amounts for each category"""
 		if not self.doc.base_net_total:
 			return
 
@@ -563,7 +556,6 @@ class TaxWithholdingController:
 			category["taxable_amount"] += flt(taxable_amount, precision)
 
 	def _update_item_wise_tax_amount(self):
-		"""Update item wise tax amounts based on filters"""
 		for item in self.doc.get("items"):
 			item._item_total_tax_amount = 0
 
@@ -593,7 +585,6 @@ class TaxWithholdingController:
 			category.unused_threshold = self._get_unused_threshold(category)
 
 	def _is_threshold_crossed_for_category(self, category):
-		"""Determine if threshold is crossed for a specific category"""
 		# Manual override - always cross threshold
 		if self.doc.ignore_tax_withholding_threshold:
 			return True
@@ -614,7 +605,6 @@ class TaxWithholdingController:
 		return self._check_historical_threshold_status(category)
 
 	def _check_historical_threshold_status(self, category):
-		"""Check if cumulative threshold is crossed based on historical data"""
 		entry = frappe.qb.DocType(DOCTYPE)
 		result = frappe._dict(
 			self._base_threshold_query(category).where(entry.status.isin(["Settled", "Under Withheld"])).run()
@@ -669,7 +659,6 @@ class TaxWithholdingController:
 		return query
 
 	def _get_historical_entries(self, category):
-		"""Get historical under withheld and over withheld entries"""
 		entry = frappe.qb.DocType(DOCTYPE)
 		base_query = (
 			frappe.qb.from_(entry)
@@ -691,7 +680,6 @@ class TaxWithholdingController:
 		)
 
 	def _get_linked_payments(self):
-		"""Get payments linked to the current document"""
 		references = frappe._dict()
 		for ref in self.doc.advances:
 			key = (ref.reference_type, ref.reference_name)
@@ -700,7 +688,6 @@ class TaxWithholdingController:
 		return references
 
 	def _create_default_entry(self, category):
-		"""Create a default entry template for the given category"""
 		return frappe._dict(
 			{
 				"company": self.doc.company,
@@ -753,7 +740,6 @@ class TaxWithholdingController:
 		self.calculate_taxes_and_totals()
 
 	def _create_tax_row(self, account_head, tax_amount):
-		"""Create a new tax withholding row"""
 		cost_center = self.doc.cost_center or erpnext.get_default_cost_center(self.doc.company)
 		return self.doc.append(
 			"taxes",
@@ -771,7 +757,6 @@ class TaxWithholdingController:
 		)
 
 	def _set_item_wise_tax_for_tds(self, tax_row, account_head, category_withholding_map, for_update=False):
-		"""Set item-wise tax breakup for TDS tax rows"""
 		# Get all categories for this account (multiple categories can share same account)
 		categories_for_account = [
 			cat for cat in self.category_details.values() if cat.account_head == account_head
@@ -840,7 +825,6 @@ class TaxWithholdingController:
 			)
 
 	def _get_category_withholding_map(self):
-		"""Calculate total withholding amount for each category"""
 		category_withholding_map = defaultdict(float)
 
 		for entry in self.doc.tax_withholding_entries:
@@ -851,7 +835,6 @@ class TaxWithholdingController:
 		return category_withholding_map
 
 	def _calculate_account_wise_amount(self):
-		"""Calculate total withholding amounts by account"""
 		account_amount_map = defaultdict(float)
 
 		for entry in self.doc.tax_withholding_entries:
@@ -863,7 +846,6 @@ class TaxWithholdingController:
 		return account_amount_map
 
 	def _remove_zero_tax_rows(self):
-		"""Remove tax withholding rows with zero amounts"""
 		self.doc.taxes = [
 			row for row in self.doc.taxes if not (row.is_tax_withholding_account and not row.tax_amount)
 		]
@@ -1057,7 +1039,6 @@ class TaxWithholdingController:
 		return constraint
 
 	def _create_base_entry(self, source_entry, category, tax_rate, default_obj):
-		"""Create a base entry with common fields"""
 		entry = {}
 		if default_obj:
 			entry.update(default_obj)
@@ -1077,7 +1058,6 @@ class TaxWithholdingController:
 		return entry
 
 	def _should_include_entry(self, entry):
-		"""Check if entry should be included (relates to current document)"""
 		return entry.get("taxable_name") == self.doc.name or entry.get("withholding_name") == self.doc.name
 
 	def compute_withheld_amount(self, taxable_amount, tax_rate, round_off_tax_amount=False):
@@ -1108,7 +1088,6 @@ class TaxWithholdingController:
 			entry.set_status()
 
 	def _is_tax_withholding_applicable(self):
-		"""Check if tax withholding should be applied to this document"""
 		# Clear existing tax withholding amounts before recalculation
 		self._clear_existing_tax_amounts()
 
@@ -1119,7 +1098,6 @@ class TaxWithholdingController:
 		return True
 
 	def _clear_existing_tax_amounts(self):
-		"""Clear existing tax withholding amounts from tax rows"""
 		for row in self.doc.taxes:
 			if row.is_tax_withholding_account and row.tax_amount:
 				row.tax_amount = 0
@@ -1129,11 +1107,9 @@ class TaxWithholdingController:
 		self.doc.calculate_taxes_and_totals()
 
 	def get_conversion_rate(self):
-		"""Get conversion rate for the document"""
 		return self.doc.get("conversion_rate") or 1
 
 	def on_validate(self):
-		"""Validate and calculate tax withholding for sales transactions"""
 		if self._is_tax_withholding_applicable():
 			self.calculate()
 
@@ -1165,15 +1141,12 @@ class PaymentTaxWithholding(TaxWithholdingController):
 		self.party = doc.party
 
 	def _get_category_names(self):
-		"""Get tax withholding category names for payment entries"""
-
 		if not self.doc.tax_withholding_category:
 			return []
 
 		return [self.doc.tax_withholding_category]
 
 	def _update_taxable_amounts(self):
-		"""Calculate taxable amounts for payment entries"""
 		category = next(iter(self.category_details.values()))
 
 		taxable_amount_in_party_currency = self.doc.unallocated_amount
@@ -1243,7 +1216,6 @@ class JournalTaxWithholding(TaxWithholdingController):
 		self._setup_party_info()
 
 	def _setup_party_info(self):
-		"""Get party information for tax withholding calculation"""
 		for row in self.doc.get("accounts"):
 			if row.party_type in ("Customer", "Supplier") and row.party:
 				if self.party and row.party != self.party:
@@ -1276,14 +1248,12 @@ class JournalTaxWithholding(TaxWithholdingController):
 		self.precision = self.doc.precision(self.party_field, self.party_row)
 
 	def _get_category_names(self):
-		"""Get tax withholding category names for journal entries"""
 		if not self.doc.tax_withholding_category:
 			return []
 
 		return [self.doc.tax_withholding_category]
 
 	def _update_taxable_amounts(self):
-		"""Calculate taxable amounts for journal entries"""
 		if not self.category_details:
 			return
 
@@ -1308,11 +1278,9 @@ class JournalTaxWithholding(TaxWithholdingController):
 		)
 
 	def get_conversion_rate(self):
-		"""Get conversion rate from party account row's exchange rate"""
 		return self.party_row.get("exchange_rate", 1.0)
 
 	def calculate_taxes_and_totals(self):
-		"""Recalculate Journal Entry totals after tax updates"""
 		self.doc.set_amounts_in_company_currency()
 		self.doc.set_total_debit_credit()
 		self.doc.set_against_account()
@@ -1446,7 +1414,6 @@ class JournalTaxWithholding(TaxWithholdingController):
 		self._cleanup_duplicate_tds_rows(tax_row)
 
 	def _cleanup_duplicate_tds_rows(self, current_tax_row):
-		"""Remove duplicate TDS rows"""
 		rows_to_remove = [
 			row
 			for row in self.doc.get("accounts")
@@ -1462,7 +1429,6 @@ class JournalTaxWithholding(TaxWithholdingController):
 		self.doc.set_against_account()
 
 	def _is_tax_withholding_applicable(self):
-		"""Check if tax withholding should be applied to this document"""
 		if not self._should_apply_tds():
 			self.doc.tax_withholding_entries = []
 			return False
