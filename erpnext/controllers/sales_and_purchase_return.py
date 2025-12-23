@@ -236,6 +236,7 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
                 )
 
 
+
 def get_ref_item_dict(valid_items, ref_item_row):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
