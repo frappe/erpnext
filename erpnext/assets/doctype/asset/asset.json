@@ -538,7 +538,7 @@
   {
    "depends_on": "eval:(doc.is_existing_asset)",
    "fieldname": "opening_number_of_booked_depreciations",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "label": "Opening Number of Booked Depreciations"
   },
   {
@@ -596,7 +596,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2025-11-17 18:01:51.417942",
+ "modified": "2025-12-23 17:48:56.217689",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

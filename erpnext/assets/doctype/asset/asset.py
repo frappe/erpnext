@@ -47,9 +47,8 @@ class Asset(AccountsController):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from frappe.types import DF
-
 		from erpnext.assets.doctype.asset_finance_book.asset_finance_book import AssetFinanceBook
+		from frappe.types import DF
 
 		additional_asset_cost: DF.Currency
 		amended_from: DF.Link | None
@@ -69,7 +68,6 @@ class Asset(AccountsController):
 		default_finance_book: DF.Link | None
 		department: DF.Link | None
 		depr_entry_posting_status: DF.Literal["", "Successful", "Failed"]
-		depreciation_completed: DF.Check
 		depreciation_method: DF.Literal["", "Straight Line", "Double Declining Balance", "Manual"]
 		disposal_date: DF.Date | None
 		finance_books: DF.Table[AssetFinanceBook]
@@ -91,7 +89,7 @@ class Asset(AccountsController):
 		naming_series: DF.Literal["ACC-ASS-.YYYY.-"]
 		next_depreciation_date: DF.Date | None
 		opening_accumulated_depreciation: DF.Currency
-		opening_number_of_booked_depreciations: DF.Int
+		opening_number_of_booked_depreciations: DF.Float
 		policy_number: DF.Data | None
 		purchase_amount: DF.Currency
 		purchase_date: DF.Date
@@ -100,21 +98,7 @@ class Asset(AccountsController):
 		purchase_receipt: DF.Link | None
 		purchase_receipt_item: DF.Data | None
 		split_from: DF.Link | None
-		status: DF.Literal[
-			"Draft",
-			"Submitted",
-			"Cancelled",
-			"Partially Depreciated",
-			"Fully Depreciated",
-			"Sold",
-			"Scrapped",
-			"In Maintenance",
-			"Out of Order",
-			"Issue",
-			"Receipt",
-			"Capitalized",
-			"Work In Progress",
-		]
+		status: DF.Literal["Draft", "Submitted", "Cancelled", "Partially Depreciated", "Fully Depreciated", "Sold", "Scrapped", "In Maintenance", "Out of Order", "Issue", "Receipt", "Capitalized", "Work In Progress"]
 		supplier: DF.Link | None
 		total_asset_cost: DF.Currency
 		total_number_of_depreciations: DF.Int
