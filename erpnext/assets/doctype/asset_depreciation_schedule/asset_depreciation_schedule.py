@@ -30,19 +30,14 @@ class AssetDepreciationSchedule(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
+		from erpnext.assets.doctype.depreciation_schedule.depreciation_schedule import DepreciationSchedule
 		from frappe.types import DF
-
-		from erpnext.assets.doctype.depreciation_schedule.depreciation_schedule import (
-			DepreciationSchedule,
-		)
 
 		amended_from: DF.Link | None
 		asset: DF.Link
 		company: DF.Link | None
 		daily_prorata_based: DF.Check
-		depreciation_method: DF.Literal[
-			"", "Straight Line", "Double Declining Balance", "Written Down Value", "Manual"
-		]
+		depreciation_method: DF.Literal["", "Straight Line", "Double Declining Balance", "Written Down Value", "Manual"]
 		depreciation_schedule: DF.Table[DepreciationSchedule]
 		expected_value_after_useful_life: DF.Currency
 		finance_book: DF.Link | None
@@ -51,8 +46,8 @@ class AssetDepreciationSchedule(Document):
 		gross_purchase_amount: DF.Currency
 		naming_series: DF.Literal["ACC-ADS-.YYYY.-"]
 		notes: DF.SmallText | None
-		opening_number_of_booked_depreciations: DF.Int
 		opening_accumulated_depreciation: DF.Currency
+		opening_number_of_booked_depreciations: DF.Float
 		rate_of_depreciation: DF.Percent
 		shift_based: DF.Check
 		status: DF.Literal["Draft", "Active", "Cancelled"]
