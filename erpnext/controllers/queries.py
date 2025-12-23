@@ -442,7 +442,7 @@ def get_filterd_batches(data):
 		if batch_data[0] not in batches:
 			batches[batch_data[0]] = list(batch_data)
 		else:
-			batches[batch_data[0]][1] += batch_data[1]
+			batches[batch_data[0]][2] += batch_data[2]
 
 	filterd_batch = []
 	for _batch, batch_data in batches.items():
