@@ -403,6 +403,10 @@ frappe.ui.form.on("Work Order", {
 		erpnext.work_order
 			.show_prompt_for_qty_input(frm, "Disassemble")
 			.then((data) => {
+				if (flt(data.qty) <= 0) {
+					frappe.msgprint(__("Disassemble Qty cannot be less than or equal to <b>0</b>."));
+					return;
+				}
 				return frappe.xcall("erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry", {
 					work_order_id: frm.doc.name,
 					purpose: "Disassemble",

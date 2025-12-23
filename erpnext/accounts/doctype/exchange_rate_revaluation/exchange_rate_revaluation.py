@@ -486,6 +486,9 @@ class ExchangeRateRevaluation(Document):
 		journal_entry.posting_date = self.posting_date
 		journal_entry.multi_currency = 1
 
+		# Prevent JE from overriding user-entered exchange rates (e.g., rate of 1)
+		journal_entry.flags.ignore_exchange_rate = True
+
 		journal_entry_accounts = []
 		for d in accounts:
 			if not flt(d.get("balance_in_account_currency"), d.precision("balance_in_account_currency")):

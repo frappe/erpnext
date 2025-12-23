@@ -204,6 +204,7 @@ def update_stock(ctx, out, doc=None):
 				"item_code": ctx.item_code,
 				"warehouse": ctx.warehouse,
 				"based_on": frappe.db.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
+				"qty": out.stock_qty,
 			}
 		)
 

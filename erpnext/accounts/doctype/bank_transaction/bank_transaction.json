@@ -38,7 +38,10 @@
   "column_break_3czf",
   "bank_party_name",
   "bank_party_account_number",
-  "bank_party_iban"
+  "bank_party_iban",
+  "extended_bank_statement_section",
+  "included_fee",
+  "excluded_fee"
  ],
  "fields": [
   {
@@ -233,12 +236,32 @@
   {
    "fieldname": "column_break_oufv",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "extended_bank_statement_section",
+   "fieldtype": "Section Break",
+   "label": "Extended Bank Statement"
+  },
+  {
+   "fieldname": "included_fee",
+   "fieldtype": "Currency",
+   "label": "Included Fee",
+   "non_negative": 1,
+   "options": "currency"
+  },
+  {
+   "description": "On save, the Excluded Fee will be converted to an Included Fee.",
+   "fieldname": "excluded_fee",
+   "fieldtype": "Currency",
+   "label": "Excluded Fee",
+   "non_negative": 1,
+   "options": "currency"
   }
  ],
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-23 17:32:58.514807",
+ "modified": "2025-12-07 20:49:18.600757",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction",
