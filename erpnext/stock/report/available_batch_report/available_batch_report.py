@@ -117,7 +117,7 @@ def get_batchwise_data_from_stock_ledger(filters):
 	query = get_query_based_on_filters(query, batch, table, filters)
 
 	for d in query.run(as_dict=True):
-		key = (d.item_code, d.warehouse, d.batch_no)
+		key = (d.item_code, d.warehouse, d.batch_id)
 		batchwise_data.setdefault(key, d)
 
 	return batchwise_data
@@ -151,7 +151,7 @@ def get_batchwise_data_from_serial_batch_bundle(batchwise_data, filters):
 	query = get_query_based_on_filters(query, batch, table, filters)
 
 	for d in query.run(as_dict=True):
-		key = (d.item_code, d.warehouse, d.batch_no)
+		key = (d.item_code, d.warehouse, d.batch_id)
 		if key in batchwise_data:
 			batchwise_data[key].balance_qty += flt(d.balance_qty)
 		else:
