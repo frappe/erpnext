@@ -2091,9 +2091,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose == "Material Issue":
 			ret["expense_account"] = item.get("expense_account") or item_group_defaults.get("expense_account")
 
-		if (self.purpose == "Manufacture" and not args.get("is_finished_item")) or not ret.get(
-			"expense_account"
-		):
+		if not ret.get("expense_account"):
 			ret["expense_account"] = frappe.get_cached_value(
 				"Company", self.company, "stock_adjustment_account"
 			)
@@ -2716,6 +2714,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return item_dict
 
 	def get_scrap_items_from_job_card(self):
+		if not hasattr(self, "pro_doc"):
+			self.pro_doc = None
+
 		if not self.pro_doc:
 			self.set_work_order_details()
 
@@ -2742,9 +2743,17 @@ class StockEntry(StockController, SubcontractingInwardController):
 				& (job_card.docstatus == 1)
 			)
 			.groupby(job_card_scrap_item.item_code)
-		).run(as_dict=1)
+		)
 
-		pending_qty = flt(self.get_completed_job_card_qty()) - flt(self.pro_doc.produced_qty)
+		if self.job_card:
+			scrap_items = scrap_items.where(job_card.name == self.job_card)
+
+		scrap_items = scrap_items.run(as_dict=1)
+
+		if self.job_card:
+			pending_qty = flt(self.fg_completed_qty)
+		else:
+			pending_qty = flt(self.get_completed_job_card_qty()) - flt(self.pro_doc.produced_qty)
 
 		used_scrap_items = self.get_used_scrap_items()
 		for row in scrap_items:

@@ -250,6 +250,7 @@ frappe.ui.form.on("BOM", {
 			});
 		}
 
+		frm.phantom_bom_filters.filters.is_stock_item = !frm.doc.is_phantom_bom;
 		if (frm.doc.is_phantom_bom) {
 			frm.phantom_bom_filters.filters.is_fixed_asset = 0;
 		} else {

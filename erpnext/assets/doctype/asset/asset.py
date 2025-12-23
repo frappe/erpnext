@@ -144,7 +144,6 @@ class Asset(AccountsController):
 
 		created_schedules = []
 		for fb_row in self.get("finance_books"):
-			self.validate_asset_finance_books(fb_row)
 			if not fb_row.rate_of_depreciation:
 				fb_row.rate_of_depreciation = self.get_depreciation_rate(fb_row, on_validate=True)
 
@@ -589,6 +588,7 @@ class Asset(AccountsController):
 
 	def set_depreciation_rate(self):
 		for d in self.get("finance_books"):
+			self.validate_asset_finance_books(d)
 			d.rate_of_depreciation = flt(
 				self.get_depreciation_rate(d, on_validate=True), d.precision("rate_of_depreciation")
 			)
@@ -597,6 +597,9 @@ class Asset(AccountsController):
 		row.expected_value_after_useful_life = flt(
 			row.expected_value_after_useful_life, self.precision("net_purchase_amount")
 		)
+
+		if flt(row.expected_value_after_useful_life) < 0:
+			frappe.throw(_("Row {0}: Expected Value After Useful Life cannot be negative").format(row.idx))
 		if flt(row.expected_value_after_useful_life) >= flt(self.net_purchase_amount):
 			frappe.throw(
 				_("Row {0}: Expected Value After Useful Life must be less than Net Purchase Amount").format(
@@ -607,6 +610,7 @@ class Asset(AccountsController):
 		if not row.depreciation_start_date:
 			row.depreciation_start_date = get_last_day(self.available_for_use_date)
 		self.validate_depreciation_start_date(row)
+		self.validate_total_number_of_depreciations_and_frequency(row)
 
 		if not self.is_existing_asset:
 			self.opening_accumulated_depreciation = 0
@@ -642,6 +646,15 @@ class Asset(AccountsController):
 				).format(row.idx),
 				title=_("Invalid Schedule"),
 			)
+
+	def validate_total_number_of_depreciations_and_frequency(self, row):
+		if row.total_number_of_depreciations <= 0:
+			frappe.throw(
+				_("Row #{0}: Total Number of Depreciations must be greater than zero").format(row.idx)
+			)
+
+		if row.frequency_of_depreciation <= 0:
+			frappe.throw(_("Row #{0}: Frequency of Depreciation must be greater than zero").format(row.idx))
 
 	def validate_depreciation_start_date(self, row):
 		if row.depreciation_start_date:

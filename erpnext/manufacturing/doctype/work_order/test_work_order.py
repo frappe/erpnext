@@ -3524,6 +3524,199 @@ class TestWorkOrder(IntegrationTestCase):
 		)
 		frappe.db.set_single_value("Stock Settings", "auto_reserve_serial_and_batch", original_auto_reserve)
 
+	def test_phantom_bom_item_not_in_additional_cost(self):
+		"""Test that phantom BOMs are not added to additional costs,
+		but regular non-stock items in the FG BOM are added."""
+
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		# Create items:
+		# - FG Item (stock item)
+		# - Phantom sub-assembly (non-stock item to be phantom)
+		# - Phantom RM (stock item - component of phantom BOM)
+		# - Packing Material (non-stock item - directly in FG BOM)
+		# - Regular RM (stock item - directly in FG BOM)
+
+		fg_item = make_item(
+			"Test FG Item For Phantom Non Stock",
+			{"is_stock_item": 1, "valuation_rate": 100},
+		).name
+
+		phantom_item = make_item(
+			"Test Phantom Sub Assembly Non Stock",
+			{"is_stock_item": 0, "valuation_rate": 0},
+		).name
+
+		phantom_rm = make_item(
+			"Test Phantom RM Item",
+			{"is_stock_item": 1, "valuation_rate": 200},
+		).name
+
+		packing_material = make_item(
+			"Test Packing Material Non Stock",
+			{"is_stock_item": 0, "valuation_rate": 150},
+		).name
+
+		regular_rm = make_item(
+			"Test Regular RM Stock Item",
+			{"is_stock_item": 1, "valuation_rate": 100},
+		).name
+
+		# Create price list entries for non-stock items
+		price_list = "_Test Price List India"
+		for item_code, rate in [
+			(phantom_item, 500),
+			(phantom_rm, 200),
+			(packing_material, 150),
+		]:
+			if not frappe.db.get_value("Item Price", {"item_code": item_code, "price_list": price_list}):
+				frappe.get_doc(
+					{
+						"doctype": "Item Price",
+						"item_code": item_code,
+						"price_list_rate": rate,
+						"price_list": price_list,
+					}
+				).insert(ignore_permissions=True)
+
+		# Create Phantom BOM (for the phantom sub-assembly)
+		phantom_bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": phantom_item,
+				"is_default": 1,
+				"is_active": 1,
+				"is_phantom_bom": 1,  # Mark as phantom BOM
+				"currency": "INR",
+				"quantity": 1,
+				"company": "_Test Company",
+				"rm_cost_as_per": "Price List",
+				"buying_price_list": price_list,
+			}
+		)
+		phantom_bom.append(
+			"items",
+			{
+				"item_code": phantom_rm,
+				"qty": 1,
+				"rate": 200,
+			},
+		)
+		phantom_bom.insert()
+		phantom_bom.submit()
+
+		# Create FG BOM with phantom item, packing material, and regular RM
+		fg_bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"is_default": 1,
+				"is_active": 1,
+				"currency": "INR",
+				"quantity": 1,
+				"company": "_Test Company",
+				"rm_cost_as_per": "Price List",
+				"buying_price_list": price_list,
+			}
+		)
+
+		# Add phantom item (will be marked as is_phantom_item based on is_phantom_bom)
+		fg_bom.append(
+			"items",
+			{
+				"item_code": phantom_item,
+				"qty": 1,
+				"rate": 200,
+				"bom_no": phantom_bom.name,
+			},
+		)
+
+		# Add packing material (non-stock, directly in FG BOM)
+		fg_bom.append(
+			"items",
+			{
+				"item_code": packing_material,
+				"qty": 1,
+				"rate": 150,
+			},
+		)
+
+		# Add regular RM (stock item)
+		fg_bom.append(
+			"items",
+			{
+				"item_code": regular_rm,
+				"qty": 1,
+				"rate": 100,
+			},
+		)
+
+		fg_bom.insert()
+		fg_bom.submit()
+
+		# Ensure stock
+		test_stock_entry.make_stock_entry(
+			item_code=regular_rm,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+		)
+
+		test_stock_entry.make_stock_entry(
+			item_code=phantom_rm,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=200,
+		)
+
+		# Create work order
+		wo = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=fg_bom.name,
+			qty=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+
+		# Transfer materials
+		se_transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 1))
+		se_transfer.insert()
+		se_transfer.submit()
+
+		# Manufacture
+		se_manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
+		se_manufacture.insert()
+
+		# Verify additional costs
+		self.assertTrue(se_manufacture.additional_costs, "Additional costs should not be empty")
+		total_additional_cost = sum(row.amount for row in se_manufacture.additional_costs)
+
+		self.assertEqual(
+			total_additional_cost,
+			150,  # only packing material; phantom RM excluded
+			f"Additional cost should be 150 (packing material only), got {total_additional_cost}",
+		)
+
+		self.assertEqual(
+			se_manufacture.total_outgoing_value,
+			300,  # 100 (regular RM) + 200 (phantom RM)
+			f"Total outgoing value should be 300, got {se_manufacture.total_outgoing_value}",
+		)
+
+		self.assertEqual(
+			se_manufacture.total_incoming_value,
+			450,  # 300 (RM total) + 150 (packing material)
+			f"Total incoming value should be 450, got {se_manufacture.total_incoming_value}",
+		)
+
+		# Clean up
+		se_manufacture.submit()
+		se_manufacture.cancel()
+		se_transfer.cancel()
+		wo.reload()
+		wo.cancel()
+		fg_bom.cancel()
+		phantom_bom.cancel()
+
 	def test_phantom_bom_explosion(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_tree_for_phantom_bom_tests
 

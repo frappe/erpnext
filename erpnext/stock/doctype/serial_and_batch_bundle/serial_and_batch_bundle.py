@@ -246,6 +246,7 @@ class SerialandBatchBundle(Document):
 			"sabb_voucher_no": self.voucher_no,
 			"sabb_voucher_detail_no": self.voucher_detail_no,
 		}
+
 		if self.voucher_type == "POS Invoice":
 			kwargs["ignore_voucher_nos"] = [self.voucher_no]
 
@@ -2012,9 +2013,9 @@ def get_available_serial_nos(kwargs):
 
 	order_by = "creation"
 	if kwargs.based_on == "LIFO":
-		order_by = "creation desc"
+		order_by = "creation"
 	elif kwargs.based_on == "Expiry":
-		order_by = "amc_expiry_date asc"
+		order_by = "amc_expiry_date"
 
 	if not kwargs.get("posting_datetime") and kwargs.get("posting_date"):
 		kwargs["posting_datetime"] = combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
@@ -2088,7 +2089,12 @@ def get_serial_nos_based_on_filters(filters, fields, order_by, kwargs):
 	doctype = frappe.qb.DocType("Serial No")
 
 	order_by_column = getattr(doctype, order_by)
-	query = frappe.qb.from_(doctype).orderby(order_by_column).limit(cint(kwargs.qty) or 10000000).for_update()
+	query = frappe.qb.from_(doctype).limit(cint(kwargs.qty) or 10000000).for_update()
+
+	if kwargs.based_on == "LIFO":
+		query = query.orderby(order_by_column, order=frappe.query_builder.Order.desc)
+	else:
+		query = query.orderby(order_by_column)
 
 	for key, value in filters.items():
 		column = getattr(doctype, key)
