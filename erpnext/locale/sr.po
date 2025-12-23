@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-21 09:37+0000\n"
-"PO-Revision-Date: 2025-12-22 03:08\n"
+"PO-Revision-Date: 2025-12-23 03:03\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Serbian (Cyrillic)\n"
 "MIME-Version: 1.0\n"
@@ -936,7 +936,7 @@ msgstr "<span class=\"h4\"><b>Пречице</b></span>"
 #. Header text in the Subcontracting Workspace
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "<span class=\"h4\"><b>Subcontracting Inward and Outward</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Издавање и пријем из подуговарања</b></span>"
 
 #. Header text in the Settings Workspace
 #: erpnext/setup/workspace/settings/settings.json
@@ -2317,7 +2317,7 @@ msgstr "Статус активан"
 #. Label of a number card in the Subcontracting Workspace
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "Active Subcontracted Items"
-msgstr ""
+msgstr "Активне подуговорене ставке"
 
 #. Label of the activities_tab (Tab Break) field in DocType 'Lead'
 #. Label of the activities_tab (Tab Break) field in DocType 'Opportunity'
@@ -6420,7 +6420,7 @@ msgstr "Просечан попуст"
 #. Label of a number card in the Buying Workspace
 #: erpnext/buying/workspace/buying/buying.json
 msgid "Average Order Values"
-msgstr ""
+msgstr "Просечна вредност поруџбина"
 
 #: erpnext/accounts/report/share_balance/share_balance.py:60
 msgid "Average Rate"
@@ -7573,7 +7573,7 @@ msgstr "Количина шарже"
 
 #: erpnext/stock/report/stock_qty_vs_batch_qty/stock_qty_vs_batch_qty.py:120
 msgid "Batch Qty updated successfully"
-msgstr ""
+msgstr "Количина шарже је успешно ажурирана"
 
 #: erpnext/stock/doctype/batch/batch.py:177
 msgid "Batch Qty updated to {0}"
@@ -9042,7 +9042,7 @@ msgstr "Не може се обрисати број серије {0}, јер с
 
 #: erpnext/controllers/accounts_controller.py:3768
 msgid "Cannot delete an item which has been ordered"
-msgstr ""
+msgstr "Није могуће обрисати ставку која је већ поручена"
 
 #: erpnext/setup/doctype/company/company.py:552
 msgid "Cannot disable perpetual inventory, as there are existing Stock Ledger Entries for the company {0}. Please cancel the stock transactions first and try again."
@@ -9099,7 +9099,7 @@ msgstr "Не може се примити од купца против нега�
 
 #: erpnext/controllers/accounts_controller.py:3900
 msgid "Cannot reduce quantity than ordered or purchased quantity"
-msgstr ""
+msgstr "Није могуће смањити количину испод поручене или набављене количине"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1506
 #: erpnext/controllers/accounts_controller.py:3187
@@ -9238,7 +9238,7 @@ msgstr "Капитализовати трошак поправке"
 
 #: erpnext/assets/doctype/asset/asset.js:208
 msgid "Capitalize this asset before submitting."
-msgstr ""
+msgstr "Капитализујте ову имовину пре подношења."
 
 #. Option for the 'Status' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -10901,7 +10901,7 @@ msgstr "Завршена операција"
 #. Label of a chart in the Projects Workspace
 #: erpnext/projects/workspace/projects/projects.json
 msgid "Completed Projects"
-msgstr ""
+msgstr "Завршени пројекти"
 
 #. Label of the completed_qty (Float) field in DocType 'Job Card Operation'
 #. Label of the completed_qty (Float) field in DocType 'Job Card Time Log'
@@ -17177,7 +17177,7 @@ msgstr "Омогући рачун инвентара по ставкама"
 #. Reposting Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Enable Parallel Reposting"
-msgstr ""
+msgstr "Омогућите паралелно поновно књижење"
 
 #. Label of the enable_perpetual_inventory (Check) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -17775,7 +17775,7 @@ msgstr "Искључени DocTypes"
 #. Label of the excluded_fee (Currency) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
 msgid "Excluded Fee"
-msgstr ""
+msgstr "Искључена накнада"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:265
 msgid "Execution"
@@ -17796,7 +17796,7 @@ msgstr "Ослобођење испоруке"
 #. Label of the exempted_role (Link) field in DocType 'Accounting Period'
 #: erpnext/accounts/doctype/accounting_period/accounting_period.json
 msgid "Exempted Role"
-msgstr ""
+msgstr "Изузета улога"
 
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:5
 msgid "Exhibition"
@@ -18101,7 +18101,7 @@ msgstr "Извоз еФактура"
 #. DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
 msgid "Extended Bank Statement"
-msgstr ""
+msgstr "Проширени банкарски извод"
 
 #. Label of the external_work_history (Table) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -22171,11 +22171,11 @@ msgstr "Укључи у бруто"
 #. Label of the included_fee (Currency) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
 msgid "Included Fee"
-msgstr ""
+msgstr "Укључена накнада"
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.py:322
 msgid "Included fee is bigger than the withdrawal itself."
-msgstr ""
+msgstr "Укључена накнада је већа од самог повлачења средстава."
 
 #: erpnext/accounts/report/gross_and_net_profit_report/gross_and_net_profit_report.py:74
 #: erpnext/accounts/report/gross_and_net_profit_report/gross_and_net_profit_report.py:75
@@ -23027,7 +23027,7 @@ msgstr "Неважећа серија именовања (. недостаје) 
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:544
 msgid "Invalid parameter. 'dn' should be of type str"
-msgstr ""
+msgstr "Неважећи параметар. 'dn' треба бити врсте str"
 
 #: erpnext/utilities/transaction_base.py:68
 msgid "Invalid reference {0} {1}"
@@ -27276,7 +27276,7 @@ msgstr "Производња према захтеву за набавку"
 #. Label of a number card in the Manufacturing Workspace
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
 msgid "Manufactured Items Value"
-msgstr ""
+msgstr "Вредност произведених ставки"
 
 #. Label of the manufactured_qty (Float) field in DocType 'Job Card'
 #. Label of the produced_qty (Float) field in DocType 'Work Order'
@@ -29686,7 +29686,7 @@ msgstr "Број месеци (приходи)"
 #. Reposting Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "No of Parallel Reposting (Per Item)"
-msgstr ""
+msgstr "Број паралелних поновних књижења (по ставци)"
 
 #. Label of the no_of_shares (Int) field in DocType 'Share Balance'
 #. Label of the no_of_shares (Int) field in DocType 'Share Transfer'
@@ -29826,7 +29826,7 @@ msgstr "Број паралелних радних картица који се 
 #. Label of a number card in the Projects Workspace
 #: erpnext/projects/workspace/projects/projects.json
 msgid "Non Completed Tasks"
-msgstr ""
+msgstr "Незавршени задаци"
 
 #. Name of a DocType
 #. Label of a Link in the Quality Workspace
@@ -30335,7 +30335,7 @@ msgstr "Проширивањем реда у табели ставке за пр
 #. Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
 msgid "On save, the Excluded Fee will be converted to an Included Fee."
-msgstr ""
+msgstr "Приликом чувања, искључена накнада ће бити претворена у укључену накнаду."
 
 #. Description of the 'Use Serial / Batch Fields' (Check) field in DocType
 #. 'Stock Settings'
@@ -30439,7 +30439,7 @@ msgstr "Само су независни чворови дозвољени у т
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.py:337
 msgid "Only one of Deposit or Withdrawal should be non-zero when applying an Excluded Fee."
-msgstr ""
+msgstr "Приликом примене искључене накнаде, само депозит или повлачење средстава може имати вредност различиту од нуле."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1166
 msgid "Only one {0} entry can be created against the Work Order {1}"
@@ -34266,7 +34266,7 @@ msgstr "Молимо Вас да откажете повезану транса�
 #: erpnext/assets/doctype/asset/asset.js:85
 #: erpnext/assets/doctype/asset/asset.py:248
 msgid "Please capitalize this asset before submitting."
-msgstr ""
+msgstr "Молимо Вас да капитализујете ову имовину пре подношења."
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:941
 msgid "Please check Multi Currency option to allow accounts with other currency"
@@ -34871,7 +34871,7 @@ msgstr "Молимо Вас да изаберете барем један ред
 
 #: erpnext/stock/report/stock_qty_vs_batch_qty/stock_qty_vs_batch_qty.js:50
 msgid "Please select at least one row with difference value"
-msgstr ""
+msgstr "Молимо Вас да изаберете најмање један ред са вредношћу разлике"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1288
 msgid "Please select atleast one item to continue"
@@ -37463,7 +37463,7 @@ msgstr "Набавне поруџбине"
 #. Label of a number card in the Buying Workspace
 #: erpnext/buying/workspace/buying/buying.json
 msgid "Purchase Orders Count"
-msgstr ""
+msgstr "Број набавних поруџбина"
 
 #. Label of the purchase_orders_items_overdue (Check) field in DocType 'Email
 #. Digest'
@@ -38231,7 +38231,7 @@ msgstr "Инспекције квалитета"
 #. Label of a chart in the Quality Workspace
 #: erpnext/quality_management/workspace/quality/quality.json
 msgid "Quality Inspections"
-msgstr ""
+msgstr "Инспекције квалитета"
 
 #: erpnext/setup/doctype/company/company.py:496
 msgid "Quality Management"
@@ -39031,7 +39031,7 @@ msgstr "Јединичне цене"
 
 #: erpnext/controllers/accounts_controller.py:4017
 msgid "Rates cannot be modified for quoted items"
-msgstr ""
+msgstr "Цене се не могу мењати за ставке које су већ понуђене"
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:48
 msgid "Ratios"
@@ -41503,7 +41503,7 @@ msgstr "Улоге које имају дозволу да заобиђу лим
 #. Period'
 #: erpnext/accounts/doctype/accounting_period/accounting_period.json
 msgid "Role allowed to bypass period restrictions."
-msgstr ""
+msgstr "Улога којој је дозвољено заобилажење ограничења периода."
 
 #. Label of the role_to_notify_on_depreciation_failure (Link) field in DocType
 #. 'Accounts Settings'
@@ -42775,7 +42775,7 @@ msgstr "Ред {0}: За постављање периодичности {1}, р
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:3243
 msgid "Row {0}: Transferred quantity cannot be greater than the requested quantity."
-msgstr ""
+msgstr "Ред {0}: Пренета количина не може бити већа од затражене количине."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:519
 msgid "Row {0}: UOM Conversion Factor is mandatory"
@@ -47331,7 +47331,7 @@ msgstr "Количина залиха"
 #. Name of a report
 #: erpnext/stock/report/stock_qty_vs_batch_qty/stock_qty_vs_batch_qty.json
 msgid "Stock Qty vs Batch Qty"
-msgstr ""
+msgstr "Количина на залихама у односу на количину шарже"
 
 #. Name of a report
 #: erpnext/stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.json
@@ -47705,7 +47705,7 @@ msgstr "Вредност залиха"
 #. Label of a chart in the Stock Workspace
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Stock Value by Item Group"
-msgstr ""
+msgstr "Вредност залиха по групи ставки"
 
 #. Name of a report
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.json
@@ -48031,7 +48031,7 @@ msgstr "Налог за пријем из подуговарања"
 #. Label of a number card in the Subcontracting Workspace
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "Subcontracting Inward Order Count"
-msgstr ""
+msgstr "Број налога за пријем из подуговарања"
 
 #. Label of the subcontracting_inward_order_item (Data) field in DocType 'Work
 #. Order'
@@ -48117,12 +48117,12 @@ msgstr "Налог за подуговарање {0} је креиран."
 #. Label of a Link in the Subcontracting Workspace
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "Subcontracting Outward Order"
-msgstr ""
+msgstr "Налог за издавање у подуговарању"
 
 #. Label of a number card in the Subcontracting Workspace
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "Subcontracting Outward Order Count"
-msgstr ""
+msgstr "Број налога за издавање у подуговарању"
 
 #. Label of the purchase_order (Link) field in DocType 'Subcontracting Order'
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
@@ -50280,7 +50280,7 @@ msgstr "Врста документа {0} мора имати поље стат�
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.py:332
 msgid "The Excluded Fee is bigger than the Deposit it is deducted from."
-msgstr ""
+msgstr "Искључена накнада је већа од депозита од ког се одбија."
 
 #: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:178
 msgid "The GL Entries and closing balances will be processed in the background, it can take a few minutes."
@@ -53489,7 +53489,7 @@ msgstr "Ажурирај трошак саставнице аутоматски 
 
 #: erpnext/stock/report/stock_qty_vs_batch_qty/stock_qty_vs_batch_qty.js:31
 msgid "Update Batch Qty"
-msgstr ""
+msgstr "Ажурирај количину шарже"
 
 #. Label of the update_billed_amount_in_delivery_note (Check) field in DocType
 #. 'POS Invoice'
@@ -54856,7 +54856,7 @@ msgstr "Складиште недовршене производње"
 #. Label of a number card in the Manufacturing Workspace
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
 msgid "WIP Work Orders"
-msgstr ""
+msgstr "Радни налози у току"
 
 #: erpnext/manufacturing/doctype/workstation/test_workstation.py:127
 #: erpnext/patches/v16_0/make_workstation_operating_components.py:50
