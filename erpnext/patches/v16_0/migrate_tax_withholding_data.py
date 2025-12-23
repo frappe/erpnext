@@ -376,7 +376,7 @@ class PurchaseInvoiceMigrator:
 				ptc.base_tax_amount_after_discount_amount,
 			)
 			.where(pi.docstatus == 1)
-			.where(ptc.is_tax_withholding_account == 1)
+			.where(ptc.account_head.isin(list(self.all_tds_accounts)))
 			.run(as_dict=True)
 		)
 
@@ -679,7 +679,7 @@ class PurchaseInvoiceMigrator:
 		tds_for_current_and_past = abs(ctx["total_tds_in_invoice"])
 
 		# Calculate TDS split between current and past invoices
-		if ctx["past_taxable_total"] > 0 and tax_rate:
+		if not ctx["tax_on_excess"] and ctx["past_taxable_total"] > 0 and tax_rate:
 			tds_for_past = flt(ctx["past_taxable_total"] * tax_rate / 100, 2)
 			tds_for_current = max(0, tds_for_current_and_past - tds_for_past)
 		else:
@@ -1074,7 +1074,8 @@ def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_
 			frappe.qb.from_(jea)
 			.select(jea.parent, jea.party_type, jea.party, jea.account)
 			.where(jea.parent.isin(je_names))
-			.where(jea.party_type.isin(["Supplier", "Customer"]))
+			.where(jea.party_type.isnotnull())
+			.where(jea.party_type != "")
 			.where(jea.party.isnotnull())
 			.where(jea.party != "")
 			.where(jea.account.notin(list(all_tds_accounts)))  # Exclude TDS account rows
@@ -1092,6 +1093,7 @@ def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_
 		je_taxes[row.journal_entry]["gl_rows"].append(row)
 
 	all_entries = {}
+	category_wise_jes = defaultdict(set)
 
 	for je_name, data in je_taxes.items():
 		info = data["info"]
@@ -1169,7 +1171,16 @@ def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_
 		entries.append(entry)
 		all_entries[("Journal Entry", je_name)] = entries
 
+		category_wise_jes[category].add(je_name)
+
 	bulk_insert_entries(all_entries)
+
+	for category, je_names in category_wise_jes.items():
+		frappe.db.set_value(
+			"Journal Entry",
+			{"name": ("in", list(je_names))},
+			{"apply_tds": 1, "tax_withholding_category": category},
+		)
 
 
 # =============================================================================
