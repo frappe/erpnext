@@ -1719,7 +1719,6 @@ class PurchaseInvoice(BuyingController):
 			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
-			"Tax Withheld Vouchers",
 			"Serial and Batch Bundle",
 			"Tax Withholding Entry",
 		)
