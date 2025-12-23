@@ -233,6 +233,8 @@ def bulk_insert_entries(all_entries):
 		"withholding_date",
 		"status",
 		"under_withheld_reason",
+		"currency",
+		"conversion_rate",
 		"created_by_migration",
 	]
 
@@ -279,6 +281,8 @@ def bulk_insert_entries(all_entries):
 					entry.get("withholding_date"),
 					status,
 					entry.get("under_withheld_reason", ""),
+					entry.get("currency", ""),
+					flt(entry.get("conversion_rate"), 9) or 1,
 					1,  # created_by_migration
 				)
 			)
@@ -369,6 +373,8 @@ class PurchaseInvoiceMigrator:
 				pi.base_tax_withholding_net_total,
 				pi.tax_withholding_category,
 				pi.is_return,
+				pi.currency,
+				pi.conversion_rate,
 				ptc.account_head,
 				ptc.base_tax_amount_after_discount_amount,
 			)
@@ -395,6 +401,8 @@ class PurchaseInvoiceMigrator:
 				pi.base_tax_withholding_net_total,
 				pi.tax_withholding_category,
 				pi.is_return,
+				pi.currency,
+				pi.conversion_rate,
 			)
 			.where(twv.parenttype == "Purchase Invoice")
 			.where(pi.docstatus == 1)
@@ -419,6 +427,8 @@ class PurchaseInvoiceMigrator:
 				pi.base_tax_withholding_net_total,
 				pi.tax_withholding_category,
 				pi.is_return,
+				pi.currency,
+				pi.conversion_rate,
 			)
 			.where(at.parenttype == "Purchase Invoice")
 			.where(at.reference_type == "Payment Entry")
@@ -439,6 +449,11 @@ class PurchaseInvoiceMigrator:
 				pe.posting_date,
 				pe.paid_amount,
 				pe.tax_withholding_category,
+				pe.paid_from_account_currency,
+				pe.paid_to_account_currency,
+				pe.source_exchange_rate,
+				pe.target_exchange_rate,
+				pe.payment_type,
 				atc.account_head,
 				atc.base_tax_amount,
 				atc.add_deduct_tax,
@@ -817,6 +832,14 @@ class PurchaseInvoiceMigrator:
 			else:
 				unallocated_taxable = info.paid_amount
 
+			# Get currency and conversion rate based on payment type
+			if info.payment_type == "Receive":
+				currency = info.paid_from_account_currency
+				conversion_rate = info.source_exchange_rate or 1
+			else:
+				currency = info.paid_to_account_currency
+				conversion_rate = info.target_exchange_rate or 1
+
 			entry = {
 				"company": info.company,
 				"party_type": party_type,
@@ -832,6 +855,8 @@ class PurchaseInvoiceMigrator:
 				"withholding_doctype": "Payment Entry",
 				"withholding_name": pe_name,
 				"withholding_date": info.posting_date,
+				"currency": currency,
+				"conversion_rate": conversion_rate,
 			}
 
 			self._add_entries("Payment Entry", pe_name, [entry])
@@ -856,6 +881,8 @@ class PurchaseInvoiceMigrator:
 			"tax_id": ctx["tax_id"],
 			"tax_withholding_category": ctx["category"],
 			"tax_rate": ctx["tax_rate"],
+			"currency": ctx["info"].currency,
+			"conversion_rate": ctx["info"].conversion_rate or 1,
 			**kwargs,
 		}
 
@@ -909,6 +936,8 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 			si.company,
 			si.base_grand_total,
 			si.is_return,
+			si.currency,
+			si.conversion_rate,
 			cust.tax_withholding_category,
 			Sum(Case().when(gle.account.isin(tcs_accounts_list), gle.credit - gle.debit).else_(0)).as_(
 				"total_tcs"
@@ -979,6 +1008,8 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 				"withholding_name": row.invoice_name,
 				"withholding_date": row.posting_date,
 				"under_withheld_reason": "Threshold Exemption",
+				"currency": row.currency,
+				"conversion_rate": row.conversion_rate or 1,
 			}
 			entries.append(threshold_entry)
 
@@ -997,6 +1028,8 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 			"withholding_doctype": "Sales Invoice",
 			"withholding_name": row.invoice_name,
 			"withholding_date": row.posting_date,
+			"currency": row.currency,
+			"conversion_rate": row.conversion_rate or 1,
 		}
 		entries.append(entry)
 
@@ -1069,7 +1102,14 @@ def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_
 		# Get party from JE Account rows that are NOT TDS accounts
 		jea_party_rows = (
 			frappe.qb.from_(jea)
-			.select(jea.parent, jea.party_type, jea.party, jea.account)
+			.select(
+				jea.parent,
+				jea.party_type,
+				jea.party,
+				jea.account,
+				jea.account_currency,
+				jea.exchange_rate,
+			)
 			.where(jea.parent.isin(je_names))
 			.where(jea.party_type.isnotnull())
 			.where(jea.party_type != "")
@@ -1080,7 +1120,7 @@ def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_
 		)
 		for row in jea_party_rows:
 			if row.parent not in je_parties:
-				je_parties[row.parent] = (row.party_type, row.party)
+				je_parties[row.parent] = (row.party_type, row.party, row.account_currency, row.exchange_rate)
 
 	# Group by journal entry
 	je_taxes = {}
@@ -1115,9 +1155,11 @@ def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_
 		# Get party from JE accounts (non-TDS rows)
 		party_type = None
 		party = None
+		account_currency = ""
+		exchange_rate = 1
 
 		if je_name in je_parties:
-			party_type, party = je_parties[je_name]
+			party_type, party, account_currency, exchange_rate = je_parties[je_name]
 
 		tax_id = get_party_tax_id(party_type, party, column_cache, party_tax_id_cache) if party else None
 		tax_rate, tax_on_excess = get_tax_rate_for_date(tax_rate_map, category, info.posting_date)
@@ -1148,6 +1190,8 @@ def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_
 				"withholding_name": je_name,
 				"withholding_date": info.posting_date,
 				"under_withheld_reason": "Threshold Exemption",
+				"currency": account_currency or "",
+				"conversion_rate": flt(exchange_rate, 9) or 1,
 			}
 			entries.append(threshold_entry)
 
@@ -1166,6 +1210,8 @@ def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_
 			"withholding_doctype": "Journal Entry",
 			"withholding_name": je_name,
 			"withholding_date": info.posting_date,
+			"currency": account_currency or "",
+			"conversion_rate": flt(exchange_rate, 9) or 1,
 		}
 		entries.append(entry)
 		all_entries[("Journal Entry", je_name)] = entries
