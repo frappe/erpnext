@@ -15,9 +15,7 @@ class AssetFinanceBook(Document):
 		from frappe.types import DF
 
 		daily_prorata_based: DF.Check
-		depreciation_method: DF.Literal[
-			"", "Straight Line", "Double Declining Balance", "Written Down Value", "Manual"
-		]
+		depreciation_method: DF.Literal["", "Straight Line", "Double Declining Balance", "Written Down Value", "Manual"]
 		depreciation_start_date: DF.Date | None
 		expected_value_after_useful_life: DF.Currency
 		finance_book: DF.Link | None
@@ -28,8 +26,8 @@ class AssetFinanceBook(Document):
 		rate_of_depreciation: DF.Percent
 		salvage_value_percentage: DF.Percent
 		shift_based: DF.Check
-		total_number_of_booked_depreciations: DF.Int
-		total_number_of_depreciations: DF.Int
+		total_number_of_booked_depreciations: DF.Float
+		total_number_of_depreciations: DF.Float
 		value_after_depreciation: DF.Currency
 	# end: auto-generated types
 
