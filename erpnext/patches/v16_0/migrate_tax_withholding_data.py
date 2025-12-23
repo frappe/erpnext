@@ -132,11 +132,11 @@ def get_tax_rate_map():
 
 
 def get_tax_rate_for_date(tax_rate_map, category, posting_date):
-	if not category or category not in tax_rate_map:
+	if not category or category not in tax_rate_map or not posting_date:
 		return 0, False
 
 	for rate in tax_rate_map[category]:
-		if rate.from_date <= posting_date <= rate.to_date:
+		if rate.from_date and rate.to_date and rate.from_date <= posting_date <= rate.to_date:
 			return (rate.tax_withholding_rate, bool(rate.tax_on_excess_amount))
 
 	return 0, False
@@ -916,7 +916,7 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 
 	for row in tcs_entries:
 		total_tcs = row.total_tcs
-		net_grand_total = row.base_grand_total - total_tcs
+		net_grand_total = abs(row.base_grand_total - total_tcs)
 
 		# Get category
 		category = row.tax_withholding_category
