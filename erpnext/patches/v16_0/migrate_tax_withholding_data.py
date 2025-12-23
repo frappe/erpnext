@@ -21,7 +21,7 @@ from collections import defaultdict
 
 import frappe
 from frappe.query_builder import Case
-from frappe.query_builder.functions import IfNull, Sum
+from frappe.query_builder.functions import IfNull, Max, Sum
 from frappe.utils import flt, now
 
 
@@ -913,7 +913,7 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 			Sum(Case().when(gle.account.isin(tcs_accounts_list), gle.credit - gle.debit).else_(0)).as_(
 				"total_tcs"
 			),
-			Case().when(gle.account.isin(tcs_accounts_list), gle.account).else_(None).as_("account"),
+			Max(Case().when(gle.account.isin(tcs_accounts_list), gle.account).else_(None)).as_("account"),
 		)
 		.where(si.docstatus == 1)
 		.groupby(si.name)
