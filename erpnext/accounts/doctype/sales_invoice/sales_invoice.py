@@ -288,10 +288,10 @@ class SalesInvoice(SellingController):
 
 	def onload(self):
 		super().onload()
-		tax_withholding_category = frappe.get_cached_value(
-			"Customer", self.customer, "tax_withholding_category"
+		tax_withholding_category, tax_withholding_group = frappe.get_cached_value(
+			"Customer", self.customer, ["tax_withholding_category", "tax_withholding_group"]
 		)
-		self.set_onload("tax_withholding_category", tax_withholding_category)
+		self.set_onload("apply_tds", tax_withholding_category or tax_withholding_group)
 
 	def validate(self):
 		self.validate_auto_set_posting_time()

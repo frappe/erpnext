@@ -109,6 +109,7 @@ erpnext.utils.get_party_details = function (frm, method, args, callback) {
 		callback: function (r) {
 			if (r.message) {
 				frm.tax_withholding_category = r.message.tax_withholding_category;
+				frm.tax_withholding_group = r.message.tax_withholding_group;
 				frm.updating_party_details = true;
 				frappe.run_serially([
 					() => frm.set_value(r.message),

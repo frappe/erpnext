@@ -363,7 +363,8 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			},
 			function () {
 				me.apply_pricing_rule();
-				me.frm.doc.apply_tds = me.frm.tax_withholding_category ? 1 : 0;
+				me.frm.doc.apply_tds =
+					me.frm.tax_withholding_category || me.frm.tax_withholding_group ? 1 : 0;
 				me.frm.clear_table("tax_withholding_entries");
 
 				// while duplicating, don't change payment terms
@@ -670,7 +671,7 @@ frappe.ui.form.on("Purchase Invoice", {
 	onload: function (frm) {
 		if (frm.doc.__onload && frm.doc.supplier) {
 			if (frm.is_new()) {
-				frm.doc.apply_tds = frm.doc.__onload.tax_withholding_category ? 1 : 0;
+				frm.doc.apply_tds = frm.doc.__onload.apply_tds ? 1 : 0;
 			}
 		}
 

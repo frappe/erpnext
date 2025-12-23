@@ -383,8 +383,8 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				),
 			},
 			function () {
-				me.frm.doc.apply_tds = me.frm.tax_withholding_category ? 1 : 0;
-				me.frm.set_df_property("apply_tds", "read_only", me.frm.tax_withholding_category ? 0 : 1);
+				me.frm.doc.apply_tds =
+					me.frm.tax_withholding_category || me.frm.tax_withholding_group ? 1 : 0;
 				me.frm.clear_table("tax_withholding_entries");
 				me.apply_pricing_rule();
 			}
@@ -825,7 +825,7 @@ frappe.ui.form.on("Sales Invoice", {
 
 		if (frm.doc.__onload && frm.doc.customer) {
 			if (frm.is_new()) {
-				frm.doc.apply_tds = frm.doc.__onload.tax_withholding_category ? 1 : 0;
+				frm.doc.apply_tds = frm.doc.__onload.apply_tds ? 1 : 0;
 			}
 		}
 
