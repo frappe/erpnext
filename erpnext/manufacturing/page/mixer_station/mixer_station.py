@@ -61,6 +61,9 @@ def confirm_materials(job_card, ingredients):
             row.required_qty = qty_by_code[row.item_code]
             row.additional_ingredients_added = added_by_code.get(row.item_code, 0)
 
+    total_qty = sum(row.required_qty for row in jc.items if row.required_qty > 0)
+    jc.for_quantity = total_qty
+
     jc.save(ignore_permissions=True)
 
     se = make_stock_entry(job_card)
@@ -69,7 +72,10 @@ def confirm_materials(job_card, ingredients):
 
     se.insert()
     se.submit()
-    return {"stock_entry": se.name}
+    return {
+        "stock_entry": se.name,
+        "total_for_quantity": total_qty,  
+    }
 
 @frappe.whitelist()
 def start_mixing(job_card):
@@ -121,3 +127,111 @@ def finish_mixing(job_card, completed_qty):
         "docstatus": jc.docstatus,
     }
 
+@frappe.whitelist()
+def quick_add_raw_materials(job_card, raw_material, qty):
+    """Dialog → Creates Doctype record + Stock Entry."""
+    add_doc = frappe.new_doc("Add Raw Materials")
+    add_doc.job_card = job_card
+    add_doc.raw_material = raw_material
+    add_doc.qty = float(qty)
+    add_doc.insert()
+    add_doc.submit()
+
+    jc = frappe.get_doc("Job Card", job_card)
+    target_row = next((row for row in jc.items if row.item_code == raw_material), None)
+    if not target_row:
+        frappe.throw(_("No Job Card Item matches <b>{0}</b>").format(raw_material))
+    if not target_row.source_warehouse:
+        frappe.throw(_("No Source Warehouse for {0}").format(raw_material))
+    
+    target_row.required_qty += float(qty)
+
+    total_qty = sum(row.required_qty for row in jc.items if row.required_qty > 0)
+    jc.for_quantity = total_qty
+
+    jc.flags.ignore_validate = True
+    jc.save(ignore_permissions=True)
+    
+    se = frappe.new_doc("Stock Entry")
+    se.job_card = job_card
+    se.work_order = jc.work_order
+    se.purpose = "Material Transfer for Manufacture"
+    se.from_bom = 1
+
+    se_item = se.append("items", {})
+    se_item.item_code = raw_material
+    se_item.item_name = target_row.item_name
+    se_item.description = target_row.description or ""
+    se_item.s_warehouse = target_row.source_warehouse
+    se_item.qty = float(qty)  # ONLY added qty
+    se_item.uom = target_row.uom
+    se_item.stock_uom = target_row.stock_uom
+    se_item.job_card_item = target_row.name
+    se_item.t_warehouse = jc.wip_warehouse or jc.warehouse
+    if not se_item.conversion_factor:
+        se_item.conversion_factor = 1
+
+    se.set_missing_values()
+    se.set_stock_entry_type()
+    # se.get_item_details()
+    
+    if not se.items:
+        frappe.throw(_("No quantity to transfer"))
+
+    se.insert()
+    se.submit()
+
+    jc = frappe.get_doc("Job Card", job_card)
+    for row in jc.items:
+        row.transferred_qty = row.required_qty
+    jc.transferred_qty = total_qty
+
+    jc.flags.ignore_validate = True
+    jc.flags.ignore_validate_update_after_submit = True
+    jc.save(ignore_permissions=True)
+
+    frappe.db.commit()
+
+    return {
+        "success": True, 
+        "stock_entry": se.name,
+        "add_raw_doc": add_doc.name,
+        "source_wh": target_row.source_warehouse,
+        "new_item_qty": target_row.required_qty,
+        "total_for_quantity": total_qty,
+        "items_count": len(jc.items)
+    }
+
+
+@frappe.whitelist()
+def create_additional_stock_entry(doc, method):
+    """Create additional Stock Entry using Job Card's make_stock_entry."""
+    jc = frappe.get_doc("Job Card", doc.job_card)
+    
+    # Find matching Job Card Item
+    jobcard_row = next((row for row in jc.items if row.item_code == doc.raw_material), None)
+    if not jobcard_row:
+        jobcard_row = jc.items[0] if jc.items else None
+    
+    if jobcard_row:
+        original_qty = jobcard_row.required_qty or 0
+        jobcard_row.required_qty = original_qty + doc.qty
+        jc.save(ignore_permissions=True)
+        
+        se = make_stock_entry(jc.name)
+        if not se.items:
+            frappe.throw(_("No quantity to transfer"))
+        
+        se.insert()
+        se.submit()
+        jobcard_row.required_qty = original_qty
+        jc.save(ignore_permissions=True)
+        
+        frappe.msgprint(
+            _("Additional materials ({0} qty) added! Stock Entry: {1}").format(
+                doc.qty, se.name
+            )
+        )
+    else:
+        frappe.throw(_("No matching Job Card Item for {0}").format(doc.raw_material))
+    

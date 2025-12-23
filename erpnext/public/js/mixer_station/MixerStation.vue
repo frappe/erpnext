@@ -5,11 +5,15 @@ const jobCard = ref(null);
 const batchNo = ref('');
 const colour = ref('Carrara White');
 const phase = ref('Preparation Phase');
-
+const selectedMixture = ref('')
+const isMixtureSelected = computed(() => !!selectedMixture.value);
 const ingredients = ref([]);
 const loadingIngredients = ref(true);
 const error = ref(null);
 const additionalIngredients = ['silane', 'catalyst', 'hardener'];
+const showAddMaterialsDialog = ref(false);
+const addRawMaterial = ref('');
+const addRawMaterialQty = ref(0);
 
 // downstream alerts (dummy)
 const alerts = ref([
@@ -260,6 +264,87 @@ function isAdditionalIngredient(name) {
     const ing = name.toString().toLowerCase();
     return additionalIngredients.some(s => ing.includes(s));
 }
+
+function openAddMaterials() {
+    const d = new frappe.ui.Dialog({
+        title: __('Add Raw Materials'),
+        size: 'small',  
+        fields: [
+            {
+                fieldtype: 'Link',
+                label: __('Job Card'),
+                fieldname: 'job_card',
+                options: 'Job Card',
+                default: jobCard.value,
+                read_only: 1,
+                reqd: 1
+            },
+            {
+                fieldtype: 'Link',
+                label: __('Raw Material'),
+                fieldname: 'raw_material',
+                options: 'Item',
+                reqd: 1,
+                get_query() {
+                    return {
+                        filters: {
+                            "item_group": "Raw Material",
+                            "item_name": "Resin"
+                        }
+                    };
+                }
+            },
+            {
+                fieldtype: 'Float',
+                label: __('Quantity'),
+                fieldname: 'qty',
+                reqd: 1,
+                precision: 2
+            }
+        ],
+        primary_action_label: __('Add'),
+        primary_action(values) {
+            frappe.call({
+                method: 'erpnext.manufacturing.page.mixer_station.mixer_station.quick_add_raw_materials',
+                args: values,
+                callback(r) {
+                    if (r.message.success) {
+                        frappe.msgprint({
+                            title: __('Success'),
+                            message: `
+                                <div class="d-flex justify-content-between" style="text-align: center;">
+                                    <b>${values.raw_material}
+                                    <span style="color: #28a745;">(+${values.qty} kg)</span><br></b> 
+                                    <a href="/app/stock-entry/${r.message.stock_entry}">${r.message.stock_entry}</a><br>
+                                </div>
+                            `,
+                            indicator: 'green'
+                        });
+                        if (cur_frm && cur_frm.doc.name === values.job_card) {
+                            cur_frm.reload_doc();
+                        }
+                        d.hide();
+                    }
+                },
+                error(e) {
+                    frappe.msgprint(__('Failed: {0}', [e.message]));
+                }
+            });
+            d.hide();
+        },
+        primary_action_condition(values) {
+            return values.job_card && values.raw_material && values.qty > 0;
+        }
+    });
+    d.set_secondary_action_label(__('Cancel'));
+    d.set_secondary_action(() => d.hide());
+    d.show();
+}
+
+function closeAddMaterials() {
+    showAddMaterialsDialog.value = false;
+}
+
 </script>
 
 <template>
@@ -294,6 +379,18 @@ function isAdditionalIngredient(name) {
                         <div class="text-muted small">
                             {{ __('Review and adjust calculated quantities before mixing.') }}
                         </div>
+                    </div>
+
+                    <div class="mb-3 d-flex justify-content-between">
+                        <label class="form-label bold">{{ __('Select Mixture') }}</label>
+                        <select v-model="selectedMixture" style="width: 30%;" class="form-control" :disabled="mixingReady || mixingStarted">
+                            <option value="" disabled selected>
+                                {{ __('Select Mixture Type...') }}
+                            </option>
+                            <option value="Mixture - A" selected>{{ __('Mixture - A') }}</option>
+                            <option value="Mixture - B">{{ __('Mixture - B') }}</option>
+                            <option value="Mixture - C">{{ __('Mixture - C') }}</option>
+                        </select>
                     </div>
 
                     <div v-if="loadingIngredients" class="text-center py-4">
@@ -368,7 +465,7 @@ function isAdditionalIngredient(name) {
                         </div>
 
                         <div class="mb-3">
-                            <button v-if="!mixingReady" :disabled="!allAdditionalIngredientsAdded" :class="!allAdditionalIngredientsAdded ? 'btn-disabled-pointer' : ''" class="btn btn-sm border border-success" @click="toggleReady">
+                            <button v-if="!mixingReady" :disabled="!isMixtureSelected || !allAdditionalIngredientsAdded" :class="!isMixtureSelected || !allAdditionalIngredientsAdded ? 'btn-disabled-pointer' : ''" class="btn btn-sm border border-success" @click="toggleReady">
                                 <span class="fa fa-check mr-1"></span>
                                 {{ __('Confirm Materials') }}
                             </button>
@@ -390,10 +487,14 @@ function isAdditionalIngredient(name) {
                         <div class="display-4 font-weight-bold mb-3" style="font-size:2.5rem;">
                             {{ formattedMixingTime }}
                         </div>
-                        <div>
-                            <button class="btn btn-success btn-block py-2" @click="finishAndDischarge">
+                        <div class="d-flex gap-2 justify-content-center mb-3">
+                            <button class="btn btn-success flex-fill" @click="finishAndDischarge">
                                 <span class="fa fa-check mr-1"></span>
                                 {{ __('Finish & Discharge') }}
+                            </button>
+                            <button class="btn btn-outline-primary flex-fill" @click="openAddMaterials">
+                                <span class="fa fa-plus mr-1"></span>
+                                {{ __('Add Materials') }}
                             </button>
                         </div>
                         
