@@ -241,10 +241,11 @@ class PurchaseInvoice(BuyingController):
 
 	def onload(self):
 		super().onload()
-		tax_withholding_category, tax_withholding_group = frappe.get_cached_value(
-			"Supplier", self.supplier, ["tax_withholding_category", "tax_withholding_group"]
-		)
-		self.set_onload("apply_tds", tax_withholding_category or tax_withholding_group)
+		if self.supplier:
+			tax_withholding_category, tax_withholding_group = frappe.get_cached_value(
+				"Supplier", self.supplier, ["tax_withholding_category", "tax_withholding_group"]
+			)
+			self.set_onload("apply_tds", tax_withholding_category or tax_withholding_group)
 
 		if self.is_new():
 			self.set("tax_withholding_entries", [])
@@ -351,12 +352,13 @@ class PurchaseInvoice(BuyingController):
 				template_name=self.payment_terms_template,
 			)
 
-		tax_withholding_category, tax_withholding_group = frappe.get_cached_value(
-			"Supplier", self.supplier, ["tax_withholding_category", "tax_withholding_group"]
-		)
-		if not for_validate:
-			if tax_withholding_category or tax_withholding_group:
-				self.apply_tds = 1
+		if self.supplier:
+			tax_withholding_category, tax_withholding_group = frappe.get_cached_value(
+				"Supplier", self.supplier, ["tax_withholding_category", "tax_withholding_group"]
+			)
+			if not for_validate:
+				if tax_withholding_category or tax_withholding_group:
+					self.apply_tds = 1
 
 		super().set_missing_values(for_validate)
 
