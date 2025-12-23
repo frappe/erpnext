@@ -34,6 +34,9 @@ def execute():
 	column_cache = get_column_cache()
 	party_tax_id_cache = {}
 
+	# Clean up any existing migration entries
+	frappe.db.delete("Tax Withholding Entry", filters={"created_by_migration": 1})
+
 	# Migrate data from each document type
 	# Purchase Invoice migration also handles Payment Entry TDS (allocated and unallocated)
 	PurchaseInvoiceMigrator(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache).migrate()
@@ -190,21 +193,6 @@ def bulk_insert_entries(all_entries):
 	"""
 	if not all_entries:
 		return
-
-	# Bulk delete existing migration entries for all parents
-	parents_by_doctype = defaultdict(list)
-	for parent_doctype, parent_name in all_entries.keys():
-		parents_by_doctype[parent_doctype].append(parent_name)
-
-	for parent_doctype, parent_names in parents_by_doctype.items():
-		frappe.db.delete(
-			"Tax Withholding Entry",
-			filters={
-				"parenttype": parent_doctype,
-				"parent": ("in", parent_names),
-				"created_by_migration": 1,
-			},
-		)
 
 	# Prepare all entries with proper fields
 	fields = [
@@ -1098,10 +1086,12 @@ def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_
 	for je_name, data in je_taxes.items():
 		info = data["info"]
 
+		# Assume TCS not allowed in Journal Entry
 		# Calculate total TDS (credit - debit)
 		total_tds = sum(flt(row.credit) - flt(row.debit) for row in data["gl_rows"])
 
-		if not total_tds:
+		if total_tds <= 0:
+			# Ignore TDS payment entries
 			continue
 
 		# Get category
