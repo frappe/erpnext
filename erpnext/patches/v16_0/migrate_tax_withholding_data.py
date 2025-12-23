@@ -194,6 +194,16 @@ def bulk_insert_entries(all_entries):
 	if not all_entries:
 		return
 
+	# Get existing names to avoid collisions
+	existing_names = set(frappe.get_all("Tax Withholding Entry", pluck="name"))
+
+	def generate_unique_name():
+		while True:
+			name = frappe.generate_hash(length=10)
+			if name not in existing_names:
+				existing_names.add(name)
+				return name
+
 	# Prepare all entries with proper fields
 	fields = [
 		"name",
@@ -242,8 +252,7 @@ def bulk_insert_entries(all_entries):
 
 			values.append(
 				(
-					# TODO: handle name collisions?
-					frappe.generate_hash(length=10),  # name
+					generate_unique_name(),  # name
 					current_time,  # creation
 					current_time,  # modified
 					current_user,  # modified_by
