@@ -85,7 +85,7 @@ def get_party_details(entries):
 
 	# Batch fetch for each party type
 	for party_type, party_set in parties_by_type.items():
-		if not party_set:
+		if not party_type or not party_set:
 			continue
 
 		doctype = frappe.qb.DocType(party_type)
@@ -93,7 +93,7 @@ def get_party_details(entries):
 
 		if party_type == "Supplier":
 			fields.extend([doctype.supplier_type.as_("entity_type"), doctype.supplier_name.as_("party_name")])
-		else:  # Customer
+		elif party_type == "Customer":
 			fields.extend([doctype.customer_type.as_("entity_type"), doctype.customer_name.as_("party_name")])
 
 		query = frappe.qb.from_(doctype).select(*fields).where(doctype.name.isin(party_set))
