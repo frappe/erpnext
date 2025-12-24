@@ -15,15 +15,6 @@
 	.financial-statements-blank-row td {
 		height: 20px;
 	}
-
-	.custom-financial-statements-blank-cell span {
-		display: inline-block;
-		min-height: 10px;
-	}
-
-	td span, td span * {
-		color: inherit !important;
-	}
 </style>
 
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
@@ -33,13 +24,17 @@
 	<h3 class="text-center">{%= filters.cost_center %}</h3>
 {% endif %}
 
-{% if (filters.fiscal_year) %}
-	<h3 class="text-center">{%= filters.fiscal_year %}</h3>
-{% endif %}
+<h3 class="text-center">{%= filters.fiscal_year %}</h3>
 
 <h5 class="text-center">
 	<strong>{%=  __("Currency") %}:</strong> {%= filters.presentation_currency || erpnext.get_currency(filters.company) %}
 </h5>
+
+{% if (filters.from_date) { %}
+	<h5 class="text-center">
+		{%= frappe.datetime.str_to_user(filters.from_date) %} - {%= frappe.datetime.str_to_user(filters.to_date) %}
+	</h5>
+{% } %}
 
 <hr>
 
@@ -50,16 +45,16 @@
 	</div>
 {% endif %}
 
-{% if not filters.report_template %}
 <table class="table table-bordered">
 	<thead>
 		<tr>
-			<th style="width: {%= 100 - (report_columns.length - 1) * 13 %}%"> {%= report_columns[0].label %}</th>
+			<th style="width: {%= 100 - (report_columns.length - 1) * 13 %}%">{%= report_columns[0].label %}</th>
 			{% for (let i=1, l=report_columns.length; i<l; i++) { %}
 				<th class="text-right">{%= report_columns[i].label %}</th>
 			{% } %}
 		</tr>
 	</thead>
+
 	<tbody>
 		{% for(let j=0, k=data.length; j<k; j++) { %}
 			{%
@@ -83,112 +78,6 @@
 		{% } %}
 	</tbody>
 </table>
-{% else %}
-<table class="table table-bordered">
-	<thead>
-		<tr>
-			{% for (let col_i=0, col_len=report_columns.length; col_i<col_len; col_i++) { %}
-				{%
-					var col = report_columns[col_i];
-					var align = col.align && col.align === 'left' ? 'text-left' : 'text-right';
-				%}
-				<th class="{%= align %}">
-					{%= col.label %}
-				</th>
-			{% } %}
-		</tr>
-	</thead>
-
-	<tbody>
-		{% for(let row_i=0, row_len=data.length; row_i<row_len; row_i++) { %}
-			{%
-				var row = data[row_i];
-				var segment_values = row.segment_values;
-			%}
-
-			<tr>
-				{% for(let col_j=0, col_len2=report_columns.length; col_j<col_len2; col_j++) { %}
-
-					{%
-						var col = report_columns[col_j];
-						var fieldname = col.fieldname;
-						var value = row[fieldname];
-
-						var display_value = value;
-						var formatting = row;
-						var is_account_column = fieldname === 'account';
-						var indent_padding = 0;
-						var td_class = [];
-						var td_style = [];
-
-						if(fieldname && fieldname.startsWith("seg_") && segment_values) {
-							var parts = fieldname.split("_");
-
-							if (parts.length >= 3) {
-								var seg_key = "seg_" + parts[1];
-								is_account_column = parts[2] === "account";
-
-								if (segment_values[seg_key]) {
-									formatting = segment_values[seg_key];
-								}
-							}
-						}
-
-						if(formatting.is_blank_line && !value){
-							td_class.push("custom-financial-statements-blank-cell");
-						}else{
-							if (is_account_column) {
-								value = formatting.account_name || value;
-
-								if (formatting.prefix) {
-									display_value = '• ' + value;
-								}else{
-									display_value = value;
-								}
-
-								if (formatting.indent) indent_padding = cint(formatting.indent) * 2;
-
-							}else if([null, undefined, ''].indexOf(value) === -1){
-								var col_for_format = Object.assign({}, col);
-								col_for_format.fieldtype = formatting.fieldtype || col.fieldtype;
-								display_value = frappe.format(value, col_for_format, {}, row);
-							}
-
-							if (formatting.bold) {
-								td_style.push('font-weight: bold !important');
-							}
-
-							if (formatting.italic) {
-								td_style.push('font-style: italic !important');
-							}
-
-							if (formatting.background) {
-								td_style.push('background-color: ' + formatting.background + ' !important');
-							}
-
-							if (formatting.color) {
-								td_style.push('color: ' + formatting.color + ' !important');
-							}
-
-							if (formatting.warn_if_negative && typeof value === "number" && value < 0) {
-								td_class.push('text-danger');
-							}
-
-							td_style.push('padding-left: ' + indent_padding + 'em');
-							td_class.push(col.align && col.align === 'left' ? 'text-left' : 'text-right');
-						}
-
-					%}
-					<td class="{%= td_class.join(' ') %}">
-						<span style="{%= td_style.join('; ') %}">{%= display_value %}</span>
-					</td>
-				{% } %}
-			</tr>
-		{% } %}
-	</tbody>
-</table>
-
-{% endif %}
 
 <p class="text-right text-muted">
 	{%= __("Printed on {0}", [frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string())]) %}
