@@ -149,8 +149,9 @@
 								if (formatting.indent) indent_padding = cint(formatting.indent) * 2;
 
 							}else if([null, undefined, ''].indexOf(value) === -1){
-								col.fieldtype = formatting.fieldtype || col.fieldtype;
-								display_value = frappe.format(value, col, {}, row);
+								var col_for_format = Object.assign({}, col);
+								col_for_format.fieldtype = formatting.fieldtype || col.fieldtype;
+								display_value = frappe.format(value, col_for_format, {}, row);
 							}
 
 							if (formatting.bold) {
