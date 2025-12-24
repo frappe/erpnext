@@ -687,13 +687,13 @@ class PaymentReconciliation(Document):
 			)
 			invoice_exchange_map.update(journals_map)
 
-		payment_entires = [
+		payment_entries = [
 			d.get("invoice_number") for d in invoices if d.get("invoice_type") == "Payment Entry"
 		]
-		payment_entires.extend(
+		payment_entries.extend(
 			[d.get("reference_name") for d in payments if d.get("reference_type") == "Payment Entry"]
 		)
-		if payment_entires:
+		if payment_entries:
 			pe = frappe.qb.DocType("Payment Entry")
 			query = (
 				frappe.qb.from_(pe)
@@ -704,10 +704,10 @@ class PaymentReconciliation(Document):
 					.else_(pe.target_exchange_rate)
 					.as_("exchange_rate"),
 				)
-				.where(pe.name.isin(payment_entires))
+				.where(pe.name.isin(payment_entries))
 			)
-			payment_entires = query.run(as_list=1)
-			invoice_exchange_map.update(payment_entires)
+			payment_entries = query.run(as_list=1)
+			invoice_exchange_map.update(payment_entries)
 
 		return invoice_exchange_map
 
