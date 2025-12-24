@@ -3,6 +3,12 @@ frappe.provide("erpnext.financial_statements");
 erpnext.financial_statements = {
 	filters: get_filters(),
 	baseData: null,
+
+	get_pdf_format: function (report, custom_format) {
+		// If report template is selected, use default pdf formatting
+		return report.get_filter_value("report_template") ? null : custom_format;
+	},
+
 	formatter: function (value, row, column, data, default_formatter, filter) {
 		const report_params = [value, row, column, data, default_formatter, filter];
 		// Growth/Margin
