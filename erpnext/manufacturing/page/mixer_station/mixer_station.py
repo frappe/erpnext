@@ -201,37 +201,3 @@ def quick_add_raw_materials(job_card, raw_material, qty):
         "total_for_quantity": total_qty,
         "items_count": len(jc.items)
     }
-
-
-@frappe.whitelist()
-def create_additional_stock_entry(doc, method):
-    """Create additional Stock Entry using Job Card's make_stock_entry."""
-    jc = frappe.get_doc("Job Card", doc.job_card)
-    
-    # Find matching Job Card Item
-    jobcard_row = next((row for row in jc.items if row.item_code == doc.raw_material), None)
-    if not jobcard_row:
-        jobcard_row = jc.items[0] if jc.items else None
-    
-    if jobcard_row:
-        original_qty = jobcard_row.required_qty or 0
-        jobcard_row.required_qty = original_qty + doc.qty
-        jc.save(ignore_permissions=True)
-        
-        se = make_stock_entry(jc.name)
-        if not se.items:
-            frappe.throw(_("No quantity to transfer"))
-        
-        se.insert()
-        se.submit()
-        jobcard_row.required_qty = original_qty
-        jc.save(ignore_permissions=True)
-        
-        frappe.msgprint(
-            _("Additional materials ({0} qty) added! Stock Entry: {1}").format(
-                doc.qty, se.name
-            )
-        )
-    else:
-        frappe.throw(_("No matching Job Card Item for {0}").format(doc.raw_material))
-    

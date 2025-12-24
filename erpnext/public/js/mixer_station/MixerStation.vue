@@ -341,10 +341,6 @@ function openAddMaterials() {
     d.show();
 }
 
-function closeAddMaterials() {
-    showAddMaterialsDialog.value = false;
-}
-
 </script>
 
 <template>
@@ -487,12 +483,12 @@ function closeAddMaterials() {
                         <div class="display-4 font-weight-bold mb-3" style="font-size:2.5rem;">
                             {{ formattedMixingTime }}
                         </div>
-                        <div class="d-flex gap-2 justify-content-center mb-3">
+                        <div class="d-flex flex-column gap-2 justify-content-center mb-3">
                             <button class="btn btn-success flex-fill" @click="finishAndDischarge">
                                 <span class="fa fa-check mr-1"></span>
                                 {{ __('Finish & Discharge') }}
                             </button>
-                            <button class="btn btn-outline-primary flex-fill" @click="openAddMaterials">
+                            <button class="btn btn-outline-primary flex-fill mt-2 border border-dark" @click="openAddMaterials">
                                 <span class="fa fa-plus mr-1"></span>
                                 {{ __('Add Materials') }}
                             </button>
