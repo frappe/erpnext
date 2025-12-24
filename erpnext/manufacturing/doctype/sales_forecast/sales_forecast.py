@@ -33,8 +33,11 @@ class SalesForecast(Document):
 		parent_warehouse: DF.Link
 		posting_date: DF.Date | None
 		selected_items: DF.TableMultiSelect[SalesForecastItem]
-		status: DF.Literal["Planned", "MPS Generated"]
+		status: DF.Literal["Planned", "MPS Generated", "Cancelled"]
 	# end: auto-generated types
+
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
 
 	def validate(self):
 		self.validate_demand_qty()

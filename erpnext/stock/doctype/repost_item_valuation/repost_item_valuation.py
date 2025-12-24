@@ -53,7 +53,7 @@ class RepostItemValuation(Document):
 		repost_only_accounting_ledgers: DF.Check
 		reposting_data_file: DF.Attach | None
 		reposting_reference: DF.Data | None
-		status: DF.Literal["Queued", "In Progress", "Completed", "Skipped", "Failed"]
+		status: DF.Literal["Queued", "In Progress", "Completed", "Skipped", "Failed", "Cancelled"]
 		total_reposting_count: DF.Int
 		via_landed_cost_voucher: DF.Check
 		voucher_no: DF.DynamicLink | None
@@ -72,6 +72,9 @@ class RepostItemValuation(Document):
 				& (table.status.isin(["Completed", "Skipped"]))
 			),
 		)
+
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
 
 	def validate(self):
 		self.reset_repost_only_accounting_ledgers()

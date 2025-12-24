@@ -43,7 +43,7 @@ class Contract(Document):
 		signed_on: DF.Datetime | None
 		signee: DF.Data | None
 		start_date: DF.Date | None
-		status: DF.Literal["Unsigned", "Active", "Inactive"]
+		status: DF.Literal["Unsigned", "Active", "Inactive", "Cancelled"]
 	# end: auto-generated types
 
 	def validate(self):
@@ -60,6 +60,9 @@ class Contract(Document):
 
 	def before_submit(self):
 		self.signed_by_company = frappe.session.user
+
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
 
 	def before_update_after_submit(self):
 		self.update_contract_status()

@@ -50,6 +50,9 @@ class BankTransaction(Document):
 		self.handle_excluded_fee()
 		self.update_allocated_amount()
 
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
+
 	def validate(self):
 		self.validate_included_fee()
 		self.validate_duplicate_references()

@@ -73,6 +73,9 @@ class Timesheet(Document):
 		self.calculate_percentage_billed()
 		self.set_dates()
 
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
+
 	def calculate_hours(self):
 		for row in self.time_logs:
 			if row.to_time and row.from_time:

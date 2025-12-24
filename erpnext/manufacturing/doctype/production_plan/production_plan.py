@@ -119,6 +119,9 @@ class ProductionPlan(Document):
 			frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"),
 		)
 
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
+
 	def validate(self):
 		self.set_pending_qty_in_row_without_reference()
 		self.calculate_total_planned_qty()

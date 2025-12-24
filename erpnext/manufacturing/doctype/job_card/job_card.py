@@ -144,6 +144,9 @@ class JobCard(Document):
 		self.set_onload("work_order_closed", self.is_work_order_closed())
 		self.set_onload("has_stock_entry", self.has_stock_entry())
 
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
+
 	def has_stock_entry(self):
 		return frappe.db.exists("Stock Entry", {"job_card": self.name, "docstatus": ["!=", 2]})
 
