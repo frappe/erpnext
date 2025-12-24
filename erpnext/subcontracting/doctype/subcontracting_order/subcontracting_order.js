@@ -524,8 +524,8 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 		var me = this;
 
 		if (doc.docstatus == 1) {
-			if (!["Closed", "Completed"].includes(doc.status)) {
-				if (flt(doc.per_received) < 100) {
+			if (doc.status != "Closed") {
+				if (flt(doc.per_received) < 100 + doc.__onload.over_delivery_receipt_allowance) {
 					this.frm.add_custom_button(
 						__("Subcontracting Receipt"),
 						this.make_subcontracting_receipt,
@@ -539,10 +539,12 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 						);
 					}
 				}
-				if (flt(doc.per_received) < 100 && me.has_unsupplied_items()) {
-					this.frm.page.set_inner_btn_group_as_primary(__("Transfer"));
-				} else {
-					this.frm.page.set_inner_btn_group_as_primary(__("Create"));
+				if (doc.status != "Completed") {
+					if (flt(doc.per_received) < 100 && me.has_unsupplied_items()) {
+						this.frm.page.set_inner_btn_group_as_primary(__("Transfer"));
+					} else {
+						this.frm.page.set_inner_btn_group_as_primary(__("Create"));
+					}
 				}
 			}
 		}
