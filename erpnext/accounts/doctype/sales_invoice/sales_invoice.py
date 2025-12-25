@@ -883,6 +883,7 @@ class SalesInvoice(SellingController):
 		if pos:
 			if not for_validate:
 				self.tax_category = pos.get("tax_category")
+				self.set_warehouse = pos.get("warehouse")
 
 			if not for_validate and not self.customer:
 				self.customer = pos.customer
