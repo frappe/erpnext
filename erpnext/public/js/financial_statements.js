@@ -141,15 +141,38 @@ erpnext.financial_statements = {
 	},
 
 	_style_custom_value(formattedValue, formatting, value) {
-		let $element = $(`<span>${formattedValue}</span>`);
+		const styles = [];
 
-		if (formatting.bold) $element.css("font-weight", "bold");
-		if (formatting.italic) $element.css("font-style", "italic");
+		if (formatting.bold) styles.push("font-weight: bold");
+		if (formatting.italic) styles.push("font-style: italic");
 		if (formatting.warn_if_negative && typeof value === "number" && value < 0)
-			$element.addClass("text-danger");
-		if (formatting.color) $element.css("color", formatting.color);
+			styles.push("color: #dc3545");
+		if (formatting.color) styles.push(`color: ${formatting.color}`);
 
-		return $element.wrap("<p></p>").parent().html();
+		if (styles.length === 0) return formattedValue;
+
+		const styleAttr = styles.join("; ");
+
+		if (/<[^>]+>/.test(formattedValue)) {
+			// It has HTML tags - we need to inject styles into the outermost element
+			let tempDiv = document.createElement("div");
+			tempDiv.innerHTML = formattedValue;
+
+			// Get the first actual element (skip text nodes)
+			const firstElement = tempDiv.querySelector("*");
+
+			if (firstElement) {
+				// Inject styles into the first/outermost HTML element
+				const existingStyle = firstElement.getAttribute("style") || "";
+				const newStyle = existingStyle ? `${existingStyle}; ${styleAttr}` : styleAttr;
+				firstElement.setAttribute("style", newStyle);
+				return tempDiv.innerHTML;
+			} else {
+				return `<span style="${styleAttr}">${formattedValue}</span>`;
+			}
+		} else {
+			return `<span style="${styleAttr}">${formattedValue}</span>`;
+		}
 	},
 
 	_format_special_view: function (value, row, column, data, default_formatter) {
