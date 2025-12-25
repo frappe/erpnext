@@ -3,7 +3,6 @@ frappe.provide("erpnext.financial_statements");
 erpnext.financial_statements = {
 	filters: get_filters(),
 	baseData: null,
-	include_index_column_in_print: false, // for default print format
 
 	get_pdf_format: function (report, custom_format) {
 		// If report template is selected, use default pdf formatting
