@@ -152,6 +152,26 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertRaises(ParentIsGroupError, child_task.save)
 
+	def test_parent_task_progress(self):
+		parent_task = create_task(
+			subject="_Test Parent Task",
+			is_group=1,
+		)
+
+		child_task1 = create_task(subject="_Test Child Task1", parent_task=parent_task.name, save=False)
+		child_task1.progress = 30
+		child_task1.save()
+
+		parent_task.reload()
+		self.assertEqual(parent_task.progress, 30)
+
+		child_task2 = create_task(subject="_Test Child Task2", parent_task=parent_task.name, save=False)
+		child_task2.progress = 50
+		child_task2.save()
+
+		parent_task.reload()
+		self.assertEqual(parent_task.progress, 40)
+
 	def test_expected_end_date(self):
 		task = create_task("Testing End Date", add_days(nowdate(), 1), add_days(nowdate(), 5))
 		task.expected_time = 72
