@@ -165,10 +165,6 @@ class WorkOrder(Document):
 		self.set_required_items(reset_only_qty=len(self.get("required_items")))
 		self.validate_operations_sequence()
 
-		if self.production_line:
-			year = frappe.utils.get_fiscal_year(frappe.utils.today(), as_dict=True).year_end[-4:]
-			self.naming_series = f"MFG-WO-{self.production_line}-{year}-.#####"
-
 	def validate_operations_sequence(self):
 		if all([not op.sequence_id for op in self.operations]):
 			for op in self.operations:
@@ -676,7 +672,7 @@ class WorkOrder(Document):
 		self.set_operation_start_end_time(row, idx)
 
 		job_card_doc = create_job_card(
-			self, row, auto_create=True, enable_capacity_planning=enable_capacity_planning
+			self, row, auto_create=True, enable_capacity_planning=enable_capacity_planning, production_line=self.production_line
 		)
 
 		if enable_capacity_planning and job_card_doc:
@@ -1668,11 +1664,12 @@ def validate_operation_data(row):
 		)
 
 
-def create_job_card(work_order, row, enable_capacity_planning=False, auto_create=False):
+def create_job_card(work_order, row, auto_create=False, enable_capacity_planning=False, production_line=None):
 	doc = frappe.new_doc("Job Card")
 	doc.update(
 		{
 			"work_order": work_order.name,
+			"production_line": production_line,
 			"workstation_type": row.get("workstation_type"),
 			"operation": row.get("operation"),
 			"workstation": row.get("workstation"),

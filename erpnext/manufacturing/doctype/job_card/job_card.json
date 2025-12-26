@@ -8,6 +8,7 @@
  "field_order": [
   "naming_series",
   "work_order",
+  "production_line",
   "bom_no",
   "production_item",
   "employee",
@@ -514,11 +515,19 @@
    "fieldname": "additional_ingredients_added",
    "fieldtype": "Check",
    "label": "Additional Ingredients Added"
+  },
+  {
+   "fieldname": "production_line",
+   "fieldtype": "Link",
+   "label": "Production Line",
+   "options": "Production Line",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-22 11:21:14.238561",
+ "modified": "2025-12-26 16:33:03.197506",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
