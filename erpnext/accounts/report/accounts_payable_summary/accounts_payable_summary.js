@@ -35,6 +35,13 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			label: __("Ageing Range"),
 			fieldtype: "Data",
 			default: "30, 60, 90, 120",
+			onload: function (report) {
+				frappe.db.get_single_value("Accounts Settings", "range").then((value) => {
+					if (value) {
+						report.set_filter_value("range", value);
+					}
+				});
+			},
 		},
 		{
 			fieldname: "finance_book",
@@ -113,6 +120,12 @@ frappe.query_reports["Accounts Payable Summary"] = {
 		report.page.add_inner_button(__("Accounts Payable"), function () {
 			var filters = report.get_values();
 			frappe.set_route("query-report", "Accounts Payable", { company: filters.company });
+		});
+
+		frappe.db.get_single_value("Accounts Settings", "default_ageing_range").then((value) => {
+			if (value) {
+				report.set_filter_value("range", value);
+			}
 		});
 	},
 };

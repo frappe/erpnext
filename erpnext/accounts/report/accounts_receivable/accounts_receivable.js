@@ -192,6 +192,12 @@ frappe.query_reports["Accounts Receivable"] = {
 			var filters = report.get_values();
 			frappe.set_route("query-report", "Accounts Receivable Summary", { company: filters.company });
 		});
+
+		frappe.db.get_single_value("Accounts Settings", "default_ageing_range").then((value) => {
+			if (value) {
+				report.set_filter_value("range", value);
+			}
+		});
 	},
 };
 
