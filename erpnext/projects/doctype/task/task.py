@@ -8,7 +8,7 @@ import frappe
 from frappe import _, throw
 from frappe.desk.form.assign_to import clear, close_all_assignments
 from frappe.model.mapper import get_mapped_doc
-from frappe.query_builder.functions import Max, Min, Sum
+from frappe.query_builder.functions import Avg, Max, Min, Sum
 from frappe.utils import add_days, add_to_date, cstr, date_diff, flt, get_link_to_form, getdate, today
 from frappe.utils.data import format_date
 from frappe.utils.nestedset import NestedSet
@@ -158,6 +158,26 @@ class Task(NestedSet):
 		if self.status == "Completed":
 			self.progress = 100
 
+	def update_parent_progress(self):
+		doc_before_save = self.get_doc_before_save()
+		if (
+			doc_before_save
+			and doc_before_save.parent_task
+			and doc_before_save.parent_task != self.parent_task
+		):
+			self.set_parent_progress(doc_before_save.parent_task)
+
+		if self.parent_task:
+			self.set_parent_progress(self.parent_task)
+
+	def set_parent_progress(self, parent_task):
+		Task = frappe.qb.DocType("Task")
+		avg_progress = (
+			frappe.qb.from_(Task).select(Avg(Task.progress)).where(Task.parent_task == parent_task)
+		).run()[0][0] or 0
+
+		frappe.db.set_value("Task", parent_task, "progress", avg_progress)
+
 	def validate_dependencies_for_template_task(self):
 		if self.is_template:
 			self.validate_parent_template_task()
@@ -213,6 +233,7 @@ class Task(NestedSet):
 		self.update_project()
 		self.unassign_todo()
 		self.populate_depends_on()
+		self.update_parent_progress()
 
 	def unassign_todo(self):
 		if self.status == "Completed":
