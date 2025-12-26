@@ -1,0 +1,52 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-26 20:57:09.888423",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_1ofs",
+  "max_pay_line_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_1ofs",
+   "fieldtype": "Section Break",
+   "label": "Payment Settings"
+  },
+  {
+   "description": "The maximum allowed amount for one line item in a bulk payment file.",
+   "fieldname": "max_pay_line_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Maximum Payment Line Item Amount",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-12-26 21:00:11.164406",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Mahi Granites Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
