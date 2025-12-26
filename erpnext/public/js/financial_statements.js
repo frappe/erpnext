@@ -152,16 +152,14 @@ erpnext.financial_statements = {
 
 		const styleAttr = styles.join("; ");
 
+		// If the formatted value contains HTML, apply styles to the first element
 		if (/<[^>]+>/.test(formattedValue)) {
-			// It has HTML tags - we need to inject styles into the outermost element
 			let tempDiv = document.createElement("div");
 			tempDiv.innerHTML = formattedValue;
 
-			// Get the first actual element (skip text nodes)
 			const firstElement = tempDiv.querySelector("*");
 
 			if (firstElement) {
-				// Inject styles into the first/outermost HTML element
 				const existingStyle = firstElement.getAttribute("style") || "";
 				const newStyle = existingStyle ? `${existingStyle}; ${styleAttr}` : styleAttr;
 				firstElement.setAttribute("style", newStyle);
