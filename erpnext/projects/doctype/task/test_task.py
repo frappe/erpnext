@@ -178,6 +178,27 @@ class TestTask(ERPNextTestSuite):
 		task.save()
 		self.assertEqual(getdate(task.exp_end_date), getdate(add_days(nowdate(), 5)))
 
+	def test_prev_parent_depends_on(self):
+		parent_task1 = create_task(
+			subject="_Test Parent Task 1",
+			is_group=1,
+		)
+
+		parent_task2 = create_task(
+			subject="_Test Parent Task 2",
+			is_group=1,
+		)
+
+		child_task = create_task(subject="_Test Child Task", parent_task=parent_task1.name, save=True)
+
+		child_task.parent_task = parent_task2.name
+		child_task.save()
+
+		parent_task1.reload()
+		parent_task2.reload()
+		self.assertEqual(parent_task1.depends_on, [])
+		self.assertEqual(parent_task2.depends_on[0].task, child_task.name)
+
 
 def create_task(
 	subject,
