@@ -56,8 +56,11 @@
 		<tr>
 			<td class="logo-cell" style="vertical-align: middle !important">
 				<div class="logo-container">
-					{% set company_logo = frappe.db.get_value("Company", doc.company, "logo_for_printing") %} {% if
-					company_logo %}
+					{% set company_logo = frappe.db.get_value("Company", doc.company, "company_logo") %} 
+					{% if not company_logo and "india_compliance" not in frappe.get_installed_apps() %}
+					{% set company_logo = frappe.db.get_value("Company", doc.company, "logo_for_printing") %}
+					{% endif %}
+					{% if company_logo %}
 					<img src="{{ frappe.utils.get_url(company_logo) }}" alt="Company Logo" />
 					{% endif %}
 				</div>
