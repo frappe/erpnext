@@ -11,9 +11,10 @@ const ingredients = ref([]);
 const loadingIngredients = ref(true);
 const error = ref(null);
 const additionalIngredients = ['silane', 'catalyst', 'hardener'];
-const showAddMaterialsDialog = ref(false);
-const addRawMaterial = ref('');
-const addRawMaterialQty = ref(0);
+const jobCardSubmitted = ref(false);
+const workOrderSubmitted = ref(false);
+const preparedQty = ref(0);
+const stockEntryName = ref('');
 
 // downstream alerts (dummy)
 const alerts = ref([
@@ -81,6 +82,12 @@ onMounted(async () => {
     mixingReady.value = !!s.mixer_materials_confirmed;
     mixingStarted.value = !!s.mixer_started;
     mixingStartTime.value = s.mixer_start_time;
+
+    jobCardSubmitted.value = !!s.job_card_submitted || false;  
+    if (jobCardSubmitted.value) {
+        preparedQty.value = s.prepared_qty || 0;
+        stockEntryName.value = s.stock_entry_name || '';
+    }
 
     if (mixingStarted.value && mixingStartTime.value) {
         const start = frappe.datetime.str_to_obj(mixingStartTime.value);
@@ -231,21 +238,52 @@ async function finishAndDischarge() {
         const jc = await frappe.db.get_doc('Job Card', jobCard.value);
         const completed_qty = jc.for_quantity || 0;
 
-        await frappe.call({
+        console.log('Calling finish_mixing with:', { 
+            job_card: jobCard.value, 
+            completed_qty 
+        });
+
+        const result = await frappe.call({
             method: 'erpnext.manufacturing.page.mixer_station.mixer_station.finish_mixing',
             args: {
                 job_card: jobCard.value,
                 completed_qty,
-            }
+            },
+            freeze: true,
+            freeze_message: __('Completing Job Card...')
         });
+        console.log('✅ SUCCESS - Full result:', result);
         mixingStarted.value = false;
         mixingStartTime.value = null;
         mixingElapsed.value = 0;
         mixingReady.value = false;
-        frappe.msgprint(__('Mixing finished and discharged'));
+
+        jobCardSubmitted.value = true;
+        preparedQty.value = result.message.job_card_qty || result.message.produced_qty;
+        stockEntryName.value = result.message.stock_entry;
+        frappe.msgprint(result.message.message);    
+        if (result.message.work_order_status === 'Completed') {
+            frappe.show_alert({
+                message: __('✅ Work Order also Completed!'),
+                indicator: 'green'
+            });
+        }
     }
-    catch (e) {
-        frappe.msgprint(__('Failed to complete Job Card: {0}', [e.message || e]));
+    catch (error) {
+        console.error('FULL ERROR OBJECT:', error);
+        console.error('error.message:', error.message);
+        console.error('error._server_messages:', error._server_messages);
+        
+        // Show ALL error details
+        const errorMsg = error.message || 
+                        (error._server_messages?.[0]?.message) || 
+                        JSON.stringify(error);
+        
+        frappe.msgprint({
+            title: __('Error'),
+            indicator: 'red',
+            message: `Failed to complete Job Card:<br><pre>${errorMsg}</pre>`
+        });
     }
 }
 
@@ -341,6 +379,35 @@ function openAddMaterials() {
     d.show();
 }
 
+async function transferToFGWarehouse() {
+    try {
+        const result = await frappe.call({
+            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.transfer_to_next_process',
+            args: {
+                mixing_work_order: workOrderName.value,  
+                qty: preparedQty.value
+            },
+            freeze: true,
+            freeze_message: __('Transferring to Distribution')
+        });
+        
+        frappe.msgprint({
+            title: __('Transfer Complete'),
+            message: result.message.message,
+            indicator: 'green'
+        });
+        
+        // Reset or navigate to next station
+        jobCardSubmitted.value = false;
+        frappe.show_alert({
+            message: `Next: ${result.message.next_work_order}`,
+            indicator: 'blue'
+        });
+        
+    } catch (error) {
+        frappe.msgprint(__('Transfer failed: {0}', [error.message]));
+    }
+}
 </script>
 
 <template>
@@ -452,7 +519,7 @@ function openAddMaterials() {
                 <!-- Middle: Mixing card -->
                 <div style="width:315px;" class="mr-4 p-4">
                     <!-- Ready to Mix state -->
-                    <div v-if="!mixingStarted" class="border rounded p-4 mb-3 text-center">
+                    <div v-if="!mixingStarted && !jobCardSubmitted" class="border rounded p-4 mb-3 text-center">
                         <div class="mb-2 text-success font-weight-bold">
                             {{ __('Ready to Mix?') }}
                         </div>
@@ -474,7 +541,7 @@ function openAddMaterials() {
                     </div>
 
                     <!-- Mixing in Progress state -->
-                    <div v-else class="border rounded p-4 mb-3 text-center" style="background:#e8f8ec;">
+                    <div v-else-if="mixingStarted && !jobCardSubmitted" class="border rounded p-4 mb-3 text-center" style="background:#e8f8ec;">
                         <div
                             class="mb-2 text-success font-weight-bold d-flex justify-content-center align-items-center">
                             <span class="fa fa-spinner fa-spin mr-2"></span>
@@ -496,6 +563,22 @@ function openAddMaterials() {
                         
                         <div class="text-muted small mt-2">
                             {{ __('Started at {0}', [startedAtLabel]) }}
+                        </div>
+                    </div>
+
+                    <div v-else-if="jobCardSubmitted" class="border rounded p-4 mb-3 text-center" style="background:#fff3cd;">
+                        <div class="mb-3 text-warning font-weight-bold d-flex justify-content-center align-items-center">
+                            <span class="fa fa-cube mr-2"></span>
+                            {{ __('Ready for Transfer') }}
+                        </div>
+                        <div class="display-4 font-weight-bold mb-4" style="font-size:2.8rem; color:#856404;">
+                            {{ preparedQty.toLocaleString() }} {{ unit || '' }}
+                        </div>
+                        <div class="d-flex flex-column gap-2 justify-content-center mb-3">
+                            <button class="btn btn-warning btn-lg flex-fill" @click="transferToFGWarehouse">
+                                <span class="fa fa-truck mr-2"></span>
+                                {{ __('Transfer') }}
+                            </button>
                         </div>
                     </div>
 

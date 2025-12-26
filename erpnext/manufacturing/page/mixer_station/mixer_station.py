@@ -2,12 +2,13 @@ import frappe
 import json
 from frappe import _
 from frappe.utils import flt
-from erpnext.manufacturing.doctype.job_card.job_card import make_stock_entry
-from erpnext.manufacturing.doctype.job_card.job_card import make_time_log
+from erpnext.manufacturing.doctype.job_card.job_card import make_time_log, make_stock_entry as jc_make_stock_entry
+from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry  as wo_make_stock_entry
 
 @frappe.whitelist()
 def get_mixer_state(job_card):
     jc = frappe.get_doc("Job Card", job_card)
+    wo = frappe.get_doc("Work Order", jc.work_order) if jc.work_order else None
     return {
         "status": jc.status,
         "docstatus": jc.docstatus,
@@ -15,6 +16,11 @@ def get_mixer_state(job_card):
         "mixer_started": 1 if jc.time_logs else 0,
         "mixer_start_time": jc.started_time,
         "mixer_finished": jc.current_time or 0, 
+        "job_card_submitted": jc.status == "Completed",
+        "job_card_completed": jc.total_completed_qty > 0,
+        "prepared_qty": wo.produced_qty if wo else jc.total_completed_qty,
+        "stock_entry_name": wo.produced_qty > 0 and "MFG-SE-*" or "",
+        "work_order_status": wo.get_status() if wo else "Draft"
     }
 
 @frappe.whitelist()
@@ -66,7 +72,7 @@ def confirm_materials(job_card, ingredients):
 
     jc.save(ignore_permissions=True)
 
-    se = make_stock_entry(job_card)
+    se = jc_make_stock_entry(job_card)
     if not se.items:
         frappe.throw(_("No remaining quantity to transfer for Job Card {0}.").format(job_card))
 
@@ -85,7 +91,7 @@ def start_mixing(job_card):
     args = {
         "job_card_id": jc.name,
         "start_time": start_time,
-        "employees": [{"employee": "HR-EMP-00002"}], 
+        "employees": [{"employee": "HR-EMP-00003"}], 
         "status": "Work In Progress",
     }
 
@@ -104,27 +110,65 @@ def start_mixing(job_card):
 def finish_mixing(job_card, completed_qty):
     """Complete the Job Card when mixing is finished."""
     jc = frappe.get_doc("Job Card", job_card)
-
+    job_card_qty = flt(jc.for_quantity or 0, 3)
     args = {
         "job_card_id": jc.name,
         "complete_time": frappe.utils.now_datetime(),
-        "completed_qty": float(completed_qty or 0),
+        "completed_qty": job_card_qty,
         "status": "Completed",
     }
 
     make_time_log(args)
     jc.reload()
     jc.status = "Completed"
-    jc.completed_qty = float(completed_qty or 0)
+    jc.completed_qty = job_card_qty
     jc.job_started = 0
     if jc.docstatus == 0:
         jc.submit()
     else:
         jc.save(ignore_permissions=True)
 
+    jc.reload()
+    jc.db_set("status", "Completed")  # Direct DB update
+    jc.reload()
+
+    work_order = jc.work_order
+    wo = frappe.get_doc("Work Order", work_order)
+
+    se_doc = wo_make_stock_entry(work_order, "Manufacture", qty=job_card_qty)
+    if isinstance(se_doc, dict):
+        se = frappe.get_doc(se_doc)
+    else:
+        se = se_doc
+
+    for item in se.items:
+        if item.is_finished_item:
+            item.t_warehouse = wo.fg_warehouse  
+            item.qty = job_card_qty
+        elif not item.is_scrap_item: 
+            item.s_warehouse = wo.source_warehouse
+
+    se.fg_completed_qty = job_card_qty
+    se.for_quantity = job_card_qty 
+    fg_item = next((item for item in se.items if item.is_finished_item), None)
+    if fg_item:
+        fg_item.qty = job_card_qty
+        fg_item.stock_qty = job_card_qty
+    se.save()
+    se.submit()
+
+    wo.update_work_order_qty()
+    wo.reload()
+    wo_status = wo.get_status()
     return {
-        "status": jc.status,
-        "docstatus": jc.docstatus,
+        "status": wo_status,
+        "work_order_status": wo_status,
+        "work_order": work_order,
+        "job_card_qty": job_card_qty,
+        "produced_qty": wo.produced_qty,
+        "total_qty": wo.qty,
+        "stock_entry": se.name,
+        "message": f"SE {se.name} ({job_card_qty} qty). WO: {wo_status}"
     }
 
 @frappe.whitelist()
@@ -163,7 +207,7 @@ def quick_add_raw_materials(job_card, raw_material, qty):
     se_item.item_name = target_row.item_name
     se_item.description = target_row.description or ""
     se_item.s_warehouse = target_row.source_warehouse
-    se_item.qty = float(qty)  # ONLY added qty
+    se_item.qty = float(qty)  
     se_item.uom = target_row.uom
     se_item.stock_uom = target_row.stock_uom
     se_item.job_card_item = target_row.name
@@ -200,4 +244,55 @@ def quick_add_raw_materials(job_card, raw_material, qty):
         "new_item_qty": target_row.required_qty,
         "total_for_quantity": total_qty,
         "items_count": len(jc.items)
+    }
+
+@frappe.whitelist()
+def transfer_to_next_process(mixing_work_order, qty=None):
+    """Transfer FG from Mixing → Next Process Source Warehouse."""
+
+    mixing_wo = frappe.get_doc("Work Order", mixing_work_order)
+    fg_item = mixing_wo.production_item
+    fg_qty = flt(qty or mixing_wo.produced_qty)
+    
+    production_plan = mixing_wo.production_plan
+    next_wo = frappe.db.get_value("Work Order", {
+        "production_plan": production_plan,
+        "production_plan_item": mixing_wo.production_plan_item,
+        "sequence_id": mixing_wo.sequence_id - 1,
+        "docstatus": 0  
+    }, "name")
+    
+    if not next_wo:
+        frappe.throw(_("No next Work Order found after {0}").format(mixing_work_order))
+    
+    next_wo_doc = frappe.get_doc("Work Order", next_wo)
+    
+    se = frappe.new_doc("Stock Entry")
+    se.purpose = "Material Transfer for Manufacture"
+    se.work_order = next_wo
+    se.job_card = ""  # No job card for inter-process transfer
+    se.company = mixing_wo.company
+    se.fg_completed_qty = fg_qty
+    
+    se.append("items", {
+        "item_code": fg_item,
+        "qty": fg_qty,
+        "stock_uom": mixing_wo.stock_uom,
+        "s_warehouse": mixing_wo.fg_warehouse,      
+        "t_warehouse": next_wo_doc.wip_warehouse,   
+        "basic_rate": 0  
+    })
+    
+    se.set_stock_entry_type()
+    se.set_missing_values()
+    se.submit()
+    
+    return {
+        "status": "Success",
+        "transfer_se": se.name,
+        "next_work_order": next_wo,
+        "qty_transferred": fg_qty,
+        "from_warehouse": mixing_wo.fg_warehouse,
+        "to_warehouse": next_wo_doc.wip_warehouse,
+        "message": f"Transferred {fg_qty} {fg_item} to {next_wo}"
     }
