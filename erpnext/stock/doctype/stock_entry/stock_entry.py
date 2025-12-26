@@ -3080,7 +3080,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			child_qty = flt(item_row["qty"], precision)
 			if not self.is_return and child_qty <= 0 and not item_row.get("is_scrap_item"):
-				if self.purpose != "Receive from Customer":
+				if self.purpose not in ["Receive from Customer", "Send to Subcontractor"]:
 					continue
 
 			se_child = self.append("items")
