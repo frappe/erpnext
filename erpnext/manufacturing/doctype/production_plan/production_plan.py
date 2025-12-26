@@ -727,6 +727,7 @@ class ProductionPlan(Document):
 				"product_bundle_item": d.product_bundle_item,
 				"planned_start_date": d.planned_start_date,
 				"project": self.project,
+				"parentfield": d.parentfield or d.parent
 			}
 
 			key = (d.item_code, d.sales_order, d.sales_order_item, d.warehouse)
@@ -888,6 +889,18 @@ class ProductionPlan(Document):
 
 		wo = frappe.new_doc("Work Order")
 		wo.update(item)
+
+		if "po_items_line_1" in item.get("parentfield", "") or "po_items_line_1" in str(item):
+			wo.production_line = "L1"
+		elif "po_items_line_2" in item.get("parentfield", "") or "po_items_line_2" in str(item):
+			wo.production_line = "L2"
+		elif "po_items_line_3" in item.get("parentfield", "") or "po_items_line_3" in str(item):
+			wo.production_line = "L3"
+		elif "po_items_mono_line" in item.get("parentfield", "") or "po_items_mono_line" in str(item):
+			wo.production_line = "MONO"
+		elif "po_items_multi_line" in item.get("parentfield", "") or "po_items_multi_line" in str(item):
+			wo.production_line = "MULTI"
+
 		wo.planned_start_date = item.get("planned_start_date") or item.get("schedule_date")
 
 		if item.get("warehouse"):

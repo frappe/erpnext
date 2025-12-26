@@ -4,6 +4,7 @@
 import json
 
 import frappe
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.model.document import Document
@@ -106,7 +107,7 @@ class WorkOrder(Document):
 		produced_qty: DF.Float
 		product_bundle_item: DF.Link | None
 		production_item: DF.Link
-		production_line: DF.Data | None
+		production_line: DF.Link | None
 		production_plan: DF.Link | None
 		production_plan_item: DF.Data | None
 		production_plan_sub_assembly_item: DF.Data | None
@@ -133,6 +134,12 @@ class WorkOrder(Document):
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
 
+	def before_naming(self):
+		"""Set naming series before document naming occurs"""
+		if self.production_line:
+			year = datetime.now().strftime("%Y")
+			self.naming_series = f"MFG-WO-{self.production_line}-{year}-.#####"
+
 	def validate(self):
 		self.validate_production_item()
 		if self.bom_no:
@@ -157,6 +164,10 @@ class WorkOrder(Document):
 
 		self.set_required_items(reset_only_qty=len(self.get("required_items")))
 		self.validate_operations_sequence()
+
+		if self.production_line:
+			year = frappe.utils.get_fiscal_year(frappe.utils.today(), as_dict=True).year_end[-4:]
+			self.naming_series = f"MFG-WO-{self.production_line}-{year}-.#####"
 
 	def validate_operations_sequence(self):
 		if all([not op.sequence_id for op in self.operations]):
