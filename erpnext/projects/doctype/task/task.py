@@ -322,6 +322,8 @@ class Task(NestedSet):
 			return True
 
 	def populate_depends_on(self):
+		TaskDependsOn = frappe.qb.DocType("Task Depends On")
+
 		if self.parent_task:
 			parent = frappe.get_doc("Task", self.parent_task)
 			if self.name not in [row.task for row in parent.depends_on]:
@@ -329,6 +331,16 @@ class Task(NestedSet):
 					"depends_on", {"doctype": "Task Depends On", "task": self.name, "subject": self.subject}
 				)
 				parent.save()
+
+		doc_before_save = self.get_doc_before_save()
+		if (
+			doc_before_save
+			and doc_before_save.parent_task
+			and doc_before_save.parent_task != self.parent_task
+		):
+			frappe.qb.from_(TaskDependsOn).delete().where(
+				(TaskDependsOn.parent == doc_before_save.parent_task) & (TaskDependsOn.task == self.name)
+			).run()
 
 	def on_trash(self):
 		if check_if_child_exists(self.name):
