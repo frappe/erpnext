@@ -7,13 +7,15 @@
  "doctype": "Number Card",
  "document_type": "Bank",
  "dynamic_filters_json": "{}",
+ "filters_config": "",
  "filters_json": "{}",
  "function": "Count",
  "idx": 2,
  "is_public": 1,
  "is_standard": 1,
  "label": "ICICI Bank",
- "modified": "2025-09-12 22:31:28.638067",
+ "method": "india_banking.india_banking.doctype.bank_connector.bank_connector.get_balanace_for_dashboard?bank_account_name=ICICI Main - ICICI Bank",
+ "modified": "2025-12-26 16:47:56.814931",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "IDBI Bank",
@@ -22,7 +24,8 @@
  "report_field": "balance",
  "report_function": "Sum",
  "report_name": "ICICI Bank",
+ "show_full_number": 0,
  "show_percentage_stats": 1,
  "stats_time_interval": "Daily",
- "type": "Report"
+ "type": "Custom"
 }
