@@ -624,6 +624,7 @@ erpnext.utils.update_child_items = function (opts) {
 			uom: d.uom,
 			fg_item: d.fg_item,
 			fg_item_qty: d.fg_item_qty,
+			description: d.description,
 		};
 	});
 
@@ -707,8 +708,8 @@ erpnext.utils.update_child_items = function (opts) {
 								conversion_factor,
 								item_name,
 								bom_no,
+								description,
 							} = r.message;
-
 							const row = dialog.fields_dict.trans_items.df.data.find(
 								(row) => row.name == me.doc.name
 							);
@@ -720,6 +721,7 @@ erpnext.utils.update_child_items = function (opts) {
 									rate: me.doc.rate || rate,
 									item_name: item_name,
 									bom_no: bom_no,
+									description: me.doc.description || description,
 								});
 								dialog.fields_dict.trans_items.grid.refresh();
 							}
@@ -780,6 +782,12 @@ erpnext.utils.update_child_items = function (opts) {
 			in_list_view: 1,
 			label: __("Rate"),
 			precision: get_precision("rate"),
+		},
+		{
+			fieldtype: "Text Editor",
+			fieldname: "description",
+			read_only: 0,
+			label: __("Description"),
 		},
 	];
 

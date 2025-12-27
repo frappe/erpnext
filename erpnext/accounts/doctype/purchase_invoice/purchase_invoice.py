@@ -24,9 +24,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_linked_doc,
 	validate_inter_company_party,
 )
-from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
-	get_party_tax_withholding_details,
-)
+from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import PurchaseTaxWithholding
 from erpnext.accounts.general_ledger import (
 	get_round_off_account_and_cost_center,
 	make_gl_entries,
@@ -61,7 +59,6 @@ class PurchaseInvoice(BuyingController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.advance_tax.advance_tax import AdvanceTax
 		from erpnext.accounts.doctype.item_wise_tax_detail.item_wise_tax_detail import ItemWiseTaxDetail
 		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
@@ -72,14 +69,13 @@ class PurchaseInvoice(BuyingController):
 		from erpnext.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import (
 			PurchaseTaxesandCharges,
 		)
-		from erpnext.accounts.doctype.tax_withheld_vouchers.tax_withheld_vouchers import TaxWithheldVouchers
+		from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import TaxWithholdingEntry
 		from erpnext.buying.doctype.purchase_receipt_item_supplied.purchase_receipt_item_supplied import (
 			PurchaseReceiptItemSupplied,
 		)
 
 		additional_discount_percentage: DF.Float
 		address_display: DF.TextEditor | None
-		advance_tax: DF.Table[AdvanceTax]
 		advances: DF.Table[PurchaseInvoiceAdvance]
 		against_expense_account: DF.SmallText | None
 		allocate_advances_automatically: DF.Check
@@ -94,7 +90,6 @@ class PurchaseInvoice(BuyingController):
 		base_paid_amount: DF.Currency
 		base_rounded_total: DF.Currency
 		base_rounding_adjustment: DF.Currency
-		base_tax_withholding_net_total: DF.Currency
 		base_taxes_and_charges_added: DF.Currency
 		base_taxes_and_charges_deducted: DF.Currency
 		base_total: DF.Currency
@@ -128,6 +123,7 @@ class PurchaseInvoice(BuyingController):
 		hold_comment: DF.SmallText | None
 		ignore_default_payment_terms_template: DF.Check
 		ignore_pricing_rule: DF.Check
+		ignore_tax_withholding_threshold: DF.Check
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
 		inter_company_invoice_reference: DF.Link | None
@@ -149,6 +145,7 @@ class PurchaseInvoice(BuyingController):
 		only_include_allocated_payments: DF.Check
 		other_charges_calculation: DF.TextEditor | None
 		outstanding_amount: DF.Currency
+		override_tax_withholding_entries: DF.Check
 		paid_amount: DF.Currency
 		party_account_currency: DF.Link | None
 		payment_schedule: DF.Table[PaymentSchedule]
@@ -198,9 +195,8 @@ class PurchaseInvoice(BuyingController):
 		supplier_warehouse: DF.Link | None
 		tax_category: DF.Link | None
 		tax_id: DF.ReadOnly | None
-		tax_withheld_vouchers: DF.Table[TaxWithheldVouchers]
-		tax_withholding_category: DF.Link | None
-		tax_withholding_net_total: DF.Currency
+		tax_withholding_entries: DF.Table[TaxWithholdingEntry]
+		tax_withholding_group: DF.Link | None
 		taxes: DF.Table[PurchaseTaxesandCharges]
 		taxes_and_charges: DF.Link | None
 		taxes_and_charges_added: DF.Currency
@@ -245,11 +241,14 @@ class PurchaseInvoice(BuyingController):
 
 	def onload(self):
 		super().onload()
-		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
-		self.set_onload("supplier_tds", supplier_tds)
+		if self.supplier:
+			tax_withholding_category, tax_withholding_group = frappe.get_cached_value(
+				"Supplier", self.supplier, ["tax_withholding_category", "tax_withholding_group"]
+			)
+			self.set_onload("apply_tds", tax_withholding_category or tax_withholding_group)
 
 		if self.is_new():
-			self.set("tax_withheld_vouchers", [])
+			self.set("tax_withholding_entries", [])
 
 	def before_save(self):
 		if not self.on_hold:
@@ -300,6 +299,7 @@ class PurchaseInvoice(BuyingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
+		PurchaseTaxWithholding(self).on_validate()
 		self.set_percentage_received()
 
 	def set_percentage_received(self):
@@ -352,11 +352,13 @@ class PurchaseInvoice(BuyingController):
 				template_name=self.payment_terms_template,
 			)
 
-		tds_category = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
-		if tds_category and not for_validate:
-			self.apply_tds = 1
-			self.tax_withholding_category = tds_category
-			self.set_onload("supplier_tds", tds_category)
+		if self.supplier:
+			tax_withholding_category, tax_withholding_group = frappe.get_cached_value(
+				"Supplier", self.supplier, ["tax_withholding_category", "tax_withholding_group"]
+			)
+			if not for_validate:
+				if tax_withholding_category or tax_withholding_group:
+					self.apply_tds = 1
 
 		super().set_missing_values(for_validate)
 
@@ -747,6 +749,7 @@ class PurchaseInvoice(BuyingController):
 
 	def on_submit(self):
 		super().on_submit()
+		PurchaseTaxWithholding(self).on_submit()
 
 		self.check_prev_docstatus()
 
@@ -788,7 +791,6 @@ class PurchaseInvoice(BuyingController):
 			self.update_project()
 
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
-		self.update_advance_tax_references()
 
 		self.process_common_party_accounting()
 
@@ -1672,6 +1674,7 @@ class PurchaseInvoice(BuyingController):
 		check_if_return_invoice_linked_with_payment_entry(self)
 
 		super().on_cancel()
+		PurchaseTaxWithholding(self).on_cancel()
 
 		self.check_on_hold_or_closed_status()
 
@@ -1718,10 +1721,9 @@ class PurchaseInvoice(BuyingController):
 			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
-			"Tax Withheld Vouchers",
 			"Serial and Batch Bundle",
+			"Tax Withholding Entry",
 		)
-		self.update_advance_tax_references(cancel=1)
 
 	def update_project(self):
 		projects = frappe._dict()
@@ -1843,102 +1845,6 @@ class PurchaseInvoice(BuyingController):
 	def unblock_invoice(self):
 		self.db_set("on_hold", 0)
 		self.db_set("release_date", None)
-
-	def set_tax_withholding(self):
-		self.set("advance_tax", [])
-		self.set("tax_withheld_vouchers", [])
-
-		if not self.apply_tds:
-			return
-
-		if self.apply_tds and not self.get("tax_withholding_category"):
-			self.tax_withholding_category = frappe.db.get_value(
-				"Supplier", self.supplier, "tax_withholding_category"
-			)
-
-		if not self.tax_withholding_category:
-			return
-
-		tax_withholding_details, advance_taxes, voucher_wise_amount = get_party_tax_withholding_details(
-			self, self.tax_withholding_category
-		)
-
-		# Adjust TDS paid on advances
-		self.allocate_advance_tds(tax_withholding_details, advance_taxes)
-
-		if not tax_withholding_details:
-			return
-
-		accounts = []
-		for d in self.taxes:
-			if d.account_head == tax_withholding_details.get("account_head"):
-				d.update(tax_withholding_details)
-
-			accounts.append(d.account_head)
-
-		if not accounts or tax_withholding_details.get("account_head") not in accounts:
-			self.append("taxes", tax_withholding_details)
-
-		to_remove = [
-			d
-			for d in self.taxes
-			if not d.tax_amount and d.account_head == tax_withholding_details.get("account_head")
-		]
-
-		for d in to_remove:
-			self.remove(d)
-
-		## Add pending vouchers on which tax was withheld
-		for row in voucher_wise_amount:
-			self.append(
-				"tax_withheld_vouchers",
-				{
-					"voucher_name": row.voucher_name,
-					"voucher_type": row.voucher_type,
-					"taxable_amount": row.taxable_amount,
-				},
-			)
-
-		# calculate totals again after applying TDS
-		self.calculate_taxes_and_totals()
-
-	def allocate_advance_tds(self, tax_withholding_details, advance_taxes):
-		for tax in advance_taxes:
-			allocated_amount = 0
-			pending_amount = flt(tax.tax_amount - tax.allocated_amount)
-			if flt(tax_withholding_details.get("tax_amount")) >= pending_amount:
-				tax_withholding_details["tax_amount"] -= pending_amount
-				allocated_amount = pending_amount
-			elif (
-				flt(tax_withholding_details.get("tax_amount"))
-				and flt(tax_withholding_details.get("tax_amount")) < pending_amount
-			):
-				allocated_amount = tax_withholding_details["tax_amount"]
-				tax_withholding_details["tax_amount"] = 0
-
-			self.append(
-				"advance_tax",
-				{
-					"reference_type": "Payment Entry",
-					"reference_name": tax.parent,
-					"reference_detail": tax.name,
-					"account_head": tax.account_head,
-					"allocated_amount": allocated_amount,
-				},
-			)
-
-	def update_advance_tax_references(self, cancel=0):
-		for tax in self.get("advance_tax"):
-			at = frappe.qb.DocType("Advance Taxes and Charges").as_("at")
-
-			if cancel:
-				frappe.qb.update(at).set(
-					at.allocated_amount, at.allocated_amount - tax.allocated_amount
-				).where(at.name == tax.reference_detail).run()
-			else:
-				frappe.qb.update(at).set(
-					at.allocated_amount, at.allocated_amount + tax.allocated_amount
-				).where(at.name == tax.reference_detail).run()
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():

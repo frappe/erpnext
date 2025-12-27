@@ -131,6 +131,15 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			frm.cscript.calculate_taxes_and_totals();
 		});
 
+		// Tax Withholding Entries - Auto calculate withholding amount when taxable amount or tax rate changes
+		frappe.ui.form.on("Tax Withholding Entry", "taxable_amount", function (frm, cdt, cdn) {
+			me.calculate_withholding_amount(frm, cdt, cdn);
+		});
+
+		frappe.ui.form.on("Tax Withholding Entry", "tax_rate", function (frm, cdt, cdn) {
+			me.calculate_withholding_amount(frm, cdt, cdn);
+		});
+
 		frappe.ui.form.on(this.frm.doctype + " Item", {
 			items_add: function (frm, cdt, cdn) {
 				var item = frappe.get_doc(cdt, cdn);
@@ -581,6 +590,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				me.send_sms();
 			});
 		}
+	}
+
+	calculate_withholding_amount(frm, cdt, cdn) {
+		// Calculate withholding amount: taxable_amount * tax_rate / 100
+		let row = frappe.get_doc(cdt, cdn);
+		let withholding_amount = flt(
+			(row.taxable_amount * row.tax_rate) / 100,
+			precision("withholding_amount", row)
+		);
+
+		// Set the calculated withholding amount
+		frappe.model.set_value(cdt, cdn, "withholding_amount", withholding_amount);
 	}
 
 	send_sms() {

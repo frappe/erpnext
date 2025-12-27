@@ -129,11 +129,13 @@ class Item(Document):
 		over_billing_allowance: DF.Float
 		over_delivery_receipt_allowance: DF.Float
 		production_capacity: DF.Int
+		purchase_tax_withholding_category: DF.Link | None
 		purchase_uom: DF.Link | None
 		quality_inspection_template: DF.Link | None
 		reorder_levels: DF.Table[ItemReorder]
 		retain_sample: DF.Check
 		safety_stock: DF.Float
+		sales_tax_withholding_category: DF.Link | None
 		sales_uom: DF.Link | None
 		sample_quantity: DF.Int
 		serial_no_series: DF.Data | None

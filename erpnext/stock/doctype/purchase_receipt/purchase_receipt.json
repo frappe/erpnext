@@ -59,8 +59,6 @@
   "column_break_27",
   "total",
   "net_total",
-  "tax_withholding_net_total",
-  "base_tax_withholding_net_total",
   "taxes_charges_section",
   "tax_category",
   "taxes_and_charges",
@@ -1256,24 +1254,6 @@
    "options": "Subcontracting Receipt",
    "read_only": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "tax_withholding_net_total",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "Tax Withholding Net Total",
-   "no_copy": 1,
-   "options": "currency",
-   "read_only": 1
-  },
-  {
-   "fieldname": "base_tax_withholding_net_total",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "Base Tax Withholding Net Total",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
   },
   {
    "fieldname": "dispatch_address",

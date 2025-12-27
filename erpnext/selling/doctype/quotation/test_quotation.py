@@ -42,6 +42,7 @@ class TestQuotation(IntegrationTestCase):
 					"rate": second_item.rate,
 					"qty": second_item.qty,
 					"docname": second_item.name,
+					"description": "test",
 				},
 				{"item_code": "_Test Item 2", "rate": 100, "qty": 7},
 			]
@@ -51,6 +52,7 @@ class TestQuotation(IntegrationTestCase):
 		qo.reload()
 		self.assertEqual(qo.get("items")[0].qty, 11)
 		self.assertEqual(qo.get("items")[-1].rate, 100)
+		self.assertEqual(qo.get("items")[1].description, "test")
 
 	def test_disallow_due_date_before_transaction_date(self):
 		qo = make_quotation(qty=3, do_not_submit=1)

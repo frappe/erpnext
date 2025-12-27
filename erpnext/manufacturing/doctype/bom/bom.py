@@ -1280,6 +1280,10 @@ def get_bom_items_as_dict(
 		fetch_exploded = 0
 		group_by_cond = "group by item_code, operation_row_id, stock_uom"
 
+	if fetch_scrap_items:
+		fetch_exploded = 0
+		group_by_cond = "group by item_code"
+
 	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 	query = """select
 				bom_item.item_code,
@@ -1492,6 +1496,10 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=
 
 	items = {}
 	for d in bom.get(table):
+		# Phantom item is exploded, so its cost is considered via its components
+		if d.get("is_phantom_item"):
+			continue
+
 		items.setdefault(d.item_code, d.amount)
 
 	non_stock_items = frappe.get_all(

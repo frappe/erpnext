@@ -46,7 +46,11 @@ def get_data(filters=None):
 
 	batch_sle_data = (
 		get_batch_qty(
-			item_code=item, batch_no=batch_no, for_stock_levels=True, consider_negative_batches=True
+			item_code=item,
+			batch_no=batch_no,
+			for_stock_levels=True,
+			consider_negative_batches=True,
+			ignore_reserved_stock=True,
 		)
 		or []
 	)
@@ -109,6 +113,7 @@ def update_batch_qty(selected_batches=None):
 			item_code=row.get("item_code"),
 			for_stock_levels=True,
 			consider_negative_batches=True,
+			ignore_reserved_stock=True,
 		)
 		batch_qty = 0.0
 		if batches:

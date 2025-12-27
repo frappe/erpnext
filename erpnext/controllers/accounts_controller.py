@@ -297,8 +297,6 @@ class AccountsController(TransactionBase):
 
 		if self.doctype == "Purchase Invoice":
 			self.calculate_paid_amount()
-			# apply tax withholding only if checked and applicable
-			self.set_tax_withholding()
 
 		with temporary_flag("company", self.company):
 			validate_regional(self)
@@ -1098,6 +1096,12 @@ class AccountsController(TransactionBase):
 						"is_fixed_asset"
 					):
 						item.set("is_fixed_asset", ret.get("is_fixed_asset", 0))
+
+					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field(
+						"tax_withholding_category",
+					):
+						if not item.get("tax_withholding_category") and ret.get("tax_withholding_category"):
+							item.set("tax_withholding_category", ret.get("tax_withholding_category"))
 
 					# Double check for cost center
 					# Items add via promotional scheme may not have cost center set
@@ -3990,6 +3994,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			elif parent_doctype == "Purchase Order":
 				prev_date, new_date = child_item.get("schedule_date"), d.get("schedule_date")
 
+			prev_description, new_description = (child_item.get("description"), d.get("description"))
+			description_unchanged = prev_description == new_description
 			rate_unchanged = prev_rate == new_rate
 			qty_unchanged = prev_qty == new_qty
 			fg_qty_unchanged = prev_fg_qty == new_fg_qty
@@ -4008,6 +4014,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 				and conversion_factor_unchanged
 				and uom_unchanged
 				and date_unchanged
+				and description_unchanged
 			):
 				continue
 
@@ -4031,6 +4038,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 				child_item.fg_item = d["fg_item"]
 
 		child_item.qty = flt(d.get("qty"))
+		child_item.description = d.get("description")
 		rate_precision = child_item.precision("rate") or 2
 		conv_fac_precision = child_item.precision("conversion_factor") or 2
 		qty_precision = child_item.precision("qty") or 2

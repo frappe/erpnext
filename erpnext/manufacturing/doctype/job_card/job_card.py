@@ -23,7 +23,7 @@ from frappe.utils import (
 	time_diff_in_hours,
 )
 
-from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
+from erpnext.manufacturing.doctype.bom.bom import add_additional_cost, get_bom_items_as_dict
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
@@ -239,6 +239,26 @@ class JobCard(Document):
 				row.status = "Pending"
 				row.sub_operation = row.operation
 				self.append("sub_operations", row)
+
+	def set_scrap_items(self):
+		if not self.semi_fg_bom:
+			return
+
+		items_dict = get_bom_items_as_dict(
+			self.semi_fg_bom, self.company, qty=self.for_quantity, fetch_exploded=0, fetch_scrap_items=1
+		)
+		for item_code, values in items_dict.items():
+			values = frappe._dict(values)
+
+			self.append(
+				"scrap_items",
+				{
+					"item_code": item_code,
+					"stock_qty": values.qty,
+					"item_name": values.item_name,
+					"stock_uom": values.stock_uom,
+				},
+			)
 
 	def validate_time_logs(self, save=False):
 		self.total_time_in_mins = 0.0
@@ -1361,10 +1381,15 @@ class JobCard(Document):
 		wo_doc = frappe.get_doc("Work Order", self.work_order)
 		add_additional_cost(ste.stock_entry, wo_doc, self)
 
-		ste.stock_entry.save()
+		ste.stock_entry.set_scrap_items()
+		for row in ste.stock_entry.items:
+			if row.is_scrap_item and not row.t_warehouse:
+				row.t_warehouse = self.target_warehouse
 
 		if auto_submit:
 			ste.stock_entry.submit()
+		else:
+			ste.stock_entry.save()
 
 		frappe.msgprint(
 			_("Stock Entry {0} has created").format(get_link_to_form("Stock Entry", ste.stock_entry.name))

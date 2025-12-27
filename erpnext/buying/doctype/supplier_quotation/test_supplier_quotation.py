@@ -25,17 +25,14 @@ class TestPurchaseOrder(IntegrationTestCase):
 					"qty": 5,
 					"docname": sq.items[0].name,
 				},
-				{
-					"item_code": "_Test Item 2",
-					"rate": 300,
-					"qty": 3,
-				},
+				{"item_code": "_Test Item 2", "rate": 300, "qty": 3, "description": "test"},
 			]
 		)
 		update_child_qty_rate("Supplier Quotation", trans_item, sq.name)
 		sq.reload()
 		self.assertEqual(sq.get("items")[0].qty, 5)
 		self.assertEqual(sq.get("items")[1].rate, 300)
+		self.assertEqual(sq.get("items")[1].description, "test")
 
 	def test_update_supplier_quotation_child_rate_disallow(self):
 		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])

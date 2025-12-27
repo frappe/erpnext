@@ -14,6 +14,7 @@
   "description",
   "included_in_paid_amount",
   "set_by_item_tax_template",
+  "is_tax_withholding_account",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -25,7 +26,6 @@
   "net_amount",
   "tax_amount",
   "total",
-  "allocated_amount",
   "column_break_13",
   "base_tax_amount",
   "base_net_amount",
@@ -97,11 +97,11 @@
    "fieldtype": "Column Break"
   },
   {
-    "allow_on_submit": 1,
-    "fieldname": "project",
-    "fieldtype": "Link",
-    "label": "Project",
-    "options": "Project"
+   "allow_on_submit": 1,
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   },
   {
    "fieldname": "section_break_8",
@@ -173,12 +173,6 @@
    "label": "Considered In Paid Amount"
   },
   {
-   "fieldname": "allocated_amount",
-   "fieldtype": "Currency",
-   "label": "Allocated Amount",
-   "options": "currency"
-  },
-  {
    "fetch_from": "account_head.account_currency",
    "fieldname": "currency",
    "fieldtype": "Link",
@@ -213,17 +207,25 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_tax_withholding_account",
+   "fieldtype": "Check",
+   "label": "Is Tax Withholding Account",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-11-22 19:16:22.346267",
+ "modified": "2025-12-15 06:42:18.707671",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Advance Taxes and Charges",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": []

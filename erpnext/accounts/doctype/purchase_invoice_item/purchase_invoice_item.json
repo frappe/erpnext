@@ -44,6 +44,7 @@
   "rate",
   "amount",
   "item_tax_template",
+  "tax_withholding_category",
   "col_break4",
   "base_rate",
   "base_amount",
@@ -892,7 +893,7 @@
    "default": "1",
    "fieldname": "apply_tds",
    "fieldtype": "Check",
-   "label": "Apply TDS"
+   "label": "Consider for Tax Withholding"
   },
   {
    "depends_on": "eval:parent.update_stock == 1 && (doc.use_serial_batch_fields === 0 || doc.docstatus === 1)",
@@ -978,6 +979,13 @@
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
    "options": "currency"
+  },
+  {
+   "fieldname": "tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Category",
+   "options": "Tax Withholding Category",
+   "print_hide": 1
   }
  ],
  "grid_page_length": 50,

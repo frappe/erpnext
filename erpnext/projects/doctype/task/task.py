@@ -98,7 +98,7 @@ class Task(NestedSet):
 		self.validate_parent_project_dates()
 
 	def set_default_end_date_if_missing(self):
-		if self.exp_start_date and self.expected_time:
+		if self.exp_start_date and self.expected_time and not self.exp_end_date:
 			self.exp_end_date = add_to_date(self.exp_start_date, hours=self.expected_time)
 
 	def validate_parent_expected_end_date(self):

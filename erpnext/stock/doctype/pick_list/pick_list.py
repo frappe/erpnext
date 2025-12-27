@@ -400,35 +400,23 @@ class PickList(TransactionBase):
 		picked_items = get_picked_items_qty(packed_items, contains_packed_items=True)
 		self.validate_picked_qty(picked_items)
 
-		picked_qty = frappe._dict()
+		doc_updates = {}
 		for d in picked_items:
-			picked_qty[d.product_bundle_item] = d.picked_qty
+			doc_updates[d.product_bundle_item] = {"picked_qty": flt(d.picked_qty)}
 
-		for packed_item in packed_items:
-			frappe.db.set_value(
-				"Packed Item",
-				packed_item,
-				"picked_qty",
-				flt(picked_qty.get(packed_item)),
-				update_modified=False,
-			)
+		if doc_updates:
+			frappe.db.bulk_update("Packed Item", doc_updates, update_modified=False)
 
 	def update_sales_order_item_qty(self, so_items):
 		picked_items = get_picked_items_qty(so_items)
 		self.validate_picked_qty(picked_items)
 
-		picked_qty = frappe._dict()
+		doc_updates = {}
 		for d in picked_items:
-			picked_qty[d.sales_order_item] = d.picked_qty
+			doc_updates[d.sales_order_item] = {"picked_qty": flt(d.picked_qty)}
 
-		for so_item in so_items:
-			frappe.db.set_value(
-				"Sales Order Item",
-				so_item,
-				"picked_qty",
-				flt(picked_qty.get(so_item)),
-				update_modified=False,
-			)
+		if doc_updates:
+			frappe.db.bulk_update("Sales Order Item", doc_updates, update_modified=False)
 
 	def update_sales_order_picking_status(self) -> None:
 		sales_orders = []
@@ -1227,26 +1215,48 @@ def create_delivery_note(source_name, target_doc=None):
 	validate_item_locations(pick_list)
 	sales_dict = dict()
 	sales_orders = []
-	delivery_note = None
+	delivery_notes = []
 	for location in pick_list.locations:
 		if location.sales_order:
 			sales_orders.append(
 				frappe.db.get_value(
-					"Sales Order", location.sales_order, ["customer", "name as sales_order"], as_dict=True
+					"Sales Order",
+					location.sales_order,
+					[
+						"customer",
+						"name as sales_order",
+						"company_address",
+						"dispatch_address_name",
+						"shipping_address_name",
+						"customer_address",
+					],
+					as_dict=True,
 				)
 			)
 
-	group_key = lambda so: so["customer"]  # noqa
-	for customer, rows in groupby(sorted(sales_orders, key=group_key), key=group_key):
-		sales_dict[customer] = {row.sales_order for row in rows}
+	group_key = lambda so: (  # noqa
+		so["customer"],
+		so["company_address"] or "",
+		so["dispatch_address_name"] or "",
+		so["shipping_address_name"] or "",
+		so["customer_address"] or "",
+	)
+	for key, rows in groupby(sorted(sales_orders, key=group_key), key=group_key):
+		sales_dict[key] = {row.sales_order for row in rows}
 
 	if sales_dict:
-		delivery_note = create_dn_with_so(sales_dict, pick_list)
+		delivery_notes.extend(create_dn_with_so(sales_dict, pick_list))
 
 	if not all(item.sales_order for item in pick_list.locations):
-		delivery_note = create_dn_wo_so(pick_list)
+		delivery_notes.append(create_dn_wo_so(pick_list))
 
-	return delivery_note
+	if len(delivery_notes) == 1:
+		return delivery_notes[0]
+	else:
+		from frappe.utils import comma_and
+
+		doc_list = [get_link_to_form("Delivery Note", p.name) for p in delivery_notes]
+		frappe.msgprint(_("{0} created").format(comma_and(doc_list)))
 
 
 def create_dn_wo_so(pick_list, delivery_note=None):
@@ -1309,17 +1319,18 @@ def create_dn_for_pick_lists(source_name, target_doc=None, kwargs=None):
 
 def create_dn_with_so(sales_dict, pick_list):
 	"""Create Delivery Note for each customer (based on SO) in a Pick List."""
-	delivery_note = None
+	delivery_notes = []
 
-	for customer in sales_dict:
-		delivery_note = create_dn_from_so(pick_list, sales_dict[customer], None)
+	for key in sales_dict:
+		delivery_note = create_dn_from_so(pick_list, sales_dict[key], None)
 		if delivery_note:
 			delivery_note.flags.ignore_mandatory = True
 			# updates packed_items on save
 			# save as multiple customers are possible
 			delivery_note.save()
+			delivery_notes.append(delivery_note)
 
-	return delivery_note
+	return delivery_notes
 
 
 def create_dn_from_so(pick_list, sales_order_list, delivery_note=None, kwargs=None):

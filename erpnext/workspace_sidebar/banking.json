@@ -9,30 +9,6 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "organization",
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Bank",
-   "link_to": "Bank",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
-   "icon": "accounting",
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Bank Account",
-   "link_to": "Bank Account",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
    "icon": "book-open-check",
    "indent": 0,
    "keep_closed": 0,
@@ -68,6 +44,41 @@
   },
   {
    "child": 0,
+   "collapsible": 1,
+   "icon": "database",
+   "indent": 1,
+   "keep_closed": 1,
+   "label": "Setup",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Section Break"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "organization",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Bank",
+   "link_to": "Bank",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "accounting",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Bank Account",
+   "link_to": "Bank Account",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
    "collapsible": 1,
    "icon": "settings",
    "indent": 0,
@@ -112,7 +123,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-11-25 10:46:09.274779",
+ "modified": "2025-12-22 16:57:07.501533",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Banking",

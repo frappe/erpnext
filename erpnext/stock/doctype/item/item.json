@@ -105,7 +105,13 @@
   "customer_details",
   "customer_items",
   "item_tax_section_break",
+  "section_break_oilf",
+  "column_break_aytr",
   "taxes",
+  "section_break_fxqz",
+  "purchase_tax_withholding_category",
+  "column_break_ltlb",
+  "sales_tax_withholding_category",
   "quality_tab",
   "inspection_required_before_purchase",
   "quality_inspection_template",
@@ -910,6 +916,37 @@
   {
    "fieldname": "column_break_wugd",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_oilf",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "column_break_aytr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_fxqz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "purchase_tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Purchase Tax Withholding Category",
+   "depends_on": "is_purchase_item",
+   "options": "Tax Withholding Category"
+  },
+  {
+   "fieldname": "column_break_ltlb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sales_tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Sales Tax Withholding Category",
+   "depends_on": "is_sales_item",
+   "options": "Tax Withholding Category"
   }
  ],
  "icon": "fa fa-tag",
