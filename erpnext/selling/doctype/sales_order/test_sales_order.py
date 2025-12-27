@@ -179,7 +179,11 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 	@change_settings(
 		"Accounts Settings",
-		{"add_taxes_from_item_tax_template": 0, "add_taxes_from_taxes_and_charges_template": 1},
+		{
+			"add_taxes_from_item_tax_template": 0,
+			"add_taxes_from_taxes_and_charges_template": 0,
+			"automatically_fetch_payment_terms": 1,
+		},
 	)
 	def test_make_sales_invoice_with_terms(self):
 		so = make_sales_order(do_not_submit=True)
