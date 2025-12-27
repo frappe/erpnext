@@ -34,7 +34,8 @@
   "base_net_amount",
   "base_tax_amount",
   "base_total",
-  "base_tax_amount_after_discount_amount"
+  "base_tax_amount_after_discount_amount",
+  "dont_recompute_tax"
  ],
  "fields": [
   {
@@ -205,11 +206,11 @@
    "fieldtype": "Column Break"
   },
   {
-    "allow_on_submit": 1,
-    "fieldname": "project",
-    "fieldtype": "Link",
-    "label": "Project",
-    "options": "Project"
+   "allow_on_submit": 1,
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   },
   {
    "default": "0",
@@ -262,13 +263,22 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "dont_recompute_tax",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Don't Recompute Tax",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-24 15:08:44.433022",
+ "modified": "2025-11-24 18:22:56.886010",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",

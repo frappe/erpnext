@@ -106,6 +106,9 @@ def get_item_details(
 
 	get_party_item_code(ctx, item, out)
 
+	if ctx.doctype in ["Sales Invoice", "Purchase Invoice"]:
+		get_tax_withholding_category(ctx, item, out)
+
 	if ctx.doctype in ["Sales Order", "Quotation"]:
 		set_valuation_rate(out, ctx)
 
@@ -215,6 +218,7 @@ def update_stock(ctx, out, doc=None):
 				"sabb_voucher_detail_no": ctx.child_docname,
 				"sabb_voucher_type": ctx.doctype,
 				"pick_reserved_items": True,
+				"qty": out.stock_qty,
 			}
 		)
 
@@ -1307,6 +1311,32 @@ def get_party_item_code(ctx: ItemDetailsCtx, item_doc, out: ItemDetails):
 	if ctx.transaction_type == "buying" and ctx.supplier:
 		item_supplier = item_doc.get("supplier_items", {"supplier": ctx.supplier})
 		out.supplier_part_no = item_supplier[0].supplier_part_no if item_supplier else None
+
+
+def get_tax_withholding_category(ctx: ItemDetailsCtx, item_doc, out: ItemDetails):
+	"""
+	Get tax withholding category for the item based on the transaction type and party.
+	"""
+
+	tax_withholding_category = None
+	field = (
+		"sales_tax_withholding_category"
+		if ctx.transaction_type == "selling"
+		else "purchase_tax_withholding_category"
+	)
+
+	if item_doc.get(field):
+		tax_withholding_category = item_doc.get(field)
+	elif ctx.transaction_type == "buying" and ctx.supplier:
+		tax_withholding_category = frappe.get_cached_value(
+			"Supplier", ctx.supplier, "tax_withholding_category"
+		)
+	elif ctx.transaction_type == "selling" and ctx.customer:
+		tax_withholding_category = frappe.get_cached_value(
+			"Customer", ctx.customer, "tax_withholding_category"
+		)
+
+	out.tax_withholding_category = tax_withholding_category
 
 
 from erpnext.deprecation_dumpster import get_pos_profile_item_details

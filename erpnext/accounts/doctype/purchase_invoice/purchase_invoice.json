@@ -27,7 +27,6 @@
   "update_billed_amount_in_purchase_order",
   "update_billed_amount_in_purchase_receipt",
   "apply_tds",
-  "tax_withholding_category",
   "amended_from",
   "supplier_invoice_details",
   "bill_no",
@@ -68,8 +67,6 @@
   "column_break_28",
   "total",
   "net_total",
-  "tax_withholding_net_total",
-  "base_tax_withholding_net_total",
   "taxes_section",
   "tax_category",
   "taxes_and_charges",
@@ -102,14 +99,17 @@
   "total_advance",
   "outstanding_amount",
   "disable_rounded_total",
+  "section_tax_withholding_entry",
+  "tax_withholding_group",
+  "ignore_tax_withholding_threshold",
+  "override_tax_withholding_entries",
+  "tax_withholding_entries",
   "section_break_44",
   "apply_discount_on",
   "base_discount_amount",
   "column_break_46",
   "additional_discount_percentage",
   "discount_amount",
-  "tax_withheld_vouchers_section",
-  "tax_withheld_vouchers",
   "sec_tax_breakup",
   "other_charges_calculation",
   "item_wise_tax_details",
@@ -130,7 +130,6 @@
   "only_include_allocated_payments",
   "get_advances",
   "advances",
-  "advance_tax",
   "write_off",
   "write_off_amount",
   "base_write_off_amount",
@@ -286,7 +285,7 @@
    "default": "0",
    "fieldname": "apply_tds",
    "fieldtype": "Check",
-   "label": "Apply Tax Withholding Amount",
+   "label": "Consider for Tax Withholding",
    "print_hide": 1
   },
   {
@@ -1359,14 +1358,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "tax_withholding_category",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Tax Withholding Category",
-   "options": "Tax Withholding Category",
-   "print_hide": 1
-  },
-  {
    "fieldname": "billing_address",
    "fieldtype": "Link",
    "label": "Select Billing Address",
@@ -1456,14 +1447,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "advance_tax",
-   "fieldtype": "Table",
-   "hidden": 1,
-   "label": "Advance Tax",
-   "options": "Advance Tax",
-   "read_only": 1
-  },
-  {
    "fieldname": "subscription",
    "fieldtype": "Link",
    "label": "Subscription",
@@ -1475,42 +1458,6 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Is Old Subcontracting Flow",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "depends_on": "apply_tds",
-   "fieldname": "tax_withholding_net_total",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "Tax Withholding Net Total",
-   "no_copy": 1,
-   "options": "currency",
-   "read_only": 1
-  },
-  {
-   "depends_on": "apply_tds",
-   "fieldname": "base_tax_withholding_net_total",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "Base Tax Withholding Net Total",
-   "no_copy": 1,
-   "options": "Company:company:default_currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "collapsible_depends_on": "tax_withheld_vouchers",
-   "fieldname": "tax_withheld_vouchers_section",
-   "fieldtype": "Section Break",
-   "label": "Tax Withheld Vouchers"
-  },
-  {
-   "fieldname": "tax_withheld_vouchers",
-   "fieldtype": "Table",
-   "label": "Tax Withheld Vouchers",
-   "no_copy": 1,
-   "options": "Tax Withheld Vouchers",
    "read_only": 1
   },
   {
@@ -1662,7 +1609,7 @@
    "fieldtype": "Data",
    "is_virtual": 1,
    "label": "Last Scanned Warehouse"
-   },
+  },
   {
    "fieldname": "claimed_landed_cost_amount",
    "fieldtype": "Currency",
@@ -1679,6 +1626,40 @@
    "label": "Item Wise Tax Details",
    "no_copy": 1,
    "options": "Item Wise Tax Detail"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.apply_tds && doc.docstatus == 0",
+   "depends_on": "eval: doc.apply_tds",
+   "fieldname": "section_tax_withholding_entry",
+   "fieldtype": "Section Break",
+   "label": "Tax Withholding Entry"
+  },
+  {
+   "fieldname": "tax_withholding_group",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Group",
+   "options": "Tax Withholding Group",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "tax_withholding_entries",
+   "fieldtype": "Table",
+   "label": "Tax Withholding Entries",
+   "options": "Tax Withholding Entry",
+   "read_only_depends_on": "eval: !doc.override_tax_withholding_entries"
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_tax_withholding_threshold",
+   "fieldtype": "Check",
+   "label": "Ignore Tax Withholding Threshold"
+  },
+  {
+   "default": "0",
+   "fieldname": "override_tax_withholding_entries",
+   "fieldtype": "Check",
+   "label": "Edit Tax Withholding Entries"
   }
  ],
  "grid_page_length": 50,
@@ -1686,7 +1667,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-04 19:19:11.380664",
+ "modified": "2025-12-15 06:41:38.237728",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

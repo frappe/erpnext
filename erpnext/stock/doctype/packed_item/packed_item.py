@@ -309,9 +309,9 @@ def update_packed_item_from_cancelled_doc(main_item_row, packing_item, pi_row, d
 		prev_doc_packed_items_map = get_cancelled_doc_packed_item_details(doc.packed_items)
 
 	if prev_doc_packed_items_map and prev_doc_packed_items_map.get(
-		(packing_item.item_code, main_item_row.item_code)
+		(packing_item.item_code, main_item_row.name)
 	):
-		prev_doc_row = prev_doc_packed_items_map.get((packing_item.item_code, main_item_row.item_code))
+		prev_doc_row = prev_doc_packed_items_map.get((packing_item.item_code, main_item_row.name))
 		pi_row.batch_no = prev_doc_row[0].batch_no
 		pi_row.serial_no = prev_doc_row[0].serial_no
 		pi_row.warehouse = prev_doc_row[0].warehouse
@@ -331,7 +331,9 @@ def get_packed_item_bin_qty(item, warehouse):
 def get_cancelled_doc_packed_item_details(old_packed_items):
 	prev_doc_packed_items_map = {}
 	for items in old_packed_items:
-		prev_doc_packed_items_map.setdefault((items.item_code, items.parent_item), []).append(items.as_dict())
+		prev_doc_packed_items_map.setdefault((items.item_code, items.parent_detail_docname), []).append(
+			items.as_dict()
+		)
 	return prev_doc_packed_items_map
 
 

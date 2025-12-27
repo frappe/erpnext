@@ -10,10 +10,12 @@
  "field_order": [
   "category_details_section",
   "category_name",
-  "round_off_tax_amount",
+  "tax_deduction_basis",
   "column_break_2",
-  "consider_party_ledger_amount",
+  "round_off_tax_amount",
   "tax_on_excess_amount",
+  "disable_cumulative_threshold",
+  "disable_transaction_threshold",
   "section_break_8",
   "rates",
   "section_break_7",
@@ -61,14 +63,7 @@
   },
   {
    "default": "0",
-   "description": "Only payment entries with apply tax withholding unchecked will be considered for checking cumulative threshold breach",
-   "fieldname": "consider_party_ledger_amount",
-   "fieldtype": "Check",
-   "label": "Consider Entire Party Ledger Amount"
-  },
-  {
-   "default": "0",
-   "description": "Tax will be withheld only for amount exceeding the cumulative threshold",
+   "description": "Tax withheld only for amount exceeding cumulative threshold",
    "fieldname": "tax_on_excess_amount",
    "fieldtype": "Check",
    "label": "Only Deduct Tax On Excess Amount "
@@ -79,6 +74,28 @@
    "fieldname": "round_off_tax_amount",
    "fieldtype": "Check",
    "label": "Round Off Tax Amount"
+  },
+  {
+   "default": "Net Total",
+   "fieldname": "tax_deduction_basis",
+   "fieldtype": "Select",
+   "label": "Deduct Tax On Basis",
+   "options": "\nGross Total\nNet Total",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "When checked, only transaction threshold will be applied for transaction individually",
+   "fieldname": "disable_cumulative_threshold",
+   "fieldtype": "Check",
+   "label": "Disable Cumulative Threshold"
+  },
+  {
+   "default": "0",
+   "description": "When checked, only cumulative threshold will be applied",
+   "fieldname": "disable_transaction_threshold",
+   "fieldtype": "Check",
+   "label": "Disable Transaction Threshold"
   }
  ],
  "index_web_pages_for_search": 1,

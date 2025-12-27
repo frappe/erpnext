@@ -26,9 +26,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 	validate_docs_for_deferred_accounting,
 	validate_docs_for_voucher_types,
 )
-from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
-	get_party_tax_withholding_details,
-)
+from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import SalesTaxWithholding
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
 from erpnext.accounts.utils import (
@@ -77,6 +75,7 @@ class SalesInvoice(SellingController):
 		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import (
 			SalesTaxesandCharges,
 		)
+		from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import TaxWithholdingEntry
 		from erpnext.selling.doctype.sales_team.sales_team import SalesTeam
 		from erpnext.stock.doctype.packed_item.packed_item import PackedItem
 
@@ -90,6 +89,7 @@ class SalesInvoice(SellingController):
 		amended_from: DF.Link | None
 		amount_eligible_for_commission: DF.Currency
 		apply_discount_on: DF.Literal["", "Grand Total", "Net Total"]
+		apply_tds: DF.Check
 		auto_repeat: DF.Link | None
 		base_change_amount: DF.Currency
 		base_discount_amount: DF.Currency
@@ -135,6 +135,7 @@ class SalesInvoice(SellingController):
 		has_subcontracted: DF.Check
 		ignore_default_payment_terms_template: DF.Check
 		ignore_pricing_rule: DF.Check
+		ignore_tax_withholding_threshold: DF.Check
 		in_words: DF.SmallText | None
 		incoterm: DF.Link | None
 		inter_company_invoice_reference: DF.Link | None
@@ -162,6 +163,7 @@ class SalesInvoice(SellingController):
 		only_include_allocated_payments: DF.Check
 		other_charges_calculation: DF.TextEditor | None
 		outstanding_amount: DF.Currency
+		override_tax_withholding_entries: DF.Check
 		packed_items: DF.Table[PackedItem]
 		paid_amount: DF.Currency
 		party_account_currency: DF.Link | None
@@ -214,6 +216,8 @@ class SalesInvoice(SellingController):
 		subscription: DF.Link | None
 		tax_category: DF.Link | None
 		tax_id: DF.Data | None
+		tax_withholding_entries: DF.Table[TaxWithholdingEntry]
+		tax_withholding_group: DF.Link | None
 		taxes: DF.Table[SalesTaxesandCharges]
 		taxes_and_charges: DF.Link | None
 		tc_name: DF.Link | None
@@ -282,6 +286,14 @@ class SalesInvoice(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
+	def onload(self):
+		super().onload()
+		if self.customer:
+			tax_withholding_category, tax_withholding_group = frappe.get_cached_value(
+				"Customer", self.customer, ["tax_withholding_category", "tax_withholding_group"]
+			)
+			self.set_onload("apply_tds", tax_withholding_category or tax_withholding_group)
+
 	def validate(self):
 		self.validate_auto_set_posting_time()
 		super().validate()
@@ -291,7 +303,7 @@ class SalesInvoice(SellingController):
 		if not (self.is_pos or self.is_debit_note):
 			self.so_dn_required()
 
-		self.set_tax_withholding()
+		SalesTaxWithholding(self).on_validate()
 
 		self.validate_proj_cust()
 		self.validate_pos_return()
@@ -413,38 +425,6 @@ class SalesInvoice(SellingController):
 		for item in self.get("items"):
 			validate_account_head(item.idx, item.income_account, self.company, _("Income"))
 
-	def set_tax_withholding(self):
-		if self.get("is_opening") == "Yes":
-			return
-
-		tax_withholding_details = get_party_tax_withholding_details(self)
-
-		if not tax_withholding_details:
-			return
-
-		accounts = []
-		tax_withholding_account = tax_withholding_details.get("account_head")
-
-		for d in self.taxes:
-			if d.account_head == tax_withholding_account:
-				d.update(tax_withholding_details)
-			accounts.append(d.account_head)
-
-		if not accounts or tax_withholding_account not in accounts:
-			self.append("taxes", tax_withholding_details)
-
-		to_remove = [
-			d
-			for d in self.taxes
-			if not d.tax_amount and d.charge_type == "Actual" and d.account_head == tax_withholding_account
-		]
-
-		for d in to_remove:
-			self.remove(d)
-
-		# calculate totals again after applying TDS
-		self.calculate_taxes_and_totals()
-
 	def before_save(self):
 		self.set_account_for_mode_of_payment()
 		self.set_paid_amount()
@@ -465,6 +445,8 @@ class SalesInvoice(SellingController):
 		if self.is_return and not self.update_billed_amount_in_sales_order:
 			# NOTE status updating bypassed for is_return
 			self.status_updater = []
+
+		SalesTaxWithholding(self).on_submit()
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
@@ -605,6 +587,7 @@ class SalesInvoice(SellingController):
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
+		SalesTaxWithholding(self).on_cancel()
 		if self.update_stock == 1:
 			self.update_stock_ledger()
 
@@ -646,6 +629,7 @@ class SalesInvoice(SellingController):
 			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
 			"Serial and Batch Bundle",
+			"Tax Withholding Entry",
 		)
 
 		self.delete_auto_created_batches()

@@ -306,7 +306,6 @@ erpnext.patches.v14_0.create_accounting_dimensions_in_subcontracting_doctypes
 erpnext.patches.v14_0.fix_subcontracting_receipt_gl_entries
 erpnext.patches.v13_0.drop_unused_sle_index_parts
 erpnext.patches.v14_0.create_accounting_dimensions_for_asset_capitalization
-erpnext.patches.v14_0.update_partial_tds_fields
 erpnext.patches.v14_0.create_incoterms_and_migrate_shipment
 erpnext.patches.v14_0.create_accounting_dimensions_for_payment_request
 erpnext.patches.v14_0.update_entry_type_for_journal_entry
@@ -453,3 +452,6 @@ erpnext.patches.v16_0.update_currency_exchange_settings_for_frankfurter #2025-12
 erpnext.patches.v16_0.migrate_account_freezing_settings_to_company
 erpnext.patches.v16_0.populate_budget_distribution_total
 erpnext.patches.v16_0.set_mr_picked_qty
+erpnext.patches.v16_0.update_tax_withholding_field_in_payment_entry
+erpnext.patches.v16_0.migrate_tax_withholding_data
+

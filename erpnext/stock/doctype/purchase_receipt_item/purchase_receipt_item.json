@@ -59,7 +59,6 @@
   "pricing_rules",
   "stock_uom_rate",
   "is_free_item",
-  "apply_tds",
   "section_break_29",
   "net_rate",
   "net_amount",
@@ -1106,14 +1105,6 @@
    "fieldname": "use_serial_batch_fields",
    "fieldtype": "Check",
    "label": "Use Serial No / Batch Fields"
-  },
-  {
-   "default": "1",
-   "fieldname": "apply_tds",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Apply TDS",
-   "read_only": 1
   },
   {
    "default": "0",

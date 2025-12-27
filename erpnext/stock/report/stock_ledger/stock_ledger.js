@@ -134,6 +134,13 @@ frappe.query_reports["Stock Ledger"] = {
 
 		return value;
 	},
+
+	onload: function (report) {
+		report.page.add_inner_button(__("View Stock Balance"), function () {
+			var filters = report.get_values();
+			frappe.set_route("query-report", "Stock Balance", filters);
+		});
+	},
 };
 
 erpnext.utils.add_inventory_dimensions("Stock Ledger", 10);

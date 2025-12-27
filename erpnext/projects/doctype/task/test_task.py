@@ -158,6 +158,12 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertRaises(ParentIsGroupError, child_task.save)
 
+	def test_expected_end_date(self):
+		task = create_task("Testing End Date", add_days(nowdate(), 1), add_days(nowdate(), 5))
+		task.expected_time = 72
+		task.save()
+		self.assertEqual(getdate(task.exp_end_date), getdate(add_days(nowdate(), 5)))
+
 
 def create_task(
 	subject,

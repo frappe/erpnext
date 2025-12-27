@@ -393,11 +393,13 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		elif doctype == "Purchase Invoice":
 			# look for Print Heading "Debit Note"
 			doc.select_print_heading = frappe.get_cached_value("Print Heading", _("Debit Note"))
-			if source.tax_withholding_category:
-				doc.set_onload("supplier_tds", source.tax_withholding_category)
 		elif doctype == "Delivery Note":
 			# manual additions to the return should hit the return warehous, too
 			doc.set_warehouse = default_warehouse_for_sales_return
+
+		if doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
+			doc.tax_withholding_group = source.tax_withholding_group
+			doc.ignore_tax_withholding_threshold = source.ignore_tax_withholding_threshold
 
 		for tax in doc.get("taxes") or []:
 			if tax.charge_type == "Actual":
@@ -455,6 +457,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = -1 * source_doc.qty
 		target_doc.pricing_rules = None
+
 		if doctype in ["Purchase Receipt", "Subcontracting Receipt"]:
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.supplier, source_doc.name, doctype
@@ -525,6 +528,8 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			target_doc.po_detail = source_doc.po_detail
 			target_doc.pr_detail = source_doc.pr_detail
 			target_doc.purchase_invoice_item = source_doc.name
+			target_doc.tax_withholding_category = source_doc.tax_withholding_category
+			target_doc.apply_tds = source_doc.apply_tds
 
 		elif doctype == "Delivery Note":
 			returned_qty_map = get_returned_qty_map_for_row(
@@ -556,6 +561,8 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 
 			if doctype == "Sales Invoice":
 				target_doc.sales_invoice_item = source_doc.name
+				target_doc.tax_withholding_category = source_doc.tax_withholding_category
+				target_doc.apply_tds = source_doc.apply_tds
 			else:
 				target_doc.pos_invoice_item = source_doc.name
 

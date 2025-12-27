@@ -21,6 +21,8 @@
   "party_name",
   "book_advance_payments_in_separate_party_account",
   "reconcile_on_advance_payment_date",
+  "apply_tds",
+  "tax_withholding_category",
   "column_break_11",
   "bank_account",
   "party_bank_account",
@@ -60,10 +62,6 @@
   "taxes_and_charges_section",
   "purchase_taxes_and_charges_template",
   "sales_taxes_and_charges_template",
-  "column_break_55",
-  "apply_tax_withholding_amount",
-  "tax_withholding_category",
-  "section_break_56",
   "taxes",
   "section_break_60",
   "base_total_taxes_and_charges",
@@ -71,6 +69,11 @@
   "total_taxes_and_charges",
   "deductions_or_loss_section",
   "deductions",
+  "section_tax_withholding_entry",
+  "tax_withholding_group",
+  "ignore_tax_withholding_threshold",
+  "override_tax_withholding_entries",
+  "tax_withholding_entries",
   "transaction_references",
   "reference_no",
   "column_break_23",
@@ -578,19 +581,12 @@
    "label": "Custom Remarks"
   },
   {
-   "depends_on": "eval:doc.apply_tax_withholding_amount",
+   "depends_on": "eval:doc.apply_tds",
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
-   "mandatory_depends_on": "eval:doc.apply_tax_withholding_amount",
+   "mandatory_depends_on": "eval:doc.apply_tds",
    "options": "Tax Withholding Category"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.party_type == 'Supplier'",
-   "fieldname": "apply_tax_withholding_amount",
-   "fieldtype": "Check",
-   "label": "Apply Tax Withholding Amount"
   },
   {
    "fieldname": "taxes_and_charges_section",
@@ -647,15 +643,6 @@
    "label": "Paid Amount After Tax (Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_55",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_56",
-   "fieldtype": "Section Break",
-   "hide_border": 1
   },
   {
    "depends_on": "eval:doc.received_amount && doc.payment_type != 'Internal Transfer'",
@@ -752,6 +739,46 @@
    "options": "No\nYes",
    "print_hide": 1,
    "search_index": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.party_type == 'Supplier'",
+   "fieldname": "apply_tds",
+   "fieldtype": "Check",
+   "label": "Consider for Tax Withholding"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.apply_tds && doc.docstatus == 0",
+   "depends_on": "eval: doc.apply_tds",
+   "fieldname": "section_tax_withholding_entry",
+   "fieldtype": "Section Break",
+   "label": "Tax Withholding Entry"
+  },
+  {
+   "fieldname": "tax_withholding_group",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Group",
+   "options": "Tax Withholding Group"
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_tax_withholding_threshold",
+   "fieldtype": "Check",
+   "label": "Ignore Tax Withholding Threshold"
+  },
+  {
+   "fieldname": "tax_withholding_entries",
+   "fieldtype": "Table",
+   "label": "Tax Withholding Entries",
+   "options": "Tax Withholding Entry",
+   "read_only_depends_on": "eval: !doc.override_tax_withholding_entries"
+  },
+  {
+   "default": "0",
+   "fieldname": "override_tax_withholding_entries",
+   "fieldtype": "Check",
+   "label": "Edit Tax Withholding Entries"
   }
  ],
  "grid_page_length": 50,

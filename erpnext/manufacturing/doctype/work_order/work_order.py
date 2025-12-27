@@ -2565,6 +2565,8 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 		work_order.transfer_material_against == "Job Card" and not work_order.skip_transfer
 	):
 		doc.get_required_items()
+		if work_order.track_semi_finished_goods:
+			doc.set_scrap_items()
 
 	if auto_create:
 		doc.flags.ignore_mandatory = True

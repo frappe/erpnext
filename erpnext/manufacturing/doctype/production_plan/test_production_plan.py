@@ -888,6 +888,109 @@ class TestProductionPlan(IntegrationTestCase):
 
 		frappe.db.rollback()
 
+	def test_get_sales_order_items_for_product_bundle(self):
+		"""Testing the Planned Qty for Product Bundle Item"""
+		from erpnext.manufacturing.doctype.work_order.test_work_order import (
+			make_stock_entry as create_stock_entry,
+		)
+		from erpnext.manufacturing.doctype.work_order.test_work_order import (
+			make_wo_order_test_record,
+		)
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		# 1. Create required items
+		bundle_item = create_item(item_code="Bundle Item", is_stock_item=0)
+		bom_item = create_item(item_code="BOM Item")
+		rm_item = create_item(item_code="RM Item")
+
+		fg_warehouse = "_Test FG Warehouse - _TC"
+
+		# Create warehouse if it doesn't exist
+		if not frappe.db.exists("Warehouse", fg_warehouse):
+			create_warehouse(warehouse_name="_Test FG Warehouse")
+
+		# 2. Create initial stock for components
+		make_stock_entry(item_code=bom_item.name, target="_Test FG Warehouse - _TC", qty=15)
+		make_stock_entry(item_code=rm_item.name, target="Stores - _TC", qty=25)
+
+		# 3. Create BOM for manufactured item
+		bom = make_bom(
+			item=bom_item.name,
+			raw_materials=[rm_item.name],
+			set_as_default_bom=1,
+		)
+
+		# 4. Create Product Bundle (Bundle Item → contains BOM Item)
+		make_product_bundle(parent=bundle_item.name, items=[bom_item.name])
+
+		# 5. Create Sales Order for 50 units of Bundle Item
+		sales_order = make_sales_order(item_code=bundle_item.name, qty=50, warehouse=fg_warehouse)
+
+		# 6. Create Work Order for partial quantity (25 out of 50)
+		work_order_qty = 25
+		work_order = make_wo_order_test_record(
+			production_item=bom_item.name,
+			bom_no=bom.name,
+			qty=work_order_qty,
+			sales_order=sales_order.name,
+			source_warehouse="Stores - _TC",
+			fg_warehouse=fg_warehouse,
+			do_not_save=1,
+		)
+
+		# Link Work Order to correct Sales Order Item row
+		work_order.sales_order_item = sales_order.items[0].name
+		work_order.save()
+		work_order.submit()
+
+		# 7. Material transfer from Stores → WIP
+		transfer_entry = frappe.get_doc(
+			create_stock_entry(work_order.name, "Material Transfer for Manufacture")
+		)
+		for d in transfer_entry.get("items"):
+			d.s_warehouse = "Stores - _TC"
+		transfer_entry.insert()
+		transfer_entry.submit()
+
+		# 8. Complete manufacturing (WIP → Finished Goods)
+		manufacture_entry = frappe.get_doc(create_stock_entry(work_order.name, "Manufacture"))
+		manufacture_entry.insert()
+		manufacture_entry.submit()
+
+		# 9. Verify work order qty is correctly updated in Sales Order
+		sales_order.reload()
+		self.assertEqual(sales_order.items[0].work_order_qty, work_order_qty)
+
+		# 10. Create partial Delivery Note (40 out of 50)
+		dn = make_delivery_note(sales_order.name)
+		dn.items[0].qty = 40
+		dn.save()
+		dn.submit()
+
+		# 11. Check delivered quantity updated correctly
+		sales_order.reload()
+		self.assertEqual(sales_order.items[0].delivered_qty, 40)
+
+		# 12. Create Production Plan from remaining open Sales Order quantity
+		pln = frappe.new_doc("Production Plan")
+		pln.company = sales_order.company
+		pln.get_items_from = "Sales Order"
+		pln.item_code = bundle_item.name
+
+		# Fetch open sales orders
+		pln.get_open_sales_orders()
+		self.assertEqual(pln.sales_orders[0].sales_order, sales_order.name)
+
+		# Pull items → should plan remaining 10 qty
+		pln.get_so_items()
+
+		"""
+		Test Case: Production Plan should plan remaining 10 units
+		(50 ordered - 25 manufactured - 40 delivered = 10 pending)
+		"""
+		self.assertEqual(pln.po_items[0].planned_qty, 10)
+
 	def test_multiple_work_order_for_production_plan_item(self):
 		"Test producing Prod Plan (making WO) in parts."
 

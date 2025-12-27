@@ -129,13 +129,13 @@ frappe.ui.form.on("Pick List", {
 
 				if (frm.doc.purpose === "Delivery") {
 					frm.add_custom_button(
-						__("Create Delivery Note"),
+						__("Delivery Note"),
 						() => frm.trigger("create_delivery_note"),
 						__("Create")
 					);
 				} else {
 					frm.add_custom_button(
-						__("Create Stock Entry"),
+						__("Stock Entry"),
 						() => frm.trigger("create_stock_entry"),
 						__("Create")
 					);

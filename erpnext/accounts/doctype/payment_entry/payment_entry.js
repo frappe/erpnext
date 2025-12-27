@@ -41,6 +41,7 @@ frappe.ui.form.on("Payment Entry", {
 
 		if (frm.is_new()) {
 			set_default_party_type(frm);
+			frm.clear_table("tax_withholding_entries");
 		}
 	},
 
@@ -532,6 +533,7 @@ frappe.ui.form.on("Payment Entry", {
 							},
 							() => frm.set_value("party_name", r.message.party_name),
 							() => frm.clear_table("references"),
+							() => frm.clear_table("tax_withholding_entries"),
 							() => frm.events.hide_unhide_fields(frm),
 							() => frm.events.set_dynamic_labels(frm),
 							() => {
@@ -564,14 +566,15 @@ frappe.ui.form.on("Payment Entry", {
 		}
 	},
 
-	apply_tax_withholding_amount: function (frm) {
-		if (!frm.doc.apply_tax_withholding_amount) {
+	apply_tds: function (frm) {
+		if (!frm.doc.apply_tds) {
 			frm.set_value("tax_withholding_category", "");
-		} else {
-			frappe.db.get_value("Supplier", frm.doc.party, "tax_withholding_category", (values) => {
+		} else if (["Customer", "Supplier"].includes(frm.doc.party_type)) {
+			frappe.db.get_value(frm.doc.party_type, frm.doc.party, "tax_withholding_category", (values) => {
 				frm.set_value("tax_withholding_category", values.tax_withholding_category);
 			});
 		}
+		frm.clear_table("tax_withholding_entries");
 	},
 
 	paid_from: function (frm) {

@@ -199,6 +199,8 @@ def get_balance_on(
 	ignore_account_permission=False,
 	account_type=None,
 	start_date=None,
+	finance_book=None,
+	include_default_fb_balances=False,
 ):
 	if not account and frappe.form_dict.get("account"):
 		account = frappe.form_dict.get("account")
@@ -293,8 +295,31 @@ def get_balance_on(
 			f"""gle.party_type = {frappe.db.escape(party_type)} and gle.party = {frappe.db.escape(party)} """
 		)
 
+	default_finance_book = None
 	if company:
 		cond.append("""gle.company = %s """ % (frappe.db.escape(company)))
+		default_finance_book = frappe.get_cached_value("Company", company, "default_finance_book")
+
+	if finance_book:
+		if default_finance_book and include_default_fb_balances:
+			cond.append(
+				f"""(gle.finance_book IN (
+						{frappe.db.escape(finance_book)},
+						{frappe.db.escape(default_finance_book)}
+					) OR gle.finance_book IS NULL
+				)"""
+			)
+		else:
+			cond.append(f"(gle.finance_book = {frappe.db.escape(finance_book)} OR gle.finance_book IS NULL)")
+
+	elif default_finance_book and include_default_fb_balances:
+		# No finance book passed → fall back to default
+		cond.append(
+			f"""(
+				gle.finance_book = {frappe.db.escape(default_finance_book)}
+				OR gle.finance_book IS NULL
+			)"""
+		)
 
 	if account or (party_type and party) or account_type:
 		precision = get_currency_precision()
@@ -1333,7 +1358,7 @@ def get_children(doctype, parent, company, is_root=False, include_disabled=False
 
 
 @frappe.whitelist()
-def get_account_balances(accounts, company):
+def get_account_balances(accounts, company, finance_book=None, include_default_fb_balances=False):
 	if isinstance(accounts, str):
 		accounts = loads(accounts)
 
@@ -1344,9 +1369,25 @@ def get_account_balances(accounts, company):
 
 	for account in accounts:
 		account["company_currency"] = company_currency
-		account["balance"] = flt(get_balance_on(account["value"], in_account_currency=False, company=company))
+		account["balance"] = flt(
+			get_balance_on(
+				account=account["value"],
+				in_account_currency=False,
+				company=company,
+				finance_book=finance_book,
+				include_default_fb_balances=include_default_fb_balances,
+			)
+		)
+
 		if account["account_currency"] and account["account_currency"] != company_currency:
-			account["balance_in_account_currency"] = flt(get_balance_on(account["value"], company=company))
+			account["balance_in_account_currency"] = flt(
+				get_balance_on(
+					account=account["value"],
+					company=company,
+					finance_book=finance_book,
+					include_default_fb_balances=include_default_fb_balances,
+				)
+			)
 
 	return accounts
 

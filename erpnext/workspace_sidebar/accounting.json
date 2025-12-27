@@ -188,6 +188,17 @@
    "type": "Link"
   },
   {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Process Payment Reconciliation",
+   "link_to": "Process Payment Reconciliation",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
    "child": 0,
    "collapsible": 1,
    "icon": "notepad-text",
@@ -228,6 +239,77 @@
    "label": "Financial Reports",
    "link_to": "Financial Reports",
    "link_type": "Workspace",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "lock-keyhole-open",
+   "indent": 1,
+   "keep_closed": 1,
+   "label": "Opening & Closing",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Section Break"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "accounting",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "COA Importer",
+   "link_to": "Chart of Accounts Importer",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "tool",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Opening Invoice Tool",
+   "link_to": "Opening Invoice Creation Tool",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "folder-clock",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Accounting Period",
+   "link_to": "Accounting Period",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "expand-alt",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "FX Revaluation",
+   "link_to": "Exchange Rate Revaluation",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "calendar-check",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Period Closing Voucher",
+   "link_to": "Period Closing Voucher",
+   "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
   },
@@ -387,7 +469,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-11-25 10:46:09.814457",
+ "modified": "2025-12-22 16:17:31.777323",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",

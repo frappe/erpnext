@@ -176,10 +176,6 @@ def _get_party_details(
 			for d in party.get("sales_team")
 		]
 
-	# supplier tax withholding category
-	if party_type == "Supplier" and party:
-		party_details["supplier_tds"] = frappe.get_value(party_type, party.name, "tax_withholding_category")
-
 	if not party_details.get("tax_category") and pos_profile:
 		party_details["tax_category"] = frappe.get_value("POS Profile", pos_profile, "tax_category")
 
@@ -352,10 +348,13 @@ def set_contact_details(party_details, party, party_type):
 
 def set_other_values(party_details, party, party_type):
 	# copy
+	to_copy = ["tax_withholding_category", "tax_withholding_group", "language"]
+
 	if party_type == "Customer":
-		to_copy = ["customer_name", "customer_group", "territory", "language"]
+		to_copy.extend(["customer_name", "customer_group", "territory"])
 	else:
-		to_copy = ["supplier_name", "supplier_group", "language"]
+		to_copy.extend(["supplier_name", "supplier_group"])
+
 	for f in to_copy:
 		party_details[f] = party.get(f)
 

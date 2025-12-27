@@ -30,11 +30,6 @@ class calculate_taxes_and_totals:
 		frappe.flags.round_off_applicable_accounts = []
 		frappe.flags.round_row_wise_tax = frappe.get_single_value("Accounts Settings", "round_row_wise_tax")
 
-		if doc.get("round_off_applicable_accounts_for_tax_withholding"):
-			frappe.flags.round_off_applicable_accounts.append(
-				doc.round_off_applicable_accounts_for_tax_withholding
-			)
-
 		self._items = self.filter_rows() if self.doc.doctype == "Quotation" else self.doc.get("items")
 		get_round_off_applicable_accounts(self.doc.company, frappe.flags.round_off_applicable_accounts)
 		self.calculate()
@@ -78,23 +73,10 @@ class calculate_taxes_and_totals:
 		self.initialize_taxes()
 		self.determine_exclusive_rate()
 		self.calculate_net_total()
-		self.calculate_tax_withholding_net_total()
 		self.calculate_taxes()
 		self.adjust_grand_total_for_inclusive_tax()
 		self.calculate_totals()
 		self.calculate_total_net_weight()
-
-	def calculate_tax_withholding_net_total(self):
-		if hasattr(self.doc, "tax_withholding_net_total"):
-			sum_net_amount = 0
-			sum_base_net_amount = 0
-			for item in self._items:
-				if hasattr(item, "apply_tds") and item.apply_tds:
-					sum_net_amount += item.net_amount
-					sum_base_net_amount += item.base_net_amount
-
-			self.doc.tax_withholding_net_total = sum_net_amount
-			self.doc.base_tax_withholding_net_total = sum_base_net_amount
 
 	def validate_item_tax_template(self):
 		if self.doc.get("is_return") and self.doc.get("return_against"):
@@ -578,16 +560,7 @@ class calculate_taxes_and_totals:
 			current_net_amount = item.net_amount
 			# distribute the tax amount proportionally to each item row
 			actual = flt(tax.tax_amount, tax.precision("tax_amount"))
-
-			if tax.get("is_tax_withholding_account") and item.meta.get_field("apply_tds"):
-				if not item.get("apply_tds") or not self.doc.tax_withholding_net_total:
-					current_tax_amount = 0.0
-				else:
-					current_tax_amount = item.net_amount * actual / self.doc.tax_withholding_net_total
-			else:
-				current_tax_amount = (
-					item.net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
-				)
+			current_tax_amount = item.net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
 
 		elif tax.charge_type == "On Net Total":
 			if tax.account_head in item_tax_map:

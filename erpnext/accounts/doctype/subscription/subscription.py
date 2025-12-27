@@ -411,7 +411,10 @@ class Subscription(Document):
 			invoice.customer = self.party
 		else:
 			invoice.supplier = self.party
-			if frappe.db.get_value("Supplier", self.party, "tax_withholding_category"):
+			tax_withholding_category, tax_withholding_group = frappe.get_cached_value(
+				"Supplier", self.party, ["tax_withholding_category", "tax_withholding_group"]
+			)
+			if tax_withholding_category or tax_withholding_group:
 				invoice.apply_tds = 1
 
 		# Add currency to invoice

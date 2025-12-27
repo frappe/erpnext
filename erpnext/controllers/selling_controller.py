@@ -1022,10 +1022,19 @@ class SellingController(StockController):
 
 
 def set_default_income_account_for_item(obj):
-	for d in obj.get("items"):
-		if d.item_code:
-			if getattr(d, "income_account", None):
-				set_item_default(d.item_code, obj.company, "income_account", d.income_account)
+	"""Set income account as default for items in the transaction.
+
+	Updates the item default income account for each item in the transaction
+	if it differs from the company's default income account.
+
+	Args:
+	    obj: Transaction document containing items table with income_account field
+	"""
+	company_default = frappe.get_cached_value("Company", obj.company, "default_income_account")
+	for d in obj.get("items", default=[]):
+		income_account = getattr(d, "income_account", None)
+		if d.item_code and income_account and income_account != company_default:
+			set_item_default(d.item_code, obj.company, "income_account", income_account)
 
 
 def get_serial_and_batch_bundle(child, parent, delivery_note_child=None):

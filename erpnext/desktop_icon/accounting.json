@@ -1,6 +1,6 @@
 {
  "app": "erpnext",
- "creation": "2025-11-17 13:19:04.309749",
+ "creation": "2025-11-17 20:55:11.854086",
  "docstatus": 0,
  "doctype": "Desktop Icon",
  "hidden": 0,
@@ -10,11 +10,11 @@
  "label": "Accounting",
  "link_to": "Accounting",
  "link_type": "Workspace",
- "modified": "2025-11-17 13:33:35.788242",
+ "modified": "2025-12-22 13:06:21.382175",
  "modified_by": "Administrator",
  "name": "Accounting",
  "owner": "Administrator",
- "parent_icon": "Accounts",
+ "parent_icon": "ERPNext",
  "roles": [],
  "standard": 1
 }
