@@ -2,12 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from typing import Any
+
 import frappe
 from frappe import _
 from frappe.utils import flt
 
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	FinancialReportEngine,
+	get_export_xlsx_cell_format,
 )
 from erpnext.accounts.report.financial_statements import (
 	compute_growth_view_data,
@@ -197,3 +200,19 @@ def get_chart_data(filters, columns, income, expense, net_profit_loss, currency)
 	chart["currency"] = currency
 
 	return chart
+
+
+def get_xlsx_cell_formatting(
+	cell_value: Any,
+	column: dict,
+	row: dict,
+	filters: dict,
+	is_total_row=False,
+) -> dict:
+	return get_export_xlsx_cell_format(
+		cell_value,
+		column,
+		row,
+		filters,
+		is_total_row,
+	)

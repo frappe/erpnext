@@ -15,6 +15,7 @@ from frappe.database.operator_map import OPERATOR_MAP
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, date_diff, flt, getdate
+from frappe.utils.xlsxutils import get_excel_number_format
 from pypika.terms import LiteralValue
 
 from erpnext import get_company_currency
@@ -37,6 +38,8 @@ from erpnext.accounts.report.financial_statements import (
 	get_period_list,
 )
 from erpnext.accounts.utils import get_children, get_currency_precision
+
+DEFAULT_BULLET_PREFIX = "• "
 
 # ============================================================================
 # DATA MODELS
@@ -1367,7 +1370,8 @@ class FormattingEngine:
 				condition=lambda rd: getattr(rd.row, "italic_text", False), format_properties={"italic": True}
 			),
 			FormattingRule(
-				condition=lambda rd: rd.is_detail_row, format_properties={"is_detail": True, "prefix": "• "}
+				condition=lambda rd: rd.is_detail_row,
+				format_properties={"is_detail": True, "prefix": DEFAULT_BULLET_PREFIX},
 			),
 			FormattingRule(
 				condition=lambda rd: getattr(rd.row, "warn_if_negative", False),
@@ -1800,3 +1804,59 @@ class GrowthViewTransformer:
 			return 0.0
 		else:
 			return flt(((current_value - previous_value) / abs(previous_value)) * 100, 2)
+
+
+def get_export_xlsx_cell_format(
+	cell_value,
+	column: dict,
+	row: dict,
+	filters: dict,
+	is_total_row: bool = False,
+) -> dict | None:
+	if cell_value in ("", None):
+		return
+
+	if is_total_row:
+		return {"bold": True}
+
+	fieldname = column.get("fieldname")
+	segment_values = row.get("segment_values")
+	formatting: dict = row  # default formatting bucket
+
+	# resolve segment-specific formatting (seg_<idx>_<field>)
+	is_account_column = fieldname == "account"
+
+	if fieldname.startswith("seg_") and isinstance(segment_values, dict):
+		parts = fieldname.split("_", 2)
+
+		if len(parts) == 3 and parts[1].isdigit():
+			seg_idx = int(parts[1])
+			is_account_column = parts[2] == "account"
+			formatting = segment_values.get(f"seg_{seg_idx}", formatting) or formatting
+
+	# determine formatting
+	format: dict = {}
+
+	# fieldtype specific formatting
+	fieldtype = formatting.get("fieldtype") or column.get("fieldtype")
+
+	if fieldtype in ("Currency", "Float", "Int", "Percent") and not is_account_column:
+		format["format"] = get_excel_number_format(fieldtype, formatting.get("currency"))
+
+	# account column extras: bullet prefix and indentation
+	if is_account_column:
+		if formatting.get("is_detail") or formatting.get("prefix"):
+			format["format"] = f"{formatting.get('prefix') or DEFAULT_BULLET_PREFIX}@"
+
+		seg_info = row.get("_segment_info") or {}
+
+		if (seg_info.get("total_segments", 1) > 1) and (indent := formatting.get("indent")) and indent > 0:
+			format["indent"] = indent * 2  # excel pt
+
+	for key in ("color", "background", "bold", "italic", "strike", "underline", "font"):
+		format[key] = formatting.get(key)
+
+	if formatting.get("warn_if_negative") and isinstance(cell_value, int | float) and cell_value < 0:
+		format["color"] = "#cb2929"
+
+	return format

@@ -3,6 +3,7 @@
 
 
 from datetime import timedelta
+from typing import Any
 
 import frappe
 from frappe import _
@@ -12,6 +13,7 @@ from pypika import Order
 
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	FinancialReportEngine,
+	get_export_xlsx_cell_format,
 )
 from erpnext.accounts.report.financial_statements import (
 	get_columns,
@@ -436,3 +438,19 @@ def get_chart_data(columns, data, currency):
 	chart["currency"] = currency
 
 	return chart
+
+
+def get_xlsx_cell_formatting(
+	cell_value: Any,
+	column: dict,
+	row: dict,
+	filters: dict,
+	is_total_row=False,
+) -> dict:
+	return get_export_xlsx_cell_format(
+		cell_value,
+		column,
+		row,
+		filters,
+		is_total_row,
+	)
