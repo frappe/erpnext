@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-21 09:37+0000\n"
-"PO-Revision-Date: 2025-12-23 03:02\n"
+"PO-Revision-Date: 2025-12-28 04:35\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -12117,11 +12117,11 @@ msgstr "ایجاد مخاطب جدید"
 
 #: erpnext/public/js/call_popup/call_popup.js:128
 msgid "Create New Customer"
-msgstr "مشتری جدید ایجاد کنید"
+msgstr "ایجاد مشتری جدید"
 
 #: erpnext/public/js/call_popup/call_popup.js:134
 msgid "Create New Lead"
-msgstr "سرنخ جدید ایجاد کنید"
+msgstr "ایجاد سرنخ جدید"
 
 #: erpnext/crm/doctype/lead/lead.js:161
 msgid "Create Opportunity"
@@ -18552,7 +18552,7 @@ msgstr ""
 #. Label of the finished_good_uom (Link) field in DocType 'Subcontracting BOM'
 #: erpnext/subcontracting/doctype/subcontracting_bom/subcontracting_bom.json
 msgid "Finished Good UOM"
-msgstr "UOM خوب به پایان رسید"
+msgstr "UOM کالای تمام شده"
 
 #: erpnext/subcontracting/doctype/subcontracting_bom/subcontracting_bom.py:51
 msgid "Finished Good {0} does not have a default BOM."
@@ -21275,7 +21275,7 @@ msgstr "اگر فعال شود، سیستم به کاربران اجازه می�
 #. in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "If enabled, the system will generate an accounting entry for materials rejected in the Purchase Receipt."
-msgstr ""
+msgstr "در صورت فعال بودن، سیستم برای مواد رد شده در رسید خرید، یک ثبت حسابداری ایجاد می‌کند."
 
 #. Description of the 'Enable Item-wise Inventory Account' (Check) field in
 #. DocType 'Company'
@@ -31494,7 +31494,7 @@ msgstr "مالک"
 #. Closing Voucher'
 #: erpnext/accounts/doctype/process_period_closing_voucher/process_period_closing_voucher.json
 msgid "P&L Closing Balance"
-msgstr ""
+msgstr "تراز اختتامیه سود و زیان"
 
 #. Label of the pan_no (Data) field in DocType 'Lower Deduction Certificate'
 #: erpnext/regional/doctype/lower_deduction_certificate/lower_deduction_certificate.json
@@ -46215,7 +46215,7 @@ msgstr "نمایش ثبت‌های در انتظار"
 #: erpnext/accounts/report/consolidated_trial_balance/consolidated_trial_balance.js:80
 #: erpnext/accounts/report/trial_balance/trial_balance.js:100
 msgid "Show unclosed fiscal year's P&L balances"
-msgstr "موجودی P&L سال مالی بسته نشده را نشان دهید"
+msgstr "نمایش تراز سود و زیان سال مالی بسته نشده"
 
 #: erpnext/accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:96
 msgid "Show with upcoming revenue/expense"
@@ -53544,7 +53544,7 @@ msgstr "به‌روزرسانی تایم‌استمپ در ارتباطات جد
 #. Order Operation'
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Updated via 'Time Log' (In Minutes)"
-msgstr "به روز شده از طریق \"Time Log\" (بر حسب دقیقه)"
+msgstr "به روز شده از طریق «لاگ زمان» (بر حسب دقیقه)"
 
 #: erpnext/accounts/doctype/account_category/account_category.py:54
 msgid "Updated {0} Financial Report Row(s) with new category name"
