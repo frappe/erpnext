@@ -437,27 +437,16 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 	elif ctx.doctype == "Purchase Receipt":
 		from erpnext.accounts.utils import get_company_default
 
-		if (
-			frappe.in_test
-			and not (
-				data := frappe.get_value(
-					"Company", ctx.company, ["stock_received_but_not_billed", "abbr"], as_dict=True
-				)
-			).stock_received_but_not_billed
-		):
-			frappe.set_value(
-				"Company",
-				ctx.company,
-				"stock_received_but_not_billed",
-				f"Stock Received But Not Billed - {data.abbr}",
-			)
-
 		if not (
 			frappe.get_value("Company", ctx.company, "enable_provisional_accounting_for_non_stock_items")
 			and not item.is_stock_item
 			and ctx.qty
 		):
-			expense_account = get_company_default(ctx.company, "stock_received_but_not_billed")
+			expense_account = (
+				get_company_default(ctx.company, "stock_received_but_not_billed")
+				if not frappe.in_test
+				else f'Stock Received But Not Billed - {frappe.get_value("Company", ctx.company, "abbr")}'
+			)
 
 	# Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not ctx.uom:
