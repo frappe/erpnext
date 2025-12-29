@@ -2,8 +2,8 @@ import frappe
 
 
 def execute():
-	stock_closing_entry = frappe.qb.Doctype("Stock Closing Entry")
-	call_log = frappe.qb.Doctype("Call Log")
+	stock_closing_entry = frappe.qb.DocType("Stock Closing Entry")
+	call_log = frappe.qb.DocType("Call Log")
 
 	# updating stock closing entry status to cancelled from canceled
 	(
