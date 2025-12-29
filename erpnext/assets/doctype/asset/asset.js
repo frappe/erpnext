@@ -111,7 +111,7 @@ frappe.ui.form.on("Asset", {
 				frm.add_custom_button(
 					__("Sell Asset"),
 					function () {
-						frm.trigger("make_sales_invoice");
+						frm.trigger("sell_asset");
 					},
 					__("Manage")
 				);
@@ -523,22 +523,6 @@ frappe.ui.form.on("Asset", {
 		}
 	},
 
-	make_sales_invoice: function (frm) {
-		frappe.call({
-			args: {
-				asset: frm.doc.name,
-				item_code: frm.doc.item_code,
-				company: frm.doc.company,
-				serial_no: frm.doc.serial_no,
-			},
-			method: "erpnext.assets.doctype.asset.asset.make_sales_invoice",
-			callback: function (r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			},
-		});
-	},
-
 	create_asset_maintenance: function (frm) {
 		frappe.call({
 			args: {
@@ -585,6 +569,57 @@ frappe.ui.form.on("Asset", {
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			},
 		});
+	},
+
+	sell_asset: function (frm) {
+		const make_sales_invoice = (sell_qty) => {
+			frappe.call({
+				method: "erpnext.assets.doctype.asset.asset.make_sales_invoice",
+				args: {
+					asset: frm.doc.name,
+					item_code: frm.doc.item_code,
+					company: frm.doc.company,
+					serial_no: frm.doc.serial_no,
+					sell_qty: sell_qty,
+				},
+				callback: function (r) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				},
+			});
+		};
+
+		const dialog = new frappe.ui.Dialog({
+			title: __("Sell Asset"),
+			fields: [
+				{
+					fieldname: "sell_qty",
+					fieldtype: "Int",
+					label: __("Sell Qty"),
+					reqd: 1,
+				},
+			],
+		});
+
+		dialog.set_primary_action(__("Sell"), function () {
+			const dialog_data = dialog.get_values();
+			const sell_qty = cint(dialog_data.sell_qty);
+
+			if (sell_qty < cint(frm.doc.asset_quantity)) {
+				frappe.confirm(
+					__(
+						"The sell quantity is less than the total asset quantity. The remaining quantity will be split into a new asset. This action cannot be undone. <br><b>Do you want to continue?<b>"
+					),
+					() => make_sales_invoice(sell_qty)
+				);
+			} else {
+				make_sales_invoice(sell_qty);
+			}
+
+			dialog.hide();
+		});
+
+		dialog.show();
 	},
 
 	split_asset: function (frm) {

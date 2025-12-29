@@ -33,6 +33,7 @@ from erpnext.accounts.utils import (
 	get_account_currency,
 	update_voucher_outstanding,
 )
+from erpnext.assets.doctype.asset.asset import split_asset
 from erpnext.assets.doctype.asset.depreciation import (
 	depreciate_asset,
 	get_gl_entries_on_asset_disposal,
@@ -479,6 +480,8 @@ class SalesInvoice(SellingController):
 			self.validate_standalone_serial_nos_customer()
 			self.update_stock_reservation_entries()
 			self.update_stock_ledger()
+
+		self.split_asset_based_on_sale_qty()
 
 		self.process_asset_depreciation()
 
@@ -1401,6 +1404,41 @@ class SalesInvoice(SellingController):
 				and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus", cache=True) != 1
 			):
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
+
+	def split_asset_based_on_sale_qty(self):
+		asset_qty_map = self.get_asset_qty()
+		for asset, qty in asset_qty_map.items():
+			remaining_qty = qty["actual_qty"] - qty["sale_qty"]
+			if remaining_qty > 0:
+				split_asset(asset, remaining_qty)
+
+	def get_asset_qty(self):
+		asset_qty_map = {}
+
+		assets = {row.asset for row in self.items if row.is_fixed_asset and row.asset}
+		if not assets or self.is_return:
+			return asset_qty_map
+
+		asset_actual_qty = dict(
+			frappe.db.get_all(
+				"Asset",
+				{"name": ["in", list(assets)]},
+				["name", "asset_quantity"],
+				as_list=True,
+			)
+		)
+		for row in self.items:
+			if row.is_fixed_asset and row.asset:
+				actual_qty = asset_actual_qty.get(row.asset)
+				asset_qty_map.setdefault(
+					row.asset,
+					{
+						"sale_qty": flt(row.qty),
+						"actual_qty": flt(actual_qty),
+					},
+				)
+
+		return asset_qty_map
 
 	def process_asset_depreciation(self):
 		if (self.is_return and self.docstatus == 2) or (not self.is_return and self.docstatus == 1):
