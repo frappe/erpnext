@@ -434,6 +434,10 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 			expense_account = get_asset_category_account(
 				fieldname="fixed_asset_account", item=ctx.item_code, company=ctx.company
 			)
+	elif ctx.doctype == "Purchase Receipt":
+		from erpnext.accounts.utils import get_company_default
+
+		expense_account = get_company_default(ctx.company, "stock_received_but_not_billed")
 
 	# Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not ctx.uom:
