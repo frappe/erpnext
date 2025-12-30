@@ -5,8 +5,6 @@ const jobCard = ref(null);
 const batchNo = ref('');
 const colour = ref('Carrara White');
 const phase = ref('Preparation Phase');
-const selectedMixture = ref('')
-const isMixtureSelected = computed(() => !!selectedMixture.value);
 const ingredients = ref([]);
 const loadingIngredients = ref(true);
 const error = ref(null);
@@ -18,6 +16,8 @@ const transferredQty = ref(0);
 const transferSuccess = ref(false); 
 const nextWorkOrder = ref(''); 
 const bomQty = ref(0);
+const selectedMixer = ref('');
+const mixersList = ref([]);
 
 // downstream alerts (dummy)
 const alerts = ref([
@@ -65,6 +65,8 @@ const allAdditionalIngredientsAdded = computed(() => {
         .every(ing => ing.is_added);
 });
 
+const isMixerSelected = computed(() => !!selectedMixer.value);
+
 // actions
 onMounted(async () => {
     const route = frappe.get_route();
@@ -75,7 +77,7 @@ onMounted(async () => {
         loadingIngredients.value = false;
         return;
     }
-
+    await loadMixers();
     const stateRes = await frappe.call({
         method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_state',
         args: { job_card: jobCard.value },
@@ -460,6 +462,28 @@ async function loadBomQty() {
         bomQty.value = 0;
     }
 }
+
+async function loadMixers() {
+    const response = await frappe.call({
+        method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_all_mixers',
+        args: {
+            job_card: jobCard.value,
+        }
+    });
+    mixersList.value = response.message || [];
+}
+
+async function onMixerChange() {
+    if (selectedMixer.value) {
+        await frappe.call({
+            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.assign_mixer_to_job_card',
+            args: {
+                job_card: jobCard.value,
+                mixer: selectedMixer.value
+            }
+        })
+    }
+}
 </script>
 
 <template>
@@ -498,13 +522,13 @@ async function loadBomQty() {
 
                     <div class="mb-3 d-flex justify-content-between">
                         <label class="form-label bold">{{ __('Select Mixture') }}</label>
-                        <select v-model="selectedMixture" style="width: 30%;" class="form-control" :disabled="mixingReady || mixingStarted">
+                        <select v-model="selectedMixer" style="width: 30%;" class="form-control" :disabled="mixingReady || mixingStarted" @change="onMixerChange">
                             <option value="" disabled selected>
                                 {{ __('Select Mixture Type...') }}
                             </option>
-                            <option value="Mixture - A" selected>{{ __('Mixture - A') }}</option>
-                            <option value="Mixture - B">{{ __('Mixture - B') }}</option>
-                            <option value="Mixture - C">{{ __('Mixture - C') }}</option>
+                            <option v-for="mixer in mixersList" :key="mixer.name" :value="mixer.name">
+                                {{ mixer.name}}
+                            </option>
                         </select>
                     </div>
 
@@ -580,7 +604,7 @@ async function loadBomQty() {
                         </div>
 
                         <div class="mb-3">
-                            <button v-if="!mixingReady" :disabled="!isMixtureSelected || !allAdditionalIngredientsAdded" :class="!isMixtureSelected || !allAdditionalIngredientsAdded ? 'btn-disabled-pointer' : ''" class="btn btn-sm border border-success" @click="toggleReady">
+                            <button v-if="!mixingReady" :disabled="!isMixerSelected || !allAdditionalIngredientsAdded" :class="!isMixerSelected || !allAdditionalIngredientsAdded ? 'btn-disabled-pointer' : ''" class="btn btn-sm border border-success" @click="toggleReady">
                                 <span class="fa fa-check mr-1"></span>
                                 {{ __('Confirm Materials') }}
                             </button>

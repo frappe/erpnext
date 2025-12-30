@@ -373,3 +373,28 @@ def get_next_process_bom_qty(mixing_work_order):
             }
     
     return {"bom_qty": 0}
+
+@frappe.whitelist()
+def get_all_mixers(job_card, production_line=None):
+    filters = {}
+    if job_card:
+        jc = frappe.get_doc("Job Card", job_card)
+        filters["line_no"] = jc.production_line or production_line
+    
+    mixers_list = frappe.get_all("Mixer", filters=filters, order_by="line_no")
+    return mixers_list
+
+@frappe.whitelist()
+def assign_mixer_to_job_card(job_card, mixer):
+    jc = frappe.get_doc("Job Card", job_card)
+    mixer_number = frappe.get_doc("Mixer", mixer)
+
+    jc.mixer_number = mixer_number
+    
+    jc.save(ignore_permissions=True)
+    frappe.db.commit()
+
+    return {
+        "status": "success",
+        "mixer_number": mixer_number
+    }

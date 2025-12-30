@@ -84,6 +84,7 @@ class JobCard(Document):
 		item_name: DF.ReadOnly | None
 		items: DF.Table[JobCardItem]
 		job_started: DF.Check
+		mixer_number: DF.Link | None
 		naming_series: DF.Literal["PO-JOB.#####"]
 		operation: DF.Link
 		operation_id: DF.Data | None

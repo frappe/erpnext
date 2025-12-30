@@ -18,6 +18,7 @@
   "for_quantity",
   "total_completed_qty",
   "process_loss_qty",
+  "mixer_number",
   "scheduled_time_section",
   "expected_start_date",
   "time_required",
@@ -522,11 +523,17 @@
    "label": "Production Line",
    "options": "Production Line",
    "read_only": 1
+  },
+  {
+   "fieldname": "mixer_number",
+   "fieldtype": "Link",
+   "label": "Mixer Number",
+   "options": "Mixer"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-26 17:46:52.536889",
+ "modified": "2025-12-30 17:14:54.191729",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
