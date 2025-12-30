@@ -139,37 +139,41 @@ erpnext.financial_statements = {
 		return erpnext.financial_statements._style_custom_value(formattedValue, formatting, value);
 	},
 
-	_style_custom_value(formattedValue, formatting, value) {
+	_style_custom_value(formatted_value, formatting, value) {
 		const styles = [];
 
 		if (formatting.bold) styles.push("font-weight: bold");
 		if (formatting.italic) styles.push("font-style: italic");
-		if (formatting.warn_if_negative && typeof value === "number" && value < 0)
-			styles.push("color: #dc3545");
-		if (formatting.color) styles.push(`color: ${formatting.color}`);
 
-		if (styles.length === 0) return formattedValue;
-
-		const styleAttr = styles.join("; ");
-
-		// If the formatted value contains HTML, apply styles to the first element
-		if (/<[^>]+>/.test(formattedValue)) {
-			let tempDiv = document.createElement("div");
-			tempDiv.innerHTML = formattedValue;
-
-			const firstElement = tempDiv.querySelector("*");
-
-			if (firstElement) {
-				const existingStyle = firstElement.getAttribute("style") || "";
-				const newStyle = existingStyle ? `${existingStyle}; ${styleAttr}` : styleAttr;
-				firstElement.setAttribute("style", newStyle);
-				return tempDiv.innerHTML;
-			} else {
-				return `<span style="${styleAttr}">${formattedValue}</span>`;
-			}
-		} else {
-			return `<span style="${styleAttr}">${formattedValue}</span>`;
+		if (formatting.warn_if_negative && typeof value === "number" && value < 0) {
+			styles.push("color: #dc3545"); // text-danger
+		} else if (formatting.color) {
+			styles.push(`color: ${formatting.color}`);
 		}
+
+		if (styles.length === 0) return formatted_value;
+
+		const style_string = styles.join("; ");
+
+		// formatted value contains HTML tags/elements
+		if (/<[^>]+>/.test(formatted_value)) {
+			const temp_div = document.createElement("div");
+			temp_div.innerHTML = formatted_value;
+
+			// parse HTML and inject styles into the first element
+			const first_element = temp_div.querySelector("*");
+
+			if (first_element) {
+				const existing_style = first_element.getAttribute("style") || "";
+				first_element.setAttribute(
+					"style",
+					existing_style ? `${existing_style}; ${style_string}` : style_string
+				);
+				return temp_div.innerHTML;
+			}
+		}
+
+		return `<span style="${style_string}">${formatted_value}</span>`;
 	},
 
 	_format_special_view: function (value, row, column, data, default_formatter) {
