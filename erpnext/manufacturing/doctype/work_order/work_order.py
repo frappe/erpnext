@@ -135,10 +135,15 @@ class WorkOrder(Document):
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
 
 	def before_naming(self):
-		"""Set naming series before document naming occurs"""
 		if self.production_line:
-			year = datetime.now().strftime("%Y")
+			year = frappe.utils.today()[:4]
 			self.naming_series = f"MFG-WO-{self.production_line}-{year}-.#####"
+		else:
+			self.naming_series = "MFG-WO-2025-.#####"
+		# """Set naming series before document naming occurs"""
+		# if self.production_line:
+		# 	year = datetime.now().strftime("%Y")
+		# 	self.naming_series = f"MFG-WO-{self.production_line}-{year}-.#####"
 
 	def validate(self):
 		self.validate_production_item()
