@@ -1,20 +1,27 @@
 {
- "creation": "2013-10-04 13:17:18.000000", 
- "docstatus": 0, 
- "doctype": "Page", 
- "icon": "fa fa-filter", 
- "idx": 1, 
- "modified": "2013-10-04 13:17:18.000000", 
- "modified_by": "Administrator", 
- "module": "Selling", 
- "name": "sales-funnel", 
- "owner": "Administrator", 
- "page_name": "sales-funnel", 
+ "content": null,
+ "creation": "2013-10-04 13:17:18",
+ "docstatus": 0,
+ "doctype": "Page",
+ "icon": "fa fa-filter",
+ "idx": 4,
+ "modified": "2025-12-17 11:13:55.702704",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "sales-funnel",
+ "owner": "Administrator",
+ "page_name": "sales-funnel",
  "roles": [
   {
    "role": "Sales Manager"
+  },
+  {
+   "role": "Sales User"
   }
- ], 
- "standard": "Yes", 
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
  "title": "Sales Funnel"
 }

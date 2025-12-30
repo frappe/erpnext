@@ -24,9 +24,9 @@ class Task(NestedSet):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
+		from erpnext.projects.doctype.dependency_task.dependency_task import DependencyTask
+		from erpnext.projects.doctype.sub_task_people.sub_task_people import SubTaskPeople
 		from frappe.types import DF
-
-		from erpnext.projects.doctype.task_depends_on.task_depends_on import TaskDependsOn
 
 		act_end_date: DF.Date | None
 		act_start_date: DF.Date | None
@@ -37,8 +37,6 @@ class Task(NestedSet):
 		completed_by: DF.Link | None
 		completed_on: DF.Date | None
 		department: DF.Link | None
-		depends_on: DF.Table[TaskDependsOn]
-		depends_on_tasks: DF.Code | None
 		description: DF.TextEditor | None
 		duration: DF.Int
 		exp_end_date: DF.Date | None
@@ -57,15 +55,17 @@ class Task(NestedSet):
 		review_date: DF.Date | None
 		rgt: DF.Int
 		start: DF.Int
-		status: DF.Literal[
-			"Open", "Working", "Pending Review", "Overdue", "Template", "Completed", "Cancelled"
-		]
+		status: DF.Literal["Open", "Hold", "Completed"]
+		sub_project: DF.Link | None
+		sub_tasks: DF.Table[DependencyTask]
 		subject: DF.Data
 		task_weight: DF.Float
 		template_task: DF.Data | None
 		total_billing_amount: DF.Currency
 		total_costing_amount: DF.Currency
 		type: DF.Link | None
+		users: DF.Table[SubTaskPeople]
+		work_package_name: DF.Link | None
 	# end: auto-generated types
 
 	nsm_parent_field = "parent_task"
@@ -79,8 +79,8 @@ class Task(NestedSet):
 	def validate(self):
 		self.validate_dates()
 		self.validate_progress()
-		self.validate_status()
-		self.update_depends_on()
+		# self.validate_status()
+		# self.update_depends_on()
 		self.validate_dependencies_for_template_task()
 		self.validate_completed_on()
 
@@ -184,6 +184,174 @@ class Task(NestedSet):
 		self.update_project()
 		self.unassign_todo()
 		self.populate_depends_on()
+		self.send_email()
+
+	def send_email(self):
+		wp_name = frappe.db.get_value("Work Packages", self.work_package_name, "work_package_name")
+		old_doc = self.get_doc_before_save()
+
+		new_users = set()
+		old_users = set()
+
+		if old_doc and old_doc.users:
+			for mem in old_doc.users:
+				if mem.assignee:
+					old_users.add(mem.assignee)
+				if mem.accountable:
+					old_users.add(mem.accountable)
+
+		if self.users:
+			for mem in self.users:
+				if mem.assignee:
+					new_users.add(mem.assignee)
+				if mem.accountable:
+					new_users.add(mem.accountable)
+
+		newly_added_users = new_users - old_users
+
+		# --- Send mail for newly added users ---
+		if newly_added_users:
+			subject = f"New Task Created: {self.subject} under {self.work_package_name or 'No Work Package Name'}"
+
+			message = f"""
+			<p>Dear User,</p>
+			<p>You got a new <b>Task</b></p>
+
+			<table border="1" cellpadding="6" style="border-collapse:collapse;">
+				<tr><th>Field</th><th>Details</th></tr>
+				<tr><td><b>Task</b></td><td>{self.subject}</td></tr>
+                <tr><td><b>Task ID</b></td><td>{self.name}</td></tr>
+				<tr><td><b>Work Package Name</b></td><td>{wp_name or 'N/A'}</td></tr>
+				<tr><td><b>Priority</b></td><td>{self.priority or 'Medium'}</td></tr>
+				<tr><td><b>Status</b></td><td>{self.status or 'Open'}</td></tr>
+			</table>
+
+			<p>
+			<a href="{frappe.utils.get_url()}/app/task/{self.name}" target="_blank">
+			Click here to view the Task
+			</a>
+			</p>
+
+			<p>Regards,<br><b>OTS</b></p>
+			"""
+
+			frappe.sendmail(
+				recipients=list(newly_added_users),
+				subject=subject,
+				message=message,
+			)
+
+		# --- Send mail when Sub Task is completed ---
+		if old_doc and old_doc.status != "Completed" and self.status == "Completed":
+			recipients = set()
+			if self.users:
+				for user in self.users:
+					if user.accountable:
+						recipients.add(user.accountable)
+
+				subject = f"Task is Completed: {self.subject} under {self.work_package_name or 'No Work Package Name'}"
+				message = f"""
+				<p>Dear Accountable,</p>
+				<p>Task is Completed.</p>
+
+				<table border="1" cellpadding="6" style="border-collapse:collapse;">
+					<tr><th>Field</th><th>Details</th></tr>
+					<tr><td><b>Task</b></td><td>{self.subject}</td></tr>
+                    <tr><td><b>Task ID</b></td><td>{self.name}</td></tr>
+					<tr><td><b>Work Package Name</b></td><td>{wp_name or 'N/A'}</td></tr>
+				</table>
+
+				<p>
+				<a href="{frappe.utils.get_url()}/app/task/{self.name}" target="_blank">
+				Click here to view the Task
+				</a>
+				</p>
+
+				<p>Regards,<br><b>OTS</b></p>
+				"""
+
+				frappe.sendmail(
+					recipients=list(recipients),
+					subject=subject,
+					message=message,
+				)
+
+		# --- Send mail when Sub Task is put on Hold ---
+		if old_doc and old_doc.status != "Hold" and self.status == "Hold":
+			recipients = set()
+			if self.users:
+				for user in self.users:
+					if user.accountable:
+						recipients.add(user.accountable)
+
+				subject = f"Task is kept on hold: {self.subject} under {self.work_package_name or 'No Work Package Name'}"
+				message = f"""
+				<p>Dear Accountable,</p>
+				<p>Task is kept on hold.</p>
+
+				<table border="1" cellpadding="6" style="border-collapse:collapse;">
+					<tr><th>Field</th><th>Details</th></tr>
+					<tr><td><b>Task</b></td><td>{self.subject}</td></tr>
+                    <tr><td><b>Task ID</b></td><td>{self.name}</td></tr>
+					<tr><td><b>Work Package Name</b></td><td>{wp_name or 'N/A'}</td></tr>
+				</table>
+
+				<p>
+				<a href="{frappe.utils.get_url()}/app/task/{self.name}" target="_blank">
+				Click here to view the Task
+				</a>
+				</p>
+
+				<p>Regards,<br><b>OTS</b></p>
+				"""
+
+				frappe.sendmail(
+					recipients=list(recipients),
+					subject=subject,
+					message=message,
+				)
+
+		# --- Send mail when Sub Task dates are changed ---
+		if (
+			not self.is_new()
+			and old_doc
+			and (
+		        str(old_doc.exp_start_date) != str(self.exp_start_date)
+		        or str(old_doc.exp_end_date) != str(self.exp_end_date)
+		    )
+		):
+			recipients = set()
+			if self.users:
+				for user in self.users:
+					if user.accountable:
+						recipients.add(user.accountable)
+
+				subject = f"Task date is updated: {self.subject} under {self.work_package_name or 'No Work Package Name'}"
+				message = f"""
+				<p>Dear Accountable,</p>
+				<p>Task date has been updated.</p>
+
+				<table border="1" cellpadding="6" style="border-collapse:collapse;">
+					<tr><th>Field</th><th>Details</th></tr>
+					<tr><td><b>Task</b></td><td>{self.subject}</td></tr>
+                    <tr><td><b>Task ID</b></td><td>{self.name}</td></tr>
+					<tr><td><b>Work Package Name</b></td><td>{wp_name or 'N/A'}</td></tr>
+				</table>
+
+				<p>
+				<a href="{frappe.utils.get_url()}/app/task/{self.name}" target="_blank">
+				Click here to view the Task
+				</a>
+				</p>
+
+				<p>Regards,<br><b>OTS</b></p>
+				"""
+
+				frappe.sendmail(
+					recipients=list(recipients),
+					subject=subject,
+					message=message,
+				)
 
 	def unassign_todo(self):
 		if self.status == "Completed":
@@ -431,3 +599,33 @@ def add_multiple_tasks(data, parent):
 
 def on_doctype_update():
 	frappe.db.add_index("Task", ["lft", "rgt"])
+
+
+@frappe.whitelist()
+def update_percent_complete(task_name):
+    task = frappe.get_doc("Task", task_name)
+    total_progress = 0
+    count = 0
+    # sub_task_progress = frappe.db.get_all(task.sub_tasks, "progress")
+    for sub_task in task.sub_tasks:
+	    if sub_task.progress is not None:
+	        total_progress += sub_task.progress
+	        count += 1
+
+    # Calculate average
+    avg_progress = total_progress / count if count > 0 else 0
+
+    # Update parent Task progress
+    # task.progress = avg_progress
+    # task.save(ignore_permissions=True)
+
+    return avg_progress
+
+@frappe.whitelist()
+def get_sub_tasks(task_name):
+    sub_tasks = frappe.db.get_all(
+        "Sub Task",
+        filters={"parent_task": task_name},
+        fields=["name", "sub_task_name", "task_progress"]
+    )
+    return sub_tasks or []

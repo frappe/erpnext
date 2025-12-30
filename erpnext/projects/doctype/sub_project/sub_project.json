@@ -1,0 +1,143 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "SUB-PROJ-.YYYY.-.#####",
+ "creation": "2025-11-09 17:50:58.999465",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sub_project_name",
+  "parent_project",
+  "status",
+  "is_active",
+  "column_break_yypu",
+  "expected_start_date",
+  "expected_end_date",
+  "priority",
+  "percent_complete",
+  "work_packages_section",
+  "work_packages",
+  "users_section",
+  "users",
+  "notes_section",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "sub_project_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Sub Project Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "parent_project",
+   "fieldtype": "Link",
+   "label": "Parent Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Open\nHold\nCompleted\nCancelled",
+   "search_index": 1
+  },
+  {
+   "default": "Yes",
+   "fieldname": "is_active",
+   "fieldtype": "Select",
+   "label": "Is_Active",
+   "options": "Yes\nNo"
+  },
+  {
+   "fieldname": "column_break_yypu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expected_start_date",
+   "fieldtype": "Date",
+   "label": "Expected Start Date"
+  },
+  {
+   "fieldname": "expected_end_date",
+   "fieldtype": "Date",
+   "label": "Expected End Date"
+  },
+  {
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "\nMedium\nLow\nHigh"
+  },
+  {
+   "fieldname": "users_section",
+   "fieldtype": "Section Break",
+   "label": "Users"
+  },
+  {
+   "fieldname": "users",
+   "fieldtype": "Table",
+   "label": "Users",
+   "options": "Project User"
+  },
+  {
+   "fieldname": "notes_section",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Text Editor",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "percent_complete",
+   "fieldtype": "Percent",
+   "label": "% Completed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "work_packages_section",
+   "fieldtype": "Section Break",
+   "label": "Work Packages"
+  },
+  {
+   "fieldname": "work_packages",
+   "fieldtype": "Table",
+   "label": "Work Packages",
+   "options": "Work Package List"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-09 19:21:44.782253",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Sub Project",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "sub_project_name"
+}

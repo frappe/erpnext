@@ -1,0 +1,144 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "SUB-TASK-.YYYY.-.#####",
+ "creation": "2025-11-09 18:06:01.015332",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sub_task_name",
+  "parent_task",
+  "status",
+  "priority",
+  "completed_by",
+  "column_break_gxuv",
+  "expected_start_date",
+  "expected_end_date",
+  "expected_time_in_hours",
+  "task_progress",
+  "completed_on",
+  "people_section",
+  "users",
+  "details_section",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "sub_task_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Sub Task Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "parent_task",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Parent Task",
+   "options": "Task"
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nHold\nCompleted"
+  },
+  {
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Priority",
+   "options": "\nLow\nMedium\nHigh\nUrgent",
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_gxuv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expected_start_date",
+   "fieldtype": "Date",
+   "label": "Expected Start Date"
+  },
+  {
+   "fieldname": "expected_end_date",
+   "fieldtype": "Date",
+   "label": "Expected End Date"
+  },
+  {
+   "fieldname": "expected_time_in_hours",
+   "fieldtype": "Float",
+   "label": "Expected Time (in hours)",
+   "precision": "2"
+  },
+  {
+   "fieldname": "task_progress",
+   "fieldtype": "Percent",
+   "label": "Task Progress (0-100%)",
+   "precision": "2"
+  },
+  {
+   "fieldname": "completed_by",
+   "fieldtype": "Link",
+   "label": "Completed By",
+   "options": "User"
+  },
+  {
+   "fieldname": "completed_on",
+   "fieldtype": "Date",
+   "label": "Completed On"
+  },
+  {
+   "fieldname": "people_section",
+   "fieldtype": "Section Break",
+   "label": "People"
+  },
+  {
+   "fieldname": "users",
+   "fieldtype": "Table",
+   "label": "Users",
+   "options": "Sub Task People"
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-10 11:49:59.255080",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Sub Task",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "sub_task_name"
+}

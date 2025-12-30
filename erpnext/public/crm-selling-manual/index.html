@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CRM & Selling Documentation</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Inter, Arial, sans-serif;
+    background: #f9fafb;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.layout {
+    display: flex;
+    height: 100vh;
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar {
+    width: 260px;
+    background: #ffffff;
+    border-right: 1px solid #e5e7eb;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+.menu-title {
+    font-weight: 600;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.menu-title:hover {
+    background: #f3f4f6;
+}
+
+.menu {
+    margin-left: 8px;
+    display: none;
+}
+
+.menu a {
+    display: block;
+    padding: 6px 12px;
+    margin: 4px 0;
+    text-decoration: none;
+    color: #111827;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.menu a:hover {
+    background: #f3f4f6;
+}
+
+/* ================= CONTENT ================= */
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: #ffffff;
+}
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <div class="sidebar">
+
+        <div class="menu-title" onclick="navigate(event, 'release.html')">
+            Release
+        </div>
+
+        <div class="menu-title" onclick="handleCrmClick(event)">
+            CRM
+        </div>
+
+        <div class="menu" id="crmMenu">
+            <a href="?page=leads.html" onclick="navigate(event, 'leads.html')">Leads</a>
+            <a href="?page=opportunities.html" onclick="navigate(event, 'opportunities.html')">Opportunities</a>
+            <a href="?page=customers.html" onclick="navigate(event, 'customers.html')">Customers</a>
+        </div>
+
+        <div class="menu-title" onclick="handleSellingClick(event)">
+            Selling
+        </div>
+        <div class="menu" id="sellingMenu">
+            <a href="?page=quotations.html" onclick="navigate(event, 'quotations.html')">Quotations</a>
+            <a href="?page=sales-orders.html" onclick="navigate(event, 'sales-orders.html')">Sales Orders</a>
+        </div>
+
+    </div>
+
+    <div class="content" id="content">
+        <!-- Dynamic content loads here -->
+    </div>
+
+</div>
+
+<script>
+function toggleMenu(menuId) {
+    const menu = document.getElementById(menuId);
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+function navigate(event, page) {
+    event.preventDefault();
+
+    fetch(page)
+        .then(res => {
+            if (!res.ok) throw new Error("Page not found");
+            return res.text();
+        })
+        .then(html => {
+            document.getElementById("content").innerHTML = html;
+            history.pushState({ page }, "", "?page=" + page);
+        })
+        .catch(() => {
+            document.getElementById("content").innerHTML =
+                "<h2>Page not found</h2>";
+        });
+}
+
+window.onpopstate = function (event) {
+    if (event.state?.page) {
+        fetch(event.state.page)
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById("content").innerHTML = html;
+            });
+    }
+};
+
+const params = new URLSearchParams(window.location.search);
+const page = params.get("page") || "release.html";
+
+fetch(page)
+    .then(res => res.text())
+    .then(html => {
+        document.getElementById("content").innerHTML = html;
+    });
+
+function handleCrmClick(event) {
+    toggleMenu('crmMenu');
+    navigate(event, 'crm.html');
+}
+
+function handleSellingClick(event) {
+    toggleMenu('sellingMenu');
+    navigate(event, 'selling.html');
+}
+</script>
+
+</body>
+</html>

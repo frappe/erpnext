@@ -1,0 +1,42 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-09 18:15:14.980856",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "assignee",
+  "accountable"
+ ],
+ "fields": [
+  {
+   "fieldname": "assignee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Assignee",
+   "options": "User"
+  },
+  {
+   "fieldname": "accountable",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Accountable",
+   "options": "User"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-09 18:16:12.357559",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Sub Task People",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

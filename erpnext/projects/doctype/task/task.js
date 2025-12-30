@@ -15,6 +15,7 @@ frappe.ui.form.on("Task", {
 	},
 
 	onload: function (frm) {
+		calulate_progress(frm);
 		frm.set_query("task", "depends_on", function () {
 			let filters = {
 				name: ["!=", frm.doc.name],
@@ -35,6 +36,11 @@ frappe.ui.form.on("Task", {
 				filters: filters,
 			};
 		});
+	},
+
+	refresh: function (frm) {
+		calulate_progress(frm);
+    	fetch_sub_tasks(frm);
 	},
 
 	is_group: function (frm) {
@@ -59,4 +65,39 @@ frappe.ui.form.on("Task", {
 	validate: function (frm) {
 		frm.doc.project && frappe.model.remove_from_locals("Project", frm.doc.project);
 	},
+	
 });
+
+function calulate_progress(frm) {
+	if(!frm.is_new()){
+		frappe.call({
+			method: "erpnext.projects.doctype.task.task.update_percent_complete",
+			args: {task_name: frm.doc.name},
+			callback: function(r) {
+				if (r.message){
+					frm.set_value("progress",r.message);
+					//frm.refresh_field("progress")
+				}
+			}
+		});
+	}
+}
+
+function fetch_sub_tasks(frm) {
+	frappe.call({
+		method: "erpnext.projects.doctype.task.task.get_sub_tasks",
+		args: {task_name:frm.doc.name},
+		callback: function(r) {
+			frm.clear_table("sub_tasks")
+			if( r.message && r.message.length > 0 ){
+				r.message.forEach( st => {
+					let row = frm.add_child("sub_tasks");
+					row.task_name = st.name;
+					row.subject = st.sub_task_name;
+					row.progress = st.progress;
+				});
+			}
+			frm.refresh_field("sub_tasks");
+		}
+	});
+}

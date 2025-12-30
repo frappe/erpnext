@@ -13,21 +13,23 @@
   "status",
   "project_type",
   "is_active",
-  "percent_complete_method",
   "percent_complete",
   "column_break_5",
-  "project_template",
   "expected_start_date",
   "expected_end_date",
   "priority",
+  "project_template",
   "department",
+  "percent_complete_method",
+  "sub_project_section",
+  "sub_projects",
+  "users_section",
+  "users",
+  "copied_from",
   "customer_details",
   "customer",
   "column_break_14",
   "sales_order",
-  "users_section",
-  "users",
-  "copied_from",
   "section_break0",
   "notes",
   "section_break_18",
@@ -63,7 +65,11 @@
   "weekly_time_to_send",
   "column_break_45",
   "subject",
-  "message"
+  "message",
+  "activity",
+  "open_activities_html",
+  "section_break_vptb",
+  "all_activities_html"
  ],
  "fields": [
   {
@@ -108,6 +114,7 @@
    "default": "Task Completion",
    "fieldname": "percent_complete_method",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "% Complete Method",
    "options": "Manual\nTask Completion\nTask Progress\nTask Weight"
   },
@@ -455,6 +462,36 @@
    "fieldtype": "Data",
    "label": "Subject",
    "mandatory_depends_on": "collect_progress"
+  },
+  {
+   "fieldname": "sub_project_section",
+   "fieldtype": "Section Break",
+   "label": "Sub Project"
+  },
+  {
+   "fieldname": "sub_projects",
+   "fieldtype": "Table",
+   "label": "Sub Projects",
+   "options": "Sub Project List"
+  },
+  {
+   "fieldname": "activity",
+   "fieldtype": "Tab Break",
+   "label": "Activity"
+  },
+  {
+   "fieldname": "open_activities_html",
+   "fieldtype": "HTML",
+   "label": "Open Activities HTML"
+  },
+  {
+   "fieldname": "section_break_vptb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "all_activities_html",
+   "fieldtype": "HTML",
+   "label": "All Activities HTML"
   }
  ],
  "icon": "fa fa-puzzle-piece",
@@ -462,7 +499,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2025-07-03 10:54:30.444139",
+ "modified": "2025-11-09 18:28:21.873181",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

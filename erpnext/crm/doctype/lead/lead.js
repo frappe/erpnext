@@ -51,6 +51,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 
 		this.show_notes();
 		this.show_activities();
+		this.render_email_history();
 	}
 
 	add_lead_to_prospect(frm) {
@@ -237,6 +238,112 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 		});
 		crm_activities.refresh();
 	}
+
+	render_email_history() {
+        const frm = this.frm;
+        
+        if (!frm.fields_dict['email_history_html']) return;
+
+        const wrapper = frm.fields_dict['email_history_html'].wrapper;
+
+        frappe.call({
+            method: "erpnext.crm.doctype.lead.lead.get_lead_emails",
+            args: {
+                doctype: frm.doc.doctype,
+                docname: frm.doc.name
+            },
+            callback: function(r) {
+                if (r.message) {
+                    let emails = r.message;
+                    let html_content = `<div class="frappe-card-group">`;
+
+                    if (emails.length === 0) {
+                        html_content += `<div class="text-muted text-center p-4">No emails found.</div>`;
+                    }
+                    emails.forEach(email => {
+                        let time_ago = frappe.datetime.comment_when(email.creation);
+                        let badge_class = email.sent_or_received === "Sent" ? "badge-success" : "badge-primary";
+                        
+                        // Buttons Logic
+                        let buttons = `
+                            <button class="btn btn-xs btn-default mr-1" onclick="cur_frm.cscript.reply_to_email('${email.name}', false)">
+                                <i class="fa fa-reply"></i> Reply
+                            </button>
+                            <button class="btn btn-xs btn-default mr-1" onclick="cur_frm.cscript.reply_to_email('${email.name}', true)">
+                                <i class="fa fa-reply-all"></i> Reply All
+                            </button>
+                            <button class="btn btn-xs btn-default" onclick="frappe.set_route('Form', 'Communication', '${email.name}')">
+                                <i class="fa fa-external-link"></i> View
+                            </button>
+                        `;
+
+                        html_content += `
+                            <div class="timeline-item-container" style="margin-bottom: 20px; padding: 15px; border: 1px solid #d1d8dd; border-radius: 6px; background-color: #fff;">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <span class="font-weight-bold text-dark">${email.sender}</span>
+                                        <span class="text-muted text-small ml-2">&bull; ${time_ago}</span>
+                                    </div>
+                                    <span class="badge ${badge_class}">${email.sent_or_received}</span>
+                                </div>
+                                
+                                <div class="email-subject text-muted small mb-2">
+                                    <strong>Subject:</strong> ${email.subject}
+                                </div>
+                                
+                                <div class="email-content text-dark mt-2" style="font-size: 14px; line-height: 1.5; max-height: 300px; overflow-y: auto;">
+                                    ${email.content} 
+                                </div>
+                                
+                                <div class="mt-3 text-right">
+                                    ${buttons}
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html_content += `</div>`;
+                    $(wrapper).html(html_content);
+                }
+            }
+        });
+    }
+
+    reply_to_email(email_name, is_reply_all) {
+        const frm = this.frm;
+        
+        // Fetch the full email document to get details for threading
+        frappe.call({
+            method: 'frappe.client.get',
+            args: { doctype: 'Communication', name: email_name },
+            callback: (r) => {
+                if (r.message) {
+                    let email = r.message;
+                    let recipients = email.sender; // Default Reply to Sender
+                    let cc = [];
+
+                    // Logic for Reply All
+                    if (is_reply_all) {
+                        // Add original CCs
+                        if (email.cc) cc.push(email.cc);
+                        // Add original Recipients (excluding us hopefully, but simple append for now)
+                        if (email.recipients) cc.push(email.recipients);
+                    }
+
+                    // Open the standard Email Composer
+                    new frappe.views.CommunicationComposer({
+                        doc: frm.doc,
+                        subject: email.subject.startsWith("Re:") ? email.subject : "Re: " + email.subject,
+                        recipients: recipients,
+                        cc: cc.join(', '),
+                        last_email: email, // This automatically handles threading and quoting!
+                        message: "", // Start with empty body
+                        forward: false
+                    });
+                }
+            }
+        });
+    }
 };
 
 extend_cscript(cur_frm.cscript, new erpnext.LeadController({ frm: cur_frm }));

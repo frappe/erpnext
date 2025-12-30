@@ -31,14 +31,11 @@ class Opportunity(TransactionBase, CRMNote):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from frappe.types import DF
-
 		from erpnext.crm.doctype.competitor_detail.competitor_detail import CompetitorDetail
 		from erpnext.crm.doctype.crm_note.crm_note import CRMNote
 		from erpnext.crm.doctype.opportunity_item.opportunity_item import OpportunityItem
-		from erpnext.crm.doctype.opportunity_lost_reason_detail.opportunity_lost_reason_detail import (
-			OpportunityLostReasonDetail,
-		)
+		from erpnext.crm.doctype.opportunity_lost_reason_detail.opportunity_lost_reason_detail import OpportunityLostReasonDetail
+		from frappe.types import DF
 
 		address_display: DF.SmallText | None
 		amended_from: DF.Link | None

@@ -638,7 +638,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-16 16:13:22.497695",
+ "modified": "2025-12-23 11:17:20.280533",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
@@ -672,6 +672,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "search_fields": "item, item_name",
  "show_name_in_global_search": 1,
  "sort_field": "modified",

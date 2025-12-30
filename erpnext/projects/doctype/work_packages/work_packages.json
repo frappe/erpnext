@@ -1,0 +1,147 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "WP-.YYYY.-.#####",
+ "creation": "2025-11-09 17:57:30.408718",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "work_package_name",
+  "parent_project",
+  "parent_sub_project",
+  "priority",
+  "column_break_dghk",
+  "module",
+  "expected_start_date",
+  "expected_end_date",
+  "is_active",
+  "progress",
+  "tasks_section",
+  "tasks",
+  "users_section",
+  "users",
+  "notes_section",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "work_package_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Work Package Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "parent_project",
+   "fieldtype": "Link",
+   "label": "Parent Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "parent_sub_project",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Parent Sub Project",
+   "options": "Sub Project"
+  },
+  {
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Priority",
+   "options": "\nHigh\nMedium\nLow"
+  },
+  {
+   "fieldname": "column_break_dghk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "module",
+   "fieldtype": "Data",
+   "label": "Module"
+  },
+  {
+   "fieldname": "expected_start_date",
+   "fieldtype": "Date",
+   "label": "Expected Start Date"
+  },
+  {
+   "fieldname": "expected_end_date",
+   "fieldtype": "Date",
+   "label": "Expected End Date"
+  },
+  {
+   "default": "Yes",
+   "fieldname": "is_active",
+   "fieldtype": "Select",
+   "label": "Is_Active",
+   "options": "Yes\nNo"
+  },
+  {
+   "fieldname": "progress",
+   "fieldtype": "Percent",
+   "label": "Work Progress (%)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "users_section",
+   "fieldtype": "Section Break",
+   "label": "Users"
+  },
+  {
+   "fieldname": "users",
+   "fieldtype": "Table",
+   "label": "Users",
+   "options": "Project User"
+  },
+  {
+   "fieldname": "notes_section",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Text Editor",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "tasks_section",
+   "fieldtype": "Section Break",
+   "label": "Tasks"
+  },
+  {
+   "fieldname": "tasks",
+   "fieldtype": "Table",
+   "label": "Tasks",
+   "options": "Task Depends On"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-09 19:23:10.783852",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Work Packages",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "work_package_name"
+}

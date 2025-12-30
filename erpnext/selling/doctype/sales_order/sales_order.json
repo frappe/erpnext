@@ -1577,6 +1577,7 @@
   {
    "fieldname": "connections_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "Connections",
    "show_dashboard": 1
   },
@@ -1664,7 +1665,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-03-03 16:49:00.676927",
+ "modified": "2025-12-10 06:25:03.431059",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1734,6 +1735,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "search_fields": "status,transaction_date,customer,customer_name, territory,order_type,company",
  "show_name_in_global_search": 1,
  "sort_field": "modified",

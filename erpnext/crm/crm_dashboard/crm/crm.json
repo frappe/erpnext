@@ -1,7 +1,10 @@
 {
  "cards": [
   {
-   "card": "New Lead (Last 1 Month)"
+   "card": "Total Leads"
+  },
+  {
+   "card": "New Lead ( This Month )"
   },
   {
    "card": "New Opportunity (Last 1 Month)"
@@ -11,6 +14,21 @@
   },
   {
    "card": "Open Opportunity"
+  },
+  {
+   "card": "New Customer ( Last Month )"
+  },
+  {
+   "card": "New Lead ( Last Month )"
+  },
+  {
+   "card": "Total Customer"
+  },
+  {
+   "card": "Opportunities Closing This Month"
+  },
+  {
+   "card": "Total Opportunities ( This Month )"
   }
  ],
  "charts": [
@@ -35,22 +53,46 @@
    "width": "Half"
   },
   {
-   "chart": "Territory Wise Sales",
+   "chart": "Leads by Industry",
    "width": "Full"
   },
   {
-   "chart": "Lead Source",
+   "chart": "Leads Created Over Time",
    "width": "Half"
+  },
+  {
+   "chart": "Leads by Source",
+   "width": "Half"
+  },
+  {
+   "chart": "Expected Revenue Forecast",
+   "width": "Full"
+  },
+  {
+   "chart": "Opportunities Created Over Time",
+   "width": "Full"
+  },
+  {
+   "chart": "Opportunity by Stage",
+   "width": "Full"
+  },
+  {
+   "chart": "Opportunity Trend",
+   "width": "Full"
+  },
+  {
+   "chart": "Leads By Stage",
+   "width": "Full"
   }
  ],
  "creation": "2020-07-20 20:17:15.985657",
  "dashboard_name": "CRM",
  "docstatus": 0,
  "doctype": "Dashboard",
- "idx": 0,
+ "idx": 6,
  "is_default": 0,
  "is_standard": 1,
- "modified": "2020-07-21 18:56:47.230053",
+ "modified": "2025-12-17 05:47:22.862225",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",

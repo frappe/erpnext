@@ -19,19 +19,14 @@ class Quotation(SellingController):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from frappe.types import DF
-
 		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
-		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import (
-			SalesTaxesandCharges,
-		)
+		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import SalesTaxesandCharges
 		from erpnext.crm.doctype.competitor_detail.competitor_detail import CompetitorDetail
 		from erpnext.selling.doctype.quotation_item.quotation_item import QuotationItem
-		from erpnext.setup.doctype.quotation_lost_reason_detail.quotation_lost_reason_detail import (
-			QuotationLostReasonDetail,
-		)
+		from erpnext.setup.doctype.quotation_lost_reason_detail.quotation_lost_reason_detail import QuotationLostReasonDetail
 		from erpnext.stock.doctype.packed_item.packed_item import PackedItem
+		from frappe.types import DF
 
 		additional_discount_percentage: DF.Float
 		address_display: DF.SmallText | None
@@ -100,9 +95,7 @@ class Quotation(SellingController):
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
 		source: DF.Link | None
-		status: DF.Literal[
-			"Draft", "Open", "Replied", "Partially Ordered", "Ordered", "Lost", "Cancelled", "Expired"
-		]
+		status: DF.Literal["Draft", "Open", "Replied", "Partially Ordered", "Ordered", "Lost", "Cancelled", "Expired"]
 		supplier_quotation: DF.Link | None
 		tax_category: DF.Link | None
 		taxes: DF.Table[SalesTaxesandCharges]
@@ -251,6 +244,7 @@ class Quotation(SellingController):
 		opp = frappe.get_doc("Opportunity", opportunity)
 		opp.set_status(status=status, update=True)
 
+
 	@frappe.whitelist()
 	def declare_enquiry_lost(self, lost_reasons_list, competitors, detailed_reason=None):
 		if not (self.is_fully_ordered() or self.is_partially_ordered()):
@@ -290,6 +284,7 @@ class Quotation(SellingController):
 		# update enquiry status
 		self.update_opportunity("Quotation")
 		self.update_lead()
+		#self.send_quotation_email()
 
 	def on_cancel(self):
 		if self.lost_reasons:
@@ -329,6 +324,48 @@ class Quotation(SellingController):
 
 		return rows_with_alternatives
 
+	def send_quotation_email(self):
+	    customer_email = None
+	    person_type = self.quotation_to
+
+	    if person_type == "Customer":
+	        customer_email = frappe.db.get_value("Customer", self.customer_name, "email_id")
+	    elif person_type == "Lead":
+	        customer_email = frappe.db.get_value("Lead", self.lead, "email_id")
+	    elif person_type == "Prospect":
+	        customer_email = frappe.db.get_value("Prospect", self.prospect, "email_id")
+
+	    if customer_email:
+	        pdf = frappe.get_print(
+	            doctype="Quotation",
+	            name=self.name,
+	            print_format="Standard",
+	            as_pdf=True
+	        )
+
+	        frappe.sendmail(
+	            recipients=customer_email,
+	            subject=f"Sales Quotation - {self.name}",
+	            message=frappe.render_template(
+	                """Dear {{ name }},<br><br>
+	                Please find the attached Sales Quotation <b>{{ quotation_name }}</b>.<br><br>
+	                Kindly revert back or contact us for any further clarifications.<br><br>
+	                Regards,<br>{{ company }}""",
+	                {
+	                    "name": self.quotation_to,
+	                    "quotation_name": self.name,
+	                    "company": self.company
+	                }
+	            ),
+	            attachments=[{
+	                "fname": f"{self.name}.pdf",
+	                "fcontent": pdf
+	            }]
+	        )
+
+	        frappe.msgprint("Email sent to customer successfully.")
+	    else:
+	        frappe.msgprint("No email ID found for the Customer / Lead / Prospect.")
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

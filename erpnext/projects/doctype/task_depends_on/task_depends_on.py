@@ -17,6 +17,7 @@ class TaskDependsOn(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		progress: DF.Percent
 		project: DF.Text | None
 		subject: DF.Text | None
 		task: DF.Link | None

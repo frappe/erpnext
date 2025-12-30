@@ -1,0 +1,66 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "creation": "2025-10-28 15:49:42.845758",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "question",
+  "lead_stage",
+  "status",
+  "type"
+ ],
+ "fields": [
+  {
+   "fieldname": "question",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Question"
+  },
+  {
+   "fieldname": "lead_stage",
+   "fieldtype": "Select",
+   "label": "Lead Stage",
+   "options": "Stage 0 - Welcome\nStage 1 - Data Gathering\nStage 2 - Event Demo\nStage 3 - One to One Demo\nStage 4 - Short Offering\nStage 5 - Formal Offering\nStage 6 - Oral Closing\nStage 7 - Signed Closing / Onboarding\nStage 8 - Users Experiencing\nStage 9 - Potential Order Scale Up\nStage 10 - Engaged Promoter"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Lead Capture\nLead Qualification\nEngagement / Nurturing\nEvaluation / proposal\nConversion / Purchase\nOnboarding / Ownership experience\nRetention"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Lead Type",
+   "options": "\nIndividual buyer\nFleet operator / delivery company\nCorporate mobility buyer\nMedia / investor"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-07 19:30:36.814349",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "CRM Question Master",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

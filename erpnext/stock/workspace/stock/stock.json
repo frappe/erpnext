@@ -336,6 +336,7 @@
    "link_to": "Serial No Service Contract Expiry",
    "link_type": "Report",
    "onboard": 0,
+   "report_ref_doctype": "Serial No",
    "type": "Link"
   },
   {
@@ -347,6 +348,7 @@
    "link_to": "Serial No Status",
    "link_type": "Report",
    "onboard": 0,
+   "report_ref_doctype": "Serial No",
    "type": "Link"
   },
   {
@@ -358,6 +360,7 @@
    "link_to": "Serial No Warranty Expiry",
    "link_type": "Report",
    "onboard": 0,
+   "report_ref_doctype": "Serial No",
    "type": "Link"
   },
   {
@@ -601,6 +604,7 @@
    "link_to": "Warehouse Wise Stock Balance",
    "link_type": "Report",
    "onboard": 0,
+   "report_ref_doctype": "Stock Ledger Entry",
    "type": "Link"
   },
   {
@@ -763,7 +767,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-07-04 14:38:14.988756",
+ "modified": "2025-12-29 07:59:59.848984",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
@@ -787,7 +791,7 @@
  "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [],
- "sequence_id": 7.0,
+ "sequence_id": 15.0,
  "shortcuts": [
   {
    "color": "Green",
@@ -836,11 +840,13 @@
   {
    "label": "Stock Ledger",
    "link_to": "Stock Ledger",
+   "report_ref_doctype": "Stock Ledger Entry",
    "type": "Report"
   },
   {
    "label": "Stock Balance",
    "link_to": "Stock Balance",
+   "report_ref_doctype": "Stock Ledger Entry",
    "type": "Report"
   },
   {

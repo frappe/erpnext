@@ -1,0 +1,201 @@
+/* ================================
+   GLOBAL RESET & BASE
+================================ */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Inter, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #111827;
+    background-color: #ffffff;
+    margin: 0;
+    padding: 30px;
+}
+
+/* ================================
+   HEADINGS
+================================ */
+h1 {
+    font-size: 28px;
+    color: #1f4f8b;
+    margin-bottom: 12px;
+}
+
+h2 {
+    font-size: 22px;
+    color: #1f4f8b;
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+h3 {
+    font-size: 18px;
+    color: #1f2937;
+    margin-top: 25px;
+    margin-bottom: 8px;
+}
+
+h4 {
+    font-size: 16px;
+    color: #374151;
+    margin-top: 20px;
+}
+
+/* ================================
+   TEXT & LINKS
+================================ */
+p {
+    margin: 8px 0 12px;
+}
+
+a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ================================
+   PATH / NAV INFO
+================================ */
+.path {
+    background: #f3f4f6;
+    padding: 8px 12px;
+    border-left: 4px solid #1f4f8b;
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+/* ================================
+   LISTS & STEPS
+================================ */
+ul {
+    margin-left: 20px;
+    padding-left: 10px;
+}
+
+ol {
+    margin-left: 20px;
+    padding-left: 10px;
+}
+
+li {
+    margin-bottom: 6px;
+}
+
+/* ================================
+   IMAGES
+================================ */
+img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    margin: 15px 0;
+}
+
+/* Utility sizes */
+.img-sm { width: 40%; }
+.img-md { width: 60%; }
+.img-lg { width: 80%; }
+
+/* ================================
+   NOTES / INFO / WARNING
+================================ */
+.note {
+    background: #f9fafb;
+    border-left: 4px solid #6366f1;
+    padding: 10px 12px;
+    margin: 15px 0;
+}
+
+.warning {
+    background: #fff7ed;
+    border-left: 4px solid #f97316;
+    padding: 10px 12px;
+    margin: 15px 0;
+}
+
+.tip {
+    background: #ecfeff;
+    border-left: 4px solid #06b6d4;
+    padding: 10px 12px;
+    margin: 15px 0;
+}
+
+/* ================================
+   TABLES (FUTURE USE)
+================================ */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 14px;
+}
+
+th, td {
+    border: 1px solid #e5e7eb;
+    padding: 8px 10px;
+    text-align: left;
+}
+
+th {
+    background: #f3f4f6;
+    font-weight: 600;
+}
+
+/* ================================
+   CODE BLOCKS (OPTIONAL)
+================================ */
+code {
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+pre {
+    background: #111827;
+    color: #f9fafb;
+    padding: 12px;
+    border-radius: 6px;
+    overflow-x: auto;
+}
+
+/* ================================
+   SEARCH HIGHLIGHT
+================================ */
+.doc-highlight {
+    background-color: #fff3cd;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+/* ================================
+   SEPARATORS
+================================ */
+hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 30px 0;
+}
+
+/* ================================
+   RESPONSIVE
+================================ */
+@media (max-width: 768px) {
+    body {
+        padding: 20px;
+    }
+
+    .img-sm,
+    .img-md,
+    .img-lg {
+        width: 100%;
+    }
+}

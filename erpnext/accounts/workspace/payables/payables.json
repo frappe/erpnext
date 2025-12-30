@@ -162,7 +162,7 @@
    "type": "Link"
   }
  ],
- "modified": "2024-01-18 22:09:46.221549",
+ "modified": "2025-12-29 07:59:59.331928",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payables",
@@ -179,6 +179,7 @@
    "doc_view": "",
    "label": "Accounts Payable",
    "link_to": "Accounts Payable",
+   "report_ref_doctype": "Purchase Invoice",
    "type": "Report"
   },
   {

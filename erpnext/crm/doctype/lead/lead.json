@@ -15,17 +15,15 @@
   "first_name",
   "middle_name",
   "last_name",
+  "gender",
   "column_break_1",
   "lead_name",
   "job_title",
-  "gender",
   "source",
-  "col_break123",
-  "lead_owner",
-  "status",
-  "customer",
-  "type",
   "request_type",
+  "lead_owner",
+  "type",
+  "customer",
   "contact_info_tab",
   "email_id",
   "website",
@@ -37,13 +35,14 @@
   "phone_ext",
   "organization_section",
   "company_name",
+  "website_url",
   "no_of_employees",
   "column_break_28",
   "annual_revenue",
   "industry",
-  "market_segment",
   "column_break_31",
   "territory",
+  "market_segment",
   "fax",
   "address_section",
   "address_html",
@@ -53,11 +52,18 @@
   "country",
   "column_break2",
   "contact_html",
+  "message_from_lead_section",
+  "message",
   "qualification_tab",
-  "qualification_status",
+  "status",
+  "lead_stage",
+  "potential_volume",
+  "conversion_potential",
   "column_break_64",
-  "qualified_by",
+  "urgency",
+  "service_location",
   "qualified_on",
+  "qualified_by",
   "other_info_tab",
   "campaign_name",
   "company",
@@ -76,7 +82,11 @@
   "notes_tab",
   "notes_html",
   "notes",
-  "dashboard_tab"
+  "email_history_tab",
+  "email_history_html",
+  "dashboard_tab",
+  "questionnaire_tab",
+  "items"
  ],
  "fields": [
   {
@@ -117,12 +127,8 @@
    "oldfieldname": "email_id",
    "oldfieldtype": "Data",
    "options": "Email",
+   "reqd": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "col_break123",
-   "fieldtype": "Column Break",
-   "width": "50%"
   },
   {
    "default": "__user",
@@ -135,7 +141,7 @@
    "search_index": 1
   },
   {
-   "default": "Lead",
+   "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -144,7 +150,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Lead\nOpen\nReplied\nOpportunity\nQuotation\nLost Quotation\nInterested\nConverted\nDo Not Contact",
+   "options": "Lead\nOpen\nReplied\nOpportunity\nHold\nQuotation\nLost Quotation\nInterested\nConverted\nDo Not Contact\nCompleted",
    "reqd": 1,
    "search_index": 1
   },
@@ -233,6 +239,7 @@
   {
    "fieldname": "fax",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Fax",
    "oldfieldname": "fax",
    "oldfieldtype": "Data"
@@ -243,7 +250,7 @@
    "label": "Lead Type",
    "oldfieldname": "type",
    "oldfieldtype": "Select",
-   "options": "\nClient\nChannel Partner\nConsultant"
+   "options": "\nIndividual Buyer\nFleet Operator / Delivery Company\nAutomotive Distributor\nShared Mobility Provider\nCorporate\nInvestor\nOthers"
   },
   {
    "fieldname": "market_segment",
@@ -267,7 +274,7 @@
    "label": "Request Type",
    "oldfieldname": "request_type",
    "oldfieldtype": "Select",
-   "options": "\nProduct Enquiry\nRequest for Information\nSuggestions\nOther"
+   "options": "\nProduct Enquiry\nRequest for Information\nSuggestions\nOthers"
   },
   {
    "fieldname": "company",
@@ -401,12 +408,6 @@
    "label": "Qualified on"
   },
   {
-   "fieldname": "qualification_status",
-   "fieldtype": "Select",
-   "label": "Qualification Status",
-   "options": "Unqualified\nIn Process\nQualified"
-  },
-  {
    "collapsible": 1,
    "fieldname": "address_section",
    "fieldtype": "Section Break",
@@ -508,8 +509,78 @@
   {
    "fieldname": "dashboard_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "Connections",
    "show_dashboard": 1
+  },
+  {
+   "fieldname": "lead_stage",
+   "fieldtype": "Select",
+   "label": "Lead Stage",
+   "options": "Welcome\nData Gathering\nRequirements and Clarifications\nDemo"
+  },
+  {
+   "fieldname": "service_location",
+   "fieldtype": "Data",
+   "label": "Service Location"
+  },
+  {
+   "fieldname": "urgency",
+   "fieldtype": "Select",
+   "label": "Urgency",
+   "options": "\nImmediate\nIn 3 months\nIn 6 months\nIn 1 year\nIn 1 + years"
+  },
+  {
+   "fieldname": "potential_volume",
+   "fieldtype": "Select",
+   "label": "Potential Volume",
+   "options": "\n1-10 vehicles\n11-50 vehicles\n50 + vehicles"
+  },
+  {
+   "fieldname": "conversion_potential",
+   "fieldtype": "Select",
+   "label": "Conversion Potential",
+   "options": "\n0 - 25 %\n26 - 50%\n51 - 75%\n76 - 100%"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "questionnaire_tab",
+   "fieldtype": "Tab Break",
+   "hidden": 1,
+   "label": "Questionnaire"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Lead Questionnaire"
+  },
+  {
+   "fieldname": "website_url",
+   "fieldtype": "Data",
+   "label": "Website URL"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "message_from_lead_section",
+   "fieldtype": "Section Break",
+   "label": "Message From Lead"
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Long Text",
+   "label": "Message"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "email_history_tab",
+   "fieldtype": "Tab Break",
+   "label": "Email History"
+  },
+  {
+   "fieldname": "email_history_html",
+   "fieldtype": "HTML",
+   "label": "Email History"
   }
  ],
  "grid_page_length": 50,
@@ -517,7 +588,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2025-06-26 11:02:01.158901",
+ "modified": "2025-12-11 07:12:37.592363",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -577,6 +648,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "search_fields": "lead_name,lead_owner,status",
  "sender_field": "email_id",
  "sender_name_field": "lead_name",

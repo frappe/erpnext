@@ -11,6 +11,15 @@
   },
   {
    "card": "Active Customers"
+  },
+  {
+   "card": "Total Quotation Value"
+  },
+  {
+   "card": "Total Sales Order Amount"
+  },
+  {
+   "card": "Quotation Count ( Last Month )"
   }
  ],
  "charts": [
@@ -23,22 +32,46 @@
    "width": "Half"
   },
   {
-   "chart": "Sales Order Analysis",
-   "width": "Half"
-  },
-  {
    "chart": "Item-wise Annual Sales",
    "width": "Full"
+  },
+  {
+   "chart": "Quotations by Party Name",
+   "width": "Full"
+  },
+  {
+   "chart": "Monthly Sales Trend",
+   "width": "Full"
+  },
+  {
+   "chart": "Total Amount Of Sales by Customer",
+   "width": "Full"
+  },
+  {
+   "chart": "Quotation Value Trend",
+   "width": "Full"
+  },
+  {
+   "chart": "Sales Order Monthly Value",
+   "width": "Full"
+  },
+  {
+   "chart": "Quotation by Status",
+   "width": "Full"
+  },
+  {
+   "chart": "Sales Order Analysis",
+   "width": "Half"
   }
  ],
  "creation": "2020-07-20 20:17:16.688162",
  "dashboard_name": "Selling",
  "docstatus": 0,
  "doctype": "Dashboard",
- "idx": 0,
+ "idx": 3,
  "is_default": 0,
  "is_standard": 1,
- "modified": "2020-07-22 15:31:22.299903",
+ "modified": "2025-12-17 05:53:19.824432",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",

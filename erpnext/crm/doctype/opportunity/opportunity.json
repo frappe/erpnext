@@ -547,6 +547,7 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "dashboard_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "Connections",
    "show_dashboard": 1
   },
@@ -626,7 +627,7 @@
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2025-06-26 11:16:13.665866",
+ "modified": "2025-12-10 06:24:22.501140",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
@@ -659,6 +660,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "search_fields": "status,transaction_date,party_name,opportunity_type,territory,company",
  "sender_field": "contact_email",
  "show_name_in_global_search": 1,

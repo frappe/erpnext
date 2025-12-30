@@ -586,7 +586,7 @@
    "type": "Link"
   }
  ],
- "modified": "2024-01-18 22:15:40.941711",
+ "modified": "2025-12-29 07:59:59.269873",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
@@ -651,16 +651,19 @@
   {
    "label": "Accounts Receivable",
    "link_to": "Accounts Receivable",
+   "report_ref_doctype": "Sales Invoice",
    "type": "Report"
   },
   {
    "label": "General Ledger",
    "link_to": "General Ledger",
+   "report_ref_doctype": "GL Entry",
    "type": "Report"
   },
   {
    "label": "Trial Balance",
    "link_to": "Trial Balance",
+   "report_ref_doctype": "GL Entry",
    "type": "Report"
   },
   {

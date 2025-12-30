@@ -9,6 +9,8 @@
  "field_order": [
   "subject",
   "project",
+  "sub_project",
+  "work_package_name",
   "issue",
   "type",
   "color",
@@ -32,9 +34,10 @@
   "is_milestone",
   "sb_details",
   "description",
-  "sb_depends_on",
-  "depends_on",
-  "depends_on_tasks",
+  "people_section",
+  "users",
+  "sub_tasks_section",
+  "sub_tasks",
   "sb_actual",
   "act_start_date",
   "actual_time",
@@ -110,6 +113,7 @@
   },
   {
    "bold": 1,
+   "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -118,7 +122,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Open\nWorking\nPending Review\nOverdue\nTemplate\nCompleted\nCancelled"
+   "options": "Open\nHold\nCompleted"
   },
   {
    "fieldname": "priority",
@@ -214,25 +218,6 @@
    "oldfieldtype": "Text Editor",
    "print_width": "300px",
    "width": "300px"
-  },
-  {
-   "fieldname": "sb_depends_on",
-   "fieldtype": "Section Break",
-   "label": "Dependencies",
-   "oldfieldtype": "Section Break"
-  },
-  {
-   "fieldname": "depends_on",
-   "fieldtype": "Table",
-   "label": "Dependent Tasks",
-   "options": "Task Depends On"
-  },
-  {
-   "fieldname": "depends_on_tasks",
-   "fieldtype": "Code",
-   "hidden": 1,
-   "label": "Depends on Tasks",
-   "read_only": 1
   },
   {
    "fieldname": "sb_actual",
@@ -392,6 +377,41 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Template Task"
+  },
+  {
+   "fieldname": "sub_project",
+   "fieldtype": "Link",
+   "label": "Sub Project",
+   "options": "Sub Project"
+  },
+  {
+   "fieldname": "work_package_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Work Package Name",
+   "options": "Work Packages"
+  },
+  {
+   "fieldname": "people_section",
+   "fieldtype": "Section Break",
+   "label": "People"
+  },
+  {
+   "fieldname": "users",
+   "fieldtype": "Table",
+   "label": "Users",
+   "options": "Sub Task People"
+  },
+  {
+   "fieldname": "sub_tasks_section",
+   "fieldtype": "Section Break",
+   "label": "Sub Tasks"
+  },
+  {
+   "fieldname": "sub_tasks",
+   "fieldtype": "Table",
+   "label": "Sub Tasks",
+   "options": "Dependency Task"
   }
  ],
  "icon": "fa fa-check",
@@ -399,7 +419,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2024-01-08 16:00:41.296203",
+ "modified": "2025-11-10 10:53:46.189942",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
@@ -420,6 +440,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "search_fields": "subject",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
