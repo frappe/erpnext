@@ -25,7 +25,6 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
-from erpnext.accounts.party import get_party_account_currency
 
 
 class InvoiceCancelled(frappe.ValidationError):
