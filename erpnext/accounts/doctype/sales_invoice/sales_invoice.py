@@ -1408,6 +1408,13 @@ class SalesInvoice(SellingController):
 	def split_asset_based_on_sale_qty(self):
 		asset_qty_map = self.get_asset_qty()
 		for asset, qty in asset_qty_map.items():
+			if qty["actual_qty"] < qty["sale_qty"]:
+				frappe.throw(
+					_(
+						"Sell quantity cannot exceed the asset quantity. Asset {0} has only {1} item(s)."
+					).format(asset, qty["actual_qty"])
+				)
+
 			remaining_qty = qty["actual_qty"] - qty["sale_qty"]
 			if remaining_qty > 0:
 				split_asset(asset, remaining_qty)
@@ -1430,13 +1437,16 @@ class SalesInvoice(SellingController):
 		for row in self.items:
 			if row.is_fixed_asset and row.asset:
 				actual_qty = asset_actual_qty.get(row.asset)
-				asset_qty_map.setdefault(
-					row.asset,
-					{
-						"sale_qty": flt(row.qty),
-						"actual_qty": flt(actual_qty),
-					},
-				)
+				if row.asset in asset_qty_map.keys():
+					asset_qty_map[row.asset]["sale_qty"] += flt(row.qty)
+				else:
+					asset_qty_map.setdefault(
+						row.asset,
+						{
+							"sale_qty": flt(row.qty),
+							"actual_qty": flt(actual_qty),
+						},
+					)
 
 		return asset_qty_map
 
