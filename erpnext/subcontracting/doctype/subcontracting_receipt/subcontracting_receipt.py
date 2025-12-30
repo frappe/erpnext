@@ -434,10 +434,18 @@ class SubcontractingReceipt(SubcontractingController):
 						supplied_item.rm_item_code
 					] += supplied_item.available_qty
 		else:
+			alternative_qtys = defaultdict(float)
+			for item in self.get("supplied_items"):
+				if item.alternative_against:
+					alternative_qtys[item.alternative_against] += item.consumed_qty
+
 			for item in self.get("supplied_items"):
 				item.available_qty_for_consumption = supplied_items_details.get(item.reference_name, {}).get(
 					item.rm_item_code, 0
-				)
+				) - alternative_qtys.get(item.bom_detail_no, 0)
+
+				if not item.available_qty_for_consumption and item.alternative_against:
+					item.available_qty_for_consumption = item.consumed_qty
 
 	def calculate_items_qty_and_amount(self):
 		rm_cost_map = {}

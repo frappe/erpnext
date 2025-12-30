@@ -14,6 +14,7 @@ class SubcontractingReceiptSuppliedItem(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		alternative_against: DF.Data | None
 		amount: DF.Currency
 		available_qty_for_consumption: DF.Float
 		batch_no: DF.Link | None

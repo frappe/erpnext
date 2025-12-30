@@ -1266,6 +1266,7 @@ def make_stock_transfer_entry(**args):
 			"stock_uom": row.stock_uom or "Nos",
 			"warehouse": row.warehouse or "_Test Warehouse - _TC",
 			"use_serial_batch_fields": row.get("use_serial_batch_fields"),
+			"original_item": row.get("original_item"),
 		}
 
 		item_details = args.itemwise_details.get(row.item_code)

@@ -269,7 +269,7 @@ class SubcontractingController(StockController):
 	def initialized_fields(self):
 		self.available_materials = frappe._dict()
 		self.__transferred_items = frappe._dict()
-		self.alternative_item_details = frappe._dict()
+		self.alternative_item_details = defaultdict(list)
 		self.__get_backflush_based_on()
 
 	def __get_subcontract_orders(self):
@@ -351,7 +351,7 @@ class SubcontractingController(StockController):
 
 	def __set_alternative_item_details(self, row):
 		if row.get("original_item"):
-			self.alternative_item_details[row.get("original_item")] = row
+			self.alternative_item_details[row.get("original_item")].append(row)
 
 	def __get_received_items(self, doctype):
 		fields = []
@@ -613,9 +613,16 @@ class SubcontractingController(StockController):
 		elif frappe.get_cached_value("Item", row.rm_item_code, "is_customer_provided_item"):
 			row.warehouse = self.customer_warehouse
 
-	def __set_alternative_item(self, bom_item):
-		if self.alternative_item_details.get(bom_item.rm_item_code):
-			bom_item.update(self.alternative_item_details[bom_item.rm_item_code])
+	def __set_alternative_item(self, bom_item, row):
+		alternative_item = self.alternative_item_details.get(bom_item.rm_item_code) or []
+		alternative_item_qty = 0
+		for item in alternative_item:
+			self.__add_supplied_or_received_item(
+				row, item, item.qty, alternative_against=bom_item.bom_detail_no
+			)
+			alternative_item_qty += item.qty
+
+		return alternative_item_qty
 
 	def __set_serial_and_batch_bundle(self, item_row, rm_obj, qty):
 		key = (rm_obj.rm_item_code, item_row.item_code, item_row.get(self.subcontract_data.order_field))
@@ -686,7 +693,7 @@ class SubcontractingController(StockController):
 
 		return serial_nos
 
-	def __add_supplied_or_received_item(self, item_row, bom_item, qty):
+	def __add_supplied_or_received_item(self, item_row, bom_item, qty, alternative_against=None):
 		bom_item.conversion_factor = item_row.conversion_factor
 		if self.subcontract_data.order_doctype == "Subcontracting Inward Order":
 			bom_item.pop("rate")
@@ -707,6 +714,7 @@ class SubcontractingController(StockController):
 			rm_obj.consumed_qty = flt(qty, rm_obj.precision("consumed_qty"))
 			rm_obj.required_qty = flt(bom_item.required_qty or qty, rm_obj.precision("required_qty"))
 			rm_obj.serial_and_batch_bundle = None
+			rm_obj.alternative_against = alternative_against
 			setattr(
 				rm_obj, self.subcontract_data.order_field, item_row.get(self.subcontract_data.order_field)
 			)
@@ -944,9 +952,9 @@ class SubcontractingController(StockController):
 					)
 					bom_item.main_item_code = row.item_code
 					self.__update_reserve_warehouse(bom_item, row)
-					self.__set_alternative_item(bom_item)
-					self.__add_supplied_or_received_item(row, bom_item, qty)
-
+					alternative_item_qty = self.__set_alternative_item(bom_item, row)
+					if (qty := (qty - alternative_item_qty)) > 0:
+						self.__add_supplied_or_received_item(row, bom_item, qty)
 			elif self.backflush_based_on != "BOM":
 				for key, transfer_item in self.available_materials.items():
 					if (key[1], key[2]) == (
@@ -1432,6 +1440,7 @@ def make_rm_stock_entry(
 								"batch_no": rm_item.get("batch_no")
 								if rm_item.get("use_serial_batch_fields")
 								else None,
+								"original_item": rm_item.get("original_item"),
 							}
 						}
 

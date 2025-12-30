@@ -1890,6 +1890,60 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 
 		self.assertRaises(BOMQuantityError, scr.submit)
 
+	def test_alternative_item_receipt(self):
+		rm_item_code = "Subcontracted SRM Item 2"
+		alternative_item_code1 = "Subcontracted SRM Item 3"
+		alternative_item_code2 = "Subcontracted SRM Item 4"
+		frappe.db.set_value("Item", rm_item_code, "allow_alternative_item", 1)
+		frappe.db.set_value("Item", alternative_item_code1, "allow_alternative_item", 1)
+		frappe.db.set_value("Item", alternative_item_code2, "allow_alternative_item", 1)
+		frappe.new_doc(
+			"Item Alternative", item_code=rm_item_code, alternative_item_code=alternative_item_code1
+		).save()
+		frappe.new_doc(
+			"Item Alternative", item_code=rm_item_code, alternative_item_code=alternative_item_code2
+		).save()
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 2",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA2",
+				"fg_item_qty": 5,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		frappe.db.set_value("BOM", sco.items[0].bom, "allow_alternative_item", 1)
+
+		rm_items = get_rm_items(sco.supplied_items)
+		rm_items[0]["qty"] = 1
+		rm_items.append(copy.deepcopy(rm_items[0]))
+		rm_items.append(copy.deepcopy(rm_items[0]))
+		rm_items[1]["item_code"] = alternative_item_code1
+		rm_items[2]["item_code"] = alternative_item_code2
+		rm_items[1]["qty"] = 2
+		rm_items[2]["qty"] = 2
+		rm_items[1]["original_item"] = rm_item_code
+		rm_items[2]["original_item"] = rm_item_code
+
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name).save()
+		self.assertEqual(len(scr.supplied_items), 3)
+		self.assertEqual(
+			sorted([item.rm_item_code for item in scr.supplied_items]),
+			sorted([rm_item_code, alternative_item_code1, alternative_item_code2]),
+		)
+		self.assertEqual(sorted([item.consumed_qty for item in scr.supplied_items]), [1, 2, 2])
+		scr.submit()
+
 
 def make_return_subcontracting_receipt(**args):
 	args = frappe._dict(args)

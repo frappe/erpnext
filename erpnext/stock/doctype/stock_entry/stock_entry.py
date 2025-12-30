@@ -1481,7 +1481,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 						if not se_item.allow_alternative_item:
 							frappe.throw(
 								_(
-									"Row {0}# Item {1} not found in 'Raw Materials Supplied' table in {2} {3}"
+									"Row #{0}: Item {1} not found in 'Raw Materials Supplied' table in {2} {3}"
 								).format(
 									se_item.idx,
 									se_item.item_code,
