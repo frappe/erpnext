@@ -6,7 +6,6 @@
 
 
 import frappe
-import frappe.model
 from frappe.tests import IntegrationTestCase
 from frappe.utils import flt, today
 
@@ -20,6 +19,7 @@ from erpnext.stock.doctype.material_request.material_request import (
 	make_supplier_quotation,
 	raise_work_orders,
 )
+from erpnext.stock.doctype.stock_entry.stock_entry import make_stock_in_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 
@@ -934,6 +934,33 @@ class TestMaterialRequest(IntegrationTestCase):
 		self.assertEqual(mr.per_ordered, 100)
 		self.assertEqual(mr.status, "Ordered")
 
+	def test_customer_provided_received_status(self):
+		create_item("CUST-0989", is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0)
+
+		mr = make_material_request(item_code="CUST-0989", material_request_type="Customer Provided")
+		se = make_stock_entry(mr.name)
+		se.insert()
+		se.submit()
+
+		mr.reload()
+
+		self.assertEqual(mr.per_ordered, 100)
+		self.assertEqual(mr.status, "Received")
+
+	def test_customer_provided_partially_received_status(self):
+		create_item("CUST-0990", is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0)
+
+		mr = make_material_request(item_code="CUST-0990", qty=10, material_request_type="Customer Provided")
+		se = make_stock_entry(mr.name)
+		se.get("items")[0].qty = 5
+		se.insert()
+		se.submit()
+
+		mr.reload()
+
+		self.assertEqual(mr.per_ordered, 50)
+		self.assertEqual(mr.status, "Partially Received")
+
 	def test_material_request_qty_over_sales_order_limit(self):
 		from erpnext.controllers.status_updater import OverAllowanceError
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -975,6 +1002,68 @@ class TestMaterialRequest(IntegrationTestCase):
 
 		pl_for_pending = create_pick_list(mr.name)
 		self.assertEqual(pl_for_pending.locations[0].qty, 5)
+
+	def test_mr_pick_list_qty_validation(self):
+		"""Test for checking pick list qty validation from Material Request"""
+
+		mr = make_material_request(material_request_type="Material Transfer")
+		pl = create_pick_list(mr.name)
+		pl.locations[0].qty = 9
+		pl.locations[0].stock_qty = 9
+		pl.submit()
+
+		mr.reload()
+		self.assertEqual(mr.items[0].picked_qty, 9)
+
+		pl = create_pick_list(mr.name)
+		self.assertEqual(pl.locations[0].qty, 1)
+
+		pl.locations[0].qty = 2
+		pl.locations[0].stock_qty = 2
+		self.assertRaises(frappe.ValidationError, pl.submit)
+
+	def test_mr_status_with_partial_and_excess_end_transit(self):
+		material_request = make_material_request(
+			material_request_type="Material Transfer",
+			item_code="_Test Item Home Desktop 100",
+		)
+
+		in_transit_wh = get_in_transit_warehouse(material_request.company)
+
+		# Make sure stock is available in source warehouse
+		self._insert_stock_entry(20.0, 20.0)
+
+		# Stock Entry (Transfer to In-Transit)
+		stock_entry_1 = make_in_transit_stock_entry(material_request.name, in_transit_wh)
+		stock_entry_1.items[0].update(
+			{
+				"qty": 5,
+				"s_warehouse": "_Test Warehouse 1 - _TC",
+			}
+		)
+		stock_entry_1.save().submit()
+
+		stock_entry_2 = make_in_transit_stock_entry(material_request.name, in_transit_wh)
+		stock_entry_2.items[0].update(
+			{
+				"qty": 5,
+				"s_warehouse": "_Test Warehouse 1 - _TC",
+			}
+		)
+		stock_entry_2.save().submit()
+
+		end_transit_1 = make_stock_in_entry(stock_entry_1.name)
+		end_transit_1.save().submit()
+
+		# Material Request Transfer Status should still be In Transit
+		material_request.load_from_db()
+		self.assertEqual(material_request.transfer_status, "In Transit")
+
+		end_transit_2 = make_stock_in_entry(stock_entry_2.name)
+		end_transit_2.items[0].update({"qty": 6})  # More than transferred
+		end_transit_2.save()
+
+		self.assertRaises(frappe.ValidationError, end_transit_2.submit)
 
 
 def get_in_transit_warehouse(company):

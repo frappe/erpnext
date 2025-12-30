@@ -130,7 +130,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			}
 		}
 
-		if (doc.outstanding_amount > 0 && !cint(doc.is_return) && !doc.on_hold) {
+		if (doc.docstatus == 1 && doc.outstanding_amount > 0 && !cint(doc.is_return) && !doc.on_hold) {
 			this.frm.add_custom_button(
 				__("Payment Request"),
 				function () {
@@ -224,7 +224,6 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			});
 		}
 
-		this.frm.set_df_property("tax_withholding_category", "hidden", doc.apply_tds ? 0 : 1);
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm);
 	}
 
@@ -364,10 +363,9 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			},
 			function () {
 				me.apply_pricing_rule();
-				me.frm.doc.apply_tds = me.frm.supplier_tds ? 1 : 0;
-				me.frm.doc.tax_withholding_category = me.frm.supplier_tds;
-				me.frm.set_df_property("apply_tds", "read_only", me.frm.supplier_tds ? 0 : 1);
-				me.frm.set_df_property("tax_withholding_category", "hidden", me.frm.supplier_tds ? 0 : 1);
+				me.frm.doc.apply_tds =
+					me.frm.tax_withholding_category || me.frm.tax_withholding_group ? 1 : 0;
+				me.frm.clear_table("tax_withholding_entries");
 
 				// while duplicating, don't change payment terms
 				if (me.frm.doc.__run_link_triggers === false) {
@@ -380,26 +378,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 	apply_tds(frm) {
 		var me = this;
-		me.frm.set_value("tax_withheld_vouchers", []);
-		if (!me.frm.doc.apply_tds) {
-			me.frm.set_value("tax_withholding_category", "");
-			me.frm.set_df_property("tax_withholding_category", "hidden", 1);
-		} else {
-			me.frm.set_value("tax_withholding_category", me.frm.supplier_tds);
-			me.frm.set_df_property("tax_withholding_category", "hidden", 0);
-		}
-	}
-
-	tax_withholding_category(frm) {
-		var me = this;
-		let filtered_taxes = (me.frm.doc.taxes || []).filter((row) => !row.is_tax_withholding_account);
-		me.frm.clear_table("taxes");
-
-		filtered_taxes.forEach((row) => {
-			me.frm.add_child("taxes", row);
-		});
-
-		me.frm.refresh_field("taxes");
+		me.frm.clear_table("tax_withholding_entries");
 	}
 
 	credit_to() {
@@ -579,17 +558,6 @@ cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function 
 	};
 };
 
-cur_frm.cscript.cost_center = function (doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if (d.cost_center) {
-		var cl = doc.items || [];
-		for (var i = 0; i < cl.length; i++) {
-			if (!cl[i].cost_center) cl[i].cost_center = d.cost_center;
-		}
-	}
-	refresh_field("items");
-};
-
 cur_frm.fields_dict["items"].grid.get_field("project").get_query = function (doc, cdt, cdn) {
 	return {
 		filters: [["Project", "status", "not in", "Completed, Cancelled"]],
@@ -703,10 +671,7 @@ frappe.ui.form.on("Purchase Invoice", {
 	onload: function (frm) {
 		if (frm.doc.__onload && frm.doc.supplier) {
 			if (frm.is_new()) {
-				frm.doc.apply_tds = frm.doc.__onload.supplier_tds ? 1 : 0;
-			}
-			if (!frm.doc.__onload.supplier_tds) {
-				frm.set_df_property("apply_tds", "read_only", 1);
+				frm.doc.apply_tds = frm.doc.__onload.apply_tds ? 1 : 0;
 			}
 		}
 
@@ -715,7 +680,7 @@ frappe.ui.form.on("Purchase Invoice", {
 		});
 
 		if (frm.is_new()) {
-			frm.clear_table("tax_withheld_vouchers");
+			frm.clear_table("tax_withholding_entries");
 		}
 	},
 
@@ -742,6 +707,7 @@ frappe.ui.form.on("Purchase Invoice", {
 
 	company: function (frm) {
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		frm.clear_table("tax_withholding_entries");
 
 		if (frm.doc.company) {
 			frappe.call({

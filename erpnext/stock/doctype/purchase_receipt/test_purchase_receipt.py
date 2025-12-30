@@ -2063,6 +2063,19 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		ste7.reload()
 		self.assertEqual(ste7.items[0].valuation_rate, 275.00)
 
+		available_qty = frappe.db.get_value(
+			"Bin",
+			{"item_code": item_code, "warehouse": warehouse},
+			"actual_qty",
+		)
+
+		new_pr = make_purchase_receipt(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=100,
+			rate=500,
+		)
+
 		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company, charges=2500 * -1)
 
 		pr.reload()
@@ -2088,6 +2101,37 @@ class TestPurchaseReceipt(IntegrationTestCase):
 
 		ste7.reload()
 		self.assertEqual(ste7.items[0].valuation_rate, valuation_rate)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": new_pr.name, "is_cancelled": 0},
+			["stock_value", "qty_after_transaction"],
+			as_dict=1,
+		)
+
+		stock_value = flt(available_qty * valuation_rate) + 50000
+		total_stock_qty = available_qty + 100
+
+		self.assertEqual(sle.stock_value, stock_value)
+		self.assertEqual(sle.qty_after_transaction, total_stock_qty)
+
+		make_purchase_receipt(
+			item_code=item_code,
+			warehouse=warehouse,
+			posting_date=add_days(today(), -12),
+			qty=100,
+			rate=500,
+		)
+
+		total_stock_qty += 100
+
+		qty_after_transaction = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": new_pr.name, "is_cancelled": 0},
+			["qty_after_transaction"],
+		)
+
+		self.assertEqual(qty_after_transaction, total_stock_qty)
 
 	def test_purchase_receipt_provisional_accounting(self):
 		# Step - 1: Create Supplier with Default Currency as USD
@@ -4670,6 +4714,41 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		)
 
 		self.assertEqual(sles, [1500.0, 1500.0])
+
+	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_multiple_transactions_with_same_posting_datetime(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.stock_ledger import NegativeStockError
+
+		item_code = make_item(
+			"Test Item for Multiple Txn with Same Posting Datetime", {"is_stock_item": 1}
+		).name
+
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=100,
+			rate=100,
+			posting_date=today(),
+			posting_time="10:00:00",
+		)
+
+		create_delivery_note(
+			item_code=item_code,
+			qty=100,
+			rate=100,
+			posting_date=today(),
+			posting_time="10:00:00",
+		)
+
+		make_purchase_receipt(
+			item_code=item_code,
+			qty=150,
+			rate=100,
+			posting_date=today(),
+			posting_time="10:00:00",
+		)
+
+		self.assertRaises(NegativeStockError, pr.cancel)
 
 
 def prepare_data_for_internal_transfer():

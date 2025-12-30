@@ -70,6 +70,7 @@ frappe.treeview_settings["Account"] = {
 					args: {
 						accounts: accounts,
 						company: cur_tree.args.company,
+						include_default_fb_balances: true,
 					},
 				});
 

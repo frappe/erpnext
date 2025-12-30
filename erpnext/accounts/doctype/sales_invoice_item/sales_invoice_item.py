@@ -24,6 +24,7 @@ class SalesInvoiceItem(Document):
 		actual_qty: DF.Float
 		allow_zero_valuation_rate: DF.Check
 		amount: DF.Currency
+		apply_tds: DF.Check
 		asset: DF.Link | None
 		barcode: DF.Data | None
 		base_amount: DF.Currency
@@ -95,6 +96,7 @@ class SalesInvoiceItem(Document):
 		stock_uom: DF.Link | None
 		stock_uom_rate: DF.Currency
 		target_warehouse: DF.Link | None
+		tax_withholding_category: DF.Link | None
 		total_weight: DF.Float
 		uom: DF.Link
 		use_serial_batch_fields: DF.Check

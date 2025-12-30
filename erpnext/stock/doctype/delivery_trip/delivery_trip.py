@@ -50,6 +50,10 @@ class DeliveryTrip(Document):
 			"UOM Conversion Factor", {"from_uom": "Meter", "to_uom": self.default_distance_uom}, "value"
 		)
 
+	def on_discard(self):
+		self.update_status()
+		self.update_delivery_notes(delete=True)
+
 	def validate(self):
 		if self._action == "submit" and not self.driver:
 			frappe.throw(_("A driver must be set to submit."))

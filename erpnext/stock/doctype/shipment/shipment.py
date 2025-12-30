@@ -72,6 +72,9 @@ class Shipment(Document):
 		value_of_goods: DF.Currency
 	# end: auto-generated types
 
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
+
 	def validate(self):
 		self.validate_weight()
 		self.validate_pickup_time()

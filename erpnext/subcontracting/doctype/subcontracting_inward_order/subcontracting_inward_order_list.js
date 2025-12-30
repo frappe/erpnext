@@ -9,6 +9,7 @@ frappe.listview_settings["Subcontracting Inward Order"] = {
 			Ongoing: "yellow",
 			Produced: "blue",
 			Delivered: "green",
+			Returned: "grey",
 			Closed: "grey",
 			Cancelled: "red",
 		};

@@ -571,6 +571,12 @@ class SubcontractingReceipt(SubcontractingController):
 
 		for row in self.items:
 			precision = row.precision("qty")
+
+			# if allow alternative item, ignore the validation as per BOM required qty
+			is_allow_alternative_item = frappe.db.get_value("BOM", row.bom, "allow_alternative_item")
+			if is_allow_alternative_item:
+				continue
+
 			for bom_item in self._get_materials_from_bom(
 				row.item_code, row.bom, row.get("include_exploded_items")
 			):
@@ -1023,7 +1029,6 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 			"Purchase Taxes and Charges": {
 				"doctype": "Purchase Taxes and Charges",
 				"reset_value": True,
-				"condition": lambda doc: not doc.is_tax_withholding_account,
 			},
 		},
 		postprocess=post_process,

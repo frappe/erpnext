@@ -117,25 +117,52 @@ frappe.ui.form.on("Asset Repair", {
 			frm.refresh_field("stock_items");
 		}
 	},
+});
 
-	purchase_invoice: function (frm) {
-		if (frm.doc.purchase_invoice) {
-			frappe.call({
-				method: "frappe.client.get_value",
-				args: {
-					doctype: "Purchase Invoice",
-					fieldname: "base_net_total",
-					filters: { name: frm.doc.purchase_invoice },
-				},
-				callback: function (r) {
-					if (r.message) {
-						frm.set_value("repair_cost", r.message.base_net_total);
-					}
-				},
-			});
-		} else {
-			frm.set_value("repair_cost", 0);
+frappe.ui.form.on("Asset Repair Purchase Invoice", {
+	purchase_invoice: function (frm, cdt, cdn) {
+		frappe.model.set_value(cdt, cdn, {
+			expense_account: "",
+			repair_cost: 0,
+		});
+	},
+
+	expense_account: function (frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+
+		if (!row.purchase_invoice || !row.expense_account) {
+			frappe.model.set_value(cdt, cdn, "repair_cost", 0);
+			return;
 		}
+
+		frappe.call({
+			method: "erpnext.assets.doctype.asset_repair.asset_repair.get_unallocated_repair_cost",
+			args: {
+				purchase_invoice: row.purchase_invoice,
+				expense_account: row.expense_account,
+			},
+			callback: function (r) {
+				if (r.message !== undefined) {
+					if (r.message > 0) {
+						frappe.model.set_value(cdt, cdn, "repair_cost", r.message);
+					} else {
+						frappe.model.set_value(cdt, cdn, "repair_cost", 0);
+						let pi_link = frappe.utils.get_form_link(
+							"Purchase Invoice",
+							row.purchase_invoice,
+							true
+						);
+						frappe.msgprint({
+							message: __(
+								"Row {0}: The entire expense amount for account {1} in {2} has already been allocated.",
+								[row.idx, row.expense_account.bold(), pi_link]
+							),
+							indicator: "orange",
+						});
+					}
+				}
+			},
+		});
 	},
 
 	show_general_ledger: (frm) => {

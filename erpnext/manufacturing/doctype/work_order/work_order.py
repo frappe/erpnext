@@ -180,6 +180,9 @@ class WorkOrder(Document):
 
 		return False
 
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
+
 	def validate(self):
 		self.validate_production_item()
 		if self.bom_no:
@@ -572,9 +575,9 @@ class WorkOrder(Document):
 		):
 			status = "In Process"
 
-		if self.track_semi_finished_goods and status != "Completed":
-			if op_status := self.get_status_based_on_operation():
-				status = op_status
+		if status != "Completed":
+			if not all(d.status == "Pending" for d in self.operations):
+				status = "In Process"
 
 		if status == "Not Started" and self.reserve_stock:
 			for row in self.required_items:
@@ -588,11 +591,6 @@ class WorkOrder(Document):
 					break
 
 		return status
-
-	def get_status_based_on_operation(self):
-		for row in self.operations:
-			if row.status != "Completed":
-				return "In Process"
 
 	def update_work_order_qty(self):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
@@ -1326,14 +1324,14 @@ class WorkOrder(Document):
 
 		for d in self.get("operations"):
 			precision = d.precision("completed_qty")
-			qty = flt(d.completed_qty, precision) + flt(d.process_loss_qty, precision)
+			qty = flt(flt(d.completed_qty, precision) + flt(d.process_loss_qty, precision), precision)
 			if not qty:
 				d.status = "Pending"
-			elif flt(qty) < flt(self.qty):
+			elif qty < flt(self.qty, precision):
 				d.status = "Work in Progress"
-			elif flt(qty) == flt(self.qty):
+			elif qty == flt(self.qty, precision):
 				d.status = "Completed"
-			elif flt(qty) <= max_allowed_qty_for_wo:
+			elif qty <= flt(max_allowed_qty_for_wo, precision):
 				d.status = "Completed"
 			else:
 				frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))
@@ -2349,7 +2347,7 @@ def make_stock_entry(
 
 	stock_entry.set_stock_entry_type()
 	stock_entry.is_additional_transfer_entry = is_additional_transfer_entry
-	stock_entry.get_items(qty, work_order.production_item)
+	stock_entry.get_items()
 
 	if purpose != "Disassemble":
 		stock_entry.set_serial_no_batch_for_finished_good()
@@ -2570,6 +2568,8 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 		work_order.transfer_material_against == "Job Card" and not work_order.skip_transfer
 	):
 		doc.get_required_items()
+		if work_order.track_semi_finished_goods:
+			doc.set_scrap_items()
 
 	if auto_create:
 		doc.flags.ignore_mandatory = True

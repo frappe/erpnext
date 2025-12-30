@@ -36,7 +36,7 @@ class CallLog(Document):
 		recording_url: DF.Data | None
 		start_time: DF.Datetime | None
 		status: DF.Literal[
-			"Ringing", "In Progress", "Completed", "Failed", "Busy", "No Answer", "Queued", "Canceled"
+			"Ringing", "In Progress", "Completed", "Failed", "Busy", "No Answer", "Queued", "Cancelled"
 		]
 		summary: DF.SmallText | None
 		to: DF.Data | None

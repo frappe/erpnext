@@ -108,7 +108,8 @@ erpnext.utils.get_party_details = function (frm, method, args, callback) {
 		args: args,
 		callback: function (r) {
 			if (r.message) {
-				frm.supplier_tds = r.message.supplier_tds;
+				frm.tax_withholding_category = r.message.tax_withholding_category;
+				frm.tax_withholding_group = r.message.tax_withholding_group;
 				frm.updating_party_details = true;
 				frappe.run_serially([
 					() => frm.set_value(r.message),
@@ -156,7 +157,7 @@ erpnext.utils.get_address_display = function (frm, address_field, display_field,
 			args: { address_dict: frm.doc[address_field] },
 			callback: function (r) {
 				if (r.message) {
-					frm.set_value(display_field, r.message);
+					frm.set_value(display_field, frappe.utils.html2text(r.message));
 				}
 			},
 		});

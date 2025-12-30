@@ -36,7 +36,10 @@ class ProcessPeriodClosingVoucher(Document):
 		parent_pcv: DF.Link
 		status: DF.Literal["Queued", "Running", "Paused", "Completed", "Cancelled"]
 		z_opening_balances: DF.Table[ProcessPeriodClosingVoucherDetail]
+
 	# end: auto-generated types
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
 
 	def validate(self):
 		self.status = "Queued"

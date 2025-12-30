@@ -37,9 +37,10 @@
   "dashboard_tab",
   "tax_tab",
   "tax_id",
-  "column_break_27",
   "tax_category",
+  "column_break_27",
   "tax_withholding_category",
+  "tax_withholding_group",
   "contact_and_address_tab",
   "address_contacts",
   "address_html",
@@ -480,6 +481,12 @@
    "fieldtype": "Table",
    "label": "Customer Numbers",
    "options": "Customer Number At Supplier"
+  },
+  {
+   "fieldname": "tax_withholding_group",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Group",
+   "options": "Tax Withholding Group"
   }
  ],
  "grid_page_length": 50,
@@ -493,7 +500,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2025-04-27 12:07:10.859758",
+ "modified": "2025-06-29 05:30:50.398653",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

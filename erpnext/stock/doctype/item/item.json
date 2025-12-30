@@ -105,7 +105,13 @@
   "customer_details",
   "customer_items",
   "item_tax_section_break",
+  "section_break_oilf",
+  "column_break_aytr",
   "taxes",
+  "section_break_fxqz",
+  "purchase_tax_withholding_category",
+  "column_break_ltlb",
+  "sales_tax_withholding_category",
   "quality_tab",
   "inspection_required_before_purchase",
   "quality_inspection_template",
@@ -171,6 +177,7 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Item Group",
+   "link_filters": "[[\"Item Group\",\"is_group\",\"=\",0]]",
    "oldfieldname": "item_group",
    "oldfieldtype": "Link",
    "options": "Item Group",
@@ -909,6 +916,37 @@
   {
    "fieldname": "column_break_wugd",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_oilf",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "column_break_aytr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_fxqz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "purchase_tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Purchase Tax Withholding Category",
+   "depends_on": "is_purchase_item",
+   "options": "Tax Withholding Category"
+  },
+  {
+   "fieldname": "column_break_ltlb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sales_tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Sales Tax Withholding Category",
+   "depends_on": "is_sales_item",
+   "options": "Tax Withholding Category"
   }
  ],
  "icon": "fa fa-tag",
@@ -916,7 +954,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2025-12-04 09:11:56.029567",
+ "modified": "2025-12-15 20:08:35.634046",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

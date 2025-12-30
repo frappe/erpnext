@@ -66,6 +66,7 @@ class RequestforQuotation(BuyingController):
 	def before_validate(self):
 		self.set_has_unit_price_items()
 		self.flags.allow_zero_qty = self.has_unit_price_items
+		self.set_message_for_supplier()
 
 	def validate(self):
 		self.validate_duplicate_supplier()
@@ -89,6 +90,13 @@ class RequestforQuotation(BuyingController):
 		self.has_unit_price_items = any(
 			not row.qty for row in self.get("items") if (row.item_code and not row.qty)
 		)
+
+	def set_message_for_supplier(self):
+		if self.email_template and not self.message_for_supplier:
+			data = frappe.get_value(
+				"Email Template", self.email_template, ["use_html", "response", "response_html"], as_dict=True
+			)
+			self.message_for_supplier = data.response_html if data.use_html else data.response
 
 	def validate_duplicate_supplier(self):
 		supplier_list = [d.supplier for d in self.suppliers]
@@ -386,6 +394,7 @@ def get_list_context(context=None):
 			"show_search": True,
 			"no_breadcrumbs": True,
 			"title": _("Request for Quotation"),
+			"list_template": "templates/includes/list/list.html",
 		}
 	)
 	return list_context

@@ -17,9 +17,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 	validate_docs_for_deferred_accounting,
 	validate_docs_for_voucher_types,
 )
-from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
-	get_party_tax_withholding_details,
-)
+from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import JournalTaxWithholding
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
@@ -50,6 +48,7 @@ class JournalEntry(AccountsController):
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.journal_entry_account.journal_entry_account import JournalEntryAccount
+		from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import TaxWithholdingEntry
 
 		accounts: DF.Table[JournalEntryAccount]
 		amended_from: DF.Link | None
@@ -66,6 +65,7 @@ class JournalEntry(AccountsController):
 		finance_book: DF.Link | None
 		for_all_stock_asset_accounts: DF.Check
 		from_template: DF.Link | None
+		ignore_tax_withholding_threshold: DF.Check
 		inter_company_journal_entry_reference: DF.Link | None
 		is_opening: DF.Literal["No", "Yes"]
 		is_system_generated: DF.Check
@@ -74,6 +74,7 @@ class JournalEntry(AccountsController):
 		multi_currency: DF.Check
 		naming_series: DF.Literal["ACC-JV-.YYYY.-"]
 		party_not_required: DF.Check
+		override_tax_withholding_entries: DF.Check
 		pay_to_recd_from: DF.Data | None
 		payment_order: DF.Link | None
 		periodic_entry_difference_account: DF.Link | None
@@ -85,6 +86,8 @@ class JournalEntry(AccountsController):
 		stock_asset_account: DF.Link | None
 		stock_entry: DF.Link | None
 		tax_withholding_category: DF.Link | None
+		tax_withholding_entries: DF.Table[TaxWithholdingEntry]
+		tax_withholding_group: DF.Link | None
 		title: DF.Data | None
 		total_amount: DF.Currency
 		total_amount_currency: DF.Link | None
@@ -151,8 +154,8 @@ class JournalEntry(AccountsController):
 		self.validate_company_in_accounting_dimension()
 		self.validate_advance_accounts()
 
-		if self.docstatus == 0:
-			self.apply_tax_withholding()
+		JournalTaxWithholding(self).on_validate()
+
 		if self.is_new() or not self.title:
 			self.title = self.get_title()
 
@@ -200,6 +203,7 @@ class JournalEntry(AccountsController):
 		self.update_asset_value()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
+		JournalTaxWithholding(self).on_submit()
 
 	@frappe.whitelist()
 	def get_balance_for_periodic_accounting(self):
@@ -283,6 +287,8 @@ class JournalEntry(AccountsController):
 			self.repost_accounting_entries()
 
 	def on_cancel(self):
+		# Cancel tax withholding entries
+
 		# References for this Journal are removed on the `on_cancel` event in accounts_controller
 		super().on_cancel()
 		self.ignore_linked_doctypes = (
@@ -296,8 +302,10 @@ class JournalEntry(AccountsController):
 			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
 			"Advance Payment Ledger Entry",
+			"Tax Withholding Entry",
 		)
 		self.make_gl_entries(1)
+		JournalTaxWithholding(self).on_cancel()
 		self.unlink_advance_entry_reference()
 		self.unlink_asset_reference()
 		self.unlink_inter_company_jv()
@@ -352,9 +360,6 @@ class JournalEntry(AccountsController):
 					_("Account: {0} can only be updated via Stock Transactions").format(account),
 					StockAccountInvalidTransaction,
 				)
-
-	def apply_tax_withholding(self):
-		JournalEntryTaxWithholding(self).apply()
 
 	def update_asset_value(self):
 		self.update_asset_on_depreciation()
@@ -1295,230 +1300,6 @@ class JournalEntry(AccountsController):
 	def validate_empty_accounts_table(self):
 		if not self.get("accounts"):
 			frappe.throw(_("Accounts table cannot be blank."))
-
-
-class JournalEntryTaxWithholding:
-	def __init__(self, journal_entry):
-		self.doc: JournalEntry = journal_entry
-		self.party = None
-		self.party_type = None
-		self.party_account = None
-		self.party_row = None
-		self.existing_tds_rows = []
-		self.precision = None
-		self.has_multiple_parties = False
-
-		# Direction fields based on party type
-		self.party_field = None  # "credit" for Supplier, "debit" for Customer
-		self.reverse_field = None  # opposite of party_field
-
-	def apply(self):
-		if not self._set_party_info():
-			return
-
-		self._setup_direction_fields()
-		self._reset_existing_tds()
-
-		if not self._should_apply_tds():
-			self._cleanup_duplicate_tds_rows(None)
-			return
-
-		if self.has_multiple_parties:
-			frappe.throw(_("Cannot apply TDS against multiple parties in one entry"))
-
-		net_total = self._calculate_net_total()
-		if net_total <= 0:
-			return
-
-		tds_details = self._get_tds_details(net_total)
-		if not tds_details or not tds_details.get("tax_amount"):
-			return
-
-		self._create_or_update_tds_row(tds_details)
-		self._update_party_amount(tds_details.get("tax_amount"), is_reversal=False)
-
-		self._recalculate_totals()
-
-	def _should_apply_tds(self):
-		return self.doc.apply_tds and self.doc.voucher_type in ("Debit Note", "Credit Note")
-
-	def _set_party_info(self):
-		for row in self.doc.get("accounts"):
-			if row.party_type in ("Customer", "Supplier") and row.party:
-				if self.party and row.party != self.party:
-					self.has_multiple_parties = True
-
-				if not self.party:
-					self.party = row.party
-					self.party_type = row.party_type
-					self.party_account = row.account
-					self.party_row = row
-
-			if row.get("is_tax_withholding_account"):
-				self.existing_tds_rows.append(row)
-
-		return bool(self.party)
-
-	def _setup_direction_fields(self):
-		"""
-		For Supplier (TDS): party has credit, TDS reduces credit
-		For Customer (TCS): party has debit, TCS increases debit
-		"""
-		if self.party_type == "Supplier":
-			self.party_field = "credit"
-			self.reverse_field = "debit"
-		else:  # Customer
-			self.party_field = "debit"
-			self.reverse_field = "credit"
-
-		self.precision = self.doc.precision(self.party_field, self.party_row)
-
-	def _reset_existing_tds(self):
-		for row in self.existing_tds_rows:
-			# TDS amount is always in credit (liability to government)
-			tds_amount = flt(row.get("credit") - row.get("debit"), self.precision)
-			if not tds_amount:
-				continue
-
-			self._update_party_amount(tds_amount, is_reversal=True)
-
-			# zero_out_tds_row
-			row.update(
-				{
-					"credit": 0,
-					"credit_in_account_currency": 0,
-					"debit": 0,
-					"debit_in_account_currency": 0,
-				}
-			)
-
-	def _update_party_amount(self, amount, is_reversal=False):
-		amount = flt(amount, self.precision)
-		amount_in_party_currency = flt(amount / self.party_row.get("exchange_rate", 1), self.precision)
-
-		# Determine which field the party amount is in
-		active_field = self.party_field if self.party_row.get(self.party_field) else self.reverse_field
-
-		# If amount is in reverse field, flip the signs
-		if active_field == self.reverse_field:
-			amount = -amount
-			amount_in_party_currency = -amount_in_party_currency
-
-		# Direction multiplier based on party type:
-		# Customer (TCS): +1 (add to debit)
-		# Supplier (TDS): -1 (subtract from credit)
-		direction = 1 if self.party_type == "Customer" else -1
-
-		# Reversal inverts the direction
-		if is_reversal:
-			direction = -direction
-
-		adjustment = amount * direction
-		adjustment_in_party_currency = amount_in_party_currency * direction
-
-		active_field_account_currency = f"{active_field}_in_account_currency"
-
-		self.party_row.update(
-			{
-				active_field: flt(self.party_row.get(active_field) + adjustment, self.precision),
-				active_field_account_currency: flt(
-					self.party_row.get(active_field_account_currency) + adjustment_in_party_currency,
-					self.precision,
-				),
-			}
-		)
-
-	def _calculate_net_total(self):
-		from erpnext.accounts.report.general_ledger.general_ledger import get_account_type_map
-
-		account_type_map = get_account_type_map(self.doc.company)
-
-		return flt(
-			sum(
-				d.get(self.reverse_field) - d.get(self.party_field)
-				for d in self.doc.get("accounts")
-				if account_type_map.get(d.account) not in ("Tax", "Chargeable")
-				and d.account != self.party_account
-				and not d.get("is_tax_withholding_account")
-			),
-			self.precision,
-		)
-
-	def _get_tds_details(self, net_total):
-		return get_party_tax_withholding_details(
-			frappe._dict(
-				{
-					"party_type": self.party_type,
-					"party": self.party,
-					"doctype": self.doc.doctype,
-					"company": self.doc.company,
-					"posting_date": self.doc.posting_date,
-					"tax_withholding_net_total": net_total,
-					"base_tax_withholding_net_total": net_total,
-					"grand_total": net_total,
-				}
-			),
-			self.doc.tax_withholding_category,
-		)
-
-	def _create_or_update_tds_row(self, tds_details):
-		tax_account = tds_details.get("account_head")
-		account_currency = get_account_currency(tax_account)
-		company_currency = frappe.get_cached_value("Company", self.doc.company, "default_currency")
-		exchange_rate = _get_exchange_rate(account_currency, company_currency, self.doc.posting_date)
-
-		tax_amount = flt(tds_details.get("tax_amount"), self.precision)
-		tax_amount_in_account_currency = flt(tax_amount / exchange_rate, self.precision)
-
-		# Find existing TDS row for this account
-		tax_row = None
-		for row in self.doc.get("accounts"):
-			if row.account == tax_account and row.get("is_tax_withholding_account"):
-				tax_row = row
-				break
-
-		if not tax_row:
-			tax_row = self.doc.append(
-				"accounts",
-				{
-					"account": tax_account,
-					"account_currency": account_currency,
-					"exchange_rate": exchange_rate,
-					"cost_center": tds_details.get("cost_center"),
-					"credit": 0,
-					"credit_in_account_currency": 0,
-					"debit": 0,
-					"debit_in_account_currency": 0,
-					"is_tax_withholding_account": 1,
-				},
-			)
-
-		# TDS/TCS is always credited (liability to government)
-		tax_row.update(
-			{
-				"credit": tax_amount,
-				"credit_in_account_currency": tax_amount_in_account_currency,
-				"debit": 0,
-				"debit_in_account_currency": 0,
-			}
-		)
-
-		self._cleanup_duplicate_tds_rows(tax_row)
-
-	def _cleanup_duplicate_tds_rows(self, current_tax_row):
-		rows_to_remove = [
-			row
-			for row in self.doc.get("accounts")
-			if row.get("is_tax_withholding_account") and row != current_tax_row
-		]
-
-		for row in rows_to_remove:
-			self.doc.remove(row)
-
-	def _recalculate_totals(self):
-		self.doc.set_amounts_in_company_currency()
-		self.doc.set_total_debit_credit()
-		self.doc.set_against_account()
 
 
 @frappe.whitelist()

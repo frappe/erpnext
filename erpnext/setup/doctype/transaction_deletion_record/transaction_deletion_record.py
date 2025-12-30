@@ -66,6 +66,9 @@ class TransactionDeletionRecord(Document):
 			}
 		)
 
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
+
 	def validate(self):
 		frappe.only_for("System Manager")
 		self.validate_doctypes_to_be_ignored()
@@ -348,8 +351,9 @@ class TransactionDeletionRecord(Document):
 				self.db_set("error_log", None)
 
 	def get_doctypes_to_be_ignored_list(self):
-		singles = frappe.get_all("DocType", filters={"issingle": 1}, pluck="name")
-		doctypes_to_be_ignored_list = singles
+		doctypes_to_be_ignored_list = frappe.get_all(
+			"DocType", or_filters=[["issingle", "=", 1], ["is_virtual", "=", 1]], pluck="name"
+		)
 		for doctype in self.doctypes_to_be_ignored:
 			doctypes_to_be_ignored_list.append(doctype.doctype_name)
 

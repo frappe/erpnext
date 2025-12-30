@@ -11,21 +11,21 @@ dependencies = [
     # Core dependencies
     "Unidecode~=1.4.0",
     "barcodenumber~=0.5.0",
-    "rapidfuzz~=3.12.2",
-    "holidays~=0.75",
+    "rapidfuzz~=3.14.3",
+    "holidays~=0.87",
 
     # integration dependencies
     "googlemaps~=4.10.0",
     "plaid-python~=7.2.1",
-    "python-youtube~=0.9.7",
+    "python-youtube~=0.9.8",
 
     # Not used directly - required by PyQRCode for PNG generation
     "pypng~=0.20220715.0",
 
     # MT940 parser for bank statements
     "mt-940>=4.26.0",
-    "pandas~=2.2.2",
-    "statsmodels~=0.14.5",
+    "pandas~=2.3.3",
+    "statsmodels~=0.14.6",
 ]
 
 [build-system]

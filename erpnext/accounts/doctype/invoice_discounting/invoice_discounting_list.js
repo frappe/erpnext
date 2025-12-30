@@ -9,8 +9,8 @@ frappe.listview_settings["Invoice Discounting"] = {
 			return [__("Disbursed"), "blue", "status,=,Disbursed"];
 		} else if (doc.status == "Settled") {
 			return [__("Settled"), "orange", "status,=,Settled"];
-		} else if (doc.status == "Canceled") {
-			return [__("Canceled"), "red", "status,=,Canceled"];
+		} else if (doc.status == "Cancelled") {
+			return [__("Cancelled"), "red", "status,=,Cancelled"];
 		}
 	},
 };

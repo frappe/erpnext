@@ -2438,6 +2438,7 @@ class TestAccountsController(IntegrationTestCase):
 
 	def test_company_linked_address(self):
 		from erpnext.crm.doctype.prospect.test_prospect import make_address
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 		company_address = make_address(
 			address_title="Company", address_type="Shipping", address_line1="100", city="Mumbai"
@@ -2465,4 +2466,17 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertRaises(frappe.ValidationError, po.save)
 		po.billing_address = company_address.name
 		po.reload()
+		po.save()
+
+		si = make_sales_order(do_not_save=1, do_not_submit=1)
+		si.dispatch_address_name = supplier_billing.name
+		self.assertRaises(frappe.ValidationError, si.save)
+		si.items[0].delivered_by_supplier = 1
+		si.items[0].supplier = "_Test Supplier"
+		si.save()
+
+		po = create_purchase_order(do_not_save=True)
+		po.shipping_address = customer_shipping.name
+		self.assertRaises(frappe.ValidationError, po.save)
+		po.items[0].delivered_by_supplier = 1
 		po.save()

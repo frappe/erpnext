@@ -53,6 +53,7 @@ class Budget(Document):
 		budget_against: DF.Literal["", "Cost Center", "Project"]
 		budget_amount: DF.Currency
 		budget_distribution: DF.Table[BudgetDistribution]
+		budget_distribution_total: DF.Currency
 		budget_end_date: DF.Date | None
 		budget_start_date: DF.Date | None
 		company: DF.Link
@@ -230,28 +231,49 @@ class Budget(Document):
 
 	def before_save(self):
 		self.allocate_budget()
+		self.budget_distribution_total = sum(flt(row.amount) for row in self.budget_distribution)
 
 	def on_update(self):
 		self.validate_distribution_totals()
 
 	def allocate_budget(self):
-		if self.revision_of:
+		if self._should_skip_allocation():
+			return
+
+		if self._should_recalculate_manual_distribution():
+			self._recalculate_manual_distribution()
 			return
 
 		if not self.should_regenerate_budget_distribution():
 			return
 
-		self.set("budget_distribution", [])
+		self._regenerate_distribution()
 
-		periods = self.get_budget_periods()
-		total_periods = len(periods)
-		row_percent = 100 / total_periods if total_periods else 0
+	def _should_skip_allocation(self):
+		return self.revision_of and not self.distribute_equally
 
-		for start_date, end_date in periods:
-			row = self.append("budget_distribution", {})
-			row.start_date = start_date
-			row.end_date = end_date
-			self.add_allocated_amount(row, row_percent)
+	def _should_recalculate_manual_distribution(self):
+		return (
+			not self.distribute_equally
+			and bool(self.budget_distribution)
+			and self._is_only_budget_amount_changed()
+		)
+
+	def _is_only_budget_amount_changed(self):
+		old = self.get_doc_before_save()
+		if not old:
+			return False
+
+		return (
+			old.budget_amount != self.budget_amount
+			and old.distribution_frequency == self.distribution_frequency
+			and old.budget_start_date == self.budget_start_date
+			and old.budget_end_date == self.budget_end_date
+		)
+
+	def _recalculate_manual_distribution(self):
+		for row in self.budget_distribution:
+			row.amount = flt((row.percent / 100) * self.budget_amount, 3)
 
 	def should_regenerate_budget_distribution(self):
 		"""Check whether budget distribution should be recalculated."""
@@ -265,13 +287,27 @@ class Budget(Document):
 				"to_fiscal_year",
 				"budget_amount",
 				"distribution_frequency",
-				"distribute_equally",
 			]
 			for field in changed_fields:
 				if old_doc.get(field) != self.get(field):
 					return True
 
 		return bool(self.distribute_equally)
+
+	def _regenerate_distribution(self):
+		self.set("budget_distribution", [])
+
+		periods = self.get_budget_periods()
+		total_periods = len(periods)
+		row_percent = 100 / total_periods if total_periods else 0
+
+		for start_date, end_date in periods:
+			row = self.append("budget_distribution", {})
+			row.start_date = start_date
+			row.end_date = end_date
+			self.add_allocated_amount(row, row_percent)
+
+		self.budget_distribution_total = self.budget_amount
 
 	def get_budget_periods(self):
 		"""Return list of (start_date, end_date) tuples based on frequency."""
@@ -312,12 +348,8 @@ class Budget(Document):
 		}.get(frequency, 1)
 
 	def add_allocated_amount(self, row, row_percent):
-		if not self.distribute_equally:
-			row.amount = 0
-			row.percent = 0
-		else:
-			row.amount = flt(self.budget_amount * row_percent / 100, 3)
-			row.percent = flt(row_percent, 3)
+		row.amount = flt(self.budget_amount * row_percent / 100, 3)
+		row.percent = flt(row_percent, 3)
 
 	def validate_distribution_totals(self):
 		if self.should_regenerate_budget_distribution():

@@ -201,6 +201,7 @@ frappe.ui.form.on("Journal Entry", {
 
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 		erpnext.utils.set_letter_head(frm);
+		frm.clear_table("tax_withholding_entries");
 	},
 
 	voucher_type: function (frm) {
@@ -250,6 +251,10 @@ frappe.ui.form.on("Journal Entry", {
 				update_jv_details(frm.doc, doc.accounts);
 			});
 		}
+	},
+
+	apply_tds: function (frm) {
+		frm.clear_table("tax_withholding_entries");
 	},
 });
 

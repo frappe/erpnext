@@ -232,6 +232,7 @@ def get_list_context(context=None):
 			"show_search": True,
 			"no_breadcrumbs": True,
 			"title": _("Supplier Quotation"),
+			"list_template": "templates/includes/list/list.html",
 		}
 	)
 
@@ -346,4 +347,16 @@ def set_expired_status():
 			`status` not in ('Cancelled', 'Stopped') AND `valid_till` < %s
 		""",
 		(nowdate()),
+	)
+
+
+def get_purchased_items(supplier_quotation: str):
+	return frappe._dict(
+		frappe.get_all(
+			"Purchase Order Item",
+			filters={"supplier_quotation": supplier_quotation, "docstatus": 1},
+			fields=["supplier_quotation_item", {"SUM": "qty"}],
+			group_by="supplier_quotation_item",
+			as_list=1,
+		)
 	)

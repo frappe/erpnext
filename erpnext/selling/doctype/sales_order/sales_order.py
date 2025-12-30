@@ -954,6 +954,7 @@ def get_list_context(context=None):
 			"show_search": True,
 			"no_breadcrumbs": True,
 			"title": _("Orders"),
+			"list_template": "templates/includes/list/list.html",
 		}
 	)
 
@@ -1641,7 +1642,6 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 			{
 				"Sales Order": {
 					"doctype": "Purchase Order",
-					"field_map": {"dispatch_address_name": "dispatch_address"},
 					"field_no_map": [
 						"address_display",
 						"contact_display",
@@ -1650,6 +1650,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 						"contact_person",
 						"taxes_and_charges",
 						"shipping_address",
+						"dispatch_address",
 					],
 					"validation": {"docstatus": ["=", 1]},
 				},

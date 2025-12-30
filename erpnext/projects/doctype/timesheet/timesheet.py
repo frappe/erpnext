@@ -73,6 +73,9 @@ class Timesheet(Document):
 		self.calculate_percentage_billed()
 		self.set_dates()
 
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
+
 	def calculate_hours(self):
 		for row in self.time_logs:
 			if row.to_time and row.from_time:
@@ -559,4 +562,5 @@ def get_list_context(context=None):
 		"title": _("Timesheets"),
 		"get_list": get_timesheets_list,
 		"row_template": "templates/includes/timesheet/timesheet_row.html",
+		"list_template": "templates/includes/list/list.html",
 	}

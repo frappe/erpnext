@@ -304,3 +304,7 @@ def get_serial_nos_for_outward(kwargs):
 		return []
 
 	return [d.serial_no for d in serial_nos]
+
+
+def on_doctype_update():
+	frappe.db.add_index("Serial No", ["item_code", "warehouse"])

@@ -645,6 +645,46 @@ class TestPickList(IntegrationTestCase):
 				if dn_item.item_code == "_Test Item 2":
 					self.assertEqual(dn_item.qty, 2)
 
+	def test_picklist_reserved_qty_validation(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		warehouse = "_Test Warehouse - _TC"
+		test_stock_item = "_Test Stock Item"
+
+		# Ensure stock item exists
+		if not frappe.db.exists("Item", test_stock_item):
+			create_item(
+				item_code=test_stock_item,
+				is_stock_item=1,
+			)
+
+		# Add initial stock qty
+		make_stock_entry(item_code=test_stock_item, to_warehouse=warehouse, qty=15)
+
+		# Create SO for 10 qty
+		sales_order_1 = make_sales_order(item_code=test_stock_item, warehouse=warehouse, qty=10)
+
+		# Create and Submit picklist for SO
+		picklist_1 = create_pick_list(sales_order_1.name)
+		picklist_1.submit()
+
+		# Create DN for 5 qty
+		dn = create_delivery_note(picklist_1.name)
+		dn.items[0].qty = 5
+		dn.save()
+		dn.submit()
+
+		# Verify partly delivered state
+		picklist_1.reload()
+		self.assertEqual(picklist_1.status, "Partly Delivered")
+
+		# Create another SO (10 qty)
+		sales_order_2 = make_sales_order(item_code=test_stock_item, warehouse=warehouse, qty=10)
+
+		# Expected pick qty = 5
+		picklist_2 = create_pick_list(sales_order_2.name)
+		self.assertEqual(picklist_2.locations[0].qty, 5)
+
 	def test_picklist_with_multi_uom(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(properties={"uoms": [dict(uom="Box", conversion_factor=24)]}).name
@@ -1380,7 +1420,7 @@ class TestPickList(IntegrationTestCase):
 		stock_entry.cancel()
 
 	def test_packed_item_in_pick_list(self):
-		warehouse_1 = "RJ Warehouse - _TC"
+		warehouse_1 = "_Test Warehouse - _TC"
 		warehouse_2 = "_Test Warehouse 2 - _TC"
 		item_1 = make_item(properties={"is_stock_item": 0}).name
 		item_2 = make_item().name
@@ -1411,7 +1451,7 @@ class TestPickList(IntegrationTestCase):
 
 	def test_packed_item_multiple_times_in_so(self):
 		frappe.db.delete("Item Price")
-		warehouse_1 = "RJ Warehouse - _TC"
+		warehouse_1 = "_Test Warehouse - _TC"
 		warehouse_2 = "_Test Warehouse 2 - _TC"
 		warehouse = "_Test Warehouse - _TC"
 		item_1 = make_item(properties={"is_stock_item": 0}).name
@@ -1485,3 +1525,72 @@ class TestPickList(IntegrationTestCase):
 		pick_list.cancel()
 		sales_order.cancel()
 		stock_entry.cancel()
+
+	def test_creating_dn_from_so_with_different_addresses(self):
+		warehouse = "_Test Warehouse - _TC"
+		item1 = make_item().name
+		item2 = make_item().name
+		item3 = make_item().name
+
+		customer_shipping_address_1 = frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": "Customer Shipping Address",
+				"address_type": "Shipping",
+				"address_line1": "123, ABC Street",
+				"city": "Mumbai",
+				"country": "India",
+				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer"}],
+				"is_shipping_address": 1,
+			}
+		).insert()
+
+		sales_order1 = make_sales_order(item_code=item1, qty=1)
+		make_stock_entry(item=item1, to_warehouse=warehouse, qty=1)
+		sales_order2 = make_sales_order(item_code=item2, qty=1)
+		make_stock_entry(item=item2, to_warehouse=warehouse, qty=1)
+		sales_order3 = make_sales_order(item_code=item3, qty=1, do_not_submit=True)
+
+		customer_shipping_address_2 = frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": "Customer Shipping Address",
+				"address_type": "Shipping",
+				"address_line1": "123, ABC Street",
+				"city": "Mumbai",
+				"country": "India",
+				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer"}],
+			}
+		).insert()
+		sales_order3.shipping_address_name = customer_shipping_address_2.name
+		sales_order3.submit()
+		make_stock_entry(item=item3, to_warehouse=warehouse, qty=1)
+
+		from json import dumps
+
+		from frappe.model.mapper import map_docs
+
+		pick_list = frappe.new_doc("Pick List")
+		map_docs(
+			"erpnext.selling.doctype.sales_order.sales_order.create_pick_list",
+			dumps([sales_order1.name, sales_order2.name, sales_order3.name]),
+			pick_list,
+		)
+		pick_list.submit()
+
+		create_delivery_note(pick_list.name)
+		delivery_notes = frappe.get_all(
+			"Delivery Note Item", filters={"against_pick_list": pick_list.name}, pluck="parent", distinct=True
+		)
+		self.assertEqual(len(delivery_notes), 2)
+
+		for delivery_note in delivery_notes:
+			doc = frappe.get_doc("Delivery Note", delivery_note)
+			if len(doc.items) == 1:
+				self.assertEqual(doc.items[0].item_code, item3)
+				self.assertEqual(doc.shipping_address_name, customer_shipping_address_2.name)
+			else:
+				self.assertEqual(doc.shipping_address_name, customer_shipping_address_1.name)
+				item_codes = [item.item_code for item in doc.items]
+				self.assertTrue(item1 in item_codes)
+				self.assertTrue(item2 in item_codes)

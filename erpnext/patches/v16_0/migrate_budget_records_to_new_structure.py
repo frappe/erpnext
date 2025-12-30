@@ -1,6 +1,10 @@
 import frappe
 from frappe.utils import add_months, flt, get_first_day, get_last_day
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
+
 
 def execute():
 	remove_old_property_setter()
@@ -78,6 +82,10 @@ def create_new_budget_from_row(budget_doc, fiscal_year, account_row, percentage_
 	core_fields = ["budget_against", "company", "cost_center", "project"]
 	for field in core_fields:
 		new_budget.set(field, budget_doc.get(field))
+
+	for fieldname in get_accounting_dimensions():
+		if budget_doc.get(fieldname):
+			new_budget.set(fieldname, budget_doc.get(fieldname))
 
 	new_budget.from_fiscal_year = fiscal_year.name
 	new_budget.to_fiscal_year = fiscal_year.name
