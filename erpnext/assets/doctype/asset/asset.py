@@ -484,6 +484,9 @@ class Asset(AccountsController):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
 
 	def validate_linked_purchase_documents(self):
+		if self.flags.is_split_asset:
+			return
+
 		for fieldname, doctype in [
 			("purchase_receipt", "Purchase Receipt"),
 			("purchase_invoice", "Purchase Invoice"),
@@ -1380,6 +1383,7 @@ def process_asset_split(existing_asset, split_qty, splitted_asset=None, is_new_a
 	scaling_factor = flt(split_qty) / flt(existing_asset.asset_quantity)
 	new_asset = frappe.copy_doc(existing_asset) if is_new_asset else splitted_asset
 	asset_doc = new_asset if is_new_asset else existing_asset
+	asset_doc.flags.is_split_asset = True
 
 	set_split_asset_values(asset_doc, scaling_factor, split_qty, existing_asset, is_new_asset)
 	log_asset_activity(existing_asset, asset_doc, splitted_asset, is_new_asset)
