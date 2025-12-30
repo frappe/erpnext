@@ -644,21 +644,21 @@ class JobCard(Document):
 				op_row.completed_qty += flt(time_log.completed_qty)
 
 		for row in self.sub_operations:
-			operation_deatils = operation_wise_completed_time.get(row.sub_operation)
-			if operation_deatils:
+			operation_details = operation_wise_completed_time.get(row.sub_operation)
+			if operation_details:
 				if row.status != "Complete":
-					row.status = operation_deatils.status
+					row.status = operation_details.status
 
-				completed_time = flt(operation_deatils.completed_time, row.precision("completed_time"))
-				if operation_deatils.employee:
+				completed_time = flt(operation_details.completed_time, row.precision("completed_time"))
+				if operation_details.employee:
 					completed_time = flt(
-						operation_deatils.completed_time / len(set(operation_deatils.employee)),
+						operation_details.completed_time / len(set(operation_details.employee)),
 						row.precision("completed_time"),
 					)
 
-					if operation_deatils.completed_qty:
+					if operation_details.completed_qty:
 						row.completed_qty = flt(
-							operation_deatils.completed_qty / len(set(operation_deatils.employee)),
+							operation_details.completed_qty / len(set(operation_details.employee)),
 							row.precision("completed_qty"),
 						)
 
