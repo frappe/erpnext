@@ -12,9 +12,12 @@ const loadingIngredients = ref(true);
 const error = ref(null);
 const additionalIngredients = ['silane', 'catalyst', 'hardener'];
 const jobCardSubmitted = ref(false);
-const workOrderSubmitted = ref(false);
 const preparedQty = ref(0);
 const stockEntryName = ref('');
+const transferredQty = ref(0);     
+const transferSuccess = ref(false); 
+const nextWorkOrder = ref(''); 
+const bomQty = ref(0);
 
 // downstream alerts (dummy)
 const alerts = ref([
@@ -140,6 +143,15 @@ onMounted(async () => {
                 is_added: !!item.additional_ingredients_added,
             };
         });
+
+        if (jobCardSubmitted.value) {
+            const jc = await frappe.db.get_doc('Job Card', jobCard.value);
+            preparedQty.value = jc.total_completed_qty || jc.for_quantity || s.prepared_qty || 0;
+            stockEntryName.value = s.stock_entry_name || '';
+            transferredQty.value = 0;
+            transferSuccess.value = false;
+            await loadBomQty();
+        }
     } 
     catch (e) {
         error.value = e.message || e;
@@ -238,11 +250,6 @@ async function finishAndDischarge() {
         const jc = await frappe.db.get_doc('Job Card', jobCard.value);
         const completed_qty = jc.for_quantity || 0;
 
-        console.log('Calling finish_mixing with:', { 
-            job_card: jobCard.value, 
-            completed_qty 
-        });
-
         const result = await frappe.call({
             method: 'erpnext.manufacturing.page.mixer_station.mixer_station.finish_mixing',
             args: {
@@ -252,29 +259,29 @@ async function finishAndDischarge() {
             freeze: true,
             freeze_message: __('Completing Job Card...')
         });
-        console.log('✅ SUCCESS - Full result:', result);
         mixingStarted.value = false;
         mixingStartTime.value = null;
         mixingElapsed.value = 0;
         mixingReady.value = false;
 
         jobCardSubmitted.value = true;
-        preparedQty.value = result.message.job_card_qty || result.message.produced_qty;
+        preparedQty.value = result.message.job_card_qty;
         stockEntryName.value = result.message.stock_entry;
+        bomQty.value = result.message.bom_qty || 0;
+        nextWorkOrder.value = result.message.next_work_order || '';
+        transferredQty.value = 0;
+        transferSuccess.value = false;
+
         frappe.msgprint(result.message.message);    
         if (result.message.work_order_status === 'Completed') {
             frappe.show_alert({
-                message: __('✅ Work Order also Completed!'),
+                message: __('Work Order also Completed!'),
                 indicator: 'green'
             });
         }
     }
     catch (error) {
-        console.error('FULL ERROR OBJECT:', error);
         console.error('error.message:', error.message);
-        console.error('error._server_messages:', error._server_messages);
-        
-        // Show ALL error details
         const errorMsg = error.message || 
                         (error._server_messages?.[0]?.message) || 
                         JSON.stringify(error);
@@ -380,25 +387,43 @@ function openAddMaterials() {
 }
 
 async function transferToFGWarehouse() {
+    if (!getCanTransfer()) { 
+        frappe.msgprint(__('Insufficient qty ({0}) for BOM requirement ({1})', 
+            [getDisplayQty().toLocaleString(), bomQty.value.toLocaleString()]));
+        return;
+    }
+    
     try {
+        const jc = await frappe.db.get_doc('Job Card', jobCard.value);
+        const workOrder = jc.work_order; 
+        const qty = bomQty.value
+        
+        if (!workOrder) {
+            frappe.msgprint(__('Work Order required from Job Card'));
+            return;
+        }
+
         const result = await frappe.call({
             method: 'erpnext.manufacturing.page.mixer_station.mixer_station.transfer_to_next_process',
             args: {
-                mixing_work_order: workOrderName.value,  
-                qty: preparedQty.value
+                mixing_work_order: workOrder,  
+                qty: bomQty.value
             },
             freeze: true,
             freeze_message: __('Transferring to Distribution')
         });
         
+        transferredQty.value += result.message.qty_transferred;   
+        if (getDisplayQty() <= 0) {
+            transferSuccess.value = true;
+        }
+
         frappe.msgprint({
             title: __('Transfer Complete'),
             message: result.message.message,
             indicator: 'green'
         });
         
-        // Reset or navigate to next station
-        jobCardSubmitted.value = false;
         frappe.show_alert({
             message: `Next: ${result.message.next_work_order}`,
             indicator: 'blue'
@@ -406,6 +431,33 @@ async function transferToFGWarehouse() {
         
     } catch (error) {
         frappe.msgprint(__('Transfer failed: {0}', [error.message]));
+    }
+}
+
+function getDisplayQty() {
+    return parseFloat((preparedQty.value - transferredQty.value).toFixed(3));
+}
+
+function getCanTransfer() {
+    const display = getDisplayQty();
+    const bom = parseFloat(bomQty.value.toFixed(2));
+    return display >= bom && !transferSuccess.value;
+}
+
+async function loadBomQty() {
+    try {
+        const jc = await frappe.db.get_doc('Job Card', jobCard.value);
+        const result = await frappe.call({
+            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_next_process_bom_qty',
+            args: { mixing_work_order: jc.work_order }
+        });
+        
+        bomQty.value = result.message.bom_qty; 
+        nextWorkOrder.value = result.message.next_work_order;
+    } 
+    catch (error) {
+        console.error('BOM qty load failed:', error);
+        bomQty.value = 0;
     }
 }
 </script>
@@ -569,16 +621,24 @@ async function transferToFGWarehouse() {
                     <div v-else-if="jobCardSubmitted" class="border rounded p-4 mb-3 text-center" style="background:#fff3cd;">
                         <div class="mb-3 text-warning font-weight-bold d-flex justify-content-center align-items-center">
                             <span class="fa fa-cube mr-2"></span>
-                            {{ __('Ready for Transfer') }}
+                            {{ transferSuccess ? 'Transfer Completed!' : 'Ready for Transfer' }}
                         </div>
                         <div class="display-4 font-weight-bold mb-4" style="font-size:2.8rem; color:#856404;">
-                            {{ preparedQty.toLocaleString() }} {{ unit || '' }}
+                            {{ getDisplayQty().toLocaleString() }}
                         </div>
                         <div class="d-flex flex-column gap-2 justify-content-center mb-3">
-                            <button class="btn btn-warning btn-lg flex-fill" @click="transferToFGWarehouse">
+                            <button 
+                                v-if="!transferSuccess.value" 
+                                :disabled="!getCanTransfer()"
+                                :class="['btn btn-lg flex-fill', getCanTransfer() ? 'btn-warning' : 'btn-secondary']"
+                                @click="transferToFGWarehouse">
                                 <span class="fa fa-truck mr-2"></span>
-                                {{ __('Transfer') }}
+                                {{ getCanTransfer() ? 'Transfer ' + bomQty.toLocaleString() : 'Insufficient Qty' }}
                             </button>
+                            <div v-else class="alert alert-success">
+                                <span class="fa fa-check-circle mr-2"></span>
+                                All transferred to {{ nextWorkOrder }}!
+                            </div>
                         </div>
                     </div>
 

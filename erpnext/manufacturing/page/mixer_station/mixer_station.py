@@ -160,6 +160,8 @@ def finish_mixing(job_card, completed_qty):
     wo.update_work_order_qty()
     wo.reload()
     wo_status = wo.get_status()
+    next_bom_data = get_next_process_bom_qty(work_order)
+    
     return {
         "status": wo_status,
         "work_order_status": wo_status,
@@ -168,8 +170,11 @@ def finish_mixing(job_card, completed_qty):
         "produced_qty": wo.produced_qty,
         "total_qty": wo.qty,
         "stock_entry": se.name,
+        "bom_qty": next_bom_data["bom_qty"], 
+        "next_work_order": next_bom_data["next_work_order"],
         "message": f"SE {se.name} ({job_card_qty} qty). WO: {wo_status}"
     }
+    
 
 @frappe.whitelist()
 def quick_add_raw_materials(job_card, raw_material, qty):
@@ -254,30 +259,61 @@ def transfer_to_next_process(mixing_work_order, qty=None):
     fg_item = mixing_wo.production_item
     fg_qty = flt(qty or mixing_wo.produced_qty)
     
-    production_plan = mixing_wo.production_plan
+    process_mapping = {
+        "Mixing": "Distribution",
+        "Distribution": "Pressing", 
+        "Pressing": "Heating",
+        "Heating": "Cooling",
+        "Cooling": "Trimming",
+        "Trimming": "Calibration",
+        "Calibration": "Polishing",
+        "Polishing": "Quality Analysis"
+    }
+
+    current_process = mixing_wo.description.split(" - ")[-1].strip() if " - " in mixing_wo.description else ""
+    next_process = process_mapping.get(current_process)
+    
+    if not next_process:
+        frappe.throw(_("No next process found after {0}").format(current_process))
+    
     next_wo = frappe.db.get_value("Work Order", {
-        "production_plan": production_plan,
-        "production_plan_item": mixing_wo.production_plan_item,
-        "sequence_id": mixing_wo.sequence_id - 1,
-        "docstatus": 0  
+        "production_plan": mixing_wo.production_plan,
+        "description": ["like", f"%{next_process}%"],
+        "docstatus": ["<", 2] 
     }, "name")
     
     if not next_wo:
-        frappe.throw(_("No next Work Order found after {0}").format(mixing_work_order))
+        all_wos = frappe.get_all("Work Order", 
+            filters={"production_plan": mixing_wo.production_plan},
+            fields=["name", "production_item", "description"]
+        )
+        frappe.throw(f"Next WO for '{next_process}' not found.")
     
     next_wo_doc = frappe.get_doc("Work Order", next_wo)
+    bom_doc = frappe.get_doc("BOM", next_wo_doc.bom_no)
+
+    transfer_qty = 0
+    for bom_item in bom_doc.items:
+        if bom_item.item_code == fg_item:  
+            transfer_qty = flt(bom_item.stock_qty) 
+            break
     
+    if transfer_qty == 0:
+        frappe.throw(f"BOM qty for {fg_item} not found in {next_wo} BOM")
+        
     se = frappe.new_doc("Stock Entry")
     se.purpose = "Material Transfer for Manufacture"
     se.work_order = next_wo
     se.job_card = ""  # No job card for inter-process transfer
     se.company = mixing_wo.company
-    se.fg_completed_qty = fg_qty
+    se.fg_completed_qty = transfer_qty
     
     se.append("items", {
         "item_code": fg_item,
-        "qty": fg_qty,
+        "qty": transfer_qty,
         "stock_uom": mixing_wo.stock_uom,
+        "uom": mixing_wo.stock_uom,  
+        "conversion_factor": 1.0, 
         "s_warehouse": mixing_wo.fg_warehouse,      
         "t_warehouse": next_wo_doc.wip_warehouse,   
         "basic_rate": 0  
@@ -291,8 +327,49 @@ def transfer_to_next_process(mixing_work_order, qty=None):
         "status": "Success",
         "transfer_se": se.name,
         "next_work_order": next_wo,
-        "qty_transferred": fg_qty,
+        "qty_transferred": transfer_qty,
         "from_warehouse": mixing_wo.fg_warehouse,
         "to_warehouse": next_wo_doc.wip_warehouse,
         "message": f"Transferred {fg_qty} {fg_item} to {next_wo}"
     }
+
+
+@frappe.whitelist()
+def get_next_process_bom_qty(mixing_work_order):
+    """Get BOM qty required for NEXT process"""
+    mixing_wo = frappe.get_doc("Work Order", mixing_work_order)
+    current_process = mixing_wo.description.split(" - ")[-1].strip()
+    process_mapping = {
+        "Mixing": "Distribution",
+        "Distribution": "Pressing", 
+        "Pressing": "Heating",
+        "Heating": "Cooling",
+        "Cooling": "Trimming",
+        "Trimming": "Calibration",
+        "Calibration": "Polishing",
+        "Polishing": "Quality Analysis"
+    }
+    next_process = process_mapping.get(current_process)
+    
+    next_wo = frappe.db.get_value("Work Order", {
+        "production_plan": mixing_wo.production_plan,
+        "description": ["like", f"%{next_process}%"],
+        "docstatus": ["<", 2]
+    }, "name")
+    
+    if not next_wo:
+        return {"bom_qty": 0}
+    
+    next_wo_doc = frappe.get_doc("Work Order", next_wo)
+    bom_doc = frappe.get_doc("BOM", next_wo_doc.bom_no)
+    fg_item = mixing_wo.production_item
+    
+    for bom_item in bom_doc.items:
+        if bom_item.item_code == fg_item:
+            return {
+                "bom_qty": flt(bom_item.stock_qty),
+                "next_work_order": next_wo,
+                "next_process": next_process
+            }
+    
+    return {"bom_qty": 0}
