@@ -702,6 +702,129 @@ class TestAsset(AssetSetup):
 		frappe.db.set_value("Asset Category Account", name, "capital_work_in_progress_account", cwip_acc)
 		frappe.db.get_value("Company", "_Test Company", "capital_work_in_progress_account", cwip_acc)
 
+	def test_partial_asset_sale(self):
+		date = nowdate()
+		purchase_date = add_months(get_first_day(date), -2)
+		depreciation_start_date = add_months(get_last_day(date), -2)
+
+		# create an asset
+		asset = create_asset(
+			item_code="Macbook Pro",
+			is_existing_asset=1,
+			calculate_depreciation=1,
+			available_for_use_date=purchase_date,
+			purchase_date=purchase_date,
+			depreciation_start_date=depreciation_start_date,
+			net_purchase_amount=1000000.0,
+			purchase_amount=1000000.0,
+			asset_quantity=10,
+			total_number_of_depreciations=12,
+			frequency_of_depreciation=1,
+			submit=1,
+		)
+		asset_depr_schedule_before_sale = get_asset_depr_schedule_doc(asset.name, "Active")
+		post_depreciation_entries(date)
+		asset.reload()
+
+		# check asset values before sale
+		self.assertEqual(asset.asset_quantity, 10)
+		self.assertEqual(asset.net_purchase_amount, 1000000)
+		self.assertEqual(asset.status, "Partially Depreciated")
+		self.assertEqual(
+			asset_depr_schedule_before_sale.depreciation_schedule[0].get("depreciation_amount"), 83333.33
+		)
+
+		# make a partial sales againt the asset
+		si = make_sales_invoice(
+			asset=asset.name, item_code="Macbook Pro", company="_Test Company", sell_qty=5
+		)
+		si.customer = "_Test Customer"
+		si.due_date = date
+		si.get("items")[0].rate = 25000
+		si.insert()
+		si.submit()
+
+		asset.reload()
+		asset_depr_schedule_after_sale = get_asset_depr_schedule_doc(asset.name, "Active")
+
+		# check asset values after sales
+		self.assertEqual(asset.asset_quantity, 5)
+		self.assertEqual(asset.net_purchase_amount, 500000)
+		self.assertEqual(asset.status, "Sold")
+		self.assertEqual(
+			asset_depr_schedule_after_sale.depreciation_schedule[0].get("depreciation_amount"), 41666.66
+		)
+
+	def test_asset_splitting_for_non_existing_asset(self):
+		date = nowdate()
+		purchase_date = add_months(get_first_day(date), -2)
+		depreciation_start_date = add_months(get_last_day(date), -2)
+
+		asset_qty = 10
+		asset_rate = 100000.0
+		asset_item = "Macbook Pro"
+		asset_location = "Test Location"
+
+		frappe.db.set_value("Item", asset_item, "is_grouped_asset", 1)
+
+		# Inward asset via Purchase Receipt
+		pr = make_purchase_receipt(
+			item_code="Macbook Pro",
+			posting_date=purchase_date,
+			qty=asset_qty,
+			rate=asset_rate,
+			location=asset_location,
+			supplier="_Test Supplier",
+		)
+		pr.submit()
+
+		asset = frappe.db.get_value("Asset", {"purchase_receipt": pr.name, "docstatus": 0}, "name")
+		asset_doc = frappe.get_doc("Asset", asset)
+		asset_doc.calculate_depreciation = 1
+		asset_doc.available_for_use_date = purchase_date
+		asset_doc.location = asset_location
+		asset_doc.append(
+			"finance_books",
+			{
+				"expected_value_after_useful_life": 0,
+				"depreciation_method": "Straight Line",
+				"total_number_of_depreciations": 12,
+				"frequency_of_depreciation": 1,
+				"depreciation_start_date": depreciation_start_date,
+			},
+		)
+		asset_doc.submit()
+
+		# check asset values before splitting
+		asset_depr_schedule_before_splitting = get_asset_depr_schedule_doc(asset_doc.name, "Active")
+		self.assertEqual(asset_doc.asset_quantity, 10)
+		self.assertEqual(asset_doc.net_purchase_amount, 1000000)
+		self.assertEqual(
+			asset_depr_schedule_before_splitting.depreciation_schedule[0].get("depreciation_amount"), 83333.33
+		)
+
+		# initate asset split
+		new_asset = split_asset(asset_doc.name, 5)
+		asset_doc.reload()
+		asset_depr_schedule_after_sale = get_asset_depr_schedule_doc(asset_doc.name, "Active")
+		new_asset_depr_schedule = get_asset_depr_schedule_doc(new_asset.name, "Active")
+
+		# check asset values after splitting
+		self.assertEqual(asset_doc.asset_quantity, 5)
+		self.assertEqual(asset_doc.net_purchase_amount, 500000)
+		self.assertEqual(
+			asset_depr_schedule_after_sale.depreciation_schedule[0].get("depreciation_amount"), 41666.66
+		)
+
+		# check new asset values after splitting
+		self.assertEqual(asset_doc.asset_quantity, 5)
+		self.assertEqual(asset_doc.net_purchase_amount, 500000)
+		self.assertEqual(
+			new_asset_depr_schedule.depreciation_schedule[0].get("depreciation_amount"), 41666.66
+		)
+
+		frappe.db.set_value("Item", asset_item, "is_grouped_asset", 0)
+
 
 class TestDepreciationMethods(AssetSetup):
 	def test_schedule_for_straight_line_method(self):
@@ -1696,6 +1819,7 @@ class TestDepreciationBasics(AssetSetup):
 		self.assertTrue(get_gl_entries("Purchase Receipt", pr.name))
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	def test_split_asset_created_via_capitalization(self):
 		"""Test that assets created via Asset Capitalization can be split without capitalization error"""
 		from erpnext.assets.doctype.asset_capitalization.test_asset_capitalization import (
@@ -1815,6 +1939,8 @@ class TestDepreciationBasics(AssetSetup):
 		)
 >>>>>>> 9eeccb765d (test: validate asset partial sales)
 
+=======
+>>>>>>> 4adeaedfde (test: validate asset split for auto created asset from purchase voucher)
 
 def get_gl_entries(doctype, docname):
 	gl_entry = frappe.qb.DocType("GL Entry")
