@@ -33,6 +33,7 @@
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
   "allow_sales_order_creation_for_expired_quotation",
+  "automatically_fetch_payment_terms_from_quotation",
   "dont_reserve_sales_order_qty_on_sales_return",
   "hide_tax_id",
   "enable_discount_accounting",
@@ -288,6 +289,12 @@
    "fieldname": "use_legacy_js_reactivity",
    "fieldtype": "Check",
    "label": "Use Legacy (Client side) Reactivity"
+  },
+  {
+   "default": "0",
+   "fieldname": "automatically_fetch_payment_terms_from_quotation",
+   "fieldtype": "Check",
+   "label": "Automatically Fetch Payment Terms from Quotation"
   }
  ],
  "grid_page_length": 50,
@@ -296,7 +303,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-17 16:08:48.865885",
+ "modified": "2025-12-30 12:22:27.836801",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
