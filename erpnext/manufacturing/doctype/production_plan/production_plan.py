@@ -707,9 +707,20 @@ class ProductionPlan(Document):
 
 	def get_production_items(self):
 		item_dict = {}
+		line_mapping = {
+			"po_items_line_1": "L1", "po_items_line_2": "L2", 
+			"po_items_line_3": "L3", "po_items_mono_line": "MONO",
+			"po_items_multi_line": "MULTI"
+		}
 		all_items = list(self.po_items_line_1) + list(self.po_items_line_2) + list(self.po_items_line_3) + list(self.po_items_mono_line) + list(self.po_items_multi_line)
 
 		for d in all_items:
+			parent_line = None
+			for line_field, line_code in line_mapping.items():
+				if d.name in [item.name for item in getattr(self, line_field, [])]:
+					parent_line = line_code
+					break
+			d.production_line = parent_line
 			item_details = {
 				"production_item": d.item_code,
 				"use_multi_level_bom": d.include_exploded_items,
@@ -727,7 +738,9 @@ class ProductionPlan(Document):
 				"product_bundle_item": d.product_bundle_item,
 				"planned_start_date": d.planned_start_date,
 				"project": self.project,
-				"parentfield": d.parentfield or d.parent
+				"parentfield": d.parentfield or d.parent,
+				"production_line": parent_line, 
+            	"parentfield": d.parentfield or d.parent
 			}
 
 			key = (d.item_code, d.sales_order, d.sales_order_item, d.warehouse)
@@ -811,6 +824,8 @@ class ProductionPlan(Document):
 				wo_list.append(work_order)
 
 	def prepare_data_for_sub_assembly_items(self, row, wo_data):
+		print(f"ROW production_line: {getattr(row, 'production_line', 'MISSING')}")
+    
 		for field in [
 			"production_item",
 			"item_name",
@@ -821,6 +836,7 @@ class ProductionPlan(Document):
 			"stock_uom",
 			"bom_level",
 			"schedule_date",
+			"production_line"
 		]:
 			if row.get(field):
 				wo_data[field] = row.get(field)
@@ -834,6 +850,7 @@ class ProductionPlan(Document):
 				"production_plan_sub_assembly_item": row.name,
 			}
 		)
+		print(f"wo_data production_line: {wo_data.get('production_line')}")
 
 	def make_subcontracted_purchase_order(self, subcontracted_po, purchase_orders):
 		if not subcontracted_po:
@@ -1017,6 +1034,7 @@ class ProductionPlan(Document):
 				self.company,
 				warehouse=self.sub_assembly_warehouse,
 				skip_available_sub_assembly_item=self.skip_available_sub_assembly_item,
+				production_line=getattr(row, "production_line", None)
 			)
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
 			sub_assembly_items_store.extend(bom_data)
@@ -1046,7 +1064,23 @@ class ProductionPlan(Document):
 
 	def set_sub_assembly_items_based_on_level(self, row, bom_data, manufacturing_type=None):
 		"Modify bom_data, set additional details."
-		is_group_warehouse = frappe.db.get_value("Warehouse", self.sub_assembly_warehouse, "is_group")
+		is_group_warehouse = False
+		if hasattr(self, 'sub_assembly_warehouse') and self.sub_assembly_warehouse:
+			is_group_warehouse = frappe.db.get_value("Warehouse", self.sub_assembly_warehouse, "is_group") or False
+			
+		line_mapping = {
+			"po_items_line_1": "L1", "po_items_line_2": "L2", 
+			"po_items_line_3": "L3", "po_items_mono_line": "MONO",
+			"po_items_multi_line": "MULTI"
+		}
+		
+		parent_line = None
+		for line_field, line_code in line_mapping.items():
+			if hasattr(self, line_field) and row.name in [item.name for item in getattr(self, line_field)]:
+				parent_line = line_code
+				break
+		
+		print(f"ROW {row.item_code} in line: {parent_line}")
 
 		for data in bom_data:
 			data.qty = data.stock_qty
@@ -1055,6 +1089,7 @@ class ProductionPlan(Document):
 			data.type_of_manufacturing = manufacturing_type or (
 				"Subcontract" if data.is_sub_contracted_item else "In House"
 			)
+			data.production_line = parent_line
 
 			if not is_group_warehouse:
 				data.fg_warehouse = self.sub_assembly_warehouse
@@ -1843,6 +1878,7 @@ def get_sub_assembly_items(
 	warehouse=None,
 	indent=0,
 	skip_available_sub_assembly_item=False,
+	production_line=None
 ):
 	data = get_bom_children(parent=bom_no)
 	for d in data:
@@ -1875,6 +1911,7 @@ def get_sub_assembly_items(
 							"parent_item_code": parent_item_code,
 							"description": d.description,
 							"production_item": d.item_code,
+							"production_line": production_line,
 							"item_name": d.item_name,
 							"stock_uom": d.stock_uom,
 							"uom": d.stock_uom,
@@ -1898,6 +1935,7 @@ def get_sub_assembly_items(
 						warehouse,
 						indent=indent + 1,
 						skip_available_sub_assembly_item=skip_available_sub_assembly_item,
+						production_line=production_line
 					)
 
 
@@ -2274,3 +2312,4 @@ def refresh_mpp_progress(mpp_name):
 #         self.calculate_total_planned_qty()
 #         self.save()
 #         return self.name
+
