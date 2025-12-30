@@ -48,10 +48,6 @@
 <table class="table table-bordered">
 	<thead>
 		<tr>
-			{% if print_settings.include_index_column %}
-				<th> # </th>
-			{% endif %}
-
 			<th style="width: {%= 100 - (report_columns.length - 1) * 16 %}%">{%= report_columns[0].label %}</th>
 
 			{% for (let i=1, l=report_columns.length; i<l; i++) { %}
@@ -68,12 +64,6 @@
 				row_class += data[j].account_name || data[j].section ? "" : " financial-statements-blank-row";
 			%}
 			<tr class="{%= row_class %}">
-				{% if print_settings.include_index_column %}
-				<td {% if row["bold"] %} style="font-weight: bold" {% endif %}>
-					<span> {{ j + 1 }} </span>
-				</td>
-				{% endif %}
-
 				<td>
 					<span style="padding-left: {%= cint(data[j].indent) * 2 %}em">{%= row.account_name || row.section %}</span>
 				</td>
