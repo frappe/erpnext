@@ -748,7 +748,6 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 					"sales_order_item": "sales_order_item",
 					"wip_composite_asset": "wip_composite_asset",
 				},
-				"field_no_map": ["expense_account"],
 				"postprocess": update_item,
 				"condition": lambda doc: (
 					True if is_unit_price_row(doc) else abs(doc.received_qty) < abs(doc.qty)

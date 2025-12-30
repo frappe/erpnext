@@ -755,7 +755,7 @@ class PurchaseReceipt(BuyingController):
 				stock_asset_rbnb = (
 					self.get_company_default("asset_received_but_not_billed")
 					if d.is_fixed_asset
-					else (d.expense_account or self.get_company_default("stock_received_but_not_billed"))
+					else self.get_company_default("stock_received_but_not_billed")
 				)
 				landed_cost_entries = self.get_item_account_wise_lcv_entries()
 				if d.is_fixed_asset:
@@ -809,7 +809,7 @@ class PurchaseReceipt(BuyingController):
 				stock_asset_rbnb = (
 					self.get_company_default("asset_received_but_not_billed")
 					if d.is_fixed_asset
-					else (d.expense_account or self.get_company_default("stock_received_but_not_billed"))
+					else self.get_company_default("stock_received_but_not_billed")
 				)
 
 				stock_value_diff = get_stock_value_difference(self.name, d.name, d.rejected_warehouse)
