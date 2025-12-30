@@ -114,6 +114,10 @@ class SubcontractingOrder(SubcontractingController):
 			"over_delivery_receipt_allowance",
 			frappe.get_single_value("Stock Settings", "over_delivery_receipt_allowance"),
 		)
+		self.set_onload(
+			"backflush_based_on",
+			frappe.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on"),
+		)
 
 		if self.reserve_stock:
 			if self.has_unreserved_stock():

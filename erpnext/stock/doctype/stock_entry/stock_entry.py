@@ -1454,9 +1454,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 						)
 					).run()[0][0] or 0
 
-				if flt(total_supplied - total_returned, precision) > flt(total_allowed, precision):
+				if flt(total_supplied + se_item.transfer_qty - total_returned, precision) > flt(
+					total_allowed, precision
+				):
 					frappe.throw(
-						_("Row {0}# Item {1} cannot be transferred more than {2} against {3} {4}").format(
+						_("Row #{0}: Item {1} cannot be transferred more than {2} against {3} {4}").format(
 							se_item.idx,
 							se_item.item_code,
 							total_allowed,

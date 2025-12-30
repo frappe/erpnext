@@ -463,9 +463,10 @@ frappe.ui.form.on("Subcontracting Order", {
 	make_subcontracting_receipt(this_obj) {
 		const doc = this_obj.frm.doc;
 		const has_overtransferred_items = doc.supplied_items.some((item) => {
-			return item.supplied_qty > item.consumed_qty;
+			return item.supplied_qty > item.required_qty;
 		});
-		if (has_overtransferred_items) {
+		const backflush_based_on = doc.__onload.backflush_based_on;
+		if (has_overtransferred_items && backflush_based_on === "BOM") {
 			const raw_data = doc.supplied_items.map((item) => {
 				const row = doc.items.find((i) => i.name === item.reference_name);
 				const qty = flt(row.qty) - flt(row.received_qty);
