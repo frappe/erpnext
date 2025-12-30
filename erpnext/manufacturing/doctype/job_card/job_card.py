@@ -91,7 +91,7 @@ class JobCard(Document):
 		posting_date: DF.Date | None
 		process_loss_qty: DF.Float
 		production_item: DF.Link | None
-		production_line: DF.Link
+		production_line: DF.Link | None
 		project: DF.Link | None
 		quality_inspection: DF.Link | None
 		quality_inspection_template: DF.Link | None
@@ -127,7 +127,7 @@ class JobCard(Document):
 			wo = frappe.get_doc("Work Order", self.work_order)
 			if wo.production_line:
 				year = frappe.utils.today()[:4]
-				self.naming_series = f"MFG-JC-{wo.production_line}-{year}-.#####"
+				self.naming_series = f"PO-{wo.production_line}-JOB.#####"
 
 	def has_stock_entry(self):
 		return frappe.db.exists("Stock Entry", {"job_card": self.name, "docstatus": ["!=", 2]})

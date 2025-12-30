@@ -521,13 +521,12 @@
    "fieldtype": "Link",
    "label": "Production Line",
    "options": "Production Line",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-26 16:33:03.197506",
+ "modified": "2025-12-26 17:46:52.536889",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
