@@ -25,7 +25,6 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
-from erpnext.accounts.party import get_party_account_currency
 
 
 class InvoiceCancelled(frappe.ValidationError):
@@ -432,7 +431,6 @@ class Subscription(Document):
 		items_list = self.get_items_from_plans(self.plans, is_prorate())
 
 		for item in items_list:
-			item["cost_center"] = self.cost_center
 			invoice.append("items", item)
 
 		# Taxes

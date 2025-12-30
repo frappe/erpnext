@@ -455,4 +455,4 @@ erpnext.patches.v16_0.set_mr_picked_qty
 erpnext.patches.v16_0.update_tax_withholding_field_in_payment_entry
 erpnext.patches.v16_0.migrate_tax_withholding_data
 erpnext.patches.v16_0.update_corrected_cancelled_status
-
+erpnext.patches.v16_0.fix_barcode_typo

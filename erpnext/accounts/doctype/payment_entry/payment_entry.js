@@ -427,7 +427,15 @@ frappe.ui.form.on("Payment Entry", {
 
 		if (frm.doc.payment_type == "Internal Transfer") {
 			$.each(
-				["party", "party_type", "paid_from", "paid_to", "references", "total_allocated_amount"],
+				[
+					"party",
+					"party_type",
+					"paid_from",
+					"paid_to",
+					"references",
+					"total_allocated_amount",
+					"party_name",
+				],
 				function (i, field) {
 					frm.set_value(field, null);
 				}
