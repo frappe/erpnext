@@ -521,10 +521,10 @@ async function onMixerChange() {
                     </div>
 
                     <div class="mb-3 d-flex justify-content-between">
-                        <label class="form-label bold">{{ __('Select Mixture') }}</label>
+                        <label class="form-label bold">{{ __('Select Mixer') }}</label>
                         <select v-model="selectedMixer" style="width: 30%;" class="form-control" :disabled="mixingReady || mixingStarted" @change="onMixerChange">
                             <option value="" disabled selected>
-                                {{ __('Select Mixture Type...') }}
+                                {{ __('Select Mixer Type...') }}
                             </option>
                             <option v-for="mixer in mixersList" :key="mixer.name" :value="mixer.name">
                                 {{ mixer.name}}
