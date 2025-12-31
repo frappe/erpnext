@@ -1,0 +1,19 @@
+{
+ "content": null,
+ "creation": "2025-12-09 18:10:53.026562",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2025-12-09 18:11:26.669095",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "operator-station",
+ "owner": "Administrator",
+ "page_name": "operator-station",
+ "roles": [],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 1,
+ "title": "Operator Station"
+}

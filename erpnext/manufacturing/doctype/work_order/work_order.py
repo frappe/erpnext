@@ -4,6 +4,7 @@
 import json
 
 import frappe
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.model.document import Document
@@ -106,7 +107,7 @@ class WorkOrder(Document):
 		produced_qty: DF.Float
 		product_bundle_item: DF.Link | None
 		production_item: DF.Link
-		production_line: DF.Data | None
+		production_line: DF.Link | None
 		production_plan: DF.Link | None
 		production_plan_item: DF.Data | None
 		production_plan_sub_assembly_item: DF.Data | None
@@ -132,6 +133,17 @@ class WorkOrder(Document):
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
+
+	def before_naming(self):
+		if self.production_line:
+			year = frappe.utils.today()[:4]
+			self.naming_series = f"MFG-WO-{self.production_line}-{year}-.#####"
+		else:
+			self.naming_series = "MFG-WO-2025-.#####"
+		# """Set naming series before document naming occurs"""
+		# if self.production_line:
+		# 	year = datetime.now().strftime("%Y")
+		# 	self.naming_series = f"MFG-WO-{self.production_line}-{year}-.#####"
 
 	def validate(self):
 		self.validate_production_item()
@@ -665,7 +677,7 @@ class WorkOrder(Document):
 		self.set_operation_start_end_time(row, idx)
 
 		job_card_doc = create_job_card(
-			self, row, auto_create=True, enable_capacity_planning=enable_capacity_planning
+			self, row, auto_create=True, enable_capacity_planning=enable_capacity_planning, production_line=self.production_line
 		)
 
 		if enable_capacity_planning and job_card_doc:
@@ -1657,11 +1669,12 @@ def validate_operation_data(row):
 		)
 
 
-def create_job_card(work_order, row, enable_capacity_planning=False, auto_create=False):
+def create_job_card(work_order, row, auto_create=False, enable_capacity_planning=False, production_line=None):
 	doc = frappe.new_doc("Job Card")
 	doc.update(
 		{
 			"work_order": work_order.name,
+			"production_line": production_line,
 			"workstation_type": row.get("workstation_type"),
 			"operation": row.get("operation"),
 			"workstation": row.get("workstation"),

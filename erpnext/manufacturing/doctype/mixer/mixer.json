@@ -1,0 +1,90 @@
+{
+ "actions": [],
+ "creation": "2025-12-30 15:29:24.733821",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_8p5g",
+  "mixer_number",
+  "mixer_code",
+  "mixer_body",
+  "line_no",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_8p5g",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Mixer",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "mixer_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mixer Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mixer_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mixer Code",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mixer_body",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Mixer Body",
+   "options": "A\nB\nC",
+   "reqd": 1
+  },
+  {
+   "fieldname": "line_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Line no",
+   "options": "Production Line",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-30 16:29:41.074168",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Mixer",
+ "naming_rule": "By script",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
