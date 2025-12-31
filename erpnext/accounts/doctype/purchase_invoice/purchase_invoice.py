@@ -2005,9 +2005,17 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 		args = json.loads(args)
 
 	def post_parent_process(source_parent, target_parent):
+		remove_items_with_zero_qty(target_parent)
+		set_missing_values(target_parent)
+
+	def remove_items_with_zero_qty(target_parent):
 		for row in target_parent.get("items"):
 			if row.get("qty") == 0:
 				target_parent.remove(row)
+
+	def set_missing_values(target):
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
 		from erpnext.controllers.sales_and_purchase_return import get_returned_qty_map_for_row
@@ -2059,7 +2067,7 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 				"postprocess": update_item,
 				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty) and select_item(doc),
 			},
-			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges"},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
 		target_doc,
 		post_parent_process,
