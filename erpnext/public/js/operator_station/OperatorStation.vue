@@ -1,12 +1,26 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
 // core state
+const jobCard = ref(null);
 const status = ref('Pending');
 const serial = ref('SLB-2025-00427');
 const colour = ref('Carrara White');
 const elapsedSeconds = ref(0);
 const timerHandle = ref(null);
+const distributionStarted = ref(false);
+const distributionStartTime = ref(null);
+const distributionElapsed = ref(0);
+const distributionTimerHandle = ref(null);
+const distributionReady = ref(false);
+const jobCardSubmitted = ref(false);
+const preparedQty = ref(0);
+const stockEntryName = ref('');
+const transferredQty = ref(0);     
+const transferSuccess = ref(false); 
+const nextWorkOrder = ref(''); 
+const bomQty = ref(0);
+
 
 const alarms = ref([
   {
@@ -53,6 +67,179 @@ function stopAndResetTimer() {
 }
 
 // actions
+onMounted(async () => {
+    const route = frappe.get_route();
+    jobCard.value = route[1] || null;
+
+    if (!jobCard.value) {
+        error.value = __('No Job Card found in route');
+        return;
+    }
+    // const stateRes = await frappe.call({
+    //     method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_state',
+    //     args: { job_card: jobCard.value },
+    // });
+
+    // const s = stateRes.message || {};
+    // mixingReady.value = !!s.mixer_materials_confirmed;
+    // mixingStarted.value = !!s.mixer_started;
+    // mixingStartTime.value = s.mixer_start_time;
+
+    jobCardSubmitted.value = !!s.job_card_submitted || false;  
+    if (jobCardSubmitted.value) {
+        preparedQty.value = s.prepared_qty || 0;
+        stockEntryName.value = s.stock_entry_name || '';
+    }
+
+    if (distributionStarted.value && distributionStartTime.value) {
+        const start = frappe.datetime.str_to_obj(distributionStartTime.value);
+        const now = frappe.datetime.now_datetime();
+        const diffSeconds = (new Date(now) - new Date(start)) / 1000;
+        distributionElapsed.value = Math.max(0, Math.floor(diffSeconds));
+
+        if (distributionTimerHandle.value) clearInterval(distributionTimerHandle.value);
+        distributionTimerHandle.value = setInterval(() => {
+            distributionElapsed.value += 1;
+        }, 1000);
+    } 
+    else {
+        distributionElapsed.value = 0;
+        if (distributionTimerHandle.value) {
+            clearInterval(distributionTimerHandle.value);
+            distributionTimerHandle.value = null;
+        }
+    }
+
+    try {
+        // loadingIngredients.value = true;
+        // error.value = null;
+
+        if (jobCard.value) {
+            const jc = await frappe.db.get_doc('Job Card', jobCard.value);
+            if (jc.bom_no) {
+                batchNo.value = jc.bom_no;  
+            }
+        }
+        
+        // const r = await frappe.call({
+        //     method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_ingredients',
+        //     args: { 
+        //         job_card: jobCard.value 
+        //     }
+        // });
+        
+        // ingredients.value = (r.message || []).map(item => {
+        //     const name = item.item_name || '';
+        //     const lower = name.toLowerCase();
+        //     const is_additional = additionalIngredients.some(s => lower.includes(s));
+
+        //     return {
+        //         name,
+        //         standard: `${item.stock_uom_qty} ${item.stock_uom}`,
+        //         unit: item.stock_uom,
+        //         qty: item.stock_uom_qty,
+        //         item_code: item.item_code,
+        //         is_added: !!item.additional_ingredients_added,
+        //     };
+        // });
+
+        if (jobCardSubmitted.value) {
+            const jc = await frappe.db.get_doc('Job Card', jobCard.value);
+            preparedQty.value = jc.total_completed_qty || jc.for_quantity || s.prepared_qty || 0;
+            stockEntryName.value = s.stock_entry_name || '';
+            transferredQty.value = 0;
+            transferSuccess.value = false;
+            // await loadBomQty();
+        }
+    } 
+    catch (e) {
+        error.value = e.message || e;
+        frappe.msgprint(__('Failed to load BOM ingredients: {0}', [error.value]));
+    } 
+});
+
+async function startDistribution() {
+    frappe.confirm(
+        __('Start Distribution now?'),
+        async () => {
+            try {
+                await frappe.call({
+                    method: 'erpnext.manufacturing.page.operator_station.operator_station.start_distribution',
+                    args: { job_card: jobCard.value }
+                });
+                distributionStarted.value = true;
+                distributionStartTime.value = frappe.datetime.now_datetime();
+
+                distributionElapsed.value = 0;
+                if (distributionTimerHandle.value) {
+                    clearInterval(distributionTimerHandle.value);
+                }
+                distributionTimerHandle.value = setInterval(() => {
+                    distributionElapsed.value += 1;
+                }, 1000);
+    
+                frappe.msgprint(__('Distribution started'));
+            }
+            catch (e) {
+                frappe.msgprint(__('Failed to start Job Card: {0}', [e.message || e]));
+            }
+        },
+        () => {
+            frappe.msgprint(__('Distribution was not started.'));
+        }
+    );
+}
+
+async function finishDistribution() {
+    if (distributionTimerHandle.value) {
+        clearInterval(distributionTimerHandle.value);
+        distributionTimerHandle.value = null;
+    }
+    try {
+        // const jc = await frappe.db.get_doc('Job Card', jobCard.value);
+        // const completed_qty = jc.for_quantity || 0;
+
+        const result = await frappe.call({
+            method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_distribution',
+            args: {
+                job_card: jobCard.value,
+            },
+        });
+        distributionStarted.value = false;
+        distributionStartTime.value = null;
+        distributionElapsed.value = 0;
+        distributionReady.value = false;
+
+        jobCardSubmitted.value = true;
+        preparedQty.value = result.message.job_card_qty;
+        stockEntryName.value = result.message.stock_entry;
+        bomQty.value = result.message.bom_qty || 0;
+        nextWorkOrder.value = result.message.next_work_order || '';
+        transferredQty.value = 0;
+        transferSuccess.value = false;
+
+        frappe.msgprint(result.message.message);    
+        if (result.message.work_order_status === 'Completed') {
+            frappe.show_alert({
+                message: __('Work Order also Completed!'),
+                indicator: 'green'
+            });
+        }
+    }
+    catch (error) {
+        console.error('error.message:', error.message);
+        const errorMsg = error.message || 
+                        (error._server_messages?.[0]?.message) || 
+                        JSON.stringify(error);
+        
+        frappe.msgprint({
+            title: __('Error'),
+            indicator: 'red',
+            message: `Failed to complete Job Card:<br><pre>${errorMsg}</pre>`
+        });
+    }
+}
+
 function startJob() {
   status.value = 'In Progress';
   showStartButton.value = false;
@@ -157,10 +344,10 @@ function statusStyle() {
         <span class="job-color mr-2">{{ colour }}</span>
         <span class="color-swatch"
               style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span>
-      </div>
+      </div>     
 
       <div class="text-center mb-2" v-if="showStartButton">
-        <button class="btn btn-success py-3 px-4" @click="startJob">
+        <button class="btn btn-success py-3 px-4" @click="startDistribution">
           <span class="fa fa-play mr-1 pr-2"></span>{{ __('Start Job') }}
         </button>
       </div>
@@ -173,7 +360,7 @@ function statusStyle() {
       </div>
 
       <div class="text-center mb-2" v-if="showActions">
-        <button class="btn btn-info mr-2" @click="finishJob">
+        <button class="btn btn-info mr-2" @click="finishDistribution">
           <span class="fa fa-check-square-o mr-1"></span>{{ __('Finish Job') }}
         </button>
         <button class="btn btn-warning mr-2" @click="haltJob">
