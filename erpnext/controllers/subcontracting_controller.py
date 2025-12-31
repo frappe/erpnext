@@ -613,12 +613,12 @@ class SubcontractingController(StockController):
 		elif frappe.get_cached_value("Item", row.rm_item_code, "is_customer_provided_item"):
 			row.warehouse = self.customer_warehouse
 
-	def __set_alternative_item(self, bom_item, row):
-		alternative_item = self.alternative_item_details.get(bom_item.rm_item_code) or []
+	def __set_alternative_item(self, item_obj, row):
+		alternative_item = self.alternative_item_details.get(item_obj.rm_item_code) or []
 		alternative_item_qty = 0
 		for item in alternative_item:
 			self.__add_supplied_or_received_item(
-				row, item, item.qty, alternative_against=bom_item.bom_detail_no
+				row, item, item.qty, alternative_against=item_obj.bom_detail_no
 			)
 			alternative_item_qty += item.qty
 

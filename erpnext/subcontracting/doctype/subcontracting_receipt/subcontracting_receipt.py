@@ -113,9 +113,12 @@ class SubcontractingReceipt(SubcontractingController):
 		]
 
 	def onload(self):
+		self.backflush_based_on = frappe.db.get_single_value(
+			"Buying Settings", "backflush_raw_materials_of_subcontract_based_on"
+		)
 		self.set_onload(
 			"backflush_based_on",
-			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on"),
+			self.backflush_based_on,
 		)
 
 	def before_validate(self):
@@ -444,7 +447,7 @@ class SubcontractingReceipt(SubcontractingController):
 					item.rm_item_code, 0
 				) - alternative_qtys.get(item.bom_detail_no, 0)
 
-				if not item.available_qty_for_consumption and item.alternative_against:
+				if item.available_qty_for_consumption <= 0 and item.alternative_against:
 					item.available_qty_for_consumption = item.consumed_qty
 
 	def calculate_items_qty_and_amount(self):
