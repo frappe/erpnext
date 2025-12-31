@@ -10,11 +10,11 @@
  "label": "Accounting",
  "link_to": "Accounting",
  "link_type": "Workspace",
- "modified": "2025-12-22 13:06:21.382175",
+ "modified": "2025-12-31 16:06:04.678577",
  "modified_by": "Administrator",
  "name": "Accounting",
  "owner": "Administrator",
- "parent_icon": "ERPNext",
+ "parent_icon": "Accounts",
  "roles": [],
  "standard": 1
 }

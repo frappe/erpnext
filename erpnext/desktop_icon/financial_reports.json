@@ -10,11 +10,12 @@
  "label": "Financial Reports",
  "link_to": "Financial Reports",
  "link_type": "Workspace",
- "modified": "2025-12-22 13:07:23.514651",
+ "modified": "2025-12-31 16:07:27.060176",
  "modified_by": "Administrator",
  "name": "Financial Reports",
  "owner": "Administrator",
- "parent_icon": "ERPNext",
+ "parent_icon": "Accounts",
  "roles": [],
+ "sidebar": "",
  "standard": 1
 }
