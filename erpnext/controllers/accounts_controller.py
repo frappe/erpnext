@@ -429,7 +429,7 @@ class AccountsController(TransactionBase):
 			rows = (
 				frappe.qb.from_(dt)
 				.select(dt.name, dt.parent, dt.parenttype)
-				.where((dt.voucher_type == self.doctype) & (dt.voucher_no == self.name))
+				.where((dt.voucher_type == self.doctype) & (dt.voucher_no == self.name) & (dt.docstatus != 2))
 				.run(as_dict=True)
 			)
 
