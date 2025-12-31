@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-21 09:37+0000\n"
-"PO-Revision-Date: 2025-12-22 03:08\n"
+"PO-Revision-Date: 2025-12-31 04:33\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -49076,7 +49076,7 @@ msgstr "System kommer automatiskt att skapa serienummer/parti för färdig artik
 msgid "System will do an implicit conversion using the pegged currency. <br>\n"
 "Ex: Instead of AED -&gt; INR, system will do AED -&gt; USD -&gt; INR using the pegged exchange rate of AED against USD."
 msgstr "System kommer att skapa implicit konvertering med hjälp av bunden valuta. <br>\n"
-"E. x: Istället för AED -&gt; INR, kommer system att göra AED -&gt; USD -&gt; INR med hjälp av bunden växelkurs för AED mot USD."
+"t. e. x: Istället för AED -&gt; INR, kommer system att göra AED -&gt; USD -&gt; INR med hjälp av bunden växelkurs för AED mot USD."
 
 #. Description of the 'Invoice Limit' (Int) field in DocType 'Payment
 #. Reconciliation'
