@@ -612,6 +612,16 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		frappe.flags.dialog_set = false;
 
+		const is_item_quick_entry_from_link =
+			frappe._from_link &&
+			frappe._from_link.field_obj?.df?.fieldname === "item_code" &&
+			frappe._from_link.field_obj?.get_options?.() === "Item";
+
+		// Skip server call while Item Quick Entry hasn't saved yet
+		if (is_item_quick_entry_from_link) {
+			return;
+		}
+
 		// Experimental: This will be removed once stability is achieved.
 		if (!frappe.boot.sysdefaults.use_legacy_js_reactivity) {
 			var item = frappe.get_doc(cdt, cdn);
