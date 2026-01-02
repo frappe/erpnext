@@ -101,10 +101,11 @@
    "label": "Use HTTP Protocol"
   }
  ],
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-11-25 13:03:41.896424",
+ "modified": "2026-01-02 18:19:02.873815",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Currency Exchange Settings",

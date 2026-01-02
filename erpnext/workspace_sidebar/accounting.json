@@ -234,6 +234,28 @@
    "type": "Link"
   },
   {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Repost Accounting Ledger",
+   "link_to": "Repost Accounting Ledger",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Repost Payment Ledger",
+   "link_to": "Repost Payment Ledger",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
    "child": 0,
    "collapsible": 1,
    "icon": "sheet",
@@ -386,6 +408,17 @@
    "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
+   "label": "Account Category",
+   "link_to": "Account Category",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
    "label": "Accounting Dimension",
    "link_to": "Accounting Dimension",
    "link_type": "DocType",
@@ -495,16 +528,49 @@
    "child": 0,
    "collapsible": 1,
    "icon": "settings",
+   "indent": 1,
+   "keep_closed": 1,
+   "label": "Settings",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Section Break"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Settings",
+   "label": "Accounts Settings",
    "link_to": "Accounts Settings",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Currency Exchange Settings",
+   "link_to": "Currency Exchange Settings",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Repost Accounting Ledger Settings",
+   "link_to": "Repost Accounting Ledger Settings",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
   }
  ],
- "modified": "2025-12-31 16:54:07.693056",
+ "modified": "2026-01-02 18:07:04.450536",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",

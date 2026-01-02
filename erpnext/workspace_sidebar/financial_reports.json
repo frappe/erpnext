@@ -73,6 +73,18 @@
    "type": "Link"
   },
   {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Financial Report Template",
+   "link_to": "Financial Report Template",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
    "child": 0,
    "collapsible": 1,
    "icon": "book-text",
@@ -260,7 +272,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-11-25 10:46:09.634854",
+ "modified": "2026-01-02 14:44:46.627363",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Reports",

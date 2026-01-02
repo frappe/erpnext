@@ -43,9 +43,10 @@
    "label": "Fetch Timesheet in Sales Invoice"
   }
  ],
+ "hide_toolbar": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-02-13 23:01:27.321902",
+ "modified": "2026-01-02 18:18:28.414222",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects Settings",
@@ -63,6 +64,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

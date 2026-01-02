@@ -153,9 +153,11 @@
    "label": "Greetings Section"
   }
  ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-27 13:10:50.989111",
+ "modified": "2026-01-02 18:18:11.475222",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support Settings",
@@ -173,6 +175,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

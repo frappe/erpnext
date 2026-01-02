@@ -36,9 +36,10 @@
    "fieldtype": "Section Break"
   }
  ],
+ "hide_toolbar": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-06-06 11:36:44.885353",
+ "modified": "2026-01-02 18:18:17.586225",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Settings",

@@ -14,10 +14,12 @@
    "options": "Repost Allowed Types"
   }
  ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-06-06 13:56:37.908879",
+ "modified": "2026-01-02 18:19:08.888368",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Accounting Ledger Settings",
@@ -43,6 +45,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

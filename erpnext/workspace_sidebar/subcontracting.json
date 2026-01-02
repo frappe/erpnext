@@ -19,9 +19,33 @@
    "type": "Link"
   },
   {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "folder-tree",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Subcontracting BOM",
+   "link_to": "Subcontracting BOM",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "move-horizontal",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Stock Entry",
+   "link_to": "Stock Entry",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
    "child": 0,
    "collapsible": 1,
-   "icon": "arrow-right",
+   "icon": "arrow-left-to-line",
    "indent": 1,
    "keep_closed": 0,
    "label": "Inward Order",
@@ -68,7 +92,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "arrow-left",
+   "icon": "arrow-right-from-line",
    "indent": 1,
    "keep_closed": 0,
    "label": "Outward Order",
@@ -108,41 +132,6 @@
    "keep_closed": 0,
    "label": "Subcontracting Receipt",
    "link_to": "Subcontracting Receipt",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
-   "icon": "tool",
-   "indent": 1,
-   "keep_closed": 1,
-   "label": "Tools",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Section Break"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "icon": "",
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Stock Entry",
-   "link_to": "Stock Entry",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "icon": "",
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Subcontracting BOM",
-   "link_to": "Subcontracting BOM",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
@@ -207,7 +196,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-12-19 16:52:24.076660",
+ "modified": "2026-01-02 17:51:15.843931",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Subcontracting",

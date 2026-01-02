@@ -24,8 +24,20 @@
    "icon": "file-question-mark",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Issues",
+   "label": "Issue",
    "link_to": "Issue",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "calendar-days",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Maintenance Schedule",
+   "link_to": "Maintenance Schedule",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
@@ -45,18 +57,6 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "receipt-text",
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "SLA",
-   "link_to": "Service Level Agreement",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
    "icon": "grid-2x2-check",
    "indent": 0,
    "keep_closed": 0,
@@ -69,10 +69,10 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "tool",
+   "icon": "database",
    "indent": 1,
    "keep_closed": 1,
-   "label": "Maintenance",
+   "label": "Setup",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Section Break"
@@ -82,8 +82,8 @@
    "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
-   "label": "Maintenance Schedule",
-   "link_to": "Maintenance Schedule",
+   "label": "Issue Type",
+   "link_to": "Issue Type",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
@@ -93,8 +93,8 @@
    "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
-   "label": "Maintenance Visit",
-   "link_to": "Maintenance Visit",
+   "label": "Issue Priority",
+   "link_to": "Issue Priority",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
@@ -135,50 +135,17 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "database",
-   "indent": 1,
-   "keep_closed": 1,
-   "label": "Setup",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Section Break"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Issue Type",
-   "link_to": "Issue Type",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Issue Priority",
-   "link_to": "Issue Priority",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
    "icon": "settings",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Support Settings",
+   "label": "Settings",
    "link_to": "Support Settings",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
   }
  ],
- "modified": "2025-11-25 10:46:09.414304",
+ "modified": "2026-01-02 17:47:19.864824",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support",
