@@ -1,8 +1,11 @@
 import { createApp } from 'vue';
 import OperatorStation from './OperatorStation.vue';
 
-function setup_operator_station(wrapper) {
-    const app = createApp(OperatorStation);
+function setup_operator_station(wrapper, process, job_card) {
+    const app = createApp(OperatorStation, {
+        process: process,
+        job_card: job_card
+    });
     app.config.globalProperties.__ = window.__;  // reuse frappe's __
     app.mount(wrapper.get(0));
     return app;
