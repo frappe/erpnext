@@ -70,7 +70,7 @@ const isMixerSelected = computed(() => !!selectedMixer.value);
 // actions
 onMounted(async () => {
     const route = frappe.get_route();
-    jobCard.value = route[1] || null;
+    jobCard.value = route[2] || null;
 
     if (!jobCard.value) {
         error.value = __('No Job Card found in route');
