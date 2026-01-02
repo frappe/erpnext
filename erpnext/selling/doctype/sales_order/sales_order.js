@@ -1325,10 +1325,44 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		}
 
 		set_po_items_data(dialog);
-		dialog.get_field("items_for_po").grid.only_sortable();
-		dialog.get_field("items_for_po").refresh();
-		dialog.wrapper.find(".grid-heading-row .grid-row-check").click();
-		dialog.show();
+        let grid = dialog.get_field("items_for_po").grid;
+
+     // 1. Enable editing but hide Add/Delete buttons
+        grid.static_rows = false; 
+        grid.cannot_add_rows = true;    // Removes the "Add Row" button
+        grid.cannot_delete_rows = true; 
+
+    // 2. Ensure fields are editable
+        grid.docfields.forEach(df => {
+            df.read_only = 0;
+        });
+
+        grid.wrapper.on("mousedown", ".grid-row", function (e) {
+    // Don't interfere if clicking an input, checkbox, or the edit pencil
+        if ($(e.target).is('input, textarea, select, .grid-row-check, .btn-open-row')) {
+                   return;
+        }
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        let idx = $(this).data("idx") - 1;
+        let row = grid.grid_rows[idx];
+
+    // Force close any currently open row form
+        if (grid.grid_form) {
+             grid.grid_form.hide();
+             grid.grid_form = null;
+        }
+
+        // Force open the clicked row's form
+         if (row) {
+              grid.open_grid_row(row);
+        } 
+    });
+        grid.refresh();
+        dialog.get_field("items_for_po").refresh();
+        dialog.show();
 	}
 
 	get_ordered_qty(item, so) {
