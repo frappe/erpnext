@@ -31,6 +31,7 @@ def create_slab(line: str, type: str, job_card_number: str | None = None):
     slab_history: SlabHistory = frappe.new_doc(
         "Slab History"
     )  # pyright: ignore[reportAssignmentType]
+    slab_history.idx = 1
     slab_history.station = current_stage
     slab_history.in_time = datetime.now()
     slab_history.job_card_number = job_card_number
@@ -105,6 +106,7 @@ def move_slab_to(
     slab_history: SlabHistory = frappe.new_doc(
         "Slab History"
     )  # pyright: ignore[reportAssignmentType]
+    slab_history.idx = len(slab.slab_history) + 1
     slab_history.station = next_stage
     slab_history.in_time = datetime.now()
     slab_history.job_card_number = job_card_number
