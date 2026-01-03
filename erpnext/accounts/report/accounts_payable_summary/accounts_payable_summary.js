@@ -35,13 +35,6 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			label: __("Ageing Range"),
 			fieldtype: "Data",
 			default: "30, 60, 90, 120",
-			onload: function (report) {
-				frappe.db.get_single_value("Accounts Settings", "range").then((value) => {
-					if (value) {
-						report.set_filter_value("range", value);
-					}
-				});
-			},
 		},
 		{
 			fieldname: "finance_book",
