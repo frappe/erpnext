@@ -15,6 +15,7 @@ class SlabHistory(Document):
 		from frappe.types import DF
 
 		in_time: DF.Datetime
+		job_card_number: DF.Data | None
 		out_time: DF.Datetime | None
 		parent: DF.Data
 		parentfield: DF.Data
