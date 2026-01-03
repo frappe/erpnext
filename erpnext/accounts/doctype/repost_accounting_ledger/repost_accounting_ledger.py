@@ -215,18 +215,25 @@ def start_repost(account_repost_doc=str) -> None:
 
 
 def get_allowed_types_from_settings(child_doc: bool = False):
-	repost_docs = [
-		x.document_type
-		for x in frappe.db.get_all(
-			"Repost Allowed Types", filters={"allowed": True}, fields=["distinct(document_type)"]
-		)
-	]
+	# Avoid DISTINCT(...) here: Frappe applies a default ORDER BY which breaks on Postgres
+	# when used with SELECT DISTINCT.
+	repost_docs = frappe.db.get_all(
+		"Repost Allowed Types",
+		filters={"allowed": True},
+		pluck="document_type",
+	)
+
+	# De-dupe while preserving order (first occurrence wins)
+	repost_docs = list(dict.fromkeys(repost_docs))
 	result = repost_docs
 
 	if repost_docs and child_doc:
 		result.extend(get_child_docs(repost_docs))
+		# Keep uniqueness after extending
+		result = list(dict.fromkeys(result))
 
 	return result
+
 
 
 def get_child_docs(doc: list) -> list:
@@ -291,8 +298,12 @@ def get_repost_allowed_types(doctype, txt, searchfield, start, page_len, filters
 	if txt:
 		filters.update({"document_type": ("like", f"%{txt}%")})
 
-	if allowed_types := frappe.db.get_all(
-		"Repost Allowed Types", filters=filters, fields=["distinct(document_type)"], as_list=1
-	):
-		return allowed_types
-	return []
+	allowed_types = frappe.db.get_all(
+		"Repost Allowed Types",
+		filters=filters,
+		pluck="document_type",
+	)
+
+	allowed_types = list(dict.fromkeys(allowed_types))
+	return [[dt] for dt in allowed_types]
+
