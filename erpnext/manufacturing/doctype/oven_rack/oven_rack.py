@@ -15,7 +15,9 @@ class OvenRack(Document):
 		from frappe.types import DF
 
 		current_slab: DF.Link | None
-		oven: DF.Link
+		parent: DF.Data
+		parentfield: DF.Data
+		parenttype: DF.Data
 		rack_number: DF.Int
 		start_time: DF.Datetime | None
 		status: DF.Literal["Idle", "Heating", "Error"]

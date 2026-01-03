@@ -12,9 +12,11 @@
   "column_break_nly3",
   "line",
   "configuration_section",
-  "upper_shelf_temp",
+  "slab_top_temp",
   "column_break_trid",
-  "lower_shelf_temp"
+  "slab_bottom_temp",
+  "racks_section",
+  "racks"
  ],
  "fields": [
   {
@@ -48,7 +50,7 @@
   {
    "fieldname": "configuration_section",
    "fieldtype": "Section Break",
-   "label": "Configuration"
+   "label": "Temperatures"
   },
   {
    "fieldname": "column_break_nly3",
@@ -59,20 +61,33 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "upper_shelf_temp",
+   "fieldname": "slab_top_temp",
    "fieldtype": "Float",
-   "label": "Upper Shelf Temperature (in \u00b0C)"
+   "label": "Slab Top Temperature (in \u00b0C)",
+   "read_only": 1
   },
   {
-   "fieldname": "lower_shelf_temp",
+   "fieldname": "slab_bottom_temp",
    "fieldtype": "Float",
-   "label": "Lower Shelf Temperature (in \u00b0C)"
+   "label": "Slab Bottom Temperature (in \u00b0C)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "racks_section",
+   "fieldtype": "Section Break",
+   "label": "Rack Status"
+  },
+  {
+   "fieldname": "racks",
+   "fieldtype": "Table",
+   "options": "Oven Rack",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-03 20:30:50.722167",
+ "modified": "2026-01-04 01:23:12.115663",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Oven",
