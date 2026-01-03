@@ -176,7 +176,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-03 16:36:18.198120",
+ "modified": "2026-01-03 19:11:10.445592",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",
@@ -210,7 +210,7 @@
    "title": "Pressing"
   },
   {
-   "color": "Gray",
+   "color": "Cyan",
    "title": "Re-pressing"
   },
   {
@@ -227,11 +227,19 @@
   },
   {
    "color": "Purple",
-   "title": "Calibration"
+   "title": "Calibration 1"
+  },
+  {
+   "color": "Purple",
+   "title": "Calibration 2"
   },
   {
    "color": "Blue",
-   "title": "Polishing"
+   "title": "Polishing 1"
+  },
+  {
+   "color": "Blue",
+   "title": "Polishing 2"
   },
   {
    "color": "Yellow",
