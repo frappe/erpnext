@@ -12,9 +12,9 @@
   "column_break_nly3",
   "line",
   "configuration_section",
-  "slab_top_temp",
+  "upper_shelf_temp",
   "column_break_trid",
-  "slab_bottom_temp"
+  "lower_shelf_temp"
  ],
  "fields": [
   {
@@ -59,20 +59,20 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "slab_top_temp",
+   "fieldname": "upper_shelf_temp",
    "fieldtype": "Float",
-   "label": "Slab Top Temperature (in \u00b0C)"
+   "label": "Upper Shelf Temperature (in \u00b0C)"
   },
   {
-   "fieldname": "slab_bottom_temp",
+   "fieldname": "lower_shelf_temp",
    "fieldtype": "Float",
-   "label": "Slab Bottom Temperature (in \u00b0C)"
+   "label": "Lower Shelf Temperature (in \u00b0C)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-18 23:22:07.226295",
+ "modified": "2026-01-03 20:30:50.722167",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Oven",

@@ -16,8 +16,8 @@ class Oven(Document):
 
 		code: DF.Data
 		line: DF.Link
+		lower_shelf_temp: DF.Float
 		oven_name: DF.Data
-		slab_bottom_temp: DF.Float
-		slab_top_temp: DF.Float
+		upper_shelf_temp: DF.Float
 	# end: auto-generated types
 	pass
