@@ -1,12 +1,14 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:{oven}-{rack_number}",
  "creation": "2025-12-18 21:05:16.645799",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_ito1",
   "rack_number",
+  "column_break_shb2",
   "oven",
   "slab_details_section",
   "current_slab",
@@ -57,15 +59,20 @@
    "label": "Status",
    "options": "Idle\nHeating\nError",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_shb2",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-18 21:19:06.061480",
+ "modified": "2026-01-04 00:57:47.038511",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Oven Rack",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
