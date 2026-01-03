@@ -592,11 +592,12 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.production_item",
+   "depends_on": "eval:doc.production_line",
    "fieldname": "production_line",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Production Line"
+   "fieldtype": "Link",
+   "label": "Production Line",
+   "options": "Production Line",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-cogs",
@@ -604,7 +605,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 15:51:23.106029",
+ "modified": "2025-12-26 15:34:56.022163",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

@@ -8,6 +8,7 @@
  "field_order": [
   "naming_series",
   "work_order",
+  "production_line",
   "bom_no",
   "production_item",
   "employee",
@@ -17,6 +18,7 @@
   "for_quantity",
   "total_completed_qty",
   "process_loss_qty",
+  "mixer_number",
   "scheduled_time_section",
   "expected_start_date",
   "time_required",
@@ -45,6 +47,7 @@
   "sub_operations",
   "section_break_8",
   "items",
+  "additional_ingredients_added",
   "scrap_items_section",
   "scrap_items",
   "corrective_operation_section",
@@ -507,11 +510,30 @@
   {
    "fieldname": "column_break_fcmp",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "additional_ingredients_added",
+   "fieldtype": "Check",
+   "label": "Additional Ingredients Added"
+  },
+  {
+   "fieldname": "production_line",
+   "fieldtype": "Link",
+   "label": "Production Line",
+   "options": "Production Line",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mixer_number",
+   "fieldtype": "Link",
+   "label": "Mixer Number",
+   "options": "Mixer"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-04 15:47:54.514290",
+ "modified": "2025-12-30 17:14:54.191729",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
@@ -564,6 +586,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

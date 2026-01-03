@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "naming_series:",
- "creation": "2017-10-29 11:53:09.523362",
+ "creation": "2025-12-08 15:45:12.714858",
  "doctype": "DocType",
  "document_type": "Document",
  "engine": "InnoDB",
@@ -571,7 +571,6 @@
    "label": "Select Items to Manufacture in Mono Line"
   },
   {
-   "depends_on": "eval:doc.is_parent_plan == 0",
    "fieldname": "monthly_production_plan",
    "fieldtype": "Link",
    "label": "Monthly Production Plan",
@@ -583,7 +582,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-08 15:27:03.209270",
+ "modified": "2025-12-17 15:03:56.113430",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
