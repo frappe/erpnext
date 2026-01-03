@@ -8,11 +8,17 @@ const serial = ref('SLB-2025-00427');
 const colour = ref('Carrara White');
 const timerHandle = ref(null);
 
-const distributionStarted = ref(false);
-const distributionStartTime = ref(null);
-const distributionElapsed = ref(0);
-const distributionTimerHandle = ref(null);
-const distributionReady = ref(true);
+const processStarted = ref(false);
+const processStartTime = ref(false);
+const processElapsed = ref(0);
+const processTimerHandle = ref(null);
+const processReady = ref(true);
+
+// const distributionStarted = ref(false);
+// const distributionStartTime = ref(null);
+// const distributionElapsed = ref(0);
+// const distributionTimerHandle = ref(null);
+// const distributionReady = ref(true);
 const jobCardSubmitted = ref(false);
 const preparedQty = ref(0);
 const stockEntryName = ref('');
@@ -41,8 +47,6 @@ const alarms = ref([
 
 // UI flags
 const showStartButton = ref(true);
-// const showTimer = ref(false);
-// const showActions = ref(false);
 const showAlarms = ref(true);
 
 // Raise‑alarm dialog
@@ -52,9 +56,9 @@ const issueDescription = ref('');
 
 // formatted timer
 const formattedTime = computed(() => {
-  const h = String(Math.floor(distributionElapsed.value / 3600)).padStart(2, '0');
-  const m = String(Math.floor((distributionElapsed.value % 3600) / 60)).padStart(2, '0');
-  const s = String(distributionElapsed.value % 60).padStart(2, '0');
+  const h = String(Math.floor(processElapsed.value / 3600)).padStart(2, '0');
+  const m = String(Math.floor((processElapsed.value % 3600) / 60)).padStart(2, '0');
+  const s = String(processElapsed.value % 60).padStart(2, '0');
   return `${h}:${m}:${s}`;
 });
 
@@ -97,34 +101,35 @@ onMounted(async () => {
         const stateRes = await frappe.call ({
           method: 'erpnext.manufacturing.page.operator_station.operator_station.get_operator_state',
           args: {
-            job_card: props.job_card
+            job_card: props.job_card,
+            process_name: props.process
           }
         });
         const state = stateRes.message || {};
-        distributionStarted.value = !!state.distribution_started;
-        distributionStartTime.value = state.distribution_start_time;
+        processStarted.value = !!state[`${props.process}_started`];
+        processStartTime.value = state[`${props.process}_start_time`];
 
         jobCardSubmitted.value = !!state.job_card_submitted || false;  
         if (jobCardSubmitted.value) {
             stockEntryName.value = state.stock_entry_name || '';
         }
 
-        if (distributionStarted.value && distributionStartTime.value) {
-            const start = frappe.datetime.str_to_obj(distributionStartTime.value);
+        if (processStarted.value && processStartTime.value) {
+            const start = frappe.datetime.str_to_obj(processStartTime.value);
             const now = frappe.datetime.now_datetime();
             const diffSeconds = (new Date(now) - new Date(start)) / 1000;
-            distributionElapsed.value = Math.max(0, Math.floor(diffSeconds));
+            processElapsed.value = Math.max(0, Math.floor(diffSeconds));
 
-            if (distributionTimerHandle.value) clearInterval(distributionTimerHandle.value);
-            distributionTimerHandle.value = setInterval(() => {
-                distributionElapsed.value += 1;
+            if (processTimerHandle.value) clearInterval(processTimerHandle.value);
+            processTimerHandle.value = setInterval(() => {
+                processElapsed.value += 1;
             }, 1000);
         } 
         else {
-            distributionElapsed.value = 0;
-            if (distributionTimerHandle.value) {
-                clearInterval(distributionTimerHandle.value);
-                distributionTimerHandle.value = null;
+            processElapsed.value = 0;
+            if (processTimerHandle.value) {
+                clearInterval(processTimerHandle.value);
+                processTimerHandle.value = null;
             }
         }
     } 
@@ -134,7 +139,7 @@ onMounted(async () => {
     } 
 });
 
-async function startDistribution() {
+async function startOperation() {
     frappe.confirm(
         __('Start Distribution now?'),
         async () => {
@@ -142,50 +147,54 @@ async function startDistribution() {
                 console.log()
                 await frappe.call({
                     method: 'erpnext.manufacturing.page.operator_station.operator_station.start_distribution',
-                    args: { job_card: jobCard.value }
+                    args: { 
+                      job_card: jobCard.value,
+                      process_name: props.process
+                     }
                 });
                 status.value = 'In Progress';
                 showStartButton.value = false;
-                distributionStarted.value = true;
-                distributionStartTime.value = frappe.datetime.now_datetime();
+                processStarted.value = true;
+                processStartTime.value = frappe.datetime.now_datetime();
 
-                distributionElapsed.value = 0;
-                if (distributionTimerHandle.value) {
-                    clearInterval(distributionTimerHandle.value);
+                processElapsed.value = 0;
+                if (processTimerHandle.value) {
+                    clearInterval(processTimerHandle.value);
                 }
-                distributionTimerHandle.value = setInterval(() => {
-                    distributionElapsed.value += 1;
+                processTimerHandle.value = setInterval(() => {
+                    processElapsed.value += 1;
                 }, 1000);
     
-                frappe.msgprint(__('Distribution started'));
+                frappe.msgprint(__('Process started'));
             }
             catch (e) {
                 frappe.msgprint(__('Failed to start Job Card: {0}', [e.message || e]));
             }
         },
         () => {
-            frappe.msgprint(__('Distribution was not started.'));
+            frappe.msgprint(__('Process was not started.'));
         }
     );
 }
 
-async function finishDistribution() {
-    if (distributionTimerHandle.value) {
-        clearInterval(distributionTimerHandle.value);
-        distributionTimerHandle.value = null;
+async function finishOperation() {
+    if (processTimerHandle.value) {
+        clearInterval(processTimerHandle.value);
+        processTimerHandle.value = null;
     }
     try {
         const result = await frappe.call({
             method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_distribution',
             args: {
                 job_card: jobCard.value,
+                process_name: props.process
             },
         });
         status.value = 'Finished';
-        distributionStarted.value = false;
-        distributionStartTime.value = null;
-        distributionElapsed.value = 0;
-        distributionReady.value = false;
+        processStarted.value = false;
+        processStartTime.value = null;
+        processElapsed.value = 0;
+        processReady.value = false;
 
         jobCardSubmitted.value = true;
         preparedQty.value = result.message.job_card_qty;
@@ -202,7 +211,9 @@ async function finishDistribution() {
                 indicator: 'green'
             });
         }
+        transferToFGWarehouse();
     }
+
     catch (error) {
         console.error('error.message:', error.message);
         const errorMsg = error.message || 
@@ -217,26 +228,59 @@ async function finishDistribution() {
     }
 }
 
-// function startJob() {
-//   status.value = 'In Progress';
-//   showStartButton.value = false;
-//   showTimer.value = true;
-//   showActions.value = true;
+async function transferToFGWarehouse() {
+  try {
+    const jc = await frappe.db.get_doc('Job Card', jobCard.value);
+    const workOrder = jc.work_order; 
+    
+    if (!workOrder) {
+        frappe.msgprint(__('Work Order required from Job Card'));
+        return;
+    }
 
-//   stopAndResetTimer();
-//   timerHandle.value = setInterval(() => {
-//     elapsedSeconds.value += 1;
-//   }, 1000);
-// }
+    const result = await frappe.call({
+        method: 'erpnext.manufacturing.page.operator_station.operator_station.transfer_to_next_process',
+        args: {
+            current_work_order: workOrder,  
+            qty: bomQty.value
+        },
+        freeze: true,
+        freeze_message: __('Transferring to Distribution')
+    });
+    
+    transferredQty.value += result.message.qty_transferred;   
+    frappe.msgprint({
+        title: __('Transfer Complete'),
+        message: result.message.message,
+        indicator: 'green'
+    });
+    
+    frappe.show_alert({
+        message: `Next: ${result.message.next_work_order}`,
+        indicator: 'blue'
+    });
+  } 
+  catch (error) {
+      frappe.msgprint(__('Transfer failed: {0}', [error.message]));
+  }
+}
 
-// function finishJob() {
-//   status.value = 'Finished';
-//   stopAndResetTimer();
-//   showTimer.value = false;
-//   showActions.value = false;
-//   showStartButton.value = true;
-//   frappe.msgprint(__('Job is Finished'));
-// }
+async function loadBomQty() {
+  try {
+    const jc = await frappe.db.get_doc('Job Card', jobCard.value);
+    const result = await frappe.call({
+        method: 'erpnext.manufacturing.page.operator_station.operator_station.get_next_process_bom_qty',
+        args: { current_work_order: jc.work_order }
+    });
+    
+    bomQty.value = result.message.bom_qty; 
+    nextWorkOrder.value = result.message.next_work_order;
+  } 
+  catch (error) {
+      console.error('BOM qty load failed:', error);
+      bomQty.value = 0;
+  }
+}
 
 function haltJob() {
   status.value = 'Halted';
@@ -323,21 +367,21 @@ function statusStyle() {
               style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span>
       </div>     
 
-      <div class="text-center mb-2" v-if="distributionReady">
-        <button class="btn btn-success py-3 px-4" @click="startDistribution">
+      <div class="text-center mb-2" v-if="processReady">
+        <button class="btn btn-success py-3 px-4" @click="startOperation">
           <span class="fa fa-play mr-1 pr-2"></span>{{ __('Start Job') }}
         </button>
       </div>
 
-      <div class="text-center mb-3" v-if="distributionStarted && !jobCardSubmitted">
+      <div class="text-center mb-3" v-if="processStarted && !jobCardSubmitted">
         <div class="text-success" style="font-size:1.5rem">
           <span class="fa fa-clock-o mr-1"></span>
           <span class="job-timer">{{ formattedTime }}</span>
         </div>
       </div>
 
-      <div class="text-center mb-2" v-if="distributionStarted">
-        <button class="btn btn-info mr-2" @click="finishDistribution">
+      <div class="text-center mb-2" v-if="processStarted">
+        <button class="btn btn-info mr-2" @click="finishOperation">
           <span class="fa fa-check-square-o mr-1"></span>{{ __('Finish Job') }}
         </button>
         <button class="btn btn-warning mr-2" @click="haltJob">
