@@ -176,7 +176,9 @@ class Task(NestedSet):
 			frappe.qb.from_(Task).select(Avg(Task.progress)).where(Task.parent_task == parent_task)
 		).run()[0][0] or 0
 
-		frappe.db.set_value("Task", parent_task, "progress", avg_progress)
+		doc = frappe.get_doc("Task", parent_task)
+		doc.progress = avg_progress
+		doc.save()
 
 	def validate_dependencies_for_template_task(self):
 		if self.is_template:

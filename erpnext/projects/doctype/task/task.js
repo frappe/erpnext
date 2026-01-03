@@ -60,7 +60,7 @@ frappe.ui.form.on("Task", {
 	},
 
 	project: function (frm) {
-		if (frm.doc.parent_task && frm.doc.project !== "") {
+		if (frm.doc.parent_task && frm.doc.project) {
 			frappe.db.get_value("Task", frm.doc.parent_task, "project").then((r) => {
 				if (r.message && r.message.project !== frm.doc.project) {
 					frm.set_value("parent_task", "");
