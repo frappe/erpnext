@@ -21,7 +21,6 @@ class Slab(Document):
 		consignment_number: DF.Data | None
 		created_on: DF.Datetime | None
 		current_job_card: DF.Data | None
-		current_stage: DF.Literal["Distribution", "Pressing", "Re-pressing", "Heating", "Cooling", "Quarantine", "Trimming", "Calibration 1", "Calibration 2", "Polishing 1", "Polishing 2", "Quality Check", "Packed", "Shipped", "Discarded"]
 		grade: DF.Data | None
 		is_repressed: DF.Check
 		line: DF.Link
@@ -30,6 +29,7 @@ class Slab(Document):
 		serial_number: DF.Data
 		shipping_date: DF.Date | None
 		slab_history: DF.Table[SlabHistory]
+		status: DF.Literal["Distribution", "Pressing", "Re-pressing", "Heating", "Cooling", "Quarantine", "Trimming", "Calibration 1", "Calibration 2", "Polishing 1", "Polishing 2", "Quality Check", "Packed", "Shipped", "Discarded"]
 		template: DF.Link
 	# end: auto-generated types
 	pass

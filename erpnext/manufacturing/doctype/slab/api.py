@@ -23,7 +23,7 @@ def create_slab(line: str, type: str, job_card_number: str | None = None):
 
     new_slab.created_on = datetime.now()
     current_stage = ALLOWED_STAGES[0]
-    new_slab.current_stage = (
+    new_slab.status = (
         current_stage  # pyright: ignore[reportAttributeAccessIssue]
     )
 
@@ -77,7 +77,7 @@ def move_slab_to(
 
     slab: Slab = frappe.get_doc("Slab", slab_number)
 
-    current_stage_index = ALLOWED_STAGES.index(slab.current_stage)
+    current_stage_index = ALLOWED_STAGES.index(slab.status)
     next_stage_index = ALLOWED_STAGES.index(next_stage)
 
     # Validation: Check the direction of transition
@@ -85,7 +85,7 @@ def move_slab_to(
         next_stage_index == current_stage_index and next_stage != "Re-pressing"
     ):
         frappe.throw(
-            f"Invalid stage transition: cannot move from {slab.current_stage} to {next_stage}"
+            f"Invalid stage transition: cannot move from {slab.status} to {next_stage}"
         )
 
     # If the slab is not checked out yet, check it out of the previous
@@ -98,7 +98,7 @@ def move_slab_to(
         checkout_slab(slab_number)
         slab: Slab = frappe.get_doc("Slab", slab_number)
 
-    slab.current_stage = next_stage  # pyright: ignore[reportAttributeAccessIssue]
+    slab.status = next_stage  # pyright: ignore[reportAttributeAccessIssue]
     slab.current_job_card = job_card_number
 
     # Append the next stage to the slab history.

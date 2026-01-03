@@ -16,7 +16,7 @@
   "column_break_mfbp",
   "created_on",
   "current_job_card",
-  "current_stage",
+  "status",
   "is_repressed",
   "quality_section",
   "grade",
@@ -56,10 +56,10 @@
    "reqd": 1
   },
   {
-   "fieldname": "current_stage",
+   "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Current Stage",
+   "label": "Status",
    "options": "Distribution\nPressing\nRe-pressing\nHeating\nCooling\nQuarantine\nTrimming\nCalibration 1\nCalibration 2\nPolishing 1\nPolishing 2\nQuality Check\nPacked\nShipped\nDiscarded",
    "read_only": 1,
    "reqd": 1
@@ -176,7 +176,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-03 16:22:34.894111",
+ "modified": "2026-01-03 16:36:18.198120",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",
