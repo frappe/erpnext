@@ -148,12 +148,12 @@ def transfer_to_next_process(current_work_order, qty=None):
     process_mapping = {
         "Mixing": "Distribution",
         "Distribution": "Pressed Slab", 
-        "Pressed Slab": "Heating",
-        "Heating": "Cooling",
-        "Cooling": "Trimming",
-        "Trimming": "Calibration",
-        "Calibration": "Polishing",
-        "Polishing": "Quality Analysis"
+        "Pressed Slab": "Heated Slab",
+        "Heated Slab": "Cooled Slab",
+        "Cooled Slab": "Trimmed Slab",
+        "Trimmed Slab": "Calibrated Slab",
+        "Calibrated Slab": "Polished Slab",
+        "Polished Slab": "Inspected Slab"
     }
 
     current_process = wo.description.split(" - ")[-1].strip() if " - " in wo.description else ""
@@ -259,13 +259,13 @@ def get_next_process_bom_qty(current_work_order):
     current_process = wo.description.split(" - ")[-1].strip()
     process_mapping = {
         "Mixing": "Distribution",
-        "Distribution": "Pressed", 
-        "Pressed": "Heating",
-        "Heating": "Cooling",
-        "Cooling": "Trimming",
-        "Trimming": "Calibration",
-        "Calibration": "Polishing",
-        "Polishing": "Quality Analysis"
+        "Distribution": "Pressed Slab", 
+        "Pressed Slab": "Heated Slab",
+        "Heated Slab": "Cooled Slab",
+        "Cooled Slab": "Trimmed Slab",
+        "Trimmed Slab": "Calibrated Slab",
+        "Calibrated Slab": "Polished Slab",
+        "Polished Slab": "Inspected Slab"
     }
     next_process = process_mapping.get(current_process)
     
