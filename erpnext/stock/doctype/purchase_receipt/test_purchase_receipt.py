@@ -49,6 +49,48 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		pr.save()
 		self.assertEqual(pr.items[0].rejected_qty, 1)
 
+	def test_return_rejected_does_not_block_accepted_return(self):
+		"""
+		Test that returning Rejected items does NOT reduce the balance of Accepted items.
+		"""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		
+		# 1. Create Draft Purchase Receipt
+		# Change do_not_submit to True so we can edit it before submitting
+		pr = make_purchase_receipt(
+			qty=10, 
+			rejected_qty=5, 
+			rate=100, 
+			do_not_submit=True 
+		)
+		
+		# Set warehouse BEFORE submission
+		pr.items[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
+		pr.save()
+		pr.submit()
+
+		# 2. Return 3 items from Rejected Warehouse
+		return_rejected = make_return_doc("Purchase Receipt", pr.name)
+		
+		# FIX: The standard flow uses 'qty' for the return amount, not 'rejected_qty'
+		return_rejected.items[0].qty = -3 
+		return_rejected.items[0].rejected_qty = 0
+		return_rejected.items[0].return_qty_from_rejected_warehouse = 1
+		return_rejected.save()
+		return_rejected.submit()
+
+		# 3. Return 10 items from Accepted Warehouse
+		return_accepted = make_return_doc("Purchase Receipt", pr.name)
+		return_accepted.items[0].qty = -10
+		return_accepted.items[0].rejected_qty = 0
+		return_accepted.items[0].return_qty_from_rejected_warehouse = 0
+		return_accepted.save()
+		
+		return_accepted.submit()
+		
+		pr.reload()
+		self.assertEqual(pr.status, "Return")
+
 	def test_purchase_receipt_received_qty(self):
 		"""
 		1. Test if received qty is validated against accepted + rejected

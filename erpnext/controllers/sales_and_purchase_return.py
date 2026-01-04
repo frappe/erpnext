@@ -169,64 +169,82 @@ def validate_returned_items(doc):
 
 
 def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
-	fields = ["stock_qty"]
-	if (doc.doctype == "Purchase Invoice" or doc.doctype == "Sales Invoice") and not doc.update_stock:
-		fields = ["qty"]
+    fields = ["stock_qty"]
+    if (doc.doctype == "Purchase Invoice" or doc.doctype == "Sales Invoice") and not doc.update_stock:
+        fields = ["qty"]
 
-	if doc.doctype in ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"]:
-		if not args.get("return_qty_from_rejected_warehouse"):
-			fields.extend(["received_qty", "rejected_qty"])
-		else:
-			fields.extend(["received_qty"])
+    if doc.doctype in ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"]:
+        if not args.get("return_qty_from_rejected_warehouse"):
+            fields.extend(["received_qty", "rejected_qty"])
+        else:
+            fields.extend(["received_qty"])
 
-	already_returned_data = already_returned_items.get(key) or {}
+    already_returned_data = already_returned_items.get(key) or {}
 
-	company_currency = erpnext.get_company_currency(doc.company)
-	field_precision = get_field_precision(
-		frappe.get_meta(doc.doctype + " Item").get_field(
-			"stock_qty" if doc.get("update_stock", "") else "qty"
-		),
-		currency=company_currency,
-	)
+    company_currency = erpnext.get_company_currency(doc.company)
+    field_precision = get_field_precision(
+        frappe.get_meta(doc.doctype + " Item").get_field(
+            "stock_qty" if doc.get("update_stock", "") else "qty"
+        ),
+        company_currency,
+    )
 
-	for column in fields:
-		returned_qty = (
-			flt(already_returned_data.get(column, 0), field_precision)
-			if len(already_returned_data) > 0
-			else 0
-		)
+    for column in fields:
+        # --- Determine which 'Returned' bucket to use ---
+        if column == "stock_qty" and args.get("return_qty_from_rejected_warehouse"):
+            returned_qty_key = "rejected_stock_qty_returned"
+        elif column == "qty" and args.get("return_qty_from_rejected_warehouse"):
+            returned_qty_key = "rejected_qty_returned"
+        else:
+            returned_qty_key = column
 
-		if column == "stock_qty" and not args.get("return_qty_from_rejected_warehouse"):
-			reference_qty = ref.get(column)
-			current_stock_qty = args.get(column)
-		elif args.get("return_qty_from_rejected_warehouse"):
-			reference_qty = ref.get("rejected_qty") * ref.get("conversion_factor", 1.0)
-			current_stock_qty = (
-				args.get(column) * args.get("conversion_factor", 1.0)
-				if column != "stock_qty"
-				else args.get(column)
-			)
-		else:
-			reference_qty = ref.get(column) * ref.get("conversion_factor", 1.0)
-			current_stock_qty = args.get(column) * args.get("conversion_factor", 1.0)
+        returned_qty = (
+            flt(already_returned_data.get(returned_qty_key, 0), field_precision)
+            if len(already_returned_data) > 0
+            else 0
+        )
 
-		max_returnable_qty = flt(flt(reference_qty, field_precision) - returned_qty, field_precision)
-		label = column.replace("_", " ").title()
+        if column == "stock_qty" and not args.get("return_qty_from_rejected_warehouse"):
+            reference_qty = ref.get(column)
+            current_stock_qty = args.get(column)
+            
+        elif args.get("return_qty_from_rejected_warehouse"):
+            # CASE 1: Returning from Rejected Warehouse
+            if column == "stock_qty":
+                reference_qty = ref.get("rejected_qty") * ref.get("conversion_factor", 1.0)
+                current_stock_qty = args.get(column)
+            else:
+                # Keep in item units
+                reference_qty = ref.get("rejected_qty")
+                current_stock_qty = args.get(column)
+                
+        else:
+            # CASE 2: Standard Return (Accepted Warehouse)
+            if column == "stock_qty":
+                reference_qty = ref.get(column) * ref.get("conversion_factor", 1.0)
+                current_stock_qty = args.get(column) * args.get("conversion_factor", 1.0)
+            else:
+                # Keep in item units (No conversion factor)
+                reference_qty = ref.get(column)
+                current_stock_qty = args.get(column)
 
-		if reference_qty:
-			if flt(args.get(column)) > 0:
-				frappe.throw(_("{0} must be negative in return document").format(label))
-			elif returned_qty >= reference_qty and args.get(column) >= 0:
-				frappe.throw(
-					_("Item {0} has already been returned").format(args.item_code), StockOverReturnError
-				)
-			elif abs(flt(current_stock_qty, field_precision)) > max_returnable_qty:
-				frappe.throw(
-					_("Row # {0}: Cannot return more than {1} for Item {2}").format(
-						args.idx, max_returnable_qty, args.item_code
-					),
-					StockOverReturnError,
-				)
+        max_returnable_qty = flt(flt(reference_qty, field_precision) - returned_qty, field_precision)
+        label = column.replace("_", " ").title()
+
+        if reference_qty:
+            if flt(args.get(column)) > 0:
+                frappe.throw(_("{0} must be negative in return document").format(label))
+            elif returned_qty >= reference_qty and args.get(column) >= 0:
+                frappe.throw(
+                    _("Item {0} has already been returned").format(args.item_code), StockOverReturnError
+                )
+            elif abs(flt(current_stock_qty, field_precision)) > max_returnable_qty:
+                frappe.throw(
+                    _("Row # {0}: Cannot return more than {1} for Item {2}").format(
+                        args.idx, max_returnable_qty, args.item_code
+                    ),
+                    StockOverReturnError,
+                )
 
 
 def get_ref_item_dict(valid_items, ref_item_row):
@@ -271,7 +289,26 @@ def get_ref_item_dict(valid_items, ref_item_row):
 
 
 def get_already_returned_items(doc):
-	column = "child.item_code, sum(abs(child.qty)) as qty, sum(abs(child.stock_qty)) as stock_qty"
+	# Updated SQL to split Accepted vs Rejected returns based on the flag
+	# Dynamically check if return_qty_from_rejected_warehouse exists in the item table
+	has_rejected_return_flag = frappe.db.has_column(f"{doc.doctype} Item", "return_qty_from_rejected_warehouse")
+
+	if has_rejected_return_flag:
+		rejected_qty_returned_col = "sum(case when child.return_qty_from_rejected_warehouse=1 then abs(child.qty) else 0 end)"
+		rejected_stock_qty_returned_col = "sum(case when child.return_qty_from_rejected_warehouse=1 then abs(child.stock_qty) else 0 end)"
+		accepted_qty_returned_where = "(child.return_qty_from_rejected_warehouse=0 OR child.return_qty_from_rejected_warehouse IS NULL)"
+	else:
+		rejected_qty_returned_col = "0"
+		rejected_stock_qty_returned_col = "0"
+		accepted_qty_returned_where = "1=1"
+
+	column = f"""child.item_code,
+		sum(case when {accepted_qty_returned_where} then abs(child.qty) else 0 end) as qty,
+		sum(case when {accepted_qty_returned_where} then abs(child.stock_qty) else 0 end) as stock_qty,
+		{rejected_qty_returned_col} as rejected_qty_returned,
+		{rejected_stock_qty_returned_col} as rejected_stock_qty_returned
+	"""
+
 	if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 		column += """, sum(abs(child.rejected_qty) * child.conversion_factor) as rejected_qty,
 			sum(abs(child.received_qty) * child.conversion_factor) as received_qty"""
@@ -281,6 +318,7 @@ def get_already_returned_items(doc):
 		if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Sales Invoice", "POS Invoice"]
 		else "dn_detail"
 	)
+
 	data = frappe.db.sql(
 		f"""
 		select {column}, child.{field}
@@ -296,7 +334,6 @@ def get_already_returned_items(doc):
 	)
 
 	items = {}
-
 	for d in data:
 		items.setdefault(
 			(d.item_code, d.get(field)),
@@ -306,6 +343,9 @@ def get_already_returned_items(doc):
 					"stock_qty": d.get("stock_qty"),
 					"received_qty": d.get("received_qty"),
 					"rejected_qty": d.get("rejected_qty"),
+					# New keys for specific validation
+					"rejected_qty_returned": d.get("rejected_qty_returned"),
+					"rejected_stock_qty_returned": d.get("rejected_stock_qty_returned"),
 				}
 			),
 		)

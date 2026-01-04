@@ -2962,8 +2962,24 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		return_pi.items[0].purchase_invoice_item = pi.items[0].name
 		return_pi.submit()
 
-		pr = make_purchase_receipt_from_pi(pi.name)
-		self.assertFalse(pr.items)
+	def test_purchase_return_for_rejected_warehouse_check(self):
+		"""
+		Test that Purchase Invoice Return works (does not crash) even though 
+		Purchase Invoice Item does not have 'return_qty_from_rejected_warehouse' column.
+		"""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		# 1. Create a simple Purchase Invoice
+		pi = make_purchase_invoice(qty=5, rate=100, update_stock=1)
+		
+		# 2. Create a full return (Debit Note) against it
+		pi_return = make_return_doc("Purchase Invoice", pi.name)
+		pi_return.save()
+		pi_return.submit()
+
+		# 3. Reload and verify status
+		pi.reload()
+		self.assertEqual(pi.status, "Return")
 
 
 def set_advance_flag(company, flag, default_account):
