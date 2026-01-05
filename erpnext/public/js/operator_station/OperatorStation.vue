@@ -6,8 +6,7 @@ import { ref, computed, onMounted } from 'vue';
 const jobCard = ref(null);
 const status = ref('Pending');
 const serial = ref('SLB-2025-00427');
-const colour = ref('Carrara White');
-const timerHandle = ref(null);
+const colour = ref('');
 
 const processStarted = ref(false);
 const processStartTime = ref(null);
@@ -25,7 +24,7 @@ const transferSuccess = ref(false);
 const nextWorkOrder = ref(''); 
 const bomNo = ref('Loading...');
 const bomQty = ref(0);
-const line = ref('L1'); 
+const slabTemplate = ref('');  
 const workstation = ref('');
 const error = ref(null);              
 const batchNo = ref(null);
@@ -91,14 +90,35 @@ onMounted(async () => {
     try {
         const jc = await frappe.db.get_doc('Job Card', jobCard.value);
         if (jc.bom_no) {
+            const bom = await frappe.db.get_doc('BOM', jc.bom_no);
             batchNo.value = jc.bom_no;  
+            if(bom.slab_template) {
+                slabTemplate.value = bom.slab_template;
+            }
         }
       
         jobCardSubmitted.value = jc.docstatus === 1 || jc.status === 'Completed';  
         if (jobCardSubmitted.value) {
             preparedQty.value = jc.total_completed_qty || jc.for_quantity || 0;
         }
-        // createSlab();
+        // const existingSlabs = await frappe.db.get_list('Slab', {
+        //     filters: { current_job_card: jobCard.value },
+        //     fields: ['name', 'serial_number', 'batch_number', 'template']
+        // });
+
+        // if (existingSlabs.length > 0) {
+        //     const slab = existingSlabs[0];
+        //     slabCreated.value = true;
+        //     slabNumber.value = slab.serial_number;
+        //     if (slab.batch_number) {
+        //          batchNo.value = slab.batch_number;
+        //     }
+        //     if (slab.template) {
+        //         colour.value = slab.template;
+        //     }
+        // } else {
+             createSlab(jc.production_line);
+        // }
 
         const stateRes = await frappe.call ({
           method: 'erpnext.manufacturing.page.operator_station.operator_station.get_operator_state',
@@ -152,27 +172,25 @@ onMounted(async () => {
 // }
 
 
-async function createSlab() {
-  if (!jobCard.value || slabCreated.value) return
+async function createSlab(line) {
+  if (!jobCard.value || slabCreated.value || !slabTemplate.value) return
   
   try {
     const result = await frappe.call({
-      method: "erpnext.manufacturing.utils.slab.create_slab",
+      method: "erpnext.manufacturing.doctype.slab.api.create_slab",
       args: { 
-        line: line.value || 'L1',
-        job_card: jobCard.value.name,
-        workstation: workstation.value
+        line: line || 'L1',
+        type: slabTemplate.value,
+        job_card_number: jobCard.value,
       }
-    })
-    
-    slabCreated.value = true
-    slabNumber.value = result;
-    const jc = await frappe.db.get_doc('Job Card', jobCard.value);
-    if (jc) {
-      bomNo.value = jc.bom_no;  
-    }
+    });
+
+    slabCreated.value = true;
+    slabNumber.value = result.message?.serial_number;
+    batchNo.value = result.message?.batch_number;
+    colour.value = result.message?.template;
   } catch (e) {
-    frappe.msgprint(__('Slab creation failed: {0}', [e.message]))
+    frappe.msgprint(__('Slab creation failed: {0}', [e.message]));
   }
 }
 
@@ -424,12 +442,12 @@ function statusStyle() {
 
       <div class="text-center text-muted small">{{ __('SERIAL NUMBER') }}</div>
       <h2 class="job-serial text-center font-weight-bold mb-2 p-3">
-        {{ serial }}
+        {{ slabNumber }} - {{ batchNo }}
       </h2>
-
-      <div class="text-center text-muted small mb-1">{{ __('Colour') }}</div>
+      
+      <!-- <div class="text-center text-muted small mb-1">{{ __('Colour') }}</div> -->
       <div class="d-flex justify-content-center align-items-center mb-3">
-        <span class="job-color mr-2">{{ colour }}</span>
+        <span class="job-color bold mr-2" style="font-size:1rem">{{ colour }}</span>
         <span class="color-swatch"
               style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span>
       </div>     
