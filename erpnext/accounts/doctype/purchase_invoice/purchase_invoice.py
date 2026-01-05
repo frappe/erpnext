@@ -2013,10 +2013,9 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 
 	def set_missing_values(source_parent, target_parent):
 		target_parent.run_method("set_missing_values")
-		target_parent.run_method("calculate_taxes_and_totals")
-
 		if args and args.get("merge_taxes"):
 			merge_taxes(source_parent, target_parent)
+		target_parent.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
 		from erpnext.controllers.sales_and_purchase_return import get_returned_qty_map_for_row
