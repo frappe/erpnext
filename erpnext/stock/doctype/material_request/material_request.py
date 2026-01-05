@@ -881,18 +881,6 @@ def make_in_transit_stock_entry(source_name, in_transit_warehouse):
 
 
 @frappe.whitelist()
-def make_in_transit_stock_entry(source_name, in_transit_warehouse):
-	ste_doc = make_stock_entry(source_name)
-	ste_doc.add_to_transit = 1
-	ste_doc.to_warehouse = in_transit_warehouse
-
-	for row in ste_doc.items:
-		row.t_warehouse = in_transit_warehouse
-
-	return ste_doc
-
-
-@frappe.whitelist()
 def update_items_after_submit(mr_name=None, trans_items=None):
 	if not mr_name:
 		frappe.throw(_("Material Request name is required"))
