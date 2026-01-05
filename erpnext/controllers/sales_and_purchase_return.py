@@ -190,25 +190,38 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 	)
 
 	for column in fields:
+		# --- 1. Determine which 'Returned' bucket to use ---
+		if column == "stock_qty" and args.get("return_qty_from_rejected_warehouse"):
+			returned_qty_key = "rejected_stock_qty_returned"
+		elif column == "qty" and args.get("return_qty_from_rejected_warehouse"):
+			returned_qty_key = "rejected_qty_returned"
+		else:
+			returned_qty_key = column
+
 		returned_qty = (
-			flt(already_returned_data.get(column, 0), field_precision)
+			flt(already_returned_data.get(returned_qty_key, 0), field_precision)
 			if len(already_returned_data) > 0
 			else 0
 		)
 
 		if column == "stock_qty" and not args.get("return_qty_from_rejected_warehouse"):
 			reference_qty = ref.get(column)
-			current_stock_qty = args.get(column)
+			current_stock_qty = args.get(column)			
 		elif args.get("return_qty_from_rejected_warehouse"):
-			reference_qty = ref.get("rejected_qty") * ref.get("conversion_factor", 1.0)
-			current_stock_qty = (
-				args.get(column) * args.get("conversion_factor", 1.0)
-				if column != "stock_qty"
-				else args.get(column)
-			)
+			if column == "stock_qty":
+				reference_qty = ref.get("rejected_qty") * ref.get("conversion_factor", 1.0)
+				current_stock_qty = args.get(column)
+			else:
+				reference_qty = ref.get("rejected_qty")
+				current_stock_qty = args.get(column)
+				
 		else:
-			reference_qty = ref.get(column) * ref.get("conversion_factor", 1.0)
-			current_stock_qty = args.get(column) * args.get("conversion_factor", 1.0)
+			reference_qty = ref.get(column)
+			current_stock_qty = args.get(column)
+			
+			if column == "stock_qty":
+				reference_qty = reference_qty * ref.get("conversion_factor", 1.0)
+				current_stock_qty = current_stock_qty * args.get("conversion_factor", 1.0)
 
 		max_returnable_qty = flt(flt(reference_qty, field_precision) - returned_qty, field_precision)
 		label = column.replace("_", " ").title()
@@ -271,7 +284,27 @@ def get_ref_item_dict(valid_items, ref_item_row):
 
 
 def get_already_returned_items(doc):
-	column = "child.item_code, sum(abs(child.qty)) as qty, sum(abs(child.stock_qty)) as stock_qty"
+	# Check if the field exists in the current doctype's item table (Safety Check)
+	has_rejected_return_flag = frappe.db.has_column(f"{doc.doctype} Item", "return_qty_from_rejected_warehouse")
+
+	if has_rejected_return_flag:
+		# Split logic: If flag is 1, it goes to rejected bucket. If 0 or NULL, accepted bucket.
+		rejected_qty_returned_col = "sum(case when child.return_qty_from_rejected_warehouse=1 then abs(child.qty) else 0 end)"
+		rejected_stock_qty_returned_col = "sum(case when child.return_qty_from_rejected_warehouse=1 then abs(child.stock_qty) else 0 end)"
+		accepted_qty_returned_where = "(child.return_qty_from_rejected_warehouse=0 OR child.return_qty_from_rejected_warehouse IS NULL)"
+	else:
+		# Fallback for doctypes without the flag (e.g. Purchase Invoice)
+		rejected_qty_returned_col = "0"
+		rejected_stock_qty_returned_col = "0"
+		accepted_qty_returned_where = "1=1"
+
+	column = f"""child.item_code,
+		sum(case when {accepted_qty_returned_where} then abs(child.qty) else 0 end) as qty,
+		sum(case when {accepted_qty_returned_where} then abs(child.stock_qty) else 0 end) as stock_qty,
+		{rejected_qty_returned_col} as rejected_qty_returned,
+		{rejected_stock_qty_returned_col} as rejected_stock_qty_returned
+	"""
+
 	if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 		column += """, sum(abs(child.rejected_qty) * child.conversion_factor) as rejected_qty,
 			sum(abs(child.received_qty) * child.conversion_factor) as received_qty"""
@@ -281,6 +314,7 @@ def get_already_returned_items(doc):
 		if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Sales Invoice", "POS Invoice"]
 		else "dn_detail"
 	)
+
 	data = frappe.db.sql(
 		f"""
 		select {column}, child.{field}
@@ -296,7 +330,6 @@ def get_already_returned_items(doc):
 	)
 
 	items = {}
-
 	for d in data:
 		items.setdefault(
 			(d.item_code, d.get(field)),
@@ -306,6 +339,8 @@ def get_already_returned_items(doc):
 					"stock_qty": d.get("stock_qty"),
 					"received_qty": d.get("received_qty"),
 					"rejected_qty": d.get("rejected_qty"),
+					"rejected_qty_returned": d.get("rejected_qty_returned"),
+					"rejected_stock_qty_returned": d.get("rejected_stock_qty_returned"),
 				}
 			),
 		)
