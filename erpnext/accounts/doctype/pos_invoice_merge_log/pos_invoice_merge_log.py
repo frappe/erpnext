@@ -697,6 +697,7 @@ def get_sales_invoice_item(return_against_pos_invoice, pos_invoice_item):
 				& (SalesInvoice.is_return == 0)
 				& (SalesInvoiceItem.pos_invoice == return_against_pos_invoice)
 				& (SalesInvoiceItem.pos_invoice_item == pos_invoice_item)
+				& (SalesInvoice.docstatus == 1)
 			)
 		)
 
