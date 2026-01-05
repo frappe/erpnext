@@ -73,17 +73,18 @@ def move_slab_to(
     checkout_and_move=True,
 ):
     # Validation: Check if the given stage is valid.
-    if next_stage not in ALLOWED_STAGES:
+    allowed_stages_lower = [stage.lower() for stage in ALLOWED_STAGES]
+    if next_stage.lower() not in allowed_stages_lower:
         frappe.throw("Invalid next stage")
 
-    slab: Slab = frappe.get_doc("Slab", slab_number)
+    slab = frappe.get_doc("Slab", slab_number)
 
-    current_stage_index = ALLOWED_STAGES.index(slab.status)
-    next_stage_index = ALLOWED_STAGES.index(next_stage)
+    current_stage_index = allowed_stages_lower.index(slab.current_stage.lower())
+    next_stage_index = allowed_stages_lower.index(next_stage.lower())
 
     # Validation: Check the direction of transition
     if next_stage_index < current_stage_index or (
-        next_stage_index == current_stage_index and next_stage != "Re-pressing"
+        next_stage_index == current_stage_index and next_stage.lower() != "Re-pressing"
     ):
         frappe.throw(
             f"Invalid stage transition: cannot move from {slab.status} to {next_stage}"
@@ -99,7 +100,7 @@ def move_slab_to(
         checkout_slab(slab_number)
         slab: Slab = frappe.get_doc("Slab", slab_number)
 
-    slab.status = next_stage  # pyright: ignore[reportAttributeAccessIssue]
+    slab.current_stage = next_stage.lower()  # pyright: ignore[reportAttributeAccessIssue]
     slab.current_job_card = job_card_number
 
     # Append the next stage to the slab history.
@@ -188,8 +189,67 @@ def get_all_existing_slabs(stage):
     
 @frappe.whitelist()
 def get_slab_for_job_card(job_card):
-    slab = frappe.get_doc("Slab", {"job_card": job_card}, 
-        fields=["name", "serial_number", "batch_number", "template", "line", "current_stage"], 
+    slab = frappe.get_value("Slab", {"current_job_card": job_card, "docstatus": 0}, 
+        ["name", "serial_number", "batch_number", "template", "line", "current_stage"], 
         as_dict=1)
     return slab
 
+
+@frappe.whitelist()
+def get_slab_from_previous_stage(job_card_name):
+    current_jc = frappe.get_doc("Job Card", job_card_name)
+    current_wo = current_jc.work_order
+    
+    wo = frappe.get_doc("Work Order", current_wo)
+    production_plan = wo.production_plan
+    reverse_process_mapping = {
+        "pressed slab": "distribution",
+        "heated slab": "pressed slab", 
+        "cooled slab": "heated slab",
+        "trimmed slab": "cooled slab",
+        "calibrated slab": "trimmed slab",
+        "polished slab": "calibrated slab",
+        "inspected slab": "polished slab"
+    }
+    
+    current_process = wo.production_item.split(" - ")[-1].strip().lower() if " - " in wo.production_item else ""
+    previous_process = reverse_process_mapping.get(current_process)
+    
+    if not previous_process:
+        frappe.msgprint(f"No previous process found before '{current_process}'")
+        return None
+    previous_wo = frappe.db.get_value("Work Order", {
+        "production_plan": production_plan,
+        "production_item": ["like", f"%{previous_process}%"],
+        "docstatus": ["<", 2]
+    }, "name")
+    
+    if not previous_wo:
+        frappe.msgprint(f"Previous WO for '{previous_process}' not found in Production Plan {production_plan}")
+        return None
+    
+    frappe.msgprint(f"Current WO: {current_wo} ({current_process}) → Previous WO: {previous_wo} ({previous_process})")
+    previous_jcs = frappe.get_all("Job Card", 
+        filters={
+            "work_order": previous_wo,
+            "docstatus": ["!=", 2]
+        },
+        fields=["name"]
+    )
+    
+    if not previous_jcs:
+        frappe.msgprint(f"No Job Cards found in previous WO: {previous_wo}")
+        return None
+    
+    previous_jc_names = [d.name for d in previous_jcs]
+    slabs = frappe.get_all("Slab", 
+        filters={
+            "current_job_card": ["in", previous_jc_names],
+            "current_stage": previous_process.title(),  
+            "docstatus": 0
+        },
+        fields=["name", "serial_number", "batch_number", "template", "line", "current_stage"],
+        order_by="creation desc"
+    )
+    #TODO - Update the nextstage title    
+    return slabs[0] if slabs else None

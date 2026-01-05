@@ -101,8 +101,9 @@ onMounted(async () => {
     if (jobCardSubmitted.value) {
       preparedQty.value = jc.total_completed_qty || jc.for_quantity || 0;
     }
-    slabInfo();
-    // 3. Load operator state
+    debugger;
+    // createSlab(jc.production_line);
+    slabInfo(jobCard, station);
     const stateRes = await frappe.call({
       method: 'erpnext.manufacturing.page.operator_station.operator_station.get_operator_state',
       args: { 
@@ -120,7 +121,6 @@ onMounted(async () => {
       stockEntryName.value = state.stock_entry_name || '';
     }
 
-    // 4. Process timer
     if (processStarted.value && processStartTime.value) {
       const start = frappe.datetime.str_to_obj(processStartTime.value);
       const now = frappe.datetime.now_datetime();
@@ -154,10 +154,15 @@ async function createSlab(line) {
       args: { 
         line: line || 'L1',
         type: slabTemplate.value,
-        job_card_number: jobCard.value,
+        job_card_number: jobCard.value.name,
       }
     });
-
+    debugger;
+    console.log('Slab created:', result);
+    if(result)
+    {
+      jobCard.slab = result.message?.serial_number;
+    }
     slabCreated.value = true;
     slabNumber.value = result.message?.serial_number;
     batchNo.value = result.message?.batch_number;
@@ -167,59 +172,75 @@ async function createSlab(line) {
   }
 }
 
-async function slabInfo() {
-  console.log('🔍 Loading slabs for station:', station, 'JC:', jobCard.value);
-    
-    const jcSlabRes = await frappe.call({
-      method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
-      args: { job_card: jobCard.value }
-    });
-    
-    let slabAlreadyExisted = jcSlabRes.message;
-    console.log('🔍 JC slab:', slabAlreadyExisted);
+async function slabInfo(jobCard, station) {
+  debugger;
+  const jc = await frappe.db.get_doc('Job Card', jobCard.value.name);
+  const jcSlabRes = await frappe.call({
+    method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
+    args: { job_card: jobCard.value.name }
+  });
+  debugger;
+  
+  let slabAlreadyExisted = jcSlabRes.message;
+  console.log('🔍 JC slab:', slabAlreadyExisted);
 
-    if (slabAlreadyExisted) {
-      if (slabAlreadyExisted.current_stage?.toLowerCase() !== station.toLowerCase()) {
-        console.log('🔄 Moving slab station...');
-        await frappe.call({
-          method: 'erpnext.manufacturing.doctype.slab.api.move_slab_to',
-          args: {
-            slab_number: slabAlreadyExisted.name,
-            next_stage: station,
-            job_card_number: jobCard.value,
-            checkout_and_move: true
-          }
-        });
-        
-        // Reload fresh data
-        const freshSlabRes = await frappe.call({
-          method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
-          args: { job_card: jobCard.value }
-        });
-        slabAlreadyExisted = freshSlabRes.message;
-        console.log('🔄 Slab moved:', slabAlreadyExisted);
-      }
-      
-      // Populate UI
-      slabCreated.value = true;
-      slabNumber.value = slabAlreadyExisted.serial_number || slabAlreadyExisted.name;
-      batchNo.value = slabAlreadyExisted.batch_number || batchNo.value;
-      slabTemplate.value = slabAlreadyExisted.template || slabTemplate.value;
-      colour.value = slabAlreadyExisted.template || colour.value;
-      line.value = slabAlreadyExisted.line || jc.production_line;
-      
-      frappe.show_alert(`✅ Slab ${slabNumber.value} @ ${station}`, 'green');
-      
-    } else if (station.toLowerCase() === 'distribution') {
-      console.log('🆕 Creating new slab...');
-      await createSlab(jc.production_line);
-    } else {
-      frappe.msgprint({
-        title: 'No Slab',
-        message: `No slab for ${jobCard.value}. Create in Distribution first.`,
-        indicator: 'orange'
+  // If no slab found for this specific Job Card, check if there's one coming from the previous stage
+  if (!slabAlreadyExisted && station.toLowerCase() !== 'distribution') {
+      const prevSlabRes = await frappe.call({
+          method: 'erpnext.manufacturing.doctype.slab.api.get_slab_from_previous_stage',
+          args: { job_card_name: jobCard.value.name }
       });
+      
+      if (prevSlabRes.message) {
+          console.log('� Found slab from previous stage:', prevSlabRes.message);
+          slabAlreadyExisted = prevSlabRes.message;
+      }
+  }
+
+  if (slabAlreadyExisted) {
+    if (slabAlreadyExisted.current_stage?.toLowerCase() !== station.toLowerCase()) {
+      console.log('🔄 Moving slab station...');
+      await frappe.call({
+        method: 'erpnext.manufacturing.doctype.slab.api.move_slab_to',
+        args: {
+          slab_number: slabAlreadyExisted.name,
+          next_stage: station,
+          job_card_number: jobCard.value.name,
+          checkout_and_move: true
+        }
+      });
+      
+      // Reload fresh data
+      const freshSlabRes = await frappe.call({
+        method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
+        args: { job_card: jobCard.value.name }
+      });
+      slabAlreadyExisted = freshSlabRes.message;
+      console.log('🔄 Slab moved:', slabAlreadyExisted);
     }
+    
+    // Populate UI
+    slabCreated.value = true;
+    slabNumber.value = slabAlreadyExisted.serial_number || slabAlreadyExisted.name;
+    batchNo.value = slabAlreadyExisted.batch_number || batchNo.value;
+    slabTemplate.value = slabAlreadyExisted.template || slabTemplate.value;
+    colour.value = slabAlreadyExisted.template || colour.value;
+    line.value = slabAlreadyExisted.line || jc.production_line;
+    
+    frappe.show_alert(`✅ Slab ${slabNumber.value} @ ${station}`, 'green');
+    
+  } 
+  else if (station.toLowerCase() === 'distribution') {
+    console.log('🆕 Creating new slab...');
+    await createSlab(jc.production_line);
+  }
+  else {
+    frappe.msgprint({
+      title: 'No Slab Found',
+      message: `No available slab found from the previous stage for this Work Order. Ensure the previous step is completed.`,
+      indicator: 'orange'
+    });
+  }
 }
 
 async function startOperation() {

@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{batch_number}-{serial_number}",
  "creation": "2025-12-18 20:15:49.438386",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -9,15 +8,13 @@
   "section_break_bop4",
   "amended_from",
   "template",
-  "line",
   "batch_number",
-  "number",
   "serial_number",
   "column_break_mfbp",
   "created_on",
+  "line",
+  "current_stage",
   "current_job_card",
-  "status",
-  "is_repressed",
   "quality_section",
   "grade",
   "column_break_e1da",
@@ -52,15 +49,6 @@
    "in_list_view": 1,
    "label": "Template",
    "options": "Slab Template",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Status",
-   "options": "Distribution\nPressing\nRe-pressing\nHeating\nCooling\nQuarantine\nTrimming\nCalibration 1\nCalibration 2\nPolishing 1\nPolishing 2\nQuality Check\nPacked\nShipped\nDiscarded",
    "read_only": 1,
    "reqd": 1
   },
@@ -106,14 +94,12 @@
   {
    "fieldname": "consignment_number",
    "fieldtype": "Data",
-   "label": "Consignment Number",
-   "read_only": 1
+   "label": "Consignment Number"
   },
   {
    "fieldname": "shipping_date",
    "fieldtype": "Date",
-   "label": "Shipping Date",
-   "read_only": 1
+   "label": "Shipping Date"
   },
   {
    "fieldname": "slab_history_section",
@@ -139,7 +125,7 @@
   },
   {
    "fieldname": "serial_number",
-   "fieldtype": "Data",
+   "fieldtype": "Int",
    "label": "Serial Number",
    "read_only": 1,
    "reqd": 1
@@ -153,34 +139,26 @@
   {
    "fieldname": "current_job_card",
    "fieldtype": "Data",
-   "label": "Current Job Card",
-   "read_only": 1
+   "label": "Current Job Card"
   },
   {
-   "default": "0",
-   "fieldname": "number",
-   "fieldtype": "Int",
-   "hidden": 1,
-   "label": "Number",
+   "fieldname": "current_stage",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Current Stage",
+   "options": "Distribution\nPressing\nHeating\nCooling\nTrimming\nCalibration 1\nCalibration 2\nPolishing 1\nPolishing 2\nQuality\nFinished",
    "read_only": 1,
    "reqd": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "is_repressed",
-   "fieldtype": "Check",
-   "label": "Is Re-pressed",
-   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2026-01-03 19:11:10.445592",
+ "modified": "2026-01-05 20:15:53.773340",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",
- "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -193,6 +171,7 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],
@@ -210,10 +189,6 @@
    "title": "Pressing"
   },
   {
-   "color": "Cyan",
-   "title": "Re-pressing"
-  },
-  {
    "color": "Orange",
    "title": "Heating"
   },
@@ -227,19 +202,11 @@
   },
   {
    "color": "Purple",
-   "title": "Calibration 1"
-  },
-  {
-   "color": "Purple",
-   "title": "Calibration 2"
+   "title": "Calibration"
   },
   {
    "color": "Blue",
-   "title": "Polishing 1"
-  },
-  {
-   "color": "Blue",
-   "title": "Polishing 2"
+   "title": "Polishing"
   },
   {
    "color": "Yellow",
@@ -247,7 +214,7 @@
   },
   {
    "color": "Green",
-   "title": "Packed"
+   "title": "Finished"
   },
   {
    "color": "Green",
