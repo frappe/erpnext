@@ -54,14 +54,14 @@ def execute(filters=None):
 	gross_income = get_revenue(income, period_list)
 	gross_expense = get_revenue(expense, period_list)
 
-	# if len(gross_income) == 0 and len(gross_expense) == 0:
-	# 	data.append(
-	# 		{
-	# 			"account_name": "'" + _("Nothing is included in gross") + "'",
-	# 			"account": "'" + _("Nothing is included in gross") + "'",
-	# 		}
-	# 	)
-	# 	return columns, data
+	if len(gross_income) == 0 and len(gross_expense) == 0:
+		data.append(
+			{
+				"account_name": "'" + _("Nothing is included in gross") + "'",
+				"account": "'" + _("Nothing is included in gross") + "'",
+			}
+		)
+		return columns, data
 
 	# to avoid error eg: gross_income[0] : list index out of range
 	if not gross_income:
