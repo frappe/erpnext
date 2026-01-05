@@ -1,0 +1,326 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{oven}-{slab_color}-{slab}-{rack}",
+ "creation": "2026-01-03 22:15:40.203096",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_c3tj",
+  "oven",
+  "column_break_ex32",
+  "date",
+  "column_break_vvt3",
+  "shift",
+  "slab_details_section",
+  "slab",
+  "column_break_7tua",
+  "slab_color",
+  "column_break_vlzy",
+  "oven_rack",
+  "temperatures",
+  "upper_shelf_temp",
+  "column_break_p0nl",
+  "lower_shelf_temp",
+  "slab_thickness_readings_section",
+  "top_left_vertex",
+  "column_break_dl8i",
+  "top_edge_center",
+  "column_break_xwyv",
+  "top_right_vertex",
+  "column_break_ckmq",
+  "right_edge_centre",
+  "section_break_wrbm",
+  "bottom_right_vertex",
+  "column_break_fka6",
+  "bottom_edge_centre",
+  "column_break_0hzr",
+  "bottom_left_vertex",
+  "column_break_jk3t",
+  "left_edge_centre",
+  "slab_curing_section",
+  "in_time",
+  "column_break_wks3",
+  "out_time",
+  "column_break_efcf",
+  "total_time_in_minutes",
+  "slab_temperatures_section",
+  "slab_top_temp",
+  "column_break_zbq7",
+  "slab_bottom_temp",
+  "section_break_ayzd",
+  "remarks",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_c3tj",
+   "fieldtype": "Section Break",
+   "label": "Basic Details"
+  },
+  {
+   "fieldname": "oven",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Oven",
+   "options": "Oven",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ex32",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_vvt3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Shift",
+   "options": "Attendance Shift",
+   "reqd": 1
+  },
+  {
+   "fieldname": "slab_details_section",
+   "fieldtype": "Section Break",
+   "label": "Slab Details"
+  },
+  {
+   "fieldname": "slab",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Slab",
+   "options": "Slab",
+   "reqd": 1
+  },
+  {
+   "fieldname": "slab_color",
+   "fieldtype": "Link",
+   "label": "Slab Color",
+   "options": "Slab Template",
+   "reqd": 1
+  },
+  {
+   "fieldname": "upper_shelf_temp",
+   "fieldtype": "Float",
+   "label": "Upper Shelf Temperature (in \u00b0C)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "lower_shelf_temp",
+   "fieldtype": "Float",
+   "label": "Lower Shelf Temperature (in \u00b0C)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_7tua",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_p0nl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "temperatures",
+   "fieldtype": "Section Break",
+   "label": "Oven Temperatures"
+  },
+  {
+   "fieldname": "slab_thickness_readings_section",
+   "fieldtype": "Section Break",
+   "label": "Slab Thickness Readings"
+  },
+  {
+   "fieldname": "top_left_vertex",
+   "fieldtype": "Float",
+   "label": "Top Left Vertex (1)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "top_edge_center",
+   "fieldtype": "Float",
+   "label": "Top Edge Centre (2)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "top_right_vertex",
+   "fieldtype": "Float",
+   "label": "Top Right Vertex (3)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "right_edge_centre",
+   "fieldtype": "Float",
+   "label": "Right Edge Centre (4)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bottom_right_vertex",
+   "fieldtype": "Float",
+   "label": "Bottom Right Vertex (5)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bottom_edge_centre",
+   "fieldtype": "Float",
+   "label": "Bottom Edge Centre (6)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bottom_left_vertex",
+   "fieldtype": "Float",
+   "label": "Bottom Left Vertex (7)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "left_edge_centre",
+   "fieldtype": "Float",
+   "label": "Left Edge Centre (8)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "slab_curing_section",
+   "fieldtype": "Section Break",
+   "label": "Slab Curing"
+  },
+  {
+   "fieldname": "in_time",
+   "fieldtype": "Time",
+   "label": "In Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_wks3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "out_time",
+   "fieldtype": "Time",
+   "label": "Out Time"
+  },
+  {
+   "fieldname": "column_break_efcf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_time_in_minutes",
+   "fieldtype": "Float",
+   "label": "Total Time (in minutes)"
+  },
+  {
+   "fieldname": "section_break_wrbm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_dl8i",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_xwyv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ckmq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_fka6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_0hzr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_jk3t",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "slab_temperatures_section",
+   "fieldtype": "Section Break",
+   "label": "Slab Temperatures"
+  },
+  {
+   "fieldname": "slab_top_temp",
+   "fieldtype": "Float",
+   "label": "Slab Top Temperature (in \u00b0C)"
+  },
+  {
+   "fieldname": "column_break_zbq7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "slab_bottom_temp",
+   "fieldtype": "Float",
+   "label": "Slab Bottom Temperature (in \u00b0C)"
+  },
+  {
+   "fieldname": "section_break_ayzd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Oven Operation",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_vlzy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "oven_rack",
+   "fieldtype": "Link",
+   "label": "Rack",
+   "options": "Oven Rack",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-01-04 00:24:54.768772",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Oven Operation",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,14 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:{oven}-{rack_number}",
  "creation": "2025-12-18 21:05:16.645799",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_ito1",
   "rack_number",
-  "oven",
-  "slab_details_section",
   "current_slab",
   "start_time",
   "status"
@@ -26,21 +25,10 @@
    "reqd": 1
   },
   {
-   "fieldname": "oven",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Oven",
-   "options": "Oven",
-   "reqd": 1
-  },
-  {
-   "fieldname": "slab_details_section",
-   "fieldtype": "Section Break",
-   "label": "Slab Details"
-  },
-  {
    "fieldname": "current_slab",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Current Slab",
    "options": "Slab",
    "read_only": 1
@@ -48,12 +36,14 @@
   {
    "fieldname": "start_time",
    "fieldtype": "Datetime",
+   "in_list_view": 1,
    "label": "Start Time",
    "read_only": 1
   },
   {
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Status",
    "options": "Idle\nHeating\nError",
    "read_only": 1
@@ -61,26 +51,15 @@
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "istable": 1,
  "links": [],
- "modified": "2025-12-18 21:19:06.061480",
+ "modified": "2026-01-04 01:16:10.535400",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Oven Rack",
+ "naming_rule": "Expression",
  "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
+ "permissions": [],
  "row_format": "Dynamic",
  "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",

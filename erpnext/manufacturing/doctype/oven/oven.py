@@ -12,11 +12,13 @@ class Oven(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
+		from erpnext.manufacturing.doctype.oven_rack.oven_rack import OvenRack
 		from frappe.types import DF
 
 		code: DF.Data
 		line: DF.Link
 		oven_name: DF.Data
+		racks: DF.Table[OvenRack]
 		slab_bottom_temp: DF.Float
 		slab_top_temp: DF.Float
 	# end: auto-generated types

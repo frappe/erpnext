@@ -9,7 +9,8 @@
   "station",
   "in_time",
   "out_time",
-  "total_time_in_minutes"
+  "total_time_in_minutes",
+  "job_card_number"
  ],
  "fields": [
   {
@@ -27,25 +28,38 @@
    "fieldname": "in_time",
    "fieldtype": "Datetime",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "In Time",
    "reqd": 1
   },
   {
    "fieldname": "out_time",
    "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Out Time"
   },
   {
    "fieldname": "total_time_in_minutes",
    "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Total Time (in minutes)"
+  },
+  {
+   "fieldname": "job_card_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Job Card",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-18 20:42:17.267854",
+ "modified": "2026-01-03 08:54:56.503474",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab History",
