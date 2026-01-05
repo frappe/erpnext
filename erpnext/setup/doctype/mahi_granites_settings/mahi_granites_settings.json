@@ -6,7 +6,9 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_1ofs",
-  "max_pay_line_amount"
+  "max_pay_line_amount",
+  "manufacturing_settings_section",
+  "quarantine_labels"
  ],
  "fields": [
   {
@@ -21,13 +23,24 @@
    "in_list_view": 1,
    "label": "Maximum Payment Line Item Amount",
    "reqd": 1
+  },
+  {
+   "fieldname": "manufacturing_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Manufacturing Settings"
+  },
+  {
+   "fieldname": "quarantine_labels",
+   "fieldtype": "Table",
+   "label": "Quarantine Labels",
+   "options": "Quarantine Label"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-26 21:00:11.164406",
+ "modified": "2026-01-06 00:34:33.961123",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Mahi Granites Settings",
