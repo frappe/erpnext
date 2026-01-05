@@ -77,6 +77,21 @@ onUnmounted(() => {
     if (timerInterval) clearInterval(timerInterval);
 });
 
+const formattedDate = computed(() => {
+    const d = currentTime.value;
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+});
+
+const formattedTime = computed(() => {
+    const d = currentTime.value;
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+});
+
 const overheat_minutes = 90; // TODO: This should be replaced by a setting in Mahi Granites Settings.
 
 const racks = computed(() => {
@@ -370,7 +385,8 @@ frappe.realtime.on('slab_checkout', (slab) => {
             <div class="border-bottom d-flex justify-content-between pb-2">
                 <div>
                     <h4 class="mb-1">{{ __('Oven') }}: {{ oven?.name }} <span class="text-muted mr-2 ml-2">|</span> {{
-                        __('Line') }}: {{ oven?.line }}</h4>
+                        __('Line') }}: {{ oven?.line }} <span class="text-muted mr-2 ml-2">|</span> {{ formattedDate }} <span
+                        class="text-muted mr-2 ml-2">|</span> {{ formattedTime }}</h4>
                     <div class="text-muted small mb-4">
                         {{ __('Manage curing process and rack assignments.') }}
                     </div>
@@ -388,24 +404,24 @@ frappe.realtime.on('slab_checkout', (slab) => {
                     </div>
                 </div>
 
-                <div class="d-flex mb-3 justify-content-end align-items-center">
-                    <span class="small mr-3 d-flex align-items-center">
-                        <span class="mr-1 border rounded d-flex"
-                            style="background:#b1b8bf; width:1rem; height:1rem;"></span>{{ __('Empty') }}
+                <!-- <div class="d-flex mb-4 justify-content-end align-items-center">
+                    <span class="small mr-4 d-flex align-items-center">
+                        <span class="mr-2 border rounded d-flex"
+                            style="background:#b0b8bf; width:1rem; height:1rem;"></span>{{ __('Empty') }}
                     </span>
-                    <span class="small mr-3 d-flex align-items-center">
-                        <span class="mr-1 border rounded d-flex"
-                            style="background:#3bc63b; width:1rem; height:1rem;"></span>{{ __('Curing') }}
+                    <span class="small mr-4 d-flex align-items-center">
+                        <span class="mr-2 border rounded d-flex"
+                            style="background:#2bc63b; width:1rem; height:1rem;"></span>{{ __('Curing') }}
                     </span>
-                    <span class="small mr-3 d-flex align-items-center">
-                        <span class="mr-1 border rounded d-flex"
-                            style="background:#ef2e3f; width:1rem; height:1rem;"></span>{{ __('Overheating') }}
+                    <span class="small mr-4 d-flex align-items-center">
+                        <span class="mr-2 border rounded d-flex"
+                            style="background:#ef1e3f; width:1rem; height:1rem;"></span>{{ __('Overheating') }}
                     </span>
                     <span class="small d-flex align-items-center">
-                        <span class="mr-1 border rounded d-flex"
-                            style="background:#78afe6; width:1rem; height:1rem;"></span>{{ __('Maintenance') }}
+                        <span class="mr-2 border rounded d-flex"
+                            style="background:#77afe6; width:1rem; height:1rem;"></span>{{ __('Maintenance') }}
                     </span>
-                </div>
+                </div> -->
             </div>
 
             <div class="rack-grid d-flex flex-wrap pt-5">
