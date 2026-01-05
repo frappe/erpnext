@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-21 09:37+0000\n"
-"PO-Revision-Date: 2025-12-22 03:07\n"
+"PO-Revision-Date: 2026-01-05 05:31\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Hungarian\n"
 "MIME-Version: 1.0\n"
@@ -741,7 +741,7 @@ msgstr ""
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:163
 #: erpnext/utilities/bulk_transaction.py:35
 msgid "<li>{}</li>"
-msgstr ""
+msgstr "<li>{}</li>"
 
 #: erpnext/controllers/accounts_controller.py:2258
 msgid "<p>Cannot overbill for the following Items:</p>"
