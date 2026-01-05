@@ -2009,9 +2009,7 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 		set_missing_values(target_parent)
 
 	def remove_items_with_zero_qty(target_parent):
-		for row in target_parent.get("items"):
-			if row.get("qty") == 0:
-				target_parent.remove(row)
+		target_parent.items = [row for row in target_parent.get("items") if row.get("qty") != 0]
 
 	def set_missing_values(target):
 		target.run_method("set_missing_values")
@@ -2067,7 +2065,10 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 				"postprocess": update_item,
 				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty) and select_item(doc),
 			},
-			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
+			"Purchase Taxes and Charges": {
+				"doctype": "Purchase Taxes and Charges",
+				"reset_value": (args and args.get("merge_taxes")),
+			},
 		},
 		target_doc,
 		post_parent_process,
