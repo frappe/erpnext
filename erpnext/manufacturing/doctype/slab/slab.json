@@ -186,7 +186,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-05 00:21:02.869555",
+ "modified": "2026-01-05 23:42:42.914718",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",
@@ -230,6 +230,10 @@
   {
    "color": "Light Blue",
    "title": "Cooling"
+  },
+  {
+   "color": "Blue",
+   "title": "Quarantine"
   },
   {
    "color": "Pink",
