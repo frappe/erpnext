@@ -14,6 +14,7 @@
   "ensure_delivery_based_on_produced_serial_no",
   "is_stock_item",
   "reserve_stock",
+  "is_closed",
   "col_break1",
   "delivery_date",
   "item_name",
@@ -1010,6 +1011,14 @@
    "fieldtype": "Float",
    "label": "Finished Good Qty",
    "mandatory_depends_on": "eval:parent.is_subcontracted"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "is_closed",
+   "fieldtype": "Check",
+   "label": "Is Closed",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

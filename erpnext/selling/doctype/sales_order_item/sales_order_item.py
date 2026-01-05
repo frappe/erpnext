@@ -47,6 +47,7 @@ class SalesOrderItem(Document):
 		grant_commission: DF.Check
 		gross_profit: DF.Currency
 		image: DF.Attach | None
+		is_closed: DF.Check
 		is_free_item: DF.Check
 		is_stock_item: DF.Check
 		item_code: DF.Link

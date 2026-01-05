@@ -78,7 +78,8 @@ def get_data(conditions, filters):
 			(soi.base_amount - (soi.billed_amt * IFNULL(so.conversion_rate, 1))) as pending_amount,
 			soi.warehouse as warehouse,
 			so.company, soi.name,
-			soi.description as description
+			soi.description as description,
+			soi.is_closed
 		FROM
 			`tabSales Order` so,
 			`tabSales Order Item` soi
@@ -325,6 +326,12 @@ def get_columns(filters):
 				"fieldname": "time_taken_to_deliver",
 				"fieldtype": "Duration",
 				"width": 100,
+			},
+			{
+				"label": _("Is Closed"),
+				"fieldname": "is_closed",
+				"fieldtype": "Check",
+				"width": 80,
 			},
 		]
 	)

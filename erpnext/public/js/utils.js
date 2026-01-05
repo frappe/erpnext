@@ -610,23 +610,31 @@ erpnext.utils.update_child_items = function (opts) {
 	const has_reserved_stock = opts.has_reserved_stock ? true : false;
 	const get_precision = (fieldname) => child_meta.fields.find((f) => f.fieldname == fieldname).precision;
 
-	this.data = frm.doc[opts.child_docname].map((d) => {
-		return {
-			docname: d.name,
-			name: d.name,
-			item_code: d.item_code,
-			item_name: d.item_name,
-			delivery_date: d.delivery_date,
-			schedule_date: d.schedule_date,
-			conversion_factor: d.conversion_factor,
-			qty: d.qty,
-			rate: d.rate,
-			uom: d.uom,
-			fg_item: d.fg_item,
-			fg_item_qty: d.fg_item_qty,
-			description: d.description,
-		};
-	});
+	const is_sales_order = frm.doc.doctype === "Sales Order";
+	this.data = frm.doc[opts.child_docname]
+		.filter((d) => {
+			if (is_sales_order) {
+				return !d.is_closed;
+			}
+			return true;
+		})
+		.map((d) => {
+			return {
+				docname: d.name,
+				name: d.name,
+				item_code: d.item_code,
+				item_name: d.item_name,
+				delivery_date: d.delivery_date,
+				schedule_date: d.schedule_date,
+				conversion_factor: d.conversion_factor,
+				qty: d.qty,
+				rate: d.rate,
+				uom: d.uom,
+				fg_item: d.fg_item,
+				fg_item_qty: d.fg_item_qty,
+				description: d.description,
+			};
+		});
 
 	const fields = [
 		{

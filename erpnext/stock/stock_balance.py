@@ -138,7 +138,7 @@ def get_reserved_qty(item_code, warehouse):
 				and (so_item.delivered_by_supplier is null or so_item.delivered_by_supplier = 0)
 				and exists(select * from `tabSales Order` so
 					where so.name = so_item.parent and so.docstatus = 1
-					and so.status not in ('On Hold', 'Closed')))
+					and so_item.is_closed=0 and so.status not in ('On Hold', 'Closed')))
 			) tab
 		where
 			so_item_qty >= so_item_delivered_qty

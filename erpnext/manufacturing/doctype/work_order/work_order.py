@@ -2447,6 +2447,7 @@ def query_sales_order(doctype: str, txt: str, searchfield: str, start: int, page
 		fields=["name"],
 		filters=[
 			["Sales Order", "docstatus", "=", 1],
+			["Sales Order", "status", "!=", "Closed"],
 		],
 		or_filters=[
 			["Sales Order Item", "item_code", "=", filters.get("production_item")],

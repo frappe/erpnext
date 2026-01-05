@@ -222,7 +222,6 @@ class SalesOrder(SellingController):
 
 	def can_update_items(self) -> bool:
 		result = True
-
 		if self.is_subcontracted:
 			if frappe.db.exists("Subcontracting Inward Order", {"sales_order": self.name, "docstatus": 1}):
 				result = False
@@ -603,7 +602,12 @@ class SalesOrder(SellingController):
 		# Limit should be checked after the 'Hold/Closed' status is reset.
 		if status == "Draft" and self.docstatus == 1:
 			self.check_credit_limit()
-		self.update_reserved_qty()
+			close_or_reopen_selected_items(self.name, "Re-open", all_items_closed=True)
+
+		if status == "Closed":
+			close_or_reopen_selected_items(self.name, "Close", all_items_closed=True)
+		else:
+			self.update_reserved_qty()
 		self.update_subcontracting_order_status()
 		self.notify_update()
 		clear_doctype_notifications(self)
@@ -1114,7 +1118,8 @@ def make_material_request(source_name: str, target_doc: str | Document | None = 
 				"condition": lambda item: not frappe.db.exists(
 					"Product Bundle", {"name": item.item_code, "disabled": 0}
 				)
-				and get_remaining_qty(item) > 0,
+				and get_remaining_qty(item) > 0
+				and not item.is_closed,
 				"postprocess": update_item,
 			},
 		},
@@ -1232,8 +1237,10 @@ def make_delivery_note(
 				return False
 
 		return (
-			(abs(doc.delivered_qty) < abs(doc.qty)) or is_unit_price_row(doc)
-		) and doc.delivered_by_supplier != 1
+			((abs(doc.delivered_qty) < abs(doc.qty)) or is_unit_price_row(doc))
+			and doc.delivered_by_supplier != 1
+			and not doc.is_closed
+		)
 
 	def update_item(source, target, source_parent):
 		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
@@ -1477,7 +1484,11 @@ def make_sales_invoice(
 				"condition": lambda doc: (
 					True
 					if is_unit_price_row(doc)
-					else (doc.qty and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)))
+					else (
+						doc.qty
+						and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount))
+						and not doc.is_closed
+					)
 				)
 				and select_item(doc),
 			},
@@ -1928,6 +1939,7 @@ def create_pick_list(source_name: str, target_doc: str | Document | None = None)
 			abs(item.delivered_qty) < abs(item.qty)
 			and item.delivered_by_supplier != 1
 			and not is_product_bundle(item.item_code)
+			and not item.is_closed
 		)
 
 	# Don't allow a Pick List to be created against a Sales Order that has reserved stock.
@@ -2010,6 +2022,9 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 		)
 		for table in [so.items, so.packed_items]:
 			for i in table:
+				if getattr(i, "is_closed", 0):
+					continue
+
 				bom = get_default_bom(i.item_code)
 				stock_qty = i.qty if i.doctype == "Packed Item" else i.stock_qty
 
@@ -2122,3 +2137,46 @@ def get_mapped_subcontracting_inward_order(source_name, target_doc=None):
 	)
 
 	return target_doc
+
+
+@frappe.whitelist()
+def close_or_reopen_selected_items(sales_order, status, selected_items=None, all_items_closed=False):
+	items = []
+	so = frappe.get_doc("Sales Order", sales_order)
+
+	# check if subcontracted so exists against the SO
+	if not so.can_update_items():
+		frappe.throw(_("Cannot close items in a subcontracted Sales Order"))
+
+	if not all_items_closed:
+		selected_items = parse_json(selected_items)
+		items = {i["docname"] for i in selected_items}
+
+	for row in so.items:
+		if not all_items_closed and row.name not in items:
+			continue
+
+		if status == "Close":
+			if row.delivered_qty and row.qty == row.delivered_qty and not all_items_closed:
+				frappe.throw(_("Item cannot be closed as it is already delivered"))
+
+			row.is_closed = 1
+		elif status == "Re-open":
+			if so.docstatus == 1:
+				so.check_credit_limit()
+			row.is_closed = 0
+
+	so.save()
+	if len(items) > 0:
+		so.update_reserved_qty(items)
+	else:
+		so.update_reserved_qty()
+
+	if not all_items_closed and all(d.is_closed for d in so.items):
+		so.status = "Closed"
+		so.set_status(update=True, status="Closed")
+		so.update_subcontracting_order_status()
+		so.notify_update()
+		clear_doctype_notifications(so)
+
+	return True

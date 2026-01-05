@@ -124,6 +124,12 @@ def get_columns(filters):
 			"options": "Currency",
 			"hidden": 1,
 		},
+		{
+			"label": _("Is Closed"),
+			"fieldtype": "Check",
+			"fieldname": "is_closed",
+			"width": 80,
+		},
 	]
 
 
@@ -159,6 +165,7 @@ def get_data(filters):
 			"delivered_quantity": flt(record.get("delivered_qty")),
 			"billed_amount": flt(record.get("billed_amt")),
 			"company": record.get("company"),
+			"is_closed": record.get("is_closed"),
 		}
 		row["currency"] = frappe.get_cached_value("Company", row["company"], "default_currency")
 		data.append(row)
@@ -207,6 +214,7 @@ def get_sales_order_details(company_list, filters):
 			db_so_item.base_amount,
 			db_so_item.delivered_qty,
 			(db_so_item.billed_amt * db_so.conversion_rate).as_("billed_amt"),
+			db_so_item.is_closed,
 		)
 		.where(db_so.docstatus == 1)
 		.where(db_so.company.isin(tuple(company_list)))

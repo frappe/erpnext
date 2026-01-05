@@ -22,6 +22,7 @@ from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.sales_order import (
 	WarehouseRequired,
+	close_or_reopen_selected_items,
 	create_pick_list,
 	make_delivery_note,
 	make_material_request,
@@ -56,6 +57,114 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 		frappe.set_user("Administrator")
+
+	def test_sales_order_item_level_closing(self):
+		warehouse = "_Test Warehouse - _TC"
+
+		item_1 = make_item("_Test SO Item Level Closing 1", {"is_stock_item": 1})
+		item_2 = make_item("_Test SO Item Level Closing 2", {"is_stock_item": 1})
+		item_3 = make_item("_Test SO Item Level Closing 3", {"is_stock_item": 1})
+
+		make_stock_entry(item_code=item_1.item_code, target=warehouse, qty=10, rate=100)
+		make_stock_entry(item_code=item_2.item_code, target=warehouse, qty=10, rate=100)
+		make_stock_entry(item_code=item_3.item_code, target=warehouse, qty=10, rate=100)
+
+		so = make_sales_order(
+			item_list=[
+				{
+					"item_code": item_1.item_code,
+					"qty": 2,
+					"rate": 100,
+					"warehouse": warehouse,
+				},
+				{
+					"item_code": item_2.item_code,
+					"qty": 3,
+					"rate": 100,
+					"warehouse": warehouse,
+				},
+				{
+					"item_code": item_3.item_code,
+					"qty": 4,
+					"rate": 100,
+					"warehouse": warehouse,
+				},
+			],
+			do_not_submit=True,
+		)
+		so.submit()
+		dn = make_delivery_note(so.name, kwargs={"filtered_children": [so.items[0].name]})
+		dn.submit()
+
+		so.reload()
+		self.assertEqual(so.items[0].delivered_qty, 2)
+
+		self.assertRaises(
+			frappe.ValidationError,
+			close_or_reopen_selected_items,
+			so.name,
+			"Close",
+			json.dumps([{"docname": so.items[0].name}]),
+		)
+
+		# checking for item reserved qty before and after closing
+		self.assertEqual(
+			frappe.get_all(
+				"Bin",
+				filters={"item_code": so.items[1].item_code, "warehouse": so.items[1].warehouse},
+				fields=["reserved_qty"],
+			)[0].reserved_qty,
+			3,
+		)
+		close_or_reopen_selected_items(so.name, "Close", json.dumps([{"docname": so.items[1].name}]))
+		so.reload()
+		self.assertEqual(
+			frappe.get_all(
+				"Bin",
+				filters={"item_code": so.items[1].item_code, "warehouse": so.items[1].warehouse},
+				fields=["reserved_qty"],
+			)[0].reserved_qty,
+			0,
+		)
+
+		# updating closed item
+		self.assertRaises(
+			frappe.ValidationError,
+			update_child_qty_rate,
+			"Sales Order",
+			json.dumps(
+				[
+					{
+						"item_code": so.items[1].item_code,
+						"rate": so.items[1].rate,
+						"qty": 5,
+						"docname": so.items[1].name,
+					}
+				]
+			),
+			so.name,
+		)
+
+		# creating pick list for remaining items
+		pick_list = create_pick_list(so.name)
+		pick_list.submit()
+		self.assertEqual(len(pick_list.locations), 1)
+		# reopening closed item
+		close_or_reopen_selected_items(
+			so.name,
+			"Re-open",
+			json.dumps([{"docname": so.items[1].name}]),
+		)
+
+		so.reload()
+		self.assertEqual(
+			frappe.get_all(
+				"Bin",
+				filters={"item_code": so.items[1].item_code, "warehouse": so.items[1].warehouse},
+				fields=["reserved_qty"],
+			)[0].reserved_qty,
+			3,
+		)
 
 	def test_sales_order_skip_delivery_note(self):
 		so = make_sales_order(do_not_submit=True)

@@ -28,6 +28,8 @@ frappe.ui.form.on("Sales Order", {
 				color = "yellow";
 			} else if (doc.stock_qty <= doc.delivered_qty) {
 				color = "green";
+			} else if (doc.is_closed) {
+				color = "grey";
 			} else {
 				color = "orange";
 			}
@@ -996,6 +998,18 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 								() => this.close_sales_order(),
 								__("Status")
 							);
+
+							this.frm.add_custom_button(
+								__("Close selected items"),
+								() => this.close_selected_items(),
+								__("Status")
+							);
+
+							this.frm.add_custom_button(
+								__("Re-open selected items"),
+								() => this.reopen_selected_items(),
+								__("Status")
+							);
 						}
 					}
 
@@ -1717,7 +1731,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			me.frm.doc.items.forEach((d) => {
 				let ordered_qty = me.get_ordered_qty(d, me.frm.doc);
 				let pending_qty = (flt(d.stock_qty) - ordered_qty) / flt(d.conversion_factor);
-				if (pending_qty > 0) {
+				if (pending_qty > 0 && !d.is_closed) {
 					po_items.push({
 						name: d.name,
 						item_name: d.item_name,
@@ -1787,6 +1801,178 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		});
 		d.show();
 	}
+	reopen_selected_items() {
+		var me = this;
+		this.data = this.frm.doc.items
+			.filter((d) => d.is_closed)
+			.map((d) => {
+				return {
+					docname: d.name,
+					item_code: d.item_code,
+					qty: d.qty,
+					is_close: d.is_closed,
+					delivered_qty: d.delivered_qty,
+				};
+			});
+		const reopen_item_fields = [
+			{
+				fieldtype: "Link",
+				fieldname: "item_code",
+				options: "Item",
+				in_list_view: 1,
+				read_only: 1,
+			},
+			{
+				fieldtype: "Float",
+				fieldname: "qty",
+				read_only: 1,
+				in_list_view: 1,
+				label: __("Qty"),
+			},
+		];
+		var d = new frappe.ui.Dialog({
+			title: __("Re-open Selected Items"),
+			size: "large",
+			fields: [
+				{
+					fieldname: "reopen_items",
+					fieldtype: "Table",
+					label: __("Items"),
+					cannot_add_rows: true,
+					in_place_edit: true,
+					fields: reopen_item_fields,
+					data: this.data,
+					get_data: () => {
+						return this.data;
+					},
+				},
+			],
+			primary_action_label: __("Re-open"),
+			primary_action: function () {
+				let values = d.get_values();
+
+				let selected_items = (values.reopen_items || []).filter((row) => row.__checked);
+				if (!selected_items.length) {
+					frappe.msgprint(__("Please select one item to re-open"));
+					return;
+				}
+				frappe.call({
+					method: "erpnext.selling.doctype.sales_order.sales_order.close_or_reopen_selected_items",
+					args: { sales_order: me.frm.doc.name, selected_items: selected_items, status: "Re-open" },
+					callback: (r) => {
+						if (!r.exc) {
+							d.hide();
+							me.frm.reload_doc();
+							frappe.show_alert({
+								message: __("Selected items re-opened"),
+								indicator: "green",
+							});
+						}
+					},
+				});
+			},
+		});
+
+		d.show();
+	}
+
+	close_selected_items() {
+		var me = this;
+		this.data = this.frm.doc.items
+			.filter((d) => d.qty > flt(d.delivered_qty) && !d.is_closed)
+			.map((d) => {
+				return {
+					docname: d.name,
+					item_code: d.item_code,
+					qty: d.qty,
+					is_close: d.is_closed,
+					delivered_qty: d.delivered_qty,
+				};
+			});
+		const close_item_fields = [
+			{
+				fieldtype: "Link",
+				fieldname: "item_code",
+				options: "Item",
+				in_list_view: 1,
+				read_only: 1,
+			},
+			{
+				fieldtype: "Float",
+				fieldname: "qty",
+				read_only: 1,
+				in_list_view: 1,
+				label: __("Qty"),
+			},
+		];
+		var d = new frappe.ui.Dialog({
+			title: __("Close Selected Items"),
+			size: "large",
+			fields: [
+				{
+					fieldname: "select_all",
+					fieldtype: "Check",
+					label: __("Select all items"),
+					default: 1,
+					onchange: function () {
+						const table_field = d.get_field("close_items");
+						table_field.df.hidden = this.get_value();
+						table_field.refresh();
+					},
+				},
+				{
+					fieldname: "close_items",
+					fieldtype: "Table",
+					label: __("Items"),
+					cannot_add_rows: true,
+					in_place_edit: true,
+					fields: close_item_fields,
+					data: this.data,
+					hidden: true,
+					get_data: () => {
+						return this.data;
+					},
+				},
+			],
+			primary_action_label: __("Close"),
+			primary_action: function () {
+				let values = d.get_values();
+
+				if (values.select_all) {
+					me.close_sales_order();
+					d.hide();
+					return;
+				}
+				let selected_items = (values.close_items || []).filter((row) => row.__checked);
+				if (selected_items.length == me.data.length) {
+					me.close_sales_order();
+					d.hide();
+					return;
+				}
+				if (!selected_items.length) {
+					frappe.msgprint(__("Please select one item to close"));
+					return;
+				}
+				frappe.call({
+					method: "erpnext.selling.doctype.sales_order.sales_order.close_or_reopen_selected_items",
+					args: { sales_order: me.frm.doc.name, selected_items: selected_items, status: "Close" },
+					callback: (r) => {
+						if (!r.exc) {
+							d.hide();
+							me.frm.reload_doc();
+							frappe.show_alert({
+								message: __("Selected items closed"),
+								indicator: "green",
+							});
+						}
+					},
+				});
+			},
+		});
+
+		d.show();
+	}
+
 	close_sales_order() {
 		this.frm.cscript.update_status("Close", "Closed");
 	}
