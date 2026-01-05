@@ -957,3 +957,65 @@ def make_in_transit_stock_entry(source_name, in_transit_warehouse):
 		row.t_warehouse = in_transit_warehouse
 
 	return ste_doc
+
+
+
+@frappe.whitelist()
+def update_items_after_submit(mr_name=None, trans_items=None):
+	if not mr_name:
+		frappe.throw(_("Material Request name is required"))
+
+	if isinstance(trans_items, str):
+		trans_items = frappe.parse_json(trans_items)
+
+	mr = frappe.get_doc("Material Request", mr_name)
+
+	# allow update after submit
+	mr.flags.ignore_validate_update_after_submit = True
+	mr.flags.ignore_validate = True
+	mr.flags.ignore_mandatory = True
+
+	existing_rows = {d.name: d for d in mr.items}
+	incoming_rows = {d.get("docname") for d in trans_items if d.get("docname")}
+
+	# DELETE removed rows
+	for rowname, row in existing_rows.items():
+		if rowname not in incoming_rows:
+			if flt(row.ordered_qty) > 0:
+				frappe.throw(
+					_("Cannot delete Item {0} because Completed Qty exists").format(row.item_code)
+				)
+			mr.remove(row)
+
+	# ADD / UPDATE rows
+	for d in trans_items:
+		if not d.get("item_code"):
+			continue
+
+		if d.get("docname") and d.get("docname") in existing_rows:
+			child = existing_rows[d.get("docname")]
+		else:
+			child = mr.append("items", {})
+
+		qty = flt(d.get("qty"))
+		conversion_factor = flt(d.get("conversion_factor")) or 1
+		stock_qty = qty * conversion_factor
+
+		if flt(child.ordered_qty) and stock_qty <= flt(child.ordered_qty):
+			frappe.throw(
+				_("Updated Qty must be greater than Completed Qty for Item {0}")
+				.format(d.get("item_code"))
+			)
+
+		child.item_code = d.get("item_code")
+		child.qty = qty
+		child.uom = d.get("uom")
+		child.rate = flt(d.get("rate"))
+		child.conversion_factor = conversion_factor
+		child.stock_qty = stock_qty
+		child.warehouse = d.get("warehouse")
+		child.schedule_date = d.get("schedule_date")
+
+	# SAVE ONCE (VERY IMPORTANT)
+	mr.save(ignore_permissions=True)
+
