@@ -146,6 +146,7 @@ class RepostAccountingLedger(Document):
 				account_repost_doc=self.name,
 				is_async=True,
 				job_name=job_name,
+				enqueue_after_commit=True,
 			)
 			frappe.msgprint(_("Repost has started in the background"))
 		else:

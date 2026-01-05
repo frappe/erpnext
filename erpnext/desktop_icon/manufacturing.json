@@ -9,12 +9,13 @@
  "idx": 1,
  "label": "Manufacturing",
  "link_to": "Manufacturing",
- "link_type": "Workspace",
- "modified": "2025-12-22 13:07:15.536476",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-01-01 20:07:01.246693",
  "modified_by": "Administrator",
  "name": "Manufacturing",
  "owner": "Administrator",
  "parent_icon": "ERPNext",
+ "restrict_removal": 0,
  "roles": [],
  "standard": 1
 }

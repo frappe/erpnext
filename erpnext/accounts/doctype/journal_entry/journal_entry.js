@@ -43,6 +43,20 @@ frappe.ui.form.on("Journal Entry", {
 				},
 			};
 		});
+
+		frm.set_query("project", "accounts", function (doc, cdt, cdn) {
+			let row = frappe.get_doc(cdt, cdn);
+			let filters = {
+				company: doc.company,
+			};
+			if (row.party_type == "Customer") {
+				filters.customer = row.party;
+			}
+			return {
+				query: "erpnext.controllers.queries.get_project_name",
+				filters,
+			};
+		});
 	},
 
 	get_balance_for_periodic_accounting(frm) {

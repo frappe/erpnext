@@ -139,8 +139,6 @@
   },
   {
    "allow_on_submit": 1,
-   "fetch_from": "email_template.response",
-   "fetch_if_empty": 1,
    "fieldname": "message_for_supplier",
    "fieldtype": "Text Editor",
    "in_list_view": 1,
@@ -322,7 +320,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-03-03 16:48:39.856779",
+ "modified": "2025-12-29 14:44:18.934901",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",

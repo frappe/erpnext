@@ -48,13 +48,11 @@ class TestProcessDeferredAccounting(IntegrationTestCase):
 		check_gl_entries(self, si.name, original_gle, "2023-07-01")
 
 		process_deferred_accounting = frappe.get_doc(
-			dict(
-				doctype="Process Deferred Accounting",
-				posting_date="2023-07-01",
-				start_date="2023-05-01",
-				end_date="2023-06-30",
-				type="Income",
-			)
+			doctype="Process Deferred Accounting",
+			posting_date="2023-07-01",
+			start_date="2023-05-01",
+			end_date="2023-06-30",
+			type="Income",
 		)
 
 		process_deferred_accounting.insert()
@@ -80,13 +78,11 @@ class TestProcessDeferredAccounting(IntegrationTestCase):
 
 	def test_pda_submission_and_cancellation(self):
 		pda = frappe.get_doc(
-			dict(
-				doctype="Process Deferred Accounting",
-				posting_date="2019-01-01",
-				start_date="2019-01-01",
-				end_date="2019-01-31",
-				type="Income",
-			)
+			doctype="Process Deferred Accounting",
+			posting_date="2019-01-01",
+			start_date="2019-01-01",
+			end_date="2019-01-31",
+			type="Income",
 		)
 		pda.submit()
 		pda.cancel()

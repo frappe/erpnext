@@ -1106,7 +1106,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			var payment_types = $.map(this.frm.doc.payments, function (d) {
 				return d.type;
 			});
-			if (in_list(payment_types, "Cash")) {
+			if (payment_types.includes("Cash")) {
 				var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 				var base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
 

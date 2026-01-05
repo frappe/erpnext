@@ -306,7 +306,7 @@ def get_batches_by_oldest(item_code, warehouse):
 @frappe.whitelist()
 def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_batch_id: str | None = None):
 	"""Split the batch into a new batch"""
-	batch = frappe.get_doc(dict(doctype="Batch", item=item_code, batch_id=new_batch_id)).insert()
+	batch = frappe.get_doc(doctype="Batch", item=item_code, batch_id=new_batch_id).insert()
 	qty = flt(qty)
 
 	company = frappe.db.get_value("Warehouse", warehouse, "company")
@@ -330,22 +330,18 @@ def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_b
 	)
 
 	stock_entry = frappe.get_doc(
-		dict(
-			doctype="Stock Entry",
-			purpose="Repack",
-			company=company,
-			items=[
-				dict(
-					item_code=item_code,
-					qty=qty,
-					s_warehouse=warehouse,
-					serial_and_batch_bundle=from_bundle_id,
-				),
-				dict(
-					item_code=item_code, qty=qty, t_warehouse=warehouse, serial_and_batch_bundle=to_bundle_id
-				),
-			],
-		)
+		doctype="Stock Entry",
+		purpose="Repack",
+		company=company,
+		items=[
+			dict(
+				item_code=item_code,
+				qty=qty,
+				s_warehouse=warehouse,
+				serial_and_batch_bundle=from_bundle_id,
+			),
+			dict(item_code=item_code, qty=qty, t_warehouse=warehouse, serial_and_batch_bundle=to_bundle_id),
+		],
 	)
 	stock_entry.set_stock_entry_type()
 	stock_entry.insert()

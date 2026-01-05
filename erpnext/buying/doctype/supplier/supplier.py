@@ -14,6 +14,7 @@ from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_
 from erpnext.accounts.party import (
 	get_dashboard_info,
 	validate_party_accounts,
+	validate_party_currency_before_merging,
 )
 from erpnext.controllers.website_list_for_contact import add_role_for_portal_user
 from erpnext.utilities.transaction_base import TransactionBase
@@ -212,6 +213,10 @@ class Supplier(TransactionBase):
 			self.db_set("supplier_primary_address", None)
 
 		delete_contact_and_address("Supplier", self.name)
+
+	def before_rename(self, olddn, newdn, merge=False):
+		if merge:
+			validate_party_currency_before_merging("Supplier", olddn, newdn)
 
 	def after_rename(self, olddn, newdn, merge=False):
 		if frappe.defaults.get_global_default("supp_master_name") == "Supplier Name":

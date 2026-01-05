@@ -22,7 +22,7 @@ frappe.listview_settings["Stock Entry"] = {
 		} else if (doc.purpose === "Send to Warehouse" && doc.per_transferred === 100) {
 			return [__("Goods Transferred"), "green", "per_transferred,=,100"];
 		} else if (doc.docstatus === 2) {
-			return [__("Canceled"), "red", "docstatus,=,2"];
+			return [__("Cancelled"), "red", "docstatus,=,2"];
 		} else {
 			return [__("Submitted"), "blue", "docstatus,=,1"];
 		}

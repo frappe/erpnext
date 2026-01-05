@@ -580,6 +580,14 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		):
 			target_doc.set("use_serial_batch_fields", 1)
 
+		if (
+			not source_doc.serial_no
+			and not source_doc.batch_no
+			and source_doc.serial_and_batch_bundle
+			and source_doc.use_serial_batch_fields
+		):
+			target_doc.set("use_serial_batch_fields", 0)
+
 		if source_doc.item_code and target_doc.get("use_serial_batch_fields"):
 			item_details = frappe.get_cached_value(
 				"Item", source_doc.item_code, ["has_batch_no", "has_serial_no"], as_dict=1

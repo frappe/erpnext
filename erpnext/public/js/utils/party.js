@@ -36,14 +36,14 @@ erpnext.utils.get_party_details = function (frm, method, args, callback) {
 		}
 
 		if (!args) {
-			if (in_list(SALES_DOCTYPES, frm.doc.doctype)) {
+			if (SALES_DOCTYPES.includes(frm.doc.doctype)) {
 				args = {
 					party: frm.doc.customer || frm.doc.party_name,
 					party_type: "Customer",
 				};
 			}
 
-			if (in_list(PURCHASE_DOCTYPES, frm.doc.doctype)) {
+			if (PURCHASE_DOCTYPES.includes(frm.doc.doctype)) {
 				args = {
 					party: frm.doc.supplier,
 					party_type: "Supplier",
@@ -57,13 +57,13 @@ erpnext.utils.get_party_details = function (frm, method, args, callback) {
 		args.fetch_payment_terms_template = cint(!frm.doc.ignore_default_payment_terms_template);
 	}
 
-	if (in_list(SALES_DOCTYPES, frm.doc.doctype)) {
+	if (SALES_DOCTYPES.includes(frm.doc.doctype)) {
 		if (!args.company_address && frm.doc.company_address) {
 			args.company_address = frm.doc.company_address;
 		}
 	}
 
-	if (in_list(PURCHASE_DOCTYPES, frm.doc.doctype)) {
+	if (PURCHASE_DOCTYPES.includes(frm.doc.doctype)) {
 		if (!args.company_address && frm.doc.billing_address) {
 			args.company_address = frm.doc.billing_address;
 		}

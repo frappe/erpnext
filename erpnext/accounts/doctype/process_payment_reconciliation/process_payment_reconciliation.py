@@ -35,7 +35,10 @@ class ProcessPaymentReconciliation(Document):
 		]
 		to_invoice_date: DF.Date | None
 		to_payment_date: DF.Date | None
+
 	# end: auto-generated types
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
 
 	def validate(self):
 		self.validate_receivable_payable_account()

@@ -3,14 +3,17 @@ frappe.provide("erpnext.financial_statements");
 erpnext.financial_statements = {
 	filters: get_filters(),
 	baseData: null,
+
+	get_pdf_format: function (report, custom_format) {
+		// If report template is selected, use default pdf formatting
+		return report.get_filter_value("report_template") ? null : custom_format;
+	},
+
 	formatter: function (value, row, column, data, default_formatter, filter) {
 		const report_params = [value, row, column, data, default_formatter, filter];
 		// Growth/Margin
 		if (erpnext.financial_statements._is_special_view(column, data))
 			return erpnext.financial_statements._format_special_view(...report_params);
-
-		if (frappe.query_report.get_filter_value("report_template"))
-			return erpnext.financial_statements._format_custom_report(...report_params);
 
 		if (frappe.query_report.get_filter_value("report_template"))
 			return erpnext.financial_statements._format_custom_report(...report_params);
@@ -56,7 +59,7 @@ erpnext.financial_statements = {
 		const isPeriodColumn = periodKeys.includes(baseName);
 
 		return {
-			isAccount: baseName === "account",
+			isAccount: baseName === erpnext.financial_statements.name_field,
 			isPeriod: isPeriodColumn,
 			segmentIndex: valueMatch && valueMatch[1] ? parseInt(valueMatch[1]) : null,
 			fieldname: baseName,
@@ -74,15 +77,26 @@ erpnext.financial_statements = {
 	},
 
 	_format_custom_account_column: function (value, data, formatting, column, default_formatter, row) {
+		// account name to display in the report
+		// 1. section_name for sections
+		// 2. account_name for accounts
+		// 3. formatting.account_name for segments
+		// 4. value as last fallback
+		value = data.section_name || data.account_name || formatting.account_name || value;
+
 		if (!value) return "";
 
 		// Link to open ledger
 		const should_link_to_ledger =
-			formatting.is_detail || (formatting.account_filters && formatting.child_accounts);
+			formatting.is_detail ||
+			(formatting.account_filters && formatting.child_accounts && formatting.child_accounts.length);
 
 		if (should_link_to_ledger) {
 			const glData = {
-				account: formatting.account_name || formatting.child_accounts || value,
+				account:
+					Array.isArray(formatting.child_accounts) && formatting.child_accounts.length
+						? formatting.child_accounts
+						: formatting.account ?? value,
 				from_date: formatting.from_date || formatting.period_start_date,
 				to_date: formatting.to_date || formatting.period_end_date,
 				account_type: formatting.account_type,
@@ -125,16 +139,41 @@ erpnext.financial_statements = {
 		return erpnext.financial_statements._style_custom_value(formattedValue, formatting, value);
 	},
 
-	_style_custom_value(formattedValue, formatting, value) {
-		let $element = $(`<span>${formattedValue}</span>`);
+	_style_custom_value(formatted_value, formatting, value) {
+		const styles = [];
 
-		if (formatting.bold) $element.css("font-weight", "bold");
-		if (formatting.italic) $element.css("font-style", "italic");
-		if (formatting.warn_if_negative && typeof value === "number" && value < 0)
-			$element.addClass("text-danger");
-		if (formatting.color) $element.css("color", formatting.color);
+		if (formatting.bold) styles.push("font-weight: bold");
+		if (formatting.italic) styles.push("font-style: italic");
 
-		return $element.wrap("<p></p>").parent().html();
+		if (formatting.warn_if_negative && typeof value === "number" && value < 0) {
+			styles.push("color: #dc3545"); // text-danger
+		} else if (formatting.color) {
+			styles.push(`color: ${formatting.color}`);
+		}
+
+		if (styles.length === 0) return formatted_value;
+
+		const style_string = styles.join("; ");
+
+		// formatted value contains HTML tags/elements
+		if (/<[^>]+>/.test(formatted_value)) {
+			const temp_div = document.createElement("div");
+			temp_div.innerHTML = formatted_value;
+
+			// parse HTML and inject styles into the first element
+			const first_element = temp_div.querySelector("*");
+
+			if (first_element) {
+				const existing_style = first_element.getAttribute("style") || "";
+				first_element.setAttribute(
+					"style",
+					existing_style ? `${existing_style}; ${style_string}` : style_string
+				);
+				return temp_div.innerHTML;
+			}
+		}
+
+		return `<span style="${style_string}">${formatted_value}</span>`;
 	},
 
 	_format_special_view: function (value, row, column, data, default_formatter) {

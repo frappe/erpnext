@@ -1121,22 +1121,30 @@ def update_billed_amount_based_on_po(po_details, update_modified=True, pr_doc=No
 
 	updated_pr = []
 	for pr_item in pr_details:
-		billed_against_po = flt(po_billed_amt_details.get(pr_item.purchase_order_item))
+		billed_amt_against_po, billed_qty_against_po = 0, 0
+		if billed_details := po_billed_amt_details.get(pr_item.purchase_order_item):
+			billed_amt_against_po = flt(billed_details["billed_amt"])
+			billed_qty_against_po = flt(billed_details["billed_qty"])
 
 		# Get billed amount directly against Purchase Receipt
 		billed_amt_against_pr = flt(pr_items_billed_amount.get(pr_item.name, 0))
 
 		# Distribute billed amount directly against PO between PRs based on FIFO
-		if billed_against_po and billed_amt_against_pr < pr_item.amount:
-			pending_to_bill = flt(pr_item.amount) - billed_amt_against_pr
-			if pending_to_bill <= billed_against_po:
-				billed_amt_against_pr += pending_to_bill
-				billed_against_po -= pending_to_bill
+		if billed_amt_against_po and billed_amt_against_pr < pr_item.amount:
+			if not billed_amt_against_pr and billed_qty_against_po and billed_qty_against_po > pr_item.qty:
+				billed_amt_against_pr = flt(flt(billed_amt_against_po) * flt(pr_item.qty)) / flt(
+					billed_qty_against_po
+				)
 			else:
-				billed_amt_against_pr += billed_against_po
-				billed_against_po = 0
+				pending_to_bill = flt(pr_item.amount) - billed_amt_against_pr
+				if pending_to_bill <= billed_amt_against_po:
+					billed_amt_against_pr += pending_to_bill
+					billed_amt_against_po -= pending_to_bill
+				else:
+					billed_amt_against_pr += billed_amt_against_po
+					billed_amt_against_po = 0
 
-		po_billed_amt_details[pr_item.purchase_order_item] = billed_against_po
+				po_billed_amt_details[pr_item.purchase_order_item]["billed_amt"] = billed_amt_against_po
 
 		if pr_item.billed_amt != billed_amt_against_pr:
 			# update existing doc if possible
@@ -1170,6 +1178,7 @@ def get_purchase_receipts_against_po_details(po_details):
 		.on(purchase_receipt.name == purchase_receipt_item.parent)
 		.select(
 			purchase_receipt_item.name,
+			purchase_receipt_item.qty,
 			purchase_receipt_item.parent,
 			purchase_receipt_item.amount,
 			purchase_receipt_item.billed_amt,
@@ -1217,7 +1226,11 @@ def get_billed_amount_against_po(po_items):
 		frappe.qb.from_(purchase_invoice_item)
 		.inner_join(purchase_invoice)
 		.on(purchase_invoice_item.parent == purchase_invoice.name)
-		.select(fn.Sum(purchase_invoice_item.amount).as_("billed_amt"), purchase_invoice_item.po_detail)
+		.select(
+			fn.Sum(purchase_invoice_item.amount).as_("billed_amt"),
+			fn.Sum(purchase_invoice_item.qty).as_("qty"),
+			purchase_invoice_item.po_detail,
+		)
 		.where(
 			(purchase_invoice_item.po_detail.isin(po_items))
 			& (purchase_invoice.docstatus == 1)
@@ -1227,7 +1240,7 @@ def get_billed_amount_against_po(po_items):
 		.groupby(purchase_invoice_item.po_detail)
 	).run(as_dict=1)
 
-	return {d.po_detail: flt(d.billed_amt) for d in query}
+	return {d.po_detail: {"billed_amt": flt(d.billed_amt), "billed_qty": flt(d.qty)} for d in query}
 
 
 def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate=False):
@@ -1240,6 +1253,8 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 
 	if adjust_incoming_rate:
 		item_wise_billed_qty = get_billed_qty_against_purchase_receipt(pr_doc)
+
+		billed_qty_based_on_po = get_billed_qty_against_purchase_order(pr_doc)
 
 	for item in pr_doc.items:
 		returned_qty = flt(item_wise_returned_qty.get(item.name))
@@ -1268,11 +1283,21 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 			if (
 				item.billed_amt is not None
 				and item.amount is not None
-				and item_wise_billed_qty.get(item.name)
+				and (
+					item_wise_billed_qty.get(item.name)
+					or billed_qty_based_on_po.get(item.purchase_order_item)
+				)
 			):
-				adjusted_amt = (
-					flt(item.billed_amt / item_wise_billed_qty.get(item.name)) - flt(item.rate)
-				) * item.qty
+				qty = item_wise_billed_qty.get(item.name)
+				if not qty:
+					if item.qty < billed_qty_based_on_po.get(item.purchase_order_item):
+						qty = item.qty
+					else:
+						qty = billed_qty_based_on_po.get(item.purchase_order_item)
+
+					billed_qty_based_on_po[item.purchase_order_item] -= qty
+
+				adjusted_amt = (flt(item.billed_amt / qty) - flt(item.rate)) * item.qty
 
 			adjusted_amt = flt(adjusted_amt * flt(pr_doc.conversion_rate), item.precision("amount"))
 			pi_landed_cost_amount += adjusted_amt
@@ -1314,6 +1339,32 @@ def get_billed_qty_against_purchase_receipt(pr_doc):
 	if not invoice_data:
 		return frappe._dict()
 	return frappe._dict(invoice_data)
+
+
+def get_billed_qty_against_purchase_order(pr_doc):
+	po_names = list(
+		set(
+			[
+				d.purchase_order_item
+				for d in pr_doc.items
+				if d.purchase_order_item and not d.purchase_invoice_item
+			]
+		)
+	)
+
+	invoice_data_po_based = frappe._dict()
+	if po_names:
+		table = frappe.qb.DocType("Purchase Invoice Item")
+		query = (
+			frappe.qb.from_(table)
+			.select(table.po_detail, fn.Sum(table.qty).as_("qty"))
+			.where((table.po_detail.isin(po_names)) & (table.docstatus == 1) & (table.pr_detail.isnull()))
+			.groupby(table.po_detail)
+		)
+		invoice_data_po_based = query.run(as_list=1)
+		invoice_data_po_based = frappe._dict(invoice_data_po_based)
+
+	return invoice_data_po_based
 
 
 def adjust_incoming_rate_for_pr(doc):

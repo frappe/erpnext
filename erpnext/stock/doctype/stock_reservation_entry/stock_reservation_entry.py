@@ -709,6 +709,7 @@ def get_available_qty_to_reserve(
 				& (sre.warehouse == warehouse)
 				& (sre.delivered_qty < sre.reserved_qty)
 			)
+			.for_update()
 		)
 
 		if ignore_sre:

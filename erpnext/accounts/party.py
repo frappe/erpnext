@@ -1063,3 +1063,21 @@ def add_party_account(party_type, party, company, account):
 
 def render_address(address, check_permissions=True):
 	return frappe.call(_render_address, address, check_permissions=check_permissions)
+
+
+def validate_party_currency_before_merging(party_type, old_party, new_party):
+	for company in frappe.get_all("Company"):
+		old_party_currency = get_party_gle_currency(party_type, old_party, company.name)
+		new_party_currency = get_party_gle_currency(party_type, new_party, company.name)
+
+		if old_party_currency and new_party_currency and old_party_currency != new_party_currency:
+			frappe.throw(
+				_(
+					"Cannot merge {0} '{1}' into '{2}' as both have existing accounting entries in different currencies for company '{3}'."
+				).format(
+					party_type,
+					old_party,
+					new_party,
+					company.name,
+				)
+			)

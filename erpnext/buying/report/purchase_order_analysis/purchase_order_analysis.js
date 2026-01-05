@@ -97,7 +97,7 @@ frappe.query_reports["Purchase Order Analysis"] = {
 		value = default_formatter(value, row, column, data);
 		let format_fields = ["received_qty", "billed_amount"];
 
-		if (in_list(format_fields, column.fieldname) && data && data[column.fieldname] > 0) {
+		if (format_fields.includes(column.fieldname) && data && data[column.fieldname] > 0) {
 			value = "<span style='color:green'>" + value + "</span>";
 		}
 		return value;

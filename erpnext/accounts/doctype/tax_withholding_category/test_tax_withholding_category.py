@@ -1214,8 +1214,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		# First invoice - below threshold, should be under withheld
 		pi = create_purchase_invoice(supplier="Test TDS Supplier6", rate=4000, do_not_save=True)
 		pi.apply_tds = 1
-		pi.tax_withholding_category = "Test Multi Invoice Category"
-		pi.save()
 		pi.submit()
 		invoices.append(pi)
 
@@ -1478,7 +1476,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 		pi = create_purchase_invoice(supplier="Test TDS Supplier6", rate=12000, do_not_save=True)
 		pi.apply_tds = 1
-		pi.tax_withholding_category = "Test Multi Invoice Category"
 		advances = pi.get_advance_entries()
 		pi.append(
 			"advances",
@@ -2096,7 +2093,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		# Create purchase invoice that settles the payment entry
 		pi = create_purchase_invoice(supplier="Test TDS Supplier6", rate=8000, do_not_save=True)
 		pi.apply_tds = 1
-		pi.tax_withholding_category = "Test Multi Invoice Category"
 		advances = pi.get_advance_entries()
 		pi.append(
 			"advances",
@@ -2719,7 +2715,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		# Create purchase invoice with manual override
 		pi = create_purchase_invoice(supplier="Test TDS Supplier6", rate=20000, do_not_save=True)
 		pi.apply_tds = 1
-		pi.tax_withholding_category = "Test Multi Invoice Category"
 		pi.ignore_tax_withholding_threshold = 1
 		pi.save()
 
@@ -2749,7 +2744,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 		# Step 2: Create Purchase Invoice with partial adjustment and manual rate change
 		pi = create_purchase_invoice(supplier="Test TDS Supplier8", rate=80000, do_not_save=True)
-		pi.tax_withholding_category = "Test Multi Invoice Category"
 		pi.override_tax_withholding_entries = 1  # Enable manual override
 		pi.tax_withholding_entries = []
 
@@ -2790,6 +2784,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		)
 
 		pi.save()
+		pi.reload()
 		pi.submit()
 
 		# Step 3: Verify the tax withholding entries
@@ -2870,7 +2865,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 		# Step 2: Create Purchase Invoice with partial adjustment and manual rate change
 		pi = create_purchase_invoice(supplier="Test TDS Supplier8", rate=80000, do_not_save=True)
-		pi.tax_withholding_category = "Test Multi Invoice Category"
 		pi.override_tax_withholding_entries = 1  # Enable manual override
 		pi.tax_withholding_entries = []
 
@@ -2911,6 +2905,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		)
 
 		pi.save()
+		pi.reload()
 		pi.submit()
 
 		# Step 3: Verify the tax withholding entries
@@ -2993,7 +2988,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.validate_tax_withholding_entries("Payment Entry", pe.name, pe_expected)
 
 		pi = create_purchase_invoice(supplier="Test TDS Supplier8", rate=50000, do_not_save=True)
-		pi.tax_withholding_category = "Test Multi Invoice Category"
 		pi.override_tax_withholding_entries = 1
 		pi.tax_withholding_entries = []
 

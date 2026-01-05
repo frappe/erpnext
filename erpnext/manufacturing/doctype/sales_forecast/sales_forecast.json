@@ -9,7 +9,6 @@
   "naming_series",
   "company",
   "posting_date",
-  "forecasting_method",
   "column_break_xdcy",
   "from_date",
   "frequency",
@@ -143,15 +142,8 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Planned\nMPS Generated",
+   "options": "Planned\nMPS Generated\nCancelled",
    "read_only": 1
-  },
-  {
-   "default": "Holt-Winters",
-   "fieldname": "forecasting_method",
-   "fieldtype": "Select",
-   "label": "Forecasting Method",
-   "options": "Holt-Winters\nManual"
   },
   {
    "default": "Monthly",
@@ -166,7 +158,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-13 16:33:49.682684",
+ "modified": "2026-01-02 15:09:32.165242",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Sales Forecast",

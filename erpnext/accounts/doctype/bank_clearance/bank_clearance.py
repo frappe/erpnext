@@ -125,7 +125,7 @@ class BankClearance(Document):
 				)
 
 			msg += "</ul>"
-			frappe.throw(_(msg))
+			msgprint(_(msg))
 			return
 
 		if not entries_to_update:

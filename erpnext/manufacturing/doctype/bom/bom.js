@@ -19,6 +19,20 @@ frappe.ui.form.on("BOM", {
 			};
 		});
 
+		frm.set_query("operation", "items", function () {
+			if (!frm.doc.operations?.length) {
+				frappe.throw(__("Please add Operations first."));
+			}
+
+			let operations = frm.doc.operations.map((d) => d.operation);
+
+			return {
+				filters: {
+					name: ["in", operations],
+				},
+			};
+		});
+
 		frm.set_query("bom_no", "operations", function (doc, cdt, cdn) {
 			let row = locals[cdt][cdn];
 			return {

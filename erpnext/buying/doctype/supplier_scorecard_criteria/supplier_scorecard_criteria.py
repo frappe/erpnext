@@ -45,7 +45,7 @@ class SupplierScorecardCriteria(Document):
 		mylist = re.finditer(regex, test_formula, re.MULTILINE | re.DOTALL)
 		for _dummy1, match in enumerate(mylist):
 			for _dummy2 in range(0, len(match.groups())):
-				test_formula = test_formula.replace("{" + match.group(1) + "}", "0")
+				test_formula = test_formula.replace("{" + match.group(1) + "}", "1")
 
 		try:
 			frappe.safe_eval(test_formula, None, {"max": max, "min": min})

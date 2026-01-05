@@ -30,4 +30,4 @@ def execute():
 
 def insert_sales_partner_type(s):
 	if not frappe.db.exists("Sales Partner Type", s):
-		frappe.get_doc(dict(doctype="Sales Partner Type", sales_partner_type=s)).insert()
+		frappe.get_doc(doctype="Sales Partner Type", sales_partner_type=s).insert()

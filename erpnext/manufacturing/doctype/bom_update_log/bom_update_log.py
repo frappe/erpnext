@@ -41,7 +41,7 @@ class BOMUpdateLog(Document):
 		error_log: DF.Link | None
 		new_bom: DF.Link | None
 		processed_boms: DF.LongText | None
-		status: DF.Literal["Queued", "In Progress", "Completed", "Failed"]
+		status: DF.Literal["Queued", "In Progress", "Completed", "Failed", "Cancelled"]
 		update_type: DF.Literal["Replace BOM", "Update Cost"]
 	# end: auto-generated types
 
@@ -63,6 +63,9 @@ class BOMUpdateLog(Document):
 			self.validate_bom_cost_update_in_progress()
 
 		self.status = "Queued"
+
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
 
 	def validate_boms_are_specified(self):
 		if self.update_type == "Replace BOM" and not (self.current_bom and self.new_bom):

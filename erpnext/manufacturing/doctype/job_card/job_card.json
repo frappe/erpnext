@@ -405,7 +405,8 @@
    "fieldname": "employee",
    "fieldtype": "Table MultiSelect",
    "label": "Employee",
-   "options": "Job Card Time Log"
+   "options": "Job Card Time Log",
+   "read_only": 1
   },
   {
    "fieldname": "serial_no",
@@ -625,7 +626,7 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-04 15:47:54.514290",
+ "modified": "2025-12-22 14:20:07.817118",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

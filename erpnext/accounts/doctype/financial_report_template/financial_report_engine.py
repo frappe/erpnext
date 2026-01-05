@@ -71,7 +71,9 @@ class PeriodValue:
 class AccountData:
 	"""Account data across all periods"""
 
-	account_name: str
+	account: str  # docname
+	account_name: str = ""  # account name
+	account_number: str = ""
 	period_values: dict[str, PeriodValue] = field(default_factory=dict)
 
 	def add_period(self, period_value: PeriodValue) -> None:
@@ -103,7 +105,11 @@ class AccountData:
 			# movement is unaccumulated by default
 
 	def copy(self):
-		copied = AccountData(account_name=self.account_name)
+		copied = AccountData(
+			account=self.account,
+			account_name=self.account_name,
+			account_number=self.account_number,
+		)
 		copied.period_values = {k: v.copy() for k, v in self.period_values.items()}
 		return copied
 
@@ -329,12 +335,10 @@ class DataCollector:
 		self.account_fields = {field.fieldname for field in frappe.get_meta("Account").fields}
 
 	def add_account_request(self, row):
-		accounts = self._parse_account_filter(self.company, row)
-
 		self.account_requests.append(
 			{
 				"row": row,
-				"accounts": accounts,
+				"accounts": self._parse_account_filter(self.company, row),
 				"balance_type": row.balance_type,
 				"reference_code": row.reference_code,
 				"reverse_sign": row.reverse_sign,
@@ -345,12 +349,12 @@ class DataCollector:
 		if not self.account_requests:
 			return {"account_data": {}, "summary": {}, "account_details": {}}
 
-		# Get all unique accounts
-		all_accounts = set()
-		for request in self.account_requests:
-			all_accounts.update(request["accounts"])
+		# Get all accounts
+		all_accounts = []
 
-		all_accounts = list(all_accounts)
+		for request in self.account_requests:
+			all_accounts.extend(request["accounts"])
+
 		if not all_accounts:
 			return {"account_data": {}, "summary": {}, "account_details": {}}
 
@@ -373,7 +377,9 @@ class DataCollector:
 			total_values = [0.0] * len(self.periods)
 			request_account_details = {}
 
-			for account_name in accounts:
+			for account in accounts:
+				account_name = account.name
+
 				if account_name not in account_data:
 					continue
 
@@ -396,20 +402,21 @@ class DataCollector:
 		return {"account_data": account_data, "summary": summary, "account_details": account_details}
 
 	@staticmethod
-	def _parse_account_filter(company, report_row) -> list[str]:
+	def _parse_account_filter(company, report_row) -> list[dict]:
 		"""
 		Find accounts matching filter criteria.
 
 		Example:
-		                Input: '["account_type", "=", "Cash"]'
-		                Output: ["Cash - COMP", "Petty Cash - COMP", "Bank - COMP"]
+
+		- Input: '["account_type", "=", "Cash"]'
+		- Output: [{"name": "Cash - COMP", "account_name": "Cash", "account_number": "1001"}]
 		"""
 		filter_parser = FilterExpressionParser()
 
 		account = frappe.qb.DocType("Account")
 		query = (
 			frappe.qb.from_(account)
-			.select(account.name)
+			.select(account.name, account.account_name, account.account_number)
 			.where(account.disabled == 0)
 			.where(account.is_group == 0)
 		)
@@ -423,8 +430,8 @@ class DataCollector:
 
 		query = query.where(where_condition)
 		query = query.orderby(account.name)
-		result = query.run(as_dict=True)
-		return [row.name for row in result]
+
+		return query.run(as_dict=True)
 
 	@staticmethod
 	def get_filtered_accounts(company: str, account_rows: list) -> list[str]:
@@ -456,17 +463,35 @@ class FinancialQueryBuilder:
 		self.filters = filters
 		self.periods = periods
 		self.company = filters.get("company")
+		self.account_meta = {}  # {name: {account_name, account_number}}
 
-	def fetch_account_balances(self, accounts: list[str]) -> dict[str, AccountData]:
+	def fetch_account_balances(self, accounts: list[dict]) -> dict[str, AccountData]:
 		"""
 		Fetch account balances for all periods with optimization.
 		Steps: get opening balances → fetch GL entries → calculate running totals
 
+		- accounts: list of accounts with details
+
+		```
+		{
+		    "name": "Cash - COMP",
+		    "account_name": "Cash",
+		    "account_number": "1001",
+		}
+		```
+
 		Returns:
 		    dict: {account: AccountData}
 		"""
-		balances_data = self._get_opening_balances(accounts)
-		gl_data = self._get_gl_movements(accounts)
+		account_names = list({acc.name for acc in accounts})
+		# NOTE: do not change accounts list as it is used in caller function
+		self.account_meta = {
+			acc.name: {"account_name": acc.account_name, "account_number": acc.account_number}
+			for acc in accounts
+		}
+
+		balances_data = self._get_opening_balances(account_names)
+		gl_data = self._get_gl_movements(account_names)
 		self._calculate_running_balances(balances_data, gl_data)
 		self._handle_balance_accumulation(balances_data)
 
@@ -543,7 +568,8 @@ class FinancialQueryBuilder:
 			gap_movement = gap_movements.get(account, 0.0)
 			opening_balance = closing_balance + gap_movement
 
-			account_data = AccountData(account)
+			account_data = AccountData(account=account, **self._get_account_meta(account))
+
 			account_data.add_period(PeriodValue(first_period_key, opening_balance, 0, 0))
 			balances_data[account] = account_data
 
@@ -613,7 +639,7 @@ class FinancialQueryBuilder:
 		for row in gl_data:
 			account = row["account"]
 			if account not in balances_data:
-				balances_data[account] = AccountData(account)
+				balances_data[account] = AccountData(account=account, **self._get_account_meta(account))
 
 			account_data: AccountData = balances_data[account]
 
@@ -713,6 +739,9 @@ class FinancialQueryBuilder:
 			query = query.where(LiteralValue(user_conditions))
 
 		return query.run(as_dict=True)
+
+	def _get_account_meta(self, account: str) -> dict[str, Any]:
+		return self.account_meta.get(account, {})
 
 
 class FilterExpressionParser:
@@ -1544,20 +1573,29 @@ class RowFormatterBase(ABC):
 		pass
 
 	def _get_values(self, row_data: RowData) -> dict[str, Any]:
-		# TODO: can be commonify COA? @abdeali
+		def _get_row_data(key: str, default: Any = "") -> Any:
+			return getattr(row_data.row, key, default) or default
+
+		def _get_filter_value(key: str, default: Any = "") -> Any:
+			return getattr(self.context.filters, key, default) or default
+
 		child_accounts = []
 
 		if row_data.account_details:
 			child_accounts = list(row_data.account_details.keys())
 
+		display_name = _get_row_data("display_name", "")
+
 		values = {
+			"account": _get_row_data("account", "") or display_name,
+			"account_name": display_name,
+			"acc_name": _get_row_data("account_name", ""),
+			"acc_number": _get_row_data("account_number", ""),
 			"child_accounts": child_accounts,
-			"account": getattr(row_data.row, "display_name", "") or "",
-			"indent": getattr(row_data.row, "indentation_level", 0),
-			"account_name": getattr(row_data.row, "account", "") or "",
 			"currency": self.context.currency or "",
-			"period_start_date": getattr(self.context.filters, "period_start_date", "") or "",
-			"period_end_date": getattr(self.context.filters, "period_end_date", "") or "",
+			"indent": _get_row_data("indentation_level", 0),
+			"period_start_date": _get_filter_value("period_start_date", ""),
+			"period_end_date": _get_filter_value("period_end_date", ""),
 			"total": 0,
 		}
 
@@ -1670,8 +1708,8 @@ class DetailRowBuilder:
 		detail_rows = []
 		parent_row = self.parent_row_data.row
 
-		for account_name, account_data in self.parent_row_data.account_details.items():
-			detail_row = self._create_detail_row_object(account_name, parent_row)
+		for account_data in self.parent_row_data.account_details.values():
+			detail_row = self._create_detail_row_object(account_data, parent_row)
 
 			balance_type = getattr(parent_row, "balance_type", "Closing Balance")
 			values = account_data.get_values_by_type(balance_type)
@@ -1687,16 +1725,20 @@ class DetailRowBuilder:
 
 		return detail_rows
 
-	def _create_detail_row_object(self, account_name: str, parent_row):
-		short_name = account_name.rsplit(" - ", 1)[0].strip()
+	def _create_detail_row_object(self, account_data: AccountData, parent_row):
+		acc_name = account_data.account_name or ""
+		acc_number = account_data.account_number or ""
+
+		display_name = f"{_(acc_number)} - {_(acc_name)}" if acc_number else _(acc_name)
 
 		return type(
 			"DetailRow",
 			(),
 			{
-				"display_name": short_name,
-				"account": account_name,
-				"account_name": short_name,
+				"account": account_data.account,
+				"display_name": display_name,
+				"account_name": acc_name,
+				"account_number": acc_number,
 				"data_source": "Account Detail",
 				"indentation_level": getattr(parent_row, "indentation_level", 0) + 1,
 				"fieldtype": getattr(parent_row, "fieldtype", None),

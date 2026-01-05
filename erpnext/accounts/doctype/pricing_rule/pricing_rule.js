@@ -171,7 +171,7 @@ frappe.ui.form.on("Pricing Rule", {
 
 		set_field_options("applicable_for", options.join("\n"));
 
-		if (!in_list(options, applicable_for)) applicable_for = null;
+		if (!options.includes(applicable_for)) applicable_for = null;
 		frm.set_value("applicable_for", applicable_for);
 	},
 });

@@ -110,6 +110,14 @@ class SubcontractingOrder(SubcontractingController):
 			"over_transfer_allowance",
 			frappe.db.get_single_value("Buying Settings", "over_transfer_allowance"),
 		)
+		self.set_onload(
+			"over_delivery_receipt_allowance",
+			frappe.get_single_value("Stock Settings", "over_delivery_receipt_allowance"),
+		)
+		self.set_onload(
+			"backflush_based_on",
+			frappe.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on"),
+		)
 
 		if self.reserve_stock:
 			if self.has_unreserved_stock():
@@ -464,16 +472,18 @@ class SubcontractingOrder(SubcontractingController):
 
 @frappe.whitelist()
 def make_subcontracting_receipt(source_name, target_doc=None):
-	return get_mapped_subcontracting_receipt(source_name, target_doc)
+	items = frappe.flags.args.get("items") if frappe.flags.args else None
+	return get_mapped_subcontracting_receipt(source_name, target_doc, items=items)
 
 
-def get_mapped_subcontracting_receipt(source_name, target_doc=None):
+def get_mapped_subcontracting_receipt(source_name, target_doc=None, items=None):
 	def update_item(source, target, source_parent):
 		target.purchase_order = source_parent.purchase_order
 		target.purchase_order_item = source.purchase_order_item
-		target.qty = flt(source.qty) - flt(source.received_qty)
+		target.qty = items.get(source.name) or (flt(source.qty) - flt(source.received_qty))
 		target.amount = (flt(source.qty) - flt(source.received_qty)) * flt(source.rate)
 
+	items = {item["name"]: item["qty"] for item in items} if items else {}
 	target_doc = get_mapped_doc(
 		"Subcontracting Order",
 		source_name,
@@ -496,7 +506,9 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 					"bom": "bom",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty),
+				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty)
+				if not items
+				else doc.name in items,
 			},
 		},
 		target_doc,
