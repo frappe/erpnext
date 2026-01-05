@@ -19,7 +19,7 @@ def get_operator_state(job_card, process_name="operator"):
         "job_card_submitted": jc.docstatus == 1 or jc.status == "Completed",
         "stock_entry_name": wo.produced_qty > 0 and f"MFG-SE-{process_name.upper()}-*" or "",
         "process_name": process_name, 
-        "current_process": wo.description.split(" - ")[-1].strip() if wo and " - " in wo.description else process_name,
+        "current_process": wo.item_name.split(" - ")[-1].strip() if wo and " - " in wo.item_name else process_name,
     }
     return state
 
@@ -146,17 +146,17 @@ def transfer_to_next_process(current_work_order, qty=None):
     fg_qty = flt(qty or wo.produced_qty)
     
     process_mapping = {
-        "Mixing": "Distribution",
-        "Distribution": "Pressed Slab", 
-        "Pressed Slab": "Heated Slab",
-        "Heated Slab": "Cooled Slab",
-        "Cooled Slab": "Trimmed Slab",
-        "Trimmed Slab": "Calibrated Slab",
-        "Calibrated Slab": "Polished Slab",
-        "Polished Slab": "Inspected Slab"
+        "mixing": "distribution",
+        "distribution": "pressed slab", 
+        "pressed slab": "heated slab",
+        "heated slab": "cooled slab",
+        "cooled slab": "trimmed slab",
+        "trimmed slab": "calibrated slab",
+        "calibrated slab": "polished slab",
+        "polished slab": "inspected slab"
     }
 
-    current_process = wo.description.split(" - ")[-1].strip() if " - " in wo.description else ""
+    current_process = wo.production_item.split(" - ")[-1].strip().lower() if " - " in wo.production_item else ""
     next_process = process_mapping.get(current_process)
     
     if not next_process:
@@ -164,14 +164,14 @@ def transfer_to_next_process(current_work_order, qty=None):
     
     next_wo = frappe.db.get_value("Work Order", {
         "production_plan": wo.production_plan,
-        "description": ["like", f"%{next_process}%"],
+        "production_item": ["like", f"%{next_process}%"],
         "docstatus": ["<", 2] 
     }, "name")
     
     if not next_wo:
         all_wos = frappe.get_all("Work Order", 
             filters={"production_plan": wo.production_plan},
-            fields=["name", "production_item", "description"]
+            fields=["name", "production_item"]
         )
         frappe.throw(f"Next WO for '{next_process}' not found.")
     
@@ -256,22 +256,22 @@ def transfer_to_next_process(current_work_order, qty=None):
 def get_next_process_bom_qty(current_work_order):
     """Get BOM qty required for NEXT process"""
     wo = frappe.get_doc("Work Order", current_work_order)
-    current_process = wo.description.split(" - ")[-1].strip()
+    current_process = wo.item_name.split(" - ")[-1].strip()
     process_mapping = {
-        "Mixing": "Distribution",
-        "Distribution": "Pressed Slab", 
-        "Pressed Slab": "Heated Slab",
-        "Heated Slab": "Cooled Slab",
-        "Cooled Slab": "Trimmed Slab",
-        "Trimmed Slab": "Calibrated Slab",
-        "Calibrated Slab": "Polished Slab",
-        "Polished Slab": "Inspected Slab"
+        "mixing": "distribution",
+        "distribution": "pressed slab", 
+        "pressed slab": "heated slab",
+        "heated slab": "cooled slab",
+        "cooled slab": "trimmed slab",
+        "trimmed slab": "calibrated slab",
+        "calibrated slab": "polished slab",
+        "polished slab": "inspected slab"
     }
     next_process = process_mapping.get(current_process)
     
     next_wo = frappe.db.get_value("Work Order", {
         "production_plan": wo.production_plan,
-        "description": ["like", f"%{next_process}%"],
+        "production_item": ["like", f"%{next_process}%"],
         "docstatus": ["<", 2]
     }, "name")
     
@@ -291,3 +291,4 @@ def get_next_process_bom_qty(current_work_order):
             }
     
     return {"bom_qty": 0}
+

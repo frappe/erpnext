@@ -165,3 +165,31 @@ def _get_slab_number():
         frappe.db.count("Slab", filters={"created_on": [">=", month_start]}) + 1
     )
     return slab_count
+
+@frappe.whitelist()
+def get_all_existing_slabs(stage):
+    slabs = frappe.get_all("Slab",
+    filters={
+            "current_stage": stage,      
+            "docstatus": 0,              
+        },
+        fields=[
+            "name",                    
+            "batch_number",            
+            "line",                       
+            "template",                
+            "current_stage",           
+            "created_on",              
+            "serial_number"            
+        ],
+        order_by="created_on desc"
+    )
+    return slabs
+    
+@frappe.whitelist()
+def get_slab_for_job_card(job_card):
+    slab = frappe.get_doc("Slab", {"job_card": job_card}, 
+        fields=["name", "serial_number", "batch_number", "template", "line", "current_stage"], 
+        as_dict=1)
+    return slab
+

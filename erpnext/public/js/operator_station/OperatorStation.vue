@@ -25,7 +25,7 @@ const nextWorkOrder = ref('');
 const bomNo = ref('Loading...');
 const bomQty = ref(0);
 const slabTemplate = ref('');  
-const workstation = ref('');
+const line = ref(null);
 const error = ref(null);              
 const batchNo = ref(null);
 
@@ -76,101 +76,74 @@ const props = defineProps({
 
 // actions
 onMounted(async () => {
+  try {
     const route = frappe.get_route();
     const station = route[1] || props.process;
     jobCard.value = route[2] || props.job_card;
 
     if (!jobCard.value) {
-        error.value = __('No Job Card found in route');
-        return;
+      error.value = __('No Job Card found in route');
+      return;
     }
-    // await this.loadIncomingSlabs();
-    // setInterval(() => this.loadIncomingSlabs(), 10000);
 
-    try {
-        const jc = await frappe.db.get_doc('Job Card', jobCard.value);
-        if (jc.bom_no) {
-            const bom = await frappe.db.get_doc('BOM', jc.bom_no);
-            batchNo.value = jc.bom_no;  
-            if(bom.slab_template) {
-                slabTemplate.value = bom.slab_template;
-            }
-        }
-      
-        jobCardSubmitted.value = jc.docstatus === 1 || jc.status === 'Completed';  
-        if (jobCardSubmitted.value) {
-            preparedQty.value = jc.total_completed_qty || jc.for_quantity || 0;
-        }
-        // const existingSlabs = await frappe.db.get_list('Slab', {
-        //     filters: { current_job_card: jobCard.value },
-        //     fields: ['name', 'serial_number', 'batch_number', 'template']
-        // });
+    const jc = await frappe.db.get_doc('Job Card', jobCard.value);
+    jobCard.value = jc;  
+    
+    if (jc.bom_no) {
+      const bom = await frappe.db.get_doc('BOM', jc.bom_no);
+      batchNo.value = jc.bom_no;
+      if (bom.slab_template) {
+        slabTemplate.value = bom.slab_template;
+      }
+    }
 
-        // if (existingSlabs.length > 0) {
-        //     const slab = existingSlabs[0];
-        //     slabCreated.value = true;
-        //     slabNumber.value = slab.serial_number;
-        //     if (slab.batch_number) {
-        //          batchNo.value = slab.batch_number;
-        //     }
-        //     if (slab.template) {
-        //         colour.value = slab.template;
-        //     }
-        // } else {
-             createSlab(jc.production_line);
-        // }
+    jobCardSubmitted.value = jc.docstatus === 1 || jc.status === 'Completed';
+    if (jobCardSubmitted.value) {
+      preparedQty.value = jc.total_completed_qty || jc.for_quantity || 0;
+    }
+    slabInfo();
+    // 3. Load operator state
+    const stateRes = await frappe.call({
+      method: 'erpnext.manufacturing.page.operator_station.operator_station.get_operator_state',
+      args: { 
+        job_card: jobCard.value, 
+        process_name: station 
+      }
+    });
+    
+    const state = stateRes.message || {};
+    processStarted.value = !!state[`${station}_started`];
+    processStartTime.value = state[`${station}_start_time`];
+    jobCardSubmitted.value = !!state.job_card_submitted || jobCardSubmitted.value;
+    
+    if (jobCardSubmitted.value) {
+      stockEntryName.value = state.stock_entry_name || '';
+    }
 
-        const stateRes = await frappe.call ({
-          method: 'erpnext.manufacturing.page.operator_station.operator_station.get_operator_state',
-          args: {
-            job_card: jobCard.value,
-            process_name: station
-          }
-        });
-        const state = stateRes.message || {};
-        processStarted.value = !!state[`${station}_started`];
-        processStartTime.value = state[`${station}_start_time`];
+    // 4. Process timer
+    if (processStarted.value && processStartTime.value) {
+      const start = frappe.datetime.str_to_obj(processStartTime.value);
+      const now = frappe.datetime.now_datetime();
+      const diffSeconds = (new Date(now) - new Date(start)) / 1000;
+      processElapsed.value = Math.max(0, Math.floor(diffSeconds));
 
-        jobCardSubmitted.value = !!state.job_card_submitted || false;  
-        if (jobCardSubmitted.value) {
-            stockEntryName.value = state.stock_entry_name || '';
-        }
+      if (processTimerHandle.value) clearInterval(processTimerHandle.value);
+      processTimerHandle.value = setInterval(() => {
+        processElapsed.value += 1;
+      }, 1000);
+    } else {
+      processElapsed.value = 0;
+      if (processTimerHandle.value) {
+        clearInterval(processTimerHandle.value);
+        processTimerHandle.value = null;
+      }
+    }
 
-        if (processStarted.value && processStartTime.value) {
-            const start = frappe.datetime.str_to_obj(processStartTime.value);
-            const now = frappe.datetime.now_datetime();
-            const diffSeconds = (new Date(now) - new Date(start)) / 1000;
-            processElapsed.value = Math.max(0, Math.floor(diffSeconds));
-
-            if (processTimerHandle.value) clearInterval(processTimerHandle.value);
-            processTimerHandle.value = setInterval(() => {
-                processElapsed.value += 1;
-            }, 1000);
-        } 
-        else {
-            processElapsed.value = 0;
-            if (processTimerHandle.value) {
-                clearInterval(processTimerHandle.value);
-                processTimerHandle.value = null;
-            }
-        }
-    } 
-    catch (e) {
-        error.value = e.message || e;
-        frappe.msgprint(__('Failed to load BOM ingredients: {0}', [error.value]));
-    } 
+  } catch (e) {
+    error.value = e.message;
+    frappe.msgprint(__('Load failed: {0}', [e.message]));
+  }
 });
-
-// async loadIncomingSlabs() {
-//   this.loading = true;
-//   const response = await frappe.call({
-//     method: 'erpnext.manufacturing.page.operator_station.operator_station.loadIncomingSlabs',
-//     args: {
-
-//     }
-//   })
-// }
-
 
 async function createSlab(line) {
   if (!jobCard.value || slabCreated.value || !slabTemplate.value) return
@@ -194,31 +167,60 @@ async function createSlab(line) {
   }
 }
 
-// async loadIncomingSlabs() {
-//   this.loading = true;
-//   const response = await frappe.call({
-//     method: "frappe.client.get_list",
-//     args: {
-//       doctype: "Serial No",
-//       filters: {
-//         item_code: "KY-1005 (3 CM) - FG",  // or dynamic
-//         warehouse: "Mixing-FG - SPL",      // previous station FG
-//         status: "Active"                   // available slabs
-//       },
-//       fields: ["name as serial", "item_code", "warehouse"]
-//     }
-//   });
-  
-  // Enrich with dimensions/status
-//   this.incomingSlabs = await Promise.all(
-//     response.message.map(async slab => ({
-//       serial: slab.serial,
-//       subtitle: await this.getSlabDimensions(slab.serial)  // custom method
-//     }))
-//   );
-//   this.loading = false;
-// }
+async function slabInfo() {
+  console.log('🔍 Loading slabs for station:', station, 'JC:', jobCard.value);
+    
+    const jcSlabRes = await frappe.call({
+      method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
+      args: { job_card: jobCard.value }
+    });
+    
+    let slabAlreadyExisted = jcSlabRes.message;
+    console.log('🔍 JC slab:', slabAlreadyExisted);
 
+    if (slabAlreadyExisted) {
+      if (slabAlreadyExisted.current_stage?.toLowerCase() !== station.toLowerCase()) {
+        console.log('🔄 Moving slab station...');
+        await frappe.call({
+          method: 'erpnext.manufacturing.doctype.slab.api.move_slab_to',
+          args: {
+            slab_number: slabAlreadyExisted.name,
+            next_stage: station,
+            job_card_number: jobCard.value,
+            checkout_and_move: true
+          }
+        });
+        
+        // Reload fresh data
+        const freshSlabRes = await frappe.call({
+          method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
+          args: { job_card: jobCard.value }
+        });
+        slabAlreadyExisted = freshSlabRes.message;
+        console.log('🔄 Slab moved:', slabAlreadyExisted);
+      }
+      
+      // Populate UI
+      slabCreated.value = true;
+      slabNumber.value = slabAlreadyExisted.serial_number || slabAlreadyExisted.name;
+      batchNo.value = slabAlreadyExisted.batch_number || batchNo.value;
+      slabTemplate.value = slabAlreadyExisted.template || slabTemplate.value;
+      colour.value = slabAlreadyExisted.template || colour.value;
+      line.value = slabAlreadyExisted.line || jc.production_line;
+      
+      frappe.show_alert(`✅ Slab ${slabNumber.value} @ ${station}`, 'green');
+      
+    } else if (station.toLowerCase() === 'distribution') {
+      console.log('🆕 Creating new slab...');
+      await createSlab(jc.production_line);
+    } else {
+      frappe.msgprint({
+        title: 'No Slab',
+        message: `No slab for ${jobCard.value}. Create in Distribution first.`,
+        indicator: 'orange'
+      });
+    }
+}
 
 async function startOperation() {
   const route = frappe.get_route();
@@ -351,23 +353,6 @@ async function transferToFGWarehouse() {
   }
 }
 
-async function loadBomQty() {
-  try {
-    const jc = await frappe.db.get_doc('Job Card', jobCard.value);
-    const result = await frappe.call({
-        method: 'erpnext.manufacturing.page.operator_station.operator_station.get_next_process_bom_qty',
-        args: { current_work_order: jc.work_order }
-    });
-    
-    bomQty.value = result.message.bom_qty; 
-    nextWorkOrder.value = result.message.next_work_order;
-  } 
-  catch (error) {
-      console.error('BOM qty load failed:', error);
-      bomQty.value = 0;
-  }
-}
-
 function haltJob() {
   status.value = 'Halted';
   if (processTimerHandle.value) {
@@ -442,7 +427,7 @@ function statusStyle() {
 
       <div class="text-center text-muted small">{{ __('SERIAL NUMBER') }}</div>
       <h2 class="job-serial text-center font-weight-bold mb-2 p-3">
-        {{ slabNumber }} - {{ batchNo }}
+        {{ batchNo }} - {{ slabNumber }}
       </h2>
       
       <!-- <div class="text-center text-muted small mb-1">{{ __('Colour') }}</div> -->
