@@ -24,8 +24,6 @@ dependencies = [
 
     # MT940 parser for bank statements
     "mt-940>=4.26.0",
-    "pandas~=2.3.3",
-    "statsmodels~=0.14.6",
 ]
 
 [build-system]

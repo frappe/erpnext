@@ -4093,6 +4093,7 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		sn_return.items[0].qty = -1
 		sn_return.items[0].received_qty = -1
 		sn_return.items[0].serial_no = pr1_serial_nos[0]
+		sn_return.items[0].use_serial_batch_fields = 1
 		sn_return.save()
 		self.assertRaises(frappe.ValidationError, sn_return.submit)
 
@@ -4127,6 +4128,7 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		batch_return.items[0].qty = -1
 		batch_return.items[0].received_qty = -1
 		batch_return.items[0].batch_no = batch_no
+		batch_return.items[0].use_serial_batch_fields = 1
 		batch_return.save()
 		self.assertRaises(frappe.ValidationError, batch_return.submit)
 
@@ -4719,46 +4721,41 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		self.assertEqual(sles, [1500.0, 1500.0])
 
 	def test_return_rejected_does_not_block_accepted_return(self):
-			"""
-			Test that returning Rejected items does NOT reduce the balance of Accepted items.
-			Scenario:
-			1. PR: 10 Accepted, 5 Rejected.
-			2. Return 1: Return 3 Rejected items.
-			3. Return 2: Return 10 Accepted items (Should succeed).
-			"""
-			from erpnext.controllers.sales_and_purchase_return import make_return_doc
-			
-			# 1. Create Purchase Receipt with Accepted and Rejected Qty
-			pr = make_purchase_receipt(
-				qty=10, 
-				rejected_qty=5, 
-				rate=100, 
-				do_not_submit=True 
-			)
-			# Set warehouse needed for rejected items
-			pr.items[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
-			pr.submit()
+		"""
+		Test that returning Rejected items does NOT reduce the balance of Accepted items.
+		Scenario:
+		1. PR: 10 Accepted, 5 Rejected.
+		2. Return 1: Return 3 Rejected items.
+		3. Return 2: Return 10 Accepted items (Should succeed).
+		"""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
-			# 2. Return 3 items from Rejected Warehouse
-			# We use the helper argument to ensure flags are set correctly
-			return_rejected = make_return_doc("Purchase Receipt", pr.name, return_against_rejected_qty=True)
-			
-			# We are returning 3 items (negative quantity)
-			return_rejected.items[0].qty = -3 
-			return_rejected.save()
-			return_rejected.submit()
+		# 1. Create Purchase Receipt with Accepted and Rejected Qty
+		pr = make_purchase_receipt(qty=10, rejected_qty=5, rate=100, do_not_submit=True)
+		# Set warehouse needed for rejected items
+		pr.items[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
+		pr.submit()
 
-			# 3. Return 10 items from Accepted Warehouse (Standard Return)
-			return_accepted = make_return_doc("Purchase Receipt", pr.name)
-			return_accepted.items[0].qty = -10
-			return_accepted.save()
-			
-			# This submit would FAIL before the fix (saying "Cannot return more than 7")
-			return_accepted.submit() 
+		# 2. Return 3 items from Rejected Warehouse
+		# We use the helper argument to ensure flags are set correctly
+		return_rejected = make_return_doc("Purchase Receipt", pr.name, return_against_rejected_qty=True)
 
-			# 4. Verify Status
-			pr.reload()
-			self.assertEqual(pr.status, "Return")
+		# We are returning 3 items (negative quantity)
+		return_rejected.items[0].qty = -3
+		return_rejected.save()
+		return_rejected.submit()
+
+		# 3. Return 10 items from Accepted Warehouse (Standard Return)
+		return_accepted = make_return_doc("Purchase Receipt", pr.name)
+		return_accepted.items[0].qty = -10
+		return_accepted.save()
+
+		# This submit would FAIL before the fix (saying "Cannot return more than 7")
+		return_accepted.submit()
+
+		# 4. Verify Status
+		pr.reload()
+		self.assertEqual(pr.status, "Return")
 
 	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_multiple_transactions_with_same_posting_datetime(self):

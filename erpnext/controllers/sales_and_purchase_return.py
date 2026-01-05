@@ -206,7 +206,7 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 
 		if column == "stock_qty" and not args.get("return_qty_from_rejected_warehouse"):
 			reference_qty = ref.get(column)
-			current_stock_qty = args.get(column)			
+			current_stock_qty = args.get(column)
 		elif args.get("return_qty_from_rejected_warehouse"):
 			if column == "stock_qty":
 				reference_qty = ref.get("rejected_qty") * ref.get("conversion_factor", 1.0)
@@ -214,11 +214,11 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 			else:
 				reference_qty = ref.get("rejected_qty")
 				current_stock_qty = args.get(column)
-				
+
 		else:
 			reference_qty = ref.get(column)
 			current_stock_qty = args.get(column)
-			
+
 			if column == "stock_qty":
 				reference_qty = reference_qty * ref.get("conversion_factor", 1.0)
 				current_stock_qty = current_stock_qty * args.get("conversion_factor", 1.0)
@@ -285,13 +285,20 @@ def get_ref_item_dict(valid_items, ref_item_row):
 
 def get_already_returned_items(doc):
 	# Check if the field exists in the current doctype's item table (Safety Check)
-	has_rejected_return_flag = frappe.db.has_column(f"{doc.doctype} Item", "return_qty_from_rejected_warehouse")
-
+	has_rejected_return_flag = frappe.db.has_column(
+		f"{doc.doctype} Item", "return_qty_from_rejected_warehouse"
+	)
 	if has_rejected_return_flag:
 		# Split logic: If flag is 1, it goes to rejected bucket. If 0 or NULL, accepted bucket.
-		rejected_qty_returned_col = "sum(case when child.return_qty_from_rejected_warehouse=1 then abs(child.qty) else 0 end)"
-		rejected_stock_qty_returned_col = "sum(case when child.return_qty_from_rejected_warehouse=1 then abs(child.stock_qty) else 0 end)"
-		accepted_qty_returned_where = "(child.return_qty_from_rejected_warehouse=0 OR child.return_qty_from_rejected_warehouse IS NULL)"
+		rejected_qty_returned_col = (
+			"sum(case when child.return_qty_from_rejected_warehouse=1 then abs(child.qty) else 0 end)"
+		)
+		rejected_stock_qty_returned_col = (
+			"sum(case when child.return_qty_from_rejected_warehouse=1 then abs(child.stock_qty) else 0 end)"
+		)
+		accepted_qty_returned_where = (
+			"(child.return_qty_from_rejected_warehouse=0 OR child.return_qty_from_rejected_warehouse IS NULL)"
+		)
 	else:
 		# Fallback for doctypes without the flag (e.g. Purchase Invoice)
 		rejected_qty_returned_col = "0"
@@ -304,7 +311,6 @@ def get_already_returned_items(doc):
 		{rejected_qty_returned_col} as rejected_qty_returned,
 		{rejected_stock_qty_returned_col} as rejected_stock_qty_returned
 	"""
-
 	if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 		column += """, sum(abs(child.rejected_qty) * child.conversion_factor) as rejected_qty,
 			sum(abs(child.received_qty) * child.conversion_factor) as received_qty"""
@@ -314,7 +320,6 @@ def get_already_returned_items(doc):
 		if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Sales Invoice", "POS Invoice"]
 		else "dn_detail"
 	)
-
 	data = frappe.db.sql(
 		f"""
 		select {column}, child.{field}
@@ -330,6 +335,7 @@ def get_already_returned_items(doc):
 	)
 
 	items = {}
+
 	for d in data:
 		items.setdefault(
 			(d.item_code, d.get(field)),
@@ -614,6 +620,14 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			and not source_doc.use_serial_batch_fields
 		):
 			target_doc.set("use_serial_batch_fields", 1)
+
+		if (
+			not source_doc.serial_no
+			and not source_doc.batch_no
+			and source_doc.serial_and_batch_bundle
+			and source_doc.use_serial_batch_fields
+		):
+			target_doc.set("use_serial_batch_fields", 0)
 
 		if source_doc.item_code and target_doc.get("use_serial_batch_fields"):
 			item_details = frappe.get_cached_value(

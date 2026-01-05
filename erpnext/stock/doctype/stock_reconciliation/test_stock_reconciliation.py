@@ -1569,6 +1569,147 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 
 		self.assertFalse(status == "Active")
 
+	def test_change_valuation_of_batch_using_backdated_stock_reco(self):
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self.make_item(
+			"Test Item Change Valuation of Batch",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TEST-BATCH-CVB-.###",
+			},
+		).name
+
+		warehouse = "_Test Warehouse - _TC"
+
+		reco = create_stock_reconciliation(
+			item_code=item_code,
+			posting_date=add_days(nowdate(), -6),
+			warehouse=warehouse,
+			qty=10,
+			rate=80,
+			use_serial_batch_fields=1,
+		)
+
+		batch_no = get_batch_from_bundle(reco.items[0].serial_and_batch_bundle)
+
+		make_stock_entry(
+			item_code=item_code,
+			source=warehouse,
+			qty=2,
+			posting_date=add_days(nowdate(), -4),
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+		)
+
+		make_stock_entry(
+			item_code=item_code,
+			source=warehouse,
+			qty=2,
+			posting_date=add_days(nowdate(), -3),
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+		)
+
+		se4 = make_stock_entry(
+			item_code=item_code,
+			source=warehouse,
+			qty=2,
+			posting_date=add_days(nowdate(), -2),
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+		)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": se4.name, "is_cancelled": 0},
+			["actual_qty", "stock_value_difference"],
+			as_dict=1,
+		)
+
+		valuation_rate = sle.stock_value_difference / sle.actual_qty
+		self.assertEqual(valuation_rate, 80)
+
+		create_stock_reconciliation(
+			item_code=item_code,
+			posting_date=add_days(nowdate(), -5),
+			warehouse=warehouse,
+			qty=10,
+			rate=100,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+		)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": se4.name, "is_cancelled": 0},
+			["actual_qty", "stock_value_difference"],
+			as_dict=1,
+		)
+
+		valuation_rate = sle.stock_value_difference / sle.actual_qty
+
+		self.assertEqual(valuation_rate, 100)
+
+		batch_qty = get_batch_qty(batch_no, warehouse, item_code)
+		self.assertEqual(batch_qty, 4)
+
+	def test_sabb_cancel_on_stock_reco_cancellation(self):
+		item_code = self.make_item(
+			"Test Item for SABB Cancel on Stock Reco Cancellation",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TEST-BATCH-SABBCANC-.###",
+			},
+		).name
+
+		warehouse = "_Test Warehouse - _TC"
+
+		sr = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=10,
+			rate=100,
+			use_serial_batch_fields=1,
+		)
+
+		sr.reload()
+
+		batch_no = get_batch_from_bundle(sr.items[0].serial_and_batch_bundle)
+
+		sr1 = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=20,
+			rate=100,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+		)
+
+		sr1.reload()
+
+		current_serial_and_batch_bundle = sr1.items[0].current_serial_and_batch_bundle
+		serial_and_batch_bundle = sr1.items[0].serial_and_batch_bundle
+
+		self.assertTrue(current_serial_and_batch_bundle)
+		self.assertTrue(serial_and_batch_bundle)
+
+		sr1.cancel()
+
+		for sabb in [serial_and_batch_bundle, current_serial_and_batch_bundle]:
+			docstatus = frappe.db.get_value(
+				"Serial and Batch Bundle",
+				sabb,
+				"docstatus",
+			)
+
+			self.assertEqual(docstatus, 2)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)

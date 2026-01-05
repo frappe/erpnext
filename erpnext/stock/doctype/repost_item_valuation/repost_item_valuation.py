@@ -76,6 +76,9 @@ class RepostItemValuation(Document):
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
 
+	def repost_now(self):
+		repost(self)
+
 	def validate(self):
 		self.reset_repost_only_accounting_ledgers()
 		self.set_company()

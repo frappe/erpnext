@@ -85,7 +85,7 @@ class ReportData:
 				"reference_doctype": sabb.reference_doctype,
 				"reference_name": sabb.reference_name,
 				"item_name": sabb.item_name,
-				"posting_date": sabb.posting_date,
+				"posting_datetime": sabb.posting_datetime,
 				"indent": indent,
 				"direction": direction,
 				"batch_expiry_date": sabb.get("batch_expiry_date"),
@@ -135,11 +135,8 @@ class ReportData:
 			if value:
 				key = (row.item_code, row.reference_name, value)
 
-			if self.doctype_name == "Batch":
-				sabb_details = self.get_qty_from_sabb(row)
-				row.update(sabb_details)
-			else:
-				row.qty = 1
+			sabb_details = self.get_data_from_sabb(row)
+			row.update(sabb_details)
 
 			if key not in source_data:
 				row["raw_materials"] = frappe._dict({})
@@ -147,7 +144,7 @@ class ReportData:
 
 		return source_data
 
-	def get_qty_from_sabb(self, row):
+	def get_data_from_sabb(self, row):
 		sabb = frappe.qb.DocType("Serial and Batch Bundle")
 		sabb_entry = frappe.qb.DocType("Serial and Batch Entry")
 
@@ -158,18 +155,22 @@ class ReportData:
 			.select(
 				sabb_entry.qty,
 				sabb_entry.warehouse,
+				sabb_entry.posting_datetime,
 			)
 			.where(
-				(sabb_entry.batch_no == row.batch_no)
-				& (sabb.voucher_type == row.reference_doctype)
+				(sabb.voucher_type == row.reference_doctype)
 				& (sabb.voucher_no == row.reference_name)
 				& (sabb.is_cancelled == 0)
 				& (sabb_entry.docstatus == 1)
 			)
 		)
 
-		results = query.run(as_dict=True)
+		if row.batch_no:
+			query = query.where(sabb_entry.batch_no == row.batch_no)
+		else:
+			query = query.where(sabb_entry.serial_no == row.serial_no)
 
+		results = query.run(as_dict=True)
 		return results[0] if results else {}
 
 	def set_backward_data(self, sabb_data, qty=None):
@@ -194,7 +195,7 @@ class ReportData:
 							details = inward_data[-1]
 
 					if details:
-						details.update(self.get_qty_from_sabb(details))
+						details.update(self.get_data_from_sabb(details))
 						sabb_data.raw_materials[key] = details
 
 				if sabb_data.raw_materials.get(key):
@@ -228,14 +229,12 @@ class ReportData:
 			query = query.select(
 				doctype.item.as_("item_code"),
 				doctype.name.as_("batch_no"),
-				doctype.manufacturing_date.as_("posting_date"),
 				doctype.expiry_date.as_("batch_expiry_date"),
 			)
 		else:
 			query = query.select(
 				doctype.item_code,
 				doctype.name.as_("serial_no"),
-				doctype.posting_date,
 				doctype.warranty_expiry_date,
 				doctype.amc_expiry_date,
 			)
@@ -331,7 +330,7 @@ class ReportData:
 				self.add_direct_outward_entry(row, sabb_data)
 
 	def add_direct_outward_entry(self, row, batch_details):
-		key = (row.item_code, row.reference_name)
+		key = (row.item_code, row.reference_name, row.serial_no, row.batch_no)
 		if key not in batch_details:
 			row["indent"] = 0
 			batch_details[key] = row
@@ -355,7 +354,7 @@ class ReportData:
 				SABE.qty,
 				SABB.item_code,
 				SABB.item_name,
-				SABB.posting_date,
+				SABB.posting_datetime,
 				SABB.warehouse,
 			)
 			.where(
@@ -363,8 +362,7 @@ class ReportData:
 				& (SABE.docstatus == 1)
 				& (SABB.type_of_transaction == type_of_transaction)
 			)
-			.orderby(SABB.posting_date)
-			.orderby(SABB.posting_time)
+			.orderby(SABB.posting_datetime)
 		)
 
 		query = query.where((SABE.serial_no == value) | (SABE.batch_no == value))
@@ -386,15 +384,21 @@ class ReportData:
 				fg_item.update(
 					{
 						"work_order": ste.work_order,
-						"posting_date": row.posting_date,
+						"posting_datetime": row.posting_datetime,
 						"serial_no": serial_no,
 						"batch_no": batch_no,
 						"indent": 0,
 						"warehouse": fg_item.warehouse,
-						"raw_materials": frappe._dict({(row.item_code, row.reference_name): row}),
+						"raw_materials": frappe._dict(
+							{(row.item_code, row.reference_name, row.serial_no, row.batch_no): row}
+						),
 					}
 				)
 				batch_details[key] = fg_item
+			else:
+				batch_details[key].raw_materials[
+					(row.item_code, row.reference_name, row.serial_no, row.batch_no)
+				] = row
 
 	def get_finished_item_from_stock_entry(self, reference_name):
 		return frappe.db.get_value(
@@ -498,9 +502,9 @@ class ReportData:
 					"width": 120,
 				},
 				{
-					"fieldname": "posting_date",
-					"label": _("Posting Date"),
-					"fieldtype": "Date",
+					"fieldname": "posting_datetime",
+					"label": _("Posting Datetime"),
+					"fieldtype": "Datetime",
 					"width": 120,
 				},
 				{

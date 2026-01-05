@@ -2966,23 +2966,26 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		self.assertFalse(pr.items)
 
 	def test_purchase_return_fallback_for_missing_column(self):
-			"""
-			Test that Purchase Invoice Return works (does not crash) even though 
-			Purchase Invoice Item does not have 'return_qty_from_rejected_warehouse' column.
-			This validates the safety check in get_already_returned_items.
-			"""
-			from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		"""
+		Test that Purchase Invoice Return works (does not crash) even though
+		Purchase Invoice Item does not have 'return_qty_from_rejected_warehouse' column.
+		"""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
-			pi = make_purchase_invoice(qty=5, rate=100, update_stock=1)
-			
-			# Create a full return (Debit Note) against it
-			pi_return = make_return_doc("Purchase Invoice", pi.name)
-			pi_return.save()
-			pi_return.submit()
+		pi = make_purchase_invoice(qty=5, rate=100, update_stock=1)
 
-			# Verify status
-			pi.reload()
-			self.assertEqual(pi.status, "Return")
+		# Create a full return
+		pi_return = make_return_doc("Purchase Invoice", pi.name)
+		pi_return.save()
+		pi_return.submit()
+
+		# Check 1: Did the return submit successfully? (Proves no crash)
+		self.assertEqual(pi_return.docstatus, 1)
+
+		# Check 2: Is the financial impact correct? (Outstanding should be 0)
+		pi.reload()
+		self.assertEqual(pi.outstanding_amount, 0)
+
 
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(

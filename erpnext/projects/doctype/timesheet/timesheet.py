@@ -79,6 +79,7 @@ class Timesheet(Document):
 	def on_update_after_submit(self):
 		self.validate_mandatory_fields()
 		self.update_task_and_project()
+		self.validate_time_logs()
 
 	def calculate_hours(self):
 		for row in self.time_logs:

@@ -9,12 +9,13 @@
  "idx": 1,
  "label": "CRM",
  "link_to": "CRM",
- "link_type": "Workspace",
- "modified": "2025-12-22 13:06:47.900639",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-01-01 20:07:01.182118",
  "modified_by": "Administrator",
  "name": "CRM",
  "owner": "Administrator",
  "parent_icon": "ERPNext",
+ "restrict_removal": 0,
  "roles": [],
  "standard": 1
 }

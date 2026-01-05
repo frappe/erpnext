@@ -172,6 +172,21 @@ class TestTimesheet(ERPNextTestSuite):
 		settings.ignore_employee_time_overlap = 1
 		settings.save()
 		timesheet.save()  # should not throw an error
+		timesheet.submit()  # should not throw an error
+		settings.ignore_employee_time_overlap = 0
+		settings.save()
+
+		timesheet.append(
+			"time_logs",
+			{
+				"billable": 1,
+				"activity_type": "_Test Activity Type",
+				"from_time": now_datetime(),
+				"to_time": now_datetime() + datetime.timedelta(hours=3),
+				"company": "_Test Company",
+			},
+		)
+		self.assertRaises(frappe.ValidationError, timesheet.submit)
 
 		settings.ignore_employee_time_overlap = initial_setting
 		settings.save()
