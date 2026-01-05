@@ -252,7 +252,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
 			idx desc,
 			name, item_name
-		limit %(start)s, %(page_len)s """.format(
+		limit %(page_len)s OFFSET %(start)s """.format(
 			columns=columns,
 			scond=searchfields,
 			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
