@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-21 09:37+0000\n"
-"PO-Revision-Date: 2026-01-02 04:46\n"
+"PO-Revision-Date: 2026-01-05 05:31\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -1799,7 +1799,7 @@ msgstr "ابعاد حسابداری"
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Accounting Dimensions "
-msgstr " ابعاد حسابداری"
+msgstr "ابعاد حسابداری "
 
 #. Label of the accounting_dimensions_section (Section Break) field in DocType
 #. 'Payment Reconciliation'
@@ -2936,7 +2936,7 @@ msgstr ""
 #. Description of the 'Customer Details' (Text) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Additional information regarding the customer."
-msgstr "اطلاعات تکمیلی در مورد مشتری"
+msgstr "اطلاعات تکمیلی در مورد مشتری."
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:590
 msgid "Additional {0} {1} of item {2} required as per BOM to complete this transaction"
@@ -5012,7 +5012,7 @@ msgstr "اعمال مبلغ کسر مالیات"
 #. Label of the apply_tds (Check) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 msgid "Apply Tax Withholding Amount "
-msgstr " اعمال مبلغ کسر مالیات"
+msgstr "اعمال مبلغ کسر مالیات "
 
 #. Label of the apply_restriction_on_values (Check) field in DocType
 #. 'Accounting Dimension Filter'
@@ -11248,7 +11248,7 @@ msgstr "نام تماس"
 #. Label of the contact_no (Data) field in DocType 'Sales Team'
 #: erpnext/selling/doctype/sales_team/sales_team.json
 msgid "Contact No."
-msgstr "شماره مخاطب"
+msgstr "شماره تماس"
 
 #. Label of the contact_person (Link) field in DocType 'Dunning'
 #. Label of the contact_person (Link) field in DocType 'POS Invoice'
@@ -13126,7 +13126,7 @@ msgstr "مشتری"
 #. Label of the customer (Link) field in DocType 'Customer Item'
 #: erpnext/accounts/doctype/customer_item/customer_item.json
 msgid "Customer "
-msgstr " مشتری"
+msgstr "مشتری "
 
 #. Label of the master_name (Dynamic Link) field in DocType 'Authorization
 #. Rule'
@@ -13435,7 +13435,7 @@ msgstr "نام مشتری"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:22
 msgid "Customer Name: "
-msgstr " نام مشتری:"
+msgstr "نام مشتری: "
 
 #. Label of the cust_master_name (Select) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
@@ -13632,7 +13632,7 @@ msgstr "نام مشتری/سرنخ"
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:19
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:21
 msgid "Customer: "
-msgstr " مشتری:"
+msgstr "مشتری: "
 
 #. Label of the section_break_3 (Section Break) field in DocType 'Process
 #. Statement Of Accounts'
@@ -16038,7 +16038,7 @@ msgstr "واحد متمایز یک آیتم"
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Distribute Additional Costs Based On "
-msgstr " توزیع هزینه های اضافی بر اساس"
+msgstr "توزیع هزینه های اضافی بر اساس "
 
 #. Label of the distribute_charges_based_on (Select) field in DocType 'Landed
 #. Cost Voucher'
@@ -16171,7 +16171,7 @@ msgstr "آیا می‌خواهید از طریق ایمیل به همه مشتر
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:334
 msgid "Do you want to submit the material request"
-msgstr "آیا می‌خواهید درخواست مواد را ارسال کنید؟"
+msgstr "آیا می‌خواهید درخواست مواد را ارسال کنید"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:103
 msgid "Do you want to submit the stock entry?"
@@ -16188,7 +16188,7 @@ msgstr "جستجوی اسناد"
 #. Label of the document_type (Link) field in DocType 'Subscription Invoice'
 #: erpnext/accounts/doctype/subscription_invoice/subscription_invoice.json
 msgid "Document Type "
-msgstr " نوع سند"
+msgstr "نوع سند "
 
 #: erpnext/accounts/doctype/accounting_dimension/accounting_dimension.py:65
 msgid "Document Type already used as a dimension"
@@ -16729,7 +16729,7 @@ msgstr "کمپین ایمیل"
 #. Label of the email_campaign_for (Select) field in DocType 'Email Campaign'
 #: erpnext/crm/doctype/email_campaign/email_campaign.json
 msgid "Email Campaign For "
-msgstr " کمپین ایمیل برای"
+msgstr "کمپین ایمیل برای "
 
 #. Label of the supplier_response_section (Section Break) field in DocType
 #. 'Request for Quotation'
@@ -16872,7 +16872,7 @@ msgstr "کارمند"
 #. Scoring Standing'
 #: erpnext/buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 msgid "Employee "
-msgstr " کارمند"
+msgstr "کارمند "
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -17323,7 +17323,7 @@ msgstr "جزئیات استهلاک را وارد کنید"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:408
 msgid "Enter discount percentage."
-msgstr "درصد تخفیف را وارد کنید"
+msgstr "درصد تخفیف را وارد کنید."
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:282
 msgid "Enter each serial no in a new line"
@@ -17716,7 +17716,7 @@ msgstr "شرکت موجود"
 #. Label of the existing_company (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Existing Company "
-msgstr " شرکت موجود"
+msgstr "شرکت موجود "
 
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:1
 msgid "Existing Customer"
@@ -37724,7 +37724,7 @@ msgstr "مقدار"
 
 #: erpnext/templates/pages/order.html:178
 msgid "Qty "
-msgstr " تعداد"
+msgstr "تعداد "
 
 #. Label of the company_total_stock (Float) field in DocType 'Sales Invoice
 #. Item'
@@ -40321,7 +40321,7 @@ msgstr "ارسال مجدد در پس‌زمینه آغاز شده است."
 
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.js:49
 msgid "Reposting in the background."
-msgstr "بازنشر در پس‌زمینه"
+msgstr "درحال بازنشر در پس‌زمینه."
 
 #. Label of the represents_company (Link) field in DocType 'Purchase Invoice'
 #. Label of the represents_company (Link) field in DocType 'Sales Invoice'
