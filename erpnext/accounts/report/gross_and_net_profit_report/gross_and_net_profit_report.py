@@ -221,11 +221,22 @@ def get_net_profit(
 
 	for period in period_list:
 		key = period if consolidated else period.key
-		gross_income_for_period = flt(gross_income[0].get(key, 0)) if gross_income else 0
-		non_gross_income_for_period = flt(non_gross_income[0].get(key, 0)) if non_gross_income else 0
 
-		gross_expense_for_period = flt(gross_expense[0].get(key, 0)) if gross_expense else 0
-		non_gross_expense_for_period = flt(non_gross_expense[0].get(key, 0)) if non_gross_expense else 0
+		gross_income_for_period = sum(
+			flt(row.get(key, 0)) for row in (gross_income or []) if flt(row.get("indent")) == 0.0
+		)
+
+		non_gross_income_for_period = sum(
+			flt(row.get(key, 0)) for row in (non_gross_income or []) if flt(row.get("indent")) == 0.0
+		)
+
+		gross_expense_for_period = sum(
+			flt(row.get(key, 0)) for row in (gross_expense or []) if flt(row.get("indent")) == 0.0
+		)
+
+		non_gross_expense_for_period = sum(
+			flt(row.get(key, 0)) for row in (non_gross_expense or []) if flt(row.get("indent")) == 0.0
+		)
 
 		total_income = gross_income_for_period + non_gross_income_for_period
 		total_expense = gross_expense_for_period + non_gross_expense_for_period
