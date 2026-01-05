@@ -10,7 +10,8 @@
   "in_time",
   "out_time",
   "total_time_in_minutes",
-  "job_card_number"
+  "job_card_number",
+  "oven_params"
  ],
  "fields": [
   {
@@ -53,13 +54,20 @@
    "in_standard_filter": 1,
    "label": "Job Card",
    "read_only": 1
+  },
+  {
+   "fieldname": "oven_params",
+   "fieldtype": "Link",
+   "label": "Oven Operation Parameters",
+   "options": "Oven Operation",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-03 08:54:56.503474",
+ "modified": "2026-01-05 19:01:23.353745",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab History",

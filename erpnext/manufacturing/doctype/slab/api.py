@@ -8,8 +8,7 @@ from erpnext.manufacturing.doctype.slab.slab import ALLOWED_STAGES, Slab
 from erpnext.manufacturing.doctype.slab_history.slab_history import SlabHistory
 
 
-# TODO: Remove allow_guest after testing.
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def create_slab(line: str, type: str, job_card_number: str | None = None):
     new_slab: Slab = frappe.new_doc("Slab")  # pyright: ignore[reportAssignmentType]
     new_slab.line = line
@@ -42,8 +41,7 @@ def create_slab(line: str, type: str, job_card_number: str | None = None):
     return new_slab
 
 
-# TODO: Remove allow_guest after testing.
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def checkout_slab(slab_number: str):
     slab: Slab = frappe.get_doc(
         "Slab", slab_number
@@ -61,16 +59,22 @@ def checkout_slab(slab_number: str):
         last_history.out_time - last_history.in_time
     ).total_seconds() / 60  # pyright: ignore[reportOperatorIssue]
 
+    slab.is_cur_stage_complete = True
+
     # TODO: Remove ignore_permissions after testing.
     slab.save(ignore_permissions=True)
 
+    frappe.publish_realtime(
+        "slab_checkout", slab, user=frappe.session.user
+    )
 
-@frappe.whitelist(allow_guest=True)
+
+@frappe.whitelist()
 def move_slab_to(
     slab_number: str,
     next_stage: str,
     job_card_number: str | None = None,
-    checkout_and_move=True,
+    checkout_and_move=False,
 ):
     # Validation: Check if the given stage is valid.
     if next_stage not in ALLOWED_STAGES:
@@ -100,6 +104,7 @@ def move_slab_to(
         slab: Slab = frappe.get_doc("Slab", slab_number)
 
     slab.status = next_stage  # pyright: ignore[reportAttributeAccessIssue]
+    slab.is_cur_stage_complete = False
     slab.current_job_card = job_card_number
 
     # Append the next stage to the slab history.
@@ -114,6 +119,31 @@ def move_slab_to(
 
     # TODO: Remove ignore_permissions after testing.
     slab.save(ignore_permissions=True)
+
+
+@frappe.whitelist(allow_guest=True)
+def get_slabs_for(line: str, next_stage: str) -> list[dict]:
+    # Determine valid previous stages based on the next_stage and rules
+    valid_previous_stages = []
+    
+    # Check if next_stage is valid
+    if next_stage in ALLOWED_STAGES:
+        target_index = ALLOWED_STAGES.index(next_stage)
+        
+        # Special handling for Heating (Pressing -> Heating, Re-pressing -> Heating)
+        if next_stage == "Heating":
+            valid_previous_stages = ["Pressing", "Re-pressing"]
+        # Special handling for Re-pressing (Pressing does NOT lead to Re-pressing here)
+        elif next_stage == "Re-pressing":
+             valid_previous_stages = []
+        # General case: previous index in ALLOWED_STAGES
+        elif target_index > 0:
+            valid_previous_stages = [ALLOWED_STAGES[target_index - 1]]
+
+    if not valid_previous_stages:
+        return []
+
+    return frappe.db.get_list("Slab", order_by="modified asc", filters={"status": ["in", valid_previous_stages], "is_cur_stage_complete": True, "line": line}, fields=["name", "number", "serial_number", "status", "line", "batch_number", "template", "creation", "modified"])
 
 
 def _generate_batch_number(line: str):

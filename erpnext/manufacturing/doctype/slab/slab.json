@@ -17,6 +17,7 @@
   "created_on",
   "current_job_card",
   "status",
+  "is_cur_stage_complete",
   "is_repressed",
   "quality_section",
   "grade",
@@ -171,12 +172,21 @@
    "fieldtype": "Check",
    "label": "Is Re-pressed",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cur_stage_complete",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Current Stage Complete",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-03 19:11:10.445592",
+ "modified": "2026-01-05 00:21:02.869555",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",

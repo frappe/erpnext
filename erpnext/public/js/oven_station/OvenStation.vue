@@ -1,187 +1,727 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, nextTick, computed, onMounted, onUnmounted } from 'vue';
 
-const incomingSlabs = ref([
-  { serial: 'SLB-2024-8841', subtitle: 'Ready 17:43' },
-  { serial: 'SLB-2024-8842', subtitle: 'Ready 17:46' },
-]);
+// TODO: Make this dynamic based on the user's role.
+const get_work_context = () => {
+    return {
+        "assigned_line": "3",
+        "assigned_station": "Oven 1",
+        "assigned_shift": "A"
+    }
+};
 
-const racks = ref([
-  { slot: 'A-1', state: 'curing', serial: 'SLB-2024-8839', colour: 'Midnight Blue', time_text: '15m Left' },
-  { slot: 'A-2', state: 'curing', serial: 'SLB-2024-8840', colour: 'Carrara White', time_text: '35m Left' },
-  { slot: 'A-3', state: 'empty' },
-  { slot: 'A-4', state: 'empty' },
-  { slot: 'B-1', state: 'overheat', serial: 'SLB-2024-8838', colour: 'Concrete Grey', time_text: '10m OVER' },
-  { slot: 'B-2', state: 'maintenance' },
-  { slot: 'B-3', state: 'empty' },
-  { slot: 'B-4', state: 'empty' },
-]);
+const updateKey = ref(0);
+
+const ovenData = ref(null);
+
+const refreshOvenData = async () => {
+    if (!work_context?.assigned_line) {
+        return
+    }
+
+    try {
+        const r = await frappe.call({
+            method: 'erpnext.manufacturing.doctype.oven.api.get_oven_from_line',
+            args: {
+                line: work_context.assigned_line,
+            }
+        });
+
+        if (r.message) {
+            ovenData.value = r.message;
+        }
+    } catch (e) {
+        console.error("Failed to fetch oven data", e);
+    }
+};
+
+
+const get_slabs_ready_for_heating = async () => {
+    // Call API to get slabs ready for heating
+    const r = await frappe.call({
+        method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
+        args: {
+            line: work_context.assigned_line,
+            next_stage: "Heating"
+        }
+    });
+
+    if (r.message) {
+        if (!incomingSlabs.value.length) {
+            incomingSlabs.value = r.message;
+        } else {
+            const new_slabs = r.message.filter(slab => incomingSlabs.value.every(s => s.name !== slab.name));
+            incomingSlabs.value.push(...new_slabs);
+
+            const removed_slabs = incomingSlabs.value.filter(slab => r.message.every(s => s.name !== slab.name));
+            incomingSlabs.value = incomingSlabs.value.filter(slab => !removed_slabs.some(s => s.name === slab.name));
+        }
+
+        updateKey.value++;
+        selectSlab(incomingSlabs.value[0], 0);
+    }
+};
+
+const incomingSlabs = ref([]);
+
+const currentTime = ref(new Date());
+let timerInterval = null;
+
+onMounted(() => {
+    timerInterval = setInterval(() => {
+        currentTime.value = new Date();
+    }, 1000);
+});
+
+onUnmounted(() => {
+    if (timerInterval) clearInterval(timerInterval);
+});
+
+const overheat_minutes = 90; // TODO: This should be replaced by a setting in Mahi Granites Settings.
+
+const racks = computed(() => {
+    if (!ovenData.value || !ovenData.value.racks) return [];
+
+    return ovenData.value.racks.map(r => {
+        // Calculate time_text if curing
+        let time_text = '';
+        if ((r.status === 'Heating' || r.status === 'Overheat') && r.start_time) {
+            const start = new Date(r.start_time);
+            const now = currentTime.value;
+            const diffMs = now - start;
+
+            if (diffMs > 0) {
+                const diffSec = Math.floor(diffMs / 1000);
+                const mm = Math.floor(diffSec / 60).toString().padStart(2, '0');
+                const ss = (diffSec % 60).toString().padStart(2, '0');
+                time_text = `${mm}:${ss}`;
+            } else {
+                time_text = "00:00";
+            }
+
+            // If the total time elapsed is greater than overheat_minutes, set status to Overheat
+            if (diffMs > overheat_minutes * 60 * 1000) {
+                r.status = 'Overheat';
+            }
+        }
+
+        return {
+            name: r.name,
+            slot: r.rack_number,
+            state: r.status,
+            slab: r.current_slab,
+            color: r.current_slab_template || "KY1005-J-20",
+            is_operational: r.is_operational,
+            time_text: time_text,
+        };
+    });
+});
+
+const oven = computed(() => {
+    return ovenData.value;
+});
+
+const work_context = get_work_context();
+// Initial load
+refreshOvenData();
+
 
 const selectedSlab = ref(null);
 
-function selectSlab(slab) {
-  selectedSlab.value = slab.serial;
+const ovenTemps = computed(() => {
+    if (!ovenData.value) return { upper: 0, lower: 0 };
+    return {
+        upper: ovenData.value.slab_top_temp,
+        lower: ovenData.value.slab_bottom_temp
+    };
+});
+
+const showMeasureModal = ref(false);
+const targetRack = ref(null);
+const measurements = ref({
+    tl: 0, tr: 0, bl: 0, br: 0,
+    tm: 0, bm: 0, lm: 0, rm: 0
+});
+
+const showUnloadModal = ref(false);
+const unloadValues = ref({
+    slab_top_temp: 0,
+    slab_bottom_temp: 0,
+    remarks: ''
+});
+
+function selectSlab(slab, index) {
+    if (index) {
+        return;
+    }
+
+    selectedSlab.value = slab;
 }
 
 function loadIntoRack(rack) {
-  if (rack.state !== 'empty') return;
-  if (!selectedSlab.value) {
-    frappe.msgprint(__('Please select an incoming slab first.'));
-    return;
-  }
+    if (rack.state !== 'Idle' || !rack.is_operational) return;
 
-  frappe.confirm(
-    __('Load slab {0} into rack {1}?', [selectedSlab.value, rack.slot]),
-    () => {
-      // YES: update rack to curing
-      rack.state = 'curing';
-      rack.serial = selectedSlab.value;
-      rack.colour = 'Carrara White'; // later from real data
-      rack.time_text = '45m Left';
-
-      // remove slab from incoming list
-      const idx = incomingSlabs.value.findIndex(s => s.serial === selectedSlab.value);
-      if (idx !== -1) incomingSlabs.value.splice(idx, 1);
-      selectedSlab.value = null;
+    if (!selectedSlab.value) {
+        frappe.msgprint(__('Please select an incoming slab first.'));
+        return;
     }
-  );
+
+    // Prepare for modal
+    targetRack.value = rack;
+    // Reset measurements
+    measurements.value = {
+        tl: 0, tr: 0, bl: 0, br: 0,
+        tm: 0, bm: 0, lm: 0, rm: 0
+    };
+
+    showMeasureModal.value = true;
+
+    nextTick(() => {
+        const el = document.getElementById('pos-tl');
+        if (el) el.select();
+    });
+}
+
+async function unload_slab_from_rack(rack) {
+    if (rack.state !== 'Heating' && rack.state !== 'Overheat' || !rack.is_operational) return;
+
+    targetRack.value = rack;
+    unloadValues.value = {
+        slab_top_temp: undefined,
+        slab_bottom_temp: undefined,
+        remarks: ''
+    };
+    showUnloadModal.value = true;
+}
+
+async function confirmUnload() {
+    if (!targetRack.value) return;
+
+    if (unloadValues.value.slab_top_temp === undefined || unloadValues.value.slab_top_temp === '' || unloadValues.value.slab_top_temp === null) {
+        frappe.msgprint(__('Please enter Slab Top Temperature'));
+        return;
+    }
+    if (unloadValues.value.slab_bottom_temp === undefined || unloadValues.value.slab_bottom_temp === '' || unloadValues.value.slab_bottom_temp === null) {
+        frappe.msgprint(__('Please enter Slab Bottom Temperature'));
+        return;
+    }
+
+    try {
+        await frappe.call({
+            method: 'erpnext.manufacturing.doctype.oven.api.unload_slab_from_oven',
+            args: {
+                rack_name: targetRack.value.name,
+                slab_name: targetRack.value.slab,
+                slab_template: targetRack.value.color,
+                values: unloadValues.value
+            }
+        });
+
+        refreshOvenData();
+        frappe.msgprint(__('Slab unloaded successfully'));
+    } catch (e) {
+        console.error(e);
+    }
+
+    showUnloadModal.value = false;
+    targetRack.value = null;
+}
+
+
+async function confirmLoad() {
+    if (!targetRack.value || !ovenData.value) {
+        return;
+    }
+
+    prepareOvenOperation();
+
+    const res = await frappe.call({
+        method: 'erpnext.manufacturing.doctype.oven.api.load_slab_into_oven',
+        args: {
+            oven_op: ovenOperation.value
+        }
+    })
+
+    if (res && res.message) {
+        refreshOvenData();
+        get_slabs_ready_for_heating();
+    }
+
+    // remove slab from incoming list
+    const idx = incomingSlabs.value.findIndex(s => s.serial === selectedSlab.value);
+    if (idx !== -1) incomingSlabs.value.splice(idx, 1);
+    selectedSlab.value = null;
+
+    closeModal();
+}
+
+function closeModal() {
+    showMeasureModal.value = false;
+    targetRack.value = null;
+}
+
+function editTemperatures() {
+    const fields = [
+        { label: 'Upper Shelf (°C)', fieldname: 'upper', fieldtype: 'Int', default: ovenTemps.value.upper },
+        { label: 'Lower Shelf (°C)', fieldname: 'lower', fieldtype: 'Int', default: ovenTemps.value.lower }
+    ];
+
+    frappe.prompt(fields, (values) => {
+        if (!ovenData.value) return;
+
+        frappe.call({
+            method: 'frappe.client.set_value',
+            args: {
+                doctype: 'Oven',
+                name: ovenData.value.name,
+                fieldname: {
+                    slab_top_temp: values.upper,
+                    slab_bottom_temp: values.lower
+                }
+            }
+        }).then(() => refreshOvenData());
+
+    }, __('Update Oven Temperatures'), __('Update'));
 }
 
 function rackClasses(rack) {
-  if (rack.state === 'curing') return 'rack-card curing';
-  if (rack.state === 'overheat') return 'rack-card overheat';
-  if (rack.state === 'maintenance') return 'rack-card maintenance';
-  return 'rack-card empty';
+    if (rack.state === 'Heating') return 'rack-card curing';
+    if (rack.state === 'Overheat') return 'rack-card overheat';
+    if (!rack.is_operational) return 'rack-card maintenance';
+    return 'rack-card empty';
 }
+
+// const oven = get_oven_details(work_context.assigned_station);
+const ovenOperation = ref({});
+
+function prepareOvenOperation() {
+    if (!ovenData.value || !selectedSlab.value || !targetRack.value) return;
+
+    ovenOperation.value = {
+        doctype: 'Oven Operation',
+        oven: ovenData.value.name,
+        date: frappe.datetime.now_datetime(),
+        shift: work_context.assigned_shift,
+        slab: selectedSlab.value.name,
+        slab_color: selectedSlab.value.template,
+        oven_rack: targetRack.value.name,
+        upper_shelf_temp: ovenTemps.value.upper,
+        lower_shelf_temp: ovenTemps.value.lower,
+        top_left_vertex: measurements.value.tl,
+        top_edge_center: measurements.value.tm,
+        top_right_vertex: measurements.value.tr,
+        right_edge_centre: measurements.value.rm,
+        bottom_right_vertex: measurements.value.br,
+        bottom_edge_centre: measurements.value.bm,
+        bottom_left_vertex: measurements.value.bl,
+        left_edge_centre: measurements.value.lm,
+        remarks: ''
+    };
+}
+
+get_slabs_ready_for_heating();
+
+frappe.realtime.on('slab_checkout', (slab) => {
+    get_slabs_ready_for_heating();
+});
+
 </script>
 
 <template>
-  <div class="page-card d-flex">
-    <!-- Left: Incoming Slabs -->
-    <div style="width:540px;" class="pr-4 border-right">
-      <h5 class="mb-3 d-flex align-items-center">
-        <span class="mr-2">+</span> {{ __('Incoming Slabs') }}
-      </h5>
-      <div class="text-muted small mb-3">
-        {{ __('Select a slab to load into an empty rack.') }}
-      </div>
-
-      <div class="incoming-list">
-        <div v-for="slab in incomingSlabs" :key="slab.serial"
-             class="incoming-item mb-2 p-3 d-flex align-items-center border rounded"
-             :style="{ background: selectedSlab === slab.serial ? '#e2edff' : '#f8f9fa', cursor: 'pointer' }"
-             @click="selectSlab(slab)">
-          <div style="width:32px;height:32px;border-radius:4px;background:#1f2937;" class="mr-3"></div>
-          <div class="flex-fill">
-            <div class="font-weight-bold small">{{ slab.serial }}</div>
-            <div class="text-muted small">
-              <span class="fa fa-clock-o mr-1"></span>{{ slab.subtitle }}
+    <div class="page-card d-flex">
+        <!-- Left: Incoming Slabs -->
+        <div style="width:540px;" class="pr-4 border-right">
+            <h5 class="mb-3 d-flex align-items-center">
+                {{ __('Incoming Slabs') }}
+            </h5>
+            <div class="text-muted small mb-3" v-if="incomingSlabs.length">
+                {{ __('Select a slab to load into an empty rack.') }}
             </div>
-          </div>
-          <div class="text-muted">
-            <span class="fa fa-arrow-right"></span>
-          </div>
+
+            <div class="incoming-list">
+                <div v-if="!incomingSlabs.length" class="text-muted small text-center p-4 border rounded bg-light">
+                    {{ __('No slabs are ready for heating right now.') }}
+                </div>
+                <TransitionGroup name="list" tag="div" v-else>
+                    <div v-for="(slab, index) in incomingSlabs" :key="slab.name"
+                        class="incoming-item mb-2 p-3 d-flex align-items-center border rounded"
+                        :style="{ background: selectedSlab && selectedSlab.name === slab.name ? '#e2edff' : '#f8f9fa', cursor: index ? 'default' : 'pointer' }"
+                        @click="selectSlab(slab, index)">
+                        <div class="slab-container" :key="updateKey">
+                            <div class="slab-thumbnail mr-3"></div>
+                            <div class="flex-fill">
+                                <div class="font-weight-bold small">{{ slab.name }}</div>
+                                <div class="text-muted small">
+                                    <!-- <span class="fa fa-clock-o mr-1"></span> -->
+                                    {{ slab.template }}
+                                </div>
+                            </div>
+                            <div class="text-muted" v-if="!index">
+                                <span class="fa fa-arrow-right"></span>
+                            </div>
+                        </div>
+                    </div>
+                </TransitionGroup>
+            </div>
         </div>
-      </div>
+
+        <!-- Center: Oven Monitor -->
+        <div class="flex-fill pl-4">
+            <div class="border-bottom d-flex justify-content-between pb-2">
+                <div>
+                    <h4 class="mb-1">{{ __('Oven') }}: {{ oven?.name }} <span class="text-muted mr-2 ml-2">|</span> {{
+                        __('Line') }}: {{ oven?.line }}</h4>
+                    <div class="text-muted small mb-4">
+                        {{ __('Manage curing process and rack assignments.') }}
+                    </div>
+                </div>
+
+                <div class="ml-4 mb-3 d-flex align-items-center cursor-pointer" @click="editTemperatures"
+                    title="Click to update">
+                    <div class="temp-badge mr-3">
+                        <span class="text-muted small mr-1">{{ __('Upper') }}:</span>
+                        <span class="font-weight-bold temp-text">{{ ovenTemps.upper }}°C</span>
+                    </div>
+                    <div class="temp-badge">
+                        <span class="text-muted small mr-1">{{ __('Lower') }}:</span>
+                        <span class="font-weight-bold temp-text">{{ ovenTemps.lower }}°C</span>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-3 justify-content-end align-items-center">
+                    <span class="small mr-3 d-flex align-items-center">
+                        <span class="mr-1 border rounded d-flex"
+                            style="background:#b1b8bf; width:1rem; height:1rem;"></span>{{ __('Empty') }}
+                    </span>
+                    <span class="small mr-3 d-flex align-items-center">
+                        <span class="mr-1 border rounded d-flex"
+                            style="background:#3bc63b; width:1rem; height:1rem;"></span>{{ __('Curing') }}
+                    </span>
+                    <span class="small mr-3 d-flex align-items-center">
+                        <span class="mr-1 border rounded d-flex"
+                            style="background:#ef2e3f; width:1rem; height:1rem;"></span>{{ __('Overheating') }}
+                    </span>
+                    <span class="small d-flex align-items-center">
+                        <span class="mr-1 border rounded d-flex"
+                            style="background:#78afe6; width:1rem; height:1rem;"></span>{{ __('Maintenance') }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="rack-grid d-flex flex-wrap pt-5">
+                <div v-for="rack in racks" :key="rack.slot" :class="rackClasses(rack)" class="mb-3 mr-3 p-3 rounded"
+                    style="position: relative;"
+                    @click="rack.state === 'Heating' || rack.state === 'Overheat' ? unload_slab_from_rack(rack) : loadIntoRack(rack)">
+                    <div v-if="rack.state === 'Overheat'" class="warning-icon pulse-icon">
+                        <span class="fa fa-exclamation-circle text-danger"></span>
+                    </div>
+                    <div class="strong mb-1" style="position: absolute;">{{ rack.slot }}</div>
+                    <div class="d-flex align-items-center justify-content-center flex-fill">
+                        <!-- empty -->
+                        <div v-if="rack.state === 'Idle' && rack.is_operational" class="text-center text-muted">
+                            <div class="mb-3"><span class="fa fa-inbox" style="font-size:1.5rem;"></span></div>
+                            <div class="font-weight-bold">{{ __('LOAD HERE') }}</div>
+                        </div>
+                        <!-- curing -->
+                        <div v-else-if="(rack.state === 'Heating' || rack.state === 'Overheat') && rack.is_operational"
+                            class="text-center">
+                            <div class="font-weight-bold mb-1">{{ rack.slab }}</div>
+                            <div class="text-muted small mb-1">{{ rack.color }}</div>
+                            <div class="text-muted small" v-if="rack.state === 'Heating'">
+                                <span class="fa fa-clock-o mr-1"></span>{{ rack.time_text }}
+                            </div>
+                            <div class="text-danger strong" v-if="rack.state === 'Overheat'">
+                                <span class="fa fa-thermometer-full mr-1 pulse-icon"></span>{{ rack.time_text }}
+                            </div>
+                        </div>
+                        <!-- overheat -->
+                        <!-- <div v-else-if="rack.state === 'Overheat' && rack.is_operational" class="text-center">
+                            <div class="font-weight-bold mb-1">{{ rack.slab }}</div>
+                            <div class="text-muted small mb-1">{{ rack.color }}</div>
+                            <div class="text-danger small">
+                                <span class="fa fa-thermometer-full mr-1"></span>{{ rack.time_text }}
+                            </div>
+                        </div> -->
+                        <!-- maintenance -->
+                        <div v-else-if="!rack.is_operational" class="text-center text-muted">
+                            <div class="mb-2">
+                                <span class="fa fa-exclamation-triangle mr-1" style="font-size:1.4rem;"></span>
+                            </div>
+                            <div class="font-weight-bold">{{ __('MAINTENANCE') }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Center: Oven Monitor -->
-    <div class="flex-fill pl-4">
-      <div class="d-flex justify-content-between">
-        <div>
-          <h4 class="mb-1">{{ __('Oven Monitor (Line A)') }}</h4>
-          <div class="text-muted small mb-4">
-            {{ __('Manage curing process and rack assignments.') }}
-          </div>
-        </div>
+    <!-- Slab Measure Modal Overlay -->
+    <div v-if="showMeasureModal" class="modal-backdrop-custom d-flex align-items-center justify-content-center">
+        <div class="modal-card shadow-lg bg-white rounded p-4" style="width: 600px;">
+            <h5 class="mb-3">{{ __('Verify Dimensions') }}</h5>
+            <p class="text-muted small mb-5">
+                {{ __('Measure 8 points on the slab before loading.') }}
+                <br>
+                <!-- {{ selectedSlab }} &rarr; {{ targetRack?.slot }} -->
+            </p>
 
-        <div class="d-flex mb-3 justify-content-end align-items-center">
-          <span class="small mr-3 d-flex align-items-center">
-            <span class="mr-1 border rounded d-flex" style="background:#b1b8bf; width:1rem; height:1rem;"></span>{{ __('Empty') }}
-          </span>
-          <span class="small mr-3 d-flex align-items-center">
-            <span class="mr-1 border rounded d-flex" style="background:#3bc63b; width:1rem; height:1rem;"></span>{{ __('Curing') }}
-          </span>
-          <span class="small mr-3 d-flex align-items-center">
-            <span class="mr-1 border rounded d-flex" style="background:#ef2e3f; width:1rem; height:1rem;"></span>{{ __('Overheating') }}
-          </span>
-          <span class="small d-flex align-items-center">
-            <span class="mr-1 border rounded d-flex" style="background:#78afe6; width:1rem; height:1rem;"></span>{{ __('Maintenance') }}
-          </span>
-        </div>
-      </div>
+            <div class="measure-container d-flex justify-content-center align-items-center mb-4">
+                <!-- The geometric representation -->
+                <div class="slab-rect position-relative border">
+                    <!-- Top Left -->
+                    <input id="pos-tl" type="number" v-model.number="measurements.tl"
+                        class="meas-input pos-tl form-control input-sm" @click="$event.target.select()">
+                    <!-- Mid Top -->
+                    <input id="pos-tm" type="number" v-model.number="measurements.tm"
+                        class="meas-input pos-tm form-control input-sm" @click="$event.target.select()">
+                    <!-- Top Right -->
+                    <input id="pos-tr" type="number" v-model.number="measurements.tr"
+                        class="meas-input pos-tr form-control input-sm" @click="$event.target.select()">
+                    <!-- Mid Right -->
+                    <input id="pos-rm" type="number" v-model.number="measurements.rm"
+                        class="meas-input pos-rm form-control input-sm" @click="$event.target.select()">
+                    <!-- Bottom Right -->
+                    <input id="pos-br" type="number" v-model.number="measurements.br"
+                        class="meas-input pos-br form-control input-sm" @click="$event.target.select()">
+                    <!-- Mid Bottom -->
+                    <input id="pos-bm" type="number" v-model.number="measurements.bm"
+                        class="meas-input pos-bm form-control input-sm" @click="$event.target.select()">
+                    <!-- Bottom Left -->
+                    <input id="pos-bl" type="number" v-model.number="measurements.bl"
+                        class="meas-input pos-bl form-control input-sm" @click="$event.target.select()">
+                    <!-- Mid Left -->
+                    <input id="pos-lm" type="number" v-model.number="measurements.lm"
+                        class="meas-input pos-lm form-control input-sm" @click="$event.target.select()">
 
-      <div class="rack-grid d-flex flex-wrap">
-        <div v-for="rack in racks" :key="rack.slot"
-             :class="rackClasses(rack)"
-             class="mb-3 mr-3 p-3 rounded"
-             style="width:225px;height:210px;display:flex;flex-direction:column;"
-             @click="loadIntoRack(rack)">
-          <div class="text-muted small mb-1">{{ rack.slot }}</div>
-          <div class="d-flex align-items-center justify-content-center flex-fill">
-            <!-- empty -->
-            <div v-if="rack.state === 'empty'" class="text-center text-muted">
-              <div class="mb-3"><span class="fa fa-inbox" style="font-size:1.5rem;"></span></div>
-              <div class="font-weight-bold">{{ __('LOAD HERE') }}</div>
+                    <div class="text-center strong mt-5 pt-5">{{ selectedSlab.name }}</div>
+                </div>
             </div>
-            <!-- curing -->
-            <div v-else-if="rack.state === 'curing'" class="text-center">
-              <div class="font-weight-bold mb-1">{{ rack.serial }}</div>
-              <div class="text-muted small mb-1">{{ rack.colour }}</div>
-              <div class="text-muted small">
-                <span class="fa fa-clock-o mr-1"></span>{{ rack.time_text }}
-              </div>
+
+            <div class="d-flex justify-content-end pt-4">
+                <button class="btn btn-secondary mr-2" @click="closeModal">{{ __('Cancel') }}</button>
+                <button class="btn btn-primary" @click="confirmLoad">{{ __('Load Slab') }}</button>
             </div>
-            <!-- overheat -->
-            <div v-else-if="rack.state === 'overheat'" class="text-center">
-              <div class="font-weight-bold mb-1">{{ rack.serial }}</div>
-              <div class="text-muted small mb-1">{{ rack.colour }}</div>
-              <div class="text-danger small">
-                <span class="fa fa-thermometer-full mr-1"></span>{{ rack.time_text }}
-              </div>
-            </div>
-            <!-- maintenance -->
-            <div v-else-if="rack.state === 'maintenance'" class="text-center text-muted">
-              <div class="mb-2">
-                <span class="fa fa-exclamation-triangle mr-1" style="font-size:1.4rem;"></span>
-              </div>
-              <div class="font-weight-bold">{{ __('MAINTENANCE') }}</div>
-            </div>
-          </div>
         </div>
-      </div>
     </div>
 
-  </div>
+    <!-- Slab Unload Modal Overlay -->
+    <div v-if="showUnloadModal" class="modal-backdrop-custom d-flex align-items-center justify-content-center">
+        <div class="modal-card shadow-lg bg-white rounded p-4" style="width: 500px;">
+            <h5 class="mb-3">{{ __('Unload Slab') }}</h5>
+            <div class="text-muted small mb-4">
+                {{ targetRack?.slab }} &bull; {{ targetRack?.color }}
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="small text-muted">{{ __('Slab Top Temperature') }} <span
+                        class="text-danger">*</span></label>
+                <input type="number" v-model.number="unloadValues.slab_top_temp" class="form-control">
+            </div>
+            <div class="form-group mb-3">
+                <label class="small text-muted">{{ __('Slab Bottom Temperature') }} <span
+                        class="text-danger">*</span></label>
+                <input type="number" v-model.number="unloadValues.slab_bottom_temp" class="form-control">
+            </div>
+            <div class="form-group mb-4">
+                <label class="small text-muted">{{ __('Remarks') }}</label>
+                <textarea v-model="unloadValues.remarks" class="form-control" rows="3"></textarea>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-secondary mr-2" @click="showUnloadModal = false">{{ __('Cancel') }}</button>
+                <button class="btn btn-primary" @click="confirmUnload">{{ __('Confirm Unload') }}</button>
+            </div>
+        </div>
+    </div>
+
 </template>
 
 <style scoped>
 .rack-card {
-  border: 2px dashed #ced4da;
-  background: #f8f9fa;
+    border: 2px dashed #ced4da;
+    background: #f8f9fa;
+    width: 225px;
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s ease;
+}
+
+.rack-card:hover {
+    cursor: pointer;
+    border-color: #74c0fc !important;
+    box-shadow: 0 0 0 3px rgba(116, 192, 252, 0.4);
 }
 
 .rack-card.empty {
-  border-style: dashed;
-  border-color: #ced4da;
-  background: #f8f9fa;
+    border-style: dashed;
+    border-color: #ced4da;
+    background: #f8f9fa;
 }
 
 .rack-card.curing {
-  border-style: solid;
-  border-color: #28a745;
-  background: #d4f8d4;
+    border-style: solid;
+    border-color: #28a745;
+    background: #d4f8d4;
 }
 
 .rack-card.overheat {
-  border-style: solid;
-  border-color: #dc3545;
-  background: #f8d7da;
+    border-style: solid;
+    border-color: #dc3545;
+    background: #f8d7da;
 }
 
 .rack-card.maintenance {
-  border-style: dashed;
-  border-color: #6c757d;
-  background: #e2edff;
+    border-style: dashed;
+    border-color: #6c757d;
+    background: #e2edff;
+}
+
+.temp-badge {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    padding: 4px 10px;
+    border-radius: 20px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+}
+
+.modal-backdrop-custom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1050;
+}
+
+.slab-rect {
+    width: 300px;
+    height: 180px;
+    /* background: #f1f3f5; */
+    border: 3px solid #333 !important;
+}
+
+.meas-input {
+    position: absolute;
+    width: 60px;
+    text-align: center;
+    padding: 2px;
+    font-size: 12px;
+}
+
+.temp-text {
+    color: green;
+}
+
+.incoming-list {
+    width: 250px;
+}
+
+.slab-container {
+    display: flex;
+    width: 100%;
+    align-items: center;
+}
+
+.slab-thumbnail {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    background: #1f2937;
+}
+
+/* Positions for inputs */
+/* Corners */
+.pos-tl {
+    top: -15px;
+    left: -30px;
+}
+
+.pos-tr {
+    top: -15px;
+    right: -30px;
+}
+
+.pos-bl {
+    bottom: -15px;
+    left: -30px;
+}
+
+.pos-br {
+    bottom: -15px;
+    right: -30px;
+}
+
+/* Mids - centered on edges */
+/* Horizontal mids: left: 50% - half width (30px) */
+.pos-tm {
+    top: -15px;
+    left: calc(50% - 30px);
+}
+
+.pos-bm {
+    bottom: -15px;
+    left: calc(50% - 30px);
+}
+
+/* Vertical mids: top: 50% - half height (~15px for input height approx) */
+/* Actually input height is maybe 30px? let's center vertically */
+.pos-lm {
+    top: calc(50% - 15px);
+    left: -30px;
+}
+
+.pos-rm {
+    top: calc(50% - 15px);
+    right: -30px;
+}
+
+.list-enter-active,
+.list-leave-active {
+    transition: all 0.2s ease-out;
+}
+
+.list-enter-from,
+.list-leave-to {
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.pulse-icon {
+    animation: pulse 1s infinite;
+    display: inline-block;
+}
+
+.warning-icon {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 2px solid #e03636 !important
 }
 </style>

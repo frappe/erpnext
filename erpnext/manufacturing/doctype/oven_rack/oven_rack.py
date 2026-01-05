@@ -15,6 +15,8 @@ class OvenRack(Document):
 		from frappe.types import DF
 
 		current_slab: DF.Link | None
+		current_slab_template: DF.Link | None
+		is_operational: DF.Check
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

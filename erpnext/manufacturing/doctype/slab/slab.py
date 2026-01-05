@@ -22,6 +22,7 @@ class Slab(Document):
 		created_on: DF.Datetime | None
 		current_job_card: DF.Data | None
 		grade: DF.Data | None
+		is_cur_stage_complete: DF.Check
 		is_repressed: DF.Check
 		line: DF.Link
 		number: DF.Int

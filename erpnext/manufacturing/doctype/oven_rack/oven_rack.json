@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{oven}-{rack_number}",
+ "autoname": "format:{parent}-{rack_number}",
  "creation": "2025-12-18 21:05:16.645799",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -9,8 +9,10 @@
   "section_break_ito1",
   "rack_number",
   "current_slab",
+  "current_slab_template",
   "start_time",
-  "status"
+  "status",
+  "is_operational"
  ],
  "fields": [
   {
@@ -23,15 +25,6 @@
    "in_list_view": 1,
    "label": "Number",
    "reqd": 1
-  },
-  {
-   "fieldname": "current_slab",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Current Slab",
-   "options": "Slab",
-   "read_only": 1
   },
   {
    "fieldname": "start_time",
@@ -47,13 +40,38 @@
    "label": "Status",
    "options": "Idle\nHeating\nError",
    "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_operational",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Is Operational",
+   "reqd": 1
+  },
+  {
+   "fieldname": "current_slab_template",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Current Slab Template",
+   "options": "Slab Template"
+  },
+  {
+   "fieldname": "current_slab",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Current Slab",
+   "options": "Slab",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-04 01:16:10.535400",
+ "modified": "2026-01-05 17:06:10.830794",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Oven Rack",
