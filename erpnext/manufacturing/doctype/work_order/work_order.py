@@ -731,6 +731,9 @@ class WorkOrder(Document):
 		frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
 
 	def create_job_card(self):
+		if frappe.db.exists("Job Card", {"work_order": self.name, "docstatus": ["!=", 2]}):
+			return
+
 		manufacturing_settings_doc = frappe.get_doc("Manufacturing Settings")
 
 		enable_capacity_planning = not cint(manufacturing_settings_doc.disable_capacity_planning)
