@@ -115,12 +115,37 @@ class Customer(TransactionBase):
 
 	def get_customer_name(self):
 		if frappe.db.get_value("Customer", self.customer_name) and not frappe.flags.in_import:
-			count = frappe.db.sql(
-				"""select ifnull(MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)), 0) from tabCustomer
-				 where name like %s""",
-				f"%{self.customer_name} - %",
-				as_list=1,
-			)[0][0]
+			name_prefix = f"{self.customer_name} - %"
+
+			if frappe.db.db_type == "postgres":
+				# Postgres: extract trailing digits (e.g. "Customer - 3") and cast to int.
+				# NOTE: PostgreSQL is strict about types; MySQL's UNSIGNED cast does not exist.
+				count = frappe.db.sql(
+					"""
+					SELECT COALESCE(
+						MAX(CAST(SUBSTRING(name FROM '\\d+$') AS INTEGER)),
+						0
+					)
+					FROM tabCustomer
+					WHERE name LIKE %(name_prefix)s
+					""",
+					{"name_prefix": name_prefix},
+					as_list=1,
+				)[0][0]
+			else:
+				# MariaDB/MySQL: keep existing behavior.
+				count = frappe.db.sql(
+					"""
+					SELECT COALESCE(
+						MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)),
+						0
+					)
+					FROM tabCustomer
+					WHERE name LIKE %(name_prefix)s
+					""",
+					{"name_prefix": name_prefix},
+					as_list=1,
+				)[0][0]
 			count = cint(count) + 1
 
 			new_customer_name = f"{self.customer_name} - {cstr(count)}"
