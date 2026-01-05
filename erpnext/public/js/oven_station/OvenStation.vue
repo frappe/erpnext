@@ -360,7 +360,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
                 <TransitionGroup name="list" tag="div" v-else>
                     <div v-for="(slab, index) in incomingSlabs" :key="slab.name"
                         class="incoming-item mb-2 p-3 d-flex align-items-center border rounded"
-                        :style="{ background: selectedSlab && selectedSlab.name === slab.name ? '#e2edff' : '#f8f9fa', cursor: index ? 'default' : 'pointer' }"
+                        :class="{ 'selected': selectedSlab && selectedSlab.name === slab.name, 'cursor-pointer': !index }"
                         @click="selectSlab(slab, index)">
                         <div class="slab-container" :key="updateKey">
                             <div class="slab-thumbnail mr-3"></div>
@@ -474,7 +474,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
 
     <!-- Slab Measure Modal Overlay -->
     <div v-if="showMeasureModal" class="modal-backdrop-custom d-flex align-items-center justify-content-center">
-        <div class="modal-card shadow-lg bg-white rounded p-4" style="width: 600px;">
+        <div class="modal-card shadow-lg rounded p-4" style="width: 600px;">
             <h5 class="mb-3">{{ __('Verify Dimensions') }}</h5>
             <p class="text-muted small mb-5">
                 {{ __('Measure 8 points on the slab before loading.') }}
@@ -523,7 +523,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
 
     <!-- Slab Unload Modal Overlay -->
     <div v-if="showUnloadModal" class="modal-backdrop-custom d-flex align-items-center justify-content-center">
-        <div class="modal-card shadow-lg bg-white rounded p-4" style="width: 500px;">
+        <div class="modal-card shadow-lg rounded p-4" style="width: 500px;">
             <h5 class="mb-3">{{ __('Unload Slab') }}</h5>
             <div class="text-muted small mb-4">
                 {{ targetRack?.slab }} &bull; {{ targetRack?.color }}
@@ -554,9 +554,29 @@ frappe.realtime.on('slab_checkout', (slab) => {
 </template>
 
 <style scoped>
+.page-card {
+    background: var(--card-bg, #fff);
+    color: var(--text-color);
+}
+
+.incoming-item {
+    background-color: var(--fg-color, #f8f9fa);
+    border-color: var(--border-color) !important;
+    transition: all 0.2s ease;
+}
+
+.incoming-item:hover {
+    border-color: var(--primary-color) !important;
+}
+
+.incoming-item.selected {
+    background-color: var(--control-bg-on-gray, #e2edff);
+    border-color: var(--primary-color) !important;
+}
+
 .rack-card {
-    border: 2px dashed #ced4da;
-    background: #f8f9fa;
+    border: 2px dashed var(--border-color, #ced4da);
+    background: var(--control-bg, #f8f9fa);
     width: 225px;
     height: 120px;
     display: flex;
@@ -566,37 +586,37 @@ frappe.realtime.on('slab_checkout', (slab) => {
 
 .rack-card:hover {
     cursor: pointer;
-    border-color: #74c0fc !important;
+    border-color: var(--primary-color, #74c0fc) !important;
     box-shadow: 0 0 0 3px rgba(116, 192, 252, 0.4);
 }
 
 .rack-card.empty {
     border-style: dashed;
-    border-color: #ced4da;
-    background: #f8f9fa;
+    border-color: var(--border-color, #ced4da);
+    background: var(--control-bg, #f8f9fa);
 }
 
 .rack-card.curing {
     border-style: solid;
     border-color: #28a745;
-    background: #d4f8d4;
+    background: var(--success-50, #d4f8d4);
 }
 
 .rack-card.overheat {
     border-style: solid;
     border-color: #dc3545;
-    background: #f8d7da;
+    background: var(--error-50, #f8d7da);
 }
 
 .rack-card.maintenance {
     border-style: dashed;
     border-color: #6c757d;
-    background: #e2edff;
+    background: var(--blue-50, #e2edff);
 }
 
 .temp-badge {
-    background: #fff;
-    border: 1px solid #dee2e6;
+    background: var(--bg-color, #fff);
+    border: 1px solid var(--border-color, #dee2e6);
     padding: 4px 10px;
     border-radius: 20px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -613,11 +633,16 @@ frappe.realtime.on('slab_checkout', (slab) => {
     z-index: 1050;
 }
 
+.modal-card {
+    background: var(--card-bg, #fff);
+    color: var(--text-color);
+}
+
 .slab-rect {
     width: 300px;
     height: 180px;
     /* background: #f1f3f5; */
-    border: 3px solid #333 !important;
+    border: 3px solid var(--text-color, #333) !important;
 }
 
 .meas-input {
@@ -629,7 +654,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
 }
 
 .temp-text {
-    color: green;
+    color: var(--text-success, green);
 }
 
 .incoming-list {
@@ -646,7 +671,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
     width: 32px;
     height: 32px;
     border-radius: 4px;
-    background: #1f2937;
+    background: var(--gray-800, #1f2937);
 }
 
 /* Positions for inputs */
