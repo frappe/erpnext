@@ -112,7 +112,6 @@ def execute(filters=None):
 	)
 	data.append({})
 	data.append(net_profit)
-	print(data)
 	return columns, data
 
 
