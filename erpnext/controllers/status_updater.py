@@ -184,6 +184,9 @@ class StatusUpdater(Document):
 	Installation Note: Update Installed Qty, Update Percent Qty and Validate over installation
 	"""
 
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
+
 	def update_prevdoc_status(self):
 		self.update_qty()
 		self.validate_qty()

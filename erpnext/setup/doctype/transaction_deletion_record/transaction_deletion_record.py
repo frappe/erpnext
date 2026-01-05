@@ -66,6 +66,9 @@ class TransactionDeletionRecord(Document):
 			}
 		)
 
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
+
 	def validate(self):
 		frappe.only_for("System Manager")
 		self.validate_doctypes_to_be_ignored()

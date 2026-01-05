@@ -554,7 +554,7 @@ class SerialandBatchBundle(Document):
 						available_qty += flt(d.qty, precision)
 
 					if not allow_negative_stock:
-						self.validate_negative_batch(d.batch_no, available_qty)
+						self.validate_negative_batch(d.batch_no, available_qty, field)
 
 			d.stock_value_difference = flt(d.qty) * flt(d.incoming_rate)
 
@@ -567,8 +567,8 @@ class SerialandBatchBundle(Document):
 					}
 				)
 
-	def validate_negative_batch(self, batch_no, available_qty):
-		if available_qty < 0 and not self.is_stock_reco_for_valuation_adjustment(available_qty):
+	def validate_negative_batch(self, batch_no, available_qty, field=None):
+		if available_qty < 0 and not self.is_stock_reco_for_valuation_adjustment(available_qty, field=field):
 			msg = f"""Batch No {bold(batch_no)} of an Item {bold(self.item_code)}
 				has negative stock
 				of quantity {bold(available_qty)} in the
@@ -576,13 +576,16 @@ class SerialandBatchBundle(Document):
 
 			frappe.throw(_(msg), BatchNegativeStockError)
 
-	def is_stock_reco_for_valuation_adjustment(self, available_qty):
+	def is_stock_reco_for_valuation_adjustment(self, available_qty, field=None):
 		if (
 			self.voucher_type == "Stock Reconciliation"
 			and self.type_of_transaction == "Outward"
 			and self.voucher_detail_no
-			and abs(frappe.db.get_value("Stock Reconciliation Item", self.voucher_detail_no, "qty"))
-			== abs(available_qty)
+			and (
+				abs(frappe.db.get_value("Stock Reconciliation Item", self.voucher_detail_no, "qty"))
+				== abs(available_qty)
+				or field == "total_qty"
+			)
 		):
 			return True
 

@@ -377,30 +377,23 @@ class TaxWithholdingController:
 		return category_names
 
 	def calculate(self):
-		# Always get category details first for account mapping
 		self.category_details = self._get_category_details()
+
+		self._update_taxable_amounts()
 
 		if not self.doc.override_tax_withholding_entries:
 			self._generate_withholding_entries()
 
-		# Final processing - entry status and tax_update
 		self._process_withholding_entries()
 
 	def _generate_withholding_entries(self):
-		# Clear existing entries
 		self.doc.tax_withholding_entries = []
 
-		# Calculate taxable amounts for each category
-		self._update_taxable_amounts()
-
-		# Apply threshold rules
 		self._evaluate_thresholds()
 
-		# Generate entries for each category
 		for category in self.category_details.values():
 			self.entries += self._create_entries_for_category(category)
 
-		# Add all generated entries to the document
 		self.doc.extend("tax_withholding_entries", self.entries)
 
 	def _create_entries_for_category(self, category):

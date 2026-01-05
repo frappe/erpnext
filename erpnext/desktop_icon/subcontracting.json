@@ -9,13 +9,14 @@
  "idx": 6,
  "label": "Subcontracting",
  "link_to": "Subcontracting",
- "link_type": "Workspace",
+ "link_type": "Workspace Sidebar",
  "logo_url": "/assets/erpnext/desktop_icons/subcontracting.svg",
- "modified": "2025-11-17 19:39:41.287788",
+ "modified": "2026-01-01 20:07:01.323508",
  "modified_by": "Administrator",
  "name": "Subcontracting",
  "owner": "Administrator",
  "parent_icon": "",
+ "restrict_removal": 0,
  "roles": [],
  "standard": 1
 }

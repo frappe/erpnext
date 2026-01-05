@@ -33,11 +33,35 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "assets",
+   "icon": "laptop",
    "indent": 0,
    "keep_closed": 0,
    "label": "Asset",
    "link_to": "Asset",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "trending-down",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Depreciation Schedule",
+   "link_to": "Asset Depreciation Schedule",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "sprout",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Asset Capitalization",
+   "link_to": "Asset Capitalization",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
@@ -51,17 +75,6 @@
    "label": "Asset Movement",
    "link_to": "Asset Movement",
    "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Fixed Asset Register",
-   "link_to": "Fixed Asset Register",
-   "link_type": "Report",
    "show_arrow": 0,
    "type": "Link"
   },
@@ -132,26 +145,26 @@
    "type": "Link"
   },
   {
-   "child": 1,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Asset Capitalization",
-   "link_to": "Asset Capitalization",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
    "child": 0,
    "collapsible": 1,
-   "icon": "notepad-text",
+   "icon": "sheet",
    "indent": 1,
    "keep_closed": 1,
    "label": "Reports",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Section Break"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Fixed Asset Register",
+   "link_to": "Fixed Asset Register",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
   },
   {
    "child": 1,
@@ -250,12 +263,13 @@
    "label": "Settings",
    "link_to": "Accounts Settings",
    "link_type": "DocType",
+   "navigate_to_tab": "assets_tab",
    "show_arrow": 0,
    "type": "Link",
    "url": ""
   }
  ],
- "modified": "2025-11-25 10:46:09.778268",
+ "modified": "2025-12-31 16:27:44.936562",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Assets",

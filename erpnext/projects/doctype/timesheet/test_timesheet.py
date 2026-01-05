@@ -8,6 +8,7 @@ from frappe.tests import IntegrationTestCase
 from frappe.utils import add_to_date, now_datetime, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError, make_sales_invoice
 from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.tests.utils import ERPNextTestSuite
@@ -21,6 +22,55 @@ class TestTimesheet(ERPNextTestSuite):
 
 	def setUp(self):
 		frappe.db.delete("Timesheet")
+
+	def test_timesheet_post_update(self):
+		frappe.get_doc(
+			{
+				"doctype": "Property Setter",
+				"doctype_or_field": "DocField",
+				"doc_type": "Timesheet",
+				"field_name": "time_logs",
+				"property": "allow_on_submit",
+				"property_type": "Check",
+				"value": "1",
+			}
+		).insert(ignore_permissions=True)
+
+		task = create_task("Test Task 1")
+
+		timesheet = frappe.new_doc("Timesheet")
+		timesheet.append(
+			"time_logs",
+			{
+				"task": task.name,
+				"from_time": now_datetime(),
+				"to_time": now_datetime() + datetime.timedelta(hours=1),
+				"company": "_Test Company",
+			},
+		)
+
+		timesheet.save()
+		timesheet.submit()
+		task.reload()
+		self.assertEqual(task.actual_time, 1)
+		timesheet.append(
+			"time_logs",
+			{
+				"task": task.name,
+				"from_time": now_datetime(),
+				"to_time": now_datetime() + datetime.timedelta(hours=2),
+				"hours": 2,
+			},
+		)
+
+		timesheet.save()
+		task.reload()
+		self.assertEqual(task.actual_time, 3)
+
+		frappe.db.delete(
+			"Property Setter",
+			{"doc_type": "Timesheet", "field_name": "time_logs", "property": "allow_on_submit"},
+		)
 
 	def test_timesheet_base_amount(self):
 		emp = make_employee("test_employee_6@salary.com")
@@ -122,6 +172,21 @@ class TestTimesheet(ERPNextTestSuite):
 		settings.ignore_employee_time_overlap = 1
 		settings.save()
 		timesheet.save()  # should not throw an error
+		timesheet.submit()  # should not throw an error
+		settings.ignore_employee_time_overlap = 0
+		settings.save()
+
+		timesheet.append(
+			"time_logs",
+			{
+				"billable": 1,
+				"activity_type": "_Test Activity Type",
+				"from_time": now_datetime(),
+				"to_time": now_datetime() + datetime.timedelta(hours=3),
+				"company": "_Test Company",
+			},
+		)
+		self.assertRaises(frappe.ValidationError, timesheet.submit)
 
 		settings.ignore_employee_time_overlap = initial_setting
 		settings.save()

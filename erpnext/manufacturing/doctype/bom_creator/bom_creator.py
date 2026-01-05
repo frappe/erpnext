@@ -4,7 +4,7 @@
 from collections import OrderedDict
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.document import Document
 from frappe.utils import cint, flt, sbool
 from pypika.terms import ValueWrapper
@@ -78,6 +78,29 @@ class BOMCreator(Document):
 
 	def validate(self):
 		self.validate_items()
+		self.validate_duplicate_item()
+
+	def validate_duplicate_item(self):
+		# If same items added multiple times under same parent, raise error
+		item_map = {}
+		for row in self.items:
+			if not row.fg_reference_id:
+				continue
+
+			key = (row.item_code, row.fg_reference_id)
+			if key in item_map:
+				parent_item_code = next(
+					item.item_code for item in self.items if item.name == row.fg_reference_id
+				)
+
+				frappe.throw(
+					_(
+						"Item {0} added multiple times under the same parent item {1} at rows {2} and {3}"
+					).format(bold(row.item_code), bold(parent_item_code), item_map[key], row.idx),
+					title=_("Duplicate Item Under Same Parent"),
+				)
+			else:
+				item_map[key] = row.idx
 
 	def validate_items(self):
 		for row in self.items:
@@ -182,7 +205,7 @@ class BOMCreator(Document):
 			else:
 				row.rate = flt(self.get_raw_material_cost(row.item_code) * row.conversion_factor)
 
-			row.amount = flt(row.rate * row.qty)
+			row.amount = flt(row.rate) * flt(row.qty)
 			amount += flt(row.amount)
 
 		return amount

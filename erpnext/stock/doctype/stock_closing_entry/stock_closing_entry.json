@@ -37,7 +37,7 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Status",
-   "options": "Draft\nQueued\nIn Progress\nCompleted\nFailed\nCanceled",
+   "options": "Draft\nQueued\nIn Progress\nCompleted\nFailed\nCancelled",
    "read_only": 1
   },
   {
@@ -68,7 +68,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-12-20 13:48:46.618066",
+ "modified": "2025-12-29 10:35:32.507988",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Closing Entry",
@@ -121,6 +121,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

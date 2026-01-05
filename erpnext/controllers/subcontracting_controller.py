@@ -1401,6 +1401,7 @@ def make_rm_stock_entry(
 
 			stock_entry.set_stock_entry_type()
 
+			over_transfer_allowance = frappe.get_single_value("Buying Settings", "over_transfer_allowance")
 			for fg_item_code in fg_item_code_list:
 				for rm_item in rm_items:
 					if (
@@ -1408,14 +1409,27 @@ def make_rm_stock_entry(
 						or rm_item.get("item_code") == fg_item_code
 					):
 						rm_item_code = rm_item.get("rm_item_code")
+						qty = rm_item.get("qty") or max(
+							rm_item.get("required_qty") - rm_item.get("total_supplied_qty"), 0
+						)
+						if qty <= 0 and rm_item.get("total_supplied_qty"):
+							per_transferred = (
+								flt(
+									rm_item.get("total_supplied_qty") / rm_item.get("required_qty"),
+									frappe.db.get_default("float_precision"),
+								)
+								* 100
+							)
+							if per_transferred >= 100 + over_transfer_allowance:
+								continue
+
 						items_dict = {
 							rm_item_code: {
 								rm_detail_field: rm_item.get("name"),
 								"item_name": rm_item.get("item_name")
 								or item_wh.get(rm_item_code, {}).get("item_name", ""),
 								"description": item_wh.get(rm_item_code, {}).get("description", ""),
-								"qty": rm_item.get("qty")
-								or max(rm_item.get("required_qty") - rm_item.get("total_supplied_qty"), 0),
+								"qty": qty,
 								"from_warehouse": rm_item.get("warehouse")
 								or rm_item.get("reserve_warehouse"),
 								"to_warehouse": subcontract_order.supplier_warehouse,

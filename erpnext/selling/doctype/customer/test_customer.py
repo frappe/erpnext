@@ -104,28 +104,24 @@ class TestCustomer(IntegrationTestCase):
 		self.assertEqual(details.tax_category, "_Test Tax Category 1")
 
 		billing_address = frappe.get_doc(
-			dict(
-				doctype="Address",
-				address_title="_Test Address With Tax Category",
-				tax_category="_Test Tax Category 2",
-				address_type="Billing",
-				address_line1="Station Road",
-				city="_Test City",
-				country="India",
-				links=[dict(link_doctype="Customer", link_name="_Test Customer With Tax Category")],
-			)
+			doctype="Address",
+			address_title="_Test Address With Tax Category",
+			tax_category="_Test Tax Category 2",
+			address_type="Billing",
+			address_line1="Station Road",
+			city="_Test City",
+			country="India",
+			links=[dict(link_doctype="Customer", link_name="_Test Customer With Tax Category")],
 		).insert()
 		shipping_address = frappe.get_doc(
-			dict(
-				doctype="Address",
-				address_title="_Test Address With Tax Category",
-				tax_category="_Test Tax Category 3",
-				address_type="Shipping",
-				address_line1="Station Road",
-				city="_Test City",
-				country="India",
-				links=[dict(link_doctype="Customer", link_name="_Test Customer With Tax Category")],
-			)
+			doctype="Address",
+			address_title="_Test Address With Tax Category",
+			tax_category="_Test Tax Category 3",
+			address_type="Shipping",
+			address_line1="Station Road",
+			city="_Test City",
+			country="India",
+			links=[dict(link_doctype="Customer", link_name="_Test Customer With Tax Category")],
 		).insert()
 
 		settings = frappe.get_single("Accounts Settings")

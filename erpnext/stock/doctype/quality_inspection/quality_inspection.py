@@ -56,9 +56,13 @@ class QualityInspection(Document):
 		remarks: DF.Text | None
 		report_date: DF.Date
 		sample_size: DF.Float
-		status: DF.Literal["", "Accepted", "Rejected"]
+		status: DF.Literal["", "Accepted", "Rejected", "Cancelled"]
 		verified_by: DF.Data | None
+
 	# end: auto-generated types
+	def on_discard(self):
+		self.update_qc_reference()
+		self.db_set("status", "Cancelled")
 
 	def validate(self):
 		if not self.readings and self.item_code:

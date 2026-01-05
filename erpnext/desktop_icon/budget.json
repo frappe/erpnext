@@ -9,12 +9,13 @@
  "idx": 4,
  "label": "Budget",
  "link_to": "Budget",
- "link_type": "DocType",
- "modified": "2025-11-17 13:34:13.514949",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-01-01 20:07:01.449176",
  "modified_by": "Administrator",
  "name": "Budget",
  "owner": "Administrator",
  "parent_icon": "Accounts",
+ "restrict_removal": 0,
  "roles": [],
  "standard": 1
 }

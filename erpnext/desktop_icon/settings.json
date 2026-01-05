@@ -9,13 +9,14 @@
  "idx": 10,
  "label": "Settings",
  "link_to": "Settings",
- "link_type": "Workspace",
+ "link_type": "Workspace Sidebar",
  "logo_url": "/assets/erpnext/desktop_icons/settings.svg",
- "modified": "2025-11-17 19:40:12.175977",
+ "modified": "2026-01-01 20:07:01.330786",
  "modified_by": "Administrator",
  "name": "Settings",
  "owner": "Administrator",
  "parent_icon": "",
+ "restrict_removal": 0,
  "roles": [],
  "standard": 1
 }

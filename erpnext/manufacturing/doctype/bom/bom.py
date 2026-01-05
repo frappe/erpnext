@@ -1036,10 +1036,14 @@ class BOM(WebsiteGenerator):
 		return erpnext.get_company_currency(self.company)
 
 	def add_to_cur_exploded_items(self, args):
-		if self.cur_exploded_items.get(args.item_code):
-			self.cur_exploded_items[args.item_code]["stock_qty"] += args.stock_qty
+		key = args.item_code
+		if args.operation:
+			key = (args.item_code, args.operation)
+
+		if self.cur_exploded_items.get(key):
+			self.cur_exploded_items[key]["stock_qty"] += args.stock_qty
 		else:
-			self.cur_exploded_items[args.item_code] = args
+			self.cur_exploded_items[key] = args
 
 	def get_child_exploded_items(self, bom_no, stock_qty, operation=None):
 		"""Add all items from Flat BOM of child BOM"""
@@ -1275,7 +1279,7 @@ def get_bom_items_as_dict(
 ):
 	item_dict = {}
 
-	group_by_cond = "group by item_code, stock_uom"
+	group_by_cond = "group by item_code, stock_uom, operation"
 	if frappe.get_cached_value("BOM", bom, "track_semi_finished_goods"):
 		fetch_exploded = 0
 		group_by_cond = "group by item_code, operation_row_id, stock_uom"
@@ -1359,6 +1363,9 @@ def get_bom_items_as_dict(
 		key = item.item_code
 		if item.operation_row_id:
 			key = (item.item_code, item.operation_row_id)
+
+		if item.operation:
+			key = (item.item_code, item.operation)
 
 		if item.get("is_phantom_item"):
 			data = get_bom_items_as_dict(

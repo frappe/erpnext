@@ -33,7 +33,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "arrow-right",
+   "icon": "arrow-left-to-line",
    "indent": 1,
    "keep_closed": 0,
    "label": "Receivables",
@@ -67,12 +67,14 @@
   {
    "child": 1,
    "collapsible": 1,
+   "filters": "",
    "icon": "",
    "indent": 0,
    "keep_closed": 0,
    "label": "Credit Note",
    "link_to": "Sales Invoice",
    "link_type": "DocType",
+   "route_options": "",
    "show_arrow": 0,
    "type": "Link"
   },
@@ -90,7 +92,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "arrow-left",
+   "icon": "arrow-right-from-line",
    "indent": 1,
    "keep_closed": 0,
    "label": "Payables",
@@ -146,7 +148,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "dollar-sign",
+   "icon": "money-coins-1",
    "indent": 1,
    "keep_closed": 1,
    "label": "Payments",
@@ -181,8 +183,41 @@
    "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
+   "label": "Payment Request",
+   "link_to": "Payment Request",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Payment Order",
+   "link_to": "Payment Order",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
    "label": "Payment Reconciliaition",
    "link_to": "Payment Reconciliation",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Unreconcile Payment",
+   "link_to": "Unreconcile Payment",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
@@ -201,7 +236,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "notepad-text",
+   "icon": "sheet",
    "indent": 1,
    "keep_closed": 1,
    "label": "Reports",
@@ -256,7 +291,7 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "accounting",
+   "icon": "",
    "indent": 0,
    "keep_closed": 0,
    "label": "COA Importer",
@@ -268,7 +303,7 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "tool",
+   "icon": "",
    "indent": 0,
    "keep_closed": 0,
    "label": "Opening Invoice Tool",
@@ -280,7 +315,7 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "folder-clock",
+   "icon": "",
    "indent": 0,
    "keep_closed": 0,
    "label": "Accounting Period",
@@ -292,7 +327,7 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "expand-alt",
+   "icon": "",
    "indent": 0,
    "keep_closed": 0,
    "label": "FX Revaluation",
@@ -304,7 +339,7 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "calendar-check",
+   "icon": "",
    "indent": 0,
    "keep_closed": 0,
    "label": "Period Closing Voucher",
@@ -462,14 +497,14 @@
    "icon": "settings",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Accounts Settings",
+   "label": "Settings",
    "link_to": "Accounts Settings",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
   }
  ],
- "modified": "2025-12-22 16:17:31.777323",
+ "modified": "2025-12-31 16:54:07.693056",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",

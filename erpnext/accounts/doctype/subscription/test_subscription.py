@@ -653,7 +653,7 @@ def reset_settings():
 
 def create_subscription(**kwargs):
 	subscription = frappe.new_doc("Subscription")
-	subscription.party_type = (kwargs.get("party_type") or "Customer",)
+	subscription.party_type = kwargs.get("party_type") or "Customer"
 	subscription.company = kwargs.get("company") or "_Test Company"
 	subscription.party = kwargs.get("party") or "_Test Customer"
 	subscription.trial_period_start = kwargs.get("trial_period_start")

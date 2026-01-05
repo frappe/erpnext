@@ -201,7 +201,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def onload(self):
 		for item in self.get("items"):
-			item.update(get_bin_details(item.item_code, item.s_warehouse))
+			item.update(get_bin_details(item.item_code, item.s_warehouse or item.t_warehouse))
 
 	def before_insert(self):
 		if self.subcontracting_order and frappe.get_cached_value(
@@ -1454,9 +1454,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 						)
 					).run()[0][0] or 0
 
-				if flt(total_supplied - total_returned, precision) > flt(total_allowed, precision):
+				if flt(total_supplied + se_item.transfer_qty - total_returned, precision) > flt(
+					total_allowed, precision
+				):
 					frappe.throw(
-						_("Row {0}# Item {1} cannot be transferred more than {2} against {3} {4}").format(
+						_("Row #{0}: Item {1} cannot be transferred more than {2} against {3} {4}").format(
 							se_item.idx,
 							se_item.item_code,
 							total_allowed,
@@ -3080,7 +3082,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			child_qty = flt(item_row["qty"], precision)
 			if not self.is_return and child_qty <= 0 and not item_row.get("is_scrap_item"):
-				if self.purpose != "Receive from Customer":
+				if self.purpose not in ["Receive from Customer", "Send to Subcontractor"]:
 					continue
 
 			se_child = self.append("items")

@@ -85,7 +85,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Unsigned\nActive\nInactive"
+   "options": "Unsigned\nActive\nInactive\nCancelled"
   },
   {
    "allow_on_submit": 1,
@@ -257,11 +257,11 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-19 17:48:45.049007",
+ "modified": "2025-12-24 21:33:51.240497",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Contract",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

@@ -57,18 +57,6 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "receipt-text",
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Monthly Distribution",
-   "link_to": "Monthly Distribution",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
    "icon": "notepad-text",
    "indent": 1,
    "keep_closed": 1,
@@ -90,7 +78,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-12-22 17:01:31.198860",
+ "modified": "2025-12-23 17:01:31.198860",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Budget",

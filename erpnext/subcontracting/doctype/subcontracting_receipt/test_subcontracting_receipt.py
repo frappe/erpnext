@@ -1890,6 +1890,36 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 
 		self.assertRaises(BOMQuantityError, scr.submit)
 
+	@IntegrationTestCase.change_settings("Buying Settings", {"over_transfer_allowance": 20})
+	@IntegrationTestCase.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 20})
+	def test_over_receipt(self):
+		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+
+		set_backflush_based_on("BOM")
+
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		rm_items[0]["qty"] = 2
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		ste_dict = make_rm_stock_entry(sco.name)
+		doc = frappe.get_doc(ste_dict)
+		self.assertEqual(doc.items[0].qty, 0)
+		doc.items[0].qty = 2
+		doc.submit()
+
+		frappe.flags["args"] = {"items": [{"name": sco.items[0].name, "qty": 2}]}
+		scr = make_subcontracting_receipt(sco.name)
+		self.assertEqual(scr.items[0].qty, 2)
+		scr.submit()
+		frappe.flags["args"].pop("items", None)
+
 
 def make_return_subcontracting_receipt(**args):
 	args = frappe._dict(args)

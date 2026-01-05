@@ -248,6 +248,23 @@ frappe.ui.form.on("Request for Quotation", {
 		}
 		refresh_field("items");
 	},
+
+	email_template(frm) {
+		if (frm.doc.email_template) {
+			frappe.db
+				.get_value("Email Template", frm.doc.email_template, [
+					"use_html",
+					"response",
+					"response_html",
+				])
+				.then((r) => {
+					frm.set_value(
+						"message_for_supplier",
+						r.message.use_html ? r.message.response_html : r.message.response
+					);
+				});
+		}
+	},
 	preview: (frm) => {
 		let dialog = new frappe.ui.Dialog({
 			title: __("Preview Email"),

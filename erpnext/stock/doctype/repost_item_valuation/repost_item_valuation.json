@@ -76,7 +76,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Queued\nIn Progress\nCompleted\nSkipped\nFailed",
+   "options": "Queued\nIn Progress\nCompleted\nSkipped\nFailed\nCancelled",
    "read_only": 1
   },
   {
@@ -252,7 +252,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-20 18:24:48.808526",
+ "modified": "2025-12-24 14:59:15.512898",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",
