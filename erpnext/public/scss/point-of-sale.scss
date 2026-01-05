@@ -117,6 +117,13 @@
 			overflow-y: scroll;
 			overflow-x: hidden;
 
+			&.items-not-found {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				height: 100%;
+			}
+
 			&.show-item-image {
 				grid-template-columns: repeat(4, minmax(0, 1fr));
 				gap: var(--margin-lg);

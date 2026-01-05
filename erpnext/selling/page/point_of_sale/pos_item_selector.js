@@ -7,12 +7,14 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.events = events;
 		this.pos_profile = pos_profile;
 		this.hide_images = settings.hide_images;
+		this.item_display_class = this.hide_images ? "hide-item-image" : "show-item-image";
 		this.auto_add_item = settings.auto_add_item_to_cart;
 
+		this.get_parent_item_group();
 		this.inti_component();
 	}
 
-	inti_component() {
+	async inti_component() {
 		this.prepare_dom();
 		this.make_search_bar();
 		this.load_items_data();
@@ -35,20 +37,20 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.$component = this.wrapper.find(".items-selector");
 		this.$items_container = this.$component.find(".items-container");
 
-		const show_hide_images = this.hide_images ? "hide-item-image" : "show-item-image";
-		this.$items_container.addClass(show_hide_images);
+		this.$items_container.addClass(this.item_display_class);
+	}
+
+	async get_parent_item_group() {
+		const r = await frappe.call({
+			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_parent_item_group",
+			args: {
+				pos_profile: this.pos_profile,
+			},
+		});
+		if (r.message) this.item_group = this.parent_item_group = r.message;
 	}
 
 	async load_items_data() {
-		if (!this.item_group) {
-			frappe.call({
-				method: "erpnext.selling.page.point_of_sale.point_of_sale.get_parent_item_group",
-				async: false,
-				callback: (r) => {
-					if (r.message) this.parent_item_group = r.message;
-				},
-			});
-		}
 		if (!this.price_list) {
 			const res = await frappe.db.get_value("POS Profile", this.pos_profile, "selling_price_list");
 			this.price_list = res.message.selling_price_list;
@@ -64,8 +66,6 @@ erpnext.PointOfSale.ItemSelector = class {
 		const price_list = (doc && doc.selling_price_list) || this.price_list;
 		let { item_group, pos_profile } = this;
 
-		!item_group && (item_group = this.parent_item_group);
-
 		return frappe.call({
 			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
 			freeze: true,
@@ -76,14 +76,30 @@ erpnext.PointOfSale.ItemSelector = class {
 	render_item_list(items) {
 		this.$items_container.html("");
 
+		if (!items?.length) {
+			this.set_items_not_found_banner();
+			return;
+		}
+
+		if (this.$items_container.hasClass("items-not-found")) {
+			this.$items_container.removeClass("items-not-found");
+			this.$items_container.addClass(this.item_display_class);
+		}
+
 		if (this.hide_images) {
 			this.$items_container.append(this.render_item_list_column_header());
 		}
 
-		items.forEach((item) => {
+		items?.forEach((item) => {
 			const item_html = this.get_item_html(item);
 			this.$items_container.append(item_html);
 		});
+	}
+
+	set_items_not_found_banner() {
+		this.$items_container.removeClass(this.item_display_class);
+		this.$items_container.addClass("items-not-found");
+		this.$items_container.html(__("Items not found."));
 	}
 
 	render_item_list_column_header() {
@@ -189,17 +205,18 @@ erpnext.PointOfSale.ItemSelector = class {
 				fieldtype: "Link",
 				options: "Item Group",
 				placeholder: __("Select item group"),
-				onchange: function () {
+				only_select: true,
+				onchange: async function () {
 					me.item_group = this.value;
 					!me.item_group && (me.item_group = me.parent_item_group);
 					me.filter_items();
+					me.set_item_selector_filter_label(this.value);
 				},
 				get_query: function () {
-					const doc = me.events.get_frm().doc;
 					return {
 						query: "erpnext.selling.page.point_of_sale.point_of_sale.item_group_query",
 						filters: {
-							pos_profile: doc ? doc.pos_profile : "",
+							pos_profile: me.pos_profile,
 						},
 					};
 				},
@@ -210,7 +227,15 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.search_field.toggle_label(false);
 		this.item_group_field.toggle_label(false);
 
+		$(this.item_group_field.awesomplete.ul).css("min-width", "unset");
+
 		this.attach_clear_btn();
+	}
+
+	set_item_selector_filter_label(value) {
+		const $filter_label = this.$component.find(".label");
+
+		$filter_label.html(value ? __(value) : __("All Items"));
 	}
 
 	attach_clear_btn() {
