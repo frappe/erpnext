@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 
 // core state
+// const loading = ref(false);
 const jobCard = ref(null);
 const status = ref('Pending');
 const serial = ref('SLB-2025-00427');
@@ -9,24 +10,25 @@ const colour = ref('Carrara White');
 const timerHandle = ref(null);
 
 const processStarted = ref(false);
-const processStartTime = ref(false);
+const processStartTime = ref(null);
 const processElapsed = ref(0);
 const processTimerHandle = ref(null);
 const processReady = ref(true);
 
-// const distributionStarted = ref(false);
-// const distributionStartTime = ref(null);
-// const distributionElapsed = ref(0);
-// const distributionTimerHandle = ref(null);
-// const distributionReady = ref(true);
+const slabCreated = ref(false);
+const slabNumber = ref(null);
 const jobCardSubmitted = ref(false);
 const preparedQty = ref(0);
 const stockEntryName = ref('');
 const transferredQty = ref(0);     
 const transferSuccess = ref(false); 
 const nextWorkOrder = ref(''); 
+const bomNo = ref('Loading...');
 const bomQty = ref(0);
-
+const line = ref('L1'); 
+const workstation = ref('');
+const error = ref(null);              
+const batchNo = ref(null);
 
 const alarms = ref([
   {
@@ -78,14 +80,13 @@ onMounted(async () => {
     const route = frappe.get_route();
     const station = route[1] || props.process;
     jobCard.value = route[2] || props.job_card;
-    console.log(jobCard.value);
-    console.log(props.jobCard.value);
 
     if (!jobCard.value) {
         error.value = __('No Job Card found in route');
         return;
     }
-    const error = ref(null);
+    // await this.loadIncomingSlabs();
+    // setInterval(() => this.loadIncomingSlabs(), 10000);
 
     try {
         const jc = await frappe.db.get_doc('Job Card', jobCard.value);
@@ -97,17 +98,18 @@ onMounted(async () => {
         if (jobCardSubmitted.value) {
             preparedQty.value = jc.total_completed_qty || jc.for_quantity || 0;
         }
+        // createSlab();
 
         const stateRes = await frappe.call ({
           method: 'erpnext.manufacturing.page.operator_station.operator_station.get_operator_state',
           args: {
-            job_card: props.job_card,
-            process_name: props.process
+            job_card: jobCard.value,
+            process_name: station
           }
         });
         const state = stateRes.message || {};
-        processStarted.value = !!state[`${props.process}_started`];
-        processStartTime.value = state[`${props.process}_start_time`];
+        processStarted.value = !!state[`${station}_started`];
+        processStartTime.value = state[`${station}_start_time`];
 
         jobCardSubmitted.value = !!state.job_card_submitted || false;  
         if (jobCardSubmitted.value) {
@@ -139,17 +141,80 @@ onMounted(async () => {
     } 
 });
 
+// async loadIncomingSlabs() {
+//   this.loading = true;
+//   const response = await frappe.call({
+//     method: 'erpnext.manufacturing.page.operator_station.operator_station.loadIncomingSlabs',
+//     args: {
+
+//     }
+//   })
+// }
+
+
+async function createSlab() {
+  if (!jobCard.value || slabCreated.value) return
+  
+  try {
+    const result = await frappe.call({
+      method: "erpnext.manufacturing.utils.slab.create_slab",
+      args: { 
+        line: line.value || 'L1',
+        job_card: jobCard.value.name,
+        workstation: workstation.value
+      }
+    })
+    
+    slabCreated.value = true
+    slabNumber.value = result;
+    const jc = await frappe.db.get_doc('Job Card', jobCard.value);
+    if (jc) {
+      bomNo.value = jc.bom_no;  
+    }
+  } catch (e) {
+    frappe.msgprint(__('Slab creation failed: {0}', [e.message]))
+  }
+}
+
+// async loadIncomingSlabs() {
+//   this.loading = true;
+//   const response = await frappe.call({
+//     method: "frappe.client.get_list",
+//     args: {
+//       doctype: "Serial No",
+//       filters: {
+//         item_code: "KY-1005 (3 CM) - FG",  // or dynamic
+//         warehouse: "Mixing-FG - SPL",      // previous station FG
+//         status: "Active"                   // available slabs
+//       },
+//       fields: ["name as serial", "item_code", "warehouse"]
+//     }
+//   });
+  
+  // Enrich with dimensions/status
+//   this.incomingSlabs = await Promise.all(
+//     response.message.map(async slab => ({
+//       serial: slab.serial,
+//       subtitle: await this.getSlabDimensions(slab.serial)  // custom method
+//     }))
+//   );
+//   this.loading = false;
+// }
+
+
 async function startOperation() {
+  const route = frappe.get_route();
+    const station = route[1] || props.process;
+    jobCard.value = route[2] || props.job_card;
     frappe.confirm(
         __('Start Distribution now?'),
         async () => {
             try {
-                console.log()
                 await frappe.call({
                     method: 'erpnext.manufacturing.page.operator_station.operator_station.start_distribution',
                     args: { 
                       job_card: jobCard.value,
-                      process_name: props.process
+                      process_name: station
                      }
                 });
                 status.value = 'In Progress';
@@ -178,16 +243,19 @@ async function startOperation() {
 }
 
 async function finishOperation() {
-    if (processTimerHandle.value) {
-        clearInterval(processTimerHandle.value);
-        processTimerHandle.value = null;
-    }
+  const route = frappe.get_route();
+  const station = route[1] || props.process;
+  jobCard.value = route[2] || props.job_card;
+  if (processTimerHandle.value) {
+      clearInterval(processTimerHandle.value);
+      processTimerHandle.value = null;
+  }
     try {
         const result = await frappe.call({
             method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_distribution',
             args: {
                 job_card: jobCard.value,
-                process_name: props.process
+                process_name: station
             },
         });
         status.value = 'Finished';
@@ -284,9 +352,9 @@ async function loadBomQty() {
 
 function haltJob() {
   status.value = 'Halted';
-  if (timerHandle.value) {
-    clearInterval(timerHandle.value);
-    timerHandle.value = null;
+  if (processTimerHandle.value) {
+    clearInterval(processTimerHandle.value);
+    processTimerHandle.value = null;
   }
   frappe.msgprint(__('Job is halted'));
 }
@@ -346,7 +414,6 @@ function statusStyle() {
 
 <template>
   <div class="operator-station page-card d-flex flex-column align-items-center">
-
     <!-- Current Job Card -->
     <div class="current-job-card mb-4 border border-dark w-50 rounded p-4">
       <div class="status text-center mb-2" style="font-size:1rem">

@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2025-12-09 18:11:26.669095",
+ "modified": "2026-01-05 11:33:00.692706",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "operator-station",
@@ -15,5 +15,5 @@
  "standard": "Yes",
  "style": null,
  "system_page": 1,
- "title": "Operator Station"
+ "title": ""
 }

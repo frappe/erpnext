@@ -20,7 +20,7 @@ frappe.pages['operator-station'].on_page_load = function(wrapper) {
         frappe.hot_update ??= [];
         frappe.hot_update.push(() => load_vue(wrapper, { config, page, job_card }));
     }
-    load_vue(wrapper, { config, page, job_card });
+    // load_vue(wrapper, { config, page, job_card });
 };
 
 frappe.pages['operator-station'].on_page_show = (wrapper) => {
