@@ -80,7 +80,7 @@ onMounted(async () => {
     const route = frappe.get_route();
     const station = route[1] || props.process;
     jobCard.value = route[2] || props.job_card;
-
+    debugger;
     if (!jobCard.value) {
       error.value = __('No Job Card found in route');
       return;
@@ -101,8 +101,6 @@ onMounted(async () => {
     if (jobCardSubmitted.value) {
       preparedQty.value = jc.total_completed_qty || jc.for_quantity || 0;
     }
-    debugger;
-    // createSlab(jc.production_line);
     slabInfo(jobCard, station);
     const stateRes = await frappe.call({
       method: 'erpnext.manufacturing.page.operator_station.operator_station.get_operator_state',
@@ -157,8 +155,6 @@ async function createSlab(line) {
         job_card_number: jobCard.value.name,
       }
     });
-    debugger;
-    console.log('Slab created:', result);
     if(result)
     {
       jobCard.slab = result.message?.serial_number;
@@ -173,16 +169,12 @@ async function createSlab(line) {
 }
 
 async function slabInfo(jobCard, station) {
-  debugger;
   const jc = await frappe.db.get_doc('Job Card', jobCard.value.name);
   const jcSlabRes = await frappe.call({
     method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
     args: { job_card: jobCard.value.name }
   });
-  debugger;
-  
   let slabAlreadyExisted = jcSlabRes.message;
-  console.log('🔍 JC slab:', slabAlreadyExisted);
 
   // If no slab found for this specific Job Card, check if there's one coming from the previous stage
   if (!slabAlreadyExisted && station.toLowerCase() !== 'distribution') {
@@ -192,14 +184,12 @@ async function slabInfo(jobCard, station) {
       });
       
       if (prevSlabRes.message) {
-          console.log('� Found slab from previous stage:', prevSlabRes.message);
           slabAlreadyExisted = prevSlabRes.message;
       }
   }
 
   if (slabAlreadyExisted) {
     if (slabAlreadyExisted.current_stage?.toLowerCase() !== station.toLowerCase()) {
-      console.log('🔄 Moving slab station...');
       await frappe.call({
         method: 'erpnext.manufacturing.doctype.slab.api.move_slab_to',
         args: {
@@ -216,7 +206,6 @@ async function slabInfo(jobCard, station) {
         args: { job_card: jobCard.value.name }
       });
       slabAlreadyExisted = freshSlabRes.message;
-      console.log('🔄 Slab moved:', slabAlreadyExisted);
     }
     
     // Populate UI
@@ -231,7 +220,6 @@ async function slabInfo(jobCard, station) {
     
   } 
   else if (station.toLowerCase() === 'distribution') {
-    console.log('🆕 Creating new slab...');
     await createSlab(jc.production_line);
   }
   else {

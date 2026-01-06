@@ -56,7 +56,6 @@ def finish_distribution(job_card, process_name="operator"):
     total_transferred = sum([item.transferred_qty for item in jc.items])
     jc.transferred_qty = total_transferred  # Force header update!
     
-    print(f"DEBUG: Header transferred_qty={jc.transferred_qty}, items sum={total_transferred}")
     bom_doc = frappe.get_doc("BOM", jc.bom_no)
     bom_qty = 0
 
