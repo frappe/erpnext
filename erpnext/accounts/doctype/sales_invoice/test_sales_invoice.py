@@ -4691,6 +4691,71 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		doc.db_set("do_not_use_batchwise_valuation", original_value)
 
+	@change_settings("Selling Settings", {"set_incoming_rate_as_invoice_rate": 1})
+	def test_standalone_credit_note_incoming_rate(self):
+		item_code = "_Test Item for Credit Note Incoming Rate"
+		make_item_for_si(
+			item_code,
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BATCH-TCNIR.####",
+			},
+		)
+
+		si = create_sales_invoice(
+			item=item_code,
+			qty=-2,
+			rate=120,
+			is_return=1,
+			update_stock=1,
+		)
+
+		stock_ledger_entry = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Sales Invoice",
+				"voucher_no": si.name,
+				"item_code": item_code,
+				"warehouse": "_Test Warehouse - _TC",
+			},
+			["incoming_rate", "valuation_rate", "actual_qty as qty", "stock_value_difference"],
+			as_dict=True,
+		)
+
+		self.assertEqual(stock_ledger_entry.incoming_rate, 120)
+		self.assertEqual(stock_ledger_entry.valuation_rate, 120)
+		self.assertEqual(stock_ledger_entry.qty, 2.0)
+		self.assertEqual(stock_ledger_entry.stock_value_difference, 240)
+
+	@change_settings("Selling Settings", {"set_incoming_rate_as_invoice_rate": 0})
+	def test_standalone_credit_note_zero_incoming_rate_validation(self):
+		from erpnext.controllers.selling_controller import StandaloneZeroIncomingRateError
+
+		item_code = "_Test Item for Credit Note Zero Incoming Rate"
+		make_item_for_si(
+			item_code,
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BATCH-TCNZIR.####",
+			},
+		)
+
+		si = create_sales_invoice(
+			item=item_code,
+			qty=-2,
+			rate=120,
+			is_return=1,
+			update_stock=1,
+			do_not_submit=1,
+			allow_zero_valuation_rate=0,
+		)
+
+		self.assertRaises(StandaloneZeroIncomingRateError, si.submit)
+
 
 def make_item_for_si(item_code, properties=None):
 	from erpnext.stock.doctype.item.test_item import make_item
