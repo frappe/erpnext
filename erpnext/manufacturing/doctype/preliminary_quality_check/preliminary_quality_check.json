@@ -1,0 +1,105 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-06 15:36:47.633529",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_wvpz",
+  "h_bend",
+  "v_bend",
+  "column_break_0kas",
+  "d1_bend",
+  "d2_bend",
+  "other_readings_section",
+  "depth",
+  "column_break_b5ob",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_wvpz",
+   "fieldtype": "Section Break",
+   "label": "Bend Readings"
+  },
+  {
+   "fieldname": "h_bend",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Horizontal Bend",
+   "reqd": 1
+  },
+  {
+   "fieldname": "v_bend",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Vertical Bend",
+   "reqd": 1
+  },
+  {
+   "fieldname": "d1_bend",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Diagonal 1 Bend",
+   "reqd": 1
+  },
+  {
+   "fieldname": "d2_bend",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Diagonal 2 Bend",
+   "reqd": 1
+  },
+  {
+   "fieldname": "other_readings_section",
+   "fieldtype": "Section Break",
+   "label": "Other Readings"
+  },
+  {
+   "fieldname": "column_break_b5ob",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "depth",
+   "fieldtype": "Select",
+   "label": "Bend Depth",
+   "options": "\nPaper Deep\nLight Paper Deep"
+  },
+  {
+   "fieldname": "column_break_0kas",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-06 17:36:10.745372",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Preliminary Quality Check",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
