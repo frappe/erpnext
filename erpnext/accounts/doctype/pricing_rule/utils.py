@@ -154,23 +154,30 @@ def _get_pricing_rules(apply_on, args, values):
 	if len(pricing_rules) >= 1:
 		pr_r = pricing_rules[0]
 		usable_count_ok = 1
+		remove_pricing_rule = 0
 		if pr_r.get('apply_rule_on_other', None):
 			if pr_r.get(apply_on_field) == args.get(apply_on_field) or args.get('parenttype') == 'POS Invoice':
-				pricing_rules = []
+				remove_pricing_rule = 1
 
 		if (pr_r.get('usable_count', 0) > 0 or pr_r.get('app_users_only', 0)) and args.get('parenttype') == 'POS Invoice':
 			if pr_r.get('usable_count', 0) > 0:
 				if args.get('customer'):
 					used_count = get_pr_usage_count(pr_r.get("name"), args.get('customer'), args.get('item_code'), args.get('uom'))
+					if isinstance(used_count, dict):
+						used_count = used_count.get('usage_count', 0)
+
 					if used_count >= pr_r.get('usable_count', 0):
-						pricing_rules = []
+						remove_pricing_rule = 1
 						usable_count_ok = 0
 				else:
-					pricing_rules = []
+					remove_pricing_rule = 1
 
 			if pr_r.get('app_users_only', 0):
-				if cint(args.get('from_app_user', 0)) != 1 or not usable_count_ok:
-					pricing_rules = []
+				if not usable_count_ok or not cint(args.get('from_app_user', 0)):
+					remove_pricing_rule = 1
+
+		if remove_pricing_rule:
+			pricing_rules = []
 
 	return pricing_rules
 
