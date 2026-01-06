@@ -8,6 +8,10 @@
   "section_break_1ofs",
   "max_pay_line_amount",
   "manufacturing_settings_section",
+  "oven_section",
+  "max_heating_minutes",
+  "quarantine_section",
+  "min_quarantine_hours",
   "quarantine_labels"
  ],
  "fields": [
@@ -26,7 +30,7 @@
   },
   {
    "fieldname": "manufacturing_settings_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Manufacturing Settings"
   },
   {
@@ -34,13 +38,35 @@
    "fieldtype": "Table",
    "label": "Quarantine Labels",
    "options": "Quarantine Label"
+  },
+  {
+   "fieldname": "quarantine_section",
+   "fieldtype": "Section Break",
+   "label": "Quarantine"
+  },
+  {
+   "default": "0",
+   "fieldname": "min_quarantine_hours",
+   "fieldtype": "Float",
+   "label": "Minimum Quarantine Time (in hours)"
+  },
+  {
+   "fieldname": "oven_section",
+   "fieldtype": "Section Break",
+   "label": "Oven"
+  },
+  {
+   "default": "0",
+   "fieldname": "max_heating_minutes",
+   "fieldtype": "Float",
+   "label": "Maximum Heating Time (in minutes)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-06 00:34:33.961123",
+ "modified": "2026-01-07 02:05:51.641663",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Mahi Granites Settings",

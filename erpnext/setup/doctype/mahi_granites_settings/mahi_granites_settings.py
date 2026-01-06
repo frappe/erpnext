@@ -15,7 +15,9 @@ class MahiGranitesSettings(Document):
 		from erpnext.manufacturing.doctype.quarantine_label.quarantine_label import QuarantineLabel
 		from frappe.types import DF
 
+		max_heating_minutes: DF.Float
 		max_pay_line_amount: DF.Currency
+		min_quarantine_hours: DF.Float
 		quarantine_labels: DF.Table[QuarantineLabel]
 	# end: auto-generated types
 	pass

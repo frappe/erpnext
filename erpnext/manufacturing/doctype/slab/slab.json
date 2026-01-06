@@ -19,6 +19,7 @@
   "status",
   "is_cur_stage_complete",
   "is_repressed",
+  "is_prematurely_unquarantined",
   "quality_section",
   "grade",
   "column_break_e1da",
@@ -181,12 +182,19 @@
    "label": "Is Current Stage Complete",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_prematurely_unquarantined",
+   "fieldtype": "Check",
+   "label": "Is Prematurely Unquarantined",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-06 17:40:51.075987",
+ "modified": "2026-01-07 02:11:28.535692",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",

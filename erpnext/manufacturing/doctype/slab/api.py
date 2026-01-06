@@ -59,6 +59,12 @@ def checkout_slab(slab_number: str):
         last_history.out_time - last_history.in_time
     ).total_seconds() / 60  # pyright: ignore[reportOperatorIssue]
 
+    if slab.status == "Quarantine":
+        # Get Mahi Granites Settings to check if the slab is quarantined prematurely.
+        settings = frappe.get_single("Mahi Granites Settings")
+        if settings.min_quarantine_hours > (last_history.out_time - last_history.in_time).total_seconds() / 3600:
+            slab.is_prematurely_unquarantined = True
+
     slab.is_cur_stage_complete = True
 
     # TODO: Remove ignore_permissions after testing.
@@ -124,6 +130,16 @@ def move_slab_to(
 
     # TODO: Remove ignore_permissions after testing.
     slab.save(ignore_permissions=True)
+    frappe.publish_realtime("slab_move", slab, user=frappe.session.user)
+
+
+@frappe.whitelist()
+def get_slabs_in(line: str, current_stage: str) -> list[dict]:
+	return frappe.db.get_list(
+		"Slab",
+		filters={"line": line, "status": current_stage, "is_cur_stage_complete": False},
+		fields=["name", "number", "serial_number", "status", "line", "batch_number", "template", "creation", "modified"],
+	)
 
 
 @frappe.whitelist(allow_guest=True)
@@ -205,24 +221,18 @@ def _get_slab_number():
 
 @frappe.whitelist()
 def get_all_existing_slabs(stage):
-    slabs = frappe.get_all("Slab",
-    filters={
-            "current_stage": stage,      
-            "docstatus": 0,              
-        },
-        fields=[
-            "name",                    
-            "batch_number",            
-            "line",                       
-            "template",                
-            "current_stage",           
-            "created_on",              
-            "serial_number"            
-        ],
-        order_by="created_on desc"
-    )
-    return slabs
-    
+	slabs = frappe.get_all(
+		"Slab",
+		filters={
+			"current_stage": stage,
+			"docstatus": 0,
+		},
+		fields=["name", "batch_number", "line", "template", "current_stage", "created_on", "serial_number"],
+		order_by="created_on desc",
+	)
+	return slabs
+
+
 @frappe.whitelist()
 def get_slab_for_job_card(job_card):
     slab = frappe.get_value("Slab", {"current_job_card": job_card, "docstatus": 0}, 
@@ -235,7 +245,7 @@ def get_slab_for_job_card(job_card):
 def get_slab_from_previous_stage(job_card_name):
     current_jc = frappe.get_doc("Job Card", job_card_name)
     current_wo = current_jc.work_order
-    
+
     wo = frappe.get_doc("Work Order", current_wo)
     production_plan = wo.production_plan
     reverse_process_mapping = {
@@ -247,10 +257,10 @@ def get_slab_from_previous_stage(job_card_name):
         "polished slab": "calibrated slab",
         "inspected slab": "polished slab"
     }
-    
+
     current_process = wo.production_item.split(" - ")[-1].strip().lower() if " - " in wo.production_item else ""
     previous_process = reverse_process_mapping.get(current_process)
-    
+
     if not previous_process:
         frappe.msgprint(f"No previous process found before '{current_process}'")
         return None
@@ -259,11 +269,11 @@ def get_slab_from_previous_stage(job_card_name):
         "production_item": ["like", f"%{previous_process}%"],
         "docstatus": ["<", 2]
     }, "name")
-    
+
     if not previous_wo:
         frappe.msgprint(f"Previous WO for '{previous_process}' not found in Production Plan {production_plan}")
         return None
-    
+
     frappe.msgprint(f"Current WO: {current_wo} ({current_process}) → Previous WO: {previous_wo} ({previous_process})")
     previous_jcs = frappe.get_all("Job Card", 
         filters={
@@ -272,11 +282,11 @@ def get_slab_from_previous_stage(job_card_name):
         },
         fields=["name"]
     )
-    
+
     if not previous_jcs:
         frappe.msgprint(f"No Job Cards found in previous WO: {previous_wo}")
         return None
-    
+
     previous_jc_names = [d.name for d in previous_jcs]
     slabs = frappe.get_all("Slab", 
         filters={
@@ -287,7 +297,7 @@ def get_slab_from_previous_stage(job_card_name):
         fields=["name", "serial_number", "batch_number", "template", "line", "status"],
         order_by="creation desc"
     )
-    #TODO - Update the nextstage title    
+    #TODO - Update the nextstage title
     return slabs[0] if slabs else None
 
 
