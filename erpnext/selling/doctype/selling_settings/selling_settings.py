@@ -44,6 +44,7 @@ class SellingSettings(Document):
 		role_to_override_stop_action: DF.Link | None
 		sales_update_frequency: DF.Literal["Monthly", "Each Transaction", "Daily"]
 		selling_price_list: DF.Link | None
+		set_incoming_rate_as_invoice_rate: DF.Check
 		so_required: DF.Literal["No", "Yes"]
 		territory: DF.Link | None
 		use_legacy_js_reactivity: DF.Check

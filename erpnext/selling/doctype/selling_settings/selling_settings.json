@@ -39,6 +39,7 @@
   "enable_cutoff_date_on_bulk_delivery_note_creation",
   "allow_zero_qty_in_quotation",
   "allow_zero_qty_in_sales_order",
+  "set_incoming_rate_as_invoice_rate",
   "experimental_section",
   "use_legacy_js_reactivity",
   "subcontracting_inward_tab",
@@ -288,6 +289,13 @@
    "fieldname": "use_legacy_js_reactivity",
    "fieldtype": "Check",
    "label": "Use Legacy (Client side) Reactivity"
+  },
+  {
+   "default": "1",
+   "description": "if enabled, system will set the incoming rate same as the invoice rate for standalone credit notes.",
+   "fieldname": "set_incoming_rate_as_invoice_rate",
+   "fieldtype": "Check",
+   "label": "Set the Incoming Rate Same as the Invoice Rate"
   }
  ],
  "grid_page_length": 50,
@@ -296,7 +304,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-17 16:08:48.865885",
+ "modified": "2026-01-06 19:15:36.892618",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
