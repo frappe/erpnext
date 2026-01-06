@@ -16,9 +16,11 @@ class PreliminaryQualityCheck(Document):
 
 		d1_bend: DF.Int
 		d2_bend: DF.Int
-		depth: DF.Literal["", "Paper Deep", "Light Paper Deep"]
+		depth: DF.Link | None
 		h_bend: DF.Int
 		remarks: DF.Text | None
+		slab: DF.Link | None
+		slab_template: DF.Link | None
 		v_bend: DF.Int
 	# end: auto-generated types
 	pass

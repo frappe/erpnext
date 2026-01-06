@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:{slab}-{slab_template}",
  "creation": "2026-01-06 15:36:47.633529",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -11,6 +12,10 @@
   "column_break_0kas",
   "d1_bend",
   "d2_bend",
+  "slab_details_section",
+  "slab",
+  "column_break_0a9c",
+  "slab_template",
   "other_readings_section",
   "depth",
   "column_break_b5ob",
@@ -66,22 +71,46 @@
   },
   {
    "fieldname": "depth",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Bend Depth",
-   "options": "\nPaper Deep\nLight Paper Deep"
+   "options": "Quarantine Label"
   },
   {
    "fieldname": "column_break_0kas",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "slab_details_section",
+   "fieldtype": "Section Break",
+   "label": "Slab Details"
+  },
+  {
+   "fieldname": "slab",
+   "fieldtype": "Link",
+   "label": "Slab",
+   "options": "Slab"
+  },
+  {
+   "fieldname": "column_break_0a9c",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "slab_template",
+   "fieldtype": "Link",
+   "label": "Slab Color",
+   "options": "Slab Template"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-06 17:36:10.745372",
+ "modified": "2026-01-06 20:27:37.629014",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Preliminary Quality Check",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

@@ -84,6 +84,54 @@ frappe.realtime.on('slab_checkout', (slab) => {
     get_slabs_ready_for_quarantine();
 });
 
+const submitQuarantine = () => {
+    if (!selectedSlab.value) {
+        frappe.msgprint(__('Please select a slab first.'));
+        return;
+    }
+
+    frappe.confirm(__('Are you sure you want to submit the quarantine check?'), async () => {
+        try {
+            await frappe.call({
+                method: 'erpnext.manufacturing.doctype.preliminary_quality_check.api.create_preliminary_quality_check',
+                args: {
+                    slab_name: selectedSlab.value.name,
+                    slab_template: selectedSlab.value.template,
+                    h_bend: quarantineMeasurements.value.bend_h_line,
+                    v_bend: quarantineMeasurements.value.bend_v_line,
+                    d1_bend: quarantineMeasurements.value.bend_br_diag,
+                    d2_bend: quarantineMeasurements.value.bend_tr_diag,
+                    depth: quarantineMeasurements.value.label,
+                    remarks: quarantineMeasurements.value.remarks
+                },
+                freeze: true,
+                callback: (r) => {
+                    if (!r.exc) {
+                        frappe.show_alert({
+                            message: __('Quarantine check submitted successfully'),
+                            indicator: 'green'
+                        });
+                        // Reset or refresh logic here if needed
+                        // For example, remove the slab from list or reset measurements
+                        quarantineMeasurements.value = {
+                            bend_tr_diag: 0,
+                            bend_br_diag: 0,
+                            bend_v_line: 0,
+                            bend_h_line: 0,
+                            label: '',
+                            remarks: ''
+                        };
+                        selectedSlab.value = null;
+                        get_slabs_ready_for_quarantine();
+                    }
+                }
+            });
+        } catch (e) {
+            frappe.msgprint(__('Failed to submit quarantine check.'));
+        }
+    });
+};
+
 </script>
 
 <template>
@@ -124,7 +172,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
         </div>
 
         <!-- Right: Quarantine Action (Placeholder) -->
-        <div class="flex-fill pl-4">
+        <div class="flex-fill pl-4 pb-5">
              <h4 class="mb-4">{{ __('Quarantine Station') }}</h4>
              <div v-if="selectedSlab" class="d-flex flex-column align-items-center">
                 <div class="measurement-card p-5 mb-4 d-flex flex-column align-items-center">
@@ -184,7 +232,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
                 </div>
 
                 <div class="mt-2">
-                    <button class="btn btn-primary" @click="console.log(quarantineMeasurements)">{{ __('Submit Quarantine') }}</button>
+                    <button class="btn btn-primary" @click="submitQuarantine">{{ __('Submit Quarantine') }}</button>
                 </div>
 
              </div>
