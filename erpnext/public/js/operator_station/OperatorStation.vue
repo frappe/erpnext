@@ -1,9 +1,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 
-// core state
-// const loading = ref(false);
-const jobCard = ref(null);
+const jobCardName = ref(null);
+const jobCardDoc = ref(null);
 const status = ref('Pending');
 const serial = ref('SLB-2025-00427');
 const colour = ref('');
@@ -79,15 +78,15 @@ onMounted(async () => {
   try {
     const route = frappe.get_route();
     const station = route[1] || props.process;
-    jobCard.value = route[2] || props.job_card;
-    debugger;
-    if (!jobCard.value) {
+    jobCardName.value = route[2] || props.job_card;
+
+    if (!jobCardName.value) {
       error.value = __('No Job Card found in route');
       return;
     }
 
-    const jc = await frappe.db.get_doc('Job Card', jobCard.value);
-    jobCard.value = jc;  
+    const jc = await frappe.db.get_doc('Job Card', jobCardName.value);
+    jobCardDoc.value = jc;  
     
     if (jc.bom_no) {
       const bom = await frappe.db.get_doc('BOM', jc.bom_no);
@@ -101,20 +100,42 @@ onMounted(async () => {
     if (jobCardSubmitted.value) {
       preparedQty.value = jc.total_completed_qty || jc.for_quantity || 0;
     }
-    slabInfo(jobCard, station);
+    await slabInfo(jc, station);
     const stateRes = await frappe.call({
       method: 'erpnext.manufacturing.page.operator_station.operator_station.get_operator_state',
       args: { 
-        job_card: jobCard.value, 
+        job_card: jobCardName.value, 
         process_name: station 
       }
     });
     
     const state = stateRes.message || {};
-    processStarted.value = !!state[`${station}_started`];
-    processStartTime.value = state[`${station}_start_time`];
-    jobCardSubmitted.value = !!state.job_card_submitted || jobCardSubmitted.value;
+    // processStarted.value = !!state[`${station}_started`];
+    status.value = state.status || 'Pending';
     
+    // Logic to set UI flags based on EXPLICIT backend status
+    if (status.value === 'Work In Progress') {
+      processStarted.value = true;
+      showStartButton.value = false;
+      processReady.value = true;
+    } else if (status.value === 'Completed') {
+      processStarted.value = false;
+      showStartButton.value = false;
+      processReady.value = false;
+      jobCardSubmitted.value = true;
+    } else if (status.value === 'Cancelled' || status.value === 'Discarded') {
+      processStarted.value = false;
+      showStartButton.value = false;
+      processReady.value = false;
+    } else {
+      // Open / Pending
+      processStarted.value = false;
+      showStartButton.value = true;
+      processReady.value = true;
+    }
+
+    processStartTime.value = state[`${station}_start_time`];
+    // jobCardSubmitted.value = !!state.job_card_submitted || jobCardSubmitted.value;
     if (jobCardSubmitted.value) {
       stockEntryName.value = state.stock_entry_name || '';
     }
@@ -144,7 +165,7 @@ onMounted(async () => {
 });
 
 async function createSlab(line) {
-  if (!jobCard.value || slabCreated.value || !slabTemplate.value) return
+  if (!jobCardDoc.value || slabCreated.value || !slabTemplate.value) return
   
   try {
     const result = await frappe.call({
@@ -152,12 +173,12 @@ async function createSlab(line) {
       args: { 
         line: line || 'L1',
         type: slabTemplate.value,
-        job_card_number: jobCard.value.name,
+        job_card_number: jobCardDoc.value.name,
       }
     });
     if(result)
     {
-      jobCard.slab = result.message?.serial_number;
+      jobCardDoc.value.slab = result.message?.serial_number;
     }
     slabCreated.value = true;
     slabNumber.value = result.message?.serial_number;
@@ -168,11 +189,11 @@ async function createSlab(line) {
   }
 }
 
-async function slabInfo(jobCard, station) {
-  const jc = await frappe.db.get_doc('Job Card', jobCard.value.name);
+async function slabInfo(jc, station) {
+  if (!jc) return;
   const jcSlabRes = await frappe.call({
     method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
-    args: { job_card: jobCard.value.name }
+    args: { job_card: jc.name }
   });
   let slabAlreadyExisted = jcSlabRes.message;
 
@@ -180,7 +201,7 @@ async function slabInfo(jobCard, station) {
   if (!slabAlreadyExisted && station.toLowerCase() !== 'distribution') {
       const prevSlabRes = await frappe.call({
           method: 'erpnext.manufacturing.doctype.slab.api.get_slab_from_previous_stage',
-          args: { job_card_name: jobCard.value.name }
+          args: { job_card_name: jc.name }
       });
       
       if (prevSlabRes.message) {
@@ -195,7 +216,7 @@ async function slabInfo(jobCard, station) {
         args: {
           slab_number: slabAlreadyExisted.name,
           next_stage: station,
-          job_card_number: jobCard.value.name,
+          job_card_number: jc.name,
           checkout_and_move: true
         }
       });
@@ -203,7 +224,7 @@ async function slabInfo(jobCard, station) {
       // Reload fresh data
       const freshSlabRes = await frappe.call({
         method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
-        args: { job_card: jobCard.value.name }
+        args: { job_card: jc.name }
       });
       slabAlreadyExisted = freshSlabRes.message;
     }
@@ -234,7 +255,7 @@ async function slabInfo(jobCard, station) {
 async function startOperation() {
   const route = frappe.get_route();
     const station = route[1] || props.process;
-    jobCard.value = route[2] || props.job_card;
+    jobCardName.value = route[2] || props.job_card;
     frappe.confirm(
         __('Start Distribution now?'),
         async () => {
@@ -242,7 +263,7 @@ async function startOperation() {
                 await frappe.call({
                     method: 'erpnext.manufacturing.page.operator_station.operator_station.start_distribution',
                     args: { 
-                      job_card: jobCard.value,
+                      job_card: jobCardName.value,
                       process_name: station
                      }
                 });
@@ -274,60 +295,57 @@ async function startOperation() {
 async function finishOperation() {
   const route = frappe.get_route();
   const station = route[1] || props.process;
-  jobCard.value = route[2] || props.job_card;
+  jobCardName.value = route[2] || props.job_card;
   if (processTimerHandle.value) {
       clearInterval(processTimerHandle.value);
       processTimerHandle.value = null;
   }
-    try {
-        const result = await frappe.call({
-            method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_distribution',
-            args: {
-                job_card: jobCard.value,
-                process_name: station
-            },
-        });
-        status.value = 'Finished';
-        processStarted.value = false;
-        processStartTime.value = null;
-        processElapsed.value = 0;
-        processReady.value = false;
+  try {
+    const result = await frappe.call({
+        method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_distribution',
+        args: {
+            job_card: jobCardName.value,
+            process_name: station
+        },
+    });
+    status.value = 'Finished';
+    processStarted.value = false;
+    processStartTime.value = null;
+    processElapsed.value = 0;
+    processReady.value = false;
 
-        jobCardSubmitted.value = true;
-        preparedQty.value = result.message.job_card_qty;
-        stockEntryName.value = result.message.stock_entry;
-        bomQty.value = result.message.bom_qty || 0;
-        nextWorkOrder.value = result.message.next_work_order || '';
-        transferredQty.value = 0;
-        transferSuccess.value = false;
+    jobCardSubmitted.value = true;
+    preparedQty.value = result.message.job_card_qty;
+    stockEntryName.value = result.message.stock_entry;
+    bomQty.value = result.message.bom_qty || 0;
+    nextWorkOrder.value = result.message.next_work_order || '';
+    transferredQty.value = 0;
+    transferSuccess.value = false;
 
-        frappe.msgprint(result.message.message);    
-        if (result.message.work_order_status === 'Completed') {
-            frappe.show_alert({
-                message: __('Work Order also Completed!'),
-                indicator: 'green'
-            });
-        }
-        transferToFGWarehouse();
-    }
-
-    catch (error) {
-        console.error('error.message:', error.message);
-        const errorMsg = error.message || 
-                        (error._server_messages?.[0]?.message) || 
-                        JSON.stringify(error);
-        
-        frappe.msgprint({ 
-            title: __('Error'),
-            indicator: 'red',
-            message: `Failed to complete Job Card:<br><pre>${errorMsg}</pre>`
+    frappe.msgprint(result.message.message);    
+    if (result.message.work_order_status === 'Completed') {
+        frappe.show_alert({
+            message: __('Work Order also Completed!'),
+            indicator: 'green'
         });
     }
+    transferToFGWarehouse();
+  }
+
+  catch (error) {
+    console.error('error.message:', error.message);
+    const errorMsg = error.message || (error._server_messages?.[0]?.message) || JSON.stringify(error);
+    frappe.msgprint({ 
+        title: __('Error'),
+        indicator: 'red',
+        message: `Failed to complete Job Card:<br><pre>${errorMsg}</pre>`
+    });
+  }
 }
 
 async function transferToFGWarehouse() {
   try {
-    const jc = await frappe.db.get_doc('Job Card', jobCard.value);
+    const jc = await frappe.db.get_doc('Job Card', jobCardName.value);
     const workOrder = jc.work_order; 
     
     if (!workOrder) {
@@ -375,14 +393,24 @@ function discardJob() {
   frappe.confirm(
     __('Are you sure you want to discard this job?'),
     () => {
-      status.value = 'Discarded';
       stopAndResetTimer();
-      showTimer.value = false;
-      showActions.value = false;
+      status.value = 'Pending'; // Reset to Pending so Start button appears
       showStartButton.value = true;
+      processReady.value = true;
+      jobCardSubmitted.value = false;
       frappe.msgprint(__('Job is discarded'));
     }
   );
+}
+
+function stopAndResetTimer() {
+    if (processTimerHandle.value) {
+        clearInterval(processTimerHandle.value);
+        processTimerHandle.value = null;
+    }
+    processStarted.value = false;
+    processElapsed.value = 0;
+    processStartTime.value = null;
 }
 
 function toggleAlarms() {
@@ -446,7 +474,7 @@ function statusStyle() {
               style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span>
       </div>     
 
-      <div class="text-center mb-2" v-if="processReady">
+      <div class="text-center mb-2" v-if="processReady && showStartButton">
         <button class="btn btn-success py-3 px-4" @click="startOperation">
           <span class="fa fa-play mr-1 pr-2"></span>{{ __('Start Job') }}
         </button>

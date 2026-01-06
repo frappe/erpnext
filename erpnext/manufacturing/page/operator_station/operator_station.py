@@ -19,6 +19,7 @@ def get_operator_state(job_card, process_name="operator"):
         "job_card_submitted": jc.docstatus == 1 or jc.status == "Completed",
         "stock_entry_name": wo.produced_qty > 0 and f"MFG-SE-{process_name.upper()}-*" or "",
         "process_name": process_name, 
+        "status": jc.status,
         "current_process": wo.item_name.split(" - ")[-1].strip() if wo and " - " in wo.item_name else process_name,
     }
     return state
