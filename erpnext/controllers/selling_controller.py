@@ -15,7 +15,7 @@ from erpnext.stock.get_item_details import get_bin_details, get_conversion_facto
 from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_valuation_method
 
 
-class StandaloneIncomingRateError(frappe.ValidationError):
+class StandaloneZeroIncomingRateError(frappe.ValidationError):
 	pass
 
 
@@ -1033,7 +1033,7 @@ class SellingController(StockController):
 
 	def validate_standalone_incoming_rate(self):
 		"""
-		Validate the standalone credit note incoming rate as per the selling settings
+		Validate the standalone credit note zero incoming rate as per the selling settings.
 		"""
 		if self.doctype not in ("Delivery Note", "Sales Invoice"):
 			return
@@ -1053,13 +1053,17 @@ class SellingController(StockController):
 			):
 				throw(
 					_(
-						"""The incoming rate should not be zero for standalone credit note. If you want to set the invoice rate as incoming rate.
-						Kindly enable {0} in {1}"""
+						"""Row #{0}: Incoming Rate for item {1} is zero, you can set the rate manually in {2} field.<br><br>
+						Alternatively, if you want system to set Incoming Rate same as Invoice Rate for standalone credit note.<br>
+						Kindly enable {3} in {4}"""
 					).format(
+						bold(row.idx),
+						bold(row.item_name),
+						bold(row.meta.get_label("incoming_rate")),
 						bold(_("Set the Incoming Rate Same as the Invoice Rate")),
 						get_link_to_form("Selling Settings", "Selling Settings"),
 					),
-					StandaloneIncomingRateError,
+					StandaloneZeroIncomingRateError,
 				)
 
 

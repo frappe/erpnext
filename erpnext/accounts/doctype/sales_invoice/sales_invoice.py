@@ -465,6 +465,7 @@ class SalesInvoice(SellingController):
 				self.make_bundle_using_old_serial_batch_fields(table_name)
 
 			self.validate_standalone_serial_nos_customer()
+			self.validate_standalone_incoming_rate()
 			self.update_stock_reservation_entries()
 			self.update_stock_ledger()
 
