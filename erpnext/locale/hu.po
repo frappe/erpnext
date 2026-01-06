@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-21 09:37+0000\n"
-"PO-Revision-Date: 2026-01-05 05:31\n"
+"PO-Revision-Date: 2026-01-06 05:28\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Hungarian\n"
 "MIME-Version: 1.0\n"
@@ -16957,7 +16957,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/batch/batch_list.js:16
 msgid "Empty"
-msgstr ""
+msgstr "Üres"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -27090,7 +27090,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/sales_forecast/sales_forecast.json
 #: erpnext/projects/doctype/project/project.json
 msgid "Manual"
-msgstr ""
+msgstr "Kézikönyv"
 
 #. Label of the manual_inspection (Check) field in DocType 'Quality Inspection'
 #. Label of the manual_inspection (Check) field in DocType 'Quality Inspection
@@ -31467,7 +31467,7 @@ msgstr ""
 #: erpnext/accounts/report/sales_register/sales_register.py:236
 #: erpnext/crm/report/lead_details/lead_details.py:45
 msgid "Owner"
-msgstr ""
+msgstr "Tulajdonos"
 
 #. Label of the p_l_closing_balance (JSON) field in DocType 'Process Period
 #. Closing Voucher'
@@ -48863,7 +48863,7 @@ msgstr ""
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:298
 #: erpnext/support/workspace/support/support.json
 msgid "Support"
-msgstr ""
+msgstr "Támogatás"
 
 #. Name of a report
 #: erpnext/support/report/support_hour_distribution/support_hour_distribution.json
