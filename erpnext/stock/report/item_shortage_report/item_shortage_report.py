@@ -40,12 +40,7 @@ def get_data(filters):
 			item.item_name,
 			item.description,
 		)
-		.where(
-			(item.disabled == 0)
-			& (bin.projected_qty < 0)
-			& (wh.name == bin.warehouse)
-			& (bin.item_code == item.name)
-		)
+		.where((item.disabled == 0) & (wh.name == bin.warehouse) & (bin.item_code == item.name))
 		.orderby(bin.projected_qty)
 	)
 
@@ -54,6 +49,9 @@ def get_data(filters):
 
 	if filters.get("company"):
 		query = query.where(wh.company == filters.get("company"))
+
+	if not filters.get("show_all"):
+		query = query.where(bin.projected_qty < 0)
 
 	return query.run(as_dict=True)
 

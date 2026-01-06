@@ -19,8 +19,17 @@ frappe.query_reports["Item Shortage Report"] = {
 			options: "Warehouse",
 			width: "100",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Warehouse", txt);
+				return frappe.db.get_link_options("Warehouse", txt, {
+					is_group: 0,
+					company: frappe.query_report.get_filter_value("company"),
+				});
 			},
+		},
+		{
+			fieldname: "show_all",
+			label: __("Show All Items"),
+			fieldtype: "Check",
+			default: 0,
 		},
 	],
 };
