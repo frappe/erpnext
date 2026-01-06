@@ -172,7 +172,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
                     </div>
 
                     <div class="w-100 mt-4 px-5">
-                        <label class="small text-muted mb-1">{{ __('Findings') }}</label>
+                        <label class="small text-muted mb-1">{{ __('Bend Depth') }}</label>
                         <select v-model="quarantineMeasurements.label" class="form-control mb-3">
                             <option value="">{{ __('') }}</option>
                             <option v-for="label in quarantineLabels" :key="label" :value="label">{{ label }}</option>
