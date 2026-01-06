@@ -100,7 +100,7 @@ def move_slab_to(
         checkout_slab(slab_number)
         slab: Slab = frappe.get_doc("Slab", slab_number)
 
-    slab.current_stage = next_stage.lower()  # pyright: ignore[reportAttributeAccessIssue]
+    slab.current_stage = ALLOWED_STAGES[next_stage_index]  # pyright: ignore[reportAttributeAccessIssue]
     slab.current_job_card = job_card_number
 
     # Append the next stage to the slab history.
@@ -108,7 +108,7 @@ def move_slab_to(
         "Slab History"
     )  # pyright: ignore[reportAssignmentType]
     slab_history.idx = len(slab.slab_history) + 1
-    slab_history.station = next_stage
+    slab_history.station = ALLOWED_STAGES[next_stage_index]
     slab_history.in_time = datetime.now()
     slab_history.job_card_number = job_card_number
     slab.slab_history.append(slab_history)
