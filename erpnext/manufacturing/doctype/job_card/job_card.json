@@ -19,6 +19,7 @@
   "total_completed_qty",
   "process_loss_qty",
   "mixer_number",
+  "slab",
   "scheduled_time_section",
   "expected_start_date",
   "time_required",
@@ -529,11 +530,17 @@
    "fieldtype": "Link",
    "label": "Mixer Number",
    "options": "Mixer"
+  },
+  {
+   "fieldname": "slab",
+   "fieldtype": "Link",
+   "label": "Slab",
+   "options": "Slab"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-30 17:14:54.191729",
+ "modified": "2026-01-05 20:10:06.928594",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
