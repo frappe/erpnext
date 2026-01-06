@@ -19,10 +19,11 @@ class OvenOperation(Document):
 		bottom_left_vertex: DF.Float
 		bottom_right_vertex: DF.Float
 		date: DF.Datetime
-		in_time: DF.Time
+		in_time: DF.Datetime
+		job_card: DF.Data
 		left_edge_centre: DF.Float
 		lower_shelf_temp: DF.Float
-		out_time: DF.Time | None
+		out_time: DF.Datetime | None
 		oven: DF.Link
 		oven_rack: DF.Link
 		remarks: DF.Text | None

@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{oven}-{slab_color}-{slab}-{rack}",
+ "autoname": "format:{oven_rack}-{slab_color}-{slab}",
  "creation": "2026-01-03 22:15:40.203096",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -12,6 +12,8 @@
   "date",
   "column_break_vvt3",
   "shift",
+  "column_break_kkfc",
+  "job_card",
   "slab_details_section",
   "slab",
   "column_break_7tua",
@@ -194,7 +196,7 @@
   },
   {
    "fieldname": "in_time",
-   "fieldtype": "Time",
+   "fieldtype": "Datetime",
    "label": "In Time",
    "reqd": 1
   },
@@ -204,7 +206,7 @@
   },
   {
    "fieldname": "out_time",
-   "fieldtype": "Time",
+   "fieldtype": "Datetime",
    "label": "Out Time"
   },
   {
@@ -292,13 +294,23 @@
    "label": "Rack",
    "options": "Oven Rack",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_kkfc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "job_card",
+   "fieldtype": "Data",
+   "label": "Job Card",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-04 00:24:54.768772",
+ "modified": "2026-01-05 19:01:01.870642",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Oven Operation",

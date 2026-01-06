@@ -23,6 +23,8 @@ class Slab(Document):
 		current_job_card: DF.Data | None
 		current_stage: DF.Literal["Distribution", "Pressing", "Heating", "Cooling", "Trimming", "Calibration 1", "Calibration 2", "Polishing 1", "Polishing 2", "Quality", "Finished"]
 		grade: DF.Data | None
+		is_cur_stage_complete: DF.Check
+		is_repressed: DF.Check
 		line: DF.Link
 		quality_assessment: DF.Data | None
 		serial_number: DF.Int

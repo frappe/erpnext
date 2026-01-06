@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:code",
  "creation": "2025-12-18 23:41:15.954193",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -43,7 +44,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Code",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "column_break_pivo",
@@ -135,10 +137,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-19 00:04:52.133149",
+ "modified": "2026-01-05 12:53:47.851902",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Attendance Shift",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {

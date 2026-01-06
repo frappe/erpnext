@@ -15,6 +15,9 @@
   "line",
   "current_stage",
   "current_job_card",
+  "status",
+  "is_cur_stage_complete",
+  "is_repressed",
   "quality_section",
   "grade",
   "column_break_e1da",
@@ -149,13 +152,29 @@
    "options": "Distribution\nPressing\nHeating\nCooling\nTrimming\nCalibration 1\nCalibration 2\nPolishing 1\nPolishing 2\nQuality\nFinished",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_repressed",
+   "fieldtype": "Check",
+   "label": "Is Re-pressed",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cur_stage_complete",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Current Stage Complete",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-05 20:15:53.773340",
+ "modified": "2026-01-05 23:42:42.914718",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",
@@ -195,6 +214,10 @@
   {
    "color": "Light Blue",
    "title": "Cooling"
+  },
+  {
+   "color": "Blue",
+   "title": "Quarantine"
   },
   {
    "color": "Pink",

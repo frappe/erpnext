@@ -63,14 +63,12 @@
   {
    "fieldname": "slab_top_temp",
    "fieldtype": "Float",
-   "label": "Slab Top Temperature (in \u00b0C)",
-   "read_only": 1
+   "label": "Slab Top Temperature (in \u00b0C)"
   },
   {
    "fieldname": "slab_bottom_temp",
    "fieldtype": "Float",
-   "label": "Slab Bottom Temperature (in \u00b0C)",
-   "read_only": 1
+   "label": "Slab Bottom Temperature (in \u00b0C)"
   },
   {
    "fieldname": "racks_section",
@@ -87,7 +85,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-04 01:23:12.115663",
+ "modified": "2026-01-04 21:38:02.435326",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Oven",
