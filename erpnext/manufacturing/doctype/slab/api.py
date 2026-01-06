@@ -104,8 +104,8 @@ def move_slab_to(
         checkout_slab(slab_number)
         slab: Slab = frappe.get_doc("Slab", slab_number)
 
-    #slab.status = next_stage  # pyright: ignore[reportAttributeAccessIssue]
-    #slab.is_cur_stage_complete = False
+    slab.status = next_stage  # pyright: ignore[reportAttributeAccessIssue]
+    slab.is_cur_stage_complete = False
     slab.current_stage = ALLOWED_STAGES[next_stage_index]  # pyright: ignore[reportAttributeAccessIssue]
     slab.current_job_card = job_card_number
 
