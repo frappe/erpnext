@@ -724,7 +724,17 @@ def get_rate_for_return(
 				raise_error_if_no_rate=False,
 			)
 
-	if not rate and voucher_type in ["Sales Invoice", "Delivery Note"]:
+	set_incoming_rate_as_invoice_rate = frappe.db.get_single_value(
+		"Selling Settings", "set_incoming_rate_as_invoice_rate"
+	)
+
+	if (
+		not rate
+		and set_incoming_rate_as_invoice_rate
+		and not return_against
+		and voucher_type in ["Sales Invoice", "Delivery Note"]
+	):
+		# set incoming rate same as invoice rate for standalone credit note
 		details = frappe.db.get_value(
 			voucher_type + " Item", voucher_detail_no, ["rate", "allow_zero_valuation_rate"], as_dict=1
 		)

@@ -15,6 +15,10 @@ from erpnext.stock.get_item_details import get_bin_details, get_conversion_facto
 from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_valuation_method
 
 
+class StandaloneIncomingRateError(frappe.ValidationError):
+	pass
+
+
 class SellingController(StockController):
 	def __setup__(self):
 		self.flags.ignore_permlevel_for_fields = ["selling_price_list", "price_list_currency"]
@@ -536,6 +540,7 @@ class SellingController(StockController):
 		allow_at_arms_length_price = frappe.get_cached_value(
 			"Stock Settings", None, "allow_internal_transfer_at_arms_length_price"
 		)
+
 		items = self.get("items") + (self.get("packed_items") or [])
 		for d in items:
 			if not frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
@@ -591,13 +596,19 @@ class SellingController(StockController):
 						self.doctype, self.name, d.item_code, self.return_against, item_row=d
 					)
 
+				set_incoming_rate_as_invoice_rate = frappe.db.get_single_value(
+					"Selling Settings", "set_incoming_rate_as_invoice_rate"
+				)
+
 				if (
-					self.get("is_return")
+					set_incoming_rate_as_invoice_rate
+					and self.get("is_return")
 					and not d.incoming_rate
 					and not self.get("return_against")
 					and not self.is_internal_transfer()
 					and not d.get("allow_zero_valuation_rate")
 				):
+					# set incoming rate same as invoice rate for standalone credit note
 					d.incoming_rate = d.rate
 
 				# For internal transfers use incoming rate as the valuation rate
@@ -1019,6 +1030,37 @@ class SellingController(StockController):
 					sre_doc.update_reserved_stock_in_bin()
 
 					qty_to_undelivered -= qty_can_be_undelivered
+
+	def validate_standalone_incoming_rate(self):
+		"""
+		Validate the standalone credit note incoming rate as per the selling settings
+		"""
+		if self.doctype not in ("Delivery Note", "Sales Invoice"):
+			return
+
+		if not self.is_return or self.return_against:
+			return
+
+		set_incoming_rate_as_invoice_rate = frappe.db.get_single_value(
+			"Selling Settings", "set_incoming_rate_as_invoice_rate"
+		)
+
+		for row in self.get("items"):
+			if (
+				not set_incoming_rate_as_invoice_rate
+				and row.incoming_rate == 0
+				and not row.allow_zero_valuation_rate
+			):
+				throw(
+					_(
+						"""The incoming rate should not be zero for standalone credit note. If you want to set the invoice rate as incoming rate.
+						Kindly enable {0} in {1}"""
+					).format(
+						bold(_("Set the Incoming Rate Same as the Invoice Rate")),
+						get_link_to_form("Selling Settings", "Selling Settings"),
+					),
+					StandaloneIncomingRateError,
+				)
 
 
 def set_default_income_account_for_item(obj):

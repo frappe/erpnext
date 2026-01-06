@@ -649,7 +649,6 @@ class update_entries_after:
 			while i < len(entries_to_fix):
 				sle = entries_to_fix[i]
 				i += 1
-
 				self.process_sle(sle)
 				self.update_bin_data(sle)
 
@@ -1225,7 +1224,28 @@ class update_entries_after:
 					get_rate_for_return,  # don't move this import to top
 				)
 
+				set_incoming_rate_as_invoice_rate = frappe.db.get_single_value(
+					"Selling Settings", "set_incoming_rate_as_invoice_rate"
+				)
+
+				return_against = frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "return_against")
+
 				if (
+					set_incoming_rate_as_invoice_rate
+					and not return_against
+					and sle.voucher_type in ["Delivery Note", "Sales Invoice"]
+				):
+					# set incoming rate same as invoice rate for standalone credit note
+					rate = get_rate_for_return(
+						sle.voucher_type,
+						sle.voucher_no,
+						sle.item_code,
+						voucher_detail_no=sle.voucher_detail_no,
+						return_against=return_against,
+						sle=sle,
+					)
+
+				elif (
 					self.valuation_method == "Moving Average"
 					and not sle.get("serial_no")
 					and not sle.get("batch_no")
