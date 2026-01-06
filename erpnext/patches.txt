@@ -456,3 +456,5 @@ erpnext.patches.v16_0.update_tax_withholding_field_in_payment_entry
 erpnext.patches.v16_0.migrate_tax_withholding_data
 erpnext.patches.v16_0.update_corrected_cancelled_status
 erpnext.patches.v16_0.fix_barcode_typo
+erpnext.patches.v15_0.enable_set_incoming_rate_as_invoice_rate
+
