@@ -1330,10 +1330,9 @@ class TestPurchaseOrder(IntegrationTestCase):
 		pi = make_pi_from_po(po.name)
 		self.assertEqual(pi.items[0].qty, 50)
 
-	def test_multiple_advances_againt_purchase_order_are_allocated_across_partial_purchase_invoices(self):
+	def test_multiple_advances_against_purchase_order_are_allocated_across_partial_purchase_invoices(self):
 		# step - 1: create PO
 		po = create_purchase_order(qty=10, rate=10)
-		po.save(ignore_permissions=True).submit()
 
 		# step - 2: create first partial advance payment
 		pe1 = get_payment_entry("Purchase Order", po.name, bank_account="_Test Bank - _TC")
@@ -1374,6 +1373,8 @@ class TestPurchaseOrder(IntegrationTestCase):
 
 		# check PO and PI status
 		po.reload()
+		pi_1.reload()
+		pi_2.reload()
 		self.assertEqual(pi_1.status, "Paid")
 		self.assertEqual(pi_2.status, "Paid")
 		self.assertEqual(po.status, "Completed")
