@@ -20,25 +20,25 @@ const jobcardsQueue = ref([]);
 const jobCardSubmitted = ref(false);
 const preparedQty = ref(0);
 const stockEntryName = ref('');
-const transferredQty = ref(0);     
-const transferSuccess = ref(false); 
-const nextWorkOrder = ref(''); 
+const transferredQty = ref(0);
+const transferSuccess = ref(false);
+const nextWorkOrder = ref('');
 const bomNo = ref('Loading...');
 const bomQty = ref(0);
-const slabTemplate = ref('');  
+const slabTemplate = ref('');
 const line = ref(null);
-const error = ref(null);              
+const error = ref(null);
 const batchNo = ref(null);
 const currentStation = ref('');
 const operationMapping = ref({
-    "mixing": "distribution",
-    "distribution": "pressing", 
-    "pressing": "heating",
-    "heating": "cooling",
-    "cooling": "trimming",
-    "trimming": "calibration",
-    "calibration": "polishing",
-    "polishing": "quality analysis"
+  "mixing": "distribution",
+  "distribution": "pressing",
+  "pressing": "heating",
+  "heating": "cooling",
+  "cooling": "trimming",
+  "trimming": "calibration",
+  "calibration": "polishing",
+  "polishing": "quality analysis"
 });
 
 const alarms = ref([
@@ -76,14 +76,14 @@ const formattedTime = computed(() => {
 });
 
 const props = defineProps({
-    process: {
-        type: String,
-        default: 'operator'
-    },
-    job_card: {
-        type: String,
-        default: null
-    }
+  process: {
+    type: String,
+    default: 'operator'
+  },
+  job_card: {
+    type: String,
+    default: null
+  }
 });
 
 // actions
@@ -94,13 +94,22 @@ onMounted(async () => {
     jobCardName.value = route[2] || props.job_card;
 
     if (!jobCardName.value) {
-      error.value = __('No Job Card found in route');
-      return;
+      const jcQueue = await frappe.call({
+        method: 'erpnext.manufacturing.page.operator_station.operator_station.get_open_job_cards',
+        args: { process: station }
+      });
+
+      if (jcQueue.message && jcQueue.message.length > 0) {
+        jobCardName.value = jcQueue.message[0].name;
+      } else {
+        error.value = __(`No pending Job Cards found for {0}`, [station]);
+        return;
+      }
     }
 
     const jc = await frappe.db.get_doc('Job Card', jobCardName.value);
-    jobCardDoc.value = jc;  
-    
+    jobCardDoc.value = jc;
+
     if (jc.bom_no) {
       const bom = await frappe.db.get_doc('BOM', jc.bom_no);
       batchNo.value = jc.bom_no;
@@ -116,16 +125,16 @@ onMounted(async () => {
     await slabInfo(jc, station);
     const stateRes = await frappe.call({
       method: 'erpnext.manufacturing.page.operator_station.operator_station.get_operator_state',
-      args: { 
-        job_card: jobCardName.value, 
-        process_name: station 
+      args: {
+        job_card: jobCardName.value,
+        process_name: station
       }
     });
-    
+
     const state = stateRes.message || {};
     // processStarted.value = !!state[`${station}_started`];
     status.value = state.status || 'Pending';
-    
+
     // Logic to set UI flags based on EXPLICIT backend status
     if (status.value === 'Work In Progress') {
       processStarted.value = true;
@@ -154,8 +163,8 @@ onMounted(async () => {
     }
 
     if (processStarted.value && processStartTime.value) {
-      const start = frappe.datetime.str_to_obj(processStartTime.value);
-      const now = frappe.datetime.now_datetime();
+      const start = new Date(processStartTime.value);
+      const now = new Date().toISOString().slice(0, 19).replace('T', ' ')
       const diffSeconds = (new Date(now) - new Date(start)) / 1000;
       processElapsed.value = Math.max(0, Math.floor(diffSeconds));
 
@@ -170,7 +179,7 @@ onMounted(async () => {
         processTimerHandle.value = null;
       }
     }
-    
+
     // Fetch Slab Queue
     await fetchQueue(line.value || jc.production_line, station);
   } catch (e) {
@@ -186,24 +195,24 @@ async function fetchQueue(line, station) {
   try {
     if (currentStation.value === 'distribution') {
       jobcardsQueue.value = [];
-        const jobcardsMethod = await frappe.call({
-            method: 'erpnext.manufacturing.page.operator_station.operator_station.get_open_job_cards',
-            args: { process: station }
-        });
-        if (jobcardsMethod.message) {
-            jobcardsQueue.value = jobcardsMethod.message || [];
-        }
-    } 
-    else {  
+      const jobcardsMethod = await frappe.call({
+        method: 'erpnext.manufacturing.page.operator_station.operator_station.get_open_job_cards',
+        args: { process: station }
+      });
+      if (jobcardsMethod.message) {
+        jobcardsQueue.value = jobcardsMethod.message || [];
+      }
+    }
+    else {
       slabsQueue.value = [];
-        const result = await frappe.call({
-          method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
-          args: {
-              line: line,
-              next_stage: station
-          }
-        });
-        debugger;
+      const result = await frappe.call({
+        method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
+        args: {
+          line: line,
+          next_stage: station
+        }
+      });
+      debugger;
       if (result.message) {
         slabsQueue.value = result.message || [];
       }
@@ -224,18 +233,17 @@ async function fetchQueue(line, station) {
 
 async function createSlab(line) {
   if (!jobCardDoc.value || slabCreated.value || !slabTemplate.value) return
-  
+
   try {
     const result = await frappe.call({
       method: "erpnext.manufacturing.doctype.slab.api.create_slab",
-      args: { 
+      args: {
         line: line || 'L1',
         type: slabTemplate.value,
         job_card_number: jobCardDoc.value.name,
       }
     });
-    if(result)
-    {
+    if (result) {
       jobCardDoc.value.slab = result.message?.serial_number;
     }
     slabCreated.value = true;
@@ -254,69 +262,69 @@ async function slabInfo(jc, station) {
     args: { job_card: jc.name }
   });
   let slab = jcSlabRes.message;
-    
+
   debugger;
   // If no slab found for this specific Job Card, check if there's one coming from the previous stage
   if (!slab && station.toLowerCase() === 'distribution') {
     await createSlab(jc.production_line);
     return;
   }
-  if(!slab){
+  if (!slab) {
     frappe.msgprint({
       title: 'No Slab Found',
       message: `No available slab found from the previous stage for this Work Order. Ensure the previous step is completed.`,
       indicator: 'orange'
     });
   }
-    // Populate UI
-    slabCreated.value = true;
-    slabNumber.value = slab.serial_number || slab.name;
-    batchNo.value = slab.batch_number || batchNo.value;
-    slabTemplate.value = slab.template || slabTemplate.value;
-    colour.value = slab.template || colour.value;
-    line.value = slab.line || jc.production_line;
-    
-    frappe.show_alert(`✅ Slab ${slabNumber.value} @ ${station}`, 'green');
-  } 
+  // Populate UI
+  slabCreated.value = true;
+  slabNumber.value = slab.serial_number || slab.name;
+  batchNo.value = slab.batch_number || batchNo.value;
+  slabTemplate.value = slab.template || slabTemplate.value;
+  colour.value = slab.template || colour.value;
+  line.value = slab.line || jc.production_line;
+
+  frappe.show_alert(`✅ Slab ${slabNumber.value} @ ${station}`, 'green');
+}
 
 async function startOperation() {
   const route = frappe.get_route();
-    const station = route[1] || props.process;
-    jobCardName.value = route[2] || props.job_card;
-    frappe.confirm(
-        __('Start Distribution now?'),
-        async () => {
-            try {
-                await frappe.call({
-                    method: 'erpnext.manufacturing.page.operator_station.operator_station.start_distribution',
-                    args: { 
-                      job_card: jobCardName.value,
-                      process_name: station
-                     }
-                });
-                status.value = 'In Progress';
-                showStartButton.value = false;
-                processStarted.value = true;
-                processStartTime.value = frappe.datetime.now_datetime();
+  const station = route[1] || props.process;
+  jobCardName.value = route[2] || props.job_card;
+  frappe.confirm(
+    __('Start Distribution now?'),
+    async () => {
+      try {
+        await frappe.call({
+          method: 'erpnext.manufacturing.page.operator_station.operator_station.start_distribution',
+          args: {
+            job_card: jobCardName.value,
+            process_name: station
+          }
+        });
+        status.value = 'In Progress';
+        showStartButton.value = false;
+        processStarted.value = true;
+        processStartTime.value = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-                processElapsed.value = 0;
-                if (processTimerHandle.value) {
-                    clearInterval(processTimerHandle.value);
-                }
-                processTimerHandle.value = setInterval(() => {
-                    processElapsed.value += 1;
-                }, 1000);
-    
-                frappe.msgprint(__('Process started'));
-            }
-            catch (e) {
-                frappe.msgprint(__('Failed to start Job Card: {0}', [e.message || e]));
-            }
-        },
-        () => {
-            frappe.msgprint(__('Process was not started.'));
+        processElapsed.value = 0;
+        if (processTimerHandle.value) {
+          clearInterval(processTimerHandle.value);
         }
-    );
+        processTimerHandle.value = setInterval(() => {
+          processElapsed.value += 1;
+        }, 1000);
+
+        frappe.msgprint(__('Process started'));
+      }
+      catch (e) {
+        frappe.msgprint(__('Failed to start Job Card: {0}', [e.message || e]));
+      }
+    },
+    () => {
+      frappe.msgprint(__('Process was not started.'));
+    }
+  );
 }
 
 async function finishOperation() {
@@ -325,17 +333,17 @@ async function finishOperation() {
   jobCardName.value = route[2] || props.job_card;
   debugger;
   if (processTimerHandle.value) {
-      clearInterval(processTimerHandle.value);
-      processTimerHandle.value = null;
+    clearInterval(processTimerHandle.value);
+    processTimerHandle.value = null;
   }
   debugger;
   try {
     const result = await frappe.call({
-        method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_distribution',
-        args: {
-            job_card: jobCardName.value,
-            process_name: station
-        },
+      method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_distribution',
+      args: {
+        job_card: jobCardName.value,
+        process_name: station
+      },
     });
     status.value = 'Finished';
     processStarted.value = false;
@@ -351,25 +359,25 @@ async function finishOperation() {
     transferredQty.value = 0;
     transferSuccess.value = false;
 
-    frappe.msgprint(result.message.message);    
+    frappe.msgprint(result.message.message);
     if (result.message.work_order_status === 'Completed') {
-        frappe.show_alert({
-            message: __('Work Order also Completed!'),
-            indicator: 'green'
-        });
+      frappe.show_alert({
+        message: __('Work Order also Completed!'),
+        indicator: 'green'
+      });
     }
     transferToFGWarehouse();
     //move slab to next station
-    await fetchQueue(line.value || jobCardDoc.value.production_line, station); 
+    await fetchQueue(line.value || jobCardDoc.value.production_line, station);
   }
 
   catch (error) {
     console.error('error.message:', error.message);
     const errorMsg = error.message || (error._server_messages?.[0]?.message) || JSON.stringify(error);
-    frappe.msgprint({ 
-        title: __('Error'),
-        indicator: 'red',
-        message: `Failed to complete Job Card:<br><pre>${errorMsg}</pre>`
+    frappe.msgprint({
+      title: __('Error'),
+      indicator: 'red',
+      message: `Failed to complete Job Card:<br><pre>${errorMsg}</pre>`
     });
   }
 }
@@ -377,37 +385,37 @@ async function finishOperation() {
 async function transferToFGWarehouse() {
   try {
     const jc = await frappe.db.get_doc('Job Card', jobCardName.value);
-    const workOrder = jc.work_order; 
-    
+    const workOrder = jc.work_order;
+
     if (!workOrder) {
-        frappe.msgprint(__('Work Order required from Job Card'));
-        return;
+      frappe.msgprint(__('Work Order required from Job Card'));
+      return;
     }
 
     const result = await frappe.call({
-        method: 'erpnext.manufacturing.page.operator_station.operator_station.transfer_to_next_process',
-        args: {
-            current_work_order: workOrder,  
-            qty: bomQty.value
-        },
-        freeze: true,
-        freeze_message: __('Transferring to Distribution')
+      method: 'erpnext.manufacturing.page.operator_station.operator_station.transfer_to_next_process',
+      args: {
+        current_work_order: workOrder,
+        qty: bomQty.value
+      },
+      freeze: true,
+      freeze_message: __('Transferring to Distribution')
     });
-    
-    transferredQty.value += result.message.qty_transferred;   
+
+    transferredQty.value += result.message.qty_transferred;
     frappe.msgprint({
-        title: __('Transfer Complete'),
-        message: result.message.message,
-        indicator: 'green'
+      title: __('Transfer Complete'),
+      message: result.message.message,
+      indicator: 'green'
     });
-    
+
     frappe.show_alert({
-        message: `Next: ${result.message.next_work_order}`,
-        indicator: 'blue'
+      message: `Next: ${result.message.next_work_order}`,
+      indicator: 'blue'
     });
-  } 
+  }
   catch (error) {
-      frappe.msgprint(__('Transfer failed: {0}', [error.message]));
+    frappe.msgprint(__('Transfer failed: {0}', [error.message]));
   }
 }
 
@@ -435,13 +443,13 @@ function discardJob() {
 }
 
 function stopAndResetTimer() {
-    if (processTimerHandle.value) {
-        clearInterval(processTimerHandle.value);
-        processTimerHandle.value = null;
-    }
-    processStarted.value = false;
-    processElapsed.value = 0;
-    processStartTime.value = null;
+  if (processTimerHandle.value) {
+    clearInterval(processTimerHandle.value);
+    processTimerHandle.value = null;
+  }
+  processStarted.value = false;
+  processElapsed.value = 0;
+  processStartTime.value = null;
 }
 
 function toggleAlarms() {
@@ -453,7 +461,7 @@ function openIssueDialog() {
 }
 
 function submitIssue() {
-  const now = frappe.datetime.now_time();
+  const now = new Date().toLocaleTimeString('en-GB');
   alarms.value.unshift({
     station: 'Mixer',
     type: issueType.value.toUpperCase(),
@@ -486,23 +494,25 @@ function statusStyle() {
 <template>
   <div class="operator-station-container d-flex h-100 w-100">
     <!-- Sidebar: Queue -->
-     
+
     <div class="queue-sidebar bg-light border-right p-3" style="width: 300px; overflow-y: auto;">
       <h5 class="mb-3 font-weight-bold text-center border-bottom pb-2">
-          {{ isDistribution ? __('Pending Job Cards') : __('Incoming Slabs') }}
+        {{ isDistribution ? __('Pending Job Cards') : __('Incoming Slabs') }}
       </h5>
-      
-      <div v-if="jobcardsQueue.length === 0 && isDistribution" class="text-muted text-center py-4 bg-white rounded border">
+
+      <div v-if="jobcardsQueue.length === 0 && isDistribution"
+        class="text-muted text-center py-4 bg-white rounded border">
         <span class="fa fa-inbox fa-2x mb-2 d-block text-muted-light"></span>
         {{ __('No Job cards in queue') }}
       </div>
 
       <div v-else>
         <div v-for="item in jobcardsQueue" :key="item.name" class="card mb-2 shadow-sm slab-card border-0">
-          <div class="card-body p-3 border-left-3 d-flex flex-column justify-content-center align-items-start" style="height: 5rem">
+          <div class="card-body p-3 border-left-3 d-flex flex-column justify-content-center align-items-start"
+            style="height: 5rem">
             <h5 class="card-title mb-1 font-weight-bold">{{ item.name }}</h5>
             <div class="small text-muted">
-                <span class="fa fa-cubes mr-1"></span>{{ item.production_item }}
+              <span class="fa fa-cubes mr-1"></span>{{ item.production_item }}
             </div>
           </div>
         </div>
@@ -512,27 +522,29 @@ function statusStyle() {
         <span class="fa fa-inbox fa-2x mb-2 d-block text-muted-light"></span>
         {{ __('No slabs in queue') }}
       </div>
-      
+
       <div v-else>
         <div v-for="item in slabsQueue" :key="item.name" class="card mb-2 shadow-sm slab-card border-0">
-        <div class="card-body p-3 border-left-3 d-flex flex-column justify-content-center align-items-start" style="height: 5rem">
-          <template>
-            <h6 class="card-title mb-1 font-weight-bold">{{ item.batch_number }} - {{ item.serial_number }}</h6>
-            <div class="small text-muted mb-1">
+          <div class="card-body p-3 border-left-3 d-flex flex-column justify-content-center align-items-start"
+            style="height: 5rem">
+            <template>
+              <h6 class="card-title mb-1 font-weight-bold">{{ item.batch_number }} - {{ item.serial_number }}</h6>
+              <div class="small text-muted mb-1">
                 <span class="fa fa-cube mr-1"></span>{{ item.template }}
-            </div>
-            <div class="mt-2 text-right">
-                <span class="badge badge-light border">{{ frappe.datetime.str_to_user(item.modified).split(" ")[1] }}</span>
-            </div>
-           </template>
+              </div>
+              <div class="mt-2 text-right">
+                <span class="badge badge-light border">{{ new Date(item.modified).toLocaleTimeString('en-GB') }}</span>
+              </div>
+            </template>
+          </div>
         </div>
       </div>
-      </div>
-      
+
     </div>
 
     <!-- Main Content Area -->
-    <div class="operator-station page-card d-flex flex-column align-items-center flex-grow-1 p-4" style="overflow-y: auto;">
+    <div class="operator-station page-card d-flex flex-column align-items-center flex-grow-1 p-4"
+      style="overflow-y: auto;">
       <!-- Current Job Card -->
       <div class="current-job-card mb-4 border border-dark w-50 rounded p-4" style="min-width: 650px;">
         <div class="status text-center mb-2" style="font-size:1rem">
@@ -545,13 +557,13 @@ function statusStyle() {
         <h2 class="job-serial text-center font-weight-bold mb-2 p-3">
           {{ batchNo }} - {{ slabNumber }}
         </h2>
-        
+
         <!-- <div class="text-center text-muted small mb-1">{{ __('Colour') }}</div> -->
         <div class="d-flex justify-content-center align-items-center mb-3">
           <span class="job-color bold mr-2" style="font-size:1rem">{{ colour }}</span>
           <span class="color-swatch"
-                style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span>
-        </div>     
+            style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span>
+        </div>
 
         <div class="text-center mb-2" v-if="processReady && showStartButton">
           <button class="btn btn-success py-3 px-4" @click="startOperation">
@@ -584,15 +596,14 @@ function statusStyle() {
         <div class="d-flex flex-column justify-content-between mb-1 py-3">
           <div class="d-flex align-items-center">
             <span class="fa fa-exclamation-triangle mr-2"
-                  style="color:#ffc107; border:1px solid #ffc107; border-radius:50%; padding:4px;"></span>
+              style="color:#ffc107; border:1px solid #ffc107; border-radius:50%; padding:4px;"></span>
             <h5 class="mb-1">{{ __('Raise Alarm') }}</h5>
           </div>
           <div class="text-muted small">
             {{ __('Report issues to the mixer operator') }}
           </div>
         </div>
-        <button class="btn btn-outline-warning btn-block border border-warning"
-                @click="openIssueDialog">
+        <button class="btn btn-outline-warning btn-block border border-warning" @click="openIssueDialog">
           <span class="fa fa-exclamation-triangle mr-1"></span>
           {{ __('Report Issue to Mixer') }}
         </button>
@@ -611,9 +622,8 @@ function statusStyle() {
           </a>
         </div>
         <div class="alarms-list pt-4" v-show="showAlarms">
-          <div v-for="(a, idx) in alarms" :key="idx"
-               class="alarm-card mb-2"
-               :style="`background:${a.tone === 'danger' ? '#ffecec' : '#fff9e6'};border-radius:8px;padding:12px 16px;`">
+          <div v-for="(a, idx) in alarms" :key="idx" class="alarm-card mb-2"
+            :style="`background:${a.tone === 'danger' ? '#ffecec' : '#fff9e6'};border-radius:8px;padding:12px 16px;`">
             <div class="d-flex justify-content-between mb-1">
               <div class="font-weight-bold">{{ a.station }}</div>
               <div class="text-muted small">{{ a.time }}</div>

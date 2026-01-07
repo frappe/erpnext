@@ -23,6 +23,7 @@ class Slab(Document):
 		current_job_card: DF.Data | None
 		grade: DF.Data | None
 		is_cur_stage_complete: DF.Check
+		is_prematurely_unquarantined: DF.Check
 		is_repressed: DF.Check
 		line: DF.Link
 		number: DF.Int

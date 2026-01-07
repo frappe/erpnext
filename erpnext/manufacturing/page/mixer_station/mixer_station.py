@@ -266,7 +266,7 @@ def transfer_to_next_process(mixing_work_order, qty=None):
         "Cooling": "Trimming",
         "Trimming": "Calibration",
         "Calibration": "Polishing",
-        "Polishing": "Quality Analysis"
+        "Polishing": "Quality Check"
     }
 
     current_process = mixing_wo.description.split(" - ")[-1].strip() if " - " in mixing_wo.description else ""
@@ -378,7 +378,7 @@ def get_next_process_bom_qty(mixing_work_order):
         "Cooling": "Trimming",
         "Trimming": "Calibration",
         "Calibration": "Polishing",
-        "Polishing": "Quality Analysis"
+        "Polishing": "Quality Check"
     }
     next_process = process_mapping.get(current_process)
     

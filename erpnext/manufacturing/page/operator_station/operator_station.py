@@ -125,7 +125,7 @@ def finish_distribution(job_card, process_name="operator"):
         "cooling": "trimming",
         "trimming": "calibration",
         "calibration": "polishing",
-        "polishing": "inspection"
+        "polishing": "Quality Check"
     }
 
     next_stage = process_mapping.get(process_name)
