@@ -413,9 +413,8 @@
   },
   {
    "fieldname": "customer_address",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Customer Address",
-   "options": "Address",
    "print_hide": 1
   },
   {
@@ -426,10 +425,9 @@
   },
   {
    "fieldname": "contact_person",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Contact Person",
-   "options": "Contact",
    "print_hide": 1
   },
   {
@@ -1566,7 +1564,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-27 20:12:57.306772",
+ "modified": "2026-01-07 09:58:00.943991",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
