@@ -547,6 +547,7 @@ def reconcile_against_document(
 				doc.make_advance_gl_entries(entry=row)
 		else:
 			_delete_pl_entries(voucher_type, voucher_no)
+			_delete_adv_pl_entries(voucher_type, voucher_no)
 			gl_map = doc.build_gl_map()
 			# Make sure there is no overallocation
 			from erpnext.accounts.general_ledger import process_debit_credit_difference
