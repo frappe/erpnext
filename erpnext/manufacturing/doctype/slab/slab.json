@@ -194,7 +194,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-07 02:11:28.535692",
+ "modified": "2026-01-07 16:19:21.118425",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",
@@ -210,6 +210,16 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
    "share": 1,
    "write": 1
   }

@@ -4,13 +4,20 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2025-12-10 20:22:41.973314",
+ "modified": "2026-01-07 16:14:55.792002",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "oven-station",
  "owner": "Administrator",
  "page_name": "oven-station",
- "roles": [],
+ "roles": [
+  {
+   "role": "Employee"
+  },
+  {
+   "role": "Administrator"
+  }
+ ],
  "script": null,
  "standard": "Yes",
  "style": null,

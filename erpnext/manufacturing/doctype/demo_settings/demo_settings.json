@@ -1,0 +1,72 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-07 16:31:02.963041",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_p8at",
+  "default_line",
+  "column_break_gk2j",
+  "default_shift"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_p8at",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "default_line",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Default Line",
+   "options": "Production Line",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_gk2j",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Default Shift",
+   "options": "Attendance Shift",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-01-07 16:44:48.109374",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Demo Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Employee",
+   "share": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

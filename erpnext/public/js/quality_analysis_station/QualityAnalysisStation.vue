@@ -1,17 +1,20 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 
-// TODO: Make this dynamic based on the user's role.
-const get_work_context = () => {
-    return {
-        "assigned_line": "3",
-        "assigned_station": "Quality Check",
-		"assigned_shift": "A",
-		"job_card": "ABC-123-345",
+const work_context = reactive({
+    assigned_line: "",
+    assigned_station: "Quality Check",
+    assigned_shift: "",
+    job_card: "ABC-123-345", // TODO: Make this dynamic
+});
+
+const fetchWorkContext = async () => {
+    const settings = await frappe.db.get_single('Demo Settings');
+    if (settings) {
+        work_context.assigned_line = settings.default_line;
+        work_context.assigned_shift = settings.default_shift;
     }
 };
-
-const work_context = get_work_context();
 const currentTime = ref('');
 const currentDate = ref('');
 const updateKey = ref(0);
@@ -185,9 +188,10 @@ const raiseQualityAlarm = async () => {
     frappe.show_alert(__('Quality alarm raised for {0}', [selectedSlab.value.name]));
 };
 
-onMounted(() => {
+onMounted(async () => {
     updateClock();
     clockInterval = setInterval(updateClock, 1000);
+    await fetchWorkContext();
     get_slabs_ready_for_qa();
     fetchGrades();
 });

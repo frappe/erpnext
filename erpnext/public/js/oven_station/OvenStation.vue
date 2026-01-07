@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, computed, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, nextTick, computed, onMounted, onUnmounted } from 'vue';
 
 // TODO: Make this dynamic based on the user's role.
 const jobCardNumber = ref(null);
@@ -10,11 +10,17 @@ const ovenData = ref(null);
 const currentSlab = ref(null); 
 const loadingSlab = ref(false);
 
-const get_work_context = () => {
-    return {
-        "assigned_line": "MULTI",
-        "assigned_station": "Oven 1",
-        "assigned_shift": "AM"
+const work_context = reactive({
+    assigned_line: "",
+    assigned_station: "Oven 1",
+    assigned_shift: ""
+});
+
+const fetchWorkContext = async () => {
+    const settings = await frappe.db.get_doc('Demo Settings');
+    if (settings) {
+        work_context.assigned_line = settings.default_line;
+        work_context.assigned_shift = settings.default_shift;
     }
 };
 
@@ -101,13 +107,14 @@ const get_slabs_ready_for_heating = async () => {
 const currentTime = ref(new Date());
 let timerInterval = null;
 
-onMounted(() => {
+onMounted(async () => {
     const route = frappe.get_route();
     jobCardNumber.value = route[2] || null;
     timerInterval = setInterval(() => {
         currentTime.value = new Date();
     }, 1000);
-    
+    await fetchWorkContext();
+    refreshOvenData();
     get_slabs_ready_for_heating();
 });
 
@@ -173,10 +180,6 @@ const racks = computed(() => {
 const oven = computed(() => {
     return ovenData.value;
 });
-
-const work_context = get_work_context();
-// Initial load
-refreshOvenData();
 
 
 const selectedSlab = ref(null);

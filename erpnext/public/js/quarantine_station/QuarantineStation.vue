@@ -1,16 +1,19 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 
-// TODO: Make this dynamic based on the user's role.
-const get_work_context = () => {
-    return {
-        "assigned_line": "3",
-        "assigned_station": "Quarantine Station",
-        "assigned_shift": "A"
+const work_context = reactive({
+    assigned_line: "",
+    assigned_station: "Quarantine Station",
+    assigned_shift: ""
+});
+
+const fetchWorkContext = async () => {
+    const settings = await frappe.db.get_doc('Demo Settings');
+    if (settings) {
+        work_context.assigned_line = settings.default_line;
+        work_context.assigned_shift = settings.default_shift;
     }
 };
-
-const work_context = get_work_context();
 const updateKey = ref(0);
 const incomingSlabs = ref([]);
 const selectedSlab = ref(null);
@@ -77,8 +80,11 @@ const quarantineMeasurements = ref({
     remarks: ''
 });
 
-get_slabs_ready_for_quarantine();
-fetchQuarantineLabels();
+onMounted(async () => {
+    await fetchWorkContext();
+    get_slabs_ready_for_quarantine();
+    fetchQuarantineLabels();
+});
 
 frappe.realtime.on('slab_checkout', (slab) => {
     get_slabs_ready_for_quarantine();

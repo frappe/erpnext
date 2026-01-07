@@ -12,8 +12,10 @@ def create_slab_quality_report(report: str | dict):
 
 	doc = frappe.new_doc("Slab Quality Report")
 	doc.update(report)
-	doc.insert()
-	doc.submit()
+
+	# TODO: Remove these after testing.
+	doc.insert(ignore_permissions=True)
+	doc.submit(ignore_permissions=True)
 
 	if doc.slab:
 		checkout_slab(doc.slab)
