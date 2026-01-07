@@ -1607,6 +1607,18 @@
    "permlevel": 1,
    "read": 1,
    "role": "All"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Customer",
+   "share": 1,
+   "write": 1
   }
  ],
  "search_fields": "posting_date, due_date, customer, base_grand_total, outstanding_amount",

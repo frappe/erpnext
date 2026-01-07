@@ -953,7 +953,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-08-27 20:10:07.864951",
+ "modified": "2023-11-28 01:48:55.759659",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
@@ -1041,6 +1041,18 @@
    "read": 1,
    "report": 1,
    "role": "Maintenance User"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Customer",
+   "share": 1,
+   "write": 1
   }
  ],
  "search_fields": "status,transaction_date,party_name,order_type",
