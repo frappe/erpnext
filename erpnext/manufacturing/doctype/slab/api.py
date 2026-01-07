@@ -299,7 +299,8 @@ def find_next_job_card(current_job_card):
     process_mapping = {
         "mixing": "distribution",
         "distribution": "pressed slab",
-        "pressed slab": "cooled slab",
+        "pressed slab": "heated slab",
+        "heated slab": "cooled slab",
         "cooled slab": "trimmed slab",
         "trimmed slab": "calibrated slab",
         "calibrated slab": "polished slab",

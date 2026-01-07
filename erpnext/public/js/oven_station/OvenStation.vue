@@ -6,7 +6,9 @@ const jobCardNumber = ref(null);
 const updateKey = ref(0);
 const ovenData = ref(null);
 // const incomingSlabs = ref([])
-const currentSlab = ref(null);
+// { name: ..., serial_number: ..., template: ..., line: ... }
+const currentSlab = ref(null); 
+const loadingSlab = ref(false);
 
 const get_work_context = () => {
     return {
@@ -38,8 +40,47 @@ const refreshOvenData = async () => {
 };
 
 
+const fetch_slab_for_job_card = async () => {
+    if (!jobCardNumber.value) return;
+
+    loadingSlab.value = true;
+    try {
+        const r = await frappe.call({
+            method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
+            args: {
+                job_card: jobCardNumber.value
+            }
+        });
+
+        if (r.message) {
+            selectedSlab.value = r.message;
+        } else {
+            // Fallback: Check previous stage
+            const r2 = await frappe.call({
+                method: 'erpnext.manufacturing.doctype.slab.api.get_slab_from_previous_stage',
+                args: {
+                    job_card_name: jobCardNumber.value
+                }
+            });
+            if (r2.message) {
+                selectedSlab.value = r2.message;
+            }
+        }
+    } catch (e) {
+        console.error("Failed to fetch slab for job card", e);
+    } finally {
+        loadingSlab.value = false;
+    }
+};
+
 const get_slabs_ready_for_heating = async () => {
-    // Call API to get slabs ready for heating
+    // If we have a specific Job Card, just fetch its slab
+    if (jobCardNumber.value) {
+        await fetch_slab_for_job_card();
+        return;
+    }
+
+    // Otherwise, fetch the general queue (Fallback/Original behavior)
     const r = await frappe.call({
         method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
         args: {
@@ -49,19 +90,11 @@ const get_slabs_ready_for_heating = async () => {
     });
 
     if (r.message) {
-        debugger;
-        if (!currentSlab.value) {
-            currentSlab.value = r.message;
-        } else {
-            const new_slabs = r.message.filter(slab => currentSlab.value.every(s => s.name !== slab.name));
-            currentSlab.value.push(...new_slabs);
-
-            const removed_slabs = currentSlab.value.filter(slab => r.message.every(s => s.name !== slab.name));
-            currentSlab.value = currentSlab.value.filter(slab => !removed_slabs.some(s => s.name === slab.name));
-        }
-
+        currentSlab.value = r.message;
         updateKey.value++;
-        selectSlab(currentSlab.value[0], 0);
+        if (currentSlab.value.length > 0) {
+            selectSlab(currentSlab.value[0], 0);
+        }
     }
 };
 
@@ -70,11 +103,12 @@ let timerInterval = null;
 
 onMounted(() => {
     const route = frappe.get_route();
-    jobCardNumber.value = route[2];
+    jobCardNumber.value = route[2] || null;
     timerInterval = setInterval(() => {
         currentTime.value = new Date();
     }, 1000);
-    currentSlab.value = jobCardNumber.value;
+    
+    get_slabs_ready_for_heating();
 });
 
 onUnmounted(() => {
@@ -181,7 +215,7 @@ function loadIntoRack(rack) {
     if (rack.state !== 'Idle' || !rack.is_operational) return;
 
     if (!selectedSlab.value) {
-        frappe.msgprint(__('Please select an incoming slab first.'));
+        frappe.msgprint(__('Please select an incoming slab or ensure Job Card is active.'));
         return;
     }
 
@@ -213,6 +247,25 @@ async function unload_slab_from_rack(rack) {
     showUnloadModal.value = true;
 }
 
+async function transfer_to_next_process(workOrder, qty) {
+    if (!workOrder) return;
+
+    try {
+        const res = await frappe.call({
+            method: 'erpnext.manufacturing.doctype.operation.api.transfer_to_next_process',
+            args: {
+                current_work_order: workOrder,
+                qty: qty
+            }
+        });
+
+        if (res.message) {
+            frappe.show_alert({message: __('Slab transferred to next process'), indicator: 'green'});
+        }
+    } catch (e) {
+        console.error("Transfer failed", e);
+    }
+}
 async function confirmUnload() {
     if (!targetRack.value) return;
 
@@ -226,7 +279,7 @@ async function confirmUnload() {
     }
 
     try {
-        await frappe.call({
+        const res = await frappe.call({
             method: 'erpnext.manufacturing.doctype.oven.api.unload_slab_from_oven',
             args: {
                 rack_name: targetRack.value.name,
@@ -236,8 +289,16 @@ async function confirmUnload() {
             }
         });
 
-        refreshOvenData();
-        frappe.msgprint(__('Slab unloaded successfully'));
+        if (res.message) {
+            const data = res.message;
+            refreshOvenData();
+            frappe.msgprint(__('Slab unloaded successfully'));
+            debugger;
+            if (data.finish_results && data.finish_results.work_order) {
+                debugger;
+                await transfer_to_next_process(data.finish_results.work_order, data.finish_results.job_card_qty);
+            }
+        }
     } catch (e) {
         console.error(e);
     }
@@ -263,13 +324,16 @@ async function confirmLoad() {
     })
 
     if (res && res.message) {
+        frappe.show_alert({message: __('Slab loaded and heating started'), indicator: 'green'});
         refreshOvenData();
         get_slabs_ready_for_heating();
     }
 
-    // remove slab from incoming list
-    const idx = currentSlab.value.findIndex(s => s.serial === selectedSlab.value);
-    if (idx !== -1) currentSlab.value.splice(idx, 1);
+    // remove slab from incoming list or clear selected if single Job Card
+    if (Array.isArray(currentSlab.value)) {
+        const idx = currentSlab.value.findIndex(s => s.name === selectedSlab.value.name);
+        if (idx !== -1) currentSlab.value.splice(idx, 1);
+    }
     selectedSlab.value = null;
 
     closeModal();
@@ -339,7 +403,7 @@ function prepareOvenOperation() {
     };
 }
 
-get_slabs_ready_for_heating();
+
 
 frappe.realtime.on('slab_checkout', (slab) => {
     get_slabs_ready_for_heating();
@@ -354,29 +418,34 @@ frappe.realtime.on('slab_checkout', (slab) => {
             <h5 class="mb-3 d-flex align-items-center">
                 {{ __('Incoming Slabs') }}
             </h5>
-            <div class="text-muted small mb-3" v-if="currentSlab.value">
+            <div class="text-muted small mb-3" v-if="currentSlab && currentSlab.length">
                 {{ __('Select a slab to load into an empty rack.') }}
             </div>
 
             <div class="incoming-list">
-                <div v-if="!currentSlab.value" class="text-muted small text-center p-4 border rounded bg-light">
+                <div v-if="loadingSlab" class="text-center p-4">
+                    <div class="spinner-border spinner-border-sm text-muted" role="status"></div>
+                </div>
+                <div v-else-if="jobCardNumber && !selectedSlab" class="text-muted small text-center p-4 border rounded bg-light">
+                    {{ __('No slab found for Job Card') }} {{ jobCardNumber }}
+                </div>
+                <div v-else-if="!jobCardNumber && (!currentSlab || !currentSlab.length)" class="text-muted small text-center p-4 border rounded bg-light">
                     {{ __('No slabs are ready for heating right now.') }}
                 </div>
                 <TransitionGroup name="list" tag="div" v-else>
-                    <div v-for="(slab, index) in currentSlab.value" :key="slab.name"
+                    <div v-for="(slab, index) in (jobCardNumber ? [selectedSlab] : currentSlab)" :key="slab?.name"
                         class="incoming-item mb-2 p-3 d-flex align-items-center border rounded"
-                        :class="{ 'selected': selectedSlab && selectedSlab.name === slab.name, 'cursor-pointer': !index }"
+                        :class="{ 'selected': selectedSlab && selectedSlab.name === slab?.name, 'cursor-pointer': jobCardNumber || !index }"
                         @click="selectSlab(slab, index)">
-                        <div class="slab-container" :key="updateKey">
+                        <div v-if="slab" class="slab-container" :key="updateKey">
                             <div class="slab-thumbnail mr-3"></div>
                             <div class="flex-fill">
                                 <div class="font-weight-bold small">{{ slab.name }}</div>
                                 <div class="text-muted small">
-                                    <!-- <span class="fa fa-clock-o mr-1"></span> -->
                                     {{ slab.template }}
                                 </div>
                             </div>
-                            <div class="text-muted" v-if="!index">
+                            <div class="text-muted">
                                 <span class="fa fa-arrow-right"></span>
                             </div>
                         </div>
