@@ -4,6 +4,7 @@ from frappe import _
 from frappe.utils import flt
 from erpnext.manufacturing.doctype.job_card.job_card import make_time_log, make_stock_entry as jc_make_stock_entry
 from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry  as wo_make_stock_entry
+from erpnext.manufacturing.doctype.slab.api import move_slab_to
 
 @frappe.whitelist()
 def get_operator_state(job_card, process_name="operator"):
@@ -23,6 +24,23 @@ def get_operator_state(job_card, process_name="operator"):
         "current_process": wo.item_name.split(" - ")[-1].strip() if wo and " - " in wo.item_name else process_name,
     }
     return state
+
+@frappe.whitelist()
+def get_open_job_cards(process):
+    """
+    Get open Job Cards for a specific process (workstation).
+    Useful for the Distribution station to see pending work orders.
+    """
+    job_cards = frappe.get_all("Job Card", 
+        filters={
+            "status": "Open",
+            "docstatus": 0,
+            "workstation": ["like", f"%{process}%"] # Match process name loosely
+        },
+        fields=["name", "work_order", "production_item", "creation"],
+        order_by="creation asc"
+    )
+    return job_cards
 
 @frappe.whitelist()
 def start_distribution(job_card, process_name="operator"):
@@ -88,6 +106,33 @@ def finish_distribution(job_card, process_name="operator"):
     jc.db_set("status", "Completed")
     jc.reload()
 
+    slabs = frappe.get_all("Slab", 
+        filters={
+            "current_job_card": jc.name,
+            "status": process_name.lower(),
+            "docstatus": 0
+        },
+        fields=["name", "serial_number", "batch_number", "template", "line", "current_stage", "status"],
+        order_by="creation desc"
+    )
+    if not slabs:
+        frappe.throw(_("No Slabs found for this Job Card"))
+
+    process_mapping = {
+        "distribution": "pressing", 
+        "pressing": "heating",
+        "heating": "cooling",
+        "cooling": "trimming",
+        "trimming": "calibration",
+        "calibration": "polishing",
+        "polishing": "inspection"
+    }
+
+    next_stage = process_mapping.get(process_name)
+    if not next_stage:
+        frappe.throw(_("Invalid process name: {0}").format(process_name))
+    move_slab_to(slab_number=slabs[0].name, next_stage=next_stage, job_card_number=jc.name, checkout_and_move=True)
+    
     work_order = jc.work_order
     wo = frappe.get_doc("Work Order", work_order)
     wo.produced_qty = job_card_qty

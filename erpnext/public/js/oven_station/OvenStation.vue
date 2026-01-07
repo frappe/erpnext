@@ -2,17 +2,19 @@
 import { ref, nextTick, computed, onMounted, onUnmounted } from 'vue';
 
 // TODO: Make this dynamic based on the user's role.
+const jobCardNumber = ref(null);
+const updateKey = ref(0);
+const ovenData = ref(null);
+// const incomingSlabs = ref([])
+const currentSlab = ref(null);
+
 const get_work_context = () => {
     return {
-        "assigned_line": "3",
+        "assigned_line": "MULTI",
         "assigned_station": "Oven 1",
-        "assigned_shift": "A"
+        "assigned_shift": "AM"
     }
 };
-
-const updateKey = ref(0);
-
-const ovenData = ref(null);
 
 const refreshOvenData = async () => {
     if (!work_context?.assigned_line) {
@@ -47,30 +49,32 @@ const get_slabs_ready_for_heating = async () => {
     });
 
     if (r.message) {
-        if (!incomingSlabs.value.length) {
-            incomingSlabs.value = r.message;
+        debugger;
+        if (!currentSlab.value) {
+            currentSlab.value = r.message;
         } else {
-            const new_slabs = r.message.filter(slab => incomingSlabs.value.every(s => s.name !== slab.name));
-            incomingSlabs.value.push(...new_slabs);
+            const new_slabs = r.message.filter(slab => currentSlab.value.every(s => s.name !== slab.name));
+            currentSlab.value.push(...new_slabs);
 
-            const removed_slabs = incomingSlabs.value.filter(slab => r.message.every(s => s.name !== slab.name));
-            incomingSlabs.value = incomingSlabs.value.filter(slab => !removed_slabs.some(s => s.name === slab.name));
+            const removed_slabs = currentSlab.value.filter(slab => r.message.every(s => s.name !== slab.name));
+            currentSlab.value = currentSlab.value.filter(slab => !removed_slabs.some(s => s.name === slab.name));
         }
 
         updateKey.value++;
-        selectSlab(incomingSlabs.value[0], 0);
+        selectSlab(currentSlab.value[0], 0);
     }
 };
-
-const incomingSlabs = ref([]);
 
 const currentTime = ref(new Date());
 let timerInterval = null;
 
 onMounted(() => {
+    const route = frappe.get_route();
+    jobCardNumber.value = route[2];
     timerInterval = setInterval(() => {
         currentTime.value = new Date();
     }, 1000);
+    currentSlab.value = jobCardNumber.value;
 });
 
 onUnmounted(() => {
@@ -247,13 +251,14 @@ async function confirmLoad() {
     if (!targetRack.value || !ovenData.value) {
         return;
     }
-
+    debugger;
     prepareOvenOperation();
 
     const res = await frappe.call({
         method: 'erpnext.manufacturing.doctype.oven.api.load_slab_into_oven',
         args: {
-            oven_op: ovenOperation.value
+            oven_op: ovenOperation.value,
+            job_card: jobCardNumber.value
         }
     })
 
@@ -263,8 +268,8 @@ async function confirmLoad() {
     }
 
     // remove slab from incoming list
-    const idx = incomingSlabs.value.findIndex(s => s.serial === selectedSlab.value);
-    if (idx !== -1) incomingSlabs.value.splice(idx, 1);
+    const idx = currentSlab.value.findIndex(s => s.serial === selectedSlab.value);
+    if (idx !== -1) currentSlab.value.splice(idx, 1);
     selectedSlab.value = null;
 
     closeModal();
@@ -349,16 +354,16 @@ frappe.realtime.on('slab_checkout', (slab) => {
             <h5 class="mb-3 d-flex align-items-center">
                 {{ __('Incoming Slabs') }}
             </h5>
-            <div class="text-muted small mb-3" v-if="incomingSlabs.length">
+            <div class="text-muted small mb-3" v-if="currentSlab.value">
                 {{ __('Select a slab to load into an empty rack.') }}
             </div>
 
             <div class="incoming-list">
-                <div v-if="!incomingSlabs.length" class="text-muted small text-center p-4 border rounded bg-light">
+                <div v-if="!currentSlab.value" class="text-muted small text-center p-4 border rounded bg-light">
                     {{ __('No slabs are ready for heating right now.') }}
                 </div>
                 <TransitionGroup name="list" tag="div" v-else>
-                    <div v-for="(slab, index) in incomingSlabs" :key="slab.name"
+                    <div v-for="(slab, index) in currentSlab.value" :key="slab.name"
                         class="incoming-item mb-2 p-3 d-flex align-items-center border rounded"
                         :class="{ 'selected': selectedSlab && selectedSlab.name === slab.name, 'cursor-pointer': !index }"
                         @click="selectSlab(slab, index)">

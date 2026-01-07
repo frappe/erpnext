@@ -13,8 +13,10 @@ const processElapsed = ref(0);
 const processTimerHandle = ref(null);
 const processReady = ref(true);
 
+const slabsQueue = ref([]);
 const slabCreated = ref(false);
 const slabNumber = ref(null);
+const jobcardsQueue = ref([]);
 const jobCardSubmitted = ref(false);
 const preparedQty = ref(0);
 const stockEntryName = ref('');
@@ -27,6 +29,29 @@ const slabTemplate = ref('');
 const line = ref(null);
 const error = ref(null);              
 const batchNo = ref(null);
+const currentStation = ref('');
+
+// const processMapping = ref({
+//     "mixing": "distribution",
+//     "distribution": "pressed slab", 
+//     "pressing": "heated slab",
+//     "heating": "cooled slab",
+//     "cooled slab": "trimmed slab",
+//     "trimmed slab": "calibrated slab",
+//     "calibrated slab": "polished slab",
+//     "polished slab": "inspected slab"
+// });
+
+const operationMapping = ref({
+    "mixing": "distribution",
+    "distribution": "pressing", 
+    "pressing": "heating",
+    "heating": "cooling",
+    "cooling": "trimming",
+    "trimming": "calibration",
+    "calibration": "polishing",
+    "polishing": "quality analysis"
+});
 
 const alarms = ref([
   {
@@ -157,12 +182,57 @@ onMounted(async () => {
         processTimerHandle.value = null;
       }
     }
-
+    
+    // Fetch Slab Queue
+    await fetchQueue(line.value || jc.production_line, station);
   } catch (e) {
     error.value = e.message;
     frappe.msgprint(__('Load failed: {0}', [e.message]));
   }
 });
+
+const isDistribution = computed(() => currentStation.value === 'distribution');
+
+async function fetchQueue(line, station) {
+  currentStation.value = station.toLowerCase();
+  try {
+    if (currentStation.value === 'distribution') {
+      jobcardsQueue.value = [];
+        const jobcardsMethod = await frappe.call({
+            method: 'erpnext.manufacturing.page.operator_station.operator_station.get_open_job_cards',
+            args: { process: station }
+        });
+        if (jobcardsMethod.message) {
+            jobcardsQueue.value = jobcardsMethod.message || [];
+        }
+    } 
+    else {  
+      slabsQueue.value = [];
+        const result = await frappe.call({
+          method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
+          args: {
+              line: line,
+              next_stage: station
+          }
+        });
+        debugger;
+      if (result.message) {
+        slabsQueue.value = result.message || [];
+      }
+    }
+    for (const jobcard of jobcardsQueue.value) {
+      console.log(jobcard);
+    }
+    console.log("Jobcards queue data:", jobcardsQueue.value);
+
+    for (const slab of slabsQueue.value) {
+      console.log(slab);
+    }
+    console.log("Slabs queue data:", slabsQueue.value);
+  } catch (e) {
+    console.error('Failed to fetch queue:', e);
+  }
+}
 
 async function createSlab(line) {
   if (!jobCardDoc.value || slabCreated.value || !slabTemplate.value) return
@@ -195,62 +265,77 @@ async function slabInfo(jc, station) {
     method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
     args: { job_card: jc.name }
   });
-  let slabAlreadyExisted = jcSlabRes.message;
-
+  let slab = jcSlabRes.message;
+    
+  debugger;
   // If no slab found for this specific Job Card, check if there's one coming from the previous stage
-  if (!slabAlreadyExisted && station.toLowerCase() !== 'distribution') {
-      const prevSlabRes = await frappe.call({
-          method: 'erpnext.manufacturing.doctype.slab.api.get_slab_from_previous_stage',
-          args: { job_card_name: jc.name }
-      });
-      
-      if (prevSlabRes.message) {
-          slabAlreadyExisted = prevSlabRes.message;
-      }
-  }
-
-  if (slabAlreadyExisted) {
-    if (slabAlreadyExisted.current_stage?.toLowerCase() !== station.toLowerCase()) {
-      await frappe.call({
-        method: 'erpnext.manufacturing.doctype.slab.api.move_slab_to',
-        args: {
-          slab_number: slabAlreadyExisted.name,
-          next_stage: station,
-          job_card_number: jc.name,
-          checkout_and_move: true
-        }
-      });
-      
-      // Reload fresh data
-      const freshSlabRes = await frappe.call({
-        method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
-        args: { job_card: jc.name }
-      });
-      slabAlreadyExisted = freshSlabRes.message;
-    }
-    
-    // Populate UI
-    slabCreated.value = true;
-    slabNumber.value = slabAlreadyExisted.serial_number || slabAlreadyExisted.name;
-    batchNo.value = slabAlreadyExisted.batch_number || batchNo.value;
-    slabTemplate.value = slabAlreadyExisted.template || slabTemplate.value;
-    colour.value = slabAlreadyExisted.template || colour.value;
-    line.value = slabAlreadyExisted.line || jc.production_line;
-    
-    frappe.show_alert(`✅ Slab ${slabNumber.value} @ ${station}`, 'green');
-    
-  } 
-  else if (station.toLowerCase() === 'distribution') {
+  if (!slab && station.toLowerCase() === 'distribution') {
     await createSlab(jc.production_line);
+    return;
   }
-  else {
+  if(!slab){
     frappe.msgprint({
       title: 'No Slab Found',
       message: `No available slab found from the previous stage for this Work Order. Ensure the previous step is completed.`,
       indicator: 'orange'
     });
   }
-}
+  //     const prevSlabRes = await frappe.call({
+  //         method: 'erpnext.manufacturing.doctype.slab.api.get_slab_from_previous_stage',
+  //         args: { job_card_name: jc.name }
+  //     });
+      
+  //     if (prevSlabRes.message) {
+  //         slabAlreadyExisted = prevSlabRes.message;
+  //         current_stage = station.toLowerCase().trim();
+  //         next_process = processMapping.value[current_stage];
+  //         next_stage = operatorMapping.value[next_process];
+  //     }
+  // }
+  // debugger;
+  // if (slabAlreadyExisted) {
+  //   if (slabAlreadyExisted.status?.toLowerCase() !== station.toLowerCase()) {
+     
+  //     // await frappe.call({
+  //     //   method: 'erpnext.manufacturing.doctype.slab.api.move_slab_to',
+  //     //   args: {
+  //     //     slab_number: slabAlreadyExisted.name,
+  //     //     next_stage: ,
+  //     //     job_card_number: jc.name,
+  //     //     checkout_and_move: true
+  //     //   }
+  //     // });
+      
+  //     // Reload fresh data
+  //     const freshSlabRes = await frappe.call({
+  //       method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
+  //       args: { job_card: jc.name }
+  //     });
+  //     slabAlreadyExisted = freshSlabRes.message;
+  //   }
+    
+    // Populate UI
+    slabCreated.value = true;
+    slabNumber.value = slab.serial_number || slab.name;
+    batchNo.value = slab.batch_number || batchNo.value;
+    slabTemplate.value = slab.template || slabTemplate.value;
+    colour.value = slab.template || colour.value;
+    line.value = slab.line || jc.production_line;
+    
+    frappe.show_alert(`✅ Slab ${slabNumber.value} @ ${station}`, 'green');
+    
+  } 
+  // else if (station.toLowerCase() === 'distribution') {
+  //   await createSlab(jc.production_line);
+  // }
+  // else {
+  //   frappe.msgprint({
+  //     title: 'No Slab Found',
+  //     message: `No available slab found from the previous stage for this Work Order. Ensure the previous step is completed.`,
+  //     indicator: 'orange'
+  //   });
+  // }
+// }
 
 async function startOperation() {
   const route = frappe.get_route();
@@ -296,10 +381,12 @@ async function finishOperation() {
   const route = frappe.get_route();
   const station = route[1] || props.process;
   jobCardName.value = route[2] || props.job_card;
+  debugger;
   if (processTimerHandle.value) {
       clearInterval(processTimerHandle.value);
       processTimerHandle.value = null;
   }
+  debugger;
   try {
     const result = await frappe.call({
         method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_distribution',
@@ -330,6 +417,8 @@ async function finishOperation() {
         });
     }
     transferToFGWarehouse();
+    //move slab to next station
+    await fetchQueue(line.value || jobCardDoc.value.production_line, station); 
   }
 
   catch (error) {
@@ -453,139 +542,188 @@ function statusStyle() {
 </script>
 
 <template>
-  <div class="operator-station page-card d-flex flex-column align-items-center">
-    <!-- Current Job Card -->
-    <div class="current-job-card mb-4 border border-dark w-50 rounded p-4">
-      <div class="status text-center mb-2" style="font-size:1rem">
-        <span class="badge badge-pill" :style="statusStyle()">
-          {{ __(status) }}
-        </span>
-      </div>
-
-      <div class="text-center text-muted small">{{ __('SERIAL NUMBER') }}</div>
-      <h2 class="job-serial text-center font-weight-bold mb-2 p-3">
-        {{ batchNo }} - {{ slabNumber }}
-      </h2>
+  <div class="operator-station-container d-flex h-100 w-100">
+    <!-- Sidebar: Queue -->
+     
+    <div class="queue-sidebar bg-light border-right p-3" style="width: 300px; overflow-y: auto;">
+      <h5 class="mb-3 font-weight-bold text-center border-bottom pb-2">
+          {{ isDistribution ? __('Pending Job Cards') : __('Incoming Slabs') }}
+      </h5>
       
-      <!-- <div class="text-center text-muted small mb-1">{{ __('Colour') }}</div> -->
-      <div class="d-flex justify-content-center align-items-center mb-3">
-        <span class="job-color bold mr-2" style="font-size:1rem">{{ colour }}</span>
-        <span class="color-swatch"
-              style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span>
-      </div>     
-
-      <div class="text-center mb-2" v-if="processReady && showStartButton">
-        <button class="btn btn-success py-3 px-4" @click="startOperation">
-          <span class="fa fa-play mr-1 pr-2"></span>{{ __('Start Job') }}
-        </button>
+      <div v-if="jobcardsQueue.length === 0 && isDistribution" class="text-muted text-center py-4 bg-white rounded border">
+        <span class="fa fa-inbox fa-2x mb-2 d-block text-muted-light"></span>
+        {{ __('No Job cards in queue') }}
       </div>
 
-      <div class="text-center mb-3" v-if="processStarted && !jobCardSubmitted">
-        <div class="text-success" style="font-size:1.5rem">
-          <span class="fa fa-clock-o mr-1"></span>
-          <span class="job-timer">{{ formattedTime }}</span>
-        </div>
-      </div>
-
-      <div class="text-center mb-2" v-if="processStarted">
-        <button class="btn btn-info mr-2" @click="finishOperation">
-          <span class="fa fa-check-square-o mr-1"></span>{{ __('Finish Job') }}
-        </button>
-        <button class="btn btn-warning mr-2" @click="haltJob">
-          <span class="fa fa-pause-circle-o mr-1"></span>{{ __('Halt Job') }}
-        </button>
-        <button class="btn btn-danger" @click="discardJob">
-          <span class="fa fa-trash-o mr-1"></span>{{ __('Discard') }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Raise Alarm -->
-    <div class="raise-alarm-box mb-4 w-50 border border-dark rounded p-4">
-      <div class="d-flex flex-column justify-content-between mb-1 py-3">
-        <div class="d-flex align-items-center">
-          <span class="fa fa-exclamation-triangle mr-2"
-                style="color:#ffc107; border:1px solid #ffc107; border-radius:50%; padding:4px;"></span>
-          <h5 class="mb-1">{{ __('Raise Alarm') }}</h5>
-        </div>
-        <div class="text-muted small">
-          {{ __('Report issues to the mixer operator') }}
-        </div>
-      </div>
-      <button class="btn btn-outline-warning btn-block border border-warning"
-              @click="openIssueDialog">
-        <span class="fa fa-exclamation-triangle mr-1"></span>
-        {{ __('Report Issue to Mixer') }}
-      </button>
-    </div>
-
-    <!-- Downstream Alarms -->
-    <div class="downstream-alarms-box w-50 border border-dark rounded p-4">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <div>
-          <span class="fa fa-bell mr-1"></span>
-          <span class="font-weight-bold">{{ __('Downstream Alarms') }}</span>
-          <span class="badge badge-danger ml-2 alarms-count">{{ alarms.length }}</span>
-        </div>
-        <a href="javascript:void(0)" class="text-muted small" @click="toggleAlarms">
-          <span class="fa fa-chevron-down"></span>
-        </a>
-      </div>
-      <div class="alarms-list pt-4" v-show="showAlarms">
-        <div v-for="(a, idx) in alarms" :key="idx"
-             class="alarm-card mb-2"
-             :style="`background:${a.tone === 'danger' ? '#ffecec' : '#fff9e6'};border-radius:8px;padding:12px 16px;`">
-          <div class="d-flex justify-content-between mb-1">
-            <div class="font-weight-bold">{{ a.station }}</div>
-            <div class="text-muted small">{{ a.time }}</div>
-          </div>
-          <div class="text-uppercase text-muted small mb-1">{{ a.type }}</div>
-          <div class="small">{{ a.description }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Simple modal for Raise Alarm -->
-    <div v-if="issueDialogOpen" class="modal-backdrop fade show"></div>
-    <div v-if="issueDialogOpen" class="modal d-block" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">{{ __('Raise Alarm') }}</h5>
-            <button type="button" class="close" @click="issueDialogOpen = false">
-              <span>&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="form-group">
-              <label>{{ __('Issue Type') }}</label>
-              <select class="form-control" v-model="issueType">
-                <option>Quality Issue</option>
-                <option>Machine Problem</option>
-                <option>Material Issue</option>
-                <option>Other</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>{{ __('Description') }}</label>
-              <textarea class="form-control" rows="3" v-model="issueDescription"></textarea>
-            </div>
-            <div class="form-group">
-              <label>{{ __('Serial Number') }}</label>
-              <input type="text" class="form-control" :value="serial" disabled />
+      <div v-else>
+        <div v-for="item in jobcardsQueue" :key="item.name" class="card mb-2 shadow-sm slab-card border-0">
+          <div class="card-body p-3 border-left-3 d-flex flex-column justify-content-center align-items-start" style="height: 5rem">
+            <h5 class="card-title mb-1 font-weight-bold">{{ item.name }}</h5>
+            <div class="small text-muted">
+                <span class="fa fa-cubes mr-1"></span>{{ item.production_item }}
             </div>
           </div>
-          <div class="modal-footer">
-            <button class="btn btn-secondary" @click="issueDialogOpen = false">
-              {{ __('Cancel') }}
-            </button>
-            <button class="btn btn-primary" @click="submitIssue">
-              {{ __('Submit') }}
-            </button>
+        </div>
+      </div>
+      <div>{{ slabsQueue.length }}</div>
+      <div v-if="false && slabsQueue.length === 0" class="text-muted text-center py-4 bg-white rounded border">
+        <span class="fa fa-inbox fa-2x mb-2 d-block text-muted-light"></span>
+        {{ __('No slabs in queue') }}
+      </div>
+      
+      <div v-else>
+        <div v-for="item in slabsQueue" :key="item.name" class="card mb-2 shadow-sm slab-card border-0">
+        <div class="card-body p-3 border-left-3 d-flex flex-column justify-content-center align-items-start" style="height: 5rem">
+          <template>
+            <h6 class="card-title mb-1 font-weight-bold">{{ item.batch_number }} - {{ item.serial_number }}</h6>
+            <div class="small text-muted mb-1">
+                <span class="fa fa-cube mr-1"></span>{{ item.template }}
+            </div>
+            <div class="mt-2 text-right">
+                <span class="badge badge-light border">{{ frappe.datetime.str_to_user(item.modified).split(" ")[1] }}</span>
+            </div>
+           </template>
+        </div>
+      </div>
+      </div>
+      
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="operator-station page-card d-flex flex-column align-items-center flex-grow-1 p-4" style="overflow-y: auto;">
+      <!-- Current Job Card -->
+      <div class="current-job-card mb-4 border border-dark w-50 rounded p-4" style="min-width: 650px;">
+        <div class="status text-center mb-2" style="font-size:1rem">
+          <span class="badge badge-pill" :style="statusStyle()">
+            {{ __(status) }}
+          </span>
+        </div>
+
+        <div class="text-center text-muted small">{{ __('SERIAL NUMBER') }}</div>
+        <h2 class="job-serial text-center font-weight-bold mb-2 p-3">
+          {{ batchNo }} - {{ slabNumber }}
+        </h2>
+        
+        <!-- <div class="text-center text-muted small mb-1">{{ __('Colour') }}</div> -->
+        <div class="d-flex justify-content-center align-items-center mb-3">
+          <span class="job-color bold mr-2" style="font-size:1rem">{{ colour }}</span>
+          <span class="color-swatch"
+                style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span>
+        </div>     
+
+        <div class="text-center mb-2" v-if="processReady && showStartButton">
+          <button class="btn btn-success py-3 px-4" @click="startOperation">
+            <span class="fa fa-play mr-1 pr-2"></span>{{ __('Start Job') }}
+          </button>
+        </div>
+
+        <div class="text-center mb-3" v-if="processStarted && !jobCardSubmitted">
+          <div class="text-success" style="font-size:1.5rem">
+            <span class="fa fa-clock-o mr-1"></span>
+            <span class="job-timer">{{ formattedTime }}</span>
+          </div>
+        </div>
+
+        <div class="text-center mb-2" v-if="processStarted">
+          <button class="btn btn-info mr-2" @click="finishOperation">
+            <span class="fa fa-check-square-o mr-1"></span>{{ __('Finish Job') }}
+          </button>
+          <button class="btn btn-warning mr-2" @click="haltJob">
+            <span class="fa fa-pause-circle-o mr-1"></span>{{ __('Halt Job') }}
+          </button>
+          <button class="btn btn-danger" @click="discardJob">
+            <span class="fa fa-trash-o mr-1"></span>{{ __('Discard') }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Raise Alarm -->
+      <div class="raise-alarm-box mb-4 w-50 border border-dark rounded p-4" style="min-width: 650px;">
+        <div class="d-flex flex-column justify-content-between mb-1 py-3">
+          <div class="d-flex align-items-center">
+            <span class="fa fa-exclamation-triangle mr-2"
+                  style="color:#ffc107; border:1px solid #ffc107; border-radius:50%; padding:4px;"></span>
+            <h5 class="mb-1">{{ __('Raise Alarm') }}</h5>
+          </div>
+          <div class="text-muted small">
+            {{ __('Report issues to the mixer operator') }}
+          </div>
+        </div>
+        <button class="btn btn-outline-warning btn-block border border-warning"
+                @click="openIssueDialog">
+          <span class="fa fa-exclamation-triangle mr-1"></span>
+          {{ __('Report Issue to Mixer') }}
+        </button>
+      </div>
+
+      <!-- Downstream Alarms -->
+      <div class="downstream-alarms-box w-50 border border-dark rounded p-4" style="min-width: 650px;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div>
+            <span class="fa fa-bell mr-1"></span>
+            <span class="font-weight-bold">{{ __('Downstream Alarms') }}</span>
+            <span class="badge badge-danger ml-2 alarms-count">{{ alarms.length }}</span>
+          </div>
+          <a href="javascript:void(0)" class="text-muted small" @click="toggleAlarms">
+            <span class="fa fa-chevron-down"></span>
+          </a>
+        </div>
+        <div class="alarms-list pt-4" v-show="showAlarms">
+          <div v-for="(a, idx) in alarms" :key="idx"
+               class="alarm-card mb-2"
+               :style="`background:${a.tone === 'danger' ? '#ffecec' : '#fff9e6'};border-radius:8px;padding:12px 16px;`">
+            <div class="d-flex justify-content-between mb-1">
+              <div class="font-weight-bold">{{ a.station }}</div>
+              <div class="text-muted small">{{ a.time }}</div>
+            </div>
+            <div class="text-uppercase text-muted small mb-1">{{ a.type }}</div>
+            <div class="small">{{ a.description }}</div>
           </div>
         </div>
       </div>
-    </div>
 
+      <!-- Simple modal for Raise Alarm -->
+      <div v-if="issueDialogOpen" class="modal-backdrop fade show"></div>
+      <div v-if="issueDialogOpen" class="modal d-block" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">{{ __('Raise Alarm') }}</h5>
+              <button type="button" class="close" @click="issueDialogOpen = false">
+                <span>&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label>{{ __('Issue Type') }}</label>
+                <select class="form-control" v-model="issueType">
+                  <option>Quality Issue</option>
+                  <option>Machine Problem</option>
+                  <option>Material Issue</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>{{ __('Description') }}</label>
+                <textarea class="form-control" rows="3" v-model="issueDescription"></textarea>
+              </div>
+              <div class="form-group">
+                <label>{{ __('Serial Number') }}</label>
+                <input type="text" class="form-control" :value="serial" disabled />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" @click="issueDialogOpen = false">
+                {{ __('Cancel') }}
+              </button>
+              <button class="btn btn-primary" @click="submitIssue">
+                {{ __('Submit') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </template>

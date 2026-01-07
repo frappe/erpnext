@@ -83,8 +83,9 @@ def move_slab_to(
 
     slab = frappe.get_doc("Slab", slab_number)
 
-    current_stage_index = allowed_stages_lower.index(slab.current_stage.lower())
-    next_stage_index = allowed_stages_lower.index(next_stage.lower())
+    current_stage_index = allowed_stages_lower.index(slab.status.lower())
+    next_stage_index = allowed_stages_lower.index(next_stage.lower())#TODO - update with correct next stage instead os manipluating data
+    next_stage = ALLOWED_STAGES[next_stage_index]
 
     # Validation: Check the direction of transition
     if next_stage_index < current_stage_index or (
@@ -105,16 +106,18 @@ def move_slab_to(
         slab: Slab = frappe.get_doc("Slab", slab_number)
 
     slab.status = next_stage  # pyright: ignore[reportAttributeAccessIssue]
-    slab.is_cur_stage_complete = False
-    slab.current_stage = ALLOWED_STAGES[next_stage_index]  # pyright: ignore[reportAttributeAccessIssue]
-    slab.current_job_card = job_card_number
+    # slab.is_cur_stage_complete = False
+    slab.is_cur_stage_complete = True
+    slab.current_stage = ALLOWED_STAGES[next_stage_index] # pyright: ignore[reportAttributeAccessIssue]
+    next_job_card_info = find_next_job_card(job_card_number)
+    slab.current_job_card = next_job_card_info["next_job_card"]
 
     # Append the next stage to the slab history.
     slab_history: SlabHistory = frappe.new_doc(
         "Slab History"
     )  # pyright: ignore[reportAssignmentType]
     slab_history.idx = len(slab.slab_history) + 1
-    slab_history.station = ALLOWED_STAGES[next_stage_index]
+    slab_history.station = ALLOWED_STAGES[next_stage_index] 
     slab_history.in_time = datetime.now()
     slab_history.job_card_number = job_card_number
     slab.slab_history.append(slab_history)
@@ -129,6 +132,7 @@ def get_slabs_for(line: str, next_stage: str) -> list[dict]:
     valid_previous_stages = []
     
     # Check if next_stage is valid
+    next_stage = next_stage.title()
     if next_stage in ALLOWED_STAGES:
         target_index = ALLOWED_STAGES.index(next_stage)
         
@@ -145,7 +149,8 @@ def get_slabs_for(line: str, next_stage: str) -> list[dict]:
     if not valid_previous_stages:
         return []
 
-    return frappe.db.get_list("Slab", order_by="modified asc", filters={"status": ["in", valid_previous_stages], "is_cur_stage_complete": True, "line": line}, fields=["name", "number", "serial_number", "status", "line", "batch_number", "template", "creation", "modified"])
+    slabs = frappe.db.get_list("Slab", order_by="modified asc", filters={"status": ["in", valid_previous_stages], "is_cur_stage_complete": 0, "line": line}, fields=["name", "serial_number", "status", "line", "batch_number", "template", "creation", "modified"])
+    return slabs
 
 
 def _generate_batch_number(line: str):
@@ -276,11 +281,73 @@ def get_slab_from_previous_stage(job_card_name):
     slabs = frappe.get_all("Slab", 
         filters={
             "current_job_card": ["in", previous_jc_names],
-            "current_stage": previous_process.title(),  
+            "status": previous_process.title(),  
             "docstatus": 0
         },
-        fields=["name", "serial_number", "batch_number", "template", "line", "current_stage"],
+        fields=["name", "serial_number", "batch_number", "template", "line", "status"],
         order_by="creation desc"
     )
     #TODO - Update the nextstage title    
     return slabs[0] if slabs else None
+
+
+@frappe.whitelist()
+def find_next_job_card(current_job_card):
+    current_jc = frappe.get_doc("Job Card", current_job_card)
+    current_wo = frappe.get_doc("Work Order", current_jc.work_order)
+
+    process_mapping = {
+        "mixing": "distribution",
+        "distribution": "pressed slab",
+        "pressed slab": "cooled slab",
+        "cooled slab": "trimmed slab",
+        "trimmed slab": "calibrated slab",
+        "calibrated slab": "polished slab",
+        "polished slab": "inspected slab",
+    }
+
+    if " - " not in current_wo.production_item:
+        frappe.throw("Unable to determine current process from Work Order")
+
+    current_process = current_wo.production_item.split(" - ")[-1].strip().lower()
+    next_process = process_mapping.get(current_process)
+
+    if not next_process:
+        frappe.throw(f"No next process found after {current_process}")
+
+    # Find next Work Order in same Production Plan
+    next_wo = frappe.db.get_value(
+        "Work Order",
+        {
+            "production_plan": current_wo.production_plan,
+            "production_item": ["like", f"%{next_process}%"],
+            "docstatus": ["<", 2],
+        },
+        "name",
+    )
+
+    if not next_wo:
+        frappe.throw(f"Next Work Order for '{next_process}' not found")
+
+    # Find first open Job Card for next Work Order
+    next_job_card = frappe.db.get_value(
+        "Job Card",
+        {
+            "work_order": next_wo,
+            "status": "Open",
+            "docstatus": 0,
+        },
+        "name",
+        order_by="creation asc",
+    )
+
+    if not next_job_card:
+        frappe.throw("No open Job Card available for next process")
+
+    return {
+        "current_job_card": current_jc.name,
+        "current_process": current_process,
+        "next_process": next_process,
+        "next_work_order": next_wo,
+        "next_job_card": next_job_card,
+    }
