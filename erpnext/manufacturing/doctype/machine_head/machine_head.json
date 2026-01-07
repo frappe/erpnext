@@ -1,0 +1,68 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{parent}-{head_no}",
+ "creation": "2026-01-07 13:28:16.518498",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_k6db",
+  "head_no",
+  "column_break_ebnw",
+  "status",
+  "other_details_section",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_k6db",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "head_no",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Head Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ebnw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "\nNew\nWorn Out\nWaiting Repair\nWaiting Replacement",
+   "reqd": 1
+  },
+  {
+   "fieldname": "other_details_section",
+   "fieldtype": "Section Break",
+   "label": "Other Details"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "label": "Remarks"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-07 13:45:12.181565",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Machine Head",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
