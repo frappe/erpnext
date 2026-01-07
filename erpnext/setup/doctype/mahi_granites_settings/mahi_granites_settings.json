@@ -12,7 +12,9 @@
   "max_heating_minutes",
   "quarantine_section",
   "min_quarantine_hours",
-  "quarantine_labels"
+  "quarantine_labels",
+  "quality_section",
+  "grades"
  ],
  "fields": [
   {
@@ -60,13 +62,25 @@
    "fieldname": "max_heating_minutes",
    "fieldtype": "Float",
    "label": "Maximum Heating Time (in minutes)"
+  },
+  {
+   "fieldname": "quality_section",
+   "fieldtype": "Section Break",
+   "label": "Quality"
+  },
+  {
+   "fieldname": "grades",
+   "fieldtype": "Table",
+   "label": "Allowed Grades",
+   "options": "Slab Quality Grade",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-07 02:05:51.641663",
+ "modified": "2026-01-07 13:55:06.828177",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Mahi Granites Settings",

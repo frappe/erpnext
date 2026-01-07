@@ -1,0 +1,269 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:QC-{slab}-{slab_template}",
+ "creation": "2026-01-07 13:48:53.635243",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "basic_details_section",
+  "amended_from",
+  "date",
+  "column_break_ml2b",
+  "shift",
+  "column_break_xwqk",
+  "job_card",
+  "slab_details_section",
+  "slab",
+  "column_break_dxoj",
+  "slab_template",
+  "column_break_uqmr",
+  "slab_dimensions_section",
+  "slab_length",
+  "column_break_jlbb",
+  "slab_width",
+  "column_break_cggy",
+  "slab_thickness",
+  "quality_measurements_section",
+  "fs",
+  "column_break_2uin",
+  "con",
+  "paper_deep_section",
+  "paper_deep_front",
+  "column_break_0ycf",
+  "paper_deep_back",
+  "crack_section",
+  "crack_front",
+  "column_break_6mxw",
+  "crack_back",
+  "section_break_ueen",
+  "bend",
+  "column_break_0tsh",
+  "grade",
+  "section_break_8ixs",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Slab Quality Report",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "basic_details_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Details"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ml2b",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Shift",
+   "options": "Attendance Shift",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_xwqk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "job_card",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Job Card",
+   "reqd": 1
+  },
+  {
+   "fieldname": "slab_details_section",
+   "fieldtype": "Section Break",
+   "label": "Slab Details"
+  },
+  {
+   "fieldname": "slab",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Slab",
+   "options": "Slab",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_dxoj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "slab_template",
+   "fieldtype": "Link",
+   "label": "Slab Template",
+   "options": "Slab Template",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_uqmr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "slab_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Slab Dimensions"
+  },
+  {
+   "fieldname": "slab_length",
+   "fieldtype": "Float",
+   "label": "Length",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_jlbb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "slab_width",
+   "fieldtype": "Float",
+   "label": "Width",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_cggy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "slab_thickness",
+   "fieldtype": "Float",
+   "label": "Thickness",
+   "reqd": 1
+  },
+  {
+   "fieldname": "quality_measurements_section",
+   "fieldtype": "Section Break",
+   "label": "Quality Measurements"
+  },
+  {
+   "fieldname": "fs",
+   "fieldtype": "Data",
+   "label": "F.S."
+  },
+  {
+   "fieldname": "column_break_2uin",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "con",
+   "fieldtype": "Data",
+   "label": "Con"
+  },
+  {
+   "fieldname": "paper_deep_section",
+   "fieldtype": "Section Break",
+   "label": "Paper Deep"
+  },
+  {
+   "fieldname": "paper_deep_front",
+   "fieldtype": "Data",
+   "label": "Front"
+  },
+  {
+   "fieldname": "column_break_0ycf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "paper_deep_back",
+   "fieldtype": "Data",
+   "label": "Back"
+  },
+  {
+   "fieldname": "crack_section",
+   "fieldtype": "Section Break",
+   "label": "Crack"
+  },
+  {
+   "fieldname": "crack_front",
+   "fieldtype": "Data",
+   "label": "Front"
+  },
+  {
+   "fieldname": "column_break_6mxw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "crack_back",
+   "fieldtype": "Data",
+   "label": "Back"
+  },
+  {
+   "fieldname": "section_break_ueen",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "bend",
+   "fieldtype": "Float",
+   "label": "Bend (in mm)"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "column_break_0tsh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grade",
+   "fieldtype": "Link",
+   "label": "Grade",
+   "options": "Slab Quality Grade",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_8ixs",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-01-07 16:00:56.630990",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Slab Quality Report",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

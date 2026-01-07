@@ -4,13 +4,17 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2025-12-16 16:59:19.573937",
+ "modified": "2026-01-07 15:26:26.470868",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "quality-analysis-station",
  "owner": "Administrator",
  "page_name": "quality-analysis-station",
- "roles": [],
+ "roles": [
+  {
+   "role": "Administrator"
+  }
+ ],
  "script": null,
  "standard": "Yes",
  "style": null,

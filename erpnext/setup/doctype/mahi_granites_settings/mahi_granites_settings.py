@@ -13,8 +13,10 @@ class MahiGranitesSettings(Document):
 
 	if TYPE_CHECKING:
 		from erpnext.manufacturing.doctype.quarantine_label.quarantine_label import QuarantineLabel
+		from erpnext.manufacturing.doctype.slab_quality_grade.slab_quality_grade import SlabQualityGrade
 		from frappe.types import DF
 
+		grades: DF.Table[SlabQualityGrade]
 		max_heating_minutes: DF.Float
 		max_pay_line_amount: DF.Currency
 		min_quarantine_hours: DF.Float
