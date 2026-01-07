@@ -1342,7 +1342,7 @@ class TestPurchaseOrder(IntegrationTestCase):
 		pe1.references[0].allocated_amount = 50
 		pe1.save(ignore_permissions=True).submit()
 
-		# check first advance paid agaist PO
+		# check first advance paid against PO
 		po.reload()
 		self.assertEqual(po.advance_paid, 50)
 
@@ -1361,7 +1361,7 @@ class TestPurchaseOrder(IntegrationTestCase):
 		pe2.references[0].allocated_amount = 50
 		pe2.save(ignore_permissions=True).submit()
 
-		# check second advance paid agaist PO
+		# check second advance paid against PO
 		po.reload()
 		self.assertEqual(po.advance_paid, 100)
 
