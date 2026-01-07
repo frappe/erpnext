@@ -435,6 +435,7 @@ frappe.ui.form.on("Payment Entry", {
 					"paid_to",
 					"references",
 					"total_allocated_amount",
+					"party_name",
 				],
 				function (i, field) {
 					frm.set_value(field, null);

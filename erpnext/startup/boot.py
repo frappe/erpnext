@@ -64,6 +64,9 @@ def boot_session(bootinfo):
 		bootinfo.party_account_types = frappe._dict(party_account_types)
 
 		bootinfo.sysdefaults.demo_company = frappe.db.get_single_value("Global Defaults", "demo_company")
+		bootinfo.sysdefaults.default_ageing_range = frappe.db.get_single_value(
+			"Accounts Settings", "default_ageing_range"
+		)
 
 
 def update_page_info(bootinfo):

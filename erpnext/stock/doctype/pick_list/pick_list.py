@@ -383,35 +383,23 @@ class PickList(TransactionBase):
 		picked_items = get_picked_items_qty(packed_items, contains_packed_items=True)
 		self.validate_picked_qty(picked_items)
 
-		picked_qty = frappe._dict()
+		doc_updates = {}
 		for d in picked_items:
-			picked_qty[d.product_bundle_item] = d.picked_qty
+			doc_updates[d.product_bundle_item] = {"picked_qty": flt(d.picked_qty)}
 
-		for packed_item in packed_items:
-			frappe.db.set_value(
-				"Packed Item",
-				packed_item,
-				"picked_qty",
-				flt(picked_qty.get(packed_item)),
-				update_modified=False,
-			)
+		if doc_updates:
+			frappe.db.bulk_update("Packed Item", doc_updates, update_modified=False)
 
 	def update_sales_order_item_qty(self, so_items):
 		picked_items = get_picked_items_qty(so_items)
 		self.validate_picked_qty(picked_items)
 
-		picked_qty = frappe._dict()
+		doc_updates = {}
 		for d in picked_items:
-			picked_qty[d.sales_order_item] = d.picked_qty
+			doc_updates[d.sales_order_item] = {"picked_qty": flt(d.picked_qty)}
 
-		for so_item in so_items:
-			frappe.db.set_value(
-				"Sales Order Item",
-				so_item,
-				"picked_qty",
-				flt(picked_qty.get(so_item)),
-				update_modified=False,
-			)
+		if doc_updates:
+			frappe.db.bulk_update("Sales Order Item", doc_updates, update_modified=False)
 
 	def update_sales_order_picking_status(self) -> None:
 		sales_orders = []

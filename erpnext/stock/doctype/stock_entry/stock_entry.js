@@ -140,6 +140,24 @@ frappe.ui.form.on("Stock Entry", {
 			};
 		});
 
+		frm.set_query("project", "items", function (doc) {
+			return {
+				query: "erpnext.controllers.queries.get_project_name",
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("project", function (doc) {
+			return {
+				query: "erpnext.controllers.queries.get_project_name",
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
+
 		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 
@@ -914,6 +932,9 @@ frappe.ui.form.on("Stock Entry Detail", {
 
 	item_code(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
+		// since some items may not have image, so empty the image field to avoid setting the image of previous item
+		d.image = "";
+
 		if (d.item_code) {
 			var args = {
 				item_code: d.item_code,

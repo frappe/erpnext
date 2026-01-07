@@ -69,6 +69,9 @@ class RepostItemValuation(Document):
 			),
 		)
 
+	def repost_now(self):
+		repost(self)
+
 	def validate(self):
 		self.set_company()
 		self.validate_period_closing_voucher()

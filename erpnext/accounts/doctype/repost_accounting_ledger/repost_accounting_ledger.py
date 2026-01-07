@@ -115,6 +115,10 @@ class RepostAccountingLedger(Document):
 	def generate_preview(self):
 		from erpnext.accounts.report.general_ledger.general_ledger import get_columns as get_gl_columns
 
+		if not self.vouchers:
+			frappe.msgprint(_("Add vouchers to generate preview."))
+			return
+
 		gl_columns = []
 		gl_data = []
 
@@ -142,6 +146,7 @@ class RepostAccountingLedger(Document):
 				account_repost_doc=self.name,
 				is_async=True,
 				job_name=job_name,
+				enqueue_after_commit=True,
 			)
 			frappe.msgprint(_("Repost has started in the background"))
 		else:

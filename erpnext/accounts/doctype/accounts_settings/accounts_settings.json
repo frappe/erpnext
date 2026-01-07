@@ -93,6 +93,7 @@
   "receivable_payable_remarks_length",
   "accounts_receivable_payable_tuning_section",
   "receivable_payable_fetch_method",
+  "default_ageing_range",
   "column_break_ntmi",
   "drop_ar_procedures",
   "legacy_section",
@@ -657,6 +658,12 @@
    "fieldname": "show_party_balance",
    "fieldtype": "Check",
    "label": "Show Party Balance"
+  },
+  {
+   "default": "30, 60, 90, 120",
+   "fieldname": "default_ageing_range",
+   "fieldtype": "Data",
+   "label": "Default Ageing Range"
   }
  ],
  "icon": "icon-cog",
@@ -664,7 +671,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-11-06 17:48:07.682837",
+ "modified": "2025-12-26 19:46:55.093717",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
