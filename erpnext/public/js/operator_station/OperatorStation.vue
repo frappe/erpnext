@@ -30,18 +30,6 @@ const line = ref(null);
 const error = ref(null);              
 const batchNo = ref(null);
 const currentStation = ref('');
-
-// const processMapping = ref({
-//     "mixing": "distribution",
-//     "distribution": "pressed slab", 
-//     "pressing": "heated slab",
-//     "heating": "cooled slab",
-//     "cooled slab": "trimmed slab",
-//     "trimmed slab": "calibrated slab",
-//     "calibrated slab": "polished slab",
-//     "polished slab": "inspected slab"
-// });
-
 const operationMapping = ref({
     "mixing": "distribution",
     "distribution": "pressing", 
@@ -280,40 +268,6 @@ async function slabInfo(jc, station) {
       indicator: 'orange'
     });
   }
-  //     const prevSlabRes = await frappe.call({
-  //         method: 'erpnext.manufacturing.doctype.slab.api.get_slab_from_previous_stage',
-  //         args: { job_card_name: jc.name }
-  //     });
-      
-  //     if (prevSlabRes.message) {
-  //         slabAlreadyExisted = prevSlabRes.message;
-  //         current_stage = station.toLowerCase().trim();
-  //         next_process = processMapping.value[current_stage];
-  //         next_stage = operatorMapping.value[next_process];
-  //     }
-  // }
-  // debugger;
-  // if (slabAlreadyExisted) {
-  //   if (slabAlreadyExisted.status?.toLowerCase() !== station.toLowerCase()) {
-     
-  //     // await frappe.call({
-  //     //   method: 'erpnext.manufacturing.doctype.slab.api.move_slab_to',
-  //     //   args: {
-  //     //     slab_number: slabAlreadyExisted.name,
-  //     //     next_stage: ,
-  //     //     job_card_number: jc.name,
-  //     //     checkout_and_move: true
-  //     //   }
-  //     // });
-      
-  //     // Reload fresh data
-  //     const freshSlabRes = await frappe.call({
-  //       method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
-  //       args: { job_card: jc.name }
-  //     });
-  //     slabAlreadyExisted = freshSlabRes.message;
-  //   }
-    
     // Populate UI
     slabCreated.value = true;
     slabNumber.value = slab.serial_number || slab.name;
@@ -323,19 +277,7 @@ async function slabInfo(jc, station) {
     line.value = slab.line || jc.production_line;
     
     frappe.show_alert(`✅ Slab ${slabNumber.value} @ ${station}`, 'green');
-    
   } 
-  // else if (station.toLowerCase() === 'distribution') {
-  //   await createSlab(jc.production_line);
-  // }
-  // else {
-  //   frappe.msgprint({
-  //     title: 'No Slab Found',
-  //     message: `No available slab found from the previous stage for this Work Order. Ensure the previous step is completed.`,
-  //     indicator: 'orange'
-  //   });
-  // }
-// }
 
 async function startOperation() {
   const route = frappe.get_route();

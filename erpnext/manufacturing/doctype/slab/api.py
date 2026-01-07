@@ -84,7 +84,7 @@ def move_slab_to(
     slab = frappe.get_doc("Slab", slab_number)
 
     current_stage_index = allowed_stages_lower.index(slab.status.lower())
-    next_stage_index = allowed_stages_lower.index(next_stage.lower())#TODO - update with correct next stage instead os manipluating data
+    next_stage_index = allowed_stages_lower.index(next_stage.lower())
     next_stage = ALLOWED_STAGES[next_stage_index]
 
     # Validation: Check the direction of transition
