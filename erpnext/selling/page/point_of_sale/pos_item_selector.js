@@ -10,11 +10,11 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.item_display_class = this.hide_images ? "hide-item-image" : "show-item-image";
 		this.auto_add_item = settings.auto_add_item_to_cart;
 
-		this.get_parent_item_group();
+		this.item_ready_group = this.get_parent_item_group();
 		this.inti_component();
 	}
 
-	async inti_component() {
+	inti_component() {
 		this.prepare_dom();
 		this.make_search_bar();
 		this.load_items_data();
@@ -51,6 +51,8 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	async load_items_data() {
+		await this.item_ready_group;
+
 		if (!this.price_list) {
 			const res = await frappe.db.get_value("POS Profile", this.pos_profile, "selling_price_list");
 			this.price_list = res.message.selling_price_list;
