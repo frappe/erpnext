@@ -42,8 +42,9 @@ class TestRenameItalyCustomerNameFields(unittest.TestCase):
 			from erpnext.regional.italy.setup import make_custom_fields
 
 			make_custom_fields(update=True)
-		except Exception:
-			pass  # Ignore if setup fails
+		except Exception as e:
+			# Ignore setup failures in tearDown, but log for debugging
+			print(f"Warning: Failed to restore Italy setup in tearDown: {e}")
 		frappe.db.commit()
 
 	def _cleanup_fields(self):
@@ -138,13 +139,15 @@ class TestRenameItalyCustomerNameFields(unittest.TestCase):
 		try:
 			if frappe.db.has_column("Customer", "first_name"):
 				frappe.db.sql_ddl("ALTER TABLE `tabCustomer` DROP COLUMN `first_name`")
-		except Exception:
-			pass
+		except Exception as e:
+			# Column might already be dropped or locked
+			print(f"Debug: Could not drop first_name column: {e}")
 		try:
 			if frappe.db.has_column("Customer", "last_name"):
 				frappe.db.sql_ddl("ALTER TABLE `tabCustomer` DROP COLUMN `last_name`")
-		except Exception:
-			pass
+		except Exception as e:
+			# Column might already be dropped or locked
+			print(f"Debug: Could not drop last_name column: {e}")
 		frappe.clear_cache()  # Clear cache after dropping columns
 
 	def _create_test_customer_direct(self):
