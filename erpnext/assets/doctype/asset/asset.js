@@ -471,16 +471,21 @@ frappe.ui.form.on("Asset", {
 	},
 
 	is_existing_asset: function (frm) {
+		if (frm.doc.is_existing_asset) {
+			frm.set_value("purchase_receipt", "");
+			frm.set_value("purchase_invoice", "");
+		}
 		frm.trigger("toggle_reference_doc");
 	},
 
 	is_composite_asset: function (frm) {
 		if (frm.doc.is_composite_asset) {
 			frm.set_value("net_purchase_amount", 0);
+			frm.set_value("purchase_receipt", "");
+			frm.set_value("purchase_invoice", "");
 		} else {
 			frm.set_df_property("net_purchase_amount", "read_only", 0);
 		}
-
 		frm.trigger("toggle_reference_doc");
 	},
 
