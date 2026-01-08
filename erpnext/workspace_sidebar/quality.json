@@ -21,35 +21,23 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "quality",
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Quality Goal",
-   "link_to": "Quality Goal",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
-   "icon": "book-text",
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Quality Procedure",
-   "link_to": "Quality Procedure",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
    "icon": "inspection-panel",
    "indent": 0,
    "keep_closed": 0,
    "label": "Quality Inspection",
    "link_to": "Quality Inspection",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "goal",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Quality Goal",
+   "link_to": "Quality Goal",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
@@ -93,24 +81,37 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "calendar-check-2",
-   "indent": 1,
-   "keep_closed": 1,
-   "label": "Goal and Procedure",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Section Break"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
+   "icon": "thumbs-up",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Quality Goal",
-   "link_to": "Quality Goal",
+   "label": "Quality Feedback",
+   "link_to": "Quality Feedback",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "users",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Quality Meeting",
+   "link_to": "Quality Meeting",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "database",
+   "indent": 1,
+   "keep_closed": 1,
+   "label": "Setup",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Section Break"
   },
   {
    "child": 1,
@@ -135,28 +136,6 @@
    "type": "Link"
   },
   {
-   "child": 0,
-   "collapsible": 1,
-   "icon": "thumbs-up",
-   "indent": 1,
-   "keep_closed": 1,
-   "label": "Feedback",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Section Break"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Quality Feedback",
-   "link_to": "Quality Feedback",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
    "child": 1,
    "collapsible": 1,
    "indent": 0,
@@ -168,73 +147,18 @@
    "type": "Link"
   },
   {
-   "child": 0,
-   "collapsible": 1,
-   "icon": "calendar-check",
-   "indent": 1,
-   "keep_closed": 1,
-   "label": "Meeting",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Section Break"
-  },
-  {
    "child": 1,
    "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
-   "label": "Quality Meeting",
-   "link_to": "Quality Meeting",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
-   "icon": "review",
-   "indent": 1,
-   "keep_closed": 1,
-   "label": "Review and Action",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Section Break"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Non Conformance",
-   "link_to": "Non Conformance",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Quality Review",
-   "link_to": "Quality Review",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Quality Action",
-   "link_to": "Quality Action",
+   "label": "Quality Inspection Template",
+   "link_to": "Quality Inspection Template",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
   }
  ],
- "modified": "2025-12-19 17:41:55.193229",
+ "modified": "2026-01-02 17:39:50.641254",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",

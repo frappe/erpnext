@@ -9,6 +9,18 @@
   {
    "child": 0,
    "collapsible": 1,
+   "icon": "home",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Home",
+   "link_to": "Banking",
+   "link_type": "Workspace",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
    "icon": "book-open-check",
    "indent": 0,
    "keep_closed": 0,
@@ -36,9 +48,33 @@
    "icon": "clipboard-check",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Reconciliation Report",
+   "label": "Reconciliation Statement",
    "link_to": "Bank Reconciliation Statement",
    "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "split",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Unreconcile Payment",
+   "link_to": "Unreconcile Payment",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "link",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Process Payment Reconciliation",
+   "link_to": "Process Payment Reconciliation",
+   "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
   },
@@ -56,7 +92,7 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "organization",
+   "icon": "",
    "indent": 0,
    "keep_closed": 0,
    "label": "Bank",
@@ -68,7 +104,7 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "accounting",
+   "icon": "",
    "indent": 0,
    "keep_closed": 0,
    "label": "Bank Account",
@@ -80,7 +116,40 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "settings",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Bank Account Type",
+   "link_to": "Bank Account Type",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Bank Account Subtype",
+   "link_to": "Bank Account Subtype",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Bank Guarantee",
+   "link_to": "Bank Guarantee",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "",
    "indent": 0,
    "keep_closed": 0,
    "label": "Plaid Settings",
@@ -123,7 +192,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-12-22 16:57:07.501533",
+ "modified": "2026-01-02 13:53:50.930215",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Banking",

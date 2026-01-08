@@ -9,22 +9,10 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "home",
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Home",
-   "link_to": "CRM",
-   "link_type": "Workspace",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
    "icon": "chart",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Dashboard",
+   "label": "Home",
    "link_to": "CRM",
    "link_type": "Dashboard",
    "show_arrow": 0,
@@ -69,7 +57,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "notepad-text",
+   "icon": "sheet",
    "indent": 1,
    "keep_closed": 1,
    "label": "Reports",
@@ -497,7 +485,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-11-25 10:46:09.695726",
+ "modified": "2026-01-02 15:06:29.836236",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",

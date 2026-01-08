@@ -13,8 +13,9 @@
    "indent": 0,
    "keep_closed": 0,
    "label": "Sales Tax Template",
-   "link_to": "Sales Taxes and Charges",
+   "link_to": "Item Tax Template",
    "link_type": "DocType",
+   "navigate_to_tab": "",
    "show_arrow": 0,
    "type": "Link"
   },
@@ -45,6 +46,17 @@
   {
    "child": 0,
    "collapsible": 1,
+   "icon": "database",
+   "indent": 1,
+   "keep_closed": 1,
+   "label": "Setup",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Section Break"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
    "icon": "triangle",
    "indent": 0,
    "keep_closed": 0,
@@ -55,7 +67,7 @@
    "type": "Link"
   },
   {
-   "child": 0,
+   "child": 1,
    "collapsible": 1,
    "icon": "book-open-text",
    "indent": 0,
@@ -67,13 +79,24 @@
    "type": "Link"
   },
   {
-   "child": 0,
+   "child": 1,
    "collapsible": 1,
    "icon": "book-text",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Tax Withholding",
+   "label": "Tax Withholding Category",
    "link_to": "Tax Withholding Category",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Tax Withholding Group",
+   "link_to": "Tax Withholding Group",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
@@ -89,9 +112,43 @@
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "sheet",
+   "indent": 1,
+   "keep_closed": 1,
+   "label": "Reports",
+   "link_to": "",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Section Break"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "TDS Computation Summary",
+   "link_to": "TDS Computation Summary",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Tax Withholding Details",
+   "link_to": "Tax Withholding Details",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-12-31 16:55:52.262432",
+ "modified": "2026-01-02 14:40:04.075046",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Taxes",

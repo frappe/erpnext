@@ -239,11 +239,12 @@
    "label": "Allow Editing of Items and Quantities in Work Order"
   }
  ],
+ "hide_toolbar": 1,
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-11-13 12:30:29.006822",
+ "modified": "2026-01-02 18:18:05.759229",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

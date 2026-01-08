@@ -83,10 +83,11 @@
    "label": "No of Parallel Reposting (Per Item)"
   }
  ],
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-05 16:16:26.548349",
+ "modified": "2026-01-02 18:18:57.115176",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reposting Settings",
