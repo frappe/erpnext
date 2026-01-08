@@ -504,11 +504,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-08 15:11:28.939052",
+ "modified": "2026-01-08 18:37:28.831935",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
  "owner": "Administrator",
- "standard": 0,
+ "standard": 1,
  "title": "Accounting"
 }
