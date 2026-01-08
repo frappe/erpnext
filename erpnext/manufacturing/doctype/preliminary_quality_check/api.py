@@ -16,6 +16,13 @@ def create_preliminary_quality_check(slab_name, slab_template, h_bend, v_bend, d
     doc.remarks = remarks
     doc.insert()
 
-    move_slab_to(slab_name, "Quarantine")
+    slab = frappe.get_doc("Slab", slab_name)
+    if slab.status != "Quarantine" and slab.is_cur_stage_complete:
+        move_slab_to(slab_name, "Quarantine")
+
+    slab = frappe.get_doc("Slab", slab_name)
+    last_history_item = slab.slab_history[-1]
+    last_history_item.preliminary_qc = doc.name
+    slab.save()
 
     return doc

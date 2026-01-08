@@ -91,27 +91,27 @@ const props = defineProps({
 onMounted(async () => {
 	try {
 		const route = frappe.get_route();
-		const station = route[1] || props.process;
+		const station = route[1] || '';
 		jobCardName.value = route[2] || null;
 		if(!jobCardName.value) {
-			await getJobCardsList();
+			jobCardName.value = await getJobCardsList();
 		}
 
 		// jobCardName.value = route[2] || props.job_card;
 
-		if (!jobCardName.value) {
-			const jcQueue = await frappe.call({
-				method: 'erpnext.manufacturing.page.operator_station.operator_station.get_open_job_cards',
-				args: { process: station }
-			});
+		//if (!jobCardName.value) {
+		//	const jcQueue = await frappe.call({
+		//		method: 'erpnext.manufacturing.page.operator_station.operator_station.get_open_job_cards',
+		//		args: { process: station }
+		//	});
 
-			if (jcQueue.message && jcQueue.message.length > 0) {
-				jobCardName.value = jcQueue.message[0].name;
-			} else {
-				error.value = __(`No pending Job Cards found for {0}`, [station]);
-				return;
-			}
-		}
+		//	if (jcQueue.message && jcQueue.message.length > 0) {
+		//		jobCardName.value = jcQueue.message[0].name;
+		//	} else {
+		//		error.value = __(`No pending Job Cards found for {0}`, [station]);
+		//		return;
+		//	}
+		//}
 
 		const jc = await frappe.db.get_doc('Job Card', jobCardName.value);
 		jobCardDoc.value = jc;
@@ -188,7 +188,7 @@ onMounted(async () => {
 		}
 
 		// Fetch Slab Queue
-		await getJobCardsList();
+		//await getJobCardsList();
 		await fetchQueue(line.value || jc.production_line, station);
 	} catch (e) {
 		error.value = e.message;
@@ -256,7 +256,8 @@ async function createSlab(line) {
 		}
 		slabCreated.value = true;
 		slabNumber.value = result.message?.serial_number;
-		batchNo.value = result.message?.batch_number;
+
+		batchNo.value = result.message?.name;
 		colour.value = result.message?.template;
 	} catch (e) {
 		frappe.msgprint(__('Slab creation failed: {0}', [e.message]));
@@ -286,7 +287,7 @@ async function slabInfo(jc, station) {
 	// Populate UI
 	slabCreated.value = true;
 	slabNumber.value = slab.serial_number || slab.name;
-	batchNo.value = slab.batch_number || batchNo.value;
+	batchNo.value = slab.name || batchNo.value;
 	slabTemplate.value = slab.template || slabTemplate.value;
 	colour.value = slab.template || colour.value;
 	line.value = slab.line || jc.production_line;
@@ -482,7 +483,7 @@ function submitIssue() {
 
 async function getJobCardsList() {
 	const route = frappe.get_route();
-	const station = route[1] || props.process;
+	const station = route[1] || '';
 	const result = await frappe.call({
 		method: 'erpnext.manufacturing.doctype.operation.api.get_job_cards_list',
 		args: {

@@ -75,7 +75,7 @@ onMounted(async () => {
     if (!jobCard.value) {
         error.value = __('No Job Card found in route');
 		loadingIngredients.value = true;
-		await getJobCardsList();
+		jobCard.value = await getJobCardsList();
 	}
 
     await loadMixers();
@@ -221,6 +221,7 @@ async function getJobCardsList() {
   });
 
 	jobCard.value = result.message.name;
+	return jobCard.value;
 }
 
 async function startMixing() {
@@ -516,7 +517,7 @@ async function onMixerChange() {
                         </a>
                     </div>
                     <h2 class="mb-3">{{ batchNo }}</h2>
-                    <div class="text-danger font-weight-bold">{{ colour }}</div>
+                    <div class="text-danger font-weight-bold">{{ jobCard }}</div>
                 </div>
 
                 <div class="ml-4">

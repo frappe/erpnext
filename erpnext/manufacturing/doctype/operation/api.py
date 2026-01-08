@@ -127,4 +127,5 @@ def get_job_cards_list(operation):
         fields=["name", "operation", "status", "work_order"],
         order_by="creation asc"
     )
+
     return job_cards[-1]

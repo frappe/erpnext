@@ -82,6 +82,7 @@ def move_slab_to(
     job_card_number: str | None = None,
     checkout_and_move=False,
 ):
+    checkout_and_move = bool(checkout_and_move)
     # Validation: Check if the given stage is valid.
     allowed_stages_lower = [stage.lower() for stage in ALLOWED_STAGES]
     if next_stage.lower() not in allowed_stages_lower:
@@ -113,9 +114,9 @@ def move_slab_to(
 
     slab.status = next_stage  # pyright: ignore[reportAttributeAccessIssue]
     # slab.is_cur_stage_complete = False
-    slab.is_cur_stage_complete = True
+    slab.is_cur_stage_complete = False
     slab.current_stage = ALLOWED_STAGES[next_stage_index] # pyright: ignore[reportAttributeAccessIssue]
-    next_job_card_info = find_next_job_card(job_card_number)
+    next_job_card_info = find_next_job_card(job_card_number or slab.slab_history[-1].job_card_number)
     slab.current_job_card = next_job_card_info["next_job_card"]
 
     # Append the next stage to the slab history.
@@ -143,7 +144,8 @@ def get_slabs_in(line: str, current_stage: str) -> list[dict]:
 
 
 @frappe.whitelist(allow_guest=True)
-def get_slabs_for(line: str, next_stage: str) -> list[dict]:
+def get_slabs_for(line: str, next_stage: str, include_current_stage = False) -> list[dict]:
+    include_current_stage = bool(include_current_stage)
     # Determine valid previous stages based on the next_stage and rules
     valid_previous_stages = []
     
@@ -164,6 +166,9 @@ def get_slabs_for(line: str, next_stage: str) -> list[dict]:
 
     if not valid_previous_stages:
         return []
+
+    if include_current_stage:
+        valid_previous_stages.append(next_stage)
 
     slabs = frappe.db.get_list("Slab", order_by="modified asc", filters={"status": ["in", valid_previous_stages], "is_cur_stage_complete": 0, "line": line}, fields=["name", "serial_number", "status", "line", "batch_number", "template", "creation", "modified"])
     return slabs

@@ -121,9 +121,12 @@ const unloadToTrimming = (slab) => {
     const performMove = async () => {
         try {
             await frappe.call({
-                method: 'erpnext.manufacturing.doctype.slab.api.checkout_slab',
+                method: 'erpnext.manufacturing.doctype.slab.api.move_slab_to',
                 args: {
-                    slab_number: slab.name,
+					slab_number: slab.name,
+					next_stage: "Trimming",
+					checkout_and_move: true,
+					job_card_number: slab.current_job_card
                 },
                 freeze: true,
                 callback: (r) => {

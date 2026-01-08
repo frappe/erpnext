@@ -122,7 +122,8 @@ def finish_distribution(job_card, process_name="operator"):
         "distribution": "pressing", 
         "pressing": "heating",
         "heating": "cooling",
-        "cooling": "trimming",
+        "cooling": "quarantine",
+        "quarantine": "trimming",
         "trimming": "calibration",
         "calibration": "polishing",
         "polishing": "Quality Check"
@@ -131,8 +132,9 @@ def finish_distribution(job_card, process_name="operator"):
     next_stage = process_mapping.get(process_name)
     if not next_stage:
         frappe.throw(_("Invalid process name: {0}").format(process_name))
+
     move_slab_to(slab_number=slabs[0].name, next_stage=next_stage, job_card_number=jc.name, checkout_and_move=True)
-    
+
     work_order = jc.work_order
     wo = frappe.get_doc("Work Order", work_order)
     wo.produced_qty = job_card_qty

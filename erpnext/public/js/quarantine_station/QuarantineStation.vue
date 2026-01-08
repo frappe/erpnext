@@ -24,7 +24,8 @@ const get_slabs_ready_for_quarantine = async () => {
         method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
         args: {
             line: work_context.assigned_line,
-            next_stage: "Quarantine"
+			next_stage: "Quarantine",
+			include_current_stage: true,
         }
     });
 
