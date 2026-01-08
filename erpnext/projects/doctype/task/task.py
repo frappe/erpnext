@@ -90,6 +90,7 @@ class Task(NestedSet):
 		self.validate_completed_on()
 		self.set_default_end_date_if_missing()
 		self.validate_parent_is_group()
+		self.validate_parent_task_project()
 
 	def validate_dates(self):
 		self.validate_from_to_dates("exp_start_date", "exp_end_date")
@@ -217,6 +218,12 @@ class Task(NestedSet):
 					),
 					ParentIsGroupError,
 				)
+
+	def validate_parent_task_project(self):
+		if self.parent_task and self.project:
+			parent_proj = frappe.get_value("Task", self.parent_task, "project")
+			if self.project != parent_proj:
+				self.parent_task = ""
 
 	def update_depends_on(self):
 		depends_on_tasks = ""
