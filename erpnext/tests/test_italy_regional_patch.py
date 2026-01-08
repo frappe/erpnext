@@ -45,7 +45,7 @@ class TestRenameItalyCustomerNameFields(unittest.TestCase):
 		except (ImportError, AttributeError, ValueError) as e:
 			# Ignore setup failures in tearDown, but log for debugging
 			frappe.logger().warning(f"Failed to restore Italy setup in tearDown: {e}")
-		frappe.db.commit()
+		frappe.db.rollback()
 
 	def _cleanup_fields(self):
 		"""Remove both old and new custom fields."""
@@ -57,14 +57,12 @@ class TestRenameItalyCustomerNameFields(unittest.TestCase):
 		]:
 			if frappe.db.exists("Custom Field", field_name):
 				frappe.db.delete("Custom Field", {"name": field_name})
-		frappe.db.commit()
 
 	def _cleanup_test_customer(self):
 		"""Remove test customer if exists."""
 		if frappe.db.exists("Customer", self.test_customer_name):
 			# Delete directly from DB to avoid controller validation
 			frappe.db.delete("Customer", {"name": self.test_customer_name})
-			frappe.db.commit()
 
 	def _create_old_custom_fields_direct(self):
 		"""Create the old custom fields directly in DB to bypass validation.
@@ -139,13 +137,13 @@ class TestRenameItalyCustomerNameFields(unittest.TestCase):
 		try:
 			if frappe.db.has_column("Customer", "first_name"):
 				frappe.db.sql_ddl("ALTER TABLE `tabCustomer` DROP COLUMN `first_name`")
-		except Exception as e:
+		except frappe.db.InternalError as e:
 			# Column might already be dropped or locked
 			frappe.logger().debug(f"Could not drop first_name column: {e}")
 		try:
 			if frappe.db.has_column("Customer", "last_name"):
 				frappe.db.sql_ddl("ALTER TABLE `tabCustomer` DROP COLUMN `last_name`")
-		except Exception as e:
+		except frappe.db.InternalError as e:
 			# Column might already be dropped or locked
 			frappe.logger().debug(f"Could not drop last_name column: {e}")
 		frappe.clear_cache()  # Clear cache after dropping columns
