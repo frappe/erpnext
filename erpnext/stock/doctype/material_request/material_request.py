@@ -957,67 +957,79 @@ def make_in_transit_stock_entry(source_name, in_transit_warehouse):
 		row.t_warehouse = in_transit_warehouse
 
 	return ste_doc
-
+	
 @frappe.whitelist()
-def update_items_after_submit(mr_name, trans_items):
-	if not mr_name:
-		frappe.throw(_("Material Request name is required"))
+def update_items_after_submit(material_request, items):
+	"""
+	Update items of a submitted Purchase Material Request
+	when it is partially ordered.
+	"""
 
-	if isinstance(trans_items, str):
-		trans_items = frappe.parse_json(trans_items)
+	if not material_request:
+		frappe.throw(_("Material Request is required"))
 
-	if not trans_items:
+	if isinstance(items, str):
+		items = frappe.parse_json(items)
+
+	if not items:
 		frappe.throw(_("No items provided for update"))
 
-	mr = frappe.get_doc("Material Request", mr_name)
+	material_request_doc = frappe.get_doc("Material Request", material_request)
 
 	# Permission check (MANDATORY)
-	mr.check_permission("write")
+	material_request_doc.check_permission("write")
 
-	# Server-side validation (DO NOT trust UI)
-	if mr.docstatus != 1:
+	# Server-side validations (do not trust UI)
+	if material_request_doc.docstatus != 1:
 		frappe.throw(_("Material Request must be submitted"))
 
-	if mr.material_request_type != "Purchase":
+	if material_request_doc.material_request_type != "Purchase":
 		frappe.throw(_("Only Purchase type Material Requests can be updated"))
 
-	if flt(mr.per_ordered) >= 100:
-		frappe.throw(_("Cannot update fully ordered Material Request"))
+	if flt(material_request_doc.per_ordered) >= 100:
+		frappe.throw(_("Cannot update a fully ordered Material Request"))
 
-	if mr.status == "Stopped":
-		frappe.throw(_("Cannot update stopped Material Request"))
+	if material_request_doc.status == "Stopped":
+		frappe.throw(_("Cannot update a stopped Material Request"))
 
-	mr.flags.ignore_validate_update_after_submit = True
 
-	existing_rows = {d.name: d for d in mr.items}
-	incoming_rows = {d.get("docname") for d in trans_items if d.get("docname")}
+	material_request_doc.flags.ignore_validate_update_after_submit = True
+
+	existing_items_by_name = {
+		item.name: item for item in material_request_doc.items
+	}
+	incoming_item_names = {
+		item.get("docname") for item in items if item.get("docname")
+	}
 
 	# Remove deleted rows
-	for rowname, row in existing_rows.items():
-		if rowname not in incoming_rows:
+	for row_name, row in existing_items_by_name.items():
+		if row_name not in incoming_item_names:
 			if flt(row.ordered_qty) > 0:
 				frappe.throw(
-					_("Cannot delete Item {0} because Completed Qty exists").format(row.item_code)
+					_("Cannot delete Item {0} because it has completed quantity")
+					.format(row.item_code)
 				)
-			mr.remove(row)
+			material_request_doc.remove(row)
 
-	# Add / Update rows
-	for d in trans_items:
-		if not d.get("item_code"):
+	
+	for item_data in items:
+		if not item_data.get("item_code"):
 			continue
 
-		if d.get("docname") and d.get("docname") in existing_rows:
-			child = existing_rows[d.get("docname")]
+		if item_data.get("docname") and item_data.get("docname") in existing_items_by_name:
+			child = existing_items_by_name[item_data.get("docname")]
 		else:
-			child = mr.append("items", {})
-			item = frappe.get_cached_doc("Item", d.get("item_code"))
-			child.item_code = item.name
-			child.item_name = item.item_name
-			child.description = item.description
-			child.stock_uom = item.stock_uom
+			child = material_request_doc.append("items", {})
+			item_doc = frappe.get_cached_doc("Item", item_data.get("item_code"))
 
-		qty = flt(d.get("qty"))
-		conversion_factor = flt(d.get("conversion_factor")) or 1
+			child.item_code = item_doc.name
+			child.item_name = item_doc.item_name
+			child.description = item_doc.description
+			child.stock_uom = item_doc.stock_uom
+
+		qty = flt(item_data.get("qty"))
+		conversion_factor = flt(item_data.get("conversion_factor")) or 1
 		stock_qty = qty * conversion_factor
 
 		if flt(child.ordered_qty) and stock_qty <= flt(child.ordered_qty):
@@ -1027,17 +1039,17 @@ def update_items_after_submit(mr_name, trans_items):
 			)
 
 		child.qty = qty
-		child.uom = d.get("uom")
-		child.rate = flt(d.get("rate"))
+		child.uom = item_data.get("uom")
+		child.rate = flt(item_data.get("rate"))
 		child.conversion_factor = conversion_factor
 		child.stock_qty = stock_qty
-		child.warehouse = d.get("warehouse")
-		child.schedule_date = d.get("schedule_date")
+		child.warehouse = item_data.get("warehouse")
+		child.schedule_date = item_data.get("schedule_date")
 
-	# Save once
-	mr.save()
 
-	# Update bin quantities
-	mr.update_requested_qty()
+	material_request_doc.save()
 
-	return mr.name
+
+	material_request_doc.update_requested_qty()
+
+	return material_request_doc.name
