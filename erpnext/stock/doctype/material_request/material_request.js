@@ -716,7 +716,7 @@ function open_update_items_dialog(frm) {
 				fieldtype: "Table",
 				label: __("Items"),
 				data: table_data,
-				get_status: (row) => (row && row.docname) ? "Read Only" : "Write",
+				get_status: (row) => (row && row.docname) ? "Read Only": "Write",
 				fields: [
 					{ fieldtype: "Data", fieldname: "docname", hidden: 1 },
 					{ fieldtype: "Link", fieldname: "item_code", label: __("Item Code"), options: "Item", in_list_view: 1,read_only_depends_on: "eval:doc.docname"},
@@ -745,7 +745,7 @@ function open_update_items_dialog(frm) {
 							});
 						}
 					},
-					{ fieldtype: "Float", fieldname: "conversion_factor", label: __("Factor"),  },	
+					{ fieldtype: "Float", fieldname: "conversion_factor", label: __("UMO Conversion Factor")  },	
 					{ fieldtype: "Float", fieldname: "completed_qty", label: __("Ordered Qty"), read_only: 1 },
 				]
 			}
