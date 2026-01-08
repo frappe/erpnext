@@ -77,9 +77,10 @@
    "type": "Link"
   }
  ],
- "modified": "2025-11-25 10:46:09.466032",
+ "modified": "2026-01-08 14:16:38.751147",
  "modified_by": "Administrator",
  "name": "Projects",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Projects"
 }

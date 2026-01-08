@@ -437,10 +437,11 @@
    "type": "Link"
   }
  ],
- "modified": "2025-12-15 11:48:11.189441",
+ "modified": "2026-01-08 14:16:38.568988",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Manufacturing"
 }

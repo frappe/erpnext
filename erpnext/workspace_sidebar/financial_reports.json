@@ -260,10 +260,11 @@
    "type": "Link"
   }
  ],
- "modified": "2025-11-25 10:46:09.634854",
+ "modified": "2026-01-08 14:16:38.862808",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Reports",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Financial Reports"
 }

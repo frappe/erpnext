@@ -123,10 +123,11 @@
    "type": "Link"
   }
  ],
- "modified": "2025-12-22 16:57:07.501533",
+ "modified": "2026-01-08 14:16:38.478613",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Banking",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Banking"
 }

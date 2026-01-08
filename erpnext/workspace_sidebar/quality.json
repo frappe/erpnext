@@ -234,10 +234,11 @@
    "type": "Link"
   }
  ],
- "modified": "2025-12-19 17:41:55.193229",
+ "modified": "2026-01-08 14:16:38.729736",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Quality"
 }

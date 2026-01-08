@@ -247,10 +247,11 @@
    "type": "Link"
   }
  ],
- "modified": "2025-11-25 10:46:09.205029",
+ "modified": "2026-01-08 14:16:38.313969",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Buying"
 }

@@ -139,10 +139,11 @@
    "type": "Link"
   }
  ],
- "modified": "2025-11-25 10:46:09.177392",
+ "modified": "2026-01-08 14:16:38.282733",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Settings",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Settings"
 }

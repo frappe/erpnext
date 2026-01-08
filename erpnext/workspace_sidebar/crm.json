@@ -497,10 +497,11 @@
    "type": "Link"
   }
  ],
- "modified": "2025-11-25 10:46:09.695726",
+ "modified": "2026-01-08 14:16:38.924111",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
  "owner": "Administrator",
+ "standard": 1,
  "title": "CRM"
 }

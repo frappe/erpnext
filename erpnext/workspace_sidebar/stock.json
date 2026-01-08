@@ -260,10 +260,11 @@
    "type": "Link"
   }
  ],
- "modified": "2025-11-25 10:46:09.161250",
+ "modified": "2026-01-08 14:16:38.253747",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Stock"
 }

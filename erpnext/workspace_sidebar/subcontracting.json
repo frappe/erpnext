@@ -207,10 +207,11 @@
    "type": "Link"
   }
  ],
- "modified": "2025-12-19 16:52:24.076660",
+ "modified": "2026-01-08 14:16:38.230691",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Subcontracting",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Subcontracting"
 }
