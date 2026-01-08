@@ -41,6 +41,10 @@ def execute():
 	frappe.db.updatedb("Customer")
 
 	# Step 3: Migrate data from old columns to new columns (if old columns still exist in DB)
+	# Note: We do NOT drop the first_name/last_name columns because they are standard fields
+	# in Customer doctype (Read Only fields that fetch from customer_primary_contact).
+	# The Italy regional setup incorrectly created Custom Fields with the same names.
+	# We only migrate the data and leave the standard columns intact.
 	if is_italy_first_name and frappe.db.has_column("Customer", "first_name"):
 		frappe.db.sql("""
 			UPDATE `tabCustomer`
@@ -48,8 +52,6 @@ def execute():
 			WHERE first_name IS NOT NULL AND first_name != ''
 			AND (italy_customer_first_name IS NULL OR italy_customer_first_name = '')
 		""")
-		# Drop old column
-		frappe.db.sql_ddl("ALTER TABLE `tabCustomer` DROP COLUMN `first_name`")
 
 	if is_italy_last_name and frappe.db.has_column("Customer", "last_name"):
 		frappe.db.sql("""
@@ -58,5 +60,3 @@ def execute():
 			WHERE last_name IS NOT NULL AND last_name != ''
 			AND (italy_customer_last_name IS NULL OR italy_customer_last_name = '')
 		""")
-		# Drop old column
-		frappe.db.sql_ddl("ALTER TABLE `tabCustomer` DROP COLUMN `last_name`")
