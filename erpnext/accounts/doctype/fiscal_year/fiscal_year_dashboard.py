@@ -6,7 +6,7 @@ def get_data():
 		"fieldname": "fiscal_year",
 		"non_standard_fieldnames": {"Budget": "from_fiscal_year"},
 		"transactions": [
-			{"label": _("Budgets"), "items": ["Budget"]},
+			{"label": _("Budgets"), "items": [{"type": "doctype", "name": "Budget", "fieldname": "from_fiscal_year"}]},
 			{"label": _("References"), "items": ["Period Closing Voucher"]},
 			{
 				"label": _("Target Details"),
