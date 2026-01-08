@@ -144,55 +144,55 @@ class WorkOrder(Document):
 	def before_insert(self):
 		processes = {
 			"mixing": {
-				"source_warehouse": "Stores",  # TODO: update to silos later
+				"source_warehouse": "SILOS Warehouse",
 				"wip_warehouse": "Mixing Warehouse",
-				"fg_warehouse": "Mixing Warehouse"
+				"fg_warehouse": "Mixing Warehouse",
 			},
 			"distribution": {
-				"source_warehouse": "Mixing Warehouse", 
+				"source_warehouse": "Mixing Warehouse",
 				"wip_warehouse": "Distribution Warehouse",
-				"fg_warehouse": "Pressing Warehouse"
+				"fg_warehouse": "Pressing Warehouse",
 			},
 			"pressed slab": {
 				"source_warehouse": "Pressing Warehouse",
 				"wip_warehouse": "Pressing Warehouse",
-				"fg_warehouse": "Heating Warehouse"
+				"fg_warehouse": "Heating Warehouse",
 			},
 			"heated slab": {
 				"source_warehouse": "Heating Warehouse",
 				"wip_warehouse": "Heating Warehouse",
-				"fg_warehouse": "Cooling Warehouse"
+				"fg_warehouse": "Cooling Warehouse",
 			},
 			"cooled slab": {
 				"source_warehouse": "Cooling Warehouse",
 				"wip_warehouse": "Cooling Warehouse",
-				"fg_warehouse": "Trimming Warehouse"
+				"fg_warehouse": "Trimming Warehouse",
 			},
 			"trimmed slab": {
 				"source_warehouse": "Trimming Warehouse",
 				"wip_warehouse": "Trimming Warehouse",
-				"fg_warehouse": "Calibration Warehouse"
+				"fg_warehouse": "Calibration Warehouse",
 			},
 			"calibrated slab": {
 				"source_warehouse": "Calibration Warehouse",
 				"wip_warehouse": "Calibration Warehouse",
-				"fg_warehouse": "Polishing Warehouse"
+				"fg_warehouse": "Polishing Warehouse",
 			},
 			"polished slab": {
 				"source_warehouse": "Polishing Warehouse",
 				"wip_warehouse": "Polishing Warehouse",
-				"fg_warehouse": "Quality Check Warehouse"
+				"fg_warehouse": "Quality Check Warehouse",
 			},
 			"inspected slab": {
 				"source_warehouse": "Quality Check Warehouse",
 				"wip_warehouse": "Quality Check Warehouse",
-				"fg_warehouse": "Finished Goods"
+				"fg_warehouse": "Finished Goods",
 			},
 			"fg": {
 				"source_warehouse": "Finished Goods",
 				"wip_warehouse": "Finished Goods",
-				"fg_warehouse": "Finished Goods"
-			}
+				"fg_warehouse": "Finished Goods",
+			},
 			# TODO: Update the finished good warehouses
 
 		}
