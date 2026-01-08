@@ -692,18 +692,17 @@ frappe.ui.form.on("Material Request", {
 		}
 	},
 });
-
 function open_update_items_dialog(frm) {
-	const table_data = frm.doc.items.map((d) => ({
-		docname: d.name,
-		item_code: d.item_code,
-		qty: flt(d.qty),
-		completed_qty: flt(d.ordered_qty),
-		uom: d.uom,
-		conversion_factor: d.conversion_factor,
-		rate: d.rate,
-		warehouse: d.warehouse,
-		schedule_date: d.schedule_date,
+	const items_data = frm.doc.items.map((row) => ({
+		docname: row.name,
+		item_code: row.item_code,
+		qty: flt(row.qty),
+		completed_qty: flt(row.ordered_qty),
+		uom: row.uom,
+		conversion_factor: row.conversion_factor,
+		rate: row.rate,
+		warehouse: row.warehouse,
+		schedule_date: row.schedule_date,
 	}));
 
 	const dialog = new frappe.ui.Dialog({
@@ -711,13 +710,15 @@ function open_update_items_dialog(frm) {
 		size: "extra-large",
 		fields: [
 			{
-				fieldname: "items_table",
+				fieldname: "items",
 				fieldtype: "Table",
 				label: __("Items"),
-				data: table_data,
-				get_data: () => table_data,
+				data: items_data,
+				get_data: () => items_data,
+				in_place_edit: false,
 				fields: [
 					{ fieldtype: "Data", fieldname: "docname", hidden: 1 },
+
 					{
 						fieldtype: "Link",
 						fieldname: "item_code",
@@ -726,6 +727,7 @@ function open_update_items_dialog(frm) {
 						in_list_view: 1,
 						reqd: 1,
 					},
+
 					{
 						fieldtype: "Float",
 						fieldname: "qty",
@@ -733,12 +735,14 @@ function open_update_items_dialog(frm) {
 						in_list_view: 1,
 						reqd: 1,
 					},
+
 					{
 						fieldtype: "Float",
 						fieldname: "completed_qty",
 						label: __("Completed Qty"),
 						read_only: 1,
 					},
+
 					{
 						fieldtype: "Link",
 						fieldname: "uom",
@@ -746,18 +750,45 @@ function open_update_items_dialog(frm) {
 						options: "UOM",
 						in_list_view: 1,
 						reqd: 1,
+
+						onchange() {
+							const row = this.doc;
+							if (!row.item_code || !row.uom) return;
+
+							frappe.call({
+								method:
+									"erpnext.stock.get_item_details.get_conversion_factor",
+								args: {
+									item_code: row.item_code,
+									uom: row.uom,
+								},
+								callback(r) {
+									if (r.message) {
+										row.conversion_factor =
+											r.message.conversion_factor || 1;
+
+										// refresh grid row
+										dialog.fields_dict.items.grid.refresh();
+									}
+								},
+							});
+						},
 					},
+
 					{
 						fieldtype: "Float",
 						fieldname: "conversion_factor",
 						label: __("Conversion Factor"),
 						read_only: 1,
+						in_list_view: 1,
 					},
+
 					{
 						fieldtype: "Currency",
 						fieldname: "rate",
 						label: __("Rate"),
 					},
+
 					{
 						fieldtype: "Link",
 						fieldname: "warehouse",
@@ -766,6 +797,7 @@ function open_update_items_dialog(frm) {
 						in_list_view: 1,
 						reqd: 1,
 					},
+
 					{
 						fieldtype: "Date",
 						fieldname: "schedule_date",
@@ -776,7 +808,9 @@ function open_update_items_dialog(frm) {
 				],
 			},
 		],
+
 		primary_action_label: __("Apply"),
+
 		primary_action() {
 			const values = dialog.get_values();
 			if (!values) return;
@@ -785,9 +819,10 @@ function open_update_items_dialog(frm) {
 				method:
 					"erpnext.stock.doctype.material_request.material_request.update_items_after_submit",
 				freeze: true,
+				freeze_message: __("Updating Material Request…"),
 				args: {
-					mr_name: frm.doc.name,
-					trans_items: values.items_table,
+					material_request: frm.doc.name,
+					items: values.items,
 				},
 				callback() {
 					frm.reload_doc();
@@ -799,5 +834,6 @@ function open_update_items_dialog(frm) {
 
 	dialog.show();
 }
+
 
 
