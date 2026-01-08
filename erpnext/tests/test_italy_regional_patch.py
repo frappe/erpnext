@@ -258,6 +258,10 @@ class TestRenameItalyCustomerNameFields(unittest.TestCase):
 		# The non-Italy field should still exist (not renamed)
 		self.assertTrue(frappe.db.exists("Custom Field", self.OLD_FIRST_NAME_FIELD))
 
+		# Verify new Italy fields were NOT created (since this wasn't an Italy field)
+		self.assertFalse(frappe.db.exists("Custom Field", self.NEW_FIRST_NAME_FIELD))
+		self.assertFalse(frappe.db.exists("Custom Field", self.NEW_LAST_NAME_FIELD))
+
 
 if __name__ == "__main__":
 	unittest.main()
