@@ -1147,4 +1147,3 @@ def test_update_items_after_submit(self):
 		mr.reload()
 
 		self.assertEqual(mr.items[0].qty, 15)
->>>>>>> Stashed changes
