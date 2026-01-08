@@ -957,3 +957,68 @@ def make_in_transit_stock_entry(source_name, in_transit_warehouse):
 		row.t_warehouse = in_transit_warehouse
 
 	return ste_doc
+
+
+@frappe.whitelist()
+def update_items_after_submit(material_request, trans_items):
+	data = json.loads(trans_items) if isinstance(trans_items, str) else trans_items
+	doc = frappe.get_doc("Material Request", material_request)
+	doc.check_permission("write")
+
+	if doc.docstatus != 1:
+		frappe.throw(_("Material Request must be submitted"))
+
+	any_qty_changed = False
+
+	for d in data:
+		child_item = None
+
+
+		if d.get("docname"):
+			for item in doc.items:
+				if item.name == d.get("docname"):
+					child_item = item
+					break
+
+			if not child_item:
+				frappe.throw(_("Row {0} not found").format(d.get("docname")))
+		else:
+			child_item = doc.append("items", {})
+			child_item.item_code = d.get("item_code")
+
+			item_info = frappe.get_cached_value("Item", child_item.item_code,
+				["item_name", "description", "stock_uom"], as_dict=1)
+			if item_info:
+				child_item.update(item_info)
+
+			any_qty_changed = True
+
+		new_qty = flt(d.get("qty"))
+		new_cf = flt(d.get("conversion_factor")) or 1.0
+		new_stock_qty = new_qty * new_cf
+
+
+		if flt(child_item.ordered_qty) > 0 and new_stock_qty < flt(child_item.ordered_qty):
+			frappe.throw(_("Item {0}: Qty cannot be less than Ordered Qty").format(child_item.item_code))
+
+		if child_item.qty != new_qty or child_item.warehouse != d.get("warehouse"):
+			any_qty_changed = True
+
+		child_item.qty = new_qty
+		child_item.uom = d.get("uom")
+		child_item.conversion_factor = new_cf
+		child_item.stock_qty = new_stock_qty
+		child_item.warehouse = d.get("warehouse")
+		child_item.schedule_date = d.get("schedule_date")
+		child_item.flags.ignore_validate_update_after_submit = True
+
+	doc.flags.ignore_validate_update_after_submit = True
+	doc.save()
+
+	if any_qty_changed:
+		doc.update_requested_qty()
+		doc.update_completed_qty()
+
+	doc.set_status()
+	doc.save()
+	return doc.name

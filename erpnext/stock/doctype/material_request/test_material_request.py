@@ -1118,4 +1118,33 @@ def make_material_request(**args):
 	return mr
 
 
+
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Currency Exchange", "BOM"]
+
+test_dependencies = ["Currency Exchange", "BOM"]
+test_records = frappe.get_test_records("Material Request")
+
+
+def test_update_items_after_submit(self):
+		from erpnext.stock.doctype.material_request.material_request import update_items_after_submit
+		import json
+
+		mr = make_material_request(qty=10)
+		mr.submit()
+
+	
+		new_items = json.dumps([{
+			"docname": mr.items[0].name,
+			"item_code": mr.items[0].item_code,
+			"qty": 15,
+			"conversion_factor": 1.0,
+			"uom": mr.items[0].uom,
+			"warehouse": mr.items[0].warehouse,
+			"schedule_date": mr.items[0].schedule_date
+		}])
+
+		update_items_after_submit(mr.name, new_items)
+		mr.reload()
+
+		self.assertEqual(mr.items[0].qty, 15)
+>>>>>>> Stashed changes
