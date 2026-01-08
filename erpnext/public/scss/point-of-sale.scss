@@ -117,6 +117,35 @@
 			overflow-y: scroll;
 			overflow-x: hidden;
 
+			&.item-loading {
+				position: relative;
+				pointer-events: none;
+			}
+
+			&.item-loading::after {
+				content: "";
+				position: absolute;
+				inset: 0;
+				background: repeating-linear-gradient(
+					90deg,
+					#f3f3f3 0px,
+					#f3f3f3 160px,
+					#e9ecef 160px,
+					#e9ecef 320px
+				);
+				animation: skeletonMove 1.1s linear infinite;
+				z-index: 1;
+			}
+
+			@keyframes skeletonMove {
+				from {
+					background-position: 0 0;
+				}
+				to {
+					background-position: 320px 0;
+				}
+			}
+
 			&.items-not-found {
 				display: flex;
 				align-items: center;

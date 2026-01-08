@@ -53,14 +53,20 @@ erpnext.PointOfSale.ItemSelector = class {
 	async load_items_data() {
 		await this.item_ready_group;
 
+		this.start_item_loading_animation();
+
 		if (!this.price_list) {
 			const res = await frappe.db.get_value("POS Profile", this.pos_profile, "selling_price_list");
 			this.price_list = res.message.selling_price_list;
 		}
 
-		this.get_items({}).then(({ message }) => {
-			this.render_item_list(message.items);
-		});
+		this.get_items({})
+			.then(({ message }) => {
+				this.render_item_list(message.items);
+			})
+			.always(() => {
+				this.stop_item_loading_animation();
+			});
 	}
 
 	get_items({ start = 0, page_length = 40, search_term = "" }) {
@@ -403,6 +409,8 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	filter_items({ search_term = "" } = {}) {
+		this.start_item_loading_animation();
+
 		const selling_price_list = this.events.get_frm().doc.selling_price_list;
 
 		if (search_term) {
@@ -423,19 +431,31 @@ erpnext.PointOfSale.ItemSelector = class {
 			}
 		}
 
-		this.get_items({ search_term }).then(({ message }) => {
-			// eslint-disable-next-line no-unused-vars
-			const { items, serial_no, batch_no, barcode } = message;
-			if (search_term && !barcode) {
-				this.search_index[selling_price_list][search_term] = items;
-			}
-			this.items = items;
-			this.render_item_list(items);
-			this.auto_add_item &&
-				this.search_field.$input[0].value &&
-				this.items.length == 1 &&
-				this.add_filtered_item_to_cart();
-		});
+		this.get_items({ search_term })
+			.then(({ message }) => {
+				// eslint-disable-next-line no-unused-vars
+				const { items, serial_no, batch_no, barcode } = message;
+				if (search_term && !barcode) {
+					this.search_index[selling_price_list][search_term] = items;
+				}
+				this.items = items;
+				this.render_item_list(items);
+				this.auto_add_item &&
+					this.search_field.$input[0].value &&
+					this.items.length == 1 &&
+					this.add_filtered_item_to_cart();
+			})
+			.always(() => {
+				this.stop_item_loading_animation();
+			});
+	}
+
+	start_item_loading_animation() {
+		this.$items_container.addClass("is-loading");
+	}
+
+	stop_item_loading_animation() {
+		this.$items_container.removeClass("is-loading");
 	}
 
 	add_filtered_item_to_cart() {
