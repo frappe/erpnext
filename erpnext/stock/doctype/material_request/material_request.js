@@ -676,125 +676,128 @@ function prevent_past_schedule_dates(frm) {
 		});
 	}
 }
-
 frappe.ui.form.on("Material Request", {
-   
-    make_custom_buttons: function(frm) {
-        if (
-            frm.doc.docstatus === 1 &&
-            frm.doc.material_request_type === "Purchase" &&
-            flt(frm.doc.per_ordered) < 100 &&
-            frm.doc.status !== "Stopped"
-        ) {
-            frm.add_custom_button(
-                __("Update Items"),
-                () => open_update_items_dialog(frm)
-            ).addClass("btn-primary");
-        }
-    }
+	refresh(frm) {
+		if (
+			frm.doc.docstatus === 1 &&
+			frm.doc.material_request_type === "Purchase" &&
+			flt(frm.doc.per_ordered) < 100 &&
+			frm.doc.status !== "Stopped"
+		) {
+			frm.add_custom_button(
+				__("Update Items"),
+				() => open_update_items_dialog(frm),
+				__("Actions")
+			);
+		}
+	},
 });
 
 function open_update_items_dialog(frm) {
-    const table_data = frm.doc.items.map((d) => ({
-        docname: d.name,
-        item_code: d.item_code,
-        qty: flt(d.qty),
-        completed_qty: flt(d.ordered_qty),
-        uom: d.uom,
-        rate: d.rate,
-        warehouse: d.warehouse,
-        schedule_date: d.schedule_date
-    }));
+	const table_data = frm.doc.items.map((d) => ({
+		docname: d.name,
+		item_code: d.item_code,
+		qty: flt(d.qty),
+		completed_qty: flt(d.ordered_qty),
+		uom: d.uom,
+		conversion_factor: d.conversion_factor,
+		rate: d.rate,
+		warehouse: d.warehouse,
+		schedule_date: d.schedule_date,
+	}));
 
-    const dialog = new frappe.ui.Dialog({
-        title: __("Update Material Request Items"),
-        size: "extra-large",
-        fields: [
-            {
-                fieldname: "items_table",
-                fieldtype: "Table",
-                label: __("Items"),
-                data: table_data,
-                fields: [
-                    { fieldtype: "Data", fieldname: "docname", hidden: 1 },
-                    {
-                        fieldtype: "Link",
-                        fieldname: "item_code",
-                        label: __("Item Code"),
-                        options: "Item",
-                        in_list_view: 1,
-                        reqd: 1,
-                        read_only: 1 // Read-only for existing rows to prevent mismatched logs
-                    },
-                    { fieldtype: "Float", fieldname: "qty", label: __("Qty"), in_list_view: 1, reqd: 1 },
-                    { 
-                        fieldtype: "Float", 
-                        fieldname: "completed_qty", 
-                        label: __("Completed Qty"), 
-                        in_list_view: 1, 
-                        read_only: 1 
-                    },
-                    {
-                        fieldtype: "Link",
-                        fieldname: "uom",
-                        label: __("UOM"),
-                        options: "UOM",
-                        in_list_view: 1,
-                        reqd: 1,
-                        onchange() {
-                            const row = this.doc;
-                            if (!row.item_code || !this.value) return;
-                            frappe.call({
-                                method: "erpnext.stock.get_item_details.get_conversion_factor",
-                                args: { item_code: row.item_code, uom: this.value },
-                                callback(r) {
-                                    if (r.message) {
-                                        row.conversion_factor = flt(r.message.conversion_factor) || 1;
-                                        dialog.fields_dict.items_table.grid.refresh();
-                                    }
-                                }
-                            });
-                        }
-                    },
-                    { fieldtype: "Link", fieldname: "warehouse", label: __("Warehouse"), options: "Warehouse", in_list_view: 1, reqd: 1 },
-                    { fieldtype: "Date", fieldname: "schedule_date", label: __("Required By"), in_list_view: 1, reqd: 1 }
-                ]
-            }
-        ],
-        primary_action_label: __("Apply Updates"),
-        primary_action() {
-            const values = dialog.get_values();
-            if (!values) return;k
-            const invalid_items = values.items_table.filter(row => {
-                const stock_qty = flt(row.qty) * flt(row.conversion_factor || 1);
-                return row.docname && stock_qty < flt(row.completed_qty);
-            });
+	const dialog = new frappe.ui.Dialog({
+		title: __("Update Material Request Items"),
+		size: "extra-large",
+		fields: [
+			{
+				fieldname: "items_table",
+				fieldtype: "Table",
+				label: __("Items"),
+				data: table_data,
+				get_data: () => table_data,
+				fields: [
+					{ fieldtype: "Data", fieldname: "docname", hidden: 1 },
+					{
+						fieldtype: "Link",
+						fieldname: "item_code",
+						label: __("Item Code"),
+						options: "Item",
+						in_list_view: 1,
+						reqd: 1,
+					},
+					{
+						fieldtype: "Float",
+						fieldname: "qty",
+						label: __("Qty"),
+						in_list_view: 1,
+						reqd: 1,
+					},
+					{
+						fieldtype: "Float",
+						fieldname: "completed_qty",
+						label: __("Completed Qty"),
+						read_only: 1,
+					},
+					{
+						fieldtype: "Link",
+						fieldname: "uom",
+						label: __("UOM"),
+						options: "UOM",
+						in_list_view: 1,
+						reqd: 1,
+					},
+					{
+						fieldtype: "Float",
+						fieldname: "conversion_factor",
+						label: __("Conversion Factor"),
+						read_only: 1,
+					},
+					{
+						fieldtype: "Currency",
+						fieldname: "rate",
+						label: __("Rate"),
+					},
+					{
+						fieldtype: "Link",
+						fieldname: "warehouse",
+						label: __("Warehouse"),
+						options: "Warehouse",
+						in_list_view: 1,
+						reqd: 1,
+					},
+					{
+						fieldtype: "Date",
+						fieldname: "schedule_date",
+						label: __("Required By"),
+						in_list_view: 1,
+						reqd: 1,
+					},
+				],
+			},
+		],
+		primary_action_label: __("Apply"),
+		primary_action() {
+			const values = dialog.get_values();
+			if (!values) return;
 
-            if (invalid_items.length > 0) {
-                frappe.msgprint({
-                    title: __("Invalid Quantity"),
-                    indicator: "red",
-                    message: __("Row {0}: New quantity cannot be less than Completed Quantity ({1})")
-                        .format(invalid_items[0].idx, invalid_items[0].completed_qty)
-                });
-                return;
-            }
+			frappe.call({
+				method:
+					"erpnext.stock.doctype.material_request.material_request.update_items_after_submit",
+				freeze: true,
+				args: {
+					mr_name: frm.doc.name,
+					trans_items: values.items_table,
+				},
+				callback() {
+					frm.reload_doc();
+					dialog.hide();
+				},
+			});
+		},
+	});
 
-            frappe.call({
-                method: "erpnext.stock.doctype.material_request.material_request.update_items_after_submit",
-                freeze: true,
-                args: {
-                    material_request: frm.doc.name,
-                    items: values.items_table
-                },
-                callback() {
-                    frm.reload_doc();
-                    dialog.hide();
-                    frappe.show_alert({message: __("Items Updated"), indicator: "green"});
-                }
-            });
-        }
-    });
-
-    dialog.show();
+	dialog.show();
 }
+
+
