@@ -669,8 +669,6 @@ function set_schedule_date(frm) {
 		);
 	}
 }
-
-
 function prevent_past_schedule_dates(frm) {
 	if (frm.doc.transaction_date) {
 		frm.fields_dict["schedule_date"].datepicker.update({
@@ -680,7 +678,7 @@ function prevent_past_schedule_dates(frm) {
 }
 
 frappe.ui.form.on("Material Request", {
-    // Standard ERPNext practice: Use make_custom_buttons instead of refresh for button logic
+   
     make_custom_buttons: function(frm) {
         if (
             frm.doc.docstatus === 1 &&
@@ -701,9 +699,8 @@ function open_update_items_dialog(frm) {
         docname: d.name,
         item_code: d.item_code,
         qty: flt(d.qty),
-        completed_qty: flt(d.ordered_qty), // Now visible to the user
+        completed_qty: flt(d.ordered_qty),
         uom: d.uom,
-        conversion_factor: flt(d.conversion_factor) || 1,
         rate: d.rate,
         warehouse: d.warehouse,
         schedule_date: d.schedule_date
@@ -759,7 +756,6 @@ function open_update_items_dialog(frm) {
                             });
                         }
                     },
-                    { fieldtype: "Float", fieldname: "conversion_factor", label: __("Conversion Factor"), in_list_view: 1 },
                     { fieldtype: "Link", fieldname: "warehouse", label: __("Warehouse"), options: "Warehouse", in_list_view: 1, reqd: 1 },
                     { fieldtype: "Date", fieldname: "schedule_date", label: __("Required By"), in_list_view: 1, reqd: 1 }
                 ]
