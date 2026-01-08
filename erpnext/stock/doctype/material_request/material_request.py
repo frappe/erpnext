@@ -958,113 +958,77 @@ def make_in_transit_stock_entry(source_name, in_transit_warehouse):
 
 	return ste_doc
 
-
 @frappe.whitelist()
 def update_items_after_submit(material_request, items):
-	"""
-	Update items of a submitted Purchase Material Request
-	when it is partially ordered.
-	"""
+    """
+    Update items of a submitted Purchase Material Request when it is partially ordered.
+    """
+    if isinstance(items, str):
+        items = frappe.parse_json(items)
 
-	if not material_request:
-		frappe.throw(_("Material Request is required"))
+    if not items:
+        frappe.throw(_("No items provided for update"))
 
-	if isinstance(items, str):
-		items = frappe.parse_json(items)
+    doc = frappe.get_doc("Material Request", material_request)
+    doc.check_permission("write")
 
-	if not items:
-		frappe.throw(_("No items provided for update"))
+    
+    if doc.docstatus != 1:
+        frappe.throw(_("Material Request must be submitted"))
+    if doc.material_request_type != "Purchase":
+        frappe.throw(_("Only Purchase type Material Requests can be updated"))
+    if flt(doc.per_ordered) >= 100:
+        frappe.throw(_("Cannot update a fully ordered Material Request"))
+    if doc.status == "Stopped":
+        frappe.throw(_("Cannot update a stopped Material Request"))
 
-	material_request_doc = frappe.get_doc(
-		"Material Request", material_request
-	)
+    updated_row_names = [d.get("docname") for d in items if d.get("docname")]
 
-	material_request_doc.check_permission("write")
+    # Remove rows not present in the dialog
+    for row in list(doc.items):
+        if row.name not in updated_row_names:
+            if flt(row.ordered_qty) > 0:
+                frappe.throw(_("Row {0}: Cannot delete item {1} because it is partially ordered")
+                             .format(row.idx, row.item_code))
+            doc.remove(row)
 
-	if material_request_doc.docstatus != 1:
-		frappe.throw(_("Material Request must be submitted"))
+    # Update existing or append new rows
+    for row_data in items:
+        if not row_data.get("item_code"):
+            continue
 
-	if material_request_doc.material_request_type != "Purchase":
-		frappe.throw(
-			_("Only Purchase type Material Requests can be updated")
-		)
+        if row_data.get("docname"):
+            child = doc.get_child_table_row("items", row_data.get("docname"))
+        else:
+            child = doc.append("items", {})
+            child.item_code = row_data.get("item_code")
+            # Fetch item defaults using cached value for performance
+            item_info = frappe.get_cached_value("Item", child.item_code, 
+                ["item_name", "description", "stock_uom"], as_dict=1)
+            if item_info:
+                child.update(item_info)
 
-	if flt(material_request_doc.per_ordered) >= 100:
-		frappe.throw(
-			_("Cannot update a fully ordered Material Request")
-		)
+        # Quantity calculations and validation
+        new_qty = flt(row_data.get("qty"))
+        conversion_factor = flt(row_data.get("conversion_factor")) or 1.0
+        stock_qty = new_qty * conversion_factor
 
-	if material_request_doc.status == "Stopped":
-		frappe.throw(_("Cannot update a stopped Material Request"))
+        if flt(child.ordered_qty) > 0 and stock_qty < flt(child.ordered_qty):
+            frappe.throw(_("Item {0}: Quantity cannot be less than Ordered Quantity ({1})")
+                         .format(child.item_code, child.ordered_qty))
 
-	
-	material_request_doc.flags.ignore_validate_update_after_submit = True
+        child.qty = new_qty
+        child.uom = row_data.get("uom")
+        child.warehouse = row_data.get("warehouse")
+        child.rate = flt(row_data.get("rate"))
+        child.conversion_factor = conversion_factor
+        child.stock_qty = stock_qty
+        child.schedule_date = row_data.get("schedule_date")
 
+   
+    doc.flags.ignore_validate_update_after_submit = True
+    doc.save()
 
-	existing_items_by_name = {
-		item.name: item for item in material_request_doc.items
-	}
+    doc.update_requested_qty()
 
-	incoming_item_names = {
-		row.get("docname")
-		for row in items
-		if row.get("docname")
-	}
-
-	for row_name, row in existing_items_by_name.items():
-		if row_name not in incoming_item_names:
-			if flt(row.ordered_qty) > 0:
-				frappe.throw(
-					_(
-						"Cannot delete Item {0} because it has completed quantity"
-					).format(row.item_code)
-				)
-			material_request_doc.remove(row)
-
-	
-	for item_data in items:
-		if not item_data.get("item_code"):
-			continue
-
-		if (
-			item_data.get("docname")
-			and item_data.get("docname") in existing_items_by_name
-		):
-			child = existing_items_by_name[item_data.get("docname")]
-		else:
-			child = material_request_doc.append("items", {})
-			item_doc = frappe.get_cached_doc(
-				"Item", item_data.get("item_code")
-			)
-
-			child.item_code = item_doc.name
-			child.item_name = item_doc.item_name
-			child.description = item_doc.description
-			child.stock_uom = item_doc.stock_uom
-
-		qty = flt(item_data.get("qty"))
-		conversion_factor = flt(item_data.get("conversion_factor")) or 1
-		stock_qty = qty * conversion_factor
-
-		if flt(child.ordered_qty) and stock_qty <= flt(
-			child.ordered_qty
-		):
-			frappe.throw(
-				_(
-					"Updated Qty must be greater than Completed Qty for Item {0}"
-				).format(child.item_code)
-			)
-
-		child.qty = qty
-		child.uom = item_data.get("uom")
-		child.rate = flt(item_data.get("rate"))
-		child.conversion_factor = conversion_factor
-		child.stock_qty = stock_qty
-		child.warehouse = item_data.get("warehouse")
-		child.schedule_date = item_data.get("schedule_date")
-
-	
-	material_request_doc.save()
-	material_request_doc.update_requested_qty()
-
-	return material_request_doc.name
+    return doc.name

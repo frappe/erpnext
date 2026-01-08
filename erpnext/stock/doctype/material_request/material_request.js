@@ -680,15 +680,14 @@ function prevent_past_schedule_dates(frm) {
 }
 
 frappe.ui.form.on("Material Request", {
-    refresh(frm) {
+    // Standard ERPNext practice: Use make_custom_buttons instead of refresh for button logic
+    make_custom_buttons: function(frm) {
         if (
             frm.doc.docstatus === 1 &&
             frm.doc.material_request_type === "Purchase" &&
             flt(frm.doc.per_ordered) < 100 &&
             frm.doc.status !== "Stopped"
         ) {
-            frm.remove_custom_button(__("Update Items"));
-
             frm.add_custom_button(
                 __("Update Items"),
                 () => open_update_items_dialog(frm)
@@ -702,7 +701,7 @@ function open_update_items_dialog(frm) {
         docname: d.name,
         item_code: d.item_code,
         qty: flt(d.qty),
-        completed_qty: flt(d.ordered_qty),
+        completed_qty: flt(d.ordered_qty), // Now visible to the user
         uom: d.uom,
         conversion_factor: flt(d.conversion_factor) || 1,
         rate: d.rate,
@@ -718,8 +717,6 @@ function open_update_items_dialog(frm) {
                 fieldname: "items_table",
                 fieldtype: "Table",
                 label: __("Items"),
-                cannot_add_rows: false,
-                cannot_delete_rows: false,
                 data: table_data,
                 fields: [
                     { fieldtype: "Data", fieldname: "docname", hidden: 1 },
@@ -729,9 +726,17 @@ function open_update_items_dialog(frm) {
                         label: __("Item Code"),
                         options: "Item",
                         in_list_view: 1,
-                        reqd: 1
+                        reqd: 1,
+                        read_only: 1 // Read-only for existing rows to prevent mismatched logs
                     },
                     { fieldtype: "Float", fieldname: "qty", label: __("Qty"), in_list_view: 1, reqd: 1 },
+                    { 
+                        fieldtype: "Float", 
+                        fieldname: "completed_qty", 
+                        label: __("Completed Qty"), 
+                        in_list_view: 1, 
+                        read_only: 1 
+                    },
                     {
                         fieldtype: "Link",
                         fieldname: "uom",
@@ -742,7 +747,6 @@ function open_update_items_dialog(frm) {
                         onchange() {
                             const row = this.doc;
                             if (!row.item_code || !this.value) return;
-
                             frappe.call({
                                 method: "erpnext.stock.get_item_details.get_conversion_factor",
                                 args: { item_code: row.item_code, uom: this.value },
@@ -755,13 +759,7 @@ function open_update_items_dialog(frm) {
                             });
                         }
                     },
-                    {
-                        fieldtype: "Float",
-                        fieldname: "conversion_factor",
-                        label: __("Factor"),
-                        in_list_view: 1,
-                        read_only: 0
-                    },
+                    { fieldtype: "Float", fieldname: "conversion_factor", label: __("Conversion Factor"), in_list_view: 1 },
                     { fieldtype: "Link", fieldname: "warehouse", label: __("Warehouse"), options: "Warehouse", in_list_view: 1, reqd: 1 },
                     { fieldtype: "Date", fieldname: "schedule_date", label: __("Required By"), in_list_view: 1, reqd: 1 }
                 ]
@@ -770,7 +768,21 @@ function open_update_items_dialog(frm) {
         primary_action_label: __("Apply Updates"),
         primary_action() {
             const values = dialog.get_values();
-            if (!values) return;
+            if (!values) return;k
+            const invalid_items = values.items_table.filter(row => {
+                const stock_qty = flt(row.qty) * flt(row.conversion_factor || 1);
+                return row.docname && stock_qty < flt(row.completed_qty);
+            });
+
+            if (invalid_items.length > 0) {
+                frappe.msgprint({
+                    title: __("Invalid Quantity"),
+                    indicator: "red",
+                    message: __("Row {0}: New quantity cannot be less than Completed Quantity ({1})")
+                        .format(invalid_items[0].idx, invalid_items[0].completed_qty)
+                });
+                return;
+            }
 
             frappe.call({
                 method: "erpnext.stock.doctype.material_request.material_request.update_items_after_submit",
@@ -789,5 +801,4 @@ function open_update_items_dialog(frm) {
     });
 
     dialog.show();
-    dialog.fields_dict.items_table.grid.refresh();
 }
