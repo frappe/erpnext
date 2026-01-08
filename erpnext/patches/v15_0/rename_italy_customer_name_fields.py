@@ -37,8 +37,6 @@ def execute():
 	# Step 2: Create the new fields and sync database schema
 	from erpnext.regional.italy.setup import make_custom_fields
 	make_custom_fields(update=True)
-	frappe.db.commit()
-	frappe.db.updatedb("Customer")
 
 	# Step 3: Migrate data from old columns to new columns (if old columns still exist in DB)
 	# Note: We do NOT drop the first_name/last_name columns because they are standard fields
