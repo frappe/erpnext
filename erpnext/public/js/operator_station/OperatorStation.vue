@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 
+const jobCardNumber = ref(null);
 const jobCardName = ref(null);
 const jobCardDoc = ref(null);
 const status = ref('Pending');
@@ -91,7 +92,9 @@ onMounted(async () => {
   try {
     const route = frappe.get_route();
     const station = route[1] || props.process;
-    jobCardName.value = route[2] || props.job_card;
+    await getJobCardsList();
+
+    // jobCardName.value = route[2] || props.job_card;
 
     if (!jobCardName.value) {
       const jcQueue = await frappe.call({
@@ -181,6 +184,7 @@ onMounted(async () => {
     }
 
     // Fetch Slab Queue
+    await getJobCardsList();
     await fetchQueue(line.value || jc.production_line, station);
   } catch (e) {
     error.value = e.message;
@@ -292,7 +296,7 @@ async function startOperation() {
   const station = route[1] || props.process;
   jobCardName.value = route[2] || props.job_card;
   frappe.confirm(
-    __('Start Distribution now?'),
+    __('Start the process now?'),
     async () => {
       try {
         await frappe.call({
@@ -474,6 +478,20 @@ function submitIssue() {
   frappe.msgprint(__('Alarm submitted'));
 }
 
+async function getJobCardsList() {
+  debugger;
+  const route = frappe.get_route();
+  const station = route[1] || props.process;
+  const result = await frappe.call({
+    method: 'erpnext.manufacturing.doctype.operation.api.get_job_cards_list',
+    args: {
+      operation: station
+    }
+  });
+  jobCardNumber.value = result.message.name;
+  return jobCardNumber.value;
+}
+
 function statusStyle() {
   if (status.value === 'In Progress') {
     return 'background:#d4f8d4;color:#137a13;padding:.5rem';
@@ -492,8 +510,9 @@ function statusStyle() {
 </script>
 
 <template>
-  <div class="operator-station-container d-flex h-100 w-100">
-    <!-- Sidebar: Queue -->
+  <!-- Sidebar: Queue -->
+
+  <!-- <div class="operator-station-container d-flex h-100 w-100">
 
     <div class="queue-sidebar bg-light border-right p-3" style="width: 300px; overflow-y: auto;">
       <h5 class="mb-3 font-weight-bold text-center border-bottom pb-2">
@@ -536,146 +555,146 @@ function statusStyle() {
                 <span class="badge badge-light border">{{ new Date(item.modified).toLocaleTimeString('en-GB') }}</span>
               </div>
             </template>
-          </div>
-        </div>
+</div>
+</div>
+</div>
+
+</div> -->
+
+  <!-- Main Content Area -->
+  <div class="operator-station page-card d-flex flex-column align-items-center flex-grow-1 p-4"
+    style="overflow-y: auto;">
+    <!-- Current Job Card -->
+    <div class="current-job-card mb-4 border border-dark w-50 rounded p-4" style="min-width: 650px;">
+      <div class="status text-center mb-2" style="font-size:1rem">
+        <span class="badge badge-pill" :style="statusStyle()">
+          {{ __(status) }}
+        </span>
       </div>
 
-    </div>
+      <div class="text-center text-muted small">{{ __('SERIAL NUMBER') }}</div>
+      <h2 class="job-serial text-center font-weight-bold mb-2 p-3">
+        {{ batchNo }} - {{ slabNumber }}
+      </h2>
 
-    <!-- Main Content Area -->
-    <div class="operator-station page-card d-flex flex-column align-items-center flex-grow-1 p-4"
-      style="overflow-y: auto;">
-      <!-- Current Job Card -->
-      <div class="current-job-card mb-4 border border-dark w-50 rounded p-4" style="min-width: 650px;">
-        <div class="status text-center mb-2" style="font-size:1rem">
-          <span class="badge badge-pill" :style="statusStyle()">
-            {{ __(status) }}
-          </span>
-        </div>
-
-        <div class="text-center text-muted small">{{ __('SERIAL NUMBER') }}</div>
-        <h2 class="job-serial text-center font-weight-bold mb-2 p-3">
-          {{ batchNo }} - {{ slabNumber }}
-        </h2>
-
-        <!-- <div class="text-center text-muted small mb-1">{{ __('Colour') }}</div> -->
-        <div class="d-flex justify-content-center align-items-center mb-3">
-          <span class="job-color bold mr-2" style="font-size:1rem">{{ colour }}</span>
-          <span class="color-swatch"
-            style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span>
-        </div>
-
-        <div class="text-center mb-2" v-if="processReady && showStartButton">
-          <button class="btn btn-success py-3 px-4" @click="startOperation">
-            <span class="fa fa-play mr-1 pr-2"></span>{{ __('Start Job') }}
-          </button>
-        </div>
-
-        <div class="text-center mb-3" v-if="processStarted && !jobCardSubmitted">
-          <div class="text-success" style="font-size:1.5rem">
-            <span class="fa fa-clock-o mr-1"></span>
-            <span class="job-timer">{{ formattedTime }}</span>
-          </div>
-        </div>
-
-        <div class="text-center mb-2" v-if="processStarted">
-          <button class="btn btn-info mr-2" @click="finishOperation">
-            <span class="fa fa-check-square-o mr-1"></span>{{ __('Finish Job') }}
-          </button>
-          <button class="btn btn-warning mr-2" @click="haltJob">
-            <span class="fa fa-pause-circle-o mr-1"></span>{{ __('Halt Job') }}
-          </button>
-          <button class="btn btn-danger" @click="discardJob">
-            <span class="fa fa-trash-o mr-1"></span>{{ __('Discard') }}
-          </button>
-        </div>
+      <!-- <div class="text-center text-muted small mb-1">{{ __('Colour') }}</div> -->
+      <div class="d-flex justify-content-center align-items-center mb-3">
+        <span class="job-color bold mr-2" style="font-size:1rem">{{ colour }}</span>
+        <span class="color-swatch"
+          style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span>
       </div>
 
-      <!-- Raise Alarm -->
-      <div class="raise-alarm-box mb-4 w-50 border border-dark rounded p-4" style="min-width: 650px;">
-        <div class="d-flex flex-column justify-content-between mb-1 py-3">
-          <div class="d-flex align-items-center">
-            <span class="fa fa-exclamation-triangle mr-2"
-              style="color:#ffc107; border:1px solid #ffc107; border-radius:50%; padding:4px;"></span>
-            <h5 class="mb-1">{{ __('Raise Alarm') }}</h5>
-          </div>
-          <div class="text-muted small">
-            {{ __('Report issues to the mixer operator') }}
-          </div>
-        </div>
-        <button class="btn btn-outline-warning btn-block border border-warning" @click="openIssueDialog">
-          <span class="fa fa-exclamation-triangle mr-1"></span>
-          {{ __('Report Issue to Mixer') }}
+      <div class="text-center mb-2" v-if="processReady && showStartButton">
+        <button class="btn btn-success py-3 px-4" @click="startOperation">
+          <span class="fa fa-play mr-1 pr-2"></span>{{ __('Start Job') }}
         </button>
       </div>
 
-      <!-- Downstream Alarms -->
-      <div class="downstream-alarms-box w-50 border border-dark rounded p-4" style="min-width: 650px;">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <div>
-            <span class="fa fa-bell mr-1"></span>
-            <span class="font-weight-bold">{{ __('Downstream Alarms') }}</span>
-            <span class="badge badge-danger ml-2 alarms-count">{{ alarms.length }}</span>
-          </div>
-          <a href="javascript:void(0)" class="text-muted small" @click="toggleAlarms">
-            <span class="fa fa-chevron-down"></span>
-          </a>
-        </div>
-        <div class="alarms-list pt-4" v-show="showAlarms">
-          <div v-for="(a, idx) in alarms" :key="idx" class="alarm-card mb-2"
-            :style="`background:${a.tone === 'danger' ? '#ffecec' : '#fff9e6'};border-radius:8px;padding:12px 16px;`">
-            <div class="d-flex justify-content-between mb-1">
-              <div class="font-weight-bold">{{ a.station }}</div>
-              <div class="text-muted small">{{ a.time }}</div>
-            </div>
-            <div class="text-uppercase text-muted small mb-1">{{ a.type }}</div>
-            <div class="small">{{ a.description }}</div>
-          </div>
+      <div class="text-center mb-3" v-if="processStarted && !jobCardSubmitted">
+        <div class="text-success" style="font-size:1.5rem">
+          <span class="fa fa-clock-o mr-1"></span>
+          <span class="job-timer">{{ formattedTime }}</span>
         </div>
       </div>
 
-      <!-- Simple modal for Raise Alarm -->
-      <div v-if="issueDialogOpen" class="modal-backdrop fade show"></div>
-      <div v-if="issueDialogOpen" class="modal d-block" tabindex="-1">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">{{ __('Raise Alarm') }}</h5>
-              <button type="button" class="close" @click="issueDialogOpen = false">
-                <span>&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="form-group">
-                <label>{{ __('Issue Type') }}</label>
-                <select class="form-control" v-model="issueType">
-                  <option>Quality Issue</option>
-                  <option>Machine Problem</option>
-                  <option>Material Issue</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>{{ __('Description') }}</label>
-                <textarea class="form-control" rows="3" v-model="issueDescription"></textarea>
-              </div>
-              <div class="form-group">
-                <label>{{ __('Serial Number') }}</label>
-                <input type="text" class="form-control" :value="serial" disabled />
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button class="btn btn-secondary" @click="issueDialogOpen = false">
-                {{ __('Cancel') }}
-              </button>
-              <button class="btn btn-primary" @click="submitIssue">
-                {{ __('Submit') }}
-              </button>
-            </div>
-          </div>
-        </div>
+      <div class="text-center mb-2" v-if="processStarted">
+        <button class="btn btn-info mr-2" @click="finishOperation">
+          <span class="fa fa-check-square-o mr-1"></span>{{ __('Finish Job') }}
+        </button>
+        <button class="btn btn-warning mr-2" @click="haltJob">
+          <span class="fa fa-pause-circle-o mr-1"></span>{{ __('Halt Job') }}
+        </button>
+        <button class="btn btn-danger" @click="discardJob">
+          <span class="fa fa-trash-o mr-1"></span>{{ __('Discard') }}
+        </button>
       </div>
-
     </div>
+
+    <!-- Raise Alarm -->
+    <div class="raise-alarm-box mb-4 w-50 border border-dark rounded p-4" style="min-width: 650px;">
+      <div class="d-flex flex-column justify-content-between mb-1 py-3">
+        <div class="d-flex align-items-center">
+          <span class="fa fa-exclamation-triangle mr-2"
+            style="color:#ffc107; border:1px solid #ffc107; border-radius:50%; padding:4px;"></span>
+          <h5 class="mb-1">{{ __('Raise Alarm') }}</h5>
+        </div>
+        <div class="text-muted small">
+          {{ __('Report issues to the mixer operator') }}
+        </div>
+      </div>
+      <button class="btn btn-outline-warning btn-block border border-warning" @click="openIssueDialog">
+        <span class="fa fa-exclamation-triangle mr-1"></span>
+        {{ __('Report Issue to Mixer') }}
+      </button>
+    </div>
+
+    <!-- Downstream Alarms -->
+    <div class="downstream-alarms-box w-50 border border-dark rounded p-4" style="min-width: 650px;">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <span class="fa fa-bell mr-1"></span>
+          <span class="font-weight-bold">{{ __('Downstream Alarms') }}</span>
+          <span class="badge badge-danger ml-2 alarms-count">{{ alarms.length }}</span>
+        </div>
+        <a href="javascript:void(0)" class="text-muted small" @click="toggleAlarms">
+          <span class="fa fa-chevron-down"></span>
+        </a>
+      </div>
+      <div class="alarms-list pt-4" v-show="showAlarms">
+        <div v-for="(a, idx) in alarms" :key="idx" class="alarm-card mb-2"
+          :style="`background:${a.tone === 'danger' ? '#ffecec' : '#fff9e6'};border-radius:8px;padding:12px 16px;`">
+          <div class="d-flex justify-content-between mb-1">
+            <div class="font-weight-bold">{{ a.station }}</div>
+            <div class="text-muted small">{{ a.time }}</div>
+          </div>
+          <div class="text-uppercase text-muted small mb-1">{{ a.type }}</div>
+          <div class="small">{{ a.description }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Simple modal for Raise Alarm -->
+    <div v-if="issueDialogOpen" class="modal-backdrop fade show"></div>
+    <div v-if="issueDialogOpen" class="modal d-block" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ __('Raise Alarm') }}</h5>
+            <button type="button" class="close" @click="issueDialogOpen = false">
+              <span>&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label>{{ __('Issue Type') }}</label>
+              <select class="form-control" v-model="issueType">
+                <option>Quality Issue</option>
+                <option>Machine Problem</option>
+                <option>Material Issue</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>{{ __('Description') }}</label>
+              <textarea class="form-control" rows="3" v-model="issueDescription"></textarea>
+            </div>
+            <div class="form-group">
+              <label>{{ __('Serial Number') }}</label>
+              <input type="text" class="form-control" :value="serial" disabled />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" @click="issueDialogOpen = false">
+              {{ __('Cancel') }}
+            </button>
+            <button class="btn btn-primary" @click="submitIssue">
+              {{ __('Submit') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
+  <!-- </div> -->
 </template>

@@ -114,3 +114,17 @@ def transfer_to_next_process(current_work_order, qty=None):
         "header_transferred_qty": open_jc_doc.transferred_qty, 
         "message": f"Transferred {fg_qty} {fg_item} to {next_wo}"
     }
+
+@frappe.whitelist()
+def get_job_cards_list(operation):
+    job_cards = frappe.db.get_list(
+        "Job Card",
+        filters={
+            "operation": ["like", f"%{operation}%"],
+            "docstatus": 0,
+            "status": ["in", ["Open", "Material Transferred"]]
+        },
+        fields=["name", "operation", "status", "work_order"],
+        order_by="creation asc"
+    )
+    return job_cards[0]
