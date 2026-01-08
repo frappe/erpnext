@@ -719,7 +719,7 @@ function open_update_items_dialog(frm) {
 				get_status: (row) => (row && row.docname) ? "Read Only" : "Write",
 				fields: [
 					{ fieldtype: "Data", fieldname: "docname", hidden: 1 },
-					{ fieldtype: "Link", fieldname: "item_code", label: __("Item Code"), options: "Item", in_list_view: 1},
+					{ fieldtype: "Link", fieldname: "item_code", label: __("Item Code"), options: "Item", in_list_view: 1,read_only_depends_on: "eval:doc.docname"},
 					{ fieldtype: "Float", fieldname: "qty", label: __("Qty"), in_list_view: 1, reqd: 1 },
 					{ fieldtype: "Link", fieldname: "warehouse", label: __("Warehouse"), options: "Warehouse", in_list_view: 1,reqd:1 },
 					{ fieldtype: "Date", fieldname: "schedule_date", label: __("Required By"), in_list_view: 1 , reqd: 1},
