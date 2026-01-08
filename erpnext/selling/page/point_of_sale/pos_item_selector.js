@@ -231,6 +231,7 @@ erpnext.PointOfSale.ItemSelector = class {
 
 		$(this.item_group_field.awesomplete.ul).css("min-width", "unset");
 
+		this.hide_open_link_btn();
 		this.attach_clear_btn();
 	}
 
@@ -238,6 +239,10 @@ erpnext.PointOfSale.ItemSelector = class {
 		const $filter_label = this.$component.find(".label");
 
 		$filter_label.html(value ? __(value) : __("All Items"));
+	}
+
+	hide_open_link_btn() {
+		$(this.item_group_field.$wrapper.find(".btn-open")).css("display", "none");
 	}
 
 	attach_clear_btn() {
@@ -249,11 +254,23 @@ erpnext.PointOfSale.ItemSelector = class {
 			</span>`
 		);
 
+		this.item_group_field.$wrapper.find(".link-btn").append(
+			`<a class="btn-clear" tabindex="-1" style="display: inline-block;" title="${__("Clear Link")}">
+				${frappe.utils.icon("close", "xs", "es-icon")}
+			</a>`
+		);
+
 		this.$clear_search_btn = this.search_field.$wrapper.find(".link-btn");
+		this.$clear_item_group_btn = this.item_group_field.$wrapper.find(".btn-clear");
 
 		this.$clear_search_btn.on("click", "a", () => {
 			this.set_search_value("");
 			this.search_field.set_focus();
+		});
+
+		this.$clear_item_group_btn.on("click", () => {
+			$(this.item_group_field.$input[0]).val("").trigger("input");
+			this.item_group_field.set_focus();
 		});
 	}
 
