@@ -46,7 +46,6 @@ frappe.pages['operator-station'].on_page_show = (wrapper) => {
 
 async function load_vue(wrapper, params) {
     const { config, page, job_card } = params;
-    debugger;
     if (page && config?.title) {
         page.set_title(config.title);
     }

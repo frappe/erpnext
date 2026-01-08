@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 
 const jobCard = ref(null);
 const batchNo = ref('');
-const colour = ref('Carrara White');
+const colour = ref('');
 const phase = ref('Preparation Phase');
 const ingredients = ref([]);
 const loadingIngredients = ref(true);
@@ -74,15 +74,17 @@ onMounted(async () => {
 
     if (!jobCard.value) {
         error.value = __('No Job Card found in route');
-        loadingIngredients.value = false;
-        return;
-    }
+		loadingIngredients.value = true;
+		await getJobCardsList();
+	}
+
     await loadMixers();
     const stateRes = await frappe.call({
         method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_state',
         args: { job_card: jobCard.value },
-    });
+	});
 
+	
     const s = stateRes.message || {};
     mixingReady.value = !!s.mixer_materials_confirmed;
     mixingStarted.value = !!s.mixer_started;
@@ -120,7 +122,8 @@ onMounted(async () => {
         if (jobCard.value) {
             const jc = await frappe.db.get_doc('Job Card', jobCard.value);
             if (jc.bom_no) {
-                batchNo.value = jc.bom_no;  
+				const bom_elements = jc.bom_no.split("-");
+                batchNo.value = `${bom_elements[1]}-${bom_elements[2]}`.trim();
             }
         }
         
@@ -205,6 +208,19 @@ async function toggleReady() {
             frappe.msgprint(__('Materials are not confirmed.'));
         }
     );
+}
+
+async function getJobCardsList() {
+  const route = frappe.get_route();
+  const station = route[1] || "";
+  const result = await frappe.call({
+    method: 'erpnext.manufacturing.doctype.operation.api.get_job_cards_list',
+    args: {
+      operation: station
+    }
+  });
+
+	jobCard.value = result.message.name;
 }
 
 async function startMixing() {
@@ -538,9 +554,9 @@ async function onMixerChange() {
                     </div>
 
                     <!-- Error -->
-                    <div v-else-if="error" class="alert alert-danger">
+                    <!--<div v-else-if="error" class="alert alert-danger">
                         {{ error }}
-                    </div>
+                    </div>-->
 
                     <div v-else>
                         <div v-for="(ing, idx) in ingredients" :key="idx" class="mb-3 pb-2 border-bottom">
@@ -691,7 +707,7 @@ async function onMixerChange() {
                     <div class="d-flex align-items-center">
                         <span class="fa fa-exclamation-circle text-danger mr-2"></span>
                         <div class="text-danger font-weight-bold">
-                            {{ __('Downstream Alerts') }}
+                            {{ __('Alerts') }}
                         </div>
                     </div>
                     

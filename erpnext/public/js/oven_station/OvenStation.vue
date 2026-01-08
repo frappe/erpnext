@@ -50,7 +50,7 @@ const fetch_slab_for_job_card = async () => {
             args: {
                 job_card: jobCardNumber.value
             }
-        });
+		});
 
         if (r.message) {
             selectedSlab.value = r.message;
@@ -293,9 +293,7 @@ async function confirmUnload() {
             const data = res.message;
             refreshOvenData();
             frappe.msgprint(__('Slab unloaded successfully'));
-            debugger;
             if (data.finish_results && data.finish_results.work_order) {
-                debugger;
                 await transfer_to_next_process(data.finish_results.work_order, data.finish_results.job_card_qty);
             }
         }
@@ -311,8 +309,8 @@ async function confirmUnload() {
 async function confirmLoad() {
     if (!targetRack.value || !ovenData.value) {
         return;
-    }
-    debugger;
+	}
+
     prepareOvenOperation();
 
     const res = await frappe.call({

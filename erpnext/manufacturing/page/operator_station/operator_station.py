@@ -45,7 +45,7 @@ def get_open_job_cards(process):
 @frappe.whitelist()
 def start_distribution(job_card, process_name="operator"):
     """Start the Job Card when mixing starts."""
-    print(f"DEBUG: Header transferred_qty={frappe.get_doc("Job Card", job_card)}")
+    #print(f"DEBUG: Header transferred_qty={frappe.get_doc("Job Card", job_card)}")
 
     jc = frappe.get_doc("Job Card", job_card)
     start_time = frappe.utils.now_datetime()
