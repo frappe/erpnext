@@ -244,17 +244,6 @@
    "type": "Link"
   },
   {
-   "child": 1,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Depreciation Schedule",
-   "link_to": "Asset Depreciation Schedule",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
    "child": 0,
    "collapsible": 1,
    "icon": "settings",
@@ -269,11 +258,10 @@
    "url": ""
   }
  ],
- "modified": "2026-01-08 18:49:12.152039",
+ "modified": "2026-01-02 14:54:20.640887",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Assets",
  "owner": "Administrator",
- "standard": 1,
  "title": "Assets"
 }

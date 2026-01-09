@@ -73,6 +73,29 @@
    "type": "Link"
   },
   {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Custom Financial Statement",
+   "link_to": "Custom Financial Statement",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Financial Report Template",
+   "link_to": "Financial Report Template",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
    "child": 0,
    "collapsible": 1,
    "icon": "book-text",
@@ -112,6 +135,104 @@
    "keep_closed": 0,
    "label": "Supplier Ledger",
    "link_to": "Supplier Ledger Summary",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "indent": 1,
+   "keep_closed": 1,
+   "label": "Registers",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Section Break"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Accounts Receivable",
+   "link_to": "Accounts Receivable",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Accounts Payable",
+   "link_to": "Accounts Payable",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "AR Summary",
+   "link_to": "Accounts Receivable Summary",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "AP Summary",
+   "link_to": "Accounts Payable Summary",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Sales Register",
+   "link_to": "Sales Register",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Purchase Register",
+   "link_to": "Purchase Register",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Item-wise sales Register",
+   "link_to": "Item-wise Sales Register",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Item-wise Purchase Register",
+   "link_to": "Item-wise Purchase Register",
    "link_type": "Report",
    "show_arrow": 0,
    "type": "Link"
@@ -260,11 +381,10 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-08 18:49:12.047975",
+ "modified": "2026-01-08 17:50:55.681403",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Reports",
  "owner": "Administrator",
- "standard": 1,
  "title": "Financial Reports"
 }
