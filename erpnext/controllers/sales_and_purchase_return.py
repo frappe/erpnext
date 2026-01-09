@@ -443,6 +443,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		doc.is_return = 1
 		doc.ignore_pricing_rule = 1
 		doc.pricing_rules = []
+		doc.advances = []
 		doc.return_against = source.name
 		doc.set_warehouse = ""
 		if doctype == "Sales Invoice" or doctype == "POS Invoice":
