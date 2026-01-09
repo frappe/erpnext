@@ -209,24 +209,45 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
+			party_doctype = "Customer" if filters.get("customer") else "Supplier"
+			group_type = "customer_group" if party_doctype == "Customer" else "supplier_group"
 			party = filters.get("customer") or filters.get("supplier")
+			party_group = frappe.get_value(party_doctype, party, group_type)
+
+			party_list = [party]
+			if party_group:
+				party_list.append(party_group)
+
+			type_list = []
+			if party_doctype == "Customer":
+				type_list.extend(["Customer", "Customer Group"])
+			elif party_doctype == "Supplier":
+				type_list.extend(["Supplier", "Supplier Group"])
+
 			item_rules_list = frappe.get_all(
 				"Party Specific Item",
-				filters={"party": party},
-				fields=["restrict_based_on", "based_on_value"],
+				filters=[["party", "in", party_list], ["party_type", "in", type_list]],
+				fields=["restrict_based_on", "based_on_value", "inclusion_type"],
 			)
 
-			filters_dict = {}
+			include_filters = defaultdict(list)
+			exclude_filters = defaultdict(list)
+
 			for rule in item_rules_list:
 				if rule["restrict_based_on"] == "Item":
 					rule["restrict_based_on"] = "name"
-				filters_dict[rule.restrict_based_on] = []
 
-			for rule in item_rules_list:
-				filters_dict[rule.restrict_based_on].append(rule.based_on_value)
+				if rule.get("inclusion_type", "Inclusive") == "Exclusive":
+					exclude_filters[rule.restrict_based_on].append(rule.based_on_value)
+				else:
+					include_filters[rule.restrict_based_on].append(rule.based_on_value)
 
-			for filter in filters_dict:
-				filters[scrub(filter)] = ["in", filters_dict[filter]]
+			for key, values in include_filters.items():
+				filters[scrub(key)] = ["in", values]
+
+			for key, values in exclude_filters.items():
+				if key not in include_filters:
+					filters[scrub(key)] = ["not in", values]
 
 			if filters.get("customer"):
 				del filters["customer"]
