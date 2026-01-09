@@ -65,6 +65,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
+   "options": "Company:company:default_currency",
    "reqd": 1
   }
  ],
@@ -72,7 +73,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-03-20 01:14:57.890299",
+ "modified": "2026-01-05 14:07:29.307312",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Reference",

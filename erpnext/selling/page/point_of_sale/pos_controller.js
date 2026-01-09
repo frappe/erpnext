@@ -39,7 +39,7 @@ erpnext.PointOfSale.Controller = class {
 				fieldtype: "Currency",
 				in_list_view: 1,
 				label: __("Opening Amount"),
-				options: "company:company_currency",
+				options: "Company:company:default_currency",
 				onchange: function () {
 					dialog.fields_dict.balance_details.df.data.some((d) => {
 						if (d.idx == this.doc.idx) {

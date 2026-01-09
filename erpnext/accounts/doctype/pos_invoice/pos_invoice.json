@@ -970,7 +970,7 @@
    "label": "Grand Total",
    "oldfieldname": "grand_total_export",
    "oldfieldtype": "Currency",
-   "options": "currency",
+   "options": "Company:company:default_currency",
    "read_only": 1,
    "reqd": 1
   },

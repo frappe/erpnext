@@ -129,6 +129,7 @@
    "fieldname": "grand_total",
    "fieldtype": "Currency",
    "label": "Grand Total",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -136,6 +137,7 @@
    "fieldname": "net_total",
    "fieldtype": "Currency",
    "label": "Net Total",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -250,6 +252,7 @@
    "fieldname": "total_taxes_and_charges",
    "fieldtype": "Currency",
    "label": "Total Taxes and Charges",
+   "options": "Company:company:default_currency",
    "read_only": 1
   }
  ],
@@ -261,11 +264,11 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2025-06-14 02:38:14.962291",
+ "modified": "2026-01-05 14:08:44.143836",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
