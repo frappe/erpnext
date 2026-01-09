@@ -958,10 +958,6 @@ def make_in_transit_stock_entry(source_name, in_transit_warehouse):
 
 	return ste_doc
 
-import json
-import frappe
-from frappe import _
-from frappe.utils import flt
 
 @frappe.whitelist()
 def update_items_after_submit(material_request, trans_items):
