@@ -1125,25 +1125,58 @@ test_dependencies = ["Currency Exchange", "BOM"]
 test_records = frappe.get_test_records("Material Request")
 
 
-def test_update_items_after_submit(self):
-		from erpnext.stock.doctype.material_request.material_request import update_items_after_submit
-		import json
+class TestMaterialRequest(FrappeTestCase):
+	def test_update_items_after_submit(self):
+		"""
+		Test standard logic for updating items in a submitted Material Request.
+		Covers: Existing row update, adding new row, and qty validation.
+		"""
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 
-		mr = make_material_request(qty=10)
+		# 1. Setup: Create and Submit Material Request
+		mr = make_material_request(item_code="_Test Item", qty=10, warehouse="_Test Warehouse - _TC")
 		mr.submit()
 
-	
-		new_items = json.dumps([{
-			"docname": mr.items[0].name,
-			"item_code": mr.items[0].item_code,
-			"qty": 15,
-			"conversion_factor": 1.0,
-			"uom": mr.items[0].uom,
-			"warehouse": mr.items[0].warehouse,
-			"schedule_date": mr.items[0].schedule_date
-		}])
+		# 2. Update existing row (increase qty to 15)
+		updated_items = [
+			{
+				"docname": mr.items[0].name,
+				"item_code": mr.items[0].item_code,
+				"qty": 15,
+				"conversion_factor": 1.0,
+				"uom": "Nos",
+				"warehouse": "_Test Warehouse - _TC",
+				"schedule_date": mr.items[0].schedule_date
+			},
+			{
+				# 3. Add a new row to the submitted document
+				"item_code": "_Test Item Home Desktop 100",
+				"qty": 5,
+				"conversion_factor": 1.0,
+				"uom": "Nos",
+				"warehouse": "_Test Warehouse - _TC",
+				"schedule_date": mr.items[0].schedule_date
+			}
+		]
 
-		update_items_after_submit(mr.name, new_items)
+	
+		update_items_after_submit(mr.name, json.dumps(updated_items))
 		mr.reload()
 
+		
+		self.assertEqual(len(mr.items), 2)
 		self.assertEqual(mr.items[0].qty, 15)
+		self.assertEqual(mr.items[1].item_code, "_Test Item Home Desktop 100")
+		self.assertEqual(mr.items[1].qty, 5)
+
+		# Mock an ordered quantity on the first item
+		frappe.db.set_value("Material Request Item", mr.items[0].name, "ordered_qty", 20)
+		
+		invalid_items = json.dumps([{
+			"docname": mr.items[0].name,
+			"item_code": mr.items[0].item_code,
+			"qty": 10 # This is less than the mocked ordered_qty of 20
+		}])
+
+	
+		self.assertRaises(frappe.ValidationError, update_items_after_submit, mr.name, invalid_items)
