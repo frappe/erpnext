@@ -958,67 +958,89 @@ def make_in_transit_stock_entry(source_name, in_transit_warehouse):
 
 	return ste_doc
 
+import json
+import frappe
+from frappe import _
+from frappe.utils import flt
 
 @frappe.whitelist()
 def update_items_after_submit(material_request, trans_items):
+	"""
+	Updates quantities and warehouses in a submitted Material Request.
+	Standard: Uses check_permission and ensures proper qty validation.
+	"""
 	data = json.loads(trans_items) if isinstance(trans_items, str) else trans_items
 	doc = frappe.get_doc("Material Request", material_request)
+	
+	# Standard: Check if user has 'Write' permission on the document
 	doc.check_permission("write")
 
 	if doc.docstatus != 1:
-		frappe.throw(_("Material Request must be submitted"))
+		frappe.throw(_("Material Request {0} must be in a Submitted state to update items.").format(material_request))
 
 	any_qty_changed = False
 
 	for d in data:
 		child_item = None
 
-
 		if d.get("docname"):
-			for item in doc.items:
-				if item.name == d.get("docname"):
-					child_item = item
-					break
-
+			# Standard: Use find to locate the specific child row
+			child_item = next((item for item in doc.items if item.name == d.get("docname")), None)
 			if not child_item:
-				frappe.throw(_("Row {0} not found").format(d.get("docname")))
+				frappe.throw(_("Row {0} not found in the current document").format(d.get("docname")))
 		else:
+			# Standard: Adding a new row to a submitted document
 			child_item = doc.append("items", {})
 			child_item.item_code = d.get("item_code")
-
-			item_info = frappe.get_cached_value("Item", child_item.item_code,
+			
+			# Fetch item details properly
+			item_details = frappe.get_cached_value("Item", child_item.item_code, 
 				["item_name", "description", "stock_uom"], as_dict=1)
-			if item_info:
-				child_item.update(item_info)
-
+			
+			if item_details:
+				child_item.item_name = item_details.item_name
+				child_item.description = item_details.description
+				child_item.stock_uom = item_details.stock_uom
+			
 			any_qty_changed = True
 
+		# Calculations
 		new_qty = flt(d.get("qty"))
 		new_cf = flt(d.get("conversion_factor")) or 1.0
 		new_stock_qty = new_qty * new_cf
 
+		# Standard: Validation against already ordered/booked quantities
+		ordered_qty = flt(child_item.ordered_qty)
+		if ordered_qty > 0 and new_stock_qty < ordered_qty:
+			frappe.throw(_("Row {0} ({1}): New Quantity ({2}) cannot be less than Ordered Quantity ({3})")
+				.format(child_item.idx, child_item.item_code, new_stock_qty, ordered_qty))
 
-		if flt(child_item.ordered_qty) > 0 and new_stock_qty < flt(child_item.ordered_qty):
-			frappe.throw(_("Item {0}: Qty cannot be less than Ordered Qty").format(child_item.item_code))
-
+		# Track changes to trigger re-binning/qty updates
 		if child_item.qty != new_qty or child_item.warehouse != d.get("warehouse"):
 			any_qty_changed = True
 
+		# Update child row fields
 		child_item.qty = new_qty
 		child_item.uom = d.get("uom")
 		child_item.conversion_factor = new_cf
 		child_item.stock_qty = new_stock_qty
 		child_item.warehouse = d.get("warehouse")
 		child_item.schedule_date = d.get("schedule_date")
+		
+		# Allow update after submit for this row
 		child_item.flags.ignore_validate_update_after_submit = True
 
+	
 	doc.flags.ignore_validate_update_after_submit = True
 	doc.save()
 
+	
 	if any_qty_changed:
 		doc.update_requested_qty()
 		doc.update_completed_qty()
+		doc.set_status()
+		doc.db_set("status", doc.status)
 
-	doc.set_status()
-	doc.save()
+	doc.add_comment("Edit", _("Updated items via 'Update Items' dialog after submission."))
+
 	return doc.name
