@@ -12,6 +12,7 @@ from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
+from frappe.query_builder import DocType
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate, parse_json, strip_html
 
@@ -235,6 +236,7 @@ class SalesOrder(SellingController):
 		self.validate_reserved_stock()
 		self.validate_serial_no_based_delivery()
 		validate_against_blanket_order(self)
+		self.validate_against_quotation_qty()
 		validate_inter_company_party(
 			self.doctype, self.customer, self.company, self.inter_company_order_reference
 		)
@@ -439,6 +441,48 @@ class SalesOrder(SellingController):
 			):
 				frappe.throw(
 					_("Delivery warehouse required for stock item {0}").format(d.item_code), WarehouseRequired
+				)
+
+	def validate_against_quotation_qty(self):
+		quotation_items = [item.quotation_item for item in self.items if item.quotation_item]
+
+		if not quotation_items:
+			return
+
+		qi = DocType("Quotation Item")
+		soi = DocType("Sales Order Item")
+
+		quotation_qty_map = frappe._dict(
+			(frappe.qb.from_(qi).select(qi.name, qi.qty).where(qi.name.isin(quotation_items))).run()
+		)
+
+		ordered_qty_map = frappe._dict(
+			(
+				frappe.qb.from_(soi)
+				.select(soi.quotation_item, Sum(soi.qty).as_("qty"))
+				.where(
+					(soi.quotation_item.isin(quotation_items))
+					& (soi.docstatus == 1)
+					& (soi.parent != self.name)
+				)
+				.groupby(soi.quotation_item)
+			).run()
+		)
+
+		for item in self.items:
+			if not item.quotation_item:
+				continue
+			quotation_qty = flt(quotation_qty_map.get(item.quotation_item))
+			ordered_qty = flt(ordered_qty_map.get(item.quotation_item))
+
+			if not quotation_qty:
+				continue
+
+			if ordered_qty + flt(item.qty) > quotation_qty:
+				frappe.throw(
+					_("Cannot submit Sales Order . Item {0} exceeds the quoted quantity.").format(
+						item.item_code
+					)
 				)
 
 	def validate_with_previous_doc(self):
