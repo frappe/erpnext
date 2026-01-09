@@ -33,6 +33,30 @@
   {
    "child": 0,
    "collapsible": 1,
+   "icon": "notebook-tabs",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Item",
+   "link_to": "Item",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "warehouse",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Warehouse",
+   "link_to": "Warehouse",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
    "icon": "list-tree",
    "indent": 0,
    "keep_closed": 0,
@@ -338,18 +362,6 @@
    "icon": "",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Item",
-   "link_to": "Item",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "icon": "",
-   "indent": 0,
-   "keep_closed": 0,
    "label": "Warehouse",
    "link_to": "Warehouse",
    "link_type": "DocType",
@@ -425,10 +437,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-02 15:08:30.661411",
+ "modified": "2026-01-09 20:34:46.526054",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Manufacturing"
 }

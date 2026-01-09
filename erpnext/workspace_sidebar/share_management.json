@@ -9,7 +9,6 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "customer",
    "indent": 0,
    "keep_closed": 0,
    "label": "Shareholder",
@@ -21,7 +20,6 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "move-horizontal",
    "indent": 0,
    "keep_closed": 0,
    "label": "Share Transfer",
@@ -33,7 +31,6 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Share Ledger",
@@ -45,7 +42,6 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "notepad-text",
    "indent": 0,
    "keep_closed": 0,
    "label": "Share Balance",
@@ -55,10 +51,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-02 14:53:29.842384",
+ "modified": "2026-01-09 20:34:46.506404",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Share Management",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Share Management"
 }
