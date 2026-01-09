@@ -678,14 +678,13 @@ function prevent_past_schedule_dates(frm) {
 		});
 	}
 }
-
 frappe.ui.form.on("Material Request", {
 	make_custom_buttons: function(frm) {
-		if (frm.doc.docstatus === 1 && 
-			frm.doc.material_request_type === "Purchase" && 
-			flt(frm.doc.per_ordered) < 100 && 
+		if (frm.doc.docstatus === 1 &&
+			frm.doc.material_request_type === "Purchase" &&
+			flt(frm.doc.per_ordered) < 100 &&
 			frm.doc.status !== "Stopped") {
-			
+
 			frm.add_custom_button(
 				__("Update Items"),
 				() => open_update_items_dialog(frm)
@@ -695,16 +694,22 @@ frappe.ui.form.on("Material Request", {
 });
 
 function open_update_items_dialog(frm) {
+	const child_meta = frappe.get_meta("Material Request Item");
+	const get_precision = (fieldname) => child_meta.fields.find((f) => f.fieldname == fieldname).precision;
+
+	// Map data exactly like erpnext.utils.update_child_items
 	const table_data = frm.doc.items.map((d) => ({
 		docname: d.name,
+		name: d.name,
 		item_code: d.item_code,
+		item_name: d.item_name,
 		qty: flt(d.qty),
-		completed_qty: flt(d.ordered_qty),
+		ordered_qty: flt(d.ordered_qty),
 		uom: d.uom,
 		conversion_factor: flt(d.conversion_factor) || 1,
-		rate: d.rate,
 		warehouse: d.warehouse,
-		schedule_date: d.schedule_date
+		schedule_date: d.schedule_date,
+		description: d.description
 	}));
 
 	const dialog = new frappe.ui.Dialog({
@@ -712,41 +717,117 @@ function open_update_items_dialog(frm) {
 		size: "extra-large",
 		fields: [
 			{
-				fieldname: "items_table",
+				fieldname: "trans_items",
 				fieldtype: "Table",
 				label: __("Items"),
+				cannot_add_rows: false,
+				in_place_edit: true,
 				data: table_data,
-				get_status: (row) => (row && row.docname) ? "Read Only": "Write",
+				get_status: (row) => (row && row.docname) ? "Read Only" : "Write",
 				fields: [
-					{ fieldtype: "Data", fieldname: "docname", hidden: 1 },
-					{ fieldtype: "Link", fieldname: "item_code", label: __("Item Code"), options: "Item", in_list_view: 1,read_only_depends_on: "eval:doc.docname"},
-					{ fieldtype: "Float", fieldname: "qty", label: __("Qty"), in_list_view: 1, reqd: 1 },
-					{ fieldtype: "Link", fieldname: "warehouse", label: __("Warehouse"), options: "Warehouse", in_list_view: 1,reqd:1 },
-					{ fieldtype: "Date", fieldname: "schedule_date", label: __("Required By"), in_list_view: 1 , reqd: 1},
-					{ fieldtype: "Float", fieldname: "completed_qty", label: __("Ordered Qty"), read_only: 1 },
+					{
+						fieldtype: "Data",
+						fieldname: "docname",
+						hidden: 1
+					},
+					{
+						fieldtype: "Link",
+						fieldname: "item_code",
+						options: "Item",
+						label: __("Item Code"),
+						in_list_view: 1,
+						reqd: 1,
+						onchange: function() {
+							const me = this;
+							if (!this.value) return;
+							frappe.call({
+								method: "erpnext.stock.get_item_details.get_item_details",
+								args: {
+									doc: frm.doc,
+									item_code: this.value,
+									company: frm.doc.company,
+									doctype: frm.doc.doctype,
+									name: frm.doc.name,
+									qty: me.doc.qty || 1
+								},
+								callback: function(r) {
+									if (r.message) {
+										const row = dialog.fields_dict.trans_items.grid.get_row(me.doc.name);
+										if (row) {
+											Object.assign(row.doc, {
+												item_name: r.message.item_name,
+												uom: r.message.uom,
+												conversion_factor: r.message.conversion_factor,
+												description: r.message.description,
+												warehouse: r.message.warehouse || me.doc.warehouse
+											});
+											dialog.fields_dict.trans_items.grid.refresh();
+										}
+									}
+								}
+							});
+						}
+					},
+					{
+						fieldtype: "Data",
+						fieldname: "item_name",
+						label: __("Item Name"),
+						read_only: 1,
+						in_list_view: 1
+					},
+					{
+						fieldtype: "Link",
+						fieldname: "warehouse",
+						label: __("Warehouse"),
+						options: "Warehouse",
+						in_list_view: 1,
+						reqd: 1
+					},
+					{
+						fieldtype: "Float",
+						fieldname: "qty",
+						label: __("Qty"),
+						in_list_view: 1,
+						reqd: 1,
+						precision: get_precision("qty")
+					},
 					{
 						fieldtype: "Link",
 						fieldname: "uom",
 						label: __("UOM"),
 						options: "UOM",
 						in_list_view: 1,
-						onchange() {
-							const row = this.doc;
-							if (!row.item_code || !this.value) return;
+						reqd: 1,
+						onchange: function() {
+							const me = this;
+							if (!me.doc.item_code || !me.value) return;
 							frappe.call({
 								method: "erpnext.stock.get_item_details.get_conversion_factor",
-								args: { item_code: row.item_code, uom: this.value },
-								callback(r) {
+								args: { item_code: me.doc.item_code, uom: me.value },
+								callback: (r) => {
 									if (r.message) {
-										row.conversion_factor = flt(r.message.conversion_factor) || 1;
-										dialog.fields_dict.items_table.grid.refresh();
+										const row = dialog.fields_dict.trans_items.grid.get_row(me.doc.name);
+										row.doc.conversion_factor = r.message.conversion_factor;
+										dialog.fields_dict.trans_items.grid.refresh();
 									}
 								}
 							});
 						}
 					},
-					{ fieldtype: "Float", fieldname: "conversion_factor", label: __("UMO Conversion Factor")  },	
-					{ fieldtype: "Float", fieldname: "completed_qty", label: __("Ordered Qty"), read_only: 1 },
+					{
+						fieldtype: "Date",
+						fieldname: "schedule_date",
+						label: __("Reqd by date"),
+						in_list_view: 1,
+						reqd: 1
+					},
+					{
+						fieldtype: "Float",
+						fieldname: "ordered_qty",
+						label: __("Ordered Qty"),
+						read_only: 1,
+						precision: get_precision("qty")
+					}
 				]
 			}
 		],
@@ -758,16 +839,23 @@ function open_update_items_dialog(frm) {
 			frappe.call({
 				method: "erpnext.stock.doctype.material_request.material_request.update_items_after_submit",
 				freeze: true,
-				args: { material_request: frm.doc.name, trans_items: values.items_table },
+				args: {
+					material_request: frm.doc.name,
+					trans_items: values.trans_items
+				},
 				callback(r) {
-					if (r.exc) return;
-					frm.reload_doc();
-					dialog.hide();
-					frappe.show_alert({message: __("Items Updated"), indicator: "green"});
+					if (!r.exc) {
+						frm.reload_doc();
+						dialog.hide();
+						frappe.show_alert({
+							message: __("Items updated successfully"),
+							indicator: "green"
+						});
+					}
 				}
 			});
 		}
 	});
+
 	dialog.show();
 }
-
