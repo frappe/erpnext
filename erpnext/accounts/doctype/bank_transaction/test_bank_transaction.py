@@ -492,3 +492,31 @@ def create_loan_and_repayment():
 	)
 	repayment_entry.submit()
 	return repayment_entry
+
+
+def test_reconciled_status_with_negative_unallocated_amount(self):
+		"""
+		Test that status remains 'Unreconciled' if the unallocated amount is negative (over-allocation).
+		Ref: Issue #51601
+		"""
+		from erpnext.accounts.doctype.bank_transaction.bank_transaction import BankTransaction
+
+		# 1. Create a dummy transaction for ₹100
+		bt = frappe.get_doc({
+			"doctype": "Bank Transaction",
+			"date": frappe.utils.nowdate(),
+			"withdrawal": 100.0,
+			"company": "safa", # use your company name from the screenshots
+			"bank_account": "Bank - Safa" 
+		}).insert()
+
+		# 2. Manually set an over-allocation of ₹110
+		bt.allocated_amount = 110.0
+		bt.update_allocated_amount() # This sets unallocated_amount to -10.0
+		
+		# 3. Trigger the status logic you fixed
+		bt.set_status()
+
+		# 4. PROOF: Assert that the status is NOT Reconciled
+		self.assertEqual(bt.unallocated_amount, -10.0)
+		self.assertEqual(bt.status, "Unreconciled")
