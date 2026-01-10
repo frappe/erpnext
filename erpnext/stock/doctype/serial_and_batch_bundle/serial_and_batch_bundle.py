@@ -2940,6 +2940,14 @@ def get_ledgers_from_serial_batch_bundle(**kwargs) -> list[frappe._dict]:
 
 
 def get_stock_ledgers_for_serial_nos(kwargs):
+	"""
+	Fetch stock ledger entries based on various filters.
+	
+	:param kwargs: etch stock ledger entries based on filters like posting_datetime, creation, warehouse, item_code, serial_nos, ignore_voucher_detail_no, voucher_no. Joining with Serial and Batch Entry table to filter based on serial numbers.
+	:return: List of stock ledger entries as dictionaries.
+	:rtype: Dictionary
+	"""
+
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 	serial_batch_entry = frappe.qb.DocType("Serial and Batch Entry")
 
