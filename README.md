@@ -13,6 +13,8 @@
 
 </div>
 
+nahi 
+
 <div align="center">
 	<img src="./erpnext/public/images/v16/hero_image.png"/>
 </div>
@@ -138,6 +140,20 @@ To setup the repository locally follow the steps mentioned below:
 
 
 ## Contributing
+
+## Search in Translated and English Languages
+
+When ERPNext is used in a translated language (for example German, Hindi, etc.),
+users often follow English documentation and tutorials.
+
+Currently, searching only translated terms can make it difficult for beginners
+to find DocTypes, menu items, and settings referenced in English guides.
+
+Supporting search in both the original English terms and translated text
+can significantly improve usability and onboarding for new users.
+
+Related Issue: #32480
+
 
 1. [Issue Guidelines](https://github.com/frappe/erpnext/wiki/Issue-Guidelines)
 1. [Report Security Vulnerabilities](https://erpnext.com/security)
