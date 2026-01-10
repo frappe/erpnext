@@ -187,6 +187,8 @@ class PurchaseOrder(BuyingController):
 		self.set_onload("can_update_items", self.can_update_items())
 
 	def before_validate(self):
+		self.set("items", [d for d in self.items if d.item_code])
+		
 		self.set_has_unit_price_items()
 		self.flags.allow_zero_qty = self.has_unit_price_items
 
