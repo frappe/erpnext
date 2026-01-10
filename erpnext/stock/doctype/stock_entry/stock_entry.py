@@ -2807,7 +2807,11 @@ class StockEntry(StockController):
 				stock_entries_child_list.append(d.ste_detail)
 				transferred_qty = frappe.get_all(
 					"Stock Entry Detail",
+<<<<<<< HEAD
 					fields=["sum(qty) as qty"],
+=======
+					fields=[{"SUM": "transfer_qty", "as": "qty"}],
+>>>>>>> 4e6d86d6f0 (fix(stock entry): calculate transferred quantity using transfer_qty)
 					filters={
 						"against_stock_entry": d.against_stock_entry,
 						"ste_detail": d.ste_detail,
