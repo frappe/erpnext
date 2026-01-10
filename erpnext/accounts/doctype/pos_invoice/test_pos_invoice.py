@@ -539,6 +539,7 @@ class TestPOSInvoice(IntegrationTestCase):
 			rate=1000,
 			serial_no=[serial_nos[0]],
 			do_not_save=1,
+			ignore_sabb_validation=True,
 		)
 
 		pos2.append("payments", {"mode_of_payment": "Bank Draft", "amount": 1000})
@@ -1016,6 +1017,7 @@ class TestPOSInvoice(IntegrationTestCase):
 				qty=1,
 				rate=100,
 				do_not_submit=True,
+				ignore_sabb_validation=True,
 			)
 
 			self.assertRaises(frappe.ValidationError, pos_inv.submit)
@@ -1157,6 +1159,7 @@ def create_pos_invoice(**args):
 					"posting_time": pos_inv.posting_time,
 					"type_of_transaction": type_of_transaction,
 					"do_not_submit": True,
+					"ignore_sabb_validation": args.ignore_sabb_validation,
 				}
 			)
 		).name

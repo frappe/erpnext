@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _, bold, json, msgprint
-from frappe.query_builder.functions import CombineDatetime, Sum
+from frappe.query_builder.functions import Sum
 from frappe.utils import add_to_date, cint, cstr, flt, get_datetime, now
 
 import erpnext

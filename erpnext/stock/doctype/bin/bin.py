@@ -5,7 +5,7 @@
 import frappe
 from frappe.model.document import Document
 from frappe.query_builder import Case, Order
-from frappe.query_builder.functions import Coalesce, CombineDatetime, Sum
+from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import flt
 
 

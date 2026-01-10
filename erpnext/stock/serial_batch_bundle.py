@@ -4,7 +4,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.naming import NamingSeries, make_autoname, parse_naming_series
 from frappe.query_builder import Case
-from frappe.query_builder.functions import CombineDatetime, Sum, Timestamp
+from frappe.query_builder.functions import Max, Sum, Timestamp
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, now, nowtime, today
 from pypika import Order
 from pypika.terms import ExistsCriterion
@@ -629,8 +629,9 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 			self.old_serial_nos = []
 
 			serial_nos = self.get_serial_nos()
+			result = self.get_serial_no_wise_incoming_rate(serial_nos)
 			for serial_no in serial_nos:
-				incoming_rate = self.get_incoming_rate_from_bundle(serial_no)
+				incoming_rate = result.get(serial_no)
 				if incoming_rate is None:
 					self.old_serial_nos.append(serial_no)
 					continue
@@ -640,39 +641,95 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 
 			self.calculate_stock_value_from_deprecarated_ledgers()
 
-	def get_incoming_rate_from_bundle(self, serial_no) -> float:
+	def get_serial_no_wise_incoming_rate(self, serial_nos):
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		bundle_child = frappe.qb.DocType("Serial and Batch Entry")
 
+		def get_latest_based_on_posting_datetime():
+			# Get latest inward record based on posting datetime for each serial no
+
+			latest_posting = (
+				frappe.qb.from_(bundle)
+				.inner_join(bundle_child)
+				.on(bundle.name == bundle_child.parent)
+				.select(
+					bundle_child.serial_no,
+					Max(bundle.posting_datetime).as_("max_posting_dt"),
+				)
+				.where(
+					(bundle.is_cancelled == 0)
+					& (bundle.docstatus == 1)
+					& (bundle.type_of_transaction == "Inward")
+					& (bundle_child.qty > 0)
+					& (bundle.item_code == self.sle.item_code)
+					& (bundle_child.warehouse == self.sle.warehouse)
+					& (bundle_child.serial_no.isin(serial_nos))
+				)
+				.groupby(bundle_child.serial_no)
+			)
+
+			# Important to exclude the current voucher to calculate correct the stock value difference
+			if self.sle.voucher_no:
+				latest_posting = latest_posting.where(bundle.voucher_no != self.sle.voucher_no)
+
+			if self.sle.posting_datetime:
+				timestamp_condition = bundle.posting_datetime <= self.sle.posting_datetime
+
+				latest_posting = latest_posting.where(timestamp_condition)
+
+			latest_posting = latest_posting.as_("latest_posting")
+
+			return latest_posting
+
+		def get_latest_based_on_creation(latest_posting):
+			# Get latest inward record based on creation for each serial no
+			latest_creation = (
+				frappe.qb.from_(bundle)
+				.join(bundle_child)
+				.on(bundle.name == bundle_child.parent)
+				.join(latest_posting)
+				.on(
+					(latest_posting.serial_no == bundle_child.serial_no)
+					& (latest_posting.max_posting_dt == bundle.posting_datetime)
+				)
+				.select(
+					bundle_child.serial_no,
+					Max(bundle.creation).as_("max_creation"),
+				)
+				.where(
+					(bundle.is_cancelled == 0)
+					& (bundle.docstatus == 1)
+					& (bundle.type_of_transaction == "Inward")
+					& (bundle_child.qty > 0)
+					& (bundle.item_code == self.sle.item_code)
+					& (bundle_child.warehouse == self.sle.warehouse)
+				)
+				.groupby(bundle_child.serial_no)
+			).as_("latest_creation")
+
+			return latest_creation
+
+		latest_posting = get_latest_based_on_posting_datetime()
+		latest_creation = get_latest_based_on_creation(latest_posting)
+
 		query = (
 			frappe.qb.from_(bundle)
-			.inner_join(bundle_child)
+			.join(bundle_child)
 			.on(bundle.name == bundle_child.parent)
-			.select((bundle_child.incoming_rate * bundle_child.qty).as_("incoming_rate"))
-			.where(
-				(bundle.is_cancelled == 0)
-				& (bundle.docstatus == 1)
-				& (bundle_child.serial_no == serial_no)
-				& (bundle.type_of_transaction == "Inward")
-				& (bundle_child.qty > 0)
-				& (bundle.item_code == self.sle.item_code)
-				& (bundle_child.warehouse == self.sle.warehouse)
+			.join(latest_creation)
+			.on(
+				(latest_creation.serial_no == bundle_child.serial_no)
+				& (latest_creation.max_creation == bundle.creation)
 			)
-			.orderby(bundle.posting_datetime, order=Order.desc)
-			.limit(1)
+			.select(
+				bundle_child.serial_no,
+				bundle_child.incoming_rate,
+			)
 		)
 
-		# Important to exclude the current voucher to calculate correct the stock value difference
-		if self.sle.voucher_no:
-			query = query.where(bundle.voucher_no != self.sle.voucher_no)
+		result = query.run(as_list=1)
 
-		if self.sle.posting_datetime:
-			timestamp_condition = bundle.posting_datetime <= self.sle.posting_datetime
-
-			query = query.where(timestamp_condition)
-
-		incoming_rate = query.run()
-		return flt(incoming_rate[0][0]) if incoming_rate else None
+		return frappe._dict(result) if result else frappe._dict({})
 
 	def get_serial_nos(self):
 		if self.sle.get("serial_nos"):
@@ -1135,6 +1192,9 @@ class SerialBatchCreation:
 
 			doc.submit()
 		else:
+			if self.get("ignore_sabb_validation"):
+				doc.flags.ignore_validate = True
+
 			doc.save()
 
 		self.validate_qty(doc)

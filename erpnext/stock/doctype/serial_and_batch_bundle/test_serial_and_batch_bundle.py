@@ -988,6 +988,7 @@ def make_serial_batch_bundle(kwargs):
 			"type_of_transaction": type_of_transaction,
 			"company": kwargs.company or "_Test Company",
 			"do_not_submit": kwargs.do_not_submit,
+			"ignore_sabb_validation": kwargs.ignore_sabb_validation or False,
 		}
 	)
 
