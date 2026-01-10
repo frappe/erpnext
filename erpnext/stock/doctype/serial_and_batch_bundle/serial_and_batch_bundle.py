@@ -2946,6 +2946,7 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 	query = (
 		frappe.qb.from_(stock_ledger_entry)
 		.select(
+			stock_ledger_entry.posting_datetime,
 			stock_ledger_entry.actual_qty,
 			stock_ledger_entry.serial_no,
 			stock_ledger_entry.serial_and_batch_bundle,
