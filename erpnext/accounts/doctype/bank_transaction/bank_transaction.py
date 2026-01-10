@@ -81,7 +81,7 @@ class BankTransaction(Document):
 		if self.docstatus == 2:
 			self.db_set("status", "Cancelled")
 		elif self.docstatus == 1:
-			if self.unallocated_amount > 0 or self.unallocated_amount < 0:
+			if self.unallocated_amount != 0:
 				self.db_set("status", "Unreconciled")
 			elif self.unallocated_amount == 0:
 				self.db_set("status", "Reconciled")
