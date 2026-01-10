@@ -324,9 +324,8 @@
   {
    "description": "Reselect, if the chosen address is edited after save",
    "fieldname": "customer_primary_address",
-   "fieldtype": "Link",
-   "label": "Customer Primary Address",
-   "options": "Address"
+   "fieldtype": "Data",
+   "label": "Customer Primary Address"
   },
   {
    "fieldname": "primary_address",
@@ -517,7 +516,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2024-03-09 16:04:08.616966",
+ "modified": "2026-01-10 13:15:50.315182",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
