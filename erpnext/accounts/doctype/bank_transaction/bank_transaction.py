@@ -145,8 +145,10 @@ class BankTransaction(Document):
 
 	def add_payment_entries(self, vouchers):
 		"Add the vouchers with zero allocation. Save() will perform the allocations and clearance"
-		if 0.0 >= self.unallocated_amount:
+		if self.unallocated_amount == 0.0:
 			frappe.throw(_("Bank Transaction {0} is already fully reconciled").format(self.name))
+		elif self.unallocated_amount < 0.0:
+			frappe.throw(_("Bank Transaction {0} is over-allocated (unallocated amount: {1})").format(self.name, self.unallocated_amount))
 
 		for voucher in vouchers:
 			self.append(
