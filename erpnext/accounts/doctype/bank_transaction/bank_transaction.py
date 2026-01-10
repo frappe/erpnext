@@ -81,10 +81,9 @@ class BankTransaction(Document):
 		if self.docstatus == 2:
 			self.db_set("status", "Cancelled")
 		elif self.docstatus == 1:
-			if self.unallocated_amount != 0:
-				self.db_set("status", "Unreconciled")
-			elif self.unallocated_amount == 0:
-				self.db_set("status", "Reconciled")
+			# Use a single line for status logic based on unallocated_amount
+			status = "Reconciled" if self.unallocated_amount == 0 else "Unreconciled"
+			self.db_set("status", status)
 
 	def validate_duplicate_references(self):
 		"""Make sure the same voucher is not allocated twice within the same Bank Transaction"""

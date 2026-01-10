@@ -216,6 +216,46 @@ class TestBankTransaction(IntegrationTestCase):
 		linked_payments = get_linked_payments(bank_transaction.name, ["loan_repayment", "exact_match"])
 		self.assertEqual(linked_payments[0]["name"], repayment_entry.name)
 
+	def test_reconciled_status_with_negative_unallocated_amount(self):
+		"""
+		Test that status remains 'Unreconciled' if the unallocated amount is negative.
+		Ref: Issue #51601
+		"""
+		# 1. Create a bank account using internal helpers
+		uniq_id = frappe.generate_hash(length=10)
+		gl_account = create_gl_account("_Test Bank " + uniq_id)
+		bank_account = create_bank_account(gl_account=gl_account, bank_account_name="Test " + uniq_id)
+
+		# 2. Create a reference transaction to link to
+		linked_bt = frappe.get_doc({
+			"doctype": "Bank Transaction",
+			"date": frappe.utils.nowdate(),
+			"deposit": 1.0,
+			"currency": "INR",
+			"bank_account": bank_account,
+		}).insert().submit()
+
+		# 3. Create main transaction and over-allocate to force negative unallocated_amount
+		bt = frappe.get_doc({
+			"doctype": "Bank Transaction",
+			"date": frappe.utils.nowdate(),
+			"withdrawal": 100.0,
+			"currency": "INR",
+			"bank_account": bank_account,
+		})
+		bt.append("payment_entries", {
+			"payment_document": "Bank Transaction",
+			"payment_entry": linked_bt.name,
+			"allocated_amount": 110.0,
+		})
+		bt.insert()
+		bt.submit()
+		bt.reload()
+
+		# 4. Verify the fix: -10.0 balance should NOT be Reconciled
+		self.assertEqual(bt.unallocated_amount, -10.0)
+		self.assertEqual(bt.status, "Unreconciled")
+
 
 def create_bank_account(
 	bank_name="Citi Bank", gl_account="_Test Bank - _TC", bank_account_name="Checking Account"
@@ -494,62 +534,3 @@ def create_loan_and_repayment():
 	return repayment_entry
 
 
-def test_reconciled_status_with_negative_unallocated_amount(self):
-		"""
-		Test that status remains 'Unreconciled' if the unallocated amount is negative.
-		Ref: Issue #51601
-		"""
-		from erpnext.accounts.doctype.bank_transaction.bank_transaction import create_bank_account, create_gl_account
-
-		# 1. Create a temporary bank account for the test environment
-		uniq_id = frappe.generate_hash(length=10)
-		gl_account = create_gl_account("_Test Bank " + uniq_id)
-		bank_account = create_bank_account(gl_account=gl_account, bank_account_name="Test " + uniq_id)
-
-		# 2. Create and SUBMIT a bank transaction
-		bt = frappe.get_doc({
-			"doctype": "Bank Transaction",
-			"date": frappe.utils.nowdate(),
-			"withdrawal": 100.0,
-			"currency": "INR",
-			"bank_account": bank_account,
-		})
-		bt.insert()
-		bt.submit() # Logic only triggers on submitted docs
-
-		# 3. Simulate over-allocation
-		bt.db_set("allocated_amount", 110.0)
-		bt.reload()
-		bt.update_allocated_amount()
-
-		# 4. Trigger status update and verify
-		bt.set_status()
-		bt.reload()
-
-		self.assertEqual(bt.unallocated_amount, -10.0)
-		self.assertEqual(bt.status, "Unreconciled")
-		"""
-		Test that status remains 'Unreconciled' if the unallocated amount is negative (over-allocation).
-		Ref: Issue #51601
-		"""
-		from erpnext.accounts.doctype.bank_transaction.bank_transaction import BankTransaction
-
-		# 1. Create a dummy transaction for ₹100
-		bt = frappe.get_doc({
-			"doctype": "Bank Transaction",
-			"date": frappe.utils.nowdate(),
-			"withdrawal": 100.0,
-			"company": "safa", # use your company name from the screenshots
-			"bank_account": "Bank - Safa" 
-		}).insert()
-
-		# 2. Manually set an over-allocation of ₹110
-		bt.allocated_amount = 110.0
-		bt.update_allocated_amount() # This sets unallocated_amount to -10.0
-		
-		# 3. Trigger the status logic you fixed
-		bt.set_status()
-
-		# 4. PROOF: Assert that the status is NOT Reconciled
-		self.assertEqual(bt.unallocated_amount, -10.0)
-		self.assertEqual(bt.status, "Unreconciled")
