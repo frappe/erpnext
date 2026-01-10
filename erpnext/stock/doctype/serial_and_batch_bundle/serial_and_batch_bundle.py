@@ -2943,10 +2943,6 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 	serial_batch_entry = frappe.qb.DocType("Serial and Batch Entry")
 
-	serial_nos = kwargs.get("serial_nos") or kwargs.get("serial_no")
-	if serial_nos and not isinstance(serial_nos, list):
-		serial_nos = [serial_nos]
-
 	query = (
 		frappe.qb.from_(stock_ledger_entry)
 		.select(
@@ -2955,15 +2951,19 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 			stock_ledger_entry.serial_and_batch_bundle,
 		)
 		.where(stock_ledger_entry.is_cancelled == 0)
+		.orderby(stock_ledger_entry.posting_datetime)
+		.orderby(stock_ledger_entry.creation)
 	)
 
-	if kwargs.get("posting_date"):
-		if kwargs.get("posting_time") is None:
-			kwargs.posting_time = nowtime()
+	if kwargs.get("posting_datetime"):
+		timestamp_condition = stock_ledger_entry.posting_datetime <= kwargs.posting_datetime
 
-		timestamp_condition = CombineDatetime(
-			stock_ledger_entry.posting_date, stock_ledger_entry.posting_time
-		) <= CombineDatetime(kwargs.posting_date, kwargs.posting_time)
+		if kwargs.get("creation"):
+			timestamp_condition = stock_ledger_entry.posting_datetime < kwargs.posting_datetime
+
+			timestamp_condition |= (stock_ledger_entry.posting_datetime == kwargs.posting_datetime) & (
+				stock_ledger_entry.creation < kwargs.creation
+			)
 
 		query = query.where(timestamp_condition)
 
@@ -2975,6 +2975,10 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 			query = query.where(stock_ledger_entry[field].isin(kwargs.get(field)))
 		else:
 			query = query.where(stock_ledger_entry[field] == kwargs.get(field))
+
+	serial_nos = kwargs.get("serial_nos") or kwargs.get("serial_no")
+	if serial_nos and not isinstance(serial_nos, list):
+		serial_nos = [serial_nos]
 
 	if serial_nos:
 		query = (
@@ -2993,7 +2997,10 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 
 		query = query.where(bundle_match | direct_match)
 
-	if kwargs.voucher_no:
+	if kwargs.ignore_voucher_detail_no:
+		query = query.where(stock_ledger_entry.voucher_detail_no != kwargs.ignore_voucher_detail_no)
+
+	elif kwargs.voucher_no:
 		query = query.where(stock_ledger_entry.voucher_no != kwargs.voucher_no)
 
 	return query.run(as_dict=True)
