@@ -345,7 +345,6 @@ erpnext.financial_statements = {
 					from_fiscal_year: filters.from_fiscal_year,
 					to_fiscal_year: filters.to_fiscal_year,
 					periodicity: filters.periodicity,
-					presentation_currency: filters.presentation_currency,
 					cost_center: filters.cost_center,
 					project: filters.project,
 				});
