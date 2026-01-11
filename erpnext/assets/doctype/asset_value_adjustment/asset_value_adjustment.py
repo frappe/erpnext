@@ -74,7 +74,7 @@ class AssetValueAdjustment(Document):
 		)
 
 	def on_cancel(self):
-		frappe.get_doc("Journal Entry", self.journal_entry).cancel()
+		self.cancel_asset_revaluation_entry()
 		self.update_asset()
 		add_asset_activity(
 			self.asset,
@@ -166,6 +166,14 @@ class AssetValueAdjustment(Document):
 
 			if dimension.get("mandatory_for_pl"):
 				debit_entry.update({dimension["fieldname"]: dimension_value})
+
+	def cancel_asset_revaluation_entry(self):
+		if not self.journal_entry:
+			return
+
+		revaluation_entry = frappe.get_doc("Journal Entry", self.journal_entry)
+		if revaluation_entry.docstatus == 1:
+			revaluation_entry.cancel()
 
 	def update_asset(self):
 		asset = self.update_asset_value_after_depreciation()
