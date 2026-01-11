@@ -173,6 +173,8 @@ class AssetValueAdjustment(Document):
 
 		revaluation_entry = frappe.get_doc("Journal Entry", self.journal_entry)
 		if revaluation_entry.docstatus == 1:
+			# Ignore permissions to match Journal Entry submission behavior
+			revaluation_entry.flags.ignore_permissions = True
 			revaluation_entry.cancel()
 
 	def update_asset(self):
