@@ -175,6 +175,7 @@ class AssetValueAdjustment(Document):
 		if revaluation_entry.docstatus == 1:
 			# Ignore permissions to match Journal Entry submission behavior
 			revaluation_entry.flags.ignore_permissions = True
+			revaluation_entry.flags.via_asset_value_adjustment = True
 			revaluation_entry.cancel()
 
 	def update_asset(self):
