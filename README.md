@@ -13,8 +13,6 @@
 
 </div>
 
-nahi 
-
 <div align="center">
 	<img src="./erpnext/public/images/v16/hero_image.png"/>
 </div>
