@@ -67,10 +67,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-02 11:46:10.598472",
+ "modified": "2026-01-10 00:06:13.032297",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Budget",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Budget"
 }

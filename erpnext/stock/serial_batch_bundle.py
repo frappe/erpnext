@@ -324,6 +324,12 @@ class SerialBatchBundle:
 			{"is_cancelled": 1},
 		)
 
+		frappe.db.set_value(
+			"Serial and Batch Entry",
+			{"voucher_no": self.sle.voucher_no, "voucher_type": self.sle.voucher_type},
+			{"is_cancelled": 1},
+		)
+
 		if self.sle.serial_and_batch_bundle:
 			frappe.get_cached_doc(
 				"Serial and Batch Bundle", self.sle.serial_and_batch_bundle
@@ -642,26 +648,23 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 			self.calculate_stock_value_from_deprecarated_ledgers()
 
 	def get_serial_no_wise_incoming_rate(self, serial_nos):
-		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		bundle_child = frappe.qb.DocType("Serial and Batch Entry")
 
 		def get_latest_based_on_posting_datetime():
 			# Get latest inward record based on posting datetime for each serial no
 
 			latest_posting = (
-				frappe.qb.from_(bundle)
-				.inner_join(bundle_child)
-				.on(bundle.name == bundle_child.parent)
+				frappe.qb.from_(bundle_child)
 				.select(
 					bundle_child.serial_no,
-					Max(bundle.posting_datetime).as_("max_posting_dt"),
+					Max(bundle_child.posting_datetime).as_("max_posting_dt"),
 				)
 				.where(
-					(bundle.is_cancelled == 0)
-					& (bundle.docstatus == 1)
-					& (bundle.type_of_transaction == "Inward")
+					(bundle_child.is_cancelled == 0)
+					& (bundle_child.docstatus == 1)
+					& (bundle_child.type_of_transaction == "Inward")
 					& (bundle_child.qty > 0)
-					& (bundle.item_code == self.sle.item_code)
+					& (bundle_child.item_code == self.sle.item_code)
 					& (bundle_child.warehouse == self.sle.warehouse)
 					& (bundle_child.serial_no.isin(serial_nos))
 				)
@@ -670,10 +673,10 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 
 			# Important to exclude the current voucher to calculate correct the stock value difference
 			if self.sle.voucher_no:
-				latest_posting = latest_posting.where(bundle.voucher_no != self.sle.voucher_no)
+				latest_posting = latest_posting.where(bundle_child.voucher_no != self.sle.voucher_no)
 
 			if self.sle.posting_datetime:
-				timestamp_condition = bundle.posting_datetime <= self.sle.posting_datetime
+				timestamp_condition = bundle_child.posting_datetime <= self.sle.posting_datetime
 
 				latest_posting = latest_posting.where(timestamp_condition)
 
@@ -684,24 +687,22 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 		def get_latest_based_on_creation(latest_posting):
 			# Get latest inward record based on creation for each serial no
 			latest_creation = (
-				frappe.qb.from_(bundle)
-				.join(bundle_child)
-				.on(bundle.name == bundle_child.parent)
+				frappe.qb.from_(bundle_child)
 				.join(latest_posting)
 				.on(
 					(latest_posting.serial_no == bundle_child.serial_no)
-					& (latest_posting.max_posting_dt == bundle.posting_datetime)
+					& (latest_posting.max_posting_dt == bundle_child.posting_datetime)
 				)
 				.select(
 					bundle_child.serial_no,
-					Max(bundle.creation).as_("max_creation"),
+					Max(bundle_child.creation).as_("max_creation"),
 				)
 				.where(
-					(bundle.is_cancelled == 0)
-					& (bundle.docstatus == 1)
-					& (bundle.type_of_transaction == "Inward")
+					(bundle_child.is_cancelled == 0)
+					& (bundle_child.docstatus == 1)
+					& (bundle_child.type_of_transaction == "Inward")
 					& (bundle_child.qty > 0)
-					& (bundle.item_code == self.sle.item_code)
+					& (bundle_child.item_code == self.sle.item_code)
 					& (bundle_child.warehouse == self.sle.warehouse)
 				)
 				.groupby(bundle_child.serial_no)
@@ -713,13 +714,11 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 		latest_creation = get_latest_based_on_creation(latest_posting)
 
 		query = (
-			frappe.qb.from_(bundle)
-			.join(bundle_child)
-			.on(bundle.name == bundle_child.parent)
+			frappe.qb.from_(bundle_child)
 			.join(latest_creation)
 			.on(
 				(latest_creation.serial_no == bundle_child.serial_no)
-				& (latest_creation.max_creation == bundle.creation)
+				& (latest_creation.max_creation == bundle_child.creation)
 			)
 			.select(
 				bundle_child.serial_no,
@@ -841,7 +840,8 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 				Sum(child.qty).as_("total_qty"),
 			)
 			.where(
-				(child.warehouse == self.sle.warehouse)
+				(child.item_code == self.sle.item_code)
+				& (child.warehouse == self.sle.warehouse)
 				& (child.batch_no.isin(self.batchwise_valuation_batches))
 				& (child.docstatus == 1)
 				& (child.type_of_transaction.isin(["Inward", "Outward"]))
@@ -887,7 +887,8 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 				Sum(child.qty).as_("qty"),
 			)
 			.where(
-				(child.warehouse == self.sle.warehouse)
+				(child.item_code == self.sle.item_code)
+				& (child.warehouse == self.sle.warehouse)
 				& (child.batch_no.isin(self.batchwise_valuation_batches))
 				& (child.docstatus == 1)
 				& (child.type_of_transaction.isin(["Inward", "Outward"]))

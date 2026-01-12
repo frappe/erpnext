@@ -87,10 +87,11 @@
    "type": "Link"
   }
  ],
- "modified": "2025-12-22 17:06:54.262451",
+ "modified": "2026-01-10 00:06:13.048591",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Subscription"
 }

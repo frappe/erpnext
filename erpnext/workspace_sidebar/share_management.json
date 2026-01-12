@@ -55,10 +55,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-02 14:53:29.842384",
+ "modified": "2026-01-10 00:06:13.040767",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Share Management",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Share Management"
 }

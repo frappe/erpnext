@@ -571,10 +571,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-08 15:04:31.767795",
+ "modified": "2026-01-10 00:06:13.234927",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Accounting"
 }

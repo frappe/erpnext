@@ -485,10 +485,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-02 15:06:29.836236",
+ "modified": "2026-01-10 00:06:13.192366",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
  "owner": "Administrator",
+ "standard": 1,
  "title": "CRM"
 }

@@ -64,10 +64,6 @@
   "role_allowed_to_over_bill",
   "credit_controller",
   "make_payment_via_journal_entry",
-  "pos_tab",
-  "pos_setting_section",
-  "post_change_gl_entries",
-  "column_break_xrnd",
   "assets_tab",
   "asset_settings_section",
   "calculate_depr_using_total_days",
@@ -79,11 +75,6 @@
   "ignore_account_closing_balance",
   "use_legacy_controller_for_pcv",
   "column_break_25",
-  "tab_break_dpet",
-  "show_balance_in_coa",
-  "banking_tab",
-  "enable_party_matching",
-  "enable_fuzzy_matching",
   "reports_tab",
   "remarks_section",
   "general_ledger_remarks_length",
@@ -96,9 +87,15 @@
   "drop_ar_procedures",
   "legacy_section",
   "ignore_is_opening_check_for_reporting",
-  "payment_request_settings",
+  "tab_break_dpet",
+  "chart_of_accounts_section",
+  "show_balance_in_coa",
+  "banking_section",
+  "enable_party_matching",
+  "enable_fuzzy_matching",
+  "payment_request_section",
   "create_pr_in_draft_status",
-  "budget_settings",
+  "budget_section",
   "use_legacy_budget_controller"
  ],
  "fields": [
@@ -283,13 +280,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "1",
-   "description": "If enabled, ledger entries will be posted for change amount in POS transactions",
-   "fieldname": "post_change_gl_entries",
-   "fieldtype": "Check",
-   "label": "Create Ledger Entries for Change Amount"
-  },
-  {
    "default": "0",
    "description": "Learn about <a href=\"https://docs.erpnext.com/docs/v13/user/manual/en/accounts/articles/common_party_accounting#:~:text=Common%20Party%20Accounting%20in%20ERPNext,Invoice%20against%20a%20primary%20Supplier.\">Common Party</a>",
    "fieldname": "enable_common_party_accounting",
@@ -330,11 +320,6 @@
    "label": "Accounts Closing"
   },
   {
-   "fieldname": "pos_setting_section",
-   "fieldtype": "Section Break",
-   "label": "POS Setting"
-  },
-  {
    "fieldname": "invoice_and_billing_tab",
    "fieldtype": "Tab Break",
    "label": "Invoice and Billing"
@@ -349,11 +334,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "pos_tab",
-   "fieldtype": "Tab Break",
-   "label": "POS"
-  },
-  {
    "default": "0",
    "description": "Enabling this will allow creation of multi-currency invoices against single party account in company currency",
    "fieldname": "allow_multi_currency_invoices_against_single_party_account",
@@ -363,7 +343,7 @@
   {
    "fieldname": "tab_break_dpet",
    "fieldtype": "Tab Break",
-   "label": "Chart Of Accounts"
+   "label": "Others"
   },
   {
    "default": "1",
@@ -406,11 +386,6 @@
    "fieldname": "show_taxes_as_table_in_print",
    "fieldtype": "Check",
    "label": "Show Taxes as Table in Print"
-  },
-  {
-   "fieldname": "banking_tab",
-   "fieldtype": "Tab Break",
-   "label": "Banking"
   },
   {
    "default": "0",
@@ -488,13 +463,8 @@
    "label": "Calculate daily depreciation using total days in depreciation period"
   },
   {
-   "description": "Payment Request created from Sales Order or Purchase Order will be in Draft status. When disabled document will be in unsaved state.",
-   "fieldname": "payment_request_settings",
-   "fieldtype": "Tab Break",
-   "label": "Payment Request"
-  },
-  {
    "default": "1",
+   "description": "Payment Requests made from Sales / Purchase Invoice will be put in Draft explicitly",
    "fieldname": "create_pr_in_draft_status",
    "fieldtype": "Check",
    "label": "Create in Draft Status"
@@ -537,10 +507,6 @@
    "options": "Invoice\nPayment\nReconciliation Date"
   },
   {
-   "fieldname": "column_break_xrnd",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "Buffered Cursor",
    "fieldname": "receivable_payable_fetch_method",
    "fieldtype": "Select",
@@ -578,11 +544,6 @@
    "fieldtype": "Link",
    "label": "Role Allowed to Override Stop Action",
    "options": "Role"
-  },
-  {
-   "fieldname": "budget_settings",
-   "fieldtype": "Tab Break",
-   "label": "Budget"
   },
   {
    "default": "1",
@@ -656,6 +617,26 @@
    "fieldname": "default_ageing_range",
    "fieldtype": "Data",
    "label": "Default Ageing Range"
+  },
+  {
+   "fieldname": "chart_of_accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Chart Of Accounts"
+  },
+  {
+   "fieldname": "banking_section",
+   "fieldtype": "Section Break",
+   "label": "Banking"
+  },
+  {
+   "fieldname": "payment_request_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Request"
+  },
+  {
+   "fieldname": "budget_section",
+   "fieldtype": "Section Break",
+   "label": "Budget"
   }
  ],
  "grid_page_length": 50,
@@ -665,7 +646,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-02 18:17:18.994348",
+ "modified": "2026-01-11 18:30:45.968531",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

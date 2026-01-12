@@ -687,10 +687,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-02 17:44:08.721891",
+ "modified": "2026-01-10 00:06:13.103140",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Selling"
 }

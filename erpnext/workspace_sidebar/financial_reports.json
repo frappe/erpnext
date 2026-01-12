@@ -381,10 +381,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-08 17:50:55.681403",
+ "modified": "2026-01-10 00:06:13.168391",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Reports",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Financial Reports"
 }

@@ -921,12 +921,22 @@ class StockController(AccountsController):
 						"Serial and Batch Bundle", row.serial_and_batch_bundle, {"is_cancelled": 1}
 					)
 
+					frappe.db.set_value(
+						"Serial and Batch Entry", {"parent": row.serial_and_batch_bundle}, {"is_cancelled": 1}
+					)
+
 				if update_values:
 					row.db_set(update_values)
 
 				if table_name == "items" and row.get("rejected_serial_and_batch_bundle"):
 					frappe.db.set_value(
 						"Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, {"is_cancelled": 1}
+					)
+
+					frappe.db.set_value(
+						"Serial and Batch Entry",
+						{"parent": row.rejected_serial_and_batch_bundle},
+						{"is_cancelled": 1},
 					)
 
 					row.db_set("rejected_serial_and_batch_bundle", None)
@@ -2310,6 +2320,7 @@ def make_bundle_for_material_transfer(**kwargs):
 		row.voucher_no = bundle_doc.voucher_no
 		row.voucher_detail_no = bundle_doc.voucher_detail_no
 		row.type_of_transaction = bundle_doc.type_of_transaction
+		row.item_code = bundle_doc.item_code
 
 	bundle_doc.set_incoming_rate()
 	bundle_doc.calculate_qty_and_amount()

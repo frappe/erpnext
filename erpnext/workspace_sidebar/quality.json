@@ -129,17 +129,6 @@
    "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
-   "label": "Tree of Procedures",
-   "link_to": "Quality Procedure",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
    "label": "Feedback Template",
    "link_to": "Quality Feedback Template",
    "link_type": "DocType",
@@ -158,10 +147,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-02 17:39:50.641254",
+ "modified": "2026-01-12 12:59:09.607272",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Quality"
 }

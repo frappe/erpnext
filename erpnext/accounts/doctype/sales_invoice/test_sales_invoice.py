@@ -1173,7 +1173,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(expected, res)
 
 	def test_pos_with_no_gl_entry_for_change_amount(self):
-		frappe.db.set_single_value("Accounts Settings", "post_change_gl_entries", 0)
+		frappe.db.set_single_value("POS Settings", "post_change_gl_entries", 0)
 
 		make_pos_profile(
 			company="_Test Company with perpetual inventory",
@@ -1221,7 +1221,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		self.validate_pos_gl_entry(pos, pos, 60, validate_without_change_gle=True)
 
-		frappe.db.set_single_value("Accounts Settings", "post_change_gl_entries", 1)
+		frappe.db.set_single_value("POS Settings", "post_change_gl_entries", 1)
 
 	def validate_pos_gl_entry(self, si, pos, cash_amount, validate_without_change_gle=False):
 		if validate_without_change_gle:

@@ -148,10 +148,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-02 14:40:04.075046",
+ "modified": "2026-01-10 00:06:13.005238",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Taxes",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Taxes"
 }

@@ -369,10 +369,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-02 12:10:07.304778",
+ "modified": "2026-01-10 00:06:12.979668",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Buying"
 }

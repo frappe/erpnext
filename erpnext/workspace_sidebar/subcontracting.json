@@ -192,14 +192,16 @@
    "label": "Settings",
    "link_to": "Buying Settings",
    "link_type": "DocType",
+   "navigate_to_tab": "subcontract",
    "show_arrow": 0,
    "type": "Link"
   }
  ],
- "modified": "2026-01-02 17:51:15.843931",
+ "modified": "2026-01-12 13:12:47.927785",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Subcontracting",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Subcontracting"
 }

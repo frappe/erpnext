@@ -1726,7 +1726,7 @@ class SalesInvoice(SellingController):
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos):
 			skip_change_gl_entries = not cint(
-				frappe.get_single_value("Accounts Settings", "post_change_gl_entries")
+				frappe.get_single_value("POS Settings", "post_change_gl_entries")
 			)
 
 			for payment_mode in self.payments:

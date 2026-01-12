@@ -139,6 +139,7 @@ class SerialandBatchBundle(Document):
 			self.set_incoming_rate()
 
 		self.calculate_qty_and_amount()
+		self.set_child_details()
 
 	def validate_serial_no_status(self):
 		serial_nos = [d.serial_no for d in self.entries if d.serial_no]
@@ -1342,7 +1343,17 @@ class SerialandBatchBundle(Document):
 		self.set_source_document_no()
 
 	def on_submit(self):
+		self.validate_docstatus()
 		self.validate_serial_nos_inventory()
+
+	def validate_docstatus(self):
+		for row in self.entries:
+			if row.docstatus != 1:
+				frappe.throw(
+					_("At Row {0}: In Serial and Batch Bundle {1} must have docstatus as 1 and not 0").format(
+						bold(row.idx), bold(self.name)
+					)
+				)
 
 	def set_child_details(self):
 		for row in self.entries:
@@ -1353,6 +1364,7 @@ class SerialandBatchBundle(Document):
 				"voucher_no",
 				"voucher_detail_no",
 				"type_of_transaction",
+				"item_code",
 			]:
 				if not row.get(field) or row.get(field) != self.get(field):
 					row.set(field, self.get(field))

@@ -425,10 +425,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-02 15:08:30.661411",
+ "modified": "2026-01-10 00:06:13.058137",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Manufacturing"
 }

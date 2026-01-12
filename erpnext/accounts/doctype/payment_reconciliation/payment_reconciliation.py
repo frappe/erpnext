@@ -6,7 +6,7 @@ import frappe
 from frappe import _, msgprint, qb
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
-from frappe.query_builder import Criterion
+from frappe.query_builder import Case, Criterion
 from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, fmt_money, get_link_to_form, getdate, nowdate, today
 
@@ -393,6 +393,9 @@ class PaymentReconciliation(Document):
 			inv.outstanding_amount = flt(entry.get("outstanding_amount"))
 
 	def get_difference_amount(self, payment_entry, invoice, allocated_amount):
+		party_account_defaults = frappe.get_cached_value(
+			"Account", self.receivable_payable_account, ["account_type", "account_currency"], as_dict=True
+		)
 		allocated_amount_precision = get_field_precision(
 			frappe.get_meta("Payment Reconciliation Allocation").get_field("allocated_amount")
 		)
@@ -400,9 +403,9 @@ class PaymentReconciliation(Document):
 			frappe.get_meta("Payment Reconciliation Allocation").get_field("difference_amount")
 		)
 		difference_amount = 0
-		if frappe.get_cached_value(
-			"Account", self.receivable_payable_account, "account_currency"
-		) != frappe.get_cached_value("Company", self.company, "default_currency"):
+		if party_account_defaults.get("account_currency") != frappe.get_cached_value(
+			"Company", self.company, "default_currency"
+		):
 			if invoice.get("exchange_rate") and payment_entry.get("exchange_rate", 1) != invoice.get(
 				"exchange_rate", 1
 			):
@@ -414,7 +417,14 @@ class PaymentReconciliation(Document):
 					invoice.get("exchange_rate", 1) * flt(allocated_amount, allocated_amount_precision),
 					difference_amount_precision,
 				)
-				difference_amount = allocated_amount_in_ref_rate - allocated_amount_in_inv_rate
+
+				# Added If clause to handle return Adhoc payments for account type holders ("Payable")
+				if party_account_defaults.get("account_type") in ("Payable") and invoice.get(
+					"invoice_type"
+				) in ["Payment Entry", "Journal Entry"]:
+					difference_amount = allocated_amount_in_inv_rate - allocated_amount_in_ref_rate
+				else:
+					difference_amount = allocated_amount_in_ref_rate - allocated_amount_in_inv_rate
 
 		return difference_amount
 
@@ -676,6 +686,28 @@ class PaymentReconciliation(Document):
 				)
 			)
 			invoice_exchange_map.update(journals_map)
+
+		payment_entries = [
+			d.get("invoice_number") for d in invoices if d.get("invoice_type") == "Payment Entry"
+		]
+		payment_entries.extend(
+			[d.get("reference_name") for d in payments if d.get("reference_type") == "Payment Entry"]
+		)
+		if payment_entries:
+			pe = frappe.qb.DocType("Payment Entry")
+			query = (
+				frappe.qb.from_(pe)
+				.select(
+					pe.name,
+					Case()
+					.when(pe.payment_type == "Receive", pe.source_exchange_rate)
+					.else_(pe.target_exchange_rate)
+					.as_("exchange_rate"),
+				)
+				.where(pe.name.isin(payment_entries))
+			)
+			payment_entries = query.run(as_list=1)
+			invoice_exchange_map.update(payment_entries)
 
 		return invoice_exchange_map
 

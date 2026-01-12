@@ -223,10 +223,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-02 11:57:04.237376",
+ "modified": "2026-01-10 00:06:13.151947",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Projects"
 }
