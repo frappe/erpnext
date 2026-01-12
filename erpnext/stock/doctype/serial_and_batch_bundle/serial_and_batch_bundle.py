@@ -12,7 +12,7 @@ import frappe.query_builder.functions
 from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
-from frappe.query_builder.functions import CombineDatetime, Sum, Concat_ws, Locate
+from frappe.query_builder.functions import Concat_ws, Locate, Sum
 from frappe.utils import (
 	cint,
 	cstr,
@@ -2975,11 +2975,10 @@ def get_ledgers_from_serial_batch_bundle(**kwargs) -> list[frappe._dict]:
 
 def get_stock_ledgers_for_serial_nos(kwargs):
 	"""
-	Fetch stock ledger entries based on various filters.
-	
-	:param kwargs: etch stock ledger entries based on filters like posting_datetime, creation, warehouse, item_code, serial_nos, ignore_voucher_detail_no, voucher_no. Joining with Serial and Batch Entry table to filter based on serial numbers.
+	    Fetch stock ledger entries based on various filters.
+	:param kwargs: Filters including posting_datetime, creation, warehouse, item_code, serial_nos, ignore_voucher_detail_no, voucher_no. Joins with Serial and Batch Entry table to filter based on serial numbers.
 	:return: List of stock ledger entries as dictionaries.
-	:rtype: Dictionary
+	:rtype: list[dict]
 	"""
 
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
