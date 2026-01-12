@@ -81,7 +81,7 @@ class BankStatementImport(DataImport):
 			self.import_file, self.google_sheets_url
 		)
 
-		if "Bank Account" not in json.dumps(preview["columns"]):
+		if "Bank Account" not in [c.get("label") for c in preview["columns"]]:
 			frappe.throw(_("Please add the Bank Account column"))
 
 		from frappe.utils.background_jobs import is_job_enqueued
