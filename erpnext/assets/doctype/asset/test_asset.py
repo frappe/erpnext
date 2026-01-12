@@ -817,8 +817,8 @@ class TestAsset(AssetSetup):
 		)
 
 		# check new asset values after splitting
-		self.assertEqual(asset_doc.asset_quantity, 5)
-		self.assertEqual(asset_doc.net_purchase_amount, 500000)
+		self.assertEqual(new_asset.asset_quantity, 5)
+		self.assertEqual(new_asset.net_purchase_amount, 500000)
 		self.assertEqual(
 			new_asset_depr_schedule.depreciation_schedule[0].get("depreciation_amount"), 41666.66
 		)
