@@ -12,7 +12,7 @@ def execute():
 		).set(sales_order_item.is_closed, 1).where(
 			(sales_order.name == sales_order_item.parent)
 			& (sales_order.status == "Closed")
-			& (sales_order_item.is_closed == 0)
+			& ((sales_order_item.is_closed == 0) | sales_order_item.is_closed.isnull())
 		).run()
 	finally:
 		frappe.db.auto_commit_on_many_writes = 0

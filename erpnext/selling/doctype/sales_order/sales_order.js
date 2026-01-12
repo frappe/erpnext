@@ -1810,7 +1810,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					docname: d.name,
 					item_code: d.item_code,
 					qty: d.qty,
-					is_close: d.is_closed,
+					is_closed: d.is_closed,
 					delivered_qty: d.delivered_qty,
 				};
 			});
@@ -1885,7 +1885,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					docname: d.name,
 					item_code: d.item_code,
 					qty: d.qty,
-					is_close: d.is_closed,
+					is_closed: d.is_closed,
 					delivered_qty: d.delivered_qty,
 				};
 			});

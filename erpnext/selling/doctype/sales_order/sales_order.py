@@ -2015,6 +2015,7 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 				"Product Bundle", {"new_item_code": ["in", item_codes], "disabled": 0}, ["new_item_code"]
 			)
 		]
+		so_items_is_closed_map = {item.name: item.is_closed for item in so.items}
 
 		overproduction_percentage_for_sales_order = (
 			frappe.get_single_value("Manufacturing Settings", "overproduction_percentage_for_sales_order")
@@ -2022,8 +2023,12 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 		)
 		for table in [so.items, so.packed_items]:
 			for i in table:
-				if getattr(i, "is_closed", 0):
-					continue
+				if table == so.packed_items:
+					if so_items_is_closed_map.get(i.parent_detail_docname):
+						continue
+				else:
+					if getattr(i, "is_closed", 0):
+						continue
 
 				bom = get_default_bom(i.item_code)
 				stock_qty = i.qty if i.doctype == "Packed Item" else i.stock_qty
@@ -2141,6 +2146,9 @@ def get_mapped_subcontracting_inward_order(source_name, target_doc=None):
 
 @frappe.whitelist()
 def close_or_reopen_selected_items(sales_order, status, selected_items=None, all_items_closed=False):
+	if not frappe.has_permission("Sales Order", "write"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
 	items = []
 	so = frappe.get_doc("Sales Order", sales_order)
 
@@ -2167,7 +2175,7 @@ def close_or_reopen_selected_items(sales_order, status, selected_items=None, all
 			row.is_closed = 0
 
 	so.save()
-	if len(items) > 0:
+	if items:
 		so.update_reserved_qty(items)
 	else:
 		so.update_reserved_qty()
