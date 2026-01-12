@@ -23,15 +23,29 @@ class PartySpecificItem(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		party_type = [self.party_type]
+		party = [self.party]
+
+		if self.party_type in ["Customer", "Supplier"]:
+			if party_group := frappe.get_value(
+				self.party_type, self.party, f"{self.party_type.lower()}_group"
+			):
+				party.append(party_group)
+				party_type.append(f"{self.party_type} Group")
+
 		exists = frappe.db.exists(
 			"Party Specific Item",
 			{
-				"party_type": self.party_type,
-				"party": self.party,
+				"party_type": ["in", party_type],
+				"party": ["in", party],
 				"restrict_based_on": self.restrict_based_on,
 				"based_on_value": self.based_on_value,
 				"name": ["!=", self.name],
 			},
 		)
 		if exists:
-			frappe.throw(_("This item filter has already been applied for the {0}").format(self.party_type))
+			frappe.throw(
+				_("This item filter has already been applied in {0}").format(
+					frappe.utils.get_link_to_form("Party Specific Item", exists)
+				)
+			)

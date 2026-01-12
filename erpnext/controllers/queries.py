@@ -208,11 +208,9 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
 	if filters and isinstance(filters, dict):
-		if filters.get("customer") or filters.get("supplier"):
+		if party := filters.get("customer") or filters.get("supplier"):
 			party_doctype = "Customer" if filters.get("customer") else "Supplier"
-			group_type = "customer_group" if party_doctype == "Customer" else "supplier_group"
-			party = filters.get("customer") or filters.get("supplier")
-			party_group = frappe.get_value(party_doctype, party, group_type)
+			party_group = frappe.get_value(party_doctype, party, f"{party_doctype.lower()}_group")
 
 			party_list = [party]
 			if party_group:
