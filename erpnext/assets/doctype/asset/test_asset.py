@@ -734,7 +734,7 @@ class TestAsset(AssetSetup):
 			asset_depr_schedule_before_sale.depreciation_schedule[0].get("depreciation_amount"), 83333.33
 		)
 
-		# make a partial sales againt the asset
+		# make a partial sales against the asset
 		si = make_sales_invoice(
 			asset=asset.name, item_code="Macbook Pro", company="_Test Company", sell_qty=5
 		)
@@ -776,7 +776,6 @@ class TestAsset(AssetSetup):
 			location=asset_location,
 			supplier="_Test Supplier",
 		)
-		pr.submit()
 
 		asset = frappe.db.get_value("Asset", {"purchase_receipt": pr.name, "docstatus": 0}, "name")
 		asset_doc = frappe.get_doc("Asset", asset)
