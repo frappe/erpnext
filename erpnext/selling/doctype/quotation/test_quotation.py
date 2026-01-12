@@ -951,8 +951,8 @@ class TestQuotation(IntegrationTestCase):
 		self.assertEqual(sales_order.items[0].qty, 1)
 		self.assertEqual(sales_order.items[-1].qty, 5)
 
-		# Row 1: 10, Row 4: 1, Row 5: 1
-		sales_order.items[0].qty = 10
+		# Row 1: 1, Row 4: 1, Row 5: 1
+		sales_order.items[0].qty = 1
 		sales_order.items[3].qty = 1
 		sales_order.items[4].qty = 1
 		sales_order.submit()
