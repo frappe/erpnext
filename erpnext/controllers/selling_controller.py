@@ -106,8 +106,17 @@ class SellingController(StockController):
 							title=_("Serial No Already Assigned"),
 						)
 
+	def check_selling_price_list(self):
+		if self.doctype in ["Sales Order", "Delivery Note", "Sales Invoice", "Quotation"]:
+			if self.customer:
+				selling_price_list = frappe.db.get_value("Customer",self.customer,"default_price_list")
+
+				if selling_price_list and frappe.db.get_value("Price List", selling_price_list, "selling"):
+					self.selling_price_list = selling_price_list
+
 	def set_missing_values(self, for_validate=False):
 		super().set_missing_values(for_validate)
+		self.check_selling_price_list()
 
 		# set contact and address details for customer, if they are not mentioned
 		self.set_missing_lead_customer_details(for_validate=for_validate)

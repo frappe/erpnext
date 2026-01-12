@@ -205,10 +205,19 @@ class BuyingController(SubcontractingController):
 					row.discount_amount = 0.0
 					row.margin_rate_or_amount = 0.0
 
+	def check_buying_price_list(self):
+		if self.doctype in ["Purchase Order", "Purchase Receipt", "Purchase Invoice"] :
+			if self.supplier:
+				buying_price_list = frappe.db.get_value("Supplier",self.supplier,"default_price_list")
+
+				if buying_price_list and frappe.db.get_value("Price List", buying_price_list, "buying"):
+					self.buying_price_list = buying_price_list
+
 	def set_missing_values(self, for_validate=False):
 		super().set_missing_values(for_validate)
 
 		self.set_supplier_from_item_default()
+		self.check_buying_price_list()
 		self.set_price_list_currency("Buying")
 
 		# set contact and address details for supplier, if they are not mentioned
