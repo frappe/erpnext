@@ -113,7 +113,7 @@ jobs:
           jq 'del(.install_apps)' ~/frappe-bench/sites/test_site/site_config.json > tmp.json
           mv tmp.json ~/frappe-bench/sites/test_site/site_config.json
 
-          wget http://frappe.io/files/erpnext-v14.sql.gz
+          wget https://frappe.io/files/erpnext-v14.sql.gz
           bench --site test_site --force restore ~/frappe-bench/erpnext-v14.sql.gz
 
           git -C "apps/frappe" remote set-url upstream https://github.com/frappe/frappe.git
