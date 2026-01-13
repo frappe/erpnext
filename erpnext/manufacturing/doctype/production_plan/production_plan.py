@@ -367,7 +367,7 @@ class ProductionPlan(Document):
 				(so_item.parent.isin(so_list))
 				& (so_item.docstatus == 1)
 				& ((so_item.stock_qty - so_item.stock_reserved_qty) > so_item.work_order_qty)
-				& ((so_item.is_closed == 0) | (so_item.is_closed.isnull()))
+				& (so_item.is_closed == 0)
 			)
 		)
 
@@ -432,7 +432,7 @@ class ProductionPlan(Document):
 						.where((bom.item == pi.item_code) & (bom.is_active == 1))
 					)
 				)
-				& ((so_item.is_closed == 0) | (so_item.is_closed.isnull()))
+				& (so_item.is_closed == 0)
 			)
 		)
 
@@ -1545,7 +1545,7 @@ def get_sales_orders(self):
 			& (so.status.notin(["Stopped", "Closed"]))
 			& (so.company == self.company)
 			& (so_item.qty > so_item.production_plan_qty)
-			& ((so_item.is_closed == 0) | (so_item.is_closed.isnull()))
+			& (so_item.is_closed == 0)
 		)
 	)
 

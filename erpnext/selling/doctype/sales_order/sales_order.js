@@ -1814,6 +1814,10 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					delivered_qty: d.delivered_qty,
 				};
 			});
+		if (!this.data.length) {
+			frappe.msgprint(__("No closed items to re-open"));
+			return;
+		}
 		const reopen_item_fields = [
 			{
 				fieldtype: "Link",
@@ -1853,7 +1857,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 				let selected_items = (values.reopen_items || []).filter((row) => row.__checked);
 				if (!selected_items.length) {
-					frappe.msgprint(__("Please select one item to re-open"));
+					frappe.msgprint(__("Please select at least one item to re-open"));
 					return;
 				}
 				frappe.call({
@@ -1889,6 +1893,10 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					delivered_qty: d.delivered_qty,
 				};
 			});
+		if (!this.data.length) {
+			frappe.msgprint(__("No items available to close"));
+			return;
+		}
 		const close_item_fields = [
 			{
 				fieldtype: "Link",
@@ -1950,7 +1958,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					return;
 				}
 				if (!selected_items.length) {
-					frappe.msgprint(__("Please select one item to close"));
+					frappe.msgprint(__("Please select at least one item to close"));
 					return;
 				}
 				frappe.call({
