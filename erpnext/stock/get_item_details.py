@@ -677,7 +677,6 @@ def get_item_tax_info(doc, tax_category, item_codes, item_rates=None, item_tax_t
 			"tax_category": tax_category,
 			"base_net_rate": item_rates.get(item_code[1]),
 		}
-
 		if item_tax_templates:
 			ctx.update({"item_tax_template": item_tax_templates.get(item_code[1])})
 
@@ -688,7 +687,12 @@ def get_item_tax_info(doc, tax_category, item_codes, item_rates=None, item_tax_t
 			as_json=True,
 		)
 
+	if not out:
+		frappe.throw(_("No Item Tax information found"), frappe.DoesNotExistError)
+
 	return out
+
+		
 
 
 @frappe.whitelist()
