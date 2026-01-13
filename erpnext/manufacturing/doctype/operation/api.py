@@ -1,4 +1,5 @@
 import frappe
+import json
 from frappe import _
 from frappe.utils import flt
 
@@ -129,3 +130,19 @@ def get_job_cards_list(operation):
     )
 
     return job_cards[-1]
+
+
+@frappe.whitelist()
+def get_operators(designation, production_line, workstation):
+    filters = {
+        "designation": designation,
+        "production_line": production_line,
+        "machine_assigned": workstation  
+    }
+    
+    employee_name = frappe.db.get_value("Employee", filters, "name")  
+    
+    if not employee_name:
+        frappe.throw(f"No operator found: designation={designation}, line={production_line}, workstation={workstation}")
+    
+    return employee_name

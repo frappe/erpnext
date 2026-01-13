@@ -4,11 +4,13 @@ from frappe import _
 from frappe.utils import flt
 from erpnext.manufacturing.doctype.job_card.job_card import make_time_log, make_stock_entry as jc_make_stock_entry
 from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry  as wo_make_stock_entry
+from erpnext.manufacturing.doctype.operation.api import get_operators
 
 @frappe.whitelist()
 def get_mixer_state(job_card):
     jc = frappe.get_doc("Job Card", job_card)
     wo = frappe.get_doc("Work Order", jc.work_order) if jc.work_order else None
+
     return {
         "status": jc.status,
         "docstatus": jc.docstatus,
@@ -88,10 +90,11 @@ def start_mixing(job_card):
     """Start the Job Card when mixing starts."""
     jc = frappe.get_doc("Job Card", job_card)
     start_time = frappe.utils.now_datetime()
+    employee_id = get_operators("Mixer Operator", jc.production_line, jc.workstation)
     args = {
         "job_card_id": jc.name,
         "start_time": start_time,
-        "employees": [{"employee": "HR-EMP-00003"}], 
+        "employees": [{"employee": employee_id}], 
         "status": "Work In Progress",
     }
 
@@ -429,3 +432,20 @@ def assign_mixer_to_job_card(job_card, mixer):
         "status": "success",
         "mixer_number": mixer_number
     }
+
+@frappe.whitelist()
+def get_mixing_queue(production_line=None):
+    filters = {
+        "operation": ["like", "%Mixing%"],
+        "docstatus": 0,
+        "status": ["in", ["Open", "Material Transferred", "Work In Progress"]]
+    }
+    if production_line:
+        filters["production_line"] = production_line
+        
+    job_cards = frappe.get_all("Job Card",
+        filters=filters,
+        fields=["name", "production_item", "creation", "status", "production_line"],
+        order_by="creation asc"
+    )
+    return job_cards
