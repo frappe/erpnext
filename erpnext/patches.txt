@@ -429,3 +429,10 @@ execute:frappe.db.set_single_value("Accounts Settings", "show_account_balance", 
 erpnext.patches.v15_0.fix_draft_je_titles
 erpnext.patches.v15_0.update_opening_number_of_booked_depreciations_type
 erpnext.patches.v15_0.update_depreciations_type
+erpnext.patches.mahi.create_production_lines
+erpnext.patches.mahi.create_warehouse_types
+erpnext.patches.mahi.create_mfg_processes
+erpnext.patches.mahi.create_mfg_warehouses
+erpnext.patches.mahi.create_mahi_settings
+erpnext.patches.mahi.create_process_maps
+erpnext.patches.mahi.create_workstations
