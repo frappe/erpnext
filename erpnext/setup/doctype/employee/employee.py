@@ -77,6 +77,7 @@ class Employee(NestedSet):
 		last_name: DF.Data | None
 		leave_encashed: DF.Literal["", "Yes", "No"]
 		lft: DF.Int
+		machine_assigned: DF.Link
 		marital_status: DF.Literal["", "Single", "Married", "Divorced", "Widowed"]
 		middle_name: DF.Data | None
 		naming_series: DF.Literal["HR-EMP-"]
@@ -91,6 +92,7 @@ class Employee(NestedSet):
 		place_of_issue: DF.Data | None
 		prefered_contact_email: DF.Literal["", "Company Email", "Personal Email", "User ID"]
 		prefered_email: DF.Data | None
+		production_line: DF.Link
 		reason_for_leaving: DF.SmallText | None
 		relation: DF.Data | None
 		relieving_date: DF.Date | None

@@ -47,6 +47,9 @@
   "col_break_22",
   "notice_number_of_days",
   "date_of_retirement",
+  "manufacturing_details",
+  "production_line",
+  "machine_assigned",
   "contact_details",
   "cell_number",
   "column_break_40",
@@ -823,6 +826,25 @@
    "fieldtype": "Link",
    "label": "Attendance Shift",
    "options": "Attendance Shift"
+  },
+  {
+   "fieldname": "manufacturing_details",
+   "fieldtype": "Tab Break",
+   "label": "Manufacturing"
+  },
+  {
+   "fieldname": "production_line",
+   "fieldtype": "Link",
+   "label": "Production Line",
+   "options": "Production Line",
+   "reqd": 1
+  },
+  {
+   "fieldname": "machine_assigned",
+   "fieldtype": "Link",
+   "label": "Machine Assigned",
+   "options": "Workstation",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-user",
@@ -830,7 +852,7 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2025-12-19 00:08:28.433657",
+ "modified": "2026-01-12 13:52:25.574415",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
