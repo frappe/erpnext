@@ -1285,8 +1285,8 @@ class ReceivablePayableReport:
 		ranges = [*self.ranges, _("Above")]
 
 		prev_range_value = 0
-		self.add_column(label=_("Below-0"), fieldname="range0", fieldtype="Currency")
-		self.ageing_column_labels.append(_("Below-0"))
+		self.add_column(label=_("<0"), fieldname="range0", fieldtype="Currency")
+		self.ageing_column_labels.append(_("<0"))
 		for idx, curr_range_value in enumerate(ranges):
 			label = f"{prev_range_value}-{curr_range_value}"
 			self.add_column(label=label, fieldname="range" + str(idx + 1))
