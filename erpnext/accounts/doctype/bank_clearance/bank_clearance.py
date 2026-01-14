@@ -134,16 +134,44 @@ class BankClearance(Document):
 
 		for d in entries_to_update:
 			if d.payment_document == "Sales Invoice":
-				frappe.db.set_value(
+				old_clearance_date = frappe.db.get_value(
 					"Sales Invoice Payment",
-					{"parent": d.payment_entry, "account": self.get("account"), "amount": [">", 0]},
+					{
+						"parent": d.payment_entry,
+						"account": self.account,
+						"amount": [">", 0],
+					},
 					"clearance_date",
-					d.clearance_date,
 				)
+				if d.clearance_date or old_clearance_date:
+					frappe.db.set_value(
+						"Sales Invoice Payment",
+						{"parent": d.payment_entry, "account": self.get("account"), "amount": [">", 0]},
+						"clearance_date",
+						d.clearance_date,
+					)
+					sales_invoice = frappe.get_lazy_doc("Sales Invoice", d.payment_entry)
+					sales_invoice.add_comment(
+						"Comment",
+						_("Clearance date changed from {0} to {1} via Bank Clearance Tool").format(
+							old_clearance_date, d.clearance_date
+						),
+					)
+
 			else:
-				# using db_set to trigger notification
 				payment_entry = frappe.get_lazy_doc(d.payment_document, d.payment_entry)
-				payment_entry.db_set("clearance_date", d.clearance_date)
+				old_clearance_date = payment_entry.clearance_date
+
+				if d.clearance_date or old_clearance_date:
+					# using db_set to trigger notification
+					payment_entry.db_set("clearance_date", d.clearance_date)
+
+					payment_entry.add_comment(
+						"Comment",
+						_("Clearance date changed from {0} to {1} via Bank Clearance Tool").format(
+							old_clearance_date, d.clearance_date
+						),
+					)
 
 		self.get_payment_entries()
 		msgprint(_("Clearance Date updated"))

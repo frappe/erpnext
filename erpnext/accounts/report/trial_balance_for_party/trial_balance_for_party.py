@@ -75,20 +75,20 @@ def get_data(filters, show_party_name):
 		closing_debit, closing_credit = toggle_debit_credit(opening_debit + debit, opening_credit + credit)
 		row.update({"closing_debit": closing_debit, "closing_credit": closing_credit})
 
-		# totals
-		for col in total_row:
-			total_row[col] += row.get(col)
-
 		row.update({"currency": company_currency})
 
 		has_value = False
 		if opening_debit or opening_credit or debit or credit or closing_debit or closing_credit:
 			has_value = True
+		# Exclude zero balance parties if filter is set
+		if filters.get("exclude_zero_balance_parties") and not closing_debit and not closing_credit:
+			continue
 
 		if cint(filters.show_zero_values) or has_value:
 			data.append(row)
-
-	# Add total row
+			# totals
+			for col in total_row:
+				total_row[col] += row.get(col)
 
 	total_row.update({"party": "'" + _("Totals") + "'", "currency": company_currency})
 	data.append(total_row)

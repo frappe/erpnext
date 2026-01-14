@@ -6,7 +6,7 @@
    "label": "Produced Quantity"
   }
  ],
- "content": "[{\"id\":\"csBCiDglCE\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"V1e9RbPfQ1\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Produced Quantity\",\"col\":12}},{\"id\":\"WeKMsoeisv\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Open Work Orders\",\"col\":4}},{\"id\":\"NPjL4YMLXd\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"WIP Work Orders\",\"col\":4}},{\"id\":\"TsAK7EGwg3\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Manufactured Items Value\",\"col\":4}},{\"id\":\"xit0dg7KvY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM\",\"col\":3}},{\"id\":\"LRhGV9GAov\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Plan\",\"col\":3}},{\"id\":\"69KKosI6Hg\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Work Order\",\"col\":3}},{\"id\":\"PwndxuIpB3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Job Card\",\"col\":3}},{\"id\":\"YHCQG3wAGv\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM Creator\",\"col\":3}},{\"id\":\"Ubj6zXcmIQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Plant Floor\",\"col\":3}},{\"id\":\"OtMcArFRa5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM Stock Report\",\"col\":3}},{\"id\":\"76yYsI5imF\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Planning Report\",\"col\":3}},{\"id\":\"PIQJYZOMnD\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Learn Manufacturing\",\"col\":3}},{\"id\":\"OaiDqTT03Y\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Forecasting\",\"col\":3}},{\"id\":\"bN_6tHS-Ct\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"yVEFZMqVwd\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"rwrmsTI58-\",\"type\":\"card\",\"data\":{\"card_name\":\"Production\",\"col\":4}},{\"id\":\"6dnsyX-siZ\",\"type\":\"card\",\"data\":{\"card_name\":\"Bill of Materials\",\"col\":4}},{\"id\":\"m5puAHoHWB\",\"type\":\"card\",\"data\":{\"card_name\":\"Subcontracting\",\"col\":4}},{\"id\":\"CIq-v5f5KC\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"8RRiQeYr0G\",\"type\":\"card\",\"data\":{\"card_name\":\"Tools\",\"col\":4}},{\"id\":\"Pu8z7-82rT\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
+ "content": "[{\"id\":\"csBCiDglCE\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"V1e9RbPfQ1\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Produced Quantity\",\"col\":12}},{\"id\":\"WeKMsoeisv\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Open Work Orders\",\"col\":4}},{\"id\":\"NPjL4YMLXd\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"WIP Work Orders\",\"col\":4}},{\"id\":\"TsAK7EGwg3\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Manufactured Items Value\",\"col\":4}},{\"id\":\"bN_6tHS-Ct\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"yVEFZMqVwd\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"rwrmsTI58-\",\"type\":\"card\",\"data\":{\"card_name\":\"Production\",\"col\":4}},{\"id\":\"6dnsyX-siZ\",\"type\":\"card\",\"data\":{\"card_name\":\"Bill of Materials\",\"col\":4}},{\"id\":\"m5puAHoHWB\",\"type\":\"card\",\"data\":{\"card_name\":\"Subcontracting\",\"col\":4}},{\"id\":\"CIq-v5f5KC\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"8RRiQeYr0G\",\"type\":\"card\",\"data\":{\"card_name\":\"Tools\",\"col\":4}},{\"id\":\"Pu8z7-82rT\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
  "creation": "2020-03-02 17:11:37.032604",
  "custom_blocks": [],
  "docstatus": 0,
@@ -443,7 +443,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-12-18 14:30:15.596594",
+ "modified": "2026-01-02 15:07:36.968043",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
@@ -468,79 +468,7 @@
  "restrict_to_domain": "",
  "roles": [],
  "sequence_id": 8.0,
- "shortcuts": [
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Learn Manufacturing",
-   "type": "URL",
-   "url": "https://school.frappe.io/lms/courses/production-planning-and-execution"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Plant Floor",
-   "link_to": "Plant Floor",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "BOM Creator",
-   "link_to": "BOM Creator",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "BOM",
-   "link_to": "BOM",
-   "stats_filter": "{\"is_active\":[\"=\",1]}",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Production Plan",
-   "link_to": "Production Plan",
-   "stats_filter": "{\"status\":[\"not in\",[\"Closed\",\"Cancelled\",\"Completed\"]]}",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Work Order",
-   "link_to": "Work Order",
-   "stats_filter": "{\"status\":[\"not in\",[\"Closed\",\"Cancelled\",\"Completed\"]]}",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Job Card",
-   "link_to": "Job Card",
-   "stats_filter": "{\"status\":[\"not in\",[\"Cancelled\",\"Completed\",null]]}",
-   "type": "DocType"
-  },
-  {
-   "label": "Forecasting",
-   "link_to": "Exponential Smoothing Forecasting",
-   "report_ref_doctype": "Sales Order",
-   "type": "Report"
-  },
-  {
-   "label": "BOM Stock Report",
-   "link_to": "BOM Stock Report",
-   "report_ref_doctype": "BOM",
-   "type": "Report"
-  },
-  {
-   "label": "Production Planning Report",
-   "link_to": "Production Planning Report",
-   "report_ref_doctype": "Work Order",
-   "type": "Report"
-  }
- ],
+ "shortcuts": [],
  "title": "Manufacturing",
  "type": "Workspace"
 }

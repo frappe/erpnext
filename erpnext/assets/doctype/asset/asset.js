@@ -111,7 +111,7 @@ frappe.ui.form.on("Asset", {
 				frm.add_custom_button(
 					__("Sell Asset"),
 					function () {
-						frm.trigger("make_sales_invoice");
+						frm.trigger("sell_asset");
 					},
 					__("Manage")
 				);
@@ -231,26 +231,64 @@ frappe.ui.form.on("Asset", {
 	},
 
 	toggle_reference_doc: function (frm) {
-		if (frm.doc.purchase_receipt && frm.doc.purchase_invoice && frm.doc.docstatus === 1) {
-			frm.set_df_property("purchase_invoice", "read_only", 1);
-			frm.set_df_property("purchase_receipt", "read_only", 1);
-		} else if (frm.doc.is_existing_asset || frm.doc.is_composite_asset) {
-			frm.toggle_reqd("purchase_receipt", 0);
-			frm.toggle_reqd("purchase_invoice", 0);
-		} else if (frm.doc.purchase_receipt) {
-			// if purchase receipt link is set then set PI disabled
-			frm.toggle_reqd("purchase_invoice", 0);
-			frm.set_df_property("purchase_invoice", "read_only", 1);
-		} else if (frm.doc.purchase_invoice) {
-			// if purchase invoice link is set then set PR disabled
-			frm.toggle_reqd("purchase_receipt", 0);
-			frm.set_df_property("purchase_receipt", "read_only", 1);
-		} else {
-			frm.toggle_reqd("purchase_receipt", 1);
-			frm.set_df_property("purchase_receipt", "read_only", 0);
-			frm.toggle_reqd("purchase_invoice", 1);
-			frm.set_df_property("purchase_invoice", "read_only", 0);
+		const is_submitted = frm.doc.docstatus === 1;
+		const is_special_asset = frm.doc.is_existing_asset || frm.doc.is_composite_asset;
+
+		const clear_field = (field) => {
+			if (frm.doc[field]) {
+				frm.set_value(field, "");
+			}
+		};
+
+		["purchase_receipt", "purchase_receipt_item", "purchase_invoice", "purchase_invoice_item"].forEach(
+			(field) => {
+				frm.toggle_reqd(field, 0);
+				frm.set_df_property(field, "read_only", 0);
+			}
+		);
+
+		if (is_submitted) {
+			[
+				"purchase_receipt",
+				"purchase_receipt_item",
+				"purchase_invoice",
+				"purchase_invoice_item",
+			].forEach((field) => {
+				frm.set_df_property(field, "read_only", 1);
+			});
+			return;
 		}
+
+		if (is_special_asset) {
+			clear_field("purchase_receipt");
+			clear_field("purchase_receipt_item");
+			clear_field("purchase_invoice");
+			clear_field("purchase_invoice_item");
+			return;
+		}
+
+		if (frm.doc.purchase_receipt) {
+			frm.toggle_reqd("purchase_receipt_item", 1);
+
+			["purchase_invoice", "purchase_invoice_item"].forEach((field) => {
+				clear_field(field);
+				frm.set_df_property(field, "read_only", 1);
+			});
+			return;
+		}
+
+		if (frm.doc.purchase_invoice) {
+			frm.toggle_reqd("purchase_invoice_item", 1);
+
+			["purchase_receipt", "purchase_receipt_item"].forEach((field) => {
+				clear_field(field);
+				frm.set_df_property(field, "read_only", 1);
+			});
+			return;
+		}
+
+		frm.toggle_reqd("purchase_receipt", 1);
+		frm.toggle_reqd("purchase_invoice", 1);
 	},
 
 	make_journal_entry: function (frm) {
@@ -480,24 +518,7 @@ frappe.ui.form.on("Asset", {
 		} else {
 			frm.set_df_property("net_purchase_amount", "read_only", 0);
 		}
-
 		frm.trigger("toggle_reference_doc");
-	},
-
-	make_sales_invoice: function (frm) {
-		frappe.call({
-			args: {
-				asset: frm.doc.name,
-				item_code: frm.doc.item_code,
-				company: frm.doc.company,
-				serial_no: frm.doc.serial_no,
-			},
-			method: "erpnext.assets.doctype.asset.asset.make_sales_invoice",
-			callback: function (r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			},
-		});
 	},
 
 	create_asset_maintenance: function (frm) {
@@ -546,6 +567,69 @@ frappe.ui.form.on("Asset", {
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			},
 		});
+	},
+
+	sell_asset: function (frm) {
+		const make_sales_invoice = (sell_qty) => {
+			frappe.call({
+				method: "erpnext.assets.doctype.asset.asset.make_sales_invoice",
+				args: {
+					asset: frm.doc.name,
+					item_code: frm.doc.item_code,
+					company: frm.doc.company,
+					serial_no: frm.doc.serial_no,
+					sell_qty: sell_qty,
+				},
+				callback: function (r) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				},
+			});
+		};
+
+		let dialog = new frappe.ui.Dialog({
+			title: __("Sell Asset"),
+			fields: [
+				{
+					fieldname: "sell_qty",
+					fieldtype: "Int",
+					label: __("Sell Qty"),
+					reqd: 1,
+				},
+			],
+		});
+
+		dialog.set_primary_action(__("Sell"), function () {
+			const dialog_data = dialog.get_values();
+			const sell_qty = cint(dialog_data.sell_qty);
+			const asset_qty = cint(frm.doc.asset_quantity);
+
+			if (sell_qty <= 0) {
+				frappe.throw(__("Sell quantity must be greater than zero"));
+			}
+
+			if (sell_qty > asset_qty) {
+				frappe.throw(__("Sell quantity cannot exceed the asset quantity"));
+			}
+
+			if (sell_qty < asset_qty) {
+				frappe.confirm(
+					__(
+						"The sell quantity is less than the total asset quantity. The remaining quantity will be split into a new asset. This action cannot be undone. <br><br><b>Do you want to continue?</b>"
+					),
+					() => {
+						make_sales_invoice(sell_qty);
+						dialog.hide();
+					}
+				);
+				return;
+			}
+
+			make_sales_invoice(sell_qty);
+			dialog.hide();
+		});
+
+		dialog.show();
 	},
 
 	split_asset: function (frm) {

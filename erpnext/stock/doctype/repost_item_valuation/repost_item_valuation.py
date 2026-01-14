@@ -290,6 +290,7 @@ class RepostItemValuation(Document):
 		"""Deduplicate similar reposts based on item-warehouse-posting combination."""
 
 		if self.repost_only_accounting_ledgers:
+			# If against same voucher there are multiple RIVs for accounting ledgers only, skip them
 			self.skipped_similar_reposts()
 			return
 
@@ -559,23 +560,11 @@ def run_parallel_reposting():
 		frappe.db.get_single_value("Stock Reposting Settings", "no_of_parallel_reposting") or 4
 	)
 
-	riv_entries = get_repost_item_valuation_entries("Item and Warehouse")
+	riv_entries = get_repost_item_valuation_entries()
 
 	for row in riv_entries:
-		if row.repost_only_accounting_ledgers:
+		if row.based_on != "Item and Warehouse" or row.repost_only_accounting_ledgers:
 			execute_reposting_entry(row.name)
-			continue
-
-		if frappe.db.get_value(
-			"Repost Item Valuation",
-			{
-				"based_on": "Item and Warehouse",
-				"item_code": row.item_code,
-				"docstatus": 1,
-				"status": "In Progress",
-			},
-			"name",
-		):
 			continue
 
 		if row.item_code in items:
@@ -623,7 +612,7 @@ def execute_reposting_entry(name):
 		doc.deduplicate_similar_repost()
 
 
-def get_repost_item_valuation_entries(based_on=None):
+def get_repost_item_valuation_entries():
 	doctype = frappe.qb.DocType("Repost Item Valuation")
 
 	query = (
@@ -638,9 +627,6 @@ def get_repost_item_valuation_entries(based_on=None):
 		.orderby(doctype.creation, order=frappe.qb.asc)
 		.orderby(doctype.status, order=frappe.qb.asc)
 	)
-
-	if based_on:
-		query = query.where((doctype.based_on == based_on) | (doctype.repost_only_accounting_ledgers == 1))
 
 	return query.run(as_dict=True)
 

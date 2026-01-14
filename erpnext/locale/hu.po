@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-21 09:37+0000\n"
-"PO-Revision-Date: 2025-12-22 03:07\n"
+"PO-Revision-Date: 2026-01-07 05:35\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Hungarian\n"
 "MIME-Version: 1.0\n"
@@ -551,7 +551,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "501-1000"
-msgstr ""
+msgstr "501-1000"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -560,7 +560,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "51-200"
-msgstr ""
+msgstr "51-200"
 
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
@@ -741,7 +741,7 @@ msgstr ""
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:163
 #: erpnext/utilities/bulk_transaction.py:35
 msgid "<li>{}</li>"
-msgstr ""
+msgstr "<li>{}</li>"
 
 #: erpnext/controllers/accounts_controller.py:2258
 msgid "<p>Cannot overbill for the following Items:</p>"
@@ -4487,7 +4487,7 @@ msgstr ""
 #: erpnext/templates/form_grid/stock_entry_grid.html:11
 #: erpnext/templates/pages/order.html:103 erpnext/templates/pages/rfq.html:46
 msgid "Amount"
-msgstr ""
+msgstr "Összeg"
 
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:22
 msgid "Amount (AED)"
@@ -16957,7 +16957,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/batch/batch_list.js:16
 msgid "Empty"
-msgstr ""
+msgstr "Üres"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -19540,7 +19540,7 @@ msgstr ""
 #: erpnext/crm/doctype/contract_fulfilment_checklist/contract_fulfilment_checklist.json
 #: erpnext/support/doctype/issue/issue.json
 msgid "Fulfilled"
-msgstr ""
+msgstr "Teljesített"
 
 #: erpnext/selling/doctype/sales_order/sales_order_dashboard.py:24
 msgid "Fulfillment"
@@ -22321,7 +22321,7 @@ msgstr ""
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/selling/doctype/industry_type/industry_type.json
 msgid "Industry"
-msgstr ""
+msgstr "Ipar"
 
 #. Name of a DocType
 #: erpnext/selling/doctype/industry_type/industry_type.json
@@ -25948,7 +25948,7 @@ msgstr ""
 #: erpnext/setup/workspace/home/home.json
 #: erpnext/support/doctype/issue/issue.json
 msgid "Lead"
-msgstr ""
+msgstr "Érdeklődés"
 
 #: erpnext/crm/doctype/lead/lead.py:549
 msgid "Lead -> Prospect"
@@ -25969,13 +25969,13 @@ msgstr ""
 #: erpnext/crm/report/lead_details/lead_details.json
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Lead Details"
-msgstr ""
+msgstr "Érdeklődés adatai"
 
 #. Label of the lead_name (Data) field in DocType 'Prospect Lead'
 #: erpnext/crm/doctype/prospect_lead/prospect_lead.json
 #: erpnext/crm/report/lead_details/lead_details.py:24
 msgid "Lead Name"
-msgstr ""
+msgstr "Érdeklődő neve"
 
 #. Label of the lead_owner (Link) field in DocType 'Lead'
 #. Label of the lead_owner (Data) field in DocType 'Prospect Lead'
@@ -25984,7 +25984,7 @@ msgstr ""
 #: erpnext/crm/report/lead_details/lead_details.py:28
 #: erpnext/crm/report/lead_owner_efficiency/lead_owner_efficiency.py:21
 msgid "Lead Owner"
-msgstr ""
+msgstr "Érdeklődés tulajdonosa"
 
 #. Name of a report
 #. Label of a Link in the CRM Workspace
@@ -27090,7 +27090,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/sales_forecast/sales_forecast.json
 #: erpnext/projects/doctype/project/project.json
 msgid "Manual"
-msgstr ""
+msgstr "Kézikönyv"
 
 #. Label of the manual_inspection (Check) field in DocType 'Quality Inspection'
 #. Label of the manual_inspection (Check) field in DocType 'Quality Inspection
@@ -29058,7 +29058,7 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/templates/includes/order/order_taxes.html:5
 msgid "Net Total"
-msgstr ""
+msgstr "Nettó összesen"
 
 #. Label of the base_net_total (Currency) field in DocType 'POS Invoice'
 #. Label of the base_net_total (Currency) field in DocType 'Purchase Invoice'
@@ -29905,7 +29905,7 @@ msgstr ""
 #: erpnext/stock/doctype/manufacturer/manufacturer.json
 #: erpnext/www/book_appointment/index.html:55
 msgid "Notes"
-msgstr ""
+msgstr "Jegyzetek"
 
 #. Label of the notes_html (HTML) field in DocType 'Lead'
 #. Label of the notes_html (HTML) field in DocType 'Opportunity'
@@ -31111,7 +31111,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.py:30
 msgid "Organization"
-msgstr ""
+msgstr "Szervezet"
 
 #. Label of the company_name (Data) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
@@ -31467,7 +31467,7 @@ msgstr ""
 #: erpnext/accounts/report/sales_register/sales_register.py:236
 #: erpnext/crm/report/lead_details/lead_details.py:45
 msgid "Owner"
-msgstr ""
+msgstr "Tulajdonos"
 
 #. Label of the p_l_closing_balance (JSON) field in DocType 'Process Period
 #. Closing Voucher'
@@ -36587,7 +36587,7 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:39
 msgid "Products"
-msgstr ""
+msgstr "Termékek"
 
 #. Label of the accounts_module (Column Break) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -40895,7 +40895,7 @@ msgstr ""
 #. Label of the response (Section Break) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "Response Details"
-msgstr ""
+msgstr "Válasz részletei"
 
 #. Label of the response_key_list (Data) field in DocType 'Support Settings'
 #: erpnext/support/doctype/support_settings/support_settings.json
@@ -45096,7 +45096,7 @@ msgstr ""
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Series"
-msgstr ""
+msgstr "Sorozat"
 
 #. Label of the series_for_depreciation_entry (Data) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -46450,7 +46450,7 @@ msgstr ""
 #. Label of the source_type (Select) field in DocType 'Support Search Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
 msgid "Source Type"
-msgstr ""
+msgstr "Forrás típusa"
 
 #. Label of the set_warehouse (Link) field in DocType 'POS Invoice'
 #. Label of the set_warehouse (Link) field in DocType 'Sales Invoice'
@@ -48863,7 +48863,7 @@ msgstr ""
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:298
 #: erpnext/support/workspace/support/support.json
 msgid "Support"
-msgstr ""
+msgstr "Támogatás"
 
 #. Name of a report
 #: erpnext/support/report/support_hour_distribution/support_hour_distribution.json

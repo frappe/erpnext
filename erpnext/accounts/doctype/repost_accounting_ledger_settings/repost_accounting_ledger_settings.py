@@ -22,8 +22,8 @@ class RepostAccountingLedgerSettings(Document):
 		from erpnext.accounts.doctype.repost_allowed_types.repost_allowed_types import RepostAllowedTypes
 
 		allowed_types: DF.Table[RepostAllowedTypes]
-
 	# end: auto-generated types
+
 	def validate(self):
 		self.update_property_for_accounting_dimension()
 

@@ -232,7 +232,7 @@ class StockLedgerEntry(Document):
 			)
 
 		if item_detail.is_stock_item != 1:
-			self.throw_error_message("Item {0} must be a stock Item").format(self.item_code)
+			self.throw_error_message(f"Item {self.item_code} must be a stock Item")
 
 		if item_detail.has_serial_no or item_detail.has_batch_no:
 			if not self.serial_and_batch_bundle:

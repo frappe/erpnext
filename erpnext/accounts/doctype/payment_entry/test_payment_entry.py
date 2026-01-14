@@ -1045,6 +1045,7 @@ class TestPaymentEntry(IntegrationTestCase):
 		)
 
 	def test_gl_of_multi_currency_payment_with_taxes(self):
+		frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 1)
 		payment_entry = create_payment_entry(
 			party="_Test Supplier USD", paid_to="_Test Payable USD - _TC", save=True
 		)
@@ -1605,6 +1606,96 @@ class TestPaymentEntry(IntegrationTestCase):
 
 		self.voucher_no = pe.name
 		self.check_gl_entries()
+
+	def test_payment_entry_merges_gl_entries_with_same_account_head(self):
+		"""
+		Test that Payment Entry merges GL entries with same account head
+		when 'Merge Similar Account Heads' setting is enabled.
+		"""
+		frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 1)
+
+		pe = create_payment_entry(
+			party_type="Supplier",
+			party="_Test Supplier",
+			paid_from="_Test Bank - _TC",
+			paid_to="Creditors - _TC",
+		)
+
+		pe.append(
+			"deductions",
+			{
+				"account": "Write Off - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"amount": 50,
+			},
+		)
+
+		pe.append(
+			"deductions",
+			{
+				"account": "Write Off - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"amount": 30,
+			},
+		)
+
+		pe.save()
+		pe.submit()
+
+		gl_entries = frappe.db.get_all(
+			"GL Entry",
+			filters={"voucher_no": pe.name, "account": "Write Off - _TC", "is_cancelled": 0},
+			fields=["debit", "credit"],
+		)
+
+		self.assertEqual(len(gl_entries), 1)
+		self.assertEqual(gl_entries[0].debit, 80)
+
+	def test_payment_entry_does_not_merge_gl_entries_when_setting_disabled(self):
+		"""
+		Test that Payment Entry does NOT merge GL entries
+		when 'Merge Similar Account Heads' is disabled.
+		"""
+
+		frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
+
+		pe = create_payment_entry(
+			party_type="Supplier",
+			party="_Test Supplier",
+			paid_from="_Test Bank - _TC",
+			paid_to="Creditors - _TC",
+		)
+
+		pe.append(
+			"deductions",
+			{
+				"account": "Write Off - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"amount": 50,
+			},
+		)
+
+		pe.append(
+			"deductions",
+			{
+				"account": "Write Off - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"amount": 30,
+			},
+		)
+
+		pe.save()
+		pe.submit()
+
+		gl_entries = frappe.db.get_all(
+			"GL Entry",
+			filters={"voucher_no": pe.name, "account": "Write Off - _TC", "is_cancelled": 0},
+			fields=["debit", "credit"],
+		)
+
+		self.assertEqual(len(gl_entries), 2)
+
+		frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 1)
 
 	def check_pl_entries(self):
 		ple = frappe.qb.DocType("Payment Ledger Entry")

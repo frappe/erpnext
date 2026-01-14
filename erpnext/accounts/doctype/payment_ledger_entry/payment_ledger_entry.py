@@ -131,7 +131,6 @@ class PaymentLedgerEntry(Document):
 				account_type == "Profit and Loss"
 				and self.company == dimension.company
 				and dimension.mandatory_for_pl
-				and not dimension.disabled
 			):
 				if not self.get(dimension.fieldname):
 					frappe.throw(
@@ -144,7 +143,6 @@ class PaymentLedgerEntry(Document):
 				account_type == "Balance Sheet"
 				and self.company == dimension.company
 				and dimension.mandatory_for_bs
-				and not dimension.disabled
 			):
 				if not self.get(dimension.fieldname):
 					frappe.throw(

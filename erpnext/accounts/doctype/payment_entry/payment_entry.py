@@ -1285,8 +1285,11 @@ class PaymentEntry(AccountsController):
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gl_entries = self.build_gl_map()
-		gl_entries = process_gl_map(gl_entries)
-		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
+
+		merge_entries = frappe.get_single_value("Accounts Settings", "merge_similar_account_heads")
+
+		gl_entries = process_gl_map(gl_entries, merge_entries=merge_entries)
+		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj, merge_entries=merge_entries)
 		if cancel:
 			cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 		else:

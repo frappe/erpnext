@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2017-10-23 11:38:54.004355",
  "doctype": "DocType",
@@ -266,7 +267,7 @@
    "link_fieldname": "asset_repair"
   }
  ],
- "modified": "2025-11-28 13:04:34.921098",
+ "modified": "2026-01-06 15:48:13.862505",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
@@ -280,6 +281,7 @@
    "delete": 1,
    "email": 1,
    "export": 1,
+   "import": 1,
    "print": 1,
    "read": 1,
    "report": 1,
@@ -295,6 +297,7 @@
    "delete": 1,
    "email": 1,
    "export": 1,
+   "import": 1,
    "print": 1,
    "read": 1,
    "report": 1,

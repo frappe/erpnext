@@ -114,6 +114,10 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			var filters = report.get_values();
 			frappe.set_route("query-report", "Accounts Payable", { company: filters.company });
 		});
+
+		if (frappe.boot.sysdefaults.default_ageing_range) {
+			report.set_filter_value("range", frappe.boot.sysdefaults.default_ageing_range);
+		}
 	},
 };
 

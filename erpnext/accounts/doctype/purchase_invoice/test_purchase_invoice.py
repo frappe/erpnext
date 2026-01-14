@@ -1498,6 +1498,8 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 	def test_purchase_invoice_advance_taxes(self):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
+		frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 1)
+
 		company = "_Test Company"
 
 		tds_account_args = {

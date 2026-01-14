@@ -973,6 +973,45 @@ class TestMaterialRequest(IntegrationTestCase):
 
 		self.assertRaises(OverAllowanceError, mr.submit)
 
+	def test_get_remaining_qty_from_sales_order(self):
+		from frappe.utils import add_to_date, today
+
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.selling.doctype.sales_order.sales_order import make_material_request
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		sub_item_a = "_Test Bundle ItemA"
+		create_item(sub_item_a, is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0)
+
+		sub_item_b = "_Test Bundle ItemB"
+		create_item(sub_item_b, is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0)
+
+		bundle_item = "_Test Bundle"
+		create_item(
+			bundle_item,
+			is_stock_item=0,
+			is_customer_provided_item=1,
+			customer="_Test Customer",
+			is_purchase_item=0,
+		)
+
+		make_product_bundle(parent=bundle_item, items=[sub_item_a, sub_item_b])
+
+		so = make_sales_order(item_code=bundle_item)
+		so.submit()
+
+		mr = make_material_request(so.name)
+		mr.schedule_date = add_to_date(today(), days=1, as_string=True)
+		mr.get("items")[0].qty = 5
+		mr.get("items")[1].qty = 5
+		mr.insert()
+		mr.submit()
+
+		mr = make_material_request(so.name)
+
+		self.assertEqual(mr.items[0].qty, 5)
+		self.assertEqual(mr.items[1].qty, 5)
+
 	def test_pending_qty_in_pick_list(self):
 		"""Test for pick list mapped doc qty from partially received Material Request Transfer"""
 		import json
@@ -1099,7 +1138,8 @@ def make_material_request(**args):
 	mr = frappe.new_doc("Material Request")
 	mr.material_request_type = args.material_request_type or "Purchase"
 	mr.company = args.company or "_Test Company"
-	mr.customer = args.customer or "_Test Customer"
+	if mr.material_request_type == "Customer Provided":
+		mr.customer = args.customer or "_Test Customer"
 	mr.append(
 		"items",
 		{
@@ -1108,6 +1148,7 @@ def make_material_request(**args):
 			"uom": args.uom or "_Test UOM",
 			"conversion_factor": args.conversion_factor or 1,
 			"schedule_date": args.schedule_date or today(),
+			"from_warehouse": args.from_warehouse,
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
 			"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		},

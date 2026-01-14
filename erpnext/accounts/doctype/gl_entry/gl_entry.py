@@ -193,7 +193,6 @@ class GLEntry(Document):
 				account_type == "Profit and Loss"
 				and self.company == dimension.company
 				and dimension.mandatory_for_pl
-				and not dimension.disabled
 				and not self.is_cancelled
 			):
 				if not self.get(dimension.fieldname):
@@ -207,7 +206,6 @@ class GLEntry(Document):
 				account_type == "Balance Sheet"
 				and self.company == dimension.company
 				and dimension.mandatory_for_bs
-				and not dimension.disabled
 				and not self.is_cancelled
 			):
 				if not self.get(dimension.fieldname):

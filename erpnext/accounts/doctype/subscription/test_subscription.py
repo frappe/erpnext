@@ -17,6 +17,7 @@ from frappe.utils.data import (
 	nowdate,
 )
 
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.subscription.subscription import get_prorata_factor
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ("UOM", "Item Group", "Item")
@@ -144,17 +145,17 @@ class TestSubscription(IntegrationTestCase):
 		subscription = create_subscription(start_date=add_days(nowdate(), -1000))
 
 		subscription.process(posting_date=subscription.current_invoice_end)  # generate first invoice
-		self.assertEqual(subscription.status, "Past Due Date")
+		self.assertEqual(subscription.status, "Grace Period")
 
 		subscription.process()
-		# Grace period is 1000 days so status should remain as Past Due Date
-		self.assertEqual(subscription.status, "Past Due Date")
+		# Grace period is 1000 days so status should remain as Grace Period
+		self.assertEqual(subscription.status, "Grace Period")
 
 		subscription.process()
-		self.assertEqual(subscription.status, "Past Due Date")
+		self.assertEqual(subscription.status, "Grace Period")
 
 		subscription.process()
-		self.assertEqual(subscription.status, "Past Due Date")
+		self.assertEqual(subscription.status, "Grace Period")
 
 		settings.grace_period = grace_period
 		settings.save()
@@ -583,6 +584,105 @@ class TestSubscription(IntegrationTestCase):
 		subscription.process(nowdate())
 		self.assertEqual(len(subscription.invoices), 1)
 
+	def test_subscription_auto_cancellation(self):
+		create_plan(
+			plan_name="_Test plan name 10",
+			cost=80,
+			currency="INR",
+			billing_interval="Day",
+			billing_interval_count=3,
+		)
+		start_date = getdate("2025-01-01")
+		subscription = create_subscription(
+			start_date=start_date,
+			end_date=add_days(start_date, 8),
+			cancel_at_period_end=1,
+			generate_new_invoices_past_due_date=1,
+			generate_invoice_at="Beginning of the current subscription period",
+			plans=[{"plan": "_Test plan name 10", "qty": 1}],
+		)
+		subscription.process(posting_date=add_days(start_date, 2))
+		self.assertEqual(len(subscription.invoices), 1)
+
+		subscription.process(posting_date=add_days(start_date, 5))
+		self.assertEqual(len(subscription.invoices), 2)
+
+		subscription.process(posting_date=add_days(start_date, 8))
+		self.assertEqual(len(subscription.invoices), 3)
+		self.assertEqual(subscription.status, "Cancelled")
+
+	def test_subscription_auto_cancellation_uneven_cycle(self):
+		create_plan(
+			plan_name="_Test plan name 10",
+			cost=80,
+			currency="INR",
+			billing_interval="Day",
+			billing_interval_count=3,
+		)
+		start_date = getdate("2025-01-01")
+		subscription = create_subscription(
+			start_date=start_date,
+			end_date=add_days(start_date, 6),
+			cancel_at_period_end=1,
+			generate_new_invoices_past_due_date=1,
+			generate_invoice_at="Beginning of the current subscription period",
+			plans=[{"plan": "_Test plan name 10", "qty": 1}],
+		)
+
+		subscription.process(posting_date=add_days(start_date, 2))
+		self.assertEqual(len(subscription.invoices), 1)
+
+		subscription.process(posting_date=add_days(start_date, 5))
+		self.assertEqual(len(subscription.invoices), 2)
+
+		# partial last cycle invoice
+		subscription.process(posting_date=add_days(start_date, 6))
+		self.assertEqual(len(subscription.invoices), 3)
+
+		self.assertEqual(subscription.status, "Cancelled")
+
+		self.assertRaises(frappe.ValidationError, subscription.process, posting_date=add_days(start_date, 7))
+
+	def test_subscription_auto_completion(self):
+		create_plan(
+			plan_name="_Test Plan 3 Day",
+			cost=100,
+			billing_interval="Day",
+			billing_interval_count=3,
+			currency="INR",
+		)
+
+		start_date = getdate("2025-01-01")
+		end_date = add_days(start_date, 6)
+
+		subscription = create_subscription(
+			start_date=start_date,
+			end_date=end_date,
+			party_type="Customer",
+			party="_Test Customer",
+			generate_invoice_at="Beginning of the current subscription period",
+			generate_new_invoices_past_due_date=1,
+			plans=[{"plan": "_Test Plan 3 Day", "qty": 1}],
+		)
+
+		for day in range(0, 10):
+			if subscription.status == "Cancelled":
+				break
+			subscription.process(posting_date=add_days(start_date, day))
+
+		invoices = frappe.get_all(
+			"Sales Invoice",
+			filters={"subscription": subscription.name, "docstatus": 1},
+			fields=["name", "from_date", "to_date"],
+			order_by="from_date asc",
+		)
+		for invoice in invoices:
+			pi = get_payment_entry("Sales Invoice", invoice.name)
+			pi.submit()
+		# After processing through all days, subscription should be completed
+		subscription.process(posting_date=add_days(end_date, 1))
+		self.assertEqual(subscription.status, "Completed")
+
 
 def make_plans():
 	create_plan(plan_name="_Test Plan Name", cost=900, currency="INR")
@@ -659,6 +759,7 @@ def create_subscription(**kwargs):
 	subscription.trial_period_start = kwargs.get("trial_period_start")
 	subscription.trial_period_end = kwargs.get("trial_period_end")
 	subscription.start_date = kwargs.get("start_date")
+	subscription.end_date = kwargs.get("end_date")
 	subscription.generate_invoice_at = kwargs.get("generate_invoice_at")
 	subscription.additional_discount_percentage = kwargs.get("additional_discount_percentage")
 	subscription.additional_discount_amount = kwargs.get("additional_discount_amount")
@@ -667,6 +768,7 @@ def create_subscription(**kwargs):
 	subscription.submit_invoice = kwargs.get("submit_invoice")
 	subscription.days_until_due = kwargs.get("days_until_due")
 	subscription.number_of_days = kwargs.get("number_of_days")
+	subscription.cancel_at_period_end = kwargs.get("cancel_at_period_end")
 
 	if not kwargs.get("plans"):
 		subscription.append("plans", {"plan": "_Test Plan Name", "qty": 1})

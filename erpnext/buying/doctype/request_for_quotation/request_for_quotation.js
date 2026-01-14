@@ -34,15 +34,6 @@ frappe.ui.form.on("Request for Quotation", {
 		});
 	},
 
-	onload: function (frm) {
-		if (!frm.doc.message_for_supplier) {
-			frm.set_value(
-				"message_for_supplier",
-				__("Please supply the specified items at the best possible rates")
-			);
-		}
-	},
-
 	refresh: function (frm, cdt, cdn) {
 		if (frm.doc.docstatus === 1) {
 			frm.add_custom_button(
@@ -256,12 +247,14 @@ frappe.ui.form.on("Request for Quotation", {
 					"use_html",
 					"response",
 					"response_html",
+					"subject",
 				])
 				.then((r) => {
 					frm.set_value(
 						"message_for_supplier",
 						r.message.use_html ? r.message.response_html : r.message.response
 					);
+					frm.set_value("subject", r.message.subject);
 				});
 		}
 	},

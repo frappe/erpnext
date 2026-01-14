@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-21 09:37+0000\n"
-"PO-Revision-Date: 2025-12-22 03:07\n"
+"PO-Revision-Date: 2026-01-06 05:28\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Dutch\n"
 "MIME-Version: 1.0\n"
@@ -471,7 +471,7 @@ msgstr ""
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "1 hr"
-msgstr ""
+msgstr "1 uur"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -480,7 +480,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "1-10"
-msgstr ""
+msgstr "1-10"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -489,7 +489,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "1000+"
-msgstr ""
+msgstr "1000+"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -498,7 +498,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "11-50"
-msgstr ""
+msgstr "11-50"
 
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:95
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:101
@@ -518,7 +518,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "201-500"
-msgstr ""
+msgstr "201-500"
 
 #. Option for the 'Periodicity' (Select) field in DocType 'Asset Maintenance
 #. Task'
@@ -551,7 +551,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "501-1000"
-msgstr ""
+msgstr "501-1000"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -560,7 +560,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "51-200"
-msgstr ""
+msgstr "51-200"
 
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
@@ -954,7 +954,7 @@ msgstr ""
 
 #: erpnext/crm/doctype/lead/lead.py:142
 msgid "A Lead requires either a person's name or an organization's name"
-msgstr ""
+msgstr "Een lead vereist de naam van een persoon of de naam van een organisatie"
 
 #: erpnext/stock/doctype/packing_slip/packing_slip.py:84
 msgid "A Packing Slip can only be created for Draft Delivery Note."
@@ -1161,7 +1161,7 @@ msgstr ""
 #. Label of the access_key (Data) field in DocType 'Currency Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgid "Access Key"
-msgstr ""
+msgstr "Toegangssleutel"
 
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.py:48
 msgid "Access Key is required for Service Provider: {0}"
@@ -1307,7 +1307,7 @@ msgstr ""
 #: erpnext/accounts/report/financial_statements.py:681
 #: erpnext/accounts/report/trial_balance/trial_balance.py:480
 msgid "Account Name"
-msgstr ""
+msgstr "Accountnaam"
 
 #: erpnext/accounts/doctype/account/account.py:373
 msgid "Account Not Found"
@@ -4487,7 +4487,7 @@ msgstr ""
 #: erpnext/templates/form_grid/stock_entry_grid.html:11
 #: erpnext/templates/pages/order.html:103 erpnext/templates/pages/rfq.html:46
 msgid "Amount"
-msgstr ""
+msgstr "Bedrag"
 
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:22
 msgid "Amount (AED)"
@@ -8765,7 +8765,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_entry/stock_entry_list.js:25
 #: erpnext/telephony/doctype/call_log/call_log.json
 msgid "Canceled"
-msgstr ""
+msgstr "Geannuleerd"
 
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:76
 msgid "Cannot Assign Cashier"
@@ -12063,7 +12063,7 @@ msgstr ""
 
 #: erpnext/utilities/activation.py:79
 msgid "Create Lead"
-msgstr ""
+msgstr "Creëer Lead"
 
 #: erpnext/utilities/activation.py:77
 msgid "Create Leads"
@@ -16957,7 +16957,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/batch/batch_list.js:16
 msgid "Empty"
-msgstr ""
+msgstr "Leeg"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -18630,7 +18630,7 @@ msgstr ""
 #: erpnext/support/doctype/service_level_priority/service_level_priority.json
 #: erpnext/support/report/first_response_time_for_issues/first_response_time_for_issues.py:15
 msgid "First Response Time"
-msgstr ""
+msgstr "Eerste reactietijd"
 
 #. Name of a report
 #. Label of a Link in the Support Workspace
@@ -18866,7 +18866,7 @@ msgstr ""
 
 #: erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html:23
 msgid "For"
-msgstr ""
+msgstr "Voor"
 
 #: erpnext/public/js/utils/sales_common.js:389
 msgid "For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table."
@@ -25975,7 +25975,7 @@ msgstr ""
 #: erpnext/crm/doctype/prospect_lead/prospect_lead.json
 #: erpnext/crm/report/lead_details/lead_details.py:24
 msgid "Lead Name"
-msgstr ""
+msgstr "Lead Naam"
 
 #. Label of the lead_owner (Link) field in DocType 'Lead'
 #. Label of the lead_owner (Data) field in DocType 'Prospect Lead'
@@ -25984,7 +25984,7 @@ msgstr ""
 #: erpnext/crm/report/lead_details/lead_details.py:28
 #: erpnext/crm/report/lead_owner_efficiency/lead_owner_efficiency.py:21
 msgid "Lead Owner"
-msgstr ""
+msgstr "Lead Eigenaar"
 
 #. Name of a report
 #. Label of a Link in the CRM Workspace
@@ -26453,7 +26453,7 @@ msgstr ""
 #: erpnext/selling/doctype/quotation/quotation_list.js:36
 #: erpnext/stock/doctype/shipment/shipment.json
 msgid "Lost"
-msgstr ""
+msgstr "Verloren"
 
 #. Name of a report
 #: erpnext/crm/report/lost_opportunity/lost_opportunity.json
@@ -26481,7 +26481,7 @@ msgstr ""
 #: erpnext/crm/report/lost_opportunity/lost_opportunity.js:30
 #: erpnext/selling/report/lost_quotations/lost_quotations.py:24
 msgid "Lost Reason"
-msgstr ""
+msgstr "Reden van verlies"
 
 #. Name of a DocType
 #: erpnext/crm/doctype/lost_reason_detail/lost_reason_detail.json
@@ -27494,7 +27494,7 @@ msgstr ""
 #. Label of a Card Break in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Masters"
-msgstr ""
+msgstr "Stamdata"
 
 #: erpnext/projects/doctype/project/project_dashboard.py:14
 msgid "Material"
@@ -29058,7 +29058,7 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/templates/includes/order/order_taxes.html:5
 msgid "Net Total"
-msgstr ""
+msgstr "Netto totaal"
 
 #. Label of the base_net_total (Currency) field in DocType 'POS Invoice'
 #. Label of the base_net_total (Currency) field in DocType 'Purchase Invoice'
@@ -29905,7 +29905,7 @@ msgstr ""
 #: erpnext/stock/doctype/manufacturer/manufacturer.json
 #: erpnext/www/book_appointment/index.html:55
 msgid "Notes"
-msgstr ""
+msgstr "Opmerkingen"
 
 #. Label of the notes_html (HTML) field in DocType 'Lead'
 #. Label of the notes_html (HTML) field in DocType 'Opportunity'
@@ -30246,7 +30246,7 @@ msgstr ""
 #. Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Ongoing"
-msgstr ""
+msgstr "Lopende"
 
 #: erpnext/manufacturing/dashboard_fixtures.py:228
 msgid "Ongoing Job Cards"
@@ -36587,7 +36587,7 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:39
 msgid "Products"
-msgstr ""
+msgstr "producten"
 
 #. Label of the accounts_module (Column Break) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -38269,7 +38269,7 @@ msgstr ""
 #: erpnext/templates/pages/material_request_info.html:48
 #: erpnext/templates/pages/order.html:97
 msgid "Quantity"
-msgstr ""
+msgstr "Hoeveelheid"
 
 #. Description of the 'Packing Unit' (Int) field in DocType 'Item Price'
 #: erpnext/stock/doctype/item_price/item_price.json
@@ -38690,7 +38690,7 @@ msgstr ""
 #: erpnext/templates/form_grid/item_grid.html:8
 #: erpnext/templates/pages/order.html:100 erpnext/templates/pages/rfq.html:43
 msgid "Rate"
-msgstr ""
+msgstr "tarief"
 
 #. Label of the rate_amount_section (Section Break) field in DocType 'BOM Item'
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
@@ -45096,7 +45096,7 @@ msgstr ""
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Series"
-msgstr ""
+msgstr "Reeksen"
 
 #. Label of the series_for_depreciation_entry (Data) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -50067,7 +50067,7 @@ msgstr ""
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Territory"
-msgstr ""
+msgstr "Regio"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/territory_item/territory_item.json
@@ -55495,7 +55495,7 @@ msgstr ""
 #: erpnext/projects/workspace/projects/projects.json
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
 msgid "Working Hours"
-msgstr ""
+msgstr "Werkuren"
 
 #. Label of the workstation (Link) field in DocType 'BOM Operation'
 #. Label of the workstation (Link) field in DocType 'BOM Website Operation'
@@ -56274,7 +56274,7 @@ msgstr ""
 
 #: erpnext/www/book_appointment/index.js:134
 msgid "to"
-msgstr ""
+msgstr "naar"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3087
 msgid "to unallocate the amount of this Return Invoice before cancelling it."

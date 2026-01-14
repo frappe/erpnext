@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-21 09:37+0000\n"
-"PO-Revision-Date: 2025-12-22 03:08\n"
+"PO-Revision-Date: 2026-01-08 05:56\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -11952,7 +11952,7 @@ msgstr "Kostnad för Utfärdade Artiklar"
 #. Name of a report
 #: erpnext/manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.json
 msgid "Cost of Poor Quality Report"
-msgstr "Rapport om Kostnad för Dålig Kvalitet"
+msgstr "Kostnad Rapport för Dålig Kvalitet"
 
 #: erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py:39
 msgid "Cost of Purchased Items"
@@ -37915,7 +37915,7 @@ msgstr "Kvantitet att Producera"
 
 #: erpnext/manufacturing/report/quality_inspection_summary/quality_inspection_summary.py:56
 msgid "Qty Wise Chart"
-msgstr "Kvalitetsmässig Diagram"
+msgstr "Kvantitet Diagram"
 
 #. Label of the section_break_6 (Section Break) field in DocType 'Asset
 #. Capitalization Service Item'
@@ -41446,7 +41446,7 @@ msgstr "Höger Underordnad"
 #. Label of the rgt (Int) field in DocType 'Quality Procedure'
 #: erpnext/quality_management/doctype/quality_procedure/quality_procedure.json
 msgid "Right Index"
-msgstr "Rätt Index"
+msgstr "Höger Index"
 
 #. Option for the 'Status' (Select) field in DocType 'Call Log'
 #: erpnext/telephony/doctype/call_log/call_log.json
@@ -49076,7 +49076,7 @@ msgstr "System kommer automatiskt att skapa serienummer/parti för färdig artik
 msgid "System will do an implicit conversion using the pegged currency. <br>\n"
 "Ex: Instead of AED -&gt; INR, system will do AED -&gt; USD -&gt; INR using the pegged exchange rate of AED against USD."
 msgstr "System kommer att skapa implicit konvertering med hjälp av bunden valuta. <br>\n"
-"E. x: Istället för AED -&gt; INR, kommer system att göra AED -&gt; USD -&gt; INR med hjälp av bunden växelkurs för AED mot USD."
+"t. e. x: Istället för AED -&gt; INR, kommer system att göra AED -&gt; USD -&gt; INR med hjälp av bunden växelkurs för AED mot USD."
 
 #. Description of the 'Invoice Limit' (Int) field in DocType 'Payment
 #. Reconciliation'

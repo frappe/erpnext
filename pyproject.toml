@@ -38,7 +38,7 @@ skip_namespaces = [
 ]
 
 [tool.bench.frappe-dependencies]
-frappe = ">=16.0.0-dev,<17.0.0"
+frappe = ">=17.0.0-dev,<18.0.0"
 
 [tool.ruff]
 line-length = 110

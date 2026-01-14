@@ -126,9 +126,11 @@ frappe.ui.form.on("Journal Entry", {
 
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
 
-		$.each(frm.doc.accounts || [], function (i, row) {
-			erpnext.journal_entry.set_exchange_rate(frm, row.doctype, row.name);
-		});
+		if (frm.doc.voucher_type !== "Exchange Gain Or Loss") {
+			$.each(frm.doc.accounts || [], function (i, row) {
+				erpnext.journal_entry.set_exchange_rate(frm, row.doctype, row.name);
+			});
+		}
 	},
 	before_save: function (frm) {
 		if (frm.doc.docstatus == 0 && !frm.doc.is_system_generated) {

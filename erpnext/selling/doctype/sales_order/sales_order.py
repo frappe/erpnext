@@ -995,12 +995,15 @@ def get_requested_item_qty(sales_order):
 		filters={"docstatus": 1, "sales_order": sales_order},
 		fields=[
 			"sales_order_item",
+			"packed_item",
 			{"SUM": "qty", "as": "qty"},
 			{"SUM": "received_qty", "as": "received_qty"},
 		],
-		group_by="sales_order_item",
+		group_by="sales_order_item, packed_item",
 	):
-		result[d.sales_order_item] = frappe._dict({"qty": d.qty, "received_qty": d.received_qty})
+		result[d.sales_order_item or d.packed_item] = frappe._dict(
+			{"qty": d.qty, "received_qty": d.received_qty}
+		)
 
 	return result
 
@@ -1025,10 +1028,36 @@ def make_material_request(source_name, target_doc=None):
 			)
 		)
 
+	def get_remaining_packed_item_qty(so_item):
+		delivered_qty = frappe.db.get_value(
+			"Sales Order Item", {"name": so_item.parent_detail_docname}, ["delivered_qty"]
+		)
+
+		bundle_item_qty = frappe.db.get_value(
+			"Product Bundle Item", {"parent": so_item.parent_item, "item_code": so_item.item_code}, ["qty"]
+		)
+
+		return flt(
+			(
+				flt(so_item.qty)
+				- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
+				- max(
+					flt(delivered_qty) * flt(bundle_item_qty)
+					- flt(requested_item_qty.get(so_item.name, {}).get("received_qty")),
+					0,
+				)
+			)
+			* bundle_item_qty
+		)
+
 	def update_item(source, target, source_parent):
 		# qty is for packed items, because packed items don't have stock_qty field
 		target.project = source_parent.project
-		target.qty = get_remaining_qty(source)
+		target.qty = (
+			get_remaining_packed_item_qty(source)
+			if source.parentfield == "packed_items"
+			else get_remaining_qty(source)
+		)
 		target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
 		target.actual_qty = get_bin_details(
 			target.item_code, target.warehouse, source_parent.company, True
@@ -1058,7 +1087,8 @@ def make_material_request(source_name, target_doc=None):
 			"Sales Order": {"doctype": "Material Request", "validation": {"docstatus": ["=", 1]}},
 			"Packed Item": {
 				"doctype": "Material Request Item",
-				"field_map": {"parent": "sales_order", "uom": "stock_uom"},
+				"field_map": {"parent": "sales_order", "uom": "stock_uom", "name": "packed_item"},
+				"condition": lambda item: get_remaining_packed_item_qty(item) > 0,
 				"postprocess": update_item,
 			},
 			"Sales Order Item": {

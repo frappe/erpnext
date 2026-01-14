@@ -3,7 +3,7 @@ import json
 from collections import defaultdict
 
 import frappe
-from frappe.query_builder.functions import CombineDatetime, Sum
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt, nowtime
 from pypika import Order
 from pypika.functions import Coalesce

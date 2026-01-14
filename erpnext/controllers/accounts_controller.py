@@ -3748,9 +3748,9 @@ def validate_child_on_delete(row, parent, ordered_item=None):
 			)
 		if flt(row.ordered_qty):
 			frappe.throw(
-				_("Row #{0}: Cannot delete item {1} which is assigned to customer's purchase order.").format(
-					row.idx, row.item_code
-				)
+				_(
+					"Row #{0}: Cannot delete item {1} which is already ordered against this Sales Order."
+				).format(row.idx, row.item_code)
 			)
 
 	if parent.doctype == "Purchase Order" and flt(row.received_qty):

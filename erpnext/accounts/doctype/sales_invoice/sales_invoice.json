@@ -778,8 +778,7 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval:doc.total_billing_amount > 0",
-   "depends_on": "eval:!doc.is_return",
+   "collapsible_depends_on": "eval:doc.total_billing_amount > 0 || doc.total_billing_hours > 0",
    "fieldname": "time_sheet_list",
    "fieldtype": "Section Break",
    "hide_border": 1,
@@ -793,7 +792,6 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Time Sheets",
-   "no_copy": 1,
    "options": "Sales Invoice Timesheet",
    "print_hide": 1
   },
@@ -2092,7 +2090,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:(!doc.is_return && doc.total_billing_amount > 0)",
+   "depends_on": "eval:doc.total_billing_amount > 0 || doc.total_billing_hours > 0",
    "fieldname": "section_break_104",
    "fieldtype": "Section Break"
   },
@@ -2306,7 +2304,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2025-10-09 14:48:59.472826",
+ "modified": "2025-12-24 18:29:50.242618",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

@@ -7,7 +7,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import DocType
-from frappe.query_builder.functions import Abs
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt, format_datetime, get_datetime
 
 import erpnext
@@ -313,6 +313,68 @@ def get_already_returned_items(doc):
 	return items
 
 
+def get_returned_qty_map_for_purchase_flow(return_against, supplier, row_name, doctype):
+	# return map of warehouses with qty and stock qty
+	# Example: {'_Test Rejected Warehouse - _TC': {'qty': 5.0, 'stock_qty': 5.0}, '_Test Warehouse - _TC': {'qty': 8.0, 'stock_qty': 8.0}}
+
+	parent_doc = frappe.qb.DocType(doctype)
+	child_doc = frappe.qb.DocType(doctype + " Item")
+
+	query = (
+		frappe.qb.from_(parent_doc)
+		.inner_join(child_doc)
+		.on(child_doc.parent == parent_doc.name)
+		.select(
+			child_doc.qty,
+			child_doc.rejected_qty,
+			child_doc.warehouse,
+			child_doc.rejected_warehouse,
+			child_doc.conversion_factor,
+		)
+		.where(
+			(parent_doc.return_against == return_against)
+			& (parent_doc.supplier == supplier)
+			& (parent_doc.docstatus == 1)
+			& (parent_doc.is_return == 1)
+		)
+	)
+
+	if doctype != "Subcontracting Receipt":
+		query = query.select(child_doc.stock_qty)
+
+	doctype_field_map = {
+		"Purchase Receipt": child_doc.purchase_receipt_item,
+		"Subcontracting Receipt": child_doc.subcontracting_receipt_item,
+	}
+
+	field = doctype_field_map.get(doctype)
+	if field:
+		query = query.where(field == row_name)
+
+	data = query.run(as_dict=True)
+
+	_return_map = frappe._dict({})
+
+	for row in data:
+		if row.warehouse and row.warehouse not in _return_map:
+			_return_map[row.warehouse] = frappe._dict({"qty": 0, "stock_qty": 0})
+
+		if row.rejected_warehouse and row.rejected_warehouse not in _return_map:
+			_return_map[row.rejected_warehouse] = frappe._dict({"qty": 0, "stock_qty": 0})
+
+		if row.warehouse:
+			qty_map = _return_map.get(row.warehouse)
+			qty_map.qty += abs(flt(row.qty))
+			qty_map.stock_qty += abs(flt(row.stock_qty))
+
+		if row.rejected_warehouse:
+			rejected_qty_map = _return_map.get(row.rejected_warehouse)
+			rejected_qty_map.qty += abs(flt(row.rejected_qty))
+			rejected_qty_map.stock_qty += abs(flt(row.rejected_qty) * flt(row.conversion_factor))
+
+	return _return_map
+
+
 def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	child_doctype = doctype + " Item"
 	reference_field = "dn_detail" if doctype == "Delivery Note" else frappe.scrub(child_doctype)
@@ -459,29 +521,22 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		target_doc.pricing_rules = None
 
 		if doctype in ["Purchase Receipt", "Subcontracting Receipt"]:
-			returned_qty_map = get_returned_qty_map_for_row(
+			returned_qty_map = get_returned_qty_map_for_purchase_flow(
 				source_parent.name, source_parent.supplier, source_doc.name, doctype
 			)
+
+			wh_map = returned_qty_map.get(source_doc.warehouse) or frappe._dict()
+			rejected_wh_map = returned_qty_map.get(source_doc.rejected_warehouse) or frappe._dict()
 
 			if doctype == "Subcontracting Receipt":
 				target_doc.received_qty = -1 * flt(source_doc.qty)
 			else:
-				target_doc.received_qty = -1 * flt(
-					source_doc.received_qty - (returned_qty_map.get("received_qty") or 0)
-				)
-				target_doc.rejected_qty = -1 * flt(
-					source_doc.rejected_qty - (returned_qty_map.get("rejected_qty") or 0)
-				)
+				target_doc.rejected_qty = -1 * flt(source_doc.rejected_qty - (rejected_wh_map.qty or 0))
 
-			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
+			target_doc.qty = -1 * flt(source_doc.qty - (wh_map.qty or 0))
 
 			if hasattr(target_doc, "stock_qty") and not return_against_rejected_qty:
-				target_doc.stock_qty = -1 * flt(
-					source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0)
-				)
-				target_doc.received_stock_qty = -1 * flt(
-					source_doc.received_stock_qty - (returned_qty_map.get("received_stock_qty") or 0)
-				)
+				target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (flt(wh_map.stock_qty) or 0))
 
 			if doctype == "Subcontracting Receipt":
 				target_doc.subcontracting_order = source_doc.subcontracting_order
@@ -489,7 +544,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				target_doc.rejected_warehouse = source_doc.rejected_warehouse
 				target_doc.subcontracting_receipt_item = source_doc.name
 				if return_against_rejected_qty:
-					target_doc.qty = -1 * flt(source_doc.rejected_qty - (returned_qty_map.get("qty") or 0))
+					target_doc.qty = -1 * flt(source_doc.rejected_qty - (rejected_wh_map.qty or 0))
 					target_doc.rejected_qty = 0.0
 					target_doc.rejected_warehouse = ""
 					target_doc.warehouse = source_doc.rejected_warehouse
@@ -502,7 +557,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				target_doc.purchase_receipt_item = source_doc.name
 
 			if doctype == "Purchase Receipt" and return_against_rejected_qty:
-				target_doc.qty = -1 * flt(source_doc.rejected_qty - (returned_qty_map.get("qty") or 0))
+				target_doc.qty = -1 * flt(source_doc.rejected_qty - (rejected_wh_map.qty or 0))
 				target_doc.rejected_qty = 0.0
 				target_doc.rejected_warehouse = ""
 				target_doc.warehouse = source_doc.rejected_warehouse

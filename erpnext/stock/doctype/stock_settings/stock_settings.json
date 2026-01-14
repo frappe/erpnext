@@ -548,12 +548,13 @@
    "label": "Validate Material Transfer Warehouses"
   }
  ],
+ "hide_toolbar": 1,
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-11-11 11:35:39.864923",
+ "modified": "2026-01-02 18:19:59.034785",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

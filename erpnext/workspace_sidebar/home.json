@@ -62,10 +62,11 @@
    "type": "Link"
   }
  ],
- "modified": "2025-11-25 10:46:09.198568",
+ "modified": "2026-01-10 00:06:12.971358",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Home",
  "owner": "Administrator",
+ "standard": 1,
  "title": "Home"
 }

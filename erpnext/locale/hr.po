@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-21 09:37+0000\n"
-"PO-Revision-Date: 2025-12-22 03:08\n"
+"PO-Revision-Date: 2026-01-07 05:36\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Croatian\n"
 "MIME-Version: 1.0\n"
@@ -52784,19 +52784,19 @@ msgstr "Stablo Procedura"
 #: erpnext/accounts/report/trial_balance/trial_balance.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Trial Balance"
-msgstr "Probno Stanje"
+msgstr "Bruto Stanje"
 
 #. Name of a report
 #: erpnext/accounts/report/trial_balance_simple/trial_balance_simple.json
 msgid "Trial Balance (Simple)"
-msgstr "Probno Stanje (Jednostavno)"
+msgstr "Bruto Stanje (Jednostavno)"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Trial Balance for Party"
-msgstr "Probno Stanje Stranke"
+msgstr "Bruto Stanje Stranke"
 
 #. Label of the trial_period_end (Date) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
@@ -52820,7 +52820,7 @@ msgstr "Datum početka probnog perioda ne može biti nakon datuma početka pretp
 #: erpnext/accounts/doctype/subscription/subscription.json
 #: erpnext/accounts/doctype/subscription/subscription_list.js:4
 msgid "Trialing"
-msgstr "Testiranje"
+msgstr "Probni Period"
 
 #. Description of the 'General Ledger' (Int) field in DocType 'Accounts
 #. Settings'

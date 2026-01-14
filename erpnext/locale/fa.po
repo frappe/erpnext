@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-21 09:37+0000\n"
-"PO-Revision-Date: 2025-12-29 04:35\n"
+"PO-Revision-Date: 2026-01-05 05:31\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -1799,7 +1799,7 @@ msgstr "ابعاد حسابداری"
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Accounting Dimensions "
-msgstr " ابعاد حسابداری"
+msgstr "ابعاد حسابداری "
 
 #. Label of the accounting_dimensions_section (Section Break) field in DocType
 #. 'Payment Reconciliation'
@@ -2936,7 +2936,7 @@ msgstr ""
 #. Description of the 'Customer Details' (Text) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Additional information regarding the customer."
-msgstr "اطلاعات تکمیلی در مورد مشتری"
+msgstr "اطلاعات تکمیلی در مورد مشتری."
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:590
 msgid "Additional {0} {1} of item {2} required as per BOM to complete this transaction"
@@ -5012,7 +5012,7 @@ msgstr "اعمال مبلغ کسر مالیات"
 #. Label of the apply_tds (Check) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 msgid "Apply Tax Withholding Amount "
-msgstr " اعمال مبلغ کسر مالیات"
+msgstr "اعمال مبلغ کسر مالیات "
 
 #. Label of the apply_restriction_on_values (Check) field in DocType
 #. 'Accounting Dimension Filter'
@@ -5269,7 +5269,7 @@ msgstr "فعالیت دارایی"
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.json
 #: erpnext/assets/workspace/assets/assets.json
 msgid "Asset Capitalization"
-msgstr "سرمایه گذاری دارایی ها"
+msgstr "سرمایه گذاری دارایی‌ها"
 
 #. Name of a DocType
 #: erpnext/assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
@@ -5342,7 +5342,7 @@ msgstr "دفتر استهلاک دارایی"
 #. Name of a DocType
 #: erpnext/assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
 msgid "Asset Depreciation Schedule"
-msgstr "جدول استهلاک دارایی ها"
+msgstr "جدول استهلاک دارایی‌ها"
 
 #: erpnext/assets/doctype/asset_shift_allocation/asset_shift_allocation.py:179
 msgid "Asset Depreciation Schedule for Asset {0} and Finance Book {1} is not using shift based depreciation"
@@ -5370,7 +5370,7 @@ msgstr ""
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.json
 #: erpnext/assets/workspace/assets/assets.json
 msgid "Asset Depreciations and Balances"
-msgstr "استهلاک و تراز دارایی ها"
+msgstr "استهلاک و تراز دارایی‌ها"
 
 #. Label of the asset_details (Section Break) field in DocType 'Serial No'
 #: erpnext/stock/doctype/serial_no/serial_no.json
@@ -11088,7 +11088,7 @@ msgstr "ارزش کل دارایی مصرف شده"
 #. Capitalization'
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.json
 msgid "Consumed Assets"
-msgstr "دارایی های مصرف شده"
+msgstr "دارایی‌های مصرف شده"
 
 #. Label of the supplied_items (Table) field in DocType 'Purchase Receipt'
 #. Label of the supplied_items (Table) field in DocType 'Subcontracting
@@ -11248,7 +11248,7 @@ msgstr "نام تماس"
 #. Label of the contact_no (Data) field in DocType 'Sales Team'
 #: erpnext/selling/doctype/sales_team/sales_team.json
 msgid "Contact No."
-msgstr "شماره مخاطب"
+msgstr "شماره تماس"
 
 #. Label of the contact_person (Link) field in DocType 'Dunning'
 #. Label of the contact_person (Link) field in DocType 'POS Invoice'
@@ -12797,7 +12797,7 @@ msgstr "ارزش دارایی جاری"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:11
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:11
 msgid "Current Assets"
-msgstr "دارایی های جاری"
+msgstr "دارایی‌های جاری"
 
 #. Label of the current_bom (Link) field in DocType 'BOM Update Log'
 #. Label of the current_bom (Link) field in DocType 'BOM Update Tool'
@@ -13126,7 +13126,7 @@ msgstr "مشتری"
 #. Label of the customer (Link) field in DocType 'Customer Item'
 #: erpnext/accounts/doctype/customer_item/customer_item.json
 msgid "Customer "
-msgstr " مشتری"
+msgstr "مشتری "
 
 #. Label of the master_name (Dynamic Link) field in DocType 'Authorization
 #. Rule'
@@ -13435,7 +13435,7 @@ msgstr "نام مشتری"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:22
 msgid "Customer Name: "
-msgstr " نام مشتری:"
+msgstr "نام مشتری: "
 
 #. Label of the cust_master_name (Select) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
@@ -13632,7 +13632,7 @@ msgstr "نام مشتری/سرنخ"
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:19
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:21
 msgid "Customer: "
-msgstr " مشتری:"
+msgstr "مشتری: "
 
 #. Label of the section_break_3 (Section Break) field in DocType 'Process
 #. Statement Of Accounts'
@@ -15196,7 +15196,7 @@ msgstr "جزئیات استهلاک"
 
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:647
 msgid "Depreciation Eliminated due to disposal of assets"
-msgstr "استهلاک به دلیل واگذاری دارایی ها حذف می‌شود"
+msgstr "استهلاک به دلیل واگذاری دارایی‌ها حذف می‌شود"
 
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #. Option for the 'Journal Entry Type' (Select) field in DocType 'Journal Entry
@@ -15292,7 +15292,7 @@ msgstr "مشاهده برنامه زمان‌بندی استهلاک"
 
 #: erpnext/assets/doctype/asset/asset.py:477
 msgid "Depreciation cannot be calculated for fully depreciated assets"
-msgstr "استهلاک برای دارایی های کاملا مستهلک شده قابل محاسبه نیست"
+msgstr "استهلاک برای دارایی‌های کاملا مستهلک شده قابل محاسبه نیست"
 
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:659
 msgid "Depreciation eliminated via reversal"
@@ -16038,7 +16038,7 @@ msgstr "واحد متمایز یک آیتم"
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Distribute Additional Costs Based On "
-msgstr " توزیع هزینه های اضافی بر اساس"
+msgstr "توزیع هزینه های اضافی بر اساس "
 
 #. Label of the distribute_charges_based_on (Select) field in DocType 'Landed
 #. Cost Voucher'
@@ -16171,7 +16171,7 @@ msgstr "آیا می‌خواهید از طریق ایمیل به همه مشتر
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:334
 msgid "Do you want to submit the material request"
-msgstr "آیا می‌خواهید درخواست مواد را ارسال کنید؟"
+msgstr "آیا می‌خواهید درخواست مواد را ارسال کنید"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:103
 msgid "Do you want to submit the stock entry?"
@@ -16188,7 +16188,7 @@ msgstr "جستجوی اسناد"
 #. Label of the document_type (Link) field in DocType 'Subscription Invoice'
 #: erpnext/accounts/doctype/subscription_invoice/subscription_invoice.json
 msgid "Document Type "
-msgstr " نوع سند"
+msgstr "نوع سند "
 
 #: erpnext/accounts/doctype/accounting_dimension/accounting_dimension.py:65
 msgid "Document Type already used as a dimension"
@@ -16729,7 +16729,7 @@ msgstr "کمپین ایمیل"
 #. Label of the email_campaign_for (Select) field in DocType 'Email Campaign'
 #: erpnext/crm/doctype/email_campaign/email_campaign.json
 msgid "Email Campaign For "
-msgstr " کمپین ایمیل برای"
+msgstr "کمپین ایمیل برای "
 
 #. Label of the supplier_response_section (Section Break) field in DocType
 #. 'Request for Quotation'
@@ -16872,7 +16872,7 @@ msgstr "کارمند"
 #. Scoring Standing'
 #: erpnext/buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 msgid "Employee "
-msgstr " کارمند"
+msgstr "کارمند "
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -17323,7 +17323,7 @@ msgstr "جزئیات استهلاک را وارد کنید"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:408
 msgid "Enter discount percentage."
-msgstr "درصد تخفیف را وارد کنید"
+msgstr "درصد تخفیف را وارد کنید."
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:282
 msgid "Enter each serial no in a new line"
@@ -17716,7 +17716,7 @@ msgstr "شرکت موجود"
 #. Label of the existing_company (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Existing Company "
-msgstr " شرکت موجود"
+msgstr "شرکت موجود "
 
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:1
 msgid "Existing Customer"
@@ -18760,7 +18760,7 @@ msgstr "حساب دارایی ثابت"
 #. Label of the fixed_asset_defaults (Section Break) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Fixed Asset Defaults"
-msgstr "پیش‌فرض دارایی های ثابت"
+msgstr "پیش‌فرض دارایی‌های ثابت"
 
 #: erpnext/stock/doctype/item/item.py:304
 msgid "Fixed Asset Item must be a non-stock item."
@@ -18771,7 +18771,7 @@ msgstr "آیتم دارایی ثابت باید یک آیتم غیر موجود�
 #: erpnext/assets/report/fixed_asset_register/fixed_asset_register.json
 #: erpnext/assets/workspace/assets/assets.json
 msgid "Fixed Asset Register"
-msgstr "ثبت دارایی های ثابت"
+msgstr "ثبت دارایی‌های ثابت"
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:211
 msgid "Fixed Asset Turnover Ratio"
@@ -18784,7 +18784,7 @@ msgstr "آیتم دارایی ثابت {0} را نمی‌توان در BOMها �
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:43
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:76
 msgid "Fixed Assets"
-msgstr "دارایی های ثابت"
+msgstr "دارایی‌های ثابت"
 
 #. Label of the fixed_deposit_number (Data) field in DocType 'Bank Guarantee'
 #: erpnext/accounts/doctype/bank_guarantee/bank_guarantee.json
@@ -21936,7 +21936,7 @@ msgstr "شامل سفارش‌های بسته شده"
 #: erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.js:54
 #: erpnext/assets/report/fixed_asset_register/fixed_asset_register.js:54
 msgid "Include Default FB Assets"
-msgstr "دارایی های پیش‌فرض FB را شامل شود"
+msgstr "دارایی‌های پیش‌فرض FB را شامل شود"
 
 #: erpnext/accounts/report/balance_sheet/balance_sheet.js:45
 #: erpnext/accounts/report/cash_flow/cash_flow.js:37
@@ -29132,7 +29132,7 @@ msgstr "ارزش دارایی جدید"
 
 #: erpnext/assets/dashboard_fixtures.py:164
 msgid "New Assets (This Year)"
-msgstr "دارایی های جدید (این سال)"
+msgstr "دارایی‌های جدید (این سال)"
 
 #. Label of the new_bom (Link) field in DocType 'BOM Update Log'
 #. Label of the new_bom (Link) field in DocType 'BOM Update Tool'
@@ -30325,7 +30325,7 @@ msgstr "فقط برای پرداخت‌های عادی اعمال می‌شود"
 
 #: erpnext/assets/report/fixed_asset_register/fixed_asset_register.js:43
 msgid "Only existing assets"
-msgstr "فقط دارایی های موجود"
+msgstr "فقط دارایی‌های موجود"
 
 #. Description of the 'Is Group' (Check) field in DocType 'Customer Group'
 #. Description of the 'Is Group' (Check) field in DocType 'Item Group'
@@ -37724,7 +37724,7 @@ msgstr "مقدار"
 
 #: erpnext/templates/pages/order.html:178
 msgid "Qty "
-msgstr " تعداد"
+msgstr "تعداد "
 
 #. Label of the company_total_stock (Float) field in DocType 'Sales Invoice
 #. Item'
@@ -40321,7 +40321,7 @@ msgstr "ارسال مجدد در پس‌زمینه آغاز شده است."
 
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.js:49
 msgid "Reposting in the background."
-msgstr "بازنشر در پس‌زمینه"
+msgstr "درحال بازنشر در پس‌زمینه."
 
 #. Label of the represents_company (Link) field in DocType 'Purchase Invoice'
 #. Label of the represents_company (Link) field in DocType 'Sales Invoice'
@@ -46927,7 +46927,7 @@ msgstr "حساب دارایی موجودی"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:36
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:59
 msgid "Stock Assets"
-msgstr "دارایی های موجودی"
+msgstr "دارایی‌های موجودی"
 
 #: erpnext/stock/report/item_price_stock/item_price_stock.py:34
 msgid "Stock Available"
@@ -49347,7 +49347,7 @@ msgstr "مقدار مالیات در سطح ردیف (آیتم‌ها) گرد م
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:69
 #: erpnext/setup/setup_wizard/operations/taxes_setup.py:256
 msgid "Tax Assets"
-msgstr "دارایی های مالیاتی"
+msgstr "دارایی‌های مالیاتی"
 
 #. Label of the sec_tax_breakup (Section Break) field in DocType 'POS Invoice'
 #. Label of the sec_tax_breakup (Section Break) field in DocType 'Purchase
@@ -50305,7 +50305,7 @@ msgstr ""
 
 #: erpnext/assets/doctype/asset/depreciation.py:342
 msgid "The following assets have failed to automatically post depreciation entries: {0}"
-msgstr "دارایی های زیر به طور خودکار ثبت‌های استهلاک را پست نکرده اند: {0}"
+msgstr "دارایی‌های زیر به طور خودکار ثبت‌های استهلاک را پست نکرده اند: {0}"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:270
 msgid "The following batches are expired, please restock them: <br> {0}"
@@ -50481,7 +50481,7 @@ msgstr "اشتراک‌گذاری‌ها با {0} وجود ندارند"
 
 #: erpnext/stock/stock_ledger.py:810
 msgid "The stock for the item {0} in the {1} warehouse was negative on the {2}. You should create a positive entry {3} before the date {4} and time {5} to post the correct valuation rate. For more details, please read the <a href='https://docs.erpnext.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'>documentation<a>."
-msgstr ""
+msgstr "موجودی آیتم {0} در انبار {1} در تاریخ {2} منفی بود. برای ثبت نرخ ارزیابی صحیح، باید یک ثبت مثبت {3} قبل از تاریخ {4} و زمان {5} ایجاد کنید. برای جزئیات بیشتر، لطفاً مستندات <a href='https://docs.erpnext.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'><a> را مطالعه کنید."
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:713
 msgid "The stock has been reserved for the following Items and Warehouses, un-reserve the same to {0} the Stock Reconciliation: <br /><br /> {1}"
@@ -56984,7 +56984,7 @@ msgstr "{} را نمی‌توان لغو کرد زیرا امتیازهای وف
 
 #: erpnext/controllers/buying_controller.py:286
 msgid "{} has submitted assets linked to it. You need to cancel the assets to create purchase return."
-msgstr "{} دارایی های مرتبط با آن را ارسال کرده است. برای ایجاد بازگشت خرید، باید دارایی ها را لغو کنید."
+msgstr "{} دارایی‌های مرتبط با آن را ارسال کرده است. برای ایجاد بازگشت خرید، باید دارایی‌ها را لغو کنید."
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:66
 msgid "{} is a child company."

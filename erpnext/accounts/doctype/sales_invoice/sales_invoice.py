@@ -33,6 +33,7 @@ from erpnext.accounts.utils import (
 	get_account_currency,
 	update_voucher_outstanding,
 )
+from erpnext.assets.doctype.asset.asset import split_asset
 from erpnext.assets.doctype.asset.depreciation import (
 	depreciate_asset,
 	get_gl_entries_on_asset_disposal,
@@ -352,10 +353,22 @@ class SalesInvoice(SellingController):
 			self.is_opening = "No"
 
 		self.set_against_income_account()
-		self.validate_time_sheets_are_submitted()
+
+		if self.is_return and not self.return_against and self.timesheets:
+			frappe.throw(_("Direct return is not allowed for Timesheet."))
+
+		if not self.is_return:
+			self.validate_time_sheets_are_submitted()
+
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount")
-		if self.is_return:
-			self.timesheets = []
+
+		if self.is_return and self.return_against:
+			for row in self.timesheets:
+				if row.billing_hours:
+					row.billing_hours = -abs(row.billing_hours)
+				if row.billing_amount:
+					row.billing_amount = -abs(row.billing_amount)
+
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
@@ -468,6 +481,8 @@ class SalesInvoice(SellingController):
 			self.update_stock_reservation_entries()
 			self.update_stock_ledger()
 
+		self.split_asset_based_on_sale_qty()
+
 		self.process_asset_depreciation()
 
 		# this sequence because outstanding may get -ve
@@ -484,7 +499,7 @@ class SalesInvoice(SellingController):
 		if cint(self.is_pos) != 1 and not self.is_return:
 			self.update_against_document_in_jv()
 
-		self.update_time_sheet(self.name)
+		self.update_time_sheet(None if (self.is_return and self.return_against) else self.name)
 
 		if frappe.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction":
 			update_company_current_month_sales(self.company)
@@ -564,7 +579,7 @@ class SalesInvoice(SellingController):
 		self.check_if_consolidated_invoice()
 
 		super().before_cancel()
-		self.update_time_sheet(None)
+		self.update_time_sheet(self.return_against if (self.is_return and self.return_against) else None)
 
 	def on_cancel(self):
 		check_if_return_invoice_linked_with_payment_entry(self)
@@ -804,8 +819,20 @@ class SalesInvoice(SellingController):
 		for data in timesheet.time_logs:
 			if (
 				(self.project and args.timesheet_detail == data.name)
-				or (not self.project and not data.sales_invoice)
-				or (not sales_invoice and data.sales_invoice == self.name)
+				or (not self.project and not data.sales_invoice and args.timesheet_detail == data.name)
+				or (
+					not sales_invoice
+					and data.sales_invoice == self.name
+					and args.timesheet_detail == data.name
+				)
+				or (
+					self.is_return
+					and self.return_against
+					and data.sales_invoice
+					and data.sales_invoice == self.return_against
+					and not sales_invoice
+					and args.timesheet_detail == data.name
+				)
 			):
 				data.sales_invoice = sales_invoice
 
@@ -845,11 +872,26 @@ class SalesInvoice(SellingController):
 			payment.account = get_bank_cash_account(payment.mode_of_payment, self.company).get("account")
 
 	def validate_time_sheets_are_submitted(self):
+		# Note: This validation is skipped for return invoices
+		# to allow returns to reference already-billed timesheet details
 		for data in self.timesheets:
+			# Handle invoice duplication
+			if data.time_sheet and data.timesheet_detail:
+				if sales_invoice := frappe.db.get_value(
+					"Timesheet Detail", data.timesheet_detail, "sales_invoice"
+				):
+					frappe.throw(
+						_("Row {0}: Sales Invoice {1} is already created for {2}").format(
+							data.idx, frappe.bold(sales_invoice), frappe.bold(data.time_sheet)
+						)
+					)
+
 			if data.time_sheet:
 				status = frappe.db.get_value("Timesheet", data.time_sheet, "status")
-				if status not in ["Submitted", "Payslip"]:
-					frappe.throw(_("Timesheet {0} is already completed or cancelled").format(data.time_sheet))
+				if status not in ["Submitted", "Payslip", "Partially Billed"]:
+					frappe.throw(
+						_("Timesheet {0} cannot be invoiced in its current state").format(data.time_sheet)
+					)
 
 	def set_pos_fields(self, for_validate=False):
 		"""Set retail related fields from POS Profiles"""
@@ -1283,7 +1325,12 @@ class SalesInvoice(SellingController):
 					timesheet.billing_amount = ts_doc.total_billable_amount
 
 	def update_timesheet_billing_for_project(self):
-		if not self.timesheets and self.project and self.is_auto_fetch_timesheet_enabled():
+		if (
+			not self.is_return
+			and not self.timesheets
+			and self.project
+			and self.is_auto_fetch_timesheet_enabled()
+		):
 			self.add_timesheet_data()
 		else:
 			self.calculate_billing_amount_for_timesheet()
@@ -1357,6 +1404,51 @@ class SalesInvoice(SellingController):
 				and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus", cache=True) != 1
 			):
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
+
+	def split_asset_based_on_sale_qty(self):
+		asset_qty_map = self.get_asset_qty()
+		for asset, qty in asset_qty_map.items():
+			if qty["actual_qty"] < qty["sale_qty"]:
+				frappe.throw(
+					_(
+						"Sell quantity cannot exceed the asset quantity. Asset {0} has only {1} item(s)."
+					).format(asset, qty["actual_qty"])
+				)
+
+			remaining_qty = qty["actual_qty"] - qty["sale_qty"]
+			if remaining_qty > 0:
+				split_asset(asset, remaining_qty)
+
+	def get_asset_qty(self):
+		asset_qty_map = {}
+
+		assets = {row.asset for row in self.items if row.is_fixed_asset and row.asset}
+		if not assets or self.is_return:
+			return asset_qty_map
+
+		asset_actual_qty = dict(
+			frappe.db.get_all(
+				"Asset",
+				{"name": ["in", list(assets)]},
+				["name", "asset_quantity"],
+				as_list=True,
+			)
+		)
+		for row in self.items:
+			if row.is_fixed_asset and row.asset:
+				actual_qty = asset_actual_qty.get(row.asset)
+				if row.asset in asset_qty_map.keys():
+					asset_qty_map[row.asset]["sale_qty"] += flt(row.qty)
+				else:
+					asset_qty_map.setdefault(
+						row.asset,
+						{
+							"sale_qty": flt(row.qty),
+							"actual_qty": flt(actual_qty),
+						},
+					)
+
+		return asset_qty_map
 
 	def process_asset_depreciation(self):
 		if (self.is_return and self.docstatus == 2) or (not self.is_return and self.docstatus == 1):
@@ -1726,7 +1818,7 @@ class SalesInvoice(SellingController):
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos):
 			skip_change_gl_entries = not cint(
-				frappe.get_single_value("Accounts Settings", "post_change_gl_entries")
+				frappe.get_single_value("POS Settings", "post_change_gl_entries")
 			)
 
 			for payment_mode in self.payments:

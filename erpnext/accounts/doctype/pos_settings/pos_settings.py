@@ -23,6 +23,7 @@ class POSSettings(Document):
 		invoice_fields: DF.Table[POSField]
 		invoice_type: DF.Literal["Sales Invoice", "POS Invoice"]
 		pos_search_fields: DF.Table[POSSearchFields]
+		post_change_gl_entries: DF.Check
 	# end: auto-generated types
 
 	def validate(self):

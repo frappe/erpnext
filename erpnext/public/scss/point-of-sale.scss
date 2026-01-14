@@ -6,8 +6,8 @@
 
 	section {
 		min-height: 30rem;
-		height: calc(100vh - 125px);
-		max-height: calc(100vh - 125px);
+		height: calc(100vh - 5rem);
+		max-height: calc(100vh - 5rem);
 	}
 
 	.frappe-control {
@@ -116,6 +116,42 @@
 			padding-top: var(--padding-xs);
 			overflow-y: scroll;
 			overflow-x: hidden;
+
+			&.item-loading {
+				position: relative;
+				pointer-events: none;
+			}
+
+			&.item-loading::after {
+				content: "";
+				position: absolute;
+				inset: 0;
+				background: repeating-linear-gradient(
+					90deg,
+					#f3f3f3 0px,
+					#f3f3f3 160px,
+					#e9ecef 160px,
+					#e9ecef 320px
+				);
+				animation: skeletonMove 1.1s linear infinite;
+				z-index: 1;
+			}
+
+			@keyframes skeletonMove {
+				from {
+					background-position: 0 0;
+				}
+				to {
+					background-position: 320px 0;
+				}
+			}
+
+			&.items-not-found {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				height: 100%;
+			}
 
 			&.show-item-image {
 				grid-template-columns: repeat(4, minmax(0, 1fr));
