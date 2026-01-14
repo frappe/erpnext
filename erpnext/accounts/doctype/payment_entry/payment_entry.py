@@ -195,9 +195,14 @@ class PaymentEntry(AccountsController):
 		PaymentTaxWithholding(self).on_validate()
 		self.set_status()
 		self.set_total_in_words()
+		self.check_amended_form()
 
 	def before_save(self):
 		self.set_matched_unset_payment_requests_to_response()
+
+	def check_amended_form(self):
+		if self.amended_from:
+			self.clearance_date = None
 
 	def on_submit(self):
 		if self.difference_amount:
