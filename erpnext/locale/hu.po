@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-21 09:37+0000\n"
-"PO-Revision-Date: 2026-01-07 05:35\n"
+"PO-Revision-Date: 2026-01-14 07:22\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Hungarian\n"
 "MIME-Version: 1.0\n"
@@ -48701,7 +48701,7 @@ msgstr ""
 #: erpnext/selling/doctype/quotation/quotation.json
 #: erpnext/stock/doctype/material_request/material_request.js:196
 msgid "Supplier Quotation"
-msgstr ""
+msgstr "Beszállítói ajánlat"
 
 #. Name of a report
 #. Label of a Link in the Buying Workspace
