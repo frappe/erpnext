@@ -665,7 +665,6 @@ def get_item_tax_info(doc, tax_category, item_codes, item_rates=None, item_tax_t
 	item_codes = parse_json(item_codes)
 	item_rates = parse_json(item_rates)
 	item_tax_templates = parse_json(item_tax_templates)
-
 	for item_code in item_codes:
 		if not item_code or item_code[1] in out or not item_tax_templates.get(item_code[1]):
 			continue
@@ -688,11 +687,10 @@ def get_item_tax_info(doc, tax_category, item_codes, item_rates=None, item_tax_t
 		)
 
 	if not out:
-		frappe.throw(_("No Item Tax information found"), frappe.DoesNotExistError)
+		return {}
 
 	return out
 
-		
 
 
 @frappe.whitelist()
