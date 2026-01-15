@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-21 09:37+0000\n"
-"PO-Revision-Date: 2026-01-14 07:22\n"
+"PO-Revision-Date: 2026-01-15 07:40\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Hungarian\n"
 "MIME-Version: 1.0\n"
@@ -7497,7 +7497,7 @@ msgstr ""
 #. 'Asset Capitalization Stock Item'
 #: erpnext/assets/doctype/asset_capitalization_stock_item/asset_capitalization_stock_item.json
 msgid "Batch and Serial No"
-msgstr ""
+msgstr "Köteg- és sorozatszám"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:880
 msgid "Batch not created for item {} since it does not have a batch series."
@@ -15151,7 +15151,7 @@ msgstr ""
 #: erpnext/accounts/report/cash_flow/cash_flow.py:161
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Depreciation"
-msgstr ""
+msgstr "Értékcsökkentés"
 
 #. Label of the depreciation_amount (Currency) field in DocType 'Depreciation
 #. Schedule'
@@ -15222,13 +15222,13 @@ msgstr ""
 #: erpnext/assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
 #: erpnext/assets/doctype/asset_finance_book/asset_finance_book.json
 msgid "Depreciation Method"
-msgstr ""
+msgstr "Értékcsökkentési módszer"
 
 #. Label of the depreciation_options (Section Break) field in DocType 'Asset
 #. Category'
 #: erpnext/assets/doctype/asset_category/asset_category.json
 msgid "Depreciation Options"
-msgstr ""
+msgstr "Értékcsökkenési lehetőségek"
 
 #. Label of the depreciation_start_date (Date) field in DocType 'Asset Finance
 #. Book'
@@ -15349,7 +15349,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.json
 msgid "Difference Account"
-msgstr ""
+msgstr "Különbség főkönyvi számla"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:689
 msgid "Difference Account in Items Table"
@@ -16248,7 +16248,7 @@ msgstr ""
 #: erpnext/assets/doctype/asset_repair/asset_repair.json
 #: erpnext/manufacturing/doctype/downtime_entry/downtime_entry.json
 msgid "Downtime"
-msgstr ""
+msgstr "Állásidő"
 
 #: erpnext/manufacturing/report/downtime_analysis/downtime_analysis.py:93
 msgid "Downtime (In Hours)"
