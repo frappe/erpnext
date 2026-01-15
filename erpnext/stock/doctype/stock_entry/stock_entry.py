@@ -910,37 +910,141 @@ class StockEntry(StockController, SubcontractingInwardController):
 					title=_("Insufficient Stock"),
 				)
 
-	def validate_component_and_quantities(self):
-		if self.purpose not in ["Manufacture", "Material Transfer for Manufacture"]:
-			return
-
-		if not frappe.db.get_single_value("Manufacturing Settings", "validate_components_quantities_per_bom"):
-			return
-
-		if not self.fg_completed_qty:
+	def validate_component_and_quantities(self) -> None:
+		if not self._should_validate_component_quantities():
 			return
 
 		raw_materials = self.get_bom_raw_materials(self.fg_completed_qty)
-
+		item_list = list(raw_materials.keys())
 		precision = frappe.get_precision("Stock Entry Detail", "qty")
-		for item_code, details in raw_materials.items():
-			if matched_item := self.get_matched_items(item_code):
-				if flt(details.get("qty"), precision) != flt(matched_item.qty, precision):
-					frappe.throw(
-						_("For the item {0}, the quantity should be {1} according to the BOM {2}.").format(
-							frappe.bold(item_code),
-							flt(details.get("qty")),
-							get_link_to_form("BOM", self.bom_no),
-						),
-						title=_("Incorrect Component Quantity"),
-					)
-			else:
+
+		total_consumed_rm = self.get_total_consumed_qty_for_wo(item_list)
+		already_manufactured_fg = self.get_total_manufactured_fg_qty_for_wo()
+
+		for item_code, bom_details in raw_materials.items():
+			self._validate_item_quantity(
+				item_code=item_code,
+				bom_details=bom_details,
+				total_consumed_rm=total_consumed_rm,
+				already_manufactured_fg=already_manufactured_fg,
+				precision=precision,
+			)
+
+	def _should_validate_component_quantities(self) -> bool:
+		if self.purpose not in ["Manufacture", "Material Transfer for Manufacture"]:
+			return False
+
+		if not frappe.db.get_single_value("Manufacturing Settings", "validate_components_quantities_per_bom"):
+			return False
+
+		return bool(self.fg_completed_qty)
+
+	def _validate_item_quantity(
+		self, item_code, bom_details, total_consumed_rm, already_manufactured_fg, precision
+	) -> None:
+		required_qty = flt(bom_details.get("qty"))
+		matched_item = self.get_matched_items(item_code)
+
+		if self.purpose == "Manufacture" and self.work_order:
+			current_entry_rm_qty = flt(matched_item.qty) if matched_item else 0.0
+			consumed_rm_upto_now = flt(total_consumed_rm.get(item_code, 0.0)) + current_entry_rm_qty
+
+			rm_per_fg = flt(required_qty) / flt(self.fg_completed_qty) if self.fg_completed_qty else 0.0
+			total_fg_after = flt(already_manufactured_fg) + flt(self.fg_completed_qty)
+			required_rm_total = flt(rm_per_fg * total_fg_after)
+
+			if flt(consumed_rm_upto_now, precision) != flt(required_rm_total, precision):
 				frappe.throw(
-					_("According to the BOM {0}, the Item '{1}' is missing in the stock entry.").format(
-						get_link_to_form("BOM", self.bom_no), frappe.bold(item_code)
+					_(
+						"For the Work Order {0}.<br/>"
+						"Item {1}, consumed qty must match BOM requirement."
+						"Required {2} for total manufactured qty {3}, but consumed is {4}."
+					).format(
+						frappe.bold(self.work_order),
+						frappe.bold(item_code),
+						frappe.bold(flt(required_rm_total, precision)),
+						frappe.bold(flt(total_fg_after, precision)),
+						frappe.bold(flt(consumed_rm_upto_now, precision)),
 					),
-					title=_("Missing Item"),
+					title=_("Incorrect Component Quantity"),
 				)
+
+			return
+
+		if matched_item:
+			if flt(required_qty, precision) != flt(matched_item.qty, precision):
+				frappe.throw(
+					_("For the item {0}, the quantity should be {1} according to the BOM {2}.").format(
+						frappe.bold(item_code),
+						flt(required_qty),
+						get_link_to_form("BOM", self.bom_no),
+					),
+					title=_("Incorrect Component Quantity"),
+				)
+		else:
+			frappe.throw(
+				_("According to the BOM {0}, the Item '{1}' is missing in the stock entry.").format(
+					get_link_to_form("BOM", self.bom_no),
+					frappe.bold(item_code),
+				),
+				title=_("Missing Item"),
+			)
+
+	def get_total_consumed_qty_for_wo(self, item_list) -> dict[str, float]:
+		StockEntry = frappe.qb.DocType("Stock Entry")
+		StockEntryDetail = frappe.qb.DocType("Stock Entry Detail")
+
+		effective_item = (
+			frappe.qb.terms.Case()
+			.when(
+				(StockEntryDetail.original_item.isnull()) | (StockEntryDetail.original_item == ""),
+				StockEntryDetail.item_code,
+			)
+			.else_(StockEntryDetail.original_item)
+			.as_("effective_item")
+		)
+
+		consumed_qty = Sum(
+			frappe.qb.terms.Case()
+			.when(
+				(StockEntry.purpose.isin(["Material Consumption for Manufacture", "Manufacture"]))
+				& (StockEntryDetail.is_finished_item == 0),
+				StockEntryDetail.qty,
+			)
+			.else_(0)
+		)
+
+		result = (
+			frappe.qb.from_(StockEntry)
+			.join(StockEntryDetail)
+			.on(StockEntry.name == StockEntryDetail.parent)
+			.select(effective_item.as_("effective_item"), consumed_qty.as_("consumed_qty"))
+			.where(
+				(effective_item.isin(item_list))
+				& (StockEntry.work_order == self.work_order)
+				& (StockEntry.docstatus == 1)
+			)
+			.groupby(effective_item)
+			.run(as_dict=True)
+		)
+
+		return {row.effective_item: flt(row.consumed_qty) for row in result}
+
+	def get_total_manufactured_fg_qty_for_wo(self) -> float:
+		StockEntry = frappe.qb.DocType("Stock Entry")
+
+		result = (
+			frappe.qb.from_(StockEntry)
+			.select(Sum(StockEntry.fg_completed_qty))
+			.where(
+				(StockEntry.work_order == self.work_order)
+				& (StockEntry.docstatus == 1)
+				& (StockEntry.purpose == "Manufacture")
+			)
+			.run()
+		)
+
+		return flt(result[0][0]) if result else 0.0
 
 	def validate_same_source_target_warehouse_during_material_transfer(self):
 		"""
