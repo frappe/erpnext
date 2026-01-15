@@ -2877,7 +2877,7 @@ class TestDeliveryNote(IntegrationTestCase):
 		frappe.clear_cache()
 
 		dn = create_delivery_note(qty=10, rate=100)
-		dn.submit()
+
 
 		si = make_sales_invoice(dn.name)
 		si.save()
@@ -2898,7 +2898,7 @@ class TestDeliveryNote(IntegrationTestCase):
 			return_against=dn.name,
 			qty=-10
 		)
-		dn_return.submit()
+
 
 		# Second Credit Note
 		cn2 = make_sales_invoice(dn_return.name)
