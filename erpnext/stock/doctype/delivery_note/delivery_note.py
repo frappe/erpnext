@@ -852,7 +852,7 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 
 	def set_missing_values(source, target):
 		if source.is_return and source.return_against:
-			# Find original Sales Invoice
+			#Sales Invoice Items linked to the Delivery Note
 			invoices = frappe.get_all(
 				"Sales Invoice Item",
 				filters={
@@ -862,22 +862,31 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 				fields=["parent", "name", "item_code"]
 			)
 
-			original_invoice = None
 			item_map = {}
+			original_invoices = set()
 
 			for row in invoices:
-				# Pick the original invoice
 				if not frappe.db.get_value("Sales Invoice", row.parent, "is_return"):
-					original_invoice = row.parent
+					original_invoices.add(row.parent)
 					item_map.setdefault(row.item_code, []).append(row.name)
 
-
-			if not original_invoice:
+			if not original_invoices:
 				frappe.throw(
 					_("Could not determine original Sales Invoice for this return."),
 					frappe.ValidationError,
 				)
 
+			if len(original_invoices) > 1:
+				frappe.throw(
+					_(
+						"Cannot create a single Credit Note for a Delivery Note "
+						"invoiced by multiple Sales Invoices. "
+						"Please return each invoice separately."
+					),
+					frappe.ValidationError,
+				)
+
+			original_invoice = next(iter(original_invoices))
 			target.return_against = original_invoice
 
 			for item in target.items:
