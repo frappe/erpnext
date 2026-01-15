@@ -2864,6 +2864,55 @@ class TestDeliveryNote(IntegrationTestCase):
 		for entry in sabb.entries:
 			self.assertEqual(entry.incoming_rate, 200)
 
+	def test_return_dn_blocks_duplicate_credit_note_submission(self):
+
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+		from erpnext.controllers.sales_and_purchase_return import (
+			make_return_doc,
+			StockOverReturnError,
+		)
+
+		# Setup
+		frappe.db.set_single_value("Accounts Settings", "allow_over_billing", 0)
+		frappe.clear_cache()
+
+		dn = create_delivery_note(qty=10, rate=100)
+		dn.submit()
+
+		si = make_sales_invoice(dn.name)
+		si.save()
+		si.submit()
+
+		# First Credit Note
+		cn1 = make_return_doc("Sales Invoice", si.name)
+		cn1.save()
+		cn1.submit()
+
+		# Simulate reconciliation
+		si.db_set("outstanding_amount", 0)
+		si.reload()
+
+		# Return Delivery Note
+		dn_return = create_delivery_note(
+			is_return=1,
+			return_against=dn.name,
+			qty=-10
+		)
+		dn_return.submit()
+
+		# Second Credit Note
+		cn2 = make_sales_invoice(dn_return.name)
+
+		# Header linkage
+		self.assertEqual(cn2.return_against, si.name)
+
+		# Item linkage
+		for item in cn2.items:
+			self.assertTrue(item.sales_invoice_item)
+
+		with self.assertRaises(StockOverReturnError):
+			cn2.save()
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

@@ -851,6 +851,32 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
+		if source.is_return and source.return_against:
+			#Find original Sales Invoice
+			invoices = frappe.get_all(
+				"Sales Invoice Item",
+				filters={
+					"delivery_note": source.return_against,
+					"docstatus": 1
+				},
+				fields=["parent", "name", "item_code"]
+			)
+
+			original_invoice = None
+			item_map = {}
+
+			for row in invoices:
+				if not frappe.db.get_value("Sales Invoice", row.parent, "is_return"):
+					original_invoice = row.parent
+					item_map.setdefault(row.item_code, []).append(row.name)
+
+			if original_invoice:
+				target.return_against = original_invoice
+
+
+				for item in target.items:
+					if item.item_code in item_map:
+						item.sales_invoice_item = item_map[item.item_code][0]
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 
