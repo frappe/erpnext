@@ -63,22 +63,23 @@ class SellingController(StockController):
 			else:
 				lead = self.party_name
 
-		if customer:
-			from erpnext.accounts.party import _get_party_details
-			fetch_payment_terms_template = False
-			if (self.get("__islocal") or
-				self.company != frappe.db.get_value(self.doctype, self.name, 'company')):
-				fetch_payment_terms_template = True
+		if not (hasattr(self, "snd_quotation") and self.snd_quotation):
+			if customer :
+				from erpnext.accounts.party import _get_party_details
+				fetch_payment_terms_template = False
+				if (self.get("__islocal") or
+					self.company != frappe.db.get_value(self.doctype, self.name, 'company')):
+					fetch_payment_terms_template = True
 
-			party_details = _get_party_details(customer,
-				ignore_permissions=self.flags.ignore_permissions,
-				doctype=self.doctype, company=self.company,
-				posting_date=self.get('posting_date'),
-				fetch_payment_terms_template=fetch_payment_terms_template,
-				party_address=self.customer_address, shipping_address=self.shipping_address_name)
-			if not self.meta.get_field("sales_team"):
-				party_details.pop("sales_team")
-			self.update_if_missing(party_details)
+				party_details = _get_party_details(customer,
+					ignore_permissions=self.flags.ignore_permissions,
+					doctype=self.doctype, company=self.company,
+					posting_date=self.get('posting_date'),
+					fetch_payment_terms_template=fetch_payment_terms_template,
+					party_address=self.customer_address, shipping_address=self.shipping_address_name)
+				if not self.meta.get_field("sales_team"):
+					party_details.pop("sales_team")
+				self.update_if_missing(party_details)
 
 		elif lead:
 			from erpnext.crm.doctype.lead.lead import get_lead_details
