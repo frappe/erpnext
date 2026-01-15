@@ -2225,21 +2225,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.add_to_stock_entry_detail(item_dict)
 
 		# Finished goods
-		item_code = frappe.db.get_value("BOM", self.bom_no, "item")
-		item = get_item_defaults(item_code, self.company)
-
-		self.add_finished_goods(
-			{
-				"from_warehouse": self.from_warehouse,
-				"to_warehouse": "",
-				"qty": self.fg_completed_qty,
-				"item_name": item.item_name,
-				"description": item.description,
-				"stock_uom": item.stock_uom,
-				"is_finished_item": 1,
-			},
-			item,
-		)
+		self.load_items_from_bom()
 
 	def get_items_from_manufacture_entry(self):
 		return frappe.get_all(
@@ -2605,6 +2591,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		expense_account = item.get("expense_account")
 		if not expense_account:
 			expense_account = frappe.get_cached_value("Company", self.company, "stock_adjustment_account")
+
 		args = {
 			"to_warehouse": to_warehouse,
 			"from_warehouse": "",
@@ -2617,6 +2604,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 			"is_finished_item": 1,
 			"sample_quantity": item.get("sample_quantity"),
 		}
+
+		if self.purpose == "Disassemble":
+			args = {
+				**args,
+				"from_warehouse": self.from_warehouse,
+				"to_warehouse": "",
+				"qty": flt(self.fg_completed_qty),
+			}
 
 		if (
 			self.work_order
