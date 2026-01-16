@@ -53,12 +53,7 @@ class calculate_taxes_and_totals:
 			self.set_discount_amount()
 			self.apply_discount_amount()
 
-		if (
-			validate_tax_template
-			and self._has_tax_template_changed
-			and self.doc.apply_discount_on == "Grand Total"
-			and self.doc.get("discount_amount")
-		):
+		if validate_tax_template and self._has_tax_template_changed:
 			return self.calculate(validate_tax_template=False)
 
 		# Update grand total as per cash and non trade discount
