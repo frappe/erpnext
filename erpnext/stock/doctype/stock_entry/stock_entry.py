@@ -2606,12 +2606,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 		}
 
 		if self.purpose == "Disassemble":
-			args = {
-				**args,
-				"from_warehouse": self.from_warehouse,
-				"to_warehouse": "",
-				"qty": flt(self.fg_completed_qty),
-			}
+			args.update(
+				{
+					"from_warehouse": self.from_warehouse,
+					"to_warehouse": "",
+					"qty": flt(self.fg_completed_qty),
+				}
+			)
 
 		if (
 			self.work_order
