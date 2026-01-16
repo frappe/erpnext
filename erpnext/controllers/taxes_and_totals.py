@@ -131,7 +131,6 @@ class calculate_taxes_and_totals:
 							)
 						)
 
-						# Set flag to trigger recalculation after discount
 						if self.discount_amount_applied:
 							self._has_tax_template_changed = True
 
