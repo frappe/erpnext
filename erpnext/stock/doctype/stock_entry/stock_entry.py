@@ -78,6 +78,10 @@ class MaxSampleAlreadyRetainedError(frappe.ValidationError):
 	pass
 
 
+class NotEnoughQuantityConsumedError(frappe.ValidationError):
+	pass
+
+
 from erpnext.controllers.stock_controller import StockController
 from erpnext.controllers.subcontracting_inward_controller import SubcontractingInwardController
 
@@ -966,6 +970,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 						frappe.bold(flt(total_fg_after, precision)),
 						frappe.bold(flt(consumed_rm_upto_now, precision)),
 					),
+					exc=NotEnoughQuantityConsumedError,
 					title=_("Incorrect Component Quantity"),
 				)
 
