@@ -335,7 +335,7 @@
   },
   {
    "fieldname": "primary_address",
-   "fieldtype": "Text",
+   "fieldtype": "Text Editor",
    "label": "Primary Address",
    "read_only": 1
   },
@@ -625,7 +625,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2025-11-25 09:35:56.772949",
+ "modified": "2026-01-16 15:56:05.967663",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
