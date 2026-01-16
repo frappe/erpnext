@@ -39,19 +39,27 @@ class calculate_taxes_and_totals:
 		items = list(filter(lambda item: not item.get("is_alternative"), self.doc.get("items")))
 		return items
 
-	def calculate(self, skip_tax_template_validation=False):
+	def calculate(self, validate_tax_template=True):
 		if not len(self.doc.items):
 			return
 
 		self.discount_amount_applied = False
+		self._has_tax_template_changed = False
+		self._validate_tax_template = validate_tax_template
+
 		self._calculate()
 
 		if self.doc.meta.get_field("discount_amount"):
 			self.set_discount_amount()
 			self.apply_discount_amount()
 
-		if not skip_tax_template_validation and self.validate_item_tax_template():
-			return self.calculate(skip_tax_template_validation=True)
+		if (
+			validate_tax_template
+			and self._has_tax_template_changed
+			and self.doc.apply_discount_on == "Grand Total"
+			and self.doc.get("discount_amount")
+		):
+			return self.calculate(validate_tax_template=False)
 
 		# Update grand total as per cash and non trade discount
 		if self.doc.apply_discount_on == "Grand Total" and self.doc.get("is_cash_or_non_trade_discount"):
@@ -71,6 +79,7 @@ class calculate_taxes_and_totals:
 	def _calculate(self):
 		self.validate_conversion_rate()
 		self.calculate_item_values()
+		self.validate_item_tax_template()
 		self.update_item_tax_map()
 		self.initialize_taxes()
 		self.determine_exclusive_rate()
@@ -81,10 +90,11 @@ class calculate_taxes_and_totals:
 		self.calculate_total_net_weight()
 
 	def validate_item_tax_template(self):
-		if self.doc.get("is_return") and self.doc.get("return_against"):
-			return False
+		if not self._validate_tax_template:
+			return
 
-		has_template_changed = False
+		if self.doc.get("is_return") and self.doc.get("return_against"):
+			return
 
 		for item in self.doc.items:
 			if item.item_code and item.get("item_tax_template"):
@@ -125,9 +135,10 @@ class calculate_taxes_and_totals:
 								item.idx, frappe.bold(item.item_code)
 							)
 						)
-						has_template_changed = True
 
-		return has_template_changed
+						# Set flag to trigger recalculation after discount
+						if self.discount_amount_applied:
+							self._has_tax_template_changed = True
 
 	def update_item_tax_map(self):
 		for item in self.doc.items:
