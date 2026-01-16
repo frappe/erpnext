@@ -17,6 +17,7 @@
   "column_break_3",
   "production_capacity",
   "warehouse",
+  "production_line",
   "workstation_status_tab",
   "status",
   "column_break_glcv",
@@ -239,13 +240,19 @@
    "fieldname": "workstation_dashboard",
    "fieldtype": "HTML",
    "label": "Workstation Dashboard"
+  },
+  {
+   "fieldname": "production_line",
+   "fieldtype": "Link",
+   "label": "Production Line",
+   "options": "Production Line"
   }
  ],
  "icon": "icon-wrench",
  "idx": 1,
  "image_field": "on_status_image",
  "links": [],
- "modified": "2025-07-13 16:02:13.615001",
+ "modified": "2026-01-13 14:55:52.803389",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation",

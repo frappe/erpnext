@@ -5,6 +5,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "general_tab",
+  "company_settings_section",
+  "mfg_unit",
   "section_break_1ofs",
   "max_pay_line_amount",
   "manufacturing_settings_section",
@@ -74,13 +77,30 @@
    "label": "Allowed Grades",
    "options": "Slab Quality Grade",
    "reqd": 1
+  },
+  {
+   "fieldname": "general_tab",
+   "fieldtype": "Tab Break",
+   "label": "General"
+  },
+  {
+   "fieldname": "company_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Company Settings"
+  },
+  {
+   "fieldname": "mfg_unit",
+   "fieldtype": "Link",
+   "label": "Manufacturing Unit",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-07 13:55:06.828177",
+ "modified": "2026-01-13 13:58:11.786584",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Mahi Granites Settings",

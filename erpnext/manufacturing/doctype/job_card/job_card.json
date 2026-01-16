@@ -20,6 +20,7 @@
   "process_loss_qty",
   "mixer_number",
   "slab",
+  "slab_template",
   "scheduled_time_section",
   "expected_start_date",
   "time_required",
@@ -536,11 +537,17 @@
    "fieldtype": "Link",
    "label": "Slab",
    "options": "Slab"
+  },
+  {
+   "fieldname": "slab_template",
+   "fieldtype": "Link",
+   "label": "Slab Template",
+   "options": "Slab Template"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-05 20:10:06.928594",
+ "modified": "2026-01-11 18:11:58.691040",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

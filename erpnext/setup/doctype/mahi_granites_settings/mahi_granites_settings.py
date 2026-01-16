@@ -19,7 +19,12 @@ class MahiGranitesSettings(Document):
 		grades: DF.Table[SlabQualityGrade]
 		max_heating_minutes: DF.Float
 		max_pay_line_amount: DF.Currency
+		mfg_unit: DF.Link
 		min_quarantine_hours: DF.Float
 		quarantine_labels: DF.Table[QuarantineLabel]
 	# end: auto-generated types
 	pass
+
+	def onload(self):
+		print(self)
+		pass

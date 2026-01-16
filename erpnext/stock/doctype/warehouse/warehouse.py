@@ -29,12 +29,15 @@ class Warehouse(NestedSet):
 		disabled: DF.Check
 		email_id: DF.Data | None
 		is_group: DF.Check
+		is_rejected_warehouse: DF.Check
 		lft: DF.Int
+		mfg_process_type: DF.Link | None
 		mobile_no: DF.Data | None
 		old_parent: DF.Link | None
 		parent_warehouse: DF.Link | None
 		phone_no: DF.Data | None
 		pin: DF.Data | None
+		production_line: DF.Link | None
 		rgt: DF.Int
 		state: DF.Data | None
 		warehouse_name: DF.Data

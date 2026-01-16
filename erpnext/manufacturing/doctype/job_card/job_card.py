@@ -104,6 +104,7 @@ class JobCard(Document):
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.SmallText | None
 		slab: DF.Link | None
+		slab_template: DF.Link | None
 		started_time: DF.Datetime | None
 		status: DF.Literal["Open", "Work In Progress", "Material Transferred", "On Hold", "Submitted", "Cancelled", "Completed"]
 		sub_operations: DF.Table[JobCardOperation]

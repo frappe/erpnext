@@ -1,11 +1,11 @@
-# Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
 # import frappe
 from frappe.model.document import Document
 
 
-class ProductionLine(Document):
+class ManufacturingProcessMap(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -14,11 +14,7 @@ class ProductionLine(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		amended_from: DF.Link | None
-		is_active: DF.Check
-		is_group: DF.Check
-		line_code: DF.Data
-		line_name: DF.Data
-		parent_line: DF.Link | None
+		source_process: DF.Link
+		target_process: DF.Link
 	# end: auto-generated types
 	pass
