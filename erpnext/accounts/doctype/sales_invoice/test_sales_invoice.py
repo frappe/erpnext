@@ -2979,7 +2979,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		item.save()
 
-		si = create_sales_invoice(item="T Shirt Tax Recalc", rate=700, do_not_save=True)
+		si = create_sales_invoice(item=item.name, rate=700, do_not_save=True)
 		si.append(
 			"taxes",
 			{
@@ -3001,7 +3001,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 		# Verify template changed to 10%
 		self.assertEqual(si.items[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
 
-		# Submit and verify GL entries balance
 		si.submit()
 
 	@IntegrationTestCase.change_settings("Selling Settings", {"enable_discount_accounting": 1})
