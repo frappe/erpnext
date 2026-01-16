@@ -235,7 +235,6 @@ def get_allowed_types_from_settings(child_doc: bool = False):
 	return result
 
 
-
 def get_child_docs(doc: list) -> list:
 	child_doc = []
 	doc = get_child_tables_of_doctypes(doc)
@@ -306,4 +305,3 @@ def get_repost_allowed_types(doctype, txt, searchfield, start, page_len, filters
 
 	allowed_types = list(dict.fromkeys(allowed_types))
 	return [[dt] for dt in allowed_types]
-

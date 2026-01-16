@@ -28,7 +28,6 @@ def update_delivery_note():
 	)
 
 
-
 def update_pick_list_items():
 	PL = frappe.qb.DocType("Pick List")
 	PLI = frappe.qb.DocType("Pick List Item")
