@@ -852,7 +852,7 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 
 	def set_missing_values(source, target):
 		if source.is_return and source.return_against:
-			#Sales Invoice Items linked to the Delivery Note
+			# Sales Invoice Items linked to the Delivery Note
 			invoices = frappe.get_all(
 				"Sales Invoice Item",
 				filters={
@@ -870,28 +870,13 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 					original_invoices.add(row.parent)
 					item_map.setdefault(row.item_code, []).append(row.name)
 
-			if not original_invoices:
-				frappe.throw(
-					_("Could not determine original Sales Invoice for this return."),
-					frappe.ValidationError,
-				)
+			if len(original_invoices) == 1:
+				original_invoice = next(iter(original_invoices))
+				target.return_against = original_invoice
 
-			if len(original_invoices) > 1:
-				frappe.throw(
-					_(
-						"Cannot create a single Credit Note for a Delivery Note "
-						"invoiced by multiple Sales Invoices. "
-						"Please return each invoice separately."
-					),
-					frappe.ValidationError,
-				)
-
-			original_invoice = next(iter(original_invoices))
-			target.return_against = original_invoice
-
-			for item in target.items:
-				if item.item_code in item_map and item_map[item.item_code]:
-					item.sales_invoice_item = item_map[item.item_code].pop(0)
+				for item in target.items:
+					if item.item_code in item_map and item_map[item.item_code]:
+						item.sales_invoice_item = item_map[item.item_code].pop(0)
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 

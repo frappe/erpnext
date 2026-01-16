@@ -2911,7 +2911,7 @@ class TestDeliveryNote(IntegrationTestCase):
 			self.assertTrue(item.sales_invoice_item)
 
 		with self.assertRaises(StockOverReturnError):
-			cn2.save()
+			cn2.submit()
 
 
 def create_delivery_note(**args):
