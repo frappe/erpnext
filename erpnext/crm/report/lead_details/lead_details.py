@@ -55,6 +55,7 @@ def get_columns():
 			"options": "Company",
 			"width": 120,
 		},
+		{"label": _("Designation"), "fieldname": "designation", "fieldtype": "Data", "width": 120},
 		{"label": _("Address"), "fieldname": "address", "fieldtype": "Data", "width": 130},
 		{"label": _("Postal Code"), "fieldname": "pincode", "fieldtype": "Data", "width": 90},
 		{"label": _("City"), "fieldname": "city", "fieldtype": "Data", "width": 100},
@@ -73,14 +74,20 @@ def get_columns():
 def get_data(filters):
 	lead = frappe.qb.DocType("Lead")
 	address = frappe.qb.DocType("Address")
-	dynamic_link = frappe.qb.DocType("Dynamic Link")
+	contact = frappe.qb.DocType("Contact")
+	dynamic_link_address = frappe.qb.DocType("Dynamic Link").as_("dla")
+	dynamic_link_contact = frappe.qb.DocType("Dynamic Link").as_("dlc")
 
 	query = (
 		frappe.qb.from_(lead)
-		.left_join(dynamic_link)
-		.on((lead.name == dynamic_link.link_name) & (dynamic_link.parenttype == "Address"))
+		.left_join(dynamic_link_address)
+		.on((lead.name == dynamic_link_address.link_name) & (dynamic_link_address.parenttype == "Address"))
 		.left_join(address)
-		.on(address.name == dynamic_link.parent)
+		.on(address.name == dynamic_link_address.parent)
+		.left_join(dynamic_link_contact)
+		.on((lead.name == dynamic_link_contact.link_name) & (dynamic_link_contact.parenttype == "Contact"))
+		.left_join(contact)
+		.on(contact.name == dynamic_link_contact.parent)
 		.select(
 			lead.name,
 			lead.lead_name,
@@ -93,6 +100,7 @@ def get_data(filters):
 			lead.phone,
 			lead.owner,
 			lead.company,
+			contact.designation,
 			(Concat_ws(", ", address.address_line1, address.address_line2)).as_("address"),
 			address.pincode,
 			address.city,
