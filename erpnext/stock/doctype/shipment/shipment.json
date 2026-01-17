@@ -115,7 +115,7 @@
   },
   {
    "fieldname": "pickup_address",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "read_only": 1
   },
   {
@@ -135,7 +135,7 @@
   },
   {
    "fieldname": "pickup_contact",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "read_only": 1
   },
   {
@@ -193,7 +193,7 @@
   },
   {
    "fieldname": "delivery_address",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "read_only": 1
   },
   {
@@ -214,7 +214,7 @@
   {
    "depends_on": "eval:doc.delivery_contact_name",
    "fieldname": "delivery_contact",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "read_only": 1
   },
   {
@@ -441,11 +441,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-07 19:24:23.566312",
+ "modified": "2026-01-16 14:59:28.547953",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -477,6 +477,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
