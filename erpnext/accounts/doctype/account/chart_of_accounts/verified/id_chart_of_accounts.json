@@ -99,14 +99,14 @@
                 },
                 "Pajak Dibayar di Muka": {
                     "PPN Masukan": {
-                        "account_number": "1151.001", 
+                        "account_number": "1181.001",
                         "account_type": "Tax"
                     },
                     "PPh 23 Dibayar di Muka": {
-                        "account_number": "1152.001", 
+                        "account_number": "1182.001",
                         "account_type": "Tax"
-                    }, 
-                    "account_number": "1150.000"
+                    },
+                    "account_number": "1180.000"
                 },
                 "account_number": "1100.000"
                 
