@@ -3000,6 +3000,8 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		# Verify template changed to 10%
 		self.assertEqual(si.items[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
+		self.assertEqual(si.taxes[0].tax_amount, 70)  # 10% of 700
+		self.assertEqual(si.grand_total, 470)  # 700 + 70 - 300
 
 		si.submit()
 

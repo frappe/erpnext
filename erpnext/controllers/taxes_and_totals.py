@@ -39,13 +39,13 @@ class calculate_taxes_and_totals:
 		items = list(filter(lambda item: not item.get("is_alternative"), self.doc.get("items")))
 		return items
 
-	def calculate(self, validate_tax_template=True):
+	def calculate(self, ignore_tax_template_validation=False):
 		if not len(self.doc.items):
 			return
 
 		self.discount_amount_applied = False
-		self._has_tax_template_changed = False
-		self._validate_tax_template = validate_tax_template
+		self.need_recomputation = False
+		self.ignore_tax_template_validation = ignore_tax_template_validation
 
 		self._calculate()
 
@@ -53,8 +53,8 @@ class calculate_taxes_and_totals:
 			self.set_discount_amount()
 			self.apply_discount_amount()
 
-		if validate_tax_template and self._has_tax_template_changed:
-			return self.calculate(validate_tax_template=False)
+		if not ignore_tax_template_validation and self.need_recomputation:
+			return self.calculate(ignore_tax_template_validation=True)
 
 		# Update grand total as per cash and non trade discount
 		if self.doc.apply_discount_on == "Grand Total" and self.doc.get("is_cash_or_non_trade_discount"):
@@ -85,7 +85,7 @@ class calculate_taxes_and_totals:
 		self.calculate_total_net_weight()
 
 	def validate_item_tax_template(self):
-		if not self._validate_tax_template:
+		if self.ignore_tax_template_validation:
 			return
 
 		if self.doc.get("is_return") and self.doc.get("return_against"):
@@ -131,8 +131,9 @@ class calculate_taxes_and_totals:
 							)
 						)
 
-						if self.discount_amount_applied:
-							self._has_tax_template_changed = True
+						# For correct tax_amount calculation re-computation is required
+						if self.discount_amount_applied and self.doc.apply_discount_on == "Grand Total":
+							self.need_recomputation = True
 
 	def update_item_tax_map(self):
 		for item in self.doc.items:
