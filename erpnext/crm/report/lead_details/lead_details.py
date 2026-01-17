@@ -78,16 +78,30 @@ def get_data(filters):
 	dynamic_link_address = frappe.qb.DocType("Dynamic Link").as_("dla")
 	dynamic_link_contact = frappe.qb.DocType("Dynamic Link").as_("dlc")
 
+	# Subquery to get the primary contact's designation for each lead
+	# This avoids Cartesian product when a lead has multiple contacts
+	contact_subquery = (
+		frappe.qb.from_(contact)
+		.join(dynamic_link_contact)
+		.on(contact.name == dynamic_link_contact.parent)
+		.select(contact.designation)
+		.where(dynamic_link_contact.link_name == lead.name)
+		.where(dynamic_link_contact.link_doctype == "Lead")
+		.where(dynamic_link_contact.parenttype == "Contact")
+		.orderby(contact.is_primary_contact, order=frappe.qb.desc)
+		.limit(1)
+	)
+
 	query = (
 		frappe.qb.from_(lead)
 		.left_join(dynamic_link_address)
-		.on((lead.name == dynamic_link_address.link_name) & (dynamic_link_address.parenttype == "Address"))
+		.on(
+			(lead.name == dynamic_link_address.link_name)
+			& (dynamic_link_address.link_doctype == "Lead")
+			& (dynamic_link_address.parenttype == "Address")
+		)
 		.left_join(address)
 		.on(address.name == dynamic_link_address.parent)
-		.left_join(dynamic_link_contact)
-		.on((lead.name == dynamic_link_contact.link_name) & (dynamic_link_contact.parenttype == "Contact"))
-		.left_join(contact)
-		.on(contact.name == dynamic_link_contact.parent)
 		.select(
 			lead.name,
 			lead.lead_name,
@@ -100,7 +114,7 @@ def get_data(filters):
 			lead.phone,
 			lead.owner,
 			lead.company,
-			contact.designation,
+			contact_subquery.as_("designation"),
 			(Concat_ws(", ", address.address_line1, address.address_line2)).as_("address"),
 			address.pincode,
 			address.city,
