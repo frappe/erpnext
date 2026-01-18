@@ -63,9 +63,7 @@ class TestGetItemDetail(IntegrationTestCase):
 			}
 		).insert()
 
-		# create purchase receipt to have some stock for delivery
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-
 		make_purchase_receipt(
 			item_code=item.item_code,
 			warehouse="_Test Warehouse - _TC",
@@ -74,20 +72,26 @@ class TestGetItemDetail(IntegrationTestCase):
 			batch_no="BATCH01",
 		)
 
-		# creating sales order just to create delivery note from it
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-
 		so = make_sales_order(item_code=item.item_code, qty=2, rate=75)
 
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
-
 		dn = make_delivery_note(so.name)
 
-		# Test 1 : On creation of DN, item's batch won't be fetched and rate will remaing the same as in SO
 		self.assertIsNone(dn.items[0].batch_no)
 		self.assertEqual(dn.items[0].rate, 75)
 
-		# Test 2 : On saving the DN, item's batch will be fetched and rate will be updated from Item Price
 		dn.save()
 		self.assertEqual(dn.items[0].batch_no, "BATCH01")
 		self.assertEqual(dn.items[0].rate, 50)
+
+	def test_get_item_tax_info_returns_empty_dict_when_no_tax(self):
+		from erpnext.stock.get_item_details import get_item_tax_info
+
+		result = get_item_tax_info(
+			item_code="TEST-ITEM",
+			tax_category=None,
+			company="Test Company"
+		)
+
+		self.assertEqual(result, {})
