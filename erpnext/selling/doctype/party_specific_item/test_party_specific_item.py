@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.controllers.queries import item_query
 
@@ -16,15 +16,6 @@ def create_party_specific_item(**args):
 	psi.restrict_based_on = args.get("restrict_based_on")
 	psi.based_on_value = args.get("based_on_value")
 	psi.insert()
-
-
-class UnitTestPartySpecificItem(UnitTestCase):
-	"""
-	Unit tests for PartySpecificItem.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
 
 
 class TestPartySpecificItem(IntegrationTestCase):

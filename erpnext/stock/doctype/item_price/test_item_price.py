@@ -3,20 +3,11 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.tests.utils import make_test_records_for_doctype
 
 from erpnext.stock.doctype.item_price.item_price import ItemPriceDuplicateItem
 from erpnext.stock.get_item_details import ItemDetailsCtx, get_price_list_rate_for
-
-
-class UnitTestItemPrice(UnitTestCase):
-	"""
-	Unit tests for ItemPrice.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
 
 
 class TestItemPrice(IntegrationTestCase):

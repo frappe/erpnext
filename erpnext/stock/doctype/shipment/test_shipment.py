@@ -4,18 +4,9 @@
 from datetime import date, timedelta
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.stock.doctype.delivery_note.delivery_note import make_shipment
-
-
-class UnitTestShipment(UnitTestCase):
-	"""
-	Unit tests for Shipment.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
 
 
 class TestShipment(IntegrationTestCase):

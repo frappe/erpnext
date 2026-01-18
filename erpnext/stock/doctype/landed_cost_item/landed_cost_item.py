@@ -17,7 +17,7 @@ class LandedCostItem(Document):
 		amount: DF.Currency
 		applicable_charges: DF.Currency
 		cost_center: DF.Link | None
-		description: DF.TextEditor
+		description: DF.TextEditor | None
 		is_fixed_asset: DF.Check
 		item_code: DF.Link
 		parent: DF.Data
@@ -27,7 +27,10 @@ class LandedCostItem(Document):
 		qty: DF.Float
 		rate: DF.Currency
 		receipt_document: DF.DynamicLink | None
-		receipt_document_type: DF.Literal["Purchase Invoice", "Purchase Receipt"]
+		receipt_document_type: DF.Literal[
+			"Purchase Invoice", "Purchase Receipt", "Stock Entry", "Subcontracting Receipt"
+		]
+		stock_entry_item: DF.Data | None
 	# end: auto-generated types
 
 	pass

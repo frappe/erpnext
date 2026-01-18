@@ -6,6 +6,7 @@ frappe.listview_settings["Pick List"] = {
 		const status_colors = {
 			Draft: "red",
 			Open: "orange",
+			"Partly Delivered": "orange",
 			Completed: "green",
 			Cancelled: "red",
 		};

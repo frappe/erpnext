@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import getdate
+from frappe.utils import create_batch, getdate
 
 from erpnext.accounts.doctype.subscription.subscription import DateTimeLikeObject, process_all
 
@@ -23,7 +23,23 @@ class ProcessSubscription(Document):
 	# end: auto-generated types
 
 	def on_submit(self):
-		process_all(subscription=self.subscription, posting_date=self.posting_date)
+		self.process_all_subscription()
+
+	def process_all_subscription(self):
+		filters = {"status": ("!=", "Cancelled")}
+
+		if self.subscription:
+			filters["name"] = self.subscription
+
+		subscriptions = frappe.get_all("Subscription", filters, pluck="name")
+
+		for subscription in create_batch(subscriptions, 500):
+			frappe.enqueue(
+				method="erpnext.accounts.doctype.subscription.subscription.process_all",
+				queue="long",
+				subscription=subscription,
+				posting_date=self.posting_date,
+			)
 
 
 def create_subscription_process(

@@ -2,13 +2,13 @@
 # For license information, please see license.txt
 
 
+import hashlib
 import json
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc, map_doc
-from frappe.query_builder import DocType
 from frappe.utils import cint, flt, get_time, getdate, nowdate, nowtime
 from frappe.utils.background_jobs import enqueue, is_job_enqueued
 from frappe.utils.scheduler import is_scheduler_inactive
@@ -16,7 +16,7 @@ from frappe.utils.scheduler import is_scheduler_inactive
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
-from erpnext.controllers.taxes_and_totals import ItemWiseTaxDetail
+from erpnext.controllers.sales_and_purchase_return import get_sales_invoice_item_from_consolidated_invoice
 
 
 class POSInvoiceMergeLog(Document):
@@ -28,11 +28,10 @@ class POSInvoiceMergeLog(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.pos_invoice_reference.pos_invoice_reference import (
-			POSInvoiceReference,
-		)
+		from erpnext.accounts.doctype.pos_invoice_reference.pos_invoice_reference import POSInvoiceReference
 
 		amended_from: DF.Link | None
+		company: DF.Link
 		consolidated_credit_note: DF.Link | None
 		consolidated_invoice: DF.Link | None
 		customer: DF.Link
@@ -156,7 +155,6 @@ class POSInvoiceMergeLog(Document):
 
 		sales_invoice.save()
 		sales_invoice.submit()
-
 		self.consolidated_invoice = sales_invoice.name
 
 		return sales_invoice
@@ -207,7 +205,7 @@ class POSInvoiceMergeLog(Document):
 		return return_invoices
 
 	def merge_pos_invoice_into(self, invoice, data):
-		items, payments, taxes = [], [], []
+		items, payments, taxes, item_tax_details = [], [], [], []
 
 		loyalty_amount_sum, loyalty_points_sum = 0, 0
 
@@ -217,6 +215,8 @@ class POSInvoiceMergeLog(Document):
 		loyalty_amount_sum, loyalty_points_sum, idx = 0, 0, 1
 
 		for doc in data:
+			old_new_item_map = frappe._dict()
+			old_new_tax_map = frappe._dict()
 			map_doc(doc, invoice, table_map={"doctype": invoice.doctype})
 
 			if doc.get("posting_date"):
@@ -238,12 +238,13 @@ class POSInvoiceMergeLog(Document):
 				si_item.pos_invoice = doc.name
 				si_item.pos_invoice_item = item.name
 				if doc.is_return:
-					si_item.sales_invoice_item = get_sales_invoice_item(
+					si_item.sales_invoice_item = get_sales_invoice_item_from_consolidated_invoice(
 						doc.return_against, item.pos_invoice_item
 					)
 				if item.serial_and_batch_bundle:
 					si_item.serial_and_batch_bundle = item.serial_and_batch_bundle
 				items.append(si_item)
+				old_new_item_map[item.name] = si_item
 
 			for tax in doc.get("taxes"):
 				found = False
@@ -253,17 +254,19 @@ class POSInvoiceMergeLog(Document):
 						t.base_tax_amount = flt(t.base_tax_amount) + flt(
 							tax.base_tax_amount_after_discount_amount
 						)
-						update_item_wise_tax_detail(t, tax)
+						old_new_tax_map[tax.name] = t
 						found = True
 				if not found:
 					tax.charge_type = "Actual"
 					tax.idx = idx
+					tax.row_id = None
 					idx += 1
 					tax.included_in_print_rate = 0
 					tax.tax_amount = tax.tax_amount_after_discount_amount
 					tax.base_tax_amount = tax.base_tax_amount_after_discount_amount
-					tax.item_wise_tax_detail = tax.item_wise_tax_detail
+					tax.dont_recompute_tax = 1
 					taxes.append(tax)
+					old_new_tax_map[tax.name] = tax
 
 			for payment in doc.get("payments"):
 				found = False
@@ -279,6 +282,16 @@ class POSInvoiceMergeLog(Document):
 			rounded_total += doc.rounded_total
 			base_rounding_adjustment += doc.base_rounding_adjustment
 			base_rounded_total += doc.base_rounded_total
+
+			for d in doc.get("item_wise_tax_details"):
+				row = frappe._dict(
+					item=old_new_item_map[d.item_row],
+					tax=old_new_tax_map[d.tax_row],
+					amount=d.amount,
+					rate=d.rate,
+					taxable_amount=d.taxable_amount,
+				)
+				item_tax_details.append(row)
 
 		if loyalty_points_sum:
 			invoice.redeem_loyalty_points = 1
@@ -303,10 +316,17 @@ class POSInvoiceMergeLog(Document):
 		accounting_dimensions = get_checks_for_pl_and_bs_accounts()
 		accounting_dimensions_fields = [d.fieldname for d in accounting_dimensions]
 		dimension_values = frappe.db.get_value(
-			"POS Profile", {"name": invoice.pos_profile}, accounting_dimensions_fields, as_dict=1
+			"POS Profile",
+			{"name": invoice.pos_profile},
+			[*accounting_dimensions_fields, "cost_center", "project"],
+			as_dict=1,
 		)
 		for dimension in accounting_dimensions:
-			dimension_value = dimension_values.get(dimension.fieldname)
+			dimension_value = (
+				data[0].get(dimension.fieldname)
+				if data[0].get(dimension.fieldname)
+				else dimension_values.get(dimension.fieldname)
+			)
 
 			if not dimension_value and (dimension.mandatory_for_pl or dimension.mandatory_for_bs):
 				frappe.throw(
@@ -318,9 +338,23 @@ class POSInvoiceMergeLog(Document):
 
 			invoice.set(dimension.fieldname, dimension_value)
 
+		invoice.set(
+			"cost_center",
+			data[0].get("cost_center") if data[0].get("cost_center") else dimension_values.get("cost_center"),
+		)
+		invoice.set(
+			"project", data[0].get("project") if data[0].get("project") else dimension_values.get("project")
+		)
+
 		if self.merge_invoices_based_on == "Customer Group":
 			invoice.flags.ignore_pos_profile = True
 			invoice.pos_profile = ""
+
+		# Unset Commission Section
+		invoice.set("sales_partner", None)
+		invoice.set("commission_rate", 0)
+		invoice.set("total_commission", 0)
+		invoice._item_wise_tax_details = item_tax_details
 
 		return invoice
 
@@ -337,7 +371,7 @@ class POSInvoiceMergeLog(Document):
 		for doc in invoice_docs:
 			doc.load_from_db()
 			inv = sales_invoice
-			if doc.is_return:
+			if doc.is_return and credit_notes:
 				for key, value in credit_notes.items():
 					if doc.name in value:
 						inv = key
@@ -398,24 +432,6 @@ class POSInvoiceMergeLog(Document):
 			si.cancel()
 
 
-def update_item_wise_tax_detail(consolidate_tax_row, tax_row):
-	consolidated_tax_detail = json.loads(consolidate_tax_row.item_wise_tax_detail)
-	tax_row_detail = json.loads(tax_row.item_wise_tax_detail)
-
-	if not consolidated_tax_detail:
-		consolidated_tax_detail = {}
-
-	for item_code, tax_data in tax_row_detail.items():
-		tax_data = ItemWiseTaxDetail(**tax_data)
-		if consolidated_tax_detail.get(item_code):
-			consolidated_tax_detail[item_code]["tax_amount"] += tax_data.tax_amount
-			consolidated_tax_detail[item_code]["net_amount"] += tax_data.net_amount
-		else:
-			consolidated_tax_detail.update({item_code: tax_data})
-
-	consolidate_tax_row.item_wise_tax_detail = json.dumps(consolidated_tax_detail)
-
-
 def get_all_unconsolidated_invoices():
 	filters = {
 		"consolidated_invoice": ["in", ["", None]],
@@ -446,12 +462,37 @@ def get_invoice_customer_map(pos_invoices):
 		pos_invoice_customer_map.setdefault(customer, [])
 		pos_invoice_customer_map[customer].append(invoice)
 
+	for customer, invoices in pos_invoice_customer_map.items():
+		pos_invoice_customer_map[customer] = split_invoices_by_accounting_dimension(invoices)
+
 	return pos_invoice_customer_map
 
 
+def split_invoices_by_accounting_dimension(pos_invoices):
+	# pos_invoices = {
+	# 	{'dim_field1': 'dim_field1_value1', 'dim_field2': 'dim_field2_value1'}: [],
+	# 	{'dim_field1': 'dim_field1_value2', 'dim_field2': 'dim_field2_value1'}: []
+	# }
+	pos_invoice_accounting_dimensions_map = {}
+	for invoice in pos_invoices:
+		dimension_fields = [d.fieldname for d in get_checks_for_pl_and_bs_accounts()]
+		accounting_dimensions = frappe.db.get_value(
+			"POS Invoice", invoice.pos_invoice, [*dimension_fields, "cost_center", "project"], as_dict=1
+		)
+
+		accounting_dimensions_dic_hash = hashlib.sha256(
+			json.dumps(accounting_dimensions).encode()
+		).hexdigest()
+
+		pos_invoice_accounting_dimensions_map.setdefault(accounting_dimensions_dic_hash, [])
+		pos_invoice_accounting_dimensions_map[accounting_dimensions_dic_hash].append(invoice)
+
+	return pos_invoice_accounting_dimensions_map
+
+
 def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
-	invoices = pos_invoices or (closing_entry and closing_entry.get("pos_transactions"))
-	if frappe.flags.in_test and not invoices:
+	invoices = pos_invoices or (closing_entry and closing_entry.get("pos_invoices"))
+	if frappe.in_test and not invoices:
 		invoices = get_all_unconsolidated_invoices()
 
 	invoice_by_customer = get_invoice_customer_map(invoices)
@@ -468,7 +509,7 @@ def unconsolidate_pos_invoices(closing_entry):
 		"POS Invoice Merge Log", filters={"pos_closing_entry": closing_entry.name}, pluck="name"
 	)
 
-	if len(closing_entry.pos_transactions) >= 10:
+	if len(closing_entry.pos_invoices) >= 10:
 		closing_entry.set_status(update=True, status="Queued")
 		enqueue_job(cancel_merge_logs, merge_logs=merge_logs, closing_entry=closing_entry)
 	else:
@@ -532,20 +573,22 @@ def split_invoices(invoices):
 
 def create_merge_logs(invoice_by_customer, closing_entry=None):
 	try:
-		for customer, invoices in invoice_by_customer.items():
-			for _invoices in split_invoices(invoices):
-				merge_log = frappe.new_doc("POS Invoice Merge Log")
-				merge_log.posting_date = (
-					getdate(closing_entry.get("posting_date")) if closing_entry else nowdate()
-				)
-				merge_log.posting_time = (
-					get_time(closing_entry.get("posting_time")) if closing_entry else nowtime()
-				)
-				merge_log.customer = customer
-				merge_log.pos_closing_entry = closing_entry.get("name") if closing_entry else None
-				merge_log.set("pos_invoices", _invoices)
-				merge_log.save(ignore_permissions=True)
-				merge_log.submit()
+		for customer, invoices_acc_dim in invoice_by_customer.items():
+			for invoices in invoices_acc_dim.values():
+				for _invoices in split_invoices(invoices):
+					merge_log = frappe.new_doc("POS Invoice Merge Log")
+					merge_log.posting_date = (
+						getdate(closing_entry.get("posting_date")) if closing_entry else nowdate()
+					)
+					merge_log.posting_time = (
+						get_time(closing_entry.get("posting_time")) if closing_entry else nowtime()
+					)
+					merge_log.company = closing_entry.get("company") if closing_entry else None
+					merge_log.customer = customer
+					merge_log.pos_closing_entry = closing_entry.get("name") if closing_entry else None
+					merge_log.set("pos_invoices", _invoices)
+					merge_log.save(ignore_permissions=True)
+					merge_log.submit()
 		if closing_entry:
 			closing_entry.set_status(update=True, status="Submitted")
 			closing_entry.db_set("error_message", "")
@@ -612,7 +655,7 @@ def enqueue_job(job, **kwargs):
 			timeout=10000,
 			event="processing_merge_logs",
 			job_id=job_id,
-			now=frappe.conf.developer_mode or frappe.flags.in_test,
+			now=frappe.conf.developer_mode or frappe.in_test,
 		)
 
 		if job == create_merge_logs:
@@ -624,7 +667,7 @@ def enqueue_job(job, **kwargs):
 
 
 def check_scheduler_status():
-	if is_scheduler_inactive() and not frappe.flags.in_test:
+	if is_scheduler_inactive() and not frappe.in_test:
 		frappe.throw(_("Scheduler is inactive. Cannot enqueue job."), title=_("Scheduler Inactive"))
 
 
@@ -633,26 +676,3 @@ def get_error_message(message) -> str:
 		return message["message"]
 	except Exception:
 		return str(message)
-
-
-def get_sales_invoice_item(return_against_pos_invoice, pos_invoice_item):
-	try:
-		SalesInvoice = DocType("Sales Invoice")
-		SalesInvoiceItem = DocType("Sales Invoice Item")
-
-		query = (
-			frappe.qb.from_(SalesInvoice)
-			.from_(SalesInvoiceItem)
-			.select(SalesInvoiceItem.name)
-			.where(
-				(SalesInvoice.name == SalesInvoiceItem.parent)
-				& (SalesInvoice.is_return == 0)
-				& (SalesInvoiceItem.pos_invoice == return_against_pos_invoice)
-				& (SalesInvoiceItem.pos_invoice_item == pos_invoice_item)
-			)
-		)
-
-		result = query.run(as_dict=True)
-		return result[0].name if result else None
-	except Exception:
-		return None

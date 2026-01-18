@@ -28,7 +28,11 @@ class POSProfile(Document):
 		from erpnext.accounts.doctype.pos_profile_user.pos_profile_user import POSProfileUser
 
 		account_for_change_amount: DF.Link | None
+		action_on_new_invoice: DF.Literal[
+			"Always Ask", "Save Changes and Load New Invoice", "Discard Changes and Load New Invoice"
+		]
 		allow_discount_change: DF.Check
+		allow_partial_payment: DF.Check
 		allow_rate_change: DF.Check
 		applicable_for_users: DF.Table[POSProfileUser]
 		apply_discount_on: DF.Literal["Grand Total", "Net Total"]
@@ -40,7 +44,6 @@ class POSProfile(Document):
 		currency: DF.Link
 		customer: DF.Link | None
 		customer_groups: DF.Table[POSCustomerGroup]
-		disable_grand_total_to_default_mop: DF.Check
 		disable_rounded_total: DF.Check
 		disabled: DF.Check
 		expense_account: DF.Link | None
@@ -56,6 +59,7 @@ class POSProfile(Document):
 		project: DF.Link | None
 		select_print_heading: DF.Link | None
 		selling_price_list: DF.Link | None
+		set_grand_total_to_default_mop: DF.Check
 		tax_category: DF.Link | None
 		taxes_and_charges: DF.Link | None
 		tc_name: DF.Link | None
@@ -71,6 +75,7 @@ class POSProfile(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_disabled()
 		self.validate_default_profile()
 		self.validate_all_link_fields()
 		self.validate_duplicate_groups()
@@ -94,6 +99,21 @@ class POSProfile(Document):
 					),
 					title=_("Mandatory Accounting Dimension"),
 				)
+
+	def validate_disabled(self):
+		old_doc = self.get_doc_before_save()
+
+		if (
+			old_doc
+			and self.disabled
+			and old_doc.disabled != self.disabled
+			and frappe.db.exists("POS Opening Entry", {"pos_profile": self.name, "status": "Open"})
+		):
+			frappe.throw(
+				_("POS Profile {0} cannot be disabled as there are ongoing POS sessions.").format(
+					frappe.bold(self.name)
+				)
+			)
 
 	def validate_default_profile(self):
 		for row in self.applicable_for_users:

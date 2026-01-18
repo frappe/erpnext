@@ -232,7 +232,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, IntegrationTestCase):
 		company.save()
 
 		test_cc = company.cost_center
-		default_expense_account = company.default_expense_account
+		default_expense_account = company.service_expense_account
 
 		item = make_item(properties={"is_stock_item": 0})
 

@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import nowdate, today
 
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry

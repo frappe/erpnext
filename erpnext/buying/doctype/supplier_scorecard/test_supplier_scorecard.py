@@ -3,16 +3,7 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
-
-
-class UnitTestSupplierScorecard(UnitTestCase):
-	"""
-	Unit tests for SupplierScorecard.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
+from frappe.tests import IntegrationTestCase
 
 
 class TestSupplierScorecard(IntegrationTestCase):

@@ -75,6 +75,8 @@ def create_company(**args):
 			"company_name": args.company_name or "Trial Balance Company",
 			"country": args.country or "India",
 			"default_currency": args.currency or "INR",
+			"parent_company": args.get("parent_company"),
+			"is_group": args.get("is_group"),
 		}
 	)
 	company.insert(ignore_if_duplicate=True)

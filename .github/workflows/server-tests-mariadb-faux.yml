@@ -9,6 +9,12 @@ on:
       - "**.css"
       - "**.md"
       - "**.html"
+      - 'crowdin.yml'
+      - '.coderabbit.yml'
+      - '.mergify.yml'
+
+permissions:
+  contents: read
 
 jobs:
   test:

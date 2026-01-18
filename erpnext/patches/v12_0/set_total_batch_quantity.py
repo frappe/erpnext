@@ -9,7 +9,7 @@ def execute():
 			frappe.db.get_value(
 				"Stock Ledger Entry",
 				{"docstatus": 1, "batch_no": batch.batch_id, "is_cancelled": 0},
-				"sum(actual_qty)",
+				[{"SUM": "actual_qty"}],
 			)
 			or 0.0
 		)

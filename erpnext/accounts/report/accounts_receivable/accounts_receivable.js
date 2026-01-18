@@ -28,16 +28,13 @@ frappe.query_reports["Accounts Receivable"] = {
 		{
 			fieldname: "cost_center",
 			label: __("Cost Center"),
-			fieldtype: "Link",
-			options: "Cost Center",
-			get_query: () => {
-				var company = frappe.query_report.get_filter_value("company");
-				return {
-					filters: {
-						company: company,
-					},
-				};
+			fieldtype: "MultiSelectList",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Cost Center", txt, {
+					company: frappe.query_report.get_filter_value("company"),
+				});
 			},
+			options: "Cost Center",
 		},
 		{
 			fieldname: "party_type",
@@ -88,6 +85,13 @@ frappe.query_reports["Accounts Receivable"] = {
 			fieldtype: "Select",
 			options: "Posting Date\nDue Date",
 			default: "Due Date",
+		},
+		{
+			fieldname: "calculate_ageing_with",
+			label: __("Calculate Ageing With"),
+			fieldtype: "Select",
+			options: "Report Date\nToday Date",
+			default: "Report Date",
 		},
 		{
 			fieldname: "range",
@@ -188,6 +192,10 @@ frappe.query_reports["Accounts Receivable"] = {
 			var filters = report.get_values();
 			frappe.set_route("query-report", "Accounts Receivable Summary", { company: filters.company });
 		});
+
+		if (frappe.boot.sysdefaults.default_ageing_range) {
+			report.set_filter_value("range", frappe.boot.sysdefaults.default_ageing_range);
+		}
 	},
 };
 

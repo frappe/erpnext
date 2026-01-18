@@ -4,6 +4,7 @@ from frappe import _
 def get_data():
 	return {
 		"fieldname": "fiscal_year",
+		"non_standard_fieldnames": {"Budget": "from_fiscal_year"},
 		"transactions": [
 			{"label": _("Budgets"), "items": ["Budget"]},
 			{"label": _("References"), "items": ["Period Closing Voucher"]},

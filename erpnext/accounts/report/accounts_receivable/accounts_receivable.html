@@ -164,6 +164,12 @@
 				{% } %}
 			</tr>
 		</thead>
+		<div class="show-filters">
+			{% if subtitle %}
+				{{ subtitle }}
+				<hr>
+			{% endif %}
+		</div>
 		<tbody>
 			{% for(var i=0, l=data.length; i<l; i++) { %}
 				<tr>
@@ -185,7 +191,7 @@
 
 						{% if(!filters.show_future_payments) { %}
 						<td>
-							{% if(!(filters.party)) { %}
+							{% if(!filters.party?.length) { %}
 								{%= data[i]["party"] %}
 								{% if(data[i]["customer_name"] && data[i]["customer_name"] != data[i]["party"]) { %}
 									<br> {%= data[i]["customer_name"] %}
@@ -258,7 +264,7 @@
 					{% if(data[i]["party"]|| "&nbsp;") { %}
 						{% if(!data[i]["is_total_row"]) { %}
 							<td>
-								{% if(!(filters.party)) { %}
+								{% if(!filters.party?.length) { %}
 									{%= data[i]["party"] %}
 									{% if(data[i]["customer_name"] && data[i]["customer_name"] != data[i]["party"]) { %}
 										<br> {%= data[i]["customer_name"] %}

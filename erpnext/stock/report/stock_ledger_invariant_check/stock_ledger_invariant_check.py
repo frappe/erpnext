@@ -44,7 +44,7 @@ def get_stock_ledger_entries(filters):
 		"Stock Ledger Entry",
 		fields=SLE_FIELDS,
 		filters={"item_code": filters.item_code, "warehouse": filters.warehouse, "is_cancelled": 0},
-		order_by="timestamp(posting_date, posting_time), creation",
+		order_by="posting_datetime, creation",
 	)
 
 

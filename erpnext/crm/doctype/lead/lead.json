@@ -486,7 +486,7 @@
   {
    "fieldname": "state",
    "fieldtype": "Data",
-   "label": "State"
+   "label": "State/Province"
   },
   {
    "fieldname": "country",
@@ -542,11 +542,12 @@
    "label": "Analytics"
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2025-01-31 13:40:08.094759",
+ "modified": "2025-06-26 11:02:01.158901",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -605,6 +606,7 @@
    "role": "Sales User"
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "lead_name,lead_owner,status",
  "sender_field": "email_id",
  "sender_name_field": "lead_name",

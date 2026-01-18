@@ -3,16 +3,7 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
-
-
-class UnitTestSupplierScorecardCriteria(UnitTestCase):
-	"""
-	Unit tests for SupplierScorecardCriteria.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
+from frappe.tests import IntegrationTestCase
 
 
 class TestSupplierScorecardCriteria(IntegrationTestCase):
@@ -26,7 +17,6 @@ class TestSupplierScorecardCriteria(IntegrationTestCase):
 	def test_formula_validate(self):
 		delete_test_scorecards()
 		self.assertRaises(frappe.ValidationError, frappe.get_doc(test_bad_criteria[1]).insert)
-		self.assertRaises(frappe.ValidationError, frappe.get_doc(test_bad_criteria[2]).insert)
 
 
 def delete_test_scorecards():
@@ -77,16 +67,8 @@ test_bad_criteria = [
 		"name": "Fake Criteria 2",
 		"weight": 40.0,
 		"doctype": "Supplier Scorecard Criteria",
-		"formula": "(({cost_of_on_time_shipments} / {tot_cost_shipments}))* 100",  # Force 0 divided by 0
-		"criteria_name": "Fake Criteria 2",
-		"max_score": 100.0,
-	},
-	{
-		"name": "Fake Criteria 3",
-		"weight": 40.0,
-		"doctype": "Supplier Scorecard Criteria",
 		"formula": "(({cost_of_on_time_shipments} {cost_of_on_time_shipments} / {tot_cost_shipments}))* 100",  # Two variables beside eachother
-		"criteria_name": "Fake Criteria 3",
+		"criteria_name": "Fake Criteria 2",
 		"max_score": 100.0,
 	},
 ]

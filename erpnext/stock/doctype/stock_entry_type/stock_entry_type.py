@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
@@ -21,7 +22,6 @@ class StockEntryType(Document):
 		add_to_transit: DF.Check
 		is_standard: DF.Check
 		purpose: DF.Literal[
-			"",
 			"Material Issue",
 			"Material Receipt",
 			"Material Transfer",
@@ -31,6 +31,10 @@ class StockEntryType(Document):
 			"Repack",
 			"Send to Subcontractor",
 			"Disassemble",
+			"Receive from Customer",
+			"Return Raw Material to Customer",
+			"Subcontracting Delivery",
+			"Subcontracting Return",
 		]
 	# end: auto-generated types
 
@@ -50,6 +54,10 @@ class StockEntryType(Document):
 			"Repack",
 			"Send to Subcontractor",
 			"Disassemble",
+			"Receive from Customer",
+			"Return Raw Material to Customer",
+			"Subcontracting Delivery",
+			"Subcontracting Return",
 		]:
 			frappe.throw(f"Stock Entry Type {self.name} cannot be set as standard")
 
@@ -92,21 +100,25 @@ class ManufactureEntry:
 	def add_raw_materials(self):
 		if self.job_card:
 			item_dict = {}
-			# if self.bom_no:
-			# 	item_dict = get_bom_items_as_dict(
-			# 		self.bom_no,
-			# 		self.company,
-			# 		qty=self.qty_to_manufacture,
-			# 		fetch_exploded=False,
-			# 		fetch_qty_in_stock_uom=False,
-			# 	)
-
 			if not item_dict:
 				item_dict = self.get_items_from_job_card()
+
+			backflush_based_on = frappe.db.get_single_value(
+				"Manufacturing Settings", "backflush_raw_materials_based_on"
+			)
 
 			for item_code, _dict in item_dict.items():
 				_dict.from_warehouse = self.source_wh.get(item_code) or self.wip_warehouse
 				_dict.to_warehouse = ""
+
+				if backflush_based_on != "BOM":
+					calculated_qty = flt(_dict.transferred_qty) - flt(_dict.consumed_qty)
+					if calculated_qty < 0:
+						frappe.throw(
+							_("Consumed quantity of item {0} exceeds transferred quantity.").format(item_code)
+						)
+
+					_dict.qty = calculated_qty
 
 			self.stock_entry.add_to_stock_entry_detail(item_dict)
 
@@ -115,9 +127,12 @@ class ManufactureEntry:
 		items = frappe.get_all(
 			"Job Card Item",
 			fields=[
+				"name as job_card_item",
 				"item_code",
 				"source_warehouse",
 				"required_qty as qty",
+				"transferred_qty",
+				"consumed_qty",
 				"item_name",
 				"uom",
 				"stock_uom",

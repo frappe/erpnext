@@ -6,6 +6,9 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+	FinancialReportEngine,
+)
 from erpnext.accounts.report.financial_statements import (
 	compute_growth_view_data,
 	compute_margin_view_data,
@@ -17,6 +20,9 @@ from erpnext.accounts.report.financial_statements import (
 
 
 def execute(filters=None):
+	if filters and filters.report_template:
+		return FinancialReportEngine().execute(filters)
+
 	period_list = get_period_list(
 		filters.from_fiscal_year,
 		filters.to_fiscal_year,
@@ -35,7 +41,6 @@ def execute(filters=None):
 		filters=filters,
 		accumulated_values=filters.accumulated_values,
 		ignore_closing_entries=True,
-		ignore_accumulated_values_for_fy=True,
 	)
 
 	expense = get_data(
@@ -46,7 +51,6 @@ def execute(filters=None):
 		filters=filters,
 		accumulated_values=filters.accumulated_values,
 		ignore_closing_entries=True,
-		ignore_accumulated_values_for_fy=True,
 	)
 
 	net_profit_loss = get_net_profit_loss(
@@ -119,9 +123,7 @@ def get_report_summary(
 
 	return [
 		{"value": net_income, "label": income_label, "datatype": "Currency", "currency": currency},
-		{"type": "separator", "value": "-"},
 		{"value": net_expense, "label": expense_label, "datatype": "Currency", "currency": currency},
-		{"type": "separator", "value": "=", "color": "blue"},
 		{
 			"value": net_profit,
 			"indicator": "Green" if net_profit > 0 else "Red",

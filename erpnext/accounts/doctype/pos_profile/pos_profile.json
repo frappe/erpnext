@@ -26,12 +26,14 @@
   "auto_add_item_to_cart",
   "validate_stock_on_save",
   "print_receipt_on_order_complete",
+  "action_on_new_invoice",
   "column_break_16",
   "update_stock",
   "ignore_pricing_rule",
   "allow_rate_change",
   "allow_discount_change",
-  "disable_grand_total_to_default_mop",
+  "set_grand_total_to_default_mop",
+  "allow_partial_payment",
   "section_break_23",
   "item_groups",
   "column_break_25",
@@ -403,20 +405,34 @@
    "label": "Print Receipt on Order Complete"
   },
   {
-   "default": "0",
-   "fieldname": "disable_grand_total_to_default_mop",
-   "fieldtype": "Check",
-   "label": "Disable auto setting Grand Total to default Payment Mode"
-  },
-  {
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
    "oldfieldname": "cost_center",
    "oldfieldtype": "Link",
    "options": "Project"
+  },
+  {
+   "default": "1",
+   "fieldname": "set_grand_total_to_default_mop",
+   "fieldtype": "Check",
+   "label": "Set Grand Total to Default Payment Method"
+  },
+  {
+   "default": "Always Ask",
+   "fieldname": "action_on_new_invoice",
+   "fieldtype": "Select",
+   "label": "Action on New Invoice",
+   "options": "Always Ask\nSave Changes and Load New Invoice\nDiscard Changes and Load New Invoice"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_partial_payment",
+   "fieldtype": "Check",
+   "label": "Allow Partial Payment"
   }
  ],
+ "grid_page_length": 50,
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
@@ -442,7 +458,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2025-04-09 11:35:13.779613",
+ "modified": "2025-06-24 11:19:19.834905",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

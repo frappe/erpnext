@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import nowdate
 
 from erpnext.controllers.stock_controller import (
@@ -14,15 +14,6 @@ from erpnext.controllers.stock_controller import (
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-
-
-class UnitTestQualityInspection(UnitTestCase):
-	"""
-	Unit tests for QualityInspection.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
 
 
 class TestQualityInspection(IntegrationTestCase):
@@ -301,7 +292,7 @@ def create_quality_inspection(**args):
 
 	if not args.readings:
 		create_quality_inspection_parameter("Size")
-		readings = {"specification": "Size", "min_value": 0, "max_value": 10}
+		readings = {"specification": "Size", "min_value": 0, "max_value": 10, "reading_1": "5"}
 		if args.status == "Rejected":
 			readings["reading_1"] = "12"  # status is auto set in child on save
 	else:

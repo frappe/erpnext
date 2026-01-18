@@ -16,6 +16,30 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_i
 
 
 class TestMaintenanceSchedule(IntegrationTestCase):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		cls.make_sales_person()
+
+	@classmethod
+	def make_sales_person(cls):
+		records = [
+			{
+				"doctype": "Sales Person",
+				"is_group": 0,
+				"parent_sales_person": "Sales Team",
+				"sales_person_name": "_Test Sales Person",
+			},
+		]
+		cls.sales_person = []
+		for x in records:
+			if not frappe.db.exists("Sales Person", {"sales_person_name": x.get("sales_person_name")}):
+				cls.sales_person.append(frappe.get_doc(x).insert())
+			else:
+				cls.sales_person.append(
+					frappe.get_doc("Sales Person", {"sales_person_name": x.get("sales_person_name")})
+				)
+
 	def test_events_should_be_created_and_deleted(self):
 		ms = make_maintenance_schedule()
 		ms.generate_schedule()
@@ -136,7 +160,7 @@ class TestMaintenanceSchedule(IntegrationTestCase):
 		self.assertFalse(ms.validate_items_table_change())
 		# After Save
 		ms.items[0].serial_no = "TEST001"
-		ms.items[0].sales_person = "_Test Sales Person"
+		ms.items[0].sales_person = self.sales_person[0].name
 		ms.items[0].no_of_visits = 2
 		self.assertTrue(ms.validate_items_table_change())
 		ms.save()

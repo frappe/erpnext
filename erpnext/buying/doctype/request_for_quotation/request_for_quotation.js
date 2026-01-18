@@ -28,15 +28,10 @@ frappe.ui.form.on("Request for Quotation", {
 				is_group: 0,
 			},
 		}));
-	},
 
-	onload: function (frm) {
-		if (!frm.doc.message_for_supplier) {
-			frm.set_value(
-				"message_for_supplier",
-				__("Please supply the specified items at the best possible rates")
-			);
-		}
+		frm.set_indicator_formatter("item_code", function (doc) {
+			return !doc.qty && frm.doc.has_unit_price_items ? "yellow" : "";
+		});
 	},
 
 	refresh: function (frm, cdt, cdn) {
@@ -154,7 +149,33 @@ frappe.ui.form.on("Request for Quotation", {
 			);
 
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
+
+			frm.add_custom_button(
+				__("Supplier Quotation Comparison"),
+				function () {
+					frm.trigger("show_supplier_quotation_comparison");
+				},
+				__("View")
+			);
 		}
+
+		if (frm.doc.docstatus === 0) {
+			erpnext.set_unit_price_items_note(frm);
+		}
+	},
+
+	show_supplier_quotation_comparison(frm) {
+		const today = new Date();
+		const oneMonthAgo = new Date(today);
+		oneMonthAgo.setMonth(today.getMonth() - 1);
+
+		frappe.route_options = {
+			company: frm.doc.company,
+			from_date: moment(oneMonthAgo).format("YYYY-MM-DD"),
+			to_date: moment(today).format("YYYY-MM-DD"),
+			request_for_quotation: frm.doc.name,
+		};
+		frappe.set_route("query-report", "Supplier Quotation Comparison");
 	},
 
 	make_supplier_quotation: function (frm) {
@@ -217,6 +238,25 @@ frappe.ui.form.on("Request for Quotation", {
 			});
 		}
 		refresh_field("items");
+	},
+
+	email_template(frm) {
+		if (frm.doc.email_template) {
+			frappe.db
+				.get_value("Email Template", frm.doc.email_template, [
+					"use_html",
+					"response",
+					"response_html",
+					"subject",
+				])
+				.then((r) => {
+					frm.set_value(
+						"message_for_supplier",
+						r.message.use_html ? r.message.response_html : r.message.response
+					);
+					frm.set_value("subject", r.message.subject);
+				});
+		}
 	},
 	preview: (frm) => {
 		let dialog = new frappe.ui.Dialog({
@@ -521,7 +561,10 @@ erpnext.buying.RequestforQuotationController = class RequestforQuotationControll
 				} else if (args.supplier_group) {
 					frappe.db
 						.get_list("Supplier", {
-							filters: { supplier_group: args.supplier_group },
+							filters: {
+								supplier_group: args.supplier_group,
+								disabled: 0,
+							},
 							limit: 100,
 							order_by: "name",
 						})

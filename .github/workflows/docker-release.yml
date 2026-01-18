@@ -2,6 +2,10 @@ name: Trigger Docker build on release
 on:
   release:
     types: [released]
+
+permissions:
+  contents: read
+
 jobs:
   curl:
     runs-on: ubuntu-latest

@@ -6,7 +6,7 @@ from frappe import _
 from frappe.utils import cstr, flt
 from frappe.utils.file_manager import remove_file
 
-from erpnext.controllers.taxes_and_totals import ItemWiseTaxDetail, get_itemised_tax
+from erpnext.controllers.taxes_and_totals import get_itemised_tax
 from erpnext.regional.italy import state_codes
 from erpnext.stock.utils import get_default_stock_uom
 
@@ -18,7 +18,7 @@ def update_itemised_tax_data(doc):
 	if doc.doctype == "Purchase Invoice":
 		return
 
-	itemised_tax = get_itemised_tax(doc.taxes)
+	itemised_tax = get_itemised_tax(doc)
 
 	for row in doc.items:
 		tax_rate = 0.0
@@ -79,7 +79,7 @@ def prepare_invoice(invoice, progressive_number):
 		invoice.transmission_format_code = "FPR12"
 
 	invoice.e_invoice_items = [item for item in invoice.items]
-	tax_data = get_invoice_summary(invoice.e_invoice_items, invoice.taxes)
+	tax_data = get_invoice_summary(invoice.e_invoice_items, invoice.taxes, invoice.item_wise_tax_details)
 	invoice.tax_data = tax_data
 
 	# Check if stamp duty (Bollo) of 2 EUR exists.
@@ -140,8 +140,9 @@ def download_zip(files, output_filename):
 	zip_stream.close()
 
 
-def get_invoice_summary(items, taxes):
+def get_invoice_summary(items, taxes, item_wise_tax_details):
 	summary_data = frappe._dict()
+	taxes_wise_tax_details = {d.tax_row: d for d in item_wise_tax_details}
 	for tax in taxes:
 		# Include only VAT charges.
 		if tax.charge_type == "Actual":
@@ -151,89 +152,61 @@ def get_invoice_summary(items, taxes):
 		if tax.charge_type in ["On Previous Row Total", "On Previous Row Amount"]:
 			reference_row = next((row for row in taxes if row.idx == int(tax.row_id or 0)), None)
 			if reference_row:
-				items.append(
-					frappe._dict(
-						idx=len(items) + 1,
-						item_code=reference_row.description,
-						item_name=reference_row.description,
-						description=reference_row.description,
-						rate=reference_row.tax_amount,
-						qty=1.0,
-						amount=reference_row.tax_amount,
-						stock_uom=get_default_stock_uom(),
-						tax_rate=tax.rate,
-						tax_amount=(reference_row.tax_amount * tax.rate) / 100,
-						net_amount=reference_row.tax_amount,
-						taxable_amount=reference_row.tax_amount,
-						item_tax_rate={tax.account_head: tax.rate},
-						charges=True,
-					)
-				)
+				append_row_as_charges(items, tax, reference_row, summary_data)
 
-		# Check item tax rates if tax rate is zero.
-		if tax.rate == 0:
-			for item in items:
-				item_tax_rate = item.item_tax_rate
-				if isinstance(item.item_tax_rate, str):
-					item_tax_rate = json.loads(item.item_tax_rate)
+		for row in taxes_wise_tax_details.get(tax.name) or []:
+			update_summary_details(summary_data, tax, row.rate, row.amount, row.taxable_amount)
 
-				if item_tax_rate and tax.account_head in item_tax_rate:
-					key = cstr(item_tax_rate[tax.account_head])
-					if key not in summary_data:
-						summary_data.setdefault(
-							key,
-							{
-								"tax_amount": 0.0,
-								"taxable_amount": 0.0,
-								"tax_exemption_reason": "",
-								"tax_exemption_law": "",
-							},
-						)
-
-					summary_data[key]["tax_amount"] += item.tax_amount
-					summary_data[key]["taxable_amount"] += item.net_amount
-					if key == "0.0":
-						summary_data[key]["tax_exemption_reason"] = tax.tax_exemption_reason
-						summary_data[key]["tax_exemption_law"] = tax.tax_exemption_law
-
-			if summary_data.get("0.0") and tax.charge_type in [
-				"On Previous Row Total",
-				"On Previous Row Amount",
-			]:
-				summary_data[key]["taxable_amount"] = tax.total
-
-			if summary_data == {}:  # Implies that Zero VAT has not been set on any item.
-				summary_data.setdefault(
-					"0.0",
-					{
-						"tax_amount": 0.0,
-						"taxable_amount": tax.total,
-						"tax_exemption_reason": tax.tax_exemption_reason,
-						"tax_exemption_law": tax.tax_exemption_law,
-					},
-				)
-
-		else:
-			item_wise_tax_detail = json.loads(tax.item_wise_tax_detail)
-			# TODO: with net_amount stored inside item_wise_tax_detail, this entire block seems obsolete and redundant
-			for _item_code, tax_data in item_wise_tax_detail.items():
-				tax_data = ItemWiseTaxDetail(**tax_data)
-				if tax_data.tax_rate != tax.rate:
-					continue
-				key = cstr(tax.rate)
-				if not summary_data.get(key):
-					summary_data.setdefault(key, {"tax_amount": 0.0, "taxable_amount": 0.0})
-				summary_data[key]["tax_amount"] += tax_data.tax_amount
-				summary_data[key]["taxable_amount"] += tax_data.net_amount
-
-			for item in items:
-				key = cstr(tax.rate)
-				if item.get("charges"):
-					if not summary_data.get(key):
-						summary_data.setdefault(key, {"taxable_amount": 0.0})
-					summary_data[key]["taxable_amount"] += item.taxable_amount
+		if summary_data == {}:
+			# Implies that Zero VAT has not been set on any item.
+			update_summary_details(summary_data, tax, 0.0, 0.0, tax.total)
 
 	return summary_data
+
+
+def update_summary_details(summary_data, tax, rate, amount, taxable_amount):
+	key = cstr(rate)
+	summary_data.setdefault(
+		key,
+		{
+			"tax_amount": 0.0,
+			"taxable_amount": 0.0,
+			"tax_exemption_reason": "",
+			"tax_exemption_law": "",
+		},
+	)
+
+	summary_data[key]["tax_amount"] += amount
+	summary_data[key]["taxable_amount"] += taxable_amount
+
+	if key == "0.0":
+		summary_data[key]["tax_exemption_reason"] = tax.tax_exemption_reason
+		summary_data[key]["tax_exemption_law"] = tax.tax_exemption_law
+
+
+def append_row_as_charges(items, tax, reference_row, summary_data):
+	rate = tax.rate
+	amount = (reference_row.tax_amount * tax.rate) / 100
+	taxable_amount = reference_row.tax_amount
+	items.append(
+		frappe._dict(
+			idx=len(items) + 1,
+			item_code=reference_row.description,
+			item_name=reference_row.description,
+			description=reference_row.description,
+			rate=reference_row.tax_amount,
+			qty=1.0,
+			amount=reference_row.tax_amount,
+			stock_uom=get_default_stock_uom(),
+			tax_rate=rate,
+			tax_amount=amount,
+			net_amount=taxable_amount,
+			taxable_amount=taxable_amount,
+			item_tax_rate={tax.account_head: tax.rate},
+			charges=True,
+		)
+	)
+	update_summary_details(summary_data, tax, rate, amount, taxable_amount)
 
 
 # Preflight for successful e-invoice export.

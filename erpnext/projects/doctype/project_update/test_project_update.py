@@ -8,6 +8,3 @@ from frappe.tests import IntegrationTestCase
 
 class TestProjectUpdate(IntegrationTestCase):
 	pass
-
-
-IGNORE_TEST_RECORD_DEPENDENCIES = ["Sales Order"]

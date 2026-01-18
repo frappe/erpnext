@@ -10,9 +10,40 @@ from erpnext.crm.doctype.lead.lead import make_customer
 from erpnext.crm.doctype.lead.test_lead import make_lead
 from erpnext.crm.doctype.opportunity.opportunity import make_quotation
 from erpnext.crm.utils import get_linked_communication_list
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestOpportunity(IntegrationTestCase):
+class TestOpportunity(ERPNextTestSuite):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		# Only first lead is required
+		# TODO: dynamically generate limited test records
+		cls.make_leads()
+		cls.make_opportunities()
+
+	@classmethod
+	def make_opportunities(cls):
+		records = [
+			{
+				"doctype": "Opportunity",
+				"name": "_Test Opportunity 1",
+				"opportunity_from": "Lead",
+				"enquiry_type": "Sales",
+				"party_name": cls.leads[0].name,
+				"transaction_date": "2013-12-12",
+				"items": [
+					{"item_name": "Test Item", "description": "Some description", "qty": 5, "rate": 100}
+				],
+			}
+		]
+		cls.opportunities = []
+		for x in records:
+			if not frappe.db.exists("Opportunity", {"name": x.get("name")}):
+				cls.opportunities.append(frappe.get_doc(x).insert())
+			else:
+				cls.opportunities.append(frappe.get_doc("Opportunity", {"party_name": x.get("party_name")}))
+
 	def test_opportunity_status(self):
 		doc = make_opportunity(with_items=0)
 		quotation = make_quotation(doc.name)

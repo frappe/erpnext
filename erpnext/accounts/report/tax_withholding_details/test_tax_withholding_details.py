@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.tests import IntegrationTestCase
-from frappe.utils import today
+from frappe.utils import add_to_date, today
 
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -57,6 +57,58 @@ class TestTaxWithholdingDetails(AccountsTestMixin, IntegrationTestCase):
 		expected_values = [
 			[inv_1.name, "TDS - 1", 10, 5000, 500, 5500],
 			[inv_2.name, "TDS - 2", 20, 5000, 1000, 6000],
+		]
+		self.check_expected_values(result, expected_values)
+
+	def test_date_filters_in_multiple_tax_withholding_rules(self):
+		create_tax_category("TDS - 3", rate=10, account="TDS - _TC", cumulative_threshold=1)
+		# insert new rate in same fiscal year
+		fiscal_year = get_fiscal_year(today(), company="_Test Company")
+		mid_year = add_to_date(fiscal_year[1], months=6)
+		tds_doc = frappe.get_doc("Tax Withholding Category", "TDS - 3")
+		tds_doc.rates[0].to_date = mid_year
+		from_date = add_to_date(mid_year, days=1)
+		tds_doc.append(
+			"rates",
+			{
+				"tax_withholding_rate": 20,
+				"from_date": from_date,
+				"to_date": fiscal_year[2],
+				"single_threshold": 1,
+				"cumulative_threshold": 1,
+			},
+		)
+
+		tds_doc.save()
+
+		inv_1 = make_purchase_invoice(
+			rate=1000, posting_date=add_to_date(fiscal_year[1], days=1), do_not_save=True, do_not_submit=True
+		)
+		inv_1.set_posting_time = 1
+		inv_1.apply_tds = 1
+		inv_1.tax_withholding_category = tds_doc.name
+		inv_1.save()
+		inv_1.submit()
+
+		inv_2 = make_purchase_invoice(rate=1000, posting_date=from_date, do_not_save=True, do_not_submit=True)
+		inv_2.set_posting_time = 1
+		inv_2.apply_tds = 1
+		inv_2.tax_withholding_category = tds_doc.name
+		inv_2.save()
+		inv_2.submit()
+
+		result = execute(
+			frappe._dict(
+				company="_Test Company",
+				party_type="Supplier",
+				from_date=fiscal_year[1],
+				to_date=fiscal_year[2],
+			)
+		)[1]
+
+		expected_values = [
+			[inv_1.name, "TDS - 3", 10.0, 5000, 500, 4500],
+			[inv_2.name, "TDS - 3", 20.0, 5000, 1000, 4000],
 		]
 		self.check_expected_values(result, expected_values)
 

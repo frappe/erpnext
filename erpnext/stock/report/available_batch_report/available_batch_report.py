@@ -6,7 +6,7 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, today
+from frappe.utils import flt, get_datetime, today
 
 
 def execute(filters=None):
@@ -167,7 +167,8 @@ def get_query_based_on_filters(query, batch, table, filters):
 		query = query.where(batch.batch_qty > 0)
 
 	else:
-		query = query.where(table.posting_date <= filters.to_date)
+		to_date = get_datetime(str(filters.to_date) + " 23:59:59")
+		query = query.where(table.posting_datetime <= to_date)
 
 	if filters.warehouse:
 		lft, rgt = frappe.db.get_value("Warehouse", filters.warehouse, ["lft", "rgt"])

@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_to_date, flt, get_datetime, time_diff_in_hours
+from frappe.utils import add_to_date, flt, get_datetime, time_diff_in_hours, time_diff_in_seconds
 
 
 class TimesheetDetail(Document):
@@ -48,7 +48,9 @@ class TimesheetDetail(Document):
 		if not (self.from_time and self.hours):
 			return
 
-		self.to_time = get_datetime(add_to_date(self.from_time, hours=self.hours, as_datetime=True))
+		_to_time = get_datetime(add_to_date(self.from_time, hours=self.hours, as_datetime=True))
+		if abs(time_diff_in_seconds(_to_time, self.to_time)) >= 1:
+			self.to_time = _to_time
 
 	def set_project(self):
 		"""Set project based on task."""
@@ -88,7 +90,17 @@ class TimesheetDetail(Document):
 		)
 
 		self.billing_amount = self.billing_rate * (self.billing_hours or 0)
-		self.costing_amount = self.costing_rate * (self.billing_hours or self.hours or 0)
+		self.costing_amount = self.costing_rate * (self.hours or 0)
+
+		exchange_rate = flt(frappe.get_value("Timesheet", self.parent, "exchange_rate")) or 1.0
+		self.base_billing_rate = flt(self.billing_rate * exchange_rate, self.precision("base_billing_rate"))
+		self.base_costing_rate = flt(self.costing_rate * exchange_rate, self.precision("base_costing_rate"))
+		self.base_billing_amount = flt(
+			self.billing_amount * exchange_rate, self.precision("base_billing_amount")
+		)
+		self.base_costing_amount = flt(
+			self.costing_amount * exchange_rate, self.precision("base_costing_amount")
+		)
 
 	def validate_dates(self):
 		"""Validate that to_time is not before from_time."""

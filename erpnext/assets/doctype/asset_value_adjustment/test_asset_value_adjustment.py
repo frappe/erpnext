@@ -114,12 +114,12 @@ class TestAssetValueAdjustment(IntegrationTestCase):
 			["2023-05-31", 9983.33, 45408.05],
 			["2023-06-30", 9983.33, 55391.38],
 			["2023-07-31", 9983.33, 65374.71],
-			["2023-08-31", 8300.0, 73674.71],
-			["2023-09-30", 8300.0, 81974.71],
-			["2023-10-31", 8300.0, 90274.71],
-			["2023-11-30", 8300.0, 98574.71],
-			["2023-12-31", 8300.0, 106874.71],
-			["2024-01-15", 8300.0, 115174.71],
+			["2023-08-31", 9070.36, 74445.07],
+			["2023-09-30", 9070.36, 83515.43],
+			["2023-10-31", 9070.36, 92585.79],
+			["2023-11-30", 9070.36, 101656.15],
+			["2023-12-31", 9070.36, 110726.51],
+			["2024-01-15", 4448.2, 115174.71],
 		]
 
 		schedules = [
@@ -154,7 +154,11 @@ class TestAssetValueAdjustment(IntegrationTestCase):
 
 		# create asset repair
 		asset_repair = create_asset_repair(
-			asset=asset_doc, capitalize_repair_cost=1, item="_Test Non Stock Item", submit=1
+			asset=asset_doc,
+			capitalize_repair_cost=1,
+			item="_Test Non Stock Item",
+			submit=1,
+			increase_in_asset_life=1,
 		)
 
 		first_asset_depr_schedule = get_asset_depr_schedule_doc(asset_doc.name, "Active")
@@ -201,24 +205,24 @@ class TestAssetValueAdjustment(IntegrationTestCase):
 			["2023-05-31", 9983.33, 45408.05],
 			["2023-06-30", 9983.33, 55391.38],
 			["2023-07-31", 9983.33, 65374.71],
-			["2023-08-31", 2766.67, 68141.38],
-			["2023-09-30", 2766.67, 70908.05],
-			["2023-10-31", 2766.67, 73674.72],
-			["2023-11-30", 2766.67, 76441.39],
-			["2023-12-31", 2766.67, 79208.06],
-			["2024-01-31", 2766.67, 81974.73],
-			["2024-02-29", 2766.67, 84741.4],
-			["2024-03-31", 2766.67, 87508.07],
-			["2024-04-30", 2766.67, 90274.74],
-			["2024-05-31", 2766.67, 93041.41],
-			["2024-06-30", 2766.67, 95808.08],
-			["2024-07-31", 2766.67, 98574.75],
-			["2024-08-31", 2766.67, 101341.42],
-			["2024-09-30", 2766.67, 104108.09],
-			["2024-10-31", 2766.67, 106874.76],
-			["2024-11-30", 2766.67, 109641.43],
-			["2024-12-31", 2766.67, 112408.1],
-			["2025-01-15", 2766.61, 115174.71],
+			["2023-08-31", 2847.27, 68221.98],
+			["2023-09-30", 2847.27, 71069.25],
+			["2023-10-31", 2847.27, 73916.52],
+			["2023-11-30", 2847.27, 76763.79],
+			["2023-12-31", 2847.27, 79611.06],
+			["2024-01-31", 2847.27, 82458.33],
+			["2024-02-29", 2847.27, 85305.6],
+			["2024-03-31", 2847.27, 88152.87],
+			["2024-04-30", 2847.27, 91000.14],
+			["2024-05-31", 2847.27, 93847.41],
+			["2024-06-30", 2847.27, 96694.68],
+			["2024-07-31", 2847.27, 99541.95],
+			["2024-08-31", 2847.27, 102389.22],
+			["2024-09-30", 2847.27, 105236.49],
+			["2024-10-31", 2847.27, 108083.76],
+			["2024-11-30", 2847.27, 110931.03],
+			["2024-12-31", 2847.27, 113778.3],
+			["2025-01-31", 1396.41, 115174.71],
 		]
 
 		schedules = [
@@ -246,12 +250,12 @@ class TestAssetValueAdjustment(IntegrationTestCase):
 			["2023-05-31", 9983.33, 45408.05],
 			["2023-06-30", 9983.33, 55391.38],
 			["2023-07-31", 9983.33, 65374.71],
-			["2023-08-31", 8208.33, 73583.04],
-			["2023-09-30", 8208.33, 81791.37],
-			["2023-10-31", 8208.33, 89999.7],
-			["2023-11-30", 8208.33, 98208.03],
-			["2023-12-31", 8208.33, 106416.36],
-			["2024-01-15", 8208.35, 114624.71],
+			["2023-08-31", 8970.18, 74344.89],
+			["2023-09-30", 8970.18, 83315.07],
+			["2023-10-31", 8970.18, 92285.25],
+			["2023-11-30", 8970.18, 101255.43],
+			["2023-12-31", 8970.18, 110225.61],
+			["2024-01-15", 4399.1, 114624.71],
 		]
 
 		schedules = [
@@ -262,7 +266,7 @@ class TestAssetValueAdjustment(IntegrationTestCase):
 		self.assertEqual(schedules, expected_schedules)
 
 	def test_difference_amount(self):
-		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location")
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
 
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name")
 		asset_doc = frappe.get_doc("Asset", asset_name)
@@ -282,17 +286,55 @@ class TestAssetValueAdjustment(IntegrationTestCase):
 		)
 		asset_doc.submit()
 
+		current_asset_value = get_asset_value_after_depreciation(asset_doc.name)
 		adj_doc = make_asset_value_adjustment(
 			asset=asset_doc.name,
-			current_asset_value=54000,
-			new_asset_value=50000.0,
+			current_asset_value=current_asset_value,
+			new_asset_value=40000,
 			date="2023-08-21",
 		)
 		adj_doc.submit()
 		difference_amount = adj_doc.new_asset_value - adj_doc.current_asset_value
-		self.assertEqual(difference_amount, -4000)
+		self.assertEqual(difference_amount, -60000)
 		asset_doc.load_from_db()
-		self.assertEqual(asset_doc.value_after_depreciation, 50000.0)
+		self.assertEqual(asset_doc.finance_books[0].value_after_depreciation, 40000.0)
+
+	def test_expected_value_after_useful_life(self):
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
+
+		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name")
+		asset_doc = frappe.get_doc("Asset", asset_name)
+		asset_doc.calculate_depreciation = 1
+		asset_doc.available_for_use_date = "2023-01-15"
+		asset_doc.purchase_date = "2023-01-15"
+
+		asset_doc.append(
+			"finance_books",
+			{
+				"expected_value_after_useful_life": 5000,
+				"salvage_value_percentage": 5,
+				"depreciation_method": "Straight Line",
+				"total_number_of_depreciations": 12,
+				"frequency_of_depreciation": 1,
+				"depreciation_start_date": "2023-01-31",
+			},
+		)
+		asset_doc.submit()
+		self.assertEqual(asset_doc.finance_books[0].expected_value_after_useful_life, 5000.0)
+
+		current_asset_value = get_asset_value_after_depreciation(asset_doc.name)
+		adj_doc = make_asset_value_adjustment(
+			asset=asset_doc.name,
+			current_asset_value=current_asset_value,
+			new_asset_value=40000,
+			date="2023-08-21",
+		)
+		adj_doc.submit()
+		difference_amount = adj_doc.new_asset_value - adj_doc.current_asset_value
+		self.assertEqual(difference_amount, -60000)
+		asset_doc.load_from_db()
+		self.assertEqual(asset_doc.finance_books[0].value_after_depreciation, 40000.0)
+		self.assertEqual(asset_doc.finance_books[0].expected_value_after_useful_life, 2000.0)
 
 
 def make_asset_value_adjustment(**args):

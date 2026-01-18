@@ -49,9 +49,11 @@
    "label": "Delay between Delivery Stops"
   }
  ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-27 13:06:50.346239",
+ "modified": "2026-01-02 18:18:39.931428",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Settings",
@@ -69,6 +71,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

@@ -1,0 +1,263 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-08-08 19:54:43.478386",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "mps_tab",
+  "naming_series",
+  "company",
+  "column_break_xdcy",
+  "posting_date",
+  "from_date",
+  "to_date",
+  "section_break_rrrx",
+  "column_break_klws",
+  "select_items",
+  "column_break_mtqw",
+  "parent_warehouse",
+  "sales_orders_and_material_requests_tab",
+  "open_orders_section",
+  "get_sales_orders",
+  "sales_orders",
+  "get_material_requests",
+  "material_requests",
+  "section_break_xtby",
+  "column_break_yhkr",
+  "get_actual_demand",
+  "column_break_vvys",
+  "section_break_cmgo",
+  "items",
+  "forecast_demand_section",
+  "sales_forecast",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_xdcy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_rrrx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_klws",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_mtqw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Master Production Schedule Item"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_cmgo",
+   "fieldtype": "Section Break",
+   "label": "Actual Demand"
+  },
+  {
+   "default": "MPS.YY.-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "MPS.YY.-.######",
+   "reqd": 1
+  },
+  {
+   "description": "For projected and forecast quantities, the system will consider all child warehouses under the selected parent warehouse.",
+   "fieldname": "parent_warehouse",
+   "fieldtype": "Link",
+   "label": "Parent Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "sales_orders_and_material_requests_tab",
+   "fieldtype": "Tab Break",
+   "label": "Demand"
+  },
+  {
+   "fieldname": "sales_orders",
+   "fieldtype": "Table",
+   "label": "Sales Orders",
+   "options": "Production Plan Sales Order"
+  },
+  {
+   "fieldname": "mps_tab",
+   "fieldtype": "Tab Break",
+   "label": "Planning"
+  },
+  {
+   "fieldname": "material_requests",
+   "fieldtype": "Table",
+   "label": "Material Requests",
+   "options": "Production Plan Material Request"
+  },
+  {
+   "fieldname": "open_orders_section",
+   "fieldtype": "Section Break",
+   "label": "Open Orders"
+  },
+  {
+   "fieldname": "section_break_xtby",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_vvys",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Master Production Schedule",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "sales_forecast",
+   "fieldtype": "Link",
+   "label": "Sales Forecast",
+   "options": "Sales Forecast"
+  },
+  {
+   "fieldname": "get_sales_orders",
+   "fieldtype": "Button",
+   "label": "Get Sales Orders"
+  },
+  {
+   "fieldname": "get_material_requests",
+   "fieldtype": "Button",
+   "label": "Get Material Requests"
+  },
+  {
+   "fieldname": "select_items",
+   "fieldtype": "Table MultiSelect",
+   "label": "Select Items",
+   "options": "Master Production Schedule Item"
+  },
+  {
+   "fieldname": "column_break_yhkr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "get_actual_demand",
+   "fieldtype": "Button",
+   "label": "Get Actual Demand"
+  },
+  {
+   "fieldname": "forecast_demand_section",
+   "fieldtype": "Section Break",
+   "label": "Forecast Demand"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-13 19:15:36.090622",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Master Production Schedule",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

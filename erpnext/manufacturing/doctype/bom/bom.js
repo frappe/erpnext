@@ -19,6 +19,20 @@ frappe.ui.form.on("BOM", {
 			};
 		});
 
+		frm.set_query("operation", "items", function () {
+			if (!frm.doc.operations?.length) {
+				frappe.throw(__("Please add Operations first."));
+			}
+
+			let operations = frm.doc.operations.map((d) => d.operation);
+
+			return {
+				filters: {
+					name: ["in", operations],
+				},
+			};
+		});
+
 		frm.set_query("bom_no", "operations", function (doc, cdt, cdn) {
 			let row = locals[cdt][cdn];
 			return {
@@ -41,13 +55,14 @@ frappe.ui.form.on("BOM", {
 			};
 		});
 
+		frm.phantom_bom_filters = {
+			query: "erpnext.manufacturing.doctype.bom.bom.item_query",
+			filters: {
+				is_stock_item: !frm.doc.is_phantom_bom,
+			},
+		};
 		frm.set_query("item", function () {
-			return {
-				query: "erpnext.manufacturing.doctype.bom.bom.item_query",
-				filters: {
-					is_stock_item: 1,
-				},
-			};
+			return frm.phantom_bom_filters;
 		});
 
 		frm.set_query("project", function () {
@@ -76,6 +91,8 @@ frappe.ui.form.on("BOM", {
 				},
 			};
 		});
+
+		frm.trigger("toggle_fields_for_semi_finished_goods");
 	},
 
 	validate: function (frm) {
@@ -87,8 +104,27 @@ frappe.ui.form.on("BOM", {
 		}
 	},
 
+	track_semi_finished_goods(frm) {
+		frm.trigger("toggle_fields_for_semi_finished_goods");
+	},
+
+	toggle_fields_for_semi_finished_goods(frm) {
+		let fields = ["finished_good", "finished_good_qty", "bom_no"];
+
+		fields.forEach((field) => {
+			frm.fields_dict["operations"].grid.update_docfield_property(
+				field,
+				"read_only",
+				!frm.doc.track_semi_finished_goods
+			);
+		});
+
+		refresh_field("operations");
+	},
+
 	with_operations: function (frm) {
 		frm.set_df_property("fg_based_operating_cost", "hidden", frm.doc.with_operations ? 1 : 0);
+		frm.trigger("toggle_fields_for_semi_finished_goods");
 	},
 
 	fg_based_operating_cost: function (frm) {
@@ -162,7 +198,7 @@ frappe.ui.form.on("BOM", {
 			);
 		}
 
-		if (frm.doc.docstatus == 1) {
+		if (frm.doc.docstatus == 1 && !frm.doc.is_phantom_bom) {
 			frm.add_custom_button(
 				__("Work Order"),
 				function () {
@@ -226,6 +262,13 @@ frappe.ui.form.on("BOM", {
 			frm.$wrapper.find(".variants-intro").on("click", () => {
 				frappe.set_route("List", "Item", { variant_of: frm.doc.item });
 			});
+		}
+
+		frm.phantom_bom_filters.filters.is_stock_item = !frm.doc.is_phantom_bom;
+		if (frm.doc.is_phantom_bom) {
+			frm.phantom_bom_filters.filters.is_fixed_asset = 0;
+		} else {
+			delete frm.phantom_bom_filters.filters.is_fixed_asset;
 		}
 	},
 
@@ -439,10 +482,12 @@ frappe.ui.form.on("BOM", {
 		);
 
 		has_template_rm.forEach((d) => {
+			let bom_qty = dialog.fields_dict.qty?.value || 1;
+
 			dialog.fields_dict.items.df.data.push({
 				item_code: d.item_code,
 				variant_item_code: "",
-				qty: (d.qty / frm.doc.quantity) * (dialog.fields_dict.qty.value || 1),
+				qty: flt(d.qty / frm.doc.quantity) * flt(bom_qty),
 				source_warehouse: d.source_warehouse,
 				operation: d.operation,
 			});
@@ -508,9 +553,24 @@ frappe.ui.form.on("BOM", {
 
 		frm.set_value("process_loss_qty", qty);
 	},
+
+	is_phantom_bom(frm) {
+		frm.doc.item = "";
+		frm.doc.uom = "";
+		frm.doc.quantity = 1;
+		frm.doc.items = undefined;
+		frm.refresh();
+	},
 });
 
 frappe.ui.form.on("BOM Operation", {
+	finished_good(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (row.finished_good === frm.doc.item) {
+			frappe.model.set_value(row.doctype, row.name, "is_final_finished_good", 1);
+		}
+	},
+
 	bom_no(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 
@@ -550,6 +610,10 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 
 		if (child.bom_no) {
 			child.bom_no = "";
+		}
+
+		if (doc.item == child.item_code) {
+			child.do_not_explode = 1;
 		}
 
 		get_bom_material_detail(doc, cdt, cdn, scrap_items);
@@ -801,6 +865,31 @@ frappe.ui.form.on("BOM Operation", "workstation", function (frm, cdt, cdn) {
 	});
 });
 
+frappe.ui.form.on("BOM Operation", "workstation_type", function (frm, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	if (!d.workstation_type) return;
+	frappe.call({
+		method: "frappe.client.get",
+		args: {
+			doctype: "Workstation Type",
+			name: d.workstation_type,
+		},
+		callback: function (data) {
+			frappe.model.set_value(d.doctype, d.name, "base_hour_rate", data.message.hour_rate);
+			frappe.model.set_value(
+				d.doctype,
+				d.name,
+				"hour_rate",
+				flt(flt(data.message.hour_rate) / flt(frm.doc.conversion_rate)),
+				2
+			);
+
+			erpnext.bom.calculate_op_cost(frm.doc);
+			erpnext.bom.calculate_total(frm.doc);
+		},
+	});
+});
+
 frappe.ui.form.on("BOM Item", {
 	do_not_explode: function (frm, cdt, cdn) {
 		get_bom_material_detail(frm.doc, cdt, cdn, false);
@@ -925,6 +1014,19 @@ frappe.ui.form.on("BOM", {
 			},
 		});
 
+		let items = frm.doc.items.filter((item) => cint(item.operation_row_id) === cint(row.idx));
+		if (items?.length) {
+			items.forEach((item) => {
+				frm._bom_rm_dialog.fields_dict.items.df.data.push({
+					item_code: item.item_code,
+					qty: item.qty,
+					name: item.name,
+				});
+			});
+
+			frm._bom_rm_dialog.fields_dict.items.grid.refresh();
+		}
+
 		frm._bom_rm_dialog.show();
 	},
 
@@ -934,6 +1036,7 @@ frappe.ui.form.on("BOM", {
 				label: __("Raw Materials"),
 				fieldname: "items",
 				fieldtype: "Table",
+				data: [],
 				reqd: 1,
 				fields: [
 					{

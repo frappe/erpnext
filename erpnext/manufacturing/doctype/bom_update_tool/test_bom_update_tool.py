@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase, timeout
+from frappe.tests import IntegrationTestCase, timeout
 
 from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
 	update_cost_in_all_boms_in_test,
@@ -10,16 +10,6 @@ from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import enqueue_replace_bom
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.stock.doctype.item.test_item import create_item
-
-
-class UnitTestBomUpdateTool(UnitTestCase):
-	"""
-	Unit tests for BomUpdateTool.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["BOM"]
 

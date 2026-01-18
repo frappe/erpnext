@@ -1,0 +1,22 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-12 15:05:54.474218",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "book-text",
+ "icon_type": "Link",
+ "idx": 3,
+ "label": "Taxes",
+ "link_to": "Taxes",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-01-01 20:07:01.356333",
+ "modified_by": "Administrator",
+ "name": "Taxes",
+ "owner": "Administrator",
+ "parent_icon": "Accounts",
+ "restrict_removal": 0,
+ "roles": [],
+ "sidebar": "",
+ "standard": 1
+}

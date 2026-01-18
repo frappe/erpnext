@@ -2,21 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import StockAccountInvalidTransaction
 from erpnext.exceptions import InvalidAccountCurrency
-
-
-class UnitTestJournalEntry(UnitTestCase):
-	"""
-	Unit tests for JournalEntry.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
+from erpnext.selling.doctype.customer.test_customer import make_customer, set_credit_limit
 
 
 class TestJournalEntry(IntegrationTestCase):
@@ -587,6 +579,27 @@ class TestJournalEntry(IntegrationTestCase):
 			{"account": "_Test Receivable USD - _TC", "transaction_exchange_rate": 85.0},
 		]
 		self.assertEqual(expected, actual)
+
+	def test_pay_to_recd_from(self):
+		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, save=False)
+		jv.pay_to_recd_from = "_Test Receiver"
+		jv.save()
+		self.assertEqual(jv.pay_to_recd_from, "_Test Receiver")
+
+		jv.pay_to_recd_from = "_Test Receiver 2"
+		jv.save()
+		jv.submit()
+
+		self.assertEqual(jv.pay_to_recd_from, "_Test Receiver 2")
+
+	def test_credit_limit_for_customer(self):
+		customer = make_customer("_Test New Customer")
+		set_credit_limit("_Test New Customer", "_Test Company", 50)
+		jv = make_journal_entry(account1="Debtors - _TC", account2="_Test Cash - _TC", amount=100, save=False)
+		jv.accounts[0].party_type = "Customer"
+		jv.accounts[0].party = customer
+		jv.save()
+		self.assertRaises(frappe.ValidationError, jv.submit)
 
 
 def make_journal_entry(

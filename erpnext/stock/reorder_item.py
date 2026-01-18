@@ -60,6 +60,7 @@ def _reorder_item():
 		else:
 			projected_qty = flt(item_warehouse_projected_qty.get(kwargs.item_code, {}).get(kwargs.warehouse))
 
+		original_reorder_qty = reorder_qty
 		if (reorder_level or reorder_qty) and projected_qty <= reorder_level:
 			deficiency = reorder_level - projected_qty
 			if deficiency > reorder_qty:
@@ -73,6 +74,9 @@ def _reorder_item():
 					"warehouse": kwargs.warehouse,
 					"reorder_qty": reorder_qty,
 					"item_details": kwargs.item_details,
+					"projected_on_hand": projected_qty,
+					"reorder_level": reorder_level,
+					"original_reorder_qty": original_reorder_qty,
 				}
 			)
 
@@ -240,6 +244,7 @@ def create_material_request(material_requests):
 				mr.update(
 					{
 						"company": company,
+						"auto_created_via_reorder": 1,
 						"transaction_date": nowdate(),
 						"material_request_type": "Material Transfer"
 						if request_type == "Transfer"
@@ -285,6 +290,9 @@ def create_material_request(material_requests):
 							"description": item.description,
 							"item_group": item.item_group,
 							"brand": item.brand,
+							"reorder_qty": d.original_reorder_qty,
+							"projected_on_hand": d.projected_on_hand,
+							"reorder_level": d.reorder_level,
 						},
 					)
 

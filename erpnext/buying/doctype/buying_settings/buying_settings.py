@@ -18,6 +18,9 @@ class BuyingSettings(Document):
 		from frappe.types import DF
 
 		allow_multiple_items: DF.Check
+		allow_zero_qty_in_purchase_order: DF.Check
+		allow_zero_qty_in_request_for_quotation: DF.Check
+		allow_zero_qty_in_supplier_quotation: DF.Check
 		auto_create_purchase_receipt: DF.Check
 		auto_create_subcontracting_order: DF.Check
 		backflush_raw_materials_of_subcontract_based_on: DF.Literal[
@@ -27,6 +30,7 @@ class BuyingSettings(Document):
 		blanket_order_allowance: DF.Float
 		buying_price_list: DF.Link | None
 		disable_last_purchase_rate: DF.Check
+		fixed_email: DF.Link | None
 		maintain_same_rate: DF.Check
 		maintain_same_rate_action: DF.Literal["Stop", "Warn"]
 		over_transfer_allowance: DF.Float
@@ -35,10 +39,12 @@ class BuyingSettings(Document):
 		project_update_frequency: DF.Literal["Each Transaction", "Manual"]
 		role_to_override_stop_action: DF.Link | None
 		set_landed_cost_based_on_purchase_invoice_rate: DF.Check
+		set_valuation_rate_for_rejected_materials: DF.Check
 		show_pay_button: DF.Check
 		supp_master_name: DF.Literal["Supplier Name", "Naming Series", "Auto Name"]
 		supplier_group: DF.Link | None
 		use_transaction_date_exchange_rate: DF.Check
+		validate_consumed_qty: DF.Check
 	# end: auto-generated types
 
 	def validate(self):
@@ -53,6 +59,9 @@ class BuyingSettings(Document):
 			self.get("supp_master_name") == "Naming Series",
 			hide_name_field=False,
 		)
+
+		if not self.bill_for_rejected_quantity_in_purchase_invoice:
+			self.set_valuation_rate_for_rejected_materials = 0
 
 	def before_save(self):
 		self.check_maintain_same_rate()

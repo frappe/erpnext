@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "code_list",
+  "canonical_uri",
   "title",
   "common_code",
   "description",
@@ -71,10 +72,17 @@
    "in_list_view": 1,
    "label": "Description",
    "max_height": "60px"
+  },
+  {
+   "fetch_from": "code_list.canonical_uri",
+   "fieldname": "canonical_uri",
+   "fieldtype": "Data",
+   "label": "Canonical URI"
   }
  ],
+ "grid_page_length": 50,
  "links": [],
- "modified": "2024-11-06 07:46:17.175687",
+ "modified": "2025-10-04 17:22:28.176155",
  "modified_by": "Administrator",
  "module": "EDI",
  "name": "Common Code",
@@ -94,6 +102,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "common_code,description",
  "show_title_field_in_link": 1,
  "sort_field": "creation",

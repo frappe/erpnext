@@ -9,6 +9,7 @@ frappe.query_reports["Customer Ledger Summary"] = {
 			fieldtype: "Link",
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
+			reqd: 1,
 		},
 		{
 			fieldname: "from_date",
@@ -113,6 +114,11 @@ frappe.query_reports["Customer Ledger Summary"] = {
 					company: frappe.query_report.get_filter_value("company"),
 				});
 			},
+		},
+		{
+			fieldname: "ignore_cr_dr_notes",
+			label: __("Ignore System Generated Credit / Debit Notes"),
+			fieldtype: "Check",
 		},
 	],
 };

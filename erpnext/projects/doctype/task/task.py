@@ -8,12 +8,17 @@ import frappe
 from frappe import _, throw
 from frappe.desk.form.assign_to import clear, close_all_assignments
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import add_days, add_to_date, cstr, date_diff, flt, get_link_to_form, getdate, today
 from frappe.utils.data import format_date
 from frappe.utils.nestedset import NestedSet
 
 
 class CircularReferenceError(frappe.ValidationError):
+	pass
+
+
+class ParentIsGroupError(frappe.ValidationError):
 	pass
 
 
@@ -84,6 +89,7 @@ class Task(NestedSet):
 		self.validate_dependencies_for_template_task()
 		self.validate_completed_on()
 		self.set_default_end_date_if_missing()
+		self.validate_parent_is_group()
 
 	def validate_dates(self):
 		self.validate_from_to_dates("exp_start_date", "exp_end_date")
@@ -92,7 +98,7 @@ class Task(NestedSet):
 		self.validate_parent_project_dates()
 
 	def set_default_end_date_if_missing(self):
-		if self.exp_start_date and self.expected_time:
+		if self.exp_start_date and self.expected_time and not self.exp_end_date:
 			self.exp_end_date = add_to_date(self.exp_start_date, hours=self.expected_time)
 
 	def validate_parent_expected_end_date(self):
@@ -112,7 +118,7 @@ class Task(NestedSet):
 			)
 
 	def validate_parent_project_dates(self):
-		if not self.project or frappe.flags.in_test:
+		if not self.project or frappe.in_test:
 			return
 
 		if project_end_date := frappe.db.get_value("Project", self.project, "expected_end_date"):
@@ -158,19 +164,35 @@ class Task(NestedSet):
 	def validate_parent_template_task(self):
 		if self.parent_task:
 			if not frappe.db.get_value("Task", self.parent_task, "is_template"):
-				parent_task_format = f"""<a href="/app/task/{self.parent_task}">{self.parent_task}</a>"""
-				frappe.throw(_("Parent Task {0} is not a Template Task").format(parent_task_format))
+				frappe.throw(
+					_("Parent Task {0} is not a Template Task").format(
+						get_link_to_form("Task", self.parent_task)
+					)
+				)
 
 	def validate_depends_on_tasks(self):
 		if self.depends_on:
 			for task in self.depends_on:
 				if not frappe.db.get_value("Task", task.task, "is_template"):
-					dependent_task_format = f"""<a href="/app/task/{task.task}">{task.task}</a>"""
-					frappe.throw(_("Dependent Task {0} is not a Template Task").format(dependent_task_format))
+					frappe.throw(
+						_("Dependent Task {0} is not a Template Task").format(
+							get_link_to_form("Task", task.task)
+						)
+					)
 
 	def validate_completed_on(self):
 		if self.completed_on and getdate(self.completed_on) > getdate():
 			frappe.throw(_("Completed On cannot be greater than Today"))
+
+	def validate_parent_is_group(self):
+		if self.parent_task:
+			if not frappe.db.get_value("Task", self.parent_task, "is_group"):
+				frappe.throw(
+					_("Parent Task {0} must be a Group Task").format(
+						get_link_to_form("Task", self.parent_task)
+					),
+					ParentIsGroupError,
+				)
 
 	def update_depends_on(self):
 		depends_on_tasks = ""
@@ -197,15 +219,22 @@ class Task(NestedSet):
 			clear(self.doctype, self.name)
 
 	def update_time_and_costing(self):
-		tl = frappe.db.sql(
-			"""select min(from_time) as start_date, max(to_time) as end_date,
-			sum(billing_amount) as total_billing_amount, sum(costing_amount) as total_costing_amount,
-			sum(hours) as time from `tabTimesheet Detail` where task = %s and docstatus=1""",
-			self.name,
-			as_dict=1,
-		)[0]
-		self.total_costing_amount = tl.total_costing_amount
-		self.total_billing_amount = tl.total_billing_amount
+		TimesheetDetail = frappe.qb.DocType("Timesheet Detail")
+		tl = (
+			frappe.qb.from_(TimesheetDetail)
+			.select(
+				Min(TimesheetDetail.from_time).as_("start_date"),
+				Max(TimesheetDetail.to_time).as_("end_date"),
+				Sum(TimesheetDetail.billing_amount).as_("total_billing_amount"),
+				Sum(TimesheetDetail.costing_amount).as_("total_costing_amount"),
+				Sum(TimesheetDetail.hours).as_("time"),
+				Sum(TimesheetDetail.base_costing_amount).as_("base_costing_amount"),
+				Sum(TimesheetDetail.base_billing_amount).as_("base_billing_amount"),
+			)
+			.where((TimesheetDetail.task == self.name) & (TimesheetDetail.docstatus == 1))
+		).run(as_dict=True)[0]
+		self.total_costing_amount = tl.base_costing_amount
+		self.total_billing_amount = tl.base_billing_amount
 		self.actual_time = tl.time
 		self.act_start_date = tl.start_date
 		self.act_end_date = tl.end_date
@@ -388,7 +417,9 @@ def get_children(doctype, parent, task=None, project=None, is_root=False):
 		# via expand child
 		filters.append(["parent_task", "=", parent])
 	else:
-		filters.append(['ifnull(`parent_task`, "")', "=", ""])
+		from frappe.query_builder import Field, functions
+
+		filters.append(functions.IfNull(Field("parent_task"), "") == "")
 
 	if project:
 		filters.append(["project", "=", project])

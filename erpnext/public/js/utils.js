@@ -213,17 +213,9 @@ $.extend(erpnext.utils, {
 	},
 
 	make_bank_account: function (doctype, docname) {
-		frappe.call({
-			method: "erpnext.accounts.doctype.bank_account.bank_account.make_bank_account",
-			args: {
-				doctype: doctype,
-				docname: docname,
-			},
-			freeze: true,
-			callback: function (r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			},
+		frappe.new_doc("Bank Account", {
+			party_type: doctype,
+			party: docname,
 		});
 	},
 
@@ -290,20 +282,6 @@ $.extend(erpnext.utils, {
 	make_subscription: function (doctype, docname) {
 		frappe.call({
 			method: "frappe.automation.doctype.auto_repeat.auto_repeat.make_auto_repeat",
-			args: {
-				doctype: doctype,
-				docname: docname,
-			},
-			callback: function (r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			},
-		});
-	},
-
-	make_pricing_rule: function (doctype, docname) {
-		frappe.call({
-			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.make_pricing_rule",
 			args: {
 				doctype: doctype,
 				docname: docname,
@@ -432,8 +410,9 @@ $.extend(erpnext.utils, {
 		if (!frappe.boot.setup_complete) {
 			return;
 		}
+		const today = frappe.datetime.get_today();
 		if (!date) {
-			date = frappe.datetime.get_today();
+			date = today;
 		}
 
 		let fiscal_year = "";
@@ -444,7 +423,7 @@ $.extend(erpnext.utils, {
 		) {
 			if (with_dates) fiscal_year = frappe.boot.current_fiscal_year;
 			else fiscal_year = frappe.boot.current_fiscal_year[0];
-		} else {
+		} else if (today != date) {
 			frappe.call({
 				method: "erpnext.accounts.utils.get_fiscal_year",
 				type: "GET", // make it cacheable
@@ -462,6 +441,16 @@ $.extend(erpnext.utils, {
 			});
 		}
 		return fiscal_year;
+	},
+
+	set_letter_head: function (frm) {
+		if (frm.fields_dict.letter_head) {
+			frappe.db.get_value("Company", frm.doc.company, "default_letter_head").then((res) => {
+				if (res.message?.default_letter_head) {
+					frm.set_value("letter_head", res.message.default_letter_head);
+				}
+			});
+		}
 	},
 });
 
@@ -635,6 +624,7 @@ erpnext.utils.update_child_items = function (opts) {
 			uom: d.uom,
 			fg_item: d.fg_item,
 			fg_item_qty: d.fg_item_qty,
+			description: d.description,
 		};
 	});
 
@@ -656,7 +646,7 @@ erpnext.utils.update_child_items = function (opts) {
 			get_query: function () {
 				let filters;
 				if (frm.doc.doctype == "Sales Order") {
-					filters = { is_sales_item: 1 };
+					filters = { is_sales_item: 1, is_stock_item: !frm.doc.is_subcontracted };
 				} else if (frm.doc.doctype == "Purchase Order") {
 					if (frm.doc.is_subcontracted) {
 						if (frm.doc.is_old_subcontracting_flow) {
@@ -718,10 +708,10 @@ erpnext.utils.update_child_items = function (opts) {
 								conversion_factor,
 								item_name,
 								bom_no,
+								description,
 							} = r.message;
-
 							const row = dialog.fields_dict.trans_items.df.data.find(
-								(doc) => doc.idx == me.doc.idx
+								(row) => row.name == me.doc.name
 							);
 							if (row) {
 								Object.assign(row, {
@@ -731,6 +721,7 @@ erpnext.utils.update_child_items = function (opts) {
 									rate: me.doc.rate || rate,
 									item_name: item_name,
 									bom_no: bom_no,
+									description: me.doc.description || description,
 								});
 								dialog.fields_dict.trans_items.grid.refresh();
 							}
@@ -792,6 +783,12 @@ erpnext.utils.update_child_items = function (opts) {
 			label: __("Rate"),
 			precision: get_precision("rate"),
 		},
+		{
+			fieldtype: "Text Editor",
+			fieldname: "description",
+			read_only: 0,
+			label: __("Description"),
+		},
 	];
 
 	if (frm.doc.doctype == "Sales Order" || frm.doc.doctype == "Purchase Order") {
@@ -812,7 +809,7 @@ erpnext.utils.update_child_items = function (opts) {
 	}
 
 	if (
-		frm.doc.doctype == "Purchase Order" &&
+		["Purchase Order", "Sales Order"].includes(frm.doc.doctype) &&
 		frm.doc.is_subcontracted &&
 		!frm.doc.is_old_subcontracting_flow
 	) {
@@ -868,7 +865,7 @@ erpnext.utils.update_child_items = function (opts) {
 			},
 		],
 		primary_action: function () {
-			if (frm.doctype == "Sales Order" && has_reserved_stock) {
+			if (frm.doctype == "Sales Order" && has_reserved_stock && frm.doc.is_subcontracted == 0) {
 				this.hide();
 				frappe.confirm(
 					__(
@@ -1026,15 +1023,11 @@ erpnext.utils.map_current_doc = function (opts) {
 					return;
 				}
 
-				if (values.constructor === Array) {
-					opts.source_name = [...new Set(values)];
-				} else {
-					opts.source_name = values;
-				}
+				opts.source_name = Array.isArray(values) ? [...new Set(values)] : values;
 
 				if (
 					opts.allow_child_item_selection ||
-					["Purchase Receipt", "Delivery Note"].includes(opts.source_doctype)
+					["Purchase Receipt", "Delivery Note", "Pick List"].includes(opts.source_doctype)
 				) {
 					// args contains filtered child docnames
 					opts.args = args;
@@ -1075,7 +1068,15 @@ frappe.form.link_formatters["Project"] = function (value, doc, df) {
  * @returns {string} - The link value with the added title.
  */
 function add_link_title(value, doc, df, title_field) {
-	if (doc && value && doc[title_field] && doc[title_field] !== value && doc[df.fieldname] === value) {
+	if (doc.doctype != df.parent) {
+		return "";
+	} else if (
+		doc &&
+		value &&
+		doc[title_field] &&
+		doc[title_field] !== value &&
+		doc[df.fieldname] === value
+	) {
 		return value + ": " + doc[title_field];
 	} else if (!value && doc.doctype && doc[title_field]) {
 		return doc[title_field];
@@ -1228,9 +1229,9 @@ function set_time_to_resolve_and_response(frm, apply_sla_for_resolution) {
 	if (apply_sla_for_resolution) {
 		let time_to_resolve;
 		if (!frm.doc.resolution_date) {
-			time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_status);
+			time_to_resolve = get_time_left(frm.doc.sla_resolution_by, frm.doc.agreement_status);
 		} else {
-			time_to_resolve = get_status(frm.doc.resolution_by, frm.doc.resolution_date);
+			time_to_resolve = get_status(frm.doc.sla_resolution_by, frm.doc.sla_resolution_date);
 		}
 
 		alert += `

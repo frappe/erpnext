@@ -16,7 +16,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import (
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
 from erpnext.accounts.party import get_party_account, get_party_bank_account
-from erpnext.accounts.utils import get_account_currency, get_currency_precision
+from erpnext.accounts.utils import get_account_currency, get_advance_payment_doctypes, get_currency_precision
 from erpnext.utilities import payment_app_import_guard
 
 ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST = [
@@ -100,7 +100,10 @@ class PaymentRequest(Document):
 		subscription_plans: DF.Table[SubscriptionPlanDetail]
 		swift_number: DF.ReadOnly | None
 		transaction_date: DF.Date | None
+
 	# end: auto-generated types
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
 
 	def validate(self):
 		if self.get("__islocal"):
@@ -129,7 +132,13 @@ class PaymentRequest(Document):
 
 			existing_payment_request_amount = flt(get_existing_payment_request_amount(ref_doc))
 
-			if existing_payment_request_amount + flt(self.grand_total) > ref_amount:
+			if (
+				flt(
+					existing_payment_request_amount + flt(self.grand_total, self.precision("grand_total")),
+					get_currency_precision(),
+				)
+				> ref_amount
+			):
 				frappe.throw(
 					_("Total Payment Request amount cannot be greater than {0} amount").format(
 						self.reference_doctype
@@ -421,6 +430,7 @@ class PaymentRequest(Document):
 		context = {
 			"doc": frappe.get_doc(self.reference_doctype, self.reference_name),
 			"payment_url": self.payment_url,
+			"payment_request": self,
 		}
 
 		if self.message:
@@ -464,10 +474,7 @@ class PaymentRequest(Document):
 			return create_stripe_subscription(gateway_controller, data)
 
 	def update_reference_advance_payment_status(self):
-		advance_payment_doctypes = frappe.get_hooks("advance_payment_receivable_doctypes") + frappe.get_hooks(
-			"advance_payment_payable_doctypes"
-		)
-		if self.reference_doctype in advance_payment_doctypes:
+		if self.reference_doctype in get_advance_payment_doctypes():
 			ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 			ref_doc.set_advance_payment_status()
 
@@ -536,8 +543,12 @@ def make_payment_request(**args):
 	if args.dt not in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST:
 		frappe.throw(_("Payment Requests cannot be created against: {0}").format(frappe.bold(args.dt)))
 
-	ref_doc = args.ref_doc or frappe.get_doc(args.dt, args.dn)
+	if args.dn and not isinstance(args.dn, str):
+		frappe.throw(_("Invalid parameter. 'dn' should be of type str"))
 
+	ref_doc = args.ref_doc or frappe.get_doc(args.dt, args.dn)
+	if not args.get("company"):
+		args.company = ref_doc.company
 	gateway_account = get_gateway_details(args) or frappe._dict()
 
 	grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
@@ -672,7 +683,12 @@ def get_amount(ref_doc, payment_account=None):
 
 	dt = ref_doc.doctype
 	if dt in ["Sales Order", "Purchase Order"]:
-		grand_total = (flt(ref_doc.rounded_total) or flt(ref_doc.grand_total)) - ref_doc.advance_paid
+		advance_amount = flt(ref_doc.advance_paid)
+		if ref_doc.party_account_currency != ref_doc.currency:
+			advance_amount = flt(flt(ref_doc.advance_paid) / ref_doc.conversion_rate)
+
+		grand_total = (flt(ref_doc.rounded_total) or flt(ref_doc.grand_total)) - advance_amount
+
 	elif dt in ["Sales Invoice", "Purchase Invoice"]:
 		if (
 			dt == "Sales Invoice"
@@ -779,7 +795,7 @@ def get_gateway_details(args):  # nosemgrep
 	"""
 	Return gateway and payment account of default payment gateway
 	"""
-	gateway_account = args.get("payment_gateway_account", {"is_default": 1})
+	gateway_account = args.get("payment_gateway_account", {"is_default": 1, "company": args.company})
 	return get_payment_gateway_account(gateway_account)
 
 
@@ -821,8 +837,7 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 	if not references:
 		return
 
-	precision = references[0].precision("allocated_amount")
-
+	precision = frappe.get_precision("Payment Entry Reference", "allocated_amount")
 	referenced_payment_requests = frappe.get_all(
 		"Payment Request",
 		filters={"name": ["in", {row.payment_request for row in references if row.payment_request}]},
@@ -835,6 +850,7 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 	)
 
 	referenced_payment_requests = {pr.name: pr for pr in referenced_payment_requests}
+	doc_updates = {}
 
 	for ref in references:
 		if not ref.payment_request:
@@ -860,7 +876,7 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 				title=_("Invalid Allocated Amount"),
 			)
 
-		# update status
+		# determine status
 		if new_outstanding_amount == payment_request["grand_total"]:
 			status = "Initiated" if payment_request["payment_request_type"] == "Outward" else "Requested"
 		elif new_outstanding_amount == 0:
@@ -868,31 +884,37 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 		elif new_outstanding_amount > 0:
 			status = "Partially Paid"
 
-		# update database
-		frappe.db.set_value(
-			"Payment Request",
-			ref.payment_request,
-			{"outstanding_amount": new_outstanding_amount, "status": status},
-		)
+		# prepare bulk update data
+		doc_updates[ref.payment_request] = {
+			"outstanding_amount": new_outstanding_amount,
+			"status": status,
+		}
+
+	# bulk update all payment requests
+	if doc_updates:
+		frappe.db.bulk_update("Payment Request", doc_updates)
 
 
 def get_dummy_message(doc):
-	return frappe.render_template(
-		"""{% if doc.contact_person -%}
-<p>Dear {{ doc.contact_person }},</p>
-{%- else %}<p>Hello,</p>{% endif %}
+	return """
+		{% if doc.contact_person -%}
+		<p>Dear {{ doc.contact_person }},</p>
+		{%- else %}<p>Hello,</p>{% endif %}
 
-<p>{{ _("Requesting payment against {0} {1} for amount {2}").format(doc.doctype,
-	doc.name, doc.get_formatted("grand_total")) }}</p>
+		<p>
+			{{ _("Requesting payment against {0} {1} for amount {2}").format(
+				doc.doctype,
+				doc.name,
+				payment_request.get_formatted("grand_total")
+			) }}
+		</p>
 
-<a href="{{ payment_url }}">{{ _("Make Payment") }}</a>
+		<a href="{{ payment_url }}">{{ _("Make Payment") }}</a>
 
-<p>{{ _("If you have any questions, please get back to us.") }}</p>
+		<p>{{ _("If you have any questions, please get back to us.") }}</p>
 
-<p>{{ _("Thank you for your business!") }}</p>
-""",
-		dict(doc=doc, payment_url="{{ payment_url }}"),
-	)
+		<p>{{ _("Thank you for your business!") }}</p>
+	"""
 
 
 @frappe.whitelist()

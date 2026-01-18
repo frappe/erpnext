@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import json
+
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
@@ -22,6 +24,7 @@ class SupplierQuotation(BuyingController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.accounts.doctype.item_wise_tax_detail.item_wise_tax_detail import ItemWiseTaxDetail
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
 		from erpnext.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import (
 			PurchaseTaxesandCharges,
@@ -60,10 +63,12 @@ class SupplierQuotation(BuyingController):
 		discount_amount: DF.Currency
 		grand_total: DF.Currency
 		group_same_items: DF.Check
+		has_unit_price_items: DF.Check
 		ignore_pricing_rule: DF.Check
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
 		is_subcontracted: DF.Check
+		item_wise_tax_details: DF.Table[ItemWiseTaxDetail]
 		items: DF.Table[SupplierQuotationItem]
 		language: DF.Data | None
 		letter_head: DF.Link | None
@@ -103,6 +108,10 @@ class SupplierQuotation(BuyingController):
 		valid_till: DF.Date | None
 	# end: auto-generated types
 
+	def before_validate(self):
+		self.set_has_unit_price_items()
+		self.flags.allow_zero_qty = self.has_unit_price_items
+
 	def validate(self):
 		super().validate()
 
@@ -128,6 +137,17 @@ class SupplierQuotation(BuyingController):
 
 	def on_trash(self):
 		pass
+
+	def set_has_unit_price_items(self):
+		"""
+		If permitted in settings and any item has 0 qty, the SQ has unit price items.
+		"""
+		if not frappe.db.get_single_value("Buying Settings", "allow_zero_qty_in_supplier_quotation"):
+			return
+
+		self.has_unit_price_items = any(
+			not row.qty for row in self.get("items") if (row.item_code and not row.qty)
+		)
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
@@ -212,6 +232,7 @@ def get_list_context(context=None):
 			"show_search": True,
 			"no_breadcrumbs": True,
 			"title": _("Supplier Quotation"),
+			"list_template": "templates/includes/list/list.html",
 		}
 	)
 
@@ -219,7 +240,12 @@ def get_list_context(context=None):
 
 
 @frappe.whitelist()
-def make_purchase_order(source_name, target_doc=None):
+def make_purchase_order(source_name, target_doc=None, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
+
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 		target.run_method("get_schedule_dates")
@@ -228,12 +254,18 @@ def make_purchase_order(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
 		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
 
+	def select_item(d):
+		filtered_items = args.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
+
 	doclist = get_mapped_doc(
 		"Supplier Quotation",
 		source_name,
 		{
 			"Supplier Quotation": {
 				"doctype": "Purchase Order",
+				"field_no_map": ["transaction_date"],
 				"validation": {
 					"docstatus": ["=", 1],
 				},
@@ -248,6 +280,7 @@ def make_purchase_order(source_name, target_doc=None):
 					["sales_order", "sales_order"],
 				],
 				"postprocess": update_item,
+				"condition": select_item,
 			},
 			"Purchase Taxes and Charges": {
 				"doctype": "Purchase Taxes and Charges",
@@ -314,4 +347,16 @@ def set_expired_status():
 			`status` not in ('Cancelled', 'Stopped') AND `valid_till` < %s
 		""",
 		(nowdate()),
+	)
+
+
+def get_purchased_items(supplier_quotation: str):
+	return frappe._dict(
+		frappe.get_all(
+			"Purchase Order Item",
+			filters={"supplier_quotation": supplier_quotation, "docstatus": 1},
+			fields=["supplier_quotation_item", {"SUM": "qty"}],
+			group_by="supplier_quotation_item",
+			as_list=1,
+		)
 	)

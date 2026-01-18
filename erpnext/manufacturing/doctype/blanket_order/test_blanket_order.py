@@ -1,22 +1,13 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_months, today
 
 from erpnext import get_company_currency
 from erpnext.stock.doctype.item.test_item import make_item
 
 from .blanket_order import make_order
-
-
-class UnitTestBlanketOrder(UnitTestCase):
-	"""
-	Unit tests for BlanketOrder.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
 
 
 class TestBlanketOrder(IntegrationTestCase):

@@ -35,11 +35,28 @@ frappe.ui.form.on("Quotation", {
 				},
 			};
 		});
+
+		frm.set_query("warehouse", "items", (doc, cdt, cdn) => {
+			return {
+				filters: {
+					company: doc.company,
+					is_group: 0,
+				},
+			};
+		});
+
+		frm.set_indicator_formatter("item_code", function (doc) {
+			return !doc.qty && frm.doc.has_unit_price_items ? "yellow" : "";
+		});
 	},
 
 	refresh: function (frm) {
 		frm.trigger("set_label");
 		frm.trigger("set_dynamic_field_label");
+
+		if (frm.doc.docstatus === 0) {
+			erpnext.set_unit_price_items_note(frm);
+		}
 
 		let sbb_field = frm.get_docfield("packed_items", "serial_and_batch_bundle");
 		if (sbb_field) {
@@ -70,7 +87,8 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 	onload(doc, dt, dn) {
 		super.onload(doc, dt, dn);
 
-		this.frm.trigger("disable_customer_if_creating_from_opportunity");
+		// TODO: think of better way to do this
+		// this.frm.trigger("disable_customer_if_creating_from_opportunity");
 	}
 	party_name() {
 		var me = this;
@@ -108,14 +126,22 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 
 		if (doc.docstatus == 1 && !["Lost", "Ordered"].includes(doc.status)) {
 			if (
-				frappe.boot.sysdefaults.allow_sales_order_creation_for_expired_quotation ||
-				!doc.valid_till ||
-				frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) >= 0
+				frappe.model.can_create("Sales Order") &&
+				(frappe.boot.sysdefaults.allow_sales_order_creation_for_expired_quotation ||
+					!doc.valid_till ||
+					frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) >= 0)
 			) {
 				this.frm.add_custom_button(__("Sales Order"), () => this.make_sales_order(), __("Create"));
+				this.frm.add_custom_button(__("Update Items"), () => {
+					erpnext.utils.update_child_items({
+						frm: this.frm,
+						child_docname: "items",
+						cannot_add_row: false,
+					});
+				});
 			}
 
-			if (doc.status !== "Ordered") {
+			if (doc.status !== "Ordered" && this.frm.has_perm("write")) {
 				this.frm.add_custom_button(__("Set as Lost"), () => {
 					this.frm.trigger("set_as_lost_dialog");
 				});
@@ -124,7 +150,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 			cur_frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 
-		if (this.frm.doc.docstatus === 0) {
+		if (this.frm.doc.docstatus === 0 && frappe.model.can_read("Opportunity")) {
 			this.frm.add_custom_button(
 				__("Opportunity"),
 				function () {
@@ -242,6 +268,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				lead: this.frm.doc.party_name,
 				posting_date: this.frm.doc.transaction_date,
 				company: this.frm.doc.company,
+				doctype: this.frm.doc.doctype,
 			},
 			callback: function (r) {
 				if (r.message) {
@@ -277,7 +304,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				},
 			},
 			{
-				fieldtype: "Data",
+				fieldtype: "Text Editor",
 				fieldname: "description",
 				label: __("Description"),
 				in_list_view: 1,

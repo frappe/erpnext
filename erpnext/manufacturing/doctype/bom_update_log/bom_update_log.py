@@ -41,7 +41,7 @@ class BOMUpdateLog(Document):
 		error_log: DF.Link | None
 		new_bom: DF.Link | None
 		processed_boms: DF.LongText | None
-		status: DF.Literal["Queued", "In Progress", "Completed", "Failed"]
+		status: DF.Literal["Queued", "In Progress", "Completed", "Failed", "Cancelled"]
 		update_type: DF.Literal["Replace BOM", "Update Cost"]
 	# end: auto-generated types
 
@@ -63,6 +63,9 @@ class BOMUpdateLog(Document):
 			self.validate_bom_cost_update_in_progress()
 
 		self.status = "Queued"
+
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
 
 	def validate_boms_are_specified(self):
 		if self.update_type == "Replace BOM" and not (self.current_bom and self.new_bom):
@@ -108,7 +111,7 @@ class BOMUpdateLog(Document):
 				doc=self,
 				boms=boms,
 				timeout=40000,
-				now=frappe.flags.in_test,
+				now=frappe.in_test,
 				enqueue_after_commit=True,
 			)
 		else:
@@ -116,7 +119,7 @@ class BOMUpdateLog(Document):
 				method="erpnext.manufacturing.doctype.bom_update_log.bom_update_log.process_boms_cost_level_wise",
 				queue="long",
 				update_doc=self,
-				now=frappe.flags.in_test,
+				now=frappe.in_test,
 				enqueue_after_commit=True,
 			)
 
@@ -128,7 +131,7 @@ def run_replace_bom_job(
 	try:
 		doc.db_set("status", "In Progress")
 
-		if not frappe.flags.in_test:
+		if not frappe.in_test:
 			frappe.db.commit()
 
 		frappe.db.auto_commit_on_many_writes = 1
@@ -141,7 +144,7 @@ def run_replace_bom_job(
 	finally:
 		frappe.db.auto_commit_on_many_writes = 0
 
-		if not frappe.flags.in_test:
+		if not frappe.in_test:
 			frappe.db.commit()  # nosemgrep
 
 
@@ -203,7 +206,7 @@ def queue_bom_cost_jobs(current_boms_list: list[str], update_doc: "BOMUpdateLog"
 			bom_list=boms_to_process,
 			batch_name=batch_row.name,
 			queue="long",
-			now=frappe.flags.in_test,
+			now=frappe.in_test,
 		)
 
 

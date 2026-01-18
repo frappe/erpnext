@@ -25,7 +25,6 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
-from erpnext.accounts.party import get_party_account_currency
 
 
 class InvoiceCancelled(frappe.ValidationError):
@@ -77,7 +76,7 @@ class Subscription(Document):
 		purchase_tax_template: DF.Link | None
 		sales_tax_template: DF.Link | None
 		start_date: DF.Date | None
-		status: DF.Literal["", "Trialing", "Active", "Past Due Date", "Cancelled", "Unpaid", "Completed"]
+		status: DF.Literal["", "Trialing", "Active", "Grace Period", "Cancelled", "Unpaid", "Completed"]
 		submit_invoice: DF.Check
 		trial_period_end: DF.Date | None
 		trial_period_start: DF.Date | None
@@ -223,13 +222,17 @@ class Subscription(Document):
 		"""
 		if self.is_trialling():
 			self.status = "Trialing"
-		elif self.status == "Active" and self.end_date and getdate(posting_date) > getdate(self.end_date):
+		elif (
+			not self.has_outstanding_invoice()
+			and self.end_date
+			and getdate(posting_date) > getdate(self.end_date)
+		):
 			self.status = "Completed"
 		elif self.is_past_grace_period():
 			self.status = self.get_status_for_past_grace_period()
 			self.cancelation_date = getdate(posting_date) if self.status == "Cancelled" else None
 		elif self.current_invoice_is_past_due() and not self.is_past_grace_period():
-			self.status = "Past Due Date"
+			self.status = "Grace Period"
 		elif not self.has_outstanding_invoice():
 			self.status = "Active"
 
@@ -411,7 +414,10 @@ class Subscription(Document):
 			invoice.customer = self.party
 		else:
 			invoice.supplier = self.party
-			if frappe.db.get_value("Supplier", self.party, "tax_withholding_category"):
+			tax_withholding_category, tax_withholding_group = frappe.get_cached_value(
+				"Supplier", self.party, ["tax_withholding_category", "tax_withholding_group"]
+			)
+			if tax_withholding_category or tax_withholding_group:
 				invoice.apply_tds = 1
 
 		# Add currency to invoice
@@ -429,7 +435,6 @@ class Subscription(Document):
 		items_list = self.get_items_from_plans(self.plans, is_prorate())
 
 		for item in items_list:
-			item["cost_center"] = self.cost_center
 			invoice.append("items", item)
 
 		# Taxes
@@ -483,18 +488,23 @@ class Subscription(Document):
 
 		return invoice
 
-	def get_items_from_plans(self, plans: list[dict[str, str]], prorate: bool | None = None) -> list[dict]:
+	def get_items_from_plans(self, plans: list[dict[str, str]], prorate: int = 0) -> list[dict]:
 		"""
 		Returns the `Item`s linked to `Subscription Plan`
 		"""
-		if prorate is None:
-			prorate = False
 
+		prorate_factor = 1
 		if prorate:
 			prorate_factor = get_prorata_factor(
 				self.current_invoice_end,
 				self.current_invoice_start,
-				cint(self.generate_invoice_at == "Beginning of the current subscription period"),
+				cint(
+					self.generate_invoice_at
+					in [
+						"Beginning of the current subscription period",
+						"Days before the current subscription period",
+					]
+				),
 			)
 
 		items = []
@@ -511,33 +521,19 @@ class Subscription(Document):
 
 			deferred = frappe.db.get_value("Item", item_code, deferred_field)
 
-			if not prorate:
-				item = {
-					"item_code": item_code,
-					"qty": plan.qty,
-					"rate": get_plan_rate(
-						plan.plan,
-						plan.qty,
-						party,
-						self.current_invoice_start,
-						self.current_invoice_end,
-					),
-					"cost_center": plan_doc.cost_center,
-				}
-			else:
-				item = {
-					"item_code": item_code,
-					"qty": plan.qty,
-					"rate": get_plan_rate(
-						plan.plan,
-						plan.qty,
-						party,
-						self.current_invoice_start,
-						self.current_invoice_end,
-						prorate_factor,
-					),
-					"cost_center": plan_doc.cost_center,
-				}
+			item = {
+				"item_code": item_code,
+				"qty": plan.qty,
+				"rate": get_plan_rate(
+					plan.plan,
+					plan.qty,
+					party,
+					self.current_invoice_start,
+					self.current_invoice_end,
+					prorate_factor,
+				),
+				"cost_center": plan_doc.cost_center,
+			}
 
 			if deferred:
 				item.update(
@@ -570,6 +566,17 @@ class Subscription(Document):
 			self.current_invoice_start, self.current_invoice_end
 		) and self.can_generate_new_invoice(posting_date):
 			self.generate_invoice(posting_date=posting_date)
+			if self.end_date:
+				next_start = add_days(self.current_invoice_end, 1)
+
+				if getdate(next_start) > getdate(self.end_date):
+					if self.cancel_at_period_end:
+						self.cancel_subscription()
+					else:
+						self.set_subscription_status(posting_date=posting_date)
+
+					self.save()
+					return
 			self.update_subscription_period(add_days(self.current_invoice_end, 1))
 		elif posting_date and getdate(posting_date) > getdate(self.current_invoice_end):
 			self.update_subscription_period()
@@ -756,18 +763,14 @@ def get_prorata_factor(
 	return diff / plan_days
 
 
-def process_all(subscription: str | None = None, posting_date: DateTimeLikeObject | None = None) -> None:
+def process_all(subscription: list, posting_date: DateTimeLikeObject | None = None) -> None:
 	"""
 	Task to updates the status of all `Subscription` apart from those that are cancelled
 	"""
-	filters = {"status": ("!=", "Cancelled")}
 
-	if subscription:
-		filters["name"] = subscription
-
-	for subscription in frappe.get_all("Subscription", filters, pluck="name"):
+	for subscription_name in subscription:
 		try:
-			subscription = frappe.get_doc("Subscription", subscription)
+			subscription = frappe.get_doc("Subscription", subscription_name)
 			subscription.process(posting_date)
 			frappe.db.commit()
 		except frappe.ValidationError:

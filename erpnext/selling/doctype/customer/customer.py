@@ -14,10 +14,15 @@ from frappe.contacts.address_and_contact import (
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
+from frappe.query_builder import Field, functions
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
 
-from erpnext.accounts.party import get_dashboard_info, validate_party_accounts
+from erpnext.accounts.party import (
+	get_dashboard_info,
+	validate_party_accounts,
+	validate_party_currency_before_merging,
+)
 from erpnext.controllers.website_list_for_contact import add_role_for_portal_user
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -35,10 +40,11 @@ class Customer(TransactionBase):
 			AllowedToTransactWith,
 		)
 		from erpnext.accounts.doctype.party_account.party_account import PartyAccount
-		from erpnext.selling.doctype.customer_credit_limit.customer_credit_limit import (
-			CustomerCreditLimit,
-		)
+		from erpnext.selling.doctype.customer_credit_limit.customer_credit_limit import CustomerCreditLimit
 		from erpnext.selling.doctype.sales_team.sales_team import SalesTeam
+		from erpnext.selling.doctype.supplier_number_at_customer.supplier_number_at_customer import (
+			SupplierNumberAtCustomer,
+		)
 		from erpnext.utilities.doctype.portal_user.portal_user import PortalUser
 
 		account_manager: DF.Link | None
@@ -77,15 +83,17 @@ class Customer(TransactionBase):
 		opportunity_name: DF.Link | None
 		payment_terms: DF.Link | None
 		portal_users: DF.Table[PortalUser]
-		primary_address: DF.Text | None
+		primary_address: DF.TextEditor | None
 		prospect_name: DF.Link | None
 		represents_company: DF.Link | None
 		sales_team: DF.Table[SalesTeam]
 		salutation: DF.Link | None
 		so_required: DF.Check
+		supplier_numbers: DF.Table[SupplierNumberAtCustomer]
 		tax_category: DF.Link | None
 		tax_id: DF.Data | None
 		tax_withholding_category: DF.Link | None
+		tax_withholding_group: DF.Link | None
 		territory: DF.Link | None
 		website: DF.Data | None
 	# end: auto-generated types
@@ -150,8 +158,7 @@ class Customer(TransactionBase):
 		self.validate_currency_for_receivable_payable_and_advance_account()
 
 		# set loyalty program tier
-		if frappe.db.exists("Customer", self.name):
-			customer = frappe.get_doc("Customer", self.name)
+		if not self.is_new() and (customer := self.get_doc_before_save()):
 			if self.loyalty_program == customer.loyalty_program and not self.loyalty_program_tier:
 				self.loyalty_program_tier = customer.loyalty_program_tier
 
@@ -205,6 +212,7 @@ class Customer(TransactionBase):
 	def validate_internal_customer(self):
 		if not self.is_internal_customer:
 			self.represents_company = ""
+			return
 
 		internal_customer = frappe.db.get_value(
 			"Customer",
@@ -232,7 +240,7 @@ class Customer(TransactionBase):
 			self.update_lead_status()
 
 		if self.flags.is_new_doc:
-			self.link_lead_address_and_contact()
+			self.link_address_and_contact()
 			self.copy_communication()
 
 		self.update_customer_groups()
@@ -276,15 +284,23 @@ class Customer(TransactionBase):
 		if self.lead_name:
 			frappe.db.set_value("Lead", self.lead_name, "status", "Converted")
 
-	def link_lead_address_and_contact(self):
-		if self.lead_name:
-			# assign lead address and contact to customer (if already not set)
+	def link_address_and_contact(self):
+		linked_documents = {
+			"Lead": self.lead_name,
+			"Opportunity": self.opportunity_name,
+			"Prospect": self.prospect_name,
+		}
+		for doctype, docname in linked_documents.items():
+			# assign lead, opportunity and prospect address and contact to customer (if already not set)
+			if not docname:
+				continue
+
 			linked_contacts_and_addresses = frappe.get_all(
 				"Dynamic Link",
 				filters=[
 					["parenttype", "in", ["Contact", "Address"]],
-					["link_doctype", "=", "Lead"],
-					["link_name", "=", self.lead_name],
+					["link_doctype", "=", doctype],
+					["link_name", "=", docname],
 				],
 				fields=["parent as name", "parenttype as doctype"],
 			)
@@ -362,6 +378,10 @@ class Customer(TransactionBase):
 		delete_contact_and_address("Customer", self.name)
 		if self.lead_name:
 			frappe.db.sql("update `tabLead` set status='Interested' where name=%s", self.lead_name)
+
+	def before_rename(self, olddn, newdn, merge=False):
+		if merge:
+			validate_party_currency_before_merging("Customer", olddn, newdn)
 
 	def after_rename(self, olddn, newdn, merge=False):
 		if frappe.defaults.get_global_default("cust_master_name") == "Customer Name":
@@ -501,11 +521,11 @@ def get_loyalty_programs(doc):
 	loyalty_programs = frappe.get_all(
 		"Loyalty Program",
 		fields=["name", "customer_group", "customer_territory"],
-		filters={
-			"auto_opt_in": 1,
-			"from_date": ["<=", today()],
-			"ifnull(to_date, '2500-01-01')": [">=", today()],
-		},
+		filters=[
+			["auto_opt_in", "=", 1],
+			["from_date", "<=", today()],
+			[functions.IfNull(Field("to_date"), "2500-01-01"), ">=", today()],
+		],
 	)
 
 	for loyalty_program in loyalty_programs:
@@ -552,7 +572,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 		message += "<br><br>"
 
 		# If not authorized person raise exception
-		credit_controller_role = frappe.db.get_single_value("Accounts Settings", "credit_controller")
+		credit_controller_role = frappe.get_single_value("Accounts Settings", "credit_controller")
 		if not credit_controller_role or credit_controller_role not in frappe.get_roles():
 			# form a list of emails for the credit controller users
 			credit_controller_users = get_users_with_role(credit_controller_role or "Sales Master Manager")
@@ -804,20 +824,28 @@ def make_address(args, is_primary_address=1, is_shipping_address=1):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, filters):
+def get_customer_primary(doctype, txt, searchfield, start, page_len, filters):
 	customer = filters.get("customer")
-
-	con = qb.DocType("Contact")
+	type = filters.get("type")
+	type_doctype = qb.DocType(type)
 	dlink = qb.DocType("Dynamic Link")
 
-	return (
-		qb.from_(con)
+	query = (
+		qb.from_(type_doctype)
 		.join(dlink)
-		.on(con.name == dlink.parent)
-		.select(con.name, con.email_id)
-		.where((dlink.link_name == customer) & (con.name.like(f"%{txt}%")))
-		.run()
+		.on(type_doctype.name == dlink.parent)
+		.select(type_doctype.name)
+		.where(
+			(dlink.link_name == customer)
+			& (type_doctype.name.like(f"%{txt}%"))
+			& (dlink.link_doctype == "Customer")
+		)
 	)
+
+	if type == "Contact":
+		query = query.select(type_doctype.email_id)
+
+	return query.run()
 
 
 def parse_full_name(full_name: str) -> tuple[str, str | None, str | None]:

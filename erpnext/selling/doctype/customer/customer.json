@@ -42,6 +42,7 @@
   "language",
   "column_break_45",
   "customer_details",
+  "supplier_numbers",
   "dashboard_tab",
   "contact_and_address_tab",
   "address_contacts",
@@ -61,9 +62,10 @@
   "tax_tab",
   "taxation_section",
   "tax_id",
-  "column_break_21",
   "tax_category",
+  "column_break_21",
   "tax_withholding_category",
+  "tax_withholding_group",
   "accounting_tab",
   "credit_limit_section",
   "payment_terms",
@@ -333,7 +335,7 @@
   },
   {
    "fieldname": "primary_address",
-   "fieldtype": "Text",
+   "fieldtype": "Text Editor",
    "label": "Primary Address",
    "read_only": 1
   },
@@ -597,6 +599,19 @@
    "fieldtype": "Read Only",
    "hidden": 1,
    "label": "Last Name"
+  },
+  {
+   "description": "Supplier numbers assigned by the customer",
+   "fieldname": "supplier_numbers",
+   "fieldtype": "Table",
+   "label": "Supplier Numbers",
+   "options": "Supplier Number At Customer"
+  },
+  {
+   "fieldname": "tax_withholding_group",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Group",
+   "options": "Tax Withholding Group"
   }
  ],
  "icon": "fa fa-user",
@@ -610,7 +625,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2025-03-05 10:01:47.885574",
+ "modified": "2026-01-16 15:56:05.967663",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

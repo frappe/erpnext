@@ -16,6 +16,7 @@ class DeliveryNoteItem(Document):
 
 		actual_batch_qty: DF.Float
 		actual_qty: DF.Float
+		against_pick_list: DF.Link | None
 		against_sales_invoice: DF.Link | None
 		against_sales_order: DF.Link | None
 		allow_zero_valuation_rate: DF.Check

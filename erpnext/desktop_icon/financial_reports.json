@@ -1,0 +1,22 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-17 20:55:11.772622",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "file",
+ "icon_type": "Link",
+ "idx": 0,
+ "label": "Financial Reports",
+ "link_to": "Financial Reports",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-01-01 20:07:01.253367",
+ "modified_by": "Administrator",
+ "name": "Financial Reports",
+ "owner": "Administrator",
+ "parent_icon": "Accounts",
+ "restrict_removal": 0,
+ "roles": [],
+ "sidebar": "",
+ "standard": 1
+}

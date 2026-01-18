@@ -5,7 +5,6 @@ INDEXED_FIELDS = {
 	"Bin": ["item_code"],
 	"GL Entry": ["voucher_no", "posting_date", "company", "party"],
 	"Purchase Order Item": ["item_code"],
-	"Stock Ledger Entry": ["warehouse"],
 }
 
 

@@ -11,6 +11,19 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 			Quotation: "Quotation",
 		};
 
+		const me = this;
+		this.frm.set_indicator_formatter("item_code", function (doc) {
+			return !doc.qty && me.frm.doc.has_unit_price_items ? "yellow" : "";
+		});
+
+		this.frm.set_query("warehouse", "items", (doc, cdt, cdn) => {
+			return {
+				filters: {
+					company: doc.company,
+					is_group: 0,
+				},
+			};
+		});
 		super.setup();
 	}
 
@@ -27,9 +40,18 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 				this.make_purchase_order.bind(this),
 				__("Create")
 			);
+			this.frm.add_custom_button(__("Update Items"), () => {
+				erpnext.utils.update_child_items({
+					frm: this.frm,
+					child_docname: "items",
+					cannot_add_row: false,
+				});
+			});
 			this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 			this.frm.add_custom_button(__("Quotation"), this.make_quotation.bind(this), __("Create"));
 		} else if (this.frm.doc.docstatus === 0) {
+			erpnext.set_unit_price_items_note(this.frm);
+
 			this.frm.add_custom_button(
 				__("Material Request"),
 				function () {

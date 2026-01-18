@@ -5,6 +5,7 @@ import frappe
 from frappe import _, bold, scrub
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.model.document import Document
+from frappe.utils.caching import request_cache
 
 
 class DoNotChangeError(frappe.ValidationError):
@@ -64,15 +65,10 @@ class InventoryDimension(Document):
 		self.reset_value()
 		self.set_source_and_target_fieldname()
 		self.set_type_of_transaction()
-		self.set_fetch_value_from()
 
 	def set_type_of_transaction(self):
 		if self.apply_to_all_doctypes:
 			self.type_of_transaction = "Both"
-
-	def set_fetch_value_from(self):
-		if self.apply_to_all_doctypes:
-			self.fetch_from_parent = self.reference_document
 
 	def do_not_update_document(self):
 		if self.is_new() or not self.has_stock_ledger():
@@ -201,8 +197,7 @@ class InventoryDimension(Document):
 					options=self.reference_document,
 					label=_("Rejected " + self.dimension_name),
 					search_index=1,
-					reqd=self.reqd,
-					mandatory_depends_on=self.mandatory_depends_on,
+					mandatory_depends_on="eval:doc.rejected_qty > 0",
 				)
 			)
 
@@ -324,12 +319,13 @@ def get_inventory_documents(
 
 	return frappe.get_all(
 		"DocField",
-		fields=["distinct parent"],
+		fields=["parent"],
 		filters=and_filters,
 		or_filters=or_filters,
 		start=start,
 		page_length=page_len,
 		as_list=1,
+		distinct=True,
 	)
 
 
@@ -363,52 +359,39 @@ def get_evaluated_inventory_dimension(doc, sl_dict, parent_doc=None):
 	return filter_dimensions
 
 
+@request_cache
 def get_document_wise_inventory_dimensions(doctype) -> dict:
-	if not hasattr(frappe.local, "document_wise_inventory_dimensions"):
-		frappe.local.document_wise_inventory_dimensions = {}
-
-	if not frappe.local.document_wise_inventory_dimensions.get(doctype):
-		dimensions = frappe.get_all(
-			"Inventory Dimension",
-			fields=[
-				"name",
-				"source_fieldname",
-				"condition",
-				"target_fieldname",
-				"type_of_transaction",
-				"fetch_from_parent",
-			],
-			filters={"disabled": 0},
-			or_filters={"document_type": doctype, "apply_to_all_doctypes": 1},
-		)
-
-		frappe.local.document_wise_inventory_dimensions[doctype] = dimensions
-
-	return frappe.local.document_wise_inventory_dimensions[doctype]
+	return frappe.get_all(
+		"Inventory Dimension",
+		fields=[
+			"name",
+			"source_fieldname",
+			"condition",
+			"target_fieldname",
+			"type_of_transaction",
+			"fetch_from_parent",
+		],
+		filters={"disabled": 0},
+		or_filters={"document_type": doctype, "apply_to_all_doctypes": 1},
+	)
 
 
 @frappe.whitelist()
+@request_cache
 def get_inventory_dimensions():
-	if not hasattr(frappe.local, "inventory_dimensions"):
-		frappe.local.inventory_dimensions = {}
-
-	if not frappe.local.inventory_dimensions:
-		dimensions = frappe.get_all(
-			"Inventory Dimension",
-			fields=[
-				"distinct target_fieldname as fieldname",
-				"source_fieldname",
-				"reference_document as doctype",
-				"validate_negative_stock",
-				"name as dimension_name",
-			],
-			filters={"disabled": 0},
-			order_by="creation",
-		)
-
-		frappe.local.inventory_dimensions = dimensions
-
-	return frappe.local.inventory_dimensions
+	return frappe.get_all(
+		"Inventory Dimension",
+		fields=[
+			"target_fieldname as fieldname",
+			"source_fieldname",
+			"reference_document as doctype",
+			"validate_negative_stock",
+			"name as dimension_name",
+		],
+		filters={"disabled": 0},
+		order_by="creation",
+		distinct=True,
+	)
 
 
 @frappe.whitelist()

@@ -155,7 +155,7 @@ class TestGeneralLedger(IntegrationTestCase):
 					"from_date": today(),
 					"to_date": today(),
 					"account": [account.name],
-					"group_by": "Group by Voucher (Consolidated)",
+					"categorize_by": "Categorize by Voucher (Consolidated)",
 				}
 			)
 		)
@@ -246,7 +246,7 @@ class TestGeneralLedger(IntegrationTestCase):
 					"from_date": today(),
 					"to_date": today(),
 					"account": [account.name],
-					"group_by": "Group by Voucher (Consolidated)",
+					"categorize_by": "Categorize by Voucher (Consolidated)",
 					"ignore_err": True,
 				}
 			)
@@ -261,7 +261,7 @@ class TestGeneralLedger(IntegrationTestCase):
 					"from_date": today(),
 					"to_date": today(),
 					"account": [account.name],
-					"group_by": "Group by Voucher (Consolidated)",
+					"categorize_by": "Categorize by Voucher (Consolidated)",
 					"ignore_err": False,
 				}
 			)
@@ -308,7 +308,7 @@ class TestGeneralLedger(IntegrationTestCase):
 					"from_date": si.posting_date,
 					"to_date": si.posting_date,
 					"account": [si.debit_to],
-					"group_by": "Group by Voucher (Consolidated)",
+					"categorize_by": "Categorize by Voucher (Consolidated)",
 					"ignore_cr_dr_notes": False,
 				}
 			)
@@ -325,7 +325,7 @@ class TestGeneralLedger(IntegrationTestCase):
 					"from_date": si.posting_date,
 					"to_date": si.posting_date,
 					"account": [si.debit_to],
-					"group_by": "Group by Voucher (Consolidated)",
+					"categorize_by": "Categorize by Voucher (Consolidated)",
 					"ignore_cr_dr_notes": True,
 				}
 			)

@@ -62,6 +62,7 @@ class Project(Document):
 		sales_order: DF.Link | None
 		second_email: DF.Time | None
 		status: DF.Literal["Open", "Completed", "Cancelled"]
+		subject: DF.Data | None
 		to_time: DF.Time | None
 		total_billable_amount: DF.Currency
 		total_billed_amount: DF.Currency
@@ -126,22 +127,20 @@ class Project(Document):
 
 	def create_task_from_template(self, task_details):
 		return frappe.get_doc(
-			dict(
-				doctype="Task",
-				subject=task_details.subject,
-				project=self.name,
-				status="Open",
-				exp_start_date=self.calculate_start_date(task_details),
-				exp_end_date=self.calculate_end_date(task_details),
-				description=task_details.description,
-				task_weight=task_details.task_weight,
-				type=task_details.type,
-				issue=task_details.issue,
-				is_group=task_details.is_group,
-				color=task_details.color,
-				template_task=task_details.name,
-				priority=task_details.priority,
-			)
+			doctype="Task",
+			subject=task_details.subject,
+			project=self.name,
+			status="Open",
+			exp_start_date=self.calculate_start_date(task_details),
+			exp_end_date=self.calculate_end_date(task_details),
+			description=task_details.description,
+			task_weight=task_details.task_weight,
+			type=task_details.type,
+			issue=task_details.issue,
+			is_group=task_details.is_group,
+			color=task_details.color,
+			template_task=task_details.name,
+			priority=task_details.priority,
 		).insert()
 
 	def calculate_start_date(self, task_details):
@@ -281,6 +280,8 @@ class Project(Document):
 				Min(TimesheetDetail.from_time).as_("start_date"),
 				Max(TimesheetDetail.to_time).as_("end_date"),
 				Sum(TimesheetDetail.hours).as_("time"),
+				Sum(TimesheetDetail.base_costing_amount).as_("base_costing_amount"),
+				Sum(TimesheetDetail.base_billing_amount).as_("base_billing_amount"),
 			)
 			.where((TimesheetDetail.project == self.name) & (TimesheetDetail.docstatus == 1))
 		).run(as_dict=True)[0]
@@ -288,8 +289,8 @@ class Project(Document):
 		self.actual_start_date = from_time_sheet.start_date
 		self.actual_end_date = from_time_sheet.end_date
 
-		self.total_costing_amount = from_time_sheet.costing_amount
-		self.total_billable_amount = from_time_sheet.billing_amount
+		self.total_costing_amount = from_time_sheet.base_costing_amount
+		self.total_billable_amount = from_time_sheet.base_billing_amount
 		self.actual_time = from_time_sheet.time
 
 		self.update_purchase_costing()
@@ -400,8 +401,6 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 
 	meta = frappe.get_meta(doctype)
 
-	fields = "distinct *"
-
 	or_filters = []
 
 	if txt:
@@ -423,13 +422,14 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 
 	return frappe.get_list(
 		doctype,
-		fields=fields,
+		fields="*",
 		filters=filters,
 		or_filters=or_filters,
 		limit_start=limit_start,
 		limit_page_length=limit_page_length,
 		order_by=order_by,
 		ignore_permissions=ignore_permissions,
+		distinct=True,
 	)
 
 
@@ -445,6 +445,7 @@ def get_list_context(context=None):
 			"title": _("Projects"),
 			"get_list": get_project_list,
 			"row_template": "templates/includes/projects/project_row.html",
+			"list_template": "templates/includes/list/list.html",
 		}
 	)
 
@@ -606,8 +607,6 @@ def send_project_update_email_to_users(project):
 		}
 	).insert()
 
-	subject = "For project %s, update your status" % (project)
-
 	incoming_email_account = frappe.db.get_value(
 		"Email Account", dict(enable_incoming=1, default_incoming=1), "email_id"
 	)
@@ -615,7 +614,7 @@ def send_project_update_email_to_users(project):
 	frappe.sendmail(
 		recipients=get_users_email(doc),
 		message=doc.message,
-		subject=_(subject),
+		subject=doc.subject,
 		reference_doctype=project_update.doctype,
 		reference_name=project_update.name,
 		reply_to=incoming_email_account,
@@ -680,7 +679,7 @@ def send_project_status_email_to_users():
 
 
 def update_project_sales_billing():
-	sales_update_frequency = frappe.db.get_single_value("Selling Settings", "sales_update_frequency")
+	sales_update_frequency = frappe.get_single_value("Selling Settings", "sales_update_frequency")
 	if sales_update_frequency == "Each Transaction":
 		return
 	elif sales_update_frequency == "Monthly" and frappe.utils.now_datetime().day != 1:
@@ -750,12 +749,7 @@ def calculate_total_purchase_cost(project: str | None = None):
 
 
 @frappe.whitelist()
-def recalculate_project_total_purchase_cost(project: str | None = None):
-	if project:
-		total_purchase_cost = calculate_total_purchase_cost(project)
-		frappe.db.set_value(
-			"Project",
-			project,
-			"total_purchase_cost",
-			(total_purchase_cost and total_purchase_cost[0][0] or 0),
-		)
+def update_costing_and_billing(project: str | None = None):
+	project = frappe.get_doc("Project", project)
+	project.update_costing()
+	project.db_update()

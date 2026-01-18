@@ -2,20 +2,30 @@ import unittest
 from functools import partial
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.core.doctype.user_permission.user_permission import add_user_permissions
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 from erpnext.controllers import queries
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 def add_default_params(func, doctype):
 	return partial(func, doctype=doctype, txt="", searchfield="name", start=0, page_len=20, filters=None)
 
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Employee", "Lead", "Item", "BOM", "Project", "Account"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "BOM", "Account"]
 
 
-class TestQueries(IntegrationTestCase):
+class TestQueries(ERPNextTestSuite):
 	# All tests are based on self.globalTestRecords[doctype]
+
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		cls.make_employees()
+		cls.make_leads()
+		cls.make_projects()
 
 	def assert_nested_in(self, item, container):
 		self.assertIn(item, [vals for tuples in container for vals in tuples])
@@ -85,3 +95,47 @@ class TestQueries(IntegrationTestCase):
 
 	def test_default_uoms(self):
 		self.assertGreaterEqual(frappe.db.count("UOM", {"enabled": 1}), 10)
+
+	def test_employee_query_with_user_permissions(self):
+		# party field is a dynamic link field in Payment Entry doctype with ignore_user_permissions=0
+		ps = make_property_setter(
+			doctype="Payment Entry",
+			fieldname="party",
+			property="ignore_user_permissions",
+			value=1,
+			property_type="Check",
+		)
+
+		user = create_user("test_employee_query@example.com", "Accounts User", "HR User")
+		add_user_permissions(
+			{
+				"user": user.name,
+				"doctype": "Employee",
+				"docname": self.employees[0].name,
+				"is_default": 1,
+				"apply_to_all_doctypes": 1,
+				"applicable_doctypes": [],
+				"hide_descendants": 0,
+			}
+		)
+
+		with self.set_user(user.name):
+			params = {
+				"doctype": "Employee",
+				"txt": "",
+				"searchfield": "name",
+				"start": 0,
+				"page_len": 20,
+				"filters": None,
+				"reference_doctype": "Payment Entry",
+				"ignore_user_permissions": 1,
+			}
+
+			result = queries.employee_query(**params)
+			self.assertGreater(len(result), 1)
+
+			ps.delete(ignore_permissions=1, force=1, delete_permanently=1)
+
+			# only one employee should be returned even though ignore_user_permissions is passed as 1
+			result = queries.employee_query(**params)
+			self.assertEqual(len(result), 1)

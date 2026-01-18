@@ -3,11 +3,11 @@
 
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.custom import ConstantColumn
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 import erpnext
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
@@ -30,6 +30,9 @@ class LandedCostVoucher(Document):
 		from erpnext.stock.doctype.landed_cost_taxes_and_charges.landed_cost_taxes_and_charges import (
 			LandedCostTaxesandCharges,
 		)
+		from erpnext.stock.doctype.landed_cost_vendor_invoice.landed_cost_vendor_invoice import (
+			LandedCostVendorInvoice,
+		)
 
 		amended_from: DF.Link | None
 		company: DF.Link
@@ -40,6 +43,8 @@ class LandedCostVoucher(Document):
 		purchase_receipts: DF.Table[LandedCostPurchaseReceipt]
 		taxes: DF.Table[LandedCostTaxesandCharges]
 		total_taxes_and_charges: DF.Currency
+		total_vendor_invoices_cost: DF.Currency
+		vendor_invoices: DF.Table[LandedCostVendorInvoice]
 	# end: auto-generated types
 
 	@frappe.whitelist()
@@ -54,13 +59,17 @@ class LandedCostVoucher(Document):
 					item.item_code = d.item_code
 					item.description = d.description
 					item.qty = d.qty
-					item.rate = d.base_rate
+					item.rate = d.get("base_rate") or d.get("rate")
 					item.cost_center = d.cost_center or erpnext.get_default_cost_center(self.company)
 					item.amount = d.base_amount
 					item.receipt_document_type = pr.receipt_document_type
 					item.receipt_document = pr.receipt_document
-					item.purchase_receipt_item = d.name
 					item.is_fixed_asset = d.is_fixed_asset
+
+					if pr.receipt_document_type == "Stock Entry":
+						item.stock_entry_item = d.name
+					else:
+						item.purchase_receipt_item = d.name
 
 	def validate(self):
 		self.check_mandatory()
@@ -72,6 +81,12 @@ class LandedCostVoucher(Document):
 			self.get_items_from_purchase_receipts()
 
 		self.set_applicable_charges_on_item()
+		self.set_total_vendor_invoices_cost()
+
+	def set_total_vendor_invoices_cost(self):
+		self.total_vendor_invoices_cost = 0.0
+		for row in self.vendor_invoices:
+			self.total_vendor_invoices_cost += flt(row.amount)
 
 	def validate_line_items(self):
 		for d in self.get("items"):
@@ -171,13 +186,6 @@ class LandedCostVoucher(Document):
 				self.get("items")[item_count - 1].applicable_charges += diff
 
 	def validate_applicable_charges_for_item(self):
-		if self.distribute_charges_based_on == "Distribute Manually" and len(self.taxes) > 1:
-			frappe.throw(
-				_(
-					"Please keep one Applicable Charges, when 'Distribute Charges Based On' is 'Distribute Manually'. For more charges, please create another Landed Cost Voucher."
-				)
-			)
-
 		based_on = self.distribute_charges_based_on.lower()
 
 		if based_on != "distribute manually":
@@ -212,12 +220,45 @@ class LandedCostVoucher(Document):
 				)
 			)
 
+	@frappe.whitelist()
+	def get_receipt_document_details(self, receipt_document_type, receipt_document):
+		if receipt_document_type in [
+			"Purchase Invoice",
+			"Purchase Receipt",
+			"Subcontracting Receipt",
+		]:
+			fields = ["supplier", "posting_date"]
+			if receipt_document_type == "Subcontracting Receipt":
+				fields.append("total as grand_total")
+			else:
+				fields.append("base_grand_total as grand_total")
+		elif receipt_document_type == "Stock Entry":
+			fields = ["total_incoming_value as grand_total"]
+
+		return frappe.db.get_value(
+			receipt_document_type,
+			receipt_document,
+			fields,
+			as_dict=True,
+		)
+
 	def on_submit(self):
 		self.validate_applicable_charges_for_item()
 		self.update_landed_cost()
+		self.update_claimed_landed_cost()
 
 	def on_cancel(self):
 		self.update_landed_cost()
+		self.update_claimed_landed_cost()
+
+	def update_claimed_landed_cost(self):
+		for row in self.vendor_invoices:
+			frappe.db.set_value(
+				"Purchase Invoice",
+				row.vendor_invoice,
+				"claimed_landed_cost_amount",
+				flt(row.amount, row.precision("amount")) if self.docstatus == 1 else 0.0,
+			)
 
 	def update_landed_cost(self):
 		for d in self.get("purchase_receipts"):
@@ -229,14 +270,20 @@ class LandedCostVoucher(Document):
 			# set landed cost voucher amount in pr item
 			doc.set_landed_cost_voucher_amount()
 
-			# set valuation amount in pr item
-			doc.update_valuation_rate(reset_outgoing_rate=False)
+			if d.receipt_document_type == "Subcontracting Receipt":
+				doc.calculate_items_qty_and_amount()
+			else:
+				# set valuation amount in pr item
+				doc.update_valuation_rate(reset_outgoing_rate=False)
 
 			# db_update will update and save landed_cost_voucher_amount and voucher_amount in PR
 			for item in doc.get("items"):
 				item.db_update()
 
 			# asset rate will be updated while creating asset gl entries from PI or PY
+
+			if d.receipt_document_type in ["Stock Entry", "Subcontracting Receipt"]:
+				continue
 
 			# update latest valuation rate in serial no
 			self.update_rate_in_serial_no_for_non_asset_items(doc)
@@ -273,13 +320,19 @@ class LandedCostVoucher(Document):
 						"item_code": item.item_code,
 						"docstatus": ["!=", 2],
 					},
-					fields=["name", "docstatus"],
+					fields=["name", "docstatus", "asset_quantity"],
 				)
-				if not docs or len(docs) < item.qty:
+
+				total_asset_qty = sum((cint(d.asset_quantity)) for d in docs)
+
+				if not docs or total_asset_qty < item.qty:
 					frappe.throw(
 						_(
-							"There are only {0} asset created or linked to {1}. Please create or link {2} Assets with respective document."
-						).format(len(docs), item.receipt_document, item.qty)
+							"For item <b>{0}</b>, only <b>{1}</b> asset have been created or linked to <b>{2}</b>. "
+							"Please create or link <b>{3}</b> more asset with the respective document."
+						).format(
+							item.item_code, total_asset_qty, item.receipt_document, item.qty - total_asset_qty
+						)
 					)
 				if docs:
 					for d in docs:
@@ -302,11 +355,34 @@ class LandedCostVoucher(Document):
 						tuple([item.valuation_rate, *serial_nos]),
 					)
 
+	@frappe.whitelist()
+	def get_vendor_invoice_amount(self, vendor_invoice):
+		filters = frappe._dict(
+			{
+				"name": vendor_invoice,
+				"company": self.company,
+			}
+		)
+
+		query = get_vendor_invoice_query(filters)
+
+		result = query.run(as_dict=True)
+		amount = result[0].unclaimed_amount if result else 0.0
+
+		return {
+			"amount": amount,
+		}
+
 
 def get_pr_items(purchase_receipt):
 	item = frappe.qb.DocType("Item")
-	pr_item = frappe.qb.DocType(purchase_receipt.receipt_document_type + " Item")
-	return (
+
+	if purchase_receipt.receipt_document_type == "Stock Entry":
+		pr_item = frappe.qb.DocType("Stock Entry Detail")
+	else:
+		pr_item = frappe.qb.DocType(purchase_receipt.receipt_document_type + " Item")
+
+	query = (
 		frappe.qb.from_(pr_item)
 		.inner_join(item)
 		.on(item.name == pr_item.item_code)
@@ -314,11 +390,8 @@ def get_pr_items(purchase_receipt):
 			pr_item.item_code,
 			pr_item.description,
 			pr_item.qty,
-			pr_item.base_rate,
-			pr_item.base_amount,
 			pr_item.name,
 			pr_item.cost_center,
-			pr_item.is_fixed_asset,
 			ConstantColumn(purchase_receipt.receipt_document_type).as_("receipt_document_type"),
 			ConstantColumn(purchase_receipt.receipt_document).as_("receipt_document"),
 		)
@@ -326,5 +399,79 @@ def get_pr_items(purchase_receipt):
 			(pr_item.parent == purchase_receipt.receipt_document)
 			& ((item.is_stock_item == 1) | (item.is_fixed_asset == 1))
 		)
-		.run(as_dict=True)
+		.orderby(pr_item.idx)
 	)
+
+	if purchase_receipt.receipt_document_type == "Subcontracting Receipt":
+		query = query.select(
+			pr_item.rate.as_("base_rate"),
+			pr_item.amount.as_("base_amount"),
+		)
+
+	elif purchase_receipt.receipt_document_type == "Stock Entry":
+		query = query.select(
+			pr_item.basic_rate.as_("base_rate"),
+			pr_item.basic_amount.as_("base_amount"),
+		)
+
+		query = query.where(pr_item.is_finished_item == 1)
+	else:
+		query = query.select(
+			pr_item.base_rate,
+			pr_item.base_amount,
+			pr_item.is_fixed_asset,
+		)
+
+	return query.run(as_dict=True)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_vendor_invoices(doctype, txt, searchfield, start, page_len, filters):
+	if not frappe.has_permission("Purchase Invoice", "read"):
+		return []
+
+	if txt and txt.lower().startswith(("select", "delete", "update")):
+		frappe.throw(_("Invalid search query"), title=_("Invalid Query"))
+
+	query = get_vendor_invoice_query(filters)
+
+	if txt:
+		query = query.where(doctype.name.like(f"%{txt}%"))
+
+	if start:
+		query = query.limit(page_len).offset(start)
+
+	return query.run(as_list=True)
+
+
+def get_vendor_invoice_query(filters):
+	doctype = frappe.qb.DocType("Purchase Invoice")
+	child_doctype = frappe.qb.DocType("Purchase Invoice Item")
+	item = frappe.qb.DocType("Item")
+
+	query = (
+		frappe.qb.from_(doctype)
+		.inner_join(child_doctype)
+		.on(child_doctype.parent == doctype.name)
+		.inner_join(item)
+		.on(item.name == child_doctype.item_code)
+		.select(
+			doctype.name,
+			(doctype.base_total - doctype.claimed_landed_cost_amount).as_("unclaimed_amount"),
+		)
+		.where(
+			(doctype.docstatus == 1)
+			& (doctype.is_subcontracted == 0)
+			& (doctype.is_return == 0)
+			& (doctype.update_stock == 0)
+			& (doctype.company == filters.get("company"))
+			& (item.is_stock_item == 0)
+		)
+		.having(frappe.qb.Field("unclaimed_amount") > 0)
+	)
+
+	if filters.get("name"):
+		query = query.where(doctype.name == filters.get("name"))
+
+	return query

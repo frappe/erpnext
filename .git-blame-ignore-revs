@@ -42,3 +42,12 @@ a308792ee7fda18a681e9181f4fd00b36385bc23
 # noisy typing refactoring of get_item_details
 7b7211ac79c248a79ba8a999ff34e734d874c0ae
 d827ed21adc7b36047e247cbb0dc6388d048a7f9
+
+# `frappe.flags.in_test` => `frappe.in_test`
+7a482a69985c952de0e8193c9d4e086aee65ee6d
+
+# these commits actually changed something valuable
+# but they have a lot of whitespace changes that make blame noisy
+# PR: https://github.com/frappe/erpnext/pull/49816
+3ffd50c772735877b330d010c1058f623da8721d
+0e8f8677b8eb31e7834f72d1c6314d3c3f392ca6

@@ -2,19 +2,10 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.utils import _create_bin
-
-
-class UnitTestBin(UnitTestCase):
-	"""
-	Unit tests for Bin.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
 
 
 class TestBin(IntegrationTestCase):

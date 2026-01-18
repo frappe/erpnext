@@ -19,7 +19,6 @@ class POSClosingEntryTaxes(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		rate: DF.Percent
 	# end: auto-generated types
 
 	pass

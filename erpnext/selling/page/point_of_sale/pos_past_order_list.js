@@ -17,8 +17,10 @@ erpnext.PointOfSale.PastOrderList = class {
 			`<section class="past-order-list">
 				<div class="filter-section">
 					<div class="label">${__("Recent Orders")}</div>
-					<div class="search-field"></div>
-					<div class="status-field"></div>
+					<div class="status-search-fields">
+						<div class="status-field"></div>
+						<div class="search-field"></div>
+					</div>
 				</div>
 				<div class="invoices-container"></div>
 			</section>`
@@ -38,9 +40,14 @@ erpnext.PointOfSale.PastOrderList = class {
 		});
 		const me = this;
 		this.$invoices_container.on("click", ".invoice-wrapper", function () {
-			const invoice_name = unescape($(this).attr("data-invoice-name"));
+			const invoice_clicked = $(this);
+			const invoice_doctype = invoice_clicked.attr("data-invoice-doctype");
+			const invoice_name = unescape(invoice_clicked.attr("data-invoice-name"));
 
-			me.events.open_invoice_data(invoice_name);
+			$(".invoice-wrapper").removeClass("invoice-selected");
+			invoice_clicked.addClass("invoice-selected");
+
+			me.events.open_invoice_data(invoice_doctype, invoice_name);
 		});
 	}
 
@@ -59,7 +66,7 @@ erpnext.PointOfSale.PastOrderList = class {
 			df: {
 				label: __("Invoice Status"),
 				fieldtype: "Select",
-				options: `Draft\nPaid\nConsolidated\nReturn`,
+				options: ["Draft", "Paid", "Consolidated", "Return", "Partly Paid"].join("\n"),
 				placeholder: __("Filter by invoice status"),
 				onchange: function () {
 					if (me.$component.is(":visible")) me.refresh_list();
@@ -99,17 +106,19 @@ erpnext.PointOfSale.PastOrderList = class {
 		const posting_datetime = frappe.datetime.str_to_user(
 			invoice.posting_date + " " + invoice.posting_time
 		);
-		return `<div class="invoice-wrapper" data-invoice-name="${escape(invoice.name)}">
-				<div class="invoice-name-date">
-					<div class="invoice-name">${invoice.name}</div>
-					<div class="invoice-date">
+		return `<div class="invoice-wrapper" data-invoice-doctype="${
+			invoice.doctype
+		}" data-invoice-name="${escape(invoice.name)}">
+				<div class="invoice-name-customer">
+					<div class="invoice-customer">
 						<svg class="mr-2" width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
 							<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
 						</svg>
-						${frappe.ellipsis(invoice.customer, 20)}
+						${frappe.ellipsis(invoice.customer_name, 20)}
 					</div>
+					<div class="invoice-name">${invoice.name}</div>
 				</div>
-				<div class="invoice-total-status">
+				<div class="invoice-total-date">
 					<div class="invoice-total">${format_currency(invoice.grand_total, invoice.currency) || 0}</div>
 					<div class="invoice-date">${posting_datetime}</div>
 				</div>

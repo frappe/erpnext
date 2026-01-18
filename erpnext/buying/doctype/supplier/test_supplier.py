@@ -11,16 +11,7 @@ from erpnext.exceptions import PartyDisabled
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Payment Term", "Payment Terms Template"]
 
 
-from frappe.tests import IntegrationTestCase, UnitTestCase
-
-
-class UnitTestSupplier(UnitTestCase):
-	"""
-	Unit tests for Supplier.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
+from frappe.tests import IntegrationTestCase
 
 
 class TestSupplier(IntegrationTestCase):
@@ -140,16 +131,14 @@ class TestSupplier(IntegrationTestCase):
 		self.assertEqual(details.tax_category, "_Test Tax Category 1")
 
 		address = frappe.get_doc(
-			dict(
-				doctype="Address",
-				address_title="_Test Address With Tax Category",
-				tax_category="_Test Tax Category 2",
-				address_type="Billing",
-				address_line1="Station Road",
-				city="_Test City",
-				country="India",
-				links=[dict(link_doctype="Supplier", link_name="_Test Supplier With Tax Category")],
-			)
+			doctype="Address",
+			address_title="_Test Address With Tax Category",
+			tax_category="_Test Tax Category 2",
+			address_type="Billing",
+			address_line1="Station Road",
+			city="_Test City",
+			country="India",
+			links=[dict(link_doctype="Supplier", link_name="_Test Supplier With Tax Category")],
 		).insert()
 
 		# Tax Category with Address
@@ -201,7 +190,7 @@ class TestSupplierPortal(IntegrationTestCase):
 		supplier.append("portal_users", {"user": user})
 		supplier.save()
 
-		frappe.set_user(user)
-		_, suppliers = get_customers_suppliers("Purchase Order", user)
+		with self.set_user(user):
+			_, suppliers = get_customers_suppliers("Purchase Order", user)
 
-		self.assertIn(supplier.name, suppliers)
+			self.assertIn(supplier.name, suppliers)

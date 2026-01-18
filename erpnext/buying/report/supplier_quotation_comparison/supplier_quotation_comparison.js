@@ -76,14 +76,14 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 			},
 		},
 		{
-			fieldname: "group_by",
-			label: __("Group by"),
+			fieldname: "categorize_by",
+			label: __("Categorize by"),
 			fieldtype: "Select",
 			options: [
-				{ label: __("Group by Supplier"), value: "Group by Supplier" },
-				{ label: __("Group by Item"), value: "Group by Item" },
+				{ label: __("Categorize by Supplier"), value: "Categorize by Supplier" },
+				{ label: __("Categorize by Item"), value: "Categorize by Item" },
 			],
-			default: __("Group by Supplier"),
+			default: __("Categorize by Supplier"),
 		},
 		{
 			fieldtype: "Check",

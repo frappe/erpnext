@@ -6,7 +6,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils.user import is_website_user
 
-__version__ = "16.0.0-dev"
+__version__ = "17.0.0-dev"
 
 
 def get_default_company(user=None):
@@ -57,7 +57,7 @@ def get_company_currency(company):
 
 def set_perpetual_inventory(enable=1, company=None):
 	if not company:
-		company = "_Test Company" if frappe.flags.in_test else get_default_company()
+		company = "_Test Company" if frappe.in_test else get_default_company()
 
 	company = frappe.get_doc("Company", company)
 	company.enable_perpetual_inventory = enable
@@ -77,7 +77,7 @@ def encode_company_abbr(name, company=None, abbr=None):
 
 def is_perpetual_inventory_enabled(company):
 	if not company:
-		company = "_Test Company" if frappe.flags.in_test else get_default_company()
+		company = "_Test Company" if frappe.in_test else get_default_company()
 
 	if not hasattr(frappe.local, "enable_perpetual_inventory"):
 		frappe.local.enable_perpetual_inventory = {}

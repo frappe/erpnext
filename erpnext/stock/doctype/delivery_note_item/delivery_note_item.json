@@ -77,6 +77,7 @@
   "against_sales_invoice",
   "si_detail",
   "dn_detail",
+  "against_pick_list",
   "pick_list_item",
   "section_break_40",
   "pick_serial_and_batch",
@@ -935,6 +936,16 @@
   {
    "fieldname": "column_break_fguf",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "against_pick_list",
+   "fieldtype": "Link",
+   "label": "Against Pick List",
+   "no_copy": 1,
+   "options": "Pick List",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
@@ -942,7 +953,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-03-07 12:33:40.868499",
+ "modified": "2025-05-31 19:51:32.651562",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

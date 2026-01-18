@@ -8,26 +8,34 @@
   "item_code",
   "from_warehouse",
   "warehouse",
-  "item_name",
   "material_request_type",
-  "quantity",
-  "required_bom_qty",
   "column_break_4",
-  "schedule_date",
+  "item_name",
   "uom",
   "conversion_factor",
+  "section_break_azee",
+  "from_bom",
+  "column_break_scnz",
+  "main_item_code",
+  "section_break_qnpt",
+  "required_bom_qty",
+  "projected_qty",
+  "column_break_wack",
+  "quantity",
+  "stock_reserved_qty",
   "item_details",
+  "schedule_date",
   "description",
   "min_order_qty",
   "section_break_8",
   "sales_order",
+  "sub_assembly_item_reference",
   "bin_qty_section",
   "actual_qty",
   "requested_qty",
   "reserved_qty_for_production",
   "column_break_yhelv",
   "ordered_qty",
-  "projected_qty",
   "safety_stock"
  ],
  "fields": [
@@ -47,7 +55,7 @@
    "label": "Item Name"
   },
   {
-   "columns": 2,
+   "columns": 3,
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -58,7 +66,7 @@
    "search_index": 1
   },
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "material_request_type",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -70,17 +78,19 @@
    "fieldtype": "Column Break"
   },
   {
-   "columns": 2,
+   "columns": 3,
    "fieldname": "quantity",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Plan to Request Qty",
+   "label": "Required Qty",
    "no_copy": 1,
    "reqd": 1
   },
   {
+   "columns": 2,
    "fieldname": "projected_qty",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Projected Qty",
    "read_only": 1
   },
@@ -89,7 +99,6 @@
    "default": "0",
    "fieldname": "actual_qty",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Qty In Stock",
    "no_copy": 1,
    "read_only": 1
@@ -172,11 +181,11 @@
    "read_only": 1
   },
   {
-   "columns": 2,
+   "columns": 3,
    "fieldname": "required_bom_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty As Per BOM",
+   "label": "Reqd Qty (BOM)",
    "no_copy": 1,
    "read_only": 1
   },
@@ -187,7 +196,7 @@
    "read_only": 1
   },
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "schedule_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -201,17 +210,70 @@
   {
    "fieldname": "column_break_yhelv",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_azee",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_wack",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stock_reserved_qty",
+   "fieldtype": "Float",
+   "label": "Stock Reserved Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "from_bom",
+   "fieldname": "from_bom",
+   "fieldtype": "Link",
+   "label": "From BOM",
+   "mandatory_depends_on": "eval:parent.reserve_stock",
+   "no_copy": 1,
+   "options": "BOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sub_assembly_item_reference",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Sub Assembly Item Reference",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_qnpt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "main_item_code",
+   "fieldname": "main_item_code",
+   "fieldtype": "Link",
+   "label": "Main Item Code",
+   "mandatory_depends_on": "eval:parent.reserve_stock",
+   "no_copy": 1,
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_scnz",
+   "fieldtype": "Column Break"
   }
  ],
+ "grid_page_length": 50,
  "istable": 1,
  "links": [],
- "modified": "2024-12-30 18:06:22.288340",
+ "modified": "2025-10-30 17:01:25.996352",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Request Plan Item",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

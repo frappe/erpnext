@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt
 
 from erpnext.controllers.status_updater import StatusUpdater
@@ -128,11 +129,11 @@ class PackingSlip(StatusUpdater):
 						item.idx
 					)
 				)
-
+			DocType = frappe.qb.DocType("Delivery Note Item" if item.dn_detail else "Packed Item")
 			remaining_qty = frappe.db.get_value(
 				"Delivery Note Item" if item.dn_detail else "Packed Item",
 				{"name": item.dn_detail or item.pi_detail, "docstatus": 0},
-				["sum(qty - packed_qty)"],
+				Sum(DocType.qty - DocType.packed_qty),
 			)
 
 			if remaining_qty is None:
@@ -174,7 +175,9 @@ class PackingSlip(StatusUpdater):
 		return (
 			cint(
 				frappe.db.get_value(
-					"Packing Slip", {"delivery_note": self.delivery_note, "docstatus": 1}, ["max(to_case_no)"]
+					"Packing Slip",
+					{"delivery_note": self.delivery_note, "docstatus": 1},
+					[{"MAX": "to_case_no"}],
 				)
 			)
 			+ 1

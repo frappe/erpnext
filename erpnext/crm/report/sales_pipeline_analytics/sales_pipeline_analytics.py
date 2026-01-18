@@ -8,6 +8,7 @@ from itertools import groupby
 import frappe
 from dateutil.relativedelta import relativedelta
 from frappe import _
+from frappe.query_builder.custom import Month, MonthName, Quarter
 from frappe.utils import cint, flt, getdate
 
 from erpnext.setup.utils import get_exchange_rate
@@ -74,7 +75,7 @@ class SalesPipelineAnalytics:
 		]
 
 		self.data_based_on = {
-			"Number": "count(name) as count",
+			"Number": {"COUNT": "*", "as": "count"},
 			"Amount": "opportunity_amount as amount",
 		}[self.filters.get("based_on")]
 
@@ -82,40 +83,52 @@ class SalesPipelineAnalytics:
 			self.filters.get("pipeline_by")
 		]
 
-		self.group_by_period = {
-			"Monthly": "month(expected_closing)",
-			"Quarterly": "QUARTER(expected_closing)",
-		}[self.filters.get("range")]
+		opp = frappe.qb.DocType("Opportunity")
+
+		if self.filters.get("range") == "Monthly":
+			self.group_by_period = Month(opp.expected_closing)
+			self.duration = MonthName(opp.expected_closing).as_("month")
+		else:
+			self.group_by_period = Quarter(opp.expected_closing)
+			self.duration = Quarter(opp.expected_closing).as_("quarter")
 
 		self.pipeline_by = {"Owner": "opportunity_owner", "Sales Stage": "sales_stage"}[
 			self.filters.get("pipeline_by")
 		]
-
-		self.duration = {
-			"Monthly": "monthname(expected_closing) as month",
-			"Quarterly": "QUARTER(expected_closing) as quarter",
-		}[self.filters.get("range")]
 
 		self.period_by = {"Monthly": "month", "Quarterly": "quarter"}[self.filters.get("range")]
 
 	def get_data(self):
 		self.get_fields()
 
+		opp = frappe.qb.DocType("Opportunity")
+		query = frappe.qb.get_query(
+			"Opportunity",
+			filters=self.get_conditions(),
+			ignore_permissions=True,
+		)
+
+		pipeline_field = opp._assign if self.group_by_based_on == "_assign" else opp.sales_stage
+
 		if self.filters.get("based_on") == "Number":
-			self.query_result = frappe.db.get_list(
-				"Opportunity",
-				filters=self.get_conditions(),
-				fields=[self.based_on, self.data_based_on, self.duration],
-				group_by=f"{self.group_by_based_on},{self.group_by_period}",
-				order_by=self.group_by_period,
+			self.query_result = (
+				query.select(
+					pipeline_field.as_(self.pipeline_by),
+					frappe.query_builder.functions.Count("*").as_("count"),
+					self.duration,
+				)
+				.groupby(pipeline_field, self.group_by_period)
+				.orderby(self.group_by_period)
+				.run(as_dict=True)
 			)
 
 		if self.filters.get("based_on") == "Amount":
-			self.query_result = frappe.db.get_list(
-				"Opportunity",
-				filters=self.get_conditions(),
-				fields=[self.based_on, self.data_based_on, self.duration, "currency"],
-			)
+			self.query_result = query.select(
+				pipeline_field.as_(self.pipeline_by),
+				opp.opportunity_amount.as_("amount"),
+				self.duration,
+				opp.currency,
+			).run(as_dict=True)
 
 			self.convert_to_base_currency()
 

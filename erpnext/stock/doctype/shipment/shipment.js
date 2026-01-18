@@ -162,7 +162,7 @@ frappe.ui.form.on("Shipment", {
 			args: { contact: contact_name },
 			callback: function (r) {
 				if (r.message) {
-					if (!(r.message.contact_email && (r.message.contact_phone || r.message.contact_mobile))) {
+					if (!(r.message.contact_email || r.message.contact_phone || r.message.contact_mobile)) {
 						if (contact_type == "Delivery") {
 							frm.set_value("delivery_contact_name", "");
 							frm.set_value("delivery_contact", "");

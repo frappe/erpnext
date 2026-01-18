@@ -96,8 +96,20 @@
                         "account_number": "1132.000"
                     }, 
                     "account_number": "1130.000"
-                }, 
+                },
+                "Pajak Dibayar di Muka": {
+                    "PPN Masukan": {
+                        "account_number": "1151.001", 
+                        "account_type": "Tax"
+                    },
+                    "PPh 23 Dibayar di Muka": {
+                        "account_number": "1152.001", 
+                        "account_type": "Tax"
+                    }, 
+                    "account_number": "1150.000"
+                },
                 "account_number": "1100.000"
+                
             }, 
             "Aktiva Tetap": {
                 "Aktiva": {
@@ -557,6 +569,10 @@
                     "Hutang Pajak": {
                         "account_number": "2141.000", 
                         "account_type": "Payable"
+                    },
+                    "PPN Keluaran": {
+                        "account_number": "2142.000", 
+                        "account_type": "Tax"
                     }, 
                     "account_number": "2140.000"
                 }, 

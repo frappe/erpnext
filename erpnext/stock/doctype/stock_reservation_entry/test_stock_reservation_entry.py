@@ -4,8 +4,8 @@
 from random import randint
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
-from frappe.utils import today
+from frappe.tests import IntegrationTestCase
+from frappe.utils import cint, today
 
 from erpnext.selling.doctype.sales_order.sales_order import create_pick_list, make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -19,15 +19,6 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 	has_reserved_stock,
 )
 from erpnext.stock.utils import get_stock_balance
-
-
-class UnitTestStockReservationEntry(UnitTestCase):
-	"""
-	Unit tests for StockReservationEntry.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
 
 
 class TestStockReservationEntry(IntegrationTestCase):
@@ -259,6 +250,8 @@ class TestStockReservationEntry(IntegrationTestCase):
 		},
 	)
 	def test_stock_reservation_against_sales_order(self) -> None:
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 		items_details = create_items()
 		se = create_material_receipt(items_details, self.warehouse, qty=10)
 
@@ -335,16 +328,29 @@ class TestStockReservationEntry(IntegrationTestCase):
 			so = make_sales_order(
 				item_list=item_list,
 				warehouse=self.warehouse,
+				do_not_submit=True,
 			)
+
+			for row in so.items:
+				row.qty = 80
+
+			so.save()
+			so.submit()
 			so.create_stock_reservation_entries()
 
 			# Test - 7: Partial Delivery against Sales Order.
 			dn1 = make_delivery_note(so.name)
 
+			item_wise_serial_nos = {}
+
 			for item in dn1.items:
-				item.qty = randint(1, 10)
+				item.qty = 10
 
 			dn1.save()
+			for row in dn1.items:
+				if row.serial_no:
+					item_wise_serial_nos.setdefault(row.item_code, []).extend(get_serial_nos(row.serial_no))
+
 			dn1.submit()
 
 			for item in so.items:
@@ -359,7 +365,7 @@ class TestStockReservationEntry(IntegrationTestCase):
 				dn2 = make_delivery_note(so.name)
 
 				for item in dn2.items:
-					item.qty += randint(1, 10)
+					item.qty = 70
 
 				dn2.save()
 				dn2.submit()

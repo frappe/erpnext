@@ -6,11 +6,14 @@ import json
 import frappe
 from frappe import utils
 from frappe.model.docstatus import DocStatus
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	get_linked_payments,
 	reconcile_vouchers,
+)
+from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
+	set_default_account_for_mode_of_payment,
 )
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
@@ -19,15 +22,6 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.tests.utils import if_lending_app_installed
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Cost Center"]
-
-
-class UnitTestBankTransaction(UnitTestCase):
-	"""
-	Unit tests for BankTransaction.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
 
 
 class TestBankTransaction(IntegrationTestCase):
@@ -430,15 +424,13 @@ def add_vouchers(gl_account="_Test Bank - _TC"):
 	except frappe.DuplicateEntryError:
 		pass
 
-	mode_of_payment = frappe.get_doc({"doctype": "Mode of Payment", "name": "Cash"})
+	mode_of_payment = frappe.get_doc({"doctype": "Mode of Payment", "name": "Wire Transfer"})
 
-	if not frappe.db.get_value("Mode of Payment Account", {"company": "_Test Company", "parent": "Cash"}):
-		mode_of_payment.append("accounts", {"company": "_Test Company", "default_account": gl_account})
-		mode_of_payment.save()
+	set_default_account_for_mode_of_payment(mode_of_payment, "_Test Company", gl_account)
 
 	si = create_sales_invoice(customer="Fayva", qty=1, rate=109080, do_not_save=1)
 	si.is_pos = 1
-	si.append("payments", {"mode_of_payment": "Cash", "account": gl_account, "amount": 109080})
+	si.append("payments", {"mode_of_payment": "Wire Transfer", "amount": 109080})
 	si.insert()
 	si.submit()
 

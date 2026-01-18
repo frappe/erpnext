@@ -159,10 +159,11 @@ def assign_item_groups_to_svd_list(svd_list: SVDList) -> None:
 
 def get_item_groups_map(svd_list: SVDList) -> dict[str, str]:
 	item_codes = set(i["item_code"] for i in svd_list)
-	ig_list = frappe.get_list(
-		"Item", fields=["item_code", "item_group"], filters=[("item_code", "in", item_codes)]
+	return frappe._dict(
+		frappe.get_all(
+			"Item", fields=["name", "item_group"], filters=[("name", "in", item_codes)], as_list=True
+		)
 	)
-	return {i["item_code"]: i["item_group"] for i in ig_list}
 
 
 def get_item_groups_dict() -> ItemGroupsDict:

@@ -66,7 +66,7 @@ def get_stock_ledger_entries(filters):
 		"Stock Ledger Entry",
 		fields=SLE_FIELDS,
 		filters=sle_filters,
-		order_by="timestamp(posting_date, posting_time), creation",
+		order_by="posting_datetime, creation",
 	)
 
 

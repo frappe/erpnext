@@ -130,16 +130,13 @@ frappe.ui.form.on("Delivery Note Item", {
 		var d = locals[dt][dn];
 		frm.update_in_all_rows("items", "expense_account", d.expense_account);
 	},
-	cost_center: function (frm, dt, dn) {
-		var d = locals[dt][dn];
-		frm.update_in_all_rows("items", "cost_center", d.cost_center);
-	},
 });
 
 erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 	erpnext.selling.SellingController
 ) {
 	setup(doc) {
+		this.setup_accounting_dimension_triggers();
 		this.setup_posting_date_time_check();
 		super.setup(doc);
 		this.frm.make_methods = {
@@ -182,6 +179,61 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 							company: me.frm.doc.company,
 							project: me.frm.doc.project || undefined,
 						},
+						allow_child_item_selection: true,
+						child_fieldname: "items",
+						child_columns: ["item_code", "item_name", "qty", "delivered_qty"],
+					});
+				},
+				__("Get Items From")
+			);
+		}
+
+		if (
+			!doc.is_return &&
+			doc.status != "Closed" &&
+			this.frm.has_perm("write") &&
+			frappe.model.can_read("Pick List") &&
+			this.frm.doc.docstatus === 0
+		) {
+			this.frm.add_custom_button(
+				__("Pick List"),
+				function () {
+					if (!me.frm.doc.customer) {
+						frappe.throw({
+							title: __("Mandatory"),
+							message: __("Please Select a Customer"),
+						});
+					}
+					erpnext.utils.map_current_doc({
+						method: "erpnext.stock.doctype.pick_list.pick_list.create_dn_for_pick_lists",
+						source_doctype: "Pick List",
+						target: me.frm,
+						setters: [
+							{
+								fieldname: "customer",
+								default: me.frm.doc.customer,
+								label: __("Customer"),
+								fieldtype: "Link",
+								options: "Customer",
+								reqd: 1,
+								read_only: 1,
+							},
+							{
+								fieldname: "sales_order",
+								label: __("Sales Order"),
+								fieldtype: "Link",
+								options: "Sales Order",
+								link_filters: `[["Sales Order","customer","=","${me.frm.doc.customer}"],["Sales Order","docstatus","=","1"],["Sales Order","delivery_status","not in",["Closed","Fully Delivered"]]]`,
+							},
+						],
+						get_query_filters: {
+							company: me.frm.doc.company,
+						},
+						get_query_method: "erpnext.stock.doctype.pick_list.pick_list.get_pick_list_query",
+						size: "extra-large",
+						allow_child_item_selection: true,
+						child_fieldname: "locations",
+						child_columns: ["item_code", "item_name", "stock_qty", "delivered_qty"],
 					});
 				},
 				__("Get Items From")
@@ -279,6 +331,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 		if (
 			doc.docstatus == 1 &&
 			!doc.is_return &&
+			doc.per_returned != 100 &&
 			doc.status != "Closed" &&
 			flt(doc.per_billed) < 100 &&
 			frappe.model.can_create("Sales Invoice")

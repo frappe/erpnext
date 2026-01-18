@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.test_runner import make_test_objects
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, today
 
 from erpnext.controllers.item_variant import (
@@ -72,15 +72,6 @@ def make_item(item_code=None, properties=None, uoms=None, barcode=None):
 	item.insert()
 
 	return item
-
-
-class UnitTestItem(UnitTestCase):
-	"""
-	Unit tests for Item.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
 
 
 class TestItem(IntegrationTestCase):
@@ -314,6 +305,7 @@ class TestItem(IntegrationTestCase):
 						"company": "_Test Company",
 						"default_warehouse": "_Test Warehouse 2 - _TC",  # no override
 						"expense_account": "_Test Account Stock Expenses - _TC",  # override brand default
+						"default_cogs_account": "_Test Account Cost for Goods Sold - _TC",  # override brand default
 						"buying_cost_center": "_Test Write Off Cost Center - _TC",  # override item group default
 					}
 				],
@@ -324,7 +316,7 @@ class TestItem(IntegrationTestCase):
 			"item_code": "Test Item With Defaults",
 			"warehouse": "_Test Warehouse 2 - _TC",  # from item
 			"income_account": "_Test Account Sales - _TC",  # from brand
-			"expense_account": "_Test Account Stock Expenses - _TC",  # from item
+			"expense_account": "_Test Account Cost for Goods Sold - _TC",  # from item
 			"cost_center": "_Test Cost Center 2 - _TC",  # from item group
 		}
 		sales_item_details = get_item_details(
@@ -820,13 +812,6 @@ class TestItem(IntegrationTestCase):
 		self.assertTrue(get_data(warehouse="_Test Warehouse - _TC"))
 		self.assertTrue(get_data(item_group="All Item Groups"))
 
-	def test_empty_description(self):
-		item = make_item(properties={"description": "<p></p>"})
-		self.assertEqual(item.description, item.item_name)
-		item.description = ""
-		item.save()
-		self.assertEqual(item.description, item.item_name)
-
 	def test_item_type_field_change(self):
 		"""Check if critical fields like `is_stock_item`, `has_batch_no` are not changed if transactions exist."""
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -971,6 +956,43 @@ class TestItem(IntegrationTestCase):
 			"must be same as in Template" in str(ve.exception),
 			msg="Different Variant UOM should not be allowed when `allow_different_uom` is disabled.",
 		)
+
+	def test_opening_stock_for_serial_batch(self):
+		items = {
+			"Test Opening Stock for Serial No": {
+				"has_serial_no": 1,
+				"opening_stock": 5,
+				"serial_no_series": "SN-TOPN-.####",
+				"valuation_rate": 100,
+			},
+			"Test Opening Stock for Batch No": {
+				"has_batch_no": 1,
+				"opening_stock": 5,
+				"batch_number_series": "BCH-TOPN-.####",
+				"valuation_rate": 100,
+				"create_new_batch": 1,
+			},
+			"Test Opening Stock for Serial and Batch No": {
+				"has_serial_no": 1,
+				"has_batch_no": 1,
+				"opening_stock": 5,
+				"batch_number_series": "SN-BCH-TOPN-.####",
+				"serial_no_series": "BCH-SN-TOPN-.####",
+				"valuation_rate": 100,
+				"create_new_batch": 1,
+			},
+		}
+
+		for item_code, properties in items.items():
+			make_item(item_code, properties)
+
+			serial_and_batch_bundle = frappe.db.get_value(
+				"Stock Entry Detail", {"docstatus": 1, "item_code": item_code}, "serial_and_batch_bundle"
+			)
+			self.assertTrue(serial_and_batch_bundle)
+
+			sabb_qty = frappe.db.get_value("Serial and Batch Bundle", serial_and_batch_bundle, "total_qty")
+			self.assertEqual(sabb_qty, properties["opening_stock"])
 
 
 def set_item_variant_settings(fields):

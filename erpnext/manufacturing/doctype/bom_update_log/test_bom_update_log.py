@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import (
 	BOMMissingError,
@@ -12,16 +12,6 @@ from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import (
 	enqueue_replace_bom,
 	enqueue_update_cost,
 )
-
-
-class UnitTestBomUpdateLog(UnitTestCase):
-	"""
-	Unit tests for BomUpdateLog.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["BOM"]
 

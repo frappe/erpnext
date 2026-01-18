@@ -18,6 +18,7 @@
   "column_break_4",
   "account",
   "company",
+  "customer",
   "address_and_contact",
   "address_html",
   "column_break_10",
@@ -175,7 +176,7 @@
   {
    "fieldname": "state",
    "fieldtype": "Data",
-   "label": "State",
+   "label": "State/Province",
    "oldfieldname": "state",
    "oldfieldtype": "Select"
   },
@@ -258,13 +259,23 @@
    "fieldname": "is_rejected_warehouse",
    "fieldtype": "Check",
    "label": "Is Rejected Warehouse"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "depends_on": "eval:!doc.disabled",
+   "description": "Only to be used for Subcontracting Inward.",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-building",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-01-22 10:47:00.674163",
+ "modified": "2025-09-05 14:47:17.140099",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",
@@ -317,6 +328,7 @@
    "role": "Manufacturing User"
   }
  ],
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",

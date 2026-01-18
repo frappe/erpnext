@@ -228,7 +228,8 @@
    "fetch_from": "bank_account.iban",
    "fieldname": "iban",
    "fieldtype": "Read Only",
-   "label": "IBAN"
+   "label": "IBAN",
+   "options": "IBAN"
   },
   {
    "fetch_from": "bank_account.branch_code",
@@ -458,11 +459,12 @@
    "label": "Phone Number"
   }
  ],
+ "grid_page_length": 50,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-01-04 05:39:32.448857",
+ "modified": "2025-08-29 11:52:48.555415",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",
@@ -497,6 +499,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "show_preview_popup": 1,
  "sort_field": "creation",
  "sort_order": "DESC",

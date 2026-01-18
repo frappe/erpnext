@@ -47,22 +47,23 @@ frappe.query_reports["Trial Balance"] = {
 		{
 			fieldname: "cost_center",
 			label: __("Cost Center"),
-			fieldtype: "Link",
-			options: "Cost Center",
-			get_query: function () {
-				var company = frappe.query_report.get_filter_value("company");
-				return {
-					doctype: "Cost Center",
-					filters: {
-						company: company,
-					},
-				};
+			fieldtype: "MultiSelectList",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Cost Center", txt, {
+					company: frappe.query_report.get_filter_value("company"),
+				});
 			},
+			options: "Cost Center",
 		},
 		{
 			fieldname: "project",
 			label: __("Project"),
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Project", txt, {
+					company: frappe.query_report.get_filter_value("company"),
+				});
+			},
 			options: "Project",
 		},
 		{
@@ -111,11 +112,18 @@ frappe.query_reports["Trial Balance"] = {
 			fieldtype: "Check",
 			default: 1,
 		},
+		{
+			fieldname: "show_group_accounts",
+			label: __("Show Group Accounts"),
+			fieldtype: "Check",
+			default: 1,
+		},
 	],
 	formatter: erpnext.financial_statements.formatter,
 	tree: true,
 	name_field: "account",
 	parent_field: "parent_account",
+	export_hidden_cols: true,
 	initial_depth: 3,
 };
 

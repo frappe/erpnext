@@ -16,6 +16,7 @@
   "stock_uom",
   "price_list_defaults_section",
   "auto_insert_price_list_rate_if_missing",
+  "update_price_list_based_on",
   "column_break_12",
   "update_existing_price_list_rate",
   "conversion_factor_section",
@@ -35,6 +36,7 @@
   "show_barcode_field",
   "clean_description_html",
   "allow_internal_transfer_at_arms_length_price",
+  "validate_material_transfer_warehouses",
   "serial_and_batch_item_settings_tab",
   "section_break_7",
   "allow_existing_serial_no",
@@ -528,14 +530,31 @@
    "fieldname": "allow_to_make_quality_inspection_after_purchase_or_delivery",
    "fieldtype": "Check",
    "label": "Allow to Make Quality Inspection after Purchase / Delivery"
+  },
+  {
+   "default": "Rate",
+   "depends_on": "eval: doc.auto_insert_price_list_rate_if_missing",
+   "fieldname": "update_price_list_based_on",
+   "fieldtype": "Select",
+   "label": "Update Price List Based On",
+   "mandatory_depends_on": "eval: doc.auto_insert_price_list_rate_if_missing",
+   "options": "Rate\nPrice List Rate"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the source and target warehouse in the Material Transfer Stock Entry must be different else an error will be thrown. If inventory dimensions are present, same source and target warehouse can be allowed but atleast any one of the inventory dimension fields must be different.",
+   "fieldname": "validate_material_transfer_warehouses",
+   "fieldtype": "Check",
+   "label": "Validate Material Transfer Warehouses"
   }
  ],
+ "hide_toolbar": 1,
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-04-11 18:56:35.781929",
+ "modified": "2026-01-02 18:19:59.034785",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

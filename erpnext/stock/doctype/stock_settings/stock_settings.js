@@ -51,4 +51,30 @@ frappe.ui.form.on("Stock Settings", {
 			}
 		);
 	},
+	auto_insert_price_list_rate_if_missing(frm) {
+		if (!frm.doc.auto_insert_price_list_rate_if_missing) return;
+
+		frm.set_value(
+			"update_price_list_based_on",
+			cint(frappe.defaults.get_default("editable_price_list_rate")) ? "Price List Rate" : "Rate"
+		);
+	},
+	update_price_list_based_on(frm) {
+		if (
+			frm.doc.update_price_list_based_on === "Price List Rate" &&
+			!cint(frappe.defaults.get_default("editable_price_list_rate"))
+		) {
+			const dialog = frappe.warn(
+				__("Incompatible Setting Detected"),
+				__(
+					"<p>Price List Rate has not been set as editable in Selling Settings. In this scenario, setting <strong>Update Price List Based On</strong> to <strong>Price List Rate</strong> will prevent auto-updation of Item Price.</p>Are you sure you want to continue?"
+				)
+			);
+			dialog.set_secondary_action(() => {
+				frm.set_value("update_price_list_based_on", "Rate");
+				dialog.hide();
+			});
+			return;
+		}
+	},
 });

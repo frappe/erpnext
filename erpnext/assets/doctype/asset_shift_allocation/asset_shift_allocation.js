@@ -2,6 +2,15 @@
 // For license information, please see license.txt
 frappe.ui.form.on("Asset Shift Allocation", {
 	onload: function (frm) {
+		frm.set_query("asset", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+					docstatus: 1,
+				},
+			};
+		});
+
 		frm.events.make_schedules_editable(frm);
 	},
 

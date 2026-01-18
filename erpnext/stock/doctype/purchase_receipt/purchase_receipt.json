@@ -40,6 +40,7 @@
   "ignore_pricing_rule",
   "sec_warehouse",
   "scan_barcode",
+  "last_scanned_warehouse",
   "column_break_31",
   "set_warehouse",
   "set_from_warehouse",
@@ -58,8 +59,6 @@
   "column_break_27",
   "total",
   "net_total",
-  "tax_withholding_net_total",
-  "base_tax_withholding_net_total",
   "taxes_charges_section",
   "tax_category",
   "taxes_and_charges",
@@ -97,6 +96,7 @@
   "discount_amount",
   "sec_tax_breakup",
   "other_charges_calculation",
+  "item_wise_tax_details",
   "pricing_rule_details",
   "pricing_rules",
   "raw_material_details",
@@ -112,8 +112,10 @@
   "contact_mobile",
   "contact_email",
   "section_break_98",
-  "shipping_address",
+  "dispatch_address",
+  "dispatch_address_display",
   "column_break_100",
+  "shipping_address",
   "shipping_address_display",
   "billing_address_section",
   "billing_address",
@@ -241,6 +243,7 @@
    "width": "100px"
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -889,7 +892,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nPartly Billed\nTo Bill\nCompleted\nReturn Issued\nCancelled\nClosed",
+   "options": "\nDraft\nPartly Billed\nTo Bill\nCompleted\nReturn\nReturn Issued\nCancelled\nClosed",
    "print_hide": 1,
    "print_width": "150px",
    "read_only": 1,
@@ -1081,7 +1084,8 @@
    "no_copy": 1,
    "options": "Delivery Note",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "scan_barcode",
@@ -1198,7 +1202,7 @@
   {
    "fieldname": "section_break_98",
    "fieldtype": "Section Break",
-   "label": "Company Shipping Address"
+   "label": "Shipping Address"
   },
   {
    "fieldname": "billing_address_section",
@@ -1243,37 +1247,50 @@
    "label": "Named Place"
   },
   {
-   "depends_on": "eval: (doc.is_subcontracted && !doc.is_old_subcontracting_flow)",
+   "depends_on": "subcontracting_receipt",
    "fieldname": "subcontracting_receipt",
    "fieldtype": "Link",
    "label": "Subcontracting Receipt",
    "options": "Subcontracting Receipt",
+   "read_only": 1,
    "search_index": 1
   },
   {
-   "fieldname": "tax_withholding_net_total",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "Tax Withholding Net Total",
-   "no_copy": 1,
-   "options": "currency",
+   "fieldname": "dispatch_address",
+   "fieldtype": "Link",
+   "label": "Dispatch Address Template",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "dispatch_address_display",
+   "fieldtype": "Text Editor",
+   "label": "Dispatch Address",
+   "print_hide": 1,
    "read_only": 1
   },
   {
-   "fieldname": "base_tax_withholding_net_total",
-   "fieldtype": "Currency",
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
+  },
+  {
+   "fieldname": "item_wise_tax_details",
+   "fieldtype": "Table",
    "hidden": 1,
-   "label": "Base Tax Withholding Net Total",
+   "label": "Item Wise Tax Details",
    "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
+   "options": "Item Wise Tax Detail"
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-13 16:55:14.129055",
+ "modified": "2025-11-27 16:46:30.210628",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
@@ -1334,6 +1351,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "status, posting_date, supplier",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

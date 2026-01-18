@@ -63,7 +63,7 @@ def update_cost_in_level(doc: "BOMUpdateLog", bom_list: list[str], batch_name: i
 	except Exception:
 		handle_exception(doc)
 	finally:
-		if not frappe.flags.in_test:
+		if not frappe.in_test:
 			frappe.db.commit()  # nosemgrep
 
 
@@ -120,7 +120,7 @@ def update_cost_in_boms(bom_list: list[str]) -> None:
 		bom_doc.calculate_cost(save_updates=True, update_hour_rate=True)
 		bom_doc.db_update()
 
-		if (index % 50 == 0) and not frappe.flags.in_test:
+		if (index % 50 == 0) and not frappe.in_test:
 			frappe.db.commit()  # nosemgrep
 
 
@@ -216,7 +216,7 @@ def set_values_in_log(log_name: str, values: dict[str, Any], commit: bool = Fals
 		query = query.set(key, value)
 	query.run()
 
-	if commit and not frappe.flags.in_test:
+	if commit and not frappe.in_test:
 		frappe.db.commit()  # nosemgrep
 
 

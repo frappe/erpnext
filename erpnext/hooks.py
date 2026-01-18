@@ -8,7 +8,7 @@ app_email = "hello@frappe.io"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
-app_home = "/app/home"
+app_home = "/desk"
 
 add_to_apps_screen = [
 	{
@@ -20,13 +20,20 @@ add_to_apps_screen = [
 	}
 ]
 
-develop_version = "15.x.x-develop"
+develop_version = "17.x.x-develop"
 
 app_include_js = "erpnext.bundle.js"
 app_include_css = "erpnext.bundle.css"
-web_include_js = "erpnext-web.bundle.js"
 web_include_css = "erpnext-web.bundle.css"
 email_css = "email_erpnext.bundle.css"
+
+app_include_icons = [
+	"/assets/erpnext/icons/pos-icons.svg",
+]
+
+web_include_icons = [
+	"/assets/erpnext/icons/pos-icons.svg",
+]
 
 doctype_js = {
 	"Address": "public/js/address.js",
@@ -44,7 +51,9 @@ doctype_list_js = {
 	],
 }
 
-override_doctype_class = {"Address": "erpnext.accounts.custom.address.ERPNextAddress"}
+page_js = {"print": "public/js/print.js"}
+
+extend_doctype_class = {"Address": "erpnext.accounts.custom.address.ERPNextAddress"}
 
 override_whitelisted_methods = {"frappe.www.contact.send_message": "erpnext.templates.utils.send_message"}
 
@@ -56,9 +65,6 @@ setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
 setup_wizard_complete = "erpnext.setup.setup_wizard.setup_wizard.setup_demo"
 setup_wizard_test = "erpnext.setup.setup_wizard.test_setup_wizard.run_setup_wizard_test"
 
-before_install = [
-	"erpnext.setup.install.check_setup_wizard_not_completed",
-]
 after_install = "erpnext.setup.install.after_install"
 
 boot_session = "erpnext.startup.boot.boot_session"
@@ -140,6 +146,14 @@ website_route_rules = [
 		},
 	},
 	{"from_route": "/purchase-orders", "to_route": "Purchase Order"},
+	{
+		"from_route": "/purchase-orders/<path:name>",
+		"to_route": "order",
+		"defaults": {
+			"doctype": "Purchase Order",
+			"parents": [{"label": "Purchase Order", "route": "purchase-orders"}],
+		},
+	},
 	{
 		"from_route": "/purchase-orders/<path:name>",
 		"to_route": "order",
@@ -276,6 +290,7 @@ standard_portal_menu_items = [
 sounds = [
 	{"name": "incoming-call", "src": "/assets/erpnext/sounds/incoming-call.mp3", "volume": 0.2},
 	{"name": "call-disconnect", "src": "/assets/erpnext/sounds/call-disconnect.mp3", "volume": 0.2},
+	{"name": "numpad-touch", "src": "/assets/erpnext/sounds/numpad-touch.mp3", "volume": 0.8},
 ]
 
 has_upload_permission = {"Employee": "erpnext.setup.doctype.employee.employee.has_upload_permission"}
@@ -352,10 +367,11 @@ doc_events = {
 	},
 	"Sales Invoice": {
 		"on_submit": [
-			"erpnext.regional.create_transaction_log",
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
 		],
-		"on_cancel": ["erpnext.regional.italy.utils.sales_invoice_on_cancel"],
+		"on_cancel": [
+			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
+		],
 		"on_trash": "erpnext.regional.check_deletion_permission",
 	},
 	"Purchase Invoice": {
@@ -365,11 +381,6 @@ doc_events = {
 		]
 	},
 	"Payment Entry": {
-		"on_submit": [
-			"erpnext.regional.create_transaction_log",
-			"erpnext.accounts.doctype.dunning.dunning.resolve_dunning",
-		],
-		"on_cancel": ["erpnext.accounts.doctype.dunning.dunning.resolve_dunning"],
 		"on_trash": "erpnext.regional.check_deletion_permission",
 	},
 	"Address": {
@@ -409,28 +420,30 @@ scheduler_events = {
 			"erpnext.manufacturing.doctype.bom_update_log.bom_update_log.resume_bom_cost_update_jobs",
 		],
 		"0/30 * * * *": [
-			"erpnext.utilities.doctype.video.video.update_youtube_data",
+			"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.run_parallel_reposting",
 		],
 		# Hourly but offset by 30 minutes
 		"30 * * * *": [
 			"erpnext.accounts.doctype.gl_entry.gl_entry.rename_gle_sle_docs",
 		],
 		# Daily but offset by 45 minutes
-		"45 0 * * *": [
-			"erpnext.stock.reorder_item.reorder_item",
-		],
+		"45 0 * * *": [],
 	},
 	"hourly": [
-		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
-		"erpnext.projects.doctype.project.project.project_status_update_reminder",
 		"erpnext.projects.doctype.project.project.hourly_reminder",
-		"erpnext.projects.doctype.project.project.collect_project_status",
 	],
-	"hourly_long": [
+	"hourly_long": [],
+	"hourly_maintenance": [
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
 		"erpnext.utilities.bulk_transaction.retry",
+		"erpnext.projects.doctype.project.project.collect_project_status",
+		"erpnext.projects.doctype.project.project.project_status_update_reminder",
+		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
+		"erpnext.utilities.doctype.video.video.update_youtube_data",
 	],
-	"daily": [
+	"daily": [],
+	"daily_long": [],
+	"daily_maintenance": [
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
 		"erpnext.crm.doctype.opportunity.opportunity.auto_close_opportunity",
 		"erpnext.controllers.accounts_controller.update_invoice_status",
@@ -454,16 +467,15 @@ scheduler_events = {
 		"erpnext.accounts.utils.auto_create_exchange_rate_revaluation_daily",
 		"erpnext.accounts.utils.run_ledger_health_checks",
 		"erpnext.assets.doctype.asset_maintenance_log.asset_maintenance_log.update_asset_maintenance_log_status",
-	],
-	"weekly": [
-		"erpnext.accounts.utils.auto_create_exchange_rate_revaluation_weekly",
-	],
-	"daily_long": [
+		"erpnext.stock.reorder_item.reorder_item",
 		"erpnext.accounts.doctype.process_subscription.process_subscription.create_subscription_process",
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.auto_update_latest_price_in_all_boms",
 		"erpnext.crm.utils.open_leads_opportunities_based_on_todays_event",
 		"erpnext.assets.doctype.asset.depreciation.post_depreciation_entries",
+	],
+	"weekly": [
+		"erpnext.accounts.utils.auto_create_exchange_rate_revaluation_weekly",
 	],
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.process_deferred_accounting",
@@ -600,6 +612,7 @@ user_privacy_documents = [
 	},
 ]
 
+
 # ERPNext doctypes for Global Search
 global_search_doctypes = {
 	"Default": [
@@ -644,6 +657,10 @@ global_search_doctypes = {
 	],
 }
 
+ignore_links_on_delete = [
+	"Tax Withholding Entry",
+]
+
 additional_timeline_content = {"*": ["erpnext.telephony.doctype.call_log.call_log.get_linked_call_logs"]}
 
 
@@ -660,3 +677,8 @@ default_log_clearing_doctypes = {
 export_python_type_annotations = True
 
 fields_for_group_similar_items = ["qty", "amount"]
+
+# Translation
+# ------------
+# List of apps whose translatable strings should be excluded from this app's translations.
+ignore_translatable_strings_from = ["frappe"]

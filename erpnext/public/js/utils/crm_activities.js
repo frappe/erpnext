@@ -35,6 +35,8 @@ erpnext.utils.CRMActivities = class CRMActivities {
 					var activities_html = frappe.render_template("crm_activities", {
 						tasks: r.message.tasks,
 						events: r.message.events,
+						tasks_history: r.message.tasks_history,
+						events_history: r.message.events_history,
 					});
 
 					$(activities_html).appendTo(me.open_activities_wrapper);

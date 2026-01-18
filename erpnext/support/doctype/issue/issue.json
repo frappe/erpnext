@@ -233,6 +233,8 @@
    "options": "Project"
   },
   {
+   "fetch_from": "email_account.company",
+   "fetch_if_empty": 1,
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -391,7 +393,7 @@
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2025-02-18 21:18:52.797745",
+ "modified": "2025-09-25 11:10:53.556731",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",

@@ -4,22 +4,13 @@
 import random
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.manufacturing.doctype.bom_creator.bom_creator import (
 	add_item,
 	add_sub_assembly,
 )
 from erpnext.stock.doctype.item.test_item import make_item
-
-
-class UnitTestBomCreator(UnitTestCase):
-	"""
-	Unit tests for BomCreator.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
 
 
 class TestBOMCreator(IntegrationTestCase):
@@ -72,8 +63,10 @@ class TestBOMCreator(IntegrationTestCase):
 
 		fg_valuation_rate = 0
 		for row in doc.items:
-			if not row.is_expandable:
+			if row.fg_item == final_product:
 				fg_valuation_rate += row.amount
+
+			if not row.is_expandable:
 				self.assertEqual(row.fg_item, "Frame Assembly")
 				self.assertEqual(row.fg_reference_id, doc.items[0].name)
 
@@ -114,8 +107,10 @@ class TestBOMCreator(IntegrationTestCase):
 
 		fg_valuation_rate = 0
 		for row in doc.items:
-			if not row.is_expandable:
+			if row.fg_item == final_product:
 				fg_valuation_rate += row.amount
+
+			if not row.is_expandable:
 				self.assertEqual(row.fg_item, "Bicycle")
 				self.assertEqual(row.fg_reference_id, doc.name)
 
@@ -179,8 +174,10 @@ class TestBOMCreator(IntegrationTestCase):
 
 		fg_valuation_rate = 0
 		for row in doc.items:
-			if not row.is_expandable:
+			if row.fg_item == final_product:
 				fg_valuation_rate += row.amount
+
+			if not row.is_expandable:
 				self.assertEqual(row.fg_item, "Pedal Assembly")
 				self.assertEqual(row.qty, 2.0)
 				self.assertEqual(row.fg_reference_id, doc.items[0].name)

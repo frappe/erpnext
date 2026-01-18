@@ -39,7 +39,7 @@ class PriceList(Document):
 
 	def set_default_if_missing(self):
 		if cint(self.selling):
-			if not frappe.db.get_single_value("Selling Settings", "selling_price_list"):
+			if not frappe.get_single_value("Selling Settings", "selling_price_list"):
 				frappe.set_value("Selling Settings", "Selling Settings", "selling_price_list", self.name)
 
 		elif cint(self.buying):

@@ -35,7 +35,7 @@ class TestSalesPartnerTargetVarianceBasedOnItemGroup(IntegrationTestCase):
 			qty=20,
 			do_not_submit=True,
 		)
-		si.sales_partner = sales_partner
+		si.sales_partner = sales_partner.name
 		si.commission_rate = 5
 		si.submit()
 

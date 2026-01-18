@@ -56,7 +56,7 @@ frappe.ui.form.on("Inventory Dimension", {
 			];
 
 			frm.fields.forEach((field) => {
-				if (!in_list(allow_to_edit_fields, field.df.fieldname)) {
+				if (!allow_to_edit_fields.includes(field.df.fieldname)) {
 					frm.set_df_property(field.df.fieldname, "read_only", "1");
 				}
 			});
@@ -75,7 +75,9 @@ frappe.ui.form.on("Inventory Dimension", {
 
 	set_parent_fields(frm) {
 		if (frm.doc.apply_to_all_doctypes) {
-			frm.set_df_property("fetch_from_parent", "options", frm.doc.reference_document);
+			let options = ["\n", frm.doc.reference_document];
+
+			frm.set_df_property("fetch_from_parent", "options", options);
 		} else if (frm.doc.document_type && frm.doc.istable) {
 			frappe.call({
 				method: "erpnext.stock.doctype.inventory_dimension.inventory_dimension.get_parent_fields",
@@ -85,7 +87,7 @@ frappe.ui.form.on("Inventory Dimension", {
 				},
 				callback: (r) => {
 					if (r.message && r.message.length) {
-						frm.set_df_property("fetch_from_parent", "options", [""].concat(r.message));
+						frm.set_df_property("fetch_from_parent", "options", ["\n"].concat(r.message));
 					} else {
 						frm.set_df_property("fetch_from_parent", "hidden", 1);
 					}

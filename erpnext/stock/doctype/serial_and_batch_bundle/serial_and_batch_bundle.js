@@ -55,14 +55,14 @@ frappe.ui.form.on("Serial and Batch Bundle", {
 
 			let fields = frm.events.get_prompt_fields(frm);
 
-			frm.add_custom_button(__("Make " + label), () => {
+			frm.add_custom_button(__("Make {0}", [label]), () => {
 				frappe.prompt(
 					fields,
 					(data) => {
 						frm.events.add_serial_batch(frm, data);
 					},
-					"Add " + label,
-					"Make " + label
+					__("Add {0}", [label]),
+					__("Make {0}", [label])
 				);
 			});
 		}

@@ -52,7 +52,7 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 		range_values = get_range_age(filters, fifo_queue, to_date, item_dict)
 
 		check_and_replace_valuations_if_moving_average(
-			range_values, details.valuation_method, details.valuation_rate
+			range_values, details.valuation_method, details.valuation_rate, filters.get("company")
 		)
 
 		row = [details.name, details.item_name, details.description, details.item_group, details.brand]
@@ -76,10 +76,12 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 	return data
 
 
-def check_and_replace_valuations_if_moving_average(range_values, item_valuation_method, valuation_rate):
+def check_and_replace_valuations_if_moving_average(
+	range_values, item_valuation_method, valuation_rate, company
+):
 	if item_valuation_method == "Moving Average" or (
 		not item_valuation_method
-		and frappe.db.get_single_value("Stock Settings", "valuation_method") == "Moving Average"
+		and frappe.get_cached_value("Company", company, "valuation_method") == "Moving Average"
 	):
 		for i in range(0, len(range_values), 2):
 			range_values[i + 1] = range_values[i] * valuation_rate
@@ -273,6 +275,7 @@ class FIFOSlots:
 					else:
 						serial_nos = get_serial_nos_from_bundle(d.serial_and_batch_bundle) or []
 
+				serial_nos = self.uppercase_serial_nos(serial_nos)
 				if d.actual_qty > 0:
 					self.__compute_incoming_stock(d, fifo_queue, transferred_item_key, serial_nos)
 				else:
@@ -288,6 +291,10 @@ class FIFOSlots:
 			self.item_details = self.__aggregate_details_by_item(self.item_details)
 
 		return self.item_details
+
+	def uppercase_serial_nos(self, serial_nos):
+		"Convert serial nos to uppercase for uniformity."
+		return [sn.upper() for sn in serial_nos]
 
 	def __init_key_stores(self, row: dict) -> tuple:
 		"Initialise keys and FIFO Queue."
@@ -492,6 +499,7 @@ class FIFOSlots:
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		entry = frappe.qb.DocType("Serial and Batch Entry")
 
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
 		query = (
 			frappe.qb.from_(bundle)
 			.join(entry)
@@ -501,7 +509,7 @@ class FIFOSlots:
 				(bundle.docstatus == 1)
 				& (entry.serial_no.isnotnull())
 				& (bundle.company == self.filters.get("company"))
-				& (bundle.posting_date <= self.filters.get("to_date"))
+				& (bundle.posting_datetime <= to_date)
 			)
 		)
 

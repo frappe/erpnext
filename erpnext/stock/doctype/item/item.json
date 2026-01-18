@@ -16,20 +16,22 @@
   "item_name",
   "item_group",
   "stock_uom",
+  "opening_stock",
+  "valuation_rate",
+  "standard_rate",
   "column_break0",
   "disabled",
   "allow_alternative_item",
   "is_stock_item",
   "has_variants",
-  "opening_stock",
-  "valuation_rate",
-  "standard_rate",
   "is_fixed_asset",
   "auto_create_assets",
   "is_grouped_asset",
   "asset_category",
   "asset_naming_series",
+  "section_break_znra",
   "over_delivery_receipt_allowance",
+  "column_break_wugd",
   "over_billing_allowance",
   "image",
   "section_break_11",
@@ -63,6 +65,8 @@
   "column_break_37",
   "has_serial_no",
   "serial_no_series",
+  "defaults_tab",
+  "item_defaults",
   "variants_section",
   "variant_of",
   "variant_based_on",
@@ -74,8 +78,6 @@
   "column_break_9s9o",
   "enable_deferred_revenue",
   "no_of_months",
-  "section_break_avcp",
-  "item_defaults",
   "purchasing_tab",
   "purchase_uom",
   "min_order_qty",
@@ -103,7 +105,13 @@
   "customer_details",
   "customer_items",
   "item_tax_section_break",
+  "section_break_oilf",
+  "column_break_aytr",
   "taxes",
+  "section_break_fxqz",
+  "purchase_tax_withholding_category",
+  "column_break_ltlb",
+  "sales_tax_withholding_category",
   "quality_tab",
   "inspection_required_before_purchase",
   "quality_inspection_template",
@@ -116,7 +124,9 @@
   "customer_code",
   "default_item_manufacturer",
   "default_manufacturer_part_no",
-  "total_projected_qty"
+  "total_projected_qty",
+  "capacity_in_days_section",
+  "production_capacity"
  ],
  "fields": [
   {
@@ -167,6 +177,7 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Item Group",
+   "link_filters": "[[\"Item Group\",\"is_group\",\"=\",0]]",
    "oldfieldname": "item_group",
    "oldfieldtype": "Link",
    "options": "Item Group",
@@ -243,8 +254,7 @@
    "default": "0",
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
-   "label": "Is Fixed Asset",
-   "set_only_once": 1
+   "label": "Is Fixed Asset"
   },
   {
    "allow_in_quick_entry": 1,
@@ -318,7 +328,8 @@
    "fieldname": "shelf_life_in_days",
    "fieldtype": "Int",
    "label": "Shelf Life In Days",
-   "mandatory_depends_on": "eval:doc.has_batch_no && doc.has_expiry_date"
+   "mandatory_depends_on": "eval:doc.has_batch_no && doc.has_expiry_date",
+   "non_negative": 1
   },
   {
    "default": "2099-12-31",
@@ -362,7 +373,8 @@
    "depends_on": "is_stock_item",
    "fieldname": "weight_per_unit",
    "fieldtype": "Float",
-   "label": "Weight Per Unit"
+   "label": "Weight Per Unit",
+   "non_negative": 1
   },
   {
    "depends_on": "eval:doc.is_stock_item",
@@ -534,13 +546,15 @@
    "fieldname": "min_order_qty",
    "fieldtype": "Float",
    "label": "Minimum Order Qty",
+   "non_negative": 1,
    "oldfieldname": "min_order_qty",
    "oldfieldtype": "Currency"
   },
   {
    "fieldname": "safety_stock",
    "fieldtype": "Float",
-   "label": "Safety Stock"
+   "label": "Safety Stock",
+   "non_negative": 1
   },
   {
    "fieldname": "purchase_details_cb",
@@ -551,6 +565,7 @@
    "fieldname": "lead_time_days",
    "fieldtype": "Int",
    "label": "Lead Time in days",
+   "non_negative": 1,
    "oldfieldname": "lead_time_days",
    "oldfieldtype": "Int"
   },
@@ -559,6 +574,7 @@
    "fieldtype": "Float",
    "label": "Last Purchase Rate",
    "no_copy": 1,
+   "non_negative": 1,
    "oldfieldname": "last_purchase_rate",
    "oldfieldtype": "Currency",
    "read_only": 1
@@ -570,7 +586,7 @@
    "label": "Is Customer Provided Item"
   },
   {
-   "depends_on": "eval:doc.is_customer_provided_item==1",
+   "depends_on": "eval:doc.is_customer_provided_item",
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
@@ -755,10 +771,9 @@
   },
   {
    "default": "0",
-   "description": "If subcontracted to a vendor",
    "fieldname": "is_sub_contracted_item",
    "fieldtype": "Check",
-   "label": "Supply Raw Materials for Purchase",
+   "label": "Is Subcontracted Item",
    "oldfieldname": "is_sub_contracted_item",
    "oldfieldtype": "Select"
   },
@@ -874,14 +889,64 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "section_break_avcp",
-   "fieldtype": "Section Break"
-  },
-  {
    "collapsible": 1,
    "fieldname": "deferred_accounting_section",
    "fieldtype": "Section Break",
    "label": "Deferred Accounting"
+  },
+  {
+   "fieldname": "capacity_in_days_section",
+   "fieldtype": "Section Break",
+   "label": "Capacity (In Days)"
+  },
+  {
+   "fieldname": "production_capacity",
+   "fieldtype": "Int",
+   "label": "Production Capacity"
+  },
+  {
+   "fieldname": "defaults_tab",
+   "fieldtype": "Tab Break",
+   "label": "Defaults"
+  },
+  {
+   "fieldname": "section_break_znra",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_wugd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_oilf",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "column_break_aytr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_fxqz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "purchase_tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Purchase Tax Withholding Category",
+   "depends_on": "is_purchase_item",
+   "options": "Tax Withholding Category"
+  },
+  {
+   "fieldname": "column_break_ltlb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sales_tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Sales Tax Withholding Category",
+   "depends_on": "is_sales_item",
+   "options": "Tax Withholding Category"
   }
  ],
  "icon": "fa fa-tag",
@@ -889,7 +954,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2025-02-03 23:43:57.253667",
+ "modified": "2025-12-15 20:08:35.634046",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -954,6 +1019,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "search_fields": "item_name,description,item_group,customer_code",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,

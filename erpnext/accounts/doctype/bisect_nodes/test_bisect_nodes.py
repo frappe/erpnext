@@ -2,16 +2,7 @@
 # See license.txt
 
 # import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
-
-
-class UnitTestBisectNodes(UnitTestCase):
-	"""
-	Unit tests for BisectNodes.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
+from frappe.tests import IntegrationTestCase
 
 
 class TestBisectNodes(IntegrationTestCase):

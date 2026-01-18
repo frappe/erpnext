@@ -22,6 +22,7 @@
   "asset_owner_company",
   "is_existing_asset",
   "is_composite_asset",
+  "is_composite_component",
   "purchase_details_section",
   "purchase_receipt",
   "purchase_receipt_item",
@@ -30,7 +31,7 @@
   "purchase_date",
   "available_for_use_date",
   "column_break_23",
-  "gross_purchase_amount",
+  "net_purchase_amount",
   "purchase_amount",
   "asset_quantity",
   "additional_asset_cost",
@@ -87,6 +88,7 @@
    "options": "ACC-ASS-.YYYY.-"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "item_code",
    "fetch_from": "item_code.item_name",
    "fetch_if_empty": 1,
@@ -154,6 +156,7 @@
   {
    "allow_on_submit": 1,
    "fetch_from": "item_code.image",
+   "fetch_if_empty": 1,
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
@@ -204,8 +207,8 @@
    "fieldname": "purchase_date",
    "fieldtype": "Date",
    "label": "Purchase Date",
-   "mandatory_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset",
-   "read_only_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset"
+   "read_only_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset",
+   "reqd": 1
   },
   {
    "fieldname": "disposal_date",
@@ -224,28 +227,21 @@
    "read_only": 1
   },
   {
-   "fieldname": "gross_purchase_amount",
-   "fieldtype": "Currency",
-   "label": "Net Purchase Amount",
-   "mandatory_depends_on": "eval:(!doc.is_composite_asset || doc.docstatus==1)",
-   "options": "Company:company:default_currency"
-  },
-  {
    "fieldname": "available_for_use_date",
    "fieldtype": "Date",
    "label": "Available-for-use Date",
-   "mandatory_depends_on": "eval:(!doc.is_composite_asset || doc.docstatus==1)"
+   "mandatory_depends_on": "eval:(!(doc.is_composite_component || doc.is_composite_asset) || doc.docstatus==1)"
   },
   {
    "default": "0",
    "fieldname": "calculate_depreciation",
    "fieldtype": "Check",
    "label": "Calculate Depreciation",
-   "read_only_depends_on": "eval:doc.is_composite_asset && !doc.gross_purchase_amount"
+   "read_only_depends_on": "eval:(doc.is_composite_asset && !doc.net_purchase_amount) || doc.is_composite_component"
   },
   {
    "default": "0",
-   "depends_on": "eval:!doc.is_composite_asset",
+   "depends_on": "eval:(!doc.is_composite_asset && !doc.is_composite_component)",
    "fieldname": "is_existing_asset",
    "fieldtype": "Check",
    "label": "Is Existing Asset"
@@ -344,7 +340,6 @@
    "label": "Maintenance Required"
   },
   {
-   "allow_on_submit": 1,
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -352,7 +347,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nSubmitted\nPartially Depreciated\nFully Depreciated\nSold\nScrapped\nIn Maintenance\nOut of Order\nIssue\nReceipt\nCapitalized\nWork In Progress",
+   "options": "Draft\nSubmitted\nCancelled\nPartially Depreciated\nFully Depreciated\nSold\nScrapped\nIn Maintenance\nOut of Order\nIssue\nReceipt\nCapitalized\nWork In Progress",
    "read_only": 1
   },
   {
@@ -404,7 +399,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "collapsible_depends_on": "is_existing_asset",
    "fieldname": "purchase_details_section",
    "fieldtype": "Section Break",
@@ -428,6 +422,7 @@
    "fieldname": "split_from",
    "fieldtype": "Link",
    "label": "Split From",
+   "no_copy": 1,
    "options": "Asset",
    "read_only": 1
   },
@@ -467,7 +462,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:!doc.is_existing_asset",
+   "depends_on": "eval:(!doc.is_existing_asset && !doc.is_composite_component)",
    "fieldname": "is_composite_asset",
    "fieldtype": "Check",
    "label": "Is Composite Asset"
@@ -477,14 +472,17 @@
    "fieldname": "total_asset_cost",
    "fieldtype": "Currency",
    "label": "Total Asset Cost",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
+   "default": "0",
    "depends_on": "eval:doc.docstatus > 0",
    "fieldname": "additional_asset_cost",
    "fieldtype": "Currency",
    "label": "Additional Asset Cost",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -545,6 +543,21 @@
    "fieldname": "section_break_jtou",
    "fieldtype": "Section Break",
    "label": "Additional Info"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:(!doc.is_existing_asset && !doc.is_composite_asset)",
+   "fieldname": "is_composite_component",
+   "fieldtype": "Check",
+   "label": "Is Composite Component"
+  },
+  {
+   "fieldname": "net_purchase_amount",
+   "fieldtype": "Currency",
+   "label": "Net Purchase Amount",
+   "mandatory_depends_on": "eval:(!doc.is_composite_asset || doc.docstatus==1)",
+   "options": "Company:company:default_currency",
+   "read_only_depends_on": "eval: doc.is_composite_asset"
   }
  ],
  "idx": 72,
@@ -588,7 +601,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2025-02-20 14:09:05.421913",
+ "modified": "2025-12-18 16:36:40.904246",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
@@ -626,6 +639,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

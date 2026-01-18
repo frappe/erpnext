@@ -1,0 +1,204 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:item_code",
+ "creation": "2025-08-21 12:46:54.727571",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "manufacturing_time_tab",
+  "item_code",
+  "column_break_qwyo",
+  "manufacturing_section",
+  "shift_time_in_hours",
+  "no_of_workstations",
+  "column_break_cdqv",
+  "no_of_shift",
+  "total_workstation_time",
+  "section_break_wuqi",
+  "column_break_yilv",
+  "manufacturing_time_in_mins",
+  "no_of_units_produced",
+  "column_break_bbsv",
+  "daily_yield",
+  "capacity_per_day",
+  "purchase_lead_time_tab",
+  "section_break_fwyn",
+  "purchase_and_other_column",
+  "purchase_time",
+  "column_break_lsfp",
+  "buffer_time",
+  "item_details_tab",
+  "item_name",
+  "stock_uom"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item",
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_qwyo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_fwyn",
+   "fieldtype": "Section Break",
+   "label": "Purchase"
+  },
+  {
+   "fieldname": "purchase_and_other_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_lsfp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "In Days",
+   "fieldname": "buffer_time",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Buffer Time"
+  },
+  {
+   "fieldname": "manufacturing_section",
+   "fieldtype": "Section Break",
+   "label": "Workstation"
+  },
+  {
+   "default": "1",
+   "fieldname": "no_of_shift",
+   "fieldtype": "Int",
+   "label": "No of Shift"
+  },
+  {
+   "fieldname": "column_break_bbsv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Per Unit Time in Mins",
+   "fieldname": "manufacturing_time_in_mins",
+   "fieldtype": "Int",
+   "label": "Manufacturing Time"
+  },
+  {
+   "description": "Per Day\nShift Time (In Hours) * No of Workstations * No of Shift",
+   "fieldname": "total_workstation_time",
+   "fieldtype": "Int",
+   "label": "Total Workstation Time (In Hours)"
+  },
+  {
+   "default": "90",
+   "description": "(Good Units Produced / Total Units Produced) \u00d7 100",
+   "fieldname": "daily_yield",
+   "fieldtype": "Percent",
+   "label": "Daily Yield (%)"
+  },
+  {
+   "description": "(Daily Yield * No of Units Produced) / 100",
+   "fieldname": "capacity_per_day",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Capacity"
+  },
+  {
+   "description": "(Total Workstation Time / Manufacturing Time) * 60",
+   "fieldname": "no_of_units_produced",
+   "fieldtype": "Int",
+   "label": "No of Units Produced"
+  },
+  {
+   "description": "In Days",
+   "fieldname": "purchase_time",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Purchase Time"
+  },
+  {
+   "description": "Per Day",
+   "fieldname": "shift_time_in_hours",
+   "fieldtype": "Int",
+   "label": "Shift Time (In Hours)"
+  },
+  {
+   "fieldname": "column_break_yilv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_wuqi",
+   "fieldtype": "Section Break",
+   "label": "Manufacturing"
+  },
+  {
+   "fieldname": "column_break_cdqv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Similar types of workstations where the same operations run in parallel.",
+   "fieldname": "no_of_workstations",
+   "fieldtype": "Int",
+   "label": "No of Workstations"
+  },
+  {
+   "fieldname": "item_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Item Details"
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_lead_time_tab",
+   "fieldtype": "Tab Break",
+   "label": "Purchase Time"
+  },
+  {
+   "fieldname": "manufacturing_time_tab",
+   "fieldtype": "Tab Break",
+   "label": "Manufacturing Time"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-10-30 11:45:03.602345",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item Lead Time",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

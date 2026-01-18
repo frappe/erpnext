@@ -8,6 +8,7 @@ import json
 import frappe
 from frappe import _, bold, scrub
 from frappe.model.meta import get_field_precision
+from frappe.query_builder import Order
 from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	add_to_date,
@@ -27,7 +28,7 @@ import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	get_available_batches,
+	get_auto_batch_nos,
 )
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_reserved_batch_nos_details,
@@ -67,8 +68,8 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 	from erpnext.controllers.stock_controller import future_sle_exists
 
 	if sl_entries:
-		cancel = sl_entries[0].get("is_cancelled")
-		if cancel:
+		cancelled = sl_entries[0].get("is_cancelled")
+		if cancelled:
 			validate_cancellation(sl_entries)
 			set_as_cancel(sl_entries[0].get("voucher_type"), sl_entries[0].get("voucher_no"))
 
@@ -79,7 +80,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 			if sle.serial_no and not via_landed_cost_voucher:
 				validate_serial_no(sle)
 
-			if cancel:
+			if cancelled:
 				sle["actual_qty"] = -flt(sle.get("actual_qty"))
 
 				if sle["actual_qty"] < 0 and not sle.get("outgoing_rate"):
@@ -108,7 +109,9 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 			if is_stock_item:
 				bin_name = get_or_make_bin(args.get("item_code"), args.get("warehouse"))
 				args.reserved_stock = flt(frappe.db.get_value("Bin", bin_name, "reserved_stock"))
-				repost_current_voucher(args, allow_negative_stock, via_landed_cost_voucher)
+				repost_current_voucher(
+					args, allow_negative_stock, via_landed_cost_voucher, cancelled=cancelled
+				)
 				update_bin_qty(bin_name, args)
 			else:
 				frappe.msgprint(
@@ -116,7 +119,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 				)
 
 
-def repost_current_voucher(args, allow_negative_stock=False, via_landed_cost_voucher=False):
+def repost_current_voucher(args, allow_negative_stock=False, via_landed_cost_voucher=False, cancelled=False):
 	if args.get("actual_qty") or args.get("voucher_type") == "Stock Reconciliation":
 		if not args.get("posting_date"):
 			args["posting_date"] = nowdate()
@@ -135,6 +138,7 @@ def repost_current_voucher(args, allow_negative_stock=False, via_landed_cost_vou
 					"sle_id": args.get("name"),
 					"creation": args.get("creation"),
 					"reserved_stock": args.get("reserved_stock"),
+					"cancelled": cancelled,
 				},
 				allow_negative_stock=allow_negative_stock,
 				via_landed_cost_voucher=via_landed_cost_voucher,
@@ -378,7 +382,7 @@ def update_args_in_repost_item_valuation(doc, index, args, distinct_item_warehou
 			}
 		)
 
-	if not frappe.flags.in_test:
+	if not frappe.in_test:
 		frappe.db.commit()
 
 	frappe.publish_realtime(
@@ -559,7 +563,7 @@ class update_entries_after:
 
 		self.company = frappe.get_cached_value("Warehouse", self.args.warehouse, "company")
 		self.set_precision()
-		self.valuation_method = get_valuation_method(self.item_code)
+		self.valuation_method = get_valuation_method(self.item_code, self.company)
 
 		self.new_items_found = False
 		self.distinct_item_warehouses = args.get("distinct_item_warehouses", frappe._dict())
@@ -651,9 +655,31 @@ class update_entries_after:
 
 				if sle.dependant_sle_voucher_detail_no:
 					entries_to_fix = self.get_dependent_entries_to_fix(entries_to_fix, sle)
+					if sle.voucher_type == "Stock Entry" and is_repack_entry(sle.voucher_no):
+						# for repack entries, we need to repost both source and target warehouses
+						self.update_distinct_item_warehouses_for_repack(sle)
 
 		if self.exceptions:
 			self.raise_exceptions()
+
+	def update_distinct_item_warehouses_for_repack(self, sle):
+		sles = (
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={
+					"voucher_type": "Stock Entry",
+					"voucher_no": sle.voucher_no,
+					"actual_qty": (">", 0),
+					"is_cancelled": 0,
+					"voucher_detail_no": ("!=", sle.dependant_sle_voucher_detail_no),
+				},
+				fields=["*"],
+			)
+			or []
+		)
+
+		for dependant_sle in sles:
+			self.update_distinct_item_warehouses(dependant_sle)
 
 	def has_stock_reco_with_serial_batch(self, sle):
 		if (
@@ -667,32 +693,30 @@ class update_entries_after:
 	def process_sle_against_current_timestamp(self):
 		sl_entries = self.get_sle_against_current_voucher()
 		for sle in sl_entries:
+			sle["timestamp"] = sle.posting_datetime
 			self.process_sle(sle)
 
 	def get_sle_against_current_voucher(self):
 		self.args["posting_datetime"] = get_combine_datetime(self.args.posting_date, self.args.posting_time)
+		doctype = frappe.qb.DocType("Stock Ledger Entry")
 
-		return frappe.db.sql(
-			"""
-			select
-				*, posting_datetime as "timestamp"
-			from
-				`tabStock Ledger Entry`
-			where
-				item_code = %(item_code)s
-				and warehouse = %(warehouse)s
-				and is_cancelled = 0
-				and (
-					posting_datetime = %(posting_datetime)s
-				)
-				and creation = %(creation)s
-			order by
-				creation ASC
-			for update
-		""",
-			self.args,
-			as_dict=1,
+		query = (
+			frappe.qb.from_(doctype)
+			.select("*")
+			.where(
+				(doctype.item_code == self.args.item_code)
+				& (doctype.warehouse == self.args.warehouse)
+				& (doctype.is_cancelled == 0)
+				& (doctype.posting_datetime == self.args.posting_datetime)
+			)
+			.orderby(doctype.creation, order=Order.asc)
+			.for_update()
 		)
+
+		if not self.args.get("cancelled"):
+			query = query.where(doctype.creation == self.args.creation)
+
+		return query.run(as_dict=True)
 
 	def get_future_entries_to_fix(self):
 		# includes current entry!
@@ -729,32 +753,21 @@ class update_entries_after:
 			self.distinct_item_warehouses[key] = val
 			self.new_items_found = True
 		else:
-			# Check if the dependent voucher is reposted
-			# If not, then do not add it to the list
-			if not self.is_dependent_voucher_reposted(dependant_sle):
-				return
-
-			existing_sle_posting_date = self.distinct_item_warehouses[key].get("sle", {}).get("posting_date")
-
-			dependent_voucher_detail_nos = self.get_dependent_voucher_detail_nos(key)
-			if getdate(dependant_sle.posting_date) < getdate(existing_sle_posting_date):
-				if dependent_voucher_detail_nos and dependant_sle.voucher_detail_no in set(
-					dependent_voucher_detail_nos
-				):
+			existing_sle = self.distinct_item_warehouses[key].get("sle", {})
+			if getdate(existing_sle.get("posting_date")) > getdate(dependant_sle.posting_date):
+				self.distinct_item_warehouses[key] = val
+				self.new_items_found = True
+			elif (
+				dependant_sle.actual_qty > 0
+				and dependant_sle.voucher_type == "Stock Entry"
+				and is_transfer_stock_entry(dependant_sle.voucher_no)
+			):
+				if self.distinct_item_warehouses[key].get("transfer_entry_to_repost"):
 					return
 
-				val.sle_changed = True
-				dependent_voucher_detail_nos.append(dependant_sle.voucher_detail_no)
-				val.dependent_voucher_detail_nos = dependent_voucher_detail_nos
+				val["transfer_entry_to_repost"] = True
 				self.distinct_item_warehouses[key] = val
 				self.new_items_found = True
-			elif dependant_sle.voucher_detail_no not in set(dependent_voucher_detail_nos):
-				# Future dependent voucher needs to be repost to get the correct stock value
-				# If dependent voucher has not reposted, then add it to the list
-				dependent_voucher_detail_nos.append(dependant_sle.voucher_detail_no)
-				self.new_items_found = True
-				val.dependent_voucher_detail_nos = dependent_voucher_detail_nos
-				self.distinct_item_warehouses[key] = val
 
 	def is_dependent_voucher_reposted(self, dependant_sle) -> bool:
 		# Return False if the dependent voucher is not reposted
@@ -821,7 +834,7 @@ class update_entries_after:
 
 		if (
 			sle.voucher_type == "Stock Reconciliation"
-			and (sle.batch_no or sle.serial_no or sle.serial_and_batch_bundle)
+			and (sle.serial_and_batch_bundle)
 			and sle.voucher_detail_no
 			and not self.args.get("sle_id")
 			and sle.is_cancelled == 0
@@ -886,6 +899,12 @@ class update_entries_after:
 					self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(
 						self.wh_data.valuation_rate
 					)
+
+					if flt(self.wh_data.qty_after_transaction, self.flt_precision) != 0:
+						self.wh_data.valuation_rate = flt(
+							self.wh_data.stock_value, self.currency_precision
+						) / flt(self.wh_data.qty_after_transaction, self.flt_precision)
+
 				else:
 					self.update_queue_values(sle)
 
@@ -898,19 +917,31 @@ class update_entries_after:
 		self.wh_data.prev_stock_value = self.wh_data.stock_value
 
 		# update current sle
-		sle.qty_after_transaction = self.wh_data.qty_after_transaction
+		sle.qty_after_transaction = flt(self.wh_data.qty_after_transaction, self.flt_precision)
 		sle.valuation_rate = self.wh_data.valuation_rate
 		sle.stock_value = self.wh_data.stock_value
 		sle.stock_queue = json.dumps(self.wh_data.stock_queue)
 
-		if not sle.is_adjustment_entry:
-			sle.stock_value_difference = stock_value_difference
-		elif sle.is_adjustment_entry and not self.args.get("sle_id"):
-			sle.stock_value_difference = get_stock_value_difference(
-				sle.item_code, sle.warehouse, sle.posting_date, sle.posting_time, sle.voucher_no
+		sle.stock_value_difference = stock_value_difference
+		if (
+			sle.is_adjustment_entry
+			and flt(sle.qty_after_transaction, self.flt_precision) == 0
+			and flt(sle.stock_value, self.currency_precision) != 0
+		):
+			sle.stock_value_difference = (
+				get_stock_value_difference(
+					sle.item_code,
+					sle.warehouse,
+					sle.posting_date,
+					sle.posting_time,
+					voucher_detail_no=sle.voucher_detail_no,
+					creation=sle.creation,
+				)
+				* -1
 			)
 
 		sle.doctype = "Stock Ledger Entry"
+		sle.modified = now()
 		frappe.get_doc(sle).db_update()
 
 		if not self.args.get("sle_id") or (
@@ -965,10 +996,12 @@ class update_entries_after:
 				self.wh_data.valuation_rate = self.get_fallback_rate(sle)
 
 	def reset_actual_qty_for_stock_reco(self, sle):
-		doc = frappe.get_cached_doc("Stock Reconciliation", sle.voucher_no)
-		doc.recalculate_current_qty(sle.voucher_detail_no)
+		doc = frappe.get_doc("Stock Reconciliation", sle.voucher_no)
+		doc.recalculate_current_qty(sle.voucher_detail_no, sle.creation, sle.actual_qty > 0)
 
 		if sle.actual_qty < 0:
+			doc.reload()
+
 			sle.actual_qty = (
 				flt(frappe.db.get_value("Stock Reconciliation Item", sle.voucher_detail_no, "current_qty"))
 				* -1
@@ -976,6 +1009,16 @@ class update_entries_after:
 
 			if abs(sle.actual_qty) == 0.0:
 				sle.is_cancelled = 1
+
+				if sle.serial_and_batch_bundle:
+					for row in doc.items:
+						if row.name == sle.voucher_detail_no:
+							row.db_set("current_serial_and_batch_bundle", "")
+
+					sabb_doc = frappe.get_doc("Serial and Batch Bundle", sle.serial_and_batch_bundle)
+					sabb_doc.voucher_detail_no = None
+					sabb_doc.voucher_no = None
+					sabb_doc.cancel()
 
 		if sle.serial_and_batch_bundle and frappe.get_cached_value("Item", sle.item_code, "has_serial_no"):
 			self.update_serial_no_status(sle)
@@ -1009,17 +1052,27 @@ class update_entries_after:
 		if not frappe.db.exists("Serial and Batch Bundle", sle.serial_and_batch_bundle):
 			return
 
-		if self.args.get("sle_id") and sle.actual_qty < 0:
-			doc = frappe.db.get_value(
-				"Serial and Batch Bundle",
-				sle.serial_and_batch_bundle,
-				["total_amount", "total_qty"],
-				as_dict=1,
-			)
+		if sle.actual_qty < 0 and (
+			sle.voucher_type in ["Stock Reconciliation", "Asset Capitalization"]
+			or not frappe.db.get_value(sle.voucher_type, sle.voucher_no, "is_return")
+		):
+			doc = frappe._dict({})
+			self.update_serial_batch_no_valuation(sle, doc, prev_sle=self.wh_data)
 		else:
 			doc = frappe.get_doc("Serial and Batch Bundle", sle.serial_and_batch_bundle)
-			doc.set_incoming_rate(save=True, allow_negative_stock=self.allow_negative_stock)
+			doc.set_incoming_rate(
+				save=True, allow_negative_stock=self.allow_negative_stock, prev_sle=self.wh_data
+			)
 			doc.calculate_qty_and_amount(save=True)
+
+		if stock_queue := frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": sle.serial_and_batch_bundle, "stock_queue": ("is", "set")},
+			pluck="stock_queue",
+			order_by="idx desc",
+			limit=1,
+		):
+			self.wh_data.stock_queue = json.loads(stock_queue[0]) if stock_queue else []
 
 		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + doc.total_amount)
 		self.wh_data.qty_after_transaction += flt(doc.total_qty, self.flt_precision)
@@ -1027,6 +1080,87 @@ class update_entries_after:
 			self.wh_data.valuation_rate = flt(self.wh_data.stock_value, self.flt_precision) / flt(
 				self.wh_data.qty_after_transaction, self.flt_precision
 			)
+
+	def update_serial_batch_no_valuation(self, sle, doc, prev_sle=None):
+		from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
+
+		sabb_data = get_serial_from_sabb(sle.serial_and_batch_bundle)
+		if not sabb_data:
+			doc.update({"total_amount": 0.0, "total_qty": 0.0, "avg_rate": 0.0})
+			return
+
+		serial_nos = [d.serial_no for d in sabb_data if d.serial_no]
+		if serial_nos:
+			sle["serial_nos"] = get_serial_nos_data(",".join(serial_nos))
+			sn_obj = SerialNoValuation(
+				sle=sle,
+				item_code=self.item_code,
+				warehouse=sle.warehouse,
+			)
+		else:
+			sle["batch_nos"] = {row.batch_no: row for row in sabb_data if row.batch_no}
+			sn_obj = BatchNoValuation(
+				sle=sle,
+				item_code=self.item_code,
+				warehouse=sle.warehouse,
+				prev_sle=prev_sle,
+			)
+
+		tot_amt = 0.0
+		total_qty = 0.0
+		avg_rate = 0.0
+
+		for d in sabb_data:
+			incoming_rate = get_incoming_rate_for_serial_and_batch(self.item_code, d, sn_obj, self.company)
+			amount = incoming_rate * flt(d.qty)
+			tot_amt += flt(amount)
+			total_qty += flt(d.qty)
+
+			if flt(incoming_rate, self.currency_precision) == flt(
+				d.incoming_rate, self.currency_precision
+			) and not getattr(d, "stock_queue", None):
+				continue
+
+			values_to_update = {
+				"incoming_rate": incoming_rate,
+				"stock_value_difference": amount,
+			}
+
+			if d.stock_queue:
+				values_to_update["stock_queue"] = d.stock_queue
+
+			frappe.db.set_value(
+				"Serial and Batch Entry",
+				d.name,
+				values_to_update,
+				update_modified=False,
+			)
+
+		if total_qty:
+			avg_rate = tot_amt / total_qty
+
+		doc.update(
+			{
+				"total_amount": tot_amt,
+				"total_qty": total_qty,
+				"avg_rate": avg_rate,
+			}
+		)
+
+		frappe.db.set_value(
+			"Serial and Batch Bundle",
+			sle.serial_and_batch_bundle,
+			{
+				"total_qty": total_qty,
+				"avg_rate": avg_rate,
+				"total_amount": tot_amt,
+			},
+			update_modified=False,
+		)
+
+		for key in ("serial_nos", "batch_nos"):
+			if key in sle:
+				del sle[key]
 
 	def get_outgoing_rate_for_batched_item(self, sle):
 		if self.wh_data.qty_after_transaction == 0:
@@ -1042,7 +1176,11 @@ class update_entries_after:
 		diff = self.wh_data.qty_after_transaction + flt(sle.actual_qty) - flt(self.reserved_stock)
 		diff = flt(diff, self.flt_precision)  # respect system precision
 
-		if diff < 0 and abs(diff) > 0.0001:
+		diff_threshold = 0.0001
+		if self.flt_precision > 4:
+			diff_threshold = 10 ** (-1 * self.flt_precision)
+
+		if diff < 0 and abs(diff) > diff_threshold:
 			# negative stock!
 			exc = sle.copy().update({"diff": diff})
 			self.exceptions.setdefault(sle.warehouse, []).append(exc)
@@ -1052,7 +1190,11 @@ class update_entries_after:
 
 	def get_dynamic_incoming_outgoing_rate(self, sle):
 		# Get updated incoming/outgoing rate from transaction
-		if sle.recalculate_rate or self.has_landed_cost_based_on_pi(sle):
+		if (
+			sle.recalculate_rate
+			or self.has_landed_cost_based_on_pi(sle)
+			or (sle.voucher_type == "Stock Entry" and sle.actual_qty > 0 and is_repack_entry(sle.voucher_no))
+		):
 			rate = self.get_incoming_outgoing_rate_from_transaction(sle)
 
 			if flt(sle.actual_qty) >= 0:
@@ -1216,7 +1358,7 @@ class update_entries_after:
 		return False
 
 	def recalculate_amounts_in_stock_entry(self, voucher_no, voucher_detail_no):
-		stock_entry = frappe.get_doc("Stock Entry", voucher_no, for_update=True)
+		stock_entry = frappe.get_lazy_doc("Stock Entry", voucher_no, for_update=True)
 		stock_entry.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
 		stock_entry.db_update()
 		for d in stock_entry.items:
@@ -1246,12 +1388,19 @@ class update_entries_after:
 
 	def update_rate_on_purchase_receipt(self, sle, outgoing_rate):
 		if frappe.db.exists(sle.voucher_type + " Item", sle.voucher_detail_no):
-			if sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"] and frappe.get_cached_value(
-				sle.voucher_type, sle.voucher_no, "is_internal_supplier"
-			):
-				frappe.db.set_value(
-					f"{sle.voucher_type} Item", sle.voucher_detail_no, "valuation_rate", sle.outgoing_rate
+			if sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]:
+				details = frappe.get_cached_value(
+					sle.voucher_type,
+					sle.voucher_no,
+					["is_internal_supplier", "is_return", "return_against"],
+					as_dict=True,
 				)
+				if details.is_internal_supplier or (details.is_return and not details.return_against):
+					rate = outgoing_rate if details.is_return else sle.outgoing_rate
+
+					frappe.db.set_value(
+						f"{sle.voucher_type} Item", sle.voucher_detail_no, "valuation_rate", rate
+					)
 		else:
 			frappe.db.set_value(
 				"Purchase Receipt Item Supplied", sle.voucher_detail_no, "rate", outgoing_rate
@@ -1259,7 +1408,7 @@ class update_entries_after:
 
 		# Recalculate subcontracted item's rate in case of subcontracted purchase receipt/invoice
 		if frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_subcontracted"):
-			doc = frappe.get_doc(sle.voucher_type, sle.voucher_no)
+			doc = frappe.get_lazy_doc(sle.voucher_type, sle.voucher_no)
 			doc.update_valuation_rate(reset_outgoing_rate=False)
 			for d in doc.items + doc.supplied_items:
 				d.db_update()
@@ -1274,7 +1423,7 @@ class update_entries_after:
 				{"rate": outgoing_rate, "amount": abs(sle.actual_qty) * outgoing_rate},
 			)
 
-		scr = frappe.get_doc("Subcontracting Receipt", sle.voucher_no, for_update=True)
+		scr = frappe.get_lazy_doc("Subcontracting Receipt", sle.voucher_no, for_update=True)
 		scr.calculate_items_qty_and_amount()
 		scr.db_update()
 		for d in scr.items:
@@ -1282,7 +1431,7 @@ class update_entries_after:
 
 	def update_rate_on_stock_reconciliation(self, sle):
 		if not sle.serial_no and not sle.batch_no:
-			sr = frappe.get_doc("Stock Reconciliation", sle.voucher_no, for_update=True)
+			sr = frappe.get_lazy_doc("Stock Reconciliation", sle.voucher_no, for_update=True)
 
 			for item in sr.items:
 				# Skip for Serial and Batch Items
@@ -1416,7 +1565,10 @@ class update_entries_after:
 					return 0.0
 
 			stock_queue.remove_stock(
-				qty=abs(actual_qty), outgoing_rate=outgoing_rate, rate_generator=rate_generator
+				qty=abs(actual_qty),
+				outgoing_rate=outgoing_rate,
+				rate_generator=rate_generator,
+				is_return_purchase_entry=self.is_return_purchase_entry(sle),
 			)
 
 		_qty, stock_value = stock_queue.get_total_stock_and_value()
@@ -1433,6 +1585,12 @@ class update_entries_after:
 
 		if self.wh_data.qty_after_transaction:
 			self.wh_data.valuation_rate = self.wh_data.stock_value / self.wh_data.qty_after_transaction
+
+	def is_return_purchase_entry(self, sle):
+		if sle.voucher_type in ["Purchase Invoice", "Purchase Receipt"]:
+			return frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_return")
+
+		return False
 
 	def update_batched_values(self, sle):
 		from erpnext.stock.serial_batch_bundle import BatchNoValuation
@@ -1591,7 +1749,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 		voucher_no = args.get("voucher_no")
 		voucher_condition = f"and voucher_no != '{voucher_no}'"
 
-	elif args.get("creation") and args.get("sle_id"):
+	elif args.get("creation") and args.get("sle_id") and not args.get("cancelled"):
 		creation = args.get("creation")
 		operator = "<="
 		voucher_condition = f"and creation < '{creation}'"
@@ -1654,8 +1812,20 @@ def get_stock_ledger_entries(
 ):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 	conditions = f" and posting_datetime {operator} %(posting_datetime)s"
-	if previous_sle.get("warehouse"):
-		conditions += " and warehouse = %(warehouse)s"
+
+	if item_code := previous_sle.get("item_code"):
+		if isinstance(item_code, list | tuple):
+			conditions += " and item_code in %(item_code)s"
+		else:
+			conditions += " and item_code = %(item_code)s"
+
+	if warehouse := previous_sle.get("warehouse"):
+		if isinstance(warehouse, list | tuple):
+			conditions += " and warehouse in %(warehouse)s"
+
+		else:
+			conditions += " and warehouse = %(warehouse)s"
+
 	elif previous_sle.get("warehouse_condition"):
 		conditions += " and " + previous_sle.get("warehouse_condition")
 
@@ -1698,8 +1868,7 @@ def get_stock_ledger_entries(
 		"""
 		select *, posting_datetime as "timestamp"
 		from `tabStock Ledger Entry`
-		where item_code = %(item_code)s
-		and is_cancelled = 0
+		where is_cancelled = 0
 		{conditions}
 		order by posting_datetime {order}, creation {order}
 		{limit} {for_update}""".format(
@@ -1727,34 +1896,11 @@ def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 			"posting_time",
 			"voucher_detail_no",
 			"posting_datetime as timestamp",
+			"voucher_type",
+			"voucher_no",
 		],
 		as_dict=1,
 	)
-
-
-def get_batch_incoming_rate(item_code, warehouse, batch_no, posting_date, posting_time, creation=None):
-	sle = frappe.qb.DocType("Stock Ledger Entry")
-
-	timestamp_condition = sle.posting_datetime < get_combine_datetime(posting_date, posting_time)
-	if creation:
-		timestamp_condition |= (sle.posting_datetime == get_combine_datetime(posting_date, posting_time)) & (
-			sle.creation < creation
-		)
-
-	batch_details = (
-		frappe.qb.from_(sle)
-		.select(Sum(sle.stock_value_difference).as_("batch_value"), Sum(sle.actual_qty).as_("batch_qty"))
-		.where(
-			(sle.item_code == item_code)
-			& (sle.warehouse == warehouse)
-			& (sle.batch_no == batch_no)
-			& (sle.is_cancelled == 0)
-		)
-		.where(timestamp_condition)
-	).run(as_dict=True)
-
-	if batch_details and batch_details[0].batch_qty:
-		return batch_details[0].batch_value / batch_details[0].batch_qty
 
 
 def get_valuation_rate(
@@ -1784,20 +1930,16 @@ def get_valuation_rate(
 				& (table.warehouse == warehouse)
 				& (table.batch_no == batch_no)
 				& (table.is_cancelled == 0)
-				& (table.voucher_no != voucher_no)
-				& (table.voucher_type != voucher_type)
+				& ((table.voucher_no != voucher_no) | (table.voucher_type != voucher_type))
 			)
 		)
 
 		last_valuation_rate = query.run()
-		if last_valuation_rate:
+		if last_valuation_rate and last_valuation_rate[0][0] is not None:
 			return flt(last_valuation_rate[0][0])
 
 	# Get moving average rate of a specific batch number
 	if warehouse and serial_and_batch_bundle:
-		sabb = frappe.db.get_value(
-			"Serial and Batch Bundle", serial_and_batch_bundle, ["posting_date", "posting_time"], as_dict=True
-		)
 		batch_obj = BatchNoValuation(
 			sle=frappe._dict(
 				{
@@ -1805,8 +1947,9 @@ def get_valuation_rate(
 					"warehouse": warehouse,
 					"actual_qty": -1,
 					"serial_and_batch_bundle": serial_and_batch_bundle,
-					"posting_date": sabb.posting_date,
-					"posting_time": sabb.posting_time,
+					"posting_datetime": frappe.get_value(
+						"Serial and Batch Bundle", serial_and_batch_bundle, "posting_datetime"
+					),
 				}
 			)
 		)
@@ -1816,7 +1959,7 @@ def get_valuation_rate(
 	# Get valuation rate from last sle for the same item and warehouse
 	if last_valuation_rate := frappe.db.sql(  # nosemgrep
 		"""select valuation_rate
-		from `tabStock Ledger Entry` force index (item_warehouse)
+		from `tabStock Ledger Entry`
 		where
 			item_code = %s
 			AND warehouse = %s
@@ -1918,6 +2061,9 @@ def get_stock_reco_qty_shift(args):
 	stock_reco_qty_shift = 0
 	if args.get("is_cancelled"):
 		if args.get("previous_qty_after_transaction"):
+			if args.get("serial_and_batch_bundle"):
+				return args.get("previous_qty_after_transaction")
+
 			# get qty (balance) that was set at submission
 			last_balance = args.get("previous_qty_after_transaction")
 			stock_reco_qty_shift = flt(args.qty_after_transaction) - flt(last_balance)
@@ -1960,7 +2106,6 @@ def get_next_stock_reco(kwargs):
 			sle.actual_qty,
 			sle.has_batch_no,
 		)
-		.force_index("item_warehouse")
 		.where(
 			(sle.item_code == kwargs.get("item_code"))
 			& (sle.warehouse == kwargs.get("warehouse"))
@@ -2109,29 +2254,6 @@ def get_future_sle_with_negative_batch_qty(sle_args):
 
 
 def validate_reserved_stock(kwargs):
-	if kwargs.serial_no:
-		serial_nos = kwargs.serial_no.split("\n")
-		validate_reserved_serial_nos(kwargs.item_code, kwargs.warehouse, serial_nos)
-
-	elif kwargs.batch_no:
-		validate_reserved_batch_nos(kwargs.item_code, kwargs.warehouse, [kwargs.batch_no])
-
-	elif kwargs.serial_and_batch_bundle:
-		sbb_entries = frappe.db.get_all(
-			"Serial and Batch Entry",
-			{
-				"parenttype": "Serial and Batch Bundle",
-				"parent": kwargs.serial_and_batch_bundle,
-				"docstatus": 1,
-			},
-			["batch_no", "serial_no"],
-		)
-
-		if serial_nos := [entry.serial_no for entry in sbb_entries if entry.serial_no]:
-			validate_reserved_serial_nos(kwargs.item_code, kwargs.warehouse, serial_nos)
-		elif batch_nos := [entry.batch_no for entry in sbb_entries if entry.batch_no]:
-			validate_reserved_batch_nos(kwargs.item_code, kwargs.warehouse, batch_nos)
-
 	# Qty based validation for non-serial-batch items OR SRE with Reservation Based On Qty.
 	precision = cint(frappe.db.get_default("float_precision")) or 2
 	balance_qty = get_stock_balance(kwargs.item_code, kwargs.warehouse)
@@ -2166,13 +2288,12 @@ def validate_reserved_serial_nos(item_code, warehouse, serial_nos):
 
 def validate_reserved_batch_nos(item_code, warehouse, batch_nos):
 	if reserved_batches_map := get_sre_reserved_batch_nos_details(item_code, warehouse, batch_nos):
-		available_batches = get_available_batches(
+		available_batches = get_auto_batch_nos(
 			frappe._dict(
 				{
 					"item_code": item_code,
 					"warehouse": warehouse,
-					"posting_date": nowdate(),
-					"posting_time": nowtime(),
+					"posting_datetime": get_combine_datetime(nowdate(), nowtime()),
 				}
 			)
 		)
@@ -2195,9 +2316,9 @@ def validate_reserved_batch_nos(item_code, warehouse, batch_nos):
 
 
 def is_negative_stock_allowed(*, item_code: str | None = None) -> bool:
-	if cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock", cache=True)):
+	if frappe.get_cached_doc("Stock Settings").allow_negative_stock:
 		return True
-	if item_code and cint(frappe.db.get_value("Item", item_code, "allow_negative_stock", cache=True)):
+	if item_code and cint(frappe.get_cached_value("Item", item_code, "allow_negative_stock")):
 		return True
 	return False
 
@@ -2236,23 +2357,85 @@ def is_internal_transfer(sle):
 		return True
 
 
-def get_stock_value_difference(item_code, warehouse, posting_date, posting_time, voucher_no=None):
+def get_stock_value_difference(
+	item_code, warehouse, posting_date, posting_time, voucher_no=None, voucher_detail_no=None, creation=None
+):
 	table = frappe.qb.DocType("Stock Ledger Entry")
 	posting_datetime = get_combine_datetime(posting_date, posting_time)
 
 	query = (
 		frappe.qb.from_(table)
 		.select(Sum(table.stock_value_difference).as_("value"))
-		.where(
-			(table.is_cancelled == 0)
-			& (table.item_code == item_code)
-			& (table.warehouse == warehouse)
-			& (table.posting_datetime <= posting_datetime)
-		)
+		.where((table.is_cancelled == 0) & (table.item_code == item_code) & (table.warehouse == warehouse))
 	)
 
-	if voucher_no:
+	if voucher_detail_no:
+		query = query.where(table.voucher_detail_no != voucher_detail_no)
+
+	elif voucher_no:
 		query = query.where(table.voucher_no != voucher_no)
+
+	if creation:
+		query = query.where(
+			(table.posting_datetime < posting_datetime)
+			| ((table.posting_datetime == posting_datetime) & (table.creation < creation))
+		)
+	else:
+		query = query.where(table.posting_datetime <= posting_datetime)
 
 	difference_amount = query.run()
 	return flt(difference_amount[0][0]) if difference_amount else 0
+
+
+@frappe.request_cache
+def is_transfer_stock_entry(voucher_no):
+	purpose = frappe.get_cached_value("Stock Entry", voucher_no, "purpose")
+
+	return purpose in ["Material Transfer", "Material Transfer for Manufacture", "Send to Subcontractor"]
+
+
+@frappe.request_cache
+def get_serial_from_sabb(serial_and_batch_bundle):
+	return frappe.get_all(
+		"Serial and Batch Entry",
+		filters={"parent": serial_and_batch_bundle},
+		fields=["serial_no", "batch_no", "name", "qty", "incoming_rate"],
+		order_by="idx",
+	)
+
+
+def get_incoming_rate_for_serial_and_batch(item_code, row, sn_obj, company):
+	if row.serial_no:
+		return abs(sn_obj.serial_no_incoming_rate.get(row.serial_no, 0.0))
+	else:
+		stock_queue = []
+		if hasattr(sn_obj, "stock_queue") and sn_obj.stock_queue:
+			stock_queue = parse_json(sn_obj.stock_queue)
+
+		val_method = get_valuation_method(item_code, company)
+
+		actual_qty = row.qty
+		if stock_queue and val_method == "FIFO" and row.batch_no in sn_obj.non_batchwise_valuation_batches:
+			if actual_qty < 0:
+				stock_queue = FIFOValuation(stock_queue)
+				_prev_qty, prev_stock_value = stock_queue.get_total_stock_and_value()
+
+				stock_queue.remove_stock(qty=abs(actual_qty))
+				_qty, stock_value = stock_queue.get_total_stock_and_value()
+
+				stock_value_difference = stock_value - prev_stock_value
+				incoming_rate = abs(flt(stock_value_difference) / abs(flt(actual_qty)))
+				stock_queue = stock_queue.state
+			else:
+				incoming_rate = abs(flt(sn_obj.batch_avg_rate.get(row.batch_no)))
+				stock_queue.append([row.qty, incoming_rate])
+			row.stock_queue = json.dumps(stock_queue)
+		else:
+			incoming_rate = abs(flt(sn_obj.batch_avg_rate.get(row.batch_no)))
+
+	return incoming_rate
+
+
+@frappe.request_cache
+def is_repack_entry(stock_entry_id):
+	return frappe.get_cached_value("Stock Entry", stock_entry_id, "purpose") == "Repack"

@@ -14,6 +14,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 	erpnext.selling.SellingController
 ) {
 	setup(doc) {
+		this.setup_accounting_dimension_triggers();
 		this.setup_posting_date_time_check();
 		super.setup(doc);
 		this.frm.make_methods = {
@@ -24,6 +25,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 	company() {
 		super.company();
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+		this.frm.clear_table("tax_withholding_entries");
 	}
 	onload() {
 		var me = this;
@@ -58,6 +60,13 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 			me.frm.script_manager.trigger("is_pos");
 			me.frm.refresh_fields();
+			frappe.db
+				.get_value("POS Profile", this.frm.doc.pos_profile, "set_grand_total_to_default_mop")
+				.then((r) => {
+					if (!r.exc) {
+						me.frm.set_default_payment = r.message.set_grand_total_to_default_mop;
+					}
+				});
 		}
 		erpnext.queries.setup_warehouse_query(this.frm);
 	}
@@ -180,6 +189,10 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		}
 
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm);
+
+		if (this.frm.doc.is_created_using_pos && !this.frm.doc.is_return) {
+			erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+		}
 	}
 
 	make_invoice_discounting() {
@@ -245,6 +258,18 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 	sales_order_btn() {
 		var me = this;
+
+		let filters = {
+			docstatus: 1,
+			status: ["not in", ["Closed", "On Hold"]],
+			per_billed: ["<", 99.99],
+			company: me.frm.doc.company,
+		};
+
+		if (me.frm.doc.has_subcontracted) {
+			filters.is_subcontracted = 1;
+		}
+
 		this.$sales_order_btn = this.frm.add_custom_button(
 			__("Sales Order"),
 			function () {
@@ -255,12 +280,10 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					setters: {
 						customer: me.frm.doc.customer || undefined,
 					},
-					get_query_filters: {
-						docstatus: 1,
-						status: ["not in", ["Closed", "On Hold"]],
-						per_billed: ["<", 99.99],
-						company: me.frm.doc.company,
-					},
+					get_query_filters: filters,
+					allow_child_item_selection: true,
+					child_fieldname: "items",
+					child_columns: ["item_code", "item_name", "qty", "amount", "billed_amt"],
 				});
 			},
 			__("Get Items From")
@@ -290,6 +313,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 						status: ["!=", "Lost"],
 						company: me.frm.doc.company,
 					},
+					allow_child_item_selection: true,
+					child_fieldname: "items",
+					child_columns: ["item_code", "item_name", "qty", "rate", "amount"],
 				});
 			},
 			__("Get Items From")
@@ -321,6 +347,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 							filters: filters,
 						};
 					},
+					allow_child_item_selection: true,
+					child_fieldname: "items",
+					child_columns: ["item_code", "item_name", "qty", "amount", "billed_amt"],
 				});
 			},
 			__("Get Items From")
@@ -354,6 +383,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				),
 			},
 			function () {
+				me.frm.doc.apply_tds =
+					me.frm.tax_withholding_category || me.frm.tax_withholding_group ? 1 : 0;
+				me.frm.clear_table("tax_withholding_entries");
 				me.apply_pricing_rule();
 			}
 		);
@@ -499,8 +531,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					},
 					callback: function (r) {
 						if (!r.exc) {
-							if (r.message && r.message.print_format) {
+							if (r.message) {
 								me.frm.pos_print_format = r.message.print_format;
+								me.frm.set_default_payment = r.message.set_default_payment;
 							}
 							me.frm.trigger("update_stock");
 							if (me.frm.doc.taxes_and_charges) {
@@ -569,6 +602,10 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 		this.calculate_taxes_and_totals();
 	}
+
+	apply_tds(frm) {
+		this.frm.clear_table("tax_withholding_entries");
+	}
 };
 
 // for backward compatibility: combine new and previous states
@@ -587,10 +624,6 @@ cur_frm.cscript.income_account = function (doc, cdt, cdn) {
 
 cur_frm.cscript.expense_account = function (doc, cdt, cdn) {
 	erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "expense_account");
-};
-
-cur_frm.cscript.cost_center = function (doc, cdt, cdn) {
-	erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "cost_center");
 };
 
 frappe.ui.form.on("Sales Invoice", {
@@ -777,27 +810,28 @@ frappe.ui.form.on("Sales Invoice", {
 				},
 			};
 		});
-	},
-	// When multiple companies are set up. in case company name is changed set default company address
-	company: function (frm) {
-		if (frm.doc.company) {
-			frappe.call({
-				method: "erpnext.setup.doctype.company.company.get_default_company_address",
-				args: { name: frm.doc.company, existing_address: frm.doc.company_address || "" },
-				debounce: 2000,
-				callback: function (r) {
-					if (r.message) {
-						frm.set_value("company_address", r.message);
-					} else {
-						frm.set_value("company_address", "");
-					}
-				},
-			});
-		}
-	},
 
+		frm.set_query("sales_person", "sales_team", function () {
+			return {
+				filters: {
+					is_group: 0,
+					enabled: 1,
+				},
+			};
+		});
+	},
 	onload: function (frm) {
 		frm.redemption_conversion_factor = null;
+
+		if (frm.doc.__onload && frm.doc.customer) {
+			if (frm.is_new()) {
+				frm.doc.apply_tds = frm.doc.__onload.apply_tds ? 1 : 0;
+			}
+		}
+
+		if (frm.is_new()) {
+			frm.clear_table("tax_withholding_entries");
+		}
 	},
 
 	update_stock: function (frm, dt, dn) {
@@ -1091,12 +1125,27 @@ frappe.ui.form.on("Sales Invoice", {
 		if (frm.doc.is_debit_note) {
 			frm.set_df_property("return_against", "label", __("Adjustment Against"));
 		}
+
+		frm.set_df_property("update_stock", "read_only", frm.doc.has_subcontracted);
+		frm.toggle_display("update_stock", !frm.doc.has_subcontracted);
 	},
 });
 
 frappe.ui.form.on("Sales Invoice Timesheet", {
 	timesheets_remove(frm) {
 		frm.trigger("calculate_timesheet_totals");
+	},
+});
+
+frappe.ui.form.on("Sales Invoice Payment", {
+	mode_of_payment: function (frm) {
+		frappe.call({
+			doc: frm.doc,
+			method: "set_account_for_mode_of_payment",
+			callback: function (r) {
+				refresh_field("payments");
+			},
+		});
 	},
 });
 

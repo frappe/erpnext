@@ -18,7 +18,6 @@ class PurchaseOrderItem(Document):
 		actual_qty: DF.Float
 		against_blanket_order: DF.Check
 		amount: DF.Currency
-		apply_tds: DF.Check
 		base_amount: DF.Currency
 		base_net_amount: DF.Currency
 		base_net_rate: DF.Currency
@@ -85,7 +84,7 @@ class PurchaseOrderItem(Document):
 		stock_qty: DF.Float
 		stock_uom: DF.Link
 		stock_uom_rate: DF.Currency
-		subcontracted_quantity: DF.Float
+		subcontracted_qty: DF.Float
 		supplier_part_no: DF.Data | None
 		supplier_quotation: DF.Link | None
 		supplier_quotation_item: DF.Link | None

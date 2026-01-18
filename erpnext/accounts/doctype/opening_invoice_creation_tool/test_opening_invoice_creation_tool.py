@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
 	create_dimension,
@@ -13,15 +13,6 @@ from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_crea
 )
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Customer", "Supplier", "Accounting Dimension"]
-
-
-class UnitTestOpeningInvoiceCreationTool(UnitTestCase):
-	"""
-	Unit tests for OpeningInvoiceCreationTool.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
 
 
 class TestOpeningInvoiceCreationTool(IntegrationTestCase):

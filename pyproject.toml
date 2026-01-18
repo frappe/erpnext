@@ -4,24 +4,26 @@ authors = [
     { name = "Frappe Technologies Pvt Ltd", email = "developers@frappe.io"}
 ]
 description = "Open Source ERP"
-requires-python = ">=3.10"
+requires-python = ">=3.14"
 readme = "README.md"
 dynamic = ["version"]
 dependencies = [
     # Core dependencies
-    "pycountry~=24.6.1",
-    "Unidecode~=1.3.6",
+    "Unidecode~=1.4.0",
     "barcodenumber~=0.5.0",
-    "rapidfuzz~=2.15.0",
-    "holidays~=0.28",
+    "rapidfuzz~=3.14.3",
+    "holidays~=0.87",
 
     # integration dependencies
-    "googlemaps",
+    "googlemaps~=4.10.0",
     "plaid-python~=7.2.1",
-    "python-youtube~=0.8.0",
+    "python-youtube~=0.9.8",
 
     # Not used directly - required by PyQRCode for PNG generation
     "pypng~=0.20220715.0",
+
+    # MT940 parser for bank statements
+    "mt-940>=4.26.0",
 ]
 
 [build-system]
@@ -36,7 +38,7 @@ skip_namespaces = [
 ]
 
 [tool.bench.frappe-dependencies]
-frappe = ">=16.0.0-dev,<17.0.0"
+frappe = ">=17.0.0-dev,<18.0.0"
 
 [tool.ruff]
 line-length = 110

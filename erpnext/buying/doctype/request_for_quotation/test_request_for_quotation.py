@@ -5,7 +5,7 @@
 from urllib.parse import urlparse
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase, change_settings
 from frappe.utils import nowdate
 
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
@@ -21,15 +21,6 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.templates.pages.rfq import check_supplier_has_docname_access
 
 
-class UnitTestRequestForQuotation(UnitTestCase):
-	"""
-	Unit tests for RequestForQuotation.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
 class TestRequestforQuotation(IntegrationTestCase):
 	def test_rfq_qty(self):
 		rfq = make_request_for_quotation(qty=0, do_not_save=True)
@@ -40,6 +31,16 @@ class TestRequestforQuotation(IntegrationTestCase):
 		rfq.items[0].qty = 1
 		rfq.save()
 		self.assertEqual(rfq.items[0].qty, 1)
+
+	def test_rfq_zero_qty(self):
+		"""
+		Test if RFQ with zero qty (Unit Price Item) is conditionally allowed.
+		"""
+		rfq = make_request_for_quotation(qty=0, do_not_save=True)
+
+		with change_settings("Buying Settings", {"allow_zero_qty_in_request_for_quotation": 1}):
+			rfq.save()
+			self.assertEqual(rfq.items[0].qty, 0)
 
 	def test_quote_status(self):
 		rfq = make_request_for_quotation()
@@ -74,6 +75,46 @@ class TestRequestforQuotation(IntegrationTestCase):
 		self.assertEqual(sq1.get("items")[0].request_for_quotation, rfq.name)
 		self.assertEqual(sq1.get("items")[0].item_code, "_Test Item")
 		self.assertEqual(sq1.get("items")[0].qty, 5)
+
+	def test_make_supplier_quotation_with_taxes(self):
+		"""Test automatic tax addition when supplier quotation is created from RFQ taxes_and_charges are set"""
+
+		# Create a Purchase Taxes and Charges Template for testing
+		tax_template = frappe.new_doc("Purchase Taxes and Charges Template")
+		tax_template.doctype = "Purchase Taxes and Charges Template"
+		tax_template.title = "_Test Purchase Taxes Template for RFQ"
+		tax_template.company = "_Test Company"
+		tax_template.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"description": "VAT",
+				"rate": 10,
+			},
+		)
+		tax_template.save()
+
+		rfq = make_request_for_quotation()
+		supplier = rfq.get("suppliers")[0].supplier
+
+		tax_rule = frappe.new_doc("Tax Rule")
+		tax_rule.company = "_Test Company"
+		tax_rule.tax_type = "Purchase"
+		tax_rule.supplier = supplier
+		tax_rule.purchase_tax_template = tax_template.name
+		tax_rule.save()
+
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier)
+
+		# Verify that taxes_and_charges is set from get_party_details
+		self.assertEqual(sq.taxes_and_charges, tax_template.name)
+
+		# Verify that taxes are automatically added
+		self.assertGreaterEqual(len(sq.get("taxes")), 1)
+
+		tax_rule.delete()
+		tax_template.delete()
 
 	def test_make_supplier_quotation_with_special_characters(self):
 		frappe.delete_doc_if_exists("Supplier", "_Test Supplier '1", force=1)
@@ -180,6 +221,32 @@ class TestRequestforQuotation(IntegrationTestCase):
 
 		supplier_doc.reload()
 		self.assertTrue(supplier_doc.portal_users[0].user)
+
+	@IntegrationTestCase.change_settings("Buying Settings", {"allow_zero_qty_in_request_for_quotation": 1})
+	def test_supplier_quotation_from_zero_qty_rfq(self):
+		rfq = make_request_for_quotation(qty=0)
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=rfq.get("suppliers")[0].supplier)
+
+		self.assertEqual(len(sq.items), 1)
+		self.assertEqual(sq.items[0].qty, 0)
+		self.assertEqual(sq.items[0].item_code, rfq.items[0].item_code)
+
+	@IntegrationTestCase.change_settings(
+		"Buying Settings",
+		{
+			"allow_zero_qty_in_request_for_quotation": 1,
+			"allow_zero_qty_in_supplier_quotation": 1,
+		},
+	)
+	def test_supplier_quotation_from_zero_qty_rfq_in_portal(self):
+		rfq = make_request_for_quotation(qty=0)
+		rfq.supplier = rfq.suppliers[0].supplier
+		sq_name = create_supplier_quotation(rfq)
+
+		sq = frappe.get_doc("Supplier Quotation", sq_name)
+		self.assertEqual(len(sq.items), 1)
+		self.assertEqual(sq.items[0].qty, 0)
+		self.assertEqual(sq.items[0].item_code, rfq.items[0].item_code)
 
 
 def make_request_for_quotation(**args) -> "RequestforQuotation":

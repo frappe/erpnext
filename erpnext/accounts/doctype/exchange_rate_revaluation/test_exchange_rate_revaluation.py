@@ -3,6 +3,8 @@
 
 
 import frappe
+from frappe.query_builder import functions
+from frappe.query_builder.utils import DocType
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, flt, today
 
@@ -81,10 +83,11 @@ class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(je.total_debit, 8500.0)
 		self.assertEqual(je.total_credit, 8500.0)
 
+		gl = DocType("GL Entry")
 		acc_balance = frappe.db.get_all(
 			"GL Entry",
 			filters={"account": self.debtors_usd, "is_cancelled": 0},
-			fields=["sum(debit)-sum(credit) as balance"],
+			fields=[(functions.Sum(gl.debit) - functions.Sum(gl.credit)).as_("balance")],
 		)[0]
 		self.assertEqual(acc_balance.balance, 8500.0)
 
@@ -146,12 +149,15 @@ class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(je.total_debit, 500.0)
 		self.assertEqual(je.total_credit, 500.0)
 
+		gl = DocType("GL Entry")
 		acc_balance = frappe.db.get_all(
 			"GL Entry",
 			filters={"account": self.debtors_usd, "is_cancelled": 0},
 			fields=[
-				"sum(debit)-sum(credit) as balance",
-				"sum(debit_in_account_currency)-sum(credit_in_account_currency) as balance_in_account_currency",
+				(functions.Sum(gl.debit) - functions.Sum(gl.credit)).as_("balance"),
+				(
+					functions.Sum(gl.debit_in_account_currency) - functions.Sum(gl.credit_in_account_currency)
+				).as_("balance_in_account_currency"),
 			],
 		)[0]
 		# account shouldn't have balance in base and account currency
@@ -193,12 +199,15 @@ class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
 		pe.references = []
 		pe.save().submit()
 
+		gl = DocType("GL Entry")
 		acc_balance = frappe.db.get_all(
 			"GL Entry",
 			filters={"account": self.debtors_usd, "is_cancelled": 0},
 			fields=[
-				"sum(debit)-sum(credit) as balance",
-				"sum(debit_in_account_currency)-sum(credit_in_account_currency) as balance_in_account_currency",
+				(functions.Sum(gl.debit) - functions.Sum(gl.credit)).as_("balance"),
+				(
+					functions.Sum(gl.debit_in_account_currency) - functions.Sum(gl.credit_in_account_currency)
+				).as_("balance_in_account_currency"),
 			],
 		)[0]
 		# account should have balance only in account currency
@@ -235,12 +244,15 @@ class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(flt(je.total_debit, precision), 0.0)
 		self.assertEqual(flt(je.total_credit, precision), 0.0)
 
+		gl = DocType("GL Entry")
 		acc_balance = frappe.db.get_all(
 			"GL Entry",
 			filters={"account": self.debtors_usd, "is_cancelled": 0},
 			fields=[
-				"sum(debit)-sum(credit) as balance",
-				"sum(debit_in_account_currency)-sum(credit_in_account_currency) as balance_in_account_currency",
+				(functions.Sum(gl.debit) - functions.Sum(gl.credit)).as_("balance"),
+				(
+					functions.Sum(gl.debit_in_account_currency) - functions.Sum(gl.credit_in_account_currency)
+				).as_("balance_in_account_currency"),
 			],
 		)[0]
 		# account shouldn't have balance in base and account currency post revaluation

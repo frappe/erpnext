@@ -11,7 +11,7 @@ def validate_webhooks_request(doctype, hmac_key, secret_key="secret"):
 	def innerfn(fn):
 		settings = frappe.get_doc(doctype)
 
-		if frappe.request and settings and settings.get(secret_key) and not frappe.flags.in_test:
+		if frappe.request and settings and settings.get(secret_key) and not frappe.in_test:
 			sig = base64.b64encode(
 				hmac.new(
 					settings.get(secret_key).encode("utf8"), frappe.request.data, hashlib.sha256

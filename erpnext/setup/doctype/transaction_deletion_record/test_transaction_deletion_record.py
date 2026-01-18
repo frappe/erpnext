@@ -3,16 +3,7 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
-
-
-class UnitTestTransactionDeletionRecord(UnitTestCase):
-	"""
-	Unit tests for TransactionDeletionRecord.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
+from frappe.tests import IntegrationTestCase
 
 
 class TestTransactionDeletionRecord(IntegrationTestCase):

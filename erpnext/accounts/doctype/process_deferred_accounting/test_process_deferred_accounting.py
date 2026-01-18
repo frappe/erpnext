@@ -16,7 +16,7 @@ from erpnext.stock.doctype.item.test_item import create_item
 class TestProcessDeferredAccounting(IntegrationTestCase):
 	def test_creation_of_ledger_entry_on_submit(self):
 		"""test creation of gl entries on submission of document"""
-		change_acc_settings(acc_frozen_upto="2023-05-31", book_deferred_entries_based_on="Months")
+		change_acc_settings(acc_frozen_till_date="2023-05-31", book_deferred_entries_based_on="Months")
 
 		deferred_account = create_account(
 			account_name="Deferred Revenue for Accounts Frozen",
@@ -40,14 +40,19 @@ class TestProcessDeferredAccounting(IntegrationTestCase):
 		si.save()
 		si.submit()
 
+		original_gle = [
+			["Debtors - _TC", 3000.0, 0, "2023-07-01"],
+			[deferred_account, 0.0, 3000, "2023-07-01"],
+		]
+
+		check_gl_entries(self, si.name, original_gle, "2023-07-01")
+
 		process_deferred_accounting = frappe.get_doc(
-			dict(
-				doctype="Process Deferred Accounting",
-				posting_date="2023-07-01",
-				start_date="2023-05-01",
-				end_date="2023-06-30",
-				type="Income",
-			)
+			doctype="Process Deferred Accounting",
+			posting_date="2023-07-01",
+			start_date="2023-05-01",
+			end_date="2023-06-30",
+			type="Income",
 		)
 
 		process_deferred_accounting.insert()
@@ -63,24 +68,30 @@ class TestProcessDeferredAccounting(IntegrationTestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, "2023-07-01")
+
+		# cancel the process deferred accounting document
+		process_deferred_accounting.cancel()
+
+		# check if gl entries are cancelled
+		check_gl_entries(self, si.name, original_gle, "2023-07-01")
 		change_acc_settings()
 
 	def test_pda_submission_and_cancellation(self):
 		pda = frappe.get_doc(
-			dict(
-				doctype="Process Deferred Accounting",
-				posting_date="2019-01-01",
-				start_date="2019-01-01",
-				end_date="2019-01-31",
-				type="Income",
-			)
+			doctype="Process Deferred Accounting",
+			posting_date="2019-01-01",
+			start_date="2019-01-01",
+			end_date="2019-01-31",
+			type="Income",
 		)
 		pda.submit()
 		pda.cancel()
 
 
-def change_acc_settings(acc_frozen_upto="", book_deferred_entries_based_on="Days"):
+def change_acc_settings(
+	company="_Test Company", acc_frozen_till_date=None, book_deferred_entries_based_on="Days"
+):
 	acc_settings = frappe.get_doc("Accounts Settings", "Accounts Settings")
-	acc_settings.acc_frozen_upto = acc_frozen_upto
 	acc_settings.book_deferred_entries_based_on = book_deferred_entries_based_on
+	frappe.db.set_value("Company", company, "accounts_frozen_till_date", acc_frozen_till_date)
 	acc_settings.save()

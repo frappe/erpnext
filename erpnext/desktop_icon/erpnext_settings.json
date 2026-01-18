@@ -1,0 +1,22 @@
+{
+ "app": "erpnext",
+ "creation": "2026-01-09 12:48:25.524807",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "setting",
+ "icon_type": "Link",
+ "idx": 10,
+ "label": "ERPNext Settings",
+ "link_to": "ERPNext Settings",
+ "link_type": "Workspace Sidebar",
+ "logo_url": "",
+ "modified": "2026-01-09 14:59:56.044037",
+ "modified_by": "Administrator",
+ "name": "ERPNext Settings",
+ "owner": "Administrator",
+ "parent_icon": "",
+ "restrict_removal": 0,
+ "roles": [],
+ "standard": 1
+}

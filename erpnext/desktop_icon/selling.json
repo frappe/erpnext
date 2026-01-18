@@ -1,0 +1,21 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-17 20:55:11.872574",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "sell",
+ "icon_type": "Link",
+ "idx": 1,
+ "label": "Selling",
+ "link_to": "Selling",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-01-01 20:07:01.189446",
+ "modified_by": "Administrator",
+ "name": "Selling",
+ "owner": "Administrator",
+ "parent_icon": "ERPNext",
+ "restrict_removal": 0,
+ "roles": [],
+ "standard": 1
+}

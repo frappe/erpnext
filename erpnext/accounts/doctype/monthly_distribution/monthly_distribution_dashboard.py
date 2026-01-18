@@ -11,6 +11,5 @@ def get_data():
 		},
 		"transactions": [
 			{"label": _("Target Details"), "items": ["Sales Person", "Territory", "Sales Partner"]},
-			{"items": ["Budget"]},
 		],
 	}

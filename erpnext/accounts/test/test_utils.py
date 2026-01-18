@@ -10,6 +10,7 @@ from erpnext.accounts.party import get_party_shipping_address
 from erpnext.accounts.utils import (
 	get_future_stock_vouchers,
 	get_voucherwise_gl_entries,
+	get_zero_cutoff,
 	sort_stock_vouchers_by_posting_date,
 )
 from erpnext.stock.doctype.item.test_item import make_item
@@ -156,6 +157,11 @@ class TestUtils(IntegrationTestCase):
 		self.assertEqual(len(doc_name), 3)
 		self.assertSequenceEqual(doc_name[0:2], ("SUP", fiscal_year))
 		frappe.db.set_default("supp_master_name", "Supplier Name")
+
+	def test_get_zero_cutoff(self):
+		self.assertEqual(get_zero_cutoff(None), 0.005)
+		self.assertEqual(get_zero_cutoff("EUR"), 0.005)
+		self.assertEqual(get_zero_cutoff("BHD"), 0.0005)
 
 
 ADDRESS_RECORDS = [

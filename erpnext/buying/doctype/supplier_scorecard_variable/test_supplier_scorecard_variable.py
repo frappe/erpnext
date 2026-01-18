@@ -3,20 +3,11 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable import (
 	VariablePathNotFound,
 )
-
-
-class UnitTestSupplierScorecardVariable(UnitTestCase):
-	"""
-	Unit tests for SupplierScorecardVariable.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
 
 
 class TestSupplierScorecardVariable(IntegrationTestCase):

@@ -7,6 +7,7 @@ import math
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import (
 	cint,
 	flt,
@@ -33,9 +34,6 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	convert_draft_asset_depr_schedules_into_active,
 	get_asset_depr_schedule_doc,
 	get_depr_schedule,
-	make_draft_asset_depr_schedules,
-	make_draft_asset_depr_schedules_if_not_present,
-	update_draft_asset_depr_schedules,
 )
 from erpnext.controllers.accounts_controller import AccountsController
 
@@ -73,13 +71,13 @@ class Asset(AccountsController):
 		disposal_date: DF.Date | None
 		finance_books: DF.Table[AssetFinanceBook]
 		frequency_of_depreciation: DF.Int
-		gross_purchase_amount: DF.Currency
 		image: DF.AttachImage | None
 		insurance_end_date: DF.Date | None
 		insurance_start_date: DF.Date | None
 		insured_value: DF.Data | None
 		insurer: DF.Data | None
 		is_composite_asset: DF.Check
+		is_composite_component: DF.Check
 		is_existing_asset: DF.Check
 		is_fully_depreciated: DF.Check
 		item_code: DF.Link
@@ -88,12 +86,13 @@ class Asset(AccountsController):
 		location: DF.Link
 		maintenance_required: DF.Check
 		naming_series: DF.Literal["ACC-ASS-.YYYY.-"]
+		net_purchase_amount: DF.Currency
 		next_depreciation_date: DF.Date | None
 		opening_accumulated_depreciation: DF.Currency
 		opening_number_of_booked_depreciations: DF.Int
 		policy_number: DF.Data | None
 		purchase_amount: DF.Currency
-		purchase_date: DF.Date | None
+		purchase_date: DF.Date
 		purchase_invoice: DF.Link | None
 		purchase_invoice_item: DF.Data | None
 		purchase_receipt: DF.Link | None
@@ -102,6 +101,7 @@ class Asset(AccountsController):
 		status: DF.Literal[
 			"Draft",
 			"Submitted",
+			"Cancelled",
 			"Partially Depreciated",
 			"Fully Depreciated",
 			"Sold",
@@ -120,7 +120,9 @@ class Asset(AccountsController):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_category()
 		self.validate_precision()
+		self.validate_linked_purchase_documents()
 		self.set_purchase_doc_row_item()
 		self.validate_asset_values()
 		self.validate_asset_and_reference()
@@ -130,34 +132,125 @@ class Asset(AccountsController):
 		self.validate_gross_and_purchase_amount()
 		self.validate_finance_books()
 
-		if not self.split_from:
-			self.prepare_depreciation_data()
+	def before_save(self):
+		self.total_asset_cost = self.net_purchase_amount + self.additional_asset_cost
+		self.status = self.get_status()
 
-			if self.calculate_depreciation:
-				update_draft_asset_depr_schedules(self)
+	def create_asset_depreciation_schedule(self):
+		self.set_depr_rate_and_value_after_depreciation()
 
-				if frappe.db.exists("Asset", self.name):
-					asset_depr_schedules_names = make_draft_asset_depr_schedules_if_not_present(self)
+		if self.split_from or not self.calculate_depreciation:
+			return
 
-					if asset_depr_schedules_names:
-						asset_depr_schedules_links = get_comma_separated_links(
-							asset_depr_schedules_names, "Asset Depreciation Schedule"
-						)
-						frappe.msgprint(
-							_(
-								"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
-							).format(asset_depr_schedules_links)
-						)
+		created_schedules = []
+		for fb_row in self.get("finance_books"):
+			if not fb_row.rate_of_depreciation:
+				fb_row.rate_of_depreciation = self.get_depreciation_rate(fb_row, on_validate=True)
+
+			existing_schedule = get_asset_depr_schedule_doc(self.name, "Draft", fb_row.finance_book)
+
+			if not existing_schedule:
+				new_schedule = frappe.new_doc("Asset Depreciation Schedule")
+				new_schedule.asset = self.name
+				new_schedule.create_depreciation_schedule(fb_row)
+				new_schedule.save()
+				created_schedules.append(new_schedule.name)
+				continue
+
+			self.evaluate_and_recreate_depreciation_schedule(existing_schedule, fb_row)
+			created_schedules.append(existing_schedule.name)
+
+		self.show_schedule_creation_message(created_schedules)
+
+	def evaluate_and_recreate_depreciation_schedule(self, existing_doc, fb_row):
+		"""Determine if depreciation schedule needs to be regenerated and recreate if necessary"""
+
+		asset_details_changed = self.has_asset_details_changed(existing_doc)
+		depreciation_settings_changed = self.has_depreciation_settings_changed(existing_doc, fb_row)
+		if self.should_regenerate_depreciation_schedule(
+			existing_doc, asset_details_changed, depreciation_settings_changed
+		):
+			existing_doc.create_depreciation_schedule(fb_row)
+			existing_doc.save()
+
+	def has_asset_details_changed(self, existing_doc):
+		"""Check if core asset details that affect depreciation have changed"""
+		return (
+			self.net_purchase_amount != existing_doc.net_purchase_amount
+			or self.opening_accumulated_depreciation != existing_doc.opening_accumulated_depreciation
+			or self.opening_number_of_booked_depreciations
+			!= existing_doc.opening_number_of_booked_depreciations
+		)
+
+	def has_depreciation_settings_changed(self, existing_doc, fb_row):
+		"""Check if depreciation calculation settings have changed"""
+
+		if not existing_doc.get("depreciation_schedule") or fb_row.depreciation_method != "Manual":
+			return True
+
+		return (
+			fb_row.depreciation_method != existing_doc.depreciation_method
+			or fb_row.total_number_of_depreciations != existing_doc.total_number_of_depreciations
+			or fb_row.frequency_of_depreciation != existing_doc.frequency_of_depreciation
+			or getdate(fb_row.depreciation_start_date)
+			!= existing_doc.get("depreciation_schedule")[0].schedule_date
+			or fb_row.expected_value_after_useful_life != existing_doc.expected_value_after_useful_life
+		)
+
+	def should_regenerate_depreciation_schedule(
+		self, existing_doc, asset_details_changed, depreciation_settings_changed
+	):
+		"""Check all conditions to determine if schedule regeneration is required"""
+
+		# Schedule doesn't exist yet
+		if not existing_doc.get("depreciation_schedule"):
+			return True
+
+		# Either asset details or depreciation settings have changed
+		if asset_details_changed or depreciation_settings_changed:
+			return True
+
+		return False
+
+	def set_depr_rate_and_value_after_depreciation(self):
+		if self.split_from:
+			return
+
+		self.value_after_depreciation = (
+			flt(self.net_purchase_amount)
+			- flt(self.opening_accumulated_depreciation)
+			+ flt(self.additional_asset_cost)
+		)
+		if self.calculate_depreciation:
+			self.set_depreciation_rate()
+			for d in self.finance_books:
+				d.db_set("value_after_depreciation", self.value_after_depreciation)
+		else:
+			self.finance_books = []
+
+	def show_schedule_creation_message(self, schedules):
+		if schedules:
+			asset_depr_schedules_links = get_comma_separated_links(schedules, "Asset Depreciation Schedule")
+			frappe.msgprint(
+				_(
+					"Asset Depreciation Schedules created/updated:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
+				).format(asset_depr_schedules_links)
+			)
+
+	def on_update(self):
+		self.create_asset_depreciation_schedule()
 		self.validate_expected_value_after_useful_life()
 		self.set_total_booked_depreciations()
-		self.total_asset_cost = self.gross_purchase_amount
-		self.status = self.get_status()
+
+	def before_submit(self):
+		if self.is_composite_asset and not has_active_capitalization(self.name):
+			frappe.throw(_("Please capitalize this asset before submitting."))
 
 	def on_submit(self):
 		self.validate_in_use_date()
 		self.make_asset_movement()
 		self.reload()
-		if not self.booked_fixed_asset and self.validate_make_gl_entry():
+		if not self.booked_fixed_asset and not self.is_composite_component and self.validate_make_gl_entry():
 			self.make_gl_entries()
 		if self.calculate_depreciation and not self.split_from:
 			convert_draft_asset_depr_schedules_into_active(self)
@@ -172,29 +265,17 @@ class Asset(AccountsController):
 		cancel_asset_depr_schedules(self)
 		self.set_status()
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
-		make_reverse_gl_entries(voucher_type="Asset", voucher_no=self.name)
-		self.db_set("booked_fixed_asset", 0)
+		if not self.is_composite_component:
+			make_reverse_gl_entries(voucher_type="Asset", voucher_no=self.name)
+			self.db_set("booked_fixed_asset", 0)
 		add_asset_activity(self.name, _("Asset cancelled"))
 
 	def after_insert(self):
-		if self.calculate_depreciation and not self.split_from:
-			asset_depr_schedules_names = make_draft_asset_depr_schedules(self)
-			asset_depr_schedules_links = get_comma_separated_links(
-				asset_depr_schedules_names, "Asset Depreciation Schedule"
-			)
-			frappe.msgprint(
-				_(
-					"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
-				).format(asset_depr_schedules_links)
-			)
-		if (
-			not frappe.db.exists(
-				{
-					"doctype": "Asset Activity",
-					"asset": self.name,
-				}
-			)
-			and not self.flags.asset_created_via_asset_capitalization
+		if not frappe.db.exists(
+			{
+				"doctype": "Asset Activity",
+				"asset": self.name,
+			}
 		):
 			add_asset_activity(self.name, _("Asset created"))
 
@@ -205,7 +286,7 @@ class Asset(AccountsController):
 		if self.is_existing_asset or self.is_composite_asset:
 			return
 
-		self.purchase_amount = self.gross_purchase_amount
+		self.purchase_amount = self.net_purchase_amount
 		purchase_doc_type = "Purchase Receipt" if self.purchase_receipt else "Purchase Invoice"
 		purchase_doc = self.purchase_receipt or self.purchase_invoice
 
@@ -225,12 +306,12 @@ class Asset(AccountsController):
 
 		for item in purchase_doc.items:
 			if self.asset_quantity > 1:
-				if item.base_net_amount == self.gross_purchase_amount and item.qty == self.asset_quantity:
+				if item.base_net_amount == self.net_purchase_amount and item.qty == self.asset_quantity:
 					return item.name
 				elif item.qty == self.asset_quantity:
 					return item.name
 			else:
-				if item.base_net_rate == self.gross_purchase_amount and item.qty == self.asset_quantity:
+				if item.base_net_rate == self.net_purchase_amount and item.qty == self.asset_quantity:
 					return item.name
 
 	def validate_asset_and_reference(self):
@@ -247,16 +328,6 @@ class Asset(AccountsController):
 
 		if self.is_existing_asset and self.purchase_invoice:
 			frappe.throw(_("Purchase Invoice cannot be made against an existing asset {0}").format(self.name))
-
-	def prepare_depreciation_data(self):
-		if self.calculate_depreciation:
-			self.value_after_depreciation = 0
-			self.set_depreciation_rate()
-		else:
-			self.finance_books = []
-			self.value_after_depreciation = flt(self.gross_purchase_amount) - flt(
-				self.opening_accumulated_depreciation
-			)
 
 	def validate_item(self):
 		item = frappe.get_cached_value(
@@ -301,7 +372,7 @@ class Asset(AccountsController):
 				)
 
 	def validate_in_use_date(self):
-		if not self.available_for_use_date:
+		if not self.available_for_use_date and not self.is_composite_component:
 			frappe.throw(_("Available for use date is required"))
 
 		for d in self.finance_books:
@@ -318,8 +389,11 @@ class Asset(AccountsController):
 			self.asset_category = frappe.get_cached_value("Item", self.item_code, "asset_category")
 
 		if self.item_code and not self.get("finance_books"):
-			finance_books = get_item_details(self.item_code, self.asset_category, self.gross_purchase_amount)
+			finance_books = get_item_details(self.item_code, self.asset_category, self.net_purchase_amount)
 			self.set("finance_books", finance_books)
+
+		if self.asset_owner == "Company" and not self.asset_owner_company:
+			self.asset_owner_company = self.company
 
 	def validate_finance_books(self):
 		if not self.calculate_depreciation or len(self.finance_books) == 1:
@@ -342,11 +416,20 @@ class Asset(AccountsController):
 					title=_("Missing Finance Book"),
 				)
 
-	def validate_precision(self):
-		if self.gross_purchase_amount:
-			self.gross_purchase_amount = flt(
-				self.gross_purchase_amount, self.precision("gross_purchase_amount")
+	def validate_category(self):
+		non_depreciable_category = frappe.db.get_value(
+			"Asset Category", self.asset_category, "non_depreciable_category"
+		)
+		if self.calculate_depreciation and non_depreciable_category:
+			frappe.throw(
+				_(
+					"This asset category is marked as non-depreciable. Please disable depreciation calculation or choose a different category."
+				)
 			)
+
+	def validate_precision(self):
+		if self.net_purchase_amount:
+			self.net_purchase_amount = flt(self.net_purchase_amount, self.precision("net_purchase_amount"))
 
 		if self.opening_accumulated_depreciation:
 			self.opening_accumulated_depreciation = flt(
@@ -357,8 +440,8 @@ class Asset(AccountsController):
 		if not self.asset_category:
 			self.asset_category = frappe.get_cached_value("Item", self.item_code, "asset_category")
 
-		if not flt(self.gross_purchase_amount) and not self.is_composite_asset:
-			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
+		if not flt(self.net_purchase_amount) and not self.is_composite_asset:
+			frappe.throw(_("Net Purchase Amount is mandatory"), frappe.MandatoryError)
 
 		if is_cwip_accounting_enabled(self.asset_category):
 			if (
@@ -398,17 +481,82 @@ class Asset(AccountsController):
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(self.purchase_date):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
 
+	def validate_linked_purchase_documents(self):
+		if self.flags.is_split_asset:
+			return
+
+		for fieldname, doctype in [
+			("purchase_receipt", "Purchase Receipt"),
+			("purchase_invoice", "Purchase Invoice"),
+		]:
+			purchase_doc = getattr(self, fieldname, None)
+
+			if not purchase_doc:
+				continue
+
+			if frappe.db.get_value(doctype, purchase_doc, "docstatus") == 0:
+				frappe.throw(
+					_("{0} is in Draft. Submit it before creating the Asset.").format(
+						get_link_to_form(doctype, purchase_doc)
+					)
+				)
+
+			self.validate_asset_qty_with_purchase_doc(doctype, purchase_doc)
+
+	def validate_asset_qty_with_purchase_doc(self, doctype, purchase_doc):
+		Asset = frappe.qb.DocType("Asset")
+
+		if doctype == "Purchase Invoice":
+			asset_filter = Asset.purchase_invoice == purchase_doc
+		else:
+			asset_filter = Asset.purchase_receipt == purchase_doc
+
+		existing_asset_qty = (
+			frappe.qb.from_(Asset)
+			.select(IfNull(Sum(Asset.asset_quantity), 0))
+			.where((Asset.item_code == self.item_code) & (Asset.name != self.name) & (Asset.docstatus != 2))
+			.where(asset_filter)
+		).run()[0][0]
+
+		PurchaseDoc = frappe.qb.DocType(doctype)
+		PurchaseDocItems = frappe.qb.DocType(f"{doctype} Item")
+
+		purchased_qty = (
+			frappe.qb.from_(PurchaseDoc)
+			.join(PurchaseDocItems)
+			.on(PurchaseDoc.name == PurchaseDocItems.parent)
+			.select(IfNull(Sum(PurchaseDocItems.qty), 0))
+			.where(PurchaseDoc.name == purchase_doc)
+			.where(PurchaseDocItems.item_code == self.item_code)
+		).run()[0][0]
+
+		if (existing_asset_qty + self.asset_quantity) > purchased_qty:
+			frappe.throw(
+				_(
+					"<b>Cannot create asset.</b><br><br>"
+					"You're trying to create <b>{0} asset(s)</b> from {2} {3}.<br>"
+					"However, only <b>{1} item(s)</b> were purchased and <b>{4} asset(s)</b> already exist against {5}."
+				).format(
+					self.asset_quantity,
+					purchased_qty,
+					doctype,
+					get_link_to_form(doctype, purchase_doc),
+					existing_asset_qty,
+					purchase_doc,
+				)
+			)
+
 	def validate_gross_and_purchase_amount(self):
 		if self.is_existing_asset:
 			return
 
-		if self.gross_purchase_amount and self.gross_purchase_amount != self.purchase_amount:
+		if self.net_purchase_amount and self.net_purchase_amount != self.purchase_amount:
 			error_message = _(
-				"Gross Purchase Amount should be <b>equal</b> to purchase amount of one single Asset."
+				"Net Purchase Amount should be <b>equal</b> to purchase amount of one single Asset."
 			)
 			error_message += "<br>"
 			error_message += _("Please do not book expense of multiple assets against one single Asset.")
-			frappe.throw(error_message, title=_("Invalid Gross Purchase Amount"))
+			frappe.throw(error_message, title=_("Invalid Net Purchase Amount"))
 
 	def make_asset_movement(self):
 		reference_doctype = "Purchase Receipt" if self.purchase_receipt else "Purchase Invoice"
@@ -425,6 +573,7 @@ class Asset(AccountsController):
 				"asset_name": self.asset_name,
 				"target_location": self.location,
 				"to_employee": self.custodian,
+				"company": self.company,
 			}
 		]
 		asset_movement = frappe.get_doc(
@@ -442,73 +591,89 @@ class Asset(AccountsController):
 
 	def set_depreciation_rate(self):
 		for d in self.get("finance_books"):
-			d.rate_of_depreciation = flt(
-				self.get_depreciation_rate(d, on_validate=True), d.precision("rate_of_depreciation")
-			)
+			self.validate_asset_finance_books(d)
+			d.rate_of_depreciation = self.get_depreciation_rate(d, on_validate=True)
 
 	def validate_asset_finance_books(self, row):
 		row.expected_value_after_useful_life = flt(
-			row.expected_value_after_useful_life, self.precision("gross_purchase_amount")
+			row.expected_value_after_useful_life, self.precision("net_purchase_amount")
 		)
-		if flt(row.expected_value_after_useful_life) >= flt(self.gross_purchase_amount):
+
+		if flt(row.expected_value_after_useful_life) < 0:
+			frappe.throw(_("Row {0}: Expected Value After Useful Life cannot be negative").format(row.idx))
+		if flt(row.expected_value_after_useful_life) >= flt(self.net_purchase_amount):
 			frappe.throw(
-				_("Row {0}: Expected Value After Useful Life must be less than Gross Purchase Amount").format(
+				_("Row {0}: Expected Value After Useful Life must be less than Net Purchase Amount").format(
 					row.idx
-				),
-				title=_("Invalid Schedule"),
+				)
 			)
 
 		if not row.depreciation_start_date:
-			if not self.available_for_use_date:
-				frappe.throw(
-					_("Row {0}: Depreciation Start Date is required").format(row.idx),
-					title=_("Invalid Schedule"),
-				)
 			row.depreciation_start_date = get_last_day(self.available_for_use_date)
+		self.validate_depreciation_start_date(row)
+		self.validate_total_number_of_depreciations_and_frequency(row)
 
 		if not self.is_existing_asset:
 			self.opening_accumulated_depreciation = 0
 			self.opening_number_of_booked_depreciations = 0
 		else:
-			depreciable_amount = flt(
-				flt(self.gross_purchase_amount) - flt(row.expected_value_after_useful_life),
-				self.precision("gross_purchase_amount"),
-			)
-			if flt(self.opening_accumulated_depreciation) > depreciable_amount:
-				frappe.throw(
-					_("Opening Accumulated Depreciation must be less than or equal to {0}").format(
-						depreciable_amount
-					)
-				)
+			self.validate_opening_depreciation_values(row)
 
-			if self.opening_accumulated_depreciation:
-				if not self.opening_number_of_booked_depreciations:
-					frappe.throw(_("Please set Opening Number of Booked Depreciations"))
-			else:
-				self.opening_number_of_booked_depreciations = 0
-
-			if flt(row.total_number_of_depreciations) <= cint(self.opening_number_of_booked_depreciations):
-				frappe.throw(
-					_(
-						"Row {0}: Total Number of Depreciations cannot be less than or equal to Opening Number of Booked Depreciations"
-					).format(row.idx),
-					title=_("Invalid Schedule"),
-				)
-
-		if row.depreciation_start_date and getdate(row.depreciation_start_date) < getdate(self.purchase_date):
+	def validate_opening_depreciation_values(self, row):
+		row.expected_value_after_useful_life = flt(
+			row.expected_value_after_useful_life, self.precision("net_purchase_amount")
+		)
+		depreciable_amount = flt(
+			flt(self.net_purchase_amount) - flt(row.expected_value_after_useful_life),
+			self.precision("net_purchase_amount"),
+		)
+		if flt(self.opening_accumulated_depreciation) > depreciable_amount:
 			frappe.throw(
-				_("Depreciation Row {0}: Next Depreciation Date cannot be before Purchase Date").format(
-					row.idx
+				_("Row #{0}: Opening Accumulated Depreciation must be less than or equal to {1}").format(
+					row.idx, depreciable_amount
 				)
 			)
 
-		if row.depreciation_start_date and getdate(row.depreciation_start_date) < getdate(
-			self.available_for_use_date
-		):
+		if self.opening_accumulated_depreciation:
+			if not self.opening_number_of_booked_depreciations:
+				frappe.throw(_("Please set opening number of booked depreciations"))
+		else:
+			self.opening_number_of_booked_depreciations = 0
+
+		if flt(row.total_number_of_depreciations) <= cint(self.opening_number_of_booked_depreciations):
 			frappe.throw(
 				_(
-					"Depreciation Row {0}: Next Depreciation Date cannot be before Available-for-use Date"
-				).format(row.idx)
+					"Row #{0}: Total Number of Depreciations cannot be less than or equal to Opening Number of Booked Depreciations"
+				).format(row.idx),
+				title=_("Invalid Schedule"),
+			)
+
+	def validate_total_number_of_depreciations_and_frequency(self, row):
+		if row.total_number_of_depreciations <= 0:
+			frappe.throw(
+				_("Row #{0}: Total Number of Depreciations must be greater than zero").format(row.idx)
+			)
+
+		if row.frequency_of_depreciation <= 0:
+			frappe.throw(_("Row #{0}: Frequency of Depreciation must be greater than zero").format(row.idx))
+
+	def validate_depreciation_start_date(self, row):
+		if row.depreciation_start_date:
+			if getdate(row.depreciation_start_date) < getdate(self.purchase_date):
+				frappe.throw(
+					_("Row #{0}: Next Depreciation Date cannot be before Purchase Date").format(row.idx)
+				)
+
+			if getdate(row.depreciation_start_date) < getdate(self.available_for_use_date):
+				frappe.throw(
+					_("Row #{0}: Next Depreciation Date cannot be before Available-for-use Date").format(
+						row.idx
+					)
+				)
+		else:
+			frappe.throw(
+				_("Row #{0}: Depreciation Start Date is required").format(row.idx),
+				title=_("Invalid Schedule"),
 			)
 
 	def set_total_booked_depreciations(self):
@@ -528,18 +693,14 @@ class Asset(AccountsController):
 			if not depr_schedule:
 				continue
 
-			accumulated_depreciation_after_full_schedule = [
-				d.accumulated_depreciation_amount for d in depr_schedule
-			]
+			accumulated_depreciation_after_full_schedule = max(
+				[d.accumulated_depreciation_amount for d in depr_schedule]
+			)
 
 			if accumulated_depreciation_after_full_schedule:
-				accumulated_depreciation_after_full_schedule = max(
-					accumulated_depreciation_after_full_schedule
-				)
-
 				asset_value_after_full_schedule = flt(
-					flt(self.gross_purchase_amount) - flt(accumulated_depreciation_after_full_schedule),
-					self.precision("gross_purchase_amount"),
+					flt(self.net_purchase_amount) - flt(accumulated_depreciation_after_full_schedule),
+					self.precision("net_purchase_amount"),
 				)
 
 				if (
@@ -593,7 +754,7 @@ class Asset(AccountsController):
 
 			self.db_set(
 				"value_after_depreciation",
-				(flt(self.gross_purchase_amount) - flt(self.opening_accumulated_depreciation)),
+				(flt(self.net_purchase_amount) - flt(self.opening_accumulated_depreciation)),
 			)
 
 	def set_status(self, status=None):
@@ -605,7 +766,10 @@ class Asset(AccountsController):
 	def get_status(self):
 		"""Returns status based on whether it is draft, submitted, scrapped or depreciated"""
 		if self.docstatus == 0:
-			status = "Draft"
+			if self.is_composite_asset:
+				status = "Work In Progress"
+			else:
+				status = "Draft"
 		elif self.docstatus == 1:
 			status = "Submitted"
 
@@ -622,29 +786,29 @@ class Asset(AccountsController):
 					].expected_value_after_useful_life
 					value_after_depreciation = self.finance_books[idx].value_after_depreciation
 
-				if (
-					flt(value_after_depreciation) <= expected_value_after_useful_life
-					or self.is_fully_depreciated
-				):
-					status = "Fully Depreciated"
-				elif flt(value_after_depreciation) < flt(self.gross_purchase_amount):
-					status = "Partially Depreciated"
+					if (
+						flt(value_after_depreciation) <= expected_value_after_useful_life
+						or self.is_fully_depreciated
+					):
+						status = "Fully Depreciated"
+					elif flt(value_after_depreciation) < flt(self.net_purchase_amount):
+						status = "Partially Depreciated"
 		elif self.docstatus == 2:
 			status = "Cancelled"
 		return status
 
 	def get_value_after_depreciation(self, finance_book=None):
 		if not self.calculate_depreciation:
-			return flt(self.value_after_depreciation, self.precision("gross_purchase_amount"))
+			return flt(self.value_after_depreciation, self.precision("net_purchase_amount"))
 
 		if not finance_book:
 			return flt(
-				self.get("finance_books")[0].value_after_depreciation, self.precision("gross_purchase_amount")
+				self.get("finance_books")[0].value_after_depreciation, self.precision("net_purchase_amount")
 			)
 
 		for row in self.get("finance_books"):
 			if finance_book == row.finance_book:
-				return flt(row.value_after_depreciation, self.precision("gross_purchase_amount"))
+				return flt(row.value_after_depreciation, self.precision("net_purchase_amount"))
 
 	def get_default_finance_book_idx(self):
 		if not self.get("default_finance_book") and self.company:
@@ -818,53 +982,52 @@ class Asset(AccountsController):
 		if isinstance(args, str):
 			args = json.loads(args)
 
-		float_precision = cint(frappe.db.get_default("float_precision")) or 2
+		rate_field_precision = frappe.get_single_value("System Settings", "float_precision") or 2
 
 		if args.get("depreciation_method") == "Double Declining Balance":
-			return 200.0 / (
+			return self.get_double_declining_balance_rate(args, rate_field_precision)
+		elif args.get("depreciation_method") == "Written Down Value":
+			return self.get_written_down_value_rate(args, rate_field_precision, on_validate)
+
+	def get_double_declining_balance_rate(self, args, rate_field_precision):
+		return flt(
+			200.0
+			/ (
 				(
 					flt(args.get("total_number_of_depreciations"), 2)
 					* flt(args.get("frequency_of_depreciation"))
 				)
 				/ 12
-			)
+			),
+			rate_field_precision,
+		)
 
-		if args.get("depreciation_method") == "Written Down Value":
-			if (
-				args.get("rate_of_depreciation")
-				and on_validate
-				and not self.flags.increase_in_asset_value_due_to_repair
-			):
-				return args.get("rate_of_depreciation")
+	def get_written_down_value_rate(self, args, rate_field_precision, on_validate):
+		if args.get("rate_of_depreciation") and on_validate:
+			return args.get("rate_of_depreciation")
 
-			if args.get("rate_of_depreciation") and not flt(args.get("expected_value_after_useful_life")):
-				return args.get("rate_of_depreciation")
+		if args.get("rate_of_depreciation") and not flt(args.get("expected_value_after_useful_life")):
+			return args.get("rate_of_depreciation")
 
-			if self.flags.increase_in_asset_value_due_to_repair:
-				value = flt(args.get("expected_value_after_useful_life")) / flt(
-					args.get("value_after_depreciation")
-				)
-			else:
-				value = flt(args.get("expected_value_after_useful_life")) / (
-					flt(self.gross_purchase_amount) - flt(self.opening_accumulated_depreciation)
-				)
+		if flt(args.get("value_after_depreciation")):
+			current_asset_value = flt(args.get("value_after_depreciation"))
+		else:
+			current_asset_value = flt(self.net_purchase_amount) - flt(self.opening_accumulated_depreciation)
 
-			depreciation_rate = math.pow(
-				value,
-				1.0
-				/ (
-					(
-						(
-							flt(args.get("total_number_of_depreciations"), 2)
-							- flt(self.opening_number_of_booked_depreciations)
-						)
-						* flt(args.get("frequency_of_depreciation"))
-					)
-					/ 12
-				),
-			)
+		value = flt(args.get("expected_value_after_useful_life")) / current_asset_value
 
-			return flt((100 * (1 - depreciation_rate)), float_precision)
+		pending_number_of_depreciations = (
+			flt(args.get("total_number_of_depreciations"), 2)
+			- flt(self.opening_number_of_booked_depreciations)
+			- flt(args.get("total_number_of_booked_depreciations"))
+		)
+		pending_years = (
+			pending_number_of_depreciations * flt(args.get("frequency_of_depreciation"))
+			+ cint(args.get("increase_in_asset_life"))
+		) / 12
+
+		depreciation_rate = 100 * (1 - math.pow(value, 1.0 / pending_years))
+		return flt(depreciation_rate, rate_field_precision)
 
 
 def has_gl_entries(doctype, docname, target_account):
@@ -906,7 +1069,7 @@ def make_post_gl_entry():
 			assets = frappe.db.sql_list(
 				""" select name from `tabAsset`
 				where asset_category = %s and ifnull(booked_fixed_asset, 0) = 0
-				and available_for_use_date = %s""",
+				and available_for_use_date = %s and docstatus = 1""",
 				(asset_category.name, nowdate()),
 			)
 
@@ -921,7 +1084,7 @@ def get_asset_naming_series():
 
 
 @frappe.whitelist()
-def make_sales_invoice(asset, item_code, company, serial_no=None):
+def make_sales_invoice(asset, item_code, company, sell_qty, serial_no=None):
 	asset_doc = frappe.get_doc("Asset", asset)
 	si = frappe.new_doc("Sales Invoice")
 	si.company = company
@@ -936,7 +1099,7 @@ def make_sales_invoice(asset, item_code, company, serial_no=None):
 			"income_account": disposal_account,
 			"serial_no": serial_no,
 			"cost_center": depreciation_cost_center,
-			"qty": 1,
+			"qty": sell_qty,
 		},
 	)
 
@@ -982,7 +1145,6 @@ def create_asset_capitalization(company, asset, asset_name, item_code):
 		{
 			"target_asset": asset,
 			"company": company,
-			"capitalization_method": "Choose a WIP composite asset",
 			"target_asset_name": asset_name,
 			"target_item_code": item_code,
 		}
@@ -1019,7 +1181,7 @@ def transfer_asset(args):
 
 
 @frappe.whitelist()
-def get_item_details(item_code, asset_category, gross_purchase_amount):
+def get_item_details(item_code, asset_category, net_purchase_amount):
 	asset_category_doc = frappe.get_cached_doc("Asset Category", asset_category)
 	books = []
 	for d in asset_category_doc.finance_books:
@@ -1032,7 +1194,7 @@ def get_item_details(item_code, asset_category, gross_purchase_amount):
 				"daily_prorata_based": d.daily_prorata_based,
 				"shift_based": d.shift_based,
 				"salvage_value_percentage": d.salvage_value_percentage,
-				"expected_value_after_useful_life": flt(gross_purchase_amount)
+				"expected_value_after_useful_life": flt(net_purchase_amount)
 				* flt(d.salvage_value_percentage / 100),
 				"depreciation_start_date": d.depreciation_start_date or nowdate(),
 				"rate_of_depreciation": d.rate_of_depreciation,
@@ -1072,7 +1234,7 @@ def get_asset_account(account_name, asset=None, asset_category=None, company=Non
 def make_journal_entry(asset_name):
 	asset = frappe.get_doc("Asset", asset_name)
 	(
-		_,
+		fixed_asset_account,
 		accumulated_depreciation_account,
 		depreciation_expense_account,
 	) = get_depreciation_accounts(asset.asset_category, asset.company)
@@ -1086,7 +1248,7 @@ def make_journal_entry(asset_name):
 	je.voucher_type = "Depreciation Entry"
 	je.naming_series = depreciation_series
 	je.company = asset.company
-	je.remark = f"Depreciation Entry against asset {asset_name}"
+	je.remark = _("Depreciation Entry against asset {0}").format(asset_name)
 
 	je.append(
 		"accounts",
@@ -1168,16 +1330,14 @@ def get_values_from_purchase_doc(purchase_doc_name, item_code, doctype):
 		frappe.throw(_(f"Selected {doctype} does not contain the Item Code {item_code}"))
 
 	first_item = matching_items[0]
-	is_multiple_items = len(matching_items) > 1
 
 	return {
 		"company": purchase_doc.company,
-		"purchase_date": purchase_doc.get("bill_date") or purchase_doc.get("posting_date"),
-		"gross_purchase_amount": flt(first_item.base_net_amount),
+		"purchase_date": purchase_doc.get("posting_date"),
+		"net_purchase_amount": flt(first_item.base_net_amount),
 		"asset_quantity": first_item.qty,
 		"cost_center": first_item.cost_center or purchase_doc.get("cost_center"),
 		"asset_location": first_item.get("asset_location"),
-		"is_multiple_items": is_multiple_items,
 		"purchase_receipt_item": first_item.name if doctype == "Purchase Receipt" else None,
 		"purchase_invoice_item": first_item.name if doctype == "Purchase Invoice" else None,
 	}
@@ -1185,166 +1345,204 @@ def get_values_from_purchase_doc(purchase_doc_name, item_code, doctype):
 
 @frappe.whitelist()
 def split_asset(asset_name, split_qty):
-	asset = frappe.get_doc("Asset", asset_name)
+	"""Split an asset into two based on the given quantity."""
+	existing_asset = frappe.get_doc("Asset", asset_name)
 	split_qty = cint(split_qty)
 
-	if split_qty >= asset.asset_quantity:
-		frappe.throw(_("Split qty cannot be grater than or equal to asset qty"))
+	validate_split_quantity(existing_asset, split_qty)
+	remaining_qty = existing_asset.asset_quantity - split_qty
 
-	remaining_qty = asset.asset_quantity - split_qty
+	# Create new asset and update existing one
+	splitted_asset = create_new_asset_from_split(existing_asset, split_qty)
+	update_existing_asset_after_split(existing_asset, remaining_qty, splitted_asset)
 
-	new_asset = create_new_asset_after_split(asset, split_qty)
-	update_existing_asset(asset, remaining_qty, new_asset.name)
+	return splitted_asset
 
+
+def validate_split_quantity(existing_asset, split_qty):
+	if split_qty >= existing_asset.asset_quantity:
+		frappe.throw(_("Split Quantity must be less than Asset Quantity"))
+
+
+def create_new_asset_from_split(existing_asset, split_qty):
+	"""Create a new asset from the split quantity."""
+	return process_asset_split(existing_asset, split_qty, is_new_asset=True)
+
+
+def update_existing_asset_after_split(existing_asset, remaining_qty, splitted_asset):
+	"""Update the existing asset with the remaining quantity."""
+	process_asset_split(existing_asset, remaining_qty, splitted_asset=splitted_asset)
+
+
+def process_asset_split(existing_asset, split_qty, splitted_asset=None, is_new_asset=False):
+	"""Handle asset creation or update during the split."""
+	scaling_factor = flt(split_qty) / flt(existing_asset.asset_quantity)
+	new_asset = frappe.copy_doc(existing_asset) if is_new_asset else splitted_asset
+	asset_doc = new_asset if is_new_asset else existing_asset
+	asset_doc.flags.is_split_asset = True
+
+	set_split_asset_values(asset_doc, scaling_factor, split_qty, existing_asset, is_new_asset)
+	log_asset_activity(existing_asset, asset_doc, splitted_asset, is_new_asset)
+
+	# Update finance books and depreciation schedules
+	update_finance_books(asset_doc, existing_asset, new_asset, scaling_factor, is_new_asset)
 	return new_asset
 
 
-def update_existing_asset(asset, remaining_qty, new_asset_name):
-	remaining_gross_purchase_amount = flt(
-		(asset.gross_purchase_amount * remaining_qty) / asset.asset_quantity
+def set_split_asset_values(asset_doc, scaling_factor, split_qty, existing_asset, is_new_asset):
+	asset_doc.net_purchase_amount = existing_asset.net_purchase_amount * scaling_factor
+	asset_doc.purchase_amount = existing_asset.net_purchase_amount
+	asset_doc.additional_asset_cost = existing_asset.additional_asset_cost * scaling_factor
+	asset_doc.total_asset_cost = asset_doc.net_purchase_amount + asset_doc.additional_asset_cost
+	asset_doc.opening_accumulated_depreciation = (
+		existing_asset.opening_accumulated_depreciation * scaling_factor
 	)
-	opening_accumulated_depreciation = flt(
-		(asset.opening_accumulated_depreciation * remaining_qty) / asset.asset_quantity
-	)
+	asset_doc.value_after_depreciation = existing_asset.value_after_depreciation * scaling_factor
+	asset_doc.asset_quantity = split_qty
+	asset_doc.split_from = existing_asset.name if is_new_asset else None
 
-	frappe.db.set_value(
-		"Asset",
-		asset.name,
-		{
-			"opening_accumulated_depreciation": opening_accumulated_depreciation,
-			"gross_purchase_amount": remaining_gross_purchase_amount,
-			"asset_quantity": remaining_qty,
-		},
-	)
+	for row in asset_doc.get("finance_books"):
+		row.value_after_depreciation = row.value_after_depreciation * scaling_factor
+		row.expected_value_after_useful_life = row.expected_value_after_useful_life * scaling_factor
 
-	add_asset_activity(
-		asset.name,
-		_("Asset updated after being split into Asset {0}").format(get_link_to_form("Asset", new_asset_name)),
-	)
+	if not is_new_asset:
+		asset_doc.flags.ignore_validate_update_after_submit = True
+		asset_doc.save()
 
-	for row in asset.get("finance_books"):
-		value_after_depreciation = flt((row.value_after_depreciation * remaining_qty) / asset.asset_quantity)
-		expected_value_after_useful_life = flt(
-			(row.expected_value_after_useful_life * remaining_qty) / asset.asset_quantity
+
+def log_asset_activity(existing_asset, asset_doc, splitted_asset, is_new_asset):
+	if is_new_asset:
+		asset_doc.insert()
+		add_asset_activity(
+			asset_doc.name,
+			_("Asset created after being split from Asset {0}").format(
+				get_link_to_form("Asset", existing_asset.name)
+			),
 		)
-		frappe.db.set_value(
-			"Asset Finance Book", row.name, "value_after_depreciation", value_after_depreciation
-		)
-		frappe.db.set_value(
-			"Asset Finance Book",
-			row.name,
-			"expected_value_after_useful_life",
-			expected_value_after_useful_life,
-		)
-
-		current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Active", row.finance_book)
-		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
-
-		new_asset_depr_schedule_doc.set_draft_asset_depr_schedule_details(asset, row)
-
-		accumulated_depreciation = 0
-
-		for term in new_asset_depr_schedule_doc.get("depreciation_schedule"):
-			depreciation_amount = flt((term.depreciation_amount * remaining_qty) / asset.asset_quantity)
-			term.depreciation_amount = depreciation_amount
-			accumulated_depreciation += depreciation_amount
-			term.accumulated_depreciation_amount = accumulated_depreciation
-
-		notes = _(
-			"This schedule was created when Asset {0} was updated after being split into new Asset {1}."
-		).format(get_link_to_form(asset.doctype, asset.name), get_link_to_form(asset.doctype, new_asset_name))
-		new_asset_depr_schedule_doc.notes = notes
-
-		current_asset_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
-		current_asset_depr_schedule_doc.cancel()
-
-		new_asset_depr_schedule_doc.submit()
-
-
-def create_new_asset_after_split(asset, split_qty):
-	new_asset = frappe.copy_doc(asset)
-	new_gross_purchase_amount = flt((asset.gross_purchase_amount * split_qty) / asset.asset_quantity)
-	opening_accumulated_depreciation = flt(
-		(asset.opening_accumulated_depreciation * split_qty) / asset.asset_quantity
-	)
-
-	new_asset.gross_purchase_amount = new_gross_purchase_amount
-	if asset.purchase_amount:
-		new_asset.purchase_amount = new_gross_purchase_amount
-	new_asset.opening_accumulated_depreciation = opening_accumulated_depreciation
-	new_asset.asset_quantity = split_qty
-	new_asset.split_from = asset.name
-
-	for row in new_asset.get("finance_books"):
-		row.value_after_depreciation = flt((row.value_after_depreciation * split_qty) / asset.asset_quantity)
-		row.expected_value_after_useful_life = flt(
-			(row.expected_value_after_useful_life * split_qty) / asset.asset_quantity
+		asset_doc.submit()
+		asset_doc.set_status()
+	else:
+		add_asset_activity(
+			existing_asset.name,
+			_("Asset updated after being split into Asset {0}").format(
+				get_link_to_form("Asset", splitted_asset.name)
+			),
 		)
 
-	new_asset.insert()
 
-	add_asset_activity(
-		new_asset.name,
-		_("Asset created after being split from Asset {0}").format(get_link_to_form("Asset", asset.name)),
+def update_finance_books(asset_doc, existing_asset, new_asset, scaling_factor, is_new_asset):
+	"""Update finance books and depreciation schedules for the asset."""
+	for fb_row in asset_doc.get("finance_books"):
+		reschedule_depr_for_updated_asset(existing_asset, new_asset, fb_row, scaling_factor, is_new_asset)
+
+	# Add references in journal entries for new asset
+	if is_new_asset:
+		for row in new_asset.get("finance_books"):
+			depr_schedule_doc = get_depr_schedule(new_asset.name, "Active", row.finance_book)
+			for schedule in depr_schedule_doc:
+				if schedule.journal_entry:
+					add_reference_in_jv_on_split(
+						schedule.journal_entry,
+						new_asset.name,
+						existing_asset.name,
+						schedule.depreciation_amount,
+					)
+
+
+def reschedule_depr_for_updated_asset(existing_asset, new_asset, fb_row, scaling_factor, is_new_asset):
+	"""Reschedule depreciation for an asset after a split."""
+	current_depr_schedule_doc = get_asset_depr_schedule_doc(
+		existing_asset.name, "Active", fb_row.finance_book
+	)
+	if not current_depr_schedule_doc:
+		return
+
+	# Create a new depreciation schedule based on the current one
+	new_depr_schedule_doc = create_new_depr_schedule(
+		current_depr_schedule_doc, existing_asset, new_asset, is_new_asset, fb_row
 	)
 
-	new_asset.submit()
-	new_asset.set_status()
+	update_depreciation_terms(new_depr_schedule_doc, scaling_factor)
+	add_depr_schedule_notes(new_depr_schedule_doc, existing_asset, new_asset, is_new_asset)
 
-	for row in new_asset.get("finance_books"):
-		current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Active", row.finance_book)
-		if not current_asset_depr_schedule_doc:
-			continue
-		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
+	if not is_new_asset:
+		current_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
+		current_depr_schedule_doc.cancel()
 
-		new_asset_depr_schedule_doc.set_draft_asset_depr_schedule_details(new_asset, row)
+	new_depr_schedule_doc.submit()
 
-		accumulated_depreciation = 0
 
-		for term in new_asset_depr_schedule_doc.get("depreciation_schedule"):
-			depreciation_amount = flt((term.depreciation_amount * split_qty) / asset.asset_quantity)
-			term.depreciation_amount = depreciation_amount
-			accumulated_depreciation += depreciation_amount
-			term.accumulated_depreciation_amount = accumulated_depreciation
+def create_new_depr_schedule(current_depr_schedule_doc, existing_asset, new_asset, is_new_asset, fb_row):
+	"""Create a new depreciation schedule based on the current one."""
+	new_depr_schedule_doc = frappe.copy_doc(current_depr_schedule_doc)
+	new_depr_schedule_doc.asset_doc = new_asset if is_new_asset else existing_asset
+	new_depr_schedule_doc.fb_row = fb_row
+	new_depr_schedule_doc.fetch_asset_details()
+	return new_depr_schedule_doc
 
-		notes = _("This schedule was created when new Asset {0} was split from Asset {1}.").format(
-			get_link_to_form(new_asset.doctype, new_asset.name), get_link_to_form(asset.doctype, asset.name)
+
+def update_depreciation_terms(new_depr_schedule_doc, scaling_factor):
+	"""Update depreciation terms with scaled amounts."""
+	accumulated_depreciation = 0
+	for term in new_depr_schedule_doc.get("depreciation_schedule"):
+		depreciation_amount = flt(
+			term.depreciation_amount * scaling_factor, term.precision("depreciation_amount")
 		)
-		new_asset_depr_schedule_doc.notes = notes
+		term.depreciation_amount = depreciation_amount
+		accumulated_depreciation = flt(
+			accumulated_depreciation + depreciation_amount, term.precision("depreciation_amount")
+		)
+		term.accumulated_depreciation_amount = accumulated_depreciation
 
-		new_asset_depr_schedule_doc.submit()
 
-	for row in new_asset.get("finance_books"):
-		depr_schedule = get_depr_schedule(new_asset.name, "Active", row.finance_book)
-		for term in depr_schedule:
-			# Update references in JV
-			if term.journal_entry:
-				add_reference_in_jv_on_split(
-					term.journal_entry, new_asset.name, asset.name, term.depreciation_amount
-				)
-
-	return new_asset
+def add_depr_schedule_notes(new_depr_schedule_doc, existing_asset, new_asset, is_new_asset):
+	notes = _("This schedule was created when Asset {0} was {1} into new Asset {2}.").format(
+		get_link_to_form(existing_asset.doctype, existing_asset.name),
+		"split" if is_new_asset else "updated after being split",
+		get_link_to_form(new_asset.doctype, new_asset.name),
+	)
+	new_depr_schedule_doc.notes = notes
 
 
 def add_reference_in_jv_on_split(entry_name, new_asset_name, old_asset_name, depreciation_amount):
+	"""Add a reference to a new asset in a journal entry after a split."""
 	journal_entry = frappe.get_doc("Journal Entry", entry_name)
 	entries_to_add = []
-	idx = len(journal_entry.get("accounts")) + 1
 
+	adjust_existing_accounts(journal_entry, old_asset_name, depreciation_amount, entries_to_add)
+	add_new_entries(journal_entry, entries_to_add, new_asset_name, depreciation_amount)
+
+	# Save and repost the journal entry
+	journal_entry.flags.ignore_validate_update_after_submit = True
+	journal_entry.save()
+
+	journal_entry.docstatus = 2
+	journal_entry.make_gl_entries(1)
+	journal_entry.docstatus = 1
+	journal_entry.make_gl_entries()
+
+
+def adjust_existing_accounts(journal_entry, old_asset_name, depreciation_amount, entries_to_add):
+	"""Adjust existing accounts and prepare new entries for the new asset."""
 	for account in journal_entry.get("accounts"):
 		if account.reference_name == old_asset_name:
 			entries_to_add.append(frappe.copy_doc(account).as_dict())
-			if account.credit:
-				account.credit = account.credit - depreciation_amount
-				account.credit_in_account_currency = (
-					account.credit_in_account_currency - account.exchange_rate * depreciation_amount
-				)
-			elif account.debit:
-				account.debit = account.debit - depreciation_amount
-				account.debit_in_account_currency = (
-					account.debit_in_account_currency - account.exchange_rate * depreciation_amount
-				)
+			adjust_account_balance(account, depreciation_amount)
 
+
+def adjust_account_balance(account, depreciation_amount):
+	"""Adjust the balance of an account based on the depreciation amount."""
+	if account.credit:
+		account.credit -= depreciation_amount
+		account.credit_in_account_currency -= account.exchange_rate * depreciation_amount
+	elif account.debit:
+		account.debit -= depreciation_amount
+		account.debit_in_account_currency -= account.exchange_rate * depreciation_amount
+
+
+def add_new_entries(journal_entry, entries_to_add, new_asset_name, depreciation_amount):
+	"""Add new entries for the new asset to the journal entry."""
+	idx = len(journal_entry.get("accounts")) + 1
 	for entry in entries_to_add:
 		entry.reference_name = new_asset_name
 		if entry.credit:
@@ -1353,17 +1551,6 @@ def add_reference_in_jv_on_split(entry_name, new_asset_name, old_asset_name, dep
 		elif entry.debit:
 			entry.debit = depreciation_amount
 			entry.debit_in_account_currency = entry.exchange_rate * depreciation_amount
-
 		entry.idx = idx
 		idx += 1
-
 		journal_entry.append("accounts", entry)
-
-	journal_entry.flags.ignore_validate_update_after_submit = True
-	journal_entry.save()
-
-	# Repost GL Entries
-	journal_entry.docstatus = 2
-	journal_entry.make_gl_entries(1)
-	journal_entry.docstatus = 1
-	journal_entry.make_gl_entries()

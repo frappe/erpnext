@@ -8,6 +8,13 @@ frappe.pages["setup-wizard"].on_page_load = function (wrapper) {
 };
 
 frappe.setup.on("before_load", function () {
+	if (
+		frappe.boot.setup_wizard_completed_apps?.length &&
+		frappe.boot.setup_wizard_completed_apps.includes("erpnext")
+	) {
+		return;
+	}
+
 	erpnext.setup.slides_settings.map(frappe.setup.add_slide);
 });
 
@@ -54,9 +61,13 @@ erpnext.setup.slides_settings = [
 
 		onload: function (slide) {
 			this.bind_events(slide);
-			this.load_chart_of_accounts(slide);
-			this.set_fy_dates(slide);
 		},
+
+		before_show: function () {
+			this.load_chart_of_accounts(this);
+			this.set_fy_dates(this);
+		},
+
 		validate: function () {
 			if (!this.validate_fy_dates()) {
 				return false;
@@ -91,7 +102,7 @@ erpnext.setup.slides_settings = [
 		},
 
 		set_fy_dates: function (slide) {
-			var country = frappe.wizard.values.country;
+			var country = frappe.wizard.values.country || frappe.defaults.get_default("country");
 
 			if (country) {
 				let fy = erpnext.setup.fiscal_years[country];
@@ -113,7 +124,7 @@ erpnext.setup.slides_settings = [
 		},
 
 		load_chart_of_accounts: function (slide) {
-			let country = frappe.wizard.values.country;
+			let country = frappe.wizard.values.country || frappe.defaults.get_default("country");
 
 			if (country) {
 				frappe.call({
@@ -239,17 +250,19 @@ erpnext.setup.fiscal_years = {
 	Afghanistan: ["12-21", "12-20"],
 	Australia: ["07-01", "06-30"],
 	Bangladesh: ["07-01", "06-30"],
-	Canada: ["04-01", "03-31"],
 	"Costa Rica": ["10-01", "09-30"],
 	Egypt: ["07-01", "06-30"],
+	Ethiopia: ["07-08", "07-07"],
 	"Hong Kong": ["04-01", "03-31"],
 	India: ["04-01", "03-31"],
 	Iran: ["06-23", "06-22"],
+	Kenya: ["07-01", "06-30"],
+	Malaysia: ["07-01", "06-30"],
 	Myanmar: ["04-01", "03-31"],
+	Nepal: ["07-16", "07-15"],
 	"New Zealand": ["04-01", "03-31"],
 	Pakistan: ["07-01", "06-30"],
 	Singapore: ["04-01", "03-31"],
 	"South Africa": ["03-01", "02-28"],
-	Thailand: ["10-01", "09-30"],
 	"United Kingdom": ["04-01", "03-31"],
 };

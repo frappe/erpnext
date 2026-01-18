@@ -2,12 +2,15 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, cstr
+from frappe.utils import cint, cstr, flt
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
+from erpnext.exceptions import ReportingCurrencyExchangeNotFoundError
+from erpnext.setup.utils import get_exchange_rate
 
 
 class AccountClosingBalance(Document):
@@ -26,12 +29,15 @@ class AccountClosingBalance(Document):
 		cost_center: DF.Link | None
 		credit: DF.Currency
 		credit_in_account_currency: DF.Currency
+		credit_in_reporting_currency: DF.Currency
 		debit: DF.Currency
 		debit_in_account_currency: DF.Currency
+		debit_in_reporting_currency: DF.Currency
 		finance_book: DF.Link | None
 		is_period_closing_voucher_entry: DF.Check
 		period_closing_voucher: DF.Link | None
 		project: DF.Link | None
+		reporting_currency_exchange_rate: DF.Float
 	# end: auto-generated types
 
 	pass
@@ -55,6 +61,7 @@ def make_closing_entries(closing_entries, voucher_name, company, closing_date):
 				"closing_date": closing_date,
 			}
 		)
+		set_amount_in_reporting_currency(cle, company, closing_date)
 		cle.flags.ignore_permissions = True
 		cle.flags.ignore_links = True
 		cle.submit()
@@ -144,3 +151,29 @@ def get_previous_closing_entries(company, closing_date, accounting_dimensions):
 		entries = query.run(as_dict=1)
 
 	return entries
+
+
+def set_amount_in_reporting_currency(cle, company, closing_date):
+	default_currency, reporting_currency = frappe.get_cached_value(
+		"Company", company, ["default_currency", "reporting_currency"]
+	)
+
+	reporting_currency_exchange_rate = get_exchange_rate(default_currency, reporting_currency, closing_date)
+	if not reporting_currency_exchange_rate:
+		frappe.throw(
+			title=_("Reporting Currency Exchange Not Found"),
+			msg=_(
+				"Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually."
+			).format(default_currency, reporting_currency, closing_date),
+			exc=ReportingCurrencyExchangeNotFoundError,
+		)
+	debit_in_reporting_currency = flt(cle.get("debit", 0) * reporting_currency_exchange_rate)
+	credit_in_reporting_currency = flt(cle.get("credit", 0) * reporting_currency_exchange_rate)
+
+	cle.update(
+		{
+			"reporting_currency_exchange_rate": reporting_currency_exchange_rate,
+			"debit_in_reporting_currency": debit_in_reporting_currency,
+			"credit_in_reporting_currency": credit_in_reporting_currency,
+		}
+	)

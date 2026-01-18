@@ -71,8 +71,8 @@ class OpeningInvoiceCreationTool(Document):
 		max_count = {}
 		fields = [
 			"company",
-			"count(name) as total_invoices",
-			"sum(outstanding_amount) as outstanding_amount",
+			{"COUNT": "*", "as": "total_invoices"},
+			{"SUM": "outstanding_amount", "as": "outstanding_amount"},
 		]
 		companies = frappe.get_all("Company", fields=["name as company", "default_currency as currency"])
 		if not companies:
@@ -214,6 +214,9 @@ class OpeningInvoiceCreationTool(Document):
 			}
 		)
 
+		if self.invoice_type == "Purchase" and row.supplier_invoice_date:
+			invoice.update({"bill_date": row.supplier_invoice_date})
+
 		accounting_dimension = get_accounting_dimensions()
 		for dimension in accounting_dimension:
 			invoice.update({dimension: self.get(dimension) or item.get(dimension)})
@@ -229,7 +232,7 @@ class OpeningInvoiceCreationTool(Document):
 		else:
 			from frappe.utils.scheduler import is_scheduler_inactive
 
-			if is_scheduler_inactive() and not frappe.flags.in_test:
+			if is_scheduler_inactive() and not frappe.in_test:
 				frappe.throw(_("Scheduler is inactive. Cannot import data."), title=_("Scheduler Inactive"))
 
 			job_id = f"opening_invoice::{self.name}"
@@ -242,7 +245,7 @@ class OpeningInvoiceCreationTool(Document):
 					event="opening_invoice_creation",
 					job_id=job_id,
 					invoices=invoices,
-					now=frappe.conf.developer_mode or frappe.flags.in_test,
+					now=frappe.conf.developer_mode or frappe.in_test,
 				)
 
 

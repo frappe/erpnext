@@ -3,18 +3,9 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.stock.doctype.item_attribute.item_attribute import ItemAttributeIncrementError
-
-
-class UnitTestItemAttribute(UnitTestCase):
-	"""
-	Unit tests for ItemAttribute.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
 
 
 class TestItemAttribute(IntegrationTestCase):

@@ -6,16 +6,23 @@ import frappe
 from frappe.tests import IntegrationTestCase
 
 from erpnext.projects.doctype.activity_cost.activity_cost import DuplicationError
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestActivityCost(IntegrationTestCase):
+class TestActivityCost(ERPNextTestSuite):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		# TODO: only 1 employee is required
+		cls.make_employees()
+
 	def test_duplication(self):
 		frappe.db.sql("delete from `tabActivity Cost`")
 		activity_cost1 = frappe.new_doc("Activity Cost")
 		activity_cost1.update(
 			{
-				"employee": "_T-Employee-00001",
-				"employee_name": "_Test Employee",
+				"employee": self.employees[0].name,
+				"employee_name": self.employees[0].first_name,
 				"activity_type": "_Test Activity Type 1",
 				"billing_rate": 100,
 				"costing_rate": 50,

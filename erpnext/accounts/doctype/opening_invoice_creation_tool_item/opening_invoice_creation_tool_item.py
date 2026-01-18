@@ -26,6 +26,7 @@ class OpeningInvoiceCreationToolItem(Document):
 		party_type: DF.Link | None
 		posting_date: DF.Date | None
 		qty: DF.Data | None
+		supplier_invoice_date: DF.Date | None
 		temporary_opening_account: DF.Link | None
 	# end: auto-generated types
 

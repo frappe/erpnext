@@ -1,6 +1,6 @@
 {
  "actions": [],
- "creation": "2014-10-16 14:35:41.950175",
+ "creation": "2025-04-09 12:12:19.824560",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -110,13 +110,15 @@
    "fieldname": "planned_start_time",
    "fieldtype": "Datetime",
    "label": "Planned Start Time",
-   "no_copy": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "planned_end_time",
    "fieldtype": "Datetime",
    "label": "Planned End Time",
-   "no_copy": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_10",
@@ -199,8 +201,8 @@
   {
    "fieldname": "sequence_id",
    "fieldtype": "Int",
-   "hidden": 1,
    "label": "Sequence ID",
+   "non_negative": 1,
    "print_hide": 1
   },
   {
@@ -294,15 +296,17 @@
    "read_only": 1
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-06-03 15:57:17.958543",
+ "modified": "2025-05-15 15:10:06.885440",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Operation",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

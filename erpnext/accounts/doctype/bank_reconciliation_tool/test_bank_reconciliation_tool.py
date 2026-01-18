@@ -40,7 +40,7 @@ class TestBankReconciliationTool(AccountsTestMixin, IntegrationTestCase):
 				{
 					"doctype": "Bank Account",
 					"account_name": "HDFC _current_",
-					"bank": bank,
+					"bank": bank.name,
 					"is_company_account": True,
 					"account": self.bank,  # account from Chart of Accounts
 				}

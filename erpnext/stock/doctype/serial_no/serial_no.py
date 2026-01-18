@@ -40,6 +40,7 @@ class SerialNo(StockController):
 		batch_no: DF.Link | None
 		brand: DF.Link | None
 		company: DF.Link
+		customer: DF.Link | None
 		description: DF.Text | None
 		employee: DF.Link | None
 		item_code: DF.Link
@@ -47,8 +48,10 @@ class SerialNo(StockController):
 		item_name: DF.Data | None
 		location: DF.Link | None
 		maintenance_status: DF.Literal["", "Under Warranty", "Out of Warranty", "Under AMC", "Out of AMC"]
-		purchase_document_no: DF.Data | None
+		posting_date: DF.Date | None
 		purchase_rate: DF.Float
+		reference_doctype: DF.Link | None
+		reference_name: DF.DynamicLink | None
 		serial_no: DF.Data
 		status: DF.Literal["", "Active", "Inactive", "Consumed", "Delivered", "Expired"]
 		warehouse: DF.Link | None
@@ -301,3 +304,7 @@ def get_serial_nos_for_outward(kwargs):
 		return []
 
 	return [d.serial_no for d in serial_nos]
+
+
+def on_doctype_update():
+	frappe.db.add_index("Serial No", ["item_code", "warehouse"])

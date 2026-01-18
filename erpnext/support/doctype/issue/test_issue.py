@@ -219,6 +219,7 @@ class TestIssue(TestSetUp):
 		frappe.flags.current_time = get_datetime("2021-11-01 19:00")
 
 		issue = make_issue(frappe.flags.current_time, index=1)
+		create_user("test@admin.com")
 		create_communication(issue.name, "test@example.com", "Received", frappe.flags.current_time)
 		add_assignment({"doctype": issue.doctype, "name": issue.name, "assign_to": ["test@admin.com"]})
 		issue.reload()

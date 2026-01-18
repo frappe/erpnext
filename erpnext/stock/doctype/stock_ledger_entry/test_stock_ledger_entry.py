@@ -8,7 +8,8 @@ from uuid import uuid4
 import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.query_builder.functions import Timestamp
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_to_date, flt, today
 
 from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
@@ -423,37 +424,35 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 			user.add_roles("Stock User")
 			user.remove_roles("Stock Manager")
 
-			frappe.set_user(user.name)
+			with self.set_user(user.name):
+				stock_entry_on_today = make_stock_entry(
+					target="_Test Warehouse - _TC", qty=10, basic_rate=100
+				)
+				back_dated_se_1 = make_stock_entry(
+					target="_Test Warehouse - _TC",
+					qty=10,
+					basic_rate=100,
+					posting_date=add_days(today(), -1),
+					do_not_submit=True,
+				)
 
-			stock_entry_on_today = make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
-			back_dated_se_1 = make_stock_entry(
-				target="_Test Warehouse - _TC",
-				qty=10,
-				basic_rate=100,
-				posting_date=add_days(today(), -1),
-				do_not_submit=True,
-			)
+				# Block back-dated entry
+				self.assertRaises(BackDatedStockTransaction, back_dated_se_1.submit)
 
-			# Block back-dated entry
-			self.assertRaises(BackDatedStockTransaction, back_dated_se_1.submit)
-
-			frappe.set_user("Administrator")
 			user.add_roles("Stock Manager")
-			frappe.set_user(user.name)
+			with self.set_user(user.name):
+				# Back dated entry allowed to Stock Manager
+				back_dated_se_2 = make_stock_entry(
+					target="_Test Warehouse - _TC", qty=10, basic_rate=100, posting_date=add_days(today(), -1)
+				)
 
-			# Back dated entry allowed to Stock Manager
-			back_dated_se_2 = make_stock_entry(
-				target="_Test Warehouse - _TC", qty=10, basic_rate=100, posting_date=add_days(today(), -1)
-			)
-
-			back_dated_se_2.cancel()
-			stock_entry_on_today.cancel()
+				back_dated_se_2.cancel()
+				stock_entry_on_today.cancel()
 
 		finally:
 			frappe.db.set_single_value(
 				"Stock Settings", "role_allowed_to_create_edit_back_dated_transactions", None
 			)
-			frappe.set_user("Administrator")
 			user.remove_roles("Stock Manager")
 
 	def test_batchwise_item_valuation_fifo(self):
@@ -1039,7 +1038,7 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 					"is_cancelled": 0,
 					"account": "Stock In Hand - TCP1",
 				},
-				"sum(credit)",
+				[{"SUM": "credit"}],
 			)
 
 		def _day(days):
@@ -1283,12 +1282,16 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 			item=item, from_warehouse=source_warehouse, to_warehouse=target_warehouse, qty=1_728.0
 		)
 
-		filters = {"voucher_no": transfer.name, "voucher_type": transfer.doctype, "is_cancelled": 0}
-		sles = frappe.get_all(
-			"Stock Ledger Entry",
-			fields=["*"],
-			filters=filters,
-			order_by="timestamp(posting_date, posting_time), creation",
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		sles = (
+			frappe.qb.from_(sle)
+			.select("*")
+			.where(sle.voucher_no == transfer.name)
+			.where(sle.voucher_type == transfer.doctype)
+			.where(sle.is_cancelled == 0)
+			.orderby(Timestamp(sle.posting_date, sle.posting_time))
+			.orderby(sle.creation)
+			.run(as_dict=True)
 		)
 		self.assertEqual(abs(sles[0].stock_value_difference), sles[1].stock_value_difference)
 
@@ -1314,7 +1317,7 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 		# To deliver 100 qty we fall short of 11.0073 qty (11.007 with precision 3)
 		# Stock up with 11.007 (balance in db becomes 99.9997, on UI it will show as 100)
 		make_stock_entry(item_code=item_code, target=warehouse, qty=11.007, rate=100)
-		self.assertEqual(get_stock_balance(item_code, warehouse), 99.9997)
+		self.assertEqual(get_stock_balance(item_code, warehouse), 100.0)
 
 		# See if delivery note goes through
 		# Negative qty error should not be raised as 99.9997 is 100 with precision 3 (system precision)
@@ -1588,15 +1591,6 @@ def get_unique_suffix():
 	# Used to isolate valuation sensitive
 	# tests to prevent future tests from failing.
 	return str(uuid4())[:8].upper()
-
-
-class UnitTestStockLedgerEntry(UnitTestCase):
-	"""
-	Unit tests for StockLedgerEntry.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
 
 
 class TestDeferredNaming(IntegrationTestCase):

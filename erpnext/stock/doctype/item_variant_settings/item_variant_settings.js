@@ -30,9 +30,9 @@ frappe.ui.form.on("Item Variant Settings", {
 				field_label_map[d.fieldname] = __(d.label, null, d.parent) + ` (${d.fieldname})`;
 
 				if (
-					!in_list(exclude_field_types, d.fieldtype) &&
+					!exclude_field_types.includes(d.fieldtype) &&
 					!d.no_copy &&
-					!in_list(exclude_fields, d.fieldname)
+					!exclude_fields.includes(d.fieldname)
 				) {
 					allow_fields.push({
 						label: field_label_map[d.fieldname],

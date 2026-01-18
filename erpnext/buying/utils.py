@@ -20,6 +20,9 @@ def update_last_purchase_rate(doc, is_submit) -> None:
 	this_purchase_date = getdate(doc.get("posting_date") or doc.get("transaction_date"))
 
 	for d in doc.get("items"):
+		if d.get("is_free_item"):
+			continue
+
 		# get last purchase details
 		last_purchase_details = get_last_purchase_details(d.item_code, doc.name)
 

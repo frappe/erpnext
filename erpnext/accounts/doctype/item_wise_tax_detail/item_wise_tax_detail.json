@@ -1,0 +1,63 @@
+{
+ "actions": [],
+ "creation": "2025-07-17 12:24:05.609186",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "item_row",
+  "tax_row",
+  "rate",
+  "amount",
+  "taxable_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_row",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Row",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tax_row",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Tax Row",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Tax Rate"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Tax Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "taxable_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Taxable Amount",
+   "options": "Company:company:default_currency"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-26 15:54:19.750714",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Item Wise Tax Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,21 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-17 20:55:11.854086",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "accounting",
+ "icon_type": "Link",
+ "idx": 1,
+ "label": "Accounting",
+ "link_to": "Accounting",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-01-01 20:07:01.203651",
+ "modified_by": "Administrator",
+ "name": "Accounting",
+ "owner": "Administrator",
+ "parent_icon": "Accounts",
+ "restrict_removal": 0,
+ "roles": [],
+ "standard": 1
+}

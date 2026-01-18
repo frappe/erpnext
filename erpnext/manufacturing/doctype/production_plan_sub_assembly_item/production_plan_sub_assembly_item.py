@@ -22,6 +22,7 @@ class ProductionPlanSubAssemblyItem(Document):
 		fg_warehouse: DF.Link | None
 		indent: DF.Int
 		item_name: DF.Data | None
+		ordered_qty: DF.Float
 		parent: DF.Data
 		parent_item_code: DF.Link | None
 		parentfield: DF.Data
@@ -32,7 +33,9 @@ class ProductionPlanSubAssemblyItem(Document):
 		purchase_order: DF.Link | None
 		qty: DF.Float
 		received_qty: DF.Float
+		required_qty: DF.Float
 		schedule_date: DF.Datetime | None
+		stock_reserved_qty: DF.Float
 		stock_uom: DF.Link | None
 		supplier: DF.Link | None
 		type_of_manufacturing: DF.Literal["In House", "Subcontract", "Material Request"]

@@ -28,7 +28,9 @@ class AccountingPeriod(Document):
 
 		closed_documents: DF.Table[ClosedDocument]
 		company: DF.Link
+		disabled: DF.Check
 		end_date: DF.Date
+		exempted_role: DF.Link | None
 		period_name: DF.Data
 		start_date: DF.Date
 	# end: auto-generated types
@@ -112,10 +114,11 @@ def validate_accounting_period_on_doc_save(doc, method=None):
 	accounting_period = (
 		frappe.qb.from_(ap)
 		.from_(cd)
-		.select(ap.name)
+		.select(ap.name, ap.exempted_role)
 		.where(
 			(ap.name == cd.parent)
 			& (ap.company == doc.company)
+			& (ap.disabled == 0)
 			& (cd.closed == 1)
 			& (cd.document_type == doc.doctype)
 			& (date >= ap.start_date)
@@ -124,6 +127,11 @@ def validate_accounting_period_on_doc_save(doc, method=None):
 	).run(as_dict=1)
 
 	if accounting_period:
+		if (
+			accounting_period[0].get("exempted_role")
+			and accounting_period[0].get("exempted_role") in frappe.get_roles()
+		):
+			return
 		frappe.throw(
 			_("You cannot create a {0} within the closed Accounting Period {1}").format(
 				doc.doctype, frappe.bold(accounting_period[0]["name"])

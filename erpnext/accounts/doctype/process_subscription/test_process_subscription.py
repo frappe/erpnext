@@ -2,16 +2,7 @@
 # See license.txt
 
 # import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
-
-
-class UnitTestProcessSubscription(UnitTestCase):
-	"""
-	Unit tests for ProcessSubscription.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
+from frappe.tests import IntegrationTestCase
 
 
 class TestProcessSubscription(IntegrationTestCase):

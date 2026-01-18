@@ -57,6 +57,47 @@
                     {{ __("No open task") }}
                 </div>
 		    {% } %}
+
+		{% if (typeof tasks_history == "object" && tasks_history?.length) { %}
+		<div class="mt-4" style="opacity: 0.8;">
+			<div class="open-section-head">
+				<span>{{ __("Completed Tasks") }}</span>
+			</div>
+			{% for (const t of tasks_history) { %}
+			<div class="single-activity">
+				{% if(t.date || t.allocated_to) { %}
+				<div class="text-muted small flex align-items-center">
+					<div>
+						{% if(t.allocated_to) { %}
+						{%= frappe.avatar(t.allocated_to) %}
+						{% } %}
+					</div>
+					<div class="ml-2">
+						<div class="indicator-pill no-indicator-dot whitespace-nowrap red">
+							{{ __("Done") }}
+						</div>
+					</div>
+					{% if (t.date) { %}
+					<div class="ml-auto">
+						{%= frappe.datetime.global_date_format(t.date) %}
+					</div>
+					{% } %}
+					<div class="checkbox {% if(!t.date) { %}ml-auto{% } else { %}ml-2{% } %}">
+						<input type="checkbox" class="completion-checkbox" checked disabled>
+					</div>
+				</div>
+				{% } %}
+				<div class="pl-2 mb-2 mt-2">
+					<div class="label-area font-md">
+						<a href="/app/todo/{{ t.name }}" title="{{ __('Open Task') }}">
+							{%= t.description %}
+						</a>
+					</div>
+				</div>
+			</div>
+			{% } %}
+		</div>
+		{% } %}
 		</div>
 		<div class="open-events pl-1">
 			<div class="open-section-head">
@@ -104,6 +145,49 @@
                 {{ __("No open event") }}
             </div>
 		    {% } %}
+
+		{% if (typeof events_history == "object" && events_history?.length) { %}
+		<div class="mt-4" style="opacity: 0.8;">
+			<div class="open-section-head">
+				<span>{{ __("Past Events") }}</span>
+			</div>
+			{% let icon_set = {"Sent/Received Email": "mail", "Call": "call", "Meeting": "share-people"}; %}
+			{% for(const event of events_history) { %}
+			<div class="single-activity">
+				<div class="flex justify-between mb-2">
+					<div class="row label-area font-md ml-1 title">
+						<span class="mr-2">
+							<svg class="icon icon-sm">
+								<use href="#icon-{{ icon_set[event.event_category] || 'calendar' }}"></use>
+							</svg>
+						</span>
+						<a href="/app/event/{{ event.name }}" title="{{ __('Open Event') }}">
+							{%= event.subject %}
+						</a>
+					</div>
+					<div class="checkbox">
+						<input type="checkbox" class="completion-checkbox" checked disabled>
+					</div>
+				</div>
+				<div class="text-muted ml-1">
+					{%= frappe.datetime.global_date_format(event.starts_on) %}
+
+					{% if (event.ends_on) { %}
+					{% if (frappe.datetime.obj_to_user(event.starts_on) != frappe.datetime.obj_to_user(event.ends_on)) %}
+					-
+					{%= frappe.datetime.global_date_format(frappe.datetime.obj_to_user(event.ends_on)) %}
+					{%= frappe.datetime.get_time(event.ends_on) %}
+					{% } else if (event.ends_on) { %}
+					-
+					{%= frappe.datetime.get_time(event.ends_on) %}
+					{% } %}
+					{% } %}
+
+				</div>
+			</div>
+			{% } %}
+		</div>
+		{% } %}
 		</div>
 	</div>
 </div>

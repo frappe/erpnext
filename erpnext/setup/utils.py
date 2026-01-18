@@ -9,10 +9,6 @@ from frappe.utils.nestedset import get_root_of
 
 from erpnext import get_default_company
 
-PEGGED_CURRENCIES = {
-	"USD": {"AED": 3.6725},  # AED is pegged to USD at a rate of 3.6725 since 1997
-}
-
 
 def before_tests():
 	frappe.clear_cache()
@@ -47,11 +43,51 @@ def before_tests():
 	frappe.db.commit()
 
 
-def get_pegged_rate(from_currency: str, to_currency: str, transaction_date) -> float | None:
-	if rate := PEGGED_CURRENCIES.get(from_currency, {}).get(to_currency):
-		return rate
-	elif rate := PEGGED_CURRENCIES.get(to_currency, {}).get(from_currency):
-		return 1 / rate
+def get_pegged_currencies():
+	pegged_currencies = frappe.get_all(
+		"Pegged Currency Details",
+		filters={"parent": "Pegged Currencies"},
+		fields=["source_currency", "pegged_against", "pegged_exchange_rate"],
+	)
+
+	pegged_map = {
+		currency.source_currency: {
+			"pegged_against": currency.pegged_against,
+			"ratio": flt(currency.pegged_exchange_rate),
+		}
+		for currency in pegged_currencies
+	}
+	return pegged_map
+
+
+def get_pegged_rate(pegged_map, from_currency, to_currency, transaction_date=None):
+	from_entry = pegged_map.get(from_currency)
+	to_entry = pegged_map.get(to_currency)
+
+	if from_currency in pegged_map and to_currency in pegged_map:
+		# Case 1: Both are present and pegged to same bases
+		if from_entry["pegged_against"] == to_entry["pegged_against"]:
+			return (1 / from_entry["ratio"]) * to_entry["ratio"]
+
+		# Case 2: Both are present but pegged to different bases
+		base_from = from_entry["pegged_against"]
+		base_to = to_entry["pegged_against"]
+		base_rate = get_exchange_rate(base_from, base_to, transaction_date)
+
+		if not base_rate:
+			return None
+
+		return (1 / from_entry["ratio"]) * base_rate * to_entry["ratio"]
+
+	# Case 3: from_currency is pegged to to_currency
+	if from_entry and from_entry["pegged_against"] == to_currency:
+		return flt(from_entry["ratio"])
+
+	# Case 4: to_currency is pegged to from_currency
+	if to_entry and to_entry["pegged_against"] == from_currency:
+		return 1 / flt(to_entry["ratio"])
+
+	""" If only one entry exists but doesn’t match pegged currency logic, return None """
 	return None
 
 
@@ -66,7 +102,7 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 	if not transaction_date:
 		transaction_date = nowdate()
 
-	currency_settings = frappe.get_doc("Accounts Settings").as_dict()
+	currency_settings = frappe.get_cached_doc("Accounts Settings")
 	allow_stale_rates = currency_settings.get("allow_stale")
 
 	filters = [
@@ -95,8 +131,12 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 	if frappe.get_cached_value("Currency Exchange Settings", "Currency Exchange Settings", "disabled"):
 		return 0.00
 
-	if rate := get_pegged_rate(from_currency, to_currency, transaction_date):
-		return rate
+	pegged_currencies = {}
+
+	if currency_settings.allow_pegged_currencies_exchange_rates:
+		pegged_currencies = get_pegged_currencies()
+		if rate := get_pegged_rate(pegged_currencies, from_currency, to_currency, transaction_date):
+			return rate
 
 	try:
 		cache = frappe.cache()
@@ -109,8 +149,12 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 			settings = frappe.get_cached_doc("Currency Exchange Settings")
 			req_params = {
 				"transaction_date": transaction_date,
-				"from_currency": from_currency if from_currency != "AED" else "USD",
-				"to_currency": to_currency if to_currency != "AED" else "USD",
+				"from_currency": from_currency
+				if from_currency not in pegged_currencies
+				else pegged_currencies[from_currency]["pegged_against"],
+				"to_currency": to_currency
+				if to_currency not in pegged_currencies
+				else pegged_currencies[to_currency]["pegged_against"],
 			}
 			params = {}
 			for row in settings.req_params:
@@ -123,12 +167,13 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 				value = value[format_ces_api(str(res_key.key), req_params)]
 			cache.setex(name=key, time=21600, value=flt(value))
 
-		# Support AED conversion through pegged USD
+		# Support multiple pegged currencies
 		value = flt(value)
-		if to_currency == "AED":
-			value *= 3.6725
-		if from_currency == "AED":
-			value /= 3.6725
+
+		if currency_settings.allow_pegged_currencies_exchange_rates and to_currency in pegged_currencies:
+			value *= flt(pegged_currencies[to_currency]["ratio"])
+		if currency_settings.allow_pegged_currencies_exchange_rates and from_currency in pegged_currencies:
+			value /= flt(pegged_currencies[from_currency]["ratio"])
 
 		return flt(value)
 	except Exception:
@@ -187,3 +232,15 @@ def welcome_email():
 	site_name = get_default_company() or "ERPNext"
 	title = _("Welcome to {0}").format(site_name)
 	return title
+
+
+def identity(x, *args, **kwargs):
+	"""Used for redefining the translation function to return the string as is.
+
+	We want to create english records but still mark the strings as translatable.
+	E.g. when the respective DocTypes have 'Translate Link Fields' enabled or
+	we're creating custom fields.
+
+	Use like this: `from erpnext.setup.utils import identity as _`
+	"""
+	return x

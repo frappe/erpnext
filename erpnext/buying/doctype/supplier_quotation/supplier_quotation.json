@@ -19,6 +19,7 @@
   "transaction_date",
   "valid_till",
   "quotation_number",
+  "has_unit_price_items",
   "amended_from",
   "accounting_dimensions_section",
   "cost_center",
@@ -80,6 +81,7 @@
   "disable_rounded_total",
   "tax_breakup",
   "other_charges_calculation",
+  "item_wise_tax_details",
   "pricing_rule_details",
   "pricing_rules",
   "address_and_contact_tab",
@@ -921,14 +923,31 @@
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
+  },
+  {
+   "default": "0",
+   "fieldname": "has_unit_price_items",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Unit Price Items",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "item_wise_tax_details",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Item Wise Tax Details",
+   "no_copy": 1,
+   "options": "Item Wise Tax Detail"
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-shopping-cart",
  "idx": 29,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-28 10:20:30.231915",
+ "modified": "2025-07-23 02:22:43.526822",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
@@ -989,6 +1008,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "status, transaction_date, supplier,grand_total",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

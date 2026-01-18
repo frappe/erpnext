@@ -2,8 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import copy
+
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_to_date, flt, now, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
@@ -19,16 +21,6 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_nos_from_bundle,
 )
 from erpnext.stock.serial_batch_bundle import SerialNoValuation
-
-
-class UnitTestLandedCostVoucher(UnitTestCase):
-	"""
-	Unit tests for LandedCostVoucher.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Currency Exchange"]
 
@@ -570,7 +562,7 @@ class TestLandedCostVoucher(IntegrationTestCase):
 			self.assertEqual(entry.credit_in_account_currency, amounts[1])
 
 	def test_asset_lcv(self):
-		"Check if LCV for an Asset updates the Assets Gross Purchase Amount correctly."
+		"Check if LCV for an Asset updates the Assets Net Purchase Amount correctly."
 		frappe.db.set_value(
 			"Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC"
 		)
@@ -599,7 +591,7 @@ class TestLandedCostVoucher(IntegrationTestCase):
 		lcv.submit()
 
 		# lcv updates amount in draft asset
-		self.assertEqual(frappe.db.get_value("Asset", assets[0].name, "gross_purchase_amount"), 50080)
+		self.assertEqual(frappe.db.get_value("Asset", assets[0].name, "net_purchase_amount"), 50080)
 
 		# tear down
 		lcv.cancel()
@@ -1077,6 +1069,189 @@ class TestLandedCostVoucher(IntegrationTestCase):
 				frappe.db.get_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "avg_rate"),
 			)
 
+	def test_lcv_for_work_order_scr(self):
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			get_rm_items,
+			get_subcontracting_order,
+			make_stock_in_entry,
+			make_stock_transfer_entry,
+		)
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_stock_entry_for_wo,
+		)
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+			make_subcontracting_receipt,
+		)
+
+		wo_fg_item = "Test Item FG LCV WO 1"
+		wo_rm_items = ["Test Item RM LCV WO 1", "Test Item RM LCV WO 2"]
+
+		scr_fg_item = "Test Item FG LCV SCR 1"
+		scr_rm_items = ["Test Item RM LCV SCR 1", "Test Item RM LCV SCR 2"]
+		company = "_Test Company with perpetual inventory"
+		warehouse = frappe.get_value("Warehouse", {"company": company}, "name")
+		wip_warehouse = frappe.get_value(
+			"Warehouse",
+			{"company": company, "name": ("!=", warehouse)},
+			"name",
+		)
+
+		service_item = "Test Service Item LCV"
+
+		for item in scr_rm_items + wo_rm_items + [wo_fg_item, scr_fg_item, service_item]:
+			make_item(
+				item,
+				{
+					"is_stock_item": 1 if item != service_item else 0,
+					"stock_uom": "Nos",
+					"company": company,
+					"is_sub_contracted_item": 1 if item == scr_fg_item else 0,
+				},
+			)
+
+		for item in scr_rm_items + wo_rm_items:
+			make_stock_entry(
+				item_code=item,
+				company=company,
+				to_warehouse=warehouse,
+				qty=10,
+				rate=100,
+			)
+
+		make_bom(item=wo_fg_item, company=company, raw_materials=wo_rm_items)
+
+		make_bom(item=scr_fg_item, company=company, raw_materials=scr_rm_items)
+
+		service_items = [
+			{
+				"warehouse": warehouse,
+				"item_code": service_item,
+				"qty": 10,
+				"rate": 100,
+				"fg_item": scr_fg_item,
+				"fg_item_qty": 10,
+				"company": company,
+				"supplier_warehouse": wip_warehouse,
+			},
+		]
+		sco = get_subcontracting_order(
+			service_items=service_items,
+			company=company,
+			warehouse=warehouse,
+			supplier_warehouse=wip_warehouse,
+		)
+
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.submit()
+
+		wo_order = make_wo_order_test_record(
+			production_item=wo_fg_item,
+			planned_start_date=now(),
+			qty=10,
+			source_warehouse=warehouse,
+			wip_warehouse=wip_warehouse,
+			fg_warehouse=warehouse,
+			company=company,
+		)
+
+		se = frappe.get_doc(make_stock_entry_for_wo(wo_order.name, "Material Transfer for Manufacture", 10))
+		se.submit()
+
+		se = frappe.get_doc(make_stock_entry_for_wo(wo_order.name, "Manufacture", 10))
+		se.submit()
+
+		lcv = make_landed_cost_voucher(
+			company=scr.company,
+			receipt_document_type="Subcontracting Receipt",
+			receipt_document=scr.name,
+			distribute_charges_based_on="Distribute Manually",
+			do_not_save=True,
+		)
+
+		lcv.append(
+			"purchase_receipts",
+			{
+				"receipt_document_type": "Stock Entry",
+				"receipt_document": se.name,
+			},
+		)
+
+		lcv.get_items_from_purchase_receipts()
+
+		accounts = [
+			"Electricity Charges - TCP1",
+			"Rent Charges - TCP1",
+		]
+
+		for account in accounts:
+			if not frappe.db.exists("Account", account):
+				create_account(
+					account_name=account.split(" - ")[0],
+					account_type="Expense Account",
+					parent_account="Direct Expenses - TCP1",
+					company=company,
+				)
+
+		for account in accounts:
+			lcv.append(
+				"taxes",
+				{
+					"description": f"{account} Charges",
+					"expense_account": account,
+					"amount": 100,
+				},
+			)
+
+		for row in lcv.items:
+			row.applicable_charges = 100.00
+
+		lcv.save()
+		lcv.submit()
+
+		for d in lcv.purchase_receipts:
+			gl_entries = frappe.get_all(
+				"GL Entry",
+				filters={
+					"voucher_type": d.receipt_document_type,
+					"voucher_no": d.receipt_document,
+					"is_cancelled": 0,
+					"account": ("in", accounts),
+				},
+				fields=["account", "credit"],
+			)
+
+			for gl in gl_entries:
+				self.assertEqual(gl.credit, 50.0)
+
+		lcv.cancel()
+
+		for d in lcv.purchase_receipts:
+			gl_entries = frappe.get_all(
+				"GL Entry",
+				filters={
+					"voucher_type": d.receipt_document_type,
+					"voucher_no": d.receipt_document,
+					"is_cancelled": 0,
+					"account": ("in", accounts),
+				},
+				fields=["account", "credit"],
+			)
+
+			self.assertFalse(gl_entries)
+
 
 def make_landed_cost_voucher(**args):
 	args = frappe._dict(args)
@@ -1092,23 +1267,24 @@ def make_landed_cost_voucher(**args):
 			{
 				"receipt_document_type": args.receipt_document_type,
 				"receipt_document": args.receipt_document,
-				"supplier": ref_doc.supplier,
-				"posting_date": ref_doc.posting_date,
-				"grand_total": ref_doc.grand_total,
+				"supplier": ref_doc.get("supplier"),
+				"posting_date": ref_doc.get("posting_date"),
+				"grand_total": ref_doc.get("grand_total"),
 			}
 		],
 	)
 
-	lcv.set(
-		"taxes",
-		[
-			{
-				"description": "Shipping Charges",
-				"expense_account": args.expense_account or "Expenses Included In Valuation - TCP1",
-				"amount": args.charges,
-			}
-		],
-	)
+	if args.charges:
+		lcv.set(
+			"taxes",
+			[
+				{
+					"description": "Shipping Charges",
+					"expense_account": args.expense_account or "Expenses Included In Valuation - TCP1",
+					"amount": args.charges,
+				}
+			],
+		)
 
 	if not args.do_not_save:
 		lcv.insert()

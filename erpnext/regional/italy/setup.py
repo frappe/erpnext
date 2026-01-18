@@ -378,6 +378,7 @@ def make_custom_fields(update=True):
 			),
 		],
 		"Purchase Invoice Item": invoice_item_fields,
+		"POS Invoice Item": invoice_item_fields,
 		"Sales Order Item": invoice_item_fields,
 		"Delivery Note Item": invoice_item_fields,
 		"Sales Invoice Item": invoice_item_fields + customer_po_fields,
@@ -469,11 +470,9 @@ def setup_report():
 
 	if not frappe.db.get_value("Custom Role", dict(report=report_name)):
 		frappe.get_doc(
-			dict(
-				doctype="Custom Role",
-				report=report_name,
-				roles=[dict(role="Accounts User"), dict(role="Accounts Manager")],
-			)
+			doctype="Custom Role",
+			report=report_name,
+			roles=[dict(role="Accounts User"), dict(role="Accounts Manager")],
 		).insert()
 
 

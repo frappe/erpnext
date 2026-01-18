@@ -174,6 +174,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.apply_on != 'Transaction'",
    "fieldname": "is_cumulative",
    "fieldtype": "Check",
    "label": "Is Cumulative"
@@ -656,7 +657,7 @@
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
- "modified": "2025-02-17 18:15:39.824639",
+ "modified": "2025-08-20 11:40:07.096854",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",

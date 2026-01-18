@@ -143,7 +143,7 @@
  ],
  "is_tree": 1,
  "links": [],
- "modified": "2025-01-22 10:47:32.581537",
+ "modified": "2025-04-29 13:53:13.488906",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Location",
@@ -198,31 +198,10 @@
    "role": "Stock Manager",
    "share": 1,
    "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Agriculture Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Agriculture User",
-   "share": 1,
-   "write": 1
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",

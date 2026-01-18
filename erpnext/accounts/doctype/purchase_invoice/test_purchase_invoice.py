@@ -1249,14 +1249,12 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		pi.submit()
 
 		pda1 = frappe.get_doc(
-			dict(
-				doctype="Process Deferred Accounting",
-				posting_date=nowdate(),
-				start_date="2019-01-01",
-				end_date="2019-03-31",
-				type="Expense",
-				company="_Test Company",
-			)
+			doctype="Process Deferred Accounting",
+			posting_date=nowdate(),
+			start_date="2019-01-01",
+			end_date="2019-03-31",
+			type="Expense",
+			company="_Test Company",
 		)
 
 		pda1.insert()
@@ -1374,7 +1372,7 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		total_debit_amount = frappe.db.get_all(
 			"Journal Entry Account",
 			{"account": creditors_account, "docstatus": 1, "reference_name": pi.name},
-			"sum(debit) as amount",
+			[{"SUM": "debit", "as": "amount"}],
 			group_by="reference_name",
 		)[0].amount
 		self.assertEqual(flt(total_debit_amount, 2), 2500)
@@ -1456,7 +1454,7 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		total_debit_amount = frappe.db.get_all(
 			"Journal Entry Account",
 			{"account": creditors_account, "docstatus": 1, "reference_name": pi_2.name},
-			"sum(debit) as amount",
+			[{"SUM": "debit", "as": "amount"}],
 			group_by="reference_name",
 		)[0].amount
 		self.assertEqual(flt(total_debit_amount, 2), 1500)
@@ -1500,6 +1498,8 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 	def test_purchase_invoice_advance_taxes(self):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
+		frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 1)
+
 		company = "_Test Company"
 
 		tds_account_args = {
@@ -1538,7 +1538,7 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		# Create Payment Entry Against the order
 		payment_entry = get_payment_entry(dt="Purchase Order", dn=po.name)
 		payment_entry.paid_from = "Cash - _TC"
-		payment_entry.apply_tax_withholding_amount = 1
+		payment_entry.apply_tds = 1
 		payment_entry.tax_withholding_category = tax_withholding_category
 		payment_entry.save()
 		payment_entry.submit()
@@ -1591,12 +1591,26 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 			self.assertEqual(expected_gle[i][1], gle.amount)
 
 		payment_entry.load_from_db()
-		self.assertEqual(payment_entry.taxes[0].allocated_amount, 3000)
+		tax_allocated = sum(
+			[
+				entry.withholding_amount
+				for entry in payment_entry.get("tax_withholding_entries", [])
+				if entry.taxable_name
+			]
+		)
+		self.assertEqual(tax_allocated, 3000)
 
 		purchase_invoice.cancel()
 
 		payment_entry.load_from_db()
-		self.assertEqual(payment_entry.taxes[0].allocated_amount, 0)
+		tax_allocated = sum(
+			[
+				entry.withholding_amount
+				for entry in payment_entry.get("tax_withholding_entries", [])
+				if entry.taxable_name
+			]
+		)
+		self.assertEqual(tax_allocated, 0)
 
 	def test_purchase_gl_with_tax_withholding_tax(self):
 		company = "_Test Company"
@@ -1631,7 +1645,6 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 			do_not_submit=1,
 		)
 		pi.apply_tds = 1
-		pi.tax_withholding_category = tax_withholding_category
 		pi.save()
 		pi.submit()
 
@@ -1660,7 +1673,7 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 
 		pi = create_purchase_invoice_from_receipt(pr.name)
 		pi.set_posting_time = 1
-		pi.posting_date = add_days(pr.posting_date, -1)
+		pi.posting_date = add_days(pr.posting_date, 1)
 		pi.items[0].expense_account = "Cost of Goods Sold - _TC"
 		pi.save()
 		pi.submit()
@@ -1669,30 +1682,38 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 
 		# Check GLE for Purchase Invoice
 		expected_gle = [
-			["Cost of Goods Sold - _TC", 250, 0, add_days(pr.posting_date, -1)],
-			["Creditors - _TC", 0, 250, add_days(pr.posting_date, -1)],
+			["Cost of Goods Sold - _TC", 250, 0, add_days(pr.posting_date, 1)],
+			["Creditors - _TC", 0, 250, add_days(pr.posting_date, 1)],
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, pi.posting_date)
 
 		expected_gle_for_purchase_receipt = [
-			["Provision Account - _TC", 250, 0, pr.posting_date],
-			["_Test Account Cost for Goods Sold - _TC", 0, 250, pr.posting_date],
-			["Provision Account - _TC", 0, 250, pi.posting_date],
-			["_Test Account Cost for Goods Sold - _TC", 250, 0, pi.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 250, 0, pr.posting_date],
+			["Provision Account - _TC", 0, 250, pr.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 0, 250, pi.posting_date],
+			["Provision Account - _TC", 250, 0, pi.posting_date],
 		]
 
-		check_gl_entries(self, pr.name, expected_gle_for_purchase_receipt, pr.posting_date)
+		check_gl_entries(
+			self, pr.name, expected_gle_for_purchase_receipt, pr.posting_date, voucher_type="Purchase Receipt"
+		)
 
 		# Cancel purchase invoice to check reverse provisional entry cancellation
 		pi.cancel()
 
 		expected_gle_for_purchase_receipt_post_pi_cancel = [
-			["Provision Account - _TC", 0, 250, pi.posting_date],
 			["_Test Account Cost for Goods Sold - _TC", 250, 0, pi.posting_date],
+			["Provision Account - _TC", 0, 250, pi.posting_date],
 		]
 
-		check_gl_entries(self, pr.name, expected_gle_for_purchase_receipt_post_pi_cancel, pr.posting_date)
+		check_gl_entries(
+			self,
+			pr.name,
+			expected_gle_for_purchase_receipt_post_pi_cancel,
+			pi.posting_date,
+			voucher_type="Purchase Receipt",
+		)
 
 		toggle_provisional_accounting_setting()
 
@@ -1702,6 +1723,9 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		# Configure Buying Settings to allow rate change
 		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 0)
 
+		# Configure Accounts Settings to allow 300% over billing
+		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", 300)
+
 		# Create PR: rate = 1000, qty = 5
 		pr = make_purchase_receipt(
 			item_code="_Test Non Stock Item", rate=1000, posting_date=add_days(nowdate(), -2)
@@ -1710,7 +1734,7 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		# Overbill PR: rate = 2000, qty = 10
 		pi = create_purchase_invoice_from_receipt(pr.name)
 		pi.set_posting_time = 1
-		pi.posting_date = add_days(pr.posting_date, -1)
+		pi.posting_date = add_days(pr.posting_date, 1)
 		pi.items[0].qty = 10
 		pi.items[0].rate = 2000
 		pi.items[0].expense_account = "Cost of Goods Sold - _TC"
@@ -1718,30 +1742,38 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		pi.submit()
 
 		expected_gle = [
-			["Cost of Goods Sold - _TC", 20000, 0, add_days(pr.posting_date, -1)],
-			["Creditors - _TC", 0, 20000, add_days(pr.posting_date, -1)],
+			["Cost of Goods Sold - _TC", 20000, 0, add_days(pr.posting_date, 1)],
+			["Creditors - _TC", 0, 20000, add_days(pr.posting_date, 1)],
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, pi.posting_date)
 
 		expected_gle_for_purchase_receipt = [
-			["Provision Account - _TC", 5000, 0, pr.posting_date],
-			["_Test Account Cost for Goods Sold - _TC", 0, 5000, pr.posting_date],
-			["Provision Account - _TC", 0, 5000, pi.posting_date],
-			["_Test Account Cost for Goods Sold - _TC", 5000, 0, pi.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 5000, 0, pr.posting_date],
+			["Provision Account - _TC", 0, 5000, pr.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 0, 5000, pi.posting_date],
+			["Provision Account - _TC", 5000, 0, pi.posting_date],
 		]
 
-		check_gl_entries(self, pr.name, expected_gle_for_purchase_receipt, pr.posting_date)
+		check_gl_entries(
+			self, pr.name, expected_gle_for_purchase_receipt, pr.posting_date, voucher_type="Purchase Receipt"
+		)
 
 		# Cancel purchase invoice to check reverse provisional entry cancellation
 		pi.cancel()
 
 		expected_gle_for_purchase_receipt_post_pi_cancel = [
-			["Provision Account - _TC", 0, 5000, pi.posting_date],
 			["_Test Account Cost for Goods Sold - _TC", 5000, 0, pi.posting_date],
+			["Provision Account - _TC", 0, 5000, pi.posting_date],
 		]
 
-		check_gl_entries(self, pr.name, expected_gle_for_purchase_receipt_post_pi_cancel, pr.posting_date)
+		check_gl_entries(
+			self,
+			pr.name,
+			expected_gle_for_purchase_receipt_post_pi_cancel,
+			pi.posting_date,
+			voucher_type="Purchase Receipt",
+		)
 
 		toggle_provisional_accounting_setting()
 
@@ -1774,13 +1806,76 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		check_gl_entries(self, pi.name, expected_gle, pi.posting_date)
 
 		expected_gle_for_purchase_receipt = [
-			["Provision Account - _TC", 5000, 0, pr.posting_date],
-			["_Test Account Cost for Goods Sold - _TC", 0, 5000, pr.posting_date],
-			["Provision Account - _TC", 0, 1000, pi.posting_date],
-			["_Test Account Cost for Goods Sold - _TC", 1000, 0, pi.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 5000, 0, pr.posting_date],
+			["Provision Account - _TC", 0, 5000, pr.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 0, 1000, pi.posting_date],
+			["Provision Account - _TC", 1000, 0, pi.posting_date],
 		]
 
-		check_gl_entries(self, pr.name, expected_gle_for_purchase_receipt, pr.posting_date)
+		check_gl_entries(
+			self, pr.name, expected_gle_for_purchase_receipt, pr.posting_date, voucher_type="Purchase Receipt"
+		)
+
+		toggle_provisional_accounting_setting()
+
+	def test_provisional_accounting_entry_multi_currency(self):
+		setup_provisional_accounting()
+
+		pr = make_purchase_receipt(
+			item_code="_Test Non Stock Item",
+			posting_date=add_days(nowdate(), -2),
+			qty=1000,
+			rate=111.11,
+			currency="USD",
+			do_not_save=1,
+			supplier="_Test Supplier USD",
+		)
+		pr.conversion_rate = 0.014783000
+		pr.save()
+		pr.submit()
+
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.set_posting_time = 1
+		pi.posting_date = add_days(pr.posting_date, 1)
+		pi.items[0].expense_account = "Cost of Goods Sold - _TC"
+		pi.save()
+		pi.submit()
+
+		self.assertEqual(pr.items[0].provisional_expense_account, "Provision Account - _TC")
+
+		# Check GLE for Purchase Invoice
+		expected_gle = [
+			["_Test Payable USD - _TC", 0, 1642.54, add_days(pr.posting_date, 1)],
+			["Cost of Goods Sold - _TC", 1642.54, 0, add_days(pr.posting_date, 1)],
+		]
+
+		check_gl_entries(self, pi.name, expected_gle, pi.posting_date)
+
+		expected_gle_for_purchase_receipt = [
+			["_Test Account Cost for Goods Sold - _TC", 1642.54, 0, pr.posting_date],
+			["Provision Account - _TC", 0, 1642.54, pr.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 0, 1642.54, pi.posting_date],
+			["Provision Account - _TC", 1642.54, 0, pi.posting_date],
+		]
+		check_gl_entries(
+			self, pr.name, expected_gle_for_purchase_receipt, pr.posting_date, voucher_type="Purchase Receipt"
+		)
+
+		# Cancel purchase invoice to check reverse provisional entry cancellation
+		pi.cancel()
+
+		expected_gle_for_purchase_receipt_post_pi_cancel = [
+			["_Test Account Cost for Goods Sold - _TC", 1642.54, 0, pi.posting_date],
+			["Provision Account - _TC", 0, 1642.54, pi.posting_date],
+		]
+
+		check_gl_entries(
+			self,
+			pr.name,
+			expected_gle_for_purchase_receipt_post_pi_cancel,
+			pi.posting_date,
+			voucher_type="Purchase Receipt",
+		)
 
 		toggle_provisional_accounting_setting()
 
@@ -2048,7 +2143,7 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 	def test_gl_entries_for_standalone_debit_note(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
-		item_code = make_item(properties={"is_stock_item": 1})
+		item_code = make_item(properties={"is_stock_item": 1}).name
 		make_purchase_invoice(item_code=item_code, qty=5, rate=500, update_stock=True)
 
 		returned_inv = make_purchase_invoice(
@@ -2065,19 +2160,16 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		rate = flt(sle.stock_value_difference) / flt(sle.actual_qty)
 		self.assertAlmostEqual(rate, 500)
 
+	@IntegrationTestCase.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
 	def test_payment_allocation_for_payment_terms(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 			create_pr_against_po,
 			create_purchase_order,
 		)
-		from erpnext.selling.doctype.sales_order.test_sales_order import (
-			automatically_fetch_payment_terms,
-		)
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 			make_purchase_invoice as make_pi_from_pr,
 		)
 
-		automatically_fetch_payment_terms()
 		frappe.db.set_value(
 			"Payment Terms Template",
 			"_Test Payment Term Template",
@@ -2103,7 +2195,6 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		pi = make_pi_from_pr(pr.name)
 		self.assertEqual(pi.payment_schedule[0].payment_amount, 1000)
 
-		automatically_fetch_payment_terms(enable=0)
 		frappe.db.set_value(
 			"Payment Terms Template",
 			"_Test Payment Term Template",
@@ -2551,6 +2642,38 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 
 		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
 
+	@IntegrationTestCase.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_pr_status_rate_adjusted_from_pi(self):
+		pr = make_purchase_receipt(qty=5, rate=100)
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.submit()
+		pr.reload()
+
+		# Inital check
+		self.assertEqual(pr.status, "Completed")
+
+		pi.reload()
+		pi.cancel()
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.items[0].rate = 80
+		pi.submit()
+		pr.reload()
+
+		# Test 1 : Adjustment amount is negative
+		self.assertEqual(pr.status, "Completed")
+
+		pi.reload()
+		pi.cancel()
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.items[0].rate = 120
+		pi.submit()
+		pr.reload()
+
+		# Test 2 : Adjustment amount is positive
+		self.assertEqual(pr.status, "Completed")
+
 	def test_opening_invoice_rounding_adjustment_validation(self):
 		pi = make_purchase_invoice(do_not_save=1)
 		pi.items[0].rate = 99.98
@@ -2705,13 +2828,13 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		To test if after applying discount on grand total,
 		the grand total is calculated correctly without any rounding errors
 		"""
-		invoice = make_purchase_invoice(qty=2, rate=100, do_not_save=True, do_not_submit=True)
+		invoice = make_purchase_invoice(qty=3, rate=100, do_not_save=True, do_not_submit=True)
 		invoice.append(
 			"items",
 			{
 				"item_code": "_Test Item",
-				"qty": 1,
-				"rate": 21.39,
+				"qty": 3,
+				"rate": 50.3,
 			},
 		)
 		invoice.append(
@@ -2720,18 +2843,19 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 				"charge_type": "On Net Total",
 				"account_head": "_Test Account VAT - _TC",
 				"description": "VAT",
-				"rate": 15.5,
+				"rate": 15,
 			},
 		)
 
-		# the grand total here will be 255.71
+		# the grand total here will be 518.54
 		invoice.disable_rounded_total = 1
-		# apply discount on grand total to adjust the grand total to 255
-		invoice.discount_amount = 0.71
+		# apply discount on grand total to adjust the grand total to 518
+		invoice.discount_amount = 0.54
+
 		invoice.save()
 
-		# check if grand total is 496 and not something like 254.99 due to rounding errors
-		self.assertEqual(invoice.grand_total, 255)
+		# check if grand total is 518 and not something like 517.99 due to rounding errors
+		self.assertEqual(invoice.grand_total, 518)
 
 	def test_apply_discount_on_grand_total_with_previous_row_total_tax(self):
 		"""
@@ -2771,6 +2895,77 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		invoice.save()
 
 		self.assertEqual(invoice.grand_total, 300)
+
+	def test_pr_pi_over_billing(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_invoice as make_purchase_invoice_from_pr,
+		)
+
+		# Configure Buying Settings to allow rate change
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 0)
+
+		pr = make_purchase_receipt(qty=10, rate=10)
+		pi = make_purchase_invoice_from_pr(pr.name)
+
+		pi.items[0].rate = 12
+
+		# Test 1 - This will fail because over billing is not allowed
+		self.assertRaises(frappe.ValidationError, pi.submit)
+
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 1)
+		# Test 2 - This will now submit because over billing allowance is ignored when set_landed_cost_based_on_purchase_invoice_rate is checked
+		pi.submit()
+
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
+		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", 20)
+		pi.cancel()
+		pi = make_purchase_invoice_from_pr(pr.name)
+		pi.items[0].rate = 12
+
+		# Test 3 - This will now submit because over billing is allowed upto 20%
+		pi.submit()
+
+		pi.reload()
+		pi.cancel()
+		pi = make_purchase_invoice_from_pr(pr.name)
+		pi.items[0].rate = 13
+
+		# Test 4 - Since this PI is overbilled by 130% and only 120% is allowed, it will fail
+		self.assertRaises(frappe.ValidationError, pi.submit)
+
+	def test_discount_percentage_not_set_when_amount_is_manually_set(self):
+		pi = make_purchase_invoice(do_not_save=True)
+		discount_amount = 7
+		pi.discount_amount = discount_amount
+		pi.save()
+		self.assertEqual(pi.additional_discount_percentage, None)
+		pi.set_posting_time = 1
+		pi.posting_date = add_days(today(), -1)
+		pi.save()
+		self.assertEqual(pi.discount_amount, discount_amount)
+
+	def test_returned_item_purchase_receipt(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
+			make_purchase_receipt as make_purchase_receipt_from_pi,
+		)
+
+		item = create_item("_Test Returned Item Purchase Receipt", is_stock_item=1)
+
+		pi = make_purchase_invoice(item_code=item.name, qty=5, rate=100)
+
+		return_pi = make_purchase_invoice(
+			item_code=item.name,
+			is_return=1,
+			return_against=pi.name,
+			qty=-5,
+			do_not_submit=True,
+		)
+
+		return_pi.items[0].purchase_invoice_item = pi.items[0].name
+		return_pi.submit()
+
+		pr = make_purchase_receipt_from_pi(pi.name)
+		self.assertFalse(pr.items)
 
 
 def set_advance_flag(company, flag, default_account):

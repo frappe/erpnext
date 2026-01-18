@@ -2,6 +2,10 @@
 # To add/remove versions just modify the matrix.
 
 name: Create weekly release pull requests
+
+permissions:
+  contents: read
+
 on:
   schedule:
     # 9:30 UTC => 3 PM IST Tuesday
@@ -15,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ["14", "15"]
+        version: ["14", "15", "16"]
 
     steps:
       - uses: octokit/request-action@v2.x

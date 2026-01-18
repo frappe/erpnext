@@ -32,6 +32,7 @@ def get_report_data(last_purchase_rate, required_qty, row, manufacture_details):
 	return [
 		row.item_code,
 		row.description,
+		row.from_bom_no,
 		comma_and(manufacture_details.get(row.item_code, {}).get("manufacturer", []), add_quotes=False),
 		comma_and(manufacture_details.get(row.item_code, {}).get("manufacturer_part", []), add_quotes=False),
 		qty_per_unit,
@@ -55,6 +56,13 @@ def get_columns():
 			"fieldname": "description",
 			"label": _("Description"),
 			"fieldtype": "Data",
+			"width": 150,
+		},
+		{
+			"fieldname": "from_bom_no",
+			"label": _("From BOM No"),
+			"fieldtype": "Link",
+			"options": "BOM",
 			"width": 150,
 		},
 		{
@@ -103,10 +111,7 @@ def get_columns():
 
 
 def get_bom_data(filters):
-	if filters.get("show_exploded_view"):
-		bom_item_table = "BOM Explosion Item"
-	else:
-		bom_item_table = "BOM Item"
+	bom_item_table = "BOM Explosion Item" if filters.get("show_exploded_view") else "BOM Item"
 
 	bom_item = frappe.qb.DocType(bom_item_table)
 	bin = frappe.qb.DocType("Bin")
@@ -118,11 +123,13 @@ def get_bom_data(filters):
 		.select(
 			bom_item.item_code,
 			bom_item.description,
+			bom_item.parent.as_("from_bom_no"),
 			bom_item.qty_consumed_per_unit.as_("qty_per_unit"),
 			IfNull(Sum(bin.actual_qty), 0).as_("actual_qty"),
 		)
 		.where((bom_item.parent == filters.get("bom")) & (bom_item.parenttype == "BOM"))
 		.groupby(bom_item.item_code)
+		.orderby(bom_item.idx)
 	)
 
 	if filters.get("warehouse"):
@@ -146,7 +153,36 @@ def get_bom_data(filters):
 		else:
 			query = query.where(bin.warehouse == filters.get("warehouse"))
 
-	return query.run(as_dict=True)
+	if bom_item_table == "BOM Item":
+		query = query.select(bom_item.bom_no, bom_item.is_phantom_item)
+
+	data = query.run(as_dict=True)
+	return explode_phantom_boms(data, filters) if bom_item_table == "BOM Item" else data
+
+
+def explode_phantom_boms(data, filters):
+	original_bom = filters.get("bom")
+	replacements = []
+
+	for idx, item in enumerate(data):
+		if not item.is_phantom_item:
+			continue
+
+		filters["bom"] = item.bom_no
+		children = get_bom_data(filters)
+		filters["bom"] = original_bom
+
+		for child in children:
+			child.qty_per_unit = (child.qty_per_unit or 0) * (item.qty_per_unit or 0)
+
+		replacements.append((idx, children))
+
+	for idx, children in reversed(replacements):
+		data.pop(idx)
+		data[idx:idx] = children
+
+	filters["bom"] = original_bom
+	return data
 
 
 def get_manufacturer_records():

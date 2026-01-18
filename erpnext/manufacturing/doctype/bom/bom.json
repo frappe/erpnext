@@ -16,6 +16,7 @@
   "is_default",
   "allow_alternative_item",
   "set_rate_of_sub_assembly_item_based_on_bom",
+  "is_phantom_bom",
   "project",
   "image",
   "currency_detail",
@@ -134,6 +135,7 @@
    "fieldname": "quantity",
    "fieldtype": "Float",
    "label": "Quantity",
+   "non_negative": 1,
    "oldfieldname": "quantity",
    "oldfieldtype": "Currency",
    "reqd": 1
@@ -200,6 +202,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:!doc.is_phantom_bom",
    "fieldname": "currency_detail",
    "fieldtype": "Section Break",
    "label": "Cost Configuration"
@@ -281,6 +284,7 @@
    "oldfieldtype": "Section Break"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
@@ -291,6 +295,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:!doc.is_phantom_bom",
    "fieldname": "scrap_section",
    "fieldtype": "Tab Break",
    "label": "Scrap & Process Loss"
@@ -308,6 +313,7 @@
    "oldfieldtype": "Section Break"
   },
   {
+   "depends_on": "eval:!doc.is_phantom_bom",
    "fieldname": "operating_cost",
    "fieldtype": "Currency",
    "label": "Operating Cost",
@@ -322,6 +328,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.is_phantom_bom",
    "fieldname": "scrap_material_cost",
    "fieldtype": "Currency",
    "label": "Scrap Material Cost",
@@ -334,6 +341,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.is_phantom_bom",
    "fieldname": "base_operating_cost",
    "fieldtype": "Currency",
    "label": "Operating Cost (Company Currency)",
@@ -350,6 +358,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.is_phantom_bom",
    "fieldname": "base_scrap_material_cost",
    "fieldtype": "Currency",
    "label": "Scrap Material Cost(Company Currency)",
@@ -378,6 +387,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.is_phantom_bom",
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -425,6 +435,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:!doc.is_phantom_bom",
    "fieldname": "website_section",
    "fieldtype": "Tab Break",
    "label": "Website"
@@ -534,6 +545,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "eval:doc.with_operations",
+   "depends_on": "eval:!doc.is_phantom_bom",
    "fieldname": "operations_section_section",
    "fieldtype": "Section Break",
    "label": "Operations"
@@ -546,12 +558,14 @@
   {
    "fieldname": "process_loss_percentage",
    "fieldtype": "Percent",
-   "label": "% Process Loss"
+   "label": "% Process Loss",
+   "non_negative": 1
   },
   {
    "fieldname": "process_loss_qty",
    "fieldtype": "Float",
    "label": "Process Loss Qty",
+   "non_negative": 1,
    "read_only": 1
   },
   {
@@ -568,6 +582,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.is_phantom_bom",
    "fieldname": "quality_inspection_section_break",
    "fieldtype": "Section Break",
    "label": "Quality Inspection"
@@ -656,6 +671,12 @@
    "fieldtype": "Link",
    "label": "Default Target Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_phantom_bom",
+   "fieldtype": "Check",
+   "label": "Is Phantom BOM"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -663,7 +684,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2024-06-03 16:24:47.518411",
+ "modified": "2025-11-19 16:17:15.925156",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
@@ -696,6 +717,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "item, item_name",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

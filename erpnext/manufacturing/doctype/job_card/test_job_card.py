@@ -5,7 +5,7 @@
 from typing import Literal
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import random_string
 from frappe.utils.data import add_to_date, now, today
 
@@ -23,21 +23,18 @@ from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_ord
 from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.utils import ERPNextTestSuite
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["UOM"]
 
 
-class UnitTestJobCard(UnitTestCase):
-	"""
-	Unit tests for JobCard.
-	Use this class for testing individual functions and methods.
-	"""
+class TestJobCard(ERPNextTestSuite):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
 
-	pass
-
-
-class TestJobCard(IntegrationTestCase):
 	def setUp(self):
+		self.make_employees()  # used in job card time log
 		self.make_bom_for_jc_tests()
 		self.transfer_material_against: Literal["Work Order", "Job Card"] = "Work Order"
 		self.source_warehouse = None
@@ -130,7 +127,7 @@ class TestJobCard(IntegrationTestCase):
 		jc1 = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
 		jc2 = frappe.get_last_doc("Job Card", {"work_order": wo2.name})
 
-		employee = "_T-Employee-00001"  # from test records
+		employee = self.employees[0].name
 
 		jc1.append(
 			"time_logs",
@@ -709,6 +706,119 @@ class TestJobCard(IntegrationTestCase):
 		self.assertEqual(wo_doc.produced_qty, 8)
 		self.assertEqual(wo_doc.process_loss_qty, 2)
 		self.assertEqual(wo_doc.status, "Completed")
+
+	def test_op_cost_calculation(self):
+		from erpnext.manufacturing.doctype.routing.test_routing import (
+			create_routing,
+			setup_bom,
+			setup_operations,
+		)
+		from erpnext.manufacturing.doctype.work_order.work_order import make_job_card
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_stock_entry_for_wo,
+		)
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		make_workstation(workstation_name="Test Workstation Z", hour_rate_rent=240)
+		operations = [
+			{"operation": "Test Operation A1", "workstation": "Test Workstation Z", "time_in_mins": 30},
+		]
+
+		warehouse = create_warehouse("Test Warehouse 123 for Job Card")
+		setup_operations(operations)
+
+		item_code = "Test Job Card Process Qty Item"
+		for item in [item_code, item_code + "RM 1", item_code + "RM 2"]:
+			if not frappe.db.exists("Item", item):
+				make_item(
+					item,
+					{
+						"item_name": item,
+						"stock_uom": "Nos",
+						"is_stock_item": 1,
+					},
+				)
+
+		routing_doc = create_routing(routing_name="Testing Route", operations=operations)
+		bom_doc = setup_bom(
+			item_code=item_code,
+			routing=routing_doc.name,
+			raw_materials=[item_code + "RM 1", item_code + "RM 2"],
+			source_warehouse=warehouse,
+		)
+
+		for row in bom_doc.items:
+			make_stock_entry(
+				item_code=row.item_code,
+				target=row.source_warehouse,
+				qty=10,
+				basic_rate=100,
+			)
+
+		wo_doc = make_wo_order_test_record(
+			production_item=item_code,
+			bom_no=bom_doc.name,
+			qty=10,
+			skip_transfer=1,
+			wip_warehouse=warehouse,
+			source_warehouse=warehouse,
+		)
+
+		first_job_card = frappe.get_all(
+			"Job Card",
+			filters={"work_order": wo_doc.name, "sequence_id": 1},
+			fields=["name"],
+			order_by="sequence_id",
+			limit=1,
+		)[0].name
+
+		jc = frappe.get_doc("Job Card", first_job_card)
+		for _ in jc.scheduled_time_logs:
+			jc.append(
+				"time_logs",
+				{
+					"from_time": now(),
+					"to_time": add_to_date(now(), minutes=1),
+					"completed_qty": 4,
+				},
+			)
+		jc.for_quantity = 4
+		jc.save()
+		jc.submit()
+
+		s = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 4))
+		s.submit()
+
+		self.assertEqual(s.additional_costs[0].amount, 4)
+
+		make_job_card(
+			wo_doc.name,
+			[
+				{
+					"name": wo_doc.operations[0].name,
+					"operation": "Test Operation A1",
+					"qty": 6,
+					"pending_qty": 6,
+				}
+			],
+		)
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": wo_doc.name})
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": add_to_date(now(), hours=1),
+				"to_time": add_to_date(now(), hours=1, minutes=2),
+				"completed_qty": 6,
+			},
+		)
+		job_card.for_quantity = 6
+		job_card.save()
+		job_card.submit()
+
+		s = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 6))
+		self.assertEqual(s.additional_costs[0].amount, 8)
 
 
 def create_bom_with_multiple_operations():

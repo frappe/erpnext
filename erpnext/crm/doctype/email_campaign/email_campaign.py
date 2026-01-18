@@ -123,7 +123,7 @@ def send_mail(entry, email_campaign):
 		subject=frappe.render_template(email_template.get("subject"), context),
 		content=frappe.render_template(email_template.response_, context),
 		sender=sender,
-		recipients=recipient_list,
+		bcc=recipient_list,
 		communication_medium="Email",
 		sent_or_received="Sent",
 		send_email=True,
@@ -144,4 +144,3 @@ def set_email_campaign_status():
 	for entry in email_campaigns:
 		email_campaign = frappe.get_doc("Email Campaign", entry.name)
 		email_campaign.update_status()
-		email_campaign.save()

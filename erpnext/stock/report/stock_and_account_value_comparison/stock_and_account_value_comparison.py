@@ -4,10 +4,11 @@
 
 import frappe
 from frappe import _
-from frappe.utils import get_link_to_form, parse_json
+from frappe.utils import get_datetime, get_link_to_form, parse_json
 
 import erpnext
 from erpnext.accounts.utils import get_currency_precision, get_stock_accounts
+from erpnext.stock.doctype.stock_reposting_settings.stock_reposting_settings import get_stock_ledgers
 from erpnext.stock.doctype.warehouse.warehouse import get_warehouses_based_on_account
 
 
@@ -41,8 +42,36 @@ def get_data(report_filters):
 		gl_data = voucher_wise_gl_data.get(key) or {}
 		d.account_value = gl_data.get("account_value", 0)
 		d.difference_value = d.stock_value - d.account_value
+		d.ledger_type = "Stock Ledger Entry"
 		if abs(d.difference_value) > 0.1:
 			data.append(d)
+
+		if key in voucher_wise_gl_data:
+			del voucher_wise_gl_data[key]
+
+	if voucher_wise_gl_data:
+		data += get_gl_ledgers_with_no_stock_ledger_entries(voucher_wise_gl_data)
+
+	return data
+
+
+def get_gl_ledgers_with_no_stock_ledger_entries(voucher_wise_gl_data):
+	data = []
+
+	for key in voucher_wise_gl_data:
+		gl_data = voucher_wise_gl_data.get(key) or {}
+		data.append(
+			{
+				"name": gl_data.get("name"),
+				"ledger_type": "GL Entry",
+				"voucher_type": gl_data.get("voucher_type"),
+				"voucher_no": gl_data.get("voucher_no"),
+				"posting_date": gl_data.get("posting_date"),
+				"stock_value": 0,
+				"account_value": gl_data.get("account_value", 0),
+				"difference_value": gl_data.get("account_value", 0) * -1,
+			}
+		)
 
 	return data
 
@@ -60,7 +89,7 @@ def get_stock_ledger_data(report_filters, filters):
 			"name",
 			"voucher_type",
 			"voucher_no",
-			"sum(stock_value_difference) as stock_value",
+			{"SUM": "stock_value_difference", "as": "stock_value"},
 			"posting_date",
 			"posting_time",
 		],
@@ -87,7 +116,11 @@ def get_gl_data(report_filters, filters):
 			"name",
 			"voucher_type",
 			"voucher_no",
-			"sum(debit_in_account_currency) - sum(credit_in_account_currency) as account_value",
+			"posting_date",
+			{
+				"SUB": [{"SUM": "debit_in_account_currency"}, {"SUM": "credit_in_account_currency"}],
+				"as": "account_value",
+			},
 		],
 		group_by="voucher_type, voucher_no",
 	)
@@ -105,9 +138,14 @@ def get_columns(filters):
 		{
 			"label": _("Stock Ledger ID"),
 			"fieldname": "name",
-			"fieldtype": "Link",
-			"options": "Stock Ledger Entry",
+			"fieldtype": "Dynamic Link",
+			"options": "ledger_type",
 			"width": "80",
+		},
+		{
+			"label": _("Ledger Type"),
+			"fieldname": "ledger_type",
+			"fieldtype": "Data",
 		},
 		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date"},
 		{"label": _("Posting Time"), "fieldname": "posting_time", "fieldtype": "Time"},
@@ -141,18 +179,29 @@ def create_reposting_entries(rows, company):
 		rows = parse_json(rows)
 
 	entries = []
-	for row in rows:
-		row = frappe._dict(row)
 
+	item_wh = frappe._dict()
+	vouchers = [row.get("voucher_no") for row in rows]
+	sles = get_stock_ledgers(vouchers)
+	for sle in sles:
+		key = (sle.item_code, sle.warehouse)
+		if key not in item_wh:
+			item_wh[key] = sle
+		elif get_datetime(item_wh.get(key).posting_datetime) > get_datetime(sle.posting_datetime):
+			item_wh[key] = sle
+
+	for key, sle in item_wh.items():
+		item_code, warehouse = key
 		try:
 			doc = frappe.get_doc(
 				{
 					"doctype": "Repost Item Valuation",
-					"based_on": "Transaction",
+					"based_on": "Item and Warehouse",
 					"status": "Queued",
-					"voucher_type": row.voucher_type,
-					"voucher_no": row.voucher_no,
-					"posting_date": row.posting_date,
+					"item_code": item_code,
+					"warehouse": warehouse,
+					"posting_date": sle.posting_date,
+					"posting_time": sle.posting_time,
 					"company": company,
 					"allow_nagative_stock": 1,
 				}

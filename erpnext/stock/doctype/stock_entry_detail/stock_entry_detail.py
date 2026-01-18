@@ -16,6 +16,7 @@ class StockEntryDetail(Document):
 
 		actual_qty: DF.Float
 		additional_cost: DF.Currency
+		against_fg: DF.Link | None
 		against_stock_entry: DF.Link | None
 		allow_alternative_item: DF.Check
 		allow_zero_valuation_rate: DF.Check
@@ -27,6 +28,7 @@ class StockEntryDetail(Document):
 		bom_no: DF.Link | None
 		conversion_factor: DF.Float
 		cost_center: DF.Link | None
+		customer_provided_item_cost: DF.Currency
 		description: DF.TextEditor | None
 		expense_account: DF.Link | None
 		has_item_scanned: DF.Check
@@ -37,6 +39,7 @@ class StockEntryDetail(Document):
 		item_group: DF.Data | None
 		item_name: DF.Data | None
 		job_card_item: DF.Data | None
+		landed_cost_voucher_amount: DF.Currency
 		material_request: DF.Link | None
 		material_request_item: DF.Link | None
 		original_item: DF.Link | None
@@ -52,6 +55,7 @@ class StockEntryDetail(Document):
 		retain_sample: DF.Check
 		s_warehouse: DF.Link | None
 		sample_quantity: DF.Int
+		scio_detail: DF.Data | None
 		sco_rm_detail: DF.Data | None
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None

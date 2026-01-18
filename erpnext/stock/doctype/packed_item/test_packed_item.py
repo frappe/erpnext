@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_to_date, nowdate
 
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
@@ -38,15 +38,6 @@ def create_product_bundle(
 	bundle_doc.insert()
 
 	return bundle, components
-
-
-class UnitTestPackedItem(UnitTestCase):
-	"""
-	Unit tests for PackedItem.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
 
 
 class TestPackedItem(IntegrationTestCase):

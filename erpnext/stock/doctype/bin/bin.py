@@ -5,7 +5,7 @@
 import frappe
 from frappe.model.document import Document
 from frappe.query_builder import Case, Order
-from frappe.query_builder.functions import Coalesce, CombineDatetime, Sum
+from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import flt
 
 
@@ -35,6 +35,28 @@ class Bin(Document):
 		warehouse: DF.Link
 	# end: auto-generated types
 
+	@frappe.whitelist()
+	def recalculate_qty(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
+		from erpnext.stock.stock_balance import (
+			get_indented_qty,
+			get_ordered_qty,
+			get_planned_qty,
+			get_reserved_qty,
+		)
+
+		self.actual_qty = get_actual_qty(self.item_code, self.warehouse)
+		self.planned_qty = get_planned_qty(self.item_code, self.warehouse)
+		self.indented_qty = get_indented_qty(self.item_code, self.warehouse)
+		self.ordered_qty = get_ordered_qty(self.item_code, self.warehouse)
+		self.reserved_qty = get_reserved_qty(self.item_code, self.warehouse)
+		self.reserved_qty_for_production = get_reserved_qty_for_production(self.item_code, self.warehouse)
+
+		self.update_reserved_qty_for_sub_contracting(update_qty=False)
+		self.update_reserved_qty_for_production_plan(skip_project_qty_update=True, update_qty=False)
+		self.set_projected_qty()
+		self.save()
+
 	def before_save(self):
 		if self.get("__islocal") or not self.stock_uom:
 			self.stock_uom = frappe.get_cached_value("Item", self.item_code, "stock_uom")
@@ -52,7 +74,7 @@ class Bin(Document):
 			- flt(self.reserved_qty_for_production_plan)
 		)
 
-	def update_reserved_qty_for_production_plan(self, skip_project_qty_update=False):
+	def update_reserved_qty_for_production_plan(self, skip_project_qty_update=False, update_qty=True):
 		"""Update qty reserved for production from Production Plan tables
 		in open production plan"""
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
@@ -68,11 +90,12 @@ class Bin(Document):
 
 		self.reserved_qty_for_production_plan = flt(reserved_qty_for_production_plan)
 
-		self.db_set(
-			"reserved_qty_for_production_plan",
-			flt(self.reserved_qty_for_production_plan),
-			update_modified=True,
-		)
+		if update_qty:
+			self.db_set(
+				"reserved_qty_for_production_plan",
+				flt(self.reserved_qty_for_production_plan),
+				update_modified=True,
+			)
 
 		if not skip_project_qty_update:
 			self.set_projected_qty()
@@ -115,7 +138,9 @@ class Bin(Document):
 		self.set_projected_qty()
 		self.db_set("projected_qty", self.projected_qty, update_modified=True)
 
-	def update_reserved_qty_for_sub_contracting(self, subcontract_doctype="Subcontracting Order"):
+	def update_reserved_qty_for_sub_contracting(
+		self, subcontract_doctype="Subcontracting Order", update_qty=True
+	):
 		# reserved qty
 
 		subcontract_order = frappe.qb.DocType(subcontract_doctype)
@@ -191,9 +216,11 @@ class Bin(Document):
 		else:
 			reserved_qty_for_sub_contract = 0
 
-		self.db_set("reserved_qty_for_sub_contract", reserved_qty_for_sub_contract, update_modified=True)
-		self.set_projected_qty()
-		self.db_set("projected_qty", self.projected_qty, update_modified=True)
+		self.reserved_qty_for_sub_contract = reserved_qty_for_sub_contract
+		if update_qty:
+			self.db_set("reserved_qty_for_sub_contract", reserved_qty_for_sub_contract, update_modified=True)
+			self.set_projected_qty()
+			self.db_set("projected_qty", self.projected_qty, update_modified=True)
 
 	def update_reserved_stock(self):
 		"""Update `Reserved Stock` on change in Reserved Qty of Stock Reservation Entry"""
@@ -235,27 +262,10 @@ def update_qty(bin_name, args):
 	bin_details = get_bin_details(bin_name)
 	# actual qty is already updated by processing current voucher
 	actual_qty = bin_details.actual_qty or 0.0
-	sle = frappe.qb.DocType("Stock Ledger Entry")
 
 	# actual qty is not up to date in case of backdated transaction
-	if future_sle_exists(args, allow_force_reposting=False):
-		last_sle_qty = (
-			frappe.qb.from_(sle)
-			.select(sle.qty_after_transaction)
-			.where(
-				(sle.item_code == args.get("item_code"))
-				& (sle.warehouse == args.get("warehouse"))
-				& (sle.is_cancelled == 0)
-			)
-			.orderby(sle.posting_datetime, order=Order.desc)
-			.orderby(sle.creation, order=Order.desc)
-			.limit(1)
-			.run()
-		)
-
-		actual_qty = 0.0
-		if last_sle_qty:
-			actual_qty = last_sle_qty[0][0]
+	if future_sle_exists(args):
+		actual_qty = get_actual_qty(args.get("item_code"), args.get("warehouse"))
 
 	ordered_qty = flt(bin_details.ordered_qty) + flt(args.get("ordered_qty"))
 	reserved_qty = flt(bin_details.reserved_qty) + flt(args.get("reserved_qty"))
@@ -287,3 +297,23 @@ def update_qty(bin_name, args):
 		},
 		update_modified=True,
 	)
+
+
+def get_actual_qty(item_code, warehouse):
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+
+	last_sle_qty = (
+		frappe.qb.from_(sle)
+		.select(sle.qty_after_transaction)
+		.where((sle.item_code == item_code) & (sle.warehouse == warehouse) & (sle.is_cancelled == 0))
+		.orderby(sle.posting_datetime, order=Order.desc)
+		.orderby(sle.creation, order=Order.desc)
+		.limit(1)
+		.run()
+	)
+
+	actual_qty = 0.0
+	if last_sle_qty:
+		actual_qty = last_sle_qty[0][0]
+
+	return actual_qty

@@ -48,7 +48,7 @@ class TestGetItemDetail(IntegrationTestCase):
 			{
 				"doctype": "Batch",
 				"batch_id": "BATCH01",
-				"item": item,
+				"item": item.name,
 			}
 		).insert()
 

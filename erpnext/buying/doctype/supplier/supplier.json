@@ -33,12 +33,14 @@
   "column_break_30",
   "website",
   "language",
+  "customer_numbers",
   "dashboard_tab",
   "tax_tab",
   "tax_id",
-  "column_break_27",
   "tax_category",
+  "column_break_27",
   "tax_withholding_category",
+  "tax_withholding_group",
   "contact_and_address_tab",
   "address_contacts",
   "address_html",
@@ -381,7 +383,7 @@
   },
   {
    "fieldname": "primary_address",
-   "fieldtype": "Text",
+   "fieldtype": "Text Editor",
    "label": "Primary Address",
    "read_only": 1
   },
@@ -473,8 +475,21 @@
   {
    "fieldname": "column_break_mglr",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer_numbers",
+   "fieldtype": "Table",
+   "label": "Customer Numbers",
+   "options": "Customer Number At Supplier"
+  },
+  {
+   "fieldname": "tax_withholding_group",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Group",
+   "options": "Tax Withholding Group"
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-user",
  "idx": 370,
  "image_field": "image",
@@ -485,7 +500,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2024-05-08 18:02:57.342931",
+ "modified": "2026-01-16 15:56:31.139206",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
@@ -544,6 +559,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "search_fields": "supplier_group",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
