@@ -38,6 +38,7 @@ from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, 
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 from erpnext.stock.utils import get_bin, get_latest_stock_qty, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
+from erpnext.manufacturing.doctype.manufacturing_process.constants import ALL_MFG_PROCESSES
 
 
 class OverProductionError(frappe.ValidationError):
@@ -135,78 +136,60 @@ class WorkOrder(Document):
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
 
 	def before_naming(self):
+		year = frappe.utils.today()[:4]
 		if self.production_line:
-			year = frappe.utils.today()[:4]
 			self.naming_series = f"MFG-WO-{self.production_line}-{year}-.#####"
 		else:
-			self.naming_series = "MFG-WO-2025-.#####"
+			self.naming_series = f"MFG-WO-{year}-.#####"
 			
 	def before_insert(self):
-		processes = {
-			"mixing": {
-				"source_warehouse": "SILOS Warehouse",
-				"wip_warehouse": "Mixing Warehouse",
-				"fg_warehouse": "Mixing Warehouse",
-			},
-			"distribution": {
-				"source_warehouse": "Mixing Warehouse",
-				"wip_warehouse": "Distribution Warehouse",
-				"fg_warehouse": "Pressing Warehouse",
-			},
-			"pressed slab": {
-				"source_warehouse": "Pressing Warehouse",
-				"wip_warehouse": "Pressing Warehouse",
-				"fg_warehouse": "Heating Warehouse",
-			},
-			"heated slab": {
-				"source_warehouse": "Heating Warehouse",
-				"wip_warehouse": "Heating Warehouse",
-				"fg_warehouse": "Cooling Warehouse",
-			},
-			"cooled slab": {
-				"source_warehouse": "Cooling Warehouse",
-				"wip_warehouse": "Cooling Warehouse",
-				"fg_warehouse": "Trimming Warehouse",
-			},
-			"trimmed slab": {
-				"source_warehouse": "Trimming Warehouse",
-				"wip_warehouse": "Trimming Warehouse",
-				"fg_warehouse": "Calibration Warehouse",
-			},
-			"calibrated slab": {
-				"source_warehouse": "Calibration Warehouse",
-				"wip_warehouse": "Calibration Warehouse",
-				"fg_warehouse": "Polishing Warehouse",
-			},
-			"polished slab": {
-				"source_warehouse": "Polishing Warehouse",
-				"wip_warehouse": "Polishing Warehouse",
-				"fg_warehouse": "Quality Check Warehouse",
-			},
-			"inspected slab": {
-				"source_warehouse": "Quality Check Warehouse",
-				"wip_warehouse": "Quality Check Warehouse",
-				"fg_warehouse": "Finished Goods",
-			},
-			"fg": {
-				"source_warehouse": "Finished Goods",
-				"wip_warehouse": "Finished Goods",
-				"fg_warehouse": "Finished Goods",
-			},
-			# TODO: Update the finished good warehouses
+		process_name = None
+		item_name_lower = (self.production_item or "").lower()
 
-		}
-		company_abbr = frappe.get_cached_value("Company", self.company, "abbr")
-		def wh(name):
-			return f"{name} - {company_abbr}"
+		# Strategy A: Try to find a matching process in BOM operations
+		if self.bom_no:
+			bom_ops = frappe.get_all("BOM Operation", filters={"parent": self.bom_no}, fields=["operation"], order_by="idx desc")
+			for row in bom_ops:
+				if row.operation in ALL_MFG_PROCESSES:
+					process_name = row.operation
+					break
+		
+		# Strategy B: Substring match against Item Code/Name
+		if not process_name:
+			# Sort processes by length descending to match longest name first
+			for process in sorted(ALL_MFG_PROCESSES, key=len, reverse=True):
+				if process.lower() in item_name_lower:
+					process_name = process
+					break
+		
+		# Strategy C: Hardcoded fallback common keywords for Mahi stage items
+		if not process_name:
+			if "pressed slab" in item_name_lower: process_name = "Pressing"
+			elif "heated slab" in item_name_lower: process_name = "Heating"
+			elif "cooled slab" in item_name_lower: process_name = "Cooling"
+			elif "trimmed slab" in item_name_lower: process_name = "Trimming"
+			elif "calibrated slab" in item_name_lower: process_name = "Calibration"
+			elif "polished slab" in item_name_lower: process_name = "Polishing"
+			elif "inspected slab" in item_name_lower: process_name = "Quality Check"
+			elif "mixing" in item_name_lower: process_name = "Mixing"
+			elif "distribution" in item_name_lower: process_name = "Distribution"
 
-		item_name = (self.production_item or "").lower()
-		for process, wh_map in processes.items():
-			if process in item_name:
-				self.source_warehouse = wh(wh_map["source_warehouse"])
-				self.wip_warehouse = wh(wh_map["wip_warehouse"])
-				self.fg_warehouse = wh(wh_map["fg_warehouse"])   
-				break
+		# Strategy D: Default to Quality Check if it looks like a final FG
+		if not process_name and "fg" in item_name_lower:
+			process_name = "Quality Check"
+
+		# 2. Lookup Process Warehouse Map
+		if process_name and self.production_line:
+			wh_map = frappe.db.get_value("Process Warehouse Map", 
+				{"process_name": process_name, "production_line": self.production_line},
+				["source_warehouse", "wip_warehouse", "fg_warehouse"],
+				as_dict=1
+			)
+			
+			if wh_map:
+				self.source_warehouse = wh_map.source_warehouse
+				self.wip_warehouse = wh_map.wip_warehouse
+				self.fg_warehouse = wh_map.fg_warehouse
 	
 	def after_insert(self):
 		"""Auto-submit Work Order after warehouses are set"""
@@ -563,8 +546,13 @@ class WorkOrder(Document):
 		self.create_serial_no_batch_no()
 
 	def on_submit(self):
+		from erpnext.manufacturing.doctype.manufacturing_process.constants import ALL_MFG_PROCESSES
 		item_lower = (self.production_item or "").lower()
-		if any(x in item_lower for x in ["warehouse", "slab", "mixing", "fg"]):
+		
+		# Skip standard warehouse validation for Mahi manufacturing items
+		is_mahi_item = any(p.lower() in item_lower for p in ALL_MFG_PROCESSES) or "slab" in item_lower or "fg" in item_lower
+		
+		if is_mahi_item:
 			pass
 		else:
 			if not self.wip_warehouse and not self.skip_transfer:

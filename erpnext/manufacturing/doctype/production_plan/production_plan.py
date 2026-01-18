@@ -28,6 +28,7 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
+from erpnext.manufacturing.doctype.production_line.constants import CHILD_LINES
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_or_make_bin
@@ -705,21 +706,30 @@ class ProductionPlan(Document):
 		if update_status:
 			self.status = "Material Requested"
 
+	def get_production_line_code(self, field_name):
+		mapping = {
+			"po_items_mono_line": "Mono Line",
+			"po_items_multi_line": "Multi Line",
+			"po_items_line_1": "Culcutta Line 1",
+			"po_items_line_2": "Culcutta Line 2",
+			"po_items_line_3": "Culcutta Line 3",
+		}
+
+		line_name = mapping.get(field_name)
+		if not line_name:
+			return None
+
+		for line in CHILD_LINES:
+			if line.get("line_name") == line_name:
+				return line.get("line_code")
+
 	def get_production_items(self):
 		item_dict = {}
-		line_mapping = {
-			"po_items_line_1": "L1", "po_items_line_2": "L2", 
-			"po_items_line_3": "L3", "po_items_mono_line": "MONO",
-			"po_items_multi_line": "MULTI"
-		}
 		all_items = list(self.po_items_line_1) + list(self.po_items_line_2) + list(self.po_items_line_3) + list(self.po_items_mono_line) + list(self.po_items_multi_line)
 
 		for d in all_items:
-			parent_line = None
-			for line_field, line_code in line_mapping.items():
-				if d.name in [item.name for item in getattr(self, line_field, [])]:
-					parent_line = line_code
-					break
+			parent_line = self.get_production_line_code(d.parentfield)
+
 			d.production_line = parent_line
 			item_details = {
 				"production_item": d.item_code,
@@ -740,7 +750,6 @@ class ProductionPlan(Document):
 				"project": self.project,
 				"parentfield": d.parentfield or d.parent,
 				"production_line": parent_line, 
-            	"parentfield": d.parentfield or d.parent
 			}
 
 			key = (d.item_code, d.sales_order, d.sales_order_item, d.warehouse)
@@ -907,16 +916,7 @@ class ProductionPlan(Document):
 		wo = frappe.new_doc("Work Order")
 		wo.update(item)
 
-		if "po_items_line_1" in item.get("parentfield", "") or "po_items_line_1" in str(item):
-			wo.production_line = "L1"
-		elif "po_items_line_2" in item.get("parentfield", "") or "po_items_line_2" in str(item):
-			wo.production_line = "L2"
-		elif "po_items_line_3" in item.get("parentfield", "") or "po_items_line_3" in str(item):
-			wo.production_line = "L3"
-		elif "po_items_mono_line" in item.get("parentfield", "") or "po_items_mono_line" in str(item):
-			wo.production_line = "MONO"
-		elif "po_items_multi_line" in item.get("parentfield", "") or "po_items_multi_line" in str(item):
-			wo.production_line = "MULTI"
+		wo.production_line = self.get_production_line_code(item.get("parentfield", "")) or item.get("production_line")
 
 		wo.planned_start_date = item.get("planned_start_date") or item.get("schedule_date")
 
@@ -1067,19 +1067,22 @@ class ProductionPlan(Document):
 		is_group_warehouse = False
 		if hasattr(self, 'sub_assembly_warehouse') and self.sub_assembly_warehouse:
 			is_group_warehouse = frappe.db.get_value("Warehouse", self.sub_assembly_warehouse, "is_group") or False
-			
-		line_mapping = {
-			"po_items_line_1": "L1", "po_items_line_2": "L2", 
-			"po_items_line_3": "L3", "po_items_mono_line": "MONO",
-			"po_items_multi_line": "MULTI"
-		}
 		
 		parent_line = None
-		for line_field, line_code in line_mapping.items():
-			if hasattr(self, line_field) and row.name in [item.name for item in getattr(self, line_field)]:
-				parent_line = line_code
-				break
+		child_tables = ["po_items_line_1", "po_items_line_2", "po_items_line_3", 
+                    "po_items_mono_line", "po_items_multi_line"]
+		for table_name in child_tables:
+			if hasattr(self, table_name):
+				for child_item in getattr(self, table_name):
+					if child_item.name == row.name:
+						parent_line = self.get_production_line_code(table_name)
+						break
+				if parent_line: 
+					break
 		
+		if not parent_line:
+			parent_line = getattr(row, 'production_line', None)
+    
 		print(f"ROW {row.item_code} in line: {parent_line}")
 
 		for data in bom_data:
