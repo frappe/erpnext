@@ -366,16 +366,19 @@
   },
   {
    "default": "0",
+   "depends_on": "auto_created_via_reorder",
    "fieldname": "auto_created_via_reorder",
    "fieldtype": "Check",
-   "label": "Auto Created (Reorder)"
+   "label": "Auto Created (Reorder)",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-02 13:56:33.001436",
+ "modified": "2026-01-10 15:34:59.000603",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",

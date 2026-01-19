@@ -123,9 +123,7 @@ def get_report_summary(
 
 	return [
 		{"value": net_income, "label": income_label, "datatype": "Currency", "currency": currency},
-		{"type": "separator", "value": "-"},
 		{"value": net_expense, "label": expense_label, "datatype": "Currency", "currency": currency},
-		{"type": "separator", "value": "=", "color": "blue"},
 		{
 			"value": net_profit,
 			"indicator": "Green" if net_profit > 0 else "Red",

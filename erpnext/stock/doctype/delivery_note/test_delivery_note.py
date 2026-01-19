@@ -2806,6 +2806,64 @@ class TestDeliveryNote(IntegrationTestCase):
 
 		frappe.db.set_single_value("System Settings", "float_precision", original_flt_precision)
 
+	def test_different_rate_for_same_serial_nos(self):
+		item_code = make_item(
+			"Test Different Rate Serial No Item",
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "DRSN-.#####"},
+		).name
+
+		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		serial_nos = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=1,
+			rate=300,
+			use_serial_batch_fields=1,
+			serial_no="\n".join(serial_nos),
+		)
+
+		dn.reload()
+
+		sabb = frappe.get_doc("Serial and Batch Bundle", dn.items[0].serial_and_batch_bundle)
+		for entry in sabb.entries:
+			self.assertEqual(entry.incoming_rate, 100)
+
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=1,
+			basic_rate=200,
+			use_serial_batch_fields=1,
+			serial_no="\n".join(serial_nos),
+		)
+		dn1 = create_delivery_note(
+			item_code=item_code,
+			qty=1,
+			rate=300,
+			use_serial_batch_fields=1,
+			serial_no="\n".join(serial_nos),
+		)
+
+		dn1.reload()
+
+		sabb = frappe.get_doc("Serial and Batch Bundle", dn1.items[0].serial_and_batch_bundle)
+		for entry in sabb.entries:
+			self.assertEqual(entry.incoming_rate, 200)
+
+		doc = frappe.new_doc("Repost Item Valuation")
+		doc.voucher_type = "Stock Entry"
+		doc.voucher_no = se.name
+		doc.submit()
+
+		sabb = frappe.get_doc("Serial and Batch Bundle", dn.items[0].serial_and_batch_bundle)
+		for entry in sabb.entries:
+			self.assertEqual(entry.incoming_rate, 100)
+
+		sabb = frappe.get_doc("Serial and Batch Bundle", dn1.items[0].serial_and_batch_bundle)
+		for entry in sabb.entries:
+			self.assertEqual(entry.incoming_rate, 200)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
