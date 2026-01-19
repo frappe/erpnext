@@ -77,7 +77,6 @@ class Employee(NestedSet):
 		last_name: DF.Data | None
 		leave_encashed: DF.Literal["", "Yes", "No"]
 		lft: DF.Int
-		machine_assigned: DF.Link
 		marital_status: DF.Literal["", "Single", "Married", "Divorced", "Widowed"]
 		middle_name: DF.Data | None
 		naming_series: DF.Literal["HR-EMP-"]
@@ -107,6 +106,7 @@ class Employee(NestedSet):
 		unsubscribed: DF.Check
 		user_id: DF.Link | None
 		valid_upto: DF.Date | None
+		workstation_type: DF.Link
 	# end: auto-generated types
 	nsm_parent_field = "reports_to"
 

@@ -49,7 +49,7 @@
   "date_of_retirement",
   "manufacturing_details",
   "production_line",
-  "machine_assigned",
+  "workstation_type",
   "contact_details",
   "cell_number",
   "column_break_40",
@@ -840,9 +840,9 @@
    "reqd": 1
   },
   {
-   "fieldname": "machine_assigned",
+   "fieldname": "workstation_type",
    "fieldtype": "Link",
-   "label": "Machine Assigned",
+   "label": "Workstation Type",
    "options": "Workstation",
    "reqd": 1
   }
@@ -852,7 +852,7 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2026-01-12 13:52:25.574415",
+ "modified": "2026-01-19 14:13:23.580758",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
