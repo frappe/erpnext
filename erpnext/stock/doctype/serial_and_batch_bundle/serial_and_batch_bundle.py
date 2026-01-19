@@ -4,7 +4,9 @@
 import collections
 import csv
 import json
+import operator
 from collections import Counter, defaultdict
+from functools import reduce
 
 import frappe
 import frappe.query_builder
@@ -32,8 +34,7 @@ from erpnext.stock.serial_batch_bundle import (
 )
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
 from erpnext.stock.valuation import FIFOValuation
-from functools import reduce
-import operator
+
 
 class SerialNoExistsInFutureTransactionError(frappe.ValidationError):
 	pass
@@ -3042,10 +3043,8 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 
 		serial_conditions = []
 
-		if  bundle_parents:
-			serial_conditions.append(
-				stock_ledger_entry.serial_and_batch_bundle.isin(bundle_parents)
-			)
+		if bundle_parents:
+			serial_conditions.append(stock_ledger_entry.serial_and_batch_bundle.isin(bundle_parents))
 
 		# Apply OR only on serial-specific subset
 		query = query.where(reduce(operator.or_, serial_conditions))
