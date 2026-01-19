@@ -1946,6 +1946,7 @@ def get_payment_ledger_entries(gl_entries, cancel=0):
 					account=gle.account,
 					party_type=gle.party_type,
 					party=gle.party,
+					project=gle.project,
 					cost_center=gle.cost_center,
 					finance_book=gle.finance_book,
 					due_date=gle.due_date,

@@ -38,6 +38,7 @@ class PaymentLedgerEntry(Document):
 		amount_in_account_currency: DF.Currency
 		company: DF.Link | None
 		cost_center: DF.Link | None
+		project: DF.Link | None
 		delinked: DF.Check
 		due_date: DF.Date | None
 		finance_book: DF.Link | None
