@@ -228,7 +228,6 @@ async function getJobCardsList() {
             operation: station
         }
     });
-    debugger;
     jobCard.value = result.message.name;
     return jobCard.value;
 }
@@ -489,7 +488,6 @@ async function loadBomQty() {
 }
 
 async function loadMixers() {
-    debugger;
     const response = await frappe.call({
         method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_all_mixers',
         args: {

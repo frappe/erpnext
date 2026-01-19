@@ -466,7 +466,6 @@ async function getJobCardsList() {
 	});
 
 	jobCardNumber.value = result.message.name;
-	debugger;
 	return jobCardNumber.value;
 }
 
