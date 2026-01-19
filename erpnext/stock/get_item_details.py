@@ -650,47 +650,61 @@ def get_barcode_data(items_list=None, item_code=None):
 
 	return itemwise_barcode
 
-
 @frappe.whitelist()
 def get_item_tax_info(doc, tax_category, item_codes, item_rates=None, item_tax_templates=None):
-	out = {}
+    out = {}
 
-	if item_tax_templates is None:
-		item_tax_templates = {}
+    if item_tax_templates is None:
+        item_tax_templates = {}
 
-	if item_rates is None:
-		item_rates = {}
+    if item_rates is None:
+        item_rates = {}
 
-	doc = parse_json(doc)
-	item_codes = parse_json(item_codes)
-	item_rates = parse_json(item_rates)
-	item_tax_templates = parse_json(item_tax_templates)
-	for item_code in item_codes:
-		if not item_code or item_code[1] in out or not item_tax_templates.get(item_code[1]):
-			continue
+    doc = parse_json(doc)
+    item_codes = parse_json(item_codes)
+    item_rates = parse_json(item_rates)
+    item_tax_templates = parse_json(item_tax_templates)
 
-		out[item_code[1]] = ItemDetails()
-		item = frappe.get_cached_doc("Item", item_code[0])
-		ctx: ItemDetailsCtx = {
-			"company": doc.company,
-			"tax_category": tax_category,
-			"base_net_rate": item_rates.get(item_code[1]),
-		}
-		if item_tax_templates:
-			ctx.update({"item_tax_template": item_tax_templates.get(item_code[1])})
+    for item_code in item_codes:
+        if not item_code or item_code[1] in out:
+            continue
 
-		get_item_tax_template(ctx, item, out[item_code[1]])
-		out[item_code[1]]["item_tax_rate"] = get_item_tax_map(
-			doc=doc,
-			tax_template=out[item_code[1]].get("item_tax_template"),
-			as_json=True,
-		)
+        # Initialize details
+        out[item_code[1]] = ItemDetails()
+        item = frappe.get_cached_doc("Item", item_code[0])
 
-	if not out:
-		return {}
+        # Build context
+        ctx: ItemDetailsCtx = {
+            "company": doc.company,
+            "tax_category": tax_category,
+            "base_net_rate": item_rates.get(item_code[1]),
+        }
 
-	return out
+        # Determine item tax template
+        item_tax_template = None
+        if item_tax_templates:
+            item_tax_template = item_tax_templates.get(item_code[1])
 
+        # Fallback to Item master if missing
+        if not item_tax_template:
+            item_tax_template = item.get("item_tax_template")
+
+        if item_tax_template:
+            ctx.update({"item_tax_template": item_tax_template})
+
+        # Compute tax template & tax rate
+        get_item_tax_template(ctx, item, out[item_code[1]])
+        out[item_code[1]]["item_tax_rate"] = get_item_tax_map(
+            doc=doc,
+            tax_template=out[item_code[1]].get("item_tax_template"),
+            as_json=True,
+        )
+
+    # Return at function scope (loop ke bahar)
+    if not out:
+        return {}
+
+    return out
 
 
 @frappe.whitelist()
