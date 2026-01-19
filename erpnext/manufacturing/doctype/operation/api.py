@@ -133,6 +133,7 @@ def get_recent_job_card(operation):
 
 @frappe.whitelist()
 def get_open_job_cards(process):
+    # employee_id = frappe.db.get_value("Employee", {"user_id": frappe.session.user})
     if(process == "Mixing"):
         filters = {
             "status": ["in", ["Open", "Material Transferred", "Work In Progress"]],

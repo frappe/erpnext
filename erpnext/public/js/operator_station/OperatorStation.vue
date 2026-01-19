@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 
 const jobCardNumber = ref(null);
 const jobCardName = ref(null);
@@ -13,6 +13,7 @@ const processStartTime = ref(null);
 const processElapsed = ref(0);
 const processTimerHandle = ref(null);
 const processReady = ref(true);
+const pollingInterval = ref(null);
 
 const slabsQueue = ref([]);
 const slabCreated = ref(false);
@@ -174,10 +175,22 @@ onMounted(async () => {
 		// Fetch Slab Queue
 		//await getJobCardsList();
 		await fetchQueue(line.value || jc.production_line, station);
+
+		// Polling alternative to socket.io
+		pollingInterval.value = setInterval(() => {
+			if (currentStation.value) {
+				fetchQueue(line.value || jobCardDoc.value?.production_line, currentStation.value);
+			}
+		}, 5000); // Poll every 5 seconds
+
 	} catch (e) {
 		error.value = e.message;
 		frappe.msgprint(__('Load failed: {0}', [e.message]));
 	}
+});
+
+onUnmounted(() => {
+	if (pollingInterval.value) clearInterval(pollingInterval.value);
 });
 
 const isDistribution = computed(() => currentStation.value === 'distribution');
@@ -195,7 +208,9 @@ async function fetchQueue(line, station) {
 				jobcardsQueue.value = jobcardsMethod.message || [];
 			}
 		}
+
 		else {
+			debugger;
 			slabsQueue.value = [];
 			const result = await frappe.call({
 				method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
@@ -253,11 +268,22 @@ async function slabInfo(jc, station) {
 		return;
 	}
 	if (!slab) {
-		frappe.msgprint({
-			title: 'No Slab Found',
-			message: `No available slab found from the previous stage for this Work Order. Ensure the previous step is completed.`,
-			indicator: 'orange'
+		const r2 = await frappe.call({
+			method: 'erpnext.manufacturing.doctype.slab.api.get_slab_from_previous_stage',
+			args: {
+				job_card_name: jobCardNumber.value
+			}
 		});
+		if (r2.message) {
+			selectedSlab.value = r2.message;
+		}
+		else {
+			frappe.msgprint({
+				title: 'No Slab Found',
+				message: `No available slab found from the previous stage for this Work Order. Ensure the previous step is completed.`,
+				indicator: 'orange'
+			});
+		}
 	}
 	// Populate UI
 	slabCreated.value = true;

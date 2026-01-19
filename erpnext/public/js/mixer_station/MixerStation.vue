@@ -415,7 +415,7 @@ function openAddMaterials() {
 async function transferToFGWarehouse() {
     if (!getCanTransfer()) {
         frappe.msgprint(__('Insufficient qty ({0}) for BOM requirement ({1})',
-            [getDisplayQty().toLocaleString(), bomQty.value.toLocaleString()]));
+            [getDisplayQty.value.toLocaleString(), bomQty.value.toLocaleString()]));
         return;
     }
 
@@ -440,7 +440,7 @@ async function transferToFGWarehouse() {
         });
 
         transferredQty.value += result.message.qty_transferred;
-        if (getDisplayQty() <= 0) {
+        if (getDisplayQty.value <= 0) {
             transferSuccess.value = true;
         }
 
@@ -460,15 +460,15 @@ async function transferToFGWarehouse() {
     }
 }
 
-function getDisplayQty() {
+const getDisplayQty = computed(() => {
     return parseFloat((preparedQty.value - transferredQty.value).toFixed(3));
-}
+});
 
-function getCanTransfer() {
-    const display = getDisplayQty();
+const getCanTransfer = computed(() => {
+    const display = getDisplayQty.value;
     const bom = parseFloat(bomQty.value.toFixed(2));
     return display >= bom && !transferSuccess.value;
-}
+});
 
 async function loadBomQty() {
     try {
@@ -737,7 +737,7 @@ function selectJobCard(name) {
                                 {{ transferSuccess ? 'Transfer Completed!' : 'Ready for Transfer' }}
                             </div>
                             <div class="display-4 font-weight-bold mb-4" style="font-size:2.8rem; color:#856404;">
-                                {{ getDisplayQty().toLocaleString() }}
+                                {{ getDisplayQty.toLocaleString() }}
                             </div>
                             <div class="d-flex flex-column gap-2 justify-content-center mb-3">
                                 <button v-if="!transferSuccess.value" :disabled="!getCanTransfer()"
