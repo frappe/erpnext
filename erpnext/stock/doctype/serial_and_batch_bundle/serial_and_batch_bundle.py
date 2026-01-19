@@ -33,7 +33,8 @@ from erpnext.stock.serial_batch_bundle import (
 )
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
 from erpnext.stock.valuation import FIFOValuation
-
+from functools import reduce
+import operator
 
 class SerialNoExistsInFutureTransactionError(frappe.ValidationError):
 	pass
@@ -3023,21 +3024,21 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 		serial_nos = [serial_nos]
 
 	if serial_nos:
-		query = (
-			query.left_join(serial_batch_entry)
-			.on(stock_ledger_entry.serial_and_batch_bundle == serial_batch_entry.parent)
-			.distinct()
-		)
+		bundle_parents = (
+			frappe.qb.from_(serial_batch_entry)
+			.select(serial_batch_entry.parent)
+			.where(serial_batch_entry.serial_no.isin(serial_nos))
+		).run(pluck=True)
 
-		bundle_match = serial_batch_entry.serial_no.isin(serial_nos)
+		serial_conditions = []
 
-		padded_serial_no = Concat_ws("", "\n", stock_ledger_entry.serial_no, "\n")
-		direct_match = None
-		for sn in serial_nos:
-			cond = Locate(f"\n{sn}\n", padded_serial_no) > 0
-			direct_match = cond if direct_match is None else (direct_match | cond)
+		if  bundle_parents:
+			serial_conditions.append(
+				stock_ledger_entry.serial_and_batch_bundle.isin(bundle_parents)
+			)
 
-		query = query.where(bundle_match | direct_match)
+		# Apply OR only on serial-specific subset
+		query = query.where(reduce(operator.or_, serial_conditions))
 
 	if kwargs.ignore_voucher_detail_no:
 		query = query.where(stock_ledger_entry.voucher_detail_no != kwargs.ignore_voucher_detail_no)
