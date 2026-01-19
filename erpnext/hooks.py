@@ -539,6 +539,7 @@ accounting_dimension_doctypes = [
 	"Stock Entry Detail",
 	"Payment Entry Deduction",
 	"Sales Taxes and Charges",
+	"Advance Taxes and Charges",
 	"Purchase Taxes and Charges",
 	"Shipping Rule",
 	"Landed Cost Item",
