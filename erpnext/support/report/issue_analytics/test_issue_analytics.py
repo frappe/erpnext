@@ -1,5 +1,3 @@
-import unittest
-
 import frappe
 from frappe.desk.form.assign_to import add as add_assignment
 from frappe.tests import IntegrationTestCase

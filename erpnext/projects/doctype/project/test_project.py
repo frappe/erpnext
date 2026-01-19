@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.projects.doctype.project_template.test_project_template import make_project_template

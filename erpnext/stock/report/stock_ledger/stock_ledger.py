@@ -3,7 +3,6 @@
 
 
 import copy
-from collections import defaultdict
 
 import frappe
 from frappe import _

@@ -9,7 +9,7 @@ from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
 from frappe.query_builder import Interval
 from frappe.query_builder.functions import Count, CurDate, Date, Sum, UnixTimestamp
-from frappe.utils import add_days, flt, get_datetime, get_link_to_form, get_time, get_url, nowtime, today
+from frappe.utils import add_days, flt, get_datetime, get_link_to_form, get_time, nowtime, today
 from frappe.utils.user import is_website_user
 
 from erpnext import get_default_company

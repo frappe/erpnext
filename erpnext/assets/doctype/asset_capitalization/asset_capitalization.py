@@ -13,7 +13,6 @@ import erpnext
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.depreciation import (
 	depreciate_asset,
-	get_disposal_account_and_cost_center,
 	get_gl_entries_on_asset_disposal,
 	get_value_after_depreciation_on_disposal_date,
 	reset_depreciation_schedule,

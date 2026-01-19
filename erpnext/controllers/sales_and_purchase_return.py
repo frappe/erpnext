@@ -7,7 +7,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import DocType
-from frappe.query_builder.functions import Abs, Sum
+from frappe.query_builder.functions import Abs
 from frappe.utils import cint, flt, format_datetime, get_datetime
 
 import erpnext

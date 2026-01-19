@@ -7,7 +7,6 @@ from frappe.model.document import Document
 from frappe.utils import (
 	add_months,
 	cint,
-	flt,
 	get_last_day,
 	get_link_to_form,
 	is_last_day_of_the_month,

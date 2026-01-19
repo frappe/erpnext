@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
-from frappe.utils import add_days, add_months, add_to_date, format_date, getdate, today
+from frappe.utils import add_days, add_months, format_date, getdate, today
 from frappe.utils.jinja import validate_template
 from frappe.utils.pdf import get_pdf
 from frappe.www.printview import get_print_style

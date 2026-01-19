@@ -11,7 +11,7 @@ from frappe.model.mapper import map_child_doc
 from frappe.query_builder import Case
 from frappe.query_builder.custom import GROUP_CONCAT
 from frappe.query_builder.functions import Coalesce, Locate, Replace, Sum
-from frappe.utils import ceil, cint, floor, flt, get_link_to_form
+from frappe.utils import cint, floor, flt, get_link_to_form
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.selling.doctype.sales_order.sales_order import (

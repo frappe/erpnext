@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import add_to_date, cint, flt, get_datetime, get_table_name, getdate
+from frappe.utils import add_to_date, cint, flt, get_datetime, getdate
 from pypika import functions as fn
 
 from erpnext.deprecation_dumpster import deprecated

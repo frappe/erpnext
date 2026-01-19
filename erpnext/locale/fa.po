@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-21 09:37+0000\n"
-"PO-Revision-Date: 2026-01-05 05:31\n"
+"PO-Revision-Date: 2026-01-13 07:06\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -825,7 +825,7 @@ msgstr ""
 #. Header text in the Stock Workspace
 #: erpnext/stock/workspace/stock/stock.json
 msgid "<span class=\"h4\"><b>Masters &amp; Reports</b></span>"
-msgstr "<span class=\"h4\"><b>مستندات و گزارش ها</b></span>"
+msgstr "<span class=\"h4\"><b>مستندات و گزارش‌ها</b></span>"
 
 #. Header text in the Selling Workspace
 #. Header text in the Stock Workspace
@@ -837,7 +837,7 @@ msgstr "<span class=\"h4\"><b>دسترسی سریع</b></span>"
 #. Header text in the Assets Workspace
 #: erpnext/assets/workspace/assets/assets.json
 msgid "<span class=\"h4\"><b>Reports & Masters</b></span>"
-msgstr "<span class=\"h4\"><b>گزارش ها و مستندات</b></span>"
+msgstr "<span class=\"h4\"><b>گزارش‌ها و مستندات</b></span>"
 
 #. Header text in the Accounting Workspace
 #. Header text in the Payables Workspace
@@ -862,7 +862,7 @@ msgstr "<span class=\"h4\"><b>گزارش ها و مستندات</b></span>"
 #: erpnext/setup/workspace/home/home.json
 #: erpnext/support/workspace/support/support.json
 msgid "<span class=\"h4\"><b>Reports &amp; Masters</b></span>"
-msgstr "<span class=\"h4\"><b>گزارش ها و مستندات</b></span>"
+msgstr "<span class=\"h4\"><b>گزارش‌ها و مستندات</b></span>"
 
 #. Header text in the Payables Workspace
 #. Header text in the Receivables Workspace
@@ -20765,7 +20765,7 @@ msgstr ""
 
 #: erpnext/assets/doctype/asset/depreciation.py:347
 msgid "Here are the error logs for the aforementioned failed depreciation entries: {0}"
-msgstr "در اینجا گزارش های خطا برای ثبت‌های استهلاک ناموفق فوق الذکر آمده است: {0}"
+msgstr "در اینجا گزارش‌های خطا برای ثبت‌های استهلاک ناموفق فوق الذکر آمده است: {0}"
 
 #: erpnext/stock/stock_ledger.py:2030
 msgid "Here are the options to proceed:"
@@ -25640,7 +25640,7 @@ msgstr "کلوین"
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Key Reports"
-msgstr "گزارش های کلیدی"
+msgstr "گزارش‌های کلیدی"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -31184,7 +31184,7 @@ msgstr "سایر اطلاعات"
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Other Reports"
-msgstr "سایر گزارش ها"
+msgstr "سایر گزارش‌ها"
 
 #. Label of the other_settings_section (Section Break) field in DocType
 #. 'Manufacturing Settings'
@@ -49881,7 +49881,7 @@ msgstr "افتتاح حساب موقت"
 #. Label of the terms (Text Editor) field in DocType 'Quotation'
 #: erpnext/selling/doctype/quotation/quotation.json
 msgid "Term Details"
-msgstr "جزئیات مدت"
+msgstr "جزئیات دوره"
 
 #. Label of the tc_name (Link) field in DocType 'POS Invoice'
 #. Label of the terms_tab (Tab Break) field in DocType 'POS Invoice'

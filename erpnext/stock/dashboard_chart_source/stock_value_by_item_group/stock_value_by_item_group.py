@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Abs, Count, Date, Sum
+from frappe.query_builder.functions import Sum
 from frappe.utils.dashboard import cache_source
 
 

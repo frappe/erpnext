@@ -12,7 +12,7 @@ import frappe.query_builder.functions
 from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Concat_ws, Locate, Sum
 from frappe.utils import (
 	cint,
 	cstr,
@@ -20,7 +20,6 @@ from frappe.utils import (
 	get_link_to_form,
 	getdate,
 	now,
-	nowtime,
 	parse_json,
 	today,
 )
@@ -2985,7 +2984,15 @@ def get_ledgers_from_serial_batch_bundle(**kwargs) -> list[frappe._dict]:
 
 
 def get_stock_ledgers_for_serial_nos(kwargs):
+	"""
+	Fetch stock ledger entries based on various filters.
+	:param kwargs: Filters including posting_datetime, creation, warehouse, item_code, serial_nos, ignore_voucher_detail_no, voucher_no. Joins with Serial and Batch Entry table to filter based on serial numbers.
+	:return: List of stock ledger entries as dictionaries.
+	:rtype: list[dict]
+	"""
+
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
+	serial_batch_entry = frappe.qb.DocType("Serial and Batch Entry")
 
 	query = (
 		frappe.qb.from_(stock_ledger_entry)
@@ -3012,7 +3019,7 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 
 		query = query.where(timestamp_condition)
 
-	for field in ["warehouse", "item_code", "serial_no"]:
+	for field in ["warehouse", "item_code"]:
 		if not kwargs.get(field):
 			continue
 
@@ -3020,6 +3027,27 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 			query = query.where(stock_ledger_entry[field].isin(kwargs.get(field)))
 		else:
 			query = query.where(stock_ledger_entry[field] == kwargs.get(field))
+
+	serial_nos = kwargs.get("serial_nos") or kwargs.get("serial_no")
+	if serial_nos and not isinstance(serial_nos, list):
+		serial_nos = [serial_nos]
+
+	if serial_nos:
+		query = (
+			query.left_join(serial_batch_entry)
+			.on(stock_ledger_entry.serial_and_batch_bundle == serial_batch_entry.parent)
+			.distinct()
+		)
+
+		bundle_match = serial_batch_entry.serial_no.isin(serial_nos)
+
+		padded_serial_no = Concat_ws("", "\n", stock_ledger_entry.serial_no, "\n")
+		direct_match = None
+		for sn in serial_nos:
+			cond = Locate(f"\n{sn}\n", padded_serial_no) > 0
+			direct_match = cond if direct_match is None else (direct_match | cond)
+
+		query = query.where(bundle_match | direct_match)
 
 	if kwargs.ignore_voucher_detail_no:
 		query = query.where(stock_ledger_entry.voucher_detail_no != kwargs.ignore_voucher_detail_no)

@@ -4,7 +4,7 @@ from collections import defaultdict
 
 import frappe
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, nowtime
+from frappe.utils import flt
 from pypika import Order
 from pypika.functions import Coalesce
 
@@ -106,8 +106,6 @@ class DeprecatedBatchNoValuation:
 		"No known instructions.",
 	)
 	def get_sle_for_batches(self):
-		from erpnext.stock.utils import get_combine_datetime
-
 		if not self.batchwise_valuation_batches:
 			return []
 

@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe import _, bold
+from frappe import _
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.custom import ConstantColumn

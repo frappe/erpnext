@@ -2,12 +2,10 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
-from frappe.model.naming import NamingSeries, make_autoname, parse_naming_series
-from frappe.query_builder import Case
-from frappe.query_builder.functions import Max, Sum, Timestamp
-from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, now, nowtime, today
+from frappe.model.naming import NamingSeries, parse_naming_series
+from frappe.query_builder.functions import Max, Sum
+from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, now
 from pypika import Order
-from pypika.terms import ExistsCriterion
 
 from erpnext.stock.deprecated_serial_batch import (
 	DeprecatedBatchNoValuation,

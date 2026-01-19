@@ -12,9 +12,7 @@ from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import (
-	add_months,
 	cint,
-	formatdate,
 	get_first_day,
 	get_last_day,
 	get_link_to_form,

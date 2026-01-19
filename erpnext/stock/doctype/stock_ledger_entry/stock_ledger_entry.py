@@ -5,7 +5,7 @@
 from datetime import date
 
 import frappe
-from frappe import _, bold
+from frappe import _
 from frappe.core.doctype.role.role import get_users
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
@@ -15,7 +15,6 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.serial_batch_bundle import SerialBatchBundle
-from erpnext.stock.stock_ledger import get_previous_sle
 
 
 class StockFreezeError(frappe.ValidationError):

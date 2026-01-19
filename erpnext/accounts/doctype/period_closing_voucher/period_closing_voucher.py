@@ -6,7 +6,6 @@ import copy
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, flt, formatdate, getdate
 
 from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (

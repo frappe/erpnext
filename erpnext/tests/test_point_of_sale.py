@@ -1,8 +1,6 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
-import unittest
 
-import frappe
 from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile

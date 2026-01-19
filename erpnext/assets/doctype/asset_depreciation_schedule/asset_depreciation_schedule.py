@@ -10,7 +10,6 @@ from frappe.utils import (
 	getdate,
 )
 
-import erpnext
 from erpnext.assets.doctype.asset_depreciation_schedule.deppreciation_schedule_controller import (
 	DepreciationScheduleController,
 )

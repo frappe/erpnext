@@ -2,14 +2,12 @@
 # For license information, please see license.txt
 
 
-from datetime import date
-
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_months, flt, fmt_money, get_last_day, getdate, month_diff
-from frappe.utils.data import get_first_day, nowdate
+from frappe.utils import add_months, flt, fmt_money, get_last_day, getdate
+from frappe.utils.data import get_first_day
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,

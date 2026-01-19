@@ -1811,7 +1811,6 @@ class TestDeliveryNote(IntegrationTestCase):
 				self.assertEqual(row.serial_no, serial_no)
 
 	def test_delivery_note_legacy_serial_no_valuation(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		frappe.flags.ignore_serial_batch_bundle_validation = True

@@ -1,18 +1,15 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import ast
 import json
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import Any, ClassVar
+from typing import Any
 
 import frappe
 from frappe import _
 from frappe.database.operator_map import OPERATOR_MAP
-from frappe.database.query import SQLFunctionParser
 
 
 @dataclass

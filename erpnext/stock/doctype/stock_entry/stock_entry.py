@@ -724,7 +724,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			"Subcontracting Return",
 		]
 
-		validate_for_manufacture = any([d.bom_no for d in self.get("items")])
+		has_bom = any([d.bom_no for d in self.get("items")])
 
 		if self.purpose in source_mandatory and self.purpose not in target_mandatory:
 			self.to_warehouse = None
@@ -753,7 +753,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 					frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
 
 			if self.purpose == "Manufacture":
-				if validate_for_manufacture:
+				if has_bom:
 					if d.is_finished_item or d.is_scrap_item:
 						d.s_warehouse = None
 						if not d.t_warehouse:
@@ -762,6 +762,17 @@ class StockEntry(StockController, SubcontractingInwardController):
 						d.t_warehouse = None
 						if not d.s_warehouse:
 							frappe.throw(_("Source warehouse is mandatory for row {0}").format(d.idx))
+
+			if self.purpose == "Disassemble":
+				if has_bom:
+					if d.is_finished_item:
+						d.t_warehouse = None
+						if not d.s_warehouse:
+							frappe.throw(_("Source warehouse is mandatory for row {0}").format(d.idx))
+					else:
+						d.s_warehouse = None
+						if not d.t_warehouse:
+							frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
 
 			if cstr(d.s_warehouse) == cstr(d.t_warehouse) and self.purpose not in [
 				"Material Transfer for Manufacture",
@@ -2162,9 +2173,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def get_items_for_disassembly(self):
 		"""Get items for Disassembly Order"""
 
-		if not self.work_order:
-			frappe.throw(_("The Work Order is mandatory for Disassembly Order"))
+		if self.work_order:
+			return self._add_items_for_disassembly_from_work_order()
 
+		return self._add_items_for_disassembly_from_bom()
+
+	def _add_items_for_disassembly_from_work_order(self):
 		items = self.get_items_from_manufacture_entry()
 
 		s_warehouse = frappe.db.get_value("Work Order", self.work_order, "fg_warehouse")
@@ -2195,6 +2209,23 @@ class StockEntry(StockController, SubcontractingInwardController):
 			child_row.s_warehouse = (self.from_warehouse or s_warehouse) if row.is_finished_item else ""
 			child_row.t_warehouse = row.s_warehouse
 			child_row.is_finished_item = 0 if row.is_finished_item else 1
+
+	def _add_items_for_disassembly_from_bom(self):
+		if not self.bom_no or not self.fg_completed_qty:
+			frappe.throw(_("BOM and Finished Good Quantity is mandatory for Disassembly"))
+
+		# Raw Materials
+		item_dict = self.get_bom_raw_materials(self.fg_completed_qty)
+
+		for item_row in item_dict.values():
+			item_row["to_warehouse"] = self.to_warehouse
+			item_row["from_warehouse"] = ""
+			item_row["is_finished_item"] = 0
+
+		self.add_to_stock_entry_detail(item_dict)
+
+		# Finished goods
+		self.load_items_from_bom()
 
 	def get_items_from_manufacture_entry(self):
 		return frappe.get_all(
@@ -2560,6 +2591,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		expense_account = item.get("expense_account")
 		if not expense_account:
 			expense_account = frappe.get_cached_value("Company", self.company, "stock_adjustment_account")
+
 		args = {
 			"to_warehouse": to_warehouse,
 			"from_warehouse": "",
@@ -2572,6 +2604,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 			"is_finished_item": 1,
 			"sample_quantity": item.get("sample_quantity"),
 		}
+
+		if self.purpose == "Disassemble":
+			args.update(
+				{
+					"from_warehouse": self.from_warehouse,
+					"to_warehouse": "",
+					"qty": flt(self.fg_completed_qty),
+				}
+			)
 
 		if (
 			self.work_order

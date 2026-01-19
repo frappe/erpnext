@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe import _, msgprint, scrub, unscrub
+from frappe import _, msgprint
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form, now

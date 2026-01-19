@@ -1,4 +1,3 @@
-import unittest
 from functools import partial
 
 import frappe

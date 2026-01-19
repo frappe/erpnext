@@ -728,7 +728,6 @@ class SubcontractingController(StockController):
 				self.set_batch_for_supplied_items()
 
 	def set_batch_for_supplied_items(self):
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
 		from erpnext.stock.get_item_details import get_filtered_serial_nos
 
 		if self.is_return:

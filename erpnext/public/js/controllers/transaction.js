@@ -945,11 +945,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				// Replace all occurences of comma with line feed
 				item.serial_no = item.serial_no.replace(/,/g, "\n");
 				item.conversion_factor = item.conversion_factor || 1;
-				refresh_field("serial_no", item.name, item.parentfield);
 				if (!doc.is_return) {
 					setTimeout(() => {
 						me.update_qty(cdt, cdn);
-					}, 3000);
+					}, 300);
 				}
 			}
 		}

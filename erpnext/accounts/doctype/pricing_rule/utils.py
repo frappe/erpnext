@@ -6,7 +6,6 @@
 
 import copy
 import json
-import math
 
 import frappe
 from frappe import _, bold

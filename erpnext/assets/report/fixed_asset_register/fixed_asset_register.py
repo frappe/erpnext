@@ -15,7 +15,6 @@ from erpnext.accounts.report.financial_statements import (
 	validate_fiscal_year,
 )
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 
 
 def execute(filters=None):

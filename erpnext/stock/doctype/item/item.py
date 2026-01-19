@@ -1,8 +1,6 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import copy
-import json
 
 import frappe
 from frappe import _, bold
@@ -20,7 +18,6 @@ from frappe.utils import (
 	now_datetime,
 	nowtime,
 	strip,
-	strip_html,
 )
 from frappe.utils.html_utils import clean_html
 from pypika import Order
