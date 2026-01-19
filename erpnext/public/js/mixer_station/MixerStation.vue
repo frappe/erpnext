@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 
 const jobCard = ref(null);
 const batchNo = ref('');
@@ -20,6 +20,7 @@ const selectedMixer = ref('');
 const mixersList = ref([]);
 const jobcardsQueue = ref([]);
 const productionLine = ref(null);
+const pollingInterval = ref(null);
 
 // downstream alerts (dummy)
 const alerts = ref([
@@ -135,6 +136,9 @@ onMounted(async () => {
         }
 
         await fetchQueue();
+        pollingInterval.value = setInterval(() => {
+            fetchQueue();
+        }, 5000); // Poll every 5 seconds
 
         const r = await frappe.call({
             method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_ingredients',
@@ -174,6 +178,10 @@ onMounted(async () => {
     finally {
         loadingIngredients.value = false;
     }
+});
+
+onUnmounted(() => {
+    if (pollingInterval.value) clearInterval(pollingInterval.value);
 });
 
 async function toggleReady() {

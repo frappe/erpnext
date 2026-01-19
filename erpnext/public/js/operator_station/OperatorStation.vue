@@ -210,7 +210,6 @@ async function fetchQueue(line, station) {
 		}
 
 		else {
-			debugger;
 			slabsQueue.value = [];
 			const result = await frappe.call({
 				method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
