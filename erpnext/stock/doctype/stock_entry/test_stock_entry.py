@@ -2233,7 +2233,7 @@ class TestStockEntry(FrappeTestCase):
 		se.submit()
 
 
-def make_serialized_item(self, **args):
+def make_serialized_item(**args):
 	args = frappe._dict(args)
 	se = frappe.copy_doc(test_records[0])
 
