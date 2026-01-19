@@ -3021,7 +3021,6 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 		query = query.where(timestamp_condition)
 
 	for field in ["warehouse", "item_code"]:
-	for field in ["warehouse", "item_code"]:
 		if not kwargs.get(field):
 			continue
 
