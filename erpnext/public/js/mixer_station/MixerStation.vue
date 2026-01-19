@@ -78,7 +78,7 @@ const isMixerSelected = computed(() => !!selectedMixer.value);
 // actions
 onMounted(async () => {
     const route = frappe.get_route();
-    // jobCard.value = route[2] || null;
+    jobCard.value = route[2] || null;
 
     if (!jobCard.value) {
         loadingIngredients.value = true;
@@ -525,8 +525,8 @@ async function loadOperators() {
 async function fetchQueue() {
     try {
         const r = await frappe.call({
-            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixing_queue',
-            args: { production_line: productionLine.value }
+            method: 'erpnext.manufacturing.doctype.operation.api.get_open_job_cards',
+            args: { process: "Mixing" }
         });
         jobcardsQueue.value = r.message || [];
     } catch (e) {

@@ -26,23 +26,6 @@ def get_operator_state(job_card, process_name="operator"):
     return state
 
 @frappe.whitelist()
-def get_open_job_cards(process):
-    """
-    Get open Job Cards for a specific process (workstation).
-    Useful for the Distribution station to see pending work orders.
-    """
-    job_cards = frappe.get_all("Job Card", 
-        filters={
-            "status": ["in", ["Material Transferred", "Work In Progress"]],
-            "docstatus": 0,
-            "workstation": ["like", f"%{process}%"] # Match process name loosely
-        },
-        fields=["name", "work_order", "status", "production_item", "creation"],
-        order_by="creation asc"
-    )
-    return job_cards
-
-@frappe.whitelist()
 def start_distribution(job_card, process_name="operator"):
     """Start the Job Card when mixing starts."""
 

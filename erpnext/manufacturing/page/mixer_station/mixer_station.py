@@ -432,18 +432,3 @@ def assign_mixer_to_job_card(job_card, mixer):
         "status": "success",
         "mixer_number": mixer_number
     }
-
-@frappe.whitelist()
-def get_mixing_queue(production_line=None):
-    filters = {
-        "operation": ["like", "%Mixing%"],
-        "docstatus": 0,
-        "status": ["in", ["Open", "Material Transferred", "Work In Progress"]]
-    }
-    
-    job_cards = frappe.get_all("Job Card",
-        filters=filters,
-        fields=["name", "production_item", "creation", "status", "production_line"],
-        order_by="creation asc"
-    )
-    return job_cards

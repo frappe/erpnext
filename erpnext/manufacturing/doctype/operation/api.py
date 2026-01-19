@@ -131,6 +131,26 @@ def get_recent_job_card(operation):
 
     return job_cards[0]
 
+@frappe.whitelist()
+def get_open_job_cards(process):
+    if(process == "Mixing"):
+        filters = {
+            "status": ["in", ["Open", "Material Transferred", "Work In Progress"]],
+            "docstatus": 0,
+            "operation": ["like", "%Mixing%"]
+        }
+    else:
+        filters = {
+            "status": ["in", ["Material Transferred", "Work In Progress"]],
+            "docstatus": 0,
+            "workstation": ["like", f"%{process}%"]
+        }
+    job_cards = frappe.get_all("Job Card", 
+        filters=filters,
+        fields=["name", "work_order", "status", "production_item", "creation"],
+        order_by="creation asc"
+    )
+    return job_cards
 
 @frappe.whitelist()
 def get_operators(designation, production_line, workstation):

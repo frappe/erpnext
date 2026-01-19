@@ -188,7 +188,7 @@ async function fetchQueue(line, station) {
 		if (currentStation.value === 'distribution') {
 			jobcardsQueue.value = [];
 			const jobcardsMethod = await frappe.call({
-				method: 'erpnext.manufacturing.page.operator_station.operator_station.get_open_job_cards',
+				method: 'erpnext.manufacturing.doctype.operation.api.get_open_job_cards',
 				args: { process: station }
 			});
 			if (jobcardsMethod.message) {
@@ -374,7 +374,7 @@ async function transferToFGWarehouse() {
 		}
 
 		const result = await frappe.call({
-			method: 'erpnext.manufacturing.page.operator_station.operator_station.transfer_to_next_process',
+			method: 'erpnext.manufacturing.doctype.operation.api.transfer_to_next_process',
 			args: {
 				current_work_order: workOrder,
 				qty: bomQty.value
