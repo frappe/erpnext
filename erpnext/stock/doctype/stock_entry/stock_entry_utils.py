@@ -190,6 +190,7 @@ def make_stock_entry(**args):
 			"cost_center": args.cost_center,
 			"expense_account": args.expense_account,
 			"use_serial_batch_fields": args.use_serial_batch_fields,
+			"sample_quantity": frappe.get_value("Item", args.item, "sample_quantity") or 0,
 		},
 	)
 

@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Abs, Count, Date, Sum
+from frappe.query_builder.functions import Sum
 from frappe.utils.dashboard import cache_source
 
 
@@ -53,11 +53,13 @@ def get_stock_value_by_item_group(company):
 		.inner_join(item_doctype)
 		.on(doctype.item_code == item_doctype.name)
 		.select(item_doctype.item_group, stock_value.as_("stock_value"))
-		.where(doctype.warehouse.isin(warehouses))
 		.groupby(item_doctype.item_group)
 		.orderby(stock_value, order=frappe.qb.desc)
 		.limit(10)
 	)
+
+	if warehouses:
+		query = query.where(doctype.warehouse.isin(warehouses))
 
 	results = query.run(as_dict=True)
 

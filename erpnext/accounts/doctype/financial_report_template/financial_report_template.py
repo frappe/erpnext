@@ -5,7 +5,6 @@ import os
 import shutil
 
 import frappe
-from frappe import _
 from frappe.model.document import Document
 
 from erpnext.accounts.doctype.account_category.account_category import import_account_categories

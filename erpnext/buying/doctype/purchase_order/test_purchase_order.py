@@ -805,8 +805,6 @@ class TestPurchaseOrder(IntegrationTestCase):
 		po_doc.reload()
 		self.assertEqual(po_doc.advance_paid, 5000)
 
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
-
 		company_doc.book_advance_payments_in_separate_party_account = False
 		company_doc.save()
 

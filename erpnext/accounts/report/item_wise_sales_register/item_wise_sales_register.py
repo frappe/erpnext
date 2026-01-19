@@ -105,7 +105,7 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 			{
 				"total_tax": total_tax,
 				"total_other_charges": total_other_charges,
-				"total": d.base_net_amount + total_tax,
+				"total": d.base_net_amount + total_tax + total_other_charges,
 				"currency": company_currency,
 			}
 		)

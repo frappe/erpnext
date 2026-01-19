@@ -502,7 +502,7 @@ class WorkOrder(Document):
 	def validate_work_order_against_so(self):
 		# already ordered qty
 		ordered_qty_against_so = frappe.db.sql(
-			"""select sum(qty) from `tabWork Order`
+			"""select sum(qty - process_loss_qty) from `tabWork Order`
 			where production_item = %s and sales_order = %s and docstatus < 2 and status != 'Closed' and name != %s""",
 			(self.production_item, self.sales_order, self.name),
 		)[0][0]

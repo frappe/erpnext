@@ -2,12 +2,10 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
-from frappe.model.naming import NamingSeries, make_autoname, parse_naming_series
-from frappe.query_builder import Case
-from frappe.query_builder.functions import Max, Sum, Timestamp
-from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, now, nowtime, today
+from frappe.model.naming import NamingSeries, parse_naming_series
+from frappe.query_builder.functions import Max, Sum
+from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, now
 from pypika import Order
-from pypika.terms import ExistsCriterion
 
 from erpnext.stock.deprecated_serial_batch import (
 	DeprecatedBatchNoValuation,
@@ -989,9 +987,10 @@ def get_batch_nos(serial_and_batch_bundle):
 
 	entries = frappe.get_all(
 		"Serial and Batch Entry",
-		fields=["batch_no", "qty", "name"],
+		fields=["batch_no", {"SUM": "qty", "as": "qty"}],
 		filters={"parent": serial_and_batch_bundle, "batch_no": ("is", "set")},
 		order_by="idx",
+		group_by="batch_no",
 	)
 
 	if not entries:
@@ -1116,7 +1115,7 @@ class SerialBatchCreation:
 
 		id = self.serial_and_batch_bundle
 		package = frappe.get_doc("Serial and Batch Bundle", id)
-		new_package = frappe.copy_doc(package)
+		new_package = frappe.copy_doc(package, ignore_no_copy=False)
 
 		if self.get("returned_serial_nos"):
 			self.remove_returned_serial_nos(new_package)

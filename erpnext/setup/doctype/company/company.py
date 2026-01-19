@@ -11,7 +11,14 @@ from frappe.cache_manager import clear_defaults_cache
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
-from frappe.utils import add_months, cint, formatdate, get_first_day, get_link_to_form, get_timestamp, today
+from frappe.utils import (
+	cint,
+	get_first_day,
+	get_last_day,
+	get_link_to_form,
+	get_timestamp,
+	today,
+)
 from frappe.utils.nestedset import NestedSet, rebuild_tree
 
 from erpnext.accounts.doctype.account.account import get_account_currency
@@ -866,30 +873,40 @@ def install_country_fixtures(company, country):
 
 
 def update_company_current_month_sales(company):
-	from_date = get_first_day(today())
-	to_date = get_first_day(add_months(from_date, 1))
+	"""Update Company's Total Monthly Sales.
 
-	results = frappe.db.sql(
-		"""
-		SELECT
-			SUM(base_grand_total) AS total,
-			DATE_FORMAT(posting_date, '%%m-%%Y') AS month_year
-		FROM
-			`tabSales Invoice`
-		WHERE
-			posting_date >= %s
-			AND posting_date < %s
-			AND docstatus = 1
-			AND company = %s
-		GROUP BY
-			month_year
-		""",
-		(from_date, to_date, company),
-		as_dict=True,
+	Postgres compatibility:
+	- Avoid MariaDB-only DATE_FORMAT().
+	- Use a date range for the current month instead (portable + index-friendly).
+	"""
+
+	# Local imports so you don't have to touch file-level imports
+	from frappe.query_builder.functions import Sum
+
+	start_date = get_first_day(today())
+	end_date = get_last_day(today())
+
+	si = frappe.qb.DocType("Sales Invoice")
+
+	total_monthly_sales = (
+		frappe.qb.from_(si)
+		.select(Sum(si.base_grand_total))
+		.where(
+			(si.docstatus == 1)
+			& (si.company == company)
+			& (si.posting_date >= start_date)
+			& (si.posting_date <= end_date)
+		)
+	).run(pluck=True)[0] or 0
+
+	# Fieldname in standard ERPNext is `total_monthly_sales`
+	frappe.db.set_value(
+		"Company",
+		company,
+		"total_monthly_sales",
+		total_monthly_sales,
+		update_modified=False,
 	)
-
-	monthly_total = results[0]["total"] if len(results) > 0 else 0
-	frappe.db.set_value("Company", company, "total_monthly_sales", monthly_total)
 
 
 def update_company_monthly_sales(company):

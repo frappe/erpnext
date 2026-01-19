@@ -1,0 +1,20 @@
+{
+ "app": "erpnext",
+ "creation": "2026-01-12 12:31:53.444807",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon_type": "Link",
+ "idx": 8,
+ "label": "Share Management",
+ "link_to": "Share Management",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-01-12 12:31:53.444807",
+ "modified_by": "Administrator",
+ "name": "Share Management",
+ "owner": "Administrator",
+ "parent_icon": "Accounts",
+ "restrict_removal": 0,
+ "roles": [],
+ "standard": 1
+}

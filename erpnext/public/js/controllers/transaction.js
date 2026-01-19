@@ -518,7 +518,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	barcode(doc, cdt, cdn) {
 		let row = locals[cdt][cdn];
-		if (row.barcode) {
+		if (row.barcode && !frappe.flags.trigger_from_barcode_scanner) {
 			erpnext.stock.utils.set_item_details_using_barcode(this.frm, row, (r) => {
 				frappe.model.set_value(cdt, cdn, {
 					item_code: r.message.item_code,
@@ -945,11 +945,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				// Replace all occurences of comma with line feed
 				item.serial_no = item.serial_no.replace(/,/g, "\n");
 				item.conversion_factor = item.conversion_factor || 1;
-				refresh_field("serial_no", item.name, item.parentfield);
 				if (!doc.is_return) {
 					setTimeout(() => {
 						me.update_qty(cdt, cdn);
-					}, 3000);
+					}, 300);
 				}
 			}
 		}
@@ -1530,8 +1529,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		} else if (
 			this.frm.doc.price_list_currency === this.frm.doc.currency &&
 			this.frm.doc.plc_conversion_rate &&
-			cint(this.frm.doc.plc_conversion_rate) != 1 &&
-			cint(this.frm.doc.plc_conversion_rate) != cint(this.frm.doc.conversion_rate)
+			flt(this.frm.doc.plc_conversion_rate) != 1 &&
+			flt(this.frm.doc.plc_conversion_rate) != flt(this.frm.doc.conversion_rate)
 		) {
 			this.frm.set_value("conversion_rate", this.frm.doc.plc_conversion_rate);
 		}

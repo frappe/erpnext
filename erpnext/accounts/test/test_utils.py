@@ -1,5 +1,3 @@
-import unittest
-
 import frappe
 from frappe.test_runner import make_test_objects
 from frappe.tests import IntegrationTestCase

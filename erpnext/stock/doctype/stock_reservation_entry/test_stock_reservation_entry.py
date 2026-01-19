@@ -5,7 +5,7 @@ from random import randint
 
 import frappe
 from frappe.tests import IntegrationTestCase
-from frappe.utils import cint, today
+from frappe.utils import today
 
 from erpnext.selling.doctype.sales_order.sales_order import create_pick_list, make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order

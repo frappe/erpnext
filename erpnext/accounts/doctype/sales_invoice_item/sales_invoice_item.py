@@ -5,10 +5,8 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils.data import cint
 
 from erpnext.assets.doctype.asset.depreciation import get_disposal_account_and_cost_center
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
 class SalesInvoiceItem(Document):

@@ -457,3 +457,4 @@ erpnext.patches.v16_0.migrate_tax_withholding_data
 erpnext.patches.v16_0.update_corrected_cancelled_status
 erpnext.patches.v16_0.fix_barcode_typo
 erpnext.patches.v16_0.set_post_change_gl_entries_on_pos_settings
+execute:frappe.delete_doc_if_exists("Workspace Sidebar", "Opening & Closing")

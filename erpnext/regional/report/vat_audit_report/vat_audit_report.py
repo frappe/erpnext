@@ -2,8 +2,6 @@
 # For license information, please see license.txt
 
 
-import json
-
 import frappe
 from frappe import _
 from frappe.utils import formatdate, get_link_to_form

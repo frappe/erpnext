@@ -12,7 +12,6 @@ from frappe.query_builder import Tuple
 from frappe.query_builder.functions import Count
 from frappe.utils import cint, comma_or, flt, getdate, nowdate
 from frappe.utils.data import comma_and, fmt_money, get_link_to_form
-from pypika import Case
 from pypika.functions import Coalesce, Sum
 
 import erpnext

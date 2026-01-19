@@ -50,13 +50,13 @@ pull_request_rules:
           - version-15-hotfix
         assignees:
           - "{{ author }}"
-  - name: backport to version-16-beta
+  - name: backport to version-16-hotfix
     conditions:
-      - label="backport version-16-beta"
+      - label="backport version-16-hotfix"
     actions:
       backport:
         branches:
-          - version-16-beta
+          - version-16-hotfix
         assignees:
           - "{{ author }}"
   - name: Automatic merge on CI success and review

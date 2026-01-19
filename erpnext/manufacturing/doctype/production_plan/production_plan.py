@@ -9,7 +9,6 @@ from collections import defaultdict
 import frappe
 from frappe import _, msgprint
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import (

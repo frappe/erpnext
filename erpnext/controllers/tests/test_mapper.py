@@ -1,5 +1,4 @@
 import json
-import unittest
 
 import frappe
 import frappe.utils

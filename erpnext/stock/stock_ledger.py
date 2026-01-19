@@ -11,9 +11,7 @@ from frappe.model.meta import get_field_precision
 from frappe.query_builder import Order
 from frappe.query_builder.functions import Sum
 from frappe.utils import (
-	add_to_date,
 	cint,
-	cstr,
 	flt,
 	format_date,
 	get_link_to_form,

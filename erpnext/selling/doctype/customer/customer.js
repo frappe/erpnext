@@ -212,9 +212,11 @@ frappe.ui.form.on("Customer", {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
 
-		var grid = cur_frm.get_field("sales_team").grid;
-		grid.set_column_disp("allocated_amount", false);
-		grid.set_column_disp("incentives", false);
+		let grid = frm.get_field("sales_team")?.grid;
+		if (grid) {
+			grid.set_column_disp("allocated_amount", false);
+			grid.set_column_disp("incentives", false);
+		}
 
 		frm.set_query("customer_group", () => {
 			return {

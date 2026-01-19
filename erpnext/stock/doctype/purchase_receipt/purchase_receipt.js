@@ -266,7 +266,7 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 					);
 				}
 				cur_frm.add_custom_button(
-					__("Retention Stock Entry"),
+					__("Sample Retention Stock Entry"),
 					this.make_retention_stock_entry,
 					__("Create")
 				);

@@ -1,6 +1,3 @@
-import unittest
-
-import frappe
 from frappe.tests import IntegrationTestCase
 
 from erpnext.crm.report.opportunity_summary_by_sales_stage.opportunity_summary_by_sales_stage import (

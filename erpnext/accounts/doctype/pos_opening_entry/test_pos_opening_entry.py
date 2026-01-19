@@ -1,6 +1,5 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-import unittest
 
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user

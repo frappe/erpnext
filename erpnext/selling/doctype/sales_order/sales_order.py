@@ -1989,7 +1989,7 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 				if not for_raw_material_request:
 					total_work_order_qty = flt(
 						qb.from_(wo)
-						.select(Sum(wo.qty))
+						.select(Sum(wo.qty - wo.process_loss_qty))
 						.where(
 							(wo.production_item == i.item_code)
 							& (wo.sales_order == so.name)

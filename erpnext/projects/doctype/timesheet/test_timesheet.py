@@ -1,12 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import datetime
-import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_to_date, now_datetime, nowdate
 
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError, make_sales_invoice
@@ -272,6 +272,60 @@ class TestTimesheet(ERPNextTestSuite):
 		ts.calculate_percentage_billed()
 		self.assertEqual(ts.per_billed, 100)
 
+	def test_partial_billing_and_return(self):
+		"""
+		Test Timesheet status transitions during partial billing, full billing,
+		sales return, and return cancellation.
+
+		Scenario:
+		1. Create a Timesheet with two billable time logs.
+		2. Create a Sales Invoice billing only one time log → Timesheet becomes Partially Billed.
+		3. Create another Sales Invoice billing the remaining time log → Timesheet becomes Billed.
+		4. Create a Sales Return against the second invoice → Timesheet reverts to Partially Billed.
+		5. Cancel the Sales Return → Timesheet returns to Billed status.
+
+		This test ensures Timesheet status is recalculated correctly
+		across billing and return lifecycle events.
+		"""
+		emp = make_employee("test_employee_6@salary.com")
+
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1, do_not_submit=True)
+		timesheet_detail = timesheet.append("time_logs", {})
+		timesheet_detail.is_billable = 1
+		timesheet_detail.activity_type = "_Test Activity Type"
+		timesheet_detail.from_time = timesheet.time_logs[0].to_time + datetime.timedelta(minutes=1)
+		timesheet_detail.hours = 2
+		timesheet_detail.to_time = timesheet_detail.from_time + datetime.timedelta(
+			hours=timesheet_detail.hours
+		)
+		timesheet.save().submit()
+
+		sales_invoice = make_sales_invoice(timesheet.name, "_Test Item", "_Test Customer", currency="INR")
+		sales_invoice.due_date = nowdate()
+		sales_invoice.timesheets.pop()
+		sales_invoice.submit()
+
+		timesheet_status = frappe.get_value("Timesheet", timesheet.name, "status")
+		self.assertEqual(timesheet_status, "Partially Billed")
+
+		sales_invoice2 = make_sales_invoice(timesheet.name, "_Test Item", "_Test Customer", currency="INR")
+		sales_invoice2.due_date = nowdate()
+		sales_invoice2.submit()
+
+		timesheet_status = frappe.get_value("Timesheet", timesheet.name, "status")
+		self.assertEqual(timesheet_status, "Billed")
+
+		sales_return = make_sales_return(sales_invoice2.name).submit()
+		timesheet_status = frappe.get_value("Timesheet", timesheet.name, "status")
+		self.assertEqual(timesheet_status, "Partially Billed")
+
+		sales_return.load_from_db()
+		sales_return.cancel()
+
+		timesheet.load_from_db()
+		self.assertEqual(timesheet.time_logs[1].sales_invoice, sales_invoice2.name)
+		self.assertEqual(timesheet.status, "Billed")
+
 
 def make_timesheet(
 	employee,
@@ -283,6 +337,7 @@ def make_timesheet(
 	company=None,
 	currency=None,
 	exchange_rate=None,
+	do_not_submit=False,
 ):
 	update_activity_type(activity_type)
 	timesheet = frappe.new_doc("Timesheet")
@@ -311,7 +366,8 @@ def make_timesheet(
 		else:
 			timesheet.save(ignore_permissions=True)
 
-	timesheet.submit()
+	if not do_not_submit:
+		timesheet.submit()
 
 	return timesheet
 

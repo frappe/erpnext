@@ -415,7 +415,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 					"cost_center": "Main - _TC",
 					"tax_amount": 500,
 					"description": "Test",
-					"add_deduct_tax": "Add",
 				},
 			)
 			pi.save()
@@ -506,7 +505,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 					"cost_center": "Main - _TC",
 					"tax_amount": 200,
 					"description": "Test Gross Tax",
-					"add_deduct_tax": "Add",
 				},
 			)
 			si.save()
@@ -541,10 +539,10 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 				"cost_center": "Main - _TC",
 				"tax_amount": 400,
 				"description": "Test Gross Tax",
-				"add_deduct_tax": "Add",
 			},
 		)
 		si.save()
+		si.reload()
 		si.submit()
 		invoices.append(si)
 		# For amount before threshold (first 8000 + VAT): TCS entry with amount zero
@@ -594,7 +592,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 				"cost_center": "Main - _TC",
 				"tax_amount": 500,
 				"description": "VAT added to test TDS calculation on gross amount",
-				"add_deduct_tax": "Add",
 			},
 		)
 		si.save()
@@ -1024,7 +1021,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 				"cost_center": "Main - _TC",
 				"tax_amount": 1000,
 				"description": "VAT added to test TDS calculation on gross amount",
-				"add_deduct_tax": "Add",
 			},
 		)
 		pi.save()
@@ -1162,7 +1158,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 				"cost_center": "Main - _TC",
 				"tax_amount": 8000,
 				"description": "Test",
-				"add_deduct_tax": "Add",
 			},
 		)
 

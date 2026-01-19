@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-21 09:37+0000\n"
-"PO-Revision-Date: 2026-01-07 05:35\n"
+"PO-Revision-Date: 2026-01-17 08:11\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Hungarian\n"
 "MIME-Version: 1.0\n"
@@ -1070,7 +1070,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Abampere"
-msgstr ""
+msgstr "Abampere"
 
 #. Label of the abbr (Data) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -1170,7 +1170,7 @@ msgstr ""
 #. Description of the 'Common Code' (Data) field in DocType 'UOM'
 #: erpnext/setup/doctype/uom/uom.json
 msgid "According to CEFACT/ICG/2010/IC013 or CEFACT/ICG/2010/IC010"
-msgstr ""
+msgstr "A CEFACT/ICG/2010/IC013 vagy a CEFACT/ICG/2010/IC010 szerint"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:939
 msgid "According to the BOM {0}, the Item '{1}' is missing in the stock entry."
@@ -2099,12 +2099,12 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Acre"
-msgstr ""
+msgstr "Hold"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Acre (US)"
-msgstr ""
+msgstr "Hold (USA)"
 
 #. Label of the action_if_quality_inspection_is_not_submitted (Select) field in
 #. DocType 'Stock Settings'
@@ -4076,7 +4076,7 @@ msgstr ""
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow UOM with Conversion Rate Defined in Item"
-msgstr ""
+msgstr "Engedélyezi a tételben meghatározott átváltási árfolyammal rendelkező mértékegységet"
 
 #. Label of the allow_discount_change (Check) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
@@ -4098,7 +4098,7 @@ msgstr ""
 #. Settings'
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.json
 msgid "Allow Variant UOM to be different from Template UOM"
-msgstr ""
+msgstr "Engedélyezi a variáns mértékegysége eltérjen a sablon mértékegységétől"
 
 #. Label of the allow_zero_rate (Check) field in DocType 'Repost Item
 #. Valuation'
@@ -4152,13 +4152,13 @@ msgstr ""
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow to Edit Stock UOM Qty for Purchase Documents"
-msgstr ""
+msgstr "Lehetővé teszi a mennyiségi egység ME szerkesztését a raktárkezelésben a beszerzési dokumentumok esetében"
 
 #. Label of the allow_to_edit_stock_uom_qty_for_sales (Check) field in DocType
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow to Edit Stock UOM Qty for Sales Documents"
-msgstr ""
+msgstr "Lehetővé teszi a mennyiségi egység ME szerkesztését a raktárkezelésben az értékesítési dokumentumok esetében"
 
 #. Label of the allow_to_make_quality_inspection_after_purchase_or_delivery
 #. (Check) field in DocType 'Stock Settings'
@@ -4630,22 +4630,22 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ampere"
-msgstr ""
+msgstr "Amper"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Hour"
-msgstr ""
+msgstr "Amperóra"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Minute"
-msgstr ""
+msgstr "Amper-perc"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Second"
-msgstr ""
+msgstr "Amper-másodperc"
 
 #: erpnext/controllers/trends.py:269 erpnext/controllers/trends.py:281
 #: erpnext/controllers/trends.py:290
@@ -5095,7 +5095,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Are"
-msgstr ""
+msgstr "Ár"
 
 #: erpnext/public/js/utils/demo.js:20
 msgid "Are you sure you want to clear all demo data?"
@@ -5122,12 +5122,12 @@ msgstr ""
 #: erpnext/assets/doctype/location/location.json
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Area"
-msgstr ""
+msgstr "Terület"
 
 #. Label of the area_uom (Link) field in DocType 'Location'
 #: erpnext/assets/doctype/location/location.json
 msgid "Area UOM"
-msgstr ""
+msgstr "Terület MEE"
 
 #: erpnext/manufacturing/report/production_planning_report/production_planning_report.py:435
 msgid "Arrival Quantity"
@@ -5136,7 +5136,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Arshin"
-msgstr ""
+msgstr "Arshin"
 
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.js:57
 #: erpnext/stock/report/stock_ageing/stock_ageing.js:16
@@ -5829,7 +5829,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Atmosphere"
-msgstr ""
+msgstr "Atmoszféra"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:244
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:73
@@ -7171,12 +7171,12 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Barleycorn"
-msgstr ""
+msgstr "Árpaszem"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Barrel (Oil)"
-msgstr ""
+msgstr "Hordó (Olaj)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -7491,13 +7491,13 @@ msgstr ""
 #. Label of the stock_uom (Link) field in DocType 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
 msgid "Batch UOM"
-msgstr ""
+msgstr "Kötegelt MEE"
 
 #. Label of the batch_and_serial_no_section (Section Break) field in DocType
 #. 'Asset Capitalization Stock Item'
 #: erpnext/assets/doctype/asset_capitalization_stock_item/asset_capitalization_stock_item.json
 msgid "Batch and Serial No"
-msgstr ""
+msgstr "Köteg- és sorozatszám"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:880
 msgid "Batch not created for item {} since it does not have a batch series."
@@ -7810,7 +7810,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Biot"
-msgstr ""
+msgstr "Biot"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:9
 msgid "Biotechnology"
@@ -7952,13 +7952,13 @@ msgstr ""
 #. Label of the bold_text (Check) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Bold Text"
-msgstr ""
+msgstr "Félkövér Szöveg"
 
 #. Description of the 'Bold Text' (Check) field in DocType 'Financial Report
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Bold text for emphasis (totals, major headings)"
-msgstr ""
+msgstr "Félkövér szöveg a kiemeléshez (összesítések, főbb címsorok)"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:282
 msgid "Book Advance Payments as Liability option is chosen. Paid From account changed from {0} to {1}."
@@ -8049,7 +8049,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Box"
-msgstr ""
+msgstr "Doboz"
 
 #. Label of the branch (Link) field in DocType 'SMS Center'
 #. Name of a DocType
@@ -8098,11 +8098,11 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:10
 msgid "Broadcasting"
-msgstr ""
+msgstr "Műsorszolgáltatás"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:11
 msgid "Brokerage"
-msgstr ""
+msgstr "Közvetítés"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:165
 msgid "Browse BOM"
@@ -8111,36 +8111,36 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Btu (It)"
-msgstr ""
+msgstr "Btu (It)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Btu (Mean)"
-msgstr ""
+msgstr "Btu (Átlag)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Btu (Th)"
-msgstr ""
+msgstr "Btu (Th)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Btu/Hour"
-msgstr ""
+msgstr "Btu/óra"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Btu/Minutes"
-msgstr ""
+msgstr "Btu/perc"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Btu/Seconds"
-msgstr ""
+msgstr "Btu/másodperc"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:101
 msgid "Bucket Size"
-msgstr ""
+msgstr "Vödör Mérete"
 
 #. Label of the budget_settings (Tab Break) field in DocType 'Accounts
 #. Settings'
@@ -8179,7 +8179,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/budget/budget.py:84
 msgid "Budget Amount can not be {0}."
-msgstr ""
+msgstr "A költségvetés összege nem lehet {0}."
 
 #. Label of the budget_detail (Section Break) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -8191,28 +8191,28 @@ msgstr ""
 #: erpnext/accounts/doctype/budget/budget.json
 #: erpnext/accounts/doctype/budget_distribution/budget_distribution.json
 msgid "Budget Distribution"
-msgstr ""
+msgstr "Költségvetés Eloszlása"
 
 #. Label of the budget_distribution_total (Currency) field in DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "Budget Distribution Total"
-msgstr ""
+msgstr "Költségvetés Eloszlás Összesen"
 
 #. Label of the budget_end_date (Date) field in DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "Budget End Date"
-msgstr ""
+msgstr "Költségvetés Vége"
 
 #: erpnext/accounts/doctype/budget/budget.py:570
 #: erpnext/accounts/doctype/budget/budget.py:572
 #: erpnext/controllers/budget_controller.py:289
 #: erpnext/controllers/budget_controller.py:292
 msgid "Budget Exceeded"
-msgstr ""
+msgstr "Költségvetés Túllépéve"
 
 #: erpnext/accounts/doctype/budget/budget.py:229
 msgid "Budget Limit Exceeded"
-msgstr ""
+msgstr "Költségvetési Korlát Túllépéve"
 
 #: erpnext/accounts/doctype/cost_center/cost_center_tree.js:61
 msgid "Budget List"
@@ -8221,7 +8221,7 @@ msgstr ""
 #. Label of the budget_start_date (Date) field in DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "Budget Start Date"
-msgstr ""
+msgstr "Költségvetés Kezdete"
 
 #. Name of a report
 #. Label of a Link in the Accounting Workspace
@@ -8256,15 +8256,15 @@ msgstr ""
 
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.py:162
 msgid "Build All?"
-msgstr ""
+msgstr "Összes építése?"
 
 #: erpnext/accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:20
 msgid "Build Tree"
-msgstr ""
+msgstr "Építési fa"
 
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.py:155
 msgid "Buildable Qty"
-msgstr ""
+msgstr "Építhető Mennyiség"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:61
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:102
@@ -8273,24 +8273,24 @@ msgstr ""
 
 #: erpnext/utilities/doctype/rename_tool/rename_tool.js:70
 msgid "Bulk Rename Jobs"
-msgstr ""
+msgstr "Tömeges Átnevezési Feladatok"
 
 #. Name of a DocType
 #: erpnext/bulk_transaction/doctype/bulk_transaction_log/bulk_transaction_log.json
 msgid "Bulk Transaction Log"
-msgstr ""
+msgstr "Tömeges Tranzakció Napló"
 
 #. Name of a DocType
 #: erpnext/bulk_transaction/doctype/bulk_transaction_log_detail/bulk_transaction_log_detail.json
 msgid "Bulk Transaction Log Detail"
-msgstr ""
+msgstr "Tömeges Tranzakció Napló Részletek"
 
 #. Label of the packed_items (Table) field in DocType 'Quotation'
 #. Label of the bundle_items_section (Section Break) field in DocType
 #. 'Quotation'
 #: erpnext/selling/doctype/quotation/quotation.json
 msgid "Bundle Items"
-msgstr ""
+msgstr "Kötegelt Tételek"
 
 #: erpnext/stock/report/product_bundle_balance/product_bundle_balance.py:95
 msgid "Bundle Qty"
@@ -8299,20 +8299,20 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Bushel (UK)"
-msgstr ""
+msgstr "Véka (Egyesült Királyság)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Bushel (US Dry Level)"
-msgstr ""
+msgstr "Véka (Amerikai Száraz Szint)"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:6
 msgid "Business Analyst"
-msgstr ""
+msgstr "Üzleti Elemző"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:7
 msgid "Business Development Manager"
-msgstr ""
+msgstr "Üzletfejlesztési Menedzser"
 
 #. Option for the 'Status' (Select) field in DocType 'Call Log'
 #: erpnext/telephony/doctype/call_log/call_log.json
@@ -8355,7 +8355,7 @@ msgstr ""
 #. Label of the sales_settings (Section Break) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Buying & Selling Settings"
-msgstr ""
+msgstr "Beszerzési és Értékesítési Beállítások"
 
 #: erpnext/accounts/report/gross_profit/gross_profit.py:357
 msgid "Buying Amount"
@@ -8381,7 +8381,7 @@ msgstr ""
 #. Label of the buying_and_selling_tab (Tab Break) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Buying and Selling"
-msgstr ""
+msgstr "Beszerzés és Értékesítés"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:219
 msgid "Buying must be checked, if Applicable For is selected as {0}"
@@ -8399,7 +8399,7 @@ msgstr ""
 
 #: erpnext/selling/report/customer_credit_balance/customer_credit_balance.py:68
 msgid "Bypass credit check at Sales Order"
-msgstr ""
+msgstr "Hitelkeret ellenőrzés kihagyása a Vevő Rendelésnél"
 
 #. Label of the cc_to (Table MultiSelect) field in DocType 'Process Statement
 #. Of Accounts'
@@ -8410,7 +8410,7 @@ msgstr ""
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 msgid "CODE-39"
-msgstr ""
+msgstr "CODE-39"
 
 #. Name of a report
 #: erpnext/stock/report/cogs_by_item_group/cogs_by_item_group.json
@@ -8425,12 +8425,12 @@ msgstr ""
 #. Label of a Card Break in the Home Workspace
 #: erpnext/crm/workspace/crm/crm.json erpnext/setup/workspace/home/home.json
 msgid "CRM"
-msgstr ""
+msgstr "CRM"
 
 #. Name of a DocType
 #: erpnext/crm/doctype/crm_note/crm_note.json
 msgid "CRM Note"
-msgstr ""
+msgstr "CRM Jegyzet"
 
 #. Name of a DocType
 #. Label of a Link in the CRM Workspace
@@ -8447,22 +8447,22 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Caballeria"
-msgstr ""
+msgstr "Caballeria"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Cable Length"
-msgstr ""
+msgstr "Vezetékhossz"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Cable Length (UK)"
-msgstr ""
+msgstr "Vezetékhossz (UK)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Cable Length (US)"
-msgstr ""
+msgstr "Vezetékhossz (US)"
 
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:62
 #: erpnext/accounts/report/accounts_payable_summary/accounts_payable_summary.js:28
@@ -8540,7 +8540,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Calibre"
-msgstr ""
+msgstr "Kaliber"
 
 #: erpnext/telephony/doctype/call_log/call_log.js:8
 msgid "Call Again"
@@ -8624,27 +8624,27 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Calorie (Food)"
-msgstr ""
+msgstr "Kalória (élelmiszer)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Calorie (It)"
-msgstr ""
+msgstr "Kalória (nemzetközi)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Calorie (Mean)"
-msgstr ""
+msgstr "Kalória (átlag)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Calorie (Th)"
-msgstr ""
+msgstr "Kalória (termokémiai)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Calorie/Seconds"
-msgstr ""
+msgstr "Kalória/másodperc"
 
 #. Name of a report
 #. Label of a Link in the CRM Workspace
@@ -8905,11 +8905,11 @@ msgstr ""
 
 #: erpnext/accounts/general_ledger.py:148
 msgid "Cannot create accounting entries against disabled accounts: {0}"
-msgstr ""
+msgstr "Nem lehet könyvelési tételeket létrehozni letiltott számlákhoz: {0}"
 
 #: erpnext/controllers/sales_and_purchase_return.py:375
 msgid "Cannot create return for consolidated invoice {0}."
-msgstr ""
+msgstr "Nem lehet visszautalást létrehozni az összevont számlához {0}."
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1120
 msgid "Cannot deactivate or cancel BOM as it is linked with other BOMs"
@@ -8926,7 +8926,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1808
 msgid "Cannot delete Exchange Gain/Loss row"
-msgstr ""
+msgstr "Nem lehet törölni az árfolyamnyereség/veszteség sort"
 
 #: erpnext/stock/doctype/serial_no/serial_no.py:120
 msgid "Cannot delete Serial No {0}, as it is used in stock transactions"
@@ -8934,7 +8934,7 @@ msgstr ""
 
 #: erpnext/controllers/accounts_controller.py:3768
 msgid "Cannot delete an item which has been ordered"
-msgstr ""
+msgstr "Nem lehet törölni egy megrendelt tételt"
 
 #: erpnext/setup/doctype/company/company.py:552
 msgid "Cannot disable perpetual inventory, as there are existing Stock Ledger Entries for the company {0}. Please cancel the stock transactions first and try again."
@@ -8942,7 +8942,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:677
 msgid "Cannot disassemble more than produced quantity."
-msgstr ""
+msgstr "Nem lehet a gyártott mennyiségnél többet szétszerelni."
 
 #: erpnext/setup/doctype/company/company.py:214
 msgid "Cannot enable Item-wise Inventory Account, as there are existing Stock Ledger Entries for the company {0} with Warehouse-wise Inventory Account. Please cancel the stock transactions first and try again."
@@ -9141,7 +9141,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Carat"
-msgstr ""
+msgstr "Karát"
 
 #. Title of an incoterm
 #: erpnext/setup/doctype/incoterm/incoterms.csv:6
@@ -9156,12 +9156,12 @@ msgstr ""
 #. Label of the carrier (Data) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
 msgid "Carrier"
-msgstr ""
+msgstr "Fuvarozó"
 
 #. Label of the carrier_service (Data) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
 msgid "Carrier Service"
-msgstr ""
+msgstr "Fuvarozói Szolgáltatás"
 
 #. Label of the carry_forward_communication_and_comments (Check) field in
 #. DocType 'CRM Settings'
@@ -9267,12 +9267,12 @@ msgstr ""
 #. Accounts'
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgid "Categorize By"
-msgstr ""
+msgstr "Kategorizálás"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.js:116
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:80
 msgid "Categorize by"
-msgstr ""
+msgstr "Kategorizálás"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.js:129
 msgid "Categorize by Account"
@@ -9309,7 +9309,7 @@ msgstr ""
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Category Details"
-msgstr ""
+msgstr "Kategória Részletek"
 
 #: erpnext/assets/dashboard_fixtures.py:93
 msgid "Category-wise Asset Value"
@@ -9332,12 +9332,12 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Celsius"
-msgstr ""
+msgstr "Celsius"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Cental"
-msgstr ""
+msgstr "Cental"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -9347,17 +9347,17 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Centigram/Litre"
-msgstr ""
+msgstr "Centigramm/liter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Centilitre"
-msgstr ""
+msgstr "Centiliter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Centimeter"
-msgstr ""
+msgstr "Centiméter"
 
 #. Label of the certificate_attachement (Attach) field in DocType 'Asset
 #. Maintenance Log'
@@ -9392,7 +9392,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Chain"
-msgstr ""
+msgstr "Lánc"
 
 #. Label of the change_amount (Currency) field in DocType 'POS Invoice'
 #. Label of the change_amount (Currency) field in DocType 'Sales Invoice'
@@ -9418,7 +9418,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.py:169
 msgid "Change in Stock Value"
-msgstr ""
+msgstr "A készletérték változása"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1002
 msgid "Change the account type to Receivable or select a different account."
@@ -9432,7 +9432,7 @@ msgstr ""
 
 #: erpnext/selling/doctype/customer/customer.py:127
 msgid "Changed customer name to '{}' as '{}' already exists."
-msgstr ""
+msgstr "Az ügyfél neve '{}'-re változott, mivel '{}' már létezik."
 
 #: erpnext/manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:155
 msgid "Changes in {0}"
@@ -9479,7 +9479,7 @@ msgstr ""
 #. Label of the tab_break_dpet (Tab Break) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Chart Of Accounts"
-msgstr ""
+msgstr "Számlatükör"
 
 #. Label of the chart_of_accounts (Select) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -9561,18 +9561,18 @@ msgstr ""
 #. Description of the 'Must be Whole Number' (Check) field in DocType 'UOM'
 #: erpnext/setup/doctype/uom/uom.json
 msgid "Check this to disallow fractions. (for Nos)"
-msgstr ""
+msgstr "Jelölje be a törtek letiltásához. (darabszámok esetén)"
 
 #. Label of the checked_on (Datetime) field in DocType 'Ledger Health'
 #: erpnext/accounts/doctype/ledger_health/ledger_health.json
 msgid "Checked On"
-msgstr ""
+msgstr "Ellenőrizve"
 
 #. Description of the 'Round Off Tax Amount' (Check) field in DocType 'Tax
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Checking this will round off the tax amount to the nearest integer"
-msgstr ""
+msgstr "Ennek bejelölésével az adó összege a legközelebbi egész számra kerekíthető"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:92
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:148
@@ -9585,7 +9585,7 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:12
 msgid "Chemical"
-msgstr ""
+msgstr "Vegyipar"
 
 #. Option for the 'Salary Mode' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -9643,7 +9643,7 @@ msgstr ""
 #. Name of a report
 #: erpnext/accounts/report/cheques_and_deposits_incorrectly_cleared/cheques_and_deposits_incorrectly_cleared.json
 msgid "Cheques and Deposits Incorrectly cleared"
-msgstr ""
+msgstr "Csekkek és befizetések helytelenül elszámolva"
 
 #: erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.js:50
 #: erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:50
@@ -9652,19 +9652,19 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/data/designation.txt:9
 msgid "Chief Executive Officer"
-msgstr ""
+msgstr "Vezérigazgató"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:10
 msgid "Chief Financial Officer"
-msgstr ""
+msgstr "Pénzügyi igazgató"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:11
 msgid "Chief Operating Officer"
-msgstr ""
+msgstr "Ügyvezető igazgató"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:12
 msgid "Chief Technology Officer"
-msgstr ""
+msgstr "Technológiai igazgató"
 
 #. Label of the child_docname (Data) field in DocType 'Pricing Rule Detail'
 #: erpnext/accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
@@ -9718,13 +9718,13 @@ msgstr ""
 
 #: erpnext/public/js/utils/demo.js:11
 msgid "Clear Demo Data"
-msgstr ""
+msgstr "Demo Adatok Törlése"
 
 #. Label of the clear_notifications (Check) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "Clear Notifications"
-msgstr ""
+msgstr "Értesítések Törlése"
 
 #. Label of the clear_table (Button) field in DocType 'Holiday List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
@@ -9762,7 +9762,7 @@ msgstr ""
 
 #: erpnext/public/js/utils/demo.js:24
 msgid "Clearing Demo Data..."
-msgstr ""
+msgstr "Demo Adatok Törlése..."
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:719
 msgid "Click on 'Get Finished Goods for Manufacture' to fetch the items from the above Sales Orders. Items only for which a BOM is present will be fetched."
@@ -9794,7 +9794,7 @@ msgstr ""
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:485
 msgid "Click to add email / phone"
-msgstr ""
+msgstr "Kattintson az e-mail / telefon hozzáadásához"
 
 #. Label of the close_issue_after_days (Int) field in DocType 'Support
 #. Settings'
@@ -9828,7 +9828,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:2377
 msgid "Closed Work Order can not be stopped or Re-opened"
-msgstr ""
+msgstr "A lezárt munkarend nem állítható le vagy nyitható meg újra"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:525
 msgid "Closed order cannot be cancelled. Unclose to cancel."
@@ -9886,11 +9886,11 @@ msgstr ""
 
 #: erpnext/public/js/bank_reconciliation_tool/number_card.js:18
 msgid "Closing Balance as per Bank Statement"
-msgstr ""
+msgstr "Záróegyenleg bankszámlakivonat szerint"
 
 #: erpnext/public/js/bank_reconciliation_tool/number_card.js:24
 msgid "Closing Balance as per ERP"
-msgstr ""
+msgstr "Záróegyenleg az ERP szerint"
 
 #. Label of the closing_date (Date) field in DocType 'Account Closing Balance'
 #. Label of the closing_date (Date) field in DocType 'Task'
@@ -9909,24 +9909,24 @@ msgstr ""
 
 #: erpnext/accounts/report/general_ledger/general_ledger.html:141
 msgid "Closing [Opening + Total] "
-msgstr ""
+msgstr "Záró [Nyitó + Összes] "
 
 #. Name of a DocType
 #. Label of the code_list (Link) field in DocType 'Common Code'
 #: erpnext/edi/doctype/code_list/code_list.json
 #: erpnext/edi/doctype/common_code/common_code.json
 msgid "Code List"
-msgstr ""
+msgstr "Kódlista"
 
 #. Description of the 'Line Reference' (Data) field in DocType 'Financial
 #. Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Code to reference this line in formulas (e.g., REV100, EXP200, ASSET100)"
-msgstr ""
+msgstr "A képletekben erre a sorra való hivatkozás kódja (pl. REV100, EXP200, ASSET100)"
 
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:4
 msgid "Cold Calling"
-msgstr ""
+msgstr "Telemarketing"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.js:281
 msgid "Collect Outstanding Amount"
@@ -9956,7 +9956,7 @@ msgstr ""
 #. Description of the 'Color' (Color) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Color to highlight values (e.g., red for exceptions)"
-msgstr ""
+msgstr "Értékek kiemelésére szolgáló szín (pl. piros a kivételekhez)"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:280
 msgid "Colour"
@@ -9969,11 +9969,11 @@ msgstr ""
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:52
 msgid "Columns are not according to template. Please compare the uploaded file with standard template"
-msgstr ""
+msgstr "Az oszlopok nem a sablon szerint vannak. Kérjük, hasonlítsa össze a feltöltött fájlt a szabványos sablonnal"
 
 #: erpnext/accounts/doctype/payment_terms_template/payment_terms_template.py:39
 msgid "Combined invoice portion must equal 100%"
-msgstr ""
+msgstr "A számla összesített részének meg kell felelnie 100%-nak"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:178
 msgid "Commercial"
@@ -10012,7 +10012,7 @@ msgstr ""
 #: erpnext/selling/report/sales_partner_transaction_summary/sales_partner_transaction_summary.py:78
 #: erpnext/selling/report/sales_person_commission_summary/sales_person_commission_summary.py:82
 msgid "Commission Rate %"
-msgstr ""
+msgstr "Jutalék mértéke %"
 
 #. Label of the commission_rate (Float) field in DocType 'POS Invoice'
 #. Label of the commission_rate (Float) field in DocType 'Sales Invoice'
@@ -10021,7 +10021,7 @@ msgstr ""
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "Commission Rate (%)"
-msgstr ""
+msgstr "Jutalék mértéke (%)"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:104
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:172
@@ -10034,13 +10034,13 @@ msgstr ""
 #: erpnext/edi/doctype/common_code/common_code.json
 #: erpnext/setup/doctype/uom/uom.json
 msgid "Common Code"
-msgstr ""
+msgstr "Közös Kód"
 
 #. Label of the communication_channel (Select) field in DocType 'Communication
 #. Medium'
 #: erpnext/communication/doctype/communication_medium/communication_medium.json
 msgid "Communication Channel"
-msgstr ""
+msgstr "Kommunikációs Csatorna"
 
 #. Name of a DocType
 #: erpnext/communication/doctype/communication_medium/communication_medium.json
@@ -10576,7 +10576,7 @@ msgstr ""
 
 #: erpnext/controllers/accounts_controller.py:4311
 msgid "Company Address is missing. You don't have permission to update it. Please contact your System Manager."
-msgstr ""
+msgstr "A cég címe hiányzik. Nincs jogosultsága a frissítéshez. Kérjük, lépjen kapcsolatba a rendszergazdával."
 
 #. Label of the bank_account (Link) field in DocType 'Payment Entry'
 #. Label of the company_bank_account (Link) field in DocType 'Payment Order'
@@ -10604,7 +10604,7 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "Company Billing Address"
-msgstr ""
+msgstr "Cég Számlázási Címe"
 
 #. Label of the company_contact_person (Link) field in DocType 'POS Invoice'
 #. Label of the company_contact_person (Link) field in DocType 'Sales Invoice'
@@ -10617,7 +10617,7 @@ msgstr ""
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "Company Contact Person"
-msgstr ""
+msgstr "Céges Kapcsolattartó Személy"
 
 #. Label of the company_description (Text Editor) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -10628,7 +10628,7 @@ msgstr ""
 #. 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Company Details"
-msgstr ""
+msgstr "Cégadatok"
 
 #. Option for the 'Preferred Contact Email' (Select) field in DocType
 #. 'Employee'
@@ -10653,12 +10653,12 @@ msgstr ""
 #. Label of the shipping_address (Link) field in DocType 'Subcontracting Order'
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "Company Shipping Address"
-msgstr ""
+msgstr "Cég Szállítási Címe"
 
 #. Label of the company_tax_id (Data) field in DocType 'Sales Invoice'
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Company Tax ID"
-msgstr ""
+msgstr "Céges adószám"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:620
 msgid "Company and Posting Date is mandatory"
@@ -10675,15 +10675,15 @@ msgstr ""
 
 #: erpnext/accounts/report/invalid_ledger_entries/invalid_ledger_entries.py:77
 msgid "Company is mandatory"
-msgstr ""
+msgstr "A cég kötelező"
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:72
 msgid "Company is mandatory for company account"
-msgstr ""
+msgstr "A cég kötelező a céges számla megadásához"
 
 #: erpnext/accounts/doctype/subscription/subscription.py:392
 msgid "Company is mandatory for generating an invoice. Please set a default company in Global Defaults."
-msgstr ""
+msgstr "A cég kötelező a számla kiállításához. Kérjük, állítson be egy alapértelmezett céget a Globális alapértelmezések között."
 
 #: erpnext/setup/doctype/company/company.js:222
 msgid "Company name not same"
@@ -10702,23 +10702,23 @@ msgstr ""
 #. Invoice'
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Company which internal customer represents"
-msgstr ""
+msgstr "Cég, amelyet a belső ügyfél képvisel"
 
 #. Description of the 'Represents Company' (Link) field in DocType 'Delivery
 #. Note'
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "Company which internal customer represents."
-msgstr ""
+msgstr "Cég, amelyet a belső ügyfél képvisel."
 
 #. Description of the 'Represents Company' (Link) field in DocType 'Purchase
 #. Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 msgid "Company which internal supplier represents"
-msgstr ""
+msgstr "Cég, amelyet a belső szállító képvisel"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:62
 msgid "Company {0} added multiple times"
-msgstr ""
+msgstr "Cég {0} többször hozzáadva"
 
 #: erpnext/accounts/doctype/account/account.py:509
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.py:1289
@@ -10727,11 +10727,11 @@ msgstr ""
 
 #: erpnext/accounts/doctype/accounting_dimension/accounting_dimension.py:83
 msgid "Company {0} is added more than once"
-msgstr ""
+msgstr "Cég {0} többször hozzáadva"
 
 #: erpnext/setup/setup_wizard/operations/taxes_setup.py:14
 msgid "Company {} does not exist yet. Taxes setup aborted."
-msgstr ""
+msgstr "A {} vállalat még nem létezik. Az adók beállítása megszakadt."
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:574
 msgid "Company {} does not match with POS Profile Company {}"
@@ -10793,7 +10793,7 @@ msgstr ""
 #. Label of a chart in the Projects Workspace
 #: erpnext/projects/workspace/projects/projects.json
 msgid "Completed Projects"
-msgstr ""
+msgstr "Befejezett Projektek"
 
 #. Label of the completed_qty (Float) field in DocType 'Job Card Operation'
 #. Label of the completed_qty (Float) field in DocType 'Job Card Time Log'
@@ -10819,12 +10819,12 @@ msgstr ""
 #: erpnext/projects/report/project_summary/project_summary.py:136
 #: erpnext/public/js/templates/crm_activities.html:64
 msgid "Completed Tasks"
-msgstr ""
+msgstr "Befejezett Feladatok"
 
 #. Label of the completed_time (Data) field in DocType 'Job Card Operation'
 #: erpnext/manufacturing/doctype/job_card_operation/job_card_operation.json
 msgid "Completed Time"
-msgstr ""
+msgstr "Befejezett Idő"
 
 #. Name of a report
 #: erpnext/manufacturing/report/completed_work_orders/completed_work_orders.json
@@ -10851,7 +10851,7 @@ msgstr ""
 
 #: erpnext/assets/doctype/asset_repair/asset_repair.py:83
 msgid "Completion Date can not be before Failure Date. Please adjust the dates accordingly."
-msgstr ""
+msgstr "A befejezés dátuma nem lehet a meghiúsulás dátuma előtt. Kérjük, ennek megfelelően igazítsa ki a dátumokat."
 
 #. Label of the completion_status (Select) field in DocType 'Maintenance
 #. Schedule Detail'
@@ -10941,17 +10941,17 @@ msgstr ""
 #. Plan'
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 msgid "Consider Minimum Order Qty"
-msgstr ""
+msgstr "Vegye figyelembe a minimális rendelési mennyiséget"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:993
 msgid "Consider Process Loss"
-msgstr ""
+msgstr "Vegye figyelembe a folyamat veszteségét"
 
 #. Label of the skip_available_sub_assembly_item (Check) field in DocType
 #. 'Production Plan'
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 msgid "Consider Projected Qty in Calculation"
-msgstr ""
+msgstr "Vegye figyelembe a számítás során a tervezett mennyiséget"
 
 #. Label of the ignore_existing_ordered_qty (Check) field in DocType
 #. 'Production Plan'
@@ -11040,7 +11040,7 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:14
 msgid "Consulting"
-msgstr ""
+msgstr "Tanácsadás"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:64
 msgid "Consumable"
@@ -11049,7 +11049,7 @@ msgstr ""
 #: erpnext/patches/v16_0/make_workstation_operating_components.py:48
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:315
 msgid "Consumables"
-msgstr ""
+msgstr "Fogyóeszközök"
 
 #. Option for the 'Status' (Select) field in DocType 'Serial No'
 #: erpnext/stock/doctype/serial_no/serial_no.json
@@ -11146,12 +11146,12 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:15
 msgid "Consumer Products"
-msgstr ""
+msgstr "Fogyasztási Cikkek"
 
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:198
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:101
 msgid "Consumption Rate"
-msgstr ""
+msgstr "Felhasználási Ráta"
 
 #. Label of the contact_desc (HTML) field in DocType 'Sales Partner'
 #: erpnext/setup/doctype/sales_partner/sales_partner.json
@@ -11270,7 +11270,7 @@ msgstr ""
 
 #: erpnext/controllers/accounts_controller.py:585
 msgid "Contact Person does not belong to the {0}"
-msgstr ""
+msgstr "A kapcsolattartó személy nem tartozik ide: {0}"
 
 #: erpnext/accounts/letterhead/company_letterhead.html:101
 #: erpnext/accounts/letterhead/company_letterhead_grey.html:119
@@ -11332,7 +11332,7 @@ msgstr ""
 #. Template'
 #: erpnext/crm/doctype/contract_template/contract_template.json
 msgid "Contract Template Help"
-msgstr ""
+msgstr "Szerződés Sablon Súgó"
 
 #. Label of the contract_terms (Text Editor) field in DocType 'Contract'
 #: erpnext/crm/doctype/contract/contract.json
@@ -11348,12 +11348,12 @@ msgstr ""
 #: erpnext/selling/report/sales_person_commission_summary/sales_person_commission_summary.py:76
 #: erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py:122
 msgid "Contribution %"
-msgstr ""
+msgstr "Hozzájárulás %"
 
 #. Label of the allocated_percentage (Float) field in DocType 'Sales Team'
 #: erpnext/selling/doctype/sales_team/sales_team.json
 msgid "Contribution (%)"
-msgstr ""
+msgstr "Hozzájárulás (%)"
 
 #: erpnext/selling/report/sales_person_commission_summary/sales_person_commission_summary.py:88
 #: erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py:130
@@ -11362,7 +11362,7 @@ msgstr ""
 
 #: erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py:124
 msgid "Contribution Qty"
-msgstr ""
+msgstr "Hozzájárulás Mennyiség"
 
 #. Label of the allocated_amount (Currency) field in DocType 'Sales Team'
 #: erpnext/selling/doctype/sales_team/sales_team.json
@@ -11435,7 +11435,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgid "Conversion Factor"
-msgstr ""
+msgstr "Átváltási Tényező"
 
 #. Label of the conversion_rate (Float) field in DocType 'Dunning'
 #. Label of the conversion_rate (Float) field in DocType 'BOM'
@@ -11531,20 +11531,20 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:495
 msgid "Corrective Job Card"
-msgstr ""
+msgstr "Korrekciós Munka Kártya"
 
 #. Label of the corrective_operation_section (Tab Break) field in DocType 'Job
 #. Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.js:502
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Corrective Operation"
-msgstr ""
+msgstr "Korrekciós Művelet"
 
 #. Label of the corrective_operation_cost (Currency) field in DocType 'Work
 #. Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Corrective Operation Cost"
-msgstr ""
+msgstr "Korrekciós Művelet Költsége"
 
 #. Label of the corrective_preventive (Select) field in DocType 'Quality
 #. Action'
@@ -11554,7 +11554,7 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:16
 msgid "Cosmetics"
-msgstr ""
+msgstr "Szépségápolás"
 
 #. Label of the cost (Currency) field in DocType 'Subscription Plan'
 #: erpnext/accounts/doctype/subscription_plan/subscription_plan.json
@@ -11806,17 +11806,17 @@ msgstr ""
 #. Label of the currency_detail (Section Break) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Cost Configuration"
-msgstr ""
+msgstr "Költség Konfiguráció"
 
 #. Label of the cost_per_unit (Float) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "Cost Per Unit"
-msgstr ""
+msgstr "Egységenkénti Költség"
 
 #. Title of an incoterm
 #: erpnext/setup/doctype/incoterm/incoterms.csv:8
 msgid "Cost and Freight"
-msgstr ""
+msgstr "Költség és Fuvardíj"
 
 #: erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py:41
 msgid "Cost of Delivered Items"
@@ -11947,7 +11947,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Coulomb"
-msgstr ""
+msgstr "Coulomb"
 
 #: erpnext/regional/doctype/import_supplier_invoice/import_supplier_invoice.py:419
 msgid "Country Code in File does not match with country code set up in the system"
@@ -12329,7 +12329,7 @@ msgstr ""
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:154
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:46
 msgid "Creation"
-msgstr ""
+msgstr "Létrehozás"
 
 #: erpnext/utilities/bulk_transaction.py:210
 msgid "Creation of <b><a href='/app/{0}'>{1}(s)</a></b> successful"
@@ -12617,37 +12617,37 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Cubic Centimeter"
-msgstr ""
+msgstr "Köbcentiméter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Cubic Decimeter"
-msgstr ""
+msgstr "Köbdeciméter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Cubic Foot"
-msgstr ""
+msgstr "Köbláb"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Cubic Inch"
-msgstr ""
+msgstr "Köbhüvelyk"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Cubic Meter"
-msgstr ""
+msgstr "Köbméter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Cubic Millimeter"
-msgstr ""
+msgstr "Köbmilliméter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Cubic Yard"
-msgstr ""
+msgstr "Köbyard"
 
 #. Label of the cumulative_threshold (Float) field in DocType 'Tax Withholding
 #. Rate'
@@ -12658,7 +12658,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Cup"
-msgstr ""
+msgstr "Csésze"
 
 #. Label of a Link in the Accounting Workspace
 #. Name of a DocType
@@ -13651,7 +13651,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Cycle/Second"
-msgstr ""
+msgstr "Ciklus/másodperc"
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:204
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:243
@@ -14052,17 +14052,17 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Decigram/Litre"
-msgstr ""
+msgstr "Decigramm/liter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Decilitre"
-msgstr ""
+msgstr "Deciliter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Decimeter"
-msgstr ""
+msgstr "Deciméter"
 
 #: erpnext/public/js/utils/sales_common.js:610
 msgid "Declare Lost"
@@ -14406,7 +14406,7 @@ msgstr ""
 #. Label of the purchase_uom (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Default Purchase Unit of Measure"
-msgstr ""
+msgstr "Alapértelmezett beszerzési mértékegység"
 
 #. Label of the default_valid_till (Data) field in DocType 'CRM Settings'
 #: erpnext/crm/doctype/crm_settings/crm_settings.json
@@ -14426,7 +14426,7 @@ msgstr ""
 #. Label of the sales_uom (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Default Sales Unit of Measure"
-msgstr ""
+msgstr "Alapértelmezett értékesítési egység"
 
 #. Label of the default_scrap_warehouse (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -14465,7 +14465,7 @@ msgstr ""
 #. Label of the stock_uom (Link) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Default Stock UOM"
-msgstr ""
+msgstr "Alapértelmezett készlet mértékegység"
 
 #. Label of the valuation_method (Select) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -14497,7 +14497,7 @@ msgstr ""
 #. Label of the stock_uom (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Default Unit of Measure"
-msgstr ""
+msgstr "Alapértelmezett mértékegység"
 
 #: erpnext/stock/doctype/item/item.py:1270
 msgid "Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You need to either cancel the linked documents or create a new Item."
@@ -14639,7 +14639,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Dekagram/Litre"
-msgstr ""
+msgstr "Dekagramm/liter"
 
 #: erpnext/projects/report/delayed_tasks_summary/delayed_tasks_summary.py:130
 msgid "Delay (In Days)"
@@ -15151,7 +15151,7 @@ msgstr ""
 #: erpnext/accounts/report/cash_flow/cash_flow.py:161
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Depreciation"
-msgstr ""
+msgstr "Értékcsökkentés"
 
 #. Label of the depreciation_amount (Currency) field in DocType 'Depreciation
 #. Schedule'
@@ -15222,13 +15222,13 @@ msgstr ""
 #: erpnext/assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
 #: erpnext/assets/doctype/asset_finance_book/asset_finance_book.json
 msgid "Depreciation Method"
-msgstr ""
+msgstr "Értékcsökkentési módszer"
 
 #. Label of the depreciation_options (Section Break) field in DocType 'Asset
 #. Category'
 #: erpnext/assets/doctype/asset_category/asset_category.json
 msgid "Depreciation Options"
-msgstr ""
+msgstr "Értékcsökkenési lehetőségek"
 
 #. Label of the depreciation_start_date (Date) field in DocType 'Asset Finance
 #. Book'
@@ -15349,7 +15349,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.json
 msgid "Difference Account"
-msgstr ""
+msgstr "Különbség főkönyvi számla"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:689
 msgid "Difference Account in Items Table"
@@ -15975,7 +15975,7 @@ msgstr ""
 #. Label of the uom (Link) field in DocType 'Delivery Trip'
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.json
 msgid "Distance UOM"
-msgstr ""
+msgstr "Távolság ME"
 
 #. Label of the acc_pay_dist_from_left_edge (Float) field in DocType 'Cheque
 #. Print Template'
@@ -16248,7 +16248,7 @@ msgstr ""
 #: erpnext/assets/doctype/asset_repair/asset_repair.json
 #: erpnext/manufacturing/doctype/downtime_entry/downtime_entry.json
 msgid "Downtime"
-msgstr ""
+msgstr "Állásidő"
 
 #: erpnext/manufacturing/report/downtime_analysis/downtime_analysis.py:93
 msgid "Downtime (In Hours)"
@@ -16281,7 +16281,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Dram"
-msgstr ""
+msgstr "Korty"
 
 #. Name of a DocType
 #. Label of the driver (Link) field in DocType 'Delivery Note'
@@ -16509,7 +16509,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Dyne"
-msgstr ""
+msgstr "Din"
 
 #: erpnext/regional/italy/utils.py:221 erpnext/regional/italy/utils.py:241
 #: erpnext/regional/italy/utils.py:251 erpnext/regional/italy/utils.py:259
@@ -16690,7 +16690,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ells (UK)"
-msgstr ""
+msgstr "Rőf (Egyesült Királyság)"
 
 #: erpnext/www/book_appointment/index.html:52
 msgid "Email Address (required)"
@@ -16962,7 +16962,7 @@ msgstr "Üres"
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ems(Pica)"
-msgstr ""
+msgstr "Ems(Pica)"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1720
 msgid "Enable Allow Partial Reservation in the Stock Settings to reserve partial stock."
@@ -17386,7 +17386,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Erg"
-msgstr ""
+msgstr "Erg"
 
 #. Label of the description (Long Text) field in DocType 'Asset Repair'
 #. Label of the error_description (Long Text) field in DocType 'Bulk
@@ -18061,7 +18061,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Fahrenheit"
-msgstr ""
+msgstr "Fahrenheit"
 
 #: erpnext/bulk_transaction/doctype/bulk_transaction_log/bulk_transaction_log.js:17
 msgid "Failed Entries"
@@ -18131,12 +18131,12 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Faraday"
-msgstr ""
+msgstr "Faraday"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Fathom"
-msgstr ""
+msgstr "Öl"
 
 #. Label of the document_name (Dynamic Link) field in DocType 'Quality
 #. Feedback'
@@ -18533,7 +18533,7 @@ msgstr ""
 #. Label of the finished_good_uom (Link) field in DocType 'Subcontracting BOM'
 #: erpnext/subcontracting/doctype/subcontracting_bom/subcontracting_bom.json
 msgid "Finished Good UOM"
-msgstr ""
+msgstr "Kész árú MEE"
 
 #: erpnext/subcontracting/doctype/subcontracting_bom/subcontracting_bom.py:51
 msgid "Finished Good {0} does not have a default BOM."
@@ -18807,12 +18807,12 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Fluid Ounce (UK)"
-msgstr ""
+msgstr "Folyékony uncia (Egyesült Királyság)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Fluid Ounce (US)"
-msgstr ""
+msgstr "Folyékony uncia (USA)"
 
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:334
 msgid "Focus on Item Group filter"
@@ -18847,22 +18847,22 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Foot"
-msgstr ""
+msgstr "Láb"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Foot Of Water"
-msgstr ""
+msgstr "Lábnyi víz"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Foot/Minute"
-msgstr ""
+msgstr "Láb/perc"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Foot/Second"
-msgstr ""
+msgstr "Láb/másodperc"
 
 #: erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html:23
 msgid "For"
@@ -19529,7 +19529,7 @@ msgstr ""
 #. Label of the uom (Link) field in DocType 'Vehicle'
 #: erpnext/setup/doctype/vehicle/vehicle.json
 msgid "Fuel UOM"
-msgstr ""
+msgstr "Üzemanyag ME"
 
 #. Option for the 'Fulfilment Status' (Select) field in DocType 'Contract'
 #. Label of the fulfilled (Check) field in DocType 'Contract Fulfilment
@@ -19621,7 +19621,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Furlong"
-msgstr ""
+msgstr "Távolságmérték"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:52
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:87
@@ -19742,22 +19742,22 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Gallon (UK)"
-msgstr ""
+msgstr "Gallon (Egyesült Királyság)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Gallon Dry (US)"
-msgstr ""
+msgstr "Gallon száraz (USA)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Gallon Liquid (US)"
-msgstr ""
+msgstr "Gallon folyadék (USA)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Gamma"
-msgstr ""
+msgstr "Gamma"
 
 #: erpnext/projects/doctype/project/project.js:102
 msgid "Gantt Chart"
@@ -19770,7 +19770,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Gauss"
-msgstr ""
+msgstr "Gauss"
 
 #. Label of the general_ledger_remarks_length (Int) field in DocType 'Accounts
 #. Settings'
@@ -20131,7 +20131,7 @@ msgstr ""
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 #: erpnext/accounts/doctype/promotional_scheme_product_discount/promotional_scheme_product_discount.json
 msgid "Give free item for every N quantity"
-msgstr ""
+msgstr "Ingyenes tétel minden N mennyiség után"
 
 #. Name of a DocType
 #. Label of a shortcut in the Settings Workspace
@@ -20189,52 +20189,52 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Grain"
-msgstr ""
+msgstr "Gabona"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Grain/Cubic Foot"
-msgstr ""
+msgstr "Gabona/köbláb"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Grain/Gallon (UK)"
-msgstr ""
+msgstr "Gabona/gallon (Egyesült Királyság)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Grain/Gallon (US)"
-msgstr ""
+msgstr "Gabona/gallon (USA)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Gram"
-msgstr ""
+msgstr "Gramm"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Gram-Force"
-msgstr ""
+msgstr "Gramm-erő"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Gram/Cubic Centimeter"
-msgstr ""
+msgstr "Gramm/köbcentiméter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Gram/Cubic Meter"
-msgstr ""
+msgstr "Gramm/köbméter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Gram/Cubic Millimeter"
-msgstr ""
+msgstr "Gramm/köbmilliméter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Gram/Litre"
-msgstr ""
+msgstr "Gramm/liter"
 
 #. Label of the grand_total (Currency) field in DocType 'Dunning'
 #. Label of the total_amount (Float) field in DocType 'Payment Entry Reference'
@@ -20419,7 +20419,7 @@ msgstr ""
 #. Label of the gross_weight_uom (Link) field in DocType 'Packing Slip'
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
 msgid "Gross Weight UOM"
-msgstr ""
+msgstr "Bruttó Tömeg ME"
 
 #. Name of a report
 #: erpnext/accounts/report/gross_and_net_profit_report/gross_and_net_profit_report.json
@@ -20551,7 +20551,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Hand"
-msgstr ""
+msgstr "Kéz"
 
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:150
 msgid "Handle Employee Advances"
@@ -20700,22 +20700,22 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Hectare"
-msgstr ""
+msgstr "Hektár"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Hectogram/Litre"
-msgstr ""
+msgstr "Hektogramm/liter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Hectometer"
-msgstr ""
+msgstr "Hektométer"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Hectopascal"
-msgstr ""
+msgstr "Hektopascal"
 
 #. Label of the height (Int) field in DocType 'Shipment Parcel'
 #. Label of the height (Int) field in DocType 'Shipment Parcel Template'
@@ -20774,7 +20774,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Hertz"
-msgstr ""
+msgstr "Hertz"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:518
 msgid "Hi,"
@@ -20906,17 +20906,17 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Horsepower"
-msgstr ""
+msgstr "Lóerő"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Horsepower-Hours"
-msgstr ""
+msgstr "Lóerő-órák"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Hour"
-msgstr ""
+msgstr "Óra"
 
 #. Label of the hour_rate (Currency) field in DocType 'BOM Operation'
 #. Label of the hour_rate (Currency) field in DocType 'Job Card'
@@ -21876,7 +21876,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Inch"
-msgstr ""
+msgstr "Hüvelyk"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -25507,12 +25507,12 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Joule"
-msgstr ""
+msgstr "Joule"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Joule/Meter"
-msgstr ""
+msgstr "Joule/méter"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js:30
 msgid "Journal Entries"
@@ -25611,7 +25611,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Kelvin"
-msgstr ""
+msgstr "Kelvin"
 
 #. Label of a Card Break in the Buying Workspace
 #. Label of a Card Break in the Selling Workspace
@@ -25625,67 +25625,67 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Kg"
-msgstr ""
+msgstr "Kg"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Kiloampere"
-msgstr ""
+msgstr "Kiloamper"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Kilocalorie"
-msgstr ""
+msgstr "Kilokalória"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Kilocoulomb"
-msgstr ""
+msgstr "Kilocoulomb"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Kilogram-Force"
-msgstr ""
+msgstr "Kilogramm-erő"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Kilogram/Cubic Centimeter"
-msgstr ""
+msgstr "Kilogramm/köbcentiméter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Kilogram/Cubic Meter"
-msgstr ""
+msgstr "Kilogramm/köbméter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Kilogram/Litre"
-msgstr ""
+msgstr "Kilogramm/liter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Kilohertz"
-msgstr ""
+msgstr "Kilohertz"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Kilojoule"
-msgstr ""
+msgstr "Kilojoule"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Kilometer"
-msgstr ""
+msgstr "Kilométer"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Kilometer/Hour"
-msgstr ""
+msgstr "Kilométer/óra"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Kilopascal"
-msgstr ""
+msgstr "Kilopascal"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -25700,12 +25700,12 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Kilowatt"
-msgstr ""
+msgstr "Kilowatt"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Kilowatt-Hour"
-msgstr ""
+msgstr "Kilowattóra"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:879
 msgid "Kindly cancel the Manufacturing Entries first against the work order {0}."
@@ -25723,7 +25723,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Knot"
-msgstr ""
+msgstr "Csomó"
 
 #. Option for the 'Default Stock Valuation Method' (Select) field in DocType
 #. 'Company'
@@ -26345,7 +26345,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Litre"
-msgstr ""
+msgstr "Liter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -27940,7 +27940,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Megacoulomb"
-msgstr ""
+msgstr "Megacoulomb"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -27950,17 +27950,17 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Megahertz"
-msgstr ""
+msgstr "Megahertz"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Megajoule"
-msgstr ""
+msgstr "Megajoule"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Megawatt"
-msgstr ""
+msgstr "Megawatt"
 
 #: erpnext/stock/stock_ledger.py:2046
 msgid "Mention Valuation Rate in the Item master."
@@ -28056,42 +28056,42 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Meter"
-msgstr ""
+msgstr "Méter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Meter Of Water"
-msgstr ""
+msgstr "Vízmérő"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Meter/Second"
-msgstr ""
+msgstr "Méter/másodperc"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Microbar"
-msgstr ""
+msgstr "Mikrobar"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Microgram"
-msgstr ""
+msgstr "Mikrogramm"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Microgram/Litre"
-msgstr ""
+msgstr "Mikrogramm/liter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Micrometer"
-msgstr ""
+msgstr "Mikrométer"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Microsecond"
-msgstr ""
+msgstr "Mikroszekundum"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:310
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:422
@@ -28101,97 +28101,97 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Mile"
-msgstr ""
+msgstr "Mérföld"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Mile (Nautical)"
-msgstr ""
+msgstr "Mérföld (tengerészeti)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Mile/Hour"
-msgstr ""
+msgstr "Mérföld/óra"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Mile/Minute"
-msgstr ""
+msgstr "Mérföld/perc"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Mile/Second"
-msgstr ""
+msgstr "Mérföld/másodperc"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Milibar"
-msgstr ""
+msgstr "Milibar"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Milliampere"
-msgstr ""
+msgstr "Milliamper"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Millicoulomb"
-msgstr ""
+msgstr "Millicoulomb"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Milligram"
-msgstr ""
+msgstr "Milligramm"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Milligram/Cubic Centimeter"
-msgstr ""
+msgstr "Milligramm/köbcentiméter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Milligram/Cubic Meter"
-msgstr ""
+msgstr "Milligramm/köbméter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Milligram/Cubic Millimeter"
-msgstr ""
+msgstr "Milligramm/Köbmilliméter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Milligram/Litre"
-msgstr ""
+msgstr "Milligramm/liter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Millihertz"
-msgstr ""
+msgstr "Millihertz"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Millilitre"
-msgstr ""
+msgstr "Milliliter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Millimeter"
-msgstr ""
+msgstr "Milliméter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Millimeter Of Mercury"
-msgstr ""
+msgstr "Higanymilliméter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Millimeter Of Water"
-msgstr ""
+msgstr "Milliméter víz"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Millisecond"
-msgstr ""
+msgstr "Ezredmásodperc"
 
 #. Label of the min_amount (Currency) field in DocType 'Promotional Scheme
 #. Price Discount'
@@ -28753,27 +28753,27 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Nanocoulomb"
-msgstr ""
+msgstr "Nanocoulomb"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Nanogram/Litre"
-msgstr ""
+msgstr "Nanogramm/liter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Nanohertz"
-msgstr ""
+msgstr "Nanohertz"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Nanometer"
-msgstr ""
+msgstr "Nanométer"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Nanosecond"
-msgstr ""
+msgstr "Nanoszekundum"
 
 #. Option for the 'Fuel Type' (Select) field in DocType 'Vehicle'
 #: erpnext/setup/doctype/vehicle/vehicle.json
@@ -29297,7 +29297,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Newton"
-msgstr ""
+msgstr "Newton"
 
 #. Label of the next_depreciation_date (Date) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -31174,32 +31174,32 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ounce"
-msgstr ""
+msgstr "Uncia"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ounce-Force"
-msgstr ""
+msgstr "Uncia-erő"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Cubic Foot"
-msgstr ""
+msgstr "Uncia/köbláb"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Cubic Inch"
-msgstr ""
+msgstr "Uncia/köbhüvelyk"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Gallon (UK)"
-msgstr ""
+msgstr "Uncia/gallon (Egyesült Királyság)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Gallon (US)"
-msgstr ""
+msgstr "Uncia/gallon (USA)"
 
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:119
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:83
@@ -31964,7 +31964,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Pair"
-msgstr ""
+msgstr "Pár"
 
 #. Label of the pallets (Select) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
@@ -33834,22 +33834,22 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Pint (UK)"
-msgstr ""
+msgstr "Pint (Egyesült Királyság)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Pint (US)"
-msgstr ""
+msgstr "Pint (USA)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Pint, Dry (US)"
-msgstr ""
+msgstr "Száraz pint (USA)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Pint, Liquid (US)"
-msgstr ""
+msgstr "Folyékony pint (USA)"
 
 #: erpnext/crm/report/sales_pipeline_analytics/sales_pipeline_analytics.js:8
 msgid "Pipeline By"
@@ -37877,7 +37877,7 @@ msgstr ""
 
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.py:133
 msgid "Qty to Build"
-msgstr ""
+msgstr "Építendő mennyiség"
 
 #: erpnext/selling/report/sales_order_analysis/sales_order_analysis.py:269
 msgid "Qty to Deliver"
@@ -37885,7 +37885,7 @@ msgstr ""
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:373
 msgid "Qty to Fetch"
-msgstr ""
+msgstr "Lekérendő mennyiség"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:304
 #: erpnext/manufacturing/doctype/job_card/job_card.py:769
@@ -37904,7 +37904,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 #: erpnext/manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.py:129
 msgid "Qty to Produce"
-msgstr ""
+msgstr "Gyártandó mennyiség"
 
 #: erpnext/buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:171
 #: erpnext/buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:252
@@ -37928,12 +37928,12 @@ msgstr ""
 #. Option for the 'Qualification Status' (Select) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
 msgid "Qualified"
-msgstr ""
+msgstr "Minősített"
 
 #. Label of the qualified_by (Link) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
 msgid "Qualified By"
-msgstr ""
+msgstr "Minősítette:"
 
 #. Label of the qualified_on (Date) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
@@ -38357,11 +38357,11 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:274
 msgid "Quantity is required"
-msgstr ""
+msgstr "Mennyiség megadása kötelező"
 
 #: erpnext/stock/dashboard/item_dashboard.js:285
 msgid "Quantity must be greater than zero, and less or equal to {0}"
-msgstr ""
+msgstr "A mennyiségnek nullánál nagyobbnak és {0}-nál kisebbnek vagy egyenlőnek kell lennie"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1013
 #: erpnext/stock/doctype/pick_list/pick_list.js:204
@@ -38406,11 +38406,11 @@ msgstr ""
 
 #: erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py:37
 msgid "Quantity to Produce should be greater than zero."
-msgstr ""
+msgstr "A gyártandó mennyiségnek nagyobbnak kell lennie nullánál."
 
 #: erpnext/public/js/utils/barcode_scanner.js:257
 msgid "Quantity to Scan"
-msgstr ""
+msgstr "Szkennelendő mennyiség"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -38459,7 +38459,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Quintal"
-msgstr ""
+msgstr "Mázsa"
 
 #: erpnext/crm/report/campaign_efficiency/campaign_efficiency.py:22
 #: erpnext/crm/report/lead_owner_efficiency/lead_owner_efficiency.py:28
@@ -38690,7 +38690,7 @@ msgstr ""
 #: erpnext/templates/form_grid/item_grid.html:8
 #: erpnext/templates/pages/order.html:100 erpnext/templates/pages/rfq.html:43
 msgid "Rate"
-msgstr ""
+msgstr "Ár"
 
 #. Label of the rate_amount_section (Section Break) field in DocType 'BOM Item'
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
@@ -38915,7 +38915,7 @@ msgstr ""
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:48
 msgid "Ratios"
-msgstr ""
+msgstr "Arányok"
 
 #: erpnext/manufacturing/report/bom_variance_report/bom_variance_report.py:52
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:46
@@ -41336,7 +41336,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Rod"
-msgstr ""
+msgstr "Rúd"
 
 #. Label of the role_allowed_to_create_edit_back_dated_transactions (Link)
 #. field in DocType 'Stock Settings'
@@ -43719,7 +43719,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Sazhen"
-msgstr ""
+msgstr "Sazhen"
 
 #. Label of the scan_barcode (Data) field in DocType 'POS Invoice'
 #. Label of the scan_barcode (Data) field in DocType 'Purchase Invoice'
@@ -43993,7 +43993,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Second"
-msgstr ""
+msgstr "Másodperc"
 
 #. Label of the second_email (Time) field in DocType 'Project'
 #: erpnext/projects/doctype/project/project.json
@@ -46609,37 +46609,37 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Square Centimeter"
-msgstr ""
+msgstr "Négyzetcentiméter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Square Foot"
-msgstr ""
+msgstr "Négyzetláb"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Square Inch"
-msgstr ""
+msgstr "Négyzethüvelyk"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Square Kilometer"
-msgstr ""
+msgstr "Négyzetkilométer"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Square Meter"
-msgstr ""
+msgstr "Négyzetméter"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Square Mile"
-msgstr ""
+msgstr "Négyzetmérföld"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Square Yard"
-msgstr ""
+msgstr "Négyzetyard"
 
 #. Label of the stage (Data) field in DocType 'Prospect Opportunity'
 #: erpnext/crm/doctype/prospect_opportunity/prospect_opportunity.json
@@ -47642,7 +47642,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Stone"
-msgstr ""
+msgstr "Kő"
 
 #. Label of the stop_reason (Select) field in DocType 'Downtime Entry'
 #: erpnext/manufacturing/doctype/downtime_entry/downtime_entry.json
@@ -48701,7 +48701,7 @@ msgstr ""
 #: erpnext/selling/doctype/quotation/quotation.json
 #: erpnext/stock/doctype/material_request/material_request.js:196
 msgid "Supplier Quotation"
-msgstr ""
+msgstr "Beszállítói ajánlat"
 
 #. Name of a report
 #. Label of a Link in the Buying Workspace
@@ -49004,7 +49004,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Tablespoon (US)"
-msgstr ""
+msgstr "Evőkanál (USA)"
 
 #. Label of the target_amount (Float) field in DocType 'Target Detail'
 #: erpnext/setup/doctype/target_detail/target_detail.json
@@ -49770,12 +49770,12 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Teaspoon"
-msgstr ""
+msgstr "Teáskanál"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Technical Atmosphere"
-msgstr ""
+msgstr "Műszaki Atmoszféra"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:47
 msgid "Technology"
@@ -50110,7 +50110,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Tesla"
-msgstr ""
+msgstr "Tesla"
 
 #. Description of the 'Display Name' (Data) field in DocType 'Financial Report
 #. Row'
@@ -51410,22 +51410,22 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ton-Force (UK)"
-msgstr ""
+msgstr "Tonna-erő (Egyesült Királyság)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ton-Force (US)"
-msgstr ""
+msgstr "Tonna-erő (USA)"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Tonne"
-msgstr ""
+msgstr "Tonna"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Tonne-Force(Metric)"
-msgstr ""
+msgstr "Tonna-erő(Metrikus)"
 
 #: erpnext/accounts/report/financial_statements.html:6
 msgid "Too many columns. Export the report and print it using a spreadsheet application."
@@ -53076,7 +53076,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Unit"
-msgstr ""
+msgstr "Egység"
 
 #: erpnext/controllers/accounts_controller.py:4041
 msgid "Unit Price"
@@ -54489,7 +54489,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Volt-Ampere"
-msgstr ""
+msgstr "Volt-Amper"
 
 #: erpnext/accounts/report/purchase_register/purchase_register.py:163
 #: erpnext/accounts/report/sales_register/sales_register.py:179
@@ -55051,27 +55051,27 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Watt"
-msgstr ""
+msgstr "Watt"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Watt-Hour"
-msgstr ""
+msgstr "Wattóra"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Wavelength In Gigametres"
-msgstr ""
+msgstr "Hullámhossz gigaméterben"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Wavelength In Kilometres"
-msgstr ""
+msgstr "Hullámhossz kilométerben"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Wavelength In Megametres"
-msgstr ""
+msgstr "Hullámhossz megaméterben"
 
 #: erpnext/www/support/index.html:7
 msgid "We're here to help!"
@@ -55720,7 +55720,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Yard"
-msgstr ""
+msgstr "Yard"
 
 #. Label of the year_end_date (Date) field in DocType 'Fiscal Year'
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.json

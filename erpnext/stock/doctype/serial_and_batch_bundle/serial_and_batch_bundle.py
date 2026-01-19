@@ -12,7 +12,7 @@ import frappe.query_builder.functions
 from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Concat_ws, Locate, Sum
 from frappe.utils import (
 	cint,
 	cstr,
@@ -20,7 +20,6 @@ from frappe.utils import (
 	get_link_to_form,
 	getdate,
 	now,
-	nowtime,
 	parse_json,
 	today,
 )
@@ -713,17 +712,16 @@ class SerialandBatchBundle(Document):
 				is_packed_item = True
 
 		stock_queue = []
-		batches = []
-		if prev_sle and prev_sle.stock_queue:
-			batches = frappe.get_all(
-				"Batch",
-				filters={
-					"name": ("in", [d.batch_no for d in self.entries if d.batch_no]),
-					"use_batchwise_valuation": 0,
-				},
-				pluck="name",
-			)
+		batches = frappe.get_all(
+			"Batch",
+			filters={
+				"name": ("in", [d.batch_no for d in self.entries if d.batch_no]),
+				"use_batchwise_valuation": 0,
+			},
+			pluck="name",
+		)
 
+		if prev_sle and prev_sle.stock_queue and parse_json(prev_sle.stock_queue):
 			if batches and valuation_method == "FIFO":
 				stock_queue = parse_json(prev_sle.stock_queue)
 
@@ -750,7 +748,7 @@ class SerialandBatchBundle(Document):
 			if d.qty:
 				d.stock_value_difference = flt(d.qty) * d.incoming_rate
 
-			if stock_queue and valuation_method == "FIFO" and d.batch_no in batches:
+			if valuation_method == "FIFO" and d.batch_no in batches and d.incoming_rate is not None:
 				stock_queue.append([d.qty, d.incoming_rate])
 				d.stock_queue = json.dumps(stock_queue)
 
@@ -2989,7 +2987,7 @@ def get_ledgers_from_serial_batch_bundle(**kwargs) -> list[frappe._dict]:
 def get_stock_ledgers_for_serial_nos(kwargs):
 	"""
 	Fetch stock ledger entries based on various filters.
-	:param kwargs: Filters including posting_datetime, creation, warehouse, item_code, serial_nos, ignore_voucher_detail_no, voucher_no. Joins with Serial and Batch Entry table to filter based on serial numbers.
+	:param kwargs: Filters including posting_datetime, creation, warehouse, item_code, serial_nos, ignore_voucher_detail_no, voucher_no. Serial and Batch Entry table to filter based on serial numbers.
 	:return: List of stock ledger entries as dictionaries.
 	:rtype: list[dict]
 	"""
@@ -3022,6 +3020,7 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 
 		query = query.where(timestamp_condition)
 
+	for field in ["warehouse", "item_code"]:
 	for field in ["warehouse", "item_code"]:
 		if not kwargs.get(field):
 			continue

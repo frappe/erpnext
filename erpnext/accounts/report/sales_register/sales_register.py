@@ -7,7 +7,6 @@ from frappe import _, msgprint
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, getdate
-from pypika import Order
 
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.report.utils import (

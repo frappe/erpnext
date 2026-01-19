@@ -440,12 +440,16 @@ frappe.ui.form.on("Stock Entry", {
 
 		if (
 			frm.doc.docstatus == 1 &&
-			frm.doc.purpose == "Material Receipt" &&
+			["Material Receipt", "Manufacture"].includes(frm.doc.purpose) &&
 			frm.get_sum("items", "sample_quantity")
 		) {
-			frm.add_custom_button(__("Create Sample Retention Stock Entry"), function () {
-				frm.trigger("make_retention_stock_entry");
-			});
+			frm.add_custom_button(
+				__("Sample Retention Stock Entry"),
+				function () {
+					frm.trigger("make_retention_stock_entry");
+				},
+				__("Create")
+			);
 		}
 
 		frm.trigger("setup_quality_inspection");
@@ -568,10 +572,6 @@ frappe.ui.form.on("Stock Entry", {
 				if (r.message) {
 					var doc = frappe.model.sync(r.message)[0];
 					frappe.set_route("Form", doc.doctype, doc.name);
-				} else {
-					frappe.msgprint(
-						__("Retention Stock Entry already created or Sample Quantity not provided")
-					);
 				}
 			},
 		});
@@ -885,12 +885,11 @@ frappe.ui.form.on("Stock Entry", {
 
 		frm.doc.items.forEach((item) => {
 			if (item.is_finished_item) {
-				fg_completed_qty += flt(item.transfer_qty);
+				fg_completed_qty += flt(item.transfer_qty + frm.doc.process_loss_qty);
 			}
 		});
 
-		frm.doc.fg_completed_qty = fg_completed_qty;
-		frm.refresh_field("fg_completed_qty");
+		frm.set_value("fg_completed_qty", fg_completed_qty);
 	},
 });
 
@@ -1054,7 +1053,7 @@ frappe.ui.form.on("Stock Entry Detail", {
 
 var validate_sample_quantity = function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	if (d.sample_quantity && frm.doc.purpose == "Material Receipt") {
+	if (d.sample_quantity && d.transfer_qty && frm.doc.purpose == "Material Receipt") {
 		frappe.call({
 			method: "erpnext.stock.doctype.stock_entry.stock_entry.validate_sample_quantity",
 			args: {

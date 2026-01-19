@@ -610,7 +610,9 @@ class SubcontractingController(StockController):
 			and self.doctype != "Subcontracting Inward Order"
 		):
 			row.reserve_warehouse = self.set_reserve_warehouse or item.warehouse
-		elif frappe.get_cached_value("Item", row.rm_item_code, "is_customer_provided_item"):
+		elif frappe.get_cached_value("Item", row.rm_item_code, "is_customer_provided_item") and self.get(
+			"customer_warehouse"
+		):
 			row.warehouse = self.customer_warehouse
 
 	def __set_alternative_item(self, bom_item):
@@ -728,7 +730,6 @@ class SubcontractingController(StockController):
 				self.set_batch_for_supplied_items()
 
 	def set_batch_for_supplied_items(self):
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
 		from erpnext.stock.get_item_details import get_filtered_serial_nos
 
 		if self.is_return:

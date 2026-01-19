@@ -7,8 +7,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
-
 
 class StockEntryType(Document):
 	# begin: auto-generated types

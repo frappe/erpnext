@@ -3,8 +3,6 @@
 
 
 import json
-import typing
-from functools import WRAPPER_ASSIGNMENTS, wraps
 
 import frappe
 from frappe import _, throw
@@ -578,9 +576,6 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 		out.total_weight = out.weight_per_unit * out.stock_qty
 
 	return out
-
-
-from erpnext.deprecation_dumpster import get_item_warehouse
 
 
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
@@ -1335,9 +1330,6 @@ def get_tax_withholding_category(ctx: ItemDetailsCtx, item_doc, out: ItemDetails
 		)
 
 	out.tax_withholding_category = tax_withholding_category
-
-
-from erpnext.deprecation_dumpster import get_pos_profile_item_details
 
 
 @erpnext.normalize_ctx_input(ItemDetailsCtx)

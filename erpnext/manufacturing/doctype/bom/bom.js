@@ -92,6 +92,10 @@ frappe.ui.form.on("BOM", {
 			};
 		});
 
+		frm.events.set_company_filters(frm, "project");
+		frm.events.set_company_filters(frm, "default_source_warehouse");
+		frm.events.set_company_filters(frm, "default_target_warehouse");
+
 		frm.trigger("toggle_fields_for_semi_finished_goods");
 	},
 
@@ -102,6 +106,16 @@ frappe.ui.form.on("BOM", {
 				title: __("Mandatory"),
 			});
 		}
+	},
+
+	set_company_filters: function (frm, fieldname) {
+		frm.set_query(fieldname, () => {
+			return {
+				filters: {
+					company: frm.doc.company,
+				},
+			};
+		});
 	},
 
 	track_semi_finished_goods(frm) {

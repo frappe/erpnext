@@ -42,8 +42,36 @@ def get_data(report_filters):
 		gl_data = voucher_wise_gl_data.get(key) or {}
 		d.account_value = gl_data.get("account_value", 0)
 		d.difference_value = d.stock_value - d.account_value
+		d.ledger_type = "Stock Ledger Entry"
 		if abs(d.difference_value) > 0.1:
 			data.append(d)
+
+		if key in voucher_wise_gl_data:
+			del voucher_wise_gl_data[key]
+
+	if voucher_wise_gl_data:
+		data += get_gl_ledgers_with_no_stock_ledger_entries(voucher_wise_gl_data)
+
+	return data
+
+
+def get_gl_ledgers_with_no_stock_ledger_entries(voucher_wise_gl_data):
+	data = []
+
+	for key in voucher_wise_gl_data:
+		gl_data = voucher_wise_gl_data.get(key) or {}
+		data.append(
+			{
+				"name": gl_data.get("name"),
+				"ledger_type": "GL Entry",
+				"voucher_type": gl_data.get("voucher_type"),
+				"voucher_no": gl_data.get("voucher_no"),
+				"posting_date": gl_data.get("posting_date"),
+				"stock_value": 0,
+				"account_value": gl_data.get("account_value", 0),
+				"difference_value": gl_data.get("account_value", 0) * -1,
+			}
+		)
 
 	return data
 
@@ -88,6 +116,7 @@ def get_gl_data(report_filters, filters):
 			"name",
 			"voucher_type",
 			"voucher_no",
+			"posting_date",
 			{
 				"SUB": [{"SUM": "debit_in_account_currency"}, {"SUM": "credit_in_account_currency"}],
 				"as": "account_value",
@@ -109,9 +138,14 @@ def get_columns(filters):
 		{
 			"label": _("Stock Ledger ID"),
 			"fieldname": "name",
-			"fieldtype": "Link",
-			"options": "Stock Ledger Entry",
+			"fieldtype": "Dynamic Link",
+			"options": "ledger_type",
 			"width": "80",
+		},
+		{
+			"label": _("Ledger Type"),
+			"fieldname": "ledger_type",
+			"fieldtype": "Data",
 		},
 		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date"},
 		{"label": _("Posting Time"), "fieldname": "posting_time", "fieldtype": "Time"},
