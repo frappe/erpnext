@@ -117,19 +117,19 @@ def transfer_to_next_process(current_work_order, qty=None):
     }
 
 @frappe.whitelist()
-def get_job_cards_list(operation):
+def get_recent_job_card(operation):
     job_cards = frappe.db.get_list(
         "Job Card",
         filters={
             "operation": ["like", f"%{operation}%"],
             "docstatus": 0,
-            "status": ["in", ["Open", "Material Transferred"]]
+            "status": ["in", ["Open", "Material Transferred", "Work In Progress"]]
         },
         fields=["name", "operation", "status", "work_order"],
         order_by="creation asc"
     )
 
-    return job_cards[-1]
+    return job_cards[0]
 
 
 @frappe.whitelist()

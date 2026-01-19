@@ -78,10 +78,9 @@ const isMixerSelected = computed(() => !!selectedMixer.value);
 // actions
 onMounted(async () => {
     const route = frappe.get_route();
-    jobCard.value = route[2] || null;
+    // jobCard.value = route[2] || null;
 
     if (!jobCard.value) {
-        error.value = __('No Job Card found in route');
         loadingIngredients.value = true;
         jobCard.value = await getJobCardsList();
     }
@@ -224,12 +223,12 @@ async function getJobCardsList() {
     const route = frappe.get_route();
     const station = route[1] || "";
     const result = await frappe.call({
-        method: 'erpnext.manufacturing.doctype.operation.api.get_job_cards_list',
+        method: 'erpnext.manufacturing.doctype.operation.api.get_recent_job_card',
         args: {
             operation: station
         }
     });
-
+    debugger;
     jobCard.value = result.message.name;
     return jobCard.value;
 }
@@ -490,10 +489,12 @@ async function loadBomQty() {
 }
 
 async function loadMixers() {
+    debugger;
     const response = await frappe.call({
         method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_all_mixers',
         args: {
             job_card: jobCard.value,
+            production_line: productionLine.value
         }
     });
     mixersList.value = response.message || [];

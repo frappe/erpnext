@@ -440,9 +440,7 @@ def get_mixing_queue(production_line=None):
         "docstatus": 0,
         "status": ["in", ["Open", "Material Transferred", "Work In Progress"]]
     }
-    if production_line:
-        filters["production_line"] = production_line
-        
+    
     job_cards = frappe.get_all("Job Card",
         filters=filters,
         fields=["name", "production_item", "creation", "status", "production_line"],

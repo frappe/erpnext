@@ -33,11 +33,11 @@ def get_open_job_cards(process):
     """
     job_cards = frappe.get_all("Job Card", 
         filters={
-            "status": "Open",
+            "status": ["in", ["Material Transferred", "Work In Progress"]],
             "docstatus": 0,
             "workstation": ["like", f"%{process}%"] # Match process name loosely
         },
-        fields=["name", "work_order", "production_item", "creation"],
+        fields=["name", "work_order", "status", "production_item", "creation"],
         order_by="creation asc"
     )
     return job_cards
@@ -45,7 +45,6 @@ def get_open_job_cards(process):
 @frappe.whitelist()
 def start_distribution(job_card, process_name="operator"):
     """Start the Job Card when mixing starts."""
-    #print(f"DEBUG: Header transferred_qty={frappe.get_doc("Job Card", job_card)}")
 
     jc = frappe.get_doc("Job Card", job_card)
     start_time = frappe.utils.now_datetime()
