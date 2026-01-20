@@ -1035,7 +1035,6 @@ class ReceivablePayableReport:
 		self,
 	):
 		self.customer = qb.DocType("Customer")
-
 		if self.filters.get("customer_group"):
 			groups = get_customer_group_with_children(self.filters.customer_group)
 			customers = (
@@ -1049,13 +1048,21 @@ class ReceivablePayableReport:
 			self.get_hierarchical_filters("Territory", "territory")
 
 		if self.filters.get("payment_terms_template"):
-			self.qb_selection_filter.append(
-				self.ple.party.isin(
-					qb.from_(self.customer)
-					.select(self.customer.name)
-					.where(self.customer.payment_terms == self.filters.get("payment_terms_template"))
-				)
+			si = qb.DocType("Sales Invoice")
+
+			customer_ptt = self.ple.party.isin(
+				qb.from_(self.customer)
+				.select(self.customer.name)
+				.where(self.customer.payment_terms == self.filters.get("payment_terms_template"))
 			)
+
+			si_ptt = self.ple.against_voucher_no.isin(
+				qb.from_(si)
+				.select(si.name)
+				.where(si.payment_terms_template == self.filters.get("payment_terms_template"))
+			)
+
+			self.qb_selection_filter.append(Criterion.any([customer_ptt, si_ptt]))
 
 		if self.filters.get("sales_partner"):
 			self.qb_selection_filter.append(
@@ -1081,13 +1088,21 @@ class ReceivablePayableReport:
 			)
 
 		if self.filters.get("payment_terms_template"):
-			self.qb_selection_filter.append(
-				self.ple.party.isin(
-					qb.from_(supplier)
-					.select(supplier.name)
-					.where(supplier.payment_terms == self.filters.get("supplier_group"))
-				)
+			pi = qb.DocType("Purchase Invoice")
+
+			supplier_ptt = self.ple.party.isin(
+				qb.from_(supplier)
+				.select(supplier.name)
+				.where(supplier.payment_terms == self.filters.get("supplier_group"))
 			)
+
+			pi_ptt = self.ple.against_voucher_no.isin(
+				qb.from_(pi)
+				.select(pi.name)
+				.where(pi.payment_terms_template == self.filters.get("payment_terms_template"))
+			)
+
+			self.qb_selection_filter.append(Criterion.any([supplier_ptt, pi_ptt]))
 
 	def get_hierarchical_filters(self, doctype, key):
 		lft, rgt = frappe.db.get_value(doctype, self.filters.get(key), ["lft", "rgt"])
