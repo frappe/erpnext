@@ -23,6 +23,7 @@ from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+from erpnext.stock.doctype.price_list.test_price_list import create_price_list_for_default_check
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	make_purchase_invoice as create_purchase_invoice_from_receipt,
 )
@@ -2966,6 +2967,24 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 
 		pr = make_purchase_receipt_from_pi(pi.name)
 		self.assertFalse(pr.items)
+
+	def test_check_default_price_list_in_purchase_invoice(self):
+		pi = frappe.new_doc("Purchase Invoice")
+		supplier = create_supplier(
+			supplier_name="_test_supplier_with_price_list", default_currency="INR", supplier_type="Company"
+		)
+		pi.supplier = supplier.name
+		price_list = create_price_list_for_default_check(
+			self, price_list_name="_test Default Price List in PI"
+		)
+		price_list_name = price_list.name
+		frappe.db.set_value("Supplier", pi.supplier, "default_price_list", price_list_name)
+		pi.posting_date = today()
+		item = create_item("_Test Item for Default Price List in PI")
+		pi.append("items", {"item_code": item.name, "qty": 2, "rate": 100})
+		pi.set_missing_values()
+		pi.insert(ignore_if_duplicate=True)
+		self.assertEqual(pi.buying_price_list, "_test Default Price List in PI")
 
 
 def set_advance_flag(company, flag, default_account):

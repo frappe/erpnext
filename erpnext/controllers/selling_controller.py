@@ -107,12 +107,16 @@ class SellingController(StockController):
 						)
 
 	def check_selling_price_list(self):
-		if self.doctype in ["Sales Order", "Delivery Note", "Sales Invoice", "Quotation"]:
+		if self.doctype in ["Sales Order", "Delivery Note", "Sales Invoice"]:
 			if self.customer:
-				selling_price_list = frappe.db.get_value("Customer",self.customer,"default_price_list")
+				selling_price_list = frappe.db.get_value("Customer", self.customer, "default_price_list")
 
 				if selling_price_list and frappe.db.get_value("Price List", selling_price_list, "selling"):
-					self.selling_price_list = selling_price_list
+					default_selling_price_list = frappe.get_single_value(
+						"Selling Settings", "selling_price_list"
+					)
+					if not self.selling_price_list or self.selling_price_list == default_selling_price_list:
+						self.selling_price_list = selling_price_list
 
 	def set_missing_values(self, for_validate=False):
 		super().set_missing_values(for_validate)
