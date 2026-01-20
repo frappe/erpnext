@@ -4,9 +4,7 @@
 import collections
 import csv
 import json
-import operator
 from collections import Counter, defaultdict
-from functools import reduce
 
 import frappe
 import frappe.query_builder
@@ -14,7 +12,7 @@ import frappe.query_builder.functions
 from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
-from frappe.query_builder.functions import Concat_ws, Locate, Sum
+from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	cint,
 	cstr,
@@ -3042,9 +3040,7 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 		).run(pluck=True)
 
 		if bundle_parents:
-			query = query.where(
-				stock_ledger_entry.serial_and_batch_bundle.isin(bundle_parents)
-			)
+			query = query.where(stock_ledger_entry.serial_and_batch_bundle.isin(bundle_parents))
 
 	if kwargs.ignore_voucher_detail_no:
 		query = query.where(stock_ledger_entry.voucher_detail_no != kwargs.ignore_voucher_detail_no)
