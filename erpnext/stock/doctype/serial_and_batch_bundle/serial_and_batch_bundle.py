@@ -3041,13 +3041,10 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 			.where(serial_batch_entry.serial_no.isin(serial_nos))
 		).run(pluck=True)
 
-		serial_conditions = []
-
 		if bundle_parents:
-			serial_conditions.append(stock_ledger_entry.serial_and_batch_bundle.isin(bundle_parents))
-
-		# Apply OR only on serial-specific subset
-		query = query.where(reduce(operator.or_, serial_conditions))
+			query = query.where(
+				stock_ledger_entry.serial_and_batch_bundle.isin(bundle_parents)
+			)
 
 	if kwargs.ignore_voucher_detail_no:
 		query = query.where(stock_ledger_entry.voucher_detail_no != kwargs.ignore_voucher_detail_no)
