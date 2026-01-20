@@ -938,7 +938,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if matched_item := self.get_matched_items(item_code):
 				if flt(details.get("qty"), precision) != flt(matched_item.qty, precision):
 					frappe.throw(
-						_("For the item {0}, the quantity should be {1} according to the BOM {2}.").format(
+						_(
+							"For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
+						).format(
 							frappe.bold(item_code),
 							flt(details.get("qty")),
 							get_link_to_form("BOM", self.bom_no),
@@ -1003,11 +1005,36 @@ class StockEntry(StockController, SubcontractingInwardController):
 								)
 
 	def get_matched_items(self, item_code):
-		for row in self.items:
+		items = [item for item in self.items if item.s_warehouse]
+		for row in items or self.get_consumed_items():
 			if row.item_code == item_code or row.original_item == item_code:
 				return row
 
 		return {}
+
+	def get_consumed_items(self):
+		"""Get all raw materials consumed through consumption entries"""
+		parent = frappe.qb.DocType("Stock Entry")
+		child = frappe.qb.DocType("Stock Entry Detail")
+
+		query = (
+			frappe.qb.from_(parent)
+			.join(child)
+			.on(parent.name == child.parent)
+			.select(
+				child.item_code,
+				Sum(child.qty).as_("qty"),
+				child.original_item,
+			)
+			.where(
+				(parent.docstatus == 1)
+				& (parent.purpose == "Material Consumption for Manufacture")
+				& (parent.work_order == self.work_order)
+			)
+			.groupby(child.item_code, child.original_item)
+		)
+
+		return query.run(as_dict=True)
 
 	@frappe.whitelist()
 	def get_stock_and_rate(self):
