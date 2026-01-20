@@ -2362,8 +2362,10 @@ class TestStockEntry(IntegrationTestCase):
 		self.assertEqual(target_sabb.entries[0].batch_no, batch)
 		self.assertEqual([entry.serial_no for entry in target_sabb.entries], serial_nos[:2])
 
-	@IntegrationTestCase.change_settings("Manufacturing Settings", {"material_consumption": 0})
 	def test_raw_material_missing_validation(self):
+		original_value = frappe.db.get_single_value("Manufacturing Settings", "material_consumption")
+		frappe.db.set_single_value("Manufacturing Settings", "material_consumption", 0)
+
 		stock_entry = make_stock_entry(
 			item_code="_Test Item",
 			qty=1,
@@ -2379,6 +2381,8 @@ class TestStockEntry(IntegrationTestCase):
 			frappe.ValidationError,
 			stock_entry.save,
 		)
+
+		frappe.db.set_single_value("Manufacturing Settings", "material_consumption", original_value)
 
 	@IntegrationTestCase.change_settings(
 		"Manufacturing Settings",
