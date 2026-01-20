@@ -78,6 +78,8 @@ It takes care of installation, setup, upgrades, monitoring, maintenance and supp
 ### Self-Hosted
 #### Docker
 
+See [Frappe Documentation](https://github.com/frappe/frappe_docker) for full documentation & FAQ on docker setup
+
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/)
@@ -114,7 +116,7 @@ docker compose -f pwd.yml up -d
 ```
 Wait for a couple of minutes for ERPNext site to be created or check `create-site` container logs before opening browser on port `8080`. (username: `Administrator`, password: `admin`)
 
-See [Frappe Docker](https://github.com/frappe/frappe_docker/blob/main/docs/01-getting-started/03-arm64.md) for ARM based docker setup or [Frappe Documentation](https://github.com/frappe/frappe_docker) for full documentation
+See [Frappe Docker](https://github.com/frappe/frappe_docker/blob/main/docs/01-getting-started/03-arm64.md) for ARM based docker setup
 
 ## Development Setup
 ### Manual Install
