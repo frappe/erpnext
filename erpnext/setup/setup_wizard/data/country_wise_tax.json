@@ -12,7 +12,7 @@
 			"default": 1
 		},
 		"Algeria TVA 9%": {
-			"account_name": "VAT 9%",
+			"account_name": "TVA 9%",
 			"tax_rate": 9.00
 		}
 	},
