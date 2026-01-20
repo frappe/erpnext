@@ -2407,6 +2407,7 @@ class TestStockEntry(IntegrationTestCase):
 		frappe.get_doc(_make_stock_entry(work_order.name, "Material Consumption for Manufacture", 5)).submit()
 		frappe.get_doc(_make_stock_entry(work_order.name, "Manufacture", 5)).submit()
 
+
 def make_serialized_item(self, **args):
 	args = frappe._dict(args)
 	se = frappe.copy_doc(self.globalTestRecords["Stock Entry"][0])
