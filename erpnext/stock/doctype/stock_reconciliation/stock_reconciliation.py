@@ -612,7 +612,7 @@ class StockReconciliation(StockController):
 
 			# validate warehouse
 			if not frappe.db.get_value("Warehouse", row.warehouse):
-				self.validation_messages.append(_get_msg(row_num, _("Warehouse not found in the system")))
+				self.validation_messages.append(_get_msg(row.idx, _("Warehouse not found in the system")))
 
 			# if both not specified
 			if row.qty in ["", None] and row.valuation_rate in ["", None]:
