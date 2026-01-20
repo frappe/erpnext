@@ -179,7 +179,7 @@ frappe.query_reports["Accounts Receivable"] = {
 		},
 	],
 	collapsible_filters: true,
-	seperate_check_filters: true,
+	separate_check_filters: true,
 
 	formatter: function (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);

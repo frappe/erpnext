@@ -109,7 +109,7 @@ frappe.query_reports["Accounts Payable Summary"] = {
 		},
 	],
 	collapsible_filters: true,
-	seperate_check_filters: true,
+	separate_check_filters: true,
 
 	onload: function (report) {
 		report.page.add_inner_button(__("Accounts Payable"), function () {
