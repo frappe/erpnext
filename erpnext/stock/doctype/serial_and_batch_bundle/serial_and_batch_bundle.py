@@ -12,7 +12,7 @@ import frappe.query_builder.functions
 from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
-from frappe.query_builder.functions import Concat_ws, Locate, Sum
+from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	cint,
 	cstr,
@@ -2986,7 +2986,7 @@ def get_ledgers_from_serial_batch_bundle(**kwargs) -> list[frappe._dict]:
 def get_stock_ledgers_for_serial_nos(kwargs):
 	"""
 	Fetch stock ledger entries based on various filters.
-	:param kwargs: Filters including posting_datetime, creation, warehouse, item_code, serial_nos, ignore_voucher_detail_no, voucher_no. Joins with Serial and Batch Entry table to filter based on serial numbers.
+	:param kwargs: Filters including posting_datetime, creation, warehouse, item_code, serial_nos, ignore_voucher_detail_no, voucher_no. Serial and Batch Entry table to filter based on serial numbers.
 	:return: List of stock ledger entries as dictionaries.
 	:rtype: list[dict]
 	"""
@@ -3033,21 +3033,14 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 		serial_nos = [serial_nos]
 
 	if serial_nos:
-		query = (
-			query.left_join(serial_batch_entry)
-			.on(stock_ledger_entry.serial_and_batch_bundle == serial_batch_entry.parent)
-			.distinct()
-		)
+		bundle_parents = (
+			frappe.qb.from_(serial_batch_entry)
+			.select(serial_batch_entry.parent)
+			.where(serial_batch_entry.serial_no.isin(serial_nos))
+		).run(pluck=True)
 
-		bundle_match = serial_batch_entry.serial_no.isin(serial_nos)
-
-		padded_serial_no = Concat_ws("", "\n", stock_ledger_entry.serial_no, "\n")
-		direct_match = None
-		for sn in serial_nos:
-			cond = Locate(f"\n{sn}\n", padded_serial_no) > 0
-			direct_match = cond if direct_match is None else (direct_match | cond)
-
-		query = query.where(bundle_match | direct_match)
+		if bundle_parents:
+			query = query.where(stock_ledger_entry.serial_and_batch_bundle.isin(bundle_parents))
 
 	if kwargs.ignore_voucher_detail_no:
 		query = query.where(stock_ledger_entry.voucher_detail_no != kwargs.ignore_voucher_detail_no)
