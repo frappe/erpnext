@@ -437,7 +437,7 @@ def get_vendor_invoices(doctype, txt, searchfield, start, page_len, filters):
 	query = get_vendor_invoice_query(filters)
 
 	if txt:
-		query = query.where(doctype.name.like(f"%{txt}%"))
+		query = query.where(frappe.qb.DocType(doctype).name.like(f"%{txt}%"))
 
 	if start:
 		query = query.limit(page_len).offset(start)

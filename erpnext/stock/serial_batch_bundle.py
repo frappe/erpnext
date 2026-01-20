@@ -633,6 +633,9 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 			self.old_serial_nos = []
 
 			serial_nos = self.get_serial_nos()
+			if not serial_nos:
+				return
+
 			result = self.get_serial_no_wise_incoming_rate(serial_nos)
 			for serial_no in serial_nos:
 				incoming_rate = result.get(serial_no)

@@ -74,6 +74,7 @@ class StockReconciliation(StockController):
 		self.validate_duplicate_serial_and_batch_bundle("items")
 		self.remove_items_with_no_change()
 		self.validate_data()
+		self.change_row_indexes()
 		self.validate_expense_account()
 		self.validate_customer_provided_item()
 		self.set_zero_value_for_customer_provided_items()
@@ -555,8 +556,7 @@ class StockReconciliation(StockController):
 
 		elif len(items) != len(self.items):
 			self.items = items
-			for i, item in enumerate(self.items):
-				item.idx = i + 1
+			self.change_idx = True
 			frappe.msgprint(_("Removed items with no change in quantity or value."))
 
 	def calculate_difference_amount(self, item, item_dict):
@@ -573,14 +573,14 @@ class StockReconciliation(StockController):
 
 	def validate_data(self):
 		def _get_msg(row_num, msg):
-			return _("Row # {0}:").format(row_num + 1) + " " + msg
+			return _("Row #{0}:").format(row_num) + " " + msg
 
 		self.validation_messages = []
 		item_warehouse_combinations = []
 
 		default_currency = frappe.db.get_default("currency")
 
-		for row_num, row in enumerate(self.items):
+		for row in self.items:
 			# find duplicates
 			key = [row.item_code, row.warehouse]
 			for field in ["serial_no", "batch_no"]:
@@ -593,7 +593,7 @@ class StockReconciliation(StockController):
 
 			if key in item_warehouse_combinations:
 				self.validation_messages.append(
-					_get_msg(row_num, _("Same item and warehouse combination already entered."))
+					_get_msg(row.idx, _("Same item and warehouse combination already entered."))
 				)
 			else:
 				item_warehouse_combinations.append(key)
@@ -603,7 +603,7 @@ class StockReconciliation(StockController):
 			if row.serial_no and not row.qty:
 				self.validation_messages.append(
 					_get_msg(
-						row_num,
+						row.idx,
 						f"Quantity should not be zero for the {bold(row.item_code)} since serial nos are specified",
 					)
 				)
@@ -611,17 +611,17 @@ class StockReconciliation(StockController):
 			# if both not specified
 			if row.qty in ["", None] and row.valuation_rate in ["", None]:
 				self.validation_messages.append(
-					_get_msg(row_num, _("Please specify either Quantity or Valuation Rate or both"))
+					_get_msg(row.idx, _("Please specify either Quantity or Valuation Rate or both"))
 				)
 
 			# do not allow negative quantity
 			if flt(row.qty) < 0:
-				self.validation_messages.append(_get_msg(row_num, _("Negative Quantity is not allowed")))
+				self.validation_messages.append(_get_msg(row.idx, _("Negative Quantity is not allowed")))
 
 			# do not allow negative valuation
 			if flt(row.valuation_rate) < 0:
 				self.validation_messages.append(
-					_get_msg(row_num, _("Negative Valuation Rate is not allowed"))
+					_get_msg(row.idx, _("Negative Valuation Rate is not allowed"))
 				)
 
 			if row.qty and row.valuation_rate in ["", None]:
@@ -652,6 +652,11 @@ class StockReconciliation(StockController):
 				msgprint(msg)
 
 			raise frappe.ValidationError(self.validation_messages)
+
+	def change_row_indexes(self):
+		if getattr(self, "change_idx", False):
+			for i, item in enumerate(self.items):
+				item.idx = i + 1
 
 	def validate_item(self, item_code, row):
 		from erpnext.stock.doctype.item.item import (

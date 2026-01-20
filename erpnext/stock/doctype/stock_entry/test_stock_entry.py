@@ -2361,6 +2361,51 @@ class TestStockEntry(IntegrationTestCase):
 		self.assertEqual(target_sabb.entries[0].batch_no, batch)
 		self.assertEqual([entry.serial_no for entry in target_sabb.entries], serial_nos[:2])
 
+	@IntegrationTestCase.change_settings("Manufacturing Settings", {"material_consumption": 0})
+	def test_raw_material_missing_validation(self):
+		stock_entry = make_stock_entry(
+			item_code="_Test Item",
+			qty=1,
+			target="_Test Warehouse - _TC",
+			do_not_save=True,
+		)
+
+		stock_entry.purpose = "Manufacture"
+		stock_entry.stock_entry_type = "Manufacture"
+		stock_entry.items[0].is_finished_item = 1
+
+		self.assertRaises(
+			frappe.ValidationError,
+			stock_entry.save,
+		)
+
+	@IntegrationTestCase.change_settings(
+		"Manufacturing Settings",
+		{
+			"material_consumption": 1,
+			"backflush_raw_materials_based_on": "BOM",
+			"validate_components_quantities_per_bom": 1,
+		},
+	)
+	def test_validation_as_per_bom_with_continuous_raw_material_consumption(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry as _make_stock_entry
+		from erpnext.manufacturing.doctype.work_order.work_order import make_work_order
+
+		fg_item = make_item("_Mobiles", properties={"is_stock_item": 1}).name
+		rm_item1 = make_item("_Battery", properties={"is_stock_item": 1}).name
+		warehouse = "Stores - WP"
+		bom_no = make_bom(item=fg_item, raw_materials=[rm_item1]).name
+		make_stock_entry(item_code=rm_item1, target=warehouse, qty=5, rate=10, purpose="Material Receipt")
+
+		work_order = make_work_order(bom_no, fg_item, 5)
+		work_order.skip_transfer = 1
+		work_order.fg_warehouse = warehouse
+		work_order.submit()
+
+		frappe.get_doc(_make_stock_entry(work_order.name, "Material Consumption for Manufacture", 5)).submit()
+		frappe.get_doc(_make_stock_entry(work_order.name, "Manufacture", 5)).submit()
+
 
 def make_serialized_item(self, **args):
 	args = frappe._dict(args)

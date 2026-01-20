@@ -502,8 +502,8 @@ class WorkOrder(Document):
 	def validate_work_order_against_so(self):
 		# already ordered qty
 		ordered_qty_against_so = frappe.db.sql(
-			"""select sum(qty) from `tabWork Order`
-			where production_item = %s and sales_order = %s and docstatus < 2 and status != 'Closed' and name != %s""",
+			"""select sum(qty - process_loss_qty) from `tabWork Order`
+			where production_item = %s and sales_order = %s and docstatus = 1 and status != 'Closed' and name != %s""",
 			(self.production_item, self.sales_order, self.name),
 		)[0][0]
 
@@ -512,13 +512,13 @@ class WorkOrder(Document):
 		# get qty from Sales Order Item table
 		so_item_qty = frappe.db.sql(
 			"""select sum(stock_qty) from `tabSales Order Item`
-			where parent = %s and item_code = %s""",
+			where parent = %s and item_code = %s and docstatus = 1""",
 			(self.sales_order, self.production_item),
 		)[0][0]
 		# get qty from Packing Item table
 		dnpi_qty = frappe.db.sql(
 			"""select sum(qty) from `tabPacked Item`
-			where parent = %s and parenttype = 'Sales Order' and item_code = %s""",
+			where parent = %s and parenttype = 'Sales Order' and item_code = %s and docstatus = 1""",
 			(self.sales_order, self.production_item),
 		)[0][0]
 		# total qty in SO
@@ -530,8 +530,10 @@ class WorkOrder(Document):
 
 		if total_qty > so_qty + (allowance_percentage / 100 * so_qty):
 			frappe.throw(
-				_("Cannot produce more Item {0} than Sales Order quantity {1}").format(
-					self.production_item, so_qty
+				_("Cannot produce more Item {0} than Sales Order quantity {1} {2}").format(
+					get_link_to_form("Item", self.production_item),
+					frappe.bold(so_qty),
+					frappe.bold(frappe.get_value("Item", self.production_item, "stock_uom")),
 				),
 				OverProductionError,
 			)
