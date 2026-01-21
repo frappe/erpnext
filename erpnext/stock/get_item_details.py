@@ -675,10 +675,14 @@ def get_item_tax_info(doc, tax_category, item_codes, item_rates=None, item_tax_t
 
         # Build context
         ctx: ItemDetailsCtx = {
-            "company": doc.company,
-            "tax_category": tax_category,
-            "base_net_rate": item_rates.get(item_code[1]),
-        }
+    "company": doc.company,
+    "tax_category": tax_category,
+    "base_net_rate": item_rates.get(item_code[1]),
+    "posting_date": doc.posting_date,
+    "transaction_date": getattr(doc, "transaction_date", None),
+    "bill_date": getattr(doc, "bill_date", None),
+}
+
 
         # Determine item tax template
         item_tax_template = None
@@ -690,21 +694,28 @@ def get_item_tax_info(doc, tax_category, item_codes, item_rates=None, item_tax_t
             item_tax_template = item.get("item_tax_template")
 
         if item_tax_template:
-            ctx.update({"item_tax_template": item_tax_template})
+          ctx.update({"item_tax_template": item_tax_template})
 
-        # Compute tax template & tax rate
-        get_item_tax_template(ctx, item, out[item_code[1]])
-        out[item_code[1]]["item_tax_rate"] = get_item_tax_map(
-            doc=doc,
-            tax_template=out[item_code[1]].get("item_tax_template"),
-            as_json=True,
-        )
+# Compute tax template & tax rate
+    
+    get_item_tax_template(ctx, item, out[item_code[1]])
 
-    # Return at function scope (loop ke bahar)
+    item_tax_template = (
+        out[item_code[1]].get("item_tax_template")
+        or ctx.get("item_tax_template")
+    )
+
+    out[item_code[1]]["item_tax_rate"] = get_item_tax_map(
+        doc=doc,
+        tax_template=item_tax_template,
+        as_json=True,
+    )
     if not out:
         return {}
 
     return out
+
+
 
 
 @frappe.whitelist()
