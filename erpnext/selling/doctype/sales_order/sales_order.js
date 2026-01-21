@@ -29,7 +29,7 @@ frappe.ui.form.on("Sales Order", {
 			} else if (doc.stock_qty <= doc.delivered_qty) {
 				color = "green";
 			} else if (doc.is_closed) {
-				color = "grey";
+				color = "red";
 			} else {
 				color = "orange";
 			}
@@ -959,20 +959,6 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						},
 						__("Status")
 					);
-
-					if (flt(doc.per_delivered) < 100 || flt(doc.per_billed) < 100) {
-						// close
-						this.frm.add_custom_button(__("Close"), () => this.close_sales_order(), __("Status"));
-					}
-				} else if (doc.status === "Closed") {
-					// un-close
-					this.frm.add_custom_button(
-						__("Re-open"),
-						function () {
-							me.frm.cscript.update_status("Re-open", "Draft");
-						},
-						__("Status")
-					);
 				}
 			}
 			if (doc.status !== "Closed") {
@@ -992,21 +978,15 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 								() => this.hold_sales_order(),
 								__("Status")
 							);
-							// close
-							this.frm.add_custom_button(
-								__("Close"),
-								() => this.close_sales_order(),
-								__("Status")
-							);
 
 							this.frm.add_custom_button(
-								__("Close selected items"),
+								__("Close items"),
 								() => this.close_selected_items(),
 								__("Status")
 							);
 
 							this.frm.add_custom_button(
-								__("Re-open selected items"),
+								__("Re-open items"),
 								() => this.reopen_selected_items(),
 								__("Status")
 							);

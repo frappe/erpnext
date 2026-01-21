@@ -1482,15 +1482,13 @@ def make_sales_invoice(
 				},
 				"postprocess": update_item,
 				"condition": lambda doc: (
-					True
-					if is_unit_price_row(doc)
-					else (
-						doc.qty
-						and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount))
-						and not doc.is_closed
+					(
+						is_unit_price_row(doc)
+						or (doc.qty and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)))
 					)
-				)
-				and select_item(doc),
+					and not doc.is_closed
+					and select_item(doc)
+				),
 			},
 			"Sales Taxes and Charges": {
 				"doctype": "Sales Taxes and Charges",
