@@ -21,7 +21,7 @@ def transfer_to_next_process(current_work_order, qty=None):
         "polished slab": "inspected slab"
     }
 
-    current_process = wo.production_item.split(" - ")[-1].strip().lower() if " - " in wo.production_item else ""
+    current_process = wo.production_item.rsplit("-", 1)[-1].strip().lower() if "-" in wo.production_item else ""
     next_process = process_mapping.get(current_process)
     
     if not next_process:
@@ -118,13 +118,21 @@ def transfer_to_next_process(current_work_order, qty=None):
 
 @frappe.whitelist()
 def get_recent_job_card(operation):
+    if(operation == "Mixing"):
+        filters = {
+            "status": ["in", ["Open", "Material Transferred", "Work In Progress", "Completed"]],
+            "docstatus": [">=", 0],
+            "operation": ["like", "%Mixing%"]
+        }
+    else:
+        filters = {
+            "status": ["in", ["Material Transferred", "Work In Progress"]],
+            "docstatus": 0,
+            "operation": ["like", f"%{operation}%"]
+        }
     job_cards = frappe.db.get_list(
         "Job Card",
-        filters={
-            "operation": ["like", f"%{operation}%"],
-            "docstatus": 0,
-            "status": ["in", ["Open", "Material Transferred", "Work In Progress"]]
-        },
+        filters=filters,
         fields=["name", "operation", "status", "work_order"],
         order_by="creation asc"
     )
@@ -136,8 +144,8 @@ def get_open_job_cards(process):
     # employee_id = frappe.db.get_value("Employee", {"user_id": frappe.session.user})
     if(process == "Mixing"):
         filters = {
-            "status": ["in", ["Open", "Material Transferred", "Work In Progress"]],
-            "docstatus": 0,
+            "status": ["in", ["Open", "Material Transferred", "Work In Progress", "Completed"]],
+            "docstatus": [">=", 0],
             "operation": ["like", "%Mixing%"]
         }
     else:
@@ -158,7 +166,7 @@ def get_operators(designation, production_line, workstation):
     filters = {
         "designation": designation,
         "production_line": production_line,
-        "machine_assigned": workstation  
+        "workstation_type": workstation  
     }
     
     employee_name = frappe.db.get_value("Employee", filters, "name")  

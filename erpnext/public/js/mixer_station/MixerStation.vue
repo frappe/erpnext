@@ -421,7 +421,7 @@ function openAddMaterials() {
 }
 
 async function transferToFGWarehouse() {
-    if (!getCanTransfer()) {
+    if (!getCanTransfer.value) {
         frappe.msgprint(__('Insufficient qty ({0}) for BOM requirement ({1})',
             [getDisplayQty.value.toLocaleString(), bomQty.value.toLocaleString()]));
         return;
@@ -438,9 +438,9 @@ async function transferToFGWarehouse() {
         }
 
         const result = await frappe.call({
-            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.transfer_to_next_process',
+            method: 'erpnext.manufacturing.doctype.operation.api.transfer_to_next_process',
             args: {
-                mixing_work_order: workOrder,
+                current_work_order: workOrder,
                 qty: bomQty.value
             },
             freeze: true,
@@ -748,11 +748,11 @@ function selectJobCard(name) {
                                 {{ getDisplayQty.toLocaleString() }}
                             </div>
                             <div class="d-flex flex-column gap-2 justify-content-center mb-3">
-                                <button v-if="!transferSuccess.value" :disabled="!getCanTransfer()"
-                                    :class="['btn btn-lg flex-fill', getCanTransfer() ? 'btn-warning' : 'btn-secondary']"
+                                <button v-if="!transferSuccess.value" :disabled="!getCanTransfer"
+                                    :class="['btn btn-lg flex-fill', getCanTransfer ? 'btn-warning' : 'btn-secondary']"
                                     @click="transferToFGWarehouse">
                                     <span class="fa fa-truck mr-2"></span>
-                                    {{ getCanTransfer() ? 'Transfer ' + bomQty.toLocaleString() : 'Insufficient Qty' }}
+                                    {{ getCanTransfer ? 'Transfer ' + bomQty.toLocaleString() : 'Insufficient Qty' }}
                                 </button>
                                 <div v-else class="alert alert-success">
                                     <span class="fa fa-check-circle mr-2"></span>

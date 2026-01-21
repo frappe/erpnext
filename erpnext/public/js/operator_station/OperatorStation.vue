@@ -173,7 +173,6 @@ onMounted(async () => {
 		}
 
 		// Fetch Slab Queue
-		//await getJobCardsList();
 		await fetchQueue(line.value || jc.production_line, station);
 
 		// Polling alternative to socket.io
