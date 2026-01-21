@@ -190,6 +190,9 @@ class WorkOrder(Document):
 				self.source_warehouse = wh_map.source_warehouse
 				self.wip_warehouse = wh_map.wip_warehouse
 				self.fg_warehouse = wh_map.fg_warehouse
+
+				for row in self.required_items:
+					row.source_warehouse = self.source_warehouse
 	
 	def after_insert(self):
 		"""Auto-submit Work Order after warehouses are set"""
