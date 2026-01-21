@@ -1,0 +1,50 @@
+{
+  "name": "Frappe Bench",
+  "forwardPorts": [8010, 9010, 6787],
+  "remoteUser": "frappe",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-vscode.live-server",
+        "grapecity.gc-excelviewer",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-mysql",
+        "visualstudioexptteam.vscodeintellicode"
+      ],
+      "settings": {
+        "terminal.integrated.profiles.linux": {
+          "frappe bash": {
+            "path": "/bin/bash"
+          }
+        },
+        "terminal.integrated.defaultProfile.linux": "frappe bash",
+        "debug.node.autoAttach": "disabled",
+        "sqltools.connections": [
+          {
+            "mysqlOptions": {
+              "authProtocol": "default",
+              "enableSsl": "Disabled"
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "mariadb",
+            "port": 3306,
+            "driver": "MariaDB",
+            "name": "MariaDB",
+            "username": "root",
+            "password": "123",
+            "database": "mysql"
+          }
+        ]
+      }
+    }
+  },
+  "dockerComposeFile": "./docker-compose.yml",
+  "service": "frappe",
+  "workspaceFolder": "/workspace/development",
+  "shutdownAction": "stopCompose",
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/frappe/.ssh,type=bind,consistency=cached"
+  ]
+}
