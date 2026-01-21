@@ -121,7 +121,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					const should_create_delivery_note = doc.items.some(
 						(item) =>
 							item.qty - item.delivered_qty > 0 &&
-							!item.scio_detail &&
 							!item.dn_detail &&
 							!item.delivered_by_supplier
 					);
