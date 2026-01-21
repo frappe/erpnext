@@ -9,7 +9,7 @@ from erpnext.setup.doctype.employee.employee import get_holiday_list_for_employe
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.utilities.transaction_base import TransactionBase, delete_events
 
-# 
+
 class MaintenanceSchedule(TransactionBase):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
