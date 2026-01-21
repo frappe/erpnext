@@ -13,17 +13,18 @@ frappe.listview_settings["Sales Order"] = {
 		"skip_delivery_note",
 	],
 	get_indicator: function (doc) {
-		if (doc.status === "Closed") {
-			// Closed
-			return [__("Closed"), "green", "status,=,Closed"];
-		} else if (doc.status === "On Hold") {
-			// on hold
-			return [__("On Hold"), "orange", "status,=,On Hold"];
-		} else if (doc.status === "Completed") {
-			return [__("Completed"), "green", "status,=,Completed"];
-		} else if (doc.advance_payment_status === "Requested") {
-			return [__("To Pay"), "gray", "advance_payment_status,=,Requested"];
-		} else if (!doc.skip_delivery_note && flt(doc.per_delivered) < 100) {
+		const color_map = {
+			Closed: "green",
+			"On Hold": "orange",
+			Completed: "green",
+			"To Pay": "gray",
+			"To Bill": "orange",
+			"To Deliver": "orange",
+			"To Deliver and Bill": "orange",
+			Cancelled: "red",
+		};
+
+		if (!doc.skip_delivery_note && flt(doc.per_delivered) < 100) {
 			if (frappe.datetime.get_diff(doc.delivery_date) < 0) {
 				// not delivered & overdue
 				return [
@@ -31,33 +32,11 @@ frappe.listview_settings["Sales Order"] = {
 					"red",
 					"per_delivered,<,100|delivery_date,<,Today|status,!=,Closed|docstatus,=,1",
 				];
-			} else if (flt(doc.grand_total) === 0) {
-				// not delivered (zeroount order)
-				return [
-					__("To Deliver"),
-					"orange",
-					"per_delivered,<,100|grand_total,=,0|status,!=,Closed|docstatus,=,1",
-				];
-			} else if (flt(doc.per_billed) < 100) {
-				// not delivered & not billed
-				return [
-					__("To Deliver and Bill"),
-					"orange",
-					"per_delivered,<,100|per_billed,<,100|status,!=,Closed",
-				];
-			} else {
-				// not billed
-				return [__("To Deliver"), "orange", "per_delivered,<,100|per_billed,=,100|status,!=,Closed"];
 			}
-		} else if (
-			flt(doc.per_delivered) === 100 &&
-			flt(doc.grand_total) !== 0 &&
-			flt(doc.per_billed) < 100
-		) {
-			// to bill
-			return [__("To Bill"), "orange", "per_delivered,=,100|per_billed,<,100|status,!=,Closed"];
-		} else if (doc.skip_delivery_note && flt(doc.per_billed) < 100) {
-			return [__("To Bill"), "orange", "per_billed,<,100|status,!=,Closed"];
+		}
+
+		if (doc.status in color_map) {
+			return [__(doc.status), color_map[doc.status]];
 		}
 	},
 	onload: function (listview) {

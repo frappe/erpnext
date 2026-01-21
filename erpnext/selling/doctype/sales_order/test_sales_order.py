@@ -57,6 +57,24 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		frappe.db.rollback()
 		frappe.set_user("Administrator")
 
+	def test_sales_order_status_for_maintenance_order(self):
+		so = make_sales_order(
+			item_code="_Test Item",
+			qty=1,
+			rate=100,
+			order_type="Maintenance",
+			do_not_submit=True,
+		)
+		so.submit()
+		self.assertEqual(so.status, "To Bill")
+
+		si = make_sales_invoice(so.name)
+		si.insert()
+		si.submit()
+
+		so.reload()
+		self.assertEqual(so.status, "Completed")
+
 	def test_sales_order_with_negative_rate(self):
 		"""
 		Test if negative rate is allowed in Sales Order via doc submission and update items
@@ -2649,6 +2667,7 @@ def make_sales_order(**args):
 	so.currency = args.currency or "INR"
 	so.po_no = args.po_no or ""
 	so.is_subcontracted = args.is_subcontracted or 0
+	so.order_type = args.order_type or "Sales"
 	if args.selling_price_list:
 		so.selling_price_list = args.selling_price_list
 
