@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-01-19 09:52+0000\n"
-"PO-Revision-Date: 2026-01-20 10:06\n"
+"PO-Revision-Date: 2026-01-21 08:37\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Arabic\n"
 "MIME-Version: 1.0\n"
@@ -16738,7 +16738,7 @@ msgstr ""
 #. Supplier'
 #: erpnext/buying/doctype/request_for_quotation_supplier/request_for_quotation_supplier.json
 msgid "Email Sent"
-msgstr "إرسال البريد الإلكتروني"
+msgstr ""
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:355
 msgid "Email Sent to Supplier {0}"
@@ -26310,7 +26310,7 @@ msgstr ""
 #. 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
 msgid "Linked Documents"
-msgstr "المستندات المرتبطة"
+msgstr ""
 
 #. Label of the section_break_12 (Section Break) field in DocType 'POS Closing
 #. Entry'
@@ -45964,7 +45964,7 @@ msgstr "سلة التسوق"
 #. Label of the short_name (Data) field in DocType 'Manufacturer'
 #: erpnext/stock/doctype/manufacturer/manufacturer.json
 msgid "Short Name"
-msgstr "الاسم المختصر"
+msgstr ""
 
 #. Label of the short_term_loan (Link) field in DocType 'Invoice Discounting'
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.json
