@@ -367,11 +367,7 @@
  "idx": 70,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2025-07-31 17:19:01.166208",
-=======
  "modified": "2026-01-21 12:48:40.792323",
->>>>>>> 5bacb67d36 (fix: warehouse permissions in MR incorrectly ignored)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
