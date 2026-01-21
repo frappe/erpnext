@@ -2211,7 +2211,14 @@ def make_delivery_note(source_name, target_doc=None):
 					"cost_center": "cost_center",
 				},
 				"postprocess": update_item,
+<<<<<<< HEAD
 				"condition": lambda doc: doc.delivered_by_supplier != 1 and not doc.dn_detail,
+=======
+				"condition": lambda doc: doc.delivered_by_supplier != 1
+				and not doc.scio_detail
+				and not doc.dn_detail
+				and doc.qty - doc.delivered_qty > 0,
+>>>>>>> 70ec977cb2 (fix: create DN btn should not be shown if it cannot be created)
 			},
 			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 			"Sales Team": {

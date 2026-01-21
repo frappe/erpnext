@@ -118,11 +118,20 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				});
 
 				if (!is_delivered_by_supplier) {
-					this.frm.add_custom_button(
-						__("Delivery Note"),
-						this.frm.cscript["Make Delivery Note"],
-						__("Create")
+					const should_create_delivery_note = doc.items.some(
+						(item) =>
+							item.qty - item.delivered_qty > 0 &&
+							!item.scio_detail &&
+							!item.dn_detail &&
+							!item.delivered_by_supplier
 					);
+					if (should_create_delivery_note) {
+						this.frm.add_custom_button(
+							__("Delivery Note"),
+							this.frm.cscript["Make Delivery Note"],
+							__("Create")
+						);
+					}
 				}
 			}
 
