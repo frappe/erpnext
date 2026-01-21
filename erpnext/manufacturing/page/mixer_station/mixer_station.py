@@ -22,7 +22,9 @@ def get_mixer_state(job_card):
         "job_card_completed": jc.total_completed_qty > 0,
         "prepared_qty": wo.produced_qty if wo else jc.total_completed_qty,
         "stock_entry_name": wo.produced_qty > 0 and "MFG-SE-*" or "",
-        "work_order_status": wo.get_status() if wo else "Draft"
+        "work_order_status": wo.get_status() if wo else "Draft",
+        "additional_ingredients_added": jc.additional_ingredients_added,
+        "mixer_number": jc.mixer_number
     }
 
 @frappe.whitelist()
@@ -49,7 +51,7 @@ def get_mixer_ingredients(job_card):
             "item_name": row.item_name,
             "stock_uom": row.stock_uom,
             "stock_uom_qty": qty,
-            "additional_ingredients_added": getattr(row, "additional_ingredients_added", 0)
+            "additional_ingredients_added": jc.additional_ingredients_added
         })
 
     return ingredients
@@ -62,16 +64,16 @@ def confirm_materials(job_card, ingredients):
     jc = frappe.get_doc("Job Card", job_card)
 
     qty_by_code = {ing["item_code"]: flt(ing["qty"]) for ing in ingredients}
-    added_by_code = {ing["item_code"]: bool(ing.get("is_added")) for ing in ingredients}
+    # added_by_code = {ing["item_code"]: bool(ing.get("is_added")) for ing in ingredients}
 
     for row in jc.items:
         if row.item_code in qty_by_code:
             row.required_qty = qty_by_code[row.item_code]
-            row.additional_ingredients_added = added_by_code.get(row.item_code, 0)
+            # row.additional_ingredients_added = added_by_code.get(row.item_code, 0)
 
     total_qty = sum(row.required_qty for row in jc.items if row.required_qty > 0)
     jc.for_quantity = total_qty
-
+    jc.additional_ingredients_added = 1
     jc.save(ignore_permissions=True)
 
     se = jc_make_stock_entry(job_card)
@@ -83,6 +85,7 @@ def confirm_materials(job_card, ingredients):
     return {
         "stock_entry": se.name,
         "total_for_quantity": total_qty,  
+        "additional_ingredients_added": jc.additional_ingredients_added
     }
 
 @frappe.whitelist()
@@ -90,7 +93,7 @@ def start_mixing(job_card):
     """Start the Job Card when mixing starts."""
     jc = frappe.get_doc("Job Card", job_card)
     start_time = frappe.utils.now_datetime()
-    employee_id = get_operators("Mixer Operator", jc.production_line, jc.workstation)
+    employee_id = get_operators("Mixer Operator", jc.production_line)
     args = {
         "job_card_id": jc.name,
         "start_time": start_time,
@@ -306,14 +309,11 @@ def get_all_mixers(job_card, production_line=None):
 @frappe.whitelist()
 def assign_mixer_to_job_card(job_card, mixer):
     jc = frappe.get_doc("Job Card", job_card)
-    mixer_number = frappe.get_doc("Mixer", mixer)
-
-    jc.mixer_number = mixer_number
-    
+    jc.mixer_number = mixer 
     jc.save(ignore_permissions=True)
     frappe.db.commit()
 
     return {
         "status": "success",
-        "mixer_number": mixer_number
+        "mixer_number": jc.mixer_number
     }

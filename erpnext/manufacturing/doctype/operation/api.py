@@ -162,16 +162,15 @@ def get_open_job_cards(process):
     return job_cards
 
 @frappe.whitelist()
-def get_operators(designation, production_line, workstation):
+def get_operators(designation, production_line):
     filters = {
         "designation": designation,
         "production_line": production_line,
-        "workstation_type": workstation  
     }
     
     employee_name = frappe.db.get_value("Employee", filters, "name")  
     
     if not employee_name:
-        frappe.throw(f"No operator found: designation={designation}, line={production_line}, workstation={workstation}")
+        frappe.throw(f"No operator found: designation={designation}, line={production_line}")
     
     return employee_name

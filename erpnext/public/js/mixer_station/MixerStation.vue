@@ -96,6 +96,7 @@ onMounted(async () => {
     mixingReady.value = !!s.mixer_materials_confirmed;
     mixingStarted.value = !!s.mixer_started;
     mixingStartTime.value = s.mixer_start_time;
+    selectedMixer.value = s.mixer_number || '';
 
     jobCardSubmitted.value = !!s.job_card_submitted || false;
     if (jobCardSubmitted.value) {
