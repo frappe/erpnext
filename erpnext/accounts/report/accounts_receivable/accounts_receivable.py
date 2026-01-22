@@ -1056,13 +1056,29 @@ class ReceivablePayableReport:
 				.where(self.customer.payment_terms == self.filters.get("payment_terms_template"))
 			)
 
-			si_ptt = self.ple.against_voucher_no.isin(
+			si_ptt = (
 				qb.from_(si)
 				.select(si.name)
 				.where(si.payment_terms_template == self.filters.get("payment_terms_template"))
+				.where(si.company == self.filters.company)
+				.where(si.posting_date <= self.filters.report_date)
 			)
 
-			self.qb_selection_filter.append(Criterion.any([customer_ptt, si_ptt]))
+			if self.filters.customer_group:
+				si_ptt = si_ptt.where(si.customer_group.isin(self.filters.customer_group))
+
+			if self.filters.party:
+				si_ptt = si_ptt.where(si.customer.isin(self.filters.party))
+
+			if self.filters.cost_center:
+				si_ptt = si_ptt.where(si.cost_center.isin(self.filters.cost_center))
+
+			if self.filters.party_account:
+				si_ptt = si_ptt.where(si.debit_to == self.filters.party_account)
+
+			sales_ptt = self.ple.against_voucher_no.isin(si_ptt)
+
+			self.qb_selection_filter.append(Criterion.any([customer_ptt, sales_ptt]))
 
 		if self.filters.get("sales_partner"):
 			self.qb_selection_filter.append(
@@ -1095,14 +1111,29 @@ class ReceivablePayableReport:
 				.select(supplier.name)
 				.where(supplier.payment_terms == self.filters.get("supplier_group"))
 			)
-
-			pi_ptt = self.ple.against_voucher_no.isin(
+			pi_ptt = (
 				qb.from_(pi)
 				.select(pi.name)
 				.where(pi.payment_terms_template == self.filters.get("payment_terms_template"))
+				.where(pi.company == self.filters.company)
+				.where(pi.posting_date <= self.filters.report_date)
 			)
 
-			self.qb_selection_filter.append(Criterion.any([supplier_ptt, pi_ptt]))
+			if self.filters.supplier_group:
+				pi_ptt = pi_ptt.where(pi.supplier_group.isin(self.filters.supplier_group))
+
+			if self.filters.party:
+				pi_ptt = pi_ptt.where(pi.supplier.isin(self.filters.party))
+
+			if self.filters.cost_center:
+				pi_ptt = pi_ptt.where(pi.cost_center.isin(self.filters.cost_center))
+
+			if self.filters.party_account:
+				pi_ptt = pi_ptt.where(pi.credit_to == self.filters.party_account)
+
+			purchase_ptt = self.ple.against_voucher_no.isin(pi_ptt)
+
+			self.qb_selection_filter.append(Criterion.any([supplier_ptt, purchase_ptt]))
 
 	def get_hierarchical_filters(self, doctype, key):
 		lft, rgt = frappe.db.get_value(doctype, self.filters.get(key), ["lft", "rgt"])
