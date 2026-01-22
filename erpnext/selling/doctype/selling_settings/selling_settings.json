@@ -35,7 +35,19 @@
   "hide_tax_id",
   "enable_discount_accounting",
   "allow_zero_qty_in_quotation",
+<<<<<<< HEAD
   "allow_zero_qty_in_sales_order"
+=======
+  "allow_zero_qty_in_sales_order",
+  "set_zero_rate_for_expired_batch",
+  "experimental_section",
+  "use_legacy_js_reactivity",
+  "subcontracting_inward_tab",
+  "section_break_zwh6",
+  "allow_delivery_of_overproduced_qty",
+  "column_break_mla9",
+  "deliver_scrap_items"
+>>>>>>> 04cdf88715 (feat(credit-note): add checkbox to set valuation rate as zero for expired batch)
  ],
  "fields": [
   {
@@ -224,6 +236,22 @@
    "fieldname": "fallback_to_default_price_list",
    "fieldtype": "Check",
    "label": "Use Prices from Default Price List as Fallback"
+<<<<<<< HEAD
+=======
+  },
+  {
+   "default": "0",
+   "fieldname": "use_legacy_js_reactivity",
+   "fieldtype": "Check",
+   "label": "Use Legacy (Client side) Reactivity"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, system will set incoming rate as zero for stand-alone credit notes with expired batch item.",
+   "fieldname": "set_zero_rate_for_expired_batch",
+   "fieldtype": "Check",
+   "label": "Set Incoming Rate as Zero for Expired Batch"
+>>>>>>> 04cdf88715 (feat(credit-note): add checkbox to set valuation rate as zero for expired batch)
   }
  ],
  "grid_page_length": 50,
@@ -232,7 +260,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-21 17:28:37.027837",
+ "modified": "2026-01-23 00:04:33.105916",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
