@@ -26,6 +26,10 @@
   "date_of_joining",
   "image",
   "status",
+  "manufacturing_section",
+  "production_line",
+  "column_break_xhpi",
+  "workstation_type",
   "erpnext_user",
   "user_id",
   "create_user",
@@ -47,9 +51,6 @@
   "col_break_22",
   "notice_number_of_days",
   "date_of_retirement",
-  "manufacturing_details",
-  "production_line",
-  "workstation_type",
   "contact_details",
   "cell_number",
   "column_break_40",
@@ -828,23 +829,25 @@
    "options": "Attendance Shift"
   },
   {
-   "fieldname": "manufacturing_details",
-   "fieldtype": "Tab Break",
-   "label": "Manufacturing"
-  },
-  {
    "fieldname": "production_line",
    "fieldtype": "Link",
    "label": "Production Line",
-   "options": "Production Line",
-   "reqd": 1
+   "options": "Production Line"
   },
   {
    "fieldname": "workstation_type",
    "fieldtype": "Link",
    "label": "Workstation Type",
-   "options": "Workstation",
-   "reqd": 1
+   "options": "Workstation"
+  },
+  {
+   "fieldname": "manufacturing_section",
+   "fieldtype": "Section Break",
+   "label": "Manufacturing"
+  },
+  {
+   "fieldname": "column_break_xhpi",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
@@ -852,7 +855,7 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2026-01-19 14:13:23.580758",
+ "modified": "2026-01-22 11:52:00.568537",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
