@@ -611,11 +611,7 @@
    "link_fieldname": "party"
   }
  ],
-<<<<<<< HEAD
- "modified": "2025-11-25 09:35:56.772949",
-=======
  "modified": "2026-01-21 17:23:42.151114",
->>>>>>> 1e3db9f916 (fix(customer): add customer group filters)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
