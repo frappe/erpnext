@@ -261,7 +261,7 @@ class DeliveryNote(SellingController):
 					where item_code = %s and warehouse = %s""",
 					(d.item_code, d.warehouse),
 				)
-				d.actual_qty = actual_qty and flt(actual_qty[0][0]) or 0
+				d.actual_qty = (actual_qty and flt(actual_qty[0][0])) or 0
 
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
@@ -283,6 +283,7 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
 		self.set_serial_and_batch_bundle_from_pick_list()
+		self.normalize_serial_and_batch_fields()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
@@ -294,6 +295,11 @@ class DeliveryNote(SellingController):
 
 		self.validate_against_stock_reservation_entries()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+
+	def normalize_serial_and_batch_fields(self):
+		for d in self.get("items"):
+			if d.get("use_serial_batch_fields") and d.get("serial_and_batch_bundle"):
+				d.serial_and_batch_bundle = None
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
@@ -782,7 +788,7 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 		)
 		.run()
 	)
-	billed_against_so = billed_against_so and billed_against_so[0][0] or 0
+	billed_against_so = (billed_against_so and billed_against_so[0][0]) or 0
 
 	# Get all Delivery Note Item rows against the Sales Order Item row
 	dn = frappe.qb.DocType("Delivery Note").as_("dn")
@@ -817,7 +823,7 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 				where dn_detail=%s and docstatus=1""",
 				dnd.name,
 			)
-			billed_amt_agianst_dn = billed_amt_agianst_dn and billed_amt_agianst_dn[0][0] or 0
+			billed_amt_agianst_dn = (billed_amt_agianst_dn and billed_amt_agianst_dn[0][0]) or 0
 
 		# Distribute billed amount directly against SO between DNs based on FIFO
 		if billed_against_so and billed_amt_agianst_dn < dnd.amount:

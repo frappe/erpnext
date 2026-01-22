@@ -130,7 +130,23 @@ frappe.ui.form.on("Delivery Note Item", {
 		var d = locals[dt][dn];
 		frm.update_in_all_rows("items", "expense_account", d.expense_account);
 	},
+	use_serial_batch_fields: function (frm, dt, dn) {
+		erpnext.stock.delivery_note.clear_bundle_if_using_serial_fields(dt, dn);
+	},
+	serial_no: function (frm, dt, dn) {
+		erpnext.stock.delivery_note.clear_bundle_if_using_serial_fields(dt, dn);
+	},
+	batch_no: function (frm, dt, dn) {
+		erpnext.stock.delivery_note.clear_bundle_if_using_serial_fields(dt, dn);
+	},
 });
+
+erpnext.stock.delivery_note.clear_bundle_if_using_serial_fields = function (dt, dn) {
+	var d = locals[dt][dn];
+	if (d && d.use_serial_batch_fields && d.serial_and_batch_bundle) {
+		frappe.model.set_value(dt, dn, "serial_and_batch_bundle", null);
+	}
+};
 
 erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 	erpnext.selling.SellingController

@@ -24,7 +24,10 @@ from erpnext.stock.doctype.delivery_note.delivery_note import (
 	make_sales_invoice,
 )
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+	get_gl_entries,
+	make_purchase_receipt,
+)
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
@@ -286,6 +289,51 @@ class TestDeliveryNote(FrappeTestCase):
 		for serial_no in returned_serial_nos2:
 			self.assertTrue(serial_no in serial_nos)
 			self.assertFalse(serial_no in returned_serial_nos1)
+
+	def test_clear_serial_and_batch_bundle_when_using_serial_fields(self):
+		serial_item_code = "Serial Bundle Clear Test Item"
+		make_item(
+			serial_item_code,
+			{
+				"has_serial_no": 1,
+				"serial_no_series": "SBBCLR-.#####",
+				"is_stock_item": 1,
+			},
+		)
+
+		pr = make_purchase_receipt(
+			item_code=serial_item_code, warehouse="_Test Warehouse - _TC", qty=1, rate=100
+		)
+		serial_no = get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle)[0]
+
+		dn = create_delivery_note(
+			item_code=serial_item_code,
+			warehouse="_Test Warehouse - _TC",
+			qty=1,
+			rate=150,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_save=True,
+		)
+		dn.items[0].serial_and_batch_bundle = make_serial_batch_bundle(
+			frappe._dict(
+				{
+					"item_code": serial_item_code,
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": -1,
+					"voucher_type": "Delivery Note",
+					"serial_nos": [serial_no],
+					"posting_date": dn.posting_date,
+					"posting_time": dn.posting_time,
+					"type_of_transaction": "Outward",
+					"do_not_submit": True,
+				}
+			)
+		).name
+		dn.insert()
+		dn.load_from_db()
+
+		self.assertFalse(dn.items[0].serial_and_batch_bundle)
 
 	def test_sales_return_for_non_bundled_items_partial(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
@@ -688,7 +736,7 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(actual_qty, 35)
 
 		# Check incoming rate for return entry
-		incoming_rate, stock_value_difference = frappe.db.get_value(
+		incoming_rate, _stock_value_difference = frappe.db.get_value(
 			"Stock Ledger Entry",
 			{"voucher_type": "Delivery Note", "voucher_no": dn1.name},
 			["incoming_rate", "stock_value_difference"],
