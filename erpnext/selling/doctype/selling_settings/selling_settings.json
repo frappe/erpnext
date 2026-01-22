@@ -232,11 +232,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2025-09-23 21:10:14.826653",
-=======
  "modified": "2026-01-21 17:28:37.027837",
->>>>>>> 1e3db9f916 (fix(customer): add customer group filters)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
