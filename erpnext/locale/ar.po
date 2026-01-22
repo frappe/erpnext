@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-01-19 09:52+0000\n"
-"PO-Revision-Date: 2026-01-21 08:37\n"
+"PO-Revision-Date: 2026-01-22 09:30\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Arabic\n"
 "MIME-Version: 1.0\n"
@@ -29698,7 +29698,7 @@ msgstr "لم يتم العثور على {0} معاملات Inter Company."
 
 #: erpnext/assets/doctype/asset/asset.js:337
 msgid "No."
-msgstr ""
+msgstr "لا."
 
 #. Label of the no_of_employees (Select) field in DocType 'Prospect'
 #: erpnext/crm/doctype/prospect/prospect.json
@@ -33676,7 +33676,7 @@ msgstr "بنزين"
 #: erpnext/manufacturing/doctype/bom/bom_item_preview.html:16
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:321
 msgid "Phantom Item"
-msgstr ""
+msgstr "عنصر شبح"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:430
 msgid "Phantom Item is mandatory"
