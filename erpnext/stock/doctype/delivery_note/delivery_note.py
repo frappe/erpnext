@@ -297,8 +297,13 @@ class DeliveryNote(SellingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def normalize_serial_and_batch_fields(self):
+		"""Clear bundle link when serial/batch fields are used for this row."""
 		for d in self.get("items"):
-			if d.get("use_serial_batch_fields") and d.get("serial_and_batch_bundle"):
+			if (
+				d.get("use_serial_batch_fields")
+				and d.get("serial_and_batch_bundle")
+				and (d.get("serial_no") or d.get("batch_no"))
+			):
 				d.serial_and_batch_bundle = None
 
 	def validate_with_previous_doc(self):

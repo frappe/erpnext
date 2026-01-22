@@ -206,15 +206,24 @@ class StockController(AccountsController):
 		if self.get("_action") == "update_after_submit":
 			return
 
-		# To handle test cases
-		if frappe.flags.in_test and frappe.flags.use_serial_and_batch_fields:
-			return
-
 		if not table_name:
 			table_name = "items"
 
 		if self.doctype == "Asset Capitalization":
 			table_name = "stock_items"
+
+		# To handle test cases: skip auto bundle creation only when none is needed
+		if frappe.flags.in_test and frappe.flags.use_serial_and_batch_fields:
+			needs_bundle = any(
+				(
+					row.get("use_serial_batch_fields")
+					and not row.get("serial_and_batch_bundle")
+					and (row.serial_no or row.batch_no or row.get("rejected_serial_no"))
+				)
+				for row in self.get(table_name)
+			)
+			if not needs_bundle:
+				return
 
 		parent_details = frappe._dict()
 		if table_name == "packed_items":
