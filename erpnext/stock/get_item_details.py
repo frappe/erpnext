@@ -418,11 +418,13 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		)
 
 	# Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
-	if not args.get("uom"):
-		if args.get("doctype") in sales_doctypes:
-			args.uom = item.sales_uom if item.sales_uom else item.stock_uom
-		elif (args.get("doctype") in ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]) or (
-			args.get("doctype") == "Material Request" and args.get("material_request_type") == "Purchase"
+	if not ctx.uom:
+		if ctx.doctype in sales_doctypes:
+			ctx.uom = item.sales_uom if item.sales_uom else item.stock_uom
+		elif (
+			(ctx.doctype in ["Purchase Order", "Purchase Receipt", "Purchase Invoice"])
+			or (ctx.doctype == "Material Request" and ctx.material_request_type == "Purchase")
+			or (ctx.doctype == "Supplier Quotation")
 		):
 			args.uom = item.purchase_uom if item.purchase_uom else item.stock_uom
 		else:
