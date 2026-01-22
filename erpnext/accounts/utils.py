@@ -608,8 +608,9 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	"""
 	original_idx_map = {row.name: row.idx for row in journal_entry.accounts}
 
-	jv_detail = journal_entry.get("accounts", {"name": d["voucher_detail_no"]})[0]
-	original_row_idx = jv_detail.idx 
+	jv_details = journal_entry.get("accounts", {"name": d["voucher_detail_no"]})
+	jv_detail = jv_details[0]  # journal entry row must exist here
+	original_row_idx = jv_detail.idx
 
 	rev_dr_or_cr = (
 		"debit_in_account_currency"
@@ -635,7 +636,7 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 
 	# new row with references
 	new_row = journal_entry.append("accounts")
-	new_row.idx = original_row_idx 
+	new_row.idx = original_row_idx
 
 	# Copy field values into new row
 	[
@@ -668,9 +669,7 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 		new_row.advance_voucher_type = jv_detail.get("reference_type")
 		new_row.advance_voucher_no = jv_detail.get("reference_name")
 
-	# will work as update after submit
 	journal_entry.flags.ignore_validate_update_after_submit = True
-	# Ledgers will be reposted by Reconciliation tool
 	journal_entry.flags.ignore_reposting_on_reconciliation = True
 
 	for row in journal_entry.accounts:
@@ -678,6 +677,7 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 			row.idx = original_idx_map[row.name]
 
 	journal_entry.accounts.sort(key=lambda d: d.idx)
+
 	if not do_not_save:
 		journal_entry.save(ignore_permissions=True)
 
