@@ -10,8 +10,12 @@ from frappe.utils import cint, flt, format_datetime, get_datetime
 
 import erpnext
 from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
+<<<<<<< HEAD
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
 from erpnext.stock.utils import get_incoming_rate, get_valuation_method
+=======
+from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_valuation_method, getdate
+>>>>>>> e78c750b4e (fix(credit-note): set incoming rate as zero for expired batch)
 
 
 class StockOverReturnError(frappe.ValidationError):
@@ -683,6 +687,29 @@ def get_rate_for_return(
 	else:
 		select_field = "abs(stock_value_difference / actual_qty)"
 
+	item_details = frappe.get_cached_value("Item", item_code, ["has_batch_no", "has_expiry_date"], as_dict=1)
+	set_zero_rate_for_expired_batch = frappe.db.get_single_value(
+		"Selling Settings", "set_zero_rate_for_expired_batch"
+	)
+
+	if (
+		set_zero_rate_for_expired_batch
+		and item_details.has_batch_no
+		and item_details.has_expiry_date
+		and not return_against
+		and voucher_type in ["Sales Invoice", "Delivery Note"]
+	):
+		# set incoming_rate zero explicitly for standalone credit note with expired batch
+		batch_no = frappe.db.get_value(f"{voucher_type} Item", voucher_detail_no, "batch_no")
+		if batch_no and is_batch_expired(batch_no, sle.get("posting_date")):
+			frappe.db.set_value(
+				voucher_type + " Item",
+				voucher_detail_no,
+				"incoming_rate",
+				0,
+			)
+			return 0
+
 	rate = flt(frappe.db.get_value("Stock Ledger Entry", filters, select_field))
 	if not (rate and return_against) and voucher_type in ["Sales Invoice", "Delivery Note"]:
 		rate = frappe.db.get_value(f"{voucher_type} Item", voucher_detail_no, "incoming_rate")
@@ -1152,3 +1179,69 @@ def get_available_serial_nos(serial_nos, warehouse):
 def get_payment_data(invoice):
 	payment = frappe.db.get_all("Sales Invoice Payment", {"parent": invoice}, ["mode_of_payment", "amount"])
 	return payment
+<<<<<<< HEAD
+=======
+
+
+@frappe.whitelist()
+def get_invoice_item_returned_qty(doctype, invoice, customer, item_row_name):
+	is_return, docstatus = frappe.db.get_value(doctype, invoice, ["is_return", "docstatus"])
+	if not is_return and docstatus == 1:
+		return get_returned_qty_map_for_row(invoice, customer, item_row_name, doctype)
+
+
+@frappe.whitelist()
+def is_invoice_returnable(doctype, invoice):
+	is_return, docstatus, customer = frappe.db.get_value(
+		doctype, invoice, ["is_return", "docstatus", "customer"]
+	)
+	if is_return or docstatus == 0:
+		return False
+
+	invoice_item_qty = frappe.db.get_all(f"{doctype} Item", {"parent": invoice}, ["name", "qty"])
+
+	already_full_returned = 0
+	for d in invoice_item_qty:
+		returned_qty = get_returned_qty_map_for_row(invoice, customer, d.name, doctype)
+		if returned_qty.qty == d.qty:
+			already_full_returned += 1
+
+	return len(invoice_item_qty) != already_full_returned
+
+
+def get_sales_invoice_item_from_consolidated_invoice(return_against_pos_invoice, pos_invoice_item):
+	try:
+		SalesInvoice = DocType("Sales Invoice")
+		SalesInvoiceItem = DocType("Sales Invoice Item")
+
+		query = (
+			frappe.qb.from_(SalesInvoice)
+			.from_(SalesInvoiceItem)
+			.select(SalesInvoiceItem.name)
+			.where(
+				(SalesInvoice.name == SalesInvoiceItem.parent)
+				& (SalesInvoice.is_return == 0)
+				& (SalesInvoiceItem.pos_invoice == return_against_pos_invoice)
+				& (SalesInvoiceItem.pos_invoice_item == pos_invoice_item)
+			)
+		)
+
+		result = query.run(as_dict=True)
+		return result[0].name if result else None
+	except Exception:
+		return None
+
+
+def is_batch_expired(batch_no, posting_date):
+	"""
+	To check whether the batch is expired or not based on the posting date.
+	"""
+	expiry_date = frappe.db.get_value("Batch", batch_no, "expiry_date")
+	if not expiry_date:
+		return
+
+	if getdate(posting_date) > getdate(expiry_date):
+		return True
+
+	return False
+>>>>>>> e78c750b4e (fix(credit-note): set incoming rate as zero for expired batch)
