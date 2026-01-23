@@ -433,6 +433,11 @@ def accumulate_values_into_parents(accounts, accounts_by_name, companies):
 		if d.parent_account:
 			account = d.parent_account_name
 
+			# Skip if parent_account_name is None or not in accounts_by_name
+			# This can happen when parent account wasn't fetched (different company/root_type)
+			if not account or account not in accounts_by_name:
+				continue
+
 			for company in companies:
 				accounts_by_name[account][company] = accounts_by_name[account].get(company, 0.0) + d.get(
 					company, 0.0
@@ -691,6 +696,13 @@ def validate_entries(key, entry, accounts_by_name, accounts):
 		if args.parent_account:
 			parent_args = get_account_details(args.parent_account)
 
+			# Build parent_account_name using the same format as account_key
+			# (with account_number prefix if present) to match accounts_by_name keys
+			if parent_args.account_number:
+				parent_account_name = f"{parent_args.account_number} - {parent_args.account_name}"
+			else:
+				parent_account_name = parent_args.account_name
+
 			args.update(
 				{
 					"lft": parent_args.lft + 1,
@@ -698,7 +710,7 @@ def validate_entries(key, entry, accounts_by_name, accounts):
 					"indent": 3,
 					"root_type": parent_args.root_type,
 					"report_type": parent_args.report_type,
-					"parent_account_name": parent_args.account_name,
+					"parent_account_name": parent_account_name,
 					"company_wise_opening_bal": defaultdict(float),
 				}
 			)
