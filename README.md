@@ -80,17 +80,17 @@ It takes care of installation, setup, upgrades, monitoring, maintenance and supp
 
 See [Frappe Documentation](https://github.com/frappe/frappe_docker) for full documentation & FAQ on docker setup
 
-## Prerequisites
+#### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose v2](https://docs.docker.com/compose/)
 - [git](https://docs.github.com/en/get-started/getting-started-with-git/set-up-git)
 
-> For Docker basics and best practices refer to Docker's [documentation](http://docs.docker.com)
+> For Docker basics and best practices refer to Docker's [documentation](https://docs.docker.com)
 
-## Demo setup
+#### Demo setup
 
-The fastest way to try Frappe is to play in an already set up sandbox, in your browser, click the button below:
+The fastest way to try ERPNext is to play in an already set up sandbox, in your browser, click the button below:
 
 <a href="https://labs.play-with-docker.com/?stack=https://raw.githubusercontent.com/frappe/frappe_docker/main/pwd.yml">
   <img src="https://raw.githubusercontent.com/play-with-docker/stacks/master/assets/images/button.png" alt="Try in PWD"/>
