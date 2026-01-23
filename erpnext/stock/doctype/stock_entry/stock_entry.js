@@ -936,47 +936,33 @@ frappe.ui.form.on("Stock Entry Detail", {
 		d.image = "";
 
 		if (d.item_code) {
-			var args = {
-				item_code: d.item_code,
-				warehouse: cstr(d.s_warehouse) || cstr(d.t_warehouse),
-				transfer_qty: d.transfer_qty,
-				serial_no: d.serial_no,
-				batch_no: d.batch_no,
-				bom_no: d.bom_no,
-				expense_account: d.expense_account,
-				cost_center: d.cost_center,
-				company: frm.doc.company,
-				qty: d.qty,
-				voucher_type: frm.doc.doctype,
-				voucher_no: d.name,
-				allow_zero_valuation: 1,
-			};
-
-			return frappe.call({
-				doc: frm.doc,
+			return frm.call({
 				method: "get_item_details",
-				args: args,
+				child: d,
+				args: {
+					item_code: d.item_code,
+					warehouse: cstr(d.s_warehouse) || cstr(d.t_warehouse),
+					transfer_qty: d.transfer_qty,
+					serial_no: d.serial_no,
+					batch_no: d.batch_no,
+					bom_no: d.bom_no,
+					expense_account: d.expense_account,
+					cost_center: d.cost_center,
+					company: frm.doc.company,
+					qty: d.qty,
+					voucher_type: frm.doc.doctype,
+					voucher_no: d.name,
+					allow_zero_valuation: 1,
+				},
 				callback: function (r) {
 					if (r.message) {
-						var d = locals[cdt][cdn];
-						$.each(r.message, function (k, v) {
-							if (v) {
-								// set_value trigger barcode function and barcode set qty to 1 in stock_controller.js, to avoid this set value manually instead of set value.
-								if (k != "barcode") {
-									frappe.model.set_value(cdt, cdn, k, v); // qty and it's subsequent fields weren't triggered
-								} else {
-									d.barcode = v;
-								}
-							}
-						});
+						// Handle barcode separately as it triggers unwanted side effects
+						if (r.message.barcode) {
+							d.barcode = r.message.barcode;
+						}
 						refresh_field("items");
 
-						let no_batch_serial_number_value = false;
-						if (d.has_serial_no || d.has_batch_no) {
-							no_batch_serial_number_value = true;
-						}
-
-						if (no_batch_serial_number_value && !frappe.flags.hide_serial_batch_dialog) {
+						if ((d.has_serial_no || d.has_batch_no) && !frappe.flags.hide_serial_batch_dialog) {
 							if (!frappe.flags.dialog_set) {
 								frappe.flags.dialog_set = true;
 							}

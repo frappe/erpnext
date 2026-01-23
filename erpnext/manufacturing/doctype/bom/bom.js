@@ -535,9 +535,9 @@ var get_bom_material_detail = function (doc, cdt, cdn, scrap_items) {
 
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
-		return frappe.call({
-			doc: doc,
+		return cur_frm.call({
 			method: "get_bom_material_detail",
+			child: d,
 			args: {
 				company: doc.company,
 				item_code: d.item_code,
@@ -553,9 +553,6 @@ var get_bom_material_detail = function (doc, cdt, cdn, scrap_items) {
 				do_not_explode: d.do_not_explode,
 			},
 			callback: function (r) {
-				d = locals[cdt][cdn];
-
-				$.extend(d, r.message);
 				refresh_field("items");
 				refresh_field("scrap_items");
 
