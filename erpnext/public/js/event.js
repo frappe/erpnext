@@ -53,3 +53,9 @@ frappe.ui.form.on("Event", {
 		);
 	},
 });
+
+// Calendar view customization to ensure color field is properly mapped
+frappe.views.calendar["Event"] = {
+	field_map: { start: "starts_on", end: "ends_on", id: "name", title: "subject", color: "color", allDay: "all_day" },
+	get_events_method: "frappe.desk.calendar.get_events",
+};
