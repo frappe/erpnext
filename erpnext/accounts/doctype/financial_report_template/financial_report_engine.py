@@ -570,7 +570,8 @@ class FinancialQueryBuilder:
 
 			account_data = AccountData(account=account, **self._get_account_meta(account))
 
-			account_data.add_period(PeriodValue(first_period_key, opening_balance, 0, 0))
+			# Fix: closing should equal opening when there are no movements yet
+			account_data.add_period(PeriodValue(first_period_key, opening_balance, opening_balance, 0))
 			balances_data[account] = account_data
 
 		return balances_data
@@ -658,12 +659,17 @@ class FinancialQueryBuilder:
 
 				current_balance = closing_balance
 
-		# Accounts with no movements
+		# Accounts with no movements - carry forward closing balance from previous period
 		for account_data in balances_data.values():
+			previous_closing = 0.0
 			for period in self.periods:
 				period_key = period["key"]
-				if period_key not in account_data.period_values:
-					account_data.add_period(PeriodValue(period_key, 0.0, 0.0, 0.0))
+				if period_key in account_data.period_values:
+					# Period exists, get its closing for carry-forward
+					previous_closing = account_data.period_values[period_key].closing
+				else:
+					# Period doesn't exist, carry forward previous closing
+					account_data.add_period(PeriodValue(period_key, previous_closing, previous_closing, 0.0))
 
 	def _handle_balance_accumulation(self, balances_data):
 		for account_data in balances_data.values():

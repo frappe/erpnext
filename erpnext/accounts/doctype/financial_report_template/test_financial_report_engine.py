@@ -1668,3 +1668,233 @@ class TestFilterExpressionParser(FinancialReportTemplateTestCase):
 		mock_row_invalid = self._create_mock_report_row(invalid_formula)
 		condition = parser.build_condition(mock_row_invalid, account_table)
 		self.assertIsNone(condition)
+
+
+class TestClosingBalanceCarryForward(FinancialReportTemplateTestCase):
+	"""
+	Test that closing balances are correctly carried forward for accounts
+	without period movements.
+
+	Regression test for: https://github.com/frappe/erpnext/issues/52011
+
+	Bug: When an account has an opening balance (from prior period GL entries)
+	but no movements in the reporting period, the engine incorrectly returned
+	a closing balance of 0 instead of carrying forward the opening balance.
+	"""
+
+	@classmethod
+	def setUpClass(cls):
+		"""Set up test fixtures for closing balance carry-forward tests."""
+		from frappe.utils import add_years, getdate, nowdate
+
+		super().setUpClass()
+
+		# Use a specific date that's reliably in a prior fiscal year
+		cls.prior_year_date = "2023-06-15"
+		cls.reporting_year_start = "2024-01-01"
+		cls.reporting_year_end = "2024-12-31"
+
+		# Create test equity account if it doesn't exist
+		cls.test_account = cls._get_or_create_test_account()
+
+		# Create journal entry in prior year to establish opening balance
+		cls._create_prior_year_journal_entry()
+
+	@classmethod
+	def _get_or_create_test_account(cls):
+		"""Get or create a test equity account"""
+		account_name = "_Test Equity Reserve - _TC"
+
+		if not frappe.db.exists("Account", account_name):
+			account = frappe.get_doc(
+				{
+					"doctype": "Account",
+					"account_name": "_Test Equity Reserve",
+					"parent_account": "Equity - _TC",
+					"company": "_Test Company",
+					"root_type": "Equity",
+					"account_type": "",
+					"is_group": 0,
+				}
+			)
+			account.insert(ignore_permissions=True)
+
+		return account_name
+
+	@classmethod
+	def _create_prior_year_journal_entry(cls):
+		"""Create a journal entry in the prior year to establish balance"""
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		# Create a journal entry that credits equity (increases equity balance)
+		# Debit: Cash, Credit: Equity Reserve
+		jv = make_journal_entry(
+			"_Test Cash - _TC",  # Debit account
+			cls.test_account,  # Credit account (equity)
+			50000,  # Amount
+			posting_date=cls.prior_year_date,
+			submit=True,
+		)
+		cls.test_journal_entry = jv
+
+	def test_closing_balance_equals_opening_when_no_movements(self):
+		"""
+		Verify that an account with prior-period balance but no current-period
+		movements shows closing balance equal to opening balance (not 0).
+		"""
+		# Create a template that selects our test equity account
+		test_rows = [
+			{
+				"reference_code": "EQUITY_TEST",
+				"display_name": "Test Equity Reserve",
+				"data_source": "Account Data",
+				"balance_type": "Closing Balance",
+				"calculation_formula": f'["account_name", "=", "_Test Equity Reserve"]',
+			},
+		]
+
+		template = FinancialReportTemplateTestCase.create_test_template_with_rows(test_rows)
+		template.insert()
+
+		try:
+			from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+				FinancialReportEngine,
+			)
+
+			# Run engine for reporting year (where account has no movements)
+			engine = FinancialReportEngine()
+			filters = frappe._dict(
+				{
+					"report_template": template.name,
+					"company": "_Test Company",
+					"period_start_date": self.reporting_year_start,
+					"period_end_date": self.reporting_year_end,
+					"from_fiscal_year": "2024",
+					"to_fiscal_year": "2024",
+					"filter_based_on": "Fiscal Year",
+					"periodicity": "Yearly",
+				}
+			)
+
+			columns, data, _, _ = engine.execute(filters)
+
+			# Find our test row in the results
+			equity_row = None
+			for row in data:
+				if row.get("reference_code") == "EQUITY_TEST":
+					equity_row = row
+					break
+
+			self.assertIsNotNone(equity_row, "EQUITY_TEST row should be in results")
+
+			# Get the period key for the yearly report
+			# Yearly reports use the fiscal year end as the key
+			period_key = None
+			for col in columns:
+				if col.get("fieldtype") == "Currency":
+					period_key = col.get("fieldname")
+					break
+
+			self.assertIsNotNone(period_key, "Should have a currency column for period values")
+
+			# The closing balance should be the carried-forward opening balance
+			# Credit to equity = negative in debit-minus-credit accounting
+			closing_balance = flt(equity_row.get(period_key, 0), 2)
+
+			# The balance should NOT be 0 - it should be the prior-year balance
+			# (50000 credit = -50000 in debit-credit terms)
+			self.assertNotEqual(
+				closing_balance,
+				0,
+				"Closing balance should not be 0 when account has prior-period balance",
+			)
+
+			# The balance should be negative (credit balance for equity)
+			self.assertLess(
+				closing_balance,
+				0,
+				"Equity credit balance should show as negative in debit-credit terms",
+			)
+
+		finally:
+			# Cleanup
+			template.delete()
+
+	def test_opening_and_closing_match_for_idle_account(self):
+		"""
+		Verify that opening_balance and closing_balance values are equal
+		when there are no movements in the period.
+		"""
+		test_rows = [
+			{
+				"reference_code": "EQ_OPENING",
+				"display_name": "Equity Opening",
+				"data_source": "Account Data",
+				"balance_type": "Opening Balance",
+				"calculation_formula": f'["account_name", "=", "_Test Equity Reserve"]',
+			},
+			{
+				"reference_code": "EQ_CLOSING",
+				"display_name": "Equity Closing",
+				"data_source": "Account Data",
+				"balance_type": "Closing Balance",
+				"calculation_formula": f'["account_name", "=", "_Test Equity Reserve"]',
+			},
+			{
+				"reference_code": "EQ_MOVEMENT",
+				"display_name": "Equity Movement",
+				"data_source": "Account Data",
+				"balance_type": "Period Movement (Debits - Credits)",
+				"calculation_formula": f'["account_name", "=", "_Test Equity Reserve"]',
+			},
+		]
+
+		template = FinancialReportTemplateTestCase.create_test_template_with_rows(test_rows)
+		template.insert()
+
+		try:
+			from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+				FinancialReportEngine,
+			)
+
+			engine = FinancialReportEngine()
+			filters = frappe._dict(
+				{
+					"report_template": template.name,
+					"company": "_Test Company",
+					"period_start_date": self.reporting_year_start,
+					"period_end_date": self.reporting_year_end,
+					"from_fiscal_year": "2024",
+					"to_fiscal_year": "2024",
+					"filter_based_on": "Fiscal Year",
+					"periodicity": "Yearly",
+				}
+			)
+
+			columns, data, _, _ = engine.execute(filters)
+
+			# Get results by reference code
+			results = {row.get("reference_code"): row for row in data}
+
+			# Get period key
+			period_key = None
+			for col in columns:
+				if col.get("fieldtype") == "Currency":
+					period_key = col.get("fieldname")
+					break
+
+			opening = flt(results.get("EQ_OPENING", {}).get(period_key, 0), 2)
+			closing = flt(results.get("EQ_CLOSING", {}).get(period_key, 0), 2)
+			movement = flt(results.get("EQ_MOVEMENT", {}).get(period_key, 0), 2)
+
+			# When movement is 0, closing should equal opening
+			self.assertEqual(movement, 0, "Movement should be 0 for account with no period activity")
+			self.assertEqual(
+				closing,
+				opening,
+				f"Closing ({closing}) should equal Opening ({opening}) when movement is 0",
+			)
+			self.assertNotEqual(opening, 0, "Opening balance should not be 0 (has prior-year balance)")
+
+		finally:
+			template.delete()
