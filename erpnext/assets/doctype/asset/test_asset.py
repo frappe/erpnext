@@ -1845,7 +1845,6 @@ class TestDepreciationBasics(AssetSetup):
 
 		stock_rate = 1000
 		stock_qty = 2
-		stock_amount = 2000
 		total_amount = 2000
 
 		# Create composite asset
