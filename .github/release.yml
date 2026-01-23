@@ -1,4 +1,0 @@
-changelog:
-  exclude:
-    labels:
-      - skip-release-notes

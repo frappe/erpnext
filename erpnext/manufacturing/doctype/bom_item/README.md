@@ -1,1 +1,0 @@
-Item required in the parent Bill of Material.

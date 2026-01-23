@@ -1,7 +1,0 @@
-Channel Partner
-Distributor
-Dealer
-Agent
-Retailer
-Implementation Partner
-Reseller

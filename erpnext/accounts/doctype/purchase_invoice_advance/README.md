@@ -1,1 +1,0 @@
-Detail of advance paid against Purchase Invoice.

@@ -1,1 +1,0 @@
-Partner / dealer / distributor who sells products (maybe for commission) and for whom targets can be set.

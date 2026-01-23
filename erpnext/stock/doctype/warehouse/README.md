@@ -1,1 +1,0 @@
-Location (physical or virtual) where Items can be stored.

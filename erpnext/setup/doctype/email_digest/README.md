@@ -1,1 +1,0 @@
-Details of automated daily, weekly, monthly digests sent to users.

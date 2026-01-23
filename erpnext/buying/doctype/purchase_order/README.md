@@ -1,1 +1,0 @@
-Confirmed order to Supplier to deliver certain Items.

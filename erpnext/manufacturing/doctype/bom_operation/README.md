@@ -1,1 +1,0 @@
-Operation performed in the parent Bill of Material.

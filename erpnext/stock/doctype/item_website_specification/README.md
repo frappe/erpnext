@@ -1,1 +1,0 @@
-Specification detail / parameter for website listing.

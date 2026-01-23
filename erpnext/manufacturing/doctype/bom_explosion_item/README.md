@@ -1,1 +1,0 @@
-Detail of Item required for the main Item by parsing the entire BOM tree.

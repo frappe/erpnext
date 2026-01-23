@@ -1,1 +1,0 @@
-Item master. Also called SKU (stock keeping unit).

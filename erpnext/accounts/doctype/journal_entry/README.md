@@ -1,1 +1,0 @@
-Journal entry for accounting entries including payments.

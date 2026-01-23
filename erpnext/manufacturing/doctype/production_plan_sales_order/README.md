@@ -1,1 +1,0 @@
-Sales Order being considered for the Production Planning Tool.

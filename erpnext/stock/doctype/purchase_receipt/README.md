@@ -1,1 +1,0 @@
-Shipment received from Supplier against Purchase Order.
