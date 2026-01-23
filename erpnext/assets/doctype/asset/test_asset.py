@@ -1832,7 +1832,12 @@ class TestDepreciationBasics(AssetSetup):
 		"""Test that assets created via Asset Capitalization can be split without capitalization error"""
 		from erpnext.assets.doctype.asset_capitalization.test_asset_capitalization import (
 			create_asset_capitalization,
+			create_asset_capitalization_data,
 		)
+		from erpnext.stock.doctype.item.test_item import create_item
+
+		# Ensure test data exists
+		create_asset_capitalization_data()
 
 		company = "_Test Company with perpetual inventory"
 		set_depreciation_settings_in_company(company=company)
@@ -1859,10 +1864,8 @@ class TestDepreciationBasics(AssetSetup):
 		# Create and submit Asset Capitalization
 		asset_capitalization = create_asset_capitalization(
 			target_asset=wip_composite_asset.name,
-			target_asset_location="Test Location",
 			stock_qty=stock_qty,
 			stock_rate=stock_rate,
-			service_expense_account="Expenses Included In Asset Valuation - TCP1",
 			company=company,
 			submit=1,
 		)
