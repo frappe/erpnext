@@ -1834,7 +1834,6 @@ class TestDepreciationBasics(AssetSetup):
 			create_asset_capitalization,
 			create_asset_capitalization_data,
 		)
-		from erpnext.stock.doctype.item.test_item import create_item
 
 		# Ensure test data exists
 		create_asset_capitalization_data()
