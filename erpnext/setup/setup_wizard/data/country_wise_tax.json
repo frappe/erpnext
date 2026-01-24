@@ -6,14 +6,14 @@
 		}
 	},
 	"Algeria": {
-		"Algeria VAT 17%": {
-			"account_name": "VAT 17%",
-			"tax_rate": 17.00,
+		"Algeria TVA 19%": {
+			"account_name": "TVA 19%",
+			"tax_rate": 19.00,
 			"default": 1
 		},
-		"Algeria VAT 7%": {
-			"account_name": "VAT 7%",
-			"tax_rate": 7.00
+		"Algeria TVA 9%": {
+			"account_name": "TVA 9%",
+			"tax_rate": 9.00
 		}
 	},
 
