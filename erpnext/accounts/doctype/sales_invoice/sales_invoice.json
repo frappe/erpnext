@@ -215,6 +215,12 @@
   "is_internal_customer",
   "is_discounted",
   "remarks",
+  "tally_references_section",
+  "tally_guid",
+  "tally_voucher_type",
+  "column_break_9bht",
+  "tally_voucher_number",
+  "ref_guid",
   "connections_tab"
  ],
  "fields": [
@@ -2186,6 +2192,41 @@
    "fieldtype": "Data",
    "is_virtual": 1,
    "label": "Last Scanned Warehouse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "tally_references_section",
+   "fieldtype": "Section Break",
+   "label": "Tally References"
+  },
+  {
+   "fieldname": "tally_guid",
+   "fieldtype": "Data",
+   "label": "GUID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tally_voucher_type",
+   "fieldtype": "Data",
+   "label": "Voucher Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_9bht",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tally_voucher_number",
+   "fieldtype": "Data",
+   "label": "Voucher Number",
+   "read_only": 1
+  },
+  {
+   "description": "This is the value of the GUID in Tally if the original transaction had to be broken up into new transactions for any reason.",
+   "fieldname": "ref_guid",
+   "fieldtype": "Data",
+   "label": "Reference GUID",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -2199,7 +2240,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2025-09-09 14:48:59.472826",
+ "modified": "2026-01-24 17:36:23.159933",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

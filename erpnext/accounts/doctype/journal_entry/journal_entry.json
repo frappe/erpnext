@@ -65,7 +65,13 @@
   "stock_entry",
   "subscription_section",
   "auto_repeat",
-  "amended_from"
+  "amended_from",
+  "tally_references_section",
+  "tally_guid",
+  "tally_voucher_type",
+  "column_break_1nte",
+  "tally_voucher_number",
+  "ref_guid"
  ],
  "fields": [
   {
@@ -552,6 +558,41 @@
    "hidden": 1,
    "label": "Party Not Required",
    "no_copy": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "tally_references_section",
+   "fieldtype": "Section Break",
+   "label": "Tally References"
+  },
+  {
+   "fieldname": "tally_guid",
+   "fieldtype": "Data",
+   "label": "GUID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tally_voucher_type",
+   "fieldtype": "Data",
+   "label": "Voucher Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1nte",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tally_voucher_number",
+   "fieldtype": "Data",
+   "label": "Voucher Number",
+   "read_only": 1
+  },
+  {
+   "description": "This is the value of the GUID in Tally if the original transaction had to be broken up into new transactions for any reason.",
+   "fieldname": "ref_guid",
+   "fieldtype": "Data",
+   "label": "Reference GUID",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -566,7 +607,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2025-09-29 13:05:46.982277",
+ "modified": "2026-01-24 17:25:49.187946",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
@@ -611,6 +652,7 @@
    "role": "Auditor"
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "voucher_type,posting_date, due_date, cheque_no",
  "sort_field": "modified",
  "sort_order": "DESC",
