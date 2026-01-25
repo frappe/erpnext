@@ -8,6 +8,7 @@ import math
 import frappe
 from frappe.utils import flt
 from frappe.utils.nestedset import NestedSet, update_nsm
+from pypika.functions import Coalesce
 
 EARTH_RADIUS = 6378137
 
@@ -215,18 +216,13 @@ def get_children(doctype, parent=None, location=None, is_root=False):
 	if parent is None or parent == "All Locations":
 		parent = ""
 
-	return frappe.db.sql(
-		f"""
-		select
-			name as value,
-			is_group as expandable
-		from
-			`tabLocation` comp
-		where
-			ifnull(parent_location, "")={frappe.db.escape(parent)}
-		""",
-		as_dict=1,
+	location_tab = frappe.qb.DocType("Location")
+	query = (
+		frappe.qb.from_(location_tab)
+		.select(location_tab.name.as_("value"), location_tab.is_group.as_("expandable"))
+		.where(Coalesce(location_tab.parent_location, "") == parent)
 	)
+	return query.run(as_dict=1)
 
 
 @frappe.whitelist()
