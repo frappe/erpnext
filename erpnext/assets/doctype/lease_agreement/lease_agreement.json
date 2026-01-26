@@ -24,7 +24,9 @@
   "lease_expense_account",
   "column_break_rcmx",
   "lease_liability_account",
-  "lease_schedule_tab"
+  "lease_schedule_tab",
+  "schedule_section",
+  "table_jilb"
  ],
  "fields": [
   {
@@ -145,13 +147,23 @@
    "options": "LA-.YYYY.-.#####.",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "table_jilb",
+   "fieldtype": "Table",
+   "label": "Schedule",
+   "options": "Lease Payment Schedule"
+  },
+  {
+   "fieldname": "schedule_section",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-27 01:41:54.372234",
+ "modified": "2026-01-27 01:55:47.424768",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Lease Agreement",

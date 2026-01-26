@@ -14,6 +14,8 @@ class LeaseAgreement(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.assets.doctype.lease_payment_schedule.lease_payment_schedule import LeasePaymentSchedule
+
 		amended_from: DF.Link | None
 		company: DF.Link
 		lease_amount: DF.Currency
@@ -26,6 +28,7 @@ class LeaseAgreement(Document):
 		payment_frequency: DF.Literal["Monthly"]
 		status: DF.Literal["Draft", "Active", "Closed", "Cancelled"]
 		supplier: DF.Link
+		table_jilb: DF.Table[LeasePaymentSchedule]
 	# end: auto-generated types
 
 	pass
