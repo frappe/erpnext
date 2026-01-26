@@ -1065,13 +1065,15 @@ class ReceivablePayableReport:
 			)
 
 			if self.filters.customer_group:
-				si_ptt = si_ptt.where(si.customer_group.isin(self.filters.customer_group))
+				customer_groups = get_customer_group_with_children(self.filters.customer_group)
+				si_ptt = si_ptt.where(si.customer_group.isin(customer_groups))
 
 			if self.filters.party:
 				si_ptt = si_ptt.where(si.customer.isin(self.filters.party))
 
 			if self.filters.cost_center:
-				si_ptt = si_ptt.where(si.cost_center.isin(self.filters.cost_center))
+				cost_centers = get_cost_centers_with_children(self.filters.cost_center)
+				si_ptt = si_ptt.where(si.cost_center.isin(cost_centers))
 
 			if self.filters.party_account:
 				si_ptt = si_ptt.where(si.debit_to == self.filters.party_account)
@@ -1109,7 +1111,7 @@ class ReceivablePayableReport:
 			supplier_ptt = self.ple.party.isin(
 				qb.from_(supplier)
 				.select(supplier.name)
-				.where(supplier.payment_terms == self.filters.get("supplier_group"))
+				.where(supplier.payment_terms == self.filters.get("payment_terms_template"))
 			)
 			pi_ptt = (
 				qb.from_(pi)
@@ -1126,7 +1128,8 @@ class ReceivablePayableReport:
 				pi_ptt = pi_ptt.where(pi.supplier.isin(self.filters.party))
 
 			if self.filters.cost_center:
-				pi_ptt = pi_ptt.where(pi.cost_center.isin(self.filters.cost_center))
+				cost_centers = get_cost_centers_with_children(self.filters.cost_center)
+				pi_ptt = pi_ptt.where(pi.cost_center.isin(cost_centers))
 
 			if self.filters.party_account:
 				pi_ptt = pi_ptt.where(pi.credit_to == self.filters.party_account)
