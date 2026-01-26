@@ -1,0 +1,180 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-01-26 01:38:57.259140",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_4udy",
+  "naming_series",
+  "company",
+  "supplier",
+  "leased_asset",
+  "amended_from",
+  "column_break_wuct",
+  "status",
+  "lease_start_date",
+  "lease_end_date",
+  "section_break_xsgj",
+  "lease_amount",
+  "column_break_ufeh",
+  "payment_frequency",
+  "section_break_jsvy",
+  "lease_expense_account",
+  "column_break_rcmx",
+  "lease_liability_account",
+  "lease_schedule_tab"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_4udy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Lease Agreement",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_wuct",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nActive\nClosed\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "lease_start_date",
+   "fieldtype": "Date",
+   "label": "Lease Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "lease_end_date",
+   "fieldtype": "Date",
+   "label": "Lease End Date",
+   "reqd": 1
+  },
+  {
+   "default": "Monthly",
+   "fieldname": "payment_frequency",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Payment Frequency",
+   "options": "Monthly",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_jsvy",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "lease_expense_account",
+   "fieldtype": "Link",
+   "label": "Lease Expense Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rcmx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lease_liability_account",
+   "fieldtype": "Link",
+   "label": "Lease Liability Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "lease_schedule_tab",
+   "fieldtype": "Tab Break",
+   "label": "Lease Schedule"
+  },
+  {
+   "fieldname": "lease_amount",
+   "fieldtype": "Currency",
+   "label": "Lease Amount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_xsgj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ufeh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "leased_asset",
+   "fieldtype": "Link",
+   "label": "Leased Asset",
+   "options": "Asset",
+   "reqd": 1
+  },
+  {
+   "default": "LA-.YYYY.-.#####.",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "LA-.YYYY.-.#####.",
+   "read_only": 1,
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-01-27 01:41:54.372234",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Lease Agreement",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
