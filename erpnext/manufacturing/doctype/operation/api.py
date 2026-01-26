@@ -136,7 +136,8 @@ def get_recent_job_card(operation):
         fields=["name", "operation", "status", "work_order"],
         order_by="creation asc"
     )
-
+    if(len(job_cards) == 0):
+        frappe.throw(_("No job cards found for operation {0}").format(operation))
     return job_cards[0]
 
 @frappe.whitelist()

@@ -93,11 +93,11 @@ def start_mixing(job_card):
     """Start the Job Card when mixing starts."""
     jc = frappe.get_doc("Job Card", job_card)
     start_time = frappe.utils.now_datetime()
-    employee_id = get_operators("Mixer Operator", jc.production_line)
+    # employee_id = get_operators("Mixer Operator", jc.production_line)
     args = {
         "job_card_id": jc.name,
         "start_time": start_time,
-        "employees": [{"employee": employee_id}], 
+        # "employees": [{"employee": employee_id}], 
         "status": "Work In Progress",
     }
 
