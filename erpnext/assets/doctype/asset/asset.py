@@ -243,20 +243,7 @@ class Asset(AccountsController):
 		self.set_total_booked_depreciations()
 
 	def before_submit(self):
-		"""Validate that composite assets are capitalized before submission.
-		
-		For composite assets, ensures that capitalization has been completed.
-		If the asset was created via split from another asset, checks the parent
-		asset's capitalization status since split assets inherit capitalization
-		status from their parent.
-		
-		Raises:
-			frappe.ValidationError: If composite asset is not capitalized and
-				parent asset (if split) is also not capitalized.
-		"""
 		if self.is_composite_asset and not has_active_capitalization(self.name):
-			# If asset was split from another asset, check parent asset's capitalization status
-			# Assets created via split inherit capitalization status from parent asset
 			if self.split_from and has_active_capitalization(self.split_from):
 				return
 			frappe.throw(_("Please capitalize this asset before submitting."))
