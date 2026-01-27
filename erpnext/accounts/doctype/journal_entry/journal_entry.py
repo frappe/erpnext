@@ -179,7 +179,7 @@ class JournalEntry(AccountsController):
 		validate_docs_for_deferred_accounting([self.name], [])
 
 	def submit(self):
-		if len(self.accounts) > 100:
+		if len(self.accounts) > 100 and not self.meta.queue_in_background:
 			queue_submission(self, "_submit")
 		else:
 			return self._submit()
