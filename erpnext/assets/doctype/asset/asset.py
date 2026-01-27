@@ -244,6 +244,8 @@ class Asset(AccountsController):
 
 	def before_submit(self):
 		if self.is_composite_asset and not has_active_capitalization(self.name):
+			if self.split_from and has_active_capitalization(self.split_from):
+				return
 			frappe.throw(_("Please capitalize this asset before submitting."))
 
 	def on_submit(self):
