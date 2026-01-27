@@ -149,6 +149,7 @@ def finish_mixing(job_card, completed_qty):
 
     for item in se.items:
         if item.is_finished_item:
+            item.s_warehouse = wo.source_warehouse
             item.t_warehouse = wo.fg_warehouse  
             item.qty = job_card_qty
         elif not item.is_scrap_item: 

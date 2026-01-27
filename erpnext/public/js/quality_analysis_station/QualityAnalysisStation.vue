@@ -1,7 +1,8 @@
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue';
 
 const work_context = reactive({
+    role: "Quality Analyst",
     assigned_line: "",
     assigned_station: "Quality Check",
     assigned_shift: "",
@@ -9,17 +10,24 @@ const work_context = reactive({
 });
 
 const fetchWorkContext = async () => {
-    const settings = await frappe.db.get_single('Demo Settings');
-    if (settings) {
-        work_context.assigned_line = settings.default_line;
-        work_context.assigned_shift = settings.default_shift;
+    const currentUser = await frappe.call({
+        method: "erpnext.setup.doctype.employee.api.get_current_user_context",
+    });
+
+    if (currentUser.message) {
+        work_context.role = currentUser.message.designation;
+        work_context.assigned_line = currentUser.message.production_line;
+        work_context.assigned_shift = currentUser.message.attendance_shift;
     }
 };
+
+const jobCardNumber = ref(null);
 const currentTime = ref('');
 const currentDate = ref('');
 const updateKey = ref(0);
 const incomingSlabs = ref([]);
 const selectedSlab = ref(null);
+const processStarted = ref(false);
 
 const form = reactive({
     // Basic Details (Auto-filled)
@@ -63,6 +71,7 @@ const fetchGrades = async () => {
 };
 
 const get_slabs_ready_for_qa = async () => {
+    debugger;
     const [for_res, in_res] = await Promise.all([
         frappe.call({
             method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
@@ -81,7 +90,7 @@ const get_slabs_ready_for_qa = async () => {
     ]);
 
     const combined_slabs = [...(in_res.message || []), ...(for_res.message || [])];
-    
+    debugger;
     // De-duplicate in case a slab is in both for some reason (shouldn't happen with current logic but good for safety)
     const unique_slabs = [];
     const seen = new Set();
@@ -99,11 +108,18 @@ const get_slabs_ready_for_qa = async () => {
 function selectSlab(slab, index) {
     if (index) return;
     selectedSlab.value = slab;
+    debugger;
+    const route = frappe.get_route();
+    if (route.length >= 1) {
+        frappe.set_route(route[0], slab.current_job_card);
+        // window.location.reload();
+    }
+    jobCardNumber.value = slab.current_job_card;
     // Reset and Auto-fill form
     Object.assign(form, {
         date: frappe.datetime.nowdate(),
         shift: work_context.assigned_shift,
-        job_card: work_context.job_card,
+        job_card: jobCardNumber.value,
         slab: slab.name,
         slab_template: slab.template,
         slab_length: null,
@@ -118,18 +134,18 @@ function selectSlab(slab, index) {
         bend: null,
         grade: '',
         remarks: ''
-	});
+    });
 
-	// Call move_slab_to here with next_stage as "Quality Check" if the current stage is complete on the slab (using the `is_cur_stage_complete` flag on the slab)
-	if (slab.is_cur_stage_complete) {
-		frappe.call({
-			method: 'erpnext.manufacturing.doctype.slab.api.move_slab_to',
-			args: {
-				slab_number: slab.name,
-				next_stage: "Quality Check"
-			}
-		});
-	}
+    // Call move_slab_to here with next_stage as "Quality Check" if the current stage is complete on the slab (using the `is_cur_stage_complete` flag on the slab)
+    if (slab.is_cur_stage_complete) {
+        frappe.call({
+            method: 'erpnext.manufacturing.doctype.slab.api.move_slab_to',
+            args: {
+                slab_number: slab.name,
+                next_stage: "Quality Check"
+            }
+        });
+    }
 }
 
 let clockInterval;
@@ -154,10 +170,16 @@ const confirmAndTag = async () => {
     }
 
     try {
+        console.log('Assigned shift:', work_context.assigned_shift);
+        // console.log('Job card:', job_card.value);
+        console.log('Job card:', jobCardNumber.value);
+
         const res = await frappe.call({
             method: 'erpnext.manufacturing.doctype.slab_quality_report.api.create_slab_quality_report',
             args: {
-                report: form
+                report: form,
+                shift: work_context.assigned_shift,
+                job_card: jobCardNumber.value
             },
             freeze: true
         });
@@ -189,8 +211,14 @@ const raiseQualityAlarm = async () => {
 };
 
 onMounted(async () => {
+    const route = frappe.get_route();
+    jobCardNumber.value = route[1] || null;
+    // if (!jobCardNumber.value) {
+    //     jobCardNumber.value = selectedSlab.value.job_card;
+    // }
     updateClock();
     clockInterval = setInterval(updateClock, 1000);
+    debugger;
     await fetchWorkContext();
     get_slabs_ready_for_qa();
     fetchGrades();
@@ -202,6 +230,38 @@ onUnmounted(() => {
 
 frappe.realtime.on('slab_checkout', () => {
     get_slabs_ready_for_qa();
+});
+
+watch(
+    [selectedSlab, jobCardNumber],
+    async ([newSlab, newJobCard]) => {
+        if (
+            processStarted.value ||
+            !newSlab?.current_job_card ||
+            !newJobCard
+        ) {
+            return;
+        }
+
+        try {
+            await frappe.call({
+                method: 'erpnext.manufacturing.page.operator_station.operator_station.start_distribution',
+                args: {
+                    job_card: newJobCard,
+                    process_name: 'Quality Analysis'
+                }
+            });
+
+            processStarted.value = true;
+            console.log('Job Card started automatically');
+        } catch (e) {
+            console.error('Failed to start job card', e);
+        }
+    }
+);
+
+watch(selectedSlab, () => {
+    processStarted.value = false;
 });
 </script>
 
@@ -463,18 +523,30 @@ frappe.realtime.on('slab_checkout', () => {
     color: var(--text-muted);
 }
 
-.breadcrumb span + span::before {
+.breadcrumb span+span::before {
     content: ' / ';
 }
 
-.slab-info-card, .qa-form-section {
+.slab-info-card,
+.qa-form-section {
     background: var(--card-bg, #fff);
 }
 
-.grade-a { color: #28a745; }
-.grade-b { color: #17a2b8; }
-.grade-c { color: #ffc107; }
-.grade-d { color: #dc3545; }
+.grade-a {
+    color: #28a745;
+}
+
+.grade-b {
+    color: #17a2b8;
+}
+
+.grade-c {
+    color: #ffc107;
+}
+
+.grade-d {
+    color: #dc3545;
+}
 
 .list-enter-active,
 .list-leave-active {

@@ -2,16 +2,21 @@
 import { ref, reactive, onMounted, computed } from 'vue';
 
 const work_context = reactive({
+    role: "Slab Loader",
     assigned_line: "",
     assigned_station: "Quarantine",
     assigned_shift: ""
 });
 
 const fetchWorkContext = async () => {
-    const settings = await frappe.db.get_doc('Demo Settings');
-    if (settings) {
-        work_context.assigned_line = settings.default_line;
-        work_context.assigned_shift = settings.default_shift;
+    const currentUser = await frappe.call({
+        method: "erpnext.setup.doctype.employee.api.get_current_user_context",
+    });
+
+    if (currentUser.message) {
+        work_context.role = currentUser.message.designation;
+        work_context.assigned_line = currentUser.message.production_line;
+        work_context.assigned_shift = currentUser.message.shift;
     }
 };
 const slabs = ref([]);
@@ -19,6 +24,7 @@ const searchQuery = ref('');
 
 const fetchSlabs = async () => {
     try {
+        debugger;
         const r = await frappe.call({
             method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_in',
             args: {
@@ -26,7 +32,7 @@ const fetchSlabs = async () => {
                 current_stage: "Quarantine"
             }
         });
-
+        debugger;
         if (r.message) {
             slabs.value = r.message;
         }
@@ -36,11 +42,12 @@ const fetchSlabs = async () => {
 };
 
 const filteredSlabs = computed(() => {
+    debugger;
     let result = slabs.value;
     if (searchQuery.value) {
         const q = searchQuery.value.toLowerCase();
-        result = result.filter(s => 
-            s.name.toLowerCase().includes(q) || 
+        result = result.filter(s =>
+            s.name.toLowerCase().includes(q) ||
             s.template.toLowerCase().includes(q)
         );
     }
@@ -69,13 +76,13 @@ const getDuration = (date_str) => {
     if (!date_str) return '';
     const modified = new Date(date_str);
     const diffMs = now.value - modified;
-    
+
     if (diffMs < 0) return '0 minutes';
-    
+
     const minutes = Math.floor(diffMs / 60000);
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
-    
+
     let duration = [];
     if (hours > 0) {
         duration.push(`${hours} ${hours === 1 ? 'hour' : 'hours'}`);
@@ -83,12 +90,12 @@ const getDuration = (date_str) => {
     if (remainingMinutes > 0 || hours === 0) {
         duration.push(`${remainingMinutes} ${remainingMinutes === 1 ? 'minute' : 'minutes'}`);
     }
-    
+
     return duration.join(' ');
 };
 
 frappe.realtime.on('slab_move', () => {
-	fetchSlabs();
+    fetchSlabs();
 });
 
 const minQuarantineHours = ref(0);
@@ -107,6 +114,7 @@ const fetchSettings = async () => {
 onMounted(async () => {
     await fetchWorkContext();
     fetchSlabs();
+    debugger;
     fetchSettings();
     setInterval(() => {
         now.value = new Date();
@@ -123,10 +131,10 @@ const unloadToTrimming = (slab) => {
             await frappe.call({
                 method: 'erpnext.manufacturing.doctype.slab.api.move_slab_to',
                 args: {
-					slab_number: slab.name,
-					next_stage: "Trimming",
-					checkout_and_move: true,
-					job_card_number: slab.current_job_card
+                    slab_number: slab.name,
+                    next_stage: "Trimming",
+                    checkout_and_move: true,
+                    job_card_number: slab.current_job_card
                 },
                 freeze: true,
                 callback: (r) => {
@@ -170,7 +178,7 @@ const unloadToTrimming = (slab) => {
         </header>
 
         <TransitionGroup name="slab-list" tag="div" class="cards-grid">
-            <div v-for="slab in filteredSlabs" :key="slab.name" class="slab-card">
+            <div v-for="slab in slabs" :key="slab.name" class="slab-card">
                 <div class="card-header" :class="getColorClass(slab.template)"></div>
                 <div class="card-body">
                     <div class="card-top-row d-flex justify-content-between align-items-center mb-2">
@@ -187,8 +195,10 @@ const unloadToTrimming = (slab) => {
                     </div>
                     <div class="slab-stats d-flex mb-4" style="gap: 2rem;">
                         <div class="stat-item w-100">
-                            <div class="stat-label d-inline-block mr-2 text-muted small text-uppercase">{{ __('Thickness') }}</div>
-                            <div class="stat-value d-inline-block font-weight-bold">{{ getThickness(slab.template) }}mm</div>
+                            <div class="stat-label d-inline-block mr-2 text-muted small text-uppercase">{{
+                                __('Thickness') }}</div>
+                            <div class="stat-value d-inline-block font-weight-bold">{{ getThickness(slab.template) }}mm
+                            </div>
                         </div>
                     </div>
                     <button class="btn btn-primary w-100 font-weight-bold" @click="unloadToTrimming(slab)">
@@ -206,7 +216,6 @@ const unloadToTrimming = (slab) => {
 </template>
 
 <style scoped>
-
 .empty-state {
     background: var(--fg-color);
     border: 1px solid var(--border-color) !important;
@@ -282,17 +291,28 @@ const unloadToTrimming = (slab) => {
 }
 
 .slab-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .card-header {
     height: 8px;
 }
 
-.card-header.midnight-blue { background: #1e3a5f; }
-.card-header.carrara-white { background: linear-gradient(90deg, #e8e8e8, #d0d0d0); }
-.card-header.concrete-grey { background: #808080; }
-.card-header.purple { background: #808080; }
+.card-header.midnight-blue {
+    background: #1e3a5f;
+}
+
+.card-header.carrara-white {
+    background: linear-gradient(90deg, #e8e8e8, #d0d0d0);
+}
+
+.card-header.concrete-grey {
+    background: #808080;
+}
+
+.card-header.purple {
+    background: #808080;
+}
 
 .card-body {
     padding: 1.25rem;

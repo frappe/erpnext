@@ -2,16 +2,22 @@
 import { ref, reactive, onMounted } from 'vue';
 
 const work_context = reactive({
+    role: "Quarantine Operator",
     assigned_line: "",
     assigned_station: "Quarantine Station",
     assigned_shift: ""
 });
 
 const fetchWorkContext = async () => {
-    const settings = await frappe.db.get_doc('Demo Settings');
-    if (settings) {
-        work_context.assigned_line = settings.default_line;
-        work_context.assigned_shift = settings.default_shift;
+    debugger;
+    const currentUser = await frappe.call({
+        method: "erpnext.setup.doctype.employee.api.get_current_user_context",
+    });
+
+    if (currentUser.message) {
+        work_context.role = currentUser.message.designation;
+        work_context.assigned_line = currentUser.message.production_line;
+        work_context.assigned_shift = currentUser.message.shift;
     }
 };
 const updateKey = ref(0);
@@ -21,14 +27,13 @@ const selectedSlab = ref(null);
 const get_slabs_ready_for_quarantine = async () => {
     // Call API to get slabs ready for quarantine
     const r = await frappe.call({
-        method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
+        method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_in',
         args: {
             line: work_context.assigned_line,
-			next_stage: "Quarantine",
-			include_current_stage: true,
+            current_stage: "Quarantine",
         }
     });
-
+    debugger;
     if (r.message) {
         if (!incomingSlabs.value.length) {
             incomingSlabs.value = r.message;
@@ -47,7 +52,7 @@ const get_slabs_ready_for_quarantine = async () => {
 function selectSlab(slab, index) {
     if (index) {
         return;
-	}
+    }
 
     selectedSlab.value = slab;
     // Reset measurements on new selection
@@ -96,7 +101,7 @@ const submitQuarantine = () => {
         frappe.msgprint(__('Please select a slab first.'));
         return;
     }
-
+    debugger;
     frappe.confirm(__('Are you sure you want to submit the quarantine check?'), async () => {
         try {
             await frappe.call({
@@ -180,49 +185,54 @@ const submitQuarantine = () => {
 
         <!-- Right: Quarantine Action (Placeholder) -->
         <div class="flex-fill pl-4 pb-5">
-             <h4 class="mb-4">{{ __('Quarantine Station') }}</h4>
-             <div v-if="selectedSlab" class="d-flex flex-column align-items-center">
+            <h4 class="mb-4">{{ __('Quarantine Station') }}</h4>
+            <div v-if="selectedSlab" class="d-flex flex-column align-items-center">
                 <div class="measurement-card p-5 mb-4 d-flex flex-column align-items-center">
                     <div class="text-muted mb-4">
                         {{ __('Selected Slab') }}: <span class="font-weight-bold">{{ selectedSlab.name }}</span>
                     </div>
-                    
+
                     <div class="measure-wrapper position-relative" style="width: 600px; height: 350px;">
                         <!-- SVG Diagram -->
                         <svg width="100%" height="100%" viewBox="0 0 600 350" preserveAspectRatio="none">
                             <!-- Border -->
-                            <rect x="2" y="2" width="596" height="346" fill="none" class="stroke-default" stroke-width="3"/>
-                            
+                            <rect x="2" y="2" width="596" height="346" fill="none" class="stroke-default"
+                                stroke-width="3" />
+
                             <!-- Diagonals -->
-                            <line x1="2" y1="2" x2="598" y2="348" class="stroke-default" stroke-width="2"/>
-                            <line x1="2" y1="348" x2="598" y2="2" class="stroke-default" stroke-width="2"/>
+                            <line x1="2" y1="2" x2="598" y2="348" class="stroke-default" stroke-width="2" />
+                            <line x1="2" y1="348" x2="598" y2="2" class="stroke-default" stroke-width="2" />
 
                             <!-- Vertical Line at ~33% -->
-                            <line x1="200" y1="2" x2="200" y2="348" class="stroke-default" stroke-width="2"/>
-                            
+                            <line x1="200" y1="2" x2="200" y2="348" class="stroke-default" stroke-width="2" />
+
                             <!-- Horizontal Center Line from Vertical Line to Right Edge -->
-                            <line x1="2" y1="175" x2="598" y2="175" class="stroke-default" stroke-width="2"/>
+                            <line x1="2" y1="175" x2="598" y2="175" class="stroke-default" stroke-width="2" />
                         </svg>
 
                         <!-- Inputs -->
                         <!-- Vertical Bend -->
                         <div class="input-pos" style="left: 200px; top: 60px;">
-                            <input type="number" v-model.number="quarantineMeasurements.bend_v_line" class="bend-input form-control input-sm" placeholder="0">
+                            <input type="number" v-model.number="quarantineMeasurements.bend_v_line"
+                                class="bend-input form-control input-sm" placeholder="0">
                         </div>
 
                         <!-- Horizontal Bend -->
                         <div class="input-pos" style="left: 80px; top: 175px;">
-                            <input type="number" v-model.number="quarantineMeasurements.bend_h_line" class="bend-input form-control input-sm" placeholder="0">
+                            <input type="number" v-model.number="quarantineMeasurements.bend_h_line"
+                                class="bend-input form-control input-sm" placeholder="0">
                         </div>
 
                         <!-- TR Diagonal Bend -->
                         <div class="input-pos" style="left: 480px; top: 70px;">
-                            <input type="number" v-model.number="quarantineMeasurements.bend_tr_diag" class="bend-input form-control input-sm" placeholder="0">
+                            <input type="number" v-model.number="quarantineMeasurements.bend_tr_diag"
+                                class="bend-input form-control input-sm" placeholder="0">
                         </div>
 
                         <!-- BR Diagonal Bend -->
                         <div class="input-pos" style="left: 480px; top: 280px;">
-                            <input type="number" v-model.number="quarantineMeasurements.bend_br_diag" class="bend-input form-control input-sm" placeholder="0">
+                            <input type="number" v-model.number="quarantineMeasurements.bend_br_diag"
+                                class="bend-input form-control input-sm" placeholder="0">
                         </div>
                     </div>
 
@@ -242,10 +252,10 @@ const submitQuarantine = () => {
                     <button class="btn btn-primary" @click="submitQuarantine">{{ __('Submit Quarantine') }}</button>
                 </div>
 
-             </div>
-             <div v-else class="text-muted">
+            </div>
+            <div v-else class="text-muted">
                 {{ __('Please select a slab from the list.') }}
-             </div>
+            </div>
         </div>
     </div>
 </template>
@@ -264,7 +274,7 @@ const submitQuarantine = () => {
 }
 
 .incoming-item {
-	cursor: pointer;
+    cursor: pointer;
     background-color: var(--fg-color);
     border-color: var(--border-color) !important;
     transition: all 0.2s ease;
@@ -311,14 +321,15 @@ const submitQuarantine = () => {
     background: var(--control-bg);
     color: var(--text-color);
     border: 1px solid var(--border-color);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .slab-thumbnail {
     width: 32px;
     height: 32px;
     border-radius: 4px;
-    background: #1f2937; /* Keeping this dark as it mimics a physical slab */
+    background: #1f2937;
+    /* Keeping this dark as it mimics a physical slab */
 }
 
 .list-enter-active,
@@ -335,7 +346,7 @@ const submitQuarantine = () => {
 .measurement-card {
     background: var(--card-bg, #fff);
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     border: 1px solid var(--border-color);
 }
 </style>

@@ -116,8 +116,9 @@ def move_slab_to(
     # slab.is_cur_stage_complete = False
     slab.is_cur_stage_complete = False
     slab.current_stage = ALLOWED_STAGES[next_stage_index] # pyright: ignore[reportAttributeAccessIssue]
-    next_job_card_info = find_next_job_card(job_card_number or slab.slab_history[-1].job_card_number)
-    slab.current_job_card = next_job_card_info["next_job_card"]
+    if next_stage.lower() != "trimming":
+        next_job_card_info = find_next_job_card(job_card_number or slab.slab_history[-1].job_card_number)
+        slab.current_job_card = next_job_card_info["next_job_card"]
 
     # Append the next stage to the slab history.
     slab_history: SlabHistory = frappe.new_doc(
@@ -136,12 +137,29 @@ def move_slab_to(
 
 @frappe.whitelist()
 def get_slabs_in(line: str, current_stage: str) -> list[dict]:
-	return frappe.db.get_list(
-		"Slab",
-		filters={"line": line, "status": current_stage, "is_cur_stage_complete": False},
-		fields=["name", "number", "serial_number", "status", "line", "batch_number", "template", "is_cur_stage_complete", "creation", "modified"],
-	)
-
+    slabs = frappe.db.get_list(
+        "Slab",
+        filters={
+            "line": line,
+            "status": current_stage,
+            "is_cur_stage_complete": False,
+        },
+        fields=[
+            "name",
+            "number",
+            "serial_number",
+            "status",
+            "line",
+            "batch_number",
+            "template",
+            "is_cur_stage_complete",
+            "creation",
+            "modified",
+            "current_job_card"
+        ],
+    )
+    return slabs
+    
 
 @frappe.whitelist(allow_guest=True)
 def get_slabs_for(line: str, next_stage: str, include_current_stage = False) -> list[dict]:
@@ -170,7 +188,7 @@ def get_slabs_for(line: str, next_stage: str, include_current_stage = False) -> 
     if include_current_stage:
         valid_previous_stages.append(next_stage)
 
-    slabs = frappe.db.get_list("Slab", order_by="modified asc", filters={"status": ["in", valid_previous_stages], "is_cur_stage_complete": 0, "line": line}, fields=["name", "serial_number", "status", "line", "batch_number", "template", "creation", "modified"])
+    slabs = frappe.db.get_list("Slab", order_by="modified asc", filters={"status": ["in", valid_previous_stages], "is_cur_stage_complete": 0, "line": line}, fields=["name", "serial_number", "status", "line", "batch_number", "template", "creation", "modified", "current_job_card"])
     return slabs
 
 
@@ -226,16 +244,16 @@ def _get_slab_number():
 
 @frappe.whitelist()
 def get_all_existing_slabs(stage):
-	slabs = frappe.get_all(
-		"Slab",
-		filters={
-			"current_stage": stage,
-			"docstatus": 0,
-		},
-		fields=["name", "batch_number", "line", "template", "current_stage", "created_on", "serial_number"],
-		order_by="created_on desc",
-	)
-	return slabs
+    slabs = frappe.get_all(
+        "Slab",
+        filters={
+            "current_stage": stage,
+            "docstatus": 0,
+        },
+        fields=["name", "batch_number", "line", "template", "current_stage", "created_on", "serial_number"],
+        order_by="created_on desc",
+    )
+    return slabs
 
 
 @frappe.whitelist()

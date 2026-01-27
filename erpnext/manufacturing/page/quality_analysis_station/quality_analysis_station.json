@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2026-01-07 15:26:26.470868",
+ "modified": "2026-01-26 19:37:32.224244",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "quality-analysis-station",
@@ -13,6 +13,9 @@
  "roles": [
   {
    "role": "Administrator"
+  },
+  {
+   "role": "Mixer Operator"
   }
  ],
  "script": null,

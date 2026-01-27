@@ -5,122 +5,13 @@ import { ref, reactive, nextTick, computed, onMounted, onUnmounted } from 'vue';
 const jobCardNumber = ref(null);
 const updateKey = ref(0);
 const ovenData = ref(null);
-// const incomingSlabs = ref([])
-// { name: ..., serial_number: ..., template: ..., line: ... }
-const currentSlab = ref(null); 
-const loadingSlab = ref(false);
-
-const work_context = reactive({
-    assigned_line: "",
-    assigned_station: "Oven 1",
-    assigned_shift: ""
-});
-
-const fetchWorkContext = async () => {
-    const settings = await frappe.db.get_doc('Demo Settings');
-    if (settings) {
-        work_context.assigned_line = settings.default_line;
-        work_context.assigned_shift = settings.default_shift;
-    }
-};
-
-const refreshOvenData = async () => {
-    if (!work_context?.assigned_line) {
-        return
-    }
-
-    try {
-        const r = await frappe.call({
-            method: 'erpnext.manufacturing.doctype.oven.api.get_oven_from_line',
-            args: {
-                line: work_context.assigned_line,
-            }
-        });
-
-        if (r.message) {
-            ovenData.value = r.message;
-        }
-    } catch (e) {
-        console.error("Failed to fetch oven data", e);
-    }
-};
-
-
-const fetch_slab_for_job_card = async () => {
-    if (!jobCardNumber.value) return;
-
-    loadingSlab.value = true;
-    try {
-        const r = await frappe.call({
-            method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
-            args: {
-                job_card: jobCardNumber.value
-            }
-		});
-
-        if (r.message) {
-            selectedSlab.value = r.message;
-        } else {
-            // Fallback: Check previous stage
-            const r2 = await frappe.call({
-                method: 'erpnext.manufacturing.doctype.slab.api.get_slab_from_previous_stage',
-                args: {
-                    job_card_name: jobCardNumber.value
-                }
-            });
-            if (r2.message) {
-                selectedSlab.value = r2.message;
-            }
-        }
-    } catch (e) {
-        console.error("Failed to fetch slab for job card", e);
-    } finally {
-        loadingSlab.value = false;
-    }
-};
-
-const get_slabs_ready_for_heating = async () => {
-    // If we have a specific Job Card, just fetch its slab
-    if (jobCardNumber.value) {
-        await fetch_slab_for_job_card();
-        return;
-    }
-
-    // Otherwise, fetch the general queue (Fallback/Original behavior)
-    const r = await frappe.call({
-        method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
-        args: {
-            line: work_context.assigned_line,
-            next_stage: "Heating"
-        }
-    });
-
-    if (r.message) {
-        currentSlab.value = r.message;
-        updateKey.value++;
-        if (currentSlab.value.length > 0) {
-            selectSlab(currentSlab.value[0], 0);
-        }
-    }
-};
-
+const slabsQueue = ref([]);
+const selectedSlab = ref(null);
 const currentTime = ref(new Date());
+let pollingInterval = ref(null);
 let timerInterval = null;
+const overheat_minutes = 90; // TODO: This should be replaced by a setting in Mahi Granites Settings.
 
-onMounted(async () => {
-    const route = frappe.get_route();
-    jobCardNumber.value = route[2] || null;
-    timerInterval = setInterval(() => {
-        currentTime.value = new Date();
-    }, 1000);
-    await fetchWorkContext();
-    refreshOvenData();
-    get_slabs_ready_for_heating();
-});
-
-onUnmounted(() => {
-    if (timerInterval) clearInterval(timerInterval);
-});
 
 const formattedDate = computed(() => {
     const d = currentTime.value;
@@ -136,8 +27,6 @@ const formattedTime = computed(() => {
     const minutes = String(d.getMinutes()).padStart(2, '0');
     return `${hours}:${minutes}`;
 });
-
-const overheat_minutes = 90; // TODO: This should be replaced by a setting in Mahi Granites Settings.
 
 const racks = computed(() => {
     if (!ovenData.value || !ovenData.value.racks) return [];
@@ -181,9 +70,6 @@ const oven = computed(() => {
     return ovenData.value;
 });
 
-
-const selectedSlab = ref(null);
-
 const ovenTemps = computed(() => {
     if (!ovenData.value) return { upper: 0, lower: 0 };
     return {
@@ -205,13 +91,143 @@ const unloadValues = ref({
     slab_bottom_temp: 0,
     remarks: ''
 });
+const currentSlab = ref(null);
+const loadingSlab = ref(false);
 
-function selectSlab(slab, index) {
-    if (index) {
-        return;
+const work_context = reactive({
+    role: "Oven Operator",
+    assigned_line: "",
+    assigned_station: "Oven 1",
+    assigned_shift: ""
+});
+
+const fetchWorkContext = async () => {
+    const currentUser = await frappe.call({
+        method: "erpnext.setup.doctype.employee.api.get_current_user_context",
+    });
+
+    if (currentUser.message) {
+        work_context.role = currentUser.message.designation;
+        work_context.assigned_line = currentUser.message.production_line;
+        work_context.assigned_shift = currentUser.message.attendance_shift;
+    }
+};
+
+const refreshOvenData = async () => {
+    if (!work_context?.assigned_line) {
+        return
     }
 
+    try {
+        const r = await frappe.call({
+            method: 'erpnext.manufacturing.doctype.oven.api.get_oven_from_line',
+            args: {
+                line: work_context.assigned_line,
+            }
+        });
+
+        if (r.message) {
+            ovenData.value = r.message;
+        }
+    } catch (e) {
+        console.error("Failed to fetch oven data", e);
+    }
+};
+
+const fetch_slab_for_job_card = async () => {
+    if (!jobCardNumber.value) return;
+
+    loadingSlab.value = true;
+    try {
+        const r = await frappe.call({
+            method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
+            args: {
+                job_card: jobCardNumber.value
+            }
+        });
+
+        if (r.message) {
+            selectedSlab.value = r.message;
+        } else {
+            // Fallback: Check previous stage
+            const r2 = await frappe.call({
+                method: 'erpnext.manufacturing.doctype.slab.api.get_slab_from_previous_stage',
+                args: {
+                    job_card_name: jobCardNumber.value
+                }
+            });
+            if (r2.message) {
+                selectedSlab.value = r2.message;
+            }
+        }
+    } catch (e) {
+        console.error("Failed to fetch slab for job card", e);
+    } finally {
+        loadingSlab.value = false;
+    }
+};
+
+const get_slabs_ready_for_heating = async () => {
+    // If we have a specific Job Card, just fetch its slab
+    if (jobCardNumber.value) {
+        await fetch_slab_for_job_card();
+        return;
+    }
+};
+
+onMounted(async () => {
+    const route = frappe.get_route();
+    jobCardNumber.value = route[1] || null;
+    timerInterval = setInterval(() => {
+        currentTime.value = new Date();
+    }, 1000);
+    await fetchWorkContext();
+    refreshOvenData();
+    await fetchQueue(work_context.assigned_line);
+
+    get_slabs_ready_for_heating();
+
+    pollingInterval.value = setInterval(() => {
+        fetchQueue(work_context.assigned_line);
+    }, 5000);
+});
+
+onUnmounted(() => {
+    if (timerInterval) clearInterval(timerInterval);
+    if (pollingInterval.value) clearInterval(pollingInterval.value);
+});
+
+async function fetchQueue(line) {
+    try {
+        slabsQueue.value = [];
+        const result = await frappe.call({
+            method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_in',
+            args: {
+                line: line,
+                current_stage: 'Heating'
+            }
+        });
+        if (result.message) {
+            slabsQueue.value = result.message || [];
+            console.log(slabsQueue.value);
+        }
+    } catch (e) {
+        console.error('Failed to fetch queue:');
+    }
+}
+
+
+function selectSlab(slab) {
+    if (!slab.current_job_card || !slab.name) return;
+    if (selectedSlab.value && slab.current_job_card === selectedSlab.value.current_job_card) {
+        return;
+    }
     selectedSlab.value = slab;
+    const route = frappe.get_route();
+    if (route.length >= 1) {
+        frappe.set_route(route[0], slab.current_job_card);
+        window.location.reload();
+    }
 }
 
 function loadIntoRack(rack) {
@@ -263,12 +279,13 @@ async function transfer_to_next_process(workOrder, qty) {
         });
 
         if (res.message) {
-            frappe.show_alert({message: __('Slab transferred to next process'), indicator: 'green'});
+            frappe.show_alert({ message: __('Slab transferred to next process'), indicator: 'green' });
         }
     } catch (e) {
         console.error("Transfer failed", e);
     }
 }
+
 async function confirmUnload() {
     if (!targetRack.value) return;
 
@@ -299,6 +316,7 @@ async function confirmUnload() {
             if (data.finish_results && data.finish_results.work_order) {
                 await transfer_to_next_process(data.finish_results.work_order, data.finish_results.job_card_qty);
             }
+            await fetchQueue(work_context.assigned_line);
         }
     } catch (e) {
         console.error(e);
@@ -308,14 +326,12 @@ async function confirmUnload() {
     targetRack.value = null;
 }
 
-
 async function confirmLoad() {
     if (!targetRack.value || !ovenData.value) {
         return;
-	}
+    }
 
     prepareOvenOperation();
-
     const res = await frappe.call({
         method: 'erpnext.manufacturing.doctype.oven.api.load_slab_into_oven',
         args: {
@@ -325,7 +341,7 @@ async function confirmLoad() {
     })
 
     if (res && res.message) {
-        frappe.show_alert({message: __('Slab loaded and heating started'), indicator: 'green'});
+        frappe.show_alert({ message: __('Slab loaded and heating started'), indicator: 'green' });
         refreshOvenData();
         get_slabs_ready_for_heating();
     }
@@ -415,7 +431,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
 <template>
     <div class="page-card d-flex">
         <!-- Left: Incoming Slabs -->
-        <div style="width:540px;" class="pr-4 border-right">
+        <div style="width:340px;" class="pr-4 border-right">
             <h5 class="mb-3 d-flex align-items-center">
                 {{ __('Incoming Slabs') }}
             </h5>
@@ -427,17 +443,19 @@ frappe.realtime.on('slab_checkout', (slab) => {
                 <div v-if="loadingSlab" class="text-center p-4">
                     <div class="spinner-border spinner-border-sm text-muted" role="status"></div>
                 </div>
-                <div v-else-if="jobCardNumber && !selectedSlab" class="text-muted small text-center p-4 border rounded bg-light">
+                <div v-else-if="jobCardNumber && !selectedSlab"
+                    class="text-muted small text-center p-4 border rounded bg-light">
                     {{ __('No slab found for Job Card') }} {{ jobCardNumber }}
                 </div>
-                <div v-else-if="!jobCardNumber && (!currentSlab || !currentSlab.length)" class="text-muted small text-center p-4 border rounded bg-light">
+                <!-- <div v-else-if="!jobCardNumber && (!currentSlab || !currentSlab.length)"
+                    class="text-muted small text-center p-4 border rounded bg-light">
                     {{ __('No slabs are ready for heating right now.') }}
-                </div>
+                </div> -->
                 <TransitionGroup name="list" tag="div" v-else>
-                    <div v-for="(slab, index) in (jobCardNumber ? [selectedSlab] : currentSlab)" :key="slab?.name"
+                    <div v-for="slab in slabsQueue" :key="slab?.name"
                         class="incoming-item mb-2 p-3 d-flex align-items-center border rounded"
-                        :class="{ 'selected': selectedSlab && selectedSlab.name === slab?.name, 'cursor-pointer': jobCardNumber || !index }"
-                        @click="selectSlab(slab, index)">
+                        :class="{ 'selected': selectedSlab && selectedSlab.name === slab?.name }"
+                        @click="selectSlab(slab)">
                         <div v-if="slab" class="slab-container" :key="updateKey">
                             <div class="slab-thumbnail mr-3"></div>
                             <div class="flex-fill">
@@ -460,8 +478,9 @@ frappe.realtime.on('slab_checkout', (slab) => {
             <div class="border-bottom d-flex justify-content-between pb-2">
                 <div>
                     <h4 class="mb-1">{{ __('Oven') }}: {{ oven?.name }} <span class="text-muted mr-2 ml-2">|</span> {{
-                        __('Line') }}: {{ oven?.line }} <span class="text-muted mr-2 ml-2">|</span> {{ formattedDate }} <span
-                        class="text-muted mr-2 ml-2">|</span> {{ formattedTime }}</h4>
+                        __('Line') }}: {{ oven?.line }} <span class="text-muted mr-2 ml-2">|</span> {{ formattedDate }}
+                        <span class="text-muted mr-2 ml-2">|</span> {{ formattedTime }}
+                    </h4>
                     <div class="text-muted small mb-4">
                         {{ __('Manage curing process and rack assignments.') }}
                     </div>
@@ -479,7 +498,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
                     </div>
                 </div>
 
-                <!-- <div class="d-flex mb-4 justify-content-end align-items-center">
+                <div class="d-flex mb-4 justify-content-end align-items-center">
                     <span class="small mr-4 d-flex align-items-center">
                         <span class="mr-2 border rounded d-flex"
                             style="background:#b0b8bf; width:1rem; height:1rem;"></span>{{ __('Empty') }}
@@ -496,7 +515,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
                         <span class="mr-2 border rounded d-flex"
                             style="background:#77afe6; width:1rem; height:1rem;"></span>{{ __('Maintenance') }}
                     </span>
-                </div> -->
+                </div>
             </div>
 
             <div class="rack-grid d-flex flex-wrap pt-5">

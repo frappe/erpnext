@@ -108,7 +108,7 @@ def unload_slab_from_oven(rack_name: str, slab_name: str, slab_template: str, va
 	rack.start_time = None
 	rack.save()
 
-	checkout_slab(slab_name)
+	# checkout_slab(slab_name)
 
 	op.submit()
 	op.save()
@@ -127,7 +127,6 @@ def start_heating(job_card):
     args = {
         "job_card_id": jc.name,
         "start_time": start_time,
-        "employees": [{"employee": "HR-EMP-00002"}],  # TODO - update operator 
         "status": "Work In Progress",
     }
 

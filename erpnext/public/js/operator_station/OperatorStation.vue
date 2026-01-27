@@ -32,16 +32,6 @@ const line = ref(null);
 const error = ref(null);
 const batchNo = ref(null);
 const currentStation = ref('');
-const operationMapping = ref({
-	"mixing": "distribution",
-	"distribution": "pressing",
-	"pressing": "heating",
-	"heating": "cooling",
-	"cooling": "trimming",
-	"trimming": "calibration",
-	"calibration": "polishing",
-	"polishing": "quality analysis"
-});
 
 const alarms = ref([
 	{
@@ -114,7 +104,7 @@ onMounted(async () => {
 		if (jobCardSubmitted.value) {
 			preparedQty.value = jc.total_completed_qty || jc.for_quantity || 0;
 		}
-		await slabInfo(jc, station);
+		// await slabInfo(jc, station);
 		const stateRes = await frappe.call({
 			method: 'erpnext.manufacturing.page.operator_station.operator_station.get_operator_state',
 			args: {
@@ -124,7 +114,6 @@ onMounted(async () => {
 		});
 
 		const state = stateRes.message || {};
-		// processStarted.value = !!state[`${station}_started`];
 		status.value = state.status || 'Pending';
 
 		// Logic to set UI flags based on EXPLICIT backend status
@@ -149,7 +138,6 @@ onMounted(async () => {
 		}
 
 		processStartTime.value = state[`${station}_start_time`];
-		// jobCardSubmitted.value = !!state.job_card_submitted || jobCardSubmitted.value;
 		if (jobCardSubmitted.value) {
 			stockEntryName.value = state.stock_entry_name || '';
 		}
@@ -184,7 +172,7 @@ onMounted(async () => {
 
 	} catch (e) {
 		error.value = e.message;
-		frappe.msgprint(__('Load failed: {0}', [e.message]));
+		frappe.msgprint(__('Load failed: {0}'));
 	}
 });
 
@@ -210,20 +198,20 @@ async function fetchQueue(line, station) {
 
 		else {
 			slabsQueue.value = [];
+			debugger;
 			const result = await frappe.call({
-				method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
+				method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_in',
 				args: {
 					line: line,
-					next_stage: station
+					current_stage: station
 				}
 			});
-
 			if (result.message) {
 				slabsQueue.value = result.message || [];
 			}
 		}
 	} catch (e) {
-		console.error('Failed to fetch queue:', e);
+		console.error('Failed to fetch queue:');
 	}
 }
 
@@ -259,7 +247,6 @@ async function slabInfo(jc, station) {
 		args: { job_card: jc.name }
 	});
 	let slab = jcSlabRes.message;
-
 	// If no slab found for this specific Job Card, check if there's one coming from the previous stage
 	if (!slab && station.toLowerCase() === 'distribution') {
 		await createSlab(jc.production_line);
@@ -308,6 +295,8 @@ async function startOperation() {
 						process_name: station
 					}
 				});
+				await slabInfo(jobCardDoc.value, station);
+
 				status.value = 'In Progress';
 				showStartButton.value = false;
 				processStarted.value = true;
@@ -320,7 +309,6 @@ async function startOperation() {
 				processTimerHandle.value = setInterval(() => {
 					processElapsed.value += 1;
 				}, 1000);
-
 				frappe.msgprint(__('Process started'));
 			}
 			catch (e) {
@@ -377,12 +365,11 @@ async function finishOperation() {
 	}
 
 	catch (error) {
-		console.error('error.message:', error.message);
 		const errorMsg = error.message || (error._server_messages?.[0]?.message) || JSON.stringify(error);
 		frappe.msgprint({
 			title: __('Error'),
 			indicator: 'red',
-			message: `Failed to complete Job Card:<br><pre>${errorMsg}</pre>`
+			message: `Failed to complete Job Card`
 		});
 	}
 }
@@ -518,6 +505,16 @@ function selectJobCard(name) {
 		window.location.reload();
 	}
 }
+
+function selectSlab(name) {
+	if (name === slabNumber.value) return;
+
+	const route = frappe.get_route();
+	if (route.length >= 2) {
+		frappe.set_route(route[0], route[1], name);
+		window.location.reload();
+	}
+}
 </script>
 <template>
 	<div class="page-card p-0 d-flex h-100 w-100">
@@ -556,7 +553,8 @@ function selectJobCard(name) {
 					{{ __('No slabs in queue') }}
 				</div>
 				<div v-else>
-					<div v-for="item in slabsQueue" :key="item.name" class="card mb-2 shadow-sm slab-card border-0">
+					<div v-for="item in slabsQueue" :key="item.name" @click="selectSlab(item.current_job_card)"
+						class="card mb-2 shadow-sm slab-card border-0">
 						<div class="card-body p-3 d-flex flex-column justify-content-center align-items-start"
 							style="border-left: 4px solid #28a745; height: 5.5rem">
 							<h6 class="card-title mb-1 font-weight-bold">{{ item.serial_number }}</h6>

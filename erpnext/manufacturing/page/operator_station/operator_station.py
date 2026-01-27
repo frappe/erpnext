@@ -31,10 +31,12 @@ def start_distribution(job_card, process_name="operator"):
 
     jc = frappe.get_doc("Job Card", job_card)
     start_time = frappe.utils.now_datetime()
+    # employee_id = get_operators("Mixer Operator", jc.production_line)
+
     args = {
         "job_card_id": jc.name,
         "start_time": start_time,
-        "employees": [{"employee": "HR-EMP-00002"}],  # TODO - update operator 
+        # "employees": [{"employee": "HR-EMP-00002"}],  # TODO - update operator 
         "status": "Work In Progress",
     }
 
@@ -88,34 +90,8 @@ def finish_distribution(job_card, process_name="operator"):
     jc.db_set("status", "Completed")
     jc.reload()
 
-    slabs = frappe.get_all("Slab", 
-        filters={
-            "current_job_card": jc.name,
-            "status": process_name.lower(),
-            "docstatus": 0
-        },
-        fields=["name", "serial_number", "batch_number", "template", "line", "current_stage", "status"],
-        order_by="creation desc"
-    )
-    if not slabs:
-        frappe.throw(_("No Slabs found for this Job Card"))
-
-    process_mapping = {
-        "distribution": "pressing", 
-        "pressing": "heating",
-        "heating": "cooling",
-        "cooling": "quarantine",
-        "quarantine": "trimming",
-        "trimming": "calibration",
-        "calibration": "polishing",
-        "polishing": "Quality Check"
-    }
-
-    next_stage = process_mapping.get(process_name)
-    if not next_stage:
-        frappe.throw(_("Invalid process name: {0}").format(process_name))
-
-    move_slab_to(slab_number=slabs[0].name, next_stage=next_stage, job_card_number=jc.name, checkout_and_move=True)
+    if( process_name.lower() != "quality analysis"):
+        transfer_slab(job_card, process_name)
 
     work_order = jc.work_order
     wo = frappe.get_doc("Work Order", work_order)
@@ -133,15 +109,16 @@ def finish_distribution(job_card, process_name="operator"):
 
     for item in stock_entry_manufacture.items:
         if item.is_finished_item:
+            item.s_warehouse = wo.source_warehouse
             item.t_warehouse = wo.fg_warehouse  
             item.qty = bom_qty
             item.stock_qty = job_card_qty * item.conversion_factor
-            item.allow_zero_valuation_rate = 1 
+            # item.allow_zero_valuation_rate = 1 
         elif not item.is_scrap_item: 
             item.s_warehouse = wo.source_warehouse
             item.qty = (item.qty/wo.qty) * job_card_qty 
             item.stock_qty = item.qty * item.conversion_factor
-            item.allow_zero_valuation_rate = 1 
+            # item.allow_zero_valuation_rate = 1 
 
     fg_item = next((item for item in stock_entry_manufacture.items if item.is_finished_item), None)
     if fg_item:
@@ -320,4 +297,36 @@ def get_next_process_bom_qty(current_work_order):
             }
     
     return {"bom_qty": 0}
+
+@frappe.whitelist()
+def transfer_slab(job_card, process_name):
+    jc = frappe.get_doc("Job Card", job_card)
+    slabs = frappe.get_all("Slab", 
+        filters={
+            "current_job_card": jc.name,
+            "status": process_name.lower(),
+            "docstatus": 0
+        },
+        fields=["name", "serial_number", "batch_number", "template", "line", "current_stage", "status"],
+        order_by="creation desc"
+    )
+    if not slabs:
+        frappe.throw(_("No Slabs found for this Job Card"))
+
+    process_mapping = {
+        "distribution": "pressing", 
+        "pressing": "heating",
+        "heating": "cooling",
+        "cooling": "quarantine",
+        "quarantine": "trimming",
+        "trimming": "calibration",
+        "calibration": "polishing",
+        "polishing": "Quality Check"
+    }
+
+    next_stage = process_mapping.get(process_name)
+    if not next_stage:
+        frappe.throw(_("Invalid process name: {0}").format(process_name))
+
+    move_slab_to(slab_number=slabs[0].name, next_stage=next_stage, job_card_number=jc.name, checkout_and_move=True)
 
