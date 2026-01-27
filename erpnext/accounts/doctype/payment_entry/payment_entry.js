@@ -400,6 +400,16 @@ frappe.ui.form.on("Payment Entry", {
 		);
 
 		frm.refresh_fields();
+
+		const party_currency =
+			frm.doc.payment_type === "Receive" ? "paid_from_account_currency" : "paid_to_account_currency";
+
+		var reference_grid = frm.fields_dict["references"].grid;
+		["total_amount", "outstanding_amount", "allocated_amount"].forEach((fieldname) => {
+			reference_grid.update_docfield_property(fieldname, "options", party_currency);
+		});
+
+		reference_grid.refresh();
 	},
 
 	show_general_ledger: function (frm) {
