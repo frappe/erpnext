@@ -215,10 +215,63 @@ class TestValidateEntries(IntegrationTestCase):
 	Regression test for #52018: parent_account_name should use account_key format.
 	"""
 
+	def test_adds_new_entry_to_accounts(self):
+		"""
+		Test that validate_entries adds a new entry to accounts_by_name
+		when the key doesn't exist.
+		"""
+		entry = frappe._dict(
+			{
+				"account": "1000 - Test Account - ABC",
+				"account_name": "Test Account",
+				"account_number": "1000",
+			}
+		)
+
+		key = "1000 - Test Account"
+		accounts_by_name = {}
+		accounts = []
+
+		validate_entries(key, entry, accounts_by_name, accounts)
+
+		# Verify account was added
+		self.assertIn(key, accounts_by_name)
+		self.assertEqual(len(accounts), 1)
+
+	def test_does_not_duplicate_existing_entry(self):
+		"""
+		Test that validate_entries doesn't add duplicate entries.
+		"""
+		existing = frappe._dict(
+			{
+				"account_name": "Test Account",
+				"account_key": "1000 - Test Account",
+			}
+		)
+
+		entry = frappe._dict(
+			{
+				"account": "1000 - Test Account - ABC",
+				"account_name": "Test Account",
+				"account_number": "1000",
+			}
+		)
+
+		key = "1000 - Test Account"
+		accounts_by_name = {key: existing}
+		accounts = [existing]
+
+		validate_entries(key, entry, accounts_by_name, accounts)
+
+		# Should still only have one entry
+		self.assertEqual(len(accounts), 1)
+
 	def test_sets_parent_account_name_with_account_number_format(self):
 		"""
 		Test that dynamically added accounts get parent_account_name
 		in account_key format (with account number prefix).
+
+		This test requires _Test Company with numbered accounts.
 		"""
 		# Skip if _Test Company doesn't exist
 		if not frappe.db.exists("Company", "_Test Company"):
