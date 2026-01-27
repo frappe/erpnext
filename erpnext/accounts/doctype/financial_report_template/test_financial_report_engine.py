@@ -1684,9 +1684,11 @@ class TestClosingBalanceCarryForward(FinancialReportTemplateTestCase):
 
 	@classmethod
 	def setUpClass(cls):
-		"""Set up test fixtures for closing balance carry-forward tests."""
-		from frappe.utils import add_years, getdate, nowdate
+		"""Set up test fixtures for closing balance carry-forward tests.
 
+		Creates a test equity account and a journal entry in a prior fiscal year
+		to establish an opening balance for testing carry-forward behavior.
+		"""
 		super().setUpClass()
 
 		# Use a specific date that's reliably in a prior fiscal year
@@ -1701,8 +1703,26 @@ class TestClosingBalanceCarryForward(FinancialReportTemplateTestCase):
 		cls._create_prior_year_journal_entry()
 
 	@classmethod
+	def tearDownClass(cls):
+		"""Clean up test fixtures after all tests complete.
+
+		Cancels and deletes the test journal entry to ensure test isolation.
+		"""
+		if hasattr(cls, "test_journal_entry") and cls.test_journal_entry:
+			try:
+				cls.test_journal_entry.cancel()
+				cls.test_journal_entry.delete()
+			except Exception:
+				pass  # Ignore cleanup errors
+		super().tearDownClass()
+
+	@classmethod
 	def _get_or_create_test_account(cls):
-		"""Get or create a test equity account"""
+		"""Get or create a test equity account.
+
+		Returns:
+		        str: The full account name including company suffix.
+		"""
 		account_name = "_Test Equity Reserve - _TC"
 
 		if not frappe.db.exists("Account", account_name):
@@ -1723,7 +1743,12 @@ class TestClosingBalanceCarryForward(FinancialReportTemplateTestCase):
 
 	@classmethod
 	def _create_prior_year_journal_entry(cls):
-		"""Create a journal entry in the prior year to establish balance"""
+		"""Create a journal entry in the prior year to establish an opening balance.
+
+		Creates a journal entry that credits the equity account, establishing
+		a balance that should be carried forward to subsequent periods.
+		The entry is stored in cls.test_journal_entry for cleanup in tearDownClass.
+		"""
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
 		# Create a journal entry that credits equity (increases equity balance)
@@ -1749,7 +1774,7 @@ class TestClosingBalanceCarryForward(FinancialReportTemplateTestCase):
 				"display_name": "Test Equity Reserve",
 				"data_source": "Account Data",
 				"balance_type": "Closing Balance",
-				"calculation_formula": f'["account_name", "=", "_Test Equity Reserve"]',
+				"calculation_formula": '["account_name", "=", "_Test Equity Reserve"]',
 			},
 		]
 
@@ -1779,13 +1804,14 @@ class TestClosingBalanceCarryForward(FinancialReportTemplateTestCase):
 			columns, data, _, _ = engine.execute(filters)
 
 			# Find our test row in the results
+			# Note: formatted output uses account_name (set to display_name), not reference_code
 			equity_row = None
 			for row in data:
-				if row.get("reference_code") == "EQUITY_TEST":
+				if row.get("account_name") == "Test Equity Reserve":
 					equity_row = row
 					break
 
-			self.assertIsNotNone(equity_row, "EQUITY_TEST row should be in results")
+			self.assertIsNotNone(equity_row, "Test Equity Reserve row should be in results")
 
 			# Get the period key for the yearly report
 			# Yearly reports use the fiscal year end as the key
@@ -1831,21 +1857,21 @@ class TestClosingBalanceCarryForward(FinancialReportTemplateTestCase):
 				"display_name": "Equity Opening",
 				"data_source": "Account Data",
 				"balance_type": "Opening Balance",
-				"calculation_formula": f'["account_name", "=", "_Test Equity Reserve"]',
+				"calculation_formula": '["account_name", "=", "_Test Equity Reserve"]',
 			},
 			{
 				"reference_code": "EQ_CLOSING",
 				"display_name": "Equity Closing",
 				"data_source": "Account Data",
 				"balance_type": "Closing Balance",
-				"calculation_formula": f'["account_name", "=", "_Test Equity Reserve"]',
+				"calculation_formula": '["account_name", "=", "_Test Equity Reserve"]',
 			},
 			{
 				"reference_code": "EQ_MOVEMENT",
 				"display_name": "Equity Movement",
 				"data_source": "Account Data",
 				"balance_type": "Period Movement (Debits - Credits)",
-				"calculation_formula": f'["account_name", "=", "_Test Equity Reserve"]',
+				"calculation_formula": '["account_name", "=", "_Test Equity Reserve"]',
 			},
 		]
 
@@ -1873,8 +1899,9 @@ class TestClosingBalanceCarryForward(FinancialReportTemplateTestCase):
 
 			columns, data, _, _ = engine.execute(filters)
 
-			# Get results by reference code
-			results = {row.get("reference_code"): row for row in data}
+			# Get results by account_name (display_name in output)
+			# Note: formatted output uses account_name, not reference_code
+			results = {row.get("account_name"): row for row in data}
 
 			# Get period key
 			period_key = None
@@ -1883,9 +1910,9 @@ class TestClosingBalanceCarryForward(FinancialReportTemplateTestCase):
 					period_key = col.get("fieldname")
 					break
 
-			opening = flt(results.get("EQ_OPENING", {}).get(period_key, 0), 2)
-			closing = flt(results.get("EQ_CLOSING", {}).get(period_key, 0), 2)
-			movement = flt(results.get("EQ_MOVEMENT", {}).get(period_key, 0), 2)
+			opening = flt(results.get("Equity Opening", {}).get(period_key, 0), 2)
+			closing = flt(results.get("Equity Closing", {}).get(period_key, 0), 2)
+			movement = flt(results.get("Equity Movement", {}).get(period_key, 0), 2)
 
 			# When movement is 0, closing should equal opening
 			self.assertEqual(movement, 0, "Movement should be 0 for account with no period activity")
