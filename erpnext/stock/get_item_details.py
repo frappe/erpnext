@@ -421,9 +421,10 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	if not args.get("uom"):
 		if args.get("doctype") in sales_doctypes:
 			args.uom = item.sales_uom if item.sales_uom else item.stock_uom
-		elif (args.get("doctype") in ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]) or (
-			args.get("doctype") == "Material Request" and args.get("material_request_type") == "Purchase"
-		):
+		elif (
+			args.get("doctype")
+			in ["Purchase Order", "Purchase Receipt", "Purchase Invoice", "Supplier Quotation"]
+		) or (args.get("doctype") == "Material Request" and args.get("material_request_type") == "Purchase"):
 			args.uom = item.purchase_uom if item.purchase_uom else item.stock_uom
 		else:
 			args.uom = item.stock_uom
