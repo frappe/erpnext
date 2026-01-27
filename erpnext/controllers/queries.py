@@ -3,6 +3,7 @@
 
 
 import json
+import re
 from collections import OrderedDict, defaultdict
 
 import frappe
@@ -16,6 +17,13 @@ from pypika import Order
 
 import erpnext
 from erpnext.stock.get_item_details import _get_item_tax_template
+
+
+def split_search_terms(txt: str | None) -> list[str]:
+	if not txt or not isinstance(txt, str):
+		return []
+
+	return [part for part in re.split(r"\s+", txt.strip()) if part]
 
 
 # searches for active employees
@@ -177,6 +185,8 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	doctype = "Item"
 	conditions = []
+	search_terms = split_search_terms(txt)
+	search_text = "%".join(search_terms) if search_terms else ""
 
 	if isinstance(filters, str):
 		filters = json.loads(filters)
@@ -195,12 +205,18 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		columns += """, if(length(tabItem.description) > 40, \
 			concat(substr(tabItem.description, 1, 40), "..."), description) as description"""
 
+	def build_search_condition(field):
+		if len(search_terms) <= 1:
+			return f"{field} like %(txt)s"
+
+		return "(" + " and ".join([f"{field} like %(txt_{i})s" for i in range(len(search_terms))]) + ")"
+
 	searchfields = searchfields + [
 		field
 		for field in [searchfield or "name", "item_code", "item_group", "item_name"]
 		if field not in searchfields
 	]
-	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
+	searchfields = " or ".join([build_search_condition(field) for field in searchfields])
 
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
@@ -234,7 +250,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	description_cond = ""
 	if frappe.db.count(doctype, cache=True) < 50000:
 		# scan description only if items are less than 50000
-		description_cond = "or tabItem.description LIKE %(txt)s"
+		description_cond = f"or {build_search_condition('tabItem.description')}"
 
 	return frappe.db.sql(
 		"""select
@@ -261,10 +277,11 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		),
 		{
 			"today": nowdate(),
-			"txt": "%%%s%%" % txt,
-			"_txt": txt.replace("%", ""),
+			"txt": f"%{search_text}%",
+			"_txt": (search_terms[0] if search_terms else "").replace("%", ""),
 			"start": start,
 			"page_len": page_len,
+			**{f"txt_{i}": f"%{term}%" for i, term in enumerate(search_terms)},
 		},
 		as_dict=as_dict,
 	)
