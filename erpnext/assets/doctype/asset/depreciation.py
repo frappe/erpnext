@@ -246,7 +246,9 @@ def _make_journal_entry_for_depreciation(
 
 def setup_journal_entry_metadata(je, depr_schedule_doc, depr_series, depr_schedule, asset):
 	je.voucher_type = "Depreciation Entry"
-	je.naming_series = depr_series
+	if depr_series:
+		je.naming_series = depr_series
+
 	je.posting_date = depr_schedule.schedule_date
 	je.company = asset.company
 	je.finance_book = depr_schedule_doc.finance_book
