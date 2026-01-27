@@ -310,17 +310,49 @@ erpnext.financial_statements = {
 
 			report.page.add_custom_menu_item(views_menu, __("Balance Sheet"), function () {
 				var filters = report.get_values();
-				frappe.set_route("query-report", "Balance Sheet", { company: filters.company });
+				frappe.set_route("query-report", "Balance Sheet", {
+					company: filters.company,
+					filter_based_on: filters.filter_based_on,
+					period_start_date: filters.period_start_date,
+					period_end_date: filters.period_end_date,
+					from_fiscal_year: filters.from_fiscal_year,
+					to_fiscal_year: filters.to_fiscal_year,
+					periodicity: filters.periodicity,
+					presentation_currency: filters.presentation_currency,
+					cost_center: filters.cost_center,
+					project: filters.project,
+				});
 			});
 
 			report.page.add_custom_menu_item(views_menu, __("Profit and Loss"), function () {
 				var filters = report.get_values();
-				frappe.set_route("query-report", "Profit and Loss Statement", { company: filters.company });
+				frappe.set_route("query-report", "Profit and Loss Statement", {
+					company: filters.company,
+					filter_based_on: filters.filter_based_on,
+					period_start_date: filters.period_start_date,
+					period_end_date: filters.period_end_date,
+					from_fiscal_year: filters.from_fiscal_year,
+					to_fiscal_year: filters.to_fiscal_year,
+					periodicity: filters.periodicity,
+					presentation_currency: filters.presentation_currency,
+					cost_center: filters.cost_center,
+					project: filters.project,
+				});
 			});
 
 			report.page.add_custom_menu_item(views_menu, __("Cash Flow Statement"), function () {
 				var filters = report.get_values();
-				frappe.set_route("query-report", "Cash Flow", { company: filters.company });
+				frappe.set_route("query-report", "Cash Flow", {
+					company: filters.company,
+					filter_based_on: filters.filter_based_on,
+					period_start_date: filters.period_start_date,
+					period_end_date: filters.period_end_date,
+					from_fiscal_year: filters.from_fiscal_year,
+					to_fiscal_year: filters.to_fiscal_year,
+					periodicity: filters.periodicity,
+					cost_center: filters.cost_center,
+					project: filters.project,
+				});
 			});
 		}
 	},
