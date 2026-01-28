@@ -534,10 +534,6 @@ class SellingController(StockController):
 				"Item", d.item_code, ["has_serial_no", "has_batch_no", "has_expiry_date"], as_dict=1
 			)
 
-<<<<<<< HEAD
-			if not self.get("return_against") or (
-				get_valuation_method(d.item_code) == "Moving Average"
-=======
 			if (
 				set_zero_rate_for_expired_batch
 				and item_details.has_batch_no
@@ -550,8 +546,7 @@ class SellingController(StockController):
 				d.incoming_rate = 0
 
 			elif not self.get("return_against") or (
-				get_valuation_method(d.item_code, self.company) == "Moving Average"
->>>>>>> e78c750b4e (fix(credit-note): set incoming rate as zero for expired batch)
+				get_valuation_method(d.item_code) == "Moving Average"
 				and self.get("is_return")
 				and not item_details.has_serial_no
 				and not item_details.has_batch_no
