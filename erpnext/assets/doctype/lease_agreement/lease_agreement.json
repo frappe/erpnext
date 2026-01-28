@@ -11,15 +11,13 @@
   "company",
   "supplier",
   "leased_asset",
-  "amended_from",
   "column_break_wuct",
   "status",
   "lease_start_date",
   "lease_end_date",
-  "section_break_xsgj",
   "lease_amount",
-  "column_break_ufeh",
   "payment_frequency",
+  "amended_from",
   "section_break_jsvy",
   "lease_expense_account",
   "column_break_rcmx",
@@ -65,6 +63,7 @@
   {
    "fieldname": "status",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Status",
    "options": "Draft\nActive\nClosed\nCancelled",
    "read_only": 1
@@ -85,7 +84,6 @@
    "default": "Monthly",
    "fieldname": "payment_frequency",
    "fieldtype": "Select",
-   "hidden": 1,
    "label": "Payment Frequency",
    "options": "Monthly",
    "read_only": 1
@@ -125,14 +123,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "section_break_xsgj",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_ufeh",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "leased_asset",
    "fieldtype": "Link",
    "label": "Leased Asset",
@@ -163,7 +153,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-27 01:55:47.424768",
+ "modified": "2026-01-28 16:20:44.170156",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Lease Agreement",

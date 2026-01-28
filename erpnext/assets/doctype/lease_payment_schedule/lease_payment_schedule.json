@@ -3,7 +3,6 @@
  "allow_rename": 1,
  "creation": "2026-01-27 01:47:11.398150",
  "doctype": "DocType",
- "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "schedule_date",
@@ -37,7 +36,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-27 01:57:48.974578",
+ "modified": "2026-01-28 16:32:38.721146",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Lease Payment Schedule",
