@@ -13,6 +13,19 @@ function render_clear_demo_action() {
 		</a>`
 	);
 
+	frappe.ui.desktop_menu_items = [
+		{
+			label: __("Clear Demo Data"),
+			icon: "trash",
+			condition: function () {
+				return frappe.boot.sysdefaults.demo_company;
+			},
+			onClick: function () {
+				return erpnext.demo.clear_demo();
+			},
+		},
+	];
+
 	demo_action.appendTo($("#toolbar-user"));
 }
 
