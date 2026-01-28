@@ -175,6 +175,10 @@ class TestQuotation(FrappeTestCase):
 
 		self.assertTrue(quotation.payment_schedule)
 
+	@IntegrationTestCase.change_settings(
+		"Selling Settings",
+		{"automatically_fetch_payment_terms_from_quotation": 1},
+	)
 	def test_make_sales_order_terms_copied(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 
@@ -318,6 +322,10 @@ class TestQuotation(FrappeTestCase):
 	@change_settings(
 		"Accounts Settings",
 		{"add_taxes_from_item_tax_template": 0, "add_taxes_from_taxes_and_charges_template": 0},
+	)
+	@IntegrationTestCase.change_settings(
+		"Selling Settings",
+		{"automatically_fetch_payment_terms_from_quotation": 1},
 	)
 	def test_make_sales_order_with_terms(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
