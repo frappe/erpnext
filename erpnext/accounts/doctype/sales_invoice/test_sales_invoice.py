@@ -4722,7 +4722,6 @@ class TestSalesInvoice(FrappeTestCase):
 
 		doc.db_set("do_not_use_batchwise_valuation", original_value)
 
-<<<<<<< HEAD
 	def test_system_generated_exchange_gain_or_loss_je_after_repost(self):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 		from erpnext.accounts.doctype.repost_accounting_ledger.test_repost_accounting_ledger import (
@@ -4775,7 +4774,7 @@ class TestSalesInvoice(FrappeTestCase):
 		)
 
 		self.assertEqual(q[0][0], 1)
-=======
+
 	@change_settings("Selling Settings", {"set_zero_rate_for_expired_batch": True})
 	def test_zero_valuation_for_standalone_credit_note_with_expired_batch(self):
 		item_code = "_Test Item for Expiry Batch Zero Valuation"
@@ -4835,7 +4834,6 @@ class TestSalesInvoice(FrappeTestCase):
 		)
 
 		self.assertEqual(stock_ledger_entry.incoming_rate, 0.0)
->>>>>>> 3460a7efb5 (test(credit-note): add unit test for zero valuation rate on expired batch)
 
 
 def make_item_for_si(item_code, properties=None):
