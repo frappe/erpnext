@@ -21,7 +21,7 @@ def get_operator_state(job_card, process_name="operator"):
         "stock_entry_name": wo.produced_qty > 0 and f"MFG-SE-{process_name.upper()}-*" or "",
         "process_name": process_name, 
         "status": jc.status,
-        "current_process": wo.item_name.split(" - ")[-1].strip() if wo and " - " in wo.item_name else process_name,
+        "current_process": wo.item_name.rsplit("-", 1)[-1].strip() if wo and "-" in wo.item_name else process_name,
     }
     return state
 
@@ -107,18 +107,18 @@ def finish_distribution(job_card, process_name="operator"):
     else:
         stock_entry_manufacture = se_doc
 
-    for item in stock_entry_manufacture.items:
-        if item.is_finished_item:
-            item.s_warehouse = wo.source_warehouse
-            item.t_warehouse = wo.fg_warehouse  
-            item.qty = bom_qty
-            item.stock_qty = job_card_qty * item.conversion_factor
-            # item.allow_zero_valuation_rate = 1 
-        elif not item.is_scrap_item: 
-            item.s_warehouse = wo.source_warehouse
-            item.qty = (item.qty/wo.qty) * job_card_qty 
-            item.stock_qty = item.qty * item.conversion_factor
-            # item.allow_zero_valuation_rate = 1 
+    # for item in stock_entry_manufacture.items:
+    #     if item.is_finished_item:
+    #         item.s_warehouse = wo.source_warehouse
+    #         item.t_warehouse = wo.fg_warehouse  
+    #         item.qty = bom_qty
+    #         item.stock_qty = job_card_qty * item.conversion_factor
+    #         # item.allow_zero_valuation_rate = 1 
+    #     elif not item.is_scrap_item: 
+    #         item.s_warehouse = wo.source_warehouse
+    #         item.qty = (item.qty/wo.qty) * job_card_qty 
+    #         item.stock_qty = item.qty * item.conversion_factor
+    #         # item.allow_zero_valuation_rate = 1 
 
     fg_item = next((item for item in stock_entry_manufacture.items if item.is_finished_item), None)
     if fg_item:
@@ -162,7 +162,7 @@ def transfer_to_next_process(current_work_order, qty=None):
         "polished slab": "inspected slab"
     }
 
-    current_process = wo.production_item.split(" - ")[-1].strip().lower() if " - " in wo.production_item else ""
+    current_process = wo.production_item.rsplit("-", 1)[-1].strip().lower() if "-" in wo.production_item else ""
     next_process = process_mapping.get(current_process)
     
     if not next_process:
@@ -262,7 +262,7 @@ def transfer_to_next_process(current_work_order, qty=None):
 def get_next_process_bom_qty(current_work_order):
     """Get BOM qty required for NEXT process"""
     wo = frappe.get_doc("Work Order", current_work_order)
-    current_process = wo.item_name.split(" - ")[-1].strip()
+    current_process = wo.item_name.rsplit("-", 1)[-1].strip()
     process_mapping = {
         "mixing": "distribution",
         "distribution": "pressed slab", 

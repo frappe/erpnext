@@ -9,7 +9,6 @@ const work_context = reactive({
 });
 
 const fetchWorkContext = async () => {
-    debugger;
     const currentUser = await frappe.call({
         method: "erpnext.setup.doctype.employee.api.get_current_user_context",
     });
@@ -33,7 +32,6 @@ const get_slabs_ready_for_quarantine = async () => {
             current_stage: "Quarantine",
         }
     });
-    debugger;
     if (r.message) {
         if (!incomingSlabs.value.length) {
             incomingSlabs.value = r.message;
@@ -101,7 +99,6 @@ const submitQuarantine = () => {
         frappe.msgprint(__('Please select a slab first.'));
         return;
     }
-    debugger;
     frappe.confirm(__('Are you sure you want to submit the quarantine check?'), async () => {
         try {
             await frappe.call({

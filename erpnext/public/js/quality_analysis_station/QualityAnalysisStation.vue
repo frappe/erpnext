@@ -71,7 +71,6 @@ const fetchGrades = async () => {
 };
 
 const get_slabs_ready_for_qa = async () => {
-    debugger;
     const [for_res, in_res] = await Promise.all([
         frappe.call({
             method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
@@ -90,7 +89,6 @@ const get_slabs_ready_for_qa = async () => {
     ]);
 
     const combined_slabs = [...(in_res.message || []), ...(for_res.message || [])];
-    debugger;
     // De-duplicate in case a slab is in both for some reason (shouldn't happen with current logic but good for safety)
     const unique_slabs = [];
     const seen = new Set();
@@ -108,7 +106,6 @@ const get_slabs_ready_for_qa = async () => {
 function selectSlab(slab, index) {
     if (index) return;
     selectedSlab.value = slab;
-    debugger;
     const route = frappe.get_route();
     if (route.length >= 1) {
         frappe.set_route(route[0], slab.current_job_card);
@@ -218,7 +215,6 @@ onMounted(async () => {
     // }
     updateClock();
     clockInterval = setInterval(updateClock, 1000);
-    debugger;
     await fetchWorkContext();
     get_slabs_ready_for_qa();
     fetchGrades();

@@ -24,7 +24,6 @@ const searchQuery = ref('');
 
 const fetchSlabs = async () => {
     try {
-        debugger;
         const r = await frappe.call({
             method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_in',
             args: {
@@ -32,7 +31,6 @@ const fetchSlabs = async () => {
                 current_stage: "Quarantine"
             }
         });
-        debugger;
         if (r.message) {
             slabs.value = r.message;
         }
@@ -42,7 +40,6 @@ const fetchSlabs = async () => {
 };
 
 const filteredSlabs = computed(() => {
-    debugger;
     let result = slabs.value;
     if (searchQuery.value) {
         const q = searchQuery.value.toLowerCase();
@@ -114,7 +111,6 @@ const fetchSettings = async () => {
 onMounted(async () => {
     await fetchWorkContext();
     fetchSlabs();
-    debugger;
     fetchSettings();
     setInterval(() => {
         now.value = new Date();

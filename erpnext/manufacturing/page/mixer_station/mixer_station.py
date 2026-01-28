@@ -147,13 +147,13 @@ def finish_mixing(job_card, completed_qty):
     else:
         se = se_doc
 
-    for item in se.items:
-        if item.is_finished_item:
-            item.s_warehouse = wo.source_warehouse
-            item.t_warehouse = wo.fg_warehouse  
-            item.qty = job_card_qty
-        elif not item.is_scrap_item: 
-            item.s_warehouse = wo.source_warehouse
+    # for item in se.items:
+    #     if item.is_finished_item:
+    #         item.s_warehouse = wo.source_warehouse
+    #         item.t_warehouse = wo.fg_warehouse  
+    #         item.qty = job_card_qty
+    #     elif not item.is_scrap_item: 
+    #         item.s_warehouse = wo.source_warehouse
 
     se.fg_completed_qty = job_card_qty
     se.for_quantity = job_card_qty 

@@ -281,7 +281,7 @@ def get_slab_from_previous_stage(job_card_name):
         "inspected slab": "polished slab"
     }
 
-    current_process = wo.production_item.split(" - ")[-1].strip().lower() if " - " in wo.production_item else ""
+    current_process = wo.production_item.rsplit("-", 1)[-1].strip().lower() if "-" in wo.production_item else ""
     previous_process = reverse_process_mapping.get(current_process)
 
     if not previous_process:
@@ -340,10 +340,10 @@ def find_next_job_card(current_job_card):
         "polished slab": "inspected slab",
     }
 
-    if " - " not in current_wo.production_item:
+    if "-" not in current_wo.production_item:
         frappe.throw("Unable to determine current process from Work Order")
 
-    current_process = current_wo.production_item.split(" - ")[-1].strip().lower()
+    current_process = current_wo.production_item.rsplit("-", 1)[-1].strip().lower()
     next_process = process_mapping.get(current_process)
 
     if not next_process:
