@@ -922,6 +922,7 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 	# Get Sales Invoices with TCS amounts aggregated
 	# Use conditional sum to aggregate TCS amounts only from TCS accounts
 	tcs_accounts_list = list(all_tcs_accounts)
+	tcs_accounts_list = [frappe.db.escape(acc) for acc in tcs_accounts_list]
 
 	tcs_entries = (
 		frappe.qb.from_(si)
