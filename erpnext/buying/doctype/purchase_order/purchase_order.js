@@ -30,6 +30,8 @@ frappe.ui.form.on("Purchase Order", {
 				color = "yellow";
 			} else if (doc.qty <= doc.received_qty) {
 				color = "green";
+			} else if (doc.is_closed) {
+				color = "red";
 			} else {
 				color = "orange";
 			}
@@ -346,9 +348,16 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 								__("Status")
 							);
 						}
+
 						this.frm.add_custom_button(
-							__("Close"),
-							() => this.close_purchase_order(),
+							__("Close Items"),
+							() => this.close_selected_items(),
+							__("Status")
+						);
+
+						this.frm.add_custom_button(
+							__("Re-open Items"),
+							() => this.reopen_selected_items(),
 							__("Status")
 						);
 					}
@@ -712,9 +721,201 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 	unclose_purchase_order() {
 		this.frm.cscript.update_status("Re-open", "Submitted");
 	}
-
 	close_purchase_order() {
 		this.frm.cscript.update_status("Close", "Closed");
+	}
+	reopen_selected_items() {
+		var me = this;
+		this.data = this.frm.doc.items
+			.filter((d) => d.is_closed)
+			.map((d) => {
+				return {
+					docname: d.name,
+					item_code: d.item_code,
+					qty: d.qty,
+					received_qty: d.received_qty,
+					is_closed: d.is_closed,
+				};
+			});
+		const reopen_item_fields = [
+			{
+				fieldtype: "Link",
+				fieldname: "item_code",
+				options: "Item",
+				in_list_view: 1,
+				label: "Item Code",
+				read_only: 1,
+			},
+			{
+				fieldtype: "Float",
+				fieldname: "qty",
+				label: "Qty",
+				read_only: 1,
+				in_list_view: 1,
+			},
+		];
+
+		var d = new frappe.ui.Dialog({
+			title: __("Re-open Selected Items"),
+			size: "large",
+			fields: [
+				{
+					fieldname: "select_all",
+					fieldtype: "Check",
+					label: __("Select all items"),
+					default: 1,
+					onchange: function (e) {
+						const table_field = d.get_field("reopen_items");
+						table_field.df.hidden = this.get_value();
+						table_field.refresh();
+					},
+				},
+				{
+					fieldname: "reopen_items",
+					fieldtype: "Table",
+					label: __("Items"),
+					fields: reopen_item_fields,
+					cannot_add_row: true,
+					in_place_edit: true,
+					hidden: true,
+					data: me.data,
+					get_data: function () {
+						return me.data;
+					},
+				},
+			],
+			primary_action_label: __("Re-open"),
+			primary_action: function () {
+				let values = d.get_values();
+
+				if (values.select_all) {
+					me.unclose_purchase_order();
+					d.hide();
+					return;
+				}
+				let selected_items = (values.reopen_items || []).filter((row) => row.__checked);
+				if (!selected_items.length) {
+					frappe.msgprint(__("Please select at least one item to re-open"));
+					return;
+				}
+				frappe.call({
+					method: "erpnext.buying.doctype.purchase_order.purchase_order.close_or_reopen_selected_items",
+					args: {
+						purchase_order: me.frm.doc.name,
+						selected_items: JSON.stringify(selected_items),
+						status: "Re-open",
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							d.hide();
+							me.frm.reload_doc();
+							frappe.show_alert({
+								message: __("Selected items re-opened successfully"),
+								indicator: "green",
+							});
+						}
+					},
+				});
+			},
+		});
+		d.show();
+	}
+	close_selected_items() {
+		var me = this;
+		this.data = this.frm.doc.items
+			.filter((d) => d.qty > flt(d.received_qty) && !d.is_closed)
+			.map((d) => {
+				return {
+					docname: d.name,
+					item_code: d.item_code,
+					qty: d.qty,
+					received_qty: d.received_qty,
+					is_closed: d.is_closed,
+				};
+			});
+		const close_item_fields = [
+			{
+				fieldtype: "Link",
+				fieldname: "item_code",
+				options: "Item",
+				in_list_view: 1,
+				label: "Item Code",
+				read_only: 1,
+			},
+			{
+				fieldtype: "Float",
+				fieldname: "qty",
+				label: "Qty",
+				read_only: 1,
+				in_list_view: 1,
+			},
+		];
+
+		var d = new frappe.ui.Dialog({
+			title: __("Close Selected Items"),
+			size: "large",
+			fields: [
+				{
+					fieldname: "select_all",
+					fieldtype: "Check",
+					label: __("Select all items"),
+					default: 1,
+					onchange: function (e) {
+						const table_field = d.get_field("close_items");
+						table_field.df.hidden = this.get_value();
+						table_field.refresh();
+					},
+				},
+				{
+					fieldname: "close_items",
+					fieldtype: "Table",
+					label: __("Items"),
+					fields: close_item_fields,
+					cannot_add_row: true,
+					in_place_edit: true,
+					data: me.data,
+					hidden: true,
+					get_data: function () {
+						return me.data;
+					},
+				},
+			],
+			primary_action_label: __("Close"),
+			primary_action: function () {
+				let values = d.get_values();
+
+				let selected_items = (values.close_items || []).filter((row) => row.__checked);
+				if (selected_items.length == me.data.length || values.select_all) {
+					me.close_purchase_order();
+					d.hide();
+					return;
+				}
+				if (!selected_items.length) {
+					frappe.msgprint(__("Please select at least one item to close"));
+					return;
+				}
+				console.log(selected_items);
+				frappe.call({
+					method: "erpnext.buying.doctype.purchase_order.purchase_order.close_or_reopen_selected_items",
+					args: {
+						purchase_order: me.frm.doc.name,
+						selected_items: JSON.stringify(selected_items),
+						status: "Closed",
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							d.hide();
+							me.frm.reload_doc();
+							frappe.show_alert({
+								message: __("Selected items closed successfully"),
+								indicator: "green",
+							});
+						}
+					},
+				});
+			},
+		});
+		d.show();
 	}
 
 	delivered_by_supplier() {

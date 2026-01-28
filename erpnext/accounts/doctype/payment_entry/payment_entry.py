@@ -2831,6 +2831,8 @@ def get_reference_details(
 			party_field = "customer" if reference_doctype == "Sales Order" else "supplier"
 			party = ref_doc.get(party_field)
 			account = get_party_account(party_type, party, ref_doc.company)
+			if reference_doctype == "Purchase Order":
+				total_amount, outstanding_amount = ref_doc.get_revised_total_based_on_closed_items()
 	else:
 		# Get the exchange rate based on the posting date of the ref doc.
 		exchange_rate = get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
@@ -2880,7 +2882,8 @@ def get_payment_entry(
 	grand_total, outstanding_amount = set_grand_total_and_outstanding_amount(
 		party_amount, dt, party_account_currency, doc
 	)
-
+	if dt == "Purchase Order":
+		grand_total, outstanding_amount = doc.get_revised_total_based_on_closed_items()
 	# bank or cash
 	bank = get_bank_cash_account(doc, bank_account)
 

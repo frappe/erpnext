@@ -44,6 +44,7 @@ class PurchaseOrderItem(Document):
 		from_warehouse: DF.Link | None
 		image: DF.Attach | None
 		include_exploded_items: DF.Check
+		is_closed: DF.Check
 		is_fixed_asset: DF.Check
 		is_free_item: DF.Check
 		item_code: DF.Link

@@ -12,6 +12,7 @@ from frappe.utils.data import today
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.party import get_due_date_from_template
 from erpnext.buying.doctype.purchase_order.purchase_order import (
+	close_or_reopen_selected_items,
 	make_inter_company_sales_order,
 	make_purchase_receipt,
 )
@@ -29,6 +30,101 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 
 
 class TestPurchaseOrder(IntegrationTestCase):
+	def test_close_purchase_order_individually(self):
+		warehouse = "_Test Warehouse - _TC"
+		supplier = "_Test Supplier"
+
+		item_1 = make_item("_Test PO Item Level Closing 1", {"is_stock_item": 1})
+		item_2 = make_item("_Test PO Item Level Closing 2", {"is_stock_item": 1})
+		item_3 = make_item("_Test PO Item Level Closing 3", {"is_stock_item": 1})
+		po = create_purchase_order(
+			supplier=supplier,
+			rm_items=[
+				{
+					"item_code": item_1.item_code,
+					"qty": 2,
+					"rate": 100,
+					"warehouse": warehouse,
+					"schedule_date": add_days(nowdate(), 1),
+				},
+				{
+					"item_code": item_2.item_code,
+					"qty": 3,
+					"rate": 100,
+					"warehouse": warehouse,
+					"schedule_date": add_days(nowdate(), 1),
+				},
+				{
+					"item_code": item_3.item_code,
+					"qty": 4,
+					"rate": 100,
+					"warehouse": warehouse,
+					"schedule_date": add_days(nowdate(), 1),
+				},
+			],
+			do_not_submit=True,
+		)
+		po.submit()
+		pr = make_purchase_receipt(
+			po.name,
+			args={"filtered_children": [po.items[0].name]},
+		)
+		pr.submit()
+		po.reload()
+		self.assertEqual(po.items[0].received_qty, 2)
+		self.assertEqual(
+			frappe.get_all(
+				"Bin",
+				filters={
+					"item_code": po.items[1].item_code,
+					"warehouse": po.items[1].warehouse,
+				},
+				fields=["ordered_qty"],
+			)[0].ordered_qty,
+			3,
+		)
+
+		close_or_reopen_selected_items(
+			po.name,
+			"Closed",
+			json.dumps([{"docname": po.items[1].name}]),
+		)
+
+		po.reload()
+		self.assertEqual(
+			frappe.get_all(
+				"Bin",
+				filters={
+					"item_code": po.items[1].item_code,
+					"warehouse": po.items[1].warehouse,
+				},
+				fields=["ordered_qty"],
+			)[0].ordered_qty,
+			0,
+		)
+
+		pr = make_purchase_receipt(po.name)
+		self.assertEqual(len(pr.get("items")), 1)
+
+		close_or_reopen_selected_items(
+			po.name,
+			"Submitted",
+			json.dumps([{"docname": po.items[1].name}]),
+		)
+
+		po.reload()
+		self.assertEqual(
+			frappe.get_all(
+				"Bin",
+				filters={
+					"item_code": po.items[1].item_code,
+					"warehouse": po.items[1].warehouse,
+				},
+				fields=["ordered_qty"],
+			)[0].ordered_qty,
+			3,
+		)
+
 	def test_purchase_order_qty(self):
 		po = create_purchase_order(qty=1, do_not_save=True)
 

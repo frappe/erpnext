@@ -815,7 +815,10 @@ def get_amount(ref_doc, payment_account=None):
 		if ref_doc.party_account_currency != ref_doc.currency:
 			advance_amount = flt(flt(ref_doc.advance_paid) / ref_doc.conversion_rate)
 
-		grand_total = (flt(ref_doc.rounded_total) or flt(ref_doc.grand_total)) - advance_amount
+		if dt == "Purchase Order":
+			grand_total = flt(ref_doc.get_revised_total_based_on_closed_items()[0]) - advance_amount
+		else:
+			grand_total = (flt(ref_doc.rounded_total) or flt(ref_doc.grand_total)) - advance_amount
 
 	elif dt in ["Sales Invoice", "Purchase Invoice"]:
 		if (

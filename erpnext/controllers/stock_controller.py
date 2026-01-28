@@ -1454,8 +1454,10 @@ class StockController(AccountsController):
 			else:
 				frappe.msgprint(msg, alert=True, indicator="orange")
 
-	def update_blanket_order(self):
-		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
+	def update_blanket_order(self, items=None):
+		if not items:
+			items = self.items
+		blanket_orders = list(set([d.blanket_order for d in items if d.blanket_order]))
 		for blanket_order in blanket_orders:
 			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
 

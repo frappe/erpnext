@@ -3,6 +3,7 @@
 
 
 import json
+from urllib.parse import parse_qs
 
 import frappe
 from frappe import _, msgprint
@@ -437,13 +438,18 @@ class PurchaseOrder(BuyingController):
 			)
 
 	def update_status(self, status):
-		self.check_modified_date()
-		self.set_status(update=True, status=status)
-		self.update_requested_qty()
-		self.update_ordered_qty()
-		self.update_reserved_qty_for_subcontract()
-		self.update_subcontracting_order_status()
-		self.update_blanket_order()
+		if status == "Closed":
+			close_or_reopen_selected_items(self.name, status="Closed", all_items_closed=True)
+		elif status in ["Submitted", "Re-open"]:
+			close_or_reopen_selected_items(self.name, status="Re-open", all_items_closed=True)
+		else:
+			self.check_modified_date()
+			self.set_status(update=True, status=status)
+			self.update_requested_qty()
+			self.update_ordered_qty()
+			self.update_reserved_qty_for_subcontract()
+			self.update_subcontracting_order_status()
+			self.update_blanket_order()
 		self.notify_update()
 		clear_doctype_notifications(self)
 
@@ -658,6 +664,13 @@ class PurchaseOrder(BuyingController):
 			if sco:
 				update_sco_status(sco, "Closed" if self.status == "Closed" else None)
 
+	def get_revised_total_based_on_closed_items(self):
+		for item in self.items:
+			if item.is_closed == 1:
+				self.grand_total -= item.amount
+		self.outstanding_amount = self.grand_total - flt(self.advance_paid)
+		return self.grand_total, self.outstanding_amount
+
 
 @frappe.request_cache
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=1.0):
@@ -760,6 +773,7 @@ def make_purchase_receipt(
 					True if is_unit_price_row(doc) else abs(doc.received_qty) < abs(doc.qty)
 				)
 				and doc.delivered_by_supplier != 1
+				and doc.is_closed != 1
 				and select_item(doc),
 			},
 			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
@@ -858,7 +872,8 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount))
-			and select_item(doc),
+			and select_item(doc)
+			and doc.is_closed != 1,
 		},
 		"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 	}
@@ -1014,3 +1029,48 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 	)
 
 	return target_doc
+
+
+@frappe.whitelist()
+def close_or_reopen_selected_items(purchase_order, status, selected_items=None, all_items_closed=False):
+	items = []
+	po = frappe.get_lazy_doc("Purchase Order", purchase_order)
+	po.check_modified_date()
+	if po.is_subcontracted or po.is_old_subcontracting_flow:
+		frappe.throw(_("Cannot Close items for Subcontracted Purchase Order {0}.").format(po.name))
+	if not all_items_closed:
+		selected_items = frappe.parse_json(selected_items)
+		items = {i["docname"]: i for i in selected_items}
+
+	for row in po.items:
+		if not all_items_closed and row.name not in items:
+			continue
+
+		if status == "Closed":
+			if flt(row.received_qty) and flt(row.received_qty) == flt(row.qty) and not all_items_closed:
+				frappe.throw(_("Cannot close item {0} as it is fully received").format(row.item_code))
+
+			row.is_closed = 1
+		elif status == "Submitted":
+			row.is_closed = 0
+
+	po.save()
+	if len(items) > 0:
+		po_item_rows = [frappe.get_doc("Purchase Order Item", item_name) for item_name in items.keys()]
+		po.update_requested_qty(items=po_item_rows)
+		po.update_ordered_qty(po_item_rows=items)
+		po.update_blanket_order(items=po_item_rows)
+	else:
+		po.set_status(update=True, status=status)
+		po.update_requested_qty()
+		po.update_ordered_qty()
+		po.update_reserved_qty_for_subcontract()
+		po.update_subcontracting_order_status()
+		po.update_blanket_order()
+
+	if not all_items_closed and all(d.is_closed for d in po.items):
+		po.db_set("status", "Closed")
+		po.update_reserved_qty_for_subcontract()
+		po.update_subcontracting_order_status()
+		po.notify_update()
+		clear_doctype_notifications(po)

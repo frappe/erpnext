@@ -1321,9 +1321,11 @@ class SubcontractingController(StockController):
 
 		return self._sub_contracted_items
 
-	def update_requested_qty(self):
+	def update_requested_qty(self, items=None):
 		material_request_map = {}
-		for d in self.get("items"):
+		if not items:
+			items = self.get("items")
+		for d in items:
 			if d.material_request_item:
 				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
 
