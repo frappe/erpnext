@@ -6,17 +6,21 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "subscription_heatmap",
+  "section_break_baei",
   "party_type",
   "party",
   "cb_1",
   "company",
   "status",
+  "trial_section",
+  "trial_period_start",
+  "column_break_asxr",
+  "trial_period_end",
   "subscription_period",
   "start_date",
   "end_date",
   "cancelation_date",
-  "trial_period_start",
-  "trial_period_end",
   "follow_calendar_months",
   "generate_new_invoices_past_due_date",
   "submit_invoice",
@@ -27,6 +31,12 @@
   "generate_invoice_at",
   "number_of_days",
   "cancel_at_period_end",
+  "invoice_details_section",
+  "last_invoice_posting_date",
+  "next_invoice_posting_date",
+  "column_break_swxi",
+  "last_invoice_from_date",
+  "last_invoice_to_date",
   "sb_4",
   "plans",
   "sb_1",
@@ -239,11 +249,11 @@
    "label": "Submit Generated Invoices"
   },
   {
-   "default": "End of the current subscription period",
+   "default": "Billing Cycle End Date",
    "fieldname": "generate_invoice_at",
    "fieldtype": "Select",
    "label": "Generate Invoice At",
-   "options": "End of the current subscription period\nBeginning of the current subscription period\nDays before the current subscription period",
+   "options": "Billing Cycle End Date\nBilling Cycle Start Date\nDays Before Billing Cycle Start",
    "reqd": 1
   },
   {
@@ -252,6 +262,62 @@
    "fieldtype": "Int",
    "label": "Number of Days",
    "mandatory_depends_on": "eval:doc.generate_invoice_at === \"Days before the current subscription period\""
+  },
+  {
+   "fieldname": "last_invoice_posting_date",
+   "fieldtype": "Date",
+   "label": "Last Invoice Posting Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "next_invoice_posting_date",
+   "fieldtype": "Date",
+   "label": "Next Invoice Posting Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_baei",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "subscription_heatmap",
+   "fieldtype": "HTML",
+   "label": "Heatmap"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "trial_section",
+   "fieldtype": "Section Break",
+   "label": "Trial"
+  },
+  {
+   "fieldname": "column_break_asxr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "invoice_details_section",
+   "fieldtype": "Section Break",
+   "label": "Invoice Details"
+  },
+  {
+   "fieldname": "column_break_swxi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_invoice_from_date",
+   "fieldtype": "Date",
+   "label": "Last Invoice From Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_invoice_to_date",
+   "fieldtype": "Date",
+   "label": "Last Invoice To Date",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -267,11 +333,11 @@
    "link_fieldname": "subscription"
   }
  ],
- "modified": "2025-12-23 19:42:52.036034",
+ "modified": "2026-01-28 19:37:48.309702",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

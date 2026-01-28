@@ -25,6 +25,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
+from erpnext.startup import filters
 
 
 class InvoiceCancelled(frappe.ValidationError):
@@ -64,11 +65,13 @@ class Subscription(Document):
 		end_date: DF.Date | None
 		follow_calendar_months: DF.Check
 		generate_invoice_at: DF.Literal[
-			"End of the current subscription period",
-			"Beginning of the current subscription period",
-			"Days before the current subscription period",
+			"Billing Cycle End Date", "Billing Cycle Start Date", "Days Before Billing Cycle Start"
 		]
 		generate_new_invoices_past_due_date: DF.Check
+		last_invoice_from_date: DF.Date | None
+		last_invoice_posting_date: DF.Date | None
+		last_invoice_to_date: DF.Date | None
+		next_invoice_posting_date: DF.Date | None
 		number_of_days: DF.Int
 		party: DF.DynamicLink
 		party_type: DF.Link
@@ -83,19 +86,42 @@ class Subscription(Document):
 	# end: auto-generated types
 
 	def before_insert(self):
-		# update start just before the subscription doc is created
-		self.update_subscription_period(self.start_date)
+		if self.last_invoice_posting_date:
+			return
 
-	def update_subscription_period(self, date: DateTimeLikeObject | None = None):
-		"""
-		Subscription period is the period to be billed. This method updates the
-		beginning of the billing period and end of the billing period.
-		The beginning of the billing period is represented in the doctype as
-		`current_invoice_start` and the end of the billing period is represented
-		as `current_invoice_end`.
-		"""
-		self.current_invoice_start = self.get_current_invoice_start(date)
-		self.current_invoice_end = self.get_current_invoice_end(self.current_invoice_start)
+		service_start = self.get_initial_service_start()
+		service_end = self.compute_service_end(service_start)
+
+		self.next_invoice_posting_date = self.compute_posting_date(service_start, service_end)
+
+	def get_initial_service_start(self):
+		if self.trial_period_end:
+			return add_days(self.trial_period_end, 1)
+		return self.start_date
+
+	def compute_service_end(self, service_start):
+		billing_cycle = self.get_billing_cycle_data()
+		service_end = add_to_date(service_start, **billing_cycle)
+
+		if self.follow_calendar_months:
+			service_end = get_last_day(service_end)
+
+		if self.end_date:
+			service_end = min(getdate(service_end), getdate(self.end_date))
+			service_end = getdate(service_end)
+
+		return service_end
+
+	# def update_subscription_period(self, date: DateTimeLikeObject | None = None):
+	# 	"""
+	# 	Subscription period is the period to be billed. This method updates the
+	# 	beginning of the billing period and end of the billing period.
+	# 	The beginning of the billing period is represented in the doctype as
+	# 	`current_invoice_start` and the end of the billing period is represented
+	# 	as `current_invoice_end`.
+	# 	"""
+	# 	self.current_invoice_start = self.get_current_invoice_start(date)
+	# 	self.current_invoice_end = self.get_current_invoice_end(self.current_invoice_start)
 
 	def _get_subscription_period(self, date: DateTimeLikeObject | None = None):
 		_current_invoice_start = self.get_current_invoice_start(date)
@@ -401,12 +427,10 @@ class Subscription(Document):
 		invoice.company = company
 		invoice.set_posting_time = 1
 
-		if self.generate_invoice_at == "Beginning of the current subscription period":
-			invoice.posting_date = self.current_invoice_start
-		elif self.generate_invoice_at == "Days before the current subscription period":
-			invoice.posting_date = posting_date or self.current_invoice_start
-		else:
-			invoice.posting_date = self.current_invoice_end
+		if not posting_date:
+			frappe.throw(_("Posting Date is mandatory for subscription invoice"))
+
+		invoice.posting_date = posting_date
 
 		invoice.cost_center = self.cost_center
 
@@ -475,8 +499,12 @@ class Subscription(Document):
 
 		# Subscription period
 		invoice.subscription = self.name
-		invoice.from_date = from_date or self.current_invoice_start
-		invoice.to_date = to_date or self.current_invoice_end
+		from_date, to_date = self.get_service_period_for_posting_date(invoice.posting_date)
+		if not from_date or not to_date:
+			frappe.throw("Service period must be explicitly passed")
+
+		invoice.from_date = from_date
+		invoice.to_date = to_date
 
 		invoice.flags.ignore_mandatory = True
 
@@ -492,17 +520,18 @@ class Subscription(Document):
 		"""
 		Returns the `Item`s linked to `Subscription Plan`
 		"""
-
+		service_start, service_end = self.get_service_period_for_cycle()
 		prorate_factor = 1
 		if prorate:
 			prorate_factor = get_prorata_factor(
-				self.current_invoice_end,
-				self.current_invoice_start,
+				service_end,
+				service_start,
+				self.next_invoice_posting_date,
 				cint(
 					self.generate_invoice_at
 					in [
-						"Beginning of the current subscription period",
-						"Days before the current subscription period",
+						"Billing Cycle Start Date",
+						"Days Before Billing Cycle Start",
 					]
 				),
 			)
@@ -528,8 +557,8 @@ class Subscription(Document):
 					plan.plan,
 					plan.qty,
 					party,
-					self.current_invoice_start,
-					self.current_invoice_end,
+					service_start,
+					service_end,
 					prorate_factor,
 				),
 				"cost_center": plan_doc.cost_center,
@@ -539,8 +568,8 @@ class Subscription(Document):
 				item.update(
 					{
 						deferred_field: deferred,
-						"service_start_date": self.current_invoice_start,
-						"service_end_date": self.current_invoice_end,
+						"service_start_date": service_start,
+						"service_end_date": service_end,
 					}
 				)
 
@@ -562,33 +591,47 @@ class Subscription(Document):
 		1. `process_for_active`
 		2. `process_for_past_due`
 		"""
-		if not self.is_current_invoice_generated(
-			self.current_invoice_start, self.current_invoice_end
-		) and self.can_generate_new_invoice(posting_date):
-			self.generate_invoice(posting_date=posting_date)
-			if self.end_date:
-				next_start = add_days(self.current_invoice_end, 1)
+		posting_date = posting_date or nowdate()
 
-				if getdate(next_start) > getdate(self.end_date):
-					if self.cancel_at_period_end:
-						self.cancel_subscription()
-					else:
-						self.set_subscription_status(posting_date=posting_date)
+		if self.status == "Cancelled" or self.cancelation_date:
+			return
 
-					self.save()
-					return
-			self.update_subscription_period(add_days(self.current_invoice_end, 1))
-		elif posting_date and getdate(posting_date) > getdate(self.current_invoice_end):
-			self.update_subscription_period()
+		if self.cancel_at_period_end and not self.next_invoice_posting_date:
+			if self.end_date and getdate(self.current_invoice.to_date) >= getdate(self.end_date):
+				self.cancel_subscription()
+				self.save()
+				return
 
-		if self.cancel_at_period_end and (
-			getdate(posting_date) >= getdate(self.current_invoice_end)
-			or getdate(posting_date) >= getdate(self.end_date)
+		while (
+			posting_date
+			and self.next_invoice_posting_date
+			and getdate(posting_date) >= getdate(self.next_invoice_posting_date)
 		):
-			self.cancel_subscription()
+			service_start, service_end = self.get_service_period_for_cycle()
+
+			self.create_invoice(
+				posting_date=self.next_invoice_posting_date,
+				from_date=service_start,
+				to_date=service_end,
+			)
+
+			self.last_invoice_from_date = service_start
+			self.last_invoice_to_date = service_end
+			self.last_invoice_posting_date = self.next_invoice_posting_date
+
+			next_service_start = add_days(service_end, 1)
+
+			if self.end_date and getdate(next_service_start) > getdate(self.end_date):
+				self.next_invoice_posting_date = None
+				break
+			next_service_end = self.compute_service_end(next_service_start)
+
+			self.next_invoice_posting_date = self.compute_posting_date(
+				next_service_start,
+				next_service_end,
+			)
 
 		self.set_subscription_status(posting_date=posting_date)
-
 		self.save()
 
 	def can_generate_new_invoice(self, posting_date: DateTimeLikeObject | None = None) -> bool:
@@ -598,11 +641,11 @@ class Subscription(Document):
 		if self.has_outstanding_invoice() and not self.generate_new_invoices_past_due_date:
 			return False
 
-		if self.generate_invoice_at == "Beginning of the current subscription period" and (
+		if self.generate_invoice_at == "Billing Cycle Start Date" and (
 			getdate(posting_date) == getdate(self.current_invoice_start)
 		):
 			return True
-		elif self.generate_invoice_at == "Days before the current subscription period" and (
+		elif self.generate_invoice_at == "Days Before Billing Cycle Start" and (
 			getdate(posting_date) == getdate(add_days(self.current_invoice_start, -1 * self.number_of_days))
 		):
 			return True
@@ -696,15 +739,16 @@ class Subscription(Document):
 
 		to_generate_invoice = (
 			True
-			if self.status == "Active"
-			and self.generate_invoice_at != "Beginning of the current subscription period"
+			if self.status == "Active" and self.generate_invoice_at != "Billing Cycle Start Date"
 			else False
 		)
 		self.status = "Cancelled"
 		self.cancelation_date = nowdate()
 
-		if to_generate_invoice and self.cancelation_date >= self.current_invoice_start:
-			self.generate_invoice(self.current_invoice_start, self.cancelation_date)
+		if to_generate_invoice and self.last_invoice_to_date:
+			service_start = add_days(self.last_invoice_to_date, 1)
+			if self.cancelation_date >= service_start:
+				self.create_invoice(posting_date=self.last_invoice_posting_date)
 
 		self.save()
 
@@ -720,7 +764,8 @@ class Subscription(Document):
 
 		self.status = "Active"
 		self.cancelation_date = None
-		self.update_subscription_period(posting_date or nowdate())
+		self.last_invoice_posting_date = None
+		self.next_invoice_posting_date = posting_date or nowdate()
 		self.save()
 
 	@frappe.whitelist()
@@ -729,21 +774,181 @@ class Subscription(Document):
 		Process Subscription and create Invoices even if current date doesn't lie between current_invoice_start and currenct_invoice_end
 		It makes use of 'Proces Subscription' to force processing in a specific 'posting_date'
 		"""
+		if not self.next_invoice_posting_date:
+			frappe.msgprint(_("Subscription has no next invoice posting date."))
+			return
 
 		# Don't process future subscriptions
-		if nowdate() < self.current_invoice_start:
+		if nowdate() < self.next_invoice_posting_date:
 			frappe.msgprint(_("Subscription for Future dates cannot be processed."))
 			return
 
-		processing_date = None
-		if self.generate_invoice_at == "Beginning of the current subscription period":
-			processing_date = self.current_invoice_start
-		elif self.generate_invoice_at == "End of the current subscription period":
-			processing_date = self.current_invoice_end
-		elif self.generate_invoice_at == "Days before the current subscription period":
-			processing_date = add_days(self.current_invoice_start, -self.number_of_days)
+		self.process(posting_date=self.next_invoice_posting_date)
 
-		self.process(posting_date=processing_date)
+	def compute_posting_date(self, service_start, service_end):
+		if self.generate_invoice_at == "Billing Cycle Start Date":
+			return service_start
+
+		if self.generate_invoice_at == "Billing Cycle End Date":
+			return service_end
+
+		# Days before
+		return add_days(service_start, -cint(self.number_of_days))
+
+	def get_service_period_for_cycle(self):
+		if not self.last_invoice_to_date:
+			service_start = self.get_initial_service_start()
+		else:
+			service_start = add_days(self.last_invoice_to_date, 1)
+
+		service_end = self.compute_service_end(service_start)
+		return service_start, service_end
+
+	def get_service_period_for_posting_date(self, posting_date):
+		"""
+		Returns the service period (from_date, to_date) for a given invoice posting date
+		"""
+
+		if self.generate_invoice_at == "Billing Cycle Start Date":
+			service_start = posting_date
+
+		elif self.generate_invoice_at == "Billing Cycle End Date":
+			billing_cycle = self.get_billing_cycle_data()
+
+			if "days" in billing_cycle:
+				offset = -billing_cycle["days"]
+				service_start = add_days(posting_date, offset)
+			else:
+				service_start = add_to_date(
+					posting_date,
+					months=-billing_cycle.get("months", 0),
+					years=-billing_cycle.get("years", 0),
+				)
+
+		else:
+			service_start = add_days(posting_date, cint(self.number_of_days))
+
+		if self.trial_period_end and getdate(service_start) <= getdate(self.trial_period_end):
+			service_start = add_days(self.trial_period_end, 1)
+
+		billing_cycle = self.get_billing_cycle_data()
+		service_end = add_to_date(service_start, **billing_cycle)
+		print("service_start, service_end", service_start, service_end)
+
+		if self.follow_calendar_months:
+			service_end = get_last_day(service_end)
+
+		if self.end_date:
+			service_end = min(service_end, self.end_date)
+
+		return service_start, service_end
+
+	def compute_next_invoice_posting_date(self, posting_date):
+		service_start, service_end = self.get_service_period_for_posting_date(posting_date)
+
+		next_service_start = add_days(service_end, 1)
+
+		if self.generate_invoice_at == "Billing Cycle Start Date":
+			return next_service_start
+
+		if self.generate_invoice_at == "Billing Cycle End Date":
+			_, next_service_end = self.get_service_period_for_posting_date(next_service_start)
+			return next_service_end
+
+		return add_days(next_service_start, -cint(self.number_of_days))
+
+	@frappe.whitelist()
+	def get_amount_details(self):
+		"""
+		Returns amount details for the subscription plans
+		"""
+		if not self.plans:
+			return []
+
+		precision = cint(frappe.db.get_default("currency_precision")) or 2
+
+		# Fetch all plans in one query
+		plan_names = [d.plan for d in self.plans]
+		plans = {
+			p.name: p
+			for p in frappe.get_all(
+				"Subscription Plan",
+				filters={"name": ["in", plan_names]},
+				fields=["name", "price_determination", "cost", "item", "price_list", "billing_interval"],
+			)
+		}
+
+		amount_details = []
+
+		for item in self.plans:
+			plan = plans.get(item.plan)
+			if not plan:
+				continue
+
+			qty = flt(item.qty)
+			amount = flt(
+				self._get_plan_amount(
+					plan, qty, self.next_invoice_posting_date or self.last_invoice_posting_date
+				),
+				precision,
+			)
+
+			amount_details.append(
+				{
+					"plan": item.plan,
+					"qty": qty,
+					"amount": amount,
+				}
+			)
+
+		return amount_details
+
+	def _get_plan_amount(self, plan, qty, inv_pst_date):
+		if plan.price_determination == "Fixed Rate":
+			return flt(plan.cost) * qty
+
+		if plan.price_determination == "Based On Price List":
+			rate = self._get_valid_price(plan, inv_pst_date)
+			return flt(rate) * qty
+
+		if plan.price_determination == "Monthly Rate":
+			cost = flt(plan.cost)
+			cur_month_days = date_diff(get_last_day(inv_pst_date), getdate(inv_pst_date).replace(day=1)) + 1
+			interval_map = {
+				"Month": 1,
+				"Year": 12,
+				"Week": 12 / 52,
+				"Day": 1 / cur_month_days,
+			}
+
+			multiplier = interval_map.get(plan.billing_interval, 1)
+			return cost * multiplier * qty
+
+		return 0
+
+	def _get_valid_price(self, plan, inv_pst_date):
+		"""
+		Fetch the correct active price based on next invoice posting date.
+		Returns 0 if no valid price found.
+		"""
+
+		price = frappe.get_all(
+			"Item Price",
+			filters={
+				"item_code": plan.item,
+				"price_list": plan.price_list,
+				"valid_from": ("<=", inv_pst_date),
+			},
+			or_filters=[
+				["valid_upto", "is", "not set"],
+				["valid_upto", ">=", inv_pst_date],
+			],
+			fields=["price_list_rate", "valid_from"],
+			order_by="valid_from desc",
+			limit=1,
+		)
+
+		return price[0].price_list_rate if price else 0
 
 
 def is_prorate() -> int:
@@ -753,12 +958,13 @@ def is_prorate() -> int:
 def get_prorata_factor(
 	period_end: DateTimeLikeObject,
 	period_start: DateTimeLikeObject,
+	posting_date: DateTimeLikeObject,
 	is_prepaid: int | None = None,
 ) -> int | float:
 	if is_prepaid:
 		return 1
 
-	diff = flt(date_diff(nowdate(), period_start) + 1)
+	diff = flt(date_diff(posting_date, period_start) + 1)
 	plan_days = flt(date_diff(period_end, period_start) + 1)
 	return diff / plan_days
 

@@ -2,6 +2,9 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Subscription", {
+	onload: function (frm) {
+		frm.trigger("render_heatmap");
+	},
 	setup: function (frm) {
 		frm.set_query("party_type", function () {
 			return {
@@ -29,6 +32,7 @@ frappe.ui.form.on("Subscription", {
 	},
 
 	refresh: function (frm) {
+		frm.trigger("get_amount_details");
 		if (frm.is_new()) return;
 
 		if (frm.doc.status !== "Cancelled") {
@@ -92,6 +96,74 @@ frappe.ui.form.on("Subscription", {
 		frm.call("force_fetch_subscription_updates").then((r) => {
 			if (!r.exec) {
 				frm.reload_doc();
+			}
+		});
+	},
+	render_heatmap(frm) {
+		let subscription_heatmap = frm.get_field("subscription_heatmap").$wrapper;
+		subscription_heatmap.addClass("subscription_heatmap_location");
+
+		// Fetch paid sales cycles from the server
+		frappe.call({
+			method: "frappe.client.get_list",
+			args: {
+				doctype: "Sales Invoice",
+				filters: {
+					subscription: frm.doc.name,
+					docstatus: 1,
+				},
+				fields: ["from_date", "to_date", "status"],
+				limit_page_length: 365,
+			},
+			callback: function (r) {
+				let datapoints = {};
+				let msiad = 86400000; // 1 day
+
+				let start = frappe.datetime.str_to_obj(frm.doc.start_date);
+				let end = frm.doc.end_date
+					? frappe.datetime.str_to_obj(frm.doc.end_date)
+					: frappe.datetime.str_to_obj(frappe.datetime.nowdate());
+
+				for (let d = new Date(start); d <= end; d.setTime(d.getTime() + msiad)) {
+					datapoints[Math.floor(d.getTime() / 1000)] = 0;
+				}
+
+				(r.message || []).forEach((inv) => {
+					if (inv.status !== "Paid") return;
+
+					let from = frappe.datetime.str_to_obj(inv.from_date);
+					let to = frappe.datetime.str_to_obj(inv.to_date);
+
+					for (let d = new Date(from); d <= to; d.setTime(d.getTime() + msiad)) {
+						let key = Math.floor(d.getTime() / 1000);
+						if (key in datapoints) datapoints[key] = 1;
+					}
+				});
+
+				new frappe.Chart(".subscription_heatmap_location", {
+					type: "heatmap",
+					data: {
+						dataPoints: datapoints,
+						start: new Date(frm.doc.start_date),
+						end: new Date(frm.doc.end_date || frappe.datetime.nowdate()),
+					},
+					countLabel: "Active Subscription",
+					discreteDomains: 1,
+				});
+			},
+		});
+		return;
+	},
+	get_amount_details(frm) {
+		frm.call("get_amount_details").then((r) => {
+			if (r.message) {
+				for (let row of r.message) {
+					let plan_row = frm.doc.plans.find((plan) => plan.plan == row.plan);
+					if (plan_row) {
+						plan_row.amount = row.amount;
+					}
+				}
+				frm.refresh_field("plans");
 			}
 		});
 	},
