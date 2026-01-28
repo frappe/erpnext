@@ -41,6 +41,7 @@
   "allow_zero_qty_in_quotation",
   "allow_zero_qty_in_sales_order",
   "set_zero_rate_for_expired_batch",
+  "automatically_fetch_payment_terms_from_quotation",
   "section_break_avhb",
   "enable_utm",
   "experimental_section",
@@ -320,6 +321,12 @@
    "fieldname": "enable_utm",
    "fieldtype": "Check",
    "label": "Enable UTM"
+   },
+  {
+   "default": "0",
+   "fieldname": "automatically_fetch_payment_terms_from_quotation",
+   "fieldtype": "Check",
+   "label": "Automatically Fetch Payment Terms from Quotation"
   }
  ],
  "grid_page_length": 50,

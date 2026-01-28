@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt, getdate, nowdate
+from frappe.utils import cint, flt, getdate, nowdate
 
 from erpnext.controllers.selling_controller import SellingController
 
@@ -467,12 +467,18 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, ar
 			},
 			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
-			"Payment Schedule": {"doctype": "Payment Schedule", "add_if_empty": True},
 		},
 		target_doc,
 		set_missing_values,
 		ignore_permissions=ignore_permissions,
 	)
+
+	automatically_fetch_payment_terms = cint(
+		frappe.get_single_value("Selling Settings", "automatically_fetch_payment_terms_from_quotation")
+	)
+
+	if automatically_fetch_payment_terms:
+		doclist.set_payment_schedule()
 
 	return doclist
 

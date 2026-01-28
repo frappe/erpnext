@@ -38,6 +38,7 @@ class SellingSettings(Document):
 		allow_sales_order_creation_for_expired_quotation: DF.Check
 		allow_zero_qty_in_quotation: DF.Check
 		allow_zero_qty_in_sales_order: DF.Check
+		automatically_fetch_payment_terms_from_quotation: DF.Check
 		blanket_order_allowance: DF.Float
 		cust_master_name: DF.Literal["Customer Name", "Naming Series", "Auto Name"]
 		customer_group: DF.Link | None
