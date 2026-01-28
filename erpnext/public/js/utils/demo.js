@@ -6,6 +6,19 @@ $(document).on("toolbar_setup", function () {
 	}
 });
 
+$(document).on("desktop_screen", function (event, data) {
+	data.desktop.add_menu_item({
+		label: __("Clear Demo Data"),
+		icon: "trash",
+		condition: function () {
+			return frappe.boot.sysdefaults.demo_company;
+		},
+		onClick: function () {
+			return erpnext.demo.clear_demo();
+		},
+	});
+});
+
 function render_clear_demo_action() {
 	let demo_action = $(
 		`<a class="dropdown-item" onclick="return erpnext.demo.clear_demo()">
