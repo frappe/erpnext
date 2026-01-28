@@ -36,7 +36,17 @@
   "enable_discount_accounting",
   "allow_zero_qty_in_quotation",
   "allow_zero_qty_in_sales_order",
-  "set_zero_rate_for_expired_batch"
+  "set_zero_rate_for_expired_batch",
+  "automatically_fetch_payment_terms_from_quotation",
+  "section_break_avhb",
+  "enable_utm",
+  "experimental_section",
+  "use_legacy_js_reactivity",
+  "subcontracting_inward_tab",
+  "section_break_zwh6",
+  "allow_delivery_of_overproduced_qty",
+  "column_break_mla9",
+  "deliver_scrap_items"
  ],
  "fields": [
   {
@@ -232,6 +242,32 @@
    "fieldname": "set_zero_rate_for_expired_batch",
    "fieldtype": "Check",
    "label": "Set Incoming Rate as Zero for Expired Batch"
+  },
+  {
+   "default": "0",
+   "description": "Manage sales partner's and sales team's commissions",
+   "fieldname": "enable_tracking_sales_commissions",
+   "fieldtype": "Check",
+   "label": "Enable tracking sales commissions"
+  },
+  {
+   "fieldname": "section_break_avhb",
+   "fieldtype": "Section Break",
+   "label": "Analytics"
+  },
+  {
+   "default": "0",
+   "description": "Enable Urchin Tracking Module parameters in Quotation, Sales Order, Sales Invoice, POS Invoice, Lead,  and Delivery Note.",
+   "documentation_url": "https://en.wikipedia.org/wiki/UTM_parameters",
+   "fieldname": "enable_utm",
+   "fieldtype": "Check",
+   "label": "Enable UTM"
+   },
+  {
+   "default": "0",
+   "fieldname": "automatically_fetch_payment_terms_from_quotation",
+   "fieldtype": "Check",
+   "label": "Automatically Fetch Payment Terms from Quotation"
   }
  ],
  "grid_page_length": 50,
