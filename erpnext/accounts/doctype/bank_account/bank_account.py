@@ -60,20 +60,15 @@ class BankAccount(Document):
 			if not self.company:
 				frappe.throw(_("Company is mandatory for company account"))
 
-<<<<<<< HEAD
-	def validate_company(self):
-		if self.is_company_account and not self.company:
-			frappe.throw(_("Company is manadatory for company account"))
+			if not self.account:
+				frappe.throw(_("Company Account is mandatory"))
+
+			self.validate_account()
 
 	@deprecated
 	def validate_iban(self):
 		"""Kept for backward compatibility, will be removed in v16."""
 		validate_iban(self.iban, throw=True)
-=======
-			if not self.account:
-				frappe.throw(_("Company Account is mandatory"))
-
-			self.validate_account()
 
 	def validate_account(self):
 		if accounts := frappe.db.get_all(
@@ -85,7 +80,6 @@ class BankAccount(Document):
 					frappe.bold(comma_and([get_link_to_form(self.doctype, x[0]) for x in accounts])),
 				)
 			)
->>>>>>> 7532ab01d6 (fix(bank_account): validation for is_company_account)
 
 	def update_default_bank_account(self):
 		if self.is_default and not self.disabled:
