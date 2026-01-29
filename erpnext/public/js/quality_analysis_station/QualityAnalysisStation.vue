@@ -241,7 +241,7 @@ watch(
 
         try {
             await frappe.call({
-                method: 'erpnext.manufacturing.page.operator_station.operator_station.start_distribution',
+                method: 'erpnext.manufacturing.page.operator_station.operator_station.start_process',
                 args: {
                     job_card: newJobCard,
                     process_name: 'Quality Analysis'

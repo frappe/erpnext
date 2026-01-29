@@ -55,7 +55,7 @@ def create_mfg_warehouses():
 # This method returns the configuration object using which the final warehouse list is generated.
 def get_warehouse_config():
 	return {
-		MIXING_PROCESS: [2, 2, 1, 1, 1], # Two for the first two child lines, one per rest of the child lines.,
+		MIXING_PROCESS: [1, 1, 1, 1, 1], # Two for the first two child lines, one per rest of the child lines.,
 		DISTRIBUTION_PROCESS: [1] * 5 # One per child line,
 	}
 
