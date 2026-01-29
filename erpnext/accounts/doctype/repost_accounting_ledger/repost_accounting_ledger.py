@@ -9,8 +9,6 @@ from frappe.desk.form.linked_with import get_child_tables_of_doctypes
 from frappe.model.document import Document
 from frappe.utils.data import comma_and
 
-from erpnext.stock import get_warehouse_account_map
-
 
 class RepostAccountingLedger(Document):
 	# begin: auto-generated types

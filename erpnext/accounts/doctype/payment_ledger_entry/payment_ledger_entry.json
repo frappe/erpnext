@@ -133,6 +133,12 @@
    "label": "Cost Center",
    "options": "Cost Center"
   },
+    {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
   {
    "fieldname": "due_date",
    "fieldtype": "Date",

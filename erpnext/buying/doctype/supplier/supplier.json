@@ -383,7 +383,7 @@
   },
   {
    "fieldname": "primary_address",
-   "fieldtype": "Text",
+   "fieldtype": "Text Editor",
    "label": "Primary Address",
    "read_only": 1
   },
@@ -500,7 +500,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2025-06-29 05:30:50.398653",
+ "modified": "2026-01-16 15:56:31.139206",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

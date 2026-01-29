@@ -6,7 +6,6 @@ from frappe.model.naming import set_name_by_naming_series
 from frappe.permissions import (
 	add_user_permission,
 	get_doc_permissions,
-	has_permission,
 	remove_user_permission,
 )
 from frappe.utils import cstr, getdate, today, validate_email_address

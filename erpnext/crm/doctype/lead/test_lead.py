@@ -1,9 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-import unittest
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import random_string, today
 
 from erpnext.crm.doctype.lead.lead import make_opportunity

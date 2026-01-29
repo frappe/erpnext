@@ -52,6 +52,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Company Account",
+   "mandatory_depends_on": "is_company_account",
    "options": "Account"
   },
   {
@@ -98,6 +99,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Company",
+   "mandatory_depends_on": "is_company_account",
    "options": "Company"
   },
   {
@@ -252,7 +254,7 @@
    "link_fieldname": "default_bank_account"
   }
  ],
- "modified": "2025-08-29 12:32:01.081687",
+ "modified": "2026-01-20 00:46:16.633364",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",

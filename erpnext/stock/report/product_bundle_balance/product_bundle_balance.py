@@ -6,7 +6,6 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull, Max
 from frappe.utils import flt
-from pypika.terms import ExistsCriterion
 
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 

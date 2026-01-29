@@ -8,7 +8,7 @@ from frappe.utils import cint, flt, get_link_to_form, nowtime
 
 from erpnext.accounts.party import render_address
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
-from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
+from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, is_batch_expired
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.item.item import set_item_default
 from erpnext.stock.get_item_details import get_bin_details, get_conversion_factor
@@ -536,16 +536,31 @@ class SellingController(StockController):
 		allow_at_arms_length_price = frappe.get_cached_value(
 			"Stock Settings", None, "allow_internal_transfer_at_arms_length_price"
 		)
+		set_zero_rate_for_expired_batch = frappe.db.get_single_value(
+			"Selling Settings", "set_zero_rate_for_expired_batch"
+		)
+
 		items = self.get("items") + (self.get("packed_items") or [])
 		for d in items:
 			if not frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
 				continue
 
 			item_details = frappe.get_cached_value(
-				"Item", d.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
+				"Item", d.item_code, ["has_serial_no", "has_batch_no", "has_expiry_date"], as_dict=1
 			)
 
-			if not self.get("return_against") or (
+			if (
+				set_zero_rate_for_expired_batch
+				and item_details.has_batch_no
+				and item_details.has_expiry_date
+				and self.get("is_return")
+				and not self.get("return_against")
+				and is_batch_expired(d.batch_no, self.get("posting_date"))
+			):
+				# set incoming rate as zero for stand-lone credit note with expired batch
+				d.incoming_rate = 0
+
+			elif not self.get("return_against") or (
 				get_valuation_method(d.item_code, self.company) == "Moving Average"
 				and self.get("is_return")
 				and not item_details.has_serial_no

@@ -1,6 +1,3 @@
-import unittest
-
-import frappe
 from frappe.tests import IntegrationTestCase
 
 from erpnext import encode_company_abbr

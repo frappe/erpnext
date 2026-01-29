@@ -1118,7 +1118,6 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 
 	def test_not_reconcile_all_serial_nos(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-		from erpnext.stock.utils import get_incoming_rate
 
 		item = self.make_item(
 			"Test Serial NO Item Not Reconcile All Serial Batch",
@@ -1450,6 +1449,7 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 			qty=10,
 			rate=100,
 			use_serial_batch_fields=1,
+			purpose="Opening Stock",
 		)
 
 		sr.reload()
@@ -1592,6 +1592,7 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 			qty=10,
 			rate=80,
 			use_serial_batch_fields=1,
+			purpose="Opening Stock",
 		)
 
 		batch_no = get_batch_from_bundle(reco.items[0].serial_and_batch_bundle)
@@ -1676,6 +1677,7 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 			qty=10,
 			rate=100,
 			use_serial_batch_fields=1,
+			purpose="Opening Stock",
 		)
 
 		sr.reload()

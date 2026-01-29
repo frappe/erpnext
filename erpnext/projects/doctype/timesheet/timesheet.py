@@ -51,7 +51,9 @@ class Timesheet(Document):
 		per_billed: DF.Percent
 		sales_invoice: DF.Link | None
 		start_date: DF.Date | None
-		status: DF.Literal["Draft", "Submitted", "Billed", "Payslip", "Completed", "Cancelled"]
+		status: DF.Literal[
+			"Draft", "Submitted", "Partially Billed", "Billed", "Payslip", "Completed", "Cancelled"
+		]
 		time_logs: DF.Table[TimesheetDetail]
 		title: DF.Data | None
 		total_billable_amount: DF.Currency
@@ -127,6 +129,9 @@ class Timesheet(Document):
 
 		if flt(self.per_billed, self.precision("per_billed")) >= 100.0:
 			self.status = "Billed"
+
+		if 0.0 < flt(self.per_billed, self.precision("per_billed")) < 100.0:
+			self.status = "Partially Billed"
 
 		if self.sales_invoice:
 			self.status = "Completed"
@@ -433,7 +438,7 @@ def make_sales_invoice(source_name, item_code=None, customer=None, currency=None
 		target.append("items", {"item_code": item_code, "qty": hours, "rate": billing_rate})
 
 	for time_log in timesheet.time_logs:
-		if time_log.is_billable:
+		if time_log.is_billable and not time_log.sales_invoice:
 			target.append(
 				"timesheets",
 				{

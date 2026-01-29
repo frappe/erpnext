@@ -2,8 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import unittest
-
 import frappe
 from frappe.tests import IntegrationTestCase
 

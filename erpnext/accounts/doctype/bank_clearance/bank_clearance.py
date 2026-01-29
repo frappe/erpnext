@@ -6,7 +6,7 @@ import frappe
 from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
-from frappe.utils import cint, flt, fmt_money, get_link_to_form, getdate
+from frappe.utils import cint, flt, fmt_money, getdate
 from pypika import Order
 
 import erpnext

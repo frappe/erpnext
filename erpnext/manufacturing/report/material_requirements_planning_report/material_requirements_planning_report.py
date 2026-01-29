@@ -15,7 +15,6 @@ from frappe.utils import (
 	days_diff,
 	flt,
 	formatdate,
-	get_date_str,
 	get_first_day,
 	getdate,
 	parse_json,

@@ -778,9 +778,8 @@ class TestSubcontractingController(IntegrationTestCase):
 				row.serial_no = "ABC"
 				break
 
-		bundle.save()
+		self.assertRaises(frappe.ValidationError, bundle.save)
 
-		self.assertRaises(frappe.ValidationError, scr1.save)
 		bundle.load_from_db()
 		for row in bundle.entries:
 			if row.idx == 1:

@@ -2,8 +2,6 @@
 # For license information, please see license.txt
 
 
-from datetime import datetime
-
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum

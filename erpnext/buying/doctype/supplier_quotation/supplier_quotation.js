@@ -16,6 +16,14 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 			return !doc.qty && me.frm.doc.has_unit_price_items ? "yellow" : "";
 		});
 
+		this.frm.set_query("warehouse", "items", (doc, cdt, cdn) => {
+			return {
+				filters: {
+					company: doc.company,
+					is_group: 0,
+				},
+			};
+		});
 		super.setup();
 	}
 

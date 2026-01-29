@@ -1,20 +1,17 @@
 frappe.provide("erpnext.demo");
 
-$(document).on("toolbar_setup", function () {
-	if (frappe.boot.sysdefaults.demo_company) {
-		render_clear_demo_action();
-	}
+$(document).on("desktop_screen", function (event, data) {
+	data.desktop.add_menu_item({
+		label: __("Clear Demo Data"),
+		icon: "trash",
+		condition: function () {
+			return frappe.boot.sysdefaults.demo_company;
+		},
+		onClick: function () {
+			return erpnext.demo.clear_demo();
+		},
+	});
 });
-
-function render_clear_demo_action() {
-	let demo_action = $(
-		`<a class="dropdown-item" onclick="return erpnext.demo.clear_demo()">
-			${__("Clear Demo Data")}
-		</a>`
-	);
-
-	demo_action.appendTo($("#toolbar-user"));
-}
 
 erpnext.demo.clear_demo = function () {
 	frappe.confirm(__("Are you sure you want to clear all demo data?"), () => {

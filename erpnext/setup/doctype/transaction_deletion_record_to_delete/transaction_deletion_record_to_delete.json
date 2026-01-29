@@ -1,0 +1,67 @@
+{
+ "actions": [],
+ "creation": "2025-11-14 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "doctype_name",
+  "company_field",
+  "document_count",
+  "child_doctypes",
+  "deleted"
+ ],
+ "fields": [
+  {
+   "fieldname": "doctype_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "DocType",
+   "options": "DocType"
+  },
+  {
+   "description": "Company link field name used for filtering (optional - leave empty to delete all records)",
+   "fieldname": "company_field",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Company Field"
+  },
+  {
+   "fieldname": "document_count",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Document Count",
+   "read_only": 1
+  },
+  {
+   "description": "Child tables that will also be deleted",
+   "fieldname": "child_doctypes",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Child DocTypes",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "deleted",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Deleted",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-14 16:17:04.494126",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Transaction Deletion Record To Delete",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

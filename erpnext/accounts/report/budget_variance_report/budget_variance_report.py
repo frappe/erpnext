@@ -18,6 +18,8 @@ def execute(filters=None):
 		dimensions = filters.get("budget_against_filter")
 	else:
 		dimensions = get_budget_dimensions(filters)
+	if not dimensions:
+		return columns, [], None, None
 
 	budget_records = get_budget_records(filters, dimensions)
 	budget_map = build_budget_map(budget_records, filters)

@@ -115,18 +115,21 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			}
 
 			if (cint(doc.update_stock) != 1) {
-				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
-				var from_delivery_note = false;
-				from_delivery_note = this.frm.doc.items.some(function (item) {
-					return item.delivery_note ? true : false;
-				});
-
-				if (!from_delivery_note && !is_delivered_by_supplier) {
-					this.frm.add_custom_button(
-						__("Delivery"),
-						this.frm.cscript["Make Delivery Note"],
-						__("Create")
+				if (!is_delivered_by_supplier) {
+					const should_create_delivery_note = doc.items.some(
+						(item) =>
+							item.qty - item.delivered_qty > 0 &&
+							!item.scio_detail &&
+							!item.dn_detail &&
+							!item.delivered_by_supplier
 					);
+					if (should_create_delivery_note) {
+						this.frm.add_custom_button(
+							__("Delivery Note"),
+							this.frm.cscript["Make Delivery Note"],
+							__("Create")
+						);
+					}
 				}
 			}
 

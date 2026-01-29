@@ -7,6 +7,7 @@
  "field_order": [
   "serial_no",
   "batch_no",
+  "item_code",
   "column_break_2",
   "qty",
   "warehouse",
@@ -22,6 +23,7 @@
   "reference_for_reservation",
   "voucher_type",
   "voucher_no",
+  "is_cancelled",
   "column_break_eykr",
   "posting_datetime",
   "type_of_transaction",
@@ -146,24 +148,28 @@
    "fieldname": "posting_datetime",
    "fieldtype": "Datetime",
    "label": "Posting Datetime",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "voucher_type",
    "fieldtype": "Data",
    "label": "Voucher Type",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "voucher_no",
    "fieldtype": "Data",
    "label": "Voucher No",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "voucher_detail_no",
    "fieldtype": "Data",
    "label": "Voucher Detail No",
+   "no_copy": 1,
    "read_only": 1,
    "search_index": 1
   },
@@ -171,18 +177,35 @@
    "fieldname": "type_of_transaction",
    "fieldtype": "Data",
    "label": "Type of Transaction",
+   "no_copy": 1,
    "read_only": 1,
    "search_index": 1
   },
   {
    "fieldname": "column_break_eykr",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cancelled",
+   "fieldtype": "Check",
+   "label": "Is Cancelled",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "no_copy": 1,
+   "options": "Item",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-09 23:28:35.191959",
+ "modified": "2026-01-11 11:05:10.789054",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Entry",

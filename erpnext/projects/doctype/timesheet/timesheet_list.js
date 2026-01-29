@@ -1,6 +1,10 @@
 frappe.listview_settings["Timesheet"] = {
 	add_fields: ["status", "total_hours", "start_date", "end_date"],
 	get_indicator: function (doc) {
+		if (doc.status == "Partially Billed") {
+			return [__("Partially Billed"), "orange", "status,=," + "Partially Billed"];
+		}
+
 		if (doc.status == "Billed") {
 			return [__("Billed"), "green", "status,=," + "Billed"];
 		}

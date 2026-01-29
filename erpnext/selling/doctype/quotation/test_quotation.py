@@ -9,7 +9,6 @@ from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.selling.doctype.quotation.quotation import make_sales_order
-from erpnext.setup.utils import get_exchange_rate
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Product Bundle"]
 

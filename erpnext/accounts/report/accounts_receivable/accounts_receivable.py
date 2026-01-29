@@ -877,11 +877,15 @@ class ReceivablePayableReport:
 		else:
 			entry_date = row.posting_date
 
+		row.range0 = 0.0
+
 		self.get_ageing_data(entry_date, row)
 
-		# ageing buckets should not have amounts if due date is not reached
 		if getdate(entry_date) > getdate(self.age_as_on):
+			row.range0 = row.outstanding
 			[setattr(row, f"range{i}", 0.0) for i in self.range_numbers]
+			row.total_due = 0
+			return
 
 		row.total_due = sum(row[f"range{i}"] for i in self.range_numbers)
 
@@ -1281,6 +1285,8 @@ class ReceivablePayableReport:
 		ranges = [*self.ranges, _("Above")]
 
 		prev_range_value = 0
+		self.add_column(label=_("<0"), fieldname="range0", fieldtype="Currency")
+		self.ageing_column_labels.append(_("<0"))
 		for idx, curr_range_value in enumerate(ranges):
 			label = f"{prev_range_value}-{curr_range_value}"
 			self.add_column(label=label, fieldname="range" + str(idx + 1))
@@ -1296,7 +1302,9 @@ class ReceivablePayableReport:
 		for row in self.data:
 			row = frappe._dict(row)
 			if not cint(row.bold):
-				values = [flt(row.get(f"range{i}", None), precision) for i in self.range_numbers]
+				values = [flt(row.get("range0", 0), precision)] + [
+					flt(row.get(f"range{i}", 0), precision) for i in self.range_numbers
+				]
 				rows.append({"values": values})
 
 		self.chart = {
