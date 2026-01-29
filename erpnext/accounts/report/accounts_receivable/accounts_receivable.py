@@ -1036,7 +1036,7 @@ class ReceivablePayableReport:
 	):
 		self.customer = qb.DocType("Customer")
 		if self.filters.get("customer_group"):
-			groups = get_customer_group_with_children(self.filters.customer_group)
+			groups = get_party_group_with_children("Customer", self.filters.customer_group)
 			customers = (
 				qb.from_(self.customer)
 				.select(self.customer.name)
@@ -1048,35 +1048,13 @@ class ReceivablePayableReport:
 			self.get_hierarchical_filters("Territory", "territory")
 
 		if self.filters.get("payment_terms_template"):
-			si = qb.DocType("Sales Invoice")
-
 			customer_ptt = self.ple.party.isin(
 				qb.from_(self.customer)
 				.select(self.customer.name)
 				.where(self.customer.payment_terms == self.filters.get("payment_terms_template"))
 			)
 
-			si_ptt = (
-				qb.from_(si)
-				.select(si.name)
-				.where(si.payment_terms_template == self.filters.get("payment_terms_template"))
-				.where(si.company == self.filters.company)
-				.where(si.posting_date <= self.filters.report_date)
-			)
-
-			if self.filters.customer_group:
-				customer_groups = get_customer_group_with_children(self.filters.customer_group)
-				si_ptt = si_ptt.where(si.customer_group.isin(customer_groups))
-
-			if self.filters.party:
-				si_ptt = si_ptt.where(si.customer.isin(self.filters.party))
-
-			if self.filters.cost_center:
-				cost_centers = get_cost_centers_with_children(self.filters.cost_center)
-				si_ptt = si_ptt.where(si.cost_center.isin(cost_centers))
-
-			if self.filters.party_account:
-				si_ptt = si_ptt.where(si.debit_to == self.filters.party_account)
+			si_ptt = self.add_payment_term_template_filters("Sales Invoice")
 
 			sales_ptt = self.ple.against_voucher_no.isin(si_ptt)
 
@@ -1106,37 +1084,59 @@ class ReceivablePayableReport:
 			)
 
 		if self.filters.get("payment_terms_template"):
-			pi = qb.DocType("Purchase Invoice")
-
 			supplier_ptt = self.ple.party.isin(
 				qb.from_(supplier)
 				.select(supplier.name)
 				.where(supplier.payment_terms == self.filters.get("payment_terms_template"))
 			)
-			pi_ptt = (
-				qb.from_(pi)
-				.select(pi.name)
-				.where(pi.payment_terms_template == self.filters.get("payment_terms_template"))
-				.where(pi.company == self.filters.company)
-				.where(pi.posting_date <= self.filters.report_date)
-			)
 
-			if self.filters.supplier_group:
-				pi_ptt = pi_ptt.where(pi.supplier_group.isin(self.filters.supplier_group))
-
-			if self.filters.party:
-				pi_ptt = pi_ptt.where(pi.supplier.isin(self.filters.party))
-
-			if self.filters.cost_center:
-				cost_centers = get_cost_centers_with_children(self.filters.cost_center)
-				pi_ptt = pi_ptt.where(pi.cost_center.isin(cost_centers))
-
-			if self.filters.party_account:
-				pi_ptt = pi_ptt.where(pi.credit_to == self.filters.party_account)
+			pi_ptt = self.add_payment_term_template_filters("Purchase Invoice")
 
 			purchase_ptt = self.ple.against_voucher_no.isin(pi_ptt)
 
 			self.qb_selection_filter.append(Criterion.any([supplier_ptt, purchase_ptt]))
+
+	def add_payment_term_template_filters(self, dtype):
+		voucher_type = qb.DocType(dtype)
+
+		ptt = (
+			qb.from_(voucher_type)
+			.select(voucher_type.name)
+			.where(voucher_type.payment_terms_template == self.filters.get("payment_terms_template"))
+			.where(voucher_type.company == self.filters.company)
+		)
+
+		if dtype == "Purchase Invoice":
+			party = "Supplier"
+			party_group_type = "supplier_group"
+			acc_type = "credit_to"
+		else:
+			party = "Customer"
+			party_group_type = "customer_group"
+			acc_type = "debit_to"
+
+		date_type = (
+			scrub(self.filters.ageing_based_on)
+			if self.filters.ageing_based_on in ["Posting Date", "Due Date"]
+			else "bill_date"
+		)
+		ptt = ptt.where(getattr(voucher_type, date_type) <= self.filters.report_date)
+
+		if self.filters.get(party_group_type):
+			party_groups = get_party_group_with_children(party, self.filters.get(party_group_type))
+			ptt = ptt.where(getattr(voucher_type, party_group_type).isin(party_groups))
+
+		if self.filters.party:
+			ptt = ptt.where(getattr(voucher_type, party.lower()).isin(self.filters.party))
+
+		if self.filters.cost_center:
+			cost_centers = get_cost_centers_with_children(self.filters.cost_center)
+			ptt = ptt.where(voucher_type.cost_center.isin(cost_centers))
+
+		if self.filters.party_account:
+			ptt = ptt.where(getattr(voucher_type, acc_type) == self.filters.party_account)
+
+		return ptt
 
 	def get_hierarchical_filters(self, doctype, key):
 		lft, rgt = frappe.db.get_value(doctype, self.filters.get(key), ["lft", "rgt"])
@@ -1379,20 +1379,26 @@ class ReceivablePayableReport:
 		self.err_journals = [x[0] for x in results] if results else []
 
 
-def get_customer_group_with_children(customer_groups):
-	if not isinstance(customer_groups, list):
-		customer_groups = [d.strip() for d in customer_groups.strip().split(",") if d]
+def get_party_group_with_children(party, party_groups):
+	if party not in ("Customer", "Supplier"):
+		return []
 
-	all_customer_groups = []
-	for d in customer_groups:
-		if frappe.db.exists("Customer Group", d):
-			lft, rgt = frappe.db.get_value("Customer Group", d, ["lft", "rgt"])
-			children = frappe.get_all("Customer Group", filters={"lft": [">=", lft], "rgt": ["<=", rgt]})
-			all_customer_groups += [c.name for c in children]
+	group_dtype = f"{party} Group"
+	if not isinstance(party_groups, list):
+		party_groups = [d.strip() for d in party_groups.strip().split(",") if d]
+
+	all_party_groups = []
+	for d in party_groups:
+		if frappe.db.exists(group_dtype, d):
+			lft, rgt = frappe.db.get_value(group_dtype, d, ["lft", "rgt"])
+			children = frappe.get_all(
+				group_dtype, filters={"lft": [">=", lft], "rgt": ["<=", rgt]}, pluck="name"
+			)
+			all_party_groups += children
 		else:
-			frappe.throw(_("Customer Group: {0} does not exist").format(d))
+			frappe.throw(_("{0}: {1} does not exist").format(group_dtype, d))
 
-	return list(set(all_customer_groups))
+	return list(set(all_party_groups))
 
 
 class InitSQLProceduresForAR:
