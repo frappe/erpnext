@@ -1139,3 +1139,66 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(len(report[1]), 1)
 		row = report[1][0]
 		self.assertEqual(expected_data_after_payment, [row.voucher_no, row.cost_center, row.outstanding])
+
+	def test_payment_terms_template_filters(self):
+		from erpnext.controllers.accounts_controller import get_payment_terms
+
+		payment_term1 = frappe.get_doc(
+			{"doctype": "Payment Term", "payment_term_name": "_Test 50% on 15 Days"}
+		).insert()
+		payment_term2 = frappe.get_doc(
+			{"doctype": "Payment Term", "payment_term_name": "_Test 50% on 30 Days"}
+		).insert()
+
+		template = frappe.get_doc(
+			{
+				"doctype": "Payment Terms Template",
+				"template_name": "_Test 50-50",
+				"terms": [
+					{
+						"doctype": "Payment Terms Template Detail",
+						"due_date_based_on": "Day(s) after invoice date",
+						"payment_term": payment_term1.name,
+						"description": "_Test 50-50",
+						"invoice_portion": 50,
+						"credit_days": 15,
+					},
+					{
+						"doctype": "Payment Terms Template Detail",
+						"due_date_based_on": "Day(s) after invoice date",
+						"payment_term": payment_term2.name,
+						"description": "_Test 50-50",
+						"invoice_portion": 50,
+						"credit_days": 30,
+					},
+				],
+			}
+		)
+		template.insert()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"based_on_payment_terms": 1,
+			"payment_terms_template": template.name,
+			"ageing_based_on": "Posting Date",
+		}
+
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si.payment_terms_template = template.name
+		schedule = get_payment_terms(template.name)
+		si.set("payment_schedule", [])
+
+		for row in schedule:
+			row["due_date"] = add_days(si.posting_date, row.get("credit_days", 0))
+			si.append("payment_schedule", row)
+
+		si.save()
+		si.submit()
+
+		report = execute(filters)
+		row = report[1][0]
+
+		self.assertEqual(len(report[1]), 2)
+		self.assertEqual([si.name, payment_term1.payment_term_name], [row.voucher_no, row.payment_term])
