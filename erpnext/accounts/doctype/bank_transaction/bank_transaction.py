@@ -78,12 +78,12 @@ class BankTransaction(Document):
 					)
 
 	def set_status(self):
-		if self.docstatus == 2:
-			self.db_set("status", "Cancelled")
-		elif self.docstatus == 1:
-			# Use a single line for status logic based on unallocated_amount
-			status = "Reconciled" if self.unallocated_amount == 0 else "Unreconciled"
-			self.db_set("status", status)
+        if self.docstatus == 2:
+            self.db_set("status", "Cancelled")
+        elif self.docstatus == 1:
+            # Precision-safe check: only exactly 0 is Reconciled
+            unallocated_amount = flt(self.unallocated_amount, self.precision("unallocated_amount"))
+            self.db_set("status", "Reconciled" if unallocated_amount == 0 else "Unreconciled")
 
 	def validate_duplicate_references(self):
 		"""Make sure the same voucher is not allocated twice within the same Bank Transaction"""
@@ -144,21 +144,23 @@ class BankTransaction(Document):
 		self.set_status()
 
 	def add_payment_entries(self, vouchers):
-		"Add the vouchers with zero allocation. Save() will perform the allocations and clearance"
-		if self.unallocated_amount == 0.0:
-			frappe.throw(_("Bank Transaction {0} is already fully reconciled").format(self.name))
-		elif self.unallocated_amount < 0.0:
-			frappe.throw(_("Bank Transaction {0} is over-allocated (unallocated amount: {1})").format(self.name, self.unallocated_amount))
+        "Add the vouchers with zero allocation. Save() will perform the allocations and clearance"
+        if self.unallocated_amount == 0.0:
+            frappe.throw(_("Bank Transaction {0} is already fully reconciled").format(self.name))
+        elif self.unallocated_amount < 0.0:
+            # New error message for over-allocation as requested by bot
+            frappe.throw(_("Bank Transaction {0} is over-allocated (unallocated amount: {1})").format(
+                self.name, self.unallocated_amount))
 
-		for voucher in vouchers:
-			self.append(
-				"payment_entries",
-				{
-					"payment_document": voucher["payment_doctype"],
-					"payment_entry": voucher["payment_name"],
-					"allocated_amount": 0.0,  # Temporary
-				},
-			)
+        for voucher in vouchers:
+            self.append(
+                "payment_entries",
+                {
+                    "payment_document": voucher["payment_doctype"],
+                    "payment_entry": voucher["payment_name"],
+                    "allocated_amount": 0.0,
+                },
+            )
 
 	def allocate_payment_entries(self):
 		"""Refactored from bank reconciliation tool.

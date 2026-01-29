@@ -216,7 +216,7 @@ class TestBankTransaction(IntegrationTestCase):
 		linked_payments = get_linked_payments(bank_transaction.name, ["loan_repayment", "exact_match"])
 		self.assertEqual(linked_payments[0]["name"], repayment_entry.name)
 
-	def test_reconciled_status_with_negative_unallocated_amount(self):
+		def test_reconciled_status_with_negative_unallocated_amount(self):
 		"""
 		Test that status remains 'Unreconciled' if the unallocated amount is negative.
 		Ref: Issue #51601
@@ -255,6 +255,7 @@ class TestBankTransaction(IntegrationTestCase):
 		# 4. Verify the fix: -10.0 balance should NOT be Reconciled
 		self.assertEqual(bt.unallocated_amount, -10.0)
 		self.assertEqual(bt.status, "Unreconciled")
+	
 
 
 def create_bank_account(
