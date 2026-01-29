@@ -106,7 +106,6 @@ def finish_distribution(job_card, process_name="operator"):
 
 	work_order = jc.work_order
 	wo = frappe.get_doc("Work Order", work_order)
-	# wo.produced_qty = job_card_qty
 	wo.material_transferred_for_manufacturing = job_card_qty
 	wo.flags.ignore_validate_update_after_submit = True
 	wo.save()
@@ -117,19 +116,6 @@ def finish_distribution(job_card, process_name="operator"):
 		stock_entry_manufacture = frappe.get_doc(se_doc)
 	else:
 		stock_entry_manufacture = se_doc
-
-	# for item in stock_entry_manufacture.items:
-	#     if item.is_finished_item:
-	#         item.s_warehouse = wo.source_warehouse
-	#         item.t_warehouse = wo.fg_warehouse
-	#         item.qty = bom_qty
-	#         item.stock_qty = job_card_qty * item.conversion_factor
-	#         # item.allow_zero_valuation_rate = 1
-	#     elif not item.is_scrap_item:
-	#         item.s_warehouse = wo.source_warehouse
-	#         item.qty = (item.qty/wo.qty) * job_card_qty
-	#         item.stock_qty = item.qty * item.conversion_factor
-	#         # item.allow_zero_valuation_rate = 1
 
 	fg_item = next((item for item in stock_entry_manufacture.items if item.is_finished_item), None)
 	if fg_item:
@@ -148,7 +134,6 @@ def finish_distribution(job_card, process_name="operator"):
 		"work_order_status": wo_status,
 		"work_order": work_order,
 		"job_card_qty": job_card_qty,
-		# "produced_qty": wo.produced_qty,
 		"total_qty": wo.qty,
 		"stock_entry": stock_entry_manufacture.name,
 		"message": f"SE {stock_entry_manufacture.name} ({job_card_qty} qty). WO: {wo_status}",
