@@ -250,7 +250,7 @@ def get_all_existing_slabs(stage):
             "current_stage": stage,
             "docstatus": 0,
         },
-        fields=["name", "batch_number", "line", "template", "current_stage", "created_on", "serial_number"],
+        fields=["name", "batch_number", "line", "template", "created_on", "status", "serial_number"],
         order_by="created_on desc",
     )
     return slabs
@@ -259,7 +259,7 @@ def get_all_existing_slabs(stage):
 @frappe.whitelist()
 def get_slab_for_job_card(job_card):
     slab = frappe.get_value("Slab", {"current_job_card": job_card, "docstatus": 0}, 
-        ["name", "serial_number", "batch_number", "template", "line", "current_stage"], 
+        ["name", "serial_number", "batch_number", "template", "line", "status"], 
         as_dict=1)
     return slab
 
