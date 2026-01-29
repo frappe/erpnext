@@ -1154,7 +1154,9 @@ def get_item_price(
 
 
 @frappe.whitelist()
-def get_batch_based_item_price(pctx: ItemPriceCtx | dict | str, item_code) -> float:
+def get_batch_based_item_price(pctx: ItemPriceCtx | dict | str, item_code=None) -> float:
+	if not item_code:
+		return 0.0
 	pctx = parse_json(pctx)
 
 	item_price = get_item_price(pctx, item_code, force_batch_no=True)
