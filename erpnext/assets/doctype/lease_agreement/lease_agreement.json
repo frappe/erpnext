@@ -27,7 +27,7 @@
   "column_break_rcmx",
   "lease_schedule_tab",
   "schedule_section",
-  "table_jilb"
+  "lease_payment_schedule"
  ],
  "fields": [
   {
@@ -130,12 +130,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "table_jilb",
-   "fieldtype": "Table",
-   "label": "Schedule",
-   "options": "Lease Payment Schedule"
-  },
-  {
    "fieldname": "schedule_section",
    "fieldtype": "Section Break"
   },
@@ -169,13 +163,19 @@
    "label": "Lease Term (Months)",
    "mandatory_depends_on": "eval: doc.use_lease_term",
    "non_negative": 1
+  },
+  {
+   "fieldname": "lease_payment_schedule",
+   "fieldtype": "Table",
+   "label": "Lease Payment Schedule",
+   "options": "Lease Payment Schedule"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-29 23:33:07.771939",
+ "modified": "2026-01-30 01:17:56.997950",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Lease Agreement",
