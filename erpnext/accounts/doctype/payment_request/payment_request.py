@@ -811,11 +811,16 @@ def get_amount(ref_doc, payment_account=None):
 
 	dt = ref_doc.doctype
 	if dt in ["Sales Order", "Purchase Order"]:
+		party_handling = True
 		advance_amount = flt(ref_doc.advance_paid)
 		if ref_doc.party_account_currency != ref_doc.currency:
 			advance_amount = flt(flt(ref_doc.advance_paid) / ref_doc.conversion_rate)
+			party_handling = False
 
-		grand_total = (flt(ref_doc.rounded_total) or flt(ref_doc.grand_total)) - advance_amount
+		if dt == "Sales Order":
+			grand_total = ref_doc.get_sales_order_amounts(party_handling)[0] - advance_amount
+		else:
+			grand_total = (flt(ref_doc.rounded_total) or flt(ref_doc.grand_total)) - advance_amount
 
 	elif dt in ["Sales Invoice", "Purchase Invoice"]:
 		if (

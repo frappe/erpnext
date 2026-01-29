@@ -836,6 +836,22 @@ class SalesOrder(SellingController):
 
 		return False
 
+	def get_sales_order_amounts(self, party_account_handling=False):
+		if party_account_handling:
+			grand_total = self.base_rounded_total or self.base_grand_total
+		else:
+			grand_total = self.rounded_total or self.grand_total
+
+		for item in self.get("items"):
+			if item.is_closed == 1:
+				if party_account_handling:
+					grand_total -= item.base_amount
+				else:
+					grand_total -= item.amount
+
+		outstanding_amount = grand_total - self.advance_paid
+		return grand_total, outstanding_amount
+
 	@frappe.whitelist()
 	def create_stock_reservation_entries(
 		self,

@@ -2826,7 +2826,10 @@ def get_reference_details(
 				)
 				exchange_rate = 1
 			else:
-				total_amount = ref_doc.get("rounded_total") or ref_doc.get("grand_total")
+				if reference_doctype in ["Sales Order"]:
+					total_amount = ref_doc.get_sales_order_amounts()[0]
+				else:
+					total_amount = ref_doc.get("rounded_total") or ref_doc.get("grand_total")
 		if not exchange_rate:
 			# Get the exchange rate from the original ref doc
 			# or get it based on the posting date of the ref doc.
@@ -2896,6 +2899,9 @@ def get_payment_entry(
 	grand_total, outstanding_amount = set_grand_total_and_outstanding_amount(
 		party_amount, dt, party_account_currency, doc
 	)
+	if dt == "Sales Order":
+		if party_account_currency == doc.company_currency:
+			grand_total, outstanding_amount = doc.get_sales_order_amounts(party_account_handling=True)
 
 	# bank or cash
 	bank = get_bank_cash_account(doc, bank_account)
