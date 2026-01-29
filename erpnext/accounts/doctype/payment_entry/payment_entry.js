@@ -1450,16 +1450,15 @@ frappe.ui.form.on("Payment Entry", {
 			callback: function (r) {
 				if (!r.exc && r.message) {
 					// set taxes table
-					if (r.message) {
-						for (let tax of r.message) {
-							if (tax.charge_type === "On Net Total") {
-								tax.charge_type = "On Paid Amount";
-							}
-							frm.add_child("taxes", tax);
+					let taxes = r.message;
+					taxes.forEach((tax) => {
+						if (tax.charge_type === "On Net Total") {
+							tax.charge_type = "On Paid Amount";
 						}
-						frm.events.apply_taxes(frm);
-						frm.events.set_unallocated_amount(frm);
-					}
+					});
+					frm.set_value("taxes", taxes);
+					frm.events.apply_taxes(frm);
+					frm.events.set_unallocated_amount(frm);
 				}
 			},
 		});
