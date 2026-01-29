@@ -77,7 +77,9 @@ def unload_slab_from_oven(rack_name: str, slab_name: str, slab_template: str, va
 
 	# Find active operation for this rack
 	op_name = frappe.db.get_value(
-		"Oven Operation", {"oven_rack": rack_name, "slab": slab_name, "slab_color": slab_template, "docstatus": 0}, "name"
+		"Oven Operation",
+		{"oven_rack": rack_name, "slab": slab_name, "slab_color": slab_template, "docstatus": 0},
+		"name",
 	)
 	if not op_name:
 		frappe.throw("No active operation found for this rack")
@@ -108,118 +110,103 @@ def unload_slab_from_oven(rack_name: str, slab_name: str, slab_template: str, va
 	rack.start_time = None
 	rack.save()
 
-	# checkout_slab(slab_name)
-
 	op.submit()
 	op.save()
 
-	return {
-		"rack": rack,
-		"finish_results": res
-	}
+	return {"rack": rack, "finish_results": res}
 
 
 @frappe.whitelist()
 def start_heating(job_card):
-    """Start the Job Card when heating starts."""
-    jc = frappe.get_doc("Job Card", job_card)
-    start_time = frappe.utils.now_datetime()
-    args = {
-        "job_card_id": jc.name,
-        "start_time": start_time,
-        "status": "Work In Progress",
-    }
+	"""Start the Job Card when heating starts."""
+	jc = frappe.get_doc("Job Card", job_card)
+	start_time = frappe.utils.now_datetime()
+	args = {
+		"job_card_id": jc.name,
+		"start_time": start_time,
+		"status": "Work In Progress",
+	}
 
-    make_time_log(args)
-    jc.reload()
-    jc.job_started = 1
-    jc.save(ignore_permissions=True)
-    return {
-        "status": jc.status,
-        "heating_started": jc.job_started,
-        "heating_start_time": jc.started_time,
-        "current_time": jc.current_time,
-    }
+	make_time_log(args)
+	jc.reload()
+	jc.job_started = 1
+	jc.save(ignore_permissions=True)
+	return {
+		"status": jc.status,
+		"heating_started": jc.job_started,
+		"heating_start_time": jc.started_time,
+		"current_time": jc.current_time,
+	}
+
 
 @frappe.whitelist()
 def finish_heating(job_card):
-    """Complete the Job Card when heating is finished."""
-    jc = frappe.get_doc("Job Card", job_card)
-    job_card_qty = flt(jc.total_completed_qty or jc.for_quantity, 3)
-    
-    args = {
-        "job_card_id": jc.name,
-        "complete_time": frappe.utils.now_datetime(),
-        "completed_qty": job_card_qty,
-        "status": "Completed",
-    }
+	"""Complete the Job Card when heating is finished."""
+	jc = frappe.get_doc("Job Card", job_card)
+	job_card_qty = flt(jc.total_completed_qty or jc.for_quantity, 3)
+	total_transferred = sum([item.transferred_qty for item in jc.items])
+	jc.transferred_qty = total_transferred
 
-    make_time_log(args)
-    last_tl = frappe.get_last_doc("Job Card Time Log", filters={"parent": jc.name})
-    if last_tl:
-        frappe.db.set_value("Job Card Time Log", last_tl.name, "completed_qty", job_card_qty)
+	args = {
+		"job_card_id": jc.name,
+		"complete_time": frappe.utils.now_datetime(),
+		"completed_qty": job_card_qty,
+		"status": "Completed",
+	}
 
-    jc.reload()
-    jc.status = "Completed"
-    jc.completed_qty = job_card_qty
-    jc.job_started = 0
-    if jc.docstatus == 0:
-        jc.submit()
-    else:
-        jc.save(ignore_permissions=True)
+	make_time_log(args)
+	last_tl = frappe.get_last_doc("Job Card Time Log", filters={"parent": jc.name})
+	if last_tl:
+		frappe.db.set_value("Job Card Time Log", last_tl.name, "completed_qty", job_card_qty)
 
-    jc.reload()
-    jc.db_set("status", "Completed")
-    jc.reload()
+	jc.reload()
+	jc.status = "Completed"
+	jc.completed_qty = job_card_qty
+	jc.job_started = 0
+	if jc.docstatus == 0:
+		jc.submit()
+	else:
+		jc.save(ignore_permissions=True)
 
-    # Move slab to next stage
-    slabs = frappe.get_all("Slab", 
-        filters={
-            "current_job_card": jc.name,
-            "status": "Heating",
-            "docstatus": 0
-        },
-        fields=["name"],
-        order_by="creation desc"
-    )
-    if slabs:
-        move_slab_to(slab_number=slabs[0].name, next_stage="Cooling", job_card_number=jc.name, checkout_and_move=True)
-    
-    work_order = jc.work_order
-    wo = frappe.get_doc("Work Order", work_order)
-    wo.produced_qty = job_card_qty
-    wo.material_transferred_for_manufacturing = job_card_qty
-    wo.flags.ignore_validate_update_after_submit = True
-    wo.save()
-    wo.reload()
+	jc.reload()
+	jc.db_set("status", "Completed")
+	jc.reload()
 
-    # Create Manufacture Stock Entry
-    se_doc = wo_make_stock_entry(work_order, "Manufacture", qty=job_card_qty)
-    if isinstance(se_doc, dict):
-        stock_entry_manufacture = frappe.get_doc(se_doc)
-    else:
-        stock_entry_manufacture = se_doc
+	# Move slab to next stage
+	slabs = frappe.get_all(
+		"Slab",
+		filters={"current_job_card": jc.name, "status": "Heating", "docstatus": 0},
+		fields=["name"],
+		order_by="creation desc",
+	)
+	if slabs:
+		move_slab_to(
+			slab_number=slabs[0].name, next_stage="Cooling", job_card_number=jc.name, checkout_and_move=True
+		)
 
-    # Set warehouses and rates
-    for item in stock_entry_manufacture.items:
-        if item.is_finished_item:
-            item.t_warehouse = wo.fg_warehouse  
-            item.qty = job_card_qty
-            item.stock_qty = job_card_qty * item.conversion_factor
-            item.allow_zero_valuation_rate = 1 
-        elif not item.is_scrap_item: 
-            item.s_warehouse = wo.source_warehouse
-            item.qty = (item.qty/wo.qty) * job_card_qty 
-            item.stock_qty = item.qty * item.conversion_factor
-            item.allow_zero_valuation_rate = 1 
+	work_order = jc.work_order
+	wo = frappe.get_doc("Work Order", work_order)
+	wo.material_transferred_for_manufacturing = job_card_qty
+	wo.flags.ignore_validate_update_after_submit = True
+	wo.save()
+	wo.reload()
 
-    stock_entry_manufacture.fg_completed_qty = job_card_qty
-    stock_entry_manufacture.save(ignore_permissions=True)
-    stock_entry_manufacture.submit()
-    
-    return {
-        "status": wo.get_status(),
-        "work_order": work_order,
-        "job_card_qty": job_card_qty,
-        "stock_entry": stock_entry_manufacture.name
-    }
+	# Create Manufacture Stock Entry
+	se_doc = wo_make_stock_entry(work_order, "Manufacture", qty=job_card_qty)
+	if isinstance(se_doc, dict):
+		stock_entry_manufacture = frappe.get_doc(se_doc)
+	else:
+		stock_entry_manufacture = se_doc
+
+	stock_entry_manufacture.fg_completed_qty = job_card_qty
+	stock_entry_manufacture.save(ignore_permissions=True)
+	stock_entry_manufacture.submit()
+	wo.update_work_order_qty()
+	wo.reload()
+
+	return {
+		"status": wo.get_status(),
+		"work_order": work_order,
+		"job_card_qty": job_card_qty,
+		"stock_entry": stock_entry_manufacture.name,
+	}
