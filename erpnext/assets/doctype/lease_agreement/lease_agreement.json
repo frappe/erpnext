@@ -10,18 +10,21 @@
   "naming_series",
   "company",
   "supplier",
-  "leased_asset",
   "column_break_wuct",
   "status",
-  "lease_start_date",
-  "lease_end_date",
-  "lease_amount",
+  "leased_asset",
   "payment_frequency",
+  "periodic_lease_amount",
   "amended_from",
+  "lease_terms_section",
+  "lease_start_date",
+  "use_lease_term",
+  "lease_term_months",
+  "column_break_rdcm",
+  "lease_end_date",
   "section_break_jsvy",
   "lease_expense_account",
   "column_break_rcmx",
-  "lease_liability_account",
   "lease_schedule_tab",
   "schedule_section",
   "table_jilb"
@@ -78,6 +81,8 @@
    "fieldname": "lease_end_date",
    "fieldtype": "Date",
    "label": "Lease End Date",
+   "mandatory_depends_on": "eval: !doc.use_lease_term",
+   "read_only_depends_on": "eval: doc.use_lease_term",
    "reqd": 1
   },
   {
@@ -85,8 +90,7 @@
    "fieldname": "payment_frequency",
    "fieldtype": "Select",
    "label": "Payment Frequency",
-   "options": "Monthly",
-   "read_only": 1
+   "options": "Monthly\nYearly"
   },
   {
    "fieldname": "section_break_jsvy",
@@ -105,22 +109,9 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "lease_liability_account",
-   "fieldtype": "Link",
-   "label": "Lease Liability Account",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
    "fieldname": "lease_schedule_tab",
    "fieldtype": "Tab Break",
    "label": "Lease Schedule"
-  },
-  {
-   "fieldname": "lease_amount",
-   "fieldtype": "Currency",
-   "label": "Lease Amount",
-   "reqd": 1
   },
   {
    "fieldname": "leased_asset",
@@ -147,13 +138,44 @@
   {
    "fieldname": "schedule_section",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "periodic_lease_amount",
+   "fieldtype": "Currency",
+   "label": "Periodic Lease Amount",
+   "non_negative": 1,
+   "options": "Company:company:default_currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "lease_terms_section",
+   "fieldtype": "Section Break",
+   "label": "Lease Terms"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_lease_term",
+   "fieldtype": "Check",
+   "label": "Use lease term"
+  },
+  {
+   "fieldname": "column_break_rdcm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.use_lease_term",
+   "fieldname": "lease_term_months",
+   "fieldtype": "Int",
+   "label": "Lease Term (Months)",
+   "mandatory_depends_on": "eval: doc.use_lease_term",
+   "non_negative": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-28 16:20:44.170156",
+ "modified": "2026-01-29 23:33:07.771939",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Lease Agreement",
