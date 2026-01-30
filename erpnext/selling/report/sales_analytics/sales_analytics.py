@@ -460,7 +460,31 @@ class Analytics:
 			labels = [d.get("label") for d in self.columns[3 : length - 1]]
 		else:
 			labels = [d.get("label") for d in self.columns[1 : length - 1]]
-		self.chart = {"data": {"labels": labels, "datasets": []}, "type": "line"}
+
+		datasets = []
+		for curve in self.data:
+			data = {
+				"name": curve.get("entity_name", curve["entity"]),
+				"values": [curve.get(scrub(label), 0) for label in labels],
+			}
+			if self.filters.curves == "non-zeros" and not sum(data["values"]):
+				continue
+			elif self.filters.curves == "total" and "indent" in curve:
+				if curve["indent"] == 0:
+					datasets.append(data)
+			elif self.filters.curves == "total":
+				if datasets:
+					a = [
+						data["values"][idx] + datasets[0]["values"][idx] for idx in range(len(data["values"]))
+					]
+					datasets[0]["values"] = a
+				else:
+					datasets.append(data)
+					datasets[0]["name"] = _("Total")
+			else:
+				datasets.append(data)
+
+		self.chart = {"data": {"labels": labels, "datasets": datasets}, "type": "line"}
 
 		if self.filters["value_quantity"] == "Value":
 			self.chart["fieldtype"] = "Currency"

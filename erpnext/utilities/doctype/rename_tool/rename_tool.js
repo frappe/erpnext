@@ -2,14 +2,6 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Rename Tool", {
-	onload: function (frm) {
-		return frappe.call({
-			method: "erpnext.utilities.doctype.rename_tool.rename_tool.get_doctypes",
-			callback: function (r) {
-				frm.set_df_property("select_doctype", "options", r.message);
-			},
-		});
-	},
 	refresh: function (frm) {
 		frm.disable_save();
 

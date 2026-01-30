@@ -436,3 +436,5 @@ erpnext.patches.mahi.create_mfg_warehouses
 erpnext.patches.mahi.create_mahi_settings
 erpnext.patches.mahi.create_process_maps
 erpnext.patches.mahi.create_workstations
+erpnext.patches.v16_0.update_currency_exchange_settings_for_frankfurter #2025-12-11
+erpnext.patches.v15_0.create_accounting_dimensions_in_advance_taxes_and_charges

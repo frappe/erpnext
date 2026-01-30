@@ -400,6 +400,16 @@ frappe.ui.form.on("Payment Entry", {
 		);
 
 		frm.refresh_fields();
+
+		const party_currency =
+			frm.doc.payment_type === "Receive" ? "paid_from_account_currency" : "paid_to_account_currency";
+
+		var reference_grid = frm.fields_dict["references"].grid;
+		["total_amount", "outstanding_amount", "allocated_amount"].forEach((fieldname) => {
+			reference_grid.update_docfield_property(fieldname, "options", party_currency);
+		});
+
+		reference_grid.refresh();
 	},
 
 	show_general_ledger: function (frm) {
@@ -435,6 +445,7 @@ frappe.ui.form.on("Payment Entry", {
 					"paid_to",
 					"references",
 					"total_allocated_amount",
+					"party_name",
 				],
 				function (i, field) {
 					frm.set_value(field, null);
@@ -1118,7 +1129,7 @@ frappe.ui.form.on("Payment Entry", {
 
 	allocate_party_amount_against_ref_docs: async function (frm, paid_amount, paid_amount_change) {
 		await frm.call("allocate_amount_to_references", {
-			paid_amount: paid_amount,
+			paid_amount: flt(paid_amount),
 			paid_amount_change: paid_amount_change,
 			allocate_payment_amount: frappe.flags.allocate_payment_amount ?? false,
 		});
@@ -1302,15 +1313,14 @@ frappe.ui.form.on("Payment Entry", {
 		let row = (frm.doc.deductions || []).find((t) => t.is_exchange_gain_loss);
 
 		if (!row) {
-			const response = await get_company_defaults(frm.doc.company);
-
+			const company_defaults = frappe.get_doc(":Company", frm.doc.company);
 			const account =
-				response.message?.[account_fieldname] ||
+				company_defaults?.[account_fieldname] ||
 				(await prompt_for_missing_account(frm, account_fieldname));
 
 			row = frm.add_child("deductions");
 			row.account = account;
-			row.cost_center = response.message?.cost_center;
+			row.cost_center = company_defaults?.cost_center;
 			row.is_exchange_gain_loss = 1;
 		}
 
@@ -1521,18 +1531,14 @@ frappe.ui.form.on("Payment Entry", {
 				"Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'"
 			);
 			d.row_id = "";
-		} else if (
-			(d.charge_type == "On Previous Row Amount" || d.charge_type == "On Previous Row Total") &&
-			d.row_id
-		) {
+		} else if (d.charge_type == "On Previous Row Amount" || d.charge_type == "On Previous Row Total") {
 			if (d.idx == 1) {
 				msg = __(
 					"Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"
 				);
 				d.charge_type = "";
 			} else if (!d.row_id) {
-				msg = __("Please specify a valid Row ID for row {0} in table {1}", [d.idx, __(d.doctype)]);
-				d.row_id = "";
+				d.row_id = d.idx - 1;
 			} else if (d.row_id && d.row_id >= d.idx) {
 				msg = __(
 					"Cannot refer row number greater than or equal to current row number for this Charge type"

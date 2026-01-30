@@ -204,6 +204,7 @@ def update_stock(ctx, out, doc=None):
 				"item_code": ctx.item_code,
 				"warehouse": ctx.warehouse,
 				"based_on": frappe.db.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
+				"qty": out.stock_qty,
 			}
 		)
 
@@ -420,9 +421,10 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	if not args.get("uom"):
 		if args.get("doctype") in sales_doctypes:
 			args.uom = item.sales_uom if item.sales_uom else item.stock_uom
-		elif (args.get("doctype") in ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]) or (
-			args.get("doctype") == "Material Request" and args.get("material_request_type") == "Purchase"
-		):
+		elif (
+			args.get("doctype")
+			in ["Purchase Order", "Purchase Receipt", "Purchase Invoice", "Supplier Quotation"]
+		) or (args.get("doctype") == "Material Request" and args.get("material_request_type") == "Purchase"):
 			args.uom = item.purchase_uom if item.purchase_uom else item.stock_uom
 		else:
 			args.uom = item.stock_uom

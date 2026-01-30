@@ -140,6 +140,24 @@ frappe.ui.form.on("Stock Entry", {
 			};
 		});
 
+		frm.set_query("project", "items", function (doc) {
+			return {
+				query: "erpnext.controllers.queries.get_project_name",
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("project", function (doc) {
+			return {
+				query: "erpnext.controllers.queries.get_project_name",
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
+
 		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 
@@ -571,6 +589,14 @@ frappe.ui.form.on("Stock Entry", {
 		}
 	},
 
+	set_rate_and_fg_qty: function (frm, cdt, cdn) {
+		frm.events.set_basic_rate(frm, cdt, cdn);
+		let item = frappe.get_doc(cdt, cdn);
+		if (item.is_finished_item) {
+			frm.events.set_fg_completed_qty(frm);
+		}
+	},
+
 	get_warehouse_details: function (frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		if (!child.bom_no) {
@@ -833,7 +859,7 @@ frappe.ui.form.on("Stock Entry", {
 
 		frm.doc.items.forEach((item) => {
 			if (item.is_finished_item) {
-				fg_completed_qty += flt(item.qty);
+				fg_completed_qty += flt(item.transfer_qty);
 			}
 		});
 
@@ -859,15 +885,11 @@ frappe.ui.form.on("Stock Entry Detail", {
 	},
 
 	qty(frm, cdt, cdn) {
-		frm.events.set_basic_rate(frm, cdt, cdn);
-		let item = frappe.get_doc(cdt, cdn);
-		if (item.is_finished_item) {
-			frm.events.set_fg_completed_qty(frm);
-		}
+		frm.events.set_rate_and_fg_qty(frm, cdt, cdn);
 	},
 
 	conversion_factor(frm, cdt, cdn) {
-		frm.events.set_basic_rate(frm, cdt, cdn);
+		frm.events.set_rate_and_fg_qty(frm, cdt, cdn);
 	},
 
 	s_warehouse(frm, cdt, cdn) {
@@ -910,6 +932,9 @@ frappe.ui.form.on("Stock Entry Detail", {
 
 	item_code(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
+		// since some items may not have image, so empty the image field to avoid setting the image of previous item
+		d.image = "";
+
 		if (d.item_code) {
 			var args = {
 				item_code: d.item_code,
@@ -951,12 +976,10 @@ frappe.ui.form.on("Stock Entry Detail", {
 							no_batch_serial_number_value = true;
 						}
 
-						if (
-							no_batch_serial_number_value &&
-							!frappe.flags.hide_serial_batch_dialog &&
-							!frappe.flags.dialog_set
-						) {
-							frappe.flags.dialog_set = true;
+						if (no_batch_serial_number_value && !frappe.flags.hide_serial_batch_dialog) {
+							if (!frappe.flags.dialog_set) {
+								frappe.flags.dialog_set = true;
+							}
 							erpnext.stock.select_batch_and_serial_no(frm, d);
 						} else {
 							frappe.flags.dialog_set = false;

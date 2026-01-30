@@ -334,7 +334,9 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 					},
 					{
 						fieldtype: "HTML",
-						options: "<b> New Journal Entry will be posted for the difference amount </b>",
+						options: __(
+							"New Journal Entry will be posted for the difference amount. The Posting Date can be modified."
+						).bold(),
 					},
 				],
 				primary_action: () => {

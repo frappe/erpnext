@@ -893,7 +893,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nPartly Billed\nTo Bill\nCompleted\nReturn Issued\nCancelled\nClosed",
+   "options": "\nDraft\nPartly Billed\nTo Bill\nCompleted\nReturn\nReturn Issued\nCancelled\nClosed",
    "print_hide": 1,
    "print_width": "150px",
    "read_only": 1,
@@ -1248,11 +1248,12 @@
    "label": "Named Place"
   },
   {
-   "depends_on": "eval: (doc.is_subcontracted && !doc.is_old_subcontracting_flow)",
+   "depends_on": "subcontracting_receipt",
    "fieldname": "subcontracting_receipt",
    "fieldtype": "Link",
    "label": "Subcontracting Receipt",
    "options": "Subcontracting Receipt",
+   "read_only": 1,
    "search_index": 1
   },
   {
@@ -1300,7 +1301,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-06 16:41:02.690658",
+ "modified": "2025-11-27 16:46:30.210628",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

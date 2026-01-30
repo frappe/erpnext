@@ -5,7 +5,6 @@
 import frappe
 from frappe import _
 from frappe.utils import flt
-from pypika import Order
 
 import erpnext
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (
@@ -16,7 +15,7 @@ from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register i
 	get_group_by_and_display_fields,
 	get_tax_accounts,
 )
-from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
+from erpnext.accounts.report.utils import get_values_for_columns
 
 
 def execute(filters=None):
@@ -40,16 +39,6 @@ def _execute(filters=None, additional_table_columns=None):
 			doctype="Purchase Invoice",
 			tax_doctype="Purchase Taxes and Charges",
 		)
-
-		scrubbed_tax_fields = {}
-
-		for tax in tax_columns:
-			scrubbed_tax_fields.update(
-				{
-					tax + " Rate": frappe.scrub(tax + " Rate"),
-					tax + " Amount": frappe.scrub(tax + " Amount"),
-				}
-			)
 
 	po_pr_map = get_purchase_receipts_against_purchase_order(item_list)
 
@@ -100,8 +89,8 @@ def _execute(filters=None, additional_table_columns=None):
 			item_tax = itemised_tax.get(d.name, {}).get(tax, {})
 			row.update(
 				{
-					scrubbed_tax_fields[tax + " Rate"]: item_tax.get("tax_rate", 0),
-					scrubbed_tax_fields[tax + " Amount"]: item_tax.get("tax_amount", 0),
+					f"{tax}_rate": item_tax.get("tax_rate", 0),
+					f"{tax}_amount": item_tax.get("tax_amount", 0),
 				}
 			)
 			total_tax += flt(item_tax.get("tax_amount"))

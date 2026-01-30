@@ -41,6 +41,7 @@
   {
    "bold": 1,
    "default": "0",
+   "description": "Only leaf nodes are allowed in transaction",
    "fieldname": "is_group",
    "fieldtype": "Check",
    "in_list_view": 1,
@@ -107,7 +108,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2022-12-24 11:16:12.486719",
+ "modified": "2025-12-02 13:57:57.814686",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Supplier Group",
@@ -168,8 +169,10 @@
    "share": 1
   }
  ],
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
- "states": []
+ "states": [],
+ "translated_doctype": 1
 }

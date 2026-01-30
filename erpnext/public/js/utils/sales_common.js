@@ -488,7 +488,30 @@ erpnext.sales_common = {
 				}
 			}
 
-			project() {
+			project(doc, cdt, cdn) {
+				if (!cdt || !cdn) {
+					if (this.frm.doc.project) {
+						$.each(this.frm.doc["items"] || [], function (i, item) {
+							if (!item.project) {
+								frappe.model.set_value(item.doctype, item.name, "project", doc.project);
+							}
+						});
+					}
+				} else {
+					const item = frappe.get_doc(cdt, cdn);
+					if (item.project) {
+						$.each(this.frm.doc["items"] || [], function (i, other_item) {
+							if (!other_item.project) {
+								frappe.model.set_value(
+									other_item.doctype,
+									other_item.name,
+									"project",
+									item.project
+								);
+							}
+						});
+					}
+				}
 				let me = this;
 				if (["Delivery Note", "Sales Invoice", "Sales Order"].includes(this.frm.doc.doctype)) {
 					if (this.frm.doc.project) {

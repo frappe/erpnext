@@ -296,6 +296,20 @@ class Timesheet(Document):
 					data.billing_amount = data.billing_rate * hours
 					data.costing_amount = data.costing_rate * costing_hours
 
+					exchange_rate = flt(self.get("exchange_rate")) or 1.0
+					data.base_billing_rate = flt(
+						data.billing_rate * exchange_rate, data.precision("base_billing_rate")
+					)
+					data.base_costing_rate = flt(
+						data.costing_rate * exchange_rate, data.precision("base_costing_rate")
+					)
+					data.base_billing_amount = flt(
+						data.billing_amount * exchange_rate, data.precision("base_billing_amount")
+					)
+					data.base_costing_amount = flt(
+						data.costing_amount * exchange_rate, data.precision("base_costing_amount")
+					)
+
 	def update_time_rates(self, ts_detail):
 		if not ts_detail.is_billable:
 			ts_detail.billing_rate = 0.0

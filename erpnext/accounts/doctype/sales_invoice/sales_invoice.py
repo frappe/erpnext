@@ -346,21 +346,34 @@ class SalesInvoice(SellingController):
 		validate_docs_for_deferred_accounting([self.name], [])
 
 	def validate_fixed_asset(self):
-		for d in self.get("items"):
-			if d.is_fixed_asset and d.meta.get_field("asset") and d.asset:
-				asset = frappe.get_doc("Asset", d.asset)
-				if self.doctype == "Sales Invoice" and self.docstatus == 1:
-					if self.update_stock:
-						frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
+		if self.doctype != "Sales Invoice":
+			return
 
-					elif asset.status in ("Scrapped", "Cancelled", "Capitalized") or (
-						asset.status == "Sold" and not self.is_return
-					):
-						frappe.throw(
-							_("Row #{0}: Asset {1} cannot be submitted, it is already {2}").format(
-								d.idx, d.asset, asset.status
+		for d in self.get("items"):
+			if d.is_fixed_asset:
+				if d.asset:
+					if not self.is_return:
+						asset_status = frappe.db.get_value("Asset", d.asset, "status")
+						if self.update_stock:
+							frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
+
+						elif asset_status in ("Scrapped", "Cancelled", "Capitalized"):
+							frappe.throw(
+								_("Row #{0}: Asset {1} cannot be sold, it is already {2}").format(
+									d.idx, d.asset, asset_status
+								)
 							)
+						elif asset_status == "Sold" and not self.is_return:
+							frappe.throw(_("Row #{0}: Asset {1} is already sold").format(d.idx, d.asset))
+					elif not self.return_against:
+						frappe.throw(
+							_("Row #{0}: Return Against is required for returning asset").format(d.idx)
 						)
+				else:
+					frappe.throw(
+						_("Row #{0}: You must select an Asset for Item {1}.").format(d.idx, d.item_code),
+						title=_("Missing Asset"),
+					)
 
 	def validate_item_cost_centers(self):
 		for item in self.items:
@@ -448,6 +461,8 @@ class SalesInvoice(SellingController):
 			self.validate_standalone_serial_nos_customer()
 			self.update_stock_reservation_entries()
 			self.update_stock_ledger()
+
+		self.process_asset_depreciation()
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
@@ -544,6 +559,8 @@ class SalesInvoice(SellingController):
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		if self.update_stock == 1:
 			self.update_stock_ledger()
+
+		self.process_asset_depreciation()
 
 		self.make_gl_entries_on_cancel()
 
@@ -1166,6 +1183,91 @@ class SalesInvoice(SellingController):
 			):
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
+	def process_asset_depreciation(self):
+		if (self.is_return and self.docstatus == 2) or (not self.is_return and self.docstatus == 1):
+			self.depreciate_asset_on_sale()
+		else:
+			self.restore_asset()
+
+		self.update_asset()
+
+	def depreciate_asset_on_sale(self):
+		"""
+		Depreciate asset on sale or cancellation of return sales invoice
+		"""
+		disposal_date = self.get_disposal_date()
+		for d in self.get("items"):
+			if d.asset:
+				asset = frappe.get_doc("Asset", d.asset)
+				if asset.calculate_depreciation and asset.status != "Fully Depreciated":
+					depreciate_asset(asset, disposal_date, self.get_note_for_asset_sale(asset))
+
+	def get_note_for_asset_sale(self, asset):
+		return _("This schedule was created when Asset {0} was {1} through Sales Invoice {2}.").format(
+			get_link_to_form(asset.doctype, asset.name),
+			_("returned") if self.is_return else _("sold"),
+			get_link_to_form(self.doctype, self.get("name")),
+		)
+
+	def restore_asset(self):
+		"""
+		Restore asset on return or cancellation of original sales invoice
+		"""
+
+		for d in self.get("items"):
+			if d.asset:
+				asset = frappe.get_cached_doc("Asset", d.asset)
+				if asset.calculate_depreciation:
+					posting_date = self.get_disposal_date()
+					reverse_depreciation_entry_made_after_disposal(asset, posting_date)
+
+					note = self.get_note_for_asset_return(asset)
+					reset_depreciation_schedule(asset, self.posting_date, note)
+
+	def get_note_for_asset_return(self, asset):
+		asset_link = get_link_to_form(asset.doctype, asset.name)
+		invoice_link = get_link_to_form(self.doctype, self.get("name"))
+		if self.is_return:
+			return _(
+				"This schedule was created when Asset {0} was returned through Sales Invoice {1}."
+			).format(asset_link, invoice_link)
+		else:
+			return _(
+				"This schedule was created when Asset {0} was restored due to Sales Invoice {1} cancellation."
+			).format(asset_link, invoice_link)
+
+	def update_asset(self):
+		"""
+		Update asset status, disposal date and asset activity on sale or return sales invoice
+		"""
+
+		def _update_asset(asset, disposal_date, note, asset_status=None):
+			frappe.db.set_value("Asset", d.asset, "disposal_date", disposal_date)
+			add_asset_activity(asset.name, note)
+			asset.set_status(asset_status)
+
+		disposal_date = self.get_disposal_date()
+		for d in self.get("items"):
+			if d.asset:
+				asset = frappe.get_cached_doc("Asset", d.asset)
+
+				if (self.is_return and self.docstatus == 1) or (not self.is_return and self.docstatus == 2):
+					note = _("Asset returned") if self.is_return else _("Asset sold")
+					asset_status, disposal_date = None, None
+				else:
+					note = _("Asset sold") if not self.is_return else _("Return invoice of asset cancelled")
+					asset_status = "Sold"
+
+				_update_asset(asset, disposal_date, note, asset_status)
+
+	def get_disposal_date(self):
+		if self.is_return:
+			disposal_date = frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
+		else:
+			disposal_date = self.posting_date
+
+		return disposal_date
+
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 
@@ -1333,73 +1435,17 @@ class SalesInvoice(SellingController):
 		)
 
 		for item in self.get("items"):
-			if flt(item.base_net_amount, item.precision("base_net_amount")) or item.is_fixed_asset:
+			if (
+				flt(item.base_net_amount, item.precision("base_net_amount"))
+				or item.is_fixed_asset
+				or enable_discount_accounting
+			):
 				# Do not book income for transfer within same company
 				if self.is_internal_transfer():
 					continue
 
-				if item.is_fixed_asset:
-					asset = self.get_asset(item)
-
-					if (self.docstatus == 2 and not self.is_return) or (
-						self.docstatus == 1 and self.is_return
-					):
-						fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
-							asset,
-							item.base_net_amount,
-							item.finance_book,
-							self.get("doctype"),
-							self.get("name"),
-							self.get("posting_date"),
-						)
-						asset.db_set("disposal_date", None)
-						add_asset_activity(asset.name, _("Asset returned"))
-						asset_status = asset.get_status()
-
-						if asset.calculate_depreciation and not asset_status == "Fully Depreciated":
-							posting_date = (
-								frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
-								if self.is_return
-								else self.posting_date
-							)
-							reverse_depreciation_entry_made_after_disposal(asset, posting_date)
-							notes = _(
-								"This schedule was created when Asset {0} was returned through Sales Invoice {1}."
-							).format(
-								get_link_to_form(asset.doctype, asset.name),
-								get_link_to_form(self.doctype, self.get("name")),
-							)
-							reset_depreciation_schedule(asset, self.posting_date, notes)
-							asset.reload()
-
-					else:
-						if asset.calculate_depreciation:
-							if not asset.status == "Fully Depreciated":
-								notes = _(
-									"This schedule was created when Asset {0} was sold through Sales Invoice {1}."
-								).format(
-									get_link_to_form(asset.doctype, asset.name),
-									get_link_to_form(self.doctype, self.get("name")),
-								)
-								depreciate_asset(asset, self.posting_date, notes)
-								asset.reload()
-
-						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
-							asset,
-							item.base_net_amount,
-							item.finance_book,
-							self.get("doctype"),
-							self.get("name"),
-							self.get("posting_date"),
-						)
-						asset.db_set("disposal_date", self.posting_date)
-						add_asset_activity(asset.name, _("Asset sold"))
-
-					for gle in fixed_asset_gl_entries:
-						gle["against"] = self.customer
-						gl_entries.append(self.get_gl_dict(gle, item=item))
-
-					self.set_asset_status(asset)
+				if item.is_fixed_asset and item.asset:
+					self.get_gl_entries_for_fixed_asset(item, gl_entries)
 
 				else:
 					income_account = (
@@ -1435,17 +1481,31 @@ class SalesInvoice(SellingController):
 		if cint(self.update_stock) and erpnext.is_perpetual_inventory_enabled(self.company):
 			gl_entries += super().get_gl_entries()
 
-	def get_asset(self, item):
-		if item.get("asset"):
-			asset = frappe.get_doc("Asset", item.asset)
+	def get_gl_entries_for_fixed_asset(self, item, gl_entries):
+		asset = frappe.get_cached_doc("Asset", item.asset)
+
+		if self.is_return:
+			fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
+				asset,
+				item.base_net_amount,
+				item.finance_book,
+				self.get("doctype"),
+				self.get("name"),
+				self.get("posting_date"),
+			)
 		else:
-			frappe.throw(
-				_("Row #{0}: You must select an Asset for Item {1}.").format(item.idx, item.item_name),
-				title=_("Missing Asset"),
+			fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
+				asset,
+				item.base_net_amount,
+				item.finance_book,
+				self.get("doctype"),
+				self.get("name"),
+				self.get("posting_date"),
 			)
 
-		self.check_finance_books(item, asset)
-		return asset
+		for gle in fixed_asset_gl_entries:
+			gle["against"] = self.customer
+			gl_entries.append(self.get_gl_dict(gle, item=item))
 
 	@property
 	def enable_discount_accounting(self):
@@ -2135,7 +2195,9 @@ def make_delivery_note(source_name, target_doc=None):
 					"cost_center": "cost_center",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.delivered_by_supplier != 1,
+				"condition": lambda doc: doc.delivered_by_supplier != 1
+				and not doc.dn_detail
+				and doc.qty - doc.delivered_qty > 0,
 			},
 			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 			"Sales Team": {

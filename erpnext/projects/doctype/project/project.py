@@ -603,7 +603,7 @@ def send_project_update_email_to_users(project):
 			"sent": 0,
 			"date": today(),
 			"time": nowtime(),
-			"naming_series": "UPDATE-.project.-.YY.MM.DD.-",
+			"naming_series": "UPDATE-.project.-.YY.MM.DD.-.####",
 		}
 	).insert()
 

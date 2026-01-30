@@ -2581,6 +2581,7 @@ class TestDeliveryNote(FrappeTestCase):
 		dn = make_delivery_note(so.name)
 		dn.submit()
 		self.assertEqual(dn.per_billed, 0)
+		self.assertEqual(dn.status, "To Bill")
 
 		si = make_sales_invoice(dn.name)
 		si.location = "Test Location"
@@ -2595,6 +2596,7 @@ class TestDeliveryNote(FrappeTestCase):
 		dn.load_from_db()
 		self.assertEqual(dn.per_billed, 100)
 		self.assertEqual(dn.per_returned, 100)
+		self.assertEqual(returned.status, "Return")
 
 	def test_sales_return_for_product_bundle(self):
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
@@ -2787,6 +2789,23 @@ class TestDeliveryNote(FrappeTestCase):
 			self.assertEqual(sre_details[0].status, "Partially Delivered")
 			self.assertEqual(sre_details[0].reserved_qty, so.items[0].qty)
 			self.assertEqual(sre_details[0].delivered_qty, dn.items[0].qty)
+
+	def test_negative_stock_with_higher_precision(self):
+		original_flt_precision = frappe.db.get_default("float_precision")
+		frappe.db.set_single_value("System Settings", "float_precision", 7)
+
+		item_code = make_item(
+			"Test Negative Stock High Precision Item", properties={"is_stock_item": 1, "valuation_rate": 1}
+		).name
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=0.0000010,
+			do_not_submit=True,
+		)
+
+		self.assertRaises(frappe.ValidationError, dn.submit)
+
+		frappe.db.set_single_value("System Settings", "float_precision", original_flt_precision)
 
 
 def create_delivery_note(**args):

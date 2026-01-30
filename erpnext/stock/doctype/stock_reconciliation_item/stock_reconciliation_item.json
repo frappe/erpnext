@@ -14,6 +14,7 @@
   "column_break_6",
   "warehouse",
   "qty",
+  "stock_uom",
   "valuation_rate",
   "amount",
   "allow_zero_valuation_rate",
@@ -85,6 +86,16 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Quantity"
+  },
+  {
+   "columns": 2,
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
   },
   {
    "columns": 2,
@@ -185,12 +196,10 @@
   },
   {
    "default": "0",
-   "depends_on": "allow_zero_valuation_rate",
    "fieldname": "allow_zero_valuation_rate",
    "fieldtype": "Check",
    "label": "Allow Zero Valuation Rate",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "depends_on": "barcode",
@@ -256,7 +265,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2025-03-12 16:34:51.326821",
+ "modified": "2025-11-20 15:27:13.868179",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",

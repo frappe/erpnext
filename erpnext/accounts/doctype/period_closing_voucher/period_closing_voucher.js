@@ -13,9 +13,9 @@ frappe.ui.form.on("Period Closing Voucher", {
 			return {
 				filters: [
 					["Account", "company", "=", frm.doc.company],
-					["Account", "is_group", "=", "0"],
+					["Account", "is_group", "=", 0],
 					["Account", "freeze_account", "=", "No"],
-					["Account", "root_type", "in", "Liability, Equity"],
+					["Account", "root_type", "in", ["Liability", "Equity"]],
 				],
 			};
 		});

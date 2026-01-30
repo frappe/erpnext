@@ -35,7 +35,8 @@
   "hide_tax_id",
   "enable_discount_accounting",
   "allow_zero_qty_in_quotation",
-  "allow_zero_qty_in_sales_order"
+  "allow_zero_qty_in_sales_order",
+  "set_zero_rate_for_expired_batch"
  ],
  "fields": [
   {
@@ -51,6 +52,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Default Customer Group",
+   "link_filters": "[[\"Customer Group\", \"is_group\", \"=\", 0]]",
    "options": "Customer Group"
   },
   {
@@ -223,6 +225,13 @@
    "fieldname": "fallback_to_default_price_list",
    "fieldtype": "Check",
    "label": "Use Prices from Default Price List as Fallback"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, system will set incoming rate as zero for stand-alone credit notes with expired batch item.",
+   "fieldname": "set_zero_rate_for_expired_batch",
+   "fieldtype": "Check",
+   "label": "Set Incoming Rate as Zero for Expired Batch"
   }
  ],
  "grid_page_length": 50,
@@ -231,7 +240,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-09-23 21:10:14.826653",
+ "modified": "2026-01-24 00:04:33.105916",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
