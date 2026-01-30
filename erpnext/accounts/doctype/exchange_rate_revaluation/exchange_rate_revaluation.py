@@ -252,7 +252,7 @@ class ExchangeRateRevaluation(Document):
 		company_currency = erpnext.get_company_currency(company)
 		precision = get_field_precision(
 			frappe.get_meta("Exchange Rate Revaluation Account").get_field("new_balance_in_base_currency"),
-			company_currency,
+			currency=company_currency,
 		)
 
 		if account_details:
@@ -485,6 +485,9 @@ class ExchangeRateRevaluation(Document):
 		journal_entry.company = self.company
 		journal_entry.posting_date = self.posting_date
 		journal_entry.multi_currency = 1
+
+		# Prevent JE from overriding user-entered exchange rates (e.g., rate of 1)
+		journal_entry.flags.ignore_exchange_rate = True
 
 		journal_entry_accounts = []
 		for d in accounts:

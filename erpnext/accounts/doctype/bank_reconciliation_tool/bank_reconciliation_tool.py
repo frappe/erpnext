@@ -304,6 +304,7 @@ def create_payment_entry_bts(
 	project=None,
 	cost_center=None,
 	allow_edit=None,
+	company_bank_account=None,
 ):
 	# Create a new payment entry based on the bank transaction
 	bank_transaction = frappe.db.get_values(
@@ -344,6 +345,9 @@ def create_payment_entry_bts(
 	pe.mode_of_payment = mode_of_payment
 	pe.project = project
 	pe.cost_center = cost_center
+
+	if company_bank_account:
+		pe.bank_account = company_bank_account
 
 	pe.validate()
 

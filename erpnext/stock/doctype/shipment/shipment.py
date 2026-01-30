@@ -20,9 +20,7 @@ class Shipment(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.stock.doctype.shipment_delivery_note.shipment_delivery_note import (
-			ShipmentDeliveryNote,
-		)
+		from erpnext.stock.doctype.shipment_delivery_note.shipment_delivery_note import ShipmentDeliveryNote
 		from erpnext.stock.doctype.shipment_parcel.shipment_parcel import ShipmentParcel
 
 		amended_from: DF.Link | None

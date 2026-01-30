@@ -41,6 +41,7 @@ class SellingSettings(Document):
 		role_to_override_stop_action: DF.Link | None
 		sales_update_frequency: DF.Literal["Monthly", "Each Transaction", "Daily"]
 		selling_price_list: DF.Link | None
+		set_zero_rate_for_expired_batch: DF.Check
 		so_required: DF.Literal["No", "Yes"]
 		territory: DF.Link | None
 		validate_selling_price: DF.Check

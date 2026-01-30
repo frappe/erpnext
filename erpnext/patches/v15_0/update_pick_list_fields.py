@@ -8,12 +8,24 @@ def execute():
 
 
 def update_delivery_note():
-	DN = frappe.qb.DocType("Delivery Note")
-	DNI = frappe.qb.DocType("Delivery Note Item")
-
-	frappe.qb.update(DNI).join(DN).on(DN.name == DNI.parent).set(DNI.against_pick_list, DN.pick_list).where(
-		IfNull(DN.pick_list, "") != ""
-	).run()
+	# Postgres doesn't support UPDATE ... JOIN. Use UPDATE ... FROM instead.
+	frappe.db.multisql(
+		{
+			"mariadb": """
+				UPDATE `tabDelivery Note Item` dni
+				JOIN `tabDelivery Note` dn ON dn.`name` = dni.`parent`
+				SET dni.`against_pick_list` = dn.`pick_list`
+				WHERE COALESCE(dn.`pick_list`, '') <> ''
+			""",
+			"postgres": """
+				UPDATE "tabDelivery Note Item" dni
+				SET against_pick_list = dn.pick_list
+				FROM "tabDelivery Note" dn
+				WHERE dn.name = dni.parent
+				  AND COALESCE(dn.pick_list, '') <> ''
+			""",
+		}
+	)
 
 
 def update_pick_list_items():

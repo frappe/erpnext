@@ -273,6 +273,9 @@ class MaterialRequest(BuyingController):
 				.groupby(doctype.material_request_item)
 			)
 
+			if self.material_request_type == "Manufacture":
+				query = query.where(doctype.status != "Closed")
+
 			mr_items_ordered_qty = frappe._dict(query.run())
 
 		return mr_items_ordered_qty

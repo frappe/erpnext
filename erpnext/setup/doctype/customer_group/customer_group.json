@@ -139,7 +139,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2023-06-02 13:40:34.435822",
+ "modified": "2025-12-02 13:58:03.378607",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Customer Group",
@@ -208,9 +208,11 @@
    "share": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "parent_customer_group",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "translated_doctype": 1
 }

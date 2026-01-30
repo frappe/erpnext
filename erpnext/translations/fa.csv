@@ -11454,3 +11454,414 @@ You can't process the serial number {0} as it has already been used in the SABB 
 {0} is a mandatory field.,{0} یک فیلد اجباری است.,
 {0} items lost during process.,{0} آیتم در طول فرآیند گم شده است.,
 {0}: {1} does not belong to the Company: {2},{0}: {1} متعلق به شرکت: {2} نیست,
+% Delivered,% تحویل داده شده,
+% of materials delivered against this Pick List,٪ مواد تحویل‌شده بر اساس این لیست انتخاب,
+"<br>
+<h4>Note</h4>
+<ul>
+<li>
+You can use <a href=""https://jinja.palletsprojects.com/en/2.11.x/"" target=""_blank"">Jinja tags</a> in <b>Subject</b> and <b>Body</b> fields for dynamic values.
+</li><li>
+    All fields in this doctype are available under the <b>doc</b> object and all fields for the customer to whom the mail will go to is available under the  <b>customer</b> object.
+</li></ul>
+<h4> Examples</h4>
+<!-- {% raw %} -->
+<ul>
+    <li><b>Subject</b>:<br><br><pre><code>Statement Of Accounts for {{ customer.customer_name }}</code></pre><br></li>
+    <li><b>Body</b>: <br><br>
+<pre><code>Hello {{ customer.customer_name }},<br>PFA your Statement Of Accounts from {{ doc.from_date }} to {{ doc.to_date }}.</code> </pre></li>
+</ul>
+<!-- {% endraw %} -->","<br>
+<h4>یادآوری</h4>
+<ul>
+<li> می‌توانید از <a href=""https://jinja.palletsprojects.com/en/2.11.x/"" target=""_blank"">تگ‌های جینجا</a> در فیلدهای <b>عنوان</b> و <b>متن</b> برای مقادیر پویا استفاده کنید. </li>
+<li> تمامی فیلدهای این داک‌تایپ تحت آبجکت <b>doc</b> و تمامی فیلدهای مربوط به مشتری که ایمیل به او ارسال می‌شود تحت آبجکت <b>customer</b> در دسترس هستند. </li>
+</ul>
+<h4> نمونه‌ها</h4>
+<!-- {% raw %} -->
+<ul>
+<li><b>موضوع</b>:<br><br><pre><code>صورت‌حساب برای {{ customer.customer_name }}</code></pre><br></li>
+<li><b>متن</b>: <br><br> <pre><code>سلام {{ customer.customer_name }},<br>صورت‌حساب شما از تاریخ {{ doc.from_date }} تا {{ doc.to_date }} پیوست شده است.</code> </pre></li>
+</ul>
+<!-- {% endraw %} -->",
+"<h4>Body Text and Closing Text Example</h4>
+
+<div>We have noticed that you have not yet paid invoice {{sales_invoice}} for {{frappe.db.get_value(""Currency"", currency, ""symbol"")}} {{outstanding_amount}}. This is a friendly reminder that the invoice was due on {{due_date}}. Please pay the amount due immediately to avoid any further dunning cost.</div>
+
+<h4>How to get fieldnames</h4>
+
+<p>The fieldnames you can use in your template are the fields in the document. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Sales Invoice)</p>
+
+<h4>Templating</h4>
+
+<p>Templates are compiled using the Jinja Templating Language. To learn more about Jinja, <a class=""strong"" href=""http://jinja.pocoo.org/docs/dev/templates/"">read this documentation.</a></p>","<h4>متن بدنه و متن پایانی</h4>
+
+<div>متوجه شدیم که شما هنوز فاکتور {{sales_invoice}} مربوط به {{frappe.db.get_value(""Currency"", currency, ""symbol"")}} {{outstanding_amount}}را پرداخت نکرده‌اید. این یک یادآوری دوستانه است که این فاکتور در تاریخ {{due_date}}سررسید شده است. لطفاً مبلغ بدهی را فوراً پرداخت کنید تا از هرگونه هزینه اضافی جلوگیری شود.</div>
+
+<h4>نحوه دریافت نام فیلدها</h4>
+
+<p>نام فیلدهایی که می‌توانید در الگوی خود استفاده کنید، فیلدهای موجود در سند هستند. شما می‌توانید فیلدهای هر سندی را از طریق Setup &gt; Customize Form View و انتخاب نوع سند (مثلاً فاکتور فروش) پیدا کنید.</p>
+
+<h4>قالب‌بندی</h4>
+
+<p>قالب‌ها با استفاده از زبان قالب‌بندی Jinja کامپایل می‌شوند. برای کسب اطلاعات بیشتر در مورد Jinja، <a class=""strong"" href=""http://jinja.pocoo.org/docs/dev/templates/"">این مستندات را مطالعه کنید.</a></p>",
+"<h4>Contract Template Example</h4>
+
+<pre>Contract for Customer {{ party_name }}
+
+-Valid From : {{ start_date }} 
+-Valid To : {{ end_date }}
+</pre>
+
+<h4>How to get fieldnames</h4>
+
+<p>The field names you can use in your Contract Template are the fields in the Contract for which you are creating the template. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Contract)</p>
+
+<h4>Templating</h4>
+
+<p>Templates are compiled using the Jinja Templating Language. To learn more about Jinja, <a class=""strong"" href=""http://jinja.pocoo.org/docs/dev/templates/"">read this documentation.</a></p>","<h4>مثال الگوی قرارداد</h4>
+
+<pre>قرارداد برای مشتری {{ party_name }}
+
+-معتبر از : {{ start_date }} 
+-معتبر برای : {{ end_date }}
+</pre>
+
+<h4>نحوه دریافت نام فیلدها</h4>
+
+<p>نام فیلدهایی که می‌توانید در الگوی قرارداد خود استفاده کنید، فیلدهایی در قراردادی هستند که برای آنها الگو را ایجاد می‌کنید. شما می‌توانید فیلدهای هر سندی را از طریق Setup &gt; Customize Form View و انتخاب نوع سند (مثلاً Contract)</p>
+
+<h4>Templateing</h4>
+
+<p>قالب‌ها با استفاده از زبان قالب‌سازی Jinja کامپایل می‌شوند. برای کسب اطلاعات بیشتر در مورد Jinja، <a class=""strong"" href=""http://jinja.pocoo.org/docs/dev/templates/"">این مستندات را مطالعه کنید.</a></p>",
+<li>Item {0} in row(s) {1} billed more than {2}</li>,<li>آیتم {0} در ردیف(های) {1} بیش از {2} صورتحساب شده است</li>,
+<p>Cannot overbill for the following Items:</p>,<p>نمی‌توان برای موارد زیر صورتحساب اضافه صادر کرد:</p>,
+<p>Following {0}s doesn't belong to Company {1} :</p>,<p>{0}های زیر متعلق به شرکت {1} نیستند:</p>,
+"<p>In your <b>Email Template</b>, you can use the following special variables:
+</p>
+<ul>
+        <li>
+            <code>{{ update_password_link }}</code>: A link where your supplier can set a new password to log into your portal.
+        </li>
+        <li>
+            <code>{{ portal_link }}</code>: A link to this RFQ in your supplier portal.
+        </li>
+        <li>
+            <code>{{ supplier_name }}</code>: The company name of your supplier.
+        </li>
+        <li>
+            <code>{{ contact.salutation }} {{ contact.last_name }}</code>: The contact person of your supplier.
+        </li><li>
+            <code>{{ user_fullname }}</code>: Your full name.
+        </li>
+    </ul>
+<p></p>
+<p>Apart from these, you can access all values in this RFQ, like <code>{{ message_for_supplier }}</code> or <code>{{ terms }}</code>.</p>","<p>در <b>الگوی ایمیل</b> خود می‌توانید از متغیرهای ویژه‌ی زیر استفاده کنید: </p>
+<ul>
+  <li>
+    <code>{{ update_password_link }}</code>: لینکی که تأمین‌کننده شما می‌تواند از آن برای تعیین رمز عبور جدید جهت ورود به پورتال شما استفاده کند.
+  </li>
+  <li>
+    <code>{{ portal_link }}</code>: لینکی به این درخواست پیش‌فاکتور در پورتال تأمین‌کننده شما.
+  </li>
+  <li>
+    <code>{{ supplier_name }}</code>: نام شرکت تأمین‌کننده شما.
+  </li>
+  <li>
+    <code>{{ contact.salutation }} {{ contact.last_name }}</code>: شخص مخاطب در شرکت تأمین‌کننده شما.
+  </li>
+  <li>
+    <code>{{ user_fullname }}</code>: نام کامل شما.
+  </li>
+</ul>
+<p></p>
+<p>علاوه بر این‌ها، می‌توانید به تمام مقادیر موجود در این درخواست پیش‌فاکتور دسترسی داشته باشید، مانند <code>{{ message_for_supplier }}</code> یا <code>{{ terms }}</code>. </p>",
+"<p>Price List Rate has not been set as editable in Selling Settings. In this scenario, setting <strong>Update Price List Based On</strong> to <strong>Price List Rate</strong> will prevent auto-updation of Item Price.</p>Are you sure you want to continue?",<p>نرخ لیست قیمت در تنظیمات فروش قابل ویرایش تنظیم نشده است. در این حالت، تنظیم <strong>به‌روزرسانی لیست قیمت بر اساس</strong> روی <strong>نرخ لیست قیمت</strong> از به‌روزرسانی خودکار قیمت کالا جلوگیری می‌کند.</p>آیا مطمئنید که می‌خواهید ادامه دهید؟,
+"<pre><h5>Message Example</h5>
+
+&lt;p&gt; Thank You for being a part of {{ doc.company }}! We hope you are enjoying the service.&lt;/p&gt;
+
+&lt;p&gt; Please find enclosed the E Bill statement. The outstanding amount is {{ doc.grand_total }}.&lt;/p&gt;
+
+&lt;p&gt; We don't want you to be spending time running around in order to pay for your Bill.<br>After all, life is beautiful and the time you have in hand should be spent to enjoy it!<br>So here are our little ways to help you get more time for life! &lt;/p&gt;
+
+&lt;a href=""{{ payment_url }}""&gt; click here to pay &lt;/a&gt;
+
+</pre>
+","<pre><h5>نمونه پیام</h5>
+
+&lt;p&gt; از اینکه بخشی از {{ doc.company }} هستید سپاسگزاریم! امیدواریم از خدمات ما لذت ببرید.&lt;/p&gt;
+
+&lt;p&gt; لطفاً صورت‌حساب الکترونیکی پیوست را بررسی فرمایید. مبلغ قابل پرداخت {{ doc.grand_total }} می‌باشد.&lt;/p&gt;
+
+&lt;p&gt; ما نمی‌خواهیم وقتتان صرف رفت‌ و آمد برای پرداخت قبض شود.<br>در نهایت، زندگی زیباست و زمانی که در اختیار دارید باید صرف لذت بردن از آن شود!<br>پس اینجا چند راهکار کوچک برای داشتن زمان بیشتر در زندگی ارائه کرده‌ایم! &lt;/p&gt;
+
+&lt;a href=""{{ payment_url }}""&gt; برای پرداخت اینجا کلیک کنید &lt;/a&gt;
+
+</pre>
+",
+"According to the BOM {0}, the Item '{1}' is missing in the stock entry.",طبق BOM {0}، آیتم '{1}' در ثبت موجودی وجود ندارد.,
+Account {0} cannot be disabled as it is already set as {1} for {2}.,حساب {0} قابل غیرفعال شدن نیست زیرا از قبل به عنوان {1} برای {2} تنظیم شده است.,
+Account {0} doesn't belong to Company {1},حساب {0} متعلق به شرکت {1} نیست,
+Account {0} is disabled.,حساب {0} غیرفعال است.,
+Advance Voucher No,شماره سند مالی پیش‌پرداخت,
+Advance Voucher Type,نوع سند مالی پیش‌پرداخت,
+Allow Partial Payment,اجازه پرداخت جزئی,
+Allow Purchase Order with Zero Quantity,اجازه ثبت سفارش خرید با مقدار صفر,
+Allow Quotation with Zero Quantity,اجازه ثبت پیش‌فاکتور با مقدار صفر,
+Allow Request for Quotation with Zero Quantity,اجازه درخواست پیش‌فاکتور با مقدار صفر,
+Allow Sales Order with Zero Quantity,اجازه ثبت سفارش خرید با مقدار صفر,
+Allow Supplier Quotation with Zero Quantity,اجازه ثبت پیش‌فاکتور تأمین‌کننده با مقدار صفر,
+Allow UOM with Conversion Rate Defined in Item,اجازه UOM با نرخ تبدیل تعریف شده در آیتم,
+Allow to Make Quality Inspection after Purchase / Delivery,اجازه دهید پس از خرید/تحویل، بازرسی کیفیت انجام شود,
+Allows users to submit Purchase Orders with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.,اجازه می‌دهد کاربران سفارش خرید با مقدار صفر ثبت کنند. این ویژگی زمانی مفید است که نرخ‌ها ثابت هستند اما مقادیر هنوز مشخص نشده‌اند. مثلاً در قراردادهای نرخ‌گذاری.,
+Allows users to submit Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.,اجازه می‌دهد کاربران پیش‌فاکتور با مقدار صفر ثبت کنند. این ویژگی زمانی مفید است که نرخ‌ها ثابت هستند اما مقادیر هنوز مشخص نشده‌اند. مثلاً در قراردادهای نرخ‌گذاری.,
+Allows users to submit Request for Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.,اجازه می‌دهد کاربران درخواست پیش‌فاکتور با مقدار صفر ثبت کنند. این ویژگی زمانی مفید است که نرخ‌ها ثابت هستند اما مقادیر هنوز مشخص نشده‌اند. مثلاً در قراردادهای نرخ‌گذاری.,
+Allows users to submit Sales Orders with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.,اجازه می‌دهد کاربران سفارش فروش با مقدار صفر ثبت کنند. این ویژگی زمانی مفید است که نرخ‌ها ثابت هستند اما مقادیر هنوز مشخص نشده‌اند. مثلاً در قراردادهای نرخ‌گذاری.,
+Allows users to submit Supplier Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.,اجازه می‌دهد کاربران پیش‌فاکتور تامین کننده با مقدار صفر ثبت کنند. این ویژگی زمانی مفید است که نرخ‌ها ثابت هستند اما مقادیر هنوز مشخص نشده‌اند. مثلاً در قراردادهای نرخ‌گذاری.,
+Analysis Chart,نمودار تحلیل,
+Asset cannot be scrapped before the last depreciation entry.,دارایی را نمی‌توان قبل از آخرین ثبت استهلاک اسقاط کرد.,
+Asset {0} does not belong to the custodian {1},دارایی {0} متعلق به متولی {1} نیست,
+Asset {0} does not belong to the location {1},دارایی {0} به مکان {1} تعلق ندارد,
+Asset {0} is in {1} status and cannot be repaired.,دارایی {0} در وضعیت {1} قرار دارد و قابل تعمیر نیست.,
+Asset {0} is not set to calculate depreciation.,دارایی {0} برای محاسبه استهلاک تنظیم نشده است.,
+Asset {0} is not submitted. Please submit the asset before proceeding.,دارایی {0} ارسال نشده است. لطفاً قبل از ادامه، دارایی را ارسال کنید.,
+At least one account with exchange gain or loss is required,حداقل یک حساب با سود یا زیان تبدیل مورد نیاز است,
+Auto Reconciliation Job Trigger,فعال‌سازی خودکار عملیات تطبیق,
+Auto Tax Settings Error,خطای تنظیمات مالیات خودکار,
+Automatically Add Taxes from Taxes and Charges Template,افزودن خودکار مالیات از الگوی مالیات و عوارض,
+Available Serial No,شماره سریال موجود,
+Batch Expiry Date,تاریخ انقضای دسته,
+Bisect Accounting Statements,صورت‌های حسابداری دوبخشی,
+Bisecting From,برش از,
+Bisecting Left ...,برش از چپ ...,
+Bisecting Right ...,برش از راست ...,
+Bisecting To,برش تا,
+Bulk Rename Jobs,کارهای تغییر نام گروهی,
+Calculate daily depreciation using total days in depreciation period,محاسبه استهلاک روزانه با استفاده از کل روزهای دوره استهلاک,
+Cannot disassemble more than produced quantity.,نمی‌توان بیش از مقدار تولید شده دمونتاژ کرد.,
+Cannot find Item or Warehouse with this Barcode,نمی‌توان آیتم یا انباری را با این بارکد پیدا کرد,
+Categorize By,دسته‌بندی بر اساس,
+Categorize by,دسته‌بندی بر اساس,
+Categorize by Account,دسته‌بندی بر اساس حساب,
+Categorize by Item,دسته‌بندی بر اساس آیتم,
+Categorize by Party,دسته‌بندی بر اساس طرف,
+Categorize by Supplier,دسته‌بندی بر اساس تامین‌کننده,
+Categorize by Voucher,دسته‌بندی بر اساس سند مالی,
+Categorize by Voucher (Consolidated),دسته‌بندی بر اساس سند مالی (تلفیقی),
+"Changing the valuation method to Moving Average will affect new transactions. If backdated entries are added, earlier FIFO-based entries will be reposted, which may change closing balances.",تغییر روش ارزش‌گذاری به میانگین متحرک، تراکنش‌های جدید را تحت تأثیر قرار می‌دهد. اگر ثبت‌های تاریخ گذشته اضافه شوند، ثبت‌های قبلی مبتنی بر FIFO دوباره ارسال می‌شوند که ممکن است مانده‌های پایانی را تغییر دهد.,
+Child Row Reference,مرجع ردیف فرزند,
+Click this button if you encounter a negative stock error for a serial or batch item. The system will fetch the available serials or batches automatically.,اگر با خطای موجودی منفی برای یک سریال یا دسته آیتم مواجه شدید، روی این دکمه کلیک کنید. سیستم سریال‌ها یا دسته‌های موجود را به‌طور خودکار دریافت می‌کند.,
+Common Code,کد عمومی,
+Consider Process Loss,در نظر گرفتن اتلاف فرآیند,
+Conversion rate must be 1.00 if document currency is same as company currency,اگر واحد پول سند با واحد پول شرکت یکسان باشد، نرخ تبدیل باید 1.00 باشد,
+Create Delivery Note,ایجاد یادداشت تحویل,
+"Creation of {0} failed.
+				Check <b><a href=""/app/bulk-transaction-log"">Bulk Transaction Log</a></b>","ایجاد {0} ناموفق بود.
+				بررسی <b><a href=""/app/bulk-transaction-log"">لاگ تراکنش‌های انبوه</a></b>",
+"Creation of {0} partially successful.
+				Check <b><a href=""/app/bulk-transaction-log"">Bulk Transaction Log</a></b>","ایجاد {0} تا حدودی موفقیت‌آمیز بود.
+				بررسی <b><a href=""/app/bulk-transaction-log"">لاگ تراکنش‌های انبوه</a></b>",
+Creditor Turnover Ratio,نسبت گردش مالی طلبکاران,
+Current Node,نود جاری,
+Current Ratio,نسبت جاری,
+Data Fetch Method,روش واکشی داده‌ها,
+Debit-Credit Mismatch,عدم تطابق بدهکار و بستانکار,
+Debit-Credit mismatch,عدم تطابق بدهکار و بستانکار,
+Debt Equity Ratio,نسبت بدهی به حقوق صاحبان سهام,
+Debtor Turnover Ratio,نسبت گردش مالی بدهکار,
+Default Operating Cost Account,حساب هزینه عملیاتی پیش‌فرض,
+Default Sales Contact,مخاطب فروش پیش‌فرض,
+Delivered Qty (in Stock UOM),مقدار تحویل داده شده (بر حسب واحد اندازه‌گیری موجودی),
+Demand,تقاضا,
+Demo Bank Account,حساب بانکی آزمایشی,
+Depreciation Entry against asset {0},ثبت استهلاک در مقابل دارایی {0},
+Depreciation Entry against {0} worth {1},ورودی استهلاک در برابر {0} ارزش {1},
+Depreciation eliminated via reversal,استهلاک از طریق معکوس کردن حذف می‌شود,
+Disassemble Order,دستور دمونتاژ,
+Disassembled Qty,مقدار دمونتاژ شده,
+Discount Amount in Transaction,مبلغ تخفیف در تراکنش,
+Discount Percentage in Transaction,درصد تخفیف در تراکنش,
+Distributed Discount Amount,مبلغ تخفیف توزیع شده,
+Do you still want to enable immutable ledger?,آیا هنوز می خواهید دفتر تغییرناپذیر را فعال کنید؟,
+Do you want to change valuation method?,آیا می‌خواهید روش ارزش‌گذاری را تغییر دهید؟,
+Documents Processed on each trigger. Queue Size should be between 5 and 100,اسناد در هر اجرا پردازش می‌شوند. اندازه صف باید بین 5 تا 100 باشد,
+Don't Enforce Free Item Qty,اجباری نکردن مقدار آیتم رایگان,
+Edit Cart,ویرایش سبد خرید,
+Employee Exit,خروج کارمند,
+Employee {0} does not belong to the company {1},کارمند {0} متعلق به شرکت {1} نیست,
+Enable Health Monitor,فعال کردن پایش سلامت,
+Enable Immutable Ledger,فعال کردن دفتر تغییرناپذیر,
+Enabling this checkbox will force each Job Card Time Log to have From Time and To Time,فعال کردن این کادر انتخاب، هر لاگ زمان کارت کار را مجبور می‌کند که «از زمان» و «تا زمان» داشته باشد,
+Enabling this will change the way how cancelled transactions are handled.,فعال کردن این گزینه، نحوه‌ی مدیریت تراکنش‌های لغو شده را تغییر می‌دهد.,
+Enforce Time Logs,اجبار کردن لاگ‌های زمان,
+Enter date to scrap asset,تاریخ اسقاط دارایی را وارد کنید,
+"Enter the Operation, the table will fetch the Operation details like Hourly Rate, Workstation automatically.
+
+ After that, set the Operation Time in minutes and the table will calculate the Operation Costs based on the Hourly Rate and Operation Time.","عملیات را وارد کنید، جدول جزئیات عملیات مانند نرخ ساعتی، ایستگاه کاری را به طور خودکار واکشی می‌کند.
+
+ پس از آن، زمان عملیات را بر حسب دقیقه تنظیم کنید و جدول هزینه های عملیات را بر اساس نرخ ساعتی و زمان عملیات محاسبه می‌کند.",
+Exchange Gain / Loss,سود / زیان تبدیل,
+Fetch Timesheet in Sales Invoice,واکشی جدول زمانی در فاکتور فروش,
+Fetch Valuation Rate for Internal Transaction,واکشی نرخ ارزش‌گذاری برای تراکنش‌های داخلی,
+Fetching Error,خطای واکشی,
+Fix SABB Entry,رفع مشکل ثبت SABB,
+Fixed Asset Turnover Ratio,نسبت گردش مالی دارایی‌های ثابت,
+"For project {0}, update your status",برای پروژه {0}، وضعیت خود را به‌روزرسانی کنید,
+"For the item {0}, the quantity should be {1} according to the BOM {2}.",برای آیتم {0}، مقدار باید برابر {1} باشد طبق BOM {2}.,
+Future date is not allowed,تاریخ آینده مجاز نیست,
+Gross Profit Ratio,نسبت سود ناخالص,
+Handle Employee Advances,رسیدگی به پیش‌پرداخت‌های کارکنان,
+Has Priority,اولویت دارد,
+"If enabled, the source and target warehouse in the Material Transfer Stock Entry must be different else an error will be thrown. If inventory dimensions are present, same source and target warehouse can be allowed but atleast any one of the inventory dimension fields must be different.",در صورت فعال بودن، انبار مبدا و مقصد در ثبت موجودی انتقال مواد باید متفاوت باشند، در غیر این صورت خطا رخ خواهد داد. اگر ابعاد موجودی وجود داشته باشد، می‌توان انبار مبدا و هدف یکسانی را مجاز دانست، اما حداقل هر یک از فیلدهای ابعاد موجودی باید متفاوت باشند.,
+"If enabled, the system will allow selecting UOMs in sales and purchase transactions only if the conversion rate is set in the item master.",در صورت فعال بودن، سیستم تنها در صورتی امکان انتخاب UOMها را در تراکنش‌های خرید و فروش فراهم می‌کند که نرخ تبدیل در فهرست اصلی آیتم تنظیم شده باشد.,
+Include Expired Batches,شامل دسته‌های منقضی شده,
+Inter Company Purchase Order,سفارش خرید بین شرکتی,
+Inter Company Sales Order,سفارش فروش بین شرکتی,
+Internal Purchase Order,سفارش خرید داخلی,
+Internal Sales Order,سفارش فروش داخلی,
+Invalid Discount Amount,مبلغ تخفیف نامعتبر است,
+Invalid Source and Target Warehouse,انبار منبع و هدف نامعتبر,
+Invalid amount in accounting entries of {} {} for Account {}: {},مبلغ نامعتبر در ثبت‌های حسابداری {} {} برای حساب {}: {},
+Inventory Turnover Ratio,نسبت گردش موجودی,
+Is Exchange Gain / Loss?,سود / زیان تبدیل است؟,
+Journal entries have been created,ثبت‌های دفتر روزنامه ایجاد شده است,
+Last Scanned Warehouse,آخرین انبار اسکن شده,
+Ledger Health,سلامت دفتر,
+Ledger Health Monitor,پایش سلامت دفتر,
+Ledger Health Monitor Company,شرکت پایش سلامت دفتر,
+Left Child,فرزند چپ,
+Liquidity Ratios,نسبت‌های نقدینگی,
+Loading Invoices! Please Wait...,در حال بارگذاری فاکتورها! لطفا صبر کنید...,
+Monitor for Last 'X' days,نظارت بر «X» روز گذشته,
+Negative Stock Error,خطای موجودی منفی,
+Net Profit Ratio,نسبت سود خالص,
+No Purchase Orders were created,هیچ سفارش خریدی ایجاد نشد,
+No Selection,بدون انتخاب,
+No Serial / Batches are available for return,هیچ سریال / دسته‌ای برای بازگشت موجود نیست,
+No items in cart,هیچ آیتمی در سبد خرید وجود ندارد,
+No stock ledger entries were created. Please set the quantity or valuation rate for the items properly and try again.,هیچ ثبت در دفتر موجودی ایجاد نشد. لطفاً مقدار یا نرخ ارزش‌گذاری آیتم‌ها را به درستی تنظیم کرده و دوباره امتحان کنید.,
+Non Depreciable Category,دسته غیر استهلاک پذیر,
+Not able to find the earliest Fiscal Year for the given company.,قادر به یافتن اولین سال مالی برای شرکت مورد نظر نیستم.,
+Only one {0} entry can be created against the Work Order {1},فقط یک ثبت {0} می‌تواند در برابر دستور کار {1} ایجاد شود,
+"Only values between [0,1) are allowed. Like {0.00, 0.04, 0.09, ...}
+Ex: If allowance is set at 0.07, accounts that have balance of 0.07 in either of the currencies will be considered as zero balance account","فقط مقادیر بین [0,1) مجاز هستند. مانند {0.00، 0.04، 0.09، ...}
+مثال: اگر سقف مجاز 0.07 تعیین شود، حساب‌هایی که موجودی 0.07 در هر یک از ارزها داشته باشند، به عنوان حساب با موجودی صفر در نظر گرفته می‌شوند",
+Open Event,رویداد باز,
+Open Work Order {0},باز کردن دستور کار {0},
+Opening Balances,ترازهای افتتاحیه,
+Opening Number of Booked Depreciations,تعداد استهلاک‌های ثبت‌شده در ابتدای دوره,
+POS Invoice is already consolidated,فاکتور POS از قبل تجمیع شده است,
+POS Invoice is not submitted,فاکتور POS ارسال نشده است,
+POS has been closed at {0}. Please refresh the page.,POS در ساعت {0} بسته شده است. لطفاً صفحه را رفرش کنید.,
+Party Full Name,نام کامل طرف,
+Party Mismatch,عدم تطابق طرف,
+Party Not Required,طرف لازم نیست,
+Payment Request is already created,درخواست پرداخت از قبل ایجاد شده است,
+Period Start Date cannot be greater than Period End Date,تاریخ شروع دوره نمی‌تواند بزرگتر از تاریخ پایان دوره باشد,
+Period Start Date must be {0},تاریخ شروع دوره باید {0} باشد,
+Please ensure that the {0} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account.,لطفاً مطمئن شوید که حساب {0} یک حساب ترازنامه است. می توانید حساب مادر را به حساب ترازنامه تغییر دهید یا حساب دیگری را انتخاب کنید.,
+Please select at least one row to fix,لطفا حداقل یک ردیف را برای اصلاح انتخاب کنید,
+Please select atleast one operation to create Job Card,لطفا حداقل یک عملیات برای ایجاد کارت کار انتخاب کنید,
+Please select items to reserve.,لطفا آیتم‌های مورد نظر برای رزرو را انتخاب کنید.,
+Please set {0} in Company {1} to account for Exchange Gain / Loss,لطفاً {0} را در شرکت {1} برای محاسبه سود / زیان تبدیل تنظیم کنید,
+Powered by {0},به پشتوانه {0},
+Printed on {0},چاپ شده در {0},
+Procedures dropped,رویه‌ها کنار گذاشته شدند,
+Processing Date,تاریخ پردازش,
+Provisional Account,حساب موقت,
+Qty (in Stock UOM),مقدار (بر حسب واحد موجودی),
+"Qty To Manufacture ({0}) cannot be a fraction for the UOM {2}. To allow this, disable '{1}' in the UOM {2}.",مقدار برای تولید ({0}) نمی‌تواند کسری از UOM {2} باشد. برای مجاز کردن این امر، '{1}' را در UOM {2} غیرفعال کنید.,
+Quick Ratio,نسبت سریع,
+Raw Materials Actions,اقدامات مربوط به مواد اولیه,
+Raw SQL,SQL خام,
+Recreate Stock Ledgers,ایجاد دوباره دفتر موجودی,
+References to Sales Invoices are Incomplete,ارجاعات به فاکتورهای فروش ناقص است,
+References to Sales Orders are Incomplete,ارجاعات به سفارش‌های فروش ناقص است,
+Rejected Warehouse and Accepted Warehouse cannot be same.,انبار رد شده و انبار پذیرفته شده نمی‌توانند یکسان باشند.,
+Remove Parent Row No in Items Table,حذف شماره ردیف والد در جدول آیتم‌ها,
+Removing rows without exchange gain or loss,حذف ردیف ها بدون مبادله سود یا ضرر,
+Return on Asset Ratio,نسبت بازده دارایی‌ها,
+Return on Equity Ratio,نسبت بازده حقوق صاحبان سهام,
+Row # {0}: Please enter quantity for Item {1} as it is not zero.,ردیف شماره {0}: لطفاً برای آیتم {1} مقدار وارد کنید، چون مقدار آن صفر نیست.,
+Row #1: Sequence ID must be 1 for Operation {0}.,ردیف #۱: شناسه توالی برای عملیات {0} باید ۱ باشد.,
+Row #{0}: From Time and To Time fields are required,ردیف #{0}: فیلدهای «از زمان» و «تا زمان» الزامی هستند,
+Row #{0}: Quality Inspection is required for Item {1},ردیف #{0}: بازرسی کیفیت برای آیتم {1} مورد نیاز است,
+Row #{0}: Quality Inspection {1} is not submitted for the item: {2},ردیف #{0}: بازرسی کیفیت {1} برای آیتم ارسال نشده است: {2},
+Row #{0}: Quality Inspection {1} was rejected for item {2},ردیف #{0}: بازرسی کیفیت {1} برای آیتم {2} رد شد,
+Row #{0}: Quantity cannot be a non-positive number. Please increase the quantity or remove the Item {1},ردیف #{0}: مقدار نمی‌تواند عدد غیرمثبت باشد. لطفاً مقدار را افزایش دهید یا آیتم {1} را حذف کنید,
+"Row #{0}: Selling rate for item {1} is lower than its {2}.
+					Selling {3} should be atleast {4}.<br><br>Alternatively,
+					you can disable selling price validation in {5} to bypass
+					this validation.","ردیف #{0}: نرخ فروش برای کالای {1} کمتر از {2} آن است.
+					فروش {3} باید حداقل {4} باشد.<br><br>همچنین،
+					می‌توانید اعتبارسنجی قیمت فروش را در {5} غیرفعال کنید تا
+					این اعتبارسنجی را دور بزنید.",
+Row #{0}: Sequence ID must be {1} or {2} for Operation {3}.,ردیف #{0}: شناسه توالی برای عملیات {3} باید {1} یا {2} باشد.,
+Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}.,ردیف #{}: مقدار موجودی برای کد آیتم: {} در انبار {} کافی نیست.,
+Row {0}: Workstation or Workstation Type is mandatory for an operation {1},ردیف {0}: ایستگاه کاری یا نوع ایستگاه کاری برای عملیات {1} اجباری است,
+Row {0}: {2} Item {1} does not exist in {2} {3},ردیف {0}: {2} آیتم {1} در {2} {3} وجود ندارد,
+Sales Partner Target Variance Based On Item Group,واریانس هدف شریک فروش بر اساس گروه آیتم,
+Scheduling...,در حال زمان‌بندی...,
+Scrap date cannot be before purchase date,تاریخ اسقاط نمی‌تواند قبل از تاریخ خرید باشد,
+Select Columns and Filters,انتخاب ستون‌ها و فیلترها,
+Select an invoice to load summary data,برای بارگیری خلاصه داده‌ها، فاکتور را انتخاب کنید,
+Select the date,انتخاب تاریخ,
+Serial No (In/Out),شماره سریال (ورودی/خروجی),
+Serial No Already Assigned,شماره سریال قبلاً اختصاص داده شده است,
+Serial No {0} is already assigned to customer {1}. Can only be returned against the customer {1},شماره سریال {0} قبلاً به مشتری {1} اختصاص داده شده است. فقط در مقابل مشتری {1} قابل استرداد است,
+Set Operating Cost / Scrap Items From Sub-assemblies,تنظیم هزینه عملیاتی / آیتم‌های ضایعات از زیر مونتاژها,
+Set Parent Row No in Items Table,تنظیم شماره ردیف والد در جدول آیتم‌ها,
+Set Serial and Batch Bundle Naming Based on Naming Series,تنظیم نامگذاری سریال و دسته‌ای باندل بر اساس سری نامگذاری,
+Set Valuation Rate for Rejected Materials,تنظیم نرخ ارزیابی برای مواد رد شده,
+Setting {0} is required,تنظیم {0} الزامی است,
+Show Credit / Debit in Company Currency,نمایش بدهکاری/بستانکاری به واحد پول شرکت,
+Show Disabled Items,نمایش آیتم‌های غیرفعال,
+Show Opening and Closing Balance,نمایش تراز افتتاحیه و اختتامیه,
+Solvency Ratios,نسبت‌های توانگری مالی,
+Subcontracted Purchase Order,سفارش خرید قرارداد فرعی شده,
+Subcontracting Conversion Factor,ضریب تبدیل پیمانکاری فرعی,
+TDS Deducted,TDS کسر شده است,
+Target Warehouse Address Link,لینک آدرس انبار هدف,
+Tax Masters,کارشناسان مالیاتی,
+Taxes row #{0}: {1} cannot be smaller than {2},ردیف مالیات #{0}: {1} نمی‌تواند کوچکتر از {2} باشد,
+The Serial No at Row #{0}: {1} is not available in warehouse {2}.,شماره سریال ردیف #{0}: {1} در انبار {2} موجود نیست.,
+The Work Order is mandatory for Disassembly Order,دستور کار برای دستور دمونتاژ الزامی است,
+The following invalid Pricing Rules are deleted:,قوانین قیمت گذاری نامعتبر زیر حذف می‌شوند:,
+The uploaded file does not match the selected Code List.,فایل آپلود شده با لیست کدهای انتخاب شده مطابقت ندارد.,
+The {0} {1} does not match with the {0} {2} in the {3} {4},{0} {1} با {0} {2} در {3} {4} مطابقت ندارد,
+This asset category is marked as non-depreciable. Please disable depreciation calculation or choose a different category.,این دسته دارایی به عنوان غیر استهلاک‌پذیر علامت‌گذاری شده است. لطفاً محاسبه استهلاک را غیرفعال کنید یا دسته دیگری را انتخاب کنید.,
+"To include sub-assembly costs and scrap items in Finished Goods on a work order without using a job card, when the 'Use Multi-Level BOM' option is enabled.",برای گنجاندن هزینه‌های زیر مونتاژ و آیتم‌های ضایعات در کالاهای نهایی در یک دستور کار بدون استفاده از کارت کار، زمانی که گزینه «استفاده از BOM چند سطحی» فعال است.,
+Total Number of Booked Depreciations ,تعداد کل استهلاک‌های ثبت شده ,
+Transaction Deletion Record Details,جزئیات رکورد حذف تراکنش,
+Transaction Name,نام تراکنش,
+Turnover Ratios,نسبت‌های گردش مالی,
+UOM {0} not found in Item {1},واحد اندازه گیری {0} در آیتم {1} یافت نشد,
+Unit Price,قیمت واحد,
+Update Billed Amount in Purchase Order,به‌روزرسانی مبلغ صورتحساب در سفارش خرید,
+Update Billed Amount in Purchase Receipt,به‌روزرسانی مبلغ صورتحساب در رسید خرید,
+Update Price List Based On,به‌روزرسانی لیست قیمت بر اساس,
+Use Legacy Controller For Period Closing Voucher,استفاده از کنترل‌کننده قدیمی برای سند مالی اختتامیه دوره,
+Validate Components and Quantities Per BOM,اعتبارسنجی مقادیر و اجزاء در هر BOM,
+Validate Consumed Qty (as per BOM),اعتبارسنجی مقدار مصرف‌شده (مطابق با BOM),
+Validate Material Transfer Warehouses,اعتبارسنجی انبارهای انتقال مواد,
+Validate Pricing Rule,اعتبارسنجی قانون قیمت‌گذاری,
+Value of New Capitalized Asset,ارزش دارایی‌های سرمایه‌ای شده جدید,
+Value of New Purchase,ارزش خرید جدید,
+Value of Sold Asset,ارزش دارایی فروخته شده,
+You cannot enable both the settings '{0}' and '{1}'.,شما نمی‌توانید هر دو تنظیمات '{0}' و '{1}' را همزمان فعال کنید.,
+You have enabled {0} and {1} in {2}. This can lead to prices from the default price list being inserted in the transaction price list.,شما {0} و {1} را در {2} فعال کرده‌اید. این می‌تواند منجر به درج قیمت‌های لیست قیمت پیش‌فرض در لیست قیمت تراکنش شود.,
+You have enabled {0} and {1} in {2}. This can lead to prices from the default price list being inserted into the transaction price list.,شما {0} و {1} را در {2} فعال کرده‌اید. این می‌تواند منجر به درج قیمت‌های لیست قیمت پیش‌فرض در لیست قیمت تراکنش شود.,
+as Code,به عنوان کد,
+as Description,به عنوان توضیحات,
+as Title,به عنوان عنوان,
+by {},توسط {},
+dated {0},مورخ {0},
+{0} Account: {1} ({2}) must be in either customer billing currency: {3} or Company default currency: {4},حساب {0}: {1} ({2}) باید به ارز صورتحساب مشتری: {3} یا ارز پیش‌فرض شرکت: {4} باشد,
+{0} is still in Draft. Please submit it before saving the Asset Repair.,{0} هنوز پیش‌نویس است. لطفاً قبل از ذخیره تعمیر دارایی، آن را ارسال کنید.,
+{0} is still in Draft. Please submit it before saving the Asset.,{0} هنوز در پیش‌نویس است. لطفاً قبل از ذخیره‌ی دارایی، آن را ارسال کنید.,
+{0} units of Item {1} is not available in any of the warehouses.,{0} واحد از آیتم {1} در هیچ یک از انبارها موجود نیست.,
+{0} will be set as the {1} in subsequently scanned items,{0} در موارد اسکن شده بعدی به عنوان {1} تنظیم خواهد شد,
+{0} {1} is already linked to Common Code {2}.,{0} {1} از قبل به کد مشترک {2} لینک شده است.,
+{0}: {1} is a group account.,{0}: {1} یک حساب گروه است.,
+{} {} is not affecting bank account {},{} {} تاثیری بر حساب بانکی {} ندارد,

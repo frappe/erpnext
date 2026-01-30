@@ -30,6 +30,7 @@
   "send_attached_files",
   "send_document_print",
   "sec_break_email_2",
+  "subject",
   "message_for_supplier",
   "terms_section_break",
   "incoterm",
@@ -126,6 +127,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.suppliers.some((item) => item.send_email) && !(doc.docstatus == 1 && !doc.email_template)",
    "fieldname": "supplier_response_section",
    "fieldtype": "Section Break",
    "label": "Email Details"
@@ -139,8 +141,7 @@
   },
   {
    "allow_on_submit": 1,
-   "fetch_from": "email_template.response",
-   "fetch_if_empty": 1,
+   "default": "Please supply the specified items at the best possible rates",
    "fieldname": "message_for_supplier",
    "fieldtype": "Text Editor",
    "in_list_view": 1,
@@ -251,7 +252,7 @@
    "label": "Preview Email"
   },
   {
-   "depends_on": "eval:!doc.__islocal",
+   "depends_on": "eval:doc.suppliers.some((item) => item.send_email)",
    "fieldname": "sec_break_email_2",
    "fieldtype": "Section Break",
    "hide_border": 1
@@ -315,6 +316,14 @@
    "hidden": 1,
    "label": "Has Unit Price Items",
    "no_copy": 1
+  },
+  {
+   "default": "Request for Quotation",
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Subject",
+   "not_nullable": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
@@ -322,7 +331,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-03-03 16:48:39.856779",
+ "modified": "2026-01-05 14:27:33.329810",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",

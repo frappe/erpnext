@@ -41,6 +41,7 @@ class AccountsSettings(Document):
 		check_supplier_invoice_uniqueness: DF.Check
 		create_pr_in_draft_status: DF.Check
 		credit_controller: DF.Link | None
+		default_ageing_range: DF.Data | None
 		delete_linked_ledger_entries: DF.Check
 		determine_address_tax_category_from: DF.Literal["Billing Address", "Shipping Address"]
 		enable_common_party_accounting: DF.Check

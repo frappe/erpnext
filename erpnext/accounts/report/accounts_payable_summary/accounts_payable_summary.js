@@ -45,16 +45,13 @@ frappe.query_reports["Accounts Payable Summary"] = {
 		{
 			fieldname: "cost_center",
 			label: __("Cost Center"),
-			fieldtype: "Link",
-			options: "Cost Center",
-			get_query: () => {
-				var company = frappe.query_report.get_filter_value("company");
-				return {
-					filters: {
-						company: company,
-					},
-				};
+			fieldtype: "MultiSelectList",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Cost Center", txt, {
+					company: frappe.query_report.get_filter_value("company"),
+				});
 			},
+			options: "Cost Center",
 		},
 		{
 			fieldname: "party_type",
@@ -105,6 +102,11 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			label: __("Revaluation Journals"),
 			fieldtype: "Check",
 		},
+		{
+			fieldname: "show_gl_balance",
+			label: __("Show GL Balance"),
+			fieldtype: "Check",
+		},
 	],
 
 	onload: function (report) {
@@ -112,6 +114,10 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			var filters = report.get_values();
 			frappe.set_route("query-report", "Accounts Payable", { company: filters.company });
 		});
+
+		if (frappe.boot.sysdefaults.default_ageing_range) {
+			report.set_filter_value("range", frappe.boot.sysdefaults.default_ageing_range);
+		}
 	},
 };
 

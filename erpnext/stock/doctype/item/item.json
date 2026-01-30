@@ -167,6 +167,7 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Item Group",
+   "link_filters": "[[\"Item Group\",\"is_group\",\"=\",0]]",
    "oldfieldname": "item_group",
    "oldfieldtype": "Link",
    "options": "Item Group",
@@ -243,8 +244,7 @@
    "default": "0",
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
-   "label": "Is Fixed Asset",
-   "set_only_once": 1
+   "label": "Is Fixed Asset"
   },
   {
    "allow_in_quick_entry": 1,
@@ -895,7 +895,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2025-08-08 14:58:48.674193",
+ "modified": "2025-12-15 20:08:35.634046",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

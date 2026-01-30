@@ -504,6 +504,61 @@ class TestInventoryDimension(FrappeTestCase):
 
 		self.assertEqual(site_name, "Site 1")
 
+	def test_validate_negative_stock_with_multiple_dimension(self):
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 0)
+		item_code = "Test Negative Multi Inventory Dimension Item"
+		create_item(item_code)
+
+		inv_dimension_1 = create_inventory_dimension(
+			apply_to_all_doctypes=1,
+			dimension_name="Inv Site",
+			reference_document="Inv Site",
+			document_type="Inv Site",
+			validate_negative_stock=1,
+		)
+		inv_dimension_1.db_set("validate_negative_stock", 1)
+
+		inv_dimension_2 = create_inventory_dimension(
+			apply_to_all_doctypes=1,
+			dimension_name="Rack",
+			reference_document="Rack",
+			document_type="Rack",
+			validate_negative_stock=1,
+		)
+		inv_dimension_2.db_set("validate_negative_stock", 1)
+		frappe.local.inventory_dimensions = {}
+		frappe.local.document_wise_inventory_dimensions = {}
+
+		pr_doc = make_purchase_receipt(item_code=item_code, qty=30, do_not_submit=True)
+		pr_doc.items[0].inv_site = "Site 1"
+		pr_doc.items[0].rack = "Rack 1"
+		pr_doc.save()
+		pr_doc.submit()
+
+		pr_doc = make_purchase_receipt(item_code=item_code, qty=15, do_not_submit=True)
+		pr_doc.items[0].inv_site = "Site 1"
+		pr_doc.items[0].rack = "Rack 2"
+		pr_doc.save()
+		pr_doc.submit()
+
+		pr_doc = make_purchase_receipt(item_code=item_code, qty=30, do_not_submit=True)
+		pr_doc.items[0].inv_site = "Site 2"
+		pr_doc.items[0].rack = "Rack 1"
+		pr_doc.save()
+		pr_doc.submit()
+
+		pr_doc = make_purchase_receipt(item_code=item_code, qty=25, do_not_submit=True)
+		pr_doc.items[0].inv_site = "Site 2"
+		pr_doc.items[0].rack = "Rack 2"
+		pr_doc.save()
+		pr_doc.submit()
+
+		dn_doc = create_delivery_note(item_code=item_code, qty=35, do_not_submit=True)
+		dn_doc.items[0].inv_site = "Site 2"
+		dn_doc.items[0].rack = "Rack 1"
+		dn_doc.save()
+		self.assertRaises(InventoryDimensionNegativeStockError, dn_doc.submit)
+
 
 def get_voucher_sl_entries(voucher_no, fields):
 	return frappe.get_all(
@@ -593,7 +648,7 @@ def prepare_test_data():
 			}
 		).insert(ignore_permissions=True)
 
-	for rack in ["Rack 1"]:
+	for rack in ["Rack 1", "Rack 2"]:
 		if not frappe.db.exists("Rack", rack):
 			frappe.get_doc({"doctype": "Rack", "rack_name": rack}).insert(ignore_permissions=True)
 

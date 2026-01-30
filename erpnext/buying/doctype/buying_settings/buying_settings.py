@@ -44,6 +44,7 @@ class BuyingSettings(Document):
 		supp_master_name: DF.Literal["Supplier Name", "Naming Series", "Auto Name"]
 		supplier_group: DF.Link | None
 		use_transaction_date_exchange_rate: DF.Check
+		validate_consumed_qty: DF.Check
 	# end: auto-generated types
 
 	def validate(self):

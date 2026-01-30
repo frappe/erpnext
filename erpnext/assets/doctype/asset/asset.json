@@ -229,7 +229,8 @@
    "fieldtype": "Currency",
    "label": "Net Purchase Amount",
    "mandatory_depends_on": "eval:(!doc.is_composite_asset || doc.docstatus==1)",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only_depends_on": "eval: doc.is_composite_asset"
   },
   {
    "fieldname": "available_for_use_date",

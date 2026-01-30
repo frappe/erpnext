@@ -81,5 +81,11 @@ frappe.query_reports["Trial Balance for Party"] = {
 			label: __("Show zero values"),
 			fieldtype: "Check",
 		},
+		{
+			fieldname: "exclude_zero_balance_parties",
+			label: __("Exclude Zero Balance Parties"),
+			fieldtype: "Check",
+			default: 1,
+		},
 	],
 };
