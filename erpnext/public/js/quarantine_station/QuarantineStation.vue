@@ -48,9 +48,9 @@ const get_slabs_ready_for_quarantine = async () => {
 };
 
 function selectSlab(slab, index) {
-    if (index) {
-        return;
-    }
+    // if (index) {
+    //     return;
+    // }
 
     selectedSlab.value = slab;
     // Reset measurements on new selection

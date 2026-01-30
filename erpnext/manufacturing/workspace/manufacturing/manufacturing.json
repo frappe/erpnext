@@ -1,7 +1,7 @@
 {
  "charts": [],
- "content": "[{\"id\":\"csBCiDglCE\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"YHCQG3wAGv\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM Creator\",\"col\":3}},{\"id\":\"xit0dg7KvY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM\",\"col\":3}},{\"id\":\"LRhGV9GAov\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Plan\",\"col\":3}},{\"id\":\"69KKosI6Hg\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Work Order\",\"col\":3}},{\"id\":\"PwndxuIpB3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Job Card\",\"col\":3}},{\"id\":\"Ubj6zXcmIQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Plant Floor\",\"col\":3}},{\"id\":\"OtMcArFRa5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM Stock Report\",\"col\":3}},{\"id\":\"76yYsI5imF\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Planning Report\",\"col\":3}},{\"id\":\"PIQJYZOMnD\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Learn Manufacturing\",\"col\":3}},{\"id\":\"OaiDqTT03Y\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Forecasting\",\"col\":3}},{\"id\":\"bN_6tHS-Ct\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"yVEFZMqVwd\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"rwrmsTI58-\",\"type\":\"card\",\"data\":{\"card_name\":\"Production\",\"col\":4}},{\"id\":\"6dnsyX-siZ\",\"type\":\"card\",\"data\":{\"card_name\":\"Bill of Materials\",\"col\":4}},{\"id\":\"CIq-v5f5KC\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"8RRiQeYr0G\",\"type\":\"card\",\"data\":{\"card_name\":\"Tools\",\"col\":4}},{\"id\":\"Pu8z7-82rT\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
- "creation": "2025-09-12 19:57:38.943315",
+ "content": "[{\"id\":\"csBCiDglCE\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"YHCQG3wAGv\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM Creator\",\"col\":3}},{\"id\":\"xit0dg7KvY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM\",\"col\":3}},{\"id\":\"LRhGV9GAov\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Plan\",\"col\":3}},{\"id\":\"69KKosI6Hg\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Work Order\",\"col\":3}},{\"id\":\"PwndxuIpB3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Job Card\",\"col\":3}},{\"id\":\"Ubj6zXcmIQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Plant Floor\",\"col\":3}},{\"id\":\"OtMcArFRa5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM Stock Report\",\"col\":3}},{\"id\":\"76yYsI5imF\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Planning Report\",\"col\":3}},{\"id\":\"PIQJYZOMnD\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Learn Manufacturing\",\"col\":3}},{\"id\":\"OaiDqTT03Y\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Forecasting\",\"col\":3}},{\"id\":\"bN_6tHS-Ct\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"hp7EaVLImR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Operator Stations</b></span>\",\"col\":12}},{\"id\":\"-ASZMn3EQJ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mixer Station\",\"col\":4}},{\"id\":\"X7aMsn_SZ5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Distribution Station\",\"col\":4}},{\"id\":\"nnVBW4fW25\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Pressing Station\",\"col\":4}},{\"id\":\"iI002ivfwu\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Oven Station\",\"col\":4}},{\"id\":\"v4olVA2u2c\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Cooling Station\",\"col\":4}},{\"id\":\"NWDrU33W1r\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Quarantine Station\",\"col\":4}},{\"id\":\"nYnpcoIvIU\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Slab Loading Station\",\"col\":4}},{\"id\":\"B7RwT2yjz9\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Trimming Station\",\"col\":4}},{\"id\":\"iHwGL-C9ic\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Calibration Station\",\"col\":4}},{\"id\":\"QGrG64mSV8\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Polishing Station\",\"col\":4}},{\"id\":\"WsJNl32osw\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Quality Analysis Station\",\"col\":4}},{\"id\":\"CF-ddIFjYP\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Preliminary Quality Check\",\"col\":4}},{\"id\":\"wh4jrIqQy8\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"yVEFZMqVwd\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"rwrmsTI58-\",\"type\":\"card\",\"data\":{\"card_name\":\"Production\",\"col\":4}},{\"id\":\"6dnsyX-siZ\",\"type\":\"card\",\"data\":{\"card_name\":\"Bill of Materials\",\"col\":4}},{\"id\":\"CIq-v5f5KC\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"8RRiQeYr0G\",\"type\":\"card\",\"data\":{\"card_name\":\"Tools\",\"col\":4}},{\"id\":\"Pu8z7-82rT\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
+ "creation": "2026-01-28 19:12:44.584352",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
@@ -317,7 +317,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-09-15 14:36:17.554642",
+ "modified": "2026-01-30 11:46:26.142031",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
@@ -328,7 +328,7 @@
  "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [],
- "sequence_id": 12.0,
+ "sequence_id": 8.0,
  "shortcuts": [
   {
    "color": "Grey",
@@ -340,6 +340,42 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "label": "Mixer Station",
+   "link_to": "mixer-station",
+   "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Pressing Station",
+   "type": "URL",
+   "url": "http://develop.splcg.com:8005/app/operator-station/pressing"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Trimming Station",
+   "type": "URL",
+   "url": "http://develop.splcg.com:8005/app/operator-station/trimming"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Quality Analysis Station",
+   "link_to": "quality-analysis-station",
+   "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Preliminary Quality Check",
+   "link_to": "Preliminary Quality Check",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
    "label": "Plant Floor",
    "link_to": "Plant Floor",
    "type": "DocType"
@@ -347,9 +383,44 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "label": "Distribution Station",
+   "type": "URL",
+   "url": "http://develop.splcg.com:8005/app/operator-station/distribution"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Oven Station",
+   "link_to": "oven-station",
+   "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Calibration Station",
+   "type": "URL",
+   "url": "http://develop.splcg.com:8005/app/operator-station/calibration"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
    "label": "BOM Creator",
    "link_to": "BOM Creator",
    "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Cooling Station",
+   "type": "URL",
+   "url": "http://develop.splcg.com:8005/app/operator-station/cooling"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Polishing Station",
+   "type": "URL",
+   "url": "http://develop.splcg.com:8005/app/operator-station/polishing"
   },
   {
    "color": "Grey",
@@ -362,10 +433,24 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "label": "Quarantine Station",
+   "link_to": "quarantine-station",
+   "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
    "label": "Production Plan",
    "link_to": "Production Plan",
    "stats_filter": "{\"status\":[\"not in\",[\"Closed\",\"Cancelled\",\"Completed\"]]}",
    "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Slab Loading Station",
+   "link_to": "slab-loading-station",
+   "type": "Page"
   },
   {
    "color": "Grey",

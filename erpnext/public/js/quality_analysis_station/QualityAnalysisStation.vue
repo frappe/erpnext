@@ -104,7 +104,7 @@ const get_slabs_ready_for_qa = async () => {
 };
 
 function selectSlab(slab, index) {
-    if (index) return;
+    // if (index) return;
     selectedSlab.value = slab;
     const route = frappe.get_route();
     if (route.length >= 1) {
@@ -289,9 +289,9 @@ watch(selectedSlab, () => {
                                     {{ slab.template }}
                                 </div>
                             </div>
-                            <div class="text-muted" v-if="!index">
+                            <!-- <div class="text-muted" v-if="!index">
                                 <span class="fa fa-arrow-right"></span>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </TransitionGroup>
