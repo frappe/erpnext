@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "customer_section",
+  "title",
   "naming_series",
   "customer",
   "customer_name",
@@ -278,6 +279,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "in_global_search": 1,
+   "in_list_view": 1,
    "label": "Customer Name",
    "oldfieldname": "customer_name",
    "oldfieldtype": "Data",
@@ -2293,6 +2295,14 @@
    "fieldname": "override_tax_withholding_entries",
    "fieldtype": "Check",
    "label": "Edit Tax Withholding Entries"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "grid_page_length": 50,
@@ -2306,7 +2316,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-01-30 16:45:59.682473",
+ "modified": "2026-01-30 15:27:21.379961",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
@@ -2359,7 +2369,7 @@
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer",
- "title_field": "customer_name",
+ "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
 }

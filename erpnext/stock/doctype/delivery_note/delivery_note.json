@@ -8,6 +8,7 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
+  "title",
   "naming_series",
   "customer",
   "tax_id",
@@ -203,6 +204,7 @@
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_global_search": 1,
+   "in_list_view": 1,
    "label": "Customer Name",
    "read_only": 1
   },
@@ -1428,13 +1430,21 @@
    "no_copy": 1,
    "options": "Item Wise Tax Detail",
    "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-29 21:24:11.781261",
+ "modified": "2026-01-30 15:34:19.838462",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
@@ -1532,7 +1542,7 @@
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer",
- "title_field": "customer_name",
+ "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
 }
