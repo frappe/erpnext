@@ -10,15 +10,12 @@ from datetime import date, datetime
 
 import frappe
 import mt940
-import openpyxl
 from frappe import _
 from frappe.core.doctype.data_import.data_import import DataImport
 from frappe.core.doctype.data_import.importer import Importer, ImportFile
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.file_manager import get_file, save_file
-from frappe.utils.xlsxutils import ILLEGAL_CHARACTERS_RE, handle_html
-from openpyxl.styles import Font
-from openpyxl.utils import get_column_letter
+from frappe.utils.xlsxutils import make_xlsx
 
 INVALID_VALUES = ("", None)
 
@@ -323,43 +320,7 @@ def write_files(import_file, data):
 			writer = csv.writer(file)
 			writer.writerows(data)
 	elif extension in ("xlsx", "xls"):
-		write_xlsx(data, "trans", file_path=full_file_path)
-
-
-def write_xlsx(data, sheet_name, wb=None, column_widths=None, file_path=None):
-	"""Write data to Excel file with formatting."""
-	# from xlsx utils with changes
-	column_widths = column_widths or []
-	if wb is None:
-		wb = openpyxl.Workbook(write_only=True)
-
-	ws = wb.create_sheet(sheet_name, 0)
-
-	for i, column_width in enumerate(column_widths):
-		if column_width:
-			ws.column_dimensions[get_column_letter(i + 1)].width = column_width
-
-	row1 = ws.row_dimensions[1]
-	row1.font = Font(name="Calibri", bold=True)
-
-	for row in data:
-		clean_row = []
-		for item in row:
-			if isinstance(item, str) and (sheet_name not in ["Data Import Template", "Data Export"]):
-				value = handle_html(item)
-			else:
-				value = item
-
-			if isinstance(item, str) and next(ILLEGAL_CHARACTERS_RE.finditer(value), None):
-				# Remove illegal characters from the string
-				value = re.sub(ILLEGAL_CHARACTERS_RE, "", value)
-
-			clean_row.append(value)
-
-		ws.append(clean_row)
-
-	wb.save(file_path)
-	return True
+		make_xlsx(data, "trans", file_path=full_file_path)
 
 
 @frappe.whitelist()
