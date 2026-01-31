@@ -320,6 +320,9 @@ def write_files(import_file, data):
 			writer = csv.writer(file)
 			writer.writerows(data)
 	elif extension in ("xlsx", "xls"):
+		# xlsxwriter doesn't support xls
+		if extension == "xls":
+			full_file_path = full_file_path.rsplit(".", 1)[0] + ".xlsx"
 		make_xlsx(data, "Bank Transaction", file_path=full_file_path)
 
 
