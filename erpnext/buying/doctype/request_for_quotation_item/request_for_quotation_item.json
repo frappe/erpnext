@@ -63,7 +63,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
