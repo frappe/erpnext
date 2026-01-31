@@ -5,6 +5,7 @@ import json
 import os
 
 import frappe
+from frappe.model.document import bulk_insert
 from frappe.utils import cstr
 from frappe.utils.nestedset import rebuild_tree
 from unidecode import unidecode
@@ -16,6 +17,7 @@ def create_charts(
 	chart = custom_chart or get_chart(chart_template, existing_company)
 	if chart:
 		accounts = []
+		frappe.local.chart_accounts = []
 
 		def _import_accounts(children, parent, root_type, root_account=False):
 			nonlocal custom_chart
@@ -58,20 +60,26 @@ def create_charts(
 					if root_account or frappe.local.flags.allow_unverified_charts:
 						account.flags.ignore_mandatory = True
 
+					account.autoname()
 					account.flags.ignore_permissions = True
 
-					account.insert()
+					account.validate()
+					frappe.local.chart_accounts.append(account)
 
 					accounts.append(account_name_in_db)
 
 					_import_accounts(child, account.name, root_type)
 
-		# Rebuild NestedSet HSM tree for Account Doctype
-		# after all accounts are already inserted.
-		frappe.local.flags.ignore_update_nsm = True
-		_import_accounts(chart, None, None, root_account=True)
-		rebuild_tree("Account")
-		frappe.local.flags.ignore_update_nsm = False
+		try:
+			# Rebuild NestedSet HSM tree for Account Doctype
+			# after all accounts are already inserted.
+			frappe.local.flags.ignore_update_nsm = True
+			_import_accounts(chart, None, None, root_account=True)
+			bulk_insert("Account", frappe.local.chart_accounts, ignore_duplicates=False)
+			rebuild_tree("Account")
+		finally:
+			frappe.local.flags.ignore_update_nsm = False
+			del frappe.local.chart_accounts
 
 
 def add_suffix_if_duplicate(account_name, account_number, accounts):

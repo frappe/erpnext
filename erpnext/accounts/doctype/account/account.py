@@ -107,6 +107,7 @@ class Account(NestedSet):
 	def validate(self):
 		if frappe.local.flags.allow_unverified_charts:
 			return
+		self.flags.account_creation_using_charts = hasattr(frappe.local, "chart_accounts")
 		self.validate_parent()
 		self.validate_parent_child_account_type()
 		self.validate_root_details()
@@ -131,15 +132,28 @@ class Account(NestedSet):
 				"Direct Expense",
 				"Indirect Expense",
 			]:
-				parent_account_type = frappe.db.get_value("Account", self.parent_account, ["account_type"])
+				parent_account_type = (
+					frappe.db.get_value("Account", self.parent_account, ["account_type"])
+					if not self.flags.account_creation_using_charts
+					else self._get_account_from_charts_accounts(
+						self.parent_account, fields=["account_type"]
+					).get("account_type")
+				)
 				if parent_account_type == self.account_type:
 					throw(_("Only Parent can be of type {0}").format(self.account_type))
 
 	def validate_parent(self):
 		"""Fetch Parent Details and validate parent account"""
 		if self.parent_account:
-			par = frappe.get_cached_value(
-				"Account", self.parent_account, ["name", "is_group", "company"], as_dict=1
+			par = (
+				frappe.get_cached_value(
+					"Account", self.parent_account, ["name", "is_group", "company"], as_dict=1
+				)
+				if not self.flags.account_creation_using_charts
+				else self._get_account_from_charts_accounts(
+					self.parent_account,
+					fields=["name", "is_group", "company"],
+				)
 			)
 			if not par:
 				throw(
@@ -162,8 +176,14 @@ class Account(NestedSet):
 
 	def set_root_and_report_type(self):
 		if self.parent_account:
-			par = frappe.get_cached_value(
-				"Account", self.parent_account, ["report_type", "root_type"], as_dict=1
+			par = (
+				frappe.get_cached_value(
+					"Account", self.parent_account, ["report_type", "root_type"], as_dict=1
+				)
+				if not self.flags.account_creation_using_charts
+				else self._get_account_from_charts_accounts(
+					self.parent_account, fields=["report_type", "root_type"], as_dict=1
+				)
 			)
 
 			if par.report_type:
@@ -350,9 +370,17 @@ class Account(NestedSet):
 			account_number = self.account_number
 
 		if account_number:
-			account_with_same_number = frappe.db.get_value(
-				"Account",
-				{"account_number": account_number, "company": self.company, "name": ["!=", self.name]},
+			account_with_same_number = (
+				frappe.db.get_value(
+					"Account",
+					{"account_number": account_number, "company": self.company, "name": ["!=", self.name]},
+				)
+				if not self.flags.account_creation_using_charts
+				else self._get_account_from_charts_accounts(
+					filters={"account_number": account_number, "company": self.company},
+					fields=["report_type", "root_type"],
+					as_dict=1,
+				)
 			)
 			if account_with_same_number:
 				frappe.throw(
@@ -360,6 +388,33 @@ class Account(NestedSet):
 						account_number, account_with_same_number
 					)
 				)
+
+	def _get_account_from_charts_accounts(
+		self, filters: None | str | dict, fields: None | list[str] = None, as_dict: int = 1
+	) -> None | "Account" | list | frappe._dict:
+		if not self.flags.account_creation_using_charts:
+			return None
+
+		if not filters:
+			return None
+		elif isinstance(filters, str):
+			filters = {"name": filters}
+
+		account = next(
+			(d for d in frappe.local.chart_accounts if all(d.get(k) == v for k, v in filters.items())),
+			None,
+		)
+
+		if account and fields:
+			data = frappe._dict()
+			for d in fields:
+				data[d] = account.get(d)
+
+			if not as_dict:
+				return [data.get(d) for d in fields]
+
+			return data
+		return account
 
 	def create_account_for_child_company(self, parent_acc_name_map, descendants, parent_acc_name):
 		for company in descendants:
