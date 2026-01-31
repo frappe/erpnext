@@ -320,7 +320,7 @@ def write_files(import_file, data):
 			writer = csv.writer(file)
 			writer.writerows(data)
 	elif extension in ("xlsx", "xls"):
-		make_xlsx(data, "trans", file_path=full_file_path)
+		make_xlsx(data, "Bank Transaction", file_path=full_file_path)
 
 
 @frappe.whitelist()
