@@ -56,7 +56,24 @@ class TestCompany(IntegrationTestCase):
 		frappe.delete_doc("Company", "COA from Existing Company")
 
 	def test_coa_based_on_country_template(self):
+		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
+
+		def remove_company_accounts(company):
+			Account = frappe.qb.DocType("Account")
+			frappe.qb.from_(Account).delete().where(Account.company == company.name).run()
+
 		countries = ["Canada", "Germany", "France"]
+
+		company = frappe.new_doc("Company")
+		company.company_name = "Lacuna, Inc."
+		company.abbr = random_string(3)
+		company.default_currency = "USD"
+		company.create_chart_of_accounts_based_on = "Standard Template"
+		company.chart_of_accounts = "Standard"
+		company.save()
+		company.reload()
+		self.delete_mode_of_payment(company.name)
+		remove_company_accounts(company)
 
 		for country in countries:
 			templates = get_charts_for_country(country)
@@ -67,14 +84,8 @@ class TestCompany(IntegrationTestCase):
 
 			for template in templates:
 				try:
-					company = frappe.new_doc("Company")
-					company.company_name = template
-					company.abbr = random_string(3)
-					company.default_currency = "USD"
-					company.create_chart_of_accounts_based_on = "Standard Template"
 					company.chart_of_accounts = template
-					company.save()
-
+					create_charts(company.name, company.chart_of_accounts, company.existing_company)
 					account_types = [
 						"Cost of Goods Sold",
 						"Depreciation",
@@ -90,7 +101,7 @@ class TestCompany(IntegrationTestCase):
 					]
 
 					for account_type in account_types:
-						filters = {"company": template, "account_type": account_type}
+						filters = {"company": company.name, "account_type": account_type}
 						if account_type in ["Bank", "Cash"]:
 							filters["is_group"] = 1
 
@@ -99,8 +110,9 @@ class TestCompany(IntegrationTestCase):
 
 						self.assertTrue(has_matching_accounts, msg=error_message)
 				finally:
-					self.delete_mode_of_payment(template)
-					frappe.delete_doc("Company", template)
+					remove_company_accounts(company)
+
+		frappe.delete_doc("Company", company.name)
 
 	def delete_mode_of_payment(self, company):
 		frappe.db.sql(
