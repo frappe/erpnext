@@ -80,7 +80,7 @@ def get_transaction_list(
 
 	filters["docstatus"] = ["<", "2"] if doctype in ["Supplier Quotation", "Purchase Invoice"] else 1
 
-	if (user != "Guest" and is_website_user()) or doctype == "Request for Quotation":
+	if user != "Guest" and is_website_user():
 		parties_doctype = "Request for Quotation Supplier" if doctype == "Request for Quotation" else doctype
 		# find party for this contact
 		customers, suppliers = get_customers_suppliers(parties_doctype, user)
