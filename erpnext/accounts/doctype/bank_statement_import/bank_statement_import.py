@@ -15,7 +15,8 @@ from frappe.core.doctype.data_import.data_import import DataImport
 from frappe.core.doctype.data_import.importer import Importer, ImportFile
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.file_manager import get_file, save_file
-from frappe.utils.xlsxutils import make_xlsx
+from frappe.utils.xlsxutils import make_xls as write_xls
+from frappe.utils.xlsxutils import make_xlsx as write_xlsx
 
 INVALID_VALUES = ("", None)
 
@@ -319,11 +320,10 @@ def write_files(import_file, data):
 		with open(full_file_path, "w", newline="") as file:
 			writer = csv.writer(file)
 			writer.writerows(data)
-	elif extension in ("xlsx", "xls"):
-		# xlsxwriter doesn't support xls
-		if extension == "xls":
-			full_file_path = full_file_path.rsplit(".", 1)[0] + ".xlsx"
-		make_xlsx(data, "Bank Transaction", file_path=full_file_path)
+	elif extension == "xlsx":
+		write_xlsx(data, "Bank Transaction", file_path=full_file_path)
+	elif extension == "xls":
+		write_xls(data, "Bank Transaction", file_path=full_file_path)
 
 
 @frappe.whitelist()
