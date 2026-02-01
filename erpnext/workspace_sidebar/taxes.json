@@ -13,7 +13,7 @@
    "indent": 0,
    "keep_closed": 0,
    "label": "Sales Tax Template",
-   "link_to": "Item Tax Template",
+   "link_to": "Sales Taxes and Charges Template",
    "link_type": "DocType",
    "navigate_to_tab": "",
    "show_arrow": 0,
@@ -148,7 +148,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-10 00:06:13.005238",
+ "modified": "2026-02-01 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Taxes",
