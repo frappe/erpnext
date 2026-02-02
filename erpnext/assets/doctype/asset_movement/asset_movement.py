@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cstr, get_link_to_form
+from frappe.utils import cstr, get_datetime, get_link_to_form
 
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 
@@ -34,6 +34,7 @@ class AssetMovement(Document):
 		for d in self.assets:
 			self.validate_asset(d)
 			self.validate_movement(d)
+			self.validate_transaction_date(d)
 
 	def validate_asset(self, d):
 		status, company = frappe.db.get_value("Asset", d.asset, ["status", "company"])
@@ -50,6 +51,26 @@ class AssetMovement(Document):
 			self.validate_location(d)
 		else:
 			self.validate_employee(d)
+
+	def validate_transaction_date(self, d):
+		previous_movement_date = frappe.db.sql(
+			"""
+			SELECT MAX(am.transaction_date)
+			FROM `tabAsset Movement` am
+			INNER JOIN `tabAsset Movement Item` ami ON am.name = ami.parent
+			WHERE
+				ami.asset=%s AND
+				am.company=%s AND
+				am.docstatus=1
+				AND am.name!=%s
+		""",
+			(d.asset, self.company, self.name),
+		)[0][0]
+
+		if previous_movement_date and get_datetime(previous_movement_date) > get_datetime(
+			self.transaction_date
+		):
+			frappe.throw("Transaction date can't be before previous asset movement date")
 
 	def validate_location_and_employee(self, d):
 		self.validate_location(d)
