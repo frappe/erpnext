@@ -2863,6 +2863,22 @@ class TestDeliveryNote(IntegrationTestCase):
 		for entry in sabb.entries:
 			self.assertEqual(entry.incoming_rate, 200)
 
+	@IntegrationTestCase.change_settings("Selling Settings", {"validate_selling_price": 1})
+	def test_validate_selling_price(self):
+		item_code = make_item("VSP Item", properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=10)
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=1)
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=1,
+			rate=9,
+			do_not_save=True,
+		)
+		self.assertRaises(frappe.ValidationError, dn.save)
+		dn.items[0].stock_qty = 2  # this will cause incoming rate to recalculate to 5.5
+		dn.save()
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
