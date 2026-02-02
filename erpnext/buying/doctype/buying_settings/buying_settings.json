@@ -215,7 +215,7 @@
    "description": "How often should Project be updated of Total Purchase Cost ?",
    "fieldname": "project_update_frequency",
    "fieldtype": "Select",
-   "label": "Update frequency of Project",
+   "label": "Transactions Update Frequency",
    "options": "Each Transaction\nManual"
   },
   {
