@@ -564,7 +564,7 @@ class SellingController(StockController):
 							d.incoming_rate = 0
 
 				if (
-					not d.incoming_rate
+					self._action == "save"
 					or self.is_internal_transfer()
 					or (
 						get_valuation_method(d.item_code, self.company) == "Moving Average"
@@ -591,8 +591,7 @@ class SellingController(StockController):
 					)
 
 				if (
-					not d.incoming_rate
-					and self.get("return_against")
+					self.get("return_against")
 					and self.get("is_return")
 					and get_valuation_method(d.item_code, self.company) == "Moving Average"
 				):
@@ -602,7 +601,6 @@ class SellingController(StockController):
 
 				if (
 					self.get("is_return")
-					and not d.incoming_rate
 					and not self.get("return_against")
 					and not self.is_internal_transfer()
 					and not d.get("allow_zero_valuation_rate")
