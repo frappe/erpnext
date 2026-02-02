@@ -511,8 +511,19 @@ def _set_missing_values(source, target):
 		target.customer_address = address[0].parent
 
 	if contact:
-		target.contact_person = contact[0].parent
+		contact_name = contact[0].parent
+		target.contact_person = contact_name
 
+		contact_details = frappe.db.get_value(
+			"Contact",
+			contact_name,
+			["full_name", "mobile_no", "email_id"],
+			as_dict=True
+		)
+		if contact_details:
+			target.contact_display = contact_details.full_name
+			target.contact_mobile = contact_details.mobile_no
+			target.contact_email = contact_details.email_id
 
 @frappe.whitelist()
 def get_loyalty_programs(doc):
