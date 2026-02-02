@@ -107,11 +107,7 @@
                         "account_number": "1132.000"
                     }, 
                     "account_number": "1130.000"
-<<<<<<< HEAD
                 }, 
-=======
-                },
->>>>>>> 6cc802147b (fix: duplicate account number (Indonesia COA) (#52080))
                 "account_number": "1100.000"
             }, 
             "Aktiva Tetap": {
