@@ -521,9 +521,12 @@ def _set_missing_values(source, target):
 			as_dict=True
 		)
 		if contact_details:
-			target.contact_display = contact_details.full_name
-			target.contact_mobile = contact_details.mobile_no
-			target.contact_email = contact_details.email_id
+			if hasattr(target, "contact_display"):
+				target.contact_display = contact_details.full_name
+			if hasattr(target, "contact_mobile"):
+				target.contact_mobile = contact_details.mobile_no
+			if hasattr(target, "contact_email"):
+				target.contact_email = contact_details.email_id
 
 @frappe.whitelist()
 def get_loyalty_programs(doc):
