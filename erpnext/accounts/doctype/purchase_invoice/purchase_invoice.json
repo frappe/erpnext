@@ -1676,13 +1676,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "This is the value of the GUID in Tally if the original transaction had to be broken up into new transactions for any reason.",
-   "fieldname": "reference_guid",
-   "fieldtype": "Data",
-   "label": "Reference GUID",
-   "read_only": 1
-  },
-  {
    "fieldname": "tally_voucher_type",
    "fieldtype": "Data",
    "label": "Voucher Type",

@@ -2203,13 +2203,13 @@
    "fieldname": "tally_guid",
    "fieldtype": "Data",
    "label": "GUID",
-   "read_only": 1
+   "read_only": 0
   },
   {
    "fieldname": "tally_voucher_type",
    "fieldtype": "Data",
    "label": "Voucher Type",
-   "read_only": 1
+   "read_only": 0
   },
   {
    "fieldname": "column_break_9bht",
@@ -2219,14 +2219,7 @@
    "fieldname": "tally_voucher_number",
    "fieldtype": "Data",
    "label": "Voucher Number",
-   "read_only": 1
-  },
-  {
-   "description": "This is the value of the GUID in Tally if the original transaction had to be broken up into new transactions for any reason.",
-   "fieldname": "ref_guid",
-   "fieldtype": "Data",
-   "label": "Reference GUID",
-   "read_only": 1
+   "read_only": 0
   }
  ],
  "grid_page_length": 50,

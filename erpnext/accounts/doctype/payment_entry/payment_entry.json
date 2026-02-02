@@ -820,13 +820,6 @@
    "fieldtype": "Data",
    "label": "Voucher Number",
    "read_only": 1
-  },
-  {
-   "description": "This is the value of the GUID in Tally if the original transaction had to be broken up into new transactions for any reason.",
-   "fieldname": "ref_guid",
-   "fieldtype": "Data",
-   "label": "Reference GUID",
-   "read_only": 1
   }
  ],
  "grid_page_length": 50,
