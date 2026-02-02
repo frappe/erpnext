@@ -2876,7 +2876,8 @@ class TestDeliveryNote(IntegrationTestCase):
 			do_not_save=True,
 		)
 		self.assertRaises(frappe.ValidationError, dn.save)
-		dn.items[0].stock_qty = 2  # this will cause incoming rate to recalculate to 5.5
+		dn.items[0].incoming_rate = 0
+		dn.items[0].stock_qty = 2
 		dn.save()
 
 
