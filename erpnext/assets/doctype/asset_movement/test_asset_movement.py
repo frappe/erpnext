@@ -150,6 +150,9 @@ class TestAssetMovement(IntegrationTestCase):
 		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
 		asset.save().submit()
 
+		if not frappe.db.exists("Location", "Test Location 2"):
+			frappe.get_doc({"doctype": "Location", "location_name": "Test Location 2"}).insert()
+
 		asset_creation_date = frappe.db.get_value(
 			"Asset Movement",
 			[["Asset Movement Item", "asset", "=", asset.name], ["docstatus", "=", 1]],
