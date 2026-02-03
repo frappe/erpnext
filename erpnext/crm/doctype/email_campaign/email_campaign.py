@@ -8,9 +8,6 @@ from frappe.core.doctype.communication.email import make
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate, today
 
-# Maximum recipients per BCC batch to avoid email provider limits and timeouts
-EMAIL_BATCH_SIZE = 100
-
 
 class EmailCampaign(Document):
 	# begin: auto-generated types
@@ -177,31 +174,30 @@ def send_mail(entry, email_campaign):
 	subject = frappe.render_template(email_template.get("subject"), context)
 	content = frappe.render_template(email_template.response_, context)
 
-	# Send in batches to avoid timeout and email provider limits
+	try:
+		comm = make(
+			doctype="Email Campaign",
+			name=campaign_name,
+			subject=subject,
+			content=content,
+			sender=sender,
+			recipients=recipient_list,
+			communication_medium="Email",
+			sent_or_received="Sent",
+			send_email=False,
+			email_template=email_template.name,
+		)
 
-	for i in range(0, len(recipient_list), EMAIL_BATCH_SIZE):
-		batch = recipient_list[i : i + EMAIL_BATCH_SIZE]
-
-		try:
-			comm = make(
-				doctype="Email Campaign",
-				name=campaign_name,
-				subject=subject,
-				content=content,
-				sender=sender,
-				bcc=batch,
-				communication_medium="Email",
-				sent_or_received="Sent",
-				send_email=True,
-				email_template=email_template.name,
-			)
-		except Exception:
-			frappe.log_error(
-				title=_("Email Campaign Batch Error"),
-				message=_("Failed to send batch {0}-{1} for campaign {2}").format(
-					i, i + len(batch), campaign_name
-				),
-			)
+		frappe.sendmail(
+			recipients=recipient_list,
+			subject=subject,
+			content=content,
+			sender=sender,
+			communication=comm["name"],
+			queue_separately=True,
+		)
+	except Exception:
+		frappe.log_error(title="Email Campaign Failed.")
 
 	return comm
 
