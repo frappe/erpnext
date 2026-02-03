@@ -33,7 +33,7 @@ def load_slab_into_oven(oven_op: str, job_card: str):
 	rack_name = new_oven_operation.oven_rack
 	slab_name = new_oven_operation.slab
 
-	now_date_time = datetime.now()
+	now_date_time = frappe.utils.now_datetime()
 
 	try:
 		frappe.db.begin()
@@ -86,7 +86,7 @@ def unload_slab_from_oven(rack_name: str, slab_name: str, slab_template: str, va
 
 	op = frappe.get_doc("Oven Operation", op_name)
 
-	now = datetime.now()
+	now = frappe.utils.now_datetime()
 	op.out_time = now
 	op.slab_top_temp = data.get("slab_top_temp")
 	op.slab_bottom_temp = data.get("slab_bottom_temp")
@@ -144,8 +144,8 @@ def finish_heating(job_card):
 	"""Complete the Job Card when heating is finished."""
 	jc = frappe.get_doc("Job Card", job_card)
 	job_card_qty = flt(jc.total_completed_qty or jc.for_quantity, 3)
-	total_transferred = sum([item.transferred_qty for item in jc.items])
-	jc.transferred_qty = total_transferred
+	# total_transferred = sum([item.transferred_qty for item in jc.items])
+	# jc.transferred_qty = total_transferred
 
 	args = {
 		"job_card_id": jc.name,

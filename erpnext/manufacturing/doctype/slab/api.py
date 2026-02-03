@@ -20,7 +20,7 @@ def create_slab(line: str, type: str, job_card_number: str | None = None):
 	new_slab.number = slab_number
 	new_slab.serial_number = f"{slab_number:04d}"
 
-	new_slab.created_on = datetime.now()
+	new_slab.created_on = frappe.utils.now_datetime()
 	current_stage = ALLOWED_STAGES[0]
 	new_slab.status = current_stage  # pyright: ignore[reportAttributeAccessIssue]
 
@@ -28,7 +28,7 @@ def create_slab(line: str, type: str, job_card_number: str | None = None):
 	slab_history: SlabHistory = frappe.new_doc("Slab History")  # pyright: ignore[reportAssignmentType]
 	slab_history.idx = 1
 	slab_history.station = current_stage
-	slab_history.in_time = datetime.now()
+	slab_history.in_time = frappe.utils.now_datetime()
 	slab_history.job_card_number = job_card_number
 	new_slab.slab_history.append(slab_history)
 
@@ -48,7 +48,7 @@ def checkout_slab(slab_number: str):
 	if last_history.out_time is not None:
 		frappe.throw("Slab is already checked out of the current station.")
 
-	last_history.out_time = datetime.now()
+	last_history.out_time = frappe.utils.now_datetime()
 	last_history.total_time_in_minutes = (last_history.out_time - last_history.in_time).total_seconds() / 60  # pyright: ignore[reportOperatorIssue]
 
 	if slab.status == "Quarantine":
@@ -115,7 +115,7 @@ def move_slab_to(
 	slab_history: SlabHistory = frappe.new_doc("Slab History")  # pyright: ignore[reportAssignmentType]
 	slab_history.idx = len(slab.slab_history) + 1
 	slab_history.station = ALLOWED_STAGES[next_stage_index]
-	slab_history.in_time = datetime.now()
+	slab_history.in_time = frappe.utils.now_datetime()
 	slab_history.job_card_number = job_card_number
 	slab.slab_history.append(slab_history)
 

@@ -35,7 +35,7 @@ const racks = computed(() => {
         // Calculate time_text if curing
         let time_text = '';
         if ((r.status === 'Heating' || r.status === 'Overheat') && r.start_time) {
-            const start = new Date(r.start_time);
+            const start = new Date(r.start_time.replace(' ', 'T'));
             const now = currentTime.value;
             const diffMs = now - start;
 
