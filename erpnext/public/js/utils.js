@@ -1047,32 +1047,6 @@ erpnext.utils.map_current_doc = function (opts) {
 	}
 };
 
-Object.entries(frappe.boot.link_formatters || {}).forEach(([doctype, fieldname]) => {
-	frappe.form.link_formatters[doctype] = function (value, doc, df) {
-		return add_link_title(value, doc, df, fieldname);
-	};
-});
-
-/**
- * Add a title to a link value based on the provided document and field information.
- *
- * @param {string} value - The value to add a link title to.
- * @param {Object} doc - The document object.
- * @param {Object} df - The field object.
- * @param {string} title_field - The field name for the title.
- * @returns {string} - The link value with the added title.
- */
-
-function add_link_title(value, doc, df, title_field) {
-	if (doc && value && doc[title_field] && doc[title_field] !== value && doc[df.fieldname] === value) {
-		return value + ": " + doc[title_field];
-	} else if (!value && doc.doctype && doc[title_field] && doc.doctype == df.parent) {
-		return doc[title_field];
-	} else {
-		return value;
-	}
-}
-
 // add description on posting time
 $(document).on("app_ready", function () {
 	if (!frappe.datetime.is_timezone_same()) {

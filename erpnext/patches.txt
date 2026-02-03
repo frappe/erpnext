@@ -461,3 +461,4 @@ erpnext.patches.v15_0.create_accounting_dimensions_in_advance_taxes_and_charges
 execute:frappe.delete_doc_if_exists("Workspace Sidebar", "Opening & Closing")
 erpnext.patches.v16_0.migrate_transaction_deletion_task_flags_to_status # 2
 erpnext.patches.v16_0.set_ordered_qty_in_quotation_item
+erpnext.patches.v16_0.add_link_formatter_data

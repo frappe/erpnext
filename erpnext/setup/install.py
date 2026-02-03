@@ -7,6 +7,7 @@ import os
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
+from frappe.utils.install import add_link_field_formatters
 
 from erpnext.setup.doctype.incoterm.incoterm import create_incoterms
 from erpnext.setup.utils import identity as _
@@ -15,6 +16,12 @@ from .default_success_action import get_default_success_action
 
 default_mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via
 	<a style="color: #888" href="http://frappe.io/erpnext">ERPNext</a></div>"""
+
+LINK_FIELD_DATA = [
+	{"doctype_name": "Item", "link_fieldname": "item_code", "display_fieldname": "item_name"},
+	{"doctype_name": "Employee", "link_fieldname": "employee", "display_fieldname": "employee_name"},
+	{"doctype_name": "Project", "link_fieldname": "project", "display_fieldname": "project_name"},
+]
 
 
 def after_install():
@@ -31,6 +38,7 @@ def after_install():
 	create_default_role_profiles()
 	add_company_to_session_defaults()
 	add_standard_navbar_items()
+	add_link_field_formatters(LINK_FIELD_DATA)
 	add_app_name()
 	update_roles()
 	make_default_operations()
