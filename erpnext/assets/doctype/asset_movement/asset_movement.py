@@ -53,24 +53,16 @@ class AssetMovement(Document):
 			self.validate_employee(d)
 
 	def validate_transaction_date(self, d):
-		previous_movement_date = frappe.db.sql(
-			"""
-			SELECT MAX(am.transaction_date)
-			FROM `tabAsset Movement` am
-			INNER JOIN `tabAsset Movement Item` ami ON am.name = ami.parent
-			WHERE
-				ami.asset=%s AND
-				am.company=%s AND
-				am.docstatus=1
-				AND am.name!=%s
-		""",
-			(d.asset, self.company, self.name),
-		)[0][0]
-
+		previous_movement_date = frappe.db.get_value(
+			"Asset Movement",
+			[["Asset Movement Item", "asset", "=", d.asset], ["docstatus", "=", 1]],
+			"transaction_date",
+			order_by="transaction_date desc",
+		)
 		if previous_movement_date and get_datetime(previous_movement_date) > get_datetime(
 			self.transaction_date
 		):
-			frappe.throw("Transaction date can't be before previous asset movement date")
+			frappe.throw("Transaction date can't be earlier than previous movement date")
 
 	def validate_location_and_employee(self, d):
 		self.validate_location(d)
