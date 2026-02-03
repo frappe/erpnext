@@ -823,6 +823,12 @@ class TestAsset(AssetSetup):
 
 		frappe.db.set_value("Item", asset_item, "is_grouped_asset", 0)
 
+	def test_is_fully_depreciated_asset_status(self):
+		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
+		asset.is_fully_depreciated = 1
+		asset.save().submit()
+		self.assertEqual(asset.status, "Fully Depreciated")
+
 
 class TestDepreciationMethods(AssetSetup):
 	@classmethod
