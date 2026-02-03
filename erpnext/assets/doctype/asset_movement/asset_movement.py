@@ -62,7 +62,7 @@ class AssetMovement(Document):
 		if previous_movement_date and get_datetime(previous_movement_date) > get_datetime(
 			self.transaction_date
 		):
-			frappe.throw("Transaction date can't be earlier than previous movement date")
+			frappe.throw(_("Transaction date can't be earlier than previous movement date"))
 
 	def validate_location_and_employee(self, d):
 		self.validate_location(d)
