@@ -460,8 +460,4 @@ erpnext.patches.v16_0.set_post_change_gl_entries_on_pos_settings
 execute:frappe.delete_doc_if_exists("Workspace Sidebar", "Opening & Closing")
 erpnext.patches.v15_0.create_accounting_dimensions_in_advance_taxes_and_charges
 erpnext.patches.v16_0.set_ordered_qty_in_quotation_item
-<<<<<<< HEAD
-erpnext.patches.v16_0.migrate_transaction_deletion_task_flags_to_status # 2
-=======
 erpnext.patches.v16_0.update_company_custom_field_in_bin
->>>>>>> d54259c99c (feat(stock): add company field to Bin with migration patch)
