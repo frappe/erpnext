@@ -108,7 +108,7 @@ New passwords will be created for the ERPNext "Administrator" user, the MariaDB 
 
 To setup the repository locally follow the steps mentioned below:
 
-1. Setup bench by following the [Installation Steps](https://frappeframework.com/docs/user/en/installation) and start the server
+1. Setup bench by following the [Installation Steps](https://frappeframework.com/docs/user/en/installation) and start the server:
    ```
    bench start
    ```
@@ -119,7 +119,7 @@ To setup the repository locally follow the steps mentioned below:
    bench new-site erpnext.localhost
    ```
 
-3. Get the ERPNext app and install it
+3. Get the ERPNext app and install it:
    ```
    # Get the ERPNext app
    bench get-app https://github.com/frappe/erpnext
@@ -128,7 +128,7 @@ To setup the repository locally follow the steps mentioned below:
    bench --site erpnext.localhost install-app erpnext
    ```
 
-4. Open the URL `http://erpnext.localhost:8000/app` in your browser, you should see the app running
+4. Open the URL `http://erpnext.localhost:8000/app` in your browser, and there you should see the app running.
 
 ## Learning and community
 
