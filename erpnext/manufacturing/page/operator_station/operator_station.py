@@ -67,8 +67,8 @@ def finish_distribution(job_card, process_name="operator"):
 	"""Complete the Job Card when mixing is finished."""
 	jc = frappe.get_doc("Job Card", job_card)
 	job_card_qty = flt(jc.total_completed_qty or jc.for_quantity, 3)
-	total_transferred = sum([item.transferred_qty for item in jc.items])
-	jc.transferred_qty = total_transferred  # Force header update!
+	# total_transferred = sum([item.transferred_qty for item in jc.items])
+	# jc.transferred_qty = total_transferred  # Force header update!
 
 	bom_doc = frappe.get_doc("BOM", jc.bom_no)
 	bom_qty = 0

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 
 const work_context = reactive({
     role: "Quality Analyst",
@@ -28,6 +28,7 @@ const updateKey = ref(0);
 const incomingSlabs = ref([]);
 const selectedSlab = ref(null);
 const processStarted = ref(false);
+const isQAStarted = ref(false);
 
 const form = reactive({
     // Basic Details (Auto-filled)
@@ -112,6 +113,7 @@ function selectSlab(slab, index) {
         // window.location.reload();
     }
     jobCardNumber.value = slab.current_job_card;
+    isQAStarted.value = false;
     // Reset and Auto-fill form
     Object.assign(form, {
         date: frappe.datetime.nowdate(),
@@ -210,9 +212,9 @@ const raiseQualityAlarm = async () => {
 onMounted(async () => {
     const route = frappe.get_route();
     jobCardNumber.value = route[1] || null;
-    // if (!jobCardNumber.value) {
-    //     jobCardNumber.value = selectedSlab.value.job_card;
-    // }
+    if (!jobCardNumber.value) {
+        jobCardNumber.value = selectedSlab.value.job_card;
+    }
     updateClock();
     clockInterval = setInterval(updateClock, 1000);
     await fetchWorkContext();
@@ -228,37 +230,24 @@ frappe.realtime.on('slab_checkout', () => {
     get_slabs_ready_for_qa();
 });
 
-watch(
-    [selectedSlab, jobCardNumber],
-    async ([newSlab, newJobCard]) => {
-        if (
-            processStarted.value ||
-            !newSlab?.current_job_card ||
-            !newJobCard
-        ) {
-            return;
-        }
+const startProcess = async () => {
+    if (!selectedSlab.value) return;
 
-        try {
-            await frappe.call({
-                method: 'erpnext.manufacturing.page.operator_station.operator_station.start_process',
-                args: {
-                    job_card: newJobCard,
-                    process_name: 'Quality Analysis'
-                }
-            });
-
-            processStarted.value = true;
-            console.log('Job Card started automatically');
-        } catch (e) {
-            console.error('Failed to start job card', e);
-        }
+    try {
+        await frappe.call({
+            method: 'erpnext.manufacturing.page.operator_station.operator_station.start_process',
+            args: {
+                job_card: jobCardNumber.value,
+                process_name: 'Quality Analysis'
+            }
+        });
+        isQAStarted.value = true;
+        processStarted.value = true;
+        console.log('Job Card started automatically');
+    } catch (e) {
+        console.error('Failed to start job card', e);
     }
-);
-
-watch(selectedSlab, () => {
-    processStarted.value = false;
-});
+};
 </script>
 
 <template>
@@ -330,7 +319,17 @@ watch(selectedSlab, () => {
                     </div>
                 </div>
 
-                <div class="qa-form-section p-4 border rounded">
+
+
+                <div v-if="!isQAStarted" class="d-flex align-items-center justify-content-center p-5 border rounded"
+                    style="min-height: 400px; background: var(--card-bg);">
+                    <button class="btn btn-primary btn-lg px-5 font-weight-bold"
+                        style="font-size: 1.2rem; transform: scale(1.2);" @click="startProcess()">
+                        <span class="fa fa-play mr-2"></span>{{ __('Start Quality Analysis') }}
+                    </button>
+                </div>
+
+                <div v-else class="qa-form-section p-4 border rounded">
                     <!-- Slab Dimensions -->
                     <h5 class="mb-4 border-bottom pb-2">{{ __('Slab Dimensions') }}</h5>
                     <div class="row mb-4">

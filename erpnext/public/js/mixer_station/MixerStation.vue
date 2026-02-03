@@ -234,7 +234,7 @@ async function getJobCardsList() {
     const result = await frappe.call({
         method: 'erpnext.manufacturing.doctype.operation.api.get_recent_job_card',
         args: {
-            operation: station
+            operation: "Mixing"
         }
     });
     jobCard.value = result.message.name;
