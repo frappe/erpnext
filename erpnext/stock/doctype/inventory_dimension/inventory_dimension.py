@@ -139,7 +139,7 @@ class InventoryDimension(Document):
 			self.source_fieldname = scrub(self.dimension_name)
 
 		if not self.target_fieldname:
-			self.target_fieldname = scrub(self.reference_document)
+			self.target_fieldname = scrub(self.dimension_name)
 
 	def on_update(self):
 		self.add_custom_fields()
