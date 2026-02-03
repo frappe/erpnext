@@ -684,9 +684,3 @@ fields_for_group_similar_items = ["qty", "amount"]
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 ignore_translatable_strings_from = ["frappe"]
-
-link_formatters = {
-	"Item": {"item_code": "item_name"},
-	"Employee": {"employee": "employee_name"},
-	"Project": {"project": "project_name"},
-}
