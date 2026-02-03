@@ -323,6 +323,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	onload() {
 		var me = this;
+		// Reset cached currency state to avoid incorrect base currency fields and labels
+		this._last_currency = null;
+		this._last_price_list_currency = null;
 
 		if (this.frm.doc.__islocal) {
 			var currency = frappe.defaults.get_user_default("currency");
@@ -1719,9 +1722,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		) {
 			return;
 		}
-
-		this._last_currency = this.frm.doc.currency;
-		this._last_price_list_currency = this.frm.doc.price_list_currency;
 
 		this.change_form_labels(company_currency);
 		this.change_grid_labels(company_currency);
