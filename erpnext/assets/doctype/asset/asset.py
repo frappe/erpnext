@@ -788,10 +788,7 @@ class Asset(AccountsController):
 					].expected_value_after_useful_life
 					value_after_depreciation = self.finance_books[idx].value_after_depreciation
 
-					if (
-						flt(value_after_depreciation) <= expected_value_after_useful_life
-						or self.is_fully_depreciated
-					):
+					if flt(value_after_depreciation) <= expected_value_after_useful_life:
 						status = "Fully Depreciated"
 					elif flt(value_after_depreciation) < flt(self.net_purchase_amount):
 						status = "Partially Depreciated"
