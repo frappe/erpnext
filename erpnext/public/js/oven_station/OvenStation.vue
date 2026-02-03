@@ -7,26 +7,8 @@ const updateKey = ref(0);
 const ovenData = ref(null);
 const slabsQueue = ref([]);
 const selectedSlab = ref(null);
-const currentTime = ref(new Date());
-let pollingInterval = ref(null);
-let timerInterval = null;
 const overheat_minutes = 90; // TODO: This should be replaced by a setting in Mahi Granites Settings.
 
-
-const formattedDate = computed(() => {
-    const d = currentTime.value;
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    return `${day}-${month}-${year}`;
-});
-
-const formattedTime = computed(() => {
-    const d = currentTime.value;
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    return `${hours}:${minutes}`;
-});
 
 const racks = computed(() => {
     if (!ovenData.value || !ovenData.value.racks) return [];
@@ -178,24 +160,13 @@ const get_slabs_ready_for_heating = async () => {
 onMounted(async () => {
     const route = frappe.get_route();
     jobCardNumber.value = route[1] || null;
-    timerInterval = setInterval(() => {
-        currentTime.value = new Date();
-    }, 1000);
     await fetchWorkContext();
     refreshOvenData();
     await fetchQueue(work_context.assigned_line);
 
     get_slabs_ready_for_heating();
-
-    pollingInterval.value = setInterval(() => {
-        fetchQueue(work_context.assigned_line);
-    }, 5000);
 });
 
-onUnmounted(() => {
-    if (timerInterval) clearInterval(timerInterval);
-    if (pollingInterval.value) clearInterval(pollingInterval.value);
-});
 
 async function fetchQueue(line) {
     try {
@@ -420,8 +391,6 @@ function prepareOvenOperation() {
     };
 }
 
-
-
 frappe.realtime.on('slab_checkout', (slab) => {
     get_slabs_ready_for_heating();
 });
@@ -478,8 +447,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
             <div class="border-bottom d-flex justify-content-between pb-2">
                 <div>
                     <h4 class="mb-1">{{ __('Oven') }}: {{ oven?.name }} <span class="text-muted mr-2 ml-2">|</span> {{
-                        __('Line') }}: {{ oven?.line }} <span class="text-muted mr-2 ml-2">|</span> {{ formattedDate }}
-                        <span class="text-muted mr-2 ml-2">|</span> {{ formattedTime }}
+                        __('Line') }}: {{ oven?.line }}
                     </h4>
                     <div class="text-muted small mb-4">
                         {{ __('Manage curing process and rack assignments.') }}

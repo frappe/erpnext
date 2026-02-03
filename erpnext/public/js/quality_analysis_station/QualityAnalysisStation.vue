@@ -22,8 +22,6 @@ const fetchWorkContext = async () => {
 };
 
 const jobCardNumber = ref(null);
-const currentTime = ref('');
-const currentDate = ref('');
 const updateKey = ref(0);
 const incomingSlabs = ref([]);
 const selectedSlab = ref(null);
@@ -147,18 +145,6 @@ function selectSlab(slab, index) {
     }
 }
 
-let clockInterval;
-
-const updateClock = () => {
-    const now = new Date();
-    currentTime.value = now.toLocaleTimeString('en-US', { hour12: false });
-    currentDate.value = now.toLocaleDateString('en-US', {
-        weekday: 'short',
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-    });
-};
 
 const confirmAndTag = async () => {
     if (!selectedSlab.value) return;
@@ -215,6 +201,7 @@ onMounted(async () => {
     if (!jobCardNumber.value) {
         jobCardNumber.value = selectedSlab.value.job_card;
     }
+
     updateClock();
     clockInterval = setInterval(updateClock, 1000);
     await fetchWorkContext();
@@ -222,9 +209,6 @@ onMounted(async () => {
     fetchGrades();
 });
 
-onUnmounted(() => {
-    if (clockInterval) clearInterval(clockInterval);
-});
 
 frappe.realtime.on('slab_checkout', () => {
     get_slabs_ready_for_qa();
