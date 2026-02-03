@@ -8,12 +8,12 @@
  "engine": "InnoDB",
  "field_order": [
   "customer_section",
+  "company",
+  "company_tax_id",
   "naming_series",
   "customer",
   "customer_name",
   "tax_id",
-  "company",
-  "company_tax_id",
   "column_break1",
   "posting_date",
   "posting_time",
@@ -2306,7 +2306,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-01-30 16:45:59.682473",
+ "modified": "2026-02-03 14:09:44.347133",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

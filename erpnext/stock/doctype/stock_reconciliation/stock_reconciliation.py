@@ -1271,15 +1271,11 @@ def get_items(warehouse, posting_date, posting_time, company, item_code=None, ig
 
 	for d in items:
 		if (d.item_code, d.warehouse) in itemwise_batch_data:
-			valuation_rate = get_stock_balance(
-				d.item_code, d.warehouse, posting_date, posting_time, with_valuation_rate=True
-			)[1]
-
 			for row in itemwise_batch_data.get((d.item_code, d.warehouse)):
 				if ignore_empty_stock and not row.qty:
 					continue
 
-				args = get_item_data(row, row.qty, valuation_rate)
+				args = get_item_data(row, row.qty, row.valuation_rate)
 				res.append(args)
 		else:
 			stock_bal = get_stock_balance(
@@ -1413,6 +1409,7 @@ def get_itemwise_batch(warehouse, posting_date, company, item_code=None):
 					"item_code": row[0],
 					"warehouse": row[3],
 					"qty": row[8],
+					"valuation_rate": row[9],
 					"item_name": row[1],
 					"batch_no": row[4],
 				}

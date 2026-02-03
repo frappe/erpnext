@@ -625,6 +625,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				callback: function (r) {
 					if (!r.exc) {
 						me.frm.refresh_fields();
+						me.show_batch_dialog_if_required(item);
 					}
 				},
 			});
@@ -635,26 +636,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	process_item_selection(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
+		let update_stock = 0;
 		var me = this;
-		var update_stock = 0,
-			show_batch_dialog = 0;
 
 		item.weight_per_unit = 0;
 		item.weight_uom = "";
 		item.uom = null; // make UOM blank to update the existing UOM when item changes
 		item.conversion_factor = 0;
-
-		if (["Sales Invoice", "Purchase Invoice"].includes(this.frm.doc.doctype)) {
-			update_stock = cint(me.frm.doc.update_stock);
-			show_batch_dialog = update_stock;
-		} else if (this.frm.doc.doctype === "Purchase Receipt" || this.frm.doc.doctype === "Delivery Note") {
-			show_batch_dialog = 1;
-		}
-
-		if (show_batch_dialog && item.use_serial_batch_fields === 1) {
-			show_batch_dialog = 0;
-		}
-
 		item.barcode = null;
 
 		if (item.item_code || item.serial_no) {
@@ -765,74 +753,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 									}
 								},
 								() => me.toggle_conversion_factor(item),
-								() => {
-									if (show_batch_dialog && !frappe.flags.trigger_from_barcode_scanner)
-										return frappe.db
-											.get_value("Item", item.item_code, [
-												"has_batch_no",
-												"has_serial_no",
-											])
-											.then((r) => {
-												if (
-													r.message &&
-													(r.message.has_batch_no || r.message.has_serial_no)
-												) {
-													frappe.flags.hide_serial_batch_dialog = false;
-												} else {
-													show_batch_dialog = false;
-												}
-											});
-								},
-								() => {
-									// check if batch serial selector is disabled or not
-									if (show_batch_dialog && !frappe.flags.hide_serial_batch_dialog)
-										return frappe.db
-											.get_single_value(
-												"Stock Settings",
-												"disable_serial_no_and_batch_selector"
-											)
-											.then((value) => {
-												if (value) {
-													frappe.flags.hide_serial_batch_dialog = true;
-												}
-											});
-								},
-								() => {
-									if (
-										show_batch_dialog &&
-										!frappe.flags.hide_serial_batch_dialog &&
-										!frappe.flags.dialog_set
-									) {
-										var d = locals[cdt][cdn];
-										$.each(r.message, function (k, v) {
-											if (!d[k]) d[k] = v;
-										});
-
-										if (d.has_batch_no && d.has_serial_no) {
-											d.batch_no = undefined;
-										}
-
-										frappe.flags.dialog_set = true;
-										erpnext.show_serial_batch_selector(
-											me.frm,
-											d,
-											(item) => {
-												me.frm.script_manager.trigger("qty", item.doctype, item.name);
-												if (!me.frm.doc.set_warehouse)
-													me.frm.script_manager.trigger(
-														"warehouse",
-														item.doctype,
-														item.name
-													);
-												me.apply_price_list(item, true);
-											},
-											undefined,
-											!frappe.flags.hide_serial_batch_dialog
-										);
-									} else {
-										frappe.flags.dialog_set = false;
-									}
-								},
+								() => me.show_batch_dialog_if_required(item),
 								() => me.conversion_factor(doc, cdt, cdn, true),
 								() => me.remove_pricing_rule(item),
 								() => {
@@ -851,6 +772,78 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				});
 			}
 		}
+	}
+
+	show_batch_dialog_if_required(item) {
+		let show_batch_dialog = 0;
+		let update_stock = 0;
+		let me = this;
+
+		if (!item.item_code) {
+			return;
+		}
+
+		if (["Sales Invoice", "Purchase Invoice"].includes(this.frm.doc.doctype)) {
+			update_stock = cint(me.frm.doc.update_stock);
+			show_batch_dialog = update_stock;
+		} else if (this.frm.doc.doctype === "Purchase Receipt" || this.frm.doc.doctype === "Delivery Note") {
+			show_batch_dialog = 1;
+		}
+
+		if (show_batch_dialog && item.use_serial_batch_fields === 1) {
+			show_batch_dialog = 0;
+		}
+
+		frappe.run_serially([
+			() => {
+				if (show_batch_dialog && !frappe.flags.trigger_from_barcode_scanner)
+					return frappe.db
+						.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
+						.then((r) => {
+							if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
+								item.has_serial_no = r.message.has_serial_no;
+								item.has_batch_no = r.message.has_batch_no;
+								frappe.flags.hide_serial_batch_dialog = false;
+							} else {
+								show_batch_dialog = false;
+							}
+						});
+			},
+			() => {
+				// check if batch serial selector is disabled or not
+				if (show_batch_dialog && !frappe.flags.hide_serial_batch_dialog)
+					return frappe.db
+						.get_single_value("Stock Settings", "disable_serial_no_and_batch_selector")
+						.then((value) => {
+							if (value) {
+								frappe.flags.hide_serial_batch_dialog = true;
+							}
+						});
+			},
+			() => {
+				if (show_batch_dialog && !frappe.flags.hide_serial_batch_dialog && !frappe.flags.dialog_set) {
+					if (item.has_batch_no && item.has_serial_no) {
+						item.batch_no = undefined;
+					}
+
+					frappe.flags.dialog_set = true;
+					erpnext.show_serial_batch_selector(
+						me.frm,
+						item,
+						(item) => {
+							me.frm.script_manager.trigger("qty", item.doctype, item.name);
+							if (!me.frm.doc.set_warehouse)
+								me.frm.script_manager.trigger("warehouse", item.doctype, item.name);
+							me.apply_price_list(item, true);
+						},
+						undefined,
+						!frappe.flags.hide_serial_batch_dialog
+					);
+				} else {
+					frappe.flags.dialog_set = false;
+				}
+			},
+		]);
 	}
 
 	price_list_rate(doc, cdt, cdn) {

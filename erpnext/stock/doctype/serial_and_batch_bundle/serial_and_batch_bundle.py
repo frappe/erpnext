@@ -17,6 +17,7 @@ from frappe.utils import (
 	cint,
 	cstr,
 	flt,
+	get_datetime,
 	get_link_to_form,
 	getdate,
 	now,
@@ -438,6 +439,8 @@ class SerialandBatchBundle(Document):
 			)
 
 	def get_valuation_rate_for_return_entry(self, return_against):
+		from erpnext.controllers.sales_and_purchase_return import get_warehouses_for_return
+
 		if not self.voucher_detail_no:
 			return {}
 
@@ -467,9 +470,11 @@ class SerialandBatchBundle(Document):
 			["Serial and Batch Bundle", "voucher_detail_no", "=", return_against_voucher_detail_no],
 		]
 
+		# Added to handle rejected warehouse case
 		if self.voucher_type in ["Purchase Receipt", "Purchase Invoice"]:
-			# Added to handle rejected warehouse case
-			filters.append(["Serial and Batch Entry", "warehouse", "=", self.warehouse])
+			warehouses = get_warehouses_for_return(self.voucher_type, return_against_voucher_detail_no)
+			if self.warehouse in warehouses:
+				filters.append(["Serial and Batch Entry", "warehouse", "=", self.warehouse])
 
 		bundle_data = frappe.get_all(
 			"Serial and Batch Bundle",
@@ -1451,31 +1456,44 @@ class SerialandBatchBundle(Document):
 		for d in self.entries:
 			available_qty = batch_wise_available_qty.get(d.batch_no, 0)
 			if flt(available_qty, precision) < 0:
-				frappe.throw(
-					_(
-						"""
-					The Batch {0} of an item {1} has negative stock in the warehouse {2}. Please add a stock quantity of {3} to proceed with this entry."""
-					).format(
-						bold(d.batch_no),
-						bold(self.item_code),
-						bold(self.warehouse),
-						bold(abs(flt(available_qty, precision))),
-					),
-					title=_("Negative Stock Error"),
-				)
+				self.throw_negative_batch(d.batch_no, available_qty, precision)
+
+	def throw_negative_batch(self, batch_no, available_qty, precision):
+		from erpnext.stock.stock_ledger import NegativeStockError
+
+		frappe.throw(
+			_(
+				"""
+			The Batch {0} of an item {1} has negative stock in the warehouse {2}. Please add a stock quantity of {3} to proceed with this entry."""
+			).format(
+				bold(batch_no),
+				bold(self.item_code),
+				bold(self.warehouse),
+				bold(abs(flt(available_qty, precision))),
+			),
+			title=_("Negative Stock Error"),
+			exc=NegativeStockError,
+		)
 
 	def get_batchwise_available_qty(self):
-		available_qty = self.get_available_qty_from_sabb()
-		available_qty_from_ledger = self.get_available_qty_from_stock_ledger()
+		batchwise_entries = self.get_available_qty_from_sabb()
+		batchwise_entries.extend(self.get_available_qty_from_stock_ledger())
 
-		if not available_qty_from_ledger:
-			return available_qty
+		available_qty = frappe._dict({})
+		batchwise_entries = sorted(
+			batchwise_entries,
+			key=lambda x: (get_datetime(x.get("posting_datetime")), get_datetime(x.get("creation"))),
+		)
 
-		for batch_no, qty in available_qty_from_ledger.items():
-			if batch_no in available_qty:
-				available_qty[batch_no] += qty
+		precision = frappe.get_precision("Serial and Batch Entry", "qty")
+		for row in batchwise_entries:
+			if row.batch_no in available_qty:
+				available_qty[row.batch_no] += flt(row.qty)
 			else:
-				available_qty[batch_no] = qty
+				available_qty[row.batch_no] = flt(row.qty)
+
+			if flt(available_qty[row.batch_no], precision) < 0:
+				self.throw_negative_batch(row.batch_no, available_qty[row.batch_no], precision)
 
 		return available_qty
 
@@ -1488,7 +1506,9 @@ class SerialandBatchBundle(Document):
 			frappe.qb.from_(sle)
 			.select(
 				sle.batch_no,
-				Sum(sle.actual_qty).as_("available_qty"),
+				sle.actual_qty.as_("qty"),
+				sle.posting_datetime,
+				sle.creation,
 			)
 			.where(
 				(sle.item_code == self.item_code)
@@ -1500,12 +1520,9 @@ class SerialandBatchBundle(Document):
 				& (sle.batch_no.isnotnull())
 			)
 			.for_update()
-			.groupby(sle.batch_no)
 		)
 
-		res = query.run(as_list=True)
-
-		return frappe._dict(res) if res else frappe._dict()
+		return query.run(as_dict=True)
 
 	def get_available_qty_from_sabb(self):
 		batches = [d.batch_no for d in self.entries if d.batch_no]
@@ -1516,7 +1533,9 @@ class SerialandBatchBundle(Document):
 			frappe.qb.from_(child)
 			.select(
 				child.batch_no,
-				Sum(child.qty).as_("available_qty"),
+				child.qty,
+				child.posting_datetime,
+				child.creation,
 			)
 			.where(
 				(child.item_code == self.item_code)
@@ -1527,13 +1546,10 @@ class SerialandBatchBundle(Document):
 				& (child.type_of_transaction.isin(["Inward", "Outward"]))
 			)
 			.for_update()
-			.groupby(child.batch_no)
 		)
 		query = query.where(child.voucher_type != "Pick List")
 
-		res = query.run(as_list=True)
-
-		return frappe._dict(res) if res else frappe._dict()
+		return query.run(as_dict=True)
 
 	def validate_voucher_no_docstatus(self):
 		if self.voucher_type == "POS Invoice":
@@ -2596,11 +2612,11 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 
 		key = (row.batch_no, row.warehouse)
 		if key in pos_batches:
-			pos_batches[key]["qty"] -= row.qty * -1 if row.is_return else row.qty
+			pos_batches[key]["qty"] += row.qty * -1
 		else:
 			pos_batches[key] = frappe._dict(
 				{
-					"qty": (row.qty * -1 if not row.is_return else row.qty),
+					"qty": row.qty * -1,
 					"warehouse": row.warehouse,
 				}
 			)

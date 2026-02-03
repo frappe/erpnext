@@ -74,8 +74,8 @@ class JournalEntry(AccountsController):
 		mode_of_payment: DF.Link | None
 		multi_currency: DF.Check
 		naming_series: DF.Literal["ACC-JV-.YYYY.-"]
-		party_not_required: DF.Check
 		override_tax_withholding_entries: DF.Check
+		party_not_required: DF.Check
 		pay_to_recd_from: DF.Data | None
 		payment_order: DF.Link | None
 		periodic_entry_difference_account: DF.Link | None
@@ -1691,6 +1691,10 @@ def get_exchange_rate(
 	credit=None,
 	exchange_rate=None,
 ):
+	# Ensure exchange_rate is always numeric to avoid calculation errors
+	if isinstance(exchange_rate, str):
+		exchange_rate = flt(exchange_rate) or 1
+
 	account_details = frappe.get_cached_value(
 		"Account", account, ["account_type", "root_type", "account_currency", "company"], as_dict=1
 	)

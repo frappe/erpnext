@@ -415,8 +415,9 @@ def reconcile(doc: None | str = None) -> None:
 					for x in allocations:
 						pr.append("allocation", x)
 
+					skip_ref_details_update_for_pe = check_multi_currency(pr)
 					# reconcile
-					pr.reconcile_allocations(skip_ref_details_update_for_pe=True)
+					pr.reconcile_allocations(skip_ref_details_update_for_pe=skip_ref_details_update_for_pe)
 
 					# If Payment Entry, update details only for newly linked references
 					# This is for performance
@@ -502,6 +503,37 @@ def reconcile(doc: None | str = None) -> None:
 				frappe.db.set_value("Process Payment Reconciliation Log", log, "status", "Reconciled")
 				frappe.db.set_value("Process Payment Reconciliation Log", log, "reconciled", True)
 				frappe.db.set_value("Process Payment Reconciliation", doc, "status", "Completed")
+
+
+def check_multi_currency(pr_doc):
+	GL = frappe.qb.DocType("GL Entry")
+	Account = frappe.qb.DocType("Account")
+
+	def get_account_currency(voucher_type, voucher_no):
+		currency = (
+			frappe.qb.from_(GL)
+			.join(Account)
+			.on(GL.account == Account.name)
+			.select(Account.account_currency)
+			.where(
+				(GL.voucher_type == voucher_type)
+				& (GL.voucher_no == voucher_no)
+				& (Account.account_type.isin(["Payable", "Receivable"]))
+			)
+			.limit(1)
+		).run(as_dict=True)
+
+		return currency[0].account_currency if currency else None
+
+	for allocation in pr_doc.allocation:
+		reference_currency = get_account_currency(allocation.reference_type, allocation.reference_name)
+
+		invoice_currency = get_account_currency(allocation.invoice_type, allocation.invoice_number)
+
+		if reference_currency != invoice_currency:
+			return True
+
+	return False
 
 
 @frappe.whitelist()
