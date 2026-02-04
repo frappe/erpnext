@@ -77,20 +77,22 @@
   "base_total_taxes_and_charges",
   "column_break_47",
   "total_taxes_and_charges",
-  "totals",
-  "base_grand_total",
-  "base_rounding_adjustment",
-  "base_rounded_total",
-  "base_in_words",
-  "column_break5",
+  "totals_section",
   "grand_total",
   "rounding_adjustment",
-  "use_company_roundoff_cost_center",
-  "rounded_total",
   "in_words",
+  "column_break5",
+  "rounded_total",
+  "disable_rounded_total",
   "total_advance",
   "outstanding_amount",
-  "disable_rounded_total",
+  "use_company_roundoff_cost_center",
+  "base_totals_section",
+  "base_grand_total",
+  "base_rounding_adjustment",
+  "base_in_words",
+  "column_break_xjag",
+  "base_rounded_total",
   "section_tax_withholding_entry",
   "tax_withholding_group",
   "ignore_tax_withholding_threshold",
@@ -1124,16 +1126,6 @@
    "hide_seconds": 1,
    "label": "Additional Discount Amount",
    "options": "currency",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "totals",
-   "fieldtype": "Section Break",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Totals",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-money",
    "print_hide": 1
   },
   {
@@ -2294,6 +2286,26 @@
    "fieldname": "override_tax_withholding_entries",
    "fieldtype": "Check",
    "label": "Edit Tax Withholding Entries"
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Totals",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-money",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "base_totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals (Company Currency)",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "column_break_xjag",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -2308,10 +2320,14 @@
   }
  ],
 <<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2026-02-06 20:43:44.732805",
 =======
  "modified": "2026-02-02 17:21:09.768833",
 >>>>>>> 2f2e16fc33 (refactor: Better organizing of the fields in various doctypes)
+=======
+ "modified": "2026-02-04 12:14:56.149710",
+>>>>>>> a734f90920 (fix: Add totals and base total section)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
