@@ -1129,9 +1129,12 @@ frappe.ui.form.on("Sales Invoice", {
 		if (frm.doc.is_debit_note) {
 			frm.set_df_property("return_against", "label", __("Adjustment Against"));
 		}
+		// Hide update stock field if has subcontracted items or linked delivery notes
+		let has_delivery_note = (frm.doc.items || []).some((item) => item.delivery_note);
+		let can_update_stock = !frm.doc.has_subcontracted && !has_delivery_note;
 
-		frm.set_df_property("update_stock", "read_only", frm.doc.has_subcontracted);
-		frm.toggle_display("update_stock", !frm.doc.has_subcontracted);
+		frm.set_df_property("update_stock", "read_only", !can_update_stock);
+		frm.toggle_display("update_stock", can_update_stock);
 	},
 });
 

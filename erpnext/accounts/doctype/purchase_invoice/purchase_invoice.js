@@ -77,6 +77,12 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 	refresh(doc) {
 		const me = this;
 		super.refresh();
+		// Hide update stock field if has purchase receipts
+		let has_purchase_receipt = (this.frm.doc.items || []).some((item) => item.purchase_receipt);
+		let can_update_stock = !has_purchase_receipt;
+
+		this.frm.set_df_property("update_stock", "read_only", !can_update_stock);
+		this.frm.toggle_display("update_stock", can_update_stock);
 
 		hide_fields(this.frm.doc);
 		// Show / Hide button
