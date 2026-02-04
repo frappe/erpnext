@@ -1125,7 +1125,7 @@
    "fieldtype": "Currency",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Grand Total (Company Currency)",
+   "label": "Grand Total (Company Currency",
    "oldfieldname": "grand_total",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -1139,9 +1139,8 @@
    "fieldtype": "Currency",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Rounding Adjustment (Company Currency)",
+   "label": "Rounding Adjustment",
    "no_copy": 1,
-   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1151,10 +1150,9 @@
    "fieldtype": "Currency",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Rounded Total (Company Currency)",
+   "label": "Rounded Total",
    "oldfieldname": "rounded_total",
    "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1164,7 +1162,7 @@
    "fieldtype": "Small Text",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "In Words (Company Currency)",
+   "label": "In Words",
    "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
@@ -2321,6 +2319,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2026-02-06 20:43:44.732805",
 =======
  "modified": "2026-02-02 17:21:09.768833",
@@ -2331,6 +2330,9 @@
 =======
  "modified": "2026-02-04 16:21:54.112633",
 >>>>>>> 0687e683f8 (refactor: Add advance settings)
+=======
+ "modified": "2026-02-04 17:34:42.040540",
+>>>>>>> 3a91f6793f (refactor: Add advance settings)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
