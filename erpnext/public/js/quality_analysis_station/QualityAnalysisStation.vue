@@ -202,8 +202,6 @@ onMounted(async () => {
         jobCardNumber.value = selectedSlab.value.job_card;
     }
 
-    updateClock();
-    clockInterval = setInterval(updateClock, 1000);
     await fetchWorkContext();
     get_slabs_ready_for_qa();
     fetchGrades();
