@@ -1132,6 +1132,13 @@ frappe.ui.form.on("Sales Invoice", {
 
 		frm.set_df_property("update_stock", "read_only", frm.doc.has_subcontracted);
 		frm.toggle_display("update_stock", !frm.doc.has_subcontracted);
+		toggle_update_stock(frm);
+	},
+});
+
+frappe.ui.form.on("Sales Invoice Item", {
+	items_remove(frm) {
+		toggle_update_stock(frm);
 	},
 });
 
@@ -1198,3 +1205,9 @@ var select_loyalty_program = function (frm, loyalty_programs) {
 
 	dialog.show();
 };
+
+function toggle_update_stock(frm) {
+	const dn_exists = (frm.doc.items || []).some((row) => row.delivery_note);
+	frm.set_df_property("update_stock", "hidden", dn_exists);
+	if (dn_exists) frm.set_value("update_stock", 0);
+}
