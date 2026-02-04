@@ -12,56 +12,76 @@
   "disabled",
   "column_break_9",
   "warehouse",
-  "utm_source",
-  "utm_campaign",
-  "utm_medium",
   "company_address",
-  "section_break_15",
-  "applicable_for_users",
+  "accounting_tab",
   "section_break_11",
   "payments",
+  "set_grand_total_to_default_mop",
+  "price_list_and_currency_section",
+  "currency",
+  "column_break_bptt",
+  "selling_price_list",
+  "write_off_section",
+  "write_off_account",
+  "column_break_ukpz",
+  "write_off_cost_center",
+  "column_break_pkca",
+  "write_off_limit",
+  "income_and_expense_account",
+  "income_account",
+  "column_break_byzk",
+  "expense_account",
+  "taxes_section",
+  "taxes_and_charges",
+  "column_break_cjpp",
+  "tax_category",
+  "section_break_19",
+  "account_for_change_amount",
+  "disable_rounded_total",
+  "column_break_23",
+  "apply_discount_on",
+  "allow_partial_payment",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "project",
+  "pos_configurations_tab",
   "section_break_14",
-  "hide_images",
-  "hide_unavailable_items",
-  "auto_add_item_to_cart",
-  "validate_stock_on_save",
-  "print_receipt_on_order_complete",
   "action_on_new_invoice",
+  "validate_stock_on_save",
   "column_break_16",
   "update_stock",
   "ignore_pricing_rule",
+  "print_receipt_on_order_complete",
+  "pos_item_selector_section",
+  "hide_images",
+  "column_break_rpny",
+  "hide_unavailable_items",
+  "column_break_stcl",
+  "auto_add_item_to_cart",
+  "pos_item_details_section",
   "allow_rate_change",
+  "column_break_hwfg",
   "allow_discount_change",
-  "set_grand_total_to_default_mop",
-  "allow_partial_payment",
+  "section_break_15",
+  "applicable_for_users",
   "section_break_23",
   "item_groups",
   "column_break_25",
   "customer_groups",
+  "more_info_tab",
   "section_break_16",
   "print_format",
   "letter_head",
   "column_break0",
   "tc_name",
   "select_print_heading",
-  "section_break_19",
-  "selling_price_list",
-  "currency",
-  "write_off_account",
-  "write_off_cost_center",
-  "write_off_limit",
-  "account_for_change_amount",
-  "disable_rounded_total",
-  "column_break_23",
-  "income_account",
-  "expense_account",
-  "taxes_and_charges",
-  "tax_category",
-  "apply_discount_on",
-  "accounting_dimensions_section",
-  "cost_center",
-  "dimension_col_break",
-  "project"
+  "campaign_section_break",
+  "utm_source",
+  "column_break_tvls",
+  "utm_campaign",
+  "column_break_xygw",
+  "utm_medium"
  ],
  "fields": [
   {
@@ -130,8 +150,7 @@
   },
   {
    "fieldname": "section_break_14",
-   "fieldtype": "Section Break",
-   "label": "Configuration"
+   "fieldtype": "Section Break"
   },
   {
    "description": "Only show Items from these Item Groups",
@@ -152,6 +171,7 @@
    "options": "POS Customer Group"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_break_16",
    "fieldtype": "Section Break",
    "label": "Print Settings"
@@ -191,7 +211,7 @@
   {
    "fieldname": "section_break_19",
    "fieldtype": "Section Break",
-   "label": "Accounting"
+   "label": "Miscellaneous"
   },
   {
    "fieldname": "selling_price_list",
@@ -427,9 +447,101 @@
   },
   {
    "default": "0",
+   "description": "Applicable on POS Invoice",
    "fieldname": "allow_partial_payment",
    "fieldtype": "Check",
    "label": "Allow Partial Payment"
+  },
+  {
+   "fieldname": "column_break_tvls",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_xygw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "campaign_section_break",
+   "fieldtype": "Section Break",
+   "label": "Campaign"
+  },
+  {
+   "fieldname": "accounting_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounting"
+  },
+  {
+   "fieldname": "more_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "pos_configurations_tab",
+   "fieldtype": "Tab Break",
+   "label": "POS Configurations"
+  },
+  {
+   "fieldname": "price_list_and_currency_section",
+   "fieldtype": "Section Break",
+   "label": "Price List & Currency"
+  },
+  {
+   "fieldname": "column_break_bptt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "write_off_section",
+   "fieldtype": "Section Break",
+   "label": "Write Off"
+  },
+  {
+   "fieldname": "column_break_ukpz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_pkca",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "income_and_expense_account",
+   "fieldtype": "Section Break",
+   "label": "Income and Expense"
+  },
+  {
+   "fieldname": "column_break_byzk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "taxes_section",
+   "fieldtype": "Section Break",
+   "label": "Taxes"
+  },
+  {
+   "fieldname": "column_break_cjpp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pos_item_selector_section",
+   "fieldtype": "Section Break",
+   "label": "POS Item Selector"
+  },
+  {
+   "fieldname": "column_break_rpny",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_stcl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pos_item_details_section",
+   "fieldtype": "Section Break",
+   "label": "POS Item Details"
+  },
+  {
+   "fieldname": "column_break_hwfg",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -458,7 +570,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2025-06-24 11:19:19.834905",
+ "modified": "2026-02-05 03:38:13.216277",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
