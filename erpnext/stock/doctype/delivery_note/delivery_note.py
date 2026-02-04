@@ -659,7 +659,7 @@ class DeliveryNote(SellingController):
 	def update_billing_status(self, update_modified=True):
 		updated_delivery_notes = [self.name]
 		for d in self.get("items"):
-			if d.si_detail and not d.so_detail:
+			if d.si_detail and d.against_sales_invoice:
 				d.db_set("billed_amt", d.amount, update_modified=update_modified)
 			elif d.so_detail:
 				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
