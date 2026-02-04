@@ -29,6 +29,7 @@
   "dn_required",
   "sales_update_frequency",
   "blanket_order_allowance",
+  "enable_tracking_sales_commissions",
   "column_break_5",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
@@ -297,6 +298,13 @@
    "fieldname": "set_zero_rate_for_expired_batch",
    "fieldtype": "Check",
    "label": "Set Incoming Rate as Zero for Expired Batch"
+  },
+  {
+   "default": "0",
+   "description": "Manage sales partner's and sales team's commissions",
+   "fieldname": "enable_tracking_sales_commissions",
+   "fieldtype": "Check",
+   "label": "Enable tracking sales commissions"
   }
  ],
  "grid_page_length": 50,
@@ -306,7 +314,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-23 00:04:33.105916",
+ "modified": "2026-02-04 16:16:57.618127",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

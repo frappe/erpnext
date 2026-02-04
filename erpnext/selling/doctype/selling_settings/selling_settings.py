@@ -10,7 +10,6 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 from frappe.model.document import Document
 from frappe.utils import cint
 
-
 class SellingSettings(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -37,6 +36,7 @@ class SellingSettings(Document):
 		editable_price_list_rate: DF.Check
 		enable_cutoff_date_on_bulk_delivery_note_creation: DF.Check
 		enable_discount_accounting: DF.Check
+		enable_tracking_sales_commissions: DF.Check
 		fallback_to_default_price_list: DF.Check
 		hide_tax_id: DF.Check
 		maintain_same_rate_action: DF.Literal["Stop", "Warn"]
@@ -57,6 +57,8 @@ class SellingSettings(Document):
 		self.toggle_discount_accounting_fields()
 
 	def validate(self):
+		old_doc = self.get_doc_before_save()
+
 		for key in [
 			"cust_master_name",
 			"customer_group",
@@ -77,6 +79,9 @@ class SellingSettings(Document):
 		)
 
 		self.validate_fallback_to_default_price_list()
+
+		if old_doc.enable_tracking_sales_commissions != self.enable_tracking_sales_commissions:
+			toggle_tracking_sales_commissions_section(not self.enable_tracking_sales_commissions)
 
 	def validate_fallback_to_default_price_list(self):
 		if (
@@ -175,3 +180,13 @@ class SellingSettings(Document):
 				"Code",
 				validate_fields_for_doctype=False,
 			)
+
+def toggle_tracking_sales_commissions_section(hide):
+	from erpnext.accounts.doctype.accounts_settings.accounts_settings import create_property_setter_for_hiding_field, SELLING_DOCTYPES
+
+	for doctype in SELLING_DOCTYPES:
+		meta = frappe.get_meta(doctype)
+		if meta.has_field("commission_section"):
+			create_property_setter_for_hiding_field(doctype, "commission_section", hide)
+		if meta.has_field("sales_team_section"):
+			create_property_setter_for_hiding_field(doctype, "sales_team_section", hide)

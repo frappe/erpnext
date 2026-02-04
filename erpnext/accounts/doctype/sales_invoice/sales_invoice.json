@@ -98,7 +98,7 @@
   "ignore_tax_withholding_threshold",
   "override_tax_withholding_entries",
   "tax_withholding_entries",
-  "section_break_49",
+  "additional_discount_section",
   "apply_discount_on",
   "base_discount_amount",
   "coupon_code",
@@ -196,13 +196,13 @@
   "column_break8",
   "unrealized_profit_loss_account",
   "against_income_account",
-  "sales_team_section_break",
+  "commission_section",
   "sales_partner",
   "amount_eligible_for_commission",
   "column_break10",
   "commission_rate",
   "total_commission",
-  "section_break2",
+  "sales_team_section",
   "sales_team",
   "edit_printing_settings",
   "letter_head",
@@ -1077,14 +1077,6 @@
    "options": "Cost Center"
   },
   {
-   "collapsible": 1,
-   "fieldname": "section_break_49",
-   "fieldtype": "Section Break",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Additional Discount"
-  },
-  {
    "default": "Grand Total",
    "fieldname": "apply_discount_on",
    "fieldtype": "Select",
@@ -1265,7 +1257,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "collapsible_depends_on": "advances",
    "fieldname": "advances_section",
    "fieldtype": "Section Break",
@@ -1699,10 +1690,10 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "default": "No",
    "fieldname": "is_opening",
    "fieldtype": "Select",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Is Opening Entry",
@@ -1729,18 +1720,6 @@
    "no_copy": 1,
    "oldfieldname": "remarks",
    "oldfieldtype": "Text",
-   "print_hide": 1
-  },
-  {
-   "collapsible": 1,
-   "collapsible_depends_on": "sales_partner",
-   "fieldname": "sales_team_section_break",
-   "fieldtype": "Section Break",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Commission",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-group",
    "print_hide": 1
   },
   {
@@ -1784,16 +1763,6 @@
    "oldfieldname": "total_commission",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
-   "print_hide": 1
-  },
-  {
-   "collapsible": 1,
-   "collapsible_depends_on": "sales_team",
-   "fieldname": "section_break2",
-   "fieldtype": "Section Break",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Sales Team",
    "print_hide": 1
   },
   {
@@ -2306,6 +2275,36 @@
   {
    "fieldname": "column_break_xjag",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "additional_discount_section",
+   "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Additional Discount"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "sales_team",
+   "fieldname": "sales_team_section",
+   "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Sales Team",
+   "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "sales_partner",
+   "fieldname": "commission_section",
+   "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Commission",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-group",
+   "print_hide": 1
   }
  ],
  "grid_page_length": 50,
@@ -2321,6 +2320,7 @@
  ],
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2026-02-06 20:43:44.732805",
 =======
  "modified": "2026-02-02 17:21:09.768833",
@@ -2328,6 +2328,9 @@
 =======
  "modified": "2026-02-04 12:14:56.149710",
 >>>>>>> a734f90920 (fix: Add totals and base total section)
+=======
+ "modified": "2026-02-04 16:21:54.112633",
+>>>>>>> 0687e683f8 (refactor: Add advance settings)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
