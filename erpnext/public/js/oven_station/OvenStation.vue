@@ -18,6 +18,7 @@ const racks = computed(() => {
         let time_text = '';
         if ((r.status === 'Heating' || r.status === 'Overheat') && r.start_time) {
             const start = new Date(r.start_time.replace(' ', 'T'));
+            const now = Date.now();
             const diffMs = now - start;
 
             if (diffMs > 0) {
