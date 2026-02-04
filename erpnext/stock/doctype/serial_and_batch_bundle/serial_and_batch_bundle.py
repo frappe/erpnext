@@ -3034,7 +3034,7 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 
 	if serial_nos:
 		bundle_parents = (
-		frappe.qb.from_(serial_batch_entry)
+			frappe.qb.from_(serial_batch_entry)
 			.select(serial_batch_entry.parent)
 			.distinct()
 			.where(serial_batch_entry.serial_no.isin(serial_nos))
