@@ -10,6 +10,7 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 from frappe.model.document import Document
 from frappe.utils import cint
 
+
 class SellingSettings(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -181,8 +182,12 @@ class SellingSettings(Document):
 				validate_fields_for_doctype=False,
 			)
 
+
 def toggle_tracking_sales_commissions_section(hide):
-	from erpnext.accounts.doctype.accounts_settings.accounts_settings import create_property_setter_for_hiding_field, SELLING_DOCTYPES
+	from erpnext.accounts.doctype.accounts_settings.accounts_settings import (
+		SELLING_DOCTYPES,
+		create_property_setter_for_hiding_field,
+	)
 
 	for doctype in SELLING_DOCTYPES:
 		meta = frappe.get_meta(doctype)

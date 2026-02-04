@@ -35,7 +35,6 @@ BUYING_DOCTYPES = [
 ]
 
 
-
 class AccountsSettings(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -193,10 +192,12 @@ class AccountsSettings(Document):
 		frappe.db.sql(f"drop procedure if exists {InitSQLProceduresForAR.init_procedure_name}")
 		frappe.db.sql(f"drop procedure if exists {InitSQLProceduresForAR.allocate_procedure_name}")
 
+
 def toggle_accounting_dimension_sections(hide):
 	accounting_dimension_doctypes = frappe.get_hooks("accounting_dimension_doctypes")
 	for doctype in accounting_dimension_doctypes:
 		create_property_setter_for_hiding_field(doctype, "accounting_dimensions_section", hide)
+
 
 def toggle_sales_discount_section(hide):
 	for doctype in SELLING_DOCTYPES + BUYING_DOCTYPES:
@@ -206,11 +207,13 @@ def toggle_sales_discount_section(hide):
 		if meta.has_field("discount_and_margin"):
 			create_property_setter_for_hiding_field(doctype, "discount_and_margin", hide)
 
+
 def toggle_loyalty_point_program_section(hide):
 	for doctype in SELLING_DOCTYPES:
 		meta = frappe.get_meta(doctype)
 		if meta.has_field("loyalty_points_redemption"):
 			create_property_setter_for_hiding_field(doctype, "loyalty_points_redemption", hide)
+
 
 def create_property_setter_for_hiding_field(doctype, field_name, hide):
 	make_property_setter(
