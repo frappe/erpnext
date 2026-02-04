@@ -1,0 +1,146 @@
+<style>
+	.print-format table, .print-format tr,
+	.print-format td, .print-format div, .print-format p {
+		font-family: Tahoma, sans-serif;
+		line-height: 150%;
+		vertical-align: middle;
+	}
+	@media screen {
+		.print-format {
+			width: 4in;
+			padding: 0.25in;
+			min-height: 8in;
+		}
+	}
+</style>
+
+{% if letter_head %}
+    {{ letter_head }}
+{% endif %}
+
+<p class="text-center" style="margin-bottom: 1rem">
+	{{ doc.company }}<br>
+	{{ doc.select_print_heading or _("Return Invoice") }}<br>
+</p>
+<p>
+	<b>{{ _("Receipt No") }}:</b> {{ doc.name }}<br>
+	<b>{{ _("Original Invoice") }}:</b> {{ doc.return_against }}<br>
+	<b>{{ _("Date") }}:</b> {{ doc.get_formatted("posting_date") }}<br>
+	<b>{{ _("Customer") }}:</b> {{ doc.customer_name }}
+</p>
+
+<hr>
+<table class="table table-condensed cart no-border">
+	<thead>
+		<tr>
+			<th width="50%">{{ _("Item") }}</th>
+			<th width="25%" class="text-right">{{ _("Qty") }}</th>
+			<th width="25%" class="text-right">{{ _("Amount") }}</th>
+		</tr>
+	</thead>
+	<tbody>
+		{%- for item in doc.items -%}
+		<tr>
+			<td>
+				{{ item.item_code }}
+				{%- if item.item_name != item.item_code -%}
+					<br>{{ item.item_name }}
+				{%- endif -%}
+				{%- if item.serial_no -%}
+					<br><b>{{ _("SR.No") }}:</b><br>
+					{{ item.serial_no | replace("\n", ", ") }}
+				{%- endif -%}
+			</td>
+			<td class="text-right">{{ item.qty }}<br>@ {{ item.get_formatted("rate") }}</td>
+			<td class="text-right">{{ item.get_formatted("amount") }}</td>
+		</tr>
+		{%- endfor -%}
+	</tbody>
+</table>
+<table class="table table-condensed no-border">
+	<tbody>
+		<tr>
+			{% if doc.flags.show_inclusive_tax_in_print %}
+				<td class="text-right" style="width: 70%">
+					{{ _("Total Excl. Tax") }}
+				</td>
+				<td class="text-right">
+					{{ doc.get_formatted("net_total", doc) }}
+				</td>
+			{% else %}
+				<td class="text-right" style="width: 70%">
+					{{ _("Total") }}
+				</td>
+				<td class="text-right">
+					{{ doc.get_formatted("total", doc) }}
+				</td>
+			{% endif %}
+		</tr>
+		{%- for row in doc.taxes -%}
+		  {%- if not row.included_in_print_rate or doc.flags.show_inclusive_tax_in_print -%}
+			<tr>
+				<td class="text-right" style="width: 70%">
+				    {% if '%' in row.description %}
+					    {{ row.description }}
+					{% else %}
+					    {{ row.description }}@{{ row.rate }}%
+					{% endif %}
+				</td>
+				<td class="text-right">
+					{{ row.get_formatted("tax_amount", doc)}}
+				</td>
+			<tr>
+		  {%- endif -%}
+		{%- endfor -%}
+
+		{%- if doc.discount_amount -%}
+		<tr>
+			<td class="text-right" style="width: 75%">
+				{{ _("Discount") }}
+			</td>
+			<td class="text-right">
+				{{ doc.get_formatted("discount_amount") }}
+			</td>
+		</tr>
+		{%- endif -%}
+		<tr>
+			<td class="text-right" style="width: 75%">
+				<b>{{ _("Grand Total") }}</b>
+			</td>
+			<td class="text-right">
+				{{ doc.get_formatted("grand_total") }}
+			</td>
+		</tr>
+		{%- if doc.rounded_total -%}
+		<tr>
+			<td class="text-right" style="width: 75%">
+				<b>{{ _("Rounded Total") }}</b>
+			</td>
+			<td class="text-right">
+				{{ doc.get_formatted("rounded_total") }}
+			</td>
+		</tr>
+		{%- endif -%}
+		<tr>
+			<td class="text-right" style="width: 75%">
+				<b>{{ _("Paid Amount") }}</b>
+			</td>
+			<td class="text-right">
+				{{ doc.get_formatted("paid_amount") }}
+			</td>
+		</tr>
+		{%- if doc.change_amount -%}
+			<tr>
+				<td class="text-right" style="width: 75%">
+					<b>{{ _("Change Amount") }}</b>
+				</td>
+				<td class="text-right">
+					{{ doc.get_formatted("change_amount")}}
+				</td>
+			</tr>
+		{%- endif -%}
+	</tbody>
+</table>
+<hr>
+<p>{{ doc.terms or "" }}</p>
+<p class="text-center">{{ _("Thank you, please visit again.") }}</p>

@@ -1,0 +1,51 @@
+<div style="position: relative">
+
+	{%- from "templates/print_formats/standard_macros.html" import add_header -%}
+<div class="page-break">
+    {%- if not doc.get("print_heading") and not doc.get("select_print_heading")
+        and doc.set("select_print_heading", _("Payment Advice")) -%}{%- endif -%}
+    {{ add_header(0, 1, doc, letter_head, no_letterhead) }}
+
+{%- for label, value in (
+        (_("Voucher Date"), frappe.utils.formatdate(doc.voucher_date)),
+        (_("Reference / Cheque No."), doc.cheque_no),
+        (_("Reference / Cheque Date"), frappe.utils.formatdate(doc.cheque_date))
+    ) -%}
+    <div class="row">
+        <div class="col-xs-4"><label class="text-right">{{ label }}</label></div>
+        <div class="col-xs-8">{{ value }}</div>
+    </div>
+{%- endfor -%}
+	<hr>
+	<p>{{ _("This amount is in full / part settlement of the listed bills") }}:</p>
+{%- for label, value in (
+         (_("Amount"), "<strong>" + doc.get_formatted("total_amount") + "</strong><br>" + (doc.total_amount_in_words or "") + "<br>"),
+        (_("References"), doc.remark)
+    ) -%}
+    <div class="row">
+        <div class="col-xs-4"><label class="text-right">{{ label }}</label></div>
+        <div class="col-xs-8">{{ value }}</div>
+    </div>
+    {%- endfor -%}
+    <hr>
+	<div style="position: absolute; top: 14cm; left: 0cm;">
+		Prepared By</div>
+	<div style="position: absolute; top: 14cm; left: 5.5cm;">
+		Authorised Signatory</div>
+	<div style="position: absolute; top: 14cm; left: 11cm;">
+		Received Payment as Above</div>
+	<div style="position: absolute; top: 16.4cm; left: 5.9cm;">
+		<strong>_____________</strong></div>
+	<div style="position: absolute; top: 16.7cm; left: 6cm;">
+		<strong>A/C Payee</strong></div>
+	<div style="position: absolute; top: 16.7cm; left: 5.9cm;">
+		<strong>_____________</strong></div>
+	<div style="position: absolute; top: 16.9cm; left: 12cm;">
+		{{ frappe.utils.formatdate(doc.cheque_date) }}</div>
+	<div style="position: absolute; top: 17.9cm; left: 1cm;">
+		{{ doc.pay_to_recd_from }}</div>
+	<div style="position: absolute; top: 18.6cm; left: 1cm; width: 7cm;">
+		{{ doc.total_amount_in_words }}</div>
+	<div style="position: absolute; top: 19.7cm; left: 12cm;">
+		{{ doc.get_formatted("total_amount") }}</div>
+</div>
