@@ -43,15 +43,17 @@
    "read_only": 1
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:55.008837",
+ "modified": "2025-11-14 16:17:25.584675",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transaction Deletion Record Details",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

@@ -4994,6 +4994,245 @@ class TestPurchaseReceipt(IntegrationTestCase):
 
 		self.assertEqual(frappe.parse_json(stock_queue), [[20, 0.0]])
 
+	def test_negative_stock_error_for_purchase_return(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = make_item(
+			"Test Negative Stock for Purchase Return Item",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TNSFPRI.#####"},
+		).name
+
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			posting_date=add_days(today(), -3),
+			qty=10,
+			rate=100,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
+
+		make_purchase_receipt(
+			item_code=item_code,
+			posting_date=add_days(today(), -4),
+			qty=10,
+			rate=100,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		make_stock_entry(
+			item_code=item_code,
+			qty=10,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+		)
+
+		return_pr = make_return_doc("Purchase Receipt", pr.name)
+		self.assertRaises(frappe.ValidationError, return_pr.submit)
+
+	def test_internal_purchase_receipt_incoming_rate_with_lcv(self):
+		"""
+		To test inter branch transaction incoming rate calculation with lcv after item reposting
+		"""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+		item_doc = create_item("_Test Internal PR LCV Item")
+		lcv_expense_account = "Expenses Included In Valuation - TCP1"
+
+		from_warehouse = create_warehouse("_Test Internal From Warehouse LCV", company=company)
+		to_warehouse = create_warehouse("_Test Internal To Warehouse LCV", company=company)
+
+		# inward qty for internal transactions
+		make_purchase_receipt(
+			item_code=item_doc.item_code,
+			qty=5,
+			rate=100,
+			company="_Test Company with perpetual inventory",
+			warehouse=from_warehouse,
+		)
+
+		idn = create_delivery_note(
+			item_code=item_doc.name,
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=5,
+			rate=100,
+			warehouse=from_warehouse,
+			target_warehouse=to_warehouse,
+		)
+		self.assertEqual(idn.items[0].rate, 100)
+
+		ipr = make_inter_company_purchase_receipt(idn.name)
+		ipr.items[0].warehouse = from_warehouse
+		self.assertEqual(ipr.items[0].rate, 100)
+		ipr.submit()
+
+		self.create_lcv(ipr.doctype, ipr.name, company, lcv_expense_account, charges=100)
+		ipr.reload()
+
+		self.assertEqual(ipr.items[0].landed_cost_voucher_amount, 100)
+		self.assertEqual(ipr.items[0].valuation_rate, 120)
+
+		# repost the receipt and check the stock ledger values
+		repost_doc = frappe.new_doc("Repost Item Valuation")
+		repost_doc.update(
+			{
+				"based_on": "Transaction",
+				"voucher_type": ipr.doctype,
+				"voucher_no": ipr.name,
+				"posting_date": ipr.posting_date,
+				"posting_time": ipr.posting_time,
+				"company": ipr.company,
+				"allow_negative_stock": 1,
+				"via_landed_cost_voucher": 0,
+				"allow_zero_rate": 0,
+			}
+		)
+		repost_doc.save()
+		repost_doc.submit()
+
+		stk_ledger = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": ipr.name, "warehouse": from_warehouse},
+			["incoming_rate", "stock_value_difference"],
+			as_dict=True,
+		)
+
+		# check the incoming rate and stock value change
+		self.assertEqual(stk_ledger.incoming_rate, 120)
+		self.assertEqual(stk_ledger.stock_value_difference, 600)
+
+	def test_negative_stock_error_for_purchase_return_when_stock_exists_in_future_date(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.stock_ledger import NegativeStockError
+
+		item_code = make_item(
+			"Test Negative Stock for Purchase Return with Future Stock Item",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TNSPFPRI.#####",
+			},
+		).name
+
+		make_purchase_receipt(
+			item_code=item_code,
+			posting_date=add_days(today(), -4),
+			qty=100,
+			rate=100,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		pr1 = make_purchase_receipt(
+			item_code=item_code,
+			posting_date=add_days(today(), -3),
+			qty=100,
+			rate=100,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		batch1 = get_batch_from_bundle(pr1.items[0].serial_and_batch_bundle)
+
+		pr2 = make_purchase_receipt(
+			item_code=item_code,
+			posting_date=add_days(today(), -2),
+			qty=100,
+			rate=100,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		batch2 = get_batch_from_bundle(pr2.items[0].serial_and_batch_bundle)
+
+		make_stock_entry(
+			item_code=item_code,
+			qty=100,
+			posting_date=add_days(today(), -1),
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			batch_no=batch1,
+			use_serial_batch_fields=1,
+		)
+
+		make_stock_entry(
+			item_code=item_code,
+			qty=100,
+			posting_date=add_days(today(), -1),
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			batch_no=batch2,
+			use_serial_batch_fields=1,
+		)
+
+		make_stock_entry(
+			item_code=item_code,
+			qty=100,
+			posting_date=today(),
+			source="_Test Warehouse 1 - _TC",
+			target="_Test Warehouse - _TC",
+			batch_no=batch1,
+			use_serial_batch_fields=1,
+		)
+
+		make_purchase_entry = make_return_doc("Purchase Receipt", pr1.name)
+		make_purchase_entry.set_posting_time = 1
+		make_purchase_entry.posting_date = pr1.posting_date
+		self.assertRaises(NegativeStockError, make_purchase_entry.submit)
+
+	def test_purchase_return_from_different_warehouse(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = make_item(
+			"Test Purchase Return From Different Warehouse Item",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TPRFDWU.#####",
+			},
+		).name
+
+		pr1 = make_purchase_receipt(
+			item_code=item_code,
+			posting_date=add_days(today(), -4),
+			qty=100,
+			rate=100,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		batch1 = get_batch_from_bundle(pr1.items[0].serial_and_batch_bundle)
+
+		make_stock_entry(
+			item_code=item_code,
+			qty=100,
+			posting_date=add_days(today(), -1),
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			batch_no=batch1,
+			use_serial_batch_fields=1,
+		)
+
+		make_purchase_entry = make_return_doc("Purchase Receipt", pr1.name)
+		make_purchase_entry.items[0].warehouse = "_Test Warehouse 1 - _TC"
+		make_purchase_entry.submit()
+		make_purchase_entry.reload()
+
+		sabb = frappe.get_doc("Serial and Batch Bundle", make_purchase_entry.items[0].serial_and_batch_bundle)
+		for row in sabb.entries:
+			self.assertEqual(row.warehouse, "_Test Warehouse 1 - _TC")
+			self.assertEqual(row.incoming_rate, 100)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier

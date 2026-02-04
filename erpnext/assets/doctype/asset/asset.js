@@ -117,14 +117,6 @@ frappe.ui.form.on("Asset", {
 				);
 
 				frm.add_custom_button(
-					__("Repair Asset"),
-					function () {
-						frm.trigger("create_asset_repair");
-					},
-					__("Manage")
-				);
-
-				frm.add_custom_button(
 					__("Split Asset"),
 					function () {
 						frm.trigger("split_asset");
@@ -152,6 +144,14 @@ frappe.ui.form.on("Asset", {
 					__("Adjust Asset Value"),
 					function () {
 						frm.trigger("create_asset_value_adjustment");
+					},
+					__("Manage")
+				);
+
+				frm.add_custom_button(
+					__("Repair Asset"),
+					function () {
+						frm.trigger("create_asset_repair");
 					},
 					__("Manage")
 				);

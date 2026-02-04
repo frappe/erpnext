@@ -808,61 +808,10 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			for ledger in entries:
 				self.stock_value_differece[ledger.batch_no] += flt(ledger.incoming_rate)
 				self.available_qty[ledger.batch_no] += flt(ledger.qty)
-				self.total_qty[ledger.batch_no] += flt(ledger.qty)
-
-			entries = self.get_batch_stock_after_date()
-			for row in entries:
-				self.total_qty[row.batch_no] += flt(row.total_qty)
 
 			self.calculate_avg_rate_from_deprecarated_ledgers()
 			self.calculate_avg_rate_for_non_batchwise_valuation()
 			self.set_stock_value_difference()
-
-	def get_batch_stock_after_date(self) -> list[dict]:
-		# Get total qty of each batch no from Serial and Batch Bundle without checking time condition
-		if not self.batchwise_valuation_batches:
-			return []
-
-		child = frappe.qb.DocType("Serial and Batch Entry")
-
-		timestamp_condition = ""
-		if self.sle.posting_datetime:
-			timestamp_condition = child.posting_datetime > self.sle.posting_datetime
-
-			if self.sle.creation:
-				timestamp_condition |= (child.posting_datetime == self.sle.posting_datetime) & (
-					child.creation > self.sle.creation
-				)
-
-		query = (
-			frappe.qb.from_(child)
-			.select(
-				child.batch_no,
-				Sum(child.qty).as_("total_qty"),
-			)
-			.where(
-				(child.item_code == self.sle.item_code)
-				& (child.warehouse == self.sle.warehouse)
-				& (child.batch_no.isin(self.batchwise_valuation_batches))
-				& (child.docstatus == 1)
-				& (child.type_of_transaction.isin(["Inward", "Outward"]))
-			)
-			.for_update()
-			.groupby(child.batch_no)
-		)
-
-		# Important to exclude the current voucher detail no / voucher no to calculate the correct stock value difference
-		if self.sle.voucher_detail_no:
-			query = query.where(child.voucher_detail_no != self.sle.voucher_detail_no)
-		elif self.sle.voucher_no:
-			query = query.where(child.voucher_no != self.sle.voucher_no)
-
-		query = query.where(child.voucher_type != "Pick List")
-
-		if timestamp_condition:
-			query = query.where(timestamp_condition)
-
-		return query.run(as_dict=True)
 
 	def get_batch_stock_before_date(self) -> list[dict]:
 		# Get batch wise stock value difference from Serial and Batch Bundle considering time condition

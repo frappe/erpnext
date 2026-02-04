@@ -1828,6 +1828,71 @@ class TestDepreciationBasics(AssetSetup):
 		pr.submit()
 		self.assertTrue(get_gl_entries("Purchase Receipt", pr.name))
 
+	def test_split_asset_created_via_capitalization(self):
+		"""Test that assets created via Asset Capitalization can be split without capitalization error"""
+		from erpnext.assets.doctype.asset_capitalization.test_asset_capitalization import (
+			create_asset_capitalization,
+			create_asset_capitalization_data,
+		)
+
+		# Ensure test data exists
+		create_asset_capitalization_data()
+
+		company = "_Test Company with perpetual inventory"
+		set_depreciation_settings_in_company(company=company)
+		name = frappe.db.get_value(
+			"Asset Category Account",
+			filters={"parent": "Computers", "company_name": company},
+			fieldname=["name"],
+		)
+		frappe.db.set_value("Asset Category Account", name, "capital_work_in_progress_account", "")
+
+		stock_rate = 1000
+		stock_qty = 2
+		total_amount = 2000
+
+		# Create composite asset
+		wip_composite_asset = create_asset(
+			asset_name="Asset Capitalization WIP Composite Asset for Split",
+			is_composite_asset=1,
+			warehouse="Stores - TCP1",
+			company=company,
+			asset_quantity=2,  # Set quantity > 1 to allow splitting
+		)
+
+		# Create and submit Asset Capitalization
+		asset_capitalization = create_asset_capitalization(
+			target_asset=wip_composite_asset.name,
+			stock_qty=stock_qty,
+			stock_rate=stock_rate,
+			company=company,
+			submit=1,
+		)
+
+		# Verify asset was capitalized
+		target_asset = frappe.get_doc("Asset", asset_capitalization.target_asset)
+		self.assertEqual(target_asset.net_purchase_amount, total_amount)
+		self.assertEqual(target_asset.status, "Work In Progress")
+
+		# Submit the capitalized asset
+		target_asset.submit()
+		self.assertEqual(target_asset.status, "Submitted")
+
+		# Split the asset - this should work without capitalization error
+		split_qty = 1
+		splitted_asset = split_asset(target_asset.name, split_qty)
+
+		# Verify split asset was created and submitted successfully
+		self.assertIsNotNone(splitted_asset)
+		self.assertEqual(splitted_asset.asset_quantity, split_qty)
+		self.assertEqual(splitted_asset.split_from, target_asset.name)
+		self.assertEqual(splitted_asset.docstatus, 1)  # Should be submitted
+		self.assertEqual(splitted_asset.status, "Submitted")
+
+		# Verify original asset was updated
+		target_asset.reload()
+		self.assertEqual(target_asset.asset_quantity, 1)  # Remaining quantity
+
 
 def get_gl_entries(doctype, docname):
 	gl_entry = frappe.qb.DocType("GL Entry")

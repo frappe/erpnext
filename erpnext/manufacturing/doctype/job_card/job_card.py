@@ -1251,10 +1251,26 @@ class JobCard(Document):
 		frappe.db.set_value("Workstation", self.workstation, "status", status)
 
 	def add_time_logs(self, **kwargs):
-		row = None
 		kwargs = frappe._dict(kwargs)
+		if not kwargs.employees and kwargs.to_time:
+			for row in self.time_logs:
+				if not row.to_time and row.from_time:
+					row.to_time = kwargs.to_time
+					row.time_in_mins = time_diff_in_minutes(row.to_time, row.from_time)
 
+					if kwargs.completed_qty:
+						row.completed_qty = kwargs.completed_qty
+					row.db_update()
+		else:
+			self.add_time_logs_for_employess(kwargs)
+
+		self.validate_time_logs(save=True)
+		self.save()
+
+	def add_time_logs_for_employess(self, kwargs):
+		row = None
 		update_status = False
+
 		for employee in kwargs.employees:
 			kwargs.employee = employee.get("employee")
 			if kwargs.from_time and not kwargs.to_time:
@@ -1289,9 +1305,6 @@ class JobCard(Document):
 					row.db_update()
 
 			self.set_status(update_status=update_status)
-
-		self.validate_time_logs(save=True)
-		self.save()
 
 	def update_workstation_status(self):
 		status_map = {

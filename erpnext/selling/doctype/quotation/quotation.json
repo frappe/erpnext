@@ -3,7 +3,7 @@
  "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
- "creation": "2013-05-24 19:29:08",
+ "creation": "2026-01-29 21:18:32.391385",
  "doctype": "DocType",
  "document_type": "Document",
  "editable_grid": 1,
@@ -1115,14 +1115,15 @@
    "hidden": 1,
    "label": "Item Wise Tax Details",
    "no_copy": 1,
-   "options": "Item Wise Tax Detail"
+   "options": "Item Wise Tax Detail",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-31 17:23:48.875382",
+ "modified": "2026-01-29 21:18:48.836168",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

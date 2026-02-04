@@ -437,8 +437,10 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 	if not ctx.uom:
 		if ctx.doctype in sales_doctypes:
 			ctx.uom = item.sales_uom if item.sales_uom else item.stock_uom
-		elif (ctx.doctype in ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]) or (
-			ctx.doctype == "Material Request" and ctx.material_request_type == "Purchase"
+		elif (
+			(ctx.doctype in ["Purchase Order", "Purchase Receipt", "Purchase Invoice"])
+			or (ctx.doctype == "Material Request" and ctx.material_request_type == "Purchase")
+			or (ctx.doctype == "Supplier Quotation")
 		):
 			ctx.uom = item.purchase_uom if item.purchase_uom else item.stock_uom
 		else:

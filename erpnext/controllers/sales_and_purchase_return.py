@@ -12,7 +12,7 @@ from frappe.utils import cint, flt, format_datetime, get_datetime
 
 import erpnext
 from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
-from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_valuation_method
+from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_valuation_method, getdate
 
 
 class StockOverReturnError(frappe.ValidationError):
@@ -759,6 +759,29 @@ def get_rate_for_return(
 		StockLedgerEntry = frappe.qb.DocType("Stock Ledger Entry")
 		select_field = Abs(StockLedgerEntry.stock_value_difference / StockLedgerEntry.actual_qty)
 
+	item_details = frappe.get_cached_value("Item", item_code, ["has_batch_no", "has_expiry_date"], as_dict=1)
+	set_zero_rate_for_expired_batch = frappe.db.get_single_value(
+		"Selling Settings", "set_zero_rate_for_expired_batch"
+	)
+
+	if (
+		set_zero_rate_for_expired_batch
+		and item_details.has_batch_no
+		and item_details.has_expiry_date
+		and not return_against
+		and voucher_type in ["Sales Invoice", "Delivery Note"]
+	):
+		# set incoming_rate zero explicitly for standalone credit note with expired batch
+		batch_no = frappe.db.get_value(f"{voucher_type} Item", voucher_detail_no, "batch_no")
+		if batch_no and is_batch_expired(batch_no, sle.get("posting_date")):
+			frappe.db.set_value(
+				voucher_type + " Item",
+				voucher_detail_no,
+				"incoming_rate",
+				0,
+			)
+			return 0
+
 	rate = flt(frappe.db.get_value("Stock Ledger Entry", filters, select_field))
 	if not (rate and return_against) and voucher_type in ["Sales Invoice", "Delivery Note"]:
 		rate = frappe.db.get_value(f"{voucher_type} Item", voucher_detail_no, "incoming_rate")
@@ -823,10 +846,32 @@ def get_filters(
 	if reference_voucher_detail_no:
 		filters["voucher_detail_no"] = reference_voucher_detail_no
 
-	if voucher_type in ["Purchase Receipt", "Purchase Invoice"] and item_row and item_row.get("warehouse"):
-		filters["warehouse"] = item_row.get("warehouse")
+	warehouses = []
+	if voucher_type in ["Purchase Receipt", "Purchase Invoice"] and item_row:
+		if reference_voucher_detail_no:
+			warehouses = get_warehouses_for_return(voucher_type, reference_voucher_detail_no)
+
+		if item_row.get("warehouse") and item_row.get("warehouse") in warehouses:
+			filters["warehouse"] = item_row.get("warehouse")
 
 	return filters
+
+
+def get_warehouses_for_return(voucher_type, name):
+	warehouses = []
+	warehouse_details = frappe.get_all(
+		voucher_type + " Item",
+		filters={"name": name, "docstatus": 1},
+		fields=["warehouse", "rejected_warehouse"],
+	)
+
+	for d in warehouse_details:
+		if d.warehouse:
+			warehouses.append(d.warehouse)
+		if d.rejected_warehouse:
+			warehouses.append(d.rejected_warehouse)
+
+	return warehouses
 
 
 def get_returned_serial_nos(child_doc, parent_doc, serial_no_field=None, ignore_voucher_detail_no=None):
@@ -1276,3 +1321,17 @@ def get_sales_invoice_item_from_consolidated_invoice(return_against_pos_invoice,
 		return result[0].name if result else None
 	except Exception:
 		return None
+
+
+def is_batch_expired(batch_no, posting_date):
+	"""
+	To check whether the batch is expired or not based on the posting date.
+	"""
+	expiry_date = frappe.db.get_value("Batch", batch_no, "expiry_date")
+	if not expiry_date:
+		return
+
+	if getdate(posting_date) > getdate(expiry_date):
+		return True
+
+	return False

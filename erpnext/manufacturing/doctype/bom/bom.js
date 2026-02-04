@@ -697,8 +697,6 @@ var get_bom_material_detail = function (doc, cdt, cdn, scrap_items) {
 				do_not_explode: d.do_not_explode,
 			},
 			callback: function (r) {
-				d = locals[cdt][cdn];
-
 				$.extend(d, r.message);
 				refresh_field("items");
 				refresh_field("scrap_items");

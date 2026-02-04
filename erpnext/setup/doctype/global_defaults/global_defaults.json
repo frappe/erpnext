@@ -13,6 +13,7 @@
   "hide_currency_symbol",
   "disable_rounded_total",
   "disable_in_words",
+  "use_posting_datetime_for_naming_documents",
   "demo_company"
  ],
  "fields": [
@@ -80,6 +81,13 @@
    "label": "Demo Company",
    "options": "Company",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "When checked, the system will use the posting datetime of the document for naming the document instead of the creation datetime of the document.",
+   "fieldname": "use_posting_datetime_for_naming_documents",
+   "fieldtype": "Check",
+   "label": "Use Posting Datetime for Naming Documents"
   }
  ],
  "grid_page_length": 50,
@@ -89,7 +97,7 @@
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-02 18:13:13.421866",
+ "modified": "2026-01-12 09:45:59.819161",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Global Defaults",

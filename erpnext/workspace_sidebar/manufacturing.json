@@ -92,6 +92,18 @@
   {
    "child": 1,
    "collapsible": 1,
+   "icon": "",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Item Lead Time",
+   "link_to": "Item Lead Time",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
    "label": "Production Plan",
@@ -425,7 +437,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-10 00:06:13.058137",
+ "modified": "2026-01-29 16:41:40.416652",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",

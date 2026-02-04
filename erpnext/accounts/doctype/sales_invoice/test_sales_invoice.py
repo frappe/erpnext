@@ -4739,6 +4739,66 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		doc.db_set("do_not_use_batchwise_valuation", original_value)
 
+	@change_settings("Selling Settings", {"set_zero_rate_for_expired_batch": True})
+	def test_zero_valuation_for_standalone_credit_note_with_expired_batch(self):
+		item_code = "_Test Item for Expiry Batch Zero Valuation"
+		make_item_for_si(
+			item_code,
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"has_expiry_date": 1,
+				"shelf_life_in_days": 2,
+				"create_new_batch": 1,
+				"batch_number_series": "TBATCH-EBZV.####",
+			},
+		)
+
+		se = make_stock_entry(
+			item_code=item_code,
+			qty=10,
+			target="_Test Warehouse - _TC",
+			rate=100,
+		)
+
+		# fetch batch no from bundle
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		si = create_sales_invoice(
+			posting_date=add_days(nowdate(), 3),
+			item=item_code,
+			qty=-10,
+			rate=100,
+			is_return=1,
+			update_stock=1,
+			use_serial_batch_fields=1,
+			do_not_save=1,
+			do_not_submit=1,
+		)
+
+		si.items[0].batch_no = batch_no
+		si.save()
+		si.submit()
+
+		si.reload()
+		# check zero incoming rate in voucher
+		self.assertEqual(si.items[0].incoming_rate, 0.0)
+
+		# chekc zero incoming rate in stock ledger
+		stock_ledger_entry = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Sales Invoice",
+				"voucher_no": si.name,
+				"item_code": item_code,
+				"warehouse": "_Test Warehouse - _TC",
+			},
+			["incoming_rate", "valuation_rate"],
+			as_dict=True,
+		)
+
+		self.assertEqual(stock_ledger_entry.incoming_rate, 0.0)
+
 
 def make_item_for_si(item_code, properties=None):
 	from erpnext.stock.doctype.item.test_item import make_item

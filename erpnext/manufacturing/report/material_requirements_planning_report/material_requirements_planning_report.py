@@ -453,7 +453,6 @@ class MaterialRequirementsPlanningReport:
 					row[field] = rm_details.get(field)
 
 			self.update_required_qty(row)
-			row.release_date = add_days(row.delivery_date, row.lead_time * -1)
 			if i != 0:
 				data.append(frappe._dict({}))
 
@@ -462,7 +461,15 @@ class MaterialRequirementsPlanningReport:
 			if rm_details.raw_materials:
 				row.capacity = get_item_capacity(row.item_code, self.filters.bucket_size)
 				row.type_of_material = "Manufacture"
+				if row.lead_time and row.required_qty:
+					row.lead_time = math.ceil(row.required_qty / row.lead_time)
+				elif not row.required_qty:
+					row.lead_time = 0
 
+			if not row.lead_time and rm_details.raw_materials:
+				row.lead_time = self.get_lead_time_from_raw_materials(rm_details.raw_materials)
+
+			row.release_date = add_days(row.delivery_date, row.lead_time * -1)
 			data.append(row)
 			if rm_details.raw_materials:
 				self.update_rm_details(
@@ -470,6 +477,15 @@ class MaterialRequirementsPlanningReport:
 				)
 
 		return data
+
+	def get_lead_time_from_raw_materials(self, raw_materials):
+		lead_time = 0
+		for material in raw_materials:
+			lead_time += math.ceil(material.lead_time)
+			if material.raw_materials:
+				lead_time += self.get_lead_time_from_raw_materials(material.raw_materials)
+
+		return lead_time
 
 	def add_non_planned_so(self, row):
 		if so_details := self._so_details.get((row.item_code, row.delivery_date)):
@@ -1198,8 +1214,10 @@ def get_item_lead_time(item_code, type_of_material):
 	if type_of_material == "Manufacture":
 		query = query.select(
 			Case()
-			.when(doctype.manufacturing_time_in_mins.isnull(), 0)
-			.else_(doctype.manufacturing_time_in_mins / 1440 + doctype.buffer_time)
+			.when(
+				(doctype.manufacturing_time_in_mins.isnull() | (doctype.manufacturing_time_in_mins <= 0)), 0
+			)
+			.else_(1440 / doctype.manufacturing_time_in_mins + doctype.buffer_time)
 			.as_("lead_time")
 		)
 	else:

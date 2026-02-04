@@ -166,28 +166,45 @@ class SubcontractingController(StockController):
 						_("Row {0}: Item {1} must be a subcontracted item.").format(item.idx, item.item_name)
 					)
 
-				if self.doctype != "Subcontracting Receipt" and item.qty > flt(
-					get_pending_subcontracted_quantity(
-						self.doctype,
-						self.purchase_order if self.doctype == "Subcontracting Order" else self.sales_order,
-					).get(
-						item.purchase_order_item
-						if self.doctype == "Subcontracting Order"
-						else item.sales_order_item
-					)
-					/ item.subcontracting_conversion_factor,
-					frappe.get_precision(
+				if self.doctype != "Subcontracting Receipt":
+					order_item_doctype = (
 						"Purchase Order Item"
 						if self.doctype == "Subcontracting Order"
-						else "Sales Order Item",
-						"qty",
-					),
-				):
-					frappe.throw(
-						_(
-							"Row {0}: Item {1}'s quantity cannot be higher than the available quantity."
-						).format(item.idx, item.item_name)
+						else "Sales Order Item"
 					)
+
+					order_name = (
+						self.purchase_order if self.doctype == "Subcontracting Order" else self.sales_order
+					)
+					order_item_field = frappe.scrub(order_item_doctype)
+
+					if not item.get(order_item_field):
+						frappe.throw(
+							_("Row {0}: Item {1} must be linked to a {2}.").format(
+								item.idx, item.item_name, order_item_doctype
+							)
+						)
+
+					pending_qty = flt(
+						flt(
+							get_pending_subcontracted_quantity(
+								order_item_doctype,
+								order_name,
+							).get(item.get(order_item_field))
+						)
+						/ item.subcontracting_conversion_factor,
+						frappe.get_precision(
+							order_item_doctype,
+							"qty",
+						),
+					)
+
+					if item.qty > pending_qty:
+						frappe.throw(
+							_(
+								"Row {0}: Item {1}'s quantity cannot be higher than the available quantity."
+							).format(item.idx, item.item_name)
+						)
 
 				if self.doctype != "Subcontracting Inward Order":
 					item.amount = item.qty * item.rate
@@ -296,10 +313,10 @@ class SubcontractingController(StockController):
 		):
 			for row in frappe.get_all(
 				f"{self.subcontract_data.order_doctype} Item",
-				fields=["item_code", {"SUB": ["qty", "received_qty"], "as": "qty"}, "parent", "name"],
+				fields=["item_code", {"SUB": ["qty", "received_qty"], "as": "qty"}, "parent", "bom"],
 				filters={"docstatus": 1, "parent": ("in", self.subcontract_orders)},
 			):
-				self.qty_to_be_received[(row.item_code, row.parent)] += row.qty
+				self.qty_to_be_received[(row.item_code, row.parent, row.bom)] += row.qty
 
 	def __get_transferred_items(self):
 		se = frappe.qb.DocType("Stock Entry")
@@ -905,13 +922,17 @@ class SubcontractingController(StockController):
 		self.__set_serial_nos(item_row, rm_obj)
 
 	def __get_qty_based_on_material_transfer(self, item_row, transfer_item):
-		key = (item_row.item_code, item_row.get(self.subcontract_data.order_field))
+		key = (
+			item_row.item_code,
+			item_row.get(self.subcontract_data.order_field),
+			item_row.get("bom"),
+		)
 
 		if self.qty_to_be_received == item_row.qty:
 			return transfer_item.qty
 
-		if self.qty_to_be_received:
-			qty = (flt(item_row.qty) * flt(transfer_item.qty)) / flt(self.qty_to_be_received.get(key, 0))
+		if self.qty_to_be_received.get(key):
+			qty = (flt(item_row.qty) * flt(transfer_item.qty)) / flt(self.qty_to_be_received.get(key))
 			transfer_item.item_details.required_qty = transfer_item.qty
 
 			if transfer_item.serial_no or frappe.get_cached_value(
@@ -960,7 +981,11 @@ class SubcontractingController(StockController):
 
 				if self.qty_to_be_received:
 					self.qty_to_be_received[
-						(row.item_code, row.get(self.subcontract_data.order_field))
+						(
+							row.item_code,
+							row.get(self.subcontract_data.order_field),
+							row.get("bom"),
+						)
 					] -= row.qty
 
 	def __set_rate_for_serial_and_batch_bundle(self):
@@ -1332,9 +1357,7 @@ def get_item_details(items):
 
 
 def get_pending_subcontracted_quantity(doctype, name):
-	table = frappe.qb.DocType(
-		"Purchase Order Item" if doctype == "Subcontracting Order" else "Sales Order Item"
-	)
+	table = frappe.qb.DocType(doctype)
 	query = (
 		frappe.qb.from_(table)
 		.select(table.name, table.stock_qty, table.subcontracted_qty)

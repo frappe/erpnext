@@ -1610,13 +1610,14 @@
    "hidden": 1,
    "label": "Item Wise Tax Details",
    "no_copy": 1,
-   "options": "Item Wise Tax Detail"
+   "options": "Item Wise Tax Detail",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-04 22:22:31.471752",
+ "modified": "2026-01-29 21:20:51.376875",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

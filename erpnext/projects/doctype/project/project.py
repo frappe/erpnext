@@ -308,6 +308,8 @@ class Project(Document):
 		self.gross_margin = flt(self.total_billed_amount) - expense_amount
 		if self.total_billed_amount:
 			self.per_gross_margin = (self.gross_margin / flt(self.total_billed_amount)) * 100
+		else:
+			self.per_gross_margin = 0
 
 	def update_purchase_costing(self):
 		total_purchase_cost = calculate_total_purchase_cost(self.name)
@@ -603,7 +605,7 @@ def send_project_update_email_to_users(project):
 			"sent": 0,
 			"date": today(),
 			"time": nowtime(),
-			"naming_series": "UPDATE-.project.-.YY.MM.DD.-",
+			"naming_series": "UPDATE-.project.-.YY.MM.DD.-.####",
 		}
 	).insert()
 

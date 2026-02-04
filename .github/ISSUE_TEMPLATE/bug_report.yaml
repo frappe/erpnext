@@ -60,7 +60,7 @@ body:
       description: Share exact version number of Frappe and ERPNext you are using.
       placeholder: |
         Frappe version -
-        ERPNext Verion -
+        ERPNext version -
     validations:
       required: true
 

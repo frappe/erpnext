@@ -720,6 +720,7 @@ class SubcontractingInwardController:
 				item.db_set("scio_detail", scio_rm.name)
 
 		if data:
+			precision = self.precision("customer_provided_item_cost", "items")
 			result = frappe.get_all(
 				"Subcontracting Inward Order Received Item",
 				filters={
@@ -734,10 +735,17 @@ class SubcontractingInwardController:
 			table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
 			case_expr_qty, case_expr_rate = Case(), Case()
 			for d in result:
-				d.received_qty += (
-					data[d.name].transfer_qty if self._action == "submit" else -data[d.name].transfer_qty
+				current_qty = flt(data[d.name].transfer_qty) * (1 if self._action == "submit" else -1)
+				current_rate = flt(data[d.name].rate)
+
+				# Calculate weighted average rate
+				old_total = d.rate * d.received_qty
+				current_total = current_rate * current_qty
+
+				d.received_qty = d.received_qty + current_qty
+				d.rate = (
+					flt((old_total + current_total) / d.received_qty, precision) if d.received_qty else 0.0
 				)
-				d.rate += data[d.name].rate if self._action == "submit" else -data[d.name].rate
 
 				if not d.required_qty and not d.received_qty:
 					deleted_docs.append(d.name)

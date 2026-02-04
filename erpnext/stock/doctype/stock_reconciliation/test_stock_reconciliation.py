@@ -1449,6 +1449,7 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 			qty=10,
 			rate=100,
 			use_serial_batch_fields=1,
+			purpose="Opening Stock",
 		)
 
 		sr.reload()
@@ -1591,6 +1592,7 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 			qty=10,
 			rate=80,
 			use_serial_batch_fields=1,
+			purpose="Opening Stock",
 		)
 
 		batch_no = get_batch_from_bundle(reco.items[0].serial_and_batch_bundle)
@@ -1675,6 +1677,7 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 			qty=10,
 			rate=100,
 			use_serial_batch_fields=1,
+			purpose="Opening Stock",
 		)
 
 		sr.reload()

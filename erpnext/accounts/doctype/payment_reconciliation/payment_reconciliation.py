@@ -746,7 +746,7 @@ class PaymentReconciliation(Document):
 		ple = qb.DocType("Payment Ledger Entry")
 		for x in self.dimensions:
 			dimension = x.fieldname
-			if self.get(dimension):
+			if self.get(dimension) and frappe.db.has_column("Payment Ledger Entry", dimension):
 				self.accounting_dimension_filter_conditions.append(ple[dimension] == self.get(dimension))
 
 	def build_qb_filter_conditions(self, get_invoices=False, get_return_invoices=False):

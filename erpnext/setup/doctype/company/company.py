@@ -1081,6 +1081,8 @@ def get_billing_shipping_address(name, billing_address=None, shipping_address=No
 
 @frappe.whitelist()
 def create_transaction_deletion_request(company):
+	frappe.only_for("System Manager")
+
 	from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
 		is_deletion_doc_running,
 	)
@@ -1088,12 +1090,16 @@ def create_transaction_deletion_request(company):
 	is_deletion_doc_running(company)
 
 	tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": company})
+	tdr.insert()
+
+	tdr.generate_to_delete_list()
+	tdr.reload()
+
 	tdr.submit()
 	tdr.start_deletion_tasks()
 
 	frappe.msgprint(
-		_("A Transaction Deletion Document: {0} is triggered for {0}").format(
-			get_link_to_form("Transaction Deletion Record", tdr.name)
-		),
-		frappe.bold(company),
+		_("Transaction Deletion Document {0} has been triggered for company {1}").format(
+			get_link_to_form("Transaction Deletion Record", tdr.name), frappe.bold(company)
+		)
 	)

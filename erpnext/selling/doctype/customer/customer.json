@@ -183,6 +183,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Customer Group",
+   "link_filters": "[[\"Customer Group\", \"is_group\", \"=\", 0]]",
    "oldfieldname": "customer_group",
    "oldfieldtype": "Link",
    "options": "Customer Group",
@@ -625,7 +626,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-01-16 15:56:05.967663",
+ "modified": "2026-01-21 17:23:42.151114",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

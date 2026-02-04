@@ -1,18 +1,19 @@
 {
  "actions": [],
  "allow_import": 1,
+ "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2022-01-25 10:29:57.771398",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "customer_section",
+  "company",
+  "company_tax_id",
   "naming_series",
   "customer",
   "customer_name",
   "tax_id",
-  "company",
-  "company_tax_id",
   "column_break1",
   "posting_date",
   "posting_time",
@@ -2250,7 +2251,8 @@
    "hidden": 1,
    "label": "Item Wise Tax Details",
    "no_copy": 1,
-   "options": "Item Wise Tax Detail"
+   "options": "Item Wise Tax Detail",
+   "print_hide": 1
   },
   {
    "default": "0",
@@ -2304,7 +2306,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2025-12-24 18:29:50.242618",
+ "modified": "2026-02-03 14:09:44.347133",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

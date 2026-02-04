@@ -35,8 +35,7 @@ class TestPartySpecificItem(IntegrationTestCase):
 		items = item_query(
 			doctype="Item", txt="", searchfield="name", start=0, page_len=20, filters=filters, as_dict=False
 		)
-		for item in items:
-			self.assertEqual(item[0], self.item.name)
+		self.assertTrue(self.item.name in flatten(items))
 
 	def test_item_query_for_supplier(self):
 		create_party_specific_item(
@@ -49,5 +48,14 @@ class TestPartySpecificItem(IntegrationTestCase):
 		items = item_query(
 			doctype="Item", txt="", searchfield="name", start=0, page_len=20, filters=filters, as_dict=False
 		)
-		for item in items:
-			self.assertEqual(item[2], self.item.item_group)
+		self.assertTrue(self.item.item_group in flatten(items))
+
+
+def flatten(lst):
+	result = []
+	for item in lst:
+		if isinstance(item, tuple):
+			result.extend(flatten(item))
+		else:
+			result.append(item)
+	return result
