@@ -198,7 +198,7 @@ const raiseQualityAlarm = async () => {
 onMounted(async () => {
     const route = frappe.get_route();
     jobCardNumber.value = route[1] || null;
-    if (!jobCardNumber.value) {
+    if (!jobCardNumber.value && selectedSlab?.value) {
         jobCardNumber.value = selectedSlab.value.job_card;
     }
 
