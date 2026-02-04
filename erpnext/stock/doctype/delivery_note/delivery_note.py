@@ -383,29 +383,34 @@ class DeliveryNote(SellingController):
 
 	def validate_sales_order_references(self):
 		self._validate_dependent_item_fields(
-			"against_sales_order", "so_detail", _("References to Sales Orders are Incomplete")
+			["against_sales_order", "so_detail"], _("References to Sales Orders are Incomplete")
 		)
 
 	def validate_sales_invoice_references(self):
-		self._validate_dependent_item_fields(
-			"against_sales_invoice", "si_detail", _("References to Sales Invoices are Incomplete")
-		)
+		fields = ["against_sales_invoice"]
+		if not self.is_return:
+			fields.append("si_detail")
 
-	def _validate_dependent_item_fields(self, field_a: str, field_b: str, error_title: str):
+		self._validate_dependent_item_fields(fields, _("References to Sales Invoices are Incomplete"))
+
+	def _validate_dependent_item_fields(self, fields: list[str], error_title: str):
 		errors = []
 		for item in self.items:
-			missing_label = None
-			if item.get(field_a) and not item.get(field_b):
-				missing_label = item.meta.get_label(field_b)
-			elif item.get(field_b) and not item.get(field_a):
-				missing_label = item.meta.get_label(field_a)
+			present_fields = [f for f in fields if item.get(f)]
+			missing_fields = set(fields) - set(present_fields)
 
-			if missing_label and missing_label != "No Label":
-				errors.append(
-					_("The field {0} in row {1} is not set").format(
-						frappe.bold(_(missing_label)), frappe.bold(item.idx)
+			if not present_fields or not missing_fields:
+				continue
+
+			for field in missing_fields:
+				missing_label = item.meta.get_label(field)
+				if missing_label and missing_label != "No Label":
+					errors.append(
+						_("The field {0} in row {1} is not set").format(
+							frappe.bold(_(missing_label)),
+							frappe.bold(item.idx),
+						)
 					)
-				)
 
 		if errors:
 			frappe.throw("<br>".join(errors), title=error_title)
