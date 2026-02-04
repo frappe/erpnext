@@ -100,11 +100,11 @@
   "apply_discount_on",
   "base_discount_amount",
   "coupon_code",
-  "is_cash_or_non_trade_discount",
-  "additional_discount_account",
   "column_break_51",
   "additional_discount_percentage",
   "discount_amount",
+  "is_cash_or_non_trade_discount",
+  "additional_discount_account",
   "sec_tax_breakup",
   "other_charges_calculation",
   "item_wise_tax_details",
@@ -217,8 +217,7 @@
   "update_auto_repeat_reference",
   "more_information",
   "status",
-  "inter_company_invoice_reference",
-  "represents_company",
+  "remarks",
   "customer_group",
   "column_break_imbx",
   "utm_source",
@@ -227,8 +226,9 @@
   "utm_content",
   "col_break23",
   "is_internal_customer",
+  "represents_company",
+  "inter_company_invoice_reference",
   "is_discounted",
-  "remarks",
   "connections_tab"
  ],
  "fields": [
@@ -794,7 +794,8 @@
    "hide_seconds": 1,
    "label": "Time Sheets",
    "options": "Sales Invoice Timesheet",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "default": "0",
@@ -2306,7 +2307,11 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
+<<<<<<< HEAD
  "modified": "2026-02-06 20:43:44.732805",
+=======
+ "modified": "2026-02-02 17:21:09.768833",
+>>>>>>> 2f2e16fc33 (refactor: Better organizing of the fields in various doctypes)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

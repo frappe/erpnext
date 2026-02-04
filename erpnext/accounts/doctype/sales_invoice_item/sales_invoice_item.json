@@ -1009,7 +1009,11 @@
  "idx": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2026-02-15 21:08:57.341638",
+=======
+ "modified": "2026-02-02 16:46:12.597972",
+>>>>>>> 2f2e16fc33 (refactor: Better organizing of the fields in various doctypes)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
