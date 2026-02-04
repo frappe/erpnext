@@ -63,6 +63,8 @@
   "allow_rate_change",
   "column_break_hwfg",
   "allow_discount_change",
+  "column_break_egpi",
+  "allow_warehouse_change",
   "section_break_15",
   "applicable_for_users",
   "section_break_23",
@@ -542,6 +544,16 @@
   {
    "fieldname": "column_break_hwfg",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_egpi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_warehouse_change",
+   "fieldtype": "Check",
+   "label": "Allow User to Edit Warehouse"
   }
  ],
  "grid_page_length": 50,
@@ -570,7 +582,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2026-02-05 03:38:13.216277",
+ "modified": "2026-02-05 04:36:40.757162",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
