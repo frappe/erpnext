@@ -66,7 +66,7 @@ class AccountsSettings(Document):
 		default_ageing_range: DF.Data | None
 		delete_linked_ledger_entries: DF.Check
 		determine_address_tax_category_from: DF.Literal["Billing Address", "Shipping Address"]
-		enable_analytical_accounting: DF.Check
+		enable_accounting_dimensions: DF.Check
 		enable_common_party_accounting: DF.Check
 		enable_discounts_and_margin: DF.Check
 		enable_fuzzy_matching: DF.Check
@@ -124,8 +124,8 @@ class AccountsSettings(Document):
 		if old_doc.show_payment_schedule_in_print != self.show_payment_schedule_in_print:
 			self.enable_payment_schedule_in_print()
 
-		if old_doc.enable_analytical_accounting != self.enable_analytical_accounting:
-			toggle_accounting_dimension_sections(not self.enable_analytical_accounting)
+		if old_doc.enable_accounting_dimensions != self.enable_accounting_dimensions:
+			toggle_accounting_dimension_sections(not self.enable_accounting_dimensions)
 			clear_cache = True
 
 		if old_doc.enable_discounts_and_margin != self.enable_discounts_and_margin:

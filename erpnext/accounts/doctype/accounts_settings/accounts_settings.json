@@ -21,7 +21,7 @@
   "allow_multi_currency_invoices_against_single_party_account",
   "confirm_before_resetting_posting_date",
   "analytics_section",
-  "enable_analytical_accounting",
+  "enable_accounting_dimensions",
   "column_break_vtnr",
   "enable_discounts_and_margin",
   "journals_section",
@@ -657,13 +657,6 @@
   },
   {
    "default": "0",
-   "description": "Enable cost center, projects and other custom accounting dimensions",
-   "fieldname": "enable_analytical_accounting",
-   "fieldtype": "Check",
-   "label": "Enable Analytical Accounting"
-  },
-  {
-   "default": "0",
    "description": "Apply discounts and margins on products",
    "fieldname": "enable_discounts_and_margin",
    "fieldtype": "Check",
@@ -688,6 +681,13 @@
   {
    "fieldname": "column_break_ctam",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Enable cost center, projects and other custom accounting dimensions",
+   "fieldname": "enable_accounting_dimensions",
+   "fieldtype": "Check",
+   "label": "Enable Accounting Dimensions"
   }
  ],
  "grid_page_length": 50,
@@ -697,7 +697,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-04 15:20:03.309843",
+ "modified": "2026-02-04 17:15:38.609327",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
