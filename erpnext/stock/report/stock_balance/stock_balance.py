@@ -283,7 +283,7 @@ class StockBalanceReport:
 			qty_dict[field] = entry.get(field)
 
 		if entry.voucher_type == "Stock Reconciliation" and (
-			not entry.batch_no or not entry.serial_no or not entry.serial_and_batch_bundle
+			not entry.batch_no and not entry.serial_no and not entry.serial_and_batch_bundle
 		):
 			qty_diff = flt(entry.qty_after_transaction) - flt(qty_dict.bal_qty)
 		else:

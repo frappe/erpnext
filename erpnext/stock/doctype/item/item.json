@@ -3,7 +3,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:item_code",
- "creation": "2013-05-03 10:45:46",
+ "creation": "2026-02-02 14:41:23.105228",
  "description": "A Product or a Service that is bought, sold or kept in stock.",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -16,9 +16,6 @@
   "item_name",
   "item_group",
   "stock_uom",
-  "opening_stock",
-  "valuation_rate",
-  "standard_rate",
   "column_break0",
   "disabled",
   "allow_alternative_item",
@@ -29,6 +26,10 @@
   "is_grouped_asset",
   "asset_category",
   "asset_naming_series",
+  "section_break_gjns",
+  "opening_stock",
+  "column_break_ixrh",
+  "standard_rate",
   "section_break_znra",
   "over_delivery_receipt_allowance",
   "column_break_wugd",
@@ -41,11 +42,14 @@
   "uoms",
   "dashboard_tab",
   "inventory_section",
+  "inventory_valuation_section",
+  "valuation_method",
+  "column_break_cqdk",
+  "valuation_rate",
   "inventory_settings_section",
   "shelf_life_in_days",
   "end_of_life",
   "default_material_request_type",
-  "valuation_method",
   "column_break1",
   "warranty_period",
   "weight_per_unit",
@@ -114,19 +118,21 @@
   "sales_tax_withholding_category",
   "quality_tab",
   "inspection_required_before_purchase",
-  "quality_inspection_template",
   "inspection_required_before_delivery",
+  "column_break_pxjh",
+  "quality_inspection_template",
   "manufacturing",
   "include_item_in_manufacturing",
   "is_sub_contracted_item",
   "default_bom",
   "column_break_74",
-  "customer_code",
-  "default_item_manufacturer",
-  "default_manufacturer_part_no",
+  "production_capacity",
   "total_projected_qty",
-  "capacity_in_days_section",
-  "production_capacity"
+  "section_break_xili",
+  "customer_code",
+  "column_break_vipt",
+  "default_manufacturer_part_no",
+  "default_item_manufacturer"
  ],
  "fields": [
   {
@@ -188,6 +194,7 @@
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_list_view": 1,
    "label": "Default Unit of Measure",
    "oldfieldname": "stock_uom",
    "oldfieldtype": "Link",
@@ -218,6 +225,7 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "is_stock_item",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Maintain Stock",
    "oldfieldname": "is_stock_item",
    "oldfieldtype": "Select"
@@ -889,15 +897,9 @@
    "fieldtype": "Column Break"
   },
   {
-   "collapsible": 1,
    "fieldname": "deferred_accounting_section",
    "fieldtype": "Section Break",
    "label": "Deferred Accounting"
-  },
-  {
-   "fieldname": "capacity_in_days_section",
-   "fieldtype": "Section Break",
-   "label": "Capacity (In Days)"
   },
   {
    "fieldname": "production_capacity",
@@ -931,10 +933,10 @@
    "fieldtype": "Section Break"
   },
   {
+   "depends_on": "is_purchase_item",
    "fieldname": "purchase_tax_withholding_category",
    "fieldtype": "Link",
    "label": "Purchase Tax Withholding Category",
-   "depends_on": "is_purchase_item",
    "options": "Tax Withholding Category"
   },
   {
@@ -942,11 +944,40 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "is_sales_item",
    "fieldname": "sales_tax_withholding_category",
    "fieldtype": "Link",
    "label": "Sales Tax Withholding Category",
-   "depends_on": "is_sales_item",
    "options": "Tax Withholding Category"
+  },
+  {
+   "fieldname": "column_break_cqdk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "inventory_valuation_section",
+   "fieldtype": "Section Break",
+   "label": "Inventory Valuation"
+  },
+  {
+   "fieldname": "section_break_gjns",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ixrh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_pxjh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_xili",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_vipt",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-tag",
@@ -954,7 +985,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2025-12-15 20:08:35.634046",
+ "modified": "2026-02-05 17:20:35.605734",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

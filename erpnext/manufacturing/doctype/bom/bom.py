@@ -296,6 +296,55 @@ class BOM(WebsiteGenerator):
 		self.set_process_loss_qty()
 		self.validate_scrap_items()
 		self.set_default_uom()
+		self.validate_semi_finished_goods()
+		self.validate_raw_materials_of_operation()
+
+	def validate_semi_finished_goods(self):
+		if not self.track_semi_finished_goods or not self.operations:
+			return
+
+		fg_items = []
+		for row in self.operations:
+			if not row.is_final_finished_good:
+				continue
+
+			fg_items.append(row.finished_good)
+
+		if not fg_items:
+			frappe.throw(
+				_(
+					"Since you have enabled 'Track Semi Finished Goods', at least one operation must have 'Is Final Finished Good' checked. For that set the FG / Semi FG Item as {0} against an operation."
+				).format(bold(self.item)),
+			)
+
+		if fg_items and len(fg_items) > 1:
+			frappe.throw(
+				_(
+					"Only one operation can have 'Is Final Finished Good' checked when 'Track Semi Finished Goods' is enabled."
+				),
+			)
+
+	def validate_raw_materials_of_operation(self):
+		if not self.track_semi_finished_goods or not self.operations:
+			return
+
+		operation_idx_with_no_rm = {}
+		for row in self.operations:
+			if row.bom_no:
+				continue
+
+			operation_idx_with_no_rm[row.idx] = row.operation
+
+		for row in self.items:
+			if row.operation_row_id and row.operation_row_id in operation_idx_with_no_rm:
+				del operation_idx_with_no_rm[row.operation_row_id]
+
+		for idx, row in operation_idx_with_no_rm.items():
+			frappe.throw(
+				_("For operation {0} at row {1}, please add raw materials or set a BOM against it.").format(
+					bold(row.operation), idx
+				),
+			)
 
 	def set_default_uom(self):
 		if not self.get("items"):

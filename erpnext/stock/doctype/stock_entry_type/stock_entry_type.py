@@ -108,7 +108,9 @@ class ManufactureEntry:
 				_dict.from_warehouse = self.source_wh.get(item_code) or self.wip_warehouse
 				_dict.to_warehouse = ""
 
-				if backflush_based_on != "BOM":
+				if backflush_based_on != "BOM" and not frappe.db.get_value(
+					"Job Card", self.job_card, "skip_material_transfer"
+				):
 					calculated_qty = flt(_dict.transferred_qty) - flt(_dict.consumed_qty)
 					if calculated_qty < 0:
 						frappe.throw(

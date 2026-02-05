@@ -809,7 +809,7 @@ erpnext.work_order = {
 				}
 			}
 
-			if (frm.doc.status != "Stopped") {
+			if (frm.doc.status != "Stopped" && !frm.doc.track_semi_finished_goods) {
 				// If "Material Consumption is check in Manufacturing Settings, allow Material Consumption
 				if (frm.doc.__onload && frm.doc.__onload.material_consumption == 1) {
 					if (flt(doc.material_transferred_for_manufacturing) > 0 || frm.doc.skip_transfer) {

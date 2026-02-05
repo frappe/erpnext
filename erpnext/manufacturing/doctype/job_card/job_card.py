@@ -166,6 +166,25 @@ class JobCard(Document):
 
 		self.validate_work_order()
 		self.set_employees()
+		self.validate_semi_finished_goods()
+
+	def validate_semi_finished_goods(self):
+		if not self.track_semi_finished_goods:
+			return
+
+		if self.items and not self.transferred_qty and not self.skip_material_transfer:
+			frappe.throw(
+				_(
+					"Materials needs to be transferred to the work in progress warehouse for the job card {0}"
+				).format(self.name)
+			)
+
+		if self.docstatus == 1 and not self.total_completed_qty:
+			frappe.throw(
+				_(
+					"Total Completed Qty is required for Job Card {0}, please start and complete the job card before submission"
+				).format(self.name)
+			)
 
 	def on_update(self):
 		self.validate_job_card_qty()
@@ -1354,6 +1373,9 @@ class JobCard(Document):
 				employees=self.employee,
 				sub_operation=kwargs.get("sub_operation"),
 			)
+
+			if self.docstatus == 1:
+				self.update_work_order()
 		else:
 			self.add_time_logs(completed_qty=kwargs.qty, employees=self.employee)
 			self.save()

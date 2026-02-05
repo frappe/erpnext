@@ -248,6 +248,16 @@ class WorkOrder(Document):
 		if self.is_new() and frappe.db.get_single_value("Stock Settings", "auto_reserve_stock"):
 			self.reserve_stock = 1
 
+	def before_save(self):
+		self.set_skip_transfer_for_operations()
+
+	def set_skip_transfer_for_operations(self):
+		if not self.track_semi_finished_goods:
+			return
+
+		for op in self.operations:
+			op.skip_material_transfer = self.skip_transfer
+
 	def validate_operations_sequence(self):
 		if all([not op.sequence_id for op in self.operations]):
 			for op in self.operations:
