@@ -19,6 +19,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.controllers.queries import item_query as _item_query
 from erpnext.controllers.sales_and_purchase_return import get_sales_invoice_item_from_consolidated_invoice
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import combine_datetime
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.stock_ledger import is_negative_stock_allowed
 
@@ -250,7 +251,29 @@ class POSInvoice(SalesInvoice):
 		self.set_status(update=True)
 		self.make_bundle_for_sales_purchase_return()
 		for table_name in ["items", "packed_items"]:
+			if not self.get(table_name):
+				continue
 			self.make_bundle_using_old_serial_batch_fields(table_name)
+			for row in self.get(table_name):
+				if not row.item_code:
+					continue
+				if row.get("serial_and_batch_bundle") or row.get("rejected_serial_and_batch_bundle"):
+					continue
+				if not self.is_serial_batch_item(row.item_code):
+					continue
+
+				bundle_details = {
+					"item_code": row.get("rm_item_code") or row.item_code,
+					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
+					"voucher_type": self.doctype,
+					"voucher_no": self.name,
+					"voucher_detail_no": row.name,
+					"company": self.company,
+					"is_rejected": 1 if row.get("rejected_warehouse") else 0,
+					"use_serial_batch_fields": row.get("use_serial_batch_fields"),
+				}
+				self.update_bundle_details(bundle_details, table_name, row)
+				self.create_serial_batch_bundle(bundle_details, row)
 			self.submit_serial_batch_bundle(table_name)
 
 		if self.coupon_code:
