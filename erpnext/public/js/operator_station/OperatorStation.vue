@@ -13,7 +13,7 @@ const processStartTime = ref(null);
 const processElapsed = ref(0);
 const processTimerHandle = ref(null);
 const processReady = ref(true);
-const pollingInterval = ref(null);
+// const pollingInterval = ref(null);
 
 const slabsQueue = ref([]);
 const slabCreated = ref(false);
@@ -79,21 +79,19 @@ const props = defineProps({
 });
 
 // actions
-onMounted(async () => {
-	try {
-		const route = frappe.get_route();
-		const station = route[1] || '';
-		jobCardName.value = route[2] || null;
-		if (!jobCardName.value) {
-			jobCardName.value = await getJobCardsList();
-		}
+const isDistribution = computed(() => currentStation.value === 'distribution');
 
+async function loadJobCard(name) {
+	if (!name) return;
+	jobCardName.value = name;
+
+	try {
 		const jc = await frappe.db.get_doc('Job Card', jobCardName.value);
 		jobCardDoc.value = jc;
 
 		if (jc.bom_no) {
 			const bom = await frappe.db.get_doc('BOM', jc.bom_no);
-			bom_elements = jc.bom_no.split("-");
+			const bom_elements = jc.bom_no.split("-");
 			batchNo.value = `${bom_elements[1] ?? ''}-${bom_elements[2] ?? ''}`.trim();
 			if (bom.slab_template) {
 				slabTemplate.value = bom.slab_template;
@@ -104,7 +102,10 @@ onMounted(async () => {
 		if (jobCardSubmitted.value) {
 			preparedQty.value = jc.total_completed_qty || jc.for_quantity || 0;
 		}
-		// await slabInfo(jc, station);
+
+		const route = frappe.get_route();
+		const station = route[1] || '';
+
 		const stateRes = await frappe.call({
 			method: 'erpnext.manufacturing.page.operator_station.operator_station.get_operator_state',
 			args: {
@@ -116,7 +117,6 @@ onMounted(async () => {
 		const state = stateRes.message || {};
 		status.value = state.status || 'Pending';
 
-		// Logic to set UI flags based on EXPLICIT backend status
 		if (status.value === 'Work In Progress') {
 			processStarted.value = true;
 			showStartButton.value = false;
@@ -131,7 +131,6 @@ onMounted(async () => {
 			showStartButton.value = false;
 			processReady.value = false;
 		} else {
-			// Open / Pending
 			processStarted.value = false;
 			showStartButton.value = true;
 			processReady.value = true;
@@ -159,16 +158,49 @@ onMounted(async () => {
 				processTimerHandle.value = null;
 			}
 		}
+	} catch (e) {
+		console.error(e);
+		frappe.msgprint(__('Failed to load Job Card details.'));
+	}
+}
 
-		// Fetch Slab Queue
-		await fetchQueue(line.value || jc.production_line, station);
-
-		// Polling alternative to socket.io
-		pollingInterval.value = setInterval(() => {
-			if (currentStation.value) {
-				fetchQueue(line.value || jobCardDoc.value?.production_line, currentStation.value);
+async function checkForNextItem() {
+	const route = frappe.get_route();
+	const station = route[1] || '';
+	if (!jobCardName.value || status.value === 'Finished') {
+		const result = await frappe.call({
+			method: 'erpnext.manufacturing.page.operator_station.operator_station.get_next_work_item',
+			args: {
+				process: station,
+				line: line.value || '2' // Defaulting to L1 for now if not known
 			}
-		}, 5000); // Poll every 5 seconds
+		});
+		if (result.message && result.message.name) {
+			if (result.message.name !== jobCardName.value) {
+				await loadJobCard(result.message.name);
+			}
+		}
+	}
+}
+
+onMounted(async () => {
+	try {
+		const route = frappe.get_route();
+		const station = route[1] || '';
+		if (!jobCardName.value) {
+			const nextItem = await frappe.call({
+				method: 'erpnext.manufacturing.page.operator_station.operator_station.get_next_work_item',
+				args: { process: station, line: '2' }
+			});
+			if (nextItem.message && nextItem.message.name) {
+				await loadJobCard(nextItem.message.name);
+			} else {
+				frappe.msgprint(__("No work available at this station."));
+				return;
+			}
+		} else {
+			await loadJobCard(jobCardName.value);
+		}
 
 	} catch (e) {
 		error.value = e.message;
@@ -176,43 +208,12 @@ onMounted(async () => {
 	}
 });
 
-onUnmounted(() => {
-	if (pollingInterval.value) clearInterval(pollingInterval.value);
-});
 
-const isDistribution = computed(() => currentStation.value === 'distribution');
-
-async function fetchQueue(line, station) {
-	currentStation.value = station.toLowerCase();
-	try {
-		if (currentStation.value === 'distribution') {
-			jobcardsQueue.value = [];
-			const jobcardsMethod = await frappe.call({
-				method: 'erpnext.manufacturing.doctype.operation.api.get_open_job_cards',
-				args: { process: station }
-			});
-			if (jobcardsMethod.message) {
-				jobcardsQueue.value = jobcardsMethod.message || [];
-			}
-		}
-
-		else {
-			slabsQueue.value = [];
-			const result = await frappe.call({
-				method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_in',
-				args: {
-					line: line,
-					current_stage: station
-				}
-			});
-			if (result.message) {
-				slabsQueue.value = result.message || [];
-			}
-		}
-	} catch (e) {
-		console.error('Failed to fetch queue:');
+frappe.realtime.on('refresh_operator_station', (data) => {
+	if (data.station && data.station.toLowerCase() === currentStation.value) {
+		checkForNextItem();
 	}
-}
+});
 
 async function createSlab(line) {
 	if (!jobCardDoc.value || slabCreated.value || !slabTemplate.value) return
@@ -287,6 +288,7 @@ async function startOperation() {
 		__('Start the process now?'),
 		async () => {
 			try {
+				await slabInfo(jobCardDoc.value, station);
 				await frappe.call({
 					method: 'erpnext.manufacturing.page.operator_station.operator_station.start_process',
 					args: {
@@ -294,7 +296,6 @@ async function startOperation() {
 						process_name: station
 					}
 				});
-				await slabInfo(jobCardDoc.value, station);
 
 				status.value = 'In Progress';
 				showStartButton.value = false;
@@ -331,7 +332,7 @@ async function finishOperation() {
 
 	try {
 		const result = await frappe.call({
-			method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_distribution',
+			method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_process',
 			args: {
 				job_card: jobCardName.value,
 				process_name: station
@@ -352,18 +353,15 @@ async function finishOperation() {
 		transferSuccess.value = false;
 
 		frappe.msgprint(result.message.message);
-		if (result.message.work_order_status === 'Completed') {
-			frappe.show_alert({
-				message: __('Work Order also Completed!'),
-				indicator: 'green'
-			});
-		}
+		frappe.show_alert({
+			message: __('Work Order also Completed!'),
+			indicator: 'green'
+		});
 		transferToFGWarehouse();
 		//move slab to next station
-		await fetchQueue(line.value || jobCardDoc.value.production_line, station);
-	}
-
-	catch (error) {
+		// Check for next item immediately
+		checkForNextItem();
+	} catch (error) {
 		const errorMsg = error.message || (error._server_messages?.[0]?.message) || JSON.stringify(error);
 		frappe.msgprint({
 			title: __('Error'),
@@ -495,88 +493,11 @@ function statusStyle() {
 	return 'background:#e9ecef;color:#6c757d;padding:.5rem';
 }
 
-function selectJobCard(name) {
-	if (name === jobCardName.value) return;
 
-	const route = frappe.get_route();
-	if (route.length >= 2) {
-		frappe.set_route(route[0], route[1], name);
-		window.location.reload();
-	}
-}
-
-function selectSlab(name) {
-	if (name === slabNumber.value) return;
-
-	const route = frappe.get_route();
-	if (route.length >= 2) {
-		frappe.set_route(route[0], route[1], name);
-		window.location.reload();
-	}
-}
 </script>
 <template>
-	<div class="page-card p-0 d-flex h-100 w-100">
-		<!-- Sidebar: Queue -->
-		<div class="queue-sidebar bg-light border-right p-3" style="width: 320px; overflow-y: auto;">
-			<h5 class="mb-3 font-weight-bold text-center border-bottom pb-2">
-				{{ isDistribution ? __('Pending Job Cards') : __('Incoming Slabs') }}
-			</h5>
-
-			<!-- Distribution Queue: Job Cards -->
-			<div v-if="isDistribution">
-				<div v-if="jobcardsQueue.length === 0" class="text-muted text-center py-4 bg-white rounded border">
-					<span class="fa fa-inbox fa-2x mb-2 d-block text-muted-light"></span>
-					{{ __('No Job cards in queue') }}
-				</div>
-				<div v-for="item in jobcardsQueue" :key="item.name" @click="selectJobCard(item.name)"
-					class="card mb-2 shadow-sm slab-card border-0" :class="{ 'active-card': item.name === jobCardName }"
-					style="cursor: pointer;">
-					<div class="card-body p-3 d-flex flex-column justify-content-center align-items-start"
-						:style="item.name === jobCardName ? 'border-left: 4px solid #007bff; background: #e7f1ff;' : 'border-left: 4px solid #ddd;'"
-						style="height: 5.5rem">
-						<div class="d-flex justify-content-between w-100 mb-1">
-							<h6 class="card-title mb-0 font-weight-bold">{{ item.name }}</h6>
-							<span class="badge badge-light border small">{{ item.status }}</span>
-						</div>
-						<div class="small text-muted mb-1 w-100">
-							<span class="fa fa-cubes mr-1"></span>{{ item.production_item }}
-						</div>
-					</div>
-				</div>
-			</div>
-			<div v-else>
-				<!-- Other Queue: Slabs -->
-				<div v-if="slabsQueue.length === 0" class="text-muted text-center py-4 bg-white rounded border">
-					<span class="fa fa-inbox fa-2x mb-2 d-block text-muted-light"></span>
-					{{ __('No slabs in queue') }}
-				</div>
-				<div v-else>
-					<div v-for="item in slabsQueue" :key="item.name" @click="selectSlab(item.current_job_card)"
-						class="card mb-2 shadow-sm slab-card border-0">
-						<div class="card-body p-3 d-flex flex-column justify-content-center align-items-start"
-							style="border-left: 4px solid #28a745; height: 5.5rem">
-							<h6 class="card-title mb-1 font-weight-bold">{{ item.serial_number }}</h6>
-							<div class="d-flex justify-content-between w-100">
-								<div class="small text-muted">
-									<span class="fa fa-cube mr-1"></span>{{ item.template }}
-								</div>
-								<span class="badge badge-light border small">
-									{{ new Date(item.modified).toLocaleTimeString([], {
-										hour: '2-digit', minute:
-											'2-digit'
-									})
-									}}
-								</span>
-							</div>
-							<div class="small text-muted mt-1 w-100 text-truncate" title="Batch">
-								{{ item.batch_number }}
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+	<div class="page-card p-0 d-flex h-100 w-100 justify-content-center">
+		<!-- Queue Sidebar Removed -->
 		<div class="operator-station page-card d-flex flex-column align-items-center flex-grow-1 p-4"
 			style="overflow-y: auto;">
 			<!-- Current Job Card -->
@@ -714,6 +635,7 @@ function selectSlab(name) {
 			</div>
 		</div>
 	</div>
+
 </template>
 
 <style scoped>
