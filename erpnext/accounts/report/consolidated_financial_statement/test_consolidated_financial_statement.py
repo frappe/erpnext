@@ -26,10 +26,10 @@ class TestAccumulateValuesIntoParents(IntegrationTestCase):
 	Regression test for #52018, #49771: KeyError when parent_account_name is None.
 	"""
 
-	def test_skips_account_with_none_parent_account_name(self):
+	def test_skips_account_with_none_parent_account_name_and_shows_warning(self):
 		"""
 		Test that accounts with parent_account_name=None are skipped
-		without raising KeyError.
+		without raising KeyError, and a warning is shown.
 		"""
 		# Account with parent_account but parent_account_name is None
 		# This can happen when parent wasn't in fetched accounts
@@ -51,13 +51,22 @@ class TestAccumulateValuesIntoParents(IntegrationTestCase):
 
 		companies = ["Test Company"]
 
+		# Clear any existing messages
+		frappe.message_log = []
+
 		# This should not raise KeyError: None
 		accumulate_values_into_parents(accounts, accounts_by_name, companies)
 
-	def test_skips_account_with_missing_parent_in_accounts_by_name(self):
+		# Verify warning was shown
+		self.assertTrue(len(frappe.message_log) > 0, "Expected a warning message")
+		warning_msg = str(frappe.message_log[0])
+		self.assertIn("Test Account", warning_msg)
+		self.assertIn("Accounts Skipped", warning_msg)
+
+	def test_skips_account_with_missing_parent_in_accounts_by_name_and_shows_warning(self):
 		"""
 		Test that accounts whose parent_account_name is not in accounts_by_name
-		are skipped without raising KeyError.
+		are skipped without raising KeyError, and a warning is shown.
 		"""
 		accounts = [
 			frappe._dict(
@@ -65,7 +74,7 @@ class TestAccumulateValuesIntoParents(IntegrationTestCase):
 					"account_name": "Child Account",
 					"account_key": "Child Account",
 					"parent_account": "Parent Account - ABC",
-					"parent_account_name": "Parent Account",  # Parent exists
+					"parent_account_name": "Parent Account",  # Parent exists but not in accounts_by_name
 					"company_wise_opening_bal": {},
 				}
 			),
@@ -78,12 +87,22 @@ class TestAccumulateValuesIntoParents(IntegrationTestCase):
 
 		companies = ["Test Company"]
 
+		# Clear any existing messages
+		frappe.message_log = []
+
 		# This should not raise KeyError: 'Parent Account'
 		accumulate_values_into_parents(accounts, accounts_by_name, companies)
 
-	def test_accumulates_values_when_parent_exists(self):
+		# Verify warning was shown
+		self.assertTrue(len(frappe.message_log) > 0, "Expected a warning message")
+		warning_msg = str(frappe.message_log[0])
+		self.assertIn("Child Account", warning_msg)
+		self.assertIn("Chart of Accounts", warning_msg)
+
+	def test_accumulates_values_when_parent_exists_without_warning(self):
 		"""
-		Test that values are correctly accumulated when parent exists.
+		Test that values are correctly accumulated when parent exists,
+		and no warning is shown.
 		"""
 		child = frappe._dict(
 			{
@@ -118,12 +137,18 @@ class TestAccumulateValuesIntoParents(IntegrationTestCase):
 
 		companies = ["Test Company"]
 
+		# Clear any existing messages
+		frappe.message_log = []
+
 		accumulate_values_into_parents(accounts, accounts_by_name, companies)
 
 		# Parent should have accumulated child's values
 		self.assertEqual(parent["Test Company"], 500.0)
 		self.assertEqual(parent["opening_balance"], 100.0)
 		self.assertEqual(parent["company_wise_opening_bal"]["Test Company"], 100.0)
+
+		# No warning should be shown when accumulation succeeds
+		self.assertEqual(len(frappe.message_log), 0, "No warning expected when parents exist")
 
 
 class TestUpdateParentAccountNames(IntegrationTestCase):

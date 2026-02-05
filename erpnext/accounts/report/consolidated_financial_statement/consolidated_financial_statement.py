@@ -429,6 +429,8 @@ def calculate_values(accounts_by_name, gl_entries_by_account, companies, filters
 
 def accumulate_values_into_parents(accounts, accounts_by_name, companies):
 	"""accumulate children's values in parent accounts"""
+	skipped_accounts = []
+
 	for d in reversed(accounts):
 		if d.parent_account:
 			account = d.parent_account_name
@@ -436,6 +438,7 @@ def accumulate_values_into_parents(accounts, accounts_by_name, companies):
 			# Skip if parent_account_name is None or not in accounts_by_name
 			# This can happen when parent account wasn't fetched (different company/root_type)
 			if not account or account not in accounts_by_name:
+				skipped_accounts.append(d)
 				continue
 
 			for company in companies:
@@ -450,6 +453,21 @@ def accumulate_values_into_parents(accounts, accounts_by_name, companies):
 			accounts_by_name[account]["opening_balance"] = accounts_by_name[account].get(
 				"opening_balance", 0.0
 			) + d.get("opening_balance", 0.0)
+
+	if skipped_accounts:
+		account_names = ", ".join(d.account_name for d in skipped_accounts[:5])
+		if len(skipped_accounts) > 5:
+			account_names += f" and {len(skipped_accounts) - 5} more"
+
+		frappe.msgprint(
+			_(
+				"Some accounts could not be consolidated because their parent account group "
+				"is not present in the consolidated view: {0}. "
+				"Ensure the Chart of Accounts group structure matches between parent and child companies."
+			).format(account_names),
+			title=_("Accounts Skipped"),
+			indicator="orange",
+		)
 
 
 def get_account_heads(root_type, companies, filters):
