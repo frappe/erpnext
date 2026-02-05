@@ -1138,7 +1138,7 @@
    "fieldtype": "Currency",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Grand Total (Company Currency",
+   "label": "Grand Total",
    "oldfieldname": "grand_total",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -2365,7 +2365,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-08-12 12:00:00.000000",
+ "modified": "2026-09-25 15:17:29.168134",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
