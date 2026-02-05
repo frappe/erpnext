@@ -233,7 +233,7 @@ def update_stock(ctx, out, doc=None):
 
 			for batch_no, batch_qty in batches.items():
 				rate = get_batch_based_item_price(
-					{"price_list": doc.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
+					{"price_list": ctx.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
 					out.item_code,
 				)
 				if batch_qty >= qty:
