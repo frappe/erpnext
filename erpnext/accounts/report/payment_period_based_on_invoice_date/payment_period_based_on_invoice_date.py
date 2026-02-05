@@ -6,7 +6,7 @@ import frappe
 from frappe import _, qb
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Abs
-from frappe.utils import flt, getdate
+from frappe.utils import getdate
 
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
 

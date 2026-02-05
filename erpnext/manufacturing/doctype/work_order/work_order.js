@@ -710,7 +710,7 @@ erpnext.work_order = {
 	set_custom_buttons: function (frm) {
 		var doc = frm.doc;
 
-		if (doc.docstatus === 1 && doc.status !== "Closed") {
+		if (doc.docstatus === 1 && !["Closed", "Completed"].includes(doc.status)) {
 			frm.add_custom_button(
 				__("Close"),
 				function () {
@@ -720,9 +720,6 @@ erpnext.work_order = {
 				},
 				__("Status")
 			);
-		}
-
-		if (doc.docstatus === 1 && !["Closed", "Completed"].includes(doc.status)) {
 			if (doc.status != "Stopped" && doc.status != "Completed") {
 				frm.add_custom_button(
 					__("Stop"),
@@ -829,7 +826,7 @@ erpnext.work_order = {
 							}
 						}
 						if (counter > 0) {
-							var consumption_btn = frm.add_custom_button(
+							frm.add_custom_button(
 								__("Material Consumption"),
 								function () {
 									const backflush_raw_materials_based_on =

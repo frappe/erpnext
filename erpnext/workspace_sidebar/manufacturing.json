@@ -33,30 +33,6 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "notebook-tabs",
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Item",
-   "link_to": "Item",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
-   "icon": "warehouse",
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Warehouse",
-   "link_to": "Warehouse",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
    "icon": "list-tree",
    "indent": 0,
    "keep_closed": 0,
@@ -112,6 +88,18 @@
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Section Break"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Item Lead Time",
+   "link_to": "Item Lead Time",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
   },
   {
    "child": 1,
@@ -362,6 +350,18 @@
    "icon": "",
    "indent": 0,
    "keep_closed": 0,
+   "label": "Item",
+   "link_to": "Item",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "",
+   "indent": 0,
+   "keep_closed": 0,
    "label": "Warehouse",
    "link_to": "Warehouse",
    "link_type": "DocType",
@@ -437,7 +437,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-08 18:49:11.863897",
+ "modified": "2026-01-29 16:41:40.416652",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",

@@ -8,7 +8,7 @@ import frappe
 from frappe import qb
 from frappe.model.document import Document
 from frappe.query_builder.functions import Count, Max, Min, Sum
-from frappe.utils import add_days, flt, get_datetime
+from frappe.utils import flt, get_datetime
 from frappe.utils.scheduler import is_scheduler_inactive
 
 from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (

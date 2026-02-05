@@ -8,7 +8,6 @@ from frappe.utils.data import (
 	add_days,
 	add_months,
 	add_to_date,
-	add_years,
 	cint,
 	date_diff,
 	flt,

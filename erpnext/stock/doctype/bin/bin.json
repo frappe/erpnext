@@ -22,6 +22,7 @@
   "reserved_stock",
   "section_break_pmrs",
   "stock_uom",
+  "company",
   "column_break_0slj",
   "valuation_rate",
   "stock_value"
@@ -133,6 +134,14 @@
    "read_only": 1
   },
   {
+   "fetch_from": "warehouse.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
    "fieldname": "valuation_rate",
    "fieldtype": "Float",
    "label": "Valuation Rate",
@@ -186,7 +195,7 @@
  "idx": 1,
  "in_create": 1,
  "links": [],
- "modified": "2024-03-27 13:06:39.414036",
+ "modified": "2026-02-01 08:11:46.824913",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Bin",
@@ -231,6 +240,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "search_fields": "item_code,warehouse",
  "sort_field": "creation",
  "sort_order": "ASC",

@@ -163,7 +163,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		}
 
 		if (this.item?.type_of_transaction === "Outward") {
-			fields = [...this.get_filter_fields(), ...fields];
+			fields = [...this.get_filter_fields(), ...fields, ...this.get_attach_field()];
 		} else {
 			fields = [...fields, ...this.get_attach_field()];
 		}
@@ -195,7 +195,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		}
 
 		let fields = [];
-		if (this.item.has_serial_no) {
+		if (this.item.has_serial_no && this.item?.type_of_transaction !== "Outward") {
 			fields.push({
 				fieldtype: "Check",
 				label: __("Enter Manually"),
@@ -217,7 +217,8 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				label: __("Import Using CSV file"),
 				fieldname: "import_using_csv_file",
 				depends_on: "eval:doc.enter_manually !== 1",
-				default: !this.item.has_serial_no ? 1 : 0,
+				default: !this.item.has_serial_no || this.item?.type_of_transaction === "Outward" ? 1 : 0,
+				hidden: this.item?.type_of_transaction === "Outward",
 				change() {
 					if (me.dialog.get_value("import_using_csv_file")) {
 						me.dialog.set_value("enter_manually", 0);
@@ -246,7 +247,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			},
 		];
 
-		if (this.item?.has_serial_no) {
+		if (this.item?.has_serial_no && this.item?.type_of_transaction !== "Outward") {
 			fields = [
 				...fields,
 				{
@@ -267,7 +268,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			];
 		}
 
-		if (this.item?.has_serial_no) {
+		if (this.item?.has_serial_no && this.item?.type_of_transaction !== "Outward") {
 			fields = [
 				...fields,
 				{

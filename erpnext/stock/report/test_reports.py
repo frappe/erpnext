@@ -1,6 +1,3 @@
-import unittest
-
-import frappe
 from frappe.tests import IntegrationTestCase
 from frappe.utils.make_random import get_random
 

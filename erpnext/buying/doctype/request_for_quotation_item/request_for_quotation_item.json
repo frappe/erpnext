@@ -63,7 +63,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -262,7 +261,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-04-28 23:30:22.927989",
+ "modified": "2026-01-31 19:46:27.884592",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation Item",

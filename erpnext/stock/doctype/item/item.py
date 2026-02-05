@@ -1,8 +1,6 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import copy
-import json
 
 import frappe
 from frappe import _, bold
@@ -20,7 +18,6 @@ from frappe.utils import (
 	now_datetime,
 	nowtime,
 	strip,
-	strip_html,
 )
 from frappe.utils.html_utils import clean_html
 from pypika import Order
@@ -183,7 +180,23 @@ class Item(Document):
 				self.add_price(default.default_price_list)
 
 		if self.opening_stock:
-			self.set_opening_stock()
+			if self.opening_stock > 10000 and self.has_serial_no:
+				frappe.enqueue(
+					self.set_opening_stock,
+					queue="long",
+					timeout=600,
+					job_name=f"set_opening_stock_for_{self.name}",
+				)
+				frappe.msgprint(
+					_(
+						"Opening stock creation has been queued and will be created in the background. Please check the stock entry after some time."
+					),
+					indicator="orange",
+					alert=True,
+				)
+
+			else:
+				self.set_opening_stock()
 
 	def validate(self):
 		if not self.item_name:
@@ -232,7 +245,24 @@ class Item(Document):
 			cint(frappe.get_single_value("Stock Settings", "clean_description_html"))
 			and self.description != self.item_name  # perf: Avoid cleaning up a fallback
 		):
+			old_desc = self.description
 			self.description = clean_html(self.description)
+
+			if (
+				old_desc
+				and self.description
+				and "<img src" in old_desc
+				and "<img src" not in self.description
+			):
+				frappe.msgprint(
+					_(
+						'Image in the description has been removed. To disable this behavior, uncheck "{0}" in {1}.'
+					).format(
+						frappe.get_meta("Stock Settings").get_label("clean_description_html"),
+						get_link_to_form("Stock Settings"),
+					),
+					alert=True,
+				)
 
 	def validate_customer_provided_part(self):
 		if self.is_customer_provided_item:
@@ -264,7 +294,11 @@ class Item(Document):
 
 	def set_opening_stock(self):
 		"""set opening stock"""
-		if not self.is_stock_item or self.has_serial_no or self.has_batch_no:
+		if (
+			not self.is_stock_item
+			or (self.has_serial_no and not self.serial_no_series)
+			or (self.has_batch_no and (not self.create_new_batch or not self.batch_number_series))
+		):
 			return
 
 		if not self.valuation_rate and not self.standard_rate and not self.is_customer_provided_item:

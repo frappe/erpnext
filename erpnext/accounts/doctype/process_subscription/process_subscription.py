@@ -5,7 +5,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import create_batch, getdate
 
-from erpnext.accounts.doctype.subscription.subscription import DateTimeLikeObject, process_all
+from erpnext.accounts.doctype.subscription.subscription import DateTimeLikeObject
 
 
 class ProcessSubscription(Document):

@@ -1,5 +1,3 @@
-import unittest
-
 from frappe.tests import IntegrationTestCase
 
 from erpnext.tests.utils import ReportFilters, ReportName, execute_script_report

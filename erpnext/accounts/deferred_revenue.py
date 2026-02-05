@@ -7,7 +7,6 @@ from frappe.utils import (
 	cint,
 	date_diff,
 	flt,
-	formatdate,
 	get_first_day,
 	get_last_day,
 	get_link_to_form,

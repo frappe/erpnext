@@ -1,12 +1,17 @@
 frappe.provide("erpnext.financial_statements");
 
+function get_filter_value(filter_name) {
+	// not warn when the filter is missing
+	return frappe.query_report.get_filter_value(filter_name, false);
+}
+
 erpnext.financial_statements = {
 	filters: get_filters(),
 	baseData: null,
 
 	get_pdf_format: function (report, custom_format) {
 		// If report template is selected, use default pdf formatting
-		return report.get_filter_value("report_template") ? null : custom_format;
+		return get_filter_value("report_template") ? null : custom_format;
 	},
 
 	formatter: function (value, row, column, data, default_formatter, filter) {
@@ -15,14 +20,14 @@ erpnext.financial_statements = {
 		if (erpnext.financial_statements._is_special_view(column, data))
 			return erpnext.financial_statements._format_special_view(...report_params);
 
-		if (frappe.query_report.get_filter_value("report_template"))
+		if (get_filter_value("report_template"))
 			return erpnext.financial_statements._format_custom_report(...report_params);
 		else return erpnext.financial_statements._format_standard_report(...report_params);
 	},
 
 	_is_special_view: function (column, data) {
 		if (!data) return false;
-		const view = frappe.query_report.get_filter_value("selected_view");
+		const view = get_filter_value("selected_view");
 		return (view === "Growth" && column.colIndex >= 3) || (view === "Margin" && column.colIndex >= 2);
 	},
 
@@ -100,7 +105,7 @@ erpnext.financial_statements = {
 				from_date: formatting.from_date || formatting.period_start_date,
 				to_date: formatting.to_date || formatting.period_end_date,
 				account_type: formatting.account_type,
-				company: frappe.query_report.get_filter_value("company"),
+				company: get_filter_value("company"),
 			};
 
 			column.link_onclick =
@@ -177,7 +182,7 @@ erpnext.financial_statements = {
 	},
 
 	_format_special_view: function (value, row, column, data, default_formatter) {
-		const selectedView = frappe.query_report.get_filter_value("selected_view");
+		const selectedView = get_filter_value("selected_view");
 
 		if (selectedView === "Growth") {
 			const growthPercent = data[column.fieldname];
@@ -252,7 +257,7 @@ erpnext.financial_statements = {
 
 		frappe.route_options = {
 			account: data.account || data.accounts,
-			company: frappe.query_report.get_filter_value("company"),
+			company: get_filter_value("company"),
 			from_date: data.from_date || data.year_start_date,
 			to_date: data.to_date || data.year_end_date,
 			project: project && project.length > 0 ? project[0].get_value() : "",
@@ -305,17 +310,49 @@ erpnext.financial_statements = {
 
 			report.page.add_custom_menu_item(views_menu, __("Balance Sheet"), function () {
 				var filters = report.get_values();
-				frappe.set_route("query-report", "Balance Sheet", { company: filters.company });
+				frappe.set_route("query-report", "Balance Sheet", {
+					company: filters.company,
+					filter_based_on: filters.filter_based_on,
+					period_start_date: filters.period_start_date,
+					period_end_date: filters.period_end_date,
+					from_fiscal_year: filters.from_fiscal_year,
+					to_fiscal_year: filters.to_fiscal_year,
+					periodicity: filters.periodicity,
+					presentation_currency: filters.presentation_currency,
+					cost_center: filters.cost_center,
+					project: filters.project,
+				});
 			});
 
 			report.page.add_custom_menu_item(views_menu, __("Profit and Loss"), function () {
 				var filters = report.get_values();
-				frappe.set_route("query-report", "Profit and Loss Statement", { company: filters.company });
+				frappe.set_route("query-report", "Profit and Loss Statement", {
+					company: filters.company,
+					filter_based_on: filters.filter_based_on,
+					period_start_date: filters.period_start_date,
+					period_end_date: filters.period_end_date,
+					from_fiscal_year: filters.from_fiscal_year,
+					to_fiscal_year: filters.to_fiscal_year,
+					periodicity: filters.periodicity,
+					presentation_currency: filters.presentation_currency,
+					cost_center: filters.cost_center,
+					project: filters.project,
+				});
 			});
 
 			report.page.add_custom_menu_item(views_menu, __("Cash Flow Statement"), function () {
 				var filters = report.get_values();
-				frappe.set_route("query-report", "Cash Flow", { company: filters.company });
+				frappe.set_route("query-report", "Cash Flow", {
+					company: filters.company,
+					filter_based_on: filters.filter_based_on,
+					period_start_date: filters.period_start_date,
+					period_end_date: filters.period_end_date,
+					from_fiscal_year: filters.from_fiscal_year,
+					to_fiscal_year: filters.to_fiscal_year,
+					periodicity: filters.periodicity,
+					cost_center: filters.cost_center,
+					project: filters.project,
+				});
 			});
 		}
 	},
@@ -345,7 +382,7 @@ function get_filters() {
 			default: ["Fiscal Year"],
 			reqd: 1,
 			on_change: function () {
-				let filter_based_on = frappe.query_report.get_filter_value("filter_based_on");
+				let filter_based_on = get_filter_value("filter_based_on");
 				frappe.query_report.toggle_filter_display(
 					"from_fiscal_year",
 					filter_based_on === "Date Range"
@@ -422,7 +459,7 @@ function get_filters() {
 			fieldtype: "MultiSelectList",
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Cost Center", txt, {
-					company: frappe.query_report.get_filter_value("company"),
+					company: get_filter_value("company"),
 				});
 			},
 			options: "Cost Center",
@@ -433,7 +470,7 @@ function get_filters() {
 			fieldtype: "MultiSelectList",
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Project", txt, {
-					company: frappe.query_report.get_filter_value("company"),
+					company: get_filter_value("company"),
 				});
 			},
 			options: "Project",

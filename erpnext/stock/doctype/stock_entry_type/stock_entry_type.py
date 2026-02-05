@@ -7,8 +7,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
-
 
 class StockEntryType(Document):
 	# begin: auto-generated types
@@ -77,7 +75,6 @@ class ManufactureEntry:
 		self.stock_entry.fg_completed_qty = self.for_quantity
 		self.stock_entry.project = self.project
 		self.stock_entry.job_card = self.job_card
-		self.stock_entry.work_order = self.work_order
 		self.stock_entry.set_stock_entry_type()
 
 		self.prepare_source_warehouse()

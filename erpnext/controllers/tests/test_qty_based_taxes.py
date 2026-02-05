@@ -1,4 +1,3 @@
-import unittest
 from uuid import uuid4 as _uuid4
 
 import frappe

@@ -110,12 +110,6 @@ frappe.ui.form.ContactAddressQuickEntryForm = class ContactAddressQuickEntryForm
 				options: "Country",
 				mandatory_depends_on: "eval:doc.city || doc.address_line1",
 			},
-			{
-				label: __("Customer POS Id"),
-				fieldname: "customer_pos_id",
-				fieldtype: "Data",
-				hidden: 1,
-			},
 		];
 
 		return variant_fields;

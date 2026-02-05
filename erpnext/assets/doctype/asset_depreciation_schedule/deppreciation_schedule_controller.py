@@ -14,7 +14,6 @@ from frappe.utils import (
 	nowdate,
 )
 
-import erpnext
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.assets.doctype.asset_depreciation_schedule.depreciation_methods import (
 	StraightLineMethod,

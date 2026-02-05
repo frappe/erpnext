@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-12-21 09:37+0000\n"
-"PO-Revision-Date: 2025-12-22 03:08\n"
+"PO-Revision-Date: 2026-01-11 06:34\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Indonesian\n"
 "MIME-Version: 1.0\n"
@@ -207,13 +207,13 @@ msgstr "% Progres"
 #. 'Subcontracting Inward Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "% Raw Material Received"
-msgstr ""
+msgstr "% Bahan Baku yang Diterima"
 
 #. Label of the per_raw_material_returned (Percent) field in DocType
 #. 'Subcontracting Inward Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "% Raw Material Returned"
-msgstr ""
+msgstr "% Bahan Baku yang Dikembalikan"
 
 #. Label of the per_received (Percent) field in DocType 'Purchase Order'
 #. Label of the per_received (Percent) field in DocType 'Material Request'
@@ -242,13 +242,13 @@ msgstr "% Dikembalikan"
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #, python-format
 msgid "% of materials billed against this Sales Order"
-msgstr ""
+msgstr "Persentase bahan yang ditagihkan terhadap Pesanan Penjualan ini"
 
 #. Description of the '% Delivered' (Percent) field in DocType 'Pick List'
 #: erpnext/stock/doctype/pick_list/pick_list.json
 #, python-format
 msgid "% of materials delivered against this Pick List"
-msgstr ""
+msgstr "% Material yang Dikirim pada Pick List ini"
 
 #. Description of the '%  Delivered' (Percent) field in DocType 'Sales Order'
 #: erpnext/selling/doctype/sales_order/sales_order.json
@@ -2321,7 +2321,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "Activities"
-msgstr ""
+msgstr "Aktivitas"
 
 #. Name of a DocType
 #. Label of a Link in the Projects Workspace
@@ -2421,15 +2421,15 @@ msgstr ""
 #. Operation'
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Actual End Time"
-msgstr ""
+msgstr "Waktu Akhir Aktual"
 
 #: erpnext/accounts/report/budget_variance_report/budget_variance_report.py:381
 msgid "Actual Expense"
-msgstr ""
+msgstr "Beban Aktual"
 
 #: erpnext/accounts/doctype/budget/budget.py:601
 msgid "Actual Expenses"
-msgstr ""
+msgstr "Beban Aktual"
 
 #. Label of the actual_operating_cost (Currency) field in DocType 'Work Order'
 #. Label of the actual_operating_cost (Currency) field in DocType 'Work Order
@@ -2437,13 +2437,13 @@ msgstr ""
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Actual Operating Cost"
-msgstr ""
+msgstr "Biaya Operasional Aktual"
 
 #. Label of the actual_operation_time (Float) field in DocType 'Work Order
 #. Operation'
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Actual Operation Time"
-msgstr ""
+msgstr "Waktu Operasi Aktual"
 
 #: erpnext/accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.py:430
 msgid "Actual Posting"
@@ -3211,18 +3211,18 @@ msgstr "Jumlah Uang Muka"
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 #: erpnext/selling/doctype/sales_order/sales_order.json
 msgid "Advance Paid"
-msgstr ""
+msgstr "Uang Muka Dibayar"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order_list.js:75
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:122
 msgid "Advance Payment"
-msgstr ""
+msgstr "Pembayaran Uang Muka"
 
 #. Option for the 'Reconciliation Takes Effect On' (Select) field in DocType
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Advance Payment Date"
-msgstr ""
+msgstr "Tanggal Pembayaran Uang Muka"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/advance_payment_ledger_entry/advance_payment_ledger_entry.json
@@ -3288,7 +3288,7 @@ msgstr ""
 #. Advance'
 #: erpnext/accounts/doctype/sales_invoice_advance/sales_invoice_advance.json
 msgid "Advance amount"
-msgstr ""
+msgstr "Jumlah uang muka"
 
 #: erpnext/controllers/taxes_and_totals.py:942
 msgid "Advance amount cannot be greater than {0} {1}"
@@ -3320,15 +3320,15 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Advances"
-msgstr ""
+msgstr "Uang Muka"
 
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:3
 msgid "Advertisement"
-msgstr ""
+msgstr "Iklan"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:2
 msgid "Advertising"
-msgstr ""
+msgstr "Periklanan"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:3
 msgid "Aerospace"
@@ -3338,7 +3338,7 @@ msgstr ""
 #. Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Affected Transactions"
-msgstr ""
+msgstr "Transaksi Terdampak"
 
 #. Label of the against (Text) field in DocType 'GL Entry'
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
@@ -3766,7 +3766,7 @@ msgstr "Semua komunikasi termasuk dan di atas ini akan dipindahkan ke Isu baru"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:946
 msgid "All items are already requested"
-msgstr ""
+msgstr "Semua barang sudah diminta"
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:1369
 msgid "All items have already been Invoiced/Returned"
@@ -3774,7 +3774,7 @@ msgstr "Semua item sudah Ditagih/Dikembalikan"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:1208
 msgid "All items have already been received"
-msgstr ""
+msgstr "Semua barang sudah diterima"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2993
 msgid "All items have already been transferred for this Work Order."
@@ -3800,7 +3800,7 @@ msgstr ""
 
 #: erpnext/selling/page/point_of_sale/pos_past_order_summary.js:200
 msgid "All the items have been already returned."
-msgstr ""
+msgstr "Semua barang sudah dikembalikan."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1171
 msgid "All the required items (raw materials) will be fetched from BOM and populated in this table. Here you can also change the Source Warehouse for any item. And during the production, you can track transferred raw materials from this table."
@@ -3915,7 +3915,7 @@ msgstr "Alokasi"
 #: erpnext/accounts/doctype/unreconcile_payment/unreconcile_payment.json
 #: erpnext/public/js/utils/unreconcile.js:104
 msgid "Allocations"
-msgstr ""
+msgstr "Alokasi"
 
 #: erpnext/manufacturing/report/production_planning_report/production_planning_report.py:427
 msgid "Allotted Qty"
@@ -3946,7 +3946,7 @@ msgstr "Izinkan Pembuatan Akun Terhadap Perusahaan Anak"
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Allow Alternative Item"
-msgstr ""
+msgstr "Izinkan Barang Alternatif"
 
 #: erpnext/stock/doctype/item_alternative/item_alternative.py:65
 msgid "Allow Alternative Item must be checked on Item {}"

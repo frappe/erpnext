@@ -8,7 +8,7 @@ app_email = "hello@frappe.io"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
-app_home = "/app/home"
+app_home = "/desk"
 
 add_to_apps_screen = [
 	{
@@ -20,7 +20,7 @@ add_to_apps_screen = [
 	}
 ]
 
-develop_version = "15.x.x-develop"
+develop_version = "17.x.x-develop"
 
 app_include_js = "erpnext.bundle.js"
 app_include_css = "erpnext.bundle.css"
@@ -402,9 +402,10 @@ doc_events = {
 }
 
 # function should expect the variable and doc as arguments
+naming_series_variables_list = ["FY", "TFY", "ABBR", "MM", "DD", "YY", "YYYY", "JJJ", "WW"]
 naming_series_variables = {
-	"FY": "erpnext.accounts.utils.parse_naming_series_variable",
-	"ABBR": "erpnext.accounts.utils.parse_naming_series_variable",
+	variable: "erpnext.accounts.utils.parse_naming_series_variable"
+	for variable in naming_series_variables_list
 }
 
 # On cancel event Payment Entry will be exempted and all linked submittable doctype will get cancelled.
@@ -570,6 +571,7 @@ accounting_dimension_doctypes = [
 	"Payment Request",
 	"Asset Movement Item",
 	"Asset Depreciation Schedule",
+	"Advance Taxes and Charges",
 ]
 
 get_matching_queries = (

@@ -11,9 +11,7 @@ from frappe.model.meta import get_field_precision
 from frappe.query_builder import Order
 from frappe.query_builder.functions import Sum
 from frappe.utils import (
-	add_to_date,
 	cint,
-	cstr,
 	flt,
 	format_date,
 	get_link_to_form,
@@ -827,7 +825,6 @@ class update_entries_after:
 			if not self.validate_negative_stock(sle):
 				self.wh_data.qty_after_transaction += flt(sle.actual_qty)
 				return
-
 		# Get dynamic incoming/outgoing rate
 		if not self.args.get("sle_id"):
 			self.get_dynamic_incoming_outgoing_rate(sle)
@@ -1903,31 +1900,6 @@ def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 	)
 
 
-def get_batch_incoming_rate(item_code, warehouse, batch_no, posting_date, posting_time, creation=None):
-	sle = frappe.qb.DocType("Stock Ledger Entry")
-
-	timestamp_condition = sle.posting_datetime < get_combine_datetime(posting_date, posting_time)
-	if creation:
-		timestamp_condition |= (sle.posting_datetime == get_combine_datetime(posting_date, posting_time)) & (
-			sle.creation < creation
-		)
-
-	batch_details = (
-		frappe.qb.from_(sle)
-		.select(Sum(sle.stock_value_difference).as_("batch_value"), Sum(sle.actual_qty).as_("batch_qty"))
-		.where(
-			(sle.item_code == item_code)
-			& (sle.warehouse == warehouse)
-			& (sle.batch_no == batch_no)
-			& (sle.is_cancelled == 0)
-		)
-		.where(timestamp_condition)
-	).run(as_dict=True)
-
-	if batch_details and batch_details[0].batch_qty:
-		return batch_details[0].batch_value / batch_details[0].batch_qty
-
-
 def get_valuation_rate(
 	item_code,
 	warehouse,
@@ -2353,6 +2325,7 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 	For inter company transfer, incoming rate is the average of the outgoing rate
 	"""
 	rate = 0.0
+	lcv_rate = 0.0
 
 	field = "delivery_note_item" if sle.voucher_type == "Purchase Receipt" else "sales_invoice_item"
 
@@ -2367,7 +2340,15 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 			"incoming_rate",
 		)
 
-	return rate
+	# add lcv amount in incoming_rate
+	lcv_amount = frappe.db.get_value(
+		f"{sle.voucher_type} Item", sle.voucher_detail_no, "landed_cost_voucher_amount"
+	)
+
+	if lcv_amount:
+		lcv_rate = flt(lcv_amount / abs(sle.actual_qty))
+
+	return rate + lcv_rate
 
 
 def is_internal_transfer(sle):

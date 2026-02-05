@@ -50,8 +50,17 @@ class SalesPartner(WebsiteGenerator):
 		if not self.route:
 			self.route = "partners/" + self.scrub(self.partner_name)
 		super().validate()
-		if self.partner_website and not self.partner_website.startswith("http"):
-			self.partner_website = "http://" + self.partner_website
+		if self.partner_website:
+			from urllib.parse import urlsplit, urlunsplit
+
+			# scrub http
+			parts = urlsplit(self.partner_website)
+			if not parts.netloc and parts.path:
+				parts = parts._replace(netloc=parts.path, path="")
+			if not parts.scheme or parts.scheme == "http":
+				parts = parts._replace(scheme="https")
+
+			self.partner_website = urlunsplit(parts)
 
 	def get_context(self, context):
 		address_names = frappe.db.get_all(

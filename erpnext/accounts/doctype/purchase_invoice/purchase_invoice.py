@@ -36,7 +36,7 @@ from erpnext.accounts.utils import get_account_currency, get_fiscal_year, update
 from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.buying.utils import check_on_hold_or_closed_status
-from erpnext.controllers.accounts_controller import validate_account_head
+from erpnext.controllers.accounts_controller import merge_taxes, validate_account_head
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	update_billed_amount_based_on_po,
@@ -2005,9 +2005,17 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 		args = json.loads(args)
 
 	def post_parent_process(source_parent, target_parent):
-		for row in target_parent.get("items"):
-			if row.get("qty") == 0:
-				target_parent.remove(row)
+		remove_items_with_zero_qty(target_parent)
+		set_missing_values(source_parent, target_parent)
+
+	def remove_items_with_zero_qty(target_parent):
+		target_parent.items = [row for row in target_parent.get("items") if row.get("qty") != 0]
+
+	def set_missing_values(source_parent, target_parent):
+		target_parent.run_method("set_missing_values")
+		if args and args.get("merge_taxes"):
+			merge_taxes(source_parent, target_parent)
+		target_parent.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
 		from erpnext.controllers.sales_and_purchase_return import get_returned_qty_map_for_row
@@ -2059,7 +2067,11 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 				"postprocess": update_item,
 				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty) and select_item(doc),
 			},
-			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges"},
+			"Purchase Taxes and Charges": {
+				"doctype": "Purchase Taxes and Charges",
+				"reset_value": not (args and args.get("merge_taxes")),
+				"ignore": args.get("merge_taxes") if args else 0,
+			},
 		},
 		target_doc,
 		post_parent_process,

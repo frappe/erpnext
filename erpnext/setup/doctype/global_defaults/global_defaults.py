@@ -39,6 +39,7 @@ class GlobalDefaults(Document):
 		disable_in_words: DF.Check
 		disable_rounded_total: DF.Check
 		hide_currency_symbol: DF.Literal["", "No", "Yes"]
+		use_posting_datetime_for_naming_documents: DF.Check
 	# end: auto-generated types
 
 	def on_update(self):

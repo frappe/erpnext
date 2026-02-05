@@ -176,7 +176,9 @@ def get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_
 	column_names = get_column_names()
 
 	# to display item as Item Code: Item Name
-	columns[0] = "Sales Invoice:Link/Item:300"
+	columns[0]["fieldname"] = "sales_invoice"
+	columns[0]["options"] = "Item"
+	columns[0]["width"] = 300
 	# removing Item Code and Item Name columns
 	supplier_master_name = frappe.db.get_single_value("Buying Settings", "supp_master_name")
 	customer_master_name = frappe.db.get_single_value("Selling Settings", "cust_master_name")

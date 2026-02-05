@@ -8,7 +8,7 @@ import frappe
 import frappe.permissions
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.tests import IntegrationTestCase, change_settings
-from frappe.utils import add_days, flt, getdate, nowdate, today
+from frappe.utils import add_days, flt, nowdate, today
 
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.controllers.accounts_controller import InvalidQtyError, get_due_date, update_child_qty_rate
@@ -57,6 +57,7 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		frappe.db.rollback()
 		frappe.set_user("Administrator")
 
+	@IntegrationTestCase.change_settings("Selling Settings", {"allow_negative_rates_for_items": 1})
 	def test_sales_order_with_negative_rate(self):
 		"""
 		Test if negative rate is allowed in Sales Order via doc submission and update items

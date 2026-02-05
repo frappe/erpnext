@@ -74,8 +74,8 @@ class JournalEntry(AccountsController):
 		mode_of_payment: DF.Link | None
 		multi_currency: DF.Check
 		naming_series: DF.Literal["ACC-JV-.YYYY.-"]
-		party_not_required: DF.Check
 		override_tax_withholding_entries: DF.Check
+		party_not_required: DF.Check
 		pay_to_recd_from: DF.Data | None
 		payment_order: DF.Link | None
 		periodic_entry_difference_account: DF.Link | None
@@ -179,10 +179,13 @@ class JournalEntry(AccountsController):
 		validate_docs_for_deferred_accounting([self.name], [])
 
 	def submit(self):
-		if len(self.accounts) > 100:
+		if len(self.accounts) > 100 and not self.meta.queue_in_background:
 			queue_submission(self, "_submit")
 		else:
 			return self._submit()
+
+	def before_cancel(self):
+		self.has_asset_adjustment_entry()
 
 	def cancel(self):
 		if len(self.accounts) > 100:
@@ -554,12 +557,27 @@ class JournalEntry(AccountsController):
 			)
 			frappe.db.set_value("Journal Entry", self.name, "inter_company_journal_entry_reference", "")
 
-	def unlink_asset_adjustment_entry(self):
-		frappe.db.sql(
-			""" update `tabAsset Value Adjustment`
-			set journal_entry = null where journal_entry = %s""",
-			self.name,
+	def has_asset_adjustment_entry(self):
+		if self.flags.get("via_asset_value_adjustment"):
+			return
+
+		asset_value_adjustment = frappe.db.get_value(
+			"Asset Value Adjustment", {"docstatus": 1, "journal_entry": self.name}, "name"
 		)
+		if asset_value_adjustment:
+			frappe.throw(
+				_(
+					"Cannot cancel this document as it is linked with the submitted Asset Value Adjustment <b>{0}</b>. Please cancel the Asset Value Adjustment to continue."
+				).format(frappe.utils.get_link_to_form("Asset Value Adjustment", asset_value_adjustment))
+			)
+
+	def unlink_asset_adjustment_entry(self):
+		AssetValueAdjustment = frappe.qb.DocType("Asset Value Adjustment")
+		(
+			frappe.qb.update(AssetValueAdjustment)
+			.set(AssetValueAdjustment.journal_entry, None)
+			.where(AssetValueAdjustment.journal_entry == self.name)
+		).run()
 
 	def validate_party(self):
 		for d in self.get("accounts"):
@@ -1673,6 +1691,10 @@ def get_exchange_rate(
 	credit=None,
 	exchange_rate=None,
 ):
+	# Ensure exchange_rate is always numeric to avoid calculation errors
+	if isinstance(exchange_rate, str):
+		exchange_rate = flt(exchange_rate) or 1
+
 	account_details = frappe.get_cached_value(
 		"Account", account, ["account_type", "root_type", "account_currency", "company"], as_dict=1
 	)

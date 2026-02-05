@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe import _, msgprint, scrub, unscrub
+from frappe import _, msgprint
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form, now
@@ -34,6 +34,7 @@ class POSProfile(Document):
 		allow_discount_change: DF.Check
 		allow_partial_payment: DF.Check
 		allow_rate_change: DF.Check
+		allow_warehouse_change: DF.Check
 		applicable_for_users: DF.Table[POSProfileUser]
 		apply_discount_on: DF.Literal["Grand Total", "Net Total"]
 		auto_add_item_to_cart: DF.Check

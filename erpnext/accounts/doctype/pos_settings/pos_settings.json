@@ -6,6 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "invoice_type",
+  "column_break_vwwt",
+  "post_change_gl_entries",
   "section_break_gyos",
   "invoice_fields",
   "pos_search_fields"
@@ -34,12 +36,24 @@
   {
    "fieldname": "section_break_gyos",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_vwwt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, ledger entries will be posted for change amount in POS transactions",
+   "fieldname": "post_change_gl_entries",
+   "fieldtype": "Check",
+   "label": "Create Ledger Entries for Change Amount",
+   "options": "1"
   }
  ],
  "hide_toolbar": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-02 18:18:17.586225",
+ "modified": "2026-01-09 17:30:41.476806",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Settings",

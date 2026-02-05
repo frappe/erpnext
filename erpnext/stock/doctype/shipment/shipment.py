@@ -27,10 +27,10 @@ class Shipment(Document):
 		awb_number: DF.Data | None
 		carrier: DF.Data | None
 		carrier_service: DF.Data | None
-		delivery_address: DF.SmallText | None
+		delivery_address: DF.TextEditor | None
 		delivery_address_name: DF.Link
 		delivery_company: DF.Link | None
-		delivery_contact: DF.SmallText | None
+		delivery_contact: DF.TextEditor | None
 		delivery_contact_email: DF.Data | None
 		delivery_contact_name: DF.Link | None
 		delivery_customer: DF.Link | None
@@ -42,10 +42,10 @@ class Shipment(Document):
 		pallets: DF.Literal["No", "Yes"]
 		parcel_template: DF.Link | None
 		pickup: DF.Data | None
-		pickup_address: DF.SmallText | None
+		pickup_address: DF.TextEditor | None
 		pickup_address_name: DF.Link
 		pickup_company: DF.Link | None
-		pickup_contact: DF.SmallText | None
+		pickup_contact: DF.TextEditor | None
 		pickup_contact_email: DF.Data | None
 		pickup_contact_name: DF.Link | None
 		pickup_contact_person: DF.Link | None

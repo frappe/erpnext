@@ -999,7 +999,7 @@ class TestProductionPlan(IntegrationTestCase):
 			items_data = pln.get_production_items()
 
 			# Update qty
-			items_data[(pln.po_items[0].name, item, None)]["qty"] = qty
+			items_data[(pln.po_items[0].name, item, None, pln.po_items[0].planned_start_date)]["qty"] = qty
 
 			# Create and Submit Work Order for each item in items_data
 			for _key, item in items_data.items():
@@ -2132,7 +2132,6 @@ class TestProductionPlan(IntegrationTestCase):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
 
@@ -2245,7 +2244,6 @@ class TestProductionPlan(IntegrationTestCase):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
 
@@ -2393,7 +2391,6 @@ class TestProductionPlan(IntegrationTestCase):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
 

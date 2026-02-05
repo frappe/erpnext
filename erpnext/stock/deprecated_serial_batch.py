@@ -3,8 +3,8 @@ import json
 from collections import defaultdict
 
 import frappe
-from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import flt, nowtime
+from frappe.query_builder.functions import Sum
+from frappe.utils import flt
 from pypika import Order
 from pypika.functions import Coalesce
 
@@ -97,7 +97,6 @@ class DeprecatedBatchNoValuation:
 		for ledger in entries:
 			self.stock_value_differece[ledger.batch_no] += flt(ledger.batch_value)
 			self.available_qty[ledger.batch_no] += flt(ledger.batch_qty)
-			self.total_qty[ledger.batch_no] += flt(ledger.batch_qty)
 
 	@deprecated(
 		"erpnext.stock.serial_batch_bundle.BatchNoValuation.get_sle_for_batches",
@@ -106,8 +105,6 @@ class DeprecatedBatchNoValuation:
 		"No known instructions.",
 	)
 	def get_sle_for_batches(self):
-		from erpnext.stock.utils import get_combine_datetime
-
 		if not self.batchwise_valuation_batches:
 			return []
 
@@ -271,7 +268,6 @@ class DeprecatedBatchNoValuation:
 		batch_data = query.run(as_dict=True)
 		for d in batch_data:
 			self.available_qty[d.batch_no] += flt(d.batch_qty)
-			self.total_qty[d.batch_no] += flt(d.batch_qty)
 
 		for d in batch_data:
 			if self.available_qty.get(d.batch_no):
@@ -383,7 +379,6 @@ class DeprecatedBatchNoValuation:
 		batch_data = query.run(as_dict=True)
 		for d in batch_data:
 			self.available_qty[d.batch_no] += flt(d.batch_qty)
-			self.total_qty[d.batch_no] += flt(d.batch_qty)
 
 		if not self.last_sle:
 			return

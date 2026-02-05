@@ -1,7 +1,6 @@
 import frappe
-from frappe import qb
 from frappe.tests import IntegrationTestCase
-from frappe.utils import add_days, flt, getdate, today
+from frappe.utils import today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice

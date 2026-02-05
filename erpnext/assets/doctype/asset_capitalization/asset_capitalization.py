@@ -13,7 +13,6 @@ import erpnext
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.depreciation import (
 	depreciate_asset,
-	get_disposal_account_and_cost_center,
 	get_gl_entries_on_asset_disposal,
 	get_value_after_depreciation_on_disposal_date,
 	reset_depreciation_schedule,
@@ -574,13 +573,19 @@ class AssetCapitalization(StockController):
 		if self.docstatus == 2:
 			net_purchase_amount = asset_doc.net_purchase_amount - total_target_asset_value
 			purchase_amount = asset_doc.purchase_amount - total_target_asset_value
-			asset_doc.db_set("total_asset_cost", asset_doc.total_asset_cost - total_target_asset_value)
+			total_asset_cost = asset_doc.total_asset_cost - total_target_asset_value
 		else:
 			net_purchase_amount = asset_doc.net_purchase_amount + total_target_asset_value
 			purchase_amount = asset_doc.purchase_amount + total_target_asset_value
+			total_asset_cost = asset_doc.total_asset_cost + total_target_asset_value
 
-		asset_doc.db_set("net_purchase_amount", net_purchase_amount)
-		asset_doc.db_set("purchase_amount", purchase_amount)
+		asset_doc.db_set(
+			{
+				"net_purchase_amount": net_purchase_amount,
+				"purchase_amount": purchase_amount,
+				"total_asset_cost": total_asset_cost,
+			}
+		)
 
 		frappe.msgprint(
 			_("Asset {0} has been updated. Please set the depreciation details if any and submit it.").format(

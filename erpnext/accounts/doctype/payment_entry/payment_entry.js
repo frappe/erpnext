@@ -400,6 +400,16 @@ frappe.ui.form.on("Payment Entry", {
 		);
 
 		frm.refresh_fields();
+
+		const party_currency =
+			frm.doc.payment_type === "Receive" ? "paid_from_account_currency" : "paid_to_account_currency";
+
+		var reference_grid = frm.fields_dict["references"].grid;
+		["total_amount", "outstanding_amount", "allocated_amount"].forEach((fieldname) => {
+			reference_grid.update_docfield_property(fieldname, "options", party_currency);
+		});
+
+		reference_grid.refresh();
 	},
 
 	show_general_ledger: function (frm) {
@@ -1104,7 +1114,7 @@ frappe.ui.form.on("Payment Entry", {
 
 	allocate_party_amount_against_ref_docs: async function (frm, paid_amount, paid_amount_change) {
 		await frm.call("allocate_amount_to_references", {
-			paid_amount: paid_amount,
+			paid_amount: flt(paid_amount),
 			paid_amount_change: paid_amount_change,
 			allocate_payment_amount: frappe.flags.allocate_payment_amount ?? false,
 		});
@@ -1440,16 +1450,15 @@ frappe.ui.form.on("Payment Entry", {
 			callback: function (r) {
 				if (!r.exc && r.message) {
 					// set taxes table
-					if (r.message) {
-						for (let tax of r.message) {
-							if (tax.charge_type === "On Net Total") {
-								tax.charge_type = "On Paid Amount";
-							}
-							frm.add_child("taxes", tax);
+					let taxes = r.message;
+					taxes.forEach((tax) => {
+						if (tax.charge_type === "On Net Total") {
+							tax.charge_type = "On Paid Amount";
 						}
-						frm.events.apply_taxes(frm);
-						frm.events.set_unallocated_amount(frm);
-					}
+					});
+					frm.set_value("taxes", taxes);
+					frm.events.apply_taxes(frm);
+					frm.events.set_unallocated_amount(frm);
 				}
 			},
 		});

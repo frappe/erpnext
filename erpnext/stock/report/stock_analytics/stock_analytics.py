@@ -4,7 +4,6 @@ import datetime
 
 import frappe
 from frappe import _, scrub
-from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import get_datetime, get_first_day_of_week, get_quarter_start, getdate
 from frappe.utils import get_first_day as get_first_day_of_month
 from frappe.utils.nestedset import get_descendants_of

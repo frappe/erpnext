@@ -735,6 +735,7 @@ erpnext.utils.update_child_items = function (opts) {
 			fieldname: "item_name",
 			label: __("Item Name"),
 			read_only: 1,
+			in_list_view: 1,
 		},
 		{
 			fieldtype: "Link",
@@ -792,7 +793,7 @@ erpnext.utils.update_child_items = function (opts) {
 	];
 
 	if (frm.doc.doctype == "Sales Order" || frm.doc.doctype == "Purchase Order") {
-		fields.splice(2, 0, {
+		fields.splice(3, 0, {
 			fieldtype: "Date",
 			fieldname: frm.doc.doctype == "Sales Order" ? "delivery_date" : "schedule_date",
 			in_list_view: 1,
@@ -800,7 +801,7 @@ erpnext.utils.update_child_items = function (opts) {
 			default: frm.doc.doctype == "Sales Order" ? frm.doc.delivery_date : frm.doc.schedule_date,
 			reqd: 1,
 		});
-		fields.splice(3, 0, {
+		fields.splice(4, 0, {
 			fieldtype: "Float",
 			fieldname: "conversion_factor",
 			label: __("Conversion Factor"),
@@ -993,7 +994,7 @@ erpnext.utils.map_current_doc = function (opts) {
 
 	if (opts.source_doctype) {
 		let data_fields = [];
-		if (["Purchase Receipt", "Delivery Note"].includes(opts.source_doctype)) {
+		if (["Purchase Receipt", "Delivery Note", "Purchase Invoice"].includes(opts.source_doctype)) {
 			let target_meta = frappe.get_meta(cur_frm.doc.doctype);
 			if (target_meta.fields.find((f) => f.fieldname === "taxes")) {
 				data_fields.push({
@@ -1068,17 +1069,9 @@ frappe.form.link_formatters["Project"] = function (value, doc, df) {
  * @returns {string} - The link value with the added title.
  */
 function add_link_title(value, doc, df, title_field) {
-	if (doc.doctype != df.parent) {
-		return "";
-	} else if (
-		doc &&
-		value &&
-		doc[title_field] &&
-		doc[title_field] !== value &&
-		doc[df.fieldname] === value
-	) {
+	if (doc && value && doc[title_field] && doc[title_field] !== value && doc[df.fieldname] === value) {
 		return value + ": " + doc[title_field];
-	} else if (!value && doc.doctype && doc[title_field]) {
+	} else if (!value && doc.doctype && doc[title_field] && doc.doctype == df.parent) {
 		return doc[title_field];
 	} else {
 		return value;

@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _, scrub
-from frappe.utils import cint, flt
+from frappe.utils import flt
 
 from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport

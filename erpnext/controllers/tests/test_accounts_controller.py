@@ -2,8 +2,6 @@
 # For license information, please see license.txt
 
 
-from datetime import datetime
-
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
@@ -2480,3 +2478,21 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertRaises(frappe.ValidationError, po.save)
 		po.items[0].delivered_by_supplier = 1
 		po.save()
+
+	@IntegrationTestCase.change_settings("Global Defaults", {"use_posting_datetime_for_naming_documents": 1})
+	def test_document_naming_rule_based_on_posting_date(self):
+		frappe.new_doc(
+			"Document Naming Rule", document_type="Sales Invoice", prefix="SI-.MM.-.YYYY.-"
+		).submit()
+
+		si = create_sales_invoice(do_not_save=True)
+		si.set_posting_time = 1
+		si.posting_date = "2025-12-31"
+		si.save()
+		self.assertEqual(si.name, "SI-12-2025-00001")
+
+		si = create_sales_invoice(do_not_save=True)
+		si.set_posting_time = 1
+		si.posting_date = "2026-01-01"
+		si.save()
+		self.assertEqual(si.name, "SI-01-2026-00002")

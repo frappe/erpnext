@@ -2,7 +2,6 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe import _
 
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import get_chart_metadata_fields
 from erpnext.accounts.doctype.account.chart_of_accounts.verified import standard_chart_of_accounts

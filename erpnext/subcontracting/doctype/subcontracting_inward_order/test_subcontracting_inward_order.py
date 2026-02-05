@@ -51,6 +51,49 @@ class IntegrationTestSubcontractingInwardOrder(IntegrationTestCase):
 		for item in rm_in.get("items"):
 			self.assertEqual(item.customer_provided_item_cost, 15)
 
+	def test_customer_provided_item_cost_with_multiple_receipts(self):
+		"""
+		Validate that rate is calculated correctly (Weighted Average) when multiple receipts
+		occur for the same SCIO Received Item.
+		"""
+		so, scio = create_so_scio()
+		rm_item = "Basic RM"
+
+		# Receipt 1: 5 Qty @ Unit Cost 10
+		rm_in_1 = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in_1.items = [item for item in rm_in_1.items if item.item_code == rm_item]
+		rm_in_1.items[0].qty = 5
+		rm_in_1.items[0].basic_rate = 10
+		rm_in_1.items[0].transfer_qty = 5
+		rm_in_1.submit()
+
+		scio.reload()
+		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
+		self.assertEqual(received_item.rate, 10)
+
+		# Receipt 2: 5 Qty @ Unit Cost 20
+		rm_in_2 = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in_2.items = [item for item in rm_in_2.items if item.item_code == rm_item]
+		rm_in_2.items[0].qty = 5
+		rm_in_2.items[0].basic_rate = 20
+		rm_in_2.items[0].transfer_qty = 5
+		rm_in_2.save()
+		rm_in_2.submit()
+
+		# Check 2: Rate should be Weighted Average
+		# (5 * 10 + 5 * 20) / 10 = 150 / 10 = 15
+		scio.reload()
+		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
+		self.assertEqual(received_item.rate, 15)
+
+		# Cancel Receipt 2: Rate should revert to original
+		# (15 * 10 - 20 * 5) / 5 = 50 / 5 = 10
+		rm_in_2.cancel()
+		scio.reload()
+		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
+		self.assertEqual(received_item.received_qty, 5)
+		self.assertEqual(received_item.rate, 10)
+
 	def test_add_extra_customer_provided_item(self):
 		so, scio = create_so_scio()
 

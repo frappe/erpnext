@@ -3,11 +3,10 @@
 
 
 import copy
-from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import CombineDatetime, Sum
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_datetime
 
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions

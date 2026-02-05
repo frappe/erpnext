@@ -212,7 +212,10 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			party = filters.get("customer") or filters.get("supplier")
 			item_rules_list = frappe.get_all(
 				"Party Specific Item",
-				filters={"party": party},
+				filters={
+					"party": ["!=", party],
+					"party_type": "Customer" if filters.get("customer") else "Supplier",
+				},
 				fields=["restrict_based_on", "based_on_value"],
 			)
 
@@ -226,7 +229,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				filters_dict[rule.restrict_based_on].append(rule.based_on_value)
 
 			for filter in filters_dict:
-				filters[scrub(filter)] = ["in", filters_dict[filter]]
+				filters[scrub(filter)] = ["not in", filters_dict[filter]]
 
 			if filters.get("customer"):
 				del filters["customer"]

@@ -1,7 +1,6 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import datetime
-import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase

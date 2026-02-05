@@ -2,8 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import copy
-
 import frappe
 from frappe.model.document import Document
 

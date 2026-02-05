@@ -1070,7 +1070,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nTo Bill\nCompleted\nReturn\nReturn Issued\nCancelled\nClosed",
+   "options": "\nDraft\nTo Bill\nPartially Billed\nCompleted\nReturn\nReturn Issued\nCancelled\nClosed",
    "print_hide": 1,
    "print_width": "150px",
    "read_only": 1,
@@ -1426,14 +1426,15 @@
    "hidden": 1,
    "label": "Item Wise Tax Details",
    "no_copy": 1,
-   "options": "Item Wise Tax Detail"
+   "options": "Item Wise Tax Detail",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-02 23:55:25.415443",
+ "modified": "2026-02-03 12:27:19.055918",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

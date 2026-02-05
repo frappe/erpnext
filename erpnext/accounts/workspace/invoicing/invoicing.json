@@ -14,10 +14,10 @@
  "for_user": "",
  "hide_custom": 0,
  "icon": "accounting",
- "idx": 3,
+ "idx": 4,
  "indicator_color": "",
  "is_hidden": 0,
- "label": "Accounting",
+ "label": "Invoicing",
  "links": [
   {
    "hidden": 0,
@@ -587,10 +587,10 @@
    "type": "Link"
   }
  ],
- "modified": "2025-12-24 13:20:34.857205",
+ "modified": "2026-01-23 11:05:47.246213",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Accounting",
+ "name": "Invoicing",
  "number_cards": [
   {
    "label": "Outgoing Bills",
@@ -617,6 +617,6 @@
  "roles": [],
  "sequence_id": 2.0,
  "shortcuts": [],
- "title": "Accounting",
+ "title": "Invoicing",
  "type": "Workspace"
 }

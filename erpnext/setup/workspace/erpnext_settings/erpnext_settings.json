@@ -11,7 +11,7 @@
  "icon": "setting",
  "idx": 0,
  "is_hidden": 0,
- "label": "Settings",
+ "label": "ERPNext Settings",
  "links": [
   {
    "dependencies": "",
@@ -69,10 +69,10 @@
    "type": "Link"
   }
  ],
- "modified": "2025-11-18 13:20:51.473774",
+ "modified": "2026-01-09 13:05:08.007297",
  "modified_by": "Administrator",
  "module": "Setup",
- "name": "Settings",
+ "name": "ERPNext Settings",
  "number_cards": [],
  "owner": "Administrator",
  "parent_page": "",
@@ -128,6 +128,6 @@
    "type": "DocType"
   }
  ],
- "title": "Settings",
+ "title": "ERPNext Settings",
  "type": "Workspace"
 }

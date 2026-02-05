@@ -5,7 +5,6 @@ import json
 
 import frappe
 from frappe import _
-from frappe.core.doctype.prepared_report.prepared_report import create_json_gz_file
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
 from frappe.utils import add_days, get_date_str, get_link_to_form, nowtime, parse_json

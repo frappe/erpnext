@@ -1,19 +1,15 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
-from frappe.utils import cint, flt, getdate, now_datetime
+from frappe.utils import cint, flt, now_datetime
 
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.assets.doctype.asset.test_asset import (
 	create_asset,
 	create_asset_data,
 	set_depreciation_settings_in_company,
-)
-from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	get_asset_depr_schedule_doc,
 )
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (

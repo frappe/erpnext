@@ -1547,6 +1547,9 @@ def add_operating_cost_component_wise(
 		if job_card and job_card.operation_id != row.name:
 			continue
 
+		if not row.actual_operation_time:
+			continue
+
 		workstation_cost = frappe.get_all(
 			"Workstation Cost",
 			fields=["operating_component", "operating_cost"],
@@ -1609,7 +1612,7 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_
 			job_card=job_card,
 		)
 
-		if not cost_added:
+		if not cost_added and not job_card:
 			stock_entry.append(
 				"additional_costs",
 				{

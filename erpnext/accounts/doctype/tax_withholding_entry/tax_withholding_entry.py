@@ -708,6 +708,10 @@ class TaxWithholdingController:
 		existing_taxes = {row.account_head: row for row in self.doc.taxes if row.is_tax_withholding_account}
 		precision = self.doc.precision("tax_amount", "taxes")
 		conversion_rate = self.get_conversion_rate()
+		add_deduct_tax = "Deduct"
+
+		if self.party_type == "Customer":
+			add_deduct_tax = "Add"
 
 		for account_head, base_amount in account_amount_map.items():
 			tax_amount = flt(base_amount / conversion_rate, precision)
@@ -724,6 +728,7 @@ class TaxWithholdingController:
 				tax_row = self._create_tax_row(account_head, tax_amount)
 				for_update = False
 
+			tax_row.add_deduct_tax = add_deduct_tax
 			# Set item-wise tax breakup for this tax row
 			self._set_item_wise_tax_for_tds(
 				tax_row, account_head, category_withholding_map, for_update=for_update
@@ -743,7 +748,6 @@ class TaxWithholdingController:
 				"account_head": account_head,
 				"description": account_head,
 				"cost_center": cost_center,
-				"add_deduct_tax": "Deduct",
 				"tax_amount": tax_amount,
 				"dont_recompute_tax": 1,
 			},
@@ -807,12 +811,14 @@ class TaxWithholdingController:
 			else:
 				item_tax_amount = 0
 
+			multiplier = -1 if tax_row.add_deduct_tax == "Deduct" else 1
+
 			self.doc._item_wise_tax_details.append(
 				frappe._dict(
 					item=item,
 					tax=tax_row,
 					rate=category.tax_rate,
-					amount=item_tax_amount * -1,  # Negative because it's a deduction
+					amount=item_tax_amount * multiplier,
 					taxable_amount=item_base_taxable,
 				)
 			)

@@ -2,7 +2,6 @@
 # For license information, please see license.txt
 
 import json
-from datetime import date
 from itertools import groupby
 
 import frappe

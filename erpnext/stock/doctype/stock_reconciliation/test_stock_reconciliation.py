@@ -1118,7 +1118,6 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 
 	def test_not_reconcile_all_serial_nos(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-		from erpnext.stock.utils import get_incoming_rate
 
 		item = self.make_item(
 			"Test Serial NO Item Not Reconcile All Serial Batch",
@@ -1450,6 +1449,7 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 			qty=10,
 			rate=100,
 			use_serial_batch_fields=1,
+			purpose="Opening Stock",
 		)
 
 		sr.reload()
@@ -1592,6 +1592,7 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 			qty=10,
 			rate=80,
 			use_serial_batch_fields=1,
+			purpose="Opening Stock",
 		)
 
 		batch_no = get_batch_from_bundle(reco.items[0].serial_and_batch_bundle)
@@ -1676,6 +1677,7 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 			qty=10,
 			rate=100,
 			use_serial_batch_fields=1,
+			purpose="Opening Stock",
 		)
 
 		sr.reload()
@@ -1709,6 +1711,101 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 			)
 
 			self.assertEqual(docstatus, 2)
+
+	def test_stock_reco_with_opening_stock_with_diff_inventory(self):
+		from erpnext.stock.doctype.inventory_dimension.test_inventory_dimension import (
+			create_inventory_dimension,
+		)
+
+		if frappe.db.exists("DocType", "Plant"):
+			return
+
+		doctype = frappe.get_doc(
+			{
+				"doctype": "DocType",
+				"name": "Plant",
+				"module": "Stock",
+				"custom": 1,
+				"fields": [
+					{
+						"fieldname": "plant_name",
+						"fieldtype": "Data",
+						"label": "Plant Name",
+						"reqd": 1,
+					}
+				],
+				"autoname": "field:plant_name",
+			}
+		)
+		doctype.insert(ignore_permissions=True)
+		create_inventory_dimension(dimension_name="ID-Plant", reference_document="Plant")
+
+		plant_a = frappe.get_doc(
+			{
+				"doctype": "Plant",
+				"plant_name": "Plant A",
+			}
+		).insert(ignore_permissions=True)
+
+		plant_b = frappe.get_doc(
+			{
+				"doctype": "Plant",
+				"plant_name": "Plant B",
+			}
+		).insert(ignore_permissions=True)
+
+		warehouse = "_Test Warehouse - _TC"
+
+		item_code = "Item-Test"
+		item = self.make_item(item_code, {"is_stock_item": 1})
+
+		sr = frappe.new_doc("Stock Reconciliation")
+		sr.purpose = "Opening Stock"
+		sr.posting_date = nowdate()
+		sr.posting_time = nowtime()
+		sr.company = "_Test Company"
+
+		sr.append(
+			"items",
+			{
+				"item_code": item.name,
+				"warehouse": warehouse,
+				"qty": 5,
+				"valuation_rate": 100,
+				"id_plant": plant_a.name,
+			},
+		)
+
+		sr.append(
+			"items",
+			{
+				"item_code": item.name,
+				"warehouse": warehouse,
+				"qty": 3,
+				"valuation_rate": 110,
+				"id_plant": plant_b.name,
+			},
+		)
+
+		sr.insert()
+		sr.submit()
+
+		self.assertEqual(len(sr.items), 2)
+		sle_count = frappe.db.count(
+			"Stock Ledger Entry",
+			{"voucher_type": "Stock Reconciliation", "voucher_no": sr.name, "is_cancelled": 0},
+		)
+		self.assertEqual(sle_count, 2)
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			{"voucher_type": "Stock Reconciliation", "voucher_no": sr.name, "is_cancelled": 0},
+			["item_code", "id_plant", "actual_qty", "valuation_rate"],
+		)
+		for s in sle:
+			if s.id_plant == plant_a.name:
+				self.assertEqual(s.actual_qty, 5)
+			elif s.id_plant == plant_b.name:
+				self.assertEqual(s.actual_qty, 3)
 
 
 def create_batch_item_with_batch(item_name, batch_id):
