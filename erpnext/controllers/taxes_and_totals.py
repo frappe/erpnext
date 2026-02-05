@@ -341,7 +341,8 @@ class calculate_taxes_and_totals:
 			):
 				amount = flt(item.amount) - total_inclusive_tax_amount_per_qty
 
-				item.net_amount = flt(amount / (1 + cumulated_tax_fraction), item.precision("net_amount"))
+				item._unrounded_net_amount = amount / (1 + cumulated_tax_fraction)
+				item.net_amount = flt(item._unrounded_net_amount, item.precision("net_amount"))
 				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
 				item.discount_percentage = flt(
 					item.discount_percentage, item.precision("discount_percentage")
@@ -558,7 +559,9 @@ class calculate_taxes_and_totals:
 			actual_breakup = tax._total_tax_breakup
 			diff = flt(expected_amount - actual_breakup, 5)
 
-			if abs(diff) <= 0.5:
+			# TODO: fix rounding difference issues
+			# Allow up to 1 for zero-precision currencies (e.g. JPY, KRW)
+			if abs(diff) <= (1 if tax.precision("tax_amount") == 0 else 0.5):
 				detail_row = self.doc._item_wise_tax_details[last_idx]
 				detail_row["amount"] = flt(detail_row["amount"] + diff, 5)
 
@@ -617,7 +620,16 @@ class calculate_taxes_and_totals:
 		elif tax.charge_type == "On Net Total":
 			if tax.account_head in item_tax_map:
 				current_net_amount = item.net_amount
-			current_tax_amount = (tax_rate / 100.0) * item.net_amount
+
+			# Use unrounded net for inclusive taxes to avoid double rounding
+			if (
+				cint(tax.included_in_print_rate)
+				and not self.discount_amount_applied
+				and hasattr(item, "_unrounded_net_amount")
+			):
+				current_tax_amount = (tax_rate / 100.0) * item._unrounded_net_amount
+			else:
+				current_tax_amount = (tax_rate / 100.0) * item.net_amount
 		elif tax.charge_type == "On Previous Row Amount":
 			current_net_amount = self.doc.get("taxes")[cint(tax.row_id) - 1].tax_amount_for_current_item
 			current_tax_amount = (tax_rate / 100.0) * current_net_amount
