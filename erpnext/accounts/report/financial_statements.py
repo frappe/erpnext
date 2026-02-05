@@ -570,7 +570,7 @@ def get_accounting_entries(
 	match_conditions = build_match_conditions(doctype)
 
 	if match_conditions:
-		query += "and" + match_conditions
+		query += " AND (" + match_conditions + ")"
 
 	if group_by_account:
 		query += " GROUP BY `account`"
