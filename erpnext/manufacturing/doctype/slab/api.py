@@ -34,6 +34,11 @@ def create_slab(line: str, type: str, job_card_number: str | None = None):
 
 	# TODO: Remove ignore_permissions after testing.
 	new_slab.save(ignore_permissions=True)
+	jc = frappe.get_doc("Job Card", job_card_number)
+	jc.slab = new_slab.name
+	jc.slab_template = new_slab.template
+	jc.save(ignore_permissions=True)
+	jc.reload()
 	return new_slab
 
 
@@ -100,11 +105,10 @@ def move_slab_to(
 		if not checkout_and_move:
 			frappe.throw("Cannot move slab without checking out")
 
-		checkout_slab(slab_number)
+		# checkout_slab(slab_number)
 		slab: Slab = frappe.get_doc("Slab", slab_number)
 
 	slab.status = next_stage  # pyright: ignore[reportAttributeAccessIssue]
-	# slab.is_cur_stage_complete = False
 	slab.is_cur_stage_complete = False
 	slab.status = ALLOWED_STAGES[next_stage_index]  # pyright: ignore[reportAttributeAccessIssue]
 	# if next_stage.lower() != "trimming":
@@ -261,13 +265,18 @@ def get_all_existing_slabs(stage):
 
 @frappe.whitelist()
 def get_slab_for_job_card(job_card):
-	slab = frappe.get_value(
+	slab_info = frappe.get_value(
 		"Slab",
 		{"current_job_card": job_card, "docstatus": 0},
 		["name", "serial_number", "batch_number", "template", "line", "status"],
 		as_dict=1,
 	)
-	return slab
+	if slab_info:
+		jc = frappe.get_doc("Job Card", job_card)
+		jc.slab = slab_info.name
+		jc.save(ignore_permissions=True)
+		jc.reload()
+	return slab_info
 
 
 @frappe.whitelist()

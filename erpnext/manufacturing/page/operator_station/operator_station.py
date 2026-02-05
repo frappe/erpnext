@@ -1,3 +1,4 @@
+from erpnext.manufacturing.doctype.slab.api import checkout_slab
 import frappe
 import json
 from frappe import _
@@ -10,7 +11,8 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	WorkOrder,
 	make_stock_entry as wo_make_stock_entry,
 )
-from erpnext.manufacturing.doctype.slab.api import move_slab_to
+from erpnext.manufacturing.doctype.slab.api import move_slab_to, get_slabs_for
+from erpnext.manufacturing.doctype.operation.api import get_open_job_cards
 
 
 @frappe.whitelist()
@@ -63,8 +65,10 @@ def start_process(job_card, process_name="operator"):
 
 
 @frappe.whitelist()
-def finish_distribution(job_card, process_name="operator"):
+def finish_process(job_card, process_name="operator"):
 	"""Complete the Job Card when mixing is finished."""
+	# try:
+	# frappe.db.begin()
 	jc = frappe.get_doc("Job Card", job_card)
 	job_card_qty = flt(jc.total_completed_qty or jc.for_quantity, 3)
 	# total_transferred = sum([item.transferred_qty for item in jc.items])
@@ -101,8 +105,8 @@ def finish_distribution(job_card, process_name="operator"):
 	jc.db_set("status", "Completed")
 	jc.reload()
 
-	if process_name.lower() != "quality analysis":
-		transfer_slab(job_card, process_name)
+	# if process_name.lower() != "quality analysis":
+	# 	transfer_slab(job_card, process_name)
 
 	work_order = jc.work_order
 	wo = frappe.get_doc("Work Order", work_order)
@@ -129,6 +133,8 @@ def finish_distribution(job_card, process_name="operator"):
 	wo.reload()
 	wo_status = wo.get_status()
 
+	checkout_slab(jc.slab)
+	# frappe.db.commit()
 	return {
 		"status": wo_status,
 		"work_order_status": wo_status,
@@ -138,6 +144,10 @@ def finish_distribution(job_card, process_name="operator"):
 		"stock_entry": stock_entry_manufacture.name,
 		"message": f"SE {stock_entry_manufacture.name} ({job_card_qty} qty). WO: {wo_status}",
 	}
+	# except Exception as e:
+	# 	frappe.db.rollback()
+	# 	frappe.log_error(frappe.get_traceback(), "finish_process failed")
+	# 	frappe.throw(str(e))
 
 
 @frappe.whitelist()
@@ -191,28 +201,36 @@ def transfer_slab(job_card, process_name):
 
 	slabs = frappe.get_all(
 		"Slab",
-		filters={"current_job_card": jc.name, "status": process_name.lower(), "docstatus": 0},
+		filters={"current_job_card": jc.name, "docstatus": 0},
 		fields=["name", "serial_number", "batch_number", "template", "line", "status"],
-		order_by="creation desc",
+		order_by="creation asc",
 	)
 	if not slabs:
 		frappe.throw(_("No Slabs found for this Job Card"))
 
-	process_mapping = {
-		"distribution": "pressing",
-		"pressing": "heating",
-		"heating": "cooling",
-		"cooling": "quarantine",
-		"quarantine": "trimming",
-		"trimming": "calibration",
-		"calibration": "polishing",
-		"polishing": "Quality Check",
-	}
-
-	next_stage = process_mapping.get(process_name)
-	if not next_stage:
-		frappe.throw(_("Invalid process name: {0}").format(process_name))
-
 	move_slab_to(
-		slab_number=slabs[0].name, next_stage=next_stage, job_card_number=jc.name, checkout_and_move=True
+		slab_number=slabs[0].name,
+		next_stage=process_name.lower(),
+		job_card_number=jc.name,
 	)
+
+
+@frappe.whitelist()
+def get_next_work_item(process, line=None):
+	if process.lower() == "distribution":
+		job_cards = get_open_job_cards(process)
+		if job_cards:
+			return {"name": job_cards[0].name, "type": "Job Card"}
+	else:
+		if line:
+			slabs_for = get_slabs_for(line, process)
+			if slabs_for:
+				transfer_slab(slabs_for[0].current_job_card, process)
+				updated_slab = frappe.get_doc("Slab", slabs_for[0].name)
+				return {
+					"name": updated_slab.current_job_card,
+					"type": "Slab",
+					"slab_name": updated_slab.name,
+				}
+
+	return None
