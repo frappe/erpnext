@@ -469,6 +469,8 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, ar
 
 	if automatically_fetch_payment_terms:
 		mapping["Payment Schedule"] = {"doctype": "Payment Schedule", "add_if_empty": True}
+	else:
+		mapping["Quotation"]["field_no_map"] = ["payment_terms_template"]
 
 	doclist = get_mapped_doc(
 		"Quotation",
