@@ -3,10 +3,12 @@ import { ref, reactive, nextTick, computed, onMounted, onUnmounted } from 'vue';
 
 // TODO: Make this dynamic based on the user's role.
 const jobCardNumber = ref(null);
-const updateKey = ref(0);
 const ovenData = ref(null);
 const slabsQueue = ref([]);
 const selectedSlab = ref(null);
+const currentTime = ref(new Date());
+let pollingInterval = ref(null);
+let timerInterval = null;
 const overheat_minutes = 90; // TODO: This should be replaced by a setting in Mahi Granites Settings.
 
 
@@ -18,7 +20,7 @@ const racks = computed(() => {
         let time_text = '';
         if ((r.status === 'Heating' || r.status === 'Overheat') && r.start_time) {
             const start = new Date(r.start_time.replace(' ', 'T'));
-            const now = new Date();
+            const now = currentTime.value;
             const diffMs = now - start;
 
             if (diffMs > 0) {
@@ -160,28 +162,38 @@ const get_slabs_ready_for_heating = async () => {
 onMounted(async () => {
     const route = frappe.get_route();
     jobCardNumber.value = route[1] || null;
+
+    timerInterval = setInterval(() => {
+        currentTime.value = new Date();
+    }, 1000);
+
     await fetchWorkContext();
     refreshOvenData();
-    await fetchQueue(work_context.assigned_line);
+    await fetchQueue(work_context.assigned_line, jobCardNumber.value);
 
-    get_slabs_ready_for_heating();
+    pollingInterval.value = setInterval(() => {
+        fetchQueue(work_context.assigned_line);
+    }, 5000);
+});
+
+onUnmounted(() => {
+    if (timerInterval) clearInterval(timerInterval);
+    if (pollingInterval.value) clearInterval(pollingInterval.value);
 });
 
 
-async function fetchQueue(line) {
+async function fetchQueue(line, jobCardNumber = null) {
     try {
         slabsQueue.value = [];
         const result = await frappe.call({
-            method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_in',
+            method: 'erpnext.manufacturing.page.oven_station.oven_station.get_slabs_for_heating',
             args: {
                 line: line,
-                current_stage: 'Heating'
+                job_card_number: jobCardNumber
             }
         });
-        if (result.message) {
-            slabsQueue.value = result.message || [];
-            console.log(slabsQueue.value);
-        }
+
+        selectSlab.value = result.message || null;
     } catch (e) {
         console.error('Failed to fetch queue:');
     }
@@ -193,12 +205,9 @@ function selectSlab(slab) {
     if (selectedSlab.value && slab.current_job_card === selectedSlab.value.current_job_card) {
         return;
     }
+
     selectedSlab.value = slab;
-    const route = frappe.get_route();
-    if (route.length >= 1) {
-        frappe.set_route(route[0], slab.current_job_card);
-        window.location.reload();
-    }
+    jobCardNumber.value = slab.current_job_card;
 }
 
 function loadIntoRack(rack) {
@@ -360,6 +369,9 @@ function rackClasses(rack) {
     if (rack.state === 'Heating') return 'rack-card curing';
     if (rack.state === 'Overheat') return 'rack-card overheat';
     if (!rack.is_operational) return 'rack-card maintenance';
+    
+    // Idle state
+    if (!selectedSlab.value) return 'rack-card disabled empty';
     return 'rack-card empty';
 }
 
@@ -399,49 +411,6 @@ frappe.realtime.on('slab_checkout', (slab) => {
 
 <template>
     <div class="page-card d-flex">
-        <!-- Left: Incoming Slabs -->
-        <div style="width:340px;" class="pr-4 border-right">
-            <h5 class="mb-3 d-flex align-items-center">
-                {{ __('Incoming Slabs') }}
-            </h5>
-            <div class="text-muted small mb-3" v-if="currentSlab && currentSlab.length">
-                {{ __('Select a slab to load into an empty rack.') }}
-            </div>
-
-            <div class="incoming-list">
-                <div v-if="loadingSlab" class="text-center p-4">
-                    <div class="spinner-border spinner-border-sm text-muted" role="status"></div>
-                </div>
-                <div v-else-if="jobCardNumber && !selectedSlab"
-                    class="text-muted small text-center p-4 border rounded bg-light">
-                    {{ __('No slab found for Job Card') }} {{ jobCardNumber }}
-                </div>
-                <!-- <div v-else-if="!jobCardNumber && (!currentSlab || !currentSlab.length)"
-                    class="text-muted small text-center p-4 border rounded bg-light">
-                    {{ __('No slabs are ready for heating right now.') }}
-                </div> -->
-                <TransitionGroup name="list" tag="div" v-else>
-                    <div v-for="slab in slabsQueue" :key="slab?.name"
-                        class="incoming-item mb-2 p-3 d-flex align-items-center border rounded"
-                        :class="{ 'selected': selectedSlab && selectedSlab.name === slab?.name }"
-                        @click="selectSlab(slab)">
-                        <div v-if="slab" class="slab-container" :key="updateKey">
-                            <div class="slab-thumbnail mr-3"></div>
-                            <div class="flex-fill">
-                                <div class="font-weight-bold small">{{ slab.name }}</div>
-                                <div class="text-muted small">
-                                    {{ slab.template }}
-                                </div>
-                            </div>
-                            <div class="text-muted">
-                                <span class="fa fa-arrow-right"></span>
-                            </div>
-                        </div>
-                    </div>
-                </TransitionGroup>
-            </div>
-        </div>
-
         <!-- Center: Oven Monitor -->
         <div class="flex-fill pl-4">
             <div class="border-bottom d-flex justify-content-between pb-2">
@@ -486,7 +455,19 @@ frappe.realtime.on('slab_checkout', (slab) => {
                 </div>
             </div>
 
-            <div class="rack-grid d-flex flex-wrap pt-5">
+            <div v-if="selectedSlab" class="d-flex align-items-center justify-content-between border rounded p-3 mb-4 mt-3" style="background-color: var(--control-bg-on-gray, #e2edff); border-color: var(--primary-color) !important;">
+                <div class="d-flex align-items-center">
+                    <span class="text-muted mr-3">{{ __('Current Slab') }}:</span>
+                    <div class="slab-thumbnail mr-3" style="width: 24px; height: 24px;"></div>
+                    <span class="font-weight-bold h5 mb-0 mr-2">{{ selectedSlab.name }}</span>
+                    <span class="text-muted">{{ selectedSlab.template }}</span>
+                </div>
+            </div>
+            <div v-else class="d-flex align-items-center justify-content-center border rounded p-3 mb-4 mt-3 bg-light text-muted">
+                {{ __('No slabs available for heating') }}
+            </div>
+
+            <div class="rack-grid d-flex flex-wrap" :class="selectedSlab ? 'pt-3' : 'pt-5'">
                 <div v-for="rack in racks" :key="rack.slot" :class="rackClasses(rack)" class="mb-3 mr-3 p-3 rounded"
                     style="position: relative;"
                     @click="rack.state === 'Heating' || rack.state === 'Overheat' ? unload_slab_from_rack(rack) : loadIntoRack(rack)">
@@ -674,6 +655,12 @@ frappe.realtime.on('slab_checkout', (slab) => {
     border-style: dashed;
     border-color: #6c757d;
     background: var(--blue-50, #e2edff);
+}
+
+.rack-card.disabled {
+    opacity: 0.5;
+    cursor: not-allowed !important;
+    pointer-events: none;
 }
 
 .temp-badge {

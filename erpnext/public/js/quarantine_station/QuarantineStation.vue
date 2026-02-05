@@ -26,10 +26,10 @@ const selectedSlab = ref(null);
 const get_slabs_ready_for_quarantine = async () => {
     // Call API to get slabs ready for quarantine
     const r = await frappe.call({
-        method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_in',
+        method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
         args: {
             line: work_context.assigned_line,
-            current_stage: "Quarantine",
+            next_stage: "Quarantine",
         }
     });
     if (r.message) {

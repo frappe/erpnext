@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, onMounted, onUnmounted } from 'vue';
 
 const work_context = reactive({
     role: "Quality Analyst",
@@ -22,11 +22,11 @@ const fetchWorkContext = async () => {
 };
 
 const jobCardNumber = ref(null);
-const updateKey = ref(0);
-const incomingSlabs = ref([]);
 const selectedSlab = ref(null);
-const processStarted = ref(false);
 const isQAStarted = ref(false);
+const hourglassRotation = ref(0);
+const hourglassIcon = ref('fa-hourglass-3');
+let hourglassInterval = null;
 
 const form = reactive({
     // Basic Details (Auto-filled)
@@ -69,47 +69,25 @@ const fetchGrades = async () => {
     }
 };
 
-const get_slabs_ready_for_qa = async () => {
-    const [for_res, in_res] = await Promise.all([
-        frappe.call({
-            method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
-            args: {
-                line: work_context.assigned_line,
-                next_stage: "Quality Check"
-            }
-        }),
-        frappe.call({
-            method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_in',
-            args: {
-                line: work_context.assigned_line,
-                current_stage: "Quality Check"
-            }
-        })
-    ]);
-
-    const combined_slabs = [...(in_res.message || []), ...(for_res.message || [])];
-    // De-duplicate in case a slab is in both for some reason (shouldn't happen with current logic but good for safety)
-    const unique_slabs = [];
-    const seen = new Set();
-    for (const slab of combined_slabs) {
-        if (!seen.has(slab.name)) {
-            unique_slabs.push(slab);
-            seen.add(slab.name);
+const get_slab_for_qa = async (job_card_number) => {
+    const res = await frappe.call({
+        method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.get_slab_or_jobcard_for_qa',
+        args: {
+            line: work_context.assigned_line,
+            job_card_number: job_card_number,
         }
+    });
+    if (res.message && res.message) {
+        selectSlab(res.message);
     }
+    else {
+        selectedSlab.value = null;
+    }
+}
 
-    incomingSlabs.value = unique_slabs;
-    updateKey.value++;
-};
 
-function selectSlab(slab, index) {
-    // if (index) return;
+function selectSlab(slab) {
     selectedSlab.value = slab;
-    const route = frappe.get_route();
-    if (route.length >= 1) {
-        frappe.set_route(route[0], slab.current_job_card);
-        // window.location.reload();
-    }
     jobCardNumber.value = slab.current_job_card;
     isQAStarted.value = false;
     // Reset and Auto-fill form
@@ -132,17 +110,6 @@ function selectSlab(slab, index) {
         grade: '',
         remarks: ''
     });
-
-    // Call move_slab_to here with next_stage as "Quality Check" if the current stage is complete on the slab (using the `is_cur_stage_complete` flag on the slab)
-    if (slab.is_cur_stage_complete) {
-        frappe.call({
-            method: 'erpnext.manufacturing.doctype.slab.api.move_slab_to',
-            args: {
-                slab_number: slab.name,
-                next_stage: "Quality Check"
-            }
-        });
-    }
 }
 
 
@@ -155,16 +122,13 @@ const confirmAndTag = async () => {
     }
 
     try {
-        console.log('Assigned shift:', work_context.assigned_shift);
-        // console.log('Job card:', job_card.value);
-        console.log('Job card:', jobCardNumber.value);
-
         const res = await frappe.call({
-            method: 'erpnext.manufacturing.doctype.slab_quality_report.api.create_slab_quality_report',
+            method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.submit_qa_report',
             args: {
                 report: form,
                 shift: work_context.assigned_shift,
-                job_card: jobCardNumber.value
+                job_card: jobCardNumber.value,
+                slab_number: selectedSlab.value.name,
             },
             freeze: true
         });
@@ -174,7 +138,7 @@ const confirmAndTag = async () => {
                 __(`Quality Report submitted and Slab ${selectedSlab.value.name} checked out.`)
             );
             selectedSlab.value = null;
-            get_slabs_ready_for_qa();
+            get_slab_for_qa();
         }
     } catch (e) {
         console.error(e);
@@ -185,31 +149,48 @@ const confirmAndTag = async () => {
 const raiseQualityAlarm = async () => {
     if (!selectedSlab.value) return;
 
-    await frappe.call({
-        method: 'your_app.api.raise_quality_alarm',
-        args: {
-            source: 'Quality Analyst Station',
-            slab_name: selectedSlab.value.name,
-        },
-    });
+    // await frappe.call({
+    //     method: 'your_app.api.raise_quality_alarm',
+    //     args: {
+    //         source: 'Quality Analyst Station',
+    //         slab_name: selectedSlab.value.name,
+    //     },
+    // });
     frappe.show_alert(__('Quality alarm raised for {0}', [selectedSlab.value.name]));
 };
 
 onMounted(async () => {
     const route = frappe.get_route();
     jobCardNumber.value = route[1] || null;
-    if (!jobCardNumber.value && selectedSlab?.value) {
-        jobCardNumber.value = selectedSlab.value.job_card;
-    }
+
+    // TODO: 
+    //  1. Get the slab from the job card if job card is present in the route.
+    //  2. Else, get the currently active job card and its associated slab.
+    //  2. If there is an active job card, pre-select its slab.
 
     await fetchWorkContext();
-    get_slabs_ready_for_qa();
+    get_slab_for_qa(jobCardNumber.value);
     fetchGrades();
+
+    startHourglassAnimation();
 });
+
+onUnmounted(() => {
+    if (hourglassInterval) clearInterval(hourglassInterval);
+});
+
+function startHourglassAnimation() {
+    hourglassInterval = setInterval(() => {
+        hourglassRotation.value += 180;
+        setTimeout(() => {
+            hourglassIcon.value = hourglassIcon.value === 'fa-hourglass-3' ? 'fa-hourglass-1' : 'fa-hourglass-3';
+        }, 500);
+    }, 1000);
+}
 
 
 frappe.realtime.on('slab_checkout', () => {
-    get_slabs_ready_for_qa();
+    get_slab_for_qa();
 });
 
 const startProcess = async () => {
@@ -217,15 +198,12 @@ const startProcess = async () => {
 
     try {
         await frappe.call({
-            method: 'erpnext.manufacturing.page.operator_station.operator_station.start_process',
+            method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.start_process',
             args: {
-                job_card: jobCardNumber.value,
-                process_name: 'Quality Analysis'
+                slab_number: selectedSlab.value.name,
             }
         });
         isQAStarted.value = true;
-        processStarted.value = true;
-        console.log('Job Card started automatically');
     } catch (e) {
         console.error('Failed to start job card', e);
     }
@@ -234,42 +212,6 @@ const startProcess = async () => {
 
 <template>
     <div class="page-card d-flex">
-        <!-- Left: Incoming Slabs -->
-        <div style="width:300px;" class="pr-4 border-right">
-            <h5 class="mb-3 d-flex align-items-center">
-                {{ __('Incoming Slabs') }}
-            </h5>
-            <div class="text-muted small mb-3" v-if="incomingSlabs.length">
-                {{ __('Select a slab for quality check.') }}
-            </div>
-
-            <div class="incoming-list">
-                <div v-if="!incomingSlabs.length" class="empty-state text-muted small text-center p-4 border rounded">
-                    {{ __('No slabs are ready for quality check right now.') }}
-                </div>
-                <TransitionGroup name="list" tag="div" v-else>
-                    <div v-for="(slab, index) in incomingSlabs" :key="slab.name"
-                        class="incoming-item mb-2 p-3 d-flex align-items-center border rounded"
-                        :class="{ 'selected': selectedSlab && selectedSlab.name === slab.name, 'cursor-pointer': !index }"
-                        @click="selectSlab(slab, index)">
-                        <div class="slab-container" :key="updateKey">
-                            <div class="slab-thumbnail mr-3"></div>
-                            <div class="flex-fill">
-                                <div class="font-weight-bold small">{{ slab.name }}</div>
-                                <div class="text-muted small">
-                                    {{ slab.template }}
-                                </div>
-                            </div>
-                            <!-- <div class="text-muted" v-if="!index">
-                                <span class="fa fa-arrow-right"></span>
-                            </div> -->
-                        </div>
-                    </div>
-                </TransitionGroup>
-            </div>
-        </div>
-
-        <!-- Right: Quality Analysis Form -->
         <div class="flex-fill pl-4">
             <main class="main-container" v-if="selectedSlab">
                 <div class="slab-info-card p-4 border rounded mb-4 d-flex align-items-center">
@@ -399,16 +341,23 @@ const startProcess = async () => {
                             <button class="btn btn-primary btn-lg px-5" @click="confirmAndTag">
                                 <span class="fa fa-check mr-2"></span>{{ __('Submit Quality Report') }}
                             </button>
-                            <button class="btn btn-outline-danger btn-lg ml-2" @click="raiseQualityAlarm">
+                            <!-- <button class="btn btn-outline-danger btn-lg ml-2" @click="raiseQualityAlarm">
                                 <span class="fa fa-bell mr-2"></span>{{ __('Raise Alarm') }}
-                            </button>
+                            </button> -->
                         </div>
                     </div>
                 </div>
             </main>
             <div v-else class="text-center p-5 text-muted">
-                <div class="mb-3"><span class="fa fa-mouse-pointer" style="font-size: 2rem;"></span></div>
-                <h5>{{ __('Select a slab from the list to start quality analysis') }}</h5>
+                <div class="mb-3">
+                    <span :class="['fa', hourglassIcon]"
+                        :style="{ transform: `rotate(${hourglassRotation}deg)`, transition: 'transform 0.5s', display: 'inline-block' }"
+                        style="font-size: 2rem;">
+                    </span>
+                </div>
+                <!-- <h5>{{ __('Select a slab from the list to start quality analysis') }}</h5> -->
+                <h3>{{ __('There are no slabs available for quality analysis right now.') }}</h3>
+                <h3>{{ __('Please wait for the next slab to arrive.') }}</h3>
             </div>
         </div>
     </div>
