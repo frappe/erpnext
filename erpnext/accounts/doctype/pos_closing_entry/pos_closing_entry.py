@@ -441,3 +441,23 @@ def build_invoice_query(invoice_doctype, user, pos_profile, start, end):
 		)
 
 	return query
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_pos_profiles(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	user = filters.get("user")
+	pos_profile_user = DocType("POS Profile User")
+	pos_profile = DocType("POS Profile")
+
+	query = (
+		frappe.qb.from_(pos_profile_user)
+		.inner_join(pos_profile)
+		.on(pos_profile_user.parent == pos_profile.name)
+		.where((pos_profile_user.user == user) & (pos_profile.name.like(f"%{txt}%")))
+		.select(pos_profile.name)
+		.limit(page_len)
+		.offset(start)
+	)
+
+	return query.run(as_list=True)

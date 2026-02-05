@@ -6,6 +6,7 @@ frappe.ui.form.on("POS Closing Entry", {
 		frm.ignore_doctypes_on_cancel_all = ["POS Invoice Merge Log", "Sales Invoice"];
 		frm.set_query("pos_profile", function (doc) {
 			return {
+				query: "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.get_pos_profiles",
 				filters: { user: doc.user },
 			};
 		});
