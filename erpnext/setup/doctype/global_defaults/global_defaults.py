@@ -85,9 +85,6 @@ class GlobalDefaults(Document):
 				"Check",
 				validate_fields_for_doctype=False,
 			)
-			make_property_setter(
-				doctype, "base_rounded_total", "print_hide", 1, "Check", validate_fields_for_doctype=False
-			)
 
 			make_property_setter(
 				doctype,
@@ -97,6 +94,7 @@ class GlobalDefaults(Document):
 				"Check",
 				validate_fields_for_doctype=False,
 			)
+
 			make_property_setter(
 				doctype,
 				"rounded_total",
