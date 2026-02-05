@@ -396,6 +396,9 @@ class DeliveryNote(SellingController):
 		)
 
 	def validate_sales_invoice_references(self):
+		if self.is_return:
+			return
+
 		self._validate_dependent_item_fields(
 			"against_sales_invoice", "si_detail", _("References to Sales Invoices are Incomplete")
 		)
@@ -663,7 +666,7 @@ class DeliveryNote(SellingController):
 	def update_billing_status(self, update_modified=True):
 		updated_delivery_notes = [self.name]
 		for d in self.get("items"):
-			if d.si_detail and not d.so_detail:
+			if d.si_detail and d.against_sales_invoice:
 				d.db_set("billed_amt", d.amount, update_modified=update_modified)
 			elif d.so_detail:
 				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
