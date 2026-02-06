@@ -1561,7 +1561,6 @@
   },
   {
    "fetch_from": "customer.language",
-   "fetch_if_empty": 1,
    "fieldname": "language",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -2316,7 +2315,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-02-05 12:53:35.316061",
+ "modified": "2026-02-07 02:21:27.504641",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
