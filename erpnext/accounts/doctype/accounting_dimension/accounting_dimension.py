@@ -287,6 +287,11 @@ def get_dimension_with_children(doctype, dimensions):
 
 @frappe.whitelist()
 def get_dimensions(with_cost_center_and_project=False):
+	is_enabled = frappe.get_single_value("Accounts Settings", "enable_accounting_dimensions")
+
+	if not is_enabled:
+		return
+
 	c = frappe.qb.DocType("Accounting Dimension Detail")
 	p = frappe.qb.DocType("Accounting Dimension")
 	dimension_filters = (
