@@ -1079,6 +1079,15 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 								() => this.make_material_request(),
 								__("Create")
 							);
+							frappe.call({
+								method: "erpnext.selling.doctype.sales_order.sales_order.has_requestable_items",
+								args: { source_name: doc.name },
+								callback: (r) => {
+									if (!r.message) {
+										this.frm.remove_custom_button(__("Material Request"), __("Create"));
+									}
+								},
+							});
 						}
 						this.frm.add_custom_button(
 							__("Request for Raw Materials"),

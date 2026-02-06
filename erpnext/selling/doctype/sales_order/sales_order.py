@@ -1139,7 +1139,6 @@ def is_requestable_row(row, requested_item_qty):
 
 @frappe.whitelist()
 def has_requestable_items(source_name):
-	print("Checking for requestable items in Sales Order:", source_name)
 	so = frappe.get_doc("Sales Order", source_name)
 	requested_item_qty = get_requested_item_qty(source_name)
 
