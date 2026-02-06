@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-02-01 09:43+0000\n"
-"PO-Revision-Date: 2026-02-05 06:50\n"
+"PO-Revision-Date: 2026-02-06 07:09\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -21,7 +21,8 @@ msgstr ""
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1455
 msgid "\n"
 "\t\t\t\t\tThe Batch {0} of an item {1} has negative stock in the warehouse {2}. Please add a stock quantity of {3} to proceed with this entry."
-msgstr ""
+msgstr "\n"
+"\t\t\t\t\tParti {0} för artikel {1} har negativ saldo i lager {2}. Lägg till lager kvantitet på {3} för att fortsätta med denna post."
 
 #. Label of the column_break_32 (Column Break) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -1125,7 +1126,7 @@ msgstr "ACC-PINV-.YYYY.-"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "ALL records will be deleted (entire DocType cleared)"
-msgstr ""
+msgstr "ALLA poster kommer att raderas (hela DocType rensas)"
 
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:552
 msgid "AMC Expiry (Serial)"
@@ -5823,7 +5824,7 @@ msgstr "Minst en av Försäljning eller Inköp måste väljas"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:314
 msgid "At least one raw material item must be present in the stock entry for the type {0}"
-msgstr ""
+msgstr "Minst en råmaterial artikel måste finnas i lager post för typ {0}"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:25
 msgid "At least one row is required for a financial report template"
@@ -7602,7 +7603,7 @@ msgstr "Starta (Dagar)"
 #. 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Beginning of the current subscription period"
-msgstr "Början av aktuell prenumeration period"
+msgstr "Vid början av aktuell prenumeration period"
 
 #: erpnext/accounts/doctype/subscription/subscription.py:323
 msgid "Below Subscription Plans are of different currency to the party default billing currency/Company currency: {0}"
@@ -8849,7 +8850,7 @@ msgstr "Kan inte godkänna om Register Poster för verifikationer under stängt 
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:202
 msgid "Cannot add child table {0} to deletion list. Child tables are automatically deleted with their parent DocTypes."
-msgstr ""
+msgstr "Kan inte att lägga till underordnad tabell {0} i borttagning lista. Underordnade tabeller raderas automatiskt med deras överordnade DocTypes."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:226
 msgid "Cannot amend {0} {1}, please create a new one instead."
@@ -8992,11 +8993,11 @@ msgstr "Det går inte att ta bort artikel som finns på order"
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:195
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:778
 msgid "Cannot delete protected core DocType: {0}"
-msgstr ""
+msgstr "Kan inte ta bort skyddad system DocType: {0}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:211
 msgid "Cannot delete virtual DocType: {0}. Virtual DocTypes do not have database tables."
-msgstr ""
+msgstr "Kan inte ta bort virtuell DocType: {0}. Virtuella DocTypes har inga databas tabeller."
 
 #: erpnext/setup/doctype/company/company.py:559
 msgid "Cannot disable perpetual inventory, as there are existing Stock Ledger Entries for the company {0}. Please cancel the stock transactions first and try again."
@@ -9033,7 +9034,7 @@ msgstr "Det går inte att slå samman {0} '{1}' till '{2}' eftersom båda har be
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:533
 msgid "Cannot produce more Item {0} than Sales Order quantity {1} {2}"
-msgstr ""
+msgstr "Kan inte producera mer av artikel {0} än Försäljning Order Kvantitet {1} {2}"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1426
 msgid "Cannot produce more item for {0}"
@@ -9100,7 +9101,7 @@ msgstr "Kan inte ange fält <b>{0}</b> för kopiering i varianter"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:264
 msgid "Cannot start deletion. Another deletion {0} is already queued/running. Please wait for it to complete."
-msgstr ""
+msgstr "Kan inte starta borttagning. Annan borttagning {0} är redan i kö/körs. Vänta tills den är klar."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1920
 msgid "Cannot {0} from {1} without any negative outstanding invoice"
@@ -9733,7 +9734,7 @@ msgstr "Teknik Ansvarig"
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child DocTypes"
-msgstr ""
+msgstr "Underordnade DocTypes"
 
 #. Label of the child_docname (Data) field in DocType 'Pricing Rule Detail'
 #: erpnext/accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
@@ -9749,7 +9750,7 @@ msgstr "Underordnad Rad Referens"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:205
 msgid "Child Table Not Allowed"
-msgstr ""
+msgstr "Underordnad tabell är inte tillåten"
 
 #: erpnext/projects/doctype/task/task.py:312
 msgid "Child Task exists for this Task. You can not delete this Task."
@@ -9763,7 +9764,7 @@ msgstr "Underordnade noder kan endast skapas under 'Grupp' Typ noder"
 #. 'Transaction Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child tables that will also be deleted"
-msgstr ""
+msgstr "Underordnade tabeller som också kommer att raderas"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:103
 msgid "Child warehouse exists for this warehouse. You can not delete this warehouse."
@@ -10614,7 +10615,7 @@ msgstr "Bolag Konto"
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:63
 msgid "Company Account is mandatory"
-msgstr ""
+msgstr "Bolag Konto Erfordras"
 
 #. Label of the company_address (Link) field in DocType 'Dunning'
 #. Label of the company_address_display (Text Editor) field in DocType 'POS
@@ -10731,7 +10732,7 @@ msgstr "Bolag E-post"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company Field"
-msgstr ""
+msgstr "Bolag"
 
 #. Label of the company_logo (Attach Image) field in DocType 'Company'
 #: erpnext/public/js/print.js:64 erpnext/setup/doctype/company/company.json
@@ -10785,7 +10786,7 @@ msgstr "Bolag erfordras för att skapa faktura. Ange standard bolag i Standard I
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company link field name used for filtering (optional - leave empty to delete all records)"
-msgstr ""
+msgstr "Fältnamn för bolag länk som används för filtrering (valfritt - lämna tomt för att radera alla poster)"
 
 #: erpnext/setup/doctype/company/company.js:222
 msgid "Company name not same"
@@ -14860,11 +14861,11 @@ msgstr "Borttagning är inte tillåtet för {0}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:216
 msgid "Deletion process restarted"
-msgstr ""
+msgstr "Borttagning process omstartad"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:97
 msgid "Deletion will start automatically after submission."
-msgstr ""
+msgstr "Borttagning startar automatiskt efter godkännade."
 
 #. Label of the delimiter_options (Data) field in DocType 'Bank Statement
 #. Import'
@@ -16309,27 +16310,27 @@ msgstr "DocType {0} finns inte"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:295
 msgid "DocType {0} with company field '{1}' is already in the list"
-msgstr ""
+msgstr "DocType {0} med bolag '{1}' finns redan i listan"
 
 #. Label of the doctypes_to_delete (Table) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "DocTypes To Delete"
-msgstr ""
+msgstr "DocTypes att ta bort"
 
 #. Description of the 'Excluded DocTypes' (Table) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "DocTypes that will NOT be deleted."
-msgstr ""
+msgstr "DocTypes som INTE kommer att tas bort."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:84
 msgid "DocTypes with a company field:"
-msgstr ""
+msgstr "DocTypes med bolag:"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "DocTypes without a company field:"
-msgstr ""
+msgstr "DocTypes utan bolag:"
 
 #: erpnext/templates/pages/search_help.py:22
 msgid "Docs Search"
@@ -16339,7 +16340,7 @@ msgstr "Dokument Sökning"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Document Count"
-msgstr ""
+msgstr "Antal Dokument"
 
 #. Label of the document_type (Link) field in DocType 'Subscription Invoice'
 #: erpnext/accounts/doctype/subscription_invoice/subscription_invoice.json
@@ -16594,7 +16595,7 @@ msgstr "Kopiera Kund Grupp"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:188
 msgid "Duplicate DocType"
-msgstr ""
+msgstr "Duplicera DocType"
 
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.py:71
 msgid "Duplicate Entry. Please check Authorization Rule {0}"
@@ -16652,7 +16653,7 @@ msgstr "Kopiera post mot Artikel Kod {0} och Producent {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:187
 msgid "Duplicate entry: {0}{1}"
-msgstr ""
+msgstr "Duplicerad post: {0}{1}"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:164
 msgid "Duplicate item group found in the item group table"
@@ -17164,7 +17165,7 @@ msgstr "Tom"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:750
 msgid "Empty To Delete List"
-msgstr ""
+msgstr "Töm för att ta bort lista"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -17411,7 +17412,7 @@ msgstr "Livslängd"
 #. 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "End of the current subscription period"
-msgstr "Slut datum på aktuell prenumeration period"
+msgstr "Vid slutet av aktuell prenumeration period"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:21
 msgid "Energy"
@@ -17618,7 +17619,7 @@ msgstr "Fel uppstod vid utvärdering av kriterier formula"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:267
 msgid "Error getting details for {0}: {1}"
-msgstr ""
+msgstr "Fel vid hämtning av detaljer för {0}: {1}"
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.py:310
 msgid "Error in party matching for Bank Transaction {0}"
@@ -18457,7 +18458,7 @@ msgstr "Hämtar..."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:222
 msgid "Field '{0}' is not a valid Company link field for DocType {1}"
-msgstr ""
+msgstr "Fält '{0}' är inte giltigt bolag länk fält för DocType {1}"
 
 #. Label of the field_mapping_section (Section Break) field in DocType
 #. 'Inventory Dimension'
@@ -18479,15 +18480,15 @@ msgstr "Fält kopieras över endast vid skapande tid."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1062
 msgid "File does not belong to this Transaction Deletion Record"
-msgstr ""
+msgstr "Filen tillhör inte denna Transaktion Borttagning Post"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1056
 msgid "File not found"
-msgstr ""
+msgstr "Filen hittades inte"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1070
 msgid "File not found on server"
-msgstr ""
+msgstr "Filen hittades inte på servern"
 
 #. Label of the file_to_rename (Attach) field in DocType 'Rename Tool'
 #: erpnext/utilities/doctype/rename_tool/rename_tool.json
@@ -19291,7 +19292,7 @@ msgstr "För kundernas bekvämlighet kan dessa koder användas i utskriftsformat
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:977
 msgid "For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
-msgstr ""
+msgstr "För artikel {0} förbrukad kvantitet ska vara {1} enligt stycklista {2}."
 
 #: erpnext/public/js/controllers/transaction.js:1306
 msgctxt "Clear payment terms template and/or payment schedule when due date is changed"
@@ -19807,7 +19808,7 @@ msgstr "Uppfyllande av Avtal Villkor"
 
 #: erpnext/stock/doctype/shipment/shipment.js:275
 msgid "Full Name, Email or Phone/Mobile of the user are mandatory to continue."
-msgstr ""
+msgstr "Fullständigt namn, E-post eller Telefon/Mobil för användare erfordras för att fortsätta."
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -20081,11 +20082,11 @@ msgstr "Skapa Lagerstängning Post"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:112
 msgid "Generate To Delete List"
-msgstr ""
+msgstr "Generera för att ta bort lista"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:468
 msgid "Generate To Delete list first"
-msgstr ""
+msgstr "Generera Ta Bort lista först"
 
 #. Description of a DocType
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -21267,7 +21268,7 @@ msgstr "IBAN"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:93
 msgid "IMPORTANT: Create a backup before proceeding!"
-msgstr ""
+msgstr "VIKTIGT: Skapa säkerhetskopia innan du fortsätter!"
 
 #. Name of a report
 #: erpnext/regional/report/irs_1099/irs_1099.json
@@ -21481,7 +21482,7 @@ msgstr "Om aktiverad tillåter system användare att leverera all kvantitet av d
 #. field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "If enabled, system will set incoming rate as zero for stand-alone credit notes with expired batch item."
-msgstr ""
+msgstr "Om aktiverat kommer system att ange inköp pris till noll för fristående kredit notor med utgången parti artikel."
 
 #. Description of the 'Deliver Scrap Items' (Check) field in DocType 'Selling
 #. Settings'
@@ -21883,7 +21884,7 @@ msgstr "Ignorerar gammal 'Är Öppning' fält i Bokföring Post som gör det mö
 
 #: erpnext/stock/doctype/item/item.py:258
 msgid "Image in the description has been removed. To disable this behavior, uncheck \"{0}\" in {1}."
-msgstr ""
+msgstr "Bilden i beskrivningen har tagits bort. För att inaktivera detta beteende, inaktivera \"{0}\" i {1}."
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:135
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:229
@@ -21930,7 +21931,7 @@ msgstr "Import Klar"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:560
 msgid "Import Summary"
-msgstr ""
+msgstr "Import Sammanfattning"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a DocType
@@ -21954,7 +21955,7 @@ msgstr "Mass Importera"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:192
 msgid "Imported {0} DocTypes"
-msgstr ""
+msgstr "Importerade {0} DocTypes"
 
 #: erpnext/edi/doctype/common_code/common_code.py:109
 msgid "Importing Common Codes"
@@ -23048,7 +23049,7 @@ msgstr "Ogiltig Avtal Order för vald Kund och Artikel"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:494
 msgid "Invalid CSV format. Expected column: doctype_name"
-msgstr ""
+msgstr "Ogiltigt CSV format. Förväntad kolumn: doctype_name"
 
 #: erpnext/quality_management/doctype/quality_procedure/quality_procedure.py:72
 msgid "Invalid Child Procedure"
@@ -23056,7 +23057,7 @@ msgstr "Ogiltig Underordnad Procedur"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:225
 msgid "Invalid Company Field"
-msgstr ""
+msgstr "Ogiltigt Bolag Fält"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2355
 msgid "Invalid Company for Inter Company Transaction."
@@ -23215,7 +23216,7 @@ msgstr "Ogiltig Villkor Uttryck"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1051
 msgid "Invalid file URL"
-msgstr ""
+msgstr "Ogiltig fil URL"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:93
 msgid "Invalid filter formula. Please check the syntax."
@@ -28952,7 +28953,7 @@ msgstr "Flera Lager Konton"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:244
 msgid "Multiple company fields available: {0}. Please select manually."
-msgstr ""
+msgstr "Flera bolag fält tillgängliga: {0}. Välj manuellt."
 
 #: erpnext/controllers/accounts_controller.py:1302
 msgid "Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year"
@@ -29049,7 +29050,7 @@ msgstr "Namngivning Serie erfodras"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:932
 msgid "Naming series '{0}' for DocType '{1}' does not contain standard '.' or '{{' separator. Using fallback extraction."
-msgstr ""
+msgstr "Namngivning serie '{0}' för DocType '{1}' innehåller inte standard '.' eller '{{' avgränsare. Använder reserv extraktion."
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -29656,7 +29657,7 @@ msgstr "Ingen Försäljning Följesedel vald för Kund {}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:749
 msgid "No DocTypes in To Delete list. Please generate or import the list before submitting."
-msgstr ""
+msgstr "Inga DocTypes i Att ta bort lista. Skapa eller importera listan innan godkännande."
 
 #: erpnext/public/js/utils/ledger_preview.js:64
 msgid "No Impact on Accounting Ledger"
@@ -29676,7 +29677,7 @@ msgstr "Inga Artiklar har valts för överföring."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1226
 msgid "No Items with Bill of Materials to Manufacture or all items already manufactured"
-msgstr ""
+msgstr "Inga artiklar med Produktion Stycklista eller alla artiklar redan producerade"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1372
 msgid "No Items with Bill of Materials."
@@ -29980,7 +29981,7 @@ msgstr "Inget reserverad lager att ångra."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:152
 msgid "No rows with zero document count found"
-msgstr ""
+msgstr "Inga rader med noll dokument antal hittades"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:801
 msgid "No stock ledger entries were created. Please set the quantity or valuation rate for the items properly and try again."
@@ -30585,7 +30586,7 @@ msgstr "Endast CSV och Excel filer kan användas för data import. Kontrollera f
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1065
 msgid "Only CSV files are allowed"
-msgstr ""
+msgstr "Endast CSV filer är tillåtna"
 
 #. Label of the tax_on_excess_amount (Check) field in DocType 'Tax Withholding
 #. Category'
@@ -34604,7 +34605,7 @@ msgstr "Ange Godkännande Roll eller Godkännande Användare"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:674
 msgid "Please enter Batch No"
-msgstr ""
+msgstr "Vänligen ange Parti Nummer"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:967
 msgid "Please enter Cost Center"
@@ -34669,7 +34670,7 @@ msgstr "Ange Konto Klass för konto {0}"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:676
 msgid "Please enter Serial No"
-msgstr ""
+msgstr "Vänligen ange Serienummer"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:309
 msgid "Please enter Serial Nos"
@@ -34770,7 +34771,7 @@ msgstr "Fyll i Försäljning Order Tabell"
 
 #: erpnext/stock/doctype/shipment/shipment.js:277
 msgid "Please first set Full Name, Email and Phone for the user"
-msgstr ""
+msgstr "Ange Fullständigt Namn, E-postadress och Telefonnummer för användare"
 
 #: erpnext/telephony/doctype/incoming_call_settings/incoming_call_settings.js:94
 msgid "Please fix overlapping time slots for {0}"
@@ -34782,11 +34783,11 @@ msgstr "Åtgärda överlappande tider för {0}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:270
 msgid "Please generate To Delete list before submitting"
-msgstr ""
+msgstr "Vänligen generera Ta Bort lista innan godkännade"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:70
 msgid "Please generate the To Delete list before submitting"
-msgstr ""
+msgstr "Vänligen generera Ta Bort lista innan godkännade"
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:67
 msgid "Please import accounts against parent company or enable {} in company master."
@@ -36649,7 +36650,7 @@ msgstr "Behandlar XML filer"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:188
 msgid "Processing import..."
-msgstr ""
+msgstr "Bearbetar import..."
 
 #: erpnext/buying/doctype/supplier/supplier_dashboard.py:10
 msgid "Procurement"
@@ -37274,7 +37275,7 @@ msgstr "Potentiella Kunder Engagerade men inte Konverterade"
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:196
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:779
 msgid "Protected DocType"
-msgstr ""
+msgstr "Skyddad DocType"
 
 #. Description of the 'Company Email' (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -39351,7 +39352,7 @@ msgstr "Råmaterial Förbrukning"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:317
 msgid "Raw Materials Missing"
-msgstr ""
+msgstr "Råmaterial Saknas"
 
 #. Label of the raw_materials_received_section (Section Break) field in DocType
 #. 'Subcontracting Inward Order'
@@ -40326,7 +40327,7 @@ msgstr "Ta bort Överordnad Radnummer i Artikel Tabell"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:140
 msgid "Remove Zero Counts"
-msgstr ""
+msgstr "Ta bort noll antal"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:9
 msgid "Remove item if charges is not applicable to that item"
@@ -40338,7 +40339,7 @@ msgstr "Borttagna Artiklar med inga förändringar i Kvantitet eller Värde."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:161
 msgid "Removed {0} rows with zero document count. Please save to persist changes."
-msgstr ""
+msgstr "Tog bort {0} rader med noll dokument antal. Spara för att ändringarna ska bestå."
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:87
 msgid "Removing rows without exchange gain or loss"
@@ -42875,7 +42876,7 @@ msgstr "Rad # {0}: Artikel {1} måste vara Underleverantör Artikel."
 
 #: erpnext/controllers/subcontracting_controller.py:183
 msgid "Row {0}: Item {1} must be linked to a {2}."
-msgstr ""
+msgstr "Rad {0}: Artikel {1} måste vara länkat till {2}."
 
 #: erpnext/controllers/subcontracting_controller.py:204
 msgid "Row {0}: Item {1}'s quantity cannot be higher than the available quantity."
@@ -45737,7 +45738,7 @@ msgstr "Ange Total Summa till Standard Betalning Metod"
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Set Incoming Rate as Zero for Expired Batch"
-msgstr ""
+msgstr "Ange Inköp Pris som noll för Utgången Parti"
 
 #. Description of the 'Territory Targets' (Section Break) field in DocType
 #. 'Territory'
@@ -46717,7 +46718,7 @@ msgstr "Hoppa över Material Överföring till Pågående Arbete Lager"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:559
 msgid "Skipped {0} DocType(s):<br>{1}"
-msgstr ""
+msgstr "Utelämnade {0} DocTyp(er):<br>{1}"
 
 #. Label of the customer_skype (Data) field in DocType 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
@@ -50782,7 +50783,7 @@ msgstr "Original Faktura ska konsolideras före eller tillsammans med retur fakt
 
 #: erpnext/controllers/accounts_controller.py:202
 msgid "The outstanding amount {0} in {1} is lesser than {2}. Updating the outstanding to this invoice."
-msgstr ""
+msgstr "Utestående belopp {0} i {1} är mindre än {2}. Uppdaterar utestående belopp till denna faktura."
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:229
 msgid "The parent account {0} does not exists in the uploaded template"
@@ -51547,7 +51548,7 @@ msgstr "Till Datum och Tid"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:118
 msgid "To Delete list generated with {0} DocTypes"
-msgstr ""
+msgstr "För att ta bort listan som genererats med {0} DocTypes"
 
 #. Option for the 'Sales Order Status' (Select) field in DocType 'Production
 #. Plan'
@@ -52791,7 +52792,7 @@ msgstr "Transaktion Datum"
 
 #: erpnext/setup/doctype/company/company.py:1102
 msgid "Transaction Deletion Document {0} has been triggered for company {1}"
-msgstr ""
+msgstr "Transaktion Borttagning Dokument {0} har utlösts för {1}"
 
 #. Name of a DocType
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
@@ -52811,15 +52812,15 @@ msgstr "Transaktion Borttagning Post Artikel"
 #. Name of a DocType
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Transaction Deletion Record To Delete"
-msgstr ""
+msgstr "Transaktion Borttagning Post att ta bort"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1096
 msgid "Transaction Deletion Record {0} is already running. {1}"
-msgstr ""
+msgstr "Transaktion Borttagning Post {0} körs redan. {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1115
 msgid "Transaction Deletion Record {0} is currently deleting {1}. Cannot save documents until deletion completes."
-msgstr ""
+msgstr "Transaktion Borttagning Poste {0} tar för närvarande bort {1}. Det går inte att spara dokument förrän borttagning är klar."
 
 #. Label of the transaction_details_section (Section Break) field in DocType
 #. 'GL Entry'
@@ -53438,7 +53439,7 @@ msgstr "Ångra Tilldelningar"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:462
 msgid "Unable to fetch DocType details. Please contact system administrator."
-msgstr ""
+msgstr "Kan inte hämta DocType detaljer. Kontakta system administratör."
 
 #: erpnext/setup/utils.py:182
 msgid "Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually"
@@ -53527,7 +53528,7 @@ msgstr "Under Arbetstid tabell  kan man lägga till start och slut tider för ar
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:931
 msgid "Unexpected Naming Series Pattern"
-msgstr ""
+msgstr "Oväntat Namngivning Serie Mönster"
 
 #. Option for the 'Fulfilment Status' (Select) field in DocType 'Contract'
 #: erpnext/crm/doctype/contract/contract.json
@@ -54125,7 +54126,7 @@ msgstr "Använd Fler Nivå Stycklista"
 #. DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "Use Posting Datetime for Naming Documents"
-msgstr ""
+msgstr "Använd Registrering Datum och tid för att Namnge Dokument"
 
 #. Label of the fallback_to_default_price_list (Check) field in DocType
 #. 'Selling Settings'
@@ -54940,7 +54941,7 @@ msgstr "Vimeo"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:214
 msgid "Virtual DocType"
-msgstr ""
+msgstr "Virtuell DocType"
 
 #: erpnext/templates/pages/help.html:46
 msgid "Visit the forums"
@@ -55473,7 +55474,7 @@ msgstr "Varning: Försäljning Order {0} finns redan mot Kund Inköp Order {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:75
 msgid "Warning: This action cannot be undone!"
-msgstr ""
+msgstr "Varning: Den här åtgärden kan inte ångras!"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_validation.py:74
 msgid "Warnings"
@@ -55553,7 +55554,7 @@ msgstr "Våglängd i Megameter"
 
 #: erpnext/controllers/accounts_controller.py:190
 msgid "We can see {0} is made against {1}. If you want {1}'s outstanding to be updated, uncheck the '{2}' checkbox."
-msgstr ""
+msgstr "Vi kan se att {0} görs mot {1}. Om du vill att {1} s utestående ska uppdateras, inaktivera '{2}'."
 
 #: erpnext/www/support/index.html:7
 msgid "We're here to help!"
@@ -55693,7 +55694,7 @@ msgstr "Vad behöver man hjälp med?"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:82
 msgid "What will be deleted:"
-msgstr ""
+msgstr "Vad kommer att tas bort:"
 
 #. Label of the whatsapp_no (Data) field in DocType 'Lead'
 #. Label of the whatsapp (Data) field in DocType 'Opportunity'
@@ -55729,7 +55730,7 @@ msgstr "När detta är valt tillämpas endast transaktion tröskel för individu
 #. in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "When checked, the system will use the posting datetime of the document for naming the document instead of the creation datetime of the document."
-msgstr ""
+msgstr "När detta alternativ är aktiverad använder system dokument registrering datum och tid för att namnge dokument istället för dokuments skapande datum och tid."
 
 #: erpnext/stock/doctype/item/item.js:1079
 msgid "When creating an Item, entering a value for this field will automatically create an Item Price at the backend."
@@ -55737,7 +55738,7 @@ msgstr "När du skapar en artikel, om du anger ett värde för detta fält, skap
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:294
 msgid "When there are multiple finished goods ({0}) in a Repack stock entry, the basic rate for all finished goods must be set manually. To set rate manually, enable the checkbox 'Set Basic Rate Manually' in the respective finished good row."
-msgstr ""
+msgstr "När det finns flera färdiga artiklar ({0}) i en ompackning lager transaktion måste bas pris för alla färdiga artiklar anges manuellt. För att ange pris manuellt, aktivera \"Aktivera bas pris manuellt\" på respektive rad för färdiga artiklar."
 
 #: erpnext/accounts/doctype/account/account.py:380
 msgid "While creating account for Child Company {0}, parent account {1} found as a ledger account."
@@ -56352,7 +56353,7 @@ msgstr "Du kan ange den som maskin namn eller åtgärd typ. Till exempel sy mask
 
 #: erpnext/controllers/accounts_controller.py:211
 msgid "You can use {0} to reconcile against {1} later."
-msgstr ""
+msgstr "Du kan använda {0} för att stämma av mot {1} senare."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1230
 msgid "You can't make any changes to Job Card since Work Order is closed."
@@ -57038,7 +57039,7 @@ msgstr "{0} på rad {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:448
 msgid "{0} is a child table and will be deleted automatically with its parent"
-msgstr ""
+msgstr "{0} är en undertabell och kommer att tas bort automatiskt tillsammans med överordnad tabell"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:94
 msgid "{0} is a mandatory Accounting Dimension. <br>Please set a value for {0} in Accounting Dimensions section."
@@ -57413,19 +57414,19 @@ msgstr "{0}, slutför åtgärd {1} före åtgärd {2}."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:519
 msgid "{0}: Child table (auto-deleted with parent)"
-msgstr ""
+msgstr "{0}: Underordnad tabell (tas bort automatiskt med överordnad tabell)"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:514
 msgid "{0}: Not found"
-msgstr ""
+msgstr "{0}: Hittades inte"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:510
 msgid "{0}: Protected DocType"
-msgstr ""
+msgstr "{0}: Skyddad DocType"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:524
 msgid "{0}: Virtual DocType (no database table)"
-msgstr ""
+msgstr "{0}: Virtuell DocType (ingen databas tabell)"
 
 #: erpnext/controllers/accounts_controller.py:539
 msgid "{0}: {1} does not belong to the Company: {2}"
