@@ -1150,6 +1150,66 @@ class TestPOSInvoice(IntegrationTestCase):
 
 		frappe.set_user("test@example.com")
 
+	def make_pos_item_contain_batch_or_serial_no_with_pricing_rule(self):
+		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
+
+		item = "_Test Item with Serial No and Pricing Rule"
+		make_item(
+			item,
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"auto_create_batch_nos": 1,
+				"batch_number_series": "BATCH-.#####",
+			},
+		)
+		make_purchase_receipt(item_code=item, warehouse="_Test Warehouse - _TC", qty=1, rate=500)
+
+		pr = make_pricing_rule(
+			title="5+1",
+			apply_on="Item Code",
+			items=[{"item_code": item}],
+			selling=1,
+			price_or_product_discount="Product",
+			free_item=item,
+			free_qty=1,
+			round_free_qty=1,
+			is_recursive=1,
+			recurse_for=5,
+		)
+		pr.save()
+
+		pos_inv = create_pos_invoice(
+			update_stock=1, items=[{"item_code": item, "qty": 6, "rate": 500}], do_not_save=0
+		)
+		self.assertEqual(len(pos_inv.items), 2)
+		self.assertIsNotNone(pos_inv.items[0].serial_and_batch_bundle)
+		self.assertIsNotNone(pos_inv.items[1].serial_and_batch_bundle)
+		serial_batch_nos1 = frappe.get_doc(
+			"Serial and Batch Bundle", pos_inv.items[0].serial_and_batch_bundle
+		)
+		serial_batch_nos2 = frappe.get_doc(
+			"Serial and Batch Bundle", pos_inv.items[1].serial_and_batch_bundle
+		)
+		batch_qty1 = abs(serial_batch_nos1.entries[0].qty)
+		batch_qty2 = abs(serial_batch_nos2.entries[0].qty)
+		self.assertEqual(abs(pos_inv.items[0].qty), batch_qty1)
+		self.assertEqual(abs(pos_inv.items[1].qty), batch_qty2)
+
+		pos_return = make_sales_return(pos_inv.name)
+		pos_return.insert()
+		pos_return.submit()
+		self.assertIsNotNone(pos_return.items[0].serial_and_batch_bundle)
+		self.assertIsNotNone(pos_return.items[1].serial_and_batch_bundle)
+		return_bundle1 = frappe.get_doc(
+			"Serial and Batch Bundle", pos_return.items[0].serial_and_batch_bundle
+		)
+		return_bundle2 = frappe.get_doc(
+			"Serial and Batch Bundle", pos_return.items[1].serial_and_batch_bundle
+		)
+		self.assertEqual(abs(pos_return.items[0].qty), abs(return_bundle1.entries[0].qty))
+		self.assertEqual(abs(pos_return.items[1].qty), abs(return_bundle2.entries[0].qty))
+
 
 def create_pos_invoice(**args):
 	args = frappe._dict(args)
