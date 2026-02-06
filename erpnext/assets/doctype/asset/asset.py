@@ -56,6 +56,7 @@ class Asset(AccountsController):
 		asset_owner: DF.Literal["", "Company", "Supplier", "Customer"]
 		asset_owner_company: DF.Link | None
 		asset_quantity: DF.Int
+		asset_type: DF.Literal["", "Existing Asset", "Composite Asset", "Composite Component"]
 		available_for_use_date: DF.Date | None
 		booked_fixed_asset: DF.Check
 		calculate_depreciation: DF.Check
@@ -67,7 +68,9 @@ class Asset(AccountsController):
 		default_finance_book: DF.Link | None
 		department: DF.Link | None
 		depr_entry_posting_status: DF.Literal["", "Successful", "Failed"]
-		depreciation_method: DF.Literal["", "Straight Line", "Double Declining Balance", "Manual"]
+		depreciation_method: DF.Literal[
+			"", "Straight Line", "Double Declining Balance", "Written Down Value", "Manual"
+		]
 		disposal_date: DF.Date | None
 		finance_books: DF.Table[AssetFinanceBook]
 		frequency_of_depreciation: DF.Int
@@ -76,9 +79,6 @@ class Asset(AccountsController):
 		insurance_start_date: DF.Date | None
 		insured_value: DF.Data | None
 		insurer: DF.Data | None
-		is_composite_asset: DF.Check
-		is_composite_component: DF.Check
-		is_existing_asset: DF.Check
 		is_fully_depreciated: DF.Check
 		item_code: DF.Link
 		item_name: DF.ReadOnly | None
@@ -243,7 +243,7 @@ class Asset(AccountsController):
 		self.set_total_booked_depreciations()
 
 	def before_submit(self):
-		if self.is_composite_asset and not has_active_capitalization(self.name):
+		if self.asset_type == "Composite Asset" and not has_active_capitalization(self.name):
 			if self.split_from and has_active_capitalization(self.split_from):
 				return
 			frappe.throw(_("Please capitalize this asset before submitting."))
@@ -252,7 +252,11 @@ class Asset(AccountsController):
 		self.validate_in_use_date()
 		self.make_asset_movement()
 		self.reload()
-		if not self.booked_fixed_asset and not self.is_composite_component and self.validate_make_gl_entry():
+		if (
+			not self.booked_fixed_asset
+			and self.asset_type != "Composite Component"
+			and self.validate_make_gl_entry()
+		):
 			self.make_gl_entries()
 		if self.calculate_depreciation and not self.split_from:
 			convert_draft_asset_depr_schedules_into_active(self)
@@ -267,7 +271,7 @@ class Asset(AccountsController):
 		cancel_asset_depr_schedules(self)
 		self.set_status()
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
-		if not self.is_composite_component:
+		if self.asset_type != "Composite Component":
 			make_reverse_gl_entries(voucher_type="Asset", voucher_no=self.name)
 			self.db_set("booked_fixed_asset", 0)
 		add_asset_activity(self.name, _("Asset cancelled"))
@@ -285,7 +289,7 @@ class Asset(AccountsController):
 		add_asset_activity(self.name, _("Asset deleted"))
 
 	def set_purchase_doc_row_item(self):
-		if self.is_existing_asset or self.is_composite_asset:
+		if self.asset_type == "Existing Asset" or self.asset_type == "Composite Asset":
 			return
 
 		self.purchase_amount = self.net_purchase_amount
@@ -328,7 +332,7 @@ class Asset(AccountsController):
 					)
 				)
 
-		if self.is_existing_asset and self.purchase_invoice:
+		if self.asset_type == "Existing Asset" and self.purchase_invoice:
 			frappe.throw(_("Purchase Invoice cannot be made against an existing asset {0}").format(self.name))
 
 	def validate_item(self):
@@ -374,7 +378,7 @@ class Asset(AccountsController):
 				)
 
 	def validate_in_use_date(self):
-		if not self.available_for_use_date and not self.is_composite_component:
+		if not self.available_for_use_date and self.asset_type != "Composite Component":
 			frappe.throw(_("Available for use date is required"))
 
 		for d in self.finance_books:
@@ -442,13 +446,13 @@ class Asset(AccountsController):
 		if not self.asset_category:
 			self.asset_category = frappe.get_cached_value("Item", self.item_code, "asset_category")
 
-		if not flt(self.net_purchase_amount) and not self.is_composite_asset:
+		if not flt(self.net_purchase_amount) and self.asset_type != "Composite Asset":
 			frappe.throw(_("Net Purchase Amount is mandatory"), frappe.MandatoryError)
 
 		if is_cwip_accounting_enabled(self.asset_category):
 			if (
-				not self.is_existing_asset
-				and not self.is_composite_asset
+				not self.asset_type == "Existing Asset"
+				and not self.asset_type == "Composite Asset"
 				and not self.purchase_receipt
 				and not self.purchase_invoice
 			):
@@ -477,7 +481,7 @@ class Asset(AccountsController):
 			if self.is_fully_depreciated:
 				frappe.throw(_("Depreciation cannot be calculated for fully depreciated assets"))
 
-		if self.is_existing_asset:
+		if self.asset_type == "Existing Asset":
 			return
 
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(self.purchase_date):
@@ -549,7 +553,7 @@ class Asset(AccountsController):
 			)
 
 	def validate_gross_and_purchase_amount(self):
-		if self.is_existing_asset:
+		if self.asset_type == "Existing Asset":
 			return
 
 		if self.net_purchase_amount and self.net_purchase_amount != self.purchase_amount:
@@ -615,7 +619,7 @@ class Asset(AccountsController):
 		self.validate_depreciation_start_date(row)
 		self.validate_total_number_of_depreciations_and_frequency(row)
 
-		if not self.is_existing_asset:
+		if self.asset_type != "Existing Asset":
 			self.opening_accumulated_depreciation = 0
 			self.opening_number_of_booked_depreciations = 0
 		else:
@@ -768,7 +772,7 @@ class Asset(AccountsController):
 	def get_status(self):
 		"""Returns status based on whether it is draft, submitted, scrapped or depreciated"""
 		if self.docstatus == 0:
-			if self.is_composite_asset:
+			if self.asset_type == "Composite Asset":
 				status = "Work In Progress"
 			else:
 				status = "Draft"
@@ -841,7 +845,7 @@ class Asset(AccountsController):
 		return records
 
 	def validate_make_gl_entry(self):
-		if self.is_composite_asset:
+		if self.asset_type == "Composite Asset":
 			return True
 
 		purchase_document = self.get_purchase_document()
@@ -922,7 +926,7 @@ class Asset(AccountsController):
 		purchase_document = self.get_purchase_document()
 		fixed_asset_account, cwip_account = self.get_fixed_asset_account(), self.get_cwip_account()
 
-		if (self.is_composite_asset or (purchase_document and self.purchase_amount)) and getdate(
+		if (self.asset_type == "Composite Asset" or (purchase_document and self.purchase_amount)) and getdate(
 			self.available_for_use_date
 		) <= getdate():
 			gl_entries.append(
@@ -962,7 +966,7 @@ class Asset(AccountsController):
 			self.db_set("booked_fixed_asset", 1)
 
 	def check_asset_capitalization_gl_entries(self):
-		if self.is_composite_asset:
+		if self.asset_type == "Composite Asset":
 			result = frappe.db.get_value(
 				"Asset Capitalization",
 				{"target_asset": self.name, "docstatus": 1},
@@ -1393,7 +1397,7 @@ def process_asset_split(existing_asset, split_qty, splitted_asset=None, is_new_a
 
 def set_split_asset_values(asset_doc, scaling_factor, split_qty, existing_asset, is_new_asset):
 	asset_doc.net_purchase_amount = existing_asset.net_purchase_amount * scaling_factor
-	asset_doc.purchase_amount = existing_asset.net_purchase_amount
+	asset_doc.purchase_amount = existing_asset.net_purchase_amount * scaling_factor
 	asset_doc.additional_asset_cost = existing_asset.additional_asset_cost * scaling_factor
 	asset_doc.total_asset_cost = asset_doc.net_purchase_amount + asset_doc.additional_asset_cost
 	asset_doc.opening_accumulated_depreciation = (

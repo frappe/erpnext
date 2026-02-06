@@ -610,6 +610,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.items.every((item) => !item.pr_detail)",
    "fieldname": "update_stock",
    "fieldtype": "Check",
    "label": "Update Stock",
@@ -1688,7 +1689,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-04 16:32:19.664287",
+ "modified": "2026-02-05 20:45:16.964500",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

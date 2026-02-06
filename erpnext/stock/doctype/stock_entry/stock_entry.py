@@ -2006,6 +2006,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			else:
 				job_doc.set_consumed_qty_in_job_card_item(self)
 				job_doc.set_manufactured_qty()
+				job_doc.update_work_order()
 
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)

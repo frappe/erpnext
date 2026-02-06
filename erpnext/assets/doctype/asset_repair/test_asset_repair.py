@@ -359,7 +359,7 @@ class TestAssetRepair(IntegrationTestCase):
 		self.assertEqual(stock_entry.asset_repair, asset_repair.name)
 
 	def test_gl_entries_with_capitalized_asset_repair(self):
-		asset = create_asset(is_existing_asset=1, calculate_depreciation=1, submit=1)
+		asset = create_asset(asset_type="Existing Asset", calculate_depreciation=1, submit=1)
 		asset_repair = create_asset_repair(
 			asset=asset, capitalize_repair_cost=1, item="_Test Non Stock Item", submit=1
 		)
@@ -399,7 +399,7 @@ def create_asset_repair(**args):
 	if args.asset:
 		asset = args.asset
 	else:
-		asset = create_asset(is_existing_asset=1, submit=1, company=args.company)
+		asset = create_asset(asset_type=args.asset_type or "Existing Asset", submit=1, company=args.company)
 	asset_repair = frappe.new_doc("Asset Repair")
 	asset_repair.update(
 		{

@@ -70,16 +70,16 @@ class TestAsset(AssetSetup):
 		self.assertRaises(frappe.MandatoryError, asset.save)
 
 	def test_pr_or_pi_mandatory_if_not_existing_asset(self):
-		"""Tests if either PI or PR is present if CWIP is enabled and is_existing_asset=0."""
+		"""Tests if either PI or PR is present if CWIP is enabled and asset_type == Existing Asset."""
 
 		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
-		asset.is_existing_asset = 0
+		asset.asset_type = ""
 
 		self.assertRaises(frappe.ValidationError, asset.save)
 
 	def test_available_for_use_date_is_after_purchase_date(self):
 		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, do_not_save=1)
-		asset.is_existing_asset = 0
+		asset.asset_type = ""
 		asset.purchase_date = getdate("2021-10-10")
 		asset.available_for_use_date = getdate("2021-10-1")
 
@@ -182,7 +182,7 @@ class TestAsset(AssetSetup):
 		asset.submit()
 
 	def test_is_fixed_asset_set(self):
-		asset = create_asset(is_existing_asset=1)
+		asset = create_asset(asset_type="Existing Asset")
 		doc = frappe.new_doc("Purchase Invoice")
 		doc.company = "_Test Company"
 		doc.supplier = "_Test Supplier"
@@ -709,7 +709,7 @@ class TestAsset(AssetSetup):
 		# create an asset
 		asset = create_asset(
 			item_code="Macbook Pro",
-			is_existing_asset=1,
+			asset_type="Existing Asset",
 			calculate_depreciation=1,
 			available_for_use_date=purchase_date,
 			purchase_date=purchase_date,
@@ -901,7 +901,7 @@ class TestDepreciationMethods(AssetSetup):
 		asset = create_asset(
 			calculate_depreciation=1,
 			available_for_use_date="2030-06-06",
-			is_existing_asset=1,
+			asset_type="Existing Asset",
 			opening_number_of_booked_depreciations=2,
 			opening_accumulated_depreciation=47178.08,
 			expected_value_after_useful_life=10000,
@@ -950,7 +950,7 @@ class TestDepreciationMethods(AssetSetup):
 		asset = create_asset(
 			calculate_depreciation=1,
 			available_for_use_date="2030-01-01",
-			is_existing_asset=1,
+			asset_type="Existing Asset",
 			depreciation_method="Double Declining Balance",
 			opening_number_of_booked_depreciations=1,
 			opening_accumulated_depreciation=50000,
@@ -1691,7 +1691,7 @@ class TestDepreciationBasics(AssetSetup):
 		self.assertEqual(asset.finance_books[0].value_after_depreciation, 100000.0)
 
 	def test_asset_cost_center(self):
-		asset = create_asset(is_existing_asset=1, do_not_save=1)
+		asset = create_asset(asset_type="Existing Asset", do_not_save=1)
 		asset.cost_center = "Main - WP"
 
 		self.assertRaises(frappe.ValidationError, asset.submit)
@@ -1728,7 +1728,7 @@ class TestDepreciationBasics(AssetSetup):
 	def test_manual_depreciation_for_existing_asset(self):
 		asset = create_asset(
 			item_code="Macbook Pro",
-			is_existing_asset=1,
+			asset_type="Existing Asset",
 			purchase_date="2020-01-30",
 			available_for_use_date="2020-01-30",
 			submit=1,
@@ -1854,7 +1854,7 @@ class TestDepreciationBasics(AssetSetup):
 		# Create composite asset
 		wip_composite_asset = create_asset(
 			asset_name="Asset Capitalization WIP Composite Asset for Split",
-			is_composite_asset=1,
+			asset_type="Composite Asset",
 			warehouse="Stores - TCP1",
 			company=company,
 			asset_quantity=2,  # Set quantity > 1 to allow splitting
@@ -1948,9 +1948,7 @@ def create_asset(**args):
 			"available_for_use_date": args.available_for_use_date or "2020-06-06",
 			"location": args.location or "Test Location",
 			"asset_owner": args.asset_owner or "Company",
-			"is_existing_asset": args.is_existing_asset or 1,
-			"is_composite_asset": args.is_composite_asset or 0,
-			"is_composite_component": args.is_composite_component or 0,
+			"asset_type": args.asset_type or "Existing Asset",
 			"asset_quantity": args.get("asset_quantity") or 1,
 			"depr_entry_posting_status": args.depr_entry_posting_status or "",
 		}
@@ -1972,7 +1970,7 @@ def create_asset(**args):
 			},
 		)
 
-	if asset.is_composite_asset:
+	if asset.asset_type == "Composite Asset":
 		asset.net_purchase_amount = 0
 		asset.purchase_amount = 0
 

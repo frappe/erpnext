@@ -449,7 +449,7 @@
   },
   {
    "default": "0",
-   "description": "Applicable on POS Invoice",
+   "description": "Applicable only on Transactions made using POS",
    "fieldname": "allow_partial_payment",
    "fieldtype": "Check",
    "label": "Allow Partial Payment"
@@ -582,7 +582,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2026-02-05 04:36:40.757162",
+ "modified": "2026-02-05 18:17:26.807353",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

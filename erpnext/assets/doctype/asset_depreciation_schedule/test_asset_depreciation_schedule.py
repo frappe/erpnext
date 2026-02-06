@@ -87,7 +87,7 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			calculate_depreciation=1,
 			depreciation_method="Straight Line",
 			available_for_use_date="2023-10-10",
-			is_existing_asset=1,
+			asset_type="Existing Asset",
 			opening_number_of_booked_depreciations=9,
 			opening_accumulated_depreciation=265,
 			depreciation_start_date="2024-07-31",
@@ -127,7 +127,7 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			calculate_depreciation=1,
 			depreciation_method="Straight Line",
 			available_for_use_date="2023-10-10",
-			is_existing_asset=1,
+			asset_type="Existing Asset",
 			opening_number_of_booked_depreciations=9,
 			opening_accumulated_depreciation=265.30,
 			depreciation_start_date="2024-07-31",
@@ -165,7 +165,7 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			calculate_depreciation=1,
 			depreciation_method="Straight Line",
 			available_for_use_date="2023-11-01",
-			is_existing_asset=1,
+			asset_type="Existing Asset",
 			opening_number_of_booked_depreciations=4,
 			opening_accumulated_depreciation=223.15,
 			depreciation_start_date="2024-12-31",
@@ -529,7 +529,7 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			depreciation_start_date="2023-03-31",
 			frequency_of_depreciation=1,
 			total_number_of_depreciations=12,
-			is_existing_asset=1,
+			asset_type="Existing Asset",
 			opening_accumulated_depreciation=64.52,
 			opening_number_of_booked_depreciations=2,
 			submit=1,
@@ -851,7 +851,7 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			depreciation_start_date="2023-03-31",
 			frequency_of_depreciation=1,
 			total_number_of_depreciations=12,
-			is_existing_asset=1,
+			asset_type="Existing Asset",
 			opening_accumulated_depreciation=64.52,
 			opening_number_of_booked_depreciations=2,
 			submit=1,
@@ -925,7 +925,7 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			depreciation_start_date="2021-12-31",
 			frequency_of_depreciation=12,
 			total_number_of_depreciations=3,
-			is_existing_asset=1,
+			asset_type="Existing Asset",
 			submit=1,
 		)
 		post_depreciation_entries(date="2021-12-31")
@@ -1014,7 +1014,7 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			depreciation_start_date="2021-12-31",
 			frequency_of_depreciation=12,
 			total_number_of_depreciations=3,
-			is_existing_asset=1,
+			asset_type="Existing Asset",
 			submit=1,
 		)
 		post_depreciation_entries(date="2021-12-31")
@@ -1093,7 +1093,7 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			rate_of_depreciation=50,
 			frequency_of_depreciation=12,
 			total_number_of_depreciations=3,
-			is_existing_asset=1,
+			asset_type="Existing Asset",
 			submit=1,
 		)
 		post_depreciation_entries(date="2021-12-31")

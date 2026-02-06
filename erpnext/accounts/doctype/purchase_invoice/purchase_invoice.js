@@ -534,7 +534,7 @@ cur_frm.fields_dict["select_print_heading"].get_query = function (doc, cdt, cdn)
 
 cur_frm.set_query("wip_composite_asset", "items", function () {
 	return {
-		filters: { is_composite_asset: 1, docstatus: 0 },
+		filters: { asset_type: "Composite Asset", docstatus: 0 },
 	};
 });
 

@@ -57,18 +57,20 @@
   "base_total_taxes_and_charges",
   "column_break_42",
   "total_taxes_and_charges",
-  "totals",
-  "base_grand_total",
-  "base_rounding_adjustment",
-  "base_rounded_total",
-  "base_in_words",
-  "column_break3",
+  "totals_section",
   "grand_total",
-  "rounding_adjustment",
-  "rounded_total",
-  "disable_rounded_total",
   "in_words",
-  "section_break_44",
+  "column_break_vyhp",
+  "rounded_total",
+  "rounding_adjustment",
+  "disable_rounded_total",
+  "base_totals_section",
+  "base_grand_total",
+  "base_in_words",
+  "column_break_bffp",
+  "base_rounded_total",
+  "base_rounding_adjustment",
+  "additional_discount_section",
   "apply_discount_on",
   "base_discount_amount",
   "coupon_code",
@@ -587,12 +589,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "section_break_44",
-   "fieldtype": "Section Break",
-   "label": "Additional Discount"
-  },
-  {
    "fieldname": "coupon_code",
    "fieldtype": "Link",
    "label": "Coupon Code",
@@ -638,17 +634,9 @@
    "print_hide": 1
   },
   {
-   "fieldname": "totals",
-   "fieldtype": "Section Break",
-   "label": "Totals",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-money",
-   "print_hide": 1
-  },
-  {
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
-   "label": "Grand Total (Company Currency)",
+   "label": "Grand Total",
    "oldfieldname": "grand_total",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -660,7 +648,7 @@
    "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
-   "label": "Rounding Adjustment (Company Currency)",
+   "label": "Rounding Adjustment",
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -669,7 +657,7 @@
   {
    "fieldname": "base_in_words",
    "fieldtype": "Data",
-   "label": "In Words (Company Currency)",
+   "label": "In Words",
    "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
@@ -679,20 +667,13 @@
   {
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
-   "label": "Rounded Total (Company Currency)",
+   "label": "Rounded Total",
    "oldfieldname": "rounded_total",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1,
    "width": "200px"
-  },
-  {
-   "fieldname": "column_break3",
-   "fieldtype": "Column Break",
-   "oldfieldtype": "Column Break",
-   "print_hide": 1,
-   "width": "50%"
   },
   {
    "fieldname": "grand_total",
@@ -1117,13 +1098,40 @@
    "no_copy": 1,
    "options": "Item Wise Tax Detail",
    "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "additional_discount_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Discount"
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-money",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "base_totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals (Company Currency)"
+  },
+  {
+   "fieldname": "column_break_vyhp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_bffp",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-29 21:18:48.836168",
+ "modified": "2026-02-06 16:44:02.134974",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

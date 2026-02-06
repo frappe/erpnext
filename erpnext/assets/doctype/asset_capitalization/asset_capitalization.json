@@ -9,30 +9,33 @@
  "field_order": [
   "title",
   "naming_series",
+  "company",
   "target_asset",
   "target_asset_name",
-  "target_item_code",
-  "finance_book",
-  "target_qty",
   "column_break_9",
-  "company",
+  "finance_book",
   "posting_date",
   "posting_time",
   "set_posting_time",
-  "target_batch_no",
-  "target_serial_no",
+  "target_item_code",
   "amended_from",
-  "target_is_fixed_asset",
-  "target_has_batch_no",
-  "target_has_serial_no",
   "section_break_16",
   "stock_items",
+  "section_break_urtz",
+  "column_break_gqep",
+  "column_break_yvlx",
   "stock_items_total",
   "section_break_26",
   "asset_items",
+  "section_break_arbh",
+  "column_break_boeu",
+  "column_break_qecy",
   "asset_items_total",
   "service_expenses_section",
   "service_items",
+  "section_break_ptna",
+  "column_break_szvh",
+  "column_break_katv",
   "service_items_total",
   "totals_section",
   "total_value",
@@ -55,18 +58,10 @@
    "depends_on": "eval:(doc.target_item_code && !doc.__islocal)",
    "fieldname": "target_item_code",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_standard_filter": 1,
    "label": "Target Item Code",
    "options": "Item",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fetch_from": "target_item_code.is_fixed_asset",
-   "fieldname": "target_is_fixed_asset",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Target Is Fixed Asset",
    "read_only": 1
   },
   {
@@ -143,6 +138,7 @@
    "depends_on": "eval:doc.docstatus == 0 || (doc.stock_items && doc.stock_items.length)",
    "fieldname": "section_break_16",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "label": "Consumed Stock Items"
   },
   {
@@ -152,48 +148,10 @@
    "options": "Asset Capitalization Stock Item"
   },
   {
-   "depends_on": "target_has_batch_no",
-   "fieldname": "target_batch_no",
-   "fieldtype": "Link",
-   "label": "Target Batch No",
-   "options": "Batch"
-  },
-  {
-   "default": "1",
-   "fieldname": "target_qty",
-   "fieldtype": "Float",
-   "hidden": 1,
-   "label": "Target Qty",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fetch_from": "target_item_code.has_batch_no",
-   "fieldname": "target_has_batch_no",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Target Has Batch No",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fetch_from": "target_item_code.has_serial_no",
-   "fieldname": "target_has_serial_no",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Target Has Serial No",
-   "read_only": 1
-  },
-  {
-   "depends_on": "target_has_serial_no",
-   "fieldname": "target_serial_no",
-   "fieldtype": "Small Text",
-   "label": "Target Serial No"
-  },
-  {
    "depends_on": "eval:doc.docstatus == 0 || (doc.asset_items && doc.asset_items.length)",
    "fieldname": "section_break_26",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "label": "Consumed Assets"
   },
   {
@@ -203,6 +161,7 @@
    "options": "Asset Capitalization Asset Item"
   },
   {
+   "depends_on": "eval: doc.stock_items_total",
    "fieldname": "stock_items_total",
    "fieldtype": "Currency",
    "label": "Consumed Stock Total Value",
@@ -210,6 +169,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval: doc.asset_items_total",
    "fieldname": "asset_items_total",
    "fieldtype": "Currency",
    "label": "Consumed Asset Total Value",
@@ -226,6 +186,7 @@
    "depends_on": "eval:doc.docstatus == 0 || (doc.service_items && doc.service_items.length)",
    "fieldname": "service_expenses_section",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "label": "Service Expenses"
   },
   {
@@ -235,6 +196,7 @@
    "options": "Asset Capitalization Service Item"
   },
   {
+   "depends_on": "eval: doc.service_items_total",
    "fieldname": "service_items_total",
    "fieldtype": "Currency",
    "label": "Service Expense Total Amount",
@@ -277,10 +239,10 @@
    "options": "Cost Center"
   },
   {
-    "fieldname": "project",
-    "fieldtype": "Link",
-    "label": "Project",
-    "options": "Project"
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   },
   {
    "fieldname": "dimension_col_break",
@@ -292,12 +254,48 @@
    "label": "Target Fixed Asset Account",
    "options": "Account",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_urtz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_gqep",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_yvlx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_arbh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_boeu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_qecy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ptna",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_szvh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_katv",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-05-20 15:15:12.110035",
+ "modified": "2026-02-06 01:52:41.890713",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization",

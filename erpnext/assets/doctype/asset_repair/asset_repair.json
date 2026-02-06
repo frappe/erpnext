@@ -9,9 +9,9 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "company",
   "asset",
   "asset_name",
-  "company",
   "column_break_2",
   "repair_status",
   "failure_date",
@@ -28,10 +28,6 @@
   "column_break_ajbh",
   "column_break_hkem",
   "repair_cost",
-  "accounting_dimensions_section",
-  "cost_center",
-  "column_break_14",
-  "project",
   "stock_consumption_details_section",
   "stock_items",
   "section_break_ltbb",
@@ -43,7 +39,12 @@
   "capitalize_repair_cost",
   "increase_in_asset_life",
   "column_break_xebe",
-  "total_repair_cost"
+  "total_repair_cost",
+  "accounting_dimensions_section",
+  "cost_center",
+  "column_break_14",
+  "project",
+  "connection_tab"
  ],
  "fields": [
   {
@@ -149,8 +150,7 @@
   {
    "fieldname": "accounting_details",
    "fieldtype": "Section Break",
-   "hide_border": 1,
-   "label": "Repair Purchase Invoices"
+   "hide_border": 1
   },
   {
    "fieldname": "stock_items",
@@ -206,6 +206,7 @@
   {
    "fieldname": "invoices",
    "fieldtype": "Table",
+   "label": "Repair Purchase Invoices",
    "mandatory_depends_on": "eval: doc.repair_status == 'Completed' && doc.repair_cost > 0;",
    "no_copy": 1,
    "options": "Asset Repair Purchase Invoice"
@@ -244,6 +245,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval: doc.consumed_items_cost",
    "fieldname": "consumed_items_cost",
    "fieldtype": "Currency",
    "label": "Consumed Items Cost"
@@ -256,7 +258,13 @@
    "depends_on": "capitalize_repair_cost",
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
+   "label": "Accounting Dimension"
+  },
+  {
+   "fieldname": "connection_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connection",
+   "show_dashboard": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -267,7 +275,7 @@
    "link_fieldname": "asset_repair"
   }
  ],
- "modified": "2026-01-06 15:48:13.862505",
+ "modified": "2026-02-06 14:57:54.257572",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",

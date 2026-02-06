@@ -81,23 +81,79 @@ frappe.ui.form.on("Asset", {
 	},
 
 	before_submit: function (frm) {
-		if (frm.doc.is_composite_asset && !frm.has_active_capitalization) {
+		if (frm.doc.asset_type == "Composite Asset" && !frm.has_active_capitalization) {
 			frappe.throw(__("Please capitalize this asset before submitting."));
 		}
 	},
 
-	refresh: function (frm) {
-		frappe.ui.form.trigger("Asset", "is_existing_asset");
+	refresh: async function (frm) {
+		frappe.ui.form.trigger("Asset", "asset_type");
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
 
+		let has_create_buttons = false;
 		if (frm.doc.docstatus == 1) {
+			if (["Submitted", "Partially Depreciated"].includes(frm.doc.status)) {
+				frm.add_custom_button(
+					__("Asset Value Adjustment"),
+					function () {
+						frm.trigger("create_asset_value_adjustment");
+					},
+					__("Create")
+				);
+
+				frm.add_custom_button(
+					__("Asset Repair"),
+					function () {
+						frm.trigger("create_asset_repair");
+					},
+					__("Create")
+				);
+				has_create_buttons = true;
+			}
+
+			if (
+				!frm.doc.calculate_depreciation &&
+				["Submitted", "Partially Depreciated", "Fully Depreciated"].includes(frm.doc.status)
+			) {
+				frm.add_custom_button(
+					__("Depreciation Entry"),
+					function () {
+						frm.trigger("make_journal_entry");
+					},
+					__("Create")
+				);
+				has_create_buttons = true;
+			}
+
+			if (has_create_buttons) {
+				frm.page.set_inner_btn_group_as_primary(__("Create"));
+			}
+
 			if (["Submitted", "Partially Depreciated", "Fully Depreciated"].includes(frm.doc.status)) {
+				if (frm.doc.maintenance_required && !frm.doc.maintenance_schedule) {
+					frm.add_custom_button(
+						__("Maintain Asset"),
+						function () {
+							frm.trigger("create_asset_maintenance");
+						},
+						__("Actions")
+					);
+				}
+
+				frm.add_custom_button(
+					__("Split Asset"),
+					function () {
+						frm.trigger("split_asset");
+					},
+					__("Actions")
+				);
+
 				frm.add_custom_button(
 					__("Transfer Asset"),
 					function () {
 						erpnext.asset.transfer_asset(frm);
 					},
-					__("Manage")
+					__("Actions")
 				);
 
 				frm.add_custom_button(
@@ -105,7 +161,7 @@ frappe.ui.form.on("Asset", {
 					function () {
 						erpnext.asset.scrap_asset(frm);
 					},
-					__("Manage")
+					__("Actions")
 				);
 
 				frm.add_custom_button(
@@ -113,15 +169,7 @@ frappe.ui.form.on("Asset", {
 					function () {
 						frm.trigger("sell_asset");
 					},
-					__("Manage")
-				);
-
-				frm.add_custom_button(
-					__("Split Asset"),
-					function () {
-						frm.trigger("split_asset");
-					},
-					__("Manage")
+					__("Actions")
 				);
 			} else if (frm.doc.status == "Scrapped") {
 				frm.add_custom_button(__("Restore Asset"), function () {
@@ -129,47 +177,9 @@ frappe.ui.form.on("Asset", {
 				}).addClass("btn-primary");
 			}
 
-			if (frm.doc.maintenance_required && !frm.doc.maintenance_schedule) {
+			if (await frm.events.should_show_accounting_ledger(frm)) {
 				frm.add_custom_button(
-					__("Maintain Asset"),
-					function () {
-						frm.trigger("create_asset_maintenance");
-					},
-					__("Manage")
-				);
-			}
-
-			if (["Submitted", "Partially Depreciated"].includes(frm.doc.status)) {
-				frm.add_custom_button(
-					__("Adjust Asset Value"),
-					function () {
-						frm.trigger("create_asset_value_adjustment");
-					},
-					__("Manage")
-				);
-
-				frm.add_custom_button(
-					__("Repair Asset"),
-					function () {
-						frm.trigger("create_asset_repair");
-					},
-					__("Manage")
-				);
-			}
-
-			if (!frm.doc.calculate_depreciation) {
-				frm.add_custom_button(
-					__("Create Depreciation Entry"),
-					function () {
-						frm.trigger("make_journal_entry");
-					},
-					__("Manage")
-				);
-			}
-
-			if (frm.doc.purchase_receipt || !frm.doc.is_existing_asset) {
-				frm.add_custom_button(
-					__("View General Ledger"),
+					__("Accounting Ledger"),
 					function () {
 						frappe.route_options = {
 							voucher_no: frm.doc.name,
@@ -179,7 +189,7 @@ frappe.ui.form.on("Asset", {
 						};
 						frappe.set_route("query-report", "General Ledger");
 					},
-					__("Manage")
+					__("View")
 				);
 			}
 
@@ -195,7 +205,7 @@ frappe.ui.form.on("Asset", {
 		if (frm.doc.docstatus == 0) {
 			frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
 
-			if (frm.doc.is_composite_asset) {
+			if (frm.doc.asset_type == "Composite Asset") {
 				frappe.call({
 					method: "erpnext.assets.doctype.asset.asset.has_active_capitalization",
 					args: {
@@ -217,6 +227,28 @@ frappe.ui.form.on("Asset", {
 		}
 	},
 
+	should_show_accounting_ledger: async function (frm) {
+		if (["Capitalized"].includes(frm.doc.status)) {
+			return false;
+		}
+
+		if (
+			!frm.doc.purchase_receipt &&
+			!frm.doc.purchase_invoice &&
+			["Existing Asset", "Composite Component"].includes(frm.doc.asset_type)
+		) {
+			return false;
+		}
+
+		const asset_category = await frappe.db.get_value(
+			"Asset Category",
+			frm.doc.asset_category,
+			"enable_cwip_accounting"
+		);
+
+		return !!asset_category.message?.enable_cwip_accounting;
+	},
+
 	set_depr_posting_failure_alert: function (frm) {
 		const alert = `
 			<div class="row">
@@ -232,7 +264,8 @@ frappe.ui.form.on("Asset", {
 
 	toggle_reference_doc: function (frm) {
 		const is_submitted = frm.doc.docstatus === 1;
-		const is_special_asset = frm.doc.is_existing_asset || frm.doc.is_composite_asset;
+		const is_special_asset =
+			frm.doc.asset_type == "Existing Asset" || frm.doc.asset_type == "Composite Asset";
 
 		const clear_field = (field) => {
 			if (frm.doc[field]) {
@@ -508,17 +541,14 @@ frappe.ui.form.on("Asset", {
 		});
 	},
 
-	is_existing_asset: function (frm) {
-		frm.trigger("toggle_reference_doc");
-	},
-
-	is_composite_asset: function (frm) {
-		if (frm.doc.is_composite_asset) {
-			frm.set_value("net_purchase_amount", 0);
-		} else {
-			frm.set_df_property("net_purchase_amount", "read_only", 0);
+	asset_type: function (frm) {
+		if (frm.doc.docstatus == 0) {
+			if (frm.doc.asset_type == "Composite Asset") {
+				frm.set_value("net_purchase_amount", 0);
+			} else {
+				frm.set_df_property("net_purchase_amount", "read_only", 0);
+			}
 		}
-		frm.trigger("toggle_reference_doc");
 	},
 
 	create_asset_maintenance: function (frm) {

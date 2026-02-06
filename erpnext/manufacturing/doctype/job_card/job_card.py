@@ -23,6 +23,10 @@ from frappe.utils import (
 	time_diff_in_hours,
 )
 
+from erpnext.controllers.stock_controller import (
+	QualityInspectionNotSubmittedError,
+	QualityInspectionRejectedError,
+)
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost, get_bom_items_as_dict
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
@@ -166,6 +170,27 @@ class JobCard(Document):
 
 		self.validate_work_order()
 		self.set_employees()
+
+		if self.docstatus == 1:
+			self.validate_semi_finished_goods()
+
+	def validate_semi_finished_goods(self):
+		if not self.track_semi_finished_goods:
+			return
+
+		if self.items and not self.transferred_qty and not self.skip_material_transfer:
+			frappe.throw(
+				_(
+					"Materials needs to be transferred to the work in progress warehouse for the job card {0}"
+				).format(self.name)
+			)
+
+		if self.docstatus == 1 and not self.total_completed_qty:
+			frappe.throw(
+				_(
+					"Total Completed Qty is required for Job Card {0}, please start and complete the job card before submission"
+				).format(self.name)
+			)
 
 	def on_update(self):
 		self.validate_job_card_qty()
@@ -732,6 +757,7 @@ class JobCard(Document):
 		self.set_process_loss()
 
 	def on_submit(self):
+		self.validate_inspection()
 		self.validate_transfer_qty()
 		self.validate_job_card()
 		self.update_work_order()
@@ -740,6 +766,66 @@ class JobCard(Document):
 	def on_cancel(self):
 		self.update_work_order()
 		self.set_transferred_qty()
+
+	def validate_inspection(self):
+		action_submit, action_reject = frappe.get_single_value(
+			"Stock Settings",
+			["action_if_quality_inspection_is_not_submitted", "action_if_quality_inspection_is_rejected"],
+		)
+
+		item = self.finished_good or self.production_item
+		bom_inspection_required = frappe.db.get_value(
+			"BOM", self.semi_fg_bom or self.bom_no, "inspection_required"
+		)
+		if bom_inspection_required:
+			if not self.quality_inspection:
+				frappe.throw(
+					_(
+						"Quality Inspection is required for the item {0} before completing the job card {1}"
+					).format(get_link_to_form("Item", item), bold(self.name))
+				)
+			qa_status, docstatus = frappe.db.get_value(
+				"Quality Inspection", self.quality_inspection, ["status", "docstatus"]
+			)
+
+			if docstatus != 1:
+				if action_submit == "Stop":
+					frappe.throw(
+						_("Quality Inspection {0} is not submitted for the item: {1}").format(
+							get_link_to_form("Quality Inspection", self.quality_inspection),
+							get_link_to_form("Item", item),
+						),
+						title=_("Inspection Submission"),
+						exc=QualityInspectionNotSubmittedError,
+					)
+				else:
+					frappe.msgprint(
+						_("Quality Inspection {0} is not submitted for the item: {1}").format(
+							get_link_to_form("Quality Inspection", self.quality_inspection),
+							get_link_to_form("Item", item),
+						),
+						alert=True,
+						indicator="orange",
+					)
+			elif qa_status == "Rejected":
+				if action_reject == "Stop":
+					frappe.throw(
+						_("Quality Inspection {0} is rejected for the item: {1}").format(
+							get_link_to_form("Quality Inspection", self.quality_inspection),
+							get_link_to_form("Item", item),
+						),
+						title=_("Inspection Rejected"),
+						exc=QualityInspectionRejectedError,
+					)
+				else:
+					frappe.msgprint(
+						_("Quality Inspection {0} is rejected for the item: {1}").format(
+							get_link_to_form("Quality Inspection", self.quality_inspection),
+							get_link_to_form("Item", item),
+						),
+						alert=True,
+						indicator="orange",
+					)
 
 	def validate_transfer_qty(self):
 		if (
@@ -1354,6 +1440,9 @@ class JobCard(Document):
 				employees=self.employee,
 				sub_operation=kwargs.get("sub_operation"),
 			)
+
+			if self.docstatus == 1:
+				self.update_work_order()
 		else:
 			self.add_time_logs(completed_qty=kwargs.qty, employees=self.employee)
 			self.save()
