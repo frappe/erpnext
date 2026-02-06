@@ -71,17 +71,19 @@ def confirm_materials(job_card, ingredients):
 	jc = frappe.get_doc("Job Card", job_card)
 
 	qty_by_code = {ing["item_code"]: flt(ing["qty"]) for ing in ingredients}
-	# added_by_code = {ing["item_code"]: bool(ing.get("is_added")) for ing in ingredients}
 
 	for row in jc.items:
 		if row.item_code in qty_by_code:
 			row.required_qty = qty_by_code[row.item_code]
 			# row.additional_ingredients_added = added_by_code.get(row.item_code, 0)
 
-	total_qty = sum(row.required_qty for row in jc.items if row.required_qty > 0)
-	jc.for_quantity = total_qty
-	jc.additional_ingredients_added = 1
-	jc.save(ignore_permissions=True)
+	total_qty = 1
+	bom = frappe.get_doc("BOM", jc.bom_no)
+	if jc.for_quantity != 1 and bom.uom != "Nos":
+		total_qty = sum(row.required_qty for row in jc.items if row.required_qty > 0)
+		jc.for_quantity = total_qty
+		jc.additional_ingredients_added = 1
+		jc.save(ignore_permissions=True)
 
 	se = jc_make_stock_entry(job_card)
 	if not se.items:
