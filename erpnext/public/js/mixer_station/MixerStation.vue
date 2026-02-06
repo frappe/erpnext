@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, reactive } from 'vue';
 
 const jobCard = ref(null);
 const batchNo = ref('');
@@ -16,6 +16,7 @@ const transferredQty = ref(0);
 const transferSuccess = ref(false);
 const nextWorkOrder = ref('');
 const bomQty = ref(0);
+const bomUOM = ref('');
 const selectedMixer = ref('');
 const mixersList = ref([]);
 const jobcardsQueue = ref([]);
@@ -41,6 +42,12 @@ const alerts = ref([
         tone: 'warning'
     }
 ]);
+
+const work_context = reactive({
+    role: "Mixer Operator",
+    assigned_line: "",
+    assigned_shift: ""
+});
 
 const mixingStarted = ref(false);
 const mixingStartTime = ref(null);
@@ -80,12 +87,13 @@ const isMixerSelected = computed(() => !!selectedMixer.value);
 onMounted(async () => {
     const route = frappe.get_route();
     jobCard.value = route[2] || null;
+    await fetchWorkContext();
 
     if (!jobCard.value) {
         loadingIngredients.value = true;
         jobCard.value = await getJobCardsList();
     }
-
+    await loadOperators();
     await loadMixers();
     const stateRes = await frappe.call({
         method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_state',
@@ -147,7 +155,9 @@ onMounted(async () => {
                 job_card: jobCard.value
             }
         });
-
+        if (r.message) {
+            bomUOM.value = r.message[0].jc_bom_uom;
+        }
         ingredients.value = (r.message || []).map(item => {
             const name = item.item_name || '';
             const lower = name.toLowerCase();
@@ -209,6 +219,7 @@ async function toggleReady() {
                     args: {
                         job_card: jobCard.value,
                         ingredients: JSON.stringify(payload),
+                        bom_uom: bomUOM.value,
                     }
                 });
 
@@ -519,16 +530,16 @@ async function onMixerChange() {
     }
 }
 
-async function loadOperators() {
-    const response = await frappe.call({
-        method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_operators',
-        args: {
-            designation: 'Mixer Operator',
-            production_line: productionLine.value,
-            workstation: workstation.value,
-        }
+async function fetchWorkContext() {
+    const currentUser = await frappe.call({
+        method: "erpnext.setup.doctype.employee.api.get_current_user_context",
     });
-    operatorsList.value = response.message || [];
+
+    if (currentUser.message) {
+        work_context.role = currentUser.message.designation;
+        work_context.assigned_line = currentUser.message.production_line;
+        work_context.assigned_shift = currentUser.message.attendance_shift;
+    }
 }
 
 async function fetchQueue() {

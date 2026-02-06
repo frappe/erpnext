@@ -58,6 +58,7 @@ def get_mixer_ingredients(job_card):
 				"stock_uom": row.stock_uom,
 				"stock_uom_qty": qty,
 				"additional_ingredients_added": jc.additional_ingredients_added,
+				"jc_bom_uom": bom_doc.uom,
 			}
 		)
 
@@ -65,7 +66,7 @@ def get_mixer_ingredients(job_card):
 
 
 @frappe.whitelist()
-def confirm_materials(job_card, ingredients):
+def confirm_materials(job_card, ingredients, bom_uom):
 	"""Create Stock Entry from mixer quantities and mark Job Card ready."""
 	ingredients = json.loads(ingredients)
 	jc = frappe.get_doc("Job Card", job_card)
@@ -78,8 +79,7 @@ def confirm_materials(job_card, ingredients):
 			# row.additional_ingredients_added = added_by_code.get(row.item_code, 0)
 
 	total_qty = 1
-	bom = frappe.get_doc("BOM", jc.bom_no)
-	if jc.for_quantity != 1 and bom.uom != "Nos":
+	if jc.for_quantity != 1 and bom_uom != "Nos":
 		total_qty = sum(row.required_qty for row in jc.items if row.required_qty > 0)
 		jc.for_quantity = total_qty
 		jc.additional_ingredients_added = 1
