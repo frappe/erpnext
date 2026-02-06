@@ -569,10 +569,12 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				current_net_amount = item.net_amount;
 			}
 			// Use unrounded net for inclusive taxes to avoid double rounding
-			var net_for_tax = (cint(tax.included_in_print_rate)
-				&& !this.discount_amount_applied
-				&& item._unrounded_net_amount !== undefined)
-				? item._unrounded_net_amount : item.net_amount;
+			var net_for_tax =
+				cint(tax.included_in_print_rate) &&
+				!this.discount_amount_applied &&
+				item._unrounded_net_amount !== undefined
+					? item._unrounded_net_amount
+					: item.net_amount;
 			current_tax_amount = (tax_rate / 100.0) * net_for_tax;
 		} else if (tax.charge_type == "On Previous Row Amount") {
 			current_net_amount = this.frm.doc["taxes"][cint(tax.row_id) - 1].tax_amount_for_current_item;

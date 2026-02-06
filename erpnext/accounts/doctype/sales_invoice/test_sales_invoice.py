@@ -458,14 +458,14 @@ class TestSalesInvoice(ERPNextTestSuite):
 		# Add 9 more items - mix of amounts and tax rates
 		# Using similar amounts to maximize same-direction rounding
 		item_configs = [
-			(50100, None),      # 10% (default)
+			(50100, None),  # 10% (default)
 			(50200, '{"_Test Account Service Tax - _TC": 5}'),  # 5% override
-			(50300, None),      # 10%
+			(50300, None),  # 10%
 			(50400, '{"_Test Account Service Tax - _TC": 5}'),  # 5%
-			(50500, None),      # 10%
+			(50500, None),  # 10%
 			(50600, '{"_Test Account Service Tax - _TC": 5}'),  # 5%
-			(50700, None),      # 10%
-			(50800, None),      # 10%
+			(50700, None),  # 10%
+			(50800, None),  # 10%
 			(50900, '{"_Test Account Service Tax - _TC": 5}'),  # 5%
 		]
 
