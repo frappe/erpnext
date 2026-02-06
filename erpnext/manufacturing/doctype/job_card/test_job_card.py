@@ -94,7 +94,7 @@ class TestJobCard(ERPNextTestSuite):
 		final_bom.item = final.name
 		final_bom.quantity = 1
 		final_bom.with_operations = 1
-		final_bom.track_semi_finished_goods = 1
+		final_bom.track_semi_finished_goods = 0
 		final_bom.append("items", {"item_code": raw.name, "qty": 1})
 		final_bom.append(
 			"operations", {"operation": cutting.name, "workstation": "_Test Workstation 1", "bom_no": cut_bom}
