@@ -1021,6 +1021,8 @@ def get_requested_item_qty(sales_order):
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
+	if not has_requestable_items(source_name):
+		frappe.throw(_("All items for this Sales Order have already been requested in Material Requests."))
 	requested_item_qty = get_requested_item_qty(source_name)
 
 	def postprocess(source, target):
@@ -1028,46 +1030,13 @@ def make_material_request(source_name, target_doc=None):
 			target.tc_name = None
 			target.terms = None
 
-	def get_remaining_qty(so_item):
-		return flt(
-			flt(so_item.qty)
-			- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
-			- max(
-				flt(so_item.get("delivered_qty"))
-				- flt(requested_item_qty.get(so_item.name, {}).get("received_qty")),
-				0,
-			)
-		)
-
-	def get_remaining_packed_item_qty(so_item):
-		delivered_qty = frappe.db.get_value(
-			"Sales Order Item", {"name": so_item.parent_detail_docname}, ["delivered_qty"]
-		)
-
-		bundle_item_qty = frappe.db.get_value(
-			"Product Bundle Item", {"parent": so_item.parent_item, "item_code": so_item.item_code}, ["qty"]
-		)
-
-		return flt(
-			(
-				flt(so_item.qty)
-				- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
-				- max(
-					flt(delivered_qty) * flt(bundle_item_qty)
-					- flt(requested_item_qty.get(so_item.name, {}).get("received_qty")),
-					0,
-				)
-			)
-			* bundle_item_qty
-		)
-
 	def update_item(source, target, source_parent):
 		# qty is for packed items, because packed items don't have stock_qty field
 		target.project = source_parent.project
 		target.qty = (
-			get_remaining_packed_item_qty(source)
+			get_remaining_packed_item_qty(source, requested_item_qty)
 			if source.parentfield == "packed_items"
-			else get_remaining_qty(source)
+			else get_remaining_qty(source, requested_item_qty)
 		)
 		target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
 		target.actual_qty = get_bin_details(
@@ -1099,7 +1068,7 @@ def make_material_request(source_name, target_doc=None):
 			"Packed Item": {
 				"doctype": "Material Request Item",
 				"field_map": {"parent": "sales_order", "uom": "stock_uom", "name": "packed_item"},
-				"condition": lambda item: get_remaining_packed_item_qty(item) > 0,
+				"condition": lambda item: get_remaining_packed_item_qty(item, requested_item_qty) > 0,
 				"postprocess": update_item,
 			},
 			"Sales Order Item": {
@@ -1113,7 +1082,7 @@ def make_material_request(source_name, target_doc=None):
 				"condition": lambda item: not frappe.db.exists(
 					"Product Bundle", {"name": item.item_code, "disabled": 0}
 				)
-				and get_remaining_qty(item) > 0,
+				and get_remaining_qty(item, requested_item_qty) > 0,
 				"postprocess": update_item,
 			},
 		},
@@ -1122,6 +1091,67 @@ def make_material_request(source_name, target_doc=None):
 	)
 
 	return doc
+
+
+def get_remaining_qty(so_item, requested_item_qty):
+	return flt(
+		flt(so_item.qty)
+		- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
+		- max(
+			flt(so_item.get("delivered_qty"))
+			- flt(requested_item_qty.get(so_item.name, {}).get("received_qty")),
+			0,
+		)
+	)
+
+
+def get_remaining_packed_item_qty(so_item, requested_item_qty):
+	delivered_qty = frappe.db.get_value(
+		"Sales Order Item", {"name": so_item.parent_detail_docname}, ["delivered_qty"]
+	)
+
+	bundle_item_qty = frappe.db.get_value(
+		"Product Bundle Item", {"parent": so_item.parent_item, "item_code": so_item.item_code}, ["qty"]
+	)
+
+	return flt(
+		flt(so_item.qty)
+		- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
+		- max(
+			flt(delivered_qty) * flt(bundle_item_qty)
+			- flt(requested_item_qty.get(so_item.name, {}).get("received_qty")),
+			0,
+		)
+	)
+
+
+def is_requestable_row(row, requested_item_qty):
+	if row.doctype == "Packed Item":
+		return get_remaining_packed_item_qty(row, requested_item_qty) > 0
+
+	if row.doctype == "Sales Order Item":
+		if is_product_bundle(row.item_code):
+			return False
+		return get_remaining_qty(row, requested_item_qty) > 0
+
+	return False
+
+
+@frappe.whitelist()
+def has_requestable_items(source_name):
+	print("Checking for requestable items in Sales Order:", source_name)
+	so = frappe.get_doc("Sales Order", source_name)
+	requested_item_qty = get_requested_item_qty(source_name)
+
+	for row in so.items:
+		if is_requestable_row(row, requested_item_qty):
+			return True
+
+	for row in so.packed_items:
+		if is_requestable_row(row, requested_item_qty):
+			return True
+
+	return False
 
 
 @frappe.whitelist()
