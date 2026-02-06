@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-02-01 09:43+0000\n"
-"PO-Revision-Date: 2026-02-05 06:50\n"
+"PO-Revision-Date: 2026-02-06 07:10\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -21,7 +21,8 @@ msgstr ""
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1455
 msgid "\n"
 "\t\t\t\t\tThe Batch {0} of an item {1} has negative stock in the warehouse {2}. Please add a stock quantity of {3} to proceed with this entry."
-msgstr ""
+msgstr "\n"
+"\t\t\t\t\tŠarža {0} artikla {1} ima negativnu zalihu na skladištu {2}. Molimo dodajte količinu zalihe od {3} kako biste nastavili s ovim unosom."
 
 #. Label of the column_break_32 (Column Break) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -1119,7 +1120,7 @@ msgstr "ACC-PINV-.YYYY.-"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "ALL records will be deleted (entire DocType cleared)"
-msgstr ""
+msgstr "SVI zapisi će biti izbrisani (cijeli DocType obrisan)"
 
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:552
 msgid "AMC Expiry (Serial)"
@@ -5817,7 +5818,7 @@ msgstr "Najmanje jedno od Prodaje ili Kupovine mora biti odabrano"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:314
 msgid "At least one raw material item must be present in the stock entry for the type {0}"
-msgstr ""
+msgstr "Najmanje jedan artikal sirovine mora biti prisutan u unosu zaliha za tip {0}"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:25
 msgid "At least one row is required for a financial report template"
@@ -8843,7 +8844,7 @@ msgstr "Nije moguće ponovo dostaviti unose u Registar za verifikate u završeno
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:202
 msgid "Cannot add child table {0} to deletion list. Child tables are automatically deleted with their parent DocTypes."
-msgstr ""
+msgstr "Nije moguće dodati podređenu tabelu {0} na listu za brisanje. Podređene tabele se automatski brišu sa svojim nadređenim DocTypes."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:226
 msgid "Cannot amend {0} {1}, please create a new one instead."
@@ -8986,11 +8987,11 @@ msgstr "Ne možete izbrisati naručeni artikal"
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:195
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:778
 msgid "Cannot delete protected core DocType: {0}"
-msgstr ""
+msgstr "Nije moguće izbrisati zaštićeni osnovni DocType: {0}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:211
 msgid "Cannot delete virtual DocType: {0}. Virtual DocTypes do not have database tables."
-msgstr ""
+msgstr "Nije moguće izbrisati virtuelni DocType: {0}. Virtuelni DocTypes nemaju tabele baze podataka."
 
 #: erpnext/setup/doctype/company/company.py:559
 msgid "Cannot disable perpetual inventory, as there are existing Stock Ledger Entries for the company {0}. Please cancel the stock transactions first and try again."
@@ -9027,7 +9028,7 @@ msgstr "Nije moguće spojiti {0} '{1}' u '{2}' jer oba imaju postojeće knjigovo
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:533
 msgid "Cannot produce more Item {0} than Sales Order quantity {1} {2}"
-msgstr ""
+msgstr "Ne može se proizvesti više artikala {0} od količine Prodajnog Naloga {1} {2}"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1426
 msgid "Cannot produce more item for {0}"
@@ -9094,7 +9095,7 @@ msgstr "Nije moguće postaviti polje <b>{0}</b> za kopiranje u varijantama"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:264
 msgid "Cannot start deletion. Another deletion {0} is already queued/running. Please wait for it to complete."
-msgstr ""
+msgstr "Nije moguće započeti brisanje. Drugo brisanje {0} je već u redu čekanja/pokrenuto. Molimo pričekajte da se završi."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1920
 msgid "Cannot {0} from {1} without any negative outstanding invoice"
@@ -9727,7 +9728,7 @@ msgstr "Glavni Tehnološki Direktor"
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child DocTypes"
-msgstr ""
+msgstr "Podređeni DocTypes"
 
 #. Label of the child_docname (Data) field in DocType 'Pricing Rule Detail'
 #: erpnext/accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
@@ -9743,7 +9744,7 @@ msgstr "Referenca za Podređeni Red"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:205
 msgid "Child Table Not Allowed"
-msgstr ""
+msgstr "Podređena tabela nije dozvoljena"
 
 #: erpnext/projects/doctype/task/task.py:312
 msgid "Child Task exists for this Task. You can not delete this Task."
@@ -9757,7 +9758,7 @@ msgstr "Podređeni članovi se mogu kreirati samo pod članovima tipa 'Grupa'"
 #. 'Transaction Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child tables that will also be deleted"
-msgstr ""
+msgstr "Podređene tabele koje će također biti izbrisane"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:103
 msgid "Child warehouse exists for this warehouse. You can not delete this warehouse."
@@ -10608,7 +10609,7 @@ msgstr "Račun Poduzeća"
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:63
 msgid "Company Account is mandatory"
-msgstr ""
+msgstr "Račun poduzeća je obavezan"
 
 #. Label of the company_address (Link) field in DocType 'Dunning'
 #. Label of the company_address_display (Text Editor) field in DocType 'POS
@@ -10725,7 +10726,7 @@ msgstr "E-pošta Poduzeća"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company Field"
-msgstr ""
+msgstr "Poduzeće"
 
 #. Label of the company_logo (Attach Image) field in DocType 'Company'
 #: erpnext/public/js/print.js:64 erpnext/setup/doctype/company/company.json
@@ -10779,7 +10780,7 @@ msgstr "Poduzeće je obavezno za generisanje fakture. Postavi standard poduzeće
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company link field name used for filtering (optional - leave empty to delete all records)"
-msgstr ""
+msgstr "Naziv polja za link poduzeća koji se koristi za filtriranje (opciono - ostavite prazno da biste izbrisali sve zapise)"
 
 #: erpnext/setup/doctype/company/company.js:222
 msgid "Company name not same"
@@ -14854,11 +14855,11 @@ msgstr "Brisanje nije dozvoljeno za zemlju {0}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:216
 msgid "Deletion process restarted"
-msgstr ""
+msgstr "Proces brisanja je ponovo pokrenut"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:97
 msgid "Deletion will start automatically after submission."
-msgstr ""
+msgstr "Brisanje će započeti automatski nakon podnošenja."
 
 #. Label of the delimiter_options (Data) field in DocType 'Bank Statement
 #. Import'
@@ -16303,27 +16304,27 @@ msgstr "DocType {0} ne postoji"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:295
 msgid "DocType {0} with company field '{1}' is already in the list"
-msgstr ""
+msgstr "DocType {0} s poljem poduzeća '{1}' već je na popisu"
 
 #. Label of the doctypes_to_delete (Table) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "DocTypes To Delete"
-msgstr ""
+msgstr "DocTypes za brisanje"
 
 #. Description of the 'Excluded DocTypes' (Table) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "DocTypes that will NOT be deleted."
-msgstr ""
+msgstr "DocTypes koji NEĆE biti izbrisani."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:84
 msgid "DocTypes with a company field:"
-msgstr ""
+msgstr "DocTypes s poljem poduzeća:"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "DocTypes without a company field:"
-msgstr ""
+msgstr "DocTypes bez polja poduzeća:"
 
 #: erpnext/templates/pages/search_help.py:22
 msgid "Docs Search"
@@ -16333,7 +16334,7 @@ msgstr "Pretraga Dokumenata"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Document Count"
-msgstr ""
+msgstr "Broj Dokumenata"
 
 #. Label of the document_type (Link) field in DocType 'Subscription Invoice'
 #: erpnext/accounts/doctype/subscription_invoice/subscription_invoice.json
@@ -16588,7 +16589,7 @@ msgstr "Kopiraj Grupa Klijenta"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:188
 msgid "Duplicate DocType"
-msgstr ""
+msgstr "Dupliciraj DocType"
 
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.py:71
 msgid "Duplicate Entry. Please check Authorization Rule {0}"
@@ -16646,7 +16647,7 @@ msgstr "Dupli unos naspram koda artikla {0} i proizvođača {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:187
 msgid "Duplicate entry: {0}{1}"
-msgstr ""
+msgstr "Dupliciraj unos: {0}{1}"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:164
 msgid "Duplicate item group found in the item group table"
@@ -17158,7 +17159,7 @@ msgstr "Prazno"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:750
 msgid "Empty To Delete List"
-msgstr ""
+msgstr "Isprazni za brisanje liste"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -17612,7 +17613,7 @@ msgstr "Greška pri evaluaciji formule kriterija"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:267
 msgid "Error getting details for {0}: {1}"
-msgstr ""
+msgstr "Greška pri preuzimanju detalja za {0}: {1}"
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.py:310
 msgid "Error in party matching for Bank Transaction {0}"
@@ -18452,7 +18453,7 @@ msgstr "Preuzimam..."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:222
 msgid "Field '{0}' is not a valid Company link field for DocType {1}"
-msgstr ""
+msgstr "Polje '{0}' nije važeće polje za vezu poduzeća za DocType {1}"
 
 #. Label of the field_mapping_section (Section Break) field in DocType
 #. 'Inventory Dimension'
@@ -18474,15 +18475,15 @@ msgstr "Polja će se kopirati samo u vrijeme kreiranja."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1062
 msgid "File does not belong to this Transaction Deletion Record"
-msgstr ""
+msgstr "Datoteka ne pripada ovom zapisu o brisanju transakcije"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1056
 msgid "File not found"
-msgstr ""
+msgstr "Datoteka nije pronađena"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1070
 msgid "File not found on server"
-msgstr ""
+msgstr "Datoteka nije pronađena na serveru"
 
 #. Label of the file_to_rename (Attach) field in DocType 'Rename Tool'
 #: erpnext/utilities/doctype/rename_tool/rename_tool.json
@@ -19286,7 +19287,7 @@ msgstr "Za praktičnost Klienta, ovi kodovi se mogu koristiti u formatima za isp
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:977
 msgid "For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
-msgstr ""
+msgstr "Za artikal {0}, potrošena količina bi trebala biti {1} prema Sastavnici {2}."
 
 #: erpnext/public/js/controllers/transaction.js:1306
 msgctxt "Clear payment terms template and/or payment schedule when due date is changed"
@@ -19802,7 +19803,7 @@ msgstr "Uslovi i Odredbe Ispunjavanja"
 
 #: erpnext/stock/doctype/shipment/shipment.js:275
 msgid "Full Name, Email or Phone/Mobile of the user are mandatory to continue."
-msgstr ""
+msgstr "Za nastavak je obavezno unijeti puno ime, e-mail ili broj telefona/mobilnog telefona korisnika."
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -20076,11 +20077,11 @@ msgstr "Generiši upis za zatvaranje Zaliha"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:112
 msgid "Generate To Delete List"
-msgstr ""
+msgstr "Generiraj za brisanje liste"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:468
 msgid "Generate To Delete list first"
-msgstr ""
+msgstr "Prvo generiraj listu za brisanje"
 
 #. Description of a DocType
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -21262,7 +21263,7 @@ msgstr "IBAN"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:93
 msgid "IMPORTANT: Create a backup before proceeding!"
-msgstr ""
+msgstr "VAŽNO: Napravite sigurnosnu kopiju prije nego što nastavite!"
 
 #. Name of a report
 #: erpnext/regional/report/irs_1099/irs_1099.json
@@ -21476,7 +21477,7 @@ msgstr "Ako je omogućeno, sistem će dozvoliti korisniku da isporuči cjelokupn
 #. field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "If enabled, system will set incoming rate as zero for stand-alone credit notes with expired batch item."
-msgstr ""
+msgstr "Ako je omogućeno, sistem će postaviti nabavnu cijenu na nulu za samostalne kreditne note sa isteklim artiklima šarže."
 
 #. Description of the 'Deliver Scrap Items' (Check) field in DocType 'Selling
 #. Settings'
@@ -21878,7 +21879,7 @@ msgstr "Zanemaruje naslijeđe polje 'Početno' u unosu Knjigovodstva koje omogu�
 
 #: erpnext/stock/doctype/item/item.py:258
 msgid "Image in the description has been removed. To disable this behavior, uncheck \"{0}\" in {1}."
-msgstr ""
+msgstr "Slika u opisu je uklonjena. Da biste onemogućili ovo ponašanje, poništite oznaku \"{0}\" u {1}."
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:135
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:229
@@ -21925,7 +21926,7 @@ msgstr "Uvoz Uspješan"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:560
 msgid "Import Summary"
-msgstr ""
+msgstr "Sažetak Uvoza"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a DocType
@@ -21949,7 +21950,7 @@ msgstr "Masovni Uvoz"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:192
 msgid "Imported {0} DocTypes"
-msgstr ""
+msgstr "Uvezeno {0} DocTypes"
 
 #: erpnext/edi/doctype/common_code/common_code.py:109
 msgid "Importing Common Codes"
@@ -23043,7 +23044,7 @@ msgstr "Nevažeća narudžba za odabranog Klijenta i Artikal"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:494
 msgid "Invalid CSV format. Expected column: doctype_name"
-msgstr ""
+msgstr "Nevažeći CSV format. Očekivana kolona: doctype_name"
 
 #: erpnext/quality_management/doctype/quality_procedure/quality_procedure.py:72
 msgid "Invalid Child Procedure"
@@ -23051,7 +23052,7 @@ msgstr "Nevažeća Podređena Procedura"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:225
 msgid "Invalid Company Field"
-msgstr ""
+msgstr "Nevažeće polje poduzeća"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2355
 msgid "Invalid Company for Inter Company Transaction."
@@ -23210,7 +23211,7 @@ msgstr "Nevažeći Izraz Uvjeta"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1051
 msgid "Invalid file URL"
-msgstr ""
+msgstr "Nevažeći URL datoteke"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:93
 msgid "Invalid filter formula. Please check the syntax."
@@ -28947,7 +28948,7 @@ msgstr "Više Skladišnih Računa"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:244
 msgid "Multiple company fields available: {0}. Please select manually."
-msgstr ""
+msgstr "Dostupno je više polja poduzeća: {0}. Molimo odaberite ručno."
 
 #: erpnext/controllers/accounts_controller.py:1302
 msgid "Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year"
@@ -29044,7 +29045,7 @@ msgstr "Serija Imenovanja je obavezna"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:932
 msgid "Naming series '{0}' for DocType '{1}' does not contain standard '.' or '{{' separator. Using fallback extraction."
-msgstr ""
+msgstr "Imenovanje serije '{0}' za DocType '{1}' ne sadrži standardni separator '.' ili '{{'. Koristi se rezervna ekstrakcija."
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -29651,7 +29652,7 @@ msgstr "Nije odabrana Dostavnica za Klijenta {}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:749
 msgid "No DocTypes in To Delete list. Please generate or import the list before submitting."
-msgstr ""
+msgstr "Nema DocTypes na listi za brisanje. Molimo vas da generišete ili uvezete listu prije podnošenja."
 
 #: erpnext/public/js/utils/ledger_preview.js:64
 msgid "No Impact on Accounting Ledger"
@@ -29671,7 +29672,7 @@ msgstr "Nema odabranih artikala za prijenos."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1226
 msgid "No Items with Bill of Materials to Manufacture or all items already manufactured"
-msgstr ""
+msgstr "Nema artikala Sastavnice za Proizvodnju ili su svi artikli već proizvedeni"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1372
 msgid "No Items with Bill of Materials."
@@ -29975,7 +29976,7 @@ msgstr "Nema rezervisanih zaliha za poništavanje."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:152
 msgid "No rows with zero document count found"
-msgstr ""
+msgstr "Nisu pronađeni redovi s nultim brojem dokumenata"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:801
 msgid "No stock ledger entries were created. Please set the quantity or valuation rate for the items properly and try again."
@@ -30580,7 +30581,7 @@ msgstr "Za uvoz podataka mogu se koristiti samo CSV i Excel datoteke. Provjeri f
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1065
 msgid "Only CSV files are allowed"
-msgstr ""
+msgstr "Dozvoljene su samo CSV datoteke"
 
 #. Label of the tax_on_excess_amount (Check) field in DocType 'Tax Withholding
 #. Category'
@@ -34599,7 +34600,7 @@ msgstr "Unesi Odobravajuća Uloga ili Odobravajućeg Korisnika"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:674
 msgid "Please enter Batch No"
-msgstr ""
+msgstr "Molimo unesite broj Šarže"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:967
 msgid "Please enter Cost Center"
@@ -34664,7 +34665,7 @@ msgstr "Unesi Kontnu Klasu za račun- {0}"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:676
 msgid "Please enter Serial No"
-msgstr ""
+msgstr "Molimo unesite Serijski broj"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:309
 msgid "Please enter Serial Nos"
@@ -34765,7 +34766,7 @@ msgstr "Popuni Tabelu Prodajnih Naloga"
 
 #: erpnext/stock/doctype/shipment/shipment.js:277
 msgid "Please first set Full Name, Email and Phone for the user"
-msgstr ""
+msgstr "Prvo postavite puno ime, e-poštu i broj telefona za korisnika"
 
 #: erpnext/telephony/doctype/incoming_call_settings/incoming_call_settings.js:94
 msgid "Please fix overlapping time slots for {0}"
@@ -34777,11 +34778,11 @@ msgstr "Popravi preklapanje vremenskih termina za {0}."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:270
 msgid "Please generate To Delete list before submitting"
-msgstr ""
+msgstr "Molimo vas da generirate listu za brisanje prije podnošenja"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:70
 msgid "Please generate the To Delete list before submitting"
-msgstr ""
+msgstr "Molimo vas da generirate listu za brisanje prije podnošenja"
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:67
 msgid "Please import accounts against parent company or enable {} in company master."
@@ -36644,7 +36645,7 @@ msgstr "Obrada XML datoteka u toku"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:188
 msgid "Processing import..."
-msgstr ""
+msgstr "Obrada uvoza..."
 
 #: erpnext/buying/doctype/supplier/supplier_dashboard.py:10
 msgid "Procurement"
@@ -37269,7 +37270,7 @@ msgstr "Prospekti Angažovani, ali ne i Preobraćeni"
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:196
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:779
 msgid "Protected DocType"
-msgstr ""
+msgstr "Zaštićeni DocType"
 
 #. Description of the 'Company Email' (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -39346,7 +39347,7 @@ msgstr "Potrošnja Sirovina"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:317
 msgid "Raw Materials Missing"
-msgstr ""
+msgstr "Nedostaju Sirovine"
 
 #. Label of the raw_materials_received_section (Section Break) field in DocType
 #. 'Subcontracting Inward Order'
@@ -40321,7 +40322,7 @@ msgstr "Ukloni Nadređeni Red Broj u Tabeli Artikala"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:140
 msgid "Remove Zero Counts"
-msgstr ""
+msgstr "Ukloni nula brojeva"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:9
 msgid "Remove item if charges is not applicable to that item"
@@ -40333,7 +40334,7 @@ msgstr "Uklonjeni artikli bez promjene Količine ili Vrijednosti."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:161
 msgid "Removed {0} rows with zero document count. Please save to persist changes."
-msgstr ""
+msgstr "Uklonjeno je {0} redova sa nula dokumenata. Molimo sačuvajte promjene da biste ih sačuvali."
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:87
 msgid "Removing rows without exchange gain or loss"
@@ -42870,7 +42871,7 @@ msgstr "Red {0}: Artikal {1} mora biti podizvođački artikal."
 
 #: erpnext/controllers/subcontracting_controller.py:183
 msgid "Row {0}: Item {1} must be linked to a {2}."
-msgstr ""
+msgstr "Red {0}: Artikal {1} mora biti povezana s {2}."
 
 #: erpnext/controllers/subcontracting_controller.py:204
 msgid "Row {0}: Item {1}'s quantity cannot be higher than the available quantity."
@@ -45731,7 +45732,7 @@ msgstr "Postavi ukupan iznos kao standardni način plaćanja"
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Set Incoming Rate as Zero for Expired Batch"
-msgstr ""
+msgstr "Postavi nabavnu cijenu kao nulu za Isteklu Šaržu"
 
 #. Description of the 'Territory Targets' (Section Break) field in DocType
 #. 'Territory'
@@ -46711,7 +46712,7 @@ msgstr "Preskoči Prijenos Materijala u Posao U Toku Skladište"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:559
 msgid "Skipped {0} DocType(s):<br>{1}"
-msgstr ""
+msgstr "Preskočeno {0} DocType(a):<br>{1}"
 
 #. Label of the customer_skype (Data) field in DocType 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
@@ -50776,7 +50777,7 @@ msgstr "Originalnu fakturu treba objediniti prije ili zajedno sa povratnom faktu
 
 #: erpnext/controllers/accounts_controller.py:202
 msgid "The outstanding amount {0} in {1} is lesser than {2}. Updating the outstanding to this invoice."
-msgstr ""
+msgstr "Nepodmireni iznos {0} u {1} je manji od {2}. Ažurira se nepodmireni iznosa na ovoj fakturi."
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:229
 msgid "The parent account {0} does not exists in the uploaded template"
@@ -51541,7 +51542,7 @@ msgstr "Do Datuma i Vremena"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:118
 msgid "To Delete list generated with {0} DocTypes"
-msgstr ""
+msgstr "Za brisanje liste generirane sa {0} DocTypes"
 
 #. Option for the 'Sales Order Status' (Select) field in DocType 'Production
 #. Plan'
@@ -52785,7 +52786,7 @@ msgstr "Datum Transakcije"
 
 #: erpnext/setup/doctype/company/company.py:1102
 msgid "Transaction Deletion Document {0} has been triggered for company {1}"
-msgstr ""
+msgstr "Dokument Brisanju Transakcije {0} je pokrenut za {1}"
 
 #. Name of a DocType
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
@@ -52805,15 +52806,15 @@ msgstr "Artikal Zapisa Brisanja Transakcije"
 #. Name of a DocType
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Transaction Deletion Record To Delete"
-msgstr ""
+msgstr "Zapis Brisanju Transakcije za brisanje"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1096
 msgid "Transaction Deletion Record {0} is already running. {1}"
-msgstr ""
+msgstr "Zapis Brisanja Transakcije {0} se već izvršava. {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1115
 msgid "Transaction Deletion Record {0} is currently deleting {1}. Cannot save documents until deletion completes."
-msgstr ""
+msgstr "Zapis Brisanja Transakcije {0} trenutno briše {1}. Nije moguće spremiti dokumente dok se brisanje ne dovrši."
 
 #. Label of the transaction_details_section (Section Break) field in DocType
 #. 'GL Entry'
@@ -53432,7 +53433,7 @@ msgstr "Poništi Dodjele"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:462
 msgid "Unable to fetch DocType details. Please contact system administrator."
-msgstr ""
+msgstr "Nije moguće preuzeti detalje o DocType. Obratite se administratoru sistema."
 
 #: erpnext/setup/utils.py:182
 msgid "Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually"
@@ -53521,7 +53522,7 @@ msgstr "U tabeli radnog vremena možete dodati vrijeme početka i završetka za 
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:931
 msgid "Unexpected Naming Series Pattern"
-msgstr ""
+msgstr "Neočekivani Uzorak Imenovanja Serije"
 
 #. Option for the 'Fulfilment Status' (Select) field in DocType 'Contract'
 #: erpnext/crm/doctype/contract/contract.json
@@ -54119,7 +54120,7 @@ msgstr "Koristi Višeslojnu Sastavnicu"
 #. DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "Use Posting Datetime for Naming Documents"
-msgstr ""
+msgstr "Koristite datum i vrijeme registracije za Imenovanje Dokumenata"
 
 #. Label of the fallback_to_default_price_list (Check) field in DocType
 #. 'Selling Settings'
@@ -54934,7 +54935,7 @@ msgstr "Vimeo"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:214
 msgid "Virtual DocType"
-msgstr ""
+msgstr "Virtualni DocType"
 
 #: erpnext/templates/pages/help.html:46
 msgid "Visit the forums"
@@ -55467,7 +55468,7 @@ msgstr "Upozorenje: Prodajni Nalog {0} već postoji naspram Kupovnog Naloga {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:75
 msgid "Warning: This action cannot be undone!"
-msgstr ""
+msgstr "Upozorenje: Ova radnja se ne može poništiti!"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_validation.py:74
 msgid "Warnings"
@@ -55547,7 +55548,7 @@ msgstr "Talasna dužina u Megametrima"
 
 #: erpnext/controllers/accounts_controller.py:190
 msgid "We can see {0} is made against {1}. If you want {1}'s outstanding to be updated, uncheck the '{2}' checkbox."
-msgstr ""
+msgstr "Vidimo da je {0} napravljen protiv {1}. Ako želite da se ažuriraju neizmireni zahtjevi za {1}, poništite oznaku u polju za potvrdu '{2}'."
 
 #: erpnext/www/support/index.html:7
 msgid "We're here to help!"
@@ -55687,7 +55688,7 @@ msgstr "Oko čega vam je potrebna pomoć?"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:82
 msgid "What will be deleted:"
-msgstr ""
+msgstr "Šta će biti izbrisano:"
 
 #. Label of the whatsapp_no (Data) field in DocType 'Lead'
 #. Label of the whatsapp (Data) field in DocType 'Opportunity'
@@ -55723,7 +55724,7 @@ msgstr "Kada je odabrano, prag transakcije će se primjenjivati samo za pojedina
 #. in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "When checked, the system will use the posting datetime of the document for naming the document instead of the creation datetime of the document."
-msgstr ""
+msgstr "Kada je označeno, sistem će za imenovanje dokumenta koristiti datum i vrijeme registracije dokumenta umjesto datuma i vremena kreiranja dokumenta."
 
 #: erpnext/stock/doctype/item/item.js:1079
 msgid "When creating an Item, entering a value for this field will automatically create an Item Price at the backend."
@@ -55731,7 +55732,7 @@ msgstr "Kada kreirate artikal, unosom vrijednosti za ovo polje automatski će se
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:294
 msgid "When there are multiple finished goods ({0}) in a Repack stock entry, the basic rate for all finished goods must be set manually. To set rate manually, enable the checkbox 'Set Basic Rate Manually' in the respective finished good row."
-msgstr ""
+msgstr "Kada postoji više gotovih proizvoda ({0}) u unosu zaliha za ponovno pakovanje, osnovna cijena za sve gotove proizvode mora se postaviti ručno. Da biste cijenu postavili ručno, označite polje za potvrdu 'Ručno postavi osnovnu cijenu' u odgovarajućem redu gotovih proizvoda."
 
 #: erpnext/accounts/doctype/account/account.py:380
 msgid "While creating account for Child Company {0}, parent account {1} found as a ledger account."
@@ -56346,7 +56347,7 @@ msgstr "Možete ga postaviti kao naziv mašine ili tip operacije. Na primjer, ma
 
 #: erpnext/controllers/accounts_controller.py:211
 msgid "You can use {0} to reconcile against {1} later."
-msgstr ""
+msgstr "Možete koristiti {0} za kasnije usklađivanje sa {1}."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1230
 msgid "You can't make any changes to Job Card since Work Order is closed."
@@ -57032,7 +57033,7 @@ msgstr "{0} u redu {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:448
 msgid "{0} is a child table and will be deleted automatically with its parent"
-msgstr ""
+msgstr "{0} je podređena tabela i biće automatski izbrisana zajedno sa svojom nadređenom tabelom"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:94
 msgid "{0} is a mandatory Accounting Dimension. <br>Please set a value for {0} in Accounting Dimensions section."
@@ -57407,19 +57408,19 @@ msgstr "{0}, završi operaciju {1} prije operacije {2}."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:519
 msgid "{0}: Child table (auto-deleted with parent)"
-msgstr ""
+msgstr "{0}: Podređena tabela (automatski izbrisana s nadređenom tabelom)"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:514
 msgid "{0}: Not found"
-msgstr ""
+msgstr "{0}: Nije pronađeno"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:510
 msgid "{0}: Protected DocType"
-msgstr ""
+msgstr "{0}: Zaštićeni DocType"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:524
 msgid "{0}: Virtual DocType (no database table)"
-msgstr ""
+msgstr "{0}: Virtualni DocType (bez tabele baze podataka)"
 
 #: erpnext/controllers/accounts_controller.py:539
 msgid "{0}: {1} does not belong to the Company: {2}"
