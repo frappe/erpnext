@@ -4079,6 +4079,10 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 				flt(d.get("conversion_factor"), conv_fac_precision) or conversion_factor
 			)
 
+		if child_item.meta.get_field("total_weight"):
+			item_details = parent.fetch_item_details(child_item)
+			parent.conversion_factor(child_item, item_details)
+
 		if d.get("delivery_date") and parent_doctype == "Sales Order":
 			child_item.delivery_date = d.get("delivery_date")
 
