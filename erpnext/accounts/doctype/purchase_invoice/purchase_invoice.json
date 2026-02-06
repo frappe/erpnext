@@ -1660,11 +1660,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2025-08-04 19:19:11.380664",
-=======
  "modified": "2026-02-05 20:45:16.964500",
->>>>>>> 5fb5b7b30e (fix: do not show update stock flag unneccessarily)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
