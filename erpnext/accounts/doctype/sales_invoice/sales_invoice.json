@@ -2200,11 +2200,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
-<<<<<<< HEAD
- "modified": "2025-09-09 14:48:59.472826",
-=======
  "modified": "2026-02-05 20:43:44.732805",
->>>>>>> 5fb5b7b30e (fix: do not show update stock flag unneccessarily)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
