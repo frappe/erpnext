@@ -896,10 +896,6 @@ def set_resolution_by(doc, start_date_time, priority):
 		doc.sla_resolution_by = get_expected_time_for(
 			parameter="resolution", service_level=priority, start_date_time=start_date_time
 		)
-		if doc.meta.has_field("total_hold_time") and doc.get("total_hold_time"):
-			doc.sla_resolution_by = add_to_date(
-				doc.sla_resolution_by, seconds=round(doc.get("total_hold_time"))
-			)
 
 
 def record_assigned_users_on_failure(doc):
