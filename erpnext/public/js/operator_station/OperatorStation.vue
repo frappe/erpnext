@@ -148,8 +148,8 @@ async function loadJobCard(name) {
 
 		if (processStarted.value && processStartTime.value) {
 			const start = new Date(processStartTime.value);
-			const now = new Date().toISOString().slice(0, 19).replace('T', ' ')
-			const diffSeconds = (new Date(now) - new Date(start)) / 1000;
+			const now = new Date()
+			const diffSeconds = (now - start) / 1000;
 			processElapsed.value = Math.max(0, Math.floor(diffSeconds));
 
 			if (processTimerHandle.value) clearInterval(processTimerHandle.value);
