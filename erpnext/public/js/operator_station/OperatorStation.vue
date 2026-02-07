@@ -4,7 +4,6 @@ import { ref, computed, onMounted, reactive } from 'vue';
 const jobCardName = ref(null);
 const jobCardDoc = ref(null);
 const status = ref('Pending');
-const serial = ref('SLB-2025-00427');
 const colour = ref('');
 
 const processStarted = ref(false);
@@ -70,7 +69,6 @@ const fetchWorkContext = async () => {
 };
 
 // UI flags
-const showStartButton = ref(true);
 const showAlarms = ref(true);
 
 // Raise‑alarm dialog
@@ -133,11 +131,9 @@ async function loadJobCard(name) {
 
 		if (status.value === 'Work In Progress') {
 			processStarted.value = true;
-			showStartButton.value = false;
-			processReady.value = true;
+			processReady.value = false;
 		} else {
 			processStarted.value = false;
-			showStartButton.value = true;
 			processReady.value = true;
 		}
 
@@ -265,7 +261,7 @@ async function startOperation() {
 				}
 
 				status.value = 'In Progress';
-				showStartButton.value = false;
+				processReady.value = false;
 				processStarted.value = true;
 				processStartTime.value = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
@@ -305,7 +301,6 @@ async function finishOperation() {
 			},
 		});
 
-		status.value = 'Finished';
 		jobCardName.value = null;
 		processStarted.value = false;
 		processStartTime.value = null;
@@ -348,7 +343,6 @@ function discardJob() {
 		() => {
 			stopAndResetTimer();
 			status.value = 'Pending'; // Reset to Pending so Start button appears
-			showStartButton.value = true;
 			processReady.value = true;
 			jobCardSubmitted.value = false;
 			frappe.msgprint(__('Job is discarded'));
@@ -392,9 +386,6 @@ function statusStyle() {
 	if (status.value === 'In Progress') {
 		return 'background:#d4f8d4;color:#137a13;padding:.5rem';
 	}
-	if (status.value === 'Finished') {
-		return 'background:#d1ecf1;color:#0c5460;padding:.5rem';
-	}
 	if (status.value === 'Halted') {
 		return 'background:#ffeeba;color:#856404;padding:.5rem';
 	}
@@ -433,7 +424,7 @@ function statusStyle() {
 						style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span>
 				</div>
 
-				<div class="text-center mb-2" v-if="processReady && showStartButton">
+				<div class="text-center mb-2" v-if="processReady">
 					<button class="btn btn-success py-3 px-4" @click="startOperation">
 						<span class="fa fa-play mr-1 pr-2"></span>{{ __('Start Job') }}
 					</button>
