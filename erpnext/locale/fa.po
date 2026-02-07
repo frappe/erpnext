@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-02-01 09:43+0000\n"
-"PO-Revision-Date: 2026-02-05 06:50\n"
+"PO-Revision-Date: 2026-02-07 07:41\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -8901,11 +8901,11 @@ msgstr ""
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:195
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:778
 msgid "Cannot delete protected core DocType: {0}"
-msgstr ""
+msgstr "نمی‌توان DocType هسته محافظت‌شده: {0} را حذف کرد"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:211
 msgid "Cannot delete virtual DocType: {0}. Virtual DocTypes do not have database tables."
-msgstr ""
+msgstr "نمی‌توان DocType مجازی: {0} را حذف کرد. DocTypeهای مجازی جداول پایگاه داده ندارند."
 
 #: erpnext/setup/doctype/company/company.py:559
 msgid "Cannot disable perpetual inventory, as there are existing Stock Ledger Entries for the company {0}. Please cancel the stock transactions first and try again."
@@ -9009,7 +9009,7 @@ msgstr "نمی‌توان فیلد <b>{0}</b> را برای کپی در گونه
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:264
 msgid "Cannot start deletion. Another deletion {0} is already queued/running. Please wait for it to complete."
-msgstr ""
+msgstr "نمی‌توان حذف را شروع کرد. حذف دیگری {0} در حال حاضر در صف/در حال اجرا است. لطفاً منتظر بمانید تا کامل شود."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1920
 msgid "Cannot {0} from {1} without any negative outstanding invoice"
@@ -9642,7 +9642,7 @@ msgstr "مدیر ارشد فناوری"
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child DocTypes"
-msgstr ""
+msgstr "DocTypeهای فرزند"
 
 #. Label of the child_docname (Data) field in DocType 'Pricing Rule Detail'
 #: erpnext/accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
@@ -9658,7 +9658,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:205
 msgid "Child Table Not Allowed"
-msgstr ""
+msgstr "جدول فرزند مجاز نیست"
 
 #: erpnext/projects/doctype/task/task.py:312
 msgid "Child Task exists for this Task. You can not delete this Task."
@@ -9672,7 +9672,7 @@ msgstr "گره‌های فرزند را می‌توان فقط تحت گره‌�
 #. 'Transaction Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child tables that will also be deleted"
-msgstr ""
+msgstr "جداول فرزند که حذف خواهند شد"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:103
 msgid "Child warehouse exists for this warehouse. You can not delete this warehouse."
@@ -10523,7 +10523,7 @@ msgstr "حساب شرکت"
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:63
 msgid "Company Account is mandatory"
-msgstr ""
+msgstr "حساب شرکت الزامی است"
 
 #. Label of the company_address (Link) field in DocType 'Dunning'
 #. Label of the company_address_display (Text Editor) field in DocType 'POS
@@ -10640,7 +10640,7 @@ msgstr "ایمیل شرکت"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company Field"
-msgstr ""
+msgstr "فیلد شرکت"
 
 #. Label of the company_logo (Attach Image) field in DocType 'Company'
 #: erpnext/public/js/print.js:64 erpnext/setup/doctype/company/company.json
@@ -14769,7 +14769,7 @@ msgstr "حذف برای کشور {0} مجاز نیست"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:216
 msgid "Deletion process restarted"
-msgstr ""
+msgstr "فرآیند حذف دوباره آغاز شد"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:97
 msgid "Deletion will start automatically after submission."
@@ -18389,11 +18389,11 @@ msgstr ""
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1056
 msgid "File not found"
-msgstr ""
+msgstr "فایل یافت نشد"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1070
 msgid "File not found on server"
-msgstr ""
+msgstr "فایلی در سرور یافت نشد"
 
 #. Label of the file_to_rename (Attach) field in DocType 'Rename Tool'
 #: erpnext/utilities/doctype/rename_tool/rename_tool.json
@@ -19713,7 +19713,7 @@ msgstr "شرایط و ضوابط تحقق"
 
 #: erpnext/stock/doctype/shipment/shipment.js:275
 msgid "Full Name, Email or Phone/Mobile of the user are mandatory to continue."
-msgstr ""
+msgstr "نام کامل، ایمیل یا شماره تلفن/موبایل کاربر برای ادامه الزامی است."
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -21173,7 +21173,7 @@ msgstr "شماره حساب بین‌المللی (IBAN)"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:93
 msgid "IMPORTANT: Create a backup before proceeding!"
-msgstr ""
+msgstr "مهم: قبل از ادامه، یک نسخه پشتیبان تهیه کنید!"
 
 #. Name of a report
 #: erpnext/regional/report/irs_1099/irs_1099.json
@@ -21833,7 +21833,7 @@ msgstr "درون‌بُرد با موفقیت انجام شد"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:560
 msgid "Import Summary"
-msgstr ""
+msgstr "خلاصه درون‌بُرد"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a DocType
@@ -22951,7 +22951,7 @@ msgstr "سفارش کلی نامعتبر برای مشتری و آیتم انت�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:494
 msgid "Invalid CSV format. Expected column: doctype_name"
-msgstr ""
+msgstr "قالب CSV نامعتبر است. ستون مورد انتظار: doctype_name"
 
 #: erpnext/quality_management/doctype/quality_procedure/quality_procedure.py:72
 msgid "Invalid Child Procedure"
@@ -22959,7 +22959,7 @@ msgstr "رویه فرزند نامعتبر"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:225
 msgid "Invalid Company Field"
-msgstr ""
+msgstr "فیلد شرکت نامعتبر"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2355
 msgid "Invalid Company for Inter Company Transaction."
@@ -23118,7 +23118,7 @@ msgstr "عبارت شرط نامعتبر است"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1051
 msgid "Invalid file URL"
-msgstr ""
+msgstr "URL فایل نامعتبر است"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:93
 msgid "Invalid filter formula. Please check the syntax."
@@ -29883,7 +29883,7 @@ msgstr "موجودی رزرو شده ای برای لغو رزرو وجود ند
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:152
 msgid "No rows with zero document count found"
-msgstr ""
+msgstr "هیچ ردیفی با تعداد سند صفر یافت نشد"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:801
 msgid "No stock ledger entries were created. Please set the quantity or valuation rate for the items properly and try again."
@@ -30488,7 +30488,7 @@ msgstr "برای درون‌بُرد داده‌ها فقط می‌توان از
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1065
 msgid "Only CSV files are allowed"
-msgstr ""
+msgstr "فقط فایل‌های CSV مجاز هستند"
 
 #. Label of the tax_on_excess_amount (Check) field in DocType 'Tax Withholding
 #. Category'
@@ -34506,7 +34506,7 @@ msgstr "لطفاً نقش تأیید یا کاربر تأیید را وارد ک
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:674
 msgid "Please enter Batch No"
-msgstr ""
+msgstr "لطفا شماره دسته را وارد کنید"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:967
 msgid "Please enter Cost Center"
@@ -34571,7 +34571,7 @@ msgstr "لطفاً نوع ریشه را برای حساب وارد کنید- {0}
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:676
 msgid "Please enter Serial No"
-msgstr ""
+msgstr "لطفا شماره سریال را وارد کنید"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:309
 msgid "Please enter Serial Nos"
@@ -34672,7 +34672,7 @@ msgstr "لطفا جدول سفارش‌های فروش را پر کنید"
 
 #: erpnext/stock/doctype/shipment/shipment.js:277
 msgid "Please first set Full Name, Email and Phone for the user"
-msgstr ""
+msgstr "لطفا ابتدا نام کامل، ایمیل و تلفن را برای کاربر تنظیم کنید"
 
 #: erpnext/telephony/doctype/incoming_call_settings/incoming_call_settings.js:94
 msgid "Please fix overlapping time slots for {0}"
@@ -54833,7 +54833,7 @@ msgstr "Vimeo"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:214
 msgid "Virtual DocType"
-msgstr ""
+msgstr "DocType مجازی"
 
 #: erpnext/templates/pages/help.html:46
 msgid "Visit the forums"
@@ -55586,7 +55586,7 @@ msgstr "برای چه چیزی به کمک نیاز دارید؟"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:82
 msgid "What will be deleted:"
-msgstr ""
+msgstr "چه چیزهایی حذف خواهد شد:"
 
 #. Label of the whatsapp_no (Data) field in DocType 'Lead'
 #. Label of the whatsapp (Data) field in DocType 'Opportunity'
@@ -56245,7 +56245,7 @@ msgstr "می‌توانید آن را به عنوان نام ماشین یا ن�
 
 #: erpnext/controllers/accounts_controller.py:211
 msgid "You can use {0} to reconcile against {1} later."
-msgstr ""
+msgstr "می‌توانید از {0} برای تطبیق با {1} بعداً استفاده کنید."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1230
 msgid "You can't make any changes to Job Card since Work Order is closed."
@@ -56931,7 +56931,7 @@ msgstr "{0} در ردیف {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:448
 msgid "{0} is a child table and will be deleted automatically with its parent"
-msgstr ""
+msgstr "{0} یک جدول فرزند است و به طور خودکار به همراه جدول والدش حذف خواهد شد"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:94
 msgid "{0} is a mandatory Accounting Dimension. <br>Please set a value for {0} in Accounting Dimensions section."
@@ -57306,19 +57306,19 @@ msgstr "{0}، عملیات {1} را قبل از عملیات {2} تکمیل کن
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:519
 msgid "{0}: Child table (auto-deleted with parent)"
-msgstr ""
+msgstr "{0}: جدول فرزند (به همراه جدول والد به صورت خودکار حذف می‌شود)"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:514
 msgid "{0}: Not found"
-msgstr ""
+msgstr "{0}: یافت نشد"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:510
 msgid "{0}: Protected DocType"
-msgstr ""
+msgstr "{0}: DocType محافظت‌شده"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:524
 msgid "{0}: Virtual DocType (no database table)"
-msgstr ""
+msgstr "{0}: DocType مجازی (بدون جدول پایگاه داده)"
 
 #: erpnext/controllers/accounts_controller.py:539
 msgid "{0}: {1} does not belong to the Company: {2}"
