@@ -77,18 +77,24 @@ const get_slab_for_qa = async (job_card_number) => {
             job_card_number: job_card_number,
         }
     });
-    if (res.message && res.message) {
-        selectSlab(res.message);
-    }
-    else {
-        selectedSlab.value = null;
+
+    if (res.message) {
+        jobCardNumber.value = res.message.job_card?.name || jobCardNumber.value;
+        selectSlab(res.message.slab);
+        isQAStarted.value = res.message.job_card?.status === "Work In Progress";
     }
 }
 
 
 function selectSlab(slab) {
+    if (!slab) {
+        selectedSlab.value = null;
+        jobCardNumber.value = null;
+        isQAStarted.value = false;
+        return;
+    }
+
     selectedSlab.value = slab;
-    jobCardNumber.value = slab.current_job_card;
     isQAStarted.value = false;
     // Reset and Auto-fill form
     Object.assign(form, {
@@ -137,6 +143,8 @@ const confirmAndTag = async () => {
             frappe.show_alert(
                 __(`Quality Report submitted and Slab ${selectedSlab.value.name} checked out.`)
             );
+
+            jobCardNumber.value = null;
             selectedSlab.value = null;
             get_slab_for_qa();
         }
@@ -189,20 +197,33 @@ function startHourglassAnimation() {
 }
 
 
-frappe.realtime.on('slab_checkout', () => {
-    get_slab_for_qa();
+frappe.realtime.on('slab_checkout', (slab) => {
+    // If the slab has been checked out on a different line or the checked out slab is not in 'Polishing', then ignore the event.
+    if (slab.line !== work_context.assigned_line || slab.status !== 'Polishing' || !slab.is_cur_stage_complete) return;
+
+    if (!selectedSlab.value) {
+        get_slab_for_qa();
+    }
+
+    // TODO: Use this if a queue is intelligently implemented on the frontend.
+    // if (!selectedSlab.value) {
+    //     jobCardNumber.value = null;
+    //     selectSlab(slab);
+    // }
 });
 
 const startProcess = async () => {
     if (!selectedSlab.value) return;
 
     try {
-        await frappe.call({
-            method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.start_process',
+        const res = await frappe.call({
+            method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.start_qa_process',
             args: {
                 slab_number: selectedSlab.value.name,
             }
         });
+
+        jobCardNumber.value = res.message;
         isQAStarted.value = true;
     } catch (e) {
         console.error('Failed to start job card', e);

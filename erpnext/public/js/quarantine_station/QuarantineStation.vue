@@ -19,8 +19,7 @@ const fetchWorkContext = async () => {
         work_context.assigned_shift = currentUser.message.shift;
     }
 };
-const updateKey = ref(0);
-const incomingSlabs = ref([]);
+
 const selectedSlab = ref(null);
 
 const get_slabs_ready_for_quarantine = async () => {
@@ -32,26 +31,12 @@ const get_slabs_ready_for_quarantine = async () => {
             next_stage: "Quarantine",
         }
     });
-    if (r.message) {
-        if (!incomingSlabs.value.length) {
-            incomingSlabs.value = r.message;
-        } else {
-            const new_slabs = r.message.filter(slab => incomingSlabs.value.every(s => s.name !== slab.name));
-            incomingSlabs.value.push(...new_slabs);
-
-            const removed_slabs = incomingSlabs.value.filter(slab => r.message.every(s => s.name !== slab.name));
-            incomingSlabs.value = incomingSlabs.value.filter(slab => !removed_slabs.some(s => s.name === slab.name));
-        }
-
-        updateKey.value++;
+    if (r.message && r.message[0]) {
+        selectSlab(r.message[0])
     }
 };
 
-function selectSlab(slab, index) {
-    // if (index) {
-    //     return;
-    // }
-
+function selectSlab(slab) {
     selectedSlab.value = slab;
     // Reset measurements on new selection
     quarantineMeasurements.value = {
@@ -86,12 +71,24 @@ const quarantineMeasurements = ref({
 
 onMounted(async () => {
     await fetchWorkContext();
-    get_slabs_ready_for_quarantine();
-    fetchQuarantineLabels();
+    await get_slabs_ready_for_quarantine();
+    await fetchQuarantineLabels();
 });
 
-frappe.realtime.on('slab_checkout', (slab) => {
-    get_slabs_ready_for_quarantine();
+frappe.realtime.on('slab_checkout', async (slab) => {
+    // If the slab has been checked out on a different line or the status of the checked out slab is not 'Cooling', then ignore the event.
+    if (slab.line !== work_context.assigned_line || slab.status !== 'Cooling') {
+        return;
+    }
+
+    if (!selectedSlab.value) {
+        await get_slabs_ready_for_quarantine();
+    }
+
+    // TODO: Use this if a queue is intelligently implemented on the frontend.
+    // if (!selectedSlab.value) {
+    //     selectSlab(slab);
+    // }
 });
 
 const submitQuarantine = () => {
@@ -114,7 +111,7 @@ const submitQuarantine = () => {
                     remarks: quarantineMeasurements.value.remarks
                 },
                 freeze: true,
-                callback: (r) => {
+                callback: async (r) => {
                     if (!r.exc) {
                         frappe.show_alert({
                             message: __('Quarantine check submitted successfully'),
@@ -131,7 +128,7 @@ const submitQuarantine = () => {
                             remarks: ''
                         };
                         selectedSlab.value = null;
-                        get_slabs_ready_for_quarantine();
+                        await get_slabs_ready_for_quarantine();
                     }
                 }
             });
@@ -145,50 +142,25 @@ const submitQuarantine = () => {
 
 <template>
     <div class="page-card d-flex">
-        <!-- Left: Incoming Slabs -->
-        <div style="width:280px;" class="pr-4 border-right">
-            <h5 class="mb-3 d-flex align-items-center">
-                {{ __('Incoming Slabs') }}
-            </h5>
-            <div class="text-muted small mb-3" v-if="incomingSlabs.length">
-                {{ __('Select a slab to quarantine.') }}
-            </div>
-
-            <div class="incoming-list">
-                <div v-if="!incomingSlabs.length" class="empty-state text-muted small text-center p-4 border rounded">
-                    {{ __('No slabs are ready for quarantine right now.') }}
-                </div>
-                <TransitionGroup name="list" tag="div" v-else>
-                    <div v-for="(slab, index) in incomingSlabs" :key="slab.name"
-                        class="incoming-item mb-2 p-3 d-flex align-items-center border rounded"
-                        :class="{ 'selected': selectedSlab && selectedSlab.name === slab.name, 'cursor-pointer': !index }"
-                        @click="selectSlab(slab, index)">
-                        <div class="slab-container" :key="updateKey">
-                            <div class="slab-thumbnail mr-3"></div>
-                            <div class="flex-fill">
-                                <div class="font-weight-bold small">{{ slab.name }}</div>
-                                <div class="text-muted small">
-                                    {{ slab.template }}
-                                </div>
-                            </div>
-                            <div class="text-muted" v-if="!index">
-                                <span class="fa fa-arrow-right"></span>
-                            </div>
-                        </div>
-                    </div>
-                </TransitionGroup>
-            </div>
-        </div>
 
         <!-- Right: Quarantine Action (Placeholder) -->
         <div class="flex-fill pl-4 pb-5">
-            <h4 class="mb-4">{{ __('Quarantine Station') }}</h4>
-            <div v-if="selectedSlab" class="d-flex flex-column align-items-center">
-                <div class="measurement-card p-5 mb-4 d-flex flex-column align-items-center">
-                    <div class="text-muted mb-4">
-                        {{ __('Selected Slab') }}: <span class="font-weight-bold">{{ selectedSlab.name }}</span>
-                    </div>
+            <!-- TODO: Remove this if used within ERPNext context -->
+            <!-- <h4 class="mb-4">{{ __('Quarantine Station') }}</h4>  -->
+            <div v-if="selectedSlab" class="d-flex align-items-center justify-content-between border rounded p-3 mb-4 mt-3" style="background-color: var(--control-bg-on-gray, #e2edff); border-color: var(--primary-color) !important;">
+                <div class="d-flex align-items-center">
+                    <span class="text-muted mr-3">{{ __('Current Slab') }}:</span>
+                    <div class="slab-thumbnail mr-3" style="width: 24px; height: 24px;"></div>
+                    <span class="font-weight-bold h5 mb-0 mr-2">{{ selectedSlab.name }}</span>
+                    <span class="text-muted">{{ selectedSlab.template }}</span>
+                </div>
+            </div>
+            <div v-else class="d-flex align-items-center justify-content-center border rounded p-3 mb-4 mt-3 text-muted">
+                {{ __('No slabs are available for quarantine right now.') }}
+            </div>
 
+            <div v-if="selectedSlab" class="d-flex flex-column align-items-center">
+                <div class="measurement-card w-100 p-5 mb-4 d-flex flex-column align-items-center">
                     <div class="measure-wrapper position-relative" style="width: 600px; height: 350px;">
                         <!-- SVG Diagram -->
                         <svg width="100%" height="100%" viewBox="0 0 600 350" preserveAspectRatio="none">
@@ -248,10 +220,6 @@ const submitQuarantine = () => {
                 <div class="mt-2">
                     <button class="btn btn-primary" @click="submitQuarantine">{{ __('Submit Quarantine') }}</button>
                 </div>
-
-            </div>
-            <div v-else class="text-muted">
-                {{ __('Please select a slab from the list.') }}
             </div>
         </div>
     </div>

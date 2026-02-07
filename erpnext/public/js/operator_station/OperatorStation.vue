@@ -1,7 +1,6 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, reactive } from 'vue';
 
-const jobCardNumber = ref(null);
 const jobCardName = ref(null);
 const jobCardDoc = ref(null);
 const status = ref('Pending');
@@ -13,25 +12,18 @@ const processStartTime = ref(null);
 const processElapsed = ref(0);
 const processTimerHandle = ref(null);
 const processReady = ref(true);
-// const pollingInterval = ref(null);
 
-const slabsQueue = ref([]);
-const slabCreated = ref(false);
 const slabNumber = ref(null);
-const jobcardsQueue = ref([]);
 const jobCardSubmitted = ref(false);
 const preparedQty = ref(0);
 const stockEntryName = ref('');
 const transferredQty = ref(0);
 const transferSuccess = ref(false);
 const nextWorkOrder = ref('');
-const bomNo = ref('Loading...');
-const bomQty = ref(0);
 const slabTemplate = ref('');
 const line = ref(null);
 const error = ref(null);
 const batchNo = ref(null);
-const currentStation = ref('');
 
 const alarms = ref([
 	{
@@ -49,6 +41,33 @@ const alarms = ref([
 		tone: 'warning'
 	}
 ]);
+
+const station_reverse_map = {
+	"pressing": "Distribution",
+	"cooling": "Heating",
+	"trimming": "Quarantine",
+	"calibration": "Trimming",
+	"polishing": "Calibration",
+};
+
+const work_context = reactive({
+    role: "Oven Operator",
+    assigned_line: "",
+    assigned_station: "Oven 1",
+    assigned_shift: ""
+});
+
+const fetchWorkContext = async () => {
+    const currentUser = await frappe.call({
+        method: "erpnext.setup.doctype.employee.api.get_current_user_context",
+    });
+
+    if (currentUser.message) {
+        work_context.role = currentUser.message.designation;
+        work_context.assigned_line = currentUser.message.production_line;
+        work_context.assigned_shift = currentUser.message.attendance_shift;
+    }
+};
 
 // UI flags
 const showStartButton = ref(true);
@@ -78,9 +97,6 @@ const props = defineProps({
 	}
 });
 
-// actions
-const isDistribution = computed(() => currentStation.value === 'distribution');
-
 async function loadJobCard(name) {
 	if (!name) return;
 	jobCardName.value = name;
@@ -89,10 +105,8 @@ async function loadJobCard(name) {
 		const jc = await frappe.db.get_doc('Job Card', jobCardName.value);
 		jobCardDoc.value = jc;
 
-		if (jc.bom_no) {
+		if (jc.bom_no && !slabTemplate.value) {
 			const bom = await frappe.db.get_doc('BOM', jc.bom_no);
-			const bom_elements = jc.bom_no.split("-");
-			batchNo.value = `${bom_elements[1] ?? ''}-${bom_elements[2] ?? ''}`.trim();
 			if (bom.slab_template) {
 				slabTemplate.value = bom.slab_template;
 			}
@@ -107,7 +121,7 @@ async function loadJobCard(name) {
 		const station = route[1] || '';
 
 		const stateRes = await frappe.call({
-			method: 'erpnext.manufacturing.page.operator_station.operator_station.get_operator_state',
+			method: 'erpnext.manufacturing.page.operator_station.operator_station.get_machine_state',
 			args: {
 				job_card: jobCardName.value,
 				process_name: station
@@ -121,15 +135,6 @@ async function loadJobCard(name) {
 			processStarted.value = true;
 			showStartButton.value = false;
 			processReady.value = true;
-		} else if (status.value === 'Completed') {
-			processStarted.value = false;
-			showStartButton.value = false;
-			processReady.value = false;
-			jobCardSubmitted.value = true;
-		} else if (status.value === 'Cancelled' || status.value === 'Discarded') {
-			processStarted.value = false;
-			showStartButton.value = false;
-			processReady.value = false;
 		} else {
 			processStarted.value = false;
 			showStartButton.value = true;
@@ -167,37 +172,42 @@ async function loadJobCard(name) {
 async function checkForNextItem() {
 	const route = frappe.get_route();
 	const station = route[1] || '';
-	if (!jobCardName.value || status.value === 'Finished') {
-		const result = await frappe.call({
-			method: 'erpnext.manufacturing.page.operator_station.operator_station.get_next_work_item',
-			args: {
-				process: station,
-				line: line.value || '2' // Defaulting to L1 for now if not known
-			}
-		});
-		if (result.message && result.message.name) {
-			if (result.message.name !== jobCardName.value) {
-				await loadJobCard(result.message.name);
-			}
-		}
+	if (!jobCardName.value) {
+		getNextWorkItem(station)
 	}
 }
 
+const getNextWorkItem = async (station) => {
+	const result = await frappe.call({
+		method: 'erpnext.manufacturing.page.operator_station.operator_station.get_next_work_item',
+		args: {
+			process: station,
+			line: line.value || '2' // Defaulting to L1 for now if not known
+		}
+	});
+
+	if (result.message) {
+		res_slab = result.message.slab
+		res_job_card = result.message.job_card
+
+		slabNumber.value = res_slab?.name || result.message.job_card?.slab;
+		colour.value = res_slab?.template || result.message.job_card?.bom_no;
+		batchNo.value = res_slab?.batch_number || result.message.job_card?.slab?.split('-')[0];
+
+		if (res_job_card && res_job_card?.name !== jobCardName.value) {
+			await loadJobCard(res_job_card.name);
+		}
+	}
+};
+
 onMounted(async () => {
 	try {
+		await fetchWorkContext();
+
 		const route = frappe.get_route();
 		const station = route[1] || '';
 		if (!jobCardName.value) {
-			const nextItem = await frappe.call({
-				method: 'erpnext.manufacturing.page.operator_station.operator_station.get_next_work_item',
-				args: { process: station, line: '2' }
-			});
-			if (nextItem.message && nextItem.message.name) {
-				await loadJobCard(nextItem.message.name);
-			} else {
-				frappe.msgprint(__("No work available at this station."));
-				return;
-			}
+			getNextWorkItem(station);
 		} else {
 			await loadJobCard(jobCardName.value);
 		}
@@ -210,76 +220,26 @@ onMounted(async () => {
 
 
 frappe.realtime.on('refresh_operator_station', (data) => {
-	if (data.station && data.station.toLowerCase() === currentStation.value) {
+	const route = frappe.get_route();
+	const station = (route[1] || '').toLowerCase();
+
+	if (station === "distribution") {
 		checkForNextItem();
 	}
 });
 
-async function createSlab(line) {
-	if (!jobCardDoc.value || slabCreated.value || !slabTemplate.value) return
+frappe.realtime.on('slab_checkout', (slab) => {
+	const route = frappe.get_route();
+	const station = route[1] || '';
 
-	try {
-		const result = await frappe.call({
-			method: "erpnext.manufacturing.doctype.slab.api.create_slab",
-			args: {
-				line: line || 'L1',
-				type: slabTemplate.value,
-				job_card_number: jobCardDoc.value.name,
-			}
-		});
-		if (result) {
-			jobCardDoc.value.slab = result.message?.serial_number;
-		}
-		slabCreated.value = true;
-		slabNumber.value = result.message?.serial_number;
-
-		batchNo.value = result.message?.name;
-		colour.value = result.message?.template;
-	} catch (e) {
-		frappe.msgprint(__('Slab creation failed: {0}', [e.message]));
-	}
-}
-
-async function slabInfo(jc, station) {
-	if (!jc) return;
-	const jcSlabRes = await frappe.call({
-		method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
-		args: { job_card: jc.name }
-	});
-	let slab = jcSlabRes.message;
-	// If no slab found for this specific Job Card, check if there's one coming from the previous stage
-	if (!slab && station.toLowerCase() === 'distribution') {
-		await createSlab(jc.production_line);
+	// If the slab has been checked out on a different line or the checked out slab is not the previous stage of the current stage, then ignore the event.
+	if (slab.line !== work_context.assigned_line || !station_reverse_map[station] || slab.status !== station_reverse_map[station]) {
 		return;
 	}
-	if (!slab) {
-		const r2 = await frappe.call({
-			method: 'erpnext.manufacturing.doctype.slab.api.get_slab_from_previous_stage',
-			args: {
-				job_card_name: jobCardNumber.value
-			}
-		});
-		if (r2.message) {
-			selectedSlab.value = r2.message;
-		}
-		else {
-			frappe.msgprint({
-				title: 'No Slab Found',
-				message: `No available slab found from the previous stage for this Work Order. Ensure the previous step is completed.`,
-				indicator: 'orange'
-			});
-		}
-	}
-	// Populate UI
-	slabCreated.value = true;
-	slabNumber.value = slab.serial_number || slab.name;
-	batchNo.value = slab.name || batchNo.value;
-	slabTemplate.value = slab.template || slabTemplate.value;
-	colour.value = slab.template || colour.value;
-	line.value = slab.line || jc.production_line;
 
-	frappe.show_alert(`✅ Slab ${slabNumber.value} @ ${station}`, 'green');
-}
+	checkForNextItem();
+});
+
 
 async function startOperation() {
 	const route = frappe.get_route();
@@ -288,14 +248,21 @@ async function startOperation() {
 		__('Start the process now?'),
 		async () => {
 			try {
-				await slabInfo(jobCardDoc.value, station);
-				await frappe.call({
+				const res = await frappe.call({
 					method: 'erpnext.manufacturing.page.operator_station.operator_station.start_process',
 					args: {
 						job_card: jobCardName.value,
-						process_name: station
+						process_name: station,
+						slab_template: slabTemplate.value,
+						slab_name: slabNumber.value,
 					}
 				});
+
+				if (res.message) {
+					colour.value = res.message.slab_template;
+					batchNo.value = res.message.slab_name?.split('-')[0] || '';
+					slabNumber.value = res.message.slab_name;
+				}
 
 				status.value = 'In Progress';
 				showStartButton.value = false;
@@ -309,15 +276,11 @@ async function startOperation() {
 				processTimerHandle.value = setInterval(() => {
 					processElapsed.value += 1;
 				}, 1000);
-				frappe.msgprint(__('Process started'));
 			}
 			catch (e) {
 				frappe.msgprint(__('Failed to start Job Card: {0}', [e.message || e]));
 			}
 		},
-		() => {
-			frappe.msgprint(__('Process was not started.'));
-		}
 	);
 }
 
@@ -331,14 +294,19 @@ async function finishOperation() {
 	}
 
 	try {
+		transferMaterials = station.toLowerCase() !== 'cooling';
+
 		const result = await frappe.call({
 			method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_process',
 			args: {
 				job_card: jobCardName.value,
-				process_name: station
+				process_name: station,
+				transfer_materials: transferMaterials,
 			},
 		});
+
 		status.value = 'Finished';
+		jobCardName.value = null;
 		processStarted.value = false;
 		processStartTime.value = null;
 		processElapsed.value = 0;
@@ -347,20 +315,14 @@ async function finishOperation() {
 		jobCardSubmitted.value = true;
 		preparedQty.value = result.message.job_card_qty;
 		stockEntryName.value = result.message.stock_entry;
-		bomQty.value = result.message.bom_qty || 0;
 		nextWorkOrder.value = result.message.next_work_order || '';
 		transferredQty.value = 0;
 		transferSuccess.value = false;
+		slabNumber.value = null;
+		batchNo.value = null;
+		colour.value = null;
 
-		frappe.msgprint(result.message.message);
-		frappe.show_alert({
-			message: __('Work Order also Completed!'),
-			indicator: 'green'
-		});
-		transferToFGWarehouse();
-		//move slab to next station
-		// Check for next item immediately
-		checkForNextItem();
+		await checkForNextItem();
 	} catch (error) {
 		const errorMsg = error.message || (error._server_messages?.[0]?.message) || JSON.stringify(error);
 		frappe.msgprint({
@@ -368,43 +330,6 @@ async function finishOperation() {
 			indicator: 'red',
 			message: `Failed to complete Job Card`
 		});
-	}
-}
-
-async function transferToFGWarehouse() {
-	try {
-		const jc = await frappe.db.get_doc('Job Card', jobCardName.value);
-		const workOrder = jc.work_order;
-
-		if (!workOrder) {
-			frappe.msgprint(__('Work Order required from Job Card'));
-			return;
-		}
-
-		const result = await frappe.call({
-			method: 'erpnext.manufacturing.doctype.operation.api.transfer_to_next_process',
-			args: {
-				current_work_order: workOrder,
-				qty: bomQty.value
-			},
-			freeze: true,
-			freeze_message: __('Transferring to Distribution')
-		});
-
-		transferredQty.value += result.message.qty_transferred;
-		frappe.msgprint({
-			title: __('Transfer Complete'),
-			message: result.message.message,
-			indicator: 'green'
-		});
-
-		frappe.show_alert({
-			message: `Next: ${result.message.next_work_order}`,
-			indicator: 'blue'
-		});
-	}
-	catch (error) {
-		frappe.msgprint(__('Transfer failed: {0}', [error.message]));
 	}
 }
 
@@ -463,20 +388,6 @@ function submitIssue() {
 	frappe.msgprint(__('Alarm submitted'));
 }
 
-async function getJobCardsList() {
-	const route = frappe.get_route();
-	const station = route[1] || '';
-	const result = await frappe.call({
-		method: 'erpnext.manufacturing.doctype.operation.api.get_recent_job_card',
-		args: {
-			operation: station
-		}
-	});
-
-	jobCardNumber.value = result.message.name;
-	return jobCardNumber.value;
-}
-
 function statusStyle() {
 	if (status.value === 'In Progress') {
 		return 'background:#d4f8d4;color:#137a13;padding:.5rem';
@@ -497,11 +408,10 @@ function statusStyle() {
 </script>
 <template>
 	<div class="page-card p-0 d-flex h-100 w-100 justify-content-center">
-		<!-- Queue Sidebar Removed -->
 		<div class="operator-station page-card d-flex flex-column align-items-center flex-grow-1 p-4"
 			style="overflow-y: auto;">
 			<!-- Current Job Card -->
-			<div class="current-job-card mb-4 border border-dark w-50 rounded p-4" style="min-width: 650px;">
+			<div v-if="jobCardName" class="current-job-card mb-4 border border-dark w-50 rounded p-4" style="min-width: 650px;">
 				<div class="status text-center mb-2" style="font-size:1rem">
 					<span class="badge badge-pill" :style="statusStyle()">
 						{{ __(status) }}
@@ -509,8 +419,8 @@ function statusStyle() {
 				</div>
 
 				<!--<div class="text-center text-muted small">{{ __('SERIAL NUMBER') }}</div>-->
-				<h2 class="job-serial text-center font-weight-bold mb-2 p-3">
-					{{ batchNo }}
+				<h2 class="job-serial text-center font-weight-bold mb-0 p-3">
+					{{ slabNumber || batchNo }}
 				</h2>
 				<h3 class="job-serial text-center font-weight-bold mb-2 p-3">
 					{{ jobCardName }}
@@ -518,7 +428,7 @@ function statusStyle() {
 
 				<!-- <div class="text-center text-muted small mb-1">{{ __('Colour') }}</div> -->
 				<div class="d-flex justify-content-center align-items-center mb-3">
-					<span class="job-color bold mr-2" style="font-size:1rem">{{ colour }}</span>
+					<span class="job-color bold mr-2" style="font-size:1rem">{{ colour || slabTemplate }}</span>
 					<span class="color-swatch"
 						style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span>
 				</div>
@@ -548,9 +458,17 @@ function statusStyle() {
 					</button>
 				</div>
 			</div>
+			<div v-else class="empty-state mb-4 border border-secondary rounded p-5 d-flex flex-column align-items-center justify-content-center" 
+				style="min-width: 650px; background-color: var(--fg-color); border-style: dashed !important;">
+				<div class="mb-3 text-muted" style="opacity: 0.5;">
+					<span class="fa fa-inbox" style="font-size: 4rem;"></span>
+				</div>
+				<h4 class="text-muted font-weight-bold">{{ __('No active job cards') }}</h4>
+				<p class="text-muted mb-0">{{ __('There are no active job cards to work on right now.') }}</p>
+			</div>
 
 			<!-- Raise Alarm -->
-			<div class="raise-alarm-box mb-4 w-50 border border-dark rounded p-4" style="min-width: 650px;">
+			<!-- <div class="raise-alarm-box mb-4 w-50 border border-dark rounded p-4" style="min-width: 650px;">
 				<div class="d-flex flex-column justify-content-between mb-1 py-3">
 					<div class="d-flex align-items-center">
 						<span class="fa fa-exclamation-triangle mr-2"
@@ -565,10 +483,10 @@ function statusStyle() {
 					<span class="fa fa-exclamation-triangle mr-1"></span>
 					{{ __('Report Issue to Mixer') }}
 				</button>
-			</div>
+			</div> -->
 
 			<!-- Downstream Alarms -->
-			<div class="downstream-alarms-box w-50 border border-dark rounded p-4" style="min-width: 650px;">
+			<!-- <div class="downstream-alarms-box w-50 border border-dark rounded p-4" style="min-width: 650px;">
 				<div class="d-flex justify-content-between align-items-center mb-2">
 					<div>
 						<span class="fa fa-bell mr-1"></span>
@@ -590,10 +508,10 @@ function statusStyle() {
 						<div class="small">{{ a.description }}</div>
 					</div>
 				</div>
-			</div>
+			</div> -->
 
 			<!-- Simple modal for Raise Alarm -->
-			<div v-if="issueDialogOpen" class="modal-backdrop fade show"></div>
+			<!-- <div v-if="issueDialogOpen" class="modal-backdrop fade show"></div>
 			<div v-if="issueDialogOpen" class="modal d-block" tabindex="-1">
 				<div class="modal-dialog">
 					<div class="modal-content">
@@ -632,7 +550,7 @@ function statusStyle() {
 						</div>
 					</div>
 				</div>
-			</div>
+			</div> -->
 		</div>
 	</div>
 

@@ -1,11 +1,11 @@
-from datetime import date, datetime
-from typing import Any
+from datetime import date
 
 from frappe import frappe
 from frappe.query_builder.functions import Count
 
 from erpnext.manufacturing.doctype.slab.slab import ALLOWED_STAGES, Slab
 from erpnext.manufacturing.doctype.slab_history.slab_history import SlabHistory
+from erpnext.setup.doctype.mahi_granites_settings.mahi_granites_settings import MahiGranitesSettings
 
 
 @frappe.whitelist()
@@ -32,13 +32,7 @@ def create_slab(line: str, type: str, job_card_number: str | None = None):
 	slab_history.job_card_number = job_card_number
 	new_slab.slab_history.append(slab_history)
 
-	# TODO: Remove ignore_permissions after testing.
 	new_slab.save(ignore_permissions=True)
-	jc = frappe.get_doc("Job Card", job_card_number)
-	jc.slab = new_slab.name
-	jc.slab_template = new_slab.template
-	jc.save(ignore_permissions=True)
-	jc.reload()
 	return new_slab
 
 
@@ -58,7 +52,7 @@ def checkout_slab(slab_number: str):
 
 	if slab.status == "Quarantine":
 		# Get Mahi Granites Settings to check if the slab is quarantined prematurely.
-		settings = frappe.get_single("Mahi Granites Settings")
+		settings: MahiGranitesSettings = frappe.get_single("Mahi Granites Settings")
 		if (
 			settings.min_quarantine_hours
 			> (last_history.out_time - last_history.in_time).total_seconds() / 3600
@@ -67,10 +61,9 @@ def checkout_slab(slab_number: str):
 
 	slab.is_cur_stage_complete = True
 
-	# TODO: Remove ignore_permissions after testing.
 	slab.save(ignore_permissions=True)
 
-	frappe.publish_realtime("slab_checkout", slab, user=frappe.session.user)
+	frappe.publish_realtime("slab_checkout", slab)
 
 
 @frappe.whitelist()
@@ -110,6 +103,7 @@ def move_slab_to(
 
 	slab.status = next_stage  # pyright: ignore[reportAttributeAccessIssue]
 	slab.is_cur_stage_complete = False
+	slab.current_job_card = job_card_number or slab.current_job_card
 	slab.status = ALLOWED_STAGES[next_stage_index]  # pyright: ignore[reportAttributeAccessIssue]
 	# if next_stage.lower() != "trimming":
 	# 	next_job_card_info = find_next_job_card(job_card_number or slab.slab_history[-1].job_card_number)
@@ -123,9 +117,8 @@ def move_slab_to(
 	slab_history.job_card_number = job_card_number
 	slab.slab_history.append(slab_history)
 
-	# TODO: Remove ignore_permissions after testing.
 	slab.save(ignore_permissions=True)
-	frappe.publish_realtime("slab_move", slab, user=frappe.session.user)
+	frappe.publish_realtime("slab_move", slab)
 
 
 @frappe.whitelist()
@@ -245,165 +238,5 @@ def _get_slab_number():
 
 	month_start = f"{curr_year}-{curr_month:02d}-01"
 
-	slab_count = frappe.db.count("Slab", filters={"created_on": [">=", month_start]}) + 1
+	slab_count = frappe.db.count("Slab", filters={"created_on": [">=", month_start]}) + 20
 	return slab_count
-
-
-@frappe.whitelist()
-def get_all_existing_slabs(stage):
-	slabs = frappe.get_all(
-		"Slab",
-		filters={
-			"status": stage,
-			"docstatus": 0,
-		},
-		fields=["name", "batch_number", "line", "template", "created_on", "status", "serial_number"],
-		order_by="created_on desc",
-	)
-	return slabs
-
-
-@frappe.whitelist()
-def get_slab_for_job_card(job_card):
-	slab_info = frappe.get_value(
-		"Slab",
-		{"current_job_card": job_card, "docstatus": 0},
-		["name", "serial_number", "batch_number", "template", "line", "status"],
-		as_dict=1,
-	)
-	if slab_info:
-		jc = frappe.get_doc("Job Card", job_card)
-		jc.slab = slab_info.name
-		jc.save(ignore_permissions=True)
-		jc.reload()
-	return slab_info
-
-
-@frappe.whitelist()
-def get_slab_from_previous_stage(job_card_name):
-	current_jc = frappe.get_doc("Job Card", job_card_name)
-	current_wo = current_jc.work_order
-
-	wo = frappe.get_doc("Work Order", current_wo)
-	production_plan = wo.production_plan
-	reverse_process_mapping = {
-		"pressed slab": "distribution",
-		"heated slab": "pressed slab",
-		"cooled slab": "heated slab",
-		"trimmed slab": "cooled slab",
-		"calibrated slab": "trimmed slab",
-		"polished slab": "calibrated slab",
-		"inspected slab": "polished slab",
-	}
-
-	current_process = (
-		wo.production_item.rsplit("-", 1)[-1].strip().lower() if "-" in wo.production_item else ""
-	)
-	previous_process = reverse_process_mapping.get(current_process)
-
-	if not previous_process:
-		frappe.msgprint(f"No previous process found before '{current_process}'")
-		return None
-	previous_wo = frappe.db.get_value(
-		"Work Order",
-		{
-			"production_plan": production_plan,
-			"production_item": ["like", f"%{previous_process}%"],
-			"docstatus": ["<", 2],
-		},
-		"name",
-	)
-
-	if not previous_wo:
-		frappe.msgprint(
-			f"Previous WO for '{previous_process}' not found in Production Plan {production_plan}"
-		)
-		return None
-
-	frappe.msgprint(
-		f"Current WO: {current_wo} ({current_process}) → Previous WO: {previous_wo} ({previous_process})"
-	)
-	previous_jcs = frappe.get_all(
-		"Job Card", filters={"work_order": previous_wo, "docstatus": ["!=", 2]}, fields=["name"]
-	)
-
-	if not previous_jcs:
-		frappe.msgprint(f"No Job Cards found in previous WO: {previous_wo}")
-		return None
-
-	previous_jc_names = [d.name for d in previous_jcs]
-	slabs = frappe.get_all(
-		"Slab",
-		filters={
-			"current_job_card": ["in", previous_jc_names],
-			"status": previous_process.title(),
-			"docstatus": 0,
-		},
-		fields=["name", "serial_number", "batch_number", "template", "line", "status"],
-		order_by="creation desc",
-	)
-	# TODO - Update the nextstage title
-	return slabs[0] if slabs else None
-
-
-@frappe.whitelist()
-def find_next_job_card(current_job_card):
-	current_jc = frappe.get_doc("Job Card", current_job_card)
-	current_wo = frappe.get_doc("Work Order", current_jc.work_order)
-
-	process_mapping = {
-		"mixing": "distribution",
-		"distribution": "pressed slab",
-		"pressed slab": "heated slab",
-		"heated slab": "cooled slab",
-		"cooled slab": "trimmed slab",
-		"trimmed slab": "calibrated slab",
-		"calibrated slab": "polished slab",
-		"polished slab": "inspected slab",
-	}
-
-	if "-" not in current_wo.production_item:
-		frappe.throw("Unable to determine current process from Work Order")
-
-	current_process = current_wo.production_item.rsplit("-", 1)[-1].strip().lower()
-	next_process = process_mapping.get(current_process)
-
-	if not next_process:
-		frappe.throw(f"No next process found after {current_process}")
-
-	# Find next Work Order in same Production Plan
-	next_wo = frappe.db.get_value(
-		"Work Order",
-		{
-			"production_plan": current_wo.production_plan,
-			"production_item": ["like", f"%{next_process}%"],
-			"docstatus": ["<", 2],
-		},
-		"name",
-	)
-
-	if not next_wo:
-		frappe.throw(f"Next Work Order for '{next_process}' not found")
-
-	# Find first open Job Card for next Work Order
-	next_job_card = frappe.db.get_value(
-		"Job Card",
-		{
-			"work_order": next_wo,
-			"status": "Open",
-			"docstatus": 0,
-		},
-		"name",
-		order_by="creation asc",
-	)
-
-	if not next_job_card:
-		frappe.throw("No open Job Card available for next process")
-
-	return {
-		"current_job_card": current_jc.name,
-		"current_process": current_process,
-		"next_process": next_process,
-		"next_work_order": next_wo,
-		"next_job_card": next_job_card,
-	}

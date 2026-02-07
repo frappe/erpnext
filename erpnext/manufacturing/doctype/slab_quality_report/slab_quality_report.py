@@ -22,7 +22,7 @@ class SlabQualityReport(Document):
 		date: DF.Date
 		fs: DF.Data | None
 		grade: DF.Link
-		job_card: DF.Data
+		job_card: DF.Link
 		paper_deep_back: DF.Data | None
 		paper_deep_front: DF.Data | None
 		remarks: DF.Text | None

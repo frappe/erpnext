@@ -12,7 +12,8 @@
   "total_time_in_minutes",
   "job_card_number",
   "oven_params",
-  "preliminary_qc"
+  "preliminary_qc",
+  "quality_report_name"
  ],
  "fields": [
   {
@@ -67,14 +68,22 @@
    "fieldname": "preliminary_qc",
    "fieldtype": "Link",
    "label": "Preliminary Quality Check",
-   "options": "Preliminary Quality Check"
+   "options": "Preliminary Quality Check",
+   "read_only": 1
+  },
+  {
+   "fieldname": "quality_report_name",
+   "fieldtype": "Link",
+   "label": "Slab Quality Report",
+   "options": "Slab Quality Report",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-06 17:12:03.368126",
+ "modified": "2026-02-06 17:00:15.788200",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab History",

@@ -22,6 +22,7 @@ class SlabHistory(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		preliminary_qc: DF.Link | None
+		quality_report_name: DF.Link | None
 		station: DF.Data
 		total_time_in_minutes: DF.Float
 	# end: auto-generated types
