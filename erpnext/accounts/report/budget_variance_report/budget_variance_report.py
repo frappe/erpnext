@@ -3,7 +3,10 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder import Field
+from frappe.query_builder import functions as fn
 from frappe.utils import add_months, flt, formatdate
+from pypika.terms import ExistsCriterion
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.utils import get_fiscal_year
@@ -39,39 +42,31 @@ def validate_filters(filters):
 
 
 def get_budget_records(filters, dimensions):
-	budget_against_field = frappe.scrub(filters["budget_against"])
+	Budget = frappe.qb.DocType("Budget")
 
-	return frappe.db.sql(
-		f"""
-		SELECT
-			b.name,
-			b.account,
-			b.{budget_against_field} AS dimension,
-			b.budget_amount,
-			b.from_fiscal_year,
-			b.to_fiscal_year,
-			b.budget_start_date,
-			b.budget_end_date
-		FROM
-			`tabBudget` b
-		WHERE
-			b.company = %s
-			AND b.docstatus = 1
-			AND b.budget_against = %s
-			AND b.{budget_against_field} IN ({", ".join(["%s"] * len(dimensions))})
-			AND (
-				b.from_fiscal_year <= %s
-				AND b.to_fiscal_year >= %s
+	return (
+		frappe.qb.from_(Budget)
+		.select(
+			Budget.name,
+			Budget.account,
+			Field(filters.get("budget_against_fieldname")).as_("dimension"),
+			Budget.budget_amount,
+			Budget.from_fiscal_year,
+			Budget.to_fiscal_year,
+			Budget.budget_start_date,
+			Budget.budget_end_date,
+		)
+		.where(
+			(Budget.company == filters.company)
+			& (Budget.docstatus == 1)
+			& (Budget.budget_against == filters.budget_against)
+			& (Field(filters.get("budget_against_fieldname")).isin(dimensions))
+			& (
+				(Budget.from_fiscal_year <= filters.to_fiscal_year)
+				& (Budget.to_fiscal_year >= filters.from_fiscal_year)
 			)
-		""",
-		(
-			filters.company,
-			filters.budget_against,
-			*dimensions,
-			filters.to_fiscal_year,
-			filters.from_fiscal_year,
-		),
-		as_dict=True,
+		)
+		.run(as_dict=1)
 	)
 
 
@@ -119,50 +114,49 @@ def build_budget_map(budget_records, filters):
 
 
 def get_actual_transactions(dimension_name, filters):
-	budget_against = frappe.scrub(filters.get("budget_against"))
-	cost_center_filter = ""
+	GLEntry = frappe.qb.DocType("GL Entry")
+	Budget = frappe.qb.DocType("Budget")
+	BudgetAgainst = frappe.qb.DocType(filters.get("budget_against"))
+
+	budget_against_subquery = (
+		frappe.qb.from_(BudgetAgainst)
+		.select(BudgetAgainst.name)
+		.where(BudgetAgainst.name == Field(filters.get("budget_against_fieldname"), table=GLEntry))
+	)
 
 	if filters.get("budget_against") == "Cost Center" and dimension_name:
 		cc_lft, cc_rgt = frappe.db.get_value("Cost Center", dimension_name, ["lft", "rgt"])
-		cost_center_filter = f"""
-			and lft >= "{cc_lft}"
-			and rgt <= "{cc_rgt}"
-		"""
+		budget_against_subquery = budget_against_subquery.where(
+			(BudgetAgainst.lft >= cc_lft) & (BudgetAgainst.rgt <= cc_rgt)
+		)
 
-	actual_transactions = frappe.db.sql(
-		f"""
-			select
-				gl.account,
-				gl.debit,
-				gl.credit,
-				gl.fiscal_year,
-				MONTHNAME(gl.posting_date) as month_name,
-				b.{budget_against} as budget_against
-			from
-				`tabGL Entry` gl,
-				`tabBudget` b
-			where
-				b.docstatus = 1
-				and b.account=gl.account
-				and b.{budget_against} = gl.{budget_against}
-				and gl.fiscal_year between %s and %s
-				and gl.is_cancelled = 0
-				and b.{budget_against} = %s
-				and exists(
-					select
-						name
-					from
-						`tab{filters.budget_against}`
-					where
-						name = gl.{budget_against}
-						{cost_center_filter}
-				)
-				group by
-					gl.name
-				order by gl.fiscal_year
-		""",
-		(filters.from_fiscal_year, filters.to_fiscal_year, dimension_name),
-		as_dict=1,
+	actual_transactions = (
+		frappe.qb.from_(GLEntry)
+		.join(Budget)
+		.on(GLEntry.account == Budget.account)
+		.select(
+			GLEntry.account,
+			GLEntry.debit,
+			GLEntry.credit,
+			GLEntry.fiscal_year,
+			fn.ToChar(GLEntry.posting_date, "Month").as_("month_name"),
+			Field(filters.get("budget_against_fieldname"), table=Budget).as_("budget_against"),
+		)
+		.where(
+			(Budget.docstatus == 1)
+			& (Budget.account == GLEntry.account)
+			& (
+				Field(filters.get("budget_against_fieldname"), table=Budget)
+				== Field(filters.get("budget_against_fieldname"), table=GLEntry)
+			)
+			& (GLEntry.fiscal_year.between(filters.from_fiscal_year, filters.to_fiscal_year))
+			& (GLEntry.is_cancelled == 0)
+			& (Field(filters.get("budget_against_fieldname"), table=Budget) == dimension_name)
+			& (ExistsCriterion(budget_against_subquery))
+		)
+		.groupby(GLEntry.name)
+		.orderby(GLEntry.fiscal_year)
+		.run(as_dict=1)
 	)
 
 	actual_transactions_map = {}
@@ -173,15 +167,18 @@ def get_actual_transactions(dimension_name, filters):
 
 
 def get_budget_distributions(budget):
-	return frappe.db.sql(
-		"""
-			SELECT start_date, end_date, amount, percent
-			FROM `tabBudget Distribution`
-			WHERE parent = %s
-			ORDER BY start_date ASC
-		  """,
-		(budget.name,),
-		as_dict=True,
+	BudgetDistribution = frappe.qb.DocType("Budget Distribution")
+	return (
+		frappe.qb.from_(BudgetDistribution)
+		.select(
+			BudgetDistribution.start_date,
+			BudgetDistribution.end_date,
+			BudgetDistribution.amount,
+			BudgetDistribution.percent,
+		)
+		.where(BudgetDistribution.parent == budget.name)
+		.orderby(BudgetDistribution.start_date)
+		.run(as_dict=1)
 	)
 
 
@@ -367,59 +364,45 @@ def get_columns(filters):
 
 
 def get_fiscal_years(filters):
-	fiscal_year = frappe.db.sql(
-		"""
-			select
-				name
-			from
-				`tabFiscal Year`
-			where
-				name between %(from_fiscal_year)s and %(to_fiscal_year)s
-		""",
-		{"from_fiscal_year": filters["from_fiscal_year"], "to_fiscal_year": filters["to_fiscal_year"]},
+	FiscalYear = frappe.qb.DocType("Fiscal Year")
+
+	query = (
+		frappe.qb.from_(FiscalYear)
+		.select(FiscalYear.name)
+		.where(FiscalYear.name.between(filters.get("from_fiscal_year"), filters.get("to_fiscal_year")))
 	)
 
-	return fiscal_year
+	return query.run()
 
 
 def get_budget_dimensions(filters):
-	order_by = ""
-	if filters.get("budget_against") == "Cost Center":
-		order_by = "order by lft"
+	BudgetDimension = frappe.qb.DocType(filters.get("budget_against"))
+
+	query = frappe.qb.from_(BudgetDimension).select(BudgetDimension.name)
 
 	if filters.get("budget_against") in ["Cost Center", "Project"]:
-		return frappe.db.sql_list(
-			"""
-				select
-					name
-				from
-					`tab{tab}`
-				where
-					company = %s
-				{order_by}
-			""".format(tab=filters.get("budget_against"), order_by=order_by),
-			filters.get("company"),
-		)
-	else:
-		return frappe.db.sql_list(
-			"""
-				select
-					name
-				from
-					`tab{tab}`
-			""".format(tab=filters.get("budget_against"))
-		)  # nosec
+		query = query.where(BudgetDimension.company == filters.get("company"))
+
+	if filters.get("budget_against") == "Cost Center":
+		query = query.orderby(BudgetDimension.lft)
+
+	return query.run(pluck=True)
 
 
 def validate_budget_dimensions(filters):
-	dimensions = [d.get("document_type") for d in get_dimensions(with_cost_center_and_project=True)[0]]
-	if filters.get("budget_against") and filters.get("budget_against") not in dimensions:
+	dimensions = get_dimensions(with_cost_center_and_project=True)[0]
+	dimensions_doctype = [d.get("document_type") for d in dimensions]
+	if filters.get("budget_against") and filters.get("budget_against") not in dimensions_doctype:
 		frappe.throw(
 			title=_("Invalid Accounting Dimension"),
 			msg=_("{0} is not a valid Accounting Dimension.").format(
 				frappe.bold(filters.get("budget_against"))
 			),
 		)
+	filters["budget_against_fieldname"] = next(
+		(d.get("fieldname") for d in dimensions if d.get("document_type") == filters.get("budget_against")),
+		None,
+	)
 
 
 def build_comparison_chart_data(filters, columns, data):
