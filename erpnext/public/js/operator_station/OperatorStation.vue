@@ -446,13 +446,13 @@ function statusStyle() {
 					</div>
 
 					<div class="text-center mb-2" v-if="processStarted">
-						<button class="btn btn-info mr-2" @click="finishOperation">
+						<button class="btn btn-info py-3 px-4 mr-5" @click="finishOperation">
 							<span class="fa fa-check-square-o mr-1"></span>{{ __('Finish Job') }}
 						</button>
-						<button class="btn btn-warning mr-2" @click="haltJob">
+						<!-- <button class="btn btn-warning py-3 px-4 mr-5" @click="haltJob">
 							<span class="fa fa-pause-circle-o mr-1"></span>{{ __('Halt Job') }}
-						</button>
-						<button class="btn btn-danger" @click="discardJob">
+						</button> -->
+						<button class="btn btn-danger py-3 px-4" @click="discardJob">
 							<span class="fa fa-trash-o mr-1"></span>{{ __('Discard') }}
 						</button>
 					</div>
