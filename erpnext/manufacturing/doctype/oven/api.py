@@ -122,7 +122,7 @@ def unload_slab_from_oven(rack_name: str, slab_name: str, slab_template: str, va
 		if op.job_card:
 			finish_process(op.job_card, "Heating", should_stop_machine=False)
 			# Check if any of the racks in the oven are in use
-			oven: Oven = frappe.get_doc("Oven", rack.oven)
+			oven: Oven = frappe.get_doc("Oven", rack.parent)
 
 			# Stop the oven only if all the racks are idle.
 			is_in_use = False

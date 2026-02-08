@@ -278,7 +278,7 @@ def get_next_work_item(process, line="", include_wip = True):
 
 def get_top_job_card_for_process(process, line="", include_wip = True):
 	job_cards = get_open_job_cards(process, line, include_wip)
-	return job_cards[-1] if job_cards else None # TODO: Replace -1 with 0 EVERYWHERE
+	return job_cards[0] if job_cards else None
 
 
 def update_slab_number_on_job_card(job_card_name, slab_name, slab_template):

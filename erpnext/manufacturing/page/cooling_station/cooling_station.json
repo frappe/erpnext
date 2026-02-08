@@ -1,0 +1,19 @@
+{
+ "content": null,
+ "creation": "2026-02-09 01:25:00.000000",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-02-09 01:25:00.000000",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "cooling-station",
+ "owner": "Administrator",
+ "page_name": "cooling-station",
+ "roles": [],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 1,
+ "title": "Cooling Station"
+}

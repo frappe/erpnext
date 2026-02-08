@@ -148,7 +148,7 @@ def get_recent_job_card(operation):
 
 
 @frappe.whitelist()
-def get_open_job_cards(process, line=None, include_wip = True):
+def get_open_job_cards(process, line=None, include_wip = True, include_material_transferred = True):
 	# employee_id = frappe.db.get_value("Employee", {"user_id": frappe.session.user})
 	if process == "Mixing":
 		filters = {
@@ -164,7 +164,10 @@ def get_open_job_cards(process, line=None, include_wip = True):
 		else:
 			ws_query = ["like", f"%{process}%"]
 
-		in_query = ["Material Transferred"]
+		in_query = []
+
+		if include_material_transferred:
+			in_query.append("Material Transferred")
 
 		if include_wip:
 			in_query.append("Work In Progress")
@@ -175,11 +178,14 @@ def get_open_job_cards(process, line=None, include_wip = True):
 			"workstation": ws_query,
 		}
 
+	if line:
+		filters["production_line"] = line
+
 	job_cards = frappe.get_all(
 		"Job Card",
 		# limit=1,
 		filters=filters,
-		fields=["name", "work_order", "status", "production_item", "slab", "slab_template", "creation"],
+		fields=["name", "work_order", "status", "production_item", "slab", "slab_template", "started_time", "creation"],
 		order_by="modified asc",
 		ignore_permissions=True
 	)
