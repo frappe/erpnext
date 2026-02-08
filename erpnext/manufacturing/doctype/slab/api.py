@@ -238,5 +238,5 @@ def _get_slab_number():
 
 	month_start = f"{curr_year}-{curr_month:02d}-01"
 
-	slab_count = frappe.db.count("Slab", filters={"created_on": [">=", month_start]}) + 20
+	slab_count = frappe.db.count("Slab", filters={"created_on": [">=", month_start]}) + 1
 	return slab_count
