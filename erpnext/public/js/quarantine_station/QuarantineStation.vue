@@ -22,7 +22,7 @@ const fetchWorkContext = async () => {
 
 const selectedSlab = ref(null);
 
-const get_slabs_ready_for_quarantine = async () => {
+const get_slabs_ready_for_quarantine = async (play_ding = false) => {
     // Call API to get slabs ready for quarantine
     const r = await frappe.call({
         method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
@@ -31,8 +31,13 @@ const get_slabs_ready_for_quarantine = async () => {
             next_stage: "Quarantine",
         }
     });
-    if (r.message && r.message[0]) {
+
+    if (r.message && r.message[0] && !selectSlab.value) {
         selectSlab(r.message[0])
+
+        if (play_ding) {
+            erpnext.utils.play_ding("new_slab");
+        }
     }
 };
 
@@ -82,7 +87,7 @@ frappe.realtime.on('slab_checkout', async (slab) => {
     }
 
     if (!selectedSlab.value) {
-        await get_slabs_ready_for_quarantine();
+        await get_slabs_ready_for_quarantine(true);
     }
 
     // TODO: Use this if a queue is intelligently implemented on the frontend.
@@ -117,6 +122,7 @@ const submitQuarantine = () => {
                             message: __('Quarantine check submitted successfully'),
                             indicator: 'green'
                         });
+                        erpnext.utils.play_ding("submit");
                         // Reset or refresh logic here if needed
                         // For example, remove the slab from list or reset measurements
                         quarantineMeasurements.value = {
@@ -127,8 +133,9 @@ const submitQuarantine = () => {
                             label: '',
                             remarks: ''
                         };
+
                         selectedSlab.value = null;
-                        await get_slabs_ready_for_quarantine();
+                        await get_slabs_ready_for_quarantine(true);
                     }
                 }
             });
@@ -147,17 +154,23 @@ const submitQuarantine = () => {
         <div class="flex-fill pl-4 pb-5">
             <!-- TODO: Remove this if used within ERPNext context -->
             <!-- <h4 class="mb-4">{{ __('Quarantine Station') }}</h4>  -->
-            <div v-if="selectedSlab" class="d-flex align-items-center justify-content-between border rounded p-3 mb-4 mt-3" style="background-color: var(--control-bg-on-gray, #e2edff); border-color: var(--primary-color) !important;">
-                <div class="d-flex align-items-center">
-                    <span class="text-muted mr-3">{{ __('Current Slab') }}:</span>
-                    <div class="slab-thumbnail mr-3" style="width: 24px; height: 24px;"></div>
-                    <span class="font-weight-bold h5 mb-0 mr-2">{{ selectedSlab.name }}</span>
-                    <span class="text-muted">{{ selectedSlab.template }}</span>
+            <Transition name="pop-switch" mode="out-in">
+                <div v-if="selectedSlab" key="current-slab" class="d-flex align-items-center justify-content-between border rounded p-3 mb-4 mt-3" style="background-color: var(--control-bg-on-gray, #e2edff); border-color: var(--primary-color) !important;">
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted mr-3">{{ __('Current Slab') }}:</span>
+                        <div class="slab-thumbnail mr-3" style="width: 24px; height: 24px;"></div>
+                        <span class="font-weight-bold h5 mb-0 mr-2">{{ selectedSlab.name }}</span>
+                        <span class="text-muted">{{ selectedSlab.template }}</span>
+                    </div>
                 </div>
-            </div>
-            <div v-else class="d-flex align-items-center justify-content-center border rounded p-3 mb-4 mt-3 text-muted">
-                {{ __('No slabs are available for quarantine right now.') }}
-            </div>
+                <div v-else key="empty-state" class="empty-state mb-4 border border-secondary rounded p-5 d-flex flex-column align-items-center justify-content-center">
+                    <div class="mb-3 text-muted" style="opacity: 0.5;">
+                        <span class="fa fa-window-maximize" style="font-size: 4rem;"></span>
+                    </div>
+                    <h4 class="text-muted font-weight-bold">{{ __('No Slabs Available') }}</h4>
+                    <p class="text-muted mb-0">{{ __('There are no slabs are available for quarantine right now.') }}</p>
+                </div>
+            </Transition>
 
             <div v-if="selectedSlab" class="d-flex flex-column align-items-center">
                 <div class="measurement-card w-100 p-5 mb-4 d-flex flex-column align-items-center">
@@ -256,7 +269,9 @@ const submitQuarantine = () => {
 
 .empty-state {
     background-color: var(--fg-color);
-    border-color: var(--border-color) !important;
+    min-width: 650px;
+    border-style: dashed !important;
+    border-width: 2px !important;
 }
 
 .slab-container {
@@ -313,5 +328,19 @@ const submitQuarantine = () => {
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     border: 1px solid var(--border-color);
+}
+
+.pop-switch-enter-active {
+	transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pop-switch-leave-active {
+	transition: all 0.2s ease-in;
+}
+
+.pop-switch-enter-from,
+.pop-switch-leave-to {
+	opacity: 0;
+	transform: scale(0.9);
 }
 </style>

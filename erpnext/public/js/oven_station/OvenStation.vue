@@ -115,7 +115,7 @@ const refreshOvenData = async () => {
     }
 };
 
-const fetch_slab_for_job_card = async () => {
+const fetch_slab_for_job_card = async (play_ding = false) => {
     loadingSlab.value = true;
     try {
         const result = await frappe.call({
@@ -126,6 +126,10 @@ const fetch_slab_for_job_card = async () => {
                 include_wip: false
             }
         });
+
+        if (!selectedSlab.value && result.message?.slab && play_ding) {
+            erpnext.utils.play_ding("new_slab");
+        }
 
         selectedSlab.value = result.message?.slab;
         jobCardNumber.value = result.message?.job_card?.name;
@@ -214,8 +218,9 @@ async function confirmUnload() {
 
         if (res.message) {
             await refreshOvenData();
-            await fetch_slab_for_job_card();
+            await fetch_slab_for_job_card(true);
             frappe.show_alert({ message: __('Slab unloaded to the next process successfully'), indicator: 'green' });
+            erpnext.utils.play_ding("submit");
         }
     } catch (e) {
         console.error(e);
@@ -243,7 +248,7 @@ async function confirmLoad() {
     if (res && res.message) {
         frappe.show_alert({ message: __('Slab loaded and heating started'), indicator: 'green' });
         await refreshOvenData();
-        await fetch_slab_for_job_card();
+        await fetch_slab_for_job_card(true);
     }
 
     // remove slab from incoming list or clear selected if single Job Card
@@ -286,13 +291,13 @@ function editTemperatures() {
 }
 
 function rackClasses(rack) {
-    if (rack.state === 'Heating') return 'rack-card curing';
-    if (rack.state === 'Overheat') return 'rack-card overheat';
-    if (!rack.is_operational) return 'rack-card maintenance';
+    if (rack.state === 'Heating') return 'curing';
+    if (rack.state === 'Overheat') return 'overheat';
+    if (!rack.is_operational) return 'maintenance';
     
     // Idle state
-    if (!selectedSlab.value) return 'rack-card disabled empty';
-    return 'rack-card empty';
+    if (!selectedSlab.value) return 'disabled empty';
+    return 'empty';
 }
 
 // const oven = get_oven_details(work_context.assigned_station);
@@ -331,7 +336,7 @@ frappe.realtime.on('slab_checkout', async (slab) => {
 
     if (!selectedSlab.value) {
         await refreshOvenData();
-        await fetch_slab_for_job_card();
+        await fetch_slab_for_job_card(true);
     }
 });
 
@@ -383,20 +388,22 @@ frappe.realtime.on('slab_checkout', async (slab) => {
                 </div>
             </div>
 
-            <div v-if="selectedSlab" class="d-flex align-items-center justify-content-between border rounded p-3 mb-4 mt-3" style="background-color: var(--control-bg-on-gray, #e2edff); border-color: var(--primary-color) !important;">
-                <div class="d-flex align-items-center">
-                    <span class="text-muted mr-3">{{ __('Current Slab') }}:</span>
-                    <div class="slab-thumbnail mr-3" style="width: 24px; height: 24px;"></div>
-                    <span class="font-weight-bold h5 mb-0 mr-2">{{ selectedSlab.name }}</span>
-                    <span class="text-muted">{{ selectedSlab.template }}</span>
+            <Transition name="pop-switch" mode="out-in">
+                <div v-if="selectedSlab" key="current-slab" class="current-slab-container d-flex align-items-center justify-content-between border rounded p-3 mb-4 mt-3" style="background-color: var(--control-bg-on-gray, #e2edff); border-color: var(--primary-color) !important;">
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted mr-3">{{ __('Current Slab') }}:</span>
+                        <div class="slab-thumbnail mr-3" style="width: 24px; height: 24px;"></div>
+                        <span class="font-weight-bold h5 mb-0 mr-2">{{ selectedSlab.name }}</span>
+                        <span class="text-muted">{{ selectedSlab.template }}</span>
+                    </div>
                 </div>
-            </div>
-            <div v-else class="d-flex align-items-center justify-content-center border rounded p-3 mb-4 mt-3 text-muted">
-                {{ __('No slabs available for heating') }}
-            </div>
+                <div v-else key="no-slabs" class="no-slabs-message d-flex align-items-center justify-content-center border rounded p-3 mb-4 mt-3 text-muted">
+                    {{ __('No slabs available for heating') }}
+                </div>
+            </Transition>
 
             <div class="rack-grid d-flex flex-wrap" :class="selectedSlab ? 'pt-3' : 'pt-5'">
-                <div v-for="rack in racks" :key="rack.slot" :class="rackClasses(rack)" class="mb-3 mr-3 p-3 rounded"
+                <div v-for="rack in racks" :key="rack.slot" :class="rackClasses(rack)" class="rack-card mb-3 mr-3 p-3 rounded"
                     style="position: relative;"
                     @click="rack.state === 'Heating' || rack.state === 'Overheat' ? unload_slab_from_rack(rack) : loadIntoRack(rack)">
                     <div v-if="rack.state === 'Overheat'" class="warning-icon pulse-icon">
@@ -570,19 +577,19 @@ frappe.realtime.on('slab_checkout', async (slab) => {
 .rack-card.curing {
     border-style: solid;
     border-color: #28a745;
-    background: var(--success-50, #d4f8d4);
+    background: rgba(40, 167, 69, 0.15); /* Green tint */
 }
 
 .rack-card.overheat {
     border-style: solid;
     border-color: #dc3545;
-    background: var(--error-50, #f8d7da);
+    background: rgba(220, 53, 69, 0.15); /* Red tint */
 }
 
 .rack-card.maintenance {
     border-style: dashed;
     border-color: #6c757d;
-    background: var(--blue-50, #e2edff);
+    background: rgba(108, 117, 125, 0.15); /* Gray tint */
 }
 
 .rack-card.disabled {
@@ -741,5 +748,19 @@ frappe.realtime.on('slab_checkout', async (slab) => {
     font-size: 1.2rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border: 2px solid #e03636 !important
+}
+
+.pop-switch-enter-active {
+	transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pop-switch-leave-active {
+	transition: all 0.2s ease-in;
+}
+
+.pop-switch-enter-from,
+.pop-switch-leave-to {
+	opacity: 0;
+	transform: scale(0.9);
 }
 </style>

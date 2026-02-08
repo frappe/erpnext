@@ -17,7 +17,7 @@ def create_preliminary_quality_check(slab_name, slab_template, h_bend, v_bend, d
     doc.d2_bend = int(d2_bend)
     doc.depth = depth
     doc.remarks = remarks
-    doc.insert()
+    doc.insert(ignore_permissions=True)
 
     slab: Slab = frappe.get_doc("Slab", slab_name)
 
@@ -26,6 +26,6 @@ def create_preliminary_quality_check(slab_name, slab_template, h_bend, v_bend, d
         raise Exception("Slab is not in quarantine.")
 
     last_history_item.preliminary_qc = doc.name
-    slab.save()
+    slab.save(ignore_permissions=True)
 
     return doc

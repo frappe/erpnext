@@ -1300,3 +1300,12 @@ $.extend(erpnext.stock.utils, {
 		});
 	},
 });
+
+erpnext.utils.play_ding = function (sound_name) {
+	try {
+		frappe.utils.play_sound(sound_name);
+	} catch (error) {
+		console.log("Sound not found");
+	}
+};
+

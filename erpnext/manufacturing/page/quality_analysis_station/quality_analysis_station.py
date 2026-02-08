@@ -83,7 +83,7 @@ def _create_slab_quality_report(slab_name: str, report: str | dict, shift: str):
     doc.update(report)
     doc.shift = shift
 
-    doc.insert()
+    doc.insert(ignore_permissions=True)
     doc.submit()
 
     slab: Slab = frappe.get_doc("Slab", slab_name)
@@ -95,6 +95,6 @@ def _create_slab_quality_report(slab_name: str, report: str | dict, shift: str):
         raise Exception("Slab is not in quality check.")
 
     last_history_item.quality_report_name = doc.name
-    slab.save()
+    slab.save(ignore_permissions=True)
 
     return doc
