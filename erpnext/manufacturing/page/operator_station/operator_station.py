@@ -6,6 +6,7 @@ from erpnext.manufacturing.doctype.job_card.job_card import (
 	make_time_log,
 )
 from erpnext.manufacturing.doctype.operation.api import get_open_job_cards, transfer_to_next_process
+from erpnext.manufacturing.doctype.production_line.production_line import ProductionLine
 from erpnext.manufacturing.doctype.slab.api import checkout_slab, create_slab, get_slabs_for, move_slab_to
 from erpnext.manufacturing.doctype.work_order.work_order import (
 	WorkOrder,
@@ -13,6 +14,8 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 from erpnext.manufacturing.doctype.work_order.work_order import (
 	make_stock_entry as wo_make_stock_entry,
 )
+from erpnext.manufacturing.doctype.workstation.workstation import Workstation
+from erpnext.setup.doctype.employee.api import get_current_user_context
 
 
 @frappe.whitelist()
@@ -73,6 +76,8 @@ def start_process(job_card, slab_name="", slab_template = "", process_name="oper
 	jc.job_started = 1
 	jc.save(ignore_permissions=True)
 
+	start_machine(process_name, jc.production_line, None)
+
 	return {
 		"status": jc.status,
 		f"{process_name}_started": jc.job_started,
@@ -84,13 +89,16 @@ def start_process(job_card, slab_name="", slab_template = "", process_name="oper
 
 
 @frappe.whitelist()
-def finish_process(job_card, transfer_materials=True):
+def finish_process(job_card, process_name, transfer_materials=True, should_stop_machine=True):
 	"""Complete the Job Card when mixing is finished."""
 
 	if isinstance(transfer_materials, str):
 		transfer_materials = transfer_materials.lower() == "true"
 
-	jc = frappe.get_doc("Job Card", job_card)
+	if isinstance(should_stop_machine, str):
+		should_stop_machine = should_stop_machine.lower() == "true"
+
+	jc: JobCard = frappe.get_doc("Job Card", job_card)
 	job_card_qty = flt(jc.total_completed_qty or jc.for_quantity, 3)
 
 	args = {
@@ -119,7 +127,7 @@ def finish_process(job_card, transfer_materials=True):
 	jc.reload()
 
 	work_order = jc.work_order
-	wo = frappe.get_doc("Work Order", work_order)
+	wo: WorkOrder = frappe.get_doc("Work Order", work_order)
 	wo.material_transferred_for_manufacturing = job_card_qty
 	wo.flags.ignore_validate_update_after_submit = True
 	wo.save()
@@ -147,6 +155,9 @@ def finish_process(job_card, transfer_materials=True):
 
 	if transfer_materials:
 		transfer_to_next_process(work_order, job_card_qty)
+
+	if should_stop_machine:
+		stop_machine(process_name, jc.production_line, None)
 
 	return {
 		"status": wo_status,
@@ -204,6 +215,49 @@ def get_next_process_bom_qty(current_work_order):
 
 	return {"bom_qty": 0}
 
+
+def get_machine(station: str, line_name: str | None = None, machine_name: str | None = None) -> Workstation | None:
+	if not line_name or not machine_name:
+		# Get the machine and line from the work context.
+		work_context = get_current_user_context()
+		line_name = line_name or (work_context.get("production_line") if work_context else None)
+		machine_name = machine_name or (work_context.get("workstation_type") if work_context else None)
+
+	if machine_name:
+		return frappe.get_doc("Workstation", machine_name)
+
+	if not machine_name and station and line_name:
+		line: ProductionLine = frappe.get_doc("Production Line", line_name)  # pyright: ignore[reportAssignmentType]
+		# Get the machine from the station and line.
+
+		# Filters should be workstation_type like '%station%' and production_line = line.name or production_line = line.parent
+		return frappe.get_last_doc(
+			"Workstation",
+			filters={
+				"workstation_type": ["like", f"%{station}%"],
+				"production_line": ["in", [line.name, line.parent_line]],
+			},
+		)  # pyright: ignore[reportAssignmentType]
+
+	return None
+
+
+def start_machine(station: str, line_name: str | None, machine_name: str | None):
+	set_machine_status("Production", station, line_name, machine_name)
+
+
+def stop_machine(station: str, line_name: str | None, machine_name: str | None):
+	set_machine_status("Idle", station, line_name, machine_name)
+
+
+def set_machine_status(status: str, station: str, line_name: str | None, machine_name: str | None):
+	machine = get_machine(station, line_name, machine_name)
+	if not machine:
+		return
+
+	machine.status = status
+	machine.save(ignore_permissions=True)
+	machine.reload()
 
 
 @frappe.whitelist()

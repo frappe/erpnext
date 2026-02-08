@@ -1,9 +1,9 @@
 import json
-from datetime import datetime
 
 import frappe
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCard
+from erpnext.manufacturing.doctype.oven.oven import Oven
 from erpnext.manufacturing.doctype.oven_operation.oven_operation import OvenOperation
 from erpnext.manufacturing.doctype.oven_rack.oven_rack import OvenRack
 from erpnext.manufacturing.doctype.slab.slab import Slab
@@ -12,6 +12,7 @@ from erpnext.manufacturing.page.operator_station.operator_station import (
 	finish_process,
 	get_top_job_card_for_process,
 	start_process,
+	stop_machine,
 )
 
 
@@ -90,7 +91,7 @@ def unload_slab_from_oven(rack_name: str, slab_name: str, slab_template: str, va
 	if not op_name:
 		frappe.throw("No active operation found for this rack")
 
-	op = frappe.get_doc("Oven Operation", op_name)
+	op: OvenOperation = frappe.get_doc("Oven Operation", op_name)
 
 	now = frappe.utils.now_datetime()
 	op.out_time = now
@@ -104,7 +105,7 @@ def unload_slab_from_oven(rack_name: str, slab_name: str, slab_template: str, va
 		op.total_time = duration.total_seconds() / 60
 
 	# Reset Rack
-	rack = frappe.get_doc("Oven Rack", rack_name)
+	rack: OvenRack = frappe.get_doc("Oven Rack", rack_name)
 	rack.status = "Idle"
 	rack.current_slab = None
 	rack.current_slab_template = None
@@ -119,7 +120,19 @@ def unload_slab_from_oven(rack_name: str, slab_name: str, slab_template: str, va
 
 		# Complete the Job Card
 		if op.job_card:
-			finish_process(op.job_card)
+			finish_process(op.job_card, "Heating", should_stop_machine=False)
+			# Check if any of the racks in the oven are in use
+			oven: Oven = frappe.get_doc("Oven", rack.oven)
+
+			# Stop the oven only if all the racks are idle.
+			is_in_use = False
+			for rack in oven.racks:
+				if rack.status == "Heating":
+					is_in_use = True
+					break
+
+			if not is_in_use:
+				stop_machine("Heating", oven.line, None)
 
 		frappe.db.commit()
 

@@ -35,7 +35,7 @@ def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number:
         # 1. Create the slab quality report.
         _create_slab_quality_report(slab_number, report, shift)
         # 2. Finish the job card and checkout the slab.
-        finish_process(job_card, False)
+        finish_process(job_card, "Quality Check", False)
 
         frappe.db.commit()
 
@@ -78,7 +78,6 @@ def _create_slab_quality_report(slab_name: str, report: str | dict, shift: str):
     if isinstance(report, str):
         report = json.loads(report)
 
-    # finish_process(job_card, "Quality Analysis")
     doc:SlabQualityReport = frappe.new_doc("Slab Quality Report")
     doc.update(report)
     doc.shift = shift
