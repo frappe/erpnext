@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-02-01 09:43+0000\n"
-"PO-Revision-Date: 2026-02-05 06:49\n"
+"PO-Revision-Date: 2026-02-08 08:02\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Italian\n"
 "MIME-Version: 1.0\n"
@@ -2272,14 +2272,14 @@ msgstr "Domanda Reale"
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:254
 #: erpnext/projects/report/delayed_tasks_summary/delayed_tasks_summary.py:129
 msgid "Actual End Date"
-msgstr ""
+msgstr "Data di fine effettiva"
 
 #. Label of the actual_end_date (Date) field in DocType 'Project'
 #. Label of the act_end_date (Date) field in DocType 'Task'
 #: erpnext/projects/doctype/project/project.json
 #: erpnext/projects/doctype/task/task.json
 msgid "Actual End Date (via Timesheet)"
-msgstr ""
+msgstr "Data di fine effettiva (tramite foglio presenze)"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:225
 msgid "Actual End Date cannot be before Actual Start Date"
@@ -2424,7 +2424,7 @@ msgstr ""
 #: erpnext/templates/pages/task_info.html:94
 #: erpnext/templates/pages/task_info.html:96
 msgid "Add Comment"
-msgstr ""
+msgstr "Aggiungi commento"
 
 #. Label of the add_corrective_operation_cost_in_finished_good_valuation
 #. (Check) field in DocType 'Manufacturing Settings'
@@ -2481,11 +2481,11 @@ msgstr ""
 
 #: erpnext/projects/doctype/task/task_tree.js:42
 msgid "Add Multiple"
-msgstr ""
+msgstr "Aggiunta multipla"
 
 #: erpnext/projects/doctype/task/task_tree.js:49
 msgid "Add Multiple Tasks"
-msgstr ""
+msgstr "Aggiungi più task"
 
 #. Label of the add_deduct_tax (Select) field in DocType 'Advance Taxes and
 #. Charges'
@@ -5669,7 +5669,7 @@ msgstr ""
 #. Task'
 #: erpnext/assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 msgid "Assign to Name"
-msgstr ""
+msgstr "Assegna al nome"
 
 #. Label of the filters_section (Section Break) field in DocType 'Service Level
 #. Agreement'
@@ -7497,7 +7497,7 @@ msgstr ""
 #. Label of the start (Int) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
 msgid "Begin On (Days)"
-msgstr ""
+msgstr "Inizia il (giorni)"
 
 #. Option for the 'Generate Invoice At' (Select) field in DocType
 #. 'Subscription'
@@ -9350,7 +9350,7 @@ msgstr ""
 #. Maintenance Task'
 #: erpnext/assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 msgid "Certificate Required"
-msgstr ""
+msgstr "Certificato richiesto"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -9882,7 +9882,7 @@ msgstr ""
 #: erpnext/accounts/doctype/account_closing_balance/account_closing_balance.json
 #: erpnext/projects/doctype/task/task.json
 msgid "Closing Date"
-msgstr ""
+msgstr "Data di chiusura"
 
 #. Label of the closing_text (Text Editor) field in DocType 'Dunning'
 #. Label of the closing_text (Text Editor) field in DocType 'Dunning Letter
@@ -10498,7 +10498,7 @@ msgstr ""
 #: erpnext/support/report/issue_analytics/issue_analytics.js:8
 #: erpnext/support/report/issue_summary/issue_summary.js:8
 msgid "Company"
-msgstr ""
+msgstr "Azienda"
 
 #: erpnext/public/js/setup_wizard.js:36
 msgid "Company Abbreviation"
@@ -10778,16 +10778,16 @@ msgstr ""
 #. Label of the completed_by (Link) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
 msgid "Completed By"
-msgstr ""
+msgstr "Completato da"
 
 #. Label of the completed_on (Date) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
 msgid "Completed On"
-msgstr ""
+msgstr "Completato il"
 
 #: erpnext/projects/doctype/task/task.py:185
 msgid "Completed On cannot be greater than Today"
-msgstr ""
+msgstr "Completato il non può superare la data odierna"
 
 #: erpnext/manufacturing/dashboard_fixtures.py:76
 msgid "Completed Operation"
@@ -14663,7 +14663,7 @@ msgstr ""
 
 #: erpnext/projects/report/delayed_tasks_summary/delayed_tasks_summary.py:130
 msgid "Delay (In Days)"
-msgstr ""
+msgstr "Ritardo (in giorni)"
 
 #: erpnext/selling/report/sales_order_analysis/sales_order_analysis.py:322
 msgid "Delay (in Days)"
@@ -14698,7 +14698,7 @@ msgstr ""
 #: erpnext/projects/report/delayed_tasks_summary/delayed_tasks_summary.json
 #: erpnext/projects/workspace/projects/projects.json
 msgid "Delayed Tasks Summary"
-msgstr ""
+msgstr "Riepilogo dei task in ritardo"
 
 #. Label of the delete_linked_ledger_entries (Check) field in DocType 'Accounts
 #. Settings'
@@ -15123,7 +15123,7 @@ msgstr ""
 #. Name of a DocType
 #: erpnext/projects/doctype/dependent_task/dependent_task.json
 msgid "Dependent Task"
-msgstr ""
+msgstr "Task dipendente"
 
 #: erpnext/projects/doctype/task/task.py:178
 msgid "Dependent Task {0} is not a Template Task"
@@ -15132,12 +15132,12 @@ msgstr ""
 #. Label of the depends_on (Table) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
 msgid "Dependent Tasks"
-msgstr ""
+msgstr "Task dipendenti"
 
 #. Label of the depends_on_tasks (Code) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
 msgid "Depends on Tasks"
-msgstr ""
+msgstr "Dipende dal task"
 
 #. Label of the deposit (Currency) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
@@ -16572,7 +16572,7 @@ msgstr ""
 #. Label of the duration (Int) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
 msgid "Duration (Days)"
-msgstr ""
+msgstr "Durata (giorni)"
 
 #: erpnext/crm/report/lead_conversion_time/lead_conversion_time.py:66
 msgid "Duration in Days"
@@ -23896,7 +23896,7 @@ msgstr ""
 #. Label of the is_template (Check) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
 msgid "Is Template"
-msgstr ""
+msgstr "È un modello"
 
 #. Label of the is_transporter (Check) field in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
@@ -23948,7 +23948,7 @@ msgstr ""
 #: erpnext/support/web_form/issues/issues.json
 #: erpnext/support/workspace/support/support.json
 msgid "Issue"
-msgstr ""
+msgstr "Segnalazione"
 
 #. Name of a report
 #: erpnext/support/report/issue_analytics/issue_analytics.json
@@ -27017,7 +27017,7 @@ msgstr ""
 #: erpnext/assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 #: erpnext/stock/doctype/serial_no/serial_no.json
 msgid "Maintenance Status"
-msgstr ""
+msgstr "Stato manutenzione"
 
 #: erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py:59
 msgid "Maintenance Status has to be Cancelled or Completed to Submit"
@@ -27027,13 +27027,13 @@ msgstr ""
 #. Task'
 #: erpnext/assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 msgid "Maintenance Task"
-msgstr ""
+msgstr "Attività di manutenzione"
 
 #. Label of the asset_maintenance_tasks (Table) field in DocType 'Asset
 #. Maintenance'
 #: erpnext/assets/doctype/asset_maintenance/asset_maintenance.json
 msgid "Maintenance Tasks"
-msgstr ""
+msgstr "Attività di manutenzione"
 
 #. Label of the maintenance_team (Link) field in DocType 'Asset Maintenance'
 #: erpnext/assets/doctype/asset_maintenance/asset_maintenance.json
@@ -27071,7 +27071,7 @@ msgstr ""
 #: erpnext/assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 #: erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.json
 msgid "Maintenance Type"
-msgstr ""
+msgstr "Tipo di manutenzione"
 
 #. Label of a Link in the CRM Workspace
 #. Name of a DocType
@@ -29447,7 +29447,7 @@ msgstr ""
 #: erpnext/public/js/templates/crm_activities.html:8
 #: erpnext/public/js/utils/crm_activities.js:69
 msgid "New Task"
-msgstr ""
+msgstr "Nuovo task"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:206
 msgid "New Version"
@@ -29486,7 +29486,7 @@ msgstr ""
 
 #: erpnext/templates/pages/projects.html:37
 msgid "New task"
-msgstr ""
+msgstr "Nuovo task"
 
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.py:254
 msgid "New {0} pricing rules are created"
@@ -30640,11 +30640,11 @@ msgstr ""
 #: erpnext/public/js/templates/crm_activities.html:33
 #: erpnext/public/js/templates/crm_activities.html:92
 msgid "Open Task"
-msgstr ""
+msgstr "Apri task"
 
 #: erpnext/public/js/templates/crm_activities.html:21
 msgid "Open Tasks"
-msgstr ""
+msgstr "Apri task"
 
 #. Label of the todo_list (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -31623,7 +31623,7 @@ msgstr ""
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:30
 #: erpnext/templates/pages/task_info.html:75
 msgid "Overdue"
-msgstr ""
+msgstr "In ritardo"
 
 #. Label of the overdue_days (Data) field in DocType 'Overdue Payment'
 #: erpnext/accounts/doctype/overdue_payment/overdue_payment.json
@@ -32342,7 +32342,7 @@ msgstr ""
 #. Label of the parent_task (Link) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
 msgid "Parent Task"
-msgstr ""
+msgstr "Task principale"
 
 #: erpnext/projects/doctype/task/task.py:168
 msgid "Parent Task {0} is not a Template Task"
@@ -36962,7 +36962,7 @@ msgstr ""
 
 #: erpnext/config/projects.py:20
 msgid "Project activity / task."
-msgstr ""
+msgstr "Attività/task progetto."
 
 #: erpnext/config/projects.py:13
 msgid "Project master."
@@ -49470,7 +49470,7 @@ msgstr ""
 #. Name of a DocType
 #: erpnext/projects/doctype/task_depends_on/task_depends_on.json
 msgid "Task Depends On"
-msgstr ""
+msgstr "Il task dipende da"
 
 #. Label of the description (Text Editor) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
@@ -49490,12 +49490,12 @@ msgstr ""
 #. Name of a DocType
 #: erpnext/projects/doctype/task_type/task_type.json
 msgid "Task Type"
-msgstr ""
+msgstr "Tipo di task"
 
 #. Option for the '% Complete Method' (Select) field in DocType 'Project'
 #: erpnext/projects/doctype/project/project.json
 msgid "Task Weight"
-msgstr ""
+msgstr "Peso del task"
 
 #: erpnext/projects/doctype/project_template/project_template.py:41
 msgid "Task {0} depends on Task {1}. Please add Task {1} to the Tasks list."
@@ -55896,7 +55896,7 @@ msgstr ""
 #: erpnext/projects/web_form/tasks/tasks.json
 #: erpnext/templates/pages/task_info.html:73
 msgid "Working"
-msgstr ""
+msgstr "In corso"
 
 #. Label of the working_hours_section (Tab Break) field in DocType
 #. 'Workstation'
