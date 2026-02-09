@@ -1074,9 +1074,16 @@ class calculate_taxes_and_totals:
 	def calculate_write_off_amount(self):
 		if self.doc.get("write_off_outstanding_amount_automatically"):
 			# NOTE: outstanding_amount is based on company currency.
-			self.doc.write_off_amount = flt(
-				self.doc.outstanding_amount / self.doc.conversion_rate, self.doc.precision("write_off_amount")
-			)
+			if self.doc.party_account_currency == self.doc.currency:
+				self.doc.write_off_amount = flt(
+					self.doc.outstanding_amount, self.doc.precision("write_off_amount")
+				)
+			else:
+				self.doc.write_off_amount = flt(
+					self.doc.outstanding_amount / self.doc.conversion_rate,
+					self.doc.precision("write_off_amount"),
+				)
+
 			self.doc.base_write_off_amount = flt(
 				self.doc.outstanding_amount,
 				self.doc.precision("base_write_off_amount"),
