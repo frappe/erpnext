@@ -989,7 +989,7 @@ erpnext.utils.map_current_doc = function (opts) {
 	}
 
 	if (query_args.filters || query_args.query) {
-		opts.get_query = () => query_args;
+		opts.get_query = () => JSON.parse(JSON.stringify(query_args));
 	}
 
 	if (opts.source_doctype) {
