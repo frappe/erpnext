@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 
 const work_context = reactive({
     role: "Quality Analyst",
@@ -27,6 +27,20 @@ const isQAStarted = ref(false);
 const hourglassRotation = ref(0);
 const hourglassIcon = ref('fa-hourglass-3');
 let hourglassInterval = null;
+
+const productionDate = computed(() => {
+    if (!selectedSlab.value?.creation) return "";
+    
+    const dateStr = selectedSlab.value.creation.split(' ')[0];
+    const [year, month, day] = dateStr.split('-');
+    
+    const months = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+    
+    return `${day} ${months[parseInt(month) - 1]} ${year}`;
+});
 
 const form = reactive({
     // Basic Details (Auto-filled)
@@ -247,7 +261,7 @@ const startProcess = async () => {
                         <div class="slab-main-info">
                             <div class="slab-id h3 font-weight-bold mb-1">{{ selectedSlab.name }}</div>
                             <div class="slab-template text-muted" style="font-size: 1.1rem;">
-                                {{ selectedSlab.template.split('-')[0].trim() }}
+                                {{ selectedSlab.template }}
                             </div>
                         </div>
                         <div class="flex-fill"></div>
@@ -257,7 +271,7 @@ const startProcess = async () => {
                                     <span class="fa fa-calendar-o mr-2"></span>{{ __('Production Date') }}
                                 </div>
                                 <div class="meta-value h5 mb-0 font-weight-bold">
-                                    {{ __('07 Jan 2026') }}
+                                    {{ productionDate }}
                                 </div>
                             </div>
                             <div class="meta-box p-3 rounded">
@@ -303,11 +317,11 @@ const startProcess = async () => {
                         <h5 class="mb-4 border-bottom pb-2">{{ __('Quality Measurements') }}</h5>
                         <div class="row mb-4">
                             <div class="col-md-6 mb-3">
-                                <label class="small text-muted">{{ __('F.S.') }}</label>
+                                <label class="small text-muted">{{ __('Filler Spot') }}</label>
                                 <input type="text" v-model="form.fs" class="form-control">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="small text-muted">{{ __('Con') }}</label>
+                                <label class="small text-muted">{{ __('Contamination') }}</label>
                                 <input type="text" v-model="form.con" class="form-control">
                             </div>
                         </div>

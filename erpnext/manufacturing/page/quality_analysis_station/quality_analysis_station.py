@@ -3,6 +3,7 @@ import json
 import frappe
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCard
+from erpnext.manufacturing.doctype.operation.api import get_open_job_cards
 from erpnext.manufacturing.doctype.slab.api import get_slabs_for
 from erpnext.manufacturing.doctype.slab.slab import Slab
 from erpnext.manufacturing.doctype.slab_quality_report.slab_quality_report import SlabQualityReport
@@ -57,7 +58,9 @@ def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
 
     # Else, get the earliest open job card for the operation.
     if not job_card:
-        job_card = get_top_job_card_for_process("Quality Check", line, True)
+        job_cards = get_open_job_cards("Quality Check", line, True)
+        wip_job_cards = [jc for jc in job_cards if jc.status == "Work In Progress"]
+        job_card = wip_job_cards[0] if wip_job_cards else job_cards[0] if job_cards else None
 
     slab = None
     if job_card and job_card.slab:
