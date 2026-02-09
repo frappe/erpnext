@@ -349,19 +349,19 @@ frappe.ui.form.on("Job Card", {
 			},
 		];
 
-		if (frm.doc.sub_operations?.length) {
+		let pending_sub_operations = (frm.doc.sub_operations || []).filter(
+			(d) => d.status === "Pending"
+		);
+		if (pending_sub_operations.length) {
 			fields.push({
 				fieldtype: "Link",
 				label: __("Sub Operation"),
 				fieldname: "sub_operation",
 				options: "Operation",
 				get_query() {
-					let non_completed_operations = frm.doc.sub_operations.filter(
-						(d) => d.status === "Pending"
-					);
 					return {
 						filters: {
-							name: ["in", non_completed_operations.map((d) => d.sub_operation)],
+							name: ["in", pending_sub_operations.map((d) => d.sub_operation)],
 						},
 					};
 				},
