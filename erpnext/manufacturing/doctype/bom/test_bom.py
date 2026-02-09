@@ -805,7 +805,7 @@ class TestBOM(IntegrationTestCase):
 		bom.buying_price_list = "_Test Price List"
 		bom.set_rate_of_sub_assembly_item_based_on_bom = 0
 		bom.items[0].uom = "Gram"
-		bom.items[0].conversion_factor = 0.001
+		bom.items[0].conversion_factor = 1.0
 		bom.save()
 		bom.update_cost(update_hour_rate=False)
 

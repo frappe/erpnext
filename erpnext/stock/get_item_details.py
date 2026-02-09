@@ -1216,7 +1216,10 @@ def get_price_list_rate_for(ctx: ItemDetailsCtx, item_code):
 				fields=["uom", "conversion_factor"]
 			)
 			
+			already_tried = {ctx.get("uom"), ctx.get("stock_uom")}
 			for uom_conversion in uom_conversions:
+				if uom_conversion.uom in already_tried:
+					continue
 				pctx.uom = uom_conversion.uom
 				price_with_alt_uom = get_item_price(pctx, item_code, ignore_party=ctx.get("ignore_party"))
 				if price_with_alt_uom:
@@ -1238,9 +1241,9 @@ def get_price_list_rate_for(ctx: ItemDetailsCtx, item_code):
 				requested_uom_to_stock = get_conversion_factor(item_code, requested_uom).get("conversion_factor", 1)
 				if price_uom_to_stock and requested_uom_to_stock:
 					conversion_ratio = requested_uom_to_stock / price_uom_to_stock
-					return flt(item_price_data[0].price_list_rate * conversion_ratio)
+					return flt(item_price_data[0].price_list_rate * conversion_ratio, 6)
 				
-			return flt(item_price_data[0].price_list_rate * flt(ctx.get("conversion_factor", 1)))
+			return flt(item_price_data[0].price_list_rate * flt(ctx.get("conversion_factor", 1)), 6)
 		else:
 			return item_price_data[0].price_list_rate
 
