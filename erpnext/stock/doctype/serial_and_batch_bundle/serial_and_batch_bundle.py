@@ -1429,6 +1429,9 @@ class SerialandBatchBundle(Document):
 	def throw_negative_batch(self, batch_no, available_qty, precision):
 		from erpnext.stock.stock_ledger import NegativeStockError
 
+		if frappe.db.get_single_value("Stock Settings", "allow_negative_stock_for_batch"):
+			return
+
 		frappe.throw(
 			_(
 				"""
