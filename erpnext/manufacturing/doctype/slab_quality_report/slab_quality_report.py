@@ -12,17 +12,19 @@ class SlabQualityReport(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
+		from erpnext.manufacturing.doctype.slab_quality_observation.slab_quality_observation import SlabQualityObservation
 		from frappe.types import DF
 
 		amended_from: DF.Link | None
 		bend: DF.Float
-		con: DF.Data | None
+		contamination: DF.Data | None
 		crack_back: DF.Data | None
 		crack_front: DF.Data | None
 		date: DF.Date
-		fs: DF.Data | None
+		filler_spot: DF.Data | None
 		grade: DF.Link
 		job_card: DF.Link
+		observations: DF.Table[SlabQualityObservation]
 		paper_deep_back: DF.Data | None
 		paper_deep_front: DF.Data | None
 		remarks: DF.Text | None

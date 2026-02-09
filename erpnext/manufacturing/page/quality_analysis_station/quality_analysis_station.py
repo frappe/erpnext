@@ -62,7 +62,7 @@ def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
         wip_job_cards = [jc for jc in job_cards if jc.status == "Work In Progress"]
         job_card = wip_job_cards[0] if wip_job_cards else job_cards[0] if job_cards else None
 
-    slab = None
+    slab: Slab | None = None
     if job_card and job_card.slab:
         slab = frappe.get_doc("Slab", job_card.slab)
 
@@ -71,9 +71,15 @@ def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
         slabs = get_slabs_for(line, next_stage="Quality Check")
         slab = slabs[0] if slabs else None
 
+    slab_size = None
+    if slab:
+        slab_size_name = slab.template.split("-")[-2]
+        slab_size = frappe.get_doc("Slab Size", slab_size_name)
+
     return {
         "slab": slab,
-        "job_card": job_card
+        "job_card": job_card,
+        "slab_size": slab_size
     }
 
 
