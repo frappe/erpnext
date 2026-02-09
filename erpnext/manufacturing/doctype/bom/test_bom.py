@@ -774,6 +774,44 @@ class TestBOM(IntegrationTestCase):
 		for row in bom.items:
 			self.assertEqual(row.stock_uom, "Kg")
 
+	@timeout
+	def test_bom_price_list_rate_cross_uom_conversion(self):
+		"""Test that BOM price list lookup converts rate when Item Price UOM differs from BOM item UOM."""
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_item(
+			properties={"is_stock_item": 1, "valuation_rate": 100, "stock_uom": "Gram"},
+			uoms=[{"uom": "Kg", "conversion_factor": 1000}],
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+
+		# Create Item Price in Kg
+		frappe.db.sql(
+			"delete from `tabItem Price` where price_list='_Test Price List' and item_code=%s", rm_item
+		)
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"price_list": "_Test Price List",
+				"item_code": rm_item,
+				"price_list_rate": 500,
+				"uom": "Kg",
+			}
+		).insert()
+
+		# Create BOM with item in Gram
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rate=100, do_not_save=True)
+		bom.rm_cost_as_per = "Price List"
+		bom.buying_price_list = "_Test Price List"
+		bom.set_rate_of_sub_assembly_item_based_on_bom = 0
+		bom.items[0].uom = "Gram"
+		bom.items[0].conversion_factor = 0.001
+		bom.save()
+		bom.update_cost(update_hour_rate=False)
+
+		# 500 INR/Kg should convert to 0.5 INR/Gram (500 * 1/1000)
+		self.assertAlmostEqual(bom.items[0].rate, 0.5)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
