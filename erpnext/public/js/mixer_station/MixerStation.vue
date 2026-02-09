@@ -22,6 +22,7 @@ const mixersList = ref([]);
 const jobcardsQueue = ref([]);
 const productionLine = ref(null);
 const pollingInterval = ref(null);
+const isDistributionBusy = ref(false);
 
 // downstream alerts (dummy)
 const alerts = ref([
@@ -93,7 +94,6 @@ onMounted(async () => {
         loadingIngredients.value = true;
         jobCard.value = await getJobCardsList();
     }
-    await loadOperators();
     await loadMixers();
     const stateRes = await frappe.call({
         method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_state',
@@ -110,6 +110,8 @@ onMounted(async () => {
     if (jobCardSubmitted.value) {
         preparedQty.value = s.prepared_qty || 0;
         stockEntryName.value = s.stock_entry_name || '';
+        transferredQty.value = s.transferred_qty_to_next || 0;
+        transferSuccess.value = s.transfer_complete || false;
     }
 
     if (mixingStarted.value && mixingStartTime.value) {
@@ -145,8 +147,10 @@ onMounted(async () => {
         }
 
         await fetchQueue();
+        await fetchDistributionStatus();
         pollingInterval.value = setInterval(() => {
             fetchQueue();
+            fetchDistributionStatus();
         }, 5000); // Poll every 5 seconds
 
         const r = await frappe.call({
@@ -177,8 +181,8 @@ onMounted(async () => {
             const jc = await frappe.db.get_doc('Job Card', jobCard.value);
             preparedQty.value = jc.total_completed_qty || jc.for_quantity || s.prepared_qty || 0;
             stockEntryName.value = s.stock_entry_name || '';
-            transferredQty.value = 0;
-            transferSuccess.value = false;
+            transferredQty.value = s.transferred_qty_to_next || 0;
+            transferSuccess.value = (preparedQty.value - transferredQty.value) <= 0.001;
             await loadBomQty();
         }
     }
@@ -460,10 +464,21 @@ async function transferToFGWarehouse() {
             freeze_message: __('Transferring to Distribution')
         });
 
-        transferredQty.value += result.message.qty_transferred;
-        if (getDisplayQty.value <= 0) {
-            transferSuccess.value = true;
-        }
+        transferredQty.value += result.message.qty_transferred_updated || 0;
+        transferSuccess.value = result.message.transfer_complete || false;
+
+        // Refresh full state
+        const refreshedState = await frappe.call({
+            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_state',
+            args: { job_card: jobCard.value }
+        });
+        preparedQty.value = refreshedState.message.prepared_qty;
+        transferredQty.value = refreshedState.message.transferred_qty_to_next;
+        transferSuccess.value = refreshedState.message.transfer_complete;
+
+        // if (getDisplayQty.value <= 0) {
+        //     transferSuccess.value = true;
+        // }
 
         frappe.msgprint({
             title: __('Transfer Complete'),
@@ -488,7 +503,7 @@ const getDisplayQty = computed(() => {
 const getCanTransfer = computed(() => {
     const display = getDisplayQty.value;
     const bom = parseFloat(bomQty.value.toFixed(2));
-    return display >= bom && !transferSuccess.value;
+    return display >= bom && !transferSuccess.value && !isDistributionBusy.value;
 });
 
 async function loadBomQty() {
@@ -552,6 +567,19 @@ async function fetchQueue() {
         jobcardsQueue.value = r.message || [];
     } catch (e) {
         console.error('Failed to fetch mixing queue:', e);
+    }
+}
+
+async function fetchDistributionStatus() {
+    if (!jobCard.value) return;
+    try {
+        const r = await frappe.call({
+            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.check_distribution_status',
+            args: { production_line: productionLine.value }
+        });
+        isDistributionBusy.value = r.message?.busy || false;
+    } catch (e) {
+        console.error('Failed to fetch distribution status:', e);
     }
 }
 
@@ -765,7 +793,9 @@ function selectJobCard(name) {
                                     :class="['btn btn-lg flex-fill', getCanTransfer ? 'btn-warning' : 'btn-secondary']"
                                     @click="transferToFGWarehouse">
                                     <span class="fa fa-truck mr-2"></span>
-                                    {{ getCanTransfer ? 'Transfer ' + bomQty.toLocaleString() : 'Insufficient Qty' }}
+                                    {{ getCanTransfer ? 'Transfer ' + bomQty.toLocaleString() : (isDistributionBusy ?
+                                        'Distribution Busy' :
+                                        'Insufficient Qty') }}
                                 </button>
                                 <div v-else class="alert alert-success">
                                     <span class="fa fa-check-circle mr-2"></span>
