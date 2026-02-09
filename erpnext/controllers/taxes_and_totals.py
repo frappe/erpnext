@@ -667,7 +667,11 @@ class calculate_taxes_and_totals:
 			diff = flt(diff, self.doc.precision("rounding_adjustment"))
 
 			if diff and abs(diff) <= (5.0 / 10 ** last_tax.precision("tax_amount")):
-				self.grand_total_diff = diff
+				# Adjust last tax row's total to match the expected inclusive amount
+				last_tax.total = flt(last_tax.total + diff, last_tax.precision("total"))
+				# Set grand_total_diff to 0 since we already adjusted last_tax.total
+				# (grand_total is calculated from last_tax.total in calculate_totals)
+				self.grand_total_diff = 0
 			else:
 				self.grand_total_diff = 0
 
