@@ -257,6 +257,12 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 		$.each(this.frm.doc.items || [], function (n, item) {
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
+
+			// For tax-exempt categories, use non-exempt rates for backing out
+			if (me.frm.doc.__is_tax_exempt) {
+				item_tax_map = (me.frm.doc.__non_exempt_rates || {})[item.item_code] || {};
+			}
+
 			var cumulated_tax_fraction = 0.0;
 			var total_inclusive_tax_amount_per_qty = 0;
 			$.each(me.frm.doc["taxes"] || [], function (i, tax) {
@@ -399,6 +405,16 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 		$.each(this.frm._items || [], function (n, item) {
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
+
+			// For tax-exempt categories, ensure all tax rates are 0
+			if (me.frm.doc.__is_tax_exempt) {
+				$.each(doc.taxes || [], function (i, tax) {
+					if (tax.account_head) {
+						item_tax_map[tax.account_head] = 0;
+					}
+				});
+			}
+
 			$.each(doc.taxes, function (i, tax) {
 				// tax_amount represents the amount of tax for the current step
 				var [current_net_amount, current_tax_amount] = me.get_current_tax_amount(

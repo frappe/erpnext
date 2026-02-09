@@ -8,7 +8,8 @@
  "engine": "InnoDB",
  "field_order": [
   "title",
-  "disabled"
+  "disabled",
+  "is_tax_exempt"
  ],
  "fields": [
   {
@@ -25,6 +26,13 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "default": "0",
+   "description": "Customers with this tax category are exempt from taxes. Tax amounts will be zero with no GL entries for tax accounts. For tax-inclusive pricing, tax will be backed out from the price so the customer pays the net amount.",
+   "fieldname": "is_tax_exempt",
+   "fieldtype": "Check",
+   "label": "Is Tax Exempt"
   }
  ],
  "index_web_pages_for_search": 1,

@@ -2661,6 +2661,35 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (me.frm.updating_party_details) return;
 
 		frappe.run_serially([
+			() => {
+				// Cache the is_tax_exempt status for use in tax calculations
+				if (me.frm.doc.tax_category) {
+					return frappe.db.get_value("Tax Category", me.frm.doc.tax_category, "is_tax_exempt").then((r) => {
+						me.frm.doc.__is_tax_exempt = r.message ? r.message.is_tax_exempt : 0;
+					});
+				} else {
+					me.frm.doc.__is_tax_exempt = 0;
+				}
+			},
+			() => {
+				// Pre-fetch non-exempt tax rates for backing out inclusive prices
+				if (me.frm.doc.__is_tax_exempt && me.frm.doc.items?.length) {
+					let item_codes = [...new Set(me.frm.doc.items.map((d) => d.item_code).filter(Boolean))];
+					if (item_codes.length) {
+						return frappe.call({
+							method: "erpnext.controllers.taxes_and_totals.get_non_exempt_tax_rates",
+							args: {
+								item_codes: item_codes,
+								tax_category: me.frm.doc.tax_category,
+								company: me.frm.doc.company,
+							},
+							callback: (r) => {
+								me.frm.doc.__non_exempt_rates = r.message || {};
+							},
+						});
+					}
+				}
+			},
 			() => this.update_item_tax_map(),
 			() => erpnext.utils.set_taxes(this.frm, "tax_category"),
 		]);

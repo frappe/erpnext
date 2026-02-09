@@ -392,6 +392,130 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(si.net_total, 3859.65)
 		self.assertEqual(si.grand_total, 4900.00)
 
+	def test_tax_exempt_exclusive_tax(self):
+		"""Tax-exempt category with exclusive taxes: tax amount must be zero,
+		grand total must equal net total (item rate unchanged)."""
+		tax_category = frappe.get_doc(
+			{"doctype": "Tax Category", "title": "_Test Tax Exempt", "is_tax_exempt": 1}
+		).insert()
+
+		si = create_sales_invoice(qty=2, rate=500, do_not_save=True)
+		si.tax_category = tax_category.name
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Service Tax",
+				"rate": 14,
+			},
+		)
+		si.insert()
+
+		# Rate stays as-is, tax is zero
+		self.assertEqual(si.items[0].net_amount, 1000)
+		self.assertEqual(si.net_total, 1000)
+		self.assertEqual(si.taxes[0].tax_amount, 0)
+		self.assertEqual(si.grand_total, 1000)
+
+	def test_tax_exempt_inclusive_tax(self):
+		"""Tax-exempt category with inclusive taxes: tax should be backed out from
+		the price so the customer pays the net amount."""
+		tax_category = frappe.get_doc(
+			{"doctype": "Tax Category", "title": "_Test Tax Exempt", "is_tax_exempt": 1}
+		).insert()
+
+		si = create_sales_invoice(qty=1, rate=1000, do_not_save=True)
+		si.tax_category = tax_category.name
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Service Tax",
+				"rate": 10,
+				"included_in_print_rate": 1,
+			},
+		)
+		si.insert()
+
+		# 1000 / 1.10 = 909.09 net, tax backed out then zeroed
+		self.assertEqual(si.items[0].net_amount, 909.09)
+		self.assertEqual(si.net_total, 909.09)
+		self.assertEqual(si.taxes[0].tax_amount, 0)
+		self.assertEqual(si.grand_total, 909.09)
+
+	def test_tax_exempt_exclusive_tax_multiple_items(self):
+		"""Tax-exempt with exclusive taxes and multiple items."""
+		tax_category = frappe.get_doc(
+			{"doctype": "Tax Category", "title": "_Test Tax Exempt", "is_tax_exempt": 1}
+		).insert()
+
+		si = create_sales_invoice(qty=3, rate=200, do_not_save=True)
+		si.tax_category = tax_category.name
+		si.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 2,
+				"rate": 350,
+				"income_account": "Sales - _TC",
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Service Tax",
+				"rate": 14,
+			},
+		)
+		si.insert()
+
+		# Item 1: 3 × 200 = 600, Item 2: 2 × 350 = 700, Total = 1300
+		self.assertEqual(si.items[0].net_amount, 600)
+		self.assertEqual(si.items[1].net_amount, 700)
+		self.assertEqual(si.net_total, 1300)
+		self.assertEqual(si.taxes[0].tax_amount, 0)
+		self.assertEqual(si.grand_total, 1300)
+
+	def test_tax_exempt_no_gl_entries_for_tax(self):
+		"""Tax-exempt invoices must not create GL entries for tax accounts."""
+		tax_category = frappe.get_doc(
+			{"doctype": "Tax Category", "title": "_Test Tax Exempt", "is_tax_exempt": 1}
+		).insert()
+
+		si = create_sales_invoice(qty=1, rate=500, do_not_save=True)
+		si.tax_category = tax_category.name
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Service Tax",
+				"rate": 10,
+			},
+		)
+		si.insert()
+		si.submit()
+
+		gl_entries = frappe.db.get_all(
+			"GL Entry",
+			filters={"voucher_no": si.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+		)
+
+		tax_gl = [e for e in gl_entries if e.account == "_Test Account Service Tax - _TC"]
+		self.assertEqual(len(tax_gl), 0, "Tax-exempt invoice should not have GL entries for tax account")
+
 	def test_sales_invoice_discount_amount(self):
 		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][3])
 		si.discount_amount = 104.94
