@@ -203,7 +203,9 @@ class BOMCreator(Document):
 					self,
 				)
 			else:
-				row.rate = flt(self.get_raw_material_cost(row.item_code) * row.conversion_factor)
+				# For sub-assemblies: rate = total raw material cost / qty (unit cost)
+				total_rm_cost = self.get_raw_material_cost(row.item_code)
+				row.rate = flt(total_rm_cost / row.qty * row.conversion_factor) if row.qty else 0
 
 			row.amount = flt(row.rate) * flt(row.qty)
 			amount += flt(row.amount)

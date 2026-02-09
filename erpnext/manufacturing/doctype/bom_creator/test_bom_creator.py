@@ -32,7 +32,7 @@ class TestBOMCreator(IntegrationTestCase):
 			company="_Test Company",
 			item_code=final_product,
 			qty=1,
-			rm_cosy_as_per="Valuation Rate",
+			rm_cost_as_per="Valuation Rate",
 			currency="INR",
 			plc_conversion_rate=1,
 			conversion_rate=1,
@@ -87,7 +87,7 @@ class TestBOMCreator(IntegrationTestCase):
 			company="_Test Company",
 			item_code=final_product,
 			qty=1,
-			rm_cosy_as_per="Valuation Rate",
+			rm_cost_as_per="Valuation Rate",
 			currency="INR",
 			plc_conversion_rate=1,
 			conversion_rate=1,
@@ -131,7 +131,7 @@ class TestBOMCreator(IntegrationTestCase):
 			company="_Test Company",
 			item_code=final_product,
 			qty=1,
-			rm_cosy_as_per="Valuation Rate",
+			rm_cost_as_per="Valuation Rate",
 			currency="INR",
 			plc_conversion_rate=1,
 			conversion_rate=1,
@@ -199,7 +199,7 @@ class TestBOMCreator(IntegrationTestCase):
 			company="_Test Company",
 			item_code=final_product,
 			qty=1,
-			rm_cosy_as_per="Valuation Rate",
+			rm_cost_as_per="Valuation Rate",
 			currency="INR",
 			plc_conversion_rate=1,
 			conversion_rate=1,
@@ -250,6 +250,76 @@ class TestBOMCreator(IntegrationTestCase):
 		doc.create_boms()
 		data = frappe.get_all("BOM", filters={"bom_creator": doc.name, "docstatus": 1})
 		self.assertEqual(len(data), 2)
+
+	def test_sub_assembly_cost_calculation_with_qty(self):
+		"""Test that sub-assembly rate is calculated as total_rm_cost / qty (unit cost)
+
+		Regression test for #52149: BOM Creator was multiplying instead of dividing,
+		causing massively inflated costs for sub-assemblies.
+		"""
+		final_product = "Test Product Cost Calc"
+		sub_assembly = "Test Sub Assembly"
+
+		make_item(final_product, {"item_group": "Raw Material", "stock_uom": "Nos"})
+		make_item(sub_assembly, {"item_group": "Raw Material", "stock_uom": "Nos"})
+
+		# Create raw materials with known valuation rates
+		make_item(
+			"Test RM 1 Cost",
+			{"item_group": "Raw Material", "stock_uom": "Nos", "valuation_rate": 100},
+		)
+		make_item(
+			"Test RM 2 Cost",
+			{"item_group": "Raw Material", "stock_uom": "Nos", "valuation_rate": 50},
+		)
+
+		doc = make_bom_creator(
+			name="Test BOM Cost Calculation",
+			company="_Test Company",
+			item_code=final_product,
+			qty=1,
+			rm_cost_as_per="Valuation Rate",
+			currency="INR",
+			plc_conversion_rate=1,
+			conversion_rate=1,
+		)
+
+		# Add sub-assembly with qty=10
+		add_sub_assembly(
+			parent=doc.name,
+			fg_item=final_product,
+			fg_reference_id=doc.name,
+			bom_item={
+				"item_code": sub_assembly,
+				"qty": 10,  # 10 units of sub-assembly
+				"items": [
+					{"item_code": "Test RM 1 Cost", "qty": 5},  # 5 * 100 = 500
+					{"item_code": "Test RM 2 Cost", "qty": 10},  # 10 * 50 = 500
+				],
+			},
+		)
+
+		doc.reload()
+
+		# Find the sub-assembly row
+		sub_assembly_row = None
+		for row in doc.items:
+			if row.item_code == sub_assembly and row.is_expandable:
+				sub_assembly_row = row
+				break
+
+		self.assertIsNotNone(sub_assembly_row, "Sub-assembly row not found")
+
+		# Total raw material cost = 500 + 500 = 1000
+		# Sub-assembly qty = 10
+		# Expected rate = 1000 / 10 = 100 per unit
+		# Expected amount = 100 * 10 = 1000
+
+		# Before fix: rate would be 1000 (total as unit), amount = 10000
+		# After fix: rate should be 100, amount = 1000
+		self.assertEqual(sub_assembly_row.qty, 10)
+		self.assertAlmostEqual(sub_assembly_row.rate, 100, places=2)
+		self.assertAlmostEqual(sub_assembly_row.amount, 1000, places=2)
 
 
 def create_items():
