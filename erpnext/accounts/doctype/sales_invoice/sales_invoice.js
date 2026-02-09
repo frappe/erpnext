@@ -165,13 +165,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				);
 			}
 		}
-
-		// Show buttons only when pos view is active
-		if (cint(doc.docstatus == 0) && this.frm.page.current_view_name !== "pos" && !doc.is_return) {
-			this.frm.cscript.sales_order_btn();
-			this.frm.cscript.delivery_note_btn();
-			this.frm.cscript.quotation_btn();
-		}
+		this.toggle_get_items();
 
 		this.set_default_print_format();
 		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
@@ -260,6 +254,23 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		}
 	}
 
+	toggle_get_items() {
+		// Show buttons only when pos view is inactive and not is_return
+		if (
+			cint(this.frm.doc.docstatus == 0) &&
+			this.frm.page.current_view_name !== "pos" &&
+			!this.frm.doc.is_return
+		) {
+			this.frm.cscript.sales_order_btn();
+			this.frm.cscript.delivery_note_btn();
+			this.frm.cscript.quotation_btn();
+		} else {
+			["Sales Order", "Quotation", "Timesheet"].forEach((label) => {
+				this.frm.remove_custom_button(label, "Get Items From");
+			});
+		}
+	}
+
 	sales_order_btn() {
 		var me = this;
 
@@ -343,7 +354,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 						var filters = {
 							docstatus: 1,
 							company: me.frm.doc.company,
-							is_return: 0,
+							is_return: me.frm.doc.is_return,
 						};
 						if (me.frm.doc.customer) filters["customer"] = me.frm.doc.customer;
 						return {
@@ -609,6 +620,10 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 	apply_tds(frm) {
 		this.frm.clear_table("tax_withholding_entries");
+	}
+
+	is_return() {
+		this.toggle_get_items();
 	}
 };
 

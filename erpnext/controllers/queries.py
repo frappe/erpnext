@@ -394,8 +394,8 @@ def get_delivery_notes_to_be_billed(
 				(`tabDelivery Note`.is_return = 0 and `tabDelivery Note`.per_billed < 100)
 				or (`tabDelivery Note`.grand_total = 0 and `tabDelivery Note`.per_billed < 100)
 				or (
-					`tabDelivery Note`.is_return = 1
-					and return_against in (select name from `tabDelivery Note` where per_billed < 100)
+					`tabDelivery Note`.is_return = 1 and `tabDelivery Note`.per_billed < 100
+					and return_against in (select name from `tabDelivery Note` where docstatus = 1 and is_return = 0)
 				)
 			)
 			{mcond} order by `tabDelivery Note`.`{key}` asc limit {page_len} offset {start}
