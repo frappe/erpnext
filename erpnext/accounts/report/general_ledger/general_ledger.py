@@ -227,7 +227,7 @@ def get_conditions(filters):
 	ignore_is_opening = frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting")
 
 	if filters.get("account"):
-		filters.account = get_accounts_with_children(filters.account)
+		filters.account = get_accounts_with_children(filters.account, filters.get("company"))
 		if filters.account:
 			conditions.append("account in %(account)s")
 
@@ -361,7 +361,7 @@ def get_party_name_map():
 	return party_map
 
 
-def get_accounts_with_children(accounts):
+def get_accounts_with_children(accounts, company=None):
 	if not isinstance(accounts, list):
 		accounts = [d.strip() for d in accounts.strip().split(",") if d]
 
@@ -380,7 +380,14 @@ def get_accounts_with_children(accounts):
 	for account in accounts_data:
 		conditions.append((doctype.lft >= account.lft) & (doctype.rgt <= account.rgt))
 
-	return frappe.qb.from_(doctype).select(doctype.name).where(Criterion.any(conditions)).run(pluck=True)
+	query = frappe.qb.from_(doctype).select(doctype.name).where(Criterion.any(conditions))
+
+	# Filter by company to avoid returning accounts from other companies
+	# Each company has its own account tree with independent lft/rgt numbering
+	if company:
+		query = query.where(doctype.company == company)
+
+	return query.run(pluck=True)
 
 
 def set_bill_no(gl_entries):

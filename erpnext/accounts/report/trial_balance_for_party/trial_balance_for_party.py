@@ -40,7 +40,7 @@ def get_data(filters, show_party_name):
 
 	account_filter = []
 	if filters.get("account"):
-		account_filter = get_accounts_with_children(filters.get("account"))
+		account_filter = get_accounts_with_children(filters.get("account"), filters.get("company"))
 
 	company_currency = frappe.get_cached_value("Company", filters.company, "default_currency")
 	opening_balances = get_opening_balances(filters, account_filter)
