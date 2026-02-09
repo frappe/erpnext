@@ -4375,14 +4375,485 @@
 	},
 
 	"Netherlands": {
+		"tax_categories": [
+			{"title": "NL-Domestic"},
+			{"title": "NL-Domestic-Reduced"},
+			{"title": "EU-B2B"},
+			{"title": "EU-B2C"},
+			{"title": "Non-EU"},
+			{"title": "NL-RC-Construction"},
+			{"title": "Exempt"}
+		],
+		"chart_of_accounts": {
+			"Netherlands - RGS Standard": {
+				"sales_tax_templates": [
+					{
+						"title": "NL BTW Verkoop 21%",
+						"is_default": 1,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Af te dragen BTW hoog 21%",
+									"account_number": "15200",
+									"account_type": "Tax",
+									"tax_rate": "21"
+								},
+								"description": "BTW 21%",
+								"rate": 21
+							}
+						]
+					},
+					{
+						"title": "NL BTW Verkoop 9%",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Af te dragen BTW laag 9%",
+									"account_number": "15210",
+									"account_type": "Tax",
+									"tax_rate": "9"
+								},
+								"description": "BTW 9%",
+								"rate": 9
+							}
+						]
+					},
+					{
+						"title": "NL BTW Verkoop 0% Export",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Af te dragen BTW 0%",
+									"account_number": "15220",
+									"account_type": "Tax",
+									"tax_rate": "0"
+								},
+								"description": "BTW 0% (Export)",
+								"rate": 0
+							}
+						]
+					},
+					{
+						"title": "NL BTW Verkoop 0% ICP",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Af te dragen BTW ICP",
+									"account_number": "15310",
+									"account_type": "Tax",
+									"tax_rate": "0"
+								},
+								"description": "BTW 0% (ICP - Intracommunautaire levering)",
+								"rate": 0
+							}
+						]
+					},
+					{
+						"title": "NL BTW Verkoop Verlegd",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Af te dragen BTW verlegd",
+									"account_number": "15300",
+									"account_type": "Tax",
+									"tax_rate": "0"
+								},
+								"description": "BTW verlegd (reverse charge)",
+								"rate": 0
+							}
+						]
+					}
+				],
+				"purchase_tax_templates": [
+					{
+						"title": "NL BTW Inkoop 21%",
+						"is_default": 1,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Te vorderen BTW hoog 21%",
+									"account_number": "15100",
+									"account_type": "Tax",
+									"tax_rate": "21"
+								},
+								"description": "BTW 21% aftrekbaar",
+								"rate": 21
+							}
+						]
+					},
+					{
+						"title": "NL BTW Inkoop 9%",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Te vorderen BTW laag 9%",
+									"account_number": "15110",
+									"account_type": "Tax",
+									"tax_rate": "9"
+								},
+								"description": "BTW 9% aftrekbaar",
+								"rate": 9
+							}
+						]
+					},
+					{
+						"title": "NL BTW Inkoop EU (verleggingsregeling)",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Te vorderen BTW ICP",
+									"account_number": "15130",
+									"account_type": "Tax",
+									"tax_rate": "21"
+								},
+								"description": "Te vorderen BTW ICP 21%",
+								"add_deduct_tax": "Add",
+								"rate": 21
+							},
+							{
+								"account_head": {
+									"account_name": "Af te dragen BTW ICP",
+									"account_number": "15310",
+									"account_type": "Tax",
+									"tax_rate": "21"
+								},
+								"description": "Af te dragen BTW ICP 21%",
+								"add_deduct_tax": "Deduct",
+								"rate": 21
+							}
+						]
+					},
+					{
+						"title": "NL BTW Inkoop EU 9% (verleggingsregeling)",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Te vorderen BTW ICP",
+									"account_number": "15130",
+									"account_type": "Tax",
+									"tax_rate": "9"
+								},
+								"description": "Te vorderen BTW ICP 9%",
+								"add_deduct_tax": "Add",
+								"rate": 9
+							},
+							{
+								"account_head": {
+									"account_name": "Af te dragen BTW ICP",
+									"account_number": "15310",
+									"account_type": "Tax",
+									"tax_rate": "9"
+								},
+								"description": "Af te dragen BTW ICP 9%",
+								"add_deduct_tax": "Deduct",
+								"rate": 9
+							}
+						]
+					},
+					{
+						"title": "NL BTW Inkoop Verlegd (binnenland)",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Te vorderen BTW verlegd",
+									"account_number": "15120",
+									"account_type": "Tax",
+									"tax_rate": "21"
+								},
+								"description": "Te vorderen BTW verlegd 21%",
+								"add_deduct_tax": "Add",
+								"rate": 21
+							},
+							{
+								"account_head": {
+									"account_name": "Af te dragen BTW verlegd",
+									"account_number": "15300",
+									"account_type": "Tax",
+									"tax_rate": "21"
+								},
+								"description": "Af te dragen BTW verlegd 21%",
+								"add_deduct_tax": "Deduct",
+								"rate": 21
+							}
+						]
+					}
+				],
+				"item_tax_templates": [
+					{
+						"title": "BTW Verkoop 21%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Af te dragen BTW hoog 21%",
+									"account_number": "15200",
+									"root_type": "Liability",
+									"tax_rate": "21"
+								},
+								"tax_rate": 21
+							}
+						]
+					},
+					{
+						"title": "BTW Verkoop 9%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Af te dragen BTW laag 9%",
+									"account_number": "15210",
+									"root_type": "Liability",
+									"tax_rate": "9"
+								},
+								"tax_rate": 9
+							}
+						]
+					},
+					{
+						"title": "BTW Verkoop 0%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Af te dragen BTW 0%",
+									"account_number": "15220",
+									"root_type": "Liability",
+									"tax_rate": "0"
+								},
+								"tax_rate": 0
+							}
+						]
+					},
+					{
+						"title": "BTW Verkoop ICP",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Af te dragen BTW ICP",
+									"account_number": "15310",
+									"root_type": "Liability",
+									"tax_rate": "0"
+								},
+								"tax_rate": 0
+							}
+						]
+					},
+					{
+						"title": "BTW Verkoop Verlegd",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Af te dragen BTW verlegd",
+									"account_number": "15300",
+									"root_type": "Liability",
+									"tax_rate": "0"
+								},
+								"tax_rate": 0
+							}
+						]
+					},
+					{
+						"title": "BTW Verkoop Vrijgesteld",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Af te dragen BTW 0%",
+									"account_number": "15220",
+									"root_type": "Liability",
+									"tax_rate": "0"
+								},
+								"tax_rate": 0
+							}
+						]
+					},
+					{
+						"title": "BTW Inkoop 21%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Te vorderen BTW hoog 21%",
+									"account_number": "15100",
+									"root_type": "Asset",
+									"tax_rate": "21"
+								},
+								"tax_rate": 21
+							}
+						]
+					},
+					{
+						"title": "BTW Inkoop 9%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Te vorderen BTW laag 9%",
+									"account_number": "15110",
+									"root_type": "Asset",
+									"tax_rate": "9"
+								},
+								"tax_rate": 9
+							}
+						]
+					},
+					{
+						"title": "Geen BTW",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Te vorderen BTW hoog 21%",
+									"account_number": "15100",
+									"root_type": "Asset",
+									"tax_rate": "0"
+								},
+								"tax_rate": 0
+							}
+						]
+					},
+					{
+						"title": "BTW Inkoop EU 21% (verleggingsregeling)",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Te vorderen BTW ICP",
+									"account_number": "15130",
+									"root_type": "Asset",
+									"tax_rate": "21"
+								},
+								"tax_rate": 21
+							},
+							{
+								"tax_type": {
+									"account_name": "Af te dragen BTW ICP",
+									"account_number": "15310",
+									"root_type": "Liability",
+									"tax_rate": "21"
+								},
+								"tax_rate": -21
+							}
+						]
+					},
+					{
+						"title": "BTW Inkoop EU 9% (verleggingsregeling)",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Te vorderen BTW ICP",
+									"account_number": "15130",
+									"root_type": "Asset",
+									"tax_rate": "9"
+								},
+								"tax_rate": 9
+							},
+							{
+								"tax_type": {
+									"account_name": "Af te dragen BTW ICP",
+									"account_number": "15310",
+									"root_type": "Liability",
+									"tax_rate": "9"
+								},
+								"tax_rate": -9
+							}
+						]
+					},
+					{
+						"title": "BTW Inkoop Verlegd 21%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Te vorderen BTW verlegd",
+									"account_number": "15120",
+									"root_type": "Asset",
+									"tax_rate": "21"
+								},
+								"tax_rate": 21
+							},
+							{
+								"tax_type": {
+									"account_name": "Af te dragen BTW verlegd",
+									"account_number": "15300",
+									"root_type": "Liability",
+									"tax_rate": "21"
+								},
+								"tax_rate": -21
+							}
+						]
+					},
+					{
+						"title": "BTW Inkoop ICP Goederen 21%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Te vorderen BTW ICP",
+									"account_number": "15130",
+									"root_type": "Asset",
+									"tax_rate": "21"
+								},
+								"tax_rate": 21
+							},
+							{
+								"tax_type": {
+									"account_name": "Af te dragen BTW ICP",
+									"account_number": "15310",
+									"root_type": "Liability",
+									"tax_rate": "21"
+								},
+								"tax_rate": -21
+							}
+						]
+					},
+					{
+						"title": "BTW Inkoop ICP Goederen 9%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Te vorderen BTW ICP",
+									"account_number": "15130",
+									"root_type": "Asset",
+									"tax_rate": "9"
+								},
+								"tax_rate": 9
+							},
+							{
+								"tax_type": {
+									"account_name": "Af te dragen BTW ICP",
+									"account_number": "15310",
+									"root_type": "Liability",
+									"tax_rate": "9"
+								},
+								"tax_rate": -9
+							}
+						]
+					},
+					{
+						"title": "BTW Inkoop Verlegd Non-EU 21%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Te vorderen BTW verlegd",
+									"account_number": "15120",
+									"root_type": "Asset",
+									"tax_rate": "21"
+								},
+								"tax_rate": 21
+							},
+							{
+								"tax_type": {
+									"account_name": "Af te dragen BTW verlegd",
+									"account_number": "15300",
+									"root_type": "Liability",
+									"tax_rate": "21"
+								},
+								"tax_rate": -21
+							}
+						]
+					}
+				]
+			}
+		},
 		"Netherlands VAT 21%": {
 			"account_name": "VAT 21%",
 			"tax_rate": 21.00,
 			"default": 1
 		},
-		"Netherlands VAT 6%": {
-			"account_name": "VAT 6%",
-			"tax_rate": 6.00
+		"Netherlands VAT 9%": {
+			"account_name": "VAT 9%",
+			"tax_rate": 9.00
 		}
 	},
 
