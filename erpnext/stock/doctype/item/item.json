@@ -452,6 +452,7 @@
    "fieldname": "batch_number_series",
    "fieldtype": "Data",
    "label": "Batch Number Series",
+   "show_description_on_click": 1,
    "translatable": 1
   },
   {
@@ -493,7 +494,8 @@
    "description": "Example: ABCD.#####\nIf series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",
    "fieldname": "serial_no_series",
    "fieldtype": "Data",
-   "label": "Serial Number Series"
+   "label": "Serial Number Series",
+   "show_description_on_click": 1
   },
   {
    "collapsible": 1,
@@ -985,7 +987,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-02-05 17:20:35.605734",
+ "modified": "2026-03-05 16:29:31.653447",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

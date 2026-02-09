@@ -221,6 +221,8 @@ def set_defaults_for_tests():
 		frappe.db.set_default(key, value)
 	frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 0)
 
+	frappe.db.set_single_value("Stock Settings", "enable_serial_and_batch_no_for_item", 1)
+
 
 def insert_record(records):
 	from frappe.desk.page.setup_wizard.setup_wizard import make_records

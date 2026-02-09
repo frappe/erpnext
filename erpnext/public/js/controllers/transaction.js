@@ -580,6 +580,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.validate_has_items();
 		erpnext.utils.view_serial_batch_nos(this.frm);
 		this.set_route_options_for_new_doc();
+		erpnext.toggle_serial_batch_fields(this.frm);
 	}
 
 	set_route_options_for_new_doc() {

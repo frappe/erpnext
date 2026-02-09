@@ -76,6 +76,8 @@ frappe.ui.form.on("Stock Reconciliation", {
 	},
 
 	refresh: function (frm) {
+		erpnext.toggle_serial_batch_fields(frm);
+
 		if (frm.doc.docstatus < 1) {
 			frm.add_custom_button(__("Fetch Items from Warehouse"), function () {
 				frm.events.get_items(frm);

@@ -119,6 +119,8 @@ frappe.ui.form.on("Pick List", {
 	refresh: (frm) => {
 		frm.trigger("add_get_items_button");
 		frm.trigger("update_warehouse_property");
+		erpnext.toggle_serial_batch_fields(frm);
+
 		if (frm.doc.docstatus === 1) {
 			const status_completed = frm.doc.status === "Completed";
 
