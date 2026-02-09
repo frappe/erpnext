@@ -50,6 +50,7 @@
    "fieldname": "amount",
    "fieldtype": "Currency",
    "label": "Amount",
+   "options": "currency",
    "read_only": 1
   },
   {
