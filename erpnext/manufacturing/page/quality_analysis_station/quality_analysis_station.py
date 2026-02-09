@@ -97,6 +97,9 @@ def _create_slab_quality_report(slab_name: str, report: str | dict, shift: str):
         raise Exception("Slab is not in quality check.")
 
     last_history_item.quality_report_name = doc.name
+
+    slab.grade = doc.grade
+    slab.quality_assessment = doc.name
     slab.save(ignore_permissions=True)
 
     return doc
