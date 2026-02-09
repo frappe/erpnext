@@ -4,12 +4,7 @@
 import unittest
 
 import frappe
-<<<<<<< HEAD
-from frappe.utils import now
-=======
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, now
->>>>>>> e98b68c38f (fix: validate asset movement transaction date (#52340))
 
 from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
 from erpnext.setup.doctype.employee.test_employee import make_employee
