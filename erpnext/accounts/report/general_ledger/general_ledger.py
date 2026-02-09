@@ -369,12 +369,13 @@ def get_accounts_with_children(accounts, company=None):
 		return
 
 	doctype = frappe.qb.DocType("Account")
-	accounts_data = (
-		frappe.qb.from_(doctype)
-		.select(doctype.lft, doctype.rgt)
-		.where(doctype.name.isin(accounts))
-		.run(as_dict=True)
-	)
+	query = frappe.qb.from_(doctype).select(doctype.lft, doctype.rgt).where(doctype.name.isin(accounts))
+
+	# Filter by company in the initial lookup as well for defense-in-depth
+	if company:
+		query = query.where(doctype.company == company)
+
+	accounts_data = query.run(as_dict=True)
 
 	conditions = []
 	for account in accounts_data:
