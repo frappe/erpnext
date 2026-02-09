@@ -988,7 +988,7 @@ class calculate_taxes_and_totals:
 			change_amount = 0
 
 			if self.doc.doctype == "Sales Invoice" and not self.doc.get("is_return"):
-				self.calculate_change_amount()
+				self.calculate_change_amount(total_amount_to_pay)
 				change_amount = (
 					self.doc.change_amount
 					if self.doc.party_account_currency == self.doc.currency
@@ -1046,11 +1046,16 @@ class calculate_taxes_and_totals:
 		self.doc.paid_amount = flt(paid_amount, self.doc.precision("paid_amount"))
 		self.doc.base_paid_amount = flt(base_paid_amount, self.doc.precision("base_paid_amount"))
 
-	def calculate_change_amount(self):
+	def calculate_change_amount(self, total_amount_to_pay):
 		self.doc.change_amount = 0.0
 		self.doc.base_change_amount = 0.0
-		grand_total = self.doc.rounded_total or self.doc.grand_total
-		base_grand_total = self.doc.base_rounded_total or self.doc.base_grand_total
+		if self.doc.party_account_currency == self.doc.currency:
+			grand_total = total_amount_to_pay
+		else:
+			grand_total = flt(
+				total_amount_to_pay / flt(self.doc.conversion_rate), self.doc.precision("grand_total")
+			)
+		base_grand_total = total_amount_to_pay
 
 		if (
 			self.doc.doctype == "Sales Invoice"
@@ -1068,11 +1073,12 @@ class calculate_taxes_and_totals:
 
 	def calculate_write_off_amount(self):
 		if self.doc.get("write_off_outstanding_amount_automatically"):
+			# NOTE: outstanding_amount is based on company currency.
 			self.doc.write_off_amount = flt(
-				self.doc.outstanding_amount, self.doc.precision("write_off_amount")
+				self.doc.outstanding_amount / self.doc.conversion_rate, self.doc.precision("write_off_amount")
 			)
 			self.doc.base_write_off_amount = flt(
-				self.doc.write_off_amount * self.doc.conversion_rate,
+				self.doc.outstanding_amount,
 				self.doc.precision("base_write_off_amount"),
 			)
 
