@@ -1,5 +1,5 @@
 import frappe
-from frappe.model.db_query import DatabaseQuery
+from frappe.desk.reportview import build_match_conditions
 from frappe.utils import flt, nowdate
 
 from erpnext.stock.utils import get_stock_balance
@@ -54,7 +54,7 @@ def get_filters(item_code=None, warehouse=None, parent_warehouse=None, company=N
 def get_warehouse_filter_based_on_permissions(filters):
 	try:
 		# check if user has any restrictions based on user permissions on warehouse
-		if DatabaseQuery("Warehouse", user=frappe.session.user).build_match_conditions():
+		if build_match_conditions("Warehouse", user=frappe.session.user):
 			filters.append(["warehouse", "in", [w.name for w in frappe.get_list("Warehouse")]])
 		return False, filters
 	except frappe.PermissionError:
