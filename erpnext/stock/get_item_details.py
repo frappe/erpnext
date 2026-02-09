@@ -1209,12 +1209,40 @@ def get_price_list_rate_for(ctx: ItemDetailsCtx, item_code):
 			pctx.uom = ctx.get("stock_uom")
 			general_price_list_rate = get_item_price(pctx, item_code, ignore_party=ctx.get("ignore_party"))
 
+		# Try alternative UOMs from the item's UOM conversion table
+		if not general_price_list_rate:
+			item_uoms = frappe.get_all(
+				"UOM Conversion Detail",
+				filters={"parent": item_code, "parenttype": "Item"},
+				fields=["uom", "conversion_factor"],
+			)
+			for uom_row in item_uoms:
+				if uom_row.uom not in [ctx.get("uom"), ctx.get("stock_uom")]:
+					pctx.uom = uom_row.uom
+					alt_price = get_item_price(pctx, item_code, ignore_party=ctx.get("ignore_party"))
+					if alt_price:
+						# Convert the price from the found UOM to the requested UOM
+						requested_uom = ctx.get("uom") or ctx.get("stock_uom")
+						found_uom = uom_row.uom
+						# Get conversion factors relative to stock UOM
+						found_cf = uom_row.conversion_factor  # found_uom to stock_uom
+						requested_cf = ctx.get("conversion_factor") or 1  # requested_uom to stock_uom
+						# Price in found_uom * (found_cf / requested_cf) = Price in requested_uom
+						conversion_multiplier = flt(found_cf) / flt(requested_cf) if requested_cf else 1
+						general_price_list_rate = alt_price
+						# Store the conversion multiplier for later use
+						ctx["_alt_uom_conversion_multiplier"] = conversion_multiplier
+						break
+
 		if general_price_list_rate:
 			item_price_data = general_price_list_rate
 
 	if item_price_data:
 		if item_price_data[0].uom == ctx.get("uom"):
 			return item_price_data[0].price_list_rate
+		elif ctx.get("_alt_uom_conversion_multiplier"):
+			# Apply the alternative UOM conversion
+			return flt(item_price_data[0].price_list_rate * ctx.get("_alt_uom_conversion_multiplier"))
 		elif not ctx.get("price_list_uom_dependant"):
 			return flt(item_price_data[0].price_list_rate * flt(ctx.get("conversion_factor", 1)))
 		else:
