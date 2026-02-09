@@ -1,0 +1,99 @@
+import json
+
+import frappe
+
+from erpnext.manufacturing.doctype.job_card.job_card import JobCard
+from erpnext.manufacturing.doctype.slab.api import get_slabs_for
+from erpnext.manufacturing.doctype.slab.slab import Slab
+from erpnext.manufacturing.doctype.slab_quality_report.slab_quality_report import SlabQualityReport
+from erpnext.manufacturing.page.operator_station.operator_station import (
+    finish_process,
+    get_top_job_card_for_process,
+    start_process,
+)
+
+
+@frappe.whitelist()
+def start_qa_process(slab_number: str):
+    slab: Slab = frappe.get_doc("Slab", slab_number)
+    #    1. Get the job card for quality analysis on the given line.
+    job_card: JobCard = get_top_job_card_for_process("Quality Check", slab.line, True)
+
+    #    2. Start the job card.
+    #    3. Move the slab to quality check.
+    start_process(job_card.name, slab_name=slab.name or "", slab_template=slab.template, process_name="Quality Check")
+
+    #    4. Return the job card number.
+    return job_card.name
+
+
+@frappe.whitelist()
+def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number: str):
+    try:
+        frappe.db.begin()
+
+        # 1. Create the slab quality report.
+        _create_slab_quality_report(slab_number, report, shift)
+        # 2. Finish the job card and checkout the slab.
+        finish_process(job_card, "Quality Check", False)
+
+        frappe.db.commit()
+
+        return {
+            "slab": slab_number,
+            "job_card": job_card
+        }
+
+    except Exception:
+        frappe.db.rollback()
+        raise
+
+
+@frappe.whitelist()
+def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
+    job_card: JobCard | None = None
+    if job_card_number:
+        job_card = frappe.get_doc("Job Card", job_card_number)
+
+    # Else, get the earliest open job card for the operation.
+    if not job_card:
+        job_card = get_top_job_card_for_process("Quality Check", line, True)
+
+    slab = None
+    if job_card and job_card.slab:
+        slab = frappe.get_doc("Slab", job_card.slab)
+
+    if not slab:
+        # If there are no active job cards, get the earliest finished slab
+        slabs = get_slabs_for(line, next_stage="Quality Check")
+        slab = slabs[0] if slabs else None
+
+    return {
+        "slab": slab,
+        "job_card": job_card
+    }
+
+
+def _create_slab_quality_report(slab_name: str, report: str | dict, shift: str):
+    if isinstance(report, str):
+        report = json.loads(report)
+
+    doc:SlabQualityReport = frappe.new_doc("Slab Quality Report")
+    doc.update(report)
+    doc.shift = shift
+
+    doc.insert(ignore_permissions=True)
+    doc.submit()
+
+    slab: Slab = frappe.get_doc("Slab", slab_name)
+    # if slab.status != "Quarantine" and slab.is_cur_stage_complete:
+    #     raise Exception("Slab is not in quarantine or is not complete.")
+
+    last_history_item = next((h for h in slab.slab_history if h.station == "Quality Check"), None)
+    if not last_history_item:
+        raise Exception("Slab is not in quality check.")
+
+    last_history_item.quality_report_name = doc.name
+    slab.save(ignore_permissions=True)
+
+    return doc

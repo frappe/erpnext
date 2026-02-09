@@ -453,7 +453,8 @@ async function transferToFGWarehouse() {
             method: 'erpnext.manufacturing.doctype.operation.api.transfer_to_next_process',
             args: {
                 current_work_order: workOrder,
-                qty: bomQty.value
+                qty: bomQty.value,
+                process: 'Mixing'
             },
             freeze: true,
             freeze_message: __('Transferring to Distribution')

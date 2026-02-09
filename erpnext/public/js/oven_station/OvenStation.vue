@@ -1,12 +1,11 @@
 <script setup>
 import { ref, reactive, nextTick, computed, onMounted, onUnmounted } from 'vue';
 
-// TODO: Make this dynamic based on the user's role.
 const jobCardNumber = ref(null);
-const updateKey = ref(0);
 const ovenData = ref(null);
-const slabsQueue = ref([]);
 const selectedSlab = ref(null);
+const currentTime = ref(new Date());
+let timerInterval = null;
 const overheat_minutes = 90; // TODO: This should be replaced by a setting in Mahi Granites Settings.
 
 
@@ -18,7 +17,7 @@ const racks = computed(() => {
         let time_text = '';
         if ((r.status === 'Heating' || r.status === 'Overheat') && r.start_time) {
             const start = new Date(r.start_time.replace(' ', 'T'));
-            const now = new Date();
+            const now = currentTime.value;
             const diffMs = now - start;
 
             if (diffMs > 0) {
@@ -116,32 +115,24 @@ const refreshOvenData = async () => {
     }
 };
 
-const fetch_slab_for_job_card = async () => {
-    if (!jobCardNumber.value) return;
-
+const fetch_slab_for_job_card = async (play_ding = false) => {
     loadingSlab.value = true;
     try {
-        const r = await frappe.call({
-            method: 'erpnext.manufacturing.doctype.slab.api.get_slab_for_job_card',
+        const result = await frappe.call({
+            method: 'erpnext.manufacturing.page.operator_station.operator_station.get_next_work_item',
             args: {
-                job_card: jobCardNumber.value
+                process: "Heating",
+                line: work_context.assigned_line,
+                include_wip: false
             }
         });
 
-        if (r.message) {
-            selectedSlab.value = r.message;
-        } else {
-            // Fallback: Check previous stage
-            const r2 = await frappe.call({
-                method: 'erpnext.manufacturing.doctype.slab.api.get_slab_from_previous_stage',
-                args: {
-                    job_card_name: jobCardNumber.value
-                }
-            });
-            if (r2.message) {
-                selectedSlab.value = r2.message;
-            }
+        if (!selectedSlab.value && result.message?.slab && play_ding) {
+            erpnext.utils.play_ding("new_slab");
         }
+
+        selectedSlab.value = result.message?.slab;
+        jobCardNumber.value = result.message?.job_card?.name;
     } catch (e) {
         console.error("Failed to fetch slab for job card", e);
     } finally {
@@ -149,57 +140,22 @@ const fetch_slab_for_job_card = async () => {
     }
 };
 
-const get_slabs_ready_for_heating = async () => {
-    // If we have a specific Job Card, just fetch its slab
-    if (jobCardNumber.value) {
-        await fetch_slab_for_job_card();
-        return;
-    }
-};
-
 onMounted(async () => {
     const route = frappe.get_route();
     jobCardNumber.value = route[1] || null;
-    await fetchWorkContext();
-    refreshOvenData();
-    await fetchQueue(work_context.assigned_line);
 
-    get_slabs_ready_for_heating();
+    timerInterval = setInterval(() => {
+        currentTime.value = new Date();
+    }, 1000);
+
+    await fetchWorkContext();
+    await refreshOvenData();
+    await fetch_slab_for_job_card();
 });
 
-
-async function fetchQueue(line) {
-    try {
-        slabsQueue.value = [];
-        const result = await frappe.call({
-            method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_in',
-            args: {
-                line: line,
-                current_stage: 'Heating'
-            }
-        });
-        if (result.message) {
-            slabsQueue.value = result.message || [];
-            console.log(slabsQueue.value);
-        }
-    } catch (e) {
-        console.error('Failed to fetch queue:');
-    }
-}
-
-
-function selectSlab(slab) {
-    if (!slab.current_job_card || !slab.name) return;
-    if (selectedSlab.value && slab.current_job_card === selectedSlab.value.current_job_card) {
-        return;
-    }
-    selectedSlab.value = slab;
-    const route = frappe.get_route();
-    if (route.length >= 1) {
-        frappe.set_route(route[0], slab.current_job_card);
-        window.location.reload();
-    }
-}
+onUnmounted(() => {
+    if (timerInterval) clearInterval(timerInterval);
+});
 
 function loadIntoRack(rack) {
     if (rack.state !== 'Idle' || !rack.is_operational) return;
@@ -237,26 +193,6 @@ async function unload_slab_from_rack(rack) {
     showUnloadModal.value = true;
 }
 
-async function transfer_to_next_process(workOrder, qty) {
-    if (!workOrder) return;
-
-    try {
-        const res = await frappe.call({
-            method: 'erpnext.manufacturing.doctype.operation.api.transfer_to_next_process',
-            args: {
-                current_work_order: workOrder,
-                qty: qty
-            }
-        });
-
-        if (res.message) {
-            frappe.show_alert({ message: __('Slab transferred to next process'), indicator: 'green' });
-        }
-    } catch (e) {
-        console.error("Transfer failed", e);
-    }
-}
-
 async function confirmUnload() {
     if (!targetRack.value) return;
 
@@ -281,13 +217,10 @@ async function confirmUnload() {
         });
 
         if (res.message) {
-            const data = res.message;
-            refreshOvenData();
-            frappe.msgprint(__('Slab unloaded successfully'));
-            if (data.finish_results && data.finish_results.work_order) {
-                await transfer_to_next_process(data.finish_results.work_order, data.finish_results.job_card_qty);
-            }
-            await fetchQueue(work_context.assigned_line);
+            await refreshOvenData();
+            await fetch_slab_for_job_card(true);
+            frappe.show_alert({ message: __('Slab unloaded to the next process successfully'), indicator: 'green' });
+            erpnext.utils.play_ding("submit");
         }
     } catch (e) {
         console.error(e);
@@ -307,19 +240,20 @@ async function confirmLoad() {
         method: 'erpnext.manufacturing.doctype.oven.api.load_slab_into_oven',
         args: {
             oven_op: ovenOperation.value,
-            job_card: jobCardNumber.value
+            job_card_name: jobCardNumber.value || selectedSlab.value?.current_job_card,
+            slab_template: selectedSlab.value?.template,
         }
     })
 
     if (res && res.message) {
         frappe.show_alert({ message: __('Slab loaded and heating started'), indicator: 'green' });
-        refreshOvenData();
-        get_slabs_ready_for_heating();
+        await refreshOvenData();
+        await fetch_slab_for_job_card(true);
     }
 
     // remove slab from incoming list or clear selected if single Job Card
     if (Array.isArray(currentSlab.value)) {
-        const idx = currentSlab.value.findIndex(s => s.name === selectedSlab.value.name);
+        const idx = currentSlab.value.findIndex(s => s.name === selectedSlab.value?.name);
         if (idx !== -1) currentSlab.value.splice(idx, 1);
     }
     selectedSlab.value = null;
@@ -357,10 +291,13 @@ function editTemperatures() {
 }
 
 function rackClasses(rack) {
-    if (rack.state === 'Heating') return 'rack-card curing';
-    if (rack.state === 'Overheat') return 'rack-card overheat';
-    if (!rack.is_operational) return 'rack-card maintenance';
-    return 'rack-card empty';
+    if (rack.state === 'Heating') return 'curing';
+    if (rack.state === 'Overheat') return 'overheat';
+    if (!rack.is_operational) return 'maintenance';
+    
+    // Idle state
+    if (!selectedSlab.value) return 'disabled empty';
+    return 'empty';
 }
 
 // const oven = get_oven_details(work_context.assigned_station);
@@ -374,8 +311,8 @@ function prepareOvenOperation() {
         oven: ovenData.value.name,
         date: frappe.datetime.now_datetime(),
         shift: work_context.assigned_shift,
-        slab: selectedSlab.value.name,
-        slab_color: selectedSlab.value.template,
+        slab: selectedSlab.value?.name,
+        slab_color: selectedSlab.value?.template,
         oven_rack: targetRack.value.name,
         upper_shelf_temp: ovenTemps.value.upper,
         lower_shelf_temp: ovenTemps.value.lower,
@@ -391,57 +328,22 @@ function prepareOvenOperation() {
     };
 }
 
-frappe.realtime.on('slab_checkout', (slab) => {
-    get_slabs_ready_for_heating();
+frappe.realtime.on('slab_checkout', async (slab) => {
+    // If the slab has been checked out on a different line or the status of the checked out slab is not 'Pressing', then ignore the event.
+    if (slab.line !== work_context.assigned_line || slab.status !== 'Pressing') {
+        return;
+    }
+
+    if (!selectedSlab.value) {
+        await refreshOvenData();
+        await fetch_slab_for_job_card(true);
+    }
 });
 
 </script>
 
 <template>
     <div class="page-card d-flex">
-        <!-- Left: Incoming Slabs -->
-        <div style="width:340px;" class="pr-4 border-right">
-            <h5 class="mb-3 d-flex align-items-center">
-                {{ __('Incoming Slabs') }}
-            </h5>
-            <div class="text-muted small mb-3" v-if="currentSlab && currentSlab.length">
-                {{ __('Select a slab to load into an empty rack.') }}
-            </div>
-
-            <div class="incoming-list">
-                <div v-if="loadingSlab" class="text-center p-4">
-                    <div class="spinner-border spinner-border-sm text-muted" role="status"></div>
-                </div>
-                <div v-else-if="jobCardNumber && !selectedSlab"
-                    class="text-muted small text-center p-4 border rounded bg-light">
-                    {{ __('No slab found for Job Card') }} {{ jobCardNumber }}
-                </div>
-                <!-- <div v-else-if="!jobCardNumber && (!currentSlab || !currentSlab.length)"
-                    class="text-muted small text-center p-4 border rounded bg-light">
-                    {{ __('No slabs are ready for heating right now.') }}
-                </div> -->
-                <TransitionGroup name="list" tag="div" v-else>
-                    <div v-for="slab in slabsQueue" :key="slab?.name"
-                        class="incoming-item mb-2 p-3 d-flex align-items-center border rounded"
-                        :class="{ 'selected': selectedSlab && selectedSlab.name === slab?.name }"
-                        @click="selectSlab(slab)">
-                        <div v-if="slab" class="slab-container" :key="updateKey">
-                            <div class="slab-thumbnail mr-3"></div>
-                            <div class="flex-fill">
-                                <div class="font-weight-bold small">{{ slab.name }}</div>
-                                <div class="text-muted small">
-                                    {{ slab.template }}
-                                </div>
-                            </div>
-                            <div class="text-muted">
-                                <span class="fa fa-arrow-right"></span>
-                            </div>
-                        </div>
-                    </div>
-                </TransitionGroup>
-            </div>
-        </div>
-
         <!-- Center: Oven Monitor -->
         <div class="flex-fill pl-4">
             <div class="border-bottom d-flex justify-content-between pb-2">
@@ -486,8 +388,22 @@ frappe.realtime.on('slab_checkout', (slab) => {
                 </div>
             </div>
 
-            <div class="rack-grid d-flex flex-wrap pt-5">
-                <div v-for="rack in racks" :key="rack.slot" :class="rackClasses(rack)" class="mb-3 mr-3 p-3 rounded"
+            <Transition name="pop-switch" mode="out-in">
+                <div v-if="selectedSlab" key="current-slab" class="current-slab-container d-flex align-items-center justify-content-between border rounded p-3 mb-4 mt-3" style="background-color: var(--control-bg-on-gray, #e2edff); border-color: var(--primary-color) !important;">
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted mr-3">{{ __('Current Slab') }}:</span>
+                        <div class="slab-thumbnail mr-3" style="width: 24px; height: 24px;"></div>
+                        <span class="font-weight-bold h5 mb-0 mr-2">{{ selectedSlab.name }}</span>
+                        <span class="text-muted">{{ selectedSlab.template }}</span>
+                    </div>
+                </div>
+                <div v-else key="no-slabs" class="no-slabs-message d-flex align-items-center justify-content-center border rounded p-3 mb-4 mt-3 text-muted">
+                    {{ __('No slabs available for heating') }}
+                </div>
+            </Transition>
+
+            <div class="rack-grid d-flex flex-wrap" :class="selectedSlab ? 'pt-3' : 'pt-5'">
+                <div v-for="rack in racks" :key="rack.slot" :class="rackClasses(rack)" class="rack-card mb-3 mr-3 p-3 rounded"
                     style="position: relative;"
                     @click="rack.state === 'Heating' || rack.state === 'Overheat' ? unload_slab_from_rack(rack) : loadIntoRack(rack)">
                     <div v-if="rack.state === 'Overheat'" class="warning-icon pulse-icon">
@@ -544,7 +460,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
                 <!-- {{ selectedSlab }} &rarr; {{ targetRack?.slot }} -->
             </p>
 
-            <div class="measure-container d-flex justify-content-center align-items-center mb-4">
+            <div class="measure-container d-flex justify-content-center align-items-center mb-4" v-if="selectedSlab">
                 <!-- The geometric representation -->
                 <div class="slab-rect position-relative border">
                     <!-- Top Left -->
@@ -661,19 +577,25 @@ frappe.realtime.on('slab_checkout', (slab) => {
 .rack-card.curing {
     border-style: solid;
     border-color: #28a745;
-    background: var(--success-50, #d4f8d4);
+    background: rgba(40, 167, 69, 0.15); /* Green tint */
 }
 
 .rack-card.overheat {
     border-style: solid;
     border-color: #dc3545;
-    background: var(--error-50, #f8d7da);
+    background: rgba(220, 53, 69, 0.15); /* Red tint */
 }
 
 .rack-card.maintenance {
     border-style: dashed;
     border-color: #6c757d;
-    background: var(--blue-50, #e2edff);
+    background: rgba(108, 117, 125, 0.15); /* Gray tint */
+}
+
+.rack-card.disabled {
+    opacity: 0.5;
+    cursor: not-allowed !important;
+    pointer-events: none;
 }
 
 .temp-badge {
@@ -826,5 +748,19 @@ frappe.realtime.on('slab_checkout', (slab) => {
     font-size: 1.2rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border: 2px solid #e03636 !important
+}
+
+.pop-switch-enter-active {
+	transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pop-switch-leave-active {
+	transition: all 0.2s ease-in;
+}
+
+.pop-switch-enter-from,
+.pop-switch-leave-to {
+	opacity: 0;
+	transform: scale(0.9);
 }
 </style>

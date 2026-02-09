@@ -22,7 +22,7 @@ const fetchWorkContext = async () => {
 const slabs = ref([]);
 const searchQuery = ref('');
 
-const fetchSlabs = async () => {
+const fetchSlabs = async (play_ding = false) => {
     try {
         const r = await frappe.call({
             method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_in',
@@ -31,7 +31,15 @@ const fetchSlabs = async () => {
                 current_stage: "Quarantine"
             }
         });
+
         if (r.message) {
+
+            // Check if there is a new slab in the incoming list
+            const incomingSlabs = r.message.filter(s => !slabs.value.some(oldSlab => oldSlab.name === s.name));
+            if (play_ding && incomingSlabs.length > 0) {
+                erpnext.utils.play_ding("new_slab");
+            }
+
             slabs.value = r.message;
         }
     } catch (e) {
@@ -91,8 +99,13 @@ const getDuration = (date_str) => {
     return duration.join(' ');
 };
 
-frappe.realtime.on('slab_move', () => {
-    fetchSlabs();
+frappe.realtime.on('slab_move', (slab) => {
+    // If the slab has been moved to a different line or the moved slab is not in 'Quarantine', then ignore the event.
+    if (slab.line !== work_context.assigned_line || slab.status !== 'Quarantine' || slab.is_cur_stage_complete) {
+        return;
+    }
+
+    fetchSlabs(true);
 });
 
 const minQuarantineHours = ref(0);
@@ -125,12 +138,9 @@ const unloadToTrimming = (slab) => {
     const performMove = async () => {
         try {
             await frappe.call({
-                method: 'erpnext.manufacturing.doctype.slab.api.move_slab_to',
+                method: 'erpnext.manufacturing.page.slab_loading_station.slab_loading_station.unload_slab_to_trimming',
                 args: {
                     slab_number: slab.name,
-                    next_stage: "Trimming",
-                    checkout_and_move: true,
-                    job_card_number: slab.current_job_card
                 },
                 freeze: true,
                 callback: (r) => {
@@ -139,7 +149,9 @@ const unloadToTrimming = (slab) => {
                             message: __('Slab {0} unloaded to Trimming', [slab.name]),
                             indicator: 'green'
                         });
-                        fetchSlabs();
+                        erpnext.utils.play_ding("submit");
+
+                        fetchSlabs(true);
                     }
                 }
             });
