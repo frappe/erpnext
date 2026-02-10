@@ -286,6 +286,8 @@ def get_conditions(filters):
 	if not (
 		filters.get("account")
 		or filters.get("party")
+		or filters.get("cost_center")
+		or filters.get("project")
 		or filters.get("categorize_by") in ["Categorize by Account", "Categorize by Party"]
 	):
 		if not ignore_is_opening:
