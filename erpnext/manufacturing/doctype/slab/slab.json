@@ -25,6 +25,8 @@
   "column_break_e1da",
   "quality_assessment",
   "export_section",
+  "packing_list_number",
+  "column_break_cnky",
   "consignment_number",
   "column_break_il7r",
   "shipping_date",
@@ -77,14 +79,16 @@
   },
   {
    "fieldname": "grade",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Grade",
+   "options": "Slab Quality Grade",
    "read_only": 1
   },
   {
    "fieldname": "quality_assessment",
-   "fieldtype": "Data",
-   "label": "Quality Assessment",
+   "fieldtype": "Link",
+   "label": "Quality Assessment Report",
+   "options": "Slab Quality Report",
    "read_only": 1
   },
   {
@@ -189,12 +193,22 @@
    "fieldtype": "Check",
    "label": "Is Prematurely Unquarantined",
    "read_only": 1
+  },
+  {
+   "fieldname": "packing_list_number",
+   "fieldtype": "Data",
+   "label": "Packing List Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_cnky",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-07 16:19:21.118425",
+ "modified": "2026-02-10 17:51:40.320473",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",

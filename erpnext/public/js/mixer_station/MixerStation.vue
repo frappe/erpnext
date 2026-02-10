@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, reactive } from 'vue';
 
 const jobCard = ref(null);
 const batchNo = ref('');
@@ -16,11 +16,13 @@ const transferredQty = ref(0);
 const transferSuccess = ref(false);
 const nextWorkOrder = ref('');
 const bomQty = ref(0);
+const bomUOM = ref('');
 const selectedMixer = ref('');
 const mixersList = ref([]);
 const jobcardsQueue = ref([]);
 const productionLine = ref(null);
 const pollingInterval = ref(null);
+const isDistributionBusy = ref(false);
 
 // downstream alerts (dummy)
 const alerts = ref([
@@ -41,6 +43,12 @@ const alerts = ref([
         tone: 'warning'
     }
 ]);
+
+const work_context = reactive({
+    role: "Mixer Operator",
+    assigned_line: "",
+    assigned_shift: ""
+});
 
 const mixingStarted = ref(false);
 const mixingStartTime = ref(null);
@@ -80,12 +88,12 @@ const isMixerSelected = computed(() => !!selectedMixer.value);
 onMounted(async () => {
     const route = frappe.get_route();
     jobCard.value = route[2] || null;
+    await fetchWorkContext();
 
     if (!jobCard.value) {
         loadingIngredients.value = true;
         jobCard.value = await getJobCardsList();
     }
-
     await loadMixers();
     const stateRes = await frappe.call({
         method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_state',
@@ -102,6 +110,8 @@ onMounted(async () => {
     if (jobCardSubmitted.value) {
         preparedQty.value = s.prepared_qty || 0;
         stockEntryName.value = s.stock_entry_name || '';
+        transferredQty.value = s.transferred_qty_to_next || 0;
+        transferSuccess.value = s.transfer_complete || false;
     }
 
     if (mixingStarted.value && mixingStartTime.value) {
@@ -137,8 +147,10 @@ onMounted(async () => {
         }
 
         await fetchQueue();
+        await fetchDistributionStatus();
         pollingInterval.value = setInterval(() => {
             fetchQueue();
+            fetchDistributionStatus();
         }, 5000); // Poll every 5 seconds
 
         const r = await frappe.call({
@@ -147,7 +159,9 @@ onMounted(async () => {
                 job_card: jobCard.value
             }
         });
-
+        if (r.message) {
+            bomUOM.value = r.message[0].jc_bom_uom;
+        }
         ingredients.value = (r.message || []).map(item => {
             const name = item.item_name || '';
             const lower = name.toLowerCase();
@@ -167,8 +181,8 @@ onMounted(async () => {
             const jc = await frappe.db.get_doc('Job Card', jobCard.value);
             preparedQty.value = jc.total_completed_qty || jc.for_quantity || s.prepared_qty || 0;
             stockEntryName.value = s.stock_entry_name || '';
-            transferredQty.value = 0;
-            transferSuccess.value = false;
+            transferredQty.value = s.transferred_qty_to_next || 0;
+            transferSuccess.value = (preparedQty.value - transferredQty.value) <= 0.001;
             await loadBomQty();
         }
     }
@@ -209,6 +223,7 @@ async function toggleReady() {
                     args: {
                         job_card: jobCard.value,
                         ingredients: JSON.stringify(payload),
+                        bom_uom: bomUOM.value,
                     }
                 });
 
@@ -442,16 +457,29 @@ async function transferToFGWarehouse() {
             method: 'erpnext.manufacturing.doctype.operation.api.transfer_to_next_process',
             args: {
                 current_work_order: workOrder,
-                qty: bomQty.value
+                qty: bomQty.value,
+                process: 'Mixing',
+                mixer_number: selectedMixer.value
             },
             freeze: true,
             freeze_message: __('Transferring to Distribution')
         });
 
-        transferredQty.value += result.message.qty_transferred;
-        if (getDisplayQty.value <= 0) {
-            transferSuccess.value = true;
-        }
+        transferredQty.value += result.message.qty_transferred_updated || 0;
+        transferSuccess.value = result.message.transfer_complete || false;
+
+        // Refresh full state
+        const refreshedState = await frappe.call({
+            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_state',
+            args: { job_card: jobCard.value }
+        });
+        preparedQty.value = refreshedState.message.prepared_qty;
+        transferredQty.value = refreshedState.message.transferred_qty_to_next;
+        transferSuccess.value = refreshedState.message.transfer_complete;
+
+        // if (getDisplayQty.value <= 0) {
+        //     transferSuccess.value = true;
+        // }
 
         frappe.msgprint({
             title: __('Transfer Complete'),
@@ -476,7 +504,7 @@ const getDisplayQty = computed(() => {
 const getCanTransfer = computed(() => {
     const display = getDisplayQty.value;
     const bom = parseFloat(bomQty.value.toFixed(2));
-    return display >= bom && !transferSuccess.value;
+    return display >= bom && !transferSuccess.value && !isDistributionBusy.value;
 });
 
 async function loadBomQty() {
@@ -519,16 +547,16 @@ async function onMixerChange() {
     }
 }
 
-async function loadOperators() {
-    const response = await frappe.call({
-        method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_operators',
-        args: {
-            designation: 'Mixer Operator',
-            production_line: productionLine.value,
-            workstation: workstation.value,
-        }
+async function fetchWorkContext() {
+    const currentUser = await frappe.call({
+        method: "erpnext.setup.doctype.employee.api.get_current_user_context",
     });
-    operatorsList.value = response.message || [];
+
+    if (currentUser.message) {
+        work_context.role = currentUser.message.designation;
+        work_context.assigned_line = currentUser.message.production_line;
+        work_context.assigned_shift = currentUser.message.attendance_shift;
+    }
 }
 
 async function fetchQueue() {
@@ -540,6 +568,19 @@ async function fetchQueue() {
         jobcardsQueue.value = r.message || [];
     } catch (e) {
         console.error('Failed to fetch mixing queue:', e);
+    }
+}
+
+async function fetchDistributionStatus() {
+    if (!jobCard.value) return;
+    try {
+        const r = await frappe.call({
+            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.check_distribution_status',
+            args: { production_line: productionLine.value }
+        });
+        isDistributionBusy.value = r.message?.busy || false;
+    } catch (e) {
+        console.error('Failed to fetch distribution status:', e);
     }
 }
 
@@ -753,7 +794,9 @@ function selectJobCard(name) {
                                     :class="['btn btn-lg flex-fill', getCanTransfer ? 'btn-warning' : 'btn-secondary']"
                                     @click="transferToFGWarehouse">
                                     <span class="fa fa-truck mr-2"></span>
-                                    {{ getCanTransfer ? 'Transfer ' + bomQty.toLocaleString() : 'Insufficient Qty' }}
+                                    {{ getCanTransfer ? 'Transfer ' + bomQty.toLocaleString() : (isDistributionBusy ?
+                                        'Distribution Busy' :
+                                        'Insufficient Qty') }}
                                 </button>
                                 <div v-else class="alert alert-success">
                                     <span class="fa fa-check-circle mr-2"></span>

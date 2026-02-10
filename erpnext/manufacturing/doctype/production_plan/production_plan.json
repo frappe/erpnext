@@ -86,11 +86,11 @@
  ],
  "fields": [
   {
-   "default": "MFG-MPP-.YYYY.-",
+   "default": "MFG-DPP-.YYYY.-",
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Naming Series",
-   "options": "MFG-MPP-.YYYY.-\nMFG-DPP-.YYYY.-",
+   "options": "MFG-DPP-.YYYY.-\nMFG-MPP-.YYYY.-",
    "reqd": 1
   },
   {
@@ -582,7 +582,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-17 15:03:56.113430",
+ "modified": "2026-02-05 16:33:21.642511",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

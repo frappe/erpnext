@@ -75,7 +75,7 @@ class ProductionPlan(Document):
 		material_requests: DF.Table[ProductionPlanMaterialRequest]
 		monthly_production_plan: DF.Link | None
 		mr_items: DF.Table[MaterialRequestPlanItem]
-		naming_series: DF.Literal["MFG-MPP-.YYYY.-", "MFG-DPP-.YYYY.-"]
+		naming_series: DF.Literal["MFG-DPP-.YYYY.-", "MFG-MPP-.YYYY.-"]
 		po_items_line_1: DF.Table[ProductionPlanItem]
 		po_items_line_2: DF.Table[ProductionPlanItem]
 		po_items_line_3: DF.Table[ProductionPlanItem]

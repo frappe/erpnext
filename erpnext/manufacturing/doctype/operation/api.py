@@ -1,11 +1,10 @@
 import frappe
-import json
 from frappe import _
 from frappe.utils import flt
 
 
 @frappe.whitelist()
-def transfer_to_next_process(current_work_order, qty=None):
+def transfer_to_next_process(current_work_order, qty=None, process=None, mixer_number=None):
 	"""Transfer FG from Mixing → Next Process Source Warehouse."""
 	wo = frappe.get_doc("Work Order", current_work_order)
 	fg_item = wo.production_item
@@ -25,6 +24,7 @@ def transfer_to_next_process(current_work_order, qty=None):
 	current_process = (
 		wo.production_item.rsplit("-", 1)[-1].strip().lower() if "-" in wo.production_item else ""
 	)
+
 	next_process = process_mapping.get(current_process)
 
 	if not next_process:
@@ -41,9 +41,6 @@ def transfer_to_next_process(current_work_order, qty=None):
 	)
 
 	if not next_wo:
-		all_wos = frappe.get_all(
-			"Work Order", filters={"production_plan": wo.production_plan}, fields=["name", "production_item"]
-		)
 		frappe.throw(f"Next WO for '{next_process}' not found.")
 
 	next_wo_doc = frappe.get_doc("Work Order", next_wo)
@@ -103,9 +100,14 @@ def transfer_to_next_process(current_work_order, qty=None):
 
 	open_jc_doc = frappe.get_doc("Job Card", open_job_card)
 	open_jc_doc.transferred_qty = sum(item.transferred_qty for item in open_jc_doc.items)
+	if mixer_number:
+		open_jc_doc.mixer_number = mixer_number
 	open_jc_doc.save(ignore_permissions=True)
 
 	frappe.db.commit()
+
+	if process == "Mixing":
+		frappe.publish_realtime("refresh_operator_station")
 
 	return {
 		"status": "Success",
@@ -119,6 +121,7 @@ def transfer_to_next_process(current_work_order, qty=None):
 		"transferred_qty_updated": job_card_item_doc.transferred_qty,  # ✅ New!
 		"header_transferred_qty": open_jc_doc.transferred_qty,
 		"message": f"Transferred {fg_qty} {fg_item} to {next_wo}",
+		"mixer_number": mixer_number,
 	}
 
 
@@ -148,7 +151,7 @@ def get_recent_job_card(operation):
 
 
 @frappe.whitelist()
-def get_open_job_cards(process):
+def get_open_job_cards(process, line=None, include_wip=True, include_material_transferred=True):
 	# employee_id = frappe.db.get_value("Employee", {"user_id": frappe.session.user})
 	if process == "Mixing":
 		filters = {
@@ -157,18 +160,57 @@ def get_open_job_cards(process):
 			"operation": ["like", "%Mixing%"],
 		}
 	else:
+		workstation_names = [x.workstation_name for x in _get_workstations(process)]
+
+		if workstation_names:
+			ws_query = ["in", workstation_names]
+		else:
+			ws_query = ["like", f"%{process}%"]
+
+		in_query = []
+
+		if include_material_transferred:
+			in_query.append("Material Transferred")
+
+		if include_wip:
+			in_query.append("Work In Progress")
+
 		filters = {
-			"status": ["in", ["Material Transferred", "Work In Progress"]],
+			"status": ["in", in_query],
 			"docstatus": 0,
-			"workstation": ["like", f"%{process}%"],
+			"workstation": ws_query,
 		}
+
+	if line:
+		filters["production_line"] = line
+
 	job_cards = frappe.get_all(
 		"Job Card",
+		# limit=1,
 		filters=filters,
-		fields=["name", "work_order", "status", "production_item", "creation"],
-		order_by="creation asc",
+		fields=[
+			"name",
+			"work_order",
+			"status",
+			"production_item",
+			"slab",
+			"slab_template",
+			"started_time",
+			"creation",
+		],
+		order_by="modified asc",
+		ignore_permissions=True,
 	)
+
 	return job_cards
+
+
+def _get_workstations(workstation_type: str):
+	return frappe.get_all(
+		"Workstation",
+		filters={"workstation_type": ["like", f"%{workstation_type}%"]},
+		fields=["workstation_name"],
+	)
 
 
 @frappe.whitelist()
