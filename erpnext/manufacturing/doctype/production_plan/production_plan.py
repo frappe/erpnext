@@ -1,4 +1,4 @@
-# Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2017, Frappe Technelogies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
 
@@ -608,6 +608,9 @@ class ProductionPlan(Document):
 		self.calculate_total_produced_qty()	
 		self.set_status()
 		self.db_set("status", self.status)
+
+	def before_save(self):
+		self.get_sub_assembly_items()
 
 	def on_submit(self):
 		self.update_bin_qty()

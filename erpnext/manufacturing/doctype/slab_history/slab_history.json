@@ -51,10 +51,11 @@
   },
   {
    "fieldname": "job_card_number",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Job Card",
+   "options": "Job Card",
    "read_only": 1
   },
   {
@@ -83,7 +84,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-06 17:00:15.788200",
+ "modified": "2026-02-10 18:17:45.110971",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab History",
