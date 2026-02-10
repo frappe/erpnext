@@ -27,7 +27,8 @@ def execute(filters=None):
 		item_groups.append(filters.item_group)
 		item_groups.extend(get_descendants_of("Item Group", filters.item_group))
 
-	warehouse_company = {}
+	# Batch fetch warehouse companies to avoid N+1 queries
+	warehouse_company = get_warehouse_company_map(bin_list)
 	data = []
 	conversion_factors = []
 	for bin in bin_list:
@@ -38,9 +39,7 @@ def execute(filters=None):
 			continue
 
 		# item = item_map.setdefault(bin.item_code, get_item(bin.item_code))
-		company = warehouse_company.setdefault(
-			bin.warehouse, frappe.db.get_value("Warehouse", bin.warehouse, "company")
-		)
+		company = warehouse_company.get(bin.warehouse)
 
 		if filters.brand and filters.brand != item.brand:
 			continue
@@ -229,6 +228,23 @@ def get_columns():
 			"convertible": "qty",
 		},
 	]
+
+
+def get_warehouse_company_map(bin_list):
+	"""Batch fetch warehouse companies to avoid N+1 queries."""
+	if not bin_list:
+		return {}
+
+	warehouses = list({bin.warehouse for bin in bin_list})
+	if not warehouses:
+		return {}
+
+	wh = frappe.qb.DocType("Warehouse")
+	warehouse_data = (
+		frappe.qb.from_(wh).select(wh.name, wh.company).where(wh.name.isin(warehouses)).run(as_dict=True)
+	)
+
+	return {d.name: d.company for d in warehouse_data}
 
 
 def get_bin_list(filters):

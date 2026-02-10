@@ -619,12 +619,29 @@ def get_opening_balance(filters, columns, sl_entries):
 		}
 	)
 
+	# Batch fetch all Stock Reconciliation purposes to avoid N+1 queries
+	sr_vouchers = [
+		sle.voucher_no
+		for sle in sl_entries
+		if sle.get("voucher_type") == "Stock Reconciliation" and sle.posting_date == filters.from_date
+	]
+
+	opening_stock_vouchers = set()
+	if sr_vouchers:
+		opening_stock_vouchers = set(
+			frappe.get_all(
+				"Stock Reconciliation",
+				filters={"name": ("in", sr_vouchers), "purpose": "Opening Stock"},
+				pluck="name",
+			)
+		)
+
 	# check if any SLEs are actually Opening Stock Reconciliation
 	for sle in list(sl_entries):
 		if (
 			sle.get("voucher_type") == "Stock Reconciliation"
 			and sle.posting_date == filters.from_date
-			and frappe.db.get_value("Stock Reconciliation", sle.voucher_no, "purpose") == "Opening Stock"
+			and sle.voucher_no in opening_stock_vouchers
 		):
 			last_entry = sle
 			sl_entries.remove(sle)
