@@ -9,20 +9,24 @@ from erpnext.manufacturing.doctype.slab.slab import Slab
 @frappe.whitelist()
 def unload_slab_to_trimming(slab_number: str):
 
-    try:
-        slab: Slab = frappe.get_doc("Slab", slab_number)
+	try:
+		slab: Slab = frappe.get_doc("Slab", slab_number)
 
-        last_job_card: JobCard = frappe.get_doc("Job Card", slab.current_job_card)
+		last_job_card: JobCard = frappe.get_doc("Job Card", slab.current_job_card)
 
-        work_order = frappe.get_doc("Work Order", last_job_card.work_order)
+		work_order = frappe.get_doc("Work Order", last_job_card.work_order)
 
-        frappe.db.begin()
+		frappe.db.begin()
 
-        checkout_slab(slab_number)
-        transfer_to_next_process(work_order.name, last_job_card.total_completed_qty)
+		checkout_slab(slab_number)
+		transfer_to_next_process(
+			work_order.name,
+			last_job_card.total_completed_qty,
+			last_job_card.operation,
+			last_job_card.mixer_number,
+		)
 
-        frappe.db.commit()
+		frappe.db.commit()
 
-    except Exception:
-        frappe.db.rollback()
-
+	except Exception:
+		frappe.db.rollback()

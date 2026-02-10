@@ -24,6 +24,7 @@ const fetchWorkContext = async () => {
 const jobCardNumber = ref(null);
 const slabSize = ref(null);
 const selectedSlab = ref(null);
+const mixerNumber = ref(null);
 const isQAStarted = ref(false);
 const hourglassRotation = ref(0);
 const hourglassIcon = ref('fa-hourglass-3');
@@ -107,6 +108,7 @@ const get_slab_for_qa = async (job_card_number, play_ding = false) => {
 
         jobCardNumber.value = res.message.job_card?.name || jobCardNumber.value;
         slabSize.value = res.message.slab_size;
+        mixerNumber.value = res.message.job_card?.mixer_number || null;
         selectSlab(res.message.slab);
         isQAStarted.value = res.message.job_card?.status === "Work In Progress";
     }
@@ -390,6 +392,7 @@ onUnmounted(() => {
                             <div class="slab-template text-muted" style="font-size: 1.1rem;">
                                 {{ selectedSlab.template }}
                             </div>
+                            <span v-if="mixerNumber">Mixer: {{ mixerNumber }}</span>
                         </div>
                         <div class="flex-fill"></div>
                         <div class="slab-meta-boxes d-flex">
@@ -621,7 +624,8 @@ onUnmounted(() => {
                         </div>
                     </div>
                 </main>
-                <div v-else key="no-slab-message" class="no-slab-message text-center p-5 text-muted" style="border: 2px dashed; border-radius: 8px;">
+                <div v-else key="no-slab-message" class="no-slab-message text-center p-5 text-muted"
+                    style="border: 2px dashed; border-radius: 8px;">
                     <div class="mb-3">
                         <span :class="['fa', hourglassIcon]"
                             :style="{ transform: `rotate(${hourglassRotation}deg)`, transition: 'transform 0.5s', display: 'inline-block' }"
@@ -760,17 +764,17 @@ onUnmounted(() => {
 }
 
 .pop-switch-enter-active {
-	transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .pop-switch-leave-active {
-	transition: all 0.2s ease-in;
+    transition: all 0.2s ease-in;
 }
 
 .pop-switch-enter-from,
 .pop-switch-leave-to {
-	opacity: 0;
-	transform: scale(0.9);
+    opacity: 0;
+    transform: scale(0.9);
 }
 </style>
 
