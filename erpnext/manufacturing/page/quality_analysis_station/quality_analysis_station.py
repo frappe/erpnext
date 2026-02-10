@@ -3,6 +3,7 @@ import json
 import frappe
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCard
+from erpnext.manufacturing.doctype.operation.api import get_open_job_cards
 from erpnext.manufacturing.doctype.slab.api import get_slabs_for
 from erpnext.manufacturing.doctype.slab.slab import Slab
 from erpnext.manufacturing.doctype.slab_quality_report.slab_quality_report import SlabQualityReport
@@ -57,9 +58,11 @@ def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
 
     # Else, get the earliest open job card for the operation.
     if not job_card:
-        job_card = get_top_job_card_for_process("Quality Check", line, True)
+        job_cards = get_open_job_cards("Quality Check", line, True)
+        wip_job_cards = [jc for jc in job_cards if jc.status == "Work In Progress"]
+        job_card = wip_job_cards[0] if wip_job_cards else job_cards[0] if job_cards else None
 
-    slab = None
+    slab: Slab | None = None
     if job_card and job_card.slab:
         slab = frappe.get_doc("Slab", job_card.slab)
 
@@ -68,9 +71,15 @@ def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
         slabs = get_slabs_for(line, next_stage="Quality Check")
         slab = slabs[0] if slabs else None
 
+    slab_size = None
+    if slab:
+        slab_size_name = slab.template.split("-")[-2]
+        slab_size = frappe.get_doc("Slab Size", slab_size_name)
+
     return {
         "slab": slab,
-        "job_card": job_card
+        "job_card": job_card,
+        "slab_size": slab_size
     }
 
 
@@ -94,6 +103,9 @@ def _create_slab_quality_report(slab_name: str, report: str | dict, shift: str):
         raise Exception("Slab is not in quality check.")
 
     last_history_item.quality_report_name = doc.name
+
+    slab.grade = doc.grade
+    slab.quality_assessment = doc.name
     slab.save(ignore_permissions=True)
 
     return doc

@@ -25,9 +25,9 @@
   "column_break_cggy",
   "slab_thickness",
   "quality_measurements_section",
-  "fs",
+  "filler_spot",
   "column_break_2uin",
-  "con",
+  "contamination",
   "paper_deep_section",
   "paper_deep_front",
   "column_break_0ycf",
@@ -41,7 +41,10 @@
   "column_break_0tsh",
   "grade",
   "section_break_8ixs",
-  "remarks"
+  "remarks",
+  "section_break_jbcr",
+  "visualizer_preview",
+  "observations"
  ],
  "fields": [
   {
@@ -156,18 +159,18 @@
    "label": "Quality Measurements"
   },
   {
-   "fieldname": "fs",
+   "fieldname": "filler_spot",
    "fieldtype": "Data",
-   "label": "F.S."
+   "label": "Filler Spot"
   },
   {
    "fieldname": "column_break_2uin",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "con",
+   "fieldname": "contamination",
    "fieldtype": "Data",
-   "label": "Con"
+   "label": "Contamination"
   },
   {
    "fieldname": "paper_deep_section",
@@ -209,7 +212,8 @@
   },
   {
    "fieldname": "section_break_ueen",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Grading & Remarks"
   },
   {
    "fieldname": "bend",
@@ -235,13 +239,30 @@
   {
    "fieldname": "section_break_8ixs",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_jbcr",
+   "fieldtype": "Section Break",
+   "label": "Observations"
+  },
+  {
+   "fieldname": "visualizer_preview",
+   "fieldtype": "HTML",
+   "label": "Visualizer Preview"
+  },
+  {
+   "fieldname": "observations",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Observations",
+   "options": "Slab Quality Observation"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-06 17:09:02.347961",
+ "modified": "2026-02-10 01:39:54.475723",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab Quality Report",
