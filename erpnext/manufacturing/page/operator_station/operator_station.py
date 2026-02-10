@@ -36,13 +36,14 @@ def get_machine_state(job_card, process_name="operator"):
 		"current_process": wo.item_name.rsplit("-", 1)[-1].strip()
 		if wo and "-" in wo.item_name
 		else process_name,
+		"mixer_number": jc.mixer_number,
 	}
 
 	return state
 
 
 @frappe.whitelist()
-def start_process(job_card, slab_name="", slab_template = "", process_name="operator"):
+def start_process(job_card, slab_name="", slab_template="", process_name="operator"):
 	"""Start the Job Card when mixing starts."""
 
 	jc: JobCard = frappe.get_doc("Job Card", job_card)
@@ -154,7 +155,7 @@ def finish_process(job_card, process_name, transfer_materials=True, should_stop_
 	checkout_slab(jc.slab)
 
 	if transfer_materials:
-		transfer_to_next_process(work_order, job_card_qty)
+		transfer_to_next_process(work_order, job_card_qty, mixer_number=jc.mixer_number)
 
 	if should_stop_machine:
 		stop_machine(process_name, jc.production_line, None)
@@ -216,7 +217,9 @@ def get_next_process_bom_qty(current_work_order):
 	return {"bom_qty": 0}
 
 
-def get_machine(station: str, line_name: str | None = None, machine_name: str | None = None) -> Workstation | None:
+def get_machine(
+	station: str, line_name: str | None = None, machine_name: str | None = None
+) -> Workstation | None:
 	if not line_name or not machine_name:
 		# Get the machine and line from the work context.
 		work_context = get_current_user_context()
@@ -261,7 +264,7 @@ def set_machine_status(status: str, station: str, line_name: str | None, machine
 
 
 @frappe.whitelist()
-def get_next_work_item(process, line="", include_wip = True):
+def get_next_work_item(process, line="", include_wip=True):
 	if isinstance(include_wip, str):
 		include_wip = include_wip.lower() == "true"
 
@@ -276,7 +279,7 @@ def get_next_work_item(process, line="", include_wip = True):
 	}
 
 
-def get_top_job_card_for_process(process, line="", include_wip = True):
+def get_top_job_card_for_process(process, line="", include_wip=True):
 	job_cards = get_open_job_cards(process, line, include_wip)
 	return job_cards[0] if job_cards else None
 

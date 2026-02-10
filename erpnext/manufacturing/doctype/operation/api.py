@@ -4,7 +4,7 @@ from frappe.utils import flt
 
 
 @frappe.whitelist()
-def transfer_to_next_process(current_work_order, qty=None, process=None):
+def transfer_to_next_process(current_work_order, qty=None, process=None, mixer_number=None):
 	"""Transfer FG from Mixing → Next Process Source Warehouse."""
 	wo = frappe.get_doc("Work Order", current_work_order)
 	fg_item = wo.production_item
@@ -100,6 +100,8 @@ def transfer_to_next_process(current_work_order, qty=None, process=None):
 
 	open_jc_doc = frappe.get_doc("Job Card", open_job_card)
 	open_jc_doc.transferred_qty = sum(item.transferred_qty for item in open_jc_doc.items)
+	if mixer_number:
+		open_jc_doc.mixer_number = mixer_number
 	open_jc_doc.save(ignore_permissions=True)
 
 	frappe.db.commit()
@@ -119,6 +121,7 @@ def transfer_to_next_process(current_work_order, qty=None, process=None):
 		"transferred_qty_updated": job_card_item_doc.transferred_qty,  # ✅ New!
 		"header_transferred_qty": open_jc_doc.transferred_qty,
 		"message": f"Transferred {fg_qty} {fg_item} to {next_wo}",
+		"mixer_number": mixer_number,
 	}
 
 
@@ -148,7 +151,7 @@ def get_recent_job_card(operation):
 
 
 @frappe.whitelist()
-def get_open_job_cards(process, line=None, include_wip = True, include_material_transferred = True):
+def get_open_job_cards(process, line=None, include_wip=True, include_material_transferred=True):
 	# employee_id = frappe.db.get_value("Employee", {"user_id": frappe.session.user})
 	if process == "Mixing":
 		filters = {
@@ -185,15 +188,29 @@ def get_open_job_cards(process, line=None, include_wip = True, include_material_
 		"Job Card",
 		# limit=1,
 		filters=filters,
-		fields=["name", "work_order", "status", "production_item", "slab", "slab_template", "started_time", "creation"],
+		fields=[
+			"name",
+			"work_order",
+			"status",
+			"production_item",
+			"slab",
+			"slab_template",
+			"started_time",
+			"creation",
+		],
 		order_by="modified asc",
-		ignore_permissions=True
+		ignore_permissions=True,
 	)
 
 	return job_cards
 
+
 def _get_workstations(workstation_type: str):
-	return frappe.get_all("Workstation", filters={"workstation_type": ["like", f"%{workstation_type}%"]}, fields=["workstation_name"])
+	return frappe.get_all(
+		"Workstation",
+		filters={"workstation_type": ["like", f"%{workstation_type}%"]},
+		fields=["workstation_name"],
+	)
 
 
 @frappe.whitelist()

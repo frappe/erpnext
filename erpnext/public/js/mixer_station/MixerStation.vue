@@ -458,7 +458,8 @@ async function transferToFGWarehouse() {
             args: {
                 current_work_order: workOrder,
                 qty: bomQty.value,
-                process: 'Mixing'
+                process: 'Mixing',
+                mixer_number: selectedMixer.value
             },
             freeze: true,
             freeze_message: __('Transferring to Distribution')

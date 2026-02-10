@@ -23,6 +23,7 @@ const slabTemplate = ref('');
 const line = ref(null);
 const error = ref(null);
 const batchNo = ref(null);
+const mixerNumber = ref(null);
 
 const alarms = ref([
 	{
@@ -50,22 +51,22 @@ const station_reverse_map = {
 };
 
 const work_context = reactive({
-    role: "Oven Operator",
-    assigned_line: "",
-    assigned_station: "Oven 1",
-    assigned_shift: ""
+	role: "Oven Operator",
+	assigned_line: "",
+	assigned_station: "Oven 1",
+	assigned_shift: ""
 });
 
 const fetchWorkContext = async () => {
-    const currentUser = await frappe.call({
-        method: "erpnext.setup.doctype.employee.api.get_current_user_context",
-    });
+	const currentUser = await frappe.call({
+		method: "erpnext.setup.doctype.employee.api.get_current_user_context",
+	});
 
-    if (currentUser.message) {
-        work_context.role = currentUser.message.designation;
-        work_context.assigned_line = currentUser.message.production_line;
-        work_context.assigned_shift = currentUser.message.attendance_shift;
-    }
+	if (currentUser.message) {
+		work_context.role = currentUser.message.designation;
+		work_context.assigned_line = currentUser.message.production_line;
+		work_context.assigned_shift = currentUser.message.attendance_shift;
+	}
 };
 
 // UI flags
@@ -139,6 +140,8 @@ async function loadJobCard(name) {
 		}
 
 		processStartTime.value = state[`${station}_start_time`];
+		mixerNumber.value = state.mixer_number;
+
 		if (jobCardSubmitted.value) {
 			stockEntryName.value = state.stock_entry_name || '';
 		}
@@ -410,7 +413,8 @@ function statusStyle() {
 			style="overflow-y: auto;">
 			<!-- Current Job Card -->
 			<Transition name="pop-switch" mode="out-in">
-				<div v-if="jobCardName" key="job-card" class="current-job-card mb-4 border border-dark w-50 rounded p-4" style="min-width: 650px;">
+				<div v-if="jobCardName" key="job-card" class="current-job-card mb-4 border border-dark w-50 rounded p-4"
+					style="min-width: 650px;">
 					<div class="status text-center mb-2" style="font-size:1rem">
 						<span class="badge badge-pill" :style="statusStyle()">
 							{{ __(status) }}
@@ -430,6 +434,10 @@ function statusStyle() {
 						<span class="job-color bold mr-2" style="font-size:1rem">{{ colour || slabTemplate }}</span>
 						<span class="color-swatch"
 							style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span>
+					</div>
+
+					<div v-if="mixerNumber" class="text-center font-weight-bold mb-2 text-muted" style="font-size:1rem">
+						Mixer: {{ mixerNumber }}
 					</div>
 
 					<div class="text-center mb-2" v-if="processReady">
@@ -457,7 +465,8 @@ function statusStyle() {
 						</button>
 					</div>
 				</div>
-				<div v-else key="empty-state" class="empty-state mb-4 border border-secondary rounded p-5 d-flex flex-column align-items-center justify-content-center" 
+				<div v-else key="empty-state"
+					class="empty-state mb-4 border border-secondary rounded p-5 d-flex flex-column align-items-center justify-content-center"
 					style="min-width: 650px; background-color: var(--fg-color); border-style: dashed !important;">
 					<div class="mb-3 text-muted" style="opacity: 0.5;">
 						<span class="fa fa-inbox" style="font-size: 4rem;"></span>

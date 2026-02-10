@@ -132,6 +132,9 @@ const fetch_slab_for_job_card = async (play_ding = false) => {
         }
 
         selectedSlab.value = result.message?.slab;
+        if (selectedSlab.value && result.message?.job_card?.mixer_number) {
+            selectedSlab.value.mixer_number = result.message.job_card.mixer_number;
+        }
         jobCardNumber.value = result.message?.job_card?.name;
     } catch (e) {
         console.error("Failed to fetch slab for job card", e);
@@ -294,7 +297,7 @@ function rackClasses(rack) {
     if (rack.state === 'Heating') return 'curing';
     if (rack.state === 'Overheat') return 'overheat';
     if (!rack.is_operational) return 'maintenance';
-    
+
     // Idle state
     if (!selectedSlab.value) return 'disabled empty';
     return 'empty';
@@ -389,22 +392,26 @@ frappe.realtime.on('slab_checkout', async (slab) => {
             </div>
 
             <Transition name="pop-switch" mode="out-in">
-                <div v-if="selectedSlab" key="current-slab" class="current-slab-container d-flex align-items-center justify-content-between border rounded p-3 mb-4 mt-3" style="background-color: var(--control-bg-on-gray, #e2edff); border-color: var(--primary-color) !important;">
+                <div v-if="selectedSlab" key="current-slab"
+                    class="current-slab-container d-flex align-items-center justify-content-between border rounded p-3 mb-4 mt-3"
+                    style="background-color: var(--control-bg-on-gray, #e2edff); border-color: var(--primary-color) !important;">
                     <div class="d-flex align-items-center">
                         <span class="text-muted mr-3">{{ __('Current Slab') }}:</span>
                         <div class="slab-thumbnail mr-3" style="width: 24px; height: 24px;"></div>
                         <span class="font-weight-bold h5 mb-0 mr-2">{{ selectedSlab.name }}</span>
-                        <span class="text-muted">{{ selectedSlab.template }}</span>
+                        <span class="text-muted mr-3">{{ selectedSlab.template }}</span>
+                        <span v-if="selectedSlab.mixer_number">Mixer : {{ selectedSlab.mixer_number }}</span>
                     </div>
                 </div>
-                <div v-else key="no-slabs" class="no-slabs-message d-flex align-items-center justify-content-center border rounded p-3 mb-4 mt-3 text-muted">
+                <div v-else key="no-slabs"
+                    class="no-slabs-message d-flex align-items-center justify-content-center border rounded p-3 mb-4 mt-3 text-muted">
                     {{ __('No slabs available for heating') }}
                 </div>
             </Transition>
 
             <div class="rack-grid d-flex flex-wrap" :class="selectedSlab ? 'pt-3' : 'pt-5'">
-                <div v-for="rack in racks" :key="rack.slot" :class="rackClasses(rack)" class="rack-card mb-3 mr-3 p-3 rounded"
-                    style="position: relative;"
+                <div v-for="rack in racks" :key="rack.slot" :class="rackClasses(rack)"
+                    class="rack-card mb-3 mr-3 p-3 rounded" style="position: relative;"
                     @click="rack.state === 'Heating' || rack.state === 'Overheat' ? unload_slab_from_rack(rack) : loadIntoRack(rack)">
                     <div v-if="rack.state === 'Overheat'" class="warning-icon pulse-icon">
                         <span class="fa fa-exclamation-circle text-danger"></span>
@@ -577,19 +584,22 @@ frappe.realtime.on('slab_checkout', async (slab) => {
 .rack-card.curing {
     border-style: solid;
     border-color: #28a745;
-    background: rgba(40, 167, 69, 0.15); /* Green tint */
+    background: rgba(40, 167, 69, 0.15);
+    /* Green tint */
 }
 
 .rack-card.overheat {
     border-style: solid;
     border-color: #dc3545;
-    background: rgba(220, 53, 69, 0.15); /* Red tint */
+    background: rgba(220, 53, 69, 0.15);
+    /* Red tint */
 }
 
 .rack-card.maintenance {
     border-style: dashed;
     border-color: #6c757d;
-    background: rgba(108, 117, 125, 0.15); /* Gray tint */
+    background: rgba(108, 117, 125, 0.15);
+    /* Gray tint */
 }
 
 .rack-card.disabled {
@@ -751,16 +761,16 @@ frappe.realtime.on('slab_checkout', async (slab) => {
 }
 
 .pop-switch-enter-active {
-	transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .pop-switch-leave-active {
-	transition: all 0.2s ease-in;
+    transition: all 0.2s ease-in;
 }
 
 .pop-switch-enter-from,
 .pop-switch-leave-to {
-	opacity: 0;
-	transform: scale(0.9);
+    opacity: 0;
+    transform: scale(0.9);
 }
 </style>
