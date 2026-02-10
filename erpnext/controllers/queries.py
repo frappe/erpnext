@@ -378,7 +378,7 @@ def get_project_name(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_delivery_notes_to_be_billed(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, as_dict: bool
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, as_dict: bool = False
 ):
 	DeliveryNote = frappe.qb.DocType("Delivery Note")
 
