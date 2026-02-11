@@ -171,14 +171,11 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "{supplier_name}",
    "fieldname": "title",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Title",
    "no_copy": 1,
-   "print_hide": 1,
-   "reqd": 1
+   "print_hide": 1
   },
   {
    "fieldname": "naming_series",
@@ -219,6 +216,7 @@
    "fieldname": "supplier_name",
    "fieldtype": "Data",
    "in_global_search": 1,
+   "in_list_view": 1,
    "label": "Supplier Name",
    "read_only": 1
   },
@@ -1310,7 +1308,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-29 21:22:54.323838",
+ "modified": "2026-02-11 11:19:42.265863",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
@@ -1364,6 +1362,6 @@
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "supplier",
- "title_field": "supplier_name",
+ "title_field": "title",
  "track_changes": 1
 }
