@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-02-08 09:43+0000\n"
-"PO-Revision-Date: 2026-02-09 08:24\n"
+"PO-Revision-Date: 2026-02-11 13:26\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -16273,7 +16273,7 @@ msgstr "Fördelad Rabatt Belopp"
 #. Label of the distribution_frequency (Select) field in DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "Distribution Frequency"
-msgstr "Fördelning Frekvens"
+msgstr "Fördelning Intervall"
 
 #. Label of the distribution_id (Data) field in DocType 'Monthly Distribution'
 #: erpnext/accounts/doctype/monthly_distribution/monthly_distribution.json
@@ -35148,7 +35148,7 @@ msgstr "Välj Fält att redigera från Numeriska Tangenter"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:709
 msgid "Please select a frequency for delivery schedule"
-msgstr "Välj frekvens för leverans schema"
+msgstr "Välj intervall för leverans schema"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:135
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.js:73
