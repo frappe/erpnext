@@ -18,7 +18,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimension_with_children,
 )
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
-from erpnext.accounts.utils import get_fiscal_year, get_zero_cutoff
+from erpnext.accounts.utils import build_qb_match_conditions, get_fiscal_year, get_zero_cutoff
 
 
 def get_period_list(
@@ -564,18 +564,16 @@ def get_accounting_entries(
 		account_filter_query = get_account_filter_query(root_lft, root_rgt, root_type, gl_entry)
 		query = query.where(ExistsCriterion(account_filter_query))
 
-	from frappe.desk.reportview import build_match_conditions
-
-	query, params = query.walk()
-	match_conditions = build_match_conditions(doctype)
+	match_conditions = build_qb_match_conditions(doctype)
 
 	if match_conditions:
-		query += " AND (" + match_conditions + ")"
+		for condition in match_conditions:
+			query = query.where(condition)
 
 	if group_by_account:
-		query += " GROUP BY `account`"
+		query = query.groupby(gl_entry.account)
 
-	return frappe.db.sql(query, params, as_dict=True)
+	return query.run(as_dict=True)
 
 
 def get_account_filter_query(root_lft, root_rgt, root_type, gl_entry):
