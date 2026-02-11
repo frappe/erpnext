@@ -2664,9 +2664,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			() => {
 				// Cache the is_tax_exempt status for use in tax calculations
 				if (me.frm.doc.tax_category) {
-					return frappe.db.get_value("Tax Category", me.frm.doc.tax_category, "is_tax_exempt").then((r) => {
-						me.frm.doc.__is_tax_exempt = r.message ? r.message.is_tax_exempt : 0;
-					});
+					return frappe.db
+						.get_value("Tax Category", me.frm.doc.tax_category, "is_tax_exempt")
+						.then((r) => {
+							me.frm.doc.__is_tax_exempt = r.message ? r.message.is_tax_exempt : 0;
+						});
 				} else {
 					me.frm.doc.__is_tax_exempt = 0;
 				}

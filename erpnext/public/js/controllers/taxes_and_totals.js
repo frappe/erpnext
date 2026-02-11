@@ -35,6 +35,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	async calculate_taxes_and_totals(update_paid_amount) {
+		await this._refresh_non_exempt_rates_if_needed();
 		this.discount_amount_applied = false;
 		this._calculate_taxes_and_totals();
 		this.calculate_discount_amount();
@@ -92,6 +93,31 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			this.set_discount_amount();
 			this.apply_discount_amount();
 		}
+	}
+
+	async _refresh_non_exempt_rates_if_needed() {
+		if (!this.frm.doc.__is_tax_exempt || !this.frm.doc.items?.length) return;
+
+		let cached = this.frm.doc.__non_exempt_rates || {};
+		let missing = [
+			...new Set(
+				this.frm.doc.items
+					.map((d) => d.item_code)
+					.filter((code) => code && !(code in cached))
+			),
+		];
+		if (!missing.length) return;
+
+		let r = await frappe.call({
+			method: "erpnext.controllers.taxes_and_totals.get_non_exempt_tax_rates",
+			args: {
+				item_codes: missing,
+				tax_category: this.frm.doc.tax_category,
+				company: this.frm.doc.company,
+			},
+		});
+		Object.assign(cached, r.message || {});
+		this.frm.doc.__non_exempt_rates = cached;
 	}
 
 	_calculate_taxes_and_totals() {
@@ -402,6 +428,13 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				actual_tax_dict[tax.idx] = flt(tax.tax_amount, precision("tax_amount", tax));
 			}
 		});
+
+		// Zero out Actual tax amounts for tax-exempt categories
+		if (me.frm.doc.__is_tax_exempt) {
+			$.each(actual_tax_dict, function (idx) {
+				actual_tax_dict[idx] = 0;
+			});
+		}
 
 		$.each(this.frm._items || [], function (n, item) {
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);

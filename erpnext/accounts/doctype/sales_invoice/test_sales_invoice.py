@@ -479,7 +479,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		)
 		si.insert()
 
-		# Item 1: 3 × 200 = 600, Item 2: 2 × 350 = 700, Total = 1300
+		# Item 1: 3 x 200 = 600, Item 2: 2 x 350 = 700, Total = 1300
 		self.assertEqual(si.items[0].net_amount, 600)
 		self.assertEqual(si.items[1].net_amount, 700)
 		self.assertEqual(si.net_total, 1300)
@@ -515,6 +515,30 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		tax_gl = [e for e in gl_entries if e.account == "_Test Account Service Tax - _TC"]
 		self.assertEqual(len(tax_gl), 0, "Tax-exempt invoice should not have GL entries for tax account")
+
+	def test_tax_exempt_actual_charge_type(self):
+		"""Tax-exempt category with Actual charge type: tax amount must be zero."""
+		tax_category = frappe.get_doc(
+			{"doctype": "Tax Category", "title": "_Test Tax Exempt", "is_tax_exempt": 1}
+		).insert()
+
+		si = create_sales_invoice(qty=2, rate=500, do_not_save=True)
+		si.tax_category = tax_category.name
+		si.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Service Tax",
+				"tax_amount": 150,
+			},
+		)
+		si.insert()
+
+		self.assertEqual(si.net_total, 1000)
+		self.assertEqual(si.taxes[0].tax_amount, 0)
+		self.assertEqual(si.grand_total, 1000)
 
 	def test_sales_invoice_discount_amount(self):
 		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][3])

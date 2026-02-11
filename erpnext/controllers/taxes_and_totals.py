@@ -346,22 +346,9 @@ class calculate_taxes_and_totals:
 		if not item.get("item_code"):
 			return {}
 
-		item_doc = frappe.get_cached_doc("Item", item.item_code)
-		company = self.doc.get("company")
-		exempt_category = self.doc.get("tax_category")
-
-		for row in item_doc.get("taxes", []):
-			if row.tax_category == exempt_category:
-				continue
-			template = frappe.get_cached_doc("Item Tax Template", row.item_tax_template)
-			rates = {}
-			for d in template.taxes:
-				if frappe.get_cached_value("Account", d.tax_type, "company") == company:
-					rates[d.tax_type] = d.tax_rate
-			if rates:
-				return rates
-
-		return {}
+		return _get_non_exempt_rates_for_item(
+			item.item_code, self.doc.get("tax_category"), self.doc.get("company")
+		)
 
 	def _load_item_tax_rate(self, item_tax_rate):
 		return json.loads(item_tax_rate) if item_tax_rate else {}
@@ -446,6 +433,11 @@ class calculate_taxes_and_totals:
 				if tax.charge_type == "Actual"
 			]
 		)
+
+		# Zero out Actual tax amounts for tax-exempt categories
+		if self._is_tax_exempt:
+			for idx in actual_tax_dict:
+				actual_tax_dict[idx] = 0
 
 		for n, item in enumerate(self._items):
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
@@ -1310,24 +1302,31 @@ def get_rounded_tax_amount(itemised_tax, precision):
 				row["tax_amount"] = flt(row["tax_amount"], precision)
 
 
+def _get_non_exempt_rates_for_item(item_code: str, tax_category: str, company: str) -> dict:
+	"""Return non-exempt tax rates for a single item, skipping the given exempt category."""
+	item_doc = frappe.get_cached_doc("Item", item_code)
+	for row in item_doc.get("taxes", []):
+		if row.tax_category == tax_category:
+			continue
+		template = frappe.get_cached_doc("Item Tax Template", row.item_tax_template)
+		rates = {}
+		for d in template.taxes:
+			if frappe.get_cached_value("Account", d.tax_type, "company") == company:
+				rates[d.tax_type] = d.tax_rate
+		if rates:
+			return rates
+	return {}
+
+
 @frappe.whitelist()
-def get_non_exempt_tax_rates(item_codes, tax_category, company):
+def get_non_exempt_tax_rates(item_codes: str | list, tax_category: str, company: str):
 	"""Get non-exempt tax rates for items, used by JS for backing out inclusive prices."""
 	item_codes = json.loads(item_codes) if isinstance(item_codes, str) else item_codes
 	result = {}
 	for item_code in item_codes:
-		item_doc = frappe.get_cached_doc("Item", item_code)
-		for row in item_doc.get("taxes", []):
-			if row.tax_category == tax_category:
-				continue
-			template = frappe.get_cached_doc("Item Tax Template", row.item_tax_template)
-			rates = {}
-			for d in template.taxes:
-				if frappe.get_cached_value("Account", d.tax_type, "company") == company:
-					rates[d.tax_type] = d.tax_rate
-			if rates:
-				result[item_code] = rates
-				break
+		rates = _get_non_exempt_rates_for_item(item_code, tax_category, company)
+		if rates:
+			result[item_code] = rates
 	return result
 
 
