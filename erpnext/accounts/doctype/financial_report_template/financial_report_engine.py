@@ -1849,7 +1849,7 @@ class GrowthViewTransformer:
 # ============================================================================
 
 
-def get_xlsx_styles(metadata: XLSXMetadata) -> dict:
+def get_xlsx_styles(metadata: XLSXMetadata) -> dict | None:
 	"""
 	Generate XLSX styles for financial report templates.
 
@@ -1949,7 +1949,7 @@ def get_xlsx_styles(metadata: XLSXMetadata) -> dict:
 			if (
 				formatting.get("warn_if_negative")
 				and cell_fieldtype in frappe.model.numeric_fieldtypes
-				and cint(row.get(fieldname)) < 0
+				and flt(row.get(fieldname)) < 0
 			):
 				style_cell(row_idx, col_idx, styles["warning"])
 			elif color := formatting.get("color"):
