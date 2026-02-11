@@ -349,13 +349,12 @@ def get_next_process_bom_qty(mixing_work_order):
 
 
 @frappe.whitelist()
-def get_all_mixers(job_card, production_line=None):
-	filters = {}
-	if job_card:
-		jc = frappe.get_doc("Job Card", job_card)
-		filters["line_no"] = jc.production_line or production_line
-
-	mixers_list = frappe.get_all("Mixer", filters=filters, order_by="line_no")
+def get_all_mixers(production_line=None):
+	filters = {
+		"production_line": production_line,
+		"workstation_type": "Mixing",
+	}
+	mixers_list = frappe.get_all("Workstation", filters=filters)
 	return mixers_list
 
 
