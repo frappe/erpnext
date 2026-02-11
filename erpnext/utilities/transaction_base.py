@@ -410,7 +410,7 @@ class TransactionBase(StatusUpdater):
 			)
 
 			if self.doctype != "Material Request":
-				item_obj.total_weight = flt(item_obj.stock_qty * item_obj.weight_per_unit)
+				item_obj.total_weight = flt(item_obj.stock_qty * flt(item_obj.weight_per_unit))
 				self.calculate_net_weight()
 
 			# TODO: for handling customization not to fetch price list rate
