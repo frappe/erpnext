@@ -84,6 +84,18 @@ const allAdditionalIngredientsAdded = computed(() => {
 
 const isMixerSelected = computed(() => !!selectedMixer.value);
 
+const fetchWorkContext = async () => {
+    const currentUser = await frappe.call({
+        method: "erpnext.setup.doctype.employee.api.get_current_user_context",
+    });
+    debugger;
+    if (currentUser.message) {
+        work_context.role = currentUser.message.designation;
+        work_context.assigned_line = currentUser.message.production_line;
+        work_context.assigned_shift = currentUser.message.attendance_shift;
+    }
+}
+
 // actions
 onMounted(async () => {
     const route = frappe.get_route();
@@ -139,7 +151,8 @@ onMounted(async () => {
 
         if (jobCard.value) {
             const jc = await frappe.db.get_doc('Job Card', jobCard.value);
-            productionLine.value = jc.production_line;
+            // productionLine.value = jc.production_line;
+            productionLine.value = work_context.assigned_line;
             if (jc.bom_no) {
                 const bom_elements = jc.bom_no.split("-");
                 batchNo.value = `${bom_elements[1]}-${bom_elements[2]}`.trim();
@@ -528,8 +541,7 @@ async function loadMixers() {
     const response = await frappe.call({
         method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_all_mixers',
         args: {
-            job_card: jobCard.value,
-            production_line: productionLine.value
+            production_line: work_context.assigned_line
         }
     });
     mixersList.value = response.message || [];
@@ -547,17 +559,6 @@ async function onMixerChange() {
     }
 }
 
-async function fetchWorkContext() {
-    const currentUser = await frappe.call({
-        method: "erpnext.setup.doctype.employee.api.get_current_user_context",
-    });
-
-    if (currentUser.message) {
-        work_context.role = currentUser.message.designation;
-        work_context.assigned_line = currentUser.message.production_line;
-        work_context.assigned_shift = currentUser.message.attendance_shift;
-    }
-}
 
 async function fetchQueue() {
     try {
@@ -576,7 +577,7 @@ async function fetchDistributionStatus() {
     try {
         const r = await frappe.call({
             method: 'erpnext.manufacturing.page.mixer_station.mixer_station.check_distribution_status',
-            args: { production_line: productionLine.value }
+            args: { production_line: work_context.assigned_line }
         });
         isDistributionBusy.value = r.message?.busy || false;
     } catch (e) {
