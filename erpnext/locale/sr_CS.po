@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-02-08 09:43+0000\n"
-"PO-Revision-Date: 2026-02-09 12:00\n"
+"PO-Revision-Date: 2026-02-11 12:28\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Serbian (Latin)\n"
 "MIME-Version: 1.0\n"
@@ -4169,7 +4169,7 @@ msgstr "Dozvoli korisniku da uređuje cene"
 #. Label of the allow_warehouse_change (Check) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Allow User to Edit Warehouse"
-msgstr ""
+msgstr "Dozvoli korisniku uređivanje skladišta"
 
 #. Label of the allow_different_uom (Check) field in DocType 'Item Variant
 #. Settings'
@@ -4759,7 +4759,7 @@ msgstr "Analitičar"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Analytical Accounting"
-msgstr ""
+msgstr "Analitičko računovodstvo"
 
 #: erpnext/public/js/utils.js:93
 msgid "Annual Billing: {0}"
@@ -4924,7 +4924,7 @@ msgstr "Primenljivo na knjiženje stvarnih troškova"
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Applicable only on Transactions made using POS"
-msgstr ""
+msgstr "Primenjivo samo na transakcije izvršene u maloprodaji"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:10
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:10
@@ -5066,7 +5066,7 @@ msgstr "Primeni sporazuma o nivou usluge za vreme rešavanja"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Apply discounts and margins on products"
-msgstr ""
+msgstr "Primeni popuste i marže na proizvode"
 
 #. Label of the apply_restriction_on_values (Check) field in DocType
 #. 'Accounting Dimension Filter'
@@ -5600,7 +5600,7 @@ msgstr "Status imovine"
 #. Label of the asset_type (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Asset Type"
-msgstr ""
+msgstr "Vrsta imovine"
 
 #. Label of the asset_value (Currency) field in DocType 'Asset Capitalization
 #. Asset Item'
@@ -6251,7 +6251,7 @@ msgstr "Dostupno"
 #. DocType 'Bin'
 #: erpnext/stock/doctype/bin/bin.json
 msgid "Available / Future Inventory"
-msgstr ""
+msgstr "Dostupan / Budući inventar"
 
 #. Label of the actual_batch_qty (Float) field in DocType 'Delivery Note Item'
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
@@ -6364,7 +6364,7 @@ msgstr "Dostupne zalihe za pakovanje stavki"
 #. Label of the available_for_use_date (Date) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Available for Use Date"
-msgstr ""
+msgstr "Datum dostupnosti za upotrebu"
 
 #: erpnext/assets/doctype/asset/asset.py:382
 msgid "Available for use date is required"
@@ -9658,11 +9658,11 @@ msgstr "Proverite da li unos prenosa materijala nije potreban"
 
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.py:58
 msgid "Check row {0} for account {1}: Party Type is only allowed for Receivable or Payable accounts"
-msgstr ""
+msgstr "Proverite red {0} za račun {1}: Vrsta stranke je dozvoljena samo za račune potraživanja ili obaveza"
 
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.py:65
 msgid "Check row {0} for account {1}: Party is only allowed if Party Type is set"
-msgstr ""
+msgstr "Proverite red {0} za račun {1}: Stranka je dozvoljena samo ukoliko je postavljena vrsta stranke"
 
 #. Description of the 'Must be Whole Number' (Check) field in DocType 'UOM'
 #: erpnext/setup/doctype/uom/uom.json
@@ -11023,12 +11023,12 @@ msgstr "Naziv komponente"
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Composite Asset"
-msgstr ""
+msgstr "Kompozitna imovina"
 
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Composite Component"
-msgstr ""
+msgstr "Kompozitna komponenta"
 
 #. Label of the comprehensive_insurance (Data) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -11087,7 +11087,7 @@ msgstr "Datum potvrde"
 #. Label of the connection_tab (Tab Break) field in DocType 'Asset Repair'
 #: erpnext/assets/doctype/asset_repair/asset_repair.json
 msgid "Connection"
-msgstr ""
+msgstr "Veza"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.js:175
 msgid "Consider Accounting Dimensions"
@@ -13621,7 +13621,7 @@ msgstr "Kupac detalji porudžbenice"
 #. Label of the customer_pos_id (Data) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Customer POS ID"
-msgstr ""
+msgstr "ID kupca u maloprodaji"
 
 #. Label of the portal_users (Table) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
@@ -17233,7 +17233,7 @@ msgstr "Ems (Pica)"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Accounting Dimensions"
-msgstr ""
+msgstr "Omogući računovodstvene dimenzije"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1721
 msgid "Enable Allow Partial Reservation in the Stock Settings to reserve partial stock."
@@ -17308,7 +17308,7 @@ msgstr "Omogućite obračunavanje popusta za prodaju"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Discounts and Margin"
-msgstr ""
+msgstr "Omogući popuste i maržu"
 
 #. Label of the enable_european_access (Check) field in DocType 'Plaid
 #. Settings'
@@ -17344,7 +17344,7 @@ msgstr "Omogući račun inventara po stavkama"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Loyalty Point Program"
-msgstr ""
+msgstr "Omogući program lojalti poena"
 
 #. Label of the enable_parallel_reposting (Check) field in DocType 'Stock
 #. Reposting Settings'
@@ -17379,7 +17379,7 @@ msgstr "Omogući praćenje YouTube-a"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable cost center, projects and other custom accounting dimensions"
-msgstr ""
+msgstr "Omogući troškovne centre, projekte i druge prilagođene računovodstvene dimenzije"
 
 #. Description of the 'Consider Rejected Warehouses' (Check) field in DocType
 #. 'Pick List'
@@ -17406,7 +17406,7 @@ msgstr "Omogući primenu sporazuma o nivou usluge za svaki {0}"
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable tracking sales commissions"
-msgstr ""
+msgstr "Omogući praćenje provizija od prodaje"
 
 #. Description of the 'Fetch Timesheet in Sales Invoice' (Check) field in
 #. DocType 'Projects Settings'
@@ -18001,7 +18001,7 @@ msgstr "Izložba"
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Existing Asset"
-msgstr ""
+msgstr "Postojeća imovina"
 
 #. Option for the 'Create Chart Of Accounts Based On' (Select) field in DocType
 #. 'Company'
@@ -19329,7 +19329,7 @@ msgstr "Za stavku {0}, cena mora biti pozitivan broj. Da biste omogućili negati
 
 #: erpnext/manufacturing/doctype/bom/bom.py:346
 msgid "For operation {0} at row {1}, please add raw materials or set a BOM against it."
-msgstr ""
+msgstr "Za operaciju {0} u redu {1}, molimo Vas da dodate sirovine ili dodelite sastavnicu."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:2574
 msgid "For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})"
@@ -22466,7 +22466,7 @@ msgstr "Račun prihoda"
 #. 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Income and Expense"
-msgstr ""
+msgstr "Prihodi i rashodi"
 
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
@@ -22999,7 +22999,7 @@ msgstr "Interni"
 #. 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Internal Customer Accounting"
-msgstr ""
+msgstr "Računovodstvo internog kupca"
 
 #: erpnext/selling/doctype/customer/customer.py:254
 msgid "Internal Customer for company {0} already exists"
@@ -23372,7 +23372,7 @@ msgstr "Koeficijent obrta zaliha"
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Inventory Valuation"
-msgstr ""
+msgstr "Vrednovanje inventara"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:29
 msgid "Investment Banking"
@@ -27375,7 +27375,7 @@ msgstr "Upravljaj troškovima operacija"
 #. DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Manage sales partner's and sales team's commissions"
-msgstr ""
+msgstr "Upravljanje provizijama prodajnih partnera i prodajnog tima"
 
 #: erpnext/utilities/activation.py:95
 msgid "Manage your orders"
@@ -28676,7 +28676,7 @@ msgstr "Minuti"
 #. Label of the section_break_19 (Section Break) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Miscellaneous"
-msgstr ""
+msgstr "Razno"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:116
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:224
@@ -30702,7 +30702,7 @@ msgstr "Prilikom primene isključene naknade, samo depozit ili povlačenje sreds
 
 #: erpnext/manufacturing/doctype/bom/bom.py:324
 msgid "Only one operation can have 'Is Final Finished Good' checked when 'Track Semi Finished Goods' is enabled."
-msgstr ""
+msgstr "Samo jedna operacija može imati označeno 'Finalni gotov proizvod' kada je omogućeno 'Praćenje poluproizvoda'."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1241
 msgid "Only one {0} entry can be created against the Work Order {1}"
@@ -31872,7 +31872,7 @@ msgstr "Vlasnik"
 #. Label of the asset_owner_section (Section Break) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Ownership"
-msgstr ""
+msgstr "Vlasništvo"
 
 #. Label of the p_l_closing_balance (JSON) field in DocType 'Process Period
 #. Closing Voucher'
@@ -31960,7 +31960,7 @@ msgstr "Zatvaranje maloprodaje nije uspelo prilikom izvođenja u pozadinskom pro
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Configurations"
-msgstr ""
+msgstr "Konfiguracija maloprodaje"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/pos_customer_group/pos_customer_group.json
@@ -32040,7 +32040,7 @@ msgstr "Fiskalni računi će biti dekonsolidovani u pozadinskom procesu"
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Item Details"
-msgstr ""
+msgstr "Detalji maloprodajne stavke"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/pos_item_group/pos_item_group.json
@@ -32051,7 +32051,7 @@ msgstr "Grupa stavki maloprodaje"
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Item Selector"
-msgstr ""
+msgstr "Selektor maloprodajne stavke"
 
 #. Label of the pos_opening_entry (Link) field in DocType 'POS Closing Entry'
 #. Name of a DocType
@@ -33345,7 +33345,7 @@ msgstr "Način plaćanja"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Payment Options"
-msgstr ""
+msgstr "Opcije plaćanja"
 
 #. Label of the payment_order (Link) field in DocType 'Journal Entry'
 #. Label of the payment_order (Link) field in DocType 'Payment Entry'
@@ -36110,7 +36110,7 @@ msgstr "Cenovnik"
 #. DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Price List & Currency"
-msgstr ""
+msgstr "Cenovnik i valuta"
 
 #. Name of a DocType
 #: erpnext/stock/doctype/price_list_country/price_list_country.json
@@ -38545,17 +38545,17 @@ msgstr "Naziv šablona inspekcije kvaliteta"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:783
 msgid "Quality Inspection is required for the item {0} before completing the job card {1}"
-msgstr ""
+msgstr "Inspekcija kvaliteta je obavezna za stavku {0} pre završetka radne kartice {1}"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:794
 #: erpnext/manufacturing/doctype/job_card/job_card.py:803
 msgid "Quality Inspection {0} is not submitted for the item: {1}"
-msgstr ""
+msgstr "Inspekcija kvaliteta {0} nije podneta za stavku: {1}"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:813
 #: erpnext/manufacturing/doctype/job_card/job_card.py:822
 msgid "Quality Inspection {0} is rejected for the item: {1}"
-msgstr ""
+msgstr "Inspekcija kvaliteta {0} je odbijena za stavku: {1}"
 
 #: erpnext/public/js/controllers/transaction.js:384
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:197
@@ -41114,7 +41114,7 @@ msgstr "Konflikt rezervisane šarže"
 #. 'Bin'
 #: erpnext/stock/doctype/bin/bin.json
 msgid "Reserved Inventory"
-msgstr ""
+msgstr "Rezervisani inventar"
 
 #. Label of the reserved_qty (Float) field in DocType 'Bin'
 #. Label of the reserved_qty (Float) field in DocType 'Stock Reservation Entry'
@@ -42558,7 +42558,10 @@ msgid "Row #{0}: Selling rate for item {1} is lower than its {2}.\n"
 "\t\t\t\t\tSelling {3} should be atleast {4}.<br><br>Alternatively,\n"
 "\t\t\t\t\tyou can disable '{5}' in {6} to bypass\n"
 "\t\t\t\t\tthis validation."
-msgstr ""
+msgstr "Red #{0}: Prodajna cena za stavku {1} je niža od njene {2}.\n"
+"\t\t\t\t\tProdajna {3} mora biti najmanje {4}. <br><br> Alternativno,\n"
+"\t\t\t\t\tmožete onemogućiti '{5}' u {6} da biste zaobišli\n"
+" \t\t\t\t\tovu proveru."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:276
 msgid "Row #{0}: Sequence ID must be {1} or {2} for Operation {3}."
@@ -46792,7 +46795,7 @@ msgstr "Pošto postoje gubici u procesu od {0} jedinica za gotov proizvod {1}, t
 
 #: erpnext/manufacturing/doctype/bom/bom.py:317
 msgid "Since you have enabled 'Track Semi Finished Goods', at least one operation must have 'Is Final Finished Good' checked. For that set the FG / Semi FG Item as {0} against an operation."
-msgstr ""
+msgstr "Pošto je omogućeno 'Praćenje poluproizvoda', najmanje jedna operacija mora imati označeno 'Finalni gotov proizvod'. Za to postavite gotov proizvod / poluproizvod kao {0} uz odgovarajuću operaciju."
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:111
 msgid "Since {0} are Serial No/Batch No items, you cannot enable 'Recreate Stock Ledgers' in Repost Item Valuation."
@@ -52186,7 +52189,7 @@ msgstr "Ukupna završena količina"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:190
 msgid "Total Completed Qty is required for Job Card {0}, please start and complete the job card before submission"
-msgstr ""
+msgstr "Ukupna završena količina je obavezna za radnu karticu {0}, molimo Vas da započnete i završite radnu karticu pre podnošenja"
 
 #. Label of the total_consumed_material_cost (Currency) field in DocType
 #. 'Project'
@@ -52816,7 +52819,7 @@ msgstr "Ukupno (količina)"
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Totals (Company Currency)"
-msgstr ""
+msgstr "Ukupno (valuta kompanije)"
 
 #: erpnext/stock/doctype/item/item_dashboard.py:33
 msgid "Traceability"
