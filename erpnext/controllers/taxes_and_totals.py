@@ -436,8 +436,10 @@ class calculate_taxes_and_totals:
 
 		# Zero out Actual tax amounts for tax-exempt categories
 		if self._is_tax_exempt:
-			for idx in actual_tax_dict:
-				actual_tax_dict[idx] = 0
+			for tax in doc.taxes:
+				if tax.charge_type == "Actual":
+					tax.tax_amount = 0
+					actual_tax_dict[tax.idx] = 0
 
 		for n, item in enumerate(self._items):
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)

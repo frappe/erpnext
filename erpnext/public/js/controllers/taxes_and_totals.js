@@ -101,9 +101,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		let cached = this.frm.doc.__non_exempt_rates || {};
 		let missing = [
 			...new Set(
-				this.frm.doc.items
-					.map((d) => d.item_code)
-					.filter((code) => code && !(code in cached))
+				this.frm.doc.items.map((d) => d.item_code).filter((code) => code && !(code in cached))
 			),
 		];
 		if (!missing.length) return;
@@ -431,8 +429,11 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 		// Zero out Actual tax amounts for tax-exempt categories
 		if (me.frm.doc.__is_tax_exempt) {
-			$.each(actual_tax_dict, function (idx) {
-				actual_tax_dict[idx] = 0;
+			$.each(doc.taxes || [], function (i, tax) {
+				if (tax.charge_type == "Actual") {
+					tax.tax_amount = 0;
+					actual_tax_dict[tax.idx] = 0;
+				}
 			});
 		}
 
