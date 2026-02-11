@@ -82,7 +82,7 @@ frappe.ui.form.on("Production Plan", {
 						query: "erpnext.controllers.queries.item_query",
 						filters: {
 							is_stock_item: 1,
-							name: ["like", "%FG"] // TODO - Update this with confirmed suffix
+							item_group: "Finished Goods",
 						},
 					};
 				});
