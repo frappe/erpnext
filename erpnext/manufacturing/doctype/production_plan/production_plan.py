@@ -42,13 +42,25 @@ class ProductionPlan(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from erpnext.manufacturing.doctype.material_request_plan_item.material_request_plan_item import MaterialRequestPlanItem
+		from erpnext.manufacturing.doctype.material_request_plan_item.material_request_plan_item import (
+			MaterialRequestPlanItem,
+		)
 		from erpnext.manufacturing.doctype.production_plan_item.production_plan_item import ProductionPlanItem
-		from erpnext.manufacturing.doctype.production_plan_item_reference.production_plan_item_reference import ProductionPlanItemReference
-		from erpnext.manufacturing.doctype.production_plan_material_request.production_plan_material_request import ProductionPlanMaterialRequest
-		from erpnext.manufacturing.doctype.production_plan_material_request_warehouse.production_plan_material_request_warehouse import ProductionPlanMaterialRequestWarehouse
-		from erpnext.manufacturing.doctype.production_plan_sales_order.production_plan_sales_order import ProductionPlanSalesOrder
-		from erpnext.manufacturing.doctype.production_plan_sub_assembly_item.production_plan_sub_assembly_item import ProductionPlanSubAssemblyItem
+		from erpnext.manufacturing.doctype.production_plan_item_reference.production_plan_item_reference import (
+			ProductionPlanItemReference,
+		)
+		from erpnext.manufacturing.doctype.production_plan_material_request.production_plan_material_request import (
+			ProductionPlanMaterialRequest,
+		)
+		from erpnext.manufacturing.doctype.production_plan_material_request_warehouse.production_plan_material_request_warehouse import (
+			ProductionPlanMaterialRequestWarehouse,
+		)
+		from erpnext.manufacturing.doctype.production_plan_sales_order.production_plan_sales_order import (
+			ProductionPlanSalesOrder,
+		)
+		from erpnext.manufacturing.doctype.production_plan_sub_assembly_item.production_plan_sub_assembly_item import (
+			ProductionPlanSubAssemblyItem,
+		)
 		from frappe.types import DF
 
 		amended_from: DF.Link | None
@@ -87,7 +99,17 @@ class ProductionPlan(Document):
 		sales_order_status: DF.Literal["", "To Deliver and Bill", "To Bill", "To Deliver"]
 		sales_orders: DF.Table[ProductionPlanSalesOrder]
 		skip_available_sub_assembly_item: DF.Check
-		status: DF.Literal["", "Draft", "Submitted", "Not Started", "In Process", "Completed", "Closed", "Cancelled", "Material Requested"]
+		status: DF.Literal[
+			"",
+			"Draft",
+			"Submitted",
+			"Not Started",
+			"In Process",
+			"Completed",
+			"Closed",
+			"Cancelled",
+			"Material Requested",
+		]
 		sub_assembly_items: DF.Table[ProductionPlanSubAssemblyItem]
 		sub_assembly_warehouse: DF.Link | None
 		to_date: DF.Date | None
@@ -146,19 +168,37 @@ class ProductionPlan(Document):
 		if self.docstatus > 0:  # set only to initialise value before submit
 			return
 
-		all_items = list(self.po_items_line_1) + list(self.po_items_line_2) + list(self.po_items_line_3) + list(self.po_items_mono_line) + list(self.po_items_multi_line)
+		all_items = (
+			list(self.po_items_line_1)
+			+ list(self.po_items_line_2)
+			+ list(self.po_items_line_3)
+			+ list(self.po_items_mono_line)
+			+ list(self.po_items_multi_line)
+		)
 		for item in all_items:
 			if not item.get("sales_order") or not item.get("material_request"):
 				item.pending_qty = item.planned_qty
 
 	def calculate_total_planned_qty(self):
 		self.total_planned_qty = 0
-		all_items = list(self.po_items_line_1) + list(self.po_items_line_2) + list(self.po_items_line_3) + list(self.po_items_mono_line) + list(self.po_items_multi_line)
+		all_items = (
+			list(self.po_items_line_1)
+			+ list(self.po_items_line_2)
+			+ list(self.po_items_line_3)
+			+ list(self.po_items_mono_line)
+			+ list(self.po_items_multi_line)
+		)
 		for d in all_items:
 			self.total_planned_qty += flt(d.planned_qty)
 
 	def validate_data(self):
-		all_items = list(self.po_items_line_1) + list(self.po_items_line_2) + list(self.po_items_line_3) + list(self.po_items_mono_line) + list(self.po_items_multi_line)
+		all_items = (
+			list(self.po_items_line_1)
+			+ list(self.po_items_line_2)
+			+ list(self.po_items_line_3)
+			+ list(self.po_items_mono_line)
+			+ list(self.po_items_multi_line)
+		)
 		for d in all_items:
 			if not d.bom_no:
 				frappe.throw(_("Please select BOM for Item in Row {0}").format(d.idx))
@@ -175,7 +215,13 @@ class ProductionPlan(Document):
 		"""
 		new_name_map = {}
 		actual_names = set()
-		all_items = list(self.po_items_line_1) + list(self.po_items_line_2) + list(self.po_items_line_3) + list(self.po_items_mono_line) + list(self.po_items_multi_line)
+		all_items = (
+			list(self.po_items_line_1)
+			+ list(self.po_items_line_2)
+			+ list(self.po_items_line_3)
+			+ list(self.po_items_mono_line)
+			+ list(self.po_items_multi_line)
+		)
 		for d in all_items:
 			if d.temporary_name:
 				new_name_map[d.temporary_name] = d.name
@@ -271,9 +317,23 @@ class ProductionPlan(Document):
 	@frappe.whitelist()
 	def combine_so_items(self):
 		# if self.combine_items and self.po_items and len(self.po_items) > 0:
-		all_items = list(self.po_items_line_1) + list(self.po_items_line_2) + list(self.po_items_line_3) + list(self.po_items_mono_line) + list(self.po_items_multi_line)
-		
-		if self.combine_items_line_1 or self.combine_items_line_2 or self.combine_items_line_3 or self.combine_items_mono_line or self.combine_items_multi_line and all_items and len(all_items) > 0:
+		all_items = (
+			list(self.po_items_line_1)
+			+ list(self.po_items_line_2)
+			+ list(self.po_items_line_3)
+			+ list(self.po_items_mono_line)
+			+ list(self.po_items_multi_line)
+		)
+
+		if (
+			self.combine_items_line_1
+			or self.combine_items_line_2
+			or self.combine_items_line_3
+			or self.combine_items_mono_line
+			or self.combine_items_multi_line
+			and all_items
+			and len(all_items) > 0
+		):
 			all_rows = []
 			# Aggregate all existing items from the three tables
 			all_rows.extend(self.po_items_line_1 or [])
@@ -513,7 +573,13 @@ class ProductionPlan(Document):
 				continue
 
 			item_details = get_item_details(data.item_code, throw=False)
-			if self.combine_items_line_1 or self.combine_items_line_2 or self.combine_items_line_3 or self.combine_items_mono_line or self.combine_items_multi_line:
+			if (
+				self.combine_items_line_1
+				or self.combine_items_line_2
+				or self.combine_items_line_3
+				or self.combine_items_mono_line
+				or self.combine_items_multi_line
+			):
 				bom_no = item_details.bom_no
 				if data.get("bom_no"):
 					bom_no = data.get("bom_no")
@@ -566,7 +632,13 @@ class ProductionPlan(Document):
 				pi.description = data.description
 
 		if refs:
-			all_items = list(self.po_items_line_1) + list(self.po_items_line_2) + list(self.po_items_line_3) + list(self.po_items_mono_line) + list(self.po_items_multi_line)
+			all_items = (
+				list(self.po_items_line_1)
+				+ list(self.po_items_line_2)
+				+ list(self.po_items_line_3)
+				+ list(self.po_items_mono_line)
+				+ list(self.po_items_multi_line)
+			)
 			for po_item in all_items:
 				if po_item.bom_no in refs:
 					po_item.planned_qty = refs[po_item.bom_no]["qty"]
@@ -589,7 +661,13 @@ class ProductionPlan(Document):
 
 	def calculate_total_produced_qty(self):
 		self.total_produced_qty = 0
-		all_items = list(self.po_items_line_1) + list(self.po_items_line_2) + list(self.po_items_line_3) + list(self.po_items_mono_line) + list(self.po_items_multi_line)
+		all_items = (
+			list(self.po_items_line_1)
+			+ list(self.po_items_line_2)
+			+ list(self.po_items_line_3)
+			+ list(self.po_items_mono_line)
+			+ list(self.po_items_multi_line)
+		)
 
 		for d in all_items:
 			self.total_produced_qty += flt(d.produced_qty)
@@ -597,7 +675,13 @@ class ProductionPlan(Document):
 		self.db_set("total_produced_qty", self.total_produced_qty, update_modified=False)
 
 	def update_produced_pending_qty(self, produced_qty, production_plan_item):
-		all_items = list(self.po_items_line_1) + list(self.po_items_line_2) + list(self.po_items_line_3) + list(self.po_items_mono_line) + list(self.po_items_multi_line)
+		all_items = (
+			list(self.po_items_line_1)
+			+ list(self.po_items_line_2)
+			+ list(self.po_items_line_3)
+			+ list(self.po_items_mono_line)
+			+ list(self.po_items_multi_line)
+		)
 
 		for data in all_items:
 			if data.name == production_plan_item:
@@ -605,7 +689,7 @@ class ProductionPlan(Document):
 				data.pending_qty = flt(data.planned_qty - produced_qty)
 				data.db_update()
 
-		self.calculate_total_produced_qty()	
+		self.calculate_total_produced_qty()
 		self.set_status()
 		self.db_set("status", self.status)
 
@@ -623,7 +707,13 @@ class ProductionPlan(Document):
 		self.update_sales_order()
 
 	def update_sales_order(self):
-		all_items = list(self.po_items_line_1) + list(self.po_items_line_2) + list(self.po_items_line_3) + list(self.po_items_mono_line) + list(self.po_items_multi_line)
+		all_items = (
+			list(self.po_items_line_1)
+			+ list(self.po_items_line_2)
+			+ list(self.po_items_line_3)
+			+ list(self.po_items_mono_line)
+			+ list(self.po_items_multi_line)
+		)
 
 		sales_orders = [row.sales_order for row in all_items if row.sales_order]
 		if sales_orders:
@@ -705,7 +795,13 @@ class ProductionPlan(Document):
 			self.update_bin_qty()
 
 	def update_ordered_status(self):
-		all_items = list(self.po_items_line_1) + list(self.po_items_line_2) + list(self.po_items_line_3) + list(self.po_items_mono_line) + list(self.po_items_multi_line)
+		all_items = (
+			list(self.po_items_line_1)
+			+ list(self.po_items_line_2)
+			+ list(self.po_items_line_3)
+			+ list(self.po_items_mono_line)
+			+ list(self.po_items_multi_line)
+		)
 
 		update_status = False
 		for d in all_items:
@@ -746,7 +842,13 @@ class ProductionPlan(Document):
 
 	def get_production_items(self):
 		item_dict = {}
-		all_items = list(self.po_items_line_1) + list(self.po_items_line_2) + list(self.po_items_line_3) + list(self.po_items_mono_line) + list(self.po_items_multi_line)
+		all_items = (
+			list(self.po_items_line_1)
+			+ list(self.po_items_line_2)
+			+ list(self.po_items_line_3)
+			+ list(self.po_items_mono_line)
+			+ list(self.po_items_multi_line)
+		)
 
 		for d in all_items:
 			parent_line = self.get_production_line_code(d.parentfield)
@@ -770,11 +872,17 @@ class ProductionPlan(Document):
 				"planned_start_date": d.planned_start_date,
 				"project": self.project,
 				"parentfield": d.parentfield or d.parent,
-				"production_line": parent_line, 
+				"production_line": parent_line,
 			}
 
 			key = (d.item_code, d.sales_order, d.sales_order_item, d.warehouse)
-			if self.combine_items_line_1 or self.combine_items_line_2 or self.combine_items_line_3 or self.combine_items_mono_line or self.combine_items_multi_line:
+			if (
+				self.combine_items_line_1
+				or self.combine_items_line_2
+				or self.combine_items_line_3
+				or self.combine_items_mono_line
+				or self.combine_items_multi_line
+			):
 				key = (d.item_code, d.sales_order, d.warehouse)
 
 			if not d.sales_order:
@@ -908,7 +1016,7 @@ class ProductionPlan(Document):
 
 	def prepare_data_for_sub_assembly_items(self, row, wo_data):
 		print(f"ROW production_line: {getattr(row, 'production_line', 'MISSING')}")
-    
+
 		for field in [
 			"production_item",
 			"item_name",
@@ -919,7 +1027,7 @@ class ProductionPlan(Document):
 			"stock_uom",
 			"bom_level",
 			"schedule_date",
-			"production_line"
+			"production_line",
 		]:
 			if row.get(field):
 				wo_data[field] = row.get(field)
@@ -990,7 +1098,9 @@ class ProductionPlan(Document):
 		wo = frappe.new_doc("Work Order")
 		wo.update(item)
 
-		wo.production_line = self.get_production_line_code(item.get("parentfield", "")) or item.get("production_line")
+		wo.production_line = self.get_production_line_code(item.get("parentfield", "")) or item.get(
+			"production_line"
+		)
 
 		wo.planned_start_date = item.get("planned_start_date") or item.get("schedule_date")
 
@@ -1085,7 +1195,13 @@ class ProductionPlan(Document):
 		self.sub_assembly_items = []
 		sub_assembly_items_store = []  # temporary store to process all subassembly items
 		bin_details = frappe._dict()
-		all_items = list(self.po_items_line_1) + list(self.po_items_line_2) + list(self.po_items_line_3) + list(self.po_items_mono_line) + list(self.po_items_multi_line)
+		all_items = (
+			list(self.po_items_line_1)
+			+ list(self.po_items_line_2)
+			+ list(self.po_items_line_3)
+			+ list(self.po_items_mono_line)
+			+ list(self.po_items_multi_line)
+		)
 
 		for row in all_items:
 			if self.skip_available_sub_assembly_item and not self.sub_assembly_warehouse:
@@ -1108,7 +1224,7 @@ class ProductionPlan(Document):
 				self.company,
 				warehouse=self.sub_assembly_warehouse,
 				skip_available_sub_assembly_item=self.skip_available_sub_assembly_item,
-				production_line=getattr(row, "production_line", None)
+				production_line=getattr(row, "production_line", None),
 			)
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
 			sub_assembly_items_store.extend(bom_data)
@@ -1139,24 +1255,31 @@ class ProductionPlan(Document):
 	def set_sub_assembly_items_based_on_level(self, row, bom_data, manufacturing_type=None):
 		"Modify bom_data, set additional details."
 		is_group_warehouse = False
-		if hasattr(self, 'sub_assembly_warehouse') and self.sub_assembly_warehouse:
-			is_group_warehouse = frappe.db.get_value("Warehouse", self.sub_assembly_warehouse, "is_group") or False
-		
+		if hasattr(self, "sub_assembly_warehouse") and self.sub_assembly_warehouse:
+			is_group_warehouse = (
+				frappe.db.get_value("Warehouse", self.sub_assembly_warehouse, "is_group") or False
+			)
+
 		parent_line = None
-		child_tables = ["po_items_line_1", "po_items_line_2", "po_items_line_3", 
-                    "po_items_mono_line", "po_items_multi_line"]
+		child_tables = [
+			"po_items_line_1",
+			"po_items_line_2",
+			"po_items_line_3",
+			"po_items_mono_line",
+			"po_items_multi_line",
+		]
 		for table_name in child_tables:
 			if hasattr(self, table_name):
 				for child_item in getattr(self, table_name):
 					if child_item.name == row.name:
 						parent_line = self.get_production_line_code(table_name)
 						break
-				if parent_line: 
+				if parent_line:
 					break
-		
+
 		if not parent_line:
-			parent_line = getattr(row, 'production_line', None)
-    
+			parent_line = getattr(row, "production_line", None)
+
 		print(f"ROW {row.item_code} in line: {parent_line}")
 
 		for data in bom_data:
@@ -1215,7 +1338,7 @@ class ProductionPlan(Document):
 			existing_row = key_wise_data[key]
 			existing_row.qty = flt(existing_row.qty) + flt(row.get("qty", 0))
 			existing_row.stock_qty = flt(existing_row.stock_qty) + flt(row.get("stock_qty", 0))
-        	# Update BOM level to max of existing and current
+			# Update BOM level to max of existing and current
 			existing_row.bom_level = max(existing_row.bom_level, row.get("bom_level", 0))
 		# 	if existing_row:
 		# 		# if row with same (item, wh, bom no, man.g type) key, merge
@@ -1231,11 +1354,17 @@ class ProductionPlan(Document):
 		# 	key_wise_data[key] for key in key_wise_data
 		# ]  # unpack into single level list
 		# return sub_assembly_items_store
-		return 	list(key_wise_data.values())
+		return list(key_wise_data.values())
 
 	def all_items_completed(self):
-		all_items = list(self.po_items_line_1) + list(self.po_items_line_2) + list(self.po_items_line_3) + list(self.po_items_mono_line) + list(self.po_items_multi_line)
-		
+		all_items = (
+			list(self.po_items_line_1)
+			+ list(self.po_items_line_2)
+			+ list(self.po_items_line_3)
+			+ list(self.po_items_mono_line)
+			+ list(self.po_items_multi_line)
+		)
+
 		all_items_produced = all(flt(d.planned_qty) - flt(d.produced_qty) < 0.000001 for d in all_items)
 		if not all_items_produced:
 			return False
@@ -1712,7 +1841,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 		po_items.extend(doc.get("po_items_mono_line"))
 	if doc.get("po_items_multi_line"):
 		po_items.extend(doc.get("po_items_multi_line"))
-	
+
 	if not po_items:
 		po_items = doc.get("po_items") if doc.get("po_items") else doc.get("items")
 
@@ -1966,7 +2095,7 @@ def get_sub_assembly_items(
 	warehouse=None,
 	indent=0,
 	skip_available_sub_assembly_item=False,
-	production_line=None
+	production_line=None,
 ):
 	data = get_bom_children(parent=bom_no)
 	for d in data:
@@ -2023,7 +2152,7 @@ def get_sub_assembly_items(
 						warehouse,
 						indent=indent + 1,
 						skip_available_sub_assembly_item=skip_available_sub_assembly_item,
-						production_line=production_line
+						production_line=production_line,
 					)
 
 
@@ -2238,75 +2367,91 @@ def get_reserved_qty_for_sub_assembly(item_code, warehouse):
 
 @frappe.whitelist()
 def create_daily_production_plan(parent_name, dpp_date=None):
-    parent = frappe.get_doc("Production Plan", parent_name)
-    if not parent.get("is_parent_plan"):
-        frappe.throw("Daily Production Plan can only be created from a parent (monthly) Production Plan.")
+	parent = frappe.get_doc("Production Plan", parent_name)
+	if not parent.get("is_parent_plan"):
+		frappe.throw("Daily Production Plan can only be created from a parent (monthly) Production Plan.")
 
-    child = frappe.new_doc("Production Plan")
-    child.company = parent.company
-    child.posting_date = dpp_date or parent.posting_date
-    child.naming_series = "MFG-DPP-.YYYY.-"
-    child.is_parent_plan = 0
-    child.monthly_production_plan = parent.name
-    # child.is_monthly_production_plan = 0
+	child = frappe.new_doc("Production Plan")
+	child.company = parent.company
+	child.posting_date = dpp_date or parent.posting_date
+	child.naming_series = "MFG-DPP-.YYYY.-"
+	child.is_parent_plan = 0
+	child.monthly_production_plan = parent.name
+	# child.is_monthly_production_plan = 0
 
-    copy_line_items(parent, child, dpp_date)
-    child.insert(ignore_permissions=True)
+	copy_line_items(parent, child, dpp_date)
+	child.insert(ignore_permissions=True)
 
-    if parent.status in ("Not Started", "Submitted"):
-        parent.status = "In Process"
-        parent.db_set("status", "In Process")
-    return child.name
+	if parent.status in ("Not Started", "Submitted"):
+		parent.status = "In Process"
+		parent.db_set("status", "In Process")
+	return child.name
+
 
 def copy_line_items(parent, child, child_date=None):
-    child_date_parsed = getdate(child_date) if child_date else None
+	child_date_parsed = getdate(child_date) if child_date else None
 
-    line_tables = [
-        ("po_items_line_1", parent.po_items_line_1),
-        ("po_items_line_2", parent.po_items_line_2),
-        ("po_items_line_3", parent.po_items_line_3),
-        ("po_items_mono_line", parent.po_items_mono_line),
-        ("po_items_multi_line", parent.po_items_multi_line),
-    ]
-    
-    for table_name, parent_items in line_tables:
-        for item in parent_items:
-            item_date = getattr(item, "planned_start_date", None)
-            item_date_parsed = getdate(item_date) if item_date else None
+	line_tables = [
+		("po_items_line_1", parent.po_items_line_1),
+		("po_items_line_2", parent.po_items_line_2),
+		("po_items_line_3", parent.po_items_line_3),
+		("po_items_mono_line", parent.po_items_mono_line),
+		("po_items_multi_line", parent.po_items_multi_line),
+	]
 
-            if not child_date_parsed or (item_date_parsed == child_date_parsed):
-                child.append(table_name, {
-                    "item_code": item.item_code,
-                    "planned_qty": item.planned_qty,
-                    "bom_no": item.bom_no,
-                    "warehouse": getattr(item, "warehouse", None),
-                    "description": getattr(item, "description", None),
-                    "uom": getattr(item, "uom", None),
-                    "planned_start_date": item_date,
-                })
+	for table_name, parent_items in line_tables:
+		for item in parent_items:
+			item_date = getattr(item, "planned_start_date", None)
+			item_date_parsed = getdate(item_date) if item_date else None
+
+			if not child_date_parsed or (item_date_parsed == child_date_parsed):
+				child.append(
+					table_name,
+					{
+						"item_code": item.item_code,
+						"planned_qty": item.planned_qty,
+						"bom_no": item.bom_no,
+						"warehouse": getattr(item, "warehouse", None),
+						"description": getattr(item, "description", None),
+						"uom": getattr(item, "uom", None),
+						"planned_start_date": item_date,
+					},
+				)
+
 
 def update_mpp_from_dpp_completion(doc, method=None):
-    """Update MPP progress when DPP completes"""
-    if doc.doctype != "Production Plan" or not doc.monthly_production_plan:
-        return
-    
-    refresh_mpp_progress(doc.monthly_production_plan)
+	"""Update MPP progress when DPP completes"""
+	if doc.doctype != "Production Plan" or not doc.monthly_production_plan:
+		return
+
+	refresh_mpp_progress(doc.monthly_production_plan)
+
 
 def update_child_item_production(mpp_name):
-    """Update MPP child item produced_qty from DPP actuals (by date + item)"""
-    
-    line_tables = ['po_items_line_1', 'po_items_line_2', 'po_items_line_3', 
-                   'po_items_mono_line', 'po_items_multi_line']
-    
-    for table_name in line_tables:
-        mpp_items = frappe.db.sql("""
+	"""Update MPP child item produced_qty from DPP actuals (by date + item)"""
+
+	line_tables = [
+		"po_items_line_1",
+		"po_items_line_2",
+		"po_items_line_3",
+		"po_items_mono_line",
+		"po_items_multi_line",
+	]
+
+	for table_name in line_tables:
+		mpp_items = frappe.db.sql(
+			"""
             SELECT name, item_code, planned_start_date, planned_qty
             FROM `tabProduction Plan Item`
             WHERE parent = %s AND parentfield = %s
-        """, (mpp_name, table_name), as_dict=1)
-        
-        for item in mpp_items:
-            dpp_produced = frappe.db.sql("""
+        """,
+			(mpp_name, table_name),
+			as_dict=1,
+		)
+
+		for item in mpp_items:
+			dpp_produced = frappe.db.sql(
+				"""
                 SELECT COALESCE(SUM(p.produced_qty), 0)
                 FROM `tabProduction Plan Item` p
                 JOIN `tabProduction Plan` d ON p.parent = d.name
@@ -2314,57 +2459,74 @@ def update_child_item_production(mpp_name):
                 AND p.item_code = %s 
                 AND DATE(p.planned_start_date) = DATE(%s)
                 AND p.parentfield = %s
-            """, (mpp_name, item.item_code, item.planned_start_date, table_name))[0][0]
-            
-            pending_qty = item.planned_qty - dpp_produced
-            
-            frappe.db.sql("""
+            """,
+				(mpp_name, item.item_code, item.planned_start_date, table_name),
+			)[0][0]
+
+			pending_qty = item.planned_qty - dpp_produced
+
+			frappe.db.sql(
+				"""
                 UPDATE `tabProduction Plan Item`
                 SET produced_qty = %s, pending_qty = %s
                 WHERE name = %s
-            """, (dpp_produced, pending_qty, item.name))
+            """,
+				(dpp_produced, pending_qty, item.name),
+			)
+
 
 @frappe.whitelist()
 def refresh_mpp_progress(mpp_name):
-    """Manual MPP refresh from all DPPs - called from JS"""
-    if not frappe.db.exists("Production Plan", mpp_name):
-        frappe.throw("MPP not found")
-    
-    mpp = frappe.get_doc("Production Plan", mpp_name)
-    if not mpp.is_parent_plan:
-        frappe.throw("Not a parent plan")
-    
-    total_planned = 0
-    line_tables = ['po_items_line_1', 'po_items_line_2', 'po_items_line_3', 
-                   'po_items_mono_line', 'po_items_multi_line']
-    for table_name in line_tables:
-        total_planned += sum(getattr(item, 'planned_qty', 0) for item in getattr(mpp, table_name, []))
-    
-    total_produced = frappe.db.sql("""
+	"""Manual MPP refresh from all DPPs - called from JS"""
+	if not frappe.db.exists("Production Plan", mpp_name):
+		frappe.throw("MPP not found")
+
+	mpp = frappe.get_doc("Production Plan", mpp_name)
+	if not mpp.is_parent_plan:
+		frappe.throw("Not a parent plan")
+
+	total_planned = 0
+	line_tables = [
+		"po_items_line_1",
+		"po_items_line_2",
+		"po_items_line_3",
+		"po_items_mono_line",
+		"po_items_multi_line",
+	]
+	for table_name in line_tables:
+		total_planned += sum(getattr(item, "planned_qty", 0) for item in getattr(mpp, table_name, []))
+
+	total_produced = frappe.db.sql(
+		"""
         SELECT COALESCE(SUM(total_produced_qty), 0)
         FROM `tabProduction Plan`
         WHERE monthly_production_plan = %s AND docstatus = 1
-    """, mpp_name)[0][0]
-    
-    frappe.db.set_value("Production Plan", mpp_name, {
-        "total_planned_qty": total_planned,
-        "total_produced_qty": total_produced,
-        "status": "Completed" if total_produced >= total_planned else "In Process"
-    })
+    """,
+		mpp_name,
+	)[0][0]
 
-    update_child_item_production(mpp_name)
-    frappe.publish_realtime("progress_update", {
-        "mpp_name": mpp_name,
-        "planned": total_planned,
-        "produced": total_produced
-    })
-    
-    return {"planned": total_planned, "produced": total_produced}
+	frappe.db.set_value(
+		"Production Plan",
+		mpp_name,
+		{
+			"total_planned_qty": total_planned,
+			"total_produced_qty": total_produced,
+			"status": "Completed" if total_produced >= total_planned else "In Process",
+		},
+	)
+
+	update_child_item_production(mpp_name)
+	frappe.publish_realtime(
+		"progress_update", {"mpp_name": mpp_name, "planned": total_planned, "produced": total_produced}
+	)
+
+	return {"planned": total_planned, "produced": total_produced}
+
 
 # @frappe.whitelist()
 # def get_dpp_list(mpp_name):
 #     """DPPs for Connections panel"""
-#     return frappe.get_all("Production Plan", 
+#     return frappe.get_all("Production Plan",
 #         filters={"monthly_production_plan": mpp_name},
 #         fields=["name", "posting_date", "status"],
 #         order_by="posting_date desc"
@@ -2400,4 +2562,3 @@ def refresh_mpp_progress(mpp_name):
 #         self.calculate_total_planned_qty()
 #         self.save()
 #         return self.name
-

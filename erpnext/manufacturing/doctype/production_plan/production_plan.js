@@ -3,34 +3,34 @@
 
 frappe.ui.form.on("Production Plan", {
 	is_monthly_production_plan(frm) {
-        if (frm.doc.is_monthly_production_plan) {
-            frm.set_value("naming_series", "MFG-MPP-.YYYY.-");
+		if (frm.doc.is_monthly_production_plan) {
+			frm.set_value("naming_series", "MFG-MPP-.YYYY.-");
 			frm.set_value("is_parent_plan", 1);
-        } else {
-            frm.set_value("naming_series", "MFG-DPP-.YYYY.-");
+		} else {
+			frm.set_value("naming_series", "MFG-DPP-.YYYY.-");
 			frm.set_value("is_parent_plan", 0);
-        }
-    },
+		}
+	},
 
-    onload(frm) {
-        // Set correct naming series when form loads (new documents)
-        if (frm.is_new()) {
-            if (frm.doc.is_monthly_production_plan) {
-                frm.set_value("naming_series", "MFG-MPP-.YYYY.-");
+	onload(frm) {
+		// Set correct naming series when form loads (new documents)
+		if (frm.is_new()) {
+			if (frm.doc.is_monthly_production_plan) {
+				frm.set_value("naming_series", "MFG-MPP-.YYYY.-");
 				frm.set_value("is_parent_plan", 1);
 
-            } else {
-                frm.set_value("naming_series", "MFG-DPP-.YYYY.-");
+			} else {
+				frm.set_value("naming_series", "MFG-DPP-.YYYY.-");
 				frm.set_value("is_parent_plan", 0);
-            }
-        }
-    },
+			}
+		}
+	},
 
 	before_save(frm) {
 		// preserve temporary names on production plan item to re-link sub-assembly items
-		[ "po_items_line_1", "po_items_line_2", "po_items_line_3", "po_items_mono_line", "po_items_multi_line" ].forEach(function(table_name) {
+		["po_items_line_1", "po_items_line_2", "po_items_line_3", "po_items_mono_line", "po_items_multi_line"].forEach(function (table_name) {
 			if (Array.isArray(frm.doc[table_name])) {
-				frm.doc[table_name].forEach(function(item) {
+				frm.doc[table_name].forEach(function (item) {
 					item.temporary_name = item.name;
 				});
 			}
@@ -75,43 +75,44 @@ frappe.ui.form.on("Production Plan", {
 			};
 		});
 
-		[ "po_items_line_1", "po_items_line_2", "po_items_line_3", "po_items_mono_line", "po_items_multi_line" ]
-		.forEach(function(table_name) {
-			frm.set_query("item_code", table_name, (doc, cdt, cdn) => {
-				return {
-					query: "erpnext.controllers.queries.item_query",
-					filters: {
-						is_stock_item: 1,
-					},
-				};
-			});
-
-			frm.set_query("bom_no", table_name, (doc, cdt, cdn) => {
-				var d = locals[cdt][cdn];
-				if (d.item_code) {
+		["po_items_line_1", "po_items_line_2", "po_items_line_3", "po_items_mono_line", "po_items_multi_line"]
+			.forEach(function (table_name) {
+				frm.set_query("item_code", table_name, (doc, cdt, cdn) => {
 					return {
-						query: "erpnext.controllers.queries.bom",
-						filters: { item: d.item_code, docstatus: 1 },
+						query: "erpnext.controllers.queries.item_query",
+						filters: {
+							is_stock_item: 1,
+							name: ["like", "%FG"] // TODO - Update this with confirmed suffix
+						},
 					};
-				} else frappe.msgprint(__("Please enter Item first"));
-			});
+				});
 
-			frm.set_query("warehouse", "mr_items", (doc) => {
-				return {
-					filters: {
-						company: doc.company,
-					},
-				};
-			});
+				frm.set_query("bom_no", table_name, (doc, cdt, cdn) => {
+					var d = locals[cdt][cdn];
+					if (d.item_code) {
+						return {
+							query: "erpnext.controllers.queries.bom",
+							filters: { item: d.item_code, docstatus: 1 },
+						};
+					} else frappe.msgprint(__("Please enter Item first"));
+				});
 
-			frm.set_query("warehouse", table_name, (doc) => {
-				return {
-					filters: {
-						company: doc.company,
-					},
-				};
+				frm.set_query("warehouse", "mr_items", (doc) => {
+					return {
+						filters: {
+							company: doc.company,
+						},
+					};
+				});
+
+				frm.set_query("warehouse", table_name, (doc) => {
+					return {
+						filters: {
+							company: doc.company,
+						},
+					};
+				});
 			});
-		});
 	},
 
 	refresh(frm) {
@@ -149,7 +150,7 @@ frappe.ui.form.on("Production Plan", {
 
 				let items = frm.events.get_items_for_work_order(frm);
 
-              	if (items?.length && frm.doc.status !== "Closed") {
+				if (items?.length && frm.doc.status !== "Closed") {
 					if (frm.doc.is_parent_plan == 1) {
 						frm.add_custom_button(
 							__("Daily Production Plan"),
@@ -159,8 +160,7 @@ frappe.ui.form.on("Production Plan", {
 							__("Create")
 						);
 					}
-					else 
-					{
+					else {
 						frm.add_custom_button(
 							__("Work Order / Subcontract PO"),
 							() => {
@@ -187,13 +187,13 @@ frappe.ui.form.on("Production Plan", {
 			}
 
 			if (frm.doc.is_parent_plan && frm.doc.docstatus == 1) {
-				frm.add_custom_button(__("Refresh from DPPs"), function() {
+				frm.add_custom_button(__("Refresh from DPPs"), function () {
 					frappe.call({
 						method: "erpnext.manufacturing.doctype.production_plan.production_plan.refresh_mpp_progress",
 						args: {
 							mpp_name: frm.doc.name
 						},
-						callback: function(r) {
+						callback: function (r) {
 							if (!r.exc) {
 								frappe.msgprint("MPP updated from its DPP's");
 								frm.refresh();
@@ -262,32 +262,32 @@ frappe.ui.form.on("Production Plan", {
 
 		set_field_options("projected_qty_formula", projected_qty_formula);
 	},
-	
-	onload: function(frm) {
-        if (frm.doc.is_parent_plan && frm.doc.docstatus == 1) {
-            // Auto-update on load
-            frappe.call({
-                method: "erpnext.manufacturing.doctype.production_plan.production_plan.refresh_mpp_progress",
-                args: { mpp_name: frm.doc.name },
-                callback: function(r) {
+
+	onload: function (frm) {
+		if (frm.doc.is_parent_plan && frm.doc.docstatus == 1) {
+			// Auto-update on load
+			frappe.call({
+				method: "erpnext.manufacturing.doctype.production_plan.production_plan.refresh_mpp_progress",
+				args: { mpp_name: frm.doc.name },
+				callback: function (r) {
 					frm.refresh()
-                }
-            });
-        }
-    },
+				}
+			});
+		}
+	},
 
 	get_items_for_work_order(frm) {
 		// let items = frm.doc.po_items;
 		let items = [];
-		if (Array.isArray(frm.doc.po_items_line_1)) 
+		if (Array.isArray(frm.doc.po_items_line_1))
 			items = items.concat(frm.doc.po_items_line_1);
-		if (Array.isArray(frm.doc.po_items_line_2)) 
+		if (Array.isArray(frm.doc.po_items_line_2))
 			items = items.concat(frm.doc.po_items_line_2);
-		if (Array.isArray(frm.doc.po_items_line_3)) 
+		if (Array.isArray(frm.doc.po_items_line_3))
 			items = items.concat(frm.doc.po_items_line_3);
-		if (Array.isArray(frm.doc.po_items_mono_line)) 
+		if (Array.isArray(frm.doc.po_items_mono_line))
 			items = items.concat(frm.doc.po_items_mono_line);
-		if (Array.isArray(frm.doc.po_items_multi_line)) 
+		if (Array.isArray(frm.doc.po_items_multi_line))
 			items = items.concat(frm.doc.po_items_multi_line);
 
 		if (frm.doc.sub_assembly_items?.length) {
@@ -422,11 +422,11 @@ frappe.ui.form.on("Production Plan", {
 	},
 
 	get_items_line_1(frm) {
-        frm.set_value("combine_items_line_1", 1);
-        frm.set_value("combine_items_line_2", 0);
-        frm.set_value("combine_items_line_3", 0);
-        frm.set_value("combine_items_mono_line", 0);
-        frm.set_value("combine_items_multi_line", 0);
+		frm.set_value("combine_items_line_1", 1);
+		frm.set_value("combine_items_line_2", 0);
+		frm.set_value("combine_items_line_3", 0);
+		frm.set_value("combine_items_mono_line", 0);
+		frm.set_value("combine_items_multi_line", 0);
 
 		frm.call({
 			method: "get_items",
@@ -436,14 +436,14 @@ frappe.ui.form.on("Production Plan", {
 				frm.refresh_field("po_items_line_1");
 			},
 		});
-    },
+	},
 
 	get_items_line_2(frm) {
-        frm.set_value("combine_items_line_1", 0);
-        frm.set_value("combine_items_line_2", 1);
-        frm.set_value("combine_items_line_3", 0);
-        frm.set_value("combine_items_mono_line", 0);
-        frm.set_value("combine_items_multi_line", 0);
+		frm.set_value("combine_items_line_1", 0);
+		frm.set_value("combine_items_line_2", 1);
+		frm.set_value("combine_items_line_3", 0);
+		frm.set_value("combine_items_mono_line", 0);
+		frm.set_value("combine_items_multi_line", 0);
 
 		frm.call({
 			method: "get_items",
@@ -453,14 +453,14 @@ frappe.ui.form.on("Production Plan", {
 				frm.refresh_field("po_items_line_2");
 			},
 		});
-    },
+	},
 
 	get_items_line_3(frm) {
-        frm.set_value("combine_items_line_1", 0);
-        frm.set_value("combine_items_line_2", 0);
-        frm.set_value("combine_items_line_3", 1);
-        frm.set_value("combine_items_mono_line", 0);
-        frm.set_value("combine_items_multi_line", 0);
+		frm.set_value("combine_items_line_1", 0);
+		frm.set_value("combine_items_line_2", 0);
+		frm.set_value("combine_items_line_3", 1);
+		frm.set_value("combine_items_mono_line", 0);
+		frm.set_value("combine_items_multi_line", 0);
 
 		frm.call({
 			method: "get_items",
@@ -470,14 +470,14 @@ frappe.ui.form.on("Production Plan", {
 				frm.refresh_field("po_items_line_3");
 			},
 		});
-    },	
+	},
 
 	get_items_mono_line(frm) {
-        frm.set_value("combine_items_line_1", 0);
-        frm.set_value("combine_items_line_2", 0);
-        frm.set_value("combine_items_line_3", 0);
-        frm.set_value("combine_items_mono_line", 1);
-        frm.set_value("combine_items_multi_line", 0);
+		frm.set_value("combine_items_line_1", 0);
+		frm.set_value("combine_items_line_2", 0);
+		frm.set_value("combine_items_line_3", 0);
+		frm.set_value("combine_items_mono_line", 1);
+		frm.set_value("combine_items_multi_line", 0);
 
 		frm.call({
 			method: "get_items",
@@ -487,14 +487,14 @@ frappe.ui.form.on("Production Plan", {
 				frm.refresh_field("po_items_mono_line");
 			},
 		});
-    },
+	},
 
 	get_items_multi_line(frm) {
-        frm.set_value("combine_items_line_1", 0);
-        frm.set_value("combine_items_line_2", 0);
-        frm.set_value("combine_items_line_3", 0);
-        frm.set_value("combine_items_mono_line", 0);
-        frm.set_value("combine_items_multi_line", 1);
+		frm.set_value("combine_items_line_1", 0);
+		frm.set_value("combine_items_line_2", 0);
+		frm.set_value("combine_items_line_3", 0);
+		frm.set_value("combine_items_mono_line", 0);
+		frm.set_value("combine_items_multi_line", 1);
 
 		frm.call({
 			method: "get_items",
@@ -504,7 +504,7 @@ frappe.ui.form.on("Production Plan", {
 				frm.refresh_field("po_items_multi_line");
 			},
 		});
-    },
+	},
 
 	combine_items(frm) {
 		frm.clear_table("prod_plan_references");
@@ -685,9 +685,9 @@ frappe.ui.form.on("Production Plan", {
 
 		// produced qty
 		let item_wise_qty = {};
-		[ "po_items_line_1", "po_items_line_2", "po_items_line_3", "po_items_mono_line", "po_items_multi_line" ].forEach(function(table_name) {
+		["po_items_line_1", "po_items_line_2", "po_items_line_3", "po_items_mono_line", "po_items_multi_line"].forEach(function (table_name) {
 			if (Array.isArray(frm.doc[table_name])) {
-				frm.doc[table_name].forEach(function(data) {
+				frm.doc[table_name].forEach(function (data) {
 					if (!item_wise_qty[data.item_code]) {
 						item_wise_qty[data.item_code] = flt(data.produced_qty || 0);
 					} else {
@@ -716,31 +716,31 @@ frappe.ui.form.on("Production Plan", {
 	},
 
 	create_daily_production_plan(frm) {
-        frappe.prompt(
-            {
-                fieldname: "dpp_date",
-                label: __("Daily Production Plan Date"),
-                fieldtype: "Date",
-                reqd: 1,
-            },
-            (values) => {
-                frappe.call({
-                    method: "erpnext.manufacturing.doctype.production_plan.production_plan.create_daily_production_plan",
-                    args: {
-                        parent_name: frm.doc.name,
-                        dpp_date: values.dpp_date,
-                    },
-                    callback: (r) => {
-                        if (!r.exc && r.message) {
-                            frappe.set_route("Form", "Production Plan", r.message);
-                        }
-                    },
-                });
-            },
-            __("Create Daily Production Plan"),
-            __("Create")
-        );
-    },
+		frappe.prompt(
+			{
+				fieldname: "dpp_date",
+				label: __("Daily Production Plan Date"),
+				fieldtype: "Date",
+				reqd: 1,
+			},
+			(values) => {
+				frappe.call({
+					method: "erpnext.manufacturing.doctype.production_plan.production_plan.create_daily_production_plan",
+					args: {
+						parent_name: frm.doc.name,
+						dpp_date: values.dpp_date,
+					},
+					callback: (r) => {
+						if (!r.exc && r.message) {
+							frappe.set_route("Form", "Production Plan", r.message);
+						}
+					},
+				});
+			},
+			__("Create Daily Production Plan"),
+			__("Create")
+		);
+	},
 });
 
 frappe.ui.form.on("Production Plan Item", {
@@ -905,40 +905,40 @@ frappe.tour["Production Plan"] = [
 		),
 	},
 	{
-        fieldname: "po_items_line_1",
-        title: "Finished Goods Line 1",
-        description: __(
-            "On expanding a row in the Items to Manufacture Line 1 table, you'll see an option to 'Include Exploded Items'. Ticking this includes raw materials of the sub-assembly items in the production process."
-        ),
-    },
-    {
-        fieldname: "po_items_line_2",
-        title: "Finished Goods Line 2",
-        description: __(
-            "On expanding a row in the Items to Manufacture Line 2 table, you'll see an option to 'Include Exploded Items'. Ticking this includes raw materials of the sub-assembly items in the production process."
-        ),
-    },
+		fieldname: "po_items_line_1",
+		title: "Finished Goods Line 1",
+		description: __(
+			"On expanding a row in the Items to Manufacture Line 1 table, you'll see an option to 'Include Exploded Items'. Ticking this includes raw materials of the sub-assembly items in the production process."
+		),
+	},
 	{
-        fieldname: "po_items_line_3",
-        title: "Finished Goods Line 3",
-        description: __(
-            "On expanding a row in the Items to Manufacture Line 3 table, you'll see an option to 'Include Exploded Items'. Ticking this includes raw materials of the sub-assembly items in the production process."
-        ),
-    },
+		fieldname: "po_items_line_2",
+		title: "Finished Goods Line 2",
+		description: __(
+			"On expanding a row in the Items to Manufacture Line 2 table, you'll see an option to 'Include Exploded Items'. Ticking this includes raw materials of the sub-assembly items in the production process."
+		),
+	},
 	{
-        fieldname: "po_items_mono_line",
-        title: "Finished Goods Mono Line",
-        description: __(
-            "On expanding a row in the Items to Manufacture Mono Line table, you'll see an option to 'Include Exploded Items'. Ticking this includes raw materials of the sub-assembly items in the production process."
-        ),
-    },
-    {
-        fieldname: "po_items_multi_line",
-        title: "Finished Goods Multi Line",
-        description: __(
-            "On expanding a row in the Items to Manufacture Multi Line table, you'll see an option to 'Include Exploded Items'. Ticking this includes raw materials of the sub-assembly items in the production process."
-        ),
-    },
+		fieldname: "po_items_line_3",
+		title: "Finished Goods Line 3",
+		description: __(
+			"On expanding a row in the Items to Manufacture Line 3 table, you'll see an option to 'Include Exploded Items'. Ticking this includes raw materials of the sub-assembly items in the production process."
+		),
+	},
+	{
+		fieldname: "po_items_mono_line",
+		title: "Finished Goods Mono Line",
+		description: __(
+			"On expanding a row in the Items to Manufacture Mono Line table, you'll see an option to 'Include Exploded Items'. Ticking this includes raw materials of the sub-assembly items in the production process."
+		),
+	},
+	{
+		fieldname: "po_items_multi_line",
+		title: "Finished Goods Multi Line",
+		description: __(
+			"On expanding a row in the Items to Manufacture Multi Line table, you'll see an option to 'Include Exploded Items'. Ticking this includes raw materials of the sub-assembly items in the production process."
+		),
+	},
 	{
 		fieldname: "include_non_stock_items",
 		title: "Include Non Stock Items",

@@ -182,7 +182,7 @@ const getNextWorkItem = async (station, play_alert = false) => {
 		method: 'erpnext.manufacturing.page.operator_station.operator_station.get_next_work_item',
 		args: {
 			process: station,
-			line: line.value || '2' // Defaulting to L1 for now if not known
+			line: work_context.assigned_line || '2' // Defaulting to L1 for now if not known
 		}
 	});
 
