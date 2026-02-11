@@ -1855,13 +1855,15 @@ def get_xlsx_styles(metadata: XLSXMetadata) -> dict:
 
 	NOTE: Currently only custom report generated with "Report Template" filter will have styles applied.
 	"""
+	# skip styling
 	if not metadata.filters.get("report_template"):
 		return
 
-	builder = XLSXStyleBuilder(metadata)
+	builder = XLSXStyleBuilder(metadata, default_styling=False)
+	builder.apply_default_styles(currency_formatting=False)
 
-	if not builder.row_is_dict:
-		return
+	# currency is fixed for all columns
+	currency = get_company_currency(metadata.filters.get("company"))
 
 	styles = {
 		"bold": builder.register_style({"bold": True}),
@@ -1870,9 +1872,10 @@ def get_xlsx_styles(metadata: XLSXMetadata) -> dict:
 	}
 
 	fieldtype_formats = {
-		"Percent": builder.register_style({"num_format": builder.get_number_format("Percent")}),
-		"Float": builder.register_style({"num_format": builder.get_number_format("Float")}),
 		"Int": builder.register_style({"num_format": "General"}),
+		"Float": builder.register_style({"num_format": builder.get_number_format("Float")}),
+		"Percent": builder.register_style({"num_format": builder.get_number_format("Percent")}),
+		"Currency": builder.register_style({"num_format": builder.get_number_format("Currency", currency)}),
 	}
 
 	cache = {"color": {}, "prefix": {}, "indent": {}}
@@ -1899,6 +1902,14 @@ def get_xlsx_styles(metadata: XLSXMetadata) -> dict:
 
 		return formatting, is_account_col
 
+	# column level styling of currency columns
+	for col_idx, col in metadata.column_map.items():
+		if col.get("fieldtype") != "Currency":
+			continue
+
+		builder.style_column(col_idx, fieldtype_formats["Currency"])
+
+	# cell level styling
 	for row_idx, row in metadata.row_map.items():
 		if builder.has_total_row and row_idx == builder.last_row_index:
 			continue
