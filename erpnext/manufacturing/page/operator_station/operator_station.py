@@ -268,20 +268,29 @@ def get_next_work_item(process, line="", include_wip=True):
 	if isinstance(include_wip, str):
 		include_wip = include_wip.lower() == "true"
 
-	job_card = get_top_job_card_for_process(process, line, include_wip)
+	job_card_data = get_top_job_card_for_process(process, line, include_wip)
+	job_card = job_card_data["top_job_card"]
+	available_job_cards_count = job_card_data["available_job_cards_count"]
 
 	slabs_for_process = get_slabs_for(line, process)
 	slab = slabs_for_process[0] if slabs_for_process else None
+	available_slabs_count = len(slabs_for_process)
 
 	return {
 		"slab": slab,
+		"available_slabs_count": available_slabs_count,
 		"job_card": job_card,
+		"available_job_cards_count": available_job_cards_count,
 	}
 
 
 def get_top_job_card_for_process(process, line="", include_wip=True):
 	job_cards = get_open_job_cards(process, line, include_wip)
-	return job_cards[0] if job_cards else None
+	return {
+		"top_job_card": job_cards[0] if job_cards else None,
+		"available_job_cards_count": len(job_cards),
+	}
+	# return job_cards[0] if job_cards else None
 
 
 def update_slab_number_on_job_card(job_card_name, slab_name, slab_template):
