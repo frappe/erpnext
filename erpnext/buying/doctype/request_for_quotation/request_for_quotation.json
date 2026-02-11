@@ -7,6 +7,7 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
+  "title",
   "naming_series",
   "company",
   "billing_address",
@@ -324,6 +325,14 @@
    "label": "Subject",
    "not_nullable": 1,
    "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "grid_page_length": 50,
@@ -331,7 +340,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-06 10:31:08.747043",
+ "modified": "2026-02-11 11:44:44.287336",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",
@@ -401,5 +410,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "title"
 }
