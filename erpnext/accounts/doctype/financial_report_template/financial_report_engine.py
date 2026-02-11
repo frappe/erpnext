@@ -232,13 +232,13 @@ class FinancialReportEngine:
 				frappe.throw(_("Missing required filter: {0}").format(filter_key))
 
 		if filters.get("presentation_currency"):
-			frappe.msgprint(_("Currency filters are currently unsupported in Custom Financial Report."))
+			frappe.throw(_("Currency filters are currently unsupported in Custom Financial Report."))
 
 		# Margin view is dependent on first row being an income account. Hence not supported.
 		# Way to implement this would be using calculated rows with formulas.
 		supported_views = ("Report", "Growth")
 		if (view := filters.get("selected_view")) and view not in supported_views:
-			frappe.msgprint(_("{0} view is currently unsupported in Custom Financial Report.").format(view))
+			frappe.throw(_("{0} view is currently unsupported in Custom Financial Report.").format(view))
 
 	def _initialize_context(self, filters: dict[str, Any]) -> ReportContext:
 		template_name = filters.get("report_template")
