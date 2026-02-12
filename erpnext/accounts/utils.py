@@ -1259,7 +1259,7 @@ def get_outstanding_invoices(
 	if account:
 		root_type, account_type = frappe.get_cached_value(
 			"Account", account[0], ["root_type", "account_type"]
-		)
+		) or (None, None)
 		party_account_type = "Receivable" if root_type == "Asset" else "Payable"
 		party_account_type = account_type or party_account_type
 	else:

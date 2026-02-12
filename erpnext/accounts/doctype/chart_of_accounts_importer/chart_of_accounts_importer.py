@@ -57,10 +57,11 @@ def validate_columns(data):
 
 
 @frappe.whitelist()
-def validate_company(company: str):
+def validate_company(company):
+
 	parent_company, allow_account_creation_against_child_company = frappe.get_cached_value(
 		"Company", company, ["parent_company", "allow_account_creation_against_child_company"]
-	)
+	) or (None, None)
 
 	if parent_company and (not allow_account_creation_against_child_company):
 		msg = _("{} is a child company.").format(frappe.bold(company)) + " "
@@ -240,7 +241,7 @@ def build_forest(data):
 	error_messages = []
 
 	for i in data:
-		(
+		(search
 			account_name,
 			parent_account,
 			account_number,

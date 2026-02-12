@@ -139,9 +139,12 @@ def get_credit_debit_accounts_for_asset(asset_category, company):
 
 
 def get_depreciation_cost_center_and_series(asset):
-	depreciation_cost_center, depreciation_series = frappe.get_cached_value(
+	result = frappe.get_cached_value(
 		"Company", asset.company, ["depreciation_cost_center", "series_for_depreciation_entry"]
 	)
+	if result is None:
+		frappe.throw(_("Company does not exist"), frappe.DoesNotExistError)
+	depreciation_cost_center, depreciation_series = result
 	depreciation_cost_center = asset.cost_center or depreciation_cost_center
 	return depreciation_cost_center, depreciation_series
 
@@ -152,9 +155,12 @@ def get_depr_cost_center_and_series():
 	res = {}
 
 	for company_name in company_names:
-		depreciation_cost_center, depreciation_series = frappe.get_cached_value(
+		result = frappe.get_cached_value(
 			"Company", company_name, ["depreciation_cost_center", "series_for_depreciation_entry"]
 		)
+		if result is None:
+			frappe.throw(_("Company does not exist"), frappe.DoesNotExistError)
+		depreciation_cost_center, depreciation_series = result
 		res.setdefault(company_name, (depreciation_cost_center, depreciation_series))
 
 	return res
@@ -773,10 +779,13 @@ def get_profit_gl_entries(
 
 
 @frappe.whitelist()
-def get_disposal_account_and_cost_center(company: str):
-	disposal_account, depreciation_cost_center = frappe.get_cached_value(
+def get_disposal_account_and_cost_center(company):
+	result=frappe.get_cached_value(
 		"Company", company, ["disposal_account", "depreciation_cost_center"]
 	)
+	if result is None:
+		frappe.throw(_("Company does not exist"), frappe.DoesNotExistError)
+	disposal_account, depreciation_cost_center = result
 
 	if not disposal_account:
 		frappe.throw(_("Please set 'Gain/Loss Account on Asset Disposal' in Company {0}").format(company))

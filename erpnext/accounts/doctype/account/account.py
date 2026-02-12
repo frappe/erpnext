@@ -236,9 +236,12 @@ class Account(NestedSet):
 			if not descendants:
 				return
 			parent_acc_name_map = {}
-			parent_acc_name, parent_acc_number = frappe.get_cached_value(
+			result = frappe.get_cached_value(
 				"Account", self.parent_account, ["account_name", "account_number"]
 			)
+			if result is None:
+				frappe.throw(_("Parent Account does not exist"), frappe.DoesNotExistError)
+			parent_acc_name, parent_acc_number = result
 			filters = {
 				"company": ["in", descendants],
 				"account_name": parent_acc_name,
@@ -487,9 +490,13 @@ def get_account_currency(account):
 		return
 
 	def generator():
-		account_currency, company = frappe.get_cached_value(
-			"Account", account, ["account_currency", "company"]
-		)
+		result = frappe.get_cached_value("Account", account, ["account_currency", "company"])
+
+		if result is None:
+			frappe.throw(_("Account does not exist"), frappe.DoesNotExistError)
+
+		account_currency, company = result
+
 		if not account_currency:
 			account_currency = frappe.get_cached_value("Company", company, "default_currency")
 

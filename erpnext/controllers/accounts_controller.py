@@ -844,9 +844,12 @@ class AccountsController(TransactionBase):
 			)
 
 	def validate_line_items(self, ref_dt, ref_dn_field, ref_link_field):
-		action, role_allowed_to_override = frappe.get_cached_value(
+		result=frappe.get_cached_value(
 			"Accounts Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
 		)
+		if result is None:
+			frappe.throw(_("Value does not exist"), frappe.DoesNotExistError)
+		action, role_allowed_to_override = result
 
 		reference_names = [d.get(ref_link_field) for d in self.get("items") if d.get(ref_link_field)]
 		reference_details = self.get_reference_details(reference_names, ref_dt + " Item")

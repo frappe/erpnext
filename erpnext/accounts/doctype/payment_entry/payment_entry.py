@@ -728,9 +728,12 @@ class PaymentEntry(AccountsController):
 				continue
 
 			if d.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
-				outstanding_amount, is_return = frappe.get_cached_value(
+				result = frappe.get_cached_value(
 					d.reference_doctype, d.reference_name, ["outstanding_amount", "is_return"]
 				)
+				if result is None:
+					frappe.throw(_(f"{d.reference_doctype} does not exist"), frappe.DoesNotExistError)
+				outstanding_amount, is_return = result
 				if outstanding_amount <= 0 and not is_return:
 					no_oustanding_refs.setdefault(d.reference_doctype, []).append(d)
 

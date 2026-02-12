@@ -39,9 +39,10 @@ class ItemTaxTemplate(Document):
 		check_list = []
 		for d in self.get("taxes"):
 			if d.tax_type:
-				account_type, account_company = frappe.get_cached_value(
-					"Account", d.tax_type, ["account_type", "company"]
-				)
+				result = frappe.get_cached_value("Account", d.tax_type, ["account_type", "company"])
+				if result is None:
+					frappe.throw(_("Account does not exist"), frappe.DoesNotExistError)
+				account_type, account_company = result
 
 				if account_company != self.company:
 					frappe.throw(

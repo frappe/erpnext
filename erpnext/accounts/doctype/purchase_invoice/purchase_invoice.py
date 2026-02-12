@@ -243,9 +243,12 @@ class PurchaseInvoice(BuyingController):
 	def onload(self):
 		super().onload()
 		if self.supplier:
-			tax_withholding_category, tax_withholding_group = frappe.get_cached_value(
+			result = frappe.get_cached_value(
 				"Supplier", self.supplier, ["tax_withholding_category", "tax_withholding_group"]
 			)
+			if result is None:
+				frappe.throw(_("Suppplier does not exist"), frappe.DoesNotExistError)
+			tax_withholding_category, tax_withholding_group = result
 			self.set_onload("apply_tds", tax_withholding_category or tax_withholding_group)
 
 		if self.is_new():
@@ -354,9 +357,12 @@ class PurchaseInvoice(BuyingController):
 			)
 
 		if self.supplier:
-			tax_withholding_category, tax_withholding_group = frappe.get_cached_value(
+			result = frappe.get_cached_value(
 				"Supplier", self.supplier, ["tax_withholding_category", "tax_withholding_group"]
 			)
+			if result is None:
+				frappe.throw(_("Supplier does not exist"), frappe.DoesNotExistError)
+			tax_withholding_category, tax_withholding_group = result
 			if not for_validate:
 				if tax_withholding_category or tax_withholding_group:
 					self.apply_tds = 1

@@ -201,9 +201,13 @@ def process_gl_map(gl_map, merge_entries=True, precision=None, from_repost=False
 
 
 def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_repost=False):
-	round_off_account, default_currency = frappe.get_cached_value(
-		"Company", gl_map[0].company, ["round_off_account", "default_currency"]
-	)
+
+	result = frappe.get_cached_value("Company", gl_map[0].company, ["round_off_account", "default_currency"])
+
+	if result is None:
+		frappe.throw(_("Company does not exist"), frappe.DoesNotExistError)
+
+	round_off_account, default_currency = result
 	if not precision:
 		precision = get_field_precision(
 			frappe.get_meta("GL Entry").get_field("debit"),
@@ -312,12 +316,14 @@ def merge_similar_entries(gl_map, precision=None):
 
 	# filter zero debit and credit entries
 	merged_gl_map = filter(
-		lambda x: flt(x.debit, precision) != 0
-		or flt(x.credit, precision) != 0
-		or (
-			x.voucher_type == "Journal Entry"
-			and frappe.get_cached_value("Journal Entry", x.voucher_no, "voucher_type")
-			== "Exchange Gain Or Loss"
+		lambda x: (
+			flt(x.debit, precision) != 0
+			or flt(x.credit, precision) != 0
+			or (
+				x.voucher_type == "Journal Entry"
+				and frappe.get_cached_value("Journal Entry", x.voucher_no, "voucher_type")
+				== "Exchange Gain Or Loss"
+			)
 		),
 		merged_gl_map,
 	)
@@ -645,7 +651,7 @@ def update_accounting_dimensions(round_off_gle):
 def get_round_off_account_and_cost_center(company, voucher_type, voucher_no, use_company_default=False):
 	round_off_account, round_off_cost_center, round_off_for_opening = frappe.get_cached_value(
 		"Company", company, ["round_off_account", "round_off_cost_center", "round_off_for_opening"]
-	) or [None, None, None]
+	) or (None, None, None)
 
 	# Use expense account as fallback
 	if not round_off_account:

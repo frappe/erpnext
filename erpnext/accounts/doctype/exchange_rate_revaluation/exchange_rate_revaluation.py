@@ -625,9 +625,12 @@ def get_account_details(
 	if not (company and posting_date):
 		frappe.throw(_("Company and Posting Date is mandatory"))
 
-	account_currency, account_type = frappe.get_cached_value(
-		"Account", account, ["account_currency", "account_type"]
-	)
+	result = frappe.get_cached_value("Account", account, ["account_currency", "account_type"])
+
+	if result is None:
+		frappe.throw(_("Account does not exist"), frappe.DoesNotExistError)
+
+	account_currency, account_type = result
 
 	if account_type in ["Receivable", "Payable"] and not (party_type and party):
 		frappe.throw(_("Party Type and Party is mandatory for {0} account").format(account_type))

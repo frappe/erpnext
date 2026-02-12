@@ -318,10 +318,10 @@ class SellingController(StockController):
 		for item in self.items:
 			if not item.item_code or item.is_free_item:
 				continue
-
-			last_purchase_rate, is_stock_item = frappe.get_cached_value(
-				"Item", item.item_code, ("last_purchase_rate", "is_stock_item")
-			)
+			result = frappe.get_cached_value("Item", item.item_code, ("last_purchase_rate", "is_stock_item"))
+			if result is None:
+				frappe.throw(_("Item does not exist"), frappe.DoesNotExistError)
+			last_purchase_rate, is_stock_item = result
 
 			last_purchase_rate_in_sales_uom = flt(
 				last_purchase_rate * (item.conversion_factor or 1), item.precision("base_net_rate")

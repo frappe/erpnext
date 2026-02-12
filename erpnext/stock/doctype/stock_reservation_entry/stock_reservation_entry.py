@@ -1632,7 +1632,7 @@ def create_stock_reservation_entries_for_so_items(
 
 		is_stock_item, has_serial_no, has_batch_no = frappe.get_cached_value(
 			"Item", item.item_code, ["is_stock_item", "has_serial_no", "has_batch_no"]
-		)
+		) or (None, None, None)
 
 		# Skip if Non-Stock Item.
 		if not is_stock_item:

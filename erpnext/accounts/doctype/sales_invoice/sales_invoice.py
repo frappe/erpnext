@@ -291,9 +291,12 @@ class SalesInvoice(SellingController):
 	def onload(self):
 		super().onload()
 		if self.customer:
-			tax_withholding_category, tax_withholding_group = frappe.get_cached_value(
+			result = frappe.get_cached_value(
 				"Customer", self.customer, ["tax_withholding_category", "tax_withholding_group"]
 			)
+			if result is None:
+				frappe.throw(_("Customer does not exist"), frappe.DoesNotExistError)
+			tax_withholding_category, tax_withholding_group = result
 			self.set_onload("apply_tds", tax_withholding_category or tax_withholding_group)
 
 	def validate(self):
@@ -2474,10 +2477,12 @@ def make_delivery_note(source_name: str, target_doc: Document | None = None):
 					"cost_center": "cost_center",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.delivered_by_supplier != 1
-				and not doc.scio_detail
-				and not doc.dn_detail
-				and doc.qty - doc.delivered_qty > 0,
+				"condition": lambda doc: (
+					doc.delivered_by_supplier != 1
+					and not doc.scio_detail
+					and not doc.dn_detail
+					and doc.qty - doc.delivered_qty > 0
+				),
 			},
 			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 			"Sales Team": {

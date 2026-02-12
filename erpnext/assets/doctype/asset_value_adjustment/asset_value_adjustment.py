@@ -91,9 +91,12 @@ class AssetValueAdjustment(Document):
 			depreciation_expense_account,
 		) = get_depreciation_accounts(asset.asset_category, asset.company)
 
-		depreciation_cost_center, depreciation_series = frappe.get_cached_value(
+		result = frappe.get_cached_value(
 			"Company", asset.company, ["depreciation_cost_center", "series_for_depreciation_entry"]
 		)
+		if result is None:
+			frappe.throw(_("Company does not exist"), frappe.DoesNotExistError)
+		depreciation_cost_center, depreciation_series = result
 
 		je = frappe.new_doc("Journal Entry")
 		je.voucher_type = "Journal Entry"

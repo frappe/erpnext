@@ -154,9 +154,13 @@ def get_previous_closing_entries(company, closing_date, accounting_dimensions):
 
 
 def set_amount_in_reporting_currency(cle, company, closing_date):
-	default_currency, reporting_currency = frappe.get_cached_value(
-		"Company", company, ["default_currency", "reporting_currency"]
-	)
+
+	result = frappe.get_cached_value("Company", company, ["default_currency", "reporting_currency"])
+
+	if result is None:
+		frappe.throw(_("Company does not exist"), frappe.DoesNotExistError)
+
+	default_currency, reporting_currency = result
 
 	reporting_currency_exchange_rate = get_exchange_rate(default_currency, reporting_currency, closing_date)
 	if not reporting_currency_exchange_rate:

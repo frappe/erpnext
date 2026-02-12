@@ -1250,9 +1250,14 @@ def make_journal_entry(asset_name: str):
 		depreciation_expense_account,
 	) = get_depreciation_accounts(asset.asset_category, asset.company)
 
-	depreciation_cost_center, depreciation_series = frappe.get_cached_value(
+	result = frappe.get_cached_value(
 		"Company", asset.company, ["depreciation_cost_center", "series_for_depreciation_entry"]
 	)
+
+	if result is None:
+		frappe.throw(_("Asset company does not exist"), frappe.DoesNotExistError)
+
+	depreciation_cost_center, depreciation_series = result
 	depreciation_cost_center = asset.cost_center or depreciation_cost_center
 
 	je = frappe.new_doc("Journal Entry")

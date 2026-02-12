@@ -82,9 +82,12 @@ def get_data(filters, conditions):
 	if conditions.get("trans") == "Quotation" and filters.get("group_by") == "Customer":
 		cond += " and t1.quotation_to = 'Customer'"
 
-	year_start_date, year_end_date = frappe.get_cached_value(
+	result = frappe.get_cached_value(
 		"Fiscal Year", filters.get("fiscal_year"), ["year_start_date", "year_end_date"]
 	)
+	if result is None:
+		frappe.throw(_("Fiscal Year does not exist"), frappe.DoesNotExistError)
+	year_start_date, year_end_date = result
 
 	if filters.get("group_by"):
 		sel_col = ""
@@ -310,9 +313,10 @@ def get_period_date_ranges(
 	from dateutil.relativedelta import relativedelta
 
 	if not year_start_date:
-		year_start_date, year_end_date = frappe.get_cached_value(
-			"Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"]
-		)
+		result = frappe.get_cached_value("Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"])
+		if result is None:
+			frappe.throw(_("Fiscal Year does not exist"), frappe.DoesNotExistError)
+		year_start_date, year_end_date = result
 
 	increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(period)
 

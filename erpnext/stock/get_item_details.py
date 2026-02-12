@@ -767,9 +767,12 @@ def _get_item_tax_template(
 	taxes_with_no_validity = []
 
 	for tax in taxes:
-		disabled, tax_company = frappe.get_cached_value(
+		result=frappe.get_cached_value(
 			"Item Tax Template", tax.item_tax_template, ["disabled", "company"]
 		)
+		if result is None:
+			frappe.throw(_("Item Tax Template does not exist"), frappe.DoesNotExistError)
+		disabled, tax_company = result
 		if not disabled and tax_company == ctx["company"]:
 			if tax.valid_from or tax.maximum_net_rate:
 				# In purchase Invoice first preference will be given to supplier invoice date
