@@ -27,13 +27,10 @@ class Supplier(TransactionBase):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from frappe.types import DF
-
-		from erpnext.accounts.doctype.allowed_to_transact_with.allowed_to_transact_with import (
-			AllowedToTransactWith,
-		)
+		from erpnext.accounts.doctype.allowed_to_transact_with.allowed_to_transact_with import AllowedToTransactWith
 		from erpnext.accounts.doctype.party_account.party_account import PartyAccount
 		from erpnext.utilities.doctype.portal_user.portal_user import PortalUser
+		from frappe.types import DF
 
 		accounts: DF.Table[PartyAccount]
 		allow_purchase_invoice_creation_without_purchase_order: DF.Check
@@ -51,7 +48,10 @@ class Supplier(TransactionBase):
 		is_internal_supplier: DF.Check
 		is_transporter: DF.Check
 		language: DF.Link | None
+		major_msme_activity: DF.Link | None
 		mobile_no: DF.ReadOnly | None
+		msme_no: DF.Data | None
+		msme_size: DF.Link | None
 		naming_series: DF.Literal["SUP-.YYYY.-"]
 		on_hold: DF.Check
 		payment_terms: DF.Link | None
