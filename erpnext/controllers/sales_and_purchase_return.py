@@ -846,10 +846,32 @@ def get_filters(
 	if reference_voucher_detail_no:
 		filters["voucher_detail_no"] = reference_voucher_detail_no
 
-	if voucher_type in ["Purchase Receipt", "Purchase Invoice"] and item_row and item_row.get("warehouse"):
-		filters["warehouse"] = item_row.get("warehouse")
+	warehouses = []
+	if voucher_type in ["Purchase Receipt", "Purchase Invoice"] and item_row:
+		if reference_voucher_detail_no:
+			warehouses = get_warehouses_for_return(voucher_type, reference_voucher_detail_no)
+
+		if item_row.get("warehouse") and item_row.get("warehouse") in warehouses:
+			filters["warehouse"] = item_row.get("warehouse")
 
 	return filters
+
+
+def get_warehouses_for_return(voucher_type, name):
+	warehouses = []
+	warehouse_details = frappe.get_all(
+		voucher_type + " Item",
+		filters={"name": name, "docstatus": 1},
+		fields=["warehouse", "rejected_warehouse"],
+	)
+
+	for d in warehouse_details:
+		if d.warehouse:
+			warehouses.append(d.warehouse)
+		if d.rejected_warehouse:
+			warehouses.append(d.rejected_warehouse)
+
+	return warehouses
 
 
 def get_returned_serial_nos(child_doc, parent_doc, serial_no_field=None, ignore_voucher_detail_no=None):

@@ -47,6 +47,7 @@
   "disable_serial_no_and_batch_selector",
   "use_serial_batch_fields",
   "do_not_update_serial_batch_on_creation_of_auto_bundle",
+  "allow_negative_stock_for_batch",
   "serial_and_batch_bundle_section",
   "set_serial_and_batch_bundle_naming_based_on_naming_series",
   "section_break_gnhq",
@@ -546,6 +547,13 @@
    "fieldname": "validate_material_transfer_warehouses",
    "fieldtype": "Check",
    "label": "Validate Material Transfer Warehouses"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the system will allow negative stock entries for the batch, but this could calculate the valuation rate incorrectly, so avoid using this option.",
+   "fieldname": "allow_negative_stock_for_batch",
+   "fieldtype": "Check",
+   "label": "Allow Negative Stock for Batch"
   }
  ],
  "hide_toolbar": 1,
@@ -554,7 +562,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-02 18:19:59.034785",
+ "modified": "2026-02-09 15:01:12.466175",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

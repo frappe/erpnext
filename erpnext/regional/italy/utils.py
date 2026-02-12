@@ -142,7 +142,14 @@ def download_zip(files, output_filename):
 
 def get_invoice_summary(items, taxes, item_wise_tax_details):
 	summary_data = frappe._dict()
-	taxes_wise_tax_details = {d.tax_row: d for d in item_wise_tax_details}
+	taxes_wise_tax_details = {}
+
+	for d in item_wise_tax_details:
+		if d.tax_row not in taxes_wise_tax_details:
+			taxes_wise_tax_details[d.tax_row] = []
+
+		taxes_wise_tax_details[d.tax_row].append(d)
+
 	for tax in taxes:
 		# Include only VAT charges.
 		if tax.charge_type == "Actual":

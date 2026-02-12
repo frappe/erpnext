@@ -123,7 +123,17 @@ class DeliveryNote(SellingController):
 		shipping_address: DF.TextEditor | None
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
-		status: DF.Literal["", "Draft", "To Bill", "Completed", "Return", "Return Issued", "Cancelled", "Closed"]
+		status: DF.Literal[
+			"",
+			"Draft",
+			"To Bill",
+			"Partially Billed",
+			"Completed",
+			"Return",
+			"Return Issued",
+			"Cancelled",
+			"Closed",
+		]
 		tax_category: DF.Link | None
 		tax_id: DF.Data | None
 		taxes: DF.Table[SalesTaxesandCharges]

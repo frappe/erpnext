@@ -87,7 +87,6 @@ class Customer(TransactionBase):
 		prospect_name: DF.Link | None
 		represents_company: DF.Link | None
 		sales_team: DF.Table[SalesTeam]
-		salutation: DF.Link | None
 		so_required: DF.Check
 		supplier_numbers: DF.Table[SupplierNumberAtCustomer]
 		tax_category: DF.Link | None
@@ -119,12 +118,37 @@ class Customer(TransactionBase):
 	def get_customer_name(self):
 		self.customer_name = self.customer_name.strip()
 		if frappe.db.get_value("Customer", self.customer_name) and not frappe.flags.in_import:
-			count = frappe.db.sql(
-				"""select ifnull(MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)), 0) from tabCustomer
-				 where name like %s""",
-				f"%{self.customer_name} - %",
-				as_list=1,
-			)[0][0]
+			name_prefix = f"{self.customer_name} - %"
+
+			if frappe.db.db_type == "postgres":
+				# Postgres: extract trailing digits (e.g. "Customer - 3") and cast to int.
+				# NOTE: PostgreSQL is strict about types; MySQL's UNSIGNED cast does not exist.
+				count = frappe.db.sql(
+					"""
+					SELECT COALESCE(
+						MAX(CAST(SUBSTRING(name FROM '\\d+$') AS INTEGER)),
+						0
+					)
+					FROM tabCustomer
+					WHERE name LIKE %(name_prefix)s
+					""",
+					{"name_prefix": name_prefix},
+					as_list=1,
+				)[0][0]
+			else:
+				# MariaDB/MySQL: keep existing behavior.
+				count = frappe.db.sql(
+					"""
+					SELECT COALESCE(
+						MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)),
+						0
+					)
+					FROM tabCustomer
+					WHERE name LIKE %(name_prefix)s
+					""",
+					{"name_prefix": name_prefix},
+					as_list=1,
+				)[0][0]
 			count = cint(count) + 1
 
 			new_customer_name = f"{self.customer_name} - {cstr(count)}"
@@ -512,6 +536,9 @@ def _set_missing_values(source, target):
 
 	if contact:
 		target.contact_person = contact[0].parent
+		target.contact_display, target.contact_email, target.contact_mobile = frappe.get_value(
+			"Contact", contact[0].parent, ["full_name", "email_id", "mobile_no"]
+		)
 
 
 @frappe.whitelist()

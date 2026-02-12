@@ -7,9 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "production_item_tab",
-  "item",
   "company",
-  "uom",
+  "item",
   "quantity",
   "cb0",
   "is_active",
@@ -17,8 +16,6 @@
   "allow_alternative_item",
   "set_rate_of_sub_assembly_item_based_on_bom",
   "is_phantom_bom",
-  "project",
-  "image",
   "currency_detail",
   "rm_cost_as_per",
   "buying_price_list",
@@ -33,11 +30,9 @@
   "column_break_23",
   "transfer_material_against",
   "routing",
-  "fg_based_operating_cost",
-  "column_break_joxb",
-  "default_source_warehouse",
-  "default_target_warehouse",
   "fg_based_section_section",
+  "fg_based_operating_cost",
+  "column_break_omye",
   "operating_cost_per_bom_quantity",
   "operations_section",
   "operations",
@@ -61,15 +56,25 @@
   "column_break_26",
   "total_cost",
   "base_total_cost",
-  "more_info_tab",
-  "item_name",
-  "column_break_27",
-  "description",
-  "has_variants",
+  "quality_inspection_tab",
   "quality_inspection_section_break",
   "inspection_required",
   "column_break_dxp7",
   "quality_inspection_template",
+  "more_info_tab",
+  "production_item_info_section",
+  "item_name",
+  "uom",
+  "image",
+  "column_break_27",
+  "description",
+  "has_variants",
+  "default_warehouse_section",
+  "default_source_warehouse",
+  "column_break_inep",
+  "default_target_warehouse",
+  "section_break_ouuf",
+  "project",
   "section_break0",
   "exploded_items",
   "website_section",
@@ -451,7 +456,8 @@
    "allow_on_submit": 1,
    "fieldname": "route",
    "fieldtype": "Small Text",
-   "label": "Route"
+   "label": "Route",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -651,14 +657,10 @@
   {
    "default": "0",
    "depends_on": "with_operations",
-   "description": "Users can consume raw materials and add semi-finished goods or final finished goods against the operation using job cards.",
+   "description": "Users can make manufacture entry against Job Cards",
    "fieldname": "track_semi_finished_goods",
    "fieldtype": "Check",
    "label": "Track Semi Finished Goods"
-  },
-  {
-   "fieldname": "column_break_joxb",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "default_source_warehouse",
@@ -677,6 +679,33 @@
    "fieldname": "is_phantom_bom",
    "fieldtype": "Check",
    "label": "Is Phantom BOM"
+  },
+  {
+   "fieldname": "default_warehouse_section",
+   "fieldtype": "Section Break",
+   "label": "Default Warehouse"
+  },
+  {
+   "fieldname": "column_break_inep",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_omye",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "production_item_info_section",
+   "fieldtype": "Section Break",
+   "label": "Production Item Info"
+  },
+  {
+   "fieldname": "section_break_ouuf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "quality_inspection_tab",
+   "fieldtype": "Tab Break",
+   "label": "Quality Inspection"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -684,7 +713,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-19 16:17:15.925156",
+ "modified": "2026-02-06 17:23:15.255301",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

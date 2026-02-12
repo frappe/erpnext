@@ -248,6 +248,16 @@ class WorkOrder(Document):
 		if self.is_new() and frappe.db.get_single_value("Stock Settings", "auto_reserve_stock"):
 			self.reserve_stock = 1
 
+	def before_save(self):
+		self.set_skip_transfer_for_operations()
+
+	def set_skip_transfer_for_operations(self):
+		if not self.track_semi_finished_goods:
+			return
+
+		for op in self.operations:
+			op.skip_material_transfer = self.skip_transfer
+
 	def validate_operations_sequence(self):
 		if all([not op.sequence_id for op in self.operations]):
 			for op in self.operations:
@@ -859,6 +869,9 @@ class WorkOrder(Document):
 			).run()
 
 	def create_serial_no_batch_no(self):
+		if self.track_semi_finished_goods:
+			return
+
 		if not (self.has_serial_no or self.has_batch_no):
 			return
 
@@ -1599,6 +1612,7 @@ class WorkOrder(Document):
 				"item_code": row.item_code,
 				"voucher_detail_no": row.name,
 				"warehouse": row.source_warehouse,
+				"status": ("not in", ["Closed", "Cancelled", "Completed"]),
 			},
 			pluck="name",
 		):
@@ -1807,24 +1821,10 @@ class WorkOrder(Document):
 		elif stock_entry.job_card:
 			# Reserve the final product for the job card.
 			finished_good = frappe.db.get_value("Job Card", stock_entry.job_card, "finished_good")
+			if finished_good == self.production_item:
+				return
 
-			for row in stock_entry.items:
-				if row.item_code == finished_good:
-					item_details = [
-						frappe._dict(
-							{
-								"item_code": row.item_code,
-								"stock_qty": row.qty,
-								"stock_reserved_qty": 0,
-								"warehouse": row.t_warehouse,
-								"voucher_no": stock_entry.work_order,
-								"voucher_type": "Work Order",
-								"name": row.name,
-								"delivered_qty": 0,
-							}
-						)
-					]
-					break
+			item_details = self.get_items_to_reserve_for_job_card(stock_entry, finished_good)
 		else:
 			# Reserve the final product for the sales order.
 			item_details = self.get_so_details()
@@ -1877,6 +1877,53 @@ class WorkOrder(Document):
 					items[row.item_code]["stock_qty"] += reserved_qty
 
 		return items
+
+	def get_items_to_reserve_for_job_card(self, stock_entry, finished_good):
+		item_details = []
+		for row in stock_entry.items:
+			if row.item_code == finished_good:
+				name = frappe.db.get_value(
+					"Work Order Item",
+					{"item_code": finished_good, "parent": self.name},
+					"name",
+				)
+
+				sres = frappe.get_all(
+					"Stock Reservation Entry",
+					fields=["reserved_qty"],
+					filters={
+						"voucher_no": self.name,
+						"item_code": finished_good,
+						"voucher_detail_no": name,
+						"warehouse": row.t_warehouse,
+						"docstatus": 1,
+						"status": "Reserved",
+					},
+				)
+
+				pending_qty = row.qty
+				for d in sres:
+					pending_qty -= d.reserved_qty
+
+				if pending_qty > 0:
+					item_details = [
+						frappe._dict(
+							{
+								"item_code": row.item_code,
+								"stock_qty": pending_qty,
+								"stock_reserved_qty": 0,
+								"warehouse": row.t_warehouse,
+								"voucher_no": stock_entry.work_order,
+								"voucher_type": "Work Order",
+								"name": name,
+								"delivered_qty": 0,
+							}
+						)
+					]
+
+				break
+
+		return item_details
 
 	def get_wo_details(self):
 		doctype = frappe.qb.DocType("Work Order")
@@ -2307,7 +2354,11 @@ def set_work_order_ops(name):
 
 @frappe.whitelist()
 def make_stock_entry(
-	work_order_id, purpose, qty=None, target_warehouse=None, is_additional_transfer_entry=False
+	work_order_id: str,
+	purpose: str,
+	qty: float | None = None,
+	target_warehouse: str | None = None,
+	is_additional_transfer_entry: bool = False,
 ):
 	work_order = frappe.get_doc("Work Order", work_order_id)
 	if not frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group"):
@@ -2329,9 +2380,6 @@ def make_stock_entry(
 		qty if qty is not None else (flt(work_order.qty) - flt(work_order.produced_qty))
 	)
 
-	if work_order.bom_no:
-		stock_entry.inspection_required = frappe.db.get_value("BOM", work_order.bom_no, "inspection_required")
-
 	if purpose == "Material Transfer for Manufacture":
 		stock_entry.to_warehouse = wip_warehouse
 		stock_entry.project = work_order.project
@@ -2343,6 +2391,10 @@ def make_stock_entry(
 		)
 		stock_entry.to_warehouse = work_order.fg_warehouse
 		stock_entry.project = work_order.project
+		if work_order.bom_no:
+			stock_entry.inspection_required = frappe.db.get_value(
+				"BOM", work_order.bom_no, "inspection_required"
+			)
 
 	if purpose == "Disassemble":
 		stock_entry.from_warehouse = work_order.fg_warehouse

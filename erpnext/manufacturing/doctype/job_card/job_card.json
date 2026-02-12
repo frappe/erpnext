@@ -6,15 +6,15 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "company",
   "naming_series",
   "work_order",
   "employee",
-  "is_subcontracted",
   "column_break_4",
   "posting_date",
-  "company",
   "project",
   "bom_no",
+  "is_subcontracted",
   "semi_finished_good__finished_good_section",
   "finished_good",
   "production_item",
@@ -70,22 +70,24 @@
   "more_information",
   "item_name",
   "requested_qty",
-  "status",
-  "operation_row_id",
   "is_paused",
   "track_semi_finished_goods",
   "column_break_20",
+  "remarks",
+  "section_break_dfoc",
+  "status",
+  "operation_row_id",
+  "amended_from",
+  "column_break_xhzg",
   "operation_row_number",
   "operation_id",
   "sequence_id",
-  "remarks",
-  "serial_and_batch_bundle",
-  "batch_no",
+  "section_break_jcmx",
   "serial_no",
+  "serial_and_batch_bundle",
+  "column_break_swqr",
   "barcode",
-  "started_time",
-  "current_time",
-  "amended_from",
+  "batch_no",
   "connections_tab"
  ],
  "fields": [
@@ -210,7 +212,7 @@
    "collapsible": 1,
    "fieldname": "more_information",
    "fieldtype": "Tab Break",
-   "label": "More Information"
+   "label": "More Info"
   },
   {
    "fieldname": "operation_id",
@@ -260,16 +262,6 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "started_time",
-   "fieldtype": "Datetime",
-   "hidden": 1,
-   "label": "Started Time",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -315,16 +307,7 @@
    "fetch_if_empty": 1,
    "fieldname": "item_name",
    "fieldtype": "Read Only",
-   "label": "Item Name"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "current_time",
-   "fieldtype": "Int",
-   "hidden": 1,
-   "label": "Current Time",
-   "no_copy": 1,
-   "print_hide": 1,
+   "label": "Item Name",
    "read_only": 1
   },
   {
@@ -466,7 +449,8 @@
    "label": "Serial and Batch Bundle",
    "no_copy": 1,
    "options": "Serial and Batch Bundle",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "depends_on": "process_loss_qty",
@@ -621,12 +605,30 @@
    "fieldname": "track_semi_finished_goods",
    "fieldtype": "Check",
    "label": "Track Semi Finished Goods"
+  },
+  {
+   "fieldname": "section_break_jcmx",
+   "fieldtype": "Section Break",
+   "label": "Serial / Batch"
+  },
+  {
+   "fieldname": "column_break_swqr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_dfoc",
+   "fieldtype": "Section Break",
+   "label": "Status and Reference"
+  },
+  {
+   "fieldname": "column_break_xhzg",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-22 14:20:07.817118",
+ "modified": "2026-02-06 18:27:03.178783",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

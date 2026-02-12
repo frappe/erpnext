@@ -154,14 +154,8 @@ def get_columns(filters):
 			"width": 60,
 		},
 		{
-			"label": _("Total Amount"),
+			"label": _("Taxable Amount"),
 			"fieldname": "total_amount",
-			"fieldtype": "Currency",
-			"width": 120,
-		},
-		{
-			"label": _("Base Total"),
-			"fieldname": "base_total",
 			"fieldtype": "Currency",
 			"width": 120,
 		},
@@ -172,10 +166,16 @@ def get_columns(filters):
 			"width": 120,
 		},
 		{
-			"label": _("Grand Total"),
+			"label": _("Grand Total (Company Currency)"),
+			"fieldname": "base_total",
+			"fieldtype": "Currency",
+			"width": 150,
+		},
+		{
+			"label": _("Grand Total (Transaction Currency)"),
 			"fieldname": "grand_total",
 			"fieldtype": "Currency",
-			"width": 120,
+			"width": 170,
 		},
 		{
 			"label": _("Reference Date"),

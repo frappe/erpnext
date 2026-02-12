@@ -412,6 +412,10 @@ class TestStockEntry(IntegrationTestCase):
 			},
 		)
 		repack.set_stock_entry_type()
+		for row in repack.items:
+			if row.t_warehouse:
+				row.set_basic_rate_manually = 1
+
 		repack.insert()
 
 		self.assertEqual(repack.items[1].is_finished_item, 1)

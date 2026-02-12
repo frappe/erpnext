@@ -8,29 +8,23 @@
  "engine": "InnoDB",
  "field_order": [
   "item",
-  "naming_series",
-  "status",
-  "production_item",
-  "item_name",
-  "image",
-  "bom_no",
-  "mps",
-  "subcontracting_inward_order",
-  "subcontracting_inward_order_item",
-  "sales_order",
-  "column_break1",
   "company",
+  "naming_series",
+  "production_item",
+  "bom_no",
+  "column_break1",
   "qty",
-  "project",
+  "sales_order",
   "track_semi_finished_goods",
   "reserve_stock",
-  "column_break_agjv",
+  "section_break_vrpa",
   "max_producible_qty",
   "material_transferred_for_manufacturing",
   "additional_transferred_qty",
+  "column_break_ezmq",
   "produced_qty",
-  "disassembled_qty",
   "process_loss_qty",
+  "disassembled_qty",
   "warehouses",
   "source_warehouse",
   "wip_warehouse",
@@ -65,22 +59,34 @@
   "column_break_24",
   "corrective_operation_cost",
   "total_operating_cost",
+  "more_info",
+  "production_item_info_section",
+  "image",
+  "item_name",
+  "stock_uom",
+  "column_break2",
+  "description",
   "serial_no_and_batch_for_finished_good_section",
   "has_serial_no",
   "has_batch_no",
   "column_break_18",
   "batch_size",
-  "more_info",
-  "description",
-  "stock_uom",
-  "column_break2",
-  "material_request",
-  "material_request_item",
-  "sales_order_item",
+  "reference_section",
+  "project",
+  "subcontracting_inward_order",
   "production_plan",
-  "production_plan_item",
+  "mps",
+  "material_request",
+  "column_break_xbhk",
+  "material_request_item",
+  "subcontracting_inward_order_item",
+  "sales_order_item",
   "production_plan_sub_assembly_item",
+  "production_plan_item",
   "product_bundle_item",
+  "section_break_ynih",
+  "status",
+  "column_break_cvuw",
   "amended_from",
   "connections_tab"
  ],
@@ -149,6 +155,7 @@
   {
    "fieldname": "bom_no",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "BOM No",
    "oldfieldname": "bom_no",
    "oldfieldtype": "Link",
@@ -198,6 +205,7 @@
    "default": "1.0",
    "fieldname": "qty",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Qty To Manufacture",
    "oldfieldname": "qty",
    "oldfieldtype": "Currency",
@@ -431,7 +439,8 @@
    "fieldname": "material_request",
    "fieldtype": "Link",
    "label": "Material Request",
-   "options": "Material Request"
+   "options": "Material Request",
+   "read_only": 1
   },
   {
    "fieldname": "material_request_item",
@@ -516,7 +525,7 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "eval:!doc.__islocal",
+   "depends_on": "eval:!doc.__islocal && doc.track_semi_finished_goods === 0 && (doc.has_serial_no === 1 || doc.has_batch_no === 1)",
    "fieldname": "serial_no_and_batch_for_finished_good_section",
    "fieldtype": "Section Break",
    "label": "Finished Good Serial / Batch"
@@ -624,10 +633,8 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_agjv",
-   "fieldtype": "Column Break"
-  },
-  {
+   "default": "0",
+   "depends_on": "eval:doc.docstatus==1 && doc.skip_transfer==0",
    "fieldname": "additional_transferred_qty",
    "fieldtype": "Float",
    "label": "Additional Transferred Qty",
@@ -659,6 +666,36 @@
    "no_copy": 1,
    "non_negative": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_vrpa",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ezmq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ynih",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "column_break_cvuw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_xbhk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "production_item_info_section",
+   "fieldtype": "Section Break",
+   "label": "Production Item Info"
   }
  ],
  "grid_page_length": 50,
@@ -667,7 +704,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-12 14:24:57.699749",
+ "modified": "2026-02-06 17:53:11.295600",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

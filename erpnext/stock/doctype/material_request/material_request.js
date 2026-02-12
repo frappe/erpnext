@@ -30,7 +30,10 @@ frappe.ui.form.on("Material Request", {
 
 		frm.set_query("from_warehouse", "items", function (doc) {
 			return {
-				filters: { company: doc.company },
+				filters: {
+					company: doc.company,
+					is_group: 0,
+				},
 			};
 		});
 
@@ -70,19 +73,28 @@ frappe.ui.form.on("Material Request", {
 
 		frm.set_query("warehouse", "items", function (doc) {
 			return {
-				filters: { company: doc.company },
+				filters: {
+					company: doc.company,
+					is_group: 0,
+				},
 			};
 		});
 
 		frm.set_query("set_warehouse", function (doc) {
 			return {
-				filters: { company: doc.company },
+				filters: {
+					company: doc.company,
+					is_group: 0,
+				},
 			};
 		});
 
 		frm.set_query("set_from_warehouse", function (doc) {
 			return {
-				filters: { company: doc.company },
+				filters: {
+					company: doc.company,
+					is_group: 0,
+				},
 			};
 		});
 

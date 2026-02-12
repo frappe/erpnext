@@ -5,6 +5,7 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.hide_images = settings.hide_images;
 		this.allow_rate_change = settings.allow_rate_change;
 		this.allow_discount_change = settings.allow_discount_change;
+		this.allow_warehouse_change = settings.allow_warehouse_change;
 		this.current_item = {};
 		this.frm_doctype = settings.frm_doctype;
 
@@ -287,6 +288,7 @@ erpnext.PointOfSale.ItemDetails = class {
 					filters: { company: this.events.get_frm().doc.company, is_group: 0 },
 				};
 			};
+			this.warehouse_control.df.read_only = !this.allow_warehouse_change;
 			this.warehouse_control.refresh();
 		}
 

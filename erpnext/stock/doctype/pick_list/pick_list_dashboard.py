@@ -1,3 +1,6 @@
+from frappe import _
+
+
 def get_data():
 	return {
 		"fieldname": "pick_list",
@@ -9,6 +12,17 @@ def get_data():
 			"Sales Order": ["locations", "sales_order"],
 		},
 		"transactions": [
-			{"items": ["Stock Entry", "Sales Order", "Delivery Note", "Stock Reservation Entry"]},
+			{
+				"label": _("Sales"),
+				"items": ["Sales Order", "Delivery Note"],
+			},
+			{
+				"label": _("Manufacturing"),
+				"items": ["Stock Entry"],
+			},
+			{
+				"label": _("Reference"),
+				"items": ["Stock Reservation Entry"],
+			},
 		],
 	}

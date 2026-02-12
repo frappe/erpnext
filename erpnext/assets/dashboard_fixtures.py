@@ -100,7 +100,7 @@ def get_charts(fiscal_year, year_start_date, year_end_date):
 					"company": company,
 					"status": "In Location",
 					"group_by": "Asset Category",
-					"is_existing_asset": 0,
+					"asset_type": ["!=", "Existing Asset"],
 				}
 			),
 			"type": "Donut",
@@ -126,7 +126,12 @@ def get_charts(fiscal_year, year_start_date, year_end_date):
 			"x_field": "location",
 			"timeseries": 0,
 			"filters_json": json.dumps(
-				{"company": company, "status": "In Location", "group_by": "Location", "is_existing_asset": 0}
+				{
+					"company": company,
+					"status": "In Location",
+					"group_by": "Location",
+					"asset_type": ["!=", "Existing Asset"],
+				}
 			),
 			"type": "Donut",
 			"doctype": "Dashboard Chart",

@@ -5111,6 +5111,128 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		self.assertEqual(stk_ledger.incoming_rate, 120)
 		self.assertEqual(stk_ledger.stock_value_difference, 600)
 
+	def test_negative_stock_error_for_purchase_return_when_stock_exists_in_future_date(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.stock_ledger import NegativeStockError
+
+		item_code = make_item(
+			"Test Negative Stock for Purchase Return with Future Stock Item",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TNSPFPRI.#####",
+			},
+		).name
+
+		make_purchase_receipt(
+			item_code=item_code,
+			posting_date=add_days(today(), -4),
+			qty=100,
+			rate=100,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		pr1 = make_purchase_receipt(
+			item_code=item_code,
+			posting_date=add_days(today(), -3),
+			qty=100,
+			rate=100,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		batch1 = get_batch_from_bundle(pr1.items[0].serial_and_batch_bundle)
+
+		pr2 = make_purchase_receipt(
+			item_code=item_code,
+			posting_date=add_days(today(), -2),
+			qty=100,
+			rate=100,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		batch2 = get_batch_from_bundle(pr2.items[0].serial_and_batch_bundle)
+
+		make_stock_entry(
+			item_code=item_code,
+			qty=100,
+			posting_date=add_days(today(), -1),
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			batch_no=batch1,
+			use_serial_batch_fields=1,
+		)
+
+		make_stock_entry(
+			item_code=item_code,
+			qty=100,
+			posting_date=add_days(today(), -1),
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			batch_no=batch2,
+			use_serial_batch_fields=1,
+		)
+
+		make_stock_entry(
+			item_code=item_code,
+			qty=100,
+			posting_date=today(),
+			source="_Test Warehouse 1 - _TC",
+			target="_Test Warehouse - _TC",
+			batch_no=batch1,
+			use_serial_batch_fields=1,
+		)
+
+		make_purchase_entry = make_return_doc("Purchase Receipt", pr1.name)
+		make_purchase_entry.set_posting_time = 1
+		make_purchase_entry.posting_date = pr1.posting_date
+		self.assertRaises(NegativeStockError, make_purchase_entry.submit)
+
+	def test_purchase_return_from_different_warehouse(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = make_item(
+			"Test Purchase Return From Different Warehouse Item",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TPRFDWU.#####",
+			},
+		).name
+
+		pr1 = make_purchase_receipt(
+			item_code=item_code,
+			posting_date=add_days(today(), -4),
+			qty=100,
+			rate=100,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		batch1 = get_batch_from_bundle(pr1.items[0].serial_and_batch_bundle)
+
+		make_stock_entry(
+			item_code=item_code,
+			qty=100,
+			posting_date=add_days(today(), -1),
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			batch_no=batch1,
+			use_serial_batch_fields=1,
+		)
+
+		make_purchase_entry = make_return_doc("Purchase Receipt", pr1.name)
+		make_purchase_entry.items[0].warehouse = "_Test Warehouse 1 - _TC"
+		make_purchase_entry.submit()
+		make_purchase_entry.reload()
+
+		sabb = frappe.get_doc("Serial and Batch Bundle", make_purchase_entry.items[0].serial_and_batch_bundle)
+		for row in sabb.entries:
+			self.assertEqual(row.warehouse, "_Test Warehouse 1 - _TC")
+			self.assertEqual(row.incoming_rate, 100)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier

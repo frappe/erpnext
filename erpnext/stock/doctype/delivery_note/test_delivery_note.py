@@ -1101,7 +1101,8 @@ class TestDeliveryNote(IntegrationTestCase):
 
 		self.assertEqual(dn2.get("items")[0].billed_amt, 400)
 		self.assertEqual(dn2.per_billed, 80)
-		self.assertEqual(dn2.status, "To Bill")
+		# Since 20% of DN2 is yet to be billed, it should be classified as partially billed.
+		self.assertEqual(dn2.status, "Partially Billed")
 
 	def test_dn_billing_status_case4(self):
 		# SO -> SI -> DN
@@ -2862,6 +2863,23 @@ class TestDeliveryNote(IntegrationTestCase):
 		sabb = frappe.get_doc("Serial and Batch Bundle", dn1.items[0].serial_and_batch_bundle)
 		for entry in sabb.entries:
 			self.assertEqual(entry.incoming_rate, 200)
+
+	@IntegrationTestCase.change_settings("Selling Settings", {"validate_selling_price": 1})
+	def test_validate_selling_price(self):
+		item_code = make_item("VSP Item", properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=10)
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=1)
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=1,
+			rate=9,
+			do_not_save=True,
+		)
+		self.assertRaises(frappe.ValidationError, dn.save)
+		dn.items[0].incoming_rate = 0
+		dn.items[0].stock_qty = 2
+		dn.save()
 
 
 def create_delivery_note(**args):

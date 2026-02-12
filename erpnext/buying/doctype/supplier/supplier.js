@@ -73,6 +73,12 @@ frappe.ui.form.on("Supplier", {
 		};
 	},
 
+	supplier_group(frm) {
+		if (frm.doc.supplier_group) {
+			frm.trigger("get_supplier_group_details");
+		}
+	},
+
 	refresh: function (frm) {
 		if (frappe.defaults.get_default("supp_master_name") != "Naming Series") {
 			frm.toggle_display("naming_series", false);
@@ -111,14 +117,6 @@ frappe.ui.form.on("Supplier", {
 				__("View")
 			);
 
-			frm.add_custom_button(
-				__("Get Supplier Group Details"),
-				function () {
-					frm.trigger("get_supplier_group_details");
-				},
-				__("Actions")
-			);
-
 			if (
 				cint(frappe.defaults.get_default("enable_common_party_accounting")) &&
 				frappe.model.can_create("Party Link")
@@ -135,14 +133,6 @@ frappe.ui.form.on("Supplier", {
 			// indicators
 			erpnext.utils.set_party_dashboard_indicators(frm);
 		}
-
-		frm.set_query("supplier_group", () => {
-			return {
-				filters: {
-					is_group: 0,
-				},
-			};
-		});
 	},
 	get_supplier_group_details: function (frm) {
 		frappe.call({

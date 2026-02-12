@@ -535,9 +535,11 @@ class PaymentRequest(Document):
 				row_number += TO_SKIP_NEW_ROW
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def make_payment_request(**args):
 	"""Make payment request"""
+
+	frappe.has_permission(doctype="Payment Request", ptype="write", throw=True)
 
 	args = frappe._dict(args)
 	if args.dt not in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST:

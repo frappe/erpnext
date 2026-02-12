@@ -9,6 +9,7 @@
  "engine": "InnoDB",
  "field_order": [
   "entry_type_and_date",
+  "company",
   "is_system_generated",
   "title",
   "voucher_type",
@@ -17,7 +18,6 @@
   "reversal_of",
   "column_break1",
   "from_template",
-  "company",
   "posting_date",
   "finance_book",
   "apply_tds",
@@ -638,7 +638,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2025-11-13 17:54:14.542903",
+ "modified": "2026-02-03 14:40:39.944524",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

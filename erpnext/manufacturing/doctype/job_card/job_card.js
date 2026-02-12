@@ -633,16 +633,6 @@ frappe.ui.form.on("Job Card", {
 		}
 	},
 
-	validate: function (frm) {
-		if ((!frm.doc.time_logs || !frm.doc.time_logs.length) && frm.doc.started_time) {
-			frm.trigger("reset_timer");
-		}
-	},
-
-	reset_timer: function (frm) {
-		frm.set_value("started_time", "");
-	},
-
 	make_dashboard: function (frm) {
 		if (frm.doc.__islocal) return;
 		var section = "";
@@ -795,10 +785,6 @@ frappe.ui.form.on("Job Card Time Log", {
 		}
 
 		frm.events.set_total_completed_qty(frm);
-	},
-
-	to_time: function (frm) {
-		frm.set_value("started_time", "");
 	},
 
 	time_in_mins(frm, cdt, cdn) {

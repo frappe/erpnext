@@ -1,5 +1,5 @@
 import frappe
-from frappe.model.db_query import DatabaseQuery
+from frappe.desk.reportview import build_match_conditions
 from frappe.utils import cint, flt
 
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
@@ -30,7 +30,7 @@ def get_data(
 		filters.append(["item_code", "in", items])
 	try:
 		# check if user has any restrictions based on user permissions on warehouse
-		if DatabaseQuery("Warehouse", user=frappe.session.user).build_match_conditions():
+		if build_match_conditions("Warehouse", user=frappe.session.user):
 			filters.append(["warehouse", "in", [w.name for w in frappe.get_list("Warehouse")]])
 	except frappe.PermissionError:
 		# user does not have access on warehouse

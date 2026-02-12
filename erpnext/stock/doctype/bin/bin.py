@@ -19,6 +19,7 @@ class Bin(Document):
 		from frappe.types import DF
 
 		actual_qty: DF.Float
+		company: DF.Link | None
 		indented_qty: DF.Float
 		item_code: DF.Link
 		ordered_qty: DF.Float

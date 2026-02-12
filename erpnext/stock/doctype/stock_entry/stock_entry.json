@@ -8,30 +8,22 @@
  "engine": "InnoDB",
  "field_order": [
   "stock_entry_details_tab",
+  "company",
   "naming_series",
   "stock_entry_type",
-  "outgoing_stock_entry",
   "purpose",
-  "add_to_transit",
-  "work_order",
-  "job_card",
-  "purchase_order",
-  "subcontracting_order",
-  "subcontracting_inward_order",
-  "delivery_note_no",
-  "sales_invoice_no",
-  "pick_list",
-  "purchase_receipt_no",
-  "asset_repair",
   "col2",
-  "company",
+  "set_posting_time",
   "posting_date",
   "posting_time",
-  "column_break_eaoa",
-  "set_posting_time",
-  "inspection_required",
+  "reference_section",
+  "add_to_transit",
   "apply_putaway_rule",
-  "is_additional_transfer_entry",
+  "inspection_required",
+  "column_break_jabv",
+  "work_order",
+  "subcontracting_order",
+  "outgoing_stock_entry",
   "bom_info_section",
   "from_bom",
   "use_multi_level_bom",
@@ -78,6 +70,17 @@
   "select_print_heading",
   "print_settings_col_break",
   "letter_head",
+  "reference_details_section",
+  "delivery_note_no",
+  "sales_invoice_no",
+  "job_card",
+  "pick_list",
+  "column_break_qpvo",
+  "asset_repair",
+  "purchase_receipt_no",
+  "purchase_order",
+  "subcontracting_inward_order",
+  "is_additional_transfer_entry",
   "more_info",
   "is_opening",
   "remarks",
@@ -168,7 +171,8 @@
    "fieldname": "subcontracting_order",
    "fieldtype": "Link",
    "label": "Subcontracting Order",
-   "options": "Subcontracting Order"
+   "options": "Subcontracting Order",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.purpose==\"Sales Return\"",
@@ -180,6 +184,7 @@
    "oldfieldtype": "Link",
    "options": "Delivery Note",
    "print_hide": 1,
+   "read_only": 1,
    "search_index": 1
   },
   {
@@ -189,7 +194,8 @@
    "label": "Sales Invoice No",
    "no_copy": 1,
    "options": "Sales Invoice",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.purpose==\"Purchase Return\"",
@@ -201,6 +207,7 @@
    "oldfieldtype": "Link",
    "options": "Purchase Receipt",
    "print_hide": 1,
+   "read_only": 1,
    "search_index": 1
   },
   {
@@ -240,13 +247,14 @@
   },
   {
    "default": "0",
+   "depends_on": "eval: doc.purpose === \"Manufacture\"",
    "fieldname": "inspection_required",
    "fieldtype": "Check",
    "label": "Inspection Required"
   },
   {
    "default": "0",
-   "depends_on": "eval:in_list([\"Material Issue\", \"Material Transfer\", \"Manufacture\", \"Repack\", \"Send to Subcontractor\", \"Material Transfer for Manufacture\", \"Material Consumption for Manufacture\", \"Disassemble\"], doc.purpose)",
+   "depends_on": "eval:in_list([\"Material Issue\", \"Manufacture\", \"Repack\", \"Send to Subcontractor\", \"Material Transfer for Manufacture\", \"Material Consumption for Manufacture\", \"Disassemble\"], doc.purpose)",
    "fieldname": "from_bom",
    "fieldtype": "Check",
    "label": "From BOM",
@@ -623,6 +631,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:in_list([\"Material Issue\", \"Manufacture\", \"Repack\", \"Send to Subcontractor\", \"Material Transfer for Manufacture\", \"Material Consumption for Manufacture\", \"Disassemble\"], doc.purpose)",
    "fieldname": "bom_info_section",
    "fieldtype": "Section Break",
    "label": "BOM Info"
@@ -678,10 +687,6 @@
    "label": "Items"
   },
   {
-   "fieldname": "column_break_eaoa",
-   "fieldtype": "Column Break"
-  },
-  {
    "depends_on": "eval:doc.asset_repair",
    "fieldname": "asset_repair",
    "fieldtype": "Link",
@@ -704,9 +709,9 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.purpose == \"Material Transfer for Manufacture\"",
    "fieldname": "is_additional_transfer_entry",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Additional Transfer Entry",
    "read_only": 1
   },
@@ -717,6 +722,23 @@
    "label": "Subcontracting Inward Order",
    "options": "Subcontracting Inward Order",
    "read_only": 1
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_jabv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_details_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "column_break_qpvo",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -725,7 +747,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-13 15:09:23.905118",
+ "modified": "2026-02-06 19:26:59.518312",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

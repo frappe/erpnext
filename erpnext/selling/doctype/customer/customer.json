@@ -12,38 +12,18 @@
  "field_order": [
   "basic_info",
   "naming_series",
-  "salutation",
-  "customer_name",
   "customer_type",
-  "customer_group",
-  "column_break0",
-  "territory",
+  "customer_name",
   "gender",
-  "lead_name",
-  "opportunity_name",
-  "prospect_name",
-  "account_manager",
+  "column_break0",
+  "customer_group",
+  "territory",
   "image",
   "defaults_tab",
   "default_currency",
   "default_bank_account",
   "column_break_14",
   "default_price_list",
-  "internal_customer_section",
-  "is_internal_customer",
-  "represents_company",
-  "column_break_70",
-  "companies",
-  "more_info",
-  "market_segment",
-  "industry",
-  "customer_pos_id",
-  "website",
-  "language",
-  "column_break_45",
-  "customer_details",
-  "supplier_numbers",
-  "dashboard_tab",
   "contact_and_address_tab",
   "address_contacts",
   "address_html",
@@ -67,16 +47,22 @@
   "tax_withholding_category",
   "tax_withholding_group",
   "accounting_tab",
+  "default_receivable_accounts",
+  "accounts",
   "credit_limit_section",
   "payment_terms",
   "credit_limits",
-  "default_receivable_accounts",
-  "accounts",
+  "internal_customer_section",
+  "is_internal_customer",
+  "represents_company",
+  "column_break_70",
+  "companies",
   "loyalty_points_tab",
   "loyalty_program",
   "column_break_54",
   "loyalty_program_tier",
   "sales_team_tab",
+  "account_manager",
   "sales_team",
   "sales_team_section",
   "default_sales_partner",
@@ -86,10 +72,27 @@
   "so_required",
   "dn_required",
   "column_break_53",
-  "is_frozen",
   "disabled",
+  "is_frozen",
   "portal_users_tab",
-  "portal_users"
+  "portal_users",
+  "more_info_tab",
+  "references_section",
+  "lead_name",
+  "opportunity_name",
+  "column_break_wlbg",
+  "prospect_name",
+  "section_break_objq",
+  "market_segment",
+  "industry",
+  "website",
+  "language",
+  "customer_pos_id",
+  "column_break_hdmn",
+  "customer_details",
+  "supplier_numbers_section",
+  "supplier_numbers",
+  "connections_tab"
  ],
  "fields": [
   {
@@ -107,13 +110,6 @@
    "set_only_once": 1
   },
   {
-   "depends_on": "eval:doc.customer_type!='Company'",
-   "fieldname": "salutation",
-   "fieldtype": "Link",
-   "label": "Salutation",
-   "options": "Salutation"
-  },
-  {
    "bold": 1,
    "fieldname": "customer_name",
    "fieldtype": "Data",
@@ -126,7 +122,7 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval:doc.customer_type != 'Company'",
+   "depends_on": "eval:doc.customer_type == 'Individual'",
    "fieldname": "gender",
    "fieldtype": "Link",
    "label": "Gender",
@@ -151,12 +147,13 @@
   {
    "fieldname": "lead_name",
    "fieldtype": "Link",
-   "label": "From Lead",
+   "label": "Lead",
    "no_copy": 1,
    "oldfieldname": "lead_name",
    "oldfieldtype": "Link",
    "options": "Lead",
    "print_hide": 1,
+   "read_only": 1,
    "report_hide": 1
   },
   {
@@ -364,25 +361,12 @@
    "options": "Payment Terms Template"
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "customer_details",
-   "fieldname": "more_info",
-   "fieldtype": "Section Break",
-   "label": "More Information",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-file-text"
-  },
-  {
    "description": "Additional information regarding the customer.",
    "fieldname": "customer_details",
    "fieldtype": "Text",
    "label": "Customer Details",
    "oldfieldname": "customer_details",
    "oldfieldtype": "Code"
-  },
-  {
-   "fieldname": "column_break_45",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "market_segment",
@@ -449,7 +433,7 @@
   {
    "fieldname": "customer_pos_id",
    "fieldtype": "Data",
-   "label": "Customer POS id",
+   "label": "Customer POS ID",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1,
@@ -482,10 +466,11 @@
   {
    "fieldname": "opportunity_name",
    "fieldtype": "Link",
-   "label": "From Opportunity",
+   "label": "Opportunity",
    "no_copy": 1,
    "options": "Opportunity",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "contact_and_address_tab",
@@ -520,12 +505,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "dashboard_tab",
-   "fieldtype": "Tab Break",
-   "label": "Dashboard",
-   "show_dashboard": 1
-  },
-  {
    "fieldname": "column_break_53",
    "fieldtype": "Column Break"
   },
@@ -554,7 +533,7 @@
    "collapsible_depends_on": "is_internal_customer",
    "fieldname": "internal_customer_section",
    "fieldtype": "Section Break",
-   "label": "Internal Customer"
+   "label": "Internal Customer Accounting"
   },
   {
    "fieldname": "column_break_70",
@@ -582,10 +561,11 @@
   {
    "fieldname": "prospect_name",
    "fieldtype": "Link",
-   "label": "From Prospect",
+   "label": "Prospect",
    "no_copy": 1,
    "options": "Prospect",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fetch_from": "customer_primary_contact.first_name",
@@ -613,6 +593,39 @@
    "fieldtype": "Link",
    "label": "Tax Withholding Group",
    "options": "Tax Withholding Group"
+  },
+  {
+   "fieldname": "more_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "references_section",
+   "fieldtype": "Section Break",
+   "label": "References"
+  },
+  {
+   "fieldname": "column_break_wlbg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_objq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_hdmn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
+  },
+  {
+   "fieldname": "supplier_numbers_section",
+   "fieldtype": "Section Break",
+   "label": "Supplier Numbers"
   }
  ],
  "icon": "fa fa-user",
@@ -626,7 +639,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-01-21 17:23:42.151114",
+ "modified": "2026-02-02 15:39:55.920831",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

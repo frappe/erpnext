@@ -541,7 +541,7 @@ class FinancialQueryBuilder:
 			.where(acb_table.period_closing_voucher == closing_voucher)
 		)
 
-		query = self._apply_standard_filters(query, acb_table)
+		query = self._apply_standard_filters(query, acb_table, "Account Closing Balance")
 		results = self._execute_with_permissions(query, "Account Closing Balance")
 
 		for row in results:
@@ -636,12 +636,15 @@ class FinancialQueryBuilder:
 		return self._execute_with_permissions(query, "GL Entry")
 
 	def _calculate_running_balances(self, balances_data: dict, gl_data: list[dict]) -> dict:
-		for row in gl_data:
-			account = row["account"]
+		gl_dict = {row["account"]: row for row in gl_data}
+		accounts = set(balances_data.keys()) | set(gl_dict.keys())
+
+		for account in accounts:
 			if account not in balances_data:
 				balances_data[account] = AccountData(account=account, **self._get_account_meta(account))
 
 			account_data: AccountData = balances_data[account]
+			gl_movement = gl_dict.get(account, {})
 
 			if account_data.has_periods():
 				first_period = account_data.get_period(self.periods[0]["key"])
@@ -651,19 +654,12 @@ class FinancialQueryBuilder:
 
 			for period in self.periods:
 				period_key = period["key"]
-				movement = row.get(period_key, 0.0)
+				movement = gl_movement.get(period_key, 0.0)
 				closing_balance = current_balance + movement
 
 				account_data.add_period(PeriodValue(period_key, current_balance, closing_balance, movement))
 
 				current_balance = closing_balance
-
-		# Accounts with no movements
-		for account_data in balances_data.values():
-			for period in self.periods:
-				period_key = period["key"]
-				if period_key not in account_data.period_values:
-					account_data.add_period(PeriodValue(period_key, 0.0, 0.0, 0.0))
 
 	def _handle_balance_accumulation(self, balances_data):
 		for account_data in balances_data.values():
@@ -683,12 +679,12 @@ class FinancialQueryBuilder:
 			else:
 				account_data.unaccumulate_values()
 
-	def _apply_standard_filters(self, query, table):
+	def _apply_standard_filters(self, query, table, doctype: str = "GL Entry"):
 		if self.filters.get("ignore_closing_entries"):
-			if hasattr(table, "is_period_closing_voucher_entry"):
-				query = query.where(table.is_period_closing_voucher_entry == 0)
-			else:
+			if doctype == "GL Entry":
 				query = query.where(table.voucher_type != "Period Closing Voucher")
+			else:
+				query = query.where(table.is_period_closing_voucher_entry == 0)
 
 		if self.filters.get("project"):
 			projects = self.filters.get("project")

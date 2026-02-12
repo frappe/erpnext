@@ -233,7 +233,7 @@ class Workstation(Document):
 
 
 @frappe.whitelist()
-def get_job_cards(workstation, job_card=None):
+def get_job_cards(workstation: str):
 	if frappe.has_permission("Job Card", "read"):
 		jc_data = frappe.get_all(
 			"Job Card",
@@ -264,6 +264,7 @@ def get_job_cards(workstation, job_card=None):
 				"status": ["not in", ["Completed", "Stopped"]],
 			},
 			order_by="expected_start_date, expected_end_date",
+			limit=10,
 		)
 
 		job_cards = [row.name for row in jc_data]
@@ -517,7 +518,7 @@ def get_color_map():
 
 
 @frappe.whitelist()
-def update_job_card(job_card, method, **kwargs):
+def update_job_card(job_card: str, method: str, **kwargs):
 	if isinstance(kwargs, dict):
 		kwargs = frappe._dict(kwargs)
 
@@ -527,7 +528,6 @@ def update_job_card(job_card, method, **kwargs):
 	if kwargs.qty and isinstance(kwargs.qty, str):
 		kwargs.qty = flt(kwargs.qty)
 
-	print(method)
 	doc = frappe.get_doc("Job Card", job_card)
 	doc.run_method(method, **kwargs)
 

@@ -20,6 +20,10 @@
   "enable_common_party_accounting",
   "allow_multi_currency_invoices_against_single_party_account",
   "confirm_before_resetting_posting_date",
+  "analytics_section",
+  "enable_accounting_dimensions",
+  "column_break_vtnr",
+  "enable_discounts_and_margin",
   "journals_section",
   "merge_similar_account_heads",
   "deferred_accounting_settings_section",
@@ -51,12 +55,16 @@
   "allow_pegged_currencies_exchange_rates",
   "column_break_yuug",
   "stale_days",
+  "payments_tab",
   "section_break_jpd0",
   "auto_reconcile_payments",
   "auto_reconciliation_job_trigger",
   "reconciliation_queue_size",
   "column_break_resa",
   "exchange_gain_loss_posting_date",
+  "payment_options_section",
+  "enable_loyalty_point_program",
+  "column_break_ctam",
   "invoicing_settings_tab",
   "accounts_transactions_settings_section",
   "over_billing_allowance",
@@ -281,7 +289,7 @@
   },
   {
    "default": "0",
-   "description": "Learn about <a href=\"https://docs.frappe.io/erpnext/user/manual/en/common_party_accounting\">Common Party</a>",
+   "description": "Learn about <a href=\"https://docs.frappe.io/erpnext/user/manual/en/common_party_accounting\" rel=\"noopener noreferrer\">Common Party</a>",
    "fieldname": "enable_common_party_accounting",
    "fieldtype": "Check",
    "label": "Enable Common Party Accounting"
@@ -637,6 +645,49 @@
    "fieldname": "budget_section",
    "fieldtype": "Section Break",
    "label": "Budget"
+  },
+  {
+   "fieldname": "analytics_section",
+   "fieldtype": "Section Break",
+   "label": "Analytical Accounting"
+  },
+  {
+   "fieldname": "column_break_vtnr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Apply discounts and margins on products",
+   "fieldname": "enable_discounts_and_margin",
+   "fieldtype": "Check",
+   "label": "Enable Discounts and Margin"
+  },
+  {
+   "fieldname": "payments_tab",
+   "fieldtype": "Tab Break",
+   "label": "Payments"
+  },
+  {
+   "fieldname": "payment_options_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Options"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_loyalty_point_program",
+   "fieldtype": "Check",
+   "label": "Enable Loyalty Point Program"
+  },
+  {
+   "fieldname": "column_break_ctam",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Enable cost center, projects and other custom accounting dimensions",
+   "fieldname": "enable_accounting_dimensions",
+   "fieldtype": "Check",
+   "label": "Enable Accounting Dimensions"
   }
  ],
  "grid_page_length": 50,
@@ -646,7 +697,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-11 18:30:45.968531",
+ "modified": "2026-02-04 17:15:38.609327",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

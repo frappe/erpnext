@@ -98,8 +98,7 @@ def get_customers_list(pos_profile=None):
 
 	return (
 		frappe.db.sql(
-			f""" select name, customer_name, customer_group,
-		territory, customer_pos_id from tabCustomer where disabled = 0
+			f""" select name, customer_name, customer_group, territory from tabCustomer where disabled = 0
 		and {cond}""",
 			tuple(customer_groups),
 			as_dict=1,

@@ -106,7 +106,7 @@ def get_columns(filters):
 			"width": 120,
 		},
 		{
-			"label": _("Total Amount"),
+			"label": _("Total Taxable Amount"),
 			"fieldname": "total_amount",
 			"fieldtype": "Float",
 			"width": 120,

@@ -496,7 +496,7 @@ class ProductionPlan(Document):
 
 			item_details = get_item_details(data.item_code, throw=False)
 			if self.combine_items:
-				bom_no = item_details.bom_no
+				bom_no = item_details.get("bom_no")
 				if data.get("bom_no"):
 					bom_no = data.get("bom_no")
 

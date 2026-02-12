@@ -58,12 +58,16 @@ frappe.ui.form.on("Warehouse", {
 			}
 
 			if ("Stock Balance" in frappe.boot.user.all_reports) {
-				frm.add_custom_button(__("Stock Balance"), function () {
-					frappe.set_route("query-report", "Stock Balance", {
-						warehouse: frm.doc.name,
-						company: frm.doc.company,
-					});
-				});
+				frm.add_custom_button(
+					__("Stock Balance"),
+					function () {
+						frappe.set_route("query-report", "Stock Balance", {
+							warehouse: frm.doc.name,
+							company: frm.doc.company,
+						});
+					},
+					__("View")
+				);
 			}
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
@@ -74,13 +78,17 @@ frappe.ui.form.on("Warehouse", {
 			frm.doc.__onload?.account &&
 			"General Ledger" in frappe.boot.user.all_reports
 		) {
-			frm.add_custom_button(__("General Ledger", null, "Warehouse"), function () {
-				frappe.route_options = {
-					account: frm.doc.__onload.account,
-					company: frm.doc.company,
-				};
-				frappe.set_route("query-report", "General Ledger");
-			});
+			frm.add_custom_button(
+				__("General Ledger", null, "Warehouse"),
+				function () {
+					frappe.route_options = {
+						account: frm.doc.__onload.account,
+						company: frm.doc.company,
+					};
+					frappe.set_route("query-report", "General Ledger");
+				},
+				__("View")
+			);
 		}
 
 		frm.toggle_enable(["is_group", "company"], false);

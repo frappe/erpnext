@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_import": 1,
- "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2022-01-25 10:29:57.771398",
  "doctype": "DocType",
@@ -9,12 +8,12 @@
  "field_order": [
   "customer_section",
   "title",
+  "company",
+  "company_tax_id",
   "naming_series",
   "customer",
   "customer_name",
   "tax_id",
-  "company",
-  "company_tax_id",
   "column_break1",
   "posting_date",
   "posting_time",
@@ -79,34 +78,36 @@
   "base_total_taxes_and_charges",
   "column_break_47",
   "total_taxes_and_charges",
-  "totals",
-  "base_grand_total",
-  "base_rounding_adjustment",
-  "base_rounded_total",
-  "base_in_words",
-  "column_break5",
+  "totals_section",
   "grand_total",
   "rounding_adjustment",
-  "use_company_roundoff_cost_center",
-  "rounded_total",
   "in_words",
+  "column_break5",
+  "rounded_total",
+  "disable_rounded_total",
   "total_advance",
   "outstanding_amount",
-  "disable_rounded_total",
+  "use_company_roundoff_cost_center",
+  "base_totals_section",
+  "base_grand_total",
+  "base_rounding_adjustment",
+  "base_in_words",
+  "column_break_xjag",
+  "base_rounded_total",
   "section_tax_withholding_entry",
   "tax_withholding_group",
   "ignore_tax_withholding_threshold",
   "override_tax_withholding_entries",
   "tax_withholding_entries",
-  "section_break_49",
+  "additional_discount_section",
   "apply_discount_on",
   "base_discount_amount",
   "coupon_code",
-  "is_cash_or_non_trade_discount",
-  "additional_discount_account",
   "column_break_51",
   "additional_discount_percentage",
   "discount_amount",
+  "is_cash_or_non_trade_discount",
+  "additional_discount_account",
   "sec_tax_breakup",
   "other_charges_calculation",
   "item_wise_tax_details",
@@ -196,13 +197,13 @@
   "column_break8",
   "unrealized_profit_loss_account",
   "against_income_account",
-  "sales_team_section_break",
+  "commission_section",
   "sales_partner",
   "amount_eligible_for_commission",
   "column_break10",
   "commission_rate",
   "total_commission",
-  "section_break2",
+  "sales_team_section",
   "sales_team",
   "edit_printing_settings",
   "letter_head",
@@ -219,8 +220,7 @@
   "update_auto_repeat_reference",
   "more_information",
   "status",
-  "inter_company_invoice_reference",
-  "represents_company",
+  "remarks",
   "customer_group",
   "column_break_imbx",
   "utm_source",
@@ -229,8 +229,9 @@
   "utm_content",
   "col_break23",
   "is_internal_customer",
+  "represents_company",
+  "inter_company_invoice_reference",
   "is_discounted",
-  "remarks",
   "connections_tab"
  ],
  "fields": [
@@ -706,6 +707,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.items.every((item) => !item.dn_detail)",
    "fieldname": "update_stock",
    "fieldtype": "Check",
    "hide_days": 1,
@@ -796,7 +798,8 @@
    "hide_seconds": 1,
    "label": "Time Sheets",
    "options": "Sales Invoice Timesheet",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "default": "0",
@@ -1076,14 +1079,6 @@
    "options": "Cost Center"
   },
   {
-   "collapsible": 1,
-   "fieldname": "section_break_49",
-   "fieldtype": "Section Break",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Additional Discount"
-  },
-  {
    "default": "Grand Total",
    "fieldname": "apply_discount_on",
    "fieldtype": "Select",
@@ -1128,21 +1123,11 @@
    "print_hide": 1
   },
   {
-   "fieldname": "totals",
-   "fieldtype": "Section Break",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Totals",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-money",
-   "print_hide": 1
-  },
-  {
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Grand Total (Company Currency)",
+   "label": "Grand Total",
    "oldfieldname": "grand_total",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -1156,9 +1141,8 @@
    "fieldtype": "Currency",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Rounding Adjustment (Company Currency)",
+   "label": "Rounding Adjustment",
    "no_copy": 1,
-   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1168,10 +1152,9 @@
    "fieldtype": "Currency",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Rounded Total (Company Currency)",
+   "label": "Rounded Total",
    "oldfieldname": "rounded_total",
    "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1181,7 +1164,7 @@
    "fieldtype": "Small Text",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "In Words (Company Currency)",
+   "label": "In Words",
    "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
@@ -1274,7 +1257,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "collapsible_depends_on": "advances",
    "fieldname": "advances_section",
    "fieldtype": "Section Break",
@@ -1708,10 +1690,10 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "default": "No",
    "fieldname": "is_opening",
    "fieldtype": "Select",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Is Opening Entry",
@@ -1738,18 +1720,6 @@
    "no_copy": 1,
    "oldfieldname": "remarks",
    "oldfieldtype": "Text",
-   "print_hide": 1
-  },
-  {
-   "collapsible": 1,
-   "collapsible_depends_on": "sales_partner",
-   "fieldname": "sales_team_section_break",
-   "fieldtype": "Section Break",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Commission",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-group",
    "print_hide": 1
   },
   {
@@ -1793,16 +1763,6 @@
    "oldfieldname": "total_commission",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
-   "print_hide": 1
-  },
-  {
-   "collapsible": 1,
-   "collapsible_depends_on": "sales_team",
-   "fieldname": "section_break2",
-   "fieldtype": "Section Break",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Sales Team",
    "print_hide": 1
   },
   {
@@ -2302,6 +2262,53 @@
    "fieldtype": "Data",
    "label": "Title",
    "no_copy": 1,
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Totals",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-money",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "base_totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals (Company Currency)",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "column_break_xjag",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "additional_discount_section",
+   "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Additional Discount"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "sales_team",
+   "fieldname": "sales_team_section",
+   "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Sales Team",
+   "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "sales_partner",
+   "fieldname": "commission_section",
+   "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Commission",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-group",
    "print_hide": 1
   }
  ],
@@ -2316,7 +2323,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-01-30 15:27:21.379961",
+ "modified": "2026-02-06 20:43:44.732805",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

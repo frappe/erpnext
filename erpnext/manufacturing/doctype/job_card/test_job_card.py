@@ -20,8 +20,9 @@ from erpnext.manufacturing.doctype.job_card.job_card import (
 	make_stock_entry as make_stock_entry_from_jc,
 )
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder
+from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder, make_work_order
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -72,6 +73,69 @@ class TestJobCard(ERPNextTestSuite):
 
 	def tearDown(self):
 		frappe.db.rollback()
+
+	def test_quality_inspection_mandatory_check(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+		raw = create_item("Fabric-Raw")
+		cut_fg = create_item("Cut-Fabric-SFG")
+		stitch_fg = create_item("Stitched-TShirt-SFG")
+		final = create_item("Finished-TShirt")
+
+		row = {"operation": "Cutting", "workstation": "_Test Workstation 1"}
+
+		cutting = make_operation(row)
+		stitching = make_operation({"operation": "Stitching", "workstation": "_Test Workstation 1"})
+		ironing = make_operation({"operation": "Ironing", "workstation": "_Test Workstation 1"})
+
+		cut_bom = create_semi_fg_bom(cut_fg.name, raw.name, inspection_required=1)
+		stitch_bom = create_semi_fg_bom(stitch_fg.name, cut_fg.name, inspection_required=0)
+		final_bom = frappe.new_doc(
+			"BOM", item=final.name, quantity=1, with_operations=1, track_semi_finished_goods=1
+		)
+		final_bom.append("items", {"item_code": raw.name, "qty": 1})
+		final_bom.append(
+			"operations",
+			{
+				"operation": cutting.name,
+				"workstation": "_Test Workstation 1",
+				"bom_no": cut_bom,
+				"skip_material_transfer": 1,
+			},
+		)
+		final_bom.append(
+			"operations",
+			{
+				"operation": stitching.name,
+				"workstation": "_Test Workstation 1",
+				"bom_no": stitch_bom,
+				"skip_material_transfer": 1,
+			},
+		)
+		final_bom.append(
+			"operations",
+			{
+				"operation": ironing.name,
+				"workstation": "_Test Workstation 1",
+				"bom_no": final_bom.name,
+				"is_final_finished_good": 1,
+				"skip_material_transfer": 1,
+			},
+		)
+		final_bom.append("items", {"item_code": stitch_fg.name, "qty": 1, "operation_row_id": 3})
+		final_bom.insert()
+		final_bom.submit()
+		work_order = make_work_order(final_bom.name, final.name, 1, variant_items=[], use_multi_level_bom=0)
+		work_order.wip_warehouse = "Work In Progress - WP"
+		work_order.fg_warehouse = "Finished Goods - WP"
+		work_order.scrap_warehouse = "All Warehouses - WP"
+		for operation in work_order.operations:
+			operation.time_in_mins = 60
+
+		work_order.submit()
+		job_card = frappe.get_all("Job Card", filters={"work_order": work_order.name, "operation": "Cutting"})
+		job_card_doc = frappe.get_doc("Job Card", job_card[0].name)
+		self.assertRaises(frappe.ValidationError, job_card_doc.submit)
 
 	def test_job_card_operations(self):
 		job_cards = frappe.get_all(
@@ -871,3 +935,13 @@ def make_wo_with_transfer_against_jc():
 	work_order.submit()
 
 	return work_order
+
+
+def create_semi_fg_bom(semi_fg_item, raw_item, inspection_required):
+	bom = frappe.new_doc("BOM")
+	bom.item = semi_fg_item
+	bom.quantity = 1
+	bom.inspection_required = inspection_required
+	bom.append("items", {"item_code": raw_item, "qty": 1})
+	bom.submit()
+	return bom.name
