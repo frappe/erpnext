@@ -732,7 +732,9 @@ class PaymentEntry(AccountsController):
 					d.reference_doctype, d.reference_name, ["outstanding_amount", "is_return"]
 				)
 				if result is None:
-					frappe.throw(_(f"{d.reference_doctype} does not exist"), frappe.DoesNotExistError)
+					frappe.throw(
+						_("{0} does not exist").format(d.reference_doctype), frappe.DoesNotExistError
+					)
 				outstanding_amount, is_return = result
 				if outstanding_amount <= 0 and not is_return:
 					no_oustanding_refs.setdefault(d.reference_doctype, []).append(d)

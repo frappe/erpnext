@@ -41,7 +41,7 @@ class ItemTaxTemplate(Document):
 			if d.tax_type:
 				result = frappe.get_cached_value("Account", d.tax_type, ["account_type", "company"])
 				if result is None:
-					frappe.throw(_("Account does not exist"), frappe.DoesNotExistError)
+					frappe.throw(_("Account {0} does not exist").format(d.tax_type), frappe.DoesNotExistError)
 				account_type, account_company = result
 
 				if account_company != self.company:

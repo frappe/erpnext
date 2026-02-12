@@ -493,7 +493,7 @@ def get_account_currency(account):
 		result = frappe.get_cached_value("Account", account, ["account_currency", "company"])
 
 		if result is None:
-			frappe.throw(_("Account does not exist"), frappe.DoesNotExistError)
+			frappe.throw(_("Account {0} does not exist").format(account), frappe.DoesNotExistError)
 
 		account_currency, company = result
 

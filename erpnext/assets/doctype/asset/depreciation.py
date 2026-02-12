@@ -742,6 +742,9 @@ def get_depreciation_accounts(asset_category, company):
 			"Company", company, ["accumulated_depreciation_account", "depreciation_expense_account"]
 		)
 
+		if accounts is None:
+			frappe.throw(_("Company does not exist"), frappe.DoesNotExistError)
+
 		if not accumulated_depreciation_account:
 			accumulated_depreciation_account = accounts[0]
 		if not depreciation_expense_account:
@@ -780,9 +783,7 @@ def get_profit_gl_entries(
 
 @frappe.whitelist()
 def get_disposal_account_and_cost_center(company):
-	result=frappe.get_cached_value(
-		"Company", company, ["disposal_account", "depreciation_cost_center"]
-	)
+	result = frappe.get_cached_value("Company", company, ["disposal_account", "depreciation_cost_center"])
 	if result is None:
 		frappe.throw(_("Company does not exist"), frappe.DoesNotExistError)
 	disposal_account, depreciation_cost_center = result

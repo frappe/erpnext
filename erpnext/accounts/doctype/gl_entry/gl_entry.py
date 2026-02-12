@@ -234,6 +234,9 @@ class GLEntry(Document):
 			"Account", self.account, fieldname=["is_group", "docstatus", "company"], as_dict=True
 		)
 
+		if account is None:
+			frappe.throw(_("Account {0} does not exist").format(self.account), frappe.DoesNotExistError)
+
 		if account.is_group == 1:
 			frappe.throw(
 				_(
@@ -257,7 +260,14 @@ class GLEntry(Document):
 		if not self.cost_center or self.is_cancelled:
 			return
 
-		is_group, company = frappe.get_cached_value("Cost Center", self.cost_center, ["is_group", "company"])
+		result = frappe.get_cached_value("Cost Center", self.cost_center, ["is_group", "company"])
+
+		if result is None:
+			frappe.throw(
+				_("Cost Center {0} does not exist").format(self.cost_center), frappe.DoesNotExistError
+			)
+
+		is_group, company = result
 
 		if company != self.company:
 			frappe.throw(
@@ -303,7 +313,7 @@ class GLEntry(Document):
 		result = frappe.get_cached_value("Company", self.company, ["default_currency", "reporting_currency"])
 
 		if result is None:
-			frappe.throw(_("Company  does not exist"), frappe.DoesNotExistError)
+			frappe.throw(_("Company does not exist"), frappe.DoesNotExistError)
 
 		default_currency, reporting_currency = result
 		transaction_date = self.transaction_date or self.posting_date
