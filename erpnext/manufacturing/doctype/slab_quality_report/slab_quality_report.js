@@ -1,6 +1,12 @@
 frappe.ui.form.on("Slab Quality Report", {
 	refresh(frm) {
 		frm.trigger('render_visualizer');
+        frm.trigger('render_grade_color');
+	},
+
+	grade(frm) {
+		frm.trigger('render_visualizer');
+        frm.trigger('render_grade_color');
 	},
 
 	render_visualizer(frm) {
@@ -93,7 +99,39 @@ frappe.ui.form.on("Slab Quality Report", {
             wrapper.html(container_html);
         }).catch(err => {
             console.error(err);
-             wrapper.html(`<div class="text-center text-muted p-5">${__("Error fetching Slab Size details")}</div>`);
+             wrapper.html(`<div class="text-center text-muted p-5">${__("Error fetching details")}</div>`);
         });
-	}
+	},
+
+    render_grade_color(frm) {
+        // Clear any existing indicator
+        const $wrapper = frm.get_field('grade').$wrapper;
+        $wrapper.find('.grade-indicator').remove();
+
+        if (!frm.doc.grade) return;
+
+        frappe.db.get_doc('Mahi Granites Settings').then(settings_doc => {
+            if (settings_doc && settings_doc.grades) {
+                const grade_entry = settings_doc.grades.find(d => d.name == frm.doc.grade || d.grade_name == frm.doc.grade);
+                $wrapper.find('.control-input')[0].style.display = 'block';
+                if (grade_entry && grade_entry.color) {
+                    $(`
+                        <div class="grade-indicator" style="
+                            display: inline-block;
+                            width: 15px;
+                            height: 15px;
+                            border-radius: 50%;
+                            background-color: ${grade_entry.color};
+                            margin-left: 10px;
+                            border: 1px solid var(--border-color);
+                            vertical-align: middle;
+                            position: absolute;
+                            left: -30px;
+                            top: 35px;
+                        " title="${__('Grade Color')}"></div>
+                    `).appendTo($wrapper.find('.control-input'));
+                }
+            }
+        });
+    }
 });
