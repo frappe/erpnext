@@ -20,7 +20,7 @@ frappe.ui.form.on("Financial Report Template", {
 		});
 	},
 
-	validate(frm) {
+	after_save(frm) {
 		if (!frm.doc.rows || frm.doc.rows.length === 0) {
 			frappe.msgprint(__("At least one row is required for a financial report template"));
 		}
