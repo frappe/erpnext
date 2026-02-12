@@ -2247,14 +2247,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 		items = self.get_items_from_manufacture_entry()
 
 		s_warehouse = frappe.db.get_value("Work Order", self.work_order, "fg_warehouse")
-
-		items_dict = get_bom_items_as_dict(
-			self.bom_no,
-			self.company,
-			self.fg_completed_qty,
-			fetch_exploded=self.use_multi_level_bom,
-			fetch_qty_in_stock_uom=False,
-		)
+		wo_produced_qty = flt(frappe.db.get_value("Work Order", self.work_order, "produced_qty"))
+		if wo_produced_qty <= 0:
+			frappe.throw(_("Work Order {0} has no produced qty").format(self.work_order))
+		disassemble_qty = flt(self.fg_completed_qty)
+		if disassemble_qty <= 0:
+			frappe.throw(_("Disassemble Qty cannot be less than or equal to 0."))
 
 		for row in items:
 			child_row = self.append("items", {})
@@ -2262,11 +2260,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				if value is not None:
 					child_row.set(field, value)
 
-			# update qty and amount from BOM items
-			bom_items = items_dict.get(row.item_code)
-			if bom_items:
-				child_row.qty = bom_items.get("qty", child_row.qty)
-				child_row.amount = bom_items.get("amount", child_row.amount)
+			child_row.qty = (flt(child_row.qty) / wo_produced_qty) * disassemble_qty
 
 			if row.is_finished_item:
 				child_row.qty = self.fg_completed_qty
@@ -2274,6 +2268,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 			child_row.s_warehouse = (self.from_warehouse or s_warehouse) if row.is_finished_item else ""
 			child_row.t_warehouse = row.s_warehouse
 			child_row.is_finished_item = 0 if row.is_finished_item else 1
+
+		self.set_transfer_qty()
+		self.calculate_rate_and_amount()
 
 	def _add_items_for_disassembly_from_bom(self):
 		if not self.bom_no or not self.fg_completed_qty:
