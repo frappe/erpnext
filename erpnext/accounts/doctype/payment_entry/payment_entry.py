@@ -127,7 +127,6 @@ class PaymentEntry(AccountsController):
 		received_amount: DF.Currency
 		received_amount_after_tax: DF.Currency
 		reconcile_on_advance_payment_date: DF.Check
-		ref_guid: DF.Data | None
 		reference_date: DF.Date | None
 		reference_no: DF.Data | None
 		references: DF.Table[PaymentEntryReference]

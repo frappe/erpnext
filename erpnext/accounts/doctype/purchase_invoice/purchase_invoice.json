@@ -204,7 +204,6 @@
   "tally_voucher_type",
   "column_break_3hyr",
   "tally_voucher_number",
-  "reference_guid",
   "connections_tab"
  ],
  "fields": [
@@ -288,7 +287,7 @@
    "default": "0",
    "fieldname": "apply_tds",
    "fieldtype": "Check",
-   "label": "Apply Tax Withholding Amount",
+   "label": "Apply Tax Withholding Amount (TDS)",
    "print_hide": 1
   },
   {
@@ -1693,7 +1692,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-24 17:26:43.808516",
+ "modified": "2026-02-12 19:23:25.126977",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
