@@ -800,31 +800,73 @@ class ProductionPlan(Document):
 	@frappe.whitelist()
 	def make_work_order(self):
 
-		frappe.enqueue(self.create_all_work_orders_for_production_plan, queue="short")
-		frappe.msgprint(
-            _("Work Orders are being created in the background"),
-            alert=True,
-            indicator="green",
-        )
+		frappe.enqueue(
+			self.create_all_work_orders_and_job_cards_for_production_plan,
+			queue="short",
+			user=frappe.session.user if frappe.session else None,
+		)
 
-	def create_all_work_orders_for_production_plan(self):
+		frappe.msgprint(
+			_("Work Orders are being created in the background"),
+			alert=True,
+			indicator="green",
+		)
+
+
+	def create_all_work_orders_and_job_cards_for_production_plan(self, user=None):
 		from erpnext.manufacturing.doctype.work_order.work_order import get_default_warehouse
+
+		if user:
+			frappe.set_user(user)
 
 		wo_list, po_list = [], []
 		subcontracted_po = {}
 		default_warehouses = get_default_warehouse()
 
-		self.make_work_order_for_finished_goods(wo_list, default_warehouses)
+		items_data = self.get_production_items()
+
+		# Calculate total job cards to be created
+		total_job_cards = 1
+
+		# For FGs
+		for _key, item in items_data.items():
+			if item.get("bom_no"):
+				total_job_cards += frappe.db.count("BOM Operation", filters={"parent": item.get("bom_no")})
+
+		# For Sub-assemblies
+		for row in self.sub_assembly_items:
+			if row.get("bom_no"):
+				total_job_cards += frappe.db.count("BOM Operation", filters={"parent": row.get("bom_no")})
+
+		if user:
+			frappe.publish_realtime(
+				"production_plan_job_card_progress",
+				{"total": total_job_cards * self.total_planned_qty, "production_plan": self.name},
+				user=user,
+			)
+
+		self.make_work_order_for_finished_goods(wo_list, default_warehouses, items_data)
 		self.make_work_order_for_subassembly_items(wo_list, subcontracted_po, default_warehouses)
 		self.make_subcontracted_purchase_order(subcontracted_po, po_list)
-		# self.show_list_created_message("Work Order", wo_list)
-		# self.show_list_created_message("Purchase Order", po_list)
 
-		# if not wo_list:
-		# 	frappe.msgprint(_("No Work Orders were created"))
+		if user:
+			frappe.publish_realtime(
+				"production_plan_job_card_progress",
+				{"reload": True, "production_plan": self.name},
+				user=user,
+			)
 
-	def make_work_order_for_finished_goods(self, wo_list, default_warehouses):
-		items_data = self.get_production_items()
+		if user:
+			frappe.publish_realtime(
+				"production_plan_work_order_progress",
+				{"progress": [total_items, total_items], "production_plan": self.name, "reload": True},
+				user=user,
+			)
+
+
+	def make_work_order_for_finished_goods(self, wo_list, default_warehouses, items_data=None):
+		if not items_data:
+			items_data = self.get_production_items()
 
 		for _key, item in items_data.items():
 			if self.sub_assembly_items:
@@ -835,7 +877,9 @@ class ProductionPlan(Document):
 			if work_order:
 				wo_list.append(work_order)
 
-	def make_work_order_for_subassembly_items(self, wo_list, subcontracted_po, default_warehouses):
+	def make_work_order_for_subassembly_items(
+		self, wo_list, subcontracted_po, default_warehouses
+	):
 		for row in self.sub_assembly_items:
 			if row.type_of_manufacturing == "Subcontract":
 				subcontracted_po.setdefault(row.supplier, []).append(row)

@@ -1783,6 +1783,13 @@ def create_job_card(work_order, row, auto_create=False, enable_capacity_planning
 		doc.insert()
 		frappe.msgprint(_("Job card {0} created").format(get_link_to_form("Job Card", doc.name)), alert=True)
 
+		if work_order.production_plan:
+			frappe.publish_realtime(
+				"production_plan_job_card_progress",
+				{"increment": 1, "production_plan": work_order.production_plan, "job_card": doc.name},
+				user=work_order.owner,
+			)
+
 	if enable_capacity_planning:
 		# automatically added scheduling rows shouldn't change status to WIP
 		doc.db_set("status", "Open")

@@ -319,12 +319,59 @@ frappe.ui.form.on("Production Plan", {
 	},
 
 	make_work_order(frm) {
+		work_order_message = __("Creating Job Cards in the background")
 		frappe.call({
 			method: "make_work_order",
 			freeze: true,
 			doc: frm.doc,
 			callback: function () {
-				frm.reload_doc();
+				frappe.show_progress(
+					work_order_message,
+					0,
+					100,
+					__("Please wait...")
+				);
+				
+				let current_progress = 0;
+				let total_progress = 1;
+
+				frappe.realtime.on("production_plan_job_card_progress", (data) => {
+					if (data.production_plan === frm.doc.name) {
+						if (data.total) {
+							total_progress = data.total;
+							current_progress = 0;
+						}
+
+						debugger;
+						
+						if (data.increment) {
+							current_progress += data.increment;
+						}
+						
+						let percent = (current_progress / total_progress) * 100;
+						if (percent > 100) percent = 100;
+
+						frappe.show_progress(
+							work_order_message,
+							percent,
+							100,
+							__("{0} Job Cards created (you can close this dialog)", [current_progress, total_progress])
+						);
+
+						if (data.reload) {
+							frappe.show_progress(
+								work_order_message,
+								100,
+								100,
+								__("Completed creating all job cards.")
+							);
+							setTimeout(() => {
+								frappe.hide_progress();
+								frm.reload_doc();
+							}, 2000);
+						}
+					}
+				});
 			},
 		});
 	},
