@@ -74,7 +74,7 @@ erpnext.accounts.ledger_preview = {
 					},
 				],
 			});
-
+			dialog.$wrapper.find(".section-body").css("max-width", "100%");
 			setTimeout(function () {
 				me.get_datatable(columns, data, dialog.get_field(fieldname).wrapper);
 			}, 200);
