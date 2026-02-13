@@ -104,8 +104,7 @@
   "tally_guid",
   "tally_voucher_type",
   "column_break_0ehw",
-  "tally_voucher_number",
-  "ref_guid"
+  "tally_voucher_number"
  ],
  "fields": [
   {
@@ -223,7 +222,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "payment_accounts_section",
    "fieldtype": "Section Break",
    "label": "Accounts"
@@ -834,7 +832,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-01-24 17:30:43.287892",
+ "modified": "2026-02-12 19:22:26.784959",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

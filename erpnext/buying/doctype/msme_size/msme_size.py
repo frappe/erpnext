@@ -5,7 +5,7 @@
 from frappe.model.document import Document
 
 
-class PreliminaryQualityCheck(Document):
+class MSMESize(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -14,13 +14,6 @@ class PreliminaryQualityCheck(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		d1_bend: DF.Int
-		d2_bend: DF.Int
-		depth: DF.Link | None
-		h_bend: DF.Int
-		remarks: DF.Text | None
-		slab: DF.Link | None
-		slab_template: DF.Link | None
-		v_bend: DF.Int
+		size_name: DF.Data
 	# end: auto-generated types
 	pass
