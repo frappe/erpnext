@@ -799,6 +799,15 @@ class ProductionPlan(Document):
 
 	@frappe.whitelist()
 	def make_work_order(self):
+
+		frappe.enqueue(self.create_all_work_orders_for_production_plan, queue="short")
+		frappe.msgprint(
+            _("Work Orders are being created in the background"),
+            alert=True,
+            indicator="green",
+        )
+
+	def create_all_work_orders_for_production_plan(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import get_default_warehouse
 
 		wo_list, po_list = [], []
@@ -808,11 +817,11 @@ class ProductionPlan(Document):
 		self.make_work_order_for_finished_goods(wo_list, default_warehouses)
 		self.make_work_order_for_subassembly_items(wo_list, subcontracted_po, default_warehouses)
 		self.make_subcontracted_purchase_order(subcontracted_po, po_list)
-		self.show_list_created_message("Work Order", wo_list)
-		self.show_list_created_message("Purchase Order", po_list)
+		# self.show_list_created_message("Work Order", wo_list)
+		# self.show_list_created_message("Purchase Order", po_list)
 
-		if not wo_list:
-			frappe.msgprint(_("No Work Orders were created"))
+		# if not wo_list:
+		# 	frappe.msgprint(_("No Work Orders were created"))
 
 	def make_work_order_for_finished_goods(self, wo_list, default_warehouses):
 		items_data = self.get_production_items()
