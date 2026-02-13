@@ -16,7 +16,7 @@ def create_slab(line: str, type: str, job_card_number: str | None = None):
 	new_slab.current_job_card = job_card_number
 	new_slab.batch_number = _generate_batch_number(line)
 
-	slab_number: int = _get_slab_number()
+	slab_number: int = _get_slab_number(new_slab.batch_number)
 	new_slab.number = slab_number
 	new_slab.serial_number = f"{slab_number:04d}"
 
@@ -231,12 +231,25 @@ def _generate_batch_number(line: str):
 	return f"{line}{year_code}/{total_working_days:03d}"
 
 
-def _get_slab_number():
+def _get_slab_number(batch: str):
 	today = date.today()
 	curr_month = today.month
 	curr_year = today.year
 
 	month_start = f"{curr_year}-{curr_month:02d}-01"
 
-	slab_count = frappe.db.count("Slab", filters={"created_on": [">=", month_start]}) + 1
+	batch_prefix = batch.split("/")[0]
+	slab_seed = 1
+
+	slab_count = (
+		frappe.db.count(
+			"Slab",
+			filters=[
+				["batch_number", "like", f"{batch_prefix}%"],
+				["creation", ">=", month_start],
+			],
+		)
+		+ slab_seed
+	)
+
 	return slab_count

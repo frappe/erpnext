@@ -19,7 +19,9 @@
   "other_readings_section",
   "depth",
   "column_break_b5ob",
-  "remarks"
+  "remarks",
+  "section_break_kuay",
+  "visual_bend_report"
  ],
  "fields": [
   {
@@ -32,6 +34,7 @@
    "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Horizontal Bend",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -39,6 +42,7 @@
    "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Vertical Bend",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -46,6 +50,7 @@
    "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Diagonal 1 Bend",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -53,6 +58,7 @@
    "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Diagonal 2 Bend",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -67,7 +73,8 @@
   {
    "fieldname": "remarks",
    "fieldtype": "Text",
-   "label": "Remarks"
+   "label": "Remarks",
+   "read_only": 1
   },
   {
    "fieldname": "depth",
@@ -75,7 +82,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Bend Depth",
-   "options": "Quarantine Label"
+   "options": "Quarantine Label",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_0kas",
@@ -90,27 +98,40 @@
    "fieldname": "slab",
    "fieldtype": "Link",
    "label": "Slab",
-   "options": "Slab"
+   "options": "Slab",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_0a9c",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "read_only": 1
   },
   {
    "fieldname": "slab_template",
    "fieldtype": "Link",
    "label": "Slab Color",
    "options": "Slab Template"
+  },
+  {
+   "fieldname": "visual_bend_report",
+   "fieldtype": "HTML",
+   "label": "Visual Bend Report",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_kuay",
+   "fieldtype": "Section Break",
+   "label": "Visual Bend Report"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-06 20:27:37.629014",
+ "modified": "2026-02-12 14:28:38.413942",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Preliminary Quality Check",
- "naming_rule": "Expression",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
