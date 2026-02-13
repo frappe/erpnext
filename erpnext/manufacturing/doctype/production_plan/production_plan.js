@@ -342,8 +342,6 @@ frappe.ui.form.on("Production Plan", {
 							current_progress = 0;
 						}
 
-						debugger;
-						
 						if (data.increment) {
 							current_progress += data.increment;
 						}

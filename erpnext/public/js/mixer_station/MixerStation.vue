@@ -88,7 +88,7 @@ const fetchWorkContext = async () => {
     const currentUser = await frappe.call({
         method: "erpnext.setup.doctype.employee.api.get_current_user_context",
     });
-    debugger;
+
     if (currentUser.message) {
         work_context.role = currentUser.message.designation;
         work_context.assigned_line = currentUser.message.production_line;
