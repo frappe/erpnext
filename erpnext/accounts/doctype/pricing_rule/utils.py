@@ -682,6 +682,8 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 		"rate": pricing_rule.free_item_rate or 0,
 		"price_list_rate": pricing_rule.free_item_rate or 0,
 		"is_free_item": 1,
+		"warehouse": args.get("warehouse") or None,
+		"batch_no": args.get("batch_no") or None,
 	}
 
 	item_data = frappe.get_cached_value(
