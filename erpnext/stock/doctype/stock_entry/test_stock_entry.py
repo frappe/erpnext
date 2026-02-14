@@ -2280,6 +2280,98 @@ class TestStockEntry(IntegrationTestCase):
 		se.save()
 		se.submit()
 
+
+	def test_disassemble_entry_with_wo(self):
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as _make_stock_entry,
+		)
+
+		TEST_WAREHOUSE = "_Test Warehouse - _TC"
+		TEST_UOM = "_Test UOM"
+		QTY_TO_MADE = 20
+		OVERRIDE_AMOUNT = 60
+
+		# Create items.  1 finished good, 4 raw mats.
+		fg_item = make_item("_Disassemble Mobile", properties={"is_stock_item": 1}).name
+		rm_item1 = make_item("_Disassemble Temper Glass", properties={"is_stock_item": 1, "valuation_rate": 1}).name
+		rm_item2 = make_item("_Disassemble Battery", properties={"is_stock_item": 1, "valuation_rate": 1}).name
+		rm_item3 = make_item("_Disassemble Speaker", properties={"is_stock_item": 1, "valuation_rate": 1}).name
+		rm_item4 = make_item("_Disassemble Alternative Battery", properties={"is_stock_item": 1, "valuation_rate": 1}).name
+
+		# Create BOM for finished good, using only first 2 raw mats.
+		bom_no = make_bom(item=fg_item, raw_materials=[rm_item1, rm_item2, rm_item3]).name
+
+		# Create a Work Order for finished good.  We want to make 20
+		work_order = frappe.new_doc("Work Order")
+		work_order.update(
+			{
+				"company": "_Test Company",
+				"fg_warehouse": TEST_WAREHOUSE,
+				"production_item": fg_item,
+				"bom_no": bom_no,
+				"qty": QTY_TO_MADE,
+				"stock_uom": TEST_UOM,
+				"additional_operating_cost": 1000,
+				"skip_transfer": 1,
+				"source_warehouse": TEST_WAREHOUSE,
+				"target_warehouse": TEST_WAREHOUSE,
+				"produced_qty": QTY_TO_MADE
+			}
+		)
+		work_order.insert()
+		work_order.submit()
+
+		# Add some stock for the raw mats.
+		make_stock_entry(item_code=rm_item1, target=TEST_WAREHOUSE, qty=60, basic_rate=100)
+		make_stock_entry(item_code=rm_item2, target=TEST_WAREHOUSE, qty=60, basic_rate=20)
+		make_stock_entry(item_code=rm_item3, target=TEST_WAREHOUSE, qty=60, basic_rate=20)
+		make_stock_entry(item_code=rm_item4, target=TEST_WAREHOUSE, qty=60, basic_rate=20)
+
+		# Create a "Manufacture" Stock Entry for Work Order.
+		stock_entry = _make_stock_entry(work_order.name, "Manufacture", QTY_TO_MADE)
+		ste = frappe.new_doc("Stock Entry").update(
+			stock_entry
+		)
+
+		for i in ste.items:
+			# If _Disassemble Temper Glass, adjust qty needed to triple
+			if i.item_code == rm_item1:
+				i.qty = OVERRIDE_AMOUNT
+			# If _Disassemble Battery, change item to _Disassemble Alternative Battery
+			elif i.item_code == rm_item2:
+				i.item_code = rm_item4
+
+		ste.insert()
+		ste.submit()
+		work_order.reload()
+
+		se = make_stock_entry(purpose="Disassemble", do_not_save=True)
+		se.work_order = work_order.name
+		# We are going to dissasemble a quarter of what we made.
+		se.fg_completed_qty = QTY_TO_MADE / 4
+		se.get_items()
+
+		rm_item4_in_se = False
+		for i in se.items:
+			if i.item_code == rm_item1:
+				self.assertEqual(i.qty, OVERRIDE_AMOUNT / 4)
+				self.assertEqual(i.transfer_qty, OVERRIDE_AMOUNT / 4)
+				self.assertEqual(i.amount, 100 * (OVERRIDE_AMOUNT / 4))
+			if i.item_code == rm_item3:
+				self.assertEqual(i.qty, (QTY_TO_MADE / 4))
+				self.assertEqual(i.transfer_qty, (QTY_TO_MADE / 4))
+				self.assertEqual(i.amount, 20 * (QTY_TO_MADE / 4))
+			if i.item_code == rm_item4:
+				rm_item4_in_se = True
+				self.assertEqual(i.qty, QTY_TO_MADE / 4)
+				self.assertEqual(i.transfer_qty, QTY_TO_MADE / 4)
+				self.assertEqual(i.amount, 20 * (QTY_TO_MADE / 4))
+
+		self.assertTrue(rm_item4_in_se)
+
+
 	def test_disassemble_entry_without_wo(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
