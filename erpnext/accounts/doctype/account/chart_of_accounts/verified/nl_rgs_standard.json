@@ -5,7 +5,6 @@
 		"VASTE ACTIVA": {
 			"root_type": "Asset",
 			"is_group": 1,
-			"account_number": "0",
 			"Immateriële vaste activa": {
 				"account_number": "01000",
 				"is_group": 1,
@@ -112,7 +111,6 @@
 		"VLOTTENDE ACTIVA": {
 			"root_type": "Asset",
 			"is_group": 1,
-			"account_number": "1",
 			"Voorraden": {
 				"account_number": "30000",
 				"is_group": 1,

@@ -4390,6 +4390,7 @@
 					{
 						"title": "NL BTW Verkoop 21%",
 						"is_default": 1,
+						"tax_category": "NL-Domestic",
 						"taxes": [
 							{
 								"account_head": {
@@ -4405,6 +4406,7 @@
 					},
 					{
 						"title": "NL BTW Verkoop 9%",
+						"tax_category": "NL-Domestic-Reduced",
 						"taxes": [
 							{
 								"account_head": {
@@ -4420,6 +4422,7 @@
 					},
 					{
 						"title": "NL BTW Verkoop 0% Export",
+						"tax_category": "Non-EU",
 						"taxes": [
 							{
 								"account_head": {
@@ -4435,6 +4438,7 @@
 					},
 					{
 						"title": "NL BTW Verkoop 0% ICP",
+						"tax_category": "EU-B2B",
 						"taxes": [
 							{
 								"account_head": {
@@ -4450,6 +4454,7 @@
 					},
 					{
 						"title": "NL BTW Verkoop Verlegd",
+						"tax_category": "NL-RC-Construction",
 						"taxes": [
 							{
 								"account_head": {
@@ -4468,6 +4473,7 @@
 					{
 						"title": "NL BTW Inkoop 21%",
 						"is_default": 1,
+						"tax_category": "NL-Domestic",
 						"taxes": [
 							{
 								"account_head": {
@@ -4483,6 +4489,7 @@
 					},
 					{
 						"title": "NL BTW Inkoop 9%",
+						"tax_category": "NL-Domestic-Reduced",
 						"taxes": [
 							{
 								"account_head": {
@@ -4498,6 +4505,7 @@
 					},
 					{
 						"title": "NL BTW Inkoop EU (verleggingsregeling)",
+						"tax_category": "EU-B2B",
 						"taxes": [
 							{
 								"account_head": {
@@ -4525,6 +4533,7 @@
 					},
 					{
 						"title": "NL BTW Inkoop EU 9% (verleggingsregeling)",
+						"tax_category": "EU-B2B",
 						"taxes": [
 							{
 								"account_head": {
@@ -4552,6 +4561,7 @@
 					},
 					{
 						"title": "NL BTW Inkoop Verlegd (binnenland)",
+						"tax_category": "NL-RC-Construction",
 						"taxes": [
 							{
 								"account_head": {
@@ -4581,6 +4591,7 @@
 				"item_tax_templates": [
 					{
 						"title": "BTW Verkoop 21%",
+						"tax_category": "NL-Domestic",
 						"taxes": [
 							{
 								"tax_type": {
@@ -4595,6 +4606,7 @@
 					},
 					{
 						"title": "BTW Verkoop 9%",
+						"tax_category": "NL-Domestic-Reduced",
 						"taxes": [
 							{
 								"tax_type": {
@@ -4609,6 +4621,7 @@
 					},
 					{
 						"title": "BTW Verkoop 0%",
+						"tax_category": "Non-EU",
 						"taxes": [
 							{
 								"tax_type": {
@@ -4623,6 +4636,7 @@
 					},
 					{
 						"title": "BTW Verkoop ICP",
+						"tax_category": "EU-B2B",
 						"taxes": [
 							{
 								"tax_type": {
@@ -4637,6 +4651,7 @@
 					},
 					{
 						"title": "BTW Verkoop Verlegd",
+						"tax_category": "NL-RC-Construction",
 						"taxes": [
 							{
 								"tax_type": {
@@ -4651,6 +4666,7 @@
 					},
 					{
 						"title": "BTW Verkoop Vrijgesteld",
+						"tax_category": "Exempt",
 						"taxes": [
 							{
 								"tax_type": {
@@ -4665,6 +4681,7 @@
 					},
 					{
 						"title": "BTW Inkoop 21%",
+						"tax_category": "NL-Domestic",
 						"taxes": [
 							{
 								"tax_type": {
@@ -4679,6 +4696,7 @@
 					},
 					{
 						"title": "BTW Inkoop 9%",
+						"tax_category": "NL-Domestic-Reduced",
 						"taxes": [
 							{
 								"tax_type": {
@@ -4693,6 +4711,7 @@
 					},
 					{
 						"title": "Geen BTW",
+						"tax_category": "Exempt",
 						"taxes": [
 							{
 								"tax_type": {
@@ -4707,6 +4726,7 @@
 					},
 					{
 						"title": "BTW Inkoop EU 21% (verleggingsregeling)",
+						"tax_category": "EU-B2B",
 						"taxes": [
 							{
 								"tax_type": {
@@ -4730,6 +4750,7 @@
 					},
 					{
 						"title": "BTW Inkoop EU 9% (verleggingsregeling)",
+						"tax_category": "EU-B2B",
 						"taxes": [
 							{
 								"tax_type": {
@@ -4753,6 +4774,7 @@
 					},
 					{
 						"title": "BTW Inkoop Verlegd 21%",
+						"tax_category": "NL-RC-Construction",
 						"taxes": [
 							{
 								"tax_type": {
@@ -4776,6 +4798,7 @@
 					},
 					{
 						"title": "BTW Inkoop ICP Goederen 21%",
+						"tax_category": "EU-B2B",
 						"taxes": [
 							{
 								"tax_type": {
@@ -4799,6 +4822,7 @@
 					},
 					{
 						"title": "BTW Inkoop ICP Goederen 9%",
+						"tax_category": "EU-B2B",
 						"taxes": [
 							{
 								"tax_type": {
@@ -4822,6 +4846,7 @@
 					},
 					{
 						"title": "BTW Inkoop Verlegd Non-EU 21%",
+						"tax_category": "Non-EU",
 						"taxes": [
 							{
 								"tax_type": {
