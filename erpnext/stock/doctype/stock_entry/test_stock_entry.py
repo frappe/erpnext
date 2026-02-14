@@ -2300,7 +2300,7 @@ class TestStockEntry(IntegrationTestCase):
 		rm_item3 = make_item("_Disassemble Speaker", properties={"is_stock_item": 1, "valuation_rate": 1}).name
 		rm_item4 = make_item("_Disassemble Alternative Battery", properties={"is_stock_item": 1, "valuation_rate": 1}).name
 
-		# Create BOM for finished good, using only first 2 raw mats.
+		# Create BOM for finished good, using first 3 raw mats.
 		bom_no = make_bom(item=fg_item, raw_materials=[rm_item1, rm_item2, rm_item3]).name
 
 		# Create a Work Order for finished good.  We want to make 20
@@ -2353,13 +2353,21 @@ class TestStockEntry(IntegrationTestCase):
 		se.fg_completed_qty = QTY_TO_MADE / 4
 		se.get_items()
 
+		rm_item1_in_se = False
+		rm_item2_in_se = False
+		rm_item3_in_se = False
 		rm_item4_in_se = False
+
 		for i in se.items:
 			if i.item_code == rm_item1:
+				rm_item1_in_se = True
 				self.assertEqual(i.qty, OVERRIDE_AMOUNT / 4)
 				self.assertEqual(i.transfer_qty, OVERRIDE_AMOUNT / 4)
 				self.assertEqual(i.amount, 100 * (OVERRIDE_AMOUNT / 4))
+			if i.item_code == rm_item2:
+				rm_item2_in_se = True
 			if i.item_code == rm_item3:
+				rm_item3_in_se = True
 				self.assertEqual(i.qty, (QTY_TO_MADE / 4))
 				self.assertEqual(i.transfer_qty, (QTY_TO_MADE / 4))
 				self.assertEqual(i.amount, 20 * (QTY_TO_MADE / 4))
@@ -2369,6 +2377,9 @@ class TestStockEntry(IntegrationTestCase):
 				self.assertEqual(i.transfer_qty, QTY_TO_MADE / 4)
 				self.assertEqual(i.amount, 20 * (QTY_TO_MADE / 4))
 
+		self.assertTrue(rm_item1_in_se)
+		self.assertFalse(rm_item2_in_se)
+		self.assertTrue(rm_item3_in_se)
 		self.assertTrue(rm_item4_in_se)
 
 
