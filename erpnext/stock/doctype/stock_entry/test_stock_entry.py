@@ -2349,7 +2349,7 @@ class TestStockEntry(IntegrationTestCase):
 
 		se = make_stock_entry(purpose="Disassemble", do_not_save=True)
 		se.work_order = work_order.name
-		# We are going to dissasemble a quarter of what we made.
+		# We are going to disassemble a quarter of what we made.
 		se.fg_completed_qty = QTY_TO_MADE / 4
 		se.get_items()
 
