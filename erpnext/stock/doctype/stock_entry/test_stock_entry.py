@@ -2317,7 +2317,6 @@ class TestStockEntry(IntegrationTestCase):
 				"skip_transfer": 1,
 				"source_warehouse": TEST_WAREHOUSE,
 				"target_warehouse": TEST_WAREHOUSE,
-				"produced_qty": QTY_TO_MADE
 			}
 		)
 		work_order.insert()
@@ -2346,6 +2345,7 @@ class TestStockEntry(IntegrationTestCase):
 		ste.insert()
 		ste.submit()
 		work_order.reload()
+		self.assertEqual(work_order.produced_qty, QTY_TO_MADE)
 
 		se = make_stock_entry(purpose="Disassemble", do_not_save=True)
 		se.work_order = work_order.name
