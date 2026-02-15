@@ -2686,7 +2686,7 @@ class TestWorkOrder(IntegrationTestCase):
 			f"Additional raw material {additional_rm} not found in disassembly",
 		)
 
-		# Over our 2 Work Orders, we've made 10 finished items.  We've used 20 units
+		# Over our 2 Manufacture entries, we've made 10 finished items.  We've used 20 units
 		# of the additional RM.  We are disassembling 4 items.  So, we should expect
 		# to see 4/10 of the 20 units used, which equals 8 units of the additional RM.
 		expected_additional_rm_qty = 8
