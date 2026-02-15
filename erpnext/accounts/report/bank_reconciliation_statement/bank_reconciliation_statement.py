@@ -328,6 +328,7 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 		)
 		.where(
 			(pi.docstatus == 1)
+			& (pi.is_paid == 1)
 			& (pi.cash_bank_account == filters.account)
 			& (pi.posting_date > filters.report_date)
 			& (pi.clearance_date <= filters.report_date)
