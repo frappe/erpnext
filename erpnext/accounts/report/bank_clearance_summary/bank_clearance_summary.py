@@ -139,6 +139,7 @@ def get_entries_for_bank_clearance_summary(filters):
 		)
 		.where(
 			(pi.docstatus == 1)
+			& (pi.is_paid == 1)
 			& (pi.cash_bank_account == filters.account)
 			& (pi.posting_date >= filters.from_date)
 			& (pi.posting_date <= filters.to_date)

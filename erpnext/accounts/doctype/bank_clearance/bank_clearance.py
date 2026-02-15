@@ -304,6 +304,7 @@ def get_payment_entries_for_bank_clearance(
 		)
 		.where(
 			(pi.docstatus == 1)
+			& (pi.is_paid == 1)
 			& (pi.cash_bank_account == account)
 			& (pi.posting_date >= from_date)
 			& (pi.posting_date <= to_date)

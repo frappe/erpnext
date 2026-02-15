@@ -223,6 +223,7 @@ def get_purchase_invoices(filters):
 		)
 		.where(
 			(pi.docstatus == 1)
+			& (pi.is_paid == 1)
 			& (pi.cash_bank_account == filters.account)
 			& (pi.posting_date <= filters.report_date)
 			& (pi.clearance_date.isnull() | (pi.clearance_date > filters.report_date))
