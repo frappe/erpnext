@@ -298,6 +298,7 @@ def get_payment_entries_for_bank_clearance(
 			pi.paid_amount.as_("credit"),
 			pi.posting_date,
 			pi.supplier.as_("against_account"),
+			pi.bill_no.as_("cheque_number"),
 			pi.clearance_date,
 			acc.account_currency,
 			ConstantColumn(0).as_("debit"),
