@@ -2295,10 +2295,18 @@ class TestStockEntry(IntegrationTestCase):
 
 		# Create items.  1 finished good, 4 raw mats.
 		fg_item = make_item("_Disassemble Mobile", properties={"is_stock_item": 1}).name
-		rm_item1 = make_item("_Disassemble Temper Glass", properties={"is_stock_item": 1, "valuation_rate": 1}).name
-		rm_item2 = make_item("_Disassemble Battery", properties={"is_stock_item": 1, "valuation_rate": 1}).name
-		rm_item3 = make_item("_Disassemble Speaker", properties={"is_stock_item": 1, "valuation_rate": 1}).name
-		rm_item4 = make_item("_Disassemble Alternative Battery", properties={"is_stock_item": 1, "valuation_rate": 1}).name
+		rm_item1 = make_item(
+			"_Disassemble Temper Glass", properties={"is_stock_item": 1, "valuation_rate": 1}
+		).name
+		rm_item2 = make_item(
+			"_Disassemble Battery", properties={"is_stock_item": 1, "valuation_rate": 1}
+		).name
+		rm_item3 = make_item(
+			"_Disassemble Speaker", properties={"is_stock_item": 1, "valuation_rate": 1}
+		).name
+		rm_item4 = make_item(
+			"_Disassemble Alternative Battery", properties={"is_stock_item": 1, "valuation_rate": 1}
+		).name
 
 		# Create BOM for finished good, using first 3 raw mats.
 		bom_no = make_bom(item=fg_item, raw_materials=[rm_item1, rm_item2, rm_item3]).name
@@ -2330,9 +2338,7 @@ class TestStockEntry(IntegrationTestCase):
 
 		# Create a "Manufacture" Stock Entry for Work Order.
 		stock_entry = _make_stock_entry(work_order.name, "Manufacture", QTY_TO_MADE)
-		ste = frappe.new_doc("Stock Entry").update(
-			stock_entry
-		)
+		ste = frappe.new_doc("Stock Entry").update(stock_entry)
 
 		for i in ste.items:
 			# If _Disassemble Temper Glass, adjust qty needed to triple
@@ -2381,7 +2387,6 @@ class TestStockEntry(IntegrationTestCase):
 		self.assertFalse(rm_item2_in_se)
 		self.assertTrue(rm_item3_in_se)
 		self.assertTrue(rm_item4_in_se)
-
 
 	def test_disassemble_entry_without_wo(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom

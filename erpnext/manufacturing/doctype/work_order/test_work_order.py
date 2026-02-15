@@ -2627,14 +2627,14 @@ class TestWorkOrder(IntegrationTestCase):
 		se_for_material_transfer.save()
 		se_for_material_transfer.submit()
 
-		# First Manufacture Entry - 3 units
+		# First Manufacture Entry - 3 units, with 6 units of additional_rm
 		se_manufacture1 = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
 		# Additional RM
 		se_manufacture1.append(
 			"items",
 			{
 				"item_code": additional_rm,
-				"qty": 3,  # 1 per unit
+				"qty": 6,  # 2 per unit
 				"s_warehouse": wo.wip_warehouse,
 				"is_finished_item": 0,
 			},
@@ -2642,14 +2642,14 @@ class TestWorkOrder(IntegrationTestCase):
 		se_manufacture1.save()
 		se_manufacture1.submit()
 
-		# Second Manufacture Entry - 7 units
+		# Second Manufacture Entry - 7 units, with 14 units of additional_rm
 		se_manufacture2 = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 7))
 		# AAdditional RM
 		se_manufacture2.append(
 			"items",
 			{
 				"item_code": additional_rm,
-				"qty": 7,  # 1 per unit
+				"qty": 14,  # 2 per unit
 				"s_warehouse": wo.wip_warehouse,
 				"is_finished_item": 0,
 			},
@@ -2686,9 +2686,10 @@ class TestWorkOrder(IntegrationTestCase):
 			f"Additional raw material {additional_rm} not found in disassembly",
 		)
 
-		# intentional full reversal as not part of BOM
-		# eg: dies or consumables used during manufacturing
-		expected_additional_rm_qty = 3 + 7
+		# Over our 2 Work Orders, we've made 10 finished items.  We've used 20 units
+		# of the additional RM.  We are disassembling 4 items.  So, we should expect
+		# to see 4/10 of the 20 units used, which equals 8 units of the additional RM.
+		expected_additional_rm_qty = 8
 		self.assertAlmostEqual(
 			additional_rm_row.qty,
 			expected_additional_rm_qty,
