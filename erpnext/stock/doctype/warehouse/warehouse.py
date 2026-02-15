@@ -280,6 +280,9 @@ def apply_warehouse_filter(query, sle, filters):
 		as_list=True,
 	)
 
+	if not warehouse_range:
+		return query
+	
 	child_query = frappe.qb.from_(warehouse_table).select(warehouse_table.name)
 
 	range_conditions = [
