@@ -244,8 +244,8 @@ def get_pos_entries(filters):
 		.join(acc)
 		.on(si_payment.account == acc.name)
 		.select(
-			ConstantColumn("Sales Invoice Payment").as_("payment_document"),
-			si_payment.name.as_("payment_entry"),
+			ConstantColumn("Sales Invoice").as_("payment_document"),
+			si.name.as_("payment_entry"),
 			si_payment.amount.as_("debit"),
 			si.posting_date,
 			si.debit_to.as_("against_account"),
