@@ -1,4 +1,5 @@
 import frappe
+import re
 from frappe import _
 from frappe.utils import flt
 
@@ -30,12 +31,16 @@ def transfer_to_next_process(current_work_order, qty=None, process=None, mixer_n
 	if not next_process:
 		frappe.throw(_("No next process found after {0}").format(current_process))
 
+	bom_doc = frappe.get_doc("BOM", wo.bom_no)
+	slab_template = re.sub(r"00", "CM", bom_doc.slab_template)
+
 	next_wo = frappe.db.get_value(
 		"Work Order",
 		{
 			"production_plan": wo.production_plan,
-			"production_item": ["like", f"%{next_process}%"],
+			"description": ["like", f"%{next_process}%"],
 			"docstatus": ["<", 2],
+			"production_item": ["like", f"%{slab_template}%"],
 		},
 		"name",
 	)

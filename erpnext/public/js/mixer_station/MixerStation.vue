@@ -265,7 +265,8 @@ async function getJobCardsList() {
     const result = await frappe.call({
         method: 'erpnext.manufacturing.doctype.operation.api.get_recent_job_card',
         args: {
-            operation: "Mixing"
+            operation: "Mixing",
+            production_line: work_context.assigned_line
         }
     });
     jobCard.value = result.message.name;
@@ -569,7 +570,10 @@ async function fetchQueue() {
         const r = await frappe.call({
             method: 'erpnext.manufacturing.doctype.operation.api.get_open_job_cards',
             args: {
-                process: "Mixing"
+                process: "Mixing",
+                line: work_context.assigned_line,
+                include_wip: true,
+                include_material_transferred: true
             }
         });
         jobcardsQueue.value = r.message || [];

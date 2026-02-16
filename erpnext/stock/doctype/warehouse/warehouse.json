@@ -15,6 +15,7 @@
   "parent_warehouse",
   "is_rejected_warehouse",
   "production_line",
+  "is_standalone",
   "column_break_4",
   "account",
   "company",
@@ -271,6 +272,13 @@
    "fieldtype": "Link",
    "label": "Production Line",
    "options": "Production Line"
+  },
+  {
+   "default": "0",
+   "description": "Check this if manual slab loading is required at this workstation",
+   "fieldname": "is_standalone",
+   "fieldtype": "Check",
+   "label": "Is Standalone"
   }
  ],
  "grid_page_length": 50,
@@ -278,7 +286,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-01-12 15:03:40.370481",
+ "modified": "2026-02-16 17:32:37.729110",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",
