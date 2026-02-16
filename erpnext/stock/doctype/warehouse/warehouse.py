@@ -30,6 +30,7 @@ class Warehouse(NestedSet):
 		email_id: DF.Data | None
 		is_group: DF.Check
 		is_rejected_warehouse: DF.Check
+		is_standalone: DF.Check
 		lft: DF.Int
 		mfg_process_type: DF.Link | None
 		mobile_no: DF.Data | None
