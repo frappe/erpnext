@@ -24,6 +24,8 @@ const line = ref(null);
 const error = ref(null);
 const batchNo = ref(null);
 const mixerNumber = ref(null);
+const slabsQueue = ref([]);
+const isTrimming = ref(false);
 
 const alarms = ref([
 	{
@@ -210,7 +212,12 @@ onMounted(async () => {
 
 		const route = frappe.get_route();
 		const station = route[1] || '';
+		isTrimming.value = station.toLowerCase() === 'trimming';
+
 		if (!jobCardName.value) {
+			if (isTrimming.value) {
+				fetchQueue(work_context.assigned_line, station);
+			}
 			getNextWorkItem(station);
 		} else {
 			await loadJobCard(jobCardName.value);
@@ -222,6 +229,25 @@ onMounted(async () => {
 	}
 });
 
+
+async function fetchQueue(line, station) {
+	try {
+		slabsQueue.value = [];
+		const result = await frappe.call({
+			method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
+			args: {
+				line: line,
+				next_stage: station.toLowerCase(),
+				limit: 100, // TODO: change this limit
+			}
+		});
+		if (result.message) {
+			slabsQueue.value = result.message || [];
+		}
+	} catch (e) {
+		console.error('Failed to fetch queue:');
+	}
+}
 
 frappe.realtime.on('refresh_operator_station', (data) => {
 	const route = frappe.get_route();
@@ -328,6 +354,9 @@ async function finishOperation() {
 		colour.value = null;
 
 		await checkForNextItem();
+		if (isTrimming.value) {
+			await fetchQueue(work_context.assigned_line, station);
+		}
 	} catch (error) {
 		const errorMsg = error.message || (error._server_messages?.[0]?.message) || JSON.stringify(error);
 		frappe.msgprint({
@@ -405,79 +434,158 @@ function statusStyle() {
 	return 'background:#e9ecef;color:#6c757d;padding:.5rem';
 }
 
+function selectJobCard(name) {
+	if (name === jobCardName.value) return;
+	frappe.set_route('operator-station', station);
+	window.location.reload();
+}
 
+async function selectSlab(slab) {
+	if (!slab) return;
+
+	slabNumber.value = slab.name;
+	colour.value = slab.template;
+	batchNo.value = slab.batch_number;
+
+	// Reset job card state if selecting a new slab manually
+	jobCardName.value = null;
+	jobCardDoc.value = null;
+	status.value = 'Pending';
+	processStarted.value = false;
+	processReady.value = true;
+
+	try {
+		const route = frappe.get_route();
+		const station = route[1] || '';
+		const r = await frappe.call({
+			method: 'erpnext.manufacturing.page.operator_station.operator_station.get_job_card_for_slab',
+			args: {
+				slab_name: slab.name,
+				process_name: station
+			}
+		});
+		if (r.message) {
+			await loadJobCard(r.message);
+		} else {
+			frappe.show_alert({
+				message: __('No open Job Card found for this slab'),
+				indicator: 'orange'
+			});
+		}
+	} catch (e) {
+		console.error(e);
+	}
+}
 </script>
 <template>
-	<div class="page-card p-0 d-flex h-100 w-100 justify-content-center">
-		<div class="operator-station page-card d-flex flex-column align-items-center flex-grow-1 p-4"
-			style="overflow-y: auto;">
-			<!-- Current Job Card -->
-			<Transition name="pop-switch" mode="out-in">
-				<div v-if="jobCardName" key="job-card" class="current-job-card mb-4 border border-dark w-50 rounded p-4"
-					style="min-width: 650px;">
-					<div class="status text-center mb-2" style="font-size:1rem">
-						<span class="badge badge-pill" :style="statusStyle()">
-							{{ __(status) }}
-						</span>
-					</div>
 
-					<!--<div class="text-center text-muted small">{{ __('SERIAL NUMBER') }}</div>-->
-					<h2 class="job-serial text-center font-weight-bold mb-0 p-3">
-						{{ slabNumber || batchNo }}
-					</h2>
-					<h3 class="job-serial text-center font-weight-bold mb-2 p-3">
-						{{ jobCardName }}
-					</h3>
+	<!-- Sidebar: Queue -->
+	<div class="operator-station-container d-flex h-100 w-100">
 
-					<!-- <div class="text-center text-muted small mb-1">{{ __('Colour') }}</div> -->
-					<div class="d-flex justify-content-center align-items-center mb-3">
-						<span class="job-color bold mr-2" style="font-size:1rem">{{ colour || slabTemplate }}</span>
-						<span class="color-swatch"
-							style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span>
-					</div>
+		<div v-if="isTrimming" class="queue-sidebar bg-light border-right p-3" style="width: 300px; overflow-y: auto;">
+			<h5 class="mb-3 font-weight-bold text-center border-bottom pb-2">
+				{{ __('Incoming Slabs') }}
+			</h5>
 
-					<div v-if="mixerNumber" class="text-center font-weight-bold mb-2 text-muted" style="font-size:1rem">
-						Mixer: {{ mixerNumber }}
-					</div>
+			<div v-if="slabsQueue.length === 0" class="text-muted text-center py-4 bg-white rounded border">
+				<span class="fa fa-inbox fa-2x mb-2 d-block text-muted-light"></span>
+				{{ __('No slabs in queue') }}
+			</div>
 
-					<div class="text-center mb-2" v-if="processReady">
-						<button class="btn btn-success py-3 px-4" @click="startOperation">
-							<span class="fa fa-play mr-1 pr-2"></span>{{ __('Start Job') }}
-						</button>
-					</div>
+			<div v-else>
+				<div v-for="item in slabsQueue" :key="item.name" @click="selectSlab(item)"
+					class="card mb-2 shadow-sm slab-card border-0">
+					<div class="card-body p-3 border-left-3 d-flex justify-content-between align-items-start"
+						style="height: 5rem">
+						<div>
+							<h6 class="card-title mb-1 font-weight-bold">{{ item.batch_number }} - {{ item.serial_number
+							}}</h6>
+							<div class="small text-muted mb-1">
+								<span class="fa fa-cube mr-1"></span>{{ item.template }}
+							</div>
 
-					<div class="text-center mb-3" v-if="processStarted && !jobCardSubmitted">
-						<div class="text-success" style="font-size:1.5rem">
-							<span class="fa fa-clock-o mr-1"></span>
-							<span class="job-timer">{{ formattedTime }}</span>
+						</div>
+						<div class="mt-2 text-right">
+							<span class="badge badge-light border">{{ new
+								Date(item.modified).toLocaleTimeString('en-GB') }}</span>
 						</div>
 					</div>
+				</div>
+			</div>
 
-					<div class="text-center mb-2" v-if="processStarted">
-						<button class="btn btn-info py-3 px-4 mr-5" @click="finishOperation">
-							<span class="fa fa-check-square-o mr-1"></span>{{ __('Finish Job') }}
-						</button>
-						<!-- <button class="btn btn-warning py-3 px-4 mr-5" @click="haltJob">
+		</div>
+
+		<div class="page-card p-0 d-flex h-100 w-100 justify-content-center">
+			<div class="operator-station page-card d-flex flex-column align-items-center flex-grow-1 p-4"
+				style="overflow-y: auto;">
+				<!-- Current Job Card -->
+				<Transition name="pop-switch" mode="out-in">
+					<div v-if="jobCardName || slabNumber" key="job-card"
+						class="current-job-card mb-4 border border-dark w-50 rounded p-4" style="min-width: 650px;">
+						<div class="status text-center mb-2" style="font-size:1rem">
+							<span class="badge badge-pill" :style="statusStyle()">
+								{{ __(status) }}
+							</span>
+						</div>
+
+						<!--<div class="text-center text-muted small">{{ __('SERIAL NUMBER') }}</div>-->
+						<h2 class="job-serial text-center font-weight-bold mb-0 p-3">
+							{{ slabNumber || batchNo }}
+						</h2>
+						<h3 class="job-serial text-center font-weight-bold mb-2 p-3">
+							{{ jobCardName }}
+						</h3>
+
+						<!-- <div class="text-center text-muted small mb-1">{{ __('Colour') }}</div> -->
+						<div class="d-flex justify-content-center align-items-center mb-3">
+							<span class="job-color bold mr-2" style="font-size:1rem">{{ colour || slabTemplate }}</span>
+							<span class="color-swatch"
+								style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span>
+						</div>
+
+						<div v-if="mixerNumber" class="text-center font-weight-bold mb-2 text-muted"
+							style="font-size:1rem">
+							Mixer: {{ mixerNumber }}
+						</div>
+
+						<div class="text-center mb-2" v-if="processReady">
+							<button class="btn btn-success py-3 px-4" @click="startOperation">
+								<span class="fa fa-play mr-1 pr-2"></span>{{ __('Start Job') }}
+							</button>
+						</div>
+
+						<div class="text-center mb-3" v-if="processStarted && !jobCardSubmitted">
+							<div class="text-success" style="font-size:1.5rem">
+								<span class="fa fa-clock-o mr-1"></span>
+								<span class="job-timer">{{ formattedTime }}</span>
+							</div>
+						</div>
+
+						<div class="text-center mb-2" v-if="processStarted">
+							<button class="btn btn-info py-3 px-4 mr-5" @click="finishOperation">
+								<span class="fa fa-check-square-o mr-1"></span>{{ __('Finish Job') }}
+							</button>
+							<!-- <button class="btn btn-warning py-3 px-4 mr-5" @click="haltJob">
 							<span class="fa fa-pause-circle-o mr-1"></span>{{ __('Halt Job') }}
 						</button> -->
-						<button class="btn btn-danger py-3 px-4" @click="discardJob">
-							<span class="fa fa-trash-o mr-1"></span>{{ __('Discard') }}
-						</button>
+							<button class="btn btn-danger py-3 px-4" @click="discardJob">
+								<span class="fa fa-trash-o mr-1"></span>{{ __('Discard') }}
+							</button>
+						</div>
 					</div>
-				</div>
-				<div v-else key="empty-state"
-					class="empty-state mb-4 border border-secondary rounded p-5 d-flex flex-column align-items-center justify-content-center"
-					style="min-width: 650px; background-color: var(--fg-color); border-style: dashed !important;">
-					<div class="mb-3 text-muted" style="opacity: 0.5;">
-						<span class="fa fa-inbox" style="font-size: 4rem;"></span>
+					<div v-else key="empty-state"
+						class="empty-state mb-4 border border-secondary rounded p-5 d-flex flex-column align-items-center justify-content-center"
+						style="min-width: 650px; background-color: var(--fg-color); border-style: dashed !important;">
+						<div class="mb-3 text-muted" style="opacity: 0.5;">
+							<span class="fa fa-inbox" style="font-size: 4rem;"></span>
+						</div>
+						<h4 class="text-muted font-weight-bold">{{ __('No active job cards') }}</h4>
+						<p class="text-muted mb-0">{{ __('There are no active job cards to work on right now.') }}</p>
 					</div>
-					<h4 class="text-muted font-weight-bold">{{ __('No active job cards') }}</h4>
-					<p class="text-muted mb-0">{{ __('There are no active job cards to work on right now.') }}</p>
-				</div>
-			</Transition>
+				</Transition>
 
-			<!-- Raise Alarm -->
-			<!-- <div class="raise-alarm-box mb-4 w-50 border border-dark rounded p-4" style="min-width: 650px;">
+				<!-- Raise Alarm -->
+				<!-- <div class="raise-alarm-box mb-4 w-50 border border-dark rounded p-4" style="min-width: 650px;">
 				<div class="d-flex flex-column justify-content-between mb-1 py-3">
 					<div class="d-flex align-items-center">
 						<span class="fa fa-exclamation-triangle mr-2"
@@ -494,8 +602,8 @@ function statusStyle() {
 				</button>
 			</div> -->
 
-			<!-- Downstream Alarms -->
-			<!-- <div class="downstream-alarms-box w-50 border border-dark rounded p-4" style="min-width: 650px;">
+				<!-- Downstream Alarms -->
+				<!-- <div class="downstream-alarms-box w-50 border border-dark rounded p-4" style="min-width: 650px;">
 				<div class="d-flex justify-content-between align-items-center mb-2">
 					<div>
 						<span class="fa fa-bell mr-1"></span>
@@ -519,8 +627,8 @@ function statusStyle() {
 				</div>
 			</div> -->
 
-			<!-- Simple modal for Raise Alarm -->
-			<!-- <div v-if="issueDialogOpen" class="modal-backdrop fade show"></div>
+				<!-- Simple modal for Raise Alarm -->
+				<!-- <div v-if="issueDialogOpen" class="modal-backdrop fade show"></div>
 			<div v-if="issueDialogOpen" class="modal d-block" tabindex="-1">
 				<div class="modal-dialog">
 					<div class="modal-content">
@@ -560,9 +668,9 @@ function statusStyle() {
 					</div>
 				</div>
 			</div> -->
+			</div>
 		</div>
 	</div>
-
 </template>
 
 <style scoped>

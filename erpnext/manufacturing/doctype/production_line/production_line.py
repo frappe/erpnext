@@ -1,7 +1,8 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-# import frappe
+import frappe
+import frappe
 from frappe.model.document import Document
 
 
@@ -22,3 +23,19 @@ class ProductionLine(Document):
 		parent_line: DF.Link | None
 	# end: auto-generated types
 	pass
+
+
+@frappe.whitelist()
+def get_parent_line(line_name: str):
+	if not line_name:
+		return None
+	line: ProductionLine = frappe.get_doc("Production Line", line_name)  # pyright: ignore[reportAssignmentType]
+	return line.parent_line
+
+
+@frappe.whitelist()
+def get_all_child_lines(line_name: str):
+	if not line_name:
+		return None
+	lines: list[ProductionLine] = frappe.get_all("Production Line", filters={"parent_line": line_name})
+	return [line.name for line in lines]
