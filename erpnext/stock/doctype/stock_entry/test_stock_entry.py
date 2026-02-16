@@ -2328,6 +2328,13 @@ class TestStockEntry(IntegrationTestCase):
 		work_order.insert()
 		work_order.submit()
 
+		se = make_stock_entry(purpose="Disassemble", do_not_save=True)
+		se.work_order = work_order.name
+		# We are going to disassemble 4.  An error should be raised as we've not,
+		# at this point, produced anything.
+		se.fg_completed_qty = 4
+		self.assertRaises(frappe.ValidationError, se.get_items)
+
 		# Add some stock for the raw mats.
 		make_stock_entry(item_code=rm_item1, target=TEST_WAREHOUSE, qty=60, basic_rate=100)
 		make_stock_entry(item_code=rm_item2, target=TEST_WAREHOUSE, qty=60, basic_rate=20)
@@ -2353,38 +2360,36 @@ class TestStockEntry(IntegrationTestCase):
 
 		se = make_stock_entry(purpose="Disassemble", do_not_save=True)
 		se.work_order = work_order.name
+		# We are going to disassemble zero, an error should be raised.
+		se.fg_completed_qty = 0
+		self.assertRaises(frappe.ValidationError, se.get_items)
+
+		se = make_stock_entry(purpose="Disassemble", do_not_save=True)
+		se.work_order = work_order.name
 		# We are going to disassemble a quarter of what we made.
 		se.fg_completed_qty = QTY_TO_MADE / 4
 		se.get_items()
 
-		rm_item1_in_se = False
-		rm_item2_in_se = False
-		rm_item3_in_se = False
-		rm_item4_in_se = False
+		item_codes = {row.item_code for row in se.items}
+
+		self.assertIn(rm_item1, item_codes)
+		self.assertNotIn(rm_item2, item_codes)
+		self.assertIn(rm_item3, item_codes)
+		self.assertIn(rm_item4, item_codes)
 
 		for i in se.items:
 			if i.item_code == rm_item1:
-				rm_item1_in_se = True
 				self.assertEqual(i.qty, OVERRIDE_AMOUNT / 4)
 				self.assertEqual(i.transfer_qty, OVERRIDE_AMOUNT / 4)
 				self.assertEqual(i.amount, 100 * (OVERRIDE_AMOUNT / 4))
-			if i.item_code == rm_item2:
-				rm_item2_in_se = True
 			if i.item_code == rm_item3:
-				rm_item3_in_se = True
 				self.assertEqual(i.qty, (QTY_TO_MADE / 4))
 				self.assertEqual(i.transfer_qty, (QTY_TO_MADE / 4))
 				self.assertEqual(i.amount, 20 * (QTY_TO_MADE / 4))
 			if i.item_code == rm_item4:
-				rm_item4_in_se = True
 				self.assertEqual(i.qty, QTY_TO_MADE / 4)
 				self.assertEqual(i.transfer_qty, QTY_TO_MADE / 4)
 				self.assertEqual(i.amount, 20 * (QTY_TO_MADE / 4))
-
-		self.assertTrue(rm_item1_in_se)
-		self.assertFalse(rm_item2_in_se)
-		self.assertTrue(rm_item3_in_se)
-		self.assertTrue(rm_item4_in_se)
 
 	def test_disassemble_entry_without_wo(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
