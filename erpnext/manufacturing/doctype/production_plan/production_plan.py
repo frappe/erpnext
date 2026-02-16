@@ -964,13 +964,6 @@ class ProductionPlan(Document):
 				user=user,
 			)
 
-		if user:
-			frappe.publish_realtime(
-				"production_plan_work_order_progress",
-				{"progress": [total_items, total_items], "production_plan": self.name, "reload": True},
-				user=user,
-			)
-
 
 	def make_work_order_for_finished_goods(self, wo_list, default_warehouses, items_data=None):
 		if not items_data:
