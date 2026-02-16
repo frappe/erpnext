@@ -26,7 +26,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:parent.doctype == 'Sales Invoice'",
+   "depends_on": "eval: [\"POS Invoice\", \"Sales Invoice\"].includes(parent.doctype)",
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -85,14 +85,23 @@
  ],
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-01-23 16:20:06.436979",
+=======
+ "modified": "2026-02-16 20:46:34.592604",
+>>>>>>> 219cf6bc57 (fix(pos_invoice): add correct depends on condition (#52689))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Payment",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
+<<<<<<< HEAD
  "sort_field": "modified",
+=======
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+>>>>>>> 219cf6bc57 (fix(pos_invoice): add correct depends on condition (#52689))
  "sort_order": "DESC",
  "states": []
 }
