@@ -121,7 +121,6 @@ onMounted(async () => {
 
     jobCardSubmitted.value = !!s.job_card_submitted || false;
     if (jobCardSubmitted.value) {
-        debugger;
         preparedQty.value = s.prepared_qty || 0;
         stockEntryName.value = s.stock_entry_name || '';
         transferredQty.value = s.transferred_qty_to_next || 0;
@@ -194,7 +193,6 @@ onMounted(async () => {
 
         if (jobCardSubmitted.value) {
             const jc = await frappe.db.get_doc('Job Card', jobCard.value);
-            debugger;
             preparedQty.value = jc.total_completed_qty || jc.for_quantity || s.prepared_qty || 0;
             stockEntryName.value = s.stock_entry_name || '';
             transferredQty.value = s.transferred_qty_to_next || 0;
@@ -315,7 +313,6 @@ async function finishAndDischarge() {
     try {
         const jc = await frappe.db.get_doc('Job Card', jobCard.value);
         const completed_qty = jc.for_quantity || 0;
-        debugger;
         const result = await frappe.call({
             method: 'erpnext.manufacturing.page.mixer_station.mixer_station.finish_mixing',
             args: {
@@ -325,14 +322,12 @@ async function finishAndDischarge() {
             freeze: true,
             freeze_message: __('Completing Job Card...')
         });
-        debugger;
         mixingStarted.value = false;
         mixingStartTime.value = null;
         mixingElapsed.value = 0;
         mixingReady.value = false;
 
         jobCardSubmitted.value = true;
-        debugger;
         preparedQty.value = result.message.job_card_qty;
         stockEntryName.value = result.message.stock_entry;
         bomQty.value = result.message.bom_qty || 0;
@@ -523,10 +518,8 @@ const getDisplayQty = computed(() => {
 });
 
 const getCanTransfer = computed(() => {
-    debugger;
     const display = getDisplayQty.value;
     const bom = parseFloat(bomQty.value.toFixed(2));
-    debugger;
     return display >= bom && !isDistributionBusy.value;
 });
 
@@ -574,7 +567,9 @@ async function fetchQueue() {
     try {
         const r = await frappe.call({
             method: 'erpnext.manufacturing.doctype.operation.api.get_open_job_cards',
-            args: { process: "Mixing" }
+            args: {
+                process: "Mixing"
+            }
         });
         jobcardsQueue.value = r.message || [];
     } catch (e) {
