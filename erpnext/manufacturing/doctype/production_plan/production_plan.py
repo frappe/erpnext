@@ -910,7 +910,7 @@ class ProductionPlan(Document):
 
 		frappe.enqueue(
 			self.create_all_work_orders_and_job_cards_for_production_plan,
-			queue="long",
+			queue="short",
 			user=frappe.session.user if frappe.session else None,
 		)
 
