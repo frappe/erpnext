@@ -546,7 +546,7 @@ async function selectSlab(slab) {
 							style="border-radius:20px; font-size: 0.9rem; width: fit-content; display: table; border: 1px solid var(--alert-text-danger)">
 							<span class="fa fa-info-circle mr-1"></span>
 							<span>
-								{{ __('{0} pending in queue', [availableSlabsCount || availableJobCardsCount]) }}
+								{{ __('{0} more pending in the queue', [availableSlabsCount || availableJobCardsCount]) }}
 							</span>
 						</div>
 						<h3 class="job-serial text-center font-weight-bold mb-2 p-3">
