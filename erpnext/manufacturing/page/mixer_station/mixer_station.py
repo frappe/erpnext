@@ -1,4 +1,5 @@
 import frappe
+import re
 import json
 from frappe import _
 from frappe import qb
@@ -323,6 +324,8 @@ def get_next_process_bom_qty(mixing_work_order):
 		"Polishing": "Quality Check",
 	}
 	next_process = process_mapping.get(current_process)
+	bom_doc = frappe.get_doc("BOM", mixing_wo.bom_no)
+	slab_template = re.sub(r"00", "CM", bom_doc.slab_template)
 
 	next_wo = frappe.db.get_value(
 		"Work Order",
@@ -330,6 +333,7 @@ def get_next_process_bom_qty(mixing_work_order):
 			"production_plan": mixing_wo.production_plan,
 			"description": ["like", f"%{next_process}%"],
 			"docstatus": ["<", 2],
+			"production_item": ["like", f"%{slab_template}%"],
 		},
 		"name",
 	)
@@ -338,10 +342,10 @@ def get_next_process_bom_qty(mixing_work_order):
 		return {"bom_qty": 0}
 
 	next_wo_doc = frappe.get_doc("Work Order", next_wo)
-	bom_doc = frappe.get_doc("BOM", next_wo_doc.bom_no)
+	next_bom_doc = frappe.get_doc("BOM", next_wo_doc.bom_no)
 	fg_item = mixing_wo.production_item
 
-	for bom_item in bom_doc.items:
+	for bom_item in next_bom_doc.items:
 		if bom_item.item_code == fg_item:
 			return {
 				"bom_qty": flt(bom_item.stock_qty),
