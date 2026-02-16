@@ -910,7 +910,7 @@ class ProductionPlan(Document):
 
 		frappe.enqueue(
 			self.create_all_work_orders_and_job_cards_for_production_plan,
-			queue="short",
+			queue="long",
 			user=frappe.session.user if frappe.session else None,
 		)
 
@@ -961,13 +961,6 @@ class ProductionPlan(Document):
 			frappe.publish_realtime(
 				"production_plan_job_card_progress",
 				{"reload": True, "production_plan": self.name},
-				user=user,
-			)
-
-		if user:
-			frappe.publish_realtime(
-				"production_plan_work_order_progress",
-				{"progress": [total_items, total_items], "production_plan": self.name, "reload": True},
 				user=user,
 			)
 
