@@ -309,11 +309,10 @@ class GLEntry(Document):
 			validate_party_gle_currency(self.party_type, self.party, self.company, self.account_currency)
 
 	def set_amount_in_reporting_currency(self):
-
 		result = frappe.get_cached_value("Company", self.company, ["default_currency", "reporting_currency"])
 
 		if result is None:
-			frappe.throw(_("Company does not exist"), frappe.DoesNotExistError)
+			frappe.throw(_("Company {0} does not exist").format(self.company), frappe.DoesNotExistError)
 
 		default_currency, reporting_currency = result
 		transaction_date = self.transaction_date or self.posting_date

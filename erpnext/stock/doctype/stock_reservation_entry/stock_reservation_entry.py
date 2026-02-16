@@ -1629,11 +1629,14 @@ def create_stock_reservation_entries_for_so_items(
 					item.idx, frappe.bold(item.item_code)
 				)
 			)
+
 		result = frappe.get_cached_value(
 			"Item", item.item_code, ["is_stock_item", "has_serial_no", "has_batch_no"]
 		)
+
 		if result is None:
-			frappe.throw(_("Item does not exist"), frappe.DoesNotExistError)
+			frappe.throw(_("Item {0} does not exist").format(item.item_code), frappe.DoesNotExistError)
+
 		is_stock_item, has_serial_no, has_batch_no = result
 
 		# Skip if Non-Stock Item.

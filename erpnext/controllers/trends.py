@@ -85,8 +85,10 @@ def get_data(filters, conditions):
 	result = frappe.get_cached_value(
 		"Fiscal Year", filters.get("fiscal_year"), ["year_start_date", "year_end_date"]
 	)
+
 	if result is None:
 		frappe.throw(_("Fiscal Year does not exist"), frappe.DoesNotExistError)
+
 	year_start_date, year_end_date = result
 
 	if filters.get("group_by"):
@@ -314,8 +316,10 @@ def get_period_date_ranges(
 
 	if not year_start_date:
 		result = frappe.get_cached_value("Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"])
+
 		if result is None:
-			frappe.throw(_("Fiscal Year does not exist"), frappe.DoesNotExistError)
+			frappe.throw(_("Fiscal Year {0} does not exist").format(fiscal_year), frappe.DoesNotExistError)
+
 		year_start_date, year_end_date = result
 
 	increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(period)

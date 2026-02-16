@@ -91,19 +91,14 @@ class TransactionBase(StatusUpdater):
 		buying_doctypes = ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]
 
 		if self.doctype in buying_doctypes:
-			result=frappe.get_cached_value(
+			action, role_allowed_to_override = frappe.get_cached_value(
 				"Buying Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
 			)
-			if result is None:
-				frappe.throw(_("Buying Settings does not exist"), frappe.DoesNotExistError)
-			action, role_allowed_to_override = result
+
 		else:
-			result=frappe.get_cached_value(
+			action, role_allowed_to_override = frappe.get_cached_value(
 				"Selling Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
 			)
-			if result is None:
-				frappe.throw(_("Selling Settings does not exist"), frappe.DoesNotExistError)
-			action, role_allowed_to_override = result
 
 		stop_actions = []
 		for ref_dt, ref_dn_field, ref_link_field in ref_details:

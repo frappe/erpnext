@@ -58,7 +58,6 @@ def validate_columns(data):
 
 @frappe.whitelist()
 def validate_company(company):
-
 	parent_company, allow_account_creation_against_child_company = frappe.get_cached_value(
 		"Company", company, ["parent_company", "allow_account_creation_against_child_company"]
 	) or (None, None)

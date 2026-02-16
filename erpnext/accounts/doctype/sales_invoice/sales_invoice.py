@@ -294,8 +294,10 @@ class SalesInvoice(SellingController):
 			result = frappe.get_cached_value(
 				"Customer", self.customer, ["tax_withholding_category", "tax_withholding_group"]
 			)
+
 			if result is None:
-				frappe.throw(_("Customer does not exist"), frappe.DoesNotExistError)
+				frappe.throw(_("Customer {0} does not exist").format(self.customer), frappe.DoesNotExistError)
+
 			tax_withholding_category, tax_withholding_group = result
 			self.set_onload("apply_tds", tax_withholding_category or tax_withholding_group)
 

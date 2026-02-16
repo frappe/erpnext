@@ -201,11 +201,10 @@ def process_gl_map(gl_map, merge_entries=True, precision=None, from_repost=False
 
 
 def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_repost=False):
-
 	result = frappe.get_cached_value("Company", gl_map[0].company, ["round_off_account", "default_currency"])
 
 	if result is None:
-		frappe.throw(_("Company does not exist"), frappe.DoesNotExistError)
+		frappe.throw(_("Company {0} does not exist").format(gl_map[0].company), frappe.DoesNotExistError)
 
 	round_off_account, default_currency = result
 	if not precision:

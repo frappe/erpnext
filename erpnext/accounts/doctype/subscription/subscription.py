@@ -414,11 +414,14 @@ class Subscription(Document):
 			invoice.customer = self.party
 		else:
 			invoice.supplier = self.party
-			result=frappe.get_cached_value(
+
+			result = frappe.get_cached_value(
 				"Supplier", self.party, ["tax_withholding_category", "tax_withholding_group"]
 			)
+
 			if result is None:
-				frappe.throw(_("Supplier does not exist"), frappe.DoesNotExistError)
+				frappe.throw(_("Supplier {0} does not exist").format(self.party), frappe.DoesNotExistError)
+
 			tax_withholding_category, tax_withholding_group = result
 			if tax_withholding_category or tax_withholding_group:
 				invoice.apply_tds = 1

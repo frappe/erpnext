@@ -236,11 +236,17 @@ class Account(NestedSet):
 			if not descendants:
 				return
 			parent_acc_name_map = {}
+
 			result = frappe.get_cached_value(
 				"Account", self.parent_account, ["account_name", "account_number"]
 			)
+
 			if result is None:
-				frappe.throw(_("Parent Account does not exist"), frappe.DoesNotExistError)
+				frappe.throw(
+					_("Parent Account {0} does not exist").format(self.parent_account),
+					frappe.DoesNotExistError,
+				)
+
 			parent_acc_name, parent_acc_number = result
 			filters = {
 				"company": ["in", descendants],

@@ -628,7 +628,7 @@ def get_account_details(
 	result = frappe.get_cached_value("Account", account, ["account_currency", "account_type"])
 
 	if result is None:
-		frappe.throw(_("Account does not exist"), frappe.DoesNotExistError)
+		frappe.throw(_("Account {0} does not exist").format(account), frappe.DoesNotExistError)
 
 	account_currency, account_type = result
 

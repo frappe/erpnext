@@ -1255,7 +1255,7 @@ def make_journal_entry(asset_name: str):
 	)
 
 	if result is None:
-		frappe.throw(_("Asset company does not exist"), frappe.DoesNotExistError)
+		frappe.throw(_("Company {0} does not exist").format(asset.company), frappe.DoesNotExistError)
 
 	depreciation_cost_center, depreciation_series = result
 	depreciation_cost_center = asset.cost_center or depreciation_cost_center

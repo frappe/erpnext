@@ -2433,7 +2433,6 @@ def make_stock_entry(
 
 @frappe.whitelist()
 def get_default_warehouse(company):
-
 	wip, fg, scrap = frappe.get_cached_value(
 		"Company", company, ["default_wip_warehouse", "default_fg_warehouse", "default_scrap_warehouse"]
 	) or (None, None, None)
