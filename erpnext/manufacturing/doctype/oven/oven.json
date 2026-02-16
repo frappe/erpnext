@@ -44,6 +44,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Line",
+   "link_filters": "[[\"Production Line\",\"is_group\",\"=\",1]]",
    "options": "Production Line",
    "reqd": 1
   },
@@ -85,8 +86,8 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-07 16:19:57.345816",
- "modified_by": "Administrator",
+ "modified": "2026-02-13 16:54:29.558911",
+ "modified_by": "harry.p@gmail.com",
  "module": "Manufacturing",
  "name": "Oven",
  "naming_rule": "By fieldname",

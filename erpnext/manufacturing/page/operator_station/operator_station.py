@@ -1,3 +1,5 @@
+from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
+from erpnext.manufacturing.doctype.production_line.production_line import get_parent_line
 import frappe
 from frappe.utils import flt
 
@@ -67,7 +69,8 @@ def start_process(job_card, slab_name="", slab_template="", process_name="operat
 		)
 
 	else:
-		new_slab = create_slab(jc.production_line or "", slab_template or "", jc.name)
+		parent_line = get_parent_line(jc.production_line)
+		new_slab = create_slab(parent_line or "", slab_template or "", jc.name)
 		slab_name = new_slab.name
 		slab_template = new_slab.template
 
@@ -268,7 +271,8 @@ def get_next_work_item(process, line="", include_wip=True):
 	if isinstance(include_wip, str):
 		include_wip = include_wip.lower() == "true"
 
-	job_card_data = get_top_job_card_for_process(process, line, include_wip)
+	child_lines = get_all_child_lines(line)
+	job_card_data = get_top_job_card_for_process(process, child_lines if child_lines else line, include_wip)
 	job_card = job_card_data["top_job_card"]
 	available_job_cards_count = job_card_data["available_job_cards_count"]
 
@@ -285,6 +289,11 @@ def get_next_work_item(process, line="", include_wip=True):
 
 
 def get_top_job_card_for_process(process, line="", include_wip=True):
+	if line and not isinstance(line, list):
+		child_lines = get_all_child_lines(line)
+		if child_lines:
+			line = child_lines
+
 	job_cards = get_open_job_cards(process, line, include_wip)
 	return {
 		"top_job_card": job_cards[0] if job_cards else None,
@@ -299,3 +308,14 @@ def update_slab_number_on_job_card(job_card_name, slab_name, slab_template):
 	jc.slab_template = slab_template
 	jc.save(ignore_permissions=True)
 	jc.reload()
+
+
+@frappe.whitelist()
+def get_job_card_for_slab(slab_name: str, process_name: str):
+	filters = {
+		"slab": slab_name,
+		"docstatus": 0,
+		"status": ["in", ["Material Transferred", "Work In Progress"]],
+		"operation": ["like", f"%{process_name}%"],
+	}
+	return frappe.db.get_value("Job Card", filters, "name")

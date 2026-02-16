@@ -23,6 +23,7 @@ const jobcardsQueue = ref([]);
 const productionLine = ref(null);
 const pollingInterval = ref(null);
 const isDistributionBusy = ref(false);
+const displayQty = ref(0);
 
 // downstream alerts (dummy)
 const alerts = ref([
@@ -117,6 +118,7 @@ onMounted(async () => {
     mixingStarted.value = !!s.mixer_started;
     mixingStartTime.value = s.mixer_start_time;
     selectedMixer.value = s.mixer_number || '';
+    displayQty.value = s.display_qty;
 
     jobCardSubmitted.value = !!s.job_card_submitted || false;
     if (jobCardSubmitted.value) {
@@ -195,7 +197,8 @@ onMounted(async () => {
             preparedQty.value = jc.total_completed_qty || jc.for_quantity || s.prepared_qty || 0;
             stockEntryName.value = s.stock_entry_name || '';
             transferredQty.value = s.transferred_qty_to_next || 0;
-            transferSuccess.value = (preparedQty.value - transferredQty.value) <= 0.001;
+            // transferSuccess.value = (preparedQty.value - transferredQty.value) <= 0.001;
+            transferSuccess.value = displayQty.value <= 0.001;
             await loadBomQty();
         }
     }
@@ -292,7 +295,6 @@ async function startMixing() {
                 mixingTimerHandle.value = setInterval(() => {
                     mixingElapsed.value += 1;
                 }, 1000);
-                frappe.msgprint(__('Mixing started'));
             }
             catch (e) {
                 frappe.msgprint(__('Failed to start Job Card: {0}', [e.message || e]));
@@ -312,7 +314,6 @@ async function finishAndDischarge() {
     try {
         const jc = await frappe.db.get_doc('Job Card', jobCard.value);
         const completed_qty = jc.for_quantity || 0;
-
         const result = await frappe.call({
             method: 'erpnext.manufacturing.page.mixer_station.mixer_station.finish_mixing',
             args: {
@@ -332,8 +333,9 @@ async function finishAndDischarge() {
         stockEntryName.value = result.message.stock_entry;
         bomQty.value = result.message.bom_qty || 0;
         nextWorkOrder.value = result.message.next_work_order || '';
-        transferredQty.value = 0;
-        transferSuccess.value = false;
+        // transferredQty.value = 0;
+        displayQty.value = result.message.display_qty;
+        transferSuccess.value = result.message.transfer_complete;
 
         frappe.msgprint(result.message.message);
         if (result.message.work_order_status === 'Completed') {
@@ -488,6 +490,7 @@ async function transferToFGWarehouse() {
         });
         preparedQty.value = refreshedState.message.prepared_qty;
         transferredQty.value = refreshedState.message.transferred_qty_to_next;
+        displayQty.value = refreshedState.message.display_qty;
         transferSuccess.value = refreshedState.message.transfer_complete;
 
         // if (getDisplayQty.value <= 0) {
@@ -511,13 +514,14 @@ async function transferToFGWarehouse() {
 }
 
 const getDisplayQty = computed(() => {
-    return parseFloat((preparedQty.value - transferredQty.value).toFixed(3));
+    // return parseFloat((preparedQty.value - transferredQty.value).toFixed(3));
+    return Number(displayQty.value || 0);
 });
 
 const getCanTransfer = computed(() => {
     const display = getDisplayQty.value;
     const bom = parseFloat(bomQty.value.toFixed(2));
-    return display >= bom && !transferSuccess.value && !isDistributionBusy.value;
+    return display >= bom && !isDistributionBusy.value;
 });
 
 async function loadBomQty() {
@@ -564,7 +568,9 @@ async function fetchQueue() {
     try {
         const r = await frappe.call({
             method: 'erpnext.manufacturing.doctype.operation.api.get_open_job_cards',
-            args: { process: "Mixing" }
+            args: {
+                process: "Mixing"
+            }
         });
         jobcardsQueue.value = r.message || [];
     } catch (e) {
@@ -825,7 +831,7 @@ function selectJobCard(name) {
             </div> <!-- /main wrapper -->
 
             <!-- Right: Downstream Alerts -->
-            <div class="p-4 border-left" style="width:300px; overflow-y: auto;">
+            <!-- <div class="p-4 border-left" style="width:300px; overflow-y: auto;">
                 <div class="mb-2 d-flex align-items-center">
                     <div>
                         <div class="d-flex align-items-center">
@@ -869,7 +875,7 @@ function selectJobCard(name) {
                         </button>
                     </div>
                 </div>
-            </div> <!-- /right column -->
+            </div> --> <!-- /right column -->
 
         </div> <!-- /Main Content Wrapper -->
     </div> <!-- /root -->
