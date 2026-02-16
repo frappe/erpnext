@@ -680,6 +680,7 @@ default_log_clearing_doctypes = {
 export_python_type_annotations = True
 
 fields_for_group_similar_items = ["qty", "amount"]
+require_type_annotated_api_methods = True
 
 # Translation
 # ------------
