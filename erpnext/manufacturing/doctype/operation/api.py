@@ -182,7 +182,10 @@ def get_open_job_cards(process, line=None, include_wip=True, include_material_tr
 		}
 
 	if line:
-		filters["production_line"] = line
+		if isinstance(line, list):
+			filters["production_line"] = ["in", line]
+		else:
+			filters["production_line"] = line
 
 	job_cards = frappe.get_all(
 		"Job Card",
