@@ -693,8 +693,8 @@ class ProductionPlan(Document):
 				self.status = "Completed"
 
 		if self.status != "Completed":
-			self.update_ordered_status()
 			self.update_requested_status()
+			self.update_ordered_status()
 
 		if close is not None:
 			self.db_set("status", self.status)
@@ -704,11 +704,12 @@ class ProductionPlan(Document):
 
 	def update_ordered_status(self):
 		update_status = False
-		for d in self.po_items:
-			if d.planned_qty == d.ordered_qty:
-				update_status = True
+		for table_name in ["po_items", "sub_assembly_items"]:
+			for d in self.get(table_name):
+				if d.ordered_qty and d.ordered_qty > 0:
+					update_status = True
 
-		if update_status and self.status != "Completed":
+		if update_status:
 			self.status = "In Process"
 
 	def update_requested_status(self):
