@@ -26,6 +26,8 @@ const batchNo = ref(null);
 const mixerNumber = ref(null);
 const slabsQueue = ref([]);
 const isTrimming = ref(false);
+const availableSlabsCount = ref(0);
+const availableJobCardsCount = ref(0);
 
 const alarms = ref([
 	{
@@ -203,6 +205,11 @@ const getNextWorkItem = async (station, play_alert = false) => {
 
 			await loadJobCard(res_job_card.name);
 		}
+
+		const slabs = result.message.available_slabs_count;
+		const cards = result.message.available_job_cards_count;
+		availableSlabsCount.value = (slabs && slabs > 0) ? (slabs - 1) : 0;
+		availableJobCardsCount.value = (cards && cards > 0) ? (cards - 1) : 0;
 	}
 };
 
@@ -521,7 +528,7 @@ async function selectSlab(slab) {
 				<!-- Current Job Card -->
 				<Transition name="pop-switch" mode="out-in">
 					<div v-if="jobCardName || slabNumber" key="job-card"
-						class="current-job-card mb-4 border border-dark w-50 rounded p-4" style="min-width: 650px;">
+						class="current-job-card active-job-card mb-4 w-50 rounded p-4" style="min-width: 650px;">
 						<div class="status text-center mb-2" style="font-size:1rem">
 							<span class="badge badge-pill" :style="statusStyle()">
 								{{ __(status) }}
@@ -532,6 +539,16 @@ async function selectSlab(slab) {
 						<h2 class="job-serial text-center font-weight-bold mb-0 p-3">
 							{{ slabNumber || batchNo }}
 						</h2>
+
+						<!-- Add here -->
+						<div v-if="availableJobCardsCount > 0 || availableSlabsCount > 0"
+							class="alert alert-danger text-center mb-2 py-1 px-3 mx-auto"
+							style="border-radius:20px; font-size: 0.9rem; width: fit-content; display: table; border: 1px solid var(--alert-text-danger)">
+							<span class="fa fa-info-circle mr-1"></span>
+							<span>
+								{{ __('{0} pending in queue', [availableSlabsCount || availableJobCardsCount]) }}
+							</span>
+						</div>
 						<h3 class="job-serial text-center font-weight-bold mb-2 p-3">
 							{{ jobCardName }}
 						</h3>
@@ -539,8 +556,8 @@ async function selectSlab(slab) {
 						<!-- <div class="text-center text-muted small mb-1">{{ __('Colour') }}</div> -->
 						<div class="d-flex justify-content-center align-items-center mb-3">
 							<span class="job-color bold mr-2" style="font-size:1rem">{{ colour || slabTemplate }}</span>
-							<span class="color-swatch"
-								style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span>
+							<!-- <span class="color-swatch"
+								style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span> -->
 						</div>
 
 						<div v-if="mixerNumber" class="text-center font-weight-bold mb-2 text-muted"
@@ -704,5 +721,18 @@ async function selectSlab(slab) {
 .pop-switch-leave-to {
 	opacity: 0;
 	transform: scale(0.9);
+}
+
+.active-job-card {
+	background-color: #fafbfc;
+	border: 1px solid var(--border-color);
+	box-shadow: var(--shadow-base);
+	transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .active-job-card {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+	border-color: var(--border-color);
+	background-color: #242629;
 }
 </style>
