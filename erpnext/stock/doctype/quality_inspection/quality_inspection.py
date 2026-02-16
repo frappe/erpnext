@@ -362,7 +362,7 @@ class QualityInspection(Document):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_query(doctype, txt, searchfield, start, page_len, filters):
+def item_query(doctype: str, txt: str, searchfield: str, start: str, page_len: str, filters: dict):
 	from frappe.desk.reportview import get_match_cond
 
 	from_doctype = cstr(filters.get("from"))
@@ -418,7 +418,9 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def quality_inspection_query(doctype, txt, searchfield, start, page_len, filters):
+def quality_inspection_query(
+	doctype: str, txt: str, searchfield: str, start: str, page_len: str, filters: dict
+):
 	return frappe.get_all(
 		"Quality Inspection",
 		limit_start=start,
@@ -435,7 +437,7 @@ def quality_inspection_query(doctype, txt, searchfield, start, page_len, filters
 
 
 @frappe.whitelist()
-def make_quality_inspection(source_name, target_doc=None):
+def make_quality_inspection(source_name: str, target_doc: str | Document | None = None):
 	def postprocess(source, doc):
 		doc.inspected_by = frappe.session.user
 		doc.get_quality_inspection_template()
@@ -457,7 +459,7 @@ def make_quality_inspection(source_name, target_doc=None):
 	return doc
 
 
-def parse_float(num: str) -> float:
+def parse_float(num: str | None) -> float:
 	"""Since reading_# fields are `Data` field they might contain number which
 	is representation in user's prefered number format instead of machine
 	readable format. This function converts them to machine readable format."""

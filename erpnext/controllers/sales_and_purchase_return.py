@@ -1,6 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
 from collections import defaultdict
 
 import frappe
@@ -1269,20 +1268,20 @@ def get_available_serial_nos(serial_nos, warehouse):
 
 
 @frappe.whitelist()
-def get_payment_data(invoice):
+def get_payment_data(invoice: str):
 	payment = frappe.db.get_all("Sales Invoice Payment", {"parent": invoice}, ["mode_of_payment", "amount"])
 	return payment
 
 
 @frappe.whitelist()
-def get_invoice_item_returned_qty(doctype, invoice, customer, item_row_name):
+def get_invoice_item_returned_qty(doctype: str, invoice: str, customer: str, item_row_name: str):
 	is_return, docstatus = frappe.db.get_value(doctype, invoice, ["is_return", "docstatus"])
 	if not is_return and docstatus == 1:
 		return get_returned_qty_map_for_row(invoice, customer, item_row_name, doctype)
 
 
 @frappe.whitelist()
-def is_invoice_returnable(doctype, invoice):
+def is_invoice_returnable(doctype: str, invoice: str):
 	is_return, docstatus, customer = frappe.db.get_value(
 		doctype, invoice, ["is_return", "docstatus", "customer"]
 	)

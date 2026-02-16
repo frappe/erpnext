@@ -9,7 +9,7 @@ import frappe
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def query_task(doctype, txt, searchfield, start, page_len, filters):
+def query_task(doctype: str, txt: str, searchfield: str, start: str, page_len: str, filters: dict):
 	from frappe.desk.reportview import build_match_conditions
 
 	search_string = "%%%s%%" % txt

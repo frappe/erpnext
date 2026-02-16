@@ -1,7 +1,7 @@
+import datetime
+
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-
 import json
 from collections import defaultdict
 
@@ -3113,12 +3113,14 @@ class AccountsController(TransactionBase):
 
 
 @frappe.whitelist()
-def get_tax_rate(account_head):
+def get_tax_rate(account_head: str):
 	return frappe.get_cached_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
 
 
 @frappe.whitelist()
-def get_default_taxes_and_charges(master_doctype, tax_template=None, company=None):
+def get_default_taxes_and_charges(
+	master_doctype: str, tax_template: str | None = None, company: str | None = None
+):
 	if not company:
 		return {}
 
@@ -3136,7 +3138,7 @@ def get_default_taxes_and_charges(master_doctype, tax_template=None, company=Non
 
 
 @frappe.whitelist()
-def get_taxes_and_charges(master_doctype, master_name):
+def get_taxes_and_charges(master_doctype: str, master_name: str):
 	if not master_name:
 		return
 	from frappe.model import child_table_fields, default_fields
@@ -3548,7 +3550,11 @@ def update_invoice_status():
 
 @frappe.whitelist()
 def get_payment_terms(
-	terms_template, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None
+	terms_template: str,
+	posting_date: str | None = None,
+	grand_total: str | None = None,
+	base_grand_total: str | None = None,
+	bill_date: str | None = None,
 ):
 	if not terms_template:
 		return
@@ -3565,7 +3571,11 @@ def get_payment_terms(
 
 @frappe.whitelist()
 def get_payment_term_details(
-	term, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None
+	term: str,
+	posting_date: str | datetime.date | None = None,
+	grand_total: str | None = None,
+	base_grand_total: str | None = None,
+	bill_date: str | datetime.date | None = None,
 ):
 	term_details = frappe._dict()
 	if isinstance(term, str):
@@ -3820,7 +3830,9 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 
 
 @frappe.whitelist()
-def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
+def update_child_qty_rate(
+	parent_doctype: str, trans_items: str, parent_doctype_name: str, child_docname: str = "items"
+):
 	from erpnext.buying.doctype.supplier_quotation.supplier_quotation import get_purchased_items
 	from erpnext.selling.doctype.quotation.quotation import get_ordered_items
 
@@ -4292,7 +4304,7 @@ def update_gl_dict_with_app_based_fields(doc, gl_dict):
 
 
 @frappe.whitelist()
-def get_missing_company_details(doctype, docname):
+def get_missing_company_details(doctype: str, docname: str):
 	from frappe.contacts.doctype.address.address import get_address_display_list
 
 	company = frappe.db.get_value(doctype, docname, "company")
@@ -4348,7 +4360,7 @@ def get_missing_company_details(doctype, docname):
 
 
 @frappe.whitelist()
-def update_company_master_and_address(current_doctype, name, company, details):
+def update_company_master_and_address(current_doctype: str, name: str, company: str, details: str):
 	from frappe.utils import validate_email_address
 
 	if isinstance(details, str):

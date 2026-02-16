@@ -2,7 +2,7 @@ import frappe
 
 
 @frappe.whitelist()
-def get_last_interaction(contact=None, lead=None):
+def get_last_interaction(contact: str | None = None, lead: str | None = None):
 	if not contact and not lead:
 		return
 

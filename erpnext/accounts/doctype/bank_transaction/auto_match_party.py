@@ -167,7 +167,7 @@ class AutoMatchbyPartyNameDescription:
 			return None, False
 
 
-def get_parties_in_order(deposit: float) -> list:
+def get_parties_in_order(deposit: float | None) -> list:
 	return (
 		["Customer", "Supplier", "Employee"]  # most -> least likely to pay us
 		if flt(deposit) > 0

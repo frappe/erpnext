@@ -1,6 +1,7 @@
+import datetime
+
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
 from itertools import groupby
 
 import frappe
@@ -19,7 +20,7 @@ def validate_filters(from_date, to_date, company):
 
 
 @frappe.whitelist()
-def get_funnel_data(from_date, to_date, company):
+def get_funnel_data(from_date: str | datetime.date, to_date: str | datetime.date, company: str):
 	validate_filters(from_date, to_date, company)
 
 	active_leads = frappe.db.sql(
@@ -60,17 +61,17 @@ def get_funnel_data(from_date, to_date, company):
 
 
 @frappe.whitelist()
-def get_opp_by_utm_source(from_date, to_date, company):
+def get_opp_by_utm_source(from_date: str, to_date: str, company: str):
 	return get_opp_by("utm_source", from_date, to_date, company)
 
 
 @frappe.whitelist()
-def get_opp_by_utm_campaign(from_date, to_date, company):
+def get_opp_by_utm_campaign(from_date: str, to_date: str, company: str):
 	return get_opp_by("utm_campaign", from_date, to_date, company)
 
 
 @frappe.whitelist()
-def get_opp_by_utm_medium(from_date, to_date, company):
+def get_opp_by_utm_medium(from_date: str, to_date: str, company: str):
 	return get_opp_by("utm_medium", from_date, to_date, company)
 
 
@@ -128,7 +129,7 @@ def get_opp_by(by_field, from_date, to_date, company):
 
 
 @frappe.whitelist()
-def get_pipeline_data(from_date, to_date, company):
+def get_pipeline_data(from_date: str | datetime.date, to_date: str | datetime.date, company: str):
 	validate_filters(from_date, to_date, company)
 
 	opportunities = frappe.get_all(

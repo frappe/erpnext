@@ -1,12 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-
 import json
 
 import frappe
 from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Abs, CombineDatetime, Sum
 from frappe.utils import cint, flt, get_datetime, getdate, nowdate
@@ -1401,7 +1400,9 @@ def get_item_wise_returned_qty(pr_doc):
 
 
 @frappe.whitelist()
-def make_purchase_invoice(source_name, target_doc=None, args=None):
+def make_purchase_invoice(
+	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+):
 	if args is None:
 		args = {}
 	if isinstance(args, str):
@@ -1554,27 +1555,27 @@ def get_returned_qty_map(purchase_receipt):
 
 
 @frappe.whitelist()
-def make_purchase_return_against_rejected_warehouse(source_name):
+def make_purchase_return_against_rejected_warehouse(source_name: str):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Purchase Receipt", source_name, return_against_rejected_qty=True)
 
 
 @frappe.whitelist()
-def make_purchase_return(source_name, target_doc=None):
+def make_purchase_return(source_name: str, target_doc: str | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Purchase Receipt", source_name, target_doc)
 
 
 @frappe.whitelist()
-def update_purchase_receipt_status(docname, status):
+def update_purchase_receipt_status(docname: str, status: str):
 	pr = frappe.get_lazy_doc("Purchase Receipt", docname)
 	pr.update_status(status)
 
 
 @frappe.whitelist()
-def make_stock_entry(source_name, target_doc=None):
+def make_stock_entry(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		target.stock_entry_type = "Material Transfer"
 		target.purpose = "Material Transfer"
@@ -1634,7 +1635,7 @@ def make_stock_entry(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_inter_company_delivery_note(source_name, target_doc=None):
+def make_inter_company_delivery_note(source_name: str, target_doc: str | Document | None = None):
 	return make_inter_company_transaction("Purchase Receipt", source_name, target_doc)
 
 
@@ -1644,7 +1645,7 @@ def update_regional_gl_entries(gl_list, doc):
 
 
 @frappe.whitelist()
-def make_lcv(doctype, docname):
+def make_lcv(doctype: str, docname: str):
 	landed_cost_voucher = frappe.new_doc("Landed Cost Voucher")
 
 	details = frappe.db.get_value(doctype, docname, ["supplier", "company", "base_grand_total"], as_dict=1)

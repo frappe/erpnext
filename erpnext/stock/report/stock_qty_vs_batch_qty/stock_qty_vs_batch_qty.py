@@ -100,7 +100,7 @@ def get_data(filters=None):
 
 
 @frappe.whitelist()
-def update_batch_qty(selected_batches=None):
+def update_batch_qty(selected_batches: str | None = None):
 	if not selected_batches:
 		return
 

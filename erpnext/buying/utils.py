@@ -117,7 +117,7 @@ def check_on_hold_or_closed_status(doctype, docname) -> None:
 
 
 @frappe.whitelist()
-def get_linked_material_requests(items):
+def get_linked_material_requests(items: str):
 	items = json.loads(items)
 	mr_list = []
 	for item in items:

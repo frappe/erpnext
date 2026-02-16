@@ -614,7 +614,12 @@ def calculate_exchange_rate_using_last_gle(company, account, party_type, party):
 
 @frappe.whitelist()
 def get_account_details(
-	company, posting_date, account, party_type=None, party=None, rounding_loss_allowance: float | None = None
+	company: str,
+	posting_date: str,
+	account: str,
+	party_type: str | None = None,
+	party: str | None = None,
+	rounding_loss_allowance: float | None = None,
 ):
 	if not (company and posting_date):
 		frappe.throw(_("Company and Posting Date is mandatory"))

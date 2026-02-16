@@ -1891,7 +1891,7 @@ class StockController(AccountsController):
 
 
 @frappe.whitelist()
-def show_accounting_ledger_preview(company, doctype, docname):
+def show_accounting_ledger_preview(company: str, doctype: str, docname: str):
 	filters = frappe._dict(company=company, include_dimensions=1)
 	doc = frappe.get_lazy_doc(doctype, docname)
 	doc.run_method("before_gl_preview")
@@ -1904,7 +1904,7 @@ def show_accounting_ledger_preview(company, doctype, docname):
 
 
 @frappe.whitelist()
-def show_stock_ledger_preview(company, doctype, docname):
+def show_stock_ledger_preview(company: str, doctype: str, docname: str):
 	filters = frappe._dict(company=company)
 	doc = frappe.get_lazy_doc(doctype, docname)
 	doc.run_method("before_sl_preview")
@@ -2065,7 +2065,7 @@ def repost_required_for_queue(doc: StockController) -> bool:
 
 
 @frappe.whitelist()
-def check_item_quality_inspection(doctype, items):
+def check_item_quality_inspection(doctype: str, items: str):
 	if isinstance(items, str):
 		items = json.loads(items)
 
@@ -2087,7 +2087,7 @@ def check_item_quality_inspection(doctype, items):
 
 
 @frappe.whitelist()
-def make_quality_inspections(doctype, docname, items, inspection_type):
+def make_quality_inspections(doctype: str, docname: str, items: str, inspection_type: str):
 	if isinstance(items, str):
 		items = json.loads(items)
 

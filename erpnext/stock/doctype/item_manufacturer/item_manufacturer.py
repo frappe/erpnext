@@ -86,7 +86,7 @@ class ItemManufacturer(Document):
 
 
 @frappe.whitelist()
-def get_item_manufacturer_part_no(item_code, manufacturer):
+def get_item_manufacturer_part_no(item_code: str, manufacturer: str):
 	return frappe.db.get_value(
 		"Item Manufacturer",
 		{"item_code": item_code, "manufacturer": manufacturer},

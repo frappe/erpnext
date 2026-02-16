@@ -90,7 +90,7 @@ class PutawayRule(Document):
 
 
 @frappe.whitelist()
-def get_available_putaway_capacity(rule):
+def get_available_putaway_capacity(rule: str):
 	stock_capacity, item_code, warehouse = frappe.db.get_value(
 		"Putaway Rule", rule, ["stock_capacity", "item_code", "warehouse"]
 	)
@@ -100,7 +100,9 @@ def get_available_putaway_capacity(rule):
 
 
 @frappe.whitelist()
-def apply_putaway_rule(doctype, items, company, sync=None, purpose=None):
+def apply_putaway_rule(
+	doctype: str, items: str, company: str, sync: str | None = None, purpose: str | None = None
+):
 	"""Applies Putaway Rule on line items.
 
 	items: List of Purchase Receipt/Stock Entry Items

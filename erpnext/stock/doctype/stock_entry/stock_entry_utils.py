@@ -36,7 +36,7 @@ def make_stock_entry(
 
 
 @frappe.whitelist()
-def make_stock_entry(**args):
+def make_stock_entry(**args: dict):
 	"""Helper function to make a Stock Entry
 
 	:item_code: Item to be moved

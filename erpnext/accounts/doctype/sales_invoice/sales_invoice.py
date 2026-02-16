@@ -1,11 +1,10 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-
 import frappe
 import frappe.utils
 from frappe import _, msgprint, throw
 from frappe.contacts.doctype.address.address import get_address_display
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder import Case
@@ -741,7 +740,7 @@ class SalesInvoice(SellingController):
 				pos_invoice_doc.cancel()
 
 	@frappe.whitelist()
-	def set_missing_values(self, for_validate=False):
+	def set_missing_values(self, for_validate: bool = False):
 		pos = self.set_pos_fields(for_validate)
 
 		if not self.debit_to:
@@ -2409,7 +2408,7 @@ def get_list_context(context=None):
 
 
 @frappe.whitelist()
-def get_bank_cash_account(mode_of_payment, company):
+def get_bank_cash_account(mode_of_payment: str, company: str):
 	account = frappe.db.get_value(
 		"Mode of Payment Account", {"parent": mode_of_payment, "company": company}, "default_account"
 	)
@@ -2424,7 +2423,7 @@ def get_bank_cash_account(mode_of_payment, company):
 
 
 @frappe.whitelist()
-def make_maintenance_schedule(source_name, target_doc=None):
+def make_maintenance_schedule(source_name: str, target_doc: str | Document | None = None):
 	doclist = get_mapped_doc(
 		"Sales Invoice",
 		source_name,
@@ -2441,7 +2440,7 @@ def make_maintenance_schedule(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_delivery_note(source_name, target_doc=None):
+def make_delivery_note(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
@@ -2490,7 +2489,7 @@ def make_delivery_note(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_sales_return(source_name, target_doc=None):
+def make_sales_return(source_name: str, target_doc: str | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Sales Invoice", source_name, target_doc)
@@ -2584,7 +2583,7 @@ def validate_inter_company_transaction(doc, doctype):
 
 
 @frappe.whitelist()
-def make_inter_company_purchase_invoice(source_name, target_doc=None):
+def make_inter_company_purchase_invoice(source_name: str, target_doc: str | Document | None = None):
 	return make_inter_company_transaction("Sales Invoice", source_name, target_doc)
 
 
@@ -2962,7 +2961,7 @@ def update_address(doc, address_field, address_display_field, address_name):
 
 
 @frappe.whitelist()
-def get_loyalty_programs(customer):
+def get_loyalty_programs(customer: str):
 	"""sets applicable loyalty program to the customer or returns a list of applicable programs"""
 	from erpnext.selling.doctype.customer.customer import get_loyalty_programs
 
@@ -2980,7 +2979,7 @@ def get_loyalty_programs(customer):
 
 
 @frappe.whitelist()
-def create_invoice_discounting(source_name, target_doc=None):
+def create_invoice_discounting(source_name: str, target_doc: str | Document | None = None):
 	invoice = frappe.get_doc("Sales Invoice", source_name)
 	invoice_discounting = frappe.new_doc("Invoice Discounting")
 	invoice_discounting.company = invoice.company
@@ -3072,7 +3071,9 @@ def get_mode_of_payment_info(mode_of_payment, company):
 
 
 @frappe.whitelist()
-def create_dunning(source_name, target_doc=None, ignore_permissions=False):
+def create_dunning(
+	source_name: str, target_doc: str | Document | None = None, ignore_permissions: bool = False
+):
 	from frappe.model.mapper import get_mapped_doc
 
 	def postprocess_dunning(source, target):

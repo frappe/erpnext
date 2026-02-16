@@ -571,7 +571,7 @@ class StockReservationEntry(Document):
 			msg = _("Stock Reservation Entry cannot be updated as it has been delivered.")
 			frappe.throw(msg)
 
-	def validate_with_allowed_qty(self, qty_to_be_reserved: float) -> None:
+	def validate_with_allowed_qty(self, qty_to_be_reserved: float | None) -> None:
 		"""Validates `Reserved Qty` with `Max Reserved Qty`."""
 
 		self.db_set(

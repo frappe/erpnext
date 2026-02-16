@@ -306,7 +306,12 @@ def field_exists(doctype, fieldname) -> str or None:
 
 @frappe.whitelist()
 def get_inventory_documents(
-	doctype=None, txt=None, searchfield=None, start=None, page_len=None, filters=None
+	doctype: str | None = None,
+	txt: str | None = None,
+	searchfield: str | None = None,
+	start: str | None = None,
+	page_len: str | None = None,
+	filters: dict | None = None,
 ):
 	and_filters = [["DocField", "parent", "not in", ["Batch", "Serial No", "Item Price"]]]
 	or_filters = [
@@ -395,13 +400,13 @@ def get_inventory_dimensions():
 
 
 @frappe.whitelist()
-def delete_dimension(dimension):
+def delete_dimension(dimension: str):
 	doc = frappe.get_doc("Inventory Dimension", dimension)
 	doc.delete()
 
 
 @frappe.whitelist()
-def get_parent_fields(child_doctype, dimension_name):
+def get_parent_fields(child_doctype: str, dimension_name: str):
 	parent_doctypes = frappe.get_all("DocField", fields=["parent"], filters={"options": child_doctype})
 
 	fields = []

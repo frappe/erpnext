@@ -34,7 +34,7 @@ class ContractTemplate(Document):
 
 
 @frappe.whitelist()
-def get_contract_template(template_name, doc):
+def get_contract_template(template_name: str, doc: str | dict):
 	if isinstance(doc, str):
 		doc = json.loads(doc)
 

@@ -1,12 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-
 import json
 
 import frappe
 from frappe import _, msgprint
 from frappe.desk.notifications import clear_doctype_notifications
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, cstr, flt, get_link_to_form
 
@@ -674,7 +673,7 @@ def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=
 
 
 @frappe.whitelist()
-def close_or_unclose_purchase_orders(names, status):
+def close_or_unclose_purchase_orders(names: str, status: str):
 	if not frappe.has_permission("Purchase Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
@@ -702,7 +701,9 @@ def set_missing_values(source, target):
 
 
 @frappe.whitelist()
-def make_purchase_receipt(source_name, target_doc=None, args=None):
+def make_purchase_receipt(
+	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+):
 	if args is None:
 		args = {}
 	if isinstance(args, str):
@@ -766,12 +767,14 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 
 
 @frappe.whitelist()
-def make_purchase_invoice(source_name, target_doc=None, args=None):
+def make_purchase_invoice(
+	source_name: str, target_doc: str | Document | None = None, args: dict | None = None
+):
 	return get_mapped_purchase_invoice(source_name, target_doc, args=args)
 
 
 @frappe.whitelist()
-def make_purchase_invoice_from_portal(purchase_order_name):
+def make_purchase_invoice_from_portal(purchase_order_name: str):
 	doc = get_mapped_purchase_invoice(purchase_order_name, ignore_permissions=True)
 	if frappe.session.user not in frappe.get_all("Portal User", {"parent": doc.supplier}, pluck="user"):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
@@ -884,21 +887,27 @@ def get_list_context(context=None):
 
 
 @frappe.whitelist()
-def update_status(status, name):
+def update_status(status: str, name: str):
 	po = frappe.get_lazy_doc("Purchase Order", name)
 	po.update_status(status)
 	po.update_delivered_qty_in_sales_order()
 
 
 @frappe.whitelist()
-def make_inter_company_sales_order(source_name, target_doc=None):
+def make_inter_company_sales_order(source_name: str, target_doc: str | Document | None = None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 
 	return make_inter_company_transaction("Purchase Order", source_name, target_doc)
 
 
 @frappe.whitelist()
-def make_subcontracting_order(source_name, target_doc=None, save=False, submit=False, notify=False):
+def make_subcontracting_order(
+	source_name: str,
+	target_doc: str | Document | None = None,
+	save: bool = False,
+	submit: bool = False,
+	notify: bool = False,
+):
 	if not is_po_fully_subcontracted(source_name):
 		target_doc = get_mapped_subcontracting_order(source_name, target_doc)
 

@@ -1,9 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-
 import frappe
 from frappe import _, bold, json, msgprint
+from frappe.model.document import Document
 from frappe.utils import add_to_date, cint, cstr, flt, now
 
 import erpnext
@@ -1260,7 +1259,14 @@ def get_batch_qty_for_stock_reco(
 
 
 @frappe.whitelist()
-def get_items(warehouse, posting_date, posting_time, company, item_code=None, ignore_empty_stock=False):
+def get_items(
+	warehouse: str,
+	posting_date: str,
+	posting_time: str,
+	company: str,
+	item_code: str | None = None,
+	ignore_empty_stock: bool = False,
+):
 	ignore_empty_stock = cint(ignore_empty_stock)
 	items = []
 	if item_code and warehouse:
@@ -1426,13 +1432,13 @@ def get_itemwise_batch(warehouse, posting_date, company, item_code=None):
 def get_stock_balance_for(
 	item_code: str,
 	warehouse: str,
-	posting_date,
-	posting_time,
+	posting_date: str,
+	posting_time: str,
 	batch_no: str | None = None,
 	with_valuation_rate: bool = True,
-	inventory_dimensions_dict=None,
-	row=None,
-	company=None,
+	inventory_dimensions_dict: dict | None = None,
+	row: Document | None = None,
+	company: str | None = None,
 ):
 	frappe.has_permission("Stock Reconciliation", "write", throw=True)
 
@@ -1519,7 +1525,7 @@ def get_stock_balance_for(
 
 
 @frappe.whitelist()
-def get_difference_account(purpose, company):
+def get_difference_account(purpose: str, company: str):
 	if purpose == "Stock Reconciliation":
 		account = get_company_default(company, "stock_adjustment_account")
 	else:

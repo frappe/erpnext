@@ -116,7 +116,7 @@ class FiscalYear(Document):
 
 
 @frappe.whitelist()
-def check_duplicate_fiscal_year(doc):
+def check_duplicate_fiscal_year(doc: Document):
 	year_start_end_dates = frappe.db.sql(
 		"""select name, year_start_date, year_end_date from `tabFiscal Year` where name!=%s""",
 		(doc.name),

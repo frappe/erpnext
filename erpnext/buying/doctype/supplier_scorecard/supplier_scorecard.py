@@ -146,7 +146,7 @@ class SupplierScorecard(Document):
 
 
 @frappe.whitelist()
-def get_timeline_data(doctype, name):
+def get_timeline_data(doctype: str, name: str):
 	# Get a list of all the associated scorecards
 	scs = frappe.get_doc(doctype, name)
 	out = {}
@@ -198,7 +198,7 @@ def refresh_scorecards():
 
 
 @frappe.whitelist()
-def make_all_scorecards(docname):
+def make_all_scorecards(docname: str):
 	sc = frappe.get_doc("Supplier Scorecard", docname)
 	supplier = frappe.get_doc("Supplier", sc.supplier)
 

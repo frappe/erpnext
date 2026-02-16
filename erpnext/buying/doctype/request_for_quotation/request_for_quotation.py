@@ -1,13 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
-
-
 import json
 
 import frappe
 from frappe import _
 from frappe.core.doctype.communication.email import make
 from frappe.desk.form.load import get_attachments
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Order
 from frappe.utils import get_url
@@ -164,7 +163,7 @@ class RequestforQuotation(BuyingController):
 		self.db_set("status", "Cancelled")
 
 	@frappe.whitelist()
-	def get_supplier_email_preview(self, supplier):
+	def get_supplier_email_preview(self, supplier: str):
 		"""Returns formatted email preview as string."""
 		rfq_suppliers = list(filter(lambda row: row.supplier == supplier, self.suppliers))
 		rfq_supplier = rfq_suppliers[0]
@@ -385,7 +384,7 @@ class RequestforQuotation(BuyingController):
 
 
 @frappe.whitelist()
-def send_supplier_emails(rfq_name):
+def send_supplier_emails(rfq_name: str):
 	check_portal_enabled("Request for Quotation")
 	rfq = frappe.get_doc("Request for Quotation", rfq_name)
 	if rfq.docstatus == 1:
@@ -418,7 +417,9 @@ def get_list_context(context=None):
 
 
 @frappe.whitelist()
-def make_supplier_quotation_from_rfq(source_name, target_doc=None, for_supplier=None):
+def make_supplier_quotation_from_rfq(
+	source_name: str, target_doc: str | Document | None = None, for_supplier: str | None = None
+):
 	def postprocess(source, target_doc):
 		if for_supplier:
 			target_doc.supplier = for_supplier
@@ -458,7 +459,7 @@ def make_supplier_quotation_from_rfq(source_name, target_doc=None, for_supplier=
 
 # This method is used to make supplier quotation from supplier's portal.
 @frappe.whitelist()
-def create_supplier_quotation(doc):
+def create_supplier_quotation(doc: str):
 	if isinstance(doc, str):
 		doc = json.loads(doc)
 
@@ -548,7 +549,9 @@ def get_pdf(
 
 
 @frappe.whitelist()
-def get_item_from_material_requests_based_on_supplier(source_name, target_doc=None):
+def get_item_from_material_requests_based_on_supplier(
+	source_name: str, target_doc: str | Document | None = None
+):
 	mr_items_list = frappe.db.sql(
 		"""
 		SELECT
@@ -612,7 +615,9 @@ def get_supplier_tag():
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_rfq_containing_supplier(doctype, txt, searchfield, start, page_len, filters):
+def get_rfq_containing_supplier(
+	doctype: str, txt: str, searchfield: str, start: str, page_len: str, filters: dict
+):
 	rfq = frappe.qb.DocType("Request for Quotation")
 	rfq_supplier = frappe.qb.DocType("Request for Quotation Supplier")
 

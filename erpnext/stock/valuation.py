@@ -257,7 +257,7 @@ class LIFOValuation(BinWiseValuation):
 		return consumed_bins
 
 
-def round_off_if_near_zero(number: float, precision: int = 7) -> float:
+def round_off_if_near_zero(number: float | None, precision: int = 7) -> float:
 	"""Rounds off the number to zero only if number is close to zero for decimal
 	specified in precision. Precision defaults to 7.
 	"""

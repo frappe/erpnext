@@ -7,7 +7,7 @@ from frappe.utils import get_link_to_form, today
 
 
 @frappe.whitelist()
-def transaction_processing(data, from_doctype, to_doctype, args=None):
+def transaction_processing(data: str, from_doctype: str, to_doctype: str, args: str | dict | None = None):
 	frappe.has_permission(from_doctype, "read", throw=True)
 	frappe.has_permission(to_doctype, "create", throw=True)
 

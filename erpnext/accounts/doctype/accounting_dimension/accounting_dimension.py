@@ -210,7 +210,7 @@ def delete_accounting_dimension(doc):
 
 
 @frappe.whitelist()
-def disable_dimension(doc):
+def disable_dimension(doc: Document):
 	if frappe.in_test:
 		toggle_disabling(doc=doc)
 	else:
@@ -286,7 +286,7 @@ def get_dimension_with_children(doctype, dimensions):
 
 
 @frappe.whitelist()
-def get_dimensions(with_cost_center_and_project=False):
+def get_dimensions(with_cost_center_and_project: bool = False):
 	c = frappe.qb.DocType("Accounting Dimension Detail")
 	p = frappe.qb.DocType("Accounting Dimension")
 	dimension_filters = (

@@ -85,7 +85,7 @@ def get_columns():
 
 
 @frappe.whitelist()
-def irs_1099_print(filters):
+def irs_1099_print(filters: str | dict):
 	if not filters:
 		frappe._dict(
 			{

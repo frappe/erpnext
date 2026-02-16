@@ -1,7 +1,7 @@
+import datetime
+
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-
 from collections import OrderedDict, defaultdict
 
 import frappe
@@ -235,18 +235,18 @@ class Batch(Document):
 
 @frappe.whitelist()
 def get_batch_qty(
-	batch_no=None,
-	warehouse=None,
-	item_code=None,
-	creation=None,
-	posting_datetime=None,
-	posting_date=None,
-	posting_time=None,
-	ignore_voucher_nos=None,
-	for_stock_levels=False,
-	consider_negative_batches=False,
-	do_not_check_future_batches=False,
-	ignore_reserved_stock=False,
+	batch_no: str | None = None,
+	warehouse: str | None = None,
+	item_code: str | None = None,
+	creation: str | None = None,
+	posting_datetime: str | None = None,
+	posting_date: str | datetime.date | None = None,
+	posting_time: str | None = None,
+	ignore_voucher_nos: bool | None = None,
+	for_stock_levels: bool = False,
+	consider_negative_batches: bool = False,
+	do_not_check_future_batches: bool = False,
+	ignore_reserved_stock: bool = False,
 ):
 	"""Returns batch actual qty if warehouse is passed,
 	        or returns dict of qty by warehouse if warehouse is None
@@ -295,7 +295,7 @@ def get_batch_qty(
 
 
 @frappe.whitelist()
-def get_batches_by_oldest(item_code, warehouse):
+def get_batches_by_oldest(item_code: str, warehouse: str):
 	"""Returns the oldest batch and qty for the given item_code and warehouse"""
 	batches = get_batch_qty(item_code=item_code, warehouse=warehouse)
 	batches_dates = [[batch, frappe.get_value("Batch", batch.batch_no, "expiry_date")] for batch in batches]
@@ -304,7 +304,9 @@ def get_batches_by_oldest(item_code, warehouse):
 
 
 @frappe.whitelist()
-def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_batch_id: str | None = None):
+def split_batch(
+	batch_no: str, item_code: str, warehouse: str, qty: float | None, new_batch_id: str | None = None
+):
 	"""Split the batch into a new batch"""
 	batch = frappe.get_doc(doctype="Batch", item=item_code, batch_id=new_batch_id).insert()
 	qty = flt(qty)
@@ -447,7 +449,7 @@ def make_batch(kwargs):
 
 
 @frappe.whitelist()
-def get_pos_reserved_batch_qty(filters):
+def get_pos_reserved_batch_qty(filters: str | dict):
 	import json
 
 	if isinstance(filters, str):

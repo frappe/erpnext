@@ -710,7 +710,7 @@ def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 
 
 @frappe.whitelist()
-def get_warehouse_details(args):
+def get_warehouse_details(args: str | dict):
 	if isinstance(args, str):
 		args = json.loads(args)
 
@@ -727,7 +727,7 @@ def get_warehouse_details(args):
 
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
-def get_consumed_asset_details(ctx):
+def get_consumed_asset_details(ctx: ItemDetailsCtx):
 	out = frappe._dict()
 
 	asset_details = frappe._dict()
@@ -773,7 +773,7 @@ def get_consumed_asset_details(ctx):
 
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
-def get_service_item_details(ctx):
+def get_service_item_details(ctx: ItemDetailsCtx):
 	out = frappe._dict()
 
 	item = frappe._dict()
@@ -795,7 +795,7 @@ def get_service_item_details(ctx):
 
 
 @frappe.whitelist()
-def get_items_tagged_to_wip_composite_asset(params):
+def get_items_tagged_to_wip_composite_asset(params: str):
 	if isinstance(params, str):
 		params = json.loads(params)
 

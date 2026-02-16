@@ -448,14 +448,14 @@ class AssetRepair(AccountsController):
 
 
 @frappe.whitelist()
-def get_downtime(failure_date, completion_date):
+def get_downtime(failure_date: str, completion_date: str):
 	downtime = time_diff_in_hours(completion_date, failure_date)
 	return round(downtime, 2)
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_purchase_invoice(doctype, txt, searchfield, start, page_len, filters):
+def get_purchase_invoice(doctype: str, txt: str, searchfield: str, start: str, page_len: str, filters: dict):
 	"""
 	Get Purchase Invoices that have expense accounts for non-stock items.
 	Only returns invoices with at least one non-stock, non-fixed-asset item with an expense account.
@@ -490,7 +490,7 @@ def get_purchase_invoice(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_expense_accounts(doctype, txt, searchfield, start, page_len, filters):
+def get_expense_accounts(doctype: str, txt: str, searchfield: str, start: str, page_len: str, filters: dict):
 	"""
 	Get expense accounts for non-stock (service) items from the purchase invoice.
 	Used as a query function for link fields.

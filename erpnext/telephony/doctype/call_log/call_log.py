@@ -126,7 +126,7 @@ class CallLog(Document):
 
 
 @frappe.whitelist()
-def add_call_summary_and_call_type(call_log, summary, call_type):
+def add_call_summary_and_call_type(call_log: str, summary: str, call_type: str):
 	doc = frappe.get_doc("Call Log", call_log)
 	doc.type_of_call = call_type
 	doc.save()

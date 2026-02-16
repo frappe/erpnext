@@ -1612,7 +1612,7 @@ class SerialandBatchBundle(Document):
 		self.delink_reference_from_batch()
 
 	@frappe.whitelist()
-	def add_serial_batch(self, data):
+	def add_serial_batch(self, data: Document):
 		serial_nos, batch_nos = [], []
 		if isinstance(data, str):
 			data = parse_json(data)
@@ -1639,7 +1639,7 @@ class SerialandBatchBundle(Document):
 
 
 @frappe.whitelist()
-def download_blank_csv_template(content):
+def download_blank_csv_template(content: str):
 	csv_data = []
 	if isinstance(content, str):
 		content = parse_json(content)
@@ -1653,7 +1653,7 @@ def download_blank_csv_template(content):
 
 
 @frappe.whitelist()
-def upload_csv_file(item_code, file_path):
+def upload_csv_file(item_code: str, file_path: str):
 	serial_nos, batch_nos = [], []
 	serial_nos, batch_nos = get_serial_batch_from_csv(item_code, file_path)
 
@@ -1751,7 +1751,7 @@ def get_serial_batch_from_data(item_code, kwargs):
 
 
 @frappe.whitelist()
-def create_serial_nos(item_code, serial_nos):
+def create_serial_nos(item_code: str, serial_nos: str):
 	serial_nos = get_serial_batch_from_data(
 		item_code,
 		{
@@ -1868,7 +1868,15 @@ def make_batch_nos(item_code, batch_nos):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
+def item_query(
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: str,
+	page_len: str,
+	filters: dict,
+	as_dict: bool = False,
+):
 	item_filters = {"disabled": 0}
 	if txt:
 		item_filters["name"] = ("like", f"%{txt}%")
@@ -1883,7 +1891,13 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 
 @frappe.whitelist()
-def get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, name=None, child_row=None):
+def get_serial_batch_ledgers(
+	item_code: str | None = None,
+	docstatus: str | None = None,
+	voucher_no: str | None = None,
+	name: str | None = None,
+	child_row: str | None = None,
+):
 	filters = get_filters_for_bundle(
 		item_code=item_code, docstatus=docstatus, voucher_no=voucher_no, name=name, child_row=child_row
 	)
@@ -1959,7 +1973,9 @@ def get_reference_serial_and_batch_bundle(child_row):
 
 
 @frappe.whitelist()
-def add_serial_batch_ledgers(entries, child_row, doc, warehouse, do_not_save=False) -> object:
+def add_serial_batch_ledgers(
+	entries: str, child_row: str, doc: Document, warehouse: str, do_not_save: bool = False
+) -> object:
 	if isinstance(child_row, str):
 		child_row = frappe._dict(parse_json(child_row))
 
@@ -2112,7 +2128,7 @@ def update_serial_batch_no_ledgers(bundle, entries, child_row, parent_doc, wareh
 
 
 @frappe.whitelist()
-def update_serial_or_batch(bundle_id, serial_no=None, batch_no=None):
+def update_serial_or_batch(bundle_id: str, serial_no: str | None = None, batch_no: str | None = None):
 	if batch_no and not serial_no:
 		if qty := frappe.db.get_value(
 			"Serial and Batch Entry", {"parent": bundle_id, "batch_no": batch_no}, "qty"
@@ -2168,7 +2184,7 @@ def get_serial_and_batch_ledger(**kwargs):
 
 
 @frappe.whitelist()
-def get_auto_data(**kwargs):
+def get_auto_data(**kwargs: object):
 	kwargs = frappe._dict(kwargs)
 	if cint(kwargs.has_serial_no):
 		return get_serial_nos_from_sre(kwargs) if kwargs.scio_detail else get_available_serial_nos(kwargs)
@@ -3258,12 +3274,14 @@ def get_stock_ledgers_batches(kwargs):
 
 
 @frappe.whitelist()
-def get_batch_no_from_serial_no(serial_no):
+def get_batch_no_from_serial_no(serial_no: str):
 	return frappe.get_cached_value("Serial No", serial_no, "batch_no")
 
 
 @frappe.whitelist()
-def is_serial_batch_no_exists(item_code, type_of_transaction, serial_no=None, batch_no=None):
+def is_serial_batch_no_exists(
+	item_code: str, type_of_transaction: str, serial_no: str | None = None, batch_no: str | None = None
+):
 	if serial_no and not frappe.db.exists("Serial No", serial_no):
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Serial No {0} does not exists").format(serial_no))
@@ -3292,7 +3310,7 @@ def make_batch_no(batch_no, item_code):
 
 
 @frappe.whitelist()
-def is_duplicate_serial_no(bundle_id, serial_no):
+def is_duplicate_serial_no(bundle_id: str, serial_no: str):
 	return frappe.db.exists("Serial and Batch Entry", {"parent": bundle_id, "serial_no": serial_no})
 
 

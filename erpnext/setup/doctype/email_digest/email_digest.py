@@ -900,7 +900,7 @@ def send():
 
 
 @frappe.whitelist()
-def get_digest_msg(name):
+def get_digest_msg(name: str):
 	return frappe.get_doc("Email Digest", name).get_msg_html()
 
 

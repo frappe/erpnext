@@ -29,7 +29,7 @@ class BOMUpdateTool(Document):
 
 
 @frappe.whitelist()
-def enqueue_replace_bom(boms: dict | str | None = None, args: dict | str | None = None) -> "BOMUpdateLog":
+def enqueue_replace_bom(boms: dict | str | None = None, args: dict | None = None) -> "BOMUpdateLog":
 	"""Returns a BOM Update Log (that queues a job) for BOM Replacement."""
 	boms = boms or args
 	if isinstance(boms, str):

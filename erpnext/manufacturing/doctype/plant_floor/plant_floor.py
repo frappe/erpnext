@@ -22,7 +22,7 @@ class PlantFloor(Document):
 	# end: auto-generated types
 
 	@frappe.whitelist()
-	def make_stock_entry(self, kwargs):
+	def make_stock_entry(self, kwargs: str | dict):
 		if isinstance(kwargs, str):
 			kwargs = frappe.parse_json(kwargs)
 
@@ -66,7 +66,9 @@ class PlantFloor(Document):
 
 
 @frappe.whitelist()
-def get_stock_summary(warehouse, start=0, item_code=None, item_group=None):
+def get_stock_summary(
+	warehouse: str, start: int = 0, item_code: str | None = None, item_group: str | None = None
+):
 	stock_details = get_stock_details(warehouse, start=start, item_code=item_code, item_group=item_group)
 
 	max_count = 0.0

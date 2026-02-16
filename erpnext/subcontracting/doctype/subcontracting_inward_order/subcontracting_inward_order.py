@@ -1,8 +1,8 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
-
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import comma_and, flt, get_link_to_form
 
@@ -322,7 +322,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 			frappe.msgprint(_("{0} created").format(comma_and(doc_list)))
 
 	@frappe.whitelist()
-	def make_rm_stock_entry_inward(self, target_doc=None):
+	def make_rm_stock_entry_inward(self, target_doc: str | Document | None = None):
 		def calculate_qty_as_per_bom(rm_item):
 			data = frappe.get_value(
 				"Subcontracting Inward Order Item",
@@ -385,7 +385,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 			return stock_entry.as_dict()
 
 	@frappe.whitelist()
-	def make_rm_return(self, target_doc=None):
+	def make_rm_return(self, target_doc: str | Document | None = None):
 		if target_doc and target_doc.get("items"):
 			target_doc.items = []
 
@@ -426,7 +426,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 			return stock_entry.as_dict()
 
 	@frappe.whitelist()
-	def make_subcontracting_delivery(self, target_doc=None):
+	def make_subcontracting_delivery(self, target_doc: str | Document | None = None):
 		if target_doc and target_doc.get("items"):
 			target_doc.items = []
 
@@ -502,7 +502,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 			return stock_entry.as_dict()
 
 	@frappe.whitelist()
-	def make_subcontracting_return(self, target_doc=None):
+	def make_subcontracting_return(self, target_doc: str | Document | None = None):
 		if target_doc and target_doc.get("items"):
 			target_doc.items = []
 
@@ -548,7 +548,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 
 @frappe.whitelist()
-def update_subcontracting_inward_order_status(scio, status=None):
+def update_subcontracting_inward_order_status(scio: str, status: str | None = None):
 	if isinstance(scio, str):
 		scio = frappe.get_doc("Subcontracting Inward Order", scio)
 

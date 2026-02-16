@@ -1,7 +1,7 @@
+import datetime
+
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-
 import frappe
 from frappe import _
 from frappe.utils import add_to_date, formatdate, get_link_to_form, getdate, nowdate
@@ -13,15 +13,15 @@ from frappe.utils.nestedset import get_descendants_of
 @frappe.whitelist()
 @cache_source
 def get(
-	chart_name=None,
-	chart=None,
-	no_cache=None,
-	filters=None,
-	from_date=None,
-	to_date=None,
-	timespan=None,
-	time_interval=None,
-	heatmap_year=None,
+	chart_name: str | None = None,
+	chart: str | None = None,
+	no_cache: str | None = None,
+	filters: str | dict | None = None,
+	from_date: str | datetime.date | None = None,
+	to_date: str | datetime.date | None = None,
+	timespan: str | None = None,
+	time_interval: str | None = None,
+	heatmap_year: str | None = None,
 ):
 	if chart_name:
 		chart = frappe.get_doc("Dashboard Chart", chart_name)

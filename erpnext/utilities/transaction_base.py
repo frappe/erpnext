@@ -291,7 +291,7 @@ class TransactionBase(StatusUpdater):
 		)
 
 	@frappe.whitelist()
-	def process_item_selection(self, item_idx):
+	def process_item_selection(self, item_idx: int):
 		# Server side 'item' doc. Update this to reflect in UI
 		item_obj = self.get("items", {"idx": item_idx})[0]
 

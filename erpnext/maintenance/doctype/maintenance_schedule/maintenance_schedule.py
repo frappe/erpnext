@@ -1,8 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
 import frappe
 from frappe import _, throw
+from frappe.model.document import Document
 from frappe.utils import add_days, cint, cstr, date_diff, formatdate, getdate
 
 from erpnext.setup.doctype.employee.employee import get_holiday_list_for_employee
@@ -405,7 +405,7 @@ class MaintenanceSchedule(TransactionBase):
 		delete_events(self.doctype, self.name)
 
 	@frappe.whitelist()
-	def get_pending_data(self, data_type, s_date=None, item_name=None):
+	def get_pending_data(self, data_type: str, s_date: str | None = None, item_name: str | None = None):
 		if data_type == "date":
 			dates = ""
 			for schedule in self.schedules:
@@ -429,7 +429,7 @@ class MaintenanceSchedule(TransactionBase):
 
 
 @frappe.whitelist()
-def get_serial_nos_from_schedule(item_code, schedule=None):
+def get_serial_nos_from_schedule(item_code: str, schedule: str | None = None):
 	serial_nos = []
 	if schedule:
 		serial_nos = frappe.db.get_value(
@@ -443,7 +443,12 @@ def get_serial_nos_from_schedule(item_code, schedule=None):
 
 
 @frappe.whitelist()
-def make_maintenance_visit(source_name, target_doc=None, item_name=None, s_id=None):
+def make_maintenance_visit(
+	source_name: str,
+	target_doc: str | Document | None = None,
+	item_name: str | None = None,
+	s_id: str | None = None,
+):
 	from frappe.model.mapper import get_mapped_doc
 
 	def condition(doc):

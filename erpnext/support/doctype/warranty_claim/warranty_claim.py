@@ -1,9 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-
 import frappe
 from frappe import _, session
+from frappe.model.document import Document
 from frappe.utils import now_datetime
 
 from erpnext.utilities.transaction_base import TransactionBase
@@ -78,7 +77,7 @@ class WarrantyClaim(TransactionBase):
 
 
 @frappe.whitelist()
-def make_maintenance_visit(source_name, target_doc=None):
+def make_maintenance_visit(source_name: str, target_doc: str | Document | None = None):
 	from frappe.model.mapper import get_mapped_doc, map_child_doc
 
 	def _update_links(source_doc, target_doc, source_parent):

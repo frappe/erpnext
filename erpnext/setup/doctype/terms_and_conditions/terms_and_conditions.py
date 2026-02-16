@@ -35,7 +35,7 @@ class TermsandConditions(Document):
 
 
 @frappe.whitelist()
-def get_terms_and_conditions(template_name, doc):
+def get_terms_and_conditions(template_name: str, doc: str):
 	if isinstance(doc, str):
 		doc = json.loads(doc)
 

@@ -1,7 +1,7 @@
+import datetime
+
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-
 import frappe
 from frappe import _
 from frappe.utils import getdate
@@ -304,7 +304,9 @@ def get_period_wise_query(bet_dates, trans_date, query_details):
 
 
 @frappe.whitelist(allow_guest=True)
-def get_period_date_ranges(period, fiscal_year=None, year_start_date=None):
+def get_period_date_ranges(
+	period: str, fiscal_year: str | None = None, year_start_date: str | datetime.date | None = None
+):
 	from dateutil.relativedelta import relativedelta
 
 	if not year_start_date:

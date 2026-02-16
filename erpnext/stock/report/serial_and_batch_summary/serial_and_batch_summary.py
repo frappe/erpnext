@@ -179,7 +179,7 @@ def get_columns(filters, data):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_voucher_type(doctype, txt, searchfield, start, page_len, filters):
+def get_voucher_type(doctype: str, txt: str, searchfield: str, start: str, page_len: str, filters: dict):
 	child_doctypes = frappe.get_all(
 		"DocField",
 		filters={"fieldname": "serial_and_batch_bundle"},
@@ -196,7 +196,7 @@ def get_voucher_type(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_serial_nos(doctype, txt, searchfield, start, page_len, filters):
+def get_serial_nos(doctype: str, txt: str, searchfield: str, start: str, page_len: str, filters: dict):
 	query_filters = {}
 
 	if txt:
@@ -224,7 +224,7 @@ def get_serial_nos(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_batch_nos(doctype, txt, searchfield, start, page_len, filters):
+def get_batch_nos(doctype: str, txt: str, searchfield: str, start: str, page_len: str, filters: dict):
 	query_filters = {}
 
 	if filters.get("voucher_no") and txt:

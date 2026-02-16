@@ -427,7 +427,7 @@ def get_customer_territory(customer):
 
 
 @frappe.whitelist()
-def get_service_level_agreement_filters(doctype, name, customer=None):
+def get_service_level_agreement_filters(doctype: str, name: str, customer: str | None = None):
 	if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
 		return
 
@@ -780,7 +780,7 @@ def get_response_and_resolution_duration(doc):
 
 
 @frappe.whitelist()
-def reset_service_level_agreement(doctype: str, docname: str, reason, user):
+def reset_service_level_agreement(doctype: str, docname: str, reason: str, user: str):
 	if not frappe.db.get_single_value("Support Settings", "allow_resetting_service_level_agreement"):
 		frappe.throw(_("Allow Resetting Service Level Agreement from Support Settings."))
 
@@ -1034,7 +1034,7 @@ def get_tz(user):
 
 
 @frappe.whitelist()
-def get_user_time(user, to_string=False):
+def get_user_time(user: str, to_string: bool = False):
 	return get_datetime_str(now_datetime(user)) if to_string else now_datetime(user)
 
 

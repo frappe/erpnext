@@ -7,13 +7,13 @@ from erpnext.stock.utils import get_stock_balance
 
 @frappe.whitelist()
 def get_data(
-	item_code=None,
-	warehouse=None,
-	parent_warehouse=None,
-	company=None,
-	start=0,
-	sort_by="stock_capacity",
-	sort_order="desc",
+	item_code: str | None = None,
+	warehouse: str | None = None,
+	parent_warehouse: str | None = None,
+	company: str | None = None,
+	start: int = 0,
+	sort_by: str = "stock_capacity",
+	sort_order: str = "desc",
 ):
 	"""Return data to render the warehouse capacity dashboard."""
 	filters = get_filters(item_code, warehouse, parent_warehouse, company)

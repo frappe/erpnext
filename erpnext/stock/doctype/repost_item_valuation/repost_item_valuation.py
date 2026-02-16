@@ -332,7 +332,7 @@ class RepostItemValuation(Document):
 
 
 @frappe.whitelist()
-def bulk_restart_reposting(names):
+def bulk_restart_reposting(names: str):
 	names = json.loads(names)
 	for name in names:
 		doc = frappe.get_doc("Repost Item Valuation", name)

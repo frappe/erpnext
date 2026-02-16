@@ -309,7 +309,7 @@ class MasterProductionSchedule(Document):
 		return items
 
 	@frappe.whitelist()
-	def fetch_materials_requests(self, **data):
+	def fetch_materials_requests(self, **data: object):
 		if isinstance(data, str):
 			data = parse_json(data)
 
@@ -365,7 +365,7 @@ class MasterProductionSchedule(Document):
 		return query.run(as_dict=True)
 
 	@frappe.whitelist()
-	def fetch_sales_orders(self, **data):
+	def fetch_sales_orders(self, **data: object):
 		if isinstance(data, str):
 			data = parse_json(data)
 
@@ -468,7 +468,7 @@ def get_item_lead_time(item_code):
 
 
 @frappe.whitelist()
-def get_mps_details(mps):
+def get_mps_details(mps: str):
 	return frappe.db.get_value(
 		"Master Production Schedule",
 		mps,

@@ -1,7 +1,7 @@
+import datetime
+
 # Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
-
-
 import frappe
 from frappe import _
 from frappe.query_builder import Order
@@ -161,11 +161,11 @@ def get_depr_cost_center_and_series():
 
 @frappe.whitelist()
 def make_depreciation_entry(
-	depr_schedule_name,
-	date=None,
-	sch_start_idx=None,
-	sch_end_idx=None,
-	accounting_dimensions=None,
+	depr_schedule_name: str,
+	date: str | None = None,
+	sch_start_idx: int | None = None,
+	sch_end_idx: int | None = None,
+	accounting_dimensions: str | None = None,
 ):
 	frappe.has_permission("Journal Entry", throw=True)
 	date = date or today()
@@ -356,7 +356,7 @@ def get_message_for_depr_entry_posting_error(asset_links, error_log_links):
 
 
 @frappe.whitelist()
-def scrap_asset(asset_name, scrap_date=None):
+def scrap_asset(asset_name: str, scrap_date: str | datetime.date | None = None):
 	asset = frappe.get_doc("Asset", asset_name)
 	scrap_date = getdate(scrap_date) or getdate(today())
 	asset.db_set("disposal_date", scrap_date)
@@ -445,7 +445,7 @@ def create_journal_entry_for_scrap(asset, scrap_date):
 
 
 @frappe.whitelist()
-def restore_asset(asset_name):
+def restore_asset(asset_name: str):
 	asset = frappe.get_doc("Asset", asset_name)
 	reverse_depreciation_entry_made_on_disposal(asset)
 	reset_depreciation_schedule(asset, get_note_for_restore(asset))
@@ -772,7 +772,7 @@ def get_profit_gl_entries(
 
 
 @frappe.whitelist()
-def get_disposal_account_and_cost_center(company):
+def get_disposal_account_and_cost_center(company: str):
 	disposal_account, depreciation_cost_center = frappe.get_cached_value(
 		"Company", company, ["disposal_account", "depreciation_cost_center"]
 	)
@@ -788,7 +788,7 @@ def get_disposal_account_and_cost_center(company):
 @frappe.whitelist()
 def get_value_after_depreciation_on_disposal_date(
 	asset: str,
-	disposal_date: str,
+	disposal_date: str | datetime.date,
 	finance_book: str | None = None,
 ) -> float:
 	asset_doc = frappe.get_doc("Asset", asset)

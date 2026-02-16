@@ -366,7 +366,7 @@ def on_doctype_update():
 
 
 @frappe.whitelist()
-def get_items_from_product_bundle(row):
+def get_items_from_product_bundle(row: str):
 	row, items = ItemDetailsCtx(json.loads(row)), []
 
 	bundled_items = get_product_bundle_items(row["item_code"])
