@@ -2280,9 +2280,7 @@ class TestStockEntry(IntegrationTestCase):
 		se.save()
 		se.submit()
 
-
 	def test_disassemble_entry_with_wo(self):
-
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 		from erpnext.manufacturing.doctype.work_order.work_order import (
 			make_stock_entry as _make_stock_entry,
