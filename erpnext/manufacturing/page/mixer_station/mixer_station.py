@@ -36,14 +36,15 @@ def get_mixer_state(job_card):
 		transferred_qty_to_next = flt(
 			frappe.db.sql(
 				"""
-                SELECT COALESCE(SUM(sed.qty), 0)
-                FROM `tabStock Entry Detail` sed
-                INNER JOIN `tabStock Entry` se ON sed.parent = se.name
-                WHERE sed.docstatus = 1 
-                AND se.work_order = %s 
-                AND sed.item_code = %s
-                AND se.purpose = 'Material Transfer for Manufacture'
-            """,
+				SELECT COALESCE(SUM(sle.actual_qty), 0)
+				FROM `tabStock Ledger Entry` sle
+				INNER JOIN `tabStock Entry` se ON sle.voucher_no = se.name
+				WHERE se.work_order = %s
+				AND sle.item_code = %s
+				AND se.purpose = 'Material Transfer for Manufacture'
+				AND sle.actual_qty > 0
+				AND sle.is_cancelled = 0
+			""",
 				(next_wo, jc.production_item),
 			)[0][0]
 			or 0,
@@ -68,7 +69,7 @@ def get_mixer_state(job_card):
 		"additional_ingredients_added": jc.additional_ingredients_added,
 		"mixer_number": jc.mixer_number,
 		"transferred_qty_to_next": transferred_qty_to_next,
-		"displaY_qty": display_qty,
+		"display_qty": display_qty,
 		"transfer_complete": display_qty <= 0.001,
 	}
 
@@ -212,6 +213,7 @@ def finish_mixing(job_card, completed_qty):
 	wo.reload()
 	wo_status = wo.get_status()
 	next_bom_data = get_next_process_bom_qty(work_order)
+	mixer_state = get_mixer_state(job_card)
 
 	return {
 		"status": wo_status,
@@ -223,6 +225,8 @@ def finish_mixing(job_card, completed_qty):
 		"stock_entry": se.name,
 		"bom_qty": next_bom_data["bom_qty"],
 		"next_work_order": next_bom_data["next_work_order"],
+		"display_qty": mixer_state["display_qty"],
+		"transfer_complete": mixer_state["transfer_complete"],
 		"message": f"SE {se.name} ({job_card_qty} qty). WO: {wo_status}",
 	}
 
