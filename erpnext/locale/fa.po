@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-02-15 09:44+0000\n"
-"PO-Revision-Date: 2026-02-16 14:51\n"
+"PO-Revision-Date: 2026-02-17 14:56\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -1138,7 +1138,7 @@ msgstr "مقدار پذیرفته شده بر حسب واحد اندازه‌گ�
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Accepted Quantity"
-msgstr "مقدار قابل قبول"
+msgstr "مقدار پذیرفته شده"
 
 #. Label of the warehouse (Link) field in DocType 'Purchase Invoice Item'
 #. Label of the set_warehouse (Link) field in DocType 'Purchase Receipt'
@@ -11038,7 +11038,7 @@ msgstr "در نظر گرفتن انبارهای مرجوعی"
 #. Label of the category (Select) field in DocType 'Purchase Taxes and Charges'
 #: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgid "Consider Tax or Charge for"
-msgstr "مالیات یا شارژ را در نظر بگیرید"
+msgstr "در نظر گرفتن مالیات یا عوارض برای"
 
 #. Label of the apply_tds (Check) field in DocType 'Payment Entry'
 #. Label of the apply_tds (Check) field in DocType 'Purchase Invoice'
@@ -11304,7 +11304,7 @@ msgstr "موبایل مخاطب"
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "Contact Mobile No"
-msgstr "تماس با شماره موبایل"
+msgstr "شماره موبایل مخاطب"
 
 #. Label of the contact_display (Small Text) field in DocType 'Purchase Order'
 #. Label of the contact (Link) field in DocType 'Delivery Stop'
@@ -11314,7 +11314,7 @@ msgstr "تماس با شماره موبایل"
 #: erpnext/stock/doctype/delivery_stop/delivery_stop.json
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "Contact Name"
-msgstr "نام تماس"
+msgstr "نام مخاطب"
 
 #. Label of the contact_no (Data) field in DocType 'Sales Team'
 #: erpnext/selling/doctype/sales_team/sales_team.json
@@ -14142,7 +14142,7 @@ msgstr "اعلام از دست رفتن"
 #: erpnext/accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 #: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgid "Deduct"
-msgstr "کسر کنید"
+msgstr "کسر"
 
 #. Label of the tax_deduction_basis (Select) field in DocType 'Tax Withholding
 #. Category'
@@ -16973,7 +16973,7 @@ msgstr "تماس اضطراری"
 #. Label of the person_to_be_contacted (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Emergency Contact Name"
-msgstr "نام تماس اضطراری"
+msgstr "نام مخاطب اضطراری"
 
 #. Label of the emergency_phone_number (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -48924,7 +48924,7 @@ msgstr ""
 #. Label of the contact_person (Link) field in DocType 'Purchase Order'
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "Supplier Contact"
-msgstr "تماس با تامین کننده"
+msgstr "مخاطب تامین کننده"
 
 #. Label of the supplier_delivery_note (Data) field in DocType 'Purchase
 #. Receipt'
