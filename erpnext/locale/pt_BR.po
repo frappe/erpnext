@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-02-15 09:44+0000\n"
-"PO-Revision-Date: 2026-02-16 14:51\n"
+"PO-Revision-Date: 2026-02-17 14:56\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Portuguese, Brazilian\n"
 "MIME-Version: 1.0\n"
@@ -2855,7 +2855,7 @@ msgstr ""
 #: erpnext/quality_management/doctype/quality_review/quality_review.json
 #: erpnext/selling/page/point_of_sale/pos_payment.js:59
 msgid "Additional Information"
-msgstr "Informações Adicionais"
+msgstr "Informação Adicional"
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:85
 msgid "Additional Information updated successfully."
@@ -16193,7 +16193,7 @@ msgstr ""
 #: erpnext/crm/doctype/lead/lead.json
 #: erpnext/crm/report/lead_details/lead_details.js:41
 msgid "Do Not Contact"
-msgstr "Não Entre Em Contato"
+msgstr "Não Contatar"
 
 #. Label of the do_not_explode (Check) field in DocType 'BOM Creator Item'
 #. Label of the do_not_explode (Check) field in DocType 'BOM Item'
@@ -26244,7 +26244,7 @@ msgstr ""
 #: erpnext/setup/workspace/home/home.json
 #: erpnext/support/doctype/issue/issue.json
 msgid "Lead"
-msgstr ""
+msgstr "Lead"
 
 #: erpnext/crm/doctype/lead/lead.py:549
 msgid "Lead -> Prospect"
@@ -26738,7 +26738,7 @@ msgstr "Oportunidade Perdida"
 #: erpnext/crm/doctype/lead/lead.json
 #: erpnext/crm/report/lead_details/lead_details.js:38
 msgid "Lost Quotation"
-msgstr "Cotação Perdida"
+msgstr "Orçamento Perdido"
 
 #. Name of a report
 #: erpnext/selling/report/lost_quotations/lost_quotations.json
@@ -29537,7 +29537,7 @@ msgstr ""
 #: erpnext/public/js/templates/crm_activities.html:8
 #: erpnext/public/js/utils/crm_activities.js:69
 msgid "New Task"
-msgstr ""
+msgstr "Nova Tarefa"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:206
 msgid "New Version"
@@ -29908,11 +29908,11 @@ msgstr ""
 
 #: erpnext/public/js/templates/crm_activities.html:145
 msgid "No open event"
-msgstr ""
+msgstr "Nenhum evento em aberto"
 
 #: erpnext/public/js/templates/crm_activities.html:57
 msgid "No open task"
-msgstr ""
+msgstr "Nenhuma tarefa em aberto"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:330
 msgid "No outstanding invoices found"
@@ -30686,7 +30686,7 @@ msgstr ""
 
 #: erpnext/public/js/templates/crm_activities.html:104
 msgid "Open Events"
-msgstr ""
+msgstr "Eventos Abertos"
 
 #: erpnext/selling/page/point_of_sale/pos_controller.js:252
 msgid "Open Form View"
@@ -30745,7 +30745,7 @@ msgstr ""
 
 #: erpnext/public/js/templates/crm_activities.html:21
 msgid "Open Tasks"
-msgstr ""
+msgstr "Tarefas Abertas"
 
 #. Label of the todo_list (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -38307,12 +38307,12 @@ msgstr "Qualificado"
 #. Label of the qualified_by (Link) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
 msgid "Qualified By"
-msgstr "Responsável de Qualificação"
+msgstr "Responsável da Qualificação"
 
 #. Label of the qualified_on (Date) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
 msgid "Qualified on"
-msgstr "Data de Qualificação"
+msgstr "Data da Qualificação"
 
 #. Name of a Workspace
 #. Label of the quality_tab (Tab Break) field in DocType 'Item'
