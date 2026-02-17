@@ -809,17 +809,14 @@ def validate_against_pcv(is_opening, posting_date, company):
 
 	pcv = frappe.qb.DocType("Period Closing Voucher")
 
-	# Some installs use period_end_date; others may only have posting_date.
-	meta = frappe.get_meta("Period Closing Voucher")
-	date_field = "period_end_date" if meta.has_field("period_end_date") else "posting_date"
-	date_col = getattr(pcv, date_field)
-
 	last_pcv_date = (
-		frappe.qb.from_(pcv).select(Max(date_col)).where((pcv.docstatus == 1) & (pcv.company == company))
+		frappe.qb.from_(pcv)
+		.select(Max(pcv.period_end_date))
+		.where((pcv.docstatus == 1) & (pcv.company == company))
 	).run(pluck=True)[0]
 
 	if last_pcv_date and getdate(posting_date) <= getdate(last_pcv_date):
-		message = _("Books have been closed till the period ending on {0}").format(formatdate(last_pcv_date))
+		message = _("Books have been closed till the period ending on {0}.").format(formatdate(last_pcv_date))
 		message += "</br >"
 		message += _("You cannot create/amend any accounting entries till this date.")
 		frappe.throw(message, title=_("Period Closed"))
