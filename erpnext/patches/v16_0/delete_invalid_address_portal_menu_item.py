@@ -1,6 +1,6 @@
 import frappe
 
-# Ammending the incorrect route in hooks.py leaves the incorrect entry in the database, it needs to be removed manually.
+# Amending the incorrect route in hooks.py leaves the incorrect entry in the database, it needs to be removed manually.
 
 
 def execute():
@@ -17,5 +17,4 @@ def execute():
 	)
 
 	for ipmi in incorrect_portal_menu_item:
-		doc = frappe.get_doc("Portal Menu Item", ipmi.name)
-		doc.delete(doc)
+		frappe.delete_doc("Portal Menu Item", ipmi.name, force=True)
