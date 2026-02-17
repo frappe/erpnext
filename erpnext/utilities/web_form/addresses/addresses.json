@@ -1,13 +1,10 @@
 {
- "accept_payment": 0,
  "allow_comments": 0,
  "allow_delete": 0,
  "allow_edit": 1,
  "allow_incomplete": 0,
  "allow_multiple": 1,
  "allow_print": 0,
- "amount": 0.0,
- "amount_based_on_field": 0,
  "anonymous": 0,
  "apply_document_permissions": 1,
  "condition_json": "[]",
@@ -15,13 +12,15 @@
  "doc_type": "Address",
  "docstatus": 0,
  "doctype": "Web Form",
+ "hide_footer": 0,
+ "hide_navbar": 0,
  "idx": 0,
  "is_standard": 1,
  "list_columns": [],
  "list_title": "",
  "login_required": 1,
  "max_attachment_size": 0,
- "modified": "2025-10-27 21:05:21.125639",
+ "modified": "2026-02-16 16:34:00.586969",
  "modified_by": "Administrator",
  "module": "Utilities",
  "name": "addresses",
@@ -31,7 +30,7 @@
  "show_attachments": 0,
  "show_list": 1,
  "show_sidebar": 0,
- "success_url": "/addresses",
+ "success_url": "/address",
  "title": "Address",
  "web_form_fields": [
   {
@@ -85,17 +84,17 @@
    "show_in_filter": 0
   },
   {
-    "allow_read_on_all_link_options": 0,
-    "fieldname": "pincode",
-    "fieldtype": "Data",
-    "hidden": 0,
-    "label": "Postal Code",
-    "max_length": 0,
-    "max_value": 0,
-    "read_only": 0,
-    "reqd": 0,
-    "show_in_filter": 0
-   },
+   "allow_read_on_all_link_options": 0,
+   "fieldname": "pincode",
+   "fieldtype": "Data",
+   "hidden": 0,
+   "label": "Postal Code",
+   "max_length": 0,
+   "max_value": 0,
+   "read_only": 0,
+   "reqd": 0,
+   "show_in_filter": 0
+  },
   {
    "allow_read_on_all_link_options": 0,
    "fieldname": "city",
@@ -120,7 +119,6 @@
    "reqd": 0,
    "show_in_filter": 0
   },
-  
   {
    "allow_read_on_all_link_options": 1,
    "fieldname": "country",
