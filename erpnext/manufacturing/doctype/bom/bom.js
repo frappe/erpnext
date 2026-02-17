@@ -556,6 +556,9 @@ frappe.ui.form.on("BOM", {
 					}
 				},
 			});
+		} else {
+			frm.clear_table("operations");
+			frm.refresh_field("operations");
 		}
 	},
 
