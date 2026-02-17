@@ -40,6 +40,7 @@ from erpnext.accounts.report.financial_statements import (
 from erpnext.accounts.utils import get_children, get_currency_precision
 
 DEFAULT_BULLET_PREFIX = "• "
+SEGMENT_PREFIX = "seg_"
 
 # ============================================================================
 # DATA MODELS
@@ -144,7 +145,7 @@ class SegmentData:
 
 	@property
 	def id(self) -> str:
-		return f"seg_{self.index}"
+		return f"{SEGMENT_PREFIX}{self.index}"
 
 
 @dataclass
@@ -1862,13 +1863,13 @@ def get_xlsx_styles(metadata: XLSXMetadata) -> dict | None:
 	builder = XLSXStyleBuilder(metadata, default_styling=False)
 	builder.apply_default_styles(currency_formatting=False)
 
-	# currency is fixed for all columns
+	# currency is fixed for all columns (only if report template filter is applied)
 	currency = get_company_currency(metadata.filters.get("company"))
 
 	styles = {
 		"bold": builder.register_style({"bold": True}),
 		"italic": builder.register_style({"italic": True}),
-		"warning": builder.register_style({"font_color": "#dc3545"}),
+		"warning": builder.register_style({"font_color": "#dc3545"}),  # text-danger
 	}
 
 	fieldtype_formats = {
@@ -1878,70 +1879,90 @@ def get_xlsx_styles(metadata: XLSXMetadata) -> dict | None:
 		"Currency": builder.register_style({"num_format": builder.get_number_format("Currency", currency)}),
 	}
 
-	cache = {"color": {}, "prefix": {}, "indent": {}}
+	# style caches
+	colors = {}
+	prefixes = {}
+	indents = {}
 
 	# quick access for hot loop
 	style_cell = builder.style_cell
 
-	def get_style(cache_key: str, value, style_props: dict) -> int:
-		if value not in cache[cache_key]:
-			cache[cache_key][value] = builder.register_style(style_props)
+	def get_color_style(color: str) -> int:
+		if color not in colors:
+			colors[color] = builder.register_style({"font_color": color})
 
-		return cache[cache_key][value]
+		return colors[color]
 
-	def resolve_segment_formatting(fieldname: str, row: dict) -> tuple[dict, bool]:
-		"""Resolve formatting for segment columns (seg_<idx>_<field>)."""
-		formatting = row.copy()
-		is_account_col = fieldname == "account"
-		segment_values = row.get("segment_values") or {}
+	def get_prefix_style(prefix: str) -> int:
+		prefix = f"{prefix or DEFAULT_BULLET_PREFIX}@"
 
-		if fieldname.startswith("seg_") and segment_values:
-			_, seg_idx, fieldname = fieldname.split("_", 2)
-			is_account_col = fieldname == "account"
-			formatting.update(segment_values.get(f"seg_{seg_idx}", {}) or {})
+		if prefix not in prefixes:
+			prefixes[prefix] = builder.register_style({"num_format": prefix})
 
-		return formatting, is_account_col
+		return prefixes[prefix]
+
+	def get_indent_style(indent: int) -> int:
+		if indent not in indents:
+			indents[indent] = builder.register_style({"align": "left", "indent": indent})
+
+		return indents[indent]
 
 	# column level styling of currency columns
+	company_currency_style = fieldtype_formats["Currency"]
+
 	for col_idx, col in metadata.column_map.items():
 		if col.get("fieldtype") != "Currency":
 			continue
 
-		builder.style_column(col_idx, fieldtype_formats["Currency"])
+		builder.style_column(col_idx, company_currency_style)
 
 	# cell level styling
 	for row_idx, row in metadata.row_map.items():
+		# skip total row
 		if builder.has_total_row and row_idx == builder.last_row_index:
 			continue
 
-		total_segments = row.get("_segment_info", {}).get("total_segments", 1)
+		is_segmented = (row.get("_segment_info", {}).get("total_segments", 1) or 1) > 1
+		segment_values = row.get("segment_values", {}) or {}
 
 		for col_idx, col in metadata.column_map.items():
-			fieldname = col.get("fieldname", "")
-			formatting, is_account_column = resolve_segment_formatting(fieldname, row)
+			fieldname = col.get("fieldname")
+			is_account = fieldname == "account"
 
-			if not is_account_column and formatting.get("is_blank_line"):
+			# determine formatting bucket
+			if is_segmented and fieldname.startswith(SEGMENT_PREFIX):
+				formatting = row.copy()
+
+				_, seg_idx, seg_fieldname = fieldname.split("_", 2)
+				is_account = seg_fieldname == "account"
+				formatting.update(segment_values.get(f"{SEGMENT_PREFIX}{seg_idx}", {}) or {})
+			else:
+				formatting = row  # default formatting bucket.
+
+			if not is_account and formatting.get("is_blank_line"):
 				continue
 
 			col_fieldtype = col.get("fieldtype")
 			cell_fieldtype = formatting.get("fieldtype") or col_fieldtype
+			cell_value = row.get(fieldname)
 
-			if is_account_column:
-				if formatting.get("is_detail") or formatting.get("prefix"):
-					prefix = f"{formatting.get('prefix') or DEFAULT_BULLET_PREFIX}@"
-					style_cell(row_idx, col_idx, get_style("prefix", prefix, {"num_format": prefix}))
+			if cell_value in (None, ""):
+				continue
 
-				# custom indentation
-				if total_segments > 1 and (indent := formatting.get("indent")) and indent > 0:
-					style_cell(
-						row_idx, col_idx, get_style("indent", indent, {"align": "left", "indent": indent})
-					)
+			# account column and other fieldtype styling
+			if is_account:
+				if formatting.get("is_detail") or (prefix := formatting.get("prefix")):
+					style_cell(row_idx, col_idx, get_prefix_style(prefix))
+
+				# custom indentation (different segment might have different indentation levels)
+				if is_segmented and (indent := formatting.get("indent")) and indent > 0:
+					style_cell(row_idx, col_idx, get_indent_style(indent))
 			else:
 				if col_fieldtype != cell_fieldtype and cell_fieldtype in fieldtype_formats:
 					style_cell(row_idx, col_idx, fieldtype_formats[cell_fieldtype])
 
 			# text styles
-			for style_key in ["bold", "italic"]:
+			for style_key in ("bold", "italic"):
 				if formatting.get(style_key):
 					style_cell(row_idx, col_idx, styles[style_key])
 
@@ -1949,10 +1970,10 @@ def get_xlsx_styles(metadata: XLSXMetadata) -> dict | None:
 			if (
 				formatting.get("warn_if_negative")
 				and cell_fieldtype in frappe.model.numeric_fieldtypes
-				and flt(row.get(fieldname)) < 0
+				and flt(cell_value) < 0
 			):
 				style_cell(row_idx, col_idx, styles["warning"])
 			elif color := formatting.get("color"):
-				style_cell(row_idx, col_idx, get_style("color", color, {"font_color": color}))
+				style_cell(row_idx, col_idx, get_color_style(color))
 
 	return builder.result
