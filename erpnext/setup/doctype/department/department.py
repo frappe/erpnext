@@ -32,9 +32,14 @@ class Department(NestedSet):
 	nsm_parent_field = "parent_department"
 
 	def autoname(self):
-		root = get_root_of("Department")
-		if root and self.department_name != root:
-			self.name = get_abbreviated_name(self.department_name, self.company)
+		if self.company:
+			abbr = frappe.get_cached_value("Company", self.company, "abbr")
+			suffix = f" - {abbr}"
+
+			if self.department_name.endswith(suffix):
+				self.name = self.department_name
+			else:
+				self.name = self.department_name + suffix
 		else:
 			self.name = self.department_name
 
