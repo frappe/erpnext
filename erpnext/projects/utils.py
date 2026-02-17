@@ -15,7 +15,7 @@ def query_task(doctype, txt, searchfield, start, page_len, filters):
 	search_string = "%%%s%%" % txt
 	order_by_string = "%s%%" % txt
 	match_conditions = build_match_conditions("Task")
-	match_conditions = ("and" + match_conditions) if match_conditions else ""
+	match_conditions = (f"and ({match_conditions})") if match_conditions else ""
 
 	return frappe.db.sql(
 		"""select name, subject from `tabTask`
