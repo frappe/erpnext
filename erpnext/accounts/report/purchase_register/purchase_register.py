@@ -6,11 +6,7 @@ import frappe
 from frappe import _, msgprint
 from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, getdate
-<<<<<<< HEAD
-from pypika import Order
-=======
 from pypika.terms import Bracket, LiteralValue, Order
->>>>>>> c6a292f6a9 (fix: user permission on reports (#52709))
 
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.report.utils import (
