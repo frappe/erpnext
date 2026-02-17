@@ -270,7 +270,7 @@ standard_portal_menu_items = [
 		"role": "Customer",
 	},
 	{"title": "Issues", "route": "/issues", "reference_doctype": "Issue", "role": "Customer"},
-	{"title": "Addresses", "route": "/addresses", "reference_doctype": "Address"},
+	{"title": "Addresses", "route": "/addresses", "reference_doctype": "Address", "role": "Customer"},
 	{
 		"title": "Timesheets",
 		"route": "/timesheets",
