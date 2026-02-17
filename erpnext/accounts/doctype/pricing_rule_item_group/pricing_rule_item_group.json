@@ -14,6 +14,7 @@
  "engine": "InnoDB",
  "fields": [
   {
+<<<<<<< HEAD
    "allow_bulk_edit": 0,
    "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
@@ -21,6 +22,9 @@
    "collapsible": 0,
    "columns": 0,
    "depends_on": "eval:parent.apply_on == 'Item Code'",
+=======
+   "depends_on": "eval:parent.apply_on == 'Item Group'",
+>>>>>>> de2843d9f1 (fix: wrong display_depends_on condition for item group and brand child tables)
    "fieldname": "item_group",
    "fieldtype": "Link",
    "hidden": 0,
@@ -90,14 +94,20 @@
  "is_submittable": 0,
  "issingle": 0,
  "istable": 1,
+<<<<<<< HEAD
  "max_attachments": 0,
  "modified": "2019-03-24 14:48:59.649168",
+=======
+ "links": [],
+ "modified": "2026-02-17 12:16:57.778471",
+>>>>>>> de2843d9f1 (fix: wrong display_depends_on condition for item group and brand child tables)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule Item Group",
  "name_case": "",
  "owner": "Administrator",
  "permissions": [],
+<<<<<<< HEAD
  "quick_entry": 0,
  "read_only": 0,
  "read_only_onload": 0,
@@ -108,3 +118,11 @@
  "track_seen": 0,
  "track_views": 0
 }
+=======
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
+>>>>>>> de2843d9f1 (fix: wrong display_depends_on condition for item group and brand child tables)
