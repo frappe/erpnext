@@ -331,7 +331,7 @@ def get_next_process_bom_qty(mixing_work_order):
 		"Work Order",
 		{
 			"production_plan": mixing_wo.production_plan,
-			"description": ["like", f"%{next_process}%"],
+			"item_name": ["like", f"%{next_process}%"],
 			"docstatus": ["<", 2],
 			"production_item": ["like", f"%{slab_template}%"],
 		},

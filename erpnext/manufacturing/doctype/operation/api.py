@@ -38,7 +38,7 @@ def transfer_to_next_process(current_work_order, qty=None, process=None, mixer_n
 		"Work Order",
 		{
 			"production_plan": wo.production_plan,
-			"description": ["like", f"%{next_process}%"],
+			"item_name": ["like", f"%{next_process}%"],
 			"docstatus": ["<", 2],
 			"production_item": ["like", f"%{slab_template}%"],
 		},

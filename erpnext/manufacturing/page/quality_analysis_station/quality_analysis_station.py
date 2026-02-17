@@ -1,3 +1,4 @@
+import erpnext.manufacturing.doctype.job_card.job_card_dashboard
 from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 import json
 
@@ -60,15 +61,18 @@ def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
 		job_card = frappe.get_doc("Job Card", job_card_number)
 
 	# Else, get the earliest open job card for the operation.
-	if not job_card:
-		if line and not isinstance(line, list):
-			child_lines = get_all_child_lines(line)
-			if child_lines:
-				line = child_lines
+	# if not job_card:
+	# 	if line and not isinstance(line, list):
+	# 		child_lines = get_all_child_lines(line)
+	# 		if child_lines:
+	# 			line = child_lines
 
-		job_cards = get_open_job_cards("Quality Check", line, True)
-		wip_job_cards = [jc for jc in job_cards if jc.status == "Work In Progress"]
-		job_card = wip_job_cards[0] if wip_job_cards else job_cards[0] if job_cards else None
+	# 	job_cards = get_open_job_cards("Quality Check", line, True)
+	child_lines = get_all_child_lines(line)
+	job_card_data = get_top_job_card_for_process("Quality Check", child_lines if child_lines else line, True)
+	# wip_job_cards = [jc for jc in job_cards if jc.status == "Work In Progress"]
+	# job_card = wip_job_cards[0] if wip_job_cards else job_cards[0] if job_cards else None
+	job_card = job_card_data["top_job_card"]
 
 	slab: Slab | None = None
 	if job_card and job_card.slab:
@@ -81,7 +85,7 @@ def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
 
 	slab_size = None
 	if slab:
-		slab_size_name = slab.template.split("-")[-2]
+		slab_size_name = slab.template.split("-")[-1]
 		slab_size = frappe.get_doc("Slab Size", slab_size_name)
 
 	return {"slab": slab, "job_card": job_card, "slab_size": slab_size}

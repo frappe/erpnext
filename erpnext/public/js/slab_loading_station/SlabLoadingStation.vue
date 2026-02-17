@@ -62,8 +62,8 @@ const filteredSlabs = computed(() => {
 
 const getThickness = (template) => {
     if (!template) return '';
-    const parts = template.split('-');
-    return parts[parts.length - 1].trim();
+    const parts = template.split("-")[-1];
+    return parts;
 };
 
 const getColorClass = (template) => {

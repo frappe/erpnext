@@ -45,7 +45,7 @@ const loadData = async (play_ding = false) => {
             }
 
             coolingQueue.value = res.message.cooling_queue || [];
-            
+
             // Initialize timers for cooling queue
             coolingQueue.value.forEach(job => {
                 if (job.status === 'Work In Progress') {
@@ -70,14 +70,15 @@ const startCooling = async (slab) => {
         const res = await frappe.call({
             method: 'erpnext.manufacturing.page.cooling_station.cooling_station.start_cooling_process',
             args: {
-                slab_number: slab.name
+                slab_number: slab.name,
+                line: work_context.assigned_line
             }
         });
 
         if (res.message) {
-             frappe.show_alert({ message: __('Cooling Started'), indicator: 'green' });
-             erpnext.utils.play_ding("submit");
-             await loadData();
+            frappe.show_alert({ message: __('Cooling Started'), indicator: 'green' });
+            erpnext.utils.play_ding("submit");
+            await loadData();
         }
     } catch (e) {
         frappe.msgprint(__('Failed to start cooling: {0}', [e.message]));
@@ -119,7 +120,7 @@ const startTimer = (job) => {
     updateJobElapsed(job);
 
     if (processTimerHandles[job.name]) return;
-    
+
     processTimerHandles[job.name] = setInterval(() => {
         const currentJob = coolingQueue.value.find(j => j.name === job.name);
         if (currentJob) {
@@ -171,13 +172,15 @@ frappe.realtime.on('slab_checkout', (slab) => {
                 <h4 class="mb-4 text-muted font-weight-bold">{{ __('Incoming Slab') }}</h4>
                 <Transition name="pop-switch" mode="out-in">
                     <div v-if="!currentIncomingSlab" key="empty" class="empty-state p-5 text-center border rounded">
-                         <div class="mb-3 text-muted" style="opacity: 0.5;">
+                        <div class="mb-3 text-muted" style="opacity: 0.5;">
                             <i class="fa fa-inbox" style="font-size: 3rem;"></i>
                         </div>
                         <p class="text-muted">{{ __('No incoming slabs') }}</p>
                     </div>
-                    
-                    <div v-else key="strip" class="incoming-slab-strip d-flex align-items-center justify-content-between border rounded p-3 shadow-sm mb-4" style="background-color: var(--control-bg-on-gray, #e2edff); border-color: var(--primary-color) !important;">
+
+                    <div v-else key="strip"
+                        class="incoming-slab-strip d-flex align-items-center justify-content-between border rounded p-3 shadow-sm mb-4"
+                        style="background-color: var(--control-bg-on-gray, #e2edff); border-color: var(--primary-color) !important;">
                         <div class="d-flex align-items-center">
                             <span class="text-muted mr-3 font-weight-bold">{{ __('Incoming Slab') }}:</span>
                             <div class="slab-thumbnail mr-3"></div>
@@ -206,14 +209,14 @@ frappe.realtime.on('slab_checkout', (slab) => {
             <div class="col-12">
                 <h4 class="mb-4 text-muted font-weight-bold">{{ __('Cooling Queue') }}</h4>
                 <div v-if="coolingQueue.length === 0" class="empty-state p-5 text-center border rounded">
-                     <div class="mb-3 text-muted" style="opacity: 0.5;">
+                    <div class="mb-3 text-muted" style="opacity: 0.5;">
                         <i class="fa fa-snowflake-o" style="font-size: 3rem;"></i>
                     </div>
                     <p class="text-muted">{{ __('No slabs in cooling') }}</p>
                 </div>
-                
+
                 <TransitionGroup v-else name="list" tag="div" class="card-columns">
-                     <div v-for="(job, index) in coolingQueue" :key="job.name" class="card mb-3 shadow-sm cooling-card">
+                    <div v-for="(job, index) in coolingQueue" :key="job.name" class="card mb-3 shadow-sm cooling-card">
                         <div class="card-body">
                             <div class="d-flex justify-content-between mb-2">
                                 <h5 class="card-title font-weight-bold mb-0">{{ job.slab }}</h5>
@@ -221,12 +224,13 @@ frappe.realtime.on('slab_checkout', (slab) => {
                             </div>
                             <p class="card-text text-muted small mb-2">{{ job.slab_template }}</p>
                             <p class="card-text text-muted x-small mb-3">{{ job.name }}</p>
-                            
+
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="text-muted small">
                                     <i class="fa fa-clock-o mr-1"></i> {{ formatDuration(job.elapsed) }}
                                 </div>
-                                <button v-if="index === 0" class="btn btn-success btn-sm px-3" @click="finishCooling(job)">
+                                <button v-if="index === 0" class="btn btn-success btn-sm px-3"
+                                    @click="finishCooling(job)">
                                     <i class="fa fa-check mr-1"></i> {{ __('Unload Slab') }}
                                 </button>
                             </div>
@@ -271,26 +275,30 @@ frappe.realtime.on('slab_checkout', (slab) => {
 
 /* Animations */
 .pop-switch-enter-active {
-	transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
 .pop-switch-leave-active {
-	transition: all 0.2s ease-in;
+    transition: all 0.2s ease-in;
 }
+
 .pop-switch-enter-from,
 .pop-switch-leave-to {
-	opacity: 0;
-	transform: scale(0.9);
+    opacity: 0;
+    transform: scale(0.9);
 }
 
 .list-enter-active,
 .list-leave-active {
     transition: all 0.3s ease;
 }
+
 .list-enter-from,
 .list-leave-to {
     opacity: 0;
     transform: translateY(20px);
 }
+
 .list-move {
     transition: transform 0.3s ease;
 }

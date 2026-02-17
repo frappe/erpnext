@@ -1,31 +1,31 @@
 frappe.ui.form.on("Slab Quality Report", {
-	refresh(frm) {
-		frm.trigger('render_visualizer');
+    refresh(frm) {
+        frm.trigger('render_visualizer');
         frm.trigger('render_grade_color');
-	},
+    },
 
-	grade(frm) {
-		frm.trigger('render_visualizer');
+    grade(frm) {
+        frm.trigger('render_visualizer');
         frm.trigger('render_grade_color');
-	},
+    },
 
-	render_visualizer(frm) {
-		if (!frm.fields_dict.visualizer_preview) return;
-		
-		const wrapper = frm.fields_dict.visualizer_preview.$wrapper;
-		wrapper.empty();
+    render_visualizer(frm) {
+        if (!frm.fields_dict.visualizer_preview) return;
 
-		if (!frm.doc.slab_template) {
-			wrapper.html(`<div class="text-center text-muted p-5">${__("Slab Template not selected")}</div>`);
-			return;
-		}
+        const wrapper = frm.fields_dict.visualizer_preview.$wrapper;
+        wrapper.empty();
+
+        if (!frm.doc.slab_template) {
+            wrapper.html(`<div class="text-center text-muted p-5">${__("Slab Template not selected")}</div>`);
+            return;
+        }
 
         const parts = frm.doc.slab_template.split('-');
-        let size_name = parts.length >= 2 ? parts[parts.length - 2] : null;
+        let size_name = parts.length >= 1 ? parts[parts.length - 1] : null;
 
         if (!size_name) {
-             wrapper.html(`<div class="text-center text-muted p-5">${__("Could not determine Slab Size from Template")}</div>`);
-             return;
+            wrapper.html(`<div class="text-center text-muted p-5">${__("Could not determine Slab Size from Template")}</div>`);
+            return;
         }
 
         frappe.db.get_doc('Slab Size', size_name).then(slab_size_doc => {
@@ -33,7 +33,7 @@ frappe.ui.form.on("Slab Quality Report", {
             const breadth = slab_size_doc.breadth; // mm (width)
 
             const obs_data = frm.doc.observations || [];
-            
+
             // CSS Variables for styling
             const borderColor = 'var(--text-color)';
             const bgColor = 'var(--fg-color)';
@@ -42,7 +42,7 @@ frappe.ui.form.on("Slab Quality Report", {
             let markers_html = obs_data.map(obs => {
                 const left_pct = (obs.x / length) * 100;
                 const top_pct = (obs.y / breadth) * 100;
-                
+
                 // Marker
                 return `<div class="obs-marker" style="
                     position: absolute;
@@ -99,9 +99,9 @@ frappe.ui.form.on("Slab Quality Report", {
             wrapper.html(container_html);
         }).catch(err => {
             console.error(err);
-             wrapper.html(`<div class="text-center text-muted p-5">${__("Error fetching details")}</div>`);
+            wrapper.html(`<div class="text-center text-muted p-5">${__("Error fetching details")}</div>`);
         });
-	},
+    },
 
     render_grade_color(frm) {
         // Clear any existing indicator
