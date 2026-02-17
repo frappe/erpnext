@@ -1,9 +1,18 @@
 import frappe
 
-# Amending the incorrect route in hooks.py leaves the incorrect entry in the database, it needs to be removed manually.
-
 
 def execute():
+	"""
+	Amending the incorrect route in hooks.py leaves
+	the incorrect entry to /addresses in the database
+	and in the Portal Settings which needs to be
+	removed manually.
+
+	This patch deletes the incorrect entry so that
+	only the correct entry with route /address
+	remains in the database and Portal Settings.
+	"""
+
 	incorrect_portal_menu_item = frappe.get_all(
 		"Portal Menu Item",
 		filters={
