@@ -829,6 +829,86 @@ class TestAsset(AssetSetup):
 		asset.save().submit()
 		self.assertEqual(asset.status, "Fully Depreciated")
 
+	def test_depreciation_accounts_is_set_for_depreciable_assets(self):
+		company_depreciation_accounts = frappe.db.get_value(
+			"Company",
+			"_Test Company",
+			[
+				"accumulated_depreciation_account",
+				"depreciation_expense_account",
+			],
+			as_dict=True,
+		)
+		frappe.db.set_value(
+			"Company",
+			"_Test Company",
+			{
+				"accumulated_depreciation_account": "",
+				"depreciation_expense_account": "",
+			},
+		)
+		asset_category_name = "Computers"
+		asset_category_account = None
+		if frappe.db.exists("Asset Category", asset_category_name):
+			filters = {
+				"parent": asset_category_name,
+				"company_name": "_Test Company",
+			}
+			fieldname = [
+				"name",
+				"accumulated_depreciation_account",
+				"depreciation_expense_account",
+			]
+			asset_category_account = frappe.db.get_value(
+				"Asset Category Account",
+				filters=filters,
+				fieldname=fieldname,
+				as_dict=True,
+			)
+			if asset_category_account and (
+				asset_category_account.accumulated_depreciation_account
+				or asset_category_account.depreciation_expense_account
+			):
+				frappe.db.set_value(
+					"Asset Category Account",
+					asset_category_account.name,
+					{
+						"accumulated_depreciation_account": "",
+						"depreciation_expense_account": "",
+					},
+				)
+		else:
+			asset_category = frappe.new_doc("Asset Category")
+			asset_category.asset_category_name = asset_category_name
+			asset_category.append(
+				"accounts",
+				{
+					"company_name": "_Test Company",
+					"fixed_asset_account": "_Test Fixed Asset - _TC",
+				},
+			)
+			asset_category.insert()
+		try:
+			asset = create_asset(asset_category=asset_category_name, calculate_depreciation=1, do_not_save=1)
+			with self.assertRaises(frappe.ValidationError) as err:
+				asset.save()
+
+			self.assertTrue(
+				"Please set Depreciation related Accounts in Asset Category Computers or Company"
+				in str(err.exception)
+			)
+		finally:
+			frappe.db.set_value("Company", "_Test Company", company_depreciation_accounts)
+			if asset_category_account:
+				frappe.db.set_value(
+					"Asset Category Account",
+					asset_category_account.name,
+					{
+						"accumulated_depreciation_account": asset_category_account.accumulated_depreciation_account,
+						"depreciation_expense_account": asset_category_account.depreciation_expense_account,
+					},
+				)
+
 
 class TestDepreciationMethods(AssetSetup):
 	@classmethod

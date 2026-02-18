@@ -550,7 +550,7 @@
   },
   {
    "default": "0",
-   "description": "If enabled, the system will allow negative stock entries for the batch, but this could calculate the valuation rate incorrectly, so avoid using this option.",
+   "description": "If enabled, the system will allow negative stock entries for the batch. But, this may lead to incorrect valuation rates, so it is recommended to avoid using this option. The system will permit negative stock only when it is caused by backdated entries and will validate and block negative stock in all other cases.",
    "fieldname": "allow_negative_stock_for_batch",
    "fieldtype": "Check",
    "label": "Allow Negative Stock for Batch"
@@ -562,7 +562,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-09 15:01:12.466175",
+ "modified": "2026-02-16 10:36:59.921491",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

@@ -3,7 +3,8 @@
 
 
 import frappe
-from frappe import _, msgprint
+from frappe import _, msgprint, qb
+from frappe.query_builder import Criterion
 
 
 def execute(filters=None):
@@ -97,45 +98,53 @@ def get_columns(filters):
 
 
 def get_entries(filters):
-	date_field = filters["doc_type"] == "Sales Order" and "transaction_date" or "posting_date"
+	dt = qb.DocType(filters["doc_type"])
+	st = qb.DocType("Sales Team")
+	date_field = dt["transaction_date"] if filters["doc_type"] == "Sales Order" else dt["posting_date"]
 
-	conditions, values = get_conditions(filters, date_field)
-	entries = frappe.db.sql(
-		"""
-		select
-			dt.name, dt.customer, dt.territory, dt.{} as posting_date,dt.base_net_total as base_net_amount,
-			st.commission_rate,st.sales_person, st.allocated_percentage, st.allocated_amount, st.incentives
-		from
-			`tab{}` dt, `tabSales Team` st
-		where
-			st.parent = dt.name and st.parenttype = {}
-			and dt.docstatus = 1 {} order by dt.name desc,st.sales_person
-		""".format(date_field, filters["doc_type"], "%s", conditions),
-		tuple([filters["doc_type"], *values]),
-		as_dict=1,
+	conditions = get_conditions(dt, st, filters, date_field)
+	entries = (
+		qb.from_(dt)
+		.join(st)
+		.on(st.parent.eq(dt.name) & st.parenttype.eq(filters["doc_type"]))
+		.select(
+			dt.name,
+			dt.customer,
+			dt.territory,
+			date_field.as_("posting_date"),
+			dt.base_net_total.as_("base_net_amount"),
+			st.commission_rate,
+			st.sales_person,
+			st.allocated_percentage,
+			st.allocated_amount,
+			st.incentives,
+		)
+		.where(Criterion.all(conditions))
+		.orderby(dt.name, st.sales_person)
+		.run(as_dict=True)
 	)
 
 	return entries
 
 
-def get_conditions(filters, date_field):
-	conditions = [""]
-	values = []
+def get_conditions(dt, st, filters, date_field):
+	conditions = []
+
+	conditions.append(dt.docstatus.eq(1))
+	from_dt = filters.get("from_date")
+	to_dt = filters.get("to_date")
+	if from_dt and to_dt:
+		conditions.append(date_field.between(from_dt, to_dt))
+	elif from_dt and not to_dt:
+		conditions.append(date_field.gte(from_dt))
+	elif not from_dt and to_dt:
+		conditions.append(date_field.lte(to_dt))
 
 	for field in ["company", "customer", "territory"]:
 		if filters.get(field):
-			conditions.append(f"dt.{field}=%s")
-			values.append(filters[field])
+			conditions.append(dt[field].eq(filters.get(field)))
 
 	if filters.get("sales_person"):
-		conditions.append("st.sales_person = '{}'".format(filters.get("sales_person")))
+		conditions.append(st["sales_person"].eq(filters.get("sales_person")))
 
-	if filters.get("from_date"):
-		conditions.append(f"dt.{date_field}>=%s")
-		values.append(filters["from_date"])
-
-	if filters.get("to_date"):
-		conditions.append(f"dt.{date_field}<=%s")
-		values.append(filters["to_date"])
-
-	return " and ".join(conditions), values
+	return conditions

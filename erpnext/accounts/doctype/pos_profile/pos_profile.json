@@ -78,7 +78,7 @@
   "column_break0",
   "tc_name",
   "select_print_heading",
-  "campaign_section_break",
+  "utm_analytics_section",
   "utm_source",
   "column_break_tvls",
   "utm_campaign",
@@ -463,12 +463,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "collapsible": 1,
-   "fieldname": "campaign_section_break",
-   "fieldtype": "Section Break",
-   "label": "Campaign"
-  },
-  {
    "fieldname": "accounting_tab",
    "fieldtype": "Tab Break",
    "label": "Accounting"
@@ -554,6 +548,12 @@
    "fieldname": "allow_warehouse_change",
    "fieldtype": "Check",
    "label": "Allow User to Edit Warehouse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "utm_analytics_section",
+   "fieldtype": "Section Break",
+   "label": "Campaign"
   }
  ],
  "grid_page_length": 50,
@@ -582,7 +582,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2026-02-05 18:17:26.807353",
+ "modified": "2026-02-10 14:24:48.597412",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

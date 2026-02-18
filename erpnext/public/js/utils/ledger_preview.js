@@ -84,6 +84,14 @@ erpnext.accounts.ledger_preview = {
 	},
 
 	get_datatable(columns, data, wrapper) {
+		columns.forEach((col) => {
+			if (col.fieldtype === "Currency") {
+				col.format = (value) => {
+					return format_currency(value);
+				};
+			}
+		});
+
 		const datatable_options = {
 			columns: columns,
 			data: data,

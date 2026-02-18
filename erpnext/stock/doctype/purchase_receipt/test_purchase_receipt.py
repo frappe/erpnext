@@ -1017,6 +1017,102 @@ class TestPurchaseReceipt(IntegrationTestCase):
 
 		pr.cancel()
 
+	def test_lcv_for_internal_transfer(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+
+		prepare_data_for_internal_transfer()
+
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+
+		item_code = make_item(
+			"Test Item For LCV in Internal Transfer",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_naming_series": "TEST-SBATCH.###"},
+		).name
+
+		pr1 = make_purchase_receipt(
+			item_code=item_code,
+			qty=10,
+			rate=100,
+			warehouse="Stores - TCP1",
+			company="_Test Company with perpetual inventory",
+		)
+
+		dn1 = create_delivery_note(
+			item_code=pr1.items[0].item_code,
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=10,
+			rate=500,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
+		)
+
+		pr = make_inter_company_purchase_receipt(dn1.name)
+		pr.items[0].from_warehouse = "Work In Progress - TCP1"
+		pr.items[0].warehouse = "Stores - TCP1"
+		pr.submit()
+
+		sle_entries = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			fields=["serial_and_batch_bundle", "actual_qty"],
+		)
+		self.assertEqual(len(sle_entries), 2)
+
+		inward_sabb = frappe.get_all(
+			"Serial and Batch Bundle",
+			filters={
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": pr.name,
+				"total_qty": (">", 0),
+				"docstatus": 1,
+			},
+			pluck="name",
+		)
+		self.assertEqual(len(inward_sabb), 1)
+
+		original_cost = frappe.db.get_value("Serial and Batch Bundle", inward_sabb[0], "total_amount")
+
+		make_landed_cost_voucher(
+			company=pr.company,
+			receipt_document_type="Purchase Receipt",
+			receipt_document=pr.name,
+			charges=100,
+			distribute_charges_based_on="Qty",
+			expense_account="Expenses Included In Valuation - TCP1",
+		)
+
+		sle_entries = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_type": "Purchase Receipt", "voucher_no": pr.name, "is_cancelled": 0},
+			fields=["serial_and_batch_bundle", "actual_qty"],
+		)
+		self.assertEqual(len(sle_entries), 2)
+
+		new_inward_sabb = frappe.get_all(
+			"Serial and Batch Bundle",
+			filters={
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": pr.name,
+				"total_qty": (">", 0),
+				"docstatus": 1,
+			},
+			pluck="name",
+		)
+		self.assertEqual(len(new_inward_sabb), 1)
+
+		new_cost = frappe.db.get_value("Serial and Batch Bundle", new_inward_sabb[0], "total_amount")
+		self.assertEqual(new_cost, original_cost + 100)
+
+		self.assertTrue(new_inward_sabb[0] == inward_sabb[0])
+
 	def test_stock_transfer_from_purchase_receipt_with_valuation(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note

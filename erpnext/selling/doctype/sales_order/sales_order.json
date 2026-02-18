@@ -161,17 +161,18 @@
   "column_break4",
   "select_print_heading",
   "language",
+  "utm_analytics_section",
+  "utm_source",
+  "utm_medium",
+  "column_break_ijxt",
+  "utm_campaign",
+  "utm_content",
   "additional_info_section",
   "is_internal_customer",
   "po_no",
   "po_date",
   "represents_company",
   "column_break_yvzv",
-  "utm_source",
-  "utm_campaign",
-  "utm_medium",
-  "utm_content",
-  "column_break_152",
   "inter_company_order_reference",
   "party_account_currency",
   "connections_tab"
@@ -1568,10 +1569,6 @@
    "label": "Additional Info"
   },
   {
-   "fieldname": "column_break_152",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "incoterm",
    "fieldtype": "Link",
    "label": "Incoterm",
@@ -1717,6 +1714,16 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Additional Discount"
+  },
+  {
+   "fieldname": "column_break_ijxt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "utm_analytics_section",
+   "fieldtype": "Section Break",
+   "label": "UTM Analytics"
   }
  ],
  "grid_page_length": 50,
@@ -1724,7 +1731,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-06 15:35:47.502692",
+ "modified": "2026-02-10 11:55:52.796522",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

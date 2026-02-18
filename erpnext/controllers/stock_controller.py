@@ -2017,7 +2017,7 @@ def get_gl_entries_for_preview(doctype, docname, fields):
 
 def get_columns(raw_columns, fields):
 	return [
-		{"name": d.get("label"), "editable": False, "width": 110}
+		{"name": d.get("label"), "editable": False, "width": 110, "fieldtype": d.get("fieldtype")}
 		for d in raw_columns
 		if not d.get("hidden") and d.get("fieldname") in fields
 	]

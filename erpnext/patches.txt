@@ -465,3 +465,4 @@ erpnext.patches.v16_0.set_ordered_qty_in_quotation_item
 erpnext.patches.v16_0.update_company_custom_field_in_bin
 erpnext.patches.v15_0.replace_http_with_https_in_sales_partner
 erpnext.patches.v16_0.migrate_asset_type_checkboxes_to_select
+erpnext.patches.v15_0.delete_quotation_lost_record_detail

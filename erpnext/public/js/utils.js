@@ -646,7 +646,11 @@ erpnext.utils.update_child_items = function (opts) {
 			get_query: function () {
 				let filters;
 				if (frm.doc.doctype == "Sales Order") {
-					filters = { is_sales_item: 1, is_stock_item: !frm.doc.is_subcontracted };
+					if (frm.doc.is_subcontracted) {
+						filters = { is_sales_item: 1, is_stock_item: 0 };
+					} else {
+						filters = { is_sales_item: 1 };
+					}
 				} else if (frm.doc.doctype == "Purchase Order") {
 					if (frm.doc.is_subcontracted) {
 						if (frm.doc.is_old_subcontracting_flow) {

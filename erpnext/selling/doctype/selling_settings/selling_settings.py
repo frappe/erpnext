@@ -10,6 +10,17 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 from frappe.model.document import Document
 from frappe.utils import cint
 
+UTM_DOCTYPES = [
+	"Lead",
+	"Quotation",
+	"POS Invoice",
+	"POS Profile",
+	"Opportunity",
+	"Sales Order",
+	"Sales Invoice",
+	"Delivery Note",
+]
+
 
 class SellingSettings(Document):
 	# begin: auto-generated types
@@ -38,6 +49,7 @@ class SellingSettings(Document):
 		enable_cutoff_date_on_bulk_delivery_note_creation: DF.Check
 		enable_discount_accounting: DF.Check
 		enable_tracking_sales_commissions: DF.Check
+		enable_utm: DF.Check
 		fallback_to_default_price_list: DF.Check
 		hide_tax_id: DF.Check
 		maintain_same_rate_action: DF.Literal["Stop", "Warn"]
@@ -83,6 +95,9 @@ class SellingSettings(Document):
 
 		if old_doc.enable_tracking_sales_commissions != self.enable_tracking_sales_commissions:
 			toggle_tracking_sales_commissions_section(not self.enable_tracking_sales_commissions)
+
+		if old_doc.enable_utm != self.enable_utm:
+			toggle_utm_analytics_section(not self.enable_utm)
 
 	def validate_fallback_to_default_price_list(self):
 		if (
@@ -195,3 +210,14 @@ def toggle_tracking_sales_commissions_section(hide):
 			create_property_setter_for_hiding_field(doctype, "commission_section", hide)
 		if meta.has_field("sales_team_section"):
 			create_property_setter_for_hiding_field(doctype, "sales_team_section", hide)
+
+
+def toggle_utm_analytics_section(hide):
+	from erpnext.accounts.doctype.accounts_settings.accounts_settings import (
+		create_property_setter_for_hiding_field,
+	)
+
+	for doctype in UTM_DOCTYPES:
+		meta = frappe.get_meta(doctype)
+		if meta.has_field("utm_analytics_section"):
+			create_property_setter_for_hiding_field(doctype, "utm_analytics_section", hide)

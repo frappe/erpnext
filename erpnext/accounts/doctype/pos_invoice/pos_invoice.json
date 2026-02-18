@@ -159,15 +159,16 @@
   "language",
   "column_break_84",
   "select_print_heading",
+  "utm_analytics_section",
+  "utm_source",
+  "utm_medium",
+  "column_break_bhao",
+  "utm_campaign",
   "more_information",
   "inter_company_invoice_reference",
   "customer_group",
   "is_discounted",
   "col_break23",
-  "utm_source",
-  "utm_campaign",
-  "utm_medium",
-  "column_break_gpiw",
   "status",
   "more_info",
   "debit_to",
@@ -1542,10 +1543,6 @@
    "label": "Update Billed Amount in Delivery Note"
   },
   {
-   "fieldname": "column_break_gpiw",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "utm_medium",
    "fieldtype": "Link",
    "label": "Medium",
@@ -1612,12 +1609,22 @@
    "no_copy": 1,
    "options": "Item Wise Tax Detail",
    "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "utm_analytics_section",
+   "fieldtype": "Section Break",
+   "label": "UTM Analytics"
+  },
+  {
+   "fieldname": "column_break_bhao",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-29 21:20:51.376875",
+ "modified": "2026-02-10 14:23:07.181782",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

@@ -52,13 +52,12 @@
   "country",
   "column_break2",
   "contact_html",
-  "section_break_analytics",
+  "utm_analytics_section",
   "utm_source",
-  "utm_content",
+  "utm_medium",
   "column_break_gkxo",
   "utm_campaign",
-  "column_break_gqka",
-  "utm_medium",
+  "utm_content",
   "qualification_tab",
   "qualification_status",
   "column_break_64",
@@ -505,10 +504,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_gqka",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "utm_content",
    "fieldtype": "Data",
    "label": "Content",
@@ -537,7 +532,8 @@
    "options": "UTM Campaign"
   },
   {
-   "fieldname": "section_break_analytics",
+   "collapsible": 1,
+   "fieldname": "utm_analytics_section",
    "fieldtype": "Section Break",
    "label": "Analytics"
   }
@@ -547,7 +543,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2025-06-26 11:02:01.158901",
+ "modified": "2026-02-10 14:36:37.157961",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",

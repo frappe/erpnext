@@ -125,19 +125,20 @@
   "competitors",
   "column_break_117",
   "order_lost_reason",
+  "utm_analytics_section",
+  "utm_source",
+  "utm_medium",
+  "column_break_fozg",
+  "utm_campaign",
+  "utm_content",
   "additional_info_section",
   "status",
   "customer_group",
   "territory",
   "column_break_108",
-  "utm_source",
-  "utm_campaign",
-  "utm_medium",
-  "utm_content",
-  "column_break4",
   "opportunity",
-  "supplier_quotation",
   "enq_det",
+  "supplier_quotation",
   "connections_tab"
  ],
  "fields": [
@@ -844,13 +845,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "column_break4",
-   "fieldtype": "Column Break",
-   "oldfieldtype": "Column Break",
-   "print_hide": 1,
-   "width": "50%"
-  },
-  {
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -1125,13 +1119,23 @@
   {
    "fieldname": "column_break_bffp",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_fozg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "utm_analytics_section",
+   "fieldtype": "Section Break",
+   "label": "UTM Analytics"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-06 16:44:02.134974",
+ "modified": "2026-02-06 17:34:22.170032",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

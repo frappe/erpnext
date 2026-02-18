@@ -154,17 +154,18 @@
   "column_break_88",
   "select_print_heading",
   "language",
+  "utm_analytics_section",
+  "utm_source",
+  "utm_medium",
+  "column_break_neoj",
+  "utm_campaign",
+  "utm_content",
   "more_info",
   "is_internal_customer",
   "represents_company",
   "inter_company_reference",
   "customer_group",
   "territory",
-  "column_break_pxls",
-  "utm_source",
-  "utm_campaign",
-  "utm_medium",
-  "utm_content",
   "column_break5",
   "excise_page",
   "instructions",
@@ -1372,10 +1373,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "column_break_pxls",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "utm_medium",
    "fieldtype": "Link",
    "label": "Medium",
@@ -1428,13 +1425,23 @@
    "no_copy": 1,
    "options": "Item Wise Tax Detail",
    "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "utm_analytics_section",
+   "fieldtype": "Section Break",
+   "label": "UTM Analytics"
+  },
+  {
+   "fieldname": "column_break_neoj",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-03 12:27:19.055918",
+ "modified": "2026-02-10 14:35:08.523130",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

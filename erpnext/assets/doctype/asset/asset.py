@@ -426,12 +426,15 @@ class Asset(AccountsController):
 		non_depreciable_category = frappe.db.get_value(
 			"Asset Category", self.asset_category, "non_depreciable_category"
 		)
-		if self.calculate_depreciation and non_depreciable_category:
-			frappe.throw(
-				_(
-					"This asset category is marked as non-depreciable. Please disable depreciation calculation or choose a different category."
+		if self.calculate_depreciation:
+			if non_depreciable_category:
+				frappe.throw(
+					_(
+						"This asset category is marked as non-depreciable. Please disable depreciation calculation or choose a different category."
+					)
 				)
-			)
+			# validate accounts required for asset depreciation
+			get_depreciation_accounts(self.asset_category, self.company)
 
 	def validate_precision(self):
 		if self.net_purchase_amount:

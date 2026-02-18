@@ -783,7 +783,9 @@ class BuyingController(SubcontractingController):
 								or self.is_return
 								or (self.is_internal_transfer() and self.docstatus == 2)
 								else self.get_package_for_target_warehouse(
-									d, type_of_transaction=type_of_transaction
+									d,
+									type_of_transaction=type_of_transaction,
+									via_landed_cost_voucher=via_landed_cost_voucher,
 								)
 							),
 						},
@@ -871,7 +873,22 @@ class BuyingController(SubcontractingController):
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
 
-	def get_package_for_target_warehouse(self, item, warehouse=None, type_of_transaction=None) -> str:
+	def get_package_for_target_warehouse(
+		self, item, warehouse=None, type_of_transaction=None, via_landed_cost_voucher=None
+	) -> str:
+		if via_landed_cost_voucher and item.get("warehouse"):
+			if sabb := frappe.db.get_value(
+				"Serial and Batch Bundle",
+				{
+					"voucher_detail_no": item.name,
+					"warehouse": item.get("warehouse"),
+					"docstatus": 1,
+					"is_cancelled": 0,
+				},
+				"name",
+			):
+				return sabb
+
 		if not item.serial_and_batch_bundle:
 			return ""
 
