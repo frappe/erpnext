@@ -44,13 +44,12 @@
   "column_break_17",
   "opportunity_amount",
   "base_opportunity_amount",
-  "section_break_analytics",
+  "utm_analytics_section",
   "utm_source",
-  "utm_content",
+  "utm_medium",
   "column_break_emai",
   "utm_campaign",
-  "column_break_whcu",
-  "utm_medium",
+  "utm_content",
   "more_info",
   "company",
   "transaction_date",
@@ -630,15 +629,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "section_break_analytics",
-   "fieldtype": "Section Break",
-   "label": "Analytics"
-  },
-  {
-   "fieldname": "column_break_whcu",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "utm_medium",
    "fieldtype": "Link",
    "label": "Medium",
@@ -650,13 +640,19 @@
    "fieldtype": "Data",
    "label": "Content",
    "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "utm_analytics_section",
+   "fieldtype": "Section Break",
+   "label": "Analytics"
   }
  ],
  "grid_page_length": 50,
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2025-08-11 13:35:39.476016",
+ "modified": "2026-02-10 14:36:01.387984",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

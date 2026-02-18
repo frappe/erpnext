@@ -1017,15 +1017,27 @@ class TestMaterialRequest(IntegrationTestCase):
 		import json
 
 		from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
-		mr = make_material_request(material_request_type="Material Transfer")
+		new_item = create_item("_Test Pick List Item", is_stock_item=1)
+		item_code = new_item.name
+
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			do_not_save=False,
+			do_not_submit=False,
+		)
+
+		mr = make_material_request(item_code=item_code, material_request_type="Material Transfer")
 		pl = create_pick_list(mr.name)
 		pl.save()
 		pl.locations[0].qty = 5
 		pl.locations[0].stock_qty = 5
 		pl.submit()
 
-		to_warehouse = create_warehouse("Test To Warehouse")
+		to_warehouse = create_warehouse("_Test Warehouse - _TC")
 
 		se_data = create_stock_entry(json.dumps(pl.as_dict()))
 		se = frappe.get_doc(se_data)
@@ -1044,6 +1056,15 @@ class TestMaterialRequest(IntegrationTestCase):
 
 	def test_mr_pick_list_qty_validation(self):
 		"""Test for checking pick list qty validation from Material Request"""
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		make_stock_entry(
+			item_code="_Test Item",
+			target="_Test Warehouse - _TC",
+			qty=10,
+			do_not_save=False,
+			do_not_submit=False,
+		)
 
 		mr = make_material_request(material_request_type="Material Transfer")
 		pl = create_pick_list(mr.name)
@@ -1103,6 +1124,19 @@ class TestMaterialRequest(IntegrationTestCase):
 		end_transit_2.save()
 
 		self.assertRaises(frappe.ValidationError, end_transit_2.submit)
+
+	def test_make_stock_entry_material_issue_warehouse_mapping(self):
+		"""Test to ensure while making stock entry from material request of type Material Issue, warehouse is mapped correctly"""
+		mr = make_material_request(material_request_type="Material Issue", do_not_submit=True)
+		mr.set_warehouse = "_Test Warehouse - _TC"
+		mr.save()
+		mr.submit()
+
+		se = make_stock_entry(mr.name)
+		self.assertEqual(se.from_warehouse, "_Test Warehouse - _TC")
+		self.assertIsNone(se.to_warehouse)
+		se.save()
+		se.submit()
 
 
 def get_in_transit_warehouse(company):

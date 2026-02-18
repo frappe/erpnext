@@ -616,6 +616,117 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		for item in scr.supplied_items:
 			self.assertFalse(item.available_qty_for_consumption)
 
+	def test_supplied_items_consumed_qty_for_similar_finished_goods(self):
+		"""
+		Test that supplied raw material consumption is calculated correctly
+		when multiple subcontracted service items use the same finished good
+		but different BOMs.
+		"""
+
+		from erpnext.controllers.subcontracting_controller import (
+			make_rm_stock_entry as make_subcontract_transfer_entry,
+		)
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		# Configuration: Backflush based on subcontract material transfer
+		set_backflush_based_on("Material Transferred for Subcontract")
+
+		# Create Raw Materials
+		raw_material_1 = make_item("_RM Item 1", properties={"is_stock_item": 1}).name
+
+		raw_material_2 = make_item("_RM Item 2", properties={"is_stock_item": 1}).name
+
+		# Create Subcontracted Finished Good
+		finished_good = make_item("_Finished Good Item", properties={"is_stock_item": 1})
+		finished_good.is_sub_contracted_item = 1
+		finished_good.save()
+
+		# Receive Raw Materials into Warehouse
+		for raw_material in (raw_material_1, raw_material_2):
+			make_stock_entry(
+				item_code=raw_material,
+				qty=10,
+				target="_Test Warehouse - _TC",
+				basic_rate=100,
+			)
+
+		# Create BOMs for the same Finished Good with different RMs
+		bom_rm_1 = make_bom(
+			item=finished_good.name,
+			quantity=1,
+			raw_materials=[raw_material_1],
+		).name
+
+		_bom_rm_2 = make_bom(
+			item=finished_good.name,
+			quantity=1,
+			raw_materials=[raw_material_2],
+		).name
+
+		# Define Subcontracted Service Items
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 1,
+				"rate": 100,
+				"fg_item": finished_good.name,
+				"fg_item_qty": 10,
+			},
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 1,
+				"rate": 150,
+				"fg_item": finished_good.name,
+				"fg_item_qty": 10,
+			},
+		]
+
+		# Create Subcontracting Order
+		subcontracting_order = get_subcontracting_order(
+			service_items=service_items,
+			do_not_save=True,
+		)
+
+		# Assign BOM only to the first service item
+		subcontracting_order.items[0].bom = bom_rm_1
+		subcontracting_order.save()
+		subcontracting_order.submit()
+
+		# Prepare Raw Material Transfer Items
+		raw_material_transfer_items = []
+		for supplied_item in subcontracting_order.supplied_items:
+			raw_material_transfer_items.append(
+				{
+					"item_code": supplied_item.main_item_code,
+					"rm_item_code": supplied_item.rm_item_code,
+					"qty": supplied_item.required_qty,
+					"warehouse": "_Test Warehouse - _TC",
+					"stock_uom": "Nos",
+				}
+			)
+
+		# Transfer Raw Materials to Subcontractor Warehouse
+		stock_entry = frappe.get_doc(
+			make_subcontract_transfer_entry(
+				subcontracting_order.name,
+				raw_material_transfer_items,
+			)
+		)
+		stock_entry.to_warehouse = "_Test Warehouse 1 - _TC"
+		stock_entry.save()
+		stock_entry.submit()
+
+		# Create Subcontracting Receipt
+		subcontracting_receipt = make_subcontracting_receipt(subcontracting_order.name)
+		subcontracting_receipt.save()
+
+		# Check consumed_qty for each supplied item
+		self.assertEqual(len(subcontracting_receipt.supplied_items), 2)
+		self.assertEqual(subcontracting_receipt.supplied_items[0].consumed_qty, 10)
+		self.assertEqual(subcontracting_receipt.supplied_items[1].consumed_qty, 10)
+
 	def test_supplied_items_cost_after_reposting(self):
 		# Set Backflush Based On as "BOM"
 		set_backflush_based_on("BOM")

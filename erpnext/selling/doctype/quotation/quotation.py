@@ -621,6 +621,9 @@ def handle_mandatory_error(e, customer, lead_name):
 def get_ordered_items(quotation: str):
 	return frappe._dict(
 		frappe.get_all(
-			"Quotation Item", {"docstatus": 1, "parent": quotation}, ["name", "ordered_qty"], as_list=True
+			"Quotation Item",
+			{"docstatus": 1, "parent": quotation, "ordered_qty": (">", 0)},
+			["name", "ordered_qty"],
+			as_list=True,
 		)
 	)

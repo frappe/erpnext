@@ -278,7 +278,9 @@ class QualityInspection(Document):
 
 	def set_status_based_on_acceptance_values(self, reading):
 		if not cint(reading.numeric):
-			result = reading.get("reading_value") == reading.get("value")
+			reading_value = reading.get("reading_value") or ""
+			value = reading.get("value") or ""
+			result = reading_value == value
 		else:
 			# numeric readings
 			result = self.min_max_criteria_passed(reading)

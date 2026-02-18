@@ -156,7 +156,6 @@ frappe.ui.form.on("Stock Entry", {
 			};
 		});
 
-		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 
 		frappe.db.get_single_value("Stock Settings", "disable_serial_no_and_batch_selector").then((value) => {
@@ -245,6 +244,7 @@ frappe.ui.form.on("Stock Entry", {
 
 	refresh: function (frm) {
 		frm.trigger("get_items_from_transit_entry");
+		frm.trigger("toggle_warehouse_fields");
 
 		if (!frm.doc.docstatus && !frm.doc.subcontracting_inward_order) {
 			frm.trigger("validate_purpose_consumption");
@@ -534,12 +534,29 @@ frappe.ui.form.on("Stock Entry", {
 		frm.remove_custom_button("Bill of Materials", "Get Items From");
 		frm.events.show_bom_custom_button(frm);
 		frm.trigger("add_to_transit");
+		frm.trigger("toggle_warehouse_fields");
 
 		frm.fields_dict.items.grid.update_docfield_property(
 			"basic_rate",
 			"read_only",
 			frm.doc.purpose == "Material Receipt" ? 0 : 1
 		);
+	},
+
+	toggle_warehouse_fields(frm) {
+		frm.fields_dict["items"].grid.update_docfield_property(
+			"s_warehouse",
+			"in_list_view",
+			!["Material Receipt", "Receive from Customer"].includes(frm.doc.purpose)
+		);
+
+		frm.fields_dict["items"].grid.update_docfield_property(
+			"t_warehouse",
+			"in_list_view",
+			!["Material Issue"].includes(frm.doc.purpose)
+		);
+
+		frm.fields_dict["items"].grid.reset_grid();
 	},
 
 	purpose: function (frm) {

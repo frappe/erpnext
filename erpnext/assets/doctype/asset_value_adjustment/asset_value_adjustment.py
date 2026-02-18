@@ -227,6 +227,6 @@ class AssetValueAdjustment(Document):
 
 
 @frappe.whitelist()
-def get_value_of_accounting_dimensions(asset_name):
+def get_value_of_accounting_dimensions(asset_name: str):
 	dimension_fields = [*frappe.get_list("Accounting Dimension", pluck="fieldname"), "cost_center"]
 	return frappe.db.get_value("Asset", asset_name, fieldname=dimension_fields, as_dict=True)

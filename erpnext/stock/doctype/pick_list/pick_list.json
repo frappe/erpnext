@@ -6,19 +6,18 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "naming_series",
   "company",
+  "naming_series",
   "purpose",
   "customer",
-  "customer_name",
-  "work_order",
-  "material_request",
-  "for_qty",
   "column_break_4",
+  "for_qty",
   "parent_warehouse",
   "consider_rejected_warehouses",
   "get_item_locations",
+  "section_break_cfiw",
   "pick_manually",
+  "column_break_nwpf",
   "ignore_pricing_rule",
   "section_break_6",
   "scan_barcode",
@@ -27,14 +26,21 @@
   "prompt_qty",
   "section_break_15",
   "locations",
-  "amended_from",
+  "other_info_tab",
   "print_settings_section",
   "group_same_items",
   "status_section",
-  "status",
-  "column_break_qyam",
+  "per_delivered",
   "delivery_status",
-  "per_delivered"
+  "column_break_refl",
+  "status",
+  "reference_section",
+  "work_order",
+  "customer_name",
+  "column_break_feoy",
+  "material_request",
+  "amended_from",
+  "connections_tab"
  ],
  "fields": [
   {
@@ -213,11 +219,9 @@
    "label": "Ignore Pricing Rule"
   },
   {
-   "collapsible": 1,
    "fieldname": "status_section",
    "fieldtype": "Section Break",
-   "label": "Status",
-   "print_hide": 1
+   "label": "Status"
   },
   {
    "fieldname": "delivery_status",
@@ -240,13 +244,41 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_qyam",
+   "fieldname": "section_break_cfiw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_nwpf",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "other_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "column_break_refl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "column_break_feoy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-03 18:36:52.282355",
+ "modified": "2026-02-06 18:14:18.361039",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

@@ -3,6 +3,7 @@
 
 frappe.ui.form.on("Journal Entry Template", {
 	onload: function (frm) {
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 		if (frm.is_new()) {
 			frappe.call({
 				type: "GET",
@@ -36,6 +37,31 @@ frappe.ui.form.on("Journal Entry Template", {
 			}
 
 			return { filters: filters };
+		});
+
+		frm.set_query("project", "accounts", function (doc, cdt, cdn) {
+			let row = frappe.get_doc(cdt, cdn);
+			let filters = {
+				company: doc.company,
+			};
+			if (row.party_type == "Customer") {
+				filters.customer = row.party;
+			}
+			return {
+				query: "erpnext.controllers.queries.get_project_name",
+				filters,
+			};
+		});
+
+		frm.set_query("party_type", "accounts", function (doc, cdt, cdn) {
+			const row = locals[cdt][cdn];
+
+			return {
+				query: "erpnext.setup.doctype.party_type.party_type.get_party_type",
+				filters: {
+					account: row.account,
+				},
+			};
 		});
 	},
 	voucher_type: function (frm) {

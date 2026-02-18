@@ -12,12 +12,14 @@
   "disabled",
   "warehouse_name",
   "column_break_3",
-  "is_group",
-  "parent_warehouse",
+  "company",
   "is_rejected_warehouse",
   "column_break_4",
   "account",
-  "company",
+  "section_break_ujhu",
+  "parent_warehouse",
+  "is_group",
+  "column_break_qhdh",
   "customer",
   "address_and_contact",
   "address_html",
@@ -94,6 +96,7 @@
    "description": "If blank, parent Warehouse Account or company default will be considered in transactions",
    "fieldname": "account",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Account",
    "options": "Account"
   },
@@ -268,6 +271,14 @@
    "fieldtype": "Link",
    "label": "Customer",
    "options": "Customer"
+  },
+  {
+   "fieldname": "section_break_ujhu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_qhdh",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -275,7 +286,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-09-05 14:47:17.140099",
+ "modified": "2026-02-05 18:17:11.035097",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",

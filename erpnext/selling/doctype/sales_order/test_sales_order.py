@@ -57,6 +57,28 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		frappe.db.rollback()
 		frappe.set_user("Administrator")
 
+	def test_sales_order_skip_delivery_note(self):
+		so = make_sales_order(do_not_submit=True)
+		so.order_type = "Maintenance"
+		so.skip_delivery_note = 1
+		so.append(
+			"items",
+			{
+				"item_code": "_Test Item 2",
+				"qty": 2,
+				"rate": 100,
+			},
+		)
+		so.save()
+		so.submit()
+
+		so.reload()
+		si = make_sales_invoice(so.name)
+		si.insert()
+		si.submit()
+		so.reload()
+		self.assertEqual(so.status, "Completed")
+
 	@IntegrationTestCase.change_settings("Selling Settings", {"allow_negative_rates_for_items": 1})
 	def test_sales_order_with_negative_rate(self):
 		"""

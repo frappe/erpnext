@@ -449,12 +449,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
 			data = frappe.db.get_value(
-				"Job Card", self.job_card, ["for_quantity", "work_order", "bom_no"], as_dict=1
+				"Job Card", self.job_card, ["for_quantity", "work_order", "bom_no", "semi_fg_bom"], as_dict=1
 			)
 			self.fg_completed_qty = data.for_quantity
 			self.work_order = data.work_order
 			self.from_bom = 1
-			self.bom_no = data.bom_no
+			self.bom_no = data.semi_fg_bom or data.bom_no
 
 	def validate_job_card_fg_item(self):
 		if not self.job_card:
@@ -971,6 +971,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		precision = frappe.get_precision("Stock Entry Detail", "qty")
 		for item_code, details in raw_materials.items():
+			item_code = item_code[0] if type(item_code) == tuple else item_code
 			if matched_item := self.get_matched_items(item_code):
 				if flt(details.get("qty"), precision) != flt(matched_item.qty, precision):
 					frappe.throw(
@@ -2005,6 +2006,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			else:
 				job_doc.set_consumed_qty_in_job_card_item(self)
 				job_doc.set_manufactured_qty()
+				job_doc.update_work_order()
 
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)

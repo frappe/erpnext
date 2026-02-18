@@ -97,7 +97,7 @@ def validate_accounting_period_on_doc_save(doc, method=None):
 	if doc.doctype == "Bank Clearance":
 		return
 	elif doc.doctype == "Asset":
-		if doc.is_existing_asset:
+		if doc.asset_type == "Existing Asset":
 			return
 		else:
 			date = doc.available_for_use_date

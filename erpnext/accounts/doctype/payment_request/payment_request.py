@@ -535,7 +535,7 @@ class PaymentRequest(Document):
 				row_number += TO_SKIP_NEW_ROW
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def make_payment_request(**args):
 	"""Make payment request"""
 
@@ -545,6 +545,9 @@ def make_payment_request(**args):
 
 	if args.dn and not isinstance(args.dn, str):
 		frappe.throw(_("Invalid parameter. 'dn' should be of type str"))
+
+	frappe.has_permission("Payment Request", "create", throw=True)
+	frappe.has_permission(args.dt, "read", args.dn, throw=True)
 
 	ref_doc = args.ref_doc or frappe.get_doc(args.dt, args.dn)
 	if not args.get("company"):
@@ -819,7 +822,7 @@ def get_print_format_list(ref_doctype):
 	return {"print_format": print_format_list}
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def resend_payment_email(docname):
 	return frappe.get_doc("Payment Request", docname).send_email()
 

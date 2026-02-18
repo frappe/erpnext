@@ -990,6 +990,16 @@ class TestQuotation(IntegrationTestCase):
 			f"Expected conversion rate {expected_rate}, got {quotation.conversion_rate}",
 		)
 
+	def test_over_order_limit(self):
+		quotation = make_quotation(qty=5)
+		so1 = make_sales_order(quotation.name)
+		so2 = make_sales_order(quotation.name)
+		so1.delivery_date = nowdate()
+		so2.delivery_date = nowdate()
+
+		so1.submit()
+		self.assertRaises(frappe.ValidationError, so2.submit)
+
 
 def enable_calculate_bundle_price(enable=1):
 	selling_settings = frappe.get_doc("Selling Settings")

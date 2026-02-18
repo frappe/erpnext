@@ -897,6 +897,53 @@ class TestPOSInvoice(IntegrationTestCase):
 			if batch.batch_no == batch_no and batch.warehouse == "_Test Warehouse - _TC":
 				self.assertEqual(batch.qty, 5)
 
+	def test_pos_batch_reservation_with_return_qty(self):
+		"""
+		Test POS Invoice reserved qty for batch without bundle with return invoices.
+		"""
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			get_auto_batch_nos,
+		)
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_batch_item_with_batch,
+		)
+
+		create_batch_item_with_batch("_Batch Item Reserve Return", "TestBatch-RR 01")
+		se = make_stock_entry(
+			target="_Test Warehouse - _TC",
+			item_code="_Batch Item Reserve Return",
+			qty=30,
+			basic_rate=100,
+		)
+
+		se.reload()
+
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		# POS Invoice for the batch without bundle
+		pos_inv = create_pos_invoice(item="_Batch Item Reserve Return", rate=300, qty=15, do_not_save=1)
+		pos_inv.append(
+			"payments",
+			{"mode_of_payment": "Cash", "amount": 4500},
+		)
+		pos_inv.items[0].batch_no = batch_no
+		pos_inv.save()
+		pos_inv.submit()
+
+		# POS Invoice return
+		pos_return = make_sales_return(pos_inv.name)
+
+		pos_return.insert()
+		pos_return.submit()
+
+		batches = get_auto_batch_nos(
+			frappe._dict({"item_code": "_Batch Item Reserve Return", "warehouse": "_Test Warehouse - _TC"})
+		)
+
+		for batch in batches:
+			if batch.batch_no == batch_no and batch.warehouse == "_Test Warehouse - _TC":
+				self.assertEqual(batch.qty, 30)
+
 	def test_pos_batch_item_qty_validation(self):
 		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 			BatchNegativeStockError,

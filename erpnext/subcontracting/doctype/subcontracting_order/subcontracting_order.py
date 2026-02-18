@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
@@ -12,7 +13,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 	StockReservation,
 	has_reserved_stock,
 )
-from erpnext.stock.stock_balance import update_bin_qty
+from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
 from erpnext.stock.utils import get_bin
 
 
@@ -234,30 +235,7 @@ class SubcontractingOrder(SubcontractingController):
 			):
 				item_wh_list.append([item.item_code, item.warehouse])
 		for item_code, warehouse in item_wh_list:
-			update_bin_qty(item_code, warehouse, {"ordered_qty": self.get_ordered_qty(item_code, warehouse)})
-
-	@staticmethod
-	def get_ordered_qty(item_code, warehouse):
-		table = frappe.qb.DocType("Subcontracting Order")
-		child = frappe.qb.DocType("Subcontracting Order Item")
-
-		query = (
-			frappe.qb.from_(table)
-			.inner_join(child)
-			.on(table.name == child.parent)
-			.select((child.qty - child.received_qty) * child.conversion_factor)
-			.where(
-				(table.docstatus == 1)
-				& (child.item_code == item_code)
-				& (child.warehouse == warehouse)
-				& (child.qty > child.received_qty)
-				& (table.status != "Completed")
-			)
-		)
-
-		query = query.run()
-
-		return flt(query[0][0]) if query else 0
+			update_bin_qty(item_code, warehouse, {"ordered_qty": get_ordered_qty(item_code, warehouse)})
 
 	def update_reserved_qty_for_subcontracting(self, sco_item_rows=None):
 		for item in self.supplied_items:
@@ -386,7 +364,7 @@ class SubcontractingOrder(SubcontractingController):
 			)
 
 	@frappe.whitelist()
-	def reserve_raw_materials(self, items=None, stock_entry=None):
+	def reserve_raw_materials(self, items: list | None = None, stock_entry: str | None = None):
 		if self.reserve_stock:
 			item_dict = {}
 
@@ -460,7 +438,7 @@ class SubcontractingOrder(SubcontractingController):
 		return False
 
 	@frappe.whitelist()
-	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
+	def cancel_stock_reservation_entries(self, sre_list: list | None = None, notify: bool = True):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			cancel_stock_reservation_entries,
 		)
@@ -471,7 +449,7 @@ class SubcontractingOrder(SubcontractingController):
 
 
 @frappe.whitelist()
-def make_subcontracting_receipt(source_name, target_doc=None):
+def make_subcontracting_receipt(source_name: str, target_doc: Document | str | None = None):
 	items = frappe.flags.args.get("items") if frappe.flags.args else None
 	return get_mapped_subcontracting_receipt(source_name, target_doc, items=items)
 
@@ -518,7 +496,7 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None, items=None):
 
 
 @frappe.whitelist()
-def update_subcontracting_order_status(sco, status=None):
+def update_subcontracting_order_status(sco: str | Document, status: str | None = None):
 	if isinstance(sco, str):
 		sco = frappe.get_doc("Subcontracting Order", sco)
 

@@ -77,17 +77,19 @@
   "taxes_and_charges_added",
   "taxes_and_charges_deducted",
   "total_taxes_and_charges",
-  "section_break_46",
+  "totals_section",
+  "grand_total",
+  "disable_rounded_total",
+  "rounding_adjustment",
+  "column_break_50",
+  "in_words",
+  "rounded_total",
+  "base_totals_section",
   "base_grand_total",
   "base_rounding_adjustment",
-  "base_rounded_total",
+  "column_break_ugyv",
   "base_in_words",
-  "column_break_50",
-  "grand_total",
-  "rounding_adjustment",
-  "rounded_total",
-  "in_words",
-  "disable_rounded_total",
+  "base_rounded_total",
   "section_break_42",
   "apply_discount_on",
   "base_discount_amount",
@@ -773,14 +775,9 @@
    "print_hide": 1
   },
   {
-   "fieldname": "section_break_46",
-   "fieldtype": "Section Break",
-   "label": "Totals"
-  },
-  {
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
-   "label": "Grand Total (Company Currency)",
+   "label": "Grand Total",
    "oldfieldname": "grand_total",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -791,7 +788,7 @@
    "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
-   "label": "Rounding Adjustment (Company Currency)",
+   "label": "Rounding Adjustment",
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -800,7 +797,7 @@
   {
    "fieldname": "base_in_words",
    "fieldtype": "Data",
-   "label": "In Words (Company Currency)",
+   "label": "In Words",
    "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
@@ -810,7 +807,7 @@
   {
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
-   "label": "Rounded Total (Company Currency)",
+   "label": "Rounded Total",
    "oldfieldname": "rounded_total",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -1282,8 +1279,22 @@
    "hidden": 1,
    "label": "Item Wise Tax Details",
    "no_copy": 1,
-   "options": "Item Wise Tax Detail",
-   "print_hide": 1
+   "options": "Item Wise Tax Detail"
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "fieldname": "base_totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals (Company Currency)",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "column_break_ugyv",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -1291,7 +1302,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-29 21:24:30.652933",
+ "modified": "2026-02-04 14:36:41.087460",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

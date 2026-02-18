@@ -121,7 +121,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Apply On",
-   "options": "\nItem Code\nItem Group\nBrand\nTransaction",
+   "options": "Item Code\nItem Group\nBrand\nTransaction",
    "reqd": 1
   },
   {
@@ -657,7 +657,7 @@
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
- "modified": "2025-08-20 11:40:07.096854",
+ "modified": "2026-02-17 12:24:07.553505",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",
@@ -714,6 +714,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",

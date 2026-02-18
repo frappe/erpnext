@@ -36,7 +36,7 @@ def get_doctypes():
 
 
 @frappe.whitelist()
-def upload(select_doctype=None, rows=None):
+def upload(select_doctype: str | None = None):
 	from frappe.utils.csvutils import read_csv_content_from_attached_file
 
 	if not select_doctype:

@@ -468,7 +468,7 @@ def get_item_lead_time(item_code):
 
 
 @frappe.whitelist()
-def get_mps_details(mps):
+def get_mps_details(mps: str):
 	return frappe.db.get_value(
 		"Master Production Schedule",
 		mps,

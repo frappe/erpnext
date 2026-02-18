@@ -57,7 +57,7 @@ class Routing(Document):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_operations(doctype, txt, searchfield, start, page_len, filters):
+def get_operations(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	query_filters = {}
 
 	if txt:

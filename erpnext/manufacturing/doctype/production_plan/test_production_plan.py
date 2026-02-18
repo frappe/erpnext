@@ -626,6 +626,90 @@ class TestProductionPlan(IntegrationTestCase):
 			frappe.db.count("Purchase Order Item", {"production_plan": plan.name, "docstatus": 1}), 2
 		)  # 2 since we have already created and submitted 2 POs
 
+	def test_sales_order_references_for_sub_assembly_items(self):
+		"""
+		Test that Sales Order and Sales Order Item references in Work Order and Purchase Order
+		are correctly propagated from the Production Plan.
+		"""
+
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		# Setup Test Items & BOM
+		fg_item = "Test FG Good Item"
+		sub_assembly_item1 = "Test Sub Assembly Item 1"
+		sub_assembly_item2 = "Test Sub Assembly Item 2"
+
+		bom_tree = {
+			fg_item: {
+				sub_assembly_item1: {"Test Raw Material 1": {}},
+				sub_assembly_item2: {"Test Raw Material 2": {}},
+			}
+		}
+
+		create_nested_bom(bom_tree, prefix="")
+
+		# Create Sales Order
+		so = make_sales_order(item_code=fg_item, qty=10)
+		so_item_row = so.items[0].name
+
+		# Create Production Plan from Sales Order
+		production_plan = frappe.new_doc("Production Plan")
+		production_plan.company = so.company
+		production_plan.get_items_from = "Sales Order"
+		production_plan.item_code = fg_item
+
+		production_plan.get_open_sales_orders()
+		self.assertEqual(production_plan.sales_orders[0].sales_order, so.name)
+
+		production_plan.get_so_items()
+
+		production_plan.skip_available_sub_assembly_item = 0
+		production_plan.get_sub_assembly_items()
+
+		self.assertEqual(len(production_plan.sub_assembly_items), 2)
+
+		# Validate Sales Order references in Sub Assembly Items
+		for row in production_plan.sub_assembly_items:
+			if row.production_item == sub_assembly_item1:
+				row.supplier = "_Test Supplier"
+				row.type_of_manufacturing = "Subcontract"
+
+			self.assertEqual(row.sales_order, so.name)
+			self.assertEqual(row.sales_order_item, so_item_row)
+
+		# Submit Production Plan
+		production_plan.save()
+		production_plan.submit()
+		production_plan.make_work_order()
+
+		# Validate Purchase Order (Subcontracted Item)
+		po_items = frappe.get_all(
+			"Purchase Order Item",
+			{
+				"production_plan": production_plan.name,
+				"fg_item": sub_assembly_item1,
+			},
+			["sales_order", "sales_order_item"],
+		)
+
+		self.assertTrue(po_items)
+		self.assertEqual(po_items[0].sales_order, so.name)
+		self.assertEqual(po_items[0].sales_order_item, so_item_row)
+
+		# Validate Work Order (In-house Item)
+		work_orders = frappe.get_all(
+			"Work Order",
+			{
+				"production_plan": production_plan.name,
+				"production_item": sub_assembly_item2,
+			},
+			["sales_order", "sales_order_item"],
+		)
+
+		self.assertTrue(work_orders)
+		self.assertEqual(work_orders[0].sales_order, so.name)
+		self.assertEqual(work_orders[0].sales_order_item, so_item_row)
+
 	def test_production_plan_for_mr_items(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 

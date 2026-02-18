@@ -1,4 +1,4 @@
 .funnel-wrapper {
-	margin: 15px;
-	width: 100%;
+    width: calc(100% - 30px);
+    margin-left: 30px;
 }

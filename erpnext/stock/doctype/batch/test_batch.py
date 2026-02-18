@@ -123,6 +123,80 @@ class TestBatch(IntegrationTestCase):
 		for d in batches:
 			self.assertEqual(d.qty, batchwise_qty[(d.batch_no, d.warehouse)])
 
+	def test_batch_qty_on_pos_creation(self):
+		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import (
+			init_user_and_profile,
+		)
+		from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
+		from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			get_auto_batch_nos,
+		)
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_batch_item_with_batch,
+		)
+
+		invoice_type = frappe.db.get_single_value("POS Settings", "invoice_type")
+		session_user = frappe.session.user
+
+		try:
+			# Set invoice type to POS Invoice
+			frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
+
+			# Create batch item
+			create_batch_item_with_batch("_Test BATCH ITEM", "TestBatch-RS 02")
+
+			# Create stock entry
+			se = make_stock_entry(
+				target="_Test Warehouse - _TC",
+				item_code="_Test BATCH ITEM",
+				qty=30,
+				basic_rate=100,
+			)
+
+			se.reload()
+
+			batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+			# Create opening entry
+			session_user = frappe.session.user
+			test_user, pos_profile = init_user_and_profile()
+			create_opening_entry(pos_profile, test_user.name)
+
+			# POS Invoice 1, for the batch without bundle
+			pos_inv1 = create_pos_invoice(item="_Test BATCH ITEM", rate=300, qty=15, do_not_save=1)
+			pos_inv1.append(
+				"payments",
+				{"mode_of_payment": "Cash", "amount": 4500},
+			)
+			pos_inv1.items[0].batch_no = batch_no
+			pos_inv1.save()
+			pos_inv1.submit()
+			pos_inv1.reload()
+
+			# Get auto batch nos after pos invoice
+			batches = get_auto_batch_nos(
+				frappe._dict(
+					{
+						"item_code": "_Test BATCH ITEM",
+						"warehouse": "_Test Warehouse - _TC",
+						"for_stock_levels": True,
+						"ignore_reserved_stock": True,
+					}
+				)
+			)
+
+			# Check batch qty after pos invoice
+			row = _find_batch_row(batches, batch_no, "_Test Warehouse - _TC")
+			self.assertIsNotNone(row)
+			self.assertEqual(row.qty, 30)
+
+		finally:
+			# Set invoice type to Sales Invoice
+			frappe.db.set_single_value("POS Settings", "invoice_type", invoice_type)
+			# Set user to session user
+			frappe.set_user(session_user)
+
 	def test_stock_entry_incoming(self):
 		"""Test batch creation via Stock Entry (Work Order)"""
 
@@ -608,6 +682,10 @@ def create_price_list_for_batch(item_code, batch, rate):
 			"price_list_rate": rate,
 		}
 	).insert()
+
+
+def _find_batch_row(batches, batch_no, warehouse):
+	return next((b for b in batches if b.batch_no == batch_no and b.warehouse == warehouse), None)
 
 
 def make_new_batch(**args):

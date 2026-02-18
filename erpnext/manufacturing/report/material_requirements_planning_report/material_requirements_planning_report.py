@@ -1295,7 +1295,7 @@ def get_item_capacity(item_code, bucket_size):
 
 
 @frappe.whitelist()
-def make_order(selected_rows, company, warehouse=None, mps=None):
+def make_order(selected_rows: str | list, company: str, warehouse: str | None = None, mps: str | None = None):
 	if not frappe.has_permission("Purchase Order", "create"):
 		frappe.throw(_("Not permitted to make Purchase Orders"), frappe.PermissionError)
 

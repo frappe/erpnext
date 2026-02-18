@@ -116,12 +116,12 @@ class TestInventoryDimension(IntegrationTestCase):
 		inward.load_from_db()
 
 		sle_data = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": inward.name}, ["shelf", "warehouse"], as_dict=1
+			"Stock Ledger Entry", {"voucher_no": inward.name}, ["to_shelf", "warehouse"], as_dict=1
 		)
 
 		self.assertEqual(inward.items[0].to_shelf, "Shelf 1")
 		self.assertEqual(sle_data.warehouse, warehouse)
-		self.assertEqual(sle_data.shelf, "Shelf 1")
+		self.assertEqual(sle_data.to_shelf, "Shelf 1")
 
 		outward = make_stock_entry(
 			item_code=item_code,

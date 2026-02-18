@@ -85,20 +85,24 @@
   "taxes_and_charges_added",
   "taxes_and_charges_deducted",
   "total_taxes_and_charges",
-  "section_break_49",
+  "totals_section",
+  "grand_total",
+  "disable_rounded_total",
+  "rounding_adjustment",
+  "column_break8",
+  "use_company_roundoff_cost_center",
+  "in_words",
+  "rounded_total",
+  "base_totals_section",
   "base_grand_total",
   "base_rounding_adjustment",
-  "base_rounded_total",
+  "column_break_hcca",
   "base_in_words",
-  "column_break8",
-  "grand_total",
-  "rounding_adjustment",
-  "use_company_roundoff_cost_center",
-  "rounded_total",
-  "in_words",
+  "base_rounded_total",
+  "section_break_ttrv",
   "total_advance",
+  "column_break_peap",
   "outstanding_amount",
-  "disable_rounded_total",
   "section_tax_withholding_entry",
   "tax_withholding_group",
   "ignore_tax_withholding_threshold",
@@ -606,6 +610,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.items.every((item) => !item.pr_detail)",
    "fieldname": "update_stock",
    "fieldtype": "Check",
    "label": "Update Stock",
@@ -883,14 +888,9 @@
    "print_hide": 1
   },
   {
-   "fieldname": "section_break_49",
-   "fieldtype": "Section Break",
-   "label": "Totals"
-  },
-  {
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
-   "label": "Grand Total (Company Currency)",
+   "label": "Grand Total",
    "oldfieldname": "grand_total",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -901,7 +901,7 @@
    "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
-   "label": "Rounding Adjustment (Company Currency)",
+   "label": "Rounding Adjustment",
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -911,7 +911,7 @@
    "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
-   "label": "Rounded Total (Company Currency)",
+   "label": "Rounded Total",
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -920,7 +920,7 @@
   {
    "fieldname": "base_in_words",
    "fieldtype": "Data",
-   "label": "In Words (Company Currency)",
+   "label": "In Words",
    "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
@@ -1625,8 +1625,7 @@
    "hidden": 1,
    "label": "Item Wise Tax Details",
    "no_copy": 1,
-   "options": "Item Wise Tax Detail",
-   "print_hide": 1
+   "options": "Item Wise Tax Detail"
   },
   {
    "collapsible": 1,
@@ -1661,6 +1660,28 @@
    "fieldname": "override_tax_withholding_entries",
    "fieldtype": "Check",
    "label": "Edit Tax Withholding Entries"
+  },
+  {
+   "fieldname": "column_break_hcca",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ttrv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_peap",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "base_totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals (Company Currency)"
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals"
   }
  ],
  "grid_page_length": 50,
@@ -1668,7 +1689,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-29 21:21:53.051193",
+ "modified": "2026-02-05 20:45:16.964500",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

@@ -141,7 +141,7 @@ class ProductionPlan(Document):
 				row.from_warehouse = ""
 
 	@frappe.whitelist()
-	def validate_sales_orders(self, sales_order=None):
+	def validate_sales_orders(self, sales_order: str | None = None):
 		sales_orders = []
 
 		if sales_order:
@@ -496,7 +496,7 @@ class ProductionPlan(Document):
 
 			item_details = get_item_details(data.item_code, throw=False)
 			if self.combine_items:
-				bom_no = item_details.bom_no
+				bom_no = item_details.get("bom_no")
 				if data.get("bom_no"):
 					bom_no = data.get("bom_no")
 
@@ -679,7 +679,7 @@ class ProductionPlan(Document):
 			frappe.delete_doc("Work Order", d.name)
 
 	@frappe.whitelist()
-	def set_status(self, close=None, update_bin=False):
+	def set_status(self, close: bool | None = None, update_bin: bool = False):
 		self.status = {0: "Draft", 1: "Submitted", 2: "Cancelled"}.get(self.docstatus)
 
 		if close:
@@ -693,8 +693,8 @@ class ProductionPlan(Document):
 				self.status = "Completed"
 
 		if self.status != "Completed":
-			self.update_ordered_status()
 			self.update_requested_status()
+			self.update_ordered_status()
 
 		if close is not None:
 			self.db_set("status", self.status)
@@ -703,25 +703,17 @@ class ProductionPlan(Document):
 			self.update_bin_qty()
 
 	def update_ordered_status(self):
-		update_status = False
-		for d in self.po_items:
-			if d.planned_qty == d.ordered_qty:
-				update_status = True
-
-		if update_status and self.status != "Completed":
-			self.status = "In Process"
+		for child_table in ["po_items", "sub_assembly_items"]:
+			for item in self.get(child_table):
+				if item.ordered_qty:
+					self.status = "In Process"
+					return
 
 	def update_requested_status(self):
-		if not self.mr_items:
-			return
-
-		update_status = True
 		for d in self.mr_items:
-			if d.quantity != d.requested_qty:
-				update_status = False
-
-		if update_status:
-			self.status = "Material Requested"
+			if d.requested_qty:
+				self.status = "Material Requested"
+				break
 
 	def get_production_items(self):
 		item_dict = {}
@@ -843,6 +835,8 @@ class ProductionPlan(Document):
 			"stock_uom",
 			"bom_level",
 			"schedule_date",
+			"sales_order",
+			"sales_order_item",
 		]:
 			if row.get(field):
 				wo_data[field] = row.get(field)
@@ -897,6 +891,8 @@ class ProductionPlan(Document):
 					"qty",
 					"description",
 					"production_plan_item",
+					"sales_order",
+					"sales_order_item",
 				]:
 					po_data[field] = row.get(field)
 
@@ -1037,7 +1033,7 @@ class ProductionPlan(Document):
 			msgprint(_("No material request created"))
 
 	@frappe.whitelist()
-	def get_sub_assembly_items(self, manufacturing_type=None):
+	def get_sub_assembly_items(self, manufacturing_type: str | None = None):
 		"Fetch sub assembly items and optionally combine them."
 		self.sub_assembly_items = []
 		sub_assembly_items_store = []  # temporary store to process all subassembly items
@@ -1121,6 +1117,10 @@ class ProductionPlan(Document):
 			if not is_group_warehouse:
 				data.fg_warehouse = self.sub_assembly_warehouse
 
+			if not self.combine_sub_items:
+				data.sales_order = row.sales_order
+				data.sales_order_item = row.sales_order_item
+
 	def set_default_supplier_for_subcontracting_order(self):
 		items = [
 			d.production_item for d in self.sub_assembly_items if d.type_of_manufacturing == "Subcontract"
@@ -1198,7 +1198,7 @@ class ProductionPlan(Document):
 
 
 @frappe.whitelist()
-def download_raw_materials(doc, warehouses=None):
+def download_raw_materials(doc: str | dict | Document, warehouses: str | list | None = None):
 	if isinstance(doc, str):
 		doc = frappe._dict(json.loads(doc))
 
@@ -1578,7 +1578,9 @@ def get_sales_orders(self):
 
 
 @frappe.whitelist()
-def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
+def get_bin_details(
+	row: str | dict, company: str, for_warehouse: str | None = None, all_warehouse: bool = False
+):
 	if isinstance(row, str):
 		row = frappe._dict(json.loads(row))
 
@@ -1613,7 +1615,7 @@ def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
 
 
 @frappe.whitelist()
-def get_so_details(sales_order):
+def get_so_details(sales_order: str):
 	return frappe.db.get_value(
 		"Sales Order", sales_order, ["transaction_date", "customer", "grand_total"], as_dict=1
 	)
@@ -1636,7 +1638,11 @@ def get_warehouse_list(warehouses):
 
 
 @frappe.whitelist()
-def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_data=None):
+def get_items_for_material_requests(
+	doc: str | frappe._dict | Document,
+	warehouses: str | list | None = None,
+	get_parent_warehouse_data: bool | int | None = None,
+):
 	if isinstance(doc, str):
 		doc = frappe._dict(json.loads(doc))
 
@@ -1889,7 +1895,7 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 
 
 @frappe.whitelist()
-def get_item_data(item_code):
+def get_item_data(item_code: str):
 	item_details = get_item_details(item_code)
 
 	return {
@@ -2130,7 +2136,14 @@ def get_raw_materials_of_sub_assembly_items(
 
 
 @frappe.whitelist()
-def sales_order_query(doctype=None, txt=None, searchfield=None, start=None, page_len=None, filters=None):
+def sales_order_query(
+	doctype: str | None = None,
+	txt: str | None = None,
+	searchfield: str | None = None,
+	start: int | None = None,
+	page_len: int | None = None,
+	filters: dict | None = None,
+):
 	frappe.has_permission("Production Plan", throw=True)
 
 	if not filters:
@@ -2201,7 +2214,9 @@ def get_reserved_qty_for_sub_assembly(item_code, warehouse):
 
 
 @frappe.whitelist()
-def make_stock_reservation_entries(doc, items=None, table_name=None, notify=False):
+def make_stock_reservation_entries(
+	doc: str | Document, items: str | list | None = None, table_name: str | None = None, notify: bool = False
+):
 	if isinstance(doc, str):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Production Plan", doc.get("name"))
@@ -2238,7 +2253,7 @@ def make_stock_reservation_entries(doc, items=None, table_name=None, notify=Fals
 
 
 @frappe.whitelist()
-def cancel_stock_reservation_entries(doc, sre_list):
+def cancel_stock_reservation_entries(doc: str | Document, sre_list: str | list):
 	if isinstance(doc, str):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Production Plan", doc.get("name"))

@@ -93,7 +93,7 @@ def get_data(filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_work_orders(doctype, txt, searchfield, start, page_len, filters):
+def get_work_orders(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	wo = frappe.qb.DocType("Work Order")
 	query = (
 		frappe.qb.from_(wo)

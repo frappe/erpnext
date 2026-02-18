@@ -52,6 +52,7 @@
   "is_free_item",
   "apply_tds",
   "grant_commission",
+  "allow_zero_valuation_rate",
   "section_break_21",
   "net_rate",
   "net_amount",
@@ -88,7 +89,6 @@
   "serial_and_batch_bundle",
   "use_serial_batch_fields",
   "col_break5",
-  "allow_zero_valuation_rate",
   "incoming_rate",
   "item_tax_rate",
   "actual_batch_qty",
@@ -580,6 +580,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "eval:doc.serial_no || doc.batch_no",
+   "depends_on": "eval:parent.update_stock",
    "fieldname": "warehouse_and_reference",
    "fieldtype": "Section Break",
    "label": "Stock Details"
@@ -595,7 +596,7 @@
    "print_hide": 1
   },
   {
-   "depends_on": "eval: parent.is_internal_customer && parent.update_stock",
+   "depends_on": "eval: parent.is_internal_customer",
    "fieldname": "target_warehouse",
    "fieldtype": "Link",
    "hidden": 1,
@@ -613,7 +614,6 @@
    "options": "Quality Inspection"
   },
   {
-   "depends_on": "eval: doc.use_serial_batch_fields === 1 && parent.update_stock === 1",
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "label": "Batch No",
@@ -626,6 +626,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:parent.update_stock",
    "fieldname": "allow_zero_valuation_rate",
    "fieldtype": "Check",
    "label": "Allow Zero Valuation Rate",
@@ -633,7 +634,6 @@
    "print_hide": 1
   },
   {
-   "depends_on": "eval: doc.use_serial_batch_fields === 1 && parent.update_stock === 1",
    "fieldname": "serial_no",
    "fieldtype": "Text",
    "label": "Serial No",
@@ -906,7 +906,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:parent.update_stock == 1 && (doc.use_serial_batch_fields === 0 || doc.docstatus === 1)",
+   "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
    "fieldname": "serial_and_batch_bundle",
    "fieldtype": "Link",
    "label": "Serial and Batch Bundle",
@@ -916,7 +916,7 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval:parent.update_stock === 1",
+   "depends_on": "eval:doc.use_serial_batch_fields === 0 && doc.docstatus === 0",
    "fieldname": "pick_serial_and_batch",
    "fieldtype": "Button",
    "label": "Pick Serial / Batch No"
@@ -1009,7 +1009,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-04 11:08:25.583561",
+ "modified": "2026-02-15 21:08:57.341638",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
