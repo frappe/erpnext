@@ -412,6 +412,7 @@ erpnext.patches.v15_0.rename_group_by_to_categorize_by
 execute:frappe.db.set_single_value("Accounts Settings", "receivable_payable_fetch_method", "Buffered Cursor")
 erpnext.patches.v14_0.set_update_price_list_based_on
 erpnext.patches.v15_0.update_journal_entry_type
+erpnext.patches.v15_0.add_bank_transaction_as_journal_entry_reference
 erpnext.patches.v15_0.set_grand_total_to_default_mop
 execute:frappe.db.set_single_value("Accounts Settings", "use_legacy_budget_controller", False)
 erpnext.patches.v15_0.set_cancelled_status_to_cancelled_pos_invoice
