@@ -1919,7 +1919,7 @@ def get_xlsx_styles(metadata: XLSXMetadata) -> dict | None:
 	# cell level styling
 	for row_idx, row in metadata.row_map.items():
 		# skip total row
-		if builder.has_total_row and row_idx == builder.last_row_index:
+		if metadata.has_total_row and row_idx == builder.last_row_index:
 			continue
 
 		is_segmented = (row.get("_segment_info", {}).get("total_segments", 1) or 1) > 1
