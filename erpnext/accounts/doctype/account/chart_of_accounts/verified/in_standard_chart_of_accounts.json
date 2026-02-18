@@ -44,6 +44,16 @@
                 "Tax Assets": {
                     "is_group": 1,
                     "account_category": "Other Current Assets"
+                },
+                "Short-term Investments": {
+                    "Marketable Securities": {
+                        "account_category": "Short-term Investments"
+                    },
+                    "Fixed Deposits": {
+                        "account_category": "Short-term Investments"
+                    },
+                    "is_group": 1,
+                    "account_category": "Short-term Investments"
                 }
             },
             "Fixed Assets": {
@@ -74,10 +84,24 @@
                 "Accumulated Depreciations": {
                     "account_type": "Accumulated Depreciation",
                     "account_category": "Tangible Assets"
+                }
+            },
+            "Intangible Assets": {
+                "Software": {
+                    "account_type": "Fixed Asset",
+                    "account_category": "Intangible Assets"
                 },
-                "CWIP Account": {
-                    "account_type": "Capital Work in Progress",
-                    "account_category": "Capital Work in Progress"
+                "Patents and Trademarks": {
+                    "account_type": "Fixed Asset",
+                    "account_category": "Intangible Assets"
+                },
+                "Goodwill": {
+                    "account_type": "Fixed Asset",
+                    "account_category": "Intangible Assets"
+                },
+                "Accumulated Amortization": {
+                    "account_type": "Accumulated Depreciation",
+                    "account_category": "Intangible Assets"
                 }
             },
             "Investments": {
@@ -263,11 +287,34 @@
                 },
                 "Short-term Provisions": {
                     "account_category": "Short-term Provisions"
+                },
+                "Other Current Liabilities": {
+                    "Accrued Expenses": {
+                        "account_category": "Other Current Liabilities"
+                    },
+                    "Customer Advances": {
+                        "account_category": "Other Current Liabilities"
+                    },
+                    "Security Deposits Received": {
+                        "account_category": "Other Current Liabilities"
+                    },
+                    "is_group": 1,
+                    "account_category": "Other Current Liabilities"
                 }
             },
             "Non-Current Liabilities": {
                 "Long-term Provisions": {
                     "account_category": "Long-term Provisions"
+                },
+                "Other Non-current Liabilities": {
+                    "Deferred Income": {
+                        "account_category": "Other Non-current Liabilities"
+                    },
+                    "Government Grants": {
+                        "account_category": "Other Non-current Liabilities"
+                    },
+                    "is_group": 1,
+                    "account_category": "Other Non-current Liabilities"
                 },
                 "is_group": 1
             },
