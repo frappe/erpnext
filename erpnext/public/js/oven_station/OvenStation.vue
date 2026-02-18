@@ -243,6 +243,7 @@ async function confirmLoad() {
         method: 'erpnext.manufacturing.doctype.oven.api.load_slab_into_oven',
         args: {
             oven_op: ovenOperation.value,
+            line: work_context.assigned_line,
             job_card_name: jobCardNumber.value || selectedSlab.value?.current_job_card,
             slab_template: selectedSlab.value?.template,
         }

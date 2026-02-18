@@ -1,8 +1,8 @@
 import json
-
 import frappe
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCard
+from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 from erpnext.manufacturing.doctype.oven.oven import Oven
 from erpnext.manufacturing.doctype.oven_operation.oven_operation import OvenOperation
 from erpnext.manufacturing.doctype.oven_rack.oven_rack import OvenRack
@@ -26,7 +26,7 @@ def get_oven_from_line(line: str):
 
 
 @frappe.whitelist()
-def load_slab_into_oven(oven_op: str, job_card_name: str, slab_template: str):
+def load_slab_into_oven(oven_op: str, line: str, job_card_name: str, slab_template: str):
 	oven_operation = json.loads(oven_op)
 
 	new_oven_operation: OvenOperation = frappe.new_doc("Oven Operation")
@@ -35,10 +35,13 @@ def load_slab_into_oven(oven_op: str, job_card_name: str, slab_template: str):
 	rack_name = new_oven_operation.oven_rack
 	slab_name = new_oven_operation.slab
 	oven_rack: OvenRack = frappe.get_doc("Oven Rack", rack_name)
-	slab: Slab = frappe.get_doc("Slab", slab_name)
+	# slab: Slab = frappe.get_doc("Slab", slab_name)
+	child_lines = get_all_child_lines(line)
 
 	if not job_card_name:
-		jc: JobCard = get_top_job_card_for_process("Heating", slab.line, include_wip=False)
+		jc: JobCard = get_top_job_card_for_process(
+			"Heating", child_lines if child_lines else line, include_wip=False
+		)
 		job_card_name = jc.name
 
 	now_date_time = frappe.utils.now_datetime()
@@ -141,4 +144,3 @@ def unload_slab_from_oven(rack_name: str, slab_name: str, slab_template: str, va
 		raise
 
 	return {"rack": rack}
-

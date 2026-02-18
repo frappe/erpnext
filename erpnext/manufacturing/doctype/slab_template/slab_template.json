@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{colour_code}-{size}-{thickness}",
+ "autoname": "format:{colour_code}-{thickness}-{size}",
  "creation": "2025-12-17 22:26:56.070084",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -42,11 +42,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-18 12:36:02.173088",
+ "modified": "2026-02-16 16:05:07.865446",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab Template",
- "naming_rule": "Expression",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
