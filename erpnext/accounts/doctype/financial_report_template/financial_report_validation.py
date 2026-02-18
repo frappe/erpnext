@@ -67,8 +67,8 @@ class ValidationResult:
 		self.warnings.append(issue)
 
 	def notify_user(self) -> None:
-		warnings = "<br><br>".join(str(w) for w in self.warnings if w)
-		errors = "<br><br>".join(str(e) for e in self.issues if e)
+		warnings = "<br><br>".join(str(w) for w in self.warnings)
+		errors = "<br><br>".join(str(e) for e in self.issues)
 
 		if warnings:
 			frappe.msgprint(warnings, title=_("Warnings"), indicator="orange")
