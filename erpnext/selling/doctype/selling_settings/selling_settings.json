@@ -262,9 +262,9 @@
    "fieldname": "enable_utm",
    "fieldtype": "Check",
    "label": "Enable UTM"
-   },
+  },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "automatically_fetch_payment_terms_from_quotation",
    "fieldtype": "Check",
    "label": "Automatically Fetch Payment Terms from Quotation"
@@ -276,7 +276,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-24 00:04:33.105916",
+ "modified": "2026-02-18 21:25:56.307468",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
