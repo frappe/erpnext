@@ -194,6 +194,8 @@ class PaymentEntry(AccountsController):
 		PaymentTaxWithholding(self).on_validate()
 		self.set_status()
 		self.set_total_in_words()
+		self.validate_paid_and_received_amount()
+		
 
 	def before_save(self):
 		self.set_matched_unset_payment_requests_to_response()
@@ -606,6 +608,14 @@ class PaymentEntry(AccountsController):
 	def validate_payment_type(self):
 		if self.payment_type not in ("Receive", "Pay", "Internal Transfer"):
 			frappe.throw(_("Payment Type must be one of Receive, Pay and Internal Transfer"))
+	
+	def validate_paid_and_received_amount(self):
+		if self.paid_amount and self.received_amount and self.source_exchange_rate and self.target_exchange_rate:
+			converted_paid_amount = flt(self.received_amount) * flt(self.target_exchange_rate)
+			if self.paid_amount != converted_paid_amount:
+				frappe.throw(
+						_("There is a mismatch between Paid and Received amounts.")
+					)
 
 	def validate_party_details(self):
 		if self.party and not frappe.db.exists(self.party_type, self.party):
