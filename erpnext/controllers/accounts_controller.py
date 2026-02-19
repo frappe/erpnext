@@ -4139,13 +4139,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 							"Items cannot be updated as Subcontracting Order is created against the Purchase Order {0}."
 						).format(frappe.bold(parent.name))
 					)
-	elif parent_doctype == "Sales Order":  # Sales Order
-		if parent.is_subcontracted and not parent.can_update_items():
-			frappe.throw(
-				_(
-					"Items cannot be updated as Subcontracting Inward Order(s) exist against this Subcontracted Sales Order."
-				)
-			)
+	else:
 		parent.validate_selling_price()
 		parent.validate_for_duplicate_items()
 		parent.validate_warehouse()
