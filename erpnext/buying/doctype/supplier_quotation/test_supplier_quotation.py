@@ -12,10 +12,7 @@ from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_pu
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 
 
-<<<<<<< HEAD
 class TestPurchaseOrder(FrappeTestCase):
-=======
-class TestPurchaseOrder(IntegrationTestCase):
 	def test_update_child_supplier_quotation_add_item(self):
 		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
 		sq.submit()
