@@ -119,7 +119,7 @@ status_map = {
 		["Pending", "eval:self.status != 'Stopped' and self.per_ordered == 0 and self.docstatus == 1"],
 		[
 			"Ordered",
-			"eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type in ['Purchase', 'Manufacture']",
+			"eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type in ['Purchase', 'Manufacture', 'Subcontracting']",
 		],
 		[
 			"Transferred",
@@ -510,13 +510,6 @@ class StatusUpdater(Document):
 		for d in self.get_all_children():
 			if d.doctype != args["source_dt"]:
 				continue
-
-			if (
-				d.get("material_request")
-				and frappe.db.get_value("Material Request", d.material_request, "material_request_type")
-				== "Subcontracting"
-			):
-				args.update({"source_field": "fg_item_qty"})
 
 			self._update_modified(args, update_modified)
 

@@ -23,7 +23,7 @@ def after_install():
 
 	set_single_defaults()
 	create_print_setting_custom_fields()
-	create_marketgin_campagin_custom_fields()
+	create_marketing_campaign_custom_fields()
 	create_custom_company_links()
 	add_all_roles_to("Administrator")
 	create_default_success_action()
@@ -119,16 +119,16 @@ def create_print_setting_custom_fields():
 	)
 
 
-def create_marketgin_campagin_custom_fields():
+def create_marketing_campaign_custom_fields():
 	create_custom_fields(
 		{
 			"UTM Campaign": [
 				{
-					"label": _("Messaging CRM Campagin"),
+					"label": _("Messaging CRM Campaign"),
 					"fieldname": "crm_campaign",
 					"fieldtype": "Link",
 					"options": "Campaign",
-					"insert_after": "campaign_decription",
+					"insert_after": "campaign_description",
 				},
 			]
 		}

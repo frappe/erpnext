@@ -45,7 +45,7 @@ class PricingRule(Document):
 		apply_discount_on: DF.Literal["Grand Total", "Net Total"]
 		apply_discount_on_rate: DF.Check
 		apply_multiple_pricing_rules: DF.Check
-		apply_on: DF.Literal["", "Item Code", "Item Group", "Brand", "Transaction"]
+		apply_on: DF.Literal["Item Code", "Item Group", "Brand", "Transaction"]
 		apply_recursion_over: DF.Float
 		apply_rule_on_other: DF.Literal["", "Item Code", "Item Group", "Brand"]
 		brands: DF.Table[PricingRuleBrand]

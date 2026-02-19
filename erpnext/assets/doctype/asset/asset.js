@@ -549,6 +549,7 @@ frappe.ui.form.on("Asset", {
 				frm.set_df_property("net_purchase_amount", "read_only", 0);
 			}
 		}
+		frm.trigger("toggle_reference_doc");
 	},
 
 	create_asset_maintenance: function (frm) {

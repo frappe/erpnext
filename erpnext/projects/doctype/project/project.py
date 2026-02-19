@@ -1,6 +1,7 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from typing import Any
 
 import frappe
 from email_reply_parser import EmailReplyParser
@@ -456,7 +457,7 @@ def get_list_context(context=None):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
+def get_users_for_project(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	conditions = []
 	return frappe.db.sql(
 		"""select name, concat_ws(' ', first_name, middle_name, last_name)
@@ -483,7 +484,7 @@ def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def get_cost_center_name(project):
+def get_cost_center_name(project: str):
 	return frappe.db.get_value("Project", project, "cost_center")
 
 
@@ -553,7 +554,7 @@ def allow_to_make_project_update(project, time, frequency):
 
 
 @frappe.whitelist()
-def create_duplicate_project(prev_doc, project_name):
+def create_duplicate_project(prev_doc: str, project_name: str):
 	"""Create duplicate project based on the old project"""
 	import json
 
@@ -693,7 +694,7 @@ def update_project_sales_billing():
 
 
 @frappe.whitelist()
-def create_kanban_board_if_not_exists(project):
+def create_kanban_board_if_not_exists(project: str):
 	from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
 
 	project = frappe.get_doc("Project", project)
@@ -704,7 +705,7 @@ def create_kanban_board_if_not_exists(project):
 
 
 @frappe.whitelist()
-def set_project_status(project, status):
+def set_project_status(project: str, status: str):
 	"""
 	set status for project and all related tasks
 	"""
@@ -721,7 +722,7 @@ def set_project_status(project, status):
 	project.save()
 
 
-def get_holiday_list(company=None):
+def get_holiday_list(company: str | None = None) -> str:
 	if not company:
 		company = get_default_company() or frappe.get_all("Company")[0].name
 

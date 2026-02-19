@@ -691,7 +691,7 @@
   }
  ],
  "grid_page_length": 50,
- "hide_toolbar": 1,
+ "hide_toolbar": 0,
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,

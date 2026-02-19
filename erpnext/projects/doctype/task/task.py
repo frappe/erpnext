@@ -326,7 +326,7 @@ class Task(NestedSet):
 
 
 @frappe.whitelist()
-def check_if_child_exists(name):
+def check_if_child_exists(name: str):
 	child_tasks = frappe.get_all("Task", filters={"parent_task": name})
 	child_tasks = [get_link_to_form("Task", task.name) for task in child_tasks]
 	return child_tasks
@@ -334,7 +334,7 @@ def check_if_child_exists(name):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_project(doctype, txt, searchfield, start, page_len, filters):
+def get_project(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	from erpnext.controllers.queries import get_match_cond
 
 	meta = frappe.get_meta(doctype)
@@ -360,7 +360,7 @@ def get_project(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def set_multiple_status(names, status):
+def set_multiple_status(names: str, status: str):
 	names = json.loads(names)
 	for name in names:
 		task = frappe.get_doc("Task", name)
@@ -382,8 +382,8 @@ def set_tasks_as_overdue():
 
 
 @frappe.whitelist()
-def make_timesheet(source_name, target_doc=None, ignore_permissions=False):
-	def set_missing_values(source, target):
+def make_timesheet(source_name: str, target_doc: dict | None = None, ignore_permissions: bool = False):
+	def set_missing_values(source: dict, target: dict) -> None:
 		target.parent_project = source.project
 		target.append(
 			"time_logs",
@@ -408,7 +408,13 @@ def make_timesheet(source_name, target_doc=None, ignore_permissions=False):
 
 
 @frappe.whitelist()
-def get_children(doctype, parent, task=None, project=None, is_root=False):
+def get_children(
+	doctype: str,
+	parent: str | None = None,
+	task: str | None = None,
+	project: str | None = None,
+	is_root: bool = False,
+):
 	filters = [["docstatus", "<", "2"]]
 
 	if task:
@@ -450,7 +456,7 @@ def add_node():
 
 
 @frappe.whitelist()
-def add_multiple_tasks(data, parent):
+def add_multiple_tasks(data: str, parent: str):
 	data = json.loads(data)
 	new_doc = {"doctype": "Task", "parent_task": parent if parent != "All Tasks" else ""}
 	new_doc["project"] = frappe.db.get_value("Task", {"name": parent}, "project") or ""

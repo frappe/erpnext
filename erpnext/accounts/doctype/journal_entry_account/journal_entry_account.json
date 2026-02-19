@@ -43,7 +43,7 @@
  "fields": [
   {
    "bold": 1,
-   "columns": 2,
+   "columns": 4,
    "fieldname": "account",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -191,7 +191,6 @@
   {
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
-   "in_list_view": 1,
    "label": "Reference Name",
    "no_copy": 1,
    "options": "reference_type",
@@ -294,7 +293,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-27 12:23:33.157655",
+ "modified": "2026-02-16 16:04:16.022407",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
