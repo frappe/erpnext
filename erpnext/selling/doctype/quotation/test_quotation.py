@@ -14,10 +14,7 @@ from erpnext.setup.utils import get_exchange_rate
 test_dependencies = ["Product Bundle"]
 
 
-<<<<<<< HEAD
 class TestQuotation(FrappeTestCase):
-=======
-class TestQuotation(IntegrationTestCase):
 	def test_update_child_quotation_add_item(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -112,7 +109,6 @@ class TestQuotation(IntegrationTestCase):
 		qo.reload()
 		self.assertEqual(len(qo.get("items")), 1)
 
->>>>>>> f4c0611cc5 (feat: update item button addition for quotation (#50976))
 	def test_quotation_qty(self):
 		qo = make_quotation(qty=0, do_not_save=True)
 		with self.assertRaises(InvalidQtyError):
