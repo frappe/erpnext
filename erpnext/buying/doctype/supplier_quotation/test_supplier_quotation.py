@@ -14,7 +14,7 @@ from erpnext.controllers.accounts_controller import InvalidQtyError, update_chil
 
 class TestPurchaseOrder(FrappeTestCase):
 	def test_update_child_supplier_quotation_add_item(self):
-		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
+		sq = frappe.copy_doc(test_records[0])
 		sq.submit()
 
 		trans_item = json.dumps(
@@ -38,7 +38,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual(sq.get("items")[1].rate, 300)
 
 	def test_update_supplier_quotation_child_rate_disallow(self):
-		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
+		sq = frappe.copy_doc(test_records[0])
 		sq.submit()
 		trans_item = json.dumps(
 			[
@@ -55,7 +55,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		)
 
 	def test_update_supplier_quotation_child_remove_item(self):
-		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
+		sq = frappe.copy_doc(test_records[0])
 		sq.submit()
 		po = make_purchase_order(sq.name)
 
