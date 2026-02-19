@@ -86,7 +86,7 @@ def get_entries_for_bank_clearance_summary(filters):
 			je.cheque_no,
 			je.clearance_date,
 			jea.against_account,
-			jea.debit - jea.credit,
+			jea.debit_in_account_currency - jea.credit_in_account_currency,
 		)
 		.where(
 			(jea.account == filters.account)

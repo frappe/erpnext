@@ -254,7 +254,19 @@ def get_payment_entries_for_bank_clearance(
 				.else_(0)
 			).as_("credit"),
 			(
-				Case().when(pe.paid_from == account, 0).else_(pe.received_amount + pe.total_taxes_and_charges)
+				Case()
+				.when(pe.paid_from == account, 0)
+				.else_(
+					pe.received_amount
+					+ (
+						Case()
+						.when(
+							company.default_currency == pe.paid_to_account_currency,
+							pe.base_total_taxes_and_charges,
+						)
+						.else_(pe.total_taxes_and_charges)
+					)
+				)
 			).as_("debit"),
 			pe.posting_date,
 			Coalesce(pe.party, Case().when(pe.paid_from == account, pe.paid_to).else_(pe.paid_from)).as_(
