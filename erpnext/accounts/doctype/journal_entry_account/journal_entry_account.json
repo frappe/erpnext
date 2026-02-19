@@ -294,11 +294,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2025-11-27 12:23:33.157655",
-=======
  "modified": "2026-02-19 17:01:22.642454",
->>>>>>> 387fb1b202 (feat: add Bank Transaction as Reference Type to Journal Entry Account (#52760))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
