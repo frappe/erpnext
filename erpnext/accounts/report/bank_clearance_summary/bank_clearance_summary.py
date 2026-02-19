@@ -93,6 +93,7 @@ def get_entries_for_bank_clearance_summary(filters):
 			& (je.docstatus == 1)
 			& (je.posting_date >= filters.from_date)
 			& (je.posting_date <= filters.to_date)
+			& ((je.is_opening == "No") | (je.is_opening.isnull()))
 		)
 		.orderby(je.posting_date, order=Order.desc)
 		.orderby(je.name, order=Order.desc)
