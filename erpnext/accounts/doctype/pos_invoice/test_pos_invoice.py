@@ -1150,6 +1150,176 @@ class TestPOSInvoice(IntegrationTestCase):
 
 		frappe.set_user("test@example.com")
 
+	def test_pos_item_with_batch_no_and_pricing_rule(self):
+		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
+
+		item = "_Test Item with Batch No and Pricing Rule"
+		make_item(
+			item,
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BATCH-.#####",
+			},
+		)
+		make_purchase_receipt(
+			item_code=item, warehouse="_Test Warehouse - _TC", qty=10, rate=500, use_serial_batch_fields=1
+		)
+
+		pr = make_pricing_rule(
+			title="5+1",
+			apply_on="Item Code",
+			item_code=item,
+			selling=1,
+			price_or_product_discount="Product",
+			free_item=item,
+			free_qty=1,
+		)
+		pr.round_free_qty = 1
+		pr.is_recursive = 1
+		pr.recurse_for = 5
+		pr.save()
+
+		pos_inv = create_pos_invoice(
+			update_stock=1, item_code=item, qty=6, rate=500, do_not_submit=1, use_serial_batch_fields=1
+		)
+		pos_inv.payments = []
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 3000})
+		pos_inv.save()
+		pos_inv.submit()
+		pos_inv.reload()
+
+		self.assertEqual(len(pos_inv.items), 2)
+		self.assertIsNotNone(pos_inv.items[0].serial_and_batch_bundle)
+		self.assertIsNotNone(pos_inv.items[1].serial_and_batch_bundle)
+		serial_batch_nos1 = frappe.get_doc(
+			"Serial and Batch Bundle", pos_inv.items[0].serial_and_batch_bundle
+		)
+		serial_batch_nos2 = frappe.get_doc(
+			"Serial and Batch Bundle", pos_inv.items[1].serial_and_batch_bundle
+		)
+		batch_qty1 = abs(serial_batch_nos1.entries[0].qty)
+		batch_qty2 = abs(serial_batch_nos2.entries[0].qty)
+		self.assertEqual(abs(pos_inv.items[0].qty), batch_qty1)
+		self.assertEqual(abs(pos_inv.items[1].qty), batch_qty2)
+
+		pos_return = make_sales_return(pos_inv.name)
+		pos_return.insert()
+		pos_return.submit()
+		self.assertIsNotNone(pos_return.items[0].serial_and_batch_bundle)
+		self.assertIsNotNone(pos_return.items[1].serial_and_batch_bundle)
+		return_bundle1 = frappe.get_doc(
+			"Serial and Batch Bundle", pos_return.items[0].serial_and_batch_bundle
+		)
+		return_bundle2 = frappe.get_doc(
+			"Serial and Batch Bundle", pos_return.items[1].serial_and_batch_bundle
+		)
+		self.assertEqual(abs(pos_return.items[0].qty), abs(return_bundle1.entries[0].qty))
+		self.assertEqual(abs(pos_return.items[1].qty), abs(return_bundle2.entries[0].qty))
+
+	def test_pos_item_with_serial_no_and_pricing_rule(self):
+		import frappe
+
+		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
+
+		item = "_Test Item with Serial No and Pricing Rule"
+		make_item(
+			item,
+			{
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "SERIAL-.#####",
+			},
+		)
+		make_purchase_receipt(
+			item_code=item, warehouse="_Test Warehouse - _TC", qty=10, rate=500, use_serial_batch_fields=1
+		)
+
+		pr = make_pricing_rule(
+			title="5+1",
+			apply_on="Item Code",
+			item_code=item,
+			selling=1,
+			price_or_product_discount="Product",
+			free_item=item,
+			free_qty=1,
+		)
+		pr.round_free_qty = 1
+		pr.is_recursive = 1
+		pr.recurse_for = 5
+		pr.save()
+
+		pos_inv = create_pos_invoice(
+			update_stock=1, item_code=item, qty=6, rate=500, do_not_submit=1, use_serial_batch_fields=1
+		)
+
+		# Assign serial numbers to the free item (pricing rule auto-adds free item
+		# but serial numbers are auto-fetched only via POS UI, not backend)
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
+
+		for row in pos_inv.items:
+			if row.is_free_item and not row.serial_no:
+				# Collect serial nos already used by other items in the invoice
+				used_serial_nos = []
+				for other_row in pos_inv.items:
+					if other_row.serial_no and other_row.name != row.name:
+						used_serial_nos.extend(other_row.serial_no.split("\n"))
+
+				available_serial_nos = get_serial_nos_for_outward(
+					frappe._dict(
+						{
+							"item_code": row.item_code,
+							"warehouse": row.warehouse or "_Test Warehouse - _TC",
+							"qty": abs(row.stock_qty or row.qty),
+							"based_on": frappe.get_single_value(
+								"Stock Settings", "pick_serial_and_batch_based_on"
+							),
+							"ignore_serial_nos": used_serial_nos,
+						}
+					)
+				)
+				row.serial_no = "\n".join(available_serial_nos[: abs(int(row.qty))])
+				if not row.warehouse:
+					row.warehouse = "_Test Warehouse - _TC"
+
+		pos_inv.payments = []
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 3000})
+		pos_inv.save()
+		pos_inv.submit()
+		pos_inv.reload()
+
+		self.assertEqual(len(pos_inv.items), 2)
+		self.assertIsNotNone(pos_inv.items[0].serial_and_batch_bundle)
+		self.assertIsNotNone(pos_inv.items[1].serial_and_batch_bundle)
+		serial_batch_nos1 = frappe.get_doc(
+			"Serial and Batch Bundle", pos_inv.items[0].serial_and_batch_bundle
+		)
+		serial_batch_nos2 = frappe.get_doc(
+			"Serial and Batch Bundle", pos_inv.items[1].serial_and_batch_bundle
+		)
+		# For serial number items, each entry has qty=1 (one per serial number)
+		bundle_qty1 = abs(sum(e.qty for e in serial_batch_nos1.entries))
+		bundle_qty2 = abs(sum(e.qty for e in serial_batch_nos2.entries))
+		self.assertEqual(abs(pos_inv.items[0].qty), bundle_qty1)
+		self.assertEqual(abs(pos_inv.items[1].qty), bundle_qty2)
+
+		pos_return = make_sales_return(pos_inv.name)
+		pos_return.insert()
+		pos_return.submit()
+		self.assertIsNotNone(pos_return.items[0].serial_and_batch_bundle)
+		self.assertIsNotNone(pos_return.items[1].serial_and_batch_bundle)
+		return_bundle1 = frappe.get_doc(
+			"Serial and Batch Bundle", pos_return.items[0].serial_and_batch_bundle
+		)
+		return_bundle2 = frappe.get_doc(
+			"Serial and Batch Bundle", pos_return.items[1].serial_and_batch_bundle
+		)
+		return_qty1 = abs(sum(e.qty for e in return_bundle1.entries))
+		return_qty2 = abs(sum(e.qty for e in return_bundle2.entries))
+		self.assertEqual(abs(pos_return.items[0].qty), return_qty1)
+		self.assertEqual(abs(pos_return.items[1].qty), return_qty2)
+
 
 def create_pos_invoice(**args):
 	args = frappe._dict(args)
