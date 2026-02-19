@@ -249,7 +249,6 @@ def get_opening_balance(
 		.where((closing_balance.company == filters.company) & (closing_balance.account.isin(accounts)))
 		.groupby(closing_balance.account)
 	)
-
 	if not ignore_reporting_currency:
 		opening_balance = opening_balance.select(
 			Sum(closing_balance.debit_in_reporting_currency).as_("debit_in_reporting_currency"),
@@ -309,16 +308,15 @@ def get_opening_balance(
 				frappe.throw(
 					_("To use a different finance book, please uncheck 'Include Default FB Entries'")
 				)
-
 			opening_balance = opening_balance.where(
 				(closing_balance.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
 				| (closing_balance.finance_book.isnull())
 			)
 		else:
-			opening_balance = opening_balance.where(
-				(closing_balance.finance_book.isin([cstr(filters.finance_book), ""]))
-				| (closing_balance.finance_book.isnull())
-			)
+			if filters.finance_book:
+				opening_balance = opening_balance.where(
+					closing_balance.finance_book == cstr(filters.finance_book)
+				)
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:

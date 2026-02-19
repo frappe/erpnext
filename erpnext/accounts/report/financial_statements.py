@@ -626,10 +626,8 @@ def apply_additional_conditions(doctype, query, from_date, ignore_closing_entrie
 				| (gl_entry.finance_book.isnull())
 			)
 		else:
-			query = query.where(
-				(gl_entry.finance_book.isin([cstr(filters.finance_book), ""]))
-				| (gl_entry.finance_book.isnull())
-			)
+			if filters.finance_book:
+				query = query.where(gl_entry.finance_book == cstr(filters.finance_book))
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
