@@ -644,9 +644,11 @@ def get_applied_pricing_rules(pricing_rules):
 
 
 def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
+	if args is None:
+		args = frappe._dict()
 	free_item = pricing_rule.free_item
 	if pricing_rule.same_item and pricing_rule.get("apply_on") != "Transaction":
-		free_item = item_details.item_code or args.item_code
+		free_item = item_details.item_code or args.get("item_code")
 
 	if not free_item:
 		frappe.throw(
@@ -656,14 +658,14 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 		)
 
 	qty = pricing_rule.free_qty or 1
-	if pricing_rule.is_recursive:
+	if pricing_rule.is_recursive and doc:
 		transaction_qty = sum(
 			[
 				row.qty
 				for row in doc.items
 				if not row.is_free_item
-				and row.item_code == args.item_code
-				and row.pricing_rules == args.pricing_rules
+				and row.item_code == args.get("item_code")
+				and row.pricing_rules == args.get("pricing_rules")
 			]
 		)
 		transaction_qty = transaction_qty - pricing_rule.apply_recursion_over
