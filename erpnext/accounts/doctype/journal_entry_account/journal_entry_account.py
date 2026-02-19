@@ -55,6 +55,7 @@ class JournalEntryAccount(Document):
 			"Fees",
 			"Full and Final Statement",
 			"Payment Entry",
+			"Bank Transaction",
 		]
 		user_remark: DF.SmallText | None
 	# end: auto-generated types

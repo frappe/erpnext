@@ -139,6 +139,8 @@ class BankTransaction(Document):
 		self.set_status()
 
 	def on_cancel(self):
+		self.ignore_linked_doctypes = ["GL Entry"]
+
 		for payment_entry in self.payment_entries:
 			self.delink_payment_entry(payment_entry)
 
