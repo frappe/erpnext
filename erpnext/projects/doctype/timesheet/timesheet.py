@@ -302,7 +302,12 @@ class Timesheet(Document):
 
 
 @frappe.whitelist()
-def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to_time=None):
+def get_projectwise_timesheet_data(
+	project: str | None = None,
+	parent: str | None = None,
+	from_time: str | None = None,
+	to_time: str | None = None,
+):
 	condition = ""
 	if project:
 		condition += "AND tsd.project = %(project)s "
@@ -341,7 +346,7 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 
 
 @frappe.whitelist()
-def get_timesheet_detail_rate(timelog, currency):
+def get_timesheet_detail_rate(timelog: str, currency: str):
 	ts = frappe.qb.DocType("Timesheet")
 	ts_detail = frappe.qb.DocType("Timesheet Detail")
 
@@ -363,7 +368,7 @@ def get_timesheet_detail_rate(timelog, currency):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
+def get_timesheet(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	if not filters:
 		filters = {}
 
@@ -388,7 +393,7 @@ def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def get_timesheet_data(name, project):
+def get_timesheet_data(name: str, project: str):
 	data = None
 	if project and project != "":
 		data = get_projectwise_timesheet_data(project, name)
@@ -409,7 +414,9 @@ def get_timesheet_data(name, project):
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, item_code=None, customer=None, currency=None):
+def make_sales_invoice(
+	source_name: str, item_code: str | None = None, customer: str | None = None, currency: str | None = None
+):
 	target = frappe.new_doc("Sales Invoice")
 	timesheet = frappe.get_doc("Timesheet", source_name)
 
@@ -461,7 +468,9 @@ def make_sales_invoice(source_name, item_code=None, customer=None, currency=None
 
 
 @frappe.whitelist()
-def get_activity_cost(employee=None, activity_type=None, currency=None):
+def get_activity_cost(
+	employee: str | None = None, activity_type: str | None = None, currency: str | None = None
+):
 	base_currency = frappe.defaults.get_global_default("currency")
 	rate = frappe.db.get_values(
 		"Activity Cost",
@@ -485,13 +494,13 @@ def get_activity_cost(employee=None, activity_type=None, currency=None):
 
 
 @frappe.whitelist()
-def get_events(start, end, filters=None):
+def get_events(start: str, end: str, filters: str | None = None):
 	"""Returns events for Gantt / Calendar view rendering.
 	:param start: Start date-time.
 	:param end: End date-time.
 	:param filters: Filters (JSON).
 	"""
-	filters = json.loads(filters)
+	filters = json.loads(filters) if filters else {}
 	from frappe.desk.calendar import get_event_conditions
 
 	conditions = get_event_conditions("Timesheet", filters)

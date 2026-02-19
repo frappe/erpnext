@@ -19,6 +19,7 @@ from frappe.utils import (
 	time_diff_in_seconds,
 	to_timedelta,
 )
+from frappe.utils.data import DateTimeLikeObject
 
 from erpnext.support.doctype.issue.issue import get_holidays
 
@@ -210,7 +211,7 @@ class Workstation(Document):
 		return schedule_date
 
 	@frappe.whitelist()
-	def start_job(self, job_card, from_time, employee):
+	def start_job(self, job_card: str, from_time: DateTimeLikeObject, employee: str):
 		doc = frappe.get_doc("Job Card", job_card)
 		doc.append("time_logs", {"from_time": from_time, "employee": employee})
 		doc.save(ignore_permissions=True)
@@ -218,7 +219,7 @@ class Workstation(Document):
 		return doc
 
 	@frappe.whitelist()
-	def complete_job(self, job_card, qty, to_time):
+	def complete_job(self, job_card: str, qty: float, to_time: DateTimeLikeObject):
 		doc = frappe.get_doc("Job Card", job_card)
 		for row in doc.time_logs:
 			if not row.to_time:
@@ -317,7 +318,7 @@ def get_status_color(status):
 
 
 @frappe.whitelist()
-def get_raw_materials(job_card):
+def get_raw_materials(job_card: str):
 	raw_materials = frappe.get_all(
 		"Job Card",
 		fields=[
@@ -391,7 +392,7 @@ def get_time_logs(job_cards):
 
 
 @frappe.whitelist()
-def get_default_holiday_list(company=None):
+def get_default_holiday_list(company: str | None = None):
 	if company:
 		if not frappe.has_permission("Company", "read"):
 			return []
@@ -533,7 +534,7 @@ def update_job_card(job_card: str, method: str, **kwargs):
 
 
 @frappe.whitelist()
-def validate_job_card(job_card, status):
+def validate_job_card(job_card: str, status: str):
 	job_card_details = frappe.db.get_value("Job Card", job_card, ["status", "for_quantity"], as_dict=1)
 
 	current_status = job_card_details.status

@@ -265,7 +265,6 @@
    "label": "Serial and Batch Reservation"
   },
   {
-   "allow_on_submit": 1,
    "default": "Qty",
    "depends_on": "eval: parent.has_serial_no || parent.has_batch_no",
    "fieldname": "reservation_based_on",
@@ -273,7 +272,7 @@
    "label": "Reservation Based On",
    "no_copy": 1,
    "options": "Qty\nSerial and Batch",
-   "read_only_depends_on": "eval: (doc.delivered_qty > 0 || doc.from_voucher_type == \"Pick List\")"
+   "read_only": 1
   },
   {
    "fieldname": "column_break_7dxj",
@@ -343,11 +342,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-10 16:09:10.380024",
+ "modified": "2026-02-19 10:17:28.695394",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

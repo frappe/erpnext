@@ -2081,7 +2081,9 @@ class WorkOrder(Document):
 
 
 @frappe.whitelist()
-def make_stock_reservation_entries(doc, items=None, is_transfer=True, notify=False):
+def make_stock_reservation_entries(
+	doc: str | Document, items: str | list | None = None, is_transfer: bool = True, notify: bool = False
+):
 	is_transfer = cint(is_transfer)
 	if isinstance(doc, str):
 		doc = parse_json(doc)
@@ -2180,7 +2182,7 @@ def get_consumed_qty(work_order, item_code):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_bom_operations(doctype, txt, searchfield, start, page_len, filters):
+def get_bom_operations(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	if txt:
 		filters["operation"] = ("like", "%%%s%%" % txt)
 
@@ -2188,7 +2190,7 @@ def get_bom_operations(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def get_item_details(item, project=None, skip_bom_info=False, throw=True):
+def get_item_details(item: str, project: str | None = None, skip_bom_info: bool = False, throw: bool = True):
 	res = frappe.db.sql(
 		"""
 		select stock_uom, description, item_name, allow_alternative_item,
@@ -2249,7 +2251,14 @@ def get_item_details(item, project=None, skip_bom_info=False, throw=True):
 
 
 @frappe.whitelist()
-def make_work_order(bom_no, item, qty=0, project=None, variant_items=None, use_multi_level_bom=None):
+def make_work_order(
+	bom_no: str,
+	item: str,
+	qty: float = 0,
+	project: str | None = None,
+	variant_items: str | list | None = None,
+	use_multi_level_bom: bool | None = None,
+):
 	if not frappe.has_permission("Work Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
@@ -2334,7 +2343,7 @@ def get_template_rm_item(wo_doc, item_code):
 
 
 @frappe.whitelist()
-def check_if_scrap_warehouse_mandatory(bom_no):
+def check_if_scrap_warehouse_mandatory(bom_no: str):
 	res = {"set_scrap_wh_mandatory": False}
 	if bom_no:
 		bom = frappe.get_doc("BOM", bom_no)
@@ -2346,7 +2355,7 @@ def check_if_scrap_warehouse_mandatory(bom_no):
 
 
 @frappe.whitelist()
-def set_work_order_ops(name):
+def set_work_order_ops(name: str):
 	po = frappe.get_doc("Work Order", name)
 	po.set_work_order_operations()
 	po.save()
@@ -2411,7 +2420,7 @@ def make_stock_entry(
 
 
 @frappe.whitelist()
-def get_default_warehouse(company):
+def get_default_warehouse(company: str):
 	wip, fg, scrap = frappe.get_cached_value(
 		"Company", company, ["default_wip_warehouse", "default_fg_warehouse", "default_scrap_warehouse"]
 	)
@@ -2423,7 +2432,7 @@ def get_default_warehouse(company):
 
 
 @frappe.whitelist()
-def stop_unstop(work_order, status):
+def stop_unstop(work_order: str, status: str):
 	"""Called from client side on Stop/Unstop event"""
 
 	if not frappe.has_permission("Work Order", "write"):
@@ -2444,7 +2453,7 @@ def stop_unstop(work_order, status):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def query_sales_order(doctype, txt, searchfield, start, page_len, filters) -> list[str]:
+def query_sales_order(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	return frappe.get_list(
 		"Sales Order",
 		fields=["name"],
@@ -2461,7 +2470,7 @@ def query_sales_order(doctype, txt, searchfield, start, page_len, filters) -> li
 
 
 @frappe.whitelist()
-def make_job_card(work_order, operations):
+def make_job_card(work_order: str, operations: str | list) -> None:
 	if isinstance(operations, str):
 		operations = json.loads(operations)
 
@@ -2494,7 +2503,7 @@ def get_operation_details(name, work_order):
 
 
 @frappe.whitelist()
-def close_work_order(work_order, status):
+def close_work_order(work_order: str, status: str):
 	if not frappe.has_permission("Work Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
@@ -2648,7 +2657,7 @@ def get_work_order_operation_data(work_order, operation, workstation):
 
 
 @frappe.whitelist()
-def create_pick_list(source_name, target_doc=None, for_qty=None):
+def create_pick_list(source_name: str, target_doc: str | None = None, for_qty: float | None = None):
 	for_qty = for_qty or json.loads(target_doc).get("for_qty")
 	max_finished_goods_qty = frappe.db.get_value("Work Order", source_name, "qty")
 
@@ -2685,6 +2694,7 @@ def create_pick_list(source_name, target_doc=None, for_qty=None):
 		target_doc,
 	)
 
+	doc.purpose = "Material Transfer for Manufacture"
 	doc.for_qty = for_qty
 
 	doc.set_item_locations()
@@ -2742,7 +2752,7 @@ def get_reserved_qty_for_production(
 
 
 @frappe.whitelist()
-def make_stock_return_entry(work_order):
+def make_stock_return_entry(work_order: str):
 	from erpnext.stock.doctype.stock_entry.stock_entry import get_available_materials
 
 	non_consumed_items = get_available_materials(work_order)

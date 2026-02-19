@@ -9,6 +9,7 @@ from operator import itemgetter
 import frappe
 from frappe import _, bold
 from frappe.core.doctype.version.version import get_diff
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Field
 from frappe.query_builder.functions import Count, IfNull, Sum
@@ -483,7 +484,7 @@ class BOM(WebsiteGenerator):
 					item.set(key, value)
 
 	@frappe.whitelist()
-	def get_bom_material_detail(self, args=None):
+	def get_bom_material_detail(self, args: dict | str | None = None):
 		"""Get raw material details like uom, desc and rate"""
 		if not args:
 			args = frappe.form_dict.get("args")
@@ -576,7 +577,13 @@ class BOM(WebsiteGenerator):
 		return flt(rate) * flt(self.plc_conversion_rate or 1) / (self.conversion_rate or 1)
 
 	@frappe.whitelist()
-	def update_cost(self, update_parent=True, from_child_bom=False, update_hour_rate=True, save=True):
+	def update_cost(
+		self,
+		update_parent: bool = True,
+		from_child_bom: bool = False,
+		update_hour_rate: bool = True,
+		save: bool = True,
+	):
 		if self.docstatus == 2:
 			return
 
@@ -787,7 +794,7 @@ class BOM(WebsiteGenerator):
 				self.add_materials_from_bom(row.finished_good, row.bom_no, row.idx, qty=row.finished_good_qty)
 
 	@frappe.whitelist()
-	def add_raw_materials(self, operation_row_id, items):
+	def add_raw_materials(self, operation_row_id: int, items: str | list):
 		if isinstance(items, str):
 			items = parse_json(items)
 
@@ -834,7 +841,9 @@ class BOM(WebsiteGenerator):
 				return row
 
 	@frappe.whitelist()
-	def add_materials_from_bom(self, finished_good, bom_no, operation_row_id, qty=None):
+	def add_materials_from_bom(
+		self, finished_good: str, bom_no: str, operation_row_id: int, qty: float | None = None
+	):
 		if not frappe.db.exists("BOM", {"item": finished_good, "name": bom_no, "docstatus": 1}):
 			frappe.throw(_("BOM {0} not found for the item {1}").format(bom_no, finished_good))
 
@@ -1454,7 +1463,7 @@ def get_bom_items_as_dict(
 
 
 @frappe.whitelist()
-def get_bom_items(bom, company, qty=1, fetch_exploded=1):
+def get_bom_items(bom: str, company: str, qty: float = 1, fetch_exploded: int = 1):
 	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded, include_non_stock_items=True).values()
 	items = list(items)
 	items.sort(key=functools.cmp_to_key(lambda a, b: a.item_code > b.item_code and 1 or -1))
@@ -1487,7 +1496,7 @@ def validate_bom_no(item, bom_no):
 
 
 @frappe.whitelist()
-def get_children(parent=None, is_root=False, **filters):
+def get_children(parent: str | None = None, is_root: bool = False, **filters):
 	if not parent or parent == "BOM":
 		frappe.msgprint(_("Please select a BOM"))
 		return
@@ -1743,7 +1752,7 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_
 
 
 @frappe.whitelist()
-def get_bom_diff(bom1, bom2):
+def get_bom_diff(bom1: str, bom2: str):
 	from frappe.model import table_fields
 
 	if bom1 == bom2:
@@ -1799,7 +1808,9 @@ def get_bom_diff(bom1, bom2):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_query(doctype, txt, searchfield, start, page_len, filters):
+def item_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | None = None
+):
 	meta = frappe.get_meta("Item", cached=True)
 	searchfields = meta.get_search_fields()
 
@@ -1854,7 +1865,13 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def make_variant_bom(source_name, bom_no, item, variant_items, target_doc=None):
+def make_variant_bom(
+	source_name: str,
+	bom_no: str,
+	item: str,
+	variant_items: str | list,
+	target_doc: Document | str | None = None,
+):
 	from erpnext.manufacturing.doctype.work_order.work_order import add_variant_item
 
 	def postprocess(source, doc):
