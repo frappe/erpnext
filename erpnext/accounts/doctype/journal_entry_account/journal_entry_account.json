@@ -185,7 +185,7 @@
    "fieldtype": "Select",
    "label": "Reference Type",
    "no_copy": 1,
-   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting\nFees\nFull and Final Statement\nPayment Entry",
+   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting\nFees\nFull and Final Statement\nPayment Entry\nBank Transaction",
    "search_index": 1
   },
   {
@@ -198,7 +198,7 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval:doc.reference_type&&!in_list(doc.reference_type, ['Expense Claim', 'Asset', 'Employee Loan', 'Employee Advance'])",
+   "depends_on": "eval:doc.reference_type&&!in_list(doc.reference_type, ['Expense Claim', 'Asset', 'Employee Loan', 'Employee Advance', 'Bank Transaction'])",
    "fieldname": "reference_due_date",
    "fieldtype": "Date",
    "label": "Reference Due Date",
@@ -295,7 +295,11 @@
  "idx": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-11-27 12:23:33.157655",
+=======
+ "modified": "2026-02-19 17:01:22.642454",
+>>>>>>> 387fb1b202 (feat: add Bank Transaction as Reference Type to Journal Entry Account (#52760))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
