@@ -233,7 +233,7 @@ def update_stock(ctx, out, doc=None):
 
 			for batch_no, batch_qty in batches.items():
 				rate = get_batch_based_item_price(
-					{"price_list": doc.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
+					{"price_list": ctx.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
 					out.item_code,
 				)
 				if batch_qty >= qty:
@@ -289,11 +289,12 @@ def get_filtered_serial_nos(serial_nos, doc, table=None):
 	if not table:
 		table = "items"
 
-	for row in doc.get(table):
-		if row.get("serial_no"):
-			for serial_no in get_serial_nos(row.get("serial_no")):
-				if serial_no in serial_nos:
-					serial_nos.remove(serial_no)
+	if doc:
+		for row in doc.get(table):
+			if row.get("serial_no"):
+				for serial_no in get_serial_nos(row.get("serial_no")):
+					if serial_no in serial_nos:
+						serial_nos.remove(serial_no)
 
 	return serial_nos
 
