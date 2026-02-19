@@ -111,7 +111,6 @@ class TestPurchaseOrder(FrappeTestCase):
 		sq.reload()
 		self.assertEqual(len(sq.get("items")), 1)
 
->>>>>>> f4c0611cc5 (feat: update item button addition for quotation (#50976))
 	def test_supplier_quotation_qty(self):
 		sq = frappe.copy_doc(test_records[0])
 		sq.items[0].qty = 0
