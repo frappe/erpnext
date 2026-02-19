@@ -1000,6 +1000,32 @@ class TestQuotation(IntegrationTestCase):
 		so1.submit()
 		self.assertRaises(frappe.ValidationError, so2.submit)
 
+	def test_quotation_status(self):
+		quotation = make_quotation()
+		quotation.submit()
+
+		so1 = make_sales_order(quotation.name)
+		so1.delivery_date = nowdate()
+		so1.submit()
+		quotation.reload()
+		self.assertEqual(quotation.status, "Ordered")
+		so1.cancel()
+
+		quotation.reload()
+		self.assertEqual(quotation.status, "Open")
+
+		so2 = make_sales_order(quotation.name)
+		so2.delivery_date = nowdate()
+		so2.items[0].qty = 1
+		so2.submit()
+		quotation.reload()
+		self.assertEqual(quotation.status, "Partially Ordered")
+
+		so2.cancel()
+
+		quotation.reload()
+		self.assertEqual(quotation.status, "Open")
+
 
 def enable_calculate_bundle_price(enable=1):
 	selling_settings = frappe.get_doc("Selling Settings")
