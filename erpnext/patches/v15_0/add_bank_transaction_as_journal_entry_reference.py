@@ -16,7 +16,11 @@ def execute():
 
 	for property_setter in property_setters:
 		existing_value = frappe.db.get_value("Property Setter", property_setter, "value") or ""
-		options = [option.strip() for option in existing_value.split("\n")]
+
+		raw_options = [option.strip() for option in existing_value.split("\n")]
+		# Preserve a single leading blank (for the empty select option) but drop spurious trailing blanks
+		options = raw_options[:1] + [o for o in raw_options[1:] if o]
+
 		if new_reference_type in options:
 			continue
 
