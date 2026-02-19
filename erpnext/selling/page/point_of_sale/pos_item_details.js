@@ -8,6 +8,7 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.allow_warehouse_change = settings.allow_warehouse_change;
 		this.current_item = {};
 		this.frm_doctype = settings.frm_doctype;
+		this.added_serial_nos = [];
 
 		this.init_component();
 	}
@@ -206,7 +207,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			"actual_qty",
 			"price_list_rate",
 		];
-		if (item.has_serial_no || item.serial_no) fields.push("serial_no");
+		if (item.has_serial_no || item.serial_no || item.is_free_item) fields.push("serial_no");
 		if (item.has_batch_no || item.batch_no) fields.push("batch_no");
 		return fields;
 	}
@@ -219,7 +220,7 @@ erpnext.PointOfSale.ItemDetails = class {
 
 	make_auto_serial_selection_btn(item) {
 		const doc = this.events.get_frm().doc;
-		if (!doc.is_return && (item.has_serial_no || item.serial_no)) {
+		if (!doc.is_return && (item.has_serial_no || item.serial_no || item.is_free_item)) {
 			if (!item.has_batch_no) {
 				this.$form_container.append(`<div class="grid-filler no-select"></div>`);
 			}
@@ -428,6 +429,23 @@ erpnext.PointOfSale.ItemDetails = class {
 			let qty = this.qty_control.get_value();
 			let conversion_factor = this.conversion_factor_control.get_value();
 			let expiry_date = this.item_row.has_batch_no ? this.events.get_frm().doc.posting_date : "";
+			this.added_serial_nos = [];
+
+			if (
+				qty ===
+				this.serial_no_control
+					.get_value()
+					.split(`\n`)
+					.filter((s) => s).length
+			) {
+				return;
+			}
+
+			this.events.get_frm().doc.items.forEach((item) => {
+				if (item.name !== this.name) {
+					this.added_serial_nos.push(...(item.serial_no ? item.serial_no.split(`\n`) : []));
+				}
+			});
 
 			let numbers = frappe.call({
 				method: "erpnext.stock.doctype.serial_no.serial_no.auto_fetch_serial_number",
@@ -438,6 +456,7 @@ erpnext.PointOfSale.ItemDetails = class {
 					batch_nos: this.current_item.batch_no || "",
 					posting_date: expiry_date,
 					for_doctype: this.frm_doctype,
+					exclude_sr_nos: this.added_serial_nos || [],
 				},
 			});
 
