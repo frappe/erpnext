@@ -571,7 +571,7 @@
    "fieldtype": "Link",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Set Source Warehouse",
+   "label": "Set Delivery Warehouse",
    "options": "Warehouse",
    "print_hide": 1
   },
