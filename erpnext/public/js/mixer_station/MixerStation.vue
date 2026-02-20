@@ -204,7 +204,7 @@ onMounted(async () => {
     }
     catch (e) {
         error.value = e.message || e;
-        frappe.msgprint(__('Failed to load BOM ingredients: {0}', [error.value]));
+        frappe.msgprint(__('Failed to load BOM ingredients'));
     }
     finally {
         loadingIngredients.value = false;
@@ -253,9 +253,6 @@ async function toggleReady() {
                 );
             }
         },
-        () => {
-            frappe.msgprint(__('Materials are not confirmed.'));
-        }
     );
 }
 

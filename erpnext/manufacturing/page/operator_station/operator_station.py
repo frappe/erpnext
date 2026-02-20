@@ -1,5 +1,3 @@
-from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
-from erpnext.manufacturing.doctype.production_line.production_line import get_parent_line
 import frappe
 from frappe.utils import flt
 
@@ -7,8 +5,13 @@ from erpnext.manufacturing.doctype.job_card.job_card import (
 	JobCard,
 	make_time_log,
 )
+from erpnext.manufacturing.doctype.manufacturing_process.constants import DISTRIBUTION_PROCESS
 from erpnext.manufacturing.doctype.operation.api import get_open_job_cards, transfer_to_next_process
-from erpnext.manufacturing.doctype.production_line.production_line import ProductionLine
+from erpnext.manufacturing.doctype.production_line.production_line import (
+	ProductionLine,
+	get_all_child_lines,
+	get_parent_line,
+)
 from erpnext.manufacturing.doctype.slab.api import checkout_slab, create_slab, get_slabs_for, move_slab_to
 from erpnext.manufacturing.doctype.work_order.work_order import (
 	WorkOrder,
@@ -69,6 +72,9 @@ def start_process(job_card, slab_name="", slab_template="", process_name="operat
 		)
 
 	else:
+		if not process_name or process_name.lower() != DISTRIBUTION_PROCESS.lower():
+			raise Exception("Cannot create a new slab outside distribution")
+
 		parent_line = get_parent_line(jc.production_line)
 		new_slab = create_slab(parent_line or "", slab_template or "", jc.name)
 		slab_name = new_slab.name
