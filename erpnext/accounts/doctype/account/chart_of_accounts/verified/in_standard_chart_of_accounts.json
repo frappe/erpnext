@@ -30,8 +30,7 @@
                 "Securities and Deposits": {
                     "Earnest Money": {
                         "account_category": "Other Current Assets"
-                    },
-                    "account_category": "Other Current Assets"
+                    }
                 },
                 "Stock Assets": {
                     "Stock In Hand": {
@@ -127,9 +126,11 @@
                     "account_category": "Operating Expenses"
                 },
                 "Marketing Expenses": {
+                    "account_type": "Chargeable",
                     "account_category": "Operating Expenses"
                 },
                 "Miscellaneous Expenses": {
+                    "account_type": "Chargeable",
                     "account_category": "Operating Expenses"
                 },
                 "Office Maintenance Expenses": {
@@ -174,15 +175,6 @@
                 },
                 "Impairment": {
                     "account_category": "Operating Expenses"
-                },
-                "Interest Expense": {
-                    "account_category": "Finance Costs"
-                },
-                "Bank Charges": {
-                    "account_category": "Finance Costs"
-                },
-                "Tax Expense": {
-                    "account_category": "Tax Expense"
                 }
             },
             "root_type": "Expense"
@@ -200,12 +192,8 @@
                 "account_type": "Income Account"
             },
             "Indirect Income": {
-                "Interest Income": {
-                    "account_category": "Investment Income"
-                },
                 "account_type": "Income Account",
-                "is_group": 1,
-                "account_category": "Other Operating Income"
+                "is_group": 1
             },
             "root_type": "Income"
         },
@@ -256,16 +244,7 @@
                     "Bank Overdraft Account": {
                         "account_category": "Short-term Borrowings"
                     }
-                },
-                "Short-term Provisions": {
-                    "account_category": "Short-term Provisions"
                 }
-            },
-            "Non-Current Liabilities": {
-                "Long-term Provisions": {
-                    "account_category": "Long-term Provisions"
-                },
-                "is_group": 1
             },
             "root_type": "Liability"
         }
