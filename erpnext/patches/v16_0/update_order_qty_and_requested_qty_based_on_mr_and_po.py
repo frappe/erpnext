@@ -10,14 +10,14 @@ def execute():
 	poi_query = (
 		frappe.qb.from_(PurchaseOrderItem)
 		.select(PurchaseOrderItem.sales_order_item, Sum(PurchaseOrderItem.qty))
-		.where(PurchaseOrderItem.sales_order_item.isnotnull() & PurchaseOrderItem.docstatus != 2)
+		.where(PurchaseOrderItem.sales_order_item.isnotnull() & PurchaseOrderItem.docstatus == 1)
 		.groupby(PurchaseOrderItem.sales_order_item)
 	)
 
 	mri_query = (
 		frappe.qb.from_(MaterialRequestItem)
 		.select(MaterialRequestItem.sales_order_item, Sum(MaterialRequestItem.qty))
-		.where(MaterialRequestItem.sales_order_item.isnotnull() & MaterialRequestItem.docstatus != 2)
+		.where(MaterialRequestItem.sales_order_item.isnotnull() & MaterialRequestItem.docstatus == 1)
 		.groupby(MaterialRequestItem.sales_order_item)
 	)
 
