@@ -248,6 +248,8 @@ class MaterialRequest(BuyingController):
 	def on_cancel(self):
 		self.update_requested_qty_in_production_plan()
 		self.update_requested_qty()
+		if self.material_request_type == "Purchase":
+			self.update_prevdoc_status()
 
 	def get_mr_items_ordered_qty(self, mr_items):
 		mr_items_ordered_qty = {}
