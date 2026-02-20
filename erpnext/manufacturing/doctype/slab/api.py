@@ -125,6 +125,7 @@ def move_slab_to(
 def get_slabs_in(line: str, current_stage: str) -> list[dict]:
 	slabs = frappe.db.get_list(
 		"Slab",
+		ignore_permissions=True,
 		filters={
 			"line": line,
 			"status": current_stage,
@@ -177,6 +178,7 @@ def get_slabs_for(line: str, next_stage: str, limit=1, include_current_stage=Fal
 	slabs = frappe.db.get_list(
 		"Slab",
 		order_by="modified asc",
+		ignore_permissions=True,
 		filters={"status": ["in", valid_previous_stages], "is_cur_stage_complete": 1, "line": line},
 		limit=limit, # Limit one to send only the first slab
 		fields=[
