@@ -794,7 +794,6 @@ class WorkOrder(Document):
 		self.update_planned_qty()
 		self.update_ordered_qty()
 		self.update_reserved_qty_for_production()
-		self.delete_auto_created_batch_and_serial_no()
 
 		if self.reserve_stock:
 			self.update_stock_reservation()
@@ -925,13 +924,6 @@ class WorkOrder(Document):
 					}
 				)
 			)
-
-	def delete_auto_created_batch_and_serial_no(self):
-		for row in frappe.get_all("Serial No", filters={"work_order": self.name}):
-			frappe.delete_doc("Serial No", row.name)
-
-		for row in frappe.get_all("Batch", filters={"reference_name": self.name}):
-			frappe.delete_doc("Batch", row.name)
 
 	def make_serial_nos(self, args):
 		item_details = frappe.get_cached_value(
