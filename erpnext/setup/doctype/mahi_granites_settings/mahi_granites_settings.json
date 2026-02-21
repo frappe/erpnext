@@ -10,6 +10,9 @@
   "mfg_unit",
   "section_break_1ofs",
   "max_pay_line_amount",
+  "finance_tab",
+  "sales_invoice_patterns_section",
+  "sales_invoice_patterns",
   "manufacturing_settings_section",
   "oven_section",
   "max_heating_minutes",
@@ -94,13 +97,29 @@
    "label": "Manufacturing Unit",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "finance_tab",
+   "fieldtype": "Tab Break",
+   "label": "Finance"
+  },
+  {
+   "fieldname": "sales_invoice_patterns_section",
+   "fieldtype": "Section Break",
+   "label": "Sales Invoice Patterns"
+  },
+  {
+   "fieldname": "sales_invoice_patterns",
+   "fieldtype": "Table",
+   "label": "Comma-separated values denoting the the first few characters of the Sales Invoice numbers of each company.",
+   "options": "Sales Invoice Series"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-13 13:58:11.786584",
+ "modified": "2026-02-21 20:36:16.955988",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Mahi Granites Settings",
