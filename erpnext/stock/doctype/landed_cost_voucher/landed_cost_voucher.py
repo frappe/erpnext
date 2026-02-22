@@ -16,6 +16,10 @@ from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
+class IncorrectCompanyValidationError(frappe.ValidationError):
+	pass
+
+
 class LandedCostVoucher(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -138,6 +142,7 @@ class LandedCostVoucher(Document):
 						frappe.bold(self.company),
 					),
 					title=_("Incorrect Company"),
+					exc=IncorrectCompanyValidationError,
 				)
 
 			if d.receipt_document_type == "Purchase Invoice":
@@ -186,6 +191,7 @@ class LandedCostVoucher(Document):
 						frappe.bold(self.company),
 					),
 					title=_("Incorrect Account"),
+					exc=IncorrectCompanyValidationError,
 				)
 
 	def set_total_taxes_and_charges(self):

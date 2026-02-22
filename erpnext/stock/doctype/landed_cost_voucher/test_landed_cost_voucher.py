@@ -178,6 +178,39 @@ class TestLandedCostVoucher(IntegrationTestCase):
 		self.assertEqual(last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction)
 		self.assertEqual(last_sle_after_landed_cost.stock_value - last_sle.stock_value, 50.0)
 
+	def test_lcv_validates_company(self):
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import (
+			IncorrectCompanyValidationError,
+		)
+
+		company_a = "_Test Company"
+		company_b = "_Test Company with perpetual inventory"
+
+		pr = make_purchase_receipt(
+			company=company_a,
+			warehouse="Stores - _TC",
+			qty=1,
+			rate=100,
+		)
+
+		lcv = make_landed_cost_voucher(
+			company=company_b,
+			receipt_document_type="Purchase Receipt",
+			receipt_document=pr.name,
+			charges=50,
+			do_not_save=True,
+		)
+
+		self.assertRaises(IncorrectCompanyValidationError, lcv.validate_receipt_documents)
+		lcv.company = company_a
+
+		self.assertRaises(IncorrectCompanyValidationError, lcv.validate_expense_accounts)
+		lcv.taxes[0].expense_account = get_expense_account(company_a)
+
+		lcv.save()
+		distribute_landed_cost_on_items(lcv)
+		lcv.submit()
+
 	def test_landed_cost_voucher_for_zero_purchase_rate(self):
 		"Test impact of LCV on future stock balances."
 		from erpnext.stock.doctype.item.test_item import make_item
