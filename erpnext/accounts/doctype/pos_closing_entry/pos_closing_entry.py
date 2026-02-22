@@ -152,7 +152,9 @@ def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def get_pos_invoices(start, end, pos_profile, user):
+def get_pos_invoices(start, end, pos_profile, user=None):
+	if not user:
+		user = frappe.session.user
 	data = frappe.db.sql(
 		"""
 	select
