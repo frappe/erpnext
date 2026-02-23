@@ -515,11 +515,7 @@
    "link_fieldname": "party"
   }
  ],
-<<<<<<< HEAD
- "modified": "2026-02-08 21:28:01.101808",
-=======
- "modified": "2026-02-02 12:36:51.566439",
->>>>>>> 2f2e16fc33 (refactor: Better organizing of the fields in various doctypes)
+ "modified": "2026-02-10 21:28:01.101808",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
