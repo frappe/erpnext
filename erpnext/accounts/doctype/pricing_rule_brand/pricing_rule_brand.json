@@ -107,10 +107,6 @@
  "sort_order": "DESC",
  "track_changes": 1,
  "track_seen": 0,
- "track_views": 0
+ "track_views": 0,
  "row_format": "Dynamic",
- "sort_field": "creation",
- "sort_order": "DESC",
- "states": [],
- "track_changes": 1
 }
