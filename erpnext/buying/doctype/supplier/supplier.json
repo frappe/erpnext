@@ -13,10 +13,6 @@
   "naming_series",
   "supplier_type",
   "supplier_name",
-<<<<<<< HEAD
-=======
-  "supplier_type",
->>>>>>> 2f2e16fc33 (refactor: Better organizing of the fields in various doctypes)
   "gender",
   "column_break0",
   "supplier_group",
@@ -67,11 +63,8 @@
   "allow_purchase_invoice_creation_without_purchase_receipt",
   "column_break_54",
   "disabled",
-<<<<<<< HEAD
   "rfq_and_purchase_order_settings_section",
-=======
   "is_frozen",
->>>>>>> 2f2e16fc33 (refactor: Better organizing of the fields in various doctypes)
   "warn_rfqs",
   "prevent_rfqs",
   "column_break_oxjw",
@@ -83,12 +76,8 @@
   "column_break_59",
   "release_date",
   "portal_users_tab",
-<<<<<<< HEAD
   "portal_users",
   "dashboard_tab"
-=======
-  "portal_users"
->>>>>>> 2f2e16fc33 (refactor: Better organizing of the fields in various doctypes)
  ],
  "fields": [
   {
@@ -504,7 +493,6 @@
    "fieldtype": "Link",
    "label": "Gender",
    "options": "Gender"
-<<<<<<< HEAD
   },
   {
    "fieldname": "rfq_and_purchase_order_settings_section",
@@ -514,8 +502,6 @@
   {
    "fieldname": "column_break_oxjw",
    "fieldtype": "Column Break"
-=======
->>>>>>> 2f2e16fc33 (refactor: Better organizing of the fields in various doctypes)
   }
  ],
  "grid_page_length": 50,
