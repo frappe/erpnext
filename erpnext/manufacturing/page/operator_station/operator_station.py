@@ -26,11 +26,11 @@ from erpnext.stock.doctype.warehouse.warehouse import Warehouse
 
 @frappe.whitelist()
 def get_machine_state(job_card, process_name="operator"):
-	jc = frappe.get_doc("Job Card", job_card)
+	jc: JobCard = frappe.get_doc("Job Card", job_card)  # pyright: ignore[reportAssignmentType]
 	if jc.work_order:
-		wo = frappe.get_doc("Work Order", jc.work_order)
+		wo: WorkOrder | None = frappe.get_doc("Work Order", jc.work_order)  # pyright: ignore[reportAssignmentType]
 	else:
-		None
+		wo = None
 
 	wip_wh_name = jc.wip_warehouse
 	wip_wh: Warehouse | None = frappe.get_doc("Warehouse", wip_wh_name)  # pyright: ignore[reportAssignmentType]
@@ -40,12 +40,12 @@ def get_machine_state(job_card, process_name="operator"):
 		f"{process_name}_started": 1 if jc.time_logs else 0,
 		f"{process_name}_start_time": jc.started_time,
 		"job_card_submitted": jc.docstatus == 1 or jc.status == "Completed",
-		"stock_entry_name": wo.produced_qty > 0 and f"MFG-SE-{process_name.upper()}-*" or "",
+		"stock_entry_name": (wo and wo.produced_qty > 0 and f"MFG-SE-{process_name.upper()}-*") or "",
 		"process_name": process_name,
 		"status": jc.status,
-		"current_process": wo.item_name.rsplit("-", 1)[-1].strip()
-		if wo and "-" in wo.item_name
-		else process_name,
+		"current_process": item_name.rsplit("-", 1)[-1].strip()
+			if wo and "-" in item_name
+			else process_name,
 		"mixer_number": jc.mixer_number,
 		"is_wh_standalone": wip_wh.is_standalone if wip_wh else 0,
 	}
@@ -57,8 +57,8 @@ def get_machine_state(job_card, process_name="operator"):
 def start_process(job_card, slab_name="", slab_template="", process_name="operator"):
 	"""Start the Job Card when mixing starts."""
 
-	jc: JobCard = frappe.get_doc("Job Card", job_card)
-	start_time = frappe.utils.now_datetime()
+	jc: JobCard = frappe.get_doc("Job Card", job_card)  # pyright: ignore[reportAssignmentType]
+	start_time = frappe.utils.now_datetime()  # pyright: ignore[reportAttributeAccessIssue]
 	# employee_id = get_operators("Mixer Operator", jc.production_line)
 
 	args = {
@@ -81,7 +81,7 @@ def start_process(job_card, slab_name="", slab_template="", process_name="operat
 		if not process_name or process_name.lower() != DISTRIBUTION_PROCESS.lower():
 			raise Exception("Cannot create a new slab outside distribution")
 
-		parent_line = get_parent_line(jc.production_line)
+		parent_line = get_parent_line(jc.production_line or "")
 		new_slab = create_slab(parent_line or "", slab_template or "", jc.name)
 		slab_name = new_slab.name
 		slab_template = new_slab.template
@@ -114,12 +114,12 @@ def finish_process(job_card, process_name, transfer_materials=True, should_stop_
 	if isinstance(should_stop_machine, str):
 		should_stop_machine = should_stop_machine.lower() == "true"
 
-	jc: JobCard = frappe.get_doc("Job Card", job_card)
+	jc: JobCard = frappe.get_doc("Job Card", job_card)  # pyright: ignore[reportAssignmentType]
 	job_card_qty = flt(jc.total_completed_qty or jc.for_quantity, 3)
 
 	args = {
 		"job_card_id": jc.name,
-		"complete_time": frappe.utils.now_datetime(),
+		"complete_time": frappe.utils.now_datetime(),  # pyright: ignore[reportAttributeAccessIssue]
 		"completed_qty": job_card_qty,
 		"status": "Completed",
 	}
@@ -143,7 +143,7 @@ def finish_process(job_card, process_name, transfer_materials=True, should_stop_
 	jc.reload()
 
 	work_order = jc.work_order
-	wo: WorkOrder = frappe.get_doc("Work Order", work_order)
+	wo: WorkOrder = frappe.get_doc("Work Order", work_order)  # pyright: ignore[reportAssignmentType]
 	wo.material_transferred_for_manufacturing = job_card_qty
 	wo.flags.ignore_validate_update_after_submit = True
 	wo.save()
