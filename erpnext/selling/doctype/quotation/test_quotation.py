@@ -1002,7 +1002,6 @@ class TestQuotation(IntegrationTestCase):
 
 	def test_quotation_status(self):
 		quotation = make_quotation()
-		quotation.submit()
 
 		so1 = make_sales_order(quotation.name)
 		so1.delivery_date = nowdate()
