@@ -73,14 +73,14 @@
   "in_words",
   "disable_rounded_total",
   "column_break_nuxg",
-  "rounded_total",
   "rounding_adjustment",
+  "rounded_total",
   "base_totals_section",
   "base_grand_total",
   "base_in_words",
   "column_break_bgfw",
-  "base_rounded_total",
   "base_rounding_adjustment",
+  "base_rounded_total",
   "section_break_efew",
   "advance_paid",
   "additional_discount_section",
@@ -1724,7 +1724,11 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2026-02-06 15:35:47.502692",
+=======
+ "modified": "2026-02-23 13:25:56.665392",
+>>>>>>> 0e356dc2e3 (fix: sales and purchase modules forms clean-up)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

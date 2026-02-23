@@ -66,17 +66,19 @@
   "base_total_taxes_and_charges",
   "column_break_47",
   "total_taxes_and_charges",
-  "totals",
-  "base_grand_total",
-  "base_rounding_adjustment",
-  "base_rounded_total",
-  "base_in_words",
-  "column_break3",
+  "totals_section",
   "grand_total",
+  "in_words",
+  "column_break3",
+  "disable_rounded_total",
   "rounding_adjustment",
   "rounded_total",
-  "in_words",
-  "disable_rounded_total",
+  "base_totals_section",
+  "base_grand_total",
+  "base_in_words",
+  "column_break_ydwe",
+  "base_rounding_adjustment",
+  "base_rounded_total",
   "section_break_49",
   "apply_discount_on",
   "base_discount_amount",
@@ -751,16 +753,9 @@
    "print_hide": 1
   },
   {
-   "fieldname": "totals",
-   "fieldtype": "Section Break",
-   "label": "Totals",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-money"
-  },
-  {
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
-   "label": "Grand Total (Company Currency)",
+   "label": "Grand Total",
    "oldfieldname": "grand_total",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -773,7 +768,7 @@
    "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
-   "label": "Rounding Adjustment (Company Currency)",
+   "label": "Rounding Adjustment",
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -783,7 +778,7 @@
    "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
-   "label": "Rounded Total (Company Currency)",
+   "label": "Rounded Total",
    "oldfieldname": "rounded_total",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -796,7 +791,7 @@
    "description": "In Words will be visible once you save the Delivery Note.",
    "fieldname": "base_in_words",
    "fieldtype": "Data",
-   "label": "In Words (Company Currency)",
+   "label": "In Words",
    "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
@@ -1428,13 +1423,47 @@
    "no_copy": 1,
    "options": "Item Wise Tax Detail",
    "print_hide": 1
+<<<<<<< HEAD
+=======
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "utm_analytics_section",
+   "fieldtype": "Section Break",
+   "label": "UTM Analytics"
+  },
+  {
+   "fieldname": "column_break_neoj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-money"
+  },
+  {
+   "fieldname": "base_totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals (Company Currency)",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "column_break_ydwe",
+   "fieldtype": "Column Break"
+>>>>>>> 0e356dc2e3 (fix: sales and purchase modules forms clean-up)
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2026-02-03 12:27:19.055918",
+=======
+ "modified": "2026-02-23 23:04:39.097097",
+>>>>>>> 0e356dc2e3 (fix: sales and purchase modules forms clean-up)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
