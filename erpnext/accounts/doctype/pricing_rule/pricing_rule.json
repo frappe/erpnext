@@ -714,7 +714,6 @@
    "write": 1
   }
  ],
- "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

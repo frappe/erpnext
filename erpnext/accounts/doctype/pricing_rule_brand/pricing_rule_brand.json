@@ -91,7 +91,6 @@
  "issingle": 0,
  "istable": 1,
  "max_attachments": 0,
- "links": [],
  "modified": "2026-02-17 12:17:13.073587",
  "modified_by": "Administrator",
  "module": "Accounts",
@@ -107,6 +106,5 @@
  "sort_order": "DESC",
  "track_changes": 1,
  "track_seen": 0,
- "track_views": 0,
- "row_format": "Dynamic"
+ "track_views": 0
 }
