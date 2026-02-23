@@ -159,11 +159,11 @@ def get_net_profit_loss(income, expense, period_list, company, currency=None, co
 
 
 def get_chart_data(filters, columns, income, expense, net_profit_loss, currency):
-	labels = [d.get("label") for d in columns[4:]]
+	labels = [d.get("label") for d in columns[2:]]
 
 	income_data, expense_data, net_profit = [], [], []
 
-	for p in columns[4:]:
+	for p in columns[2:]:
 		if income:
 			income_data.append(income[-2].get(p.get("fieldname")))
 		if expense:
