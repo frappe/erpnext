@@ -21,6 +21,7 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 )
 from erpnext.manufacturing.doctype.workstation.workstation import Workstation
 from erpnext.setup.doctype.employee.api import get_current_user_context
+from erpnext.stock.doctype.warehouse.warehouse import Warehouse
 
 
 @frappe.whitelist()
@@ -31,6 +32,10 @@ def get_machine_state(job_card, process_name="operator"):
 	else:
 		None
 
+	wip_wh_name = jc.wip_warehouse
+	wip_wh: Warehouse | None = frappe.get_doc("Warehouse", wip_wh_name)  # pyright: ignore[reportAssignmentType]
+
+	item_name: str = str(wo.item_name) if wo else ""
 	state = {
 		f"{process_name}_started": 1 if jc.time_logs else 0,
 		f"{process_name}_start_time": jc.started_time,
@@ -42,6 +47,7 @@ def get_machine_state(job_card, process_name="operator"):
 		if wo and "-" in wo.item_name
 		else process_name,
 		"mixer_number": jc.mixer_number,
+		"is_wh_standalone": wip_wh.is_standalone if wip_wh else 0,
 	}
 
 	return state

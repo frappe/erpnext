@@ -25,7 +25,7 @@ const error = ref(null);
 const batchNo = ref(null);
 const mixerNumber = ref(null);
 const slabsQueue = ref([]);
-const isTrimming = ref(false);
+const is_standalone = ref(false);
 const availableSlabsCount = ref(0);
 const availableJobCardsCount = ref(0);
 
@@ -132,6 +132,8 @@ async function loadJobCard(name) {
 			}
 		});
 
+		is_standalone.value = !!stateRes?.message?.is_wh_standalone;
+
 		const state = stateRes.message || {};
 		status.value = state.status || 'Pending';
 
@@ -219,10 +221,9 @@ onMounted(async () => {
 
 		const route = frappe.get_route();
 		const station = route[1] || '';
-		isTrimming.value = station.toLowerCase() === 'trimming';
 
 		if (!jobCardName.value) {
-			if (isTrimming.value) {
+			if (is_standalone.value) {
 				fetchQueue(work_context.assigned_line, station);
 			}
 			getNextWorkItem(station);
@@ -361,7 +362,7 @@ async function finishOperation() {
 		colour.value = null;
 
 		await checkForNextItem();
-		if (isTrimming.value) {
+		if (is_standalone.value) {
 			await fetchQueue(work_context.assigned_line, station);
 		}
 	} catch (error) {
@@ -489,7 +490,7 @@ async function selectSlab(slab) {
 	<!-- Sidebar: Queue -->
 	<div class="operator-station-container d-flex h-100 w-100">
 
-		<div v-if="isTrimming" class="queue-sidebar bg-light border-right p-3" style="width: 300px; overflow-y: auto;">
+		<div v-if="is_standalone" class="queue-sidebar bg-light border-right p-3" style="width: 300px; overflow-y: auto;">
 			<h5 class="mb-3 font-weight-bold text-center border-bottom pb-2">
 				{{ __('Incoming Slabs') }}
 			</h5>
