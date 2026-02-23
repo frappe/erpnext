@@ -2316,23 +2316,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
- "modified": "2026-02-06 20:43:44.732805",
-=======
- "modified": "2026-02-02 17:21:09.768833",
->>>>>>> 2f2e16fc33 (refactor: Better organizing of the fields in various doctypes)
-=======
- "modified": "2026-02-04 12:14:56.149710",
->>>>>>> a734f90920 (fix: Add totals and base total section)
-=======
- "modified": "2026-02-04 16:21:54.112633",
->>>>>>> 0687e683f8 (refactor: Add advance settings)
-=======
- "modified": "2026-02-04 17:34:42.040540",
->>>>>>> 3a91f6793f (refactor: Add advance settings)
+ "modified": "2026-02-15 20:43:44.732805",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
