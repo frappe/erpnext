@@ -342,6 +342,12 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		this.$delivery_note_btn = this.frm.add_custom_button(
 			__("Delivery Note"),
 			function () {
+				if (!me.frm.doc.customer) {
+					frappe.throw({
+						title: __("Mandatory"),
+						message: __("Please Select a Customer"),
+					});
+				}
 				erpnext.utils.map_current_doc({
 					method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
 					source_doctype: "Delivery Note",
