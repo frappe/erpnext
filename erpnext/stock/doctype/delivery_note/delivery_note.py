@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_company_address
+from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
@@ -1104,10 +1105,12 @@ def make_shipment(source_name, target_doc=None):
 		target.pickup_contact_person = frappe.session.user
 
 		if source.contact_person:
+			contact_person = source.contact_person or get_default_contact("Customer", source.customer)
 			contact = frappe.db.get_value(
-				"Contact", source.contact_person, ["email_id", "phone", "mobile_no"], as_dict=1
+				"Contact", contact_person, ["email_id", "phone", "mobile_no"], as_dict=1
 			)
-			delivery_contact_display = f"{source.contact_display}"
+
+			delivery_contact_display = f"{source.contact_display or contact_person or ''}"
 			if contact:
 				if contact.email_id:
 					delivery_contact_display += "<br>" + contact.email_id
@@ -1115,7 +1118,7 @@ def make_shipment(source_name, target_doc=None):
 					delivery_contact_display += "<br>" + contact.phone
 				if contact.mobile_no and not contact.phone:
 					delivery_contact_display += "<br>" + contact.mobile_no
-			target.delivery_contact = delivery_contact_display
+			target.delivery_contact = contact_person
 
 		if source.shipping_address_name:
 			target.delivery_address_name = source.shipping_address_name
