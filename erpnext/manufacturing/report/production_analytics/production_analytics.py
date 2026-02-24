@@ -50,7 +50,7 @@ def get_work_orders(filters):
 	)
 
 
-def get_data(filters, columns):
+def get_data(filters, period_columns):
 	ranges = build_ranges(filters)
 	period_labels = [scrub(pd) for _fd, _td, pd in ranges]
 	periodic_data = {status: {pd: 0 for pd in period_labels} for status in WORK_ORDER_STATUS_LIST}
@@ -85,7 +85,7 @@ def get_data(filters, columns):
 			row[scrub(period)] = periodic_data[status].get(scrub(period), 0)
 		data.append(row)
 
-	chart = get_chart_data(periodic_data, columns)
+	chart = get_chart_data(periodic_data, period_columns)
 	return data, chart
 
 
@@ -104,9 +104,9 @@ def build_ranges(filters):
 	return ranges
 
 
-def get_chart_data(periodic_data, columns):
-	period_labels = [col.get("label") for col in columns]
-	period_fieldnames = [col.get("fieldname") for col in columns]
+def get_chart_data(periodic_data, period_columns):
+	period_labels = [col.get("label") for col in period_columns]
+	period_fieldnames = [col.get("fieldname") for col in period_columns]
 
 	datasets = []
 	for status in WORK_ORDER_STATUS_LIST:
