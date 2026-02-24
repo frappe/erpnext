@@ -2305,18 +2305,6 @@
    "oldfieldtype": "Section Break",
    "options": "fa fa-group",
    "print_hide": 1
-<<<<<<< HEAD
-=======
-  },
-  {
-   "fieldname": "column_break_ixxw",
-   "fieldtype": "Column Break"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "utm_analytics_section",
-   "fieldtype": "Section Break",
-   "label": "UTM Analytics"
   },
   {
    "fieldname": "section_break_vacb",
@@ -2325,7 +2313,6 @@
   {
    "fieldname": "column_break_rdks",
    "fieldtype": "Column Break"
->>>>>>> 0e356dc2e3 (fix: sales and purchase modules forms clean-up)
   }
  ],
  "grid_page_length": 50,
@@ -2339,11 +2326,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
-<<<<<<< HEAD
- "modified": "2026-02-15 20:43:44.732805",
-=======
- "modified": "2026-02-23 13:29:00.301842",
->>>>>>> 0e356dc2e3 (fix: sales and purchase modules forms clean-up)
+ "modified": "2026-02-23 14:29:00.301842",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
