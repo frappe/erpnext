@@ -13,6 +13,7 @@ from erpnext.manufacturing.doctype.production_line.production_line import (
 	get_parent_line,
 )
 from erpnext.manufacturing.doctype.slab.api import checkout_slab, create_slab, get_slabs_for, move_slab_to
+from erpnext.manufacturing.doctype.slab.slab import Slab
 from erpnext.manufacturing.doctype.work_order.work_order import (
 	WorkOrder,
 )
@@ -273,9 +274,15 @@ def set_machine_status(status: str, station: str, line_name: str | None, machine
 	if not machine:
 		return
 
-	machine.status = status
+	machine.status = status  # pyright: ignore[reportAttributeAccessIssue]
 	machine.save(ignore_permissions=True)
 	machine.reload()
+
+
+def _get_job_card_for_line_and_process(line_name: str, process: str, include_wip=True):
+	child_lines = get_all_child_lines(line_name) or []
+	job_card_data = get_top_job_card_for_process(process, child_lines if child_lines else line_name, include_wip)
+	return job_card_data
 
 
 @frappe.whitelist()
@@ -283,8 +290,7 @@ def get_next_work_item(process, line="", include_wip=True):
 	if isinstance(include_wip, str):
 		include_wip = include_wip.lower() == "true"
 
-	child_lines = get_all_child_lines(line)
-	job_card_data = get_top_job_card_for_process(process, child_lines if child_lines else line, include_wip)
+	job_card_data = _get_job_card_for_line_and_process(line, process, include_wip)
 	job_card = job_card_data["top_job_card"]
 	available_job_cards_count = job_card_data["available_job_cards_count"]
 
@@ -300,7 +306,7 @@ def get_next_work_item(process, line="", include_wip=True):
 	}
 
 
-def get_top_job_card_for_process(process, line="", include_wip=True):
+def get_top_job_card_for_process(process, line: str | list="", include_wip=True):
 	if line and not isinstance(line, list):
 		child_lines = get_all_child_lines(line)
 		if child_lines:
@@ -324,10 +330,7 @@ def update_slab_number_on_job_card(job_card_name, slab_name, slab_template):
 
 @frappe.whitelist()
 def get_job_card_for_slab(slab_name: str, process_name: str):
-	filters = {
-		"slab": slab_name,
-		"docstatus": 0,
-		"status": ["in", ["Material Transferred", "Work In Progress"]],
-		"operation": ["like", f"%{process_name}%"],
-	}
-	return frappe.db.get_value("Job Card", filters, "name")
+	slab: Slab = frappe.get_doc("Slab", slab_name)  # pyright: ignore[reportAssignmentType]
+	job_card_data = _get_job_card_for_line_and_process(slab.line, process_name, include_wip=True)
+	job_card = job_card_data["top_job_card"]
+	return job_card

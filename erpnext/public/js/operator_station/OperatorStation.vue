@@ -133,6 +133,9 @@ async function loadJobCard(name) {
 		});
 
 		is_standalone.value = !!stateRes?.message?.is_wh_standalone;
+		if (is_standalone.value) {
+			fetchQueue(work_context.assigned_line, station);
+		}
 
 		const state = stateRes.message || {};
 		status.value = state.status || 'Pending';
@@ -223,9 +226,6 @@ onMounted(async () => {
 		const station = route[1] || '';
 
 		if (!jobCardName.value) {
-			if (is_standalone.value) {
-				fetchQueue(work_context.assigned_line, station);
-			}
 			getNextWorkItem(station);
 		} else {
 			await loadJobCard(jobCardName.value);
@@ -442,12 +442,6 @@ function statusStyle() {
 	return 'background:#e9ecef;color:#6c757d;padding:.5rem';
 }
 
-function selectJobCard(name) {
-	if (name === jobCardName.value) return;
-	frappe.set_route('operator-station', station);
-	window.location.reload();
-}
-
 async function selectSlab(slab) {
 	if (!slab) return;
 
@@ -472,8 +466,9 @@ async function selectSlab(slab) {
 				process_name: station
 			}
 		});
-		if (r.message) {
-			await loadJobCard(r.message);
+
+		if (r.message?.name) {
+			await loadJobCard(r.message.name);
 		} else {
 			frappe.show_alert({
 				message: __('No open Job Card found for this slab'),
@@ -502,7 +497,7 @@ async function selectSlab(slab) {
 
 			<div v-else>
 				<div v-for="item in slabsQueue" :key="item.name" @click="selectSlab(item)"
-					class="card mb-2 shadow-sm slab-card border-0">
+					class="card pointer mb-2 shadow-sm slab-card border-0">
 					<div class="card-body p-3 border-left-3 d-flex justify-content-between align-items-start"
 						style="height: 5rem">
 						<div>
