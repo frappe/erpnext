@@ -485,12 +485,12 @@ async function selectSlab(slab) {
 	<!-- Sidebar: Queue -->
 	<div class="operator-station-container d-flex h-100 w-100">
 
-		<div v-if="is_standalone" class="queue-sidebar bg-light border-right p-3" style="width: 300px; overflow-y: auto;">
+		<div v-if="is_standalone" class="queue-sidebar border-right p-3" style="width: 300px; overflow-y: auto;">
 			<h5 class="mb-3 font-weight-bold text-center border-bottom pb-2">
 				{{ __('Incoming Slabs') }}
 			</h5>
 
-			<div v-if="slabsQueue.length === 0" class="text-muted text-center py-4 bg-white rounded border">
+			<div v-if="slabsQueue.length === 0" class="text-muted text-center py-4 rounded border empty-queue-state">
 				<span class="fa fa-inbox fa-2x mb-2 d-block text-muted-light"></span>
 				{{ __('No slabs in queue') }}
 			</div>
@@ -509,7 +509,7 @@ async function selectSlab(slab) {
 
 						</div>
 						<div class="mt-2 text-right">
-							<span class="badge badge-light border">{{ new
+							<span class="badge border item-time-badge">{{ new
 								Date(item.modified).toLocaleTimeString('en-GB') }}</span>
 						</div>
 					</div>
@@ -688,17 +688,44 @@ async function selectSlab(slab) {
 
 <style scoped>
 .queue-sidebar {
-	background-color: #fcfcfc;
+	background-color: var(--bg-light, #fcfcfc);
+	border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .queue-sidebar {
+	background-color: var(--control-bg, #1f2124);
+}
+
+.empty-queue-state {
+	background-color: var(--fg-color);
+	border-style: dashed !important;
+	border-color: var(--border-color) !important;
+}
+
+.item-time-badge {
+	background-color: var(--control-bg);
+	color: var(--text-color);
+	border-color: var(--border-color) !important;
 }
 
 .slab-card {
 	transition: all 0.2s ease;
 	border-radius: 8px;
+	background-color: var(--fg-color, #ffffff);
 }
 
 .slab-card:hover {
 	transform: translateX(4px);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="dark"] .slab-card {
+	background-color: var(--card-bg, #242629);
+	border: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .slab-card:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }
 
 .active-card {
