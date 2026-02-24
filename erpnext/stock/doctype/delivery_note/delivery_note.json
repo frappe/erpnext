@@ -1423,18 +1423,6 @@
    "no_copy": 1,
    "options": "Item Wise Tax Detail",
    "print_hide": 1
-<<<<<<< HEAD
-=======
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "utm_analytics_section",
-   "fieldtype": "Section Break",
-   "label": "UTM Analytics"
-  },
-  {
-   "fieldname": "column_break_neoj",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "totals_section",
@@ -1452,18 +1440,13 @@
   {
    "fieldname": "column_break_ydwe",
    "fieldtype": "Column Break"
->>>>>>> 0e356dc2e3 (fix: sales and purchase modules forms clean-up)
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-02-03 12:27:19.055918",
-=======
- "modified": "2026-02-23 23:04:39.097097",
->>>>>>> 0e356dc2e3 (fix: sales and purchase modules forms clean-up)
+ "modified": "2026-02-23 23:05:39.097097",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
