@@ -415,7 +415,7 @@ frappe.realtime.on('slab_checkout', async (slab) => {
                     class="rack-card mb-3 mr-3 p-3 rounded" style="position: relative;"
                     @click="rack.state === 'Heating' || rack.state === 'Overheat' ? unload_slab_from_rack(rack) : loadIntoRack(rack)">
                     <div v-if="rack.state === 'Overheat'" class="warning-icon pulse-icon">
-                        <span class="fa fa-exclamation-circle text-danger"></span>
+                        <span class="fa fa-exclamation-circle text-danger exclamation-icon"></span>
                     </div>
                     <div class="strong mb-1" style="position: absolute;">{{ rack.slot }}</div>
                     <div class="d-flex align-items-center justify-content-center flex-fill">
@@ -773,5 +773,9 @@ frappe.realtime.on('slab_checkout', async (slab) => {
 .pop-switch-leave-to {
     opacity: 0;
     transform: scale(0.9);
+}
+
+.exclamation-icon {
+	line-height: 0 !important;
 }
 </style>

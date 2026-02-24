@@ -25,7 +25,7 @@ const error = ref(null);
 const batchNo = ref(null);
 const mixerNumber = ref(null);
 const slabsQueue = ref([]);
-const isTrimming = ref(false);
+const is_standalone = ref(false);
 const availableSlabsCount = ref(0);
 const availableJobCardsCount = ref(0);
 
@@ -132,6 +132,11 @@ async function loadJobCard(name) {
 			}
 		});
 
+		is_standalone.value = !!stateRes?.message?.is_wh_standalone;
+		if (is_standalone.value) {
+			fetchQueue(work_context.assigned_line, station);
+		}
+
 		const state = stateRes.message || {};
 		status.value = state.status || 'Pending';
 
@@ -219,12 +224,8 @@ onMounted(async () => {
 
 		const route = frappe.get_route();
 		const station = route[1] || '';
-		isTrimming.value = station.toLowerCase() === 'trimming';
 
 		if (!jobCardName.value) {
-			if (isTrimming.value) {
-				fetchQueue(work_context.assigned_line, station);
-			}
 			getNextWorkItem(station);
 		} else {
 			await loadJobCard(jobCardName.value);
@@ -361,7 +362,7 @@ async function finishOperation() {
 		colour.value = null;
 
 		await checkForNextItem();
-		if (isTrimming.value) {
+		if (is_standalone.value) {
 			await fetchQueue(work_context.assigned_line, station);
 		}
 	} catch (error) {
@@ -441,12 +442,6 @@ function statusStyle() {
 	return 'background:#e9ecef;color:#6c757d;padding:.5rem';
 }
 
-function selectJobCard(name) {
-	if (name === jobCardName.value) return;
-	frappe.set_route('operator-station', station);
-	window.location.reload();
-}
-
 async function selectSlab(slab) {
 	if (!slab) return;
 
@@ -471,8 +466,9 @@ async function selectSlab(slab) {
 				process_name: station
 			}
 		});
-		if (r.message) {
-			await loadJobCard(r.message);
+
+		if (r.message?.name) {
+			await loadJobCard(r.message.name);
 		} else {
 			frappe.show_alert({
 				message: __('No open Job Card found for this slab'),
@@ -489,19 +485,19 @@ async function selectSlab(slab) {
 	<!-- Sidebar: Queue -->
 	<div class="operator-station-container d-flex h-100 w-100">
 
-		<div v-if="isTrimming" class="queue-sidebar bg-light border-right p-3" style="width: 300px; overflow-y: auto;">
+		<div v-if="is_standalone" class="queue-sidebar border-right p-3" style="width: 300px; overflow-y: auto;">
 			<h5 class="mb-3 font-weight-bold text-center border-bottom pb-2">
 				{{ __('Incoming Slabs') }}
 			</h5>
 
-			<div v-if="slabsQueue.length === 0" class="text-muted text-center py-4 bg-white rounded border">
+			<div v-if="slabsQueue.length === 0" class="text-muted text-center py-4 rounded border empty-queue-state">
 				<span class="fa fa-inbox fa-2x mb-2 d-block text-muted-light"></span>
 				{{ __('No slabs in queue') }}
 			</div>
 
 			<div v-else>
 				<div v-for="item in slabsQueue" :key="item.name" @click="selectSlab(item)"
-					class="card mb-2 shadow-sm slab-card border-0">
+					class="card pointer mb-2 shadow-sm slab-card border-0">
 					<div class="card-body p-3 border-left-3 d-flex justify-content-between align-items-start"
 						style="height: 5rem">
 						<div>
@@ -513,7 +509,7 @@ async function selectSlab(slab) {
 
 						</div>
 						<div class="mt-2 text-right">
-							<span class="badge badge-light border">{{ new
+							<span class="badge border item-time-badge">{{ new
 								Date(item.modified).toLocaleTimeString('en-GB') }}</span>
 						</div>
 					</div>
@@ -692,17 +688,44 @@ async function selectSlab(slab) {
 
 <style scoped>
 .queue-sidebar {
-	background-color: #fcfcfc;
+	background-color: var(--bg-light, #fcfcfc);
+	border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .queue-sidebar {
+	background-color: var(--control-bg, #1f2124);
+}
+
+.empty-queue-state {
+	background-color: var(--fg-color);
+	border-style: dashed !important;
+	border-color: var(--border-color) !important;
+}
+
+.item-time-badge {
+	background-color: var(--control-bg);
+	color: var(--text-color);
+	border-color: var(--border-color) !important;
 }
 
 .slab-card {
 	transition: all 0.2s ease;
 	border-radius: 8px;
+	background-color: var(--fg-color, #ffffff);
 }
 
 .slab-card:hover {
 	transform: translateX(4px);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="dark"] .slab-card {
+	background-color: var(--card-bg, #242629);
+	border: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .slab-card:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }
 
 .active-card {
