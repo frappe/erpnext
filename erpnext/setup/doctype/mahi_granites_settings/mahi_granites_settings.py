@@ -4,6 +4,8 @@
 # import frappe
 from frappe.model.document import Document
 
+from erpnext.setup.doctype.sales_invoice_series.sales_invoice_series import SalesInvoiceSeries
+
 
 class MahiGranitesSettings(Document):
 	# begin: auto-generated types
@@ -13,9 +15,6 @@ class MahiGranitesSettings(Document):
 
 	if TYPE_CHECKING:
 		from frappe.types import DF
-		from spl_mods.mahi_granites.doctype.sales_invoice_series.sales_invoice_series import (
-			SalesInvoiceSeries,
-		)
 
 		from erpnext.manufacturing.doctype.quarantine_label.quarantine_label import QuarantineLabel
 		from erpnext.manufacturing.doctype.slab_quality_grade.slab_quality_grade import SlabQualityGrade
