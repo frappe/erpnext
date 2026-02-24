@@ -1689,11 +1689,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-02-05 21:45:16.964500",
-=======
- "modified": "2026-02-23 13:23:57.269770",
->>>>>>> 0e356dc2e3 (fix: sales and purchase modules forms clean-up)
+ "modified": "2026-02-23 14:23:57.269770",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
