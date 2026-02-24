@@ -85,5 +85,4 @@ def create_shipping_rule(shipping_rule_type, shipping_rule_name):
 		},
 	)
 	sr.insert(ignore_permissions=True)
-	sr.submit()
 	return sr

@@ -695,7 +695,6 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		sales_person = (
 			frappe.get_doc({"doctype": "Sales Person", "sales_person_name": "John Clark", "enabled": True})
 			.insert()
-			.submit()
 		)
 		si = self.create_sales_invoice(do_not_submit=True)
 		si.append("sales_team", {"sales_person": sales_person.name, "allocated_percentage": 100})
@@ -782,7 +781,6 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 				}
 			)
 			.insert()
-			.submit()
 		)
 
 		si2 = self.create_sales_invoice(do_not_submit=True)
@@ -1005,7 +1003,6 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 				}
 			)
 			.insert()
-			.submit()
 		)
 
 		si = self.create_sales_invoice(do_not_submit=True)

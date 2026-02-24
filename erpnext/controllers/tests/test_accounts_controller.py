@@ -2483,7 +2483,7 @@ class TestAccountsController(IntegrationTestCase):
 	def test_document_naming_rule_based_on_posting_date(self):
 		frappe.new_doc(
 			"Document Naming Rule", document_type="Sales Invoice", prefix="SI-.MM.-.YYYY.-"
-		).submit()
+		).insert()
 
 		si = create_sales_invoice(do_not_save=True)
 		si.set_posting_time = 1
