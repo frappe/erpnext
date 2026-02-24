@@ -1724,11 +1724,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-02-06 15:35:47.502692",
-=======
- "modified": "2026-02-23 13:25:56.665392",
->>>>>>> 0e356dc2e3 (fix: sales and purchase modules forms clean-up)
+ "modified": "2026-02-23 14:25:56.665392",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
