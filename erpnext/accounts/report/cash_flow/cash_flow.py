@@ -145,7 +145,7 @@ def execute(filters=None):
 		True,
 	)
 
-	chart = get_chart_data(columns, data, company_currency)
+	chart = get_chart_data(period_list, data, company_currency)
 
 	report_summary = get_report_summary(summary_data, company_currency)
 
@@ -417,12 +417,12 @@ def get_report_summary(summary_data, currency):
 	return report_summary
 
 
-def get_chart_data(columns, data, currency):
-	labels = [d.get("label") for d in columns[2:]]
+def get_chart_data(period_list, data, currency):
+	labels = [period.get("label") for period in period_list]
 	datasets = [
 		{
 			"name": section.get("section").replace("'", ""),
-			"values": [section.get(d.get("fieldname")) for d in columns[2:]],
+			"values": [section.get(period.get("key")) for period in period_list],
 		}
 		for section in data
 		if section.get("parent_section") is None and section.get("currency")

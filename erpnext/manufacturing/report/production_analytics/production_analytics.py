@@ -6,24 +6,25 @@ import frappe
 from frappe import _, scrub
 from frappe.utils import getdate, today
 
-from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
+from erpnext.stock.report.stock_analytics.stock_analytics import (
+	get_period,
+	get_period_columns,
+	get_period_date_ranges,
+)
 
 WORK_ORDER_STATUS_LIST = ["Not Started", "Overdue", "Pending", "Completed", "Closed", "Stopped"]
 
 
 def execute(filters=None):
-	columns = get_columns(filters)
-	data, chart = get_data(filters, columns)
+	period_columns = get_period_columns(filters)
+	columns = get_columns(period_columns)
+	data, chart = get_data(filters, period_columns)
 	return columns, data, None, chart
 
 
-def get_columns(filters):
+def get_columns(period_columns):
 	columns = [{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 140}]
-	ranges = get_period_date_ranges(filters)
-
-	for _dummy, end_date in ranges:
-		period = get_period(end_date, filters)
-		columns.append({"label": _(period), "fieldname": scrub(period), "fieldtype": "Float", "width": 120})
+	columns.extend(period_columns)
 
 	return columns
 
@@ -104,8 +105,8 @@ def build_ranges(filters):
 
 
 def get_chart_data(periodic_data, columns):
-	period_labels = [d.get("label") for d in columns[1:]]
-	period_fieldnames = [d.get("fieldname") for d in columns[1:]]
+	period_labels = [col.get("label") for col in columns]
+	period_fieldnames = [col.get("fieldname") for col in columns]
 
 	datasets = []
 	for status in WORK_ORDER_STATUS_LIST:

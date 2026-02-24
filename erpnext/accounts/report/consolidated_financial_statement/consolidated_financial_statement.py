@@ -48,22 +48,25 @@ def execute(filters=None):
 		return columns, data, message, chart
 
 	fiscal_year = get_fiscal_year_data(filters.get("from_fiscal_year"), filters.get("to_fiscal_year"))
-	companies_column, companies = get_companies(filters)
-	columns = get_columns(companies_column, filters)
+	company_list, companies = get_companies(filters)
+	company_columns = get_company_columns(company_list, filters)
+	columns = get_columns(company_columns)
 
 	if filters.get("report") == "Balance Sheet":
 		data, message, chart, report_summary = get_balance_sheet_data(
-			fiscal_year, companies, columns, filters
+			fiscal_year, companies, company_columns, filters
 		)
 	elif filters.get("report") == "Profit and Loss Statement":
-		data, message, chart, report_summary = get_profit_loss_data(fiscal_year, companies, columns, filters)
+		data, message, chart, report_summary = get_profit_loss_data(
+			fiscal_year, companies, company_columns, filters
+		)
 	else:
 		data, report_summary = get_cash_flow_data(fiscal_year, companies, filters)
 
 	return columns, data, message, chart, report_summary
 
 
-def get_balance_sheet_data(fiscal_year, companies, columns, filters):
+def get_balance_sheet_data(fiscal_year, companies, company_columns, filters):
 	asset = get_data(companies, "Asset", "Debit", fiscal_year, filters=filters)
 
 	liability = get_data(companies, "Liability", "Credit", fiscal_year, filters=filters)
@@ -116,7 +119,7 @@ def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 		True,
 	)
 
-	chart = get_chart_data(filters, columns, asset, liability, equity, company_currency)
+	chart = get_chart_data(filters, company_columns, asset, liability, equity, company_currency)
 
 	return data, message, chart, report_summary
 
@@ -164,7 +167,7 @@ def get_root_account_name(root_type, company):
 		return root_account[0][0]
 
 
-def get_profit_loss_data(fiscal_year, companies, columns, filters):
+def get_profit_loss_data(fiscal_year, companies, company_columns, filters):
 	income, expense, net_profit_loss = get_income_expense_data(companies, fiscal_year, filters)
 	company_currency = get_company_currency(filters)
 
@@ -174,7 +177,7 @@ def get_profit_loss_data(fiscal_year, companies, columns, filters):
 	if net_profit_loss:
 		data.append(net_profit_loss)
 
-	chart = get_pl_chart_data(filters, columns, income, expense, net_profit_loss, company_currency)
+	chart = get_pl_chart_data(filters, company_columns, income, expense, net_profit_loss, company_currency)
 
 	report_summary, primitive_summary = get_pl_summary(
 		companies, "", income, expense, net_profit_loss, company_currency, filters, True
@@ -280,7 +283,30 @@ def get_account_type_based_data(account_type, companies, fiscal_year, filters):
 	return data
 
 
-def get_columns(companies, filters):
+def get_company_columns(companies, filters):
+	company_columns = []
+	for company in companies:
+		apply_currency_formatter = 1 if not filters.presentation_currency else 0
+		currency = filters.presentation_currency
+		if not currency:
+			currency = erpnext.get_company_currency(company)
+
+		company_columns.append(
+			{
+				"fieldname": company,
+				"label": f"{company} ({currency})",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 150,
+				"apply_currency_formatter": apply_currency_formatter,
+				"company_name": company,
+			}
+		)
+
+	return company_columns
+
+
+def get_columns(company_columns):
 	columns = [
 		{
 			"fieldname": "account",
@@ -298,23 +324,7 @@ def get_columns(companies, filters):
 		},
 	]
 
-	for company in companies:
-		apply_currency_formatter = 1 if not filters.presentation_currency else 0
-		currency = filters.presentation_currency
-		if not currency:
-			currency = erpnext.get_company_currency(company)
-
-		columns.append(
-			{
-				"fieldname": company,
-				"label": f"{company} ({currency})",
-				"fieldtype": "Currency",
-				"options": "currency",
-				"width": 150,
-				"apply_currency_formatter": apply_currency_formatter,
-				"company_name": company,
-			}
-		)
+	columns.extend(company_columns)
 
 	return columns
 

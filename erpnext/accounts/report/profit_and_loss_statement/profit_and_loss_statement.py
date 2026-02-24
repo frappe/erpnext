@@ -162,18 +162,19 @@ def get_net_profit_loss(income, expense, period_list, company, currency=None, co
 		return net_profit_loss
 
 
-def get_chart_data(filters, period_list, income, expense, net_profit_loss, currency):
-	labels = [period.label for period in period_list]
+def get_chart_data(filters, chart_columns, income, expense, net_profit_loss, currency):
+	labels = [col.get("label") for col in chart_columns]
 
 	income_data, expense_data, net_profit = [], [], []
 
-	for p in period_list:
+	for col in chart_columns:
+		key = col.get("key") or col.get("fieldname")
 		if income:
-			income_data.append(income[-2].get(p.key))
+			income_data.append(income[-2].get(key))
 		if expense:
-			expense_data.append(expense[-2].get(p.key))
+			expense_data.append(expense[-2].get(key))
 		if net_profit_loss:
-			net_profit.append(net_profit_loss.get(p.key))
+			net_profit.append(net_profit_loss.get(key))
 
 	datasets = []
 	if income_data:
