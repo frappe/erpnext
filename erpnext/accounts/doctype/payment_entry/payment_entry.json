@@ -441,7 +441,7 @@
   {
    "fieldname": "transaction_references",
    "fieldtype": "Section Break",
-   "label": "Transaction ID"
+   "label": "Transaction References"
   },
   {
    "bold": 1,
@@ -832,7 +832,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-02-12 19:22:26.784959",
+ "modified": "2026-02-24 14:22:19.788499",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
