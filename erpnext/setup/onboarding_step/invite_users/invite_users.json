@@ -1,0 +1,20 @@
+{
+ "action": "Create Entry",
+ "action_label": "Invite Users",
+ "creation": "2026-02-24 18:04:21.585575",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-24 18:04:21.585575",
+ "modified_by": "Administrator",
+ "name": "Invite Users",
+ "owner": "Administrator",
+ "reference_document": "User",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Invite Users",
+ "validate_action": 1
+}
