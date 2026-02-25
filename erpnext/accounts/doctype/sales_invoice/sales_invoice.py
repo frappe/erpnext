@@ -119,7 +119,7 @@ class SalesInvoice(SellingController):
 		cost_center: DF.Link | None
 		coupon_code: DF.Link | None
 		currency: DF.Link
-		customer: DF.Link | None
+		customer: DF.Link
 		customer_address: DF.Link | None
 		customer_group: DF.Link | None
 		customer_name: DF.SmallText | None

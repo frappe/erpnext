@@ -271,6 +271,7 @@
    "oldfieldtype": "Link",
    "options": "Customer",
    "print_hide": 1,
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -2330,7 +2331,11 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
+<<<<<<< HEAD
  "modified": "2026-02-10 11:59:07.819903",
+=======
+ "modified": "2026-02-25 12:41:57.043459",
+>>>>>>> 1d4c835843 (fix: customer field made mandatory for sales invoice)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
