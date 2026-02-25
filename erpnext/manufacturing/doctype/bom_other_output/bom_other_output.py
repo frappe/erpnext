@@ -1,11 +1,11 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
+# import frappe
 from frappe.model.document import Document
 
 
-class BOMScrapItem(Document):
+class BOMOtherOutput(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -14,17 +14,24 @@ class BOMScrapItem(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		amount: DF.Currency
-		base_amount: DF.Currency
-		base_rate: DF.Currency
+		base_cost: DF.Currency
+		conversion_factor: DF.Float
+		cost: DF.Currency
+		cost_allocation_per: DF.Percent
+		description: DF.TextEditor | None
+		image: DF.AttachImage | None
 		item_code: DF.Link
 		item_name: DF.Data | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		rate: DF.Currency
+		process_loss_per: DF.Percent
+		qty: DF.Float
+		qty_after_process_loss: DF.Float
 		stock_qty: DF.Float
 		stock_uom: DF.Link | None
+		type: DF.Literal["Co-Product", "By-Product", "Scrap", "Finished Good"]
+		uom: DF.Link
 	# end: auto-generated types
 
 	pass

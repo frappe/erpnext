@@ -2360,7 +2360,7 @@ def check_if_scrap_warehouse_mandatory(bom_no: str):
 	if bom_no:
 		bom = frappe.get_doc("BOM", bom_no)
 
-		if len(bom.scrap_items) > 0:
+		if bom.has_scrap_items():
 			res["set_scrap_wh_mandatory"] = True
 
 	return res
