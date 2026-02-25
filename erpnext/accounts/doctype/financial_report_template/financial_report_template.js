@@ -324,6 +324,8 @@ function update_formula_description(frm, data_source) {
 	const list_style = `style="margin-bottom: var(--margin-sm); color: var(--text-muted); font-size: 0.9em;"`;
 	const note_style = `style="margin-bottom: 0; color: var(--text-muted); font-size: 0.9em;"`;
 	const tip_style = `style="margin-bottom: 0; color: var(--text-color); font-size: 0.85em;"`;
+	const code_style = `style="background: var(--bg-light-gray); padding: var(--padding-xs); border-radius: var(--border-radius); font-size: 0.85em; width: max-content; margin-bottom: var(--margin-sm);"`;
+	const pre_style = `style="margin: 0; border-radius: var(--border-radius)"`;
 
 	let description_html = "";
 
@@ -384,8 +386,13 @@ function update_formula_description(frm, data_source) {
 					<li><code>my_app.financial_reports.get_kpi_data</code></li>
 				</ul>
 
+				<h6 ${subtitle_style}>Method Signature:</h6>
+				<div ${code_style}>
+					<pre ${pre_style}>def get_custom_data(filters, periods, row): <br>&nbsp; # filters: dict — report filters (company, period, etc.) <br>&nbsp; # periods: list[dict] — period definitions <br>&nbsp; # row: dict — the current report row <br><br>&nbsp; return [1000.0, 1200.0, 1150.0]  # one value per period</pre>
+				</div>
+
 				<h6 ${subtitle_style}>Return Format:</h6>
-				<p ${text_style}>Numbers for each period: <code>[1000.0, 1200.0, 1150.0]</code></p>
+				<p ${text_style}>A list of numbers, one for each period: <code>[1000.0, 1200.0, 1150.0]</code></p>
 			</div>`;
 	} else if (data_source === "Blank Line") {
 		description_html = `
