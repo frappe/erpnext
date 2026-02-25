@@ -8,7 +8,7 @@ repos:
     rev: v4.3.0
     hooks:
       - id: trailing-whitespace
-        files: "erpnext.*"
+        files: "perceptrons.*"
         exclude: ".*json$|.*txt$|.*csv|.*md"
       - id: check-yaml
       - id: no-commit-to-branch
@@ -28,11 +28,11 @@ repos:
         # Ignore any files that might contain jinja / bundles
         exclude: |
             (?x)^(
-                erpnext/public/dist/.*|
+                perceptrons/public/dist/.*|
                 cypress/.*|
                 .*node_modules.*|
                 .*boilerplate.*|
-                erpnext/templates/includes/.*
+                perceptrons/templates/includes/.*
             )$
 
   - repo: https://github.com/pre-commit/mirrors-eslint
@@ -44,13 +44,13 @@ repos:
         # Ignore any files that might contain jinja / bundles
         exclude: |
             (?x)^(
-                erpnext/public/dist/.*|
+                perceptrons/public/dist/.*|
                 cypress/.*|
                 .*node_modules.*|
                 .*boilerplate.*|
-                erpnext/public/js/controllers/.*|
-                erpnext/templates/pages/order.js|
-                erpnext/templates/includes/.*
+                perceptrons/public/js/controllers/.*|
+                perceptrons/templates/pages/order.js|
+                perceptrons/templates/includes/.*
             )$
 
   - repo: https://github.com/astral-sh/ruff-pre-commit

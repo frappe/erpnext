@@ -3,21 +3,21 @@
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence,
 
-erpnext/accounts/               @ruthra-kumar
-erpnext/assets/                 @khushi8112
-erpnext/regional                @ruthra-kumar
-erpnext/selling                 @ruthra-kumar
-erpnext/support/                @ruthra-kumar
+perceptrons/accounts/               @ruthra-kumar
+perceptrons/assets/                 @khushi8112
+perceptrons/regional                @ruthra-kumar
+perceptrons/selling                 @ruthra-kumar
+perceptrons/support/                @ruthra-kumar
 
-erpnext/buying/                 @rohitwaghchaure @mihir-kandoi
-erpnext/maintenance/            @rohitwaghchaure
-erpnext/manufacturing/          @rohitwaghchaure @mihir-kandoi
-erpnext/quality_management/     @rohitwaghchaure
-erpnext/stock/                  @rohitwaghchaure @mihir-kandoi
-erpnext/subcontracting          @mihir-kandoi
+perceptrons/buying/                 @rohitwaghchaure @mihir-kandoi
+perceptrons/maintenance/            @rohitwaghchaure
+perceptrons/manufacturing/          @rohitwaghchaure @mihir-kandoi
+perceptrons/quality_management/     @rohitwaghchaure
+perceptrons/stock/                  @rohitwaghchaure @mihir-kandoi
+perceptrons/subcontracting          @mihir-kandoi
 
-erpnext/controllers/            @ruthra-kumar @rohitwaghchaure @mihir-kandoi
-erpnext/patches/                @ruthra-kumar
+perceptrons/controllers/            @ruthra-kumar @rohitwaghchaure @mihir-kandoi
+perceptrons/patches/                @ruthra-kumar
 
 .github/                        @ruthra-kumar
 pyproject.toml                  @ruthra-kumar

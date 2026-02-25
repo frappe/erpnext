@@ -1,7 +1,7 @@
 [project]
-name = "erpnext"
+name = "perceptrons"
 authors = [
-    { name = "Frappe Technologies Pvt Ltd", email = "developers@frappe.io"}
+    { name = "Hash Include Solutions FZC", email = "info@hashinclude.io"}
 ]
 description = "Open Source ERP"
 requires-python = ">=3.14"
@@ -33,8 +33,8 @@ build-backend = "flit_core.buildapi"
 [tool.frappe.testing.function_type_validation]
 max_module_depth = 1
 skip_namespaces = [
-    "erpnext.deprecation_dumpster",
-    "erpnext.assets.dashboard_fixtures",  # https://github.com/frappe/erpnext/issues/44418
+    "perceptrons.deprecation_dumpster",
+    "perceptrons.assets.dashboard_fixtures",  # https://github.com/anasabdullatheef/pj-0001/issues/44418
 ]
 
 [tool.bench.frappe-dependencies]
@@ -79,6 +79,6 @@ docstring-code-format = true
 
 
 [project.urls]
-Homepage = "https://frappe.io/erpnext"
-Repository = "https://github.com/frappe/erpnext.git"
-"Bug Reports" = "https://github.com/frappe/erpnext/issues"
+Homepage = "https://github.com/anasabdullatheef/pj-0001"
+Repository = "https://github.com/anasabdullatheef/pj-0001.git"
+"Bug Reports" = "https://github.com/anasabdullatheef/pj-0001/issues"

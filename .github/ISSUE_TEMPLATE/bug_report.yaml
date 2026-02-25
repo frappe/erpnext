@@ -1,16 +1,16 @@
 name: Bug Report
-description: Report a bug encountered while using ERPNext
+description: Report a bug encountered while using Perceptrons
 labels: ["bug"]
 
 body:
   - type: markdown
     attributes:
       value: |
-        Welcome to ERPNext issue tracker! Before creating an issue, please heed the following:
+        Welcome to Perceptrons issue tracker! Before creating an issue, please heed the following:
 
-        1. This tracker should only be used to report bugs and request features / enhancements to ERPNext
-            - For questions and general support, checkout the [user manual](https://docs.erpnext.com/) or use [forum](https://discuss.frappe.io/c/erpnext/6)
-            - For documentation issues, propose edit on [documentation site](https://docs.erpnext.com/) directly.
+        1. This tracker should only be used to report bugs and request features / enhancements to Perceptrons
+            - For questions and general support, checkout the [user manual](https://docs.perceptrons.com/) or use [forum](https://discuss.frappe.io/c/perceptrons/6)
+            - For documentation issues, propose edit on [documentation site](https://docs.perceptrons.com/) directly.
         2. When making a bug report, make sure you provide all required information. The easier it is for
            maintainers to reproduce, the faster it'll be fixed.
         3. If you think you know what the reason for the bug is, share it with us. Maybe put in a PR 😉
@@ -28,7 +28,7 @@ body:
     id: module
     attributes:
       label: Module
-      description: Select affected module of ERPNext.
+      description: Select affected module of Perceptrons.
       multiple: true
       options:
         - accounts
@@ -57,10 +57,10 @@ body:
     id: exact-version
     attributes:
       label: Version
-      description: Share exact version number of Frappe and ERPNext you are using.
+      description: Share exact version number of Frappe and Perceptrons you are using.
       placeholder: |
         Frappe version -
-        ERPNext version -
+        Perceptrons version -
     validations:
       required: true
 
@@ -86,4 +86,4 @@ body:
   - type: markdown
     attributes:
       value: |
-        By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/frappe/erpnext/blob/develop/CODE_OF_CONDUCT.md)
+        By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/anasabdullatheef/pj-0001/blob/develop/CODE_OF_CONDUCT.md)

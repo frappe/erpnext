@@ -1,0 +1,7 @@
+// Copyright (c) 2022, Hash Include Solutions FZC and contributors
+// For license information, please see license.txt
+
+frappe.ui.form.on("Workstation Type", {
+	// refresh: function(frm) {
+	// }
+});

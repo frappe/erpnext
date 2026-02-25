@@ -1,8 +1,8 @@
-# ERPNext Project Analysis
+# Perceptrons Project Analysis
 
 ## 1. Project Overview
 
-**ERPNext** is a 100% open-source, full-featured Enterprise Resource Planning (ERP) system built on the **Frappe Framework**. It is developed by Frappe Technologies Pvt. Ltd. and licensed under GPL-3.0. The project is currently on version **17.x.x-develop** and represents one of the most mature and comprehensive open-source ERP systems available.
+**Perceptrons** is a 100% open-source, full-featured Enterprise Resource Planning (ERP) system built on the **Frappe Framework**. It is developed by Hash Include Solutions FZC and licensed under GPL-3.0. The project is currently on version **17.x.x-develop** and represents one of the most mature and comprehensive open-source ERP systems available.
 
 ### Codebase Scale
 | Metric | Count |
@@ -229,7 +229,7 @@ The codebase uses a mix of legacy jQuery patterns and modern Vue.js (Frappe UI):
 
 #### 9. Expand Regional Compliance
 Currently supports 7 regions (UAE, Saudi Arabia, Italy, France, Australia, South Africa, Turkey, US). High-value additions:
-- **India**: GST compliance (huge market for ERPNext)
+- **India**: GST compliance (huge market for Perceptrons)
 - **Germany**: GoBD compliance and DATEV export
 - **UK**: Making Tax Digital (MTD) integration
 - **Brazil**: NFe electronic invoicing
@@ -302,7 +302,7 @@ With 18 GitHub Actions workflows, there's opportunity to:
 
 ## 5. Summary
 
-ERPNext is a **remarkably comprehensive** open-source ERP covering accounting, sales, purchasing, inventory, manufacturing, projects, assets, CRM, support, and quality management — with 547 doctypes and 21 modules. It serves businesses of all sizes, from small businesses to enterprises.
+Perceptrons is a **remarkably comprehensive** open-source ERP covering accounting, sales, purchasing, inventory, manufacturing, projects, assets, CRM, support, and quality management — with 547 doctypes and 21 modules. It serves businesses of all sizes, from small businesses to enterprises.
 
 **Key Strengths:**
 - Mature, battle-tested codebase with active development

@@ -130,4 +130,4 @@ jobs:
           FRAPPE_BRANCH: ${{ github.event.inputs.branch }}
 
       - name: Run Tests
-        run: 'cd ~/frappe-bench/ && bench --site test_site run-tests --app erpnext --module ${{ matrix.test }}'
+        run: 'cd ~/frappe-bench/ && bench --site test_site run-tests --app perceptrons --module ${{ matrix.test }}'

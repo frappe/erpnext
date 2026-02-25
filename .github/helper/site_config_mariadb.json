@@ -12,6 +12,6 @@
  "root_login": "root",
  "root_password": "root",
  "host_name": "http://test_site:8000",
- "install_apps": ["payments", "erpnext"],
+ "install_apps": ["payments", "perceptrons"],
  "throttle_user_limit": 100
 }

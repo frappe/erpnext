@@ -6,8 +6,8 @@ latest_updates.json
 .wnf-lang-status
 *.egg-info
 dist/
-erpnext/public/dist
-erpnext/docs/current
+perceptrons/public/dist
+perceptrons/docs/current
 *.swp
 *.swo
 __pycache__

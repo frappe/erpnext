@@ -113,11 +113,11 @@ jobs:
           jq 'del(.install_apps)' ~/frappe-bench/sites/test_site/site_config.json > tmp.json
           mv tmp.json ~/frappe-bench/sites/test_site/site_config.json
 
-          wget https://frappe.io/files/erpnext-v14.sql.gz
-          bench --site test_site --force restore ~/frappe-bench/erpnext-v14.sql.gz
+          wget https://frappe.io/files/perceptrons-v14.sql.gz
+          bench --site test_site --force restore ~/frappe-bench/perceptrons-v14.sql.gz
 
           git -C "apps/frappe" remote set-url upstream https://github.com/frappe/frappe.git
-          git -C "apps/erpnext" remote set-url upstream https://github.com/frappe/erpnext.git
+          git -C "apps/perceptrons" remote set-url upstream https://github.com/anasabdullatheef/pj-0001.git
 
 
           function update_to_version() {
@@ -128,15 +128,15 @@ jobs:
 
             # Fetch and checkout branches
             git -C "apps/frappe" fetch --depth 1 upstream $branch_name:$branch_name
-            git -C "apps/erpnext" fetch --depth 1 upstream $branch_name:$branch_name
+            git -C "apps/perceptrons" fetch --depth 1 upstream $branch_name:$branch_name
             git -C "apps/frappe" checkout -q -f $branch_name
-            git -C "apps/erpnext" checkout -q -f $branch_name
+            git -C "apps/perceptrons" checkout -q -f $branch_name
 
             # Resetup env and install apps
             pgrep honcho | xargs kill
             rm -rf ~/frappe-bench/env
             bench -v setup env --python python$2
-            bench pip install -e ./apps/erpnext
+            bench pip install -e ./apps/perceptrons
             bench start &>> ~/frappe-bench/bench_start.log &
 
             bench --site test_site migrate
@@ -148,12 +148,12 @@ jobs:
           echo "Updating to latest version"
           git -C "apps/frappe" fetch --depth 1 upstream "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
           git -C "apps/frappe" checkout -q -f FETCH_HEAD
-          git -C "apps/erpnext" checkout -q -f "$GITHUB_SHA"
+          git -C "apps/perceptrons" checkout -q -f "$GITHUB_SHA"
 
           pgrep honcho | xargs kill
           rm -rf ~/frappe-bench/env
           bench -v setup env
-          bench pip install -e ./apps/erpnext
+          bench pip install -e ./apps/perceptrons
           bench start &>> ~/frappe-bench/bench_start.log &
 
           bench --site test_site migrate

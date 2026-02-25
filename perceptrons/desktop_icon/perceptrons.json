@@ -1,0 +1,19 @@
+{
+ "app": "perceptrons",
+ "creation": "2025-11-17 13:19:04.178534",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 1,
+ "icon_type": "App",
+ "idx": 100,
+ "label": "Perceptrons",
+ "link": "/app/home",
+ "link_type": "External",
+ "logo_url": "/assets/perceptrons/images/perceptrons-logo.svg",
+ "modified": "2025-11-17 16:33:37.520201",
+ "modified_by": "Administrator",
+ "name": "Perceptrons",
+ "owner": "Administrator",
+ "roles": [],
+ "standard": 1
+}
