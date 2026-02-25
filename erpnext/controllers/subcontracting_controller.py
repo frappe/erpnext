@@ -1382,54 +1382,6 @@ def make_rm_stock_entry(
 				postprocess=post_process,
 			)
 
-<<<<<<< HEAD
-			stock_entry.purpose = "Send to Subcontractor"
-
-			if order_doctype == "Purchase Order":
-				stock_entry.purchase_order = subcontract_order.name
-			else:
-				stock_entry.subcontracting_order = subcontract_order.name
-
-			stock_entry.set_stock_entry_type()
-
-			for fg_item_code in fg_item_code_list:
-				for rm_item in rm_items:
-					if (
-						rm_item.get("main_item_code") == fg_item_code
-						or rm_item.get("item_code") == fg_item_code
-					):
-						rm_item_code = rm_item.get("rm_item_code")
-						items_dict = {
-							rm_item_code: {
-								rm_detail_field: rm_item.get("name"),
-								"item_name": rm_item.get("item_name")
-								or item_wh.get(rm_item_code, {}).get("item_name", ""),
-								"description": item_wh.get(rm_item_code, {}).get("description", ""),
-								"qty": rm_item.get("qty")
-								or max(rm_item.get("required_qty") - rm_item.get("total_supplied_qty"), 0),
-								"from_warehouse": rm_item.get("warehouse")
-								or rm_item.get("reserve_warehouse"),
-								"to_warehouse": subcontract_order.supplier_warehouse,
-								"stock_uom": rm_item.get("stock_uom"),
-								"serial_and_batch_bundle": rm_item.get("serial_and_batch_bundle"),
-								"main_item_code": fg_item_code,
-								"allow_alternative_item": item_wh.get(rm_item_code, {}).get(
-									"allow_alternative_item"
-								),
-								"use_serial_batch_fields": rm_item.get("use_serial_batch_fields"),
-								"serial_no": rm_item.get("serial_no")
-								if rm_item.get("use_serial_batch_fields")
-								else None,
-								"batch_no": rm_item.get("batch_no")
-								if rm_item.get("use_serial_batch_fields")
-								else None,
-							}
-						}
-
-						stock_entry.add_to_stock_entry_detail(items_dict)
-
-=======
->>>>>>> 1d3d09f48c (refactor: use postprocess in mapped_doc to update items in subcontracting controller)
 			if target_doc:
 				return stock_entry
 			else:
