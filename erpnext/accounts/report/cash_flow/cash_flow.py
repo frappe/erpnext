@@ -411,14 +411,8 @@ def get_report_summary(summary_data, currency):
 	return report_summary
 
 
-<<<<<<< HEAD
-def get_chart_data(columns, data, currency):
-	labels = [d.get("label") for d in columns[2:]]
-	print(data)
-=======
 def get_chart_data(period_list, data, currency):
 	labels = [period.get("label") for period in period_list]
->>>>>>> bdcb2c1512 (refactor: separate construction of chart related data from `get_columns()` (#52824))
 	datasets = [
 		{
 			"name": section.get("section").replace("'", ""),

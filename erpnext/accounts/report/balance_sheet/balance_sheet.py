@@ -225,14 +225,6 @@ def get_report_summary(
 	], (net_asset - net_liability + net_equity)
 
 
-<<<<<<< HEAD
-def get_chart_data(filters, columns, asset, liability, equity, currency):
-	labels = [d.get("label") for d in columns[2:]]
-
-	asset_data, liability_data, equity_data = [], [], []
-
-	for p in columns[2:]:
-=======
 def get_chart_data(filters, chart_columns, asset, liability, equity, currency):
 	labels = [col.get("label") for col in chart_columns]
 
@@ -240,7 +232,6 @@ def get_chart_data(filters, chart_columns, asset, liability, equity, currency):
 
 	for col in chart_columns:
 		key = col.get("key") or col.get("fieldname")
->>>>>>> bdcb2c1512 (refactor: separate construction of chart related data from `get_columns()` (#52824))
 		if asset:
 			asset_data.append(asset[-2].get(key))
 		if liability:
