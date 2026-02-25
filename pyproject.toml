@@ -40,6 +40,11 @@ skip_namespaces = [
 [tool.bench.frappe-dependencies]
 frappe = ">=17.0.0-dev,<18.0.0"
 
+[tool.bench.assets]
+build_dir = "./banking"
+out_dir = "../erpnext/public/banking"
+index_html_path = "../erpnext/www/banking.html"
+
 [tool.ruff]
 line-length = 110
 target-version = "py310"
