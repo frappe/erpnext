@@ -1,15 +1,48 @@
+import { useEffect } from 'react'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { FrappeProvider } from 'frappe-react-sdk'
+import { Toaster } from '@/components/ui/sonner'
+import BankReconciliation from '@/pages/BankReconciliation'
+import { TooltipProvider } from './components/ui/tooltip'
+import BankStatementImporter from '@/pages/BankStatementImporter'
 
 function App() {
+	useEffect(() => {
+		// Check if user is logged in by checking the Cookie "user_id"
+		// In Frappe, unauthenticated users are "Guest"
+		const userId = document.cookie?.split('; ').find(row => row.startsWith('user_id='))?.split('=')[1]?.trim()
+		const isLoggedIn = userId !== 'Guest'
+
+		if (!isLoggedIn) {
+			if (import.meta.env.DEV) {
+				return
+			}
+			// Redirect to Frappe login page
+			window.location.href = '/login?redirect-to=/banking'
+			return
+		}
+	}, [])
 
 	return (
-		<div className="App">
-			<FrappeProvider>
-				<div>
-
-				</div>
+		<TooltipProvider>
+			<FrappeProvider
+				swrConfig={{
+					errorRetryCount: 2
+				}}
+				socketPort={import.meta.env.VITE_SOCKET_PORT}
+				siteName={window.frappe?.boot?.sitename ?? import.meta.env.VITE_SITE_NAME}>
+				{window.frappe?.boot?.user?.name && window.frappe?.boot?.user?.name !== 'Guest' &&
+					<BrowserRouter>
+						<Routes>
+							<Route index element={<BankReconciliation />} />
+							<Route path="/statement-importer" element={<BankStatementImporter />} />
+							<Route path="*" element={<Navigate to="/" />} />
+						</Routes>
+					</BrowserRouter>
+				}
+				<Toaster richColors theme='light' />
 			</FrappeProvider>
-		</div>
+		</TooltipProvider>
 	)
 }
 
