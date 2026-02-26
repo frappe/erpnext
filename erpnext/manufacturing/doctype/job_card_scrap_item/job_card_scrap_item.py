@@ -21,6 +21,7 @@ class JobCardScrapItem(Document):
 		parenttype: DF.Data
 		stock_qty: DF.Float
 		stock_uom: DF.Link | None
+		type: DF.Literal["Co-Product", "By-Product", "Scrap", "Finished Good"]
 	# end: auto-generated types
 
 	pass

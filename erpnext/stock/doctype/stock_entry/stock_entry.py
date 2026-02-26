@@ -2591,7 +2591,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:
 			other_item_dict = self.get_other_materials(self.fg_completed_qty)
 			for item in other_item_dict.values():
-				if self.pro_doc and self.pro_doc.scrap_warehouse:
+				if self.pro_doc and self.pro_doc.scrap_warehouse and item.type == "Scrap":
 					item["to_warehouse"] = self.pro_doc.scrap_warehouse
 
 			self.add_to_stock_entry_detail(other_item_dict, bom_no=self.bom_no)

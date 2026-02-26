@@ -2645,7 +2645,7 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 	):
 		doc.get_required_items()
 		if work_order.track_semi_finished_goods:
-			doc.set_scrap_items()
+			doc.set_other_outputs()
 
 	if auto_create:
 		doc.flags.ignore_mandatory = True

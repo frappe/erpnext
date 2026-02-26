@@ -145,12 +145,12 @@ class SubcontractingReceipt(SubcontractingController):
 		super().validate()
 
 		if self.is_new() and self.get("_action") == "save" and not frappe.in_test:
-			self.get_scrap_items()
+			self.get_other_items()
 
 		self.set_missing_values()
 
 		if self.get("_action") == "submit":
-			self.validate_scrap_items()
+			self.validate_other_items()
 			self.validate_accepted_warehouse()
 			self.validate_rejected_warehouse()
 
@@ -366,7 +366,7 @@ class SubcontractingReceipt(SubcontractingController):
 							"rm_cost_per_qty": 0,
 							"service_cost_per_qty": 0,
 							"additional_cost_per_qty": 0,
-							"scrap_cost_per_qty": 0,
+							"other_outputs_cost_per_qty": 0,
 							"amount": qty * rate,
 							"warehouse": self.set_warehouse,
 							"rejected_warehouse": self.rejected_warehouse,
@@ -377,12 +377,12 @@ class SubcontractingReceipt(SubcontractingController):
 			self.calculate_additional_costs()
 			self.calculate_items_qty_and_amount()
 
-	def remove_scrap_items(self, recalculate_rate=False):
+	def remove_other_items(self, recalculate_rate=False):
 		for item in list(self.items):
 			if item.type:
 				self.remove(item)
 			else:
-				item.scrap_cost_per_qty = 0
+				item.other_outputs_cost_per_qty = 0
 
 		if recalculate_rate:
 			self.calculate_items_qty_and_amount()
@@ -440,15 +440,15 @@ class SubcontractingReceipt(SubcontractingController):
 			else:
 				rm_cost_map[item.reference_name] = item.amount
 
-		scrap_cost_map = {}
+		others_items_cost_map = {}
 		for item in self.get("items") or []:
 			if item.type:
 				item.amount = flt(item.qty) * flt(item.rate)
 
-				if item.reference_name in scrap_cost_map:
-					scrap_cost_map[item.reference_name] += item.amount
+				if item.reference_name in others_items_cost_map:
+					others_items_cost_map[item.reference_name] += item.amount
 				else:
-					scrap_cost_map[item.reference_name] = item.amount
+					others_items_cost_map[item.reference_name] = item.amount
 
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
@@ -459,11 +459,11 @@ class SubcontractingReceipt(SubcontractingController):
 						item.rm_cost_per_qty = item.rm_supp_cost / item.qty
 						rm_cost_map.pop(item.name)
 
-					if item.name in scrap_cost_map:
-						item.scrap_cost_per_qty = scrap_cost_map[item.name] / item.qty
-						scrap_cost_map.pop(item.name)
+					if item.name in others_items_cost_map:
+						item.other_outputs_cost_per_qty = others_items_cost_map[item.name] / item.qty
+						others_items_cost_map.pop(item.name)
 					else:
-						item.scrap_cost_per_qty = 0
+						item.other_outputs_cost_per_qty = 0
 
 				lcv_cost_per_qty = 0.0
 				if item.landed_cost_voucher_amount:
@@ -474,7 +474,7 @@ class SubcontractingReceipt(SubcontractingController):
 					+ flt(item.service_cost_per_qty)
 					+ flt(item.additional_cost_per_qty)
 					+ flt(lcv_cost_per_qty)
-					- flt(item.scrap_cost_per_qty)
+					+ flt(item.other_outputs_cost_per_qty)
 				)
 
 			item.received_qty = flt(item.qty) + flt(item.rejected_qty)
@@ -486,24 +486,24 @@ class SubcontractingReceipt(SubcontractingController):
 			self.total_qty = total_qty
 			self.total = total_amount
 
-	def validate_scrap_items(self):
+	def validate_other_items(self):
 		for item in self.items:
 			if item.type:
 				if not item.qty:
 					frappe.throw(
-						_("Row #{0}: Scrap Item Qty cannot be zero").format(item.idx),
+						_("Row #{0}: Other Output Qty cannot be zero").format(item.idx),
 					)
 
 				if item.rejected_qty:
 					frappe.throw(
-						_("Row #{0}: Rejected Qty cannot be set for Scrap Item {1}.").format(
+						_("Row #{0}: Rejected Qty cannot be set for Other Output Item {1}.").format(
 							item.idx, frappe.bold(item.item_code)
 						),
 					)
 
 				if not item.reference_name:
 					frappe.throw(
-						_("Row #{0}: Finished Good reference is mandatory for Scrap Item {1}.").format(
+						_("Row #{0}: Finished Good reference is mandatory for Other Output Item {1}.").format(
 							item.idx, frappe.bold(item.item_code)
 						),
 					)

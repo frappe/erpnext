@@ -102,6 +102,7 @@ class JobCard(Document):
 		operation_id: DF.Data | None
 		operation_row_id: DF.Int
 		operation_row_number: DF.Literal[None]
+		other_outputs: DF.Table[JobCardScrapItem]
 		posting_date: DF.Date | None
 		process_loss_qty: DF.Float
 		production_item: DF.Link | None
@@ -111,7 +112,6 @@ class JobCard(Document):
 		remarks: DF.SmallText | None
 		requested_qty: DF.Float
 		scheduled_time_logs: DF.Table[JobCardScheduledTime]
-		scrap_items: DF.Table[JobCardScrapItem]
 		semi_fg_bom: DF.Link | None
 		sequence_id: DF.Int
 		serial_and_batch_bundle: DF.Link | None
@@ -268,23 +268,24 @@ class JobCard(Document):
 				row.sub_operation = row.operation
 				self.append("sub_operations", row)
 
-	def set_scrap_items(self):
+	def set_other_outputs(self):
 		if not self.semi_fg_bom:
 			return
 
 		items_dict = get_bom_items_as_dict(
-			self.semi_fg_bom, self.company, qty=self.for_quantity, fetch_exploded=0, fetch_scrap_items=1
+			self.semi_fg_bom, self.company, qty=self.for_quantity, fetch_exploded=0, fetch_other_items=1
 		)
 		for item_code, values in items_dict.items():
 			values = frappe._dict(values)
 
 			self.append(
-				"scrap_items",
+				"other_outputs",
 				{
 					"item_code": item_code,
 					"stock_qty": values.qty,
 					"item_name": values.item_name,
 					"stock_uom": values.stock_uom,
+					"type": values.type,
 				},
 			)
 
@@ -1483,9 +1484,9 @@ class JobCard(Document):
 		wo_doc = frappe.get_doc("Work Order", self.work_order)
 		add_additional_cost(ste.stock_entry, wo_doc, self)
 
-		ste.stock_entry.set_scrap_items()
+		ste.stock_entry.set_other_items()
 		for row in ste.stock_entry.items:
-			if row.is_scrap_item and not row.t_warehouse:
+			if row.type and not row.t_warehouse:
 				row.t_warehouse = self.target_warehouse
 
 		if auto_submit:
