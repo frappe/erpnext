@@ -182,8 +182,8 @@ class TestQuotation(IntegrationTestCase):
 		self.assertTrue(quotation.payment_schedule)
 
 	@IntegrationTestCase.change_settings(
-		"Selling Settings",
-		{"automatically_fetch_payment_terms_from_quotation": 1},
+		"Accounts Settings",
+		{"automatically_fetch_payment_terms": 1},
 	)
 	def test_make_sales_order_terms_copied(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
@@ -327,11 +327,11 @@ class TestQuotation(IntegrationTestCase):
 
 	@IntegrationTestCase.change_settings(
 		"Accounts Settings",
-		{"add_taxes_from_item_tax_template": 0, "add_taxes_from_taxes_and_charges_template": 0},
-	)
-	@IntegrationTestCase.change_settings(
-		"Selling Settings",
-		{"automatically_fetch_payment_terms_from_quotation": 1},
+		{
+			"add_taxes_from_item_tax_template": 0,
+			"add_taxes_from_taxes_and_charges_template": 0,
+			"automatically_fetch_payment_terms": 1,
+		},
 	)
 	def test_make_sales_order_with_terms(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
@@ -369,10 +369,13 @@ class TestQuotation(IntegrationTestCase):
 		sales_order.save()
 
 		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 8906.00)
-		self.assertEqual(sales_order.payment_schedule[0].due_date, getdate(quotation.transaction_date))
+		self.assertEqual(
+			getdate(sales_order.payment_schedule[0].due_date), getdate(quotation.transaction_date)
+		)
 		self.assertEqual(sales_order.payment_schedule[1].payment_amount, 8906.00)
 		self.assertEqual(
-			sales_order.payment_schedule[1].due_date, getdate(add_days(quotation.transaction_date, 30))
+			getdate(sales_order.payment_schedule[1].due_date),
+			getdate(add_days(quotation.transaction_date, 30)),
 		)
 
 	def test_valid_till_before_transaction_date(self):
@@ -1071,6 +1074,56 @@ class TestQuotation(IntegrationTestCase):
 
 		quotation.reload()
 		self.assertEqual(quotation.status, "Open")
+
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings",
+		{"automatically_fetch_payment_terms": 1},
+	)
+	def test_make_sales_order_with_payment_terms(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+
+		template = frappe.get_doc(
+			{
+				"doctype": "Payment Terms Template",
+				"template_name": "_Test Payment Terms Template for Quotation",
+				"terms": [
+					{
+						"doctype": "Payment Terms Template Detail",
+						"invoice_portion": 50.00,
+						"credit_days_based_on": "Day(s) after invoice date",
+						"credit_days": 0,
+					},
+					{
+						"doctype": "Payment Terms Template Detail",
+						"invoice_portion": 50.00,
+						"credit_days_based_on": "Day(s) after invoice date",
+						"credit_days": 10,
+					},
+				],
+			}
+		).save()
+
+		quotation = make_quotation(qty=10, rate=1000, do_not_submit=1)
+		quotation.transaction_date = add_days(nowdate(), -2)
+		quotation.valid_till = add_days(nowdate(), 10)
+		quotation.update({"payment_terms_template": template.name, "payment_schedule": []})
+		quotation.save()
+		quotation.submit()
+
+		self.assertEqual(quotation.payment_schedule[0].payment_amount, 5000)
+		self.assertEqual(quotation.payment_schedule[1].payment_amount, 5000)
+		self.assertEqual(quotation.payment_schedule[0].due_date, quotation.transaction_date)
+		self.assertEqual(quotation.payment_schedule[1].due_date, add_days(quotation.transaction_date, 10))
+
+		sales_order = make_sales_order(quotation.name)
+		sales_order.transaction_date = nowdate()
+		sales_order.delivery_date = nowdate()
+		sales_order.save()
+
+		self.assertEqual(sales_order.payment_schedule[0].due_date, sales_order.transaction_date)
+		self.assertEqual(sales_order.payment_schedule[1].due_date, add_days(sales_order.transaction_date, 10))
+		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 5000)
+		self.assertEqual(sales_order.payment_schedule[1].payment_amount, 5000)
 
 
 def enable_calculate_bundle_price(enable=1):
