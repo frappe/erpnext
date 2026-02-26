@@ -212,6 +212,7 @@ def get_purchase_order_qty(item_code, warehouse):
 			& (PurchaseOrder.status.notin(["Closed", "Delivered"]))
 			& (PurchaseOrder.docstatus == 1)
 			& (Coalesce(PurchaseOrderItem.delivered_by_supplier, 0) == 0)
+			& (Coalesce(PurchaseOrderItem.is_closed, 0) == 0)
 		)
 		.run()
 	)

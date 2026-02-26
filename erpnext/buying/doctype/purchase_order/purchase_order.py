@@ -1051,7 +1051,7 @@ def close_or_reopen_selected_items(purchase_order, status, selected_items=None, 
 				frappe.throw(_("Cannot close item {0} as it is fully received").format(row.item_code))
 
 			row.is_closed = 1
-		elif status == "Submitted":
+		elif status == "Submitted" or status == "Re-open":
 			row.is_closed = 0
 
 	po.save()
