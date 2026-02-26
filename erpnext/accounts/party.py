@@ -87,7 +87,7 @@ def get_party_details(
 		price_list,
 		currency,
 		doctype,
-		ignore_permissions,
+		False,  # Permission should always be checked in whitelisted function as this can be called from client side
 		fetch_payment_terms_template,
 		party_address,
 		company_address,
