@@ -1,49 +1,71 @@
-import frappe
 import re
+from copy import deepcopy
+
+import frappe
 from frappe import _
 from frappe.utils import flt
+
+from erpnext.manufacturing.doctype.bom.bom import BOM
+from erpnext.manufacturing.doctype.manufacturing_process.constants import MFG_PROCESS_MAP, MIXING_PROCESS
+from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder
+from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 
 
 @frappe.whitelist()
 def transfer_to_next_process(current_work_order, qty=None, process=None, mixer_number=None):
 	"""Transfer FG from Mixing → Next Process Source Warehouse."""
-	wo = frappe.get_doc("Work Order", current_work_order)
+	wo: WorkOrder = frappe.get_doc("Work Order", current_work_order) #pyright: ignore
 	fg_item = wo.production_item
 	fg_qty = flt(qty or wo.produced_qty)
 
-	process_mapping = {
-		"mixing": "distribution",
-		"distribution": "pressed slab",
-		"pressed slab": "heated slab",
-		"heated slab": "cooled slab",
-		"cooled slab": "trimmed slab",
-		"trimmed slab": "calibrated slab",
-		"calibrated slab": "polished slab",
-		"polished slab": "inspected slab",
-	}
+	process_mapping = deepcopy(MFG_PROCESS_MAP)
+	process_mapping["Mixing Operation - SJ"] = process_mapping[MIXING_PROCESS] # TODO: Find a better way to do this rather than hardcoding the process name
 
-	current_process = (
-		wo.production_item.rsplit("-", 1)[-1].strip().lower() if "-" in wo.production_item else ""
-	)
+	current_process = wo.operations[0].operation if wo.operations else ""
 
 	next_process = process_mapping.get(current_process)
 
 	if not next_process:
 		frappe.throw(_("No next process found after {0}").format(current_process))
 
-	bom_doc = frappe.get_doc("BOM", wo.bom_no)
-	slab_template = re.sub(r"00", "CM", bom_doc.slab_template)
+	bom_doc: BOM = frappe.get_doc("BOM", wo.bom_no) #pyright: ignore
+	slab_template = re.sub(r"00", "CM", str(bom_doc.slab_template))
 
-	next_wo = frappe.db.get_value(
+	next_wos = frappe.db.get_list(
 		"Work Order",
-		{
+		filters={
 			"production_plan": wo.production_plan,
-			"item_name": ["like", f"%{next_process}%"],
 			"docstatus": ["<", 2],
 			"production_item": ["like", f"%{slab_template}%"],
 		},
-		"name",
+		fields=["name"],
+		ignore_permissions=True,
 	)
+
+	wo_names = [wo.name for wo in next_wos]
+	wo_ops = frappe.db.get_list(
+		"Work Order Operation",
+		filters={
+			"parent": ["in", wo_names],
+			"operation": ["=", next_process],
+		},
+		fields=["parent"],
+		ignore_permissions=True,
+	)
+
+	next_wo = wo_ops[0].parent if wo_ops else None
+
+	if not next_wo:
+		next_wo = frappe.db.get_value(
+			"Work Order",
+			{
+				"production_plan": wo.production_plan,
+				"item_name": ["like", f"%{next_process}%"],
+				"docstatus": ["<", 2],
+				"production_item": ["like", f"%{slab_template}%"],
+			},
+			"name",
+		)
 
 	if not next_wo:
 		frappe.throw(f"Next WO for '{next_process}' not found.")
@@ -73,10 +95,10 @@ def transfer_to_next_process(current_work_order, qty=None, process=None, mixer_n
 	if not job_card_item:
 		frappe.throw(f"No Job Card Item found for {fg_item} in {open_job_card}")
 
-	se = frappe.new_doc("Stock Entry")
+	se: StockEntry = frappe.new_doc("Stock Entry") #pyright: ignore
 	se.purpose = "Material Transfer for Manufacture"
-	se.work_order = next_wo
-	se.job_card = open_job_card  # No job card for inter-process transfer
+	se.work_order = next_wo #pyright: ignore
+	se.job_card = open_job_card #pyright: ignore # No job card for inter-process transfer
 	se.company = wo.company
 	se.fg_completed_qty = transfer_qty
 

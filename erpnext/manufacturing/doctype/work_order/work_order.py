@@ -141,7 +141,8 @@ class WorkOrder(Document):
 			self.naming_series = f"MFG-WO-{self.production_line}-{year}-.#####"
 		else:
 			self.naming_series = f"MFG-WO-{year}-.#####"
-			
+
+
 	def before_insert(self):
 		process_name = None
 		item_name_lower = (self.production_item or "").lower()
@@ -153,7 +154,7 @@ class WorkOrder(Document):
 				if row.operation in ALL_MFG_PROCESSES:
 					process_name = row.operation
 					break
-		
+
 		# Strategy B: Substring match against Item Code/Name
 		if not process_name:
 			# Sort processes by length descending to match longest name first
@@ -161,18 +162,18 @@ class WorkOrder(Document):
 				if process.lower() in item_name_lower:
 					process_name = process
 					break
-		
+
 		# Strategy C: Hardcoded fallback common keywords for Mahi stage items
-		if not process_name:
+		if not process_name and item_name_lower:
 			if "pressed slab" in item_name_lower: process_name = "Pressing"
 			elif "heated slab" in item_name_lower: process_name = "Heating"
 			elif "cooled slab" in item_name_lower: process_name = "Cooling"
 			elif "trimmed slab" in item_name_lower: process_name = "Trimming"
 			elif "calibrated slab" in item_name_lower: process_name = "Calibration"
 			elif "polished slab" in item_name_lower: process_name = "Polishing"
-			elif "inspected slab" in item_name_lower: process_name = "Quality Check"
 			elif "mixing" in item_name_lower: process_name = "Mixing"
 			elif "distribution" in item_name_lower: process_name = "Distribution"
+			else: process_name = "Quality Check"
 
 		# Strategy D: Default to Quality Check if it looks like a final FG
 		if not process_name and "fg" in item_name_lower:
@@ -185,7 +186,8 @@ class WorkOrder(Document):
 				["source_warehouse", "wip_warehouse", "fg_warehouse"],
 				as_dict=1
 			)
-			
+
+
 			if wh_map:
 				self.source_warehouse = wh_map.source_warehouse
 				self.wip_warehouse = wh_map.wip_warehouse
@@ -193,7 +195,8 @@ class WorkOrder(Document):
 
 				for row in self.required_items:
 					row.source_warehouse = self.source_warehouse
-	
+
+
 	def after_insert(self):
 		"""Auto-submit Work Order after warehouses are set"""
 		self.load_from_db() 

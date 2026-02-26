@@ -1,11 +1,18 @@
+from copy import deepcopy
+
 import frappe
+from frappe import _
 from frappe.utils import flt
 
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	JobCard,
 	make_time_log,
 )
-from erpnext.manufacturing.doctype.manufacturing_process.constants import DISTRIBUTION_PROCESS
+from erpnext.manufacturing.doctype.manufacturing_process.constants import (
+	DISTRIBUTION_PROCESS,
+	MFG_PROCESS_MAP,
+	MIXING_PROCESS,
+)
 from erpnext.manufacturing.doctype.operation.api import get_open_job_cards, transfer_to_next_process
 from erpnext.manufacturing.doctype.production_line.production_line import (
 	ProductionLine,
@@ -188,32 +195,42 @@ def finish_process(job_card, process_name, transfer_materials=True, should_stop_
 
 
 @frappe.whitelist()
-def get_next_process_bom_qty(current_work_order):
+def get_next_process_bom_qty(current_work_order: str):
 	"""Get BOM qty required for NEXT process"""
-	wo: WorkOrder = frappe.get_doc("Work Order", current_work_order)  # pyright: ignore[reportUnknownParameterType]
-	current_process = wo.item_name.rsplit("-", 1)[-1].strip() if wo.item_name else ""
-	process_mapping = {
-		"mixing": "distribution",
-		"distribution": "pressed slab",
-		"pressed slab": "heated slab",
-		"heated slab": "cooled slab",
-		"cooled slab": "trimmed slab",
-		"trimmed slab": "calibrated slab",
-		"calibrated slab": "polished slab",
-		"polished slab": "inspected slab",
-	}
+	wo: WorkOrder = frappe.get_doc("Work Order", current_work_order)  # pyright: ignore
+
+	current_process = wo.operations[0].operation if wo.operations else ""
+
+	process_mapping = deepcopy(MFG_PROCESS_MAP)
+	process_mapping["Mixing Operation - SJ"] = process_mapping[MIXING_PROCESS] # TODO: Find a better way to do this rather than hardcoding the process name
 
 	next_process = process_mapping.get(current_process)
 
-	next_wo = frappe.db.get_value(
+	if not next_process:
+		frappe.throw(_("No next process found after {0}").format(current_process))
+
+	next_wos = frappe.db.get_list(
 		"Work Order",
-		{
+		filters={
 			"production_plan": wo.production_plan,
-			"production_item": ["like", f"%{next_process}%"],
 			"docstatus": ["<", 2],
 		},
-		"name",
+		fields=["name"],
+		ignore_permissions=True,
 	)
+
+	wo_names = [wo.name for wo in next_wos]
+	wo_ops = frappe.db.get_list(
+		"Work Order Operation",
+		filters={
+			"parent": ["in", wo_names],
+			"operation": ["=", next_process],
+		},
+		fields=["parent"],
+		ignore_permissions=True,
+	)
+
+	next_wo = wo_ops[0].parent if wo_ops else None
 
 	if not next_wo:
 		return {"bom_qty": 0}
