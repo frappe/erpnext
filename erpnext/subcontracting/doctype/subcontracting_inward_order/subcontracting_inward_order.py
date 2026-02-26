@@ -41,6 +41,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 		customer_warehouse: DF.Link
 		items: DF.Table[SubcontractingInwardOrderItem]
 		naming_series: DF.Literal["SCI-ORD-.YYYY.-"]
+		other_items: DF.Table[SubcontractingInwardOrderScrapItem]
 		per_delivered: DF.Percent
 		per_process_loss: DF.Percent
 		per_produced: DF.Percent
@@ -49,7 +50,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 		per_returned: DF.Percent
 		received_items: DF.Table[SubcontractingInwardOrderReceivedItem]
 		sales_order: DF.Link
-		scrap_items: DF.Table[SubcontractingInwardOrderScrapItem]
 		service_items: DF.Table[SubcontractingInwardOrderServiceItem]
 		set_delivery_warehouse: DF.Link | None
 		status: DF.Literal[
@@ -475,23 +475,23 @@ class SubcontractingInwardOrder(SubcontractingController):
 			stock_entry.add_to_stock_entry_detail(items_dict)
 
 		if (
-			frappe.get_single_value("Selling Settings", "deliver_scrap_items")
-			and self.scrap_items
+			frappe.get_single_value("Selling Settings", "deliver_other_items")
+			and self.other_items
 			and scio_details
 		):
-			scrap_items = [
-				scrap_item for scrap_item in self.scrap_items if scrap_item.reference_name in scio_details
+			other_items = [
+				other_item for other_item in self.other_items if other_item.reference_name in scio_details
 			]
-			for scrap_item in scrap_items:
-				qty = scrap_item.produced_qty - scrap_item.delivered_qty
+			for other_item in other_items:
+				qty = other_item.produced_qty - other_item.delivered_qty
 				if qty > 0:
 					items_dict = {
-						scrap_item.item_code: {
-							"qty": scrap_item.produced_qty - scrap_item.delivered_qty,
-							"from_warehouse": scrap_item.warehouse,
-							"stock_uom": scrap_item.stock_uom,
-							"scio_detail": scrap_item.name,
-							"is_scrap_item": 1,
+						other_item.item_code: {
+							"qty": other_item.produced_qty - other_item.delivered_qty,
+							"from_warehouse": other_item.warehouse,
+							"stock_uom": other_item.stock_uom,
+							"scio_detail": other_item.name,
+							"type": other_item.type,
 						}
 					}
 

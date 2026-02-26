@@ -23,6 +23,7 @@ class SubcontractingInwardOrderScrapItem(Document):
 		produced_qty: DF.Float
 		reference_name: DF.Data
 		stock_uom: DF.Link
+		type: DF.Literal["Co-Product", "By-Product", "Scrap", "Finished Good"]
 		warehouse: DF.Link
 	# end: auto-generated types
 
