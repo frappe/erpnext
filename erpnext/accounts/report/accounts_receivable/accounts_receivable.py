@@ -1115,26 +1115,19 @@ class ReceivablePayableReport:
 			party_group_type = "customer_group"
 			acc_type = "debit_to"
 
-		date_type = (
-			scrub(self.filters.ageing_based_on)
-			if self.filters.ageing_based_on in ["Posting Date", "Due Date"]
-			else "bill_date"
-		)
-		ptt = ptt.where(getattr(voucher_type, date_type) <= self.filters.report_date)
-
 		if self.filters.get(party_group_type):
 			party_groups = get_party_group_with_children(party, self.filters.get(party_group_type))
-			ptt = ptt.where(getattr(voucher_type, party_group_type).isin(party_groups))
+			ptt = ptt.where((voucher_type[party_group_type]).isin(party_groups))
 
 		if self.filters.party:
-			ptt = ptt.where(getattr(voucher_type, party.lower()).isin(self.filters.party))
+			ptt = ptt.where((voucher_type[party.lower()]).isin(self.filters.party))
 
 		if self.filters.cost_center:
 			cost_centers = get_cost_centers_with_children(self.filters.cost_center)
 			ptt = ptt.where(voucher_type.cost_center.isin(cost_centers))
 
 		if self.filters.party_account:
-			ptt = ptt.where(getattr(voucher_type, acc_type) == self.filters.party_account)
+			ptt = ptt.where(voucher_type[acc_type] == self.filters.party_account)
 
 		return ptt
 
