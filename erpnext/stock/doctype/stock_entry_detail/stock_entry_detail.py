@@ -35,6 +35,7 @@ class StockEntryDetail(Document):
 		has_item_scanned: DF.Check
 		image: DF.Attach | None
 		is_finished_item: DF.Check
+		is_legacy_scrap_item: DF.Check
 		item_code: DF.Link
 		item_group: DF.Data | None
 		item_name: DF.Data | None

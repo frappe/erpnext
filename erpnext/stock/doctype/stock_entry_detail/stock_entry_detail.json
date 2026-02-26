@@ -18,6 +18,7 @@
   "item_name",
   "col_break2",
   "is_finished_item",
+  "is_legacy_scrap_item",
   "type",
   "quality_inspection",
   "subcontracted_item",
@@ -664,6 +665,13 @@
    "hidden": 1,
    "label": "BOM Secondary Item",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_legacy_scrap_item",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Legacy Scrap Item"
   }
  ],
  "grid_page_length": 50,

@@ -1210,6 +1210,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def get_basic_rate_for_manufactured_item(self, finished_item_qty, outgoing_items_cost=0) -> float:
 		settings = frappe.get_single("Manufacturing Settings")
+		scrap_items_cost = sum([flt(d.basic_amount) for d in self.get("items") if d.is_legacy_scrap_item])
 
 		if settings.material_consumption:
 			if settings.get_rm_cost_from_consumption_entry and self.work_order:
@@ -1272,7 +1273,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				bom_items = self.get_bom_raw_materials(finished_item_qty)
 				outgoing_items_cost = sum([flt(row.qty) * flt(row.rate) for row in bom_items.values()])
 
-		return flt(outgoing_items_cost / finished_item_qty)
+		return flt((outgoing_items_cost - scrap_items_cost) / finished_item_qty)
 
 	def distribute_additional_costs(self):
 		# If no incoming items, set additional costs blank
@@ -3221,6 +3222,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			se_child.scio_detail = item_row.get("scio_detail")
 			se_child.sample_quantity = item_row.get("sample_quantity", 0)
 			se_child.type = item_row.get("type")
+			se_child.is_legacy_scrap_item = item_row.get("is_legacy")
 			se_child.bom_secondary_item = item_row.get("name")
 
 			for field in [

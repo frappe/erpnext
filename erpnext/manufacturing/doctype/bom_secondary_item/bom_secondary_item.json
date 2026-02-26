@@ -7,6 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "type",
+  "column_break_gres",
+  "is_legacy",
   "section_break_sbnk",
   "item_code",
   "item_name",
@@ -185,13 +187,25 @@
    "options": "Company:company:default_currency",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_gres",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_legacy",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Legacy",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-26 12:21:55.608369",
+ "modified": "2026-02-26 18:45:44.478509",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Secondary Item",

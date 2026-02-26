@@ -20,6 +20,7 @@ class BOMSecondaryItem(Document):
 		cost_allocation_per: DF.Percent
 		description: DF.TextEditor | None
 		image: DF.AttachImage | None
+		is_legacy: DF.Check
 		item_code: DF.Link
 		item_name: DF.Data | None
 		parent: DF.Data

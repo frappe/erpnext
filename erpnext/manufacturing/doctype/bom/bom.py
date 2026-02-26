@@ -1436,7 +1436,7 @@ def get_bom_items_as_dict(
 		query = query.format(
 			table="BOM Secondary Item",
 			where_conditions=")",
-			select_columns=", item.description, bom_item.cost_allocation_per, bom_item.process_loss_per, bom_item.type, bom_item.name",
+			select_columns=", item.description, bom_item.cost_allocation_per, bom_item.process_loss_per, bom_item.type, bom_item.name, bom_item.is_legacy",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
 			group_by_cond=group_by_cond,
