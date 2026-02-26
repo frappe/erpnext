@@ -29,7 +29,8 @@ def transfer_to_next_process(current_work_order, qty=None, process=None, mixer_n
 		frappe.throw(_("No next process found after {0}").format(current_process))
 
 	bom_doc: BOM = frappe.get_doc("BOM", wo.bom_no) #pyright: ignore
-	slab_template = re.sub(r"00", "CM", str(bom_doc.slab_template))
+
+	slab_template = _get_slab_template_from_bom(bom_doc)
 
 	next_wos = frappe.db.get_list(
 		"Work Order",
@@ -256,3 +257,13 @@ def get_operators(designation, production_line):
 		frappe.throw(f"No operator found: designation={designation}, line={production_line}")
 
 	return employee_name
+
+
+def _get_slab_template_from_bom(bom_doc):
+	template_components = bom_doc.slab_template.split("-") if bom_doc.slab_template else []
+	size_index = 2 # TODO: This depends on the template's naming structure. Use a reliable way to do it like fetching the slab template and then the size from within it.
+	for index, _ in enumerate(template_components):
+		if index == size_index:
+			template_components[index] = re.sub(r"00", "CM", template_components[index])
+	slab_template = "-".join(template_components)
+	return slab_template

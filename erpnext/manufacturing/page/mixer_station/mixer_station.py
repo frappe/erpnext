@@ -1,16 +1,19 @@
-import frappe
-import re
 import json
+
+import frappe
 from frappe import _
-from frappe import qb
 from frappe.utils import flt
+
 from erpnext.manufacturing.doctype.bom.bom import BOM
 from erpnext.manufacturing.doctype.job_card.job_card import (
-	make_time_log,
 	make_stock_entry as jc_make_stock_entry,
 )
-from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder, make_stock_entry as wo_make_stock_entry
-from erpnext.manufacturing.doctype.operation.api import get_operators, get_open_job_cards
+from erpnext.manufacturing.doctype.job_card.job_card import (
+	make_time_log,
+)
+from erpnext.manufacturing.doctype.operation.api import _get_slab_template_from_bom, get_open_job_cards
+from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder
+from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry as wo_make_stock_entry
 
 
 @frappe.whitelist()
@@ -330,13 +333,7 @@ def get_next_process_bom_qty(mixing_work_order):
 	next_process = process_mapping.get(current_process)
 	bom_doc: BOM = frappe.get_doc("BOM", mixing_wo.bom_no)  # pyright: ignore[reportAssignmentType]
 
-	template_components = bom_doc.slab_template.split("-") if bom_doc.slab_template else []
-	size_index = 2 # TODO: This depends on the template's naming structure. Use a reliable way to do it like fetching the slab template and then the size from within it.
-	for index, _ in enumerate(template_components):
-		if index == size_index:
-			template_components[index] = re.sub(r"00", "CM", template_components[index])
-
-	slab_template = "-".join(template_components)
+	slab_template = _get_slab_template_from_bom(bom_doc)
 
 	next_wos = frappe.db.get_list(
 		"Work Order",
