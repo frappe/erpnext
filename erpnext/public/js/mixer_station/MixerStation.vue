@@ -249,7 +249,7 @@ async function toggleReady() {
                 );
             } catch (e) {
                 frappe.msgprint(
-                    __('Failed to confirm materials: {0}', [e.message || e])
+                    __('Failed to confirm materials')
                 );
             }
         },
@@ -422,7 +422,7 @@ function openAddMaterials() {
                             message: `
                                 <div class="d-flex justify-content-between" style="text-align: center;">
                                     <b>${values.raw_material}
-                                    <span style="color: #28a745;">(+${values.qty} kg)</span><br></b> 
+                                    <span style="color: #28a745;">(+${values.qty} kg)</span><br></b>
                                     <a href="/app/stock-entry/${r.message.stock_entry}">${r.message.stock_entry}</a><br>
                                 </div>
                             `,

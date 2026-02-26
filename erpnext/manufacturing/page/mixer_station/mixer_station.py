@@ -4,11 +4,12 @@ import json
 from frappe import _
 from frappe import qb
 from frappe.utils import flt
+from erpnext.manufacturing.doctype.bom.bom import BOM
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	make_time_log,
 	make_stock_entry as jc_make_stock_entry,
 )
-from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry as wo_make_stock_entry
+from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder, make_stock_entry as wo_make_stock_entry
 from erpnext.manufacturing.doctype.operation.api import get_operators, get_open_job_cards
 
 
@@ -311,10 +312,12 @@ def quick_add_raw_materials(job_card, raw_material, qty):
 @frappe.whitelist()
 def get_next_process_bom_qty(mixing_work_order):
 	"""Get BOM qty required for NEXT process"""
-	mixing_wo = frappe.get_doc("Work Order", mixing_work_order)
-	current_process = mixing_wo.description.rsplit("-", 1)[-1].strip()
+	mixing_wo: WorkOrder = frappe.get_doc("Work Order", mixing_work_order)  # pyright: ignore[reportAssignmentType]
+	current_process = mixing_wo.operations[0].operation if mixing_wo.operations else ""
+
 	process_mapping = {
 		"Mixing": "Distribution",
+		"Mixing Operation - SJ": "Distribution",
 		"Distribution": "Pressing",
 		"Pressing": "Heating",
 		"Heating": "Cooling",
@@ -323,20 +326,54 @@ def get_next_process_bom_qty(mixing_work_order):
 		"Calibration": "Polishing",
 		"Polishing": "Quality Check",
 	}
-	next_process = process_mapping.get(current_process)
-	bom_doc = frappe.get_doc("BOM", mixing_wo.bom_no)
-	slab_template = re.sub(r"00", "CM", bom_doc.slab_template)
 
-	next_wo = frappe.db.get_value(
+	next_process = process_mapping.get(current_process)
+	bom_doc: BOM = frappe.get_doc("BOM", mixing_wo.bom_no)  # pyright: ignore[reportAssignmentType]
+
+	template_components = bom_doc.slab_template.split("-") if bom_doc.slab_template else []
+	size_index = 2 # TODO: This depends on the template's naming structure. Use a reliable way to do it like fetching the slab template and then the size from within it.
+	for index, _ in enumerate(template_components):
+		if index == size_index:
+			template_components[index] = re.sub(r"00", "CM", template_components[index])
+
+	slab_template = "-".join(template_components)
+
+	next_wos = frappe.db.get_list(
 		"Work Order",
-		{
+		filters={
 			"production_plan": mixing_wo.production_plan,
-			"item_name": ["like", f"%{next_process}%"],
 			"docstatus": ["<", 2],
 			"production_item": ["like", f"%{slab_template}%"],
 		},
-		"name",
+		fields=["name"],
+		ignore_permissions=True,
 	)
+
+	wo_names = [wo.name for wo in next_wos]
+	wo_ops = frappe.db.get_list(
+		"Work Order Operation",
+		filters={
+			"parent": ["in", wo_names],
+			"operation": ["=", next_process],
+		},
+		fields=["parent"],
+		ignore_permissions=True,
+	)
+
+	next_wo = wo_ops[0].parent if wo_ops else None
+
+	if not next_wo:
+		next_wo = frappe.db.get_value(
+			"Work Order",
+			{
+				"production_plan": mixing_wo.production_plan,
+				"item_name": ["like", f"%{next_process}%"],
+				"docstatus": ["<", 2],
+				"production_item": ["like", f"%{slab_template}%"],
+			},
+			"name",
+		)
+
 
 	if not next_wo:
 		return {"bom_qty": 0}
