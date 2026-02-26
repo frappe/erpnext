@@ -958,7 +958,7 @@ frappe.tour["BOM"] = [
 	},
 ];
 
-frappe.ui.form.on("BOM Scrap Item", {
+frappe.ui.form.on("BOM Secondary Item", {
 	item_code(frm, cdt, cdn) {
 		const { item_code } = locals[cdt][cdn];
 	},

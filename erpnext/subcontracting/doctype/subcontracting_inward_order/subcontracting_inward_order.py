@@ -475,7 +475,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 			stock_entry.add_to_stock_entry_detail(items_dict)
 
 		if (
-			frappe.get_single_value("Selling Settings", "deliver_other_items")
+			frappe.get_single_value("Selling Settings", "deliver_secondary_items")
 			and self.other_items
 			and scio_details
 		):

@@ -127,6 +127,7 @@ class BOM(WebsiteGenerator):
 		buying_price_list: DF.Link | None
 		company: DF.Link
 		conversion_rate: DF.Float
+		cost_allocation: DF.Currency
 		cost_allocation_per: DF.Percent
 		currency: DF.Link
 		default_source_warehouse: DF.Link | None
@@ -416,19 +417,22 @@ class BOM(WebsiteGenerator):
 		doc.set_status(save=True)
 
 	def set_fg_cost_allocation(self):
-		secondary_items_per = 0
+		total_secondary_items_per = 0
 		for item in self.secondary_items:
-			secondary_items_per += item.cost_allocation_per
+			total_secondary_items_per += item.cost_allocation_per
 
-		self.cost_allocation_per = 100 - secondary_items_per
+		if self.cost_allocation_per == 100 and total_secondary_items_per:
+			self.cost_allocation_per -= total_secondary_items_per
+
+		self.cost_allocation = self.raw_material_cost * (self.cost_allocation_per / 100)
 
 	def validate_total_cost_allocation(self):
-		total_cost_allocation_per = 0
+		total_cost_allocation_per = self.cost_allocation_per
 		for item in self.secondary_items:
 			total_cost_allocation_per += item.cost_allocation_per
 
-		if total_cost_allocation_per > 100:
-			frappe.throw(_("Total Cost Allocation % should be less than or equal to 100"))
+		if total_cost_allocation_per != 100:
+			frappe.throw(_("Cost allocation between finished goods and secondary items should equal 100%"))
 
 	def on_update_after_submit(self):
 		self.validate_bom_links()

@@ -70,6 +70,7 @@
   {
    "fieldname": "type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Type",
    "options": "Co-Product\nBy-Product\nScrap\nFinished Good",
    "reqd": 1
@@ -78,10 +79,10 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-26 10:38:01.409554",
+ "modified": "2026-02-26 15:14:46.217211",
  "modified_by": "Administrator",
  "module": "Manufacturing",
- "name": "Job Card Scrap Item",
+ "name": "Job Card Secondary Item",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,

@@ -352,6 +352,7 @@ class SubcontractingReceipt(SubcontractingController):
 				bom = frappe.get_doc("BOM", item.bom)
 				for secondary_item in bom.secondary_items:
 					qty = flt(item.qty) * (flt(secondary_item.stock_qty) / flt(bom.quantity))
+					qty -= qty * (secondary_item.process_loss_per / 100)
 					rate = (item.amount * (secondary_item.cost_allocation_per / 100)) / qty
 					self.append(
 						"items",
