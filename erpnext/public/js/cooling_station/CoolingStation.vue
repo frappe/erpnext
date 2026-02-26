@@ -190,9 +190,9 @@ frappe.realtime.on('slab_checkout', (slab) => {
                             </div>
                         </div>
                         <div class="actions">
-                            <button class="btn btn-outline-secondary btn-sm mr-2 px-3" @click="skipSlab">
+                            <!-- <button class="btn btn-outline-secondary btn-sm mr-2 px-3" @click="skipSlab">
                                 <i class="fa fa-step-forward mr-1"></i> {{ __('Skip') }}
-                            </button>
+                            </button> -->
                             <button class="btn btn-primary btn-sm px-4" @click="startCooling(currentIncomingSlab)">
                                 <i class="fa fa-play mr-1"></i> {{ __('Accept & Start') }}
                             </button>
