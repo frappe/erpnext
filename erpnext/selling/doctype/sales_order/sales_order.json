@@ -123,6 +123,7 @@
   "company_contact_person",
   "payment_schedule_section",
   "payment_terms_section",
+  "ignore_default_payment_terms_template",
   "payment_terms_template",
   "payment_schedule",
   "terms_section_break",
@@ -1733,6 +1734,14 @@
    "fieldtype": "Time",
    "label": "Time",
    "mandatory_depends_on": "is_internal_customer"
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_default_payment_terms_template",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Ignore Default Payment Terms Template",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -1740,7 +1749,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 00:42:18.834823",
+ "modified": "2026-03-04 18:04:05.873483",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

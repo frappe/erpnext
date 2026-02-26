@@ -1307,6 +1307,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (this.frm.doc.transaction_date) {
 			this.frm.transaction_date = this.frm.doc.transaction_date;
 			frappe.ui.form.trigger(this.frm.doc.doctype, "currency");
+			this.recalculate_terms();
 		}
 	}
 

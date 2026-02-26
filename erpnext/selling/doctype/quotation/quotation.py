@@ -452,34 +452,34 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, ar
 		return child_filter
 
 	automatically_fetch_payment_terms = cint(
-		frappe.get_single_value("Selling Settings", "automatically_fetch_payment_terms_from_quotation")
+		frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
 	)
-
-	mapping = {
-		"Quotation": {"doctype": "Sales Order", "validation": {"docstatus": ["=", 1]}},
-		"Quotation Item": {
-			"doctype": "Sales Order Item",
-			"field_map": {"parent": "prevdoc_docname", "name": "quotation_item"},
-			"postprocess": update_item,
-			"condition": lambda d: can_map_row(d) and select_item(d),
-		},
-		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
-		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
-	}
-
-	if automatically_fetch_payment_terms:
-		mapping["Payment Schedule"] = {"doctype": "Payment Schedule", "add_if_empty": True}
-	else:
-		mapping["Quotation"]["field_no_map"] = ["payment_terms_template"]
 
 	doclist = get_mapped_doc(
 		"Quotation",
 		source_name,
-		mapping,
+		{
+			"Quotation": {
+				"doctype": "Sales Order",
+				"validation": {"docstatus": ["=", 1]},
+				"field_no_map": ["payment_terms_template"],
+			},
+			"Quotation Item": {
+				"doctype": "Sales Order Item",
+				"field_map": {"parent": "prevdoc_docname", "name": "quotation_item"},
+				"postprocess": update_item,
+				"condition": lambda d: can_map_row(d) and select_item(d),
+			},
+			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
+			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
+		},
 		target_doc,
 		set_missing_values,
 		ignore_permissions=ignore_permissions,
 	)
+
+	if automatically_fetch_payment_terms:
+		doclist.set_payment_schedule()
 
 	return doclist
 

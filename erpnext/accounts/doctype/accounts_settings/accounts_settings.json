@@ -205,7 +205,7 @@
    "description": "Payment Terms from orders will be fetched into the invoices as is",
    "fieldname": "automatically_fetch_payment_terms",
    "fieldtype": "Check",
-   "label": "Automatically Fetch Payment Terms from Order"
+   "label": "Automatically Fetch Payment Terms from Order/Quotation"
   },
   {
    "description": "The percentage you are allowed to bill more against the amount ordered. For example, if the order value is $100 for an item and tolerance is set as 10%, then you are allowed to bill up to $110 ",
@@ -697,7 +697,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-04 17:15:38.609327",
+ "modified": "2026-02-27 01:04:09.415288",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

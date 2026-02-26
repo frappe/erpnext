@@ -117,6 +117,7 @@ class SalesOrder(SellingController):
 		grand_total: DF.Currency
 		group_same_items: DF.Check
 		has_unit_price_items: DF.Check
+		ignore_default_payment_terms_template: DF.Check
 		ignore_pricing_rule: DF.Check
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
