@@ -4,7 +4,6 @@
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
- "is_submittable": 1,
  "field_order": [
   "main_item_code",
   "rm_item_code",
