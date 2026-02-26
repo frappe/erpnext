@@ -103,7 +103,7 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 			frappe.ValidationError,
 			close_or_reopen_selected_items,
 			so.name,
-			"Close",
+			"Closed",
 			json.dumps([{"docname": so.items[0].name}]),
 		)
 
@@ -116,7 +116,7 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 			)[0].reserved_qty,
 			3,
 		)
-		close_or_reopen_selected_items(so.name, "Close", json.dumps([{"docname": so.items[1].name}]))
+		close_or_reopen_selected_items(so.name, "Closed", json.dumps([{"docname": so.items[1].name}]))
 		so.reload()
 		self.assertEqual(
 			frappe.get_all(

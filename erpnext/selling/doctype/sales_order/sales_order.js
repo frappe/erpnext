@@ -981,13 +981,13 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 							this.frm.add_custom_button(
 								__("Close items"),
-								() => this.close_selected_items(),
+								() => this.close_or_reopen_selected_items("Closed"),
 								__("Status")
 							);
 
 							this.frm.add_custom_button(
 								__("Re-open items"),
-								() => this.reopen_selected_items(),
+								() => this.close_or_reopen_selected_items("Re-open"),
 								__("Status")
 							);
 						}
@@ -1781,10 +1781,11 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		});
 		d.show();
 	}
-	reopen_selected_items() {
+
+	close_or_reopen_selected_items(status) {
 		var me = this;
 		this.data = this.frm.doc.items
-			.filter((d) => d.is_closed)
+			.filter((d) => (status === "Closed" ? d.qty > flt(d.delivered_qty) && !d.is_closed : d.is_closed))
 			.map((d) => {
 				return {
 					docname: d.name,
@@ -1792,13 +1793,18 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					qty: d.qty,
 					is_closed: d.is_closed,
 					delivered_qty: d.delivered_qty,
+					__checked: 1,
 				};
 			});
 		if (!this.data.length) {
-			frappe.msgprint(__("No closed items to re-open"));
+			frappe.msgprint(
+				status === "Closed"
+					? __("No items available to close")
+					: __("No closed items available to re-open")
+			);
 			return;
 		}
-		const reopen_item_fields = [
+		const item_fields = [
 			{
 				fieldtype: "Link",
 				fieldname: "item_code",
@@ -1815,141 +1821,65 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			},
 		];
 		var d = new frappe.ui.Dialog({
-			title: __("Re-open Selected Items"),
+			title: status === "Closed" ? __("Close Selected Items") : __("Re-open Selected Items"),
 			size: "large",
 			fields: [
 				{
-					fieldname: "reopen_items",
+					fieldname: "items",
 					fieldtype: "Table",
 					label: __("Items"),
 					cannot_add_rows: true,
 					in_place_edit: true,
-					fields: reopen_item_fields,
+					fields: item_fields,
 					data: this.data,
 					get_data: () => {
 						return this.data;
 					},
 				},
 			],
-			primary_action_label: __("Re-open"),
-			primary_action: function () {
-				let values = d.get_values();
-
-				let selected_items = (values.reopen_items || []).filter((row) => row.__checked);
-				if (!selected_items.length) {
-					frappe.msgprint(__("Please select at least one item to re-open"));
-					return;
-				}
-				frappe.call({
-					method: "erpnext.selling.doctype.sales_order.sales_order.close_or_reopen_selected_items",
-					args: { sales_order: me.frm.doc.name, selected_items: selected_items, status: "Re-open" },
-					callback: (r) => {
-						if (!r.exc) {
-							d.hide();
-							me.frm.reload_doc();
-							frappe.show_alert({
-								message: __("Selected items re-opened"),
-								indicator: "green",
-							});
-						}
-					},
-				});
-			},
-		});
-
-		d.show();
-	}
-
-	close_selected_items() {
-		var me = this;
-		this.data = this.frm.doc.items
-			.filter((d) => d.qty > flt(d.delivered_qty) && !d.is_closed)
-			.map((d) => {
-				return {
-					docname: d.name,
-					item_code: d.item_code,
-					qty: d.qty,
-					is_closed: d.is_closed,
-					delivered_qty: d.delivered_qty,
-				};
-			});
-		if (!this.data.length) {
-			frappe.msgprint(__("No items available to close"));
-			return;
-		}
-		const close_item_fields = [
-			{
-				fieldtype: "Link",
-				fieldname: "item_code",
-				options: "Item",
-				in_list_view: 1,
-				read_only: 1,
-			},
-			{
-				fieldtype: "Float",
-				fieldname: "qty",
-				read_only: 1,
-				in_list_view: 1,
-				label: __("Qty"),
-			},
-		];
-		var d = new frappe.ui.Dialog({
-			title: __("Close Selected Items"),
-			size: "large",
-			fields: [
-				{
-					fieldname: "select_all",
-					fieldtype: "Check",
-					label: __("Select all items"),
-					default: 1,
-					onchange: function () {
-						const table_field = d.get_field("close_items");
-						table_field.df.hidden = this.get_value();
-						table_field.refresh();
-					},
-				},
-				{
-					fieldname: "close_items",
-					fieldtype: "Table",
-					label: __("Items"),
-					cannot_add_rows: true,
-					in_place_edit: true,
-					fields: close_item_fields,
-					data: this.data,
-					hidden: true,
-					get_data: () => {
-						return this.data;
-					},
-				},
-			],
-			primary_action_label: __("Close"),
+			primary_action_label: status === "Closed" ? __("Close") : __("Re-open"),
 			primary_action: function () {
 				let values = d.get_values();
 
 				if (values.select_all) {
-					me.close_sales_order();
+					if (status === "Closed") {
+						me.close_sales_order();
+					} else {
+						me.reopen_sales_order();
+					}
 					d.hide();
 					return;
 				}
-				let selected_items = (values.close_items || []).filter((row) => row.__checked);
+				let selected_items = (values.items || []).filter((row) => row.__checked);
 				if (selected_items.length == me.data.length) {
-					me.close_sales_order();
+					if (status === "Close") {
+						me.close_sales_order();
+					} else {
+						me.reopen_sales_order();
+					}
 					d.hide();
 					return;
 				}
 				if (!selected_items.length) {
-					frappe.msgprint(__("Please select at least one item to close"));
+					frappe.msgprint(
+						status === "Closed"
+							? __("Please select at least one item to close")
+							: __("Please select at least one item to re-open")
+					);
 					return;
 				}
 				frappe.call({
 					method: "erpnext.selling.doctype.sales_order.sales_order.close_or_reopen_selected_items",
-					args: { sales_order: me.frm.doc.name, selected_items: selected_items, status: "Close" },
+					args: { sales_order: me.frm.doc.name, selected_items: selected_items, status: status },
 					callback: (r) => {
 						if (!r.exc) {
 							d.hide();
 							me.frm.reload_doc();
 							frappe.show_alert({
-								message: __("Selected items closed"),
+								message:
+									status === "Close"
+										? __("Selected items closed")
+										: __("Selected items re-opened"),
 								indicator: "green",
 							});
 						}
@@ -1963,6 +1893,9 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	close_sales_order() {
 		this.frm.cscript.update_status("Close", "Closed");
+	}
+	reopen_sales_order() {
+		this.frm.cscript.update_status("Re-open", "Draft");
 	}
 	update_status(label, status) {
 		var doc = this.frm.doc;

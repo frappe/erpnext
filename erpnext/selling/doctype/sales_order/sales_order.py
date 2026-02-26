@@ -2175,15 +2175,16 @@ def close_or_reopen_selected_items(sales_order, status, selected_items=None, all
 		items = {i["docname"] for i in selected_items}
 
 	for row in so.items:
+		print(status)
 		if not all_items_closed and row.name not in items:
 			continue
 
-		if status == "Close":
+		if status == "Closed":
 			if row.delivered_qty and row.qty == row.delivered_qty and not all_items_closed:
 				frappe.throw(_("Item cannot be closed as it is already delivered"))
 
 			row.is_closed = 1
-		elif status == "Re-open":
+		elif status == "Re-open" or status == "Submitted":
 			if so.docstatus == 1:
 				so.check_credit_limit()
 			row.is_closed = 0
