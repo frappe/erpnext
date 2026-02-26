@@ -10,7 +10,7 @@
   "item_code",
   "column_break_2",
   "item_name",
-  "is_scrap_item",
+  "type",
   "section_break_4",
   "description",
   "brand",
@@ -33,7 +33,7 @@
   "rm_cost_per_qty",
   "service_cost_per_qty",
   "additional_cost_per_qty",
-  "scrap_cost_per_qty",
+  "other_outputs_cost_per_qty",
   "rm_supp_cost",
   "warehouse_and_reference",
   "warehouse",
@@ -164,7 +164,7 @@
   },
   {
    "columns": 1,
-   "depends_on": "eval: !parent.is_return",
+   "depends_on": "eval:!parent.is_return",
    "fieldname": "rejected_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -172,7 +172,7 @@
    "no_copy": 1,
    "print_hide": 1,
    "print_width": "100px",
-   "read_only_depends_on": "eval: doc.is_scrap_item",
+   "read_only_depends_on": "eval:doc.type",
    "width": "100px"
   },
   {
@@ -505,26 +505,6 @@
    "print_hide": 1
   },
   {
-   "default": "0",
-   "depends_on": "eval: !doc.bom",
-   "fieldname": "is_scrap_item",
-   "fieldtype": "Check",
-   "label": "Is Scrap Item",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only_depends_on": "eval: doc.bom"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval: !doc.is_scrap_item",
-   "fieldname": "scrap_cost_per_qty",
-   "fieldtype": "Float",
-   "label": "Scrap Cost Per Qty",
-   "no_copy": 1,
-   "non_negative": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "reference_name",
    "fieldtype": "Data",
    "hidden": 1,
@@ -609,13 +589,34 @@
    "fieldtype": "Link",
    "label": "Service Expense Account",
    "options": "Account"
+  },
+  {
+   "depends_on": "eval: !doc.bom",
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "no_copy": 1,
+   "options": "\nCo-Product\nBy-Product\nScrap\nFinished Good",
+   "print_hide": 1,
+   "read_only_depends_on": "eval: doc.bom"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.type",
+   "fieldname": "other_outputs_cost_per_qty",
+   "fieldtype": "Currency",
+   "label": "Other Outputs Cost Per Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-26 12:00:38.877638",
+ "modified": "2026-02-26 09:35:55.534916",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",

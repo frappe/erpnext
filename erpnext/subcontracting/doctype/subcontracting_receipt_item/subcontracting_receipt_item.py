@@ -25,13 +25,13 @@ class SubcontractingReceiptItem(Document):
 		expense_account: DF.Link | None
 		image: DF.Attach | None
 		include_exploded_items: DF.Check
-		is_scrap_item: DF.Check
 		item_code: DF.Link
 		item_name: DF.Data | None
 		job_card: DF.Link | None
 		landed_cost_voucher_amount: DF.Currency
 		manufacturer: DF.Link | None
 		manufacturer_part_no: DF.Data | None
+		other_outputs_cost_per_qty: DF.Currency
 		page_break: DF.Check
 		parent: DF.Data
 		parentfield: DF.Data
@@ -52,7 +52,6 @@ class SubcontractingReceiptItem(Document):
 		rm_cost_per_qty: DF.Currency
 		rm_supp_cost: DF.Currency
 		schedule_date: DF.Date | None
-		scrap_cost_per_qty: DF.Float
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.SmallText | None
 		service_cost_per_qty: DF.Currency
@@ -61,6 +60,7 @@ class SubcontractingReceiptItem(Document):
 		subcontracting_order: DF.Link | None
 		subcontracting_order_item: DF.Data | None
 		subcontracting_receipt_item: DF.Data | None
+		type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Finished Good"]
 		use_serial_batch_fields: DF.Check
 		warehouse: DF.Link | None
 	# end: auto-generated types

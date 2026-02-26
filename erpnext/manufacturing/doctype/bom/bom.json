@@ -48,11 +48,11 @@
   "costing",
   "operating_cost",
   "raw_material_cost",
-  "scrap_material_cost",
+  "other_material_cost",
   "cb1",
   "base_operating_cost",
   "base_raw_material_cost",
-  "base_scrap_material_cost",
+  "base_other_material_cost",
   "column_break_26",
   "total_cost",
   "base_total_cost",
@@ -320,15 +320,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:!doc.is_phantom_bom",
-   "fieldname": "scrap_material_cost",
-   "fieldtype": "Currency",
-   "label": "Scrap Material Cost",
-   "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "cb1",
    "fieldtype": "Column Break"
   },
@@ -347,15 +338,6 @@
    "label": "Raw Material Cost (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:!doc.is_phantom_bom",
-   "fieldname": "base_scrap_material_cost",
-   "fieldtype": "Currency",
-   "label": "Scrap Material Cost(Company Currency)",
-   "no_copy": 1,
-   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -706,6 +688,24 @@
    "label": "Cost Allocation %",
    "non_negative": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.is_phantom_bom",
+   "fieldname": "other_material_cost",
+   "fieldtype": "Currency",
+   "label": "Other Material Cost",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.is_phantom_bom",
+   "fieldname": "base_other_material_cost",
+   "fieldtype": "Currency",
+   "label": "Other Material Cost(Company Currency)",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-sitemap",
@@ -713,7 +713,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-25 23:42:17.434393",
+ "modified": "2026-02-26 09:38:04.743741",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

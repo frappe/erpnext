@@ -350,28 +350,18 @@ class SubcontractingReceipt(SubcontractingController):
 		for item in list(self.items):
 			if item.bom:
 				bom = frappe.get_doc("BOM", item.bom)
-				for scrap_item in bom.scrap_items:
-					qty = flt(item.qty) * (flt(scrap_item.stock_qty) / flt(bom.quantity))
-					rate = (
-						get_valuation_rate(
-							scrap_item.item_code,
-							self.set_warehouse,
-							self.doctype,
-							self.name,
-							currency=erpnext.get_company_currency(self.company),
-							company=self.company,
-						)
-						or scrap_item.rate
-					)
+				for other_output in bom.other_outputs:
+					qty = flt(item.qty) * (flt(other_output.stock_qty) / flt(bom.quantity))
+					rate = (item.amount * (other_output.cost_allocation_per / 100)) / qty
 					self.append(
 						"items",
 						{
-							"is_scrap_item": 1,
+							"type": other_output.type,
 							"reference_name": item.name,
-							"item_code": scrap_item.item_code,
-							"item_name": scrap_item.item_name,
+							"item_code": other_output.item_code,
+							"item_name": other_output.item_name,
 							"qty": qty,
-							"stock_uom": scrap_item.stock_uom,
+							"stock_uom": other_output.stock_uom,
 							"rate": rate,
 							"rm_cost_per_qty": 0,
 							"service_cost_per_qty": 0,
@@ -389,7 +379,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def remove_scrap_items(self, recalculate_rate=False):
 		for item in list(self.items):
-			if item.is_scrap_item:
+			if item.type:
 				self.remove(item)
 			else:
 				item.scrap_cost_per_qty = 0
@@ -452,7 +442,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		scrap_cost_map = {}
 		for item in self.get("items") or []:
-			if item.is_scrap_item:
+			if item.type:
 				item.amount = flt(item.qty) * flt(item.rate)
 
 				if item.reference_name in scrap_cost_map:
@@ -462,7 +452,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
-			if not item.is_scrap_item:
+			if not item.type:
 				if item.qty:
 					if item.name in rm_cost_map:
 						item.rm_supp_cost = rm_cost_map[item.name]
@@ -498,7 +488,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def validate_scrap_items(self):
 		for item in self.items:
-			if item.is_scrap_item:
+			if item.type:
 				if not item.qty:
 					frappe.throw(
 						_("Row #{0}: Scrap Item Qty cannot be zero").format(item.idx),

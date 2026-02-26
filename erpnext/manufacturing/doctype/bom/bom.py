@@ -119,8 +119,8 @@ class BOM(WebsiteGenerator):
 		allow_alternative_item: DF.Check
 		amended_from: DF.Link | None
 		base_operating_cost: DF.Currency
+		base_other_material_cost: DF.Currency
 		base_raw_material_cost: DF.Currency
-		base_scrap_material_cost: DF.Currency
 		base_total_cost: DF.Currency
 		bom_creator: DF.Link | None
 		bom_creator_item: DF.Data | None
@@ -146,6 +146,7 @@ class BOM(WebsiteGenerator):
 		operating_cost: DF.Currency
 		operating_cost_per_bom_quantity: DF.Currency
 		operations: DF.Table[BOMOperation]
+		other_material_cost: DF.Currency
 		other_outputs: DF.Table[BOMOtherOutput]
 		plc_conversion_rate: DF.Float
 		price_list_currency: DF.Link | None
@@ -158,7 +159,6 @@ class BOM(WebsiteGenerator):
 		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List"]
 		route: DF.SmallText | None
 		routing: DF.Link | None
-		scrap_material_cost: DF.Currency
 		set_rate_of_sub_assembly_item_based_on_bom: DF.Check
 		show_in_website: DF.Check
 		show_items: DF.Check
@@ -921,9 +921,9 @@ class BOM(WebsiteGenerator):
 
 		old_cost = self.total_cost
 
-		self.total_cost = self.operating_cost + self.raw_material_cost - self.scrap_material_cost
+		self.total_cost = self.operating_cost + self.raw_material_cost - self.other_material_cost
 		self.base_total_cost = (
-			self.base_operating_cost + self.base_raw_material_cost - self.base_scrap_material_cost
+			self.base_operating_cost + self.base_raw_material_cost - self.base_other_material_cost
 		)
 
 		if self.total_cost != old_cost:
@@ -1035,8 +1035,8 @@ class BOM(WebsiteGenerator):
 			if save:
 				d.db_update()
 
-		self.scrap_material_cost = total_sm_cost
-		self.base_scrap_material_cost = base_total_sm_cost
+		self.other_material_cost = total_sm_cost
+		self.base_other_material_cost = base_total_sm_cost
 
 	def calculate_exploded_cost(self):
 		"Set exploded row cost from it's parent BOM."
