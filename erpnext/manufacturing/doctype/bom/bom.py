@@ -296,11 +296,12 @@ class BOM(WebsiteGenerator):
 		self.update_stock_qty()
 		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate=False, save=False)
 		self.set_process_loss_qty()
-		self.validate_uom()
+		self.validate_uoms()
 		self.set_default_uom()
 		self.validate_semi_finished_goods()
 		self.validate_qty_not_zero()
 		self.set_fg_cost_allocation()
+		self.validate_total_cost_allocation()
 
 		if self.docstatus == 1:
 			self.validate_raw_materials_of_operation()
@@ -420,6 +421,14 @@ class BOM(WebsiteGenerator):
 			other_outputs_per += item.cost_allocation_per
 
 		self.cost_allocation_per = 100 - other_outputs_per
+
+	def validate_total_cost_allocation(self):
+		total_cost_allocation_per = 0
+		for item in self.other_outputs:
+			total_cost_allocation_per += item.cost_allocation_per
+
+		if total_cost_allocation_per > 100:
+			frappe.throw(_("Total Cost Allocation % should be less than or equal to 100"))
 
 	def on_update_after_submit(self):
 		self.validate_bom_links()
@@ -1237,14 +1246,21 @@ class BOM(WebsiteGenerator):
 				item.qty * (item.process_loss_per / 100), self.precision("quantity")
 			)
 
-	def validate_uom(self):
-		must_be_whole_number = frappe.get_value("UOM", self.uom, "must_be_whole_number")
+	def validate_uoms(self):
+		self.validate_uom(self.item, self.uom, self.process_loss_percentage, self.process_loss_qty)
+		for item in self.other_outputs:
+			self.validate_uom(
+				item.item_code, item.stock_uom, item.process_loss_per, item.qty_after_process_loss
+			)
 
-		if self.process_loss_percentage and self.process_loss_percentage > 100:
+	def validate_uom(self, item_code, uom, process_loss_per, process_loss_qty):
+		must_be_whole_number = frappe.get_value("UOM", uom, "must_be_whole_number")
+
+		if process_loss_per and process_loss_per > 100:
 			frappe.throw(_("Process Loss Percentage cannot be greater than 100"))
 
-		if self.process_loss_qty and must_be_whole_number and self.process_loss_qty % 1 != 0:
-			msg = f"Item: {frappe.bold(self.item)} with Stock UOM: {frappe.bold(self.uom)} can't have fractional process loss qty as UOM {frappe.bold(self.uom)} is a whole Number."
+		if process_loss_qty and must_be_whole_number and process_loss_qty % 1 != 0:
+			msg = f"Item: {frappe.bold(item_code)} with Stock UOM: {frappe.bold(uom)} can't have fractional process loss qty as UOM {frappe.bold(uom)} is a whole Number."
 			frappe.throw(msg, title=_("Invalid Process Loss Configuration"))
 
 	def has_scrap_items(self):
