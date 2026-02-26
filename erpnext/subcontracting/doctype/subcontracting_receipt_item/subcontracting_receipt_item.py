@@ -31,7 +31,6 @@ class SubcontractingReceiptItem(Document):
 		landed_cost_voucher_amount: DF.Currency
 		manufacturer: DF.Link | None
 		manufacturer_part_no: DF.Data | None
-		other_outputs_cost_per_qty: DF.Currency
 		page_break: DF.Check
 		parent: DF.Data
 		parentfield: DF.Data
@@ -52,6 +51,7 @@ class SubcontractingReceiptItem(Document):
 		rm_cost_per_qty: DF.Currency
 		rm_supp_cost: DF.Currency
 		schedule_date: DF.Date | None
+		secondary_items_cost_per_qty: DF.Currency
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.SmallText | None
 		service_cost_per_qty: DF.Currency

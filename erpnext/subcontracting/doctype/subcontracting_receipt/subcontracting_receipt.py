@@ -350,23 +350,23 @@ class SubcontractingReceipt(SubcontractingController):
 		for item in list(self.items):
 			if item.bom:
 				bom = frappe.get_doc("BOM", item.bom)
-				for other_output in bom.other_outputs:
-					qty = flt(item.qty) * (flt(other_output.stock_qty) / flt(bom.quantity))
-					rate = (item.amount * (other_output.cost_allocation_per / 100)) / qty
+				for secondary_item in bom.secondary_items:
+					qty = flt(item.qty) * (flt(secondary_item.stock_qty) / flt(bom.quantity))
+					rate = (item.amount * (secondary_item.cost_allocation_per / 100)) / qty
 					self.append(
 						"items",
 						{
-							"type": other_output.type,
+							"type": secondary_item.type,
 							"reference_name": item.name,
-							"item_code": other_output.item_code,
-							"item_name": other_output.item_name,
+							"item_code": secondary_item.item_code,
+							"item_name": secondary_item.item_name,
 							"qty": qty,
-							"stock_uom": other_output.stock_uom,
+							"stock_uom": secondary_item.stock_uom,
 							"rate": rate,
 							"rm_cost_per_qty": 0,
 							"service_cost_per_qty": 0,
 							"additional_cost_per_qty": 0,
-							"other_outputs_cost_per_qty": 0,
+							"secondary_items_cost_per_qty": 0,
 							"amount": qty * rate,
 							"warehouse": self.set_warehouse,
 							"rejected_warehouse": self.rejected_warehouse,
@@ -382,7 +382,7 @@ class SubcontractingReceipt(SubcontractingController):
 			if item.type:
 				self.remove(item)
 			else:
-				item.other_outputs_cost_per_qty = 0
+				item.secondary_items_cost_per_qty = 0
 
 		if recalculate_rate:
 			self.calculate_items_qty_and_amount()
@@ -460,10 +460,10 @@ class SubcontractingReceipt(SubcontractingController):
 						rm_cost_map.pop(item.name)
 
 					if item.name in others_items_cost_map:
-						item.other_outputs_cost_per_qty = others_items_cost_map[item.name] / item.qty
+						item.secondary_items_cost_per_qty = others_items_cost_map[item.name] / item.qty
 						others_items_cost_map.pop(item.name)
 					else:
-						item.other_outputs_cost_per_qty = 0
+						item.secondary_items_cost_per_qty = 0
 
 				lcv_cost_per_qty = 0.0
 				if item.landed_cost_voucher_amount:
@@ -474,7 +474,7 @@ class SubcontractingReceipt(SubcontractingController):
 					+ flt(item.service_cost_per_qty)
 					+ flt(item.additional_cost_per_qty)
 					+ flt(lcv_cost_per_qty)
-					+ flt(item.other_outputs_cost_per_qty)
+					+ flt(item.secondary_items_cost_per_qty)
 				)
 
 			item.received_qty = flt(item.qty) + flt(item.rejected_qty)
@@ -491,19 +491,19 @@ class SubcontractingReceipt(SubcontractingController):
 			if item.type:
 				if not item.qty:
 					frappe.throw(
-						_("Row #{0}: Other Output Qty cannot be zero").format(item.idx),
+						_("Row #{0}: Secondary Item Qty cannot be zero").format(item.idx),
 					)
 
 				if item.rejected_qty:
 					frappe.throw(
-						_("Row #{0}: Rejected Qty cannot be set for Other Output Item {1}.").format(
+						_("Row #{0}: Rejected Qty cannot be set for Secondary Item {1}.").format(
 							item.idx, frappe.bold(item.item_code)
 						),
 					)
 
 				if not item.reference_name:
 					frappe.throw(
-						_("Row #{0}: Finished Good reference is mandatory for Other Output Item {1}.").format(
+						_("Row #{0}: Finished Good reference is mandatory for Secondary Item {1}.").format(
 							item.idx, frappe.bold(item.item_code)
 						),
 					)

@@ -1123,7 +1123,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 					d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
 			elif d.type:
 				cost_allocation_per = frappe.get_value(
-					"BOM Other Output", d.bom_other_output, "cost_allocation_per"
+					"BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per"
 				)
 				d.basic_rate = flt((outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty)
 
@@ -2589,7 +2589,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def set_other_items(self):
 		if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:
-			other_item_dict = self.get_other_materials(self.fg_completed_qty)
+			other_item_dict = self.get_secondary_items(self.fg_completed_qty)
 			for item in other_item_dict.values():
 				if self.pro_doc and self.pro_doc.scrap_warehouse and item.type == "Scrap":
 					item["to_warehouse"] = self.pro_doc.scrap_warehouse
@@ -2782,7 +2782,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		return item_dict
 
-	def get_other_materials(self, qty):
+	def get_secondary_items(self, qty):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 
 		if (
@@ -3218,7 +3218,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			se_child.scio_detail = item_row.get("scio_detail")
 			se_child.sample_quantity = item_row.get("sample_quantity", 0)
 			se_child.type = item_row.get("type")
-			se_child.bom_other_output = item_row.get("name")
+			se_child.bom_secondary_item = item_row.get("name")
 
 			for field in [
 				self.subcontract_data.rm_detail_field,

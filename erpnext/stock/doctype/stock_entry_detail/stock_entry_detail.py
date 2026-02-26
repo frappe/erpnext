@@ -26,7 +26,7 @@ class StockEntryDetail(Document):
 		basic_rate: DF.Currency
 		batch_no: DF.Link | None
 		bom_no: DF.Link | None
-		bom_other_output: DF.Data | None
+		bom_secondary_item: DF.Data | None
 		conversion_factor: DF.Float
 		cost_center: DF.Link | None
 		customer_provided_item_cost: DF.Currency

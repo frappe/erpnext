@@ -194,7 +194,7 @@
  "modified": "2026-02-26 12:21:55.608369",
  "modified_by": "Administrator",
  "module": "Manufacturing",
- "name": "BOM Other Output",
+ "name": "BOM Secondary Item",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

@@ -23,7 +23,7 @@ frappe.ui.form.on("Job Card", {
 			};
 		});
 
-		frm.set_query("item_code", "other_outputs", () => {
+		frm.set_query("item_code", "secondary_items", () => {
 			return {
 				filters: {
 					disabled: 0,

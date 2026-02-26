@@ -82,7 +82,7 @@
   "column_break_51",
   "reference_purchase_receipt",
   "job_card_item",
-  "bom_other_output"
+  "bom_secondary_item"
  ],
  "fields": [
   {
@@ -660,10 +660,10 @@
    "options": "\nCo-Product\nBy-Product\nScrap\nFinished Good"
   },
   {
-   "fieldname": "bom_other_output",
+   "fieldname": "bom_secondary_item",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "BOM Other Output",
+   "label": "BOM Secondary Item",
    "read_only": 1
   }
  ],

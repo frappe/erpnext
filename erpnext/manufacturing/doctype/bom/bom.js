@@ -621,7 +621,7 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 	item_code(doc, cdt, cdn) {
 		let other_items = false;
 		var child = locals[cdt][cdn];
-		if (child.doctype == "BOM Other Output") {
+		if (child.doctype == "BOM Secondary Item") {
 			other_items = true;
 		}
 
@@ -709,7 +709,7 @@ var get_bom_material_detail = function (doc, cdt, cdn, other_items) {
 			callback: function (r) {
 				$.extend(d, r.message);
 				refresh_field("items");
-				refresh_field("other_outputs");
+				refresh_field("secondary_items");
 
 				doc = locals[doc.doctype][doc.name];
 				erpnext.bom.calculate_rm_cost(doc);
@@ -727,7 +727,7 @@ cur_frm.cscript.qty = function (doc) {
 
 cur_frm.cscript.rate = function (doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	const is_other_item = cdt == "BOM Other Output";
+	const is_other_item = cdt == "BOM Secondary Item";
 
 	if (d.bom_no) {
 		frappe.msgprint(__("You cannot change the rate if BOM is mentioned against any Item."));
@@ -801,9 +801,9 @@ erpnext.bom.calculate_rm_cost = function (doc) {
 
 // Calculate Total Cost
 erpnext.bom.calculate_total = function (doc) {
-	var total_cost = flt(doc.operating_cost) + flt(doc.raw_material_cost) - flt(doc.other_material_cost);
+	var total_cost = flt(doc.operating_cost) + flt(doc.raw_material_cost) - flt(doc.secondary_items_cost);
 	var base_total_cost =
-		flt(doc.base_operating_cost) + flt(doc.base_raw_material_cost) - flt(doc.base_other_material_cost);
+		flt(doc.base_operating_cost) + flt(doc.base_raw_material_cost) - flt(doc.base_secondary_items_cost);
 
 	cur_frm.set_value("total_cost", total_cost);
 	cur_frm.set_value("base_total_cost", base_total_cost);
@@ -979,7 +979,7 @@ function trigger_process_loss_qty_prompt(frm, cdt, cdn, item_code) {
 			const row = locals[cdt][cdn];
 			row.stock_qty = (frm.doc.quantity * data.percent) / 100;
 			row.qty = row.stock_qty / (row.conversion_factor || 1);
-			refresh_field("other_outputs");
+			refresh_field("secondary_items");
 		},
 		__("Set Process Loss Item Quantity"),
 		__("Set Quantity")

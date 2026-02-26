@@ -114,13 +114,13 @@ class BOM(WebsiteGenerator):
 		from erpnext.manufacturing.doctype.bom_explosion_item.bom_explosion_item import BOMExplosionItem
 		from erpnext.manufacturing.doctype.bom_item.bom_item import BOMItem
 		from erpnext.manufacturing.doctype.bom_operation.bom_operation import BOMOperation
-		from erpnext.manufacturing.doctype.bom_other_output.bom_other_output import BOMOtherOutput
+		from erpnext.manufacturing.doctype.bom_secondary_item.bom_secondary_item import BOMSecondaryItem
 
 		allow_alternative_item: DF.Check
 		amended_from: DF.Link | None
 		base_operating_cost: DF.Currency
-		base_other_material_cost: DF.Currency
 		base_raw_material_cost: DF.Currency
+		base_secondary_items_cost: DF.Currency
 		base_total_cost: DF.Currency
 		bom_creator: DF.Link | None
 		bom_creator_item: DF.Data | None
@@ -146,8 +146,6 @@ class BOM(WebsiteGenerator):
 		operating_cost: DF.Currency
 		operating_cost_per_bom_quantity: DF.Currency
 		operations: DF.Table[BOMOperation]
-		other_material_cost: DF.Currency
-		other_outputs: DF.Table[BOMOtherOutput]
 		plc_conversion_rate: DF.Float
 		price_list_currency: DF.Link | None
 		process_loss_percentage: DF.Percent
@@ -159,6 +157,8 @@ class BOM(WebsiteGenerator):
 		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List"]
 		route: DF.SmallText | None
 		routing: DF.Link | None
+		secondary_items: DF.Table[BOMSecondaryItem]
+		secondary_items_cost: DF.Currency
 		set_rate_of_sub_assembly_item_based_on_bom: DF.Check
 		show_in_website: DF.Check
 		show_items: DF.Check
@@ -286,7 +286,7 @@ class BOM(WebsiteGenerator):
 		self.set_plc_conversion_rate()
 		self.validate_uom_is_interger()
 		self.set_bom_material_details()
-		self.set_other_outputs_details()
+		self.set_secondary_items_details()
 		self.validate_materials()
 		self.validate_transfer_against()
 		self.set_routing_operations()
@@ -332,7 +332,7 @@ class BOM(WebsiteGenerator):
 			)
 
 	def validate_qty_not_zero(self):
-		for item in self.other_outputs:
+		for item in self.secondary_items:
 			if not item.qty:
 				frappe.throw(
 					_("Row #{0}: Quantity should be greater than 0 for {1} Item {2}").format(
@@ -416,15 +416,15 @@ class BOM(WebsiteGenerator):
 		doc.set_status(save=True)
 
 	def set_fg_cost_allocation(self):
-		other_outputs_per = 0
-		for item in self.other_outputs:
-			other_outputs_per += item.cost_allocation_per
+		secondary_items_per = 0
+		for item in self.secondary_items:
+			secondary_items_per += item.cost_allocation_per
 
-		self.cost_allocation_per = 100 - other_outputs_per
+		self.cost_allocation_per = 100 - secondary_items_per
 
 	def validate_total_cost_allocation(self):
 		total_cost_allocation_per = 0
-		for item in self.other_outputs:
+		for item in self.secondary_items:
 			total_cost_allocation_per += item.cost_allocation_per
 
 		if total_cost_allocation_per > 100:
@@ -498,8 +498,8 @@ class BOM(WebsiteGenerator):
 				if not item.get(r):
 					item.set(r, ret[r])
 
-	def set_other_outputs_details(self):
-		for item in self.get("other_outputs"):
+	def set_secondary_items_details(self):
+		for item in self.get("secondary_items"):
 			args = {
 				"item_code": item.item_code,
 				"company": self.company,
@@ -720,7 +720,7 @@ class BOM(WebsiteGenerator):
 				)
 
 	def update_stock_qty(self):
-		for m in self.get("items") + self.get("other_outputs"):
+		for m in self.get("items") + self.get("secondary_items"):
 			if not m.conversion_factor:
 				m.conversion_factor = flt(get_conversion_factor(m.item_code, m.uom)["conversion_factor"])
 			if m.uom and m.qty:
@@ -930,9 +930,9 @@ class BOM(WebsiteGenerator):
 
 		old_cost = self.total_cost
 
-		self.total_cost = self.operating_cost + self.raw_material_cost - self.other_material_cost
+		self.total_cost = self.operating_cost + self.raw_material_cost - self.secondary_items_cost
 		self.base_total_cost = (
-			self.base_operating_cost + self.base_raw_material_cost - self.base_other_material_cost
+			self.base_operating_cost + self.base_raw_material_cost - self.base_secondary_items_cost
 		)
 
 		if self.total_cost != old_cost:
@@ -1035,7 +1035,7 @@ class BOM(WebsiteGenerator):
 		base_total_sm_cost = 0
 		precision = self.precision("raw_material_cost")
 
-		for d in self.get("other_outputs"):
+		for d in self.get("secondary_items"):
 			d.cost = flt(self.raw_material_cost * (d.cost_allocation_per / 100), precision)
 			d.base_cost = flt(d.cost * self.conversion_rate, precision)
 
@@ -1044,8 +1044,8 @@ class BOM(WebsiteGenerator):
 			if save:
 				d.db_update()
 
-		self.other_material_cost = total_sm_cost
-		self.base_other_material_cost = base_total_sm_cost
+		self.secondary_items_cost = total_sm_cost
+		self.base_secondary_items_cost = base_total_sm_cost
 
 	def calculate_exploded_cost(self):
 		"Set exploded row cost from it's parent BOM."
@@ -1241,14 +1241,14 @@ class BOM(WebsiteGenerator):
 		if self.process_loss_percentage:
 			self.process_loss_qty = flt(self.quantity) * flt(self.process_loss_percentage) / 100
 
-		for item in self.other_outputs:
+		for item in self.secondary_items:
 			item.qty_after_process_loss = flt(
 				item.qty * (item.process_loss_per / 100), self.precision("quantity")
 			)
 
 	def validate_uoms(self):
 		self.validate_uom(self.item, self.uom, self.process_loss_percentage, self.process_loss_qty)
-		for item in self.other_outputs:
+		for item in self.secondary_items:
 			self.validate_uom(
 				item.item_code, item.stock_uom, item.process_loss_per, item.qty_after_process_loss
 			)
@@ -1264,7 +1264,7 @@ class BOM(WebsiteGenerator):
 			frappe.throw(msg, title=_("Invalid Process Loss Configuration"))
 
 	def has_scrap_items(self):
-		return any(d.get("type") == "Scrap" for d in self.get("other_outputs"))
+		return any(d.get("type") == "Scrap" for d in self.get("secondary_items"))
 
 
 def get_bom_item_rate(args, bom_doc):
@@ -1430,7 +1430,7 @@ def get_bom_items_as_dict(
 		)
 	elif fetch_other_items:
 		query = query.format(
-			table="BOM Other Output",
+			table="BOM Secondary Item",
 			where_conditions=")",
 			select_columns=", item.description, bom_item.cost_allocation_per, bom_item.process_loss_per, bom_item.type, bom_item.name",
 			is_stock_item=is_stock_item,
@@ -1517,7 +1517,7 @@ def validate_bom_no(item, bom_no):
 		for d in bom.items:
 			if d.item_code.lower() == item.lower():
 				rm_item_exists = True
-		for d in bom.other_outputs:
+		for d in bom.secondary_items:
 			if d.item_code.lower() == item.lower():
 				rm_item_exists = True
 		if (
@@ -1807,7 +1807,7 @@ def get_bom_diff(bom1: str, bom2: str):
 	identifiers = {
 		"operations": "operation",
 		"items": "item_code",
-		"other_outputs": "item_code",
+		"secondary_items": "item_code",
 		"exploded_items": "item_code",
 	}
 

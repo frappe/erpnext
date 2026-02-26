@@ -102,7 +102,6 @@ class JobCard(Document):
 		operation_id: DF.Data | None
 		operation_row_id: DF.Int
 		operation_row_number: DF.Literal[None]
-		other_outputs: DF.Table[JobCardScrapItem]
 		posting_date: DF.Date | None
 		process_loss_qty: DF.Float
 		production_item: DF.Link | None
@@ -112,6 +111,7 @@ class JobCard(Document):
 		remarks: DF.SmallText | None
 		requested_qty: DF.Float
 		scheduled_time_logs: DF.Table[JobCardScheduledTime]
+		secondary_items: DF.Table[JobCardScrapItem]
 		semi_fg_bom: DF.Link | None
 		sequence_id: DF.Int
 		serial_and_batch_bundle: DF.Link | None
@@ -268,7 +268,7 @@ class JobCard(Document):
 				row.sub_operation = row.operation
 				self.append("sub_operations", row)
 
-	def set_other_outputs(self):
+	def set_secondary_items(self):
 		if not self.semi_fg_bom:
 			return
 
@@ -279,7 +279,7 @@ class JobCard(Document):
 			values = frappe._dict(values)
 
 			self.append(
-				"other_outputs",
+				"secondary_items",
 				{
 					"item_code": item_code,
 					"stock_qty": values.qty,
