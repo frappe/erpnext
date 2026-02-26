@@ -273,7 +273,7 @@ class JobCard(Document):
 			return
 
 		items_dict = get_bom_items_as_dict(
-			self.semi_fg_bom, self.company, qty=self.for_quantity, fetch_exploded=0, fetch_other_items=1
+			self.semi_fg_bom, self.company, qty=self.for_quantity, fetch_exploded=0, fetch_secondary_items=1
 		)
 		for item_code, values in items_dict.items():
 			values = frappe._dict(values)
@@ -1484,7 +1484,7 @@ class JobCard(Document):
 		wo_doc = frappe.get_doc("Work Order", self.work_order)
 		add_additional_cost(ste.stock_entry, wo_doc, self)
 
-		ste.stock_entry.set_other_items()
+		ste.stock_entry.set_secondary_items()
 		for row in ste.stock_entry.items:
 			if row.type and not row.t_warehouse:
 				row.t_warehouse = self.target_warehouse

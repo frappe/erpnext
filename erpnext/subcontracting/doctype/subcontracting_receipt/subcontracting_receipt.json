@@ -673,13 +673,13 @@
    "fieldname": "get_secondary_items",
    "fieldtype": "Button",
    "label": "Get Secondary Items",
-   "options": "get_other_items"
+   "options": "get_secondary_items"
   }
  ],
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-26 13:29:39.252724",
+ "modified": "2026-02-26 17:17:30.328951",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt",

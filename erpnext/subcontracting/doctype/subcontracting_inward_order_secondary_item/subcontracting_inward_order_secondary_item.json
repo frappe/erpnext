@@ -117,7 +117,7 @@
  "modified": "2026-02-26 12:03:18.167925",
  "modified_by": "Administrator",
  "module": "Subcontracting",
- "name": "Subcontracting Inward Order Scrap Item",
+ "name": "Subcontracting Inward Order Secondary Item",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

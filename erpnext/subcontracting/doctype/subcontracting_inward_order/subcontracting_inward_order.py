@@ -26,8 +26,8 @@ class SubcontractingInwardOrder(SubcontractingController):
 		from erpnext.subcontracting.doctype.subcontracting_inward_order_received_item.subcontracting_inward_order_received_item import (
 			SubcontractingInwardOrderReceivedItem,
 		)
-		from erpnext.subcontracting.doctype.subcontracting_inward_order_scrap_item.subcontracting_inward_order_scrap_item import (
-			SubcontractingInwardOrderScrapItem,
+		from erpnext.subcontracting.doctype.subcontracting_inward_order_secondary_item.subcontracting_inward_order_secondary_item import (
+			SubcontractingInwardOrderSecondaryItem,
 		)
 		from erpnext.subcontracting.doctype.subcontracting_inward_order_service_item.subcontracting_inward_order_service_item import (
 			SubcontractingInwardOrderServiceItem,
@@ -41,7 +41,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 		customer_warehouse: DF.Link
 		items: DF.Table[SubcontractingInwardOrderItem]
 		naming_series: DF.Literal["SCI-ORD-.YYYY.-"]
-		other_items: DF.Table[SubcontractingInwardOrderScrapItem]
 		per_delivered: DF.Percent
 		per_process_loss: DF.Percent
 		per_produced: DF.Percent
@@ -50,6 +49,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 		per_returned: DF.Percent
 		received_items: DF.Table[SubcontractingInwardOrderReceivedItem]
 		sales_order: DF.Link
+		secondary_items: DF.Table[SubcontractingInwardOrderSecondaryItem]
 		service_items: DF.Table[SubcontractingInwardOrderServiceItem]
 		set_delivery_warehouse: DF.Link | None
 		status: DF.Literal[
@@ -476,22 +476,24 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 		if (
 			frappe.get_single_value("Selling Settings", "deliver_secondary_items")
-			and self.other_items
+			and self.secondary_items
 			and scio_details
 		):
-			other_items = [
-				other_item for other_item in self.other_items if other_item.reference_name in scio_details
+			secondary_items = [
+				secondary_item
+				for secondary_item in self.secondary_items
+				if secondary_item.reference_name in scio_details
 			]
-			for other_item in other_items:
-				qty = other_item.produced_qty - other_item.delivered_qty
+			for secondary_item in secondary_items:
+				qty = secondary_item.produced_qty - secondary_item.delivered_qty
 				if qty > 0:
 					items_dict = {
-						other_item.item_code: {
-							"qty": other_item.produced_qty - other_item.delivered_qty,
-							"from_warehouse": other_item.warehouse,
-							"stock_uom": other_item.stock_uom,
-							"scio_detail": other_item.name,
-							"type": other_item.type,
+						secondary_item.item_code: {
+							"qty": secondary_item.produced_qty - secondary_item.delivered_qty,
+							"from_warehouse": secondary_item.warehouse,
+							"stock_uom": secondary_item.stock_uom,
+							"scio_detail": secondary_item.name,
+							"type": secondary_item.type,
 						}
 					}
 

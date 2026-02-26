@@ -145,12 +145,12 @@ class SubcontractingReceipt(SubcontractingController):
 		super().validate()
 
 		if self.is_new() and self.get("_action") == "save" and not frappe.in_test:
-			self.get_other_items()
+			self.get_secondary_items()
 
 		self.set_missing_values()
 
 		if self.get("_action") == "submit":
-			self.validate_other_items()
+			self.validate_secondary_items()
 			self.validate_accepted_warehouse()
 			self.validate_rejected_warehouse()
 
@@ -344,8 +344,8 @@ class SubcontractingReceipt(SubcontractingController):
 				self.update_rate_for_supplied_items()
 
 	@frappe.whitelist()
-	def get_scrap_items(self, recalculate_rate: bool | None = False):
-		self.remove_scrap_items()
+	def get_secondary_items(self, recalculate_rate: bool | None = False):
+		self.remove_secondary_items()
 
 		for item in list(self.items):
 			if item.bom:
@@ -378,7 +378,7 @@ class SubcontractingReceipt(SubcontractingController):
 			self.calculate_additional_costs()
 			self.calculate_items_qty_and_amount()
 
-	def remove_other_items(self, recalculate_rate=False):
+	def remove_secondary_items(self, recalculate_rate=False):
 		for item in list(self.items):
 			if item.type:
 				self.remove(item)
@@ -487,7 +487,7 @@ class SubcontractingReceipt(SubcontractingController):
 			self.total_qty = total_qty
 			self.total = total_amount
 
-	def validate_other_items(self):
+	def validate_secondary_items(self):
 		for item in self.items:
 			if item.type:
 				if not item.qty:

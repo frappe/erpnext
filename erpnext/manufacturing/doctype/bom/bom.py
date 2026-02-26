@@ -1371,7 +1371,7 @@ def get_bom_items_as_dict(
 	company,
 	qty=1,
 	fetch_exploded=1,
-	fetch_other_items=0,
+	fetch_secondary_items=0,
 	include_non_stock_items=False,
 	fetch_qty_in_stock_uom=True,
 ):
@@ -1382,7 +1382,7 @@ def get_bom_items_as_dict(
 		fetch_exploded = 0
 		group_by_cond = "group by item_code, operation_row_id, stock_uom"
 
-	if fetch_other_items:
+	if fetch_secondary_items:
 		fetch_exploded = 0
 		group_by_cond = "group by item_code"
 
@@ -1432,7 +1432,7 @@ def get_bom_items_as_dict(
 		items = frappe.db.sql(
 			query, {"parent": bom, "qty": qty, "bom": bom, "company": company}, as_dict=True
 		)
-	elif fetch_other_items:
+	elif fetch_secondary_items:
 		query = query.format(
 			table="BOM Secondary Item",
 			where_conditions=")",
@@ -1471,7 +1471,7 @@ def get_bom_items_as_dict(
 				company,
 				qty=item.get("qty"),
 				fetch_exploded=fetch_exploded,
-				fetch_other_items=fetch_other_items,
+				fetch_secondary_items=fetch_secondary_items,
 				include_non_stock_items=include_non_stock_items,
 				fetch_qty_in_stock_uom=fetch_qty_in_stock_uom,
 			)
@@ -1965,9 +1965,9 @@ def get_op_cost_from_sub_assemblies(bom_no, op_cost=0):
 	return op_cost
 
 
-def get_other_items_from_sub_assemblies(bom_no, company, qty, other_items=None):
-	if not other_items:
-		other_items = {}
+def get_secondary_items_from_sub_assemblies(bom_no, company, qty, secondary_items=None):
+	if not secondary_items:
+		secondary_items = {}
 
 	bom_items = frappe.get_all(
 		"BOM Item",
@@ -1981,9 +1981,9 @@ def get_other_items_from_sub_assemblies(bom_no, company, qty, other_items=None):
 			continue
 
 		qty = flt(row.qty) * flt(qty)
-		items = get_bom_items_as_dict(row.bom_no, company, qty=qty, fetch_exploded=0, fetch_other_items=1)
-		other_items.update(items)
+		items = get_bom_items_as_dict(row.bom_no, company, qty=qty, fetch_exploded=0, fetch_secondary_items=1)
+		secondary_items.update(items)
 
-		get_other_items_from_sub_assemblies(row.bom_no, company, qty, other_items)
+		get_secondary_items_from_sub_assemblies(row.bom_no, company, qty, secondary_items)
 
-	return other_items
+	return secondary_items

@@ -1337,8 +1337,6 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 
 	get_items() {
 		var me = this;
-		if (!this.frm.doc.fg_completed_qty || !this.frm.doc.bom_no)
-			frappe.throw(__("BOM and Manufacturing Quantity are required"));
 
 		if (this.frm.doc.work_order || this.frm.doc.bom_no) {
 			// if work order / bom is mentioned, get items

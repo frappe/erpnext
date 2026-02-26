@@ -36,7 +36,7 @@
   "capacity_planning_for_days",
   "mins_between_operations",
   "other_settings_section",
-  "set_op_cost_and_others_from_sub_assemblies",
+  "set_op_cost_and_secondary_items_from_sub_assemblies",
   "column_break_23",
   "make_serial_no_batch_from_work_order"
  ],
@@ -233,10 +233,10 @@
   },
   {
    "default": "0",
-   "description": "To include sub-assembly costs and other items in Finished Goods on a work order without using a job card, when the 'Use Multi-Level BOM' option is enabled.",
-   "fieldname": "set_op_cost_and_others_from_sub_assemblies",
+   "description": "To include sub-assembly costs and secondary items in Finished Goods on a work order without using a job card, when the 'Use Multi-Level BOM' option is enabled.",
+   "fieldname": "set_op_cost_and_secondary_items_from_sub_assemblies",
    "fieldtype": "Check",
-   "label": "Set Operating Cost / Other Items From Sub-assemblies"
+   "label": "Set Operating Cost / Secondary Items From Sub-assemblies"
   }
  ],
  "hide_toolbar": 1,
@@ -244,7 +244,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-26 09:40:09.546738",
+ "modified": "2026-02-26 17:06:24.040382",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

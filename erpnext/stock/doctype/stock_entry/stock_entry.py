@@ -32,7 +32,7 @@ from erpnext.manufacturing.doctype.bom.bom import (
 	add_additional_cost,
 	get_bom_items_as_dict,
 	get_op_cost_from_sub_assemblies,
-	get_other_items_from_sub_assemblies,
+	get_secondary_items_from_sub_assemblies,
 	validate_bom_no,
 )
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
@@ -248,7 +248,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_company_in_accounting_dimension()
 
 		if self.purpose in ("Manufacture", "Repack"):
-			self.mark_finished_and_other_items()
+			self.mark_finished_and_secondary_items()
 			if not self.job_card:
 				self.validate_finished_goods()
 			else:
@@ -1115,18 +1115,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 				items.append(d.item_code)
 			elif d.is_finished_item:
 				if self.purpose == "Manufacture":
-					d.basic_rate = flt(
-						self.get_basic_rate_for_manufactured_item(d.transfer_qty, outgoing_items_cost)
-						* (frappe.get_value("BOM", self.bom_no, "cost_allocation_per") / 100)
+					d.basic_rate = self.get_basic_rate_for_manufactured_item(
+						d.transfer_qty, outgoing_items_cost
 					)
+					if self.bom_no:
+						d.basic_rate *= frappe.get_value("BOM", self.bom_no, "cost_allocation_per") / 100
 				elif self.purpose == "Repack":
 					d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
-			elif d.type:
+			elif d.type and d.bom_secondary_item:
 				cost_allocation_per = frappe.get_value(
 					"BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per"
 				)
-				if cost_allocation_per:
-					d.basic_rate = flt((outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty)
+				d.basic_rate = flt((outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty)
 
 			if not d.basic_rate and not d.allow_zero_valuation_rate:
 				if self.is_new():
@@ -1625,7 +1625,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				order,
 			)
 
-	def mark_finished_and_other_items(self):
+	def mark_finished_and_secondary_items(self):
 		if self.purpose != "Repack" and any(
 			[d.item_code for d in self.items if (d.is_finished_item and d.t_warehouse)]
 		):
@@ -2443,7 +2443,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				self.load_items_from_bom()
 
 		self.set_serial_batch_from_reserved_entry()
-		self.set_other_items()
+		self.set_secondary_items()
 		self.set_actual_qty()
 		self.validate_customer_provided_item()
 		self.calculate_rate_and_amount(raise_error_if_no_rate=False)
@@ -2588,7 +2588,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		return query.run(as_dict=True)
 
-	def set_other_items(self):
+	def set_secondary_items(self):
 		if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:
 			secondary_items_dict = self.get_secondary_items(self.fg_completed_qty)
 			for item in secondary_items_dict.values():
@@ -2791,16 +2791,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 
 		if (
-			frappe.db.get_single_value("Manufacturing Settings", "set_op_cost_and_others_from_sub_assemblies")
+			frappe.db.get_single_value(
+				"Manufacturing Settings", "set_op_cost_and_secondary_items_from_sub_assemblies"
+			)
 			and self.work_order
 			and frappe.get_cached_value("Work Order", self.work_order, "use_multi_level_bom")
 		):
-			item_dict = get_other_items_from_sub_assemblies(self.bom_no, self.company, qty)
+			item_dict = get_secondary_items_from_sub_assemblies(self.bom_no, self.company, qty)
 		else:
 			# item dict = { item_code: {qty, description, stock_uom} }
 			item_dict = (
 				get_bom_items_as_dict(
-					self.bom_no, self.company, qty=qty, fetch_exploded=0, fetch_other_items=1
+					self.bom_no, self.company, qty=qty, fetch_exploded=0, fetch_secondary_items=1
 				)
 				or {}
 			)
@@ -2872,13 +2874,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 		else:
 			pending_qty = flt(self.get_completed_job_card_qty()) - flt(self.pro_doc.produced_qty)
 
-		used_other_items = self.get_used_secondary_items()
+		used_secondary_items = self.get_used_secondary_items()
 		for row in other:
-			row.stock_qty -= flt(used_other_items.get(row.item_code))
+			row.stock_qty -= flt(used_secondary_items.get(row.item_code))
 			row.stock_qty = (row.stock_qty) * flt(self.fg_completed_qty) / flt(pending_qty)
 
-			if used_other_items.get(row.item_code):
-				used_other_items[row.item_code] -= row.stock_qty
+			if used_secondary_items.get(row.item_code):
+				used_secondary_items[row.item_code] -= row.stock_qty
 
 			if cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number")):
 				row.stock_qty = frappe.utils.ceil(row.stock_qty)
@@ -2889,7 +2891,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return flt(min([d.completed_qty for d in self.pro_doc.operations]))
 
 	def get_used_secondary_items(self):
-		used_other_items = defaultdict(float)
+		used_secondary_items = defaultdict(float)
 		data = frappe.get_all(
 			"Stock Entry",
 			fields=["`tabStock Entry Detail`.`item_code`", "`tabStock Entry Detail`.`qty`"],
@@ -2902,9 +2904,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		)
 
 		for row in data:
-			used_other_items[row.item_code] += row.qty
+			used_secondary_items[row.item_code] += row.qty
 
-		return used_other_items
+		return used_secondary_items
 
 	def get_unconsumed_raw_materials(self):
 		wo = frappe.get_doc("Work Order", self.work_order)
@@ -3196,7 +3198,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			item_row = item_dict[d]
 
 			child_qty = flt(item_row["qty"], precision)
-			if not self.is_return and child_qty <= 0 and not item_row.get("type") == "Scrap":
+			if not self.is_return and child_qty <= 0 and not item_row.get("type"):
 				if self.purpose not in ["Receive from Customer", "Send to Subcontractor"]:
 					continue
 
@@ -3696,7 +3698,7 @@ def get_operating_cost_per_unit(work_order=None, bom_no=None):
 		if (
 			bom_no
 			and frappe.db.get_single_value(
-				"Manufacturing Settings", "set_op_cost_and_others_from_sub_assemblies"
+				"Manufacturing Settings", "set_op_cost_and_secondary_items_from_sub_assemblies"
 			)
 			and frappe.get_cached_value("Work Order", work_order.name, "use_multi_level_bom")
 		):

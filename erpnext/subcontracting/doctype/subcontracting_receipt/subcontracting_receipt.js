@@ -184,15 +184,15 @@ frappe.ui.form.on("Subcontracting Receipt", {
 		set_warehouse_in_children(frm.doc.items, "rejected_warehouse", frm.doc.rejected_warehouse);
 	},
 
-	get_scrap_items: (frm) => {
+	get_secondary_items: (frm) => {
 		frappe.call({
 			doc: frm.doc,
-			method: "get_scrap_items",
+			method: "get_secondary_items",
 			args: {
 				recalculate_rate: true,
 			},
 			freeze: true,
-			freeze_message: __("Getting Scrap Items"),
+			freeze_message: __("Getting Secondary Items"),
 			callback: (r) => {
 				if (!r.exc) {
 					frm.refresh();

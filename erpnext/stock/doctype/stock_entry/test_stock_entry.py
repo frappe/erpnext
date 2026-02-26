@@ -907,8 +907,8 @@ class TestStockEntry(IntegrationTestCase):
 			if d.s_warehouse:
 				rm_cost += d.amount
 		fg_cost = next(filter(lambda x: x.item_code == "_Test FG Item", s.get("items"))).amount
-		scrap_cost = next(filter(lambda x: x.is_scrap_item, s.get("items"))).amount
-		self.assertEqual(fg_cost, flt(rm_cost - scrap_cost, 2))
+		secondary_item_cost = next(filter(lambda x: x.type, s.get("items"))).amount
+		self.assertEqual(fg_cost, flt(rm_cost - secondary_item_cost, 2))
 
 		# When Stock Entry has only FG + Scrap
 		s.items.pop(0)
@@ -987,15 +987,15 @@ class TestStockEntry(IntegrationTestCase):
 
 		self.assertRaises(frappe.ValidationError, ste.submit)
 
-	def test_quality_check_for_scrap_item(self):
+	def test_quality_check_for_secondary_item(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import (
 			make_stock_entry as _make_stock_entry,
 		)
 
-		scrap_item = "_Test Scrap Item 1"
-		make_item(scrap_item, {"is_stock_item": 1, "is_purchase_item": 0})
+		secondary_item = "_Test Scrap Item 1"
+		make_item(secondary_item, {"is_stock_item": 1, "is_purchase_item": 0})
 
-		bom_name = frappe.db.get_value("BOM Scrap Item", {"docstatus": 1}, "parent")
+		bom_name = frappe.db.get_value("BOM Secondary Item", {"docstatus": 1}, "parent")
 		production_item = frappe.db.get_value("BOM", bom_name, "item")
 
 		work_order = frappe.new_doc("Work Order")
@@ -1025,18 +1025,18 @@ class TestStockEntry(IntegrationTestCase):
 					basic_rate=row.basic_rate or 100,
 				)
 
-			if row.is_scrap_item:
-				row.item_code = scrap_item
-				row.uom = frappe.db.get_value("Item", scrap_item, "stock_uom")
-				row.stock_uom = frappe.db.get_value("Item", scrap_item, "stock_uom")
+			if row.type:
+				row.item_code = secondary_item
+				row.uom = frappe.db.get_value("Item", secondary_item, "stock_uom")
+				row.stock_uom = frappe.db.get_value("Item", secondary_item, "stock_uom")
 
 		stock_entry.inspection_required = 1
 		stock_entry.save()
 
-		self.assertTrue([row.item_code for row in stock_entry.items if row.is_scrap_item])
+		self.assertTrue([row.item_code for row in stock_entry.items if row.type])
 
 		for row in stock_entry.items:
-			if not row.is_scrap_item:
+			if not row.type:
 				qc = frappe.get_doc(
 					{
 						"doctype": "Quality Inspection",
@@ -1056,7 +1056,7 @@ class TestStockEntry(IntegrationTestCase):
 		stock_entry.reload()
 		stock_entry.submit()
 		for row in stock_entry.items:
-			if row.is_scrap_item:
+			if row.type:
 				self.assertFalse(row.quality_inspection)
 			else:
 				self.assertTrue(row.quality_inspection)

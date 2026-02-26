@@ -559,11 +559,10 @@
   },
   {
    "default": "0",
-   "depends_on": "is_finished_item",
    "fieldname": "is_finished_item",
    "fieldtype": "Check",
    "label": "Is Finished Item",
-   "read_only_depends_on": "eval:in_list([\"Subcontracting Delivery\", \"Subcontracting Return\"], parent.purpose) || doc.is_finished_item"
+   "read_only_depends_on": "eval:in_list([\"Subcontracting Delivery\", \"Subcontracting Return\"], parent.purpose)"
   },
   {
    "fieldname": "job_card_item",

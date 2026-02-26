@@ -18,7 +18,7 @@ class SubcontractingInwardController:
 	def on_submit_subcontracting_inward(self):
 		self.update_inward_order_item()
 		self.update_inward_order_received_items()
-		self.update_inward_order_other_items()
+		self.update_inward_order_secondary_items()
 		self.create_stock_reservation_entries_for_inward()
 		self.update_inward_order_status()
 
@@ -28,7 +28,7 @@ class SubcontractingInwardController:
 		self.validate_delivery()
 		self.validate_receive_from_customer_cancel()
 		self.update_inward_order_received_items()
-		self.update_inward_order_other_items()
+		self.update_inward_order_secondary_items()
 		self.remove_reference_for_additional_items()
 		self.update_inward_order_status()
 
@@ -519,7 +519,7 @@ class SubcontractingInwardController:
 			if max_allowed_qty:
 				max_allowed_qty = max_allowed_qty[0]
 			else:
-				table = frappe.qb.DocType("Subcontracting Inward Order Scrap Item")
+				table = frappe.qb.DocType("Subcontracting Inward Order Secondary Item")
 				query = (
 					frappe.qb.from_(table)
 					.select((table.produced_qty - table.delivered_qty).as_("max_allowed_qty"))
@@ -539,7 +539,7 @@ class SubcontractingInwardController:
 							frappe.get_cached_value(
 								"Subcontracting Inward Order Item"
 								if not item.type
-								else "Subcontracting Inward Order Scrap Item",
+								else "Subcontracting Inward Order Secondary Item",
 								item.scio_detail,
 								"stock_uom",
 							)
@@ -591,8 +591,8 @@ class SubcontractingInwardController:
 
 			for item in [item for item in self.items if not item.is_finished_item]:
 				if item.type:
-					scio_other_item = frappe.get_value(
-						"Subcontracting Inward Order Scrap Item",
+					scio_secondary_item = frappe.get_value(
+						"Subcontracting Inward Order Secondary Item",
 						{
 							"docstatus": 1,
 							"item_code": item.item_code,
@@ -603,12 +603,13 @@ class SubcontractingInwardController:
 						as_dict=True,
 					)
 					if (
-						scio_other_item
-						and scio_other_item.delivered_qty > scio_other_item.produced_qty - item.transfer_qty
+						scio_secondary_item
+						and scio_secondary_item.delivered_qty
+						> scio_secondary_item.produced_qty - item.transfer_qty
 					):
 						frappe.throw(
 							_(
-								"Row #{0}: Cannot cancel this Manufacturing Stock Entry as quantity of Scrap Item {1} produced cannot be less than quantity delivered."
+								"Row #{0}: Cannot cancel this Manufacturing Stock Entry as quantity of Secondary Item {1} produced cannot be less than quantity delivered."
 							).format(item.idx, get_link_to_form("Item", item.item_code))
 						)
 				else:
@@ -649,7 +650,7 @@ class SubcontractingInwardController:
 				doctype = (
 					"Subcontracting Inward Order Item"
 					if not item.type
-					else "Subcontracting Inward Order Scrap Item"
+					else "Subcontracting Inward Order Secondary Item"
 				)
 				frappe.db.set_value(
 					doctype,
@@ -860,24 +861,24 @@ class SubcontractingInwardController:
 				doc.insert()
 				doc.submit()
 
-	def update_inward_order_other_items(self):
+	def update_inward_order_secondary_items(self):
 		if (scio := self.subcontracting_inward_order) and self.purpose == "Manufacture":
-			other_items_list = [item for item in self.items if item.type]
-			other_items = frappe._dict(
+			secondary_items_list = [item for item in self.items if item.type]
+			secondary_items = frappe._dict(
 				{
 					(item.item_code, item.t_warehouse): item.transfer_qty
 					if self._action == "submit"
 					else -item.transfer_qty
-					for item in other_items_list
+					for item in secondary_items_list
 				}
 			)
-			if other_items:
-				item_codes, warehouses = zip(*list(other_items.keys()), strict=True)
+			if secondary_items:
+				item_codes, warehouses = zip(*list(secondary_items.keys()), strict=True)
 				item_codes = list(item_codes)
 				warehouses = list(warehouses)
 
 				result = frappe.get_all(
-					"Subcontracting Inward Order Scrap Item",
+					"Subcontracting Inward Order Secondary Item",
 					filters={
 						"item_code": ["in", item_codes],
 						"warehouse": ["in", warehouses],
@@ -890,7 +891,7 @@ class SubcontractingInwardController:
 				)
 
 				if result:
-					other_items_dict = frappe._dict(
+					secondary_items_dict = frappe._dict(
 						{
 							(d.item_code, d.warehouse): frappe._dict(
 								{"name": d.name, "produced_qty": d.produced_qty}
@@ -900,41 +901,45 @@ class SubcontractingInwardController:
 					)
 					deleted_docs = []
 					case_expr = Case()
-					table = frappe.qb.DocType("Subcontracting Inward Order Scrap Item")
-					for key, value in other_items_dict.items():
-						if self._action == "cancel" and value.produced_qty - abs(other_items.get(key)) == 0:
+					table = frappe.qb.DocType("Subcontracting Inward Order Secondary Item")
+					for key, value in secondary_items_dict.items():
+						if (
+							self._action == "cancel"
+							and value.produced_qty - abs(secondary_items.get(key)) == 0
+						):
 							deleted_docs.append(value.name)
-							frappe.delete_doc("Subcontracting Inward Order Scrap Item", value.name)
+							frappe.delete_doc("Subcontracting Inward Order Secondary Item", value.name)
 						else:
 							case_expr = case_expr.when(
-								table.name == value.name, value.produced_qty + other_items.get(key)
+								table.name == value.name, value.produced_qty + secondary_items.get(key)
 							)
 
 					if final_list := list(
-						set([v.name for v in other_items_dict.values()]) - set(deleted_docs)
+						set([v.name for v in secondary_items_dict.values()]) - set(deleted_docs)
 					):
 						frappe.qb.update(table).set(table.produced_qty, case_expr).where(
 							(table.name.isin(final_list)) & (table.docstatus == 1)
 						).run()
 
 				fg_item_code = next(fg for fg in self.items if fg.is_finished_item).item_code
-				for other_item in [
+				for secondary_item in [
 					item
-					for item in other_items_list
+					for item in secondary_items_list
 					if (item.item_code, item.t_warehouse) not in [(d.item_code, d.warehouse) for d in result]
 				]:
 					doc = frappe.new_doc(
-						"Subcontracting Inward Order Scrap Item",
+						"Subcontracting Inward Order Secondary Item",
 						parent=scio,
 						parenttype="Subcontracting Inward Order",
-						parentfield="other_items",
-						idx=frappe.db.count("Subcontracting Inward Order Scrap Item", {"parent": scio}) + 1,
-						item_code=other_item.item_code,
+						parentfield="secondary_items",
+						idx=frappe.db.count("Subcontracting Inward Order Secondary Item", {"parent": scio})
+						+ 1,
+						item_code=secondary_item.item_code,
 						fg_item_code=fg_item_code,
-						stock_uom=other_item.stock_uom,
-						warehouse=other_item.t_warehouse,
-						produced_qty=other_item.transfer_qty,
-						type=other_item.type,
+						stock_uom=secondary_item.stock_uom,
+						warehouse=secondary_item.t_warehouse,
+						produced_qty=secondary_item.transfer_qty,
+						type=secondary_item.type,
 						delivered_qty=0,
 						reference_name=frappe.get_value(
 							"Work Order", self.work_order, "subcontracting_inward_order_item"
@@ -966,7 +971,7 @@ class SubcontractingInwardController:
 				and (
 					not frappe.db.exists("Subcontracting Inward Order Received Item", item.scio_detail)
 					and not frappe.db.exists("Subcontracting Inward Order Item", item.scio_detail)
-					and not frappe.db.exists("Subcontracting Inward Order Scrap Item", item.scio_detail)
+					and not frappe.db.exists("Subcontracting Inward Order Secondary Item", item.scio_detail)
 				)
 			]
 			for item in items:

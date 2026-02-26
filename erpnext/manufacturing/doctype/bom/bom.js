@@ -619,10 +619,10 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 	}
 
 	item_code(doc, cdt, cdn) {
-		let other_items = false;
+		let secondary_items = false;
 		var child = locals[cdt][cdn];
 		if (child.doctype == "BOM Secondary Item") {
-			other_items = true;
+			secondary_items = true;
 		}
 
 		if (child.bom_no) {
@@ -633,7 +633,7 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 			child.do_not_explode = 1;
 		}
 
-		get_bom_material_detail(doc, cdt, cdn, other_items);
+		get_bom_material_detail(doc, cdt, cdn, secondary_items);
 	}
 
 	buying_price_list(doc) {
@@ -682,7 +682,7 @@ cur_frm.cscript.is_default = function (doc) {
 	if (doc.is_default) cur_frm.set_value("is_active", 1);
 };
 
-var get_bom_material_detail = function (doc, cdt, cdn, other_items) {
+var get_bom_material_detail = function (doc, cdt, cdn, secondary_items) {
 	if (!doc.company) {
 		frappe.throw({ message: __("Please select a Company first."), title: __("Mandatory") });
 	}
@@ -696,7 +696,7 @@ var get_bom_material_detail = function (doc, cdt, cdn, other_items) {
 				company: doc.company,
 				item_code: d.item_code,
 				bom_no: d.bom_no != null ? d.bom_no : "",
-				other_items: other_items,
+				secondary_items: secondary_items,
 				qty: d.qty,
 				stock_qty: d.stock_qty,
 				include_item_in_manufacturing: d.include_item_in_manufacturing,
@@ -727,11 +727,11 @@ cur_frm.cscript.qty = function (doc) {
 
 cur_frm.cscript.rate = function (doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	const is_other_item = cdt == "BOM Secondary Item";
+	const is_secondary_item = cdt == "BOM Secondary Item";
 
 	if (d.bom_no) {
 		frappe.msgprint(__("You cannot change the rate if BOM is mentioned against any Item."));
-		get_bom_material_detail(doc, cdt, cdn, is_other_item);
+		get_bom_material_detail(doc, cdt, cdn, is_secondary_item);
 	} else {
 		erpnext.bom.calculate_rm_cost(doc);
 		erpnext.bom.calculate_total(doc);
