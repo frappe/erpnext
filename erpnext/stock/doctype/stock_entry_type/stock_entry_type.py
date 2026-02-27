@@ -302,7 +302,14 @@ class ManufactureEntry:
 		args = {
 			"to_warehouse": self.fg_warehouse,
 			"from_warehouse": "",
-			"qty": self.for_quantity,
+			"qty": flt(
+				self.for_quantity
+				- (
+					self.for_quantity
+					* (frappe.get_value("BOM", self.bom_no, "process_loss_percentage") / 100)
+				),
+				self.stock_entry.precision("fg_completed_qty"),
+			),
 			"item_name": item.item_name,
 			"description": item.description,
 			"stock_uom": item.stock_uom,

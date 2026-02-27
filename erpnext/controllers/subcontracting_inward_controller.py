@@ -240,6 +240,7 @@ class SubcontractingInwardController:
 			for item in self.get("items")
 			if not item.is_finished_item
 			and not item.type
+			and not item.is_legacy_scrap_item
 			and frappe.get_cached_value("Item", item.item_code, "is_customer_provided_item")
 		]
 
@@ -368,7 +369,9 @@ class SubcontractingInwardController:
 		if self.subcontracting_inward_order:
 			if self.purpose in ["Subcontracting Delivery", "Subcontracting Return", "Manufacture"]:
 				for item in self.items:
-					if (item.is_finished_item or item.type) and item.valuation_rate == 0:
+					if (
+						item.is_finished_item or item.type or item.is_legacy_scrap_item
+					) and item.valuation_rate == 0:
 						item.allow_zero_valuation_rate = 1
 
 	def validate_warehouse_(self):
@@ -467,7 +470,7 @@ class SubcontractingInwardController:
 				self.validate_delivery_on_save()
 			else:
 				for item in self.items:
-					if not item.type:
+					if not item.type and not item.is_legacy_scrap_item:
 						delivered_qty, returned_qty = frappe.get_value(
 							"Subcontracting Inward Order Item",
 							item.scio_detail,
@@ -538,7 +541,7 @@ class SubcontractingInwardController:
 						bold(
 							frappe.get_cached_value(
 								"Subcontracting Inward Order Item"
-								if not item.type
+								if not item.type and not item.is_legacy_scrap_item
 								else "Subcontracting Inward Order Secondary Item",
 								item.scio_detail,
 								"stock_uom",
@@ -590,7 +593,7 @@ class SubcontractingInwardController:
 				)
 
 			for item in [item for item in self.items if not item.is_finished_item]:
-				if item.type:
+				if item.type or item.is_legacy_scrap_item:
 					scio_secondary_item = frappe.get_value(
 						"Subcontracting Inward Order Secondary Item",
 						{
@@ -649,7 +652,7 @@ class SubcontractingInwardController:
 			for item in self.items:
 				doctype = (
 					"Subcontracting Inward Order Item"
-					if not item.type
+					if not item.type and not item.is_legacy_scrap_item
 					else "Subcontracting Inward Order Secondary Item"
 				)
 				frappe.db.set_value(
@@ -764,7 +767,11 @@ class SubcontractingInwardController:
 		customer_warehouse = frappe.get_cached_value(
 			"Subcontracting Inward Order", self.subcontracting_inward_order, "customer_warehouse"
 		)
-		items = [item for item in self.items if not item.is_finished_item and not item.type]
+		items = [
+			item
+			for item in self.items
+			if not item.is_finished_item and not item.type and not item.is_legacy_scrap_item
+		]
 		item_code_wh = frappe._dict(
 			{
 				(
@@ -863,7 +870,7 @@ class SubcontractingInwardController:
 
 	def update_inward_order_secondary_items(self):
 		if (scio := self.subcontracting_inward_order) and self.purpose == "Manufacture":
-			secondary_items_list = [item for item in self.items if item.type]
+			secondary_items_list = [item for item in self.items if item.type or item.is_legacy_scrap_item]
 			secondary_items = frappe._dict(
 				{
 					(item.item_code, item.t_warehouse): item.transfer_qty

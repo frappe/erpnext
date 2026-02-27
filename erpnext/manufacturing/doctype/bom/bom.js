@@ -696,7 +696,6 @@ var get_bom_material_detail = function (doc, cdt, cdn, secondary_items) {
 				company: doc.company,
 				item_code: d.item_code,
 				bom_no: d.bom_no != null ? d.bom_no : "",
-				secondary_items: secondary_items,
 				qty: d.qty,
 				stock_qty: d.stock_qty,
 				include_item_in_manufacturing: d.include_item_in_manufacturing,
@@ -705,6 +704,7 @@ var get_bom_material_detail = function (doc, cdt, cdn, secondary_items) {
 				conversion_factor: d.conversion_factor,
 				sourced_by_supplier: d.sourced_by_supplier,
 				do_not_explode: d.do_not_explode,
+				fetch_rate: !secondary_items,
 			},
 			callback: function (r) {
 				$.extend(d, r.message);

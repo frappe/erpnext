@@ -72,14 +72,13 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Type",
-   "options": "Co-Product\nBy-Product\nScrap\nFinished Good",
-   "reqd": 1
+   "options": "Co-Product\nBy-Product\nScrap\nFinished Good"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-26 17:25:08.950329",
+ "modified": "2026-02-27 13:05:54.615159",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card Secondary Item",

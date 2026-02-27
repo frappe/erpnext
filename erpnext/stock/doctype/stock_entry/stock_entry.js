@@ -1332,7 +1332,9 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	}
 
 	fg_completed_qty() {
-		this.get_items();
+		if (!this.frm.doc.job_card) {
+			this.get_items();
+		}
 	}
 
 	get_items() {

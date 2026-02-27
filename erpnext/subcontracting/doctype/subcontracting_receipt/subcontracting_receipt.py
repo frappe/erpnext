@@ -352,8 +352,19 @@ class SubcontractingReceipt(SubcontractingController):
 				bom = frappe.get_doc("BOM", item.bom)
 				for secondary_item in bom.secondary_items:
 					qty = flt(item.qty) * (flt(secondary_item.stock_qty) / flt(bom.quantity))
-					qty -= qty * (secondary_item.process_loss_per / 100)
-					rate = (item.amount * (secondary_item.cost_allocation_per / 100)) / qty
+					if not secondary_item.is_legacy:
+						qty -= flt(qty * (secondary_item.process_loss_per / 100), item.precision("qty"))
+						rate = (item.amount * (secondary_item.cost_allocation_per / 100)) / qty
+					else:
+						rate = get_valuation_rate(
+							secondary_item.item_code,
+							self.set_warehouse,
+							self.doctype,
+							self.name,
+							currency=erpnext.get_company_currency(self.company),
+							company=self.company,
+						)
+
 					self.append(
 						"items",
 						{
@@ -380,7 +391,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def remove_secondary_items(self, recalculate_rate=False):
 		for item in list(self.items):
-			if item.type:
+			if item.type or item.is_legacy_scrap_item:
 				self.remove(item)
 			else:
 				item.secondary_items_cost_per_qty = 0
@@ -443,7 +454,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		others_items_cost_map = {}
 		for item in self.get("items") or []:
-			if item.type:
+			if item.type or item.is_legacy_scrap_item:
 				item.amount = flt(item.qty) * flt(item.rate)
 
 				if item.reference_name in others_items_cost_map:
@@ -453,7 +464,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
-			if not item.type:
+			if not item.type and not item.is_legacy_scrap_item:
 				if item.qty:
 					if item.name in rm_cost_map:
 						item.rm_supp_cost = rm_cost_map[item.name]
@@ -489,7 +500,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def validate_secondary_items(self):
 		for item in self.items:
-			if item.type:
+			if item.type or item.is_legacy_scrap_item:
 				if not item.qty:
 					frappe.throw(
 						_("Row #{0}: Secondary Item Qty cannot be zero").format(item.idx),

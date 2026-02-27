@@ -2482,14 +2482,14 @@ def query_sales_order(doctype: str, txt: str, searchfield: str, start: int, page
 
 
 @frappe.whitelist()
-def make_job_card(work_order: str, operations: str | list) -> None:
+def make_job_card(work_order: str, operations: str | list, parent_bom: str | None = None):
 	if isinstance(operations, str):
 		operations = json.loads(operations)
 
 	work_order = frappe.get_doc("Work Order", work_order)
 	for row in operations:
 		row = frappe._dict(row)
-		row.update(get_operation_details(row.name, work_order))
+		row.update(get_operation_details(row.name, work_order, parent_bom))
 
 		validate_operation_data(row)
 		qty = row.get("qty")
@@ -2499,7 +2499,7 @@ def make_job_card(work_order: str, operations: str | list) -> None:
 				create_job_card(work_order, row, auto_create=True)
 
 
-def get_operation_details(name, work_order):
+def get_operation_details(name, work_order, parent_bom):
 	for row in work_order.operations:
 		if row.name == name:
 			return {
@@ -2509,7 +2509,7 @@ def get_operation_details(name, work_order):
 				"fg_warehouse": row.fg_warehouse,
 				"wip_warehouse": row.wip_warehouse,
 				"finished_good": row.finished_good,
-				"bom_no": row.get("bom_no"),
+				"bom_no": row.get("bom_no") or parent_bom,
 				"is_subcontracted": row.get("is_subcontracted"),
 			}
 

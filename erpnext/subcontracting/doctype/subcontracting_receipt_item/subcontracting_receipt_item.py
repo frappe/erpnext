@@ -25,6 +25,7 @@ class SubcontractingReceiptItem(Document):
 		expense_account: DF.Link | None
 		image: DF.Attach | None
 		include_exploded_items: DF.Check
+		is_legacy_scrap_item: DF.Check
 		item_code: DF.Link
 		item_name: DF.Data | None
 		job_card: DF.Link | None

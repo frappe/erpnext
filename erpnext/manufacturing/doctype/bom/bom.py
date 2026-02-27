@@ -508,14 +508,15 @@ class BOM(WebsiteGenerator):
 				"item_code": item.item_code,
 				"company": self.company,
 				"uom": item.uom,
+				"fetch_rate": False,
 			}
-			ret = self.get_bom_material_detail(args, fetch_rate=False)
+			ret = self.get_bom_material_detail(args)
 			for key, value in ret.items():
 				if item.get(key) is None:
 					item.set(key, value)
 
 	@frappe.whitelist()
-	def get_bom_material_detail(self, args: dict | str | None = None, fetch_rate: bool = True):
+	def get_bom_material_detail(self, args: dict | str | None = None):
 		"""Get raw material details like uom, desc and rate"""
 		if not args:
 			args = frappe.form_dict.get("args")
@@ -536,7 +537,7 @@ class BOM(WebsiteGenerator):
 		)
 		args.update(item)
 
-		rate = self.get_rm_rate(args) if fetch_rate else 0
+		rate = self.get_rm_rate(args) if args.get("fetch_rate", True) else 0
 		ret_item = {
 			"item_name": item and args["item_name"] or "",
 			"description": item and args["description"] or "",

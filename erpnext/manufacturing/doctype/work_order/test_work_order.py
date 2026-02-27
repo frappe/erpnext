@@ -1053,7 +1053,7 @@ class TestWorkOrder(IntegrationTestCase):
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
-			if row.type:
+			if row.type or row.is_legacy_scrap_item:
 				self.assertEqual(row.qty, 1)
 
 		# Partial Job Card 1 with qty 10
@@ -1065,7 +1065,7 @@ class TestWorkOrder(IntegrationTestCase):
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
-			if row.type:
+			if row.type or row.is_legacy_scrap_item:
 				self.assertEqual(row.qty, 2)
 
 		# Partial Job Card 2 with qty 10
@@ -2154,7 +2154,7 @@ class TestWorkOrder(IntegrationTestCase):
 		self.assertTrue(se_doc.additional_costs)
 		secondary_items = []
 		for item in se_doc.items:
-			if item.type:
+			if item.type or item.is_legacy_scrap_item:
 				secondary_items.append(item.item_code)
 
 		self.assertEqual(
