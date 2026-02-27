@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-02-22 09:43+0000\n"
-"PO-Revision-Date: 2026-02-26 16:53\n"
+"PO-Revision-Date: 2026-02-27 16:51\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Serbian (Latin)\n"
 "MIME-Version: 1.0\n"
@@ -21903,7 +21903,7 @@ msgstr "Ukoliko je omogućeno, izvorno i ciljno skladište u unosu zaliha prenos
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "If enabled, the system will allow negative stock entries for the batch. But, this may lead to incorrect valuation rates, so it is recommended to avoid using this option. The system will permit negative stock only when it is caused by backdated entries and will validate and block negative stock in all other cases."
-msgstr "Ukoliko je omogućeno, sistem će dozvoliti knjižete negativnog stanja zaliha za šaržu. To može dovesti do netačne stope vrednovanja, pa se preporučuje izbegavanje ove opcije. Sistem će dozvoliti negativno stanje samo u slučaju retroaktivnih knjiženja i blokiraće negativno stanje u svim ostalim slučajevima."
+msgstr "Ukoliko je omogućeno, sistem će dozvoliti knjiženje negativnog stanja zaliha za šaržu. To može dovesti do netačne stope vrednovanja, pa se preporučuje izbegavanje ove opcije. Sistem će dozvoliti negativno stanje samo u slučaju retroaktivnih knjiženja i blokiraće negativno stanje u svim ostalim slučajevima."
 
 #. Description of the 'Allow UOM with Conversion Rate Defined in Item' (Check)
 #. field in DocType 'Stock Settings'
@@ -58288,7 +58288,7 @@ msgstr "{0} jedinica stavke {1} nije dostupno ni u jednom skladištu."
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:1009
 msgid "{0} units of Item {1} is not available in any of the warehouses. Other Pick Lists exist for this item."
-msgstr "{0} jedinica stavke {1} nije dostupni ni u jednom skladištu. Postoje druge liste za odabir za ovu stavku."
+msgstr "{0} jedinica stavke {1} nije dostupno ni u jednom skladištu. Postoje druge liste za odabir za ovu stavku."
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:144
 msgid "{0} units of {1} are required in {2} with the inventory dimension: {3} on {4} {5} for {6} to complete the transaction."
