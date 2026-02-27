@@ -135,7 +135,7 @@ class TaxRule(Document):
 
 
 @frappe.whitelist()
-def get_party_details(party: str, party_type: str, args: dict | None = None):
+def get_party_details(party: str | None, party_type: str, args: dict | None = None):
 	out = {}
 	billing_address, shipping_address = None, None
 	if args:

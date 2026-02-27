@@ -492,7 +492,7 @@ def reconcile_vouchers(bank_transaction_name: str, vouchers: str):
 @frappe.whitelist()
 def get_linked_payments(
 	bank_transaction_name: str,
-	document_types: list[str] | None = None,
+	document_types: str | list[str] | None = None,
 	from_date: str | date | None = None,
 	to_date: str | date | None = None,
 	filter_by_reference_date: bool | None = None,

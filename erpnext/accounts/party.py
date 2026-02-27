@@ -719,7 +719,7 @@ def get_address_tax_category(
 
 @frappe.whitelist()
 def set_taxes(
-	party: str,
+	party: str | None,
 	party_type: str,
 	posting_date: str | date | None,
 	company: str | None,
