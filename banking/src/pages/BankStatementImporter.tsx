@@ -54,7 +54,7 @@ const BankStatementImporter = () => {
 
     return (
         <div className="flex flex-col">
-            <div className="flex gap-1 items-baseline p-4">
+            <div className="flex gap-2 items-baseline p-4">
                 <H1 className="text-2xl tracking-normal font-bold">{_("Banking")}</H1>
                 <Breadcrumb>
                     <BreadcrumbList>

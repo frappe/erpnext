@@ -307,7 +307,7 @@ const UnreconciledTransactionItem = ({ transaction }: { transaction: Unreconcile
                 </div>
                 <div className="gap-1 flex flex-col items-end min-w-36 h-full text-right">
                     {isWithdrawal ? <ArrowUpRight className="w-6 h-6 text-destructive" /> : <ArrowDownRight className="w-6 h-6 text-green-600" />}
-                    {amount && amount > 0 && <span className="font-semibold font-mono text-md">{formatCurrency(amount, currency)}</span>}
+                    {amount && amount > 0 && <span className="font-semibold font-mono text-base">{formatCurrency(amount, currency)}</span>}
                     {amount !== transaction.unallocated_amount && <span className="text-xs text-gray-700">{formatCurrency(transaction.unallocated_amount, currency)}<br />{_("Unallocated")}</span>}
                 </div>
             </div>
