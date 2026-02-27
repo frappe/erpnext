@@ -8,7 +8,7 @@ from datetime import date
 import frappe
 from frappe import _, throw
 from frappe.model.document import Document
-from frappe.utils import formatdate, getdate, today
+from frappe.utils import DateTimeLikeObject, formatdate, getdate, today
 
 
 class OverlapError(frappe.ValidationError):
@@ -168,7 +168,7 @@ class HolidayList(Document):
 
 
 @frappe.whitelist()
-def get_events(start, end, filters=None):
+def get_events(start: DateTimeLikeObject, end: DateTimeLikeObject, filters: str | dict | None = None):
 	"""Returns events for Gantt / Calendar view rendering.
 
 	:param start: Start date-time.
