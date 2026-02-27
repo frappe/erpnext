@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-02-22 09:43+0000\n"
-"PO-Revision-Date: 2026-02-26 16:53\n"
+"PO-Revision-Date: 2026-02-27 16:51\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -2027,7 +2027,7 @@ msgstr "Bokföring"
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 #: erpnext/setup/doctype/company/company.json
 msgid "Accounts Closing"
-msgstr "Bokföring Stängning"
+msgstr "Bokföring Period"
 
 #. Label of the accounts_frozen_till_date (Date) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -3459,7 +3459,7 @@ msgstr "Mot Intäkt Konto"
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:729
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:776
 msgid "Against Journal Entry {0} does not have any unmatched {1} entry"
-msgstr "Mot Journal Post {0} som inte har någon oavstämd {1} post"
+msgstr "Mot Journal Post {0} som inte har någon ej avstämd {1} post"
 
 #: erpnext/accounts/doctype/gl_entry/gl_entry.py:393
 msgid "Against Journal Entry {0} is already adjusted against some other voucher"
@@ -17605,7 +17605,7 @@ msgstr "Aktivera System Övervakning"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Immutable Ledger"
-msgstr "Aktivera Oförenderlig Register"
+msgstr "Aktivera Oförenderlig Bokföring"
 
 #. Label of the enable_item_wise_inventory_account (Check) field in DocType
 #. 'Company'
@@ -20744,7 +20744,7 @@ msgstr "Hämta Tidrapporter"
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js:102
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js:107
 msgid "Get Unreconciled Entries"
-msgstr "Hämta Oavstämda Poster"
+msgstr "Hämta Ej Avstämda Poster"
 
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.js:69
 msgid "Get stops from"
@@ -30285,11 +30285,11 @@ msgstr "Inga Villkor"
 
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js:236
 msgid "No Unreconciled Invoices and Payments found for this party and account"
-msgstr "Inga Oavstämda Fakturor och Betalningar hittades för denna parti och konto"
+msgstr "Inga Ej Avstämda Fakturor och Betalningar hittades för denna parti och konto"
 
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js:241
 msgid "No Unreconciled Payments found for this party"
-msgstr "Inga Oavstämda Betalningar hittades för denna parti"
+msgstr "Inga Ej Avstämda Betalningar hittades för denna parti"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:782
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.py:250
@@ -40662,7 +40662,7 @@ msgstr "Avstämning Rapport"
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Reconciliation Takes Effect On"
-msgstr "Avstämning Träder i Kraft"
+msgstr "Avstämning tar effekt på"
 
 #. Label of the recording_html (HTML) field in DocType 'Call Log'
 #: erpnext/telephony/doctype/call_log/call_log.json
