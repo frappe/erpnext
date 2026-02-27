@@ -330,8 +330,19 @@
   --color-ink-blue-4: var(--ink-blue-4);
 
   --color-ink-cyan-1: var(--ink-cyan-1);
+  --color-ink-cyan-2: var(--ink-cyan-2);
+  --color-ink-cyan-3: var(--ink-cyan-3);
+  --color-ink-cyan-4: var(--ink-cyan-4);
+
   --color-ink-pink-1: var(--ink-pink-1);
+  --color-ink-pink-2: var(--ink-pink-2);
+  --color-ink-pink-3: var(--ink-pink-3);
+  --color-ink-pink-4: var(--ink-pink-4);
+
   --color-ink-violet-1: var(--ink-violet-1);
+  --color-ink-violet-2: var(--ink-violet-2);
+  --color-ink-violet-3: var(--ink-violet-3);
+  --color-ink-violet-4: var(--ink-violet-4);
 
   --color-ink-blue-link: var(--ink-blue-link);
 
@@ -599,9 +610,20 @@
   --ink-blue-3: var(--blue-500);
   --ink-blue-4: var(--blue-700);
 
-  --ink-cyan-1: var(--cyan-500);
-  --ink-pink-1: var(--pink-500);
-  --ink-violet-1: var(--violet-500);
+  --ink-cyan-1: var(--cyan-50);
+  --ink-cyan-2: var(--cyan-400);
+  --ink-cyan-3: var(--cyan-500);
+  --ink-cyan-4: var(--cyan-700);
+
+  --ink-pink-1: var(--pink-50);
+  --ink-pink-2: var(--pink-400);
+  --ink-pink-3: var(--pink-500);
+  --ink-pink-4: var(--pink-700);
+
+  --ink-violet-1: var(--violet-50);
+  --ink-violet-2: var(--violet-400);
+  --ink-violet-3: var(--violet-500);
+  --ink-violet-4: var(--violet-700);
 
   --ink-blue-link: var(--blue-400);
 
@@ -856,7 +878,7 @@
   --ink-red-1: var(--white);
   --ink-red-2: var(--red-700);
   --ink-red-3: var(--red-400);
-  --ink-red-4: var(--red-200);
+  --ink-red-4: var(--red-300);
 
   --ink-green-1: var(--white);
   --ink-green-2: var(--green-700);
@@ -873,9 +895,20 @@
   --ink-blue-3: var(--blue-400);
   --ink-blue-4: var(--blue-300);
 
-  --ink-cyan-1: var(--cyan-300);
-  --ink-pink-1: var(--pink-300);
-  --ink-violet-1: var(--violet-300);
+  --ink-cyan-1: var(--white);
+  --ink-cyan-2: var(--cyan-700);
+  --ink-cyan-3: var(--cyan-400);
+  --ink-cyan-4: var(--cyan-300);
+
+  --ink-violet-1: var(--white);
+  --ink-violet-2: var(--violet-700);
+  --ink-violet-3: var(--violet-400);
+  --ink-violet-4: var(--violet-300);
+
+  --ink-pink-1: var(--white);
+  --ink-pink-2: var(--pink-700);
+  --ink-pink-3: var(--pink-400);
+  --ink-pink-4: var(--pink-300);
 
   --ink-blue-link: var(--blue-500);
 
