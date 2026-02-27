@@ -98,7 +98,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	async _refresh_non_exempt_rates_if_needed() {
 		if (!this.frm.doc.__is_tax_exempt || !this.frm.doc.items?.length) return;
 
-		let cached = this.frm.doc.__non_exempt_rates || {};
+		let cache_key = `__non_exempt_rates__${this.frm.doc.tax_category}__${this.frm.doc.company}`;
+		let cached = this.frm.doc[cache_key] || {};
 		let missing = [
 			...new Set(
 				this.frm.doc.items.map((d) => d.item_code).filter((code) => code && !(code in cached))
@@ -115,7 +116,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			},
 		});
 		Object.assign(cached, r.message || {});
-		this.frm.doc.__non_exempt_rates = cached;
+		this.frm.doc[cache_key] = cached;
 	}
 
 	_calculate_taxes_and_totals() {
@@ -284,7 +285,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 			// For tax-exempt categories, use non-exempt rates for backing out
 			if (me.frm.doc.__is_tax_exempt) {
-				item_tax_map = (me.frm.doc.__non_exempt_rates || {})[item.item_code] || {};
+				let cache_key = `__non_exempt_rates__${me.frm.doc.tax_category}__${me.frm.doc.company}`;
+				item_tax_map = (me.frm.doc[cache_key] || {})[item.item_code] || {};
 			}
 
 			var cumulated_tax_fraction = 0.0;
