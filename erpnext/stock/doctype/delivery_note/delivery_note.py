@@ -1104,13 +1104,13 @@ def make_shipment(source_name, target_doc=None):
 		# As we are using session user details in the pickup_contact then pickup_contact_person will be session user
 		target.pickup_contact_person = frappe.session.user
 
-		if source.contact_person:
-			contact_person = source.contact_person or get_default_contact("Customer", source.customer)
+		contact_person = source.contact_person or get_default_contact("Customer", source.customer)
+		if contact_person:
 			contact = frappe.db.get_value(
 				"Contact", contact_person, ["email_id", "phone", "mobile_no"], as_dict=1
 			)
 
-			delivery_contact_display = f"{source.contact_display or contact_person or ''}"
+			delivery_contact_display = source.contact_display or contact_person or ""
 			if contact:
 				if contact.email_id:
 					delivery_contact_display += "<br>" + contact.email_id
@@ -1118,7 +1118,9 @@ def make_shipment(source_name, target_doc=None):
 					delivery_contact_display += "<br>" + contact.phone
 				if contact.mobile_no and not contact.phone:
 					delivery_contact_display += "<br>" + contact.mobile_no
-			target.delivery_contact = contact_person
+
+			target.delivery_contact_name = contact_person
+			target.delivery_contact = delivery_contact_display
 
 		if source.shipping_address_name:
 			target.delivery_address_name = source.shipping_address_name
