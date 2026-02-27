@@ -37,7 +37,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Type",
-   "options": "Co-Product\nBy-Product\nScrap\nFinished Good",
+   "options": "Co-Product\nBy-Product\nScrap\nAdditional Finished Good",
    "reqd": 1
   },
   {
@@ -205,7 +205,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-26 18:45:44.478509",
+ "modified": "2026-02-27 15:15:06.609091",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Secondary Item",

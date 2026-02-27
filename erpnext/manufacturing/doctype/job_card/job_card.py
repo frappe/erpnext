@@ -286,8 +286,9 @@ class JobCard(Document):
 			}
 
 			if not values.is_legacy:
-				secondary_item["stock_qty"] -= secondary_item["stock_qty"] * (
-					values.cost_allocation_per / 100
+				secondary_item["stock_qty"] -= flt(
+					secondary_item["stock_qty"] * (values.process_loss_per / 100),
+					self.precision("for_quantity"),
 				)
 
 			self.append("secondary_items", secondary_item)

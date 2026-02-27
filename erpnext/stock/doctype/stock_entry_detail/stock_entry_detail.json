@@ -656,8 +656,7 @@
    "fieldname": "type",
    "fieldtype": "Select",
    "label": "Type",
-   "mandatory_depends_on": "type",
-   "options": "\nCo-Product\nBy-Product\nScrap\nFinished Good"
+   "options": "\nCo-Product\nBy-Product\nScrap\nAdditional Finished Good"
   },
   {
    "fieldname": "bom_secondary_item",

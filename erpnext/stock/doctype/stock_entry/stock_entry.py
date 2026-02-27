@@ -2600,7 +2600,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 					if item.process_loss_per:
 						item["qty"] -= flt(
 							item["qty"] * (item.process_loss_per / 100),
-							frappe.db.get_defaults("float_precision"),
+							self.precision("fg_completed_qty"),
 						)
 
 			self.add_to_stock_entry_detail(secondary_items_dict, bom_no=self.bom_no)
