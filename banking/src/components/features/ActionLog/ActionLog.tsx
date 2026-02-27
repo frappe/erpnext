@@ -44,7 +44,7 @@ const ActionLog = () => {
             <Tooltip>
                 <TooltipTrigger asChild>
                     <DialogTrigger asChild>
-                        <Button variant={'outline'} size='icon'>
+                        <Button variant={'outline'} isIconButton>
                             <HistoryIcon />
                         </Button>
                     </DialogTrigger>
@@ -410,7 +410,7 @@ const CancelActionLogItem = ({ item, type, timestamp, bank }: { item: ActionLogI
                 <AlertDialogTrigger asChild>
                     <Button
                         variant={'ghost'}
-                        size='icon'
+                        isIconButton
                         title={_("Cancel")}
                         className='hover:text-destructive hover:bg-destructive/5 text-muted-foreground hidden group-hover:inline-flex'>
                         <CircleXIcon className='w-8 h-8' />
@@ -468,7 +468,7 @@ const CancelActionLogItem = ({ item, type, timestamp, bank }: { item: ActionLogI
                 <AlertDialogCancel disabled={loading}>
                     {_("Close")}
                 </AlertDialogCancel>
-                <Button variant={'destructive'} disabled={loading} onClick={onUndo}>
+                <Button theme="red" disabled={loading} onClick={onUndo}>
                     {loading ? <Loader2Icon className='w-4 h-4 animate-spin' /> : _(("Undo"))}
                 </Button>
             </AlertDialogFooter>

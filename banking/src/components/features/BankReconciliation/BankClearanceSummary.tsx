@@ -175,7 +175,7 @@ const SetClearanceDateButton = ({ voucher, bankAccount, companyID, mutate }: { v
         <DialogTrigger disabled={!bankAccount}>
             <Tooltip delayDuration={500}>
                 <TooltipTrigger>
-                    <Button variant='link' size="sm" className="px-0 text-destructive underline underline-offset-4">{_("Force Clear")}</Button>
+                    <Button variant='link' size="sm" className="px-0" theme="red">{_("Force Clear")}</Button>
                 </TooltipTrigger>
                 <TooltipContent align='start'>
                     {_("Set the clearance date for this voucher without reconciling with a bank transaction.")}

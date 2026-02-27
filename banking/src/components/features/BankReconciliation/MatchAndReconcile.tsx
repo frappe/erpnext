@@ -408,7 +408,7 @@ const OptionsForMultipleTransactions = ({ transactions }: { transactions: Unreco
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <Button
-                                            size='lg'
+                                            size='md'
                                             aria-label={_("Record a bank journal entry for expenses, income or split transactions")}
                                             onClick={() => setRecordJournalEntryModalOpen(true)}>
                                             <Landmark /> {_("Bank Entry")}
@@ -426,7 +426,7 @@ const OptionsForMultipleTransactions = ({ transactions }: { transactions: Unreco
                                     <TooltipTrigger asChild>
                                         <Button
                                             variant='outline'
-                                            size='lg'
+                                            size='md'
                                             aria-label={_("Record a payment entry against a customer or supplier")}
                                             onClick={() => setRecordPaymentModalOpen(true)}>
                                             <Receipt /> {_("Record Payment")}
@@ -445,7 +445,7 @@ const OptionsForMultipleTransactions = ({ transactions }: { transactions: Unreco
                                     <TooltipTrigger asChild>
                                         <Button
                                             variant='outline'
-                                            size='lg'
+                                            size='md'
                                             aria-label={_("Record an internal transfer to another bank/credit card/cash account")}
                                             onClick={() => setTransferModalOpen(true)}>
                                             <ArrowRightLeft /> {_("Transfer")}
@@ -483,6 +483,7 @@ const OptionsForSingleTransaction = ({ transaction, contentHeight }: { transacti
                         <TooltipTrigger asChild>
                             <Button
                                 variant='outline'
+                                size='md'
                                 aria-label={_("Record a payment entry against a customer or supplier")}
                                 onClick={() => setRecordPaymentModalOpen(true)}>
                                 <Receipt /> {_("Record Payment")}
@@ -500,6 +501,7 @@ const OptionsForSingleTransaction = ({ transaction, contentHeight }: { transacti
                         <TooltipTrigger asChild>
                             <Button
                                 variant='outline'
+                                size='md'
                                 aria-label={_("Record a bank journal entry for expenses, income or split transactions")}
                                 onClick={() => setRecordJournalEntryModalOpen(true)}>
                                 <Landmark /> {_("Bank Entry")}
@@ -517,6 +519,7 @@ const OptionsForSingleTransaction = ({ transaction, contentHeight }: { transacti
                         <TooltipTrigger asChild>
                             <Button
                                 variant='outline'
+                                size='md'
                                 aria-label={_("Record an internal transfer to another bank/credit card/cash account")}
                                 onClick={() => setTransferModalOpen(true)}>
                                 <ArrowRightLeft /> {_("Transfer")}
@@ -654,7 +657,7 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
                 <div className="space-y-2">
                     <div className="flex items-center gap-0.5">
                         <span className="text-sm font-medium text-foreground">{_("Action Type")}:</span>
-                        <Badge variant="secondary" className={`text-sm font-medium ${styles.text} bg-opacity-10`}>
+                        <Badge variant='secondary' className={`text-sm font-medium ${styles.text} bg-opacity-10`}>
                             {rule.classify_as}
                         </Badge>
                     </div>

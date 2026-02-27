@@ -751,7 +751,7 @@ const InvoicesSection = ({ currency }: { currency: string }) => {
         <div className="flex justify-between gap-2">
             <div className="flex gap-2 justify-end">
                 {selectedRows.length > 0 && <div>
-                    <Button size='sm' type='button' variant={'destructive'} onClick={onRemove}><Trash2 /> {_("Remove")}</Button>
+                    <Button size='sm' type='button' theme="red" onClick={onRemove}><Trash2 /> {_("Remove")}</Button>
                 </div>}
             </div>
             <Summary currency={currency} />
@@ -790,7 +790,7 @@ const DifferenceButton = ({ index, currency }: { index: number, currency: string
                 <Button
                     variant='ghost'
                     onClick={onPayInFull}
-                    size='icon'
+                    isIconButton
                     className="text-muted-foreground">
                     <AlertCircleIcon />
                 </Button>
@@ -1271,7 +1271,7 @@ const OtherChargesSection = ({ currency }: { currency: string }) => {
                     <Button size='sm' type='button' variant={'outline'} onClick={onAdd}><Plus /> {_("Add Row")}</Button>
                 </div>
                 {selectedRows.length > 0 && <div>
-                    <Button size='sm' type='button' variant={'destructive'} onClick={onRemove}><Trash2 /> {_("Remove")}</Button>
+                    <Button size='sm' type='button' theme="red" onClick={onRemove}><Trash2 /> {_("Remove")}</Button>
                 </div>}
             </div>
         </div>

@@ -317,14 +317,17 @@
   --color-ink-green-1: var(--ink-green-1);
   --color-ink-green-2: var(--ink-green-2);
   --color-ink-green-3: var(--ink-green-3);
+  --color-ink-green-4: var(--ink-green-4);
 
   --color-ink-amber-1: var(--ink-amber-1);
   --color-ink-amber-2: var(--ink-amber-2);
   --color-ink-amber-3: var(--ink-amber-3);
+  --color-ink-amber-4: var(--ink-amber-4);
 
   --color-ink-blue-1: var(--ink-blue-1);
   --color-ink-blue-2: var(--ink-blue-2);
   --color-ink-blue-3: var(--ink-blue-3);
+  --color-ink-blue-4: var(--ink-blue-4);
 
   --color-ink-cyan-1: var(--ink-cyan-1);
   --color-ink-pink-1: var(--ink-pink-1);
@@ -579,19 +582,22 @@
   --ink-red-1: var(--red-50);
   --ink-red-2: var(--red-400);
   --ink-red-3: var(--red-500);
-  --ink-red-4: var(--red-600);
+  --ink-red-4: var(--red-700);
 
   --ink-green-1: var(--green-50);
-  --ink-green-2: var(--green-500);
-  --ink-green-3: var(--green-600);
+  --ink-green-2: var(--green-400);
+  --ink-green-3: var(--green-500);
+  --ink-green-4: var(--green-700);
 
   --ink-amber-1: var(--amber-50);
-  --ink-amber-2: var(--amber-500);
-  --ink-amber-3: var(--amber-600);
+  --ink-amber-2: var(--amber-400);
+  --ink-amber-3: var(--amber-500);
+  --ink-amber-4: var(--amber-700);
 
   --ink-blue-1: var(--blue-50);
-  --ink-blue-2: var(--blue-500);
-  --ink-blue-3: var(--blue-600);
+  --ink-blue-2: var(--blue-400);
+  --ink-blue-3: var(--blue-500);
+  --ink-blue-4: var(--blue-700);
 
   --ink-cyan-1: var(--cyan-500);
   --ink-pink-1: var(--pink-500);
@@ -853,16 +859,19 @@
   --ink-red-4: var(--red-200);
 
   --ink-green-1: var(--white);
-  --ink-green-2: var(--green-400);
-  --ink-green-3: var(--green-300);
+  --ink-green-2: var(--green-700);
+  --ink-green-3: var(--green-400);
+  --ink-green-4: var(--green-300);
 
   --ink-amber-1: var(--white);
-  --ink-amber-2: var(--amber-400);
-  --ink-amber-3: var(--amber-300);
+  --ink-amber-2: var(--amber-700);
+  --ink-amber-3: var(--amber-400);
+  --ink-amber-4: var(--amber-300);
 
   --ink-blue-1: var(--white);
-  --ink-blue-2: var(--blue-400);
-  --ink-blue-3: var(--blue-300);
+  --ink-blue-2: var(--blue-700);
+  --ink-blue-3: var(--blue-400);
+  --ink-blue-4: var(--blue-300);
 
   --ink-cyan-1: var(--cyan-300);
   --ink-pink-1: var(--pink-300);

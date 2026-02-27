@@ -43,7 +43,7 @@ export const FileDropzone = ({ files, setFiles, accept, multiple = true, onDrop,
                             <span className='text-muted-foreground text-xs'>{formatBytes(f.size)}</span>
                         </div>
                     </div>
-                    <Button type='button' variant='ghost' size='icon'
+                    <Button type='button' variant='ghost' isIconButton
                         className='text-muted-foreground hover:text-gray-900 hover:bg-transparent'
                         onClick={(e) => {
                             e.stopPropagation()

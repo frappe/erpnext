@@ -212,7 +212,7 @@ const DescriptionRules = () => {
                         />
                     </div>
                     <div>
-                        <Button variant="ghost" type='button' size="icon" onClick={() => remove(index)} disabled={fields.length === 1}>
+                        <Button variant="ghost" type='button' isIconButton onClick={() => remove(index)} disabled={fields.length === 1}>
                             <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
                     </div>
@@ -407,7 +407,7 @@ const MultipleAccountsSelection = () => {
                         <TableCell colSpan={3} className="text-center">
                             <div className="py-2 flex flex-col gap-2 items-center">
                                 <span>{_("No accounts configured")}</span>
-                                <Button variant="link" type="button" className="underline" onClick={() => setIsConfigureAccountsModalOpen(true)}>{_("Configure Accounts")}</Button>
+                                <Button variant="subtle" type="button" onClick={() => setIsConfigureAccountsModalOpen(true)}>{_("Configure Accounts")}</Button>
                             </div>
                         </TableCell>
                     </TableRow>
@@ -743,7 +743,7 @@ const ConfigureAccountsModalContent = () => {
                         <Button size='sm' type='button' variant={'outline'} onClick={onAdd}><Plus /> {_("Add Row")}</Button>
                     </div>
                     {selectedRows.length > 0 && <div>
-                        <Button size='sm' type='button' variant={'destructive'} onClick={onRemove}><Trash2 /> {_("Remove")}</Button>
+                        <Button size='sm' type='button' theme="red" onClick={onRemove}><Trash2 /> {_("Remove")}</Button>
                     </div>}
                 </div>
             </div>

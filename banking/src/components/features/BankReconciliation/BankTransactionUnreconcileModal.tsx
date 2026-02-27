@@ -115,7 +115,7 @@ const BankTransactionUnreconcileModalContent = () => {
         </div>
         <AlertDialogFooter>
             <AlertDialogCancel disabled={loading}>{_("Cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={onUnreconcile} variant="destructive" disabled={loading}>
+            <AlertDialogAction onClick={onUnreconcile} theme="red" disabled={loading}>
                 {_("Unreconcile")}
             </AlertDialogAction>
         </AlertDialogFooter>

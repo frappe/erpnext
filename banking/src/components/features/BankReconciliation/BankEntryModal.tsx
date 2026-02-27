@@ -725,7 +725,7 @@ const Entries = ({ company, isWithdrawal, currency }: { company: string, isWithd
                     <Button size='sm' type='button' variant={'outline'} onClick={onAdd}><Plus /> {_("Add Row")}</Button>
                 </div>
                 {selectedRows.length > 0 && <div>
-                    <Button size='sm' type='button' variant={'destructive'} onClick={onRemove}><Trash2 /> {_("Remove")}</Button>
+                    <Button size='sm' type='button' theme="red" onClick={onRemove}><Trash2 /> {_("Remove")}</Button>
                 </div>}
             </div>
             <Summary currency={currency} addRow={onAddDifferenceClicked} />

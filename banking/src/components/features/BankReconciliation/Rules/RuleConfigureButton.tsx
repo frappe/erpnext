@@ -54,7 +54,7 @@ const RuleConfigureButton = () => {
             <Tooltip>
                 <TooltipTrigger asChild>
                     <SheetTrigger asChild>
-                        <Button size='icon' variant='outline' title={_("Transaction Matching Rules")}>
+                        <Button isIconButton variant='outline' title={_("Transaction Matching Rules")}>
                             <ZapIcon />
                         </Button>
                     </SheetTrigger>
@@ -66,7 +66,7 @@ const RuleConfigureButton = () => {
             <SheetContent className="min-w-3xl">
                 <SheetHeader>
                     <div className="flex items-center gap-2">
-                        {(selectedRule || isNewRule) && <Button variant='ghost' size='icon' className="p-0" onClick={() => {
+                        {(selectedRule || isNewRule) && <Button variant='ghost' isIconButton className="p-0" onClick={() => {
                             setSelectedRule(null)
                             setIsNewRule(false)
                         }}>
@@ -348,7 +348,7 @@ const SortableRuleItem = ({
                 <div className="flex items-center gap-2 h-full justify-center">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant='ghost' size='icon'>
+                            <Button variant='ghost' isIconButton>
                                 <MoreVertical />
                             </Button>
                         </DropdownMenuTrigger>

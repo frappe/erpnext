@@ -316,7 +316,7 @@ const ClosingBalancesList = ({ bankAccount, date }: { bankAccount: SelectedBank 
                         <TableCell className="text-right">
                             <Button
                                 title={_("Delete")}
-                                type='button' size='icon' className="h-fit w-fit p-0 hover:bg-transparent active:bg-transparent hover:text-destructive" variant='ghost' onClick={() => onDelete(item.name)}>
+                                type='button' isIconButton className="h-fit w-fit p-0 hover:bg-transparent active:bg-transparent hover:text-destructive" variant='ghost' onClick={() => onDelete(item.name)}>
                                 <Trash2 />
                             </Button>
                         </TableCell>

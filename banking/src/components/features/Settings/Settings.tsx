@@ -23,7 +23,7 @@ const Settings = () => {
             <Tooltip>
                 <TooltipTrigger asChild>
                     <DialogTrigger asChild>
-                        <Button variant={'outline'} size='icon'>
+                        <Button variant={'outline'} isIconButton>
                             <SettingsIcon />
                         </Button>
                     </DialogTrigger>
