@@ -2961,6 +2961,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				frappe.call({
 					method: "erpnext.controllers.stock_controller.make_quality_inspections",
 					args: {
+						company: me.frm.doc.company,
 						doctype: me.frm.doc.doctype,
 						docname: me.frm.doc.name,
 						items: selected_data,
