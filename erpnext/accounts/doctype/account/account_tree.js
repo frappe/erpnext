@@ -99,7 +99,10 @@ frappe.treeview_settings["Account"] = {
 					});
 				}
 			});
-		} else render_balances();
+		} else {
+			// render_balances();
+			setTimeout(render_balances, 0);
+		}
 	},
 	add_tree_node: "erpnext.accounts.utils.add_ac",
 	menu_items: [
