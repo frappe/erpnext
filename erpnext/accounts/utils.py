@@ -341,16 +341,6 @@ def get_balance_on(
 		else:
 			select_field = "sum(round(debit, %s)) - sum(round(credit, %s))"
 
-		print(
-			frappe.db.sql(
-				"""
-			SELECT {}
-			FROM `tabGL Entry` gle
-			WHERE {}""".format(select_field, " and ".join(cond)),
-				(precision, precision),
-				run=False,
-			)
-		)
 		bal = frappe.db.sql(
 			"""
 			SELECT {}
