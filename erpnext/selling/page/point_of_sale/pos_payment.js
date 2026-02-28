@@ -211,20 +211,15 @@ erpnext.PointOfSale.Payment = class {
 			} else {
 				// clicked one is not selected then select it
 				mode_clicked.addClass("border-primary");
-
-				me.selected_mode = me[`${mode}_control`];
+				mode_clicked.find(".mode-of-payment-control").css("display", "flex");
+				me.$payment_modes.find(`.${mode}-amount`).css("display", "none");
 				const mode_clicked_amount = mode_clicked.find(`.${mode}-amount`).get(0);
-				if (!mode_clicked_amount.innerHTML) {
-					mode_clicked_amount.innerHTML = format_currency(0, me.events.get_frm().doc.currency);
+				if (!mode_clicked_amount.innerText) {
+					mode_clicked_amount.innerText = format_currency(0, me.events.get_frm().doc.currency);
 				}
+				me.selected_mode = me[`${mode}_control`];
+				me.selected_mode && me.selected_mode.$input.get(0).focus();
 				me.auto_set_remaining_amount();
-			}
-		});
-
-		// change payment amount for selected mode on key press from keyboard
-		$(document).on("keydown", function (e) {
-			if (me.selected_mode) {
-				me.on_numpad_clicked(e.key, false);
 			}
 		});
 
