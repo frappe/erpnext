@@ -107,14 +107,19 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		];
 		if (!missing.length) return;
 
-		let r = await frappe.call({
-			method: "erpnext.controllers.taxes_and_totals.get_non_exempt_tax_rates",
-			args: {
-				item_codes: missing,
-				tax_category: this.frm.doc.tax_category,
-				company: this.frm.doc.company,
-			},
-		});
+		let r;
+		try {
+			r = await frappe.call({
+				method: "erpnext.controllers.taxes_and_totals.get_non_exempt_tax_rates",
+				args: {
+					item_codes: missing,
+					tax_category: this.frm.doc.tax_category,
+					company: this.frm.doc.company,
+				},
+			});
+		} catch {
+			return;
+		}
 		Object.assign(cached, r.message || {});
 		this.frm.doc[cache_key] = cached;
 	}
