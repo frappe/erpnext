@@ -107,6 +107,11 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		];
 		if (!missing.length) return;
 
+		// Guard against concurrent calls for the same cache key
+		let in_flight_key = `__non_exempt_rates_fetching__${this.frm.doc.tax_category}__${this.frm.doc.company}`;
+		if (this.frm.doc[in_flight_key]) return;
+		this.frm.doc[in_flight_key] = true;
+
 		let r;
 		try {
 			r = await frappe.call({
@@ -119,6 +124,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			});
 		} catch {
 			return;
+		} finally {
+			delete this.frm.doc[in_flight_key];
 		}
 		Object.assign(cached, r.message || {});
 		this.frm.doc[cache_key] = cached;

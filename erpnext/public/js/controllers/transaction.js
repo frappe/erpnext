@@ -1161,6 +1161,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	company() {
 		var me = this;
+		// Invalidate all non-exempt rate caches so stale keys don't linger
+		Object.keys(me.frm.doc)
+			.filter((k) => k.startsWith("__non_exempt_rates"))
+			.forEach((k) => delete me.frm.doc[k]);
 		var set_pricing = function () {
 			if (me.frm.doc.company && me.frm.fields_dict.currency) {
 				frappe.run_serially([
@@ -2660,6 +2664,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		if (me.frm.updating_party_details) return;
 
+		// Invalidate all non-exempt rate caches so stale keys don't linger
+		Object.keys(me.frm.doc)
+			.filter((k) => k.startsWith("__non_exempt_rates"))
+			.forEach((k) => delete me.frm.doc[k]);
+
 		frappe.run_serially([
 			() => {
 				// Cache the is_tax_exempt status for use in tax calculations
@@ -2686,7 +2695,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								company: me.frm.doc.company,
 							},
 							callback: (r) => {
-								me.frm.doc.__non_exempt_rates = r.message || {};
+								let cache_key = `__non_exempt_rates__${me.frm.doc.tax_category}__${me.frm.doc.company}`;
+								me.frm.doc[cache_key] = r.message || {};
 							},
 						});
 					}
