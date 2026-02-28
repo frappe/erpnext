@@ -279,18 +279,19 @@ class Item(Document):
 				"Selling Settings", "selling_price_list"
 			) or frappe.db.get_value("Price List", _("Standard Selling"))
 		if price_list:
-			item_price = frappe.get_doc(
-				{
-					"doctype": "Item Price",
-					"price_list": price_list,
-					"item_code": self.name,
-					"uom": self.stock_uom,
-					"brand": self.brand,
-					"currency": erpnext.get_default_currency(),
-					"price_list_rate": self.standard_rate,
-				}
-			)
-			item_price.insert()
+			price_description = {
+				"doctype": "Item Price",
+				"brand": self.brand,
+				"currency": erpnext.get_default_currency(),
+				"item_code": self.name,
+				"packing_unit": 0,
+				"price_list": price_list,
+				"uom": self.stock_uom,
+				"price_list_rate": self.standard_rate,
+			}
+			if not frappe.db.exists(price_description):
+				item_price = frappe.get_doc(price_description)
+				item_price.insert()
 
 	def set_opening_stock(self):
 		"""set opening stock"""
