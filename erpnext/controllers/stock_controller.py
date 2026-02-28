@@ -1702,7 +1702,13 @@ def check_item_quality_inspection(doctype, items):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def make_quality_inspections(doctype, docname, items):
+=======
+def make_quality_inspections(
+	company: str, doctype: str, docname: str, items: str | list, inspection_type: str
+):
+>>>>>>> 74def423ed (fix(stock): pass company to avoid document naming rule issue in QI)
 	if isinstance(items, str):
 		items = json.loads(items)
 
@@ -1721,6 +1727,7 @@ def make_quality_inspections(doctype, docname, items):
 
 		quality_inspection = frappe.get_doc(
 			{
+				"company": company,
 				"doctype": "Quality Inspection",
 				"inspection_type": "Incoming",
 				"inspected_by": frappe.session.user,
