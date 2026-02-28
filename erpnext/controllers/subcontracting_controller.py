@@ -206,7 +206,7 @@ class SubcontractingController(StockController):
 							).format(item.idx, item.item_name)
 						)
 
-				if self.doctype != "Subcontracting Inward Order":
+				if self.doctype not in ["Subcontracting Inward Order", "Subcontracting Receipt"]:
 					item.amount = item.qty * item.rate
 
 				if item.bom:
@@ -238,7 +238,7 @@ class SubcontractingController(StockController):
 			and self._doc_before_save
 		):
 			for row in self._doc_before_save.get("items"):
-				item_dict[row.name] = (row.item_code, row.qty + (row.get("rejected_qty") or 0))
+				item_dict[row.name] = (row.item_code, row.received_qty)
 
 		return item_dict
 
@@ -264,7 +264,7 @@ class SubcontractingController(StockController):
 			self.__reference_name.append(row.name)
 			if (row.name not in item_dict) or (
 				row.item_code,
-				row.qty + (row.get("rejected_qty") or 0),
+				row.received_qty,
 			) != item_dict[row.name]:
 				self.__changed_name.append(row.name)
 
@@ -961,7 +961,7 @@ class SubcontractingController(StockController):
 				):
 					qty = (
 						flt(bom_item.qty_consumed_per_unit)
-						* flt(row.qty + (row.get("rejected_qty") or 0))
+						* flt(row.get("received_qty") or (row.qty + (row.get("rejected_qty") or 0)))
 						* row.conversion_factor
 					)
 					bom_item.main_item_code = row.item_code

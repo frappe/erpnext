@@ -560,6 +560,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.is_legacy_scrap_item && !doc.type",
    "fieldname": "is_finished_item",
    "fieldtype": "Check",
    "label": "Is Finished Item",

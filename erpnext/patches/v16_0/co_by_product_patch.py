@@ -8,28 +8,30 @@ def execute():
 
 
 def copy_doctypes():
+	frappe.db.auto_commit_on_many_writes = True
 	insert_into_bom()
 	insert_into_job_card()
 	insert_into_subcontracting_inward()
+	frappe.db.auto_commit_on_many_writes = False
 
 
 def insert_into_bom():
-	fields = ["parent", "idx", "item_code", "item_name", "stock_uom", "stock_qty"]
-	data = frappe.get_all("BOM Scrap Item", {"docstatus": 1}, fields)
-	if data:
-		values = [
-			(*item.values(), 1, "secondary_items", item.stock_uom, 1, item.stock_qty, 1) for item in data
-		]
-		frappe.db.bulk_insert(
-			"BOM Secondary Item",
-			fields=[*fields, "docstatus", "parentfield", "uom", "conversion_factor", "qty", "is_legacy"],
-			values=values,
+	fields = ["item_code", "item_name", "stock_uom", "stock_qty", "rate"]
+	data = frappe.get_all("BOM Scrap Item", {"docstatus": 1}, ["parent", *fields])
+	for item in data:
+		bom = frappe.get_doc("BOM", item.parent)
+		secondary_item = frappe.new_doc("BOM Secondary Item", parent_doc=bom, parentfield="secondary_items")
+		secondary_item.update({field: item[field] for field in fields})
+		secondary_item.update(
+			{"uom": item.stock_uom, "conversion_factor": 1, "qty": item.stock_qty, "is_legacy": 1}
 		)
+		secondary_item.insert()
+		secondary_item.submit()
 
 
 def insert_into_job_card():
 	fields = ["item_code", "item_name", "description", "stock_qty", "stock_uom"]
-	bulk_insert("Job Card Scrap Item", "Job Card Secondary Item", fields, ["type"], ["Scrap"])
+	bulk_insert("Job Card", "Job Card Scrap Item", "Job Card Secondary Item", fields, ["type"], ["Scrap"])
 
 
 def insert_into_subcontracting_inward():
@@ -43,6 +45,7 @@ def insert_into_subcontracting_inward():
 		"delivered_qty",
 	]
 	bulk_insert(
+		"Subcontracting Inward Order",
 		"Subcontracting Inward Order Scrap Item",
 		"Subcontracting Inward Order Secondary Item",
 		fields,
@@ -51,13 +54,17 @@ def insert_into_subcontracting_inward():
 	)
 
 
-def bulk_insert(old_doctype, new_doctype, old_fields, new_fields, new_values):
-	data = frappe.get_all(old_doctype, {"docstatus": 1}, ["parent", "idx", *old_fields])
-	if data:
-		values = [(1, "secondary_items", *item.values(), *new_values) for item in data]
-		frappe.db.bulk_insert(
-			new_doctype, fields=["docstatus", "parentfield", *old_fields, *new_fields], values=values
+def bulk_insert(parent_doctype, old_doctype, new_doctype, old_fields, new_fields, new_values):
+	data = frappe.get_all(old_doctype, {"docstatus": 1}, ["parent", *old_fields])
+	for item in data:
+		parent_doc = frappe.get_doc(parent_doctype, item.parent)
+		secondary_item = frappe.new_doc(new_doctype, parent_doc=parent_doc, parentfield="secondary_items")
+		secondary_item.update({old_field: item[old_field] for old_field in old_fields})
+		secondary_item.update(
+			{new_field: new_value for new_field, new_value in zip(new_fields, new_values, strict=True)}
 		)
+		secondary_item.insert()
+		secondary_item.submit()
 
 
 def rename_fields():

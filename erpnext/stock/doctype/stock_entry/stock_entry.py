@@ -2597,11 +2597,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 					if self.pro_doc.scrap_warehouse and item.type == "Scrap":
 						item["to_warehouse"] = self.pro_doc.scrap_warehouse
 
-					if item.process_loss_per:
-						item["qty"] -= flt(
-							item["qty"] * (item.process_loss_per / 100),
-							self.precision("fg_completed_qty"),
-						)
+				if item.process_loss_per:
+					item["qty"] -= flt(
+						item["qty"] * (item.process_loss_per / 100),
+						self.precision("fg_completed_qty"),
+					)
 
 			self.add_to_stock_entry_detail(secondary_items_dict, bom_no=self.bom_no)
 

@@ -2409,7 +2409,7 @@ class TestStockEntry(IntegrationTestCase):
 
 		frappe.get_doc(_make_stock_entry(work_order.name, "Material Consumption for Manufacture", 5)).submit()
 		frappe.get_doc(_make_stock_entry(work_order.name, "Manufacture", 5)).submit()
-
+		
 	def test_qi_creation_with_naming_rule_company_condition(self):
 		"""
 		Unit test case to check the document naming rule with company condition
@@ -2457,6 +2457,35 @@ class TestStockEntry(IntegrationTestCase):
 
 		# delete naming rule
 		frappe.delete_doc("Document Naming Rule", qc_naming_rule.name)
+
+	def test_co_by_product(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		frappe.set_value("UOM", "Nos", "must_be_whole_number", 0)
+
+		fg_item = make_item("FG Item", properties={"is_stock_item": 1}).name
+		rm_item = make_item("RM Item", properties={"is_stock_item": 1}).name
+		scrap_item = make_item("Scrap Item", properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=5, rate=10, purpose="Material Receipt")
+
+		bom_no = make_bom(
+			item=fg_item, raw_materials=[rm_item], scrap_items=[scrap_item], process_loss_percentage=10
+		).name
+		se = make_stock_entry(item_code=fg_item, qty=5, purpose="Manufacture", do_not_save=True)
+		se.from_bom = 1
+		se.bom_no = bom_no
+		se.fg_completed_qty = 5
+		se.from_warehouse = warehouse
+		se.to_warehouse = "_Test Warehouse 1 - _TC"
+		se.get_items()
+		se.save()
+		se.reload()
+
+		self.assertEqual(se.items[1].qty, 4.5)
+		self.assertEqual(se.items[1].amount, 45)
+		self.assertEqual(se.items[2].qty, 4.5)
+		self.assertEqual(se.items[2].amount, 5)
 
 
 def make_serialized_item(self, **args):

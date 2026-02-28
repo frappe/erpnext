@@ -500,8 +500,8 @@ class TestSubcontractingController(IntegrationTestCase):
 		scr1.items[0].qty = 2
 		add_second_row_in_scr(scr1)
 		scr1.flags.ignore_mandatory = True
-		scr1.save()
 		scr1.set_missing_values()
+		scr1.save()
 		scr1.submit()
 
 		for _key, value in get_supplied_items(scr1).items():
@@ -512,8 +512,8 @@ class TestSubcontractingController(IntegrationTestCase):
 		scr2.items[0].qty = 2
 		add_second_row_in_scr(scr2)
 		scr2.flags.ignore_mandatory = True
-		scr2.save()
 		scr2.set_missing_values()
+		scr2.save()
 		scr2.submit()
 
 		for _key, value in get_supplied_items(scr2).items():
@@ -522,8 +522,8 @@ class TestSubcontractingController(IntegrationTestCase):
 		scr3 = make_subcontracting_receipt(sco.name)
 		scr3.items[0].qty = 2
 		scr3.flags.ignore_mandatory = True
-		scr3.save()
 		scr3.set_missing_values()
+		scr3.save()
 		scr3.submit()
 
 		for _key, value in get_supplied_items(scr3).items():

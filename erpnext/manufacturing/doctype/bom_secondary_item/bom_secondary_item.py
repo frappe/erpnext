@@ -29,9 +29,10 @@ class BOMSecondaryItem(Document):
 		process_loss_per: DF.Percent
 		qty: DF.Float
 		qty_after_process_loss: DF.Float
+		rate: DF.Currency
 		stock_qty: DF.Float
 		stock_uom: DF.Link | None
-		type: DF.Literal["Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
+		type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
 		uom: DF.Link
 	# end: auto-generated types
 

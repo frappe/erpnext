@@ -174,6 +174,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 
 		frm.trigger("setup_quality_inspection");
 		frm.trigger("set_route_options_for_new_doc");
+		frm.set_df_property("items", "cannot_add_rows", true);
 	},
 
 	set_warehouse: (frm) => {
@@ -422,12 +423,20 @@ frappe.ui.form.on("Subcontracting Receipt Item", {
 		set_missing_values(frm);
 	},
 
+	rejected_qty(frm) {
+		set_missing_values(frm);
+	},
+
+	process_loss_qty(frm) {
+		set_missing_values(frm);
+	},
+
 	rate(frm) {
 		set_missing_values(frm);
 	},
 
-	items_delete: (frm) => {
-		set_missing_values(frm);
+	items_add(frm, cdt, cdn) {
+		frappe.model.set_value(cdt, cdn, "type", "Scrap");
 	},
 
 	add_serial_batch_bundle(frm, cdt, cdn) {

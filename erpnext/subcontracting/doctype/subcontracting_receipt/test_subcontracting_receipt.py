@@ -596,6 +596,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 
 		scr.items[0].qty = 6  # Accepted Qty
 		scr.items[0].rejected_qty = 4
+		scr.set_missing_values()
 		scr.save()
 
 		# consumed_qty should be (accepted_qty * qty_consumed_per_unit) = (6 * 1) = 6
@@ -1192,6 +1193,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 					"item_code": item,
 					"stock_qty": 1 * (idx + 1),
 					"rate": 10 * (idx + 1),
+					"type": "Scrap",
 				},
 			)
 		bom.save()

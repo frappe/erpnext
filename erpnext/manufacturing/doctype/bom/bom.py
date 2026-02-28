@@ -1269,7 +1269,7 @@ class BOM(WebsiteGenerator):
 			frappe.throw(msg, title=_("Invalid Process Loss Configuration"))
 
 	def has_scrap_items(self):
-		return any(d.get("type") == "Scrap" for d in self.get("secondary_items"))
+		return any(d.get("type") == "Scrap" or d.get("is_legacy") for d in self.get("secondary_items"))
 
 
 def get_bom_item_rate(args, bom_doc):

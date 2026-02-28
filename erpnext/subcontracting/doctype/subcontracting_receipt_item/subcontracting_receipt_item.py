@@ -36,6 +36,7 @@ class SubcontractingReceiptItem(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		process_loss_qty: DF.Float
 		project: DF.Link | None
 		purchase_order: DF.Link | None
 		purchase_order_item: DF.Data | None

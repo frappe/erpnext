@@ -3938,7 +3938,7 @@ def prepare_boms_for_sub_assembly_test():
 			do_not_submit=True,
 		)
 
-		bom.append("secondary_items", {"item_code": "Test Final Scrap Item 1", "qty": 1})
+		bom.append("secondary_items", {"item_code": "Test Final Scrap Item 1", "qty": 1, "is_legacy": 1})
 
 		bom.submit()
 
@@ -3951,7 +3951,7 @@ def prepare_boms_for_sub_assembly_test():
 			do_not_submit=True,
 		)
 
-		bom.append("secondary_items", {"item_code": "Test Final Scrap Item 2", "qty": 1})
+		bom.append("secondary_items", {"item_code": "Test Final Scrap Item 2", "qty": 1, "is_legacy": 1})
 
 		bom.submit()
 
