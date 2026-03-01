@@ -250,10 +250,17 @@ frappe.ui.form.on("Request for Quotation", {
 					"subject",
 				])
 				.then((r) => {
-					frm.set_value(
-						"message_for_supplier",
-						r.message.use_html ? r.message.response_html : r.message.response
-					);
+					if (r.message.use_html) {
+						frm.set_value({
+							mfs_html: r.message.response_html,
+							use_html: 1,
+						});
+					} else {
+						frm.set_value({
+							message_for_supplier: r.message.response,
+							use_html: 0,
+						});
+					}
 					frm.set_value("subject", r.message.subject);
 				});
 		}
