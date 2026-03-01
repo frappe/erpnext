@@ -167,6 +167,7 @@ class PurchaseOrder(BuyingController):
 		total_qty: DF.Float
 		total_taxes_and_charges: DF.Currency
 		transaction_date: DF.Date
+		transaction_time: DF.Time | None
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
