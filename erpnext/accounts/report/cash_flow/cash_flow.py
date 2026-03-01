@@ -274,8 +274,8 @@ def add_total_row_account(out, data, label, period_list, currency, summary_data,
             total_row["total"] += row["total"]
 
     out.append(total_row)
-    empty_row = {"account_name": "", "currency": "", "total": None}
-    out.append(empty_row)
+    spacer = {"account_name": "", "currency": "", "total": None}
+    out.append(spacer)
 
     return total_row
 
@@ -306,7 +306,10 @@ def show_opening_and_closing_balance(out, period_list, currency, net_change_in_c
     opening_balance["total"] = opening_balance[period_list[0]["key"]]
     closing_balance["total"] = closing_balance[period_list[-1]["key"]]
 
-    out.extend([opening_balance, net_change_in_cash, closing_balance, {}])
+    spacer = {"section_name": "", "section": "", "currency": "", "total": None}
+    for period in period_list:
+        spacer[period["key"]] = None
+    out.extend([opening_balance, net_change_in_cash, closing_balance, spacer])
 
 
 def get_opening_balance(company, period_list, filters):
