@@ -1469,7 +1469,6 @@ def get_account_balances_beta(company: str, include_default_fb_balances: bool = 
 		parent = account.get("parent_account")
 		if parent:
 			account_balances_cc[parent] += account_balances_cc.get(account.get("name"))
-			account_balances_ac[parent] += account_balances_ac.get(account.get("name"))
 
 	accounts_data = [
 		{
