@@ -251,8 +251,8 @@ def get_start_date(period, accumulated_values, company):
 
 def add_total_row_account(out, data, label, period_list, currency, summary_data, filters, consolidated=False):
     total_row = {
-        "account_name": "'" + _("{0}").format(label) + "'",
-        "section": "'" + _("{0}").format(label) + "'",
+        "account_name": "'" + _(label) + "'",
+        "section": "'" + _(label) + "'",
         "currency": currency,
     }
 
