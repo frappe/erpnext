@@ -380,7 +380,8 @@ class AccountFilterValidator(Validator):
 	"""Validates account filter expressions used in Account Data rows"""
 
 	def __init__(self, account_fields: set | None = None):
-		self.account_fields = account_fields or set(frappe.get_meta("Account")._valid_columns)
+		self.account_meta = frappe.get_meta("Account")
+		self.account_fields = account_fields or set(self.account_meta._valid_columns)
 
 	def validate(self, row) -> ValidationResult:
 		result = ValidationResult()
@@ -400,7 +401,11 @@ class AccountFilterValidator(Validator):
 
 		try:
 			filter_config = json.loads(row.calculation_formula)
-			error = self._validate_filter_structure(filter_config, self.account_fields)
+			error = self._validate_filter_structure(
+				filter_config,
+				self.account_fields,
+				row.advanced_filtering,
+			)
 
 			if error:
 				result.add_error(
@@ -422,7 +427,12 @@ class AccountFilterValidator(Validator):
 
 		return result
 
-	def _validate_filter_structure(self, filter_config, account_fields: set) -> str | None:
+	def _validate_filter_structure(
+		self,
+		filter_config,
+		account_fields: set,
+		advanced_filtering: bool = False,
+	) -> str | None:
 		# simple condition: [field, operator, value]
 		if isinstance(filter_config, list):
 			if len(filter_config) != 3:
@@ -434,7 +444,8 @@ class AccountFilterValidator(Validator):
 				return "Field and operator must be strings"
 
 			if field not in account_fields:
-				return f"Field '{field}' is not a valid account field"
+				display = field if advanced_filtering else self.account_meta.get_label(field)
+				return f"Field '{display}' is not a valid account field"
 
 			if operator.casefold() not in OPERATOR_MAP:
 				return f"Invalid operator '{operator}'"
@@ -457,7 +468,7 @@ class AccountFilterValidator(Validator):
 
 			# recursive
 			for condition in conditions:
-				error = self._validate_filter_structure(condition, account_fields)
+				error = self._validate_filter_structure(condition, account_fields, advanced_filtering)
 				if error:
 					return error
 		else:
