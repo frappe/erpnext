@@ -6,7 +6,7 @@ import json
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from functools import reduce
+from functools import cache, reduce
 from typing import Any, Union
 
 import frappe
@@ -1879,33 +1879,22 @@ def get_xlsx_styles(metadata: XLSXMetadata) -> dict | None:
 		"Currency": builder.register_style({"num_format": builder.get_number_format("Currency", currency)}),
 	}
 
-	# style caches
-	colors = {}
-	prefixes = {}
-	indents = {}
-
 	# quick access for hot loop
 	style_cell = builder.style_cell
 
+	@cache
 	def get_color_style(color: str) -> int:
-		if color not in colors:
-			colors[color] = builder.register_style({"font_color": color})
+		return builder.register_style({"font_color": color})
 
-		return colors[color]
-
+	@cache
 	def get_prefix_style(prefix: str) -> int:
 		prefix = f"{prefix or DEFAULT_BULLET_PREFIX}@"
 
-		if prefix not in prefixes:
-			prefixes[prefix] = builder.register_style({"num_format": prefix})
+		return builder.register_style({"num_format": prefix})
 
-		return prefixes[prefix]
-
+	@cache
 	def get_indent_style(indent: int) -> int:
-		if indent not in indents:
-			indents[indent] = builder.register_style({"align": "left", "indent": indent})
-
-		return indents[indent]
+		return builder.register_style({"align": "left", "indent": indent})
 
 	# column level styling of currency columns
 	company_currency_style = fieldtype_formats["Currency"]
