@@ -240,6 +240,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_warehouse()
+		self.validate_warehouse_of_sabb()
 		self.validate_work_order()
 		self.validate_bom()
 		self.set_process_loss_qty()
