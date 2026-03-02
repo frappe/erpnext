@@ -382,6 +382,11 @@ class AccountFilterValidator(Validator):
 	def __init__(self, account_fields: set | None = None):
 		self.account_meta = frappe.get_meta("Account")
 		self.account_fields = account_fields or set(self.account_meta._valid_columns)
+		self.unsupported_fields = {
+			*frappe.model.default_fields,
+			*frappe.model.child_table_fields,
+			*frappe.model.optional_fields,
+		}
 
 	def validate(self, row) -> ValidationResult:
 		result = ValidationResult()
@@ -443,8 +448,12 @@ class AccountFilterValidator(Validator):
 			if not isinstance(field, str) or not isinstance(operator, str):
 				return "Field and operator must be strings"
 
+			display = field if advanced_filtering else self.account_meta.get_label(field)
+
+			if field in self.unsupported_fields:
+				return f"Field '{display}' is not supported in filters"
+
 			if field not in account_fields:
-				display = field if advanced_filtering else self.account_meta.get_label(field)
 				return f"Field '{display}' is not a valid account field"
 
 			if operator.casefold() not in OPERATOR_MAP:
