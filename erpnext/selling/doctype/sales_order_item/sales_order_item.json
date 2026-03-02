@@ -1025,11 +1025,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
  "modified": "2026-02-20 16:39:00.200328",
-=======
- "modified": "2026-02-20 14:18:00.736068",
->>>>>>> c2f19036f3 (fix: correct fields being updated on material request and purchase order creation from sales order)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",
