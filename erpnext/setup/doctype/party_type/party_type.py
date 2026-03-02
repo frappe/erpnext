@@ -49,4 +49,19 @@ def get_party_type(doctype, txt, searchfield, start, page_len, filters):
 		params,
 	)
 
+	if not result and txt:
+		# No match found — txt may be a translated DocType name (non-English locale).
+		# Party Type names are stored in English, so fall back to matching against
+		# translated names.
+		params["txt"] = "%"
+		all_types = frappe.db.sql(
+			f"""select name from `tabParty Type`
+			where `{searchfield}` LIKE %(txt)s {cond}
+			order by name""",
+			params,
+		)
+		search_txt = txt.lower()
+		result = tuple((name,) for (name,) in all_types if search_txt in frappe._(name).lower())
+		result = result[int(start) : int(start) + int(page_len)]
+
 	return result or []

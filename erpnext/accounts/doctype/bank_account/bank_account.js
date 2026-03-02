@@ -14,7 +14,9 @@ frappe.ui.form.on("Bank Account", {
 		});
 		frm.set_query("party_type", function () {
 			return {
-				query: "erpnext.setup.doctype.party_type.party_type.get_party_type",
+				filters: {
+					name: ["in", Object.keys(frappe.boot.party_account_types)],
+				},
 			};
 		});
 	},

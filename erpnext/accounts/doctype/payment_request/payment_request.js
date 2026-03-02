@@ -6,7 +6,9 @@ frappe.ui.form.on("Payment Request", {
 	setup: function (frm) {
 		frm.set_query("party_type", function () {
 			return {
-				query: "erpnext.setup.doctype.party_type.party_type.get_party_type",
+				filters: {
+					name: ["in", Object.keys(frappe.boot.party_account_types)],
+				},
 			};
 		});
 
