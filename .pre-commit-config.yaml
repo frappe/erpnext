@@ -1,5 +1,5 @@
 exclude: 'node_modules|.git'
-default_stages: [manual]
+default_stages: [pre-commit]
 fail_fast: false
 
 
