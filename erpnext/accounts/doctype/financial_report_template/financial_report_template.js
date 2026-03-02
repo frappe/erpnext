@@ -36,14 +36,6 @@ frappe.ui.form.on("Financial Report Row", {
 		update_formula_label(frm, row.data_source);
 		update_formula_description(frm, row.data_source);
 
-		if (row.data_source !== "Account Data") {
-			frappe.model.set_value(cdt, cdn, "balance_type", "");
-		}
-
-		if (["Blank Line", "Column Break", "Section Break"].includes(row.data_source)) {
-			frappe.model.set_value(cdt, cdn, "calculation_formula", "");
-		}
-
 		set_up_filters_editor(frm, cdt, cdn);
 	},
 
