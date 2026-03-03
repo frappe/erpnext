@@ -199,36 +199,64 @@ def get_slabs_for(line: str, next_stage: str, limit=1, include_current_stage=Fal
 
 def _generate_batch_number(line: str):
 	today = date.today()
-	year_code = chr(65 + today.year - 2017)
 
-	# A: Get total days in the year until today
-	total_days_so_far = today.timetuple().tm_yday
+	# A: Get the current fiscal year
+	fiscal_years: list = frappe.db.get_all(
+		"Fiscal Year", filters=[["year_start_date", "<=", today], ["year_end_date", ">=", today]], fields=["year_start_date", "year_end_date"]
+	)  # pyright: ignore[reportAssignmentType]
 
-	# B: Get the total holidays from the first day of the year till today
-	year_start = f"{today.year}-01-01"
+	if not fiscal_years:
+		frappe.throw("No fiscal year found for the current date.", ValidationError)
+
+	fiscal_year: FiscalYear = fiscal_years[0]
+
+	year_code = chr(65 + fiscal_year.year_start_date.year - 2017)  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
+
+	# B: Get total days in the fiscal year until today
+	time_diff = today - fiscal_year.year_start_date  # pyright: ignore[reportOperatorIssue, reportOptionalMemberAccess]
+	total_days_so_far = time_diff.days
+
+	# C: Get the total holidays from the first day of the fiscal year of the year till today
+	year_start_date = (
+		fiscal_year.year_start_date.strftime("%Y-%m-%d")  # pyright: ignore[reportAttributeAccessIssue]
+		if fiscal_year and fiscal_year.year_start_date
+		else None
+	)
+
+	year_end_date = (
+		fiscal_year.year_end_date.strftime("%Y-%m-%d") if fiscal_year and fiscal_year.year_end_date else None  # pyright: ignore[reportAttributeAccessIssue]
+	)
+
 	today_string = today.strftime("%Y-%m-%d")
 	HOLIDAY_LIST = frappe.qb.DocType("Holiday List")
-	query = (
-		frappe.qb.from_(HOLIDAY_LIST)
-		.select(Count("*"))
-		.where(HOLIDAY_LIST.from_date <= today_string)
-		.where(HOLIDAY_LIST.to_date >= today_string)
-	)
+
+	query_conditions = (
+		(HOLIDAY_LIST.from_date <= year_start_date) & (HOLIDAY_LIST.to_date >= year_start_date)
+	) | ((HOLIDAY_LIST.from_date <= year_end_date) & (HOLIDAY_LIST.to_date >= year_end_date))
+
+	query = frappe.qb.from_(HOLIDAY_LIST).select(Count("*")).where(query_conditions)
 
 	result = query.run()
 	holiday_list_count = result[0][0]
 
 	if holiday_list_count == 0:
-		frappe.throw("No holidays found. Please create a holiday list for the current year.")
+		frappe.throw("No holidays found. Please create a holiday list for the current year.", ValidationError)
 
 	# format date as string
-	holidays = frappe.db.count(
+	holidays = frappe.db.get_list(
 		"Holiday",
-		filters=[["holiday_date", "between", [year_start, today.strftime("%Y-%m-%d")]]],
+		filters=[["holiday_date", "between", [year_start_date, today_string]]],
+		fields=["holiday_date"],
+		ignore_permissions=True,
 	)
 
+	if today_string in [holiday["holiday_date"].strftime("%Y-%m-%d") for holiday in holidays]:
+		frappe.throw("Today is a holiday. Cannot generate batch number.", ValidationError)
+
+	holiday_count = len(holidays)
+
 	# Calculate A - B
-	total_working_days = total_days_so_far - holidays
+	total_working_days = total_days_so_far - holiday_count
 
 	return f"{line}{year_code}/{total_working_days:03d}"
 
