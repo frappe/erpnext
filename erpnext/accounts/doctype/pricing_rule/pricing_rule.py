@@ -346,8 +346,7 @@ def apply_pricing_rule(args: str | dict, doc: str | dict | Document | None = Non
 
 	args = frappe._dict(args)
 
-	if not args.transaction_type:
-		set_transaction_type(args)
+	set_transaction_type(args)
 
 	# list of dictionaries
 	out = []
@@ -689,7 +688,7 @@ def remove_pricing_rules(item_list: str | list):
 
 
 def set_transaction_type(args):
-	if args.transaction_type:
+	if args.transaction_type in ["buying", "selling"]:
 		return
 	if args.doctype in ("Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
 		args.transaction_type = "selling"
