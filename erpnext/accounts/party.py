@@ -77,6 +77,8 @@ def get_party_details(
 		return frappe._dict()
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
+	if ignore_permissions:
+		frappe.log("ignore_permissions is deprecated and has no effect in get_party_details function")
 	return _get_party_details(
 		party,
 		account,
