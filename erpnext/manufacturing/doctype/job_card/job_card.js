@@ -136,6 +136,7 @@ frappe.ui.form.on("Job Card", {
 		}
 
 		if (!frm.is_new() && frm.doc.__onload?.work_order_stopped) {
+			frm.disable_save();
 			frm.dashboard.add_comment(__("Work Order {0} is stopped.", [frm.doc.work_order]));
 			return;
 		}

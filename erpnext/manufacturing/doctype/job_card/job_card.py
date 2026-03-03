@@ -1229,6 +1229,7 @@ class JobCard(Document):
 
 	@frappe.whitelist()
 	def pause_job(self, **kwargs):
+		self.validate_work_order()
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
 
@@ -1237,6 +1238,7 @@ class JobCard(Document):
 
 	@frappe.whitelist()
 	def resume_job(self, **kwargs):
+		self.validate_work_order()
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
 
@@ -1338,6 +1340,7 @@ class JobCard(Document):
 		frappe.db.set_value("Workstation", self.workstation, "status", status)
 
 	def add_time_logs(self, **kwargs):
+		self.validate_work_order()
 		kwargs = frappe._dict(kwargs)
 		if not kwargs.employees and kwargs.to_time:
 			for row in self.time_logs:
