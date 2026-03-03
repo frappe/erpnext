@@ -509,7 +509,6 @@ def get_customer_emails(customer_name: str, primary_mandatory: str | int, billin
 
 @frappe.whitelist()
 def download_statements(document_name: str):
-	frappe.has_permission("Process Statement Of Accounts", "read", document_name, throw=True)
 	doc = frappe.get_doc("Process Statement Of Accounts", document_name)
 	doc.check_permission("read")
 	report = get_report_pdf(doc)

@@ -50,8 +50,7 @@ class BankReconciliationTool(Document):
 def get_bank_transactions(
 	bank_account: str, from_date: str | date | None = None, to_date: str | date | None = None
 ):
-	# returns bank transactions for a bank account only if user has read permission for the bank account
-	frappe.has_permission("Bank Account", "read", bank_account, throw=True)
+	# returns bank transactions for a bank account
 	filters = []
 	filters.append(["bank_account", "=", bank_account])
 	filters.append(["docstatus", "=", 1])
@@ -113,8 +112,7 @@ def get_account_balance(bank_account: str, till_date: str | date, company: str):
 def update_bank_transaction(
 	bank_transaction_name: str, reference_number: str, party_type: str | None = None, party: str | None = None
 ):
-	frappe.has_permission("Bank Transaction", "write", bank_transaction_name, throw=True)
-	# updates bank transaction based on the new parameters provided by the user from Vouchers only if user has write permission for the bank transaction
+	# updates bank transaction based on the new parameters provided by the user from Vouchers
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	bank_transaction.reference_number = reference_number
 	bank_transaction.party_type = party_type

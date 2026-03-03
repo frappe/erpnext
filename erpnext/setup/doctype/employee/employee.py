@@ -313,8 +313,6 @@ def deactivate_sales_person(status: str | None = None, employee: str | None = No
 
 @frappe.whitelist()
 def create_user(employee: str, email: str | None = None):
-	frappe.has_permission("Employee", "write", employee, throw=True)
-	frappe.has_permission("User", "create", throw=True)
 	emp = frappe.get_doc("Employee", employee)
 
 	employee_name = emp.employee_name.split(" ")
