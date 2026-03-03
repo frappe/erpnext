@@ -262,7 +262,7 @@ def _generate_batch_number(line: str):
 	return f"{line}{year_code}/{total_working_days:03d}"
 
 
-def _get_slab_number(batch: str):
+def _get_slab_number(batch: str, line: str) -> int:
 	today = date.today()
 	curr_month = today.month
 	curr_year = today.year
@@ -270,9 +270,11 @@ def _get_slab_number(batch: str):
 	month_start = f"{curr_year}-{curr_month:02d}-01"
 
 	batch_prefix = batch.split("/")[0]
-	slab_seed = 1
 
-	slab_count = (
+	mahi_granites_settings: MahiGranitesSettings = frappe.get_doc("Mahi Granites Settings")  # pyright: ignore[reportAssignmentType]
+	slab_seed = next((seed.seed for seed in mahi_granites_settings.slab_seeds if seed.line == line), 0)
+
+	slab_count: int = (
 		frappe.db.count(
 			"Slab",
 			filters=[
@@ -283,4 +285,4 @@ def _get_slab_number(batch: str):
 		+ slab_seed
 	)
 
-	return slab_count
+	return slab_count or 0
