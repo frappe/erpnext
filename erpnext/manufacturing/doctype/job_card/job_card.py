@@ -145,6 +145,7 @@ class JobCard(Document):
 		excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 		self.set_onload("job_card_excess_transfer", excess_transfer)
 		self.set_onload("work_order_closed", self.is_work_order_closed())
+		self.set_onload("work_order_stopped", self.is_work_order_stopped())
 		self.set_onload("has_stock_entry", self.has_stock_entry())
 
 	def on_discard(self):
@@ -843,13 +844,6 @@ class JobCard(Document):
 		if self.track_semi_finished_goods:
 			return
 
-		if self.work_order and frappe.get_cached_value("Work Order", self.work_order, "status") == "Stopped":
-			frappe.throw(
-				_("Transaction not allowed against stopped Work Order {0}").format(
-					get_link_to_form("Work Order", self.work_order)
-				)
-			)
-
 		if not self.time_logs:
 			frappe.throw(
 				_("Time logs are required for {0} {1}").format(
@@ -1314,6 +1308,13 @@ class JobCard(Document):
 		if self.is_work_order_closed():
 			frappe.throw(_("You can't make any changes to Job Card since Work Order is closed."))
 
+		if self.is_work_order_stopped():
+			frappe.throw(
+				_("Transaction not allowed against stopped Work Order {0}").format(
+					get_link_to_form("Work Order", self.work_order)
+				)
+			)
+
 	def set_employees(self):
 		self.employee = []
 		for item in self.time_logs:
@@ -1322,11 +1323,12 @@ class JobCard(Document):
 
 	def is_work_order_closed(self):
 		if self.work_order:
-			status = frappe.get_value("Work Order", self.work_order)
+			return frappe.get_cached_value("Work Order", self.work_order, "status") == "Closed"
+		return False
 
-			if status == "Closed":
-				return True
-
+	def is_work_order_stopped(self):
+		if self.work_order:
+			return frappe.get_cached_value("Work Order", self.work_order, "status") == "Stopped"
 		return False
 
 	def update_status_in_workstation(self, status):

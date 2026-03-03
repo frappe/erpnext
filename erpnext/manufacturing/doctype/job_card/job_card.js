@@ -135,6 +135,11 @@ frappe.ui.form.on("Job Card", {
 			return;
 		}
 
+		if (!frm.is_new() && frm.doc.__onload?.work_order_stopped) {
+			frm.dashboard.add_comment(__("Work Order {0} is stopped.", [frm.doc.work_order]));
+			return;
+		}
+
 		if (frm.doc.is_subcontracted) {
 			frm.trigger("make_subcontracting_po");
 			return;
