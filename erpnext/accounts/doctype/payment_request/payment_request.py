@@ -954,6 +954,7 @@ def resend_payment_email(docname: str):
 
 @frappe.whitelist()
 def make_payment_entry(docname: str):
+	frappe.has_permission("Payment Request", "write", docname, throw=True)
 	doc = frappe.get_doc("Payment Request", docname)
 	return doc.create_payment_entry(submit=False).as_dict()
 

@@ -465,6 +465,8 @@ def get_customer_emails(customer_name: str, primary_mandatory: str | int, billin
 	when Is Billing Contact checked
 	and Primary email- email with Is Primary checked"""
 
+	frappe.has_permission("Customer", "read", customer_name, throw=True)
+
 	billing_email = frappe.db.sql(
 		"""
 		SELECT
@@ -507,6 +509,7 @@ def get_customer_emails(customer_name: str, primary_mandatory: str | int, billin
 
 @frappe.whitelist()
 def download_statements(document_name: str):
+	frappe.has_permission("Process Statement Of Accounts", "read", document_name, throw=True)
 	doc = frappe.get_doc("Process Statement Of Accounts", document_name)
 	report = get_report_pdf(doc)
 	if report:
