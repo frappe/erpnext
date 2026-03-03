@@ -2299,7 +2299,6 @@ class TestStockEntry(FrappeTestCase):
 			stock_entry.doctype,
 			stock_entry.name,
 			stock_entry.as_dict().get("items"),
-			"Incoming",
 		)
 		self.assertEqual(qi[0], "NQC-ST-00001")
 
