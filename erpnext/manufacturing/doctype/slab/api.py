@@ -1,8 +1,11 @@
 from datetime import date
 
 from frappe import frappe
+from frappe import utils as frappe_utils
+from frappe.exceptions import ValidationError
 from frappe.query_builder.functions import Count
 
+from erpnext.accounts.doctype.fiscal_year.fiscal_year import FiscalYear
 from erpnext.manufacturing.doctype.slab.slab import ALLOWED_STAGES, Slab
 from erpnext.manufacturing.doctype.slab_history.slab_history import SlabHistory
 from erpnext.setup.doctype.mahi_granites_settings.mahi_granites_settings import MahiGranitesSettings
@@ -16,11 +19,11 @@ def create_slab(line: str, type: str, job_card_number: str | None = None):
 	new_slab.current_job_card = job_card_number
 	new_slab.batch_number = _generate_batch_number(line)
 
-	slab_number: int = _get_slab_number(new_slab.batch_number)
+	slab_number: int = _get_slab_number(new_slab.batch_number, line)
 	new_slab.number = slab_number
 	new_slab.serial_number = f"{slab_number:04d}"
 
-	new_slab.created_on = frappe.utils.now_datetime()
+	new_slab.created_on = frappe_utils.now_datetime()
 	current_stage = ALLOWED_STAGES[0]
 	new_slab.status = current_stage  # pyright: ignore[reportAttributeAccessIssue]
 
@@ -28,7 +31,7 @@ def create_slab(line: str, type: str, job_card_number: str | None = None):
 	slab_history: SlabHistory = frappe.new_doc("Slab History")  # pyright: ignore[reportAssignmentType]
 	slab_history.idx = 1
 	slab_history.station = current_stage
-	slab_history.in_time = frappe.utils.now_datetime()
+	slab_history.in_time = frappe_utils.now_datetime()
 	slab_history.job_card_number = job_card_number
 	new_slab.slab_history.append(slab_history)
 
@@ -47,16 +50,14 @@ def checkout_slab(slab_number: str):
 	if last_history.out_time is not None:
 		frappe.throw("Slab is already checked out of the current station.")
 
-	last_history.out_time = frappe.utils.now_datetime()
-	last_history.total_time_in_minutes = (last_history.out_time - last_history.in_time).total_seconds() / 60  # pyright: ignore[reportOperatorIssue]
+	last_history.out_time = frappe_utils.now_datetime()
+	total_seconds = (last_history.out_time - last_history.in_time).total_seconds()  # pyright: ignore[reportOperatorIssue]
+	last_history.total_time_in_minutes = total_seconds / 60
 
 	if slab.status == "Quarantine":
 		# Get Mahi Granites Settings to check if the slab is quarantined prematurely.
-		settings: MahiGranitesSettings = frappe.get_single("Mahi Granites Settings")
-		if (
-			settings.min_quarantine_hours
-			> (last_history.out_time - last_history.in_time).total_seconds() / 3600
-		):
+		settings: MahiGranitesSettings = frappe.get_single("Mahi Granites Settings")  # pyright: ignore[reportAssignmentType]
+		if settings.min_quarantine_hours > total_seconds / 3600:
 			slab.is_prematurely_unquarantined = True
 
 	slab.is_cur_stage_complete = True
@@ -79,7 +80,7 @@ def move_slab_to(
 	if next_stage.lower() not in allowed_stages_lower:
 		frappe.throw("Invalid next stage")
 
-	slab = frappe.get_doc("Slab", slab_number)
+	slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
 
 	current_stage_index = allowed_stages_lower.index(slab.status.lower())
 	next_stage_index = allowed_stages_lower.index(next_stage.lower())
@@ -99,7 +100,7 @@ def move_slab_to(
 			frappe.throw("Cannot move slab without checking out")
 
 		# checkout_slab(slab_number)
-		slab: Slab = frappe.get_doc("Slab", slab_number)
+		slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
 
 	slab.status = next_stage  # pyright: ignore[reportAttributeAccessIssue]
 	slab.is_cur_stage_complete = False
@@ -113,7 +114,7 @@ def move_slab_to(
 	slab_history: SlabHistory = frappe.new_doc("Slab History")  # pyright: ignore[reportAssignmentType]
 	slab_history.idx = len(slab.slab_history) + 1
 	slab_history.station = ALLOWED_STAGES[next_stage_index]
-	slab_history.in_time = frappe.utils.now_datetime()
+	slab_history.in_time = frappe_utils.now_datetime()
 	slab_history.job_card_number = job_card_number
 	slab.slab_history.append(slab_history)
 
