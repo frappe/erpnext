@@ -448,7 +448,7 @@ class AccountFilterValidator(Validator):
 			if not isinstance(field, str) or not isinstance(operator, str):
 				return "Field and operator must be strings"
 
-			display = field if advanced_filtering else self.account_meta.get_label(field)
+			display = (field if advanced_filtering else self.account_meta.get_label(field)) or field
 
 			if field in self.unsupported_fields:
 				return f"Field '{display}' is not supported in filters"
