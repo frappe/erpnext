@@ -41,6 +41,18 @@ pull_request_rules:
           - version-14-hotfix
         assignees:
           - "{{ author }}"
+  - name: backport to version-15-hotfix with automerge
+    conditions:
+      - label="backport version-15-hotfix"
+      - label="enable automerge on backports"
+    actions:
+      backport:
+        branches:
+          - version-15-hotfix
+        labels:
+          - enable automerge on backports
+        assignees:
+          - "{{ author }}"
   - name: backport to version-15-hotfix
     conditions:
       - label="backport version-15-hotfix"
@@ -48,6 +60,18 @@ pull_request_rules:
       backport:
         branches:
           - version-15-hotfix
+        assignees:
+          - "{{ author }}"
+  - name: backport to version-16-hotfix with automerge
+    conditions:
+      - label="backport version-16-hotfix"
+      - label="enable automerge on backports"
+    actions:
+      backport:
+        branches:
+          - version-16-hotfix
+        labels:
+          - enable automerge on backports
         assignees:
           - "{{ author }}"
   - name: backport to version-16-hotfix
@@ -59,6 +83,18 @@ pull_request_rules:
           - version-16-hotfix
         assignees:
           - "{{ author }}"
+  - name: Auto-merge backports when explicitly enabled
+    conditions:
+      - author=mergify[bot]
+      - label="enable automerge on backports"
+      - or:
+          - base=version-15-hotfix
+          - base=version-16-hotfix
+      - check-success=*
+      - label!=dont-merge
+    actions:
+      merge:
+        method: squash
   - name: Automatic merge on CI success and review
     conditions:
       - status-success=linters
