@@ -1,11 +1,6 @@
 import frappe
-<<<<<<< HEAD
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import today
-=======
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, today
->>>>>>> 9a5b476d9c (Merge pull request #51940 from aerele/accounts-receivable-payment-terms-template-filter)
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.report.accounts_payable.accounts_payable import execute
