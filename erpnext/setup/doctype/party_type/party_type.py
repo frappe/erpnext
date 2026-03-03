@@ -24,7 +24,7 @@ class PartyType(Document):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_party_type(doctype, txt, searchfield, start, page_len, filters):
+def get_party_type(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	cond = ""
 	account_type = None
 
@@ -53,13 +53,19 @@ def get_party_type(doctype, txt, searchfield, start, page_len, filters):
 		# No match found — txt may be a translated DocType name (non-English locale).
 		# Party Type names are stored in English, so fall back to matching against
 		# translated names.
-		params["txt"] = "%"
-		all_types = frappe.db.sql(
-			f"""select name from `tabParty Type`
-			where `{searchfield}` LIKE %(txt)s {cond}
-			order by name""",
-			params,
-		)
+		if account_type and account_type in ["Receivable", "Payable"]:
+			all_types = frappe.db.sql(
+				"select name from `tabParty Type` where account_type = %(account_type)s or name = 'Employee' order by name",
+				{"account_type": account_type},
+			)
+		elif account_type:
+			all_types = frappe.db.sql(
+				"select name from `tabParty Type` where account_type = %(account_type)s order by name",
+				{"account_type": account_type},
+			)
+		else:
+			all_types = frappe.db.sql("select name from `tabParty Type` order by name")
+
 		search_txt = txt.lower()
 		result = tuple((name,) for (name,) in all_types if search_txt in frappe._(name).lower())
 		result = result[int(start) : int(start) + int(page_len)]
