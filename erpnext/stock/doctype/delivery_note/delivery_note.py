@@ -1111,7 +1111,7 @@ def make_shipment(source_name, target_doc=None):
 			)
 
 			delivery_contact_display = source.contact_display or contact_person or ""
-			if contact:
+			if contact and not source.contact_display:
 				if contact.email_id:
 					delivery_contact_display += "<br>" + contact.email_id
 				if contact.phone:
@@ -1120,6 +1120,8 @@ def make_shipment(source_name, target_doc=None):
 					delivery_contact_display += "<br>" + contact.mobile_no
 
 			target.delivery_contact_name = contact_person
+			if contact and contact.email_id and not target.delivery_contact_email:
+				target.delivery_contact_email = contact.email_id
 			target.delivery_contact = delivery_contact_display
 
 		if source.shipping_address_name:
