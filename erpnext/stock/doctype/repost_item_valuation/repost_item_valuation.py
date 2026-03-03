@@ -570,7 +570,20 @@ def run_parallel_reposting():
 
 	riv_entries = get_repost_item_valuation_entries()
 
+	rq_jobs = frappe.get_all(
+		"RQ Job",
+		fields=["arguments"],
+		filters={
+			"status": ("like", "%started%"),
+			"job_name": "erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.execute_reposting_entry",
+		},
+	)
+
 	for row in riv_entries:
+		if rq_jobs:
+			if job_running_for_entry(row.name, rq_jobs):
+				continue
+
 		if row.based_on != "Item and Warehouse" or row.repost_only_accounting_ledgers:
 			execute_reposting_entry(row.name)
 			continue
@@ -719,3 +732,19 @@ def get_existing_reposting_only_gl_entries(reposting_reference):
 		reposting_map[key] = d.reposting_reference
 
 	return reposting_map
+
+
+def job_running_for_entry(reposting_entry, rq_jobs):
+	for job in rq_jobs:
+		if not job.arguments:
+			continue
+
+		try:
+			job_args = json.loads(job.arguments)
+		except (TypeError, json.JSONDecodeError):
+			continue
+
+		if isinstance(job_args, dict) and job_args.get("kwargs", {}).get("name") == reposting_entry:
+			return True
+
+	return False

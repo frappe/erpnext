@@ -95,6 +95,7 @@
   "ordered_qty",
   "planned_qty",
   "production_plan_qty",
+  "requested_qty",
   "column_break_69",
   "work_order_qty",
   "delivered_qty",
@@ -1010,6 +1011,14 @@
    "fieldtype": "Float",
    "label": "Finished Good Qty",
    "mandatory_depends_on": "eval:parent.is_subcontracted"
+  },
+  {
+   "fieldname": "requested_qty",
+   "fieldtype": "Float",
+   "label": "Requested Qty",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

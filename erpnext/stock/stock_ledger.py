@@ -1303,7 +1303,7 @@ class update_entries_after:
 				else:
 					if sle.voucher_type in ("Delivery Note", "Sales Invoice"):
 						ref_doctype = "Packed Item"
-					elif sle == "Subcontracting Receipt":
+					elif sle.voucher_type == "Subcontracting Receipt":
 						ref_doctype = "Subcontracting Receipt Supplied Item"
 					else:
 						ref_doctype = "Purchase Receipt Item Supplied"

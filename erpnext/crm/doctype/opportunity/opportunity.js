@@ -307,6 +307,21 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 			};
 		});
 
+		this.frm.set_query("uom", "items", function (doc, cdt, cdn) {
+			let row = locals[cdt][cdn];
+
+			if (!row.item_code) {
+				return;
+			}
+
+			return {
+				query: "erpnext.controllers.queries.get_item_uom_query",
+				filters: {
+					item_code: row.item_code,
+				},
+			};
+		});
+
 		me.frm.set_query("contact_person", erpnext.queries["contact_query"]);
 
 		if (me.frm.doc.opportunity_from == "Lead") {
