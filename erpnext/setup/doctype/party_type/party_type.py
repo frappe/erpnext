@@ -56,7 +56,7 @@ def get_party_type(doctype: str, txt: str, searchfield: str, start: int, page_le
 			params,
 		)
 		search_txt = txt.lower()
-		result = tuple((name,) for (name,) in all_types if search_txt in frappe._(name).lower())
+		result = [(name,) for (name,) in all_types if search_txt in frappe._(name).lower()]
 		result = result[int(start) : int(start) + int(page_len)]
 
 	return result or []
