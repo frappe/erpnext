@@ -29,6 +29,7 @@ const isQAStarted = ref(false);
 const hourglassRotation = ref(0);
 const hourglassIcon = ref('fa-hourglass-3');
 let hourglassInterval = null;
+const isProcessing = ref(false);
 
 // Visual Observation State
 const observations = ref([]);
@@ -163,6 +164,7 @@ const confirmAndTag = async () => {
     }
 
     try {
+        isProcessing.value = true;
         form.observations = observations.value;
         const res = await frappe.call({
             method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.submit_qa_report',
@@ -189,6 +191,8 @@ const confirmAndTag = async () => {
     } catch (e) {
         console.error(e);
         frappe.msgprint(__('An error occurred while submitting the quality report.'));
+    } finally {
+        isProcessing.value = false;
     }
 };
 
@@ -256,6 +260,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
 const startProcess = async () => {
     if (!selectedSlab.value) return;
 
+    isProcessing.value = true;
     try {
         const res = await frappe.call({
             method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.start_qa_process',
@@ -268,6 +273,8 @@ const startProcess = async () => {
         isQAStarted.value = true;
     } catch (e) {
         console.error('Failed to start job card', e);
+    } finally {
+        isProcessing.value = false;
     }
 };
 
@@ -423,8 +430,9 @@ onUnmounted(() => {
                     <div v-if="!isQAStarted" class="d-flex align-items-center justify-content-center p-5 border rounded"
                         style="min-height: 400px; background: var(--card-bg);">
                         <button class="btn btn-primary btn-lg px-5 font-weight-bold"
-                            style="font-size: 1.2rem; transform: scale(1.2);" @click="startProcess()">
-                            <span class="fa fa-play mr-2"></span>{{ __('Start Quality Analysis') }}
+                            style="font-size: 1.2rem; transform: scale(1.2);" :disabled="isProcessing" @click="startProcess()">
+                            <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-2"></span>
+                            <span v-else class="fa fa-play mr-2"></span>{{ __('Start Quality Analysis') }}
                         </button>
                     </div>
 
@@ -617,8 +625,9 @@ onUnmounted(() => {
 
                         <div class="mt-4 border-top pt-4 d-flex justify-content-end align-items-center">
                             <div class="actions">
-                                <button class="btn btn-primary btn-lg px-5" @click="confirmAndTag">
-                                    <span class="fa fa-check mr-2"></span>{{ __('Submit Quality Report') }}
+                                <button class="btn btn-primary btn-lg px-5" :disabled="isProcessing" @click="confirmAndTag">
+                                    <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-2"></span>
+                                    <span v-else class="fa fa-check mr-2"></span>{{ __('Submit Quality Report') }}
                                 </button>
                                 <!-- <button class="btn btn-outline-danger btn-lg ml-2" @click="raiseQualityAlarm">
                                     <span class="fa fa-bell mr-2"></span>{{ __('Raise Alarm') }}

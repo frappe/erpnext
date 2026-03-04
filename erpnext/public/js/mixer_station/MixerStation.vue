@@ -24,6 +24,7 @@ const productionLine = ref(null);
 const pollingInterval = ref(null);
 const isDistributionBusy = ref(false);
 const displayQty = ref(0);
+const isProcessing = ref(false);
 
 // downstream alerts (dummy)
 const alerts = ref([
@@ -234,6 +235,7 @@ async function toggleReady() {
     frappe.confirm(
         __('Do you want to confirm the materials?'),
         async () => {
+            isProcessing.value = true;
             try {
                 const payload = ingredients.value.map(ing => ({
                     item_code: ing.item_code,
@@ -257,6 +259,8 @@ async function toggleReady() {
                     message: __('Failed to confirm materials'),
                     indicator: 'red'
                 });
+            } finally {
+                isProcessing.value = false;
             }
         },
     );
@@ -284,6 +288,7 @@ async function startMixing() {
     frappe.confirm(
         __('Start mixing now?'),
         async () => {
+            isProcessing.value = true;
             try {
                 await frappe.call({
                     method: 'erpnext.manufacturing.page.mixer_station.mixer_station.start_mixing',
@@ -305,6 +310,8 @@ async function startMixing() {
                     message: __('Failed to start Job Card for mixing'),
                     indicator: 'red'
                 });
+            } finally {
+                isProcessing.value = false;
             }
         },
         () => {
@@ -322,6 +329,7 @@ async function finishAndDischarge() {
         mixingTimerHandle.value = null;
     }
     try {
+        isProcessing.value = true;
         const jc = await frappe.db.get_doc('Job Card', jobCard.value);
         const completed_qty = jc.for_quantity || 0;
         const result = await frappe.call({
@@ -357,6 +365,8 @@ async function finishAndDischarge() {
             indicator: 'red',
             message: `Failed to complete Job Card:<br><pre>${errorMsg}</pre>`
         });
+    } finally {
+        isProcessing.value = false;
     }
 }
 
@@ -464,6 +474,7 @@ async function transferToFGWarehouse() {
     }
 
     try {
+        isProcessing.value = true;
         const jc = await frappe.db.get_doc('Job Card', jobCard.value);
         const workOrder = jc.work_order;
         const qty = bomQty.value
@@ -507,6 +518,8 @@ async function transferToFGWarehouse() {
             message: __('Transfer failed'),
             indicator: 'red'
         });
+    } finally {
+        isProcessing.value = false;
     }
 }
 
@@ -742,16 +755,18 @@ function selectJobCard(name) {
 
                             <div class="mb-3">
                                 <button v-if="!mixingReady"
-                                    :disabled="!isMixerSelected || !allAdditionalIngredientsAdded"
-                                    :class="!isMixerSelected || !allAdditionalIngredientsAdded ? 'btn-disabled-pointer' : ''"
+                                    :disabled="!isMixerSelected || !allAdditionalIngredientsAdded || isProcessing"
+                                    :class="!isMixerSelected || !allAdditionalIngredientsAdded || isProcessing ? 'btn-disabled-pointer' : ''"
                                     class="btn btn-sm border border-success" @click="toggleReady">
-                                    <span class="fa fa-check mr-1"></span>
+                                    <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
+                                    <span v-else class="fa fa-check mr-1"></span>
                                     {{ __('Confirm Materials') }}
                                 </button>
 
-                                <button v-else class="btn btn-success btn-block py-2" :disabled="mixingStarted"
+                                <button v-else class="btn btn-success btn-block py-2" :disabled="mixingStarted || isProcessing"
                                     @click="startMixing">
-                                    <span class="fa fa-play mr-1"></span>
+                                    <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
+                                    <span v-else class="fa fa-play mr-1"></span>
                                     {{ __('Start Mixing') }}
                                 </button>
                             </div>
@@ -769,8 +784,9 @@ function selectJobCard(name) {
                                 {{ formattedMixingTime }}
                             </div>
                             <div class="d-flex flex-column gap-2 justify-content-center mb-3">
-                                <button class="btn btn-success flex-fill" @click="finishAndDischarge">
-                                    <span class="fa fa-check mr-1"></span>
+                                <button class="btn btn-success flex-fill" :disabled="isProcessing" @click="finishAndDischarge">
+                                    <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
+                                    <span v-else class="fa fa-check mr-1"></span>
                                     {{ __('Finish & Discharge') }}
                                 </button>
                                 <button class="btn btn-outline-primary flex-fill mt-2 border border-dark"
@@ -796,10 +812,11 @@ function selectJobCard(name) {
                                 {{ getDisplayQty.toLocaleString() }}
                             </div>
                             <div class="d-flex flex-column gap-2 justify-content-center mb-3">
-                                <button v-if="!transferSuccess.value" :disabled="!getCanTransfer"
-                                    :class="['btn btn-lg flex-fill', getCanTransfer ? 'btn-warning' : 'btn-secondary']"
+                                <button v-if="!transferSuccess.value" :disabled="!getCanTransfer || isProcessing"
+                                    :class="['btn btn-lg flex-fill', (getCanTransfer && !isProcessing) ? 'btn-warning' : 'btn-secondary']"
                                     @click="transferToFGWarehouse">
-                                    <span class="fa fa-truck mr-2"></span>
+                                    <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-2"></span>
+                                    <span v-else class="fa fa-truck mr-2"></span>
                                     {{ getCanTransfer ? 'Transfer ' + bomQty.toLocaleString() : (isDistributionBusy ?
                                         'Distribution Busy' :
                                         'Insufficient Qty') }}

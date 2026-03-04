@@ -7,6 +7,7 @@ const selectedSlab = ref(null);
 const currentTime = ref(new Date());
 let timerInterval = null;
 const overheat_minutes = 90; // TODO: This should be replaced by a setting in Mahi Granites Settings.
+const isProcessing = ref(false);
 
 
 const racks = computed(() => {
@@ -216,6 +217,7 @@ async function confirmUnload() {
         return;
     }
 
+    isProcessing.value = true;
     try {
         const res = await frappe.call({
             method: 'erpnext.manufacturing.doctype.oven.api.unload_slab_from_oven',
@@ -235,10 +237,11 @@ async function confirmUnload() {
         }
     } catch (e) {
         console.error(e);
+    } finally {
+        isProcessing.value = false;
+        showUnloadModal.value = false;
+        targetRack.value = null;
     }
-
-    showUnloadModal.value = false;
-    targetRack.value = null;
 }
 
 async function confirmLoad() {
@@ -246,31 +249,38 @@ async function confirmLoad() {
         return;
     }
 
-    prepareOvenOperation();
-    const res = await frappe.call({
-        method: 'erpnext.manufacturing.doctype.oven.api.load_slab_into_oven',
-        args: {
-            oven_op: ovenOperation.value,
-            line: work_context.assigned_line,
-            job_card_name: jobCardNumber.value || selectedSlab.value?.current_job_card,
-            slab_template: selectedSlab.value?.template,
+    isProcessing.value = true;
+    try {
+        prepareOvenOperation();
+        const res = await frappe.call({
+            method: 'erpnext.manufacturing.doctype.oven.api.load_slab_into_oven',
+            args: {
+                oven_op: ovenOperation.value,
+                line: work_context.assigned_line,
+                job_card_name: jobCardNumber.value || selectedSlab.value?.current_job_card,
+                slab_template: selectedSlab.value?.template,
+            }
+        })
+
+        if (res && res.message) {
+            frappe.show_alert({ message: __('Slab loaded and heating started'), indicator: 'green' });
+            await refreshOvenData();
+            await fetch_slab_for_job_card(true);
         }
-    })
 
-    if (res && res.message) {
-        frappe.show_alert({ message: __('Slab loaded and heating started'), indicator: 'green' });
-        await refreshOvenData();
-        await fetch_slab_for_job_card(true);
+        // remove slab from incoming list or clear selected if single Job Card
+        if (Array.isArray(currentSlab.value)) {
+            const idx = currentSlab.value.findIndex(s => s.name === selectedSlab.value?.name);
+            if (idx !== -1) currentSlab.value.splice(idx, 1);
+        }
+        selectedSlab.value = null;
+
+        closeModal();
+    } catch (e) {
+        console.error(e);
+    } finally {
+        isProcessing.value = false;
     }
-
-    // remove slab from incoming list or clear selected if single Job Card
-    if (Array.isArray(currentSlab.value)) {
-        const idx = currentSlab.value.findIndex(s => s.name === selectedSlab.value?.name);
-        if (idx !== -1) currentSlab.value.splice(idx, 1);
-    }
-    selectedSlab.value = null;
-
-    closeModal();
 }
 
 function closeModal() {
@@ -509,8 +519,11 @@ frappe.realtime.on('slab_checkout', async (slab) => {
             </div>
 
             <div class="d-flex justify-content-end pt-4">
-                <button class="btn btn-secondary mr-2" @click="closeModal">{{ __('Cancel') }}</button>
-                <button class="btn btn-primary" @click="confirmLoad">{{ __('Load Slab') }}</button>
+                <button class="btn btn-secondary mr-2" :disabled="isProcessing" @click="closeModal">{{ __('Cancel') }}</button>
+                <button class="btn btn-primary" :disabled="isProcessing" @click="confirmLoad">
+                    <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
+                    {{ __('Load Slab') }}
+                </button>
             </div>
         </div>
     </div>
@@ -539,8 +552,11 @@ frappe.realtime.on('slab_checkout', async (slab) => {
             </div>
 
             <div class="d-flex justify-content-end">
-                <button class="btn btn-secondary mr-2" @click="showUnloadModal = false">{{ __('Cancel') }}</button>
-                <button class="btn btn-primary" @click="confirmUnload">{{ __('Confirm Unload') }}</button>
+                <button class="btn btn-secondary mr-2" :disabled="isProcessing" @click="showUnloadModal = false">{{ __('Cancel') }}</button>
+                <button class="btn btn-primary" :disabled="isProcessing" @click="confirmUnload">
+                    <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
+                    {{ __('Confirm Unload') }}
+                </button>
             </div>
         </div>
     </div>

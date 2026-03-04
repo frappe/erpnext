@@ -21,6 +21,7 @@ const fetchWorkContext = async () => {
 };
 
 const selectedSlab = ref(null);
+const isProcessing = ref(false);
 
 const get_slabs_ready_for_quarantine = async (play_ding = false) => {
     // Call API to get slabs ready for quarantine
@@ -110,6 +111,7 @@ const submitQuarantine = () => {
         return;
     }
     frappe.confirm(__('Are you sure you want to submit the quarantine check?'), async () => {
+        isProcessing.value = true;
         try {
             await frappe.call({
                 method: 'erpnext.manufacturing.doctype.preliminary_quality_check.api.create_preliminary_quality_check',
@@ -149,6 +151,8 @@ const submitQuarantine = () => {
             });
         } catch (e) {
             frappe.msgprint(__('Failed to submit quarantine check.'));
+        } finally {
+            isProcessing.value = false;
         }
     });
 };
@@ -239,7 +243,10 @@ const submitQuarantine = () => {
                 </div>
 
                 <div class="mt-2">
-                    <button class="btn btn-primary" @click="submitQuarantine">{{ __('Submit Quarantine') }}</button>
+                    <button class="btn btn-primary" :disabled="isProcessing" @click="submitQuarantine">
+                        <i v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></i>
+                        {{ __('Submit Quarantine') }}
+                    </button>
                 </div>
             </div>
         </div>

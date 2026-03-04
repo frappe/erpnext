@@ -28,6 +28,7 @@ const slabsQueue = ref([]);
 const is_standalone = ref(false);
 const availableSlabsCount = ref(0);
 const availableJobCardsCount = ref(0);
+const isProcessing = ref(false);
 
 const alarms = ref([
 	{
@@ -341,6 +342,7 @@ async function startOperation() {
 	frappe.confirm(
 		__('Start the process now?'),
 		async () => {
+			isProcessing.value = true;
 			try {
 				const res = await frappe.call({
 					method: 'erpnext.manufacturing.page.operator_station.operator_station.start_process',
@@ -373,6 +375,8 @@ async function startOperation() {
 			}
 			catch (e) {
 				frappe.msgprint(__('Failed to start Job Card: {0}', [e.message || e]));
+			} finally {
+				isProcessing.value = false;
 			}
 		},
 	);
@@ -382,6 +386,7 @@ async function finishOperation() {
 	frappe.confirm(
 		__('Are you sure you want to finish this job?'),
 		async () => {
+			isProcessing.value = true;
 			const route = frappe.get_route();
 			const station = route[1] || props.process;
 
@@ -428,6 +433,8 @@ async function finishOperation() {
 					indicator: 'red',
 					message: `Failed to complete Job Card`
 				});
+			} finally {
+				isProcessing.value = false;
 			}
 		}
 	);
@@ -515,6 +522,7 @@ async function selectSlab(slab) {
 	processReady.value = true;
 
 	try {
+		isProcessing.value = true;
 		const route = frappe.get_route();
 		const station = route[1] || '';
 		const r = await frappe.call({
@@ -535,6 +543,8 @@ async function selectSlab(slab) {
 		}
 	} catch (e) {
 		console.error(e);
+	} finally {
+		isProcessing.value = false;
 	}
 }
 </script>
@@ -620,8 +630,9 @@ async function selectSlab(slab) {
 						</div>
 
 						<div class="text-center mb-2" v-if="processReady">
-							<button class="btn btn-success py-3 px-4" @click="startOperation">
-								<span class="fa fa-play mr-1 pr-2"></span>{{ __('Start Job') }}
+							<button class="btn btn-success py-3 px-4" :disabled="isProcessing" @click="startOperation">
+								<span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1 pr-2"></span>
+								<span v-else class="fa fa-play mr-1 pr-2"></span>{{ __('Start Job') }}
 							</button>
 						</div>
 
@@ -633,8 +644,9 @@ async function selectSlab(slab) {
 						</div>
 
 						<div class="text-center mb-2" v-if="processStarted">
-							<button class="btn btn-info py-3 px-4 mr-5" @click="finishOperation">
-								<span class="fa fa-check-square-o mr-1"></span>{{ __('Finish Job') }}
+							<button class="btn btn-info py-3 px-4 mr-5" :disabled="isProcessing" @click="finishOperation">
+								<span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
+								<span v-else class="fa fa-check-square-o mr-1"></span>{{ __('Finish Job') }}
 							</button>
 							<!-- <button class="btn btn-warning py-3 px-4 mr-5" @click="haltJob">
 							<span class="fa fa-pause-circle-o mr-1"></span>{{ __('Halt Job') }}

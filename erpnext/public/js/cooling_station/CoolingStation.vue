@@ -6,6 +6,7 @@ const currentIncomingSlab = computed(() => incomingSlabs.value.length > 0 ? inco
 const coolingQueue = ref([]);
 const processTimerHandles = reactive({});
 const error = ref(null);
+const isProcessing = ref(false);
 
 const work_context = reactive({
     role: "Cooling Operator",
@@ -66,6 +67,7 @@ const skipSlab = () => {
 };
 
 const startCooling = async (slab) => {
+    isProcessing.value = true;
     try {
         const res = await frappe.call({
             method: 'erpnext.manufacturing.page.cooling_station.cooling_station.start_cooling_process',
@@ -82,10 +84,13 @@ const startCooling = async (slab) => {
         }
     } catch (e) {
         frappe.msgprint(__('Failed to start cooling: {0}', [e.message]));
+    } finally {
+        isProcessing.value = false;
     }
 };
 
 const finishCooling = async (job) => {
+    isProcessing.value = true;
     try {
         const res = await frappe.call({
             method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_process',
@@ -104,6 +109,8 @@ const finishCooling = async (job) => {
         }
     } catch (e) {
         frappe.msgprint(__('Failed to finish cooling: {0}', [e.message]));
+    } finally {
+        isProcessing.value = false;
     }
 };
 
@@ -197,8 +204,9 @@ frappe.realtime.on('slab_checkout', (slab) => {
                             <!-- <button class="btn btn-outline-secondary btn-sm mr-2 px-3" @click="skipSlab">
                                 <i class="fa fa-step-forward mr-1"></i> {{ __('Skip') }}
                             </button> -->
-                            <button class="btn btn-primary btn-sm px-4" @click="startCooling(currentIncomingSlab)">
-                                <i class="fa fa-play mr-1"></i> {{ __('Accept & Start') }}
+                            <button class="btn btn-primary btn-sm px-4" :disabled="isProcessing" @click="startCooling(currentIncomingSlab)">
+                                <i v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></i>
+                                <i v-else class="fa fa-play mr-1"></i> {{ __('Accept & Start') }}
                             </button>
                         </div>
                     </div>
@@ -234,8 +242,10 @@ frappe.realtime.on('slab_checkout', (slab) => {
                                     <i class="fa fa-clock-o mr-1"></i> {{ formatDuration(job.elapsed) }}
                                 </div>
                                 <button v-if="index === 0" class="btn btn-success btn-sm px-3"
+                                    :disabled="isProcessing"
                                     @click="finishCooling(job)">
-                                    <i class="fa fa-check mr-1"></i> {{ __('Unload Slab') }}
+                                    <i v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></i>
+                                    <i v-else class="fa fa-check mr-1"></i> {{ __('Unload Slab') }}
                                 </button>
                             </div>
                         </div>
