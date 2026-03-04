@@ -710,7 +710,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	item_code(doc, cdt, cdn) {
 		var me = this;
 		frappe.flags.dialog_set = false;
-
+		this.process_item_selection_with_legacy_reactivity(doc, cdt, cdn);
+	}
+	process_item_selection_with_legacy_reactivity(doc, cdt, cdn) {
 		// Experimental: This will be removed once stability is achieved.
 		if (!frappe.boot.sysdefaults.use_legacy_js_reactivity) {
 			var item = frappe.get_doc(cdt, cdn);
@@ -1300,6 +1302,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		if (this.frm.doc.company) {
 			erpnext.last_selected_company = this.frm.doc.company;
+		}
+
+		if (this.frm.doc.items.length > 0) {
+			this.frm.doc.items.forEach((item) => {
+				this.process_item_selection_with_legacy_reactivity(this.frm.doc, item.doctype, item.name);
+			});
 		}
 	}
 
