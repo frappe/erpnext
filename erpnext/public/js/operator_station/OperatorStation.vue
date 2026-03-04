@@ -272,22 +272,27 @@ const getNextWorkItem = async (station, play_alert = false) => {
 onMounted(async () => {
 	try {
 		await fetchWorkContext();
+		await loadData();
 
-		const route = frappe.get_route();
-		const station = route[1] || '';
-
-		if (!jobCardName.value) {
-			getNextWorkItem(station);
-		} else {
-			await loadJobCard(jobCardName.value);
-		}
-
+		document.addEventListener("refresh-operator-station", () => {
+			loadData();
+		});
 	} catch (e) {
 		error.value = e.message;
 		frappe.msgprint(__('Load failed: {0}'));
 	}
 });
 
+async function loadData() {
+	const route = frappe.get_route();
+	const station = route[1] || '';
+
+	if (!jobCardName.value) {
+		getNextWorkItem(station);
+	} else {
+		await loadJobCard(jobCardName.value);
+	}
+}
 
 async function fetchQueue(line, station) {
 	try {
@@ -416,9 +421,6 @@ async function finishOperation() {
 				colour.value = null;
 
 				await checkForNextItem();
-				if (is_standalone.value) {
-					await fetchQueue(work_context.assigned_line, station);
-				}
 			} catch (error) {
 				const errorMsg = error.message || (error._server_messages?.[0]?.message) || JSON.stringify(error);
 				frappe.msgprint({

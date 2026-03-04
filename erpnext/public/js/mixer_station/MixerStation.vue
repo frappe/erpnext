@@ -102,7 +102,19 @@ onMounted(async () => {
     const route = frappe.get_route();
     jobCard.value = route[2] || null;
     await fetchWorkContext();
+    await loadData();
 
+    document.addEventListener("refresh-mixer-station", () => {
+        loadData();
+    });
+
+    pollingInterval.value = setInterval(() => {
+        fetchQueue();
+        fetchDistributionStatus();
+    }, 5000); // Poll every 5 seconds
+});
+
+async function loadData() {
     if (!jobCard.value) {
         loadingIngredients.value = true;
         jobCard.value = await getJobCardsList();
@@ -163,10 +175,6 @@ onMounted(async () => {
 
         await fetchQueue();
         await fetchDistributionStatus();
-        pollingInterval.value = setInterval(() => {
-            fetchQueue();
-            fetchDistributionStatus();
-        }, 5000); // Poll every 5 seconds
 
         const r = await frappe.call({
             method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_ingredients',
@@ -209,7 +217,7 @@ onMounted(async () => {
     finally {
         loadingIngredients.value = false;
     }
-});
+}
 
 onUnmounted(() => {
     if (pollingInterval.value) clearInterval(pollingInterval.value);

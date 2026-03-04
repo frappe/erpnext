@@ -76,9 +76,17 @@ const quarantineMeasurements = ref({
 
 onMounted(async () => {
     await fetchWorkContext();
+    await loadData();
+
+    document.addEventListener("refresh-quarantine-station", () => {
+        loadData();
+    });
+});
+
+async function loadData() {
     await get_slabs_ready_for_quarantine();
     await fetchQuarantineLabels();
-});
+}
 
 frappe.realtime.on('slab_checkout', async (slab) => {
     // If the slab has been checked out on a different line or the status of the checked out slab is not 'Cooling', then ignore the event.

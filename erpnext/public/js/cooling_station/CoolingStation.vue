@@ -149,6 +149,10 @@ const formatDuration = (seconds) => {
 onMounted(async () => {
     await fetchWorkContext();
     await loadData();
+
+    document.addEventListener("refresh-cooling-station", () => {
+        loadData();
+    });
 });
 
 onUnmounted(() => {

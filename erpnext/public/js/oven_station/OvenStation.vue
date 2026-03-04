@@ -152,9 +152,17 @@ onMounted(async () => {
     }, 1000);
 
     await fetchWorkContext();
+    await loadData();
+
+    document.addEventListener("refresh-oven-station", () => {
+        loadData();
+    });
+});
+
+async function loadData() {
     await refreshOvenData();
     await fetch_slab_for_job_card();
-});
+}
 
 onUnmounted(() => {
     if (timerInterval) clearInterval(timerInterval);

@@ -123,12 +123,21 @@ const fetchSettings = async () => {
 
 onMounted(async () => {
     await fetchWorkContext();
-    fetchSlabs();
-    fetchSettings();
+    await loadData();
+
+    document.addEventListener("refresh-slab-loading-station", () => {
+        loadData();
+    });
+
     setInterval(() => {
         now.value = new Date();
     }, 60000);
 });
+
+async function loadData() {
+    await fetchSlabs();
+    await fetchSettings();
+}
 
 const unloadToTrimming = (slab) => {
     const modified = new Date(slab.modified);

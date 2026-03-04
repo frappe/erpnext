@@ -209,17 +209,20 @@ onMounted(async () => {
     const route = frappe.get_route();
     jobCardNumber.value = route[1] || null;
 
-    // TODO: 
-    //  1. Get the slab from the job card if job card is present in the route.
-    //  2. Else, get the currently active job card and its associated slab.
-    //  2. If there is an active job card, pre-select its slab.
-
     await fetchWorkContext();
-    get_slab_for_qa(jobCardNumber.value);
-    fetchGrades();
+    await loadData();
+
+    document.addEventListener("refresh-qa-station", () => {
+        loadData();
+    });
 
     startHourglassAnimation();
 });
+
+async function loadData() {
+    await get_slab_for_qa(jobCardNumber.value);
+    await fetchGrades();
+}
 
 onUnmounted(() => {
     if (hourglassInterval) clearInterval(hourglassInterval);

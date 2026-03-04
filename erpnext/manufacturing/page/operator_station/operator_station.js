@@ -19,6 +19,14 @@ frappe.pages['operator-station'].on_page_load = function (wrapper) {
         single_column: true
     });
 
+    const refresh_page = async () => {
+        if (frappe.operator_station_app?._instance?.proxy) {
+            document.dispatchEvent(new CustomEvent('refresh-operator-station'));
+        }
+    };
+
+    page.add_inner_button('<span class="fa fa-refresh"></span>', refresh_page);
+
     if (frappe.boot.developer_mode) {
         frappe.hot_update ??= [];
         frappe.hot_update.push(() => load_vue(wrapper, { config, page, job_card }));
