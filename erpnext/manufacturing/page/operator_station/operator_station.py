@@ -311,8 +311,12 @@ def get_next_work_item(process, line="", include_wip=True):
 	job_card = job_card_data["top_job_card"]
 	available_job_cards_count = job_card_data["available_job_cards_count"]
 
+	is_wip = job_card and job_card.status == 'Work In Progress'
+	slab = frappe.get_doc("Slab", job_card.slab) if is_wip and job_card.slab else None
+
 	slabs_for_process = get_slabs_for(line, process, limit=1000) # Giving an arbitrarily high limit to make sure that the exact number of slabs is fetched.
-	slab = slabs_for_process[0] if slabs_for_process else None
+
+	slab = slab if slab else (slabs_for_process[0] if slabs_for_process else None)
 	available_slabs_count = len(slabs_for_process)
 
 	return {

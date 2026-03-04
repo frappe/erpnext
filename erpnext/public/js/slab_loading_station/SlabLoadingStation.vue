@@ -21,6 +21,7 @@ const fetchWorkContext = async () => {
 };
 const slabs = ref([]);
 const searchQuery = ref('');
+const isProcessing = ref(false);
 
 const fetchSlabs = async (play_ding = false) => {
     try {
@@ -123,12 +124,21 @@ const fetchSettings = async () => {
 
 onMounted(async () => {
     await fetchWorkContext();
-    fetchSlabs();
-    fetchSettings();
+    await loadData();
+
+    document.addEventListener("refresh-slab-loading-station", () => {
+        loadData();
+    });
+
     setInterval(() => {
         now.value = new Date();
     }, 60000);
 });
+
+async function loadData() {
+    await fetchSlabs();
+    await fetchSettings();
+}
 
 const unloadToTrimming = (slab) => {
     const modified = new Date(slab.modified);
@@ -136,6 +146,7 @@ const unloadToTrimming = (slab) => {
     const elapsedHours = diffMs / (1000 * 60 * 60);
 
     const performMove = async () => {
+        isProcessing.value = true;
         try {
             await frappe.call({
                 method: 'erpnext.manufacturing.page.slab_loading_station.slab_loading_station.unload_slab_to_trimming',
@@ -157,6 +168,8 @@ const unloadToTrimming = (slab) => {
             });
         } catch (e) {
             frappe.msgprint(__('Failed to unload slab to Trimming.'));
+        } finally {
+            isProcessing.value = false;
         }
     };
 
@@ -209,9 +222,10 @@ const unloadToTrimming = (slab) => {
                             </div>
                         </div>
                     </div>
-                    <button class="btn btn-primary w-100 font-weight-bold" @click="unloadToTrimming(slab)">
+                    <button class="btn btn-primary w-100 font-weight-bold" :disabled="isProcessing" @click="unloadToTrimming(slab)">
+                        <i v-if="isProcessing" class="fa fa-spinner fa-spin mr-2"></i>
                         {{ __('Unload to Trimming') }}
-                        <span class="fa fa-arrow-right ml-2" style="opacity: 0.5;"></span>
+                        <span v-if="!isProcessing" class="fa fa-arrow-right ml-2" style="opacity: 0.5;"></span>
                     </button>
                 </div>
             </div>

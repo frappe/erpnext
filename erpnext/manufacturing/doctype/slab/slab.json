@@ -64,7 +64,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Distribution\nPressing\nRe-pressing\nHeating\nCooling\nQuarantine\nTrimming\nCalibration\nPolishing\nQuality Check\nPacked\nShipped\nDiscarded",
+   "options": "Distribution\nPressing\nRe-Pressing\nHeating\nCooling\nQuarantine\nTrimming\nCalibration\nPolishing\nQuality Check\nPacked\nShipped\nDiscarded",
    "read_only": 1,
    "reqd": 1
   },
@@ -208,11 +208,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-10 17:51:40.320473",
+ "modified": "2026-03-04 12:54:58.899571",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",
- "naming_rule": "Expression",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -253,7 +253,7 @@
   },
   {
    "color": "Cyan",
-   "title": "Re-pressing"
+   "title": "Re-Pressing"
   },
   {
    "color": "Orange",

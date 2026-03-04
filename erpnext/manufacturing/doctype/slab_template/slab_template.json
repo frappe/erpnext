@@ -26,9 +26,9 @@
   },
   {
    "fieldname": "thickness",
-   "fieldtype": "Link",
+   "fieldtype": "Select",
    "label": "Thickness",
-   "options": "Slab Thickness",
+   "options": "3CM\n2CM",
    "reqd": 1
   },
   {
@@ -42,7 +42,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-16 16:05:07.865446",
+ "modified": "2026-03-04 21:59:39.322188",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab Template",
