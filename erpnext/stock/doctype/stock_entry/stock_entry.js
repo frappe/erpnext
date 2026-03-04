@@ -930,10 +930,6 @@ frappe.ui.form.on("Stock Entry Detail", {
 		);
 	},
 
-	qty(frm, cdt, cdn) {
-		frm.events.set_rate_and_fg_qty(frm, cdt, cdn);
-	},
-
 	conversion_factor(frm, cdt, cdn) {
 		frm.events.set_rate_and_fg_qty(frm, cdt, cdn);
 	},
