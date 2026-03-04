@@ -14,12 +14,14 @@ from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 @frappe.whitelist()
 def transfer_to_next_process(current_work_order, qty=None, process=None, mixer_number=None):
 	"""Transfer FG from Mixing → Next Process Source Warehouse."""
-	wo: WorkOrder = frappe.get_doc("Work Order", current_work_order) #pyright: ignore
+	wo: WorkOrder = frappe.get_doc("Work Order", current_work_order)  # pyright: ignore
 	fg_item = wo.production_item
 	fg_qty = flt(qty or wo.produced_qty)
 
 	process_mapping = deepcopy(MFG_PROCESS_MAP)
-	process_mapping["Mixing Operation - SJ"] = process_mapping[MIXING_PROCESS] # TODO: Find a better way to do this rather than hardcoding the process name
+	process_mapping["Mixing Operation - SJ"] = process_mapping[
+		MIXING_PROCESS
+	]  # TODO: Find a better way to do this rather than hardcoding the process name
 
 	current_process = wo.operations[0].operation if wo.operations else ""
 
@@ -28,7 +30,7 @@ def transfer_to_next_process(current_work_order, qty=None, process=None, mixer_n
 	if not next_process:
 		frappe.throw(_("No next process found after {0}").format(current_process))
 
-	bom_doc: BOM = frappe.get_doc("BOM", wo.bom_no) #pyright: ignore
+	bom_doc: BOM = frappe.get_doc("BOM", wo.bom_no)  # pyright: ignore
 
 	slab_template = _get_slab_template_from_bom(bom_doc)
 
@@ -38,6 +40,7 @@ def transfer_to_next_process(current_work_order, qty=None, process=None, mixer_n
 			"production_plan": wo.production_plan,
 			"docstatus": ["<", 2],
 			"production_item": ["like", f"%{slab_template}%"],
+			"production_line": wo.production_line,
 		},
 		fields=["name"],
 		ignore_permissions=True,
@@ -96,10 +99,10 @@ def transfer_to_next_process(current_work_order, qty=None, process=None, mixer_n
 	if not job_card_item:
 		frappe.throw(f"No Job Card Item found for {fg_item} in {open_job_card}")
 
-	se: StockEntry = frappe.new_doc("Stock Entry") #pyright: ignore
+	se: StockEntry = frappe.new_doc("Stock Entry")  # pyright: ignore
 	se.purpose = "Material Transfer for Manufacture"
-	se.work_order = next_wo #pyright: ignore
-	se.job_card = open_job_card #pyright: ignore # No job card for inter-process transfer
+	se.work_order = next_wo  # pyright: ignore
+	se.job_card = open_job_card  # pyright: ignore # No job card for inter-process transfer
 	se.company = wo.company
 	se.fg_completed_qty = transfer_qty
 
@@ -261,7 +264,7 @@ def get_operators(designation, production_line):
 
 def _get_slab_template_from_bom(bom_doc):
 	template_components = bom_doc.slab_template.split("-") if bom_doc.slab_template else []
-	size_index = 2 # TODO: This depends on the template's naming structure. Use a reliable way to do it like fetching the slab template and then the size from within it.
+	size_index = 2  # TODO: This depends on the template's naming structure. Use a reliable way to do it like fetching the slab template and then the size from within it.
 	for index, _ in enumerate(template_components):
 		if index == size_index:
 			temp = re.sub(r"0", "00", template_components[index])
