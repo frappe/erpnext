@@ -50,22 +50,11 @@ def get_party_type(doctype: str, txt: str, searchfield: str, start: int, page_le
 	)
 
 	if not result and txt:
-		# No match found — txt may be a translated DocType name (non-English locale).
-		# Party Type names are stored in English, so fall back to matching against
-		# translated names.
-		if account_type and account_type in ["Receivable", "Payable"]:
-			all_types = frappe.db.sql(
-				"select name from `tabParty Type` where account_type = %(account_type)s or name = 'Employee' order by name",
-				{"account_type": account_type},
-			)
-		elif account_type:
-			all_types = frappe.db.sql(
-				"select name from `tabParty Type` where account_type = %(account_type)s order by name",
-				{"account_type": account_type},
-			)
-		else:
-			all_types = frappe.db.sql("select name from `tabParty Type` order by name")
-
+		# txt may be a translated name — re-run with the same filters but match against translations
+		all_types = frappe.db.sql(
+			f"select name from `tabParty Type` where 1=1 {cond} order by name",
+			params,
+		)
 		search_txt = txt.lower()
 		result = tuple((name,) for (name,) in all_types if search_txt in frappe._(name).lower())
 		result = result[int(start) : int(start) + int(page_len)]
