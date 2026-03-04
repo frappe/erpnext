@@ -1415,7 +1415,7 @@ def get_account_balances(
 
 
 @frappe.whitelist()
-def get_account_balances_beta(company: str, include_default_fb_balances: bool = False):
+def get_account_balances_coa(company: str, include_default_fb_balances: bool = False):
 	company_currency = frappe.get_cached_value("Company", company, "default_currency")
 
 	Account = DocType("Account")
@@ -1454,7 +1454,9 @@ def get_account_balances_beta(company: str, include_default_fb_balances: bool = 
 		default_finance_book = frappe.get_cached_value("Company", company, "default_finance_book")
 
 	if default_finance_book:
-		condition_list.append(GLEntry.finance_book == default_finance_book)
+		condition_list.append(
+			(GLEntry.finance_book == default_finance_book) | (GLEntry.finance_book.isnull())
+		)
 
 	for condition in condition_list:
 		get_ledger_balances_query = get_ledger_balances_query.where(condition)
