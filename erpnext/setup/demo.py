@@ -244,9 +244,16 @@ def delete_company(company):
 
 
 def read_data_file_using_hooks(doctype):
-	path = os.path.join(os.path.dirname(__file__), "demo_data")
-	with open(os.path.join(path, doctype + ".json")) as f:
-		data = f.read()
+	apps = frappe.get_installed_apps()
+	data = None
+	for app in apps:
+		path = frappe.get_app_path(app, "setup")
+		try:
+			with open(os.path.join(path, "demo_data", doctype + ".json")) as f:
+				data = f.read()
+			break
+		except FileNotFoundError:
+			continue
 
 	return data
 
