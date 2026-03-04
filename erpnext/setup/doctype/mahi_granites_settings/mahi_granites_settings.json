@@ -127,15 +127,14 @@
    "fieldname": "slab_seeds",
    "fieldtype": "Table",
    "label": "Slab Seeds",
-   "options": "Slab Seed",
-   "reqd": 1
+   "options": "Slab Seed"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-26 22:25:19.238521",
+ "modified": "2026-03-04 22:47:36.884031",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Mahi Granites Settings",
