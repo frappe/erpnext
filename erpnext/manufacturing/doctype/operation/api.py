@@ -264,6 +264,7 @@ def _get_slab_template_from_bom(bom_doc):
 	size_index = 2 # TODO: This depends on the template's naming structure. Use a reliable way to do it like fetching the slab template and then the size from within it.
 	for index, _ in enumerate(template_components):
 		if index == size_index:
-			template_components[index] = re.sub(r"00", "CM", template_components[index])
+			temp = re.sub(r"0", "00", template_components[index])
+			template_components[index] = re.sub(r"00", "CM", temp)
 	slab_template = "-".join(template_components)
 	return slab_template
