@@ -37,13 +37,8 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual(sq.get("items")[0].qty, 5)
 		self.assertEqual(sq.get("items")[1].rate, 300)
 
-<<<<<<< HEAD
-	def test_update_supplier_quotation_child_rate_disallow(self):
-		sq = frappe.copy_doc(test_records[0])
-=======
 	def test_update_supplier_quotation_child_rate(self):
-		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
->>>>>>> 2ec02e477f (feat: allowing rate modification in update item in quotation)
+		sq = frappe.copy_doc(test_records[0])
 		sq.submit()
 		trans_item = json.dumps(
 			[
