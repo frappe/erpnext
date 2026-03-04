@@ -68,6 +68,25 @@ def checkout_slab(slab_number: str):
 
 
 @frappe.whitelist()
+def re_press_slab(slab_number: str):
+	slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
+	if slab.status != "Pressing":
+		frappe.throw("Cannot re-press a slab that is not in the pressing stage")
+
+	# Get the last item in slab history
+	last_history = slab.slab_history[-1]
+	# Check if the out time on the last history item is None. If it is, checkout the slab first.
+	if last_history.out_time is None:
+		checkout_slab(slab_number)
+
+	slab.reload()
+	slab.is_repressed = True
+	slab.save(ignore_permissions=True)
+
+	move_slab_to(slab_number, "Re-Pressing", slab.current_job_card)
+
+
+@frappe.whitelist()
 def move_slab_to(
 	slab_number: str,
 	next_stage: str,
@@ -160,11 +179,11 @@ def get_slabs_for(line: str, next_stage: str, limit=1, include_current_stage=Fal
 	if next_stage in ALLOWED_STAGES:
 		target_index = ALLOWED_STAGES.index(next_stage)
 
-		# Special handling for Heating (Pressing -> Heating, Re-pressing -> Heating)
+		# Special handling for Heating (Pressing -> Heating, Re-Pressing -> Heating)
 		if next_stage == "Heating":
-			valid_previous_stages = ["Pressing", "Re-pressing"]
-		# Special handling for Re-pressing (Pressing does NOT lead to Re-pressing here)
-		elif next_stage == "Re-pressing":
+			valid_previous_stages = ["Pressing", "Re-Pressing"]
+		# Special handling for Re-pressing (Pressing does NOT lead to Re-Pressing here)
+		elif next_stage == "Re-Pressing":
 			valid_previous_stages = []
 		# General case: previous index in ALLOWED_STAGES
 		elif target_index > 0:

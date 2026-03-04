@@ -73,7 +73,7 @@ const unloadValues = ref({
     slab_bottom_temp: 0,
     remarks: ''
 });
-const currentSlab = ref(null);
+
 const loadingSlab = ref(false);
 
 const work_context = reactive({
@@ -262,18 +262,12 @@ async function confirmLoad() {
             }
         })
 
+        selectedSlab.value = null;
         if (res && res.message) {
             frappe.show_alert({ message: __('Slab loaded and heating started'), indicator: 'green' });
             await refreshOvenData();
             await fetch_slab_for_job_card(true);
         }
-
-        // remove slab from incoming list or clear selected if single Job Card
-        if (Array.isArray(currentSlab.value)) {
-            const idx = currentSlab.value.findIndex(s => s.name === selectedSlab.value?.name);
-            if (idx !== -1) currentSlab.value.splice(idx, 1);
-        }
-        selectedSlab.value = null;
 
         closeModal();
     } catch (e) {
