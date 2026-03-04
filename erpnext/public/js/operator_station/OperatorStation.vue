@@ -380,27 +380,31 @@ async function startOperation() {
 }
 
 async function repressSlab() {
-	isProcessing.value = true;
-
 	if (!currentStation.value || currentStation.value !== "pressing") {
 		return;
 	}
 
-	try {
-		const result = await frappe.call({
-			method: 'erpnext.manufacturing.doctype.slab.api.re_press_slab',
-			args: {
-				slab_number: slabNumber.value,
-			},
-		});
+	frappe.confirm(
+		__('Are you sure you want to re-press this slab?'),
+		async () => {
+			isProcessing.value = true;
+			try {
+				const result = await frappe.call({
+					method: 'erpnext.manufacturing.doctype.slab.api.re_press_slab',
+					args: {
+						slab_number: slabNumber.value,
+					},
+				});
 
-		erpnext.utils.play_ding("submit");
+				erpnext.utils.play_ding("submit");
 
-	} catch (e) {
-		frappe.msgprint(__('Failed to repress slab'));
-	} finally {
-		isProcessing.value = false;
-	}
+			} catch (e) {
+				frappe.msgprint(__('Failed to repress slab'));
+			} finally {
+				isProcessing.value = false;
+			}
+		}
+	);
 }
 
 async function finishOperation() {

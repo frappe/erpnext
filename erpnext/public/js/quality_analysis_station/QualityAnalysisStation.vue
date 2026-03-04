@@ -163,37 +163,42 @@ const confirmAndTag = async () => {
         return;
     }
 
-    try {
-        isProcessing.value = true;
-        form.observations = observations.value;
-        const res = await frappe.call({
-            method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.submit_qa_report',
-            args: {
-                report: form,
-                shift: work_context.assigned_shift,
-                job_card: jobCardNumber.value,
-                slab_number: selectedSlab.value.name,
-            },
-            freeze: true
-        });
+    frappe.confirm(
+        __('Are you sure you want to submit this quality report?'),
+        async () => {
+            try {
+                isProcessing.value = true;
+                form.observations = observations.value;
+                const res = await frappe.call({
+                    method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.submit_qa_report',
+                    args: {
+                        report: form,
+                        shift: work_context.assigned_shift,
+                        job_card: jobCardNumber.value,
+                        slab_number: selectedSlab.value.name,
+                    },
+                    freeze: true
+                });
 
-        if (res && res.message) {
-            frappe.show_alert(
-                __(`Quality Report submitted and Slab ${selectedSlab.value.name} checked out.`)
-            );
+                if (res && res.message) {
+                    frappe.show_alert(
+                        __(`Quality Report submitted and Slab ${selectedSlab.value.name} checked out.`)
+                    );
 
-            erpnext.utils.play_ding("submit");
+                    erpnext.utils.play_ding("submit");
 
-            jobCardNumber.value = null;
-            selectedSlab.value = null;
-            get_slab_for_qa(null, true);
+                    jobCardNumber.value = null;
+                    selectedSlab.value = null;
+                    get_slab_for_qa(null, true);
+                }
+            } catch (e) {
+                console.error(e);
+                frappe.msgprint(__('An error occurred while submitting the quality report.'));
+            } finally {
+                isProcessing.value = false;
+            }
         }
-    } catch (e) {
-        console.error(e);
-        frappe.msgprint(__('An error occurred while submitting the quality report.'));
-    } finally {
-        isProcessing.value = false;
-    }
+    );
 };
 
 const raiseQualityAlarm = async () => {

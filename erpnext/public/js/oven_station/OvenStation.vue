@@ -217,31 +217,36 @@ async function confirmUnload() {
         return;
     }
 
-    isProcessing.value = true;
-    try {
-        const res = await frappe.call({
-            method: 'erpnext.manufacturing.doctype.oven.api.unload_slab_from_oven',
-            args: {
-                rack_name: targetRack.value.name,
-                slab_name: targetRack.value.slab,
-                slab_template: targetRack.value.color,
-                values: unloadValues.value
-            }
-        });
+    frappe.confirm(
+        __('Are you sure you want to unload this slab?'),
+        async () => {
+            isProcessing.value = true;
+            try {
+                const res = await frappe.call({
+                    method: 'erpnext.manufacturing.doctype.oven.api.unload_slab_from_oven',
+                    args: {
+                        rack_name: targetRack.value.name,
+                        slab_name: targetRack.value.slab,
+                        slab_template: targetRack.value.color,
+                        values: unloadValues.value
+                    }
+                });
 
-        if (res.message) {
-            await refreshOvenData();
-            await fetch_slab_for_job_card(true);
-            frappe.show_alert({ message: __('Slab unloaded to the next process successfully'), indicator: 'green' });
-            erpnext.utils.play_ding("submit");
+                if (res.message) {
+                    await refreshOvenData();
+                    await fetch_slab_for_job_card(true);
+                    frappe.show_alert({ message: __('Slab unloaded to the next process successfully'), indicator: 'green' });
+                    erpnext.utils.play_ding("submit");
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                isProcessing.value = false;
+                showUnloadModal.value = false;
+                targetRack.value = null;
+            }
         }
-    } catch (e) {
-        console.error(e);
-    } finally {
-        isProcessing.value = false;
-        showUnloadModal.value = false;
-        targetRack.value = null;
-    }
+    );
 }
 
 async function confirmLoad() {
@@ -249,32 +254,37 @@ async function confirmLoad() {
         return;
     }
 
-    isProcessing.value = true;
-    try {
-        prepareOvenOperation();
-        const res = await frappe.call({
-            method: 'erpnext.manufacturing.doctype.oven.api.load_slab_into_oven',
-            args: {
-                oven_op: ovenOperation.value,
-                line: work_context.assigned_line,
-                job_card_name: jobCardNumber.value || selectedSlab.value?.current_job_card,
-                slab_template: selectedSlab.value?.template,
+    frappe.confirm(
+        __('Are you sure you want to load this slab into the oven?'),
+        async () => {
+            isProcessing.value = true;
+            try {
+                prepareOvenOperation();
+                const res = await frappe.call({
+                    method: 'erpnext.manufacturing.doctype.oven.api.load_slab_into_oven',
+                    args: {
+                        oven_op: ovenOperation.value,
+                        line: work_context.assigned_line,
+                        job_card_name: jobCardNumber.value || selectedSlab.value?.current_job_card,
+                        slab_template: selectedSlab.value?.template,
+                    }
+                })
+
+                selectedSlab.value = null;
+                if (res && res.message) {
+                    frappe.show_alert({ message: __('Slab loaded and heating started'), indicator: 'green' });
+                    await refreshOvenData();
+                    await fetch_slab_for_job_card(true);
+                }
+
+                closeModal();
+            } catch (e) {
+                console.error(e);
+            } finally {
+                isProcessing.value = false;
             }
-        })
-
-        selectedSlab.value = null;
-        if (res && res.message) {
-            frappe.show_alert({ message: __('Slab loaded and heating started'), indicator: 'green' });
-            await refreshOvenData();
-            await fetch_slab_for_job_card(true);
         }
-
-        closeModal();
-    } catch (e) {
-        console.error(e);
-    } finally {
-        isProcessing.value = false;
-    }
+    );
 }
 
 function closeModal() {

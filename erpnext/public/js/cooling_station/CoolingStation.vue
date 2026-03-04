@@ -67,51 +67,61 @@ const skipSlab = () => {
 };
 
 const startCooling = async (slab) => {
-    isProcessing.value = true;
-    try {
-        const res = await frappe.call({
-            method: 'erpnext.manufacturing.page.cooling_station.cooling_station.start_cooling_process',
-            args: {
-                slab_number: slab.name,
-                line: work_context.assigned_line
-            }
-        });
+    frappe.confirm(
+        __('Are you sure you want to start the cooling process for this slab?'),
+        async () => {
+            isProcessing.value = true;
+            try {
+                const res = await frappe.call({
+                    method: 'erpnext.manufacturing.page.cooling_station.cooling_station.start_cooling_process',
+                    args: {
+                        slab_number: slab.name,
+                        line: work_context.assigned_line
+                    }
+                });
 
-        if (res.message) {
-            frappe.show_alert({ message: __('Cooling Started'), indicator: 'green' });
-            erpnext.utils.play_ding("submit");
-            await loadData();
+                if (res.message) {
+                    frappe.show_alert({ message: __('Cooling Started'), indicator: 'green' });
+                    erpnext.utils.play_ding("submit");
+                    await loadData();
+                }
+            } catch (e) {
+                frappe.msgprint(__('Failed to start cooling: {0}', [e.message]));
+            } finally {
+                isProcessing.value = false;
+            }
         }
-    } catch (e) {
-        frappe.msgprint(__('Failed to start cooling: {0}', [e.message]));
-    } finally {
-        isProcessing.value = false;
-    }
+    );
 };
 
 const finishCooling = async (job) => {
-    isProcessing.value = true;
-    try {
-        const res = await frappe.call({
-            method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_process',
-            args: {
-                job_card: job.name,
-                process_name: 'Cooling',
-                transfer_materials: false
-            }
-        });
+    frappe.confirm(
+        __('Are you sure you want to finish the cooling process and unload this slab?'),
+        async () => {
+            isProcessing.value = true;
+            try {
+                const res = await frappe.call({
+                    method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_process',
+                    args: {
+                        job_card: job.name,
+                        process_name: 'Cooling',
+                        transfer_materials: false
+                    }
+                });
 
-        if (res.message) {
-            stopTimer(job.name);
-            frappe.show_alert({ message: __('Cooling Finished'), indicator: 'green' });
-            erpnext.utils.play_ding("submit");
-            await loadData();
+                if (res.message) {
+                    stopTimer(job.name);
+                    frappe.show_alert({ message: __('Cooling Finished'), indicator: 'green' });
+                    erpnext.utils.play_ding("submit");
+                    await loadData();
+                }
+            } catch (e) {
+                frappe.msgprint(__('Failed to finish cooling: {0}', [e.message]));
+            } finally {
+                isProcessing.value = false;
+            }
         }
-    } catch (e) {
-        frappe.msgprint(__('Failed to finish cooling: {0}', [e.message]));
-    } finally {
-        isProcessing.value = false;
-    }
+    );
 };
 
 const updateJobElapsed = (job) => {
