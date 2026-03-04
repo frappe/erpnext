@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, reactive } from 'vue';
+import { ref, computed, onMounted, reactive, watch } from 'vue';
 
 const jobCardName = ref(null);
 const jobCardDoc = ref(null);
@@ -75,6 +75,57 @@ const fetchWorkContext = async () => {
 
 // UI flags
 const showAlarms = ref(true);
+
+const lastThickness = ref(null);
+
+function showThicknessConfirmationDialog(oldThick, newThick) {
+	let d = new frappe.ui.Dialog({
+		title: __('Thickness Changed'),
+		fields: [
+			{
+				fieldname: 'msg',
+				fieldtype: 'HTML',
+				options: `<div class="text-center" style="font-size: 1.2rem; margin: 15px 0;">
+					<span class="fa fa-exclamation-triangle text-warning" style="font-size: 2rem; margin-bottom: 10px; display: block;"></span>
+					<p>${__('The slab thickness has changed from')} <b>${oldThick}</b> ${__('to')} <b>${newThick}</b>.</p>
+					<p class="text-muted" style="font-size: 1rem;">${__("Please confirm that the machine's settings have been adjusted accordingly.")}</p>
+				</div>`
+			}
+		],
+		primary_action_label: __('Yes, I confirm'),
+		primary_action: function() {
+			d.hide();
+		}
+	});
+
+	if (d.get_close_btn()) {
+		d.get_close_btn().hide();
+	}
+
+	d.$wrapper.modal({ backdrop: 'static', keyboard: false });
+	d.show();
+}
+
+function handleThicknessChange(newTemplate) {
+	if (!newTemplate) return;
+	// If the current process is not Calibration or Polishing do not show the confirmation dialog.
+	const route = frappe.get_route();
+	const station = (route[1] || '').toLowerCase();
+	if (station !== 'calibration' && station !== 'polishing') return;
+
+	const parts = String(newTemplate).split('-');
+	if (parts.length >= 3) {
+		const newThickness = parts[2];
+		if (lastThickness.value && lastThickness.value !== newThickness) {
+			showThicknessConfirmationDialog(lastThickness.value, newThickness);
+		}
+
+		lastThickness.value = newThickness;
+	}
+}
+
+watch(() => colour.value, handleThicknessChange);
+watch(() => slabTemplate.value, handleThicknessChange);
 
 // Raise‑alarm dialog
 const issueDialogOpen = ref(false);
