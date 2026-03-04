@@ -58,8 +58,22 @@ class TestQuotation(IntegrationTestCase):
 		qo.payment_schedule[0].due_date = add_days(qo.transaction_date, -2)
 		self.assertRaises(frappe.ValidationError, qo.save)
 
-	def test_update_child_disallow_rate_change(self):
-		qo = make_quotation(qty=4)
+	def test_update_child_rate_change(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_1 = make_item("_Test Item")
+		item_2 = make_item("_Test Item 1")
+
+		item_list = [
+			{"item_code": item_1.item_code, "warehouse": "_Test Warehouse - _TC", "qty": 10, "rate": 300},
+			{"item_code": item_2.item_code, "warehouse": "_Test Warehouse - _TC", "qty": 5, "rate": 400},
+		]
+
+		qo = make_quotation(item_list=item_list)
+		so = make_sales_order(qo.name, args={"filtered_children": [qo.items[0].name]})
+		so.delivery_date = nowdate()
+		so.submit()
+		qo.reload()
 		trans_item = json.dumps(
 			[
 				{
@@ -67,10 +81,35 @@ class TestQuotation(IntegrationTestCase):
 					"rate": 5000,
 					"qty": qo.items[0].qty,
 					"docname": qo.items[0].name,
-				}
+				},
+				{
+					"item_code": qo.items[1].item_code,
+					"rate": qo.items[1].rate,
+					"qty": qo.items[1].qty,
+					"docname": qo.items[1].name,
+				},
 			]
 		)
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Quotation", trans_item, qo.name)
+		trans_item = json.dumps(
+			[
+				{
+					"item_code": qo.items[0].item_code,
+					"rate": qo.items[0].rate,
+					"qty": qo.items[0].qty,
+					"docname": qo.items[0].name,
+				},
+				{
+					"item_code": qo.items[1].item_code,
+					"rate": 50,
+					"qty": qo.items[1].qty,
+					"docname": qo.items[1].name,
+				},
+			]
+		)
+		update_child_qty_rate("Quotation", trans_item, qo.name)
+		qo.reload()
+		self.assertEqual(qo.items[1].rate, 50)
 
 	def test_update_child_removing_item(self):
 		qo = make_quotation(qty=10)

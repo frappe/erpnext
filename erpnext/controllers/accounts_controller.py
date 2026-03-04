@@ -3886,20 +3886,28 @@ def update_child_qty_rate(
 			return frappe.db.get_single_value("Buying Settings", "allow_zero_qty_in_purchase_order") or False
 		return False
 
-	def validate_quantity(child_item, new_data):
+	def validate_quantity_and_rate(child_item, new_data):
 		if not flt(new_data.get("qty")) and not is_allowed_zero_qty():
 			frappe.throw(
-				_("Row #{0}: Quantity for Item {1} cannot be zero.").format(
+				_("Row #{0}:Quantity for Item {1} cannot be zero.").format(
 					new_data.get("idx"), frappe.bold(new_data.get("item_code"))
 				),
 				title=_("Invalid Qty"),
 			)
 
-		if parent_doctype == "Sales Order" and flt(new_data.get("qty")) < flt(child_item.delivered_qty):
-			frappe.throw(_("Cannot set quantity less than delivered quantity"))
+		qty_limits = {
+			"Sales Order": ("delivered_qty", _("Cannot set quantity less than delivered quantity")),
+			"Purchase Order": ("received_qty", _("Cannot set quantity less than received quantity")),
+		}
 
-		if parent_doctype == "Purchase Order" and flt(new_data.get("qty")) < flt(child_item.received_qty):
-			frappe.throw(_("Cannot set quantity less than received quantity"))
+		if parent_doctype in qty_limits:
+			qty_field, error_message = qty_limits[parent_doctype]
+			if flt(new_data.get("qty")) < flt(child_item.get(qty_field)):
+				frappe.throw(
+					_("Row #{0}:").format(new_data.get("idx"))
+					+ error_message.format(frappe.bold(new_data.get("item_code"))),
+					title=_("Invalid Qty"),
+				)
 
 		if parent_doctype in ["Quotation", "Supplier Quotation"]:
 			if (parent_doctype == "Quotation" and not ordered_items) or (
@@ -3912,7 +3920,15 @@ def update_child_qty_rate(
 				if parent_doctype == "Quotation"
 				else purchased_items.get(child_item.name)
 			)
+
 			if qty_to_check:
+				if not rate_unchanged:
+					frappe.throw(
+						_(
+							"Cannot update rate as item {0} is already ordered or purchased against this quotation"
+						).format(frappe.bold(new_data.get("item_code")))
+					)
+
 				if flt(new_data.get("qty")) < qty_to_check:
 					frappe.throw(_("Cannot reduce quantity than ordered or purchased quantity"))
 
@@ -4031,10 +4047,7 @@ def update_child_qty_rate(
 			):
 				continue
 
-		validate_quantity(child_item, d)
-		if parent_doctype in ["Quotation", "Supplier Quotation"]:
-			if not rate_unchanged:
-				frappe.throw(_("Rates cannot be modified for quoted items"))
+		validate_quantity_and_rate(child_item, d)
 
 		if flt(child_item.get("qty")) != flt(d.get("qty")):
 			any_qty_changed = True
