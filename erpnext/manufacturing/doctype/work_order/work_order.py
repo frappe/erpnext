@@ -713,19 +713,25 @@ class WorkOrder(Document):
 		self.db_set("disassembled_qty", self.disassembled_qty)
 
 	def get_transferred_or_manufactured_qty(self, purpose, fieldname):
-		table = frappe.qb.DocType("Stock Entry")
-		query = frappe.qb.from_(table).where(
-			(table.work_order == self.name) & (table.docstatus == 1) & (table.purpose == purpose)
+		parent = frappe.qb.DocType("Stock Entry")
+
+		query = frappe.qb.from_(parent).where(
+			(parent.work_order == self.name)
+			& (parent.docstatus == 1)
+			& (parent.purpose == purpose)
+			& (parent.is_additional_transfer_entry == cint(fieldname == "additional_transferred_qty"))
 		)
 
 		if purpose == "Manufacture":
-			query = query.select(Sum(table.fg_completed_qty) - Sum(table.process_loss_qty))
+			child = frappe.qb.DocType("Stock Entry Detail")
+			query = (
+				query.join(child)
+				.on(parent.name == child.parent)
+				.select(Sum(child.transfer_qty))
+				.where(child.is_finished_item == 1)
+			)
 		else:
-			query = query.select(Sum(table.fg_completed_qty))
-
-		query = query.where(
-			table.is_additional_transfer_entry == cint(fieldname == "additional_transferred_qty")
-		)
+			query = query.select(Sum(parent.fg_completed_qty))
 
 		return flt(query.run()[0][0])
 
