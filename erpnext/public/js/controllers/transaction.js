@@ -543,7 +543,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						schedules: selected,
 					},
 				});
-
+				frappe.model.sync(pr_name);
 				frappe.set_route("Form", "Payment Request", pr_name.name);
 			},
 		});
