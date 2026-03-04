@@ -374,56 +374,61 @@ async function startOperation() {
 }
 
 async function finishOperation() {
-	const route = frappe.get_route();
-	const station = route[1] || props.process;
+	frappe.confirm(
+		__('Are you sure you want to finish this job?'),
+		async () => {
+			const route = frappe.get_route();
+			const station = route[1] || props.process;
 
-	if (processTimerHandle.value) {
-		clearInterval(processTimerHandle.value);
-		processTimerHandle.value = null;
-	}
+			if (processTimerHandle.value) {
+				clearInterval(processTimerHandle.value);
+				processTimerHandle.value = null;
+			}
 
-	try {
-		transferMaterials = station.toLowerCase() !== 'cooling';
+			try {
+				const transferMaterials = station.toLowerCase() !== 'cooling';
 
-		const result = await frappe.call({
-			method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_process',
-			args: {
-				job_card: jobCardName.value,
-				process_name: station,
-				transfer_materials: transferMaterials,
-			},
-		});
+				const result = await frappe.call({
+					method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_process',
+					args: {
+						job_card: jobCardName.value,
+						process_name: station,
+						transfer_materials: transferMaterials,
+					},
+				});
 
-		erpnext.utils.play_ding("submit");
+				erpnext.utils.play_ding("submit");
 
-		jobCardName.value = null;
-		processStarted.value = false;
-		processStartTime.value = null;
-		processElapsed.value = 0;
-		processReady.value = false;
+				jobCardName.value = null;
+				processStarted.value = false;
+				processStartTime.value = null;
+				processElapsed.value = 0;
+				processReady.value = false;
 
-		jobCardSubmitted.value = true;
-		preparedQty.value = result.message.job_card_qty;
-		stockEntryName.value = result.message.stock_entry;
-		nextWorkOrder.value = result.message.next_work_order || '';
-		transferredQty.value = 0;
-		transferSuccess.value = false;
-		slabNumber.value = null;
-		batchNo.value = null;
-		colour.value = null;
+				jobCardSubmitted.value = true;
+				preparedQty.value = result.message.job_card_qty;
+				stockEntryName.value = result.message.stock_entry;
+				nextWorkOrder.value = result.message.next_work_order || '';
+				transferredQty.value = 0;
+				transferSuccess.value = false;
+				slabNumber.value = null;
+				batchNo.value = null;
+				colour.value = null;
 
-		await checkForNextItem();
-		if (is_standalone.value) {
-			await fetchQueue(work_context.assigned_line, station);
+				await checkForNextItem();
+				if (is_standalone.value) {
+					await fetchQueue(work_context.assigned_line, station);
+				}
+			} catch (error) {
+				const errorMsg = error.message || (error._server_messages?.[0]?.message) || JSON.stringify(error);
+				frappe.msgprint({
+					title: __('Error'),
+					indicator: 'red',
+					message: `Failed to complete Job Card`
+				});
+			}
 		}
-	} catch (error) {
-		const errorMsg = error.message || (error._server_messages?.[0]?.message) || JSON.stringify(error);
-		frappe.msgprint({
-			title: __('Error'),
-			indicator: 'red',
-			message: `Failed to complete Job Card`
-		});
-	}
+	);
 }
 
 function haltJob() {
