@@ -603,7 +603,7 @@ def get_item_warehouse_(ctx: ItemDetailsCtx, item, overwrite_warehouse, defaults
 			or defaults.item_defaults.get("default_warehouse")
 			or defaults.item_group_defaults.get("default_warehouse")
 			or defaults.brand_defaults.get("default_warehouse")
-			or ctx.warehouse
+			or None
 		)
 
 	else:
