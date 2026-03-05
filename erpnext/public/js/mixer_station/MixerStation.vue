@@ -224,16 +224,13 @@ onUnmounted(() => {
     if (pollingInterval.value) clearInterval(pollingInterval.value);
 });
 
-async function toggleReady() {
-    if (mixingStarted.value) {
-        return;
-    }
+async function confirmAndStartMixing() {
     if (!allAdditionalIngredientsAdded.value) {
         frappe.msgprint(__('Mark all additional ingredients as Added first.'));
         return;
     }
     frappe.confirm(
-        __('Do you want to confirm the materials?'),
+        __('Do you want to confirm the materials and start mixing?'),
         async () => {
             isProcessing.value = true;
             try {
@@ -245,7 +242,7 @@ async function toggleReady() {
                 }));
 
                 const r = await frappe.call({
-                    method: 'erpnext.manufacturing.page.mixer_station.mixer_station.confirm_materials',
+                    method: 'erpnext.manufacturing.page.mixer_station.mixer_station.confirm_and_start_mixing',
                     args: {
                         job_card: jobCard.value,
                         ingredients: JSON.stringify(payload),
@@ -254,6 +251,16 @@ async function toggleReady() {
                 });
 
                 mixingReady.value = true;
+                mixingStarted.value = true;
+                mixingStartTime.value = frappe.datetime.now_datetime();
+
+                mixingElapsed.value = 0;
+                if (mixingTimerHandle.value) {
+                    clearInterval(mixingTimerHandle.value);
+                }
+                mixingTimerHandle.value = setInterval(() => {
+                    mixingElapsed.value += 1;
+                }, 1000);
             } catch (e) {
                 frappe.show_alert({
                     message: __('Failed to confirm materials'),
@@ -265,6 +272,47 @@ async function toggleReady() {
         },
     );
 }
+
+// async function toggleReady() {
+//     if (mixingStarted.value) {
+//         return;
+//     }
+//     if (!allAdditionalIngredientsAdded.value) {
+//         frappe.msgprint(__('Mark all additional ingredients as Added first.'));
+//         return;
+//     }
+//     frappe.confirm(
+//         __('Do you want to confirm the materials?'),
+//         async () => {
+//             try {
+//                 const payload = ingredients.value.map(ing => ({
+//                     item_code: ing.item_code,
+//                     qty: ing.qty,
+//                     unit: ing.unit,
+//                     is_added: ing.is_added,
+//                 }));
+
+//                 const r = await frappe.call({
+//                     method: 'erpnext.manufacturing.page.mixer_station.mixer_station.confirm_materials',
+//                     args: {
+//                         job_card: jobCard.value,
+//                         ingredients: JSON.stringify(payload),
+//                         bom_uom: bomUOM.value,
+//                     }
+//                 });
+
+//                 mixingReady.value = true;
+//                 frappe.msgprint(
+//                     __('Materials confirmed. Stock Entry {0} created.', [r.message.stock_entry])
+//                 );
+//             } catch (e) {
+//                 frappe.msgprint(
+//                     __('Failed to confirm materials')
+//                 );
+//             }
+//         },
+//     );
+// }
 
 async function getJobCardsList() {
     const route = frappe.get_route();
@@ -280,48 +328,48 @@ async function getJobCardsList() {
     return jobCard.value;
 }
 
-async function startMixing() {
-    if (!mixingReady.value) {
-        frappe.msgprint(__('Confirm materials before starting mixing.'));
-        return;
-    }
-    frappe.confirm(
-        __('Start mixing now?'),
-        async () => {
-            isProcessing.value = true;
-            try {
-                await frappe.call({
-                    method: 'erpnext.manufacturing.page.mixer_station.mixer_station.start_mixing',
-                    args: { job_card: jobCard.value }
-                });
-                mixingStarted.value = true;
-                mixingStartTime.value = frappe.datetime.now_datetime();
+// async function startMixing() {
+//     if (!mixingReady.value) {
+//         frappe.msgprint(__('Confirm materials before starting mixing.'));
+//         return;
+//     }
+//     frappe.confirm(
+//         __('Start mixing now?'),
+//         async () => {
+//             isProcessing.value = true;
+//             try {
+//                 await frappe.call({
+//                     method: 'erpnext.manufacturing.page.mixer_station.mixer_station.start_mixing',
+//                     args: { job_card: jobCard.value }
+//                 });
+//                 mixingStarted.value = true;
+//                 mixingStartTime.value = frappe.datetime.now_datetime();
 
-                mixingElapsed.value = 0;
-                if (mixingTimerHandle.value) {
-                    clearInterval(mixingTimerHandle.value);
-                }
-                mixingTimerHandle.value = setInterval(() => {
-                    mixingElapsed.value += 1;
-                }, 1000);
-            }
-            catch (e) {
-                frappe.show_alert({
-                    message: __('Failed to start Job Card for mixing'),
-                    indicator: 'red'
-                });
-            } finally {
-                isProcessing.value = false;
-            }
-        },
-        () => {
-            frappe.show_alert({
-                message: __('Mixing was not started.'),
-                indicator: 'red'
-            });
-        }
-    );
-}
+//                 mixingElapsed.value = 0;
+//                 if (mixingTimerHandle.value) {
+//                     clearInterval(mixingTimerHandle.value);
+//                 }
+//                 mixingTimerHandle.value = setInterval(() => {
+//                     mixingElapsed.value += 1;
+//                 }, 1000);
+//             }
+//             catch (e) {
+//                 frappe.show_alert({
+//                     message: __('Failed to start Job Card for mixing'),
+//                     indicator: 'red'
+//                 });
+//             } finally {
+//                 isProcessing.value = false;
+//             }
+//         },
+//         () => {
+//             frappe.show_alert({
+//                 message: __('Mixing was not started.'),
+//                 indicator: 'red'
+//             });
+//         }
+//     );
+// }
 
 async function finishAndDischarge() {
     if (mixingTimerHandle.value) {
@@ -577,14 +625,12 @@ async function onMixerChange() {
 async function fetchQueue() {
     try {
         const r = await frappe.call({
-            method: 'erpnext.manufacturing.doctype.operation.api.get_open_job_cards',
+            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixing_queue',
             args: {
-                process: "Mixing",
-                line: work_context.assigned_line,
-                include_wip: true,
-                include_material_transferred: true
+                production_line: work_context.assigned_line,
             }
         });
+
         jobcardsQueue.value = r.message || [];
     } catch (e) {
         console.error('Failed to fetch mixing queue:', e);
@@ -754,20 +800,13 @@ function selectJobCard(name) {
                             </div>
 
                             <div class="mb-3">
-                                <button v-if="!mixingReady"
-                                    :disabled="!isMixerSelected || !allAdditionalIngredientsAdded || isProcessing"
-                                    :class="!isMixerSelected || !allAdditionalIngredientsAdded || isProcessing ? 'btn-disabled-pointer' : ''"
-                                    class="btn btn-sm border border-success" @click="toggleReady">
+                                <button
+                                    :disabled="!isMixerSelected || !allAdditionalIngredientsAdded || mixingStarted || isProcessing"
+                                    :class="!isMixerSelected || !allAdditionalIngredientsAdded || mixingStarted || isProcessing ? 'btn-disabled-pointer' : ''"
+                                    class="btn btn-success btn-block py-3" @click="confirmAndStartMixing">
                                     <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
-                                    <span v-else class="fa fa-check mr-1"></span>
-                                    {{ __('Confirm Materials') }}
-                                </button>
-
-                                <button v-else class="btn btn-success btn-block py-2" :disabled="mixingStarted || isProcessing"
-                                    @click="startMixing">
-                                    <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
-                                    <span v-else class="fa fa-play mr-1"></span>
-                                    {{ __('Start Mixing') }}
+                                    <span v-else :class="mixingReady ? 'fa fa-play mr-1' : 'fa fa-check mr-1'"></span>
+                                    {{ __('Confirm Materials and Start Mixing') }}
                                 </button>
                             </div>
                         </div>
@@ -784,7 +823,8 @@ function selectJobCard(name) {
                                 {{ formattedMixingTime }}
                             </div>
                             <div class="d-flex flex-column gap-2 justify-content-center mb-3">
-                                <button class="btn btn-success flex-fill" :disabled="isProcessing" @click="finishAndDischarge">
+                                <button class="btn btn-success flex-fill" :disabled="isProcessing"
+                                    @click="finishAndDischarge">
                                     <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
                                     <span v-else class="fa fa-check mr-1"></span>
                                     {{ __('Finish & Discharge') }}
@@ -921,62 +961,62 @@ function selectJobCard(name) {
 }
 
 .queue-sidebar {
-	max-height: calc(100vh - 150px);
-	background-color: var(--bg-light, #fcfcfc);
-	border-color: var(--border-color) !important;
+    max-height: calc(100vh - 150px);
+    background-color: var(--bg-light, #fcfcfc);
+    border-color: var(--border-color) !important;
 }
 
 [data-theme="dark"] .queue-sidebar {
-	background-color: var(--control-bg, #1f2124);
+    background-color: var(--control-bg, #1f2124);
 }
 
 .empty-queue-state {
-	background-color: var(--fg-color);
-	border-style: dashed !important;
-	border-color: var(--border-color) !important;
+    background-color: var(--fg-color);
+    border-style: dashed !important;
+    border-color: var(--border-color) !important;
 }
 
 .item-time-badge {
-	background-color: var(--control-bg);
-	color: var(--text-color);
-	border-color: var(--border-color) !important;
+    background-color: var(--control-bg);
+    color: var(--text-color);
+    border-color: var(--border-color) !important;
 }
 
 .slab-card {
-	transition: all 0.2s ease;
-	border-radius: 8px;
-	background-color: var(--fg-color, #ffffff);
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    background-color: var(--fg-color, #ffffff);
 }
 
 [data-theme="dark"] .slab-card {
-	background-color: var(--card-bg, #242629);
-	border: 1px solid var(--border-color) !important;
+    background-color: var(--card-bg, #242629);
+    border: 1px solid var(--border-color) !important;
 }
 
 .slab-card:hover {
-	transform: translateX(4px);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
 }
 
 [data-theme="dark"] .slab-card:hover {
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }
 
 .slab-card .card-body {
-	border-left: 4px solid var(--border-color, #ddd);
-	border-radius: inherit;
+    border-left: 4px solid var(--border-color, #ddd);
+    border-radius: inherit;
 }
 
 .slab-card.active-card {
-	box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2) !important;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2) !important;
 }
 
 .slab-card.active-card .card-body {
-	border-left: 4px solid var(--primary, #007bff);
-	background-color: rgba(0, 123, 255, 0.05);
+    border-left: 4px solid var(--primary, #007bff);
+    background-color: rgba(0, 123, 255, 0.05);
 }
 
 [data-theme="dark"] .slab-card.active-card .card-body {
-	background-color: rgba(0, 123, 255, 0.2);
+    background-color: rgba(0, 123, 255, 0.2);
 }
 </style>
