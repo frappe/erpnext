@@ -267,6 +267,8 @@ class PurchaseInvoice(BuyingController):
 
 		super().validate()
 
+		self.title = self.supplier_name
+
 		if not self.is_return:
 			self.po_required()
 			self.pr_required()
