@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import frappe
 from frappe.model.utils.rename_field import rename_field
 
@@ -18,13 +20,20 @@ def copy_doctypes():
 def insert_into_bom():
 	fields = ["item_code", "item_name", "stock_uom", "stock_qty", "rate"]
 	data = frappe.get_all("BOM Scrap Item", {"docstatus": 1}, ["parent", *fields])
+	grouped_data = defaultdict(list)
 	for item in data:
-		bom = frappe.get_doc("BOM", item.parent)
-		secondary_item = frappe.new_doc("BOM Secondary Item", parent_doc=bom, parentfield="secondary_items")
-		secondary_item.update({field: item[field] for field in fields})
-		secondary_item.update(
-			{"uom": item.stock_uom, "conversion_factor": 1, "qty": item.stock_qty, "is_legacy": 1}
-		)
+		grouped_data[item.parent].append(item)
+
+	for parent, items in grouped_data.items():
+		bom = frappe.get_doc("BOM", parent)
+		for item in items:
+			secondary_item = frappe.new_doc(
+				"BOM Secondary Item", parent_doc=bom, parentfield="secondary_items"
+			)
+			secondary_item.update({field: item[field] for field in fields})
+			secondary_item.update(
+				{"uom": item.stock_uom, "conversion_factor": 1, "qty": item.stock_qty, "is_legacy": 1}
+			)
 		secondary_item.insert()
 		secondary_item.submit()
 
@@ -56,13 +65,19 @@ def insert_into_subcontracting_inward():
 
 def bulk_insert(parent_doctype, old_doctype, new_doctype, old_fields, new_fields, new_values):
 	data = frappe.get_all(old_doctype, {"docstatus": 1}, ["parent", *old_fields])
+	grouped_data = defaultdict(list)
+
 	for item in data:
-		parent_doc = frappe.get_doc(parent_doctype, item.parent)
-		secondary_item = frappe.new_doc(new_doctype, parent_doc=parent_doc, parentfield="secondary_items")
-		secondary_item.update({old_field: item[old_field] for old_field in old_fields})
-		secondary_item.update(
-			{new_field: new_value for new_field, new_value in zip(new_fields, new_values, strict=True)}
-		)
+		grouped_data[item.parent].append(item)
+
+	for parent, items in grouped_data.items():
+		parent_doc = frappe.get_doc(parent_doctype, parent)
+		for item in items:
+			secondary_item = frappe.new_doc(new_doctype, parent_doc=parent_doc, parentfield="secondary_items")
+			secondary_item.update({old_field: item[old_field] for old_field in old_fields})
+			secondary_item.update(
+				{new_field: new_value for new_field, new_value in zip(new_fields, new_values, strict=True)}
+			)
 		secondary_item.insert()
 		secondary_item.submit()
 
