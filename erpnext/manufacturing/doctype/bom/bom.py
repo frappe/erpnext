@@ -302,6 +302,41 @@ class BOM(WebsiteGenerator):
 		frappe.cache().hdel("bom_children", self.name)
 		self.check_recursion()
 
+	def before_save(self):
+		if not self.item:
+			return
+		base_item_code = self.item.split(" - ")[0].strip()
+		slab_template = frappe.db.exists("Slab Template", base_item_code)
+		if not slab_template:
+			parts = base_item_code.split("-")
+
+			slab_colour = f"{parts[0]}-{parts[1]}"
+			thickness = parts[2].upper()
+			slab_size = parts[3]
+
+			slab_color = frappe.db.exists("Slab Colour", slab_colour)
+			if not slab_color:
+				slab_color_doc = frappe.new_doc("Slab Colour")
+				slab_color_doc.code = slab_colour
+				slab_color_doc.insert(ignore_permissions=True)
+				slab_color = slab_color_doc.name
+
+			slab_size = frappe.db.exists("Slab Size", slab_size)
+			if not slab_size:
+				frappe.throw("Slab Size does not exist")
+
+			if thickness not in ["2CM", "3CM"]:
+				frappe.throw("Slab Thickness should be either 2CM or 3CM")
+
+			slab_doc = frappe.new_doc("Slab Template")
+			slab_doc.colour_code = slab_color
+			slab_doc.thickness = thickness
+			slab_doc.size = slab_size
+			slab_doc.insert(ignore_permissions=True)
+			slab_template = slab_doc.name
+
+		self.slab_template = slab_template
+
 	def on_submit(self):
 		self.manage_default_bom()
 		self.update_bom_creator_status()

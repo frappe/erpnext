@@ -29,6 +29,40 @@ def check_distribution_status(production_line):
 
 
 @frappe.whitelist()
+def get_mixing_queue(production_line):
+	"""Return open mixing job cards, filtering Completed cards to only those
+	with sufficient qty to transfer (display_qty >= bom_qty)."""
+	all_cards = get_open_job_cards(
+		process="Mixing",
+		line=production_line,
+		include_wip=True,
+		include_material_transferred=True,
+	)
+
+	result = []
+	for card in all_cards:
+		status = card.get("status")
+		# Non-completed cards are always visible in the queue
+		if status != "Completed":
+			result.append(card)
+			continue
+
+		# For completed cards, check if there is still qty available to transfer
+		try:
+			state = get_mixer_state(card["name"])
+			display_qty = flt(state.get("display_qty", 0), 3)
+			bom_data = get_next_process_bom_qty(frappe.db.get_value("Job Card", card["name"], "work_order"))
+			bom_qty = flt(bom_data.get("bom_qty", 0), 2)
+			if display_qty >= bom_qty and bom_qty > 0:
+				result.append(card)
+		except Exception:
+			# If we can't determine qty, include the card to be safe
+			result.append(card)
+
+	return result
+
+
+@frappe.whitelist()
 def get_mixer_state(job_card):
 	jc = frappe.get_doc("Job Card", job_card)
 	wo = frappe.get_doc("Work Order", jc.work_order) if jc.work_order else None
@@ -113,48 +147,89 @@ def get_mixer_ingredients(job_card):
 
 
 @frappe.whitelist()
-def confirm_materials(job_card, ingredients, bom_uom):
+def confirm_and_start_mixing(job_card, ingredients, bom_uom):
 	"""Create Stock Entry from mixer quantities and mark Job Card ready."""
-	ingredients = json.loads(ingredients)
-	jc = frappe.get_doc("Job Card", job_card)
+	try:
+		frappe.db.begin()
+		ingredients = json.loads(ingredients)
+		jc = frappe.get_doc("Job Card", job_card)
 
-	qty_by_code = {ing["item_code"]: flt(ing["qty"]) for ing in ingredients}
+		qty_by_code = {ing["item_code"]: flt(ing["qty"]) for ing in ingredients}
 
-	for row in jc.items:
-		if row.item_code in qty_by_code:
-			row.required_qty = qty_by_code[row.item_code]
-			# row.additional_ingredients_added = added_by_code.get(row.item_code, 0)
+		for row in jc.items:
+			if row.item_code in qty_by_code:
+				row.required_qty = qty_by_code[row.item_code]
+				# row.additional_ingredients_added = added_by_code.get(row.item_code, 0)
 
-	total_qty = 1
-	if jc.for_quantity != 1 and bom_uom != "Nos":
-		total_qty = sum(row.required_qty for row in jc.items if row.required_qty > 0)
-		jc.for_quantity = total_qty
-		jc.additional_ingredients_added = 1
-		jc.save(ignore_permissions=True)
+		total_qty = 1
+		if jc.for_quantity != 1 and bom_uom != "Nos":
+			total_qty = sum(row.required_qty for row in jc.items if row.required_qty > 0)
+			jc.for_quantity = total_qty
+			jc.additional_ingredients_added = 1
+			jc.save(ignore_permissions=True)
 
-	se = jc_make_stock_entry(job_card)
-	if not se.items:
-		frappe.throw(_("No remaining quantity to transfer for Job Card {0}.").format(job_card))
+		se = jc_make_stock_entry(job_card)
+		if not se.items:
+			frappe.throw(_("No remaining quantity to transfer for Job Card {0}.").format(job_card))
 
-	se.insert()
-	se.submit()
-	return {
-		"stock_entry": se.name,
-		"total_for_quantity": total_qty,
-		"additional_ingredients_added": jc.additional_ingredients_added,
-	}
+		se.insert()
+		se.submit()
+
+		start_mixing(job_card)
+		frappe.db.commit()
+		return {
+			"stock_entry": se.name,
+			"total_for_quantity": total_qty,
+			"additional_ingredients_added": jc.additional_ingredients_added,
+			"status": jc.status,
+			"mixer_started": jc.job_started,
+			"mixer_start_time": jc.started_time,
+			"current_time": jc.current_time,
+		}
+	except Exception:
+		frappe.db.rollback()
+		frappe.throw()
 
 
-@frappe.whitelist()
+# def confirm_materials(job_card, ingredients, bom_uom):
+# 	"""Create Stock Entry from mixer quantities and mark Job Card ready."""
+# 	ingredients = json.loads(ingredients)
+# 	jc = frappe.get_doc("Job Card", job_card)
+
+# 	qty_by_code = {ing["item_code"]: flt(ing["qty"]) for ing in ingredients}
+
+# 	for row in jc.items:
+# 		if row.item_code in qty_by_code:
+# 			row.required_qty = qty_by_code[row.item_code]
+# 			# row.additional_ingredients_added = added_by_code.get(row.item_code, 0)
+
+# 	total_qty = 1
+# 	if jc.for_quantity != 1 and bom_uom != "Nos":
+# 		total_qty = sum(row.required_qty for row in jc.items if row.required_qty > 0)
+# 		jc.for_quantity = total_qty
+# 		jc.additional_ingredients_added = 1
+# 		jc.save(ignore_permissions=True)
+
+# 	se = jc_make_stock_entry(job_card)
+# 	if not se.items:
+# 		frappe.throw(_("No remaining quantity to transfer for Job Card {0}.").format(job_card))
+
+# 	se.insert()
+# 	se.submit()
+# 	return {
+# 		"stock_entry": se.name,
+# 		"total_for_quantity": total_qty,
+# 		"additional_ingredients_added": jc.additional_ingredients_added,
+# 	}
+
+
 def start_mixing(job_card):
 	"""Start the Job Card when mixing starts."""
 	jc = frappe.get_doc("Job Card", job_card)
 	start_time = frappe.utils.now_datetime()
-	# employee_id = get_operators("Mixer Operator", jc.production_line)
 	args = {
 		"job_card_id": jc.name,
 		"start_time": start_time,
-		# "employees": [{"employee": employee_id}],
 		"status": "Work In Progress",
 	}
 

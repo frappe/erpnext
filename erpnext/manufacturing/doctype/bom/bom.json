@@ -640,7 +640,8 @@
    "fieldname": "slab_template",
    "fieldtype": "Link",
    "label": "Slab Template",
-   "options": "Slab Template"
+   "options": "Slab Template",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-sitemap",
@@ -648,7 +649,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-05 14:51:40.257947",
+ "modified": "2026-03-05 12:54:49.000543",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
