@@ -7,6 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "account_category_name",
+  "root_type",
+  "column_break_qluu",
   "description"
  ],
  "fields": [
@@ -22,12 +24,29 @@
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description"
+  },
+  {
+   "fieldname": "column_break_qluu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "root_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Root Type",
+   "options": "\nAsset\nLiability\nIncome\nExpense\nEquity"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2025-10-15 03:19:47.171349",
+ "links": [
+  {
+   "link_doctype": "Account",
+   "link_fieldname": "account_category"
+  }
+ ],
+ "modified": "2026-03-05 06:25:21.189288",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Category",
