@@ -303,7 +303,7 @@ class BOM(WebsiteGenerator):
 		self.check_recursion()
 
 	def before_save(self):
-		if not self.item:
+		if not self.item or self.company != "Unit-2":
 			return
 		base_item_code = self.item.split(" - ")[0].strip()
 		slab_template = frappe.db.exists("Slab Template", base_item_code)
