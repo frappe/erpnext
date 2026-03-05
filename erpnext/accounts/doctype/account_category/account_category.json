@@ -15,6 +15,7 @@
    "fieldname": "account_category_name",
    "fieldtype": "Data",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Account Category Name",
    "reqd": 1,
    "unique": 1
@@ -45,7 +46,7 @@
    "link_fieldname": "account_category"
   }
  ],
- "modified": "2026-03-05 06:30:00.256879",
+ "modified": "2026-03-05 06:30:54.800166",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Category",
