@@ -46,7 +46,7 @@
    "link_fieldname": "account_category"
   }
  ],
- "modified": "2026-03-05 06:30:54.800166",
+ "modified": "2026-03-05 06:38:54.587536",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Category",
@@ -86,5 +86,6 @@
  "search_fields": "account_category_name, description",
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "account_category_name"
 }
