@@ -4,7 +4,7 @@ import { ref, computed, onMounted, reactive, watch } from 'vue';
 const jobCardName = ref(null);
 const jobCardDoc = ref(null);
 const status = ref('Pending');
-const colour = ref('');
+// const colour = ref('');
 
 const processStarted = ref(false);
 const processStartTime = ref(null);
@@ -100,7 +100,7 @@ function showThicknessConfirmationDialog(oldThick, newThick) {
 			}
 		],
 		primary_action_label: __('Yes, I confirm'),
-		primary_action: function() {
+		primary_action: function () {
 			d.hide();
 		}
 	});
@@ -131,7 +131,6 @@ function handleThicknessChange(newTemplate) {
 	}
 }
 
-watch(() => colour.value, handleThicknessChange);
 watch(() => slabTemplate.value, handleThicknessChange);
 
 // Raise‑alarm dialog
@@ -162,7 +161,7 @@ const props = defineProps({
 	}
 });
 
-async function loadJobCard(name) {
+async function loadJobCard(name, slab_template = null) {
 	if (!name) return;
 
 	jobCardName.value = name;
@@ -170,13 +169,13 @@ async function loadJobCard(name) {
 	try {
 		const jc = await frappe.db.get_doc('Job Card', jobCardName.value);
 		jobCardDoc.value = jc;
-
-		if (jc.bom_no && !slabTemplate.value) {
-			const bom = await frappe.db.get_doc('BOM', jc.bom_no);
-			if (bom.slab_template) {
-				slabTemplate.value = bom.slab_template;
-			}
-		}
+		slabTemplate.value = slab_template;
+		// if (jc.bom_no && !slabTemplate.value) {
+		// 	const bom = await frappe.db.get_doc('BOM', jc.bom_no);
+		// 	if (bom.slab_template) {
+		// 		slabTemplate.value = bom.slab_template;
+		// 	}
+		// }
 
 		jobCardSubmitted.value = jc.docstatus === 1 || jc.status === 'Completed';
 		if (jobCardSubmitted.value) {
@@ -254,10 +253,9 @@ const getNextWorkItem = async (play_alert = false) => {
 	if (result.message) {
 		res_slab = result.message.slab
 		res_job_card = result.message.job_card
-
 		slabNumber.value = res_slab?.name || result.message.job_card?.slab;
 		isRepressed.value = res_slab?.is_repressed || false;
-		colour.value = res_slab?.template || result.message.job_card?.bom_no;
+		slabTemplate.value = res_slab?.template || result.message.job_card?.bom_no;
 		batchNo.value = res_slab?.batch_number || result.message.job_card?.slab?.split('-')[0];
 
 		if (res_job_card && res_job_card?.name !== jobCardName.value) {
@@ -265,7 +263,7 @@ const getNextWorkItem = async (play_alert = false) => {
 				erpnext.utils.play_ding("new_slab");
 			}
 
-			await loadJobCard(res_job_card.name);
+			await loadJobCard(res_job_card.name, res_slab?.template);
 		}
 
 		const slabs = result.message.available_slabs_count;
@@ -293,7 +291,7 @@ async function loadData() {
 	if (!jobCardName.value) {
 		getNextWorkItem();
 	} else {
-		await loadJobCard(jobCardName.value);
+		await loadJobCard(jobCardName.value, slabTemplate.value);
 	}
 }
 
@@ -352,7 +350,7 @@ async function startOperation() {
 				});
 
 				if (res.message) {
-					colour.value = res.message.slab_template;
+					slabTemplate.value = res.message.slab_template;
 					batchNo.value = res.message.slab_name?.split('-')[0] || '';
 					slabNumber.value = res.message.slab_name;
 				}
@@ -446,7 +444,7 @@ async function finishOperation() {
 				transferSuccess.value = false;
 				slabNumber.value = null;
 				batchNo.value = null;
-				colour.value = null;
+				slabTemplate.value = null;
 				isRepressed.value = false;
 
 				await checkForNextItem();
@@ -533,9 +531,8 @@ function statusStyle() {
 
 async function selectSlab(slab) {
 	if (!slab) return;
-
 	slabNumber.value = slab.name;
-	colour.value = slab.template;
+	slabTemplate.value = slab.template;
 	batchNo.value = slab.batch_number;
 
 	// Reset job card state if selecting a new slab manually
@@ -556,7 +553,7 @@ async function selectSlab(slab) {
 		});
 
 		if (r.message?.name) {
-			await loadJobCard(r.message.name);
+			await loadJobCard(r.message.name, slabTemplate.value);
 		} else {
 			frappe.show_alert({
 				message: __('No open Job Card found for this slab'),
@@ -635,18 +632,16 @@ async function selectSlab(slab) {
 							style="border-radius:20px; font-size: 0.9rem; width: fit-content; display: table; border: 1px solid var(--alert-text-danger)">
 							<span class="fa fa-info-circle mr-1"></span>
 							<span>
-								{{ __('{0} more pending in the queue', [availableSlabsCount || availableJobCardsCount]) }}
+								{{ __('{0} more pending in the queue', [availableSlabsCount || availableJobCardsCount])
+								}}
 							</span>
 						</div>
 						<h3 class="job-serial text-center font-weight-bold mb-2 p-3">
 							{{ jobCardName }}
 						</h3>
 
-						<!-- <div class="text-center text-muted small mb-1">{{ __('Colour') }}</div> -->
 						<div class="d-flex justify-content-center align-items-center mb-3">
-							<span class="job-color bold mr-2" style="font-size:1rem">{{ colour || slabTemplate }}</span>
-							<!-- <span class="color-swatch"
-								style="width:24px;height:24px;border-radius:4px;background:#f5f5f5;border:1px solid #ddd;"></span> -->
+							<span class="job-color bold mr-2" style="font-size:1rem">{{ slabTemplate }}</span>
 						</div>
 
 						<div v-if="mixerNumber" class="text-center font-weight-bold mb-2 text-muted"
@@ -669,11 +664,13 @@ async function selectSlab(slab) {
 						</div>
 
 						<div class="text-center mb-2" v-if="processStarted">
-							<button class="btn btn-info py-3 px-4 mr-5" :disabled="isProcessing" @click="finishOperation">
+							<button class="btn btn-info py-3 px-4 mr-5" :disabled="isProcessing"
+								@click="finishOperation">
 								<span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
 								<span v-else class="fa fa-check-square-o mr-1"></span>{{ __('Finish Job') }}
 							</button>
-							<button class="btn btn-warning py-3 px-4 mr-5" v-if="isPressing" :disabled="isProcessing" @click="repressSlab">
+							<button class="btn btn-warning py-3 px-4 mr-5" v-if="isPressing" :disabled="isProcessing"
+								@click="repressSlab">
 								<span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
 								<span v-else class="fa fa-retweet mr-1"></span>{{ __('Re-press') }}
 							</button>
