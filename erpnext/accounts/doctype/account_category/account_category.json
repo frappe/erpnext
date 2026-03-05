@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_rename": 1,
  "autoname": "field:account_category_name",
  "creation": "2025-08-02 06:22:31.835063",
  "doctype": "DocType",
@@ -46,7 +47,7 @@
    "link_fieldname": "account_category"
   }
  ],
- "modified": "2026-03-05 06:38:54.587536",
+ "modified": "2026-03-05 06:41:39.275402",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Category",
@@ -86,6 +87,5 @@
  "search_fields": "account_category_name, description",
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": [],
- "title_field": "account_category_name"
+ "states": []
 }
