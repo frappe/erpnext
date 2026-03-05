@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, reactive } from 'vue';
+import { ref, computed, onMounted, reactive, watch } from 'vue';
 
 const jobCardName = ref(null);
 const jobCardDoc = ref(null);
@@ -28,6 +28,9 @@ const slabsQueue = ref([]);
 const is_standalone = ref(false);
 const availableSlabsCount = ref(0);
 const availableJobCardsCount = ref(0);
+const isProcessing = ref(false);
+const isRepressed = ref(false);
+const currentStation = ref(null);
 
 const alarms = ref([
 	{
@@ -62,6 +65,10 @@ const work_context = reactive({
 });
 
 const fetchWorkContext = async () => {
+	const route = frappe.get_route();
+	const station = route[1] || '';
+	currentStation.value = station.toLowerCase();
+
 	const currentUser = await frappe.call({
 		method: "erpnext.setup.doctype.employee.api.get_current_user_context",
 	});
@@ -76,6 +83,57 @@ const fetchWorkContext = async () => {
 // UI flags
 const showAlarms = ref(true);
 
+const lastThickness = ref(null);
+
+function showThicknessConfirmationDialog(oldThick, newThick) {
+	let d = new frappe.ui.Dialog({
+		title: __('Thickness Changed'),
+		fields: [
+			{
+				fieldname: 'msg',
+				fieldtype: 'HTML',
+				options: `<div class="text-center" style="font-size: 1.2rem; margin: 15px 0;">
+					<span class="fa fa-exclamation-triangle text-warning" style="font-size: 2rem; margin-bottom: 10px; display: block;"></span>
+					<p>${__('The slab thickness has changed from')} <b>${oldThick}</b> ${__('to')} <b>${newThick}</b>.</p>
+					<p class="text-muted" style="font-size: 1rem;">${__("Please confirm that the machine's settings have been adjusted accordingly.")}</p>
+				</div>`
+			}
+		],
+		primary_action_label: __('Yes, I confirm'),
+		primary_action: function() {
+			d.hide();
+		}
+	});
+
+	if (d.get_close_btn()) {
+		d.get_close_btn().hide();
+	}
+
+	d.$wrapper.modal({ backdrop: 'static', keyboard: false });
+	d.show();
+}
+
+function handleThicknessChange(newTemplate) {
+	if (!newTemplate) return;
+	// If the current process is not Calibration or Polishing do not show the confirmation dialog.
+	const route = frappe.get_route();
+	const station = (route[1] || '').toLowerCase();
+	if (station !== 'calibration' && station !== 'polishing') return;
+
+	const parts = String(newTemplate).split('-');
+	if (parts.length >= 3) {
+		const newThickness = parts[2];
+		if (lastThickness.value && lastThickness.value !== newThickness) {
+			showThicknessConfirmationDialog(lastThickness.value, newThickness);
+		}
+
+		lastThickness.value = newThickness;
+	}
+}
+
+watch(() => colour.value, handleThicknessChange);
+watch(() => slabTemplate.value, handleThicknessChange);
+
 // Raise‑alarm dialog
 const issueDialogOpen = ref(false);
 const issueType = ref('Quality Issue');
@@ -87,6 +145,10 @@ const formattedTime = computed(() => {
 	const m = String(Math.floor((processElapsed.value % 3600) / 60)).padStart(2, '0');
 	const s = String(processElapsed.value % 60).padStart(2, '0');
 	return `${h}:${m}:${s}`;
+});
+
+const isPressing = computed(() => {
+	return currentStation.value === 'pressing';
 });
 
 const props = defineProps({
@@ -121,20 +183,17 @@ async function loadJobCard(name) {
 			preparedQty.value = jc.total_completed_qty || jc.for_quantity || 0;
 		}
 
-		const route = frappe.get_route();
-		const station = route[1] || '';
-
 		const stateRes = await frappe.call({
 			method: 'erpnext.manufacturing.page.operator_station.operator_station.get_machine_state',
 			args: {
 				job_card: jobCardName.value,
-				process_name: station
+				process_name: currentStation.value
 			}
 		});
 
 		is_standalone.value = !!stateRes?.message?.is_wh_standalone;
 		if (is_standalone.value) {
-			fetchQueue(work_context.assigned_line, station);
+			fetchQueue(work_context.assigned_line, currentStation.value);
 		}
 
 		const state = stateRes.message || {};
@@ -148,7 +207,7 @@ async function loadJobCard(name) {
 			processReady.value = true;
 		}
 
-		processStartTime.value = state[`${station}_start_time`];
+		processStartTime.value = state[`${currentStation.value}_start_time`];
 		mixerNumber.value = state.mixer_number;
 
 		if (jobCardSubmitted.value) {
@@ -173,24 +232,21 @@ async function loadJobCard(name) {
 			}
 		}
 	} catch (e) {
-		console.error(e);
 		frappe.msgprint(__('Failed to load Job Card details.'));
 	}
 }
 
 async function checkForNextItem() {
-	const route = frappe.get_route();
-	const station = route[1] || '';
 	if (!jobCardName.value) {
-		await getNextWorkItem(station, true)
+		await getNextWorkItem(true)
 	}
 }
 
-const getNextWorkItem = async (station, play_alert = false) => {
+const getNextWorkItem = async (play_alert = false) => {
 	const result = await frappe.call({
 		method: 'erpnext.manufacturing.page.operator_station.operator_station.get_next_work_item',
 		args: {
-			process: station,
+			process: currentStation.value,
 			line: work_context.assigned_line || '2' // Defaulting to L1 for now if not known
 		}
 	});
@@ -200,6 +256,7 @@ const getNextWorkItem = async (station, play_alert = false) => {
 		res_job_card = result.message.job_card
 
 		slabNumber.value = res_slab?.name || result.message.job_card?.slab;
+		isRepressed.value = res_slab?.is_repressed || false;
 		colour.value = res_slab?.template || result.message.job_card?.bom_no;
 		batchNo.value = res_slab?.batch_number || result.message.job_card?.slab?.split('-')[0];
 
@@ -221,22 +278,24 @@ const getNextWorkItem = async (station, play_alert = false) => {
 onMounted(async () => {
 	try {
 		await fetchWorkContext();
+		await loadData();
 
-		const route = frappe.get_route();
-		const station = route[1] || '';
-
-		if (!jobCardName.value) {
-			getNextWorkItem(station);
-		} else {
-			await loadJobCard(jobCardName.value);
-		}
-
+		document.addEventListener("refresh-operator-station", () => {
+			loadData();
+		});
 	} catch (e) {
 		error.value = e.message;
-		frappe.msgprint(__('Load failed: {0}'));
+		frappe.msgprint(__('Load failed'));
 	}
 });
 
+async function loadData() {
+	if (!jobCardName.value) {
+		getNextWorkItem();
+	} else {
+		await loadJobCard(jobCardName.value);
+	}
+}
 
 async function fetchQueue(line, station) {
 	try {
@@ -267,11 +326,8 @@ frappe.realtime.on('refresh_operator_station', (data) => {
 });
 
 frappe.realtime.on('slab_checkout', (slab) => {
-	const route = frappe.get_route();
-	const station = route[1] || '';
-
 	// If the slab has been checked out on a different line or the checked out slab is not the previous stage of the current stage, then ignore the event.
-	if (slab.line !== work_context.assigned_line || !station_reverse_map[station] || slab.status !== station_reverse_map[station]) {
+	if (slab.line !== work_context.assigned_line || !station_reverse_map[currentStation.value] || slab.status !== station_reverse_map[currentStation.value]) {
 		return;
 	}
 
@@ -280,17 +336,16 @@ frappe.realtime.on('slab_checkout', (slab) => {
 
 
 async function startOperation() {
-	const route = frappe.get_route();
-	const station = route[1] || props.process;
 	frappe.confirm(
 		__('Start the process now?'),
 		async () => {
+			isProcessing.value = true;
 			try {
 				const res = await frappe.call({
 					method: 'erpnext.manufacturing.page.operator_station.operator_station.start_process',
 					args: {
 						job_card: jobCardName.value,
-						process_name: station,
+						process_name: currentStation.value,
 						slab_template: slabTemplate.value,
 						slab_name: slabNumber.value,
 					}
@@ -316,63 +371,97 @@ async function startOperation() {
 				}, 1000);
 			}
 			catch (e) {
-				frappe.msgprint(__('Failed to start Job Card: {0}', [e.message || e]));
+				frappe.msgprint(__('Failed to start Job Card'));
+			} finally {
+				isProcessing.value = false;
 			}
 		},
 	);
 }
 
-async function finishOperation() {
-	const route = frappe.get_route();
-	const station = route[1] || props.process;
-
-	if (processTimerHandle.value) {
-		clearInterval(processTimerHandle.value);
-		processTimerHandle.value = null;
+async function repressSlab() {
+	if (!currentStation.value || currentStation.value !== "pressing") {
+		return;
 	}
 
-	try {
-		transferMaterials = station.toLowerCase() !== 'cooling';
+	frappe.confirm(
+		__('Are you sure you want to re-press this slab?'),
+		async () => {
+			isProcessing.value = true;
+			try {
+				const result = await frappe.call({
+					method: 'erpnext.manufacturing.doctype.slab.api.re_press_slab',
+					args: {
+						slab_number: slabNumber.value,
+					},
+				});
 
-		const result = await frappe.call({
-			method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_process',
-			args: {
-				job_card: jobCardName.value,
-				process_name: station,
-				transfer_materials: transferMaterials,
-			},
-		});
+				erpnext.utils.play_ding("submit");
 
-		erpnext.utils.play_ding("submit");
-
-		jobCardName.value = null;
-		processStarted.value = false;
-		processStartTime.value = null;
-		processElapsed.value = 0;
-		processReady.value = false;
-
-		jobCardSubmitted.value = true;
-		preparedQty.value = result.message.job_card_qty;
-		stockEntryName.value = result.message.stock_entry;
-		nextWorkOrder.value = result.message.next_work_order || '';
-		transferredQty.value = 0;
-		transferSuccess.value = false;
-		slabNumber.value = null;
-		batchNo.value = null;
-		colour.value = null;
-
-		await checkForNextItem();
-		if (is_standalone.value) {
-			await fetchQueue(work_context.assigned_line, station);
+			} catch (e) {
+				frappe.msgprint(__('Failed to repress slab'));
+			} finally {
+				isProcessing.value = false;
+			}
 		}
-	} catch (error) {
-		const errorMsg = error.message || (error._server_messages?.[0]?.message) || JSON.stringify(error);
-		frappe.msgprint({
-			title: __('Error'),
-			indicator: 'red',
-			message: `Failed to complete Job Card`
-		});
-	}
+	);
+}
+
+async function finishOperation() {
+	frappe.confirm(
+		__('Are you sure you want to finish this job?'),
+		async () => {
+			isProcessing.value = true;
+
+			if (processTimerHandle.value) {
+				clearInterval(processTimerHandle.value);
+				processTimerHandle.value = null;
+			}
+
+			try {
+				const transferMaterials = currentStation.value.toLowerCase() !== 'cooling';
+
+				const result = await frappe.call({
+					method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_process',
+					args: {
+						job_card: jobCardName.value,
+						process_name: currentStation.value,
+						transfer_materials: transferMaterials,
+					},
+				});
+
+				erpnext.utils.play_ding("submit");
+
+				jobCardName.value = null;
+				processStarted.value = false;
+				processStartTime.value = null;
+				processElapsed.value = 0;
+				processReady.value = false;
+
+				jobCardSubmitted.value = true;
+				preparedQty.value = result.message.job_card_qty;
+				stockEntryName.value = result.message.stock_entry;
+				nextWorkOrder.value = result.message.next_work_order || '';
+				transferredQty.value = 0;
+				transferSuccess.value = false;
+				slabNumber.value = null;
+				batchNo.value = null;
+				colour.value = null;
+				isRepressed.value = false;
+
+				await checkForNextItem();
+			} catch (error) {
+				const errorMsg = error.message || (error._server_messages?.[0]?.message) || JSON.stringify(error);
+				frappe.msgprint({
+					title: __('Error'),
+					indicator: 'red',
+					message: `Failed to complete Job Card`
+				});
+			} finally {
+				isProcessing.value = false;
+			}
+		}
+	);
 }
 
 function haltJob() {
@@ -431,15 +520,15 @@ function submitIssue() {
 
 function statusStyle() {
 	if (status.value === 'In Progress') {
-		return 'background:#d4f8d4;color:#137a13;padding:.5rem';
+		return 'background:#d4f8d4;color:#137a13';
 	}
 	if (status.value === 'Halted') {
-		return 'background:#ffeeba;color:#856404;padding:.5rem';
+		return 'background:#ffeeba;color:#856404';
 	}
 	if (status.value === 'Discarded') {
-		return 'background:#f8d7da;color:#721c24;padding:.5rem';
+		return 'background:#f8d7da;color:#721c24';
 	}
-	return 'background:#e9ecef;color:#6c757d;padding:.5rem';
+	return 'background:#e9ecef;color:#6c757d';
 }
 
 async function selectSlab(slab) {
@@ -457,13 +546,12 @@ async function selectSlab(slab) {
 	processReady.value = true;
 
 	try {
-		const route = frappe.get_route();
-		const station = route[1] || '';
+		isProcessing.value = true;
 		const r = await frappe.call({
 			method: 'erpnext.manufacturing.page.operator_station.operator_station.get_job_card_for_slab',
 			args: {
 				slab_name: slab.name,
-				process_name: station
+				process_name: currentStation.value
 			}
 		});
 
@@ -477,6 +565,8 @@ async function selectSlab(slab) {
 		}
 	} catch (e) {
 		console.error(e);
+	} finally {
+		isProcessing.value = false;
 	}
 }
 </script>
@@ -529,6 +619,9 @@ async function selectSlab(slab) {
 							<span class="badge badge-pill" :style="statusStyle()">
 								{{ __(status) }}
 							</span>
+							<span class="badge badge-pill repressed-badge ml-2" v-if="isRepressed">
+								{{ __('Re-Pressing') }}
+							</span>
 						</div>
 
 						<!--<div class="text-center text-muted small">{{ __('SERIAL NUMBER') }}</div>-->
@@ -562,8 +655,9 @@ async function selectSlab(slab) {
 						</div>
 
 						<div class="text-center mb-2" v-if="processReady">
-							<button class="btn btn-success py-3 px-4" @click="startOperation">
-								<span class="fa fa-play mr-1 pr-2"></span>{{ __('Start Job') }}
+							<button class="btn btn-success py-3 px-4" :disabled="isProcessing" @click="startOperation">
+								<span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1 pr-2"></span>
+								<span v-else class="fa fa-play mr-1 pr-2"></span>{{ __('Start Job') }}
 							</button>
 						</div>
 
@@ -575,8 +669,13 @@ async function selectSlab(slab) {
 						</div>
 
 						<div class="text-center mb-2" v-if="processStarted">
-							<button class="btn btn-info py-3 px-4 mr-5" @click="finishOperation">
-								<span class="fa fa-check-square-o mr-1"></span>{{ __('Finish Job') }}
+							<button class="btn btn-info py-3 px-4 mr-5" :disabled="isProcessing" @click="finishOperation">
+								<span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
+								<span v-else class="fa fa-check-square-o mr-1"></span>{{ __('Finish Job') }}
+							</button>
+							<button class="btn btn-warning py-3 px-4 mr-5" v-if="isPressing" :disabled="isProcessing" @click="repressSlab">
+								<span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
+								<span v-else class="fa fa-retweet mr-1"></span>{{ __('Re-press') }}
 							</button>
 							<!-- <button class="btn btn-warning py-3 px-4 mr-5" @click="haltJob">
 							<span class="fa fa-pause-circle-o mr-1"></span>{{ __('Halt Job') }}
@@ -757,5 +856,21 @@ async function selectSlab(slab) {
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 	border-color: var(--border-color);
 	background-color: #242629;
+}
+
+.badge-pill {
+	padding: 0.5rem;
+}
+
+.repressed-badge {
+	background-color: #fff3cd !important;
+	color: #856404 !important;
+	border: 1px solid #ffeeba;
+}
+
+[data-theme="dark"] .repressed-badge {
+	background-color: #664d03 !important;
+	color: #ffda6a !important;
+	border: 1px solid #664d03;
 }
 </style>

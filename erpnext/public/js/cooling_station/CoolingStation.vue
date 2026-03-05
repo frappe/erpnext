@@ -6,6 +6,7 @@ const currentIncomingSlab = computed(() => incomingSlabs.value.length > 0 ? inco
 const coolingQueue = ref([]);
 const processTimerHandles = reactive({});
 const error = ref(null);
+const isProcessing = ref(false);
 
 const work_context = reactive({
     role: "Cooling Operator",
@@ -66,45 +67,61 @@ const skipSlab = () => {
 };
 
 const startCooling = async (slab) => {
-    try {
-        const res = await frappe.call({
-            method: 'erpnext.manufacturing.page.cooling_station.cooling_station.start_cooling_process',
-            args: {
-                slab_number: slab.name,
-                line: work_context.assigned_line
-            }
-        });
+    frappe.confirm(
+        __('Are you sure you want to start the cooling process for this slab?'),
+        async () => {
+            isProcessing.value = true;
+            try {
+                const res = await frappe.call({
+                    method: 'erpnext.manufacturing.page.cooling_station.cooling_station.start_cooling_process',
+                    args: {
+                        slab_number: slab.name,
+                        line: work_context.assigned_line
+                    }
+                });
 
-        if (res.message) {
-            frappe.show_alert({ message: __('Cooling Started'), indicator: 'green' });
-            erpnext.utils.play_ding("submit");
-            await loadData();
+                if (res.message) {
+                    frappe.show_alert({ message: __('Cooling Started'), indicator: 'green' });
+                    erpnext.utils.play_ding("submit");
+                    await loadData();
+                }
+            } catch (e) {
+                frappe.msgprint(__('Failed to start cooling: {0}', [e.message]));
+            } finally {
+                isProcessing.value = false;
+            }
         }
-    } catch (e) {
-        frappe.msgprint(__('Failed to start cooling: {0}', [e.message]));
-    }
+    );
 };
 
 const finishCooling = async (job) => {
-    try {
-        const res = await frappe.call({
-            method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_process',
-            args: {
-                job_card: job.name,
-                process_name: 'Cooling',
-                transfer_materials: false
-            }
-        });
+    frappe.confirm(
+        __('Are you sure you want to finish the cooling process and unload this slab?'),
+        async () => {
+            isProcessing.value = true;
+            try {
+                const res = await frappe.call({
+                    method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_process',
+                    args: {
+                        job_card: job.name,
+                        process_name: 'Cooling',
+                        transfer_materials: false
+                    }
+                });
 
-        if (res.message) {
-            stopTimer(job.name);
-            frappe.show_alert({ message: __('Cooling Finished'), indicator: 'green' });
-            erpnext.utils.play_ding("submit");
-            await loadData();
+                if (res.message) {
+                    stopTimer(job.name);
+                    frappe.show_alert({ message: __('Cooling Finished'), indicator: 'green' });
+                    erpnext.utils.play_ding("submit");
+                    await loadData();
+                }
+            } catch (e) {
+                frappe.msgprint(__('Failed to finish cooling: {0}', [e.message]));
+            } finally {
+                isProcessing.value = false;
+            }
         }
-    } catch (e) {
-        frappe.msgprint(__('Failed to finish cooling: {0}', [e.message]));
-    }
+    );
 };
 
 const updateJobElapsed = (job) => {
@@ -149,6 +166,10 @@ const formatDuration = (seconds) => {
 onMounted(async () => {
     await fetchWorkContext();
     await loadData();
+
+    document.addEventListener("refresh-cooling-station", () => {
+        loadData();
+    });
 });
 
 onUnmounted(() => {
@@ -193,8 +214,9 @@ frappe.realtime.on('slab_checkout', (slab) => {
                             <!-- <button class="btn btn-outline-secondary btn-sm mr-2 px-3" @click="skipSlab">
                                 <i class="fa fa-step-forward mr-1"></i> {{ __('Skip') }}
                             </button> -->
-                            <button class="btn btn-primary btn-sm px-4" @click="startCooling(currentIncomingSlab)">
-                                <i class="fa fa-play mr-1"></i> {{ __('Accept & Start') }}
+                            <button class="btn btn-primary btn-sm px-4" :disabled="isProcessing" @click="startCooling(currentIncomingSlab)">
+                                <i v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></i>
+                                <i v-else class="fa fa-play mr-1"></i> {{ __('Accept & Start') }}
                             </button>
                         </div>
                     </div>
@@ -230,8 +252,10 @@ frappe.realtime.on('slab_checkout', (slab) => {
                                     <i class="fa fa-clock-o mr-1"></i> {{ formatDuration(job.elapsed) }}
                                 </div>
                                 <button v-if="index === 0" class="btn btn-success btn-sm px-3"
+                                    :disabled="isProcessing"
                                     @click="finishCooling(job)">
-                                    <i class="fa fa-check mr-1"></i> {{ __('Unload Slab') }}
+                                    <i v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></i>
+                                    <i v-else class="fa fa-check mr-1"></i> {{ __('Unload Slab') }}
                                 </button>
                             </div>
                         </div>

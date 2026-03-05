@@ -14,6 +14,8 @@
   "sales_invoice_patterns_section",
   "sales_invoice_patterns",
   "manufacturing_settings_section",
+  "slab_section",
+  "slab_seeds",
   "oven_section",
   "max_heating_minutes",
   "quarantine_section",
@@ -113,13 +115,26 @@
    "fieldtype": "Table",
    "label": "Comma-separated values denoting the the first few characters of the Sales Invoice numbers of each company.",
    "options": "Sales Invoice Series"
+  },
+  {
+   "fieldname": "slab_section",
+   "fieldtype": "Section Break",
+   "label": "Slab"
+  },
+  {
+   "default": "0",
+   "description": "The initial seed that is to be given to the slab number on each line to make sure the system is in sync with the manufacturing floor.",
+   "fieldname": "slab_seeds",
+   "fieldtype": "Table",
+   "label": "Slab Seeds",
+   "options": "Slab Seed"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-21 20:36:16.955988",
+ "modified": "2026-03-04 22:47:36.884031",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Mahi Granites Settings",

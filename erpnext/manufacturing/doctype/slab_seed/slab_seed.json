@@ -1,0 +1,50 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-02-26 22:22:39.093560",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_gdgl",
+  "line",
+  "seed"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_gdgl",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "line",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Line",
+   "options": "Production Line",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "seed",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Seed",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-02-26 22:23:38.625881",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Slab Seed",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

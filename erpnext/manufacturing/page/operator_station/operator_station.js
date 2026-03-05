@@ -11,12 +11,21 @@ frappe.pages['operator-station'].on_page_load = function (wrapper) {
         'calibration': { title: 'Calibration Station', process: 'calibration' },
         'operator': { title: 'Operator Station', process: 'operator' }
     }
+
     let config = station_map[station.toLowerCase()] || station_map['operator']
     let page = frappe.ui.make_app_page({
         parent: wrapper,
         title: config.title,
         single_column: true
     });
+
+    const refresh_page = async () => {
+        if (frappe.operator_station_app?._instance?.proxy) {
+            document.dispatchEvent(new CustomEvent('refresh-operator-station'));
+        }
+    };
+
+    page.add_inner_button('<span class="fa fa-refresh"></span>', refresh_page);
 
     if (frappe.boot.developer_mode) {
         frappe.hot_update ??= [];

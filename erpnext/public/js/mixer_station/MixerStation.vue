@@ -24,6 +24,7 @@ const productionLine = ref(null);
 const pollingInterval = ref(null);
 const isDistributionBusy = ref(false);
 const displayQty = ref(0);
+const isProcessing = ref(false);
 
 // downstream alerts (dummy)
 const alerts = ref([
@@ -102,7 +103,19 @@ onMounted(async () => {
     const route = frappe.get_route();
     jobCard.value = route[2] || null;
     await fetchWorkContext();
+    await loadData();
 
+    document.addEventListener("refresh-mixer-station", () => {
+        loadData();
+    });
+
+    pollingInterval.value = setInterval(() => {
+        fetchQueue();
+        fetchDistributionStatus();
+    }, 5000); // Poll every 5 seconds
+});
+
+async function loadData() {
     if (!jobCard.value) {
         loadingIngredients.value = true;
         jobCard.value = await getJobCardsList();
@@ -163,10 +176,6 @@ onMounted(async () => {
 
         await fetchQueue();
         await fetchDistributionStatus();
-        pollingInterval.value = setInterval(() => {
-            fetchQueue();
-            fetchDistributionStatus();
-        }, 5000); // Poll every 5 seconds
 
         const r = await frappe.call({
             method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_ingredients',
@@ -209,7 +218,7 @@ onMounted(async () => {
     finally {
         loadingIngredients.value = false;
     }
-});
+}
 
 onUnmounted(() => {
     if (pollingInterval.value) clearInterval(pollingInterval.value);
@@ -226,6 +235,7 @@ async function toggleReady() {
     frappe.confirm(
         __('Do you want to confirm the materials?'),
         async () => {
+            isProcessing.value = true;
             try {
                 const payload = ingredients.value.map(ing => ({
                     item_code: ing.item_code,
@@ -244,13 +254,13 @@ async function toggleReady() {
                 });
 
                 mixingReady.value = true;
-                frappe.msgprint(
-                    __('Materials confirmed. Stock Entry {0} created.', [r.message.stock_entry])
-                );
             } catch (e) {
-                frappe.msgprint(
-                    __('Failed to confirm materials')
-                );
+                frappe.show_alert({
+                    message: __('Failed to confirm materials'),
+                    indicator: 'red'
+                });
+            } finally {
+                isProcessing.value = false;
             }
         },
     );
@@ -258,7 +268,6 @@ async function toggleReady() {
 
 async function getJobCardsList() {
     const route = frappe.get_route();
-    const station = route[1] || "";
     const result = await frappe.call({
         method: 'erpnext.manufacturing.doctype.operation.api.get_recent_job_card',
         args: {
@@ -266,6 +275,7 @@ async function getJobCardsList() {
             production_line: work_context.assigned_line
         }
     });
+
     jobCard.value = result.message.name;
     return jobCard.value;
 }
@@ -278,6 +288,7 @@ async function startMixing() {
     frappe.confirm(
         __('Start mixing now?'),
         async () => {
+            isProcessing.value = true;
             try {
                 await frappe.call({
                     method: 'erpnext.manufacturing.page.mixer_station.mixer_station.start_mixing',
@@ -295,11 +306,19 @@ async function startMixing() {
                 }, 1000);
             }
             catch (e) {
-                frappe.msgprint(__('Failed to start Job Card: {0}', [e.message || e]));
+                frappe.show_alert({
+                    message: __('Failed to start Job Card for mixing'),
+                    indicator: 'red'
+                });
+            } finally {
+                isProcessing.value = false;
             }
         },
         () => {
-            frappe.msgprint(__('Mixing was not started.'));
+            frappe.show_alert({
+                message: __('Mixing was not started.'),
+                indicator: 'red'
+            });
         }
     );
 }
@@ -310,6 +329,7 @@ async function finishAndDischarge() {
         mixingTimerHandle.value = null;
     }
     try {
+        isProcessing.value = true;
         const jc = await frappe.db.get_doc('Job Card', jobCard.value);
         const completed_qty = jc.for_quantity || 0;
         const result = await frappe.call({
@@ -334,17 +354,8 @@ async function finishAndDischarge() {
         // transferredQty.value = 0;
         displayQty.value = result.message.display_qty;
         transferSuccess.value = result.message.transfer_complete;
-
-        frappe.msgprint(result.message.message);
-        if (result.message.work_order_status === 'Completed') {
-            frappe.show_alert({
-                message: __('Work Order also Completed!'),
-                indicator: 'green'
-            });
-        }
     }
     catch (error) {
-        console.error('error.message:', error.message);
         const errorMsg = error.message ||
             (error._server_messages?.[0]?.message) ||
             JSON.stringify(error);
@@ -354,6 +365,8 @@ async function finishAndDischarge() {
             indicator: 'red',
             message: `Failed to complete Job Card:<br><pre>${errorMsg}</pre>`
         });
+    } finally {
+        isProcessing.value = false;
     }
 }
 
@@ -435,9 +448,13 @@ function openAddMaterials() {
                     }
                 },
                 error(e) {
-                    frappe.msgprint(__('Failed: {0}', [e.message]));
+                    frappe.show_alert({
+                        message: __('Failed to add raw materials'),
+                        indicator: 'red'
+                    });
                 }
             });
+
             d.hide();
         },
         primary_action_condition(values) {
@@ -457,6 +474,7 @@ async function transferToFGWarehouse() {
     }
 
     try {
+        isProcessing.value = true;
         const jc = await frappe.db.get_doc('Job Card', jobCard.value);
         const workOrder = jc.work_order;
         const qty = bomQty.value
@@ -486,6 +504,7 @@ async function transferToFGWarehouse() {
             method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_state',
             args: { job_card: jobCard.value }
         });
+
         preparedQty.value = refreshedState.message.prepared_qty;
         transferredQty.value = refreshedState.message.transferred_qty_to_next;
         displayQty.value = refreshedState.message.display_qty;
@@ -494,20 +513,13 @@ async function transferToFGWarehouse() {
         // if (getDisplayQty.value <= 0) {
         //     transferSuccess.value = true;
         // }
-
-        frappe.msgprint({
-            title: __('Transfer Complete'),
-            message: result.message.message,
-            indicator: 'green'
-        });
-
-        frappe.show_alert({
-            message: `Next: ${result.message.next_work_order}`,
-            indicator: 'blue'
-        });
-
     } catch (error) {
-        frappe.msgprint(__('Transfer failed: {0}', [error.message]));
+        frappe.show_alert({
+            message: __('Transfer failed'),
+            indicator: 'red'
+        });
+    } finally {
+        isProcessing.value = false;
     }
 }
 
@@ -603,12 +615,12 @@ function selectJobCard(name) {
 <template>
     <div class="page-card p-0 d-flex h-100 w-100">
         <!-- Sidebar: Queue -->
-        <div class="queue-sidebar bg-light border-right p-3" style="width: 320px; overflow-y: auto;">
+        <div class="queue-sidebar border-right p-3" style="width: 320px; overflow-y: auto;">
             <h5 class="mb-3 font-weight-bold text-center border-bottom pb-2">
                 {{ __('Mixing Queue') }}
             </h5>
 
-            <div v-if="jobcardsQueue.length === 0" class="text-muted text-center py-4 bg-white rounded border">
+            <div v-if="jobcardsQueue.length === 0" class="text-muted text-center py-4 rounded border empty-queue-state">
                 <span class="fa fa-inbox fa-2x mb-2 d-block text-muted-light"></span>
                 {{ __('No Job cards in queue') }}
             </div>
@@ -618,11 +630,10 @@ function selectJobCard(name) {
                     class="card mb-2 shadow-sm slab-card border-0" :class="{ 'active-card': item.name === jobCard }"
                     style="cursor: pointer;">
                     <div class="card-body p-3 d-flex flex-column justify-content-center align-items-start"
-                        :style="item.name === jobCard ? 'border-left: 4px solid #007bff; background: #e7f1ff;' : 'border-left: 4px solid #ddd;'"
                         style="height: 5.5rem">
                         <div class="d-flex justify-content-between w-100 mb-1">
                             <h6 class="card-title mb-0 font-weight-bold">{{ item.name }}</h6>
-                            <span class="badge badge-light border small">{{ item.status }}</span>
+                            <span class="badge border item-time-badge small">{{ item.status }}</span>
                         </div>
                         <div class="small text-muted mb-1 w-100">
                             <span class="fa fa-cubes mr-1"></span>{{ item.production_item }}
@@ -744,16 +755,18 @@ function selectJobCard(name) {
 
                             <div class="mb-3">
                                 <button v-if="!mixingReady"
-                                    :disabled="!isMixerSelected || !allAdditionalIngredientsAdded"
-                                    :class="!isMixerSelected || !allAdditionalIngredientsAdded ? 'btn-disabled-pointer' : ''"
+                                    :disabled="!isMixerSelected || !allAdditionalIngredientsAdded || isProcessing"
+                                    :class="!isMixerSelected || !allAdditionalIngredientsAdded || isProcessing ? 'btn-disabled-pointer' : ''"
                                     class="btn btn-sm border border-success" @click="toggleReady">
-                                    <span class="fa fa-check mr-1"></span>
+                                    <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
+                                    <span v-else class="fa fa-check mr-1"></span>
                                     {{ __('Confirm Materials') }}
                                 </button>
 
-                                <button v-else class="btn btn-success btn-block py-2" :disabled="mixingStarted"
+                                <button v-else class="btn btn-success btn-block py-2" :disabled="mixingStarted || isProcessing"
                                     @click="startMixing">
-                                    <span class="fa fa-play mr-1"></span>
+                                    <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
+                                    <span v-else class="fa fa-play mr-1"></span>
                                     {{ __('Start Mixing') }}
                                 </button>
                             </div>
@@ -771,8 +784,9 @@ function selectJobCard(name) {
                                 {{ formattedMixingTime }}
                             </div>
                             <div class="d-flex flex-column gap-2 justify-content-center mb-3">
-                                <button class="btn btn-success flex-fill" @click="finishAndDischarge">
-                                    <span class="fa fa-check mr-1"></span>
+                                <button class="btn btn-success flex-fill" :disabled="isProcessing" @click="finishAndDischarge">
+                                    <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
+                                    <span v-else class="fa fa-check mr-1"></span>
                                     {{ __('Finish & Discharge') }}
                                 </button>
                                 <button class="btn btn-outline-primary flex-fill mt-2 border border-dark"
@@ -798,10 +812,11 @@ function selectJobCard(name) {
                                 {{ getDisplayQty.toLocaleString() }}
                             </div>
                             <div class="d-flex flex-column gap-2 justify-content-center mb-3">
-                                <button v-if="!transferSuccess.value" :disabled="!getCanTransfer"
-                                    :class="['btn btn-lg flex-fill', getCanTransfer ? 'btn-warning' : 'btn-secondary']"
+                                <button v-if="!transferSuccess.value" :disabled="!getCanTransfer || isProcessing"
+                                    :class="['btn btn-lg flex-fill', (getCanTransfer && !isProcessing) ? 'btn-warning' : 'btn-secondary']"
                                     @click="transferToFGWarehouse">
-                                    <span class="fa fa-truck mr-2"></span>
+                                    <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-2"></span>
+                                    <span v-else class="fa fa-truck mr-2"></span>
                                     {{ getCanTransfer ? 'Transfer ' + bomQty.toLocaleString() : (isDistributionBusy ?
                                         'Distribution Busy' :
                                         'Insufficient Qty') }}
@@ -906,20 +921,62 @@ function selectJobCard(name) {
 }
 
 .queue-sidebar {
-    background-color: #fcfcfc;
+	max-height: calc(100vh - 150px);
+	background-color: var(--bg-light, #fcfcfc);
+	border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .queue-sidebar {
+	background-color: var(--control-bg, #1f2124);
+}
+
+.empty-queue-state {
+	background-color: var(--fg-color);
+	border-style: dashed !important;
+	border-color: var(--border-color) !important;
+}
+
+.item-time-badge {
+	background-color: var(--control-bg);
+	color: var(--text-color);
+	border-color: var(--border-color) !important;
 }
 
 .slab-card {
-    transition: all 0.2s ease;
-    border-radius: 8px;
+	transition: all 0.2s ease;
+	border-radius: 8px;
+	background-color: var(--fg-color, #ffffff);
+}
+
+[data-theme="dark"] .slab-card {
+	background-color: var(--card-bg, #242629);
+	border: 1px solid var(--border-color) !important;
 }
 
 .slab-card:hover {
-    transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+	transform: translateX(4px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
 }
 
-.active-card {
-    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15) !important;
+[data-theme="dark"] .slab-card:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+.slab-card .card-body {
+	border-left: 4px solid var(--border-color, #ddd);
+	border-radius: inherit;
+}
+
+.slab-card.active-card {
+	box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2) !important;
+}
+
+.slab-card.active-card .card-body {
+	border-left: 4px solid var(--primary, #007bff);
+	background-color: rgba(0, 123, 255, 0.05);
+}
+
+[data-theme="dark"] .slab-card.active-card .card-body {
+	background-color: rgba(0, 123, 255, 0.2);
 }
 </style>
