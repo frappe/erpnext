@@ -5,6 +5,16 @@ frappe.ui.form.on("Account", {
 	setup: function (frm) {
 		frm.add_fetch("parent_account", "report_type", "report_type");
 		frm.add_fetch("parent_account", "root_type", "root_type");
+
+		frm.set_query("account_category", function () {
+			if (!frm.doc.root_type) return;
+
+			return {
+				filters: {
+					root_type: ["in", [frm.doc.root_type, ""]],
+				},
+			};
+		});
 	},
 	onload: function (frm) {
 		frm.set_query("parent_account", function (doc) {
