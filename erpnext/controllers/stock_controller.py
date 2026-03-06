@@ -1994,7 +1994,7 @@ def get_accounting_ledger_preview(doc, filters):
 
 	doc.docstatus = 1
 
-	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note"):
+	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note", "Stock Entry"):
 		doc.update_stock_ledger()
 
 	doc.make_gl_entries()
