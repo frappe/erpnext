@@ -1,18 +1,17 @@
 import json
-import os
+from pathlib import Path
 
 import frappe
 
 
 def execute():
-	module_path = frappe.get_module_path("Accounts")
-	categories_file = os.path.join(module_path, "financial_report_template", "account_categories.json")
+	base_path = Path(frappe.get_app_path("erpnext", "accounts")).resolve()
+	categories_file = (base_path / "financial_report_template" / "account_categories.json").resolve()
 
-	if not os.path.exists(categories_file):
+	if not categories_file.exists():
 		return
 
-	with open(categories_file) as f:
-		categories = json.load(f)
+	categories = json.loads(frappe.read_file(str(categories_file)))
 
 	root_type_categories = {}
 	for category in categories:
