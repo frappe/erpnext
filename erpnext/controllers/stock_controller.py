@@ -1982,6 +1982,7 @@ def get_accounting_ledger_preview(doc, filters):
 		"against",
 		"party_type",
 		"party",
+		"cost_center",
 		"against_voucher_type",
 		"against_voucher",
 	]
@@ -1990,7 +1991,6 @@ def get_accounting_ledger_preview(doc, filters):
 		dimensions = get_accounting_dimensions()
 		fields.append('project')
 		fields.extend(dimensions)
-		fields.append('cost_center')
 
 	doc.docstatus = 1
 
