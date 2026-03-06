@@ -1962,8 +1962,18 @@ def show_stock_ledger_preview(company: str, doctype: str, docname: str):
 
 def get_accounting_ledger_preview(doc, filters):
 	from erpnext.accounts.report.general_ledger.general_ledger import get_columns as get_gl_columns
+	from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
-	gl_columns, gl_data = [], []
+	if not filters:
+		filters = {}
+
+	include_dimensions_in_preview = frappe.db.get_single_value(
+		"Accounts Settings",
+		"include_dimensions_in_preview"
+	)
+
+	filters["include_dimensions"] = 1 if include_dimensions_in_preview else 0
+
 	fields = [
 		"posting_date",
 		"account",
@@ -1972,18 +1982,25 @@ def get_accounting_ledger_preview(doc, filters):
 		"against",
 		"party_type",
 		"party",
-		"cost_center",
 		"against_voucher_type",
 		"against_voucher",
 	]
 
+	if filters["include_dimensions"]:
+		dimensions = get_accounting_dimensions()
+		fields.append('project')
+		fields.extend(dimensions)
+		fields.append('cost_center')
+
 	doc.docstatus = 1
 
-	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note", "Stock Entry"):
+	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note"):
 		doc.update_stock_ledger()
 
 	doc.make_gl_entries()
+
 	columns = get_gl_columns(filters)
+
 	gl_entries = get_gl_entries_for_preview(doc.doctype, doc.name, fields)
 
 	gl_columns = get_columns(columns, fields)
