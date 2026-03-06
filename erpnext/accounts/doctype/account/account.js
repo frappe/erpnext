@@ -6,6 +6,15 @@ frappe.ui.form.on("Account", {
 		frm.add_fetch("parent_account", "report_type", "report_type");
 		frm.add_fetch("parent_account", "root_type", "root_type");
 
+		frm.set_query("parent_account", function (doc) {
+			return {
+				filters: {
+					is_group: 1,
+					company: doc.company,
+				},
+			};
+		});
+
 		frm.set_query("account_category", function () {
 			if (!frm.doc.root_type) return;
 
@@ -16,16 +25,7 @@ frappe.ui.form.on("Account", {
 			};
 		});
 	},
-	onload: function (frm) {
-		frm.set_query("parent_account", function (doc) {
-			return {
-				filters: {
-					is_group: 1,
-					company: doc.company,
-				},
-			};
-		});
-	},
+
 	refresh: function (frm) {
 		frm.toggle_display("account_name", frm.is_new());
 
@@ -68,12 +68,20 @@ frappe.ui.form.on("Account", {
 			}
 		}
 	},
+
 	account_type: function (frm) {
 		if (frm.doc.is_group == 0) {
 			frm.toggle_display(["tax_rate"], frm.doc.account_type == "Tax");
 			frm.toggle_display("warehouse", frm.doc.account_type == "Stock");
 		}
 	},
+
+	root_type: function (frm) {
+		if (frm.doc.account_category) {
+			frm.set_value("account_category", "");
+		}
+	},
+
 	add_toolbar_buttons: function (frm) {
 		frm.add_custom_button(
 			__("Chart of Accounts"),
