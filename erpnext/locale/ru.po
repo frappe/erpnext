@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-02-22 09:43+0000\n"
-"PO-Revision-Date: 2026-02-22 16:37\n"
+"PO-Revision-Date: 2026-03-06 17:38\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Russian\n"
 "MIME-Version: 1.0\n"
@@ -25,7 +25,12 @@ msgid "\n"
 "\t\t\tIf it is not possible to make an adjustment entry, please enable 'Allow Negative Stock for Batch' in Stock Settings to proceed.\n"
 "\t\t\tHowever, enabling this setting may lead to negative stock in the system.\n"
 "\t\t\tSo please ensure the stock levels are adjusted as soon as possible to maintain the correct valuation rate."
-msgstr ""
+msgstr "\n"
+"\t\t\tПартия {0} товара {1} имеет отрицательный остаток на складе {2}{3}.\n"
+"\t\t\tПожалуйста, добавьте количество товара {4}, чтобы продолжить ввод данных.\n"
+"\t\t\tЕсли невозможно внести корректирующие данные, пожалуйста, включите параметр «Разрешить отрицательный остаток для партии» в настройках склада, чтобы продолжить.\n"
+"\t\t\tОднако включение этого параметра может привести к отрицательному остатку в системе.\n"
+"\t\t\tПоэтому, пожалуйста, убедитесь, что уровни запасов скорректированы как можно скорее, чтобы поддерживать правильную оценочную стоимость."
 
 #. Label of the column_break_32 (Column Break) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -1094,7 +1099,7 @@ msgstr "Для вас создана новая встреча с {0}"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:3
 msgid "A new fiscal year has been automatically created."
-msgstr ""
+msgstr "Новый финансовый год был создан автоматически."
 
 #: erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.py:96
 msgid "A template with tax category {0} already exists. Only one template is allowed with each tax category"
@@ -1133,7 +1138,7 @@ msgstr "ACC-PINV-.YYYY.-"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "ALL records will be deleted (entire DocType cleared)"
-msgstr ""
+msgstr "ВСЕ записи будут удалены (весь DocType будет очищен)"
 
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:552
 msgid "AMC Expiry (Serial)"
@@ -1149,7 +1154,7 @@ msgstr "Дата истечения срока действия AMC"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "AP Summary"
-msgstr ""
+msgstr "Сводка по кредиторской задолженности"
 
 #. Label of the api_details_section (Section Break) field in DocType 'Currency
 #. Exchange Settings'
@@ -4075,7 +4080,7 @@ msgstr "Разрешить отрицательный запас"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow Negative Stock for Batch"
-msgstr ""
+msgstr "Разрешить отрицательный остаток для партии"
 
 #. Label of the allow_negative_rates_for_items (Check) field in DocType
 #. 'Selling Settings'
@@ -4227,7 +4232,7 @@ msgstr "Разрешить пользователю редактировать �
 #. Label of the allow_warehouse_change (Check) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Allow User to Edit Warehouse"
-msgstr ""
+msgstr "Разрешить пользователю редактировать склад"
 
 #. Label of the allow_different_uom (Check) field in DocType 'Item Variant
 #. Settings'
@@ -5943,7 +5948,7 @@ msgstr "Необходимо выбрать хотя бы один вариан�
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:314
 msgid "At least one raw material item must be present in the stock entry for the type {0}"
-msgstr ""
+msgstr "Как минимум одна единица сырья должна присутствовать в записи о запасах для типа {0}"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:25
 msgid "At least one row is required for a financial report template"
@@ -6336,7 +6341,7 @@ msgstr "Доступно"
 #. DocType 'Bin'
 #: erpnext/stock/doctype/bin/bin.json
 msgid "Available / Future Inventory"
-msgstr ""
+msgstr "Доступный / Будущий запас"
 
 #. Label of the actual_batch_qty (Float) field in DocType 'Delivery Note Item'
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
@@ -7265,7 +7270,7 @@ msgstr "Банковский овердрафтовый счет"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/banking.json
 msgid "Bank Reconciliation"
-msgstr ""
+msgstr "Инвентаризация банковских счетов"
 
 #. Name of a report
 #. Label of a Link in the Invoicing Workspace
@@ -8459,7 +8464,7 @@ msgstr "Дата начала бюджета"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/budget.json
 msgid "Budget Variance"
-msgstr ""
+msgstr "Отклонение от бюджета"
 
 #. Name of a report
 #. Label of a Link in the Invoicing Workspace
@@ -8653,7 +8658,7 @@ msgstr "Копия для"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "COA Importer"
-msgstr ""
+msgstr "Импорт плана счетов"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -8937,7 +8942,7 @@ msgstr "Графики кампаний"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:113
 msgid "Campaign {0} not found"
-msgstr ""
+msgstr "Кампания {0} не найдена"
 
 #: erpnext/setup/doctype/authorization_control/authorization_control.py:60
 msgid "Can be approved by {0}"
@@ -9052,7 +9057,7 @@ msgstr "Невозможно повторно отправить записи в
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:202
 msgid "Cannot add child table {0} to deletion list. Child tables are automatically deleted with their parent DocTypes."
-msgstr ""
+msgstr "Невозможно добавить дочернюю таблицу {0} в список для удаления. Дочерние таблицы автоматически удаляются вместе с родительскими DocType."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:226
 msgid "Cannot amend {0} {1}, please create a new one instead."
@@ -9195,7 +9200,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:211
 msgid "Cannot delete virtual DocType: {0}. Virtual DocTypes do not have database tables."
-msgstr ""
+msgstr "Невозможно удалить виртуальный DocType: {0}. Виртуальные DocType не имеют таблиц в базе данных."
 
 #: erpnext/setup/doctype/company/company.py:559
 msgid "Cannot disable perpetual inventory, as there are existing Stock Ledger Entries for the company {0}. Please cancel the stock transactions first and try again."
@@ -9232,7 +9237,7 @@ msgstr "Невозможно объединить {0} '{1}' с '{2}', поско
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:543
 msgid "Cannot produce more Item {0} than Sales Order quantity {1} {2}"
-msgstr ""
+msgstr "Невозможно произвести больше товаров {0}, чем количество товаров в заказе на продажу {1} {2}"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1439
 msgid "Cannot produce more item for {0}"
@@ -9287,7 +9292,7 @@ msgstr "Невозможно установить несколько парам�
 
 #: erpnext/assets/doctype/asset_category/asset_category.py:108
 msgid "Cannot set multiple account rows for the same company"
-msgstr ""
+msgstr "Невозможно задать несколько счетов для одной и той же компании"
 
 #: erpnext/controllers/accounts_controller.py:3885
 msgid "Cannot set quantity less than delivered quantity"
@@ -9303,7 +9308,7 @@ msgstr "Невозможно установить поле <b>{0}</b> для к�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:264
 msgid "Cannot start deletion. Another deletion {0} is already queued/running. Please wait for it to complete."
-msgstr ""
+msgstr "Невозможно начать удаление. Другое удаление {0} уже находится в очереди/выполняется. Пожалуйста, дождитесь его завершения."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1920
 msgid "Cannot {0} from {1} without any negative outstanding invoice"
@@ -9945,7 +9950,7 @@ msgstr "Технический директор"
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child DocTypes"
-msgstr ""
+msgstr "Дочерние типы документов"
 
 #. Label of the child_docname (Data) field in DocType 'Pricing Rule Detail'
 #: erpnext/accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
@@ -9961,7 +9966,7 @@ msgstr "Ссылка на дочернюю строку"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:205
 msgid "Child Table Not Allowed"
-msgstr ""
+msgstr "Дочерняя таблица не допускается"
 
 #: erpnext/projects/doctype/task/task.py:312
 msgid "Child Task exists for this Task. You can not delete this Task."
@@ -9975,7 +9980,7 @@ msgstr "Дочерние узлы могут быть созданы тольк�
 #. 'Transaction Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child tables that will also be deleted"
-msgstr ""
+msgstr "Дочерние таблицы, которые также будут удалены"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:103
 msgid "Child warehouse exists for this warehouse. You can not delete this warehouse."
@@ -10833,7 +10838,7 @@ msgstr "Счет компании"
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:63
 msgid "Company Account is mandatory"
-msgstr ""
+msgstr "Счет компании обязателен"
 
 #. Label of the company_address (Link) field in DocType 'Dunning'
 #. Label of the company_address_display (Text Editor) field in DocType 'POS
@@ -10950,7 +10955,7 @@ msgstr "Электронная почта компании"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company Field"
-msgstr ""
+msgstr "Поле компании"
 
 #. Label of the company_logo (Attach Image) field in DocType 'Company'
 #: erpnext/public/js/print.js:64 erpnext/setup/doctype/company/company.json
@@ -11004,7 +11009,7 @@ msgstr "Компания обязательна для создания счет
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company link field name used for filtering (optional - leave empty to delete all records)"
-msgstr ""
+msgstr "Название поля ссылки на компанию, используемое для фильтрации (необязательно — оставьте пустым, чтобы удалить все записи)"
 
 #: erpnext/setup/doctype/company/company.js:222
 msgid "Company name not same"
@@ -11197,12 +11202,12 @@ msgstr "Наименование компонента"
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Composite Asset"
-msgstr ""
+msgstr "Составной актив"
 
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Composite Component"
-msgstr ""
+msgstr "Составной компонент"
 
 #. Label of the comprehensive_insurance (Data) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -11261,7 +11266,7 @@ msgstr "Дата подтверждения"
 #. Label of the connection_tab (Tab Break) field in DocType 'Asset Repair'
 #: erpnext/assets/doctype/asset_repair/asset_repair.json
 msgid "Connection"
-msgstr ""
+msgstr "Подключение"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.js:175
 msgid "Consider Accounting Dimensions"
@@ -11361,7 +11366,7 @@ msgstr "Консолидированный финансовый отчет"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Consolidated Report"
-msgstr ""
+msgstr "Сводный отчет"
 
 #. Label of the consolidated_invoice (Link) field in DocType 'POS Invoice'
 #. Label of the consolidated_invoice (Link) field in DocType 'POS Invoice Merge
@@ -13717,7 +13722,7 @@ msgstr "Номер клиента LPO"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Customer Ledger"
-msgstr ""
+msgstr "Клиентская книга"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -13831,7 +13836,7 @@ msgstr "Подробности заказа клиента"
 #. Label of the customer_pos_id (Data) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Customer POS ID"
-msgstr ""
+msgstr "Идентификатор клиента точки продаж"
 
 #. Label of the portal_users (Table) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
@@ -15141,11 +15146,11 @@ msgstr "Для страны не разрешено удаление {0}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:216
 msgid "Deletion process restarted"
-msgstr ""
+msgstr "Процесс удаления перезапущен"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:97
 msgid "Deletion will start automatically after submission."
-msgstr ""
+msgstr "Удаление начнётся автоматически после отправки."
 
 #. Label of the delimiter_options (Data) field in DocType 'Bank Statement
 #. Import'
@@ -16602,27 +16607,27 @@ msgstr "DocType {0} не существует"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:295
 msgid "DocType {0} with company field '{1}' is already in the list"
-msgstr ""
+msgstr "DocType {0} с полем компании '{1}' уже есть в списке"
 
 #. Label of the doctypes_to_delete (Table) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "DocTypes To Delete"
-msgstr ""
+msgstr "DocType для удаления"
 
 #. Description of the 'Excluded DocTypes' (Table) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "DocTypes that will NOT be deleted."
-msgstr ""
+msgstr "DocType, которые НЕ будут удалены."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:84
 msgid "DocTypes with a company field:"
-msgstr ""
+msgstr "DocTypes с полем \"Компания\":"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "DocTypes without a company field:"
-msgstr ""
+msgstr "Типы документов без поля \"Компания\":"
 
 #: erpnext/templates/pages/search_help.py:22
 msgid "Docs Search"
@@ -16632,11 +16637,11 @@ msgstr "Поиск документов"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Document Count"
-msgstr ""
+msgstr "Количество документов"
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:78
 msgid "Document No"
-msgstr ""
+msgstr "Документ №"
 
 #. Label of the document_type (Link) field in DocType 'Subscription Invoice'
 #: erpnext/accounts/doctype/subscription_invoice/subscription_invoice.json
@@ -16899,7 +16904,7 @@ msgstr "Дублировать группу клиентов"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:188
 msgid "Duplicate DocType"
-msgstr ""
+msgstr "Дублирование DocType"
 
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.py:71
 msgid "Duplicate Entry. Please check Authorization Rule {0}"
@@ -16957,7 +16962,7 @@ msgstr "Повторяющаяся запись с кодом товара {0} �
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:187
 msgid "Duplicate entry: {0}{1}"
-msgstr ""
+msgstr "Повторяющаяся запись: {0}{1}"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:165
 msgid "Duplicate item group found in the item group table"
@@ -17230,7 +17235,7 @@ msgstr "Кампания по электронной почте"
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:149
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:157
 msgid "Email Campaign Error"
-msgstr ""
+msgstr "Ошибка кампании электронной почты"
 
 #. Label of the email_campaign_for (Select) field in DocType 'Email Campaign'
 #: erpnext/crm/doctype/email_campaign/email_campaign.json
@@ -17239,7 +17244,7 @@ msgstr "Email-кампания для"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:125
 msgid "Email Campaign Send Error"
-msgstr ""
+msgstr "Ошибка отправки кампании электронной почты"
 
 #. Label of the supplier_response_section (Section Break) field in DocType
 #. 'Request for Quotation'
@@ -17490,7 +17495,7 @@ msgstr "Пустой"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:752
 msgid "Empty To Delete List"
-msgstr ""
+msgstr "Пустой список для удаления"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -17576,7 +17581,7 @@ msgstr "Включить учет скидок при продаже"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Discounts and Margin"
-msgstr ""
+msgstr "Включить скидки и наценку"
 
 #. Label of the enable_european_access (Check) field in DocType 'Plaid
 #. Settings'
@@ -17640,7 +17645,7 @@ msgstr "Включить резервирование запасов"
 #. Label of the enable_utm (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable UTM"
-msgstr ""
+msgstr "Включить UTM"
 
 #. Description of the 'Enable UTM' (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
@@ -18695,7 +18700,7 @@ msgstr "Не удалось провести записи по амортиза�
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:126
 msgid "Failed to send email for campaign {0} to {1}"
-msgstr ""
+msgstr "Не удалось отправить электронное письмо для кампании {0} на адрес {1}"
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:30
 #: erpnext/setup/setup_wizard/setup_wizard.py:31
@@ -18749,7 +18754,7 @@ msgstr "Отзыв от"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/quality.json
 msgid "Feedback Template"
-msgstr ""
+msgstr "Шаблон обратной связи"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -18837,7 +18842,7 @@ msgstr "Получение данных..."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:222
 msgid "Field '{0}' is not a valid Company link field for DocType {1}"
-msgstr ""
+msgstr "Поле '{0}' не является действительным полем ссылки на компанию для DocType {1}"
 
 #. Label of the field_mapping_section (Section Break) field in DocType
 #. 'Inventory Dimension'
@@ -18859,15 +18864,15 @@ msgstr "Поля будут скопированы только во время 
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1064
 msgid "File does not belong to this Transaction Deletion Record"
-msgstr ""
+msgstr "Файл не относится к данной записи об удалении транзакции"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1058
 msgid "File not found"
-msgstr ""
+msgstr "Файл не найден"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1072
 msgid "File not found on server"
-msgstr ""
+msgstr "Файл не найден на сервере"
 
 #. Label of the file_to_rename (Attach) field in DocType 'Rename Tool'
 #: erpnext/utilities/doctype/rename_tool/rename_tool.json
@@ -19322,7 +19327,7 @@ msgstr "Финансовый год компании"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:5
 msgid "Fiscal Year Details"
-msgstr ""
+msgstr "Подробная информация о финансовом году"
 
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.py:47
 msgid "Fiscal Year End Date should be one year after Fiscal Year Start Date"
@@ -19638,7 +19643,7 @@ msgstr "Для элемента {0} ставка должна быть поло�
 
 #: erpnext/manufacturing/doctype/bom/bom.py:347
 msgid "For operation {0} at row {1}, please add raw materials or set a BOM against it."
-msgstr ""
+msgstr "Для операции {0} в строке {1} добавьте сырье или создайте спецификацию материалов для нее."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:2591
 msgid "For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})"
@@ -19692,7 +19697,7 @@ msgstr "Для удобства клиентов эти коды можно ис
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:978
 msgid "For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
-msgstr ""
+msgstr "Для изделия {0} количество потребленного материала должно быть {1} согласно спецификации материалов {2}."
 
 #: erpnext/public/js/controllers/transaction.js:1299
 msgctxt "Clear payment terms template and/or payment schedule when due date is changed"
@@ -20198,7 +20203,7 @@ msgstr "Условия и положения выполнения"
 
 #: erpnext/stock/doctype/shipment/shipment.js:275
 msgid "Full Name, Email or Phone/Mobile of the user are mandatory to continue."
-msgstr ""
+msgstr "Для продолжения необходимо указать полное имя, адрес электронной почты или номер телефона/мобильного телефона пользователя."
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -20476,11 +20481,11 @@ msgstr "Создать запись закрытия складского зап
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:112
 msgid "Generate To Delete List"
-msgstr ""
+msgstr "Создать список для удаления"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:470
 msgid "Generate To Delete list first"
-msgstr ""
+msgstr "Сначала сгенерируйте список для удаления"
 
 #. Description of a DocType
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -30013,7 +30018,7 @@ msgstr "Новые расходы"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:1
 msgid "New Fiscal Year - {0}"
-msgstr ""
+msgstr "Новый финансовый год - {0}"
 
 #. Label of the income (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -30183,7 +30188,7 @@ msgstr "Нет примечания о доставке для клиента {}
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:751
 msgid "No DocTypes in To Delete list. Please generate or import the list before submitting."
-msgstr ""
+msgstr "В списке «Для удаления» нет DocTypes. Пожалуйста, сгенерируйте или импортируйте список перед отправкой."
 
 #: erpnext/public/js/utils/ledger_preview.js:64
 msgid "No Impact on Accounting Ledger"
@@ -30203,7 +30208,7 @@ msgstr "Не выбрано ни одного товара для передач
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1226
 msgid "No Items with Bill of Materials to Manufacture or all items already manufactured"
-msgstr ""
+msgstr "Нет товаров, для которых имеется спецификация материалов для производства, или все товары уже изготовлены"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1372
 msgid "No Items with Bill of Materials."
@@ -30334,7 +30339,7 @@ msgstr "Различий по складскому счёту {0} не обна�
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:150
 msgid "No email found for {0} {1}"
-msgstr ""
+msgstr "Адрес электронной почты для {0} {1} не найден"
 
 #: erpnext/telephony/doctype/call_log/call_log.py:117
 msgid "No employee was scheduled for call popup"
@@ -30489,7 +30494,7 @@ msgstr "Не найдено принятых транзакций"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:158
 msgid "No recipients found for campaign {0}"
-msgstr ""
+msgstr "Получателей для кампании {0} не найдено."
 
 #: erpnext/accounts/report/purchase_register/purchase_register.py:45
 #: erpnext/accounts/report/sales_register/sales_register.py:46
@@ -30515,7 +30520,7 @@ msgstr "Нет зарезервированных запасов для отме
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:152
 msgid "No rows with zero document count found"
-msgstr ""
+msgstr "Строки с нулевым количеством документов не найдены"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:804
 msgid "No stock ledger entries were created. Please set the quantity or valuation rate for the items properly and try again."
@@ -31121,7 +31126,7 @@ msgstr "Для импорта данных можно использовать �
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1067
 msgid "Only CSV files are allowed"
-msgstr ""
+msgstr "Разрешается использовать только CSV-файлы"
 
 #. Label of the tax_on_excess_amount (Check) field in DocType 'Tax Withholding
 #. Category'
@@ -31438,7 +31443,7 @@ msgstr "Открытие счета"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Opening Invoice Tool"
-msgstr ""
+msgstr "Инструмент для открытия счета-фактуры"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1646
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1990
@@ -32209,7 +32214,7 @@ msgstr "Внешний"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Outward Order"
-msgstr ""
+msgstr "Исходящий заказ"
 
 #. Label of the over_billing_allowance (Currency) field in DocType 'Accounts
 #. Settings'
@@ -32362,7 +32367,7 @@ msgstr "Владелец"
 #. Label of the asset_owner_section (Section Break) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Ownership"
-msgstr ""
+msgstr "Собственность"
 
 #. Label of the p_l_closing_balance (JSON) field in DocType 'Process Period
 #. Closing Voucher'
@@ -32457,7 +32462,7 @@ msgstr "Закрытие точки продаж не удалось при вы
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Configurations"
-msgstr ""
+msgstr "Настройки POS"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/pos_customer_group/pos_customer_group.json
@@ -33857,7 +33862,7 @@ msgstr "Режим платежа"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Payment Options"
-msgstr ""
+msgstr "Варианты оплаты"
 
 #. Label of the payment_order (Link) field in DocType 'Journal Entry'
 #. Label of the payment_order (Link) field in DocType 'Payment Entry'
@@ -33924,7 +33929,7 @@ msgstr "Платеж получен"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/payments.json
 msgid "Payment Reconciliaition"
-msgstr ""
+msgstr "Сверка платежей"
 
 #. Name of a DocType
 #. Label of the payment_reconciliation (Table) field in DocType 'POS Closing
@@ -35257,7 +35262,7 @@ msgstr "Пожалуйста, введите утверждении роли и�
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:677
 msgid "Please enter Batch No"
-msgstr ""
+msgstr "Пожалуйста, введите номер партии"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:970
 msgid "Please enter Cost Center"
@@ -35322,7 +35327,7 @@ msgstr "Пожалуйста, укажите корневой тип для сч
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:679
 msgid "Please enter Serial No"
-msgstr ""
+msgstr "Пожалуйста, введите серийный номер"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:309
 msgid "Please enter Serial Nos"
@@ -35423,7 +35428,7 @@ msgstr "Пожалуйста, заполните таблицу заказов �
 
 #: erpnext/stock/doctype/shipment/shipment.js:277
 msgid "Please first set Full Name, Email and Phone for the user"
-msgstr ""
+msgstr "Пожалуйста, сначала укажите полное имя, адрес электронной почты и номер телефона пользователя"
 
 #: erpnext/telephony/doctype/incoming_call_settings/incoming_call_settings.js:94
 msgid "Please fix overlapping time slots for {0}"
@@ -35435,11 +35440,11 @@ msgstr "Пожалуйста, исправьте накладывающиеся 
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:270
 msgid "Please generate To Delete list before submitting"
-msgstr ""
+msgstr "Пожалуйста, сгенерируйте список для удаления перед проведением"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:70
 msgid "Please generate the To Delete list before submitting"
-msgstr ""
+msgstr "Пожалуйста, сгенерируйте список для удаления перед проведением"
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:67
 msgid "Please import accounts against parent company or enable {} in company master."
@@ -35488,7 +35493,7 @@ msgstr "Пожалуйста, обновите или сбросьте прив�
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:43
 msgid "Please review the {0} configuration and complete any required financial setup activities."
-msgstr ""
+msgstr "Пожалуйста, проверьте конфигурацию {0} и выполните все необходимые действия по настройке финансовых параметров."
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:12
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:28
@@ -36577,7 +36582,7 @@ msgstr "Предыдущий финансовый год не закрыт"
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:54
 msgid "Previous Qty"
-msgstr ""
+msgstr "Предыдущее количество"
 
 #. Label of the previous_work_experience (Section Break) field in DocType
 #. 'Employee'
@@ -36667,7 +36672,7 @@ msgstr "Прайс-лист"
 #. DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Price List & Currency"
-msgstr ""
+msgstr "Прайс-лист и валюта"
 
 #. Name of a DocType
 #: erpnext/stock/doctype/price_list_country/price_list_country.json
@@ -37325,7 +37330,7 @@ msgstr "Обработка файлов XML"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:188
 msgid "Processing import..."
-msgstr ""
+msgstr "Обработка импорта..."
 
 #: erpnext/buying/doctype/supplier/supplier_dashboard.py:10
 msgid "Procurement"
@@ -37503,7 +37508,7 @@ msgstr "Производство товара"
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Production Item Info"
-msgstr ""
+msgstr "Информация о товаре"
 
 #. Label of the production_plan (Link) field in DocType 'Purchase Order Item'
 #. Name of a DocType
@@ -38003,7 +38008,7 @@ msgstr "Перспективные, но не работающие"
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:196
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:781
 msgid "Protected DocType"
-msgstr ""
+msgstr "Защищенный DocType"
 
 #. Description of the 'Company Email' (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -39205,17 +39210,17 @@ msgstr "Название шаблона проверки качества"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:782
 msgid "Quality Inspection is required for the item {0} before completing the job card {1}"
-msgstr ""
+msgstr "Перед заполнением накладной {1} необходимо провести контроль качества изделия {0}"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:793
 #: erpnext/manufacturing/doctype/job_card/job_card.py:802
 msgid "Quality Inspection {0} is not submitted for the item: {1}"
-msgstr ""
+msgstr "Контроль качества {0} не проведён для товара: {1}"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:812
 #: erpnext/manufacturing/doctype/job_card/job_card.py:821
 msgid "Quality Inspection {0} is rejected for the item: {1}"
-msgstr ""
+msgstr "Контроль качества {0} отклоняется для изделия: {1}"
 
 #: erpnext/public/js/controllers/transaction.js:384
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:196
@@ -39702,7 +39707,7 @@ msgstr "Указанная сумма"
 #. in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "RFQ and Purchase Order Settings"
-msgstr ""
+msgstr "Настройки запроса коммерческого предложения и заказа на закупку"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:120
 msgid "RFQs are not allowed for {0} due to a scorecard standing of {1}"
@@ -40158,7 +40163,7 @@ msgstr "Потребление сырья"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:317
 msgid "Raw Materials Missing"
-msgstr ""
+msgstr "Отсутствует сырье"
 
 #. Label of the raw_materials_received_section (Section Break) field in DocType
 #. 'Subcontracting Inward Order'
@@ -41147,7 +41152,7 @@ msgstr "Удалить номер родительской строки в та�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:140
 msgid "Remove Zero Counts"
-msgstr ""
+msgstr "Удалить нулевые значения"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:9
 msgid "Remove item if charges is not applicable to that item"
@@ -43126,7 +43131,7 @@ msgstr "Строка #{0}: Запись в журнале {1} не имеет у
 
 #: erpnext/assets/doctype/asset_category/asset_category.py:149
 msgid "Row #{0}: Missing <b>{1}</b> for company <b>{2}</b>."
-msgstr ""
+msgstr "Строка #{0}: Отсутствует <b>{1}</b> для компании <b>{2}</b>."
 
 #: erpnext/assets/doctype/asset/asset.py:678
 msgid "Row #{0}: Next Depreciation Date cannot be before Available-for-use Date"
@@ -43271,7 +43276,10 @@ msgid "Row #{0}: Selling rate for item {1} is lower than its {2}.\n"
 "\t\t\t\t\tSelling {3} should be atleast {4}.<br><br>Alternatively,\n"
 "\t\t\t\t\tyou can disable '{5}' in {6} to bypass\n"
 "\t\t\t\t\tthis validation."
-msgstr ""
+msgstr "Строка #{0}: Продажный курс для товара {1} ниже, чем для его {2}.\n"
+"\t\t\t\t\tПродажный курс для {3} должен быть не ниже {4}.<br><br>В качестве альтернативы,\n"
+"\t\t\t\t\tвы можете отключить '{5}' в {6}, чтобы обойти\n"
+"\t\t\t\t\tэту проверку."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:276
 msgid "Row #{0}: Sequence ID must be {1} or {2} for Operation {3}."
@@ -43705,7 +43713,7 @@ msgstr "Строка {0}: Позиция {1} должна быть субпод�
 
 #: erpnext/controllers/subcontracting_controller.py:183
 msgid "Row {0}: Item {1} must be linked to a {2}."
-msgstr ""
+msgstr "Строка {0}: Элемент {1} должен быть связан с {2}."
 
 #: erpnext/controllers/subcontracting_controller.py:204
 msgid "Row {0}: Item {1}'s quantity cannot be higher than the available quantity."
@@ -45845,7 +45853,7 @@ msgstr "Настройки серии и партии товара"
 #. Label of the section_break_jcmx (Section Break) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Serial / Batch"
-msgstr ""
+msgstr "Серийный номер/номер партии"
 
 #. Label of the serial_and_batch_bundle (Link) field in DocType 'Stock
 #. Reconciliation Item'
@@ -46642,7 +46650,7 @@ msgstr "Установить общую сумму на метод оплаты 
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Set Incoming Rate as Zero for Expired Batch"
-msgstr ""
+msgstr "Установить нулевую стоимость входящей партии для просроченных товаров"
 
 #. Description of the 'Territory Targets' (Section Break) field in DocType
 #. 'Territory'
@@ -47590,7 +47598,7 @@ msgstr "Одновременный"
 
 #: erpnext/assets/doctype/asset_category/asset_category.py:183
 msgid "Since there are active depreciable assets under this category, the following accounts are required. <br><br>"
-msgstr ""
+msgstr "Поскольку в этой категории имеются активные амортизируемые активы, необходимы следующие счета. <br><br>"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:688
 msgid "Since there is a process loss of {0} units for the finished good {1}, you should reduce the quantity by {0} units for the finished good {1} in the Items Table."
@@ -47644,7 +47652,7 @@ msgstr "Пропустить передачу материалов на скла
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:561
 msgid "Skipped {0} DocType(s):<br>{1}"
-msgstr ""
+msgstr "Пропущено {0} DocType(s):<br>{1}"
 
 #. Label of the customer_skype (Data) field in DocType 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
@@ -49952,7 +49960,7 @@ msgstr "Время поставки от поставщика (дни)"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Supplier Ledger"
-msgstr ""
+msgstr "Главная книга поставщика"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -50848,7 +50856,7 @@ msgstr "Настройки налогов"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/selling.json
 msgid "Tax Template"
-msgstr ""
+msgstr "Шаблон Налога"
 
 #: erpnext/accounts/doctype/tax_rule/tax_rule.py:83
 msgid "Tax Template is mandatory."
@@ -51682,7 +51690,7 @@ msgstr "Поля от Акционера и Акционера не могут �
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:40
 msgid "The fiscal year has been automatically created in a Disabled state to maintain consistency with the previous fiscal year's status."
-msgstr ""
+msgstr "Для обеспечения согласованности со статусом предыдущего финансового года финансовый год был автоматически создан в состоянии «Отключено»."
 
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:240
 msgid "The folio numbers are not matching"
@@ -52562,7 +52570,7 @@ msgstr "Ко времени"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:118
 msgid "To Delete list generated with {0} DocTypes"
-msgstr ""
+msgstr "Список для удаления, создан для {0} типов документов"
 
 #. Option for the 'Sales Order Status' (Select) field in DocType 'Production
 #. Plan'
@@ -53113,7 +53121,7 @@ msgstr "Всего завершено кол-во"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:189
 msgid "Total Completed Qty is required for Job Card {0}, please start and complete the job card before submission"
-msgstr ""
+msgstr "Для ввода данных в карточку задания {0} необходимо указать общее количество выполненных работ. Пожалуйста, начните и завершите заполнение карточки задания перед проведением"
 
 #. Label of the total_consumed_material_cost (Currency) field in DocType
 #. 'Project'
@@ -53522,7 +53530,7 @@ msgstr "Совокупный налог"
 
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:109
 msgid "Total Taxable Amount"
-msgstr ""
+msgstr "Общая налогооблагаемая сумма"
 
 #. Label of the total_taxes_and_charges (Currency) field in DocType 'Payment
 #. Entry'
@@ -53747,7 +53755,7 @@ msgstr "Всего (кол-во)"
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Totals (Company Currency)"
-msgstr ""
+msgstr "Всего (валюта компании)"
 
 #: erpnext/stock/doctype/item/item_dashboard.py:33
 msgid "Traceability"
@@ -53856,15 +53864,15 @@ msgstr "Элемент записи удаления транзакции"
 #. Name of a DocType
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Transaction Deletion Record To Delete"
-msgstr ""
+msgstr "Запись удаления транзакции"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1098
 msgid "Transaction Deletion Record {0} is already running. {1}"
-msgstr ""
+msgstr "Запись удаления транзакции {0} уже выполняется. {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1117
 msgid "Transaction Deletion Record {0} is currently deleting {1}. Cannot save documents until deletion completes."
-msgstr ""
+msgstr "Запись удаления транзакции {0} в настоящее время удаляет {1}. Невозможно сохранить документы до завершения процесса."
 
 #. Label of the transaction_details_section (Section Break) field in DocType
 #. 'GL Entry'
@@ -53900,7 +53908,7 @@ msgstr "Название транзакции"
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:60
 msgid "Transaction Qty"
-msgstr ""
+msgstr "Количество транзакций"
 
 #. Label of the transaction_settings_section (Tab Break) field in DocType
 #. 'Buying Settings'
@@ -53934,7 +53942,7 @@ msgstr "Валюта транзакции: {0} не может отличать�
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:65
 msgid "Transaction date can't be earlier than previous movement date"
-msgstr ""
+msgstr "Дата транзакции не может быть раньше предыдущей даты движения"
 
 #. Description of the 'Applicable For' (Section Break) field in DocType 'Tax
 #. Withholding Entry'
@@ -54500,7 +54508,7 @@ msgstr "URL может быть только строкой"
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "UTM Analytics"
-msgstr ""
+msgstr "UTM аналитика"
 
 #. Option for the 'Data Fetch Method' (Select) field in DocType 'Accounts
 #. Settings'
@@ -54519,7 +54527,7 @@ msgstr "Несогласованные распределения"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:464
 msgid "Unable to fetch DocType details. Please contact system administrator."
-msgstr ""
+msgstr "Не удалось получить детали DocType. Пожалуйста, свяжитесь с системным администратором."
 
 #: erpnext/setup/utils.py:182
 msgid "Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually"
@@ -54608,7 +54616,7 @@ msgstr "В таблице «Рабочие часы» можно добавит�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:933
 msgid "Unexpected Naming Series Pattern"
-msgstr ""
+msgstr "Непредвиденный шаблон именования серий"
 
 #. Option for the 'Fulfilment Status' (Select) field in DocType 'Contract'
 #: erpnext/crm/doctype/contract/contract.json
@@ -55212,7 +55220,7 @@ msgstr "Использовать многоуровневую специфика
 #. DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "Use Posting Datetime for Naming Documents"
-msgstr ""
+msgstr "Использовать дату и время проведения для именования документов"
 
 #. Label of the fallback_to_default_price_list (Check) field in DocType
 #. 'Selling Settings'
@@ -55358,7 +55366,7 @@ msgstr "Пользователи могут включить флажок, ес�
 #. 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Users can make manufacture entry against Job Cards"
-msgstr ""
+msgstr "Пользователи могут вносить производственные записи на основании заказ-нарядов"
 
 #. Description of the 'Role Allowed to Over Bill ' (Link) field in DocType
 #. 'Accounts Settings'
@@ -56023,7 +56031,7 @@ msgstr "Vimeo"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:214
 msgid "Virtual DocType"
-msgstr ""
+msgstr "Виртуальный DocType"
 
 #: erpnext/templates/pages/help.html:46
 msgid "Visit the forums"
@@ -56558,7 +56566,7 @@ msgstr "Внимание: Сделка {0} уже существует по За
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:75
 msgid "Warning: This action cannot be undone!"
-msgstr ""
+msgstr "Внимание: Это действие нельзя отменить!"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_validation.py:74
 msgid "Warnings"
@@ -56640,7 +56648,7 @@ msgstr "Длина волны в мегаметрах"
 
 #: erpnext/controllers/accounts_controller.py:190
 msgid "We can see {0} is made against {1}. If you want {1}'s outstanding to be updated, uncheck the '{2}' checkbox."
-msgstr ""
+msgstr "Мы видим, что {0} создано для {1}. Если вы хотите обновить незавершенные операции {1}, снимите флажок '{2}'."
 
 #: erpnext/www/support/index.html:7
 msgid "We're here to help!"
@@ -56780,7 +56788,7 @@ msgstr "Как я могу вам помочь?"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:82
 msgid "What will be deleted:"
-msgstr ""
+msgstr "Что будет удалено:"
 
 #. Label of the whatsapp_no (Data) field in DocType 'Lead'
 #. Label of the whatsapp (Data) field in DocType 'Opportunity'
@@ -56816,7 +56824,7 @@ msgstr "Если этот флажок установлен, то к каждо�
 #. in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "When checked, the system will use the posting datetime of the document for naming the document instead of the creation datetime of the document."
-msgstr ""
+msgstr "Если этот параметр установлен, система будет использовать дату и время публикации документа для его именования вместо даты и времени создания документа."
 
 #: erpnext/stock/doctype/item/item.js:1079
 msgid "When creating an Item, entering a value for this field will automatically create an Item Price at the backend."
@@ -57430,7 +57438,7 @@ msgstr "Вы можете изменить родительский счет н�
 
 #: erpnext/assets/doctype/asset_category/asset_category.py:186
 msgid "You can either configure default depreciation accounts in the Company or set the required accounts in the following rows: <br><br>"
-msgstr ""
+msgstr "Вы можете либо настроить счета амортизации по умолчанию в разделе «Компания», либо указать необходимые счета в следующих строках: <br><br>"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:703
 msgid "You can not enter current voucher in 'Against Journal Entry' column"
@@ -57459,7 +57467,7 @@ msgstr "Вы можете задать его как имя машины или 
 
 #: erpnext/controllers/accounts_controller.py:211
 msgid "You can use {0} to reconcile against {1} later."
-msgstr ""
+msgstr "Вы можете использовать {0} для сверки с {1} позже."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1315
 msgid "You can't make any changes to Job Card since Work Order is closed."
@@ -57675,7 +57683,7 @@ msgstr "в процентах от количества готовой прод�
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1472
 msgid "as of {0}"
-msgstr ""
+msgstr "по состоянию на {0}"
 
 #: erpnext/www/book_appointment/index.html:43
 msgid "at"
@@ -58149,7 +58157,7 @@ msgstr "{0} в строке {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:450
 msgid "{0} is a child table and will be deleted automatically with its parent"
-msgstr ""
+msgstr "{0} — это дочерняя таблица, и она будет автоматически удалена вместе со своей родительской таблицей"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:95
 msgid "{0} is a mandatory Accounting Dimension. <br>Please set a value for {0} in Accounting Dimensions section."
@@ -58276,7 +58284,7 @@ msgstr "{0} единиц товара {1} нет в наличии ни на о�
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:1009
 msgid "{0} units of Item {1} is not available in any of the warehouses. Other Pick Lists exist for this item."
-msgstr ""
+msgstr "{0} единиц товара {1} нет в наличии ни на одном из складов. Для этого товара существуют другие списки комплектации."
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:144
 msgid "{0} units of {1} are required in {2} with the inventory dimension: {3} on {4} {5} for {6} to complete the transaction."
@@ -58524,19 +58532,19 @@ msgstr "{0}, завершите операцию {1} перед операцие
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:521
 msgid "{0}: Child table (auto-deleted with parent)"
-msgstr ""
+msgstr "{0}: Дочерняя таблица (автоматически удаляется вместе с родительской)"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:516
 msgid "{0}: Not found"
-msgstr ""
+msgstr "{0} Не найдено"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:512
 msgid "{0}: Protected DocType"
-msgstr ""
+msgstr "{0}: Защищенный DocType"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:526
 msgid "{0}: Virtual DocType (no database table)"
-msgstr ""
+msgstr "{0}: Виртуальный DocType (нет таблицы в базе данных)"
 
 #: erpnext/controllers/accounts_controller.py:539
 msgid "{0}: {1} does not belong to the Company: {2}"
