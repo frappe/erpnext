@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.email.inbox import link_communication_to_document
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import DocType, Interval
 from frappe.query_builder.functions import Now
@@ -380,7 +381,7 @@ def get_item_details(item_code):
 
 
 @frappe.whitelist()
-def make_quotation(source_name, target_doc=None):
+def make_quotation(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 
@@ -433,7 +434,7 @@ def make_quotation(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_request_for_quotation(source_name, target_doc=None):
+def make_request_for_quotation(source_name: str, target_doc: str | Document | None = None):
 	def update_item(obj, target, source_parent):
 		target.conversion_factor = 1.0
 
@@ -455,7 +456,7 @@ def make_request_for_quotation(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_customer(source_name, target_doc=None):
+def make_customer(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		target.opportunity_name = source.name
 
@@ -479,7 +480,7 @@ def make_customer(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_supplier_quotation(source_name, target_doc=None):
+def make_supplier_quotation(source_name: str, target_doc: str | Document | None = None):
 	doclist = get_mapped_doc(
 		"Opportunity",
 		source_name,
