@@ -2017,7 +2017,7 @@ def get_accounting_ledger_preview(doc, filters):
 
 	if filters["include_dimensions"]:
 		dimensions = get_accounting_dimensions()
-		fields.append('project')
+		fields.append("project")
 		fields.extend(dimensions)
 
 	doc.docstatus = 1
