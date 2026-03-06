@@ -104,7 +104,9 @@
   "payment_request_section",
   "create_pr_in_draft_status",
   "budget_section",
-  "use_legacy_budget_controller"
+  "use_legacy_budget_controller",
+  "preview_tab",
+  "include_dimensions_in_preview"
  ],
  "fields": [
   {
@@ -688,6 +690,17 @@
    "fieldname": "enable_accounting_dimensions",
    "fieldtype": "Check",
    "label": "Enable Accounting Dimensions"
+  },
+  {
+   "fieldname": "preview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Preview"
+  },
+  {
+   "default": "0",
+   "fieldname": "include_dimensions_in_preview",
+   "fieldtype": "Check",
+   "label": "Include Dimensions In Preview"
   }
  ],
  "grid_page_length": 50,

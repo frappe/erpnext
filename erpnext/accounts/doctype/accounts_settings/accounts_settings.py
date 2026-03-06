@@ -77,6 +77,7 @@ class AccountsSettings(Document):
 		general_ledger_remarks_length: DF.Int
 		ignore_account_closing_balance: DF.Check
 		ignore_is_opening_check_for_reporting: DF.Check
+		include_dimensions_in_preview: DF.Check
 		maintain_same_internal_transaction_rate: DF.Check
 		maintain_same_rate_action: DF.Literal["Stop", "Warn"]
 		make_payment_via_journal_entry: DF.Check
