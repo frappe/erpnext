@@ -444,6 +444,7 @@ class TestGrossProfit(IntegrationTestCase):
 			qty=-1, rate=100, posting_date=nowdate(), do_not_save=True, do_not_submit=True
 		)
 		sinv.is_return = 1
+		sinv.items[0].allow_zero_valuation_rate = 1
 		sinv = sinv.save().submit()
 
 		filters = frappe._dict(

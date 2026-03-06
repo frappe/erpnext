@@ -90,7 +90,7 @@ class PutawayRule(Document):
 
 
 @frappe.whitelist()
-def get_available_putaway_capacity(rule):
+def get_available_putaway_capacity(rule: str):
 	stock_capacity, item_code, warehouse = frappe.db.get_value(
 		"Putaway Rule", rule, ["stock_capacity", "item_code", "warehouse"]
 	)
@@ -100,7 +100,9 @@ def get_available_putaway_capacity(rule):
 
 
 @frappe.whitelist()
-def apply_putaway_rule(doctype, items, company, sync=None, purpose=None):
+def apply_putaway_rule(
+	doctype: str, items: list | str, company: str, sync: str | bool | None = None, purpose: str | None = None
+):
 	"""Applies Putaway Rule on line items.
 
 	items: List of Purchase Receipt/Stock Entry Items
@@ -193,8 +195,8 @@ def apply_putaway_rule(doctype, items, company, sync=None, purpose=None):
 		show_unassigned_items_message(items_not_accomodated)
 
 	if updated_table and _items_changed(items, updated_table, doctype):
-		items[:] = updated_table
 		frappe.msgprint(_("Applied putaway rules."), alert=True)
+		return updated_table
 
 	if sync and json.loads(sync):  # sync with client side
 		return items

@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _, bold
+from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc, map_doc
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
@@ -753,7 +754,7 @@ class POSInvoice(SalesInvoice):
 		return profile
 
 	@frappe.whitelist()
-	def set_missing_values(self, for_validate=False):
+	def set_missing_values(self, for_validate: bool = False):
 		profile = self.set_pos_fields(for_validate)
 
 		if not self.debit_to:
@@ -854,7 +855,7 @@ class POSInvoice(SalesInvoice):
 			return frappe.get_doc("Payment Request", pr)
 
 	@frappe.whitelist()
-	def update_payments(self, payments):
+	def update_payments(self, payments: list):
 		if self.status == "Consolidated":
 			frappe.throw(_("Create Payment Entry for Consolidated POS Invoices."))
 
@@ -897,7 +898,7 @@ class POSInvoice(SalesInvoice):
 
 
 @frappe.whitelist()
-def get_stock_availability(item_code, warehouse):
+def get_stock_availability(item_code: str | None, warehouse: str):
 	if frappe.db.get_value("Item", item_code, "is_stock_item"):
 		is_stock_item = True
 		bin_qty = get_bin_qty(item_code, warehouse)
@@ -1020,14 +1021,14 @@ def get_pos_reserved_qty_from_table(child_table, item_code, warehouse):
 
 
 @frappe.whitelist()
-def make_sales_return(source_name, target_doc=None):
+def make_sales_return(source_name: str, target_doc: Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("POS Invoice", source_name, target_doc)
 
 
 @frappe.whitelist()
-def make_merge_log(invoices):
+def make_merge_log(invoices: str | list):
 	import json
 
 	if isinstance(invoices, str):
@@ -1077,7 +1078,15 @@ def add_return_modes(doc, pos_profile):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
+def item_query(
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	as_dict: bool = False,
+):
 	if pos_profile := filters.get("pos_profile")[1]:
 		pos_profile = frappe.get_cached_doc("POS Profile", pos_profile)
 		if item_groups := get_item_group(pos_profile):

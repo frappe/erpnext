@@ -78,21 +78,23 @@
   "column_break_47",
   "total_taxes_and_charges",
   "totals_section",
+  "use_company_roundoff_cost_center",
   "grand_total",
-  "rounding_adjustment",
   "in_words",
   "column_break5",
-  "rounded_total",
   "disable_rounded_total",
-  "total_advance",
-  "outstanding_amount",
-  "use_company_roundoff_cost_center",
+  "rounding_adjustment",
+  "rounded_total",
   "base_totals_section",
   "base_grand_total",
-  "base_rounding_adjustment",
   "base_in_words",
   "column_break_xjag",
+  "base_rounding_adjustment",
   "base_rounded_total",
+  "section_break_vacb",
+  "total_advance",
+  "column_break_rdks",
+  "outstanding_amount",
   "section_tax_withholding_entry",
   "tax_withholding_group",
   "ignore_tax_withholding_threshold",
@@ -269,6 +271,7 @@
    "oldfieldtype": "Link",
    "options": "Customer",
    "print_hide": 1,
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -797,8 +800,7 @@
    "hide_seconds": 1,
    "label": "Time Sheets",
    "options": "Sales Invoice Timesheet",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "default": "0",
@@ -2307,6 +2309,14 @@
    "fieldname": "utm_analytics_section",
    "fieldtype": "Section Break",
    "label": "UTM Analytics"
+  },
+  {
+   "fieldname": "section_break_vacb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_rdks",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -2320,7 +2330,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-02-10 11:59:07.819903",
+ "modified": "2026-02-28 17:58:56.453076",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

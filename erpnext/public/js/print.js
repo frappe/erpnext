@@ -1,11 +1,22 @@
-const doctype_list = ["Sales Invoice", "Delivery Note", "Purchase Order", "POS Invoice"];
+const doctype_list = [
+	"Sales Order",
+	"Sales Invoice",
+	"Delivery Note",
+	"Purchase Order",
+	"Purchase Invoice",
+	"POS Invoice",
+];
 const allowed_print_formats = [
+	"Sales Order Standard",
+	"Sales Order with Item Image",
 	"Sales Invoice Standard",
 	"Sales Invoice with Item Image",
 	"Delivery Note Standard",
 	"Delivery Note with Item Image",
 	"Purchase Order Standard",
 	"Purchase Order with Item Image",
+	"Purchase Invoice Standard",
+	"Purchase Invoice with Item Image",
 	"POS Invoice Standard",
 	"POS Invoice with Item Image",
 ];

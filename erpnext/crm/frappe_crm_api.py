@@ -58,7 +58,9 @@ def create_prospect_against_crm_deal():
 		)
 		pass
 
-	create_contacts(json.loads(doc.contacts), prospect.company_name, "Prospect", prospect_name)
+	if doc.contacts and len(doc.contacts):
+		create_contacts(json.loads(doc.contacts), prospect.company_name, "Prospect", prospect_name)
+
 	create_address("Prospect", prospect_name, doc.address)
 	frappe.response["message"] = prospect_name
 

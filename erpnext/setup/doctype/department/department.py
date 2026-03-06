@@ -32,8 +32,7 @@ class Department(NestedSet):
 	nsm_parent_field = "parent_department"
 
 	def autoname(self):
-		root = get_root_of("Department")
-		if root and self.department_name != root:
+		if self.company:
 			self.name = get_abbreviated_name(self.department_name, self.company)
 		else:
 			self.name = self.department_name

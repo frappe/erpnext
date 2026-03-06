@@ -6,6 +6,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, getdate, nowdate
 
@@ -240,7 +241,9 @@ def get_list_context(context=None):
 
 
 @frappe.whitelist()
-def make_purchase_order(source_name, target_doc=None, args=None):
+def make_purchase_order(
+	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+):
 	if args is None:
 		args = {}
 	if isinstance(args, str):
@@ -294,7 +297,7 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 
 
 @frappe.whitelist()
-def make_purchase_invoice(source_name, target_doc=None):
+def make_purchase_invoice(source_name: str, target_doc: str | Document | None = None):
 	doc = get_mapped_doc(
 		"Supplier Quotation",
 		source_name,
@@ -315,7 +318,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_quotation(source_name, target_doc=None):
+def make_quotation(source_name: str, target_doc: str | Document | None = None):
 	doclist = get_mapped_doc(
 		"Supplier Quotation",
 		source_name,

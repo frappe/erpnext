@@ -21,7 +21,7 @@ def repost_ple_for_voucher(voucher_type, voucher_no, gle_map=None):
 
 
 @frappe.whitelist()
-def start_payment_ledger_repost(docname=None):
+def start_payment_ledger_repost(docname: str | None = None):
 	"""
 	Repost Payment Ledger Entries for Vouchers through Background Job
 	"""
@@ -119,7 +119,7 @@ class RepostPaymentLedger(Document):
 
 
 @frappe.whitelist()
-def execute_repost_payment_ledger(docname):
+def execute_repost_payment_ledger(docname: str):
 	"""Repost Payment Ledger Entries by background job."""
 
 	job_name = "payment_ledger_repost_" + docname

@@ -10,6 +10,7 @@ from frappe.contacts.address_and_contact import (
 from frappe.contacts.doctype.address.address import get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.email.inbox import link_communication_to_document
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import comma_and, get_link_to_form, has_gravatar, validate_email_address
 
@@ -314,7 +315,7 @@ class Lead(SellingController, CRMNote):
 
 
 @frappe.whitelist()
-def make_customer(source_name, target_doc=None):
+def make_customer(source_name: str, target_doc: str | Document | None = None):
 	return _make_customer(source_name, target_doc)
 
 
@@ -361,7 +362,7 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 
 
 @frappe.whitelist()
-def make_opportunity(source_name, target_doc=None):
+def make_opportunity(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -391,7 +392,7 @@ def make_opportunity(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_quotation(source_name, target_doc=None):
+def make_quotation(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 

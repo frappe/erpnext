@@ -103,10 +103,6 @@ class AccountingDimension(Document):
 		if not self.fieldname:
 			self.fieldname = scrub(self.label)
 
-	def on_update(self):
-		frappe.flags.accounting_dimensions = None
-		frappe.flags.accounting_dimensions_details = None
-
 
 def make_dimension_in_accounting_doctypes(doc, doclist=None):
 	if not doclist:
@@ -210,7 +206,7 @@ def delete_accounting_dimension(doc):
 
 
 @frappe.whitelist()
-def disable_dimension(doc):
+def disable_dimension(doc: str):
 	if frappe.in_test:
 		toggle_disabling(doc=doc)
 	else:
@@ -241,34 +237,26 @@ def get_doctypes_with_dimensions():
 	return frappe.get_hooks("accounting_dimension_doctypes")
 
 
-def get_accounting_dimensions(as_list=True, filters=None):
-	if not filters:
-		filters = {"disabled": 0}
-
-	if frappe.flags.accounting_dimensions is None:
-		frappe.flags.accounting_dimensions = frappe.get_all(
-			"Accounting Dimension",
-			fields=["label", "fieldname", "disabled", "document_type"],
-			filters=filters,
-		)
+def get_accounting_dimensions(as_list=True):
+	accounting_dimensions = frappe.get_all(
+		"Accounting Dimension",
+		fields=["label", "fieldname", "disabled", "document_type"],
+		filters={"disabled": 0},
+	)
 
 	if as_list:
-		return [d.fieldname for d in frappe.flags.accounting_dimensions]
+		return [d.fieldname for d in accounting_dimensions]
 	else:
-		return frappe.flags.accounting_dimensions
+		return accounting_dimensions
 
 
 def get_checks_for_pl_and_bs_accounts():
-	if frappe.flags.accounting_dimensions_details is None:
-		# nosemgrep
-		frappe.flags.accounting_dimensions_details = frappe.db.sql(
-			"""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
+	return frappe.db.sql(
+		"""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
 			FROM `tabAccounting Dimension`p ,`tabAccounting Dimension Detail` c
 			WHERE p.name = c.parent AND p.disabled = 0""",
-			as_dict=1,
-		)
-
-	return frappe.flags.accounting_dimensions_details
+		as_dict=1,
+	)
 
 
 def get_dimension_with_children(doctype, dimensions):
@@ -286,7 +274,7 @@ def get_dimension_with_children(doctype, dimensions):
 
 
 @frappe.whitelist()
-def get_dimensions(with_cost_center_and_project=False):
+def get_dimensions(with_cost_center_and_project: str | bool = False):
 	c = frappe.qb.DocType("Accounting Dimension Detail")
 	p = frappe.qb.DocType("Accounting Dimension")
 	dimension_filters = (

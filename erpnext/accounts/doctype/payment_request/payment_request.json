@@ -19,6 +19,8 @@
   "column_break_4",
   "reference_doctype",
   "reference_name",
+  "payment_reference_section",
+  "payment_reference",
   "transaction_details",
   "grand_total",
   "currency",
@@ -157,6 +159,7 @@
    "label": "Amount",
    "non_negative": 1,
    "options": "currency",
+   "read_only_depends_on": "eval:doc.payment_reference.length>0",
    "reqd": 1
   },
   {
@@ -457,6 +460,17 @@
    "fieldname": "phone_number",
    "fieldtype": "Data",
    "label": "Phone Number"
+  },
+  {
+   "fieldname": "payment_reference_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "payment_reference",
+   "fieldtype": "Table",
+   "label": "Payment Reference",
+   "options": "Payment Reference",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -464,7 +478,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-29 11:52:48.555415",
+ "modified": "2026-01-13 12:53:00.963274",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",

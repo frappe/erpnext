@@ -24,8 +24,8 @@ frappe.ui.form.on("Production Plan", {
 			"Material Request": "Material Request",
 		};
 
-		frm.set_df_property("sub_assembly_items", "cannot_delete_rows", true);
-		frm.set_df_property("mr_items", "cannot_delete_rows", true);
+		frm.set_df_property("sub_assembly_items", "cannot_add_rows", true);
+		frm.set_df_property("mr_items", "cannot_add_rows", true);
 	},
 
 	setup_queries(frm) {

@@ -1,12 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
 import json
+from datetime import date
 from functools import reduce
 
 import frappe
 from frappe import ValidationError, _, qb, scrub, throw
+from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Tuple
 from frappe.query_builder.functions import Count
@@ -1064,8 +1065,12 @@ class PaymentEntry(AccountsController):
 				total_allocated_amount += flt(d.allocated_amount)
 				base_total_allocated_amount += self.calculate_base_allocated_amount_for_reference(d)
 
-		self.total_allocated_amount = abs(total_allocated_amount)
-		self.base_total_allocated_amount = abs(base_total_allocated_amount)
+		self.total_allocated_amount = flt(
+			abs(total_allocated_amount), self.precision("total_allocated_amount")
+		)
+		self.base_total_allocated_amount = flt(
+			abs(base_total_allocated_amount), self.precision("base_total_allocated_amount")
+		)
 
 	def set_unallocated_amount(self):
 		self.unallocated_amount = 0
@@ -1081,20 +1086,32 @@ class PaymentEntry(AccountsController):
 			self.base_paid_amount + deductions_to_consider
 		):
 			self.unallocated_amount = (
-				self.base_paid_amount
-				+ deductions_to_consider
-				- self.base_total_allocated_amount
-				- included_taxes
-			) / self.source_exchange_rate
+				flt(
+					(
+						self.base_paid_amount
+						+ deductions_to_consider
+						- self.base_total_allocated_amount
+						- included_taxes
+					),
+					self.precision("unallocated_amount"),
+				)
+				/ self.source_exchange_rate
+			)
 		elif self.payment_type == "Pay" and self.base_total_allocated_amount < (
 			self.base_received_amount - deductions_to_consider
 		):
 			self.unallocated_amount = (
-				self.base_received_amount
-				- deductions_to_consider
-				- self.base_total_allocated_amount
-				- included_taxes
-			) / self.target_exchange_rate
+				flt(
+					(
+						self.base_received_amount
+						- deductions_to_consider
+						- self.base_total_allocated_amount
+						- included_taxes
+					),
+					self.precision("unallocated_amount"),
+				)
+				/ self.target_exchange_rate
+			)
 
 	def set_exchange_gain_loss(self):
 		exchange_gain_loss = flt(
@@ -1867,7 +1884,9 @@ class PaymentEntry(AccountsController):
 		frappe.response["matched_payment_requests"] = matched_payment_requests
 
 	@frappe.whitelist()
-	def allocate_amount_to_references(self, paid_amount, paid_amount_change, allocate_payment_amount):
+	def allocate_amount_to_references(
+		self, paid_amount: float, paid_amount_change: bool, allocate_payment_amount: bool
+	):
 		"""
 		Allocate `Allocated Amount` and `Payment Request` against `Reference` based on `Paid Amount` and `Outstanding Amount`.\n
 		:param paid_amount: Paid Amount / Received Amount.
@@ -2039,7 +2058,7 @@ class PaymentEntry(AccountsController):
 				)
 
 	@frappe.whitelist()
-	def set_matched_payment_requests(self, matched_payment_requests):
+	def set_matched_payment_requests(self, matched_payment_requests: str | list | None):
 		"""
 		Set `Payment Request` against `Reference` based on `matched_payment_requests`.\n
 		:param matched_payment_requests: List of tuple of matched Payment Requests.
@@ -2255,7 +2274,7 @@ def validate_inclusive_tax(tax, doc):
 
 
 @frappe.whitelist()
-def get_outstanding_reference_documents(args, validate=False):
+def get_outstanding_reference_documents(args: str | dict, validate: bool = False):
 	if isinstance(args, str):
 		args = json.loads(args)
 
@@ -2670,7 +2689,7 @@ def get_negative_outstanding_invoices(
 
 
 @frappe.whitelist()
-def get_party_details(company, party_type, party, date, cost_center=None):
+def get_party_details(company: str, party_type: str, party: str, date: str, cost_center: str | None = None):
 	bank_account = ""
 	party_bank_account = ""
 
@@ -2696,7 +2715,7 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 
 
 @frappe.whitelist()
-def get_account_details(account, date, cost_center=None):
+def get_account_details(account: str, date: str | date, cost_center: str | None = None):
 	frappe.has_permission("Payment Entry", throw=True)
 
 	# to check if the passed account is accessible under reference doctype Payment Entry
@@ -2716,7 +2735,7 @@ def get_account_details(account, date, cost_center=None):
 
 
 @frappe.whitelist()
-def get_company_defaults(company):
+def get_company_defaults(company: str):
 	fields = ["write_off_account", "exchange_gain_loss_account", "cost_center"]
 	return frappe.get_cached_value("Company", company, fields, as_dict=1)
 
@@ -2755,7 +2774,11 @@ def get_outstanding_on_journal_entry(voucher_no, party_type, party):
 
 @frappe.whitelist()
 def get_reference_details(
-	reference_doctype, reference_name, party_account_currency, party_type=None, party=None
+	reference_doctype: str,
+	reference_name: str,
+	party_account_currency: str,
+	party_type: str | None = None,
+	party: str | None = None,
 ):
 	total_amount = outstanding_amount = exchange_rate = account = None
 
@@ -2846,15 +2869,15 @@ def get_reference_details(
 
 @frappe.whitelist()
 def get_payment_entry(
-	dt,
-	dn,
-	party_amount=None,
-	bank_account=None,
-	bank_amount=None,
-	party_type=None,
-	payment_type=None,
-	reference_date=None,
-	created_from_payment_request=False,
+	dt: str,
+	dn: str,
+	party_amount: int | float | None = None,
+	bank_account: str | None = None,
+	bank_amount: int | float | None = None,
+	party_type: str | None = None,
+	payment_type: str | None = None,
+	reference_date: str | date | None = None,
+	created_from_payment_request: bool | None = None,
 ):
 	doc = frappe.get_doc(dt, dn)
 	over_billing_allowance = frappe.get_single_value("Accounts Settings", "over_billing_allowance")
@@ -3520,7 +3543,7 @@ def get_paid_amount(dt, dn, party_type, party, account, due_date):
 
 
 @frappe.whitelist()
-def make_payment_order(source_name, target_doc=None):
+def make_payment_order(source_name: str, target_doc: str | Document | None = None):
 	from frappe.model.mapper import get_mapped_doc
 
 	def set_missing_values(source, target):

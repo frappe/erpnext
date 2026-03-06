@@ -87,6 +87,12 @@ frappe.query_reports["Consolidated Trial Balance"] = {
 			default: 1,
 		},
 		{
+			fieldname: "show_net_values",
+			label: __("Show net values in opening and closing columns"),
+			fieldtype: "Check",
+			default: 1,
+		},
+		{
 			fieldname: "show_group_accounts",
 			label: __("Show Group Accounts"),
 			fieldtype: "Check",

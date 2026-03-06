@@ -5,6 +5,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
@@ -343,7 +344,7 @@ class SubcontractingReceipt(SubcontractingController):
 				self.update_rate_for_supplied_items()
 
 	@frappe.whitelist()
-	def get_scrap_items(self, recalculate_rate=False):
+	def get_scrap_items(self, recalculate_rate: bool | None = False):
 		self.remove_scrap_items()
 
 		for item in list(self.items):
@@ -930,21 +931,27 @@ class SubcontractingReceipt(SubcontractingController):
 
 
 @frappe.whitelist()
-def make_subcontract_return_against_rejected_warehouse(source_name):
+def make_subcontract_return_against_rejected_warehouse(source_name: str):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Subcontracting Receipt", source_name, return_against_rejected_qty=True)
 
 
 @frappe.whitelist()
-def make_subcontract_return(source_name, target_doc=None):
+def make_subcontract_return(source_name: str, target_doc: Document | str | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Subcontracting Receipt", source_name, target_doc)
 
 
 @frappe.whitelist()
-def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False, notify=False):
+def make_purchase_receipt(
+	source_name: Document | str,
+	target_doc: Document | str | None = None,
+	save: bool = False,
+	submit: bool = False,
+	notify: bool = False,
+):
 	if isinstance(source_name, str):
 		source_doc = frappe.get_doc("Subcontracting Receipt", source_name)
 	else:

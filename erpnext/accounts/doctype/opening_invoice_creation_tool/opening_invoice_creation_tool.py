@@ -293,7 +293,7 @@ def publish(index, total, doctype):
 
 
 @frappe.whitelist()
-def get_temporary_opening_account(company=None):
+def get_temporary_opening_account(company: str | None = None):
 	if not company:
 		return
 

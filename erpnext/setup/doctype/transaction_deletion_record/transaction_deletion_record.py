@@ -165,6 +165,8 @@ class TransactionDeletionRecord(Document):
 
 	def validate(self):
 		frappe.only_for("System Manager")
+		if not self.doctypes_to_be_ignored:
+			self.populate_doctypes_to_be_ignored_table()
 		self.validate_to_delete_list()
 
 	def validate_to_delete_list(self):

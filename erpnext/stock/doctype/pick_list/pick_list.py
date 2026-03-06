@@ -4,9 +4,11 @@
 import json
 from collections import OrderedDict, defaultdict
 from itertools import groupby
+from typing import Any
 
 import frappe
 from frappe import _, bold
+from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc
 from frappe.query_builder import Case
 from frappe.query_builder.custom import GROUP_CONCAT
@@ -428,7 +430,7 @@ class PickList(TransactionBase):
 			frappe.get_doc("Sales Order", sales_order, for_update=True).update_picking_status()
 
 	@frappe.whitelist()
-	def create_stock_reservation_entries(self, notify=True) -> None:
+	def create_stock_reservation_entries(self, notify: bool = True) -> None:
 		"""Creates Stock Reservation Entries for Sales Order Items against Pick List."""
 
 		so_items_details_map = {}
@@ -455,7 +457,7 @@ class PickList(TransactionBase):
 				)
 
 	@frappe.whitelist()
-	def cancel_stock_reservation_entries(self, notify=True) -> None:
+	def cancel_stock_reservation_entries(self, notify: bool = True) -> None:
 		"""Cancel Stock Reservation Entries for Sales Order Items created against Pick List."""
 
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
@@ -480,7 +482,7 @@ class PickList(TransactionBase):
 				)
 
 	@frappe.whitelist()
-	def set_item_locations(self, save=False):
+	def set_item_locations(self, save: bool = False):
 		self.validate_for_qty()
 		items = self.aggregate_item_qty()
 		picked_items_details = self.get_picked_items_details(items)
@@ -1006,12 +1008,11 @@ def validate_picked_materials(item_code, required_qty, locations, picked_item_de
 	if remaining_qty > 0:
 		if picked_item_details:
 			frappe.msgprint(
-				_("{0} units of Item {1} is picked in another Pick List.").format(
-					remaining_qty, get_link_to_form("Item", item_code)
-				),
+				_(
+					"{0} units of Item {1} is not available in any of the warehouses. Other Pick Lists exist for this item."
+				).format(remaining_qty, get_link_to_form("Item", item_code)),
 				title=_("Already Picked"),
 			)
-
 		else:
 			frappe.msgprint(
 				_("{0} units of Item {1} is not available in any of the warehouses.").format(
@@ -1210,7 +1211,7 @@ def get_available_item_locations_for_other_item(
 
 
 @frappe.whitelist()
-def create_delivery_note(source_name, target_doc=None):
+def create_delivery_note(source_name: str, target_doc: str | Document | None = None):
 	pick_list = frappe.get_doc("Pick List", source_name)
 	validate_item_locations(pick_list)
 	sales_dict = dict()
@@ -1281,7 +1282,9 @@ def create_dn_wo_so(pick_list, delivery_note=None):
 
 
 @frappe.whitelist()
-def create_dn_for_pick_lists(source_name, target_doc=None, kwargs=None):
+def create_dn_for_pick_lists(
+	source_name: str, target_doc: str | Document | None = None, kwargs: dict | str | None = None
+):
 	"""Get Items from Multiple Pick Lists and create a Delivery Note for filtered customer"""
 	if kwargs is None:
 		kwargs = {}
@@ -1429,7 +1432,7 @@ def add_product_bundles_to_delivery_note(
 
 
 @frappe.whitelist()
-def create_stock_entry(pick_list):
+def create_stock_entry(pick_list: str):
 	pick_list = frappe.get_doc(json.loads(pick_list))
 	validate_item_locations(pick_list)
 
@@ -1455,7 +1458,15 @@ def create_stock_entry(pick_list):
 
 
 @frappe.whitelist()
-def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filters, as_dict):
+def get_pending_work_orders(
+	doctype: Any,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_length: int,
+	filters: dict,
+	as_dict: bool = False,
+):
 	wo = frappe.qb.DocType("Work Order")
 	return (
 		frappe.qb.from_(wo)
@@ -1475,7 +1486,9 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 
 
 @frappe.whitelist()
-def get_item_details(item_code, uom=None, warehouse=None, company=None):
+def get_item_details(
+	item_code: str, uom: str | None = None, warehouse: str | None = None, company: str | None = None
+):
 	details = frappe.db.get_value("Item", item_code, "stock_uom", as_dict=1)
 	details.uom = uom or details.stock_uom
 	if uom:
@@ -1588,7 +1601,7 @@ def update_common_item_properties(item, location):
 	item.item_code = location.item_code
 	item.s_warehouse = location.warehouse
 	item.transfer_qty = location.picked_qty
-	item.qty = location.qty
+	item.qty = flt(location.picked_qty / (location.conversion_factor or 1), location.precision("qty"))
 	item.uom = location.uom
 	item.conversion_factor = location.conversion_factor
 	item.stock_uom = location.stock_uom
@@ -1611,7 +1624,7 @@ def get_rejected_warehouses():
 
 
 @frappe.whitelist()
-def get_pick_list_query(doctype, txt, searchfield, start, page_len, filters):
+def get_pick_list_query(doctype: Any, txt: str, searchfield: Any, start: int, page_len: int, filters: dict):
 	frappe.has_permission("Pick List", throw=True)
 
 	if not filters.get("company"):

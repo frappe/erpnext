@@ -376,12 +376,12 @@ class BOMCreator(Document):
 		return False
 
 	@frappe.whitelist()
-	def get_default_bom(self, item_code) -> str:
+	def get_default_bom(self, item_code: str):
 		return frappe.get_cached_value("Item", item_code, "default_bom")
 
 
 @frappe.whitelist()
-def get_children(doctype=None, parent=None, **kwargs):
+def get_children(doctype: str | None = None, parent: str | None = None, **kwargs):
 	if isinstance(kwargs, str):
 		kwargs = frappe.parse_json(kwargs)
 
@@ -561,7 +561,7 @@ def delete_node(**kwargs):
 
 
 @frappe.whitelist()
-def edit_bom_creator(doctype, docname, data, parent):
+def edit_bom_creator(doctype: str, docname: str, data: str | dict, parent: str):
 	if isinstance(data, str):
 		data = frappe.parse_json(data)
 

@@ -16,6 +16,7 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 
 	refresh() {
 		this.show_general_ledger();
+		erpnext.toggle_serial_batch_fields(this.frm);
 
 		if (this.frm.doc.stock_items && this.frm.doc.stock_items.length) {
 			this.show_stock_ledger();
@@ -396,7 +397,7 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 				method: "erpnext.assets.doctype.asset_capitalization.asset_capitalization.get_warehouse_details",
 				child: item,
 				args: {
-					args: {
+					ctx: {
 						item_code: item.item_code,
 						warehouse: cstr(item.warehouse),
 						qty: -1 * flt(item.stock_qty),

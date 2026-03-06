@@ -22,12 +22,12 @@ from erpnext.stock.get_item_details import ItemDetailsCtx, _get_item_tax_templat
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def employee_query(
-	doctype,
-	txt,
-	searchfield,
-	start,
-	page_len,
-	filters,
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict | str | None = None,
 	reference_doctype: str | None = None,
 	ignore_user_permissions: bool = False,
 ):
@@ -91,7 +91,9 @@ def has_ignored_field(reference_doctype, doctype):
 # searches for leads which are not converted
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def lead_query(doctype, txt, searchfield, start, page_len, filters):
+def lead_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | None = None
+):
 	doctype = "Lead"
 	fields = get_fields(doctype, ["name", "lead_name", "company_name"])
 
@@ -127,7 +129,7 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
+def tax_account_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	doctype = "Account"
 	company_currency = erpnext.get_company_currency(filters.get("company"))
 
@@ -174,7 +176,15 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
+def item_query(
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict | str | None = None,
+	as_dict: bool = False,
+):
 	doctype = "Item"
 	conditions = []
 
@@ -280,7 +290,9 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def bom(doctype, txt, searchfield, start, page_len, filters):
+def bom(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | str | None = None
+):
 	doctype = "BOM"
 	conditions = []
 	fields = get_fields(doctype, ["name", "item"])
@@ -312,7 +324,9 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_project_name(doctype, txt, searchfield, start, page_len, filters):
+def get_project_name(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | None = None
+):
 	proj = qb.DocType("Project")
 	qb_filter_and_conditions = []
 	qb_filter_or_conditions = []
@@ -363,7 +377,9 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters, as_dict):
+def get_delivery_notes_to_be_billed(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, as_dict: bool
+):
 	doctype = "Delivery Note"
 	fields = get_fields(doctype, ["name", "customer", "posting_date"])
 
@@ -399,7 +415,7 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
+def get_batch_no(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	doctype = "Batch"
 	meta = frappe.get_meta(doctype, cached=True)
 	searchfields = meta.get_search_fields()
@@ -559,7 +575,9 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_account_list(doctype, txt, searchfield, start, page_len, filters):
+def get_account_list(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | list
+):
 	doctype = "Account"
 	filter_list = []
 
@@ -590,7 +608,7 @@ def get_account_list(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_blanket_orders(doctype, txt, searchfield, start, page_len, filters):
+def get_blanket_orders(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	bo = frappe.qb.DocType("Blanket Order")
 	bo_item = frappe.qb.DocType("Blanket Order Item")
 
@@ -615,7 +633,7 @@ def get_blanket_orders(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_income_account(doctype, txt, searchfield, start, page_len, filters):
+def get_income_account(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	from erpnext.controllers.queries import get_match_cond
 
 	# income account can be any Credit account,
@@ -649,7 +667,15 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters, reference_doctype=None):
+def get_filtered_dimensions(
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	reference_doctype: str | None = None,
+):
 	from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
 		get_dimension_filter_map,
 	)
@@ -703,7 +729,7 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters,
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
+def get_expense_account(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	from erpnext.controllers.queries import get_match_cond
 
 	if not filters:
@@ -728,7 +754,7 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
+def warehouse_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: list):
 	# Should be used when item code is passed in filters.
 	doctype = "Warehouse"
 	conditions, bin_conditions = [], []
@@ -776,7 +802,7 @@ def get_doctype_wise_filters(filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
+def get_batch_numbers(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	query = """select batch_id from `tabBatch`
 			where disabled = 0
 			and (expiry_date >= CURRENT_DATE or expiry_date IS NULL)
@@ -790,7 +816,9 @@ def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_manufacturer_query(doctype, txt, searchfield, start, page_len, filters):
+def item_manufacturer_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
 	item_filters = [
 		["manufacturer", "like", "%" + txt + "%"],
 		["item_code", "=", filters.get("item_code")],
@@ -809,7 +837,7 @@ def item_manufacturer_query(doctype, txt, searchfield, start, page_len, filters)
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_purchase_receipts(doctype, txt, searchfield, start, page_len, filters):
+def get_purchase_receipts(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	query = """
 		select pr.name
 		from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pritem
@@ -826,7 +854,7 @@ def get_purchase_receipts(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_purchase_invoices(doctype, txt, searchfield, start, page_len, filters):
+def get_purchase_invoices(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	query = """
 		select pi.name
 		from `tabPurchase Invoice` pi, `tabPurchase Invoice Item` piitem
@@ -843,7 +871,9 @@ def get_purchase_invoices(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_doctypes_for_closing(doctype, txt, searchfield, start, page_len, filters):
+def get_doctypes_for_closing(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
 	doctypes = frappe.get_hooks("period_closing_doctypes")
 	if txt:
 		doctypes = [d for d in doctypes if txt.lower() in d.lower()]
@@ -852,7 +882,7 @@ def get_doctypes_for_closing(doctype, txt, searchfield, start, page_len, filters
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
+def get_tax_template(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	item_doc = frappe.get_cached_doc("Item", filters.get("item_code"))
 	item_group = filters.get("item_group")
 	company = filters.get("company")
@@ -918,7 +948,9 @@ def get_fields(doctype, fields=None):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_payment_terms_for_references(doctype, txt, searchfield, start, page_len, filters) -> list:
+def get_payment_terms_for_references(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
 	terms = []
 	if filters:
 		terms = frappe.db.get_all(
@@ -933,7 +965,9 @@ def get_payment_terms_for_references(doctype, txt, searchfield, start, page_len,
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_filtered_child_rows(doctype, txt, searchfield, start, page_len, filters) -> list:
+def get_filtered_child_rows(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
 	table = frappe.qb.DocType(doctype)
 	query = (
 		frappe.qb.from_(table)
@@ -961,7 +995,7 @@ def get_filtered_child_rows(doctype, txt, searchfield, start, page_len, filters)
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_item_uom_query(doctype, txt, searchfield, start, page_len, filters):
+def get_item_uom_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	if frappe.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item"):
 		query_filters = {"parent": filters.get("item_code")}
 

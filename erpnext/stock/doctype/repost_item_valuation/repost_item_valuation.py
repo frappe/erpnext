@@ -332,7 +332,7 @@ class RepostItemValuation(Document):
 
 
 @frappe.whitelist()
-def bulk_restart_reposting(names):
+def bulk_restart_reposting(names: str):
 	names = json.loads(names)
 	for name in names:
 		doc = frappe.get_doc("Repost Item Valuation", name)
@@ -470,7 +470,15 @@ def repost_gl_entries(doc):
 	repost_affected_transaction = get_affected_transactions(doc)
 
 	transactions = directly_dependent_transactions + list(repost_affected_transaction)
-	if doc.based_on == "Item and Warehouse" and not doc.repost_only_accounting_ledgers:
+	enable_separate_reposting_for_gl = frappe.db.get_single_value(
+		"Stock Reposting Settings", "enable_separate_reposting_for_gl"
+	)
+
+	if (
+		enable_separate_reposting_for_gl
+		and doc.based_on == "Item and Warehouse"
+		and not doc.repost_only_accounting_ledgers
+	):
 		make_reposting_for_accounting_ledgers(
 			transactions,
 			doc.company,
@@ -562,7 +570,20 @@ def run_parallel_reposting():
 
 	riv_entries = get_repost_item_valuation_entries()
 
+	rq_jobs = frappe.get_all(
+		"RQ Job",
+		fields=["arguments"],
+		filters={
+			"status": ("like", "%started%"),
+			"job_name": "erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.execute_reposting_entry",
+		},
+	)
+
 	for row in riv_entries:
+		if rq_jobs:
+			if job_running_for_entry(row.name, rq_jobs):
+				continue
+
 		if row.based_on != "Item and Warehouse" or row.repost_only_accounting_ledgers:
 			execute_reposting_entry(row.name)
 			continue
@@ -671,25 +692,59 @@ def execute_repost_item_valuation():
 
 
 def make_reposting_for_accounting_ledgers(transactions, company, repost_doc):
+	reposting_map = get_existing_reposting_only_gl_entries(repost_doc.name)
+
 	for voucher_type, voucher_no in transactions:
-		if frappe.db.exists(
-			"Repost Item Valuation",
-			{
-				"voucher_type": voucher_type,
-				"voucher_no": voucher_no,
-				"docstatus": 1,
-				"reposting_reference": repost_doc.name,
-				"repost_only_accounting_ledgers": 1,
-				"status": "Queued",
-			},
-		):
+		if reposting_map.get((voucher_type, voucher_no)):
 			continue
 
-		new_repost_doc = frappe.new_doc("Repost Item Valuation")
-		new_repost_doc.company = company
-		new_repost_doc.voucher_type = voucher_type
-		new_repost_doc.voucher_no = voucher_no
-		new_repost_doc.repost_only_accounting_ledgers = 1
-		new_repost_doc.reposting_reference = repost_doc.name
-		new_repost_doc.flags.ignore_permissions = True
-		new_repost_doc.submit()
+		try:
+			new_repost_doc = frappe.new_doc("Repost Item Valuation")
+			new_repost_doc.company = company
+			new_repost_doc.voucher_type = voucher_type
+			new_repost_doc.voucher_no = voucher_no
+			new_repost_doc.repost_only_accounting_ledgers = 1
+			new_repost_doc.reposting_reference = repost_doc.name
+			new_repost_doc.flags.ignore_permissions = True
+			new_repost_doc.submit()
+		except Exception:
+			pass
+
+
+def get_existing_reposting_only_gl_entries(reposting_reference):
+	existing_reposting = frappe.get_all(
+		"Repost Item Valuation",
+		filters={
+			"reposting_reference": reposting_reference,
+			"docstatus": 1,
+			"status": "Queued",
+			"repost_only_accounting_ledgers": 1,
+		},
+		fields=["reposting_reference", "voucher_type", "voucher_no"],
+	)
+
+	if not existing_reposting:
+		return frappe._dict()
+
+	reposting_map = {}
+	for d in existing_reposting:
+		key = (d.voucher_type, d.voucher_no)
+		reposting_map[key] = d.reposting_reference
+
+	return reposting_map
+
+
+def job_running_for_entry(reposting_entry, rq_jobs):
+	for job in rq_jobs:
+		if not job.arguments:
+			continue
+
+		try:
+			job_args = json.loads(job.arguments)
+		except (TypeError, json.JSONDecodeError):
+			continue
+
+		if isinstance(job_args, dict) and job_args.get("kwargs", {}).get("name") == reposting_entry:
+			return True
+
+	return False

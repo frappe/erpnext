@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from datetime import date
 
 import frappe
 from frappe import _, msgprint, qb, scrub
@@ -55,22 +56,22 @@ class DuplicatePartyAccountError(frappe.ValidationError):
 
 @frappe.whitelist()
 def get_party_details(
-	party=None,
-	account=None,
-	party_type="Customer",
-	company=None,
-	posting_date=None,
-	bill_date=None,
-	price_list=None,
-	currency=None,
-	doctype=None,
-	ignore_permissions=False,
-	fetch_payment_terms_template=True,
-	party_address=None,
-	company_address=None,
-	shipping_address=None,
-	dispatch_address=None,
-	pos_profile=None,
+	party: str | None = None,
+	account: str | None = None,
+	party_type: str = "Customer",
+	company: str | None = None,
+	posting_date: str | None = None,
+	bill_date: str | None = None,
+	price_list: str | None = None,
+	currency: str | None = None,
+	doctype: str | None = None,
+	ignore_permissions: bool | None = False,
+	fetch_payment_terms_template: bool = True,
+	party_address: str | None = None,
+	company_address: str | None = None,
+	shipping_address: str | None = None,
+	dispatch_address: str | None = None,
+	pos_profile: str | None = None,
 ):
 	if not party:
 		return frappe._dict()
@@ -296,19 +297,9 @@ def complete_contact_details(party_details):
 	contact_details = frappe._dict()
 
 	if party_details.party_type == "Employee":
-		contact_details = frappe.db.get_value(
-			"Employee",
-			party_details.party,
-			[
-				"employee_name as contact_display",
-				"prefered_email as contact_email",
-				"cell_number as contact_mobile",
-				"designation as contact_designation",
-				"department as contact_department",
-			],
-			as_dict=True,
-		)
+		from erpnext.setup.doctype.employee.employee import _get_contact_details as get_employee_contact
 
+		contact_details = get_employee_contact(party_details.party)
 		contact_details.update({"contact_person": None, "contact_phone": None})
 	elif party_details.contact_person:
 		contact_details = frappe.db.get_value(
@@ -416,7 +407,9 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 
 
 @frappe.whitelist()
-def get_party_account(party_type, party=None, company=None, include_advance=False):
+def get_party_account(
+	party_type: str, party: str | None = None, company: str | None = None, include_advance: bool = False
+):
 	"""Returns the account for the given `party`.
 	Will first search in party (Customer / Supplier) record, if not found,
 	will search in group (Customer Group / Supplier Group),
@@ -501,7 +494,7 @@ def get_party_advance_account(party_type, party, company):
 
 
 @frappe.whitelist()
-def get_party_bank_account(party_type, party):
+def get_party_bank_account(party_type: str, party: str):
 	return frappe.db.get_value("Bank Account", {"party_type": party_type, "party": party, "is_default": 1})
 
 
@@ -619,7 +612,14 @@ def validate_party_accounts(doc):
 
 
 @frappe.whitelist()
-def get_due_date(posting_date, party_type, party, company=None, bill_date=None, template_name=None):
+def get_due_date(
+	posting_date: str | date | None,
+	party_type: str | None,
+	party: str | None,
+	company: str | None = None,
+	bill_date: str | None = None,
+	template_name: str | None = None,
+):
 	"""Get due date from `Payment Terms Template`"""
 	due_date = None
 	if (bill_date or posting_date) and party:
@@ -701,7 +701,9 @@ def validate_due_date_with_template(posting_date, due_date, bill_date, template_
 
 
 @frappe.whitelist()
-def get_address_tax_category(tax_category=None, billing_address=None, shipping_address=None):
+def get_address_tax_category(
+	tax_category: str | None = None, billing_address: str | None = None, shipping_address: str | None = None
+):
 	addr_tax_category_from = frappe.get_single_value(
 		"Accounts Settings", "determine_address_tax_category_from"
 	)
@@ -717,16 +719,16 @@ def get_address_tax_category(tax_category=None, billing_address=None, shipping_a
 
 @frappe.whitelist()
 def set_taxes(
-	party,
-	party_type,
-	posting_date,
-	company,
-	customer_group=None,
-	supplier_group=None,
-	tax_category=None,
-	billing_address=None,
-	shipping_address=None,
-	use_for_shopping_cart=None,
+	party: str | None,
+	party_type: str,
+	posting_date: str | date | None,
+	company: str | None,
+	customer_group: str | None = None,
+	supplier_group: str | None = None,
+	tax_category: str | None = None,
+	billing_address: str | None = None,
+	shipping_address: str | None = None,
+	use_for_shopping_cart: int | None = None,
 ):
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_party_details, get_tax_template
 
@@ -766,7 +768,7 @@ def set_taxes(
 
 
 @frappe.whitelist()
-def get_payment_terms_template(party_name, party_type, company=None):
+def get_payment_terms_template(party_name: str, party_type: str, company: str | None = None):
 	if party_type not in ("Customer", "Supplier"):
 		return
 	template = None

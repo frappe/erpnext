@@ -324,10 +324,8 @@ def get_conditions(filters):
 
 	from frappe.desk.reportview import build_match_conditions
 
-	match_conditions = build_match_conditions("GL Entry")
-
-	if match_conditions:
-		conditions.append(match_conditions)
+	if match_conditions := build_match_conditions("GL Entry"):
+		conditions.append(f"({match_conditions})")
 
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
 

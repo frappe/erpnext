@@ -6,6 +6,7 @@ import json
 
 import frappe
 from frappe import _, qb, throw
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
@@ -1745,10 +1746,6 @@ class PurchaseInvoice(BuyingController):
 			project_doc.db_update()
 
 	def validate_supplier_invoice(self):
-		if self.bill_date:
-			if getdate(self.bill_date) > getdate(self.posting_date):
-				frappe.throw(_("Supplier Invoice Date cannot be greater than Posting Date"))
-
 		if self.bill_no:
 			if cint(frappe.get_single_value("Accounts Settings", "check_supplier_invoice_uniqueness")):
 				fiscal_year = get_fiscal_year(self.posting_date, company=self.company, as_dict=True)
@@ -1945,14 +1942,14 @@ def make_regional_gl_entries(gl_entries, doc):
 
 
 @frappe.whitelist()
-def make_debit_note(source_name, target_doc=None):
+def make_debit_note(source_name: str, target_doc: str | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Purchase Invoice", source_name, target_doc)
 
 
 @frappe.whitelist()
-def make_stock_entry(source_name, target_doc=None):
+def make_stock_entry(source_name: str, target_doc: str | Document | None = None):
 	doc = get_mapped_doc(
 		"Purchase Invoice",
 		source_name,
@@ -1970,35 +1967,37 @@ def make_stock_entry(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def change_release_date(name, release_date=None):
+def change_release_date(name: str, release_date: str | None = None):
 	if frappe.db.exists("Purchase Invoice", name):
 		pi = frappe.get_lazy_doc("Purchase Invoice", name)
 		pi.db_set("release_date", release_date)
 
 
 @frappe.whitelist()
-def unblock_invoice(name):
+def unblock_invoice(name: str):
 	if frappe.db.exists("Purchase Invoice", name):
 		pi = frappe.get_lazy_doc("Purchase Invoice", name)
 		pi.unblock_invoice()
 
 
 @frappe.whitelist()
-def block_invoice(name, release_date, hold_comment=None):
+def block_invoice(name: str, release_date: str, hold_comment: str | None = None):
 	if frappe.db.exists("Purchase Invoice", name):
 		pi = frappe.get_lazy_doc("Purchase Invoice", name)
 		pi.block_invoice(hold_comment, release_date)
 
 
 @frappe.whitelist()
-def make_inter_company_sales_invoice(source_name, target_doc=None):
+def make_inter_company_sales_invoice(source_name: str, target_doc: Document | None = None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 
 	return make_inter_company_transaction("Purchase Invoice", source_name, target_doc)
 
 
 @frappe.whitelist()
-def make_purchase_receipt(source_name, target_doc=None, args=None):
+def make_purchase_receipt(
+	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+):
 	if args is None:
 		args = {}
 	if isinstance(args, str):

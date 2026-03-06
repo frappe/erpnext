@@ -25,7 +25,13 @@ class ItemTemplateCannotHaveStock(frappe.ValidationError):
 
 
 @frappe.whitelist()
-def get_variant(template, args=None, variant=None, manufacturer=None, manufacturer_part_no=None):
+def get_variant(
+	template: str,
+	args: dict | str | None = None,
+	variant: str | None = None,
+	manufacturer: str | None = None,
+	manufacturer_part_no: str | None = None,
+):
 	"""
 	Validates Attributes and their Values, then looks for an exactly
 	matching Item Variant
@@ -198,7 +204,7 @@ def find_variant(template, args, variant_item_code=None):
 
 
 @frappe.whitelist()
-def create_variant(item, args, use_template_image=False):
+def create_variant(item: str, args: dict | str, use_template_image: bool = False):
 	use_template_image = frappe.parse_json(use_template_image)
 	if isinstance(args, str):
 		args = json.loads(args)
@@ -223,7 +229,7 @@ def create_variant(item, args, use_template_image=False):
 
 
 @frappe.whitelist()
-def enqueue_multiple_variant_creation(item, args, use_template_image=False):
+def enqueue_multiple_variant_creation(item: str, args: dict | str, use_template_image: bool = False):
 	use_template_image = frappe.parse_json(use_template_image)
 	# There can be innumerable attribute combinations, enqueue
 	if isinstance(args, str):
@@ -403,7 +409,7 @@ def make_variant_item_code(template_item_code, template_item_name, variant):
 
 
 @frappe.whitelist()
-def create_variant_doc_for_quick_entry(template, args):
+def create_variant_doc_for_quick_entry(template: str, args: dict | str):
 	variant_based_on = frappe.db.get_value("Item", template, "variant_based_on")
 	args = json.loads(args)
 	if variant_based_on == "Manufacturer":

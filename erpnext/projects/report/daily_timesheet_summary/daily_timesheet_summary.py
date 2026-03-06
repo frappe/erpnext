@@ -60,6 +60,6 @@ def get_conditions(filters):
 
 	match_conditions = build_match_conditions("Timesheet")
 	if match_conditions:
-		conditions += " and %s" % match_conditions
+		conditions += " and (%s)" % match_conditions
 
 	return conditions

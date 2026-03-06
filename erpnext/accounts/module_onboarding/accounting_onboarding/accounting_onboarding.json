@@ -1,0 +1,41 @@
+{
+ "allow_roles": [
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ],
+ "creation": "2026-02-22 18:26:42.015787",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "idx": 4,
+ "is_complete": 0,
+ "modified": "2026-02-23 22:51:34.267812",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Accounting Onboarding",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Chart of Accounts"
+  },
+  {
+   "step": "Setup Sales taxes"
+  },
+  {
+   "step": "Create Sales Invoice"
+  },
+  {
+   "step": "Create Payment Entry"
+  },
+  {
+   "step": "View Balance Sheet"
+  },
+  {
+   "step": "Review Accounts Settings"
+  }
+ ],
+ "title": "Accounting Onboarding"
+}

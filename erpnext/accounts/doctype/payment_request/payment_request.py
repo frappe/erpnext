@@ -45,6 +45,7 @@ class PaymentRequest(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.accounts.doctype.payment_reference.payment_reference import PaymentReference
 		from erpnext.accounts.doctype.subscription_plan_detail.subscription_plan_detail import (
 			SubscriptionPlanDetail,
 		)
@@ -78,6 +79,7 @@ class PaymentRequest(Document):
 		payment_gateway: DF.ReadOnly | None
 		payment_gateway_account: DF.Link | None
 		payment_order: DF.Link | None
+		payment_reference: DF.Table[PaymentReference]
 		payment_request_type: DF.Literal["Outward", "Inward"]
 		payment_url: DF.Data | None
 		phone_number: DF.Data | None
@@ -109,15 +111,36 @@ class PaymentRequest(Document):
 		if self.get("__islocal"):
 			self.status = "Draft"
 		self.validate_reference_document()
+		self.validate_against_payment_reference()
 		self.validate_payment_request_amount()
 		# self.validate_currency()
 		self.validate_subscription_details()
+
+	def validate_against_payment_reference(self):
+		if not self.payment_reference:
+			return
+
+		expected = sum(flt(r.amount) for r in self.payment_reference)
+		if flt(expected, self.precision("grand_total")) != flt(self.grand_total):
+			frappe.throw(_("Grand Total must match sum of Payment References"))
+
+		seen = set()
+		for r in self.payment_reference:
+			if not r.payment_schedule:
+				continue  # legacy mode → skip
+
+			if r.payment_schedule in seen:
+				frappe.throw(_("Duplicate Payment Schedule selected"))
+
+			seen.add(r.payment_schedule)
 
 	def validate_reference_document(self):
 		if not self.reference_doctype or not self.reference_name:
 			frappe.throw(_("To create a Payment Request reference document is required"))
 
 	def validate_payment_request_amount(self):
+		if self.payment_reference:
+			return
 		if self.grand_total == 0:
 			frappe.throw(
 				_("{0} cannot be zero").format(self.get_label_from_fieldname("grand_total")),
@@ -539,8 +562,6 @@ class PaymentRequest(Document):
 def make_payment_request(**args):
 	"""Make payment request"""
 
-	frappe.has_permission(doctype="Payment Request", ptype="write", throw=True)
-
 	args = frappe._dict(args)
 	if args.dt not in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST:
 		frappe.throw(_("Payment Requests cannot be created against: {0}").format(frappe.bold(args.dt)))
@@ -548,12 +569,69 @@ def make_payment_request(**args):
 	if args.dn and not isinstance(args.dn, str):
 		frappe.throw(_("Invalid parameter. 'dn' should be of type str"))
 
+	frappe.has_permission("Payment Request", "create", throw=True)
+	frappe.has_permission(args.dt, "read", args.dn, throw=True)
+
 	ref_doc = args.ref_doc or frappe.get_doc(args.dt, args.dn)
 	if not args.get("company"):
 		args.company = ref_doc.company
+
 	gateway_account = get_gateway_details(args) or frappe._dict()
 
-	grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
+	# Schedule-based PRs are allowed only if no Payment Entry exists for this document.
+	# Any existing Payment Entry forces legacy (amount-based) flow.
+	selected_payment_schedules = json.loads(args.get("schedules")) if args.get("schedules") else []
+
+	# Backend guard:
+	# If any Payment Entry exists, schedule-based PRs are not allowed.
+	if selected_payment_schedules and get_existing_payment_entry(ref_doc.name):
+		frappe.throw(
+			_(
+				"Payment Schedule based Payment Requests cannot be created because a Payment Entry already exists for this document."
+			)
+		)
+
+	has_payment_entry = bool(get_existing_payment_entry(ref_doc.name))
+
+	payment_reference = []
+
+	if selected_payment_schedules:
+		existing_payment_references = get_existing_payment_references(ref_doc.name)
+
+		if existing_payment_references:
+			existing_ids = {r["payment_schedule"] for r in existing_payment_references}
+			selected_ids = {r["name"] for r in selected_payment_schedules}
+			duplicate_ids = existing_ids & selected_ids
+
+			if duplicate_ids:
+				duplicate_schedules = []
+				for row in selected_payment_schedules:
+					if row["name"] in duplicate_ids:
+						existing_ref = next(
+							(r for r in existing_payment_references if r["payment_schedule"] == row["name"]),
+							{},
+						)
+						existing_pr = existing_ref.get("parent")
+						duplicate_schedules.append(
+							f"Payment Term: {row.get('payment_term')}, "
+							f"Due Date: {row.get('due_date')}, "
+							f"Amount: {row.get('payment_amount')} "
+							f"(already requested in PR {existing_pr})"
+						)
+				frappe.throw(
+					_("The following payment schedule(s) already exist:\n{0}").format(
+						"\n".join(duplicate_schedules)
+					)
+				)
+
+		payment_reference = set_payment_references(args.get("schedules"))
+
+	# Determine grand_total
+	if selected_payment_schedules and not has_payment_entry:
+		grand_total = sum(row.get("payment_amount") for row in selected_payment_schedules)
+	else:
+		grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
+
 	if not grand_total:
 		frappe.throw(_("Payment Entry is already created"))
 
@@ -563,7 +641,6 @@ def make_payment_request(**args):
 		loyalty_amount = validate_loyalty_points(ref_doc, int(args.loyalty_points))  # sets fields on ref_doc
 		ref_doc.db_update()
 		grand_total = grand_total - loyalty_amount
-
 	# fetches existing payment request `grand_total` amount
 	existing_payment_request_amount = get_existing_payment_request_amount(ref_doc)
 
@@ -583,19 +660,20 @@ def make_payment_request(**args):
 			else:
 				# If PR's are processed, cancel all of them.
 				cancel_old_payment_requests(ref_doc.doctype, ref_doc.name)
-		else:
+		elif not selected_payment_schedules:
 			grand_total = validate_and_calculate_grand_total(grand_total, existing_payment_request_amount)
-
 	draft_payment_request = frappe.db.get_value(
 		"Payment Request",
 		{"reference_doctype": ref_doc.doctype, "reference_name": ref_doc.name, "docstatus": 0},
 	)
 
 	if draft_payment_request:
-		frappe.db.set_value(
-			"Payment Request", draft_payment_request, "grand_total", grand_total, update_modified=False
-		)
 		pr = frappe.get_doc("Payment Request", draft_payment_request)
+
+		if selected_payment_schedules:
+			apply_payment_references(pr, payment_reference)
+			pr.save()
+
 	else:
 		bank_account = (
 			get_party_bank_account(args.get("party_type"), args.get("party"))
@@ -650,7 +728,10 @@ def make_payment_request(**args):
 			}
 		)
 
-		# Update dimensions
+		if selected_payment_schedules:
+			apply_payment_references(pr, payment_reference)
+
+		# Dimensions
 		pr.update(
 			{
 				"cost_center": ref_doc.get("cost_center"),
@@ -677,6 +758,51 @@ def make_payment_request(**args):
 		return pr
 
 	return pr.as_dict()
+
+
+def apply_payment_references(pr, payment_reference):
+	existing_refs = pr.get("payment_reference") or []
+
+	existing_ids = {r.get("payment_schedule") for r in existing_refs if r.get("payment_schedule")}
+	new_refs = [r for r in (payment_reference or []) if r.get("payment_schedule") not in existing_ids]
+	pr.set("payment_reference", existing_refs + new_refs)
+	pr.set("grand_total", sum(flt(r.get("amount")) for r in pr.get("payment_reference")))
+
+
+def set_payment_references(payment_schedules):
+	payment_schedules = json.loads(payment_schedules) if payment_schedules else []
+	payment_reference = []
+
+	for row in payment_schedules:
+		payment_reference.append(
+			{
+				"payment_term": row.get("payment_term"),
+				"payment_schedule": row.get("name"),
+				"description": row.get("description"),
+				"due_date": row.get("due_date"),
+				"amount": row.get("payment_amount"),
+			}
+		)
+
+	return payment_reference
+
+
+def get_existing_payment_entry(ref_docname):
+	pe = frappe.qb.DocType("Payment Entry")
+	per = frappe.qb.DocType("Payment Entry Reference")
+
+	existing_pe = (
+		frappe.qb.from_(pe)
+		.join(per)
+		.on(per.parent == pe.name)
+		.select(pe.name)
+		.where(pe.docstatus < 2)
+		.where(per.reference_name == ref_docname)
+		.limit(1)
+		.run()
+	)
+
+	return existing_pe
 
 
 def get_amount(ref_doc, payment_account=None):
@@ -811,7 +937,7 @@ def get_payment_gateway_account(filter):
 
 
 @frappe.whitelist()
-def get_print_format_list(ref_doctype):
+def get_print_format_list(ref_doctype: str):
 	print_format_list = ["Standard"]
 
 	print_format_list.extend(
@@ -821,13 +947,13 @@ def get_print_format_list(ref_doctype):
 	return {"print_format": print_format_list}
 
 
-@frappe.whitelist(allow_guest=True)
-def resend_payment_email(docname):
+@frappe.whitelist()
+def resend_payment_email(docname: str):
 	return frappe.get_doc("Payment Request", docname).send_email()
 
 
 @frappe.whitelist()
-def make_payment_entry(docname):
+def make_payment_entry(docname: str):
 	doc = frappe.get_doc("Payment Request", docname)
 	return doc.create_payment_entry(submit=False).as_dict()
 
@@ -920,7 +1046,7 @@ def get_dummy_message(doc):
 
 
 @frappe.whitelist()
-def get_subscription_details(reference_doctype, reference_name):
+def get_subscription_details(reference_doctype: str, reference_name: str):
 	if reference_doctype == "Sales Invoice":
 		subscriptions = frappe.db.sql(
 			"""SELECT parent as sub_name FROM `tabSubscription Invoice` WHERE invoice=%s""",
@@ -936,7 +1062,7 @@ def get_subscription_details(reference_doctype, reference_name):
 
 
 @frappe.whitelist()
-def make_payment_order(source_name, target_doc=None):
+def make_payment_order(source_name: str, target_doc: str | Document | None = None):
 	from frappe.model.mapper import get_mapped_doc
 
 	def set_missing_values(source, target):
@@ -984,7 +1110,9 @@ def validate_payment(doc, method=None):
 
 
 @frappe.whitelist()
-def get_open_payment_requests_query(doctype, txt, searchfield, start, page_len, filters):
+def get_open_payment_requests_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
 	# permission checks in `get_list()`
 	filters = frappe._dict(filters)
 
@@ -1023,3 +1151,44 @@ def get_irequests_of_payment_request(doc: str | None = None) -> list:
 			},
 		)
 	return res
+
+
+@frappe.whitelist()
+def get_available_payment_schedules(reference_doctype, reference_name):
+	ref_doc = frappe.get_doc(reference_doctype, reference_name)
+
+	if not hasattr(ref_doc, "payment_schedule") or not ref_doc.payment_schedule:
+		return []
+
+	if get_existing_payment_entry(reference_name):
+		return []
+
+	existing_refs = get_existing_payment_references(reference_name)
+	existing_ids = {r["payment_schedule"] for r in existing_refs if r.get("payment_schedule")}
+
+	return [r for r in ref_doc.payment_schedule if r.name not in existing_ids]
+
+
+def get_existing_payment_references(reference_name):
+	PR = frappe.qb.DocType("Payment Request")
+	PRF = frappe.qb.DocType("Payment Reference")
+
+	result = (
+		frappe.qb.from_(PR)
+		.join(PRF)
+		.on(PR.name == PRF.parent)
+		.select(
+			PRF.payment_term,
+			PRF.due_date,
+			PRF.amount.as_("payment_amount"),
+			PRF.payment_schedule,
+			PRF.parent,
+		)
+		.where(PR.reference_name == reference_name)
+		.where(PR.docstatus < 2)
+		.where(
+			PR.status.isin(["Draft", "Requested", "Initiated", "Partially Paid", "Payment Ordered", "Paid"])
+		)
+	).run(as_dict=True)
+
+	return result

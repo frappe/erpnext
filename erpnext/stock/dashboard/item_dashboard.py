@@ -9,7 +9,12 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 
 @frappe.whitelist()
 def get_data(
-	item_code=None, warehouse=None, item_group=None, start=0, sort_by="actual_qty", sort_order="desc"
+	item_code: str | None = None,
+	warehouse: str | None = None,
+	item_group: str | None = None,
+	start: int = 0,
+	sort_by: str = "actual_qty",
+	sort_order: str = "desc",
 ):
 	"""Return data to render the item dashboard"""
 	filters = []

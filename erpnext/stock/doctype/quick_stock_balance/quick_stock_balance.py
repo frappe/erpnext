@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils.data import DateTimeLikeObject
 
 from erpnext.stock.utils import get_stock_balance, get_stock_value_on
 
@@ -32,7 +33,7 @@ class QuickStockBalance(Document):
 
 
 @frappe.whitelist()
-def get_stock_item_details(warehouse, date, item=None, barcode=None):
+def get_stock_item_details(warehouse: str, date: str, item: str | None = None, barcode: str | None = None):
 	out = {}
 	if barcode:
 		out["item"] = frappe.db.get_value("Item Barcode", filters={"barcode": barcode}, fieldname=["parent"])

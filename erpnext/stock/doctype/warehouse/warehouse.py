@@ -3,6 +3,7 @@
 
 
 import json
+from typing import Any
 
 import frappe
 from frappe import _, throw
@@ -191,7 +192,13 @@ class Warehouse(NestedSet):
 
 
 @frappe.whitelist()
-def get_children(doctype, parent=None, company=None, is_root=False, include_disabled=False):
+def get_children(
+	doctype: str,
+	parent: str | None = None,
+	company: str | None = None,
+	is_root: bool = False,
+	include_disabled: bool | str = False,
+):
 	if is_root:
 		parent = ""
 
@@ -224,7 +231,7 @@ def add_node():
 
 
 @frappe.whitelist()
-def convert_to_group_or_ledger(docname=None):
+def convert_to_group_or_ledger(docname: str | None = None):
 	if not docname:
 		docname = frappe.form_dict.docname
 	return frappe.get_doc("Warehouse", docname).convert_to_group_or_ledger()
@@ -299,7 +306,9 @@ def apply_warehouse_filter(query, sle, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_warehouses_for_reorder(doctype, txt, searchfield, start, page_len, filters):
+def get_warehouses_for_reorder(
+	doctype: str, txt: Any, searchfield: Any, start: int, page_len: int, filters: dict
+):
 	filters = frappe._dict(filters or {})
 
 	if filters.warehouse and not frappe.db.exists("Warehouse", filters.warehouse):

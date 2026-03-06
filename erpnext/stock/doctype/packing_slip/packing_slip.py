@@ -206,7 +206,7 @@ class PackingSlip(StatusUpdater):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_details(doctype, txt, searchfield, start, page_len, filters):
+def item_details(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	from erpnext.controllers.queries import get_match_cond
 
 	return frappe.db.sql(

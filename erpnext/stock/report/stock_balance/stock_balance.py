@@ -8,7 +8,7 @@ from typing import Any, TypedDict
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Coalesce
+from frappe.query_builder.functions import Coalesce, Count
 from frappe.utils import add_days, cint, date_diff, flt, getdate
 from frappe.utils.nestedset import get_descendants_of
 
@@ -165,6 +165,7 @@ class StockBalanceReport:
 				sle.serial_no,
 				sle.serial_and_batch_bundle,
 				sle.has_serial_no,
+				sle.voucher_detail_no,
 				item_table.item_group,
 				item_table.stock_uom,
 				item_table.item_name,
@@ -190,6 +191,8 @@ class StockBalanceReport:
 		if self.filters.get("show_stock_ageing_data"):
 			self.sle_entries = self.sle_query.run(as_dict=True)
 
+		self.prepare_stock_reco_voucher_wise_count()
+
 		# HACK: This is required to avoid causing db query in flt
 		_system_settings = frappe.get_cached_doc("System Settings")
 		with frappe.db.unbuffered_cursor():
@@ -206,6 +209,71 @@ class StockBalanceReport:
 		self.item_warehouse_map = filter_items_with_no_transactions(
 			self.item_warehouse_map, self.float_precision, self.inventory_dimensions
 		)
+
+	def prepare_stock_reco_voucher_wise_count(self):
+		self.stock_reco_voucher_wise_count = frappe._dict()
+
+		doctype = frappe.qb.DocType("Stock Ledger Entry")
+		item = frappe.qb.DocType("Item")
+
+		query = (
+			frappe.qb.from_(doctype)
+			.inner_join(item)
+			.on(doctype.item_code == item.name)
+			.select(doctype.voucher_detail_no, Count(doctype.name).as_("count"))
+			.where(
+				(doctype.voucher_type == "Stock Reconciliation")
+				& (doctype.docstatus < 2)
+				& (doctype.is_cancelled == 0)
+				& (item.has_serial_no == 1)
+			)
+			.groupby(doctype.voucher_detail_no)
+		)
+
+		if items := self.filters.item_code:
+			if isinstance(items, str):
+				items = [items]
+
+			query = query.where(item.name.isin(items))
+
+		if self.filters.item_group:
+			childrens = []
+			childrens.append(self.filters.item_group)
+			if item_group_childrens := get_descendants_of(
+				"Item Group", self.filters.item_group, ignore_permissions=True
+			):
+				childrens.extend(item_group_childrens)
+
+			if childrens:
+				query = query.where(item.item_group.isin(childrens))
+
+		if warehouses := self.filters.get("warehouse"):
+			if isinstance(warehouses, str):
+				warehouses = [warehouses]
+
+			childrens = []
+			for warehouse in warehouses:
+				childrens.append(warehouse)
+				if warehouse_childrens := get_descendants_of("Warehouse", warehouse, ignore_permissions=True):
+					childrens.extend(warehouse_childrens)
+
+			if childrens:
+				query = query.where(doctype.warehouse.isin(childrens))
+
+		data = query.run(as_dict=True)
+		if not data:
+			return
+
+		for row in data:
+			if row.count != 1:
+				continue
+
+			sr_item = frappe.db.get_value(
+				"Stock Reconciliation Item", row.voucher_detail_no, ["current_qty", "qty"], as_dict=True
+			)
+
+			if sr_item.qty and sr_item.current_qty:
+				self.stock_reco_voucher_wise_count[row.voucher_detail_no] = sr_item.current_qty
 
 	def prepare_new_data(self):
 		if self.filters.get("show_stock_ageing_data"):
@@ -283,9 +351,14 @@ class StockBalanceReport:
 			qty_dict[field] = entry.get(field)
 
 		if entry.voucher_type == "Stock Reconciliation" and (
-			not entry.batch_no and not entry.serial_no and not entry.serial_and_batch_bundle
+			not entry.batch_no or entry.serial_no or entry.serial_and_batch_bundle
 		):
-			qty_diff = flt(entry.qty_after_transaction) - flt(qty_dict.bal_qty)
+			if entry.serial_no and entry.voucher_detail_no in self.stock_reco_voucher_wise_count:
+				qty_dict.opening_qty -= self.stock_reco_voucher_wise_count.get(entry.voucher_detail_no, 0)
+				qty_dict.bal_qty = 0.0
+				qty_diff = flt(entry.actual_qty)
+			else:
+				qty_diff = flt(entry.qty_after_transaction) - flt(qty_dict.bal_qty)
 		else:
 			qty_diff = flt(entry.actual_qty)
 

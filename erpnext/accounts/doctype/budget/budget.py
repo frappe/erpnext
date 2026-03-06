@@ -845,7 +845,7 @@ def get_fiscal_year_date_range(from_fiscal_year, to_fiscal_year):
 
 
 @frappe.whitelist()
-def revise_budget(budget_name):
+def revise_budget(budget_name: str):
 	old_budget = frappe.get_doc("Budget", budget_name)
 
 	if old_budget.docstatus == 1:

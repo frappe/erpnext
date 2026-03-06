@@ -221,7 +221,7 @@ def auto_fetch_serial_number(
 
 
 @frappe.whitelist()
-def get_pos_reserved_serial_nos(filters):
+def get_pos_reserved_serial_nos(filters: str | dict):
 	if isinstance(filters, str):
 		filters = json.loads(filters)
 

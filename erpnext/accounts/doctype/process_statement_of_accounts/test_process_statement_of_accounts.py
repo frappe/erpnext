@@ -18,7 +18,18 @@ class TestProcessStatementOfAccounts(AccountsTestMixin, IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
+		letterhead = frappe.get_doc("Letter Head", "Company Letterhead - Grey")
+		letterhead.is_default = 0
+		letterhead.save()
 		cls.enterClassContext(cls.change_settings("Selling Settings", validate_selling_price=0))
+
+	@classmethod
+	def tearDownClass(cls):
+		super().tearDownClass()
+		letterhead = frappe.get_doc("Letter Head", "Company Letterhead - Grey")
+		letterhead.is_default = 1
+		letterhead.save()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		self.create_company()

@@ -2,7 +2,7 @@ import click
 import frappe
 from frappe.query_builder.functions import Coalesce
 
-from erpnext.setup.install import create_marketgin_campagin_custom_fields
+from erpnext.setup.install import create_marketing_campaign_custom_fields
 
 
 def execute():
@@ -31,7 +31,7 @@ def execute():
 	frappe.delete_doc("DocType", "Lead Source", ignore_missing=True)
 
 	campaign = frappe.qb.DocType("Campaign")
-	create_marketgin_campagin_custom_fields()
+	create_marketing_campaign_custom_fields()
 	marketing_campaign = frappe.qb.DocType("UTM Campaign")
 
 	# Fetch all Campaigns

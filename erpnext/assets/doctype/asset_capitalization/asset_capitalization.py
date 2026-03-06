@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import json
+from typing import Any
 
 import frappe
 
@@ -609,7 +610,7 @@ class AssetCapitalization(StockController):
 
 
 @frappe.whitelist()
-def get_target_item_details(item_code: str | None = None, company: str | None = None) -> frappe._dict:
+def get_target_item_details(item_code: str | None = None, company: str | None = None):
 	out = frappe._dict()
 
 	# Get Item Details
@@ -635,7 +636,7 @@ def get_target_item_details(item_code: str | None = None, company: str | None = 
 
 
 @frappe.whitelist()
-def get_target_asset_details(asset: str | None = None, company: str | None = None) -> frappe._dict:
+def get_target_asset_details(asset: str | None = None, company: str | None = None):
 	out = frappe._dict()
 
 	# Get Asset Details
@@ -710,24 +711,22 @@ def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 
 
 @frappe.whitelist()
-def get_warehouse_details(args):
-	if isinstance(args, str):
-		args = json.loads(args)
-
-	args = frappe._dict(args)
-
-	out = {}
-	if args.warehouse and args.item_code:
-		out = {
-			"actual_qty": get_previous_sle(args).get("qty_after_transaction") or 0,
-			"valuation_rate": get_incoming_rate(args, raise_error_if_no_rate=False),
-		}
+@erpnext.normalize_ctx_input(ItemDetailsCtx)
+def get_warehouse_details(ctx: ItemDetailsCtx) -> frappe._dict:
+	out = frappe._dict()
+	if ctx.warehouse and ctx.item_code:
+		out = frappe._dict(
+			{
+				"actual_qty": get_previous_sle(ctx).get("qty_after_transaction") or 0,
+				"valuation_rate": get_incoming_rate(ctx, raise_error_if_no_rate=False),
+			}
+		)
 	return out
 
 
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
-def get_consumed_asset_details(ctx):
+def get_consumed_asset_details(ctx: ItemDetailsCtx) -> frappe._dict:
 	out = frappe._dict()
 
 	asset_details = frappe._dict()
@@ -773,7 +772,7 @@ def get_consumed_asset_details(ctx):
 
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
-def get_service_item_details(ctx):
+def get_service_item_details(ctx: ItemDetailsCtx) -> frappe._dict:
 	out = frappe._dict()
 
 	item = frappe._dict()
@@ -795,7 +794,7 @@ def get_service_item_details(ctx):
 
 
 @frappe.whitelist()
-def get_items_tagged_to_wip_composite_asset(params):
+def get_items_tagged_to_wip_composite_asset(params: dict | str):
 	if isinstance(params, str):
 		params = json.loads(params)
 

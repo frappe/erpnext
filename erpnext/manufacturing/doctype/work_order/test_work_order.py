@@ -598,6 +598,33 @@ class TestWorkOrder(IntegrationTestCase):
 			work_order1.cancel()
 			work_order.cancel()
 
+	def test_planned_qty_updates_after_closing_work_order(self):
+		item_code = "_Test FG Item"
+		fg_warehouse = "_Test Warehouse 1 - _TC"
+
+		planned_before = (
+			frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": fg_warehouse}, "planned_qty")
+			or 0
+		)
+
+		wo = make_wo_order_test_record(item=item_code, fg_warehouse=fg_warehouse, qty=10)
+
+		planned_after_submit = (
+			frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": fg_warehouse}, "planned_qty")
+			or 0
+		)
+		self.assertEqual(planned_after_submit, planned_before + 10)
+
+		close_work_order(wo.name, "Closed")
+
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Closed")
+
+		planned_after_close = (
+			frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": fg_warehouse}, "planned_qty")
+			or 0
+		)
+		self.assertEqual(planned_after_close, planned_before)
+
 	def test_work_order_with_non_transfer_item(self):
 		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
 

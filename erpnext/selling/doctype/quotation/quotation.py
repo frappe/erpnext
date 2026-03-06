@@ -6,8 +6,9 @@ import json
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt, getdate, nowdate
+from frappe.utils import cint, flt, getdate, nowdate
 
 from erpnext.controllers.selling_controller import SellingController
 
@@ -257,7 +258,9 @@ class Quotation(SellingController):
 		opp.set_status(status=status, update=True)
 
 	@frappe.whitelist()
-	def declare_enquiry_lost(self, lost_reasons_list, competitors, detailed_reason=None):
+	def declare_enquiry_lost(
+		self, lost_reasons_list: list, competitors: list, detailed_reason: str | None = None
+	):
 		if not (self.is_fully_ordered() or self.is_partially_ordered()):
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]
@@ -353,7 +356,9 @@ def get_list_context(context=None):
 
 
 @frappe.whitelist()
-def make_sales_order(source_name: str, target_doc=None, args=None):
+def make_sales_order(
+	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+):
 	if not frappe.db.get_singles_value(
 		"Selling Settings", "allow_sales_order_creation_for_expired_quotation"
 	):
@@ -446,6 +451,10 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, ar
 		child_filter = d.name in filtered_items if filtered_items else True
 		return child_filter
 
+	automatically_fetch_payment_terms = cint(
+		frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
+	)
+
 	doclist = get_mapped_doc(
 		"Quotation",
 		source_name,
@@ -453,6 +462,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, ar
 			"Quotation": {
 				"doctype": "Sales Order",
 				"validation": {"docstatus": ["=", 1]},
+				"field_no_map": ["payment_terms_template"],
 			},
 			"Quotation Item": {
 				"doctype": "Sales Order Item",
@@ -462,12 +472,14 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, ar
 			},
 			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
-			"Payment Schedule": {"doctype": "Payment Schedule", "add_if_empty": True},
 		},
 		target_doc,
 		set_missing_values,
 		ignore_permissions=ignore_permissions,
 	)
+
+	if automatically_fetch_payment_terms:
+		doclist.set_payment_schedule()
 
 	return doclist
 
@@ -495,7 +507,9 @@ def set_expired_status():
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None, args=None):
+def make_sales_invoice(
+	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+):
 	return _make_sales_invoice(source_name, target_doc, args=args)
 
 

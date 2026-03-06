@@ -399,6 +399,9 @@ class SerialBatchBundle:
 
 	def submit_serial_and_batch_bundle(self):
 		doc = frappe.get_doc("Serial and Batch Bundle", self.sle.serial_and_batch_bundle)
+		if self.sle.voucher_detail_no and doc.voucher_detail_no != self.sle.voucher_detail_no:
+			doc.voucher_detail_no = self.sle.voucher_detail_no
+
 		self.validate_actual_qty(doc)
 
 		doc.flags.ignore_voucher_validation = True
@@ -457,6 +460,11 @@ class SerialBatchBundle:
 		customer = None
 		if sle.voucher_type in ["Sales Invoice", "Delivery Note"] and sle.actual_qty < 0:
 			customer = frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "customer")
+
+		if sle.voucher_type in ["Stock Entry"] and sle.actual_qty < 0:
+			purpose = frappe.get_cached_value("Stock Entry", sle.voucher_no, "purpose")
+			if purpose in ["Disassemble", "Material Receipt"]:
+				status = "Inactive"
 
 		sn_table = frappe.qb.DocType("Serial No")
 
