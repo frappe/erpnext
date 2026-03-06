@@ -152,7 +152,6 @@ class ShippingRule(Document):
 				frappe.throw(_("Shipping rule only applicable for Buying"))
 
 			shipping_charge["doctype"] = "Purchase Taxes and Charges"
-			shipping_charge["category"] = "Valuation and Total"
 			shipping_charge["add_deduct_tax"] = "Add"
 
 		existing_shipping_charge = doc.get("taxes", filters=shipping_charge)
@@ -160,6 +159,9 @@ class ShippingRule(Document):
 			# take the last record found
 			existing_shipping_charge[-1].tax_amount = shipping_amount
 		else:
+			# Set category and other fields only at insert time
+			if self.shipping_rule_type != "Selling":
+				shipping_charge["category"] = "Valuation and Total"
 			shipping_charge["tax_amount"] = shipping_amount
 			shipping_charge["description"] = self.label
 			doc.append("taxes", shipping_charge)
