@@ -21,7 +21,6 @@ frappe.dashboards.chart_sources["Account Balance Timeline"] = {
 			get_query: () => {
 				return {
 					filters: {
-						company: frappe.defaults.get_user_default("Company"),
 						account_type: "Bank",
 						is_group: 0,
 					},
