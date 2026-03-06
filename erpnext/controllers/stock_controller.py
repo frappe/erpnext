@@ -1961,6 +1961,34 @@ def show_stock_ledger_preview(company: str, doctype: str, docname: str):
 
 
 def get_accounting_ledger_preview(doc, filters):
+	"""
+	Generate the Accounting Ledger Preview for a document.
+
+	This function prepares the General Ledger preview entries before the
+	document is submitted. By default, the preview shows standard fields
+	such as posting date, account, debit, credit, and cost center.
+
+	If the **Include Dimensions In Preview** option is enabled in
+	Accounts Settings, the preview will also include all configured
+	accounting dimensions (including project and other dimensions).
+
+	The function:
+	- Reads the Accounts Settings configuration.
+	- Dynamically includes accounting dimensions if enabled.
+	- Generates temporary GL entries for preview.
+	- Returns the formatted columns and data for display.
+
+	Args:
+		doc (Document): The source document for which the ledger preview
+			is being generated.
+		filters (dict | None): Optional filters used for configuring
+			the preview output.
+
+	Returns:
+		tuple: A tuple containing:
+			- gl_columns (list): Column definitions for the preview.
+			- gl_data (list): Ledger entry rows for the preview.
+	"""
 	from erpnext.accounts.report.general_ledger.general_ledger import get_columns as get_gl_columns
 	from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
