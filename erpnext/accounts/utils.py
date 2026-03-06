@@ -552,7 +552,6 @@ def reconcile_against_document(
 
 				reposting_rows.append(referenced_row)
 
-		doc.flags.ignore_links = True
 		doc.save(ignore_permissions=True)
 
 		if voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:

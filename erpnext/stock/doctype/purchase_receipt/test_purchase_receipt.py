@@ -4278,8 +4278,7 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		self.assertTrue(sles)
 
 		for row in sles:
-			doc = frappe.get_doc("Stock Ledger Entry", row)
-			doc.delete()
+			frappe.db.delete("Stock Ledger Entry", {"name": row})
 
 		sles = frappe.get_all(
 			"Stock Ledger Entry",
