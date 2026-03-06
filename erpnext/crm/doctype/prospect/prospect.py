@@ -6,6 +6,7 @@ from frappe.contacts.address_and_contact import (
 	delete_contact_and_address,
 	load_address_and_contact,
 )
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.crm.utils import CRMNote, copy_comments, link_communications, link_open_events
@@ -87,7 +88,7 @@ class Prospect(CRMNote):
 
 
 @frappe.whitelist()
-def make_customer(source_name, target_doc=None):
+def make_customer(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		target.customer_type = "Company"
 		target.company_name = source.name
@@ -111,7 +112,7 @@ def make_customer(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_opportunity(source_name, target_doc=None):
+def make_opportunity(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		target.opportunity_from = "Prospect"
 		target.customer_name = source.company_name
