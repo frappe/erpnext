@@ -96,9 +96,8 @@ class TemplateValidator:
 			result.merge(validator.validate(self.template))
 
 		# Run row-level validations
-		account_fields = {field.fieldname for field in frappe.get_meta("Account").fields}
 		for row in self.template.rows:
-			result.merge(self.formula_validator.validate(row, account_fields))
+			result.merge(self.formula_validator.validate(row))
 
 		return result
 
@@ -382,11 +381,6 @@ class AccountFilterValidator(Validator):
 	def __init__(self, account_fields: set | None = None):
 		self.account_meta = frappe.get_meta("Account")
 		self.account_fields = account_fields or set(self.account_meta._valid_columns)
-		self.unsupported_fields = {
-			*frappe.model.default_fields,
-			*frappe.model.child_table_fields,
-			*frappe.model.optional_fields,
-		}
 
 	def validate(self, row) -> ValidationResult:
 		result = ValidationResult()
@@ -450,11 +444,8 @@ class AccountFilterValidator(Validator):
 
 			display = (field if advanced_filtering else self.account_meta.get_label(field)) or field
 
-			if field in self.unsupported_fields:
-				return f"Field '{display}' is not supported in filters"
-
 			if field not in account_fields:
-				return f"Field '{display}' is not a valid account field"
+				return f"Field '{display}' is not a valid Account field"
 
 			if operator.casefold() not in OPERATOR_MAP:
 				return f"Invalid operator '{operator}'"
@@ -493,7 +484,7 @@ class FormulaValidator(Validator):
 		self.calculation_validator = CalculationFormulaValidator(reference_codes)
 		self.account_filter_validator = AccountFilterValidator()
 
-	def validate(self, row, account_fields: set) -> ValidationResult:
+	def validate(self, row) -> ValidationResult:
 		result = ValidationResult()
 
 		if not row.calculation_formula:
@@ -503,9 +494,6 @@ class FormulaValidator(Validator):
 			return self.calculation_validator.validate(row)
 
 		elif row.data_source == "Account Data":
-			# Update account fields if provided
-			if account_fields:
-				self.account_filter_validator.account_fields = account_fields
 			return self.account_filter_validator.validate(row)
 
 		elif row.data_source == "Custom API":
