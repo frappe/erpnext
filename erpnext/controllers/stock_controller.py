@@ -2010,15 +2010,19 @@ def get_accounting_ledger_preview(doc, filters):
 		"against",
 		"party_type",
 		"party",
-		"cost_center",
-		"against_voucher_type",
-		"against_voucher",
 	]
 
 	if filters["include_dimensions"]:
 		dimensions = get_accounting_dimensions()
 		fields.append("project")
 		fields.extend(dimensions)
+
+	fields.append("cost_center")
+
+	fields.extend([
+		"against_voucher_type",
+		"against_voucher",
+	])
 
 	doc.docstatus = 1
 
@@ -2035,7 +2039,6 @@ def get_accounting_ledger_preview(doc, filters):
 	gl_data = get_data(fields, gl_entries)
 
 	return gl_columns, gl_data
-
 
 def get_stock_ledger_preview(doc, filters):
 	from erpnext.stock.report.stock_ledger.stock_ledger import get_columns as get_sl_columns
