@@ -191,7 +191,7 @@ def auto_fetch_serial_number(
 	posting_date: str | None = None,
 	batch_nos: str | list[str] | None = None,
 	for_doctype: str | None = None,
-	exclude_sr_nos=None,
+	exclude_sr_nos: str | None = None,
 ) -> list[str]:
 	filters = frappe._dict({"item_code": item_code, "warehouse": warehouse})
 
