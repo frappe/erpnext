@@ -140,6 +140,7 @@ class ShippingRule(Document):
 			"charge_type": "Actual",
 			"account_head": self.account,
 			"cost_center": self.cost_center,
+			"description": self.label,
 		}
 		if self.shipping_rule_type == "Selling":
 			# check if not applied on purchase
@@ -163,7 +164,6 @@ class ShippingRule(Document):
 			if self.shipping_rule_type != "Selling":
 				shipping_charge["category"] = "Valuation and Total"
 			shipping_charge["tax_amount"] = shipping_amount
-			shipping_charge["description"] = self.label
 			doc.append("taxes", shipping_charge)
 
 	def sort_shipping_rule_conditions(self):
