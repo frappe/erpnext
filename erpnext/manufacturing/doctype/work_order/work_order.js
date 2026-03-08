@@ -461,10 +461,11 @@ frappe.ui.form.on("Work Order", {
 		var added_min = false;
 
 		// produced qty
-		var title = __("{0} items produced", [frm.doc.produced_qty]);
+		let produced_qty = frm.doc.produced_qty - frm.doc.disassembled_qty;
+		var title = __("{0} items produced", [produced_qty]);
 		bars.push({
 			title: title,
-			width: (frm.doc.produced_qty / frm.doc.qty) * 100 + "%",
+			width: (flt(produced_qty) / frm.doc.qty) * 100 + "%",
 			progress_class: "progress-bar-success",
 		});
 		if (bars[0].width == "0%") {
@@ -500,6 +501,8 @@ frappe.ui.form.on("Work Order", {
 				message = message + ". " + title;
 			}
 		}
+
+		//process loss qty
 		if (frm.doc.process_loss_qty) {
 			var process_loss_width = (frm.doc.process_loss_qty / frm.doc.qty) * 100;
 			title = __("{0} items lost during process.", [frm.doc.process_loss_qty]);
@@ -510,6 +513,19 @@ frappe.ui.form.on("Work Order", {
 			});
 			message = message + ". " + title;
 		}
+
+		// disassembled qty
+		if (frm.doc.disassembled_qty) {
+			var disassembled_width = (frm.doc.disassembled_qty / frm.doc.qty) * 100;
+			title = __("{0} items disassembled", [frm.doc.disassembled_qty]);
+			bars.push({
+				title: title,
+				width: disassembled_width + "%",
+				progress_class: "progress-bar-secondary",
+			});
+			message = message + ". " + title;
+		}
+
 		frm.dashboard.add_progress(__("Status"), bars, message);
 	},
 
