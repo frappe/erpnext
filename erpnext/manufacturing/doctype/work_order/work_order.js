@@ -481,10 +481,21 @@ frappe.ui.form.on("Work Order", {
 			if (pending_complete > 0) {
 				var width = (pending_complete / frm.doc.qty) * 100 - added_min;
 				title = __("{0} items in progress", [pending_complete]);
+				let progress_class = "progress-bar-warning";
+				if (frm.doc.status == "Closed") {
+					if (frm.doc.required_items.find((d) => d.returned_qty > 0)) {
+						title = __("{0} items returned", [pending_complete]);
+						progress_class = "progress-bar-warning";
+					} else {
+						title = __("{0} items to return", [pending_complete]);
+						progress_class = "progress-bar-info";
+					}
+				}
+
 				bars.push({
 					title: title,
 					width: (width > 100 ? "99.5" : width) + "%",
-					progress_class: "progress-bar-warning",
+					progress_class: progress_class,
 				});
 				message = message + ". " + title;
 			}
