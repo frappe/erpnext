@@ -200,6 +200,7 @@ class JobCard(Document):
 
 	def set_manufactured_qty(self):
 		table_name = "Stock Entry"
+		child_name = "Stock Entry Detail"
 		if self.is_subcontracted:
 			table_name = "Subcontracting Receipt Item"
 
@@ -209,8 +210,13 @@ class JobCard(Document):
 		if self.is_subcontracted:
 			query = query.select(Sum(table.qty))
 		else:
-			query = query.select(Sum(table.fg_completed_qty))
-			query = query.where(table.purpose == "Manufacture")
+			child = frappe.qb.DocType(child_name)
+			query = (
+				query.join(child)
+				.on(table.name == child.parent)
+				.select(Sum(child.transfer_qty))
+				.where((table.purpose == "Manufacture") & (child.is_finished_item == 1))
+			)
 
 		qty = query.run()[0][0] or 0.0
 		self.manufactured_qty = flt(qty)
@@ -269,11 +275,15 @@ class JobCard(Document):
 				self.append("sub_operations", row)
 
 	def set_secondary_items(self):
-		if not self.semi_fg_bom:
+		if not self.semi_fg_bom and not self.bom_no:
 			return
 
 		items_dict = get_bom_items_as_dict(
-			self.semi_fg_bom, self.company, qty=self.for_quantity, fetch_exploded=0, fetch_secondary_items=1
+			self.semi_fg_bom or self.bom_no,
+			self.company,
+			qty=self.for_quantity,
+			fetch_exploded=0,
+			fetch_secondary_items=1,
 		)
 		for item_code, values in items_dict.items():
 			values = frappe._dict(values)
@@ -283,6 +293,7 @@ class JobCard(Document):
 				"item_name": values.item_name,
 				"stock_uom": values.stock_uom,
 				"type": values.type,
+				"bom_secondary_item": values.name,
 			}
 
 			if not values.is_legacy:
@@ -1188,7 +1199,7 @@ class JobCard(Document):
 	def set_status(self, update_status=False):
 		self.status = {0: "Open", 1: "Submitted", 2: "Cancelled"}[self.docstatus or 0]
 		if self.finished_good and self.docstatus == 1:
-			if self.manufactured_qty >= self.for_quantity:
+			if (self.manufactured_qty + self.process_loss_qty) >= self.for_quantity:
 				self.status = "Completed"
 			elif self.transferred_qty > 0 or self.skip_material_transfer:
 				self.status = "Work In Progress"
@@ -1469,6 +1480,7 @@ class JobCard(Document):
 		ste = ManufactureEntry(
 			{
 				"for_quantity": self.for_quantity - self.manufactured_qty,
+				"process_loss_qty": self.process_loss_qty,
 				"job_card": self.name,
 				"skip_material_transfer": self.skip_material_transfer,
 				"backflush_from_wip_warehouse": self.backflush_from_wip_warehouse,
@@ -1489,7 +1501,7 @@ class JobCard(Document):
 		add_additional_cost(ste.stock_entry, wo_doc, self)
 
 		ste.stock_entry.pro_doc = frappe.get_doc("Work Order", self.work_order)
-		ste.stock_entry.set_secondary_items()
+		ste.stock_entry.set_secondary_items_from_job_card()
 		for row in ste.stock_entry.items:
 			if (row.type or row.is_legacy_scrap_item) and not row.t_warehouse:
 				row.t_warehouse = self.target_warehouse

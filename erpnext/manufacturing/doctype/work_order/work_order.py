@@ -2424,6 +2424,7 @@ def make_stock_entry(
 	stock_entry.set_stock_entry_type()
 	stock_entry.is_additional_transfer_entry = is_additional_transfer_entry
 	stock_entry.get_items()
+	stock_entry.set_secondary_items_from_job_card()
 
 	if purpose != "Disassemble":
 		stock_entry.set_serial_no_batch_for_finished_good()
@@ -2644,8 +2645,9 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 		work_order.transfer_material_against == "Job Card" and not work_order.skip_transfer
 	):
 		doc.get_required_items()
-		if work_order.track_semi_finished_goods:
-			doc.set_secondary_items()
+
+	if work_order.track_semi_finished_goods:
+		doc.set_secondary_items()
 
 	if auto_create:
 		doc.flags.ignore_mandatory = True

@@ -2409,7 +2409,7 @@ class TestStockEntry(IntegrationTestCase):
 
 		frappe.get_doc(_make_stock_entry(work_order.name, "Material Consumption for Manufacture", 5)).submit()
 		frappe.get_doc(_make_stock_entry(work_order.name, "Manufacture", 5)).submit()
-		
+
 	def test_qi_creation_with_naming_rule_company_condition(self):
 		"""
 		Unit test case to check the document naming rule with company condition

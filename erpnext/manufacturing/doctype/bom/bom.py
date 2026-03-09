@@ -495,6 +495,7 @@ class BOM(WebsiteGenerator):
 					"conversion_factor": item.conversion_factor,
 					"sourced_by_supplier": item.sourced_by_supplier,
 					"do_not_explode": item.do_not_explode,
+					"fetch_rate": True,
 				}
 			)
 
@@ -537,7 +538,7 @@ class BOM(WebsiteGenerator):
 		)
 		args.update(item)
 
-		rate = self.get_rm_rate(args) if args.get("fetch_rate", True) else 0
+		rate = self.get_rm_rate(args) if args.get("fetch_rate") else 0
 		ret_item = {
 			"item_name": item and args["item_name"] or "",
 			"description": item and args["description"] or "",

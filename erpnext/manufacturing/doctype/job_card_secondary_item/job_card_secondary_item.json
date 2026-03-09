@@ -10,6 +10,7 @@
   "column_break_3",
   "item_code",
   "item_name",
+  "bom_secondary_item",
   "quantity_and_rate",
   "stock_qty",
   "column_break_6",
@@ -74,12 +75,19 @@
    "label": "Type",
    "options": "Co-Product\nBy-Product\nScrap\nAdditional Finished Good",
    "reqd": 1
+  },
+  {
+   "fieldname": "bom_secondary_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "BOM Secondary Item Reference",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-27 15:44:40.084050",
+ "modified": "2026-03-06 13:51:00.492621",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card Secondary Item",

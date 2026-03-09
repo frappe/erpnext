@@ -13,6 +13,7 @@ class JobCardSecondaryItem(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		bom_secondary_item: DF.Data | None
 		description: DF.SmallText | None
 		item_code: DF.Link
 		item_name: DF.Data | None

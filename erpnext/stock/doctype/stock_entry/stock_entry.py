@@ -662,7 +662,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				item.set("expense_account", item_details.get("expense_account"))
 
 	def validate_fg_completed_qty(self):
-		if self.purpose != "Manufacture":
+		if self.purpose != "Manufacture" or not self.from_bom:
 			return
 
 		fg_qty = defaultdict(float)
@@ -2649,7 +2649,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if not self.pro_doc:
 				self.pro_doc = frappe.get_doc("Work Order", self.work_order)
 
-			if self.pro_doc:
+			if self.pro_doc and not self.pro_doc.track_semi_finished_goods:
 				self.bom_no = self.pro_doc.bom_no
 			else:
 				# invalid work order
@@ -2814,12 +2814,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 		for item in item_dict.values():
 			item.from_warehouse = ""
 
-		job_card_secondary_items = {}
+		return item_dict
+
+	def set_secondary_items_from_job_card(self):
+		item_dict = {}
 		for row in self.get_secondary_items_from_job_card():
 			if row.stock_qty <= 0:
 				continue
 
-			job_card_secondary_items[row.item_code] = frappe._dict(
+			item_dict[row.item_code] = frappe._dict(
 				{
 					"uom": row.stock_uom,
 					"from_warehouse": "",
@@ -2828,12 +2831,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 					"type": row.type,
 					"item_name": row.item_name,
 					"description": row.description,
-					"allow_zero_valuation_rate": 1,
+					"bom_secondary_item": row.bom_secondary_item,
 				}
 			)
-		self.add_to_stock_entry_detail(job_card_secondary_items, bom_no=self.bom_no)
 
-		return item_dict
+		for item in item_dict.values():
+			item.from_warehouse = ""
+
+		self.add_to_stock_entry_detail(item_dict)
 
 	def get_secondary_items_from_job_card(self):
 		if not hasattr(self, "pro_doc"):
@@ -2857,6 +2862,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				job_card_secondary_item.description,
 				job_card_secondary_item.stock_uom,
 				job_card_secondary_item.type,
+				job_card_secondary_item.bom_secondary_item,
 			)
 			.join(job_card_secondary_item)
 			.on(job_card_secondary_item.parent == job_card.name)
@@ -2866,6 +2872,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				& (job_card.docstatus == 1)
 			)
 			.groupby(job_card_secondary_item.item_code, job_card_secondary_item.type)
+			.orderby(job_card_secondary_item.idx)
 		)
 
 		if self.job_card:
@@ -3236,7 +3243,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			se_child.sample_quantity = item_row.get("sample_quantity", 0)
 			se_child.type = item_row.get("type")
 			se_child.is_legacy_scrap_item = item_row.get("is_legacy")
-			se_child.bom_secondary_item = item_row.get("name")
+			se_child.bom_secondary_item = item_row.get("name") or item_row.get("bom_secondary_item")
 
 			for field in [
 				self.subcontract_data.rm_detail_field,
