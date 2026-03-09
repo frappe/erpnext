@@ -55,7 +55,13 @@ frappe.ui.form.on("Material Request", {
 			};
 		});
 	},
-
+	schedule_date(frm) {
+		if (frm.doc.schedule_date) {
+			frm.doc.items.forEach((d) => {
+				frappe.model.set_value(d.doctype, d.name, "schedule_date", frm.doc.schedule_date);
+			});
+		}
+	},
 	onload: function (frm) {
 		// add item, if previous view was item
 		erpnext.utils.add_item(frm);
@@ -109,8 +115,12 @@ frappe.ui.form.on("Material Request", {
 		frm.events.make_custom_buttons(frm);
 		frm.toggle_reqd("customer", frm.doc.material_request_type == "Customer Provided");
 		frm.trigger("set_warehouse_label");
+		erpnext.buying.prevent_past_schedule_dates(frm);
 	},
-
+	transaction_date(frm) {
+		erpnext.buying.prevent_past_schedule_dates(frm);
+		frm.set_value("schedule_date", "");
+	},
 	set_from_warehouse: function (frm) {
 		if (frm.doc.material_request_type == "Material Transfer" && frm.doc.set_from_warehouse) {
 			frm.doc.items.forEach((d) => {
@@ -642,10 +652,6 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 		set_schedule_date(this.frm);
 	}
 
-	schedule_date() {
-		set_schedule_date(this.frm);
-	}
-
 	qty(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		row.amount = flt(row.qty) * flt(row.rate);
@@ -668,3 +674,4 @@ function set_schedule_date(frm) {
 		);
 	}
 }
+
