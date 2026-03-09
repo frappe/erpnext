@@ -19,3 +19,6 @@ node_modules/
 .backportrc.json
 # Aider AI Chat
 .aider*
+
+# ZirakERP Docker
+docker/.env
