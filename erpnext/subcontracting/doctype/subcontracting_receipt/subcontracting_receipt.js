@@ -435,10 +435,6 @@ frappe.ui.form.on("Subcontracting Receipt Item", {
 		set_missing_values(frm);
 	},
 
-	items_add(frm, cdt, cdn) {
-		frappe.model.set_value(cdt, cdn, "type", "Scrap");
-	},
-
 	add_serial_batch_bundle(frm, cdt, cdn) {
 		let item = locals[cdt][cdn];
 

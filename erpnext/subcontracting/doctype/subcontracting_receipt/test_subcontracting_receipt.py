@@ -1193,7 +1193,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 					"item_code": item,
 					"stock_qty": 1 * (idx + 1),
 					"rate": 10 * (idx + 1),
-					"type": "Scrap",
+					"is_legacy": 1,
 				},
 			)
 		bom.save()

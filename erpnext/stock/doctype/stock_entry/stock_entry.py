@@ -2827,7 +2827,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 					"uom": row.stock_uom,
 					"from_warehouse": "",
 					"qty": row.stock_qty,
-					"converison_factor": 1,
+					"conversion_factor": 1,
 					"type": row.type,
 					"item_name": row.item_name,
 					"description": row.description,

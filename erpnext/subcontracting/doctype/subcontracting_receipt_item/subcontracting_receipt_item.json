@@ -596,15 +596,13 @@
    "options": "Account"
   },
   {
-   "depends_on": "eval: !doc.bom && !doc.is_legacy_scrap_item",
    "fieldname": "type",
    "fieldtype": "Select",
    "label": "Type",
-   "mandatory_depends_on": "eval:!doc.subcontracting_order_item && !doc.is_legacy_scrap_item",
    "no_copy": 1,
    "options": "\nCo-Product\nBy-Product\nScrap\nAdditional Finished Good",
    "print_hide": 1,
-   "read_only_depends_on": "eval:doc.subcontracting_order_item"
+   "read_only": 1
   },
   {
    "default": "0",
@@ -637,7 +635,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-02 12:40:54.654424",
+ "modified": "2026-03-09 15:11:16.977539",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",

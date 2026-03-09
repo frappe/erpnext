@@ -10,16 +10,19 @@ def execute():
 
 
 def copy_doctypes():
+	previous = frappe.db.auto_commit_on_many_writes
 	frappe.db.auto_commit_on_many_writes = True
-	insert_into_bom()
-	insert_into_job_card()
-	insert_into_subcontracting_inward()
-	frappe.db.auto_commit_on_many_writes = False
+	try:
+		insert_into_bom()
+		insert_into_job_card()
+		insert_into_subcontracting_inward()
+	finally:
+		frappe.db.auto_commit_on_many_writes = previous
 
 
 def insert_into_bom():
 	fields = ["item_code", "item_name", "stock_uom", "stock_qty", "rate"]
-	data = frappe.get_all("BOM Scrap Item", {"docstatus": 1}, ["parent", *fields])
+	data = frappe.get_all("BOM Scrap Item", {"docstatus": ("<", 2)}, ["parent", *fields])
 	grouped_data = defaultdict(list)
 	for item in data:
 		grouped_data[item.parent].append(item)
@@ -34,8 +37,8 @@ def insert_into_bom():
 			secondary_item.update(
 				{"uom": item.stock_uom, "conversion_factor": 1, "qty": item.stock_qty, "is_legacy": 1}
 			)
-		secondary_item.insert()
-		secondary_item.submit()
+			secondary_item.insert()
+			secondary_item.submit()
 
 
 def insert_into_job_card():
@@ -64,7 +67,7 @@ def insert_into_subcontracting_inward():
 
 
 def bulk_insert(parent_doctype, old_doctype, new_doctype, old_fields, new_fields, new_values):
-	data = frappe.get_all(old_doctype, {"docstatus": 1}, ["parent", *old_fields])
+	data = frappe.get_all(old_doctype, {"docstatus": ("<", 2)}, ["parent", *old_fields])
 	grouped_data = defaultdict(list)
 
 	for item in data:
@@ -78,8 +81,8 @@ def bulk_insert(parent_doctype, old_doctype, new_doctype, old_fields, new_fields
 			secondary_item.update(
 				{new_field: new_value for new_field, new_value in zip(new_fields, new_values, strict=True)}
 			)
-		secondary_item.insert()
-		secondary_item.submit()
+			secondary_item.insert()
+			secondary_item.submit()
 
 
 def rename_fields():

@@ -474,7 +474,11 @@ class SubcontractingReceipt(SubcontractingController):
 		secondary_items_cost_map = {}
 		for item in self.get("items") or []:
 			if item.type or item.is_legacy_scrap_item:
-				qty = flt(item.qty) if item.is_legacy_scrap_item else flt(item.received_qty)
+				qty = (
+					flt(item.qty)
+					if item.is_legacy_scrap_item
+					else (flt(item.received_qty) - flt(item.process_loss_qty))
+				)
 				item.amount = qty * flt(item.rate)
 
 				if item.reference_name in secondary_items_cost_map:
