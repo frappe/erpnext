@@ -170,12 +170,12 @@ async function loadJobCard(name, slab_template = null) {
 		const jc = await frappe.db.get_doc('Job Card', jobCardName.value);
 		jobCardDoc.value = jc;
 		slabTemplate.value = slab_template;
-		// if (jc.bom_no && !slabTemplate.value) {
-		// 	const bom = await frappe.db.get_doc('BOM', jc.bom_no);
-		// 	if (bom.slab_template) {
-		// 		slabTemplate.value = bom.slab_template;
-		// 	}
-		// }
+		if (jc.bom_no && !slab_template) {
+			const bom = await frappe.db.get_doc('BOM', jc.bom_no);
+			if (bom.slab_template) {
+				slabTemplate.value = bom.slab_template;
+			}
+		}
 
 		jobCardSubmitted.value = jc.docstatus === 1 || jc.status === 'Completed';
 		if (jobCardSubmitted.value) {
