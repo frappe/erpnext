@@ -266,6 +266,7 @@
   {
    "fieldname": "due_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Due Date",
    "oldfieldname": "due_date",
    "oldfieldtype": "Date"
@@ -319,6 +320,7 @@
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Date",
    "oldfieldname": "posting_date",
    "oldfieldtype": "Date",
@@ -397,6 +399,8 @@
   {
    "fieldname": "bill_no",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Supplier Invoice No",
    "oldfieldname": "bill_no",
    "oldfieldtype": "Data",
@@ -1689,7 +1693,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-23 13:23:57.269770",
+ "modified": "2026-03-09 17:15:27.014131",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

@@ -140,6 +140,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Company",
    "oldfieldname": "company",
@@ -181,7 +182,6 @@
    "fieldname": "cheque_no",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "in_list_view": 1,
    "label": "Reference Number",
    "mandatory_depends_on": "eval:doc.voucher_type == \"Bank Entry\"",
    "no_copy": 1,
@@ -665,7 +665,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-02-16 16:06:10.468482",
+ "modified": "2026-03-09 17:15:26.569327",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
