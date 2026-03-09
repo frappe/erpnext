@@ -1414,6 +1414,78 @@ def get_account_balances(
 	return accounts
 
 
+@frappe.whitelist()
+def get_account_balances_coa(company: str, include_default_fb_balances: bool = False):
+	company_currency = frappe.get_cached_value("Company", company, "default_currency")
+
+	Account = DocType("Account")
+	account_list = (
+		frappe.qb.from_(Account)
+		.select(Account.name, Account.parent_account, Account.account_currency)
+		.where(Account.company == company)
+		.orderby(Account.lft)
+		.run(as_dict=True)
+	)
+
+	account_balances_cc = {account.get("name"): 0 for account in account_list}
+
+	account_balances_ac = {account.get("name"): 0 for account in account_list}
+
+	GLEntry = DocType("GL Entry")
+	precision = get_currency_precision()
+	get_ledger_balances_query = (
+		frappe.qb.from_(GLEntry)
+		.select(
+			GLEntry.account,
+			(Sum(Round(GLEntry.debit, precision)) - Sum(Round(GLEntry.credit, precision))).as_("balance"),
+			(
+				Sum(Round(GLEntry.debit_in_account_currency, precision))
+				- Sum(Round(GLEntry.credit_in_account_currency, precision))
+			).as_("balance_in_account_currency"),
+		)
+		.groupby(GLEntry.account)
+	)
+
+	condition_list = [GLEntry.company == company, GLEntry.is_cancelled == 0]
+
+	default_finance_book = None
+
+	if include_default_fb_balances:
+		default_finance_book = frappe.get_cached_value("Company", company, "default_finance_book")
+
+	if default_finance_book:
+		condition_list.append(
+			(GLEntry.finance_book == default_finance_book) | (GLEntry.finance_book.isnull())
+		)
+
+	for condition in condition_list:
+		get_ledger_balances_query = get_ledger_balances_query.where(condition)
+
+	ledger_balances = get_ledger_balances_query.run(as_dict=True)
+
+	for ledger_entry in ledger_balances:
+		account_balances_cc[ledger_entry.get("account")] = ledger_entry.get("balance")
+		account_balances_ac[ledger_entry.get("account")] = ledger_entry.get("balance_in_account_currency")
+
+	for account in reversed(account_list):
+		parent = account.get("parent_account")
+		if parent:
+			account_balances_cc[parent] += account_balances_cc.get(account.get("name"))
+
+	accounts_data = [
+		{
+			"value": account.get("name"),
+			"company_currency": company_currency,
+			"balance": account_balances_cc.get(account.get("name")),
+			"account_currency": account.get("account_currency"),
+			"balance_in_account_currency": account_balances_ac.get(account.get("name")),
+		}
+		for account in account_list
+	]
+
+	return accounts_data
+
+
 def create_payment_gateway_account(gateway, payment_channel="Email", company=None):
 	from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
 
