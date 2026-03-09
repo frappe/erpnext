@@ -1,205 +1,810 @@
 source,translated,context
-Login,تسجيل الدخول,
-Logout,تسجيل الخروج,
-Log in,تسجيل الدخول,
-Log out,تسجيل الخروج,
-Password,كلمة المرور,
-Forgot Password,نسيت كلمة المرور,
-Reset Password,إعادة تعيين كلمة المرور,
-Change Password,تغيير كلمة المرور,
-Email,البريد الإلكتروني,
-Email Address,عنوان البريد الإلكتروني,
-Username,اسم المستخدم,
-Sign Up,إنشاء حساب,
-Remember me,تذكرني,
-Welcome,مرحباً,
-Save,حفظ,
-Saved,تم الحفظ,
-Submit,إرسال,
-Cancel,إلغاء,
-Delete,حذف,
-Create,إنشاء,
-Edit,تعديل,
-New,جديد,
-Print,طباعة,
-Search,بحث,
-Filter,تصفية,
-Add,إضافة,
-Remove,إزالة,
-Update,تحديث,
-Close,إغلاق,
-Open,فتح,
-Back,رجوع,
-Next,التالي,
-Previous,السابق,
-Refresh,تحديث,
-Import,استيراد,
-Export,تصدير,
-Download,تنزيل,
-Upload,رفع,
-Attach,إرفاق,
-Copy,نسخ,
-Select,اختيار,
-Select All,اختيار الكل,
-Apply,تطبيق,
-Clear,مسح,
-Confirm,تأكيد,
-OK,موافق,
-Yes,نعم,
-No,لا,
-Done,تم,
-Send,إرسال,
-Continue,متابعة,
-Undo,تراجع,
-Duplicate,نسخ مكرر,
-Rename,إعادة تسمية,
-View,عرض,
-Hide,إخفاء,
-Show,إظهار,
-Expand,توسيع,
-Collapse,طي,
-Home,الرئيسية,
-Dashboard,لوحة القيادة,
-Settings,الإعدادات,
-Setup,الإعداد,
-Help,مساعدة,
-About,حول,
-Profile,الملف الشخصي,
-Notifications,الإشعارات,
-Messages,الرسائل,
-Workspace,مساحة العمل,
-Module,وحدة,
-Report,تقرير,
-Reports,التقارير,
-List,قائمة,
-Form,نموذج,
-Tree,شجرة,
-Calendar,التقويم,
-Image,صورة,
-Inbox,صندوق الوارد,
-Status,الحالة,
-Active,نشط,
-Inactive,غير نشط,
-Enable,تمكين,
-Disable,تعطيل,
-Enabled,ممكّن,
-Disabled,معطّل,
-Draft,مسودة,
-Pending,قيد الانتظار,
-Approved,موافق عليه,
-Rejected,مرفوض,
-Submitted,مُقدَّم,
-Cancelled,ملغى,
-Completed,مكتمل,
-Closed,مغلق,
-Overdue,متأخر,
-On Hold,معلّق,
-In Progress,قيد التنفيذ,
-Error,خطأ,
-Success,نجاح,
-Warning,تحذير,
-Info,معلومات,
-Date,التاريخ,
-Time,الوقت,
-Today,اليوم,
-Yesterday,أمس,
-Tomorrow,غداً,
-This Week,هذا الأسبوع,
-Last Week,الأسبوع الماضي,
-This Month,هذا الشهر,
-Last Month,الشهر الماضي,
-This Year,هذا العام,
-Last Year,العام الماضي,
-From Date,من تاريخ,
-To Date,إلى تاريخ,
-Start Date,تاريخ البدء,
-End Date,تاريخ الانتهاء,
-Due Date,تاريخ الاستحقاق,
-Created,تم الإنشاء,
-Modified,تم التعديل,
-Name,الاسم,
-Description,الوصف,
-Title,العنوان,
-Type,النوع,
-Category,الفئة,
-Group,مجموعة,
-Remarks,ملاحظات,
-Note,ملاحظة,
-Notes,ملاحظات,
-Comment,تعليق,
-Comments,التعليقات,
-Tag,وسم,
-Tags,الوسوم,
-Owner,المالك,
-Required,مطلوب,
-Mandatory,إلزامي,
-Read Only,للقراءة فقط,
-Hidden,مخفي,
-All,الكل,
-None,لا شيء,
-Other,أخرى,
-Custom,مخصص,
-Standard,قياسي,
-Advanced,متقدم,
-Basic,أساسي,
-Details,التفاصيل,
-Summary,ملخص,
-More,المزيد,
-Less,أقل,
-Loading...,جاري التحميل...,
-Loading,جاري التحميل,
-Please wait...,يرجى الانتظار...,
-No results found,لم يتم العثور على نتائج,
-No data,لا توجد بيانات,
-Not Permitted,غير مسموح,
-Not Found,غير موجود,
-Access Denied,تم رفض الوصول,
-Are you sure?,هل أنت متأكد؟,
-Updated,تم التحديث,
-Deleted,تم الحذف,
-User,مستخدم,
-Users,المستخدمون,
-Role,دور,
-Permission,إذن,
-Permissions,الأذونات,
-Language,اللغة,
-Country,البلد,
-Company,الشركة,
-Phone,الهاتف,
-Mobile No,رقم الجوال,
-Website,الموقع الإلكتروني,
-Default,افتراضي,
-Administrator,المدير,
-System Manager,مدير النظام,
-Guest,ضيف,
-Select Language,اختر اللغة,
-Select your language,اختر لغتك,
-Set Up Your Company,إعداد شركتك,
-Complete Setup,إكمال الإعداد,
-Approve,موافقة,
-Reject,رفض,
-Review,مراجعة,
-Print Format,تنسيق الطباعة,
-Letter Head,ترويسة,
-Terms and Conditions,الشروط والأحكام,
-Workflow,سير العمل,
-Header,رأس الصفحة,
-Footer,تذييل الصفحة,
-Row,صف,
-Column,عمود,
-Table,جدول,
-Average,المتوسط,
-Count,العدد,
-Sum,المجموع,
-Percentage,النسبة المئوية,
-Chart,رسم بياني,
-and,و,
-or,أو,
-of,من,
-for,لـ,
-in,في,
-from,من,
-to,إلى,
-by,بواسطة,
-not,لا,
-with,مع,
+"Accepted Qty","الكمية المقبولة",""
+"Access Log","سجل الوصول",""
+"Account","الحساب",""
+"Accounting","المحاسبة",""
+"Accounting Details","التفاصيل المحاسبية",""
+"Accounting Dimension","البعد المحاسبي",""
+"Accounting Entries","القيود المحاسبية",""
+"Accounting Masters","البيانات الرئيسية المحاسبية",""
+"Accounting Period","الفترة المحاسبية",""
+"Accounts Payable","حسابات الدفع",""
+"Accounts Receivable","حسابات القبض",""
+"Accounts Settings","إعدادات الحسابات",""
+"Accounts Setup","إعداد الحسابات",""
+"Actions","الإجراءات",""
+"Active Employees","الموظفون النشطون",""
+"Active Projects","المشاريع النشطة",""
+"Active Subcontracted Items","الأصناف المتعاقد عليها من الباطن النشطة",""
+"Activity","النشاط",""
+"Activity Cost","تكلفة النشاط",""
+"Activity Log","سجل النشاط",""
+"Activity Type","نوع النشاط",""
+"Add Row","إضافة صف",""
+"Add Sidebar Item","إضافة عنصر الشريط الجانبي",""
+"Add Tag","إضافة وسم",""
+"Add a comment","أضف تعليقاً",""
+"Additional Discount","خصم إضافي",""
+"Address","العنوان",""
+"Address And Contacts","العناوين وجهات الاتصال",""
+"Advance Paid","الدفعة المقدمة",""
+"Against","مقابل",""
+"Amend","تعديل",""
+"Amended From","معدّل من",""
+"Amount","المبلغ",""
+"Applicable On","ينطبق على",""
+"Apply Filters","تطبيق المرشحات",""
+"Appointment","الموعد",""
+"Apr","أبريل",""
+"April","أبريل",""
+"Ascending","تصاعدي",""
+"Asset","الأصل",""
+"Asset Activity","نشاط الأصل",""
+"Asset Capitalization","رسملة الأصول",""
+"Asset Category","فئة الأصول",""
+"Asset Depreciation Ledger","دفتر إهلاك الأصول",""
+"Asset Depreciations and Balances","إهلاكات وأرصدة الأصول",""
+"Asset Maintenance","صيانة الأصول",""
+"Asset Maintenance Log","سجل صيانة الأصول",""
+"Asset Maintenance Team","فريق صيانة الأصول",""
+"Asset Movement","حركة الأصول",""
+"Asset Repair","إصلاح الأصول",""
+"Asset Value Adjustment","تعديل قيمة الأصول",""
+"Asset Value Analytics","تحليلات قيمة الأصول",""
+"Assets","الأصول",""
+"Assets Setup","إعداد الأصول",""
+"Assign To","تعيين إلى",""
+"Assigned To","معيّن إلى",""
+"Assignment Rule","قاعدة التعيين",""
+"Attach File","إرفاق ملف",""
+"Attendance","الحضور",""
+"Aug","أغسطس",""
+"August","أغسطس",""
+"Authentication","المصادقة",""
+"Available Stock for Packing Items","المخزون المتاح لعناصر التعبئة",""
+"Average Order Value","متوسط قيمة الطلب",""
+"Average Order Values","متوسط قيم الطلبات",""
+"BOM","قائمة المواد",""
+"BOM Comparison Tool","أداة مقارنة قائمة المواد",""
+"BOM Creator","منشئ قائمة المواد",""
+"BOM Operations Time","وقت عمليات قائمة المواد",""
+"BOM Search","بحث قائمة المواد",""
+"BOM Stock Report","تقرير مخزون قائمة المواد",""
+"BOM Update Tool","أداة تحديث قائمة المواد",""
+"Background Jobs","المهام الخلفية",""
+"Balance Sheet","الميزانية العمومية",""
+"Bank","البنك",""
+"Bank Account","الحساب البنكي",""
+"Bank Clearance","تصفية البنك",""
+"Bank Reconciliation Statement","كشف تسوية البنك",""
+"Bank Reconciliation Tool","أداة تسوية البنك",""
+"Banking","الخدمات المصرفية",""
+"Base Grand Total","المجموع الكلي الأساسي",""
+"Base Net Total","الصافي الأساسي",""
+"Batch","دفعة",""
+"Batch Item Expiry Status","حالة انتهاء صلاحية عنصر الدفعة",""
+"Batch No","رقم الدفعة",""
+"Batch-Wise Balance History","تاريخ الرصيد حسب الدفعة",""
+"Bill of Materials","قائمة المواد",""
+"Billing Address","عنوان الفواتير",""
+"Blanket Order","أمر شامل",""
+"Branch","الفرع",""
+"Brand","العلامة التجارية",""
+"Budget","الميزانية",""
+"Budget Variance Report","تقرير انحراف الميزانية",""
+"Build","البناء",""
+"Bulk Update","تحديث جماعي",""
+"Buying","المشتريات",""
+"Buying Reports","تقارير الشراء",""
+"Buying Settings","إعدادات الشراء",""
+"Buying Setup","إعداد الشراء",""
+"CRM","إدارة علاقات العملاء",""
+"CRM Settings","إعدادات CRM",""
+"Campaign","حملة",""
+"Campaign Efficiency","كفاءة الحملة",""
+"Cash Flow","التدفق النقدي",""
+"Chart of Accounts","شجرة الحسابات",""
+"Chart of Accounts Importer","مستورد شجرة الحسابات",""
+"Chart of Cost Centers","شجرة مراكز التكلفة",""
+"City","المدينة",""
+"Clear Filters","مسح المرشحات",""
+"Client Script","برنامج العميل",""
+"Collapse All","طي الكل",""
+"Color","اللون",""
+"Communication","التواصل",""
+"Communication Logs","سجلات الاتصالات",""
+"Company","الشركة",""
+"Completed Projects","المشاريع المكتملة",""
+"Connections","الروابط",""
+"Consolidated Financial Statement","القوائم المالية الموحدة",""
+"Contact","جهة اتصال",""
+"Contact Email","البريد الإلكتروني للاتصال",""
+"Contact Mobile","هاتف الاتصال",""
+"Contact Person","جهة الاتصال",""
+"Contract","العقد",""
+"Conversion Factor","معامل التحويل",""
+"Conversion Rate","معدل التحويل",""
+"Cost Center","مركز التكلفة",""
+"Cost Center Allocation","تخصيص مركز التكلفة",""
+"Cost Center and Budgeting","مركز التكلفة والميزانية",""
+"Cost of Delivered Items","تكلفة العناصر المسلّمة",""
+"Coupon Code","رمز القسيمة",""
+"Create Asset","إنشاء أصل",""
+"Create Asset Category","إنشاء فئة أصول",""
+"Create Asset Item","إنشاء عنصر أصول",""
+"Create Asset Location","إنشاء موقع أصول",""
+"Create Bill of Materials","إنشاء قائمة المواد",""
+"Create Customer","إنشاء عميل",""
+"Create Delivery Note","إنشاء إشعار التسليم",""
+"Create Department","إنشاء قسم",""
+"Create Designation","إنشاء مسمى وظيفي",""
+"Create Employee","إنشاء موظف",""
+"Create Existing Asset","إنشاء أصل موجود",""
+"Create Finished Good","إنشاء منتج تام",""
+"Create Issue","إنشاء مشكلة",""
+"Create Issue Type","إنشاء نوع المشكلة",""
+"Create Item","إنشاء عنصر",""
+"Create Lead","إنشاء عميل محتمل",""
+"Create Leave Application","إنشاء طلب إجازة",""
+"Create Operation","إنشاء عملية",""
+"Create Payroll Entry","إنشاء قيد رواتب",""
+"Create Project","إنشاء مشروع",""
+"Create Purchase Invoice","إنشاء فاتورة شراء",""
+"Create Purchase Order","إنشاء أمر شراء",""
+"Create Purchase Receipt","إنشاء إيصال الشراء",""
+"Create Quality Goal","إنشاء هدف الجودة",""
+"Create Quality Inspection","إنشاء فحص الجودة",""
+"Create Quality Procedure","إنشاء إجراء الجودة",""
+"Create Raw Material","إنشاء مادة خام",""
+"Create Request for Quotation","إنشاء طلب عرض أسعار",""
+"Create Sales Invoice","إنشاء فاتورة مبيعات",""
+"Create Sales Order","إنشاء أمر بيع",""
+"Create Service Level Agreement","إنشاء اتفاقية مستوى الخدمة",""
+"Create Supplier","إنشاء مورد",""
+"Create Task","إنشاء مهمة",""
+"Create Timesheet","إنشاء جدول دوام",""
+"Create Transfer Entry","إنشاء إدخال نقل",""
+"Create Warehouse","إنشاء مستودع",""
+"Create Warehouses","إنشاء المستودعات",""
+"Create Work Order","إنشاء أمر عمل",""
+"Create a BOM","إنشاء قائمة مواد",""
+"Create a Delivery Note","إنشاء إذن تسليم",""
+"Create a Job Card","إنشاء بطاقة عمل",""
+"Create a Stock Entry","إنشاء قيد مخزون",""
+"Create a Work Order","إنشاء أمر عمل",""
+"Create supplier","إنشاء مورد",""
+"Created By","أنشئ بواسطة",""
+"Credit Note","إشعار دائن",""
+"Currency","العملة",""
+"Currency Exchange","صرف العملات",""
+"Custom Field","حقل مخصص",""
+"Custom Translation","ترجمة مخصصة",""
+"Customer","العميل",""
+"Customer Acquisition and Loyalty","اكتساب العملاء والولاء",""
+"Customer Addresses And Contacts","عناوين وجهات اتصال العملاء",""
+"Customer Credit Balance","رصيد ائتمان العميل",""
+"Customer Group","مجموعة العملاء",""
+"Customer Ledger Summary","ملخص دفتر العميل",""
+"Customers Without Any Sales Transactions","العملاء بدون أي معاملات بيع",""
+"Customization","التخصيص",""
+"Customize Form","تخصيص النموذج",""
+"Customs Tariff Number","رقم التعريفة الجمركية",""
+"Daily","يومي",""
+"Daily Timesheet Summary","ملخص الجدول الزمني اليومي",""
+"Dashboard","لوحة المعلومات",""
+"Dashboard Chart","رسم بياني للوحة المعلومات",""
+"Data Import","استيراد البيانات",""
+"Data Import and Settings","استيراد البيانات والإعدادات",""
+"Date of Birth","تاريخ الميلاد",""
+"Debit Note","إشعار مدين",""
+"Dec","ديسمبر",""
+"December","ديسمبر",""
+"Default Warehouse","المستودع الافتراضي",""
+"Deferred Accounting Settings","إعدادات المحاسبة المؤجلة",""
+"Delayed Item Report","تقرير العنصر المتأخر",""
+"Delayed Order Report","تقرير الطلب المتأخر",""
+"Delayed Tasks Summary","ملخص المهام المتأخرة",""
+"Deleted Documents","المستندات المحذوفة",""
+"Delivery Date","تاريخ التسليم",""
+"Delivery Note","إشعار التسليم",""
+"Delivery Note Trends","اتجاهات إذن التسليم",""
+"Delivery Settings","إعدادات التسليم",""
+"Delivery Trip","رحلة التوصيل",""
+"Department","القسم",""
+"Depreciation","الإهلاك",""
+"Depreciation Schedule","جدول الإهلاك",""
+"Descending","تنازلي",""
+"Designation","المسمى الوظيفي",""
+"Discard","تجاهل",""
+"Discount","الخصم",""
+"DocType","نوع المستند",""
+"Document","المستند",""
+"Document Share Report","تقرير مشاركة المستندات",""
+"Download Backups","تنزيل النسخ الاحتياطية",""
+"Downtime Analysis","تحليل وقت التوقف",""
+"Downtime Entry","إدخال وقت التوقف",""
+"Due Date","تاريخ الاستحقاق",""
+"Duplicate","تكرار",""
+"ERPNext Settings","إعدادات ERPNext",""
+"Edit in Full Page","تحرير في صفحة كاملة",""
+"Email Account","حساب البريد الإلكتروني",""
+"Email Campaign","حملة البريد الإلكتروني",""
+"Email Group","مجموعة البريد الإلكتروني",""
+"Employee","الموظف",""
+"Employee Checkin","تسجيل حضور الموظف",""
+"Employee Leave Balance","رصيد إجازات الموظف",""
+"Employee Lifecycle","دورة حياة الموظف",""
+"Employment Type","نوع التوظيف",""
+"Empty","فارغ",""
+"Energy Point Log","سجل نقاط الطاقة",""
+"Error Logs","سجلات الأخطاء",""
+"Events","الأحداث",""
+"Exchange Rate","سعر الصرف",""
+"Exchange Rate Revaluation","إعادة تقييم سعر الصرف",""
+"Expand All","توسيع الكل",""
+"Expense Claim","مطالبة المصروفات",""
+"Exponential Smoothing Forecasting","التنبؤ بالتنعيم الأسي",""
+"Export Data","تصدير البيانات",""
+"Failed Login Attempts","محاولات تسجيل الدخول الفاشلة",""
+"Feb","فبراير",""
+"February","فبراير",""
+"Feedback","التغذية الراجعة",""
+"File Manager","مدير الملفات",""
+"Filters","المرشحات",""
+"Finance Book","الدفتر المالي",""
+"Financial Reports","التقارير المالية",""
+"Financial Statements","القوائم المالية",""
+"Finished Good","المنتج النهائي",""
+"First Name","الاسم الأول",""
+"First Response Time for Issues","وقت الاستجابة الأول للمشاكل",""
+"First Response Time for Opportunity","وقت الاستجابة الأول للفرص",""
+"Fiscal Year","السنة المالية",""
+"Forecasting","التنبؤ",""
+"Framework","إطار العمل",""
+"Frappe CRM","CRM Frappe",""
+"Frappe Helpdesk","مكتب مساعدة Frappe",""
+"Full Name","الاسم الكامل",""
+"Gantt","غانت",""
+"Gender","الجنس",""
+"General Ledger","دفتر الأستاذ العام",""
+"Getting Started","البدء",""
+"Global Defaults","الإعدادات الافتراضية العامة",""
+"Goal","الهدف",""
+"Goal and Procedure","الهدف والإجراء",""
+"Goods In Transit","بضائع في الطريق",""
+"Goods Received Note","إشعار استلام البضائع",""
+"Google Calendar","تقويم جوجل",""
+"Google Contacts","جهات اتصال جوجل",""
+"Google Services","خدمات جوجل",""
+"Google Settings","إعدادات جوجل",""
+"Grand Total","المجموع الكلي",""
+"Gross Profit","الربح الإجمالي",""
+"Gross Weight","الوزن الإجمالي",""
+"Gross and Net Profit Report","تقرير الربح الإجمالي والصافي",""
+"Group By","تجميع حسب",""
+"HR Settings","إعدادات الموارد البشرية",""
+"HR Setup","إعداد الموارد البشرية",""
+"Holiday List","قائمة العطل",""
+"Home","الرئيسية",""
+"Homepage","الصفحة الرئيسية",""
+"Human Resources","الموارد البشرية",""
+"Import Data","استيراد البيانات",""
+"Import Supplier Invoice","استيراد فاتورة المورد",""
+"In Words","بالحروف",""
+"Inactive Customers","العملاء غير النشطين",""
+"Inactive Sales Items","عناصر المبيعات غير النشطة",""
+"Incoming Bills","الفواتير الواردة",""
+"Incoming Payment","الدفعات الواردة",""
+"Insert Above","إدراج أعلاه",""
+"Insert Below","إدراج أسفله",""
+"Installation Note","ملاحظة التثبيت",""
+"Integrations","التكاملات",""
+"Inventory Dimension","بُعد المخزون",""
+"Invoice","فاتورة",""
+"Invoicing","الفواتير",""
+"Issue","مشكلة",""
+"Issue Priority","أولوية المشكلة",""
+"Issue Type","نوع المشكلة",""
+"Issues","المشاكل",""
+"Item","الصنف",""
+"Item Alternative","بديل العنصر",""
+"Item Attribute","سمة العنصر",""
+"Item Group","مجموعة الأصناف",""
+"Item Lead Time","وقت تسليم الصنف",""
+"Item Manufacturer","الشركة المصنعة للصنف",""
+"Item Price","سعر العنصر",""
+"Item Price Stock","مخزون وسعر العنصر",""
+"Item Prices","أسعار العناصر",""
+"Item Shortage Report","تقرير نقص العناصر",""
+"Item Tax Template","قالب ضريبة العنصر",""
+"Item Variant Details","تفاصيل متغير الصنف",""
+"Item Variant Settings","إعدادات متغيرات العناصر",""
+"Item-wise Price List Rate","معدل قائمة الأسعار حسب العنصر",""
+"Item-wise Purchase History","تاريخ الشراء حسب العنصر",""
+"Item-wise Purchase Register","سجل الشراء حسب العنصر",""
+"Item-wise Sales History","تاريخ المبيعات حسب العنصر",""
+"Item-wise Sales Register","سجل المبيعات حسب العنصر",""
+"Items & Pricing","العناصر والتسعير",""
+"Items Catalogue","كتالوج الأصناف",""
+"Items To Be Requested","العناصر المطلوب طلبها",""
+"Items and Pricing","العناصر والتسعير",""
+"Items to Order and Receive","الأصناف للطلب والاستلام",""
+"Itemwise Recommended Reorder Level","مستوى إعادة الطلب الموصى به حسب الصنف",""
+"Jan","يناير",""
+"January","يناير",""
+"Job Card","بطاقة العمل",""
+"Job Card Summary","ملخص بطاقة العمل",""
+"Journal Entry","قيد اليومية",""
+"Journal Entry Template","قالب قيد اليومية",""
+"Jul","يوليو",""
+"July","يوليو",""
+"Jun","يونيو",""
+"June","يونيو",""
+"Kanban","كانبان",""
+"Key Reports","التقارير الرئيسية",""
+"LDAP Settings","إعدادات LDAP",""
+"Landed Cost Voucher","سند تكلفة الإيصال",""
+"Last Name","الاسم الأخير",""
+"Last Quarter","الربع الأخير",""
+"Last synced","آخر مزامنة",""
+"Lead","العميل المحتمل",""
+"Lead Details","تفاصيل العميل المحتمل",""
+"Lead Owner Efficiency","كفاءة مالك العميل المحتمل",""
+"Lead Source","مصدر العميل المحتمل",""
+"Learn Asset","تعلم الأصول",""
+"Leave Allocation","تخصيص الإجازات",""
+"Leave Application","طلب إجازة",""
+"Leave Block List","قائمة حظر الإجازات",""
+"Leave Period","فترة الإجازة",""
+"Leave Policy","سياسة الإجازات",""
+"Leave Type","نوع الإجازة",""
+"Ledgers","السجلات",""
+"Liked by","أعجب به",""
+"Likes","الإعجابات",""
+"Links","الروابط",""
+"List","قائمة",""
+"Location","الموقع",""
+"Log out","تسجيل الخروج",""
+"Login Activity","نشاط تسجيل الدخول",""
+"Looks like you haven't received any notifications.","يبدو أنك لم تتلقَ أي إشعارات.",""
+"Lost Opportunity","فرصة ضائعة",""
+"Lower Deduction Certificate","شهادة خصم أقل",""
+"Loyalty Point Entry","إدخال نقاط الولاء",""
+"Loyalty Program","برنامج الولاء",""
+"Maintenance","الصيانة",""
+"Maintenance Schedule","جدول الصيانة",""
+"Maintenance Visit","زيارة الصيانة",""
+"Manufactured Items Value","قيمة الأصناف المصنعة",""
+"Manufacturing","التصنيع",""
+"Manufacturing Reports","تقارير التصنيع",""
+"Manufacturing Settings","إعدادات التصنيع",""
+"Manufacturing Setup","إعداد التصنيع",""
+"Map","خريطة",""
+"Mar","مارس",""
+"March","مارس",""
+"Mark all as read","تحديد الكل كمقروء",""
+"Master Production Schedule","جدول الإنتاج الرئيسي",""
+"Masters","البيانات الرئيسية",""
+"Masters & Reports","البيانات الرئيسية والتقارير",""
+"Material","المادة",""
+"Material Planning","تخطيط المواد",""
+"Material Request","طلب مواد",""
+"Material Requests for which Supplier Quotations are not created","طلبات المواد التي لم يتم إنشاء عروض أسعار الموردين لها",""
+"Material Requirements Planning","تخطيط متطلبات المواد",""
+"May","مايو",""
+"Meeting","اجتماع",""
+"Menu","القائمة",""
+"Milestones","المراحل الرئيسية",""
+"Mode of Payment","طريقة الدفع",""
+"Modified By","عُدّل بواسطة",""
+"Module Def","تعريف الوحدة",""
+"Module Onboarding","إعداد الوحدة",""
+"Modules","الوحدات",""
+"Monthly","شهري",""
+"Monthly Distribution","التوزيع الشهري",""
+"More Info","مزيد من المعلومات",""
+"Move Down","نقل لأسفل",""
+"Move Up","نقل لأعلى",""
+"Multi Currency","عملات متعددة",""
+"My Settings","إعداداتي",""
+"Naming Series","سلسلة التسمية",""
+"Navbar Settings","إعدادات شريط التنقل",""
+"Net Total","الصافي",""
+"Net Weight","الوزن الصافي",""
+"New Lead (Last 1 Month)","عميل محتمل جديد (الشهر الماضي)",""
+"New Opportunity (Last 1 Month)","فرصة جديدة (الشهر الماضي)",""
+"Newsletter","النشرة الإخبارية",""
+"No Data","لا توجد بيانات",""
+"No New notifications","لا توجد إشعارات جديدة",""
+"No Upcoming Events","لا توجد أحداث قادمة",""
+"No new notifications","لا توجد إشعارات جديدة",""
+"No results","لا توجد نتائج",""
+"Non Completed Tasks","المهام غير المكتملة",""
+"Non Conformance","عدم المطابقة",""
+"Not Started","لم يبدأ",""
+"Not found","غير موجود",""
+"Nothing New","لا يوجد جديد",""
+"Notification","إشعار",""
+"Nov","نوفمبر",""
+"November","نوفمبر",""
+"Number Card","بطاقة الأرقام",""
+"Number Cards","بطاقات الأرقام",""
+"OAuth Client","عميل OAuth",""
+"OAuth Provider Settings","إعدادات مزود OAuth",""
+"Oct","أكتوبر",""
+"October","أكتوبر",""
+"Open Issues","المشاكل المفتوحة",""
+"Open Projects","المشاريع المفتوحة",""
+"Open Sales Orders Count","عدد أوامر المبيعات المفتوحة",""
+"Open Work Orders","أوامر العمل المفتوحة",""
+"Opening Invoice Creation Tool","أداة إنشاء فاتورة الافتتاح",""
+"Opening and Closing","الافتتاح والإغلاق",""
+"Operating Cost","تكلفة التشغيل",""
+"Operation","العملية",""
+"Opportunity","فرصة",""
+"Opportunity Summary by Sales Stage","ملخص الفرص حسب مرحلة المبيعات",""
+"Ordered Qty","الكمية المطلوبة",""
+"Other Reports","تقارير أخرى",""
+"Outgoing Bills","الفواتير الصادرة",""
+"Outgoing Payment","الدفعات الصادرة",""
+"Outstanding Amount","المبلغ المستحق",""
+"POS Closing Entry","قيد إغلاق نقطة البيع",""
+"POS Opening Entry","قيد افتتاح نقطة البيع",""
+"POS Settings","إعدادات نقطة البيع",""
+"Package","الحزمة",""
+"Package Import","استيراد الحزمة",""
+"Packages","الحزم",""
+"Packing Slip","إيصال التعبئة",""
+"Page","صفحة",""
+"Paid Amount","المبلغ المدفوع",""
+"Payment","دفعة",""
+"Payment Entry","إدخال الدفع",""
+"Payment Period Based On Invoice Date","فترة الدفع حسب تاريخ الفاتورة",""
+"Payment Reconciliation","تسوية المدفوعات",""
+"Payment Schedule","جدول الدفع",""
+"Payment Term","شرط الدفع",""
+"Payments","المدفوعات",""
+"Payroll","كشف الرواتب",""
+"Payroll Entry","قيد الرواتب",""
+"Pending Review","بانتظار المراجعة",""
+"Pending SO Items For Purchase Request","عناصر أمر البيع المعلقة لطلب الشراء",""
+"Period Closing Voucher","قسيمة إقفال الفترة",""
+"Permitted Documents For User","المستندات المسموح بها للمستخدم",""
+"Pick List","قائمة الانتقاء",""
+"Plaid Settings","إعدادات Plaid",""
+"Planned Qty","الكمية المخططة",""
+"Plant Floor","أرضية المصنع",""
+"Point of Sale","نقطة البيع",""
+"Point-of-Sale Profile","ملف نقطة البيع",""
+"Postal Code","الرمز البريدي",""
+"Posting Date","تاريخ الترحيل",""
+"Price List","قائمة الأسعار",""
+"Pricing Rule","قاعدة التسعير",""
+"Print Format","تنسيق الطباعة",""
+"Print Settings","إعدادات الطباعة",""
+"Priority","الأولوية",""
+"Procurement Tracker","متتبع المشتريات",""
+"Produced Quantity","الكمية المنتجة",""
+"Product Bundle","حزمة المنتج",""
+"Production","الإنتاج",""
+"Production Analytics","تحليلات الإنتاج",""
+"Production Plan","خطة الإنتاج",""
+"Production Planning Report","تقرير تخطيط الإنتاج",""
+"Profit and Loss","الأرباح والخسائر",""
+"Profit and Loss Statement","بيان الأرباح والخسائر",""
+"Profitability","الربحية",""
+"Profitability Analysis","تحليل الربحية",""
+"Project","مشروع",""
+"Project Summary","ملخص المشروع",""
+"Project Template","قالب المشروع",""
+"Project Type","نوع المشروع",""
+"Project Update","تحديث المشروع",""
+"Project wise Stock Tracking","تتبع المخزون حسب المشروع",""
+"Projects","المشاريع",""
+"Projects Settings","إعدادات المشاريع",""
+"Projects Setup","إعداد المشاريع",""
+"Promotional Scheme","نظام الترويج",""
+"Property Setter","محدد الخاصية",""
+"Prospect","العميل المرتقب",""
+"Prospects Engaged But Not Converted","العملاء المرتقبون المتفاعلون غير المحولين",""
+"Purchase Analytics","تحليلات الشراء",""
+"Purchase Invoice","فاتورة الشراء",""
+"Purchase Invoice Trends","اتجاهات فواتير الشراء",""
+"Purchase Order","أمر الشراء",""
+"Purchase Order Analysis","تحليل أوامر الشراء",""
+"Purchase Order Trends","اتجاهات أوامر الشراء",""
+"Purchase Orders Count","عدد أوامر الشراء",""
+"Purchase Receipt","إيصال الشراء",""
+"Purchase Receipt Trends","اتجاهات إيصالات الشراء",""
+"Purchase Taxes and Charges Template","قالب ضرائب ورسوم الشراء",""
+"Push Notification Settings","إعدادات إشعارات الدفع",""
+"Push Notifications","إشعارات الدفع",""
+"Putaway Rule","قاعدة التخزين",""
+"Qty","الكمية",""
+"Quality","الجودة",""
+"Quality Action","إجراء الجودة",""
+"Quality Feedback","ملاحظات الجودة",""
+"Quality Feedback Template","قالب ملاحظات الجودة",""
+"Quality Goal","هدف الجودة",""
+"Quality Inspection","فحص الجودة",""
+"Quality Inspection Summary","ملخص فحص الجودة",""
+"Quality Inspection Template","قالب فحص الجودة",""
+"Quality Inspections","فحوصات الجودة",""
+"Quality Management","إدارة الجودة",""
+"Quality Meeting","اجتماع الجودة",""
+"Quality Procedure","إجراء الجودة",""
+"Quality Procedure (SOP)","إجراء الجودة (SOP)",""
+"Quality Review","مراجعة الجودة",""
+"Quality Setup","إعداد الجودة",""
+"Quarterly","ربع سنوي",""
+"Quick Access","الوصول السريع",""
+"Quick Entry","إدخال سريع",""
+"Quick Stock Balance","رصيد المخزون السريع",""
+"Quotation","عرض السعر",""
+"Quotation Trends","اتجاهات عروض الأسعار",""
+"Quoted Item Comparison","مقارنة العناصر المعروضة",""
+"Rate","السعر",""
+"Raw Materials","المواد الخام",""
+"Receivable Payable Summary","ملخص المدينين والدائنين",""
+"Received Qty","الكمية المستلمة",""
+"Reference","المرجع",""
+"Reference Name","اسم المرجع",""
+"Reference Type","نوع المرجع",""
+"Regional","إقليمي",""
+"Rejected Qty","الكمية المرفوضة",""
+"Reload","إعادة التحميل",""
+"Report","تقرير",""
+"Report Builder","منشئ التقارير",""
+"Reports","التقارير",""
+"Reports & Masters","التقارير والبيانات الرئيسية",""
+"Repost Item Valuation","إعادة ترحيل تقييم الصنف",""
+"Request for Quotation","طلب عرض أسعار",""
+"Requested Items To Be Transferred","الأصناف المطلوب نقلها",""
+"Requested Items To Order","العناصر المطلوبة للطلب",""
+"Required By","مطلوب بحلول",""
+"Reserved Qty","الكمية المحجوزة",""
+"Reset Chart","إعادة تعيين الرسم البياني",""
+"Return","إرجاع",""
+"Review","مراجعة",""
+"Review Buying Settings","مراجعة إعدادات الشراء",""
+"Review Manufacturing Settings","مراجعة إعدادات التصنيع",""
+"Review Selling Settings","مراجعة إعدادات البيع",""
+"Review Stock Settings","مراجعة إعدادات المخزون",""
+"Review and Action","المراجعة والإجراء",""
+"Role Permission for Page and Report","صلاحيات الدور للصفحات والتقارير",""
+"Role Permissions Manager","مدير صلاحيات الأدوار",""
+"Rounded Total","الإجمالي المقرب",""
+"Rounding Adjustment","تعديل التقريب",""
+"Routing","التوجيه",""
+"SMS Center","مركز الرسائل النصية",""
+"SMS Log","سجل الرسائل النصية",""
+"SMS Settings","إعدادات الرسائل النصية",""
+"Salary","الراتب",""
+"Salary Component","مكون الراتب",""
+"Salary Slip","قسيمة الراتب",""
+"Salary Structure","هيكل الرواتب",""
+"Sales Analytics","تحليلات المبيعات",""
+"Sales Forecast","توقعات المبيعات",""
+"Sales Funnel","قمع المبيعات",""
+"Sales Invoice","فاتورة المبيعات",""
+"Sales Invoice Trends","اتجاهات فواتير المبيعات",""
+"Sales Order","أمر البيع",""
+"Sales Order Analysis","تحليل أوامر البيع",""
+"Sales Order Trends","اتجاهات أوامر المبيعات",""
+"Sales Orders","أوامر البيع",""
+"Sales Orders Count","عدد أوامر المبيعات",""
+"Sales Partner","شريك المبيعات",""
+"Sales Partner Commission Summary","ملخص عمولة شريك المبيعات",""
+"Sales Partner Target Variance Based On Item Group","فارق هدف شريك المبيعات حسب مجموعة الصنف",""
+"Sales Partner Target Variance based on Item Group","انحراف هدف شريك المبيعات حسب مجموعة العناصر",""
+"Sales Partner Transaction Summary","ملخص معاملات شريك المبيعات",""
+"Sales Partners Commission","عمولة شركاء المبيعات",""
+"Sales Payment Summary","ملخص مدفوعات المبيعات",""
+"Sales Person","مندوب المبيعات",""
+"Sales Person Commission Summary","ملخص عمولة مندوب المبيعات",""
+"Sales Person Target Variance Based On Item Group","انحراف هدف مندوب المبيعات حسب مجموعة العناصر",""
+"Sales Person-wise Transaction Summary","ملخص المعاملات حسب مندوب المبيعات",""
+"Sales Pipeline","خط أنابيب المبيعات",""
+"Sales Pipeline Analytics","تحليل خط أنابيب المبيعات",""
+"Sales Register","سجل المبيعات",""
+"Sales Stage","مرحلة البيع",""
+"Sales Taxes and Charges Template","قالب ضرائب ورسوم المبيعات",""
+"Save","حفظ",""
+"Scheduled Job Type","نوع المهمة المجدولة",""
+"Scheduled Jobs Logs","سجلات المهام المجدولة",""
+"Scrap Items","عناصر الخردة",""
+"Scripting","البرمجة",""
+"See all Activity","عرض كل النشاط",""
+"Select Date Range","اختر نطاق التاريخ",""
+"Selling","المبيعات",""
+"Selling Reports","تقارير المبيعات",""
+"Selling Settings","إعدادات المبيعات",""
+"Selling Setup","إعداد المبيعات",""
+"Sep","سبتمبر",""
+"September","سبتمبر",""
+"Serial No","الرقم التسلسلي",""
+"Serial No Ledger","سجل الرقم التسلسلي",""
+"Serial No Service Contract Expiry","انتهاء عقد خدمة الرقم التسلسلي",""
+"Serial No Status","حالة الرقم التسلسلي",""
+"Serial No Warranty Expiry","انتهاء ضمان الرقم التسلسلي",""
+"Serial No and Batch","الرقم التسلسلي والدفعة",""
+"Serial No and Batch Traceability","تتبع الرقم التسلسلي والدفعة",""
+"Serial and Batch","التسلسلي والدفعة",""
+"Serial and Batch Bundle","حزمة التسلسلي والدفعة",""
+"Server Script","برنامج الخادم",""
+"Service Level Agreement","اتفاقية مستوى الخدمة",""
+"Service Level Agreement Details","تفاصيل اتفاقية مستوى الخدمة",""
+"Set Status","تعيين الحالة",""
+"Settings","الإعدادات",""
+"Share","مشاركة",""
+"Share Balance","رصيد الأسهم",""
+"Share Ledger","سجل الأسهم",""
+"Share Management","إدارة الأسهم",""
+"Share Transfer","نقل الأسهم",""
+"Share Type","نوع السهم",""
+"Shareholder","المساهم",""
+"Shift Assignment","تعيين الوردية",""
+"Shift Type","نوع الوردية",""
+"Shipping Address","عنوان الشحن",""
+"Shipping Rule","قاعدة الشحن",""
+"Showing","عرض",""
+"Size","الحجم",""
+"Skip","تخطي",""
+"Skip All","تخطي الكل",""
+"Slack Webhook URL","رابط Slack Webhook",""
+"Social Login Key","مفتاح تسجيل الدخول الاجتماعي",""
+"Sort By","ترتيب حسب",""
+"Source","المصدر",""
+"Source Warehouse","المستودع المصدر",""
+"Start typing...","ابدأ بالكتابة...",""
+"Stock","المخزون",""
+"Stock Ageing","تقادم المخزون",""
+"Stock Analytics","تحليلات المخزون",""
+"Stock Availability","توفر المخزون",""
+"Stock Balance","رصيد المخزون",""
+"Stock Entry","إدخال المخزون",""
+"Stock Ledger","سجل المخزون",""
+"Stock Projected Qty","الكمية المتوقعة للمخزون",""
+"Stock Received But Not Billed","مخزون مستلم غير مفوتر",""
+"Stock Reconciliation","تسوية المخزون",""
+"Stock Reports","تقارير المخزون",""
+"Stock Reposting Settings","إعدادات إعادة ترحيل المخزون",""
+"Stock Settings","إعدادات المخزون",""
+"Stock Setup","إعداد المخزون",""
+"Stock Summary","ملخص المخزون",""
+"Stock Transactions","معاملات المخزون",""
+"Stock UOM","وحدة قياس المخزون",""
+"Stock Value by Item Group","قيمة المخزون حسب مجموعة الصنف",""
+"Subcontract Order Summary","ملخص أمر التعاقد من الباطن",""
+"Subcontracted Item To Be Received","صنف التعاقد من الباطن للاستلام",""
+"Subcontracted Raw Materials To Be Transferred","المواد الخام المتعاقد عليها للنقل",""
+"Subcontracting","التعاقد من الباطن",""
+"Subcontracting BOM","قائمة مواد التعاقد من الباطن",""
+"Subcontracting Delivery","تسليم التعاقد من الباطن",""
+"Subcontracting Inward Order","أمر وارد للتعاقد من الباطن",""
+"Subcontracting Inward Order Count","عدد الأوامر الواردة للتعاقد من الباطن",""
+"Subcontracting Order","أمر التعاقد من الباطن",""
+"Subcontracting Outward Order","أمر صادر للتعاقد من الباطن",""
+"Subcontracting Outward Order Count","عدد الأوامر الصادرة للتعاقد من الباطن",""
+"Subcontracting Receipt","إيصال التعاقد من الباطن",""
+"Subscription","الاشتراك",""
+"Subscription Management","إدارة الاشتراكات",""
+"Subscription Plan","خطة الاشتراك",""
+"Subscription Settings","إعدادات الاشتراك",""
+"Supplier","المورد",""
+"Supplier Addresses And Contacts","عناوين وجهات اتصال الموردين",""
+"Supplier Group","مجموعة الموردين",""
+"Supplier Ledger Summary","ملخص دفتر المورد",""
+"Supplier Quotation","عرض سعر المورد",""
+"Supplier Quotation Trends","اتجاهات عروض أسعار الموردين",""
+"Supplier Scorecard","بطاقة أداء المورد",""
+"Supplier Scorecard Criteria","معايير بطاقة أداء المورد",""
+"Supplier Scorecard Variable","متغير بطاقة أداء المورد",""
+"Supplier-Wise Sales Analytics","تحليلات المبيعات حسب المورد",""
+"Support","الدعم",""
+"Support Analytics","تحليلات الدعم",""
+"Support Settings","إعدادات الدعم",""
+"Support Setup","إعداد الدعم",""
+"Switch to Frappe CRM","التبديل إلى Frappe CRM",""
+"Switch to Helpdesk","التبديل إلى مكتب المساعدة",""
+"System Health Report","تقرير صحة النظام",""
+"System Logs","سجلات النظام",""
+"Target","الهدف",""
+"Target Warehouse","المستودع الهدف",""
+"Task","مهمة",""
+"Tax","الضريبة",""
+"Tax Category","فئة الضريبة",""
+"Tax Withholding Category","فئة الاستقطاع الضريبي",""
+"Tax Withholding Rate Reductions","تخفيضات معدل استقطاع الضرائب",""
+"Taxes","الضرائب",""
+"Taxes and Charges","الضرائب والرسوم",""
+"Terms","الشروط",""
+"Terms and Conditions Template","قالب الشروط والأحكام",""
+"Territory","المنطقة",""
+"The resource you are looking for is not available","المورد الذي تبحث عنه غير متاح",""
+"There are no upcoming events for you.","لا توجد أحداث قادمة لك.",""
+"There is nothing new to show you right now.","لا يوجد شيء جديد لعرضه الآن.",""
+"Time Tracking","تتبع الوقت",""
+"Timesheet","جدول الدوام",""
+"Timesheet Billing Summary","ملخص فوترة جدول الدوام",""
+"Tools","الأدوات",""
+"Total","الإجمالي",""
+"Total Active Items","إجمالي الأصناف النشطة",""
+"Total Items","إجمالي العناصر",""
+"Total Purchase Amount","إجمالي مبلغ الشراء",""
+"Total Sales Amount","إجمالي مبلغ المبيعات",""
+"Total Stock Summary","ملخص المخزون الإجمالي",""
+"Total Stock Value","إجمالي قيمة المخزون",""
+"Total Taxes and Charges","إجمالي الضرائب والرسوم",""
+"Total Warehouses","إجمالي المستودعات",""
+"Transaction Date","تاريخ المعاملة",""
+"Transfer of Material","نقل المواد",""
+"Tree of Procedures","شجرة الإجراءات",""
+"Trial Balance","ميزان المراجعة",""
+"Trial Balance (Simple)","ميزان المراجعة (بسيط)",""
+"Trial Balance for Party","ميزان المراجعة للطرف",""
+"Type a message","اكتب رسالة",""
+"UOM","وحدة القياس",""
+"UOM Conversion Factor","معامل تحويل وحدة القياس",""
+"UTM Source","مصدر UTM",""
+"Unit","الوحدة",""
+"Upcoming Salary Slips","قسائم الرواتب القادمة",""
+"User Permissions","صلاحيات المستخدم",""
+"User Settings","إعدادات المستخدم",""
+"Users","المستخدمون",""
+"Valid From","صالح من",""
+"Valid Upto","صالح حتى",""
+"Version","الإصدار",""
+"View Asset Reports","عرض تقارير الأصول",""
+"View Balance Sheet","عرض الميزانية العمومية",""
+"View HR Reports","عرض تقارير الموارد البشرية",""
+"View Production Analytics","عرض تحليلات الإنتاج",""
+"View Project Profitability","عرض ربحية المشروع",""
+"View Project Summary","عرض ملخص المشروع",""
+"View Purchase Analytics","عرض تحليلات الشراء",""
+"View Purchase Order Analysis","عرض تحليل أمر الشراء",""
+"View Sales Analytics","عرض تحليلات المبيعات",""
+"View Sales Order Analysis","عرض تحليل أوامر البيع",""
+"View Sales Pipeline","عرض خط أنابيب المبيعات",""
+"View Stock Balance","عرض رصيد المخزون",""
+"View Stock Reports","عرض تقارير المخزون",""
+"View Work Order Summary","عرض ملخص أمر العمل",""
+"Views","العروض",""
+"Voucher Wise Balance","الرصيد حسب القسيمة",""
+"WIP Work Orders","أوامر العمل قيد التنفيذ",""
+"Warehouse","المستودع",""
+"Warehouse Type","نوع المستودع",""
+"Warehouse Wise Stock Balance","رصيد المخزون حسب المستودع",""
+"Warehouse and Reference","المستودع والمرجع",""
+"Warranty","الضمان",""
+"Warranty Claim","مطالبة الضمان",""
+"Webhook Request Log","سجل طلبات Webhook",""
+"Website Listing","قائمة الموقع الإلكتروني",""
+"Weekly","أسبوعي",""
+"Weight","الوزن",""
+"What's New","ما الجديد",""
+"Won Opportunities","الفرص المكسوبة",""
+"Work In Progress","قيد التنفيذ",""
+"Work Order","أمر العمل",""
+"Work Order Consumed Materials","المواد المستهلكة لأمر العمل",""
+"Work Order Summary","ملخص أمر العمل",""
+"Work-in-Progress Warehouse","مستودع الأعمال الجارية",""
+"Workflow","سير العمل",""
+"Workflow Action","إجراء سير العمل",""
+"Workflow State","حالة سير العمل",""
+"Working Hours","ساعات العمل",""
+"Workspace","مساحة العمل",""
+"Workstation","محطة العمل",""
+"Workstation Type","نوع محطة العمل",""
+"Write Off Amount","مبلغ الشطب",""
+"Yearly","سنوي",""
+"You need to create these first:","تحتاج إلى إنشاء هذه أولاً:",""
+"Your Shortcuts","اختصاراتك",""
+"completed","مكتمل",""
+"entries","إدخالات",""
+"instead.","بدلاً من ذلك.",""
+"just now","الآن",""
+"not found","غير موجود",""
+"per page","لكل صفحة",""
+"rows","صفوف",""
+"steps completed","خطوات مكتملة",""
