@@ -987,6 +987,11 @@ def make_delivery_trip(
 ):
 	if not target_doc:
 		target_doc = frappe.new_doc("Delivery Trip")
+
+	def postprocess(source, target):
+		target.address = source.shipping_address_name or source.customer_address
+		target.customer_address = source.shipping_address or source.address_display
+
 	doclist = get_mapped_doc(
 		"Delivery Note",
 		source_name,
@@ -996,11 +1001,10 @@ def make_delivery_trip(
 				"on_parent": target_doc,
 				"field_map": {
 					"name": "delivery_note",
-					"shipping_address_name": "address",
-					"shipping_address": "customer_address",
 					"contact_person": "contact",
 					"contact_display": "customer_contact",
 				},
+				"postprocess": postprocess,
 			},
 		},
 		ignore_child_tables=True,
