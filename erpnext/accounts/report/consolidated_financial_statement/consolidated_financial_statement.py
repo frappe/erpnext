@@ -656,7 +656,11 @@ def set_gl_entries_by_account(
 			query = query.where(Criterion.all(additional_conditions))
 		gl_entries = query.run(as_dict=True)
 
-		if filters and filters.get("presentation_currency") != d.default_currency:
+		if (
+			filters
+			and filters.get("presentation_currency")
+			and filters.get("presentation_currency") != d.default_currency
+		):
 			currency_info["company"] = d.name
 			currency_info["company_currency"] = d.default_currency
 			convert_to_presentation_currency(gl_entries, currency_info)

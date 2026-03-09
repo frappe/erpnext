@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-02-22 09:43+0000\n"
-"PO-Revision-Date: 2026-02-24 16:58\n"
+"PO-Revision-Date: 2026-02-26 16:53\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -6996,7 +6996,7 @@ msgstr "حساب بانک / نقدی"
 #. Label of the bank_ac_no (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Bank A/C No."
-msgstr "شماره تهویه مطبوع بانک"
+msgstr "شماره حساب بانکی"
 
 #. Name of a DocType
 #. Label of the bank_account (Link) field in DocType 'Bank Clearance'

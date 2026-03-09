@@ -333,9 +333,10 @@ class SellingController(StockController):
 			if is_internal_customer or not is_stock_item:
 				continue
 
-			if item.get("incoming_rate") and item.base_net_rate < (
+			rate_field = "valuation_rate" if self.doctype in ["Sales Order", "Quotation"] else "incoming_rate"
+			if item.get(rate_field) and item.base_net_rate < (
 				valuation_rate := flt(
-					item.incoming_rate * (item.conversion_factor or 1), item.precision("base_net_rate")
+					item.get(rate_field) * (item.conversion_factor or 1), item.precision("base_net_rate")
 				)
 			):
 				throw_message(

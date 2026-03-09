@@ -1322,9 +1322,9 @@ class JobCard(Document):
 
 	def is_work_order_closed(self):
 		if self.work_order:
-			status = frappe.get_value("Work Order", self.work_order)
+			status = frappe.get_value("Work Order", self.work_order, "status")
 
-			if status == "Closed":
+			if status in ["Closed", "Stopped"]:
 				return True
 
 		return False

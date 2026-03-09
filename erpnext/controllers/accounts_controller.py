@@ -2526,13 +2526,14 @@ class AccountsController(TransactionBase):
 		grand_total = flt(self.get("rounded_total") or self.grand_total)
 		automatically_fetch_payment_terms = 0
 
-		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
-			base_grand_total = base_grand_total - flt(self.base_write_off_amount)
-			grand_total = grand_total - flt(self.write_off_amount)
+		if self.doctype in ("Sales Invoice", "Purchase Invoice", "Sales Order"):
 			po_or_so, doctype, fieldname = self.get_order_details()
 			automatically_fetch_payment_terms = cint(
 				frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
 			)
+			if self.doctype != "Sales Order":
+				base_grand_total = base_grand_total - flt(self.base_write_off_amount)
+				grand_total = grand_total - flt(self.write_off_amount)
 
 		if self.get("total_advance"):
 			if party_account_currency == self.company_currency:
@@ -2548,7 +2549,7 @@ class AccountsController(TransactionBase):
 
 		if not self.get("payment_schedule"):
 			if (
-				self.doctype in ["Sales Invoice", "Purchase Invoice"]
+				self.doctype in ["Sales Invoice", "Purchase Invoice", "Sales Order"]
 				and automatically_fetch_payment_terms
 				and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
 			):
@@ -2606,16 +2607,18 @@ class AccountsController(TransactionBase):
 		if not self.get("items"):
 			return None, None, None
 		if self.doctype == "Sales Invoice":
-			po_or_so = self.get("items")[0].get("sales_order")
-			po_or_so_doctype = "Sales Order"
-			po_or_so_doctype_name = "sales_order"
-
+			prev_doc = self.get("items")[0].get("sales_order")
+			prev_doctype = "Sales Order"
+			prev_doctype_name = "sales_order"
+		elif self.doctype == "Purchase Invoice":
+			prev_doc = self.get("items")[0].get("purchase_order")
+			prev_doctype = "Purchase Order"
+			prev_doctype_name = "purchase_order"
 		else:
-			po_or_so = self.get("items")[0].get("purchase_order")
-			po_or_so_doctype = "Purchase Order"
-			po_or_so_doctype_name = "purchase_order"
-
-		return po_or_so, po_or_so_doctype, po_or_so_doctype_name
+			prev_doc = self.get("items")[0].get("prevdoc_docname")
+			prev_doctype = "Quotation"
+			prev_doctype_name = "prevdoc_docname"
+		return prev_doc, prev_doctype, prev_doctype_name
 
 	def linked_order_has_payment_terms(self, po_or_so, fieldname, doctype):
 		if po_or_so and self.all_items_have_same_po_or_so(po_or_so, fieldname):
@@ -3886,20 +3889,28 @@ def update_child_qty_rate(
 			return frappe.db.get_single_value("Buying Settings", "allow_zero_qty_in_purchase_order") or False
 		return False
 
-	def validate_quantity(child_item, new_data):
+	def validate_quantity_and_rate(child_item, new_data):
 		if not flt(new_data.get("qty")) and not is_allowed_zero_qty():
 			frappe.throw(
-				_("Row #{0}: Quantity for Item {1} cannot be zero.").format(
+				_("Row #{0}:Quantity for Item {1} cannot be zero.").format(
 					new_data.get("idx"), frappe.bold(new_data.get("item_code"))
 				),
 				title=_("Invalid Qty"),
 			)
 
-		if parent_doctype == "Sales Order" and flt(new_data.get("qty")) < flt(child_item.delivered_qty):
-			frappe.throw(_("Cannot set quantity less than delivered quantity"))
+		qty_limits = {
+			"Sales Order": ("delivered_qty", _("Cannot set quantity less than delivered quantity")),
+			"Purchase Order": ("received_qty", _("Cannot set quantity less than received quantity")),
+		}
 
-		if parent_doctype == "Purchase Order" and flt(new_data.get("qty")) < flt(child_item.received_qty):
-			frappe.throw(_("Cannot set quantity less than received quantity"))
+		if parent_doctype in qty_limits:
+			qty_field, error_message = qty_limits[parent_doctype]
+			if flt(new_data.get("qty")) < flt(child_item.get(qty_field)):
+				frappe.throw(
+					_("Row #{0}:").format(new_data.get("idx"))
+					+ error_message.format(frappe.bold(new_data.get("item_code"))),
+					title=_("Invalid Qty"),
+				)
 
 		if parent_doctype in ["Quotation", "Supplier Quotation"]:
 			if (parent_doctype == "Quotation" and not ordered_items) or (
@@ -3912,7 +3923,15 @@ def update_child_qty_rate(
 				if parent_doctype == "Quotation"
 				else purchased_items.get(child_item.name)
 			)
+
 			if qty_to_check:
+				if not rate_unchanged:
+					frappe.throw(
+						_(
+							"Cannot update rate as item {0} is already ordered or purchased against this quotation"
+						).format(frappe.bold(new_data.get("item_code")))
+					)
+
 				if flt(new_data.get("qty")) < qty_to_check:
 					frappe.throw(_("Cannot reduce quantity than ordered or purchased quantity"))
 
@@ -4031,10 +4050,7 @@ def update_child_qty_rate(
 			):
 				continue
 
-		validate_quantity(child_item, d)
-		if parent_doctype in ["Quotation", "Supplier Quotation"]:
-			if not rate_unchanged:
-				frappe.throw(_("Rates cannot be modified for quoted items"))
+		validate_quantity_and_rate(child_item, d)
 
 		if flt(child_item.get("qty")) != flt(d.get("qty")):
 			any_qty_changed = True

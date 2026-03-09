@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-02-22 09:43+0000\n"
-"PO-Revision-Date: 2026-02-22 16:38\n"
+"PO-Revision-Date: 2026-02-27 16:51\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Serbian (Latin)\n"
 "MIME-Version: 1.0\n"
@@ -25,7 +25,12 @@ msgid "\n"
 "\t\t\tIf it is not possible to make an adjustment entry, please enable 'Allow Negative Stock for Batch' in Stock Settings to proceed.\n"
 "\t\t\tHowever, enabling this setting may lead to negative stock in the system.\n"
 "\t\t\tSo please ensure the stock levels are adjusted as soon as possible to maintain the correct valuation rate."
-msgstr ""
+msgstr "\n"
+"\t\t\tŠarža {0} stavke {1} ima negativno stanje zaliha u skladištu {2}{3}.\n"
+"\t\t\tMolimo Vas da uneste količinu zaliha od {4} kako biste nastavili sa ovim unosom.\n"
+"\t\t\tUkoliko nije moguće izvršiti korektivno knjiženje, omogućite opciju 'Dozvoli negativno stanje zaliha za šaržu' u podešavanjima zaliha kako biste nastavili.\n"
+"\t\t\tMeđutim, omogućavanjem ove opcije može dovesti do negativnog stanja zaliha u sistemu.\n"
+"\t\t\tObavezno uskladite stanje zaliha što je pre moguće kako bi stopa vrednovanja ostala tačna."
 
 #. Label of the column_break_32 (Column Break) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -1094,7 +1099,7 @@ msgstr "Novi sastanak je zakazan za Vas sa {0}"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:3
 msgid "A new fiscal year has been automatically created."
-msgstr ""
+msgstr "Nova fiskalna godina je automatski kreirana."
 
 #: erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.py:96
 msgid "A template with tax category {0} already exists. Only one template is allowed with each tax category"
@@ -1149,7 +1154,7 @@ msgstr "Datum isteka godišnjeg ugovora o održavanju"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "AP Summary"
-msgstr ""
+msgstr "Rezime obaveza"
 
 #. Label of the api_details_section (Section Break) field in DocType 'Currency
 #. Exchange Settings'
@@ -1160,7 +1165,7 @@ msgstr "API Detalji"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "AR Summary"
-msgstr ""
+msgstr "Rezime potraživanja"
 
 #. Label of the awb_number (Data) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
@@ -2132,7 +2137,7 @@ msgstr "Podešavanje računa"
 #: erpnext/desktop_icon/accounts_setup.json
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Accounts Setup"
-msgstr ""
+msgstr "Podešavanje računa"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1319
 msgid "Accounts table cannot be blank."
@@ -7265,7 +7270,7 @@ msgstr "Račun za prekoračenje"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/banking.json
 msgid "Bank Reconciliation"
-msgstr ""
+msgstr "Bankarsko usklađivanje"
 
 #. Name of a report
 #. Label of a Link in the Invoicing Workspace
@@ -8459,7 +8464,7 @@ msgstr "Datum početka budžeta"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/budget.json
 msgid "Budget Variance"
-msgstr ""
+msgstr "Odstupanje od budžeta"
 
 #. Name of a report
 #. Label of a Link in the Invoicing Workspace
@@ -8653,7 +8658,7 @@ msgstr "CC za"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "COA Importer"
-msgstr ""
+msgstr "Uvoz kontnog okvira"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -9287,7 +9292,7 @@ msgstr "Ne može se postaviti više podrazumevanih stavki za jednu kompaniju."
 
 #: erpnext/assets/doctype/asset_category/asset_category.py:108
 msgid "Cannot set multiple account rows for the same company"
-msgstr ""
+msgstr "Nije moguće postaviti više redova računa za istu kompaniju"
 
 #: erpnext/controllers/accounts_controller.py:3885
 msgid "Cannot set quantity less than delivered quantity"
@@ -11361,7 +11366,7 @@ msgstr "Konsolidovani finansijski izveštaj"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Consolidated Report"
-msgstr ""
+msgstr "Konsolidovan izveštaj"
 
 #. Label of the consolidated_invoice (Link) field in DocType 'POS Invoice'
 #. Label of the consolidated_invoice (Link) field in DocType 'POS Invoice Merge
@@ -13717,7 +13722,7 @@ msgstr "Kupac lokalna narudžbina br."
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Customer Ledger"
-msgstr ""
+msgstr "Knjiga kupaca"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -14472,7 +14477,7 @@ msgstr "Podaci o entitetu gde se vrši odbitak"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/taxes.json
 msgid "Deduction Certificate"
-msgstr ""
+msgstr "Potvrda o odbitku"
 
 #. Label of the deductions_or_loss_section (Section Break) field in DocType
 #. 'Payment Entry'
@@ -16636,7 +16641,7 @@ msgstr "Broj dokumenata"
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:78
 msgid "Document No"
-msgstr ""
+msgstr "Broj dokumenta"
 
 #. Label of the document_type (Link) field in DocType 'Subscription Invoice'
 #: erpnext/accounts/doctype/subscription_invoice/subscription_invoice.json
@@ -18654,7 +18659,7 @@ msgstr "FIFO/LIFO red čekanja"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "FX Revaluation"
-msgstr ""
+msgstr "Revalorizacija deviznog kursa"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -18749,7 +18754,7 @@ msgstr "Povratna informacija od"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/quality.json
 msgid "Feedback Template"
-msgstr ""
+msgstr "Šablon za povratne informacije"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -19322,7 +19327,7 @@ msgstr "Fiskalna godina kompanije"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:5
 msgid "Fiscal Year Details"
-msgstr ""
+msgstr "Detalji fiskalne godine"
 
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.py:47
 msgid "Fiscal Year End Date should be one year after Fiscal Year Start Date"
@@ -21898,7 +21903,7 @@ msgstr "Ukoliko je omogućeno, izvorno i ciljno skladište u unosu zaliha prenos
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "If enabled, the system will allow negative stock entries for the batch. But, this may lead to incorrect valuation rates, so it is recommended to avoid using this option. The system will permit negative stock only when it is caused by backdated entries and will validate and block negative stock in all other cases."
-msgstr ""
+msgstr "Ukoliko je omogućeno, sistem će dozvoliti knjiženje negativnog stanja zaliha za šaržu. To može dovesti do netačne stope vrednovanja, pa se preporučuje izbegavanje ove opcije. Sistem će dozvoliti negativno stanje samo u slučaju retroaktivnih knjiženja i blokiraće negativno stanje u svim ostalim slučajevima."
 
 #. Description of the 'Allow UOM with Conversion Rate Defined in Item' (Check)
 #. field in DocType 'Stock Settings'
@@ -23920,7 +23925,7 @@ msgstr "Ulazno"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Inward Order"
-msgstr ""
+msgstr "Nalog za prijem"
 
 #. Label of the is_account_payable (Check) field in DocType 'Cheque Print
 #. Template'
@@ -26001,7 +26006,7 @@ msgstr "Registar prodaje po stavkama"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Item-wise sales Register"
-msgstr ""
+msgstr "Knjiga prodaje po stavkama"
 
 #: erpnext/stock/get_item_details.py:713
 msgid "Item/Item Code required to get Item Tax Template."
@@ -26035,7 +26040,7 @@ msgstr "Potrebne stavke"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Items To Be Received"
-msgstr ""
+msgstr "Stavke za prijem"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a report
@@ -28327,7 +28332,7 @@ msgstr "Izdavanje materijala"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/manufacturing.json
 msgid "Material Planning"
-msgstr ""
+msgstr "Planiranje materijala"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
@@ -28605,7 +28610,7 @@ msgstr "Materijal ka dobavljaču"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Materials To Be Transferred"
-msgstr ""
+msgstr "Materijal za prenos"
 
 #: erpnext/controllers/subcontracting_controller.py:1569
 msgid "Materials are already received against the {0} {1}"
@@ -28851,7 +28856,7 @@ msgstr "Poruke duže od 160 karaktera biće podeljene u više poruka"
 
 #: erpnext/setup/install.py:127
 msgid "Messaging CRM Campaign"
-msgstr ""
+msgstr "CRM kampanja za poruke"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -29148,7 +29153,7 @@ msgstr "Nedostajući račun"
 
 #: erpnext/assets/doctype/asset_category/asset_category.py:191
 msgid "Missing Accounts"
-msgstr ""
+msgstr "Nedostajući računi"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:430
 msgid "Missing Asset"
@@ -29193,7 +29198,7 @@ msgstr "Nedostaje broj serije paketa"
 
 #: erpnext/assets/doctype/asset_category/asset_category.py:156
 msgid "Missing account configuration for company <b>{0}</b>."
-msgstr ""
+msgstr "Nedostaje konfiguracija računa za kompaniju <b>{0}</b>."
 
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.js:154
 msgid "Missing email template for dispatch. Please set one in Delivery Settings."
@@ -29613,7 +29618,7 @@ msgstr "Analiza potrebna"
 #. Name of a report
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.json
 msgid "Negative Batch Report"
-msgstr ""
+msgstr "Izveštaj o šaržama sa negativnim stanjem"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:622
 msgid "Negative Quantity is not allowed"
@@ -30015,7 +30020,7 @@ msgstr "Novi rashodi"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:1
 msgid "New Fiscal Year - {0}"
-msgstr ""
+msgstr "Nova fiskalna godina - {0}"
 
 #. Label of the income (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -31440,7 +31445,7 @@ msgstr "Stavka početne fakture"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Opening Invoice Tool"
-msgstr ""
+msgstr "Alat za unos početnih faktura"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1646
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1990
@@ -32211,7 +32216,7 @@ msgstr "Izlazno"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Outward Order"
-msgstr ""
+msgstr "Nalog za izdavanje"
 
 #. Label of the over_billing_allowance (Currency) field in DocType 'Accounts
 #. Settings'
@@ -33926,7 +33931,7 @@ msgstr "Plaćanje primljeno"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/payments.json
 msgid "Payment Reconciliaition"
-msgstr ""
+msgstr "Usklađivanje plaćanja"
 
 #. Name of a DocType
 #. Label of the payment_reconciliation (Table) field in DocType 'POS Closing
@@ -35489,7 +35494,7 @@ msgstr "Molimo Vas da osvežite ili resetujete Plaid vezu sa bankom {}."
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:43
 msgid "Please review the {0} configuration and complete any required financial setup activities."
-msgstr ""
+msgstr "Pogledajte konfiguraciju {0} i dovršite neophodna finansijska podešavanja."
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:12
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:28
@@ -36578,7 +36583,7 @@ msgstr "Prethodna fiskalna godina nije zatvorena"
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:54
 msgid "Previous Qty"
-msgstr ""
+msgstr "Prethodna količina"
 
 #. Label of the previous_work_experience (Section Break) field in DocType
 #. 'Employee'
@@ -40652,7 +40657,7 @@ msgstr "Veličina reda za usklađivanje"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/banking.json
 msgid "Reconciliation Statement"
-msgstr ""
+msgstr "Izveštaj o usklađenosti"
 
 #. Label of the reconciliation_takes_effect_on (Select) field in DocType
 #. 'Company'
@@ -40941,7 +40946,7 @@ msgstr "Regionalni"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Registers"
-msgstr ""
+msgstr "Registri"
 
 #. Label of the registration_details (Code) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -43127,7 +43132,7 @@ msgstr "Red #{0}: Nalog knjiženja {1} ne sadrži račun {2} ili je već povezan
 
 #: erpnext/assets/doctype/asset_category/asset_category.py:149
 msgid "Row #{0}: Missing <b>{1}</b> for company <b>{2}</b>."
-msgstr ""
+msgstr "Red #{0}: Nedostaje <b>{1}</b> za kompaniju <b>{2}</b>."
 
 #: erpnext/assets/doctype/asset/asset.py:678
 msgid "Row #{0}: Next Depreciation Date cannot be before Available-for-use Date"
@@ -47596,7 +47601,7 @@ msgstr "Simultano"
 
 #: erpnext/assets/doctype/asset_category/asset_category.py:183
 msgid "Since there are active depreciable assets under this category, the following accounts are required. <br><br>"
-msgstr ""
+msgstr "Pošto postoje aktivna sredstva koja se amortizuju u ovoj kategoriji, sledeći računi su obavezni. <br><br>"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:688
 msgid "Since there is a process loss of {0} units for the finished good {1}, you should reduce the quantity by {0} units for the finished good {1} in the Items Table."
@@ -49958,7 +49963,7 @@ msgstr "Vreme isporuke dobavljača (dani)"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Supplier Ledger"
-msgstr ""
+msgstr "Knjiga dobavljača"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -50854,7 +50859,7 @@ msgstr "Podešavanje poreza"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/selling.json
 msgid "Tax Template"
-msgstr ""
+msgstr "Poreski šablon"
 
 #: erpnext/accounts/doctype/tax_rule/tax_rule.py:83
 msgid "Tax Template is mandatory."
@@ -51689,7 +51694,7 @@ msgstr "Polja od vlasnika i ka vlasniku ne mogu biti prazna"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:40
 msgid "The fiscal year has been automatically created in a Disabled state to maintain consistency with the previous fiscal year's status."
-msgstr ""
+msgstr "Fiskalna godina je automatski kreirana u onemogućenom statusu radi usklađenosti sa statusom prethodne fiskalne godine."
 
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:240
 msgid "The folio numbers are not matching"
@@ -53907,7 +53912,7 @@ msgstr "Naziv transakcije"
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:60
 msgid "Transaction Qty"
-msgstr ""
+msgstr "Transakciona količina"
 
 #. Label of the transaction_settings_section (Tab Break) field in DocType
 #. 'Buying Settings'
@@ -57437,7 +57442,7 @@ msgstr "Možete promeniti matični račun u račun bilansa stanja ili izabrati d
 
 #: erpnext/assets/doctype/asset_category/asset_category.py:186
 msgid "You can either configure default depreciation accounts in the Company or set the required accounts in the following rows: <br><br>"
-msgstr ""
+msgstr "Možete konfigurisati podrazumevane račune amortizacije u podešavanjima kompanije ili uneti potrebne račune u sledećim redovima: <br><br>"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:703
 msgid "You can not enter current voucher in 'Against Journal Entry' column"
@@ -57682,7 +57687,7 @@ msgstr "kao procenat količine finalne stavke"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1472
 msgid "as of {0}"
-msgstr ""
+msgstr "na dan {0}"
 
 #: erpnext/www/book_appointment/index.html:43
 msgid "at"
@@ -58283,7 +58288,7 @@ msgstr "{0} jedinica stavke {1} nije dostupno ni u jednom skladištu."
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:1009
 msgid "{0} units of Item {1} is not available in any of the warehouses. Other Pick Lists exist for this item."
-msgstr ""
+msgstr "{0} jedinica stavke {1} nije dostupno ni u jednom skladištu. Postoje druge liste za odabir za ovu stavku."
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:144
 msgid "{0} units of {1} are required in {2} with the inventory dimension: {3} on {4} {5} for {6} to complete the transaction."

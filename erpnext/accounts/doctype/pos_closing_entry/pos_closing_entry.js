@@ -4,19 +4,6 @@
 frappe.ui.form.on("POS Closing Entry", {
 	onload: async function (frm) {
 		frm.ignore_doctypes_on_cancel_all = ["POS Invoice Merge Log", "Sales Invoice"];
-		frm.set_query("pos_profile", function (doc) {
-			return {
-				filters: { user: doc.user },
-			};
-		});
-
-		frm.set_query("user", function (doc) {
-			return {
-				query: "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.get_cashiers",
-				filters: { parent: doc.pos_profile },
-			};
-		});
-
 		frm.set_query("pos_opening_entry", function (doc) {
 			return { filters: { status: "Open", docstatus: 1 } };
 		});

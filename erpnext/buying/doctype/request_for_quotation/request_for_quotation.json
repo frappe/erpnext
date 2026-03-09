@@ -31,7 +31,9 @@
   "send_document_print",
   "sec_break_email_2",
   "subject",
+  "use_html",
   "message_for_supplier",
+  "mfs_html",
   "terms_section_break",
   "incoterm",
   "named_place",
@@ -142,12 +144,13 @@
   {
    "allow_on_submit": 1,
    "default": "Please supply the specified items at the best possible rates",
+   "depends_on": "eval:doc.use_html == 0",
    "fieldname": "message_for_supplier",
    "fieldtype": "Text Editor",
    "in_list_view": 1,
    "label": "Message for Supplier",
-   "print_hide": 1,
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.use_html == 0",
+   "print_hide": 1
   },
   {
    "collapsible": 1,
@@ -324,6 +327,22 @@
    "label": "Subject",
    "not_nullable": 1,
    "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.use_html == 1",
+   "fieldname": "mfs_html",
+   "fieldtype": "Code",
+   "label": "Message for Supplier",
+   "mandatory_depends_on": "eval:doc.use_html == 1",
+   "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "use_html",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Use HTML"
   }
  ],
  "grid_page_length": 50,
@@ -331,7 +350,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-06 10:31:08.747043",
+ "modified": "2026-03-01 23:38:48.079274",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",

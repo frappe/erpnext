@@ -11,8 +11,9 @@ class TestGetItemDetail(IntegrationTestCase):
 		args = frappe._dict(
 			{
 				"item_code": "_Test Item",
-				"company": "_Test Company",
+				"company": "_Test Company 1",
 				"customer": "_Test Customer",
+				"currency": "USD",
 				"conversion_rate": 1.0,
 				"price_list_currency": "USD",
 				"plc_conversion_rate": 1.0,

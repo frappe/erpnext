@@ -49,6 +49,7 @@ class TestReactivity(AccountsTestMixin, IntegrationTestCase):
 				"debit_to": self.debit_to,
 				"posting_date": today(),
 				"cost_center": self.cost_center,
+				"currency": "INR",
 				"conversion_rate": 1,
 				"selling_price_list": self.price_list,
 			}

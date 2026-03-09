@@ -1860,6 +1860,9 @@ def get_stock_ledger_entries(
 	if extra_cond:
 		conditions += f"{extra_cond}"
 
+	if previous_sle.get("project"):
+		conditions += " and project = %(project)s"
+
 	# nosemgrep
 	return frappe.db.sql(
 		"""

@@ -230,6 +230,36 @@ class StockBalanceReport:
 			.groupby(doctype.voucher_detail_no)
 		)
 
+		if items := self.filters.item_code:
+			if isinstance(items, str):
+				items = [items]
+
+			query = query.where(item.name.isin(items))
+
+		if self.filters.item_group:
+			childrens = []
+			childrens.append(self.filters.item_group)
+			if item_group_childrens := get_descendants_of(
+				"Item Group", self.filters.item_group, ignore_permissions=True
+			):
+				childrens.extend(item_group_childrens)
+
+			if childrens:
+				query = query.where(item.item_group.isin(childrens))
+
+		if warehouses := self.filters.get("warehouse"):
+			if isinstance(warehouses, str):
+				warehouses = [warehouses]
+
+			childrens = []
+			for warehouse in warehouses:
+				childrens.append(warehouse)
+				if warehouse_childrens := get_descendants_of("Warehouse", warehouse, ignore_permissions=True):
+					childrens.extend(warehouse_childrens)
+
+			if childrens:
+				query = query.where(doctype.warehouse.isin(childrens))
+
 		data = query.run(as_dict=True)
 		if not data:
 			return
@@ -238,10 +268,12 @@ class StockBalanceReport:
 			if row.count != 1:
 				continue
 
-			current_qty = frappe.db.get_value(
-				"Stock Reconciliation Item", row.voucher_detail_no, "current_qty"
+			sr_item = frappe.db.get_value(
+				"Stock Reconciliation Item", row.voucher_detail_no, ["current_qty", "qty"], as_dict=True
 			)
-			self.stock_reco_voucher_wise_count[row.voucher_detail_no] = current_qty
+
+			if sr_item.qty and sr_item.current_qty:
+				self.stock_reco_voucher_wise_count[row.voucher_detail_no] = sr_item.current_qty
 
 	def prepare_new_data(self):
 		if self.filters.get("show_stock_ageing_data"):

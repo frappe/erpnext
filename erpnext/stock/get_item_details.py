@@ -658,7 +658,7 @@ def get_barcode_data(items_list=None, item_code=None):
 def get_item_tax_info(
 	doc: Document | str | None,
 	tax_category: str,
-	item_codes: list,
+	item_codes: list | str,
 	item_rates: dict | None = None,
 	item_tax_templates: dict | None = None,
 ):

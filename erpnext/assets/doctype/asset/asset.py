@@ -7,6 +7,7 @@ import math
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import (
 	cint,
@@ -986,7 +987,7 @@ class Asset(AccountsController):
 		return False
 
 	@frappe.whitelist()
-	def get_depreciation_rate(self, args, on_validate=False):
+	def get_depreciation_rate(self, args: str | dict | Document, on_validate: bool = False):
 		if isinstance(args, str):
 			args = json.loads(args)
 
