@@ -40,11 +40,11 @@ def get(
 	company = filters.get("company")
 
 	if not company and not account:
-		return {"error_message": _("Company and Account filters not set")}
+		frappe.throw(_("Company and account filters not set!"))
 	if not company:
-		return {"error_message": _("Company filter not set")}
+		frappe.throw(_("Company filter not set!"))
 	if not account:
-		return {"error_message": _("Account filter not set")}
+		frappe.throw(_("Account filter not set!"))
 
 	if not to_date:
 		to_date = nowdate()
