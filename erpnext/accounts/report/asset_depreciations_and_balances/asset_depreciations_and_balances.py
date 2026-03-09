@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import add_days, flt, formatdate
 
 
@@ -75,82 +76,102 @@ def get_group_by_asset_category_data(filters):
 
 
 def get_asset_categories_for_grouped_by_category(filters):
-	condition = ""
-	if filters.get("asset_category"):
-		condition += " and a.asset_category = %(asset_category)s"
-	if filters.get("finance_book"):
-		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = a.name and ads.finance_book = %(finance_book)s)"
+	asset = frappe.qb.DocType("Asset")
+	asset_depreciation_schedule = frappe.qb.DocType("Asset Depreciation Schedule")
+	asset_capitalization_asset_item = frappe.qb.DocType("Asset Capitalization Asset Item")
+	asset_capitalization = frappe.qb.DocType("Asset Capitalization")
 
-	# nosemgrep
-	return frappe.db.sql(
-		f"""
-		SELECT a.asset_category,
-			   ifnull(sum(case when a.purchase_date < %(from_date)s then
-							   case when ifnull(a.disposal_date, 0) = 0 or a.disposal_date >= %(from_date)s then
-									a.net_purchase_amount
-							   else
-									0
-							   end
-						   else
-								0
-						   end), 0) as value_as_on_from_date,
-			   ifnull(sum(case when a.purchase_date >= %(from_date)s then
-			   						a.net_purchase_amount
-			   				   else
-			   				   		0
-			   				   end), 0) as value_of_new_purchase,
-			   ifnull(sum(case when ifnull(a.disposal_date, 0) != 0
-			   						and a.disposal_date >= %(from_date)s
-			   						and a.disposal_date <= %(to_date)s then
-							   case when a.status = "Sold" then
-							   		a.net_purchase_amount
-							   else
-							   		0
-							   end
-						   else
-								0
-						   end), 0) as value_of_sold_asset,
-			   ifnull(sum(case when ifnull(a.disposal_date, 0) != 0
-			   						and a.disposal_date >= %(from_date)s
-			   						and a.disposal_date <= %(to_date)s then
-							   case when a.status = "Scrapped" then
-							   		a.net_purchase_amount
-							   else
-							   		0
-							   end
-						   else
-								0
-						   end), 0) as value_of_scrapped_asset,
-				ifnull(sum(case when ifnull(a.disposal_date, 0) != 0
-			   						and a.disposal_date >= %(from_date)s
-			   						and a.disposal_date <= %(to_date)s then
-							   case when a.status = "Capitalized" then
-							   		a.net_purchase_amount
-							   else
-							   		0
-							   end
-						   else
-								0
-						   end), 0) as value_of_capitalized_asset
-		from `tabAsset` a
-		where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s {condition}
-			and not exists(
-				select 1 from `tabAsset Capitalization Asset Item` acai join `tabAsset Capitalization` ac on acai.parent=ac.name
-				where acai.asset = a.name
-				and ac.posting_date < %(from_date)s
-				and ac.docstatus=1
+	disposal_in_period = (asset.disposal_date.isnull()) | (asset.disposal_date >= filters.from_date) & (
+		asset.disposal_date >= filters.from_date
+	) & (asset.disposal_date <= filters.to_date)
+
+	value_as_on_from_date = IfNull(
+		Sum(
+			frappe.qb.terms.Case()
+			.when(
+				(asset.purchase_date < filters.from_date)
+				& ((IfNull(asset.disposal_date, 0) == 0) | (asset.disposal_date >= filters.from_date)),
+				asset.net_purchase_amount,
 			)
-		group by a.asset_category
-	""",
-		{
-			"to_date": filters.to_date,
-			"from_date": filters.from_date,
-			"company": filters.company,
-			"asset_category": filters.get("asset_category"),
-			"finance_book": filters.get("finance_book"),
-		},
-		as_dict=1,
+			.else_(0)
+		),
+		0,
+	).as_("value_as_on_from_date")
+
+	value_of_new_purchase = IfNull(
+		Sum(
+			frappe.qb.terms.Case()
+			.when(asset.purchase_date >= filters.from_date, asset.net_purchase_amount)
+			.else_(0)
+		),
+		0,
+	).as_("value_of_new_purchase")
+
+	value_of_sold_asset = IfNull(
+		Sum(
+			frappe.qb.terms.Case()
+			.when(disposal_in_period & (asset.status == "Sold"), asset.net_purchase_amount)
+			.else_(0)
+		),
+		0,
+	).as_("value_of_sold_asset")
+
+	value_of_scrapped_asset = IfNull(
+		Sum(
+			frappe.qb.terms.Case()
+			.when(disposal_in_period & (asset.status == "Scrapped"), asset.net_purchase_amount)
+			.else_(0)
+		),
+		0,
+	).as_("value_of_scrapped_asset")
+
+	value_of_capitalized_asset = IfNull(
+		Sum(
+			frappe.qb.terms.Case()
+			.when(disposal_in_period & (asset.status == "Capitalized"), asset.net_purchase_amount)
+			.else_(0)
+		),
+		0,
+	).as_("value_of_capitalized_asset")
+
+	capitalized_before_from_date = (
+		frappe.qb.from_(asset_capitalization_asset_item)
+		.join(asset_capitalization)
+		.on(asset_capitalization_asset_item.parent == asset_capitalization.name)
+		.select(asset_capitalization_asset_item.asset)
+		.where(asset_capitalization.posting_date < filters.from_date)
+		.where(asset_capitalization.docstatus == 1)
 	)
+
+	query = (
+		frappe.qb.from_(asset)
+		.select(
+			asset.asset_category,
+			value_as_on_from_date,
+			value_of_new_purchase,
+			value_of_sold_asset,
+			value_of_scrapped_asset,
+			value_of_capitalized_asset,
+		)
+		.where(asset.docstatus == 1)
+		.where(asset.company == filters.company)
+		.where(asset.purchase_date <= filters.to_date)
+		.where(asset.name.notin(capitalized_before_from_date))
+		.groupby(asset.asset_category)
+	)
+
+	if filters.get("asset_category"):
+		query = query.where(asset.asset_category == filters.get("asset_category"))
+
+	if filters.get("finance_book"):
+		assets_with_finance_book = (
+			frappe.qb.from_(asset_depreciation_schedule)
+			.select(asset_depreciation_schedule.asset)
+			.where(asset_depreciation_schedule.finance_book == filters.get("finance_book"))
+		)
+		query = query.where(asset.name.isin(assets_with_finance_book))
+
+	return query.run(as_dict=True)
 
 
 def get_assets_for_grouped_by_category(filters):
