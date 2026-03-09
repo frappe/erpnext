@@ -2878,6 +2878,22 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let data = [];
 		const fields = [
 			{
+				label: "Include Items without mandatory Quality Inspection",
+				fieldtype: "Check",
+				fieldname: "include_non_mandatory_items",
+				default: 0,
+				description: __(
+					"If checked, items which do not require mandatory quality inspection will also be included."
+				),
+				hidden: !["Stock Entry", "Purchase Receipt"].includes(this.frm.doc.doctype),
+				onchange: (e) => {
+					const include_all = dialog.get_value("include_non_mandatory_items");
+					include_all
+						? this.refresh_quality_inspection(dialog, true)
+						: this.refresh_quality_inspection(dialog, false);
+				},
+			},
+			{
 				label: "Items",
 				fieldtype: "Table",
 				fieldname: "items",
@@ -2989,18 +3005,28 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			primary_action_label: __("Create"),
 		});
 
+		this.refresh_quality_inspection(dialog, false);
+	}
+	refresh_quality_inspection(dialog, include_non_mandatory_items, show_include_item_check = false) {
+		const me = this;
+		let data = [];
 		frappe.call({
 			method: "erpnext.controllers.stock_controller.check_item_quality_inspection",
 			args: {
 				doctype: this.frm.doc.doctype,
 				items: this.frm.doc.items,
+				include_non_mandatory_items: include_non_mandatory_items,
 			},
 			freeze: true,
 			callback: function (r) {
+				let dialog_items = [];
+				if (show_include_item_check) {
+					dialog.fields_dict.include_non_mandatory_items.df.hidden = true;
+					dialog.fields_dict.include_non_mandatory_items.refresh();
+				}
 				r.message.forEach((item) => {
-					if (me.has_inspection_required(item)) {
-						let dialog_items = dialog.fields_dict.items;
-						dialog_items.df.data.push({
+					if (me.has_inspection_required(item) || include_non_mandatory_items) {
+						dialog_items.push({
 							item_code: item.item_code,
 							item_name: item.item_name,
 							qty: item.qty,
@@ -3010,14 +3036,21 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							sample_size: item.sample_quantity,
 							child_row_reference: item.name,
 						});
-						dialog_items.grid.refresh();
+						dialog.fields_dict.items.df.data = dialog_items;
+						dialog.fields_dict.items.grid.refresh();
 					}
 				});
 
 				data = dialog.fields_dict.items.df.data;
 				if (!data.length) {
-					frappe.msgprint(
-						__("All items in this document already have a linked Quality Inspection.")
+					frappe.confirm(
+						"No items require quality inspection. Do you want to proceed?",
+						function () {
+							me.refresh_quality_inspection(dialog, true, true);
+						},
+						function () {
+							dialog.hide();
+						}
 					);
 				} else {
 					dialog.show();
@@ -3025,7 +3058,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			},
 		});
 	}
-
 	has_inspection_required(item) {
 		if (this.frm.doc.doctype === "Stock Entry" && this.frm.doc.purpose == "Manufacture") {
 			if (item.is_finished_item && !item.quality_inspection) {

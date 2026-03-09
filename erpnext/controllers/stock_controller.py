@@ -2106,9 +2106,16 @@ def repost_required_for_queue(doc: StockController) -> bool:
 
 
 @frappe.whitelist()
-def check_item_quality_inspection(doctype: str, items: str | list[dict]):
+def check_item_quality_inspection(
+	doctype: str, items: str | list[dict], include_non_mandatory_items: str | bool = "false"
+):
+	include_non_mandatory_items = frappe.parse_json(include_non_mandatory_items)
+
 	if isinstance(items, str):
 		items = json.loads(items)
+
+	if include_non_mandatory_items:
+		return items
 
 	inspection_fieldname_map = {
 		"Purchase Receipt": "inspection_required_before_purchase",

@@ -7,7 +7,6 @@ frappe.ui.form.on("BOM", {
 	setup(frm) {
 		frm.custom_make_buttons = {
 			"Work Order": "Work Order",
-			"Quality Inspection": "Quality Inspection",
 		};
 
 		frm.set_query("bom_no", "items", function () {
@@ -226,16 +225,6 @@ frappe.ui.form.on("BOM", {
 					__("Variant BOM"),
 					function () {
 						frm.trigger("make_variant_bom");
-					},
-					__("Create")
-				);
-			}
-
-			if (frm.doc.inspection_required) {
-				frm.add_custom_button(
-					__("Quality Inspection"),
-					function () {
-						frm.trigger("make_quality_inspection");
 					},
 					__("Create")
 				);
