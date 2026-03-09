@@ -57,27 +57,33 @@ $.extend(erpnext, {
 		}
 
 		fields.forEach((field) => {
-			frm.fields_dict[child_name].grid.update_docfield_property(field, "hidden", hide_fields);
+			if (frm.fields_dict[child_name].get_field(field)) {
+				frm.fields_dict[child_name].grid.update_docfield_property(field, "hidden", hide_fields);
 
-			frm.fields_dict[child_name].grid.update_docfield_property(
-				field,
-				"in_list_view",
-				hide_fields ? 0 : 1
-			);
-
-			if (
-				frm.doc.doctype === "Subcontracting Receipt" &&
-				!["add_serial_batch_for_rejected_qty", "rejected_serial_and_batch_bundle"].includes(field)
-			) {
-				frm.fields_dict["supplied_items"].grid.update_docfield_property(field, "hidden", hide_fields);
-
-				frm.fields_dict["supplied_items"].grid.update_docfield_property(
+				frm.fields_dict[child_name].grid.update_docfield_property(
 					field,
 					"in_list_view",
 					hide_fields ? 0 : 1
 				);
 
-				frm.fields_dict["supplied_items"].grid.reset_grid();
+				if (
+					frm.doc.doctype === "Subcontracting Receipt" &&
+					!["add_serial_batch_for_rejected_qty", "rejected_serial_and_batch_bundle"].includes(field)
+				) {
+					frm.fields_dict["supplied_items"].grid.update_docfield_property(
+						field,
+						"hidden",
+						hide_fields
+					);
+
+					frm.fields_dict["supplied_items"].grid.update_docfield_property(
+						field,
+						"in_list_view",
+						hide_fields ? 0 : 1
+					);
+
+					frm.fields_dict["supplied_items"].grid.reset_grid();
+				}
 			}
 		});
 
