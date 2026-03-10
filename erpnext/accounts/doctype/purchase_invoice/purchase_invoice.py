@@ -734,9 +734,10 @@ class PurchaseInvoice(BuyingController):
 			for item in self.get("items"):
 				if item.purchase_receipt:
 					frappe.throw(
-						_("Stock cannot be updated against Purchase Receipt {0}").format(
-							item.purchase_receipt
-						)
+						_(
+							"Stock cannot be updated for Purchase Invoice {0} because a Purchase Receipt {1} has already been created for this transaction. Please disable the 'Update Stock' checkbox in the Purchase Invoice and save the invoice."
+						).format(self.name, item.purchase_receipt),
+						title=_("Stock Update Not Allowed"),
 					)
 
 	def validate_for_repost(self):
