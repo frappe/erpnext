@@ -929,7 +929,7 @@ class BOM(WebsiteGenerator):
 		"""Calculate bom totals"""
 		self.calculate_op_cost(update_hour_rate)
 		self.calculate_rm_cost(save=save_updates)
-		self.calculate_other_costs(save=save_updates)
+		self.calculate_secondary_items_costs(save=save_updates)
 		if save_updates:
 			# not via doc event, table is not regenerated and needs updation
 			self.calculate_exploded_cost()
@@ -1035,20 +1035,21 @@ class BOM(WebsiteGenerator):
 		self.raw_material_cost = total_rm_cost
 		self.base_raw_material_cost = base_total_rm_cost
 
-	def calculate_other_costs(self, save=False):
+	def calculate_secondary_items_costs(self, save=False):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
 		total_sm_cost = 0
 		base_total_sm_cost = 0
 		precision = self.precision("raw_material_cost")
 
 		for d in self.get("secondary_items"):
-			d.cost = flt(self.raw_material_cost * (d.cost_allocation_per / 100), precision)
-			d.base_cost = flt(d.cost * self.conversion_rate, precision)
+			if not d.is_legacy:
+				d.cost = flt(self.raw_material_cost * (d.cost_allocation_per / 100), precision)
+				d.base_cost = flt(d.cost * self.conversion_rate, precision)
 
-			total_sm_cost += d.cost
-			base_total_sm_cost += d.base_cost
-			if save:
-				d.db_update()
+				total_sm_cost += d.cost
+				base_total_sm_cost += d.base_cost
+				if save:
+					d.db_update()
 
 		self.secondary_items_cost = total_sm_cost
 		self.base_secondary_items_cost = base_total_sm_cost
@@ -1249,7 +1250,7 @@ class BOM(WebsiteGenerator):
 
 		for item in self.secondary_items:
 			item.qty_after_process_loss = flt(
-				item.qty * (item.process_loss_per / 100), self.precision("quantity")
+				item.stock_qty * (item.process_loss_per / 100), self.precision("quantity")
 			)
 
 	def validate_uoms(self):

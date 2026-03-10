@@ -38,7 +38,6 @@ def insert_into_bom():
 				{"uom": item.stock_uom, "conversion_factor": 1, "qty": item.stock_qty, "is_legacy": 1}
 			)
 			secondary_item.insert()
-			secondary_item.submit()
 
 
 def insert_into_job_card():
@@ -82,7 +81,6 @@ def bulk_insert(parent_doctype, old_doctype, new_doctype, old_fields, new_fields
 				{new_field: new_value for new_field, new_value in zip(new_fields, new_values, strict=True)}
 			)
 			secondary_item.insert()
-			secondary_item.submit()
 
 
 def rename_fields():

@@ -351,10 +351,11 @@ class SubcontractingReceipt(SubcontractingController):
 			if item.bom:
 				bom = frappe.get_doc("BOM", item.bom)
 				for secondary_item in bom.secondary_items:
-					per_unit = flt(secondary_item.stock_qty) / flt(bom.quantity)
+					per_unit = secondary_item.stock_qty / bom.quantity
 					received_qty = flt(item.received_qty * per_unit, item.precision("received_qty"))
 					qty = flt(
-						item.received_qty * (per_unit - secondary_item.qty_after_process_loss),
+						item.received_qty
+						* (per_unit - (secondary_item.qty_after_process_loss / bom.quantity)),
 						item.precision("qty"),
 					)
 					if not secondary_item.is_legacy:
@@ -519,7 +520,7 @@ class SubcontractingReceipt(SubcontractingController):
 					* flt(item.rate)
 					* (frappe.get_value("BOM", item.bom, "cost_allocation_per") / 100)
 				)
-				item.rate = item.amount / item.qty
+				item.rate = item.amount / (item.qty or item.rejected_qty)
 			else:
 				item.qty = flt(item.received_qty) - flt(item.process_loss_qty)
 				item.amount = flt(item.qty) * flt(item.rate)

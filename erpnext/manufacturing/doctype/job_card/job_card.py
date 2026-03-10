@@ -1477,12 +1477,23 @@ class JobCard(Document):
 
 	@frappe.whitelist()
 	def make_stock_entry_for_semi_fg_item(self, auto_submit: bool = False):
+		def get_consumed_process_loss():
+			table = frappe.qb.DocType("Stock Entry")
+			query = (
+				frappe.qb.from_(table)
+				.select(Sum(table.process_loss_qty))
+				.where(
+					(table.purpose == "Manufacture") & (table.job_card == self.name) & (table.docstatus == 1)
+				)
+			)
+			return query.run()[0][0] or 0
+
 		from erpnext.stock.doctype.stock_entry_type.stock_entry_type import ManufactureEntry
 
 		ste = ManufactureEntry(
 			{
 				"for_quantity": self.for_quantity - self.manufactured_qty,
-				"process_loss_qty": self.process_loss_qty,
+				"process_loss_qty": self.process_loss_qty - get_consumed_process_loss(),
 				"job_card": self.name,
 				"skip_material_transfer": self.skip_material_transfer,
 				"backflush_from_wip_warehouse": self.backflush_from_wip_warehouse,

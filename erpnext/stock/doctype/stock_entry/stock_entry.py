@@ -1118,10 +1118,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 					d.basic_rate = self.get_basic_rate_for_manufactured_item(
 						d.transfer_qty, outgoing_items_cost
 					)
-					if self.bom_no:
-						d.basic_rate *= frappe.get_value("BOM", self.bom_no, "cost_allocation_per") / 100
 				elif self.purpose == "Repack":
 					d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
+
+				if self.bom_no:
+					d.basic_rate *= frappe.get_value("BOM", self.bom_no, "cost_allocation_per") / 100
 			elif d.type and d.bom_secondary_item:
 				cost_allocation_per = frappe.get_value(
 					"BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per"
@@ -2590,7 +2591,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return query.run(as_dict=True)
 
 	def set_secondary_items(self):
-		if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:
+		if self.purpose in ["Manufacture", "Repack"]:
 			secondary_items_dict = self.get_secondary_items(self.fg_completed_qty)
 			for item in secondary_items_dict.values():
 				if self.pro_doc and item.type:
@@ -2817,6 +2818,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return item_dict
 
 	def set_secondary_items_from_job_card(self):
+		if self.purpose not in ["Manufacture", "Repack"]:
+			return
+
 		item_dict = {}
 		for row in self.get_secondary_items_from_job_card():
 			if row.stock_qty <= 0:
