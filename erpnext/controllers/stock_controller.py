@@ -1135,6 +1135,16 @@ class StockController(AccountsController):
 				continue
 
 			if qi_required:  # validate row only if inspection is required on item level
+				if self.doctype in [
+					"Purchase Receipt",
+					"Purchase Invoice",
+					"Sales Invoice",
+					"Delivery Note",
+				] and frappe.get_single_value(
+					"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
+				):
+					return
+
 				self.validate_qi_presence(row)
 				if self.docstatus == 1:
 					self.validate_qi_submission(row)
@@ -1142,6 +1152,7 @@ class StockController(AccountsController):
 
 	def validate_qi_presence(self, row):
 		"""Check if QI is present on row level. Warn on save and stop on submit if missing."""
+<<<<<<< HEAD
 		if self.doctype in [
 			"Purchase Receipt",
 			"Purchase Invoice",
@@ -1152,6 +1163,8 @@ class StockController(AccountsController):
 		):
 			return
 
+=======
+>>>>>>> 9f62ec5192 (fix: allow user to make QI after submission not working)
 		if not row.quality_inspection:
 			msg = _("Row #{0}: Quality Inspection is required for Item {1}").format(
 				row.idx, frappe.bold(row.item_code)
