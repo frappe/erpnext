@@ -258,6 +258,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		if (has_inclusive_tax == false) return;
 
 		$.each(this.frm.doc.items || [], function (n, item) {
+			item._unrounded_net_amount = null;
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
 			var cumulated_tax_fraction = 0.0;
 			var total_inclusive_tax_amount_per_qty = 0;
@@ -414,6 +415,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		});
 
 		$.each(this.frm._items || [], function (n, item) {
+			item._unrounded_net_amount = null;
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
 			$.each(doc.taxes, function (i, tax) {
 				// tax_amount represents the amount of tax for the current step
@@ -572,7 +574,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			var net_for_tax =
 				cint(tax.included_in_print_rate) &&
 				!this.discount_amount_applied &&
-				item._unrounded_net_amount !== undefined
+				item._unrounded_net_amount !== null
 					? item._unrounded_net_amount
 					: item.net_amount;
 			current_tax_amount = (tax_rate / 100.0) * net_for_tax;

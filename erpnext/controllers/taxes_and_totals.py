@@ -314,6 +314,7 @@ class calculate_taxes_and_totals:
 			return
 
 		for item in self.doc.items:
+			item._unrounded_net_amount = None
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
 			cumulated_tax_fraction = 0
 			total_inclusive_tax_amount_per_qty = 0
@@ -625,7 +626,7 @@ class calculate_taxes_and_totals:
 			if (
 				cint(tax.included_in_print_rate)
 				and not self.discount_amount_applied
-				and hasattr(item, "_unrounded_net_amount")
+				and item._unrounded_net_amount is not None
 			):
 				current_tax_amount = (tax_rate / 100.0) * item._unrounded_net_amount
 			else:
