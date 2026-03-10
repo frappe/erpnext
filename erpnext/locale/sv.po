@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-03-08 09:42+0000\n"
-"PO-Revision-Date: 2026-03-09 16:57\n"
+"PO-Revision-Date: 2026-03-10 17:36\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -5891,7 +5891,7 @@ msgstr "Tillgångar"
 #. Title of the Module Onboarding 'Asset Onboarding'
 #: erpnext/assets/module_onboarding/asset_onboarding/asset_onboarding.json
 msgid "Assets Setup"
-msgstr "Inställning av Tillgångar"
+msgstr "Tillgång Inställningar"
 
 #: erpnext/controllers/buying_controller.py:1048
 msgid "Assets not created for {item_code}. You will have to create asset manually."
