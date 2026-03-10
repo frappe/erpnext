@@ -10,7 +10,6 @@
  "field_order": [
   "supplier_section",
   "company",
-  "title",
   "naming_series",
   "supplier",
   "supplier_name",
@@ -24,6 +23,8 @@
   "is_subcontracted",
   "has_unit_price_items",
   "supplier_warehouse",
+  "section_break_zymg",
+  "title",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -174,14 +175,11 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "{supplier_name}",
    "fieldname": "title",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Title",
    "no_copy": 1,
-   "print_hide": 1,
-   "reqd": 1
+   "print_hide": 1
   },
   {
    "fieldname": "naming_series",
@@ -1321,6 +1319,10 @@
    "fieldtype": "Time",
    "label": "Time",
    "mandatory_depends_on": "is_internal_supplier"
+  },
+  {
+   "fieldname": "section_break_zymg",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
@@ -1328,7 +1330,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 17:15:29.184682",
+ "modified": "2026-03-10 09:15:16.918145",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

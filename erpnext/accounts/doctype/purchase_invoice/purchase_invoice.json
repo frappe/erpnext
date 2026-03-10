@@ -8,7 +8,6 @@
  "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
-  "title",
   "naming_series",
   "supplier",
   "supplier_name",
@@ -28,6 +27,8 @@
   "update_billed_amount_in_purchase_receipt",
   "apply_tds",
   "amended_from",
+  "section_break_ecfi",
+  "title",
   "supplier_invoice_details",
   "bill_no",
   "column_break_15",
@@ -211,10 +212,8 @@
  "fields": [
   {
    "allow_on_submit": 1,
-   "default": "{supplier_name}",
    "fieldname": "title",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Title",
    "no_copy": 1,
    "print_hide": 1
@@ -1686,6 +1685,10 @@
    "fieldname": "totals_section",
    "fieldtype": "Section Break",
    "label": "Totals"
+  },
+  {
+   "fieldname": "section_break_ecfi",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
@@ -1693,7 +1696,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 17:15:27.014131",
+ "modified": "2026-03-10 09:05:26.595644",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
@@ -1756,6 +1759,6 @@
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "supplier",
- "title_field": "title",
+ "title_field": "supplier_name",
  "track_changes": 1
 }

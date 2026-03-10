@@ -18,6 +18,8 @@
   "status",
   "has_unit_price_items",
   "amended_from",
+  "section_break_trpf",
+  "title",
   "suppliers_section",
   "suppliers",
   "items_section",
@@ -346,6 +348,18 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Use HTML"
+  },
+  {
+   "fieldname": "section_break_trpf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "grid_page_length": 50,
@@ -353,7 +367,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 17:15:29.774614",
+ "modified": "2026-03-10 09:17:37.998377",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",
@@ -423,5 +437,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "company"
 }
