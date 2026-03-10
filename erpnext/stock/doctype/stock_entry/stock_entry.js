@@ -932,6 +932,10 @@ frappe.ui.form.on("Stock Entry Detail", {
 	},
 
 	conversion_factor(frm, cdt, cdn) {
+		let item = frappe.get_doc(cdt, cdn);
+		if (item.is_finished_item) {
+			frappe.flags.__skip_fg_completed_qty_refresh = true;
+		}
 		frm.events.set_rate_and_fg_qty(frm, cdt, cdn);
 	},
 
@@ -1332,6 +1336,11 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	}
 
 	fg_completed_qty() {
+		if (frappe.flags.__skip_fg_completed_qty_refresh) {
+			frappe.flags.__skip_fg_completed_qty_refresh = false;
+			return;
+		}
+
 		this.get_items();
 	}
 
