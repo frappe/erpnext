@@ -22,6 +22,8 @@
   "company",
   "has_unit_price_items",
   "amended_from",
+  "section_break_cojf",
+  "title",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -1130,13 +1132,25 @@
    "fieldname": "utm_analytics_section",
    "fieldtype": "Section Break",
    "label": "UTM Analytics"
+  },
+  {
+   "fieldname": "section_break_cojf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 17:15:31.941114",
+ "modified": "2026-03-10 09:20:48.449281",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
