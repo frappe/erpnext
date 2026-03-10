@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import getdate
+from frappe.utils import DateTimeLikeObject, getdate
 
 
 def get_columns(filters, trans):
@@ -303,8 +303,10 @@ def get_period_wise_query(bet_dates, trans_date, query_details):
 	return query_details
 
 
-@frappe.whitelist(allow_guest=True)
-def get_period_date_ranges(period, fiscal_year=None, year_start_date=None):
+@frappe.whitelist()
+def get_period_date_ranges(
+	period: str, fiscal_year: str | None = None, year_start_date: DateTimeLikeObject | None = None
+):
 	from dateutil.relativedelta import relativedelta
 
 	if not year_start_date:

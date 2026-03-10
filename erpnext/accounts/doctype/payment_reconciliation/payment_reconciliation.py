@@ -433,7 +433,9 @@ class PaymentReconciliation(Document):
 		return frappe.get_single_value("Accounts Settings", "auto_reconcile_payments")
 
 	@frappe.whitelist()
-	def calculate_difference_on_allocation_change(self, payment_entry, invoice, allocated_amount):
+	def calculate_difference_on_allocation_change(
+		self, payment_entry: list, invoice: list, allocated_amount: float
+	):
 		invoice_exchange_map = self.get_invoice_exchange_map(invoice, payment_entry)
 		invoice[0]["exchange_rate"] = invoice_exchange_map.get(invoice[0].get("invoice_number"))
 		if payment_entry[0].get("reference_type") in ["Sales Invoice", "Purchase Invoice"]:
@@ -445,7 +447,7 @@ class PaymentReconciliation(Document):
 		return new_difference_amount
 
 	@frappe.whitelist()
-	def allocate_entries(self, args):
+	def allocate_entries(self, args: dict):
 		self.validate_entries()
 
 		exc_gain_loss_posting_date = frappe.db.get_single_value(

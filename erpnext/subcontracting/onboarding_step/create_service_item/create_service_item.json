@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Service Item",
+ "creation": "2026-02-23 22:29:22.864871",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-23 22:31:09.968918",
+ "modified_by": "Administrator",
+ "name": "Create Service Item",
+ "owner": "Administrator",
+ "reference_document": "Item",
+ "route_options": "{\n    \"is_stock_item\": 0\n}",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Create Service Item",
+ "validate_action": 1
+}

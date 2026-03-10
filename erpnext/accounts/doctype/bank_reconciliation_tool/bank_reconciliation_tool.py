@@ -1,8 +1,8 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
 import json
+from datetime import date
 
 import frappe
 from frappe import _
@@ -47,7 +47,9 @@ class BankReconciliationTool(Document):
 
 
 @frappe.whitelist()
-def get_bank_transactions(bank_account, from_date=None, to_date=None):
+def get_bank_transactions(
+	bank_account: str, from_date: str | date | None = None, to_date: str | date | None = None
+):
 	# returns bank transactions for a bank account
 	filters = []
 	filters.append(["bank_account", "=", bank_account])
@@ -80,7 +82,7 @@ def get_bank_transactions(bank_account, from_date=None, to_date=None):
 
 
 @frappe.whitelist()
-def get_account_balance(bank_account, till_date, company):
+def get_account_balance(bank_account: str, till_date: str | date, company: str):
 	# returns account balance till the specified date
 	account = frappe.db.get_value("Bank Account", bank_account, "account")
 	filters = frappe._dict(
@@ -106,7 +108,9 @@ def get_account_balance(bank_account, till_date, company):
 
 
 @frappe.whitelist()
-def update_bank_transaction(bank_transaction_name, reference_number, party_type=None, party=None):
+def update_bank_transaction(
+	bank_transaction_name: str, reference_number: str, party_type: str | None = None, party: str | None = None
+):
 	# updates bank transaction based on the new parameters provided by the user from Vouchers
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	bank_transaction.reference_number = reference_number
@@ -135,16 +139,16 @@ def update_bank_transaction(bank_transaction_name, reference_number, party_type=
 
 @frappe.whitelist()
 def create_journal_entry_bts(
-	bank_transaction_name,
-	reference_number=None,
-	reference_date=None,
-	posting_date=None,
-	entry_type=None,
-	second_account=None,
-	mode_of_payment=None,
-	party_type=None,
-	party=None,
-	allow_edit=None,
+	bank_transaction_name: str,
+	reference_number: str | None = None,
+	reference_date: str | None = None,
+	posting_date: str | date | None = None,
+	entry_type: str | None = None,
+	second_account: str | None = None,
+	mode_of_payment: str | None = None,
+	party_type: str | None = None,
+	party: str | None = None,
+	allow_edit: bool | None = None,
 ):
 	# Create a new journal entry based on the bank transaction
 	bank_transaction = frappe.db.get_values(
@@ -294,17 +298,17 @@ def create_journal_entry_bts(
 
 @frappe.whitelist()
 def create_payment_entry_bts(
-	bank_transaction_name,
-	reference_number=None,
-	reference_date=None,
-	party_type=None,
-	party=None,
-	posting_date=None,
-	mode_of_payment=None,
-	project=None,
-	cost_center=None,
-	allow_edit=None,
-	company_bank_account=None,
+	bank_transaction_name: str,
+	reference_number: str | None = None,
+	reference_date: str | None = None,
+	party_type: str | None = None,
+	party: str | None = None,
+	posting_date: str | None = None,
+	mode_of_payment: str | None = None,
+	project: str | None = None,
+	cost_center: str | None = None,
+	allow_edit: bool | None = None,
+	company_bank_account: str | None = None,
 ):
 	# Create a new payment entry based on the bank transaction
 	bank_transaction = frappe.db.get_values(
@@ -371,12 +375,12 @@ def create_payment_entry_bts(
 
 @frappe.whitelist()
 def auto_reconcile_vouchers(
-	bank_account,
-	from_date=None,
-	to_date=None,
-	filter_by_reference_date=None,
-	from_reference_date=None,
-	to_reference_date=None,
+	bank_account: str,
+	from_date: str | date | None = None,
+	to_date: str | date | None = None,
+	filter_by_reference_date: bool | None = None,
+	from_reference_date: bool | None = None,
+	to_reference_date: str | None = None,
 ):
 	bank_transactions = get_bank_transactions(bank_account)
 
@@ -471,7 +475,7 @@ def get_auto_reconcile_message(partially_reconciled, reconciled):
 
 
 @frappe.whitelist()
-def reconcile_vouchers(bank_transaction_name, vouchers):
+def reconcile_vouchers(bank_transaction_name: str, vouchers: str):
 	# updated clear date of all the vouchers based on the bank transaction
 	vouchers = json.loads(vouchers)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
@@ -487,13 +491,13 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 
 @frappe.whitelist()
 def get_linked_payments(
-	bank_transaction_name,
-	document_types=None,
-	from_date=None,
-	to_date=None,
-	filter_by_reference_date=None,
-	from_reference_date=None,
-	to_reference_date=None,
+	bank_transaction_name: str,
+	document_types: str | list[str] | None = None,
+	from_date: str | date | None = None,
+	to_date: str | date | None = None,
+	filter_by_reference_date: bool | None = None,
+	from_reference_date: bool | None = None,
+	to_reference_date: str | None = None,
 ):
 	# get all matching payments for a bank transaction
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)

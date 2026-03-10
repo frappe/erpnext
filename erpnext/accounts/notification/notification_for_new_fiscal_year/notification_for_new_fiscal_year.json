@@ -1,7 +1,8 @@
 {
  "attach_print": 0,
  "channel": "Email",
- "condition": "doc.auto_created",
+ "condition": "doc.auto_created == 1",
+ "condition_type": "Python",
  "creation": "2018-04-25 14:19:05.440361",
  "days_in_advance": 0,
  "docstatus": 0,
@@ -11,8 +12,10 @@
  "event": "New",
  "idx": 0,
  "is_standard": 1,
+ "message": "<h4>{{ _(\"New Fiscal Year - {0}\").format(doc.name) }}</h4>\n\n<p>{{ _(\"A new fiscal year has been automatically created.\") }}</p>\n\n<p>{{ _(\"Fiscal Year Details\") }}</p>\n\n<table style=\"margin-bottom: 1rem; width: 70%\">\n    <tr>\n        <td style=\"font-weight:bold; width: 40%\">{{ _(\"Year Name\") }}</td>\n        <td>{{ doc.name }}</td>\n    </tr>\n    <tr>\n        <td style=\"font-weight:bold; width: 40%\">{{ _(\"Start Date\") }}</td>\n        <td>{{ frappe.format_value(doc.year_start_date) }}</td>\n    </tr>\n    <tr>\n        <td style=\"font-weight:bold; width: 40%\">{{ _(\"End Date\") }}</td>\n        <td>{{ frappe.format_value(doc.year_end_date) }}</td>\n    </tr>\n    {% if doc.companies|length > 0 %}\n    <tr>\n        <td style=\"vertical-align: top; font-weight: bold; width: 40%\" rowspan=\"{{ doc.companies|length }}\">\n        {% if doc.companies|length < 2 %}\n            {{ _(\"Company\") }}\n        {% else %}\n            {{ _(\"Companies\") }}\n        {% endif %}\n        </td>\n        <td>{{ doc.companies[0].company }}</td>\n    </tr>\n    {% for idx in range(1, doc.companies|length) %}\n    <tr>\n        <td>{{ doc.companies[idx].company }}</td>\n    </tr>\n    {% endfor %}\n    {% endif %}\n</table>\n\n{% if doc.disabled %}\n<p>{{ _(\"The fiscal year has been automatically created in a Disabled state to maintain consistency with the previous fiscal year's status.\") }}</p>\n{% endif %}\n\n<p>{{ _(\"Please review the {0} configuration and complete any required financial setup activities.\").format(frappe.utils.get_link_to_form(\"Fiscal Year\", doc.name, frappe.bold(\"Fiscal Year\"))) }}</p>",
  "message_type": "HTML",
- "modified": "2023-11-17 08:54:51.532104",
+ "minutes_offset": 0,
+ "modified": "2026-02-23 17:37:03.755394",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Notification for new fiscal year",
@@ -27,5 +30,5 @@
  ],
  "send_system_notification": 0,
  "send_to_all_assignees": 0,
- "subject": "Notification for new fiscal year {{ doc.name }}"
+ "subject": "New Fiscal Year {{ doc.name }} - Review Required"
 }

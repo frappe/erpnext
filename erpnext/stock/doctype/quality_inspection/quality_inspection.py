@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from typing import Any
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -364,7 +366,7 @@ class QualityInspection(Document):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_query(doctype, txt, searchfield, start, page_len, filters):
+def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page_len: int, filters: dict):
 	from frappe.desk.reportview import get_match_cond
 
 	from_doctype = cstr(filters.get("from"))
@@ -420,7 +422,9 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def quality_inspection_query(doctype, txt, searchfield, start, page_len, filters):
+def quality_inspection_query(
+	doctype: Any, txt: str | None, searchfield: Any, start: int, page_len: int, filters: dict
+):
 	return frappe.get_all(
 		"Quality Inspection",
 		limit_start=start,
@@ -437,7 +441,7 @@ def quality_inspection_query(doctype, txt, searchfield, start, page_len, filters
 
 
 @frappe.whitelist()
-def make_quality_inspection(source_name, target_doc=None):
+def make_quality_inspection(source_name: str, target_doc: Document | str | None = None):
 	def postprocess(source, doc):
 		doc.inspected_by = frappe.session.user
 		doc.get_quality_inspection_template()

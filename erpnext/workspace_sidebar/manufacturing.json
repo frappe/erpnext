@@ -437,9 +437,10 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-29 16:41:40.416652",
+ "modified": "2026-02-20 16:45:00.399936",
  "modified_by": "Administrator",
  "module": "Manufacturing",
+ "module_onboarding": "Manufacturing Onboarding",
  "name": "Manufacturing",
  "owner": "Administrator",
  "standard": 1,

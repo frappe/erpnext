@@ -381,9 +381,10 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-10 00:06:13.168391",
+ "modified": "2026-02-22 18:35:48.416287",
  "modified_by": "Administrator",
  "module": "Accounts",
+ "module_onboarding": "Accounting Onboarding",
  "name": "Financial Reports",
  "owner": "Administrator",
  "standard": 1,

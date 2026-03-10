@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Abs, CombineDatetime, Sum
 from frappe.utils import cint, flt, get_datetime, getdate, nowdate
@@ -246,7 +247,8 @@ class PurchaseReceipt(BuyingController):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
 
 		if self.get("items") and self.apply_putaway_rule and not self.get("is_return"):
-			apply_putaway_rule(self.doctype, self.get("items"), self.company)
+			if items := apply_putaway_rule(self.doctype, self.get("items"), self.company):
+				self.items = items
 
 	def validate(self):
 		self.validate_posting_time()
@@ -1246,7 +1248,9 @@ def get_billed_amount_against_po(po_items):
 def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate=False):
 	# Update Billing % based on pending accepted qty
 	buying_settings = frappe.get_single("Buying Settings")
-	over_billing_allowance = frappe.get_single_value("Accounts Settings", "over_billing_allowance")
+	over_billing_allowance, role_allowed_to_over_bill = frappe.get_single_value(
+		"Accounts Settings", ["over_billing_allowance", "role_allowed_to_over_bill"]
+	)
 
 	total_amount, total_billed_amount, pi_landed_cost_amount = 0, 0, 0
 	item_wise_returned_qty = get_item_wise_returned_qty(pr_doc)
@@ -1304,7 +1308,10 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 			item.db_set("amount_difference_with_purchase_invoice", adjusted_amt, update_modified=False)
 		elif amount and item.billed_amt > amount:
 			per_over_billed = (flt(item.billed_amt / amount, 2) * 100) - 100
-			if per_over_billed > over_billing_allowance:
+			if (
+				per_over_billed > over_billing_allowance
+				and role_allowed_to_over_bill not in frappe.get_roles()
+			):
 				frappe.throw(
 					_("Over Billing Allowance exceeded for Purchase Receipt Item {0} ({1}) by {2}%").format(
 						item.name, frappe.bold(item.item_code), per_over_billed - over_billing_allowance
@@ -1401,7 +1408,9 @@ def get_item_wise_returned_qty(pr_doc):
 
 
 @frappe.whitelist()
-def make_purchase_invoice(source_name, target_doc=None, args=None):
+def make_purchase_invoice(
+	source_name: str | None, target_doc: str | Document | None = None, args: dict | str | None = None
+):
 	if args is None:
 		args = {}
 	if isinstance(args, str):
@@ -1554,27 +1563,27 @@ def get_returned_qty_map(purchase_receipt):
 
 
 @frappe.whitelist()
-def make_purchase_return_against_rejected_warehouse(source_name):
+def make_purchase_return_against_rejected_warehouse(source_name: str):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Purchase Receipt", source_name, return_against_rejected_qty=True)
 
 
 @frappe.whitelist()
-def make_purchase_return(source_name, target_doc=None):
+def make_purchase_return(source_name: str, target_doc: str | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Purchase Receipt", source_name, target_doc)
 
 
 @frappe.whitelist()
-def update_purchase_receipt_status(docname, status):
+def update_purchase_receipt_status(docname: str, status: str):
 	pr = frappe.get_lazy_doc("Purchase Receipt", docname)
 	pr.update_status(status)
 
 
 @frappe.whitelist()
-def make_stock_entry(source_name, target_doc=None):
+def make_stock_entry(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		target.stock_entry_type = "Material Transfer"
 		target.purpose = "Material Transfer"
@@ -1634,7 +1643,7 @@ def make_stock_entry(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_inter_company_delivery_note(source_name, target_doc=None):
+def make_inter_company_delivery_note(source_name: str, target_doc: str | Document | None = None):
 	return make_inter_company_transaction("Purchase Receipt", source_name, target_doc)
 
 
@@ -1644,7 +1653,7 @@ def update_regional_gl_entries(gl_list, doc):
 
 
 @frappe.whitelist()
-def make_lcv(doctype, docname):
+def make_lcv(doctype: str, docname: str):
 	landed_cost_voucher = frappe.new_doc("Landed Cost Voucher")
 
 	details = frappe.db.get_value(doctype, docname, ["supplier", "company", "base_grand_total"], as_dict=1)

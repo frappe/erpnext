@@ -10,6 +10,7 @@ import frappe.utils
 from frappe import _, qb
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import Sum
@@ -116,6 +117,7 @@ class SalesOrder(SellingController):
 		grand_total: DF.Currency
 		group_same_items: DF.Check
 		has_unit_price_items: DF.Check
+		ignore_default_payment_terms_template: DF.Check
 		ignore_pricing_rule: DF.Check
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
@@ -186,6 +188,7 @@ class SalesOrder(SellingController):
 		total_qty: DF.Float
 		total_taxes_and_charges: DF.Currency
 		transaction_date: DF.Date
+		transaction_time: DF.Time | None
 		utm_campaign: DF.Link | None
 		utm_content: DF.Data | None
 		utm_medium: DF.Link | None
@@ -530,7 +533,7 @@ class SalesOrder(SellingController):
 			"Unreconcile Payment Entries",
 		)
 		super().on_cancel()
-
+		super().update_prevdoc_status()
 		# Cannot cancel closed SO
 		if self.status == "Closed":
 			frappe.throw(_("Closed order cannot be cancelled. Unclose to cancel."))
@@ -835,8 +838,8 @@ class SalesOrder(SellingController):
 	def create_stock_reservation_entries(
 		self,
 		items_details: list[dict] | None = None,
-		from_voucher_type: Literal["Pick List", "Purchase Receipt"] = None,
-		notify=True,
+		from_voucher_type: Literal["Pick List", "Purchase Receipt"] | None = None,
+		notify: bool = True,
 	) -> None:
 		"""Creates Stock Reservation Entries for Sales Order Items."""
 
@@ -852,7 +855,7 @@ class SalesOrder(SellingController):
 		)
 
 	@frappe.whitelist()
-	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
+	def cancel_stock_reservation_entries(self, sre_list: list | None = None, notify: bool = True) -> None:
 		"""Cancel Stock Reservation Entries for Sales Order Items."""
 
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
@@ -872,7 +875,7 @@ class SalesOrder(SellingController):
 					item.delivery_date = self.delivery_date
 
 	@frappe.whitelist()
-	def get_delivery_schedule(self, sales_order_item):
+	def get_delivery_schedule(self, sales_order_item: str):
 		return frappe.get_all(
 			"Delivery Schedule Item",
 			filters={"sales_order_item": sales_order_item, "sales_order": self.name},
@@ -881,7 +884,7 @@ class SalesOrder(SellingController):
 		)
 
 	@frappe.whitelist()
-	def create_delivery_schedule(self, child_row, schedules):
+	def create_delivery_schedule(self, child_row: dict | frappe._dict, schedules: str | list[dict]):
 		if isinstance(child_row, dict):
 			child_row = frappe._dict(child_row)
 
@@ -978,7 +981,7 @@ def is_enable_cutoff_date_on_bulk_delivery_note_creation():
 
 
 @frappe.whitelist()
-def close_or_unclose_sales_orders(names, status):
+def close_or_unclose_sales_orders(names: str, status: str):
 	if not frappe.has_permission("Sales Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
@@ -1020,7 +1023,7 @@ def get_requested_item_qty(sales_order):
 
 
 @frappe.whitelist()
-def make_material_request(source_name, target_doc=None):
+def make_material_request(source_name: str, target_doc: str | Document | None = None):
 	requested_item_qty = get_requested_item_qty(source_name)
 
 	def postprocess(source, target):
@@ -1125,7 +1128,7 @@ def make_material_request(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_project(source_name, target_doc=None):
+def make_project(source_name: str, target_doc: str | Document | None = None):
 	def postprocess(source, doc):
 		doc.project_type = "External"
 		doc.project_name = source.name
@@ -1152,7 +1155,9 @@ def make_project(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_delivery_note(source_name, target_doc=None, kwargs=None):
+def make_delivery_note(
+	source_name: str, target_doc: str | Document | None = None, kwargs: dict | None = None
+):
 	from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 		get_sre_details_for_voucher,
@@ -1325,7 +1330,12 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, args=None):
+def make_sales_invoice(
+	source_name: str,
+	target_doc: str | Document | None = None,
+	ignore_permissions: bool = False,
+	args: str | dict | None = None,
+):
 	if args is None:
 		args = {}
 	if isinstance(args, str):
@@ -1497,7 +1507,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, a
 
 
 @frappe.whitelist()
-def make_maintenance_schedule(source_name, target_doc=None):
+def make_maintenance_schedule(source_name: str, target_doc: str | Document | None = None):
 	maint_schedule = frappe.db.sql(
 		"""select t1.name
 		from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2
@@ -1523,7 +1533,7 @@ def make_maintenance_schedule(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_maintenance_visit(source_name, target_doc=None):
+def make_maintenance_visit(source_name: str, target_doc: str | Document | None = None):
 	visit = frappe.db.sql(
 		"""select t1.name
 		from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2
@@ -1550,7 +1560,7 @@ def make_maintenance_visit(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def get_events(start, end, filters=None):
+def get_events(start: str, end: str, filters: str | dict | None = None):
 	"""Returns events for Gantt / Calendar view rendering.
 
 	:param start: Start date-time.
@@ -1587,7 +1597,9 @@ def get_events(start, end, filters=None):
 
 
 @frappe.whitelist()
-def make_purchase_order(source_name, selected_items=None, target_doc=None):
+def make_purchase_order(
+	source_name: str, selected_items: str | list | None = None, target_doc: str | Document | None = None
+):
 	"""Creates Purchase Order for each Supplier. Returns a list of doc objects."""
 
 	from erpnext.setup.utils import get_exchange_rate
@@ -1600,12 +1612,14 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.supplier = supplier
-		target.currency = frappe.db.get_value(
-			"Supplier", filters={"name": supplier}, fieldname=["default_currency"]
-		)
 		company_currency = frappe.db.get_value(
 			"Company", filters={"name": target.company}, fieldname=["default_currency"]
 		)
+		supplier_currency = frappe.db.get_value(
+			"Supplier", filters={"name": supplier}, fieldname=["default_currency"]
+		)
+
+		target.currency = supplier_currency if supplier_currency else company_currency
 
 		target.conversion_rate = get_exchange_rate(target.currency, company_currency, args="for_buying")
 
@@ -1772,7 +1786,7 @@ def is_product_bundle(item_code):
 
 
 @frappe.whitelist()
-def make_work_orders(items, sales_order, company, project=None):
+def make_work_orders(items: str, sales_order: str, company: str, project: str | None = None):
 	"""Make Work Orders against the given Sales Order for the given `items`"""
 	items = json.loads(items).get("items")
 	out = []
@@ -1804,13 +1818,15 @@ def make_work_orders(items, sales_order, company, project=None):
 
 
 @frappe.whitelist()
-def update_status(status, name):
+def update_status(status: str, name: str):
 	so = frappe.get_doc("Sales Order", name)
 	so.update_status(status)
 
 
 @frappe.whitelist()
-def make_raw_material_request(items, company, sales_order, project=None):
+def make_raw_material_request(
+	items: str | frappe._dict, company: str, sales_order: str, project: str | None = None
+):
 	if not frappe.has_permission("Sales Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
@@ -1870,14 +1886,14 @@ def make_raw_material_request(items, company, sales_order, project=None):
 
 
 @frappe.whitelist()
-def make_inter_company_purchase_order(source_name, target_doc=None):
+def make_inter_company_purchase_order(source_name: str, target_doc: str | Document | None = None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 
 	return make_inter_company_transaction("Sales Order", source_name, target_doc)
 
 
 @frappe.whitelist()
-def create_pick_list(source_name, target_doc=None):
+def create_pick_list(source_name: str, target_doc: str | Document | None = None):
 	from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 
 	def validate_sales_order():
@@ -1976,7 +1992,7 @@ def update_produced_qty_in_so_item(sales_order, sales_order_item):
 
 
 @frappe.whitelist()
-def get_work_order_items(sales_order, for_raw_material_request=0):
+def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 	"""Returns items with BOM that already do not have a linked work order"""
 	if sales_order:
 		so = frappe.get_doc("Sales Order", sales_order)
@@ -2045,7 +2061,7 @@ def get_stock_reservation_status():
 
 
 @frappe.whitelist()
-def make_subcontracting_inward_order(source_name, target_doc=None):
+def make_subcontracting_inward_order(source_name: str, target_doc: str | Document | None = None):
 	if not is_so_fully_subcontracted(source_name):
 		return get_mapped_subcontracting_inward_order(source_name, target_doc)
 	else:

@@ -1,0 +1,21 @@
+{
+ "action": "Update Settings",
+ "action_label": "Review Accounts Settings",
+ "creation": "2026-02-23 19:27:06.055104",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 1,
+ "is_skipped": 0,
+ "modified": "2026-02-23 22:16:40.855407",
+ "modified_by": "Administrator",
+ "name": "Review Accounts Settings",
+ "owner": "Administrator",
+ "path": "desk/accounts-settings",
+ "reference_document": "Accounts Settings",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Review Accounts Settings",
+ "validate_action": 0
+}

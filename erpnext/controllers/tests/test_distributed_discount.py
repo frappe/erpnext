@@ -59,3 +59,41 @@ class TestTaxesAndTotals(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(so.total, 1500)
 		self.assertAlmostEqual(so.net_total, 1272.73, places=2)
 		self.assertEqual(so.grand_total, 1400)
+
+	def test_100_percent_discount_with_inclusive_tax(self):
+		"""Test that 100% discount with inclusive taxes results in zero net_total"""
+		so = make_sales_order(do_not_save=1)
+		so.apply_discount_on = "Grand Total"
+		so.items[0].qty = 2
+		so.items[0].rate = 1300
+		so.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account VAT - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Account VAT",
+				"included_in_print_rate": True,
+				"rate": 9,
+			},
+		)
+		so.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Account Service Tax",
+				"included_in_print_rate": True,
+				"rate": 9,
+			},
+		)
+		so.save()
+
+		# Apply 100% discount
+		so.discount_amount = 2600
+		calculate_taxes_and_totals(so)
+
+		# net_total should be exactly 0, not 0.01
+		self.assertEqual(so.net_total, 0)
+		self.assertEqual(so.grand_total, 0)

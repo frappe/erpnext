@@ -224,7 +224,9 @@ class Supplier(TransactionBase):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_supplier_primary(doctype, txt, searchfield, start, page_len, filters):
+def get_supplier_primary(
+	doctype: str | None, txt: str, searchfield: str | None, start: int, page_len: int, filters: dict
+):
 	supplier = filters.get("supplier")
 	type = filters.get("type")
 	type_doctype = frappe.qb.DocType(type)

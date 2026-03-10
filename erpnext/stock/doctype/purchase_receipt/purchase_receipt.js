@@ -365,6 +365,15 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 	apply_putaway_rule() {
 		if (this.frm.doc.apply_putaway_rule) erpnext.apply_putaway_rule(this.frm);
 	}
+
+	items_add(doc, cdt, cdn) {
+		const row = frappe.get_doc(cdt, cdn);
+		this.frm.script_manager.copy_from_first_row("items", row, [
+			"expense_account",
+			"cost_center",
+			"project",
+		]);
+	}
 };
 
 // for backward compatibility: combine new and previous states

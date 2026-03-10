@@ -122,7 +122,7 @@ def filter_result_items(result, pos_profile):
 
 
 @frappe.whitelist()
-def get_parent_item_group(pos_profile):
+def get_parent_item_group(pos_profile: str):
 	item_groups = get_item_groups(pos_profile)
 
 	if not item_groups:
@@ -132,7 +132,14 @@ def get_parent_item_group(pos_profile):
 
 
 @frappe.whitelist()
-def get_items(start, page_length, price_list, item_group, pos_profile, search_term=""):
+def get_items(
+	start: str | int,
+	page_length: str | int,
+	price_list: str | None,
+	item_group: str,
+	pos_profile: str,
+	search_term: str = "",
+):
 	warehouse, hide_unavailable_items = frappe.db.get_value(
 		"POS Profile", pos_profile, ["warehouse", "hide_unavailable_items"]
 	)
@@ -296,7 +303,7 @@ def get_item_group_condition(pos_profile):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_group_query(doctype, txt, searchfield, start, page_len, filters):
+def item_group_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	item_groups = []
 	cond = "1=1"
 	pos_profile = filters.get("pos_profile")
@@ -316,7 +323,7 @@ def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def check_opening_entry(user):
+def check_opening_entry(user: str):
 	open_vouchers = frappe.db.get_all(
 		"POS Opening Entry",
 		filters={"user": user, "pos_closing_entry": ["in", ["", None]], "docstatus": 1},
@@ -328,7 +335,7 @@ def check_opening_entry(user):
 
 
 @frappe.whitelist()
-def create_opening_voucher(pos_profile, company, balance_details):
+def create_opening_voucher(pos_profile: str, company: str, balance_details: str):
 	balance_details = json.loads(balance_details)
 
 	new_pos_opening = frappe.get_doc(
@@ -348,7 +355,7 @@ def create_opening_voucher(pos_profile, company, balance_details):
 
 
 @frappe.whitelist()
-def get_past_order_list(search_term, status, limit=20):
+def get_past_order_list(search_term: str, status: str, limit: int = 20):
 	fields = ["name", "grand_total", "currency", "customer", "customer_name", "posting_time", "posting_date"]
 	invoice_list = []
 
@@ -419,7 +426,7 @@ def get_past_order_list(search_term, status, limit=20):
 
 
 @frappe.whitelist()
-def set_customer_info(fieldname, customer, value=""):
+def set_customer_info(fieldname: str, customer: str, value: str = ""):
 	if fieldname == "loyalty_program":
 		frappe.db.set_value("Customer", customer, "loyalty_program", value)
 
@@ -459,7 +466,7 @@ def set_customer_info(fieldname, customer, value=""):
 
 
 @frappe.whitelist()
-def get_pos_profile_data(pos_profile):
+def get_pos_profile_data(pos_profile: str):
 	pos_profile = frappe.get_doc("POS Profile", pos_profile)
 	pos_profile = pos_profile.as_dict()
 
@@ -521,7 +528,7 @@ def get_invoice_filters(doctype, status, name=None):
 
 
 @frappe.whitelist()
-def get_customer_recent_transactions(customer):
+def get_customer_recent_transactions(customer: str):
 	sales_invoices = frappe.db.get_list(
 		"Sales Invoice",
 		filters={

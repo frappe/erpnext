@@ -141,7 +141,7 @@ def preprocess_mt940_content(content: str) -> str:
 
 
 @frappe.whitelist()
-def convert_mt940_to_csv(data_import, mt940_file_path):
+def convert_mt940_to_csv(data_import: str, mt940_file_path: str):
 	doc = frappe.get_doc("Bank Statement Import", data_import)
 
 	_file_doc, content = get_file(mt940_file_path)
@@ -206,26 +206,28 @@ def convert_mt940_to_csv(data_import, mt940_file_path):
 
 
 @frappe.whitelist()
-def get_preview_from_template(data_import, import_file=None, google_sheets_url=None):
+def get_preview_from_template(
+	data_import: str, import_file: str | None = None, google_sheets_url: str | None = None
+):
 	return frappe.get_doc("Bank Statement Import", data_import).get_preview_from_template(
 		import_file, google_sheets_url
 	)
 
 
 @frappe.whitelist()
-def form_start_import(data_import):
+def form_start_import(data_import: str):
 	job_id = frappe.get_doc("Bank Statement Import", data_import).start_import()
 	return job_id is not None
 
 
 @frappe.whitelist()
-def download_errored_template(data_import_name):
+def download_errored_template(data_import_name: str):
 	data_import = frappe.get_doc("Bank Statement Import", data_import_name)
 	data_import.export_errored_rows()
 
 
 @frappe.whitelist()
-def download_import_log(data_import_name):
+def download_import_log(data_import_name: str):
 	return frappe.get_doc("Bank Statement Import", data_import_name).download_import_log()
 
 
@@ -327,7 +329,7 @@ def write_files(import_file, data):
 
 
 @frappe.whitelist()
-def get_import_status(docname):
+def get_import_status(docname: str):
 	import_status = {}
 
 	data_import = frappe.get_doc("Bank Statement Import", docname)

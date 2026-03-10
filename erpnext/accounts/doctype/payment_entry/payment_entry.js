@@ -512,12 +512,16 @@ frappe.ui.form.on("Payment Entry", {
 			frm.set_value("contact_email", "");
 			frm.set_value("contact_person", "");
 		}
+
 		if (frm.doc.payment_type && frm.doc.party_type && frm.doc.party && frm.doc.company) {
 			if (!frm.doc.posting_date) {
 				frappe.msgprint(__("Please select Posting Date before selecting Party"));
 				frm.set_value("party", "");
 				return;
 			}
+
+			erpnext.utils.get_employee_contact_details(frm);
+
 			frm.set_party_account_based_on_party = true;
 
 			let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;

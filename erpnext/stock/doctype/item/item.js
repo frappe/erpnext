@@ -84,7 +84,25 @@ frappe.ui.form.on("Item", {
 		}
 	},
 
+	toggle_has_serial_batch_fields(frm) {
+		let hide_fields = cint(frappe.user_defaults?.enable_serial_and_batch_no_for_item) === 0 ? 1 : 0;
+
+		frm.toggle_display(["serial_no_series", "batch_number_series", "create_new_batch"], !hide_fields);
+		frm.toggle_enable(["has_serial_no", "has_batch_no"], !hide_fields);
+
+		if (hide_fields) {
+			let description = __(
+				"To enable the Serial No and Batch No feature, please check the 'Enable Serial / Batch No for Item' checkbox in Stock Settings."
+			);
+
+			frm.set_df_property("has_serial_no", "description", description);
+			frm.set_df_property("has_batch_no", "description", description);
+		}
+	},
+
 	refresh: function (frm) {
+		frm.trigger("toggle_has_serial_batch_fields");
+
 		if (frm.doc.is_stock_item) {
 			frm.add_custom_button(
 				__("Stock Balance"),

@@ -3,6 +3,7 @@
 
 
 import json
+from typing import Any
 
 import frappe
 from frappe import _, throw
@@ -54,7 +55,12 @@ def _preprocess_ctx(ctx):
 
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
-def get_item_details(ctx, doc=None, for_validate=False, overwrite_warehouse=True) -> ItemDetails:
+def get_item_details(
+	ctx: ItemDetailsCtx | str,
+	doc: Document | str | None = None,
+	for_validate: bool = False,
+	overwrite_warehouse: bool = True,
+):
 	"""
 	ctx = {
 	        "item_code": "",
@@ -649,7 +655,13 @@ def get_barcode_data(items_list=None, item_code=None):
 
 
 @frappe.whitelist()
-def get_item_tax_info(doc, tax_category, item_codes, item_rates=None, item_tax_templates=None):
+def get_item_tax_info(
+	doc: Document | str | None,
+	tax_category: str,
+	item_codes: list | str,
+	item_rates: dict | None = None,
+	item_tax_templates: dict | None = None,
+):
 	out = {}
 
 	if item_tax_templates is None:
@@ -690,7 +702,7 @@ def get_item_tax_info(doc, tax_category, item_codes, item_rates=None, item_tax_t
 
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
-def get_item_tax_template(ctx, item=None, out: ItemDetails | None = None):
+def get_item_tax_template(ctx: ItemDetailsCtx, item: Document | None = None, out: ItemDetails | None = None):
 	"""
 	Determines item_tax template from item or parent item groups.
 
@@ -821,7 +833,7 @@ def is_within_valid_range(ctx: ItemDetailsCtx, tax) -> bool:
 
 
 @frappe.whitelist()
-def get_item_tax_map(*, doc: str | dict | Document, tax_template: str | None = None, as_json=True):
+def get_item_tax_map(*, doc: str | dict | Document, tax_template: str | None = None, as_json: bool = True):
 	doc = parse_json(doc)
 	item_tax_map = {}
 	for t in (t for t in (doc.get("taxes") or []) if not t.get("set_by_item_tax_template")):
@@ -838,7 +850,7 @@ def get_item_tax_map(*, doc: str | dict | Document, tax_template: str | None = N
 
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
-def calculate_service_end_date(ctx: ItemDetailsCtx, item=None):
+def calculate_service_end_date(ctx: ItemDetailsCtx, item: Document | None = None):
 	_preprocess_ctx(ctx)
 	if not item:
 		item = frappe.get_cached_doc("Item", ctx.item_code)
@@ -1156,7 +1168,7 @@ def get_item_price(
 
 
 @frappe.whitelist()
-def get_batch_based_item_price(pctx: ItemPriceCtx | dict | str, item_code) -> float:
+def get_batch_based_item_price(pctx: ItemPriceCtx | dict | str, item_code: str):
 	pctx = parse_json(pctx)
 
 	item_price = get_item_price(pctx, item_code, force_batch_no=True)
@@ -1172,7 +1184,7 @@ def get_batch_based_item_price(pctx: ItemPriceCtx | dict | str, item_code) -> fl
 
 
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
-def get_price_list_rate_for(ctx: ItemDetailsCtx, item_code):
+def get_price_list_rate_for(ctx: ItemDetailsCtx, item_code: str):
 	"""
 	:param customer: link to Customer DocType
 	:param supplier: link to Supplier DocType
@@ -1355,7 +1367,7 @@ def get_pos_profile_item_details_(ctx: ItemDetailsCtx, company, pos_profile=None
 
 
 @frappe.whitelist()
-def get_pos_profile(company, pos_profile=None, user=None):
+def get_pos_profile(company: str, pos_profile: str | None = None, user: str | None = None):
 	if pos_profile:
 		return frappe.get_cached_doc("POS Profile", pos_profile)
 
@@ -1391,7 +1403,7 @@ def get_pos_profile(company, pos_profile=None, user=None):
 
 
 @frappe.whitelist()
-def get_conversion_factor(item_code, uom):
+def get_conversion_factor(item_code: str | None, uom: str):
 	item = frappe.get_cached_value("Item", item_code, ["variant_of", "stock_uom"], as_dict=True)
 	if not item_code or not item or uom == item.stock_uom:
 		return {"conversion_factor": 1.0}
@@ -1422,7 +1434,7 @@ def get_conversion_factor(item_code, uom):
 
 
 @frappe.whitelist()
-def get_projected_qty(item_code, warehouse):
+def get_projected_qty(item_code: str, warehouse: str):
 	return {
 		"projected_qty": frappe.db.get_value(
 			"Bin", {"item_code": item_code, "warehouse": warehouse}, "projected_qty"
@@ -1431,7 +1443,9 @@ def get_projected_qty(item_code, warehouse):
 
 
 @frappe.whitelist()
-def get_bin_details(item_code, warehouse, company=None, include_child_warehouses=False):
+def get_bin_details(
+	item_code: str, warehouse: str | None, company: str | None = None, include_child_warehouses: bool = False
+):
 	bin_details = {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
 
 	if warehouse:
@@ -1472,7 +1486,7 @@ def get_company_total_stock(item_code, company):
 
 
 @frappe.whitelist()
-def get_batch_qty(batch_no, warehouse, item_code):
+def get_batch_qty(batch_no: str, warehouse: str, item_code: str):
 	from erpnext.stock.doctype.batch import batch
 
 	if batch_no:
@@ -1481,7 +1495,7 @@ def get_batch_qty(batch_no, warehouse, item_code):
 
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
-def apply_price_list(ctx, as_doc=False, doc=None):
+def apply_price_list(ctx: ItemDetailsCtx | str, as_doc: bool = False, doc: Document | str | None = None):
 	"""Apply pricelist on a document-like dict object and return as
 	{'parent': dict, 'children': list}
 
@@ -1581,7 +1595,7 @@ def get_price_list_currency_and_exchange_rate(ctx: ItemDetailsCtx):
 
 
 @frappe.whitelist()
-def get_default_bom(item_code=None):
+def get_default_bom(item_code: str | None = None):
 	def _get_bom(item):
 		bom = frappe.get_all("BOM", dict(item=item, is_active=True, is_default=True, docstatus=1), limit=1)
 		return bom[0].name if bom else None
@@ -1599,7 +1613,7 @@ def get_default_bom(item_code=None):
 
 
 @frappe.whitelist()
-def get_valuation_rate(item_code, company, warehouse=None):
+def get_valuation_rate(item_code: str, company: str, warehouse: str | None = None):
 	if frappe.get_cached_value("Warehouse", warehouse, "is_group"):
 		return {"valuation_rate": 0.0}
 
@@ -1640,7 +1654,7 @@ def get_gross_profit(out: ItemDetails):
 
 
 @frappe.whitelist()
-def get_serial_no(_args, serial_nos=None, sales_order=None):
+def get_serial_no(_args: Any, serial_nos: list | None = None, sales_order: str | None = None):
 	serial_nos = serial_nos or []
 	return serial_nos
 

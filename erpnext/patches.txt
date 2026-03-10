@@ -412,6 +412,7 @@ erpnext.patches.v15_0.rename_group_by_to_categorize_by
 execute:frappe.db.set_single_value("Accounts Settings", "receivable_payable_fetch_method", "Buffered Cursor")
 erpnext.patches.v14_0.set_update_price_list_based_on
 erpnext.patches.v15_0.update_journal_entry_type
+erpnext.patches.v15_0.add_bank_transaction_as_journal_entry_reference
 erpnext.patches.v15_0.set_grand_total_to_default_mop
 execute:frappe.db.set_single_value("Accounts Settings", "use_legacy_budget_controller", False)
 erpnext.patches.v15_0.set_cancelled_status_to_cancelled_pos_invoice
@@ -466,3 +467,7 @@ erpnext.patches.v16_0.update_company_custom_field_in_bin
 erpnext.patches.v15_0.replace_http_with_https_in_sales_partner
 erpnext.patches.v16_0.migrate_asset_type_checkboxes_to_select
 erpnext.patches.v15_0.delete_quotation_lost_record_detail
+erpnext.patches.v16_0.add_portal_redirects
+erpnext.patches.v16_0.update_order_qty_and_requested_qty_based_on_mr_and_po
+erpnext.patches.v16_0.complete_onboarding_steps_for_older_sites #2
+erpnext.patches.v16_0.enable_serial_batch_setting

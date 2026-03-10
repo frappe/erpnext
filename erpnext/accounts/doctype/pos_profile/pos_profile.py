@@ -275,7 +275,7 @@ def get_child_nodes(group_type, root):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
+def pos_profile_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	user = frappe.session["user"]
 	company = filters.get("company") or frappe.defaults.get_user_default("company")
 
@@ -319,7 +319,7 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def set_default_profile(pos_profile, company):
+def set_default_profile(pos_profile: str, company: str):
 	modified = now()
 	user = frappe.session.user
 

@@ -2,9 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from datetime import datetime, timedelta
+
 import frappe
 from frappe import _, bold, json, msgprint
 from frappe.utils import add_to_date, cint, cstr, flt, now
+from frappe.utils.data import DateTimeLikeObject
 
 import erpnext
 from erpnext.accounts.utils import get_company_default
@@ -16,6 +19,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_available_serial_nos,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
 from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_stock_balance
 
 
@@ -522,9 +526,9 @@ class StockReconciliation(StockController):
 				if abs(difference_amount) > 0:
 					return True
 
-			float_precision = frappe.db.get_default("float_precision") or 3
-			item_dict["rate"] = flt(item_dict.get("rate"), float_precision)
-			item.valuation_rate = flt(item.valuation_rate, float_precision) if item.valuation_rate else None
+			rate_precision = item.precision("valuation_rate")
+			item_dict["rate"] = flt(item_dict.get("rate"), rate_precision)
+			item.valuation_rate = flt(item.valuation_rate, rate_precision) if item.valuation_rate else None
 			if (
 				(item.qty is None or item.qty == item_dict.get("qty"))
 				and (item.valuation_rate is None or item.valuation_rate == item_dict.get("rate"))
@@ -1260,7 +1264,14 @@ def get_batch_qty_for_stock_reco(
 
 
 @frappe.whitelist()
-def get_items(warehouse, posting_date, posting_time, company, item_code=None, ignore_empty_stock=False):
+def get_items(
+	warehouse: str,
+	posting_date: DateTimeLikeObject,
+	posting_time: DateTimeLikeObject,
+	company: str,
+	item_code: str | None = None,
+	ignore_empty_stock: bool | str | int = False,
+):
 	ignore_empty_stock = cint(ignore_empty_stock)
 	items = []
 	if item_code and warehouse:
@@ -1426,13 +1437,13 @@ def get_itemwise_batch(warehouse, posting_date, company, item_code=None):
 def get_stock_balance_for(
 	item_code: str,
 	warehouse: str,
-	posting_date,
-	posting_time,
+	posting_date: DateTimeLikeObject,
+	posting_time: DateTimeLikeObject | timedelta,
 	batch_no: str | None = None,
 	with_valuation_rate: bool = True,
-	inventory_dimensions_dict=None,
-	row=None,
-	company=None,
+	inventory_dimensions_dict: dict | None = None,
+	row: StockReconciliationItem | str | dict | None = None,
+	company: str | None = None,
 ):
 	frappe.has_permission("Stock Reconciliation", "write", throw=True)
 
@@ -1519,7 +1530,7 @@ def get_stock_balance_for(
 
 
 @frappe.whitelist()
-def get_difference_account(purpose, company):
+def get_difference_account(purpose: str, company: str):
 	if purpose == "Stock Reconciliation":
 		account = get_company_default(company, "stock_adjustment_account")
 	else:

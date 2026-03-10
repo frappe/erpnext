@@ -11,6 +11,7 @@ from frappe.contacts.address_and_contact import (
 	delete_contact_and_address,
 	load_address_and_contact,
 )
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
@@ -431,7 +432,7 @@ class Customer(TransactionBase):
 
 
 @frappe.whitelist()
-def make_quotation(source_name, target_doc=None):
+def make_quotation(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -460,7 +461,7 @@ def make_quotation(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_opportunity(source_name, target_doc=None):
+def make_opportunity(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -484,7 +485,7 @@ def make_opportunity(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_payment_entry(source_name, target_doc=None):
+def make_payment_entry(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -542,7 +543,7 @@ def _set_missing_values(source, target):
 
 
 @frappe.whitelist()
-def get_loyalty_programs(doc):
+def get_loyalty_programs(doc: Document):
 	"""returns applicable loyalty programs for a customer"""
 
 	lp_details = []
@@ -644,7 +645,9 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 
 
 @frappe.whitelist()
-def send_emails(customer, customer_outstanding, credit_limit, credit_controller_users_list):
+def send_emails(
+	customer: str, customer_outstanding: float, credit_limit: float, credit_controller_users_list: str | list
+):
 	if isinstance(credit_controller_users_list, str):
 		credit_controller_users_list = json.loads(credit_controller_users_list)
 	subject = _("Credit limit reached for customer {0}").format(customer)
@@ -852,7 +855,7 @@ def make_address(args, is_primary_address=1, is_shipping_address=1):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_customer_primary(doctype, txt, searchfield, start, page_len, filters):
+def get_customer_primary(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	customer = filters.get("customer")
 	type = filters.get("type")
 	type_doctype = qb.DocType(type)

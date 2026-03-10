@@ -1,0 +1,44 @@
+{
+ "allow_roles": [
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Stock User"
+  }
+ ],
+ "creation": "2026-02-20 13:52:55.989409",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2026-02-20 13:53:46.461261",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Stock Onboarding",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Setup Warehouse"
+  },
+  {
+   "step": "Create Item"
+  },
+  {
+   "step": "Create Purchase Receipt"
+  },
+  {
+   "step": "Create Delivery Note"
+  },
+  {
+   "step": "View Stock Balance Report"
+  },
+  {
+   "step": "View Stock Ledger Report"
+  },
+  {
+   "step": "Create Stock Entry"
+  }
+ ],
+ "title": "Onboarding for Stock!"
+}

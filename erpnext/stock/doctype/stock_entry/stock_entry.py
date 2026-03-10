@@ -7,6 +7,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Sum
@@ -215,7 +216,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		apply_rule = self.apply_putaway_rule and (self.purpose in ["Material Transfer", "Material Receipt"])
 
 		if self.get("items") and apply_rule:
-			apply_putaway_rule(self.doctype, self.get("items"), self.company, purpose=self.purpose)
+			if items := apply_putaway_rule(
+				self.doctype, self.get("items"), self.company, purpose=self.purpose
+			):
+				self.items = items
 
 		if self.project:
 			for item in self.items:
@@ -236,6 +240,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_warehouse()
+		self.validate_warehouse_of_sabb()
 		self.validate_work_order()
 		self.validate_bom()
 		self.set_process_loss_qty()
@@ -2094,7 +2099,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return False
 
 	@frappe.whitelist()
-	def get_item_details(self, args: ItemDetailsCtx = None, for_update=False):
+	def get_item_details(self, args: ItemDetailsCtx | None = None, for_update: bool = False):
 		item = frappe.qb.DocType("Item")
 		item_default = frappe.qb.DocType("Item Default")
 
@@ -3515,7 +3520,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 
 @frappe.whitelist()
-def move_sample_to_retention_warehouse(company, items):
+def move_sample_to_retention_warehouse(company: str, items: str | list):
 	from erpnext.stock.serial_batch_bundle import (
 		SerialBatchCreation,
 		get_batch_nos,
@@ -3596,7 +3601,7 @@ def move_sample_to_retention_warehouse(company, items):
 
 
 @frappe.whitelist()
-def make_stock_in_entry(source_name, target_doc=None):
+def make_stock_in_entry(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		target.stock_entry_type = "Material Transfer"
 		target.set_missing_values()
@@ -3647,7 +3652,7 @@ def make_stock_in_entry(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def get_work_order_details(work_order, company):
+def get_work_order_details(work_order: str, company: str):
 	work_order = frappe.get_doc("Work Order", work_order)
 	pending_qty_to_produce = flt(work_order.qty) - flt(work_order.produced_qty)
 
@@ -3766,7 +3771,7 @@ def get_valuation_rate_for_finished_good_entry(work_order):
 
 
 @frappe.whitelist()
-def get_uom_details(item_code, uom, qty):
+def get_uom_details(item_code: str, uom: str, qty: float | None):
 	"""Returns dict `{"conversion_factor": [value], "transfer_qty": qty * [value]}`
 	:param args: dict with `item_code`, `uom` and `qty`"""
 	conversion_factor = get_conversion_factor(item_code, uom).get("conversion_factor")
@@ -3825,7 +3830,7 @@ def get_expired_batches():
 
 
 @frappe.whitelist()
-def get_warehouse_details(args):
+def get_warehouse_details(args: str | dict):
 	if isinstance(args, str):
 		args = json.loads(args)
 
@@ -3847,7 +3852,7 @@ def get_warehouse_details(args):
 
 
 @frappe.whitelist()
-def validate_sample_quantity(item_code, sample_quantity, qty, batch_no=None):
+def validate_sample_quantity(item_code: str, sample_quantity: int, qty: float, batch_no: str | None = None):
 	if cint(qty) < cint(sample_quantity):
 		frappe.throw(
 			_("Sample quantity {0} cannot be more than received quantity {1}").format(sample_quantity, qty)
@@ -3916,7 +3921,7 @@ def get_supplied_items(
 
 
 @frappe.whitelist()
-def get_items_from_subcontract_order(source_name, target_doc=None):
+def get_items_from_subcontract_order(source_name: str, target_doc: str | Document | None = None):
 	from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
 
 	if isinstance(target_doc, str):

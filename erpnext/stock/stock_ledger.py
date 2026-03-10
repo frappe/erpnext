@@ -1303,7 +1303,7 @@ class update_entries_after:
 				else:
 					if sle.voucher_type in ("Delivery Note", "Sales Invoice"):
 						ref_doctype = "Packed Item"
-					elif sle == "Subcontracting Receipt":
+					elif sle.voucher_type == "Subcontracting Receipt":
 						ref_doctype = "Subcontracting Receipt Supplied Item"
 					else:
 						ref_doctype = "Purchase Receipt Item Supplied"
@@ -1860,6 +1860,9 @@ def get_stock_ledger_entries(
 	if extra_cond:
 		conditions += f"{extra_cond}"
 
+	if previous_sle.get("project"):
+		conditions += " and project = %(project)s"
+
 	# nosemgrep
 	return frappe.db.sql(
 		"""
@@ -1908,6 +1911,7 @@ def get_valuation_rate(
 	allow_zero_rate=False,
 	currency=None,
 	company=None,
+	fallbacks=True,
 	raise_error_if_no_rate=True,
 	batch_no=None,
 	serial_and_batch_bundle=None,
@@ -1968,23 +1972,20 @@ def get_valuation_rate(
 	):
 		return flt(last_valuation_rate[0][0])
 
-	# If negative stock allowed, and item delivered without any incoming entry,
-	# system does not found any SLE, then take valuation rate from Item
-	valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate")
-
-	if not valuation_rate:
-		# try Item Standard rate
-		valuation_rate = frappe.db.get_value("Item", item_code, "standard_rate")
-
-		if not valuation_rate:
-			# try in price list
-			valuation_rate = frappe.db.get_value(
+	if fallbacks:
+		# If negative stock allowed, and item delivered without any incoming entry,
+		# system does not found any SLE, then take valuation rate from Item
+		if rate := (
+			frappe.db.get_value("Item", item_code, "valuation_rate")
+			or frappe.db.get_value("Item", item_code, "standard_rate")
+			or frappe.db.get_value(
 				"Item Price", dict(item_code=item_code, buying=1, currency=currency), "price_list_rate"
 			)
+		):
+			return flt(rate)
 
 	if (
 		not allow_zero_rate
-		and not valuation_rate
 		and raise_error_if_no_rate
 		and cint(erpnext.is_perpetual_inventory_enabled(company))
 	):
@@ -2013,8 +2014,6 @@ def get_valuation_rate(
 		msg = message + solutions + sub_solutions + "</li>"
 
 		frappe.throw(msg=msg, title=_("Valuation Rate Missing"))
-
-	return valuation_rate
 
 
 def update_qty_in_future_sle(args, allow_negative_stock=False):

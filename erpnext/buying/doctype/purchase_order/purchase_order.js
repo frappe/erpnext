@@ -428,7 +428,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 						this.frm.add_custom_button(
 							__("Payment Request"),
 							function () {
-								me.make_payment_request();
+								me.make_payment_request_with_schedule();
 							},
 							__("Create")
 						);

@@ -637,11 +637,18 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 	}
 
 	buying_price_list(doc) {
-		this.apply_price_list();
+		if (doc.rm_cost_as_per !== "Price List" && doc.buying_price_list) {
+			this.frm.set_value("buying_price_list", "");
+			return;
+		}
+
+		if (doc.buying_price_list) {
+			this.apply_price_list();
+		}
 	}
 
 	plc_conversion_rate(doc) {
-		if (!this.in_apply_price_list) {
+		if (!this.in_apply_price_list && doc.rm_cost_as_per === "Price List") {
 			this.apply_price_list(null, true);
 		}
 	}

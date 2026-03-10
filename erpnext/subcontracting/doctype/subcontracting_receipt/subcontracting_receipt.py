@@ -344,7 +344,7 @@ class SubcontractingReceipt(SubcontractingController):
 				self.update_rate_for_supplied_items()
 
 	@frappe.whitelist()
-	def get_scrap_items(self, recalculate_rate: bool = False):
+	def get_scrap_items(self, recalculate_rate: bool | None = False):
 		self.remove_scrap_items()
 
 		for item in list(self.items):

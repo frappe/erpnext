@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_months, flt, formatdate
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.trends import get_period_date_ranges
 
@@ -12,6 +13,8 @@ from erpnext.controllers.trends import get_period_date_ranges
 def execute(filters=None):
 	if not filters:
 		filters = {}
+
+	validate_filters(filters)
 
 	columns = get_columns(filters)
 	if filters.get("budget_against_filter"):
@@ -29,6 +32,10 @@ def execute(filters=None):
 	chart_data = build_comparison_chart_data(filters, columns, data)
 
 	return columns, data, None, chart_data
+
+
+def validate_filters(filters):
+	validate_budget_dimensions(filters)
 
 
 def get_budget_records(filters, dimensions):
@@ -51,7 +58,7 @@ def get_budget_records(filters, dimensions):
 			b.company = %s
 			AND b.docstatus = 1
 			AND b.budget_against = %s
-			AND b.{budget_against_field} IN ({', '.join(['%s'] * len(dimensions))})
+			AND b.{budget_against_field} IN ({", ".join(["%s"] * len(dimensions))})
 			AND (
 				b.from_fiscal_year <= %s
 				AND b.to_fiscal_year >= %s
@@ -402,6 +409,17 @@ def get_budget_dimensions(filters):
 					`tab{tab}`
 			""".format(tab=filters.get("budget_against"))
 		)  # nosec
+
+
+def validate_budget_dimensions(filters):
+	dimensions = [d.get("document_type") for d in get_dimensions(with_cost_center_and_project=True)[0]]
+	if filters.get("budget_against") and filters.get("budget_against") not in dimensions:
+		frappe.throw(
+			title=_("Invalid Accounting Dimension"),
+			msg=_("{0} is not a valid Accounting Dimension.").format(
+				frappe.bold(filters.get("budget_against"))
+			),
+		)
 
 
 def build_comparison_chart_data(filters, columns, data):

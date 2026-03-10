@@ -671,6 +671,11 @@ class calculate_taxes_and_totals:
 			else:
 				self.grand_total_diff = 0
 
+			# Apply rounding adjustment to grand_total_for_distributing_discount
+			# to prevent precision errors during discount distribution
+			if hasattr(self, "grand_total_for_distributing_discount") and not self.discount_amount_applied:
+				self.grand_total_for_distributing_discount += self.grand_total_diff
+
 	def calculate_totals(self):
 		grand_total_diff = self.grand_total_diff
 
@@ -1184,7 +1189,7 @@ def get_itemised_tax_breakup_html(doc):
 
 
 @frappe.whitelist()
-def get_round_off_applicable_accounts(company, account_list):
+def get_round_off_applicable_accounts(company: str, account_list: list | str):
 	# required to set correct region
 	with temporary_flag("company", company):
 		return get_regional_round_off_accounts(company, account_list)

@@ -420,7 +420,7 @@ def get_context(customer, doc):
 
 
 @frappe.whitelist()
-def fetch_customers(customer_collection, collection_name, primary_mandatory):
+def fetch_customers(customer_collection: str, collection_name: str, primary_mandatory: str | int):
 	customer_list = []
 	customers = []
 
@@ -460,7 +460,7 @@ def fetch_customers(customer_collection, collection_name, primary_mandatory):
 
 
 @frappe.whitelist()
-def get_customer_emails(customer_name, primary_mandatory, billing_and_primary=True):
+def get_customer_emails(customer_name: str, primary_mandatory: str | int, billing_and_primary: bool = True):
 	"""Returns first email from Contact Email table as a Billing email
 	when Is Billing Contact checked
 	and Primary email- email with Is Primary checked"""
@@ -506,7 +506,7 @@ def get_customer_emails(customer_name, primary_mandatory, billing_and_primary=Tr
 
 
 @frappe.whitelist()
-def download_statements(document_name):
+def download_statements(document_name: str):
 	doc = frappe.get_doc("Process Statement Of Accounts", document_name)
 	report = get_report_pdf(doc)
 	if report:
@@ -516,7 +516,7 @@ def download_statements(document_name):
 
 
 @frappe.whitelist()
-def send_emails(document_name, from_scheduler=False, posting_date=None):
+def send_emails(document_name: str, from_scheduler: bool = False, posting_date: str | None = None):
 	doc = frappe.get_doc("Process Statement Of Accounts", document_name)
 	report = get_report_pdf(doc, consolidated=False)
 

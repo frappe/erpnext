@@ -1104,7 +1104,9 @@ class SubcontractingInwardController:
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_fg_reference_names(doctype, txt, searchfield, start, page_len, filters):
+def get_fg_reference_names(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
 	return frappe.get_all(
 		"Subcontracting Inward Order Item",
 		limit_start=start,

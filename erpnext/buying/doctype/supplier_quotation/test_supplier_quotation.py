@@ -34,7 +34,7 @@ class TestPurchaseOrder(IntegrationTestCase):
 		self.assertEqual(sq.get("items")[1].rate, 300)
 		self.assertEqual(sq.get("items")[1].description, "test")
 
-	def test_update_supplier_quotation_child_rate_disallow(self):
+	def test_update_supplier_quotation_child_rate(self):
 		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
 		sq.submit()
 		trans_item = json.dumps(
@@ -42,6 +42,22 @@ class TestPurchaseOrder(IntegrationTestCase):
 				{
 					"item_code": sq.items[0].item_code,
 					"rate": 300,
+					"qty": sq.items[0].qty,
+					"docname": sq.items[0].name,
+				},
+			]
+		)
+		update_child_qty_rate("Supplier Quotation", trans_item, sq.name)
+		sq.reload()
+		self.assertEqual(sq.get("items")[0].rate, 300)
+		po = make_purchase_order(sq.name)
+		po.schedule_date = add_days(today(), 1)
+		po.submit()
+		trans_item = json.dumps(
+			[
+				{
+					"item_code": sq.items[0].item_code,
+					"rate": 20,
 					"qty": sq.items[0].qty,
 					"docname": sq.items[0].name,
 				},

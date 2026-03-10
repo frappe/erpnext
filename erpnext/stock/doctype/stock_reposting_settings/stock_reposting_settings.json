@@ -13,8 +13,11 @@
   "end_time",
   "limits_dont_apply_on",
   "item_based_reposting",
+  "section_break_dxuf",
   "enable_parallel_reposting",
   "no_of_parallel_reposting",
+  "column_break_itvd",
+  "enable_separate_reposting_for_gl",
   "errors_notification_section",
   "notify_reposting_error_to_role"
  ],
@@ -81,13 +84,28 @@
    "fieldname": "no_of_parallel_reposting",
    "fieldtype": "Int",
    "label": "No of Parallel Reposting (Per Item)"
+  },
+  {
+   "fieldname": "section_break_dxuf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_itvd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "item_based_reposting",
+   "fieldname": "enable_separate_reposting_for_gl",
+   "fieldtype": "Check",
+   "label": "Enable Separate Reposting for GL"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-02 18:18:57.115176",
+ "modified": "2026-02-25 14:11:33.461173",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reposting Settings",

@@ -226,6 +226,17 @@
    "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
+   "label": "Item",
+   "link_to": "Item",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
    "label": "Asset Category",
    "link_to": "Asset Category",
    "link_type": "DocType",
@@ -258,9 +269,10 @@
    "url": ""
   }
  ],
- "modified": "2026-01-10 00:06:13.218453",
+ "modified": "2026-02-23 20:57:05.930062",
  "modified_by": "Administrator",
  "module": "Assets",
+ "module_onboarding": "Asset Onboarding",
  "name": "Assets",
  "owner": "Administrator",
  "standard": 1,

@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder import DocType
@@ -846,7 +847,9 @@ def get_returned_qty_map(delivery_note):
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None, args=None):
+def make_sales_invoice(
+	source_name: str, target_doc: str | Document | None = None, args: dict | str | None = None
+):
 	if args is None:
 		args = {}
 	if isinstance(args, str):
@@ -975,7 +978,9 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 
 
 @frappe.whitelist()
-def make_delivery_trip(source_name, target_doc=None, kwargs=None):
+def make_delivery_trip(
+	source_name: str, target_doc: str | Document | None = None, kwargs: dict | None = None
+):
 	if not target_doc:
 		target_doc = frappe.new_doc("Delivery Trip")
 	doclist = get_mapped_doc(
@@ -1001,7 +1006,9 @@ def make_delivery_trip(source_name, target_doc=None, kwargs=None):
 
 
 @frappe.whitelist()
-def make_installation_note(source_name, target_doc=None, kwargs=None):
+def make_installation_note(
+	source_name: str, target_doc: str | Document | None = None, kwargs: dict | None = None
+):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.installed_qty)
 		target.serial_no = obj.serial_no
@@ -1029,7 +1036,7 @@ def make_installation_note(source_name, target_doc=None, kwargs=None):
 
 
 @frappe.whitelist()
-def make_packing_slip(source_name, target_doc=None):
+def make_packing_slip(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 
@@ -1084,7 +1091,7 @@ def make_packing_slip(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_shipment(source_name, target_doc=None):
+def make_shipment(source_name: str, target_doc: str | Document | None = None):
 	def postprocess(source, target):
 		user = frappe.db.get_value(
 			"User", frappe.session.user, ["email", "full_name", "phone", "mobile_no"], as_dict=1
@@ -1159,20 +1166,20 @@ def make_shipment(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_sales_return(source_name, target_doc=None):
+def make_sales_return(source_name: str, target_doc: str | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Delivery Note", source_name, target_doc)
 
 
 @frappe.whitelist()
-def update_delivery_note_status(docname, status):
+def update_delivery_note_status(docname: str, status: str):
 	dn = frappe.get_lazy_doc("Delivery Note", docname)
 	dn.update_status(status)
 
 
 @frappe.whitelist()
-def make_inter_company_purchase_receipt(source_name, target_doc=None):
+def make_inter_company_purchase_receipt(source_name: str, target_doc: str | Document | None = None):
 	return make_inter_company_transaction("Delivery Note", source_name, target_doc)
 
 

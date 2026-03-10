@@ -80,6 +80,7 @@ class SalesOrderItem(Document):
 		quotation_item: DF.Data | None
 		rate: DF.Currency
 		rate_with_margin: DF.Currency
+		requested_qty: DF.Float
 		reserve_stock: DF.Check
 		returned_qty: DF.Float
 		stock_qty: DF.Float

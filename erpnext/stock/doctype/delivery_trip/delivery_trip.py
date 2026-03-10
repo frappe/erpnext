@@ -150,7 +150,7 @@ class DeliveryTrip(Document):
 		frappe.msgprint(_("Delivery Notes {0} updated").format(", ".join(delivery_notes_updated)))
 
 	@frappe.whitelist()
-	def process_route(self, optimize):
+	def process_route(self, optimize: bool):
 		"""
 		Estimate the arrival times for each stop in the Delivery Trip.
 		If `optimize` is True, the stops will be re-arranged, based
@@ -305,7 +305,7 @@ class DeliveryTrip(Document):
 
 
 @frappe.whitelist()
-def get_contact_and_address(name):
+def get_contact_and_address(name: str):
 	out = frappe._dict()
 
 	get_default_contact(out, name)
@@ -367,7 +367,7 @@ def get_default_address(out, name):
 
 
 @frappe.whitelist()
-def get_contact_display(contact):
+def get_contact_display(contact: str):
 	contact_info = frappe.db.get_value(
 		"Contact", contact, ["first_name", "last_name", "phone", "mobile_no"], as_dict=1
 	)
@@ -403,7 +403,7 @@ def sanitize_address(address):
 
 
 @frappe.whitelist()
-def notify_customers(delivery_trip):
+def notify_customers(delivery_trip: str):
 	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
 
 	context = delivery_trip.as_dict()
@@ -468,7 +468,7 @@ def get_attachments(delivery_stop):
 
 
 @frappe.whitelist()
-def get_driver_email(driver):
+def get_driver_email(driver: str):
 	employee = frappe.db.get_value("Driver", driver, "employee")
 	email = frappe.db.get_value("Employee", employee, "prefered_email")
 	return {"email": email}

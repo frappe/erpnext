@@ -56,7 +56,6 @@ class TestRouting(IntegrationTestCase):
 				self.assertEqual(job_card_doc.total_completed_qty, 10)
 
 		wo_doc.cancel()
-		wo_doc.delete()
 
 	def test_update_bom_operation_time(self):
 		"""Update cost shouldn't update routing times."""

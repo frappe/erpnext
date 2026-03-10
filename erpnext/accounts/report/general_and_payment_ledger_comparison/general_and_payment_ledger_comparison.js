@@ -38,6 +38,20 @@ function get_filters() {
 			},
 		},
 		{
+			fieldname: "party_type",
+			label: __("Party Type"),
+			fieldtype: "Link",
+			options: "Party Type",
+			width: 100,
+		},
+		{
+			fieldname: "party",
+			label: __("Party"),
+			fieldtype: "Dynamic Link",
+			options: "party_type",
+			width: 100,
+		},
+		{
 			fieldname: "voucher_no",
 			label: __("Voucher No"),
 			fieldtype: "Data",

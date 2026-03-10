@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from typing import Any
+
 import frappe
 from frappe import _
 from frappe.utils.dashboard import cache_source
@@ -10,15 +12,15 @@ from frappe.utils.dashboard import cache_source
 @frappe.whitelist()
 @cache_source
 def get(
-	chart_name=None,
-	chart=None,
-	no_cache=None,
-	filters=None,
-	from_date=None,
-	to_date=None,
-	timespan=None,
-	time_interval=None,
-	heatmap_year=None,
+	chart_name: str | None = None,
+	chart: Any | None = None,
+	no_cache: Any | None = None,
+	filters: dict | str | None = None,
+	from_date: Any | None = None,
+	to_date: Any | None = None,
+	timespan: Any | None = None,
+	time_interval: Any | None = None,
+	heatmap_year: Any | None = None,
 ):
 	labels, datapoints = [], []
 	filters = frappe.parse_json(filters)

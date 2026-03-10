@@ -1,0 +1,20 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Purchase Invoice",
+ "creation": "2026-02-19 12:38:14.868162",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 5,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-25 16:58:56.386439",
+ "modified_by": "Administrator",
+ "name": "Create Purchase Invoice",
+ "owner": "Administrator",
+ "reference_document": "Purchase Invoice",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Create Purchase Invoice",
+ "validate_action": 1
+}
