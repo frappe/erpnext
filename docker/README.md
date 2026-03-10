@@ -15,10 +15,10 @@ docker compose up -d
 ```
 
 The first run takes **3-5 minutes** as it:
-1. Pulls all required images (MariaDB, Redis, ERPNext)
+1. Pulls all required images (MariaDB, Redis, ZirakERP)
 2. Starts the database and Redis
 3. Configures the bench
-4. Creates your first site with ERPNext installed
+4. Creates your first site with ZirakERP installed
 
 ## Access the ERP
 
@@ -74,7 +74,7 @@ This deletes all data and starts fresh.
 | Service       | Purpose                          | Port  |
 |---------------|----------------------------------|-------|
 | frontend      | Nginx reverse proxy              | 8080  |
-| backend       | Frappe/ERPNext application server | 8000* |
+| backend       | ZirakERP application server      | 8000* |
 | websocket     | Real-time updates (Socket.IO)    | 9000* |
 | db            | MariaDB database                 | 3306* |
 | redis-cache   | Caching layer                    | 6379* |

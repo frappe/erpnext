@@ -1,0 +1,15 @@
+{
+	"name": "ZirakERP",
+	"image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+	},
+	"postCreateCommand": "bash .devcontainer/setup.sh",
+	"forwardPorts": [8080],
+	"portsAttributes": {
+		"8080": {
+			"label": "ZirakERP",
+			"onAutoForward": "notify"
+		}
+	}
+}

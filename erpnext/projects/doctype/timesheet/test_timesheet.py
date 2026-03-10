@@ -11,10 +11,10 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError, make_sales_invoice
 from erpnext.setup.doctype.employee.test_employee import make_employee
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ZirakERPTestSuite
 
 
-class TestTimesheet(ERPNextTestSuite):
+class TestTimesheet(ZirakERPTestSuite):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()

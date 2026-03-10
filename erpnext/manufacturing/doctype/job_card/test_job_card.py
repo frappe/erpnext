@@ -24,12 +24,12 @@ from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder, make_
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ZirakERPTestSuite
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["UOM"]
 
 
-class TestJobCard(ERPNextTestSuite):
+class TestJobCard(ZirakERPTestSuite):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()

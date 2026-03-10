@@ -12,11 +12,9 @@ Some key notes before you open a PR:
 
 Also, if you're new here
 
-- Documentation Guidelines => https://github.com/frappe/erpnext/wiki/Updating-Documentation
-
-- Contribution Guide => https://github.com/frappe/erpnext/blob/develop/.github/CONTRIBUTING.md
-
-- Pull Request Checklist => https://github.com/frappe/erpnext/wiki/Pull-Request-Checklist
+- Documentation Guidelines => https://docs.zirakerp.com
+- Contribution Guide => .github/CONTRIBUTING.md
+- Pull Request Checklist => https://docs.zirakerp.com/pull-request-checklist
 
 -->
 

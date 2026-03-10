@@ -1,6 +1,14 @@
+# ZirakERP Docker Compose Configuration
+# Builds custom image from local rebranded source
 services:
   backend:
-    image: frappe/erpnext:v16.8.2
+    # ZirakERP application backend
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: zirakerp:latest
+    labels:
+      com.zirakerp.service: "backend"
     networks:
       - zirak_network
     restart: on-failure
@@ -14,7 +22,10 @@ services:
       MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:-admin}
 
   configurator:
-    image: frappe/erpnext:v16.8.2
+    # ZirakERP site configurator (one-time setup)
+    image: zirakerp:latest
+    labels:
+      com.zirakerp.service: "configurator"
     networks:
       - zirak_network
     restart: "no"
@@ -48,7 +59,10 @@ services:
         condition: service_started
 
   create-site:
-    image: frappe/erpnext:v16.8.2
+    # ZirakERP site creator (one-time setup)
+    image: zirakerp:latest
+    labels:
+      com.zirakerp.service: "create-site"
     networks:
       - zirak_network
     restart: "no"
@@ -82,7 +96,10 @@ services:
         condition: service_completed_successfully
 
   db:
+    # ZirakERP database
     image: mariadb:10.6
+    labels:
+      com.zirakerp.service: "database"
     networks:
       - zirak_network
     healthcheck:
@@ -103,7 +120,10 @@ services:
       - db-data:/var/lib/mysql
 
   frontend:
-    image: frappe/erpnext:v16.8.2
+    # ZirakERP web frontend (Nginx)
+    image: zirakerp:latest
+    labels:
+      com.zirakerp.service: "frontend"
     networks:
       - zirak_network
     depends_on:
@@ -128,7 +148,10 @@ services:
       - "${HTTP_PORT:-8080}:8080"
 
   queue-long:
-    image: frappe/erpnext:v16.8.2
+    # ZirakERP long-running background worker
+    image: zirakerp:latest
+    labels:
+      com.zirakerp.service: "queue-long"
     networks:
       - zirak_network
     restart: on-failure
@@ -145,7 +168,10 @@ services:
       FRAPPE_REDIS_QUEUE: redis://redis-queue:6379
 
   queue-short:
-    image: frappe/erpnext:v16.8.2
+    # ZirakERP short-running background worker
+    image: zirakerp:latest
+    labels:
+      com.zirakerp.service: "queue-short"
     networks:
       - zirak_network
     restart: on-failure
@@ -162,7 +188,10 @@ services:
       FRAPPE_REDIS_QUEUE: redis://redis-queue:6379
 
   redis-queue:
+    # ZirakERP job queue (Redis)
     image: redis:6.2-alpine
+    labels:
+      com.zirakerp.service: "redis-queue"
     networks:
       - zirak_network
     restart: on-failure
@@ -170,13 +199,19 @@ services:
       - redis-queue-data:/data
 
   redis-cache:
+    # ZirakERP cache layer (Redis)
     image: redis:6.2-alpine
+    labels:
+      com.zirakerp.service: "redis-cache"
     networks:
       - zirak_network
     restart: on-failure
 
   scheduler:
-    image: frappe/erpnext:v16.8.2
+    # ZirakERP task scheduler
+    image: zirakerp:latest
+    labels:
+      com.zirakerp.service: "scheduler"
     networks:
       - zirak_network
     restart: on-failure
@@ -188,7 +223,10 @@ services:
       - logs:/home/frappe/frappe-bench/logs
 
   websocket:
-    image: frappe/erpnext:v16.8.2
+    # ZirakERP real-time websocket service
+    image: zirakerp:latest
+    labels:
+      com.zirakerp.service: "websocket"
     networks:
       - zirak_network
     restart: on-failure

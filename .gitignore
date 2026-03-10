@@ -22,3 +22,6 @@ node_modules/
 
 # ZirakERP Docker
 docker/.env
+
+# Local frappe-bench dev environment
+frappe-bench/

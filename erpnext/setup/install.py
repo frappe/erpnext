@@ -14,7 +14,7 @@ from erpnext.setup.utils import identity as _
 from .default_success_action import get_default_success_action
 
 default_mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via
-	<a style="color: #888" href="http://frappe.io/erpnext">ERPNext</a></div>"""
+	<a style="color: #888" href="https://zirakerp.com">ZirakERP</a></div>"""
 
 
 def after_install():
@@ -147,7 +147,7 @@ def create_custom_company_links():
 	"""Add link fields to Company in Email Account and Communication.
 
 	These DocTypes are provided by the Frappe Framework but need to be associated
-	with a company in ERPNext to allow for multitenancy. I.e. one company should
+	with a company in ZirakERP to allow for multitenancy. I.e. one company should
 	not be able to access emails and communications from another company.
 	"""
 	create_custom_fields(
@@ -188,7 +188,7 @@ def add_standard_navbar_items():
 		{
 			"item_label": _("Documentation"),
 			"item_type": "Route",
-			"route": "https://docs.erpnext.com/",
+			"route": "https://docs.zirakerp.com/",
 			"is_standard": 1,
 		},
 		{
@@ -236,7 +236,7 @@ def add_standard_navbar_items():
 
 
 def add_app_name():
-	frappe.db.set_single_value("System Settings", "app_name", "ERPNext")
+	frappe.db.set_single_value("System Settings", "app_name", "ZirakERP")
 
 
 def update_roles():

@@ -11,7 +11,7 @@
  "icon": "setting",
  "idx": 0,
  "is_hidden": 0,
- "label": "ERPNext Settings",
+ "label": "ZirakERP Settings",
  "links": [
   {
    "dependencies": "",
@@ -72,7 +72,7 @@
  "modified": "2026-01-09 13:05:08.007297",
  "modified_by": "Administrator",
  "module": "Setup",
- "name": "ERPNext Settings",
+ "name": "ZirakERP Settings",
  "number_cards": [],
  "owner": "Administrator",
  "parent_page": "",
@@ -128,6 +128,6 @@
    "type": "DocType"
   }
  ],
- "title": "ERPNext Settings",
+ "title": "ZirakERP Settings",
  "type": "Workspace"
 }

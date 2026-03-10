@@ -1,5 +1,14 @@
 @import "./order-page";
 
+// ── ZirakERP website theme ──
+.web-footer {
+	background: linear-gradient(170deg, #F0FDFA 0%, #CCFBF1 50%, #fff 100%);
+}
+
+.web-footer a {
+	color: var(--zirakerp-dark, #0F766E);
+}
+
 .filter-options {
 	max-height: 300px;
 	overflow: auto;
@@ -8,13 +17,16 @@
 .address-card {
 	cursor: pointer;
 	position: relative;
+	border-radius: var(--border-radius-lg);
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
 	.check {
 		display: none;
 	}
 
 	&.active {
-		border-color: var(--primary);
+		border-color: var(--zirakerp-primary, #0D9488);
+		box-shadow: 0 0 0 2px var(--zirakerp-soft, #99F6E4);
 
 		.check {
 			display: inline-flex;
@@ -25,7 +37,7 @@
 .check {
 	display: inline-flex;
 	padding: 0.25rem;
-	background: var(--primary);
+	background: var(--zirakerp-primary, #0D9488);
 	color: white;
 	border-radius: 50%;
 	font-size: 12px;

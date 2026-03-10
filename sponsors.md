@@ -1,4 +1,4 @@
-## Sponsors
+## ZirakERP Sponsors
 
 #### Features
 

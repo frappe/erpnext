@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 48" fill="none">
+  <defs>
+    <linearGradient id="zGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#14B8A6"/>
+      <stop offset="100%" stop-color="#0D9488"/>
+    </linearGradient>
+  </defs>
+  <!-- Icon: Stylized Z in rounded square -->
+  <rect x="2" y="4" width="40" height="40" rx="10" fill="url(#zGrad)"/>
+  <path d="M12 16h16l-16 16h16" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Wordmark -->
+  <text x="52" y="34" font-family="Nunito Sans, Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="800" fill="#115E59">Zirak<tspan fill="#0D9488">ERP</tspan></text>
+</svg>

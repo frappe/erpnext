@@ -117,7 +117,7 @@ def if_lending_app_not_installed(function):
 	return wrapper
 
 
-class ERPNextTestSuite(IntegrationTestCase):
+class ZirakERPTestSuite(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()

@@ -6,10 +6,10 @@ from frappe.utils import random_string, today
 
 from erpnext.crm.doctype.lead.lead import make_opportunity
 from erpnext.crm.utils import get_linked_prospect
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ZirakERPTestSuite
 
 
-class TestLead(ERPNextTestSuite):
+class TestLead(ZirakERPTestSuite):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()

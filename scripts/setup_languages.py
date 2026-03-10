@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Setup script to register Kurdish and configure languages in Frappe/ERPNext.
+Setup script to register Kurdish and configure languages in Frappe/ZirakERP.
 Run this INSIDE the Docker container:
   docker compose exec backend bench --site frontend execute scripts/setup_languages.py
 

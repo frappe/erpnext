@@ -1,10 +1,10 @@
 [project]
 name = "erpnext"
 authors = [
-    { name = "Frappe Technologies Pvt Ltd", email = "developers@frappe.io"}
+    { name = "Zirak Technologies", email = "developers@zirakerp.com"}
 ]
-description = "Open Source ERP"
-requires-python = ">=3.14"
+description = "ZirakERP — Open Source ERP"
+requires-python = ">=3.10"
 readme = "README.md"
 dynamic = ["version"]
 dependencies = [
@@ -79,6 +79,6 @@ docstring-code-format = true
 
 
 [project.urls]
-Homepage = "https://frappe.io/erpnext"
-Repository = "https://github.com/frappe/erpnext.git"
-"Bug Reports" = "https://github.com/frappe/erpnext/issues"
+Homepage = "https://zirakerp.com"
+Repository = "https://github.com/AlanJumeworworworworworw/zirakerp.git"
+"Bug Reports" = "https://github.com/AlanJumeworworworworworw/zirakerp/issues"

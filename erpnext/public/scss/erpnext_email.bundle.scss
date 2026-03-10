@@ -1,21 +1,23 @@
+// ZirakERP Email Styles
+
 .panel-header {
-	background-color: var(--bg-color);
-	border: 1px solid var(--border-color);
-	border-radius: 3px 3px 0 0;
+	background-color: #F0FDFA;
+	border: 1px solid #CCFBF1;
+	border-radius: 8px 8px 0 0;
 }
 
 .panel-body {
 	background-color: white;
-	border: 1px solid var(--border-color);
+	border: 1px solid #CCFBF1;
 	border-top: none;
-	border-radius: 0 0 3px 3px;
+	border-radius: 0 0 8px 8px;
 	overflow-wrap: break-word;
 }
 
 .sender-avatar {
 	width: 24px;
 	height: 24px;
-	border-radius: 3px;
+	border-radius: 6px;
 	vertical-align: middle;
 }
 
@@ -24,7 +26,7 @@
 
 	line-height: 24px;
 	text-align: center;
-	color: var(--border-color);
-	border: 1px solid var(--border-color);
-	background-color: white;
+	color: #0D9488;
+	border: 1px solid #99F6E4;
+	background-color: #F0FDFA;
 }

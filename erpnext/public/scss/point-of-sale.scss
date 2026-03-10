@@ -736,8 +736,15 @@
 						@extend .primary-action;
 						margin: 0px;
 						margin-bottom: var(--margin-sm);
-						background-color: var(--blue-200);
+						background-color: var(--zirakerp-primary, #0D9488);
 						color: white;
+						border-radius: var(--border-radius-lg);
+						font-weight: 700;
+						transition: background-color 0.15s ease;
+
+						&:hover {
+							background-color: var(--zirakerp-dark, #0F766E);
+						}
 					}
 				}
 			}
@@ -945,14 +952,21 @@
 		padding: var(--padding-lg);
 
 		.border-primary {
-			border: 1px solid var(--blue-500);
+			border: 1px solid var(--zirakerp-primary, #0D9488);
 		}
 
 		.submit-order-btn {
 			@extend .primary-action;
 			margin-top: 0%;
-			background-color: var(--btn-primary);
-			color: var(--neutral);
+			background-color: var(--zirakerp-primary, #0D9488);
+			color: #fff;
+			border-radius: var(--border-radius-lg);
+			font-weight: 700;
+			transition: background-color 0.15s ease;
+
+			&:hover {
+				background-color: var(--zirakerp-dark, #0F766E);
+			}
 		}
 
 		.section-label {

@@ -1,6 +1,6 @@
 frappe.provide("frappe.help.help_links");
 
-const docsUrl = "https://erpnext.com/docs/";
+const docsUrl = "https://docs.zirakerp.com/";
 
 frappe.help.help_links["Form/Rename Tool"] = [
 	{

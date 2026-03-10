@@ -1,15 +1,15 @@
 {
-  "name": "erpnext",
-  "description": "Open Source ERP System powered by the Frappe Framework",
+  "name": "zirakerp",
+  "description": "Open Source ERP System — ZirakERP",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/frappe/erpnext.git"
+    "url": "git+https://github.com/AlanJumeworworworworworw/zirakerp.git"
   },
-  "homepage": "https://frappe.io/erpnext",
-  "author": "Frappe Technologies Pvt. Ltd.",
+  "homepage": "https://zirakerp.com",
+  "author": "Zirak Technologies",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/frappe/erpnext/issues"
+    "url": "https://github.com/AlanJumeworworworworworw/zirakerp/issues"
   },
   "devDependencies": {},
   "dependencies": {

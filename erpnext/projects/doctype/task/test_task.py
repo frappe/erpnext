@@ -5,10 +5,10 @@ import frappe
 from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.projects.doctype.task.task import CircularReferenceError, ParentIsGroupError
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ZirakERPTestSuite
 
 
-class TestTask(ERPNextTestSuite):
+class TestTask(ZirakERPTestSuite):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()

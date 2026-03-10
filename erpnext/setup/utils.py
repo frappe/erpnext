@@ -30,7 +30,7 @@ def before_tests():
 				"fy_end_date": f"{current_year}-12-31",
 				"language": "english",
 				"company_tagline": "Testing",
-				"email": "test@erpnext.com",
+				"email": "test@zirakerp.com",
 				"password": "test",
 				"chart_of_accounts": "Standard",
 			}
@@ -236,7 +236,7 @@ def insert_record(records):
 
 
 def welcome_email():
-	site_name = get_default_company() or "ERPNext"
+	site_name = get_default_company() or "ZirakERP"
 	title = _("Welcome to {0}").format(site_name)
 	return title
 

@@ -4,10 +4,10 @@
 import frappe
 
 from erpnext.projects.doctype.activity_cost.activity_cost import DuplicationError
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ZirakERPTestSuite
 
 
-class TestActivityCost(ERPNextTestSuite):
+class TestActivityCost(ZirakERPTestSuite):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()

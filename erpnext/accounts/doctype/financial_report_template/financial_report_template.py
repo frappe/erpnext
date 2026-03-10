@@ -122,7 +122,7 @@ def sync_financial_report_templates(chart_of_accounts=None, existing_company=Non
 	if existing_company:
 		return
 
-	# Allow regional templates to completely override ERPNext
+	# Allow regional templates to completely override ZirakERP
 	# templates based on the chart of accounts selected
 	disable_default_financial_report_template = False
 	if chart_of_accounts:

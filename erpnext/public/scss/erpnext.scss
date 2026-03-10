@@ -1,4 +1,298 @@
-.erpnext-footer {
+// ─────────────────────────────────────────────────────────
+// ZirakERP Design System
+// Teal-first palette · Nunito Sans typography · Rounded UI
+// ─────────────────────────────────────────────────────────
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,300;0,6..12,400;0,6..12,500;0,6..12,600;0,6..12,700;0,6..12,800;0,6..12,900;1,6..12,400;1,6..12,600&display=swap');
+
+// ── Brand tokens ──
+:root {
+	--zirakerp-primary: #0D9488;
+	--zirakerp-dark: #0F766E;
+	--zirakerp-deeper: #115E59;
+	--zirakerp-light: #14B8A6;
+	--zirakerp-soft: #99F6E4;
+	--zirakerp-faint: #CCFBF1;
+	--zirakerp-off-white: #F0FDFA;
+
+	// ── Typography override ──
+	--font-stack: "Nunito Sans", "Inter", "-apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", sans-serif;
+
+	// ── Primary / accent → teal ──
+	--primary: var(--zirakerp-primary);
+	--primary-color: var(--zirakerp-primary);
+	--brand-color: var(--zirakerp-primary);
+
+	// ── Buttons ──
+	--btn-primary: var(--zirakerp-primary);
+	--btn-primary-dark: var(--zirakerp-dark);
+	--border-primary: var(--zirakerp-primary);
+
+	// ── Links ──
+	--text-on-teal: #fff;
+
+	// ── Focus ring ──
+	--highlight-shadow: 0 0 0 2px var(--zirakerp-soft), 0 0 8px var(--zirakerp-light);
+
+	// ── Progress bar ──
+	--progress-bar-bg: var(--zirakerp-primary);
+
+	// ── Checkbox ──
+	--checkbox-color: var(--zirakerp-primary);
+	--checkbox-gradient: linear-gradient(
+		180deg,
+		var(--zirakerp-light) -40%,
+		var(--zirakerp-primary) 100%
+	);
+
+	// ── Page background ──
+	--bg-color: var(--zirakerp-off-white);
+	--fg-color: #fff;
+	--fg-hover-color: var(--zirakerp-faint);
+
+	// ── Navbar ──
+	--navbar-bg: #fff;
+
+	// ── Sidebar ──
+	--surface-menu-bar: var(--zirakerp-off-white);
+	--sidebar-hover-color: var(--zirakerp-faint);
+	--sidebar-active-color: #fff;
+	--sidebar-border-color: var(--zirakerp-faint);
+}
+
+// Dark mode adjustments
+[data-theme="dark"] {
+	--zirakerp-primary: #14B8A6;
+	--zirakerp-dark: #0D9488;
+	--zirakerp-deeper: #0F766E;
+	--zirakerp-soft: #115E59;
+	--zirakerp-faint: #042f2e;
+	--zirakerp-off-white: #042f2e;
+
+	--primary: var(--zirakerp-primary);
+	--primary-color: var(--zirakerp-primary);
+	--brand-color: var(--zirakerp-primary);
+	--btn-primary: var(--zirakerp-primary);
+	--border-primary: var(--zirakerp-primary);
+	--progress-bar-bg: var(--zirakerp-primary);
+	--checkbox-color: var(--zirakerp-primary);
+	--checkbox-gradient: linear-gradient(
+		180deg,
+		var(--zirakerp-dark) -40%,
+		var(--zirakerp-primary) 100%
+	);
+
+	--bg-color: #0a0a0a;
+	--fg-color: var(--gray-900);
+	--fg-hover-color: var(--gray-800);
+	--navbar-bg: var(--gray-900);
+	--surface-menu-bar: #0f0f0f;
+	--sidebar-hover-color: rgba(13, 148, 136, 0.15);
+	--sidebar-active-color: rgba(13, 148, 136, 0.25);
+	--sidebar-border-color: #232323;
+}
+
+// ── Global font application ──
+body,
+html {
+	font-family: var(--font-stack) !important;
+}
+
+// ── Primary button styling ──
+.btn-primary,
+.btn-primary-dark {
+	background-color: var(--zirakerp-primary) !important;
+	border-color: var(--zirakerp-primary) !important;
+	color: #fff !important;
+
+	&:hover,
+	&:focus {
+		background-color: var(--zirakerp-dark) !important;
+		border-color: var(--zirakerp-dark) !important;
+		box-shadow: 0 2px 8px rgba(13, 148, 136, 0.35);
+	}
+
+	&:active {
+		background-color: var(--zirakerp-deeper) !important;
+		border-color: var(--zirakerp-deeper) !important;
+	}
+}
+
+// ── Link colors ──
+a {
+	color: var(--zirakerp-dark);
+
+	&:hover {
+		color: var(--zirakerp-deeper);
+	}
+}
+
+// ── Navbar accent ──
+.navbar .navbar-brand,
+.navbar .navbar-home {
+	color: var(--zirakerp-deeper) !important;
+}
+
+// ── Sidebar ──
+.body-sidebar {
+	background: var(--surface-menu-bar) !important;
+	border-right: 1px solid var(--sidebar-border-color) !important;
+}
+
+.standard-sidebar-item {
+	border-radius: 8px !important;
+	margin: 1px 6px !important;
+	transition: background 0.15s ease, color 0.15s ease;
+
+	&:hover {
+		background: var(--sidebar-hover-color) !important;
+	}
+
+	&.active-sidebar,
+	&.selected {
+		background: var(--sidebar-active-color) !important;
+		box-shadow: none !important;
+
+		a, span, .sidebar-item-label {
+			color: var(--zirakerp-primary) !important;
+			font-weight: 600;
+		}
+	}
+
+	a, span, .sidebar-item-label {
+		color: var(--text-color);
+	}
+}
+
+.desk-sidebar .sidebar-menu .selected,
+.desk-sidebar .sidebar-menu a.selected {
+	color: var(--zirakerp-primary) !important;
+	font-weight: 600;
+}
+
+// ── Navbar ──
+.navbar {
+	background: var(--navbar-bg) !important;
+	border-bottom: 1px solid var(--zirakerp-faint) !important;
+	box-shadow: 0 1px 4px rgba(13, 148, 136, 0.06);
+}
+
+[data-theme="dark"] .navbar {
+	border-bottom-color: var(--border-color) !important;
+	box-shadow: none;
+}
+
+.navbar .navbar-nav .nav-link {
+	&:hover {
+		color: var(--zirakerp-primary) !important;
+	}
+}
+
+// ── Page background ──
+.page-container {
+	background-color: var(--bg-color) !important;
+}
+
+html, body {
+	background-color: var(--bg-color) !important;
+}
+
+// ── Page heading accent bar ──
+.page-head {
+	background: var(--fg-color) !important;
+	border-bottom: 2px solid var(--zirakerp-faint);
+}
+
+// ── Workspace / main content ──
+.layout-main-section {
+	background: var(--fg-color);
+	border-radius: 12px;
+}
+
+// ── List view rows ──
+.list-row:hover {
+	background-color: var(--zirakerp-off-white);
+}
+
+[data-theme="dark"] .list-row:hover {
+	background-color: var(--fg-hover-color);
+}
+
+// ── Indicator overrides (teal for active / success) ──
+.indicator-pill.green,
+.indicator-pill.blue {
+	background-color: var(--zirakerp-faint);
+	color: var(--zirakerp-deeper);
+}
+
+.indicator.green::before,
+.indicator.blue::before {
+	background: var(--zirakerp-primary);
+}
+
+// ── Form section headers ──
+.section-head {
+	color: var(--zirakerp-deeper);
+	font-weight: 700;
+}
+
+// ── Cards ──
+.frappe-card,
+.pos-card {
+	border-radius: var(--border-radius-lg);
+	border: 1px solid var(--border-color);
+	transition: box-shadow 0.2s ease;
+
+	&:hover {
+		box-shadow: 0 4px 16px rgba(13, 148, 136, 0.08);
+	}
+}
+
+// ── Workspace module cards ──
+.widget.shortcut-widget-box .widget-head .widget-title {
+	color: var(--zirakerp-deeper);
+}
+
+// ── Like / rating accents ──
+.like-active-item .like-action {
+	color: var(--zirakerp-primary) !important;
+}
+
+// ── Tags ──
+.frappe-tag .tag-pill {
+	background-color: var(--zirakerp-faint);
+	color: var(--zirakerp-deeper);
+	border: 1px solid var(--zirakerp-soft);
+}
+
+// ── Setup wizard accent ──
+.setup-wizard-slide .step-icon.active {
+	background-color: var(--zirakerp-primary);
+	color: #fff;
+}
+
+// ── Onboarding ──
+.onboarding-steps .step-text.complete {
+	color: var(--zirakerp-primary);
+}
+
+// ── Custom scrollbar (subtle teal tint) ──
+::-webkit-scrollbar-thumb {
+	background: var(--gray-400);
+	border-radius: 6px;
+
+	&:hover {
+		background: var(--zirakerp-primary);
+	}
+}
+
+// ── Toast / notification accent ──
+.toast-header {
+	border-bottom: 2px solid var(--zirakerp-faint);
+}
+
+.zirakerp-footer {
 	margin: 11px auto;
 	text-align: center;
 }
@@ -15,7 +309,7 @@
 	margin: -10px auto;
 }
 
-.erpnext-icon {
+.zirakerp-icon {
 	width: 24px;
 	margin-right: 0px;
 	margin-top: -3px;

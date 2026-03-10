@@ -8,7 +8,7 @@ import frappe
 def execute():
 	navbar_settings = frappe.get_single("Navbar Settings")
 	for item in navbar_settings.help_dropdown:
-		if item.is_standard and item.route == "https://erpnext.com/docs/user/manual":
-			item.route = "https://docs.erpnext.com/docs/v14/user/manual/en/introduction"
+		if item.is_standard and item.route == "https://zirakerp.com/docs/user/manual":
+			item.route = "https://docs.zirakerp.com/docs/v14/user/manual/en/introduction"
 
 	navbar_settings.save()
