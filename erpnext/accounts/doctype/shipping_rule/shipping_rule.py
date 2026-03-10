@@ -155,7 +155,9 @@ class ShippingRule(Document):
 			shipping_charge["category"] = "Valuation and Total"
 			shipping_charge["add_deduct_tax"] = "Add"
 
-		existing_shipping_charge = doc.get("taxes", filters=shipping_charge)
+		# Exclude 'category' from filter since it can change for non-stock items
+		filter_dict = {k: v for k, v in shipping_charge.items() if k != "category"}
+		existing_shipping_charge = doc.get("taxes", filters=filter_dict)
 		if existing_shipping_charge:
 			# take the last record found
 			existing_shipping_charge[-1].tax_amount = shipping_amount
