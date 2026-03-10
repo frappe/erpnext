@@ -604,8 +604,6 @@ class calculate_taxes_and_totals:
 		current_net_amount = 0.0
 
 		if tax_rate == NOT_APPLICABLE_TAX:
-			if not tax.get("dont_recompute_tax"):
-				self.set_item_wise_tax(item, tax, 0, current_tax_amount, current_net_amount)
 			return current_net_amount, current_tax_amount
 
 		if tax.charge_type == "Actual":

@@ -392,13 +392,6 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 				"taxable_amount": 100.0,
 			},
 			{
-				"item_row": self.doc.items[0].name,
-				"tax_row": self.doc.taxes[1].name,
-				"rate": 0,
-				"amount": 0.0,
-				"taxable_amount": 0.0,
-			},
-			{
 				"item_row": self.doc.items[1].name,
 				"tax_row": self.doc.taxes[0].name,
 				"rate": 0.0,
