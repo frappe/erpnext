@@ -674,4 +674,3 @@ function set_schedule_date(frm) {
 		);
 	}
 }
-
