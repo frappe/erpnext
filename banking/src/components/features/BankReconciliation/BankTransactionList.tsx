@@ -164,7 +164,7 @@ const BankTransactionListView = () => {
                     <TableCell className="text-right">{formatCurrency(row.withdrawal, bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))}</TableCell>
                     <TableCell className="text-right">{formatCurrency(row.deposit, bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))}</TableCell>
                     <TableCell className="text-right">{formatCurrency(row.unallocated_amount, bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))}</TableCell>
-                    <TableCell>{row.transaction_type ? <Badge variant={'outline'}>{row.transaction_type}</Badge> : null}</TableCell>
+                    <TableCell>{row.transaction_type ? <Badge>{row.transaction_type}</Badge> : null}</TableCell>
                     <TableCell>
                         {(!row.allocated_amount || (row.allocated_amount && row.allocated_amount === 0)) ?
                             <div className="bg-transparent border border-border flex items-center justify-center gap-1.5 px-2 py-1 text-xs w-fit rounded-md">

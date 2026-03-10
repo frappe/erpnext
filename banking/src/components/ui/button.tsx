@@ -23,10 +23,11 @@ const buttonVariants = cva(
         "2xl": "h-13 text-2xl font-medium px-3.5 rounded-xl [&_svg:not([class*='size-'])]:size-6",
       },
       theme: {
-        gray: "focus-visible:ring-outline-gray-3",
-        blue: "focus-visible:ring-blue-400",
-        green: "focus-visible:ring-outline-green-2",
-        red: "focus-visible:ring-outline-red-2"
+        gray: "focus-visible:shadow-focus-gray",
+        blue: "focus-visible:shadow-focus-blue",
+        green: "focus-visible:shadow-focus-green",
+        red: "focus-visible:shadow-focus-red",
+        amber: "focus-visible:shadow-focus-amber",
       },
       isIconButton: {
         true: "",
@@ -69,38 +70,38 @@ const buttonVariants = cva(
       {
         variant: "solid",
         theme: "blue",
-        className: "bg-blue-500 hover:bg-surface-blue-3 active:bg-blue-700 disabled:bg-blue-300 disabled:text-ink-white"
+        className: "bg-surface-blue-5 text-ink-blue-1 hover:bg-surface-blue-6 active:bg-surface-blue-7 disabled:bg-surface-blue-2 disabled:text-ink-blue-2"
       },
       {
         variant: "solid",
         theme: "green",
-        className: "bg-surface-green-3 hover:bg-green-700 active:bg-green-800 disabled:bg-surface-green-2 disabled:text-ink-green-2"
+        className: "bg-surface-green-5 text-ink-green-1 hover:bg-surface-green-6 active:bg-surface-green-7 disabled:bg-surface-green-2 disabled:text-ink-green-2"
       },
       {
         variant: "solid",
         theme: "red",
-        className: "bg-surface-red-5 hover:bg-surface-red-6 active:bg-surface-red-7 disabled:bg-surface-red-2 disabled:text-ink-red-2"
+        className: "bg-surface-red-5 text-ink-red-1 hover:bg-surface-red-6 active:bg-surface-red-7 disabled:bg-surface-red-2 disabled:text-ink-red-2"
       },
       // Subtle Buttons
       {
         variant: "subtle",
         theme: "gray",
-        className: "text-ink-gray-8 bg-surface-gray-2 hover:bg-surface-gray-3 active:bg-surface-gray-4 disabled:bg-surface-gray-2 disabled:text-ink-gray-4"
+        className: "text-ink-gray-7 bg-surface-gray-2 hover:bg-surface-gray-3 active:bg-surface-gray-4 disabled:bg-surface-gray-2 disabled:text-ink-gray-4"
       },
       {
         variant: "subtle",
         theme: "blue",
-        className: "text-ink-blue-3 bg-surface-blue-2 hover:bg-blue-200 active:bg-blue-300 disabled:bg-surface-blue-2 disabled:text-ink-blue-link"
+        className: "text-ink-blue-4 bg-surface-blue-2 hover:bg-surface-blue-3 active:bg-surface-blue-4 disabled:bg-surface-blue-2 disabled:text-ink-blue-2"
       },
       {
         variant: "subtle",
         theme: "green",
-        className: "text-green-800 bg-surface-green-2 hover:bg-green-200 active:bg-green-300 disabled:bg-surface-green-2 disabled:text-ink-green-2"
+        className: "text-ink-green-4 bg-surface-green-2 hover:bg-surface-green-3 active:bg-surface-green-4 disabled:bg-surface-green-2 disabled:text-ink-green-2"
       },
       {
         variant: "subtle",
         theme: "red",
-        className: "text-red-700 bg-surface-red-2 hover:bg-surface-red-3 active:bg-surface-red-4 disabled:bg-surface-red-2 disabled:text-ink-red-2"
+        className: "text-ink-red-4 bg-surface-red-2 hover:bg-surface-red-3 active:bg-surface-red-4 disabled:bg-surface-red-2 disabled:text-ink-red-2"
       },
 
       // Outline buttons
@@ -108,25 +109,25 @@ const buttonVariants = cva(
         variant: "outline",
         theme: "gray",
         className:
-          "text-ink-gray-8 border-outline-gray-2 hover:border-outline-gray-3 active:border-outline-gray-3 active:bg-surface-gray-4 disabled:bg-surface-gray-2 disabled:text-ink-gray-4 disabled:border-outline-gray-2"
+          "text-ink-gray-7 border-outline-gray-2 hover:border-outline-gray-3 active:border-outline-gray-4 active:bg-surface-gray-4 disabled:bg-surface-gray-2 disabled:text-ink-gray-4 disabled:border-outline-gray-2"
       },
       {
         variant: "outline",
         theme: "blue",
         className:
-          "text-ink-blue-3 border-outline-blue-1 hover:border-blue-400 active:border-blue-400 active:bg-blue-300 disabled:bg-surface-blue-2 disabled:text-ink-blue-link disabled:border-outline-blue-1"
+          "text-ink-blue-4 border-outline-blue-2 hover:border-outline-blue-3 active:border-outline-blue-4 active:bg-surface-blue-4 disabled:bg-surface-blue-2 disabled:text-ink-blue-2 disabled:border-outline-blue-2"
       },
       {
         variant: "outline",
         theme: "green",
         className:
-          "text-green-800 border-outline-green-2 hover:border-green-500 active:border-green-500 active:bg-green-300 disabled:bg-surface-green-2 disabled:text-ink-green-2  disabled:border-outline-green-2"
+          "text-ink-green-4 border-outline-green-2 hover:border-outline-green-3 active:border-outline-green-4 active:bg-surface-green-4 disabled:bg-surface-green-2 disabled:text-ink-green-2 disabled:border-outline-green-2"
       },
       {
         variant: "outline",
         theme: "red",
         className:
-          "text-red-700 border-outline-red-1 hover:border-outline-red-2 active:border-outline-red-2 active:bg-surface-red-3 disabled:bg-surface-red-2 disabled:text-ink-red-2 disabled:border-outline-red-1"
+          "text-ink-red-4 border-outline-red-2 hover:border-outline-red-3 active:border-outline-red-4 active:bg-surface-red-4 disabled:bg-surface-red-2 disabled:text-ink-red-2 disabled:border-outline-red-2"
       },
 
       // Ghost buttons
@@ -134,25 +135,25 @@ const buttonVariants = cva(
         variant: "ghost",
         theme: "gray",
         className:
-          "text-ink-gray-8 hover:bg-surface-gray-3 active:bg-surface-gray-4 disabled:text-ink-gray-4"
+          "text-ink-gray-7 hover:bg-surface-gray-3 active:bg-surface-gray-4 disabled:text-ink-gray-4"
       },
       {
         variant: "ghost",
         theme: "blue",
         className:
-          "text-ink-blue-3 hover:bg-blue-200 active:bg-blue-300 disabled:text-ink-blue-link"
+          "text-ink-blue-4 hover:bg-surface-blue-3 active:bg-surface-blue-4 disabled:text-ink-blue-2"
       },
       {
         variant: "ghost",
         theme: "green",
         className:
-          "text-green-800 hover:bg-green-200 active:bg-green-300 disabled:text-ink-green-2"
+          "text-ink-green-4 hover:bg-surface-green-3 active:bg-surface-green-4 disabled:text-ink-green-2"
       },
       {
         variant: "ghost",
         theme: "red",
         className:
-          "text-red-700 hover:bg-surface-red-3 active:bg-surface-red-4 disabled:text-ink-red-2"
+          "text-ink-red-4 hover:bg-surface-red-3 active:bg-surface-red-4 disabled:text-ink-red-2"
       },
       //Link buttons
       {

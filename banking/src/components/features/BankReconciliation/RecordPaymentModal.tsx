@@ -497,9 +497,9 @@ const PaymentEntryForm = ({ selectedTransaction, selectedBankAccount }: { select
                 </div>
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button variant={'outline'} disabled={loading}>{_("Cancel")}</Button>
+                        <Button variant={'outline'} size='md' disabled={loading}>{_("Cancel")}</Button>
                     </DialogClose>
-                    <Button type='submit' disabled={loading || isUploading}>{_("Submit")}</Button>
+                    <Button type='submit' size='md' disabled={loading || isUploading}>{_("Submit")}</Button>
                 </DialogFooter>
             </div>
         </form>

@@ -98,8 +98,8 @@ const BankTransactionUnreconcileModalContent = () => {
                             </TableCell>
                             <TableCell>{formatCurrency(voucher.allocated_amount)}</TableCell>
                             <TableCell>{voucher.reconciliation_type === 'Voucher Created' ?
-                                <Badge className="bg-green-600 text-white rounded-sm">{_(voucher.reconciliation_type)}</Badge> :
-                                <Badge className="rounded-sm">{_(voucher.reconciliation_type ?? "Matched")}</Badge>}</TableCell>
+                                <Badge theme="green">{_(voucher.reconciliation_type)}</Badge> :
+                                <Badge theme="blue">{_(voucher.reconciliation_type ?? "Matched")}</Badge>}</TableCell>
                         </TableRow>
                     })}
                 </TableBody>

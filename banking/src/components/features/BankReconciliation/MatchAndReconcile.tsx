@@ -482,7 +482,7 @@ const OptionsForSingleTransaction = ({ transaction, contentHeight }: { transacti
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button
-                                variant='outline'
+                                variant='subtle'
                                 size='md'
                                 aria-label={_("Record a payment entry against a customer or supplier")}
                                 onClick={() => setRecordPaymentModalOpen(true)}>

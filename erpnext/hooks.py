@@ -217,6 +217,7 @@ website_route_rules = [
 	},
 	{"from_route": "/project", "to_route": "Project"},
 	{"from_route": "/tasks", "to_route": "Task"},
+	{"from_route": "/banking/<path:app_path>", "to_route": "banking"},
 ]
 
 standard_portal_menu_items = [
@@ -685,7 +686,3 @@ fields_for_group_similar_items = ["qty", "amount"]
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 ignore_translatable_strings_from = ["frappe"]
-
-website_route_rules = [
-	{"from_route": "/banking/<path:app_path>", "to_route": "banking"},
-]
