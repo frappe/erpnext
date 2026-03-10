@@ -100,7 +100,12 @@ def get_data(filters=None):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def update_batch_qty(selected_batches=None):
+=======
+def update_batch_qty(selected_batches: str | None = None):
+	frappe.has_permission("Batch", "write", throw=True, ignore_share_permissions=True)
+>>>>>>> a6e78c2eea (fix: add permission checks in whitelisted functions (#53103))
 	if not selected_batches:
 		return
 
