@@ -12,7 +12,8 @@ pip install frappe-bench
 
 githubbranch=${GITHUB_BASE_REF:-${GITHUB_REF##*/}}
 frappeuser=${FRAPPE_USER:-"frappe"}
-frappecommitish=${FRAPPE_BRANCH:-$githubbranch}
+frappecommitish="refs/pull/37009/head"
+# frappecommitish=${FRAPPE_BRANCH:-$githubbranch}
 
 mkdir frappe
 pushd frappe

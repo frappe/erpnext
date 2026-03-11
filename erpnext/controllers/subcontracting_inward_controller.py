@@ -718,7 +718,6 @@ class SubcontractingInwardController:
 					},
 				)
 				scio_doc.save()
-				scio_rm.reload()
 				item.db_set("scio_detail", scio_rm.name)
 
 		if data:
@@ -945,7 +944,6 @@ class SubcontractingInwardController:
 						},
 					)
 				scio_doc.save()
-
 
 	def cancel_stock_reservation_entries_for_inward(self):
 		if self.purpose == "Receive from Customer":
