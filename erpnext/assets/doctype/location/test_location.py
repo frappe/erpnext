@@ -2,6 +2,7 @@
 # See license.txt
 import json
 import math
+from unittest.mock import patch
 
 import frappe
 from frappe.tests import IntegrationTestCase
@@ -16,42 +17,81 @@ from erpnext.assets.doctype.location.location import (
 )
 
 
-def create_location(
-	location_name,
-	parent_location=None,
-	area=0,
-	is_group=0,
-	is_container=0,
-	latitude=0,
-	longitude=0,
-	location_geojson=None,
-):
-	"""
-	Helper function to create location document
-	"""
-	doc = frappe.get_doc(
-		{
-			"doctype": "Location",
-			"location_name": location_name,
-			"parent_location": parent_location,
-			"area": area,
-			"is_group": is_group,
-			"is_container": is_container,
-			"latitude": latitude,
-			"longitude": longitude,
-		}
-	)
-	if location_geojson:
-		doc.location = location_geojson
-
-	doc.insert(ignore_permissions=True)
-
-	return doc
-
-
 class TestLocation(IntegrationTestCase):
+	def setUp(self):
+		self.ancestor_snapshots = {}
+		for location in ["Basil Farm", "Division 1", "Field 1", "Block 1", "Test Location Area"]:
+			if frappe.db.exists("Location", location):
+				doc = frappe.get_doc("Location", location)
+				for ancestor_name in doc.get_ancestors():
+					if ancestor_name not in self.ancestor_snapshots:
+						ancestor_doc = frappe.get_doc("Location", ancestor_name)
+						self.ancestor_snapshots[ancestor_name] = {
+							"area": ancestor_doc.area,
+							"location": ancestor_doc.location,
+						}
+
+		self.created_locations = []
+
 	def tearDown(self):
 		frappe.db.rollback()
+
+		for ancestor_name, snapshot in self.ancestor_snapshots.items():
+			if frappe.db.exists("Location", ancestor_name):
+				frappe.db.set_value(
+					"Location",
+					ancestor_name,
+					{
+						"area": snapshot["area"],
+						"location": snapshot["location"],
+					},
+					update_modified=False,
+				)
+
+		for name in reversed(self.created_locations):
+			if frappe.db.exists("Location", name):
+				frappe.delete_doc(
+					"Location",
+					name,
+					force=True,
+					ignore_permissions=True,
+				)
+
+		frappe.db.commit()
+
+	def create_location(
+		self,
+		location_name,
+		parent_location=None,
+		area=0,
+		is_group=0,
+		is_container=0,
+		latitude=0,
+		longitude=0,
+		location_geojson=None,
+	):
+		"""
+		Helper function to create location document
+		"""
+		doc = frappe.get_doc(
+			{
+				"doctype": "Location",
+				"location_name": location_name,
+				"parent_location": parent_location,
+				"area": area,
+				"is_group": is_group,
+				"is_container": is_container,
+				"latitude": latitude,
+				"longitude": longitude,
+			}
+		)
+		if location_geojson:
+			doc.location = location_geojson
+
+		doc.insert(ignore_permissions=True)
+		self.created_locations.append(doc.name)
+
+		return doc
 
 	def test_calculate_location_area_polygon(self):
 		geojson = json.dumps(
@@ -70,7 +110,7 @@ class TestLocation(IntegrationTestCase):
 			}
 		)
 
-		location = create_location("_Test Polygon Location", location_geojson=geojson)
+		location = self.create_location("_Test Polygon Location", location_geojson=geojson)
 
 		self.assertGreater(location.area, 0)
 
@@ -88,7 +128,7 @@ class TestLocation(IntegrationTestCase):
 			}
 		)
 
-		location = create_location("_Test Circle Location", location_geojson=geojson)
+		location = self.create_location("_Test Circle Location", location_geojson=geojson)
 
 		expected_area = math.pi * 10 * 10
 		self.assertAlmostEqual(location.area, expected_area, places=2)
@@ -107,7 +147,7 @@ class TestLocation(IntegrationTestCase):
 			}
 		)
 
-		location = create_location("_Test Features Location", location_geojson=geojson)
+		location = self.create_location("_Test Features Location", location_geojson=geojson)
 		features = location.get_location_features()
 
 		self.assertEqual(len(features), 1)
@@ -129,7 +169,7 @@ class TestLocation(IntegrationTestCase):
 			}
 		)
 
-		location = create_location("_Test Nested JSON Location", location_geojson=geojson)
+		location = self.create_location("_Test Nested JSON Location", location_geojson=geojson)
 		features = location.get_location_features()
 
 		self.assertIsInstance(features, list)
@@ -137,13 +177,13 @@ class TestLocation(IntegrationTestCase):
 		self.assertEqual(features[0]["type"], "Feature")
 
 	def test_get_location_features_empty(self):
-		location = create_location("_Test Location")
+		location = self.create_location("_Test Location")
 		features = location.get_location_features()
 
 		self.assertEqual(features, [])
 
 	def test_set_location_features(self):
-		location = create_location("_Test Location")
+		location = self.create_location("_Test Location")
 
 		new_features = [
 			{
@@ -174,7 +214,7 @@ class TestLocation(IntegrationTestCase):
 			}
 		)
 
-		location = create_location("_Test Child Property", location_geojson=geojson)
+		location = self.create_location("_Test Child Property", location_geojson=geojson)
 		filtered_features = location.add_child_property()
 
 		self.assertEqual(len(filtered_features), 1)
@@ -202,14 +242,14 @@ class TestLocation(IntegrationTestCase):
 			}
 		)
 
-		location = create_location("_Test Separator", location_geojson=geojson)
+		location = self.create_location("_Test Separator", location_geojson=geojson)
 		child_features, non_child_features = location.feature_seperator("Child1")
 
 		self.assertEqual(len(child_features), 1)
 		self.assertEqual(len(non_child_features), 1)
 
 	def test_update_ancestor_location_features(self):
-		parent = create_location("_Test Parent Location", is_group=1)
+		parent = self.create_location("_Test Parent Location", is_group=1)
 
 		child_geojson = json.dumps(
 			{
@@ -224,7 +264,9 @@ class TestLocation(IntegrationTestCase):
 			}
 		)
 
-		child = create_location("Child Location", parent_location=parent.name, location_geojson=child_geojson)
+		child = self.create_location(
+			"Child Location", parent_location=parent.name, location_geojson=child_geojson
+		)
 
 		child.save()
 
@@ -236,7 +278,7 @@ class TestLocation(IntegrationTestCase):
 		self.assertTrue(parent_features[0]["properties"]["child_feature"])
 
 	def test_update_ancestor_features_with_discarded_features(self):
-		parent = create_location("_Test Parent Location 2", is_group=1)
+		parent = self.create_location("_Test Parent Location 2", is_group=1)
 
 		initial_geojson = json.dumps(
 			{
@@ -256,13 +298,13 @@ class TestLocation(IntegrationTestCase):
 			}
 		)
 
-		child = create_location(
+		child = self.create_location(
 			"_Test Child Location", parent_location=parent.name, location_geojson=initial_geojson
 		)
-
 		child.save()
+
 		parent.reload()
-		initial_feature_count = len(parent.get_location_features())
+		self.assertEqual(len(parent.get_location_features()), 2)
 
 		updated_geojson = json.dumps(
 			{
@@ -284,10 +326,11 @@ class TestLocation(IntegrationTestCase):
 		final_features = parent.get_location_features()
 
 		self.assertIsInstance(final_features, list)
-		self.assertNotEqual(initial_feature_count, len(final_features))
+		self.assertEqual(len(final_features), 1)
+		self.assertEqual({feature["properties"]["id"] for feature in final_features}, {"feature3"})
 
 	def test_remove_ancestor_location_features(self):
-		parent = create_location("_Test Parent Location 3", is_group=1)
+		parent = self.create_location("_Test Parent Location 3", is_group=1)
 
 		child1_geojson = json.dumps(
 			{
@@ -315,12 +358,12 @@ class TestLocation(IntegrationTestCase):
 			}
 		)
 
-		child1 = create_location(
+		child1 = self.create_location(
 			"_Test Child Location 2", parent_location=parent.name, location_geojson=child1_geojson
 		)
 		child1.save()
 
-		child2 = create_location(
+		child2 = self.create_location(
 			"_Test Child Location 3", parent_location=parent.name, location_geojson=child2_geojson
 		)
 		child2.save()
@@ -396,7 +439,7 @@ class TestLocation(IntegrationTestCase):
 		self.assertEqual(area, 0.0)
 
 	def test_get_children_root(self):
-		root_location = create_location("_Test Root Location 1", is_group=1)
+		root_location = self.create_location("_Test Root Location 1", is_group=1)
 
 		children = get_children(doctype="Location", parent=None)
 		self.assertIsInstance(children, list)
@@ -404,10 +447,23 @@ class TestLocation(IntegrationTestCase):
 		child_names = [c["value"] for c in children]
 		self.assertIn(root_location.name, child_names)
 
+	def test_get_children_with_translated_root(self):
+		with patch("erpnext.assets.doctype.location.location._") as mock_translate:
+			mock_translate.side_effect = lambda x: "Todas las ubicaciones" if x == "All Locations" else x
+
+			children_translated = get_children("Location", parent="Todas las ubicaciones")
+			children_english = get_children("Location", parent="All Locations")
+			children_empty = get_children("Location", parent="")
+
+			# All three should return the same root-level locations
+			self.assertIsInstance(children_translated, list)
+			self.assertEqual(children_translated, children_english)
+			self.assertEqual(children_translated, children_empty)
+
 	def test_get_children_with_parent(self):
-		parent = create_location("_Test Parent Location 4", is_group=1)
-		child1 = create_location("_Test Child Location 1", parent_location=parent.name)
-		child2 = create_location("_Test Child Location 2", parent_location=parent.name, is_group=1)
+		parent = self.create_location("_Test Parent Location 4", is_group=1)
+		child1 = self.create_location("_Test Child Location 1", parent_location=parent.name)
+		child2 = self.create_location("_Test Child Location 2", parent_location=parent.name, is_group=1)
 
 		children = get_children(doctype="Location", parent=parent.name)
 
@@ -423,7 +479,7 @@ class TestLocation(IntegrationTestCase):
 				self.assertEqual(child["expandable"], 1)
 
 	def test_get_children_all_locations(self):
-		root_location = create_location("_Test Root Location 2", is_group=1)
+		root_location = self.create_location("_Test Root Location 2", is_group=1)
 
 		children = get_children(doctype="Location", parent="All Locations")
 		self.assertIsInstance(children, list)
@@ -463,8 +519,8 @@ class TestLocation(IntegrationTestCase):
 		self.assertIsNone(location.parent_location)
 
 	def test_nested_set_lft_rgt(self):
-		parent = create_location("_Test Nested Parent", is_group=1)
-		child = create_location("_Test Nested Child", parent_location=parent.name)
+		parent = self.create_location("_Test Nested Parent", is_group=1)
+		child = self.create_location("_Test Nested Child", parent_location=parent.name)
 
 		parent.reload()
 		child.reload()
@@ -474,8 +530,8 @@ class TestLocation(IntegrationTestCase):
 		self.assertLess(child.rgt, parent.rgt)
 
 	def test_validate_if_child_exists_on_trash(self):
-		parent = create_location("_Test Parent To Delete", is_group=1)
-		create_location("_Test Child Preventing Delete", parent_location=parent.name)
+		parent = self.create_location("_Test Parent To Delete", is_group=1)
+		self.create_location("_Test Child Preventing Delete", parent_location=parent.name)
 
 		with self.assertRaises(frappe.ValidationError):
 			parent.delete()
@@ -513,7 +569,14 @@ class TestLocation(IntegrationTestCase):
 			"""
 				SHOW INDEX FROM `tabLocation`
 				WHERE Column_name IN ('lft', 'rgt')
-			"""
+			""",
+			as_dict=True,
 		)
 
+		indexes = {}
+
+		for row in result:
+			indexes.setdefault(row["Key_name"], []).append((row["Seq_in_index"], row["Column_name"]))
+
+		self.assertIn([(1, "lft"), (2, "rgt")], [sorted(columns) for columns in indexes.values()])
 		self.assertTrue(len(result) >= 2)
