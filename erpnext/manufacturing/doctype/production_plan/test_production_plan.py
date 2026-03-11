@@ -2789,6 +2789,7 @@ def make_bom(**args):
 			"company": args.company or "_Test Company",
 			"routing": args.routing,
 			"with_operations": args.with_operations or 0,
+			"process_loss_percentage": args.process_loss_percentage or 0,
 		}
 	)
 
@@ -2809,6 +2810,23 @@ def make_bom(**args):
 				"source_warehouse": args.source_warehouse,
 			},
 		)
+
+	if args.scrap_items:
+		for item in args.scrap_items:
+			item_doc = frappe.get_doc("Item", item)
+			bom.append(
+				"secondary_items",
+				{
+					"type": "Scrap",
+					"item_code": item,
+					"item_name": item,
+					"uom": item_doc.stock_uom,
+					"stock_uom": item_doc.stock_uom,
+					"qty": args.scrap_qty or 1,
+					"cost_allocation_per": args.scrap_cost_allocation_per or 10,
+					"process_loss_per": args.scrap_process_loss_per or 10,
+				},
+			)
 
 	if not args.do_not_save:
 		bom.insert(ignore_permissions=True)

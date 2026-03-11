@@ -160,7 +160,7 @@ class SubcontractingController(StockController):
 					).format(item.idx, get_link_to_form("Item", item.item_code))
 				)
 
-			if not item.get("is_scrap_item"):
+			if not item.get("type") and not item.get("is_legacy_scrap_item"):
 				if not is_sub_contracted_item:
 					frappe.throw(
 						_("Row {0}: Item {1} must be a subcontracted item.").format(item.idx, item.item_name)
@@ -206,7 +206,7 @@ class SubcontractingController(StockController):
 							).format(item.idx, item.item_name)
 						)
 
-				if self.doctype != "Subcontracting Inward Order":
+				if self.doctype not in ["Subcontracting Inward Order", "Subcontracting Receipt"]:
 					item.amount = item.qty * item.rate
 
 				if item.bom:
@@ -238,7 +238,7 @@ class SubcontractingController(StockController):
 			and self._doc_before_save
 		):
 			for row in self._doc_before_save.get("items"):
-				item_dict[row.name] = (row.item_code, row.qty + (row.get("rejected_qty") or 0))
+				item_dict[row.name] = (row.item_code, row.received_qty)
 
 		return item_dict
 
@@ -264,7 +264,7 @@ class SubcontractingController(StockController):
 			self.__reference_name.append(row.name)
 			if (row.name not in item_dict) or (
 				row.item_code,
-				row.qty + (row.get("rejected_qty") or 0),
+				row.received_qty,
 			) != item_dict[row.name]:
 				self.__changed_name.append(row.name)
 
@@ -961,7 +961,7 @@ class SubcontractingController(StockController):
 				):
 					qty = (
 						flt(bom_item.qty_consumed_per_unit)
-						* flt(row.qty + (row.get("rejected_qty") or 0))
+						* flt(row.get("received_qty") or (row.qty + (row.get("rejected_qty") or 0)))
 						* row.conversion_factor
 					)
 					bom_item.main_item_code = row.item_code
@@ -1278,22 +1278,28 @@ class SubcontractingController(StockController):
 		if self.total_additional_costs:
 			if self.distribute_additional_costs_based_on == "Amount":
 				total_amt = sum(
-					flt(item.amount) for item in self.get("items") if not item.get("is_scrap_item")
+					flt(item.amount)
+					for item in self.get("items")
+					if not item.get("type") and not item.get("is_legacy_scrap_item")
 				)
 				for item in self.items:
-					if not item.get("is_scrap_item"):
+					if not item.get("type") and not item.get("is_legacy_scrap_item"):
 						item.additional_cost_per_qty = (
 							(item.amount * self.total_additional_costs) / total_amt
 						) / item.qty
 			else:
-				total_qty = sum(flt(item.qty) for item in self.get("items") if not item.get("is_scrap_item"))
+				total_qty = sum(
+					flt(item.qty)
+					for item in self.get("items")
+					if not item.get("type") and not item.get("is_legacy_scrap_item")
+				)
 				additional_cost_per_qty = self.total_additional_costs / total_qty
 				for item in self.items:
-					if not item.get("is_scrap_item"):
+					if not item.get("type") and not item.get("is_legacy_scrap_item"):
 						item.additional_cost_per_qty = additional_cost_per_qty
 		else:
 			for item in self.items:
-				if not item.get("is_scrap_item"):
+				if not item.get("type") and not item.get("is_legacy_scrap_item"):
 					item.additional_cost_per_qty = 0
 
 	@frappe.whitelist()
