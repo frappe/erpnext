@@ -16,21 +16,35 @@ class LeaseAgreement(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.assets.doctype.lease_escalation_schedule.lease_escalation_schedule import (
+			LeaseEscalationSchedule,
+		)
 		from erpnext.assets.doctype.lease_payment_schedule.lease_payment_schedule import LeasePaymentSchedule
 
 		amended_from: DF.Link | None
 		company: DF.Link
+		cost_center: DF.Link | None
+		discount_rate: DF.Percent
+		down_payment_amount: DF.Currency
+		down_payment_date: DF.Date | None
+		escalation_rate: DF.Percent
+		escalation_type: DF.Literal["None", "Fixed", "Step"]
 		lease_end_date: DF.Date
-		lease_expense_account: DF.Link
 		lease_payment_schedule: DF.Table[LeasePaymentSchedule]
 		lease_start_date: DF.Date
 		lease_term_months: DF.Int
+		lease_type: DF.Literal["Finance", "Operating"]
 		leased_asset: DF.Link
 		naming_series: DF.Literal["LA-.YYYY.-.#####."]
 		payment_frequency: DF.Literal["Monthly", "Yearly"]
 		periodic_lease_amount: DF.Currency
+		present_value: DF.Currency
+		security_deposite_amount: DF.Currency
+		security_deposite_date: DF.Date | None
 		status: DF.Literal["Draft", "Active", "Closed", "Cancelled"]
 		supplier: DF.Link
+		table_ghnl: DF.Table[LeaseEscalationSchedule]
+		total_lease_payments: DF.Currency
 		use_lease_term: DF.Check
 	# end: auto-generated types
 

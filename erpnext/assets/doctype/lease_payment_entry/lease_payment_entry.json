@@ -1,0 +1,204 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-11 14:56:51.421958",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_h83b",
+  "amended_from",
+  "lease_agreement",
+  "payment_date",
+  "column_break_frpj",
+  "lease_type",
+  "schedule_row",
+  "payment_breakdown_section",
+  "interest",
+  "straight_line_expense",
+  "column_break_nxol",
+  "principal_amount",
+  "actual_payment",
+  "deferred_rent",
+  "gst_section",
+  "gst_amount",
+  "column_break_ljek",
+  "tds_amount",
+  "net_payable",
+  "section_break_tpft",
+  "purchase_invoice",
+  "column_break_pyxr",
+  "bank_account",
+  "section_break_kxdd",
+  "journal_entry",
+  "column_break_eltc",
+  "gst_journal_entry"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_h83b",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Lease Payment Entry",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "lease_agreement",
+   "fieldtype": "Link",
+   "label": "Lease Agreement",
+   "options": "Lease Agreement"
+  },
+  {
+   "fieldname": "column_break_frpj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lease_type",
+   "fieldtype": "Data",
+   "label": "Lease Type"
+  },
+  {
+   "fieldname": "schedule_row",
+   "fieldtype": "Data",
+   "label": "Schedule Row"
+  },
+  {
+   "fieldname": "payment_date",
+   "fieldtype": "Date",
+   "label": "Payment Date"
+  },
+  {
+   "fieldname": "payment_breakdown_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Breakdown"
+  },
+  {
+   "fieldname": "interest",
+   "fieldtype": "Currency",
+   "label": "Interest Amount"
+  },
+  {
+   "fieldname": "column_break_nxol",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "principal_amount",
+   "fieldtype": "Currency",
+   "label": "Principal Amount"
+  },
+  {
+   "fieldname": "straight_line_expense",
+   "fieldtype": "Currency",
+   "label": "Straight Line Expense"
+  },
+  {
+   "fieldname": "actual_payment",
+   "fieldtype": "Currency",
+   "label": "Actual Payment"
+  },
+  {
+   "fieldname": "deferred_rent",
+   "fieldtype": "Currency",
+   "label": "Deferred Rent"
+  },
+  {
+   "fieldname": "gst_section",
+   "fieldtype": "Section Break",
+   "label": "GST"
+  },
+  {
+   "fieldname": "gst_amount",
+   "fieldtype": "Currency",
+   "label": "GST Amount"
+  },
+  {
+   "fieldname": "column_break_ljek",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tds_amount",
+   "fieldtype": "Currency",
+   "label": "TDS Amount"
+  },
+  {
+   "fieldname": "net_payable",
+   "fieldtype": "Currency",
+   "label": "Net Payable"
+  },
+  {
+   "fieldname": "section_break_tpft",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "purchase_invoice",
+   "fieldtype": "Link",
+   "label": "Purchase Invoice",
+   "options": "Purchase Invoice"
+  },
+  {
+   "fieldname": "column_break_pyxr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "section_break_kxdd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Journal Entry",
+   "options": "Journal Entry"
+  },
+  {
+   "fieldname": "column_break_eltc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gst_journal_entry",
+   "fieldtype": "Link",
+   "label": "GST Journal Entry",
+   "options": "Journal Entry"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-03-11 15:07:33.030997",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Lease Payment Entry",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

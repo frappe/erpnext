@@ -10,24 +10,42 @@
   "naming_series",
   "company",
   "supplier",
+  "lease_type",
   "column_break_wuct",
   "status",
   "leased_asset",
-  "payment_frequency",
-  "periodic_lease_amount",
   "amended_from",
   "lease_terms_section",
   "lease_start_date",
   "use_lease_term",
   "lease_term_months",
+  "discount_rate",
+  "present_value",
   "column_break_rdcm",
+  "payment_frequency",
+  "periodic_lease_amount",
   "lease_end_date",
+  "total_lease_payments",
+  "escalation_type_section",
+  "escalation_type",
+  "column_break_hjqv",
+  "escalation_rate",
+  "down_payment_section",
+  "down_payment_amount",
+  "column_break_tqzw",
+  "down_payment_date",
+  "security_deposite_section",
+  "security_deposite_amount",
+  "column_break_iifw",
+  "security_deposite_date",
   "section_break_jsvy",
-  "lease_expense_account",
+  "cost_center",
   "column_break_rcmx",
   "lease_schedule_tab",
   "schedule_section",
-  "lease_payment_schedule"
+  "lease_payment_schedule",
+  "escalation_schedule_section",
+  "table_ghnl"
  ],
  "fields": [
   {
@@ -98,20 +116,13 @@
    "label": "Accounting Details"
   },
   {
-   "fieldname": "lease_expense_account",
-   "fieldtype": "Link",
-   "label": "Lease Expense Account",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
    "fieldname": "column_break_rcmx",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "lease_schedule_tab",
    "fieldtype": "Tab Break",
-   "label": "Lease Schedule"
+   "label": "Lease Escalation Schedule"
   },
   {
    "fieldname": "leased_asset",
@@ -169,13 +180,113 @@
    "fieldtype": "Table",
    "label": "Lease Payment Schedule",
    "options": "Lease Payment Schedule"
+  },
+  {
+   "fieldname": "lease_type",
+   "fieldtype": "Select",
+   "label": "Lease Type",
+   "options": "Finance\nOperating"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "depends_on": "eval:doc.lease_type==\"Finance\"",
+   "fieldname": "discount_rate",
+   "fieldtype": "Percent",
+   "label": "Discount Rate",
+   "mandatory_depends_on": "eval:doc.lease_type==\"Finance\""
+  },
+  {
+   "fieldname": "total_lease_payments",
+   "fieldtype": "Currency",
+   "label": "Total Lease Payments"
+  },
+  {
+   "fieldname": "present_value",
+   "fieldtype": "Currency",
+   "label": "Present Value"
+  },
+  {
+   "fieldname": "down_payment_section",
+   "fieldtype": "Section Break",
+   "label": "Down Payment"
+  },
+  {
+   "fieldname": "down_payment_amount",
+   "fieldtype": "Currency",
+   "label": "Down Payment Amount"
+  },
+  {
+   "fieldname": "column_break_tqzw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "down_payment_date",
+   "fieldtype": "Date",
+   "label": "Down Payment Date"
+  },
+  {
+   "fieldname": "security_deposite_section",
+   "fieldtype": "Section Break",
+   "label": "Security Deposite"
+  },
+  {
+   "fieldname": "security_deposite_amount",
+   "fieldtype": "Currency",
+   "label": "Security Deposite Amount"
+  },
+  {
+   "fieldname": "column_break_iifw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "security_deposite_date",
+   "fieldtype": "Date",
+   "label": "Security Deposite Date"
+  },
+  {
+   "depends_on": "eval:doc.lease_type==\"Operating\"",
+   "fieldname": "escalation_type_section",
+   "fieldtype": "Section Break",
+   "label": "Escalation"
+  },
+  {
+   "fieldname": "escalation_type",
+   "fieldtype": "Select",
+   "label": "Escalation Type",
+   "mandatory_depends_on": "eval:doc.lease_type==\"Operating\"",
+   "options": "None\nFixed\nStep"
+  },
+  {
+   "fieldname": "column_break_hjqv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "escalation_rate",
+   "fieldtype": "Percent",
+   "label": "Escalation Rate",
+   "mandatory_depends_on": "eval:doc.lease_type==\"Operating\" && doc.escalation_type==\"Fixed %\""
+  },
+  {
+   "fieldname": "escalation_schedule_section",
+   "fieldtype": "Section Break",
+   "label": "Escalation Schedule"
+  },
+  {
+   "fieldname": "table_ghnl",
+   "fieldtype": "Table",
+   "options": "Lease Escalation Schedule"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-30 01:17:56.997950",
+ "modified": "2026-03-11 16:05:41.839468",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Lease Agreement",

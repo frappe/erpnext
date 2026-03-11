@@ -1,0 +1,121 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-11 11:43:45.167935",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_oigd",
+  "amended_from",
+  "lease_agreement",
+  "lease_type",
+  "generated_on",
+  "total_periods",
+  "column_break_nfil",
+  "total_payment",
+  "total_interest",
+  "total_principal",
+  "lease_payment_schedule_section",
+  "table_orqo"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_oigd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Lease Amortization Schedule",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "lease_agreement",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Lease Agreement",
+   "options": "Lease Agreement",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "lease_type",
+   "fieldtype": "Select",
+   "label": "Lease Type",
+   "options": "Finance\nOperating"
+  },
+  {
+   "fieldname": "generated_on",
+   "fieldtype": "Date",
+   "label": "Generated On"
+  },
+  {
+   "fieldname": "total_periods",
+   "fieldtype": "Int",
+   "label": "Total Periods"
+  },
+  {
+   "fieldname": "column_break_nfil",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_payment",
+   "fieldtype": "Currency",
+   "label": "Total Payment"
+  },
+  {
+   "fieldname": "total_interest",
+   "fieldtype": "Currency",
+   "label": "Total Interest"
+  },
+  {
+   "fieldname": "total_principal",
+   "fieldtype": "Currency",
+   "label": "Total Principal"
+  },
+  {
+   "fieldname": "lease_payment_schedule_section",
+   "fieldtype": "Section Break",
+   "label": "Lease Payment schedule"
+  },
+  {
+   "fieldname": "table_orqo",
+   "fieldtype": "Table",
+   "options": "Lease Payment Schedule"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-03-11 14:42:42.555439",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Lease Amortization Schedule",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

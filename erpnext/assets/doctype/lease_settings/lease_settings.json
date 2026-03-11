@@ -1,0 +1,63 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-11 12:02:18.491865",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "right_of_use_asset_account",
+  "column_break_zokn",
+  "lease_liability_account"
+ ],
+ "fields": [
+  {
+   "fieldname": "right_of_use_asset_account",
+   "fieldtype": "Link",
+   "label": "Right of Use Asset Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_zokn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lease_liability_account",
+   "fieldtype": "Link",
+   "label": "Lease Liability Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-03-11 12:09:50.202100",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Lease Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

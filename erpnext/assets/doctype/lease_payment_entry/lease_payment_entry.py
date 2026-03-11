@@ -5,7 +5,7 @@
 from frappe.model.document import Document
 
 
-class LeasePaymentSchedule(Document):
+class LeasePaymentEntry(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -15,22 +15,22 @@ class LeasePaymentSchedule(Document):
 		from frappe.types import DF
 
 		actual_payment: DF.Currency
-		amount: DF.Currency
-		closing_balance: DF.Currency
-		cumulative_deferred: DF.Currency
+		amended_from: DF.Link | None
+		bank_account: DF.Link | None
 		deferred_rent: DF.Currency
+		gst_amount: DF.Currency
+		gst_journal_entry: DF.Link | None
 		interest: DF.Currency
-		is_posted: DF.Check
 		journal_entry: DF.Link | None
-		opening_balance: DF.Currency
-		parent: DF.Data
-		parentfield: DF.Data
-		parenttype: DF.Data
-		payment_amount: DF.Currency
-		payment_date: DF.Date
+		lease_agreement: DF.Link | None
+		lease_type: DF.Data | None
+		net_payable: DF.Currency
+		payment_date: DF.Date | None
 		principal_amount: DF.Currency
+		purchase_invoice: DF.Link | None
+		schedule_row: DF.Data | None
 		straight_line_expense: DF.Currency
-		superseded: DF.Check
+		tds_amount: DF.Currency
 	# end: auto-generated types
 
 	pass

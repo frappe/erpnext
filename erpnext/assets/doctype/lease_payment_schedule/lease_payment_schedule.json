@@ -5,20 +5,24 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "schedule_date",
+  "payment_date",
   "amount",
+  "opening_balance",
+  "actual_payment",
+  "straight_line_expense",
+  "deferred_rent",
+  "cumulative_deferred",
   "column_break_nbdb",
+  "make_lease_entry",
+  "payment_amount",
+  "interest",
+  "principal_amount",
+  "closing_balance",
+  "is_posted",
   "journal_entry",
-  "make_lease_entry"
+  "superseded"
  ],
  "fields": [
-  {
-   "fieldname": "schedule_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Schedule Date",
-   "reqd": 1
-  },
   {
    "fieldname": "amount",
    "fieldtype": "Currency",
@@ -44,13 +48,77 @@
   {
    "fieldname": "column_break_nbdb",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "payment_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Payment Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "opening_balance",
+   "fieldtype": "Currency",
+   "label": "Opening Balance"
+  },
+  {
+   "fieldname": "payment_amount",
+   "fieldtype": "Currency",
+   "label": "Payment Amount"
+  },
+  {
+   "fieldname": "interest",
+   "fieldtype": "Currency",
+   "label": "Interest"
+  },
+  {
+   "fieldname": "principal_amount",
+   "fieldtype": "Currency",
+   "label": "Principal Amount"
+  },
+  {
+   "fieldname": "closing_balance",
+   "fieldtype": "Currency",
+   "label": "Closing Balance"
+  },
+  {
+   "fieldname": "actual_payment",
+   "fieldtype": "Currency",
+   "label": "Actual Payment "
+  },
+  {
+   "fieldname": "straight_line_expense",
+   "fieldtype": "Currency",
+   "label": "Straight Line Expense"
+  },
+  {
+   "fieldname": "deferred_rent",
+   "fieldtype": "Currency",
+   "label": "Deferred Rent"
+  },
+  {
+   "fieldname": "cumulative_deferred",
+   "fieldtype": "Currency",
+   "label": "Cumulative Deferred"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_posted",
+   "fieldtype": "Check",
+   "label": "Is posted"
+  },
+  {
+   "default": "0",
+   "fieldname": "superseded",
+   "fieldtype": "Check",
+   "label": "Superseded"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-30 01:05:50.368331",
+ "modified": "2026-03-11 14:48:50.234630",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Lease Payment Schedule",

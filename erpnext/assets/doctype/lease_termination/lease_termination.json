@@ -1,0 +1,140 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-11 15:16:01.636174",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_a8xw",
+  "amended_from",
+  "lease_agreement",
+  "column_break_slzv",
+  "termination_date",
+  "termination_reason",
+  "section_break_gtak",
+  "remaining_liability",
+  "accumulated_depreciation",
+  "termination_penalty",
+  "gainloss",
+  "column_break_taue",
+  "rou_asset_gross",
+  "rou_net_book_value",
+  "penalty_account",
+  "termination_journal_entry"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_a8xw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Lease Termination",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "lease_agreement",
+   "fieldtype": "Link",
+   "label": "Lease Agreement",
+   "options": "Lease Agreement"
+  },
+  {
+   "fieldname": "column_break_slzv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "termination_date",
+   "fieldtype": "Date",
+   "label": "Termination Date"
+  },
+  {
+   "fieldname": "termination_reason",
+   "fieldtype": "Small Text",
+   "label": "Termination Reason"
+  },
+  {
+   "fieldname": "section_break_gtak",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "remaining_liability",
+   "fieldtype": "Currency",
+   "label": "Remaining Liability"
+  },
+  {
+   "fieldname": "column_break_taue",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rou_asset_gross",
+   "fieldtype": "Currency",
+   "label": "ROU Asset Gross"
+  },
+  {
+   "fieldname": "accumulated_depreciation",
+   "fieldtype": "Currency",
+   "label": "Accumulated Depreciation"
+  },
+  {
+   "fieldname": "rou_net_book_value",
+   "fieldtype": "Currency",
+   "label": "ROU Net Book Value"
+  },
+  {
+   "fieldname": "termination_penalty",
+   "fieldtype": "Currency",
+   "label": "Termination Penalty"
+  },
+  {
+   "fieldname": "penalty_account",
+   "fieldtype": "Link",
+   "label": "Penalty Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "gainloss",
+   "fieldtype": "Currency",
+   "label": "Gain/Loss"
+  },
+  {
+   "fieldname": "termination_journal_entry",
+   "fieldtype": "Link",
+   "label": "Termination Journal Entry",
+   "options": "Journal Entry"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-03-11 15:50:53.938800",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Lease Termination",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
