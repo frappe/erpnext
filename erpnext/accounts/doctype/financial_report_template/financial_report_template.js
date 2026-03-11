@@ -328,104 +328,110 @@ function update_formula_description(frm, data_source) {
 	if (data_source === "Account Data") {
 		description_html = `
 			<div ${container_style}>
-				<h5 ${title_style}>Account Filter Guide</h5>
-				<p ${text_style}>Specify which accounts to include in this line.</p>
+				<h5 ${title_style}>${__("Account Filter Guide")}</h5>
+				<p ${text_style}>${__("Specify which accounts to include in this line.")}</p>
 
-				<h6 ${subtitle_style}>Basic Examples:</h6>
+				<h6 ${subtitle_style}>${__("Basic Examples:")}</h6>
 				<ul ${list_style}>
-					<li><code>["account_type", "=", "Cash"]</code> - All Cash accounts</li>
-					<li><code>["root_type", "in", ["Asset", "Liability"]]</code> - All Asset and Liability accounts</li>
-					<li><code>["account_category", "like", "Revenue"]</code> - Revenue accounts</li>
+					<li><code>["account_type", "=", "Cash"]</code> - ${__("All Cash accounts")}</li>
+					<li><code>["root_type", "in", ["Asset", "Liability"]]</code> - ${__("All Asset and Liability accounts")}</li>
+					<li><code>["account_category", "like", "Revenue"]</code> - ${__("Revenue accounts")}</li>
 				</ul>
 
-				<h6 ${subtitle_style}>Multiple Conditions (AND/OR):</h6>
+				<h6 ${subtitle_style}>${__("Multiple Conditions (AND/OR):")}</h6>
 				<ul ${list_style}>
 					<li><code>{"and": [["root_type", "=", "Asset"], ["account_type", "=", "Cash"]]}</code></li>
 					<li><code>{"or": [["account_category", "like", "Revenue"], ["account_category", "like", "Income"]]}</code></li>
 				</ul>
 
-				<p ${note_style}><strong>Available operators:</strong> <code>=, !=, in, not in, like, not like, is</code></p>
-				<p ${tip_style}><strong>Multi-Company Tip:</strong> Use fields like <code>account_type</code>, <code>root_type</code>, and <code>account_category</code> for templates that work across multiple companies.</p>
+				<p ${note_style}><strong>${__(
+			"Available operators:"
+		)}</strong> <code>=, !=, in, not in, like, not like, is</code></p>
+				<p ${tip_style}><strong>${__("Multi-Company Tip:")}</strong> ${__(
+			"Use fields like <code>account_type</code>, <code>root_type</code>, and <code>account_category</code> for templates that work across multiple companies."
+		)}</p>
 			</div>`;
 	} else if (data_source === "Calculated Amount") {
 		description_html = `
 			<div ${container_style}>
-				<h5 ${title_style}>Formula Guide</h5>
-				<p ${text_style}>Create calculations using reference codes from other lines.</p>
+				<h5 ${title_style}>${__("Formula Guide")}</h5>
+				<p ${text_style}>${__("Create calculations using reference codes from other lines.")}</p>
 
-				<h6 ${subtitle_style}>Basic Examples:</h6>
+				<h6 ${subtitle_style}>${__("Basic Examples:")}</h6>
 				<ul ${list_style}>
-					<li><code>REV100 + REV200</code> - Add two revenue lines</li>
-					<li><code>ASSETS - LIABILITIES</code> - Calculate equity</li>
-					<li><code>REVENUE * 0.1</code> - 10% of revenue</li>
+					<li><code>REV100 + REV200</code> - ${__("Add two revenue lines")}</li>
+					<li><code>${__("ASSETS - LIABILITIES")}</code> - ${__("Calculate equity")}</li>
+					<li><code>${__("REVENUE * 0.1")}</code> - ${__("10% of revenue")}</li>
 				</ul>
 
-				<h6 ${subtitle_style}>Common Functions:</h6>
+				<h6 ${subtitle_style}>${__("Common Functions:")}</h6>
 				<ul ${list_style}>
-					<li><code>abs(value)</code> - Remove negative sign</li>
-					<li><code>round(value)</code> - Round to whole number</li>
-					<li><code>max(val1, val2)</code> - Larger of two values</li>
-					<li><code>min(val1, val2)</code> - Smaller of two values</li>
+					<li><code>abs(value)</code> - ${__("Remove negative sign")}</li>
+					<li><code>round(value)</code> - ${__("Round to whole number")}</li>
+					<li><code>max(val1, val2)</code> - ${__("Larger of two values")}</li>
+					<li><code>min(val1, val2)</code> - ${__("Smaller of two values")}</li>
 				</ul>
 
-				<p ${note_style}><strong>Required:</strong> Use "Reference Code" from other rows in your formulas.</p>
+				<p ${note_style}>"<strong>${__("Required:")}</strong> ${__(
+			'Use "Reference Code" from other rows in your formulas.'
+		)}</p>
 			</div>`;
 	} else if (data_source === "Custom API") {
 		description_html = `
 			<div ${container_style}>
-				<h5 ${title_style}>Custom API Setup</h5>
-				<p ${text_style}>Path to your custom method that returns financial data.</p>
+				<h5 ${title_style}>${__("Custom API Setup")}</h5>
+				<p ${text_style}>${__("Path to your custom method that returns financial data.")}</p>
 
-				<h6 ${subtitle_style}>Format:</h6>
+				<h6 ${subtitle_style}>${__("Format:")}</h6>
 				<ul ${list_style}>
 					<li><code>erpnext.custom.financial_apis.get_custom_revenue</code></li>
 					<li><code>my_app.financial_reports.get_kpi_data</code></li>
 				</ul>
 
-				<h6 ${subtitle_style}>Return Format:</h6>
-				<p ${text_style}>Numbers for each period: <code>[1000.0, 1200.0, 1150.0]</code></p>
+				<h6 ${subtitle_style}>${__("Return Format:")}</h6>
+				<p ${text_style}>${__("Numbers for each period:")} <code>[1000.0, 1200.0, 1150.0]</code></p>
 			</div>`;
 	} else if (data_source === "Blank Line") {
 		description_html = `
 			<div ${container_style}>
-				<h5 ${title_style}>Blank Line</h5>
-				<p ${text_style}>Adds empty space for better visual separation.</p>
+				<h5 ${title_style}>${__("Blank Line")}</h5>
+				<p ${text_style}>${__("Adds empty space for better visual separation.")}</p>
 
-				<h6 ${subtitle_style}>Use For:</h6>
+				<h6 ${subtitle_style}>${__("Use For:")}</h6>
 				<ul ${list_style}>
-					<li>Separating major sections</li>
-					<li>Adding space before totals</li>
+					<li>${__("Separating major sections")}</li>
+					<li>${__("Adding space before totals")}</li>
 				</ul>
 
-				<p ${note_style}><strong>Note:</strong> No formula needed - creates visual spacing only.</p>
+				<p ${note_style}><strong>${__("Note:")}</strong> ${__("No formula needed - creates visual spacing only.")}</p>
 			</div>`;
 	} else if (data_source === "Column Break") {
 		description_html = `
 			<div ${container_style}>
-				<h5 ${title_style}>Column Break</h5>
-				<p ${text_style}>Creates a visual break for side-by-side layout.</p>
+				<h5 ${title_style}>${__("Column Break")}</h5>
+				<p ${text_style}>${__("Creates a visual break for side-by-side layout.")}</p>
 
-				<h6 ${subtitle_style}>Use For:</h6>
+				<h6 ${subtitle_style}>${__("Use For:")}</h6>
 				<ul ${list_style}>
-					<li>Horizontal P&L statements</li>
-					<li>Side-by-side Balance Sheet sections</li>
+					<li>${__("Horizontal P&L statements")}</li>
+					<li>${__("Side-by-side Balance Sheet sections")}</li>
 				</ul>
 
-				<p ${note_style}><strong>Note:</strong> No formula needed - this is for formatting only.</p>
+				<p ${note_style}><strong>${__("Note:")}</strong> ${__("No formula needed - this is for formatting only.")}</p>
 			</div>`;
 	} else if (data_source === "Section Break") {
 		description_html = `
 			<div ${container_style}>
-				<h5 ${title_style}>Section Break</h5>
-				<p ${text_style}>Creates a visual break for separating different sections.</p>
+				<h5 ${title_style}>${__("Section Break")}</h5>
+				<p ${text_style}>${__("Creates a visual break for separating different sections.")}</p>
 
-				<h6 ${subtitle_style}>Use For:</h6>
+				<h6 ${subtitle_style}>${__("Use For:")}</h6>
 				<ul ${list_style}>
-					<li>Separating major sections in a report - say trading & profit and loss</li>
-					<li>Improving readability by adding space</li>
+					<li>${__("Separating major sections in a report - say trading & profit and loss")}</li>
+					<li>${__("Improving readability by adding space")}</li>
 				</ul>
 
-				<p ${note_style}><strong>Note:</strong> No formula needed - this is for formatting only.</p>
+				<p ${note_style}><strong>${__("Note:")}</strong> ${__("No formula needed - this is for formatting only.")}</p>
 			</div>`;
 	}
 
