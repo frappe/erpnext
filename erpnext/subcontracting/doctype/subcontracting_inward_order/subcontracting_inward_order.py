@@ -26,8 +26,8 @@ class SubcontractingInwardOrder(SubcontractingController):
 		from erpnext.subcontracting.doctype.subcontracting_inward_order_received_item.subcontracting_inward_order_received_item import (
 			SubcontractingInwardOrderReceivedItem,
 		)
-		from erpnext.subcontracting.doctype.subcontracting_inward_order_scrap_item.subcontracting_inward_order_scrap_item import (
-			SubcontractingInwardOrderScrapItem,
+		from erpnext.subcontracting.doctype.subcontracting_inward_order_secondary_item.subcontracting_inward_order_secondary_item import (
+			SubcontractingInwardOrderSecondaryItem,
 		)
 		from erpnext.subcontracting.doctype.subcontracting_inward_order_service_item.subcontracting_inward_order_service_item import (
 			SubcontractingInwardOrderServiceItem,
@@ -49,7 +49,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 		per_returned: DF.Percent
 		received_items: DF.Table[SubcontractingInwardOrderReceivedItem]
 		sales_order: DF.Link
-		scrap_items: DF.Table[SubcontractingInwardOrderScrapItem]
+		secondary_items: DF.Table[SubcontractingInwardOrderSecondaryItem]
 		service_items: DF.Table[SubcontractingInwardOrderServiceItem]
 		set_delivery_warehouse: DF.Link | None
 		status: DF.Literal[
@@ -475,23 +475,25 @@ class SubcontractingInwardOrder(SubcontractingController):
 			stock_entry.add_to_stock_entry_detail(items_dict)
 
 		if (
-			frappe.get_single_value("Selling Settings", "deliver_scrap_items")
-			and self.scrap_items
+			frappe.get_single_value("Selling Settings", "deliver_secondary_items")
+			and self.secondary_items
 			and scio_details
 		):
-			scrap_items = [
-				scrap_item for scrap_item in self.scrap_items if scrap_item.reference_name in scio_details
+			secondary_items = [
+				secondary_item
+				for secondary_item in self.secondary_items
+				if secondary_item.reference_name in scio_details
 			]
-			for scrap_item in scrap_items:
-				qty = scrap_item.produced_qty - scrap_item.delivered_qty
+			for secondary_item in secondary_items:
+				qty = secondary_item.produced_qty - secondary_item.delivered_qty
 				if qty > 0:
 					items_dict = {
-						scrap_item.item_code: {
-							"qty": scrap_item.produced_qty - scrap_item.delivered_qty,
-							"from_warehouse": scrap_item.warehouse,
-							"stock_uom": scrap_item.stock_uom,
-							"scio_detail": scrap_item.name,
-							"is_scrap_item": 1,
+						secondary_item.item_code: {
+							"qty": secondary_item.produced_qty - secondary_item.delivered_qty,
+							"from_warehouse": secondary_item.warehouse,
+							"stock_uom": secondary_item.stock_uom,
+							"scio_detail": secondary_item.name,
+							"type": secondary_item.type,
 						}
 					}
 

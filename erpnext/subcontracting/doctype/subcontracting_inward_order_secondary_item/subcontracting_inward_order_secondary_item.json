@@ -6,13 +6,15 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "column_break_rptg",
+  "type",
+  "reference_name",
+  "column_break_jkzt",
   "item_code",
   "fg_item_code",
   "column_break_hoxe",
   "stock_uom",
   "warehouse",
-  "column_break_rptg",
-  "reference_name",
   "section_break_gqk9",
   "produced_qty",
   "column_break_n4xc",
@@ -93,16 +95,29 @@
   {
    "fieldname": "column_break_n4xc",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "no_copy": 1,
+   "options": "Co-Product\nBy-Product\nScrap\nAdditional Finished Good",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_jkzt",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-14 10:28:30.192350",
+ "modified": "2026-02-27 15:15:40.009957",
  "modified_by": "Administrator",
  "module": "Subcontracting",
- "name": "Subcontracting Inward Order Scrap Item",
+ "name": "Subcontracting Inward Order Secondary Item",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

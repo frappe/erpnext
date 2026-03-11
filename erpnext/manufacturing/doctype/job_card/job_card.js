@@ -23,7 +23,7 @@ frappe.ui.form.on("Job Card", {
 			};
 		});
 
-		frm.set_query("item_code", "scrap_items", () => {
+		frm.set_query("item_code", "secondary_items", () => {
 			return {
 				filters: {
 					disabled: 0,
@@ -96,7 +96,7 @@ frappe.ui.form.on("Job Card", {
 			frm.doc.docstatus === 1 &&
 			!frm.doc.is_subcontracted &&
 			(frm.doc.skip_material_transfer || frm.doc.transferred_qty > 0) &&
-			flt(frm.doc.for_quantity) + flt(frm.doc.process_loss_qty) > flt(frm.doc.manufactured_qty)
+			flt(frm.doc.manufactured_qty) + flt(frm.doc.process_loss_qty) < flt(frm.doc.for_quantity)
 		) {
 			frm.add_custom_button(__("Make Stock Entry"), () => {
 				frappe.confirm(
@@ -272,8 +272,6 @@ frappe.ui.form.on("Job Card", {
 
 					is_timer_running = true;
 				}
-
-				frm.trigger("make_dashboard");
 			}
 		}
 

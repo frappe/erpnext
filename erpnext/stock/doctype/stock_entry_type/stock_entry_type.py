@@ -74,13 +74,18 @@ class ManufactureEntry:
 		self.stock_entry = frappe.new_doc("Stock Entry")
 		self.stock_entry.purpose = self.purpose
 		self.stock_entry.company = self.company
-		self.stock_entry.from_bom = 1
-		self.stock_entry.bom_no = self.bom_no
-		self.stock_entry.use_multi_level_bom = 1
+
+		if self.bom_no:
+			self.stock_entry.from_bom = 1
+			self.stock_entry.bom_no = self.bom_no
+			self.stock_entry.use_multi_level_bom = 1
+
 		self.stock_entry.fg_completed_qty = self.for_quantity
+		self.stock_entry.process_loss_qty = self.process_loss_qty
 		self.stock_entry.project = self.project
 		self.stock_entry.job_card = self.job_card
 		self.stock_entry.set_stock_entry_type()
+		self.stock_entry.work_order = self.work_order
 
 		self.prepare_source_warehouse()
 		self.add_raw_materials()
@@ -302,7 +307,7 @@ class ManufactureEntry:
 		args = {
 			"to_warehouse": self.fg_warehouse,
 			"from_warehouse": "",
-			"qty": self.for_quantity,
+			"qty": self.for_quantity - self.process_loss_qty,
 			"item_name": item.item_name,
 			"description": item.description,
 			"stock_uom": item.stock_uom,

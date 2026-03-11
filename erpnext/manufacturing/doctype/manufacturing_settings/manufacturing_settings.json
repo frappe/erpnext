@@ -36,7 +36,7 @@
   "capacity_planning_for_days",
   "mins_between_operations",
   "other_settings_section",
-  "set_op_cost_and_scrap_from_sub_assemblies",
+  "set_op_cost_and_secondary_items_from_sub_assemblies",
   "column_break_23",
   "make_serial_no_batch_from_work_order"
  ],
@@ -204,13 +204,6 @@
   },
   {
    "default": "0",
-   "description": "To include sub-assembly costs and scrap items in Finished Goods on a work order without using a job card, when the 'Use Multi-Level BOM' option is enabled.",
-   "fieldname": "set_op_cost_and_scrap_from_sub_assemblies",
-   "fieldtype": "Check",
-   "label": "Set Operating Cost / Scrap Items From Sub-assemblies"
-  },
-  {
-   "default": "0",
    "description": "Enabling this checkbox will force each Job Card Time Log to have From Time and To Time",
    "fieldname": "enforce_time_logs",
    "fieldtype": "Check",
@@ -237,6 +230,13 @@
    "fieldname": "allow_editing_of_items_and_quantities_in_work_order",
    "fieldtype": "Check",
    "label": "Allow Editing of Items and Quantities in Work Order"
+  },
+  {
+   "default": "0",
+   "description": "To include sub-assembly costs and secondary items in Finished Goods on a work order without using a job card, when the 'Use Multi-Level BOM' option is enabled.",
+   "fieldname": "set_op_cost_and_secondary_items_from_sub_assemblies",
+   "fieldtype": "Check",
+   "label": "Set Operating Cost / Secondary Items From Sub-assemblies"
   }
  ],
  "hide_toolbar": 1,
@@ -244,7 +244,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-02 18:18:05.759229",
+ "modified": "2026-02-26 17:06:24.040382",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

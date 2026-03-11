@@ -329,10 +329,12 @@ class IntegrationTestSubcontractingInwardOrder(IntegrationTestCase):
 		delivery.items[0].qty = 6
 		self.assertRaises(frappe.ValidationError, delivery.submit)
 
-	@IntegrationTestCase.change_settings("Selling Settings", {"deliver_scrap_items": 1})
-	def test_scrap_delivery(self):
+	@IntegrationTestCase.change_settings("Selling Settings", {"deliver_secondary_items": 1})
+	def test_secondary_items_delivery(self):
 		new_bom = frappe.copy_doc(frappe.get_doc("BOM", "BOM-Basic FG Item-001"))
-		new_bom.scrap_items.append(frappe.new_doc("BOM Scrap Item", item_code="Basic RM 2", qty=1))
+		new_bom.secondary_items.append(
+			frappe.new_doc("BOM Secondary Item", item_code="Basic RM 2", qty=1, type="Scrap")
+		)
 		new_bom.submit()
 		sc_bom = frappe.get_doc("Subcontracting BOM", "SB-0001")
 		sc_bom.finished_good_bom = new_bom.name
@@ -349,12 +351,12 @@ class IntegrationTestSubcontractingInwardOrder(IntegrationTestCase):
 		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture")).submit()
 
 		scio.reload()
-		self.assertEqual(scio.scrap_items[0].item_code, "Basic RM 2")
+		self.assertEqual(scio.secondary_items[0].item_code, "Basic RM 2")
 
 		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
 		self.assertEqual(delivery.items[-1].item_code, "Basic RM 2")
 
-		frappe.db.set_single_value("Selling Settings", "deliver_scrap_items", 0)
+		frappe.db.set_single_value("Selling Settings", "deliver_secondary_items", 0)
 		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
 		self.assertNotEqual(delivery.items[-1].item_code, "Basic RM 2")
 

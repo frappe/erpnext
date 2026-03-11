@@ -6,7 +6,7 @@ from typing import Literal
 
 import frappe
 from frappe.tests import IntegrationTestCase
-from frappe.utils import random_string
+from frappe.utils import flt, random_string
 from frappe.utils.data import add_to_date, now, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import (
@@ -883,6 +883,190 @@ class TestJobCard(ERPNextTestSuite):
 
 		s = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 6))
 		self.assertEqual(s.additional_costs[0].amount, 8)
+
+	def test_co_by_product_for_sfg_flow(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 0)
+
+		def create_bom(raw_material, finished_good, scrap_item, submit=True):
+			bom = frappe.new_doc("BOM")
+			bom.item = finished_good
+			bom.quantity = 1
+			bom.append("items", {"item_code": raw_material, "qty": 1})
+			bom.append(
+				"secondary_items",
+				{
+					"item_code": scrap_item,
+					"qty": 1,
+					"process_loss_per": 10,
+					"cost_allocation_per": 5,
+					"type": "Scrap",
+				},
+			)
+			if submit:
+				bom.insert()
+				bom.submit()
+
+			return bom
+
+		rm1 = create_item("RM 1")
+		scrap1 = create_item("Scrap 1")
+		sfg = create_item("SFG 1")
+		sfg_bom = create_bom(rm1.name, sfg.name, scrap1.name)
+
+		rm2 = create_item("RM 2")
+		fg1 = create_item("FG 1")
+		scrap2 = create_item("Scrap 2")
+		scrap_extra = create_item("Scrap Extra")
+		fg_bom = create_bom(rm2.name, fg1.name, scrap2.name, submit=False)
+		fg_bom.with_operations = 1
+		fg_bom.track_semi_finished_goods = 1
+
+		operation1 = {
+			"operation": "Test Operation A",
+			"workstation": "_Test Workstation A",
+			"finished_good": sfg.name,
+			"bom_no": sfg_bom.name,
+			"finished_good_qty": 1,
+			"sequence_id": 1,
+		}
+		operation2 = {
+			"operation": "Test Operation B",
+			"workstation": "_Test Workstation A",
+			"finished_good": fg1.name,
+			"bom_no": fg_bom.name,
+			"finished_good_qty": 1,
+			"is_final_finished_good": 1,
+			"sequence_id": 2,
+		}
+
+		make_workstation(operation1)
+		make_operation(operation1)
+		make_operation(operation2)
+
+		fg_bom.append("operations", operation1)
+		fg_bom.append("operations", operation2)
+		fg_bom.append("items", {"item_code": sfg.name, "qty": 1, "uom": "Nos", "operation_row_id": 2})
+		fg_bom.insert()
+		fg_bom.save()
+		fg_bom.submit()
+
+		work_order = make_wo_order_test_record(
+			item=fg1.name,
+			qty=10,
+			source_warehouse="Stores - _TC",
+			fg_warehouse="Finished Goods - _TC",
+			bom_no=fg_bom.name,
+			skip_transfer=1,
+			do_not_save=True,
+		)
+
+		work_order.operations[0].time_in_mins = 60
+		work_order.operations[1].time_in_mins = 60
+		work_order.save()
+		work_order.submit()
+
+		job_card = frappe.get_doc(
+			"Job Card",
+			frappe.db.get_value(
+				"Job Card", {"work_order": work_order.name, "operation": "Test Operation A"}, "name"
+			),
+		)
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": "2009-01-01 12:06:25",
+				"to_time": "2009-01-01 12:37:25",
+				"completed_qty": job_card.for_quantity,
+			},
+		)
+		job_card.append(
+			"secondary_items", {"item_code": scrap_extra.name, "stock_qty": 5, "type": "Co-Product"}
+		)
+		job_card.submit()
+
+		for row in sfg_bom.items:
+			make_stock_entry(
+				item_code=row.item_code,
+				target="Stores - _TC",
+				qty=10,
+				basic_rate=100,
+			)
+
+		manufacturing_entry = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
+		manufacturing_entry.submit()
+
+		self.assertEqual(manufacturing_entry.items[2].item_code, scrap1.name)
+		self.assertEqual(manufacturing_entry.items[2].qty, 9)
+		self.assertEqual(flt(manufacturing_entry.items[2].basic_rate, 3), 5.556)
+		self.assertEqual(manufacturing_entry.items[3].item_code, scrap_extra.name)
+		self.assertEqual(manufacturing_entry.items[3].type, "Co-Product")
+		self.assertEqual(manufacturing_entry.items[3].qty, 5)
+		self.assertEqual(manufacturing_entry.items[3].basic_rate, 0)
+
+		job_card = frappe.get_doc(
+			"Job Card",
+			frappe.db.get_value(
+				"Job Card", {"work_order": work_order.name, "operation": "Test Operation B"}, "name"
+			),
+		)
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": "2009-02-01 12:06:25",
+				"to_time": "2009-02-01 12:37:25",
+				"completed_qty": job_card.for_quantity,
+			},
+		)
+		job_card.submit()
+
+		for row in fg_bom.items:
+			make_stock_entry(
+				item_code=row.item_code,
+				target="Stores - _TC",
+				qty=10,
+				basic_rate=100,
+			)
+
+		manufacturing_entry = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
+		manufacturing_entry.submit()
+
+		self.assertEqual(manufacturing_entry.items[2].item_code, scrap2.name)
+		self.assertEqual(manufacturing_entry.items[2].qty, 9)
+		self.assertEqual(flt(manufacturing_entry.items[2].basic_rate, 3), 5.556)
+
+	def test_secondary_items_without_sfg(self):
+		for row in frappe.get_doc("BOM", self.work_order.bom_no).items:
+			make_stock_entry(
+				item_code=row.item_code,
+				target="_Test Warehouse - _TC",
+				qty=10,
+				basic_rate=100,
+			)
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		job_card.append("secondary_items", {"item_code": "_Test Item", "stock_qty": 2, "type": "Scrap"})
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": "2009-01-01 12:06:25",
+				"to_time": "2009-01-01 12:37:25",
+				"completed_qty": job_card.for_quantity,
+			},
+		)
+		job_card.save()
+		job_card.submit()
+
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_stock_entry_for_wo,
+		)
+
+		s = frappe.get_doc(make_stock_entry_for_wo(self.work_order.name, "Manufacture"))
+		s.submit()
+
+		self.assertEqual(s.items[3].item_code, "_Test Item")
+		self.assertEqual(s.items[3].transfer_qty, 2)
 
 
 def create_bom_with_multiple_operations():
