@@ -221,11 +221,12 @@ website_route_rules = [
 
 standard_navbar_items = [
 	{
-		"item_label": "Clear Demo Data",
+		"item_label": "Erase Demo Data",
 		"item_type": "Action",
 		"action": "erpnext.demo.clear_demo();",
 		"is_standard": 1,
-		"condition": "eval: frappe.boot.sysdefaults.demo_company",
+		"condition": "eval: frappe.boot.sysdefaults.demo_company && frappe.boot.sysdefaults.demo_company.length > 0",
+		"icon": "trash",
 	},
 ]
 
