@@ -57,7 +57,8 @@ class TestLocation(IntegrationTestCase):
 					ignore_permissions=True,
 				)
 
-		frappe.db.commit()
+		# some of the code under test commit internally
+		frappe.db.commit()  # nosemgrep
 
 	def create_location(
 		self,
