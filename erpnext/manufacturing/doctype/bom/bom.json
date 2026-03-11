@@ -16,6 +16,14 @@
   "allow_alternative_item",
   "set_rate_of_sub_assembly_item_based_on_bom",
   "is_phantom_bom",
+  "cost_allocation_section",
+  "cost_allocation_per",
+  "column_break_srby",
+  "cost_allocation",
+  "process_loss_section",
+  "process_loss_percentage",
+  "column_break_ssj2",
+  "process_loss_qty",
   "currency_detail",
   "rm_cost_as_per",
   "buying_price_list",
@@ -38,21 +46,16 @@
   "operations",
   "materials_section",
   "items",
-  "scrap_section",
-  "scrap_items_section",
-  "scrap_items",
-  "process_loss_section",
-  "process_loss_percentage",
-  "column_break_ssj2",
-  "process_loss_qty",
+  "secondary_items_tab",
+  "secondary_items",
   "costing",
   "operating_cost",
   "raw_material_cost",
-  "scrap_material_cost",
+  "secondary_items_cost",
   "cb1",
   "base_operating_cost",
   "base_raw_material_cost",
-  "base_scrap_material_cost",
+  "base_secondary_items_cost",
   "column_break_26",
   "total_cost",
   "base_total_cost",
@@ -299,19 +302,6 @@
    "reqd": 1
   },
   {
-   "collapsible": 1,
-   "depends_on": "eval:!doc.is_phantom_bom",
-   "fieldname": "scrap_section",
-   "fieldtype": "Tab Break",
-   "label": "Scrap & Process Loss"
-  },
-  {
-   "fieldname": "scrap_items",
-   "fieldtype": "Table",
-   "label": "Scrap Items",
-   "options": "BOM Scrap Item"
-  },
-  {
    "fieldname": "costing",
    "fieldtype": "Tab Break",
    "label": "Costing",
@@ -333,15 +323,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:!doc.is_phantom_bom",
-   "fieldname": "scrap_material_cost",
-   "fieldtype": "Currency",
-   "label": "Scrap Material Cost",
-   "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "cb1",
    "fieldtype": "Column Break"
   },
@@ -360,15 +341,6 @@
    "label": "Raw Material Cost (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:!doc.is_phantom_bom",
-   "fieldname": "base_scrap_material_cost",
-   "fieldtype": "Currency",
-   "label": "Scrap Material Cost(Company Currency)",
-   "no_copy": 1,
-   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -603,12 +575,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "scrap_items_section",
-   "fieldtype": "Section Break",
-   "hide_border": 1,
-   "label": "Scrap Items"
-  },
-  {
    "default": "0",
    "fieldname": "fg_based_operating_cost",
    "fieldtype": "Check",
@@ -706,6 +672,59 @@
    "fieldname": "quality_inspection_tab",
    "fieldtype": "Tab Break",
    "label": "Quality Inspection"
+  },
+  {
+   "fieldname": "secondary_items",
+   "fieldtype": "Table",
+   "label": "Secondary Items",
+   "options": "BOM Secondary Item"
+  },
+  {
+   "depends_on": "eval:!doc.is_phantom_bom",
+   "fieldname": "secondary_items_cost",
+   "fieldtype": "Currency",
+   "label": "Secondary Items Cost",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.is_phantom_bom",
+   "fieldname": "base_secondary_items_cost",
+   "fieldtype": "Currency",
+   "label": "Secondary Items Cost (Company Currency)",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "secondary_items_tab",
+   "fieldtype": "Tab Break",
+   "label": "Secondary Items"
+  },
+  {
+   "fieldname": "cost_allocation_section",
+   "fieldtype": "Section Break",
+   "label": "Cost Allocation"
+  },
+  {
+   "fieldname": "column_break_srby",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_allocation",
+   "fieldtype": "Currency",
+   "label": "Cost Allocation",
+   "non_negative": 1,
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "default": "100",
+   "fieldname": "cost_allocation_per",
+   "fieldtype": "Percent",
+   "label": "% Cost Allocation",
+   "non_negative": 1
   }
  ],
  "icon": "fa fa-sitemap",
@@ -713,7 +732,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-06 17:23:15.255301",
+ "modified": "2026-02-26 14:13:34.040181",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

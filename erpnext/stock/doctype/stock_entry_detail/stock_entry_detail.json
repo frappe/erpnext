@@ -18,7 +18,8 @@
   "item_name",
   "col_break2",
   "is_finished_item",
-  "is_scrap_item",
+  "is_legacy_scrap_item",
+  "type",
   "quality_inspection",
   "subcontracted_item",
   "against_fg",
@@ -81,7 +82,8 @@
   "putaway_rule",
   "column_break_51",
   "reference_purchase_receipt",
-  "job_card_item"
+  "job_card_item",
+  "bom_secondary_item"
  ],
  "fields": [
   {
@@ -558,12 +560,7 @@
   },
   {
    "default": "0",
-   "fieldname": "is_scrap_item",
-   "fieldtype": "Check",
-   "label": "Is Scrap Item"
-  },
-  {
-   "default": "0",
+   "depends_on": "eval:!doc.is_legacy_scrap_item && !doc.type",
    "fieldname": "is_finished_item",
    "fieldtype": "Check",
    "label": "Is Finished Item",
@@ -654,6 +651,28 @@
    "no_copy": 1,
    "options": "Subcontracting Inward Order Item",
    "set_only_once": 1
+  },
+  {
+   "depends_on": "eval:parent.purpose == \"Manufacture\" && doc.t_warehouse && !doc.is_finished_item && !doc.is_legacy_scrap_item",
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "\nCo-Product\nBy-Product\nScrap\nAdditional Finished Good"
+  },
+  {
+   "fieldname": "bom_secondary_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "BOM Secondary Item",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "is_legacy_scrap_item",
+   "fieldname": "is_legacy_scrap_item",
+   "fieldtype": "Check",
+   "label": "Is Legacy Scrap Item",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

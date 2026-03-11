@@ -334,7 +334,7 @@ class TestWorkOrder(IntegrationTestCase):
 			cint(bin1_on_stop_production.projected_qty) + 1, cint(self.bin1_at_start.projected_qty)
 		)
 
-	def test_scrap_material_qty(self):
+	def test_secondary_material_qty(self):
 		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
 
 		# add raw materials to stores
@@ -359,15 +359,15 @@ class TestWorkOrder(IntegrationTestCase):
 			"Work Order", wo_order.name, ["scrap_warehouse", "qty", "produced_qty", "bom_no"], as_dict=1
 		)
 
-		scrap_item_details = get_scrap_item_details(wo_order_details.bom_no)
+		secondary_item_details = get_secondary_item_details(wo_order_details.bom_no)
 
 		self.assertEqual(wo_order_details.produced_qty, 2)
 
 		for item in s.items:
-			if item.bom_no and item.item_code in scrap_item_details:
+			if item.bom_no and item.item_code in secondary_item_details:
 				self.assertEqual(wo_order_details.scrap_warehouse, item.t_warehouse)
 				self.assertEqual(
-					flt(wo_order_details.qty) * flt(scrap_item_details[item.item_code]), item.qty
+					flt(wo_order_details.qty) * flt(secondary_item_details[item.item_code]), item.qty
 				)
 
 	def test_allow_overproduction(self):
@@ -994,7 +994,7 @@ class TestWorkOrder(IntegrationTestCase):
 		self.assertEqual(wo.status, "Completed")
 
 	@timeout(seconds=60)
-	def test_job_card_scrap_item(self):
+	def test_job_card_secondary_item(self):
 		items = [
 			"Test FG Item for Scrap Item Test",
 			"Test RM Item 1 for Scrap Item Test",
@@ -1053,7 +1053,7 @@ class TestWorkOrder(IntegrationTestCase):
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
-			if row.is_scrap_item:
+			if row.type or row.is_legacy_scrap_item:
 				self.assertEqual(row.qty, 1)
 
 		# Partial Job Card 1 with qty 10
@@ -1065,7 +1065,7 @@ class TestWorkOrder(IntegrationTestCase):
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
-			if row.is_scrap_item:
+			if row.type or row.is_legacy_scrap_item:
 				self.assertEqual(row.qty, 2)
 
 		# Partial Job Card 2 with qty 10
@@ -2115,10 +2115,12 @@ class TestWorkOrder(IntegrationTestCase):
 		for row in se_doc.additional_costs:
 			self.assertEqual(row.expense_account, operating_cost_account)
 
-	def test_op_cost_and_scrap_based_on_sub_assemblies(self):
+	def test_set_op_cost_and_secondary_items_from_sub_assemblies(self):
 		# Make Sub Assembly BOM 1
 
-		frappe.db.set_single_value("Manufacturing Settings", "set_op_cost_and_scrap_from_sub_assemblies", 1)
+		frappe.db.set_single_value(
+			"Manufacturing Settings", "set_op_cost_and_secondary_items_from_sub_assemblies", 1
+		)
 
 		items = {
 			"Test Final FG Item": 0,
@@ -2150,16 +2152,20 @@ class TestWorkOrder(IntegrationTestCase):
 		se_doc.save()
 
 		self.assertTrue(se_doc.additional_costs)
-		scrap_items = []
+		secondary_items = []
 		for item in se_doc.items:
-			if item.is_scrap_item:
-				scrap_items.append(item.item_code)
+			if item.type or item.is_legacy_scrap_item:
+				secondary_items.append(item.item_code)
 
-		self.assertEqual(sorted(scrap_items), sorted(["Test Final Scrap Item 1", "Test Final Scrap Item 2"]))
+		self.assertEqual(
+			sorted(secondary_items), sorted(["Test Final Scrap Item 1", "Test Final Scrap Item 2"])
+		)
 		for row in se_doc.additional_costs:
 			self.assertEqual(row.amount, 3000)
 
-		frappe.db.set_single_value("Manufacturing Settings", "set_op_cost_and_scrap_from_sub_assemblies", 0)
+		frappe.db.set_single_value(
+			"Manufacturing Settings", "set_op_cost_and_secondary_items_from_sub_assemblies", 0
+		)
 
 	@IntegrationTestCase.change_settings(
 		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
@@ -3932,7 +3938,7 @@ def prepare_boms_for_sub_assembly_test():
 			do_not_submit=True,
 		)
 
-		bom.append("scrap_items", {"item_code": "Test Final Scrap Item 1", "qty": 1})
+		bom.append("secondary_items", {"item_code": "Test Final Scrap Item 1", "qty": 1, "is_legacy": 1})
 
 		bom.submit()
 
@@ -3945,7 +3951,7 @@ def prepare_boms_for_sub_assembly_test():
 			do_not_submit=True,
 		)
 
-		bom.append("scrap_items", {"item_code": "Test Final Scrap Item 2", "qty": 1})
+		bom.append("secondary_items", {"item_code": "Test Final Scrap Item 2", "qty": 1, "is_legacy": 1})
 
 		bom.submit()
 
@@ -4140,7 +4146,7 @@ def update_job_card(job_card, jc_qty=None, days=None):
 	employee = frappe.db.get_value("Employee", {"status": "Active"}, "name")
 	job_card_doc = frappe.get_doc("Job Card", job_card)
 	job_card_doc.set(
-		"scrap_items",
+		"secondary_items",
 		[
 			{"item_code": "Test RM Item 1 for Scrap Item Test", "stock_qty": 2},
 			{"item_code": "Test RM Item 2 for Scrap Item Test", "stock_qty": 2},
@@ -4180,17 +4186,17 @@ def update_job_card(job_card, jc_qty=None, days=None):
 	job_card_doc.submit()
 
 
-def get_scrap_item_details(bom_no):
-	scrap_items = {}
+def get_secondary_item_details(bom_no):
+	secondary_items = {}
 	for item in frappe.db.sql(
-		"""select item_code, stock_qty from `tabBOM Scrap Item`
+		"""select item_code, stock_qty from `tabBOM Secondary Item`
 		where parent = %s""",
 		bom_no,
 		as_dict=1,
 	):
-		scrap_items[item.item_code] = item.stock_qty
+		secondary_items[item.item_code] = item.stock_qty
 
-	return scrap_items
+	return secondary_items
 
 
 def allow_overproduction(fieldname, percentage):

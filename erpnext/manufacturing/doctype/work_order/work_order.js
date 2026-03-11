@@ -387,6 +387,7 @@ frappe.ui.form.on("Work Order", {
 					args: {
 						work_order: frm.doc.name,
 						operations: selected_rows,
+						parent_bom: frm.doc.bom_no,
 					},
 					callback: function () {
 						frm.reload_doc();

@@ -819,7 +819,7 @@ class Company(NestedSet):
 		boms = frappe.db.sql_list("select name from tabBOM where company=%s", self.name)
 		if boms:
 			frappe.db.sql("delete from tabBOM where company=%s", self.name)
-			for dt in ("BOM Operation", "BOM Item", "BOM Scrap Item", "BOM Explosion Item"):
+			for dt in ("BOM Operation", "BOM Item", "BOM Secondary Item", "BOM Explosion Item"):
 				frappe.db.sql(
 					"delete from `tab{}` where parent in ({})".format(dt, ", ".join(["%s"] * len(boms))),
 					tuple(boms),
