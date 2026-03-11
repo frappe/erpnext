@@ -163,13 +163,16 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 	},
 	onload: function () {
 		let fiscal_year = erpnext.utils.get_fiscal_year(frappe.datetime.get_today());
+		var filters = frappe.query_report.get_values();
 
-		frappe.model.with_doc("Fiscal Year", fiscal_year, function (r) {
-			var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
-			frappe.query_report.set_filter_value({
-				period_start_date: fy.year_start_date,
-				period_end_date: fy.year_end_date,
+		if (!filters.period_start_date || !filters.period_end_date) {
+			frappe.model.with_doc("Fiscal Year", fiscal_year, function (r) {
+				var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
+				frappe.query_report.set_filter_value({
+					period_start_date: fy.year_start_date,
+					period_end_date: fy.year_end_date,
+				});
 			});
-		});
+		}
 	},
 };
