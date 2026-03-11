@@ -359,6 +359,11 @@ def set_product_bundle_rate_amount(doc, parent_items_price):
 		if bundle_rate and bundle_rate != item.rate:
 			item.rate = bundle_rate
 			item.amount = flt(bundle_rate * item.qty)
+			item.margin_rate_or_amount = 0
+			item.discount_percentage = 0
+			item.discount_amount = 0
+	doc.calculate_taxes_and_totals()
+	doc.set_total_in_words()
 
 
 def on_doctype_update():
