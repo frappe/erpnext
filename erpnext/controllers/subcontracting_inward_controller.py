@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import frappe
 from frappe import _, bold
 from frappe.query_builder import Case
@@ -871,14 +873,14 @@ class SubcontractingInwardController:
 	def update_inward_order_secondary_items(self):
 		if (scio := self.subcontracting_inward_order) and self.purpose == "Manufacture":
 			secondary_items_list = [item for item in self.items if item.type or item.is_legacy_scrap_item]
-			secondary_items = frappe._dict(
-				{
-					(item.item_code, item.t_warehouse): item.transfer_qty
-					if self._action == "submit"
-					else -item.transfer_qty
-					for item in secondary_items_list
-				}
-			)
+
+			secondary_items = defaultdict(float)
+			for item in secondary_items_list:
+				secondary_items[(item.item_code, item.t_warehouse)] += (
+					item.transfer_qty if self._action == "submit" else -item.transfer_qty
+				)
+			secondary_items = frappe._dict(secondary_items)
+
 			if secondary_items:
 				item_codes, warehouses = zip(*list(secondary_items.keys()), strict=True)
 				item_codes = list(item_codes)

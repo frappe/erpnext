@@ -1493,7 +1493,7 @@ class JobCard(Document):
 		ste = ManufactureEntry(
 			{
 				"for_quantity": self.for_quantity - self.manufactured_qty,
-				"process_loss_qty": self.process_loss_qty - get_consumed_process_loss(),
+				"process_loss_qty": max(self.process_loss_qty - get_consumed_process_loss(), 0),
 				"job_card": self.name,
 				"skip_material_transfer": self.skip_material_transfer,
 				"backflush_from_wip_warehouse": self.backflush_from_wip_warehouse,

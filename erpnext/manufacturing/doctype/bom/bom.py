@@ -300,7 +300,7 @@ class BOM(WebsiteGenerator):
 		self.validate_uoms()
 		self.set_default_uom()
 		self.validate_semi_finished_goods()
-		self.validate_qty_not_zero()
+		self.validate_secondary_items()
 		self.set_fg_cost_allocation()
 		self.validate_total_cost_allocation()
 
@@ -332,11 +332,18 @@ class BOM(WebsiteGenerator):
 				),
 			)
 
-	def validate_qty_not_zero(self):
+	def validate_secondary_items(self):
 		for item in self.secondary_items:
 			if not item.qty:
 				frappe.throw(
 					_("Row #{0}: Quantity should be greater than 0 for {1} Item {2}").format(
+						item.idx, item.type, get_link_to_form("Item", item.item_code)
+					)
+				)
+
+			if item.process_loss_per >= 100:
+				frappe.throw(
+					_("Row #{0}: Process Loss Percentage should be less than 100% for {1} Item {2}").format(
 						item.idx, item.type, get_link_to_form("Item", item.item_code)
 					)
 				)

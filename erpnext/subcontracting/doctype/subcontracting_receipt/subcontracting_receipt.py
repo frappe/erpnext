@@ -359,11 +359,14 @@ class SubcontractingReceipt(SubcontractingController):
 						item.precision("qty"),
 					)
 					if not secondary_item.is_legacy:
+						lcv_cost_per_qty = (
+							flt(item.landed_cost_voucher_amount) / flt(item.qty) if flt(item.qty) else 0.0
+						)
 						fg_item_cost = (
 							flt(item.rm_cost_per_qty)
 							+ flt(item.secondary_items_cost_per_qty)
 							+ flt(item.additional_cost_per_qty)
-							+ flt(item.landed_cost_voucher_amount)
+							+ flt(lcv_cost_per_qty)
 							+ flt(item.service_cost_per_qty)
 						) * flt(item.received_qty)
 						rate = (
