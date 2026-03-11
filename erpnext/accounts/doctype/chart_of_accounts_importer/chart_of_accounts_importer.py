@@ -38,7 +38,9 @@ class ChartofAccountsImporter(Document):
 
 	def validate(self):
 		if self.import_file:
-			get_coa("Chart of Accounts Importer", "All Accounts", file_name=self.import_file, for_validate=1)
+			get_coa(
+				"Chart of Accounts Importer", _("All Accounts"), file_name=self.import_file, for_validate=1
+			)
 
 
 def validate_columns(data):
@@ -252,7 +254,7 @@ def build_forest(data):
 		) = i
 
 		if not account_name:
-			error_messages.append(f"Row {line_no}: Please enter Account Name")
+			error_messages.append(_("Row {0}: Please enter Account Name").format(line_no))
 
 		name = account_name
 		if account_number:

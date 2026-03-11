@@ -16,7 +16,7 @@ frappe.treeview_settings["Location"] = {
 		},
 	],
 	breadcrumb: "Assets",
-	root_label: "All Locations",
+	root_label: __("All Locations"),
 	get_tree_root: false,
 	menu_items: [
 		{

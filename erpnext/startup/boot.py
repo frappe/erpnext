@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe import _
 from frappe.defaults import get_user_default
 from frappe.utils import cint
 
@@ -71,12 +72,12 @@ def boot_session(bootinfo):
 def update_page_info(bootinfo):
 	bootinfo.page_info.update(
 		{
-			"Chart of Accounts": {"title": "Chart of Accounts", "route": "Tree/Account"},
-			"Chart of Cost Centers": {"title": "Chart of Cost Centers", "route": "Tree/Cost Center"},
-			"Item Group Tree": {"title": "Item Group Tree", "route": "Tree/Item Group"},
-			"Customer Group Tree": {"title": "Customer Group Tree", "route": "Tree/Customer Group"},
-			"Territory Tree": {"title": "Territory Tree", "route": "Tree/Territory"},
-			"Sales Person Tree": {"title": "Sales Person Tree", "route": "Tree/Sales Person"},
+			"Chart of Accounts": {"title": _("Chart of Accounts"), "route": "Tree/Account"},
+			"Chart of Cost Centers": {"title": _("Chart of Cost Centers"), "route": "Tree/Cost Center"},
+			"Item Group Tree": {"title": _("Item Group Tree"), "route": "Tree/Item Group"},
+			"Customer Group Tree": {"title": _("Customer Group Tree"), "route": "Tree/Customer Group"},
+			"Territory Tree": {"title": _("Territory Tree"), "route": "Tree/Territory"},
+			"Sales Person Tree": {"title": _("Sales Person Tree"), "route": "Tree/Sales Person"},
 		}
 	)
 

@@ -6,6 +6,7 @@ import json
 import math
 
 import frappe
+from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import NestedSet, update_nsm
 
@@ -212,7 +213,7 @@ def _ring_area(coords):
 
 @frappe.whitelist()
 def get_children(doctype: str, parent: str | None = None, location: str | None = None, is_root: bool = False):
-	if parent is None or parent == "All Locations":
+	if parent is None or parent in {"All Locations", _("All Locations")}:
 		parent = ""
 
 	return frappe.db.sql(
@@ -236,7 +237,7 @@ def add_node():
 	args = frappe.form_dict
 	args = make_tree_args(**args)
 
-	if args.parent_location == "All Locations":
+	if args.parent_location in {"All Locations", _("All Locations")}:
 		args.parent_location = None
 
 	frappe.get_doc(args).insert()

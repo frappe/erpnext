@@ -30,7 +30,7 @@ def transaction_processing(
 	skipped_msg = ""
 
 	if skipped_records:
-		skipped_msg = _("{0} creation for the following records will be skipped.").format(to_doctype)
+		skipped_msg = _("{0} creation for the following records will be skipped.").format(_(to_doctype))
 
 		skipped_msg += (
 			"<br><br><ul>"
@@ -43,7 +43,9 @@ def transaction_processing(
 		return
 
 	frappe.msgprint(
-		_("Started a background job to create {1} {0}. {2}").format(to_doctype, length_of_data, skipped_msg)
+		_("Started a background job to create {1} {0}. {2}").format(
+			_(to_doctype), length_of_data, skipped_msg
+		)
 	)
 	frappe.enqueue(
 		job,
@@ -207,12 +209,13 @@ def create_log(doc_name, e, from_doctype, to_doctype, status, log_date=None, res
 
 
 def show_job_status(fail_count, deserialized_data_count, to_doctype):
+	doctype_label = _(to_doctype)
 	if not fail_count:
 		frappe.msgprint(
 			_("Creation of <b><a href='/app/{0}'>{1}(s)</a></b> successful").format(
-				to_doctype.lower().replace(" ", "-"), to_doctype
+				to_doctype.lower().replace(" ", "-"), doctype_label
 			),
-			title="Successful",
+			title=_("Successful"),
 			indicator="green",
 		)
 	elif fail_count != 0 and fail_count < deserialized_data_count:
@@ -220,8 +223,8 @@ def show_job_status(fail_count, deserialized_data_count, to_doctype):
 			_(
 				"""Creation of {0} partially successful.
 				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>"""
-			).format(to_doctype),
-			title="Partially successful",
+			).format(doctype_label),
+			title=_("Partially successful"),
 			indicator="orange",
 		)
 	else:
@@ -229,7 +232,7 @@ def show_job_status(fail_count, deserialized_data_count, to_doctype):
 			_(
 				"""Creation of {0} failed.
 				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>"""
-			).format(to_doctype),
-			title="Failed",
+			).format(doctype_label),
+			title=_("Failed"),
 			indicator="red",
 		)

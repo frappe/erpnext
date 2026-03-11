@@ -191,7 +191,7 @@ class AccountsController(TransactionBase):
 				msg = _(
 					"We can see {0} is made against {1}. If you want {1}'s outstanding to be updated, uncheck the '{2}' checkbox."
 				).format(
-					frappe.bold(document_type),
+					frappe.bold(_(document_type)),
 					get_link_to_form(self.doctype, self.get("return_against")),
 					frappe.bold(_("Update Outstanding for Self")),
 				)
@@ -802,14 +802,16 @@ class AccountsController(TransactionBase):
 				msg += _("Please create purchase from internal sale or delivery document itself")
 				frappe.throw(msg, title=_("Internal Sales Reference Missing"))
 
-			label = "Delivery Note Item" if self.doctype == "Purchase Receipt" else "Sales Invoice Item"
+			label = _("Delivery Note Item") if self.doctype == "Purchase Receipt" else _("Sales Invoice Item")
 
 			field = frappe.scrub(label)
 
 			for row in self.get("items"):
 				if not row.get(field):
-					msg = f"At Row {row.idx}: The field {bold(label)} is mandatory for internal transfer"
-					frappe.throw(_(msg), title=_("Internal Transfer Reference Missing"))
+					msg = _("At Row {0}: The field {1} is mandatory for internal transfer").format(
+						row.idx, bold(label)
+					)
+					frappe.throw(msg, title=_("Internal Transfer Reference Missing"))
 
 	def validate_internal_transaction(self):
 		if not cint(frappe.get_single_value("Accounts Settings", "maintain_same_internal_transaction_rate")):

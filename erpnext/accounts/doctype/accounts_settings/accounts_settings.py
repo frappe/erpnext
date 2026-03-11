@@ -143,7 +143,7 @@ class AccountsSettings(Document):
 	def validate_stale_days(self):
 		if not self.allow_stale and cint(self.stale_days) <= 0:
 			frappe.msgprint(
-				_("Stale Days should start from 1."), title="Error", indicator="red", raise_exception=1
+				_("Stale Days should start from 1."), title=_("Error"), indicator="red", raise_exception=1
 			)
 
 	def enable_payment_schedule_in_print(self):
