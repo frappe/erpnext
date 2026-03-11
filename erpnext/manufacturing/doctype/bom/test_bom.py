@@ -895,7 +895,7 @@ def create_bom_with_process_loss_item(
 
 	if scrap_qty:
 		bom_doc.append(
-			"scrap_items",
+			"secondary_items",
 			{
 				"item_code": fg_item.item_code,
 				"qty": scrap_qty,

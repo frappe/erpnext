@@ -59,8 +59,8 @@
   "time_logs",
   "section_break_21",
   "sub_operations",
-  "scrap_items_section",
-  "scrap_items",
+  "secondary_items_section",
+  "secondary_items",
   "corrective_operation_section",
   "for_job_card",
   "is_corrective_job_card",
@@ -407,20 +407,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "scrap_items_section",
-   "fieldtype": "Tab Break",
-   "label": "Scrap Items"
-  },
-  {
-   "fieldname": "scrap_items",
-   "fieldtype": "Table",
-   "label": "Scrap Items",
-   "no_copy": 1,
-   "options": "Job Card Scrap Item",
-   "print_hide": 1
-  },
-  {
    "fetch_from": "operation.quality_inspection_template",
    "fieldname": "quality_inspection_template",
    "fieldtype": "Link",
@@ -623,12 +609,26 @@
   {
    "fieldname": "column_break_xhzg",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "secondary_items",
+   "fieldtype": "Table",
+   "label": "Secondary Items",
+   "no_copy": 1,
+   "options": "Job Card Secondary Item",
+   "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "secondary_items_section",
+   "fieldtype": "Tab Break",
+   "label": "Secondary Items"
   }
  ],
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-06 18:27:03.178783",
+ "modified": "2026-02-26 15:13:56.767070",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

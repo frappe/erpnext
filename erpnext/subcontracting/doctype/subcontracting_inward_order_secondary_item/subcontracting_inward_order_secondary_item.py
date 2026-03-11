@@ -5,7 +5,7 @@
 from frappe.model.document import Document
 
 
-class SubcontractingInwardOrderScrapItem(Document):
+class SubcontractingInwardOrderSecondaryItem(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -23,6 +23,7 @@ class SubcontractingInwardOrderScrapItem(Document):
 		produced_qty: DF.Float
 		reference_name: DF.Data
 		stock_uom: DF.Link
+		type: DF.Literal["Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
 		warehouse: DF.Link
 	# end: auto-generated types
 

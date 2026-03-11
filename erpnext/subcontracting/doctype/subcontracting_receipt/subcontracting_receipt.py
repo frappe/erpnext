@@ -144,12 +144,12 @@ class SubcontractingReceipt(SubcontractingController):
 		super().validate()
 
 		if self.is_new() and self.get("_action") == "save" and not frappe.in_test:
-			self.get_scrap_items()
+			self.get_secondary_items()
 
 		self.set_missing_values()
 
 		if self.get("_action") == "submit":
-			self.validate_scrap_items()
+			self.validate_secondary_items()
 			self.validate_accepted_warehouse()
 			self.validate_rejected_warehouse()
 
@@ -343,39 +343,66 @@ class SubcontractingReceipt(SubcontractingController):
 				self.update_rate_for_supplied_items()
 
 	@frappe.whitelist()
-	def get_scrap_items(self, recalculate_rate=False):
-		self.remove_scrap_items()
+	def get_secondary_items(self, recalculate_rate: bool | None = False):
+		self.remove_secondary_items()
 
 		for item in list(self.items):
 			if item.bom:
 				bom = frappe.get_doc("BOM", item.bom)
-				for scrap_item in bom.scrap_items:
-					qty = flt(item.qty) * (flt(scrap_item.stock_qty) / flt(bom.quantity))
-					rate = (
-						get_valuation_rate(
-							scrap_item.item_code,
-							self.set_warehouse,
-							self.doctype,
-							self.name,
-							currency=erpnext.get_company_currency(self.company),
-							company=self.company,
-						)
-						or scrap_item.rate
+				for secondary_item in bom.secondary_items:
+					per_unit = secondary_item.stock_qty / bom.quantity
+					received_qty = flt(item.received_qty * per_unit, item.precision("received_qty"))
+					qty = flt(
+						item.received_qty * (per_unit - (secondary_item.process_loss_qty / bom.quantity)),
+						item.precision("qty"),
 					)
+					if not secondary_item.is_legacy:
+						lcv_cost_per_qty = (
+							flt(item.landed_cost_voucher_amount) / flt(item.qty) if flt(item.qty) else 0.0
+						)
+						fg_item_cost = (
+							flt(item.rm_cost_per_qty)
+							+ flt(item.secondary_items_cost_per_qty)
+							+ flt(item.additional_cost_per_qty)
+							+ flt(lcv_cost_per_qty)
+							+ flt(item.service_cost_per_qty)
+						) * flt(item.received_qty)
+						rate = (
+							(item.amount if self.is_new() else fg_item_cost)
+							* (secondary_item.cost_allocation_per / 100)
+						) / qty
+					else:
+						rate = (
+							get_valuation_rate(
+								secondary_item.item_code,
+								self.set_warehouse,
+								self.doctype,
+								self.name,
+								currency=erpnext.get_company_currency(self.company),
+								company=self.company,
+							)
+							or secondary_item.rate
+						)
+
 					self.append(
 						"items",
 						{
-							"is_scrap_item": 1,
+							"type": secondary_item.type,
+							"is_legacy_scrap_item": secondary_item.is_legacy,
 							"reference_name": item.name,
-							"item_code": scrap_item.item_code,
-							"item_name": scrap_item.item_name,
-							"qty": qty,
-							"stock_uom": scrap_item.stock_uom,
+							"item_code": secondary_item.item_code,
+							"item_name": secondary_item.item_name,
+							"qty": received_qty
+							if not secondary_item.is_legacy
+							else flt(item.qty) * (flt(secondary_item.stock_qty) / flt(bom.quantity)),
+							"received_qty": received_qty,
+							"process_loss_qty": received_qty - qty,
+							"stock_uom": secondary_item.stock_uom,
 							"rate": rate,
 							"rm_cost_per_qty": 0,
 							"service_cost_per_qty": 0,
 							"additional_cost_per_qty": 0,
-							"scrap_cost_per_qty": 0,
+							"secondary_items_cost_per_qty": 0,
 							"amount": qty * rate,
 							"warehouse": self.set_warehouse,
 							"rejected_warehouse": self.rejected_warehouse,
@@ -386,15 +413,12 @@ class SubcontractingReceipt(SubcontractingController):
 			self.calculate_additional_costs()
 			self.calculate_items_qty_and_amount()
 
-	def remove_scrap_items(self, recalculate_rate=False):
+	def remove_secondary_items(self):
 		for item in list(self.items):
-			if item.is_scrap_item:
+			if item.type or item.is_legacy_scrap_item:
 				self.remove(item)
 			else:
-				item.scrap_cost_per_qty = 0
-
-		if recalculate_rate:
-			self.calculate_items_qty_and_amount()
+				item.secondary_items_cost_per_qty = 0
 
 	@frappe.whitelist()
 	def set_missing_values(self):
@@ -449,30 +473,35 @@ class SubcontractingReceipt(SubcontractingController):
 			else:
 				rm_cost_map[item.reference_name] = item.amount
 
-		scrap_cost_map = {}
+		secondary_items_cost_map = {}
 		for item in self.get("items") or []:
-			if item.is_scrap_item:
-				item.amount = flt(item.qty) * flt(item.rate)
+			if item.type or item.is_legacy_scrap_item:
+				qty = (
+					flt(item.qty)
+					if item.is_legacy_scrap_item
+					else (flt(item.received_qty) - flt(item.process_loss_qty))
+				)
+				item.amount = qty * flt(item.rate)
 
-				if item.reference_name in scrap_cost_map:
-					scrap_cost_map[item.reference_name] += item.amount
+				if item.reference_name in secondary_items_cost_map:
+					secondary_items_cost_map[item.reference_name] += item.amount
 				else:
-					scrap_cost_map[item.reference_name] = item.amount
+					secondary_items_cost_map[item.reference_name] = item.amount
 
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
-			if not item.is_scrap_item:
+			if not item.type and not item.is_legacy_scrap_item:
 				if item.qty:
 					if item.name in rm_cost_map:
 						item.rm_supp_cost = rm_cost_map[item.name]
-						item.rm_cost_per_qty = item.rm_supp_cost / item.qty
+						item.rm_cost_per_qty = item.rm_supp_cost / (item.received_qty or item.qty)
 						rm_cost_map.pop(item.name)
 
-					if item.name in scrap_cost_map:
-						item.scrap_cost_per_qty = scrap_cost_map[item.name] / item.qty
-						scrap_cost_map.pop(item.name)
+					if item.name in secondary_items_cost_map:
+						item.secondary_items_cost_per_qty = secondary_items_cost_map[item.name] / item.qty
+						secondary_items_cost_map.pop(item.name)
 					else:
-						item.scrap_cost_per_qty = 0
+						item.secondary_items_cost_per_qty = 0
 
 				lcv_cost_per_qty = 0.0
 				if item.landed_cost_voucher_amount:
@@ -483,36 +512,44 @@ class SubcontractingReceipt(SubcontractingController):
 					+ flt(item.service_cost_per_qty)
 					+ flt(item.additional_cost_per_qty)
 					+ flt(lcv_cost_per_qty)
-					- flt(item.scrap_cost_per_qty)
 				)
 
-			item.received_qty = flt(item.qty) + flt(item.rejected_qty)
-			item.amount = flt(item.qty) * flt(item.rate)
+			if item.bom:
+				item.received_qty = flt(item.qty) + flt(item.rejected_qty) + flt(item.process_loss_qty)
+				item.amount = (
+					flt(item.received_qty)
+					* flt(item.rate)
+					* (frappe.get_value("BOM", item.bom, "cost_allocation_per") / 100)
+				)
+				item.rate = item.amount / (item.qty or item.rejected_qty)
+			else:
+				item.qty = flt(item.received_qty) - flt(item.process_loss_qty)
+				item.amount = flt(item.qty) * flt(item.rate)
 
-			total_qty += flt(item.qty)
+			total_qty += flt(item.qty) + flt(item.rejected_qty)
 			total_amount += item.amount
 		else:
 			self.total_qty = total_qty
 			self.total = total_amount
 
-	def validate_scrap_items(self):
+	def validate_secondary_items(self):
 		for item in self.items:
-			if item.is_scrap_item:
+			if item.type or item.is_legacy_scrap_item:
 				if not item.qty:
 					frappe.throw(
-						_("Row #{0}: Scrap Item Qty cannot be zero").format(item.idx),
+						_("Row #{0}: Secondary Item Qty cannot be zero").format(item.idx),
 					)
 
 				if item.rejected_qty:
 					frappe.throw(
-						_("Row #{0}: Rejected Qty cannot be set for Scrap Item {1}.").format(
+						_("Row #{0}: Rejected Qty cannot be set for Secondary Item {1}.").format(
 							item.idx, frappe.bold(item.item_code)
 						),
 					)
 
 				if not item.reference_name:
 					frappe.throw(
-						_("Row #{0}: Finished Good reference is mandatory for Scrap Item {1}.").format(
+						_("Row #{0}: Finished Good reference is mandatory for Secondary Item {1}.").format(
 							item.idx, frappe.bold(item.item_code)
 						),
 					)

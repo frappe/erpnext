@@ -501,8 +501,8 @@ class TestSubcontractingController(ERPNextTestSuite):
 		scr1.items[0].qty = 2
 		add_second_row_in_scr(scr1)
 		scr1.flags.ignore_mandatory = True
-		scr1.save()
 		scr1.set_missing_values()
+		scr1.save()
 		scr1.submit()
 
 		for _key, value in get_supplied_items(scr1).items():
@@ -513,8 +513,8 @@ class TestSubcontractingController(ERPNextTestSuite):
 		scr2.items[0].qty = 2
 		add_second_row_in_scr(scr2)
 		scr2.flags.ignore_mandatory = True
-		scr2.save()
 		scr2.set_missing_values()
+		scr2.save()
 		scr2.submit()
 
 		for _key, value in get_supplied_items(scr2).items():
@@ -523,8 +523,8 @@ class TestSubcontractingController(ERPNextTestSuite):
 		scr3 = make_subcontracting_receipt(sco.name)
 		scr3.items[0].qty = 2
 		scr3.flags.ignore_mandatory = True
-		scr3.save()
 		scr3.set_missing_values()
+		scr3.save()
 		scr3.submit()
 
 		for _key, value in get_supplied_items(scr3).items():
@@ -1163,6 +1163,54 @@ class TestSubcontractingController(ERPNextTestSuite):
 		sco.reload()
 
 		self.assertEqual([item.rm_item_code for item in sco.supplied_items], expected)
+
+	def test_co_by_product(self):
+		frappe.set_value("UOM", "Nos", "must_be_whole_number", 0)
+
+		fg_item = make_item("FG Item", properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		rm_item = make_item("RM Item", properties={"is_stock_item": 1}).name
+		scrap_item = make_item("Scrap Item", properties={"is_stock_item": 1}).name
+		make_bom(
+			item=fg_item, raw_materials=[rm_item], scrap_items=[scrap_item], process_loss_percentage=10
+		).name
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 11",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr1 = make_subcontracting_receipt(sco.name)
+		scr1.get_secondary_items()
+		scr1.save()
+
+		self.assertEqual(scr1.items[0].received_qty, 5)
+		self.assertEqual(scr1.items[0].process_loss_qty, 0.5)
+		self.assertEqual(scr1.items[0].qty, 4.5)
+		self.assertEqual(scr1.items[0].rate, 200)
+		self.assertEqual(scr1.items[0].amount, 900)
+
+		self.assertEqual(scr1.items[1].item_code, scrap_item)
+		self.assertEqual(scr1.items[1].received_qty, 5)
+		self.assertEqual(scr1.items[1].process_loss_qty, 0.5)
+		self.assertEqual(scr1.items[1].qty, 4.5)
+		self.assertEqual(flt(scr1.items[1].rate, 3), 11.111)
+		self.assertEqual(scr1.items[1].amount, 50)
+
+		frappe.set_value("UOM", "Nos", "must_be_whole_number", 1)
 
 
 def add_second_row_in_scr(scr):

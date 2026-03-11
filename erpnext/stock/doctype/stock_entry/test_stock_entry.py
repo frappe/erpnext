@@ -909,8 +909,8 @@ class TestStockEntry(ERPNextTestSuite):
 			if d.s_warehouse:
 				rm_cost += d.amount
 		fg_cost = next(filter(lambda x: x.item_code == "_Test FG Item", s.get("items"))).amount
-		scrap_cost = next(filter(lambda x: x.is_scrap_item, s.get("items"))).amount
-		self.assertEqual(fg_cost, flt(rm_cost - scrap_cost, 2))
+		secondary_item_cost = next(filter(lambda x: x.type or x.is_legacy_scrap_item, s.get("items"))).amount
+		self.assertEqual(fg_cost, flt(rm_cost - secondary_item_cost, 2))
 
 		# When Stock Entry has only FG + Scrap
 		s.items.pop(0)
@@ -989,15 +989,15 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, ste.submit)
 
-	def test_quality_check_for_scrap_item(self):
+	def test_quality_check_for_secondary_item(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import (
 			make_stock_entry as _make_stock_entry,
 		)
 
-		scrap_item = "_Test Scrap Item 1"
-		make_item(scrap_item, {"is_stock_item": 1, "is_purchase_item": 0})
+		secondary_item = "_Test Scrap Item 1"
+		make_item(secondary_item, {"is_stock_item": 1, "is_purchase_item": 0})
 
-		bom_name = frappe.db.get_value("BOM Scrap Item", {"docstatus": 1}, "parent")
+		bom_name = frappe.db.get_value("BOM Secondary Item", {"docstatus": 1}, "parent")
 		production_item = frappe.db.get_value("BOM", bom_name, "item")
 
 		work_order = frappe.new_doc("Work Order")
@@ -1027,18 +1027,18 @@ class TestStockEntry(ERPNextTestSuite):
 					basic_rate=row.basic_rate or 100,
 				)
 
-			if row.is_scrap_item:
-				row.item_code = scrap_item
-				row.uom = frappe.db.get_value("Item", scrap_item, "stock_uom")
-				row.stock_uom = frappe.db.get_value("Item", scrap_item, "stock_uom")
+			if row.type or row.is_legacy_scrap_item:
+				row.item_code = secondary_item
+				row.uom = frappe.db.get_value("Item", secondary_item, "stock_uom")
+				row.stock_uom = frappe.db.get_value("Item", secondary_item, "stock_uom")
 
 		stock_entry.inspection_required = 1
 		stock_entry.save()
 
-		self.assertTrue([row.item_code for row in stock_entry.items if row.is_scrap_item])
+		self.assertTrue([row.item_code for row in stock_entry.items if row.type or row.is_legacy_scrap_item])
 
 		for row in stock_entry.items:
-			if not row.is_scrap_item:
+			if not row.type and not row.is_legacy_scrap_item:
 				qc = frappe.get_doc(
 					{
 						"doctype": "Quality Inspection",
@@ -1058,7 +1058,7 @@ class TestStockEntry(ERPNextTestSuite):
 		stock_entry.reload()
 		stock_entry.submit()
 		for row in stock_entry.items:
-			if row.is_scrap_item:
+			if row.type or row.is_legacy_scrap_item:
 				self.assertFalse(row.quality_inspection)
 			else:
 				self.assertTrue(row.quality_inspection)
@@ -2463,6 +2463,35 @@ class TestStockEntry(ERPNextTestSuite):
 
 		# delete naming rule
 		frappe.delete_doc("Document Naming Rule", qc_naming_rule.name)
+
+	def test_co_by_product(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		frappe.set_value("UOM", "Nos", "must_be_whole_number", 0)
+
+		fg_item = make_item("FG Item", properties={"is_stock_item": 1}).name
+		rm_item = make_item("RM Item", properties={"is_stock_item": 1}).name
+		scrap_item = make_item("Scrap Item", properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=5, rate=10, purpose="Material Receipt")
+
+		bom_no = make_bom(
+			item=fg_item, raw_materials=[rm_item], scrap_items=[scrap_item], process_loss_percentage=10
+		).name
+		se = make_stock_entry(item_code=fg_item, qty=5, purpose="Manufacture", do_not_save=True)
+		se.from_bom = 1
+		se.bom_no = bom_no
+		se.fg_completed_qty = 5
+		se.from_warehouse = warehouse
+		se.to_warehouse = "_Test Warehouse 1 - _TC"
+		se.get_items()
+		se.save()
+		se.reload()
+
+		self.assertEqual(se.items[1].qty, 4.5)
+		self.assertEqual(se.items[1].amount, 45)
+		self.assertEqual(se.items[2].qty, 4.5)
+		self.assertEqual(se.items[2].amount, 5)
 
 
 def make_serialized_item(self, **args):

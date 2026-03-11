@@ -2356,7 +2356,7 @@ def check_if_scrap_warehouse_mandatory(bom_no):
 	if bom_no:
 		bom = frappe.get_doc("BOM", bom_no)
 
-		if len(bom.scrap_items) > 0:
+		if bom.has_scrap_items():
 			res["set_scrap_wh_mandatory"] = True
 
 	return res
@@ -2420,6 +2420,7 @@ def make_stock_entry(
 	stock_entry.set_stock_entry_type()
 	stock_entry.is_additional_transfer_entry = is_additional_transfer_entry
 	stock_entry.get_items()
+	stock_entry.set_secondary_items_from_job_card()
 
 	if purpose != "Disassemble":
 		stock_entry.set_serial_no_batch_for_finished_good()
@@ -2478,14 +2479,14 @@ def query_sales_order(doctype, txt, searchfield, start, page_len, filters) -> li
 
 
 @frappe.whitelist()
-def make_job_card(work_order, operations):
+def make_job_card(work_order: str, operations: str | list, parent_bom: str | None = None):
 	if isinstance(operations, str):
 		operations = json.loads(operations)
 
 	work_order = frappe.get_doc("Work Order", work_order)
 	for row in operations:
 		row = frappe._dict(row)
-		row.update(get_operation_details(row.name, work_order))
+		row.update(get_operation_details(row.name, work_order, parent_bom))
 
 		validate_operation_data(row)
 		qty = row.get("qty")
@@ -2495,7 +2496,7 @@ def make_job_card(work_order, operations):
 				create_job_card(work_order, row, auto_create=True)
 
 
-def get_operation_details(name, work_order):
+def get_operation_details(name, work_order, parent_bom):
 	for row in work_order.operations:
 		if row.name == name:
 			return {
@@ -2505,7 +2506,7 @@ def get_operation_details(name, work_order):
 				"fg_warehouse": row.fg_warehouse,
 				"wip_warehouse": row.wip_warehouse,
 				"finished_good": row.finished_good,
-				"bom_no": row.get("bom_no"),
+				"bom_no": row.get("bom_no") or parent_bom,
 				"is_subcontracted": row.get("is_subcontracted"),
 			}
 
@@ -2640,8 +2641,9 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 		work_order.transfer_material_against == "Job Card" and not work_order.skip_transfer
 	):
 		doc.get_required_items()
-		if work_order.track_semi_finished_goods:
-			doc.set_scrap_items()
+
+	if work_order.track_semi_finished_goods:
+		doc.set_secondary_items()
 
 	if auto_create:
 		doc.flags.ignore_mandatory = True

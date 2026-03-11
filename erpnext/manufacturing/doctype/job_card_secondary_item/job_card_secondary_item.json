@@ -1,36 +1,47 @@
 {
  "actions": [],
- "creation": "2016-09-26 02:19:21.642081",
+ "creation": "2021-09-14 00:30:28.533884",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "type",
+  "description",
+  "column_break_3",
   "item_code",
-  "column_break_2",
   "item_name",
+  "bom_secondary_item",
   "quantity_and_rate",
   "stock_qty",
-  "rate",
-  "amount",
   "column_break_6",
-  "stock_uom",
-  "base_rate",
-  "base_amount"
+  "stock_uom"
  ],
  "fields": [
   {
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Item Code",
+   "label": "Secondary Item Code",
    "options": "Item",
    "reqd": 1
   },
   {
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Item Name"
+   "label": "Secondary Item Name"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "item_code.description",
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description",
+   "read_only": 1
   },
   {
    "fieldname": "quantity_and_rate",
@@ -46,25 +57,11 @@
    "reqd": 1
   },
   {
-   "fieldname": "rate",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Rate",
-   "non_negative": 1,
-   "options": "currency"
-  },
-  {
-   "fieldname": "amount",
-   "fieldtype": "Currency",
-   "label": "Amount",
-   "options": "currency",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_6",
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "item_code.stock_uom",
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "label": "Stock UOM",
@@ -72,32 +69,28 @@
    "read_only": 1
   },
   {
-   "fieldname": "base_rate",
-   "fieldtype": "Currency",
-   "label": "Basic Rate (Company Currency)",
-   "options": "Company:company:default_currency",
-   "print_hide": 1,
-   "read_only": 1
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "Co-Product\nBy-Product\nScrap\nAdditional Finished Good",
+   "reqd": 1
   },
   {
-   "fieldname": "base_amount",
-   "fieldtype": "Currency",
-   "label": "Basic Amount (Company Currency)",
-   "options": "Company:company:default_currency",
-   "print_hide": 1,
+   "fieldname": "bom_secondary_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "BOM Secondary Item Reference",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
   }
  ],
+ "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-31 16:21:44.047007",
+ "modified": "2026-03-06 13:51:00.492621",
  "modified_by": "Administrator",
  "module": "Manufacturing",
- "name": "BOM Scrap Item",
+ "name": "Job Card Secondary Item",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,

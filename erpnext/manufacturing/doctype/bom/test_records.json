@@ -36,15 +36,17 @@
   "quantity": 1.0
  },
  {
-  "scrap_items":[
+  "secondary_items":[
   {
    "amount": 2000.0,
-   "doctype": "BOM Scrap Item",
+   "doctype": "BOM Secondary Item",
    "item_code": "_Test Item Home Desktop 100",
-   "parentfield": "scrap_items",
+   "parentfield": "secondary_items",
    "stock_qty": 1.0,
    "rate": 2000.0,
-   "stock_uom": "_Test UOM"
+   "stock_uom": "_Test UOM",
+   "type": "Scrap",
+   "is_legacy": 1
   }
   ],
   "items": [
