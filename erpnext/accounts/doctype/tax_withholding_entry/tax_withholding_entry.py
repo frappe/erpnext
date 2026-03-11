@@ -195,9 +195,13 @@ class TaxWithholdingEntry(Document):
 							precision,
 						)
 
-				new_entry = frappe.copy_doc(old_entry)
-				new_entry.update(values_to_update)
-				new_entry.insert()
+				parent_doc = frappe.get_doc(old_entry.parenttype, old_entry.parent)
+				parent_doc.flags.ignore_validate_update_after_submit = True
+				new_child_data = old_entry.as_dict()
+				new_child_data.update(values_to_update)
+				new_child_data["name"] = None
+				parent_doc.append(old_entry.parentfield, new_child_data)
+				parent_doc.save()
 
 				docs_needing_reindex.add((old_entry.parenttype, old_entry.parent))
 
@@ -321,7 +325,7 @@ class TaxWithholdingEntry(Document):
 			if entry.withholding_amount == 0:
 				continue
 
-			new_entry = frappe.copy_doc(frappe.get_doc(DOCTYPE, **entry))
+			old_doc = frappe.get_doc(DOCTYPE, **entry)
 			values_to_update = {
 				"taxable_amount": abs(entry.taxable_amount),
 				"withholding_amount": 0,
@@ -334,8 +338,13 @@ class TaxWithholdingEntry(Document):
 				"withholding_name": "",
 				"withholding_date": None,
 			}
-			new_entry.update(values_to_update)
-			new_entry.insert()
+			parent_doc = frappe.get_doc(old_doc.parenttype, old_doc.parent)
+			parent_doc.flags.ignore_validate_update_after_submit = True
+			new_child_data = old_doc.as_dict()
+			new_child_data.update(values_to_update)
+			new_child_data["name"] = None
+			parent_doc.append(old_doc.parentfield, new_child_data)
+			parent_doc.save()
 
 			docs_needing_reindex.add((entry.parenttype, entry.parent))
 
