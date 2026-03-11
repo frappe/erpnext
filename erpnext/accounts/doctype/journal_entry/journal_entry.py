@@ -294,6 +294,8 @@ class JournalEntry(AccountsController):
 
 		# References for this Journal are removed on the `on_cancel` event in accounts_controller
 		super().on_cancel()
+
+		from_doc_events = getattr(self, "ignore_linked_doctypes", ())
 		self.ignore_linked_doctypes = (
 			"GL Entry",
 			"Stock Ledger Entry",
@@ -307,6 +309,10 @@ class JournalEntry(AccountsController):
 			"Advance Payment Ledger Entry",
 			"Tax Withholding Entry",
 		)
+
+		if from_doc_events and from_doc_events != self.ignore_linked_doctypes:
+			self.ignore_linked_doctypes = self.ignore_linked_doctypes + from_doc_events
+
 		self.make_gl_entries(1)
 		JournalTaxWithholding(self).on_cancel()
 		self.unlink_advance_entry_reference()
