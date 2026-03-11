@@ -432,7 +432,7 @@ class TestLocation(IntegrationTestCase):
 		self.assertIn(root_location.name, child_names)
 
 	def test_add_node(self):
-		frappe.form_dict = frappe._dict(
+		frappe.local.form_dict = frappe._dict(
 			{
 				"doctype": "Location",
 				"location_name": "_Test New Node Location",
@@ -447,7 +447,7 @@ class TestLocation(IntegrationTestCase):
 		self.assertTrue(frappe.db.exists("Location", {"location_name": "_Test New Node Location"}))
 
 	def test_add_node_with_all_locations_parent(self):
-		frappe.form_dict = frappe._dict(
+		frappe.local.form_dict = frappe._dict(
 			{
 				"doctype": "Location",
 				"location_name": "_Test New Node All Locations",
