@@ -30,7 +30,7 @@
   "column_break_gtbl",
   "cost",
   "base_cost",
-  "qty_after_process_loss"
+  "process_loss_qty"
  ],
  "fields": [
   {
@@ -66,16 +66,6 @@
    "no_copy": 1,
    "non_negative": 1,
    "options": "currency",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "qty_after_process_loss",
-   "fieldtype": "Float",
-   "label": "Qty After Process Loss",
-   "no_copy": 1,
-   "non_negative": 1,
    "read_only": 1,
    "reqd": 1
   },
@@ -212,13 +202,23 @@
    "no_copy": 1,
    "non_negative": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "process_loss_qty",
+   "fieldtype": "Float",
+   "label": "Process Loss Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-02 12:34:36.477544",
+ "modified": "2026-03-11 12:12:29.208031",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Secondary Item",

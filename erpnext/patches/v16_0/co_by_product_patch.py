@@ -35,7 +35,13 @@ def insert_into_bom():
 			)
 			secondary_item.update({field: item[field] for field in fields})
 			secondary_item.update(
-				{"uom": item.stock_uom, "conversion_factor": 1, "qty": item.stock_qty, "is_legacy": 1}
+				{
+					"uom": item.stock_uom,
+					"conversion_factor": 1,
+					"qty": item.stock_qty,
+					"is_legacy": 1,
+					"type": "Scrap",
+				}
 			)
 			secondary_item.insert()
 

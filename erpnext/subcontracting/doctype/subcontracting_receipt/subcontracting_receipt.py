@@ -354,8 +354,7 @@ class SubcontractingReceipt(SubcontractingController):
 					per_unit = secondary_item.stock_qty / bom.quantity
 					received_qty = flt(item.received_qty * per_unit, item.precision("received_qty"))
 					qty = flt(
-						item.received_qty
-						* (per_unit - (secondary_item.qty_after_process_loss / bom.quantity)),
+						item.received_qty * (per_unit - (secondary_item.process_loss_qty / bom.quantity)),
 						item.precision("qty"),
 					)
 					if not secondary_item.is_legacy:

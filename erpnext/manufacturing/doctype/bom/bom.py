@@ -1256,16 +1256,14 @@ class BOM(WebsiteGenerator):
 			self.process_loss_qty = flt(self.quantity) * flt(self.process_loss_percentage) / 100
 
 		for item in self.secondary_items:
-			item.qty_after_process_loss = flt(
+			item.process_loss_qty = flt(
 				item.stock_qty * (item.process_loss_per / 100), self.precision("quantity")
 			)
 
 	def validate_uoms(self):
 		self.validate_uom(self.item, self.uom, self.process_loss_percentage, self.process_loss_qty)
 		for item in self.secondary_items:
-			self.validate_uom(
-				item.item_code, item.stock_uom, item.process_loss_per, item.qty_after_process_loss
-			)
+			self.validate_uom(item.item_code, item.stock_uom, item.process_loss_per, item.process_loss_qty)
 
 	def validate_uom(self, item_code, uom, process_loss_per, process_loss_qty):
 		must_be_whole_number = frappe.get_value("UOM", uom, "must_be_whole_number")
