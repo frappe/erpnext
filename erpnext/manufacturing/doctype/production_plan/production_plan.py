@@ -1901,7 +1901,7 @@ def get_item_data(item_code: str):
 	return {
 		"bom_no": item_details.get("bom_no"),
 		"stock_uom": item_details.get("stock_uom"),
-		"description": item_details.get("description")
+		"description": item_details.get("description"),
 	}
 
 
