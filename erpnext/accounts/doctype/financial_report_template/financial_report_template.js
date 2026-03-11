@@ -372,7 +372,7 @@ function update_formula_description(frm, data_source) {
 					<li><code>min(val1, val2)</code> - ${__("Smaller of two values")}</li>
 				</ul>
 
-				<p ${note_style}>"<strong>${__("Required:")}</strong> ${__(
+				<p ${note_style}><strong>${__("Required:")}</strong> ${__(
 			'Use "Reference Code" from other rows in your formulas.'
 		)}</p>
 			</div>`;
