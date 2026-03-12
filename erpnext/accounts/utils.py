@@ -1620,7 +1620,7 @@ def parse_naming_series_variable(doc, variable):
 				getdate(doc.get("posting_date") or doc.get("transaction_date") or doc.get("posting_datetime"))
 				or now_datetime()
 			)
-			if frappe.get_single_value("Global Defaults", "use_posting_datetime_for_naming_documents")
+			if doc and frappe.get_single_value("Global Defaults", "use_posting_datetime_for_naming_documents")
 			else now_datetime()
 		)
 		return date.strftime(data[variable]) if variable in data else determine_consecutive_week_number(date)
