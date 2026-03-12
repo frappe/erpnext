@@ -131,7 +131,8 @@ def update_status_for_contracts():
 	Run the daily hook to update the statuses for all signed
 	and submitted Contracts
 	"""
-
+	batch_size = 1000
+	processed = 0
 	while True:
 		contracts = frappe.get_all(
 			"Contract",
@@ -144,24 +145,24 @@ def update_status_for_contracts():
 		if not contracts:
 			break
 
-		activate_contacts = {}
-		inactivate_contacts = {}
+		activate_contracts = {}
+		inactivate_contracts = {}
 
 		for contract in contracts:
 			status = get_status(contract.get("start_date"), contract.get("end_date"))
 
 			if contract.get("status") != status:
 				if status == "Active":
-					activate_contacts[contract.get("name")] = {"status": status}
+					activate_contracts[contract.get("name")] = {"status": status}
 				else:
-					inactivate_contacts[contract.get("name")] = {"status": status}
+					inactivate_contracts[contract.get("name")] = {"status": status}
 
-		if activate_contacts:
-			frappe.db.bulk_update("Contract", activate_contacts)
-			activate_contacts = {}
+		if activate_contracts:
+			frappe.db.bulk_update("Contract", activate_contracts)
+			activate_contracts = {}
 
-		if inactivate_contacts:
-			frappe.db.bulk_update("Contract", inactivate_contacts)
-			inactivate_contacts = {}
+		if inactivate_contracts:
+			frappe.db.bulk_update("Contract", inactivate_contracts)
+			inactivate_contracts = {}
 
 		processed += batch_size
