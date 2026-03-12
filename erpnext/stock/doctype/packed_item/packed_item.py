@@ -354,6 +354,7 @@ def update_product_bundle_rate(parent_items_price, pi_row, item_row):
 
 def set_product_bundle_rate_amount(doc, parent_items_price):
 	"Set cumulative rate and amount in bundle item."
+	rate_updated = False
 	for item in doc.get("items"):
 		bundle_rate = parent_items_price.get((item.item_code, item.name))
 		if bundle_rate and bundle_rate != item.rate:
@@ -362,8 +363,10 @@ def set_product_bundle_rate_amount(doc, parent_items_price):
 			item.margin_rate_or_amount = 0
 			item.discount_percentage = 0
 			item.discount_amount = 0
-	doc.calculate_taxes_and_totals()
-	doc.set_total_in_words()
+			rate_updated = True
+	if rate_updated:
+		doc.calculate_taxes_and_totals()
+		doc.set_total_in_words()
 
 
 def on_doctype_update():
