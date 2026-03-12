@@ -410,12 +410,12 @@ frappe.ui.form.on("Material Request", {
 	},
 
 	make_purchase_order: function (frm) {
-            frappe.model.open_mapped_doc({
-            method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
-            frm: frm,
-            run_link_triggers: true,
-        });
-    },
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
+			frm: frm,
+			run_link_triggers: true,
+		});
+	},
 
 	make_request_for_quotation: function (frm) {
 		frappe.model.open_mapped_doc({
