@@ -36,6 +36,7 @@ frappe.ui.form.on("Asset", {
 	},
 
 	company: function (frm) {
+		frm.trigger("set_dynamic_labels");
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
@@ -87,7 +88,7 @@ frappe.ui.form.on("Asset", {
 	},
 
 	refresh: async function (frm) {
-		frm.set_currency_labels(["net_purchase_amount"], erpnext.get_currency(frm.doc.company));
+		frm.trigger("set_dynamic_labels");
 
 		frappe.ui.form.trigger("Asset", "asset_type");
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
@@ -227,6 +228,10 @@ frappe.ui.form.on("Asset", {
 				});
 			}
 		}
+	},
+
+	set_dynamic_labels: function (frm) {
+		frm.set_currency_labels(["net_purchase_amount"], erpnext.get_currency(frm.doc.company));
 	},
 
 	should_show_accounting_ledger: async function (frm) {
