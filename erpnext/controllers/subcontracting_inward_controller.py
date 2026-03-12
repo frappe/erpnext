@@ -696,28 +696,34 @@ class SubcontractingInwardController:
 					{"transfer_qty": item.transfer_qty, "rate": item.customer_provided_item_cost}
 				)
 			else:
-				scio_doc = frappe.get_doc("Subcontracting Inward Order", self.subcontracting_inward_order)
-				scio_doc.flags.ignore_validate_update_after_submit = True
-				scio_rm = scio_doc.append(
-					"received_items",
-					{
-						"rm_item_code": item.item_code,
-						"stock_uom": item.stock_uom,
-						"warehouse": item.t_warehouse,
-						"received_qty": item.transfer_qty,
-						"consumed_qty": 0,
-						"work_order_qty": 0,
-						"returned_qty": 0,
-						"rate": item.customer_provided_item_cost,
-						"is_customer_provided_item": True,
-						"is_additional_item": True,
-						"reference_name": item.against_fg,
-						"main_item_code": frappe.get_cached_value(
-							"Subcontracting Inward Order Item", item.against_fg, "item_code"
-						),
-					},
+				scio_rm = frappe.new_doc(
+					"Subcontracting Inward Order Received Item",
+					parent=self.subcontracting_inward_order,
+					parenttype="Subcontracting Inward Order",
+					parentfield="received_items",
+					idx=frappe.db.count(
+						"Subcontracting Inward Order Received Item",
+						{"parent": self.subcontracting_inward_order},
+					)
+					+ 1,
+					rm_item_code=item.item_code,
+					stock_uom=item.stock_uom,
+					warehouse=item.t_warehouse,
+					received_qty=item.transfer_qty,
+					consumed_qty=0,
+					work_order_qty=0,
+					returned_qty=0,
+					rate=item.customer_provided_item_cost,
+					is_customer_provided_item=True,
+					is_additional_item=True,
+					reference_name=item.against_fg,
+					main_item_code=frappe.get_cached_value(
+						"Subcontracting Inward Order Item", item.against_fg, "item_code"
+					),
 				)
-				scio_doc.save()
+				scio_rm.skip_docstatus_validation = True
+				scio_rm.insert()
+				scio_rm.submit()
 				item.db_set("scio_detail", scio_rm.name)
 
 		if data:
@@ -841,24 +847,30 @@ class SubcontractingInwardController:
 				and (item.item_code, item.s_warehouse)
 				not in [(d.rm_item_code, d.warehouse) for d in data if not d.is_customer_provided_item]
 			]:
-				scio_doc = frappe.get_doc("Subcontracting Inward Order", self.subcontracting_inward_order)
-				scio_doc.flags.ignore_validate_update_after_submit = True
-				scio_doc.append(
-					"received_items",
-					{
-						"main_item_code": main_item_code,
-						"rm_item_code": extra_item.item_code,
-						"stock_uom": extra_item.stock_uom,
-						"reference_name": frappe.get_cached_value(
-							"Work Order", self.work_order, "subcontracting_inward_order_item"
-						),
-						"required_qty": 0,
-						"consumed_qty": extra_item.transfer_qty,
-						"warehouse": extra_item.s_warehouse,
-						"is_additional_item": True,
-					},
+				doc = frappe.new_doc(
+					"Subcontracting Inward Order Received Item",
+					parent=self.subcontracting_inward_order,
+					parenttype="Subcontracting Inward Order",
+					parentfield="received_items",
+					idx=frappe.db.count(
+						"Subcontracting Inward Order Received Item",
+						{"parent": self.subcontracting_inward_order},
+					)
+					+ 1,
+					main_item_code=main_item_code,
+					rm_item_code=extra_item.item_code,
+					stock_uom=extra_item.stock_uom,
+					reference_name=frappe.get_cached_value(
+						"Work Order", self.work_order, "subcontracting_inward_order_item"
+					),
+					required_qty=0,
+					consumed_qty=extra_item.transfer_qty,
+					warehouse=extra_item.s_warehouse,
+					is_additional_item=True,
 				)
-				scio_doc.save()
+				doc.skip_docstatus_validation = True
+				doc.insert()
+				doc.submit()
 
 	def update_inward_order_secondary_items(self):
 		if (scio := self.subcontracting_inward_order) and self.purpose == "Manufacture":
@@ -921,29 +933,32 @@ class SubcontractingInwardController:
 						).run()
 
 				fg_item_code = next(fg for fg in self.items if fg.is_finished_item).item_code
-				scio_doc = frappe.get_doc("Subcontracting Inward Order", scio)
-				scio_doc.flags.ignore_validate_update_after_submit = True
 				for secondary_item in [
 					item
 					for item in secondary_items_list
 					if (item.item_code, item.t_warehouse) not in [(d.item_code, d.warehouse) for d in result]
 				]:
-					scio_doc.append(
-						"secondary_items",
-						{
-							"item_code": secondary_item.item_code,
-							"fg_item_code": fg_item_code,
-							"stock_uom": secondary_item.stock_uom,
-							"warehouse": secondary_item.t_warehouse,
-							"produced_qty": secondary_item.transfer_qty,
-							"type": secondary_item.type,
-							"delivered_qty": 0,
-							"reference_name": frappe.get_value(
-								"Work Order", self.work_order, "subcontracting_inward_order_item"
-							),
-						},
+					doc = frappe.new_doc(
+						"Subcontracting Inward Order Secondary Item",
+						parent=scio,
+						parenttype="Subcontracting Inward Order",
+						parentfield="secondary_items",
+						idx=frappe.db.count("Subcontracting Inward Order Secondary Item", {"parent": scio})
+						+ 1,
+						item_code=secondary_item.item_code,
+						fg_item_code=fg_item_code,
+						stock_uom=secondary_item.stock_uom,
+						warehouse=secondary_item.t_warehouse,
+						produced_qty=secondary_item.transfer_qty,
+						type=secondary_item.type,
+						delivered_qty=0,
+						reference_name=frappe.get_value(
+							"Work Order", self.work_order, "subcontracting_inward_order_item"
+						),
 					)
-				scio_doc.save()
+					doc.skip_docstatus_validation = True
+					doc.insert()
+					doc.submit()
 
 	def cancel_stock_reservation_entries_for_inward(self):
 		if self.purpose == "Receive from Customer":
