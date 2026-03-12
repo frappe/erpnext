@@ -2105,9 +2105,6 @@ def get_raw_materials_of_sub_assembly_items(
 	for item in query.run(as_dict=True):
 		key = (item.item_code, item.bom_no)
 		existing_key = (item.item_code, item.bom_no or item.main_bom)
-		if item.is_phantom_item:
-			sub_assembly_items.setdefault(key, 0)
-			sub_assembly_items[key] += item.get("qty")
 
 		if item.bom_no and not item.is_phantom_item and key not in sub_assembly_items:
 			continue
@@ -2116,7 +2113,7 @@ def get_raw_materials_of_sub_assembly_items(
 			continue
 
 		if item.bom_no:
-			planned_qty = flt(item.get("qty")) if item.is_phantom_item else flt(sub_assembly_items[key])
+			recursion_qty = flt(item.get("qty")) if item.is_phantom_item else flt(sub_assembly_items[key])
 			get_raw_materials_of_sub_assembly_items(
 				existing_sub_assembly_items,
 				item_details,
@@ -2124,7 +2121,7 @@ def get_raw_materials_of_sub_assembly_items(
 				item.bom_no,
 				include_non_stock_items,
 				sub_assembly_items,
-				planned_qty=planned_qty,
+				planned_qty=recursion_qty,
 			)
 			if not item.is_phantom_item:
 				existing_sub_assembly_items.add(existing_key)
