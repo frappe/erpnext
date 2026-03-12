@@ -1,0 +1,552 @@
+{
+    "country_code": "iq",
+    "name": "Iraq - Unified Accounting System (English)",
+    "tree": {
+        "Assets": {
+            "Fixed Assets": {
+                "Land": {
+                    "account_number": "111",
+                    "account_type": "Fixed Asset"
+                },
+                "Buildings and Constructions": {
+                    "account_number": "112",
+                    "account_type": "Fixed Asset"
+                },
+                "Machinery and Equipment": {
+                    "account_number": "113",
+                    "account_type": "Fixed Asset"
+                },
+                "Vehicles and Transportation": {
+                    "Motor Vehicles": {
+                        "account_number": "1141",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Other Transport": {
+                        "account_number": "1142",
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_number": "114",
+                    "account_type": "Fixed Asset"
+                },
+                "Tools and Molds": {
+                    "account_number": "115",
+                    "account_type": "Fixed Asset"
+                },
+                "Furniture and Office Equipment": {
+                    "Furniture": {
+                        "account_number": "1161",
+                        "account_type": "Fixed Asset"
+                    },
+                    "AC and Cooling": {
+                        "account_number": "1162",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Electrical Equipment": {
+                        "account_number": "1163",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Copying Machines": {
+                        "account_number": "1164",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Computers": {
+                        "account_number": "1165",
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_number": "116",
+                    "account_type": "Fixed Asset"
+                },
+                "account_number": "11",
+                "is_group": 1
+            },
+            "Projects Under Construction": {
+                "Land Under Construction": {
+                    "account_number": "121",
+                    "account_type": "Fixed Asset"
+                },
+                "Buildings Under Construction": {
+                    "account_number": "122",
+                    "account_type": "Fixed Asset"
+                },
+                "Machinery Under Construction": {
+                    "account_number": "123",
+                    "account_type": "Fixed Asset"
+                },
+                "Vehicles Under Construction": {
+                    "account_number": "124",
+                    "account_type": "Fixed Asset"
+                },
+                "Tools Under Construction": {
+                    "account_number": "125",
+                    "account_type": "Fixed Asset"
+                },
+                "Furniture Under Construction": {
+                    "account_number": "126",
+                    "account_type": "Fixed Asset"
+                },
+                "Investment Expenditure": {
+                    "Advance Payments": {
+                        "account_number": "1291",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Letters of Credit": {
+                        "account_number": "1292",
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_number": "129",
+                    "is_group": 1
+                },
+                "account_number": "12",
+                "is_group": 1
+            },
+            "Inventory": {
+                "Raw Materials": {
+                    "account_number": "131",
+                    "account_type": "Stock"
+                },
+                "Spare Parts": {
+                    "account_number": "132",
+                    "account_type": "Stock"
+                },
+                "Fuel Inventory": {
+                    "account_number": "133",
+                    "account_type": "Stock"
+                },
+                "Miscellaneous Stock": {
+                    "account_number": "134",
+                    "account_type": "Stock"
+                },
+                "Finished Goods": {
+                    "account_number": "135",
+                    "account_type": "Stock"
+                },
+                "Goods for Sale": {
+                    "account_number": "136",
+                    "account_type": "Stock"
+                },
+                "Work in Progress": {
+                    "account_number": "137",
+                    "account_type": "Stock"
+                },
+                "Scraps and Consumables": {
+                    "account_number": "1354",
+                    "account_type": "Stock"
+                },
+                "account_number": "13",
+                "account_type": "Stock"
+            },
+            "Notes Receivable": {
+                "account_number": "14",
+                "account_type": "Receivable"
+            },
+            "Debtors": {
+                "Current Activity Debtors": {
+                    "account_number": "151",
+                    "account_type": "Receivable"
+                },
+                "account_number": "15",
+                "account_type": "Receivable"
+            },
+            "Customers": {
+                "Private Sector Customers": {
+                    "account_number": "1614",
+                    "account_type": "Receivable"
+                },
+                "Public Sector Customers": {
+                    "account_number": "1611",
+                    "account_type": "Receivable"
+                },
+                "Foreign Customers": {
+                    "account_number": "1615",
+                    "account_type": "Receivable"
+                },
+                "account_number": "16",
+                "account_type": "Receivable"
+            },
+            "Debit Adjustments": {
+                "Accrued Revenue": {
+                    "account_number": "171"
+                },
+                "Prepaid Expenses": {
+                    "account_number": "172"
+                },
+                "account_number": "17"
+            },
+            "Cash and Bank": {
+                "Cash in Hand": {
+                    "account_number": "181",
+                    "account_type": "Cash"
+                },
+                "Bank Accounts": {
+                    "Current Account IQD": {
+                        "account_number": "1831",
+                        "account_type": "Bank"
+                    },
+                    "Current Account USD": {
+                        "account_number": "1832",
+                        "account_type": "Bank"
+                    },
+                    "account_number": "183",
+                    "account_type": "Bank"
+                },
+                "Bank Deposits": {
+                    "account_number": "184",
+                    "account_type": "Bank"
+                },
+                "account_number": "18",
+                "is_group": 1
+            },
+            "account_number": "1",
+            "root_type": "Asset"
+        },
+        "Liabilities and Equity": {
+            "Share Capital": {
+                "Paid-up Capital": {
+                    "account_number": "211"
+                },
+                "Unpaid Capital": {
+                    "account_number": "212"
+                },
+                "account_number": "21"
+            },
+            "Reserves": {
+                "Legal Reserve": {
+                    "account_number": "221"
+                },
+                "General Reserve": {
+                    "account_number": "222"
+                },
+                "Retained Earnings": {
+                    "account_number": "223"
+                },
+                "account_number": "22"
+            },
+            "Provisions": {
+                "Building Depreciation": {
+                    "account_number": "2312",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "Machinery Depreciation": {
+                    "account_number": "2313",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "Vehicle Depreciation": {
+                    "account_number": "2314",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "Tools Depreciation": {
+                    "account_number": "2315",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "Furniture Depreciation": {
+                    "account_number": "2316",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "Doubtful Debts Provision": {
+                    "account_number": "232"
+                },
+                "End of Service Provision": {
+                    "account_number": "233"
+                },
+                "Other Provisions": {
+                    "account_number": "239"
+                },
+                "account_number": "23",
+                "is_group": 1
+            },
+            "Loans": {
+                "Short-term Bank Loans": {
+                    "account_number": "241"
+                },
+                "Long-term Bank Loans": {
+                    "account_number": "242"
+                },
+                "account_number": "24"
+            },
+            "Notes Payable": {
+                "account_number": "25",
+                "account_type": "Payable"
+            },
+            "Suppliers and Creditors": {
+                "Private Sector Suppliers": {
+                    "account_number": "2614",
+                    "account_type": "Payable"
+                },
+                "Public Sector Suppliers": {
+                    "account_number": "2611",
+                    "account_type": "Payable"
+                },
+                "Foreign Suppliers": {
+                    "account_number": "2615",
+                    "account_type": "Payable"
+                },
+                "Non-current Activity Creditors": {
+                    "account_number": "265",
+                    "account_type": "Payable"
+                },
+                "account_number": "26",
+                "account_type": "Payable"
+            },
+            "Credit Adjustments": {
+                "Deferred Revenue": {
+                    "account_number": "271"
+                },
+                "Accrued Expenses": {
+                    "account_number": "272"
+                },
+                "account_number": "27"
+            },
+            "Taxes and Duties Payable": {
+                "Income Tax Payable": {
+                    "account_number": "281",
+                    "account_type": "Tax"
+                },
+                "Sales Tax Payable": {
+                    "account_number": "282",
+                    "account_type": "Tax"
+                },
+                "Tourism Services Tax": {
+                    "account_number": "283",
+                    "account_type": "Tax"
+                },
+                "Stamp Duty": {
+                    "account_number": "284",
+                    "account_type": "Tax"
+                },
+                "Social Security Payable": {
+                    "account_number": "285",
+                    "account_type": "Tax"
+                },
+                "Other Taxes and Duties": {
+                    "account_number": "289",
+                    "account_type": "Tax"
+                },
+                "account_number": "28",
+                "account_type": "Tax",
+                "is_group": 1
+            },
+            "Profit and Loss": {
+                "account_number": "29"
+            },
+            "account_number": "2",
+            "root_type": "Liability"
+        },
+        "Expenses": {
+            "Materials Consumed": {
+                "Raw Materials Consumed": {
+                    "account_number": "311"
+                },
+                "Spare Parts Consumed": {
+                    "account_number": "312"
+                },
+                "Fuel Consumed": {
+                    "account_number": "313"
+                },
+                "account_number": "31",
+                "account_type": "Cost of Goods Sold"
+            },
+            "Salaries and Wages": {
+                "Salaries": {
+                    "account_number": "321"
+                },
+                "Wages": {
+                    "account_number": "322"
+                },
+                "Bonuses": {
+                    "account_number": "323"
+                },
+                "Employee Allowances": {
+                    "account_number": "324"
+                },
+                "Social Security Contributions": {
+                    "account_number": "325"
+                },
+                "account_number": "32"
+            },
+            "Services": {
+                "Rent": {
+                    "account_number": "331"
+                },
+                "Maintenance and Repairs": {
+                    "account_number": "332"
+                },
+                "Transport": {
+                    "account_number": "333"
+                },
+                "Post, Phone and Communications": {
+                    "account_number": "334"
+                },
+                "Electricity and Water": {
+                    "account_number": "335"
+                },
+                "Insurance": {
+                    "account_number": "336"
+                },
+                "Professional and Consulting Fees": {
+                    "account_number": "337"
+                },
+                "Other Services": {
+                    "account_number": "339"
+                },
+                "account_number": "33"
+            },
+            "Other Operating Expenses": {
+                "Stationery and Printing": {
+                    "account_number": "341"
+                },
+                "Travel": {
+                    "account_number": "342"
+                },
+                "Hospitality and PR": {
+                    "account_number": "343"
+                },
+                "Advertising": {
+                    "account_number": "344"
+                },
+                "Subscriptions": {
+                    "account_number": "345"
+                },
+                "Government Fees": {
+                    "account_number": "346"
+                },
+                "Bank Charges": {
+                    "account_number": "347"
+                },
+                "Miscellaneous Expenses": {
+                    "account_number": "349"
+                },
+                "account_number": "34"
+            },
+            "Taxes and Duties Expense": {
+                "Income Tax Expense": {
+                    "account_number": "351",
+                    "account_type": "Tax"
+                },
+                "Stamp Duty Expense": {
+                    "account_number": "352",
+                    "account_type": "Tax"
+                },
+                "Other Taxes": {
+                    "account_number": "359",
+                    "account_type": "Tax"
+                },
+                "account_number": "35"
+            },
+            "Interest and Commissions": {
+                "Loan Interest": {
+                    "account_number": "361"
+                },
+                "Late Payment Interest": {
+                    "account_number": "362"
+                },
+                "Bank Commissions": {
+                    "account_number": "363"
+                },
+                "account_number": "36"
+            },
+            "Depreciation": {
+                "Building Depreciation": {
+                    "account_number": "372"
+                },
+                "Machinery Depreciation": {
+                    "account_number": "373"
+                },
+                "Vehicle Depreciation": {
+                    "account_number": "374"
+                },
+                "Tools Depreciation": {
+                    "account_number": "375"
+                },
+                "Furniture Depreciation": {
+                    "account_number": "376"
+                },
+                "account_number": "37",
+                "account_type": "Depreciation"
+            },
+            "Transfer Expenses": {
+                "Donations and Grants": {
+                    "account_number": "3831"
+                },
+                "Other Transfer Expenses": {
+                    "account_number": "3839"
+                },
+                "account_number": "38"
+            },
+            "Profit and Loss Account": {
+                "Capital Losses": {
+                    "account_number": "393"
+                },
+                "Currency Differences": {
+                    "account_number": "394"
+                },
+                "account_number": "39"
+            },
+            "account_number": "3",
+            "root_type": "Expense"
+        },
+        "Income": {
+            "Operating Revenue": {
+                "Goods Sales": {
+                    "account_number": "411",
+                    "account_type": "Income Account"
+                },
+                "Services Revenue": {
+                    "account_number": "412",
+                    "account_type": "Income Account"
+                },
+                "Product Sales": {
+                    "account_number": "413",
+                    "account_type": "Income Account"
+                },
+                "Net Sales of Goods": {
+                    "account_number": "421",
+                    "account_type": "Income Account"
+                },
+                "account_number": "41",
+                "account_type": "Income Account"
+            },
+            "Other Income": {
+                "Rental Income": {
+                    "account_number": "431",
+                    "account_type": "Income Account"
+                },
+                "Interest Income": {
+                    "account_number": "432",
+                    "account_type": "Income Account"
+                },
+                "Investment Income": {
+                    "account_number": "433",
+                    "account_type": "Income Account"
+                },
+                "Miscellaneous Income": {
+                    "account_number": "439",
+                    "account_type": "Income Account"
+                },
+                "account_number": "43",
+                "account_type": "Income Account"
+            },
+            "Transfer Revenue": {
+                "Donations Received": {
+                    "account_number": "441",
+                    "account_type": "Income Account"
+                },
+                "Compensations Received": {
+                    "account_number": "4832",
+                    "account_type": "Income Account"
+                },
+                "account_number": "44",
+                "account_type": "Income Account"
+            },
+            "Capital Gains": {
+                "account_number": "494",
+                "account_type": "Income Account"
+            },
+            "Currency Gain": {
+                "account_number": "495",
+                "account_type": "Income Account"
+            },
+            "account_number": "4",
+            "root_type": "Income"
+        }
+    }
+}

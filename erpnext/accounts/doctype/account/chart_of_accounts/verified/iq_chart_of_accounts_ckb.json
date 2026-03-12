@@ -1,0 +1,552 @@
+{
+    "country_code": "iq",
+    "name": "عێراق - سیستەمی ژمێریاری یەکگرتوو (کوردی)",
+    "tree": {
+        "سامانەکان": {
+            "سامانە جێگیرەکان": {
+                "زەوی": {
+                    "account_number": "111",
+                    "account_type": "Fixed Asset"
+                },
+                "بینا و دروستکردنەکان": {
+                    "account_number": "112",
+                    "account_type": "Fixed Asset"
+                },
+                "ئامێر و تەجهیزات": {
+                    "account_number": "113",
+                    "account_type": "Fixed Asset"
+                },
+                "ئامرازەکانی گواستنەوە": {
+                    "ئۆتۆمبێلەکان": {
+                        "account_number": "1141",
+                        "account_type": "Fixed Asset"
+                    },
+                    "گواستنەوەی تر": {
+                        "account_number": "1142",
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_number": "114",
+                    "account_type": "Fixed Asset"
+                },
+                "ئامراز و قاڵبەکان": {
+                    "account_number": "115",
+                    "account_type": "Fixed Asset"
+                },
+                "کەلوپەل و ئامێری ئۆفیس": {
+                    "کەلوپەل": {
+                        "account_number": "1161",
+                        "account_type": "Fixed Asset"
+                    },
+                    "ئامێری ساردکردنەوە": {
+                        "account_number": "1162",
+                        "account_type": "Fixed Asset"
+                    },
+                    "ئامێری کارەبایی": {
+                        "account_number": "1163",
+                        "account_type": "Fixed Asset"
+                    },
+                    "ئامێری لەبەرگرتنەوە": {
+                        "account_number": "1164",
+                        "account_type": "Fixed Asset"
+                    },
+                    "کۆمپیوتەرەکان": {
+                        "account_number": "1165",
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_number": "116",
+                    "account_type": "Fixed Asset"
+                },
+                "account_number": "11",
+                "is_group": 1
+            },
+            "پڕۆژە بەردەوامەکان": {
+                "زەوی لەژێر دروستکردن": {
+                    "account_number": "121",
+                    "account_type": "Fixed Asset"
+                },
+                "بینا لەژێر دروستکردن": {
+                    "account_number": "122",
+                    "account_type": "Fixed Asset"
+                },
+                "ئامێر لەژێر دروستکردن": {
+                    "account_number": "123",
+                    "account_type": "Fixed Asset"
+                },
+                "ئۆتۆمبێل لەژێر دروستکردن": {
+                    "account_number": "124",
+                    "account_type": "Fixed Asset"
+                },
+                "ئامراز لەژێر دروستکردن": {
+                    "account_number": "125",
+                    "account_type": "Fixed Asset"
+                },
+                "کەلوپەل لەژێر دروستکردن": {
+                    "account_number": "126",
+                    "account_type": "Fixed Asset"
+                },
+                "خەرجی وەبەرهێنان": {
+                    "پارەدانی پێشوەخت": {
+                        "account_number": "1291",
+                        "account_type": "Fixed Asset"
+                    },
+                    "بڕوانامەی بانکی": {
+                        "account_number": "1292",
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_number": "129",
+                    "is_group": 1
+                },
+                "account_number": "12",
+                "is_group": 1
+            },
+            "کۆگا": {
+                "مادەی خاو": {
+                    "account_number": "131",
+                    "account_type": "Stock"
+                },
+                "پارچەی یەدەک": {
+                    "account_number": "132",
+                    "account_type": "Stock"
+                },
+                "سووتەمەنی": {
+                    "account_number": "133",
+                    "account_type": "Stock"
+                },
+                "کۆگای جۆراوجۆر": {
+                    "account_number": "134",
+                    "account_type": "Stock"
+                },
+                "بەرهەمی تەواو": {
+                    "account_number": "135",
+                    "account_type": "Stock"
+                },
+                "کاڵا بۆ فرۆشتن": {
+                    "account_number": "136",
+                    "account_type": "Stock"
+                },
+                "بەرهەمی نیوەچێ": {
+                    "account_number": "137",
+                    "account_type": "Stock"
+                },
+                "پاشماوە و بەکارهاتووەکان": {
+                    "account_number": "1354",
+                    "account_type": "Stock"
+                },
+                "account_number": "13",
+                "account_type": "Stock"
+            },
+            "بەڵگەنامەی وەرگرتن": {
+                "account_number": "14",
+                "account_type": "Receivable"
+            },
+            "قەرزارەکان": {
+                "قەرزاری چالاکی ئێستا": {
+                    "account_number": "151",
+                    "account_type": "Receivable"
+                },
+                "account_number": "15",
+                "account_type": "Receivable"
+            },
+            "کڕیارەکان": {
+                "کڕیاری سێکتەری تایبەت": {
+                    "account_number": "1614",
+                    "account_type": "Receivable"
+                },
+                "کڕیاری سێکتەری گشتی": {
+                    "account_number": "1611",
+                    "account_type": "Receivable"
+                },
+                "کڕیاری دەرەوە": {
+                    "account_number": "1615",
+                    "account_type": "Receivable"
+                },
+                "account_number": "16",
+                "account_type": "Receivable"
+            },
+            "ڕێکخستنی قەرز": {
+                "داهاتی کۆنەکراو": {
+                    "account_number": "171"
+                },
+                "خەرجی پێشوەخت": {
+                    "account_number": "172"
+                },
+                "account_number": "17"
+            },
+            "نەقد و بانک": {
+                "نەقد لە سندوق": {
+                    "account_number": "181",
+                    "account_type": "Cash"
+                },
+                "نەقد لە بانک": {
+                    "هەژماری ڕۆژانە دینار": {
+                        "account_number": "1831",
+                        "account_type": "Bank"
+                    },
+                    "هەژماری ڕۆژانە دۆلار": {
+                        "account_number": "1832",
+                        "account_type": "Bank"
+                    },
+                    "account_number": "183",
+                    "account_type": "Bank"
+                },
+                "پاشەکەوتی بانک": {
+                    "account_number": "184",
+                    "account_type": "Bank"
+                },
+                "account_number": "18",
+                "is_group": 1
+            },
+            "account_number": "1",
+            "root_type": "Asset"
+        },
+        "بەرپرسیارێتی و مافی خاوەنداری": {
+            "سەرمایە": {
+                "سەرمایەی دراو": {
+                    "account_number": "211"
+                },
+                "سەرمایەی نەدراو": {
+                    "account_number": "212"
+                },
+                "account_number": "21"
+            },
+            "پاشەکەوتەکان": {
+                "پاشەکەوتی یاسایی": {
+                    "account_number": "221"
+                },
+                "پاشەکەوتی گشتی": {
+                    "account_number": "222"
+                },
+                "قازانجی کۆکراوە": {
+                    "account_number": "223"
+                },
+                "account_number": "22"
+            },
+            "تەرخانکراوەکان": {
+                "کاندنی بینا": {
+                    "account_number": "2312",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "کاندنی ئامێرەکان": {
+                    "account_number": "2313",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "کاندنی ئۆتۆمبێلەکان": {
+                    "account_number": "2314",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "کاندنی ئامرازەکان": {
+                    "account_number": "2315",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "کاندنی کەلوپەلەکان": {
+                    "account_number": "2316",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "تەرخانکراو بۆ قەرزی گومانلێکراو": {
+                    "account_number": "232"
+                },
+                "تەرخانکراوی کۆتایی خزمەت": {
+                    "account_number": "233"
+                },
+                "تەرخانکراوەکانی تر": {
+                    "account_number": "239"
+                },
+                "account_number": "23",
+                "is_group": 1
+            },
+            "قەرزەکان": {
+                "قەرزی بانکی کورتخایەن": {
+                    "account_number": "241"
+                },
+                "قەرزی بانکی درێژخایەن": {
+                    "account_number": "242"
+                },
+                "account_number": "24"
+            },
+            "بەڵگەنامەی پارەدان": {
+                "account_number": "25",
+                "account_type": "Payable"
+            },
+            "دابینکەرەکان و قەرزخۆرەکان": {
+                "دابینکەری سێکتەری تایبەت": {
+                    "account_number": "2614",
+                    "account_type": "Payable"
+                },
+                "دابینکەری سێکتەری گشتی": {
+                    "account_number": "2611",
+                    "account_type": "Payable"
+                },
+                "دابینکەری دەرەوە": {
+                    "account_number": "2615",
+                    "account_type": "Payable"
+                },
+                "قەرزخۆری چالاکی ناڕۆژانە": {
+                    "account_number": "265",
+                    "account_type": "Payable"
+                },
+                "account_number": "26",
+                "account_type": "Payable"
+            },
+            "ڕێکخستنی قەرزخۆری": {
+                "داهاتی پێشوەخت": {
+                    "account_number": "271"
+                },
+                "خەرجی نەدراو": {
+                    "account_number": "272"
+                },
+                "account_number": "27"
+            },
+            "باج و ڕسووم": {
+                "باجی داهات": {
+                    "account_number": "281",
+                    "account_type": "Tax"
+                },
+                "باجی فرۆشتن": {
+                    "account_number": "282",
+                    "account_type": "Tax"
+                },
+                "باجی خزمەتگوزاری گەشتیاری": {
+                    "account_number": "283",
+                    "account_type": "Tax"
+                },
+                "ڕسوومی تابع": {
+                    "account_number": "284",
+                    "account_type": "Tax"
+                },
+                "دڵنیایی کۆمەڵایەتی": {
+                    "account_number": "285",
+                    "account_type": "Tax"
+                },
+                "باج و ڕسوومی تر": {
+                    "account_number": "289",
+                    "account_type": "Tax"
+                },
+                "account_number": "28",
+                "account_type": "Tax",
+                "is_group": 1
+            },
+            "قازانج و زیان": {
+                "account_number": "29"
+            },
+            "account_number": "2",
+            "root_type": "Liability"
+        },
+        "خەرجییەکان": {
+            "مادەی بەکارهاتوو لە بەرهەمهێنان": {
+                "مادەی خاوی بەکارهاتوو": {
+                    "account_number": "311"
+                },
+                "پارچەی یەدەکی بەکارهاتوو": {
+                    "account_number": "312"
+                },
+                "سووتەمەنی بەکارهاتوو": {
+                    "account_number": "313"
+                },
+                "account_number": "31",
+                "account_type": "Cost of Goods Sold"
+            },
+            "مووچە و کرێ": {
+                "مووچەکان": {
+                    "account_number": "321"
+                },
+                "کرێکان": {
+                    "account_number": "322"
+                },
+                "پاداشتەکان": {
+                    "account_number": "323"
+                },
+                "بڕی تایبەتی کارمەندان": {
+                    "account_number": "324"
+                },
+                "بەشداری دڵنیایی کۆمەڵایەتی": {
+                    "account_number": "325"
+                },
+                "account_number": "32"
+            },
+            "خزمەتگوزارییەکان": {
+                "کرێ": {
+                    "account_number": "331"
+                },
+                "چاککردنەوە و نۆژەنکردن": {
+                    "account_number": "332"
+                },
+                "گواستنەوە": {
+                    "account_number": "333"
+                },
+                "پۆست و تەلەفۆن و پەیوەندی": {
+                    "account_number": "334"
+                },
+                "کارەبا و ئاو": {
+                    "account_number": "335"
+                },
+                "بیمە": {
+                    "account_number": "336"
+                },
+                "کرێی ڕاوێژکاری": {
+                    "account_number": "337"
+                },
+                "خزمەتگوزاری تر": {
+                    "account_number": "339"
+                },
+                "account_number": "33"
+            },
+            "خەرجی کارکردنی تر": {
+                "قرتاسیە و چاپ": {
+                    "account_number": "341"
+                },
+                "گەشتکردن": {
+                    "account_number": "342"
+                },
+                "پێشوازی و پەیوەندییە گشتییەکان": {
+                    "account_number": "343"
+                },
+                "ڕێکلام": {
+                    "account_number": "344"
+                },
+                "بەشداری و ئەندامێتی": {
+                    "account_number": "345"
+                },
+                "ڕسوومی حکوومی": {
+                    "account_number": "346"
+                },
+                "خەرجی بانکی": {
+                    "account_number": "347"
+                },
+                "خەرجی جۆراوجۆر": {
+                    "account_number": "349"
+                },
+                "account_number": "34"
+            },
+            "خەرجی باج و ڕسووم": {
+                "خەرجی باجی داهات": {
+                    "account_number": "351",
+                    "account_type": "Tax"
+                },
+                "خەرجی ڕسوومی تابع": {
+                    "account_number": "352",
+                    "account_type": "Tax"
+                },
+                "باجی تر": {
+                    "account_number": "359",
+                    "account_type": "Tax"
+                },
+                "account_number": "35"
+            },
+            "سوود و کۆمیسیۆن": {
+                "سوودی قەرز": {
+                    "account_number": "361"
+                },
+                "سوودی درەنگکەوتن": {
+                    "account_number": "362"
+                },
+                "کۆمیسیۆنی بانک": {
+                    "account_number": "363"
+                },
+                "account_number": "36"
+            },
+            "کاندن": {
+                "کاندنی بینا": {
+                    "account_number": "372"
+                },
+                "کاندنی ئامێرەکان": {
+                    "account_number": "373"
+                },
+                "کاندنی ئۆتۆمبێلەکان": {
+                    "account_number": "374"
+                },
+                "کاندنی ئامرازەکان": {
+                    "account_number": "375"
+                },
+                "کاندنی کەلوپەلەکان": {
+                    "account_number": "376"
+                },
+                "account_number": "37",
+                "account_type": "Depreciation"
+            },
+            "خەرجی گواستنەوە": {
+                "بەخشین و یارمەتی": {
+                    "account_number": "3831"
+                },
+                "خەرجی گواستنەوەی تر": {
+                    "account_number": "3839"
+                },
+                "account_number": "38"
+            },
+            "هەژماری قازانج و زیان": {
+                "زیانی سەرمایەیی": {
+                    "account_number": "393"
+                },
+                "جیاوازی دراو": {
+                    "account_number": "394"
+                },
+                "account_number": "39"
+            },
+            "account_number": "3",
+            "root_type": "Expense"
+        },
+        "داهاتەکان": {
+            "داهاتی کارکردن": {
+                "فرۆشتنی کاڵا": {
+                    "account_number": "411",
+                    "account_type": "Income Account"
+                },
+                "داهاتی خزمەتگوزاری": {
+                    "account_number": "412",
+                    "account_type": "Income Account"
+                },
+                "فرۆشتنی بەرهەم": {
+                    "account_number": "413",
+                    "account_type": "Income Account"
+                },
+                "فرۆشتنی خاوێنی کاڵا": {
+                    "account_number": "421",
+                    "account_type": "Income Account"
+                },
+                "account_number": "41",
+                "account_type": "Income Account"
+            },
+            "داهاتی تر": {
+                "داهاتی کرێ": {
+                    "account_number": "431",
+                    "account_type": "Income Account"
+                },
+                "داهاتی سوود": {
+                    "account_number": "432",
+                    "account_type": "Income Account"
+                },
+                "داهاتی وەبەرهێنان": {
+                    "account_number": "433",
+                    "account_type": "Income Account"
+                },
+                "داهاتی جۆراوجۆر": {
+                    "account_number": "439",
+                    "account_type": "Income Account"
+                },
+                "account_number": "43",
+                "account_type": "Income Account"
+            },
+            "داهاتی گواستنەوە": {
+                "بەخشین و یارمەتی وەرگیراو": {
+                    "account_number": "441",
+                    "account_type": "Income Account"
+                },
+                "قەرەبوو و غەرامەی وەرگیراو": {
+                    "account_number": "4832",
+                    "account_type": "Income Account"
+                },
+                "account_number": "44",
+                "account_type": "Income Account"
+            },
+            "قازانجی سەرمایەیی": {
+                "account_number": "494",
+                "account_type": "Income Account"
+            },
+            "قازانجی دراو": {
+                "account_number": "495",
+                "account_type": "Income Account"
+            },
+            "account_number": "4",
+            "root_type": "Income"
+        }
+    }
+}

@@ -1,0 +1,552 @@
+{
+    "country_code": "iq",
+    "name": "Iraq - النظام المحاسبي الموحد",
+    "tree": {
+        "الموجودات - Assets": {
+            "الموجودات الثابتة - Fixed Assets": {
+                "الأراضي - Land": {
+                    "account_number": "111",
+                    "account_type": "Fixed Asset"
+                },
+                "المباني والإنشاءات والطرق - Buildings and Constructions": {
+                    "account_number": "112",
+                    "account_type": "Fixed Asset"
+                },
+                "الآلات والمعدات - Machinery and Equipment": {
+                    "account_number": "113",
+                    "account_type": "Fixed Asset"
+                },
+                "وسائل نقل وانتقال - Vehicles and Transportation": {
+                    "وسائل نقل بالسيارات - Motor Vehicles": {
+                        "account_number": "1141",
+                        "account_type": "Fixed Asset"
+                    },
+                    "وسائل نقل أخرى - Other Transport": {
+                        "account_number": "1142",
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_number": "114",
+                    "account_type": "Fixed Asset"
+                },
+                "العدد والقوالب - Tools and Molds": {
+                    "account_number": "115",
+                    "account_type": "Fixed Asset"
+                },
+                "أثاث وأجهزة مكتبية - Furniture and Office Equipment": {
+                    "الأثاث - Furniture": {
+                        "account_number": "1161",
+                        "account_type": "Fixed Asset"
+                    },
+                    "أجهزة تبريد وتكييف - AC and Cooling": {
+                        "account_number": "1162",
+                        "account_type": "Fixed Asset"
+                    },
+                    "أجهزة كهربائية - Electrical Equipment": {
+                        "account_number": "1163",
+                        "account_type": "Fixed Asset"
+                    },
+                    "أجهزة الاستنساخ - Copying Machines": {
+                        "account_number": "1164",
+                        "account_type": "Fixed Asset"
+                    },
+                    "أجهزة الحاسوب - Computers": {
+                        "account_number": "1165",
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_number": "116",
+                    "account_type": "Fixed Asset"
+                },
+                "account_number": "11",
+                "is_group": 1
+            },
+            "مشروعات تحت التنفيذ - Projects Under Construction": {
+                "أراضي تحت التنفيذ - Land Under Construction": {
+                    "account_number": "121",
+                    "account_type": "Fixed Asset"
+                },
+                "مباني تحت التنفيذ - Buildings Under Construction": {
+                    "account_number": "122",
+                    "account_type": "Fixed Asset"
+                },
+                "آلات ومعدات تحت التنفيذ - Machinery Under Construction": {
+                    "account_number": "123",
+                    "account_type": "Fixed Asset"
+                },
+                "وسائل نقل تحت التنفيذ - Vehicles Under Construction": {
+                    "account_number": "124",
+                    "account_type": "Fixed Asset"
+                },
+                "عدد وقوالب تحت التنفيذ - Tools Under Construction": {
+                    "account_number": "125",
+                    "account_type": "Fixed Asset"
+                },
+                "أثاث تحت التنفيذ - Furniture Under Construction": {
+                    "account_number": "126",
+                    "account_type": "Fixed Asset"
+                },
+                "الإنفاق الاستثماري - Investment Expenditure": {
+                    "دفعات مقدمة - Advance Payments": {
+                        "account_number": "1291",
+                        "account_type": "Fixed Asset"
+                    },
+                    "اعتمادات مستندية - Letters of Credit": {
+                        "account_number": "1292",
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_number": "129",
+                    "is_group": 1
+                },
+                "account_number": "12",
+                "is_group": 1
+            },
+            "مخزون المستودعات - Inventory": {
+                "مخزن مواد أولية - Raw Materials": {
+                    "account_number": "131",
+                    "account_type": "Stock"
+                },
+                "مخزن مواد احتياطية - Spare Parts": {
+                    "account_number": "132",
+                    "account_type": "Stock"
+                },
+                "مخزن وقود - Fuel Inventory": {
+                    "account_number": "133",
+                    "account_type": "Stock"
+                },
+                "مخزن متنوعات - Miscellaneous Stock": {
+                    "account_number": "134",
+                    "account_type": "Stock"
+                },
+                "مخزن إنتاج تام - Finished Goods": {
+                    "account_number": "135",
+                    "account_type": "Stock"
+                },
+                "مخزن بضائع لغرض البيع - Goods for Sale": {
+                    "account_number": "136",
+                    "account_type": "Stock"
+                },
+                "مخزن إنتاج غير تام - Work in Progress": {
+                    "account_number": "137",
+                    "account_type": "Stock"
+                },
+                "مخزن مخلفات ومستهلكات - Scraps and Consumables": {
+                    "account_number": "1354",
+                    "account_type": "Stock"
+                },
+                "account_number": "13",
+                "account_type": "Stock"
+            },
+            "أوراق القبض - Notes Receivable": {
+                "account_number": "14",
+                "account_type": "Receivable"
+            },
+            "المدينون - Debtors": {
+                "مدينو نشاط جاري - Current Activity Debtors": {
+                    "account_number": "151",
+                    "account_type": "Receivable"
+                },
+                "account_number": "15",
+                "account_type": "Receivable"
+            },
+            "العملاء - Customers": {
+                "عملاء قطاع خاص - Private Sector Customers": {
+                    "account_number": "1614",
+                    "account_type": "Receivable"
+                },
+                "عملاء قطاع عام - Public Sector Customers": {
+                    "account_number": "1611",
+                    "account_type": "Receivable"
+                },
+                "عملاء خارجيون - Foreign Customers": {
+                    "account_number": "1615",
+                    "account_type": "Receivable"
+                },
+                "account_number": "16",
+                "account_type": "Receivable"
+            },
+            "حسابات التسوية المدينة - Debit Adjustments": {
+                "إيرادات مستحقة غير مقبوضة - Accrued Revenue": {
+                    "account_number": "171"
+                },
+                "مصاريف مدفوعة مقدماً - Prepaid Expenses": {
+                    "account_number": "172"
+                },
+                "account_number": "17"
+            },
+            "النقدية - Cash and Bank": {
+                "نقدية في الصندوق - Cash in Hand": {
+                    "account_number": "181",
+                    "account_type": "Cash"
+                },
+                "نقدية لدى المصارف - Bank Accounts": {
+                    "حساب جاري دينار - Current Account IQD": {
+                        "account_number": "1831",
+                        "account_type": "Bank"
+                    },
+                    "حساب جاري دولار - Current Account USD": {
+                        "account_number": "1832",
+                        "account_type": "Bank"
+                    },
+                    "account_number": "183",
+                    "account_type": "Bank"
+                },
+                "ودائع لدى المصارف - Bank Deposits": {
+                    "account_number": "184",
+                    "account_type": "Bank"
+                },
+                "account_number": "18",
+                "is_group": 1
+            },
+            "account_number": "1",
+            "root_type": "Asset"
+        },
+        "المطلوبات وحقوق الملكية - Liabilities and Equity": {
+            "رأس المال - Share Capital": {
+                "رأس المال المدفوع - Paid-up Capital": {
+                    "account_number": "211"
+                },
+                "رأس المال غير المدفوع - Unpaid Capital": {
+                    "account_number": "212"
+                },
+                "account_number": "21"
+            },
+            "الاحتياطيات - Reserves": {
+                "الاحتياطي القانوني - Legal Reserve": {
+                    "account_number": "221"
+                },
+                "الاحتياطي العام - General Reserve": {
+                    "account_number": "222"
+                },
+                "الأرباح المتراكمة - Retained Earnings": {
+                    "account_number": "223"
+                },
+                "account_number": "22"
+            },
+            "المخصصات - Provisions": {
+                "مخصص اندثار المباني - Building Depreciation": {
+                    "account_number": "2312",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "مخصص اندثار الآلات والمعدات - Machinery Depreciation": {
+                    "account_number": "2313",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "مخصص اندثار وسائل النقل - Vehicle Depreciation": {
+                    "account_number": "2314",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "مخصص اندثار العدد والقوالب - Tools Depreciation": {
+                    "account_number": "2315",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "مخصص اندثار الأثاث - Furniture Depreciation": {
+                    "account_number": "2316",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "مخصص ديون مشكوك فيها - Doubtful Debts Provision": {
+                    "account_number": "232"
+                },
+                "مخصص نهاية الخدمة - End of Service Provision": {
+                    "account_number": "233"
+                },
+                "مخصصات أخرى - Other Provisions": {
+                    "account_number": "239"
+                },
+                "account_number": "23",
+                "is_group": 1
+            },
+            "القروض - Loans": {
+                "قروض مصرفية قصيرة الأجل - Short-term Bank Loans": {
+                    "account_number": "241"
+                },
+                "قروض مصرفية طويلة الأجل - Long-term Bank Loans": {
+                    "account_number": "242"
+                },
+                "account_number": "24"
+            },
+            "أوراق الدفع - Notes Payable": {
+                "account_number": "25",
+                "account_type": "Payable"
+            },
+            "المجهزون والدائنون - Suppliers and Creditors": {
+                "مجهزون قطاع خاص - Private Sector Suppliers": {
+                    "account_number": "2614",
+                    "account_type": "Payable"
+                },
+                "مجهزون قطاع عام - Public Sector Suppliers": {
+                    "account_number": "2611",
+                    "account_type": "Payable"
+                },
+                "مجهزون خارجيون - Foreign Suppliers": {
+                    "account_number": "2615",
+                    "account_type": "Payable"
+                },
+                "دائنو نشاط غير جاري - Non-current Activity Creditors": {
+                    "account_number": "265",
+                    "account_type": "Payable"
+                },
+                "account_number": "26",
+                "account_type": "Payable"
+            },
+            "حسابات التسوية الدائنة - Credit Adjustments": {
+                "إيرادات مستلمة مقدماً - Deferred Revenue": {
+                    "account_number": "271"
+                },
+                "مصاريف مستحقة غير مدفوعة - Accrued Expenses": {
+                    "account_number": "272"
+                },
+                "account_number": "27"
+            },
+            "الضرائب والرسوم المستحقة - Taxes and Duties Payable": {
+                "ضريبة الدخل المستحقة - Income Tax Payable": {
+                    "account_number": "281",
+                    "account_type": "Tax"
+                },
+                "ضريبة المبيعات المستحقة - Sales Tax Payable": {
+                    "account_number": "282",
+                    "account_type": "Tax"
+                },
+                "ضريبة الخدمات السياحية - Tourism Services Tax": {
+                    "account_number": "283",
+                    "account_type": "Tax"
+                },
+                "رسم الطابع - Stamp Duty": {
+                    "account_number": "284",
+                    "account_type": "Tax"
+                },
+                "الضمان الاجتماعي المستحق - Social Security Payable": {
+                    "account_number": "285",
+                    "account_type": "Tax"
+                },
+                "ضرائب ورسوم أخرى - Other Taxes and Duties": {
+                    "account_number": "289",
+                    "account_type": "Tax"
+                },
+                "account_number": "28",
+                "account_type": "Tax",
+                "is_group": 1
+            },
+            "الأرباح والخسائر - Profit and Loss": {
+                "account_number": "29"
+            },
+            "account_number": "2",
+            "root_type": "Liability"
+        },
+        "المصروفات - Expenses": {
+            "المواد المستهلكة في الإنتاج - Materials Consumed": {
+                "مواد أولية مستهلكة - Raw Materials Consumed": {
+                    "account_number": "311"
+                },
+                "مواد احتياطية مستهلكة - Spare Parts Consumed": {
+                    "account_number": "312"
+                },
+                "وقود مستهلك - Fuel Consumed": {
+                    "account_number": "313"
+                },
+                "account_number": "31",
+                "account_type": "Cost of Goods Sold"
+            },
+            "الرواتب والأجور - Salaries and Wages": {
+                "رواتب - Salaries": {
+                    "account_number": "321"
+                },
+                "أجور - Wages": {
+                    "account_number": "322"
+                },
+                "مكافآت - Bonuses": {
+                    "account_number": "323"
+                },
+                "مخصصات الموظفين - Employee Allowances": {
+                    "account_number": "324"
+                },
+                "اشتراكات الضمان الاجتماعي - Social Security Contributions": {
+                    "account_number": "325"
+                },
+                "account_number": "32"
+            },
+            "خدمات - Services": {
+                "إيجارات - Rent": {
+                    "account_number": "331"
+                },
+                "صيانة وإصلاح - Maintenance and Repairs": {
+                    "account_number": "332"
+                },
+                "نقل ومواصلات - Transport": {
+                    "account_number": "333"
+                },
+                "بريد وهاتف واتصالات - Post, Phone and Communications": {
+                    "account_number": "334"
+                },
+                "كهرباء وماء - Electricity and Water": {
+                    "account_number": "335"
+                },
+                "تأمين - Insurance": {
+                    "account_number": "336"
+                },
+                "خدمات مهنية واستشارية - Professional and Consulting Fees": {
+                    "account_number": "337"
+                },
+                "خدمات أخرى - Other Services": {
+                    "account_number": "339"
+                },
+                "account_number": "33"
+            },
+            "مصروفات تشغيلية أخرى - Other Operating Expenses": {
+                "قرطاسية ومطبوعات - Stationery and Printing": {
+                    "account_number": "341"
+                },
+                "سفر وانتقالات - Travel": {
+                    "account_number": "342"
+                },
+                "ضيافة وعلاقات عامة - Hospitality and PR": {
+                    "account_number": "343"
+                },
+                "إعلان ودعاية - Advertising": {
+                    "account_number": "344"
+                },
+                "اشتراكات وعضويات - Subscriptions": {
+                    "account_number": "345"
+                },
+                "رسوم حكومية - Government Fees": {
+                    "account_number": "346"
+                },
+                "مصروفات بنكية - Bank Charges": {
+                    "account_number": "347"
+                },
+                "مصروفات متنوعة - Miscellaneous Expenses": {
+                    "account_number": "349"
+                },
+                "account_number": "34"
+            },
+            "الضرائب والرسوم - Taxes and Duties Expense": {
+                "ضريبة الدخل - Income Tax Expense": {
+                    "account_number": "351",
+                    "account_type": "Tax"
+                },
+                "رسم الطابع - Stamp Duty Expense": {
+                    "account_number": "352",
+                    "account_type": "Tax"
+                },
+                "ضرائب ورسوم أخرى - Other Taxes": {
+                    "account_number": "359",
+                    "account_type": "Tax"
+                },
+                "account_number": "35"
+            },
+            "فوائد وعمولات - Interest and Commissions": {
+                "فوائد قروض - Loan Interest": {
+                    "account_number": "361"
+                },
+                "فوائد تأخيرية - Late Payment Interest": {
+                    "account_number": "362"
+                },
+                "عمولات مصرفية - Bank Commissions": {
+                    "account_number": "363"
+                },
+                "account_number": "36"
+            },
+            "الاندثار - Depreciation": {
+                "اندثار المباني - Building Depreciation": {
+                    "account_number": "372"
+                },
+                "اندثار الآلات والمعدات - Machinery Depreciation": {
+                    "account_number": "373"
+                },
+                "اندثار وسائل النقل - Vehicle Depreciation": {
+                    "account_number": "374"
+                },
+                "اندثار العدد والقوالب - Tools Depreciation": {
+                    "account_number": "375"
+                },
+                "اندثار الأثاث - Furniture Depreciation": {
+                    "account_number": "376"
+                },
+                "account_number": "37",
+                "account_type": "Depreciation"
+            },
+            "مصروفات تحويلية - Transfer Expenses": {
+                "تبرعات ومنح - Donations and Grants": {
+                    "account_number": "3831"
+                },
+                "مصروفات تحويلية أخرى - Other Transfer Expenses": {
+                    "account_number": "3839"
+                },
+                "account_number": "38"
+            },
+            "الأرباح والخسائر - Profit and Loss Account": {
+                "خسائر رأسمالية - Capital Losses": {
+                    "account_number": "393"
+                },
+                "فروقات عملة - Currency Differences": {
+                    "account_number": "394"
+                },
+                "account_number": "39"
+            },
+            "account_number": "3",
+            "root_type": "Expense"
+        },
+        "الإيرادات - Income": {
+            "إيراد النشاط الجاري - Operating Revenue": {
+                "مبيعات بضائع - Goods Sales": {
+                    "account_number": "411",
+                    "account_type": "Income Account"
+                },
+                "مبيعات خدمات - Services Revenue": {
+                    "account_number": "412",
+                    "account_type": "Income Account"
+                },
+                "مبيعات منتجات - Product Sales": {
+                    "account_number": "413",
+                    "account_type": "Income Account"
+                },
+                "صافي مبيعات بضائع لغرض البيع - Net Sales of Goods": {
+                    "account_number": "421",
+                    "account_type": "Income Account"
+                },
+                "account_number": "41",
+                "account_type": "Income Account"
+            },
+            "إيرادات أخرى - Other Income": {
+                "إيرادات إيجارات - Rental Income": {
+                    "account_number": "431",
+                    "account_type": "Income Account"
+                },
+                "إيرادات فوائد - Interest Income": {
+                    "account_number": "432",
+                    "account_type": "Income Account"
+                },
+                "إيرادات استثمارات - Investment Income": {
+                    "account_number": "433",
+                    "account_type": "Income Account"
+                },
+                "إيرادات متنوعة - Miscellaneous Income": {
+                    "account_number": "439",
+                    "account_type": "Income Account"
+                },
+                "account_number": "43",
+                "account_type": "Income Account"
+            },
+            "إيرادات تحويلية - Transfer Revenue": {
+                "تبرعات ومنح مستلمة - Donations Received": {
+                    "account_number": "441",
+                    "account_type": "Income Account"
+                },
+                "تعويضات وغرامات مستلمة - Compensations Received": {
+                    "account_number": "4832",
+                    "account_type": "Income Account"
+                },
+                "account_number": "44",
+                "account_type": "Income Account"
+            },
+            "مكاسب رأسمالية - Capital Gains": {
+                "account_number": "494",
+                "account_type": "Income Account"
+            },
+            "فروقات عملة دائنة - Currency Gain": {
+                "account_number": "495",
+                "account_type": "Income Account"
+            },
+            "account_number": "4",
+            "root_type": "Income"
+        }
+    }
+}
