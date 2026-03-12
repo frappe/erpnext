@@ -708,7 +708,10 @@ def make_reposting_for_accounting_ledgers(transactions, company, repost_doc):
 			new_repost_doc.flags.ignore_permissions = True
 			new_repost_doc.submit()
 		except Exception:
-			pass
+			frappe.log_error(
+				title="Repost Item Valuation Failed",
+				message=f"Failed to create GL repost for {voucher_type} {voucher_no}",
+			)
 
 
 def get_existing_reposting_only_gl_entries(reposting_reference):
