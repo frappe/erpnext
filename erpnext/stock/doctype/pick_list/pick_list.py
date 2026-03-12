@@ -100,6 +100,7 @@ class PickList(TransactionBase):
 		self.validate_expired_batches()
 		self.validate_for_qty()
 		self.validate_stock_qty()
+		self.validate_warehouses()
 		self.check_serial_no_status()
 		self.validate_with_previous_doc()
 
@@ -152,6 +153,23 @@ class PickList(TransactionBase):
 						"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} in the warehouse {4}."
 					).format(row.idx, row.picked_qty, bold(row.item_code), bin_qty, bold(row.warehouse)),
 					title=_("Insufficient Stock"),
+				)
+
+	def validate_warehouses(self):
+		for location in self.locations:
+			company = frappe.get_cached_value("Warehouse", location.warehouse, "company")
+
+			if company != self.company:
+				frappe.throw(
+					_(
+						"Row {0}: Warehouse {1} is linked to company {2}. Please select an warehouse belonging to company {3}."
+					).format(
+						location.idx,
+						frappe.bold(location.warehouse),
+						frappe.bold(company),
+						frappe.bold(self.company),
+					),
+					title=_("Incorrect Warehouse"),
 				)
 
 	def check_serial_no_status(self):
