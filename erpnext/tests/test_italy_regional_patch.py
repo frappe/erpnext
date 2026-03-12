@@ -201,19 +201,13 @@ class TestRenameItalyCustomerNameFields(unittest.TestCase):
 		self.assertTrue(frappe.db.exists("Custom Field", self.NEW_LAST_NAME_FIELD))
 
 		# Verify data was migrated to new columns
-		new_first_name = frappe.db.get_value(
-			"Customer", self.test_customer_name, "italy_customer_first_name"
-		)
-		new_last_name = frappe.db.get_value(
-			"Customer", self.test_customer_name, "italy_customer_last_name"
-		)
+		new_first_name = frappe.db.get_value("Customer", self.test_customer_name, "italy_customer_first_name")
+		new_last_name = frappe.db.get_value("Customer", self.test_customer_name, "italy_customer_last_name")
 		self.assertEqual(new_first_name, "Mario")
 		self.assertEqual(new_last_name, "Rossi")
 
-		# Verify old columns were dropped (clear cache first as has_column caches results)
-		frappe.clear_cache()
-		self.assertFalse(frappe.db.has_column("Customer", "first_name"))
-		self.assertFalse(frappe.db.has_column("Customer", "last_name"))
+		# Note: first_name/last_name columns are NOT dropped because they are
+		# standard Customer fields (Read Only, fetch from customer_primary_contact)
 
 	def test_patch_skips_non_italy_fields(self):
 		"""Test that the patch skips fields that are not Italy regional fields."""
