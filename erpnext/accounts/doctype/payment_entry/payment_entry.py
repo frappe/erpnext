@@ -1291,6 +1291,13 @@ class PaymentEntry(AccountsController):
 			self.setup_party_account_field()
 		self.set_transaction_currency_and_rate()
 
+		if not self.transaction_exchange_rate:
+			frappe.throw(
+				_("Transaction Exchange Rate is required to create GL Entries for Payment Entry {0}").format(
+					self.name
+				)
+			)
+
 		gl_entries = []
 		self.add_party_gl_entries(gl_entries)
 		self.add_bank_gl_entries(gl_entries)
