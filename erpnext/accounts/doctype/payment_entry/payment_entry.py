@@ -1372,7 +1372,7 @@ class PaymentEntry(AccountsController):
 						dr_or_cr: allocated_amount_in_company_currency,
 						dr_or_cr + "_in_transaction_currency": d.allocated_amount
 						if self.transaction_currency == self.party_account_currency
-						else allocated_amount_in_company_currency / (self.transaction_exchange_rate or 1),
+						else allocated_amount_in_company_currency / self.transaction_exchange_rate,
 						"advance_voucher_type": d.advance_voucher_type,
 						"advance_voucher_no": d.advance_voucher_no,
 						"transaction_exchange_rate": self.target_exchange_rate,
@@ -1424,7 +1424,7 @@ class PaymentEntry(AccountsController):
 						dr_or_cr + "_in_account_currency": self.unallocated_amount,
 						dr_or_cr + "_in_transaction_currency": self.unallocated_amount
 						if self.party_account_currency == self.transaction_currency
-						else base_unallocated_amount / (self.transaction_exchange_rate or 1),
+						else base_unallocated_amount / self.transaction_exchange_rate,
 						dr_or_cr: base_unallocated_amount,
 					},
 					item=self,
@@ -1517,7 +1517,7 @@ class PaymentEntry(AccountsController):
 		args_dict[dr_or_cr + "_in_transaction_currency"] = (
 			invoice.allocated_amount
 			if self.party_account_currency == self.transaction_currency
-			else base_allocated_amount / (self.transaction_exchange_rate or 1)
+			else base_allocated_amount / self.transaction_exchange_rate
 		)
 
 		args_dict.update(
@@ -1544,7 +1544,7 @@ class PaymentEntry(AccountsController):
 		args_dict[dr_or_cr + "_in_transaction_currency"] = (
 			invoice.allocated_amount
 			if self.party_account_currency == self.transaction_currency
-			else base_allocated_amount / (self.transaction_exchange_rate or 1)
+			else base_allocated_amount / self.transaction_exchange_rate
 		)
 		args_dict.update(
 			{
@@ -1571,7 +1571,7 @@ class PaymentEntry(AccountsController):
 						"credit_in_account_currency": self.paid_amount,
 						"credit_in_transaction_currency": self.paid_amount
 						if self.paid_from_account_currency == self.transaction_currency
-						else self.base_paid_amount / (self.transaction_exchange_rate or 1),
+						else self.base_paid_amount / self.transaction_exchange_rate,
 						"credit": self.base_paid_amount,
 						"cost_center": self.cost_center,
 						"post_net_value": True,
@@ -1589,7 +1589,7 @@ class PaymentEntry(AccountsController):
 						"debit_in_account_currency": self.received_amount,
 						"debit_in_transaction_currency": self.received_amount
 						if self.paid_to_account_currency == self.transaction_currency
-						else self.base_received_amount / (self.transaction_exchange_rate or 1),
+						else self.base_received_amount / self.transaction_exchange_rate,
 						"debit": self.base_received_amount,
 						"cost_center": self.cost_center,
 					},
@@ -1626,7 +1626,7 @@ class PaymentEntry(AccountsController):
 						if account_currency == self.company_currency
 						else d.tax_amount,
 						dr_or_cr + "_in_transaction_currency": base_tax_amount
-						/ (self.transaction_exchange_rate or 1),
+						/ self.transaction_exchange_rate,
 						"cost_center": d.cost_center,
 						"post_net_value": True,
 					},
@@ -1653,7 +1653,7 @@ class PaymentEntry(AccountsController):
 							if account_currency == self.company_currency
 							else d.tax_amount,
 							rev_dr_or_cr + "_in_transaction_currency": base_tax_amount
-							/ (self.transaction_exchange_rate or 1),
+							/ self.transaction_exchange_rate,
 							"cost_center": self.cost_center,
 							"post_net_value": True,
 						},
@@ -1678,7 +1678,7 @@ class PaymentEntry(AccountsController):
 						"account_currency": account_currency,
 						"against": self.party or self.paid_from,
 						"debit_in_account_currency": d.amount,
-						"debit_in_transaction_currency": d.amount / (self.transaction_exchange_rate or 1),
+						"debit_in_transaction_currency": d.amount / self.transaction_exchange_rate,
 						"debit": d.amount,
 						"cost_center": d.cost_center,
 					},
