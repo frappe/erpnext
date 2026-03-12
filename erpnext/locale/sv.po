@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-03-08 09:42+0000\n"
-"PO-Revision-Date: 2026-03-10 17:36\n"
+"PO-Revision-Date: 2026-03-12 17:35\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -43937,7 +43937,7 @@ msgstr "Rad # {0}: Åtgärd erfodras mot Råmaterial post {1}"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:230
 msgid "Row {0} picked quantity is less than the required quantity, additional {1} {2} required."
-msgstr "Rad # {0}: Plockad kvantitet är lägre än erfordrad kvantitet, ytterligare {1} {2} erfordras."
+msgstr "Rad {0} plockad kvantitet är mindre än önskad kvantitet, extra {1} {2} erfordras."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1565
 msgid "Row {0}# Item {1} not found in 'Raw Materials Supplied' table in {2} {3}"
