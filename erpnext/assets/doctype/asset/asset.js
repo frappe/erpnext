@@ -87,6 +87,8 @@ frappe.ui.form.on("Asset", {
 	},
 
 	refresh: async function (frm) {
+		frm.set_currency_labels(["net_purchase_amount"], erpnext.get_currency(frm.doc.company));
+
 		frappe.ui.form.trigger("Asset", "asset_type");
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
 
