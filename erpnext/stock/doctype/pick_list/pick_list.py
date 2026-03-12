@@ -960,6 +960,7 @@ def get_available_item_locations(
 		locations = get_available_item_locations_for_batched_item(
 			item_code,
 			from_warehouses,
+			company,
 			consider_rejected_warehouses=consider_rejected_warehouses,
 		)
 	else:
@@ -1060,6 +1061,7 @@ def get_available_item_locations_for_serial_and_batched_item(
 	locations = get_available_item_locations_for_batched_item(
 		item_code,
 		from_warehouses,
+		company,
 		consider_rejected_warehouses=consider_rejected_warehouses,
 	)
 
@@ -1140,6 +1142,7 @@ def get_available_item_locations_for_serialized_item(
 def get_available_item_locations_for_batched_item(
 	item_code,
 	from_warehouses,
+	company,
 	consider_rejected_warehouses=False,
 ):
 	locations = []
@@ -1148,6 +1151,7 @@ def get_available_item_locations_for_batched_item(
 			{
 				"item_code": item_code,
 				"warehouse": from_warehouses,
+				"company": company,
 				"based_on": frappe.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
 			}
 		)
