@@ -659,8 +659,8 @@ def get_item_tax_info(
 	doc: Document | str | None,
 	tax_category: str,
 	item_codes: list | str,
-	item_rates: dict | None = None,
-	item_tax_templates: dict | None = None,
+	item_rates: dict | str | None = None,
+	item_tax_templates: dict | str | None = None,
 ):
 	out = {}
 
