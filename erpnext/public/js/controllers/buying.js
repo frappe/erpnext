@@ -682,3 +682,10 @@ erpnext.buying.get_items_from_product_bundle = function (frm) {
 
 	dialog.show();
 };
+erpnext.buying.prevent_past_schedule_dates = function (frm) {
+	if (frm.doc.transaction_date) {
+		frm.fields_dict["schedule_date"].datepicker?.update({
+			minDate: new Date(frm.doc.transaction_date),
+		});
+	}
+};
