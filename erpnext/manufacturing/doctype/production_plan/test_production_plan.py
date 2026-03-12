@@ -2710,6 +2710,92 @@ class TestProductionPlan(IntegrationTestCase):
 			[item.item_code for item in plan.mr_items], ["Item Level 1-3", "Item Level 2-3", "Item Level 3-1"]
 		)
 
+	def test_phantom_bom_explosion_across_multiple_po_items(self):
+		"""
+		Regression: when the same phantom item (BOM) is referenced inside sub-assemblies
+		of two different production plan items, its raw materials must be fully exploded
+		for *both* plan items.
+		"""
+		# Setup items
+		fg_a = make_item("FG for Cross-PO Phantom Test A")
+		fg_b = make_item("FG for Cross-PO Phantom Test B")
+		sa_a = make_item("SA for Cross-PO Phantom Test A")
+		sa_b = make_item("SA for Cross-PO Phantom Test B")
+		phantom = make_item("Phantom for Cross-PO Test")
+		rm = make_item("RM for Cross-PO Phantom Test")
+
+		# Create the shared phantom BOM
+		phantom_bom = make_bom(item=phantom.name, raw_materials=[rm.name], do_not_save=True)
+		phantom_bom.is_phantom_bom = 1
+		phantom_bom.save()
+		phantom_bom.submit()
+
+		# Create SA-A BOM with phantom
+		sa_a_bom = make_bom(item=sa_a.name, raw_materials=[phantom.name], do_not_save=True)
+		sa_a_bom.items[0].bom_no = phantom_bom.name
+		sa_a_bom.save()
+		sa_a_bom.submit()
+
+		# Create SA-B BOM with the SAME phantom
+		sa_b_bom = make_bom(item=sa_b.name, raw_materials=[phantom.name], do_not_save=True)
+		sa_b_bom.items[0].bom_no = phantom_bom.name
+		sa_b_bom.save()
+		sa_b_bom.submit()
+
+		# Create FG-A BOM with SA-A
+		fg_a_bom = make_bom(item=fg_a.name, raw_materials=[sa_a.name], do_not_save=True)
+		fg_a_bom.items[0].bom_no = sa_a_bom.name
+		fg_a_bom.save()
+		fg_a_bom.submit()
+
+		# Create FG-B BOM with SA-B
+		fg_b_bom = make_bom(item=fg_b.name, raw_materials=[sa_b.name], do_not_save=True)
+		fg_b_bom.items[0].bom_no = sa_b_bom.name
+		fg_b_bom.save()
+		fg_b_bom.submit()
+
+		# Build Production Plan with both FGs
+		plan = frappe.new_doc("Production Plan")
+		plan.company = "_Test Company"
+		plan.posting_date = nowdate()
+		plan.ignore_existing_ordered_qty = 1
+		plan.skip_available_sub_assembly_item = 1
+		plan.sub_assembly_warehouse = "_Test Warehouse - _TC"
+
+		for fg_item, bom in [(fg_a.name, fg_a_bom.name), (fg_b.name, fg_b_bom.name)]:
+			plan.append(
+				"po_items",
+				{
+					"use_multi_level_bom": 1,
+					"item_code": fg_item,
+					"bom_no": bom,
+					"planned_qty": 1,
+					"planned_start_date": now_datetime(),
+					"stock_uom": "Nos",
+				},
+			)
+
+		plan.insert()
+		plan.get_sub_assembly_items()
+
+		# Verify both sub-assemblies are present
+		sa_items = {row.production_item for row in plan.sub_assembly_items}
+		self.assertIn(sa_a.name, sa_items)
+		self.assertIn(sa_b.name, sa_items)
+
+		plan.submit()
+
+		mr_items = get_items_for_material_requests(plan.as_dict())
+
+		# Phantom raw material should be counted twice (once per FG → SA → shared phantom)
+		rm_total_qty = sum(flt(d["quantity"]) for d in mr_items if d["item_code"] == rm.name)
+		self.assertEqual(
+			rm_total_qty,
+			2.0,
+			f"Expected RM qty=2 (1 per FG via shared phantom BOM), got {rm_total_qty}. "
+			"The phantom BOM was not re-exploded for the second po_item.",
+		)
+
 
 def create_production_plan(**args):
 	"""
