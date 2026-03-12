@@ -132,13 +132,36 @@ def update_status_for_contracts():
 	and submitted Contracts
 	"""
 
-	contracts = frappe.get_all(
-		"Contract",
-		filters={"is_signed": True, "docstatus": 1},
-		fields=["name", "start_date", "end_date"],
-	)
+	while True:
+		contracts = frappe.get_all(
+			"Contract",
+			filters={"is_signed": True, "docstatus": 1},
+			fields=["name", "start_date", "end_date", "status"],
+			limit_start=processed,
+			limit_page_length=batch_size,
+		)
 
-	for contract in contracts:
-		status = get_status(contract.get("start_date"), contract.get("end_date"))
+		if not contracts:
+			break
 
-		frappe.db.set_value("Contract", contract.get("name"), "status", status)
+		activate_contacts = {}
+		inactivate_contacts = {}
+
+		for contract in contracts:
+			status = get_status(contract.get("start_date"), contract.get("end_date"))
+
+			if contract.get("status") != status:
+				if status == "Active":
+					activate_contacts[contract.get("name")] = {"status": status}
+				else:
+					inactivate_contacts[contract.get("name")] = {"status": status}
+
+		if activate_contacts:
+			frappe.db.bulk_update("Contract", activate_contacts)
+			activate_contacts = {}
+
+		if inactivate_contacts:
+			frappe.db.bulk_update("Contract", inactivate_contacts)
+			inactivate_contacts = {}
+
+		processed += batch_size
