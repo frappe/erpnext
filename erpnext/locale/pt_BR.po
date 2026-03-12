@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-03-08 09:42+0000\n"
-"PO-Revision-Date: 2026-03-11 17:39\n"
+"PO-Revision-Date: 2026-03-12 17:35\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Portuguese, Brazilian\n"
 "MIME-Version: 1.0\n"
@@ -31134,7 +31134,7 @@ msgstr ""
 #. Label of the scheduled_confirmation_date (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Offer Date"
-msgstr ""
+msgstr "Data da Oferta"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:56
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:92
@@ -37311,7 +37311,7 @@ msgstr ""
 #. Request'
 #: erpnext/stock/doctype/material_request/material_request.json
 msgid "Printing Details"
-msgstr ""
+msgstr "Detalhes de Impressão"
 
 #. Label of the printing_settings_section (Section Break) field in DocType
 #. 'Dunning'
