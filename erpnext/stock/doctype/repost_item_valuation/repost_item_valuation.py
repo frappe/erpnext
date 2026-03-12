@@ -693,6 +693,7 @@ def execute_repost_item_valuation():
 
 def make_reposting_for_accounting_ledgers(transactions, company, repost_doc):
 	reposting_map = get_existing_reposting_only_gl_entries(repost_doc.name)
+	failed_vouchers = []
 
 	for voucher_type, voucher_no in transactions:
 		if reposting_map.get((voucher_type, voucher_no)):
@@ -708,10 +709,16 @@ def make_reposting_for_accounting_ledgers(transactions, company, repost_doc):
 			new_repost_doc.flags.ignore_permissions = True
 			new_repost_doc.submit()
 		except Exception:
+			failed_vouchers.append(f"{voucher_type} {voucher_no}")
 			frappe.log_error(
 				title="Repost Item Valuation Failed",
-				message=f"Failed to create GL repost for {voucher_type} {voucher_no}",
+				message=frappe.get_traceback(with_context=True),
 			)
+
+	if failed_vouchers:
+		frappe.throw(
+			_("Failed to queue GL repost for: {0}").format(", ".join(failed_vouchers))
+		)
 
 
 def get_existing_reposting_only_gl_entries(reposting_reference):
