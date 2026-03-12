@@ -596,7 +596,6 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			target_doc.against_sales_order = source_doc.against_sales_order
 			target_doc.against_sales_invoice = source_doc.against_sales_invoice
 			target_doc.so_detail = source_doc.so_detail
-			target_doc.si_detail = source_doc.si_detail
 			target_doc.expense_account = source_doc.expense_account
 			target_doc.dn_detail = source_doc.name
 			if default_warehouse_for_sales_return:
