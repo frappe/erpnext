@@ -82,6 +82,7 @@ class AccountsSettings(Document):
 		make_payment_via_journal_entry: DF.Check
 		merge_similar_account_heads: DF.Check
 		over_billing_allowance: DF.Currency
+		preview_mode: DF.Check
 		receivable_payable_fetch_method: DF.Literal["Buffered Cursor", "UnBuffered Cursor", "Raw SQL"]
 		receivable_payable_remarks_length: DF.Int
 		reconciliation_queue_size: DF.Int

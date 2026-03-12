@@ -40,6 +40,9 @@ import erpnext
 # imported to enable erpnext.accounts.utils.get_account_currency
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
+from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
+	get_dimension_filter_map,
+)
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.utils import get_stock_value_on
 
@@ -2717,3 +2720,769 @@ def build_qb_match_conditions(doctype, user=None) -> list:
 
 def is_immutable_ledger_enabled():
 	return frappe.get_single_value("Accounts Settings", "enable_immutable_ledger")
+
+
+pre_submit_DOCTYPE_CONFIG = {
+	"Sales Invoice": {
+		"check_prev_docstatus": True,
+		"validate_pos_paid_amount": True,
+		"validate_asset_split": True,
+		"validate_stock": True,
+		"validate_serial_batch": True,
+		"validate_packed_items": True,
+		"validate_gl": True,
+		"validate_sle": True,
+		"check_credit_limit": True,
+		"check_common_party_accounting": True,
+		"check_tax_withholding": True,
+	},
+	"Purchase Invoice": {
+		"check_prev_docstatus": True,
+		"validate_stock": True,
+		"validate_serial_batch": True,
+		"validate_gl": True,
+		"validate_sle": True,
+		"check_common_party_accounting": True,
+		"check_tax_withholding": True,
+	},
+	"Delivery Note": {
+		"check_prev_docstatus": True,
+		"validate_stock": True,
+		"validate_serial_batch": True,
+		"validate_packed_items": True,
+		"validate_sle": True,
+		"check_credit_limit": True,
+		"validate_packed_qty": True,
+	},
+	"Purchase Receipt": {
+		"check_prev_docstatus": True,
+		"validate_serial_batch": True,
+		"validate_gl": True,
+		"validate_sle": True,
+	},
+}
+
+_ALWAYS_STOCK_DOCTYPES = ("Delivery Note", "Purchase Receipt")
+
+
+def pre_submit_validation(doc, method=None):
+	if not frappe.get_cached_value("Accounts Settings", None, "preview_mode"):
+		return
+	cfg = pre_submit_DOCTYPE_CONFIG.get(doc.doctype)
+	if not cfg or not doc.company:
+		return
+	_run_pre_submit_checks(doc, cfg)
+
+
+def _run_pre_submit_checks(doc, cfg):
+	if cfg.get("check_prev_docstatus"):
+		_check_prev_docstatus(doc)
+
+	if cfg.get("validate_pos_paid_amount") and doc.doctype == "Sales Invoice":
+		_check_pos_paid_amount(doc)
+
+	if cfg.get("validate_asset_split"):
+		_validate_asset_split(doc)
+
+	needs_stock = getattr(doc, "update_stock", False) or doc.doctype in _ALWAYS_STOCK_DOCTYPES
+
+	if needs_stock:
+		if cfg.get("validate_stock"):
+			_validate_stock_availability(doc)
+		if cfg.get("validate_serial_batch"):
+			_validate_serial_and_batch_fields(doc)
+		if cfg.get("validate_packed_items"):
+			_validate_packed_items(doc)
+		if cfg.get("validate_sle"):
+			_validate_sle_full(doc)
+
+	if cfg.get("validate_gl"):
+		_validate_gl_full(doc)
+
+	if cfg.get("check_credit_limit"):
+		_check_credit_limit_warn(doc)
+
+	if cfg.get("validate_packed_qty") and doc.doctype == "Delivery Note":
+		_validate_packed_qty(doc)
+
+	if cfg.get("check_common_party_accounting"):
+		_check_common_party_accounting(doc)
+
+	if cfg.get("check_tax_withholding"):
+		_check_tax_withholding(doc)
+
+
+def _check_prev_docstatus(doc):
+	try:
+		if hasattr(doc, "check_prev_docstatus"):
+			doc.check_prev_docstatus()
+	except frappe.ValidationError:
+		raise
+	except Exception as e:
+		frappe.msgprint(str(e), title=_("Pre-Submit Warning"), indicator="orange")
+
+
+def _check_pos_paid_amount(doc):
+	try:
+		if hasattr(doc, "validate_pos_paid_amount"):
+			doc.validate_pos_paid_amount()
+	except frappe.ValidationError:
+		raise
+	except Exception as e:
+		frappe.msgprint(str(e), title=_("Pre-Submit Warning"), indicator="orange")
+
+
+def _check_tax_withholding(doc):
+	"""
+	Advisory check: verifies TDS/TCS configuration won't blow up on submit.
+	Covers SalesTaxWithholding and PurchaseTaxWithholding.
+	"""
+	if not doc.get("apply_tds"):
+		return
+
+	tds_category = doc.get("tax_withholding_category")
+	if not tds_category:
+		frappe.msgprint(
+			_("Apply TDS is enabled but no Tax Withholding Category is set. Submission will fail."),
+			title=_("Pre-Submit Warning: Tax Withholding"),
+			indicator="orange",
+		)
+		return
+
+	# Check a rate exists for the current fiscal year
+	from erpnext.accounts.utils import get_fiscal_year
+
+	try:
+		get_fiscal_year(doc.posting_date, company=doc.company)[0]
+	except Exception:
+		frappe.throw(
+			_("Invalid Posting Date: {0}. Please check if the fiscal year is set up correctly.").format(
+				frappe.bold(doc.posting_date)
+			),
+			title=_("Pre-Submission Validation"),
+		)
+		return
+
+	rate_exists = frappe.db.exists(
+		"Tax Withholding Rate",
+		{
+			"parent": tds_category,
+			"from_date": ("<=", doc.posting_date),
+			"to_date": (">=", doc.posting_date),
+		},
+	)
+	if not rate_exists:
+		frappe.msgprint(
+			_(
+				"Tax Withholding Category {0} has no rate configured for {1}. "
+				"Submission may fail when creating TDS entries."
+			).format(frappe.bold(tds_category), frappe.bold(doc.posting_date)),
+			title=_("Pre-Submit Warning: Tax Withholding"),
+			indicator="orange",
+		)
+
+
+def _validate_asset_split(doc):
+	if getattr(doc, "is_return", False):
+		return
+	for item in doc.items:
+		if not item.get("is_fixed_asset") or not item.get("asset"):
+			continue
+		actual_qty = frappe.db.get_value("Asset", item.asset, "asset_quantity")
+		if actual_qty is None:
+			frappe.throw(
+				_("Row #{0}: Asset {1} does not exist or has been deleted.").format(
+					item.idx, frappe.bold(item.asset)
+				),
+				title=_("Pre-Submission Validation"),
+			)
+		if flt(item.qty) > flt(actual_qty):
+			frappe.throw(
+				_(
+					"Row #{0}: Sell quantity ({1}) cannot exceed asset quantity. "
+					"Asset {2} has only {3} item(s) available."
+				).format(item.idx, item.qty, frappe.bold(item.asset), actual_qty),
+				title=_("Pre-Submission Validation"),
+			)
+
+
+def _validate_stock_availability(doc):
+	from erpnext.stock.utils import get_stock_balance
+
+	if frappe.get_cached_value("Stock Settings", None, "allow_negative_stock"):
+		return
+	is_outward = doc.doctype in ("Sales Invoice", "Delivery Note") and not getattr(doc, "is_return", False)
+	if not is_outward:
+		return
+
+	for item in doc.items:
+		if not item.get("item_code") or not flt(item.get("qty")):
+			continue
+		if not frappe.get_cached_value("Item", item.item_code, "is_stock_item"):
+			continue
+		if frappe.get_cached_value("Item", item.item_code, "allow_negative_stock"):
+			continue
+		if item.get("serial_and_batch_bundle") or not item.get("warehouse"):
+			continue
+
+		available = get_stock_balance(
+			item.item_code,
+			item.warehouse,
+			doc.posting_date,
+			doc.posting_time or "00:00:00",
+		)
+		if flt(available) < flt(item.stock_qty):
+			frappe.msgprint(
+				_(
+					"Row #{0}: Insufficient stock for {1} in {2}. " "Available: {3} {4}, Required: {5} {4}."
+				).format(
+					item.idx,
+					frappe.bold(item.item_code),
+					frappe.bold(item.warehouse),
+					available,
+					item.stock_uom,
+					item.stock_qty,
+				),
+				title=_("Pre-Submit Warning: Stock"),
+				indicator="orange",
+			)
+
+
+def _validate_serial_and_batch_fields(doc):
+	try:
+		if hasattr(doc, "validate_standalone_serial_nos_customer"):
+			doc.validate_standalone_serial_nos_customer()
+	except frappe.ValidationError:
+		raise
+	except Exception:
+		pass
+
+	for item in doc.items:
+		if not item.get("item_code"):
+			continue
+		has_serial = frappe.get_cached_value("Item", item.item_code, "has_serial_no")
+		has_batch = frappe.get_cached_value("Item", item.item_code, "has_batch_no")
+		if not has_serial and not has_batch:
+			continue
+		if item.get("serial_and_batch_bundle"):
+			continue
+		if has_serial and not item.get("serial_no"):
+			frappe.throw(
+				_("Row #{0}: Serial No is required for Item {1}.").format(
+					item.idx, frappe.bold(item.item_code)
+				),
+				title=_("Pre-Submission Validation"),
+			)
+		if has_batch and not item.get("batch_no"):
+			frappe.throw(
+				_("Row #{0}: Batch No is required for Item {1}.").format(
+					item.idx, frappe.bold(item.item_code)
+				),
+				title=_("Pre-Submission Validation"),
+			)
+
+
+def _validate_packed_items(doc):
+	for packed in doc.get("packed_items") or []:
+		if not packed.get("item_code"):
+			continue
+		if flt(packed.qty) <= 0:
+			frappe.throw(
+				_("Row #{0} (Packed Item): Quantity must be > 0 for Item {1}.").format(
+					packed.idx, frappe.bold(packed.item_code)
+				),
+				title=_("Pre-Submission Validation"),
+			)
+		if not packed.get("warehouse"):
+			frappe.throw(
+				_("Row #{0} (Packed Item): Warehouse is required for Item {1}.").format(
+					packed.idx, frappe.bold(packed.item_code)
+				),
+				title=_("Pre-Submission Validation"),
+			)
+
+
+def _validate_packed_qty(doc):
+	if doc.doctype != "Delivery Note":
+		return
+	try:
+		if hasattr(doc, "validate_packed_qty"):
+			doc.validate_packed_qty()
+	except frappe.ValidationError:
+		raise
+	except Exception as e:
+		frappe.msgprint(str(e), title=_("Pre-Submit Warning"), indicator="orange")
+
+
+def _check_common_party_accounting(doc):
+	if doc.doctype not in ("Sales Invoice", "Purchase Invoice"):
+		return
+
+	if not frappe.get_cached_value("Accounts Settings", None, "enable_common_party_accounting"):
+		return
+
+	party_type = "Customer" if doc.doctype == "Sales Invoice" else "Supplier"
+	party = doc.get("customer") if doc.doctype == "Sales Invoice" else doc.get("supplier")
+
+	if not party:
+		return
+
+	party_link = frappe.db.get_value(
+		"Party Link",
+		{
+			"primary_role": party_type,
+			"primary_party": party,
+		},
+		["primary_party", "secondary_role"],
+		as_dict=True,
+	)
+
+	if not party_link:
+		return
+
+	unrealized_account = frappe.get_cached_value("Company", doc.company, "unrealized_profit_loss_account")
+	if not unrealized_account:
+		frappe.msgprint(
+			_(
+				"Common Party Accounting is enabled and {0} {1} is linked to a {2}. "
+				"However, Company {3} has no Unrealized Profit / Loss account set. "
+				"Submission will fail — please set it in the Company master."
+			).format(
+				party_type,
+				frappe.bold(party),
+				party_link.secondary_role,
+				frappe.bold(doc.company),
+			),
+			title=_("Pre-Submit Warning: Common Party Accounting"),
+			indicator="orange",
+		)
+
+
+def _validate_sle_full(doc):
+	try:
+		sl_entries = _get_all_sl_entries(doc)
+	except frappe.ValidationError as e:
+		frappe.throw(
+			_("An SLE issue will block submission: {0}").format(str(e)),
+			title=_("Pre-Submission Validation: Stock"),
+		)
+		return
+	except Exception as e:
+		frappe.msgprint(
+			_("Could not build Stock Ledger Entries for pre-validation: {0}").format(str(e)),
+			title=_("Pre-Submit Warning: Stock"),
+			indicator="orange",
+		)
+		return
+
+	if not sl_entries:
+		return
+
+	critical_errors = []
+	advisory_warnings = []
+
+	for sle in sl_entries:
+		c_errs, a_warns = _validate_single_sle(sle, doc)
+		critical_errors.extend(c_errs)
+		advisory_warnings.extend(a_warns)
+
+	if critical_errors:
+		bullet_list = "".join(f"<li>{e}</li>" for e in critical_errors)
+		frappe.throw(
+			_("The following Stock issues will block submission:<br><ul>{0}</ul>").format(bullet_list),
+			title=_("Pre-Submission Validation: Stock Ledger"),
+		)
+
+	for warning in advisory_warnings:
+		frappe.msgprint(warning, title=_("Pre-Submit Warning: Stock"), indicator="orange")
+
+
+def _get_all_sl_entries(doc):
+	entries = []
+	is_outward = doc.doctype in ("Sales Invoice", "Delivery Note")
+
+	for item in doc.items:
+		if not item.get("item_code") or not item.get("warehouse"):
+			continue
+		if not frappe.get_cached_value("Item", item.item_code, "is_stock_item"):
+			continue
+
+		entries.append(
+			frappe._dict(
+				{
+					"item_code": item.item_code,
+					"warehouse": item.warehouse,
+					"posting_date": doc.posting_date,
+					"posting_time": doc.posting_time or "00:00:00",
+					"voucher_type": doc.doctype,
+					"voucher_no": doc.name,
+					"voucher_detail_no": item.name,
+					"actual_qty": -flt(item.stock_qty) if is_outward else flt(item.stock_qty),
+					"stock_uom": item.stock_uom,
+					"batch_no": item.get("batch_no"),
+					"serial_no": item.get("serial_no"),
+					"serial_and_batch_bundle": item.get("serial_and_batch_bundle"),
+					"company": doc.company,
+				}
+			)
+		)
+
+	for packed in doc.get("packed_items") or []:
+		if not packed.get("item_code") or not packed.get("warehouse"):
+			continue
+		if not flt(packed.get("qty")):
+			continue
+		if not frappe.get_cached_value("Item", packed.item_code, "is_stock_item"):
+			continue
+
+		entries.append(
+			frappe._dict(
+				{
+					"item_code": packed.item_code,
+					"warehouse": packed.warehouse,
+					"posting_date": doc.posting_date,
+					"posting_time": doc.posting_time or "00:00:00",
+					"voucher_type": doc.doctype,
+					"voucher_no": doc.name,
+					"voucher_detail_no": packed.name,
+					"actual_qty": -flt(packed.qty) if is_outward else flt(packed.qty),
+					"stock_uom": packed.stock_uom,
+					"batch_no": packed.get("batch_no"),
+					"serial_no": packed.get("serial_no"),
+					"serial_and_batch_bundle": packed.get("serial_and_batch_bundle"),
+					"company": doc.company,
+				}
+			)
+		)
+
+	return entries
+
+
+def _validate_single_sle(sle, doc):
+	# Returns (critical_errors[], advisory_warnings[])
+	critical = []
+	advisory = []
+
+	# 1. validate_mandatory
+	for field in ("item_code", "warehouse", "voucher_type", "voucher_no", "posting_date"):
+		if not sle.get(field):
+			critical.append(_("SLE is missing mandatory field: {0}.").format(frappe.bold(field)))
+
+	if critical:
+		return critical, advisory
+
+	# 2. validate_item
+	item_data = frappe.db.get_value(
+		"Item",
+		sle.item_code,
+		["name", "disabled", "is_stock_item", "has_serial_no", "has_batch_no"],
+		as_dict=True,
+	)
+	if not item_data:
+		critical.append(_("Item {0} does not exist.").format(frappe.bold(sle.item_code)))
+		return critical, advisory
+	if item_data.disabled:
+		critical.append(_("Item {0} is disabled.").format(frappe.bold(sle.item_code)))
+	if not item_data.is_stock_item:
+		critical.append(
+			_("Item {0} is not a stock item and cannot have Stock Ledger Entries.").format(
+				frappe.bold(sle.item_code)
+			)
+		)
+
+	# 3. validate_warehouse
+	wh_data = frappe.db.get_value(
+		"Warehouse",
+		sle.warehouse,
+		["name", "is_group", "company", "disabled"],
+		as_dict=True,
+	)
+	if not wh_data:
+		critical.append(_("Warehouse {0} does not exist.").format(frappe.bold(sle.warehouse)))
+	else:
+		if wh_data.disabled:
+			critical.append(_("Warehouse {0} is disabled.").format(frappe.bold(sle.warehouse)))
+		if wh_data.is_group:
+			critical.append(
+				_("Warehouse {0} is a group warehouse and cannot be used in transactions.").format(
+					frappe.bold(sle.warehouse)
+				)
+			)
+		if wh_data.company and wh_data.company != doc.company:
+			critical.append(
+				_("Warehouse {0} belongs to company {1}, not {2}.").format(
+					frappe.bold(sle.warehouse),
+					frappe.bold(wh_data.company),
+					frappe.bold(doc.company),
+				)
+			)
+
+	if critical:
+		return critical, advisory  # skip serial/batch if fundamentals are broken
+
+	# 4. validate_batch (advisory)
+	if item_data.has_batch_no and sle.get("batch_no") and not sle.get("serial_and_batch_bundle"):
+		advisory.extend(_validate_sle_batch(sle))
+
+	# 5. validate_serial_no (advisory)
+	if item_data.has_serial_no and sle.get("serial_no") and not sle.get("serial_and_batch_bundle"):
+		advisory.extend(_validate_sle_serial_nos(sle))
+
+	return critical, advisory
+
+
+def _validate_sle_batch(sle):
+	warnings = []
+	batch_no = sle.batch_no
+
+	batch_data = frappe.db.get_value(
+		"Batch",
+		batch_no,
+		["name", "disabled", "item", "expiry_date"],
+		as_dict=True,
+	)
+
+	if not batch_data:
+		warnings.append(
+			_("Item {0}: Batch {1} does not exist.").format(frappe.bold(sle.item_code), frappe.bold(batch_no))
+		)
+		return warnings
+
+	if batch_data.disabled:
+		warnings.append(
+			_("Item {0}: Batch {1} is disabled.").format(frappe.bold(sle.item_code), frappe.bold(batch_no))
+		)
+	if batch_data.item != sle.item_code:
+		warnings.append(
+			_("Item {0}: Batch {1} belongs to Item {2}, not this item.").format(
+				frappe.bold(sle.item_code), frappe.bold(batch_no), frappe.bold(batch_data.item)
+			)
+		)
+	if batch_data.expiry_date and cstr(batch_data.expiry_date) < cstr(sle.posting_date):
+		warnings.append(
+			_("Item {0}: Batch {1} expired on {2}. Posting date is {3}.").format(
+				frappe.bold(sle.item_code),
+				frappe.bold(batch_no),
+				frappe.bold(batch_data.expiry_date),
+				frappe.bold(sle.posting_date),
+			)
+		)
+
+	return warnings
+
+
+def _validate_sle_serial_nos(sle):
+	warnings = []
+	is_outward = flt(sle.actual_qty) < 0
+	serial_nos = [s.strip() for s in (sle.serial_no or "").split("\n") if s.strip()]
+
+	for serial_no in serial_nos:
+		sn_data = frappe.db.get_value(
+			"Serial No",
+			serial_no,
+			["name", "item_code", "status", "warehouse"],
+			as_dict=True,
+		)
+		if not sn_data:
+			warnings.append(
+				_("Item {0}: Serial No {1} does not exist.").format(
+					frappe.bold(sle.item_code), frappe.bold(serial_no)
+				)
+			)
+			continue
+
+		if sn_data.item_code != sle.item_code:
+			warnings.append(
+				_("Serial No {0} belongs to Item {1}, not {2}.").format(
+					frappe.bold(serial_no), frappe.bold(sn_data.item_code), frappe.bold(sle.item_code)
+				)
+			)
+
+		# Outward: serial must be Active and in the correct warehouse
+		if is_outward:
+			if sn_data.status not in ("Active", ""):
+				warnings.append(
+					_("Serial No {0} has status '{1}' and may not be available for delivery.").format(
+						frappe.bold(serial_no), sn_data.status
+					)
+				)
+			if sn_data.warehouse and sn_data.warehouse != sle.warehouse:
+				warnings.append(
+					_("Serial No {0} is in Warehouse {1}, but transaction uses Warehouse {2}.").format(
+						frappe.bold(serial_no), frappe.bold(sn_data.warehouse), frappe.bold(sle.warehouse)
+					)
+				)
+		# Inward: serial must NOT already be in stock
+		else:
+			if sn_data.status == "Active":
+				warnings.append(
+					_("Serial No {0} already exists in stock (Active). Cannot receive again.").format(
+						frappe.bold(serial_no)
+					)
+				)
+
+	return warnings
+
+
+def _validate_gl_full(doc):
+	try:
+		gl_entries = doc.get_gl_entries()
+	except frappe.ValidationError as e:
+		frappe.throw(
+			_("A GL account issue will block submission: {0}").format(str(e)),
+			title=_("Pre-Submission Validation: GL"),
+		)
+		return
+	except Exception as e:
+		frappe.msgprint(
+			_("Could not build GL entries for pre-validation: {0}").format(str(e)),
+			title=_("Pre-Submit Warning: GL"),
+			indicator="orange",
+		)
+		return
+
+	if not gl_entries:
+		return
+
+	errors = []
+	for gle in gl_entries:
+		errors.extend(_validate_single_gle(gle, doc))
+	errors.extend(_validate_debit_credit_balance(gl_entries))
+
+	if errors:
+		bullet_list = "".join(f"<li>{e}</li>" for e in errors)
+		frappe.throw(
+			_("The following GL issues will block submission:<br><ul>{0}</ul>").format(bullet_list),
+			title=_("Pre-Submission Validation: GL Entries"),
+		)
+
+
+def _validate_single_gle(gle, doc):
+	errors = []
+	account = gle.get("account")
+
+	if not account:
+		errors.append(_("A GL entry has no account specified."))
+		return errors
+
+	acc_data = frappe.db.get_value(
+		"Account",
+		account,
+		["name", "disabled", "is_group", "company", "account_type", "root_type", "freeze_account"],
+		as_dict=True,
+	)
+
+	if not acc_data:
+		errors.append(_("Account {0} does not exist.").format(frappe.bold(account)))
+		return errors
+
+	if acc_data.disabled:
+		errors.append(_("Account {0} is disabled.").format(frappe.bold(account)))
+	if acc_data.is_group:
+		errors.append(
+			_("Account {0} is a group account and cannot be used in transactions.").format(
+				frappe.bold(account)
+			)
+		)
+	if acc_data.company != doc.company:
+		errors.append(
+			_("Account {0} belongs to company {1}, not {2}.").format(
+				frappe.bold(account), frappe.bold(acc_data.company), frappe.bold(doc.company)
+			)
+		)
+
+	# validate_mandatory — party for Receivable/Payable
+	if acc_data.account_type in ("Receivable", "Payable"):
+		if not gle.get("party_type") or not gle.get("party"):
+			errors.append(
+				_("Account {0} ({1}) requires Party Type and Party to be set.").format(
+					frappe.bold(account), acc_data.account_type
+				)
+			)
+
+	# validate_account_type — root_type sanity
+	debit = flt(gle.get("debit"))
+	credit = flt(gle.get("credit"))
+	if debit and acc_data.root_type == "Income":
+		errors.append(
+			_("Account {0} is an Income account but is being debited.").format(frappe.bold(account))
+		)
+	if credit and acc_data.root_type == "Expense":
+		errors.append(
+			_("Account {0} is an Expense account but is being credited.").format(frappe.bold(account))
+		)
+
+	if acc_data.freeze_account == "Yes":
+		errors.append(
+			_("Account {0} is frozen and cannot be used in transactions.").format(frappe.bold(account))
+		)
+	else:
+		frozen_date = frappe.get_cached_value("Accounts Settings", None, "accounts_frozen_upto")
+		if frozen_date and cstr(doc.posting_date) <= cstr(frozen_date):
+			bypass_role = (
+				frappe.get_cached_value("Accounts Settings", None, "role_allowed_to_set_frozen_accounts")
+				or "Accounts Manager"
+			)
+			if bypass_role not in frappe.get_roles():
+				errors.append(
+					_(
+						"Accounts are frozen up to {0}. Posting on {1} is not allowed (Role '{2}' required)."
+					).format(frappe.bold(frozen_date), frappe.bold(doc.posting_date), bypass_role)
+				)
+
+	pcv = frappe.db.get_value(
+		"Period Closing Voucher",
+		{"company": doc.company, "period_end_date": (">=", doc.posting_date), "docstatus": 1},
+		["name", "period_end_date"],
+		as_dict=True,
+	)
+	if pcv:
+		errors.append(
+			_("Period Closing Voucher {0} exists up to {1}. Posting on {2} is not allowed.").format(
+				frappe.bold(pcv.name), frappe.bold(pcv.period_end_date), frappe.bold(doc.posting_date)
+			)
+		)
+
+	if account_requires_cost_center(account, doc.company) and not gle.get("cost_center"):
+		errors.append(_("Account {0} requires a Cost Center.").format(frappe.bold(account)))
+
+	return errors
+
+
+def _validate_debit_credit_balance(gl_entries):
+	total_debit = sum(flt(e.get("debit")) for e in gl_entries)
+	total_credit = sum(flt(e.get("credit")) for e in gl_entries)
+	if abs(total_debit - total_credit) > 0.005:
+		return [
+			_("GL entries are not balanced. Debit: {0}, Credit: {1}, Difference: {2}.").format(
+				total_debit, total_credit, abs(total_debit - total_credit)
+			)
+		]
+	return []
+
+
+def _check_credit_limit_warn(doc):
+	if getattr(doc, "is_return", False):
+		return
+	try:
+		if hasattr(doc, "check_credit_limit"):
+			doc.check_credit_limit()
+	except frappe.ValidationError as e:
+		frappe.msgprint(
+			_("Credit limit warning — submission may be blocked: {0}").format(str(e)),
+			title=_("Pre-Submit Warning: Credit Limit"),
+			indicator="orange",
+		)
+
+
+def account_requires_cost_center(account, company):
+	# Check dimension filter map for mandatory cost center
+	dimension_filter_map = get_dimension_filter_map()
+
+	for key, value in dimension_filter_map.items():
+		dimension, acc = key
+		if dimension == "cost_center" and acc == account:
+			if value["is_mandatory"]:
+				return True
+
+	return False
