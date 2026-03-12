@@ -120,7 +120,7 @@ class TestRenameItalyCustomerNameFields(unittest.TestCase):
 			),
 		)
 
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep: frappe-manual-commit -- required after raw SQL INSERT in test setup
 
 	def _add_old_columns_to_db(self):
 		"""Ensure old columns exist in the database table."""
@@ -173,7 +173,7 @@ class TestRenameItalyCustomerNameFields(unittest.TestCase):
 				"Rossi",
 			),
 		)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep: frappe-manual-commit -- required after raw SQL INSERT in test setup
 
 	def test_patch_renames_fields_and_migrates_data(self):
 		"""Test that the patch renames fields and migrates data correctly."""
@@ -246,7 +246,7 @@ class TestRenameItalyCustomerNameFields(unittest.TestCase):
 				"customer_name",
 			),
 		)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep: frappe-manual-commit -- required after raw SQL INSERT in test setup
 
 		# Execute the patch
 		from erpnext.patches.v15_0.rename_italy_customer_name_fields import execute

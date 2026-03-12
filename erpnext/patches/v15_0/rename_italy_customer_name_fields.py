@@ -36,6 +36,7 @@ def execute():
 
 	# Step 2: Create the new fields and sync database schema
 	from erpnext.regional.italy.setup import make_custom_fields
+
 	make_custom_fields(update=True)
 
 	# Step 3: Migrate data from old columns to new columns (if old columns still exist in DB)
@@ -44,17 +45,21 @@ def execute():
 	# The Italy regional setup incorrectly created Custom Fields with the same names.
 	# We only migrate the data and leave the standard columns intact.
 	if is_italy_first_name and frappe.db.has_column("Customer", "first_name"):
-		frappe.db.sql("""
+		frappe.db.sql(
+			"""
 			UPDATE `tabCustomer`
 			SET italy_customer_first_name = first_name
 			WHERE first_name IS NOT NULL AND first_name != ''
 			AND (italy_customer_first_name IS NULL OR italy_customer_first_name = '')
-		""")
+		"""
+		)
 
 	if is_italy_last_name and frappe.db.has_column("Customer", "last_name"):
-		frappe.db.sql("""
+		frappe.db.sql(
+			"""
 			UPDATE `tabCustomer`
 			SET italy_customer_last_name = last_name
 			WHERE last_name IS NOT NULL AND last_name != ''
 			AND (italy_customer_last_name IS NULL OR italy_customer_last_name = '')
-		""")
+		"""
+		)
