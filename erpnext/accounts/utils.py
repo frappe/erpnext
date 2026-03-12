@@ -2142,6 +2142,7 @@ def create_payment_ledger_entry(
 				if is_immutable_ledger_enabled():
 					ple.delinked = 0
 					ple.posting_date = frappe.form_dict.get("posting_date") or getdate()
+				ple.flags.ignore_links = True
 
 			ple.flags.ignore_permissions = 1
 			ple.flags.adv_adj = adv_adj

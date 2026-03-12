@@ -692,11 +692,9 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 			)
 
 	def test_sales_person(self):
-		sales_person = (
-			frappe.get_doc({"doctype": "Sales Person", "sales_person_name": "John Clark", "enabled": True})
-			.insert()
-			.submit()
-		)
+		sales_person = frappe.get_doc(
+			{"doctype": "Sales Person", "sales_person_name": "John Clark", "enabled": True}
+		).insert()
 		si = self.create_sales_invoice(do_not_submit=True)
 		si.append("sales_team", {"sales_person": sales_person.name, "allocated_percentage": 100})
 		si.save().submit()
@@ -772,18 +770,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 
 	def test_party_account_filter(self):
 		si1 = self.create_sales_invoice()
-		self.customer2 = (
-			frappe.get_doc(
-				{
-					"doctype": "Customer",
-					"customer_name": "Jane Doe",
-					"type": "Individual",
-					"default_currency": "USD",
-				}
-			)
-			.insert()
-			.submit()
-		)
+		self.customer2 = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "Jane Doe",
+				"type": "Individual",
+				"default_currency": "USD",
+			}
+		).insert()
 
 		si2 = self.create_sales_invoice(do_not_submit=True)
 		si2.posting_date = add_days(today(), -1)
@@ -995,18 +989,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(expected_data, report_output)
 
 	def test_future_payments_on_foreign_currency(self):
-		self.customer2 = (
-			frappe.get_doc(
-				{
-					"doctype": "Customer",
-					"customer_name": "Jane Doe",
-					"type": "Individual",
-					"default_currency": "USD",
-				}
-			)
-			.insert()
-			.submit()
-		)
+		self.customer2 = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "Jane Doe",
+				"type": "Individual",
+				"default_currency": "USD",
+			}
+		).insert()
 
 		si = self.create_sales_invoice(do_not_submit=True)
 		si.posting_date = add_days(today(), -1)

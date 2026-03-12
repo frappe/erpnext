@@ -2068,9 +2068,11 @@ class WorkOrder(Document):
 			if row.item_code not in required_items:
 				additional_items.setdefault(row.item_code, []).append(row)
 
+		self.flags.ignore_validate_update_after_submit = True
+
 		for item_code, rows in additional_items.items():
 			for row in rows:
-				child_row = self.append(
+				self.append(
 					"required_items",
 					{
 						"item_code": item_code,
@@ -2081,15 +2083,13 @@ class WorkOrder(Document):
 						"rate": row.basic_rate,
 						"amount": row.amount,
 						"description": row.description,
-						"docstatus": 1,
 						"is_additional_item": 1,
 						"voucher_detail_reference": row.name,
 					},
 				)
 
-				child_row.insert()
-
-			stock_entry.reload()
+		self.save()
+		stock_entry.reload()
 
 
 @frappe.whitelist()
