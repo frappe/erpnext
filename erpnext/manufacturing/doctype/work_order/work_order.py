@@ -217,6 +217,7 @@ class WorkOrder(Document):
 
 		self.enable_auto_reserve_stock()
 		self.validate_operations_sequence()
+		self.validate_batch_size()
 		self.validate_subcontracting_inward_order()
 
 	def validate_dates(self):
@@ -286,6 +287,15 @@ class WorkOrder(Document):
 						)
 					)
 				sequence_id = op.sequence_id
+
+	def validate_batch_size(self):
+		for d in self.get("operations"):
+			if not d.fixed_time and d.set_cost_based_on_bom_qty and not flt(d.batch_size):
+				frappe.throw(
+					_("Row {0}: Batch Size is required for Operation {1}").format(
+						d.idx, frappe.bold(d.operation)
+					)
+				)
 
 	def validate_subcontracting_inward_order(self):
 		if scio := self.subcontracting_inward_order:
@@ -1321,7 +1331,7 @@ class WorkOrder(Document):
 	def calculate_time(self):
 		for d in self.get("operations"):
 			if not d.fixed_time:
-				d.time_in_mins = flt(d.time_in_mins) * flt(flt(self.qty) / flt(d.batch_size or 1))
+				d.time_in_mins = flt(d.time_in_mins) * (flt(self.qty) / flt(d.batch_size))
 
 		self.calculate_operating_cost()
 
