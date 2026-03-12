@@ -360,13 +360,13 @@ def copy_attributes_to_variant(item, variant):
 	else:
 		if item.variant_based_on == "Item Attribute":
 			if variant.attributes:
-				attributes_description = item.description + " "
+				attributes_description = item.description or ""
 				for d in variant.attributes:
 					attributes_description += (
 						"<div>" + d.attribute + ": " + cstr(d.attribute_value) + "</div>"
 					)
 
-				if attributes_description not in variant.description:
+				if attributes_description not in (variant.description or ""):
 					variant.description = attributes_description
 
 
