@@ -116,12 +116,12 @@ frappe.ui.form.on("Material Request", {
 	refresh: function (frm) {
 		frm.events.make_custom_buttons(frm);
 		frm.toggle_reqd("customer", frm.doc.material_request_type == "Customer Provided");
-		prevent_past_schedule_dates(frm);
+		erpnext.buying.prevent_past_schedule_dates(frm);
 		frm.trigger("set_warehouse_label");
 	},
 
 	transaction_date(frm) {
-		prevent_past_schedule_dates(frm);
+		erpnext.buying.prevent_past_schedule_dates(frm);
 		frm.set_value("schedule_date", "");
 	},
 
@@ -679,13 +679,5 @@ function set_schedule_date(frm) {
 			"items",
 			"schedule_date"
 		);
-	}
-}
-
-function prevent_past_schedule_dates(frm) {
-	if (frm.doc.transaction_date) {
-		frm.fields_dict["schedule_date"].datepicker.update({
-			minDate: new Date(frm.doc.transaction_date),
-		});
 	}
 }
