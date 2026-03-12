@@ -727,11 +727,10 @@ class TestGrossProfit(IntegrationTestCase):
 
 		_, data = execute(filters=filters)
 		total = data[-1]
-
-		self.assertEqual(total[5], 1000.0)
-		self.assertEqual(total[6], 0.0)
-		self.assertEqual(total[7], 1000.0)
-		self.assertEqual(total[8], 100.0)
+		self.assertEqual(total["base_amount"], 1000.0)
+		self.assertEqual(total["buying_amount"], 0.0)
+		self.assertEqual(total["gross_profit"], 1000.0)
+		self.assertEqual(total["gross_profit_%"], 100.0)
 
 
 def make_sales_person(sales_person_name="_Test Sales Person"):
