@@ -1838,16 +1838,7 @@ def get_sub_assembly_items(
 							"is_sub_contracted_item": d.is_sub_contracted_item,
 							"bom_level": indent,
 							"indent": indent,
-<<<<<<< HEAD
-							"stock_qty": stock_qty,
-=======
 							"stock_qty": flt(stock_qty, precision),
-							"required_qty": flt(required_qty, precision),
-							"projected_qty": bin_details[d.item_code][0].get("projected_qty", 0)
-							if bin_details.get(d.item_code)
-							else 0,
-							"main_bom": bom_no,
->>>>>>> 3bb18d0baf (fix: precision issue in production plan (#53370))
 						}
 					)
 				)
