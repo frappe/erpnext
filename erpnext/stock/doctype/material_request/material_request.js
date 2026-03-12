@@ -642,10 +642,6 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 		set_schedule_date(this.frm);
 	}
 
-	schedule_date() {
-		set_schedule_date(this.frm);
-	}
-
 	qty(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		row.amount = flt(row.qty) * flt(row.rate);

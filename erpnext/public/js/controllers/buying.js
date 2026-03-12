@@ -140,6 +140,7 @@ erpnext.buying = {
 
 				this.toggle_subcontracting_fields();
 				super.refresh();
+				this.prevent_past_schedule_dates(this.frm);
 			}
 
 			toggle_subcontracting_fields() {
@@ -181,6 +182,28 @@ erpnext.buying = {
 					},
 				});
 				erpnext.utils.set_letter_head(this.frm)
+			}
+
+			schedule_date(doc, cdt, cdn) {
+				if (doc.schedule_date && !cdt.endsWith(" Item")) {
+					doc.items.forEach((d) => {
+						frappe.model.set_value(d.doctype, d.name, "schedule_date", doc.schedule_date);
+					});
+				}
+			}
+
+			transaction_date() {
+				super.transaction_date();
+				this.frm.set_value("schedule_date", "");
+				this.prevent_past_schedule_dates(this.frm);
+			}
+
+			prevent_past_schedule_dates(frm) {
+				if (frm.doc.transaction_date && frm.fields_dict["schedule_date"]) {
+					frm.fields_dict["schedule_date"].datepicker?.update({
+						minDate: new Date(frm.doc.transaction_date),
+					});
+				}
 			}
 
 			supplier_address() {
