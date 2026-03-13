@@ -44,39 +44,52 @@ def setup_customer_name_fields():
 		{"field_name": "first_name", "property": "fieldtype", "value": "Data", "property_type": "Select"},
 		{"field_name": "first_name", "property": "hidden", "value": "0", "property_type": "Check"},
 		{"field_name": "first_name", "property": "fetch_from", "value": "", "property_type": "Small Text"},
-		{"field_name": "first_name", "property": "depends_on", "value": 'eval:doc.customer_type!="Company"', "property_type": "Data"},
+		{
+			"field_name": "first_name",
+			"property": "depends_on",
+			"value": 'eval:doc.customer_type!="Company"',
+			"property_type": "Data",
+		},
 		{"field_name": "first_name", "property": "print_hide", "value": "1", "property_type": "Check"},
 		{"field_name": "last_name", "property": "fieldtype", "value": "Data", "property_type": "Select"},
 		{"field_name": "last_name", "property": "hidden", "value": "0", "property_type": "Check"},
 		{"field_name": "last_name", "property": "fetch_from", "value": "", "property_type": "Small Text"},
-		{"field_name": "last_name", "property": "depends_on", "value": 'eval:doc.customer_type!="Company"', "property_type": "Data"},
+		{
+			"field_name": "last_name",
+			"property": "depends_on",
+			"value": 'eval:doc.customer_type!="Company"',
+			"property_type": "Data",
+		},
 		{"field_name": "last_name", "property": "print_hide", "value": "1", "property_type": "Check"},
 	]
 
 	for ps_data in property_setters:
 		ps_name = f"Customer-{ps_data['field_name']}-{ps_data['property']}"
 		if not frappe.db.exists("Property Setter", ps_name):
-			frappe.get_doc({
-				"doctype": "Property Setter",
-				"doctype_or_field": "DocField",
-				"doc_type": "Customer",
-				"field_name": ps_data["field_name"],
-				"property": ps_data["property"],
-				"value": ps_data["value"],
-				"property_type": ps_data["property_type"],
-				"is_system_generated": 1,
-			}).insert(ignore_permissions=True)
+			frappe.get_doc(
+				{
+					"doctype": "Property Setter",
+					"doctype_or_field": "DocField",
+					"doc_type": "Customer",
+					"field_name": ps_data["field_name"],
+					"property": ps_data["property"],
+					"value": ps_data["value"],
+					"property_type": ps_data["property_type"],
+					"is_system_generated": 1,
+				}
+			).insert(ignore_permissions=True)
 
 	# Client Script to reposition first_name/last_name after customer_type
 	script_name = "Italy - Customer Name Fields"
 	if not frappe.db.exists("Client Script", script_name):
-		frappe.get_doc({
-			"doctype": "Client Script",
-			"name": script_name,
-			"dt": "Customer",
-			"script_type": "Client",
-			"enabled": 1,
-			"script": """
+		frappe.get_doc(
+			{
+				"doctype": "Client Script",
+				"name": script_name,
+				"dt": "Customer",
+				"script_type": "Client",
+				"enabled": 1,
+				"script": """
 frappe.ui.form.on('Customer', {
 	refresh(frm) {
 		// Move first_name and last_name after customer_type for Italian e-invoicing
@@ -90,7 +103,8 @@ frappe.ui.form.on('Customer', {
 	}
 });
 """,
-		}).insert(ignore_permissions=True)
+			}
+		).insert(ignore_permissions=True)
 
 
 def make_custom_fields(update=True):
