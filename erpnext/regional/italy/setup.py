@@ -18,8 +18,79 @@ from erpnext.regional.italy import (
 
 def setup(company=None, patch=True):
 	make_custom_fields()
+	setup_customer_name_fields()
 	setup_report()
 	add_permissions()
+
+
+def setup_customer_name_fields():
+	"""Set up first_name/last_name as editable fields for Italian e-invoicing.
+
+	The standard Customer doctype has first_name/last_name as Read Only hidden fields
+	that fetch from customer_primary_contact. Italian e-invoicing (SDI) requires these
+	to be editable for Individual customers (ditta individuale).
+
+	Instead of creating duplicate Custom Fields (which causes UniqueFieldnameError),
+	we use Property Setters to modify the standard fields' behavior.
+	"""
+	# Clean up duplicate Custom Fields from old regional setup
+	for fieldname in ("first_name", "last_name"):
+		cf_name = f"Customer-{fieldname}"
+		if frappe.db.exists("Custom Field", cf_name):
+			frappe.delete_doc("Custom Field", cf_name, force=True)
+
+	# Use Property Setters to make standard fields editable
+	property_setters = [
+		{"field_name": "first_name", "property": "fieldtype", "value": "Data", "property_type": "Select"},
+		{"field_name": "first_name", "property": "hidden", "value": "0", "property_type": "Check"},
+		{"field_name": "first_name", "property": "fetch_from", "value": "", "property_type": "Small Text"},
+		{"field_name": "first_name", "property": "depends_on", "value": 'eval:doc.customer_type!="Company"', "property_type": "Data"},
+		{"field_name": "first_name", "property": "print_hide", "value": "1", "property_type": "Check"},
+		{"field_name": "last_name", "property": "fieldtype", "value": "Data", "property_type": "Select"},
+		{"field_name": "last_name", "property": "hidden", "value": "0", "property_type": "Check"},
+		{"field_name": "last_name", "property": "fetch_from", "value": "", "property_type": "Small Text"},
+		{"field_name": "last_name", "property": "depends_on", "value": 'eval:doc.customer_type!="Company"', "property_type": "Data"},
+		{"field_name": "last_name", "property": "print_hide", "value": "1", "property_type": "Check"},
+	]
+
+	for ps_data in property_setters:
+		ps_name = f"Customer-{ps_data['field_name']}-{ps_data['property']}"
+		if not frappe.db.exists("Property Setter", ps_name):
+			frappe.get_doc({
+				"doctype": "Property Setter",
+				"doctype_or_field": "DocField",
+				"doc_type": "Customer",
+				"field_name": ps_data["field_name"],
+				"property": ps_data["property"],
+				"value": ps_data["value"],
+				"property_type": ps_data["property_type"],
+				"is_system_generated": 1,
+			}).insert(ignore_permissions=True)
+
+	# Client Script to reposition first_name/last_name after customer_type
+	script_name = "Italy - Customer Name Fields"
+	if not frappe.db.exists("Client Script", script_name):
+		frappe.get_doc({
+			"doctype": "Client Script",
+			"name": script_name,
+			"dt": "Customer",
+			"script_type": "Client",
+			"enabled": 1,
+			"script": """
+frappe.ui.form.on('Customer', {
+	refresh(frm) {
+		// Move first_name and last_name after customer_type for Italian e-invoicing
+		const customer_type_field = frm.fields_dict.customer_type;
+		const first_name_field = frm.fields_dict.first_name;
+		const last_name_field = frm.fields_dict.last_name;
+		if (customer_type_field && first_name_field && last_name_field) {
+			customer_type_field.$wrapper.after(last_name_field.$wrapper);
+			customer_type_field.$wrapper.after(first_name_field.$wrapper);
+		}
+	}
+});
+""",
+		}).insert(ignore_permissions=True)
 
 
 def make_custom_fields(update=True):
@@ -230,22 +301,6 @@ def make_custom_fields(update=True):
 				print_hide=1,
 				description=_("Set this if the customer is a Public Administration company."),
 				depends_on='eval:doc.customer_type=="Company"',
-			),
-			dict(
-				fieldname="first_name",
-				label="First Name",
-				fieldtype="Data",
-				insert_after="salutation",
-				print_hide=1,
-				depends_on='eval:doc.customer_type!="Company"',
-			),
-			dict(
-				fieldname="last_name",
-				label="Last Name",
-				fieldtype="Data",
-				insert_after="first_name",
-				print_hide=1,
-				depends_on='eval:doc.customer_type!="Company"',
 			),
 		],
 		"Mode of Payment": [
