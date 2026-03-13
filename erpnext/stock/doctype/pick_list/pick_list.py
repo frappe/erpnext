@@ -30,6 +30,15 @@ from erpnext.stock.serial_batch_bundle import (
 )
 from erpnext.utilities.transaction_base import TransactionBase
 
+
+class MissingWarehouseValidationError(frappe.ValidationError):
+	pass
+
+
+class IncorrectWarehouseValidationError(frappe.ValidationError):
+	pass
+
+
 # TODO: Prioritize SO or WO group warehouse
 
 
@@ -100,7 +109,6 @@ class PickList(TransactionBase):
 		self.validate_expired_batches()
 		self.validate_for_qty()
 		self.validate_stock_qty()
-		self.validate_warehouses()
 		self.check_serial_no_status()
 		self.validate_with_previous_doc()
 
@@ -111,6 +119,7 @@ class PickList(TransactionBase):
 
 		if self.get("locations"):
 			self.validate_sales_order_percentage()
+			self.validate_warehouses()
 
 	def validate_stock_qty(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -157,12 +166,19 @@ class PickList(TransactionBase):
 
 	def validate_warehouses(self):
 		for location in self.locations:
+			if not location.warehouse:
+				frappe.throw(
+					_("Row {0}: Warehouse is required").format(location.idx),
+					title=_("Missing Warehouse"),
+					exc=MissingWarehouseValidationError,
+				)
+
 			company = frappe.get_cached_value("Warehouse", location.warehouse, "company")
 
 			if company != self.company:
 				frappe.throw(
 					_(
-						"Row {0}: Warehouse {1} is linked to company {2}. Please select an warehouse belonging to company {3}."
+						"Row {0}: Warehouse {1} is linked to company {2}. Please select a warehouse belonging to company {3}."
 					).format(
 						location.idx,
 						frappe.bold(location.warehouse),
@@ -170,6 +186,7 @@ class PickList(TransactionBase):
 						frappe.bold(self.company),
 					),
 					title=_("Incorrect Warehouse"),
+					exc=IncorrectWarehouseValidationError,
 				)
 
 	def check_serial_no_status(self):

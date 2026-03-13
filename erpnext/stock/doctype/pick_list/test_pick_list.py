@@ -211,6 +211,7 @@ class TestPickList(IntegrationTestCase):
 						"qty": 1000,
 						"stock_qty": 1000,
 						"conversion_factor": 1,
+						"warehouse": "_Test Warehouse - _TC",
 						"sales_order": so.name,
 						"sales_order_item": so.items[0].name,
 					}
