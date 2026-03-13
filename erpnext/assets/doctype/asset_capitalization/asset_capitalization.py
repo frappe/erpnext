@@ -663,7 +663,7 @@ def get_target_asset_details(asset: str | None = None, company: str | None = Non
 
 
 @frappe.whitelist()
-@erpnext.normalize_ctx_input(ItemDetailsCtx)
+@erpnext.normalize_ctx_input()
 def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 	out = frappe._dict()
 
@@ -711,7 +711,7 @@ def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 
 
 @frappe.whitelist()
-@erpnext.normalize_ctx_input(ItemDetailsCtx)
+@erpnext.normalize_ctx_input()
 def get_warehouse_details(ctx: ItemDetailsCtx) -> frappe._dict:
 	out = frappe._dict()
 	if ctx.warehouse and ctx.item_code:
@@ -725,7 +725,7 @@ def get_warehouse_details(ctx: ItemDetailsCtx) -> frappe._dict:
 
 
 @frappe.whitelist()
-@erpnext.normalize_ctx_input(ItemDetailsCtx)
+@erpnext.normalize_ctx_input()
 def get_consumed_asset_details(ctx: ItemDetailsCtx) -> frappe._dict:
 	out = frappe._dict()
 
@@ -771,7 +771,7 @@ def get_consumed_asset_details(ctx: ItemDetailsCtx) -> frappe._dict:
 
 
 @frappe.whitelist()
-@erpnext.normalize_ctx_input(ItemDetailsCtx)
+@erpnext.normalize_ctx_input()
 def get_service_item_details(ctx: ItemDetailsCtx) -> frappe._dict:
 	out = frappe._dict()
 
