@@ -1601,12 +1601,12 @@ def get_autoname_with_number(number_value, doc_title, company):
 def parse_naming_series_variable(doc, variable):
 	if variable in ["FY", "TFY"]:
 		if doc:
-			date = doc.get("posting_date") or doc.get("transaction_date") or getdate()
+			doc_date = doc.get("posting_date") or doc.get("transaction_date") or getdate()
 			company = doc.get("company")
 		else:
-			date = getdate()
+			doc_date = getdate()
 			company = None
-		return get_fiscal_year(date=date, company=company, truncate=variable == "TFY")[0]
+		return get_fiscal_year(date=doc_date, company=company, truncate=variable == "TFY")[0]
 
 	elif variable == "ABBR":
 		if doc:
@@ -1618,7 +1618,7 @@ def parse_naming_series_variable(doc, variable):
 
 	else:
 		data = {"YY": "%y", "YYYY": "%Y", "MM": "%m", "DD": "%d", "JJJ": "%j"}
-		date = (
+		doc_date = (
 			(
 				getdate(doc.get("posting_date") or doc.get("transaction_date") or doc.get("posting_datetime"))
 				or now_datetime()
@@ -1626,7 +1626,11 @@ def parse_naming_series_variable(doc, variable):
 			if doc and frappe.get_single_value("Global Defaults", "use_posting_datetime_for_naming_documents")
 			else now_datetime()
 		)
-		return date.strftime(data[variable]) if variable in data else determine_consecutive_week_number(date)
+		return (
+			doc_date.strftime(data[variable])
+			if variable in data
+			else determine_consecutive_week_number(doc_date)
+		)
 
 
 @frappe.whitelist()
