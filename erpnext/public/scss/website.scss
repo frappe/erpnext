@@ -1,13 +1,348 @@
 @import "./order-page";
 
-// ── ZirakERP website theme ──
+// ─────────────────────────────────────────────────────────
+// ZirakERP Website & Login Theme
+// Indigo palette · Inter typography · Premium feel
+// ─────────────────────────────────────────────────────────
+
+// ── Brand tokens for website pages ──
+:root {
+	--zirak-50: #EEF2FF;
+	--zirak-100: #E0E7FF;
+	--zirak-200: #C7D2FE;
+	--zirak-300: #A5B4FC;
+	--zirak-400: #818CF8;
+	--zirak-500: #6366F1;
+	--zirak-600: #4F46E5;
+	--zirak-700: #4338CA;
+	--zirak-800: #3730A3;
+	--zirak-900: #312E81;
+	--zirak-950: #1E1B4B;
+}
+
+// ── Global website typography ──
+body {
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+// ══════════════════════════════════════
+// LOGIN PAGE
+// ══════════════════════════════════════
+
+// Page background
+.page-card {
+	background: #F8FAFC !important;
+	min-height: 100vh;
+}
+
+[data-theme="dark"] .page-card {
+	background: #050816 !important;
+}
+
+// Login container card
+.page-card .page-card-head {
+	text-align: center;
+	padding-bottom: 8px;
+}
+
+// "Login to Frappe" heading — hide "Frappe" text via override
+.page-card .page-card-head .page-card-title {
+	font-size: 22px;
+	font-weight: 700;
+	color: var(--text-color);
+	letter-spacing: -0.01em;
+}
+
+// Login form card
+.page-card .form-container {
+	background: #fff;
+	border: 1px solid #E2E8F0;
+	border-radius: 16px;
+	padding: 32px !important;
+	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+	max-width: 420px;
+	margin: 0 auto;
+}
+
+[data-theme="dark"] .page-card .form-container {
+	background: #111827;
+	border-color: rgba(148, 163, 184, 0.12);
+	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+// Login form inputs
+.page-card input[type="text"],
+.page-card input[type="email"],
+.page-card input[type="password"] {
+	border-radius: 10px !important;
+	border: 1px solid #E2E8F0 !important;
+	padding: 10px 14px !important;
+	font-size: 14px;
+	background: #F8FAFC !important;
+	transition: all 0.15s ease;
+	height: auto !important;
+
+	&:focus {
+		border-color: var(--zirak-400) !important;
+		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12) !important;
+		background: #fff !important;
+		outline: none;
+	}
+
+	&::placeholder {
+		color: #94A3B8;
+	}
+}
+
+[data-theme="dark"] .page-card input[type="text"],
+[data-theme="dark"] .page-card input[type="email"],
+[data-theme="dark"] .page-card input[type="password"] {
+	background: rgba(255, 255, 255, 0.05) !important;
+	border-color: rgba(148, 163, 184, 0.15) !important;
+	color: #F1F5F9;
+
+	&:focus {
+		border-color: var(--zirak-400) !important;
+		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+		background: rgba(255, 255, 255, 0.08) !important;
+	}
+}
+
+// Login form labels
+.page-card .form-group label {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--text-muted);
+	margin-bottom: 6px;
+}
+
+// Login button — primary indigo
+.page-card .btn-primary,
+.page-card .btn-primary-dark,
+.login-content .btn-primary,
+.for-login .btn-primary {
+	background: var(--zirak-500) !important;
+	border: none !important;
+	border-radius: 10px !important;
+	padding: 10px 20px !important;
+	font-size: 14px;
+	font-weight: 600;
+	color: #fff !important;
+	box-shadow: 0 1px 3px rgba(99, 102, 241, 0.3);
+	transition: all 0.15s ease;
+	width: 100%;
+	letter-spacing: 0;
+
+	&:hover {
+		background: var(--zirak-600) !important;
+		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+		transform: translateY(-1px);
+	}
+
+	&:active {
+		background: var(--zirak-700) !important;
+		transform: translateY(0);
+	}
+}
+
+// Secondary/ghost buttons on login
+.page-card .btn-default,
+.page-card .btn-secondary,
+.login-content .btn-default {
+	border-radius: 10px !important;
+	border: 1px solid #E2E8F0 !important;
+	padding: 10px 20px !important;
+	font-size: 14px;
+	font-weight: 500;
+	background: transparent !important;
+	color: var(--text-color) !important;
+	transition: all 0.15s ease;
+
+	&:hover {
+		border-color: var(--zirak-300) !important;
+		color: var(--zirak-600) !important;
+		background: var(--zirak-50) !important;
+	}
+}
+
+// Login links (forgot password, email link)
+.page-card a,
+.login-content a {
+	color: var(--zirak-600);
+	font-weight: 500;
+	font-size: 13px;
+	text-decoration: none;
+
+	&:hover {
+		color: var(--zirak-700);
+		text-decoration: underline;
+	}
+}
+
+[data-theme="dark"] .page-card a,
+[data-theme="dark"] .login-content a {
+	color: var(--zirak-400);
+
+	&:hover {
+		color: var(--zirak-300);
+	}
+}
+
+// Login page logo area
+.page-card .page-logo {
+	margin-bottom: 16px;
+}
+
+// "or" divider text
+.page-card .or-text,
+.page-card .login-divider {
+	color: #94A3B8;
+	font-size: 13px;
+	margin: 16px 0;
+}
+
+// ══════════════════════════════════════
+// WEBSITE NAVBAR
+// ══════════════════════════════════════
+
+.web-header,
+.website-header {
+	background: rgba(255, 255, 255, 0.9) !important;
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	border-bottom: 1px solid #E2E8F0;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .web-header,
+[data-theme="dark"] .website-header {
+	background: rgba(11, 16, 33, 0.9) !important;
+	border-bottom-color: rgba(148, 163, 184, 0.08);
+	box-shadow: none;
+}
+
+.web-header .navbar-nav .nav-link {
+	border-radius: 8px;
+	font-weight: 500;
+	font-size: 14px;
+	padding: 6px 12px;
+	transition: all 0.15s ease;
+
+	&:hover {
+		color: var(--zirak-500) !important;
+		background: var(--zirak-50);
+	}
+}
+
+// ══════════════════════════════════════
+// WEBSITE FOOTER
+// ══════════════════════════════════════
+
 .web-footer {
-	background: linear-gradient(170deg, #F0FDFA 0%, #CCFBF1 50%, #fff 100%);
+	background: linear-gradient(170deg, var(--zirak-50) 0%, #E0E7FF 50%, #fff 100%);
+	border-top: 1px solid #E2E8F0;
+}
+
+[data-theme="dark"] .web-footer {
+	background: #050816;
+	border-top-color: rgba(148, 163, 184, 0.08);
 }
 
 .web-footer a {
-	color: var(--zirakerp-dark, #0F766E);
+	color: var(--zirak-600);
+
+	&:hover {
+		color: var(--zirak-700);
+	}
 }
+
+[data-theme="dark"] .web-footer a {
+	color: var(--zirak-400);
+
+	&:hover {
+		color: var(--zirak-300);
+	}
+}
+
+// "Powered by ZirakERP" footer
+.web-footer .footer-powered {
+	font-size: 12px;
+	color: #94A3B8;
+
+	a {
+		color: var(--zirak-500);
+		font-weight: 600;
+	}
+}
+
+// ══════════════════════════════════════
+// PORTAL / WEBSITE PAGES
+// ══════════════════════════════════════
+
+// Website buttons (all pages)
+.website-btn,
+.web-page .btn-primary {
+	background: var(--zirak-500) !important;
+	border-color: var(--zirak-500) !important;
+	color: #fff !important;
+	border-radius: 8px;
+	font-weight: 500;
+	transition: all 0.15s ease;
+
+	&:hover {
+		background: var(--zirak-600) !important;
+		border-color: var(--zirak-600) !important;
+		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+	}
+}
+
+// Website links
+.web-page a,
+.website-content a {
+	color: var(--zirak-600);
+
+	&:hover {
+		color: var(--zirak-700);
+	}
+}
+
+[data-theme="dark"] .web-page a,
+[data-theme="dark"] .website-content a {
+	color: var(--zirak-400);
+
+	&:hover {
+		color: var(--zirak-300);
+	}
+}
+
+// Website cards
+.website-card,
+.web-page .card {
+	border-radius: 12px;
+	border: 1px solid #E2E8F0;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+	transition: all 0.2s ease;
+
+	&:hover {
+		box-shadow: 0 4px 16px rgba(99, 102, 241, 0.08);
+		border-color: var(--zirak-200);
+	}
+}
+
+[data-theme="dark"] .website-card,
+[data-theme="dark"] .web-page .card {
+	background: #111827;
+	border-color: rgba(148, 163, 184, 0.12);
+
+	&:hover {
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+		border-color: rgba(99, 102, 241, 0.2);
+	}
+}
+
+// ══════════════════════════════════════
+// PORTAL ADDRESS CARD
+// ══════════════════════════════════════
 
 .filter-options {
 	max-height: 300px;
@@ -25,8 +360,8 @@
 	}
 
 	&.active {
-		border-color: var(--zirakerp-primary, #0D9488);
-		box-shadow: 0 0 0 2px var(--zirakerp-soft, #99F6E4);
+		border-color: var(--zirak-500);
+		box-shadow: 0 0 0 2px var(--zirak-200);
 
 		.check {
 			display: inline-flex;
@@ -37,13 +372,17 @@
 .check {
 	display: inline-flex;
 	padding: 0.25rem;
-	background: var(--zirakerp-primary, #0D9488);
+	background: var(--zirak-500);
 	color: white;
 	border-radius: 50%;
 	font-size: 12px;
 	width: 24px;
 	height: 24px;
 }
+
+// ══════════════════════════════════════
+// WEBSITE LIST & TRANSACTION ITEMS
+// ══════════════════════════════════════
 
 .website-list {
 	background-color: var(--fg-color);
@@ -63,6 +402,11 @@
 	padding: 1rem 0;
 	border-bottom: 1px solid var(--border-color);
 	position: relative;
+	transition: background 0.15s ease;
+
+	&:hover {
+		background: var(--zirak-50);
+	}
 
 	&:only-child,
 	&:last-child {
@@ -83,6 +427,14 @@
 	}
 }
 
+[data-theme="dark"] .transaction-list-item:hover {
+	background: rgba(99, 102, 241, 0.06);
+}
+
+// ══════════════════════════════════════
+// MISCELLANEOUS WEBSITE ELEMENTS
+// ══════════════════════════════════════
+
 .place-order-container {
 	text-align: right;
 }
@@ -101,5 +453,43 @@
 .items-preview {
 	@media screen and (max-width: 567px) {
 		margin-top: 1rem;
+	}
+}
+
+// ══════════════════════════════════════
+// BOOK APPOINTMENT PAGE
+// ══════════════════════════════════════
+
+.appointment-page {
+	.btn-primary {
+		background: var(--zirak-500) !important;
+		border-color: var(--zirak-500) !important;
+		border-radius: 8px;
+
+		&:hover {
+			background: var(--zirak-600) !important;
+		}
+	}
+}
+
+// ══════════════════════════════════════
+// SCROLLBAR (website pages)
+// ══════════════════════════════════════
+
+::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #CBD5E1;
+	border-radius: 10px;
+
+	&:hover {
+		background: var(--zirak-400);
 	}
 }
