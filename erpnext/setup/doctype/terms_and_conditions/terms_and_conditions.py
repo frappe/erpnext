@@ -21,6 +21,7 @@ class TermsandConditions(Document):
 		from frappe.types import DF
 
 		buying: DF.Check
+		copy_attachments_to_transaction: DF.Check
 		disabled: DF.Check
 		selling: DF.Check
 		terms: DF.TextEditor | None
