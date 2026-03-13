@@ -118,8 +118,9 @@ class TestItalySetup(IntegrationTestCase):
 		setup_customer_name_fields()
 		setup_customer_name_fields()
 
-		ps_count = frappe.db.count(
-			"Property Setter",
-			filters={"doc_type": "Customer", "field_name": "first_name"},
-		)
-		self.assertEqual(ps_count, 5)
+		for fieldname in ("first_name", "last_name"):
+			ps_count = frappe.db.count(
+				"Property Setter",
+				filters={"doc_type": "Customer", "field_name": fieldname},
+			)
+			self.assertEqual(ps_count, 5)
