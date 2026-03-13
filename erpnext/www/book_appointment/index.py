@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from frappe.utils.data import get_system_timezone
 
+VALID_TIMEZONES: frozenset = frozenset(zoneinfo.available_timezones())
+
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 no_cache = 1
@@ -43,9 +45,14 @@ def get_timezones():
 
 @frappe.whitelist(allow_guest=True)
 def get_appointment_slots(date: str, timezone: str):
+	if timezone not in VALID_TIMEZONES:
+		frappe.throw(frappe._("Invalid timezone"), frappe.ValidationError)
 	# Convert query to local timezones
 	format_string = "%Y-%m-%d %H:%M:%S"
-	query_start_time = datetime.datetime.strptime(date + " 00:00:00", format_string)
+	try:
+		query_start_time = datetime.datetime.strptime(date + " 00:00:00", format_string)
+	except ValueError:
+		frappe.throw(frappe._("Invalid date format"), frappe.ValidationError)
 	query_end_time = datetime.datetime.strptime(date + " 23:59:59", format_string)
 	query_start_time = convert_to_system_timezone(timezone, query_start_time)
 	query_end_time = convert_to_system_timezone(timezone, query_end_time)
@@ -93,8 +100,13 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 
 @frappe.whitelist(allow_guest=True)
 def create_appointment(date: str, time: str, tz: str, contact: str):
+	if tz not in VALID_TIMEZONES:
+		frappe.throw(frappe._("Invalid timezone"), frappe.ValidationError)
 	format_string = "%Y-%m-%d %H:%M:%S"
-	scheduled_time = datetime.datetime.strptime(date + " " + time, format_string)
+	try:
+		scheduled_time = datetime.datetime.strptime(date + " " + time, format_string)
+	except ValueError:
+		frappe.throw(frappe._("Invalid date format"), frappe.ValidationError)
 	# Strip tzinfo from datetime objects since it's handled by the doctype
 	scheduled_time = scheduled_time.replace(tzinfo=None)
 	scheduled_time = convert_to_system_timezone(tz, scheduled_time)
@@ -102,12 +114,13 @@ def create_appointment(date: str, time: str, tz: str, contact: str):
 	# Create a appointment document from form
 	appointment = frappe.new_doc("Appointment")
 	appointment.scheduled_time = scheduled_time
-	contact = json.loads(contact)
-	appointment.customer_name = contact.get("name", None)
-	appointment.customer_phone_number = contact.get("number", None)
-	appointment.customer_skype = contact.get("skype", None)
-	appointment.customer_details = contact.get("notes", None)
-	appointment.customer_email = contact.get("email", None)
+	contact_data = json.loads(contact) if isinstance(contact, str) else contact
+	MAX_FIELD_LEN = 140
+	appointment.customer_name = str(contact_data.get("name") or "")[:MAX_FIELD_LEN]
+	appointment.customer_phone_number = str(contact_data.get("number") or "")[:MAX_FIELD_LEN]
+	appointment.customer_skype = str(contact_data.get("skype") or "")[:MAX_FIELD_LEN]
+	appointment.customer_details = str(contact_data.get("notes") or "")[:1000]
+	appointment.customer_email = str(contact_data.get("email") or "")[:MAX_FIELD_LEN]
 	appointment.status = "Open"
 	appointment.insert(ignore_permissions=True)
 	return appointment

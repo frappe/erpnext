@@ -3,7 +3,7 @@ app_title = "ZirakERP"
 app_publisher = "Zirak Technologies"
 app_description = """ERP made simple"""
 app_icon = "fa fa-th"
-app_color = "#0D9488"
+app_color = "#6366F1"
 app_email = "hello@zirakerp.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/AlanJumeworworworworworw/zirakerp"
@@ -146,14 +146,6 @@ website_route_rules = [
 		},
 	},
 	{"from_route": "/purchase-orders", "to_route": "Purchase Order"},
-	{
-		"from_route": "/purchase-orders/<path:name>",
-		"to_route": "order",
-		"defaults": {
-			"doctype": "Purchase Order",
-			"parents": [{"label": "Purchase Order", "route": "purchase-orders"}],
-		},
-	},
 	{
 		"from_route": "/purchase-orders/<path:name>",
 		"to_route": "order",

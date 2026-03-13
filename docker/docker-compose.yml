@@ -90,7 +90,9 @@ services:
           fi
         done;
         echo "Configuration ready!";
-        bench new-site --mariadb-user-host-login-scope='%' --admin-password=admin --db-root-username=root --db-root-password=${DB_PASSWORD:-admin} --install-app erpnext --set-default frontend;
+        bench new-site --mariadb-user-host-login-scope='%' --admin-password=$${ADMIN_PASSWORD} --db-root-username=root --db-root-password=${DB_PASSWORD:-admin} --install-app erpnext --set-default frontend;
+    environment:
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     depends_on:
       configurator:
         condition: service_completed_successfully

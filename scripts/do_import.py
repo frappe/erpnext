@@ -24,4 +24,5 @@ def run():
     frappe.db.commit()
     print("DONE - translations committed to database")
 
-run()
+if __name__ == "__main__":
+    run()
