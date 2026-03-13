@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-03-08 09:42+0000\n"
-"PO-Revision-Date: 2026-03-12 17:35\n"
+"PO-Revision-Date: 2026-03-13 17:37\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Portuguese, Brazilian\n"
 "MIME-Version: 1.0\n"
@@ -8071,7 +8071,7 @@ msgstr ""
 #. Accounts'
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgid "Body"
-msgstr ""
+msgstr "Corpo"
 
 #. Label of the body_text (Text Editor) field in DocType 'Dunning'
 #. Label of the body_text (Text Editor) field in DocType 'Dunning Letter Text'
@@ -20211,12 +20211,12 @@ msgstr ""
 #: erpnext/telephony/doctype/incoming_call_handling_schedule/incoming_call_handling_schedule.json
 #: erpnext/templates/pages/timelog_info.html:31
 msgid "From Time"
-msgstr "Do Horário"
+msgstr "Horário Inicial"
 
 #. Label of the from_time (Time) field in DocType 'Appointment Booking Slots'
 #: erpnext/crm/doctype/appointment_booking_slots/appointment_booking_slots.json
 msgid "From Time "
-msgstr ""
+msgstr "Horário Inicial "
 
 #: erpnext/accounts/doctype/cashier_closing/cashier_closing.py:67
 msgid "From Time Should Be Less Than To Time"
@@ -53071,7 +53071,7 @@ msgstr ""
 #: erpnext/telephony/doctype/incoming_call_handling_schedule/incoming_call_handling_schedule.json
 #: erpnext/templates/pages/timelog_info.html:34
 msgid "To Time"
-msgstr "Até o Horário"
+msgstr "Horário Final"
 
 #: erpnext/projects/doctype/timesheet_detail/timesheet_detail.py:108
 msgid "To Time cannot be before from date"
@@ -58264,7 +58264,7 @@ msgstr ""
 
 #: erpnext/templates/includes/macros.html:202
 msgid "ratings"
-msgstr ""
+msgstr "avaliações"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1245
 msgid "received from"
