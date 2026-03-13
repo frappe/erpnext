@@ -1052,16 +1052,13 @@ def make_material_request(source_name: str, target_doc: str | Document | None = 
 		)
 
 		return flt(
-			(
-				flt(so_item.qty)
-				- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
-				- max(
-					flt(delivered_qty) * flt(bundle_item_qty)
-					- flt(requested_item_qty.get(so_item.name, {}).get("received_qty")),
-					0,
-				)
+			flt(so_item.qty)
+			- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
+			- max(
+				flt(delivered_qty) * flt(bundle_item_qty)
+				- flt(requested_item_qty.get(so_item.name, {}).get("received_qty")),
+				0,
 			)
-			* bundle_item_qty
 		)
 
 	def update_item(source, target, source_parent):
@@ -1093,6 +1090,7 @@ def make_material_request(source_name: str, target_doc: str | Document | None = 
 			)
 		)
 		target.amount = target.qty * target.rate
+		target.schedule_date = source_parent.delivery_date
 
 	doc = get_mapped_doc(
 		"Sales Order",
@@ -1124,7 +1122,14 @@ def make_material_request(source_name: str, target_doc: str | Document | None = 
 		postprocess,
 	)
 
-	return doc
+	if doc and doc.items:
+		return doc
+	else:
+		frappe.throw(
+			_("Material Request already created for the ordered quantity."),
+			title=_("Material Request Exists"),
+		)
+		return None
 
 
 @frappe.whitelist()
