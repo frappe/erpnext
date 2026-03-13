@@ -97,8 +97,8 @@
         {%- if doc.customer_data.customer_type == "Individual" %}
           <CodiceFiscale>{{ doc.customer_data.fiscal_code }}</CodiceFiscale>
           <Anagrafica>
-            <Nome>{{ doc.customer_data.italy_customer_first_name }}</Nome>
-            <Cognome>{{ doc.customer_data.italy_customer_last_name }}</Cognome>
+            <Nome>{{ doc.customer_data.first_name }}</Nome>
+            <Cognome>{{ doc.customer_data.last_name }}</Cognome>
           </Anagrafica>
         {%- else %}
           <IdFiscaleIVA>
