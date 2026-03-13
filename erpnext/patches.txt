@@ -432,4 +432,10 @@ erpnext.patches.v16_0.set_ordered_qty_in_quotation_item
 erpnext.patches.v15_0.replace_http_with_https_in_sales_partner
 erpnext.patches.v16_0.add_portal_redirects
 erpnext.patches.v16_0.update_order_qty_and_requested_qty_based_on_mr_and_po
+<<<<<<< HEAD
 erpnext.patches.v15_0.rename_italy_customer_name_fields
+=======
+erpnext.patches.v16_0.complete_onboarding_steps_for_older_sites #2
+erpnext.patches.v16_0.enable_serial_batch_setting
+erpnext.patches.v16_0.co_by_product_patch
+>>>>>>> bd87a7e612 (Revert "fix(regional): rename duplicate Customer fields in Italy setup" (#53409))

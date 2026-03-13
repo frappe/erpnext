@@ -232,7 +232,7 @@ def make_custom_fields(update=True):
 				depends_on='eval:doc.customer_type=="Company"',
 			),
 			dict(
-				fieldname="italy_customer_first_name",
+				fieldname="first_name",
 				label="First Name",
 				fieldtype="Data",
 				insert_after="salutation",
@@ -240,10 +240,10 @@ def make_custom_fields(update=True):
 				depends_on='eval:doc.customer_type!="Company"',
 			),
 			dict(
-				fieldname="italy_customer_last_name",
+				fieldname="last_name",
 				label="Last Name",
 				fieldtype="Data",
-				insert_after="italy_customer_first_name",
+				insert_after="first_name",
 				print_hide=1,
 				depends_on='eval:doc.customer_type!="Company"',
 			),
