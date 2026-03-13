@@ -1,6 +1,7 @@
 import functools
 import inspect
-from typing import TypeVar
+from types import UnionType
+from typing import TypeVar, get_origin
 
 import frappe
 from frappe.model.document import Document
@@ -167,18 +168,31 @@ def check_app_permission():
 T = TypeVar("T")
 
 
-def normalize_ctx_input(T: type) -> callable:
+def normalize_ctx_input() -> callable:
 	"""
-	Normalizes the first argument (ctx) of the decorated function by:
+	Normalizes the `ctx` argument of the decorated function by:
 	- Converting Document objects to dictionaries
 	- Parsing JSON strings
-	- Casting the result to the specified type T
+	- Casting the result to the specified type on parameter annotations
+	- Adds Document, dict and str type annotation to the `ctx` parameter
+
+	On function definition, add only single type.
 	"""
 
 	def decorator(func: callable):
-		# conserve annotations for frappe.utils.typing_validations
-		@functools.wraps(func, assigned=(a for a in functools.WRAPPER_ASSIGNMENTS if a != "__annotations__"))
-		def wrapper(ctx: T | Document | dict | str, *args, **kwargs):
+		T = func.__annotations__.get("ctx", None)
+		sig = inspect.signature(func)
+		is_union = get_origin(T) is UnionType
+
+		@functools.wraps(func)
+		def wrapper(*args, **kwargs):
+			if not T or is_union:
+				return func(*args, **kwargs)
+
+			bound = sig.bind(*args, **kwargs)
+			bound.apply_defaults()
+			ctx = bound.arguments.get("ctx")
+
 			if isinstance(ctx, Document):
 				ctx = T(**ctx.as_dict())
 			elif isinstance(ctx, dict):
@@ -186,10 +200,13 @@ def normalize_ctx_input(T: type) -> callable:
 			else:
 				ctx = T(**frappe.parse_json(ctx))
 
-			return func(ctx, *args, **kwargs)
+			bound.arguments["ctx"] = ctx
 
-		# set annotations from function
-		wrapper.__annotations__.update({k: v for k, v in func.__annotations__.items() if k != "ctx"})
+			return func(*bound.args, **bound.kwargs)
+
+		if T and not is_union:
+			wrapper.__annotations__["ctx"] = T | Document | dict | str
+
 		return wrapper
 
 	return decorator
