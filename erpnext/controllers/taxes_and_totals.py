@@ -555,6 +555,19 @@ class calculate_taxes_and_totals:
 				tax_amount *= -1.0 if (tax.add_deduct_tax == "Deduct") else 1.0
 		return tax_amount
 
+	def get_rejected_qty_value(self, item):
+		"""Calculate the value of rejected quantity for purchase receipt items."""
+		if (
+			item.doctype != "Purchase Receipt Item"
+			or not item.rejected_qty
+			or not frappe.get_single_value(
+				"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
+			)
+		):
+			return 0
+
+		return flt(item.rejected_qty) * flt(item.net_rate)
+
 	def set_cumulative_total(self, row_idx, tax):
 		tax_amount = tax.tax_amount_after_discount_amount
 		tax_amount = self.get_tax_amount_if_for_valuation_or_deduction(tax_amount, tax)
@@ -564,21 +577,29 @@ class calculate_taxes_and_totals:
 		else:
 			tax.total = flt(self.doc.get("taxes")[row_idx - 1].total + tax_amount, tax.precision("total"))
 
+		if self.doc.doctype == "Purchase Receipt" and frappe.get_single_value(
+			"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
+		):
+			for item in self.doc.items:
+				tax.total += self.get_rejected_qty_value(item)
+
 	def get_current_tax_and_net_amount(self, item, tax, item_tax_map):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)
 		current_tax_amount = 0.0
 		current_net_amount = 0.0
 
+		net_amount = item.net_amount + self.get_rejected_qty_value(item)
+
 		if tax.charge_type == "Actual":
-			current_net_amount = item.net_amount
+			current_net_amount = net_amount
 			# distribute the tax amount proportionally to each item row
 			actual = flt(tax.tax_amount, tax.precision("tax_amount"))
-			current_tax_amount = item.net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
+			current_tax_amount = net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
 
 		elif tax.charge_type == "On Net Total":
 			if tax.account_head in item_tax_map:
-				current_net_amount = item.net_amount
-			current_tax_amount = (tax_rate / 100.0) * item.net_amount
+				current_net_amount = net_amount
+			current_tax_amount = (tax_rate / 100.0) * net_amount
 		elif tax.charge_type == "On Previous Row Amount":
 			current_net_amount = self.doc.get("taxes")[cint(tax.row_id) - 1].tax_amount_for_current_item
 			current_tax_amount = (tax_rate / 100.0) * current_net_amount
@@ -587,7 +608,9 @@ class calculate_taxes_and_totals:
 			current_tax_amount = (tax_rate / 100.0) * current_net_amount
 		elif tax.charge_type == "On Item Quantity":
 			# don't sum current net amount due to the field being a currency field
-			current_tax_amount = tax_rate * item.qty
+			current_tax_amount = tax_rate * (
+				flt(item.received_qty) if item.doctype == "Purchase Receipt Item" else item.qty
+			)
 
 		if not tax.get("dont_recompute_tax"):
 			self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount, current_net_amount)
