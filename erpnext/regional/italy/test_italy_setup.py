@@ -21,7 +21,7 @@ class TestItalySetup(IntegrationTestCase):
 			frappe.delete_doc("Client Script", "Italy - Customer Name Fields", force=True)
 
 		# Clean up any leftover Custom Fields
-		for fieldname in ("first_name", "last_name"):
+		for fieldname in ("first_name", "last_name", "test_italy_setup_field"):
 			cf_name = f"Customer-{fieldname}"
 			if frappe.db.exists("Custom Field", cf_name):
 				frappe.delete_doc("Custom Field", cf_name, force=True)
@@ -51,6 +51,20 @@ class TestItalySetup(IntegrationTestCase):
 				"value",
 			)
 			self.assertEqual(fetch_from_ps, "")
+
+			depends_on_ps = frappe.db.get_value(
+				"Property Setter",
+				{"doc_type": "Customer", "field_name": fieldname, "property": "depends_on"},
+				"value",
+			)
+			self.assertEqual(depends_on_ps, 'eval:doc.customer_type!="Company"')
+
+			print_hide_ps = frappe.db.get_value(
+				"Property Setter",
+				{"doc_type": "Customer", "field_name": fieldname, "property": "print_hide"},
+				"value",
+			)
+			self.assertEqual(print_hide_ps, "1")
 
 	def test_client_script_created(self):
 		"""Client Script should be created to reposition fields."""
