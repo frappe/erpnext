@@ -375,6 +375,9 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		pr.get("items")[0].rejected_warehouse = pr.get("items")[0].warehouse
 		self.assertRaises(frappe.ValidationError, pr.save)
 
+	@IntegrationTestCase.change_settings(
+		"Buying Settings", {"bill_for_rejected_quantity_in_purchase_invoice": 0}
+	)
 	def test_rejected_serial_no(self):
 		pr = frappe.copy_doc(self.globalTestRecords["Purchase Receipt"][0])
 		pr.get("items")[0].item_code = "_Test Serialized Item With Series"

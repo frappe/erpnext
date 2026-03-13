@@ -609,7 +609,12 @@ class calculate_taxes_and_totals:
 		elif tax.charge_type == "On Item Quantity":
 			# don't sum current net amount due to the field being a currency field
 			current_tax_amount = tax_rate * (
-				flt(item.received_qty) if item.doctype == "Purchase Receipt Item" else item.qty
+				flt(item.received_qty)
+				if item.doctype == "Purchase Receipt Item"
+				and frappe.get_single_value(
+					"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
+				)
+				else item.qty
 			)
 
 		if not tax.get("dont_recompute_tax"):

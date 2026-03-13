@@ -77,6 +77,9 @@ class TestTaxes(IntegrationTestCase):
 			}
 		).insert()
 
+	@IntegrationTestCase.change_settings(
+		"Buying Settings", {"bill_for_rejected_quantity_in_purchase_invoice": 0}
+	)
 	def test_taxes(self):
 		self.created_docs = []
 		for dt in [
