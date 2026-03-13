@@ -26,8 +26,6 @@ class TestItalySetup(IntegrationTestCase):
 			if frappe.db.exists("Custom Field", cf_name):
 				frappe.delete_doc("Custom Field", cf_name, force=True)
 
-		frappe.db.commit()
-
 	def test_property_setters_created(self):
 		"""Property Setters should make first_name/last_name editable and visible."""
 		setup_customer_name_fields()
