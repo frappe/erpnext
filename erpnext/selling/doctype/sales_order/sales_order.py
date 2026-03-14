@@ -450,9 +450,11 @@ class SalesOrder(SellingController):
 				and not d.warehouse
 				and not cint(d.delivered_by_supplier)
 			):
-				frappe.throw(
-					_("Delivery warehouse required for stock item {0}").format(d.item_code), WarehouseRequired
-				)
+				frappe.msgprint(
+                                        _("Delivery warehouse not set for stock item {0}").format(d.item_code),
+                                        indicator="orange",
+                                        alert=True,
+                                )
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
