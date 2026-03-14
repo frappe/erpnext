@@ -81,17 +81,18 @@ body {
 	letter-spacing: -0.01em;
 }
 
-// Login form inputs
+// Login form inputs — left padding accounts for the icon (mail/lock)
 .page-card input[type="text"],
 .page-card input[type="email"],
 .page-card input[type="password"] {
 	border-radius: 10px !important;
 	border: 1px solid #E2E8F0 !important;
-	padding: 10px 14px !important;
+	padding: 10px 14px 10px 36px !important;
 	font-size: 14px;
 	background: #F8FAFC !important;
 	transition: all 0.15s ease;
 	height: auto !important;
+	width: 100% !important;
 
 	&:focus {
 		border-color: var(--zirak-400) !important;
@@ -103,6 +104,32 @@ body {
 	&::placeholder {
 		color: #94A3B8;
 	}
+}
+
+// Center all text in the login card
+.login-content.page-card {
+	text-align: center;
+
+	.forgot-password-message,
+	.login-divider,
+	.or-text {
+		text-align: center;
+	}
+
+	// Keep inputs left-aligned for typing
+	input[type="text"],
+	input[type="email"],
+	input[type="password"] {
+		text-align: left;
+	}
+}
+
+// Ensure the input icon container doesn't overlap
+.page-card .input-icon {
+	left: 10px !important;
+	top: 50% !important;
+	transform: translateY(-50%);
+	z-index: 1;
 }
 
 [data-theme="dark"] .page-card input[type="text"],
