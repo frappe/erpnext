@@ -101,10 +101,15 @@ class CostCenter(NestedSet):
 		)
 
 	def before_rename(self, olddn, newdn, merge=False):
+		"""
+		Validate and prepare the new Cost Center name before renaming.
+
+		Ensures the company abbreviation is appended and the cost center
+		number prefix is not duplicated if already present in the new name.
+		"""
 		from erpnext.setup.doctype.company.company import get_name_with_abbr
 
 		new_cost_center = get_name_with_abbr(newdn, self.company)
-
 		super().before_rename(olddn, new_cost_center, merge, "is_group")
 
 		if not merge:
@@ -114,6 +119,12 @@ class CostCenter(NestedSet):
 		return new_cost_center
 
 	def after_rename(self, olddn, newdn, merge=False):
+		"""
+		Update cost_center_name and cost_center_number fields after renaming.
+
+		Skips field updates if called from update_cost_center, since that
+		function already sets the correct values before calling rename_doc.
+		"""
 		super().after_rename(olddn, newdn, merge)
 
 		if frappe.flags.get("update_cost_center_in_progress"):
@@ -139,7 +150,6 @@ class CostCenter(NestedSet):
 			if new_cost_center.cost_center_name != cost_center_name:
 				self.cost_center_name = cost_center_name
 				self.db_set("cost_center_name", cost_center_name)
-
 
 def on_doctype_update():
 	frappe.db.add_index("Cost Center", ["lft", "rgt"])

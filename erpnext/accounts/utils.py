@@ -1547,6 +1547,19 @@ def create_payment_gateway_account(gateway, payment_channel="Email", company=Non
 def update_cost_center(
 	docname: str, cost_center_name: str, cost_center_number: str, company: str, merge: bool
 ):
+	"""
+	Update the Cost Center name and/or number.
+
+	Renames the Cost Center document by building a new name from the given
+	number prefix and bare name, updates the cost_center_name and
+	cost_center_number fields, and renames all linked transactions.
+
+	:param docname: Current name of the Cost Center document
+	:param cost_center_name: Bare name of the cost center (without number prefix or company suffix)
+	:param cost_center_number: New number/code prefix for the cost center
+	:param company: Company the cost center belongs to
+	:param merge: Whether to merge with an existing cost center of the same name
+	"""
 	validate_field_number("Cost Center", docname, cost_center_number, company, "cost_center_number")
 
 	bare_name = cost_center_name.strip()
@@ -1560,9 +1573,11 @@ def update_cost_center(
 
 	new_name = get_autoname_with_number(cost_center_number, bare_name, company)
 	if docname != new_name:
-		frappe.flags.update_cost_center_in_progress = True
-		frappe.rename_doc("Cost Center", docname, new_name, force=1, merge=merge)
-		frappe.flags.update_cost_center_in_progress = False
+		try:
+			frappe.flags.update_cost_center_in_progress = True
+			frappe.rename_doc("Cost Center", docname, new_name, force=1, merge=merge)
+		finally:
+			frappe.flags.update_cost_center_in_progress = False
 		return new_name
 
 def validate_field_number(doctype_name, docname, number_value, company, field_name):
