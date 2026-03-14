@@ -100,18 +100,6 @@ class CostCenter(NestedSet):
 			"Cost Center Allocation Percentage", filters={"cost_center": self.name, "docstatus": 1}
 		)
 
-	# def before_rename(self, olddn, newdn, merge=False):
-	# 	# Add company abbr if not provided
-	# 	from erpnext.setup.doctype.company.company import get_name_with_abbr
-
-	# 	new_cost_center = get_name_with_abbr(newdn, self.company)
-
-	# 	# Validate properties before merging
-	# 	super().before_rename(olddn, new_cost_center, merge, "is_group")
-	# 	if not merge:
-	# 		new_cost_center = get_name_with_number(new_cost_center, self.cost_center_number)
-
-	# 	return new_cost_center
 	def before_rename(self, olddn, newdn, merge=False):
 		from erpnext.setup.doctype.company.company import get_name_with_abbr
 
@@ -120,7 +108,6 @@ class CostCenter(NestedSet):
 		super().before_rename(olddn, new_cost_center, merge, "is_group")
 
 		if not merge:
-        	# Only add number prefix if not already present
 			if self.cost_center_number and not new_cost_center.startswith(self.cost_center_number + " - "):
 				new_cost_center = get_name_with_number(new_cost_center, self.cost_center_number)
 
@@ -129,14 +116,14 @@ class CostCenter(NestedSet):
 	def after_rename(self, olddn, newdn, merge=False):
 		super().after_rename(olddn, newdn, merge)
 
+		if frappe.flags.get("update_cost_center_in_progress"):
+			return
+
 		if not merge:
 			new_cost_center = frappe.db.get_value(
 				"Cost Center", newdn, ["cost_center_name", "cost_center_number"], as_dict=1
 			)
-
-			# exclude company abbr
 			new_parts = newdn.split(" - ")[:-1]
-			# update cost center number and remove from parts
 			if new_parts[0][0].isdigit():
 				if len(new_parts) == 1:
 					new_parts = newdn.split(" ")
@@ -148,7 +135,6 @@ class CostCenter(NestedSet):
 					self.db_set("cost_center_number", new_parts[0])
 				new_parts = new_parts[1:]
 
-			# update cost center name
 			cost_center_name = " - ".join(new_parts)
 			if new_cost_center.cost_center_name != cost_center_name:
 				self.cost_center_name = cost_center_name

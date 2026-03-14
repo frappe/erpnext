@@ -48,65 +48,66 @@ frappe.ui.form.on("Cost Center", {
 		}
 	},
 	update_cost_center_number: function (frm) {
-		var d = new frappe.ui.Dialog({
-			title: __("Update Cost Center Name / Number"),
-			fields: [
-				{
-					label: "Cost Center Name",
-					fieldname: "cost_center_name",
-					fieldtype: "Data",
-					reqd: 1,
-					default: frm.doc.cost_center_name,
-				},
-				{
-					label: "Cost Center Number",
-					fieldname: "cost_center_number",
-					fieldtype: "Data",
-					default: frm.doc.cost_center_number,
-				},
-				{
-					label: __("Merge with existing"),
-					fieldname: "merge",
-					fieldtype: "Check",
-					default: 0,
-				},
-			],
-			primary_action: function () {
-				let data = d.get_values();
-				if (
-					data.cost_center_name === frm.doc.cost_center_name &&
-					data.cost_center_number === frm.doc.cost_center_number
-				) {
-					d.hide();
-					return;
-				}
-				frappe.dom.freeze();
-				frappe.call({
-					method: "erpnext.accounts.utils.update_cost_center",
-					args: {
-						docname: frm.doc.name,
-						cost_center_name: data.cost_center_name,
-						cost_center_number: cstr(data.cost_center_number),
-						company: frm.doc.company,
-						merge: data.merge,
+		frappe.db.get_value("Cost Center", frm.doc.name, ["cost_center_name", "cost_center_number"], (r) => {
+			var d = new frappe.ui.Dialog({
+				title: __("Update Cost Center Name / Number"),
+				fields: [
+					{
+						label: "Cost Center Name",
+						fieldname: "cost_center_name",
+						fieldtype: "Data",
+						reqd: 1,
+						default: r.cost_center_name,
 					},
-					callback: function (r) {
-						frappe.dom.unfreeze();
-						if (!r.exc) {
-							if (r.message) {
-								frappe.set_route("Form", "Cost Center", r.message);
-							} else {
-								frm.set_value("cost_center_name", data.cost_center_name);
-								frm.set_value("cost_center_number", data.cost_center_number);
+					{
+						label: "Cost Center Number",
+						fieldname: "cost_center_number",
+						fieldtype: "Data",
+						default: r.cost_center_number,
+					},
+					{
+						label: __("Merge with existing"),
+						fieldname: "merge",
+						fieldtype: "Check",
+						default: 0,
+					},
+				],
+				primary_action: function () {
+					let data = d.get_values();
+					if (
+						data.cost_center_name === r.cost_center_name &&
+						data.cost_center_number === r.cost_center_number
+					) {
+						d.hide();
+						return;
+					}
+					frappe.dom.freeze();
+					frappe.call({
+						method: "erpnext.accounts.utils.update_cost_center",
+						args: {
+							docname: frm.doc.name,
+							cost_center_name: data.cost_center_name,
+							cost_center_number: cstr(data.cost_center_number),
+							company: frm.doc.company,
+							merge: data.merge,
+						},
+						callback: function (r) {
+							frappe.dom.unfreeze();
+							if (!r.exc) {
+								if (r.message) {
+									frappe.set_route("Form", "Cost Center", r.message);
+								} else {
+									frm.reload_doc();
+								}
+								d.hide();
 							}
-							d.hide();
-						}
-					},
-				});
-			},
-			primary_action_label: __("Update"),
+						},
+					});
+				},
+				primary_action_label: __("Update"),
+			});
+			d.show();
 		});
-		d.show();
 	},
 
 	parent_cost_center(frm) {
