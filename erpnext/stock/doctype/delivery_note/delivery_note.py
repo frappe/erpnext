@@ -982,6 +982,11 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 def make_delivery_trip(source_name, target_doc=None, kwargs=None):
 	if not target_doc:
 		target_doc = frappe.new_doc("Delivery Trip")
+
+	def update_address(source_doc, target_doc, source_parent):
+		target_doc.address = source_doc.shipping_address_name or source_doc.customer_address
+		target_doc.customer_address = source_doc.shipping_address or source_doc.address_display
+
 	doclist = get_mapped_doc(
 		"Delivery Note",
 		source_name,
@@ -991,11 +996,10 @@ def make_delivery_trip(source_name, target_doc=None, kwargs=None):
 				"on_parent": target_doc,
 				"field_map": {
 					"name": "delivery_note",
-					"shipping_address_name": "address",
-					"shipping_address": "customer_address",
 					"contact_person": "contact",
 					"contact_display": "customer_contact",
 				},
+				"postprocess": update_address,
 			},
 		},
 		ignore_child_tables=True,
