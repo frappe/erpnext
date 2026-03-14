@@ -100,16 +100,29 @@ class CostCenter(NestedSet):
 			"Cost Center Allocation Percentage", filters={"cost_center": self.name, "docstatus": 1}
 		)
 
+	# def before_rename(self, olddn, newdn, merge=False):
+	# 	# Add company abbr if not provided
+	# 	from erpnext.setup.doctype.company.company import get_name_with_abbr
+
+	# 	new_cost_center = get_name_with_abbr(newdn, self.company)
+
+	# 	# Validate properties before merging
+	# 	super().before_rename(olddn, new_cost_center, merge, "is_group")
+	# 	if not merge:
+	# 		new_cost_center = get_name_with_number(new_cost_center, self.cost_center_number)
+
+	# 	return new_cost_center
 	def before_rename(self, olddn, newdn, merge=False):
-		# Add company abbr if not provided
 		from erpnext.setup.doctype.company.company import get_name_with_abbr
 
 		new_cost_center = get_name_with_abbr(newdn, self.company)
 
-		# Validate properties before merging
 		super().before_rename(olddn, new_cost_center, merge, "is_group")
+
 		if not merge:
-			new_cost_center = get_name_with_number(new_cost_center, self.cost_center_number)
+        	# Only add number prefix if not already present
+			if self.cost_center_number and not new_cost_center.startswith(self.cost_center_number + " - "):
+				new_cost_center = get_name_with_number(new_cost_center, self.cost_center_number)
 
 		return new_cost_center
 
