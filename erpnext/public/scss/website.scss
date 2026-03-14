@@ -35,10 +35,21 @@ body {
 	background: #fff !important;
 	border: 1px solid #E2E8F0 !important;
 	border-radius: 16px !important;
-	padding: 32px 32px 24px !important;
+	padding: 40px !important;
 	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
-	max-width: 420px;
+	max-width: 480px;
+	width: 100%;
 	margin: 0 auto;
+	overflow: hidden;
+
+	// Ensure inner elements don't overflow
+	.page-card-body {
+		padding: 0 !important;
+	}
+
+	.form-signin {
+		padding: 0 !important;
+	}
 }
 
 [data-theme="dark"] .login-content.page-card {
