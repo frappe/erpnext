@@ -29,45 +29,45 @@ body {
 // LOGIN PAGE
 // ══════════════════════════════════════
 
-// Page background
-.page-card {
-	background: #F8FAFC !important;
-	min-height: 100vh;
-}
-
-[data-theme="dark"] .page-card {
-	background: #050816 !important;
-}
-
-// Login container card
-.page-card .page-card-head {
-	text-align: center;
-	padding-bottom: 8px;
-}
-
-// "Login to Frappe" heading — hide "Frappe" text via override
-.page-card .page-card-head .page-card-title {
-	font-size: 22px;
-	font-weight: 700;
-	color: var(--text-color);
-	letter-spacing: -0.01em;
-}
-
-// Login form card
-.page-card .form-container {
-	background: #fff;
-	border: 1px solid #E2E8F0;
-	border-radius: 16px;
-	padding: 32px !important;
-	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+// Kill the 899px min-height on the login card
+.login-content.page-card {
+	min-height: auto !important;
+	background: #fff !important;
+	border: 1px solid #E2E8F0 !important;
+	border-radius: 16px !important;
+	padding: 32px 32px 24px !important;
+	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 	max-width: 420px;
 	margin: 0 auto;
 }
 
-[data-theme="dark"] .page-card .form-container {
-	background: #111827;
-	border-color: rgba(148, 163, 184, 0.12);
-	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+[data-theme="dark"] .login-content.page-card {
+	background: #111827 !important;
+	border-color: rgba(148, 163, 184, 0.12) !important;
+	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+// Center the login page vertically
+.for-login {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+	padding: 40px 20px;
+}
+
+// Login heading area (logo + title)
+.for-login .page-card-head {
+	text-align: center;
+	margin-bottom: 24px;
+}
+
+.for-login .page-card-head .page-card-title {
+	font-size: 22px;
+	font-weight: 700;
+	color: var(--text-color);
+	letter-spacing: -0.01em;
 }
 
 // Login form inputs
