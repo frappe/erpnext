@@ -2104,16 +2104,16 @@ def get_raw_materials_of_sub_assembly_items(
 
 	for item in query.run(as_dict=True):
 		key = (item.item_code, item.bom_no)
-		if item.is_phantom_item:
-			sub_assembly_items[key] += item.get("qty")
+		existing_key = (item.item_code, item.bom_no or item.main_bom)
 
-		if (item.bom_no and key not in sub_assembly_items) or (
-			(item.item_code, item.bom_no or item.main_bom) in existing_sub_assembly_items
-		):
+		if item.bom_no and not item.is_phantom_item and key not in sub_assembly_items:
+			continue
+
+		if not item.is_phantom_item and existing_key in existing_sub_assembly_items:
 			continue
 
 		if item.bom_no:
-			planned_qty = flt(sub_assembly_items[key])
+			recursion_qty = flt(item.get("qty")) if item.is_phantom_item else flt(sub_assembly_items[key])
 			get_raw_materials_of_sub_assembly_items(
 				existing_sub_assembly_items,
 				item_details,
@@ -2121,9 +2121,10 @@ def get_raw_materials_of_sub_assembly_items(
 				item.bom_no,
 				include_non_stock_items,
 				sub_assembly_items,
-				planned_qty=planned_qty,
+				planned_qty=recursion_qty,
 			)
-			existing_sub_assembly_items.add((item.item_code, item.bom_no or item.main_bom))
+			if not item.is_phantom_item:
+				existing_sub_assembly_items.add(existing_key)
 		else:
 			if not item.conversion_factor and item.purchase_uom:
 				item.conversion_factor = get_uom_conversion_factor(item.item_code, item.purchase_uom)

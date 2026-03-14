@@ -721,7 +721,7 @@ class SubcontractingInwardController:
 						"Subcontracting Inward Order Item", item.against_fg, "item_code"
 					),
 				)
-				scio_rm.skip_docstatus_validation = True
+				scio_rm.flags.skip_docstatus_validation = True
 				scio_rm.insert()
 				scio_rm.submit()
 				item.db_set("scio_detail", scio_rm.name)
@@ -868,7 +868,7 @@ class SubcontractingInwardController:
 					warehouse=extra_item.s_warehouse,
 					is_additional_item=True,
 				)
-				doc.skip_docstatus_validation = True
+				doc.flags.skip_docstatus_validation = True
 				doc.insert()
 				doc.submit()
 
@@ -956,7 +956,7 @@ class SubcontractingInwardController:
 							"Work Order", self.work_order, "subcontracting_inward_order_item"
 						),
 					)
-					doc.skip_docstatus_validation = True
+					doc.flags.skip_docstatus_validation = True
 					doc.insert()
 					doc.submit()
 
