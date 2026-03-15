@@ -37,6 +37,7 @@
   "total_billable_amount",
   "total_billed_amount",
   "total_consumed_material_cost",
+  "total_asset_capitalization_amount",
   "cost_center",
   "margin",
   "gross_margin",
@@ -327,6 +328,12 @@
    "read_only": 1
   },
   {
+   "fieldname": "total_asset_capitalization_amount",
+   "fieldtype": "Currency",
+   "label": "Total Asset Capitalization Cost (via Asset Capitalization)",
+   "read_only": 1
+  },
+  {
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Default Cost Center",
@@ -480,7 +487,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-03-09 17:15:24.426294",
+ "modified": "2026-03-04 11:09:55.253367",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

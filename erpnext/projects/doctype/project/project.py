@@ -71,6 +71,7 @@ class Project(Document):
 		total_costing_amount: DF.Currency
 		total_purchase_cost: DF.Currency
 		total_sales_amount: DF.Currency
+		total_asset_capitalization_amount: DF.Currency
 		users: DF.Table[ProjectUser]
 		weekly_time_to_send: DF.Time | None
 	# end: auto-generated types
@@ -294,6 +295,7 @@ class Project(Document):
 		self.total_billable_amount = from_time_sheet.base_billing_amount
 		self.actual_time = from_time_sheet.time
 
+		self.update_asset_capitalization_costing()
 		self.update_purchase_costing()
 		self.update_sales_amount()
 		self.update_billed_amount()
@@ -303,6 +305,7 @@ class Project(Document):
 		expense_amount = (
 			flt(self.total_costing_amount)
 			+ flt(self.total_purchase_cost)
+			+ flt(self.total_asset_capitalization_amount)
 			+ flt(self.get("total_consumed_material_cost", 0))
 		)
 
@@ -315,6 +318,17 @@ class Project(Document):
 	def update_purchase_costing(self):
 		total_purchase_cost = calculate_total_purchase_cost(self.name)
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
+
+	def update_asset_capitalization_costing(self):
+		total_asset_capitalization_amount = frappe.db.sql(
+			"""select sum(total_value)
+			from `tabAsset Capitalization` where project = %s and docstatus=1""",
+			self.name,
+		)
+
+		self.total_asset_capitalization_amount = (
+			total_asset_capitalization_amount and total_asset_capitalization_amount[0][0] or 0
+		)
 
 	def update_sales_amount(self):
 		total_sales_amount = frappe.db.sql(
