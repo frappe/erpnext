@@ -26,7 +26,7 @@ frappe.ui.form.on("Sales Order", {
 			let color;
 			if (!doc.qty && frm.doc.has_unit_price_items) {
 				color = "yellow";
-			} else if (doc.stock_qty <= doc.delivered_qty) {
+			} else if (doc.stock_qty <= doc.actual_qty) {
 				color = "green";
 			} else {
 				color = "orange";
