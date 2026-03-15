@@ -35,7 +35,7 @@ jobs:
       postgres:
         image: postgres:13.3
         env:
-          POSTGRES_PASSWORD: travis
+          POSTGRES_PASSWORD: frappe_ci_root
         options: >-
           --health-cmd pg_isready
           --health-interval 10s

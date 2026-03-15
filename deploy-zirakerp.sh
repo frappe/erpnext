@@ -1,7 +1,6 @@
 #!/bin/bash
 ##############################################################################
 # ZirakERP Deployment Script for Hostinger VPS (Ubuntu 24.04)
-# Server: srv928799.hstgr.cloud (148.230.104.240)
 # VPS: KVM 1 — 1 CPU, 4 GB RAM, 50 GB Disk
 #
 # Usage:
@@ -24,7 +23,7 @@ set -euo pipefail
 # ========================
 FRAPPE_USER="frappe"
 BENCH_DIR="/home/${FRAPPE_USER}/frappe-bench"
-SITE_NAME="srv928799.hstgr.cloud"
+SITE_NAME="${SITE_NAME:?Set SITE_NAME to your server hostname (e.g. myserver.example.com)}"
 ZIRAKERP_REPO="https://github.com/alanasm1958/ZirakERP.git"
 ZIRAKERP_BRANCH="develop"
 FRAPPE_BRANCH="version-15"
@@ -311,7 +310,6 @@ echo "=============================================="
 echo ""
 echo "  Access your site at:"
 echo "    http://${SITE_NAME}"
-echo "    http://148.230.104.240"
 echo ""
 echo "  Login:"
 echo "    User: Administrator"

@@ -18,8 +18,8 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: "3306"
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-admin}
-      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:-admin}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
 
   configurator:
     # ZirakERP site configurator (one-time setup)
@@ -90,7 +90,7 @@ services:
           fi
         done;
         echo "Configuration ready!";
-        bench new-site --mariadb-user-host-login-scope='%' --admin-password=$${ADMIN_PASSWORD} --db-root-username=root --db-root-password=${DB_PASSWORD:-admin} --install-app erpnext --set-default frontend;
+        bench new-site --mariadb-user-host-login-scope='%' --admin-password=$${ADMIN_PASSWORD} --db-root-username=root --db-root-password=${DB_PASSWORD:?Set DB_PASSWORD in .env} --install-app erpnext --set-default frontend;
     environment:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     depends_on:
@@ -105,7 +105,7 @@ services:
     networks:
       - zirak_network
     healthcheck:
-      test: mysqladmin ping -h localhost --password=${DB_PASSWORD:-admin}
+      test: mysqladmin ping -h localhost --password=${DB_PASSWORD:?Set DB_PASSWORD in .env}
       interval: 5s
       retries: 20
       start_period: 10s
@@ -116,8 +116,8 @@ services:
       - --skip-character-set-client-handshake
       - --skip-innodb-read-only-compressed
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-admin}
-      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:-admin}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
     volumes:
       - db-data:/var/lib/mysql
 

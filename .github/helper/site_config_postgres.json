@@ -11,7 +11,7 @@
  "mail_password": "test",
  "admin_password": "admin",
  "root_login": "postgres",
- "root_password": "travis",
+ "root_password": "frappe_ci_root",
  "host_name": "http://test_site:8000",
  "install_apps": ["erpnext"],
  "throttle_user_limit": 100
