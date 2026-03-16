@@ -227,12 +227,6 @@ def set_status(name, status):
 
 
 def auto_close_tickets():
-<<<<<<< HEAD
-	"""Auto-close replied support tickets after 7 days"""
-	auto_close_after_days = (
-		frappe.db.get_value("Support Settings", "Support Settings", "close_issue_after_days") or 7
-	)
-=======
 	"""
 	Auto-close replied support tickets as defined on `close_issue_after_days` in Support Settings.
 	Disables the feature if `close_issue_after_days` is set to 0.
@@ -241,7 +235,6 @@ def auto_close_tickets():
 
 	if not auto_close_after_days:
 		return
->>>>>>> 09dd2f851d (fix(support-settings): disable the auto-close tickets feature if `close_issue_after_days` is set to 0 (#53499))
 
 	table = frappe.qb.DocType("Issue")
 	issues = (
