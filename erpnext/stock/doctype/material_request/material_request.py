@@ -18,7 +18,6 @@ from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, new_line_se
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
-from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.stock_balance import get_indented_qty, update_bin_qty
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
@@ -501,17 +500,6 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 
 	def postprocess(source, target_doc):
 		target_doc.is_subcontracted = is_subcontracted
-		if frappe.flags.args and frappe.flags.args.default_supplier:
-			# items only for given default supplier
-			supplier_items = []
-			for d in target_doc.items:
-				if is_subcontracted and not d.item_code:
-					continue
-				default_supplier = get_item_defaults(d.item_code, target_doc.company).get("default_supplier")
-				if frappe.flags.args.default_supplier == default_supplier:
-					supplier_items.append(d)
-			target_doc.items = supplier_items
-
 		set_missing_values(source, target_doc)
 
 	def select_item(d):
@@ -690,6 +678,7 @@ def get_material_requests_based_on_supplier(doctype, txt, searchfield, start, pa
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 @frappe.validate_and_sanitize_search_inputs
 def get_default_supplier_query(doctype, txt, searchfield, start, page_len, filters):
 	doc = frappe.get_doc("Material Request", filters.get("doc"))
@@ -722,6 +711,9 @@ def get_default_supplier_query(doctype, txt, searchfield, start, page_len, filte
 
 @frappe.whitelist()
 def make_supplier_quotation(source_name, target_doc=None):
+=======
+def make_supplier_quotation(source_name: str, target_doc: str | Document | None = None):
+>>>>>>> c09ea94133 (fix: remove supplier selection dialog when creating Purchase Order from Material Request (#53391))
 	def postprocess(source, target_doc):
 		set_missing_values(source, target_doc)
 
