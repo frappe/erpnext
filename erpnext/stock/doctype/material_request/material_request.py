@@ -709,11 +709,7 @@ def get_default_supplier_query(doctype, txt, searchfield, start, page_len, filte
 	return query.run(as_dict=False)
 
 
-@frappe.whitelist()
 def make_supplier_quotation(source_name, target_doc=None):
-=======
-def make_supplier_quotation(source_name: str, target_doc: str | Document | None = None):
->>>>>>> c09ea94133 (fix: remove supplier selection dialog when creating Purchase Order from Material Request (#53391))
 	def postprocess(source, target_doc):
 		set_missing_values(source, target_doc)
 
