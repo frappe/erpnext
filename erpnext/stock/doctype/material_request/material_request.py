@@ -678,37 +678,6 @@ def get_material_requests_based_on_supplier(doctype, txt, searchfield, start, pa
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
-@frappe.validate_and_sanitize_search_inputs
-def get_default_supplier_query(doctype, txt, searchfield, start, page_len, filters):
-	doc = frappe.get_doc("Material Request", filters.get("doc"))
-	item_list = []
-	for d in doc.items:
-		item_list.append(d.item_code)
-
-	supplier = frappe.qb.DocType("Supplier")
-	item_default = frappe.qb.DocType("Item Default")
-	query = (
-		frappe.qb.from_(supplier)
-		.left_join(item_default)
-		.on(supplier.name == item_default.default_supplier)
-		.select(item_default.default_supplier)
-		.where(
-			(item_default.parent.isin(item_list))
-			& (item_default.default_supplier.notnull())
-			& (supplier[searchfield].like(f"%{txt}%"))
-		)
-		.offset(start)
-		.limit(page_len)
-	)
-
-	meta = frappe.get_meta("Supplier")
-	if meta.show_title_field_in_link and meta.title_field:
-		query = query.select(supplier[meta.title_field])
-
-	return query.run(as_dict=False)
-
-
 def make_supplier_quotation(source_name, target_doc=None):
 	def postprocess(source, target_doc):
 		set_missing_values(source, target_doc)
