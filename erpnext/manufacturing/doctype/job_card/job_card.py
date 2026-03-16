@@ -402,9 +402,8 @@ class JobCard(Document):
 		# if key number reaches/crosses to production_capacity means capacity is full and overlap error generated
 		# this will store last to_time of sequential job cards
 		alloted_capacity = {1: time_logs[0]["to_time"]}
-		# flag for sequential Job card found
-		sequential_job_card_found = False
 		for i in range(1, len(time_logs)):
+			sequential_job_card_found = False
 			# scanning for all Existing keys
 			for key in alloted_capacity.keys():
 				# if current Job Card from time is greater than last to_time in that key means these job card are sequential
