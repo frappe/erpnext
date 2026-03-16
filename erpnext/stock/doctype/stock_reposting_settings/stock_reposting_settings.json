@@ -101,11 +101,11 @@
    "label": "Enable Separate Reposting for GL"
   }
  ],
- "hide_toolbar": 1,
+ "hide_toolbar": 0,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-25 14:11:33.461173",
+ "modified": "2026-03-16 13:28:20.978007",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reposting Settings",
