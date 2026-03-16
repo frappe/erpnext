@@ -165,11 +165,7 @@
  ],
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2021-10-14 13:08:38.473616",
-=======
  "modified": "2026-03-16 16:33:45.859541",
->>>>>>> 09dd2f851d (fix(support-settings): disable the auto-close tickets feature if `close_issue_after_days` is set to 0 (#53499))
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support Settings",
