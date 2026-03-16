@@ -754,7 +754,7 @@ class POSInvoice(SalesInvoice):
 		return profile
 
 	@frappe.whitelist()
-	def set_missing_values(self, for_validate: bool = False):
+	def set_missing_values(self, for_validate: bool | None = False):
 		profile = self.set_pos_fields(for_validate)
 
 		if not self.debit_to:
