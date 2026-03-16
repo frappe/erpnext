@@ -4,6 +4,7 @@ import datetime
 import json
 from collections import OrderedDict
 
+from erpnext.manufacturing.doctype.production_line.production_line import get_parent_line
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
@@ -137,6 +138,35 @@ class JobCard(Document):
 
 	def before_validate(self):
 		self.set_wip_warehouse()
+
+	def set_workstation(self):
+		if not self.operation or not self.production_line:
+			return
+
+		workstation_type = self.operation.split()[0]
+		parent_line = get_parent_line(self.production_line)
+		
+		workstation = frappe.db.get_value(
+			"Workstation",
+			{
+				"workstation_type": ["like", f"{workstation_type}%"],
+				"production_line": self.production_line,
+			},
+			"name",
+		)
+
+		if not workstation and parent_line:
+			workstation = frappe.db.get_value(
+			"Workstation",
+			{
+				"workstation_type": self.operation,
+				"production_line": parent_line,
+			},
+			"name",
+		)
+
+		if workstation:
+			self.workstation = workstation
 
 	def validate(self):
 		self.validate_time_logs()
