@@ -43,7 +43,6 @@ frappe.query_reports["Pending Workflow"] = {
 			label: __("Workflow Action"),
 			fieldtype: "Link",
 			options: "Workflow Action Master",
-			default: "Approve",
 			reqd: 1,
 		},
 	],
@@ -78,7 +77,12 @@ frappe.query_reports["Pending Workflow"] = {
 							rows: docs,
 							action: action,
 						},
+						freeze: true,
+						freeze_message: __("Applying workflow action..."),
 						callback: function(r) {
+							if (r.exc) {
+								return;
+							}
 							frappe.show_alert({
 								message: __("{0} successfully applied.", [action]),
 								indicator: "green"

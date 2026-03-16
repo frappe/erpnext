@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.model.workflow import apply_workflow
+from frappe.model.workflow import apply_workflow, WorkflowTransitionError
 from frappe.utils import parse_json, today, date_diff
 
 
@@ -21,7 +21,7 @@ def get_columns():
 			"fieldname": "company",
 			"fieldtype": "Link",
 			"options": "Company",
-			"width": 180,
+			"width": 160,
 		},
 		{
 			"label": _("DocType"),
@@ -40,19 +40,19 @@ def get_columns():
 			"label": _("Status"),
 			"fieldname": "workflow_state",
 			"fieldtype": "Data",
-			"width": 250,
+			"width": 240,
 		},
 		{
 			"label": _("Created Date"),
 			"fieldname": "created_date",
 			"fieldtype": "Date",
-			"width": 130,
+			"width": 120,
 		},
 		{
-			"label": _("Workflow Date"),
+			"label": _("Workflow Action Date"),
 			"fieldname": "workflow_date",
 			"fieldtype": "Date",
-			"width": 130,
+			"width": 120,
 		},
 		{
 			"label": _("Days Pending"),
@@ -130,7 +130,7 @@ def get_data(filters):
 		workflow_state = result.get("workflow_state")
 		workflow_action = filters.get("workflow_action")
 		
-		if not workflow_action_allowed(
+		if workflow_action and not workflow_action_allowed(
 			wa.reference_doctype,
 			workflow_state,
 			workflow_action,
@@ -180,13 +180,23 @@ def apply_workflow_action(rows, action):
 	if isinstance(rows, str):
 		rows = parse_json(rows)
 
+	errors = []
+
 	for row in rows:
 		doc = frappe.get_doc(row["doctype"], row["name"])
 
 		try:
 			apply_workflow(doc, action)
-		except Exception:
-			frappe.throw(
-				_("You do not have permission to perform {0} action on selected document(s).")
-				.format(action)
+		except WorkflowTransitionError:
+			errors.append(
+				_("Permission denied for {0} action on {1} {2}.")
+				.format(action, row["doctype"], row["name"])
 			)
+		except Exception as e:
+			errors.append(
+				_("Cannot apply {0} on {1} {2}: {3}")
+				.format(action, row["doctype"], row["name"], str(e))
+			)
+
+	if errors:
+		frappe.throw("<br>".join(errors))
