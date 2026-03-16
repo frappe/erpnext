@@ -39,7 +39,7 @@ frappe.query_reports[PL_REPORT_NAME]["filters"].push(
 		fieldname: "accumulated_values",
 		label: __("Accumulated Values"),
 		fieldtype: "Check",
-		default: 1,
+		default: 0,
 	},
 	{
 		fieldname: "include_default_book_entries",
