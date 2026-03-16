@@ -57,6 +57,32 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		frappe.db.rollback()
 		frappe.set_user("Administrator")
 
+	def test_sales_order_with_product_bundle_for_partial_material_request(self):
+		product_bundle = make_product_bundle(
+			"_Test Product Bundle Item", ["_Test Item", "_Test Item Home Desktop 100"]
+		)
+		so = make_sales_order(item_code=product_bundle.name, qty=2)
+		mr = make_material_request(so.name)
+		mr.items[0].qty = 4
+		mr.items[1].qty = 2
+		mr.items[0].schedule_date = today()
+		mr.items[1].schedule_date = today()
+		mr.save()
+		mr.submit()
+		mr.reload()
+		self.assertEqual(mr.items[0].qty, 4)
+		mr = make_material_request(so.name)
+		self.assertEqual(mr.items[0].qty, 6)
+
+	def test_sales_order_with_full_material_request(self):
+		so = make_sales_order(item_code="_Test Item", qty=5, do_not_submit=True)
+		so.submit()
+		mr = make_material_request(so.name)
+		mr.save()
+		mr.submit()
+		mr.reload()
+		self.assertRaises(frappe.ValidationError, make_material_request, so.name)
+
 	def test_sales_order_skip_delivery_note(self):
 		so = make_sales_order(do_not_submit=True)
 		so.order_type = "Maintenance"
