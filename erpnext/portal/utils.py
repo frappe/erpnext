@@ -47,21 +47,8 @@ def create_customer_or_supplier():
 	if party_exists(doctype, user):
 		return
 
-	party = frappe.new_doc(doctype)
 	fullname = frappe.utils.get_fullname(user)
-
-	if doctype != "Customer":
-		party.update(
-			{
-				"supplier_name": fullname,
-				"supplier_group": "All Supplier Groups",
-				"supplier_type": "Individual",
-			}
-		)
-
-	party.flags.ignore_mandatory = True
-	party.insert(ignore_permissions=True)
-
+	party = create_party(doctype, fullname)
 	alternate_doctype = "Customer" if doctype == "Supplier" else "Supplier"
 
 	if party_exists(alternate_doctype, user):
@@ -69,6 +56,22 @@ def create_customer_or_supplier():
 		fullname += "-" + doctype
 
 	create_party_contact(doctype, fullname, user, party.name)
+
+def create_party(doctype, fullname):
+	party = frappe.new_doc(doctype)
+	# Can't set parent party as group
+	name_field = f"{doctype.lower()}_name"
+	type_field = f"{doctype.lower()}_type"
+
+	party.update(
+		{
+			name_field: fullname,
+			type_field: "Individual",
+		}
+	)
+
+	party.flags.ignore_mandatory = True
+	party.insert(ignore_permissions=True)
 
 	return party
 
