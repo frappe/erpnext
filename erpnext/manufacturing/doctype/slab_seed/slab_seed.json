@@ -8,6 +8,7 @@
  "field_order": [
   "section_break_gdgl",
   "line",
+  "seed_month",
   "seed"
  ],
  "fields": [
@@ -30,13 +31,20 @@
    "in_list_view": 1,
    "label": "Seed",
    "reqd": 1
+  },
+  {
+   "fieldname": "seed_month",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Month",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-26 22:23:38.625881",
+ "modified": "2026-03-17 00:34:34.504297",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab Seed",
