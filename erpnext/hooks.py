@@ -418,11 +418,19 @@ naming_series_variables = {
 	for variable in naming_series_variables_list
 }
 
-# On cancel event Payment Entry will be exempted and all linked submittable doctype will get cancelled.
-# to maintain data integrity we exempted payment entry. it will un-link when sales invoice get cancelled.
-# if payment entry not in auto cancel exempted doctypes it will cancel payment entry.
 auto_cancel_exempted_doctypes = [
+	# On cancel event Payment Entry will be exempted and all linked submittable doctype will get cancelled.
+	# to maintain data integrity we exempted payment entry. it will un-link when sales invoice get cancelled.
+	# if payment entry not in auto cancel exempted doctypes it will cancel payment entry.
 	"Payment Entry",
+	# Reverse ledger entries are created instead to ensure ledger immutability.
+	"GL Entry",
+	"Stock Ledger Entry",
+	"Payment Ledger Entry",
+	"Advance Payment Ledger Entry",
+	# May be linked to Period Closing Voucher, but cancelled with custom logic in PCV.
+	# This is better to avoid stale docs when cancelling PCV from backend.
+	"Account Closing Balance",
 ]
 
 scheduler_events = {

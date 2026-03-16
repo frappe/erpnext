@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-03-08 09:42+0000\n"
-"PO-Revision-Date: 2026-03-09 16:58\n"
+"PO-Revision-Date: 2026-03-13 17:37\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Portuguese, Brazilian\n"
 "MIME-Version: 1.0\n"
@@ -8071,7 +8071,7 @@ msgstr ""
 #. Accounts'
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgid "Body"
-msgstr ""
+msgstr "Corpo"
 
 #. Label of the body_text (Text Editor) field in DocType 'Dunning'
 #. Label of the body_text (Text Editor) field in DocType 'Dunning Letter Text'
@@ -20211,12 +20211,12 @@ msgstr ""
 #: erpnext/telephony/doctype/incoming_call_handling_schedule/incoming_call_handling_schedule.json
 #: erpnext/templates/pages/timelog_info.html:31
 msgid "From Time"
-msgstr "Do Horário"
+msgstr "Horário Inicial"
 
 #. Label of the from_time (Time) field in DocType 'Appointment Booking Slots'
 #: erpnext/crm/doctype/appointment_booking_slots/appointment_booking_slots.json
 msgid "From Time "
-msgstr ""
+msgstr "Horário Inicial "
 
 #: erpnext/accounts/doctype/cashier_closing/cashier_closing.py:67
 msgid "From Time Should Be Less Than To Time"
@@ -21640,7 +21640,7 @@ msgstr ""
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:338
 #: erpnext/selling/doctype/sales_order/sales_order.js:989
 msgid "Hold"
-msgstr "Segurar"
+msgstr "Pendente"
 
 #. Label of the sb_14 (Section Break) field in DocType 'Purchase Invoice'
 #. Label of the on_hold (Check) field in DocType 'Purchase Invoice'
@@ -31134,7 +31134,7 @@ msgstr ""
 #. Label of the scheduled_confirmation_date (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Offer Date"
-msgstr ""
+msgstr "Data da Oferta"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:56
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:92
@@ -34887,7 +34887,7 @@ msgstr ""
 #: erpnext/crm/doctype/appointment/appointment.json
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:946
 msgid "Phone Number"
-msgstr "Número de telefone"
+msgstr "Número de Telefone"
 
 #. Name of a DocType
 #. Label of the pick_list (Link) field in DocType 'Stock Entry'
@@ -37311,7 +37311,7 @@ msgstr ""
 #. Request'
 #: erpnext/stock/doctype/material_request/material_request.json
 msgid "Printing Details"
-msgstr ""
+msgstr "Detalhes de Impressão"
 
 #. Label of the printing_settings_section (Section Break) field in DocType
 #. 'Dunning'
@@ -41176,7 +41176,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.py:200
 msgid "Rejected "
-msgstr ""
+msgstr "Rejeitado "
 
 #. Label of the rejected_qty (Float) field in DocType 'Purchase Invoice Item'
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
@@ -53071,7 +53071,7 @@ msgstr ""
 #: erpnext/telephony/doctype/incoming_call_handling_schedule/incoming_call_handling_schedule.json
 #: erpnext/templates/pages/timelog_info.html:34
 msgid "To Time"
-msgstr "Até o Horário"
+msgstr "Horário Final"
 
 #: erpnext/projects/doctype/timesheet_detail/timesheet_detail.py:108
 msgid "To Time cannot be before from date"
@@ -58264,7 +58264,7 @@ msgstr ""
 
 #: erpnext/templates/includes/macros.html:202
 msgid "ratings"
-msgstr ""
+msgstr "avaliações"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1245
 msgid "received from"

@@ -925,7 +925,10 @@ class update_entries_after:
 		if (
 			sle.is_adjustment_entry
 			and flt(sle.qty_after_transaction, self.flt_precision) == 0
-			and flt(sle.stock_value, self.currency_precision) != 0
+			and (
+				flt(sle.stock_value, self.currency_precision) != 0
+				or flt(sle.stock_value_difference, self.currency_precision) == 0
+			)
 		):
 			sle.stock_value_difference = (
 				get_stock_value_difference(
