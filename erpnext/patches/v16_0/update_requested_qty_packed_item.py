@@ -1,5 +1,5 @@
 import frappe
-from frappe.query_builder import Sum
+from frappe.query_builder.functions import Sum
 
 
 def execute():
