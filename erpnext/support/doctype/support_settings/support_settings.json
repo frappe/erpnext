@@ -37,9 +37,11 @@
   },
   {
    "default": "7",
+   "description": "Set this value to 0 to disable the feature.",
    "fieldname": "close_issue_after_days",
    "fieldtype": "Int",
-   "label": "Close Issue After Days"
+   "label": "Close Issue After Days",
+   "non_negative": 1
   },
   {
    "fieldname": "portal_sb",
@@ -157,7 +159,7 @@
  "hide_toolbar": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-02 18:18:11.475222",
+ "modified": "2026-03-16 16:33:45.859541",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support Settings",
