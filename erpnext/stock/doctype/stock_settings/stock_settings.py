@@ -114,6 +114,22 @@ class StockSettings(Document):
 		self.validate_auto_insert_price_list_rate_if_missing()
 		self.change_precision_for_for_sales()
 		self.change_precision_for_purchase()
+		self.validate_do_not_use_batchwise_valuation()
+
+	def validate_do_not_use_batchwise_valuation(self):
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+		if not frappe.get_all("Serial and Batch Bundle", filters={"docstatus": 1}, limit=1, pluck="name"):
+			return
+
+		if doc_before_save.do_not_use_batchwise_valuation and not self.do_not_use_batchwise_valuation:
+			frappe.throw(
+				_("Cannot disable {0} as it may lead to incorrect stock valuation.").format(
+					frappe.bold(_("Do Not Use Batchwise Valuation"))
+				)
+			)
 
 	def validate_serial_and_batch_no_settings(self):
 		doc_before_save = self.get_doc_before_save()
