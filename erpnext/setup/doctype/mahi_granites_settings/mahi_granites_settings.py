@@ -27,7 +27,6 @@ class MahiGranitesSettings(Document):
 		min_quarantine_hours: DF.Float
 		quarantine_labels: DF.Table[QuarantineLabel]
 		sales_invoice_patterns: DF.Table[SalesInvoiceSeries]
-		show_job_card_queue_to_mixer_operators: DF.Check
 		slab_seeds: DF.Table[SlabSeed]
 	# end: auto-generated types
 	pass

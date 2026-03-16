@@ -21,12 +21,10 @@ const selectedMixer = ref('');
 const mixersList = ref([]);
 const jobcardsQueue = ref([]);
 const productionLine = ref(null);
-const currentLine = ref(null);
 const pollingInterval = ref(null);
 const isDistributionBusy = ref(false);
 const displayQty = ref(0);
 const isProcessing = ref(false);
-const showJobCardQueue = ref(false);
 
 // downstream alerts (dummy)
 const alerts = ref([
@@ -89,134 +87,94 @@ const allAdditionalIngredientsAdded = computed(() => {
 const isMixerSelected = computed(() => !!selectedMixer.value);
 
 const fetchWorkContext = async () => {
-    const mixerContext = await frappe.call({
-        method: "erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_station_context",
+    const currentUser = await frappe.call({
+        method: "erpnext.setup.doctype.employee.api.get_current_user_context",
     });
 
-    if (mixerContext.message) {
-        work_context.role = mixerContext.message.current_user.designation;
-        work_context.assigned_line = mixerContext.message.current_user.production_line;
-        work_context.assigned_shift = mixerContext.message.current_user.attendance_shift;
-        showJobCardQueue.value = !!mixerContext.message.show_job_card_queue;
+    if (currentUser.message) {
+        work_context.role = currentUser.message.designation;
+        work_context.assigned_line = currentUser.message.production_line;
+        work_context.assigned_shift = currentUser.message.attendance_shift;
     }
 }
 
-async function getMixerState() {
+// actions
+onMounted(async () => {
+    const route = frappe.get_route();
+    jobCard.value = route[2] || null;
+    await fetchWorkContext();
+    await loadData();
+
+    document.addEventListener("refresh-mixer-station", () => {
+        loadData();
+    });
+
+    pollingInterval.value = setInterval(() => {
+        fetchQueue();
+        fetchDistributionStatus();
+    }, 5000); // Poll every 5 seconds
+});
+
+async function loadData() {
+    if (!jobCard.value) {
+        loadingIngredients.value = true;
+        jobCard.value = await getJobCardsList();
+    }
+    await loadMixers();
     const stateRes = await frappe.call({
         method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_state',
         args: { job_card: jobCard.value },
     });
 
-    return stateRes;
-};
+    const s = stateRes.message || {};
+    mixingReady.value = !!s.mixer_materials_confirmed;
+    mixingStarted.value = !!s.mixer_started;
+    mixingStartTime.value = s.mixer_start_time;
+    selectedMixer.value = s.mixer_number || '';
+    displayQty.value = s.display_qty;
 
-// actions
-onMounted(async () => {
-    jobCard.value = null;
-    await fetchWorkContext();
+    jobCardSubmitted.value = !!s.job_card_submitted || false;
+    if (jobCardSubmitted.value) {
+        preparedQty.value = s.prepared_qty || 0;
+        stockEntryName.value = s.stock_entry_name || '';
+        transferredQty.value = s.transferred_qty_to_next || 0;
+        transferSuccess.value = s.transfer_complete || false;
+    }
 
-    currentLine.value = work_context.assigned_line;
+    if (mixingStarted.value && mixingStartTime.value) {
+        const start = frappe.datetime.str_to_obj(mixingStartTime.value);
+        const now = frappe.datetime.now_datetime();
+        const diffSeconds = (new Date(now) - new Date(start)) / 1000;
+        mixingElapsed.value = Math.max(0, Math.floor(diffSeconds));
 
-    await loadData();
-
-    document.addEventListener("refresh-mixer-station", async () => {
-        await loadData();
-    });
-
-    pollingInterval.value = setInterval(() => {
-        // TODO: Wrap all these in a single call and reuse it.
-        fetchQueue();
-        fetchDistributionStatus();
-        loadMixers();
-    }, 5000); // Poll every 5 seconds
-});
-
-async function loadData() {
-    loadingIngredients.value = true;
-    error.value = null;
+        if (mixingTimerHandle.value) clearInterval(mixingTimerHandle.value);
+        mixingTimerHandle.value = setInterval(() => {
+            mixingElapsed.value += 1;
+        }, 1000);
+    }
+    else {
+        mixingElapsed.value = 0;
+        if (mixingTimerHandle.value) {
+            clearInterval(mixingTimerHandle.value);
+            mixingTimerHandle.value = null;
+        }
+    }
 
     try {
-        await loadMixers();
-        await fetchQueue();
-
-        let activeJob = null;
-        if (selectedMixer.value) {
-            const selectedMixerObj = mixersList.value.find(m => m.name === selectedMixer.value);
-            if (selectedMixerObj && selectedMixerObj.active_job_card) {
-                activeJob = selectedMixerObj.active_job_card;
-            }
-        }
-
-        if (activeJob) {
-            jobCard.value = activeJob;
-        } else if (jobcardsQueue.value.length > 0) {
-            const queueForMixer = jobcardsQueue.value.filter(jc => !jc.mixer_number || jc.mixer_number === selectedMixer.value);
-            if (queueForMixer.length > 0) {
-                jobCard.value = queueForMixer[0].name;
-            } else {
-                jobCard.value = jobcardsQueue.value[0].name;
-            }
-        } else {
-            jobCard.value = null;
-        }
-
-        if (!jobCard.value) {
-            mixingReady.value = false;
-            mixingStarted.value = false;
-            mixingStartTime.value = null;
-            displayQty.value = 0;
-            jobCardSubmitted.value = false;
-            ingredients.value = [];
-            batchNo.value = '';
-            loadingIngredients.value = false;
-            return;
-        }
-
-        const stateRes = await getMixerState();
-
-        const s = stateRes.message || {};
-        mixingReady.value = !!s.mixer_materials_confirmed;
-        mixingStarted.value = !!s.mixer_started;
-        mixingStartTime.value = s.mixer_start_time;
-        selectedMixer.value = selectedMixer.value || s.mixer_number || '';
-        displayQty.value = s.display_qty;
-
-        jobCardSubmitted.value = !!s.job_card_submitted;
-        if (jobCardSubmitted.value) {
-            preparedQty.value = s.prepared_qty || 0;
-            stockEntryName.value = s.stock_entry_name || '';
-            transferredQty.value = s.transferred_qty_to_next || 0;
-            transferSuccess.value = s.transfer_complete || false;
-        }
-
-        if (mixingStarted.value && mixingStartTime.value) {
-            const start = frappe.datetime.str_to_obj(mixingStartTime.value);
-            const now = frappe.datetime.now_datetime();
-            const diffSeconds = (new Date(now) - new Date(start)) / 1000;
-            mixingElapsed.value = Math.max(0, Math.floor(diffSeconds));
-
-            if (mixingTimerHandle.value) clearInterval(mixingTimerHandle.value);
-            mixingTimerHandle.value = setInterval(() => {
-                mixingElapsed.value += 1;
-            }, 1000);
-        } else {
-            mixingElapsed.value = 0;
-            if (mixingTimerHandle.value) {
-                clearInterval(mixingTimerHandle.value);
-                mixingTimerHandle.value = null;
-            }
-        }
+        loadingIngredients.value = true;
+        error.value = null;
 
         if (jobCard.value) {
             const jc = await frappe.db.get_doc('Job Card', jobCard.value);
             // productionLine.value = jc.production_line;
-            productionLine.value = currentLine.value;
+            productionLine.value = work_context.assigned_line;
             if (jc.bom_no) {
                 const bom_elements = jc.bom_no.split("-");
                 batchNo.value = `${bom_elements[1]}-${bom_elements[2]}`.trim();
             }
         }
 
+        await fetchQueue();
         await fetchDistributionStatus();
 
         const r = await frappe.call({
@@ -225,7 +183,6 @@ async function loadData() {
                 job_card: jobCard.value
             }
         });
-
         if (r.message) {
             bomUOM.value = r.message[0].jc_bom_uom;
         }
@@ -293,8 +250,6 @@ async function confirmAndStartMixing() {
                     }
                 });
 
-                await loadData();
-
                 mixingReady.value = true;
                 mixingStarted.value = true;
                 mixingStartTime.value = frappe.datetime.now_datetime();
@@ -359,19 +314,18 @@ async function confirmAndStartMixing() {
 //     );
 // }
 
-async function selectMixerTab(mixerName) {
-    if (selectedMixer.value !== mixerName) {
-        selectedMixer.value = mixerName;
-
-        // Find selected mixer to read its production line and active job card
-        const selectedMixerObj = mixersList.value.find(m => m.name === mixerName);
-        if (selectedMixerObj) {
-            currentLine.value = selectedMixerObj.production_line;
-            jobCard.value = null;
+async function getJobCardsList() {
+    const route = frappe.get_route();
+    const result = await frappe.call({
+        method: 'erpnext.manufacturing.doctype.operation.api.get_recent_job_card',
+        args: {
+            operation: "Mixing",
+            production_line: work_context.assigned_line
         }
+    });
 
-        await loadData();
-    }
+    jobCard.value = result.message.name;
+    return jobCard.value;
 }
 
 // async function startMixing() {
@@ -594,14 +548,15 @@ async function transferToFGWarehouse() {
         transferSuccess.value = result.message.transfer_complete || false;
 
         // Refresh full state
-        const refreshedState = await getMixerState();
+        const refreshedState = await frappe.call({
+            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_state',
+            args: { job_card: jobCard.value }
+        });
 
         preparedQty.value = refreshedState.message.prepared_qty;
         transferredQty.value = refreshedState.message.transferred_qty_to_next;
         displayQty.value = refreshedState.message.display_qty;
         transferSuccess.value = refreshedState.message.transfer_complete;
-
-        await loadData();
 
         // if (getDisplayQty.value <= 0) {
         //     transferSuccess.value = true;
@@ -648,34 +603,21 @@ async function loadMixers() {
     const response = await frappe.call({
         method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_all_mixers',
         args: {
-            production_line: currentLine.value || work_context.assigned_line
-        } // Ensure we get mixers for the current line
+            production_line: work_context.assigned_line
+        }
     });
+    mixersList.value = response.message || [];
+}
 
-    const newMixers = response.message || [];
-    
-    // Update array reactively instead of replacing it, so that Vue UI updates smoothly
-    if (!mixersList.value?.length) {
-        mixersList.value = newMixers;
-    } else {
-        for (const nm of newMixers) {
-            const existing = mixersList.value.find(m => m.name === nm.name);
-            if (existing) {
-                existing.status = nm.status;
-                existing.active_job_card = nm.active_job_card;
-            } else {
-                mixersList.value.push(nm);
+async function onMixerChange() {
+    if (selectedMixer.value) {
+        await frappe.call({
+            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.assign_mixer_to_job_card',
+            args: {
+                job_card: jobCard.value,
+                mixer: selectedMixer.value
             }
-        }
-    }
-
-    // Auto-select mixer if none selected yet
-    if (!selectedMixer.value && mixersList.value.length > 0) {
-        const firstMixerInLine = mixersList.value.find(m => m.production_line === currentLine.value) || mixersList.value[0];
-        if (firstMixerInLine) {
-            selectedMixer.value = firstMixerInLine.name;
-            currentLine.value = firstMixerInLine.production_line;
-        }
+        })
     }
 }
 
@@ -685,7 +627,7 @@ async function fetchQueue() {
         const r = await frappe.call({
             method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixing_queue',
             args: {
-                production_line: currentLine.value,
+                production_line: work_context.assigned_line,
             }
         });
 
@@ -700,7 +642,7 @@ async function fetchDistributionStatus() {
     try {
         const r = await frappe.call({
             method: 'erpnext.manufacturing.page.mixer_station.mixer_station.check_distribution_status',
-            args: { production_line: currentLine.value }
+            args: { production_line: work_context.assigned_line }
         });
         isDistributionBusy.value = r.message?.busy || false;
     } catch (e) {
@@ -719,7 +661,7 @@ function selectJobCard(name) {
 <template>
     <div class="page-card p-0 d-flex h-100 w-100">
         <!-- Sidebar: Queue -->
-        <div class="queue-sidebar border-right p-3" style="width: 320px; overflow-y: auto;" v-if="showJobCardQueue">
+        <div class="queue-sidebar border-right p-3" style="width: 320px; overflow-y: auto;">
             <h5 class="mb-3 font-weight-bold text-center border-bottom pb-2">
                 {{ __('Mixing Queue') }}
             </h5>
@@ -754,37 +696,15 @@ function selectJobCard(name) {
         <!-- Main Content Wrapper -->
         <div class="d-flex flex-grow-1" style="overflow-x: auto;">
             <!-- Left + middle columns wrapper -->
-            <div class="p-4" style="min-width: 600px; padding-top: 0 !important; flex: 1;">
+            <div class="p-4" style="min-width: 600px; flex: 1;">
                 <!-- Top header -->
-                <div class="mb-4">
-                    <a href="javascript:history.back()" class="small text-muted">
-                        &larr; {{ __('Back to Queue') }}
-                    </a>
-                </div>
-
-                <!-- Tabs for Mixers -->
-                <div v-show="mixersList.length > 1" class="mb-4 d-flex p-2 bg-light w-100" style="border-radius: 16px; gap: 0.5rem; overflow-x: auto;">
-                    <div v-for="mixer in mixersList" :key="mixer.name"
-                        class="text-center p-3 d-flex flex-column align-items-center justify-content-center border-0 flex-fill"
-                        :class="[
-                            selectedMixer === mixer.name ? 'bg-primary shadow text-white' :
-                                (mixer.status === 'Finished' ? 'bg-success shadow text-white' : 'text-secondary'),
-                            (mixingReady || mixingStarted) ? 'opacity-50' : ''
-                        ]"
-                        style="min-width: 120px; border-radius: 12px; transition: all 0.2s; cursor: pointer;"
-                        @click="selectMixerTab(mixer.name)">
-
-                        <div class="mb-2">
-                            <i v-if="mixer.status === 'In Progress'" class="fa fa-spinner fa-pulse fa-2x" title="In Progress"></i>
-                            <i v-else-if="mixer.status === 'Finished'" class="fa fa-check-circle fa-2x" title="Finished"></i>
-                            <i v-else class="fa fa-cube fa-2x" title="Idle"></i>
-                        </div>
-                        <div class="font-weight-bold" style="font-size: 0.95rem;">{{ mixer.name }} {{ mixer.status }}</div>
-                    </div>
-                </div>
-
-                <div class="d-flex align-items-center mb-4" v-if="jobCard">
+                <div class="d-flex align-items-center mb-4">
                     <div>
+                        <div class="mb-1">
+                            <a href="javascript:history.back()" class="small text-muted">
+                                &larr; {{ __('Back to Queue') }}
+                            </a>
+                        </div>
                         <h2 class="mb-3">{{ batchNo }}</h2>
                         <div class="text-danger font-weight-bold">{{ jobCard }}</div>
                     </div>
@@ -796,7 +716,7 @@ function selectJobCard(name) {
                     </div>
                 </div> <!-- /header -->
 
-                <div class="d-flex" v-if="jobCard">
+                <div class="d-flex">
                     <!-- Left: Raw Material Inputs -->
                     <div class="flex-fill mr-4" style="font-size: medium;">
                         <div class="mb-3">
@@ -806,7 +726,18 @@ function selectJobCard(name) {
                             </div>
                         </div>
 
-
+                        <div class="mb-3 d-flex justify-content-between">
+                            <label class="form-label bold">{{ __('Select Mixer') }}</label>
+                            <select v-model="selectedMixer" style="width: 30%;" class="form-control"
+                                :disabled="mixingReady || mixingStarted" @change="onMixerChange">
+                                <option value="" disabled selected>
+                                    {{ __('Select Mixer Type...') }}
+                                </option>
+                                <option v-for="mixer in mixersList" :key="mixer.name" :value="mixer.name">
+                                    {{ mixer.name }}
+                                </option>
+                            </select>
+                        </div>
 
                         <div v-if="loadingIngredients" class="text-center py-4">
                             <div class="spinner-border spinner-border-sm mr-2" role="status"></div>
@@ -953,14 +884,6 @@ function selectJobCard(name) {
                         </div>
                     </div> <!-- /middle column -->
                 </div> <!-- /d-flex for left+middle -->
-
-                <div v-if="!jobCard" class="d-flex flex-column align-items-center justify-content-center p-5 mt-4">
-                    <div class="text-center text-muted p-5 rounded border empty-queue-state">
-                        <i class="fa fa-inbox fa-3x mb-3 text-muted-light"></i>
-                        <h4 class="font-weight-bold">{{ __('No Job Card Available') }}</h4>
-                        <p class="mb-0 mt-2">{{ __('Please wait for a job card to be available for this mixer.') }}</p>
-                    </div>
-                </div>
             </div> <!-- /main wrapper -->
 
             <!-- Right: Downstream Alerts -->
@@ -1049,11 +972,8 @@ function selectJobCard(name) {
 
 .empty-queue-state {
     background-color: var(--fg-color);
-    border: 2px dashed #a3a3a3 !important;
-}
-
-[data-theme="dark"] .empty-queue-state {
-    border-color: #525252 !important;
+    border-style: dashed !important;
+    border-color: var(--border-color) !important;
 }
 
 .item-time-badge {
