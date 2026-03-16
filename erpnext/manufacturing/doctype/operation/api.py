@@ -157,7 +157,7 @@ def transfer_to_next_process(current_work_order, qty=None, process=None, mixer_n
 
 
 @frappe.whitelist()
-def get_recent_job_card(operation):
+def get_recent_job_card(operation, production_line = None):
 	if operation == "Mixing":
 		filters = {
 			"status": ["in", ["Open", "Material Transferred", "Work In Progress", "Completed"]],
@@ -170,12 +170,17 @@ def get_recent_job_card(operation):
 			"docstatus": 0,
 			"operation": ["like", f"%{operation}%"],
 		}
+
+	if production_line:
+		filters["production_line"] = production_line
+
 	job_cards = frappe.db.get_list(
 		"Job Card",
 		filters=filters,
 		fields=["name", "operation", "status", "work_order"],
 		order_by="creation asc",
 	)
+
 	if len(job_cards) == 0:
 		frappe.throw(_("No job cards found for operation {0}").format(operation))
 	return job_cards[0]
@@ -229,10 +234,13 @@ def get_open_job_cards(process, line=None, include_wip=True, include_material_tr
 			"production_item",
 			"slab",
 			"slab_template",
+			"workstation",
+			"workstation_type",
 			"started_time",
 			"creation",
+			"modified",
 		],
-		order_by="modified asc",
+		order_by="status desc, creation asc",
 		ignore_permissions=True,
 	)
 

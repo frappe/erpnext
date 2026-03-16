@@ -152,7 +152,8 @@ class JobCard(Document):
 				"workstation_type": ["like", f"{workstation_type}%"],
 				"production_line": self.production_line,
 			},
-			"name",
+			["name", "workstation_type"],
+			as_dict=True,
 		)
 
 		if not workstation and parent_line:
@@ -162,11 +163,13 @@ class JobCard(Document):
 				"workstation_type": self.operation,
 				"production_line": parent_line,
 			},
-			"name",
+			["name", "workstation_type"],
+			as_dict=True,
 		)
 
 		if workstation:
-			self.workstation = workstation
+			self.workstation = workstation.name
+			self.workstation_type = workstation.workstation_type
 
 	def validate(self):
 		self.validate_time_logs()
