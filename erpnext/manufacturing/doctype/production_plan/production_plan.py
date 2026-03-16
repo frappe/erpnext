@@ -731,6 +731,7 @@ class ProductionPlan(Document):
 				"description": d.description,
 				"stock_uom": d.stock_uom,
 				"company": self.company,
+				"source_warehouse": frappe.get_value("BOM", d.bom_no, "default_source_warehouse"),
 				"fg_warehouse": d.warehouse,
 				"production_plan": self.name,
 				"production_plan_item": d.name,
@@ -807,6 +808,7 @@ class ProductionPlan(Document):
 				continue
 
 			work_order_data = {
+				"source_warehouse": frappe.get_value("BOM", row.bom_no, "default_source_warehouse"),
 				"wip_warehouse": default_warehouses.get("wip_warehouse"),
 				"fg_warehouse": default_warehouses.get("fg_warehouse"),
 				"scrap_warehouse": default_warehouses.get("scrap_warehouse"),
