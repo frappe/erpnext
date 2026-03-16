@@ -312,7 +312,12 @@
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "in_list_view": 1,
+<<<<<<< HEAD
    "label": "Date",
+=======
+   "in_standard_filter": 1,
+   "label": "Posting Date",
+>>>>>>> 4cd150ba7a (fix: change "Date" label to "Posting Date" in Sales Invoice and Purchase Invoice (#53503))
    "oldfieldname": "posting_date",
    "oldfieldtype": "Date",
    "print_hide": 1,
