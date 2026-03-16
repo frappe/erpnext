@@ -95,7 +95,16 @@ class MaterialRequest(BuyingController):
 				"join_field": "sales_order_item",
 				"target_ref_field": "stock_qty",
 				"source_field": "stock_qty",
-			}
+			},
+			{
+				"source_dt": "Material Request Item",
+				"target_dt": "Packed Item",
+				"target_field": "requested_qty",
+				"target_parent_dt": "Sales Order",
+				"join_field": "packed_item",
+				"target_ref_field": "qty",
+				"source_field": "qty",
+			},
 		]
 
 	def check_if_already_pulled(self):

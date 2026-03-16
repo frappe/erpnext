@@ -1003,20 +1003,19 @@ def close_or_unclose_sales_orders(names, status):
 
 def get_requested_item_qty(sales_order):
 	result = {}
-	for d in frappe.db.get_all(
-		"Material Request Item",
-		filters={"docstatus": 1, "sales_order": sales_order},
-		fields=[
-			"sales_order_item",
-			"packed_item",
-			{"SUM": "qty", "as": "qty"},
-			{"SUM": "received_qty", "as": "received_qty"},
-		],
-		group_by="sales_order_item, packed_item",
-	):
-		result[d.sales_order_item or d.packed_item] = frappe._dict(
-			{"qty": d.qty, "received_qty": d.received_qty}
-		)
+
+	so = frappe.get_doc("Sales Order", sales_order)
+
+	for item in so.items:
+		if is_product_bundle(item.item_code):
+			for packed_item in so.get("packed_items"):
+				if (
+					packed_item.parent_item == item.item_code
+					and packed_item.parent_detail_docname == item.name
+				):
+					result[packed_item.name] = frappe._dict({"qty": packed_item.requested_qty})
+		else:
+			result[item.name] = frappe._dict({"qty": item.requested_qty})
 
 	return result
 
@@ -1035,8 +1034,7 @@ def make_material_request(source_name, target_doc=None):
 			flt(so_item.qty)
 			- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
 			- max(
-				flt(so_item.get("delivered_qty"))
-				- flt(requested_item_qty.get(so_item.name, {}).get("received_qty")),
+				flt(so_item.get("delivered_qty")),
 				0,
 			)
 		)
@@ -1051,16 +1049,12 @@ def make_material_request(source_name, target_doc=None):
 		)
 
 		return flt(
-			(
-				flt(so_item.qty)
-				- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
-				- max(
-					flt(delivered_qty) * flt(bundle_item_qty)
-					- flt(requested_item_qty.get(so_item.name, {}).get("received_qty")),
-					0,
-				)
+			flt(so_item.qty)
+			- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
+			- max(
+				flt(delivered_qty) * flt(bundle_item_qty),
+				0,
 			)
-			* bundle_item_qty
 		)
 
 	def update_item(source, target, source_parent):
@@ -1122,8 +1116,10 @@ def make_material_request(source_name, target_doc=None):
 		target_doc,
 		postprocess,
 	)
-
-	return doc
+	if doc and doc.items:
+		return doc
+	else:
+		frappe.throw(_("Material Request already created for the ordered quantity"))
 
 
 @frappe.whitelist()
