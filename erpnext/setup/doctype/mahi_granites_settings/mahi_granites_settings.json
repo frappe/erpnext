@@ -16,8 +16,6 @@
   "manufacturing_settings_section",
   "slab_section",
   "slab_seeds",
-  "mixing_section",
-  "show_job_card_queue_to_mixer_operators",
   "oven_section",
   "max_heating_minutes",
   "quarantine_section",
@@ -130,24 +128,13 @@
    "fieldtype": "Table",
    "label": "Slab Seeds",
    "options": "Slab Seed"
-  },
-  {
-   "fieldname": "mixing_section",
-   "fieldtype": "Section Break",
-   "label": "Mixing"
-  },
-  {
-   "default": "0",
-   "fieldname": "show_job_card_queue_to_mixer_operators",
-   "fieldtype": "Check",
-   "label": "Show Job Card Queue to Mixer Operators"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-17 00:03:47.073350",
+ "modified": "2026-03-04 22:47:36.884031",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Mahi Granites Settings",

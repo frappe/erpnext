@@ -579,14 +579,6 @@ class WorkOrder(Document):
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
 		self.create_job_card()
-		self.set_workstation_to_job_cards()
-
-	def set_workstation_to_job_cards(self):
-		job_cards = frappe.get_all("Job Card", filters={"work_order": self.name}, fields=["name"])
-		for job_card in job_cards:
-			job_card_doc = frappe.get_doc("Job Card", job_card.name)
-			job_card_doc.set_workstation()
-			job_card_doc.save()
 
 	def on_cancel(self):
 		self.validate_cancel()

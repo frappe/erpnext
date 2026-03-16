@@ -19,6 +19,5 @@ class SlabSeed(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		seed: DF.Int
-		seed_month: DF.Date
 	# end: auto-generated types
 	pass
