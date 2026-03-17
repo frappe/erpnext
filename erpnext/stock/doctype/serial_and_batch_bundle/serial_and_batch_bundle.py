@@ -2673,25 +2673,37 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 	"""Returns a dict of `Batch No` followed by the `Qty` reserved in POS Invoices."""
 
 	pos_batches = frappe._dict()
-	pos_invoices = frappe.get_all(
-		"POS Invoice",
-		fields=[
-			"`tabPOS Invoice Item`.batch_no",
-			"`tabPOS Invoice Item`.qty",
-			"`tabPOS Invoice`.is_return",
-			"`tabPOS Invoice Item`.warehouse",
-			"`tabPOS Invoice Item`.name as child_docname",
-			"`tabPOS Invoice`.name as parent_docname",
-			"`tabPOS Invoice Item`.use_serial_batch_fields",
-			"`tabPOS Invoice Item`.serial_and_batch_bundle",
-		],
-		filters=[
-			["POS Invoice", "consolidated_invoice", "is", "not set"],
-			["POS Invoice", "docstatus", "=", 1],
-			["POS Invoice Item", "item_code", "=", kwargs.item_code],
-			["POS Invoice", "name", "not in", kwargs.ignore_voucher_nos],
-		],
+	POS_Invoice = frappe.qb.DocType("POS Invoice")
+	POS_Invoice_Item = frappe.qb.DocType("POS Invoice Item")
+
+	pos_invoices = (
+		frappe.qb.from_(POS_Invoice)
+		.inner_join(POS_Invoice_Item)
+		.on(POS_Invoice.name == POS_Invoice_Item.parent)
+		.select(
+			POS_Invoice_Item.batch_no,
+			POS_Invoice_Item.qty,
+			POS_Invoice.is_return,
+			POS_Invoice_Item.warehouse,
+			POS_Invoice_Item.name.as_("child_docname"),
+			POS_Invoice.name.as_("parent_docname"),
+			POS_Invoice_Item.use_serial_batch_fields,
+			POS_Invoice_Item.serial_and_batch_bundle,
+		)
+		.where(
+			(POS_Invoice.consolidated_invoice.isnull())
+			& (POS_Invoice.docstatus == 1)
+			& (POS_Invoice_Item.item_code == kwargs.item_code)
+		)
 	)
+
+	if kwargs.get("company"):
+		pos_invoices = pos_invoices.where(POS_Invoice.company == kwargs.get("company"))
+
+	if kwargs.get("ignore_voucher_nos"):
+		pos_invoices = pos_invoices.where(POS_Invoice.name.notin(kwargs.get("ignore_voucher_nos")))
+
+	pos_invoices = pos_invoices.run(as_dict=True)
 
 	ids = [
 		pos_invoice.serial_and_batch_bundle
@@ -2754,6 +2766,9 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 		)
 		.groupby(sb_entry.batch_no, sre.warehouse)
 	)
+
+	if kwargs.get("company"):
+		query = query.where(sre.company == kwargs.get("company"))
 
 	if kwargs.batch_no:
 		if isinstance(kwargs.batch_no, list):
@@ -2979,6 +2994,9 @@ def get_available_batches(kwargs):
 		.groupby(batch_ledger.batch_no, batch_ledger.warehouse)
 	)
 
+	if kwargs.get("company"):
+		query = query.where(stock_ledger_entry.company == kwargs.get("company"))
+
 	if not kwargs.get("for_stock_levels"):
 		query = query.where((batch_table.expiry_date >= today()) | (batch_table.expiry_date.isnull()))
 
@@ -3087,6 +3105,9 @@ def get_picked_batches(kwargs) -> dict[str, dict]:
 			& (table.voucher_no.isnotnull())
 		)
 	)
+
+	if kwargs.get("company"):
+		query = query.where(table.company == kwargs.get("company"))
 
 	if kwargs.get("item_code"):
 		query = query.where(table.item_code == kwargs.get("item_code"))
@@ -3303,6 +3324,9 @@ def get_stock_ledgers_batches(kwargs):
 		.where((stock_ledger_entry.is_cancelled == 0) & (stock_ledger_entry.batch_no.isnotnull()))
 		.groupby(stock_ledger_entry.batch_no, stock_ledger_entry.warehouse)
 	)
+
+	if kwargs.get("company"):
+		query = query.where(stock_ledger_entry.company == kwargs.get("company"))
 
 	for field in ["warehouse", "item_code", "batch_no"]:
 		if not kwargs.get(field):

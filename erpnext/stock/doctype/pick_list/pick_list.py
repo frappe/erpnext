@@ -28,6 +28,15 @@ from erpnext.stock.serial_batch_bundle import (
 )
 from erpnext.utilities.transaction_base import TransactionBase
 
+
+class MissingWarehouseValidationError(frappe.ValidationError):
+	pass
+
+
+class IncorrectWarehouseValidationError(frappe.ValidationError):
+	pass
+
+
 # TODO: Prioritize SO or WO group warehouse
 
 
@@ -108,6 +117,7 @@ class PickList(TransactionBase):
 
 		if self.get("locations"):
 			self.validate_sales_order_percentage()
+			self.validate_warehouses()
 
 	def validate_stock_qty(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -150,6 +160,31 @@ class PickList(TransactionBase):
 						"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} in the warehouse {4}."
 					).format(row.idx, row.picked_qty, bold(row.item_code), bin_qty, bold(row.warehouse)),
 					title=_("Insufficient Stock"),
+				)
+
+	def validate_warehouses(self):
+		for location in self.locations:
+			if not location.warehouse:
+				frappe.throw(
+					_("Row {0}: Warehouse is required").format(location.idx),
+					title=_("Missing Warehouse"),
+					exc=MissingWarehouseValidationError,
+				)
+
+			company = frappe.get_cached_value("Warehouse", location.warehouse, "company")
+
+			if company != self.company:
+				frappe.throw(
+					_(
+						"Row {0}: Warehouse {1} is linked to company {2}. Please select a warehouse belonging to company {3}."
+					).format(
+						location.idx,
+						frappe.bold(location.warehouse),
+						frappe.bold(company),
+						frappe.bold(self.company),
+					),
+					title=_("Incorrect Warehouse"),
+					exc=IncorrectWarehouseValidationError,
 				)
 
 	def check_serial_no_status(self):
@@ -958,6 +993,7 @@ def get_available_item_locations(
 		locations = get_available_item_locations_for_batched_item(
 			item_code,
 			from_warehouses,
+			company,
 			consider_rejected_warehouses=consider_rejected_warehouses,
 		)
 	else:
@@ -1058,6 +1094,7 @@ def get_available_item_locations_for_serial_and_batched_item(
 	locations = get_available_item_locations_for_batched_item(
 		item_code,
 		from_warehouses,
+		company,
 		consider_rejected_warehouses=consider_rejected_warehouses,
 	)
 
@@ -1138,6 +1175,7 @@ def get_available_item_locations_for_serialized_item(
 def get_available_item_locations_for_batched_item(
 	item_code,
 	from_warehouses,
+	company,
 	consider_rejected_warehouses=False,
 ):
 	locations = []
@@ -1146,6 +1184,7 @@ def get_available_item_locations_for_batched_item(
 			{
 				"item_code": item_code,
 				"warehouse": from_warehouses,
+				"company": company,
 				"based_on": frappe.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
 			}
 		)
