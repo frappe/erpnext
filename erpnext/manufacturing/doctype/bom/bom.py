@@ -1233,39 +1233,27 @@ class BOM(WebsiteGenerator):
 		if self.with_operations and not self.get("operations") and self.docstatus == 1:
 			frappe.throw(_("Operations cannot be left blank"))
 
-		if self.with_operations:
-			for d in self.operations:
-				if not d.description:
-					d.description = frappe.db.get_value("Operation", d.operation, "description")
+		if not self.with_operations:
+			return
 
-				if not d.batch_size or d.batch_size <= 0:
-					d.batch_size = 1
+		for d in self.operations:
+			if not d.description:
+				d.description = frappe.db.get_value("Operation", d.operation, "description")
 
-				if not d.workstation and not d.workstation_type:
-					frappe.throw(
-						_("Row {0}: Workstation or Workstation Type is mandatory for an operation {1}")
-						.format(d.idx, d.operation)
-					)
+			if not d.batch_size or d.batch_size <= 0:
+				d.batch_size = 1
 
-				if not d.operation_time or d.operation_time <= 0:
-					frappe.throw(
-						_("Row {0}: Operation Time must be greater than 0 for operation {1}")
-						.format(d.idx, d.operation)
-					)
+			if not d.workstation and not d.workstation_type:
+				frappe.throw(
+					_("Row {0}: Workstation or Workstation Type is mandatory for an operation {1}")
+					.format(d.idx, d.operation)
+				)
 
-		if self.with_operations:
-			for d in self.operations:
-				if not d.description:
-					d.description = frappe.db.get_value("Operation", d.operation, "description")
-				if not d.batch_size or d.batch_size <= 0:
-					d.batch_size = 1
-
-				if not d.workstation and not d.workstation_type:
-					frappe.throw(
-						_(
-							"Row {0}: Workstation or Workstation Type is mandatory for an operation {1}"
-						).format(d.idx, d.operation)
-					)
+			if not d.operation_time or d.operation_time <= 0:
+				frappe.throw(
+					_("Row {0}: Operation Time must be greater than 0 for operation {1}")
+					.format(d.idx, d.operation)
+				)
 
 	def get_tree_representation(self) -> BOMTree:
 		"""Get a complete tree representation preserving order of child items."""
