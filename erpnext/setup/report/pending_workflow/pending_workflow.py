@@ -77,7 +77,8 @@ def get_data(filters):
 			"reference_doctype",
 			"reference_name",
 			"creation as workflow_date"
-		]
+		],
+		order_by="creation desc",
 	)
 
 	latest_actions = {}
@@ -96,16 +97,21 @@ def get_data(filters):
 		if filters.get("reference_doctype") and wa.reference_doctype != filters.get("reference_doctype"):
 			continue
 
+		meta = frappe.get_meta(wa.reference_doctype)
+		has_company = meta.has_field("company")
+
+		if filters.get("company") and not has_company:
+			continue
+
 		Doc = frappe.qb.DocType(wa.reference_doctype)
+
+		select_fields = [Doc.name, Doc.workflow_state, Doc.creation.as_("created_date")]
+		if has_company:
+			select_fields.append(Doc.company)
 
 		query = (
 			frappe.qb.from_(Doc)
-			.select(
-				Doc.name,
-				Doc.company,
-				Doc.workflow_state,
-				Doc.creation.as_("created_date"),
-			)
+			.select(*select_fields)
 			.where(Doc.name == wa.reference_name)
 			.where(Doc.docstatus < 2)
 		)
@@ -183,9 +189,8 @@ def apply_workflow_action(rows, action):
 	errors = []
 
 	for row in rows:
-		doc = frappe.get_doc(row["doctype"], row["name"])
-
 		try:
+			doc = frappe.get_doc(row["doctype"], row["name"])
 			apply_workflow(doc, action)
 		except WorkflowTransitionError:
 			errors.append(
