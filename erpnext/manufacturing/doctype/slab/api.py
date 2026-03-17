@@ -12,9 +12,10 @@ from erpnext.setup.doctype.mahi_granites_settings.mahi_granites_settings import 
 
 
 @frappe.whitelist()
-def create_slab(line: str, type: str, job_card_number: str | None = None):
+def create_slab(line: str, child_line: str, type: str, job_card_number: str | None = None):
 	new_slab: Slab = frappe.new_doc("Slab")  # pyright: ignore[reportAssignmentType]
 	new_slab.line = line
+	new_slab.child_line = child_line
 	new_slab.template = type
 	new_slab.current_job_card = job_card_number
 	new_slab.batch_number = _generate_batch_number(line)

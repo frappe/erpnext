@@ -18,6 +18,7 @@ class Slab(Document):
 
 		amended_from: DF.Link | None
 		batch_number: DF.Data
+		child_line: DF.Link | None
 		consignment_number: DF.Data | None
 		created_on: DF.Datetime | None
 		current_job_card: DF.Data | None
