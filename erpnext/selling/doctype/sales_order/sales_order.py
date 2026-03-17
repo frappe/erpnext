@@ -1340,6 +1340,30 @@ def make_sales_invoice(
 	# 0 qty is accepted, as the qty is uncertain for some items
 	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
 
+	invoice = get_mapped_doc(
+		"Sales Order",
+		source_name,
+		{
+			"Sales Order": {
+				"doctype": "Sales Invoice",
+				"field_map": {"name": "sales_order"},
+				"validation": {"docstatus": ["=", 1]},
+			},
+			"Sales Order Item": {
+				"doctype": "Sales Invoice Item",
+				"field_map": {
+					"name": "sales_order_item",
+					"income_account": "income_account",
+					"cost_center": "cost_center",
+					"warehouse": "warehouse",
+				},
+			},
+		},
+		target_doc=target_doc,
+		ignore_permissions=ignore_permissions,
+	)
+	return invoice
+
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
 
