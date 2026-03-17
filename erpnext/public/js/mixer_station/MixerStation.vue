@@ -960,7 +960,13 @@ function selectJobCard(name) {
                 </div> <!-- /d-flex for left+middle -->
 
                 <div v-if="!jobCard" class="d-flex flex-column align-items-center justify-content-center p-5 mt-4">
-                    <div class="text-center text-muted p-5 rounded border empty-queue-state">
+                    <div v-if="loadingIngredients" class="d-flex flex-column align-items-center justify-content-center p-5 mt-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <p class="mt-3 text-muted">{{ __('Fetching latest job card details from server...') }}</p>
+                    </div>
+                    <div v-else class="text-center text-muted p-5 rounded border empty-queue-state">
                         <i class="fa fa-inbox fa-3x mb-3 text-muted-light"></i>
                         <h4 class="font-weight-bold">{{ __('No Job Card Available') }}</h4>
                         <p class="mb-0 mt-2">{{ __('Please wait for a job card to be available for this mixer.') }}</p>
