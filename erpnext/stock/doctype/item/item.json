@@ -340,6 +340,7 @@
   },
   {
    "depends_on": "is_stock_item",
+   "documentation_url": "https://docs.frappe.io/erpnext/change-valuation-method",
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Valuation Method",
@@ -896,7 +897,11 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
+<<<<<<< HEAD
  "modified": "2025-12-15 20:08:35.634046",
+=======
+ "modified": "2026-03-17 20:39:05.218344",
+>>>>>>> f319857939 (chore: add documentation link in valuation method field (#53564))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
