@@ -1250,7 +1250,7 @@ class BOM(WebsiteGenerator):
 					)
 				)
 
-			if not d.time_in_mins or d.time_in_mins <= 0:
+			if d.time_in_mins is not None and d.time_in_mins <= 0:
 				frappe.throw(
 					_("Row {0}: Operation Time (mins) must be greater than 0 for operation {1}").format(
 						d.idx, d.operation
