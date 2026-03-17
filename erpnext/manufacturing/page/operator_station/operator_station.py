@@ -48,7 +48,6 @@ def get_machine_state(job_card, process_name="operator"):
 		f"{process_name}_started": 1 if jc.time_logs else 0,
 		f"{process_name}_start_time": jc.started_time,
 		"job_card_submitted": jc.docstatus == 1 or jc.status == "Completed",
-		"stock_entry_name": (wo and wo.produced_qty > 0 and f"MFG-SE-{process_name.upper()}-*") or "",
 		"process_name": process_name,
 		"status": jc.status,
 		"current_process": item_name.rsplit("-", 1)[-1].strip()

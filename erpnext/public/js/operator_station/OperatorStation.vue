@@ -15,7 +15,6 @@ const processReady = ref(true);
 const slabNumber = ref(null);
 const jobCardSubmitted = ref(false);
 const preparedQty = ref(0);
-const stockEntryName = ref('');
 const transferredQty = ref(0);
 const transferSuccess = ref(false);
 const nextWorkOrder = ref('');
@@ -208,10 +207,6 @@ async function loadJobCard(name, slab_template = null) {
 
 		processStartTime.value = state[`${currentStation.value}_start_time`];
 		mixerNumber.value = state.mixer_number;
-
-		if (jobCardSubmitted.value) {
-			stockEntryName.value = state.stock_entry_name || '';
-		}
 
 		if (processStarted.value && processStartTime.value) {
 			const start = new Date(processStartTime.value);
@@ -438,7 +433,6 @@ async function finishOperation() {
 
 				jobCardSubmitted.value = true;
 				preparedQty.value = result.message.job_card_qty;
-				stockEntryName.value = result.message.stock_entry;
 				nextWorkOrder.value = result.message.next_work_order || '';
 				transferredQty.value = 0;
 				transferSuccess.value = false;
