@@ -123,12 +123,17 @@ onMounted(async () => {
         await loadData();
     });
 
-    pollingInterval.value = setInterval(() => {
-        // TODO: Wrap all these in a single call and reuse it.
-        fetchQueue();
-        fetchDistributionStatus();
-        loadMixers();
-    }, 5000); // Poll every 5 seconds
+    frappe.realtime.on('refresh_mixer_station', () => {
+        fetchPollingData();
+    });
+
+    frappe.realtime.on('slab_checkout', (slab) => {
+        if (slab.child_line !== currentLine.value || slab.status !== 'Distribution') {
+            return;
+        }
+
+        fetchPollingData();
+    });
 });
 
 async function loadData() {
@@ -136,8 +141,7 @@ async function loadData() {
     error.value = null;
 
     try {
-        await loadMixers();
-        await fetchQueue();
+        await fetchPollingData(fetch_queue=1, fetch_status=1, fetch_mixers=1)
 
         let activeJob = null;
         if (selectedMixer.value) {
@@ -217,8 +221,6 @@ async function loadData() {
             }
         }
 
-        await fetchDistributionStatus();
-
         const r = await frappe.call({
             method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_ingredients',
             args: {
@@ -229,6 +231,7 @@ async function loadData() {
         if (r.message) {
             bomUOM.value = r.message[0].jc_bom_uom;
         }
+
         ingredients.value = (r.message || []).map(item => {
             const name = item.item_name || '';
             const lower = name.toLowerCase();
@@ -262,10 +265,6 @@ async function loadData() {
         loadingIngredients.value = false;
     }
 }
-
-onUnmounted(() => {
-    if (pollingInterval.value) clearInterval(pollingInterval.value);
-});
 
 async function confirmAndStartMixing() {
     if (!allAdditionalIngredientsAdded.value) {
@@ -448,6 +447,8 @@ async function finishAndDischarge() {
         // transferredQty.value = 0;
         displayQty.value = result.message.display_qty;
         transferSuccess.value = result.message.transfer_complete;
+
+        await loadData();
     }
     catch (error) {
         const errorMsg = error.message ||
@@ -596,6 +597,9 @@ async function transferToFGWarehouse() {
         // Refresh full state
         const refreshedState = await getMixerState();
 
+        // Reset the local storage with data from the server
+        localStorage.removeItem(`mixer_status_${selectedMixer.value}`);
+
         preparedQty.value = refreshedState.message.prepared_qty;
         transferredQty.value = refreshedState.message.transferred_qty_to_next;
         displayQty.value = refreshedState.message.display_qty;
@@ -644,17 +648,48 @@ async function loadBomQty() {
     }
 }
 
-async function loadMixers() {
-    const response = await frappe.call({
-        method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_all_mixers',
-        args: {
-            production_line: currentLine.value || work_context.assigned_line
-        } // Ensure we get mixers for the current line
-    });
+async function fetchPollingData(fetch_queue=1, fetch_status=1, fetch_mixers=1) {
+    try {
+        const r = await frappe.call({
+            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixer_polling_data',
+            args: {
+                production_line: currentLine.value,
+                fetch_queue: fetch_queue,
+                fetch_status: fetch_status,
+                fetch_mixers: fetch_mixers
+            }
+        });
 
-    const newMixers = response.message || [];
+        if (r.message) {
+            if (r.message.queue) {
+                jobcardsQueue.value = r.message.queue;
+            }
+            if (r.message.distribution_status) {
+                isDistributionBusy.value = r.message.distribution_status.busy || false;
+            }
+            if (r.message.mixers) {
+                updateMixersList(r.message.mixers);
+            }
+        }
+    } catch (e) {
+        console.error('Failed to fetch polling data:', e);
+    }
+}
+
+function updateMixersList(newMixers) {
+    if (!newMixers) return;
     
-    // Update array reactively instead of replacing it, so that Vue UI updates smoothly
+    for (const nm of newMixers) {
+        if (nm.status === 'Finished') {
+            localStorage.setItem(`mixer_status_${nm.name}`, 'Finished');
+        } else {
+            const savedStatus = localStorage.getItem(`mixer_status_${nm.name}`);
+            if (savedStatus === 'Finished') {
+                nm.status = 'Finished';
+            }
+        }
+    }
+
     if (!mixersList.value?.length) {
         mixersList.value = newMixers;
     } else {
@@ -669,42 +704,12 @@ async function loadMixers() {
         }
     }
 
-    // Auto-select mixer if none selected yet
     if (!selectedMixer.value && mixersList.value.length > 0) {
         const firstMixerInLine = mixersList.value.find(m => m.production_line === currentLine.value) || mixersList.value[0];
         if (firstMixerInLine) {
             selectedMixer.value = firstMixerInLine.name;
             currentLine.value = firstMixerInLine.production_line;
         }
-    }
-}
-
-
-async function fetchQueue() {
-    try {
-        const r = await frappe.call({
-            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_mixing_queue',
-            args: {
-                production_line: currentLine.value,
-            }
-        });
-
-        jobcardsQueue.value = r.message || [];
-    } catch (e) {
-        console.error('Failed to fetch mixing queue:', e);
-    }
-}
-
-async function fetchDistributionStatus() {
-    if (!jobCard.value) return;
-    try {
-        const r = await frappe.call({
-            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.check_distribution_status',
-            args: { production_line: currentLine.value }
-        });
-        isDistributionBusy.value = r.message?.busy || false;
-    } catch (e) {
-        console.error('Failed to fetch distribution status:', e);
     }
 }
 
@@ -779,7 +784,7 @@ function selectJobCard(name) {
                             <i v-else-if="mixer.status === 'Finished'" class="fa fa-check-circle fa-2x" title="Finished"></i>
                             <i v-else class="fa fa-cube fa-2x" title="Idle"></i>
                         </div>
-                        <div class="font-weight-bold" style="font-size: 0.95rem;">{{ mixer.name }} {{ mixer.status }}</div>
+                        <div class="font-weight-bold" style="font-size: 0.95rem;">{{ mixer.name }}</div>
                     </div>
                 </div>
 
@@ -955,7 +960,13 @@ function selectJobCard(name) {
                 </div> <!-- /d-flex for left+middle -->
 
                 <div v-if="!jobCard" class="d-flex flex-column align-items-center justify-content-center p-5 mt-4">
-                    <div class="text-center text-muted p-5 rounded border empty-queue-state">
+                    <div v-if="loadingIngredients" class="d-flex flex-column align-items-center justify-content-center p-5 mt-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <p class="mt-3 text-muted">{{ __('Fetching latest job card details from server...') }}</p>
+                    </div>
+                    <div v-else class="text-center text-muted p-5 rounded border empty-queue-state">
                         <i class="fa fa-inbox fa-3x mb-3 text-muted-light"></i>
                         <h4 class="font-weight-bold">{{ __('No Job Card Available') }}</h4>
                         <p class="mb-0 mt-2">{{ __('Please wait for a job card to be available for this mixer.') }}</p>

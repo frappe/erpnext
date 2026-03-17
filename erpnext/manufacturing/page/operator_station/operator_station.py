@@ -90,7 +90,11 @@ def start_process(job_card, slab_name="", slab_template="", process_name="operat
 			raise Exception("Cannot create a new slab outside distribution")
 
 		parent_line = get_parent_line(jc.production_line or "")
-		new_slab = create_slab(parent_line or "", slab_template or "", jc.name)
+		child_line = ""
+		if parent_line and parent_line != jc.production_line:
+			child_line = jc.production_line
+
+		new_slab = create_slab(parent_line or "", child_line or "", slab_template or "", jc.name)
 		slab_name = new_slab.name
 		slab_template = new_slab.template
 

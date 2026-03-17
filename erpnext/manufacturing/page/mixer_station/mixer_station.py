@@ -544,3 +544,24 @@ def assign_mixer_to_job_card(job_card, mixer):
 	frappe.db.commit()
 
 	return {"status": "success", "mixer_number": jc.mixer_number}
+
+
+@frappe.whitelist()
+def get_mixer_polling_data(production_line=None, fetch_queue=0, fetch_status=0, fetch_mixers=0):
+	"""Consolidated endpoint for polling queue, distribution status, and mixers"""
+	result = {}
+
+	fetch_queue_bool = frappe.utils.cint(fetch_queue)
+	fetch_status_bool = frappe.utils.cint(fetch_status)
+	fetch_mixers_bool = frappe.utils.cint(fetch_mixers)
+
+	if fetch_status_bool:
+		result["distribution_status"] = check_distribution_status(production_line)
+
+	if fetch_queue_bool:
+		result["queue"] = get_mixing_queue(production_line)
+
+	if fetch_mixers_bool:
+		result["mixers"] = get_all_mixers(production_line)
+
+	return result
