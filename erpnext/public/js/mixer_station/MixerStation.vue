@@ -126,6 +126,14 @@ onMounted(async () => {
     frappe.realtime.on('refresh_mixer_station', () => {
         fetchPollingData();
     });
+
+    frappe.realtime.on('slab_checkout', (slab) => {
+        if (slab.child_line !== currentLine.value || slab.status !== 'Distribution') {
+            return;
+        }
+
+        fetchPollingData();
+    });
 });
 
 async function loadData() {
