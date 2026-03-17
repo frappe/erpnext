@@ -3,7 +3,6 @@ import { ref, computed, onMounted, onUnmounted, reactive } from 'vue';
 
 const jobCard = ref(null);
 const batchNo = ref('');
-const colour = ref('');
 const phase = ref('Preparation Phase');
 const ingredients = ref([]);
 const loadingIngredients = ref(true);
@@ -11,10 +10,8 @@ const error = ref(null);
 const additionalIngredients = ['silane', 'catalyst', 'hardener'];
 const jobCardSubmitted = ref(false);
 const preparedQty = ref(0);
-const stockEntryName = ref('');
 const transferredQty = ref(0);
 const transferSuccess = ref(false);
-const nextWorkOrder = ref('');
 const bomQty = ref(0);
 const bomUOM = ref('');
 const selectedMixer = ref('');
@@ -22,7 +19,6 @@ const mixersList = ref([]);
 const jobcardsQueue = ref([]);
 const productionLine = ref(null);
 const currentLine = ref(null);
-const pollingInterval = ref(null);
 const isDistributionBusy = ref(false);
 const displayQty = ref(0);
 const isProcessing = ref(false);
@@ -184,11 +180,11 @@ async function loadData() {
         mixingStartTime.value = s.mixer_start_time;
         selectedMixer.value = selectedMixer.value || s.mixer_number || '';
         displayQty.value = s.display_qty;
+        bomQty.value = s.bom_qty;
 
         jobCardSubmitted.value = !!s.job_card_submitted;
         if (jobCardSubmitted.value) {
             preparedQty.value = s.prepared_qty || 0;
-            stockEntryName.value = s.stock_entry_name || '';
             transferredQty.value = s.transferred_qty_to_next || 0;
             transferSuccess.value = s.transfer_complete || false;
         }
@@ -246,16 +242,6 @@ async function loadData() {
                 is_added: !!item.additional_ingredients_added,
             };
         });
-
-        if (jobCardSubmitted.value) {
-            const jc = await frappe.db.get_doc('Job Card', jobCard.value);
-            preparedQty.value = jc.total_completed_qty || jc.for_quantity || s.prepared_qty || 0;
-            stockEntryName.value = s.stock_entry_name || '';
-            transferredQty.value = s.transferred_qty_to_next || 0;
-            // transferSuccess.value = (preparedQty.value - transferredQty.value) <= 0.001;
-            transferSuccess.value = displayQty.value <= 0.001;
-            await loadBomQty();
-        }
     }
     catch (e) {
         error.value = e.message || e;
@@ -441,10 +427,7 @@ async function finishAndDischarge() {
 
         jobCardSubmitted.value = true;
         preparedQty.value = result.message.job_card_qty;
-        stockEntryName.value = result.message.stock_entry;
         bomQty.value = result.message.bom_qty || 0;
-        nextWorkOrder.value = result.message.next_work_order || '';
-        // transferredQty.value = 0;
         displayQty.value = result.message.display_qty;
         transferSuccess.value = result.message.transfer_complete;
 
@@ -572,7 +555,6 @@ async function transferToFGWarehouse() {
         isProcessing.value = true;
         const jc = await frappe.db.get_doc('Job Card', jobCard.value);
         const workOrder = jc.work_order;
-        const qty = bomQty.value
 
         if (!workOrder) {
             frappe.msgprint(__('Work Order required from Job Card'));
@@ -582,6 +564,7 @@ async function transferToFGWarehouse() {
         const result = await frappe.call({
             method: 'erpnext.manufacturing.doctype.operation.api.transfer_to_next_process',
             args: {
+                current_job_card: jobCard.value,
                 current_work_order: workOrder,
                 qty: bomQty.value,
                 process: 'Mixing',
@@ -631,22 +614,6 @@ const getCanTransfer = computed(() => {
     return display >= bom && !isDistributionBusy.value;
 });
 
-async function loadBomQty() {
-    try {
-        const jc = await frappe.db.get_doc('Job Card', jobCard.value);
-        const result = await frappe.call({
-            method: 'erpnext.manufacturing.page.mixer_station.mixer_station.get_next_process_bom_qty',
-            args: { mixing_work_order: jc.work_order }
-        });
-
-        bomQty.value = result.message.bom_qty;
-        nextWorkOrder.value = result.message.next_work_order;
-    }
-    catch (error) {
-        console.error('BOM qty load failed:', error);
-        bomQty.value = 0;
-    }
-}
 
 async function fetchPollingData(fetch_queue=1, fetch_status=1, fetch_mixers=1) {
     try {
@@ -935,10 +902,6 @@ function selectJobCard(name) {
                                         'Distribution Busy' :
                                         'Insufficient Qty') }}
                                 </button>
-                                <div v-else class="alert alert-success">
-                                    <span class="fa fa-check-circle mr-2"></span>
-                                    All transferred to {{ nextWorkOrder }}!
-                                </div>
                             </div>
                         </div>
 
