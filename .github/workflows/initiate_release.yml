@@ -9,7 +9,7 @@ permissions:
 on:
   schedule:
     # 9:30 UTC => 3 PM IST Tuesday
-    - cron: "30 9 * * 2"
+    - cron: "30 9 * * 1,4"
   workflow_dispatch:
 
 jobs:
