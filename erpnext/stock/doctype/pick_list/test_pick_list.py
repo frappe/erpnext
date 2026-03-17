@@ -342,6 +342,46 @@ class TestPickList(IntegrationTestCase):
 		self.assertEqual(pick_list.locations[0].batch_no, batch_no.name)
 		self.assertEqual(pick_list.locations[0].warehouse, batch_warehouse.name)
 
+	def test_pick_list_warehouse_validation(self):
+		"""check if the warehouse validations are triggered"""
+		from erpnext.stock.doctype.pick_list.pick_list import (
+			IncorrectWarehouseValidationError,
+			MissingWarehouseValidationError,
+		)
+
+		warehouse_item = create_item("Warehouse Item")
+		temp_company = frappe.get_doc(
+			{"doctype": "Company", "company_name": "Temp Company", "default_currency": "INR"}
+		).insert()
+		temp_warehouse = frappe.get_doc(
+			{"doctype": "Warehouse", "warehouse_name": "Temp Warehouse", "company": temp_company.name}
+		).insert()
+
+		make_stock_entry(item_code=warehouse_item.name, qty=10, rate=100.0, to_warehouse=temp_warehouse.name)
+
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": temp_company.name,
+				"purpose": "Material Transfer",
+				"pick_manually": 1,
+				"locations": [
+					{
+						"item_code": warehouse_item.name,
+						"qty": 5,
+						"stock_qty": 5,
+						"conversion_factor": 1,
+					}
+				],
+			}
+		)
+
+		self.assertRaises(MissingWarehouseValidationError, pick_list.insert)
+		pick_list.locations[0].warehouse = "_Test Warehouse - _TC"
+		self.assertRaises(IncorrectWarehouseValidationError, pick_list.insert)
+		pick_list.locations[0].warehouse = temp_warehouse.name
+		pick_list.insert()
+
 	def test_pick_list_for_batched_and_serialised_item(self):
 		# check if oldest batch no and serial nos are picked
 		item = frappe.db.exists("Item", {"item_name": "Batched and Serialised Item"})
