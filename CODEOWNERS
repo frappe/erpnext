@@ -13,8 +13,8 @@ erpnext/maintenance/            @rohitwaghchaure @mihir-kandoi
 erpnext/manufacturing/          @rohitwaghchaure @mihir-kandoi
 erpnext/quality_management/     @rohitwaghchaure @mihir-kandoi
 erpnext/stock/                  @rohitwaghchaure @mihir-kandoi
-erpnext/subcontracting          @mihir-kandoi
-erpnext/projects                @nishkagosalia
+erpnext/subcontracting/         @mihir-kandoi
+erpnext/projects/               @nishkagosalia
 
 erpnext/controllers/            @ruthra-kumar @rohitwaghchaure @mihir-kandoi
 erpnext/patches/                @ruthra-kumar @rohitwaghchaure @mihir-kandoi
