@@ -33,40 +33,41 @@ frappe.ui.form.on("Global Defaults", {
 				__("Demo")
 			);
 		}
-
-		frm.add_custom_button(
-			__("Clear Demo Data"),
-			function () {
-				frappe.confirm(
-					__("Are you sure you want to clear all demo data? This cannot be undone."),
-					function () {
-						frappe.call({
-							method: "erpnext.setup.demo.clear_demo_data",
-							freeze: true,
-							freeze_message: __("Clearing Demo Data..."),
-							callback: function (r) {
-								if (!r.exc) {
+		if (frm.doc.demo_company) {
+			frm.add_custom_button(
+				__("Clear Demo Data"),
+				function () {
+					frappe.confirm(
+						__("Are you sure you want to clear all demo data? This cannot be undone."),
+						function () {
+							frappe.call({
+								method: "erpnext.setup.demo.clear_demo_data",
+								freeze: true,
+								freeze_message: __("Clearing Demo Data..."),
+								callback: function (r) {
+									if (!r.exc) {
+										frappe.msgprint({
+											title: __("Success"),
+											message: __("Demo data has been cleared successfully."),
+											indicator: "green",
+										});
+										frm.reload_doc();
+									}
+								},
+								error: function () {
 									frappe.msgprint({
-										title: __("Success"),
-										message: __("Demo data has been cleared successfully."),
-										indicator: "green",
+										title: __("Error"),
+										message: __("Failed to clear demo data. Check the error log."),
+										indicator: "red",
 									});
-									frm.reload_doc();
-								}
-							},
-							error: function () {
-								frappe.msgprint({
-									title: __("Error"),
-									message: __("Failed to clear demo data. Check the error log."),
-									indicator: "red",
-								});
-							},
-						});
-					}
-				);
-			},
-			__("Demo")
-		);
+								},
+							});
+						}
+					);
+				},
+				__("Demo")
+			);
+		}
 	},
 	onload: function (frm) {
 		frm.trigger("get_distance_uoms");

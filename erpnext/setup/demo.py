@@ -18,6 +18,7 @@ from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_a
 
 @frappe.whitelist()
 def setup_demo_data():
+	frappe.only_for("System Manager")
 	from frappe.utils.telemetry import capture
 
 	capture("demo_data_creation_started", "erpnext")
@@ -95,7 +96,7 @@ def create_demo_record(doctype):
 
 def make_transactions(company):
 	frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
-	frappe.db.commit()
+
 	from erpnext.accounts.utils import FiscalYearError
 
 	try:
@@ -115,7 +116,7 @@ def make_transactions(company):
 				create_transaction(item, company, start_date)
 
 	convert_order_to_invoices()
-	# frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 0)
+	frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 0)
 
 
 def create_transaction(doctype, company, start_date):
