@@ -634,8 +634,6 @@ def get_blanket_orders(doctype: str, txt: str, searchfield: str, start: int, pag
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_income_account(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	from erpnext.controllers.queries import get_match_cond
-
 	# income account can be any Credit account,
 	# but can also be a Asset account with account_type='Income Account' in special circumstances.
 	# Hence the first condition is an "OR"
@@ -730,8 +728,6 @@ def get_filtered_dimensions(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_expense_account(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	from erpnext.controllers.queries import get_match_cond
-
 	if not filters:
 		filters = {}
 
