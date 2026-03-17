@@ -964,6 +964,8 @@ class ProductionPlan(Document):
 				user=user,
 			)
 
+		frappe.publish_realtime("refresh_mixer_station")
+
 
 	def make_work_order_for_finished_goods(self, wo_list, default_warehouses, items_data=None):
 		if not items_data:
