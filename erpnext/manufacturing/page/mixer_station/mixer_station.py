@@ -14,6 +14,8 @@ from erpnext.manufacturing.doctype.job_card.job_card import (
 from erpnext.manufacturing.doctype.operation.api import _get_slab_template_from_bom, get_open_job_cards
 from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder
 from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry as wo_make_stock_entry
+from erpnext.setup.doctype.employee.api import get_current_user_context
+from erpnext.setup.doctype.mahi_granites_settings.mahi_granites_settings import MahiGranitesSettings
 
 
 @frappe.whitelist()
@@ -26,6 +28,16 @@ def check_distribution_status(production_line):
 	)
 
 	return {"busy": len(distribution_cards) > 0}
+
+
+@frappe.whitelist()
+def get_mixer_station_context():
+	user_context = get_current_user_context()
+	mahi_settings: MahiGranitesSettings = frappe.get_doc("Mahi Granites Settings")
+	return {
+		"current_user": user_context,
+		"show_job_card_queue": mahi_settings.show_job_card_queue_to_mixer_operators,
+	}
 
 
 @frappe.whitelist()
@@ -64,6 +76,9 @@ def get_mixing_queue(production_line):
 
 @frappe.whitelist()
 def get_mixer_state(job_card):
+	if not job_card:
+		return {}
+
 	jc = frappe.get_doc("Job Card", job_card)
 	wo = frappe.get_doc("Work Order", jc.work_order) if jc.work_order else None
 
@@ -186,9 +201,9 @@ def confirm_and_start_mixing(job_card, ingredients, bom_uom):
 			"mixer_start_time": jc.started_time,
 			"current_time": jc.current_time,
 		}
-	except Exception:
+	except Exception as e:
 		frappe.db.rollback()
-		frappe.throw()
+		frappe.throw(f"Failed to confirm and start mixing: {e}")
 
 
 # def confirm_materials(job_card, ingredients, bom_uom):
@@ -468,11 +483,56 @@ def get_next_process_bom_qty(mixing_work_order):
 
 @frappe.whitelist()
 def get_all_mixers(production_line=None):
-	filters = {
-		"production_line": production_line,
-		"workstation_type": "Mixing",
-	}
-	mixers_list = frappe.get_all("Workstation", filters=filters)
+	# Check if the current user has the role of Administrator
+	user_roles = frappe.get_roles()
+	is_admin = "Administrator" in user_roles or "Floor Manager" in user_roles
+
+	production_line_names: list[str] = []
+	production_lines = frappe.get_all("Production Line", fields=["name", "is_group", "parent_line"])
+	if is_admin and not production_line:
+		production_line_names = [line.name for line in production_lines if not line.is_group]
+
+	elif production_line:
+		# Get all the production lines
+		parent_line = None
+		for line in production_lines:
+			if line.name == production_line:
+				if line.is_group:
+					parent_line = line.name
+				else:
+					parent_line = line.parent_line
+
+		production_line_names = [line.name for line in production_lines if line.parent_line == parent_line]
+
+	filters = [
+		["workstation_type", '=', "Mixing"],
+		["production_line", 'in', production_line_names if production_line_names else ['']]
+	]
+
+	mixers_list = frappe.get_all("Workstation", filters=filters, fields=["name", "production_line"], order_by="name asc")
+
+	active_job_cards = frappe.get_all(
+		"Job Card",
+		filters={"job_started": 1, "status": ("!=", "Completed"), "workstation": ("is", "set"), "workstation_type": "Mixing"},
+		fields=["name", "workstation", "workstation_type"]
+	)
+
+	active_names = {d.workstation: d.name for d in active_job_cards if d.workstation}
+
+	queue_cards = get_mixing_queue(production_line)
+	finished_names = {card.get("workstation"): card.get("name") for card in queue_cards if card.get("status") == "Completed" and card.get("workstation")}
+
+	for m in mixers_list:
+		if m.name in finished_names:
+			m.status = "Finished"
+			m.active_job_card = finished_names[m.name]
+		elif m.name in active_names:
+			m.status = "In Progress"
+			m.active_job_card = active_names[m.name]
+		else:
+			m.status = "Idle"
+			m.active_job_card = None
+
 	return mixers_list
 
 

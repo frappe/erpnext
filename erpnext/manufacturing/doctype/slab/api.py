@@ -217,6 +217,28 @@ def get_slabs_for(line: str, next_stage: str, limit=1, include_current_stage=Fal
 	return slabs
 
 
+@frappe.whitelist()
+def get_batch_numbers(include_child_lines = False):
+	production_lines = frappe.db.get_list(
+		"Production Line",
+		ignore_permissions=True,
+		fields=["name", "parent_line", "is_group"],
+		filters={
+			"is_active": 1,
+		}
+	)
+
+	batch_numbers = {}
+
+	for line in production_lines:
+		if not line.is_group and not include_child_lines:
+			continue
+
+		batch_numbers[line.name] = _generate_batch_number(line.name)
+
+	return batch_numbers
+
+
 def _generate_batch_number(line: str):
 	today = date.today()
 
@@ -291,7 +313,7 @@ def _get_slab_number(batch: str, line: str) -> int:
 	batch_prefix = batch.split("/")[0]
 
 	mahi_granites_settings: MahiGranitesSettings = frappe.get_doc("Mahi Granites Settings")  # pyright: ignore[reportAssignmentType]
-	slab_seed = next((seed.seed for seed in mahi_granites_settings.slab_seeds if seed.line == line), 0)
+	slab_seed = next((seed.seed for seed in mahi_granites_settings.slab_seeds if seed.line == line and seed.seed_month and seed.seed_month.strftime("%Y-%m-%d") == month_start), 0)  # pyright: ignore
 
 	slab_count: int = (
 		frappe.db.count(
