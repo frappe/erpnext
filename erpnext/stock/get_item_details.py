@@ -973,25 +973,17 @@ def insert_item_price(args):
 		return
 
 	transaction_date = (
-		getdate(ctx.get("posting_date") or ctx.get("transaction_date") or ctx.get("posting_datetime"))
+		getdate(args.get("posting_date") or args.get("transaction_date") or args.get("posting_datetime"))
 		or getdate()
 	)
 
 	item_prices = frappe.get_all(
 		"Item Price",
-<<<<<<< HEAD
-		{
+		filters={
 			"item_code": args.item_code,
 			"price_list": args.price_list,
 			"currency": args.currency,
 			"uom": args.stock_uom,
-=======
-		filters={
-			"item_code": ctx.item_code,
-			"price_list": ctx.price_list,
-			"currency": ctx.currency,
-			"uom": ctx.stock_uom,
->>>>>>> 49581e7408 (fix: Creating new item price incase of changes in expired item price (#53534))
 		},
 		fields=["name", "price_list_rate", "valid_from", "valid_upto"],
 		order_by="valid_from desc, creation desc",
@@ -1018,20 +1010,15 @@ def insert_item_price(args):
 		if not price_list_rate or item_price.price_list_rate == price_list_rate:
 			return
 
-<<<<<<< HEAD
-		frappe.db.set_value("Item Price", item_price.name, "price_list_rate", price_list_rate)
-		frappe.msgprint(
-			_("Item Price updated for {0} in Price List {1}").format(args.item_code, args.price_list),
-			alert=True,
-		)
-=======
 		is_price_valid_for_transaction = (
 			not item_price.valid_from or getdate(item_price.valid_from) <= transaction_date
 		) and (not item_price.valid_upto or getdate(item_price.valid_upto) >= transaction_date)
 		if is_price_valid_for_transaction:
 			frappe.db.set_value("Item Price", item_price.name, "price_list_rate", price_list_rate)
 			frappe.msgprint(
-				_("Item Price updated for {0} in Price List {1}").format(ctx.item_code, ctx.price_list),
+				_("Item Price updated for {0} in Price List {1}").format(
+					get_link_to_form("Item", args.item_code), args.price_list
+				),
 				alert=True,
 			)
 		else:
@@ -1039,20 +1026,19 @@ def insert_item_price(args):
 
 			item_price = frappe.new_doc(
 				"Item Price",
-				item_code=ctx.item_code,
+				item_code=args.item_code,
 				price_list_rate=price_list_rate,
-				currency=ctx.currency,
-				uom=ctx.stock_uom,
-				price_list=ctx.price_list,
+				currency=args.currency,
+				uom=args.stock_uom,
+				price_list=args.price_list,
 			)
 			item_price.insert()
 			frappe.msgprint(
 				_("Item Price Added for {0} in Price List {1}").format(
-					get_link_to_form("Item", ctx.item_code), ctx.price_list
+					get_link_to_form("Item", args.item_code), args.price_list
 				),
 				alert=True,
 			)
->>>>>>> 49581e7408 (fix: Creating new item price incase of changes in expired item price (#53534))
 	else:
 		rate_to_consider = (
 			(flt(args.price_list_rate) or flt(args.rate))
@@ -1073,14 +1059,8 @@ def insert_item_price(args):
 		)
 		item_price.insert()
 		frappe.msgprint(
-<<<<<<< HEAD
 			_("Item Price added for {0} in Price List {1}").format(args.item_code, args.price_list),
 			alert=True,
-=======
-			_("Item Price added for {0} in Price List {1}").format(
-				get_link_to_form("Item", ctx.item_code), ctx.price_list
-			)
->>>>>>> 49581e7408 (fix: Creating new item price incase of changes in expired item price (#53534))
 		)
 
 

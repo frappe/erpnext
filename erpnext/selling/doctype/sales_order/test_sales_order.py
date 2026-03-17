@@ -57,9 +57,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
-<<<<<<< HEAD
-=======
-	@IntegrationTestCase.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{
 			"auto_insert_price_list_rate_if_missing": 1,
@@ -124,7 +122,6 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		mr.reload()
 		self.assertRaises(frappe.ValidationError, make_material_request, so.name)
 
->>>>>>> 49581e7408 (fix: Creating new item price incase of changes in expired item price (#53534))
 	def test_sales_order_skip_delivery_note(self):
 		so = make_sales_order(do_not_submit=True)
 		so.order_type = "Maintenance"
