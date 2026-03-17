@@ -221,7 +221,7 @@ website_route_rules = [
 
 standard_navbar_items = [
 	{
-		"item_label": "Erase Demo Data",
+		"item_label": "Delete Demo Data",
 		"item_type": "Action",
 		"action": "erpnext.demo.clear_demo();",
 		"is_standard": 1,
