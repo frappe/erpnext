@@ -244,11 +244,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-01-02 18:18:05.759229",
-=======
  "modified": "2026-03-16 13:28:20.714576",
->>>>>>> e2667ab098 (fix: enable logs to track changes in doctype. (#53491))
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",
