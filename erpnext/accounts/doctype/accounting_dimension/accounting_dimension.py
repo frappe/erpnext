@@ -3,6 +3,7 @@
 
 
 import json
+import unicodedata
 
 import frappe
 from frappe import _, scrub
@@ -101,7 +102,9 @@ class AccountingDimension(Document):
 			self.label = cstr(self.document_type)
 
 		if not self.fieldname:
-			self.fieldname = scrub(self.label)
+			# Strip diacritics (e.g. "Département" → "departement") to produce a valid ASCII fieldname.
+			ascii_label = unicodedata.normalize("NFKD", self.label).encode("ascii", "ignore").decode("ascii")
+			self.fieldname = scrub(ascii_label)
 
 
 def make_dimension_in_accounting_doctypes(doc, doclist=None):

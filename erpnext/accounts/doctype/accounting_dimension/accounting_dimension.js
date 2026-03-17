@@ -58,7 +58,9 @@ frappe.ui.form.on("Accounting Dimension", {
 	},
 
 	label: function (frm) {
-		frm.set_value("fieldname", frm.doc.label.replace(/ /g, "_").replace(/-/g, "_").toLowerCase());
+		// Strip diacritics (e.g. "Département" → "departement") to match server-side fieldname generation.
+		const ascii_label = frm.doc.label.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+		frm.set_value("fieldname", ascii_label.replace(/ /g, "_").replace(/-/g, "_").toLowerCase());
 	},
 
 	document_type: function (frm) {
