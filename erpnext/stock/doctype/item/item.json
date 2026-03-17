@@ -358,6 +358,7 @@
   },
   {
    "depends_on": "is_stock_item",
+   "documentation_url": "https://docs.frappe.io/erpnext/change-valuation-method",
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Valuation Method",
@@ -988,7 +989,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-03-05 16:29:31.653447",
+ "modified": "2026-03-17 20:39:05.218344",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
