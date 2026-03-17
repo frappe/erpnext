@@ -29,8 +29,19 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 	company_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
 
 	item_list = get_items(filters, additional_table_columns, additional_conditions)
+<<<<<<< HEAD
 	if item_list:
 		itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency)
+=======
+	if not item_list:
+		return columns, [], None, None, None, 0
+
+	itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency)
+	default_taxes = {}
+	for tax in tax_columns:
+		default_taxes[f"{tax}_rate"] = 0
+		default_taxes[f"{tax}_amount"] = 0
+>>>>>>> 072ec9b7ae (fix: initialize all tax columns to resolve Key error in `item_wise_sales_register` and `item_wise_purchase_register` reports (#53323))
 
 	mode_of_payments = get_mode_of_payments(set(d.parent for d in item_list))
 	so_dn_map = get_delivery_notes_against_sales_order(item_list)
@@ -88,8 +99,15 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 
 		total_tax = 0
 		total_other_charges = 0
+<<<<<<< HEAD
 		for tax in tax_columns:
 			item_tax = itemised_tax.get(d.name, {}).get(tax, {})
+=======
+
+		row.update(default_taxes.copy())
+
+		for tax, details in itemised_tax.get(d.name, {}).items():
+>>>>>>> 072ec9b7ae (fix: initialize all tax columns to resolve Key error in `item_wise_sales_register` and `item_wise_purchase_register` reports (#53323))
 			row.update(
 				{
 					f"{tax}_rate": item_tax.get("tax_rate", 0),
