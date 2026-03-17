@@ -167,6 +167,7 @@
    "set_only_once": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
    "fieldname": "item_name",
    "fieldtype": "Data",
