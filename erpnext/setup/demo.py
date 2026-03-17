@@ -16,16 +16,24 @@ from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
 
 
+@frappe.whitelist()
 def setup_demo_data():
 	from frappe.utils.telemetry import capture
 
 	capture("demo_data_creation_started", "erpnext")
 	try:
+		frappe.publish_realtime("demo_setup_progress", {"current": 1, "total": 4, "msg": "Creating company"})
 		company = create_demo_company()
+		frappe.publish_realtime(
+			"demo_setup_progress", {"current": 2, "total": 4, "msg": "Creating master data"}
+		)
 		process_masters()
+		frappe.publish_realtime(
+			"demo_setup_progress", {"current": 3, "total": 4, "msg": "Making transactions"}
+		)
 		make_transactions(company)
 		frappe.cache.delete_keys("bootinfo")
-		frappe.publish_realtime("demo_data_complete")
+		frappe.publish_realtime("demo_setup_progress", {"current": 4, "total": 4, "msg": "Done!"})
 	except Exception:
 		frappe.log_error("Failed to create demo data")
 		capture("demo_data_creation_failed", "erpnext", properties={"exception": frappe.get_traceback()})
@@ -95,6 +103,7 @@ def create_demo_record(doctype):
 
 def make_transactions(company):
 	frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
+	frappe.db.commit()
 	from erpnext.accounts.utils import FiscalYearError
 
 	try:
@@ -114,7 +123,7 @@ def make_transactions(company):
 				create_transaction(item, company, start_date)
 
 	convert_order_to_invoices()
-	frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 0)
+	# frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 0)
 
 
 def create_transaction(doctype, company, start_date):
@@ -162,7 +171,6 @@ def convert_order_to_invoices():
 
 			if invoice.get("payment_schedule"):
 				invoice.payment_schedule[0].due_date = order.transaction_date
-
 			invoice.update_stock = 1
 			invoice.submit()
 
