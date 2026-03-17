@@ -62,6 +62,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Warehouse",
+   "mandatory_depends_on": "eval: parent.pick_manually",
    "options": "Warehouse",
    "read_only": 1
   },
@@ -283,7 +284,11 @@
  ],
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-09-23 00:02:57.817040",
+=======
+ "modified": "2026-03-17 16:25:10.358013",
+>>>>>>> 31d14df37b (fix(stock): add company filter while fetching batches (#53369))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List Item",
