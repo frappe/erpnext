@@ -16,6 +16,11 @@ frappe.ui.form.on("Global Defaults", {
 								freeze_message: __("Create Demo Data..."),
 								callback: function (r) {
 									if (!r.exc) {
+										frappe.msgprint({
+											title: __("Success"),
+											message: __("Demo data has been created successfully."),
+											indicator: "green",
+										});
 										frm.reload_doc();
 									}
 								},
