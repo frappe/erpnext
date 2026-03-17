@@ -82,6 +82,7 @@ class JobCard(Document):
 		for_quantity: DF.Float
 		hour_rate: DF.Currency
 		is_corrective_job_card: DF.Check
+		is_finished: DF.Check
 		item_name: DF.ReadOnly | None
 		items: DF.Table[JobCardItem]
 		job_started: DF.Check

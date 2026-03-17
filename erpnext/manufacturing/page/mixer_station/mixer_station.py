@@ -6,10 +6,11 @@ from frappe.utils import flt
 
 from erpnext.manufacturing.doctype.bom.bom import BOM
 from erpnext.manufacturing.doctype.job_card.job_card import (
-	make_stock_entry as jc_make_stock_entry,
+	JobCard,
+	make_time_log,
 )
 from erpnext.manufacturing.doctype.job_card.job_card import (
-	make_time_log,
+	make_stock_entry as jc_make_stock_entry,
 )
 from erpnext.manufacturing.doctype.operation.api import _get_slab_template_from_bom, get_open_job_cards
 from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder
@@ -79,8 +80,8 @@ def get_mixer_state(job_card):
 	if not job_card:
 		return {}
 
-	jc = frappe.get_doc("Job Card", job_card)
-	wo = frappe.get_doc("Work Order", jc.work_order) if jc.work_order else None
+	jc: JobCard = frappe.get_doc("Job Card", job_card)  # pyright: ignore
+	produced_qty = frappe.get_value("Work Order", jc.work_order, "produced_qty") if jc.work_order else None
 
 	next_bom = get_next_process_bom_qty(jc.work_order)
 	next_wo = next_bom.get("next_work_order")
@@ -100,13 +101,15 @@ def get_mixer_state(job_card):
 				AND sle.is_cancelled = 0
 			""",
 				(next_wo, jc.production_item),
-			)[0][0]
+			)[0][0] # pyright: ignore
 			or 0,
 			3,
 		)
 
-	prepared_qty = wo.produced_qty if wo else jc.total_completed_qty
+	prepared_qty = (produced_qty if produced_qty else jc.total_completed_qty) or 0 # pyright: ignore
+
 	display_qty = flt(prepared_qty - transferred_qty_to_next, 3)
+	bom_qty = flt(next_bom.get("bom_qty", 0), 2)
 
 	return {
 		"status": jc.status,
@@ -118,13 +121,12 @@ def get_mixer_state(job_card):
 		"job_card_submitted": jc.status == "Completed",
 		"job_card_completed": jc.total_completed_qty > 0,
 		"prepared_qty": prepared_qty,
-		"stock_entry_name": wo.produced_qty > 0 and "MFG-SE-*" or "",
-		"work_order_status": wo.get_status() if wo else "Draft",
 		"additional_ingredients_added": jc.additional_ingredients_added,
 		"mixer_number": jc.mixer_number,
 		"transferred_qty_to_next": transferred_qty_to_next,
 		"display_qty": display_qty,
 		"transfer_complete": display_qty <= 0.001,
+		"bom_qty": bom_qty
 	}
 
 
@@ -482,7 +484,7 @@ def get_next_process_bom_qty(mixing_work_order):
 
 
 @frappe.whitelist()
-def get_all_mixers(production_line=None):
+def get_all_mixers(production_line=None, mixing_queue = None):
 	# Check if the current user has the role of Administrator
 	user_roles = frappe.get_roles()
 	is_admin = "Administrator" in user_roles or "Floor Manager" in user_roles
@@ -519,7 +521,7 @@ def get_all_mixers(production_line=None):
 
 	active_names = {d.workstation: d.name for d in active_job_cards if d.workstation}
 
-	queue_cards = get_mixing_queue(production_line)
+	queue_cards = mixing_queue or get_mixing_queue(production_line)
 	finished_names = {card.get("workstation"): card.get("name") for card in queue_cards if card.get("status") == "Completed" and card.get("workstation")}
 
 	for m in mixers_list:
@@ -558,10 +560,12 @@ def get_mixer_polling_data(production_line=None, fetch_queue=0, fetch_status=0, 
 	if fetch_status_bool:
 		result["distribution_status"] = check_distribution_status(production_line)
 
+	mixing_queue = []
 	if fetch_queue_bool:
-		result["queue"] = get_mixing_queue(production_line)
+		mixing_queue = get_mixing_queue(production_line)
+		result["queue"] = mixing_queue
 
 	if fetch_mixers_bool:
-		result["mixers"] = get_all_mixers(production_line)
+		result["mixers"] = get_all_mixers(production_line, mixing_queue)
 
 	return result
