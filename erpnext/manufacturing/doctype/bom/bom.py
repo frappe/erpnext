@@ -1245,14 +1245,16 @@ class BOM(WebsiteGenerator):
 
 			if not d.workstation and not d.workstation_type:
 				frappe.throw(
-					_("Row {0}: Workstation or Workstation Type is mandatory for an operation {1}")
-					.format(d.idx, d.operation)
+					_("Row {0}: Workstation or Workstation Type is mandatory for an operation {1}").format(
+						d.idx, d.operation
+					)
 				)
 
-			if not d.operation_time or d.operation_time <= 0:
+			if not d.time_in_mins or d.time_in_mins <= 0:
 				frappe.throw(
-					_("Row {0}: Operation Time must be greater than 0 for operation {1}")
-					.format(d.idx, d.operation)
+					_("Row {0}: Operation Time (mins) must be greater than 0 for operation {1}").format(
+						d.idx, d.operation
+					)
 				)
 
 	def get_tree_representation(self) -> BOMTree:
