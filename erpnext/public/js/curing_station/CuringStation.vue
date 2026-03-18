@@ -2,9 +2,9 @@
 import { ref, reactive, onMounted } from 'vue';
 
 const work_context = reactive({
-    role: "Quarantine Operator",
+    role: "Curing Operator",
     assigned_line: "",
-    assigned_station: "Quarantine Station",
+    assigned_station: "Curing Station",
     assigned_shift: ""
 });
 
@@ -23,13 +23,13 @@ const fetchWorkContext = async () => {
 const selectedSlab = ref(null);
 const isProcessing = ref(false);
 
-const get_slabs_ready_for_quarantine = async (play_ding = false) => {
-    // Call API to get slabs ready for quarantine
+const get_slabs_ready_for_curing = async (play_ding = false) => {
+    // Call API to get slabs ready for curing
     const r = await frappe.call({
         method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
         args: {
             line: work_context.assigned_line,
-            next_stage: "Quarantine",
+            next_stage: "Curing",
         }
     });
 
@@ -45,7 +45,7 @@ const get_slabs_ready_for_quarantine = async (play_ding = false) => {
 function selectSlab(slab) {
     selectedSlab.value = slab;
     // Reset measurements on new selection
-    quarantineMeasurements.value = {
+    curingMeasurements.value = {
         bend_tr_diag: 0,
         bend_br_diag: 0,
         bend_v_line: 0,
@@ -53,20 +53,20 @@ function selectSlab(slab) {
     };
 }
 
-const quarantineLabels = ref([]);
+const curingLabels = ref([]);
 
-const fetchQuarantineLabels = async () => {
+const fetchCuringLabels = async () => {
     try {
         const doc = await frappe.db.get_doc('Mahi Granites Settings');
-        if (doc && doc.quarantine_labels) {
-            quarantineLabels.value = doc.quarantine_labels.map(row => row.parameter);
+        if (doc && doc.curing_labels) {
+            curingLabels.value = doc.curing_labels.map(row => row.parameter);
         }
     } catch (e) {
-        console.error("Failed to fetch quarantine labels", e);
+        console.error("Failed to fetch curing labels", e);
     }
 };
 
-const quarantineMeasurements = ref({
+const curingMeasurements = ref({
     bend_tr_diag: 0,
     bend_br_diag: 0,
     bend_v_line: 0,
@@ -79,14 +79,14 @@ onMounted(async () => {
     await fetchWorkContext();
     await loadData();
 
-    document.addEventListener("refresh-quarantine-station", () => {
+    document.addEventListener("refresh-curing-station", () => {
         loadData();
     });
 });
 
 async function loadData() {
-    await get_slabs_ready_for_quarantine();
-    await fetchQuarantineLabels();
+    await get_slabs_ready_for_curing();
+    await fetchCuringLabels();
 }
 
 frappe.realtime.on('slab_checkout', async (slab) => {
@@ -96,7 +96,7 @@ frappe.realtime.on('slab_checkout', async (slab) => {
     }
 
     if (!selectedSlab.value) {
-        await get_slabs_ready_for_quarantine(true);
+        await get_slabs_ready_for_curing(true);
     }
 
     // TODO: Use this if a queue is intelligently implemented on the frontend.
@@ -105,12 +105,12 @@ frappe.realtime.on('slab_checkout', async (slab) => {
     // }
 });
 
-const submitQuarantine = () => {
+const submitCuring = () => {
     if (!selectedSlab.value) {
         frappe.msgprint(__('Please select a slab first.'));
         return;
     }
-    frappe.confirm(__('Are you sure you want to submit the quarantine check?'), async () => {
+    frappe.confirm(__('Are you sure you want to submit the curing check?'), async () => {
         isProcessing.value = true;
         try {
             await frappe.call({
@@ -118,24 +118,24 @@ const submitQuarantine = () => {
                 args: {
                     slab_name: selectedSlab.value.name,
                     slab_template: selectedSlab.value.template,
-                    h_bend: quarantineMeasurements.value.bend_h_line,
-                    v_bend: quarantineMeasurements.value.bend_v_line,
-                    d1_bend: quarantineMeasurements.value.bend_br_diag,
-                    d2_bend: quarantineMeasurements.value.bend_tr_diag,
-                    depth: quarantineMeasurements.value.label,
-                    remarks: quarantineMeasurements.value.remarks
+                    h_bend: curingMeasurements.value.bend_h_line,
+                    v_bend: curingMeasurements.value.bend_v_line,
+                    d1_bend: curingMeasurements.value.bend_br_diag,
+                    d2_bend: curingMeasurements.value.bend_tr_diag,
+                    depth: curingMeasurements.value.label,
+                    remarks: curingMeasurements.value.remarks
                 },
                 freeze: true,
                 callback: async (r) => {
                     if (!r.exc) {
                         frappe.show_alert({
-                            message: __('Quarantine check submitted successfully'),
+                            message: __('Curing check submitted successfully'),
                             indicator: 'green'
                         });
                         erpnext.utils.play_ding("submit");
                         // Reset or refresh logic here if needed
                         // For example, remove the slab from list or reset measurements
-                        quarantineMeasurements.value = {
+                        curingMeasurements.value = {
                             bend_tr_diag: 0,
                             bend_br_diag: 0,
                             bend_v_line: 0,
@@ -145,12 +145,12 @@ const submitQuarantine = () => {
                         };
 
                         selectedSlab.value = null;
-                        await get_slabs_ready_for_quarantine(true);
+                        await get_slabs_ready_for_curing(true);
                     }
                 }
             });
         } catch (e) {
-            frappe.msgprint(__('Failed to submit quarantine check.'));
+            frappe.msgprint(__('Failed to submit curing check.'));
         } finally {
             isProcessing.value = false;
         }
@@ -162,10 +162,10 @@ const submitQuarantine = () => {
 <template>
     <div class="page-card d-flex">
 
-        <!-- Right: Quarantine Action (Placeholder) -->
+        <!-- Right: Curing Action (Placeholder) -->
         <div class="flex-fill pl-4 pb-5">
             <!-- TODO: Remove this if used within ERPNext context -->
-            <!-- <h4 class="mb-4">{{ __('Quarantine Station') }}</h4>  -->
+            <!-- <h4 class="mb-4">{{ __('Curing Station') }}</h4>  -->
             <Transition name="pop-switch" mode="out-in">
                 <div v-if="selectedSlab" key="current-slab" class="d-flex align-items-center justify-content-between border rounded p-3 mb-4 mt-3" style="background-color: var(--control-bg-on-gray, #e2edff); border-color: var(--primary-color) !important;">
                     <div class="d-flex align-items-center">
@@ -180,7 +180,7 @@ const submitQuarantine = () => {
                         <span class="fa fa-window-maximize" style="font-size: 4rem;"></span>
                     </div>
                     <h4 class="text-muted font-weight-bold">{{ __('No Slabs Available') }}</h4>
-                    <p class="text-muted mb-0">{{ __('There are no slabs are available for quarantine right now.') }}</p>
+                    <p class="text-muted mb-0">{{ __('There are no slabs are available for curing right now.') }}</p>
                 </div>
             </Transition>
 
@@ -207,45 +207,45 @@ const submitQuarantine = () => {
                         <!-- Inputs -->
                         <!-- Vertical Bend -->
                         <div class="input-pos" style="left: 200px; top: 60px;">
-                            <input type="number" v-model.number="quarantineMeasurements.bend_v_line"
+                            <input type="number" v-model.number="curingMeasurements.bend_v_line"
                                 class="bend-input form-control input-sm" placeholder="0">
                         </div>
 
                         <!-- Horizontal Bend -->
                         <div class="input-pos" style="left: 80px; top: 175px;">
-                            <input type="number" v-model.number="quarantineMeasurements.bend_h_line"
+                            <input type="number" v-model.number="curingMeasurements.bend_h_line"
                                 class="bend-input form-control input-sm" placeholder="0">
                         </div>
 
                         <!-- TR Diagonal Bend -->
                         <div class="input-pos" style="left: 480px; top: 70px;">
-                            <input type="number" v-model.number="quarantineMeasurements.bend_tr_diag"
+                            <input type="number" v-model.number="curingMeasurements.bend_tr_diag"
                                 class="bend-input form-control input-sm" placeholder="0">
                         </div>
 
                         <!-- BR Diagonal Bend -->
                         <div class="input-pos" style="left: 480px; top: 280px;">
-                            <input type="number" v-model.number="quarantineMeasurements.bend_br_diag"
+                            <input type="number" v-model.number="curingMeasurements.bend_br_diag"
                                 class="bend-input form-control input-sm" placeholder="0">
                         </div>
                     </div>
 
                     <div class="w-100 mt-4 px-5">
                         <label class="small text-muted mb-1">{{ __('Bend Depth') }}</label>
-                        <select v-model="quarantineMeasurements.label" class="form-control mb-3">
+                        <select v-model="curingMeasurements.label" class="form-control mb-3">
                             <option value="">{{ __('') }}</option>
-                            <option v-for="label in quarantineLabels" :key="label" :value="label">{{ label }}</option>
+                            <option v-for="label in curingLabels" :key="label" :value="label">{{ label }}</option>
                         </select>
 
                         <label class="small text-muted mb-1">{{ __('Remarks') }}</label>
-                        <textarea v-model="quarantineMeasurements.remarks" class="form-control" rows="3"></textarea>
+                        <textarea v-model="curingMeasurements.remarks" class="form-control" rows="3"></textarea>
                     </div>
                 </div>
 
                 <div class="mt-2">
-                    <button class="btn btn-primary" :disabled="isProcessing" @click="submitQuarantine">
+                    <button class="btn btn-primary" :disabled="isProcessing" @click="submitCuring">
                         <i v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></i>
-                        {{ __('Submit Quarantine') }}
+                        {{ __('Submit Curing') }}
                     </button>
                 </div>
             </div>

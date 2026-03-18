@@ -31,7 +31,7 @@
  "modified": "2026-01-06 20:09:22.452458",
  "modified_by": "Administrator",
  "module": "Manufacturing",
- "name": "Quarantine Label",
+ "name": "Curing Label",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [],

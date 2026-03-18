@@ -20,9 +20,9 @@
   "show_job_card_queue_to_mixer_operators",
   "oven_section",
   "max_heating_minutes",
-  "quarantine_section",
-  "min_quarantine_hours",
-  "quarantine_labels",
+  "curing_section",
+  "min_curing_hours",
+  "curing_labels",
   "quality_section",
   "grades"
  ],
@@ -46,21 +46,21 @@
    "label": "Manufacturing Settings"
   },
   {
-   "fieldname": "quarantine_labels",
+   "fieldname": "curing_labels",
    "fieldtype": "Table",
-   "label": "Quarantine Labels",
-   "options": "Quarantine Label"
+   "label": "Curing Labels",
+   "options": "Curing Label"
   },
   {
-   "fieldname": "quarantine_section",
+   "fieldname": "curing_section",
    "fieldtype": "Section Break",
-   "label": "Quarantine"
+   "label": "Curing"
   },
   {
    "default": "0",
-   "fieldname": "min_quarantine_hours",
+   "fieldname": "min_curing_hours",
    "fieldtype": "Float",
-   "label": "Minimum Quarantine Time (in hours)"
+   "label": "Minimum Curing Time (in hours)"
   },
   {
    "fieldname": "oven_section",
@@ -147,7 +147,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-17 00:03:47.073350",
+ "modified": "2026-03-18 23:09:11.488335",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Mahi Granites Settings",

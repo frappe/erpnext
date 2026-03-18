@@ -51,7 +51,7 @@ const alarms = ref([
 const station_reverse_map = {
 	"pressing": "Distribution",
 	"cooling": "Heating",
-	"trimming": "Quarantine",
+	"trimming": "Curing",
 	"calibration": "Trimming",
 	"polishing": "Calibration",
 };

@@ -6,13 +6,13 @@ import frappe
 from erpnext.manufacturing.doctype.manufacturing_process.constants import (
 	CALIBRATION_PROCESS,
 	COOLING_PROCESS,
+	CURING_PROCESS,
 	DISTRIBUTION_PROCESS,
 	HEATING_PROCESS,
 	MIXING_PROCESS,
 	POLISHING_PROCESS,
 	PRESSING_PROCESS,
 	QUALITY_CHECK_PROCESS,
-	QUARANTINE_PROCESS,
 	TRIMMING_PROCESS,
 )
 from erpnext.manufacturing.doctype.manufacturing_process.manufacturing_process import (
@@ -30,7 +30,7 @@ def create_mfg_processes():
 		DISTRIBUTION_PROCESS,
 		PRESSING_PROCESS,
 		HEATING_PROCESS,
-		QUARANTINE_PROCESS,
+		CURING_PROCESS,
 		COOLING_PROCESS,
 		TRIMMING_PROCESS,
 		CALIBRATION_PROCESS,

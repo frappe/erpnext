@@ -103,8 +103,8 @@ def _create_slab_quality_report(slab_name: str, report: str | dict, shift: str):
 	doc.submit()
 
 	slab: Slab = frappe.get_doc("Slab", slab_name)
-	# if slab.status != "Quarantine" and slab.is_cur_stage_complete:
-	#     raise Exception("Slab is not in quarantine or is not complete.")
+	# if slab.status != "Curing" and slab.is_cur_stage_complete:
+	#     raise Exception("Slab is not in curing or is not complete.")
 
 	last_history_item = next((h for h in slab.slab_history if h.station == "Quality Check"), None)
 	if not last_history_item:

@@ -20,7 +20,7 @@
   "status",
   "is_cur_stage_complete",
   "is_repressed",
-  "is_prematurely_unquarantined",
+  "is_prematurely_checked_out",
   "quality_section",
   "grade",
   "column_break_e1da",
@@ -65,7 +65,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Distribution\nPressing\nRe-Pressing\nHeating\nCooling\nQuarantine\nTrimming\nCalibration\nPolishing\nQuality Check\nPacked\nShipped\nDiscarded",
+   "options": "Distribution\nPressing\nRe-Pressing\nHeating\nCooling\nCuring\nTrimming\nCalibration\nPolishing\nQuality Check\nPacked\nShipped\nDiscarded",
    "read_only": 1,
    "reqd": 1
   },
@@ -190,9 +190,9 @@
   },
   {
    "default": "0",
-   "fieldname": "is_prematurely_unquarantined",
+   "fieldname": "is_prematurely_checked_out",
    "fieldtype": "Check",
-   "label": "Is Prematurely Unquarantined",
+   "label": "Is Prematurely Moved Out of Curing",
    "read_only": 1
   },
   {
@@ -272,7 +272,7 @@
   },
   {
    "color": "Blue",
-   "title": "Quarantine"
+   "title": "Curing"
   },
   {
    "color": "Pink",

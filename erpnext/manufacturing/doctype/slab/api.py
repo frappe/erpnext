@@ -55,11 +55,11 @@ def checkout_slab(slab_number: str):
 	total_seconds = (last_history.out_time - last_history.in_time).total_seconds()  # pyright: ignore[reportOperatorIssue]
 	last_history.total_time_in_minutes = total_seconds / 60
 
-	if slab.status == "Quarantine":
-		# Get Mahi Granites Settings to check if the slab is quarantined prematurely.
+	if slab.status == "Curing":
+		# Get Mahi Granites Settings to check if the slab is moved out of curing prematurely.
 		settings: MahiGranitesSettings = frappe.get_single("Mahi Granites Settings")  # pyright: ignore[reportAssignmentType]
-		if settings.min_quarantine_hours > total_seconds / 3600:
-			slab.is_prematurely_unquarantined = True
+		if settings.min_curing_hours > total_seconds / 3600:
+			slab.is_prematurely_checked_out = True
 
 	slab.is_cur_stage_complete = True
 
