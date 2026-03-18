@@ -321,7 +321,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Date",
+   "label": "Posting Date",
    "oldfieldname": "posting_date",
    "oldfieldtype": "Date",
    "print_hide": 1,
@@ -391,7 +391,7 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "bill_no",
+   "collapsible_depends_on": "posting_date",
    "fieldname": "supplier_invoice_details",
    "fieldtype": "Section Break",
    "label": "Supplier Invoice"
@@ -1693,7 +1693,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 17:15:27.014131",
+ "modified": "2026-03-17 20:44:00.221219",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

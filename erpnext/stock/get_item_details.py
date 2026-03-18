@@ -12,7 +12,7 @@ from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import add_days, add_months, cint, cstr, flt, getdate, parse_json
+from frappe.utils import add_days, add_months, cint, cstr, flt, get_link_to_form, getdate, parse_json
 
 import erpnext
 from erpnext import get_company_currency
@@ -1062,16 +1062,30 @@ def insert_item_price(ctx: ItemDetailsCtx):
 	):
 		return
 
-	item_price = frappe.db.get_value(
+	transaction_date = (
+		getdate(ctx.get("posting_date") or ctx.get("transaction_date") or ctx.get("posting_datetime"))
+		or getdate()
+	)
+
+	item_prices = frappe.get_all(
 		"Item Price",
-		{
+		filters={
 			"item_code": ctx.item_code,
 			"price_list": ctx.price_list,
 			"currency": ctx.currency,
 			"uom": ctx.stock_uom,
 		},
-		["name", "price_list_rate"],
-		as_dict=1,
+		fields=["name", "price_list_rate", "valid_from", "valid_upto"],
+		order_by="valid_from desc, creation desc",
+	)
+	item_price = next(
+		(
+			row
+			for row in item_prices
+			if (not row.valid_from or getdate(row.valid_from) <= transaction_date)
+			and (not row.valid_upto or getdate(row.valid_upto) >= transaction_date)
+		),
+		item_prices[0] if item_prices else None,
 	)
 
 	update_based_on_price_list_rate = stock_settings.update_price_list_based_on == "Price List Rate"
@@ -1086,11 +1100,33 @@ def insert_item_price(ctx: ItemDetailsCtx):
 		if not price_list_rate or item_price.price_list_rate == price_list_rate:
 			return
 
-		frappe.db.set_value("Item Price", item_price.name, "price_list_rate", price_list_rate)
-		frappe.msgprint(
-			_("Item Price updated for {0} in Price List {1}").format(ctx.item_code, ctx.price_list),
-			alert=True,
-		)
+		is_price_valid_for_transaction = (
+			not item_price.valid_from or getdate(item_price.valid_from) <= transaction_date
+		) and (not item_price.valid_upto or getdate(item_price.valid_upto) >= transaction_date)
+		if is_price_valid_for_transaction:
+			frappe.db.set_value("Item Price", item_price.name, "price_list_rate", price_list_rate)
+			frappe.msgprint(
+				_("Item Price updated for {0} in Price List {1}").format(ctx.item_code, ctx.price_list),
+				alert=True,
+			)
+		else:
+			# if price is not valid for the transaction date, insert a new price list rate with updated price and future validity
+
+			item_price = frappe.new_doc(
+				"Item Price",
+				item_code=ctx.item_code,
+				price_list_rate=price_list_rate,
+				currency=ctx.currency,
+				uom=ctx.stock_uom,
+				price_list=ctx.price_list,
+			)
+			item_price.insert()
+			frappe.msgprint(
+				_("Item Price Added for {0} in Price List {1}").format(
+					get_link_to_form("Item", ctx.item_code), ctx.price_list
+				),
+				alert=True,
+			)
 	else:
 		rate_to_consider = (
 			(flt(ctx.price_list_rate) or flt(ctx.rate)) if update_based_on_price_list_rate else flt(ctx.rate)
@@ -1109,8 +1145,9 @@ def insert_item_price(ctx: ItemDetailsCtx):
 		)
 		item_price.insert()
 		frappe.msgprint(
-			_("Item Price added for {0} in Price List {1}").format(ctx.item_code, ctx.price_list),
-			alert=True,
+			_("Item Price added for {0} in Price List {1}").format(
+				get_link_to_form("Item", ctx.item_code), ctx.price_list
+			)
 		)
 
 
