@@ -3258,10 +3258,7 @@ class _RegexpMatch(Criterion):
 		self.pattern = ValueWrapper(pattern)
 
 	def get_sql(self, **kwargs):
-		return "{field} REGEXP {pattern}".format(
-			field=self.field.get_sql(**kwargs),
-			pattern=self.pattern.get_sql(**kwargs),
-		)
+		return f"{self.field.get_sql(**kwargs)} REGEXP {self.pattern.get_sql(**kwargs)}"
 
 
 def get_stock_ledgers_for_serial_nos(kwargs):
