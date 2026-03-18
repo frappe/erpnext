@@ -1660,11 +1660,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-02-05 20:45:16.964500",
-=======
  "modified": "2026-03-17 20:44:00.221219",
->>>>>>> b433852f8a (chore: make supplier data expanded by default in PI (#53565))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
