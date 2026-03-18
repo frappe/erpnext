@@ -15,7 +15,6 @@ from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import Sum
-from pypika.terms import Criterion, ValueWrapper
 from frappe.utils import (
 	cint,
 	cstr,
@@ -29,6 +28,7 @@ from frappe.utils import (
 	today,
 )
 from frappe.utils.csvutils import build_csv_response
+from pypika.terms import Criterion, ValueWrapper
 
 from erpnext.stock.doctype.purchase_receipt_item.purchase_receipt_item import PurchaseReceiptItem
 from erpnext.stock.serial_batch_bundle import (
