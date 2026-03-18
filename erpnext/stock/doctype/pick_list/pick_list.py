@@ -1175,12 +1175,8 @@ def get_available_item_locations_for_batched_item(
 			{
 				"item_code": item_code,
 				"warehouse": from_warehouses,
-<<<<<<< HEAD
 				"based_on": frappe.db.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
-=======
 				"company": company,
-				"based_on": frappe.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
->>>>>>> 31d14df37b (fix(stock): add company filter while fetching batches (#53369))
 			}
 		)
 	)
