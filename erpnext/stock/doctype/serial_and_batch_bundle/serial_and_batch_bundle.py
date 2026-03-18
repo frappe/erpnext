@@ -14,7 +14,8 @@ import frappe.query_builder.functions
 from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
-from frappe.query_builder.functions import CustomFunction, Sum
+from frappe.query_builder.functions import Sum
+from pypika.terms import Criterion, ValueWrapper
 from frappe.utils import (
 	cint,
 	cstr,
@@ -3247,6 +3248,22 @@ def get_ledgers_from_serial_batch_bundle(**kwargs) -> list[frappe._dict]:
 	return query.run(as_dict=True)
 
 
+class _RegexpMatch(Criterion):
+	"""Generates ``field REGEXP 'pattern'`` — REGEXP is an infix operator in MariaDB/MySQL,
+	not a two-argument function."""
+
+	def __init__(self, field, pattern):
+		super().__init__()
+		self.field = field
+		self.pattern = ValueWrapper(pattern)
+
+	def get_sql(self, **kwargs):
+		return "{field} REGEXP {pattern}".format(
+			field=self.field.get_sql(**kwargs),
+			pattern=self.pattern.get_sql(**kwargs),
+		)
+
+
 def get_stock_ledgers_for_serial_nos(kwargs):
 	"""
 	Fetch stock ledger entries based on various filters.
@@ -3307,10 +3324,9 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 
 		# Legacy path: serial numbers stored as newline-separated string in serial_no field.
 		# Use REGEXP instead of 1000+ OR conditions to avoid PyPika recursion.
-		Regexp = CustomFunction("REGEXP", ["field", "pattern"])
 		escaped = [re.escape(sn) for sn in serial_nos]
 		pattern = "(^|\\n)(" + "|".join(escaped) + ")(\\n|$)"
-		direct_match = Regexp(stock_ledger_entry.serial_no, pattern)
+		direct_match = _RegexpMatch(stock_ledger_entry.serial_no, pattern)
 
 		if bundle_parents:
 			serial_condition = stock_ledger_entry.serial_and_batch_bundle.isin(bundle_parents) | direct_match
