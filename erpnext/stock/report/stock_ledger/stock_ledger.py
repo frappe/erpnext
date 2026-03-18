@@ -688,6 +688,7 @@ def get_opening_balance(filters, columns, sl_entries, inv_dimension_wise_value=N
 			"posting_time": "00:00:00",
 			"project": project,
 		},
+		for_report=True,
 	)
 
 	# check if any SLEs are actually Opening Stock Reconciliation

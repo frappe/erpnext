@@ -1781,7 +1781,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 	return sle[0] if sle else frappe._dict()
 
 
-def get_previous_sle(args, for_update=False, extra_cond=None):
+def get_previous_sle(args, for_update=False, extra_cond=None, for_report=False):
 	"""
 	get the last sle on or before the current time-bucket,
 	to get actual qty before transaction, this function
@@ -1797,7 +1797,7 @@ def get_previous_sle(args, for_update=False, extra_cond=None):
 	"""
 	args["name"] = args.get("sle", None) or ""
 	sle = get_stock_ledger_entries(
-		args, "<=", "desc", "limit 1", for_update=for_update, extra_cond=extra_cond
+		args, "<=", "desc", "limit 1", for_update=for_update, extra_cond=extra_cond, for_report=for_report
 	)
 	return sle and sle[0] or {}
 
@@ -1811,6 +1811,7 @@ def get_stock_ledger_entries(
 	debug=False,
 	check_serial_no=True,
 	extra_cond=None,
+	for_report=False,
 ):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 	conditions = f" and posting_datetime {operator} %(posting_datetime)s"
@@ -1865,7 +1866,7 @@ def get_stock_ledger_entries(
 	if extra_cond:
 		conditions += f"{extra_cond}"
 
-	if previous_sle.get("project"):
+	if for_report and previous_sle.get("project"):
 		conditions += " and project = %(project)s"
 
 	# nosemgrep
