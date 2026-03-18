@@ -32,6 +32,7 @@ def _execute(filters=None, additional_table_columns=None):
 
 	item_list = get_items(filters, additional_table_columns)
 	aii_account_map = get_aii_accounts()
+	default_taxes = {}
 	if item_list:
 		itemised_tax, tax_columns = get_tax_accounts(
 			item_list,
@@ -40,6 +41,9 @@ def _execute(filters=None, additional_table_columns=None):
 			doctype="Purchase Invoice",
 			tax_doctype="Purchase Taxes and Charges",
 		)
+		for tax in tax_columns:
+			default_taxes[f"{tax}_rate"] = 0
+			default_taxes[f"{tax}_amount"] = 0
 
 	po_pr_map = get_purchase_receipts_against_purchase_order(item_list)
 
@@ -87,6 +91,7 @@ def _execute(filters=None, additional_table_columns=None):
 
 		total_tax = 0
 		total_other_charges = 0
+		row.update(default_taxes.copy())
 		for tax, details in itemised_tax.get(d.name, {}).items():
 			row.update(
 				{

@@ -2267,10 +2267,13 @@ def make_work_order(
 	bom_no: str,
 	item: str,
 	qty: float = 0,
+	company: str | None = None,
 	project: str | None = None,
 	variant_items: str | list | None = None,
 	use_multi_level_bom: bool | None = None,
 ):
+	from erpnext import get_default_company
+
 	if not frappe.has_permission("Work Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
@@ -2286,6 +2289,7 @@ def make_work_order(
 	wo_doc = frappe.new_doc("Work Order")
 	wo_doc.track_semi_finished_goods = frappe.db.get_value("BOM", bom_no, "track_semi_finished_goods")
 	wo_doc.production_item = item
+	wo_doc.company = company or get_default_company()
 	wo_doc.update(item_details)
 	wo_doc.bom_no = bom_no
 	wo_doc.use_multi_level_bom = cint(use_multi_level_bom)

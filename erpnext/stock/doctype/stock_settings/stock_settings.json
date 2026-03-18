@@ -558,13 +558,13 @@
    "label": "Enable Serial / Batch No for Item"
   }
  ],
- "hide_toolbar": 1,
+ "hide_toolbar": 0,
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-25 10:56:34.105949",
+ "modified": "2026-03-16 13:28:19.254641",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

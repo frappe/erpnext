@@ -49,10 +49,10 @@
    "label": "Allow Variant UOM to be different from Template UOM"
   }
  ],
- "hide_toolbar": 1,
+ "hide_toolbar": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-02 18:18:23.005859",
+ "modified": "2026-03-16 13:28:20.597912",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Variant Settings",

@@ -359,6 +359,136 @@ class TestSerialandBatchBundle(IntegrationTestCase):
 		self.assertFalse(json.loads(sle.stock_queue or "[]"))
 		self.assertEqual(flt(sle.stock_value), 0.0)
 
+	def test_old_moving_avg_item_with_without_batchwise_valuation(self):
+		frappe.flags.ignore_serial_batch_bundle_validation = True
+		frappe.flags.use_serial_and_batch_fields = True
+		batch_item_code = "Old Batch Item Valuation 2"
+		make_item(
+			batch_item_code,
+			{
+				"has_batch_no": 1,
+				"batch_number_series": "TEST-OLD2-BAT-VAL-.#####",
+				"create_new_batch": 1,
+				"is_stock_item": 1,
+				"valuation_method": "Moving Average",
+			},
+		)
+
+		non_batchwise_val_batches = [
+			"TEST-OLD2-BAT-VAL-00001",
+			"TEST-OLD2-BAT-VAL-00002",
+			"TEST-OLD2-BAT-VAL-00003",
+			"TEST-OLD2-BAT-VAL-00004",
+		]
+
+		for batch_id in non_batchwise_val_batches:
+			if not frappe.db.exists("Batch", batch_id):
+				batch_doc = frappe.get_doc(
+					{
+						"doctype": "Batch",
+						"batch_id": batch_id,
+						"item": batch_item_code,
+						"use_batchwise_valuation": 0,
+					}
+				).insert(ignore_permissions=True)
+
+				self.assertTrue(batch_doc.use_batchwise_valuation)
+				batch_doc.db_set(
+					{
+						"use_batchwise_valuation": 0,
+						"batch_qty": 20,
+					}
+				)
+
+		qty_after_transaction = 0
+		balance_value = 0
+		i = 0
+		for batch_id in non_batchwise_val_batches:
+			i += 1
+			qty = 20
+			valuation = 100 * i
+			qty_after_transaction += qty
+			balance_value += qty * valuation
+
+			doc = frappe.get_doc(
+				{
+					"doctype": "Stock Ledger Entry",
+					"posting_date": today(),
+					"posting_time": nowtime(),
+					"batch_no": batch_id,
+					"incoming_rate": valuation,
+					"qty_after_transaction": qty_after_transaction,
+					"stock_value_difference": valuation * qty,
+					"stock_value": balance_value,
+					"balance_value": balance_value,
+					"valuation_rate": balance_value / qty_after_transaction,
+					"actual_qty": qty,
+					"item_code": batch_item_code,
+					"warehouse": "_Test Warehouse - _TC",
+				}
+			)
+
+			doc.set_posting_datetime()
+			doc.flags.ignore_permissions = True
+			doc.flags.ignore_mandatory = True
+			doc.flags.ignore_links = True
+			doc.flags.ignore_validate = True
+			doc.submit()
+			doc.reload()
+
+		frappe.flags.ignore_serial_batch_bundle_validation = False
+		frappe.flags.use_serial_and_batch_fields = False
+
+		se = make_stock_entry(
+			item_code=batch_item_code,
+			target="_Test Warehouse - _TC",
+			qty=30,
+			rate=355,
+			use_serial_batch_fields=True,
+		)
+
+		se = make_stock_entry(
+			item_code=batch_item_code,
+			source="_Test Warehouse - _TC",
+			qty=70,
+			use_serial_batch_fields=True,
+		)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"item_code": batch_item_code, "is_cancelled": 0, "voucher_no": se.name},
+			["qty_after_transaction", "stock_value"],
+			as_dict=True,
+		)
+
+		self.assertEqual(flt(sle.stock_value), 14000.0)
+		self.assertEqual(flt(sle.qty_after_transaction), 40.0)
+
+		se = make_stock_entry(
+			item_code=batch_item_code,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			rate=200,
+			use_serial_batch_fields=True,
+		)
+
+		se = make_stock_entry(
+			item_code=batch_item_code,
+			source="_Test Warehouse - _TC",
+			qty=50,
+			use_serial_batch_fields=True,
+		)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"item_code": batch_item_code, "is_cancelled": 0, "voucher_no": se.name},
+			["qty_after_transaction", "stock_value"],
+			as_dict=True,
+		)
+
+		self.assertEqual(flt(sle.stock_value), 0.0)
+		self.assertEqual(flt(sle.qty_after_transaction), 0.0)
+
 	def test_old_serial_no_valuation(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
