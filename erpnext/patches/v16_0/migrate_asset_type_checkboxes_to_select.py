@@ -10,6 +10,5 @@ def execute():
 		Case()
 		.when(Asset.is_existing_asset == 1, "Existing Asset")
 		.when(Asset.is_composite_asset == 1, "Composite Asset")
-		.when(Asset.is_composite_component == 1, "Composite Component")
 		.else_(""),
 	).run()

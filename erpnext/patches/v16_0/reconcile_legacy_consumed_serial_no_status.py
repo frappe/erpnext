@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 import frappe
-from frappe.query_builder.functions import IfNull
+from frappe.query_builder.functions import CombineDatetime, IfNull, Max
 from frappe.utils import flt, get_datetime
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as parse_serial_nos
@@ -22,10 +22,9 @@ def execute():
 	This backfills serials affected by older ERPNext behavior where outward raw
 	material movements in manufacturing-related stock entries could leave the
 	serial status as Delivered. The patch starts from a narrow Delivered seed set,
-	rebuilds each serial's effective history from both Serial and Batch Bundles
-	and legacy Stock Ledger Entry serial fields, and only updates rows whose
-	latest non-cancelled movement is an outward Stock Entry for a purpose that
-	now maps to Consumed.
+	compares each serial's latest bundle movement with its legacy Stock Ledger
+	Entry serial history, and only updates rows whose latest non-cancelled
+	movement is an outward Stock Entry for a purpose that now maps to Consumed.
 	"""
 	updates = get_consumed_serial_no_status_updates()
 	if not updates:
@@ -72,24 +71,37 @@ def get_consumed_serial_no_status_updates(serial_no=None, limit=None):
 		item_wise_serial_nos[candidate.item_code].add(candidate.name)
 
 	history_by_serial = defaultdict(list)
-	for movement in get_bundle_movements([candidate.name for candidate in candidates]):
+	for movement in get_latest_bundle_movements([candidate.name for candidate in candidates]):
 		history_by_serial[movement.serial_no].append(movement)
 
 	for item_code, serial_nos in item_wise_serial_nos.items():
 		for movement in get_legacy_movements(item_code, serial_nos):
 			history_by_serial[movement.serial_no].append(movement)
 
-	updates = []
+	latest_movement_by_serial = {}
+	stock_entry_voucher_nos = set()
 	for candidate in candidates:
 		movements = sorted(history_by_serial.get(candidate.name, ()), key=_movement_sort_key)
 		if not movements:
 			continue
 
 		latest_movement = movements[-1]
+		latest_movement_by_serial[candidate.name] = latest_movement
+		if latest_movement.actual_qty < 0 and latest_movement.voucher_type == "Stock Entry":
+			stock_entry_voucher_nos.add(latest_movement.voucher_no)
+
+	stock_entry_purposes = get_stock_entry_purposes(stock_entry_voucher_nos)
+
+	updates = []
+	for candidate in candidates:
+		latest_movement = latest_movement_by_serial.get(candidate.name)
+		if not latest_movement:
+			continue
+
 		if latest_movement.actual_qty >= 0 or latest_movement.voucher_type != "Stock Entry":
 			continue
 
-		purpose = frappe.get_cached_value("Stock Entry", latest_movement.voucher_no, "purpose")
+		purpose = stock_entry_purposes.get(latest_movement.voucher_no)
 		if purpose not in CONSUMED_STOCK_ENTRY_PURPOSES:
 			continue
 
@@ -115,6 +127,18 @@ def get_consumed_serial_no_status_updates(serial_no=None, limit=None):
 	return updates
 
 
+def get_stock_entry_purposes(voucher_nos):
+	if not voucher_nos:
+		return {}
+
+	rows = frappe.get_all(
+		"Stock Entry",
+		fields=["name", "purpose"],
+		filters={"name": ("in", sorted(voucher_nos))},
+	)
+	return {row.name: row.purpose for row in rows}
+
+
 def get_candidate_serial_nos(serial_no=None):
 	filters = {
 		"status": "Delivered",
@@ -137,35 +161,87 @@ def get_candidate_serial_nos(serial_no=None):
 	)
 
 
-def get_bundle_movements(serial_nos):
+def get_latest_bundle_movements(serial_nos):
 	if not serial_nos:
 		return []
 
-	sbe = frappe.qb.DocType("Serial and Batch Entry")
-	sabb = frappe.qb.DocType("Serial and Batch Bundle")
+	bundle = frappe.qb.DocType("Serial and Batch Bundle")
+	bundle_child = frappe.qb.DocType("Serial and Batch Entry")
+	bundle_posting_timestamp = get_bundle_posting_timestamp(bundle)
+	bundle_has_posting_datetime = frappe.db.has_column("Serial and Batch Bundle", "posting_datetime")
 
 	movements = []
 	for serial_chunk in _chunked(serial_nos, BUNDLE_QUERY_CHUNK_SIZE):
-		rows = (
-			frappe.qb.from_(sbe)
-			.inner_join(sabb)
-			.on(sabb.name == sbe.parent)
+		latest_posting = (
+			frappe.qb.from_(bundle)
+			.join(bundle_child)
+			.on(bundle.name == bundle_child.parent)
 			.select(
-				sbe.serial_no,
-				sbe.qty.as_("actual_qty"),
-				sabb.voucher_type,
-				sabb.voucher_no,
-				sabb.posting_date,
-				sabb.posting_time,
-				sabb.creation,
+				bundle_child.serial_no,
+				Max(bundle_posting_timestamp).as_("max_posting_datetime"),
 			)
-			.where((sbe.serial_no.isin(serial_chunk)) & (sabb.docstatus == 1))
-		).run(as_dict=True)
+			.where(
+				(bundle_child.serial_no.isin(serial_chunk))
+				& (bundle.docstatus == 1)
+				& (bundle.is_cancelled == 0)
+			)
+			.groupby(bundle_child.serial_no)
+		).as_("latest_posting")
+
+		latest_creation = (
+			frappe.qb.from_(bundle)
+			.join(bundle_child)
+			.on(bundle.name == bundle_child.parent)
+			.join(latest_posting)
+			.on(
+				(latest_posting.serial_no == bundle_child.serial_no)
+				& (latest_posting.max_posting_datetime == bundle_posting_timestamp)
+			)
+			.select(
+				bundle_child.serial_no,
+				Max(bundle.creation).as_("max_creation"),
+			)
+			.where((bundle.docstatus == 1) & (bundle.is_cancelled == 0))
+			.groupby(bundle_child.serial_no)
+		).as_("latest_creation")
+
+		query = (
+			frappe.qb.from_(bundle)
+			.join(bundle_child)
+			.on(bundle.name == bundle_child.parent)
+			.join(latest_creation)
+			.on(
+				(latest_creation.serial_no == bundle_child.serial_no)
+				& (latest_creation.max_creation == bundle.creation)
+			)
+			.select(
+				bundle_child.serial_no,
+				bundle_child.qty.as_("actual_qty"),
+				bundle.voucher_type,
+				bundle.voucher_no,
+				bundle.creation,
+			)
+			.where((bundle.docstatus == 1) & (bundle.is_cancelled == 0))
+		)
+
+		if bundle_has_posting_datetime:
+			query = query.select(bundle.posting_datetime)
+		else:
+			query = query.select(bundle.posting_date, bundle.posting_time)
+
+		rows = query.run(as_dict=True)
 
 		for row in rows:
 			movements.append(_make_movement(row, row.serial_no))
 
 	return movements
+
+
+def get_bundle_posting_timestamp(bundle):
+	if frappe.db.has_column("Serial and Batch Bundle", "posting_datetime"):
+		return bundle.posting_datetime
+
+	return CombineDatetime(bundle.posting_date, IfNull(bundle.posting_time, "00:00:00"))
 
 
 def get_legacy_movements(item_code, candidate_serial_nos):
@@ -204,8 +280,11 @@ def get_legacy_movements(item_code, candidate_serial_nos):
 
 
 def _make_movement(row, serial_no):
-	posting_time = row.posting_time or "00:00:00"
-	posting_datetime = get_datetime(f"{row.posting_date} {posting_time}")
+	if getattr(row, "posting_datetime", None):
+		posting_datetime = get_datetime(row.posting_datetime)
+	else:
+		posting_time = row.posting_time or "00:00:00"
+		posting_datetime = get_datetime(f"{row.posting_date} {posting_time}")
 
 	return frappe._dict(
 		{
