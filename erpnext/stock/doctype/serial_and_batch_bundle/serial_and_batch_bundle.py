@@ -4,6 +4,7 @@
 import collections
 import csv
 import json
+import re
 from collections import Counter, defaultdict
 from typing import Any
 
@@ -13,7 +14,7 @@ import frappe.query_builder.functions
 from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
-from frappe.query_builder.functions import Concat_ws, Locate, Sum
+from frappe.query_builder.functions import CustomFunction, Sum
 from frappe.utils import (
 	cint,
 	cstr,
@@ -3296,21 +3297,27 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 		serial_nos = [serial_nos]
 
 	if serial_nos:
-		query = (
-			query.left_join(serial_batch_entry)
-			.on(stock_ledger_entry.serial_and_batch_bundle == serial_batch_entry.parent)
+		# Pre-fetch bundle parents via subquery to avoid PyPika recursion with 1000+ serial numbers
+		bundle_parents = (
+			frappe.qb.from_(serial_batch_entry)
+			.select(serial_batch_entry.parent)
 			.distinct()
-		)
+			.where(serial_batch_entry.serial_no.isin(serial_nos))
+		).run(pluck=True)
 
-		bundle_match = serial_batch_entry.serial_no.isin(serial_nos)
+		# Legacy path: serial numbers stored as newline-separated string in serial_no field.
+		# Use REGEXP instead of 1000+ OR conditions to avoid PyPika recursion.
+		Regexp = CustomFunction("REGEXP", ["field", "pattern"])
+		escaped = [re.escape(sn) for sn in serial_nos]
+		pattern = "(^|\\n)(" + "|".join(escaped) + ")(\\n|$)"
+		direct_match = Regexp(stock_ledger_entry.serial_no, pattern)
 
-		padded_serial_no = Concat_ws("", "\n", stock_ledger_entry.serial_no, "\n")
-		direct_match = None
-		for sn in serial_nos:
-			cond = Locate(f"\n{sn}\n", padded_serial_no) > 0
-			direct_match = cond if direct_match is None else (direct_match | cond)
+		if bundle_parents:
+			serial_condition = stock_ledger_entry.serial_and_batch_bundle.isin(bundle_parents) | direct_match
+		else:
+			serial_condition = direct_match
 
-		query = query.where(bundle_match | direct_match)
+		query = query.where(serial_condition)
 
 	if kwargs.ignore_voucher_detail_no:
 		query = query.where(stock_ledger_entry.voucher_detail_no != kwargs.ignore_voucher_detail_no)
