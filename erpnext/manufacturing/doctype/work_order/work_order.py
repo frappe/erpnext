@@ -2264,7 +2264,6 @@ def get_item_details(item, project=None, skip_bom_info=False, throw=True):
 def make_work_order(
 	bom_no, item, qty=0, company=None, project=None, variant_items=None, use_multi_level_bom=None
 ):
-
 	from erpnext import get_default_company
 
 	if not frappe.has_permission("Work Order", "write"):
