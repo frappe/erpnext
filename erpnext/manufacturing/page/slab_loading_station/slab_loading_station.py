@@ -20,6 +20,7 @@ def unload_slab_to_trimming(slab_number: str):
 
 		checkout_slab(slab_number)
 		transfer_to_next_process(
+			last_job_card.name,
 			work_order.name,
 			last_job_card.total_completed_qty,
 			last_job_card.operation,

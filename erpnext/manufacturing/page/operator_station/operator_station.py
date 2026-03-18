@@ -50,9 +50,7 @@ def get_machine_state(job_card, process_name="operator"):
 		"job_card_submitted": jc.docstatus == 1 or jc.status == "Completed",
 		"process_name": process_name,
 		"status": jc.status,
-		"current_process": item_name.rsplit("-", 1)[-1].strip()
-			if wo and "-" in item_name
-			else process_name,
+		"current_process": item_name.rsplit("-", 1)[-1].strip() if wo and "-" in item_name else process_name,
 		"mixer_number": jc.mixer_number,
 		"is_wh_standalone": wip_wh.is_standalone if wip_wh else 0,
 	}
@@ -181,7 +179,7 @@ def finish_process(job_card, process_name, transfer_materials=True, should_stop_
 	checkout_slab(jc.slab)
 
 	if transfer_materials:
-		transfer_to_next_process(work_order, job_card_qty, mixer_number=jc.mixer_number)
+		transfer_to_next_process(job_card, work_order, job_card_qty, mixer_number=jc.mixer_number)
 
 	if should_stop_machine:
 		stop_machine(process_name, jc.production_line, None)
@@ -205,7 +203,9 @@ def get_next_process_bom_qty(current_work_order: str):
 	current_process = wo.operations[0].operation if wo.operations else ""
 
 	process_mapping = deepcopy(MFG_PROCESS_MAP)
-	process_mapping["Mixing Operation - SJ"] = process_mapping[MIXING_PROCESS] # TODO: Find a better way to do this rather than hardcoding the process name
+	process_mapping["Mixing Operation - SJ"] = process_mapping[
+		MIXING_PROCESS
+	]  # TODO: Find a better way to do this rather than hardcoding the process name
 
 	next_process = process_mapping.get(current_process)
 
@@ -301,7 +301,9 @@ def set_machine_status(status: str, station: str, line_name: str | None, machine
 
 def _get_job_card_for_line_and_process(line_name: str, process: str, include_wip=True):
 	child_lines = get_all_child_lines(line_name) or []
-	job_card_data = get_top_job_card_for_process(process, child_lines if child_lines else line_name, include_wip)
+	job_card_data = get_top_job_card_for_process(
+		process, child_lines if child_lines else line_name, include_wip
+	)
 	return job_card_data
 
 
@@ -314,10 +316,12 @@ def get_next_work_item(process, line="", include_wip=True):
 	job_card = job_card_data["top_job_card"]
 	available_job_cards_count = job_card_data["available_job_cards_count"]
 
-	is_wip = job_card and job_card.status == 'Work In Progress'
+	is_wip = job_card and job_card.status == "Work In Progress"
 	slab = frappe.get_doc("Slab", job_card.slab) if is_wip and job_card.slab else None
 
-	slabs_for_process = get_slabs_for(line, process, limit=1000) # Giving an arbitrarily high limit to make sure that the exact number of slabs is fetched.
+	slabs_for_process = get_slabs_for(
+		line, process, limit=1000
+	)  # Giving an arbitrarily high limit to make sure that the exact number of slabs is fetched.
 
 	slab = slab if slab else (slabs_for_process[0] if slabs_for_process else None)
 	available_slabs_count = len(slabs_for_process)
@@ -330,7 +334,7 @@ def get_next_work_item(process, line="", include_wip=True):
 	}
 
 
-def get_top_job_card_for_process(process, line: str | list="", include_wip=True):
+def get_top_job_card_for_process(process, line: str | list = "", include_wip=True):
 	if line and not isinstance(line, list):
 		child_lines = get_all_child_lines(line)
 		if child_lines:
