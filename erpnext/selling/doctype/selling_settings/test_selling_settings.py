@@ -6,11 +6,12 @@ from erpnext.tests.utils import ERPNextTestSuite
 from unittest.mock import patch
 
 class TestSellingSettings(ERPNextTestSuite):
-	def test_defaults_populated(self):
-		# Setup default values are not populated on migrate, this test checks
-		# if setup was completed correctly
-		default = frappe.db.get_single_value("Selling Settings", "maintain_same_rate_action")
-		self.assertEqual("Stop", default)
+    def test_defaults_populated(self):
+        # Setup default values are not populated on migrate, this test checks
+        # if setup was completed correctly
+        default = frappe.db.get_single_value("Selling Settings", "maintain_same_rate_action")
+        self.assertEqual("Stop", default)
+
     def test_validate_allows_insert_when_no_prior_doc(self):
         class_under_test = frappe.get_doc({
             "doctype": "Selling Settings",
@@ -38,7 +39,7 @@ class TestSellingSettings(ERPNextTestSuite):
             self.fail(f"validate() raised an unexpected exception: {exc}")
     
     @patch("erpnext.selling.doctype.selling_settings.selling_settings.toggle_tracking_sales_commissions_section")
-    @patch("erpnext.selling.doctype.selling_settings.selling_settings.toggle_utm")
+    @patch("erpnext.selling.doctype.selling_settings.selling_settings.toggle_utm_analytics_section")
     def test_validate_doesnt_call_toggle_functions_when_old_doc_is_None(self, mock_toggle_tracking_sales_commissions_section, mock_toggle_utm):
         class_under_test = frappe.get_doc({
             "doctype": "Selling Settings",
@@ -63,7 +64,7 @@ class TestSellingSettings(ERPNextTestSuite):
         mock_toggle_utm.assert_not_called()
 
     @patch("erpnext.selling.doctype.selling_settings.selling_settings.toggle_tracking_sales_commissions_section")
-    @patch("erpnext.selling.doctype.selling_settings.selling_settings.toggle_utm")
+    @patch("erpnext.selling.doctype.selling_settings.selling_settings.toggle_utm_analytics_section")
     def test_validate_doesnt_call_toggle_functions_when_old_doc_has_same_values(self, mock_toggle_tracking_sales_commissions_section, mock_toggle_utm):
         class_under_test = frappe.get_doc({
             "doctype": "Selling Settings",
