@@ -1581,7 +1581,7 @@ def make_purchase_return(source_name: str, target_doc: str | Document | None = N
 
 @frappe.whitelist()
 def update_purchase_receipt_status(docname: str, status: str):
-	pr = frappe.get_lazy_doc("Purchase Receipt", docname)
+	pr = frappe.get_lazy_doc("Purchase Receipt", docname, check_permission="write")
 	pr.update_status(status)
 
 
