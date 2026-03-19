@@ -404,7 +404,7 @@ class PurchaseReceipt(BuyingController):
 		self.update_received_qty_if_from_pp()
 
 	def update_received_qty_if_from_pp(self):
-		from frappe.query_builder.functions import Sum
+		from frappe.query_builder.functions import Coalesce, Sum
 
 		items_from_po = [item.purchase_order_item for item in self.items if item.purchase_order_item]
 		if items_from_po:
@@ -413,7 +413,10 @@ class PurchaseReceipt(BuyingController):
 				frappe.qb.from_(table)
 				.select(table.production_plan_sub_assembly_item)
 				.distinct()
-				.where(table.name.isin(items_from_po) & table.production_plan_sub_assembly_item.isnotnull())
+				.where(
+					table.name.isin(items_from_po)
+					& Coalesce(table.production_plan_sub_assembly_item, "").ne("")
+				)
 			)
 			result = subquery.run(as_dict=True)
 			if result:
