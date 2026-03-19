@@ -849,7 +849,10 @@ class WorkOrder(Document):
 
 				if (
 					wo_item
-					and (d.work_order_qty + (wo_item.required_qty if self._action == "submit" else 0))
+					and (
+						d.work_order_qty
+						+ (wo_item.required_qty if getattr(self, "_action", None) == "submit" else 0)
+					)
 					== d.bom_qty
 					and d.received_qty > d.bom_qty
 				):
@@ -881,7 +884,7 @@ class WorkOrder(Document):
 					table.work_order_qty
 					+ (
 						required_qty[item.rm_item_code]
-						if self._action == "submit"
+						if getattr(self, "_action", None) == "submit"
 						else -required_qty[item.rm_item_code]
 					),
 				)
@@ -2542,6 +2545,7 @@ def close_work_order(work_order: str, status: str):
 
 	work_order.update_status(status)
 	work_order.on_close_or_cancel()
+	work_order.db_set("status", status)
 	frappe.msgprint(_("Work Order has been {0}").format(status))
 	work_order.notify_update()
 	return work_order.status
