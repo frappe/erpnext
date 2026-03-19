@@ -563,7 +563,7 @@ class PurchaseReceipt(BuyingController):
 				else flt(item.net_amount, item.precision("net_amount"))
 			)
 
-			outgoing_amount = item.base_net_amount
+			outgoing_amount = item.qty * item.base_net_rate
 			if self.is_internal_transfer() and item.valuation_rate:
 				outgoing_amount = abs(get_stock_value_difference(self.name, item.name, item.from_warehouse))
 				credit_amount = outgoing_amount
