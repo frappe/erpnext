@@ -1802,8 +1802,13 @@ def make_work_orders(items, sales_order, company, project=None):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def update_status(status, name):
 	so = frappe.get_doc("Sales Order", name)
+=======
+def update_status(status: str, name: str):
+	so = frappe.get_doc("Sales Order", name, check_permission="write")
+>>>>>>> 8e17c722fb (fix: validate permission before updating status (#53651))
 	so.update_status(status)
 
 
