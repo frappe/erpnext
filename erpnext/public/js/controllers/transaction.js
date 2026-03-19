@@ -516,7 +516,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				const selected = values.payment_schedules.filter((r) => r.__checked);
 
 				if (!selected.length) {
-					frappe.msgprint(__("Please select at least one schedule."));
+					frappe.show_alert({
+						message: __("Please select at least one schedule."),
+						indicator: "orange",
+					});
 					return;
 				}
 				console.log(selected);
