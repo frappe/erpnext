@@ -2421,7 +2421,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 							self.to_warehouse if self.purpose == "Send to Subcontractor" else ""
 						)
 
-						if original_item != item.get("item_code"):
+						if isinstance(original_item, str) and original_item != item.get("item_code"):
 							item["original_item"] = original_item
 
 					self.add_to_stock_entry_detail(item_dict)
