@@ -1413,13 +1413,10 @@ def make_purchase_return(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def update_purchase_receipt_status(docname, status):
+	frappe.has_permission("Purchase Receipt", "write", docname, throw=True)
+
 	pr = frappe.get_doc("Purchase Receipt", docname)
-=======
-def update_purchase_receipt_status(docname: str, status: str):
-	pr = frappe.get_lazy_doc("Purchase Receipt", docname, check_permission="write")
->>>>>>> 8e17c722fb (fix: validate permission before updating status (#53651))
 	pr.update_status(status)
 
 

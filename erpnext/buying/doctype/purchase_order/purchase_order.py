@@ -911,13 +911,10 @@ def get_list_context(context=None):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def update_status(status, name):
+	frappe.has_permission("Purchase Order", "write", name, throw=True)
+
 	po = frappe.get_doc("Purchase Order", name)
-=======
-def update_status(status: str, name: str):
-	po = frappe.get_lazy_doc("Purchase Order", name, check_permission="write")
->>>>>>> 8e17c722fb (fix: validate permission before updating status (#53651))
 	po.update_status(status)
 	po.update_delivered_qty_in_sales_order()
 
