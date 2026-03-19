@@ -27,7 +27,7 @@ def get_columns():
 		_("BOM UOM") + "::160",
 		_("Required Qty") + ":Float:120",
 		_("In Stock Qty") + ":Float:120",
-		_("Enough Parts to Build") + ":Float:200",
+		_("Producible Fg Item") + ":Float:200",
 	]
 
 
@@ -78,7 +78,7 @@ def get_bom_stock(filters):
 			BOM_ITEM.stock_uom,
 			(Sum(BOM_ITEM.stock_qty) * qty_to_produce) / BOM.quantity,
 			bin_subquery.actual_qty,
-			Floor(bin_subquery.actual_qty / ((Sum(BOM_ITEM.stock_qty) * qty_to_produce) / BOM.quantity)),
+			Floor(bin_subquery.actual_qty / ((Sum(BOM_ITEM.stock_qty)) / BOM.quantity)),
 		)
 		.where((BOM_ITEM.parent == filters.get("bom")) & (BOM_ITEM.parenttype == "BOM"))
 		.groupby(BOM_ITEM.item_code)
