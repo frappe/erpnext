@@ -15,7 +15,8 @@ def copy_doctypes():
 	try:
 		insert_into_bom()
 		insert_into_job_card()
-		insert_into_subcontracting_inward()
+		if frappe.db.has_table("Subcontracting Inward Order Scrap Item"):
+			insert_into_subcontracting_inward()
 	finally:
 		frappe.db.auto_commit_on_many_writes = previous
 
