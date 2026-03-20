@@ -319,6 +319,8 @@ has_website_permission = {
 	"Project": "erpnext.controllers.website_list_for_contact.has_website_permission",
 }
 
+before_tests = "erpnext.setup.utils.before_tests"
+
 
 period_closing_doctypes = [
 	"Sales Invoice",

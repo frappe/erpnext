@@ -2795,9 +2795,6 @@ class BootStrapTestData:
 		self.make_records(["address_title", "address_type"], records)
 
 
-BootStrapTestData()
-
-
 class ERPNextTestSuite(unittest.TestCase):
 	@classmethod
 	def registerAs(cls, _as):

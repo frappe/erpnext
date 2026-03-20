@@ -10,6 +10,16 @@ from frappe.utils.nestedset import get_root_of
 from erpnext import get_default_company
 
 
+def before_tests():
+	frappe.clear_cache()
+	from erpnext.tests.utils import BootStrapTestData
+
+	BootStrapTestData()
+	_enable_all_roles_for_admin()
+	set_defaults_for_tests()
+	frappe.db.commit()
+
+
 def get_pegged_currencies():
 	pegged_currencies = frappe.get_all(
 		"Pegged Currency Details",
