@@ -2535,19 +2535,22 @@ class AccountsController(TransactionBase):
 				base_grand_total = base_grand_total - flt(self.base_write_off_amount)
 				grand_total = grand_total - flt(self.write_off_amount)
 
+		advance_amount = 0
+		base_advance_amount = 0
+
 		if self.get("total_advance"):
 			if party_account_currency == self.company_currency:
-				base_grand_total -= self.get("total_advance")
-				grand_total = flt(
-					base_grand_total / self.get("conversion_rate"), self.precision("grand_total")
+				base_advance_amount = self.get("total_advance")
+				advance_amount = flt(
+					base_advance_amount / self.get("conversion_rate"), self.precision("grand_total")
 				)
 			else:
-				grand_total -= self.get("total_advance")
-				base_grand_total = flt(
-					grand_total * self.get("conversion_rate"), self.precision("base_grand_total")
+				advance_amount = self.get("total_advance")
+				base_advance_amount = flt(
+					advance_amount * self.get("conversion_rate"), self.precision("base_grand_total")
 				)
 
-		if not self.get("payment_schedule"):
+		if not self.get("payment_schedule") and not self.get("ignore_default_payment_terms_template"):
 			if (
 				self.doctype in ["Sales Invoice", "Purchase Invoice", "Sales Order"]
 				and automatically_fetch_payment_terms
@@ -2602,6 +2605,22 @@ class AccountsController(TransactionBase):
 				po_or_so, doctype, grand_total, base_grand_total, automatically_fetch_payment_terms
 			)
 			self.ignore_default_payment_terms_template = 1
+
+		if advance_amount and self.get("payment_schedule"):
+			for d in self.get("payment_schedule"):
+				if advance_amount <= 0:
+					break
+
+				deduct = min(d.payment_amount, advance_amount)
+				base_deduct = min(d.base_payment_amount, base_advance_amount)
+
+				d.payment_amount -= deduct
+				d.base_payment_amount -= base_deduct
+				d.outstanding = d.payment_amount
+				d.base_outstanding = d.base_payment_amount
+
+				advance_amount -= deduct
+				base_advance_amount -= base_deduct
 
 	def get_order_details(self):
 		if not self.get("items"):
