@@ -8,12 +8,15 @@ import frappe
 from frappe import _
 from frappe.utils import flt, formatdate
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
 
 
 def execute(filters=None):
 	if not filters:
 		filters = {}
+
+	validate_filters(filters)
 
 	columns = get_columns(filters)
 	if filters.get("budget_against_filter"):
@@ -33,6 +36,21 @@ def execute(filters=None):
 	chart = get_chart_data(filters, columns, data)
 
 	return columns, data, None, chart
+
+
+def validate_filters(filters):
+	validate_budget_dimensions(filters)
+
+
+def validate_budget_dimensions(filters):
+	dimensions = [d.get("document_type") for d in get_dimensions(with_cost_center_and_project=True)[0]]
+	if filters.get("budget_against") and filters.get("budget_against") not in dimensions:
+		frappe.throw(
+			title=_("Invalid Accounting Dimension"),
+			msg=_("{0} is not a valid Accounting Dimension.").format(
+				frappe.bold(filters.get("budget_against"))
+			),
+		)
 
 
 def get_final_data(dimension, dimension_items, filters, period_month_ranges, data, DCC_allocation):
