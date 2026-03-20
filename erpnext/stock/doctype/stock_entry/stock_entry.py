@@ -590,14 +590,6 @@ class StockEntry(StockController):
 					flt(item.qty) * flt(item.conversion_factor), self.precision("transfer_qty", item)
 				)
 
-<<<<<<< HEAD
-			if self.purpose == "Manufacture":
-				item.set("expense_account", item_details.get("expense_account"))
-=======
-			if self.purpose == "Subcontracting Delivery":
-				item.expense_account = frappe.get_value("Company", self.company, "default_expense_account")
->>>>>>> fa35fbdb8e (fix: do not overwrite expense account in stock entry (#53658))
-
 	def validate_fg_completed_qty(self):
 		item_wise_qty = {}
 		if self.purpose == "Manufacture" and self.work_order:
