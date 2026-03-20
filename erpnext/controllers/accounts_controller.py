@@ -2290,6 +2290,16 @@ class AccountsController(TransactionBase):
 
 		return stock_items
 
+	def get_asset_items(self):
+		asset_items = []
+		item_codes = list(set(item.item_code for item in self.get("items")))
+		if item_codes:
+			asset_items = frappe.db.get_values(
+				"Item", {"name": ["in", item_codes], "is_fixed_asset": 1}, pluck="name", cache=True
+			)
+
+		return asset_items
+
 	def calculate_total_advance_from_ledger(self):
 		adv = frappe.qb.DocType("Advance Payment Ledger Entry")
 		return (
