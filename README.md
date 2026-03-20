@@ -78,7 +78,7 @@ It takes care of installation, setup, upgrades, monitoring, maintenance and supp
 ### Self-Hosted
 #### Docker
 
-See [Frappe Documentation](https://github.com/frappe/frappe_docker) for full documentation & FAQ on docker setup
+See [Frappe Docker Documentation](https://github.com/frappe/frappe_docker) for full documentation & FAQ on docker setup
 
 #### Prerequisites
 
