@@ -55,6 +55,14 @@ def validate_filters(filters):
 	if filters.get("based_on") == filters.get("group_by"):
 		frappe.throw(_("'Based On' and 'Group By' can not be same"))
 
+	if filters.get("period_based_on") and filters.period_based_on not in ["bill_date", "posting_date"]:
+		frappe.throw(
+			msg=_("{0} can be either {1} or {2}.").format(
+				frappe.bold("Period based On"), frappe.bold("Posting Date"), frappe.bold("Billing Date")
+			),
+			title=_("Invalid Filter"),
+		)
+
 
 def get_data(filters, conditions):
 	data = []
