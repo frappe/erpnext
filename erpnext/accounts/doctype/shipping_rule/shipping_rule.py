@@ -152,7 +152,9 @@ class ShippingRule(Document):
 				frappe.throw(_("Shipping rule only applicable for Buying"))
 
 			shipping_charge["doctype"] = "Purchase Taxes and Charges"
-			shipping_charge["category"] = "Valuation and Total"
+			shipping_charge["category"] = (
+				"Valuation and Total" if doc.get_stock_items() or doc.get_asset_items() else "Total"
+			)
 			shipping_charge["add_deduct_tax"] = "Add"
 
 		existing_shipping_charge = doc.get("taxes", filters=shipping_charge)
