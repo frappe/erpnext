@@ -4,7 +4,7 @@ import { ref, reactive, onMounted, computed } from 'vue';
 const work_context = reactive({
     role: "Slab Loader",
     assigned_line: "",
-    assigned_station: "Quarantine",
+    assigned_station: "Curing",
     assigned_shift: ""
 });
 
@@ -29,7 +29,7 @@ const fetchSlabs = async (play_ding = false) => {
             method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_in',
             args: {
                 line: work_context.assigned_line,
-                current_stage: "Quarantine"
+                current_stage: "Curing"
             }
         });
 
@@ -101,21 +101,21 @@ const getDuration = (date_str) => {
 };
 
 frappe.realtime.on('slab_move', (slab) => {
-    // If the slab has been moved to a different line or the moved slab is not in 'Quarantine', then ignore the event.
-    if (slab.line !== work_context.assigned_line || slab.status !== 'Quarantine' || slab.is_cur_stage_complete) {
+    // If the slab has been moved to a different line or the moved slab is not in 'Curing', then ignore the event.
+    if (slab.line !== work_context.assigned_line || slab.status !== 'Curing' || slab.is_cur_stage_complete) {
         return;
     }
 
     fetchSlabs(true);
 });
 
-const minQuarantineHours = ref(0);
+const minCuringHours = ref(0);
 
 const fetchSettings = async () => {
     try {
         const doc = await frappe.db.get_doc('Mahi Granites Settings');
         if (doc) {
-            minQuarantineHours.value = doc.min_quarantine_hours || 0;
+            minCuringHours.value = doc.min_curing_hours || 0;
         }
     } catch (e) {
         console.error("Failed to fetch settings", e);
@@ -173,9 +173,9 @@ const unloadToTrimming = (slab) => {
         }
     };
 
-    if (elapsedHours < minQuarantineHours.value) {
+    if (elapsedHours < minCuringHours.value) {
         frappe.confirm(
-            __('The prescribed time for quarantine ({0} hours) has not passed for slab {1}. Do you want to proceed with the unloading anyway?', [minQuarantineHours.value, slab.name]),
+            __('The prescribed time for curing ({0} hours) has not passed for slab {1}. Do you want to proceed with the unloading anyway?', [minCuringHours.value, slab.name]),
             () => performMove()
         );
     } else {
@@ -189,8 +189,8 @@ const unloadToTrimming = (slab) => {
     <div class="slab-loading-station">
         <header class="station-header d-flex justify-content-between align-items-center mb-5">
             <div>
-                <h2 class="section-title">{{ __('Quarantine Inventory') }}</h2>
-                <p class="section-subtitle">{{ __('Select quarantined slabs to unload onto the trimming line.') }}</p>
+                <h2 class="section-title">{{ __('Curing Inventory') }}</h2>
+                <p class="section-subtitle">{{ __('Select cured slabs to unload onto the trimming line.') }}</p>
             </div>
             <div class="search-box">
                 <span class="fa fa-search search-icon mr-2"></span>
@@ -212,7 +212,7 @@ const unloadToTrimming = (slab) => {
                     <div class="slab-color-name font-weight-bold mb-2">{{ slab.name }}</div>
                     <div class="slab-meta-row text-muted small mb-3">
                         <span class="fa fa-clock-o mr-1"></span>
-                        {{ __('In quarantine for') }} <span class="strong">{{ getDuration(slab.modified) }}</span>
+                        {{ __('In curing for') }} <span class="strong">{{ getDuration(slab.modified) }}</span>
                     </div>
                     <div class="slab-stats d-flex mb-4" style="gap: 2rem;">
                         <div class="stat-item w-100">
@@ -232,7 +232,7 @@ const unloadToTrimming = (slab) => {
         </TransitionGroup>
 
         <div v-if="!filteredSlabs.length" class="empty-state text-center p-5 border rounded">
-            <div class="text-muted">{{ __('No slabs found in quarantine.') }}</div>
+            <div class="text-muted">{{ __('No slabs found in curing.') }}</div>
         </div>
     </div>
 </template>

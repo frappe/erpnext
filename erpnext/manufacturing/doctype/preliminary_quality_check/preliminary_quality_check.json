@@ -82,7 +82,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Bend Depth",
-   "options": "Quarantine Label",
+   "options": "Curing Label",
    "read_only": 1
   },
   {
@@ -127,7 +127,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-12 14:28:38.413942",
+ "modified": "2026-03-18 23:09:11.264638",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Preliminary Quality Check",

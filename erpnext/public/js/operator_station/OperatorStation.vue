@@ -8,9 +8,10 @@ const status = ref('Pending');
 
 const processStarted = ref(false);
 const processStartTime = ref(null);
-const processElapsed = ref(0);
-const processTimerHandle = ref(null);
+const secondsElapsed = ref(0);
+const timerHandle = ref(null);
 const processReady = ref(true);
+const isPaused = ref(false);
 
 const slabNumber = ref(null);
 const jobCardSubmitted = ref(false);
@@ -51,7 +52,7 @@ const alarms = ref([
 const station_reverse_map = {
 	"pressing": "Distribution",
 	"cooling": "Heating",
-	"trimming": "Quarantine",
+	"trimming": "Curing",
 	"calibration": "Trimming",
 	"polishing": "Calibration",
 };
@@ -139,9 +140,10 @@ const issueDescription = ref('');
 
 // formatted timer
 const formattedTime = computed(() => {
-	const h = String(Math.floor(processElapsed.value / 3600)).padStart(2, '0');
-	const m = String(Math.floor((processElapsed.value % 3600) / 60)).padStart(2, '0');
-	const s = String(processElapsed.value % 60).padStart(2, '0');
+	const seconds = secondsElapsed.value;
+	const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+	const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+	const s = String(Math.floor(seconds % 60)).padStart(2, '0');
 	return `${h}:${m}:${s}`;
 });
 
@@ -181,53 +183,81 @@ async function loadJobCard(name, slab_template = null) {
 			preparedQty.value = jc.total_completed_qty || jc.for_quantity || 0;
 		}
 
-		const stateRes = await frappe.call({
-			method: 'erpnext.manufacturing.page.operator_station.operator_station.get_machine_state',
-			args: {
-				job_card: jobCardName.value,
-				process_name: currentStation.value
-			}
-		});
+		res = await frappe.db.get_value("Warehouse", jc.wip_warehouse, ["is_standalone"]);
+		is_standalone.value = !!(res?.message?.is_standalone)
 
-		is_standalone.value = !!stateRes?.message?.is_wh_standalone;
 		if (is_standalone.value) {
 			fetchQueue(work_context.assigned_line, currentStation.value);
 		}
 
-		const state = stateRes.message || {};
-		status.value = state.status || 'Pending';
+		status.value = jc.status || 'Pending';
+		isPaused.value = jc.status === 'On Hold';
 
 		if (status.value === 'Work In Progress') {
 			processStarted.value = true;
 			processReady.value = false;
-		} else {
+		}
+		else if (status.value === 'On Hold') {
+			processStarted.value = true;
+		}
+		else {
 			processStarted.value = false;
 			processReady.value = true;
 		}
 
-		processStartTime.value = state[`${currentStation.value}_start_time`];
-		mixerNumber.value = state.mixer_number;
+		processStartTime.value = jc.started_time;
+		mixerNumber.value = jc.mixer_number;
 
-		if (processStarted.value && processStartTime.value) {
-			const start = new Date(processStartTime.value);
-			const now = new Date()
-			const diffSeconds = (now - start) / 1000;
-			processElapsed.value = Math.max(0, Math.floor(diffSeconds));
-
-			if (processTimerHandle.value) clearInterval(processTimerHandle.value);
-			processTimerHandle.value = setInterval(() => {
-				processElapsed.value += 1;
-			}, 1000);
-		} else {
-			processElapsed.value = 0;
-			if (processTimerHandle.value) {
-				clearInterval(processTimerHandle.value);
-				processTimerHandle.value = null;
-			}
-		}
+		updateTimer(jc);
 	} catch (e) {
 		frappe.msgprint(__('Failed to load Job Card details.'));
 	}
+}
+
+function updateTimer(jc) {
+	if (isPaused.value) {
+		// Set the job timer to the value of the time elapsed until pause.
+		clearInterval(timerHandle.value);
+		currentTime = getCurrentTime(jc);
+		secondsElapsed.value = currentTime;
+	}
+	else {
+		// Initialize the job timer.
+		initJobTimer(jc);
+	}
+}
+
+function initJobTimer(jc) {
+	clearInterval(timerHandle.value);
+	timerHandle.value = setInterval(() => {
+		var current = getCurrentTime(jc);
+		secondsElapsed.value = current;
+	}, 1000);
+}
+
+function get_seconds_diff(d1, d2) {
+	return moment(d1).diff(d2, "seconds");
+}
+
+function getCurrentTime(jc) {
+	let current_time = 0;
+	if (!jc?.time_logs) {
+		return current_time;
+	}
+
+	jc.time_logs.forEach((d) => {
+		if (d.to_time) {
+			if (d.time_in_mins) {
+				current_time += flt(d.time_in_mins, 2) * 60;
+			} else {
+				current_time += get_seconds_diff(d.to_time, d.from_time);
+			}
+		} else {
+			current_time += get_seconds_diff(frappe.datetime.now_datetime(), d.from_time);
+		}
+	});
+
+	return current_time;
 }
 
 async function checkForNextItem() {
@@ -327,6 +357,15 @@ frappe.realtime.on('slab_checkout', (slab) => {
 	checkForNextItem();
 });
 
+async function confirmResume() {
+	frappe.confirm(
+		__('Are you sure you want to resume this job?'),
+		async () => {
+			await pauseOrResumeProcess(false);
+		}
+	);
+}
+
 
 async function startOperation() {
 	frappe.confirm(
@@ -355,12 +394,12 @@ async function startOperation() {
 				processStarted.value = true;
 				processStartTime.value = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-				processElapsed.value = 0;
-				if (processTimerHandle.value) {
-					clearInterval(processTimerHandle.value);
+				secondsElapsed.value = 0;
+				if (timerHandle.value) {
+					clearInterval(timerHandle.value);
 				}
-				processTimerHandle.value = setInterval(() => {
-					processElapsed.value += 1;
+				timerHandle.value = setInterval(() => {
+					secondsElapsed.value += 1;
 				}, 1000);
 			}
 			catch (e) {
@@ -406,9 +445,9 @@ async function finishOperation() {
 		async () => {
 			isProcessing.value = true;
 
-			if (processTimerHandle.value) {
-				clearInterval(processTimerHandle.value);
-				processTimerHandle.value = null;
+			if (timerHandle.value) {
+				clearInterval(timerHandle.value);
+				timerHandle.value = null;
 			}
 
 			try {
@@ -428,7 +467,7 @@ async function finishOperation() {
 				jobCardName.value = null;
 				processStarted.value = false;
 				processStartTime.value = null;
-				processElapsed.value = 0;
+				secondsElapsed.value = 0;
 				processReady.value = false;
 
 				jobCardSubmitted.value = true;
@@ -458,33 +497,62 @@ async function finishOperation() {
 
 function haltJob() {
 	status.value = 'Halted';
-	if (processTimerHandle.value) {
-		clearInterval(processTimerHandle.value);
-		processTimerHandle.value = null;
+	if (timerHandle.value) {
+		clearInterval(timerHandle.value);
+		timerHandle.value = null;
 	}
 	frappe.msgprint(__('Job is halted'));
 }
 
-function discardJob() {
+async function confirmPause() {
 	frappe.confirm(
-		__('Are you sure you want to discard this job?'),
-		() => {
-			stopAndResetTimer();
-			status.value = 'Pending'; // Reset to Pending so Start button appears
-			processReady.value = true;
-			jobCardSubmitted.value = false;
-			frappe.msgprint(__('Job is discarded'));
+		__('Are you sure you want to pause this job?'),
+		async () => {
+			await pauseOrResumeProcess();
 		}
 	);
 }
 
-function stopAndResetTimer() {
-	if (processTimerHandle.value) {
-		clearInterval(processTimerHandle.value);
-		processTimerHandle.value = null;
+async function pauseOrResumeProcess(pause = true) {
+	if (!jobCardDoc.value) {
+		frappe.msgprint(__('No job card selected'));
+		return;
 	}
+
+	const args = {
+		job_card_name: jobCardDoc.value.name,
+		action_time: frappe.datetime.now_datetime(),
+	};
+
+	const endpoint = pause ? "pause_process" : "resume_process";
+	const method = `erpnext.manufacturing.page.operator_station.operator_station.${endpoint}`;
+
+	// Call the pause_job or resume_job endpoint in operator_station
+	isProcessing.value = true;
+	const res = await frappe.call({
+		method,
+		args,
+	});
+
+	isPaused.value = pause;
+	status.value = res?.message?.status || "On Hold";
+	jc = res?.message?.job_card || null;
+	if (jc) {
+		jobCardDoc.value = jc;
+		updateTimer(jc);
+	}
+
+	isProcessing.value = false;
+}
+
+function stopAndResetTimer() {
+	if (timerHandle.value) {
+		clearInterval(timerHandle.value);
+		timerHandle.value = null;
+	}
+
 	processStarted.value = false;
-	processElapsed.value = 0;
+	secondsElapsed.value = 0;
 	processStartTime.value = null;
 }
 
@@ -520,6 +588,10 @@ function statusStyle() {
 	if (status.value === 'Discarded') {
 		return 'background:#f8d7da;color:#721c24';
 	}
+	if (status.value === 'On Hold') {
+		return 'background:#fef3c7;color:#d97706;border: 1px solid #d97706';
+	}
+
 	return 'background:#e9ecef;color:#6c757d';
 }
 
@@ -643,7 +715,7 @@ async function selectSlab(slab) {
 							Mixer: {{ mixerNumber }}
 						</div>
 
-						<div class="text-center mb-2" v-if="processReady">
+						<div class="text-center mb-2" v-if="processReady && !isPaused">
 							<button class="btn btn-success py-3 px-4" :disabled="isProcessing" @click="startOperation">
 								<span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1 pr-2"></span>
 								<span v-else class="fa fa-play mr-1 pr-2"></span>{{ __('Start Job') }}
@@ -659,20 +731,25 @@ async function selectSlab(slab) {
 
 						<div class="text-center mb-2" v-if="processStarted">
 							<button class="btn btn-info py-3 px-4 mr-5" :disabled="isProcessing"
-								@click="finishOperation">
+								@click="finishOperation" v-if="!isPaused">
 								<span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
-								<span v-else class="fa fa-check-square-o mr-1"></span>{{ __('Finish Job') }}
+								<span v-else class="fa fa-check-square-o mr-2"></span>{{ __('Finish Job') }}
 							</button>
-							<button class="btn btn-warning py-3 px-4 mr-5" v-if="isPressing" :disabled="isProcessing"
+							<button class="btn btn-warning py-3 px-4 mr-5" v-if="isPressing && !isPaused" :disabled="isProcessing"
 								@click="repressSlab">
 								<span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
 								<span v-else class="fa fa-retweet mr-1"></span>{{ __('Re-press') }}
 							</button>
+							<button class="btn btn-success py-3 px-4" v-if="isPaused" :disabled="isProcessing" @click="confirmResume">
+								<span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1 pr-2"></span>
+								<span v-else class="fa fa-play mr-1 pr-2"></span>{{ __('Resume Job') }}
+							</button>
 							<!-- <button class="btn btn-warning py-3 px-4 mr-5" @click="haltJob">
 							<span class="fa fa-pause-circle-o mr-1"></span>{{ __('Halt Job') }}
 						</button> -->
-							<button class="btn btn-danger py-3 px-4" @click="discardJob">
-								<span class="fa fa-trash-o mr-1"></span>{{ __('Discard') }}
+							<button class="btn btn-primary py-3 px-4" @click="confirmPause" :disabled="isProcessing" v-if="!isPaused">
+								<span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1 pr-2"></span>
+								<span v-else class="fa fa-pause mr-2"></span>{{ __('Pause Job') }}
 							</button>
 						</div>
 					</div>

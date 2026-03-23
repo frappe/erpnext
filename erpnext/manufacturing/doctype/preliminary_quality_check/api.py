@@ -1,14 +1,17 @@
 import frappe
 
+from erpnext.manufacturing.doctype.preliminary_quality_check.preliminary_quality_check import (
+    PreliminaryQualityCheck,
+)
 from erpnext.manufacturing.doctype.slab.api import move_slab_to
 from erpnext.manufacturing.doctype.slab.slab import Slab
 
 
 @frappe.whitelist()
-def create_preliminary_quality_check(slab_name, slab_template, h_bend, v_bend, d1_bend, d2_bend, depth, remarks):
-    move_slab_to(slab_name, "Quarantine")
+def create_preliminary_quality_check(slab_name, slab_template, h_bend, v_bend, d1_bend, d2_bend, depth = None, remarks = None):
+    move_slab_to(slab_name, "Curing")
 
-    doc = frappe.new_doc("Preliminary Quality Check")
+    doc: PreliminaryQualityCheck = frappe.new_doc("Preliminary Quality Check")  # pyright: ignore[reportAssignmentType]
     doc.slab = slab_name
     doc.slab_template = slab_template
     doc.h_bend = int(h_bend)
@@ -21,9 +24,9 @@ def create_preliminary_quality_check(slab_name, slab_template, h_bend, v_bend, d
 
     slab: Slab = frappe.get_doc("Slab", slab_name)
 
-    last_history_item = next((h for h in slab.slab_history if h.station == "Quarantine"), None)
+    last_history_item = next((h for h in slab.slab_history if h.station == "Curing"), None)
     if not last_history_item:
-        raise Exception("Slab is not in quarantine.")
+        raise Exception("Slab is not in curing.")
 
     last_history_item.preliminary_qc = doc.name
     slab.save(ignore_permissions=True)

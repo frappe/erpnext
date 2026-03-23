@@ -11,7 +11,7 @@ from erpnext.manufacturing.doctype.manufacturing_process.constants import (
 	POLISHING_PROCESS,
 	PRESSING_PROCESS,
 	QUALITY_CHECK_PROCESS,
-	QUARANTINE_PROCESS,
+	CURING_PROCESS,
 	TRIMMING_PROCESS,
 )
 from erpnext.manufacturing.doctype.manufacturing_process_map.manufacturing_process_map import (
@@ -30,7 +30,7 @@ from erpnext.stock.doctype.warehouse.constants import (
 	POLISHING_WAREHOUSE,
 	PRESSING_WAREHOUSE,
 	QUALITY_CHECK_WAREHOUSE,
-	# QUARANTINE_WAREHOUSE,
+	# CURING_WAREHOUSE,
 	SILOS_WAREHOUSE,
 	TRIMMING_WAREHOUSE,
 )

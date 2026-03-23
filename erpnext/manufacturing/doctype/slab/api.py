@@ -55,11 +55,11 @@ def checkout_slab(slab_number: str):
 	total_seconds = (last_history.out_time - last_history.in_time).total_seconds()  # pyright: ignore[reportOperatorIssue]
 	last_history.total_time_in_minutes = total_seconds / 60
 
-	if slab.status == "Quarantine":
-		# Get Mahi Granites Settings to check if the slab is quarantined prematurely.
+	if slab.status == "Curing":
+		# Get Mahi Granites Settings to check if the slab is moved out of curing prematurely.
 		settings: MahiGranitesSettings = frappe.get_single("Mahi Granites Settings")  # pyright: ignore[reportAssignmentType]
-		if settings.min_quarantine_hours > total_seconds / 3600:
-			slab.is_prematurely_unquarantined = True
+		if settings.min_curing_hours > total_seconds / 3600:
+			slab.is_prematurely_checked_out = True
 
 	slab.is_cur_stage_complete = True
 
@@ -240,6 +240,36 @@ def get_batch_numbers(include_child_lines = False):
 	return batch_numbers
 
 
+def pause_or_resume_slab_operation(slab_number: str, pause: bool):
+		# Get the slab document
+		slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
+		# Get the last item in slab history
+		last_history = slab.slab_history[-1]
+
+		# Check if the out time on the last history item is None
+		if pause and last_history.out_time is not None:
+			frappe.throw("Invalid Operation: Slab operation is already paused.")
+
+		if not pause and last_history.out_time is None:
+			frappe.throw("Invalid Operation: Slab operation is not paused.")
+
+		if pause:
+			last_history.out_time = frappe_utils.now_datetime()
+			total_seconds = (last_history.out_time - last_history.in_time).total_seconds()  # pyright: ignore[reportOperatorIssue]
+			last_history.total_time_in_minutes = total_seconds / 60
+			slab.is_paused = True
+		else:
+			slab_history: SlabHistory = frappe.new_doc("Slab History")  # pyright: ignore[reportAssignmentType]
+			slab_history.idx = last_history.idx + 1
+			slab_history.station = last_history.station
+			slab_history.in_time = frappe_utils.now_datetime()
+			slab_history.job_card_number = last_history.job_card_number
+			slab.slab_history.append(slab_history)
+			slab.is_paused = False
+
+		slab.save(ignore_permissions=True)
+
+
 def _generate_batch_number(line: str):
 	today = date.today()
 
@@ -325,6 +355,6 @@ def _get_slab_number(batch: str, line: str) -> int:
 			],
 		)
 		+ slab_seed
-	)
+	) + 1
 
 	return slab_count or 0
