@@ -311,7 +311,7 @@ class JournalEntry(AccountsController):
 		)
 
 		if from_doc_events and from_doc_events != self.ignore_linked_doctypes:
-			self.ignore_linked_doctypes = self.ignore_linked_doctypes + from_doc_events
+			self.ignore_linked_doctypes = self.ignore_linked_doctypes + tuple(from_doc_events)
 
 		self.make_gl_entries(1)
 		JournalTaxWithholding(self).on_cancel()
