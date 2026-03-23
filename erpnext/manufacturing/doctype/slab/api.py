@@ -325,6 +325,6 @@ def _get_slab_number(batch: str, line: str) -> int:
 			],
 		)
 		+ slab_seed
-	)
+	) + 1
 
 	return slab_count or 0
