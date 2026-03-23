@@ -190,7 +190,7 @@ class BootStrapTestData:
 			if not frappe.db.exists("Supplier Scorecard Standing", {"name": x.get("standing_name")}):
 				frappe.get_doc(x).insert()
 
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def make_master_data(self):
 		self.make_fiscal_year()
@@ -244,7 +244,7 @@ class BootStrapTestData:
 		self.update_stock_settings()
 		self.update_system_settings()
 
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 		# custom doctype
 		# DDL commands have implicit commit
