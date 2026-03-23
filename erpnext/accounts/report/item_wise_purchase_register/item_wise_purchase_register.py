@@ -89,14 +89,10 @@ def _execute(filters=None, additional_table_columns=None):
 		}
 
 		total_tax = 0
-<<<<<<< HEAD
+		row.update(default_taxes.copy())
+
 		for tax in tax_columns:
 			item_tax = itemised_tax.get(d.name, {}).get(tax, {})
-=======
-		total_other_charges = 0
-		row.update(default_taxes.copy())
-		for tax, details in itemised_tax.get(d.name, {}).items():
->>>>>>> 072ec9b7ae (fix: initialize all tax columns to resolve Key error in `item_wise_sales_register` and `item_wise_purchase_register` reports (#53323))
 			row.update(
 				{
 					f"{tax}_rate": item_tax.get("tax_rate", 0),
