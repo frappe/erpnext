@@ -1728,9 +1728,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			frappe.run_serially([
 				() => this.remove_pricing_rule_for_item(item),
 				() => this.conversion_factor(doc, cdt, cdn, true),
-				() => this.apply_price_list(item, true), //reapply price list before applying pricing rule
+				// () => this.apply_price_list(item, true), //reapply price list before applying pricing rule
 				() => this.calculate_stock_uom_rate(doc, cdt, cdn),
-				() => this.apply_pricing_rule(item, true),
+				() => this.apply_pricing_rule(null, true),
 			]);
 		} else {
 			this.conversion_factor(doc, cdt, cdn, true);
@@ -1791,6 +1791,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	process_item_removal() {
 		this.frm.trigger("calculate_taxes_and_totals");
 		this.frm.trigger("calculate_net_weight");
+		this.apply_pricing_rule(null, true);
 	}
 
 	calculate_net_weight() {
@@ -2160,7 +2161,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						r.message.forEach((row_item) => {
 							me.remove_pricing_rule(row_item);
 						});
-						me._set_values_for_item_list(r.message);
+						me._set_values_for_item_list(r.message,true);
 						me.calculate_taxes_and_totals();
 						if (me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on");
 					}
@@ -2224,7 +2225,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			args: { args: args, doc: me.frm.doc },
 			callback: function (r) {
 				if (!r.exc && r.message) {
-					me._set_values_for_item_list(r.message);
+					me._set_values_for_item_list(r.message,true);
 					if (item) me.set_gross_profit(item);
 					if (me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on");
 				}
@@ -2320,10 +2321,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				append_item(d);
 			});
 		}
+		
 		return item_list;
 	}
 
-	_set_values_for_item_list(children) {
+	_set_values_for_item_list(children,from_pricing_rule=false) {
 		const items_rule_dict = {};
 
 		for (const child of children) {
@@ -2344,9 +2346,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							child.apply_rule_on_other_items &&
 							JSON.parse(child.apply_rule_on_other_items).length
 						) {
-							if (!JSON.parse(child.apply_rule_on_other_items).includes(child.item_code)) {
-								continue;
-							}
+							const apply_on = child.apply_rule_on || "item_code";
+    						const item_value = frappe.get_doc(child.doctype, child.name)?.[apply_on];
+							if (!JSON.parse(child.apply_rule_on_other_items).includes(item_value)) {
+							continue;
+						}
+
 						}
 
 						frappe.model.set_value(child.doctype, child.name, key, value);
@@ -2375,7 +2380,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}
 		}
 
-		this.apply_rule_on_other_items(items_rule_dict);
+		// this.apply_rule_on_other_items(items_rule_dict);
+		if (!from_pricing_rule) {
+			this.apply_rule_on_other_items(items_rule_dict);
+		}
 		this.calculate_taxes_and_totals();
 	}
 

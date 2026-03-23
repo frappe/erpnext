@@ -1137,12 +1137,29 @@ class AccountsController(TransactionBase):
 			# if user changed the discount percentage then set user's discount percentage ?
 			if pricing_rule_args.get("price_or_product_discount") == "Price":
 				item.set("pricing_rules", pricing_rule_args.get("pricing_rules"))
+
+
+
+				# if pricing_rule_args.get("apply_rule_on_other_items"):
+				# 	other_items = json.loads(pricing_rule_args.get("apply_rule_on_other_items"))
+				# 	if other_items and item.item_code not in other_items:
+				# 		return
 				if pricing_rule_args.get("apply_rule_on_other_items"):
 					other_items = json.loads(pricing_rule_args.get("apply_rule_on_other_items"))
-					if other_items and item.item_code not in other_items:
-						return
+					if other_items:
+						apply_on = pricing_rule_args.get("apply_rule_on")
+						item_value = item.get(apply_on) if apply_on else item.item_code
+						if item_value not in other_items:
+							return
+						
+
+
+
+
+
 
 				item.set("discount_percentage", pricing_rule_args.get("discount_percentage"))
+				
 				item.set("discount_amount", pricing_rule_args.get("discount_amount"))
 				if pricing_rule_args.get("pricing_rule_for") == "Rate":
 					item.set("price_list_rate", pricing_rule_args.get("price_list_rate"))

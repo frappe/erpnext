@@ -39,14 +39,15 @@ def get_pricing_rules(args, doc=None):
 			break
 
 	rules = []
-
 	pricing_rules = filter_pricing_rule_based_on_condition(pricing_rules, doc)
 
 	if not pricing_rules:
 		return []
 
 	if apply_multiple_pricing_rules(pricing_rules):
+		print("\nBEFORE SORT:", [r.get("name") for r in pricing_rules])
 		pricing_rules = sorted_by_priority(pricing_rules, args, doc)
+		print("AFTER SORT:", [r.get("name") for r in pricing_rules])
 		for pricing_rule in pricing_rules:
 			if isinstance(pricing_rule, list):
 				rules.extend(pricing_rule)
