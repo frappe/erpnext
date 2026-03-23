@@ -19,6 +19,7 @@
   "current_job_card",
   "status",
   "is_cur_stage_complete",
+  "is_paused",
   "is_repressed",
   "is_prematurely_checked_out",
   "quality_section",
@@ -210,12 +211,19 @@
    "fieldtype": "Link",
    "label": "Mixer Line",
    "options": "Production Line"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_paused",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Paused"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-17 16:48:02.176406",
+ "modified": "2026-03-23 16:56:52.709894",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",

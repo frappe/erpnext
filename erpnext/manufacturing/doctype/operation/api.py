@@ -190,14 +190,14 @@ def get_recent_job_card(operation, production_line = None):
 
 
 @frappe.whitelist()
-def get_open_job_cards(process, line=None, include_wip=True, include_material_transferred=True):
+def get_open_job_cards(process, line=None, include_wip=True, include_material_transferred=True, include_paused=True):
 	is_mixing = process == "Mixing"
 	if is_mixing:
 		filters = {
 			"status": ["in", ["Open", "Material Transferred", "Work In Progress", "Completed"]],
 			"docstatus": [">=", 0],
 			"operation": ["like", "%Mixing%"],
-			"is_finished": 0,
+			"is_finished": ['=', '0'],
 		}
 	else:
 		workstation_names = [x.workstation_name for x in _get_workstations(process)]
@@ -215,9 +215,12 @@ def get_open_job_cards(process, line=None, include_wip=True, include_material_tr
 		if include_wip:
 			in_query.append("Work In Progress")
 
+		if include_paused:
+			in_query.append("On Hold")
+
 		filters = {
 			"status": ["in", in_query],
-			"docstatus": 0,
+			"docstatus": ['=', '0'],
 			"workstation": ws_query,
 		}
 
