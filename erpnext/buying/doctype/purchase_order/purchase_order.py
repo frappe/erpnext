@@ -888,8 +888,13 @@ def get_list_context(context=None):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def update_status(status, name):
 	po = frappe.get_lazy_doc("Purchase Order", name, check_permission="write")
+=======
+def update_status(status: str, name: str):
+	po = frappe.get_lazy_doc("Purchase Order", name, check_permission="submit")
+>>>>>>> 8ea0cc90df (fix: check for `submit` permissions instead of `write` permissions when updating status (#53697))
 	po.update_status(status)
 	po.update_delivered_qty_in_sales_order()
 
