@@ -263,7 +263,7 @@ class TransactionBase(StatusUpdater):
 					"company": self.get("company"),
 					"order_type": self.get("order_type"),
 					"is_pos": cint(self.get("is_pos")),
-					"is_return": cint(self.get("is_return)")),
+					"is_return": cint(self.get("is_return")),
 					"is_subcontracted": self.get("is_subcontracted"),
 					"ignore_pricing_rule": self.get("ignore_pricing_rule"),
 					"doctype": self.get("doctype"),
@@ -287,7 +287,8 @@ class TransactionBase(StatusUpdater):
 					"child_docname": item.get("name"),
 					"is_old_subcontracting_flow": self.get("is_old_subcontracting_flow"),
 				}
-			)
+			),
+			self,
 		)
 
 	@frappe.whitelist()
