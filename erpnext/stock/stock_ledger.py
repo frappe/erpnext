@@ -2046,7 +2046,6 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 		where
 			item_code = %(item_code)s
 			and warehouse = %(warehouse)s
-			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
 			and (
 				posting_datetime > %(posting_datetime)s

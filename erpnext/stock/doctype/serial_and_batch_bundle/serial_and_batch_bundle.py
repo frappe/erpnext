@@ -758,11 +758,16 @@ class SerialandBatchBundle(Document):
 
 		precision = frappe.get_precision("Serial and Batch Entry", "incoming_rate")
 		for d in self.entries:
+			fifo_batch_wise_val = True
+			if valuation_method == "FIFO" and d.batch_no in batches:
+				fifo_batch_wise_val = False
+
 			if self.is_rejected and not set_valuation_rate_for_rejected_materials:
 				rate = 0.0
 			elif (
 				(flt(d.incoming_rate, precision) == flt(rate, precision))
 				and not stock_queue
+				and fifo_batch_wise_val
 				and d.qty
 				and d.stock_value_difference
 			):

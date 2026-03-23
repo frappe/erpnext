@@ -659,9 +659,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if self.purpose == "Subcontracting Delivery":
 				item.expense_account = frappe.get_value("Company", self.company, "default_expense_account")
 
-			if self.purpose == "Manufacture":
-				item.set("expense_account", item_details.get("expense_account"))
-
 	def validate_fg_completed_qty(self):
 		if self.purpose != "Manufacture" or not self.from_bom:
 			return
