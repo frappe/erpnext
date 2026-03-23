@@ -1681,7 +1681,7 @@ def make_work_orders(items, sales_order, company, project=None):
 
 @frappe.whitelist()
 def update_status(status, name):
-	frappe.has_permission("Sales Order", "write", name, throw=True)
+	frappe.has_permission("Sales Order", "submit", name, throw=True)
 
 	so = frappe.get_doc("Sales Order", name)
 	so.update_status(status)

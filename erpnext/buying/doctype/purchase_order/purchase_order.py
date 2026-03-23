@@ -912,7 +912,7 @@ def get_list_context(context=None):
 
 @frappe.whitelist()
 def update_status(status, name):
-	frappe.has_permission("Purchase Order", "write", name, throw=True)
+	frappe.has_permission("Purchase Order", "submit", name, throw=True)
 
 	po = frappe.get_doc("Purchase Order", name)
 	po.update_status(status)
