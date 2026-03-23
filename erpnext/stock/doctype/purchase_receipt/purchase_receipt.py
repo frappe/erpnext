@@ -1580,13 +1580,8 @@ def make_purchase_return(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def update_purchase_receipt_status(docname, status):
-	pr = frappe.get_lazy_doc("Purchase Receipt", docname, check_permission="write")
-=======
-def update_purchase_receipt_status(docname: str, status: str):
 	pr = frappe.get_lazy_doc("Purchase Receipt", docname, check_permission="submit")
->>>>>>> 8ea0cc90df (fix: check for `submit` permissions instead of `write` permissions when updating status (#53697))
 	pr.update_status(status)
 
 
