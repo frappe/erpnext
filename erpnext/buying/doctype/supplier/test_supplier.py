@@ -3,7 +3,6 @@
 
 
 import frappe
-from frappe.tests import UnitTestCase
 
 from erpnext.accounts.party import get_due_date
 from erpnext.controllers.website_list_for_contact import get_customers_suppliers

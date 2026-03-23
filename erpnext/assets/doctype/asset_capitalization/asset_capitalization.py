@@ -2,7 +2,6 @@
 # For license information, please see license.txt
 
 import json
-from typing import Any
 
 import frappe
 

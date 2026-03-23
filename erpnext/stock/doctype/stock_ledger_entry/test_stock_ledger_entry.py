@@ -7,11 +7,9 @@ from uuid import uuid4
 
 import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
-from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.query_builder.functions import Timestamp
 from frappe.utils import add_days, add_to_date, flt, today
 
-from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (

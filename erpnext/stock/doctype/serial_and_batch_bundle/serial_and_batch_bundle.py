@@ -2,7 +2,6 @@
 # For license information, please see license.txt
 
 import collections
-import csv
 import json
 from collections import Counter, defaultdict
 from typing import Any

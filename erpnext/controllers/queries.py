@@ -11,7 +11,7 @@ from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.permissions import has_permission
 from frappe.query_builder import Criterion, CustomFunction
 from frappe.query_builder.functions import Concat, Locate, Sum
-from frappe.utils import cint, nowdate, today, unique
+from frappe.utils import nowdate, today, unique
 from pypika import Order
 
 import erpnext

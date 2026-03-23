@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import frappe
 from frappe import _, bold, json, msgprint

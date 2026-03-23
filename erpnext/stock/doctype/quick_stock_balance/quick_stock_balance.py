@@ -5,7 +5,6 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils.data import DateTimeLikeObject
 
 from erpnext.stock.utils import get_stock_balance, get_stock_value_on
 
