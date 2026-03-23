@@ -587,7 +587,7 @@ class WorkOrder(Document):
 		if self.docstatus == 0:
 			status = "Draft"
 		elif self.docstatus == 1:
-			if status != "Stopped":
+			if status not in ["Closed", "Stopped"]:
 				status = "Not Started"
 				if flt(self.material_transferred_for_manufacturing) > 0:
 					status = "In Process"
