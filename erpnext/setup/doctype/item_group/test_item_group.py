@@ -231,8 +231,3 @@ class TestItemGroup(ERPNextTestSuite):
 				return no_of_children
 
 		return get_no_of_children([item_group], 0)
-
-	def _print_tree(self):
-		import json
-
-		print(json.dumps(frappe.db.sql("select name, lft, rgt from `tabItem Group` order by lft"), indent=1))
