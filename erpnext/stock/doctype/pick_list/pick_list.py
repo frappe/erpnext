@@ -527,6 +527,16 @@ class PickList(TransactionBase):
 		if self.parent_warehouse:
 			from_warehouses.extend(get_descendants_of("Warehouse", self.parent_warehouse))
 
+		item_warehouse_dict = frappe._dict()
+		if self.work_order:
+			item_warehouse_list = frappe.get_all(
+				"Work Order Item",
+				filters={"parent": self.work_order},
+				fields=["item_code", "source_warehouse"],
+			)
+			if item_warehouse_list:
+				item_warehouse_dict = {item.item_code: item.source_warehouse for item in item_warehouse_list}
+
 		# Create replica before resetting, to handle empty table on update after submit.
 		locations_replica = self.get("locations")
 
@@ -543,6 +553,9 @@ class PickList(TransactionBase):
 		len_idx = len(self.get("locations")) or 0
 		for item_doc in items:
 			item_code = item_doc.item_code
+
+			if self.work_order and item_warehouse_dict.get(item_code):
+				from_warehouses = [item_warehouse_dict.get(item_code)]
 
 			self.item_location_map.setdefault(
 				item_code,
