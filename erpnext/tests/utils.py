@@ -16,11 +16,8 @@ ReportName = NewType("ReportName", str)
 
 
 def create_test_contact_and_address():
-	frappe.db.sql("delete from tabContact")
-	frappe.db.sql("delete from `tabContact Email`")
-	frappe.db.sql("delete from `tabContact Phone`")
-	frappe.db.sql("delete from tabAddress")
-	frappe.db.sql("delete from `tabDynamic Link`")
+	for doctype in ("Contact", "Contact Email", "Contact Phone", "Address", "Dynamic Link"):
+		frappe.db.delete(doctype)
 
 	frappe.get_doc(
 		{

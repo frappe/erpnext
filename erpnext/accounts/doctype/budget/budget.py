@@ -115,23 +115,19 @@ class Budget(Document):
 		if not account:
 			return
 
-		existing_budget = frappe.db.sql(
-			f"""
-			SELECT name, account
-			FROM `tabBudget`
-			WHERE
-				docstatus < 2
-				AND company = %s
-				AND {budget_against_field} = %s
-				AND account = %s
-				AND name != %s
-				AND (
-					(SELECT year_start_date FROM `tabFiscal Year` WHERE name = from_fiscal_year) <= %s
-					AND (SELECT year_end_date FROM `tabFiscal Year` WHERE name = to_fiscal_year) >= %s
-				)
-			""",
-			(self.company, budget_against, account, self.name, self.budget_end_date, self.budget_start_date),
-			as_dict=True,
+		existing_budget = frappe.get_all(
+			"Budget",
+			filters=[
+				["docstatus", "<", 2],
+				["company", "=", self.company],
+				[budget_against_field, "=", budget_against],
+				["account", "=", account],
+				["name", "!=", self.name],
+				["budget_start_date", "<=", self.budget_end_date],
+				["budget_end_date", ">=", self.budget_start_date],
+			],
+			fields=["name", "account"],
+			limit=1,
 		)
 
 		if existing_budget:
@@ -381,17 +377,16 @@ def validate_expense_against_budget(params, expense_amount=0):
 	posting_fiscal_year = get_fiscal_year(posting_date, company=params.get("company"))[0]
 	year_start_date, year_end_date = get_fiscal_year_date_range(posting_fiscal_year, posting_fiscal_year)
 
-	budget_exists = frappe.db.sql(
-		"""
-		select name
-		from `tabBudget`
-		where company = %s
-		and docstatus = 1
-		and (SELECT year_start_date FROM `tabFiscal Year` WHERE name = from_fiscal_year) <= %s
-		and (SELECT year_end_date FROM `tabFiscal Year` WHERE name = to_fiscal_year) >= %s
-		limit 1
-		""",
-		(params.company, year_end_date, year_start_date),
+	budget_exists = frappe.get_all(
+		"Budget",
+		filters=[
+			["company", "=", params.company],
+			["docstatus", "=", 1],
+			["budget_start_date", "<=", year_end_date],
+			["budget_end_date", ">=", year_start_date],
+		],
+		limit=1,
+		pluck="name",
 	)
 
 	if not budget_exists:
@@ -435,49 +430,52 @@ def validate_expense_against_budget(params, expense_amount=0):
 		):
 			doctype = dimension.get("document_type")
 
+			budget_filters = [
+				["company", "=", params.company],
+				["docstatus", "=", 1],
+				["budget_start_date", "<=", params.posting_date],
+				["budget_end_date", ">=", params.posting_date],
+				["account", "=", params.account],
+			]
+
 			if frappe.get_cached_value("DocType", doctype, "is_tree"):
 				lft, rgt = frappe.get_cached_value(doctype, params.get(budget_against), ["lft", "rgt"])
-				condition = f"""and exists(select name from `tab{doctype}`
-					where lft<={lft} and rgt>={rgt} and name=b.{budget_against})"""  # nosec
+				budget_against_values = frappe.get_all(
+					doctype,
+					filters={"lft": ["<=", lft], "rgt": [">=", rgt]},
+					pluck="name",
+				)
+				budget_filters.append([budget_against, "in", budget_against_values])
 				params.is_tree = True
 			else:
-				condition = f"and b.{budget_against}={frappe.db.escape(params.get(budget_against))}"
+				budget_filters.append([budget_against, "=", params.get(budget_against)])
 				params.is_tree = False
 
 			params.budget_against_field = budget_against
 			params.budget_against_doctype = doctype
 
-			budget_records = frappe.db.sql(
-				f"""
-				SELECT
-					b.name,
-					b.{budget_against} AS budget_against,
-					b.budget_amount,
-					b.from_fiscal_year,
-					b.to_fiscal_year,
-					b.budget_start_date,
-					b.budget_end_date,
-					IFNULL(b.applicable_on_material_request, 0) AS for_material_request,
-					IFNULL(b.applicable_on_purchase_order, 0) AS for_purchase_order,
-					IFNULL(b.applicable_on_booking_actual_expenses, 0) AS for_actual_expenses,
-					b.action_if_annual_budget_exceeded,
-					b.action_if_accumulated_monthly_budget_exceeded,
-					b.action_if_annual_budget_exceeded_on_mr,
-					b.action_if_accumulated_monthly_budget_exceeded_on_mr,
-					b.action_if_annual_budget_exceeded_on_po,
-					b.action_if_accumulated_monthly_budget_exceeded_on_po
-				FROM
-					`tabBudget` b
-				WHERE
-					b.company = %s
-					AND b.docstatus = 1
-					AND %s BETWEEN b.budget_start_date AND b.budget_end_date
-					AND b.account = %s
-					{condition}
-				""",
-				(params.company, params.posting_date, params.account),
-				as_dict=True,
-			)  # nosec
+			budget_records = frappe.get_all(
+				"Budget",
+				filters=budget_filters,
+				fields=[
+					"name",
+					f"{budget_against} as budget_against",
+					"budget_amount",
+					"from_fiscal_year",
+					"to_fiscal_year",
+					"budget_start_date",
+					"budget_end_date",
+					"ifnull(applicable_on_material_request, 0) as for_material_request",
+					"ifnull(applicable_on_purchase_order, 0) as for_purchase_order",
+					"ifnull(applicable_on_booking_actual_expenses, 0) as for_actual_expenses",
+					"action_if_annual_budget_exceeded",
+					"action_if_accumulated_monthly_budget_exceeded",
+					"action_if_annual_budget_exceeded_on_mr",
+					"action_if_accumulated_monthly_budget_exceeded_on_mr",
+					"action_if_annual_budget_exceeded_on_po",
+					"action_if_accumulated_monthly_budget_exceeded_on_po",
+				],
+			)
 
 			if budget_records:
 				validate_budget_records(params, budget_records, expense_amount)
@@ -690,18 +688,32 @@ def get_requested_amount(params):
 
 def get_ordered_amount(params):
 	item_code = params.get("item_code")
-	condition = get_other_condition(params, "Purchase Order")
+	purchase_order = frappe.qb.DocType("Purchase Order")
+	purchase_order_item = frappe.qb.DocType("Purchase Order Item")
+	start_date = frappe.get_cached_value("Fiscal Year", params.from_fiscal_year, "year_start_date")
+	end_date = frappe.get_cached_value("Fiscal Year", params.to_fiscal_year, "year_end_date")
 
-	data = frappe.db.sql(
-		f""" select ifnull(sum(child.amount - child.billed_amt), 0) as amount
-		from `tabPurchase Order Item` child, `tabPurchase Order` parent where
-		parent.name = child.parent and child.item_code = %s and parent.docstatus = 1 and child.amount > child.billed_amt
-		and parent.status != 'Closed' and {condition}""",
-		item_code,
-		as_list=1,
+	query = (
+		frappe.qb.from_(purchase_order_item)
+		.join(purchase_order)
+		.on(purchase_order.name == purchase_order_item.parent)
+		.select(Sum(purchase_order_item.amount - purchase_order_item.billed_amt).as_("amount"))
+		.where(
+			(purchase_order_item.item_code == item_code)
+			& (purchase_order.docstatus == 1)
+			& (purchase_order_item.amount > purchase_order_item.billed_amt)
+			& (purchase_order.status != "Closed")
+			& (purchase_order_item.expense_account == params.expense_account)
+			& purchase_order.transaction_date.between(start_date, end_date)
+		)
 	)
 
-	return data[0][0] if data else 0
+	budget_against_field = params.get("budget_against_field")
+	if budget_against_field and params.get(budget_against_field):
+		query = query.where(purchase_order_item[budget_against_field] == params.get(budget_against_field))
+
+	data = query.run(as_dict=True)
+	return data[0].amount if data else 0
 
 
 def get_other_condition(params, for_doc):
@@ -726,47 +738,36 @@ def get_actual_expense(params):
 		params.budget_against_doctype = frappe.unscrub(params.budget_against_field)
 
 	budget_against_field = params.get("budget_against_field")
-	condition1 = " and gle.posting_date <= %(month_end_date)s" if params.get("month_end_date") else ""
-
-	date_condition = (
-		f"and gle.posting_date between '{params.budget_start_date}' and '{params.budget_end_date}'"
+	gl_entry = frappe.qb.DocType("GL Entry")
+	query = (
+		frappe.qb.from_(gl_entry)
+		.select(Sum(gl_entry.debit - gl_entry.credit).as_("amount"))
+		.where(
+			(gl_entry.is_cancelled == 0)
+			& (gl_entry.account == params.account)
+			& gl_entry.posting_date.between(params.budget_start_date, params.budget_end_date)
+			& (gl_entry.company == params.company)
+			& (gl_entry.docstatus == 1)
+		)
 	)
+
+	if params.get("month_end_date"):
+		query = query.where(gl_entry.posting_date <= params.month_end_date)
 
 	if params.is_tree:
 		lft_rgt = frappe.db.get_value(
 			params.budget_against_doctype, params.get(budget_against_field), ["lft", "rgt"], as_dict=1
 		)
-		params.update(lft_rgt)
-
-		condition2 = f"""
-			and exists(
-				select name from `tab{params.budget_against_doctype}`
-				where lft >= %(lft)s and rgt <= %(rgt)s
-				and name = gle.{budget_against_field}
-			)
-		"""
+		dimension_values = frappe.get_all(
+			params.budget_against_doctype,
+			filters={"lft": [">=", lft_rgt.lft], "rgt": ["<=", lft_rgt.rgt]},
+			pluck="name",
+		)
+		query = query.where(gl_entry[budget_against_field].isin(dimension_values))
 	else:
-		condition2 = f"""
-			and gle.{budget_against_field} = %({budget_against_field})s
-		"""
+		query = query.where(gl_entry[budget_against_field] == params.get(budget_against_field))
 
-	amount = flt(
-		frappe.db.sql(
-			f"""
-				select sum(gle.debit) - sum(gle.credit)
-				from `tabGL Entry` gle
-				where
-					is_cancelled = 0
-					and gle.account = %(account)s
-					{condition1}
-					{date_condition}
-					and gle.company = %(company)s
-					and gle.docstatus = 1
-					{condition2}
-			""",
-			params,
-		)[0][0]
-	)  # nosec
+	amount = flt(query.run(as_dict=True)[0].amount or 0)  # nosec
 
 	return amount
 

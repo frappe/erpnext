@@ -17,8 +17,7 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		frappe.db.set_single_value("Accounts Settings", "use_legacy_controller_for_pcv", 1)
 
 	def test_closing_entry(self):
-		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
-		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
+		clear_records_for_company("Test PCV Company", "GL Entry", "Period Closing Voucher")
 
 		company = create_company()
 		cost_center = create_cost_center("Test Cost Center 1")
@@ -58,19 +57,21 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			("Sales - TPC", 400.0, 0.0),
 		)
 
-		pcv_gle = frappe.db.sql(
-			"""
-			select account, debit, credit from `tabGL Entry` where voucher_no=%s order by account
-		""",
-			(pcv.name),
+		pcv_gle = tuple(
+			frappe.get_all(
+				"GL Entry",
+				filters={"voucher_no": pcv.name},
+				fields=["account", "debit", "credit"],
+				order_by="account",
+				as_list=True,
+			)
 		)
 		pcv.reload()
 		self.assertEqual(pcv.gle_processing_status, "Completed")
 		self.assertEqual(pcv_gle, expected_gle)
 
 	def test_cost_center_wise_posting(self):
-		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
-		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
+		clear_records_for_company("Test PCV Company", "GL Entry", "Period Closing Voucher")
 
 		company = create_company()
 		surplus_account = create_account()
@@ -113,13 +114,14 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			("Sales - TPC", 200.0, 0.0, cost_center2),
 		)
 
-		pcv_gle = frappe.db.sql(
-			"""
-			select account, debit, credit, cost_center
-			from `tabGL Entry` where voucher_no=%s
-			order by account, cost_center
-		""",
-			(pcv.name),
+		pcv_gle = tuple(
+			frappe.get_all(
+				"GL Entry",
+				filters={"voucher_no": pcv.name},
+				fields=["account", "debit", "credit", "cost_center"],
+				order_by="account asc, cost_center asc",
+				as_list=True,
+			)
 		)
 
 		self.assertSequenceEqual(pcv_gle, expected_gle)
@@ -135,8 +137,7 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		)
 
 	def test_period_closing_with_finance_book_entries(self):
-		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
-		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
+		clear_records_for_company("Test PCV Company", "GL Entry", "Period Closing Voucher")
 
 		company = create_company()
 		surplus_account = create_account()
@@ -177,20 +178,20 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			("Sales - TPC", 400.0, 0.0, jv.finance_book),
 		)
 
-		pcv_gle = frappe.db.sql(
-			"""
-			select account, debit, credit, finance_book
-			from `tabGL Entry` where voucher_no=%s
-			order by account, finance_book
-		""",
-			(pcv.name),
+		pcv_gle = tuple(
+			frappe.get_all(
+				"GL Entry",
+				filters={"voucher_no": pcv.name},
+				fields=["account", "debit", "credit", "finance_book"],
+				order_by="account asc, finance_book asc",
+				as_list=True,
+			)
 		)
 
 		self.assertSequenceEqual(pcv_gle, expected_gle)
 
 	def test_gl_entries_restrictions(self):
-		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
-		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
+		clear_records_for_company("Test PCV Company", "GL Entry", "Period Closing Voucher")
 
 		company = create_company()
 		cost_center = create_cost_center("Test Cost Center 1")
@@ -212,9 +213,9 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, jv1.submit)
 
 	def test_closing_balance_with_dimensions_and_test_reposting_entry(self):
-		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
-		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
-		frappe.db.sql("delete from `tabAccount Closing Balance` where company='Test PCV Company'")
+		clear_records_for_company(
+			"Test PCV Company", "GL Entry", "Period Closing Voucher", "Account Closing Balance"
+		)
 
 		company = create_company()
 		cost_center1 = create_cost_center("Test Cost Center 1")
@@ -390,3 +391,8 @@ def create_cost_center(cc_name):
 	)
 	costcenter.insert(ignore_if_duplicate=True)
 	return costcenter.name
+
+
+def clear_records_for_company(company: str, *doctypes: str):
+	for doctype in doctypes:
+		frappe.db.delete(doctype, {"company": company})

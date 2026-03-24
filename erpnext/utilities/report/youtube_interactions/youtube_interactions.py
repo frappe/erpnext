@@ -30,17 +30,23 @@ def get_columns():
 
 
 def get_data(filters):
-	return frappe.db.sql(
-		"""
-		SELECT
-			publish_date, title, provider, duration,
-			view_count, like_count, dislike_count, comment_count
-		FROM `tabVideo`
-		WHERE view_count is not null
-			and publish_date between %(from_date)s and %(to_date)s
-		ORDER BY view_count desc""",
-		filters,
-		as_dict=1,
+	return frappe.get_all(
+		"Video",
+		filters=[
+			["view_count", "is", "set"],
+			["publish_date", "between", [filters.get("from_date"), filters.get("to_date")]],
+		],
+		fields=[
+			"publish_date",
+			"title",
+			"provider",
+			"duration",
+			"view_count",
+			"like_count",
+			"dislike_count",
+			"comment_count",
+		],
+		order_by="view_count desc",
 	)
 
 

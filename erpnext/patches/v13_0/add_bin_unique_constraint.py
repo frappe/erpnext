@@ -17,7 +17,8 @@ def execute():
 
 def delete_broken_bins():
 	# delete useless bins
-	frappe.db.sql("delete from `tabBin` where item_code is null or warehouse is null")
+	bin_doc = frappe.qb.DocType("Bin")
+	frappe.qb.from_(bin_doc).delete().where(bin_doc.item_code.isnull() | bin_doc.warehouse.isnull()).run()
 
 
 def delete_and_patch_duplicate_bins():

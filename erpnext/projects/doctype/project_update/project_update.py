@@ -4,6 +4,7 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import add_days, today
 
 
 class ProjectUpdate(Document):
@@ -31,30 +32,33 @@ class ProjectUpdate(Document):
 
 @frappe.whitelist()
 def daily_reminder():
-	project = frappe.db.sql(
-		"""SELECT `tabProject`.project_name,`tabProject`.frequency,`tabProject`.expected_start_date,`tabProject`.expected_end_date,`tabProject`.percent_complete FROM `tabProject`;"""
+	projects = frappe.get_all(
+		"Project",
+		fields=["project_name", "frequency", "expected_start_date", "expected_end_date", "percent_complete"],
 	)
-	for projects in project:
-		project_name = projects[0]
-		frequency = projects[1]
-		date_start = projects[2]
-		date_end = projects[3]
-		progress = projects[4]
-		draft = frappe.db.sql(
-			"""SELECT count(docstatus) from `tabProject Update` WHERE `tabProject Update`.project = %s AND `tabProject Update`.docstatus = 0;""",
-			project_name,
+	for project in projects:
+		project_name = project.project_name
+		number_of_drafts = frappe.db.count(
+			"Project Update", filters={"project": project_name, "docstatus": 0}
 		)
-		for drafts in draft:
-			number_of_drafts = drafts[0]
-		update = frappe.db.sql(
-			"""SELECT name,date,time,progress,progress_details FROM `tabProject Update` WHERE `tabProject Update`.project = %s AND date = DATE_ADD(CURRENT_DATE, INTERVAL -1 DAY);""",
-			project_name,
+		update = frappe.get_all(
+			"Project Update",
+			filters={"project": project_name, "date": add_days(today(), -1)},
+			fields=["name", "date", "time", "progress", "progress_details"],
 		)
-		email_sending(project_name, frequency, date_start, date_end, progress, number_of_drafts, update)
+		email_sending(
+			project_name,
+			project.frequency,
+			project.expected_start_date,
+			project.expected_end_date,
+			project.percent_complete,
+			number_of_drafts,
+			update,
+		)
 
 
 def email_sending(project_name, frequency, date_start, date_end, progress, number_of_drafts, update):
-	holiday = frappe.db.sql("""SELECT holiday_date FROM `tabHoliday` where holiday_date = CURRENT_DATE;""")
+	holiday = frappe.db.exists("Holiday", {"holiday_date": today()})
 	msg = (
 		"<p>Project Name: "
 		+ project_name
@@ -84,23 +88,23 @@ def email_sending(project_name, frequency, date_start, date_end, progress, numbe
 	for updates in update:
 		msg += (
 			"<tr><td>"
-			+ str(updates[0])
+			+ str(updates.name)
 			+ "</td><td>"
-			+ str(updates[1])
+			+ str(updates.date)
 			+ "</td><td>"
-			+ str(updates[2])
+			+ str(updates.time)
 			+ "</td><td>"
-			+ str(updates[3])
+			+ str(updates.progress)
 			+ "</td>"
 			+ "</td><td>"
-			+ str(updates[4])
+			+ str(updates.progress_details)
 			+ "</td></tr>"
 		)
 
 	msg += "</table>"
-	if len(holiday) == 0:
-		email = frappe.db.sql("""SELECT user from `tabProject User` WHERE parent = %s;""", project_name)
-		for emails in email:
-			frappe.sendmail(recipients=emails, subject=frappe._(project_name + " " + "Summary"), message=msg)
-	else:
-		pass
+	if not holiday:
+		email = frappe.get_all("Project User", filters={"parent": project_name}, pluck="user")
+		for email_id in email:
+			frappe.sendmail(
+				recipients=email_id, subject=frappe._(project_name + " " + "Summary"), message=msg
+			)

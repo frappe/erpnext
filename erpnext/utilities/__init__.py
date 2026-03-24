@@ -10,12 +10,15 @@ from erpnext.utilities.activation import get_level
 
 
 def update_doctypes():
-	for d in frappe.db.sql(
-		"""select df.parent, df.fieldname
-		from tabDocField df, tabDocType dt where df.fieldname
-		like "%description%" and df.parent = dt.name and dt.istable = 1""",
-		as_dict=1,
-	):
+	docfield = frappe.qb.DocType("DocField")
+	doctype = frappe.qb.DocType("DocType")
+	for d in (
+		frappe.qb.from_(docfield)
+		.join(doctype)
+		.on(docfield.parent == doctype.name)
+		.select(docfield.parent, docfield.fieldname)
+		.where(docfield.fieldname.like("%description%") & (doctype.istable == 1))
+	).run(as_dict=True):
 		dt = frappe.get_doc("DocType", d.parent)
 
 		for f in dt.fields:
@@ -31,8 +34,8 @@ def get_site_info(site_info):
 	domain = None
 
 	if not company:
-		company = frappe.db.sql("select name from `tabCompany` order by creation asc")
-		company = company[0][0] if company else None
+		company = frappe.get_all("Company", order_by="creation", limit=1, pluck="name")
+		company = company[0] if company else None
 
 	if company:
 		domain = frappe.get_cached_value("Company", cstr(company), "domain")

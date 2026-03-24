@@ -5,10 +5,9 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 def execute():
 	frappe.reload_doc("accounts", "doctype", "accounting_dimension")
 
-	accounting_dimensions = frappe.db.sql(
-		"""select fieldname, label, document_type, disabled from
-		`tabAccounting Dimension`""",
-		as_dict=1,
+	accounting_dimensions = frappe.get_all(
+		"Accounting Dimension",
+		fields=["fieldname", "label", "document_type", "disabled"],
 	)
 
 	if not accounting_dimensions:

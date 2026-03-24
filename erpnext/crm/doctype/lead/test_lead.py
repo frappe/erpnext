@@ -86,8 +86,8 @@ class TestLead(ERPNextTestSuite):
 		self.assertEqual(len(address_1.get("links")), 1)
 
 	def test_prospect_creation_from_lead(self):
-		frappe.db.sql("delete from `tabLead` where lead_name='Rahul Tripathi'")
-		frappe.db.sql("delete from `tabProspect` where name='Prospect Company'")
+		delete_records("Lead", "lead_name", "Rahul Tripathi")
+		delete_records("Prospect", "name", "Prospect Company")
 
 		lead = make_lead(
 			first_name="Rahul",
@@ -108,8 +108,8 @@ class TestLead(ERPNextTestSuite):
 		self.assertEqual(event.event_participants[1].reference_docname, prospect)
 
 	def test_opportunity_from_lead(self):
-		frappe.db.sql("delete from `tabLead` where lead_name='Rahul Tripathi'")
-		frappe.db.sql("delete from `tabOpportunity` where party_name='Rahul Tripathi'")
+		delete_records("Lead", "lead_name", "Rahul Tripathi")
+		delete_records("Opportunity", "party_name", "Rahul Tripathi")
 
 		lead = make_lead(
 			first_name="Rahul",
@@ -138,8 +138,8 @@ class TestLead(ERPNextTestSuite):
 		)
 
 	def test_copy_events_from_lead_to_prospect(self):
-		frappe.db.sql("delete from `tabLead` where lead_name='Rahul Tripathi'")
-		frappe.db.sql("delete from `tabProspect` where name='Prospect Company'")
+		delete_records("Lead", "lead_name", "Rahul Tripathi")
+		delete_records("Prospect", "name", "Prospect Company")
 
 		lead = make_lead(
 			first_name="Rahul",
@@ -182,6 +182,10 @@ def create_todo(description, reference_type, reference_name):
 	todo.reference_name = reference_name
 	todo.insert()
 	return todo
+
+
+def delete_records(doctype: str, fieldname: str, value: str):
+	frappe.db.delete(doctype, {fieldname: value})
 
 
 def make_lead(**args):

@@ -7,6 +7,11 @@ def execute():
 	frappe.reload_doc("manufacturing", "doctype", "work_order")
 	frappe.reload_doc("manufacturing", "doctype", "work_order_item")
 
-	frappe.db.sql(
-		"""UPDATE `tabWork Order Item` SET amount = ifnull(rate, 0.0) * ifnull(required_qty, 0.0)"""
-	)
+	for row in frappe.get_all("Work Order Item", fields=["name", "rate", "required_qty"]):
+		frappe.db.set_value(
+			"Work Order Item",
+			row.name,
+			"amount",
+			(row.rate or 0.0) * (row.required_qty or 0.0),
+			update_modified=False,
+		)

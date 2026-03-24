@@ -215,18 +215,17 @@ def get_children(doctype: str, parent: str | None = None, location: str | None =
 	if parent is None or parent == "All Locations":
 		parent = ""
 
-	return frappe.db.sql(
-		f"""
-		select
-			name as value,
-			is_group as expandable
-		from
-			`tabLocation` comp
-		where
-			ifnull(parent_location, "")={frappe.db.escape(parent)}
-		""",
-		as_dict=1,
+	location_doc = frappe.qb.DocType("Location")
+	query = frappe.qb.from_(location_doc).select(
+		location_doc.name.as_("value"), location_doc.is_group.as_("expandable")
 	)
+
+	if parent:
+		query = query.where(location_doc.parent_location == parent)
+	else:
+		query = query.where(location_doc.parent_location.isnull() | (location_doc.parent_location == ""))
+
+	return query.run(as_dict=1)
 
 
 @frappe.whitelist()

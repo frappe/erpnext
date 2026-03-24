@@ -13,6 +13,7 @@ from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import (
 	cint,
+	cstr,
 	date_diff,
 	flt,
 	get_datetime,
@@ -529,26 +530,46 @@ class WorkOrder(Document):
 
 	def validate_work_order_against_so(self):
 		# already ordered qty
-		ordered_qty_against_so = frappe.db.sql(
-			"""select sum(qty - process_loss_qty) from `tabWork Order`
-			where production_item = %s and sales_order = %s and docstatus = 1 and status != 'Closed' and name != %s""",
-			(self.production_item, self.sales_order, self.name),
-		)[0][0]
+		ordered_work_orders = frappe.get_all(
+			"Work Order",
+			filters={
+				"production_item": self.production_item,
+				"sales_order": self.sales_order,
+				"docstatus": 1,
+				"status": ["!=", "Closed"],
+				"name": ["!=", self.name],
+			},
+			fields=["sum(qty) as total_qty", "sum(process_loss_qty) as total_process_loss_qty"],
+		)[0]
+		ordered_qty_against_so = flt(ordered_work_orders.total_qty) - flt(
+			ordered_work_orders.total_process_loss_qty
+		)
 
 		total_qty = flt(ordered_qty_against_so) + flt(self.qty)
 
 		# get qty from Sales Order Item table
-		so_item_qty = frappe.db.sql(
-			"""select sum(stock_qty) from `tabSales Order Item`
-			where parent = %s and item_code = %s and docstatus = 1""",
-			(self.sales_order, self.production_item),
-		)[0][0]
+		so_item_qty = flt(
+			frappe.get_all(
+				"Sales Order Item",
+				filters={"parent": self.sales_order, "item_code": self.production_item, "docstatus": 1},
+				fields=["sum(stock_qty) as stock_qty"],
+			)[0].stock_qty
+			or 0
+		)
 		# get qty from Packing Item table
-		dnpi_qty = frappe.db.sql(
-			"""select sum(qty) from `tabPacked Item`
-			where parent = %s and parenttype = 'Sales Order' and item_code = %s and docstatus = 1""",
-			(self.sales_order, self.production_item),
-		)[0][0]
+		dnpi_qty = flt(
+			frappe.get_all(
+				"Packed Item",
+				filters={
+					"parent": self.sales_order,
+					"parenttype": "Sales Order",
+					"item_code": self.production_item,
+					"docstatus": 1,
+				},
+				fields=["sum(qty) as qty"],
+			)[0].qty
+			or 0
+		)
 		# total qty in SO
 		so_qty = flt(so_item_qty) + flt(dnpi_qty)
 
@@ -1089,15 +1110,16 @@ class WorkOrder(Document):
 			frappe.throw(_("Stopped Work Order cannot be cancelled, Unstop it first to cancel"))
 
 		# Check whether any stock entry exists against this Work Order
-		stock_entry = frappe.db.sql(
-			"""select name from `tabStock Entry`
-			where work_order = %s and docstatus = 1""",
-			self.name,
+		stock_entry = frappe.get_all(
+			"Stock Entry",
+			filters={"work_order": self.name, "docstatus": 1},
+			limit=1,
+			pluck="name",
 		)
 		if stock_entry:
 			frappe.throw(
 				_("Cannot cancel because submitted Stock Entry {0} exists").format(
-					frappe.utils.get_link_to_form("Stock Entry", stock_entry[0][0])
+					frappe.utils.get_link_to_form("Stock Entry", stock_entry[0])
 				)
 			)
 
@@ -1127,19 +1149,18 @@ class WorkOrder(Document):
 			mr_obj.update_requested_qty([self.material_request_item])
 
 	def set_produced_qty_for_sub_assembly_item(self):
-		table = frappe.qb.DocType("Work Order")
-
-		query = (
-			frappe.qb.from_(table)
-			.select(Sum(table.produced_qty))
-			.where(
-				(table.production_plan == self.production_plan)
-				& (table.production_plan_sub_assembly_item == self.production_plan_sub_assembly_item)
-				& (table.docstatus == 1)
-			)
-		).run()
-
-		produced_qty = flt(query[0][0]) if query else 0
+		produced_qty = flt(
+			frappe.get_all(
+				"Work Order",
+				filters={
+					"production_plan": self.production_plan,
+					"production_plan_sub_assembly_item": self.production_plan_sub_assembly_item,
+					"docstatus": 1,
+				},
+				fields=["sum(produced_qty) as produced_qty"],
+			)[0].produced_qty
+			or 0
+		)
 
 		frappe.db.set_value(
 			"Production Plan Sub Assembly Item",
@@ -1150,23 +1171,13 @@ class WorkOrder(Document):
 
 	def update_ordered_qty(self):
 		if self.production_plan and (self.production_plan_item or self.production_plan_sub_assembly_item):
-			table = frappe.qb.DocType("Work Order")
-
-			query = (
-				frappe.qb.from_(table)
-				.select(Sum(table.qty))
-				.where((table.production_plan == self.production_plan) & (table.docstatus == 1))
-			)
-
+			filters = {"production_plan": self.production_plan, "docstatus": 1}
 			if self.production_plan_item:
-				query = query.where(table.production_plan_item == self.production_plan_item)
+				filters["production_plan_item"] = self.production_plan_item
 			elif self.production_plan_sub_assembly_item:
-				query = query.where(
-					table.production_plan_sub_assembly_item == self.production_plan_sub_assembly_item
-				)
+				filters["production_plan_sub_assembly_item"] = self.production_plan_sub_assembly_item
 
-			query = query.run()
-			qty = flt(query[0][0]) if query else 0
+			qty = flt(frappe.get_all("Work Order", filters=filters, fields=["sum(qty) as qty"])[0].qty or 0)
 
 			if self.production_plan_item:
 				frappe.db.set_value("Production Plan Item", self.production_plan_item, "ordered_qty", qty)
@@ -1188,27 +1199,28 @@ class WorkOrder(Document):
 
 		total_bundle_qty = 1
 		if self.product_bundle_item:
-			total_bundle_qty = frappe.db.sql(
-				""" select sum(qty) from
-				`tabProduct Bundle Item` where parent = %s""",
-				(frappe.db.escape(self.product_bundle_item)),
-			)[0][0]
+			total_bundle_qty = flt(
+				frappe.get_all(
+					"Product Bundle Item",
+					filters={"parent": self.product_bundle_item},
+					fields=["sum(qty) as qty"],
+				)[0].qty
+				or 0
+			)
 
 			if not total_bundle_qty:
 				# product bundle is 0 (product bundle allows 0 qty for items)
 				total_bundle_qty = 1
 
-		cond = "product_bundle_item = %s" if self.product_bundle_item else "production_item = %s"
+		filters = {"sales_order": self.sales_order, "docstatus": 1, "status": ["!=", "Closed"]}
+		if self.product_bundle_item:
+			filters["product_bundle_item"] = self.product_bundle_item
+		else:
+			filters["production_item"] = self.production_item
 
-		qty = frappe.db.sql(
-			f""" select sum(qty) from
-			`tabWork Order` where sales_order = %s and docstatus = 1 and status <> 'Closed' and {cond}
-			""",
-			(self.sales_order, (self.product_bundle_item or self.production_item)),
-			as_list=1,
+		work_order_qty = flt(
+			frappe.get_all("Work Order", filters=filters, fields=["sum(qty) as qty"])[0].qty or 0
 		)
-
-		work_order_qty = qty[0][0] if qty and qty[0][0] else 0
 		frappe.db.set_value(
 			"Sales Order Item",
 			self.sales_order_item,
@@ -1219,11 +1231,14 @@ class WorkOrder(Document):
 	def update_work_order_qty_in_combined_so(self):
 		total_bundle_qty = 1
 		if self.product_bundle_item:
-			total_bundle_qty = frappe.db.sql(
-				""" select sum(qty) from
-				`tabProduct Bundle Item` where parent = %s""",
-				(frappe.db.escape(self.product_bundle_item)),
-			)[0][0]
+			total_bundle_qty = flt(
+				frappe.get_all(
+					"Product Bundle Item",
+					filters={"parent": self.product_bundle_item},
+					fields=["sum(qty) as qty"],
+				)[0].qty
+				or 0
+			)
 
 			if not total_bundle_qty:
 				# product bundle is 0 (product bundle allows 0 qty for items)
@@ -1748,15 +1763,20 @@ class WorkOrder(Document):
 
 	@frappe.whitelist()
 	def make_bom(self):
-		data = frappe.db.sql(
-			""" select sed.item_code, sed.qty, sed.s_warehouse
-			from `tabStock Entry Detail` sed, `tabStock Entry` se
-			where se.name = sed.parent and se.purpose = 'Manufacture'
-			and (sed.t_warehouse is null or sed.t_warehouse = '') and se.docstatus = 1
-			and se.work_order = %s""",
-			(self.name),
-			as_dict=1,
-		)
+		stock_entry = frappe.qb.DocType("Stock Entry")
+		stock_entry_detail = frappe.qb.DocType("Stock Entry Detail")
+		data = (
+			frappe.qb.from_(stock_entry_detail)
+			.join(stock_entry)
+			.on(stock_entry.name == stock_entry_detail.parent)
+			.select(stock_entry_detail.item_code, stock_entry_detail.qty, stock_entry_detail.s_warehouse)
+			.where(
+				(stock_entry.purpose == "Manufacture")
+				& (stock_entry_detail.t_warehouse.isnull() | (stock_entry_detail.t_warehouse == ""))
+				& (stock_entry.docstatus == 1)
+				& (stock_entry.work_order == self.name)
+			)
+		).run(as_dict=True)
 
 		bom = frappe.new_doc("BOM")
 		bom.item = self.production_item
@@ -2203,23 +2223,30 @@ def get_bom_operations(doctype: str, txt: str, searchfield: str, start: int, pag
 
 @frappe.whitelist()
 def get_item_details(item: str, project: str | None = None, skip_bom_info: bool = False, throw: bool = True):
-	res = frappe.db.sql(
-		"""
-		select stock_uom, description, item_name, allow_alternative_item,
-			include_item_in_manufacturing
-		from `tabItem`
-		where disabled=0
-			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %s)
-			and name=%s
-	""",
-		(nowdate(), item),
-		as_dict=1,
+	res = frappe.db.get_value(
+		"Item",
+		item,
+		[
+			"stock_uom",
+			"description",
+			"item_name",
+			"allow_alternative_item",
+			"include_item_in_manufacturing",
+			"disabled",
+			"end_of_life",
+		],
+		as_dict=True,
 	)
 
-	if not res:
+	if (
+		not res
+		or res.disabled
+		or (res.end_of_life and cstr(res.end_of_life) != "0000-00-00" and cstr(res.end_of_life) <= nowdate())
+	):
 		return {}
 
-	res = res[0]
+	res.pop("disabled", None)
+	res.pop("end_of_life", None)
 	if skip_bom_info:
 		return res
 

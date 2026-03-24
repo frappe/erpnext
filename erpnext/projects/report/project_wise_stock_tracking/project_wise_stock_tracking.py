@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
 
 
 def execute(filters=None):
@@ -50,19 +51,28 @@ def get_columns():
 
 
 def get_project_details():
-	return frappe.db.sql(
-		""" select name, project_name, status, company, customer, estimated_costing,
-		expected_start_date, expected_end_date from tabProject where docstatus < 2""",
-		as_dict=1,
+	return frappe.get_all(
+		"Project",
+		fields=[
+			"name",
+			"project_name",
+			"status",
+			"company",
+			"customer",
+			"estimated_costing",
+			"expected_start_date",
+			"expected_end_date",
+		],
+		filters={"docstatus": ["<", 2]},
 	)
 
 
 def get_purchased_items_cost():
-	pr_items = frappe.db.sql(
-		"""select project, sum(base_net_amount) as amount
-		from `tabPurchase Receipt Item` where ifnull(project, '') != ''
-		and docstatus = 1 group by project""",
-		as_dict=1,
+	pr_items = frappe.get_all(
+		"Purchase Receipt Item",
+		filters=[["project", "!=", ""], ["docstatus", "=", 1]],
+		fields=["project", "sum(base_net_amount) as amount"],
+		group_by="project",
 	)
 
 	pr_item_map = {}
@@ -73,13 +83,20 @@ def get_purchased_items_cost():
 
 
 def get_issued_items_cost():
-	se_items = frappe.db.sql(
-		"""select se.project, sum(se_item.amount) as amount
-		from `tabStock Entry` se, `tabStock Entry Detail` se_item
-		where se.name = se_item.parent and se.docstatus = 1 and ifnull(se_item.t_warehouse, '') = ''
-		and se.project != '' group by se.project""",
-		as_dict=1,
-	)
+	stock_entry = frappe.qb.DocType("Stock Entry")
+	stock_entry_detail = frappe.qb.DocType("Stock Entry Detail")
+	se_items = (
+		frappe.qb.from_(stock_entry_detail)
+		.join(stock_entry)
+		.on(stock_entry.name == stock_entry_detail.parent)
+		.select(stock_entry.project, Sum(stock_entry_detail.amount).as_("amount"))
+		.where(
+			(stock_entry.docstatus == 1)
+			& ((stock_entry_detail.t_warehouse.isnull()) | (stock_entry_detail.t_warehouse == ""))
+			& (stock_entry.project != "")
+		)
+		.groupby(stock_entry.project)
+	).run(as_dict=True)
 
 	se_item_map = {}
 	for item in se_items:
@@ -89,22 +106,32 @@ def get_issued_items_cost():
 
 
 def get_delivered_items_cost():
-	dn_items = frappe.db.sql(
-		"""select dn.project, sum(dn_item.base_net_amount) as amount
-		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
-		where dn.name = dn_item.parent and dn.docstatus = 1 and ifnull(dn.project, '') != ''
-		group by dn.project""",
-		as_dict=1,
-	)
+	delivery_note = frappe.qb.DocType("Delivery Note")
+	delivery_note_item = frappe.qb.DocType("Delivery Note Item")
+	dn_items = (
+		frappe.qb.from_(delivery_note_item)
+		.join(delivery_note)
+		.on(delivery_note.name == delivery_note_item.parent)
+		.select(delivery_note.project, Sum(delivery_note_item.base_net_amount).as_("amount"))
+		.where((delivery_note.docstatus == 1) & (delivery_note.project != ""))
+		.groupby(delivery_note.project)
+	).run(as_dict=True)
 
-	si_items = frappe.db.sql(
-		"""select si.project, sum(si_item.base_net_amount) as amount
-		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
-		where si.name = si_item.parent and si.docstatus = 1 and si.update_stock = 1
-		and si.is_pos = 1 and ifnull(si.project, '') != ''
-		group by si.project""",
-		as_dict=1,
-	)
+	sales_invoice = frappe.qb.DocType("Sales Invoice")
+	sales_invoice_item = frappe.qb.DocType("Sales Invoice Item")
+	si_items = (
+		frappe.qb.from_(sales_invoice_item)
+		.join(sales_invoice)
+		.on(sales_invoice.name == sales_invoice_item.parent)
+		.select(sales_invoice.project, Sum(sales_invoice_item.base_net_amount).as_("amount"))
+		.where(
+			(sales_invoice.docstatus == 1)
+			& (sales_invoice.update_stock == 1)
+			& (sales_invoice.is_pos == 1)
+			& (sales_invoice.project != "")
+		)
+		.groupby(sales_invoice.project)
+	).run(as_dict=True)
 
 	dn_item_map = {}
 	for item in dn_items:

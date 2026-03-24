@@ -24,9 +24,12 @@ def execute():
 
 
 def build_tree():
-	frappe.db.sql(
-		"""update `tabSupplier Group` set parent_supplier_group = '{}'
-		where is_group = 0""".format(_("All Supplier Groups"))
+	frappe.db.set_value(
+		"Supplier Group",
+		{"is_group": 0},
+		"parent_supplier_group",
+		_("All Supplier Groups"),
+		update_modified=False,
 	)
 
 	if not frappe.db.exists("Supplier Group", _("All Supplier Groups")):

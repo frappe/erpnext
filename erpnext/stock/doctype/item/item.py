@@ -502,32 +502,37 @@ class Item(Document):
 			for item_barcode in self.barcodes:
 				options = frappe.get_meta("Item Barcode").get_options("barcode_type").split("\n")
 				if item_barcode.barcode:
-					duplicate = frappe.db.sql(
-						"""select parent from `tabItem Barcode` where barcode = %s and parent != %s""",
-						(item_barcode.barcode, self.name),
+					duplicate = frappe.get_all(
+						"Item Barcode",
+						filters={
+							"barcode": item_barcode.barcode,
+							"parent": ["!=", self.name],
+						},
+						limit=1,
+						pluck="parent",
 					)
 					if duplicate:
 						frappe.throw(
 							_("Barcode {0} already used in Item {1}").format(
-								item_barcode.barcode, duplicate[0][0]
+								item_barcode.barcode, duplicate[0]
 							)
 						)
 
-					item_barcode.barcode_type = (
-						"" if item_barcode.barcode_type not in options else item_barcode.barcode_type
+				item_barcode.barcode_type = (
+					"" if item_barcode.barcode_type not in options else item_barcode.barcode_type
+				)
+				if item_barcode.barcode_type:
+					barcode_type = convert_erpnext_to_barcodenumber(
+						item_barcode.barcode_type.replace("-", "").upper(), item_barcode.barcode
 					)
-					if item_barcode.barcode_type:
-						barcode_type = convert_erpnext_to_barcodenumber(
-							item_barcode.barcode_type.replace("-", "").upper(), item_barcode.barcode
-						)
-						if barcode_type in barcodenumber.barcodes():
-							if not barcodenumber.check_code(barcode_type, item_barcode.barcode):
-								frappe.throw(
-									_("Barcode {0} is not a valid {1} code").format(
-										item_barcode.barcode, item_barcode.barcode_type
-									),
-									InvalidBarcode,
-								)
+					if barcode_type in barcodenumber.barcodes():
+						if not barcodenumber.check_code(barcode_type, item_barcode.barcode):
+							frappe.throw(
+								_("Barcode {0} is not a valid {1} code").format(
+									item_barcode.barcode, item_barcode.barcode_type
+								),
+								InvalidBarcode,
+							)
 
 	def validate_warehouse_for_reorder(self):
 		"""Validate Reorder level table for duplicate and conditional mandatory"""
@@ -570,11 +575,12 @@ class Item(Document):
 
 	def stock_ledger_created(self):
 		if not hasattr(self, "_stock_ledger_created"):
-			self._stock_ledger_created = len(
-				frappe.db.sql(
-					"""select name from `tabStock Ledger Entry`
-				where item_code = %s and is_cancelled = 0 limit 1""",
-					self.name,
+			self._stock_ledger_created = bool(
+				frappe.get_all(
+					"Stock Ledger Entry",
+					filters={"item_code": self.name, "is_cancelled": 0},
+					limit=1,
+					pluck="name",
 				)
 			)
 		return self._stock_ledger_created
@@ -586,26 +592,20 @@ class Item(Document):
 		if self.is_new():
 			return
 
-		frappe.db.sql(
-			"""
-				UPDATE `tabItem Price`
-				SET
-					item_name=%(item_name)s,
-					item_description=%(item_description)s,
-					brand=%(brand)s
-				WHERE item_code=%(item_code)s
-			""",
-			dict(
-				item_name=self.item_name,
-				item_description=self.description,
-				brand=self.brand,
-				item_code=self.name,
-			),
+		frappe.db.set_value(
+			"Item Price",
+			{"item_code": self.name},
+			{
+				"item_name": self.item_name,
+				"item_description": self.description,
+				"brand": self.brand,
+			},
+			update_modified=False,
 		)
 
 	def on_trash(self):
-		frappe.db.sql("""delete from tabBin where item_code=%s""", self.name)
-		frappe.db.sql("delete from `tabItem Price` where item_code=%s", self.name)
+		frappe.db.delete("Bin", {"item_code": self.name})
+		frappe.db.delete("Item Price", {"item_code": self.name})
 		for variant_of in frappe.get_all("Item", filters={"variant_of": self.name}):
 			frappe.delete_doc("Item", variant_of.name)
 
@@ -637,16 +637,20 @@ class Item(Document):
 		frappe.db.delete("Bin", {"item_code": old_name})
 
 	def validate_duplicate_item_in_stock_reconciliation(self, old_name, new_name):
-		records = frappe.db.sql(
-			""" SELECT parent, COUNT(*) as records
-			FROM `tabStock Reconciliation Item`
-			WHERE item_code = %s and docstatus = 1
-			GROUP By item_code, warehouse, parent
-			HAVING records > 1
-		""",
-			new_name,
-			as_dict=1,
-		)
+		stock_reconciliation_item = frappe.qb.DocType("Stock Reconciliation Item")
+		records = (
+			frappe.qb.from_(stock_reconciliation_item)
+			.select(stock_reconciliation_item.parent, Count("*").as_("records"))
+			.where(
+				(stock_reconciliation_item.item_code == new_name) & (stock_reconciliation_item.docstatus == 1)
+			)
+			.groupby(
+				stock_reconciliation_item.item_code,
+				stock_reconciliation_item.warehouse,
+				stock_reconciliation_item.parent,
+			)
+			.having(Count("*") > 1)
+		).run(as_dict=True)
 
 		if not records:
 			return
@@ -723,31 +727,26 @@ class Item(Document):
 			return
 
 		if self.db_get("description") != self.description:
-			frappe.db.sql(
-				"""
-				update `tabBOM`
-				set description = %s
-				where item = %s and docstatus < 2
-			""",
-				(self.description, self.name),
+			frappe.db.set_value(
+				"BOM",
+				{"item": self.name, "docstatus": ["<", 2]},
+				"description",
+				self.description,
+				update_modified=False,
 			)
-
-			frappe.db.sql(
-				"""
-				update `tabBOM Item`
-				set description = %s
-				where item_code = %s and docstatus < 2
-			""",
-				(self.description, self.name),
+			frappe.db.set_value(
+				"BOM Item",
+				{"item_code": self.name, "docstatus": ["<", 2]},
+				"description",
+				self.description,
+				update_modified=False,
 			)
-
-			frappe.db.sql(
-				"""
-				update `tabBOM Explosion Item`
-				set description = %s
-				where item_code = %s and docstatus < 2
-			""",
-				(self.description, self.name),
+			frappe.db.set_value(
+				"BOM Explosion Item",
+				{"item_code": self.name, "docstatus": ["<", 2]},
+				"description",
+				self.description,
+				update_modified=False,
 			)
 
 	def validate_item_defaults(self):
@@ -1291,14 +1290,17 @@ def check_stock_uom_with_bin(item, stock_uom):
 				).format(item)
 			)
 
-	bin_list = frappe.db.sql(
-		"""
-			select * from `tabBin` where item_code = %s
-				and (reserved_qty > 0 or ordered_qty > 0 or indented_qty > 0 or planned_qty > 0)
-				and stock_uom != %s
-			""",
-		(item, stock_uom),
-		as_dict=1,
+	bin_list = frappe.get_all(
+		"Bin",
+		filters={"item_code": item, "stock_uom": ["!=", stock_uom]},
+		or_filters=[
+			{"reserved_qty": [">", 0]},
+			{"ordered_qty": [">", 0]},
+			{"indented_qty": [">", 0]},
+			{"planned_qty": [">", 0]},
+		],
+		limit=1,
+		pluck="name",
 	)
 
 	if bin_list:
@@ -1309,7 +1311,7 @@ def check_stock_uom_with_bin(item, stock_uom):
 		)
 
 	# No SLE or documents against item. Bin UOM can be changed safely.
-	frappe.db.sql("""update `tabBin` set stock_uom=%s where item_code=%s""", (stock_uom, item))
+	frappe.db.set_value("Bin", {"item_code": item}, "stock_uom", stock_uom, update_modified=False)
 
 
 def get_item_defaults(item_code, company):
@@ -1379,20 +1381,16 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 	# 			 g -> mg = 1000
 	# 			 g -> kg = 0.001
 	# therefore	 kg -> mg = 1000  / 0.001 = 1,000,000
-	intermediate_match = frappe.db.sql(
-		"""
-			select (first.value / second.value) as value
-			from `tabUOM Conversion Factor` first
-			join `tabUOM Conversion Factor` second
-				on first.from_uom = second.from_uom
-			where
-				first.to_uom = %(to_uom)s
-				and second.to_uom = %(from_uom)s
-			limit 1
-			""",
-		{"to_uom": to_uom, "from_uom": from_uom},
-		as_dict=1,
-	)
+	first = frappe.qb.DocType("UOM Conversion Factor").as_("first")
+	second = frappe.qb.DocType("UOM Conversion Factor").as_("second")
+	intermediate_match = (
+		frappe.qb.from_(first)
+		.join(second)
+		.on(first.from_uom == second.from_uom)
+		.select((first.value / second.value).as_("value"))
+		.where((first.to_uom == to_uom) & (second.to_uom == from_uom))
+		.limit(1)
+	).run(as_dict=True)
 
 	if intermediate_match:
 		return intermediate_match[0].value

@@ -12,17 +12,12 @@ from frappe.utils.user import is_website_user
 
 
 def get_list_context(context=None):
+	currency_symbols = frappe.get_all("Currency", filters={"enabled": 1}, fields=["name", "symbol"])
+
 	return {
 		"global_number_format": frappe.db.get_default("number_format") or "#,###.##",
 		"currency": frappe.db.get_default("currency"),
-		"currency_symbols": json.dumps(
-			dict(
-				frappe.db.sql(
-					"""select name, symbol
-			from tabCurrency where enabled=1"""
-				)
-			)
-		),
+		"currency_symbols": json.dumps({d.name: d.symbol for d in currency_symbols}),
 		"row_template": "templates/includes/transaction_row.html",
 		"get_list": get_transaction_list,
 	}
@@ -242,14 +237,11 @@ def get_customers_suppliers(doctype, user):
 
 
 def get_parents_for_user(parenttype: str) -> list[str]:
-	portal_user = frappe.qb.DocType("Portal User")
-
-	return (
-		frappe.qb.from_(portal_user)
-		.select(portal_user.parent)
-		.where(portal_user.user == frappe.session.user)
-		.where(portal_user.parenttype == parenttype)
-	).run(pluck="name")
+	return frappe.get_all(
+		"Portal User",
+		filters={"user": frappe.session.user, "parenttype": parenttype},
+		pluck="parent",
+	)
 
 
 def has_website_permission(doc, ptype, user, verbose=False):

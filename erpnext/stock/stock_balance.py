@@ -19,14 +19,14 @@ def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False,
 		existing_allow_negative_stock = frappe.get_single_value("Stock Settings", "allow_negative_stock")
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
-	item_warehouses = frappe.db.sql(
-		"""
-		select distinct item_code, warehouse
-		from
-			(select item_code, warehouse from tabBin
-			union
-			select item_code, warehouse from `tabStock Ledger Entry`) a
-	"""
+	item_warehouses = sorted(
+		{
+			(row[0], row[1])
+			for row in (
+				frappe.get_all("Bin", fields=["item_code", "warehouse"], as_list=True)
+				+ frappe.get_all("Stock Ledger Entry", fields=["item_code", "warehouse"], as_list=True)
+			)
+		}
 	)
 	for d in item_warehouses:
 		try:
@@ -78,15 +78,16 @@ def repost_actual_qty(item_code, warehouse, allow_zero_rate=False, allow_negativ
 
 
 def get_balance_qty_from_sle(item_code, warehouse):
-	balance_qty = frappe.db.sql(
-		"""select qty_after_transaction from `tabStock Ledger Entry`
-		where item_code=%s and warehouse=%s and is_cancelled=0
-		order by posting_datetime desc, creation desc
-		limit 1""",
-		(item_code, warehouse),
+	balance_qty = frappe.get_all(
+		"Stock Ledger Entry",
+		filters={"item_code": item_code, "warehouse": warehouse, "is_cancelled": 0},
+		fields=["qty_after_transaction"],
+		order_by="posting_datetime desc, creation desc",
+		limit=1,
+		pluck="qty_after_transaction",
 	)
 
-	return flt(balance_qty[0][0]) if balance_qty else 0.0
+	return flt(balance_qty[0]) if balance_qty else 0.0
 
 
 def get_reserved_qty(item_code, warehouse):
@@ -151,30 +152,42 @@ def get_reserved_qty(item_code, warehouse):
 
 def get_indented_qty(item_code, warehouse):
 	# Ordered Qty is always maintained in stock UOM
-	inward_qty = frappe.db.sql(
-		"""
-		select sum(mr_item.stock_qty - mr_item.ordered_qty)
-		from `tabMaterial Request Item` mr_item, `tabMaterial Request` mr
-		where mr_item.item_code=%s and mr_item.warehouse=%s
-			and mr.material_request_type in ('Purchase', 'Manufacture', 'Customer Provided', 'Material Transfer')
-			and mr_item.stock_qty > mr_item.ordered_qty and mr_item.parent=mr.name
-			and mr.status!='Stopped' and mr.docstatus=1
-	""",
-		(item_code, warehouse),
-	)
+	material_request = frappe.qb.DocType("Material Request")
+	material_request_item = frappe.qb.DocType("Material Request Item")
+	inward_qty = (
+		frappe.qb.from_(material_request_item)
+		.join(material_request)
+		.on(material_request_item.parent == material_request.name)
+		.select(Sum(material_request_item.stock_qty - material_request_item.ordered_qty))
+		.where(
+			(material_request_item.item_code == item_code)
+			& (material_request_item.warehouse == warehouse)
+			& (
+				material_request.material_request_type.isin(
+					["Purchase", "Manufacture", "Customer Provided", "Material Transfer"]
+				)
+			)
+			& (material_request_item.stock_qty > material_request_item.ordered_qty)
+			& (material_request.status != "Stopped")
+			& (material_request.docstatus == 1)
+		)
+	).run()
 	inward_qty = flt(inward_qty[0][0]) if inward_qty else 0
 
-	outward_qty = frappe.db.sql(
-		"""
-		select sum(mr_item.stock_qty - mr_item.ordered_qty)
-		from `tabMaterial Request Item` mr_item, `tabMaterial Request` mr
-		where mr_item.item_code=%s and mr_item.warehouse=%s
-			and mr.material_request_type = 'Material Issue'
-			and mr_item.stock_qty > mr_item.ordered_qty and mr_item.parent=mr.name
-			and mr.status!='Stopped' and mr.docstatus=1
-	""",
-		(item_code, warehouse),
-	)
+	outward_qty = (
+		frappe.qb.from_(material_request_item)
+		.join(material_request)
+		.on(material_request_item.parent == material_request.name)
+		.select(Sum(material_request_item.stock_qty - material_request_item.ordered_qty))
+		.where(
+			(material_request_item.item_code == item_code)
+			& (material_request_item.warehouse == warehouse)
+			& (material_request.material_request_type == "Material Issue")
+			& (material_request_item.stock_qty > material_request_item.ordered_qty)
+			& (material_request.status != "Stopped")
+			& (material_request.docstatus == 1)
+		)
+	).run()
 	outward_qty = flt(outward_qty[0][0]) if outward_qty else 0
 
 	requested_qty = inward_qty - outward_qty
@@ -247,15 +260,18 @@ def get_subcontracting_order_qty(item_code, warehouse):
 
 
 def get_planned_qty(item_code, warehouse):
-	planned_qty = frappe.db.sql(
-		"""
-		select sum(qty - produced_qty) from `tabWork Order`
-		where production_item = %s and fg_warehouse = %s and status not in ('Stopped', 'Completed', 'Closed')
-		and docstatus=1 and qty > produced_qty""",
-		(item_code, warehouse),
+	work_orders = frappe.get_all(
+		"Work Order",
+		filters={
+			"production_item": item_code,
+			"fg_warehouse": warehouse,
+			"status": ["not in", ["Stopped", "Completed", "Closed"]],
+			"docstatus": 1,
+		},
+		fields=["qty", "produced_qty"],
 	)
 
-	return flt(planned_qty[0][0]) if planned_qty else 0
+	return sum(max(flt(d.qty) - flt(d.produced_qty), 0) for d in work_orders)
 
 
 def update_bin_qty(item_code, warehouse, qty_dict=None):
@@ -283,43 +299,45 @@ def set_stock_balance_as_per_serial_no(
 	if not posting_time:
 		posting_time = nowtime()
 
-	condition = " and item.name='%s'" % item_code.replace("'", "'") if item_code else ""
-
-	bin = frappe.db.sql(
-		"""select bin.item_code, bin.warehouse, bin.actual_qty, item.stock_uom
-		from `tabBin` bin, tabItem item
-		where bin.item_code = item.name and item.has_serial_no = 1 %s"""
-		% condition
+	item_filters = {"has_serial_no": 1}
+	if item_code:
+		item_filters["name"] = item_code
+	items = frappe.get_all("Item", filters=item_filters, fields=["name", "stock_uom"])
+	stock_uom_by_item = {d.name: d.stock_uom for d in items}
+	bin = frappe.get_all(
+		"Bin",
+		filters={"item_code": ["in", list(stock_uom_by_item)]} if stock_uom_by_item else {"name": ["=", ""]},
+		fields=["item_code", "warehouse", "actual_qty"],
 	)
 
 	for d in bin:
-		serial_nos = frappe.db.sql(
-			"""select count(name) from `tabSerial No`
-			where item_code=%s and warehouse=%s and docstatus < 2""",
-			(d[0], d[1]),
+		serial_nos = frappe.db.count(
+			"Serial No",
+			filters={"item_code": d.item_code, "warehouse": d.warehouse, "docstatus": ["<", 2]},
 		)
 
-		sle = frappe.db.sql(
-			"""select valuation_rate, company from `tabStock Ledger Entry`
-			where item_code = %s and warehouse = %s and is_cancelled = 0
-			order by posting_date desc limit 1""",
-			(d[0], d[1]),
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"item_code": d.item_code, "warehouse": d.warehouse, "is_cancelled": 0},
+			fields=["valuation_rate", "company"],
+			order_by="posting_date desc",
+			limit=1,
 		)
 
 		sle_dict = {
 			"doctype": "Stock Ledger Entry",
-			"item_code": d[0],
-			"warehouse": d[1],
+			"item_code": d.item_code,
+			"warehouse": d.warehouse,
 			"transaction_date": nowdate(),
 			"posting_date": posting_date,
 			"posting_time": posting_time,
 			"voucher_type": "Stock Reconciliation (Manual)",
 			"voucher_no": "",
 			"voucher_detail_no": "",
-			"actual_qty": flt(serial_nos[0][0]) - flt(d[2]),
-			"stock_uom": d[3],
-			"incoming_rate": sle and flt(serial_nos[0][0]) > flt(d[2]) and flt(sle[0][0]) or 0,
-			"company": sle and cstr(sle[0][1]) or 0,
+			"actual_qty": flt(serial_nos) - flt(d.actual_qty),
+			"stock_uom": stock_uom_by_item.get(d.item_code),
+			"incoming_rate": sle and flt(serial_nos) > flt(d.actual_qty) and flt(sle[0].valuation_rate) or 0,
+			"company": sle and cstr(sle[0].company) or 0,
 			"batch_no": "",
 			"serial_no": "",
 		}
@@ -334,8 +352,8 @@ def set_stock_balance_as_per_serial_no(
 
 		create_repost_item_valuation_entry(
 			{
-				"item_code": d[0],
-				"warehouse": d[1],
+				"item_code": d.item_code,
+				"warehouse": d.warehouse,
 				"posting_date": posting_date,
 				"posting_time": posting_time,
 			}

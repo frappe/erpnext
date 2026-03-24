@@ -9,10 +9,12 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 
 
 class TestPOSInvoiceMerging(POSInvoiceTestMixin):
+	def clear_pos_invoices(self):
+		frappe.db.delete("POS Invoice")
+
 	def clear_pos_data(self):
-		frappe.db.sql("delete from `tabPOS Opening Entry`;")
-		frappe.db.sql("delete from `tabPOS Closing Entry`;")
-		frappe.db.sql("delete from `tabPOS Invoice`;")
+		for doctype in ("POS Opening Entry", "POS Closing Entry", "POS Invoice"):
+			frappe.db.delete(doctype)
 
 	def setUp(self):
 		self.clear_pos_data()
@@ -33,7 +35,7 @@ class TestPOSInvoiceMerging(POSInvoiceTestMixin):
 			consolidate_pos_invoices,
 		)
 
-		frappe.db.sql("delete from `tabPOS Invoice`")
+		self.clear_pos_invoices()
 		test_user, pos_profile = init_user_and_profile()
 		pos_inv = create_pos_invoice(rate=300, additional_discount_percentage=10, do_not_submit=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 270})
@@ -63,7 +65,7 @@ class TestPOSInvoiceMerging(POSInvoiceTestMixin):
 			consolidate_pos_invoices,
 		)
 
-		frappe.db.sql("delete from `tabPOS Invoice`")
+		self.clear_pos_invoices()
 		test_user, pos_profile = init_user_and_profile()
 		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 300})
@@ -122,7 +124,7 @@ class TestPOSInvoiceMerging(POSInvoiceTestMixin):
 		item = "Test Selling Price Validation"
 		make_item(item, {"is_stock_item": 1})
 		make_purchase_receipt(item_code=item, warehouse="_Test Warehouse - _TC", qty=1, rate=300)
-		frappe.db.sql("delete from `tabPOS Invoice`")
+		self.clear_pos_invoices()
 		test_user, pos_profile = init_user_and_profile()
 		pos_inv = create_pos_invoice(item=item, rate=300, do_not_submit=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 300})

@@ -43,15 +43,16 @@ class CashierClosing(Document):
 		self.make_calculations()
 
 	def get_outstanding(self):
-		values = frappe.db.sql(
-			"""
-			select sum(outstanding_amount)
-			from `tabSales Invoice`
-			where posting_date=%s and posting_time>=%s and posting_time<=%s and owner=%s
-		""",
-			(self.date, self.from_time, self.time, self.user),
+		values = frappe.get_all(
+			"Sales Invoice",
+			filters={
+				"posting_date": self.date,
+				"posting_time": ["between", [self.from_time, self.time]],
+				"owner": self.user,
+			},
+			fields=["sum(outstanding_amount) as outstanding_amount"],
 		)
-		self.outstanding_amount = flt(values[0][0] if values else 0)
+		self.outstanding_amount = flt(values[0].outstanding_amount if values else 0)
 
 	def make_calculations(self):
 		total = 0.00

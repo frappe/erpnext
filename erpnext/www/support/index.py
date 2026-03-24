@@ -1,4 +1,6 @@
 import frappe
+from frappe.query_builder.functions import Count
+from pypika import Order
 
 
 def get_context(context):
@@ -30,26 +32,27 @@ def get_context(context):
 
 
 def get_favorite_articles_by_page_view():
-	return frappe.db.sql(
-		"""
-			SELECT
-				t1.name as name,
-				t1.title as title,
-				t1.content as content,
-				t1.route as route,
-				t1.category as category,
-				count(t1.route) as count
-			FROM `tabHelp Article` AS t1
-				INNER JOIN
-				`tabWeb Page View` AS t2
-			ON t1.route = t2.path
-			WHERE t1.published = 1
-			GROUP BY route
-			ORDER BY count DESC
-			LIMIT 6;
-			""",
-		as_dict=True,
-	)
+	help_article = frappe.qb.DocType("Help Article")
+	web_page_view = frappe.qb.DocType("Web Page View")
+	count_expr = Count(help_article.route)
+
+	return (
+		frappe.qb.from_(help_article)
+		.join(web_page_view)
+		.on(help_article.route == web_page_view.path)
+		.select(
+			help_article.name.as_("name"),
+			help_article.title.as_("title"),
+			help_article.content.as_("content"),
+			help_article.route.as_("route"),
+			help_article.category.as_("category"),
+			count_expr.as_("count"),
+		)
+		.where(help_article.published == 1)
+		.groupby(help_article.route)
+		.orderby(count_expr, order=Order.desc)
+		.limit(6)
+	).run(as_dict=True)
 
 
 def get_favorite_articles(favorite_articles):

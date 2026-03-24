@@ -24,14 +24,13 @@ def reorder_item():
 def _reorder_item():
 	material_requests = {"Purchase": {}, "Transfer": {}, "Material Issue": {}, "Manufacture": {}}
 	warehouse_company = frappe._dict(
-		frappe.db.sql(
-			"""select name, company from `tabWarehouse`
-		where disabled=0"""
-		)
+		{
+			d.name: d.company
+			for d in frappe.get_all("Warehouse", filters={"disabled": 0}, fields=["name", "company"])
+		}
 	)
-	default_company = (
-		erpnext.get_default_company() or frappe.db.sql("""select name from tabCompany limit 1""")[0][0]
-	)
+	company_names = frappe.get_all("Company", limit=1, pluck="name")
+	default_company = erpnext.get_default_company() or (company_names[0] if company_names else None)
 
 	items_to_consider = get_items_for_reorder()
 
@@ -189,13 +188,11 @@ def get_item_warehouse_projected_qty(items_to_consider):
 	item_warehouse_projected_qty = {}
 	items_to_consider = list(items_to_consider.keys())
 
-	for item_code, warehouse, projected_qty in frappe.db.sql(
-		"""select item_code, warehouse, projected_qty
-		from tabBin where item_code in ({})
-			and (warehouse != '' and warehouse is not null)""".format(
-			", ".join(["%s"] * len(items_to_consider))
-		),
-		items_to_consider,
+	for item_code, warehouse, projected_qty in frappe.get_all(
+		"Bin",
+		filters={"item_code": ["in", items_to_consider], "warehouse": ["!=", ""]},
+		fields=["item_code", "warehouse", "projected_qty"],
+		as_list=True,
 	):
 		if item_code not in item_warehouse_projected_qty:
 			item_warehouse_projected_qty.setdefault(item_code, {})

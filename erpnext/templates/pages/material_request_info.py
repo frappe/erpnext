@@ -4,7 +4,9 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt
+from pypika import Order
 
 
 def get_context(context):
@@ -33,30 +35,32 @@ def get_context(context):
 
 
 def get_more_items_info(items, material_request):
+	work_order = frappe.qb.DocType("Work Order")
+	work_order_item = frappe.qb.DocType("Work Order Item")
+	stock_entry_detail = frappe.qb.DocType("Stock Entry Detail")
+
 	for item in items:
 		item.customer_provided = frappe.get_value("Item", item.item_code, "is_customer_provided_item")
-		item.work_orders = frappe.db.sql(
-			"""
-			select
-				wo.name, wo.status, wo_item.consumed_qty
-			from
-				`tabWork Order Item` wo_item, `tabWork Order` wo
-			where
-				wo_item.item_code=%s
-				and wo_item.consumed_qty=0
-				and wo_item.parent=wo.name
-				and wo.status not in ('Completed', 'Cancelled', 'Stopped')
-			order by
-				wo.name asc""",
-			item.item_code,
-			as_dict=1,
-		)
+		item.work_orders = (
+			frappe.qb.from_(work_order_item)
+			.join(work_order)
+			.on(work_order_item.parent == work_order.name)
+			.select(work_order.name, work_order.status, work_order_item.consumed_qty)
+			.where(
+				(work_order_item.item_code == item.item_code)
+				& (work_order_item.consumed_qty == 0)
+				& (work_order.status.notin(["Completed", "Cancelled", "Stopped"]))
+			)
+			.orderby(work_order.name, order=Order.asc)
+		).run(as_dict=True)
 		item.delivered_qty = flt(
-			frappe.db.sql(
-				"""select sum(transfer_qty)
-						from `tabStock Entry Detail` where material_request = %s
-						and item_code = %s and docstatus = 1""",
-				(material_request, item.item_code),
-			)[0][0]
+			frappe.qb.from_(stock_entry_detail)
+			.select(Sum(stock_entry_detail.transfer_qty))
+			.where(
+				(stock_entry_detail.material_request == material_request)
+				& (stock_entry_detail.item_code == item.item_code)
+				& (stock_entry_detail.docstatus == 1)
+			)
+			.run()[0][0]
 		)
 	return items

@@ -2,24 +2,22 @@ import frappe
 
 
 def execute():
-	user_permissions = frappe.db.sql(
-		"""select name, for_value from `tabUser Permission`
-        where allow='Department'""",
-		as_dict=1,
+	user_permissions = frappe.get_all(
+		"User Permission", filters={"allow": "Department"}, fields=["name", "for_value"]
 	)
 	for d in user_permissions:
 		user_permission = frappe.get_doc("User Permission", d.name)
-		for new_dept in frappe.db.sql(
-			"""select name from tabDepartment
-            where ifnull(company, '') != '' and department_name=%s""",
-			d.for_value,
+		for new_dept in frappe.get_all(
+			"Department",
+			filters={"company": ["!=", ""], "department_name": d.for_value},
+			pluck="name",
 		):
 			try:
 				new_user_permission = frappe.copy_doc(user_permission)
-				new_user_permission.for_value = new_dept[0]
+				new_user_permission.for_value = new_dept
 				new_user_permission.save()
 			except frappe.DuplicateEntryError:
 				pass
 
 	frappe.reload_doc("hr", "doctype", "department")
-	frappe.db.sql("update tabDepartment set disabled=1 where ifnull(company, '') = ''")
+	frappe.db.set_value("Department", {"company": ["in", ["", None]]}, "disabled", 1, update_modified=False)

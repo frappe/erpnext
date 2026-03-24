@@ -3,10 +3,10 @@ import frappe
 
 def execute():
 	frappe.reload_doc("maintenance", "doctype", "Maintenance Schedule Detail")
-	frappe.db.sql(
-		"""
-		UPDATE `tabMaintenance Schedule Detail`
-		SET completion_status = 'Pending'
-		WHERE docstatus < 2
-	"""
+	frappe.db.set_value(
+		"Maintenance Schedule Detail",
+		{"docstatus": ["<", 2]},
+		"completion_status",
+		"Pending",
+		update_modified=False,
 	)

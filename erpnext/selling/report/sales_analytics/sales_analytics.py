@@ -515,7 +515,7 @@ class Analytics:
 
 	def get_supplier_parent_child_map(self):
 		self.parent_child_map = frappe._dict(
-			frappe.db.sql(""" select name, supplier_group from `tabSupplier`""")
+			(d.name, d.supplier_group) for d in frappe.get_all("Supplier", fields=["name", "supplier_group"])
 		)
 
 	def get_chart_data(self):

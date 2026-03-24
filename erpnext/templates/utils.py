@@ -15,12 +15,16 @@ def send_message(sender: str, message: str, subject: str = "Website Query"):
 	message = escape_html(message)
 
 	lead = customer = None
-	customer = frappe.db.sql(
-		"""select distinct dl.link_name from `tabDynamic Link` dl
-		left join `tabContact` c on dl.parent=c.name where dl.link_doctype='Customer'
-		and c.email_id = %s""",
-		sender,
-	)
+	dynamic_link = frappe.qb.DocType("Dynamic Link")
+	contact = frappe.qb.DocType("Contact")
+	customer = (
+		frappe.qb.from_(dynamic_link)
+		.left_join(contact)
+		.on(dynamic_link.parent == contact.name)
+		.select(dynamic_link.link_name)
+		.distinct()
+		.where((dynamic_link.link_doctype == "Customer") & (contact.email_id == sender))
+	).run(pluck=True)
 
 	if not customer:
 		lead = frappe.db.get_value("Lead", dict(email_id=sender))

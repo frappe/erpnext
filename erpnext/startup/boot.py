@@ -11,7 +11,6 @@ import erpnext.accounts.utils
 
 def boot_session(bootinfo):
 	"""boot session - send website info if guest"""
-
 	if frappe.session["user"] != "Guest":
 		update_page_info(bootinfo)
 
@@ -34,28 +33,34 @@ def boot_session(bootinfo):
 		)
 
 		# if no company, show a dialog box to create a new company
-		bootinfo.customer_count = frappe.db.sql("""SELECT count(*) FROM `tabCustomer`""")[0][0]
+		bootinfo.customer_count = frappe.db.count("Customer")
 
 		if not bootinfo.customer_count:
-			bootinfo.setup_complete = (
-				frappe.db.sql(
-					"""SELECT `name`
-				FROM `tabCompany`
-				LIMIT 1"""
-				)
-				and "Yes"
-				or "No"
-			)
+			bootinfo.setup_complete = "Yes" if frappe.get_all("Company", limit=1, pluck="name") else "No"
 
-		bootinfo.docs += frappe.db.sql(
-			"""select name, default_currency, cost_center, default_selling_terms, default_buying_terms,
-			default_letter_head, default_bank_account, enable_perpetual_inventory, country, exchange_gain_loss_account from `tabCompany`""",
-			as_dict=1,
-			update={"doctype": ":Company"},
+		company_docs = frappe.get_all(
+			"Company",
+			fields=[
+				"name",
+				"default_currency",
+				"cost_center",
+				"default_selling_terms",
+				"default_buying_terms",
+				"default_letter_head",
+				"default_bank_account",
+				"enable_perpetual_inventory",
+				"country",
+				"exchange_gain_loss_account",
+			],
 		)
+		for doc in company_docs:
+			doc["doctype"] = ":Company"
+		bootinfo.docs += company_docs
 
-		party_account_types = frappe.db.sql(""" select name, ifnull(account_type, '') from `tabParty Type`""")
-		bootinfo.party_account_types = frappe._dict(party_account_types)
+		party_account_types = frappe.get_all("Party Type", fields=["name", "account_type"])
+		bootinfo.party_account_types = frappe._dict(
+			(d.name, d.account_type or "") for d in party_account_types
+		)
 		fiscal_year = erpnext.accounts.utils.get_fiscal_years(
 			frappe.utils.nowdate(), company=get_user_default("company"), raise_on_missing=False
 		)

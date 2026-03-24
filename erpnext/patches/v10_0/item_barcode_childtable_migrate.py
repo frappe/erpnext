@@ -12,7 +12,7 @@ def execute():
 	if "barcode" not in frappe.db.get_table_columns("Item"):
 		return
 
-	items_barcode = frappe.db.sql("select name, barcode from tabItem where barcode is not null", as_dict=True)
+	items_barcode = frappe.get_all("Item", filters={"barcode": ["is", "set"]}, fields=["name", "barcode"])
 	frappe.reload_doc("stock", "doctype", "item")
 
 	for item in items_barcode:

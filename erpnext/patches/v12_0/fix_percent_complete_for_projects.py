@@ -6,11 +6,9 @@ def execute():
 	for project in frappe.get_all("Project", fields=["name", "percent_complete_method"]):
 		total = frappe.db.count("Task", dict(project=project.name))
 		if project.percent_complete_method == "Task Completion" and total > 0:
-			completed = frappe.db.sql(
-				"""select count(name) from tabTask where
-					project=%s and status in ('Cancelled', 'Completed')""",
-				project.name,
-			)[0][0]
+			completed = frappe.db.count(
+				"Task", {"project": project.name, "status": ["in", ["Cancelled", "Completed"]]}
+			)
 			percent_complete = flt(flt(completed) / total * 100, 2)
 			if project.percent_complete != percent_complete:
 				frappe.db.set_value("Project", project.name, "percent_complete", percent_complete)

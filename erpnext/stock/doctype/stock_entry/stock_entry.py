@@ -575,30 +575,29 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		projects = set(item.project for item in self.items if item.project)
 		for project in projects:
-			amount = frappe.db.sql(
-				""" select ifnull(sum(amount), 0)
-				from
-					`tabStock Entry Detail`
-				where
-					docstatus = 1 and project = %s
-					and (t_warehouse is null or t_warehouse = '')""",
-				project,
-				as_list=1,
+			amount = (
+				frappe.get_all(
+					"Stock Entry Detail",
+					filters={"docstatus": 1, "project": project, "t_warehouse": ["in", ["", None]]},
+					fields=["sum(amount) as amount"],
+				)[0].amount
+				or 0
 			)
+			stock_entry = frappe.qb.DocType("Stock Entry")
+			landed_cost_taxes_and_charges = frappe.qb.DocType("Landed Cost Taxes and Charges")
+			additional_costs = (
+				frappe.qb.from_(landed_cost_taxes_and_charges)
+				.join(stock_entry)
+				.on(landed_cost_taxes_and_charges.parent == stock_entry.name)
+				.select(Sum(landed_cost_taxes_and_charges.base_amount).as_("amount"))
+				.where(
+					(stock_entry.docstatus == 1)
+					& (stock_entry.project == project)
+					& (stock_entry.purpose == "Manufacture")
+				)
+			).run(as_dict=True)
 
-			amount = amount[0][0] if amount else 0
-			additional_costs = frappe.db.sql(
-				""" select ifnull(sum(sed.base_amount), 0)
-				from
-					`tabStock Entry` se, `tabLanded Cost Taxes and Charges` sed
-				where
-					se.docstatus = 1 and se.project = %s and sed.parent = se.name
-					and se.purpose = 'Manufacture'""",
-				project,
-				as_list=1,
-			)
-
-			additional_cost_amt = additional_costs[0][0] if additional_costs else 0
+			additional_cost_amt = additional_costs[0].amount if additional_costs else 0
 
 			amount += additional_cost_amt
 			project = frappe.get_doc("Project", project)
@@ -900,15 +899,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 			production_item, qty = frappe.db.get_value(
 				"Work Order", self.work_order, ["production_item", "qty"]
 			)
-			args = [*other_ste, production_item]
-			fg_qty_already_entered = frappe.db.sql(
-				"""select sum(transfer_qty)
-				from `tabStock Entry Detail`
-				where parent in ({})
-					and item_code = {}
-					and ifnull(s_warehouse,'')='' """.format(", ".join(["%s" * len(other_ste)]), "%s"),
-				args,
-			)[0][0]
+			fg_qty_already_entered = (
+				frappe.get_all(
+					"Stock Entry Detail",
+					filters={
+						"parent": ["in", other_ste],
+						"item_code": production_item,
+						"s_warehouse": ["in", ["", None]],
+					},
+					fields=["sum(transfer_qty) as transfer_qty"],
+				)[0].transfer_qty
+				or 0
+			)
 			if fg_qty_already_entered and fg_qty_already_entered >= qty:
 				frappe.throw(
 					_("Stock Entries already created for Work Order {0}: {1}").format(

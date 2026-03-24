@@ -10,8 +10,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestPurchaseRegister(ERPNextTestSuite):
 	def test_purchase_register(self):
-		frappe.db.sql("delete from `tabPurchase Invoice` where company='_Test Company 6'")
-		frappe.db.sql("delete from `tabGL Entry` where company='_Test Company 6'")
+		clear_records_for_company("_Test Company 6", "Purchase Invoice", "GL Entry")
 
 		filters = frappe._dict(company="_Test Company 6", from_date=add_months(today(), -1), to_date=today())
 
@@ -27,8 +26,7 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(first_row.grand_total, 1100)
 
 	def test_purchase_register_ledger_view(self):
-		frappe.db.sql("delete from `tabPurchase Invoice` where company='_Test Company 6'")
-		frappe.db.sql("delete from `tabGL Entry` where company='_Test Company 6'")
+		clear_records_for_company("_Test Company 6", "Purchase Invoice", "GL Entry")
 
 		filters = frappe._dict(
 			company="_Test Company 6",
@@ -124,3 +122,8 @@ def make_payment_entry():
 		save=1,
 		submit=1,
 	)
+
+
+def clear_records_for_company(company: str, *doctypes: str):
+	for doctype in doctypes:
+		frappe.db.delete(doctype, {"company": company})

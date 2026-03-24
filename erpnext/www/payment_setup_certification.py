@@ -1,4 +1,5 @@
 import frappe
+from pypika import Order
 
 no_cache = 1
 
@@ -11,14 +12,19 @@ def get_context(context):
 
 def get_all_certifications_of_a_member():
 	"""Returns all certifications"""
-	all_certifications = []
-	all_certifications = frappe.db.sql(
-		""" select cc.name,cc.from_date,cc.to_date,ca.amount,ca.currency
-		from `tabCertified Consultant` cc
-		inner join `tabCertification Application` ca
-		on cc.certification_application = ca.name
-		where paid = 1 and email = %(user)s order by cc.to_date desc""",
-		{"user": frappe.session.user},
-		as_dict=True,
-	)
-	return all_certifications
+	certified_consultant = frappe.qb.DocType("Certified Consultant")
+	certification_application = frappe.qb.DocType("Certification Application")
+	return (
+		frappe.qb.from_(certified_consultant)
+		.join(certification_application)
+		.on(certified_consultant.certification_application == certification_application.name)
+		.select(
+			certified_consultant.name,
+			certified_consultant.from_date,
+			certified_consultant.to_date,
+			certification_application.amount,
+			certification_application.currency,
+		)
+		.where((certified_consultant.paid == 1) & (certified_consultant.email == frappe.session.user))
+		.orderby(certified_consultant.to_date, order=Order.desc)
+	).run(as_dict=True)

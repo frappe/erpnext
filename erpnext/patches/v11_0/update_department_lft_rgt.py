@@ -11,9 +11,12 @@ def execute():
 			{"doctype": "Department", "department_name": _("All Departments"), "is_group": 1}
 		).insert(ignore_permissions=True, ignore_mandatory=True)
 
-	frappe.db.sql(
-		"""update `tabDepartment` set parent_department = '{}'
-		where is_group = 0""".format(_("All Departments"))
+	frappe.db.set_value(
+		"Department",
+		{"is_group": 0},
+		"parent_department",
+		_("All Departments"),
+		update_modified=False,
 	)
 
 	rebuild_tree("Department")

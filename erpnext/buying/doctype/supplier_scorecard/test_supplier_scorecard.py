@@ -36,20 +36,32 @@ def make_supplier_scorecard():
 def delete_test_scorecards():
 	my_doc = make_supplier_scorecard()
 	if frappe.db.exists("Supplier Scorecard", my_doc.name):
+		supplier_scorecard_period = frappe.qb.DocType("Supplier Scorecard Period")
+		supplier_scorecard_scoring_criteria = frappe.qb.DocType("Supplier Scorecard Scoring Criteria")
+		supplier_scorecard_scoring_standing = frappe.qb.DocType("Supplier Scorecard Scoring Standing")
+		supplier_scorecard_scoring_variable = frappe.qb.DocType("Supplier Scorecard Scoring Variable")
+
 		# Delete all the periods, then delete the scorecard
-		frappe.db.sql(
-			"""delete from `tabSupplier Scorecard Period` where scorecard = %(scorecard)s""",
-			{"scorecard": my_doc.name},
-		)
-		frappe.db.sql(
-			"""delete from `tabSupplier Scorecard Scoring Criteria` where parenttype = 'Supplier Scorecard Period'"""
-		)
-		frappe.db.sql(
-			"""delete from `tabSupplier Scorecard Scoring Standing` where parenttype = 'Supplier Scorecard Period'"""
-		)
-		frappe.db.sql(
-			"""delete from `tabSupplier Scorecard Scoring Variable` where parenttype = 'Supplier Scorecard Period'"""
-		)
+		(
+			frappe.qb.from_(supplier_scorecard_period)
+			.delete()
+			.where(supplier_scorecard_period.scorecard == my_doc.name)
+		).run()
+		(
+			frappe.qb.from_(supplier_scorecard_scoring_criteria)
+			.delete()
+			.where(supplier_scorecard_scoring_criteria.parenttype == "Supplier Scorecard Period")
+		).run()
+		(
+			frappe.qb.from_(supplier_scorecard_scoring_standing)
+			.delete()
+			.where(supplier_scorecard_scoring_standing.parenttype == "Supplier Scorecard Period")
+		).run()
+		(
+			frappe.qb.from_(supplier_scorecard_scoring_variable)
+			.delete()
+			.where(supplier_scorecard_scoring_variable.parenttype == "Supplier Scorecard Period")
+		).run()
 		frappe.delete_doc(my_doc.doctype, my_doc.name)
 
 

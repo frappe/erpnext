@@ -322,82 +322,99 @@ class SalesOrder(SellingController):
 			not row.qty for row in self.get("items") if (row.item_code and not row.qty)
 		)
 
-	def validate_po(self):
-		# validate p.o date v/s delivery date
-		if self.po_date and not self.skip_delivery_note:
+		def validate_po(self):
+			# validate p.o date v/s delivery date
+			if self.po_date and not self.skip_delivery_note:
+				for d in self.get("items"):
+					if d.delivery_date and getdate(self.po_date) > getdate(d.delivery_date):
+						frappe.throw(
+							_("Row #{0}: Expected Delivery Date cannot be before Purchase Order Date").format(
+								d.idx
+							)
+						)
+
+			if self.po_no and self.customer and not self.skip_delivery_note:
+				sales_order = qb.DocType("Sales Order")
+				so = (
+					qb.from_(sales_order)
+					.select(sales_order.name)
+					.where(
+						(sales_order.po_no == self.po_no)
+						& (sales_order.name != self.name)
+						& (sales_order.docstatus < 2)
+						& (sales_order.customer == self.customer)
+					)
+					.limit(1)
+				).run()
+				if so and so[0][0]:
+					if cint(
+						frappe.get_single_value("Selling Settings", "allow_against_multiple_purchase_orders")
+					):
+						frappe.msgprint(
+							_(
+								"Warning: Sales Order {0} already exists against Customer's Purchase Order {1}"
+							).format(frappe.bold(so[0][0]), frappe.bold(self.po_no)),
+							alert=True,
+						)
+					else:
+						frappe.throw(
+							_(
+								"Sales Order {0} already exists against Customer's Purchase Order {1}. To allow multiple Sales Orders, Enable {2} in {3}"
+							).format(
+								frappe.bold(so[0][0]),
+								frappe.bold(self.po_no),
+								frappe.bold(
+									_("'Allow Multiple Sales Orders Against a Customer's Purchase Order'")
+								),
+								get_link_to_form("Selling Settings", "Selling Settings"),
+							)
+						)
+
+		def validate_for_items(self):
 			for d in self.get("items"):
-				if d.delivery_date and getdate(self.po_date) > getdate(d.delivery_date):
-					frappe.throw(
-						_("Row #{0}: Expected Delivery Date cannot be before Purchase Order Date").format(
-							d.idx
+				# used for production plan
+				d.transaction_date = self.transaction_date
+
+				bin_doctype = qb.DocType("Bin")
+				tot_avail_qty = (
+					qb.from_(bin_doctype)
+					.select(bin_doctype.projected_qty)
+					.where((bin_doctype.item_code == d.item_code) & (bin_doctype.warehouse == d.warehouse))
+					.limit(1)
+				).run()
+				d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
+
+		def product_bundle_has_stock_item(self, product_bundle):
+			"""Returns true if product bundle has stock item"""
+			item = qb.DocType("Item")
+			product_bundle_item = qb.DocType("Product Bundle Item")
+			ret = len(
+				qb.from_(item)
+				.join(product_bundle_item)
+				.on(product_bundle_item.item_code == item.name)
+				.select(item.name)
+				.where((product_bundle_item.parent == product_bundle) & (item.is_stock_item == 1))
+				.limit(1)
+				.run()
+			)
+			return ret
+
+		def validate_sales_mntc_quotation(self):
+			for d in self.get("items"):
+				if d.prevdoc_docname:
+					quotation = qb.DocType("Quotation")
+					res = (
+						qb.from_(quotation)
+						.select(quotation.name)
+						.where(
+							(quotation.name == d.prevdoc_docname) & (quotation.order_type == self.order_type)
 						)
-					)
-
-		if self.po_no and self.customer and not self.skip_delivery_note:
-			so = frappe.db.sql(
-				"select name from `tabSales Order` \
-				where ifnull(po_no, '') = %s and name != %s and docstatus < 2\
-				and customer = %s",
-				(self.po_no, self.name, self.customer),
-			)
-			if so and so[0][0]:
-				if cint(
-					frappe.get_single_value("Selling Settings", "allow_against_multiple_purchase_orders")
-				):
-					frappe.msgprint(
-						_(
-							"Warning: Sales Order {0} already exists against Customer's Purchase Order {1}"
-						).format(frappe.bold(so[0][0]), frappe.bold(self.po_no)),
-						alert=True,
-					)
-				else:
-					frappe.throw(
-						_(
-							"Sales Order {0} already exists against Customer's Purchase Order {1}. To allow multiple Sales Orders, Enable {2} in {3}"
-						).format(
-							frappe.bold(so[0][0]),
-							frappe.bold(self.po_no),
-							frappe.bold(
-								_("'Allow Multiple Sales Orders Against a Customer's Purchase Order'")
-							),
-							get_link_to_form("Selling Settings", "Selling Settings"),
+						.limit(1)
+					).run()
+					if not res:
+						frappe.msgprint(
+							_("Quotation {0} not of type {1}").format(d.prevdoc_docname, self.order_type)
 						)
-					)
-
-	def validate_for_items(self):
-		for d in self.get("items"):
-			# used for production plan
-			d.transaction_date = self.transaction_date
-
-			tot_avail_qty = frappe.db.sql(
-				"select projected_qty from `tabBin` \
-				where item_code = %s and warehouse = %s",
-				(d.item_code, d.warehouse),
-			)
-			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
-
-	def product_bundle_has_stock_item(self, product_bundle):
-		"""Returns true if product bundle has stock item"""
-		ret = len(
-			frappe.db.sql(
-				"""select i.name from tabItem i, `tabProduct Bundle Item` pbi
-			where pbi.parent = %s and pbi.item_code = i.name and i.is_stock_item = 1""",
-				product_bundle,
-			)
-		)
-		return ret
-
-	def validate_sales_mntc_quotation(self):
-		for d in self.get("items"):
-			if d.prevdoc_docname:
-				res = frappe.db.sql(
-					"select name from `tabQuotation` where name=%s and order_type = %s",
-					(d.prevdoc_docname, self.order_type),
-				)
-				if not res:
-					frappe.msgprint(
-						_("Quotation {0} not of type {1}").format(d.prevdoc_docname, self.order_type)
-					)
 
 	def validate_delivery_date(self):
 		if self.order_type == "Sales" and not self.skip_delivery_note:
@@ -423,17 +440,26 @@ class SalesOrder(SellingController):
 
 		self.validate_sales_mntc_quotation()
 
-	def validate_proj_cust(self):
-		if self.project and self.customer_name:
-			res = frappe.db.sql(
-				"""select name from `tabProject` where name = %s
-				and (customer = %s or ifnull(customer,'')='')""",
-				(self.project, self.customer),
-			)
-			if not res:
-				frappe.throw(
-					_("Customer {0} does not belong to project {1}").format(self.customer, self.project)
-				)
+		def validate_proj_cust(self):
+			if self.project and self.customer_name:
+				project = qb.DocType("Project")
+				res = (
+					qb.from_(project)
+					.select(project.name)
+					.where(
+						(project.name == self.project)
+						& (
+							(project.customer == self.customer)
+							| project.customer.isnull()
+							| (project.customer == "")
+						)
+					)
+					.limit(1)
+				).run()
+				if not res:
+					frappe.throw(
+						_("Customer {0} does not belong to project {1}").format(self.customer, self.project)
+					)
 
 	def validate_warehouse(self):
 		super().validate_warehouse()
@@ -470,13 +496,22 @@ class SalesOrder(SellingController):
 		if cint(frappe.get_single_value("Selling Settings", "maintain_same_sales_rate")):
 			self.validate_rate_with_reference_doc([["Quotation", "prevdoc_docname", "quotation_item"]])
 
-	def update_enquiry_status(self, prevdoc, flag):
-		enq = frappe.db.sql(
-			"select t2.prevdoc_docname from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.name=%s",
-			prevdoc,
-		)
-		if enq:
-			frappe.db.sql("update `tabOpportunity` set status = %s where name=%s", (flag, enq[0][0]))
+		def update_enquiry_status(self, prevdoc, flag):
+			quotation = qb.DocType("Quotation")
+			quotation_item = qb.DocType("Quotation Item")
+			enq = (
+				qb.from_(quotation)
+				.join(quotation_item)
+				.on(quotation_item.parent == quotation.name)
+				.select(quotation_item.prevdoc_docname)
+				.where(quotation.name == prevdoc)
+				.limit(1)
+			).run()
+			if enq:
+				opportunity = qb.DocType("Opportunity")
+				(
+					qb.update(opportunity).set(opportunity.status, flag).where(opportunity.name == enq[0][0])
+				).run()
 
 	def update_prevdoc_status(self, flag=None):
 		for quotation in set(d.prevdoc_docname for d in self.get("items")):
@@ -577,12 +612,16 @@ class SalesOrder(SellingController):
 			check_credit_limit(self.customer, self.company)
 
 	def check_nextdoc_docstatus(self):
-		linked_invoices = frappe.db.sql_list(
-			"""select distinct t1.name
-			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
-			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 0""",
-			self.name,
-		)
+		sales_invoice = qb.DocType("Sales Invoice")
+		sales_invoice_item = qb.DocType("Sales Invoice Item")
+		linked_invoices = (
+			qb.from_(sales_invoice)
+			.join(sales_invoice_item)
+			.on(sales_invoice_item.parent == sales_invoice.name)
+			.select(sales_invoice.name)
+			.distinct()
+			.where((sales_invoice_item.sales_order == self.name) & (sales_invoice.docstatus == 0))
+		).run(pluck="name")
 
 		if linked_invoices:
 			linked_invoices = [get_link_to_form("Sales Invoice", si) for si in linked_invoices]
@@ -594,8 +633,7 @@ class SalesOrder(SellingController):
 
 	def check_modified_date(self):
 		mod_db = frappe.db.get_value("Sales Order", self.name, "modified")
-		date_diff = frappe.db.sql(f"select TIMEDIFF('{mod_db}', '{cstr(self.modified)}')")
-		if date_diff and date_diff[0][0]:
+		if frappe.utils.get_datetime(mod_db) != frappe.utils.get_datetime(self.modified):
 			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name))
 
 	def update_status(self, status):
@@ -682,17 +720,20 @@ class SalesOrder(SellingController):
 
 		for item in self.items:
 			if item.delivered_by_supplier:
-				item_delivered_qty = frappe.db.sql(
-					"""select sum(qty)
-					from `tabPurchase Order Item` poi, `tabPurchase Order` po
-					where poi.sales_order_item = %s
-						and poi.item_code = %s
-						and poi.parent = po.name
-						and po.docstatus = 1
-						and po.status = 'Delivered'""",
-					(item.name, item.item_code),
-				)
-
+				purchase_order = qb.DocType("Purchase Order")
+				purchase_order_item = qb.DocType("Purchase Order Item")
+				item_delivered_qty = (
+					qb.from_(purchase_order_item)
+					.join(purchase_order)
+					.on(purchase_order_item.parent == purchase_order.name)
+					.select(Sum(purchase_order_item.qty))
+					.where(
+						(purchase_order_item.sales_order_item == item.name)
+						& (purchase_order_item.item_code == item.item_code)
+						& (purchase_order.docstatus == 1)
+						& (purchase_order.status == "Delivered")
+					)
+				).run()
 				item_delivered_qty = item_delivered_qty[0][0] if item_delivered_qty else 0
 				item.db_set("delivered_qty", flt(item_delivered_qty), update_modified=False)
 
@@ -1504,12 +1545,16 @@ def make_sales_invoice(
 
 @frappe.whitelist()
 def make_maintenance_schedule(source_name: str, target_doc: str | Document | None = None):
-	maint_schedule = frappe.db.sql(
-		"""select t1.name
-		from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2
-		where t2.parent=t1.name and t2.sales_order=%s and t1.docstatus=1""",
-		source_name,
-	)
+	maintenance_schedule = qb.DocType("Maintenance Schedule")
+	maintenance_schedule_item = qb.DocType("Maintenance Schedule Item")
+	maint_schedule = (
+		qb.from_(maintenance_schedule)
+		.join(maintenance_schedule_item)
+		.on(maintenance_schedule_item.parent == maintenance_schedule.name)
+		.select(maintenance_schedule.name)
+		.where((maintenance_schedule_item.sales_order == source_name) & (maintenance_schedule.docstatus == 1))
+		.limit(1)
+	).run()
 
 	if not maint_schedule:
 		doclist = get_mapped_doc(
@@ -1530,13 +1575,20 @@ def make_maintenance_schedule(source_name: str, target_doc: str | Document | Non
 
 @frappe.whitelist()
 def make_maintenance_visit(source_name: str, target_doc: str | Document | None = None):
-	visit = frappe.db.sql(
-		"""select t1.name
-		from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2
-		where t2.parent=t1.name and t2.prevdoc_docname=%s
-		and t1.docstatus=1 and t1.completion_status='Fully Completed'""",
-		source_name,
-	)
+	maintenance_visit = qb.DocType("Maintenance Visit")
+	maintenance_visit_purpose = qb.DocType("Maintenance Visit Purpose")
+	visit = (
+		qb.from_(maintenance_visit)
+		.join(maintenance_visit_purpose)
+		.on(maintenance_visit_purpose.parent == maintenance_visit.name)
+		.select(maintenance_visit.name)
+		.where(
+			(maintenance_visit_purpose.prevdoc_docname == source_name)
+			& (maintenance_visit.docstatus == 1)
+			& (maintenance_visit.completion_status == "Fully Completed")
+		)
+		.limit(1)
+	).run()
 
 	if not visit:
 		doclist = get_mapped_doc(

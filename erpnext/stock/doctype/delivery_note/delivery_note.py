@@ -269,12 +269,12 @@ class DeliveryNote(SellingController):
 	def set_actual_qty(self):
 		for d in self.get("items"):
 			if d.item_code and d.warehouse:
-				actual_qty = frappe.db.sql(
-					"""select actual_qty from `tabBin`
-					where item_code = %s and warehouse = %s""",
-					(d.item_code, d.warehouse),
+				d.actual_qty = flt(
+					frappe.db.get_value(
+						"Bin", {"item_code": d.item_code, "warehouse": d.warehouse}, "actual_qty"
+					)
+					or 0
 				)
-				d.actual_qty = actual_qty and flt(actual_qty[0][0]) or 0
 
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
@@ -426,13 +426,8 @@ class DeliveryNote(SellingController):
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
 		if self.project and self.customer:
-			res = frappe.db.sql(
-				"""select name from `tabProject`
-				where name = %s and (customer = %s or
-					ifnull(customer,'')='')""",
-				(self.project, self.customer),
-			)
-			if not res:
+			project_customer = frappe.db.get_value("Project", self.project, "customer")
+			if project_customer and project_customer != self.customer:
 				frappe.throw(
 					_("Customer {0} does not belong to project {1}").format(self.customer, self.project)
 				)
@@ -625,37 +620,49 @@ class DeliveryNote(SellingController):
 			update_pick_list_status(pick_list)
 
 	def check_next_docstatus(self):
-		submit_rv = frappe.db.sql(
-			"""select t1.name
-			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
-			where t1.name = t2.parent and t2.delivery_note = %s and t1.docstatus = 1""",
-			(self.name),
+		sales_invoice_parents = frappe.get_all(
+			"Sales Invoice Item", filters={"delivery_note": self.name}, pluck="parent"
+		)
+		submit_rv = (
+			frappe.get_all(
+				"Sales Invoice",
+				filters={"name": ["in", sales_invoice_parents], "docstatus": 1},
+				limit=1,
+				pluck="name",
+			)
+			if sales_invoice_parents
+			else []
 		)
 		if submit_rv:
-			frappe.throw(_("Sales Invoice {0} has already been submitted").format(submit_rv[0][0]))
+			frappe.throw(_("Sales Invoice {0} has already been submitted").format(submit_rv[0]))
 
-		submit_in = frappe.db.sql(
-			"""select t1.name
-			from `tabInstallation Note` t1, `tabInstallation Note Item` t2
-			where t1.name = t2.parent and t2.prevdoc_docname = %s and t1.docstatus = 1""",
-			(self.name),
+		installation_note_parents = frappe.get_all(
+			"Installation Note Item", filters={"prevdoc_docname": self.name}, pluck="parent"
+		)
+		submit_in = (
+			frappe.get_all(
+				"Installation Note",
+				filters={"name": ["in", installation_note_parents], "docstatus": 1},
+				limit=1,
+				pluck="name",
+			)
+			if installation_note_parents
+			else []
 		)
 		if submit_in:
-			frappe.throw(_("Installation Note {0} has already been submitted").format(submit_in[0][0]))
+			frappe.throw(_("Installation Note {0} has already been submitted").format(submit_in[0]))
 
 	def cancel_packing_slips(self):
 		"""
 		Cancel submitted packing slips related to this delivery note
 		"""
-		res = frappe.db.sql(
-			"""SELECT name FROM `tabPacking Slip` WHERE delivery_note = %s
-			AND docstatus = 1""",
-			self.name,
+		res = frappe.get_all(
+			"Packing Slip", filters={"delivery_note": self.name, "docstatus": 1}, pluck="name"
 		)
 
 		if res:
-			for r in res:
-				ps = frappe.get_doc("Packing Slip", r[0])
+			for packing_slip_name in res:
+				ps = frappe.get_doc("Packing Slip", packing_slip_name)
 				ps.cancel()
 			frappe.msgprint(_("Packing Slip(s) cancelled"))
 
@@ -764,12 +771,14 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 			billed_against_so -= billed_amt_against_dn
 		else:
 			# Get billed amount directly against Delivery Note
-			billed_amt_against_dn = frappe.db.sql(
-				"""select sum(amount) from `tabSales Invoice Item`
-				where dn_detail=%s and docstatus=1""",
-				dnd.name,
+			billed_amt_against_dn = (
+				frappe.get_all(
+					"Sales Invoice Item",
+					filters={"dn_detail": dnd.name, "docstatus": 1},
+					fields=["sum(amount) as amount"],
+				)[0].amount
+				or 0
 			)
-			billed_amt_against_dn = billed_amt_against_dn and billed_amt_against_dn[0][0] or 0
 
 		# Distribute billed amount directly against SO between DNs based on FIFO
 		if billed_against_so and billed_amt_against_dn < dnd.amount:

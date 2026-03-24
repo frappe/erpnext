@@ -25,15 +25,11 @@ class TestPOSProfile(ERPNextTestSuite):
 			items = get_items_list(doc, doc.company)
 			customers = get_customers_list(doc)
 
-			products_count = frappe.db.sql(
-				""" select count(name) from tabItem where item_group = '_Test Item Group'""", as_list=1
-			)
-			customers_count = frappe.db.sql(
-				""" select count(name) from tabCustomer where customer_group = '_Test Customer Group'"""
-			)
+			products_count = frappe.db.count("Item", {"item_group": "_Test Item Group"})
+			customers_count = frappe.db.count("Customer", {"customer_group": "_Test Customer Group"})
 
-			self.assertEqual(len(items), products_count[0][0])
-			self.assertEqual(len(customers), customers_count[0][0])
+			self.assertEqual(len(items), products_count)
+			self.assertEqual(len(customers), customers_count)
 
 	def test_disabled_pos_profile_creation(self):
 		make_pos_profile(name="_Test POS Profile 001", disabled=1)
@@ -83,60 +79,76 @@ class TestPOSProfile(ERPNextTestSuite):
 def get_customers_list(pos_profile=None):
 	if pos_profile is None:
 		pos_profile = {}
-	cond = "1=1"
-	customer_groups = []
+	filters = {"disabled": 0}
 	if pos_profile.get("customer_groups"):
+		customer_groups = []
 		# Get customers based on the customer groups defined in the POS profile
 		for d in pos_profile.get("customer_groups"):
 			customer_groups.extend(
 				[d.get("name") for d in get_child_nodes("Customer Group", d.get("customer_group"))]
 			)
-		cond = "customer_group in ({})".format(", ".join(["%s"] * len(customer_groups)))
+		filters["customer_group"] = ["in", customer_groups]
 
 	return (
-		frappe.db.sql(
-			f""" select name, customer_name, customer_group, territory from tabCustomer where disabled = 0
-		and {cond}""",
-			tuple(customer_groups),
-			as_dict=1,
+		frappe.get_all(
+			"Customer",
+			fields=["name", "customer_name", "customer_group", "territory"],
+			filters=filters,
 		)
 		or {}
 	)
 
 
 def get_items_list(pos_profile, company):
-	cond = ""
 	args_list = []
+	item = frappe.qb.DocType("Item")
+	item_default = frappe.qb.DocType("Item Default")
+	uom_conversion = frappe.qb.DocType("UOM Conversion Detail")
 	if pos_profile.get("item_groups"):
 		# Get items based on the item groups defined in the POS profile
 		for d in pos_profile.get("item_groups"):
 			args_list.extend([d.name for d in get_child_nodes("Item Group", d.item_group)])
-		if args_list:
-			cond = "and i.item_group in ({})".format(", ".join(["%s"] * len(args_list)))
 
-	return frappe.db.sql(
-		f"""
-		select
-			i.name, i.item_code, i.item_name, i.description, i.item_group, i.has_batch_no,
-			i.has_serial_no, i.is_stock_item, i.brand, i.stock_uom, i.image,
-			id.expense_account, id.selling_cost_center, id.default_warehouse,
-			i.sales_uom, c.conversion_factor
-		from
-			`tabItem` i
-		left join `tabItem Default` id on id.parent = i.name and id.company = %s
-		left join `tabUOM Conversion Detail` c on i.name = c.parent and i.sales_uom = c.uom
-		where
-			i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1 and i.is_fixed_asset = 0
-			{cond}
-		""",
-		tuple([company, *args_list]),
-		as_dict=1,
+	query = (
+		frappe.qb.from_(item)
+		.left_join(item_default)
+		.on((item_default.parent == item.name) & (item_default.company == company))
+		.left_join(uom_conversion)
+		.on((item.name == uom_conversion.parent) & (item.sales_uom == uom_conversion.uom))
+		.select(
+			item.name,
+			item.item_code,
+			item.item_name,
+			item.description,
+			item.item_group,
+			item.has_batch_no,
+			item.has_serial_no,
+			item.is_stock_item,
+			item.brand,
+			item.stock_uom,
+			item.image,
+			item_default.expense_account,
+			item_default.selling_cost_center,
+			item_default.default_warehouse,
+			item.sales_uom,
+			uom_conversion.conversion_factor,
+		)
+		.where(
+			(item.disabled == 0)
+			& (item.has_variants == 0)
+			& (item.is_sales_item == 1)
+			& (item.is_fixed_asset == 0)
+		)
 	)
+	if args_list:
+		query = query.where(item.item_group.isin(args_list))
+
+	return query.run(as_dict=1)
 
 
 def make_pos_profile(**args):
-	frappe.db.sql("delete from `tabPOS Payment Method`")
-	frappe.db.sql("delete from `tabPOS Profile`")
+	frappe.db.delete("POS Payment Method")
+	frappe.db.delete("POS Profile")
 
 	args = frappe._dict(args)
 

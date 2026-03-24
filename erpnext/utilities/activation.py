@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.core.doctype.installed_applications.installed_applications import get_setup_wizard_completed_apps
+from frappe.utils import add_to_date, now_datetime
 
 import erpnext
 
@@ -55,7 +56,13 @@ def get_level(site_info):
 	sales_data.append({"Communication": communication_number})
 
 	# recent login
-	if frappe.db.sql("select name from tabUser where last_login > date_sub(now(), interval 2 day) limit 1"):
+	recent_login = frappe.get_all(
+		"User",
+		filters={"last_login": [">", add_to_date(now_datetime(), days=-2, as_datetime=True)]},
+		limit=1,
+		pluck="name",
+	)
+	if recent_login:
 		activation_level += 1
 
 	level = {"activation_level": activation_level, "sales_data": sales_data}

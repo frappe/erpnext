@@ -40,19 +40,17 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 def get_sle(**args):
-	condition, values = "", []
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	query = frappe.qb.from_(sle).select(sle.star)
 	for key, value in args.items():
-		condition += " and " if condition else " where "
-		condition += f"`{key}`=%s"
-		values.append(value)
+		query = query.where(sle[key] == value)
 
-	return frappe.db.sql(
-		"""select * from `tabStock Ledger Entry` %s
-		order by timestamp(posting_date, posting_time) desc, creation desc limit 1"""
-		% condition,
-		values,
-		as_dict=1,
-	)
+	return (
+		query.orderby(sle.posting_date, order=frappe.qb.desc)
+		.orderby(sle.posting_time, order=frappe.qb.desc)
+		.orderby(sle.creation, order=frappe.qb.desc)
+		.limit(1)
+	).run(as_dict=1)
 
 
 class TestStockEntry(ERPNextTestSuite):
@@ -259,20 +257,25 @@ class TestStockEntry(ERPNextTestSuite):
 
 		mr.cancel()
 
+		stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 		self.assertTrue(
-			frappe.db.sql(
-				"""select * from `tabStock Ledger Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""",
-				mr.name,
-			)
+			(
+				frappe.qb.from_(stock_ledger_entry)
+				.select(stock_ledger_entry.name)
+				.where(
+					(stock_ledger_entry.voucher_type == "Stock Entry")
+					& (stock_ledger_entry.voucher_no == mr.name)
+				)
+			).run(pluck=True)
 		)
 
+		gl_entry = frappe.qb.DocType("GL Entry")
 		self.assertTrue(
-			frappe.db.sql(
-				"""select * from `tabGL Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""",
-				mr.name,
-			)
+			(
+				frappe.qb.from_(gl_entry)
+				.select(gl_entry.name)
+				.where((gl_entry.voucher_type == "Stock Entry") & (gl_entry.voucher_no == mr.name))
+			).run(pluck=True)
 		)
 
 	def test_material_issue_gl_entry(self):
@@ -351,13 +354,13 @@ class TestStockEntry(ERPNextTestSuite):
 
 		if source_warehouse_account == target_warehouse_account:
 			# no gl entry as both source and target warehouse has linked to same account.
+			gl_entry = frappe.qb.DocType("GL Entry")
 			self.assertFalse(
-				frappe.db.sql(
-					"""select * from `tabGL Entry`
-				where voucher_type='Stock Entry' and voucher_no=%s""",
-					mtn.name,
-					as_dict=1,
-				)
+				(
+					frappe.qb.from_(gl_entry)
+					.select(gl_entry.name)
+					.where((gl_entry.voucher_type == "Stock Entry") & (gl_entry.voucher_no == mtn.name))
+				).run(pluck=True)
 			)
 
 		else:
@@ -451,13 +454,13 @@ class TestStockEntry(ERPNextTestSuite):
 			],
 		)
 
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Stock Entry' and voucher_no=%s
-			order by account desc""",
-			repack.name,
-			as_dict=1,
-		)
+		gl_entry = frappe.qb.DocType("GL Entry")
+		gl_entries = (
+			frappe.qb.from_(gl_entry)
+			.select(gl_entry.account, gl_entry.debit, gl_entry.credit)
+			.where((gl_entry.voucher_type == "Stock Entry") & (gl_entry.voucher_no == repack.name))
+			.orderby(gl_entry.account, order=frappe.qb.desc)
+		).run(as_dict=1)
 		self.assertFalse(gl_entries)
 
 	def test_repack_with_additional_costs(self):
@@ -538,13 +541,15 @@ class TestStockEntry(ERPNextTestSuite):
 		expected_sle.sort(key=lambda x: x[1])
 
 		# check stock ledger entries
-		sle = frappe.db.sql(
-			"""select item_code, warehouse, actual_qty
-			from `tabStock Ledger Entry` where voucher_type = %s
-			and voucher_no = %s order by item_code, warehouse, actual_qty""",
-			(voucher_type, voucher_no),
-			as_list=1,
-		)
+		sle_table = frappe.qb.DocType("Stock Ledger Entry")
+		sle = (
+			frappe.qb.from_(sle_table)
+			.select(sle_table.item_code, sle_table.warehouse, sle_table.actual_qty)
+			.where((sle_table.voucher_type == voucher_type) & (sle_table.voucher_no == voucher_no))
+			.orderby(sle_table.item_code)
+			.orderby(sle_table.warehouse)
+			.orderby(sle_table.actual_qty)
+		).run(as_list=1)
 		self.assertTrue(sle)
 		sle.sort(key=lambda x: x[1])
 
@@ -556,13 +561,14 @@ class TestStockEntry(ERPNextTestSuite):
 	def check_gl_entries(self, voucher_type, voucher_no, expected_gl_entries):
 		expected_gl_entries.sort(key=lambda x: x[0])
 
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
-			from `tabGL Entry` where voucher_type=%s and voucher_no=%s
-			order by account asc, debit asc""",
-			(voucher_type, voucher_no),
-			as_list=1,
-		)
+		gl_entry = frappe.qb.DocType("GL Entry")
+		gl_entries = (
+			frappe.qb.from_(gl_entry)
+			.select(gl_entry.account, gl_entry.debit, gl_entry.credit)
+			.where((gl_entry.voucher_type == voucher_type) & (gl_entry.voucher_no == voucher_no))
+			.orderby(gl_entry.account)
+			.orderby(gl_entry.debit)
+		).run(as_list=1)
 
 		self.assertTrue(gl_entries)
 		gl_entries.sort(key=lambda x: x[0])

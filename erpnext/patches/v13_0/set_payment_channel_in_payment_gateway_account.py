@@ -12,9 +12,4 @@ def execute():
 
 
 def set_payment_channel_as_email():
-	frappe.db.sql(
-		"""
-		UPDATE `tabPayment Gateway Account`
-		SET `payment_channel` = "Email"
-	"""
-	)
+	frappe.db.set_value("Payment Gateway Account", {}, "payment_channel", "Email", update_modified=False)

@@ -10,6 +10,7 @@ from frappe.query_builder import Interval
 from frappe.query_builder.functions import Count, CurDate, Date, Sum, UnixTimestamp
 from frappe.utils import add_days, flt, get_datetime, get_link_to_form, get_time, nowtime, today
 from frappe.utils.user import is_website_user
+from pypika import Order
 
 from erpnext import get_default_company
 from erpnext.controllers.queries import get_filters_cond
@@ -74,16 +75,19 @@ class Project(Document):
 	# end: auto-generated types
 
 	def onload(self):
+		timesheet_detail = qb.DocType("Timesheet Detail")
 		self.set_onload(
 			"activity_summary",
-			frappe.db.sql(
-				"""select activity_type,
-			sum(hours) as total_hours
-			from `tabTimesheet Detail` where project=%s and docstatus < 2 group by activity_type
-			order by total_hours desc""",
-				self.name,
-				as_dict=True,
-			),
+			(
+				qb.from_(timesheet_detail)
+				.select(
+					timesheet_detail.activity_type,
+					Sum(timesheet_detail.hours).as_("total_hours"),
+				)
+				.where((timesheet_detail.project == self.name) & (timesheet_detail.docstatus < 2))
+				.groupby(timesheet_detail.activity_type)
+				.orderby(Sum(timesheet_detail.hours), order=Order.desc)
+			).run(as_dict=True),
 		)
 
 	def before_print(self, settings=None):
@@ -229,37 +233,33 @@ class Project(Document):
 			if (self.percent_complete_method == "Task Completion" and total > 0) or (
 				not self.percent_complete_method and total > 0
 			):
-				completed = frappe.db.sql(
-					"""select count(name) from tabTask where
-					project=%s and status in ('Cancelled', 'Completed')""",
-					self.name,
-				)[0][0]
+				task = qb.DocType("Task")
+				completed = (
+					qb.from_(task)
+					.select(Count(task.name))
+					.where((task.project == self.name) & task.status.isin(["Cancelled", "Completed"]))
+				).run()[0][0]
 				self.percent_complete = flt(flt(completed) / total * 100, 2)
 
 			if self.percent_complete_method == "Task Progress" and total > 0:
-				progress = frappe.db.sql(
-					"""select sum(progress) from tabTask where
-					project=%s""",
-					self.name,
-				)[0][0]
+				task = qb.DocType("Task")
+				progress = (qb.from_(task).select(Sum(task.progress)).where(task.project == self.name)).run()[
+					0
+				][0]
 				self.percent_complete = flt(flt(progress) / total, 2)
 
 			if self.percent_complete_method == "Task Weight" and total > 0:
-				weight_sum = frappe.db.sql(
-					"""select sum(task_weight) from tabTask where
-					project=%s""",
-					self.name,
-				)[0][0]
-				weighted_progress = frappe.db.sql(
-					"""select progress, task_weight from tabTask where
-					project=%s""",
-					self.name,
-					as_dict=1,
-				)
+				task = qb.DocType("Task")
+				weight_sum = (
+					qb.from_(task).select(Sum(task.task_weight)).where(task.project == self.name)
+				).run()[0][0]
+				weighted_progress = (
+					qb.from_(task).select(task.progress, task.task_weight).where(task.project == self.name)
+				).run(as_dict=True)
 				pct_complete = 0
 				for row in weighted_progress:
 					pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
-				self.percent_complete = flt(flt(pct_complete), 2)
+			self.percent_complete = flt(flt(pct_complete), 2)
 
 		# don't update status if it is cancelled
 		if self.status == "Cancelled":
@@ -315,11 +315,12 @@ class Project(Document):
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
 
 	def update_sales_amount(self):
-		total_sales_amount = frappe.db.sql(
-			"""select sum(base_net_total)
-			from `tabSales Order` where project = %s and docstatus=1""",
-			self.name,
-		)
+		sales_order = qb.DocType("Sales Order")
+		total_sales_amount = (
+			qb.from_(sales_order)
+			.select(Sum(sales_order.base_net_total))
+			.where((sales_order.project == self.name) & (sales_order.docstatus == 1))
+		).run()
 
 		self.total_sales_amount = total_sales_amount and total_sales_amount[0][0] or 0
 
@@ -327,26 +328,30 @@ class Project(Document):
 		self.total_billed_amount = self.get_billed_amount_from_parent() + self.get_billed_amount_from_child()
 
 	def get_billed_amount_from_parent(self):
-		total_billed_amount = frappe.db.sql(
-			"""select sum(base_net_amount)
-			from `tabSales Invoice` si join `tabSales Invoice Item` si_item on si_item.parent = si.name
-				where si_item.project is null
-				and si.project is not null
-				and si.project = %s
-				and si.docstatus = 1""",
-			self.name,
-		)
+		sales_invoice = qb.DocType("Sales Invoice")
+		sales_invoice_item = qb.DocType("Sales Invoice Item")
+		total_billed_amount = (
+			qb.from_(sales_invoice)
+			.join(sales_invoice_item)
+			.on(sales_invoice_item.parent == sales_invoice.name)
+			.select(Sum(sales_invoice_item.base_net_amount))
+			.where(
+				sales_invoice_item.project.isnull()
+				& sales_invoice.project.isnotnull()
+				& (sales_invoice.project == self.name)
+				& (sales_invoice.docstatus == 1)
+			)
+		).run()
 
 		return total_billed_amount and total_billed_amount[0][0] or 0
 
 	def get_billed_amount_from_child(self):
-		total_billed_amount = frappe.db.sql(
-			"""select sum(base_net_amount)
-			from `tabSales Invoice Item`
-				where project = %s
-				and docstatus = 1""",
-			self.name,
-		)
+		sales_invoice_item = qb.DocType("Sales Invoice Item")
+		total_billed_amount = (
+			qb.from_(sales_invoice_item)
+			.select(Sum(sales_invoice_item.base_net_amount))
+			.where((sales_invoice_item.project == self.name) & (sales_invoice_item.docstatus == 1))
+		).run()
 
 		return total_billed_amount and total_billed_amount[0][0] or 0
 
@@ -537,11 +542,12 @@ def weekly_reminder():
 
 
 def allow_to_make_project_update(project, time, frequency):
-	data = frappe.db.sql(
-		""" SELECT name from `tabProject Update`
-		WHERE project = %s and date = %s """,
-		(project, today()),
-	)
+	project_update = qb.DocType("Project Update")
+	data = (
+		qb.from_(project_update)
+		.select(project_update.name)
+		.where((project_update.project == project) & (project_update.date == today()))
+	).run()
 
 	# len(data) > 1 condition is checked for twicely frequency
 	if data and (frequency in ["Daily", "Weekly"] or len(data) > 1):

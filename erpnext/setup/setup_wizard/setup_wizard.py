@@ -10,7 +10,7 @@ from erpnext.setup.setup_wizard.operations import install_fixtures as fixtures
 
 
 def get_setup_stages(args=None):
-	if frappe.db.sql("select name from tabCompany"):
+	if frappe.get_all("Company", limit=1, pluck="name"):
 		stages = [
 			{
 				"status": _("Wrapping up"),

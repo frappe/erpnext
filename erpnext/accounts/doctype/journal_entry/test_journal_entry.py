@@ -42,20 +42,29 @@ class TestJournalEntry(ERPNextTestSuite):
 		test_voucher.submit()
 
 		if test_voucher.doctype == "Journal Entry":
+			journal_entry_account = frappe.qb.DocType("Journal Entry Account")
 			self.assertTrue(
-				frappe.db.sql(
-					"""select name from `tabJournal Entry Account`
-				where account = %s and docstatus = 1 and parent = %s""",
-					("Debtors - _TC", test_voucher.name),
-				)
+				(
+					frappe.qb.from_(journal_entry_account)
+					.select(journal_entry_account.name)
+					.where(
+						(journal_entry_account.account == "Debtors - _TC")
+						& (journal_entry_account.docstatus == 1)
+						& (journal_entry_account.parent == test_voucher.name)
+					)
+				).run(pluck=True)
 			)
 
+		journal_entry_account = frappe.qb.DocType("Journal Entry Account")
 		self.assertFalse(
-			frappe.db.sql(
-				"""select name from `tabJournal Entry Account`
-			where reference_type = %s and reference_name = %s""",
-				(test_voucher.doctype, test_voucher.name),
-			)
+			(
+				frappe.qb.from_(journal_entry_account)
+				.select(journal_entry_account.name)
+				.where(
+					(journal_entry_account.reference_type == test_voucher.doctype)
+					& (journal_entry_account.reference_name == test_voucher.name)
+				)
+			).run(pluck=True)
 		)
 
 		base_jv.get("accounts")[0].is_advance = (
@@ -68,12 +77,17 @@ class TestJournalEntry(ERPNextTestSuite):
 
 		submitted_voucher = frappe.get_doc(test_voucher.doctype, test_voucher.name)
 
+		journal_entry_account = frappe.qb.DocType("Journal Entry Account")
 		self.assertTrue(
-			frappe.db.sql(
-				f"""select name from `tabJournal Entry Account`
-			where reference_type = %s and reference_name = %s and {dr_or_cr}=400""",
-				(submitted_voucher.doctype, submitted_voucher.name),
-			)
+			(
+				frappe.qb.from_(journal_entry_account)
+				.select(journal_entry_account.name)
+				.where(
+					(journal_entry_account.reference_type == submitted_voucher.doctype)
+					& (journal_entry_account.reference_name == submitted_voucher.name)
+					& (journal_entry_account[dr_or_cr] == 400)
+				)
+			).run(pluck=True)
 		)
 
 		if base_jv.get("accounts")[0].is_advance == "Yes":
@@ -82,11 +96,12 @@ class TestJournalEntry(ERPNextTestSuite):
 
 	def advance_paid_testcase(self, base_jv, test_voucher, dr_or_cr):
 		# Test advance paid field
-		advance_paid = frappe.db.sql(
-			"""select advance_paid from `tab{}`
-					where name={}""".format(test_voucher.doctype, "%s"),
-			(test_voucher.name),
-		)
+		voucher_table = frappe.qb.DocType(test_voucher.doctype)
+		advance_paid = (
+			frappe.qb.from_(voucher_table)
+			.select(voucher_table.advance_paid)
+			.where(voucher_table.name == test_voucher.name)
+		).run()
 		payment_against_order = base_jv.get("accounts")[0].get(dr_or_cr)
 
 		self.assertTrue(flt(advance_paid[0][0]) == flt(payment_against_order))
@@ -95,12 +110,16 @@ class TestJournalEntry(ERPNextTestSuite):
 		if test_voucher.doctype == "Journal Entry":
 			# if test_voucher is a Journal Entry, test cancellation of test_voucher
 			test_voucher.cancel()
+			journal_entry_account = frappe.qb.DocType("Journal Entry Account")
 			self.assertFalse(
-				frappe.db.sql(
-					"""select name from `tabJournal Entry Account`
-				where reference_type='Journal Entry' and reference_name=%s""",
-					test_voucher.name,
-				)
+				(
+					frappe.qb.from_(journal_entry_account)
+					.select(journal_entry_account.name)
+					.where(
+						(journal_entry_account.reference_type == "Journal Entry")
+						& (journal_entry_account.reference_name == test_voucher.name)
+					)
+				).run(pluck=True)
 			)
 
 		elif test_voucher.doctype in ["Sales Order", "Purchase Order"]:
@@ -195,11 +214,12 @@ class TestJournalEntry(ERPNextTestSuite):
 		# cancel
 		jv.cancel()
 
-		gle = frappe.db.sql(
-			"""select name from `tabGL Entry`
-			where voucher_type='Sales Invoice' and voucher_no=%s""",
-			jv.name,
-		)
+		gl_entry = frappe.qb.DocType("GL Entry")
+		gle = (
+			frappe.qb.from_(gl_entry)
+			.select(gl_entry.name)
+			.where((gl_entry.voucher_type == "Sales Invoice") & (gl_entry.voucher_no == jv.name))
+		).run(pluck=True)
 
 		self.assertFalse(gle)
 

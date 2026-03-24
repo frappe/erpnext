@@ -11,4 +11,5 @@ def execute():
 		current_index += 1
 		frappe.rename_doc("Member", member["name"], "MEM-" + str(current_index).zfill(5))
 
-	frappe.db.sql("""update `tabMember` set naming_series = 'MEM-'""")
+	member = frappe.qb.DocType("Member")
+	(frappe.qb.update(member).set(member.naming_series, "MEM-")).run()

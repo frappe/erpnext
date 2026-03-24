@@ -76,10 +76,9 @@ class Task(NestedSet):
 	nsm_parent_field = "parent_task"
 
 	def get_customer_details(self):
-		cust = frappe.db.sql("select customer_name from `tabCustomer` where name=%s", self.customer)
-		if cust:
-			ret = {"customer_name": cust and cust[0][0] or ""}
-			return ret
+		customer_name = frappe.db.get_value("Customer", self.customer, "customer_name")
+		if customer_name:
+			return {"customer_name": customer_name}
 
 	def validate(self):
 		self.validate_dates()
@@ -252,16 +251,13 @@ class Task(NestedSet):
 		for d in check_list:
 			task_list, count = [self.name], 0
 			while len(task_list) > count:
-				tasks = frappe.db.sql(
-					" select {} from `tabTask Depends On` where {} = {} ".format(d[0], d[1], "%s"),
-					cstr(task_list[count]),
-				)
+				tasks = frappe.get_all("Task Depends On", filters={d[1]: cstr(task_list[count])}, pluck=d[0])
 				count = count + 1
-				for b in tasks:
-					if b[0] == self.name:
+				for task_name in tasks:
+					if task_name == self.name:
 						frappe.throw(_("Circular Reference Error"), CircularReferenceError)
-					if b[0]:
-						task_list.append(b[0])
+					if task_name:
+						task_list.append(task_name)
 
 				if count == 15:
 					break
@@ -269,18 +265,17 @@ class Task(NestedSet):
 	def reschedule_dependent_tasks(self):
 		end_date = self.exp_end_date or self.act_end_date
 		if end_date:
-			for task_name in frappe.db.sql(
-				"""
-				select name from `tabTask` as parent
-				where parent.project = %(project)s
-					and parent.name in (
-						select parent from `tabTask Depends On` as child
-						where child.task = %(task)s and child.project = %(project)s)
-			""",
-				{"project": self.project, "task": self.name},
-				as_dict=1,
+			dependent_parents = frappe.get_all(
+				"Task Depends On",
+				filters={"task": self.name, "project": self.project},
+				pluck="parent",
+			)
+			for task_name in frappe.get_all(
+				"Task",
+				filters={"project": self.project, "name": ["in", dependent_parents]},
+				pluck="name",
 			):
-				task = frappe.get_doc("Task", task_name.name)
+				task = frappe.get_doc("Task", task_name)
 				if (
 					task.exp_start_date
 					and task.exp_end_date

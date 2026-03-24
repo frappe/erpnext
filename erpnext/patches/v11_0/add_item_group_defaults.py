@@ -17,10 +17,14 @@ def execute():
 	frappe.reload_doc("setup", "doctype", "item_group")
 
 	companies = frappe.get_all("Company")
-	item_groups = frappe.db.sql(
-		"""select name, default_income_account, default_expense_account,\
-		default_cost_center from `tabItem Group`""",
-		as_dict=True,
+	item_groups = frappe.get_all(
+		"Item Group",
+		fields=[
+			"name",
+			"default_income_account",
+			"default_expense_account",
+			"default_cost_center",
+		],
 	)
 
 	if len(companies) == 1:

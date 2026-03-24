@@ -13,9 +13,11 @@ def execute():
 	if not frappe.db.has_column("Loyalty Point Entry", "sales_invoice"):
 		return
 
-	frappe.db.sql(
-		"""UPDATE `tabLoyalty Point Entry` lpe
-		SET lpe.`invoice_type` = 'Sales Invoice', lpe.`invoice` = lpe.`sales_invoice`
-		WHERE lpe.`sales_invoice` IS NOT NULL
-		AND (lpe.`invoice` IS NULL OR lpe.`invoice` = '')"""
-	)
+	loyalty_point_entry = frappe.qb.DocType("Loyalty Point Entry")
+	(
+		frappe.qb.update(loyalty_point_entry)
+		.set(loyalty_point_entry.invoice_type, "Sales Invoice")
+		.set(loyalty_point_entry.invoice, loyalty_point_entry.sales_invoice)
+		.where(loyalty_point_entry.sales_invoice.isnotnull())
+		.where(loyalty_point_entry.invoice.isnull() | (loyalty_point_entry.invoice == ""))
+	).run()

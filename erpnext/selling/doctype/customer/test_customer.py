@@ -211,7 +211,7 @@ class TestCustomer(ERPNextTestSuite):
 		so.save()
 
 	def test_duplicate_customer(self):
-		frappe.db.sql("delete from `tabCustomer` where customer_name='_Test Customer 1'")
+		frappe.db.delete("Customer", {"customer_name": "_Test Customer 1"})
 
 		if not frappe.db.get_value("Customer", "_Test Customer 1"):
 			test_customer_1 = frappe.get_doc(get_customer_dict("_Test Customer 1")).insert(

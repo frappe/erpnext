@@ -5,9 +5,9 @@ def execute():
 	if frappe.db.has_table("Tax Withholding Category") and frappe.db.has_column(
 		"Tax Withholding Category", "round_off_tax_amount"
 	):
-		frappe.db.sql(
-			"""
-			UPDATE `tabTax Withholding Category` set round_off_tax_amount = 0
-			WHERE round_off_tax_amount IS NULL
-		"""
-		)
+		tax_withholding_category = frappe.qb.DocType("Tax Withholding Category")
+		(
+			frappe.qb.update(tax_withholding_category)
+			.set(tax_withholding_category.round_off_tax_amount, 0)
+			.where(tax_withholding_category.round_off_tax_amount.isnull())
+		).run()

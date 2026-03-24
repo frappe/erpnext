@@ -12,7 +12,9 @@ from frappe.cache_manager import clear_defaults_cache
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
+from frappe.query_builder.functions import Count
 from frappe.utils import (
+	add_to_date,
 	cint,
 	get_first_day,
 	get_last_day,
@@ -151,11 +153,7 @@ class Company(NestedSet):
 			"Purchase Order",
 			"Supplier Quotation",
 		]:
-			if frappe.db.sql(
-				"""select name from `tab{}` where company={} and docstatus=1
-					limit 1""".format(doctype, "%s"),
-				self.name,
-			):
+			if frappe.get_all(doctype, filters={"company": self.name, "docstatus": 1}, limit=1, pluck="name"):
 				exists = True
 				break
 
@@ -193,15 +191,21 @@ class Company(NestedSet):
 		if previous_valuation_method and previous_valuation_method != self.valuation_method:
 			# check if there are any stock ledger entries against items
 			# which does not have it's own valuation method
-			sle = frappe.db.sql(
-				"""select name from `tabStock Ledger Entry` sle
-				where exists(select name from tabItem
-					where name=sle.item_code and (valuation_method is null or valuation_method='')) and sle.company=%s limit 1
-			""",
-				self.name,
-			)
+			sle = frappe.qb.DocType("Stock Ledger Entry")
+			item = frappe.qb.DocType("Item")
+			sle_exists = (
+				frappe.qb.from_(sle)
+				.join(item)
+				.on(item.name == sle.item_code)
+				.select(sle.name)
+				.where(
+					(sle.company == self.name)
+					& (item.valuation_method.isnull() | (item.valuation_method == ""))
+				)
+				.limit(1)
+			).run(pluck=True)
 
-			if sle:
+			if sle_exists:
 				frappe.throw(
 					_(
 						"Can't change the valuation method, as there are transactions against some items which do not have its own valuation method"
@@ -234,7 +238,7 @@ class Company(NestedSet):
 		if not self.abbr.strip():
 			frappe.throw(_("Abbreviation is mandatory"))
 
-		if frappe.db.sql("select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)):
+		if frappe.db.exists("Company", {"abbr": self.abbr, "name": ["!=", self.name]}):
 			frappe.throw(_("Abbreviation already used for another company"))
 
 	@frappe.whitelist()
@@ -334,11 +338,10 @@ class Company(NestedSet):
 
 	def on_update(self):
 		NestedSet.on_update(self)
-		if not frappe.db.sql(
-			"""select name from tabAccount
-				where company=%s and docstatus<2 limit 1""",
-			self.name,
-		):
+		account_exists = frappe.get_all(
+			"Account", filters={"company": self.name, "docstatus": ["<", 2]}, limit=1, pluck="name"
+		)
+		if not account_exists:
 			if not frappe.local.flags.ignore_chart_of_accounts:
 				frappe.flags.country_change = True
 				sync_financial_report_templates(self.chart_of_accounts, self.existing_company)
@@ -752,11 +755,12 @@ class Company(NestedSet):
 
 	def after_rename(self, olddn, newdn, merge=False):
 		self.db_set("company_name", newdn)
-
-		frappe.db.sql(
-			"""update `tabDefaultValue` set defvalue=%s
-			where defkey='Company' and defvalue=%s""",
-			(newdn, olddn),
+		frappe.db.set_value(
+			"DefaultValue",
+			{"defkey": "Company", "defvalue": olddn},
+			"defvalue",
+			newdn,
+			update_modified=False,
 		)
 
 		clear_defaults_cache()
@@ -770,74 +774,62 @@ class Company(NestedSet):
 		"""
 		NestedSet.validate_if_child_exists(self)
 		frappe.utils.nestedset.update_nsm(self)
-
-		rec = frappe.db.sql("SELECT name from `tabGL Entry` where company = %s", self.name)
-		if not rec:
-			frappe.db.sql(
-				"""delete from `tabBudget Account`
-				where exists(select name from tabBudget
-					where name=`tabBudget Account`.parent and company = %s)""",
-				self.name,
-			)
+		gl_entry_exists = frappe.get_all("GL Entry", filters={"company": self.name}, limit=1, pluck="name")
+		if not gl_entry_exists:
+			budget = frappe.qb.DocType("Budget")
+			budget_account = frappe.qb.DocType("Budget Account")
+			budget_subquery = frappe.qb.from_(budget).select(budget.name).where(budget.company == self.name)
+			frappe.qb.from_(budget_account).delete().where(budget_account.parent.isin(budget_subquery)).run()
 
 			for doctype in ["Account", "Cost Center", "Budget", "Party Account"]:
-				frappe.db.sql(f"delete from `tab{doctype}` where company = %s", self.name)
+				frappe.db.delete(doctype, {"company": self.name})
 
 		if not frappe.db.get_value("Stock Ledger Entry", {"company": self.name}):
-			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.name)
+			frappe.db.delete("Warehouse", {"company": self.name})
 
 		frappe.defaults.clear_default("company", value=self.name)
 		for doctype in ["Mode of Payment Account", "Item Default"]:
-			frappe.db.sql(f"delete from `tab{doctype}` where company = %s", self.name)
+			frappe.db.delete(doctype, {"company": self.name})
 
 		# clear default accounts, warehouses from item
-		warehouses = frappe.db.sql_list("select name from tabWarehouse where company=%s", self.name)
+		warehouses = frappe.get_all("Warehouse", filters={"company": self.name}, pluck="name")
 		if warehouses:
-			frappe.db.sql(
-				"""delete from `tabItem Reorder` where warehouse in (%s)"""
-				% ", ".join(["%s"] * len(warehouses)),
-				tuple(warehouses),
-			)
+			frappe.db.delete("Item Reorder", {"warehouse": ["in", warehouses]})
 
 		# reset default company
-		frappe.db.sql(
-			"""update `tabSingles` set value=''
-			where doctype='Global Defaults' and field='default_company'
-			and value=%s""",
-			self.name,
-		)
+		if frappe.db.get_single_value("Global Defaults", "default_company") == self.name:
+			frappe.db.set_single_value("Global Defaults", "default_company", "")
 
 		# reset default company
-		frappe.db.sql(
-			"""update `tabSingles` set value=''
-			where doctype='Chart of Accounts Importer' and field='company'
-			and value=%s""",
-			self.name,
-		)
+		if frappe.db.get_single_value("Chart of Accounts Importer", "company") == self.name:
+			frappe.db.set_single_value("Chart of Accounts Importer", "company", "")
 
 		# delete BOMs
-		boms = frappe.db.sql_list("select name from tabBOM where company=%s", self.name)
+		boms = frappe.get_all("BOM", filters={"company": self.name}, pluck="name")
 		if boms:
-			frappe.db.sql("delete from tabBOM where company=%s", self.name)
+			frappe.db.delete("BOM", {"company": self.name})
 			for dt in ("BOM Operation", "BOM Item", "BOM Secondary Item", "BOM Explosion Item"):
-				frappe.db.sql(
-					"delete from `tab{}` where parent in ({})".format(dt, ", ".join(["%s"] * len(boms))),
-					tuple(boms),
-				)
+				frappe.db.delete(dt, {"parent": ["in", boms]})
 
-		frappe.db.sql("delete from tabEmployee where company=%s", self.name)
-		frappe.db.sql("delete from tabDepartment where company=%s", self.name)
-		frappe.db.sql("delete from `tabTax Withholding Account` where company=%s", self.name)
-		frappe.db.sql("delete from `tabTransaction Deletion Record` where company=%s", self.name)
+		for doctype in [
+			"Employee",
+			"Department",
+			"Tax Withholding Account",
+			"Transaction Deletion Record",
+		]:
+			frappe.db.delete(doctype, {"company": self.name})
 
 		# delete tax templates
-		frappe.db.sql("delete from `tabSales Taxes and Charges Template` where company=%s", self.name)
-		frappe.db.sql("delete from `tabPurchase Taxes and Charges Template` where company=%s", self.name)
-		frappe.db.sql("delete from `tabItem Tax Template` where company=%s", self.name)
+		for doctype in [
+			"Sales Taxes and Charges Template",
+			"Purchase Taxes and Charges Template",
+			"Item Tax Template",
+		]:
+			frappe.db.delete(doctype, {"company": self.name})
 
 		# delete Process Deferred Accounts if no GL Entry found
 		if not frappe.db.get_value("GL Entry", {"company": self.name}):
-			frappe.db.sql("delete from `tabProcess Deferred Accounting` where company=%s", self.name)
+			frappe.db.delete("Process Deferred Accounting", {"company": self.name})
 
 	def check_parent_changed(self):
 		frappe.flags.parent_company_changed = False
@@ -942,19 +934,8 @@ def cache_companies_monthly_sales_history():
 def get_children(doctype: str, parent: str | None = None, company: str | None = None, is_root: bool = False):
 	if parent is None or parent == "All Companies":
 		parent = ""
-
-	return frappe.db.sql(
-		f"""
-		select
-			name as value,
-			is_group as expandable
-		from
-			`tabCompany` comp
-		where
-			ifnull(parent_company, "")={frappe.db.escape(parent)}
-		""",
-		as_dict=1,
-	)
+	filters = {"parent_company": parent} if parent else [["parent_company", "in", ["", None]]]
+	return frappe.get_all("Company", filters=filters, fields=["name as value", "is_group as expandable"])
 
 
 @frappe.whitelist()
@@ -972,56 +953,26 @@ def add_node():
 
 def get_all_transactions_annual_history(company):
 	out = {}
+	from_date = add_to_date(today(), years=-1)
+	for doctype, date_field in (
+		("Quotation", "transaction_date"),
+		("Sales Order", "transaction_date"),
+		("Delivery Note", "posting_date"),
+		("Sales Invoice", "posting_date"),
+		("Issue", "creation"),
+		("Project", "creation"),
+	):
+		doc = frappe.qb.DocType(doctype)
+		items = (
+			frappe.qb.from_(doc)
+			.select(getattr(doc, date_field).as_("transaction_date"), Count(doc.star).as_("count"))
+			.where((doc.company == company) & (getattr(doc, date_field) > from_date))
+			.groupby(getattr(doc, date_field))
+		).run(as_dict=True)
 
-	items = frappe.db.sql(
-		"""
-		select transaction_date, count(*) as count
-
-		from (
-			select name, transaction_date, company
-			from `tabQuotation`
-
-			UNION ALL
-
-			select name, transaction_date, company
-			from `tabSales Order`
-
-			UNION ALL
-
-			select name, posting_date as transaction_date, company
-			from `tabDelivery Note`
-
-			UNION ALL
-
-			select name, posting_date as transaction_date, company
-			from `tabSales Invoice`
-
-			UNION ALL
-
-			select name, creation as transaction_date, company
-			from `tabIssue`
-
-			UNION ALL
-
-			select name, creation as transaction_date, company
-			from `tabProject`
-		) t
-
-		where
-			company=%s
-			and
-			transaction_date > date_sub(curdate(), interval 1 year)
-
-		group by
-			transaction_date
-			""",
-		(company),
-		as_dict=True,
-	)
-
-	for d in items:
-		timestamp = get_timestamp(d["transaction_date"])
-		out.update({timestamp: d["count"]})
+		for d in items:
+			timestamp = get_timestamp(d["transaction_date"])
+			out[timestamp] = out.get(timestamp, 0) + d["count"]
 
 	return out
 
@@ -1051,17 +1002,20 @@ def get_default_company_address(
 	sort_key: Literal["is_shipping_address", "is_primary_address"] = "is_primary_address",
 	existing_address: str | None = None,
 ):
-	out = frappe.db.sql(
-		""" SELECT
-			addr.name, addr.{}
-		FROM
-			`tabAddress` addr, `tabDynamic Link` dl
-		WHERE
-			dl.parent = addr.name and dl.link_doctype = 'Company' and
-			dl.link_name = {} and ifnull(addr.disabled, 0) = 0
-		""".format(sort_key, "%s"),
-		(name),
-	)  # nosec
+	addr = frappe.qb.DocType("Address")
+	dynamic_link = frappe.qb.DocType("Dynamic Link")
+	sort_column = getattr(addr, sort_key)
+	out = (
+		frappe.qb.from_(addr)
+		.join(dynamic_link)
+		.on(dynamic_link.parent == addr.name)
+		.select(addr.name, sort_column)
+		.where(
+			(dynamic_link.link_doctype == "Company")
+			& (dynamic_link.link_name == name)
+			& (addr.disabled.isnull() | (addr.disabled == 0))
+		)
+	).run()
 
 	if existing_address:
 		if existing_address in [d[0] for d in out]:

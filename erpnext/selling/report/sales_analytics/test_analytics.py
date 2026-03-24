@@ -11,7 +11,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestAnalytics(ERPNextTestSuite):
 	def test_sales_analytics(self):
-		frappe.db.sql("delete from `tabSales Order` where company='_Test Company 2'")
+		frappe.db.delete("Sales Order", {"company": "_Test Company 2"})
 
 		create_sales_orders()
 

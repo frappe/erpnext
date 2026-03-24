@@ -2,10 +2,15 @@ import frappe
 
 
 def execute():
-	frappe.db.sql(
-		"""
-		update `tabMaterial Request`
-		set status='Manufactured'
-		where docstatus=1 and material_request_type='Manufacture' and per_ordered=100 and status != 'Stopped'
-	"""
+	frappe.db.set_value(
+		"Material Request",
+		{
+			"docstatus": 1,
+			"material_request_type": "Manufacture",
+			"per_ordered": 100,
+			"status": ["!=", "Stopped"],
+		},
+		"status",
+		"Manufactured",
+		update_modified=False,
 	)

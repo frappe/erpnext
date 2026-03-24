@@ -118,20 +118,26 @@ class POSProfile(Document):
 
 	def validate_default_profile(self):
 		for row in self.applicable_for_users:
-			res = frappe.db.sql(
-				"""select pf.name
-				from
-					`tabPOS Profile User` pfu, `tabPOS Profile` pf
-				where
-					pf.name = pfu.parent and pfu.user = %s and pf.name != %s and pf.company = %s
-					and pfu.default=1 and pf.disabled = 0""",
-				(row.user, self.name, self.company),
+			other_profile_names = frappe.get_all(
+				"POS Profile User",
+				filters={"user": row.user, "parent": ["!=", self.name], "default": 1},
+				pluck="parent",
+			)
+			res = (
+				frappe.get_all(
+					"POS Profile",
+					filters={"name": ["in", other_profile_names], "company": self.company, "disabled": 0},
+					limit=1,
+					pluck="name",
+				)
+				if other_profile_names
+				else []
 			)
 
 			if row.default and res:
 				msgprint(
 					_("Already set default in pos profile {0} for user {1}, kindly disabled default").format(
-						res[0][0], row.user
+						res[0], row.user
 					),
 					raise_exception=1,
 				)
@@ -209,15 +215,11 @@ class POSProfile(Document):
 	def set_defaults(self, include_current_pos=True):
 		frappe.defaults.clear_default("is_pos")
 
+		filters = {"default": 1}
 		if not include_current_pos:
-			condition = " where pfu.name != '%s' and pfu.default = 1 " % self.name.replace("'", "'")
-		else:
-			condition = " where pfu.default = 1 "
+			filters["name"] = ["!=", self.name]
 
-		pos_view_users = frappe.db.sql_list(
-			f"""select pfu.user
-			from `tabPOS Profile User` as pfu {condition}"""
-		)
+		pos_view_users = frappe.get_all("POS Profile User", filters=filters, pluck="user")
 
 		for user in pos_view_users:
 			if user:
@@ -266,10 +268,11 @@ def get_permitted_nodes(group_type):
 
 def get_child_nodes(group_type, root):
 	lft, rgt = frappe.db.get_value(group_type, root, ["lft", "rgt"])
-	return frappe.db.sql(
-		f""" Select name, lft, rgt from `tab{group_type}` where
-			lft >= {lft} and rgt <= {rgt} order by lft""",
-		as_dict=1,
+	return frappe.get_all(
+		group_type,
+		filters={"lft": [">=", lft], "rgt": ["<=", rgt]},
+		fields=["name", "lft", "rgt"],
+		order_by="lft",
 	)
 
 

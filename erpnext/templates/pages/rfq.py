@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.utils import formatdate
+from pypika import Order
 
 from erpnext.controllers.website_list_for_contact import get_customers_suppliers
 
@@ -30,14 +31,9 @@ def get_supplier():
 
 
 def check_supplier_has_docname_access(supplier):
-	status = True
-	if frappe.form_dict.name not in frappe.db.sql_list(
-		"""select parent from `tabRequest for Quotation Supplier`
-		where supplier = %s""",
-		(supplier,),
-	):
-		status = False
-	return status
+	return frappe.form_dict.name in frappe.get_all(
+		"Request for Quotation Supplier", filters={"supplier": supplier}, pluck="parent"
+	)
 
 
 def unauthorized_user(supplier):
@@ -59,16 +55,25 @@ def update_supplier_details(context):
 
 
 def get_link_quotation(supplier, rfq):
-	quotation = frappe.db.sql(
-		""" select distinct `tabSupplier Quotation Item`.parent as name,
-		`tabSupplier Quotation`.status, `tabSupplier Quotation`.transaction_date from
-		`tabSupplier Quotation Item`, `tabSupplier Quotation` where `tabSupplier Quotation`.docstatus < 2 and
-		`tabSupplier Quotation Item`.request_for_quotation =%(name)s and
-		`tabSupplier Quotation Item`.parent = `tabSupplier Quotation`.name and
-		`tabSupplier Quotation`.supplier = %(supplier)s order by `tabSupplier Quotation`.creation desc""",
-		{"name": rfq, "supplier": supplier},
-		as_dict=1,
-	)
+	supplier_quotation = frappe.qb.DocType("Supplier Quotation")
+	supplier_quotation_item = frappe.qb.DocType("Supplier Quotation Item")
+	quotation = (
+		frappe.qb.from_(supplier_quotation_item)
+		.join(supplier_quotation)
+		.on(supplier_quotation_item.parent == supplier_quotation.name)
+		.select(
+			supplier_quotation_item.parent.as_("name"),
+			supplier_quotation.status,
+			supplier_quotation.transaction_date,
+		)
+		.where(
+			(supplier_quotation.docstatus < 2)
+			& (supplier_quotation_item.request_for_quotation == rfq)
+			& (supplier_quotation.supplier == supplier)
+		)
+		.distinct()
+		.orderby(supplier_quotation.creation, order=Order.desc)
+	).run(as_dict=True)
 
 	for data in quotation:
 		data.transaction_date = formatdate(data.transaction_date)

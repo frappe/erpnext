@@ -29,32 +29,29 @@ class PendingRepostingError(frappe.ValidationError):
 
 
 def get_stock_value_from_bin(warehouse=None, item_code=None):
-	values = {}
-	conditions = ""
-	if warehouse:
-		conditions += """ and `tabBin`.warehouse in (
-						select w2.name from `tabWarehouse` w1
-						join `tabWarehouse` w2 on
-						w1.name = %(warehouse)s
-						and w2.lft between w1.lft and w1.rgt
-						) """
-
-		values["warehouse"] = warehouse
-
-	if item_code:
-		conditions += " and `tabBin`.item_code = %(item_code)s"
-
-		values["item_code"] = item_code
-
+	bin_doctype = frappe.qb.DocType("Bin")
+	item_doctype = frappe.qb.DocType("Item")
 	query = (
-		"""select sum(stock_value) from `tabBin`, `tabItem` where 1 = 1
-		and `tabItem`.name = `tabBin`.item_code and ifnull(`tabItem`.disabled, 0) = 0 %s"""
-		% conditions
+		frappe.qb.from_(bin_doctype)
+		.join(item_doctype)
+		.on(item_doctype.name == bin_doctype.item_code)
+		.select(Sum(bin_doctype.stock_value))
+		.where(IfNull(item_doctype.disabled, 0) == 0)
 	)
 
-	stock_value = frappe.db.sql(query, values)
+	if warehouse:
+		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+		warehouse_names = frappe.get_all(
+			"Warehouse",
+			filters={"lft": [">=", lft], "rgt": ["<=", rgt]},
+			pluck="name",
+		)
+		query = query.where(bin_doctype.warehouse.isin(warehouse_names))
 
-	return stock_value
+	if item_code:
+		query = query.where(bin_doctype.item_code == item_code)
+
+	return query.run()
 
 
 def get_stock_value_on(
@@ -168,36 +165,32 @@ def get_serial_nos_data(serial_nos):
 
 @frappe.whitelist()
 def get_latest_stock_qty(item_code: str, warehouse: str | None = None):
-	values, condition = [item_code], ""
+	filters = {"item_code": item_code}
 	if warehouse:
 		lft, rgt, is_group = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt", "is_group"])
 
 		if is_group:
-			values.extend([lft, rgt])
-			condition += "and exists (\
-				select name from `tabWarehouse` wh where wh.name = tabBin.warehouse\
-				and wh.lft >= %s and wh.rgt <= %s)"
-
+			filters["warehouse"] = [
+				"in",
+				frappe.get_all(
+					"Warehouse",
+					filters={"lft": [">=", lft], "rgt": ["<=", rgt]},
+					pluck="name",
+				),
+			]
 		else:
-			values.append(warehouse)
-			condition += " AND warehouse = %s"
+			filters["warehouse"] = warehouse
 
-	actual_qty = frappe.db.sql(
-		f"""select sum(actual_qty) from tabBin
-		where item_code=%s {condition}""",
-		values,
-	)[0][0]
+	actual_qty = frappe.get_all("Bin", filters=filters, fields=["sum(actual_qty) as actual_qty"])[
+		0
+	].actual_qty
 
 	return actual_qty
 
 
 def get_latest_stock_balance():
 	bin_map = {}
-	for d in frappe.db.sql(
-		"""SELECT item_code, warehouse, stock_value as stock_value
-		FROM tabBin""",
-		as_dict=1,
-	):
+	for d in frappe.get_all("Bin", fields=["item_code", "warehouse", "stock_value"]):
 		bin_map.setdefault(d.warehouse, {}).setdefault(d.item_code, flt(d.stock_value))
 
 	return bin_map
@@ -339,12 +332,9 @@ def get_avg_purchase_rate(serial_nos):
 
 	serial_nos = get_valid_serial_nos(serial_nos)
 	return flt(
-		frappe.db.sql(
-			"""select avg(purchase_rate) from `tabSerial No`
-		where name in (%s)"""
-			% ", ".join(["%s"] * len(serial_nos)),
-			tuple(serial_nos),
-		)[0][0]
+		frappe.get_all(
+			"Serial No", filters={"name": ["in", serial_nos]}, fields=["avg(purchase_rate) as purchase_rate"]
+		)[0].purchase_rate
 	)
 
 
@@ -511,16 +501,24 @@ def add_additional_uom_columns(columns, result, include_uom, conversion_factors)
 
 
 def get_incoming_outgoing_rate_for_cancel(item_code, voucher_type, voucher_no, voucher_detail_no):
-	outgoing_rate = frappe.db.sql(
-		"""SELECT CASE WHEN actual_qty = 0 THEN 0 ELSE abs(stock_value_difference / actual_qty) END
-		FROM `tabStock Ledger Entry`
-		WHERE voucher_type = %s and voucher_no = %s
-			and item_code = %s and voucher_detail_no = %s
-			ORDER BY CREATION DESC limit 1""",
-		(voucher_type, voucher_no, item_code, voucher_detail_no),
+	stock_ledger_entries = frappe.get_all(
+		"Stock Ledger Entry",
+		filters={
+			"voucher_type": voucher_type,
+			"voucher_no": voucher_no,
+			"item_code": item_code,
+			"voucher_detail_no": voucher_detail_no,
+		},
+		fields=["actual_qty", "stock_value_difference"],
+		order_by="creation desc",
+		limit=1,
 	)
 
-	outgoing_rate = outgoing_rate[0][0] if outgoing_rate else 0.0
+	if not stock_ledger_entries:
+		return 0.0
+
+	entry = stock_ledger_entries[0]
+	outgoing_rate = 0 if not entry.actual_qty else abs(entry.stock_value_difference / entry.actual_qty)
 
 	return outgoing_rate
 

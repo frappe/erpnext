@@ -1049,14 +1049,12 @@ def get_dummy_message(doc):
 @frappe.whitelist()
 def get_subscription_details(reference_doctype: str, reference_name: str):
 	if reference_doctype == "Sales Invoice":
-		subscriptions = frappe.db.sql(
-			"""SELECT parent as sub_name FROM `tabSubscription Invoice` WHERE invoice=%s""",
-			reference_name,
-			as_dict=1,
+		subscriptions = frappe.get_all(
+			"Subscription Invoice", filters={"invoice": reference_name}, pluck="parent"
 		)
 		subscription_plans = []
 		for subscription in subscriptions:
-			plans = frappe.get_doc("Subscription", subscription.sub_name).plans
+			plans = frappe.get_doc("Subscription", subscription).plans
 			for plan in plans:
 				subscription_plans.append(plan)
 		return subscription_plans

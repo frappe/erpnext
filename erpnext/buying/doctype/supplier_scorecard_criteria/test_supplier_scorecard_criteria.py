@@ -22,16 +22,10 @@ class TestSupplierScorecardCriteria(ERPNextTestSuite):
 
 def delete_test_scorecards():
 	# Delete all the periods so we can delete all the criteria
-	frappe.db.sql("""delete from `tabSupplier Scorecard Period`""")
-	frappe.db.sql(
-		"""delete from `tabSupplier Scorecard Scoring Criteria` where parenttype = 'Supplier Scorecard Period'"""
-	)
-	frappe.db.sql(
-		"""delete from `tabSupplier Scorecard Scoring Standing` where parenttype = 'Supplier Scorecard Period'"""
-	)
-	frappe.db.sql(
-		"""delete from `tabSupplier Scorecard Scoring Variable` where parenttype = 'Supplier Scorecard Period'"""
-	)
+	frappe.db.delete("Supplier Scorecard Period")
+	frappe.db.delete("Supplier Scorecard Scoring Criteria", {"parenttype": "Supplier Scorecard Period"})
+	frappe.db.delete("Supplier Scorecard Scoring Standing", {"parenttype": "Supplier Scorecard Period"})
+	frappe.db.delete("Supplier Scorecard Scoring Variable", {"parenttype": "Supplier Scorecard Period"})
 
 	for d in test_good_criteria:
 		if frappe.db.exists("Supplier Scorecard Criteria", d.get("name")):

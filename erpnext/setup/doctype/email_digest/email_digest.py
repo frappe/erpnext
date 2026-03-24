@@ -9,6 +9,8 @@ import frappe.desk.notifications
 from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.core.doctype.user.user import STANDARD_USERS
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Count, Sum
 from frappe.utils import (
 	add_to_date,
 	flt,
@@ -21,6 +23,7 @@ from frappe.utils import (
 	now_datetime,
 	today,
 )
+from pypika import Order
 
 from erpnext.accounts.utils import get_balance_on, get_count_on, get_fiscal_year
 
@@ -85,14 +88,11 @@ class EmailDigest(Document):
 	@frappe.whitelist()
 	def get_users(self):
 		"""get list of users"""
-		user_list = frappe.db.sql(
-			"""
-			select name, enabled from tabUser
-			where name not in ({})
-			and user_type != "Website User"
-			order by enabled desc, name asc""".format(", ".join(["%s"] * len(STANDARD_USERS))),
-			STANDARD_USERS,
-			as_dict=1,
+		user_list = frappe.get_all(
+			"User",
+			filters={"name": ["not in", STANDARD_USERS], "user_type": ["!=", "Website User"]},
+			fields=["name", "enabled"],
+			order_by="enabled desc, name asc",
 		)
 
 		if self.recipient_list:
@@ -107,13 +107,7 @@ class EmailDigest(Document):
 	@frappe.whitelist()
 	def send(self):
 		# send email only to enabled users
-		valid_users = [
-			p[0]
-			for p in frappe.db.sql(
-				"""select name from `tabUser`
-			where enabled=1"""
-			)
-		]
+		valid_users = set(frappe.get_all("User", filters={"enabled": 1}, pluck="name"))
 
 		if self.recipients:
 			for row in self.recipients:
@@ -232,13 +226,22 @@ class EmailDigest(Document):
 		if not user_id:
 			user_id = frappe.session.user
 
-		todo_list = frappe.db.sql(
-			"""select *
-			from `tabToDo` where (owner=%s or assigned_by=%s) and status='Open'
-			order by field(priority, 'High', 'Medium', 'Low') asc, date asc limit 20""",
-			(user_id, user_id),
-			as_dict=True,
+		to_do = frappe.qb.DocType("ToDo")
+		priority_order = (
+			Case()
+			.when(to_do.priority == "High", 1)
+			.when(to_do.priority == "Medium", 2)
+			.when(to_do.priority == "Low", 3)
+			.else_(4)
 		)
+		todo_list = (
+			frappe.qb.from_(to_do)
+			.select(to_do.star)
+			.where(((to_do.owner == user_id) | (to_do.assigned_by == user_id)) & (to_do.status == "Open"))
+			.orderby(priority_order)
+			.orderby(to_do.date)
+			.limit(20)
+		).run(as_dict=True)
 
 		for t in todo_list:
 			t.link = get_url_to_form("ToDo", t.name)
@@ -250,11 +253,13 @@ class EmailDigest(Document):
 		if not user_id:
 			user_id = frappe.session.user
 
-		return frappe.db.sql(
-			"""select count(*) from `tabToDo`
-			where status='Open' and (owner=%s or assigned_by=%s)""",
-			(user_id, user_id),
-		)[0][0]
+		result = frappe.get_all(
+			"ToDo",
+			filters={"status": "Open"},
+			or_filters={"owner": user_id, "assigned_by": user_id},
+			fields=["count(name) as count"],
+		)
+		return result[0].count if result else 0
 
 	def get_issue_list(self, user_id=None):
 		"""Get issue list"""
@@ -266,11 +271,12 @@ class EmailDigest(Document):
 		if not role_permissions.get("read"):
 			return None
 
-		issue_list = frappe.db.sql(
-			"""select *
-			from `tabIssue` where status in ("Replied","Open")
-			order by creation asc limit 10""",
-			as_dict=True,
+		issue_list = frappe.get_all(
+			"Issue",
+			filters={"status": ["in", ["Replied", "Open"]]},
+			fields=["name", "subject", "status"],
+			order_by="creation asc",
+			limit=10,
 		)
 
 		for t in issue_list:
@@ -280,21 +286,19 @@ class EmailDigest(Document):
 
 	def get_issue_count(self):
 		"""Get count of Issue"""
-		return frappe.db.sql(
-			"""select count(*) from `tabIssue`
-			where status in ('Open','Replied') """
-		)[0][0]
+		return frappe.db.count("Issue", {"status": ["in", ["Open", "Replied"]]})
 
 	def get_project_list(self, user_id=None):
 		"""Get project list"""
 		if not user_id:
 			user_id = frappe.session.user
 
-		project_list = frappe.db.sql(
-			"""select *
-			from `tabProject` where status='Open' and project_type='External'
-			order by creation asc limit 10""",
-			as_dict=True,
+		project_list = frappe.get_all(
+			"Project",
+			filters={"status": "Open", "project_type": "External"},
+			fields=["name", "project_name", "status"],
+			order_by="creation asc",
+			limit=10,
 		)
 
 		for t in project_list:
@@ -304,10 +308,7 @@ class EmailDigest(Document):
 
 	def get_project_count(self):
 		"""Get count of Project"""
-		return frappe.db.sql(
-			"""select count(*) from `tabProject`
-			where status='Open' and project_type='External'"""
-		)[0][0]
+		return frappe.db.count("Project", {"status": "Open", "project_type": "External"})
 
 	def set_accounting_cards(self, context):
 		"""Create accounting cards if checked"""
@@ -487,14 +488,24 @@ class EmailDigest(Document):
 
 	def get_sales_orders_to_bill(self):
 		"""Get value not billed"""
-
-		value, count = frappe.db.sql(
-			"""select ifnull((sum(grand_total)) - (sum(grand_total*per_billed/100)),0),
-                    count(*) from `tabSales Order`
-					where (transaction_date <= %(to_date)s) and billing_status != "Fully Billed" and company = %(company)s
-					and status not in ('Closed','Cancelled', 'Completed') """,
-			{"to_date": self.future_to_date, "company": self.company},
-		)[0]
+		sales_order = frappe.qb.DocType("Sales Order")
+		result = (
+			frappe.qb.from_(sales_order)
+			.select(
+				Sum(sales_order.grand_total).as_("grand_total"),
+				Sum((sales_order.grand_total * sales_order.per_billed) / 100).as_("billed_total"),
+				Count(sales_order.star).as_("count"),
+			)
+			.where(
+				(sales_order.transaction_date <= self.future_to_date)
+				& (sales_order.billing_status != "Fully Billed")
+				& (sales_order.company == self.company)
+				& (sales_order.status.notin(["Closed", "Cancelled", "Completed"]))
+			)
+		).run(as_dict=True)
+		result = result[0] if result else {}
+		value = (result.get("grand_total") or 0) - (result.get("billed_total") or 0)
+		count = result.get("count") or 0
 
 		label = get_link_to_report(
 			"Sales Order",
@@ -513,14 +524,24 @@ class EmailDigest(Document):
 
 	def get_sales_orders_to_deliver(self):
 		"""Get value not delivered"""
-
-		value, count = frappe.db.sql(
-			"""select ifnull((sum(grand_total)) - (sum(grand_total*per_delivered/100)),0),
-					count(*) from `tabSales Order`
-					where (transaction_date <= %(to_date)s) and delivery_status != "Fully Delivered" and company = %(company)s
-					and status not in ('Closed','Cancelled', 'Completed') """,
-			{"to_date": self.future_to_date, "company": self.company},
-		)[0]
+		sales_order = frappe.qb.DocType("Sales Order")
+		result = (
+			frappe.qb.from_(sales_order)
+			.select(
+				Sum(sales_order.grand_total).as_("grand_total"),
+				Sum((sales_order.grand_total * sales_order.per_delivered) / 100).as_("delivered_total"),
+				Count(sales_order.star).as_("count"),
+			)
+			.where(
+				(sales_order.transaction_date <= self.future_to_date)
+				& (sales_order.delivery_status != "Fully Delivered")
+				& (sales_order.company == self.company)
+				& (sales_order.status.notin(["Closed", "Cancelled", "Completed"]))
+			)
+		).run(as_dict=True)
+		result = result[0] if result else {}
+		value = (result.get("grand_total") or 0) - (result.get("delivered_total") or 0)
+		count = result.get("count") or 0
 
 		label = get_link_to_report(
 			"Sales Order",
@@ -539,14 +560,24 @@ class EmailDigest(Document):
 
 	def get_purchase_orders_to_receive(self):
 		"""Get value not received"""
-
-		value, count = frappe.db.sql(
-			"""select ifnull((sum(grand_total))-(sum(grand_total*per_received/100)),0),
-                    count(*) from `tabPurchase Order`
-					where (transaction_date <= %(to_date)s) and per_received < 100 and company = %(company)s
-					and status not in ('Closed','Cancelled', 'Completed') """,
-			{"to_date": self.future_to_date, "company": self.company},
-		)[0]
+		purchase_order = frappe.qb.DocType("Purchase Order")
+		result = (
+			frappe.qb.from_(purchase_order)
+			.select(
+				Sum(purchase_order.grand_total).as_("grand_total"),
+				Sum((purchase_order.grand_total * purchase_order.per_received) / 100).as_("received_total"),
+				Count(purchase_order.star).as_("count"),
+			)
+			.where(
+				(purchase_order.transaction_date <= self.future_to_date)
+				& (purchase_order.per_received < 100)
+				& (purchase_order.company == self.company)
+				& (purchase_order.status.notin(["Closed", "Cancelled", "Completed"]))
+			)
+		).run(as_dict=True)
+		result = result[0] if result else {}
+		value = (result.get("grand_total") or 0) - (result.get("received_total") or 0)
+		count = result.get("count") or 0
 
 		label = get_link_to_report(
 			"Purchase Order",
@@ -565,14 +596,24 @@ class EmailDigest(Document):
 
 	def get_purchase_orders_to_bill(self):
 		"""Get purchase not billed"""
-
-		value, count = frappe.db.sql(
-			"""select ifnull((sum(grand_total)) - (sum(grand_total*per_billed/100)),0),
-                    count(*) from `tabPurchase Order`
-					where (transaction_date <= %(to_date)s) and per_billed < 100 and company = %(company)s
-					and status not in ('Closed','Cancelled', 'Completed') """,
-			{"to_date": self.future_to_date, "company": self.company},
-		)[0]
+		purchase_order = frappe.qb.DocType("Purchase Order")
+		result = (
+			frappe.qb.from_(purchase_order)
+			.select(
+				Sum(purchase_order.grand_total).as_("grand_total"),
+				Sum((purchase_order.grand_total * purchase_order.per_billed) / 100).as_("billed_total"),
+				Count(purchase_order.star).as_("count"),
+			)
+			.where(
+				(purchase_order.transaction_date <= self.future_to_date)
+				& (purchase_order.per_billed < 100)
+				& (purchase_order.company == self.company)
+				& (purchase_order.status.notin(["Closed", "Cancelled", "Completed"]))
+			)
+		).run(as_dict=True)
+		result = result[0] if result else {}
+		value = (result.get("grand_total") or 0) - (result.get("billed_total") or 0)
+		count = result.get("count") or 0
 
 		label = get_link_to_report(
 			"Purchase Order",
@@ -710,14 +751,26 @@ class EmailDigest(Document):
 		return self.get_summary_of_pending_quotations("pending_quotations")
 
 	def get_summary_of_pending(self, doc_type, fieldname, getfield):
-		value, count, billed_value, delivered_value = frappe.db.sql(
-			"""select ifnull(sum(grand_total),0), count(*),
-			ifnull(sum(grand_total*per_billed/100),0), ifnull(sum(grand_total*{}/100),0)  from `tab{}`
-			where (transaction_date <= %(to_date)s)
-			and status not in ('Closed','Cancelled', 'Completed')
-			and company = %(company)s """.format(getfield, doc_type),
-			{"to_date": self.future_to_date, "company": self.company},
-		)[0]
+		doc = frappe.qb.DocType(doc_type)
+		result = (
+			frappe.qb.from_(doc)
+			.select(
+				Sum(doc.grand_total).as_("grand_total"),
+				Count(doc.star).as_("count"),
+				Sum((doc.grand_total * doc.per_billed) / 100).as_("billed_total"),
+				Sum((doc.grand_total * getattr(doc, getfield)) / 100).as_("delivered_total"),
+			)
+			.where(
+				(doc.transaction_date <= self.future_to_date)
+				& (doc.status.notin(["Closed", "Cancelled", "Completed"]))
+				& (doc.company == self.company)
+			)
+		).run(as_dict=True)
+		result = result[0] if result else {}
+		value = result.get("grand_total") or 0
+		count = result.get("count") or 0
+		billed_value = result.get("billed_total") or 0
+		delivered_value = result.get("delivered_total") or 0
 
 		return {
 			"label": self.meta.get_label(fieldname),
@@ -728,21 +781,31 @@ class EmailDigest(Document):
 		}
 
 	def get_summary_of_pending_quotations(self, fieldname):
-		value, count = frappe.db.sql(
-			"""select ifnull(sum(grand_total),0), count(*) from `tabQuotation`
-			where (transaction_date <= %(to_date)s)
-			and company = %(company)s
-			and status not in ('Ordered','Cancelled', 'Lost') """,
-			{"to_date": self.future_to_date, "company": self.company},
-		)[0]
+		quotation = frappe.qb.DocType("Quotation")
+		result = (
+			frappe.qb.from_(quotation)
+			.select(Sum(quotation.grand_total).as_("grand_total"), Count(quotation.star).as_("count"))
+			.where(
+				(quotation.transaction_date <= self.future_to_date)
+				& (quotation.company == self.company)
+				& (quotation.status.notin(["Ordered", "Cancelled", "Lost"]))
+			)
+		).run(as_dict=True)
+		result = result[0] if result else {}
+		value = result.get("grand_total") or 0
+		count = result.get("count") or 0
 
-		last_value = frappe.db.sql(
-			"""select ifnull(sum(grand_total),0) from `tabQuotation`
-			where (transaction_date <= %(to_date)s)
-			and company = %(company)s
-			and status not in ('Ordered','Cancelled', 'Lost') """,
-			{"to_date": self.past_to_date, "company": self.company},
-		)[0][0]
+		last_result = (
+			frappe.qb.from_(quotation)
+			.select(Sum(quotation.grand_total).as_("grand_total"))
+			.where(
+				(quotation.transaction_date <= self.past_to_date)
+				& (quotation.company == self.company)
+				& (quotation.status.notin(["Ordered", "Cancelled", "Lost"]))
+			)
+		).run(as_dict=True)
+		last_result = last_result[0] if last_result else {}
+		last_value = last_result.get("grand_total") or 0
 
 		label = get_link_to_report(
 			"Quotation",
@@ -860,41 +923,55 @@ class EmailDigest(Document):
 			return fmt_money(value, currency=self.currency)
 
 	def get_purchase_orders_items_overdue_list(self):
-		fields_po = "distinct `tabPurchase Order Item`.parent as po"
-		fields_poi = (
-			"`tabPurchase Order Item`.parent, `tabPurchase Order Item`.schedule_date, item_code,"
-			"received_qty, qty - received_qty as missing_qty, rate, amount"
+		purchase_order = frappe.qb.DocType("Purchase Order")
+		purchase_order_item = frappe.qb.DocType("Purchase Order Item")
+		overdue_condition = (
+			(purchase_order.status != "Closed")
+			& (purchase_order_item.docstatus == 1)
+			& (purchase_order_item.schedule_date < today())
+			& (purchase_order_item.received_qty < purchase_order_item.qty)
 		)
-
-		sql_po = f"""select {fields_po} from `tabPurchase Order Item`
-			left join `tabPurchase Order` on `tabPurchase Order`.name = `tabPurchase Order Item`.parent
-			where status<>'Closed' and `tabPurchase Order Item`.docstatus=1 and CURRENT_DATE > `tabPurchase Order Item`.schedule_date
-			and received_qty < qty order by `tabPurchase Order Item`.parent DESC,
-			`tabPurchase Order Item`.schedule_date DESC"""
-
-		sql_poi = f"""select {fields_poi} from `tabPurchase Order Item`
-			left join `tabPurchase Order` on `tabPurchase Order`.name = `tabPurchase Order Item`.parent
-			where status<>'Closed' and `tabPurchase Order Item`.docstatus=1 and CURRENT_DATE > `tabPurchase Order Item`.schedule_date
-			and received_qty < qty order by `tabPurchase Order Item`.idx"""
-		purchase_order_list = frappe.db.sql(sql_po, as_dict=True)
-		purchase_order_items_overdue_list = frappe.db.sql(sql_poi, as_dict=True)
+		purchase_order_list = (
+			frappe.qb.from_(purchase_order_item)
+			.left_join(purchase_order)
+			.on(purchase_order.name == purchase_order_item.parent)
+			.select(purchase_order_item.parent.as_("po"))
+			.distinct()
+			.where(overdue_condition)
+			.orderby(purchase_order_item.parent, order=Order.desc)
+			.orderby(purchase_order_item.schedule_date, order=Order.desc)
+		).run(as_dict=True)
+		purchase_order_items_overdue_list = (
+			frappe.qb.from_(purchase_order_item)
+			.left_join(purchase_order)
+			.on(purchase_order.name == purchase_order_item.parent)
+			.select(
+				purchase_order_item.parent,
+				purchase_order_item.schedule_date,
+				purchase_order_item.item_code,
+				purchase_order_item.received_qty,
+				(purchase_order_item.qty - purchase_order_item.received_qty).as_("missing_qty"),
+				purchase_order_item.rate,
+				purchase_order_item.amount,
+				purchase_order.currency.as_("currency"),
+			)
+			.where(overdue_condition)
+			.orderby(purchase_order_item.idx)
+		).run(as_dict=True)
 
 		for t in purchase_order_items_overdue_list:
 			t.link = get_url_to_form("Purchase Order", t.parent)
-			t.rate = fmt_money(t.rate, 2, t.currency)
-			t.amount = fmt_money(t.amount, 2, t.currency)
+			t.rate = fmt_money(t.rate, 2, t.currency or self.currency)
+			t.amount = fmt_money(t.amount, 2, t.currency or self.currency)
 		return purchase_order_list, purchase_order_items_overdue_list
 
 
 def send():
 	now_date = now_datetime().date()
-
-	for ed in frappe.db.sql(
-		"""select name from `tabEmail Digest`
-			where enabled=1 and docstatus<2""",
-		as_list=1,
+	for email_digest_name in frappe.get_all(
+		"Email Digest", filters={"enabled": 1, "docstatus": ["<", 2]}, pluck="name"
 	):
-		ed_obj = frappe.get_doc("Email Digest", ed[0])
+		ed_obj = frappe.get_doc("Email Digest", email_digest_name)
 		if now_date == ed_obj.get_next_sending():
 			ed_obj.send()
 

@@ -744,11 +744,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr = frappe.get_doc("Material Request", mr.name)
 		mr.submit()
 		completed_qty = mr.items[0].ordered_qty
-		requested_qty = frappe.db.sql(
-			"""select indented_qty from `tabBin` where \
-			item_code= %s and warehouse= %s """,
-			(mr.items[0].item_code, mr.items[0].warehouse),
-		)[0][0]
+		requested_qty = get_indented_qty(mr.items[0].item_code, mr.items[0].warehouse)
 
 		prod_order = raise_work_orders(mr.name, mr.company)
 		po = frappe.get_doc("Work Order", prod_order[0])
@@ -758,11 +754,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr = frappe.get_doc("Material Request", mr.name)
 		self.assertEqual(completed_qty + po.qty, mr.items[0].ordered_qty)
 
-		new_requested_qty = frappe.db.sql(
-			"""select indented_qty from `tabBin` where \
-			item_code= %s and warehouse= %s """,
-			(mr.items[0].item_code, mr.items[0].warehouse),
-		)[0][0]
+		new_requested_qty = get_indented_qty(mr.items[0].item_code, mr.items[0].warehouse)
 
 		self.assertEqual(requested_qty - po.qty, new_requested_qty)
 
@@ -771,11 +763,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr = frappe.get_doc("Material Request", mr.name)
 		self.assertEqual(completed_qty, mr.items[0].ordered_qty)
 
-		new_requested_qty = frappe.db.sql(
-			"""select indented_qty from `tabBin` where \
-			item_code= %s and warehouse= %s """,
-			(mr.items[0].item_code, mr.items[0].warehouse),
-		)[0][0]
+		new_requested_qty = get_indented_qty(mr.items[0].item_code, mr.items[0].warehouse)
 		self.assertEqual(requested_qty, new_requested_qty)
 
 	def test_requested_qty_multi_uom(self):
@@ -1194,3 +1182,13 @@ def make_material_request(**args):
 	if not args.do_not_submit:
 		mr.submit()
 	return mr
+
+
+def get_indented_qty(item_code: str, warehouse: str):
+	bin_table = frappe.qb.DocType("Bin")
+	result = (
+		frappe.qb.from_(bin_table)
+		.select(bin_table.indented_qty)
+		.where((bin_table.item_code == item_code) & (bin_table.warehouse == warehouse))
+	).run()
+	return result[0][0] if result else 0
