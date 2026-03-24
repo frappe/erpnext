@@ -383,32 +383,15 @@ def get_fiscal_years(filters):
 
 
 def get_budget_dimensions(filters):
-	order_by = ""
-	if filters.get("budget_against") == "Cost Center":
-		order_by = "order by lft"
-
 	if filters.get("budget_against") in ["Cost Center", "Project"]:
-		return frappe.db.sql_list(
-			"""
-				select
-					name
-				from
-					`tab{tab}`
-				where
-					company = %s
-				{order_by}
-			""".format(tab=filters.get("budget_against"), order_by=order_by),
-			filters.get("company"),
+		return frappe.get_all(
+			filters.get("budget_against"),
+			filters={"company": filters.get("company")},
+			order_by="lft asc" if filters.get("budget_against") == "Cost Center" else None,
+			pluck="name",
 		)
 	else:
-		return frappe.db.sql_list(
-			"""
-				select
-					name
-				from
-					`tab{tab}`
-			""".format(tab=filters.get("budget_against"))
-		)  # nosec
+		return frappe.get_all(filters.get("budget_against"), pluck="name")  # nosec
 
 
 def validate_budget_dimensions(filters):

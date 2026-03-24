@@ -195,10 +195,10 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 		except TypeError:
 			frappe.throw(_("Invalid {0}").format(args.get(field)))
 
-		parent_groups = frappe.db.sql_list(
-			"""select name from `tab{}`
-			where lft<={} and rgt>={}""".format(parenttype, "%s", "%s"),
-			(lft, rgt),
+		parent_groups = frappe.get_all(
+			parenttype,
+			filters={"lft": ["<=", lft], "rgt": [">=", rgt]},
+			pluck="name",
 		)
 
 		if parenttype in ["Customer Group", "Item Group", "Territory"]:

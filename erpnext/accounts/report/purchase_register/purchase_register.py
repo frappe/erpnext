@@ -307,14 +307,17 @@ def get_account_columns(invoice_list, include_payments):
 	unrealized_profit_loss_account_columns = []
 
 	if invoice_list:
-		expense_accounts = frappe.db.sql_list(
-			"""select distinct expense_account
-			from `tabPurchase Invoice Item` where docstatus = 1
-			and (expense_account is not null and expense_account != '')
-			and parenttype='Purchase Invoice'
-			and parent in (%s) order by expense_account"""
-			% ", ".join(["%s"] * len(invoice_list)),
-			tuple([inv.name for inv in invoice_list]),
+		expense_accounts = frappe.get_all(
+			"Purchase Invoice Item",
+			filters={
+				"docstatus": 1,
+				"expense_account": ["!=", ""],
+				"parenttype": "Purchase Invoice",
+				"parent": ["in", [inv.name for inv in invoice_list]],
+			},
+			distinct=True,
+			order_by="expense_account asc",
+			pluck="expense_account",
 		)
 
 		purchase_taxes_query = get_taxes_query(invoice_list, "Purchase Taxes and Charges", "Purchase Invoice")
@@ -326,13 +329,16 @@ def get_account_columns(invoice_list, include_payments):
 			advance_tax_accounts = advance_taxes_query.run(as_dict=True, pluck="account_head")
 			tax_accounts = set(tax_accounts + advance_tax_accounts)
 
-		unrealized_profit_loss_accounts = frappe.db.sql_list(
-			"""SELECT distinct unrealized_profit_loss_account
-			from `tabPurchase Invoice` where docstatus = 1 and name in (%s)
-			and ifnull(unrealized_profit_loss_account, '') != ''
-			order by unrealized_profit_loss_account"""
-			% ", ".join(["%s"] * len(invoice_list)),
-			tuple(inv.name for inv in invoice_list),
+		unrealized_profit_loss_accounts = frappe.get_all(
+			"Purchase Invoice",
+			filters={
+				"docstatus": 1,
+				"name": ["in", [inv.name for inv in invoice_list]],
+				"unrealized_profit_loss_account": ["!=", ""],
+			},
+			distinct=True,
+			order_by="unrealized_profit_loss_account asc",
+			pluck="unrealized_profit_loss_account",
 		)
 
 	for account in expense_accounts:
@@ -547,10 +553,11 @@ def get_invoice_po_pr_map(invoice_list):
 		if d.purchase_receipt:
 			pr_list = [d.purchase_receipt]
 		elif d.po_detail:
-			pr_list = frappe.db.sql_list(
-				"""select distinct parent from `tabPurchase Receipt Item`
-				where docstatus=1 and purchase_order_item=%s""",
-				d.po_detail,
+			pr_list = frappe.get_all(
+				"Purchase Receipt Item",
+				filters={"docstatus": 1, "purchase_order_item": d.po_detail},
+				distinct=True,
+				pluck="parent",
 			)
 
 		if pr_list:

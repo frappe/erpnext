@@ -168,9 +168,8 @@ class TestItemGroup(ERPNextTestSuite):
 		self.test_basic_tree()
 
 		# move its children back
-		for name in frappe.db.sql_list(
-			"""select name from `tabItem Group`
-			where parent_item_group='_Test Item Group C'"""
+		for name in frappe.get_all(
+			"Item Group", filters={"parent_item_group": "_Test Item Group C"}, pluck="name"
 		):
 			doc = frappe.get_doc("Item Group", name)
 			doc.parent_item_group = "_Test Item Group B"
@@ -218,11 +217,7 @@ class TestItemGroup(ERPNextTestSuite):
 		def get_no_of_children(item_groups, no_of_children):
 			children = []
 			for ig in item_groups:
-				children += frappe.db.sql_list(
-					"""select name from `tabItem Group`
-				where ifnull(parent_item_group, '')=%s""",
-					ig or "",
-				)
+				children += frappe.get_all("Item Group", filters={"parent_item_group": ig}, pluck="name")
 
 			if len(children):
 				return get_no_of_children(children, no_of_children + len(children))

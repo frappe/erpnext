@@ -24,13 +24,13 @@ def get_data(
 		filters.append(["warehouse", "=", warehouse])
 	if item_group:
 		lft, rgt = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"])
-		items = frappe.db.sql_list(
-			"""
-			select i.name from `tabItem` i
-			where exists(select name from `tabItem Group`
-				where name=i.item_group and lft >=%s and rgt<=%s)
-		""",
-			(lft, rgt),
+		item_groups = frappe.get_all(
+			"Item Group", filters={"lft": [">=", lft], "rgt": ["<=", rgt]}, pluck="name"
+		)
+		items = frappe.get_all(
+			"Item",
+			filters={"item_group": ["in", item_groups]},
+			pluck="name",
 		)
 		filters.append(["item_code", "in", items])
 	try:

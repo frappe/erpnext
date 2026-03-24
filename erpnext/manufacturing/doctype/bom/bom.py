@@ -638,10 +638,11 @@ class BOM(WebsiteGenerator):
 
 		# update parent BOMs
 		if self.total_cost != existing_bom_cost and update_parent:
-			parent_boms = frappe.db.sql_list(
-				"""select distinct parent from `tabBOM Item`
-				where bom_no = %s and docstatus=1 and parenttype='BOM'""",
-				self.name,
+			parent_boms = frappe.get_all(
+				"BOM Item",
+				filters={"bom_no": self.name, "docstatus": 1, "parenttype": "BOM"},
+				distinct=True,
+				pluck="parent",
 			)
 
 			for bom in parent_boms:
@@ -909,10 +910,10 @@ class BOM(WebsiteGenerator):
 		def _get_children(bom_no):
 			children = frappe.cache().hget("bom_children", bom_no)
 			if children is None:
-				children = frappe.db.sql_list(
-					"""SELECT `bom_no` FROM `tabBOM Item`
-					WHERE `parent`=%s AND `bom_no`!='' AND `parenttype`='BOM'""",
-					bom_no,
+				children = frappe.get_all(
+					"BOM Item",
+					filters={"parent": bom_no, "bom_no": ["!=", ""], "parenttype": "BOM"},
+					pluck="bom_no",
 				)
 				frappe.cache().hset("bom_children", bom_no, children)
 			return children

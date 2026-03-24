@@ -1218,7 +1218,4 @@ class GrossProfitGenerator:
 			).setdefault(d.parent_item, []).append(d)
 
 	def load_non_stock_items(self):
-		self.non_stock_items = frappe.db.sql_list(
-			"""select name from tabItem
-			where is_stock_item=0"""
-		)
+		self.non_stock_items = frappe.get_all("Item", filters={"is_stock_item": 0}, pluck="name")

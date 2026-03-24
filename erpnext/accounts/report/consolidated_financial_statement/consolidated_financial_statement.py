@@ -512,9 +512,11 @@ def get_companies(filters):
 def get_subsidiary_companies(company):
 	lft, rgt = frappe.get_cached_value("Company", company, ["lft", "rgt"])
 
-	return frappe.db.sql_list(
-		f"""select name from `tabCompany`
-		where lft >= {lft} and rgt <= {rgt} order by lft, rgt"""
+	return frappe.get_all(
+		"Company",
+		filters={"lft": [">=", lft], "rgt": ["<=", rgt]},
+		order_by="lft asc, rgt asc",
+		pluck="name",
 	)
 
 

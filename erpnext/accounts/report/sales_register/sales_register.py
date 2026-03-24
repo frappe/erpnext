@@ -346,12 +346,12 @@ def get_account_columns(invoice_list, include_payments):
 	unrealized_profit_loss_account_columns = []
 
 	if invoice_list:
-		income_accounts = frappe.db.sql_list(
-			"""select distinct income_account
-			from `tabSales Invoice Item` where docstatus = 1 and parent in (%s)
-			order by income_account"""
-			% ", ".join(["%s"] * len(invoice_list)),
-			tuple(inv.name for inv in invoice_list),
+		income_accounts = frappe.get_all(
+			"Sales Invoice Item",
+			filters={"docstatus": 1, "parent": ["in", [inv.name for inv in invoice_list]]},
+			distinct=True,
+			order_by="income_account asc",
+			pluck="income_account",
 		)
 
 		sales_taxes_query = get_taxes_query(invoice_list, "Sales Taxes and Charges", "Sales Invoice")
@@ -363,14 +363,17 @@ def get_account_columns(invoice_list, include_payments):
 			advance_tax_accounts = advance_taxes_query.run(as_dict=True, pluck="account_head")
 			tax_accounts = set(tax_accounts + advance_tax_accounts)
 
-		unrealized_profit_loss_accounts = frappe.db.sql_list(
-			"""SELECT distinct unrealized_profit_loss_account
-			from `tabSales Invoice` where docstatus = 1 and name in (%s)
-			and is_internal_customer = 1
-			and ifnull(unrealized_profit_loss_account, '') != ''
-			order by unrealized_profit_loss_account"""
-			% ", ".join(["%s"] * len(invoice_list)),
-			tuple(inv.name for inv in invoice_list),
+		unrealized_profit_loss_accounts = frappe.get_all(
+			"Sales Invoice",
+			filters={
+				"docstatus": 1,
+				"name": ["in", [inv.name for inv in invoice_list]],
+				"is_internal_customer": 1,
+				"unrealized_profit_loss_account": ["!=", ""],
+			},
+			distinct=True,
+			order_by="unrealized_profit_loss_account asc",
+			pluck="unrealized_profit_loss_account",
 		)
 
 	for account in income_accounts:
@@ -577,10 +580,11 @@ def get_invoice_so_dn_map(invoice_list):
 		if d.delivery_note:
 			delivery_note_list = [d.delivery_note]
 		elif d.sales_order:
-			delivery_note_list = frappe.db.sql_list(
-				"""select distinct parent from `tabDelivery Note Item`
-				where docstatus=1 and so_detail=%s""",
-				d.so_detail,
+			delivery_note_list = frappe.get_all(
+				"Delivery Note Item",
+				filters={"docstatus": 1, "so_detail": d.so_detail},
+				distinct=True,
+				pluck="parent",
 			)
 
 		if delivery_note_list:

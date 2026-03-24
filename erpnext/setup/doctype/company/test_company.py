@@ -170,11 +170,7 @@ class TestCompany(ERPNextTestSuite):
 		def get_no_of_children(companies, no_of_children):
 			children = []
 			for company in companies:
-				children += frappe.db.sql_list(
-					"""select name from `tabCompany`
-				where ifnull(parent_company, '')=%s""",
-					company or "",
-				)
+				children += frappe.get_all("Company", filters={"parent_company": company}, pluck="name")
 
 			if len(children):
 				return get_no_of_children(children, no_of_children + len(children))

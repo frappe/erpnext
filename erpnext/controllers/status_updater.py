@@ -656,18 +656,10 @@ class StatusUpdater(Document):
 		if not ref_docs:
 			return
 
-		zero_amount_refdocs = frappe.db.sql_list(
-			f"""
-			SELECT
-				name
-			from
-				`tab{ref_dt}`
-			where
-				docstatus = 1
-				and base_net_total = 0
-				and name in %(ref_docs)s
-		""",
-			{"ref_docs": ref_docs},
+		zero_amount_refdocs = frappe.get_all(
+			ref_dt,
+			filters={"docstatus": 1, "base_net_total": 0, "name": ["in", ref_docs]},
+			pluck="name",
 		)
 
 		if zero_amount_refdocs:

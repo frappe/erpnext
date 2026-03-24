@@ -185,9 +185,7 @@ class MaintenanceSchedule(TransactionBase):
 		else:
 			holiday_list = frappe.get_cached_value("Company", self.company, "default_holiday_list")
 
-		holidays = frappe.db.sql_list(
-			"""select holiday_date from `tabHoliday` where parent=%s""", holiday_list
-		)
+		holidays = frappe.get_all("Holiday", filters={"parent": holiday_list}, pluck="holiday_date")
 
 		if not validated and holidays:
 			# max iterations = len(holidays)

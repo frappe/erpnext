@@ -56,10 +56,10 @@ def get_data(filters, dimension_list):
 		(filters.company),
 	)[0]
 
-	account = frappe.db.sql_list(
-		"""select name from `tabAccount`
-		where lft >= %s and rgt <= %s and company = %s""",
-		(min_lft, max_rgt, filters.company),
+	account = frappe.get_all(
+		"Account",
+		filters={"lft": [">=", min_lft], "rgt": ["<=", max_rgt], "company": filters.company},
+		pluck="name",
 	)
 
 	gl_entries_by_account = {}
