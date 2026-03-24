@@ -60,31 +60,28 @@ class PaymentOrder(Document):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_mop_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	reference = frappe.qb.DocType("Payment Order Reference")
-	return (
-		frappe.qb.from_(reference)
-		.select(reference.mode_of_payment)
-		.where((reference.parent == filters.get("parent")) & reference.mode_of_payment.like(f"%{txt}%"))
-		.limit(page_len)
-		.offset(start)
-	).run(as_list=True)
+	return frappe.get_all(
+		"Payment Order Reference",
+		filters={"parent": filters.get("parent"), "mode_of_payment": ["like", f"%{txt}%"]},
+		fields=["mode_of_payment"],
+		as_list=True,
+		limit_start=start,
+		limit_page_length=page_len,
+	)
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_supplier_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	reference = frappe.qb.DocType("Payment Order Reference")
-	return (
-		frappe.qb.from_(reference)
-		.select(reference.supplier)
-		.where(
-			(reference.parent == filters.get("parent"))
-			& reference.supplier.like(f"%{txt}%")
-			& (reference.payment_reference.isnull() | (reference.payment_reference == ""))
-		)
-		.limit(page_len)
-		.offset(start)
-	).run(as_list=True)
+	return frappe.get_all(
+		"Payment Order Reference",
+		filters={"parent": filters.get("parent"), "supplier": ["like", f"%{txt}%"]},
+		or_filters=[["payment_reference", "is", "not set"], ["payment_reference", "=", ""]],
+		fields=["supplier"],
+		as_list=True,
+		limit_start=start,
+		limit_page_length=page_len,
+	)
 
 
 @frappe.whitelist()

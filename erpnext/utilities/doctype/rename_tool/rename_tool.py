@@ -29,7 +29,7 @@ class RenameTool(Document):
 @frappe.whitelist()
 @deprecated
 def get_doctypes():
-	return frappe.get_all(
+	return frappe.get_list(
 		"DocType",
 		filters={"allow_rename": 1, "module": ["!=", "Core"]},
 		order_by="name asc",

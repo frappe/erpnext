@@ -940,9 +940,7 @@ def get_payment_gateway_account(filter):
 def get_print_format_list(ref_doctype: str):
 	print_format_list = ["Standard"]
 
-	print_format_list.extend(
-		[p.name for p in frappe.get_all("Print Format", filters={"doc_type": ref_doctype})]
-	)
+	print_format_list.extend(frappe.get_list("Print Format", filters={"doc_type": ref_doctype}, pluck="name"))
 
 	return {"print_format": print_format_list}
 
