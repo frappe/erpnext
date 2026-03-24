@@ -4,25 +4,16 @@ import json
 
 import frappe
 from frappe import _
-from frappe.tests import IntegrationTestCase
 from frappe.utils import random_string
 
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
 	get_charts_for_country,
 )
 from erpnext.setup.doctype.company.company import get_default_company_address
-
-IGNORE_TEST_RECORD_DEPENDENCIES = [
-	"Account",
-	"Cost Center",
-	"Payment Terms Template",
-	"Salary Component",
-	"Warehouse",
-]
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Fiscal Year"]
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestCompany(IntegrationTestCase):
+class TestCompany(ERPNextTestSuite):
 	def test_coa_based_on_existing_company(self):
 		company = frappe.new_doc("Company")
 		company.company_name = "COA from Existing Company"
@@ -30,6 +21,7 @@ class TestCompany(IntegrationTestCase):
 		company.default_currency = "INR"
 		company.create_chart_of_accounts_based_on = "Existing Company"
 		company.existing_company = "_Test Company"
+		company.country = "India"
 		company.save()
 
 		expected_results = {
@@ -65,6 +57,9 @@ class TestCompany(IntegrationTestCase):
 
 			self.assertTrue(templates)
 
+			for company in frappe.db.get_all("Company", {"company_name": ["in", templates]}):
+				frappe.delete_doc("Company", company.name)
+
 			for template in templates:
 				try:
 					company = frappe.new_doc("Company")
@@ -73,6 +68,7 @@ class TestCompany(IntegrationTestCase):
 					company.default_currency = "USD"
 					company.create_chart_of_accounts_based_on = "Standard Template"
 					company.chart_of_accounts = template
+					company.country = country
 					company.save()
 
 					account_types = [
@@ -110,6 +106,7 @@ class TestCompany(IntegrationTestCase):
 		)
 
 	def test_basic_tree(self, records=None):
+		self.load_test_records("Company")
 		min_lft = 1
 		max_rgt = frappe.db.sql("select max(rgt) from `tabCompany`")[0][0]
 
@@ -118,7 +115,7 @@ class TestCompany(IntegrationTestCase):
 
 		for company in records:
 			lft, rgt, parent_company = frappe.db.get_value(
-				"Company", company["company_name"], ["lft", "rgt", "parent_company"]
+				"Company", company.get("company_name"), ["lft", "rgt", "parent_company"]
 			)
 
 			if parent_company:

@@ -1094,7 +1094,8 @@ class BuyingController(SubcontractingController):
 		for dimension in accounting_dimensions[0]:
 			fieldname = dimension["fieldname"]
 			default_dimension = accounting_dimensions[1].get(self.company, {}).get(fieldname)
-			asset.update({fieldname: row.get(fieldname) or self.get(fieldname) or default_dimension})
+			if not asset.get(fieldname):
+				asset.update({fieldname: row.get(fieldname) or self.get(fieldname) or default_dimension})
 
 		asset.flags.ignore_validate = True
 		asset.flags.ignore_mandatory = True

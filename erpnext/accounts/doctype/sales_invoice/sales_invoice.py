@@ -2778,7 +2778,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				"doctype": target_doctype,
 				"postprocess": update_details,
 				"set_target_warehouse": "set_from_warehouse",
-				"field_no_map": ["taxes_and_charges", "set_warehouse", "shipping_address"],
+				"field_no_map": ["taxes_and_charges", "set_warehouse", "shipping_address", "cost_center"],
 			},
 			doctype + " Item": item_field_map,
 		},

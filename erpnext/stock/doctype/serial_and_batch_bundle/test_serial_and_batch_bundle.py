@@ -4,7 +4,6 @@
 import json
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import flt, nowtime, today
 
 from erpnext.stock.doctype.item.test_item import make_item
@@ -15,9 +14,10 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	make_serial_nos,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestSerialandBatchBundle(IntegrationTestCase):
+class TestSerialandBatchBundle(ERPNextTestSuite):
 	def test_naming_for_sabb(self):
 		frappe.db.set_single_value(
 			"Stock Settings", "set_serial_and_batch_bundle_naming_based_on_naming_series", 1
@@ -40,6 +40,7 @@ class TestSerialandBatchBundle(IntegrationTestCase):
 						"doctype": "Serial No",
 						"serial_no": sn,
 						"item_code": serial_item_code,
+						"company": "_Test Company",
 					}
 				).insert(ignore_permissions=True)
 
@@ -706,6 +707,7 @@ class TestSerialandBatchBundle(IntegrationTestCase):
 						"doctype": "Serial No",
 						"serial_no": serial_no,
 						"item_code": item,
+						"company": "_Test Company",
 					}
 				).insert(ignore_permissions=True)
 
@@ -769,7 +771,7 @@ class TestSerialandBatchBundle(IntegrationTestCase):
 		make_serial_nos(item_code, serial_nos)
 		self.assertTrue(frappe.db.exists("Serial No", serial_no_id))
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
 	)
 	def test_duplicate_serial_and_batch_bundle(self):
@@ -803,6 +805,7 @@ class TestSerialandBatchBundle(IntegrationTestCase):
 						"doctype": "Serial No",
 						"serial_no": serial_no,
 						"item_code": sn_item,
+						"company": "_Test Company",
 					}
 				).insert(ignore_permissions=True)
 				serial_nos.append(serial_no)

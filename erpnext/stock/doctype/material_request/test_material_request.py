@@ -6,7 +6,6 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import flt, today
 
 from erpnext.controllers.accounts_controller import InvalidQtyError
@@ -21,9 +20,13 @@ from erpnext.stock.doctype.material_request.material_request import (
 )
 from erpnext.stock.doctype.stock_entry.stock_entry import make_stock_in_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestMaterialRequest(IntegrationTestCase):
+class TestMaterialRequest(ERPNextTestSuite):
+	def setUp(self):
+		self.load_test_records("Material Request")
+
 	def test_material_request_qty(self):
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
 		mr.items[0].qty = 0
@@ -1191,6 +1194,3 @@ def make_material_request(**args):
 	if not args.do_not_submit:
 		mr.submit()
 	return mr
-
-
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Currency Exchange", "BOM"]

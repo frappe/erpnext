@@ -5,7 +5,6 @@
 import json
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import flt
 
 from erpnext.accounts.party import get_due_date
@@ -15,16 +14,10 @@ from erpnext.selling.doctype.customer.customer import (
 	get_customer_outstanding,
 	parse_full_name,
 )
-from erpnext.tests.utils import create_test_contact_and_address
-
-IGNORE_TEST_RECORD_DEPENDENCIES = ["Price List"]
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Payment Term", "Payment Terms Template"]
+from erpnext.tests.utils import ERPNextTestSuite, create_test_contact_and_address
 
 
-class TestCustomer(IntegrationTestCase):
-	def tearDown(self):
-		set_credit_limit("_Test Customer", "_Test Company", 0)
-
+class TestCustomer(ERPNextTestSuite):
 	def test_get_customer_group_details(self):
 		doc = frappe.new_doc("Customer Group")
 		doc.customer_group_name = "_Testing Customer Group"
@@ -96,14 +89,11 @@ class TestCustomer(IntegrationTestCase):
 	def test_party_details_tax_category(self):
 		from erpnext.accounts.party import get_party_details
 
-		frappe.delete_doc_if_exists("Address", "_Test Address With Tax Category-Billing")
-		frappe.delete_doc_if_exists("Address", "_Test Address With Tax Category-Shipping")
-
 		# Tax Category without Address
 		details = get_party_details("_Test Customer With Tax Category")
 		self.assertEqual(details.tax_category, "_Test Tax Category 1")
 
-		billing_address = frappe.get_doc(
+		frappe.get_doc(
 			doctype="Address",
 			address_title="_Test Address With Tax Category",
 			tax_category="_Test Tax Category 2",
@@ -111,9 +101,10 @@ class TestCustomer(IntegrationTestCase):
 			address_line1="Station Road",
 			city="_Test City",
 			country="India",
+			is_primary_address=True,
 			links=[dict(link_doctype="Customer", link_name="_Test Customer With Tax Category")],
 		).insert()
-		shipping_address = frappe.get_doc(
+		frappe.get_doc(
 			doctype="Address",
 			address_title="_Test Address With Tax Category",
 			tax_category="_Test Tax Category 3",
@@ -121,6 +112,7 @@ class TestCustomer(IntegrationTestCase):
 			address_line1="Station Road",
 			city="_Test City",
 			country="India",
+			is_shipping_address=True,
 			links=[dict(link_doctype="Customer", link_name="_Test Customer With Tax Category")],
 		).insert()
 
@@ -142,8 +134,6 @@ class TestCustomer(IntegrationTestCase):
 		# Rollback
 		settings.determine_address_tax_category_from = rollback_setting
 		settings.save()
-		billing_address.delete()
-		shipping_address.delete()
 
 	def test_rename(self):
 		# delete communication linked to these 2 customers
@@ -183,8 +173,6 @@ class TestCustomer(IntegrationTestCase):
 
 		# rename back to original
 		frappe.rename_doc("Customer", new_name, "_Test Customer 1")
-
-		frappe.db.rollback()
 
 	def test_freezed_customer(self):
 		frappe.db.set_value("Customer", "_Test Customer", "is_frozen", 1)

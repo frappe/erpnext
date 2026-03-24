@@ -2,20 +2,19 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, now
 
-from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestAssetMovement(IntegrationTestCase):
+class TestAssetMovement(ERPNextTestSuite):
 	def setUp(self):
 		frappe.db.set_value(
 			"Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC"
 		)
-		create_asset_data()
 		make_location()
 
 	def test_movement(self):

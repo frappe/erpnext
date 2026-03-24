@@ -4,7 +4,6 @@
 from random import randint
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import today
 
 from erpnext.selling.doctype.sales_order.sales_order import create_pick_list, make_delivery_note
@@ -19,15 +18,16 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 	has_reserved_stock,
 )
 from erpnext.stock.utils import get_stock_balance
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestStockReservationEntry(IntegrationTestCase):
+class TestStockReservationEntry(ERPNextTestSuite):
 	def setUp(self) -> None:
 		self.warehouse = "_Test Warehouse - _TC"
 		self.sr_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
 		create_material_receipt(items={self.sr_item.name: self.sr_item}, warehouse=self.warehouse, qty=100)
 
-	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_validate_stock_reservation_settings(self) -> None:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			validate_stock_reservation_settings,
@@ -120,7 +120,7 @@ class TestStockReservationEntry(IntegrationTestCase):
 		sre.load_from_db()
 		self.assertEqual(sre.status, "Cancelled")
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1}
 	)
 	def test_update_reserved_qty_in_voucher(self) -> None:
@@ -189,7 +189,7 @@ class TestStockReservationEntry(IntegrationTestCase):
 		self.assertEqual(sre1.status, "Cancelled")
 		self.assertEqual(so.items[0].stock_reserved_qty, 0)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1}
 	)
 	def test_cant_consume_reserved_stock(self) -> None:
@@ -239,7 +239,7 @@ class TestStockReservationEntry(IntegrationTestCase):
 		se.submit()
 		se.cancel()
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,
@@ -382,7 +382,7 @@ class TestStockReservationEntry(IntegrationTestCase):
 				for sre_detail in sre_details:
 					self.assertEqual(sre_detail.reserved_qty, sre_detail.delivered_qty)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,
@@ -502,7 +502,7 @@ class TestStockReservationEntry(IntegrationTestCase):
 					# Test - 9: After Delivery Note cancellation, SB Entry Delivered Qty should be `0`.
 					self.assertEqual(sb_entry.delivered_qty, 0)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,
@@ -583,7 +583,7 @@ class TestStockReservationEntry(IntegrationTestCase):
 				# Test - 3: Reserved Serial/Batch Nos should be equal to Picked Serial/Batch Nos.
 				self.assertSetEqual(picked_sb_details, reserved_sb_details)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,
@@ -663,7 +663,7 @@ class TestStockReservationEntry(IntegrationTestCase):
 				# Test - 3: Reserved Serial/Batch Nos should be equal to PR Item Serial/Batch Nos.
 				self.assertEqual(set(sb_details), set(reserved_sb_details))
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,
@@ -696,10 +696,6 @@ class TestStockReservationEntry(IntegrationTestCase):
 
 		# Test - 1: ValidationError should be thrown as the inwarded stock is reserved.
 		self.assertRaises(frappe.ValidationError, se.cancel)
-
-	def tearDown(self) -> None:
-		cancel_all_stock_reservation_entries()
-		return super().tearDown()
 
 
 def create_items() -> dict:

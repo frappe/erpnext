@@ -2378,9 +2378,7 @@ def get_outstanding_reference_documents(args: str | dict, validate: bool = False
 			vouchers=args.get("vouchers") or None,
 		)
 
-		outstanding_invoices = split_invoices_based_on_payment_terms(
-			outstanding_invoices, args.get("company")
-		)
+		outstanding_invoices = split_refdocs_based_on_payment_terms(outstanding_invoices, args.get("company"))
 
 		for d in outstanding_invoices:
 			d["exchange_rate"] = 1
@@ -2418,6 +2416,8 @@ def get_outstanding_reference_documents(args: str | dict, validate: bool = False
 			filters=args,
 		)
 
+		orders_to_be_billed = split_refdocs_based_on_payment_terms(orders_to_be_billed, args.get("company"))
+
 	data = negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 
 	if not data:
@@ -2440,13 +2440,13 @@ def get_outstanding_reference_documents(args: str | dict, validate: bool = False
 	return data
 
 
-def split_invoices_based_on_payment_terms(outstanding_invoices, company) -> list:
+def split_refdocs_based_on_payment_terms(refdocs, company) -> list:
 	"""Split a list of invoices based on their payment terms."""
-	exc_rates = get_currency_data(outstanding_invoices, company)
+	exc_rates = get_currency_data(refdocs, company)
 
-	outstanding_invoices_after_split = []
-	for entry in outstanding_invoices:
-		if entry.voucher_type in ["Sales Invoice", "Purchase Invoice"]:
+	outstanding_refdoc_after_split = []
+	for entry in refdocs:
+		if entry.voucher_type in ["Sales Invoice", "Purchase Invoice", "Sales Order", "Purchase Order"]:
 			if payment_term_template := frappe.db.get_value(
 				entry.voucher_type, entry.voucher_no, "payment_terms_template"
 			):
@@ -2461,25 +2461,25 @@ def split_invoices_based_on_payment_terms(outstanding_invoices, company) -> list
 						),
 						alert=True,
 					)
-				outstanding_invoices_after_split += split_rows
+				outstanding_refdoc_after_split += split_rows
 				continue
 
 		# If not an invoice or no payment terms template, add as it is
-		outstanding_invoices_after_split.append(entry)
+		outstanding_refdoc_after_split.append(entry)
 
-	return outstanding_invoices_after_split
+	return outstanding_refdoc_after_split
 
 
-def get_currency_data(outstanding_invoices: list, company: str | None = None) -> dict:
+def get_currency_data(outstanding_refdocs: list, company: str | None = None) -> dict:
 	"""Get currency and conversion data for a list of invoices."""
 	exc_rates = frappe._dict()
 	company_currency = frappe.db.get_value("Company", company, "default_currency") if company else None
 
-	for doctype in ["Sales Invoice", "Purchase Invoice"]:
-		invoices = [x.voucher_no for x in outstanding_invoices if x.voucher_type == doctype]
+	for doctype in ["Sales Invoice", "Purchase Invoice", "Sales Order", "Purchase Order"]:
+		refdoc = [x.voucher_no for x in outstanding_refdocs if x.voucher_type == doctype]
 		for x in frappe.db.get_all(
 			doctype,
-			filters={"name": ["in", invoices]},
+			filters={"name": ["in", refdoc]},
 			fields=["name", "currency", "conversion_rate", "party_account_currency"],
 		):
 			exc_rates[x.name] = frappe._dict(

@@ -1,12 +1,12 @@
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_months, nowdate
 
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.projects.report.delayed_tasks_summary.delayed_tasks_summary import execute
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestDelayedTasksSummary(IntegrationTestCase):
+class TestDelayedTasksSummary(ERPNextTestSuite):
 	@classmethod
 	def setUp(self):
 		task1 = create_task("_Test Task 98", add_days(nowdate(), -10), nowdate())
@@ -41,7 +41,3 @@ class TestDelayedTasksSummary(IntegrationTestCase):
 
 		for key in ["subject", "status", "priority", "delay"]:
 			self.assertEqual(expected_data[1].get(key), data.get(key))
-
-	def tearDown(self):
-		for task in ["_Test Task 98", "_Test Task 99"]:
-			frappe.get_doc("Task", {"subject": task}).delete()

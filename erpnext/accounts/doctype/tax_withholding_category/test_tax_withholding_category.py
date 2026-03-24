@@ -5,27 +5,20 @@ import datetime
 
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_months, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Supplier Group", "Customer Group"]
 
-
-class TestTaxWithholdingCategory(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
+class TestTaxWithholdingCategory(ERPNextTestSuite):
+	def setUp(self):
 		# create relevant supplier, etc
 		create_records()
 		create_tax_withholding_category_records()
 		make_pan_no_field()
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 	def validate_tax_withholding_entries(self, doctype, docname, expected_entries):
 		"""Validate tax withholding entries for a document"""
@@ -1036,6 +1029,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 		self.cleanup_invoices(invoices)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
 	def test_tds_calculation_on_net_total_partial_tds(self):
 		self.setup_party_with_category("Supplier", "Test TDS Supplier4", "Cumulative Threshold TDS")
 		invoices = []
@@ -2049,7 +2043,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.assertEqual(pi2.taxes, [])
 		self.assertEqual(payment.taxes[0].tax_amount, 6000)
 
-	@IntegrationTestCase.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
 	def test_tds_payment_entry_cancellation(self):
 		"""
 		Test payment entry cancellation clears withholding references from matched entries
@@ -2227,7 +2221,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.validate_tax_withholding_entries("Purchase Invoice", pi1.name, expected_entries)
 		self.cleanup_invoices(invoices)
 
-	@IntegrationTestCase.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
 	def test_tds_purchase_invoice_cancellation(self):
 		"""
 		Test that after cancellation, new documents get automatically adjusted against remaining entries

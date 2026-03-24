@@ -5,13 +5,12 @@
 import copy
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_to_date, flt, now, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.utils import update_gl_entries_after
-from erpnext.assets.doctype.asset.test_asset import create_asset_category, create_fixed_asset_item
+from erpnext.assets.doctype.asset.test_asset import create_fixed_asset_item
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	get_gl_entries,
@@ -21,11 +20,13 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_nos_from_bundle,
 )
 from erpnext.stock.serial_batch_bundle import SerialNoValuation
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Currency Exchange"]
 
+class TestLandedCostVoucher(ERPNextTestSuite):
+	def setUp(self):
+		self.load_test_records("Currency Exchange")
 
-class TestLandedCostVoucher(IntegrationTestCase):
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
@@ -400,6 +401,7 @@ class TestLandedCostVoucher(IntegrationTestCase):
 					"doctype": "Serial No",
 					"item_code": item_code,
 					"serial_no": serial_no,
+					"company": "_Test Company",
 				}
 			).insert()
 
@@ -600,9 +602,6 @@ class TestLandedCostVoucher(IntegrationTestCase):
 			"Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC"
 		)
 
-		if not frappe.db.exists("Asset Category", "Computers"):
-			create_asset_category()
-
 		if not frappe.db.exists("Item", "Macbook Pro"):
 			create_fixed_asset_item()
 
@@ -671,6 +670,7 @@ class TestLandedCostVoucher(IntegrationTestCase):
 						"doctype": "Serial No",
 						"item_code": sn_item,
 						"serial_no": sn,
+						"company": "_Test Company",
 					}
 				)
 				sn_doc.insert()
@@ -821,6 +821,7 @@ class TestLandedCostVoucher(IntegrationTestCase):
 						"doctype": "Serial No",
 						"item_code": sn_item,
 						"serial_no": sn,
+						"company": "_Test Company",
 					}
 				)
 				sn_doc.insert()
@@ -1010,6 +1011,7 @@ class TestLandedCostVoucher(IntegrationTestCase):
 						"doctype": "Serial No",
 						"item_code": sn_item,
 						"serial_no": sn,
+						"company": "_Test Company",
 					}
 				)
 				sn_doc.insert()

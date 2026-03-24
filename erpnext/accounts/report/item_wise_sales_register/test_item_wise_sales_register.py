@@ -1,20 +1,17 @@
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import getdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestItemWiseSalesRegister(AccountsTestMixin, IntegrationTestCase):
+class TestItemWiseSalesRegister(AccountsTestMixin, ERPNextTestSuite):
 	def setUp(self):
 		self.create_company()
 		self.create_customer()
 		self.create_item()
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 	def create_sales_invoice(self, item=None, taxes=None, do_not_submit=False):
 		si = create_sales_invoice(
@@ -79,9 +76,13 @@ class TestItemWiseSalesRegister(AccountsTestMixin, IntegrationTestCase):
 		self.assertDictEqual(report_output, expected_result)
 
 	def test_grouped_report_handles_different_tax_descriptions(self):
-		self.create_item(item_name="_Test Item Tax Description A")
+		self.create_item(
+			item_name="_Test Item Tax Description A", company="_Test Company", warehouse="Stores - _TC"
+		)
 		first_item = self.item
-		self.create_item(item_name="_Test Item Tax Description B")
+		self.create_item(
+			item_name="_Test Item Tax Description B", company="_Test Company", warehouse="Stores - _TC"
+		)
 		second_item = self.item
 
 		first_tax_description = "Tax Description A"

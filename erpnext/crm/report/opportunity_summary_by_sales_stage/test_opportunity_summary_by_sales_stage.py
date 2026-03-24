@@ -1,21 +1,14 @@
-from frappe.tests import IntegrationTestCase
-
 from erpnext.crm.report.opportunity_summary_by_sales_stage.opportunity_summary_by_sales_stage import (
 	execute,
 )
 from erpnext.crm.report.sales_pipeline_analytics.test_sales_pipeline_analytics import (
-	create_company,
-	create_customer,
 	create_opportunity,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestOpportunitySummaryBySalesStage(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		create_company()
-		create_customer()
+class TestOpportunitySummaryBySalesStage(ERPNextTestSuite):
+	def setUp(self):
 		create_opportunity()
 
 	def test_opportunity_summary_by_sales_stage(self):

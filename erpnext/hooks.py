@@ -63,7 +63,6 @@ welcome_email = "erpnext.setup.utils.welcome_email"
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
 setup_wizard_complete = "erpnext.setup.setup_wizard.setup_wizard.setup_demo"
-setup_wizard_test = "erpnext.setup.setup_wizard.test_setup_wizard.run_setup_wizard_test"
 
 after_install = "erpnext.setup.install.after_install"
 
@@ -319,8 +318,6 @@ has_website_permission = {
 	"Timesheet": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Project": "erpnext.controllers.website_list_for_contact.has_website_permission",
 }
-
-before_tests = "erpnext.setup.utils.before_tests"
 
 
 period_closing_doctypes = [

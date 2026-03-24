@@ -3,16 +3,16 @@
 import datetime
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import flt
 
 from erpnext.support.doctype.issue_priority.test_issue_priority import make_priorities
 from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
 	get_service_level_agreement_fields,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestServiceLevelAgreement(IntegrationTestCase):
+class TestServiceLevelAgreement(ERPNextTestSuite):
 	def setUp(self):
 		self.create_company()
 		frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
@@ -357,10 +357,6 @@ class TestServiceLevelAgreement(IntegrationTestCase):
 		lead.save()
 		applied_sla = frappe.db.get_value("Lead", lead.name, "service_level_agreement")
 		self.assertFalse(applied_sla)
-
-	def tearDown(self):
-		for d in frappe.get_all("Service Level Agreement"):
-			frappe.delete_doc("Service Level Agreement", d.name, force=1)
 
 
 def get_service_level_agreement(

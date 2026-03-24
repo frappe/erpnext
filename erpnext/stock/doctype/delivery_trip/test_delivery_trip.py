@@ -3,7 +3,6 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, flt, now_datetime, nowdate
 
 import erpnext
@@ -11,10 +10,10 @@ from erpnext.stock.doctype.delivery_trip.delivery_trip import (
 	get_contact_and_address,
 	notify_customers,
 )
-from erpnext.tests.utils import create_test_contact_and_address
+from erpnext.tests.utils import ERPNextTestSuite, create_test_contact_and_address
 
 
-class TestDeliveryTrip(IntegrationTestCase):
+class TestDeliveryTrip(ERPNextTestSuite):
 	def setUp(self):
 		super().setUp()
 		driver = create_driver()
@@ -23,16 +22,26 @@ class TestDeliveryTrip(IntegrationTestCase):
 		create_test_contact_and_address()
 		address = create_address(driver)
 
-		self.delivery_trip = create_delivery_trip(driver, address)
-
-	def tearDown(self):
-		frappe.db.sql("delete from `tabDriver`")
-		frappe.db.sql("delete from `tabVehicle`")
-		frappe.db.sql("delete from `tabEmail Template`")
-		frappe.db.sql("delete from `tabDelivery Trip`")
-		return super().tearDown()
+		self.delivery_trip = create_delivery_trip(driver, address, company="_Test Company")
 
 	def test_delivery_trip_notify_customers(self):
+		# set default outgoing
+		outgoing = frappe.get_doc(
+			{
+				"doctype": "Email Account",
+				"company": "_Test Company",
+				"enable_outgoing": 1,
+				"default_outgoing": 1,
+				"awaiting_password": 1,
+				"auth_method": "Basic",
+				"password": "test",
+				"smtp_server": "localhost",
+				"stmp_port": 25,
+				"email_id": "test@example.in",
+			}
+		)
+		outgoing.save()
+
 		notify_customers(delivery_trip=self.delivery_trip.name)
 		self.delivery_trip.load_from_db()
 		self.assertEqual(self.delivery_trip.email_notification_sent, 1)
@@ -176,14 +185,14 @@ def create_vehicle():
 		vehicle.insert()
 
 
-def create_delivery_trip(driver, address, contact=None):
+def create_delivery_trip(driver, address, contact=None, company=None):
 	if not contact:
 		contact = get_contact_and_address("_Test Customer")
 
 	delivery_trip = frappe.get_doc(
 		{
 			"doctype": "Delivery Trip",
-			"company": erpnext.get_default_company(),
+			"company": company or erpnext.get_default_company(),
 			"departure_time": add_days(now_datetime(), 5),
 			"driver": driver.name,
 			"driver_address": address.name,

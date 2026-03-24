@@ -3,7 +3,6 @@
 
 import frappe
 from frappe import _dict
-from frappe.tests import IntegrationTestCase
 
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
@@ -21,11 +20,10 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Sales Invoice", "Stock Entry", "Batch"]
 
-
-class TestPickList(IntegrationTestCase):
+class TestPickList(ERPNextTestSuite):
 	def test_pick_list_picks_warehouse_for_each_item(self):
 		item_code = make_item().name
 		try:
@@ -280,7 +278,12 @@ class TestPickList(IntegrationTestCase):
 		from erpnext.stock.doctype.batch.test_batch import make_new_batch
 
 		batch_company = frappe.get_doc(
-			{"doctype": "Company", "company_name": "Batch Company", "default_currency": "INR"}
+			{
+				"doctype": "Company",
+				"company_name": "Batch Company",
+				"default_currency": "INR",
+				"country": "India",
+			}
 		)
 		batch_company.insert()
 
@@ -351,7 +354,12 @@ class TestPickList(IntegrationTestCase):
 
 		warehouse_item = create_item("Warehouse Item")
 		temp_company = frappe.get_doc(
-			{"doctype": "Company", "company_name": "Temp Company", "default_currency": "INR"}
+			{
+				"doctype": "Company",
+				"company_name": "Temp Company",
+				"default_currency": "INR",
+				"country": "India",
+			}
 		).insert()
 		temp_warehouse = frappe.get_doc(
 			{"doctype": "Warehouse", "warehouse_name": "Temp Warehouse", "company": temp_company.name}
@@ -512,6 +520,7 @@ class TestPickList(IntegrationTestCase):
 		self.assertEqual(pick_list.locations[1].qty, 5)
 		self.assertEqual(pick_list.locations[1].sales_order_item, sales_order.items[0].name)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_pick_list_for_items_with_multiple_UOM(self):
 		item_code = make_item(
 			uoms=[
@@ -1376,6 +1385,7 @@ class TestPickList(IntegrationTestCase):
 
 		frappe.db.set_single_value("Stock Settings", "over_picking_allowance", 0)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_ignore_pricing_rule_in_pick_list(self):
 		frappe.flags.print_stmt = False
 		warehouse = "_Test Warehouse - _TC"
@@ -1477,6 +1487,7 @@ class TestPickList(IntegrationTestCase):
 		for loc in pl.locations:
 			self.assertEqual(loc.batch_no, batch2)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_multiple_pick_lists_delivery_note(self):
 		from erpnext.stock.doctype.pick_list.pick_list import create_dn_for_pick_lists
 
@@ -1563,6 +1574,7 @@ class TestPickList(IntegrationTestCase):
 		stock_entry_2.cancel()
 		stock_entry_3.cancel()
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_packed_item_multiple_times_in_so(self):
 		frappe.db.delete("Item Price")
 		warehouse_1 = "_Test Warehouse - _TC"

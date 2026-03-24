@@ -57,6 +57,8 @@ class RequestforQuotation(BuyingController):
 		select_print_heading: DF.Link | None
 		send_attached_files: DF.Check
 		send_document_print: DF.Check
+		shipping_address: DF.Link | None
+		shipping_address_display: DF.TextEditor | None
 		status: DF.Literal["", "Draft", "Submitted", "Cancelled"]
 		subject: DF.Data
 		suppliers: DF.Table[RequestforQuotationSupplier]

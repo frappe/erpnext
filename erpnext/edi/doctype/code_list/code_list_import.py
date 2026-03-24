@@ -3,6 +3,7 @@ import json
 import frappe
 import requests
 from frappe import _
+from frappe.utils import escape_html
 from lxml import etree
 
 URL_PREFIXES = ("http://", "https://")
@@ -32,7 +33,12 @@ def import_genericode():
 			content = f.read()
 
 	# Parse the xml content
-	parser = etree.XMLParser(remove_blank_text=True)
+	parser = etree.XMLParser(
+		remove_blank_text=True,
+		resolve_entities=False,
+		load_dtd=False,
+		no_network=True,
+	)
 	try:
 		root = etree.fromstring(content, parser=parser)
 	except Exception as e:
@@ -104,7 +110,7 @@ def get_genericode_columns_and_examples(root):
 
 	# Get column names
 	for column in root.findall(".//Column"):
-		column_id = column.get("Id")
+		column_id = escape_html(column.get("Id"))
 		columns.append(column_id)
 		example_values[column_id] = []
 		filterable_columns[column_id] = set()
@@ -112,7 +118,7 @@ def get_genericode_columns_and_examples(root):
 	# Get all values and count unique occurrences
 	for row in root.findall(".//SimpleCodeList/Row"):
 		for value in row.findall("Value"):
-			column_id = value.get("ColumnRef")
+			column_id = escape_html(value.get("ColumnRef"))
 			if column_id not in columns:
 				# Handle undeclared column
 				columns.append(column_id)
@@ -123,7 +129,7 @@ def get_genericode_columns_and_examples(root):
 			if simple_value is None:
 				continue
 
-			filterable_columns[column_id].add(simple_value.text)
+			filterable_columns[column_id].add(escape_html(simple_value.text))
 
 	# Get example values (up to 3) and filter columns with cardinality <= 5
 	for row in root.findall(".//SimpleCodeList/Row")[:3]:
@@ -133,7 +139,7 @@ def get_genericode_columns_and_examples(root):
 			if simple_value is None:
 				continue
 
-			example_values[column_id].append(simple_value.text)
+			example_values[column_id].append(escape_html(simple_value.text))
 
 	filterable_columns = {k: list(v) for k, v in filterable_columns.items() if len(v) <= 5}
 

@@ -6,7 +6,6 @@ import json
 import frappe
 from frappe import utils
 from frappe.model.docstatus import DocStatus
-from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	get_linked_payments,
@@ -19,12 +18,10 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_paymen
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.tests.utils import if_lending_app_installed
-
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Cost Center"]
+from erpnext.tests.utils import ERPNextTestSuite, if_lending_app_installed
 
 
-class TestBankTransaction(IntegrationTestCase):
+class TestBankTransaction(ERPNextTestSuite):
 	def setUp(self):
 		make_pos_profile()
 

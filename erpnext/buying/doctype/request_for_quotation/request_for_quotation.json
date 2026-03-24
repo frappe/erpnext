@@ -9,8 +9,6 @@
  "field_order": [
   "naming_series",
   "company",
-  "billing_address",
-  "billing_address_display",
   "vendor",
   "column_break1",
   "transaction_date",
@@ -43,7 +41,13 @@
   "select_print_heading",
   "letter_head",
   "more_info",
-  "opportunity"
+  "opportunity",
+  "address_and_contact_tab",
+  "billing_address",
+  "billing_address_display",
+  "column_break_czul",
+  "shipping_address",
+  "shipping_address_display"
  ],
  "fields": [
   {
@@ -346,6 +350,27 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Use HTML"
+  },
+  {
+   "fieldname": "address_and_contact_tab",
+   "fieldtype": "Tab Break",
+   "label": "Address & Contact"
+  },
+  {
+   "fieldname": "column_break_czul",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shipping_address",
+   "fieldtype": "Link",
+   "label": "Company Shipping Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "shipping_address_display",
+   "fieldtype": "Text Editor",
+   "label": "Shipping Address Details",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -353,7 +378,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 17:15:29.774614",
+ "modified": "2026-03-19 15:27:56.730649",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",

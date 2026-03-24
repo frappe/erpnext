@@ -65,6 +65,8 @@
   "address_display",
   "accounting_dimensions_section",
   "project",
+  "column_break_wgvc",
+  "cost_center",
   "other_info_tab",
   "printing_settings",
   "select_print_heading",
@@ -739,6 +741,16 @@
   {
    "fieldname": "column_break_qpvo",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_wgvc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "grid_page_length": 50,
@@ -747,7 +759,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-06 19:26:59.518312",
+ "modified": "2026-03-04 19:03:23.426082",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

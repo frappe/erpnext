@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import frappe
 from frappe import _, bold, json, msgprint
@@ -244,6 +244,7 @@ class StockReconciliation(StockController):
 				serial_and_batch_bundle = frappe.get_doc(
 					{
 						"doctype": "Serial and Batch Bundle",
+						"company": self.company,
 						"item_code": item.item_code,
 						"warehouse": item.warehouse,
 						"posting_datetime": combine_datetime(self.posting_date, self.posting_time),

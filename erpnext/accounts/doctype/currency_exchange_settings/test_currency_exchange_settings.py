@@ -2,8 +2,8 @@
 # For license information, please see license.txt
 # import frappe
 
-from frappe.tests import IntegrationTestCase
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestCurrencyExchangeSettings(IntegrationTestCase):
+class TestCurrencyExchangeSettings(ERPNextTestSuite):
 	pass

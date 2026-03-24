@@ -565,7 +565,9 @@ frappe.ui.form.on("Stock Entry", {
 		frm.fields_dict.items.grid.refresh();
 		frm.cscript.toggle_related_fields(frm.doc);
 	},
-
+	cost_center(frm, cdt, cdn) {
+		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "cost_center");
+	},
 	validate_purpose_consumption: function (frm) {
 		frappe
 			.call({

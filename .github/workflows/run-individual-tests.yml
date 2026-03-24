@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: server-individual-tests-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
-  cancel-in-progress: false
+  group: server-individual-tests-lightmode-develop
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -21,7 +21,7 @@ jobs:
     - id: set-matrix
       run: |
         # Use grep and find to get the list of test files
-        matrix=$(find . -path '*/doctype/*/test_*.py' | xargs grep -l 'def test_' | awk '{
+        matrix=$(find . -path '*/test_*.py' | xargs grep -l 'def test_' | sort | awk '{
             # Remove ./ prefix, file extension, and replace / with .
             gsub(/^\.\//, "", $0)
             gsub(/\.py$/, "", $0)
@@ -58,6 +58,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{fromJson(needs.discover.outputs.matrix)}}
+      max-parallel: 14
 
     name: Test
 
@@ -130,4 +131,13 @@ jobs:
           FRAPPE_BRANCH: ${{ github.event.inputs.branch }}
 
       - name: Run Tests
-        run: 'cd ~/frappe-bench/ && bench --site test_site run-tests --app erpnext --module ${{ matrix.test }}'
+        run: |
+          site_name=$(echo "${{matrix.test}}" | sed -e 's/.*\.\(test_.*$\)/\1/')
+          echo "$site_name"
+          mkdir ~/frappe-bench/sites/$site_name
+          cp -r "${GITHUB_WORKSPACE}/.github/helper/site_config_mariadb.json" ~/frappe-bench/sites/$site_name/site_config.json
+          cd ~/frappe-bench/
+          bench --site $site_name reinstall --yes
+          bench --site $site_name set-config allow_tests true
+          bench --site $site_name run-tests --module ${{ matrix.test }} --lightmode
+

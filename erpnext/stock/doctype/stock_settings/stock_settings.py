@@ -353,8 +353,8 @@ def clean_all_descriptions():
 	for item in frappe.get_all("Item", ["name", "description"]):
 		if item.description:
 			clean_description = clean_html(item.description)
-		if item.description != clean_description:
-			frappe.db.set_value("Item", item.name, "description", clean_description)
+			if item.description != clean_description:
+				frappe.db.set_value("Item", item.name, "description", clean_description)
 
 
 @frappe.whitelist()

@@ -56,6 +56,22 @@ def create_customer_or_supplier():
 		fullname += "-" + doctype
 
 	create_party_contact(doctype, fullname, user, party.name)
+	return party
+
+
+def create_party(doctype, fullname):
+	party = frappe.new_doc(doctype)
+	# Can't set parent party as group
+
+	party.update(
+		{
+			f"{doctype.lower()}_name": fullname,
+			f"{doctype.lower()}_type": "Individual",
+		}
+	)
+
+	party.flags.ignore_mandatory = True
+	party.insert(ignore_permissions=True)
 
 def create_party(doctype, fullname):
 	party = frappe.new_doc(doctype)

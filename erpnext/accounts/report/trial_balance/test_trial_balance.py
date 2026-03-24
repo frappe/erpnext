@@ -2,13 +2,13 @@
 # MIT License. See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import today
 
 from erpnext.accounts.report.trial_balance.trial_balance import execute
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestTrialBalance(IntegrationTestCase):
+class TestTrialBalance(ERPNextTestSuite):
 	def setUp(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
@@ -61,10 +61,6 @@ class TestTrialBalance(IntegrationTestCase):
 		)
 		total_row = execute(filters)[1][-1]
 		self.assertEqual(total_row["debit"], total_row["credit"])
-
-	def tearDown(self):
-		clear_dimension_defaults("Branch")
-		disable_dimension()
 
 
 def create_company(**args):
