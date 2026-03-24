@@ -59,7 +59,9 @@ class TestGLEntry(ERPNextTestSuite):
 		)
 
 		self.assertTrue(all(entry.to_rename == 1 for entry in gl_entries))
-		old_naming_series_current_value = frappe.db.get_value("Series", naming_series, "current")
+		old_naming_series_current_value = frappe.db.get_value(
+			"Series", {"name": naming_series}, "current", order_by="name"
+		)
 
 		rename_gle_sle_docs()
 
@@ -75,7 +77,9 @@ class TestGLEntry(ERPNextTestSuite):
 			all(new.name != old.name for new, old in zip(gl_entries, new_gl_entries, strict=False))
 		)
 
-		new_naming_series_current_value = frappe.db.get_value("Series", naming_series, "current")
+		new_naming_series_current_value = frappe.db.get_value(
+			"Series", {"name": naming_series}, "current", order_by="name"
+		)
 		self.assertEqual(old_naming_series_current_value + 2, new_naming_series_current_value)
 
 	def test_validate_account_party_type(self):
