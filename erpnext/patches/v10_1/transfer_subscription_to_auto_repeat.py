@@ -19,14 +19,14 @@ def execute():
 			if frappe.db.has_column(doctype, "subscription"):
 				rename_field(doctype, "subscription", "auto_repeat")
 
-	subscriptions = frappe.get_all("Subscription", fields=["*"])
+	subscriptions = frappe.db.sql("select * from `tabSubscription`", as_dict=1)
 
 	for doc in subscriptions:
 		doc["doctype"] = "Auto Repeat"
 		auto_repeat = frappe.get_doc(doc)
 		auto_repeat.db_insert()
 
-	frappe.db.delete("Subscription")
+	frappe.db.sql("delete from `tabSubscription`")
 	frappe.db.commit()
 	drop_columns_from_subscription()
 

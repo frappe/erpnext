@@ -2,7 +2,17 @@ import frappe
 
 
 def execute():
-	values = frappe.db.get_singles_dict("Accounts Settings")
+	rows = frappe.db.sql(
+		"""
+		SELECT field, value
+		FROM `tabSingles`
+		WHERE doctype='Accounts Settings'
+		AND field IN ('acc_frozen_upto', 'frozen_accounts_modifier')
+		""",
+		as_dict=True,
+	)
+
+	values = {row["field"]: row["value"] for row in rows}
 
 	frozen_till = values.get("acc_frozen_upto")
 	modifier = values.get("frozen_accounts_modifier")

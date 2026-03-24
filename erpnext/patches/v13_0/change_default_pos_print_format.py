@@ -2,10 +2,8 @@ import frappe
 
 
 def execute():
-	frappe.db.set_value(
-		"POS Profile",
-		{"print_format": "Point of Sale"},
-		"print_format",
-		"POS Invoice",
-		update_modified=False,
+	frappe.db.sql(
+		"""UPDATE `tabPOS Profile` profile
+		SET profile.`print_format` = 'POS Invoice'
+		WHERE profile.`print_format` = 'Point of Sale'"""
 	)

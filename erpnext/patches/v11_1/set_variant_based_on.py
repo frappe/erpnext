@@ -6,7 +6,9 @@ import frappe
 
 
 def execute():
-	item = frappe.qb.DocType("Item")
-	frappe.qb.update(item).set(item.variant_based_on, "Item Attribute").where(
-		item.variant_based_on.isnull() | (item.variant_based_on == "")
-	).where((item.has_variants == 1) | (item.variant_of.isnotnull() & (item.variant_of != ""))).run()
+	frappe.db.sql(
+		"""update tabItem set variant_based_on = 'Item Attribute'
+		where ifnull(variant_based_on, '') = ''
+		and (has_variants=1 or ifnull(variant_of, '') != '')
+	"""
+	)

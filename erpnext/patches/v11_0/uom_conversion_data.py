@@ -12,7 +12,7 @@ def execute():
 		add_uom_data()
 	else:
 		# delete conversion data and insert again
-		frappe.qb.from_(frappe.qb.DocType("UOM Conversion Factor")).delete().run()
+		frappe.db.sql("delete from `tabUOM Conversion Factor`")
 		try:
 			frappe.delete_doc("UOM", "Hundredweight")
 			frappe.delete_doc("UOM", "Pound Cubic Yard")

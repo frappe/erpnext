@@ -59,7 +59,7 @@ def execute():
 		)
 
 		# update the item tax table
-		frappe.db.delete("Item Tax", {"parent": item_code, "parenttype": "Item"})
+		frappe.db.sql("delete from `tabItem Tax` where parent=%s and parenttype='Item'", item_code)
 		if item_tax_template_name:
 			item = frappe.get_doc("Item", item_code)
 			item.set("taxes", [])

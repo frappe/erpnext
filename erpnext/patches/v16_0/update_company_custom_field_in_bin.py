@@ -4,13 +4,11 @@ import frappe
 def execute():
 	frappe.reload_doc("stock", "doctype", "bin")
 
-	bin_ = frappe.qb.DocType("Bin")
-	warehouse = frappe.qb.DocType("Warehouse")
-
-	(
-		frappe.qb.update(bin_)
-		.inner_join(warehouse)
-		.on(bin_.warehouse == warehouse.name)
-		.set(bin_.company, warehouse.company)
-		.where(bin_.company.isnull() | (bin_.company == ""))
-	).run()
+	frappe.db.sql(
+		"""
+        UPDATE `tabBin` b
+        INNER JOIN `tabWarehouse` w ON b.warehouse = w.name
+        SET b.company = w.company
+        WHERE b.company IS NULL OR b.company = ''
+    """
+	)

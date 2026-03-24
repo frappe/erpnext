@@ -11,22 +11,24 @@ def execute():
 	frappe.reload_doc("accounts", "doctype", "subscription_plan")
 
 	if frappe.db.has_column("Subscription", "customer"):
-		subscription = frappe.qb.DocType("Subscription")
-		(
-			frappe.qb.update(subscription)
-			.set(subscription.start_date, subscription.start)
-			.set(subscription.party_type, "Customer")
-			.set(subscription.party, subscription.customer)
-			.set(subscription.sales_tax_template, subscription.tax_template)
-			.where(subscription.party.isnull() | (subscription.party == ""))
-		).run()
+		frappe.db.sql(
+			"""
+			UPDATE `tabSubscription`
+			SET
+				start_date = start,
+				party_type = 'Customer',
+				party = customer,
+				sales_tax_template = tax_template
+			WHERE IFNULL(party,'') = ''
+		"""
+		)
 
-	frappe.db.set_value(
-		"Subscription Invoice",
-		{"document_type": ["in", ["", None]]},
-		"document_type",
-		"Sales Invoice",
-		update_modified=False,
+	frappe.db.sql(
+		"""
+		UPDATE `tabSubscription Invoice`
+		SET document_type = 'Sales Invoice'
+		WHERE IFNULL(document_type, '') = ''
+	"""
 	)
 
 	price_determination_map = {
@@ -35,10 +37,11 @@ def execute():
 	}
 
 	for key, value in price_determination_map.items():
-		frappe.db.set_value(
-			"Subscription Plan",
-			{"price_determination": key},
-			"price_determination",
-			value,
-			update_modified=False,
+		frappe.db.sql(
+			"""
+			UPDATE `tabSubscription Plan`
+			SET price_determination = %s
+			WHERE price_determination = %s
+		""",
+			(value, key),
 		)

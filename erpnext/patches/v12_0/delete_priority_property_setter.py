@@ -2,7 +2,11 @@ import frappe
 
 
 def execute():
-	frappe.db.delete(
-		"Property Setter",
-		{"doc_type": "Issue", "field_name": "priority", "property": "options"},
+	frappe.db.sql(
+		"""
+		DELETE FROM `tabProperty Setter`
+		WHERE `tabProperty Setter`.doc_type='Issue'
+			AND `tabProperty Setter`.field_name='priority'
+			AND `tabProperty Setter`.property='options'
+	"""
 	)

@@ -10,19 +10,13 @@ def execute():
 		return
 
 	frappe.reload_doc("core", "doctype", "has_role")
-	frappe.db.delete(
-		"Has Role",
-		{
-			"parenttype": "Report",
-			"parent": [
-				"in",
-				[
-					"GST Sales Register",
-					"GST Purchase Register",
-					"GST Itemised Sales Register",
-					"GST Itemised Purchase Register",
-					"Eway Bill",
-				],
-			],
-		},
+	frappe.db.sql(
+		"""
+		delete from
+			`tabHas Role`
+		where
+			parenttype = 'Report' and parent in('GST Sales Register',
+				'GST Purchase Register', 'GST Itemised Sales Register',
+				'GST Itemised Purchase Register', 'Eway Bill')
+		"""
 	)

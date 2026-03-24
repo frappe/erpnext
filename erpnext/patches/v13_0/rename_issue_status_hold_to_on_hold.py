@@ -12,4 +12,13 @@ def execute():
 
 
 def rename_status():
-	frappe.db.set_value("Issue", {"status": "Hold"}, "status", "On Hold", update_modified=False)
+	frappe.db.sql(
+		"""
+		UPDATE
+			`tabIssue`
+		SET
+			status = 'On Hold'
+		WHERE
+			status = 'Hold'
+	"""
+	)

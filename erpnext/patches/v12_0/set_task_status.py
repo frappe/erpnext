@@ -15,4 +15,4 @@ def execute():
 			property_setter.save()
 
 	# renamed default status to Completed as status "Closed" is ambiguous
-	frappe.db.set_value("Task", {"status": "Closed"}, "status", "Completed", update_modified=False)
+	frappe.db.sql('update tabTask set status = "Completed" where status = "Closed"')

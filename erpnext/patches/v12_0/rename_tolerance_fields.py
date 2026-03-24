@@ -13,5 +13,4 @@ def execute():
 	qty_allowance = frappe.db.get_single_value("Stock Settings", "over_delivery_receipt_allowance")
 	frappe.db.set_single_value("Accounts Settings", "over_delivery_receipt_allowance", qty_allowance)
 
-	item = frappe.qb.DocType("Item")
-	(frappe.qb.update(item).set(item.over_billing_allowance, item.over_delivery_receipt_allowance)).run()
+	frappe.db.sql("update tabItem set over_billing_allowance=over_delivery_receipt_allowance")

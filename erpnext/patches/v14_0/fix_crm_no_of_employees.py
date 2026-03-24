@@ -14,10 +14,11 @@ def execute():
 	for doctype in ("Lead", "Opportunity", "Prospect"):
 		frappe.reload_doctype(doctype)
 		for key, value in options.items():
-			frappe.db.set_value(
-				doctype,
-				{"no_of_employees": key},
-				"no_of_employees",
-				value,
-				update_modified=False,
+			frappe.db.sql(
+				f"""
+                update `tab{doctype}`
+                set no_of_employees = %s
+                where no_of_employees = %s
+            """,
+				(value, key),
 			)
