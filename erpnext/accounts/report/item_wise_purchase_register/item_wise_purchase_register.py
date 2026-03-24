@@ -378,7 +378,7 @@ def get_items(filters, additional_table_columns):
 def get_aii_accounts():
 	return {
 		d.name: d.stock_received_but_not_billed
-		for d in frappe.get_all("Company", fields=["name", "stock_received_but_not_billed"])
+		for d in frappe.get_list("Company", fields=["name", "stock_received_but_not_billed"])
 	}
 
 
@@ -387,7 +387,7 @@ def get_purchase_receipts_against_purchase_order(item_list):
 	po_item_rows = list(set(d.po_detail for d in item_list))
 
 	if po_item_rows:
-		purchase_receipts = frappe.get_all(
+		purchase_receipts = frappe.get_list(
 			"Purchase Receipt Item",
 			filters={"docstatus": 1, "purchase_order_item": ["in", po_item_rows]},
 			fields=["parent", "purchase_order_item"],

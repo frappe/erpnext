@@ -30,7 +30,7 @@ def get_columns():
 
 
 def get_data(filters):
-	return frappe.get_all(
+	return frappe.get_list(
 		"Video",
 		filters=[
 			["view_count", "is", "set"],

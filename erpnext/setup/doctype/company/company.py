@@ -935,7 +935,7 @@ def get_children(doctype: str, parent: str | None = None, company: str | None = 
 	if parent is None or parent == "All Companies":
 		parent = ""
 	filters = {"parent_company": parent} if parent else [["parent_company", "in", ["", None]]]
-	return frappe.get_all("Company", filters=filters, fields=["name as value", "is_group as expandable"])
+	return frappe.get_list("Company", filters=filters, fields=["name as value", "is_group as expandable"])
 
 
 @frappe.whitelist()

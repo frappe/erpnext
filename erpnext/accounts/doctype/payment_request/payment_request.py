@@ -1049,7 +1049,7 @@ def get_dummy_message(doc):
 @frappe.whitelist()
 def get_subscription_details(reference_doctype: str, reference_name: str):
 	if reference_doctype == "Sales Invoice":
-		subscriptions = frappe.get_all(
+		subscriptions = frappe.get_list(
 			"Subscription Invoice", filters={"invoice": reference_name}, pluck="parent"
 		)
 		subscription_plans = []

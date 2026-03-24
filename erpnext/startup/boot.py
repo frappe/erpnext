@@ -38,7 +38,7 @@ def boot_session(bootinfo):
 		if not bootinfo.customer_count:
 			bootinfo.setup_complete = "Yes" if frappe.get_all("Company", limit=1, pluck="name") else "No"
 
-		company_docs = frappe.get_all(
+		company_docs = frappe.get_list(
 			"Company",
 			fields=[
 				"name",
@@ -57,7 +57,7 @@ def boot_session(bootinfo):
 			doc["doctype"] = ":Company"
 		bootinfo.docs += company_docs
 
-		party_account_types = frappe.get_all("Party Type", fields=["name", "account_type"])
+		party_account_types = frappe.get_list("Party Type", fields=["name", "account_type"])
 		bootinfo.party_account_types = frappe._dict(
 			(d.name, d.account_type or "") for d in party_account_types
 		)

@@ -51,7 +51,7 @@ def get_columns():
 
 
 def get_project_details():
-	return frappe.get_all(
+	return frappe.get_list(
 		"Project",
 		fields=[
 			"name",
@@ -68,7 +68,7 @@ def get_project_details():
 
 
 def get_purchased_items_cost():
-	pr_items = frappe.get_all(
+	pr_items = frappe.get_list(
 		"Purchase Receipt Item",
 		filters=[["project", "!=", ""], ["docstatus", "=", 1]],
 		fields=["project", "sum(base_net_amount) as amount"],
