@@ -322,99 +322,97 @@ class SalesOrder(SellingController):
 			not row.qty for row in self.get("items") if (row.item_code and not row.qty)
 		)
 
-		def validate_po(self):
-			# validate p.o date v/s delivery date
-			if self.po_date and not self.skip_delivery_note:
-				for d in self.get("items"):
-					if d.delivery_date and getdate(self.po_date) > getdate(d.delivery_date):
-						frappe.throw(
-							_("Row #{0}: Expected Delivery Date cannot be before Purchase Order Date").format(
-								d.idx
-							)
+	def validate_po(self):
+		# validate p.o date v/s delivery date
+		if self.po_date and not self.skip_delivery_note:
+			for d in self.get("items"):
+				if d.delivery_date and getdate(self.po_date) > getdate(d.delivery_date):
+					frappe.throw(
+						_("Row #{0}: Expected Delivery Date cannot be before Purchase Order Date").format(
+							d.idx
 						)
-
-			if self.po_no and self.customer and not self.skip_delivery_note:
-				sales_order = qb.DocType("Sales Order")
-				so = (
-					qb.from_(sales_order)
-					.select(sales_order.name)
-					.where(
-						(sales_order.po_no == self.po_no)
-						& (sales_order.name != self.name)
-						& (sales_order.docstatus < 2)
-						& (sales_order.customer == self.customer)
 					)
-					.limit(1)
-				).run()
-				if so and so[0][0]:
-					if cint(
-						frappe.get_single_value("Selling Settings", "allow_against_multiple_purchase_orders")
-					):
-						frappe.msgprint(
-							_(
-								"Warning: Sales Order {0} already exists against Customer's Purchase Order {1}"
-							).format(frappe.bold(so[0][0]), frappe.bold(self.po_no)),
-							alert=True,
-						)
-					else:
-						frappe.throw(
-							_(
-								"Sales Order {0} already exists against Customer's Purchase Order {1}. To allow multiple Sales Orders, Enable {2} in {3}"
-							).format(
-								frappe.bold(so[0][0]),
-								frappe.bold(self.po_no),
-								frappe.bold(
-									_("'Allow Multiple Sales Orders Against a Customer's Purchase Order'")
-								),
-								get_link_to_form("Selling Settings", "Selling Settings"),
-							)
-						)
 
-		def validate_for_items(self):
-			for d in self.get("items"):
-				# used for production plan
-				d.transaction_date = self.transaction_date
-
-				bin_doctype = qb.DocType("Bin")
-				tot_avail_qty = (
-					qb.from_(bin_doctype)
-					.select(bin_doctype.projected_qty)
-					.where((bin_doctype.item_code == d.item_code) & (bin_doctype.warehouse == d.warehouse))
-					.limit(1)
-				).run()
-				d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
-
-		def product_bundle_has_stock_item(self, product_bundle):
-			"""Returns true if product bundle has stock item"""
-			item = qb.DocType("Item")
-			product_bundle_item = qb.DocType("Product Bundle Item")
-			ret = len(
-				qb.from_(item)
-				.join(product_bundle_item)
-				.on(product_bundle_item.item_code == item.name)
-				.select(item.name)
-				.where((product_bundle_item.parent == product_bundle) & (item.is_stock_item == 1))
+		if self.po_no and self.customer and not self.skip_delivery_note:
+			sales_order = qb.DocType("Sales Order")
+			so = (
+				qb.from_(sales_order)
+				.select(sales_order.name)
+				.where(
+					(sales_order.po_no == self.po_no)
+					& (sales_order.name != self.name)
+					& (sales_order.docstatus < 2)
+					& (sales_order.customer == self.customer)
+				)
 				.limit(1)
-				.run()
-			)
-			return ret
+			).run()
+			if so and so[0][0]:
+				if cint(
+					frappe.get_single_value("Selling Settings", "allow_against_multiple_purchase_orders")
+				):
+					frappe.msgprint(
+						_(
+							"Warning: Sales Order {0} already exists against Customer's Purchase Order {1}"
+						).format(frappe.bold(so[0][0]), frappe.bold(self.po_no)),
+						alert=True,
+					)
+				else:
+					frappe.throw(
+						_(
+							"Sales Order {0} already exists against Customer's Purchase Order {1}. To allow multiple Sales Orders, Enable {2} in {3}"
+						).format(
+							frappe.bold(so[0][0]),
+							frappe.bold(self.po_no),
+							frappe.bold(
+								_("'Allow Multiple Sales Orders Against a Customer's Purchase Order'")
+							),
+							get_link_to_form("Selling Settings", "Selling Settings"),
+						)
+					)
 
-		def validate_sales_mntc_quotation(self):
-			for d in self.get("items"):
-				if d.prevdoc_docname:
-					quotation = qb.DocType("Quotation")
-					res = (
-						qb.from_(quotation)
-						.select(quotation.name)
-						.where(
-							(quotation.name == d.prevdoc_docname) & (quotation.order_type == self.order_type)
-						)
-						.limit(1)
-					).run()
-					if not res:
-						frappe.msgprint(
-							_("Quotation {0} not of type {1}").format(d.prevdoc_docname, self.order_type)
-						)
+	def validate_for_items(self):
+		for d in self.get("items"):
+			# used for production plan
+			d.transaction_date = self.transaction_date
+
+			bin_doctype = qb.DocType("Bin")
+			tot_avail_qty = (
+				qb.from_(bin_doctype)
+				.select(bin_doctype.projected_qty)
+				.where((bin_doctype.item_code == d.item_code) & (bin_doctype.warehouse == d.warehouse))
+				.limit(1)
+			).run()
+			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
+
+	def product_bundle_has_stock_item(self, product_bundle):
+		"""Returns true if product bundle has stock item"""
+		item = qb.DocType("Item")
+		product_bundle_item = qb.DocType("Product Bundle Item")
+		ret = len(
+			qb.from_(item)
+			.join(product_bundle_item)
+			.on(product_bundle_item.item_code == item.name)
+			.select(item.name)
+			.where((product_bundle_item.parent == product_bundle) & (item.is_stock_item == 1))
+			.limit(1)
+			.run()
+		)
+		return ret
+
+	def validate_sales_mntc_quotation(self):
+		for d in self.get("items"):
+			if d.prevdoc_docname:
+				quotation = qb.DocType("Quotation")
+				res = (
+					qb.from_(quotation)
+					.select(quotation.name)
+					.where((quotation.name == d.prevdoc_docname) & (quotation.order_type == self.order_type))
+					.limit(1)
+				).run()
+				if not res:
+					frappe.msgprint(
+						_("Quotation {0} not of type {1}").format(d.prevdoc_docname, self.order_type)
+					)
 
 	def validate_delivery_date(self):
 		if self.order_type == "Sales" and not self.skip_delivery_note:
@@ -440,26 +438,26 @@ class SalesOrder(SellingController):
 
 		self.validate_sales_mntc_quotation()
 
-		def validate_proj_cust(self):
-			if self.project and self.customer_name:
-				project = qb.DocType("Project")
-				res = (
-					qb.from_(project)
-					.select(project.name)
-					.where(
-						(project.name == self.project)
-						& (
-							(project.customer == self.customer)
-							| project.customer.isnull()
-							| (project.customer == "")
-						)
+	def validate_proj_cust(self):
+		if self.project and self.customer_name:
+			project = qb.DocType("Project")
+			res = (
+				qb.from_(project)
+				.select(project.name)
+				.where(
+					(project.name == self.project)
+					& (
+						(project.customer == self.customer)
+						| project.customer.isnull()
+						| (project.customer == "")
 					)
-					.limit(1)
-				).run()
-				if not res:
-					frappe.throw(
-						_("Customer {0} does not belong to project {1}").format(self.customer, self.project)
-					)
+				)
+				.limit(1)
+			).run()
+			if not res:
+				frappe.throw(
+					_("Customer {0} does not belong to project {1}").format(self.customer, self.project)
+				)
 
 	def validate_warehouse(self):
 		super().validate_warehouse()
@@ -496,22 +494,20 @@ class SalesOrder(SellingController):
 		if cint(frappe.get_single_value("Selling Settings", "maintain_same_sales_rate")):
 			self.validate_rate_with_reference_doc([["Quotation", "prevdoc_docname", "quotation_item"]])
 
-		def update_enquiry_status(self, prevdoc, flag):
-			quotation = qb.DocType("Quotation")
-			quotation_item = qb.DocType("Quotation Item")
-			enq = (
-				qb.from_(quotation)
-				.join(quotation_item)
-				.on(quotation_item.parent == quotation.name)
-				.select(quotation_item.prevdoc_docname)
-				.where(quotation.name == prevdoc)
-				.limit(1)
-			).run()
-			if enq:
-				opportunity = qb.DocType("Opportunity")
-				(
-					qb.update(opportunity).set(opportunity.status, flag).where(opportunity.name == enq[0][0])
-				).run()
+	def update_enquiry_status(self, prevdoc, flag):
+		quotation = qb.DocType("Quotation")
+		quotation_item = qb.DocType("Quotation Item")
+		enq = (
+			qb.from_(quotation)
+			.join(quotation_item)
+			.on(quotation_item.parent == quotation.name)
+			.select(quotation_item.prevdoc_docname)
+			.where(quotation.name == prevdoc)
+			.limit(1)
+		).run()
+		if enq:
+			opportunity = qb.DocType("Opportunity")
+			(qb.update(opportunity).set(opportunity.status, flag).where(opportunity.name == enq[0][0])).run()
 
 	def update_prevdoc_status(self, flag=None):
 		for quotation in set(d.prevdoc_docname for d in self.get("items")):

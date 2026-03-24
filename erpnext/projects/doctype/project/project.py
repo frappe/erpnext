@@ -259,7 +259,7 @@ class Project(Document):
 				pct_complete = 0
 				for row in weighted_progress:
 					pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
-			self.percent_complete = flt(flt(pct_complete), 2)
+				self.percent_complete = flt(flt(pct_complete), 2)
 
 		# don't update status if it is cancelled
 		if self.status == "Cancelled":

@@ -465,9 +465,9 @@ def validate_expense_against_budget(params, expense_amount=0):
 					"to_fiscal_year",
 					"budget_start_date",
 					"budget_end_date",
-					"ifnull(applicable_on_material_request, 0) as for_material_request",
-					"ifnull(applicable_on_purchase_order, 0) as for_purchase_order",
-					"ifnull(applicable_on_booking_actual_expenses, 0) as for_actual_expenses",
+					"applicable_on_material_request",
+					"applicable_on_purchase_order",
+					"applicable_on_booking_actual_expenses",
 					"action_if_annual_budget_exceeded",
 					"action_if_accumulated_monthly_budget_exceeded",
 					"action_if_annual_budget_exceeded_on_mr",
@@ -478,6 +478,10 @@ def validate_expense_against_budget(params, expense_amount=0):
 			)
 
 			if budget_records:
+				for budget in budget_records:
+					budget.for_material_request = budget.applicable_on_material_request or 0
+					budget.for_purchase_order = budget.applicable_on_purchase_order or 0
+					budget.for_actual_expenses = budget.applicable_on_booking_actual_expenses or 0
 				validate_budget_records(params, budget_records, expense_amount)
 
 
