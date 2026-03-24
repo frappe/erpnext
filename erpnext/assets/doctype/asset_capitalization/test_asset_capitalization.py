@@ -374,6 +374,7 @@ class TestAssetCapitalization(ERPNextTestSuite):
 		consumed_asset_doc.update(
 			{
 				"asset_type": "Composite Component",
+				"location": "Test Location",
 				"purchase_date": pr.posting_date,
 				"available_for_use_date": pr.posting_date,
 			}
@@ -549,38 +550,32 @@ def create_depreciation_asset(**args):
 
 
 def get_actual_gle_dict(name):
-	return dict(
-		frappe.db.sql(
-			"""
-		select account, sum(debit-credit) as diff
-		from `tabGL Entry`
-		where voucher_type = 'Asset Capitalization' and voucher_no = %s
-		group by account
-		having diff != 0
-	""",
-			name,
-		)
+	gl_entries = frappe.get_all(
+		"GL Entry",
+		filters={"voucher_type": "Asset Capitalization", "voucher_no": name},
+		fields=["account", {"SUM": "debit", "as": "debit"}, {"SUM": "credit", "as": "credit"}],
+		group_by="account",
 	)
+	return {d.account: flt(d.debit) - flt(d.credit) for d in gl_entries if flt(d.debit) - flt(d.credit)}
 
 
 def get_actual_sle_dict(name):
-	sles = frappe.db.sql(
-		"""
-		select
-			item_code, warehouse,
-			sum(actual_qty) as actual_qty,
-			sum(stock_value_difference) as stock_value_difference
-		from `tabStock Ledger Entry`
-		where voucher_type = 'Asset Capitalization' and voucher_no = %s
-		group by item_code, warehouse
-		having actual_qty != 0
-	""",
-		name,
-		as_dict=1,
+	sles = frappe.get_all(
+		"Stock Ledger Entry",
+		filters={"voucher_type": "Asset Capitalization", "voucher_no": name},
+		fields=[
+			"item_code",
+			"warehouse",
+			{"SUM": "actual_qty", "as": "actual_qty"},
+			{"SUM": "stock_value_difference", "as": "stock_value_difference"},
+		],
+		group_by="item_code, warehouse",
 	)
 
 	sle_dict = {}
 	for d in sles:
+		if not flt(d.actual_qty):
+			continue
 		sle_dict[(d.item_code, d.warehouse)] = {
 			"actual_qty": d.actual_qty,
 			"stock_value_difference": d.stock_value_difference,

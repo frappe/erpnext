@@ -40,19 +40,11 @@ class TestStockBalance(ERPNextTestSuite):
 			make_stock_entry(item_code=item_code, **movement)
 
 	def assertInvariants(self, rows):
-		last_balance = frappe.db.sql(
-			"""
-			WITH last_balances AS (
-				SELECT item_code, warehouse,
-					stock_value, qty_after_transaction,
-					ROW_NUMBER() OVER (PARTITION BY item_code, warehouse
-						ORDER BY timestamp(posting_date, posting_time) desc, creation desc)
-						AS rn
-					FROM `tabStock Ledger Entry`
-					where is_cancelled=0
-				)
-				SELECT * FROM last_balances WHERE rn = 1""",
-			as_dict=True,
+		last_balance = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"is_cancelled": 0},
+			fields=["item_code", "warehouse", "stock_value", "qty_after_transaction"],
+			order_by="posting_date desc, posting_time desc, creation desc",
 		)
 
 		item_wh_stock = _dict()

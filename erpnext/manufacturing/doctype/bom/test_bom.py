@@ -97,10 +97,10 @@ class TestBOM(ERPNextTestSuite):
 		update_cost_in_all_boms_in_test()
 
 		# check if new valuation rate updated in all BOMs
-		for d in frappe.db.sql(
-			"""select base_rate from `tabBOM Item`
-			where item_code='_Test Item 2' and docstatus=1 and parenttype='BOM'""",
-			as_dict=1,
+		for d in frappe.get_all(
+			"BOM Item",
+			filters={"item_code": "_Test Item 2", "docstatus": 1, "parenttype": "BOM"},
+			fields=["base_rate"],
 		):
 			self.assertEqual(d.base_rate, rm_base_rate + 10)
 
@@ -165,9 +165,7 @@ class TestBOM(ERPNextTestSuite):
 	def test_bom_cost_multi_uom_multi_currency_based_on_price_list(self):
 		frappe.db.set_value("Price List", "_Test Price List", "price_not_uom_dependent", 1)
 		for item_code, rate in (("_Test Item", 3600), ("_Test Item Home Desktop Manufactured", 3000)):
-			frappe.db.sql(
-				"delete from `tabItem Price` where price_list='_Test Price List' and item_code=%s", item_code
-			)
+			frappe.db.delete("Item Price", {"price_list": "_Test Price List", "item_code": item_code})
 			item_price = frappe.new_doc("Item Price")
 			item_price.price_list = "_Test Price List"
 			item_price.item_code = item_code

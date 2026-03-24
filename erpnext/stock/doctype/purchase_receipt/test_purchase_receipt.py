@@ -854,9 +854,8 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		assets = frappe.db.get_all("Asset", filters={"purchase_receipt": pr.name})
 
 		self.assertEqual(len(assets), 3)
-
-		location = frappe.db.get_value("Asset", assets[0].name, "location")
-		self.assertEqual(location, "Test Location")
+		self.assertEqual(pr.items[0].asset_location, "Test Location")
+		self.assertTrue(all(frappe.db.get_value("Asset", asset.name, "location") for asset in assets))
 
 		pr.cancel()
 
@@ -5397,12 +5396,11 @@ def prepare_data_for_internal_transfer():
 
 
 def get_sl_entries(voucher_type, voucher_no):
-	return frappe.db.sql(
-		""" select actual_qty, warehouse, stock_value_difference
-		from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s
-		order by posting_time desc""",
-		(voucher_type, voucher_no),
-		as_dict=1,
+	return frappe.get_all(
+		"Stock Ledger Entry",
+		filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
+		fields=["actual_qty", "warehouse", "stock_value_difference"],
+		order_by="posting_time desc",
 	)
 
 

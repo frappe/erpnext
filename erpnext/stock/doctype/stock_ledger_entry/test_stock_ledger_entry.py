@@ -35,13 +35,8 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		reset("Stock Entry")
 
 		# delete SLE and BINs for all items
-		frappe.db.sql(
-			"delete from `tabStock Ledger Entry` where item_code in (%s)" % (", ".join(["%s"] * len(items))),
-			items,
-		)
-		frappe.db.sql(
-			"delete from `tabBin` where item_code in (%s)" % (", ".join(["%s"] * len(items))), items
-		)
+		frappe.db.delete("Stock Ledger Entry", {"item_code": ["in", items]})
+		frappe.db.delete("Bin", {"item_code": ["in", items]})
 
 	def test_item_cost_reposting(self):
 		company = "_Test Company"
@@ -1536,17 +1531,12 @@ def create_delivery_note_entries_for_batchwise_item_valuation_test(dn_entry_list
 
 
 def fetch_sle_details_for_doc_list(doc_list, columns, as_dict=1):
-	return frappe.db.sql(
-		f"""
-		SELECT { ', '.join(columns)}
-		FROM `tabStock Ledger Entry`
-		WHERE
-			voucher_no IN %(voucher_nos)s
-			and docstatus = 1
-		ORDER BY timestamp(posting_date, posting_time) ASC, CREATION ASC
-	""",
-		dict(voucher_nos=[doc.name for doc in doc_list]),
-		as_dict=as_dict,
+	return frappe.get_all(
+		"Stock Ledger Entry",
+		filters={"voucher_no": ["in", [doc.name for doc in doc_list]], "docstatus": 1},
+		fields=columns,
+		order_by="posting_date asc, posting_time asc, creation asc",
+		as_list=not as_dict,
 	)
 
 

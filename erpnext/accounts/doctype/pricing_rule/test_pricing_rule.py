@@ -1593,7 +1593,7 @@ def delete_existing_pricing_rules():
 		"Pricing Rule Item Group",
 		"Pricing Rule Brand",
 	]:
-		frappe.db.sql(f"delete from `tab{doctype}`")
+		frappe.db.delete(doctype)
 
 
 def make_item_price(item, price_list_name, item_price):

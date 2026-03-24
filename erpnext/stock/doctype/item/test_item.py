@@ -459,10 +459,7 @@ class TestItem(ERPNextTestSuite):
 		frappe.delete_doc_if_exists("Item", "_Test Numeric Template Item")
 		frappe.delete_doc_if_exists("Item Attribute", "Test Item Length")
 
-		frappe.db.sql(
-			"""delete from `tabItem Variant Attribute`
-			where attribute='Test Item Length' """
-		)
+		frappe.db.delete("Item Variant Attribute", {"attribute": "Test Item Length"})
 
 		frappe.flags.attribute_values = None
 
@@ -607,7 +604,7 @@ class TestItem(ERPNextTestSuite):
 
 	def test_add_item_barcode(self):
 		# Clean up
-		frappe.db.sql("""delete from `tabItem Barcode`""")
+		frappe.db.delete("Item Barcode")
 		item_code = "Test Item Barcode"
 		if frappe.db.exists("Item", item_code):
 			frappe.delete_doc("Item", item_code)
@@ -686,10 +683,12 @@ class TestItem(ERPNextTestSuite):
 	def test_index_creation(self):
 		"check if index is getting created in db"
 
-		indices = frappe.db.sql("show index from tabItem", as_dict=1)
-		expected_columns = {"item_code", "item_name", "item_group"}
-		for index in indices:
-			expected_columns.discard(index.get("Column_name"))
+		expected_indexes = {"item_code": "item_code", "item_name": "item_name", "item_group": "item_group"}
+		expected_columns = {
+			field
+			for field, index_name in expected_indexes.items()
+			if not frappe.db.has_index("tabItem", index_name)
+		}
 
 		if expected_columns:
 			self.fail(f"Expected db index on these columns: {', '.join(expected_columns)}")

@@ -236,21 +236,11 @@ class TestAssetRepair(ERPNextTestSuite):
 			submit=1,
 		)
 
-		gl_entries = frappe.db.sql(
-			"""
-			select
-				account,
-				sum(debit) as debit,
-				sum(credit) as credit
-			from `tabGL Entry`
-			where
-				voucher_type='Asset Repair'
-				and voucher_no=%s
-			group by
-				account
-		""",
-			asset_repair.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Asset Repair", "voucher_no": asset_repair.name},
+			fields=["account", {"SUM": "debit", "as": "debit"}, {"SUM": "credit", "as": "credit"}],
+			group_by="account",
 		)
 
 		self.assertTrue(gl_entries)
@@ -285,21 +275,11 @@ class TestAssetRepair(ERPNextTestSuite):
 			submit=1,
 		)
 
-		gl_entries = frappe.db.sql(
-			"""
-			select
-				account,
-				sum(debit) as debit,
-				sum(credit) as credit
-			from `tabGL Entry`
-			where
-				voucher_type='Asset Repair'
-				and voucher_no=%s
-			group by
-				account
-		""",
-			asset_repair.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Asset Repair", "voucher_no": asset_repair.name},
+			fields=["account", {"SUM": "debit", "as": "debit"}, {"SUM": "credit", "as": "credit"}],
+			group_by="account",
 		)
 
 		self.assertTrue(gl_entries)

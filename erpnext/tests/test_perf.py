@@ -3,9 +3,14 @@ import frappe
 from erpnext.tests.utils import ERPNextTestSuite
 
 INDEXED_FIELDS = {
-	"Bin": ["item_code"],
-	"GL Entry": ["voucher_no", "posting_date", "company", "party"],
-	"Purchase Order Item": ["item_code"],
+	"Bin": {"item_code": "unique_item_warehouse"},
+	"GL Entry": {
+		"voucher_no": "voucher_no",
+		"posting_date": "posting_date",
+		"company": "company",
+		"party": "party",
+	},
+	"Purchase Order Item": {"item_code": "item_code_warehouse_index"},
 }
 
 
@@ -15,10 +20,8 @@ class TestPerformance(ERPNextTestSuite):
 		# other composite index. If those are removed this test should be
 		# updated accordingly.
 		for doctype, fields in INDEXED_FIELDS.items():
-			for field in fields:
+			for field, index_name in fields.items():
 				self.assertTrue(
-					frappe.db.sql(
-						f"""SHOW INDEX FROM `tab{doctype}`
-						WHERE Column_name = "{field}" AND Seq_in_index = 1"""
-					)
+					frappe.db.has_index(f"tab{doctype}", index_name),
+					msg=f"Expected index for {doctype}.{field}",
 				)

@@ -140,11 +140,7 @@ class TestCustomer(ERPNextTestSuite):
 
 		new_name = "_Test Customer 1 Renamed"
 		for name in ("_Test Customer 1", new_name):
-			frappe.db.sql(
-				"""delete from `tabComment`
-				where reference_doctype=%s and reference_name=%s""",
-				("Customer", name),
-			)
+			frappe.db.delete("Comment", {"reference_doctype": "Customer", "reference_name": name})
 
 		# add comments
 		comment = frappe.get_doc("Customer", "_Test Customer 1").add_comment(

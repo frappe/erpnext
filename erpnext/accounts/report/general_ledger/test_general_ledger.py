@@ -135,17 +135,18 @@ class TestGeneralLedger(ERPNextTestSuite):
 		revaluation_jv.submit()
 
 		# check the balance of the account
-		balance = frappe.db.sql(
-			"""
-				select sum(debit_in_account_currency) - sum(credit_in_account_currency)
-				from `tabGL Entry`
-				where account = %s
-				group by account
-			""",
-			account.name,
+		balance = frappe.get_all(
+			"GL Entry",
+			filters={"account": account.name},
+			fields=[
+				{"SUM": "debit_in_account_currency", "as": "debit_in_account_currency"},
+				{"SUM": "credit_in_account_currency", "as": "credit_in_account_currency"},
+			],
 		)
 
-		self.assertEqual(balance[0][0], 100)
+		self.assertEqual(
+			flt(balance[0].debit_in_account_currency) - flt(balance[0].credit_in_account_currency), 100
+		)
 
 		# check if general ledger shows correct balance
 		columns, data = execute(

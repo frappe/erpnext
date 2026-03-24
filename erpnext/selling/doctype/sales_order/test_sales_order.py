@@ -852,10 +852,12 @@ class TestSalesOrder(AccountsTestMixin, ERPNextTestSuite):
 			item_doc.save()
 		else:
 			# update valid from
-			frappe.db.sql(
-				"""UPDATE `tabItem Tax` set valid_from = CURRENT_DATE
-				where parent = %(item)s and item_tax_template = %(tax)s""",
-				{"item": item, "tax": tax_template},
+			frappe.db.set_value(
+				"Item Tax",
+				{"parent": item, "item_tax_template": tax_template},
+				"valid_from",
+				nowdate(),
+				update_modified=False,
 			)
 
 		so = make_sales_order(item_code=item, qty=1, do_not_save=1)
@@ -905,10 +907,12 @@ class TestSalesOrder(AccountsTestMixin, ERPNextTestSuite):
 		self.assertEqual(so.taxes[1].total, 480)
 
 		# teardown
-		frappe.db.sql(
-			"""UPDATE `tabItem Tax` set valid_from = NULL
-			where parent = %(item)s and item_tax_template = %(tax)s""",
-			{"item": item, "tax": tax_template},
+		frappe.db.set_value(
+			"Item Tax",
+			{"parent": item, "item_tax_template": tax_template},
+			"valid_from",
+			None,
+			update_modified=False,
 		)
 		so.cancel()
 		so.delete()

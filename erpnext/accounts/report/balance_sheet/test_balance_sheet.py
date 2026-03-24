@@ -13,8 +13,8 @@ COMPANY_SHORT_NAME = "_TC6"
 
 class TestBalanceSheet(ERPNextTestSuite):
 	def test_balance_sheet(self):
-		frappe.db.sql(f"delete from `tabJournal Entry` where company='{COMPANY}'")
-		frappe.db.sql(f"delete from `tabGL Entry` where company='{COMPANY}'")
+		frappe.db.delete("Journal Entry", {"company": COMPANY})
+		frappe.db.delete("GL Entry", {"company": COMPANY})
 
 		create_account("VAT Liabilities", f"Duties and Taxes - {COMPANY_SHORT_NAME}", COMPANY)
 		create_account("Advance VAT Paid", f"Duties and Taxes - {COMPANY_SHORT_NAME}", COMPANY)

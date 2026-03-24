@@ -85,11 +85,10 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			)
 
 			# check stock value
-			sle = frappe.db.sql(
-				"""select * from `tabStock Ledger Entry`
-				where voucher_type='Stock Reconciliation' and voucher_no=%s""",
-				stock_reco.name,
-				as_dict=1,
+			sle = frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_type": "Stock Reconciliation", "voucher_no": stock_reco.name},
+				fields=["qty_after_transaction", "stock_value"],
 			)
 
 			qty_after_transaction = flt(d[0]) if d[0] != "" else flt(last_sle.get("qty_after_transaction"))

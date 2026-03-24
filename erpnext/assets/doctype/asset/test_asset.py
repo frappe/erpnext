@@ -1730,11 +1730,12 @@ class TestDepreciationBasics(AssetSetup):
 			("_Test Depreciations - _TC", 30000.0, 0.0),
 		)
 
-		gle = frappe.db.sql(
-			"""select account, debit, credit from `tabGL Entry`
-			where against_voucher_type='Asset' and against_voucher = %s
-			order by account""",
-			asset.name,
+		gle = frappe.get_all(
+			"GL Entry",
+			filters={"against_voucher_type": "Asset", "against_voucher": asset.name},
+			fields=["account", "debit", "credit"],
+			order_by="account asc",
+			as_list=1,
 		)
 
 		self.assertSequenceEqual(gle, expected_gle)
