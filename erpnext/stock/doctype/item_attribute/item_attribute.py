@@ -63,19 +63,19 @@ class ItemAttribute(Document):
 		attributes_list = [d.attribute_value for d in self.item_attribute_values]
 
 		# Get Item Variant Attribute details of variant items
-		items = frappe.db.sql(
-			"""
-			select
-				i.name, iva.attribute_value as value
-			from
-				`tabItem Variant Attribute` iva, `tabItem` i
-			where
-				iva.attribute = %(attribute)s
-				and iva.parent = i.name and
-				i.variant_of is not null and i.variant_of != ''""",
-			{"attribute": self.name},
-			as_dict=1,
-		)
+		item = frappe.qb.DocType("Item")
+		item_variant_attribute = frappe.qb.DocType("Item Variant Attribute")
+		items = (
+			frappe.qb.from_(item_variant_attribute)
+			.join(item)
+			.on(item_variant_attribute.parent == item.name)
+			.select(item.name, item_variant_attribute.attribute_value.as_("value"))
+			.where(
+				(item_variant_attribute.attribute == self.name)
+				& item.variant_of.isnotnull()
+				& (item.variant_of != "")
+			)
+		).run(as_dict=True)
 
 		for item in items:
 			if self.numeric_values:

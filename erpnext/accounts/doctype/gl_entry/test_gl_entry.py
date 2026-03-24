@@ -26,12 +26,16 @@ class TestGLEntry(ERPNextTestSuite):
 		jv.flags.ignore_validate = True
 		jv.submit()
 
-		round_off_entry = frappe.db.sql(
-			"""select name from `tabGL Entry`
-			where voucher_type='Journal Entry' and voucher_no = %s
-			and account='_Test Write Off - _TC' and cost_center='_Test Cost Center - _TC'
-			and debit = 0 and credit = '.01'""",
-			jv.name,
+		round_off_entry = frappe.db.exists(
+			"GL Entry",
+			{
+				"voucher_type": "Journal Entry",
+				"voucher_no": jv.name,
+				"account": "_Test Write Off - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"debit": 0,
+				"credit": ".01",
+			},
 		)
 
 		self.assertTrue(round_off_entry)
@@ -55,9 +59,7 @@ class TestGLEntry(ERPNextTestSuite):
 		)
 
 		self.assertTrue(all(entry.to_rename == 1 for entry in gl_entries))
-		old_naming_series_current_value = frappe.db.sql(
-			"SELECT current from tabSeries where name = %s", naming_series
-		)[0][0]
+		old_naming_series_current_value = frappe.db.get_value("Series", naming_series, "current")
 
 		rename_gle_sle_docs()
 
@@ -73,9 +75,7 @@ class TestGLEntry(ERPNextTestSuite):
 			all(new.name != old.name for new, old in zip(gl_entries, new_gl_entries, strict=False))
 		)
 
-		new_naming_series_current_value = frappe.db.sql(
-			"SELECT current from tabSeries where name = %s", naming_series
-		)[0][0]
+		new_naming_series_current_value = frappe.db.get_value("Series", naming_series, "current")
 		self.assertEqual(old_naming_series_current_value + 2, new_naming_series_current_value)
 
 	def test_validate_account_party_type(self):

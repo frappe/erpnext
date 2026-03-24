@@ -176,21 +176,9 @@ def add_dimension_to_budget_doctype(df, doc):
 def delete_accounting_dimension(doc):
 	doclist = get_doctypes_with_dimensions()
 
-	frappe.db.sql(
-		"""
-		DELETE FROM `tabCustom Field`
-		WHERE fieldname = {}
-		AND dt IN ({})""".format("%s", ", ".join(["%s"] * len(doclist))),  # nosec
-		tuple([doc.fieldname, *doclist]),
-	)
+	frappe.db.delete("Custom Field", {"fieldname": doc.fieldname, "dt": ["in", doclist]})
 
-	frappe.db.sql(
-		"""
-		DELETE FROM `tabProperty Setter`
-		WHERE field_name = {}
-		AND doc_type IN ({})""".format("%s", ", ".join(["%s"] * len(doclist))),  # nosec
-		tuple([doc.fieldname, *doclist]),
-	)
+	frappe.db.delete("Property Setter", {"field_name": doc.fieldname, "doc_type": ["in", doclist]})
 
 	budget_against_property = frappe.get_doc("Property Setter", "Budget-budget_against-options")
 	value_list = budget_against_property.value.split("\n")[3:]
@@ -251,12 +239,23 @@ def get_accounting_dimensions(as_list=True):
 
 
 def get_checks_for_pl_and_bs_accounts():
-	return frappe.db.sql(
-		"""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
-			FROM `tabAccounting Dimension`p ,`tabAccounting Dimension Detail` c
-			WHERE p.name = c.parent AND p.disabled = 0""",
-		as_dict=1,
-	)
+	parent = frappe.qb.DocType("Accounting Dimension")
+	child = frappe.qb.DocType("Accounting Dimension Detail")
+	return (
+		frappe.qb.from_(child)
+		.join(parent)
+		.on(parent.name == child.parent)
+		.select(
+			parent.label,
+			parent.disabled,
+			parent.fieldname,
+			child.default_dimension,
+			child.company,
+			child.mandatory_for_pl,
+			child.mandatory_for_bs,
+		)
+		.where(parent.disabled == 0)
+	).run(as_dict=True)
 
 
 def get_dimension_with_children(doctype, dimensions):

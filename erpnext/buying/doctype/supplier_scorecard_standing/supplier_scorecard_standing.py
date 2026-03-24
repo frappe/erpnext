@@ -40,14 +40,4 @@ def get_scoring_standing(standing_name: str):
 
 @frappe.whitelist()
 def get_standings_list():
-	standings = frappe.db.sql(
-		"""
-		SELECT
-			scs.name
-		FROM
-			`tabSupplier Scorecard Standing` scs""",
-		{},
-		as_dict=1,
-	)
-
-	return standings
+	return frappe.get_all("Supplier Scorecard Standing", fields=["name"])

@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.utils import format_date, get_datetime
+from pypika import Order
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -131,6 +132,8 @@ class MaintenanceVisit(TransactionBase):
 
 	def update_customer_issue(self, flag):
 		if not self.maintenance_schedule:
+			maintenance_visit = frappe.qb.DocType("Maintenance Visit")
+			maintenance_visit_purpose = frappe.qb.DocType("Maintenance Visit Purpose")
 			for d in self.get("purposes"):
 				if d.prevdoc_docname and d.prevdoc_doctype == "Warranty Claim":
 					if flag == 1:
@@ -143,10 +146,25 @@ class MaintenanceVisit(TransactionBase):
 						elif self.completion_status == "Partially Completed":
 							status = "Work In Progress"
 					else:
-						nm = frappe.db.sql(
-							"select t1.name, t1.mntc_date, t2.service_person, t2.work_done from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.completion_status = 'Partially Completed' and t2.prevdoc_docname = %s and t1.name!=%s and t1.docstatus = 1 order by t1.name desc limit 1",
-							(d.prevdoc_docname, self.name),
-						)
+						nm = (
+							frappe.qb.from_(maintenance_visit_purpose)
+							.join(maintenance_visit)
+							.on(maintenance_visit_purpose.parent == maintenance_visit.name)
+							.select(
+								maintenance_visit.name,
+								maintenance_visit.mntc_date,
+								maintenance_visit_purpose.service_person,
+								maintenance_visit_purpose.work_done,
+							)
+							.where(
+								(maintenance_visit.completion_status == "Partially Completed")
+								& (maintenance_visit_purpose.prevdoc_docname == d.prevdoc_docname)
+								& (maintenance_visit.name != self.name)
+								& (maintenance_visit.docstatus == 1)
+							)
+							.orderby(maintenance_visit.name, order=Order.desc)
+							.limit(1)
+						).run()
 
 						if nm:
 							status = "Work In Progress"
@@ -180,14 +198,29 @@ class MaintenanceVisit(TransactionBase):
 				# check_for_doctype = d.prevdoc_doctype
 
 		if check_for_docname:
-			check = frappe.db.sql(
-				"select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.name!=%s and t2.prevdoc_docname=%s and t1.docstatus = 1 and (t1.mntc_date > %s or (t1.mntc_date = %s and t1.mntc_time > %s))",
-				(self.name, check_for_docname, self.mntc_date, self.mntc_date, self.mntc_time),
-			)
+			maintenance_visit = frappe.qb.DocType("Maintenance Visit")
+			maintenance_visit_purpose = frappe.qb.DocType("Maintenance Visit Purpose")
+			check = (
+				frappe.qb.from_(maintenance_visit_purpose)
+				.join(maintenance_visit)
+				.on(maintenance_visit_purpose.parent == maintenance_visit.name)
+				.select(maintenance_visit.name)
+				.where(
+					(maintenance_visit.name != self.name)
+					& (maintenance_visit_purpose.prevdoc_docname == check_for_docname)
+					& (maintenance_visit.docstatus == 1)
+					& (
+						(maintenance_visit.mntc_date > self.mntc_date)
+						| (
+							(maintenance_visit.mntc_date == self.mntc_date)
+							& (maintenance_visit.mntc_time > self.mntc_time)
+						)
+					)
+				)
+			).run(pluck=True)
 
 			if check:
-				check_lst = [x[0] for x in check]
-				check_lst = ",".join(check_lst)
+				check_lst = ",".join(check)
 				frappe.throw(
 					_("Cancel Material Visits {0} before cancelling this Maintenance Visit").format(check_lst)
 				)

@@ -5,6 +5,7 @@ from itertools import groupby
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Count
 from frappe.utils import flt
 
 from erpnext.accounts.report.utils import convert
@@ -22,34 +23,55 @@ def validate_filters(from_date, to_date, company):
 def get_funnel_data(from_date: str, to_date: str, company: str):
 	validate_filters(from_date, to_date, company)
 
-	active_leads = frappe.db.sql(
-		"""select count(*) from `tabLead`
-		where (date(`creation`) between %s and %s)
-		and company=%s""",
-		(from_date, to_date, company),
-	)[0][0]
+	lead = frappe.qb.DocType("Lead")
+	quotation = frappe.qb.DocType("Quotation")
+	customer = frappe.qb.DocType("Customer")
+	from_datetime = f"{from_date} 00:00:00"
+	to_datetime = f"{to_date} 23:59:59.999999"
 
-	opportunities = frappe.db.sql(
-		"""select count(*) from `tabOpportunity`
-		where (date(`creation`) between %s and %s)
-		and opportunity_from='Lead' and company=%s""",
-		(from_date, to_date, company),
-	)[0][0]
+	active_leads = (
+		frappe.get_all(
+			"Lead",
+			filters={
+				"creation": ["between", [from_datetime, to_datetime]],
+				"company": company,
+			},
+			fields=[{"COUNT": "*", "as": "count"}],
+		)[0].count
+		or 0
+	)
 
-	quotations = frappe.db.sql(
-		"""select count(*) from `tabQuotation`
-		where docstatus = 1 and (date(`creation`) between %s and %s)
-		and (opportunity!="" or quotation_to="Lead") and company=%s""",
-		(from_date, to_date, company),
-	)[0][0]
+	opportunities = (
+		frappe.get_all(
+			"Opportunity",
+			filters={
+				"creation": ["between", [from_datetime, to_datetime]],
+				"opportunity_from": "Lead",
+				"company": company,
+			},
+			fields=[{"COUNT": "*", "as": "count"}],
+		)[0].count
+		or 0
+	)
 
-	converted = frappe.db.sql(
-		"""select count(*) from `tabCustomer`
-		JOIN `tabLead` ON `tabLead`.name = `tabCustomer`.lead_name
-		WHERE (date(`tabCustomer`.creation) between %s and %s)
-		and `tabLead`.company=%s""",
-		(from_date, to_date, company),
-	)[0][0]
+	quotations = (
+		frappe.qb.from_(quotation)
+		.select(Count("*").as_("count"))
+		.where(
+			(quotation.docstatus == 1)
+			& quotation.creation.between(from_datetime, to_datetime)
+			& ((quotation.opportunity != "") | (quotation.quotation_to == "Lead"))
+			& (quotation.company == company)
+		)
+	).run()[0][0] or 0
+
+	converted = (
+		frappe.qb.from_(customer)
+		.join(lead)
+		.on(lead.name == customer.lead_name)
+		.select(Count("*").as_("count"))
+		.where(customer.creation.between(from_datetime, to_datetime) & (lead.company == company))
+	).run()[0][0] or 0
 
 	return [
 		{"title": _("Active Leads"), "value": active_leads, "color": "#B03B46"},

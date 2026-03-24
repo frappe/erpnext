@@ -49,11 +49,8 @@ class QualityProcedure(NestedSet):
 
 	def on_trash(self):
 		# clear from child table (sub procedures)
-		frappe.db.sql(
-			"""update `tabQuality Procedure Process`
-			set `procedure`='' where `procedure`=%s""",
-			self.name,
-		)
+		process = frappe.qb.DocType("Quality Procedure Process")
+		(frappe.qb.update(process).set(process.procedure, "").where(process.procedure == self.name)).run()
 		NestedSet.on_trash(self, allow_root_deletion=True)
 
 	def check_for_incorrect_child(self):

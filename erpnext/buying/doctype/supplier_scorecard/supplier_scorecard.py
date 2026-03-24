@@ -89,19 +89,11 @@ class SupplierScorecard(Document):
 			throw(_("Criteria weights must add up to 100%"))
 
 	def calculate_total_score(self):
-		scorecards = frappe.db.sql(
-			"""
-			SELECT
-				scp.name
-			FROM
-				`tabSupplier Scorecard Period` scp
-			WHERE
-				scp.scorecard = %(sc)s
-				AND scp.docstatus = 1
-			ORDER BY
-				scp.end_date DESC""",
-			{"sc": self.name},
-			as_dict=1,
+		scorecards = frappe.get_all(
+			"Supplier Scorecard Period",
+			filters={"scorecard": self.name, "docstatus": 1},
+			fields=["name"],
+			order_by="end_date desc",
 		)
 
 		period = 0
@@ -151,17 +143,10 @@ def get_timeline_data(doctype: str, name: str):
 	scs = frappe.get_doc(doctype, name)
 	out = {}
 	timeline_data = {}
-	scorecards = frappe.db.sql(
-		"""
-		SELECT
-			sc.name
-		FROM
-			`tabSupplier Scorecard Period` sc
-		WHERE
-			sc.scorecard = %(scs)s
-			AND sc.docstatus = 1""",
-		{"scs": scs.name},
-		as_dict=1,
+	scorecards = frappe.get_all(
+		"Supplier Scorecard Period",
+		filters={"scorecard": scs.name, "docstatus": 1},
+		fields=["name"],
 	)
 
 	for sc in scorecards:
@@ -181,15 +166,7 @@ def daterange(start_date, end_date):
 
 
 def refresh_scorecards():
-	scorecards = frappe.db.sql(
-		"""
-		SELECT
-			sc.name
-		FROM
-			`tabSupplier Scorecard` sc""",
-		{},
-		as_dict=1,
-	)
+	scorecards = frappe.get_all("Supplier Scorecard", fields=["name"])
 	for sc in scorecards:
 		# Check to see if any new scorecard periods are created
 		if make_all_scorecards(sc.name) > 0:

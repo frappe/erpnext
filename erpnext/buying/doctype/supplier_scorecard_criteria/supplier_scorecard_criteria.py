@@ -55,17 +55,7 @@ class SupplierScorecardCriteria(Document):
 
 @frappe.whitelist()
 def get_criteria_list():
-	criteria = frappe.db.sql(
-		"""
-		SELECT
-			scs.name
-		FROM
-			`tabSupplier Scorecard Criteria` scs""",
-		{},
-		as_dict=1,
-	)
-
-	return criteria
+	return frappe.get_all("Supplier Scorecard Criteria", fields=["name"])
 
 
 def get_variables(criteria_name):
@@ -81,16 +71,11 @@ def _get_variables(criteria):
 	for _dummy1, match in enumerate(mylist):
 		for _dummy2 in range(0, len(match.groups())):
 			try:
-				var = frappe.db.sql(
-					"""
-					SELECT
-						scv.variable_label, scv.description, scv.param_name, scv.path
-					FROM
-						`tabSupplier Scorecard Variable` scv
-					WHERE
-						param_name=%(param)s""",
-					{"param": match.group(1)},
-					as_dict=1,
+				var = frappe.get_all(
+					"Supplier Scorecard Variable",
+					filters={"param_name": match.group(1)},
+					fields=["variable_label", "description", "param_name", "path"],
+					limit=1,
 				)[0]
 				my_variables.append(var)
 			except Exception:
