@@ -1,12 +1,14 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe import qb
 from frappe.utils import flt, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.report.general_ledger.general_ledger import execute
+from erpnext.accounts.report.general_ledger.general_ledger import execute, get_conditions
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -332,3 +334,31 @@ class TestGeneralLedger(ERPNextTestSuite):
 		)
 		actual = set([x.voucher_no for x in data if x.voucher_no])
 		self.assertEqual(expected, actual)
+
+	def test_get_conditions_uses_qb_user_permission_conditions(self):
+		rendered_condition = "`tabGL Entry`.`company` in ('_Test Company')"
+		filters = frappe._dict(
+			{
+				"company": "_Test Company",
+				"from_date": today(),
+				"to_date": today(),
+			}
+		)
+
+		with (
+			patch(
+				"erpnext.accounts.report.general_ledger.general_ledger.build_qb_match_conditions",
+				return_value=[object()],
+			),
+			patch(
+				"erpnext.accounts.report.general_ledger.general_ledger.get_accounting_dimensions",
+				return_value=[],
+			),
+			patch("frappe.get_single_value", return_value=0),
+			patch("erpnext.accounts.report.general_ledger.general_ledger.Criterion.all") as criterion_all,
+		):
+			criterion_all.return_value.get_sql.return_value = rendered_condition
+
+			conditions = get_conditions(filters)
+
+		self.assertIn(f"({rendered_condition})", conditions)

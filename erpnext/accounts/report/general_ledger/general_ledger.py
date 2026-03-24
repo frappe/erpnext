@@ -14,7 +14,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
-from erpnext.accounts.utils import get_account_currency
+from erpnext.accounts.utils import build_qb_match_conditions, get_account_currency
 
 DEBIT_CREDIT_DICT = {
 	"debit": 0.0,
@@ -322,10 +322,8 @@ def get_conditions(filters):
 	if not filters.get("show_cancelled_entries"):
 		conditions.append("is_cancelled = 0")
 
-	from frappe.desk.reportview import build_match_conditions
-
-	if match_conditions := build_match_conditions("GL Entry"):
-		conditions.append(f"({match_conditions})")
+	if user_permission_condition := get_user_permission_condition():
+		conditions.append(f"({user_permission_condition})")
 
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
@@ -343,6 +341,17 @@ def get_conditions(filters):
 						conditions.append(f"{dimension.fieldname} in %({dimension.fieldname})s")
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
+
+
+def get_user_permission_condition():
+	if not (match_conditions := build_qb_match_conditions("GL Entry")):
+		return ""
+
+	quote_char = '"' if frappe.db.db_type == "postgres" else "`"
+	return Criterion.all(match_conditions).get_sql(
+		quote_char=quote_char,
+		secondary_quote_char="'",
+	)
 
 
 def get_party_name_map():
