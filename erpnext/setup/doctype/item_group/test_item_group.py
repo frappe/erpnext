@@ -20,7 +20,7 @@ class TestItemGroup(ERPNextTestSuite):
 
 	def test_basic_tree(self, records=None):
 		min_lft = 1
-		max_rgt = frappe.db.sql("select max(rgt) from `tabItem Group`")[0][0]
+		max_rgt = frappe.get_all("Item Group", fields=[{"MAX": "rgt", "as": "rgt"}])[0].rgt
 
 		if not records:
 			records = self.globalTestRecords["Item Group"][2:]
@@ -131,11 +131,10 @@ class TestItemGroup(ERPNextTestSuite):
 		frappe.db.get_value("Item Group", parent_item_group, "rgt")
 
 		ancestors = get_ancestors_of("Item Group", "_Test Item Group B - 3")
-		ancestors = frappe.db.sql(
-			"""select name, rgt from `tabItem Group`
-			where name in ({})""".format(", ".join(["%s"] * len(ancestors))),
-			tuple(ancestors),
-			as_dict=True,
+		ancestors = frappe.get_all(
+			"Item Group",
+			filters={"name": ["in", ancestors]},
+			fields=["name", "rgt"],
 		)
 
 		frappe.delete_doc("Item Group", "_Test Item Group B - 3")

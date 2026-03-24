@@ -3159,20 +3159,22 @@ def check_if_return_invoice_linked_with_payment_entry(self):
 	else:
 		invoice = self.name
 
-	payment_entries = frappe.db.sql_list(
-		"""
-		SELECT
-			t1.name
-		FROM
-			`tabPayment Entry` t1, `tabPayment Entry Reference` t2
-		WHERE
-			t1.name = t2.parent
-			and t1.docstatus = 1
-			and t2.reference_name = %s
-			and t2.allocated_amount < 0
-		""",
-		invoice,
+	payment_entry_references = frappe.get_all(
+		"Payment Entry Reference",
+		filters={"reference_name": invoice, "allocated_amount": ["<", 0]},
+		pluck="parent",
 	)
+	submitted_payment_entries = set()
+	if payment_entry_references:
+		submitted_payment_entries = set(
+			frappe.get_all(
+				"Payment Entry",
+				filters={"name": ["in", payment_entry_references], "docstatus": 1},
+				pluck="name",
+			)
+		)
+
+	payment_entries = [name for name in payment_entry_references if name in submitted_payment_entries]
 
 	links_to_pe = []
 	if payment_entries:

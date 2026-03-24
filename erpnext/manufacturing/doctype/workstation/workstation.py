@@ -162,17 +162,25 @@ class Workstation(Document):
 
 	def validate_overlap_for_operation_timings(self):
 		"""Check if there is no overlap in setting Workstation Operating Hours"""
+		working_hour = frappe.qb.DocType("Workstation Working Hour")
+
 		for d in self.get("working_hours"):
-			existing = frappe.db.sql_list(
-				"""select idx from `tabWorkstation Working Hour`
-				where parent = %s and name != %s
-					and (
-						(start_time between %s and %s) or
-						(end_time between %s and %s) or
-						(%s between start_time and end_time))
-				""",
-				(self.name, d.name, d.start_time, d.end_time, d.start_time, d.end_time, d.start_time),
-			)
+			existing = (
+				frappe.qb.from_(working_hour)
+				.select(working_hour.idx)
+				.where(
+					(working_hour.parent == self.name)
+					& (working_hour.name != d.name)
+					& (
+						working_hour.start_time.between(d.start_time, d.end_time)
+						| working_hour.end_time.between(d.start_time, d.end_time)
+						| (
+							(working_hour.start_time <= d.start_time)
+							& (working_hour.end_time >= d.start_time)
+						)
+					)
+				)
+			).run(pluck=True)
 
 			if existing:
 				frappe.throw(
@@ -181,18 +189,13 @@ class Workstation(Document):
 				)
 
 	def update_bom_operation(self):
-		bom_list = frappe.db.sql(
-			"""select DISTINCT parent from `tabBOM Operation`
-			where workstation = %s and parenttype = 'routing' """,
-			self.name,
-		)
+		bom_operation = frappe.qb.DocType("BOM Operation")
 
-		for bom_no in bom_list:
-			frappe.db.sql(
-				"""update `tabBOM Operation` set hour_rate = %s
-				where parent = %s and workstation = %s""",
-				(self.hour_rate, bom_no[0], self.name),
-			)
+		(
+			frappe.qb.update(bom_operation)
+			.set(bom_operation.hour_rate, self.hour_rate)
+			.where((bom_operation.workstation == self.name) & (bom_operation.parenttype == "routing"))
+		).run()
 
 	def validate_workstation_holiday(self, schedule_date, skip_holiday_list_check=False):
 		if not skip_holiday_list_check and (
@@ -439,12 +442,16 @@ def check_workstation_for_holiday(workstation, from_datetime, to_datetime):
 	holiday_list = frappe.db.get_value("Workstation", workstation, "holiday_list")
 	if holiday_list and from_datetime and to_datetime:
 		applicable_holidays = []
-		for d in frappe.db.sql(
-			"""select holiday_date from `tabHoliday` where parent = %s
-			and holiday_date between %s and %s """,
-			(holiday_list, getdate(from_datetime), getdate(to_datetime)),
-		):
-			applicable_holidays.append(formatdate(d[0]))
+		holiday_dates = frappe.get_all(
+			"Holiday",
+			filters={
+				"parent": holiday_list,
+				"holiday_date": ["between", [getdate(from_datetime), getdate(to_datetime)]],
+			},
+			pluck="holiday_date",
+		)
+		for holiday_date in holiday_dates:
+			applicable_holidays.append(formatdate(holiday_date))
 
 		if applicable_holidays:
 			frappe.throw(

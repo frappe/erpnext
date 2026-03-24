@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _, bold, throw
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form, nowtime
 
 from erpnext.accounts.party import render_address
@@ -433,39 +434,50 @@ class SellingController(StockController):
 			product_bundle_items[item_code] = item_code in items_with_product_bundle
 
 	def get_already_delivered_qty(self, current_docname, so, so_detail):
-		delivered_via_dn = frappe.db.sql(
-			"""select sum(qty) from `tabDelivery Note Item`
-			where so_detail = %s and docstatus = 1
-			and against_sales_order = %s
-			and parent != %s""",
-			(so_detail, so, current_docname),
+		sales_invoice = frappe.qb.DocType("Sales Invoice")
+		sales_invoice_item = frappe.qb.DocType("Sales Invoice Item")
+
+		delivered_via_dn = (
+			frappe.get_all(
+				"Delivery Note Item",
+				filters={
+					"so_detail": so_detail,
+					"docstatus": 1,
+					"against_sales_order": so,
+					"parent": ["!=", current_docname],
+				},
+				fields=[{"SUM": "qty", "as": "qty"}],
+			)[0].qty
+			or 0
 		)
 
-		delivered_via_si = frappe.db.sql(
-			"""select sum(si_item.qty)
-			from `tabSales Invoice Item` si_item, `tabSales Invoice` si
-			where si_item.parent = si.name and si.update_stock = 1
-			and si_item.so_detail = %s and si.docstatus = 1
-			and si_item.sales_order = %s
-			and si.name != %s""",
-			(so_detail, so, current_docname),
-		)
+		delivered_via_si = (
+			frappe.qb.from_(sales_invoice_item)
+			.join(sales_invoice)
+			.on(sales_invoice_item.parent == sales_invoice.name)
+			.select(Sum(sales_invoice_item.qty).as_("qty"))
+			.where(
+				(sales_invoice.update_stock == 1)
+				& (sales_invoice_item.so_detail == so_detail)
+				& (sales_invoice.docstatus == 1)
+				& (sales_invoice_item.sales_order == so)
+				& (sales_invoice.name != current_docname)
+			)
+		).run()[0][0] or 0
 
-		total_delivered_qty = (flt(delivered_via_dn[0][0]) if delivered_via_dn else 0) + (
-			flt(delivered_via_si[0][0]) if delivered_via_si else 0
-		)
+		total_delivered_qty = flt(delivered_via_dn) + flt(delivered_via_si)
 
 		return total_delivered_qty
 
 	def get_so_qty_and_warehouse(self, so_detail):
-		so_item = frappe.db.sql(
-			"""select qty, warehouse from `tabSales Order Item`
-			where name = %s and docstatus = 1""",
-			so_detail,
-			as_dict=1,
+		so_item = frappe.get_value(
+			"Sales Order Item",
+			{"name": so_detail, "docstatus": 1},
+			["qty", "warehouse"],
+			as_dict=True,
 		)
-		so_qty = so_item and flt(so_item[0]["qty"]) or 0.0
-		so_warehouse = so_item and so_item[0]["warehouse"] or ""
+		so_qty = so_item and flt(so_item.qty) or 0.0
+		so_warehouse = so_item and so_item.warehouse or ""
 		return so_qty, so_warehouse
 
 	def check_sales_order_on_hold_or_close(self, ref_fieldname):

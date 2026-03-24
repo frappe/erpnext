@@ -99,16 +99,12 @@ class TestCompany(ERPNextTestSuite):
 					frappe.delete_doc("Company", template)
 
 	def delete_mode_of_payment(self, company):
-		frappe.db.sql(
-			""" delete from `tabMode of Payment Account`
-			where company =%s """,
-			(company),
-		)
+		frappe.db.delete("Mode of Payment Account", {"company": company})
 
 	def test_basic_tree(self, records=None):
 		self.load_test_records("Company")
 		min_lft = 1
-		max_rgt = frappe.db.sql("select max(rgt) from `tabCompany`")[0][0]
+		max_rgt = frappe.get_all("Company", fields=[{"MAX": "rgt", "as": "rgt"}])[0].rgt
 
 		if not records:
 			records = self.globalTestRecords["Company"][2:]

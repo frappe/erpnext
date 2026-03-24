@@ -43,19 +43,19 @@ class AccountingDimensionFilter(Document):
 		self.validate_applicable_accounts()
 
 	def validate_applicable_accounts(self):
-		accounts = frappe.db.sql(
-			"""
-				SELECT a.applicable_on_account as account
-				FROM `tabApplicable On Account` a, `tabAccounting Dimension Filter` d
-				WHERE d.name = a.parent
-				and d.name != %s
-				and d.accounting_dimension = %s
-			""",
-			(self.name, self.accounting_dimension),
-			as_dict=1,
+		dimension_filters = frappe.get_all(
+			"Accounting Dimension Filter",
+			filters={"name": ["!=", self.name], "accounting_dimension": self.accounting_dimension},
+			pluck="name",
 		)
 
-		account_list = [d.account for d in accounts]
+		account_list = []
+		if dimension_filters:
+			account_list = frappe.get_all(
+				"Applicable On Account",
+				filters={"parent": ["in", dimension_filters]},
+				pluck="applicable_on_account",
+			)
 
 		for account in self.get("accounts"):
 			if account.applicable_on_account in account_list:
@@ -69,33 +69,46 @@ class AccountingDimensionFilter(Document):
 
 
 def get_dimension_filter_map():
-	filters = frappe.db.sql(
-		"""
-		SELECT
-			a.applicable_on_account, d.dimension_value, p.accounting_dimension,
-			p.allow_or_restrict, p.fieldname, a.is_mandatory
-		FROM
-			`tabApplicable On Account` a,
-			`tabAccounting Dimension Filter` p
-		LEFT JOIN `tabAllowed Dimension` d ON d.parent = p.name
-		WHERE
-			p.name = a.parent
-			AND p.disabled = 0
-	""",
-		as_dict=1,
+	dimension_filters = frappe.get_all(
+		"Accounting Dimension Filter",
+		filters={"disabled": 0},
+		fields=["name", "accounting_dimension", "allow_or_restrict", "fieldname"],
 	)
 
 	dimension_filter_map = {}
+	if not dimension_filters:
+		return dimension_filter_map
 
-	for f in filters:
-		build_map(
-			dimension_filter_map,
-			f.fieldname,
-			f.applicable_on_account,
-			f.dimension_value,
-			f.allow_or_restrict,
-			f.is_mandatory,
-		)
+	filter_names = [dimension_filter.name for dimension_filter in dimension_filters]
+	account_rows = frappe.get_all(
+		"Applicable On Account",
+		filters={"parent": ["in", filter_names]},
+		fields=["parent", "applicable_on_account", "is_mandatory"],
+	)
+	dimension_rows = frappe.get_all(
+		"Allowed Dimension",
+		filters={"parent": ["in", filter_names]},
+		fields=["parent", "dimension_value"],
+	)
+	dimensions_by_parent = {}
+	for row in dimension_rows:
+		dimensions_by_parent.setdefault(row.parent, []).append(row.dimension_value)
+	accounts_by_parent = {}
+	for row in account_rows:
+		accounts_by_parent.setdefault(row.parent, []).append(row)
+
+	for dimension_filter in dimension_filters:
+		filter_values = dimensions_by_parent.get(dimension_filter.name) or [None]
+		for account in accounts_by_parent.get(dimension_filter.name, []):
+			for filter_value in filter_values:
+				build_map(
+					dimension_filter_map,
+					dimension_filter.fieldname,
+					account.applicable_on_account,
+					filter_value,
+					dimension_filter.allow_or_restrict,
+					account.is_mandatory,
+				)
 	return dimension_filter_map
 
 

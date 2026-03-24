@@ -42,11 +42,20 @@ class ActivityCost(Document):
 			self.title = self.activity_type
 
 	def check_unique(self):
+		activity_cost = frappe.qb.DocType("Activity Cost")
+
 		if self.employee:
-			if frappe.db.sql(
-				"""select name from `tabActivity Cost` where employee_name= %s and activity_type= %s and name != %s""",
-				(self.employee_name, self.activity_type, self.name),
-			):
+			existing = (
+				frappe.qb.from_(activity_cost)
+				.select(activity_cost.name)
+				.where(
+					(activity_cost.employee_name == self.employee_name)
+					& (activity_cost.activity_type == self.activity_type)
+					& (activity_cost.name != self.name)
+				)
+				.limit(1)
+			).run(pluck=True)
+			if existing:
 				frappe.throw(
 					_("Activity Cost exists for Employee {0} against Activity Type - {1}").format(
 						self.employee, self.activity_type
@@ -54,10 +63,17 @@ class ActivityCost(Document):
 					DuplicationError,
 				)
 		else:
-			if frappe.db.sql(
-				"""select name from `tabActivity Cost` where ifnull(employee, '')='' and activity_type= %s and name != %s""",
-				(self.activity_type, self.name),
-			):
+			existing = (
+				frappe.qb.from_(activity_cost)
+				.select(activity_cost.name)
+				.where(
+					((activity_cost.employee.isnull()) | (activity_cost.employee == ""))
+					& (activity_cost.activity_type == self.activity_type)
+					& (activity_cost.name != self.name)
+				)
+				.limit(1)
+			).run(pluck=True)
+			if existing:
 				frappe.throw(
 					_("Default Activity Cost exists for Activity Type - {0}").format(self.activity_type),
 					DuplicationError,

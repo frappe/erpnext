@@ -1,4 +1,5 @@
 import frappe
+from frappe.query_builder import Order
 
 
 @frappe.whitelist()
@@ -9,30 +10,27 @@ def get_last_interaction(contact: str | None = None, lead: str | None = None):
 	last_communication = None
 	last_issue = None
 	if contact:
-		query_condition = ""
-		values = []
+		communication = frappe.qb.DocType("Communication")
+		conditions = []
 		contact = frappe.get_doc("Contact", contact)
 		for link in contact.links:
 			if link.link_doctype == "Customer":
 				last_issue = get_last_issue_from_customer(link.link_name)
-			query_condition += "(`reference_doctype`=%s AND `reference_name`=%s) OR"
-			values += [link.link_doctype, link.link_name]
+			conditions.append(
+				(communication.reference_doctype == link.link_doctype)
+				& (communication.reference_name == link.link_name)
+			)
 
-		if query_condition:
-			# remove extra appended 'OR'
-			query_condition = query_condition[:-2]
-			last_communication = frappe.db.sql(
-				f"""
-				SELECT `name`, `content`
-				FROM `tabCommunication`
-				WHERE `sent_or_received`='Received'
-				AND ({query_condition})
-				ORDER BY `creation`
-				LIMIT 1
-			""",
-				values,
-				as_dict=1,
-			)  # nosec
+		if conditions:
+			last_communication = (
+				frappe.qb.from_(communication)
+				.select(communication.name, communication.content)
+				.where(
+					(communication.sent_or_received == "Received") & frappe.qb.terms.Criterion.any(conditions)
+				)
+				.orderby(communication.creation, order=Order.desc)
+				.limit(1)
+			).run(as_dict=True)
 
 	if lead:
 		last_communication = frappe.get_all(

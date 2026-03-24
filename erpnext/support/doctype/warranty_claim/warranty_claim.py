@@ -62,14 +62,19 @@ class WarrantyClaim(TransactionBase):
 			self.resolution_date = now_datetime()
 
 	def on_cancel(self):
-		lst = frappe.db.sql(
-			"""select t1.name
-			from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2
-			where t2.parent = t1.name and t2.prevdoc_docname = %s and	t1.docstatus!=2""",
-			(self.name),
-		)
+		maintenance_visit = frappe.qb.DocType("Maintenance Visit")
+		maintenance_visit_purpose = frappe.qb.DocType("Maintenance Visit Purpose")
+		lst = (
+			frappe.qb.from_(maintenance_visit_purpose)
+			.join(maintenance_visit)
+			.on(maintenance_visit_purpose.parent == maintenance_visit.name)
+			.select(maintenance_visit.name)
+			.where(
+				(maintenance_visit_purpose.prevdoc_docname == self.name) & (maintenance_visit.docstatus != 2)
+			)
+		).run(pluck=True)
 		if lst:
-			lst1 = ",".join(x[0] for x in lst)
+			lst1 = ",".join(lst)
 			frappe.throw(_("Cancel Material Visit {0} before cancelling this Warranty Claim").format(lst1))
 		else:
 			self.db_set("status", "Cancelled")
@@ -86,13 +91,19 @@ def make_maintenance_visit(source_name: str, target_doc: str | Document | None =
 		target_doc.prevdoc_doctype = source_parent.doctype
 		target_doc.prevdoc_docname = source_parent.name
 
-	visit = frappe.db.sql(
-		"""select t1.name
-		from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2
-		where t2.parent=t1.name and t2.prevdoc_docname=%s
-		and t1.docstatus=1 and t1.completion_status='Fully Completed'""",
-		source_name,
-	)
+	maintenance_visit = frappe.qb.DocType("Maintenance Visit")
+	maintenance_visit_purpose = frappe.qb.DocType("Maintenance Visit Purpose")
+	visit = (
+		frappe.qb.from_(maintenance_visit_purpose)
+		.join(maintenance_visit)
+		.on(maintenance_visit_purpose.parent == maintenance_visit.name)
+		.select(maintenance_visit.name)
+		.where(
+			(maintenance_visit_purpose.prevdoc_docname == source_name)
+			& (maintenance_visit.docstatus == 1)
+			& (maintenance_visit.completion_status == "Fully Completed")
+		)
+	).run(pluck=True)
 
 	if not visit:
 		target_doc = get_mapped_doc(

@@ -1503,11 +1503,12 @@ class TestSalesOrder(AccountsTestMixin, ERPNextTestSuite):
 
 		# Check if Work Orders were raised
 		for item in so_item_name:
-			wo_qty = frappe.db.sql(
-				"select sum(qty) from `tabWork Order` where sales_order=%s and sales_order_item=%s",
-				(so.name, item),
-			)
-			self.assertEqual(wo_qty[0][0], so_item_name.get(item))
+			wo_qty = frappe.get_all(
+				"Work Order",
+				filters={"sales_order": so.name, "sales_order_item": item},
+				fields=[{"SUM": "qty", "as": "qty"}],
+			)[0].qty
+			self.assertEqual(wo_qty, so_item_name.get(item))
 
 	def test_advance_payment_entry_unlink_against_sales_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
@@ -1686,9 +1687,7 @@ class TestSalesOrder(AccountsTestMixin, ERPNextTestSuite):
 		mr_dict["include_exploded_items"] = 0
 		mr_dict["ignore_existing_ordered_qty"] = 1
 		make_raw_material_request(mr_dict, so.company, so.name)
-		mr = frappe.db.sql(
-			"""select name from `tabMaterial Request` ORDER BY creation DESC LIMIT 1""", as_dict=1
-		)[0]
+		mr = frappe.get_all("Material Request", fields=["name"], order_by="creation desc", limit=1)[0]
 		mr_doc = frappe.get_doc("Material Request", mr.get("name"))
 		self.assertEqual(mr_doc.items[0].sales_order, so.name)
 

@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder import Order
 from frappe.utils import cstr, get_datetime, get_link_to_form
 
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
@@ -127,25 +128,24 @@ class AssetMovement(Document):
 
 	def get_latest_location_and_custodian(self, asset):
 		current_location, current_employee = "", ""
-		cond = "1=1"
 
 		# latest entry corresponds to current document's location, employee when transaction date > previous dates
 		# In case of cancellation it corresponds to previous latest document's location, employee
-		args = {"asset": asset, "company": self.company}
-		latest_movement_entry = frappe.db.sql(
-			f"""
-			SELECT asm_item.target_location, asm_item.to_employee
-			FROM `tabAsset Movement Item` asm_item
-			JOIN `tabAsset Movement` asm ON asm_item.parent = asm.name
-			WHERE
-				asm_item.asset = %(asset)s AND
-				asm.company = %(company)s AND
-				asm.docstatus = 1 AND {cond}
-			ORDER BY asm.transaction_date DESC
-			LIMIT 1
-			""",
-			args,
-		)
+		asset_movement = frappe.qb.DocType("Asset Movement")
+		asset_movement_item = frappe.qb.DocType("Asset Movement Item")
+		latest_movement_entry = (
+			frappe.qb.from_(asset_movement_item)
+			.join(asset_movement)
+			.on(asset_movement_item.parent == asset_movement.name)
+			.select(asset_movement_item.target_location, asset_movement_item.to_employee)
+			.where(
+				(asset_movement_item.asset == asset)
+				& (asset_movement.company == self.company)
+				& (asset_movement.docstatus == 1)
+			)
+			.orderby(asset_movement.transaction_date, order=Order.desc)
+			.limit(1)
+		).run()
 
 		if latest_movement_entry:
 			current_location = latest_movement_entry[0][0]

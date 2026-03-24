@@ -25,28 +25,29 @@ class PartyType(Document):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_party_type(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	cond = ""
 	account_type = None
 
 	if filters and filters.get("account"):
 		account_type = frappe.db.get_value("Account", filters.get("account"), "account_type")
-		if account_type:
-			if account_type in ["Receivable", "Payable"]:
-				# Include Employee regardless of its configured account_type, but still respect the text filter
-				cond = "and (account_type = %(account_type)s or name = 'Employee')"
-			else:
-				cond = "and account_type = %(account_type)s"
+	query_filters = {searchfield: ["like", f"%{txt}%"]}
+	or_filters = None
 
-	# Build parameters dictionary
-	params = {"txt": "%" + txt + "%", "start": start, "page_len": page_len}
 	if account_type:
-		params["account_type"] = account_type
+		if account_type in ["Receivable", "Payable"]:
+			# Include Employee regardless of its configured account_type, but still respect the text filter.
+			or_filters = [{"account_type": account_type}, {"name": "Employee"}]
+		else:
+			query_filters["account_type"] = account_type
 
-	result = frappe.db.sql(
-		f"""select name from `tabParty Type`
-        where `{searchfield}` LIKE %(txt)s {cond}
-        order by name limit %(page_len)s offset %(start)s""",
-		params,
+	result = frappe.get_list(
+		"Party Type",
+		filters=query_filters,
+		or_filters=or_filters,
+		fields=["name"],
+		order_by="name",
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
 	)
 
 	return result or []

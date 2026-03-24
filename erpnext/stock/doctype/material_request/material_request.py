@@ -15,7 +15,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Order
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
+from frappe.utils import cint, cstr, flt, get_datetime, get_link_to_form, getdate, new_line_sep, nowdate
 
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
@@ -126,21 +126,28 @@ class MaterialRequest(BuyingController):
 
 		for so_no in so_items.keys():
 			for item in so_items[so_no].keys():
-				already_indented = frappe.db.sql(
-					"""select sum(qty)
-					from `tabMaterial Request Item`
-					where item_code = %s and sales_order = %s and
-					docstatus = 1 and parent != %s""",
-					(item, so_no, self.name),
+				already_indented = (
+					frappe.get_all(
+						"Material Request Item",
+						filters={
+							"item_code": item,
+							"sales_order": so_no,
+							"docstatus": 1,
+							"parent": ["!=", self.name],
+						},
+						fields=[{"SUM": "qty", "as": "qty"}],
+					)[0].qty
+					or 0
 				)
-				already_indented = already_indented and flt(already_indented[0][0]) or 0
 
-				actual_so_qty = frappe.db.sql(
-					"""select sum(stock_qty) from `tabSales Order Item`
-					where parent = %s and item_code = %s and docstatus = 1""",
-					(so_no, item),
+				actual_so_qty = (
+					frappe.get_all(
+						"Sales Order Item",
+						filters={"parent": so_no, "item_code": item, "docstatus": 1},
+						fields=[{"SUM": "stock_qty", "as": "stock_qty"}],
+					)[0].stock_qty
+					or 0
 				)
-				actual_so_qty = actual_so_qty and flt(actual_so_qty[0][0]) or 0
 
 				if actual_so_qty and (flt(so_items[so_no][item]) + already_indented > actual_so_qty):
 					frappe.throw(
@@ -250,10 +257,8 @@ class MaterialRequest(BuyingController):
 		self.set_status(update=True, status="Cancelled")
 
 	def check_modified_date(self):
-		mod_db = frappe.db.sql("""select modified from `tabMaterial Request` where name = %s""", self.name)
-		date_diff = frappe.db.sql(f"""select TIMEDIFF('{mod_db[0][0]}', '{cstr(self.modified)}')""")
-
-		if date_diff and date_diff[0][0]:
+		modified = frappe.db.get_value("Material Request", self.name, "modified")
+		if modified and get_datetime(modified) != get_datetime(self.modified):
 			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(_(self.doctype), self.name))
 
 	def update_status(self, status):
