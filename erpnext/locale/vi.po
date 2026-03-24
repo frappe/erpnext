@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-03-22 09:45+0000\n"
-"PO-Revision-Date: 2026-03-23 06:43\n"
+"PO-Revision-Date: 2026-03-24 06:42\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Vietnamese\n"
 "MIME-Version: 1.0\n"
@@ -34,15 +34,15 @@ msgstr ""
 
 #: erpnext/selling/doctype/quotation/quotation.js:82
 msgid " Address"
-msgstr ""
+msgstr " Địa Chỉ"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:611
 msgid " Amount"
-msgstr ""
+msgstr "Số tiền"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:114
 msgid " BOM"
-msgstr ""
+msgstr "BOM"
 
 #. Label of the default_wip_warehouse (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
