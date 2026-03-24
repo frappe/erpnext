@@ -539,7 +539,10 @@ class WorkOrder(Document):
 				"status": ["!=", "Closed"],
 				"name": ["!=", self.name],
 			},
-			fields=["sum(qty) as total_qty", "sum(process_loss_qty) as total_process_loss_qty"],
+			fields=[
+				{"SUM": "qty", "as": "total_qty"},
+				{"SUM": "process_loss_qty", "as": "total_process_loss_qty"},
+			],
 		)[0]
 		ordered_qty_against_so = flt(ordered_work_orders.total_qty) - flt(
 			ordered_work_orders.total_process_loss_qty
@@ -552,7 +555,7 @@ class WorkOrder(Document):
 			frappe.get_all(
 				"Sales Order Item",
 				filters={"parent": self.sales_order, "item_code": self.production_item, "docstatus": 1},
-				fields=["sum(stock_qty) as stock_qty"],
+				fields=[{"SUM": "stock_qty", "as": "stock_qty"}],
 			)[0].stock_qty
 			or 0
 		)
@@ -566,7 +569,7 @@ class WorkOrder(Document):
 					"item_code": self.production_item,
 					"docstatus": 1,
 				},
-				fields=["sum(qty) as qty"],
+				fields=[{"SUM": "qty", "as": "qty"}],
 			)[0].qty
 			or 0
 		)
@@ -1157,7 +1160,7 @@ class WorkOrder(Document):
 					"production_plan_sub_assembly_item": self.production_plan_sub_assembly_item,
 					"docstatus": 1,
 				},
-				fields=["sum(produced_qty) as produced_qty"],
+				fields=[{"SUM": "produced_qty", "as": "produced_qty"}],
 			)[0].produced_qty
 			or 0
 		)
@@ -1177,7 +1180,10 @@ class WorkOrder(Document):
 			elif self.production_plan_sub_assembly_item:
 				filters["production_plan_sub_assembly_item"] = self.production_plan_sub_assembly_item
 
-			qty = flt(frappe.get_all("Work Order", filters=filters, fields=["sum(qty) as qty"])[0].qty or 0)
+			qty = flt(
+				frappe.get_all("Work Order", filters=filters, fields=[{"SUM": "qty", "as": "qty"}])[0].qty
+				or 0
+			)
 
 			if self.production_plan_item:
 				frappe.db.set_value("Production Plan Item", self.production_plan_item, "ordered_qty", qty)
@@ -1203,7 +1209,7 @@ class WorkOrder(Document):
 				frappe.get_all(
 					"Product Bundle Item",
 					filters={"parent": self.product_bundle_item},
-					fields=["sum(qty) as qty"],
+					fields=[{"SUM": "qty", "as": "qty"}],
 				)[0].qty
 				or 0
 			)
@@ -1219,7 +1225,7 @@ class WorkOrder(Document):
 			filters["production_item"] = self.production_item
 
 		work_order_qty = flt(
-			frappe.get_all("Work Order", filters=filters, fields=["sum(qty) as qty"])[0].qty or 0
+			frappe.get_all("Work Order", filters=filters, fields=[{"SUM": "qty", "as": "qty"}])[0].qty or 0
 		)
 		frappe.db.set_value(
 			"Sales Order Item",
@@ -1235,7 +1241,7 @@ class WorkOrder(Document):
 				frappe.get_all(
 					"Product Bundle Item",
 					filters={"parent": self.product_bundle_item},
-					fields=["sum(qty) as qty"],
+					fields=[{"SUM": "qty", "as": "qty"}],
 				)[0].qty
 				or 0
 			)

@@ -50,7 +50,7 @@ class CashierClosing(Document):
 				"posting_time": ["between", [self.from_time, self.time]],
 				"owner": self.user,
 			},
-			fields=["sum(outstanding_amount) as outstanding_amount"],
+			fields=[{"SUM": "outstanding_amount", "as": "outstanding_amount"}],
 		)
 		self.outstanding_amount = flt(values[0].outstanding_amount if values else 0)
 

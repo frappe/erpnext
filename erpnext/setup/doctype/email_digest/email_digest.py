@@ -257,7 +257,7 @@ class EmailDigest(Document):
 			"ToDo",
 			filters={"status": "Open"},
 			or_filters={"owner": user_id, "assigned_by": user_id},
-			fields=["count(name) as count"],
+			fields=[{"COUNT": "name", "as": "count"}],
 		)
 		return result[0].count if result else 0
 

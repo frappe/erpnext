@@ -579,7 +579,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				frappe.get_all(
 					"Stock Entry Detail",
 					filters={"docstatus": 1, "project": project, "t_warehouse": ["in", ["", None]]},
-					fields=["sum(amount) as amount"],
+					fields=[{"SUM": "amount", "as": "amount"}],
 				)[0].amount
 				or 0
 			)
@@ -907,7 +907,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 						"item_code": production_item,
 						"s_warehouse": ["in", ["", None]],
 					},
-					fields=["sum(transfer_qty) as transfer_qty"],
+					fields=[{"SUM": "transfer_qty", "as": "transfer_qty"}],
 				)[0].transfer_qty
 				or 0
 			)

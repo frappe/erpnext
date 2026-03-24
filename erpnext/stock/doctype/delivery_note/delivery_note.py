@@ -775,7 +775,7 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 				frappe.get_all(
 					"Sales Invoice Item",
 					filters={"dn_detail": dnd.name, "docstatus": 1},
-					fields=["sum(amount) as amount"],
+					fields=[{"SUM": "amount", "as": "amount"}],
 				)[0].amount
 				or 0
 			)

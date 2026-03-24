@@ -181,7 +181,7 @@ def get_latest_stock_qty(item_code: str, warehouse: str | None = None):
 		else:
 			filters["warehouse"] = warehouse
 
-	actual_qty = frappe.get_all("Bin", filters=filters, fields=["sum(actual_qty) as actual_qty"])[
+	actual_qty = frappe.get_all("Bin", filters=filters, fields=[{"SUM": "actual_qty", "as": "actual_qty"}])[
 		0
 	].actual_qty
 
@@ -333,7 +333,9 @@ def get_avg_purchase_rate(serial_nos):
 	serial_nos = get_valid_serial_nos(serial_nos)
 	return flt(
 		frappe.get_all(
-			"Serial No", filters={"name": ["in", serial_nos]}, fields=["avg(purchase_rate) as purchase_rate"]
+			"Serial No",
+			filters={"name": ["in", serial_nos]},
+			fields=[{"AVG": "purchase_rate", "as": "purchase_rate"}],
 		)[0].purchase_rate
 	)
 
