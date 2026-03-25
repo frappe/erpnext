@@ -612,12 +612,18 @@ class PurchaseInvoice(BuyingController):
 		frappe.db.set_value(self.doctype, self.name, "against_expense_account", self.against_expense_account)
 
 	def po_required(self):
+<<<<<<< HEAD
 		if frappe.db.get_value("Buying Settings", None, "po_required") == "Yes":
 			if frappe.get_value(
+=======
+		if (
+			frappe.db.get_single_value("Buying Settings", "po_required") == "Yes"
+			and not self.is_internal_transfer()
+			and not frappe.get_value(
+>>>>>>> 3f74733942 (fix: purchase invoice for internal transfers should not require PO (#53791))
 				"Supplier", self.supplier, "allow_purchase_invoice_creation_without_purchase_order"
-			):
-				return
-
+			)
+		):
 			for d in self.get("items"):
 				if not d.purchase_order:
 					msg = _("Purchase Order Required for item {}").format(frappe.bold(d.item_code))
