@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-03-22 09:45+0000\n"
-"PO-Revision-Date: 2026-03-23 06:42\n"
+"PO-Revision-Date: 2026-03-25 08:09\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Serbian (Cyrillic)\n"
 "MIME-Version: 1.0\n"
@@ -1498,7 +1498,7 @@ msgstr "Стање рачуна је већ на дуговној страни, 
 
 #: erpnext/accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.py:47
 msgid "Account filter not set!"
-msgstr ""
+msgstr "Филтер налога није подешен!"
 
 #. Label of the account_for_change_amount (Link) field in DocType 'POS Invoice'
 #. Label of the account_for_change_amount (Link) field in DocType 'POS Profile'
@@ -9268,7 +9268,7 @@ msgstr "Није могуће онемогућити стварно праћењ
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:129
 msgid "Cannot disable {0} as it may lead to incorrect stock valuation."
-msgstr ""
+msgstr "Није могуће онемогућити {0} јер то може довести до нетачног вредновања залиха."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:711
 msgid "Cannot disassemble more than produced quantity."
@@ -10086,11 +10086,11 @@ msgstr "Клаузуле и услови"
 
 #: erpnext/public/js/utils/barcode_scanner.js:493
 msgid "Clear Last Scanned Warehouse"
-msgstr ""
+msgstr "Очисти последње скенирано складиште"
 
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:264
 msgid "Clear Link"
-msgstr ""
+msgstr "Очисти линк"
 
 #. Label of the clear_notifications_status (Select) field in DocType
 #. 'Transaction Deletion Record'
@@ -11078,7 +11078,7 @@ msgstr "Компанија и датум књижења су обавезни"
 
 #: erpnext/accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.py:43
 msgid "Company and account filters not set!"
-msgstr ""
+msgstr "Филтери компаније и рачуна нису постављени!"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2582
 msgid "Company currencies of both the companies should match for Inter Company Transactions."
@@ -11091,7 +11091,7 @@ msgstr "Поље за компанију је обавезно"
 
 #: erpnext/accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.py:45
 msgid "Company filter not set!"
-msgstr ""
+msgstr "Филтер компаније није постављен!"
 
 #: erpnext/accounts/report/invalid_ledger_entries/invalid_ledger_entries.py:77
 msgid "Company is mandatory"
@@ -15421,7 +15421,7 @@ msgstr "Обриши отказане књиговодствене уносе"
 #. Type: Action
 #: erpnext/hooks.py erpnext/public/js/utils/demo.js:5
 msgid "Delete Demo Data"
-msgstr ""
+msgstr "Обриши демо податке"
 
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.js:66
 msgid "Delete Dimension"
@@ -16881,7 +16881,7 @@ msgstr "Не користи вредновање по шаржама"
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:130
 msgid "Do Not Use Batchwise Valuation"
-msgstr ""
+msgstr "Не користи вредновање по шаржама"
 
 #. Description of the 'Hide Currency Symbol' (Select) field in DocType 'Global
 #. Defaults'
@@ -25851,7 +25851,7 @@ msgstr "Цена ставке"
 
 #: erpnext/stock/get_item_details.py:1125
 msgid "Item Price Added for {0} in Price List {1}"
-msgstr ""
+msgstr "Цена ставке је додата за {0} у ценовник {1}"
 
 #. Label of the item_price_settings_section (Section Break) field in DocType
 #. 'Accounts Settings'
@@ -28874,7 +28874,7 @@ msgstr "Врста захтева за набавку"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:1123
 msgid "Material Request already created for the ordered quantity"
-msgstr ""
+msgstr "Захтев за набавку је већ креиран за наручену количину"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:1846
 msgid "Material Request not created, as quantity for Raw Materials already available."
@@ -29600,7 +29600,7 @@ msgstr "Недостаје број серије пакета"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:172
 msgid "Missing Warehouse"
-msgstr ""
+msgstr "Недостаје складиште"
 
 #: erpnext/assets/doctype/asset_category/asset_category.py:156
 msgid "Missing account configuration for company <b>{0}</b>."
@@ -34630,7 +34630,7 @@ msgstr "Методе плаћања су обавезне. Молимо Вас �
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3035
 msgid "Payment methods refreshed. Please review before proceeding."
-msgstr ""
+msgstr "Методе плаћања су освежене. Молимо Вас да их прегледате пре наставка."
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.js:466
 #: erpnext/selling/page/point_of_sale/pos_payment.js:366
@@ -42845,7 +42845,7 @@ msgstr "Враћена количина у јединици мера залих�
 
 #: erpnext/buying/report/subcontracted_raw_materials_to_be_transferred/subcontracted_raw_materials_to_be_transferred.py:44
 msgid "Returned Quantity"
-msgstr ""
+msgstr "Враћена количина"
 
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.py:101
 msgid "Returned exchange rate is neither integer not float."
@@ -44234,7 +44234,7 @@ msgstr "Ред {0}: Количина ставке {1} не може бити в�
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1251
 msgid "Row {0}: Operation time should be greater than 0 for operation {1}"
-msgstr ""
+msgstr "Ред {0}: Време операције мора бити већ од 0 за операцију {1}"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:615
 msgid "Row {0}: Packed Qty must be equal to {1} Qty."
@@ -44366,11 +44366,11 @@ msgstr "Ред {0}: Фактор конверзије јединица мере 
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:171
 msgid "Row {0}: Warehouse is required"
-msgstr ""
+msgstr "Ред {0}: Складиште је обавезно"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:180
 msgid "Row {0}: Warehouse {1} is linked to company {2}. Please select a warehouse belonging to company {3}."
-msgstr ""
+msgstr "Ред {0}: Складиште {1} је повезано са компанијом {2}. Молимо Вас да изаберете складиште које припада компанији {3}."
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1245
 #: erpnext/manufacturing/doctype/work_order/work_order.py:415
@@ -47410,7 +47410,7 @@ msgstr "Постави ово уколико је купац јавно пред
 #. Settings'
 #: erpnext/support/doctype/support_settings/support_settings.json
 msgid "Set this value to 0 to disable the feature."
-msgstr ""
+msgstr "Поставите ову вредност на 0 да бисте онемогућили функционалност."
 
 #: erpnext/assets/doctype/asset/asset.py:901
 msgid "Set {0} in asset category {1} for company {2}"
