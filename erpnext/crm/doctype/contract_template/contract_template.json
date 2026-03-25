@@ -56,11 +56,7 @@
   }
  ],
  "links": [],
-<<<<<<< HEAD
- "modified": "2020-12-07 10:44:22.587047",
-=======
  "modified": "2026-03-25 19:27:19.162421",
->>>>>>> e136bfbb61 (fix(contract_template): restrict `create`, `write` and `delete` access only to `System Manager` (#53787))
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Contract Template",
@@ -106,12 +102,7 @@
    "share": 1
   }
  ],
-<<<<<<< HEAD
  "sort_field": "modified",
-=======
- "row_format": "Dynamic",
- "sort_field": "creation",
->>>>>>> e136bfbb61 (fix(contract_template): restrict `create`, `write` and `delete` access only to `System Manager` (#53787))
  "sort_order": "DESC",
  "track_changes": 1
 }
