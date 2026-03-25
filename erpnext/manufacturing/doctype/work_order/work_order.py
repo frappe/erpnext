@@ -587,7 +587,7 @@ class WorkOrder(Document):
 		if self.docstatus == 0:
 			status = "Draft"
 		elif self.docstatus == 1:
-			if status != "Stopped":
+			if status not in ["Closed", "Stopped"]:
 				status = "Not Started"
 				if flt(self.material_transferred_for_manufacturing) > 0:
 					status = "In Process"
@@ -2068,9 +2068,11 @@ class WorkOrder(Document):
 			if row.item_code not in required_items:
 				additional_items.setdefault(row.item_code, []).append(row)
 
+		self.flags.ignore_validate_update_after_submit = True
+
 		for item_code, rows in additional_items.items():
 			for row in rows:
-				child_row = self.append(
+				self.append(
 					"required_items",
 					{
 						"item_code": item_code,
@@ -2081,15 +2083,13 @@ class WorkOrder(Document):
 						"rate": row.basic_rate,
 						"amount": row.amount,
 						"description": row.description,
-						"docstatus": 1,
 						"is_additional_item": 1,
 						"voucher_detail_reference": row.name,
 					},
 				)
 
-				child_row.insert()
-
-			stock_entry.reload()
+		self.save()
+		stock_entry.reload()
 
 
 @frappe.whitelist()
@@ -2130,7 +2130,7 @@ def make_stock_reservation_entries(
 
 
 @frappe.whitelist()
-def cancel_stock_reservation_entries(doc, sre_list):
+def cancel_stock_reservation_entries(doc: str | dict, sre_list: str | list):
 	if isinstance(doc, str):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Work Order", doc.get("name"))
@@ -2267,10 +2267,13 @@ def make_work_order(
 	bom_no: str,
 	item: str,
 	qty: float = 0,
+	company: str | None = None,
 	project: str | None = None,
 	variant_items: str | list | None = None,
 	use_multi_level_bom: bool | None = None,
 ):
+	from erpnext import get_default_company
+
 	if not frappe.has_permission("Work Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
@@ -2286,6 +2289,7 @@ def make_work_order(
 	wo_doc = frappe.new_doc("Work Order")
 	wo_doc.track_semi_finished_goods = frappe.db.get_value("BOM", bom_no, "track_semi_finished_goods")
 	wo_doc.production_item = item
+	wo_doc.company = company or get_default_company()
 	wo_doc.update(item_details)
 	wo_doc.bom_no = bom_no
 	wo_doc.use_multi_level_bom = cint(use_multi_level_bom)
@@ -2360,7 +2364,7 @@ def check_if_scrap_warehouse_mandatory(bom_no: str):
 	if bom_no:
 		bom = frappe.get_doc("BOM", bom_no)
 
-		if len(bom.scrap_items) > 0:
+		if bom.has_scrap_items():
 			res["set_scrap_wh_mandatory"] = True
 
 	return res
@@ -2424,6 +2428,7 @@ def make_stock_entry(
 	stock_entry.set_stock_entry_type()
 	stock_entry.is_additional_transfer_entry = is_additional_transfer_entry
 	stock_entry.get_items()
+	stock_entry.set_secondary_items_from_job_card()
 
 	if purpose != "Disassemble":
 		stock_entry.set_serial_no_batch_for_finished_good()
@@ -2482,14 +2487,14 @@ def query_sales_order(doctype: str, txt: str, searchfield: str, start: int, page
 
 
 @frappe.whitelist()
-def make_job_card(work_order: str, operations: str | list) -> None:
+def make_job_card(work_order: str, operations: str | list, parent_bom: str | None = None):
 	if isinstance(operations, str):
 		operations = json.loads(operations)
 
 	work_order = frappe.get_doc("Work Order", work_order)
 	for row in operations:
 		row = frappe._dict(row)
-		row.update(get_operation_details(row.name, work_order))
+		row.update(get_operation_details(row.name, work_order, parent_bom))
 
 		validate_operation_data(row)
 		qty = row.get("qty")
@@ -2499,7 +2504,7 @@ def make_job_card(work_order: str, operations: str | list) -> None:
 				create_job_card(work_order, row, auto_create=True)
 
 
-def get_operation_details(name, work_order):
+def get_operation_details(name, work_order, parent_bom):
 	for row in work_order.operations:
 		if row.name == name:
 			return {
@@ -2509,7 +2514,7 @@ def get_operation_details(name, work_order):
 				"fg_warehouse": row.fg_warehouse,
 				"wip_warehouse": row.wip_warehouse,
 				"finished_good": row.finished_good,
-				"bom_no": row.get("bom_no"),
+				"bom_no": row.get("bom_no") or parent_bom,
 				"is_subcontracted": row.get("is_subcontracted"),
 			}
 
@@ -2644,8 +2649,9 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 		work_order.transfer_material_against == "Job Card" and not work_order.skip_transfer
 	):
 		doc.get_required_items()
-		if work_order.track_semi_finished_goods:
-			doc.set_scrap_items()
+
+	if work_order.track_semi_finished_goods:
+		doc.set_secondary_items()
 
 	if auto_create:
 		doc.flags.ignore_mandatory = True

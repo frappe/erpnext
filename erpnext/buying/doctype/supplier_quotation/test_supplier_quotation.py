@@ -5,14 +5,18 @@
 import json
 
 import frappe
-from frappe.tests import IntegrationTestCase, change_settings
+from frappe.tests import change_settings
 from frappe.utils import add_days, today
 
 from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestPurchaseOrder(IntegrationTestCase):
+class TestPurchaseOrder(ERPNextTestSuite):
+	def setUp(self):
+		self.load_test_records("Supplier Quotation")
+
 	def test_update_child_supplier_quotation_add_item(self):
 		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
 		sq.submit()
@@ -166,7 +170,7 @@ class TestPurchaseOrder(IntegrationTestCase):
 
 		po.insert()
 
-	@IntegrationTestCase.change_settings("Buying Settings", {"allow_zero_qty_in_supplier_quotation": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_zero_qty_in_supplier_quotation": 1})
 	def test_map_purchase_order_from_zero_qty_supplier_quotation(self):
 		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
 		sq.items[0].qty = 0

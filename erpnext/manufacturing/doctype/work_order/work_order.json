@@ -570,7 +570,8 @@
   {
    "fieldname": "production_plan_sub_assembly_item",
    "fieldtype": "Data",
-   "label": "Production Plan Sub-assembly Item",
+   "hidden": 1,
+   "label": "Production Plan Sub Assembly Item",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
@@ -704,7 +705,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-06 17:53:11.295600",
+ "modified": "2026-03-16 10:15:28.708688",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

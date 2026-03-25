@@ -2,7 +2,6 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
@@ -18,30 +17,25 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_nos_from_bundle,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestPOSInvoiceMergeLog(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		frappe.db.sql("delete from `tabPOS Opening Entry`")
-		cls.enterClassContext(cls.change_settings("Selling Settings", validate_selling_price=0))
-		cls.enterClassContext(cls.change_settings("POS Settings", invoice_type="POS Invoice"))
-		mode_of_payment = frappe.get_doc("Mode of Payment", "Bank Draft")
-		set_default_account_for_mode_of_payment(mode_of_payment, "_Test Company", "_Test Bank - _TC")
-
+class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 	def setUp(self):
-		frappe.db.sql("delete from `tabPOS Invoice`")
+		mode_of_payment = frappe.get_doc("Mode of Payment", "Bank Draft")
+		self.test_user, self.pos_profile = init_user_and_profile()
+		self.opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
-	def tearDown(self):
-		frappe.set_user("Administrator")
-		frappe.db.sql("delete from `tabPOS Profile`")
-		frappe.db.sql("delete from `tabPOS Invoice`")
+		set_default_account_for_mode_of_payment(mode_of_payment, "_Test Company", "_Test Bank - _TC")
+		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
+		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
+
+	def make_closing_entry(self):
+		closing_entry = make_closing_entry_from_opening(self.opening_entry)
+		closing_entry.insert().submit()
+		return closing_entry
 
 	def test_consolidated_invoice_creation(self):
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
-
 		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 300})
 		pos_inv.save()
@@ -57,9 +51,7 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 		pos_inv3.save()
 		pos_inv3.submit()
 
-		closing_entry = make_closing_entry_from_opening(opening_entry)
-		closing_entry.insert()
-		closing_entry.submit()
+		self.make_closing_entry()
 
 		pos_inv.load_from_db()
 		self.assertTrue(frappe.db.exists("Sales Invoice", pos_inv.consolidated_invoice))
@@ -70,9 +62,6 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 		self.assertFalse(pos_inv.consolidated_invoice == pos_inv3.consolidated_invoice)
 
 	def test_consolidated_credit_note_creation(self):
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
-
 		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 300})
 		pos_inv.save()
@@ -97,9 +86,7 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 		pos_inv_cn.paid_amount = -300
 		pos_inv_cn.submit()
 
-		closing_entry = make_closing_entry_from_opening(opening_entry)
-		closing_entry.insert()
-		closing_entry.submit()
+		self.make_closing_entry()
 
 		pos_inv.load_from_db()
 		self.assertTrue(frappe.db.exists("Sales Invoice", pos_inv.consolidated_invoice))
@@ -117,9 +104,6 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 		self.assertEqual(consolidated_credit_note.payments[1].amount, -200)
 
 	def test_consolidated_invoice_item_taxes(self):
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
-
 		inv = create_pos_invoice(qty=1, rate=100, do_not_save=True)
 
 		inv.append(
@@ -156,9 +140,7 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 		inv2.save()
 		inv2.submit()
 
-		closing_entry = make_closing_entry_from_opening(opening_entry)
-		closing_entry.insert()
-		closing_entry.submit()
+		self.make_closing_entry()
 
 		inv.load_from_db()
 
@@ -206,9 +188,6 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 			qty=10,
 		)
 
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
-
 		inv = create_pos_invoice(qty=3, rate=10000, do_not_save=True)
 		inv.append(
 			"taxes",
@@ -243,9 +222,7 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 		inv2.insert()
 		inv2.submit()
 
-		closing_entry = make_closing_entry_from_opening(opening_entry)
-		closing_entry.insert()
-		closing_entry.submit()
+		self.make_closing_entry()
 
 		inv.load_from_db()
 		consolidated_invoice = frappe.get_doc("Sales Invoice", inv.consolidated_invoice)
@@ -262,9 +239,6 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 			rate=8000,
 			qty=10,
 		)
-
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
 		inv = create_pos_invoice(qty=6, rate=10000, do_not_save=True)
 		inv.append(
@@ -305,16 +279,14 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 		inv3.insert()
 		inv3.submit()
 
-		closing_entry = make_closing_entry_from_opening(opening_entry)
-		closing_entry.insert()
-		closing_entry.submit()
+		self.make_closing_entry()
 
 		inv.load_from_db()
 		consolidated_invoice = frappe.get_doc("Sales Invoice", inv.consolidated_invoice)
 		self.assertNotEqual(consolidated_invoice.outstanding_amount, 800)
 		self.assertEqual(consolidated_invoice.status, "Paid")
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"System Settings", {"number_format": "#,###.###", "currency_precision": 3, "float_precision": 3}
 	)
 	def test_consolidation_round_off_error_3(self):
@@ -324,8 +296,6 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 			rate=8000,
 			qty=10,
 		)
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
 		item_rates = [69, 59, 29]
 		for _i in [1, 2]:
@@ -362,9 +332,7 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 			inv.save()
 			inv.submit()
 
-		closing_entry = make_closing_entry_from_opening(opening_entry)
-		closing_entry.insert()
-		closing_entry.submit()
+		self.make_closing_entry()
 
 		inv.load_from_db()
 		consolidated_invoice = frappe.get_doc("Sales Invoice", inv.consolidated_invoice)
@@ -382,9 +350,6 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 			qty=10,
 		)
 
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
-
 		inv = create_pos_invoice(qty=1, rate=69.5, do_not_save=True)
 		inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 70})
 		inv.insert()
@@ -395,9 +360,7 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 		inv2.insert()
 		inv2.submit()
 
-		closing_entry = make_closing_entry_from_opening(opening_entry)
-		closing_entry.insert()
-		closing_entry.submit()
+		self.make_closing_entry()
 
 		inv.load_from_db()
 		consolidated_invoice = frappe.get_doc("Sales Invoice", inv.consolidated_invoice)
@@ -414,13 +377,11 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 		The second and third POS Invoice should be consolidated with a single Merge Log
 		"""
 
+		self.load_test_records("Stock Entry")
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(self)
 		serial_no = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]
-
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
 		pos_inv = create_pos_invoice(
 			item_code="_Test Serialized Item With Series",
@@ -448,9 +409,7 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 		pos_inv2.save()
 		pos_inv2.submit()
 
-		closing_entry = make_closing_entry_from_opening(opening_entry)
-		closing_entry.insert()
-		closing_entry.submit()
+		self.make_closing_entry()
 
 		pos_inv.load_from_db()
 		pos_inv2.load_from_db()
@@ -468,9 +427,6 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 
 		create_cost_center(cost_center_name="_Test POS Cost Center 1", is_group=0)
 		create_cost_center(cost_center_name="_Test POS Cost Center 2", is_group=0)
-
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
 		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 300})
@@ -490,9 +446,7 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 		pos_inv3.save()
 		pos_inv3.submit()
 
-		closing_entry = make_closing_entry_from_opening(opening_entry)
-		closing_entry.insert()
-		closing_entry.submit()
+		self.make_closing_entry()
 
 		pos_inv.load_from_db()
 		self.assertTrue(frappe.db.exists("Sales Invoice", pos_inv.consolidated_invoice))
@@ -511,17 +465,12 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 		"""
 		Test if the company is fetched from POS Closing Entry
 		"""
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
-
 		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 300})
 		pos_inv.save()
 		pos_inv.submit()
 
-		closing_entry = make_closing_entry_from_opening(opening_entry)
-		closing_entry.insert()
-		closing_entry.submit()
+		closing_entry = self.make_closing_entry()
 
 		self.assertTrue(frappe.db.exists("POS Invoice Merge Log", {"pos_closing_entry": closing_entry.name}))
 

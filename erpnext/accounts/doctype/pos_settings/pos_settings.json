@@ -50,10 +50,10 @@
    "options": "1"
   }
  ],
- "hide_toolbar": 1,
+ "hide_toolbar": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-09 17:30:41.476806",
+ "modified": "2026-03-16 13:28:19.677217",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Settings",

@@ -67,7 +67,7 @@ frappe.ui.form.on("Purchase Order", {
 	},
 
 	transaction_date(frm) {
-		prevent_past_schedule_dates(frm);
+		erpnext.buying.prevent_past_schedule_dates(frm);
 		frm.set_value("schedule_date", "");
 	},
 
@@ -87,7 +87,7 @@ frappe.ui.form.on("Purchase Order", {
 		if (frm.doc.docstatus == 0) {
 			erpnext.set_unit_price_items_note(frm);
 		}
-		prevent_past_schedule_dates(frm);
+		erpnext.buying.prevent_past_schedule_dates(frm);
 	},
 
 	get_materials_from_supplier: function (frm) {
@@ -779,11 +779,3 @@ frappe.ui.form.on("Purchase Order", "is_subcontracted", function (frm) {
 		erpnext.buying.get_default_bom(frm);
 	}
 });
-
-function prevent_past_schedule_dates(frm) {
-	if (frm.doc.transaction_date) {
-		frm.fields_dict["schedule_date"].datepicker?.update({
-			minDate: new Date(frm.doc.transaction_date),
-		});
-	}
-}

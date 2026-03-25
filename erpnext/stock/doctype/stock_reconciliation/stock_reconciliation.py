@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import frappe
 from frappe import _, bold, json, msgprint
@@ -244,6 +244,7 @@ class StockReconciliation(StockController):
 				serial_and_batch_bundle = frappe.get_doc(
 					{
 						"doctype": "Serial and Batch Bundle",
+						"company": self.company,
 						"item_code": item.item_code,
 						"warehouse": item.warehouse,
 						"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
@@ -527,11 +528,11 @@ class StockReconciliation(StockController):
 					return True
 
 			rate_precision = item.precision("valuation_rate")
-			item_dict["rate"] = flt(item_dict.get("rate"), rate_precision)
-			item.valuation_rate = flt(item.valuation_rate, rate_precision) if item.valuation_rate else None
+			rate = flt(item_dict.get("rate"), rate_precision)
+			valuation_rate = flt(item.valuation_rate, rate_precision) if item.valuation_rate else None
 			if (
 				(item.qty is None or item.qty == item_dict.get("qty"))
-				and (item.valuation_rate is None or item.valuation_rate == item_dict.get("rate"))
+				and (valuation_rate is None or valuation_rate == rate)
 				and (not item.serial_no or (item.serial_no == item_dict.get("serial_nos")))
 			):
 				return False
@@ -1011,9 +1012,9 @@ class StockReconciliation(StockController):
 
 	def set_total_qty_and_amount(self):
 		for d in self.get("items"):
-			d.amount = flt(d.qty, d.precision("qty")) * flt(d.valuation_rate, d.precision("valuation_rate"))
-			d.current_amount = flt(d.current_qty, d.precision("current_qty")) * flt(
-				d.current_valuation_rate, d.precision("current_valuation_rate")
+			d.amount = flt(flt(d.qty) * flt(d.valuation_rate), d.precision("amount"))
+			d.current_amount = flt(
+				flt(d.current_qty) * flt(d.current_valuation_rate), d.precision("current_amount")
 			)
 
 			d.quantity_difference = flt(d.qty) - flt(d.current_qty)

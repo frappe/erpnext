@@ -1,8 +1,9 @@
 import frappe
-from frappe.tests.utils import FrappeTestCase
+
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestTaxesAndTotals(FrappeTestCase):
+class TestTaxesAndTotals(ERPNextTestSuite):
 	def setUp(self):
 		self.doc = frappe.get_doc(
 			{

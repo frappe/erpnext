@@ -75,25 +75,48 @@ It takes care of installation, setup, upgrades, monitoring, maintenance and supp
 </div>
 
 
-
 ### Self-Hosted
 #### Docker
 
-Prerequisites: docker, docker-compose, git. Refer [Docker Documentation](https://docs.docker.com) for more details on Docker setup.
+See [Frappe Docker Documentation](https://github.com/frappe/frappe_docker) for full documentation & FAQ on docker setup
 
-Run following commands:
+#### Prerequisites
 
-```
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose v2](https://docs.docker.com/compose/)
+- [git](https://docs.github.com/en/get-started/getting-started-with-git/set-up-git)
+
+> For Docker basics and best practices refer to Docker's [documentation](https://docs.docker.com)
+
+#### Demo setup
+
+The fastest way to try ERPNext is to play in an already set up sandbox, in your browser, click the button below:
+
+<a href="https://labs.play-with-docker.com/?stack=https://raw.githubusercontent.com/frappe/frappe_docker/main/pwd.yml">
+  <img src="https://raw.githubusercontent.com/play-with-docker/stacks/master/assets/images/button.png" alt="Try in PWD"/>
+</a>
+
+### Try on your environment
+
+> **⚠️ Disposable demo only**
+>
+> **This setup is intended for quick evaluation. Expect to throw the environment away.** You will not be able to install custom apps to this setup. For production deployments, custom configurations, and detailed explanations, see the full documentation.
+
+First clone the repo:
+
+```sh
 git clone https://github.com/frappe/frappe_docker
 cd frappe_docker
-docker compose -f pwd.yml up -d
 ```
 
-After a couple of minutes, site should be accessible on your localhost port: 8080. Use below default login credentials to access the site.
-- Username: Administrator
-- Password: admin
+Then run:
 
-See [Frappe Docker](https://github.com/frappe/frappe_docker?tab=readme-ov-file#to-run-on-arm64-architecture-follow-this-instructions) for ARM based docker setup.
+```sh
+docker compose -f pwd.yml up -d
+```
+Wait for a couple of minutes for ERPNext site to be created or check `create-site` container logs before opening browser on port `8080`. (username: `Administrator`, password: `admin`)
+
+See [Frappe Docker](https://github.com/frappe/frappe_docker/blob/main/docs/01-getting-started/03-arm64.md) for ARM based docker setup
 
 
 ## Development Setup

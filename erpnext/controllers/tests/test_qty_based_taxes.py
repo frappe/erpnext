@@ -1,14 +1,15 @@
 from uuid import uuid4 as _uuid4
 
 import frappe
-from frappe.tests import IntegrationTestCase
+
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 def uuid4():
 	return str(_uuid4())
 
 
-class TestTaxes(IntegrationTestCase):
+class TestTaxes(ERPNextTestSuite):
 	def setUp(self):
 		self.company = frappe.get_doc(
 			{
@@ -124,12 +125,3 @@ class TestTaxes(IntegrationTestCase):
 			doc.insert()
 			self.assertEqual(doc.taxes[0].tax_amount, 600)
 			self.created_docs.append(doc)
-
-	def tearDown(self):
-		for doc in self.created_docs:
-			doc.delete()
-		self.item.delete()
-		self.item_group.delete()
-		self.item_tax_template.delete()
-		self.account.delete()
-		self.company.delete()

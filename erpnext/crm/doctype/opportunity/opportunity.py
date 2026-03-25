@@ -262,7 +262,9 @@ class Opportunity(TransactionBase, CRMNote):
 			self.party_name = lead_name
 
 	@frappe.whitelist()
-	def declare_enquiry_lost(self, lost_reasons_list, competitors, detailed_reason=None):
+	def declare_enquiry_lost(
+		self, lost_reasons_list: list, competitors: list, detailed_reason: str | None = None
+	):
 		if not self.has_active_quotation():
 			self.status = "Lost"
 			self.lost_reasons = []
@@ -363,7 +365,7 @@ class Opportunity(TransactionBase, CRMNote):
 
 
 @frappe.whitelist()
-def get_item_details(item_code):
+def get_item_details(item_code: str):
 	item = frappe.db.sql(
 		"""select item_name, stock_uom, image, description, item_group, brand
 		from `tabItem` where name = %s""",
@@ -495,7 +497,7 @@ def make_supplier_quotation(source_name: str, target_doc: str | Document | None 
 
 
 @frappe.whitelist()
-def set_multiple_status(names, status):
+def set_multiple_status(names: str | list[str], status: str):
 	names = json.loads(names)
 	for name in names:
 		opp = frappe.get_doc("Opportunity", name)
@@ -525,7 +527,9 @@ def auto_close_opportunity():
 
 
 @frappe.whitelist()
-def make_opportunity_from_communication(communication, company, ignore_communication_links=False):
+def make_opportunity_from_communication(
+	communication: str, company: str, ignore_communication_links: bool = False
+):
 	from erpnext.crm.doctype.lead.lead import make_lead_from_communication
 
 	doc = frappe.get_doc("Communication", communication)

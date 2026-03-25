@@ -13,6 +13,9 @@ def execute():
 		return
 
 	company_creation = frappe.get_all("Company", fields=["creation"], order_by="creation asc", limit=1)
+	if not company_creation:
+		return
+
 	days_diff = date_diff(getdate(today()), getdate(company_creation[0].creation))
 
 	if days_diff > 15:

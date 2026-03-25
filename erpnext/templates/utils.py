@@ -7,7 +7,7 @@ from frappe.utils import escape_html
 
 
 @frappe.whitelist(allow_guest=True)
-def send_message(sender, message, subject="Website Query"):
+def send_message(sender: str, message: str, subject: str = "Website Query"):
 	from frappe.www.contact import send_message as website_send_message
 
 	website_send_message(sender, message, subject)

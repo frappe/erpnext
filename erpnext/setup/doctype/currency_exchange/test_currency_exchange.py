@@ -3,10 +3,10 @@
 from unittest import mock
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import cint, flt
 
 from erpnext.setup.utils import get_exchange_rate
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 def save_new_records(test_records):
@@ -77,20 +77,18 @@ def patched_requests_get(*args, **kwargs):
 
 
 @mock.patch("requests.get", side_effect=patched_requests_get)
-class TestCurrencyExchange(IntegrationTestCase):
+class TestCurrencyExchange(ERPNextTestSuite):
+	def setUp(self):
+		self.load_test_records("Currency Exchange")
+		save_new_records(self.globalTestRecords["Currency Exchange"])
+
 	def clear_cache(self):
 		cache = frappe.cache()
 		for date in test_exchange_values.keys():
 			key = "currency_exchange_rate_{}:{}:{}".format(date, "USD", "INR")
 			cache.delete(key)
 
-	def tearDown(self):
-		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
-		self.clear_cache()
-
 	def test_exchange_rate(self, mock_get):
-		save_new_records(self.globalTestRecords["Currency Exchange"])
-
 		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
 
 		# Start with allow_stale is True
@@ -114,8 +112,6 @@ class TestCurrencyExchange(IntegrationTestCase):
 		self.assertEqual(flt(exchange_rate, 3), 65.1)
 
 	def test_exchange_rate_via_exchangerate_host(self, mock_get):
-		save_new_records(self.globalTestRecords["Currency Exchange"])
-
 		# Update Currency Exchange Rate
 		settings = frappe.get_single("Currency Exchange Settings")
 		settings.service_provider = "exchangerate.host"

@@ -350,7 +350,7 @@ class SerialBatchBundle:
 					"Serial and Batch Entry", {"parent": self.sle.serial_and_batch_bundle, "docstatus": 0}
 				)
 				> 0
-			):
+			) and not self.sle.is_cancelled:
 				frappe.throw(
 					_("Serial and Batch Bundle {0} is not submitted").format(
 						bold(self.sle.serial_and_batch_bundle)

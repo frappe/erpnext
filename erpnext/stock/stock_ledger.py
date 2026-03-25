@@ -230,6 +230,8 @@ def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	sle.flags.ignore_permissions = 1
 	sle.allow_negative_stock = allow_negative_stock
 	sle.via_landed_cost_voucher = via_landed_cost_voucher
+	if args.get("is_cancelled"):
+		sle.flags.ignore_links = True
 	sle.submit()
 
 	# Added to handle the case when the stock ledger entry is created from the repostig
@@ -923,7 +925,10 @@ class update_entries_after:
 		if (
 			sle.is_adjustment_entry
 			and flt(sle.qty_after_transaction, self.flt_precision) == 0
-			and flt(sle.stock_value, self.currency_precision) != 0
+			and (
+				flt(sle.stock_value, self.currency_precision) != 0
+				or flt(sle.stock_value_difference, self.currency_precision) == 0
+			)
 		):
 			sle.stock_value_difference = (
 				get_stock_value_difference(
@@ -1776,7 +1781,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 	return sle[0] if sle else frappe._dict()
 
 
-def get_previous_sle(args, for_update=False, extra_cond=None):
+def get_previous_sle(args, for_update=False, extra_cond=None, for_report=False):
 	"""
 	get the last sle on or before the current time-bucket,
 	to get actual qty before transaction, this function
@@ -1792,7 +1797,7 @@ def get_previous_sle(args, for_update=False, extra_cond=None):
 	"""
 	args["name"] = args.get("sle", None) or ""
 	sle = get_stock_ledger_entries(
-		args, "<=", "desc", "limit 1", for_update=for_update, extra_cond=extra_cond
+		args, "<=", "desc", "limit 1", for_update=for_update, extra_cond=extra_cond, for_report=for_report
 	)
 	return sle and sle[0] or {}
 
@@ -1806,6 +1811,7 @@ def get_stock_ledger_entries(
 	debug=False,
 	check_serial_no=True,
 	extra_cond=None,
+	for_report=False,
 ):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 	conditions = f" and posting_datetime {operator} %(posting_datetime)s"
@@ -1860,7 +1866,7 @@ def get_stock_ledger_entries(
 	if extra_cond:
 		conditions += f"{extra_cond}"
 
-	if previous_sle.get("project"):
+	if for_report and previous_sle.get("project"):
 		conditions += " and project = %(project)s"
 
 	# nosemgrep
@@ -2040,7 +2046,6 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 		where
 			item_code = %(item_code)s
 			and warehouse = %(warehouse)s
-			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
 			and (
 				posting_datetime > %(posting_datetime)s

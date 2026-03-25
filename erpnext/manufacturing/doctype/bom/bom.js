@@ -297,6 +297,7 @@ frappe.ui.form.on("BOM", {
 						bom_no: frm.doc.name,
 						item: item,
 						qty: data.qty || 0.0,
+						company: frm.doc.company,
 						project: frm.doc.project,
 						variant_items: variant_items,
 						use_multi_level_bom: frm.doc?.track_semi_finished_goods ? 0 : use_multi_level_bom,
@@ -619,10 +620,10 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 	}
 
 	item_code(doc, cdt, cdn) {
-		var scrap_items = false;
+		let secondary_items = false;
 		var child = locals[cdt][cdn];
-		if (child.doctype == "BOM Scrap Item") {
-			scrap_items = true;
+		if (child.doctype == "BOM Secondary Item") {
+			secondary_items = true;
 		}
 
 		if (child.bom_no) {
@@ -633,15 +634,22 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 			child.do_not_explode = 1;
 		}
 
-		get_bom_material_detail(doc, cdt, cdn, scrap_items);
+		get_bom_material_detail(doc, cdt, cdn, secondary_items);
 	}
 
 	buying_price_list(doc) {
-		this.apply_price_list();
+		if (doc.rm_cost_as_per !== "Price List" && doc.buying_price_list) {
+			this.frm.set_value("buying_price_list", "");
+			return;
+		}
+
+		if (doc.buying_price_list) {
+			this.apply_price_list();
+		}
 	}
 
 	plc_conversion_rate(doc) {
-		if (!this.in_apply_price_list) {
+		if (!this.in_apply_price_list && doc.rm_cost_as_per === "Price List") {
 			this.apply_price_list(null, true);
 		}
 	}
@@ -675,7 +683,7 @@ cur_frm.cscript.is_default = function (doc) {
 	if (doc.is_default) cur_frm.set_value("is_active", 1);
 };
 
-var get_bom_material_detail = function (doc, cdt, cdn, scrap_items) {
+var get_bom_material_detail = function (doc, cdt, cdn, secondary_items) {
 	if (!doc.company) {
 		frappe.throw({ message: __("Please select a Company first."), title: __("Mandatory") });
 	}
@@ -689,7 +697,6 @@ var get_bom_material_detail = function (doc, cdt, cdn, scrap_items) {
 				company: doc.company,
 				item_code: d.item_code,
 				bom_no: d.bom_no != null ? d.bom_no : "",
-				scrap_items: scrap_items,
 				qty: d.qty,
 				stock_qty: d.stock_qty,
 				include_item_in_manufacturing: d.include_item_in_manufacturing,
@@ -698,15 +705,15 @@ var get_bom_material_detail = function (doc, cdt, cdn, scrap_items) {
 				conversion_factor: d.conversion_factor,
 				sourced_by_supplier: d.sourced_by_supplier,
 				do_not_explode: d.do_not_explode,
+				fetch_rate: !secondary_items,
 			},
 			callback: function (r) {
 				$.extend(d, r.message);
 				refresh_field("items");
-				refresh_field("scrap_items");
+				refresh_field("secondary_items");
 
 				doc = locals[doc.doctype][doc.name];
 				erpnext.bom.calculate_rm_cost(doc);
-				erpnext.bom.calculate_scrap_materials_cost(doc);
 				erpnext.bom.calculate_total(doc);
 			},
 			freeze: true,
@@ -716,20 +723,18 @@ var get_bom_material_detail = function (doc, cdt, cdn, scrap_items) {
 
 cur_frm.cscript.qty = function (doc) {
 	erpnext.bom.calculate_rm_cost(doc);
-	erpnext.bom.calculate_scrap_materials_cost(doc);
 	erpnext.bom.calculate_total(doc);
 };
 
 cur_frm.cscript.rate = function (doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	const is_scrap_item = cdt == "BOM Scrap Item";
+	const is_secondary_item = cdt == "BOM Secondary Item";
 
 	if (d.bom_no) {
 		frappe.msgprint(__("You cannot change the rate if BOM is mentioned against any Item."));
-		get_bom_material_detail(doc, cdt, cdn, is_scrap_item);
+		get_bom_material_detail(doc, cdt, cdn, is_secondary_item);
 	} else {
 		erpnext.bom.calculate_rm_cost(doc);
-		erpnext.bom.calculate_scrap_materials_cost(doc);
 		erpnext.bom.calculate_total(doc);
 	}
 };
@@ -737,7 +742,6 @@ cur_frm.cscript.rate = function (doc, cdt, cdn) {
 erpnext.bom.update_cost = function (doc) {
 	erpnext.bom.calculate_op_cost(doc);
 	erpnext.bom.calculate_rm_cost(doc);
-	erpnext.bom.calculate_scrap_materials_cost(doc);
 	erpnext.bom.calculate_total(doc);
 };
 
@@ -796,34 +800,11 @@ erpnext.bom.calculate_rm_cost = function (doc) {
 	cur_frm.set_value("base_raw_material_cost", base_total_rm_cost);
 };
 
-// sm : scrap material
-erpnext.bom.calculate_scrap_materials_cost = function (doc) {
-	var sm = doc.scrap_items || [];
-	var total_sm_cost = 0;
-	var base_total_sm_cost = 0;
-
-	for (var i = 0; i < sm.length; i++) {
-		var base_rate = flt(sm[i].rate) * flt(doc.conversion_rate);
-		var amount = flt(sm[i].rate) * flt(sm[i].stock_qty);
-		var base_amount = amount * flt(doc.conversion_rate);
-
-		frappe.model.set_value("BOM Scrap Item", sm[i].name, "base_rate", base_rate);
-		frappe.model.set_value("BOM Scrap Item", sm[i].name, "amount", amount);
-		frappe.model.set_value("BOM Scrap Item", sm[i].name, "base_amount", base_amount);
-
-		total_sm_cost += amount;
-		base_total_sm_cost += base_amount;
-	}
-
-	cur_frm.set_value("scrap_material_cost", total_sm_cost);
-	cur_frm.set_value("base_scrap_material_cost", base_total_sm_cost);
-};
-
 // Calculate Total Cost
 erpnext.bom.calculate_total = function (doc) {
-	var total_cost = flt(doc.operating_cost) + flt(doc.raw_material_cost) - flt(doc.scrap_material_cost);
+	var total_cost = flt(doc.operating_cost) + flt(doc.raw_material_cost) - flt(doc.secondary_items_cost);
 	var base_total_cost =
-		flt(doc.base_operating_cost) + flt(doc.base_raw_material_cost) - flt(doc.base_scrap_material_cost);
+		flt(doc.base_operating_cost) + flt(doc.base_raw_material_cost) - flt(doc.base_secondary_items_cost);
 
 	cur_frm.set_value("total_cost", total_cost);
 	cur_frm.set_value("base_total_cost", base_total_cost);
@@ -978,7 +959,7 @@ frappe.tour["BOM"] = [
 	},
 ];
 
-frappe.ui.form.on("BOM Scrap Item", {
+frappe.ui.form.on("BOM Secondary Item", {
 	item_code(frm, cdt, cdn) {
 		const { item_code } = locals[cdt][cdn];
 	},
@@ -999,7 +980,7 @@ function trigger_process_loss_qty_prompt(frm, cdt, cdn, item_code) {
 			const row = locals[cdt][cdn];
 			row.stock_qty = (frm.doc.quantity * data.percent) / 100;
 			row.qty = row.stock_qty / (row.conversion_factor || 1);
-			refresh_field("scrap_items");
+			refresh_field("secondary_items");
 		},
 		__("Set Process Loss Item Quantity"),
 		__("Set Quantity")

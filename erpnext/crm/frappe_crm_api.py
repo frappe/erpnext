@@ -151,7 +151,7 @@ def contact_exists(email, mobile_no):
 
 
 @frappe.whitelist()
-def create_customer(customer_data=None):
+def create_customer(customer_data: dict | None = None):
 	if not customer_data:
 		customer_data = frappe.form_dict
 

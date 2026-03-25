@@ -1,15 +1,9 @@
 import frappe
-from frappe.tests import IntegrationTestCase
+
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestAccountsSettings(IntegrationTestCase):
-	def tearDown(self):
-		# Just in case `save` method succeeds, we need to take things back to default so that other tests
-		# don't break
-		cur_settings = frappe.get_doc("Accounts Settings", "Accounts Settings")
-		cur_settings.allow_stale = 1
-		cur_settings.save()
-
+class TestAccountsSettings(ERPNextTestSuite):
 	def test_stale_days(self):
 		cur_settings = frappe.get_doc("Accounts Settings", "Accounts Settings")
 		cur_settings.allow_stale = 0

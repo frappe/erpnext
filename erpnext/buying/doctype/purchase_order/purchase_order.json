@@ -252,6 +252,7 @@
    "allow_on_submit": 1,
    "fieldname": "schedule_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Required By"
   },
   {
@@ -1327,7 +1328,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 00:40:47.119584",
+ "modified": "2026-03-09 17:15:29.184682",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

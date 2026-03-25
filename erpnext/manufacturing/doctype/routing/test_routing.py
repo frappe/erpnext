@@ -1,24 +1,16 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.manufacturing.doctype.job_card.job_card import OperationSequenceError
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["UOM"]
 
-
-class TestRouting(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		cls.item_code = "Test Routing Item - A"
-
-	@classmethod
-	def tearDownClass(cls):
-		frappe.db.sql("delete from tabBOM where item=%s", cls.item_code)
+class TestRouting(ERPNextTestSuite):
+	def setUp(self):
+		self.item_code = "Test Routing Item - A"
 
 	def test_sequence_id(self):
 		operations = [

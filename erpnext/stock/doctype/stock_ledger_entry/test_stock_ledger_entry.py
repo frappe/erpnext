@@ -7,12 +7,9 @@ from uuid import uuid4
 
 import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
-from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.query_builder.functions import Timestamp
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_to_date, flt, today
 
-from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
@@ -29,9 +26,10 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 )
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.tests.test_utils import StockTestMixin
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
+class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 	def setUp(self):
 		items = create_items()
 		reset("Stock Entry")
@@ -44,9 +42,6 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 		frappe.db.sql(
 			"delete from `tabBin` where item_code in (%s)" % (", ".join(["%s"] * len(items))), items
 		)
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 	def test_item_cost_reposting(self):
 		company = "_Test Company"
@@ -1256,7 +1251,7 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 		self.assertEqual(sle[0].qty_after_transaction, 105)
 		self.assertEqual(sle[0].actual_qty, 100)
 
-	@IntegrationTestCase.change_settings("System Settings", {"float_precision": 3, "currency_precision": 2})
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3, "currency_precision": 2})
 	def test_transfer_invariants(self):
 		"""Extact stock value should be transferred."""
 
@@ -1295,7 +1290,7 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 		)
 		self.assertEqual(abs(sles[0].stock_value_difference), sles[1].stock_value_difference)
 
-	@IntegrationTestCase.change_settings("System Settings", {"float_precision": 4})
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 4})
 	def test_negative_qty_with_precision(self):
 		"Test if system precision is respected while validating negative qty."
 		from erpnext.stock.doctype.item.test_item import create_item
@@ -1335,7 +1330,7 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 
 		self.assertEqual(flt(get_stock_balance(item_code, warehouse), 3), 0.000)
 
-	@IntegrationTestCase.change_settings("System Settings", {"float_precision": 4})
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 4})
 	def test_future_negative_qty_with_precision(self):
 		"""
 		Ledger:
@@ -1591,81 +1586,3 @@ def get_unique_suffix():
 	# Used to isolate valuation sensitive
 	# tests to prevent future tests from failing.
 	return str(uuid4())[:8].upper()
-
-
-class TestDeferredNaming(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls) -> None:
-		super().setUpClass()
-		cls.gle_autoname = frappe.get_meta("GL Entry").autoname
-		cls.sle_autoname = frappe.get_meta("Stock Ledger Entry").autoname
-
-	def setUp(self) -> None:
-		self.item = make_item().name
-		self.warehouse = "Stores - TCP1"
-		self.company = "_Test Company with perpetual inventory"
-
-	def tearDown(self) -> None:
-		make_property_setter(
-			doctype="GL Entry",
-			for_doctype=True,
-			property="autoname",
-			value=self.gle_autoname,
-			property_type="Data",
-			fieldname=None,
-		)
-		make_property_setter(
-			doctype="Stock Ledger Entry",
-			for_doctype=True,
-			property="autoname",
-			value=self.sle_autoname,
-			property_type="Data",
-			fieldname=None,
-		)
-
-		# since deferred naming autocommits, commit all changes to avoid flake
-		frappe.db.commit()  # nosemgrep
-
-	@staticmethod
-	def get_gle_sles(se):
-		filters = {"voucher_type": se.doctype, "voucher_no": se.name}
-		gle = set(frappe.get_list("GL Entry", filters, pluck="name"))
-		sle = set(frappe.get_list("Stock Ledger Entry", filters, pluck="name"))
-		return gle, sle
-
-	def test_deferred_naming(self):
-		se = make_stock_entry(
-			item_code=self.item, to_warehouse=self.warehouse, qty=10, rate=100, company=self.company
-		)
-
-		gle, sle = self.get_gle_sles(se)
-		rename_gle_sle_docs()
-		renamed_gle, renamed_sle = self.get_gle_sles(se)
-
-		self.assertFalse(gle & renamed_gle, msg="GLEs not renamed")
-		self.assertFalse(sle & renamed_sle, msg="SLEs not renamed")
-		se.cancel()
-
-	def test_hash_naming(self):
-		# disable naming series
-		for doctype in ("GL Entry", "Stock Ledger Entry"):
-			make_property_setter(
-				doctype=doctype,
-				for_doctype=True,
-				property="autoname",
-				value="hash",
-				property_type="Data",
-				fieldname=None,
-			)
-
-		se = make_stock_entry(
-			item_code=self.item, to_warehouse=self.warehouse, qty=10, rate=100, company=self.company
-		)
-
-		gle, sle = self.get_gle_sles(se)
-		rename_gle_sle_docs()
-		renamed_gle, renamed_sle = self.get_gle_sles(se)
-
-		self.assertEqual(gle, renamed_gle, msg="GLEs are renamed while using hash naming")
-		self.assertEqual(sle, renamed_sle, msg="SLEs are renamed while using hash naming")
-		se.cancel()

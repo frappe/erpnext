@@ -45,6 +45,64 @@ frappe.ui.form.on("Employee", {
 
 	refresh: function (frm) {
 		frm.fields_dict.date_of_birth.datepicker.update({ maxDate: new Date() });
+
+		if (!frm.is_new() && !frm.doc.user_id) {
+			frm.add_custom_button(__("Create User"), () => {
+				const dialog = new frappe.ui.Dialog({
+					title: __("Create User"),
+					fields: [
+						{
+							fieldtype: "Data",
+							fieldname: "email",
+							label: __("Email"),
+							reqd: 1,
+							default:
+								frm.doc.prefered_email || frm.doc.company_email || frm.doc.personal_email,
+						},
+						{
+							fieldtype: "Check",
+							fieldname: "create_user_permission",
+							label: __("Create User Permission"),
+							default: 1,
+						},
+					],
+					primary_action_label: __("Create"),
+					primary_action: (values) => {
+						if (!values.email) {
+							frappe.msgprint(__("Email is required to create a user."));
+							return;
+						}
+
+						frappe
+							.call({
+								method: "erpnext.setup.doctype.employee.employee.create_user",
+								args: {
+									employee: frm.doc.name,
+									email: values.email,
+									create_user_permission: values.create_user_permission ? 1 : 0,
+								},
+								freeze: true,
+								freeze_message: __("Creating User..."),
+							})
+							.then(() => {
+								dialog.hide();
+								frm.reload_doc();
+							});
+					},
+				});
+
+				dialog.show();
+			});
+		}
+	},
+
+	create_user_automatically: function (frm) {
+		if (frm.doc.create_user_automatically) {
+			frm.set_value("user_id", "");
+			frm.set_df_property("user_id", "read_only", 1);
+		} else {
+			frm.set_df_property("user_id", "read_only", 0);
+		}
 	},
 
 	prefered_contact_email: function (frm) {
@@ -74,24 +132,6 @@ frappe.ui.form.on("Employee", {
 			args: {
 				employee: frm.doc.employee,
 				status: frm.doc.status,
-			},
-		});
-	},
-
-	create_user: function (frm) {
-		if (!frm.doc.prefered_email) {
-			frappe.throw(__("Please enter Preferred Contact Email"));
-		}
-		frappe.call({
-			method: "erpnext.setup.doctype.employee.employee.create_user",
-			args: {
-				employee: frm.doc.name,
-				email: frm.doc.prefered_email,
-			},
-			freeze: true,
-			freeze_message: __("Creating User..."),
-			callback: function (r) {
-				frm.reload_doc();
 			},
 		});
 	},

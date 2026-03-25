@@ -65,6 +65,11 @@ frappe.query_reports["Purchase Analytics"] = {
 			default: "Monthly",
 			reqd: 1,
 		},
+		{
+			fieldname: "show_aggregate_value_from_subsidiary_companies",
+			label: __("Show Aggregate Value from Subsidiary Companies"),
+			fieldtype: "Check",
+		},
 	],
 	get_datatable_options(options) {
 		return Object.assign(options, {

@@ -2,27 +2,14 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
-from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
-	create_dimension,
-	disable_dimension,
-)
 from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import (
 	get_temporary_opening_account,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Customer", "Supplier", "Accounting Dimension"]
 
-
-class TestOpeningInvoiceCreationTool(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		if not frappe.db.exists("Company", "_Test Opening Invoice Company"):
-			make_company()
-		create_dimension()
-		return super().setUpClass()
-
+class TestOpeningInvoiceCreationTool(ERPNextTestSuite):
 	def make_invoices(
 		self,
 		invoice_type="Sales",
@@ -149,9 +136,6 @@ class TestOpeningInvoiceCreationTool(IntegrationTestCase):
 		}
 		self.check_expected_values(invoices, expected_value, invoice_type="Sales")
 
-	def tearDown(self):
-		disable_dimension()
-
 
 def get_opening_invoice_creation_dict(**args):
 	party = "Customer" if args.get("invoice_type", "Sales") == "Sales" else "Supplier"
@@ -188,19 +172,6 @@ def get_opening_invoice_creation_dict(**args):
 
 	invoice_dict.update(args)
 	return invoice_dict
-
-
-def make_company():
-	if frappe.db.exists("Company", "_Test Opening Invoice Company"):
-		return frappe.get_doc("Company", "_Test Opening Invoice Company")
-
-	company = frappe.new_doc("Company")
-	company.company_name = "_Test Opening Invoice Company"
-	company.abbr = "_TOIC"
-	company.default_currency = "INR"
-	company.country = "Pakistan"
-	company.insert()
-	return company
 
 
 def make_customer(customer=None):

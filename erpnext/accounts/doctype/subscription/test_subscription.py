@@ -3,7 +3,6 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils.data import (
 	add_days,
 	add_months,
@@ -18,19 +17,15 @@ from frappe.utils.data import (
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.subscription.subscription import get_prorata_factor
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ("UOM", "Item Group", "Item")
 
-
-class TestSubscription(IntegrationTestCase):
+class TestSubscription(ERPNextTestSuite):
 	def setUp(self):
 		make_plans()
 		create_parties()
 		reset_settings()
 		frappe.db.set_value("Company", "_Test Company", "accounts_frozen_till_date", None)
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 	def test_create_subscription_with_trial_with_correct_period(self):
 		subscription = create_subscription(
@@ -471,7 +466,7 @@ class TestSubscription(IntegrationTestCase):
 		currency = frappe.db.get_value("Sales Invoice", subscription.invoices[0].name, "currency")
 		self.assertEqual(currency, "USD")
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1},
 	)

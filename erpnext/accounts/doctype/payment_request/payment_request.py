@@ -750,7 +750,8 @@ def make_payment_request(**args):
 			pr.submit()
 
 	if args.order_type == "Shopping Cart":
-		frappe.db.commit()
+		if not frappe.in_test:
+			frappe.db.commit()
 		frappe.local.response["type"] = "redirect"
 		frappe.local.response["location"] = pr.get_payment_url()
 
@@ -955,6 +956,7 @@ def resend_payment_email(docname: str):
 @frappe.whitelist()
 def make_payment_entry(docname: str):
 	doc = frappe.get_doc("Payment Request", docname)
+	doc.check_permission("read")
 	return doc.create_payment_entry(submit=False).as_dict()
 
 
@@ -1154,7 +1156,7 @@ def get_irequests_of_payment_request(doc: str | None = None) -> list:
 
 
 @frappe.whitelist()
-def get_available_payment_schedules(reference_doctype, reference_name):
+def get_available_payment_schedules(reference_doctype: str, reference_name: str):
 	ref_doc = frappe.get_doc(reference_doctype, reference_name)
 
 	if not hasattr(ref_doc, "payment_schedule") or not ref_doc.payment_schedule:

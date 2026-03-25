@@ -49,7 +49,7 @@
   "section_break_zwh6",
   "allow_delivery_of_overproduced_qty",
   "column_break_mla9",
-  "deliver_scrap_items"
+  "deliver_secondary_items"
  ],
  "fields": [
   {
@@ -261,13 +261,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "description": "If enabled, the Scrap Item generated against a Finished Good will also be added in the Stock Entry when delivering that Finished Good.",
-   "fieldname": "deliver_scrap_items",
-   "fieldtype": "Check",
-   "label": "Deliver Scrap Items"
-  },
-  {
    "fieldname": "item_price_tab",
    "fieldtype": "Tab Break",
    "label": "Item Price"
@@ -320,16 +313,23 @@
    "fieldname": "enable_utm",
    "fieldtype": "Check",
    "label": "Enable UTM"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the Secondary Items generated against a Finished Good will also be added in the Stock Entry when delivering that Finished Good.",
+   "fieldname": "deliver_secondary_items",
+   "fieldtype": "Check",
+   "label": "Deliver Secondary Items"
   }
  ],
  "grid_page_length": 50,
- "hide_toolbar": 1,
+ "hide_toolbar": 0,
  "icon": "fa fa-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-27 00:47:46.003305",
+ "modified": "2026-03-16 13:28:18.988883",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

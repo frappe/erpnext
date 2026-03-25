@@ -36,15 +36,17 @@
   "quantity": 1.0
  },
  {
-  "scrap_items":[
+  "secondary_items":[
   {
    "amount": 2000.0,
-   "doctype": "BOM Scrap Item",
+   "doctype": "BOM Secondary Item",
    "item_code": "_Test Item Home Desktop 100",
-   "parentfield": "scrap_items",
+   "parentfield": "secondary_items",
    "stock_qty": 1.0,
    "rate": 2000.0,
-   "stock_uom": "_Test UOM"
+   "stock_uom": "_Test UOM",
+   "type": "Scrap",
+   "is_legacy": 1
   }
   ],
   "items": [
@@ -79,6 +81,7 @@
   "is_default": 1,
   "currency": "USD",
   "item": "_Test FG Item",
+  "company": "_Test Company",
   "quantity": 1.0
  },
  {
@@ -161,6 +164,7 @@
   "currency": "USD",
   "item": "_Test Variant Item",
   "quantity": 1.0,
+  "company": "_Test Company",
   "with_operations": 1
  },
  {
@@ -187,6 +191,7 @@
   "quantity": 1.0,
   "with_operations": 0,
   "fg_based_operating_cost": 1,
+  "company": "_Test Company",
   "operating_cost_per_bom_quantity": 140
  }
 ]

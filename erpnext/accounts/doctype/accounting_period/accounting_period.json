@@ -20,7 +20,6 @@
   {
    "fieldname": "period_name",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Period Name",
    "reqd": 1,
    "unique": 1
@@ -79,7 +78,7 @@
   }
  ],
  "links": [],
- "modified": "2025-12-01 16:53:44.631299",
+ "modified": "2026-03-09 17:15:33.577217",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Period",

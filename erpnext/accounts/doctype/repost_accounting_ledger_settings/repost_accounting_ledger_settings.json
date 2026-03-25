@@ -15,11 +15,11 @@
   }
  ],
  "grid_page_length": 50,
- "hide_toolbar": 1,
+ "hide_toolbar": 0,
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-02 18:19:08.888368",
+ "modified": "2026-03-16 13:28:21.312607",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Accounting Ledger Settings",

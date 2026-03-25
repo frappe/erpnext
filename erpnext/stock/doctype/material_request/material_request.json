@@ -159,6 +159,7 @@
    "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Transaction Date",
    "no_copy": 1,
    "oldfieldname": "transaction_date",
@@ -282,7 +283,6 @@
   {
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Set Target Warehouse",
    "options": "Warehouse"
   },
@@ -377,7 +377,7 @@
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-21 12:48:40.792323",
+ "modified": "2026-03-09 17:15:30.124509",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",

@@ -1,21 +1,18 @@
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import today
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.report.supplier_ledger_summary.supplier_ledger_summary import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestSupplierLedgerSummary(AccountsTestMixin, IntegrationTestCase):
+class TestSupplierLedgerSummary(AccountsTestMixin, ERPNextTestSuite):
 	def setUp(self):
 		self.create_company()
 		self.create_supplier()
 		self.create_item()
 		self.clear_old_entries()
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 	def create_purchase_invoice(self, do_not_submit=False):
 		frappe.set_user("Administrator")

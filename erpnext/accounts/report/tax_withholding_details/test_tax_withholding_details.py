@@ -2,7 +2,6 @@
 # MIT License. See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_to_date, today
 
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
@@ -14,9 +13,10 @@ from erpnext.accounts.doctype.tax_withholding_category.test_tax_withholding_cate
 from erpnext.accounts.report.tax_withholding_details.tax_withholding_details import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestTaxWithholdingDetails(AccountsTestMixin, IntegrationTestCase):
+class TestTaxWithholdingDetails(AccountsTestMixin, ERPNextTestSuite):
 	def setUp(self):
 		self.create_company()
 		self.clear_old_entries()
@@ -125,9 +125,6 @@ class TestTaxWithholdingDetails(AccountsTestMixin, IntegrationTestCase):
 				voucher.grand_total,
 			)
 			self.assertSequenceEqual(voucher_actual_values, voucher_expected_values)
-
-	def tearDown(self):
-		self.clear_old_entries()
 
 
 def create_tax_accounts():

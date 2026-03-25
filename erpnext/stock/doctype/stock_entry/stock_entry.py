@@ -32,7 +32,7 @@ from erpnext.manufacturing.doctype.bom.bom import (
 	add_additional_cost,
 	get_bom_items_as_dict,
 	get_op_cost_from_sub_assemblies,
-	get_scrap_items_from_sub_assemblies,
+	get_secondary_items_from_sub_assemblies,
 	validate_bom_no,
 )
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
@@ -107,6 +107,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		asset_repair: DF.Link | None
 		bom_no: DF.Link | None
 		company: DF.Link
+		cost_center: DF.Link | None
 		credit_note: DF.Link | None
 		delivery_note_no: DF.Link | None
 		fg_completed_qty: DF.Float
@@ -248,7 +249,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_company_in_accounting_dimension()
 
 		if self.purpose in ("Manufacture", "Repack"):
-			self.mark_finished_and_scrap_items()
+			self.mark_finished_and_secondary_items()
 			if not self.job_card:
 				self.validate_finished_goods()
 			else:
@@ -275,7 +276,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_component_and_quantities()
 
 		if self.get("purpose") != "Manufacture":
-			# ignore scrap item wh difference and empty source/target wh
+			# ignore other item wh difference and empty source/target wh
 			# in Manufacture Entry
 			self.reset_default_field_value("from_warehouse", "items", "s_warehouse")
 			self.reset_default_field_value("to_warehouse", "items", "t_warehouse")
@@ -658,11 +659,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if self.purpose == "Subcontracting Delivery":
 				item.expense_account = frappe.get_value("Company", self.company, "default_expense_account")
 
-			if self.purpose == "Manufacture":
-				item.set("expense_account", item_details.get("expense_account"))
-
 	def validate_fg_completed_qty(self):
-		if self.purpose != "Manufacture":
+		if self.purpose != "Manufacture" or not self.from_bom:
 			return
 
 		fg_qty = defaultdict(float)
@@ -795,7 +793,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			if self.purpose == "Manufacture":
 				if has_bom:
-					if d.is_finished_item or d.is_scrap_item:
+					if d.is_finished_item or d.type or d.is_legacy_scrap_item:
 						d.s_warehouse = None
 						if not d.t_warehouse:
 							frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
@@ -1099,11 +1097,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def set_basic_rate(self, reset_outgoing_rate=True, raise_error_if_no_rate=True):
 		"""
-		Set rate for outgoing, scrapped and finished items
+		Set rate for outgoing, secondary and finished items
 		"""
 		# Set rate for outgoing items
 		outgoing_items_cost = self.set_rate_for_outgoing_items(reset_outgoing_rate, raise_error_if_no_rate)
-		finished_item_qty = sum(d.transfer_qty for d in self.items if d.is_finished_item)
 
 		items = []
 		# Set basic rate for incoming items
@@ -1117,10 +1114,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 			elif d.is_finished_item:
 				if self.purpose == "Manufacture":
 					d.basic_rate = self.get_basic_rate_for_manufactured_item(
-						finished_item_qty, outgoing_items_cost
+						d.transfer_qty, outgoing_items_cost
 					)
 				elif self.purpose == "Repack":
 					d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
+
+				if self.bom_no:
+					d.basic_rate *= frappe.get_value("BOM", self.bom_no, "cost_allocation_per") / 100
+			elif d.type and d.bom_secondary_item:
+				cost_allocation_per = frappe.get_value(
+					"BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per"
+				)
+				d.basic_rate = (outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
 
 			if not d.basic_rate and not d.allow_zero_valuation_rate:
 				if self.is_new():
@@ -1204,7 +1209,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def get_basic_rate_for_manufactured_item(self, finished_item_qty, outgoing_items_cost=0) -> float:
 		settings = frappe.get_single("Manufacturing Settings")
-		scrap_items_cost = sum([flt(d.basic_amount) for d in self.get("items") if d.is_scrap_item])
+		scrap_items_cost = sum([flt(d.basic_amount) for d in self.get("items") if d.is_legacy_scrap_item])
 
 		if settings.material_consumption:
 			if settings.get_rm_cost_from_consumption_entry and self.work_order:
@@ -1218,7 +1223,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 					},
 				):
 					for item in self.items:
-						if not item.is_finished_item and not item.is_scrap_item:
+						if not item.is_finished_item and not item.type and not item.is_legacy_scrap_item:
 							label = frappe.get_meta(settings.doctype).get_label(
 								"get_rm_cost_from_consumption_entry"
 							)
@@ -1620,7 +1625,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				order,
 			)
 
-	def mark_finished_and_scrap_items(self):
+	def mark_finished_and_secondary_items(self):
 		if self.purpose != "Repack" and any(
 			[d.item_code for d in self.items if (d.is_finished_item and d.t_warehouse)]
 		):
@@ -1637,11 +1642,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if d.t_warehouse and not d.s_warehouse:
 				if self.purpose == "Repack" or d.item_code == finished_item:
 					d.is_finished_item = 1
-				else:
-					d.is_scrap_item = 1
 			else:
 				d.is_finished_item = 0
-				d.is_scrap_item = 0
+				d.type = ""
 
 	def get_finished_item(self):
 		finished_item = None
@@ -2424,7 +2427,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 							self.to_warehouse if self.purpose == "Send to Subcontractor" else ""
 						)
 
-						if original_item != item.get("item_code"):
+						if isinstance(original_item, str) and original_item != item.get("item_code"):
 							item["original_item"] = original_item
 
 					self.add_to_stock_entry_detail(item_dict)
@@ -2440,7 +2443,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				self.load_items_from_bom()
 
 		self.set_serial_batch_from_reserved_entry()
-		self.set_scrap_items()
+		self.set_secondary_items()
 		self.set_actual_qty()
 		self.validate_customer_provided_item()
 		self.calculate_rate_and_amount(raise_error_if_no_rate=False)
@@ -2585,14 +2588,21 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		return query.run(as_dict=True)
 
-	def set_scrap_items(self):
-		if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:
-			scrap_item_dict = self.get_bom_scrap_material(self.fg_completed_qty)
-			for item in scrap_item_dict.values():
-				if self.pro_doc and self.pro_doc.scrap_warehouse:
-					item["to_warehouse"] = self.pro_doc.scrap_warehouse
+	def set_secondary_items(self):
+		if self.purpose in ["Manufacture", "Repack"]:
+			secondary_items_dict = self.get_secondary_items(self.fg_completed_qty)
+			for item in secondary_items_dict.values():
+				if self.pro_doc and item.type:
+					if self.pro_doc.scrap_warehouse and item.type == "Scrap":
+						item["to_warehouse"] = self.pro_doc.scrap_warehouse
 
-			self.add_to_stock_entry_detail(scrap_item_dict, bom_no=self.bom_no)
+				if item.process_loss_per:
+					item["qty"] -= flt(
+						item["qty"] * (item.process_loss_per / 100),
+						self.precision("fg_completed_qty"),
+					)
+
+			self.add_to_stock_entry_detail(secondary_items_dict, bom_no=self.bom_no)
 
 	def set_process_loss_qty(self):
 		if self.purpose not in ("Manufacture", "Repack"):
@@ -2606,7 +2616,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				fields=[{"MAX": "process_loss_qty", "as": "process_loss_qty"}],
 			)
 
-			if data and data[0].process_loss_qty is not None:
+			if data and data[0].process_loss_qty:
 				process_loss_qty = data[0].process_loss_qty
 				if flt(self.process_loss_qty, precision) != flt(process_loss_qty, precision):
 					self.process_loss_qty = flt(process_loss_qty, precision)
@@ -2638,7 +2648,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if not self.pro_doc:
 				self.pro_doc = frappe.get_doc("Work Order", self.work_order)
 
-			if self.pro_doc:
+			if self.pro_doc and not self.pro_doc.track_semi_finished_goods:
 				self.bom_no = self.pro_doc.bom_no
 			else:
 				# invalid work order
@@ -2780,54 +2790,59 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		return item_dict
 
-	def get_bom_scrap_material(self, qty):
+	def get_secondary_items(self, qty):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 
 		if (
-			frappe.db.get_single_value("Manufacturing Settings", "set_op_cost_and_scrap_from_sub_assemblies")
+			frappe.db.get_single_value(
+				"Manufacturing Settings", "set_op_cost_and_secondary_items_from_sub_assemblies"
+			)
 			and self.work_order
 			and frappe.get_cached_value("Work Order", self.work_order, "use_multi_level_bom")
 		):
-			item_dict = get_scrap_items_from_sub_assemblies(self.bom_no, self.company, qty)
+			item_dict = get_secondary_items_from_sub_assemblies(self.bom_no, self.company, qty)
 		else:
 			# item dict = { item_code: {qty, description, stock_uom} }
 			item_dict = (
 				get_bom_items_as_dict(
-					self.bom_no, self.company, qty=qty, fetch_exploded=0, fetch_scrap_items=1
+					self.bom_no, self.company, qty=qty, fetch_exploded=0, fetch_secondary_items=1
 				)
 				or {}
 			)
 
 		for item in item_dict.values():
 			item.from_warehouse = ""
-			item.is_scrap_item = 1
-
-		for row in self.get_scrap_items_from_job_card():
-			if row.stock_qty <= 0:
-				continue
-
-			item_row = item_dict.get(row.item_code)
-			if not item_row:
-				item_row = frappe._dict({})
-
-			item_row.update(
-				{
-					"uom": row.stock_uom,
-					"from_warehouse": "",
-					"qty": row.stock_qty + flt(item_row.stock_qty),
-					"converison_factor": 1,
-					"is_scrap_item": 1,
-					"item_name": row.item_name,
-					"description": row.description,
-					"allow_zero_valuation_rate": 1,
-				}
-			)
-
-			item_dict[row.item_code] = item_row
 
 		return item_dict
 
-	def get_scrap_items_from_job_card(self):
+	def set_secondary_items_from_job_card(self):
+		if self.purpose not in ["Manufacture", "Repack"]:
+			return
+
+		item_dict = {}
+		for row in self.get_secondary_items_from_job_card():
+			if row.stock_qty <= 0:
+				continue
+
+			item_dict[row.item_code] = frappe._dict(
+				{
+					"uom": row.stock_uom,
+					"from_warehouse": "",
+					"qty": row.stock_qty,
+					"conversion_factor": 1,
+					"type": row.type,
+					"item_name": row.item_name,
+					"description": row.description,
+					"bom_secondary_item": row.bom_secondary_item,
+				}
+			)
+
+		for item in item_dict.values():
+			item.from_warehouse = ""
+
+		self.add_to_stock_entry_detail(item_dict)
+
+	def get_secondary_items_from_job_card(self):
 		if not hasattr(self, "pro_doc"):
 			self.pro_doc = None
 
@@ -2838,70 +2853,78 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return []
 
 		job_card = frappe.qb.DocType("Job Card")
-		job_card_scrap_item = frappe.qb.DocType("Job Card Scrap Item")
+		job_card_secondary_item = frappe.qb.DocType("Job Card Secondary Item")
 
-		scrap_items = (
+		other = (
 			frappe.qb.from_(job_card)
 			.select(
-				Sum(job_card_scrap_item.stock_qty).as_("stock_qty"),
-				job_card_scrap_item.item_code,
-				job_card_scrap_item.item_name,
-				job_card_scrap_item.description,
-				job_card_scrap_item.stock_uom,
+				Sum(job_card_secondary_item.stock_qty).as_("stock_qty"),
+				job_card_secondary_item.item_code,
+				job_card_secondary_item.item_name,
+				job_card_secondary_item.description,
+				job_card_secondary_item.stock_uom,
+				job_card_secondary_item.type,
+				job_card_secondary_item.bom_secondary_item,
 			)
-			.join(job_card_scrap_item)
-			.on(job_card_scrap_item.parent == job_card.name)
+			.join(job_card_secondary_item)
+			.on(job_card_secondary_item.parent == job_card.name)
 			.where(
-				(job_card_scrap_item.item_code.isnotnull())
+				(job_card_secondary_item.item_code.isnotnull())
 				& (job_card.work_order == self.work_order)
 				& (job_card.docstatus == 1)
 			)
-			.groupby(job_card_scrap_item.item_code)
+			.groupby(job_card_secondary_item.item_code, job_card_secondary_item.type)
+			.orderby(job_card_secondary_item.idx)
 		)
 
 		if self.job_card:
-			scrap_items = scrap_items.where(job_card.name == self.job_card)
+			other = other.where(job_card.name == self.job_card)
 
-		scrap_items = scrap_items.run(as_dict=1)
+		other = other.run(as_dict=1)
 
 		if self.job_card:
 			pending_qty = flt(self.fg_completed_qty)
 		else:
 			pending_qty = flt(self.get_completed_job_card_qty()) - flt(self.pro_doc.produced_qty)
 
-		used_scrap_items = self.get_used_scrap_items()
-		for row in scrap_items:
-			row.stock_qty -= flt(used_scrap_items.get(row.item_code))
+		used_secondary_items = self.get_used_secondary_items()
+		for row in other:
+			row.stock_qty -= flt(used_secondary_items.get(row.item_code))
 			row.stock_qty = (row.stock_qty) * flt(self.fg_completed_qty) / flt(pending_qty)
 
-			if used_scrap_items.get(row.item_code):
-				used_scrap_items[row.item_code] -= row.stock_qty
+			if used_secondary_items.get(row.item_code):
+				used_secondary_items[row.item_code] -= row.stock_qty
 
 			if cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number")):
 				row.stock_qty = frappe.utils.ceil(row.stock_qty)
 
-		return scrap_items
+		return other
 
 	def get_completed_job_card_qty(self):
 		return flt(min([d.completed_qty for d in self.pro_doc.operations]))
 
-	def get_used_scrap_items(self):
-		used_scrap_items = defaultdict(float)
-		data = frappe.get_all(
-			"Stock Entry",
-			fields=["`tabStock Entry Detail`.`item_code`", "`tabStock Entry Detail`.`qty`"],
-			filters=[
-				["Stock Entry", "work_order", "=", self.work_order],
-				["Stock Entry Detail", "is_scrap_item", "=", 1],
-				["Stock Entry", "docstatus", "=", 1],
-				["Stock Entry", "purpose", "in", ["Repack", "Manufacture"]],
-			],
-		)
+	def get_used_secondary_items(self):
+		used_secondary_items = defaultdict(float)
+
+		StockEntry = frappe.qb.DocType("Stock Entry")
+		StockEntryDetail = frappe.qb.DocType("Stock Entry Detail")
+		data = (
+			frappe.qb.from_(StockEntry)
+			.inner_join(StockEntryDetail)
+			.on(StockEntryDetail.parent == StockEntry.name)
+			.select(StockEntryDetail.item_code, StockEntryDetail.qty)
+			.where(
+				(StockEntry.work_order == self.work_order)
+				& ((StockEntryDetail.type.isnotnull()) | (StockEntryDetail.is_legacy_scrap_item == 1))
+				& (StockEntry.docstatus == 1)
+				& (StockEntry.purpose.isin(["Repack", "Manufacture"]))
+			)
+		).run(as_dict=1)
 
 		for row in data:
-			used_scrap_items[row.item_code] += row.qty
+			used_secondary_items[row.item_code] += row.qty
 
-		return used_scrap_items
+		return used_secondary_items
 
 	def get_unconsumed_raw_materials(self):
 		wo = frappe.get_doc("Work Order", self.work_order)
@@ -3193,7 +3216,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 			item_row = item_dict[d]
 
 			child_qty = flt(item_row["qty"], precision)
-			if not self.is_return and child_qty <= 0 and not item_row.get("is_scrap_item"):
+			if (
+				not self.is_return
+				and child_qty <= 0
+				and not item_row.get("type")
+				and not item_row.get("is_legacy_scrap_item")
+			):
 				if self.purpose not in ["Receive from Customer", "Send to Subcontractor"]:
 					continue
 
@@ -3211,11 +3239,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 				item_row, company=self.company
 			)
 			se_child.is_finished_item = item_row.get("is_finished_item", 0)
-			se_child.is_scrap_item = item_row.get("is_scrap_item", 0)
 			se_child.po_detail = item_row.get("po_detail")
 			se_child.sco_rm_detail = item_row.get("sco_rm_detail")
 			se_child.scio_detail = item_row.get("scio_detail")
 			se_child.sample_quantity = item_row.get("sample_quantity", 0)
+			se_child.type = item_row.get("type")
+			se_child.is_legacy_scrap_item = item_row.get("is_legacy")
+			se_child.bom_secondary_item = item_row.get("name") or item_row.get("bom_secondary_item")
 
 			for field in [
 				self.subcontract_data.rm_detail_field,
@@ -3692,7 +3722,7 @@ def get_operating_cost_per_unit(work_order=None, bom_no=None):
 		if (
 			bom_no
 			and frappe.db.get_single_value(
-				"Manufacturing Settings", "set_op_cost_and_scrap_from_sub_assemblies"
+				"Manufacturing Settings", "set_op_cost_and_secondary_items_from_sub_assemblies"
 			)
 			and frappe.get_cached_value("Work Order", work_order.name, "use_multi_level_bom")
 		):

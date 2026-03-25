@@ -920,11 +920,9 @@ class SalesInvoice(SellingController):
 		if self.pos_profile:
 			pos = frappe.get_doc("POS Profile", self.pos_profile)
 
-		if not self.get("payments") and not for_validate:
-			update_multi_mode_option(self, pos)
-
 		if pos:
 			if not for_validate:
+				update_multi_mode_option(self, pos)
 				self.tax_category = pos.get("tax_category")
 
 			if not for_validate and not self.customer:
@@ -2780,7 +2778,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				"doctype": target_doctype,
 				"postprocess": update_details,
 				"set_target_warehouse": "set_from_warehouse",
-				"field_no_map": ["taxes_and_charges", "set_warehouse", "shipping_address"],
+				"field_no_map": ["taxes_and_charges", "set_warehouse", "shipping_address", "cost_center"],
 			},
 			doctype + " Item": item_field_map,
 		},
@@ -3009,6 +3007,8 @@ def update_multi_mode_option(doc, pos_profile):
 		payment.account = payment_mode.default_account
 		payment.type = payment_mode.type
 
+	mop_refetched = bool(doc.payments) and not doc.is_created_using_pos
+
 	doc.set("payments", [])
 	invalid_modes = []
 	mode_of_payments = [d.mode_of_payment for d in pos_profile.get("payments")]
@@ -3029,6 +3029,12 @@ def update_multi_mode_option(doc, pos_profile):
 		else:
 			msg = _("Please set default Cash or Bank account in Mode of Payments {}")
 		frappe.throw(msg.format(", ".join(invalid_modes)), title=_("Missing Account"))
+
+	if mop_refetched:
+		frappe.toast(
+			_("Payment methods refreshed. Please review before proceeding."),
+			indicator="orange",
+		)
 
 
 def get_all_mode_of_payments(doc):

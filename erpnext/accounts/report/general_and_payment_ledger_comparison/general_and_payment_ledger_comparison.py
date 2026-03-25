@@ -68,6 +68,12 @@ class General_Payment_Ledger_Comparison:
 				if self.filters.period_end_date:
 					filter_criterion.append(gle.posting_date.lte(self.filters.period_end_date))
 
+				if self.filters.party_type:
+					filter_criterion.append(gle.party_type.eq(self.filters.party_type))
+
+				if self.filters.party:
+					filter_criterion.append(gle.party.eq(self.filters.party))
+
 				if acc_type == "receivable":
 					outstanding = (Sum(gle.debit) - Sum(gle.credit)).as_("outstanding")
 				else:
@@ -110,6 +116,12 @@ class General_Payment_Ledger_Comparison:
 
 				if self.filters.period_end_date:
 					filter_criterion.append(ple.posting_date.lte(self.filters.period_end_date))
+
+				if self.filters.party_type:
+					filter_criterion.append(ple.party_type.eq(self.filters.party_type))
+
+				if self.filters.party:
+					filter_criterion.append(ple.party.eq(self.filters.party))
 
 				self.account_types[acc_type].ple = (
 					qb.from_(ple)

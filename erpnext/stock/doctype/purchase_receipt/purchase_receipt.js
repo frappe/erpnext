@@ -19,7 +19,7 @@ frappe.ui.form.on("Purchase Receipt", {
 
 		frm.set_query("wip_composite_asset", "items", function () {
 			return {
-				filters: { is_composite_asset: 1, docstatus: 0 },
+				filters: { asset_type: "Composite Asset", docstatus: 0 },
 			};
 		});
 
