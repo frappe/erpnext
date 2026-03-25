@@ -31,6 +31,37 @@ frappe.ui.form.on("Job Card", {
 			};
 		});
 
+<<<<<<< HEAD
+=======
+		frm.set_query("operation", "time_logs", () => {
+			let operations = (frm.doc.sub_operations || []).map((d) => d.sub_operation);
+			return {
+				filters: {
+					name: ["in", operations],
+				},
+			};
+		});
+
+		frm.set_query("work_order", function () {
+			return {
+				filters: {
+					status: ["not in", ["Cancelled", "Closed", "Stopped"]],
+				},
+			};
+		});
+
+		frm.events.set_company_filters(frm, "target_warehouse");
+		frm.events.set_company_filters(frm, "source_warehouse");
+		frm.events.set_company_filters(frm, "wip_warehouse");
+		frm.set_query("source_warehouse", "items", () => {
+			return {
+				filters: {
+					company: frm.doc.company,
+				},
+			};
+		});
+
+>>>>>>> d43d308e2f (fix(manufacturing): apply work order status filter in job card (#53766))
 		frm.set_indicator_formatter("sub_operation", function (doc) {
 			if (doc.status == "Pending") {
 				return "red";
