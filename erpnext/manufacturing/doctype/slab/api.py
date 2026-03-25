@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from frappe import frappe
 from frappe import utils as frappe_utils
@@ -290,6 +290,28 @@ def _generate_batch_number(line: str):
 	# B: Get total days in the fiscal year until today
 	time_diff = today - fiscal_year.year_start_date  # pyright: ignore[reportOperatorIssue, reportOptionalMemberAccess]
 	total_days_so_far = time_diff.days
+
+	attendance_shifts = frappe.db.get_all(
+		"Attendance Shift",
+		fields=["name", "start_time", "end_time", "does_span_next_day"],
+		limit=1,
+		order_by="start_time DESC",
+	)
+
+	last_shift = attendance_shifts[0] if attendance_shifts else None
+	if not last_shift:
+		raise frappe.ValidationError("No attendance shifts found.")
+
+	shift = last_shift
+	now_time = datetime.now()
+	shift_start_hour = shift.start_time.seconds / 3600
+	start_day_factor = 1 if shift.does_span_next_day and now_time.hour < shift_start_hour else 0
+	shift_start_datetime = datetime(today.year, today.month, today.day - start_day_factor) + shift.start_time
+	shift_end_datetime = datetime(today.year, today.month, today.day) + shift.end_time
+
+	# If the current time falls in the LAST shift of the day AND is after midnight, subtract 1 from total_days_so_far so that the batch number still reflects that of the previous day.
+	if shift_start_datetime <= now_time <= shift_end_datetime:
+		total_days_so_far -= 1
 
 	# C: Get the total holidays from the first day of the fiscal year of the year till today
 	year_start_date = (
