@@ -8,6 +8,7 @@ from typing import Any, NewType
 import frappe
 from frappe import _
 from frappe.core.doctype.report.report import get_report_module_dotted_path
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.tests.utils import load_test_records_for
 from frappe.utils import now_datetime, today
 
@@ -240,15 +241,28 @@ class BootStrapTestData:
 		self.make_sales_person()
 		self.make_activity_type()
 		self.make_address()
+		self.update_support_settings()
 		self.update_selling_settings()
 		self.update_stock_settings()
 		self.update_system_settings()
 
 		frappe.db.commit()  # nosemgrep
 
-		# custom doctype
 		# DDL commands have implicit commit
+		# Dimensions
+		self.make_dimensions()
+
+		# custom doctype
 		self.make_custom_doctype()
+
+		# data on custom doctype
+		self.make_shelf()
+		self.make_rack()
+		self.make_inv_site()
+		self.make_store()
+
+		# custom field
+		self.make_custom_field()
 
 	def update_system_settings(self):
 		system_settings = frappe.get_doc("System Settings")
@@ -257,6 +271,11 @@ class BootStrapTestData:
 		system_settings.currency_precision = system_settings.float_precision = 2
 		system_settings.rounding_method = "Banker's Rounding"
 		system_settings.save()
+
+	def update_support_settings(self):
+		support_settings = frappe.get_doc("Support Settings")
+		support_settings.track_service_level_agreement = True
+		support_settings.save()
 
 	def update_selling_settings(self):
 		selling_settings = frappe.get_doc("Selling Settings")
@@ -956,6 +975,7 @@ class BootStrapTestData:
 	def make_location(self):
 		records = [
 			{"doctype": "Location", "location_name": "Test Location"},
+			{"doctype": "Location", "location_name": "Test Location 2"},
 			{"doctype": "Location", "location_name": "Test Location Area", "is_group": 1, "is_container": 1},
 			{
 				"doctype": "Location",
@@ -2743,6 +2763,46 @@ class BootStrapTestData:
 					}
 				).insert(ignore_permissions=True)
 
+			if not frappe.db.exists("DocType", "Order Assignment"):
+				frappe.get_doc(
+					{
+						"doctype": "DocType",
+						"name": "Order Assignment",
+						"module": "Buying",
+						"custom": 1,
+						"autoname": "field:po",
+						"fields": [
+							{
+								"label": "PO",
+								"fieldname": "po",
+								"fieldtype": "Link",
+								"options": "Purchase Order",
+							},
+							{
+								"label": "Supplier",
+								"fieldname": "supplier",
+								"fieldtype": "Data",
+								"fetch_from": "po.supplier",
+							},
+						],
+						"permissions": [
+							{
+								"create": 1,
+								"delete": 1,
+								"email": 1,
+								"export": 1,
+								"print": 1,
+								"read": 1,
+								"report": 1,
+								"role": "System Manager",
+								"share": 1,
+								"write": 1,
+							},
+							{"read": 1, "role": "Supplier"},
+						],
+					}
+				).insert(ignore_if_duplicate=True)
+
 	def make_address(self):
 		records = [
 			{
@@ -2793,6 +2853,103 @@ class BootStrapTestData:
 			},
 		]
 		self.make_records(["address_title", "address_type"], records)
+
+	def make_dimensions(self):
+		records = [
+			{
+				"doctype": "Accounting Dimension",
+				"document_type": "Department",
+				"dimension_defaults": [
+					{
+						"company": "_Test Company",
+						"reference_document": "Department",
+						"default_dimension": "_Test Department - _TC",
+					}
+				],
+			},
+			{
+				"doctype": "Accounting Dimension",
+				"document_type": "Location",
+				"dimension_defaults": [
+					{
+						"company": "_Test Company",
+						"reference_document": "Location",
+						"default_dimension": "Block 1",
+					}
+				],
+			},
+			{
+				"doctype": "Accounting Dimension",
+				"document_type": "Branch",
+			},
+		]
+		self.make_records(["document_type"], records)
+
+	def make_custom_field(self):
+		pan_field = {
+			"Supplier": [
+				{
+					"fieldname": "pan",
+					"label": "PAN",
+					"fieldtype": "Data",
+					"translatable": 0,
+				}
+			]
+		}
+
+		create_custom_fields(pan_field, update=1)
+
+	def make_shelf(self):
+		records = [
+			{
+				"doctype": "Shelf",
+				"shelf_name": "Shelf 1",
+			},
+			{
+				"doctype": "Shelf",
+				"shelf_name": "Shelf 2",
+			},
+		]
+		self.make_records(["shelf_name"], records)
+
+	def make_rack(self):
+		records = [
+			{
+				"doctype": "Rack",
+				"rack_name": "Rack 1",
+			},
+			{
+				"doctype": "Rack",
+				"rack_name": "Rack 2",
+			},
+		]
+		self.make_records(["rack_name"], records)
+
+	def make_inv_site(self):
+		records = [
+			{
+				"doctype": "Inv Site",
+				"site_name": "Site 1",
+			},
+			{
+				"doctype": "Inv Site",
+				"site_name": "Site 2",
+			},
+		]
+		self.make_records(["site_name"], records)
+
+	def make_store(self):
+		records = [
+			{
+				"doctype": "Store",
+				"store_name": "Store 1",
+			},
+			{
+				"doctype": "Store",
+				"store_name": "Store 2",
+			},
+		]
+		self.make_records(["store_name"], records)
 
 
 BootStrapTestData()

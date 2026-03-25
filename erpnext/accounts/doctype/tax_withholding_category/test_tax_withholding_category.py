@@ -18,7 +18,6 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		# create relevant supplier, etc
 		create_records()
 		create_tax_withholding_category_records()
-		make_pan_no_field()
 
 	def validate_tax_withholding_entries(self, doctype, docname, expected_entries):
 		"""Validate tax withholding entries for a document"""
@@ -3998,18 +3997,3 @@ def create_lower_deduction_certificate(
 				"certificate_limit": limit,
 			}
 		).insert()
-
-
-def make_pan_no_field():
-	pan_field = {
-		"Supplier": [
-			{
-				"fieldname": "pan",
-				"label": "PAN",
-				"fieldtype": "Data",
-				"translatable": 0,
-			}
-		]
-	}
-
-	create_custom_fields(pan_field, update=1)

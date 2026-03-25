@@ -2246,13 +2246,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
 	def test_rounding_adjustment_3(self):
-		from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import create_dimension
-
-		# Dimension creates custom field, which does an implicit DB commit as it is a DDL command
-		# Ensure dimension don't have any mandatory fields
-		create_dimension()
-
-		# rollback from tearDown() happens till here
 		si = create_sales_invoice(do_not_save=True)
 		si.items = []
 		for d in [(1122, 2), (1122.01, 1), (1122.01, 1)]:

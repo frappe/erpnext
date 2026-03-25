@@ -40,6 +40,14 @@ frappe.ui.form.on("Job Card", {
 			};
 		});
 
+		frm.set_query("work_order", function () {
+			return {
+				filters: {
+					status: ["not in", ["Cancelled", "Closed", "Stopped"]],
+				},
+			};
+		});
+
 		frm.events.set_company_filters(frm, "target_warehouse");
 		frm.events.set_company_filters(frm, "source_warehouse");
 		frm.events.set_company_filters(frm, "wip_warehouse");

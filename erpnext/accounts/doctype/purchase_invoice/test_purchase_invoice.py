@@ -2189,11 +2189,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 	def test_offsetting_entries_for_accounting_dimensions(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
-		from erpnext.accounts.report.trial_balance.test_trial_balance import (
-			clear_dimension_defaults,
-			create_accounting_dimension,
-			disable_dimension,
-		)
 
 		create_account(
 			account_name="Offsetting",
@@ -2201,7 +2196,16 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			parent_account="Temporary Accounts - _TC",
 		)
 
-		create_accounting_dimension(company="_Test Company", offsetting_account="Offsetting - _TC")
+		dim = frappe.get_doc("Accounting Dimension", "Branch")
+		dim.append(
+			"dimension_defaults",
+			{
+				"company": "_Test Company",
+				"reference_document": "Branch",
+				"offsetting_account": "Offsetting - _TC",
+			},
+		)
+		dim.save()
 
 		branch1 = frappe.new_doc("Branch")
 		branch1.branch = "Location 1"
@@ -2238,8 +2242,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			voucher_type="Purchase Invoice",
 			additional_columns=["branch"],
 		)
-		clear_dimension_defaults("Branch")
-		disable_dimension()
 
 	def test_repost_accounting_entries(self):
 		# update repost settings

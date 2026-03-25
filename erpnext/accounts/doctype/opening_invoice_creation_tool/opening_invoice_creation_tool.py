@@ -274,7 +274,8 @@ def start_import(invoices):
 			doc.flags.ignore_mandatory = True
 			doc.insert(set_name=invoice_number)
 			doc.submit()
-			frappe.db.commit()
+			if not frappe.in_test:
+				frappe.db.commit()
 			names.append(doc.name)
 		except Exception:
 			errors += 1

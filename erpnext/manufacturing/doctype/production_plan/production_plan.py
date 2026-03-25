@@ -615,7 +615,12 @@ class ProductionPlan(Document):
 				None,
 			):
 				item.db_set("sub_assembly_item_reference", reference)
-			elif self.reserve_stock and item.main_item_code and item.from_bom:
+			elif (
+				self.reserve_stock
+				and item.main_item_code
+				and item.from_bom
+				and item.main_item_code != frappe.get_cached_value("BOM", item.from_bom, "item")
+			):
 				frappe.throw(
 					_(
 						"Sub assembly item references are missing. Please fetch the sub assemblies and raw materials again."
