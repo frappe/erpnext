@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from frappe import frappe
 from frappe import utils as frappe_utils
@@ -201,7 +201,7 @@ def get_slabs_for(line: str, next_stage: str, limit=1, include_current_stage=Fal
 		order_by="modified asc",
 		ignore_permissions=True,
 		filters={"status": ["in", valid_previous_stages], "is_cur_stage_complete": 1, "line": line},
-		limit=limit, # Limit one to send only the first slab
+		limit=limit,  # Limit one to send only the first slab
 		fields=[
 			"name",
 			"serial_number",
@@ -219,14 +219,14 @@ def get_slabs_for(line: str, next_stage: str, limit=1, include_current_stage=Fal
 
 
 @frappe.whitelist()
-def get_batch_numbers(include_child_lines = False):
+def get_batch_numbers(include_child_lines=False):
 	production_lines = frappe.db.get_list(
 		"Production Line",
 		ignore_permissions=True,
 		fields=["name", "parent_line", "is_group"],
 		filters={
 			"is_active": 1,
-		}
+		},
 	)
 
 	batch_numbers = {}
@@ -241,33 +241,33 @@ def get_batch_numbers(include_child_lines = False):
 
 
 def pause_or_resume_slab_operation(slab_number: str, pause: bool):
-		# Get the slab document
-		slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
-		# Get the last item in slab history
-		last_history = slab.slab_history[-1]
+	# Get the slab document
+	slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
+	# Get the last item in slab history
+	last_history = slab.slab_history[-1]
 
-		# Check if the out time on the last history item is None
-		if pause and last_history.out_time is not None:
-			frappe.throw("Invalid Operation: Slab operation is already paused.")
+	# Check if the out time on the last history item is None
+	if pause and last_history.out_time is not None:
+		frappe.throw("Invalid Operation: Slab operation is already paused.")
 
-		if not pause and last_history.out_time is None:
-			frappe.throw("Invalid Operation: Slab operation is not paused.")
+	if not pause and last_history.out_time is None:
+		frappe.throw("Invalid Operation: Slab operation is not paused.")
 
-		if pause:
-			last_history.out_time = frappe_utils.now_datetime()
-			total_seconds = (last_history.out_time - last_history.in_time).total_seconds()  # pyright: ignore[reportOperatorIssue]
-			last_history.total_time_in_minutes = total_seconds / 60
-			slab.is_paused = True
-		else:
-			slab_history: SlabHistory = frappe.new_doc("Slab History")  # pyright: ignore[reportAssignmentType]
-			slab_history.idx = last_history.idx + 1
-			slab_history.station = last_history.station
-			slab_history.in_time = frappe_utils.now_datetime()
-			slab_history.job_card_number = last_history.job_card_number
-			slab.slab_history.append(slab_history)
-			slab.is_paused = False
+	if pause:
+		last_history.out_time = frappe_utils.now_datetime()
+		total_seconds = (last_history.out_time - last_history.in_time).total_seconds()  # pyright: ignore[reportOperatorIssue]
+		last_history.total_time_in_minutes = total_seconds / 60
+		slab.is_paused = True
+	else:
+		slab_history: SlabHistory = frappe.new_doc("Slab History")  # pyright: ignore[reportAssignmentType]
+		slab_history.idx = last_history.idx + 1
+		slab_history.station = last_history.station
+		slab_history.in_time = frappe_utils.now_datetime()
+		slab_history.job_card_number = last_history.job_card_number
+		slab.slab_history.append(slab_history)
+		slab.is_paused = False
 
-		slab.save(ignore_permissions=True)
+	slab.save(ignore_permissions=True)
 
 
 def _generate_batch_number(line: str):
@@ -275,7 +275,9 @@ def _generate_batch_number(line: str):
 
 	# A: Get the current fiscal year
 	fiscal_years: list = frappe.db.get_all(
-		"Fiscal Year", filters=[["year_start_date", "<=", today], ["year_end_date", ">=", today]], fields=["year_start_date", "year_end_date"]
+		"Fiscal Year",
+		filters=[["year_start_date", "<=", today], ["year_end_date", ">=", today]],
+		fields=["year_start_date", "year_end_date"],
 	)  # pyright: ignore[reportAssignmentType]
 
 	if not fiscal_years:
@@ -288,6 +290,28 @@ def _generate_batch_number(line: str):
 	# B: Get total days in the fiscal year until today
 	time_diff = today - fiscal_year.year_start_date  # pyright: ignore[reportOperatorIssue, reportOptionalMemberAccess]
 	total_days_so_far = time_diff.days
+
+	attendance_shifts = frappe.db.get_all(
+		"Attendance Shift",
+		fields=["name", "start_time", "end_time", "does_span_next_day"],
+		limit=1,
+		order_by="start_time DESC",
+	)
+
+	last_shift = attendance_shifts[0] if attendance_shifts else None
+	if not last_shift:
+		raise frappe.ValidationError("No attendance shifts found.")
+
+	shift = last_shift
+	now_time = datetime.now()
+	shift_start_hour = shift.start_time.seconds / 3600
+	start_day_factor = 1 if shift.does_span_next_day and now_time.hour < shift_start_hour else 0
+	shift_start_datetime = datetime(today.year, today.month, today.day - start_day_factor) + shift.start_time
+	shift_end_datetime = datetime(today.year, today.month, today.day) + shift.end_time
+
+	# If the current time falls in the LAST shift of the day AND is after midnight, subtract 1 from total_days_so_far so that the batch number still reflects that of the previous day.
+	if shift_start_datetime <= now_time <= shift_end_datetime:
+		total_days_so_far -= 1
 
 	# C: Get the total holidays from the first day of the fiscal year of the year till today
 	year_start_date = (
@@ -344,7 +368,14 @@ def _get_slab_number(batch: str, line: str) -> int:
 	batch_prefix = batch.split("/")[0]
 
 	mahi_granites_settings: MahiGranitesSettings = frappe.get_doc("Mahi Granites Settings")  # pyright: ignore[reportAssignmentType]
-	slab_seed = next((seed.seed for seed in mahi_granites_settings.slab_seeds if seed.line == line and seed.seed_month and seed.seed_month.strftime("%Y-%m-%d") == month_start), 0)  # pyright: ignore
+	slab_seed = next(
+		(
+			seed.seed
+			for seed in mahi_granites_settings.slab_seeds
+			if seed.line == line and seed.seed_month and seed.seed_month.strftime("%Y-%m-%d") == month_start
+		),
+		0,
+	)  # pyright: ignore
 
 	slab_count: int = (
 		frappe.db.count(
