@@ -208,7 +208,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		super().before_print(settings)
 		self.update_item_bin_details()
 
-	def update_item_bin_details(self):
+	def update_items_from_bin_details(self):
 		for item in self.get("items"):
 			item.update(get_bin_details(item.item_code, item.s_warehouse or item.t_warehouse))
 
