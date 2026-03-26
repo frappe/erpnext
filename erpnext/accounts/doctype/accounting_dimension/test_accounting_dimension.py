@@ -155,7 +155,8 @@ class TestAccountingDimension(ERPNextTestSuite):
 			ascii_label = unicodedata.normalize("NFKD", label).encode("ascii", "ignore").decode("ascii")
 			client_fieldname = ascii_label.replace(" ", "_").replace("-", "_").lower()
 			server_fieldname = self._get_fieldname(label)
-			self.assertEqual(client_fieldname, server_fieldname)
+			self.assertEqual(client_fieldname, expected_fieldname)
+			self.assertEqual(server_fieldname, expected_fieldname)
 
 	def test_edge_cases_fieldname_generation(self):
 		test_cases = [
