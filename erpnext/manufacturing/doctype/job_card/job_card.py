@@ -92,6 +92,7 @@ class JobCard(Document):
 		operation_id: DF.Data | None
 		operation_row_number: DF.Literal[None]
 		posting_date: DF.Date | None
+		priority: DF.Int
 		process_loss_qty: DF.Float
 		production_item: DF.Link | None
 		production_line: DF.Link | None
