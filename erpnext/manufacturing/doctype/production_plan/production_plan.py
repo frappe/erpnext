@@ -83,6 +83,7 @@ class ProductionPlan(Document):
 		include_subcontracted_items: DF.Check
 		is_monthly_production_plan: DF.Check
 		is_parent_plan: DF.Check
+		is_test_item: DF.Check
 		item_code: DF.Link | None
 		material_requests: DF.Table[ProductionPlanMaterialRequest]
 		monthly_production_plan: DF.Link | None
@@ -920,7 +921,6 @@ class ProductionPlan(Document):
 			indicator="green",
 		)
 
-
 	def create_all_work_orders_and_job_cards_for_production_plan(self, user=None):
 		from erpnext.manufacturing.doctype.work_order.work_order import get_default_warehouse
 
@@ -966,7 +966,6 @@ class ProductionPlan(Document):
 
 		frappe.publish_realtime("refresh_mixer_station")
 
-
 	def make_work_order_for_finished_goods(self, wo_list, default_warehouses, items_data=None):
 		if not items_data:
 			items_data = self.get_production_items()
@@ -980,9 +979,7 @@ class ProductionPlan(Document):
 			if work_order:
 				wo_list.append(work_order)
 
-	def make_work_order_for_subassembly_items(
-		self, wo_list, subcontracted_po, default_warehouses
-	):
+	def make_work_order_for_subassembly_items(self, wo_list, subcontracted_po, default_warehouses):
 		for row in self.sub_assembly_items:
 			if row.type_of_manufacturing == "Subcontract":
 				subcontracted_po.setdefault(row.supplier, []).append(row)
