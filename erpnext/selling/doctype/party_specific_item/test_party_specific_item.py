@@ -2,11 +2,9 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.controllers.queries import item_query
-
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Customer", "Supplier"]
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 def create_party_specific_item(**args):
@@ -18,37 +16,38 @@ def create_party_specific_item(**args):
 	psi.insert()
 
 
-class TestPartySpecificItem(IntegrationTestCase):
-	def setUp(self):
-		self.customer = frappe.get_last_doc("Customer")
-		self.supplier = frappe.get_last_doc("Supplier")
-		self.item = frappe.get_last_doc("Item")
-
+class TestPartySpecificItem(ERPNextTestSuite):
 	def test_item_query_for_customer(self):
+		customer = "_Test Customer With Template"
+		item = "_Test Item"
+
 		create_party_specific_item(
 			party_type="Customer",
-			party=self.customer.name,
+			party=customer,
 			restrict_based_on="Item",
-			based_on_value=self.item.name,
+			based_on_value=item,
 		)
-		filters = {"is_sales_item": 1, "customer": self.customer.name}
+		filters = {"is_sales_item": 1, "customer": customer}
 		items = item_query(
 			doctype="Item", txt="", searchfield="name", start=0, page_len=20, filters=filters, as_dict=False
 		)
-		self.assertTrue(self.item.name in flatten(items))
+		self.assertTrue(item in flatten(items))
 
 	def test_item_query_for_supplier(self):
+		supplier = "_Test Supplier With Template 1"
+		item = "_Test Item Group"
+
 		create_party_specific_item(
 			party_type="Supplier",
-			party=self.supplier.name,
+			party=supplier,
 			restrict_based_on="Item Group",
-			based_on_value=self.item.item_group,
+			based_on_value=item,
 		)
-		filters = {"supplier": self.supplier.name, "is_purchase_item": 1}
+		filters = {"supplier": supplier, "is_purchase_item": 1}
 		items = item_query(
 			doctype="Item", txt="", searchfield="name", start=0, page_len=20, filters=filters, as_dict=False
 		)
-		self.assertTrue(self.item.item_group in flatten(items))
+		self.assertTrue(item in flatten(items))
 
 
 def flatten(lst):

@@ -4,16 +4,18 @@
 import json
 
 import frappe
-from frappe.tests import IntegrationTestCase, change_settings
+from frappe.tests import change_settings
 from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.selling.doctype.quotation.quotation import make_sales_order
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Product Bundle"]
 
+class TestQuotation(ERPNextTestSuite):
+	def setUp(self):
+		self.load_test_records("Quotation")
 
-class TestQuotation(IntegrationTestCase):
 	def test_update_child_quotation_add_item(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -58,8 +60,22 @@ class TestQuotation(IntegrationTestCase):
 		qo.payment_schedule[0].due_date = add_days(qo.transaction_date, -2)
 		self.assertRaises(frappe.ValidationError, qo.save)
 
-	def test_update_child_disallow_rate_change(self):
-		qo = make_quotation(qty=4)
+	def test_update_child_rate_change(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_1 = make_item("_Test Item")
+		item_2 = make_item("_Test Item 1")
+
+		item_list = [
+			{"item_code": item_1.item_code, "warehouse": "_Test Warehouse - _TC", "qty": 10, "rate": 300},
+			{"item_code": item_2.item_code, "warehouse": "_Test Warehouse - _TC", "qty": 5, "rate": 400},
+		]
+
+		qo = make_quotation(item_list=item_list)
+		so = make_sales_order(qo.name, args={"filtered_children": [qo.items[0].name]})
+		so.delivery_date = nowdate()
+		so.submit()
+		qo.reload()
 		trans_item = json.dumps(
 			[
 				{
@@ -67,10 +83,35 @@ class TestQuotation(IntegrationTestCase):
 					"rate": 5000,
 					"qty": qo.items[0].qty,
 					"docname": qo.items[0].name,
-				}
+				},
+				{
+					"item_code": qo.items[1].item_code,
+					"rate": qo.items[1].rate,
+					"qty": qo.items[1].qty,
+					"docname": qo.items[1].name,
+				},
 			]
 		)
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Quotation", trans_item, qo.name)
+		trans_item = json.dumps(
+			[
+				{
+					"item_code": qo.items[0].item_code,
+					"rate": qo.items[0].rate,
+					"qty": qo.items[0].qty,
+					"docname": qo.items[0].name,
+				},
+				{
+					"item_code": qo.items[1].item_code,
+					"rate": 50,
+					"qty": qo.items[1].qty,
+					"docname": qo.items[1].name,
+				},
+			]
+		)
+		update_child_qty_rate("Quotation", trans_item, qo.name)
+		qo.reload()
+		self.assertEqual(qo.items[1].rate, 50)
 
 	def test_update_child_removing_item(self):
 		qo = make_quotation(qty=10)
@@ -142,6 +183,10 @@ class TestQuotation(IntegrationTestCase):
 
 		self.assertTrue(quotation.payment_schedule)
 
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"automatically_fetch_payment_terms": 1},
+	)
 	def test_make_sales_order_terms_copied(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 
@@ -282,9 +327,13 @@ class TestQuotation(IntegrationTestCase):
 		sales_order.delivery_date = nowdate()
 		sales_order.insert()
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
-		{"add_taxes_from_item_tax_template": 0, "add_taxes_from_taxes_and_charges_template": 0},
+		{
+			"add_taxes_from_item_tax_template": 0,
+			"add_taxes_from_taxes_and_charges_template": 0,
+			"automatically_fetch_payment_terms": 1,
+		},
 	)
 	def test_make_sales_order_with_terms(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
@@ -322,10 +371,13 @@ class TestQuotation(IntegrationTestCase):
 		sales_order.save()
 
 		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 8906.00)
-		self.assertEqual(sales_order.payment_schedule[0].due_date, getdate(quotation.transaction_date))
+		self.assertEqual(
+			getdate(sales_order.payment_schedule[0].due_date), getdate(quotation.transaction_date)
+		)
 		self.assertEqual(sales_order.payment_schedule[1].payment_amount, 8906.00)
 		self.assertEqual(
-			sales_order.payment_schedule[1].due_date, getdate(add_days(quotation.transaction_date, 30))
+			getdate(sales_order.payment_schedule[1].due_date),
+			getdate(add_days(quotation.transaction_date, 30)),
 		)
 
 	def test_valid_till_before_transaction_date(self):
@@ -825,7 +877,7 @@ class TestQuotation(IntegrationTestCase):
 		quotation.items[0].conversion_factor = 2.23
 		self.assertRaises(frappe.ValidationError, quotation.save)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"add_taxes_from_item_tax_template": 1, "add_taxes_from_taxes_and_charges_template": 0},
 	)
@@ -893,7 +945,7 @@ class TestQuotation(IntegrationTestCase):
 		self.assertEqual(quotation.rounding_adjustment, 0)
 		self.assertEqual(quotation.rounded_total, 0)
 
-	@IntegrationTestCase.change_settings("Selling Settings", {"allow_zero_qty_in_quotation": 1})
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_zero_qty_in_quotation": 1})
 	def test_so_from_zero_qty_quotation(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -926,6 +978,7 @@ class TestQuotation(IntegrationTestCase):
 		quotation.reload()
 		self.assertEqual(quotation.status, "Ordered")
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_duplicate_items_in_quotation(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -972,7 +1025,7 @@ class TestQuotation(IntegrationTestCase):
 		quotation.reload()
 		self.assertEqual(quotation.status, "Ordered")
 
-	@change_settings("Accounts Settings", {"allow_pegged_currencies_exchange_rates": True})
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"allow_pegged_currencies_exchange_rates": True})
 	def test_make_quotation_qar_to_inr(self):
 		quotation = make_quotation(
 			currency="QAR",
@@ -1024,6 +1077,56 @@ class TestQuotation(IntegrationTestCase):
 
 		quotation.reload()
 		self.assertEqual(quotation.status, "Open")
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"automatically_fetch_payment_terms": 1},
+	)
+	def test_make_sales_order_with_payment_terms(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+
+		template = frappe.get_doc(
+			{
+				"doctype": "Payment Terms Template",
+				"template_name": "_Test Payment Terms Template for Quotation",
+				"terms": [
+					{
+						"doctype": "Payment Terms Template Detail",
+						"invoice_portion": 50.00,
+						"credit_days_based_on": "Day(s) after invoice date",
+						"credit_days": 0,
+					},
+					{
+						"doctype": "Payment Terms Template Detail",
+						"invoice_portion": 50.00,
+						"credit_days_based_on": "Day(s) after invoice date",
+						"credit_days": 10,
+					},
+				],
+			}
+		).save()
+
+		quotation = make_quotation(qty=10, rate=1000, do_not_submit=1)
+		quotation.transaction_date = add_days(nowdate(), -2)
+		quotation.valid_till = add_days(nowdate(), 10)
+		quotation.update({"payment_terms_template": template.name, "payment_schedule": []})
+		quotation.save()
+		quotation.submit()
+
+		self.assertEqual(quotation.payment_schedule[0].payment_amount, 5000)
+		self.assertEqual(quotation.payment_schedule[1].payment_amount, 5000)
+		self.assertEqual(quotation.payment_schedule[0].due_date, quotation.transaction_date)
+		self.assertEqual(quotation.payment_schedule[1].due_date, add_days(quotation.transaction_date, 10))
+
+		sales_order = make_sales_order(quotation.name)
+		sales_order.transaction_date = nowdate()
+		sales_order.delivery_date = nowdate()
+		sales_order.save()
+
+		self.assertEqual(sales_order.payment_schedule[0].due_date, sales_order.transaction_date)
+		self.assertEqual(sales_order.payment_schedule[1].due_date, add_days(sales_order.transaction_date, 10))
+		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 5000)
+		self.assertEqual(sales_order.payment_schedule[1].payment_amount, 5000)
 
 
 def enable_calculate_bundle_price(enable=1):

@@ -5,13 +5,12 @@
 import copy
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_to_date, flt, now, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.utils import update_gl_entries_after
-from erpnext.assets.doctype.asset.test_asset import create_asset_category, create_fixed_asset_item
+from erpnext.assets.doctype.asset.test_asset import create_fixed_asset_item
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	get_gl_entries,
@@ -21,11 +20,13 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_nos_from_bundle,
 )
 from erpnext.stock.serial_batch_bundle import SerialNoValuation
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Currency Exchange"]
 
+class TestLandedCostVoucher(ERPNextTestSuite):
+	def setUp(self):
+		self.load_test_records("Currency Exchange")
 
-class TestLandedCostVoucher(IntegrationTestCase):
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
@@ -177,6 +178,39 @@ class TestLandedCostVoucher(IntegrationTestCase):
 
 		self.assertEqual(last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction)
 		self.assertEqual(last_sle_after_landed_cost.stock_value - last_sle.stock_value, 50.0)
+
+	def test_lcv_validates_company(self):
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import (
+			IncorrectCompanyValidationError,
+		)
+
+		company_a = "_Test Company"
+		company_b = "_Test Company with perpetual inventory"
+
+		pr = make_purchase_receipt(
+			company=company_a,
+			warehouse="Stores - _TC",
+			qty=1,
+			rate=100,
+		)
+
+		lcv = make_landed_cost_voucher(
+			company=company_b,
+			receipt_document_type="Purchase Receipt",
+			receipt_document=pr.name,
+			charges=50,
+			do_not_save=True,
+		)
+
+		self.assertRaises(IncorrectCompanyValidationError, lcv.validate_receipt_documents)
+		lcv.company = company_a
+
+		self.assertRaises(IncorrectCompanyValidationError, lcv.validate_expense_accounts)
+		lcv.taxes[0].expense_account = get_expense_account(company_a)
+
+		lcv.save()
+		distribute_landed_cost_on_items(lcv)
+		lcv.submit()
 
 	def test_landed_cost_voucher_for_zero_purchase_rate(self):
 		"Test impact of LCV on future stock balances."
@@ -367,6 +401,7 @@ class TestLandedCostVoucher(IntegrationTestCase):
 					"doctype": "Serial No",
 					"item_code": item_code,
 					"serial_no": serial_no,
+					"company": "_Test Company",
 				}
 			).insert()
 
@@ -567,9 +602,6 @@ class TestLandedCostVoucher(IntegrationTestCase):
 			"Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC"
 		)
 
-		if not frappe.db.exists("Asset Category", "Computers"):
-			create_asset_category()
-
 		if not frappe.db.exists("Item", "Macbook Pro"):
 			create_fixed_asset_item()
 
@@ -638,6 +670,7 @@ class TestLandedCostVoucher(IntegrationTestCase):
 						"doctype": "Serial No",
 						"item_code": sn_item,
 						"serial_no": sn,
+						"company": "_Test Company",
 					}
 				)
 				sn_doc.insert()
@@ -788,6 +821,7 @@ class TestLandedCostVoucher(IntegrationTestCase):
 						"doctype": "Serial No",
 						"item_code": sn_item,
 						"serial_no": sn,
+						"company": "_Test Company",
 					}
 				)
 				sn_doc.insert()
@@ -977,6 +1011,7 @@ class TestLandedCostVoucher(IntegrationTestCase):
 						"doctype": "Serial No",
 						"item_code": sn_item,
 						"serial_no": sn,
+						"company": "_Test Company",
 					}
 				)
 				sn_doc.insert()
@@ -1259,6 +1294,7 @@ def make_landed_cost_voucher(**args):
 	lcv = frappe.new_doc("Landed Cost Voucher")
 	lcv.company = args.company or "_Test Company"
 	lcv.distribute_charges_based_on = args.distribute_charges_based_on or "Amount"
+	expense_account = get_expense_account(args.company or "_Test Company")
 
 	lcv.set(
 		"purchase_receipts",
@@ -1279,7 +1315,7 @@ def make_landed_cost_voucher(**args):
 			[
 				{
 					"description": "Shipping Charges",
-					"expense_account": args.expense_account or "Expenses Included In Valuation - TCP1",
+					"expense_account": args.expense_account or expense_account,
 					"amount": args.charges,
 				}
 			],
@@ -1299,6 +1335,7 @@ def create_landed_cost_voucher(receipt_document_type, receipt_document, company,
 	lcv = frappe.new_doc("Landed Cost Voucher")
 	lcv.company = company
 	lcv.distribute_charges_based_on = "Amount"
+	expense_account = get_expense_account(company)
 
 	lcv.set(
 		"purchase_receipts",
@@ -1318,7 +1355,7 @@ def create_landed_cost_voucher(receipt_document_type, receipt_document, company,
 		[
 			{
 				"description": "Insurance Charges",
-				"expense_account": "Expenses Included In Valuation - TCP1",
+				"expense_account": expense_account,
 				"amount": charges,
 			}
 		],
@@ -1331,6 +1368,11 @@ def create_landed_cost_voucher(receipt_document_type, receipt_document, company,
 	lcv.submit()
 
 	return lcv
+
+
+def get_expense_account(company):
+	company_abbr = frappe.get_cached_value("Company", company, "abbr")
+	return f"Expenses Included In Valuation - {company_abbr}"
 
 
 def distribute_landed_cost_on_items(lcv):

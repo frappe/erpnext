@@ -16,6 +16,7 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 
 	refresh() {
 		this.show_general_ledger();
+		erpnext.toggle_serial_batch_fields(this.frm);
 
 		if (this.frm.doc.stock_items && this.frm.doc.stock_items.length) {
 			this.show_stock_ledger();

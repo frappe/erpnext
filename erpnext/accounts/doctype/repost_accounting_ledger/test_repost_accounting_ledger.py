@@ -4,7 +4,6 @@
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, nowdate, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -14,22 +13,16 @@ from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries, make_purchase_receipt
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestRepostAccountingLedger(AccountsTestMixin, IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		cls.enterClassContext(cls.change_settings("Selling Settings", validate_selling_price=0))
-
+class TestRepostAccountingLedger(AccountsTestMixin, ERPNextTestSuite):
 	def setUp(self):
 		self.create_company()
 		self.create_customer()
 		self.create_item()
+		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
 		update_repost_settings()
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 	def test_01_basic_functions(self):
 		si = create_sales_invoice(
@@ -121,7 +114,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, IntegrationTestCase):
 		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
 		self.assertRaises(frappe.ValidationError, ral.save)
 
-	@IntegrationTestCase.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
 	def test_04_pcv_validation(self):
 		# Clear old GL entries so PCV can be submitted.
 		gl = frappe.qb.DocType("GL Entry")

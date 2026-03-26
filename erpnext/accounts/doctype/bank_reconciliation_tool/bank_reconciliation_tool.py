@@ -59,7 +59,7 @@ def get_bank_transactions(
 		filters.append(["date", "<=", to_date])
 	if from_date:
 		filters.append(["date", ">=", from_date])
-	transactions = frappe.get_all(
+	transactions = frappe.get_list(
 		"Bank Transaction",
 		fields=[
 			"date",
@@ -84,6 +84,7 @@ def get_bank_transactions(
 @frappe.whitelist()
 def get_account_balance(bank_account: str, till_date: str | date, company: str):
 	# returns account balance till the specified date
+	frappe.has_permission("Bank Account", "read", bank_account, throw=True)
 	account = frappe.db.get_value("Bank Account", bank_account, "account")
 	filters = frappe._dict(
 		{

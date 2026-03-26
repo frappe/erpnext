@@ -249,6 +249,7 @@ class DeprecatedBatchNoValuation:
 			.select(
 				sle.batch_no,
 				Sum(sle.actual_qty).as_("batch_qty"),
+				Sum(sle.stock_value_difference).as_("batch_value"),
 			)
 			.where(
 				(sle.item_code == self.sle.item_code)
@@ -265,9 +266,24 @@ class DeprecatedBatchNoValuation:
 		if self.sle.name:
 			query = query.where(sle.name != self.sle.name)
 
+		# Moving Average items with no Use Batch wise Valuation but want to use batch wise valuation
+		moving_avg_item_non_batch_value = False
+		if valuation_method := self.get_valuation_method(self.sle.item_code):
+			if valuation_method == "Moving Average" and not frappe.db.get_single_value(
+				"Stock Settings", "do_not_use_batchwise_valuation"
+			):
+				query = query.where(batch.use_batchwise_valuation == 0)
+				moving_avg_item_non_batch_value = True
+
 		batch_data = query.run(as_dict=True)
 		for d in batch_data:
 			self.available_qty[d.batch_no] += flt(d.batch_qty)
+			if moving_avg_item_non_batch_value:
+				self.non_batchwise_balance_qty[d.batch_no] += flt(d.batch_qty)
+				self.non_batchwise_balance_value[d.batch_no] += flt(d.batch_value)
+
+		if moving_avg_item_non_batch_value:
+			return
 
 		for d in batch_data:
 			if self.available_qty.get(d.batch_no):
@@ -376,9 +392,24 @@ class DeprecatedBatchNoValuation:
 
 		query = query.where(bundle.voucher_type != "Pick List")
 
+		# Moving Average items with no Use Batch wise Valuation but want to use batch wise valuation
+		moving_avg_item_non_batch_value = False
+		if valuation_method := self.get_valuation_method(self.sle.item_code):
+			if valuation_method == "Moving Average" and not frappe.db.get_single_value(
+				"Stock Settings", "do_not_use_batchwise_valuation"
+			):
+				query = query.where(batch.use_batchwise_valuation == 0)
+				moving_avg_item_non_batch_value = True
+
 		batch_data = query.run(as_dict=True)
 		for d in batch_data:
 			self.available_qty[d.batch_no] += flt(d.batch_qty)
+			if moving_avg_item_non_batch_value:
+				self.non_batchwise_balance_qty[d.batch_no] += flt(d.batch_qty)
+				self.non_batchwise_balance_value[d.batch_no] += flt(d.batch_value)
+
+		if moving_avg_item_non_batch_value:
+			return
 
 		if not self.last_sle:
 			return
@@ -386,3 +417,8 @@ class DeprecatedBatchNoValuation:
 		for batch_no in self.available_qty:
 			self.non_batchwise_balance_value[batch_no] = flt(self.last_sle.stock_value)
 			self.non_batchwise_balance_qty[batch_no] = flt(self.last_sle.qty_after_transaction)
+
+	def get_valuation_method(self, item_code):
+		from erpnext.stock.utils import get_valuation_method
+
+		return get_valuation_method(item_code, self.sle.company)

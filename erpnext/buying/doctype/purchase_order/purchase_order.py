@@ -167,6 +167,7 @@ class PurchaseOrder(BuyingController):
 		total_qty: DF.Float
 		total_taxes_and_charges: DF.Currency
 		transaction_date: DF.Date
+		transaction_time: DF.Time | None
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
@@ -784,7 +785,8 @@ def make_purchase_invoice_from_portal(purchase_order_name: str):
 	if frappe.session.user not in frappe.get_all("Portal User", {"parent": doc.supplier}, pluck="user"):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 	doc.save()
-	frappe.db.commit()
+	if not frappe.in_test:
+		frappe.db.commit()
 	frappe.response["type"] = "redirect"
 	frappe.response.location = "/purchase-invoices/" + doc.name
 
@@ -893,7 +895,7 @@ def get_list_context(context=None):
 
 @frappe.whitelist()
 def update_status(status: str, name: str):
-	po = frappe.get_lazy_doc("Purchase Order", name)
+	po = frappe.get_lazy_doc("Purchase Order", name, check_permission="submit")
 	po.update_status(status)
 	po.update_delivered_qty_in_sales_order()
 

@@ -12,29 +12,21 @@
   "project_name",
   "status",
   "project_type",
-  "is_active",
   "percent_complete_method",
-  "percent_complete",
   "column_break_5",
   "project_template",
-  "expected_start_date",
-  "expected_end_date",
   "priority",
   "department",
-  "customer_details",
-  "customer",
-  "column_break_14",
-  "sales_order",
-  "users_section",
-  "users",
-  "copied_from",
-  "section_break0",
-  "notes",
+  "is_active",
+  "percent_complete",
   "section_break_18",
+  "expected_start_date",
   "actual_start_date",
   "actual_time",
   "column_break_20",
+  "expected_end_date",
   "actual_end_date",
+  "costing_tab",
   "project_details",
   "estimated_costing",
   "total_costing_amount",
@@ -50,7 +42,7 @@
   "gross_margin",
   "column_break_37",
   "per_gross_margin",
-  "monitor_progress",
+  "monitor_progress_tab",
   "collect_progress",
   "holiday_list",
   "frequency",
@@ -63,7 +55,18 @@
   "weekly_time_to_send",
   "column_break_45",
   "subject",
-  "message"
+  "message",
+  "more_info_tab",
+  "customer_details",
+  "customer",
+  "column_break_14",
+  "sales_order",
+  "users_section",
+  "users",
+  "copied_from",
+  "section_break0",
+  "notes",
+  "connections_tab"
  ],
  "fields": [
   {
@@ -115,6 +118,7 @@
    "bold": 1,
    "fieldname": "percent_complete",
    "fieldtype": "Percent",
+   "in_list_view": 1,
    "label": "% Completed",
    "no_copy": 1,
    "read_only": 1
@@ -135,6 +139,7 @@
    "bold": 1,
    "fieldname": "expected_start_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Expected Start Date",
    "oldfieldname": "project_start_date",
    "oldfieldtype": "Date"
@@ -231,7 +236,7 @@
    "collapsible": 1,
    "fieldname": "section_break_18",
    "fieldtype": "Section Break",
-   "label": "Start and End Dates"
+   "label": "Timeline"
   },
   {
    "fieldname": "actual_start_date",
@@ -258,7 +263,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "project_details",
    "fieldtype": "Section Break",
    "label": "Costing and Billing",
@@ -329,7 +333,6 @@
    "options": "Cost Center"
   },
   {
-   "collapsible": 1,
    "fieldname": "margin",
    "fieldtype": "Section Break",
    "label": "Margin",
@@ -356,12 +359,6 @@
    "oldfieldname": "per_gross_margin",
    "oldfieldtype": "Currency",
    "read_only": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "monitor_progress",
-   "fieldtype": "Section Break",
-   "label": "Monitor Progress"
   },
   {
    "default": "0",
@@ -455,6 +452,27 @@
    "fieldtype": "Data",
    "label": "Subject",
    "mandatory_depends_on": "collect_progress"
+  },
+  {
+   "fieldname": "costing_tab",
+   "fieldtype": "Tab Break",
+   "label": "Costing"
+  },
+  {
+   "fieldname": "monitor_progress_tab",
+   "fieldtype": "Tab Break",
+   "label": "Progress"
+  },
+  {
+   "fieldname": "more_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
   }
  ],
  "icon": "fa fa-puzzle-piece",
@@ -462,7 +480,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2025-08-21 17:57:58.314809",
+ "modified": "2026-03-09 17:15:24.426294",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

@@ -772,7 +772,8 @@ def process_all(subscription: list, posting_date: DateTimeLikeObject | None = No
 		try:
 			subscription = frappe.get_doc("Subscription", subscription_name)
 			subscription.process(posting_date)
-			frappe.db.commit()
+			if not frappe.in_test:
+				frappe.db.commit()
 		except frappe.ValidationError:
 			frappe.db.rollback()
 			subscription.log_error("Subscription failed")

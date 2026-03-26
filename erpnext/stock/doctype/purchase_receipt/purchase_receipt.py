@@ -187,6 +187,7 @@ class PurchaseReceipt(BuyingController):
 				"target_ref_field": "stock_qty",
 				"source_field": "stock_qty",
 				"percent_join_field": "material_request",
+				"validate_qty": False,
 			},
 			{
 				"source_dt": "Purchase Receipt Item",
@@ -331,7 +332,10 @@ class PurchaseReceipt(BuyingController):
 			)
 
 	def po_required(self):
-		if frappe.db.get_single_value("Buying Settings", "po_required") == "Yes":
+		if (
+			frappe.db.get_single_value("Buying Settings", "po_required") == "Yes"
+			and not self.is_internal_transfer()
+		):
 			for d in self.get("items"):
 				if not d.purchase_order:
 					frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
@@ -406,7 +410,7 @@ class PurchaseReceipt(BuyingController):
 		self.update_received_qty_if_from_pp()
 
 	def update_received_qty_if_from_pp(self):
-		from frappe.query_builder.functions import Sum
+		from frappe.query_builder.functions import Coalesce, Sum
 
 		items_from_po = [item.purchase_order_item for item in self.items if item.purchase_order_item]
 		if items_from_po:
@@ -415,7 +419,10 @@ class PurchaseReceipt(BuyingController):
 				frappe.qb.from_(table)
 				.select(table.production_plan_sub_assembly_item)
 				.distinct()
-				.where(table.name.isin(items_from_po) & table.production_plan_sub_assembly_item.isnotnull())
+				.where(
+					table.name.isin(items_from_po)
+					& Coalesce(table.production_plan_sub_assembly_item, "").ne("")
+				)
 			)
 			result = subquery.run(as_dict=True)
 			if result:
@@ -1248,7 +1255,9 @@ def get_billed_amount_against_po(po_items):
 def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate=False):
 	# Update Billing % based on pending accepted qty
 	buying_settings = frappe.get_single("Buying Settings")
-	over_billing_allowance = frappe.get_single_value("Accounts Settings", "over_billing_allowance")
+	over_billing_allowance, role_allowed_to_over_bill = frappe.get_single_value(
+		"Accounts Settings", ["over_billing_allowance", "role_allowed_to_over_bill"]
+	)
 
 	total_amount, total_billed_amount, pi_landed_cost_amount = 0, 0, 0
 	item_wise_returned_qty = get_item_wise_returned_qty(pr_doc)
@@ -1306,7 +1315,10 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 			item.db_set("amount_difference_with_purchase_invoice", adjusted_amt, update_modified=False)
 		elif amount and item.billed_amt > amount:
 			per_over_billed = (flt(item.billed_amt / amount, 2) * 100) - 100
-			if per_over_billed > over_billing_allowance:
+			if (
+				per_over_billed > over_billing_allowance
+				and role_allowed_to_over_bill not in frappe.get_roles()
+			):
 				frappe.throw(
 					_("Over Billing Allowance exceeded for Purchase Receipt Item {0} ({1}) by {2}%").format(
 						item.name, frappe.bold(item.item_code), per_over_billed - over_billing_allowance
@@ -1572,8 +1584,8 @@ def make_purchase_return(source_name: str, target_doc: str | Document | None = N
 
 
 @frappe.whitelist()
-def update_purchase_receipt_status(docname, status):
-	pr = frappe.get_lazy_doc("Purchase Receipt", docname)
+def update_purchase_receipt_status(docname: str, status: str):
+	pr = frappe.get_lazy_doc("Purchase Receipt", docname, check_permission="submit")
 	pr.update_status(status)
 
 

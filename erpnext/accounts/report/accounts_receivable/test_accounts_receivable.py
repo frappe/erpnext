@@ -1,6 +1,5 @@
 import frappe
 from frappe import qb
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, flt, getdate, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -8,18 +7,16 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
+class TestAccountsReceivable(AccountsTestMixin, ERPNextTestSuite):
 	def setUp(self):
 		self.create_company()
 		self.create_customer()
 		self.create_item()
 		self.create_usd_receivable_account()
 		self.clear_old_entries()
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 	def create_sales_invoice(self, no_payment_schedule=False, do_not_submit=False, **args):
 		frappe.set_user("Administrator")
@@ -199,7 +196,7 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		row = report[1]
 		self.assertTrue(len(row) == 0)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1},
 	)
@@ -448,7 +445,7 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 			],
 		)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)
@@ -692,11 +689,9 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 			)
 
 	def test_sales_person(self):
-		sales_person = (
-			frappe.get_doc({"doctype": "Sales Person", "sales_person_name": "John Clark", "enabled": True})
-			.insert()
-			.submit()
-		)
+		sales_person = frappe.get_doc(
+			{"doctype": "Sales Person", "sales_person_name": "John Clark", "enabled": True}
+		).insert()
 		si = self.create_sales_invoice(do_not_submit=True)
 		si.append("sales_team", {"sales_person": sales_person.name, "allocated_percentage": 100})
 		si.save().submit()
@@ -772,18 +767,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 
 	def test_party_account_filter(self):
 		si1 = self.create_sales_invoice()
-		self.customer2 = (
-			frappe.get_doc(
-				{
-					"doctype": "Customer",
-					"customer_name": "Jane Doe",
-					"type": "Individual",
-					"default_currency": "USD",
-				}
-			)
-			.insert()
-			.submit()
-		)
+		self.customer2 = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "Jane Doe",
+				"type": "Individual",
+				"default_currency": "USD",
+			}
+		).insert()
 
 		si2 = self.create_sales_invoice(do_not_submit=True)
 		si2.posting_date = add_days(today(), -1)
@@ -995,18 +986,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(expected_data, report_output)
 
 	def test_future_payments_on_foreign_currency(self):
-		self.customer2 = (
-			frappe.get_doc(
-				{
-					"doctype": "Customer",
-					"customer_name": "Jane Doe",
-					"type": "Individual",
-					"default_currency": "USD",
-				}
-			)
-			.insert()
-			.submit()
-		)
+		self.customer2 = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "Jane Doe",
+				"type": "Individual",
+				"default_currency": "USD",
+			}
+		).insert()
 
 		si = self.create_sales_invoice(do_not_submit=True)
 		si.posting_date = add_days(today(), -1)
@@ -1139,3 +1126,66 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(len(report[1]), 1)
 		row = report[1][0]
 		self.assertEqual(expected_data_after_payment, [row.voucher_no, row.cost_center, row.outstanding])
+
+	def test_payment_terms_template_filters(self):
+		from erpnext.controllers.accounts_controller import get_payment_terms
+
+		payment_term1 = frappe.get_doc(
+			{"doctype": "Payment Term", "payment_term_name": "_Test 50% on 15 Days"}
+		).insert()
+		payment_term2 = frappe.get_doc(
+			{"doctype": "Payment Term", "payment_term_name": "_Test 50% on 30 Days"}
+		).insert()
+
+		template = frappe.get_doc(
+			{
+				"doctype": "Payment Terms Template",
+				"template_name": "_Test 50-50",
+				"terms": [
+					{
+						"doctype": "Payment Terms Template Detail",
+						"due_date_based_on": "Day(s) after invoice date",
+						"payment_term": payment_term1.name,
+						"description": "_Test 50-50",
+						"invoice_portion": 50,
+						"credit_days": 15,
+					},
+					{
+						"doctype": "Payment Terms Template Detail",
+						"due_date_based_on": "Day(s) after invoice date",
+						"payment_term": payment_term2.name,
+						"description": "_Test 50-50",
+						"invoice_portion": 50,
+						"credit_days": 30,
+					},
+				],
+			}
+		)
+		template.insert()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"based_on_payment_terms": 1,
+			"payment_terms_template": template.name,
+			"ageing_based_on": "Posting Date",
+		}
+
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si.payment_terms_template = template.name
+		schedule = get_payment_terms(template.name)
+		si.set("payment_schedule", [])
+
+		for row in schedule:
+			row["due_date"] = add_days(si.posting_date, row.get("credit_days", 0))
+			si.append("payment_schedule", row)
+
+		si.save()
+		si.submit()
+
+		report = execute(filters)
+		row = report[1][0]
+
+		self.assertEqual(len(report[1]), 2)
+		self.assertEqual([si.name, payment_term1.payment_term_name], [row.voucher_no, row.payment_term])

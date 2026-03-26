@@ -16,6 +16,10 @@ from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
+class IncorrectCompanyValidationError(frappe.ValidationError):
+	pass
+
+
 class LandedCostVoucher(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -77,6 +81,7 @@ class LandedCostVoucher(Document):
 		self.check_mandatory()
 		self.validate_receipt_documents()
 		self.validate_line_items()
+		self.validate_expense_accounts()
 		init_landed_taxes_and_totals(self)
 		self.set_total_taxes_and_charges()
 		if not self.get("items"):
@@ -118,10 +123,27 @@ class LandedCostVoucher(Document):
 		receipt_documents = []
 
 		for d in self.get("purchase_receipts"):
-			docstatus = frappe.db.get_value(d.receipt_document_type, d.receipt_document, "docstatus")
+			docstatus, company = frappe.get_cached_value(
+				d.receipt_document_type, d.receipt_document, ["docstatus", "company"]
+			)
 			if docstatus != 1:
 				msg = f"Row {d.idx}: {d.receipt_document_type} {frappe.bold(d.receipt_document)} must be submitted"
 				frappe.throw(_(msg), title=_("Invalid Document"))
+
+			if company != self.company:
+				frappe.throw(
+					_(
+						"Row {0}: {1} {2} is linked to company {3}. Please select a document belonging to company {4}."
+					).format(
+						d.idx,
+						d.receipt_document_type,
+						frappe.bold(d.receipt_document),
+						frappe.bold(company),
+						frappe.bold(self.company),
+					),
+					title=_("Incorrect Company"),
+					exc=IncorrectCompanyValidationError,
+				)
 
 			if d.receipt_document_type == "Purchase Invoice":
 				update_stock = frappe.db.get_value(
@@ -152,6 +174,24 @@ class LandedCostVoucher(Document):
 			if not item.cost_center:
 				frappe.throw(
 					_("Row {0}: Cost center is required for an item {1}").format(item.idx, item.item_code)
+				)
+
+	def validate_expense_accounts(self):
+		for t in self.taxes:
+			company = frappe.get_cached_value("Account", t.expense_account, "company")
+
+			if company != self.company:
+				frappe.throw(
+					_(
+						"Row {0}: Expense Account {1} is linked to company {2}. Please select an account belonging to company {3}."
+					).format(
+						t.idx,
+						frappe.bold(t.expense_account),
+						frappe.bold(company),
+						frappe.bold(self.company),
+					),
+					title=_("Incorrect Account"),
+					exc=IncorrectCompanyValidationError,
 				)
 
 	def set_total_taxes_and_charges(self):

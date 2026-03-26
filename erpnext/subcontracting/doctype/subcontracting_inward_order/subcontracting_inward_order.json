@@ -25,7 +25,7 @@
   "raw_materials_received_section",
   "received_items",
   "scrap_items_generated_section",
-  "scrap_items",
+  "secondary_items",
   "service_items_section",
   "service_items",
   "tab_other_info",
@@ -252,17 +252,10 @@
    "reqd": 1
   },
   {
-   "depends_on": "scrap_items",
+   "depends_on": "secondary_items",
    "fieldname": "scrap_items_generated_section",
    "fieldtype": "Section Break",
-   "label": "Scrap Items Generated"
-  },
-  {
-   "fieldname": "scrap_items",
-   "fieldtype": "Table",
-   "label": "Scrap Items",
-   "no_copy": 1,
-   "options": "Subcontracting Inward Order Scrap Item"
+   "label": "Secondary Items Generated"
   },
   {
    "fieldname": "per_returned",
@@ -300,13 +293,20 @@
    "label": "Customer Currency",
    "options": "Currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "secondary_items",
+   "fieldtype": "Table",
+   "label": "Secondary Items",
+   "no_copy": 1,
+   "options": "Subcontracting Inward Order Secondary Item"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 15:52:55.781346",
+ "modified": "2026-02-26 17:16:21.697846",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Inward Order",

@@ -381,7 +381,9 @@
    "fieldtype": "Date",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Posting Date",
    "no_copy": 1,
    "oldfieldname": "posting_date",
    "oldfieldtype": "Date",
@@ -415,6 +417,7 @@
    "fieldtype": "Date",
    "hide_days": 1,
    "hide_seconds": 1,
+   "in_list_view": 1,
    "label": "Payment Due Date",
    "no_copy": 1,
    "oldfieldname": "due_date",
@@ -800,8 +803,7 @@
    "hide_seconds": 1,
    "label": "Time Sheets",
    "options": "Sales Invoice Timesheet",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "default": "0",
@@ -1640,6 +1642,7 @@
    "fieldtype": "Select",
    "hide_days": 1,
    "hide_seconds": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
    "length": 30,
@@ -2331,7 +2334,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-02-25 12:41:57.043459",
+ "modified": "2026-03-09 17:15:30.931929",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

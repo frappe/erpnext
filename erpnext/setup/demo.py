@@ -57,8 +57,20 @@ def clear_demo_data():
 
 
 def create_demo_company():
-	company = frappe.db.get_all("Company")[0].name
-	company_doc = frappe.get_doc("Company", company)
+	if frappe.flags.in_test:
+		hash = frappe.generate_hash(length=3)
+		company_doc = frappe._dict(
+			{
+				"company_name": "Test Company" + " " + hash,
+				"abbr": "TC" + hash,
+				"default_currency": "INR",
+				"country": "India",
+				"chart_of_accounts": "Standard",
+			}
+		)
+	else:
+		company = frappe.db.get_all("Company")[0].name
+		company_doc = frappe.get_doc("Company", company).as_dict()
 
 	# Make a dummy company
 	new_company = frappe.new_doc("Company")

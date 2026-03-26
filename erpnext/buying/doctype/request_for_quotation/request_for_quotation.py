@@ -48,7 +48,8 @@ class RequestforQuotation(BuyingController):
 		incoterm: DF.Link | None
 		items: DF.Table[RequestforQuotationItem]
 		letter_head: DF.Link | None
-		message_for_supplier: DF.TextEditor
+		message_for_supplier: DF.TextEditor | None
+		mfs_html: DF.Code | None
 		named_place: DF.Data | None
 		naming_series: DF.Literal["PUR-RFQ-.YYYY.-"]
 		opportunity: DF.Link | None
@@ -56,12 +57,15 @@ class RequestforQuotation(BuyingController):
 		select_print_heading: DF.Link | None
 		send_attached_files: DF.Check
 		send_document_print: DF.Check
+		shipping_address: DF.Link | None
+		shipping_address_display: DF.TextEditor | None
 		status: DF.Literal["", "Draft", "Submitted", "Cancelled"]
 		subject: DF.Data
 		suppliers: DF.Table[RequestforQuotationSupplier]
 		tc_name: DF.Link | None
 		terms: DF.TextEditor | None
 		transaction_date: DF.Date
+		use_html: DF.Check
 		vendor: DF.Link | None
 	# end: auto-generated types
 
@@ -101,8 +105,16 @@ class RequestforQuotation(BuyingController):
 				["use_html", "response", "response_html", "subject"],
 				as_dict=True,
 			)
-			if not self.message_for_supplier:
-				self.message_for_supplier = data.response_html if data.use_html else data.response
+
+			self.use_html = data.use_html
+
+			if data.use_html:
+				if not self.mfs_html:
+					self.mfs_html = data.response_html
+			else:
+				if not self.message_for_supplier:
+					self.message_for_supplier = data.response
+
 			if not self.subject:
 				self.subject = data.subject
 
@@ -305,7 +317,10 @@ class RequestforQuotation(BuyingController):
 		else:
 			sender = frappe.session.user not in STANDARD_USERS and frappe.session.user or None
 
-		rendered_message = frappe.render_template(self.message_for_supplier, doc_args)
+		message_template = self.mfs_html if self.use_html else self.message_for_supplier
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-ssti
+		rendered_message = frappe.render_template(message_template, doc_args)
+
 		subject_source = (
 			self.subject
 			or frappe.get_value("Email Template", self.email_template, "subject")

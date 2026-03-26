@@ -42,9 +42,9 @@ erpnext.landed_cost_taxes_and_charges = {
 
 				if (row.account_currency == company_currency) {
 					row.exchange_rate = 1;
-					frm.set_df_property("taxes", "hidden", 1, row.name, "exchange_rate");
+					frm.set_df_property("taxes", "hidden", 1, frm.docname, "exchange_rate", cdn);
 				} else if (!row.exchange_rate || row.exchange_rate == 1) {
-					frm.set_df_property("taxes", "hidden", 0, row.name, "exchange_rate");
+					frm.set_df_property("taxes", "hidden", 0, frm.docname, "exchange_rate", cdn);
 					frappe.call({
 						method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_exchange_rate",
 						args: {

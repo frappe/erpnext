@@ -516,7 +516,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				const selected = values.payment_schedules.filter((r) => r.__checked);
 
 				if (!selected.length) {
-					frappe.msgprint(__("Please select at least one schedule."));
+					frappe.show_alert({
+						message: __("Please select at least one schedule."),
+						indicator: "orange",
+					});
 					return;
 				}
 				console.log(selected);
@@ -543,7 +546,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						schedules: selected,
 					},
 				});
-
+				frappe.model.sync(pr_name);
 				frappe.set_route("Form", "Payment Request", pr_name.name);
 			},
 		});
@@ -580,6 +583,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.validate_has_items();
 		erpnext.utils.view_serial_batch_nos(this.frm);
 		this.set_route_options_for_new_doc();
+		erpnext.toggle_serial_batch_fields(this.frm);
 	}
 
 	set_route_options_for_new_doc() {
@@ -1307,6 +1311,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (this.frm.doc.transaction_date) {
 			this.frm.transaction_date = this.frm.doc.transaction_date;
 			frappe.ui.form.trigger(this.frm.doc.doctype, "currency");
+			this.recalculate_terms();
 		}
 	}
 
@@ -1846,7 +1851,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				"base_operating_cost",
 				"base_raw_material_cost",
 				"base_total_cost",
-				"base_scrap_material_cost",
+				"base_secondary_items_cost",
 				"base_totals_section",
 			],
 			company_currency
@@ -1864,7 +1869,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				"paid_amount",
 				"write_off_amount",
 				"operating_cost",
-				"scrap_material_cost",
+				"secondary_items_cost",
 				"raw_material_cost",
 				"total_cost",
 				"totals_section",
@@ -1905,7 +1910,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				"base_operating_cost",
 				"base_raw_material_cost",
 				"base_total_cost",
-				"base_scrap_material_cost",
+				"base_secondary_items_cost",
 				"base_rounding_adjustment",
 			],
 			this.frm.doc.currency != company_currency
@@ -1970,11 +1975,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 		}
 
-		if (this.frm.doc.scrap_items && this.frm.doc.scrap_items.length > 0) {
-			this.frm.set_currency_labels(["rate", "amount"], this.frm.doc.currency, "scrap_items");
-			this.frm.set_currency_labels(["base_rate", "base_amount"], company_currency, "scrap_items");
+		if (this.frm.doc.secondary_items && this.frm.doc.secondary_items.length > 0) {
+			this.frm.set_currency_labels(["rate", "amount"], this.frm.doc.currency, "secondary_items");
+			this.frm.set_currency_labels(["base_rate", "base_amount"], company_currency, "secondary_items");
 
-			var item_grid = this.frm.fields_dict["scrap_items"].grid;
+			var item_grid = this.frm.fields_dict["secondary_items"].grid;
 			$.each(["base_rate", "base_amount"], function (i, fname) {
 				if (frappe.meta.get_docfield(item_grid.doctype, fname))
 					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
@@ -2961,6 +2966,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				frappe.call({
 					method: "erpnext.controllers.stock_controller.make_quality_inspections",
 					args: {
+						company: me.frm.doc.company,
 						doctype: me.frm.doc.doctype,
 						docname: me.frm.doc.name,
 						items: selected_data,

@@ -245,6 +245,7 @@ frappe.ui.form.on("Stock Entry", {
 	refresh: function (frm) {
 		frm.trigger("get_items_from_transit_entry");
 		frm.trigger("toggle_warehouse_fields");
+		erpnext.toggle_serial_batch_fields(frm);
 
 		if (!frm.doc.docstatus && !frm.doc.subcontracting_inward_order) {
 			frm.trigger("validate_purpose_consumption");
@@ -564,7 +565,9 @@ frappe.ui.form.on("Stock Entry", {
 		frm.fields_dict.items.grid.refresh();
 		frm.cscript.toggle_related_fields(frm.doc);
 	},
-
+	cost_center(frm, cdt, cdn) {
+		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "cost_center");
+	},
 	validate_purpose_consumption: function (frm) {
 		frappe
 			.call({
@@ -928,10 +931,6 @@ frappe.ui.form.on("Stock Entry Detail", {
 			"read_only",
 			row?.set_basic_rate_manually ? 0 : 1
 		);
-	},
-
-	qty(frm, cdt, cdn) {
-		frm.events.set_rate_and_fg_qty(frm, cdt, cdn);
 	},
 
 	conversion_factor(frm, cdt, cdn) {
@@ -1335,13 +1334,13 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	}
 
 	fg_completed_qty() {
-		this.get_items();
+		if (!this.frm.doc.job_card) {
+			this.get_items();
+		}
 	}
 
 	get_items() {
 		var me = this;
-		if (!this.frm.doc.fg_completed_qty || !this.frm.doc.bom_no)
-			frappe.throw(__("BOM and Manufacturing Quantity are required"));
 
 		if (this.frm.doc.work_order || this.frm.doc.bom_no) {
 			// if work order / bom is mentioned, get items

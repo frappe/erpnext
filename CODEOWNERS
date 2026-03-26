@@ -7,17 +7,17 @@ erpnext/accounts/               @ruthra-kumar
 erpnext/assets/                 @khushi8112
 erpnext/regional                @ruthra-kumar
 erpnext/selling                 @ruthra-kumar
-erpnext/support/                @ruthra-kumar
 
 erpnext/buying/                 @rohitwaghchaure @mihir-kandoi
-erpnext/maintenance/            @rohitwaghchaure
+erpnext/maintenance/            @rohitwaghchaure @mihir-kandoi
 erpnext/manufacturing/          @rohitwaghchaure @mihir-kandoi
-erpnext/quality_management/     @rohitwaghchaure
+erpnext/quality_management/     @rohitwaghchaure @mihir-kandoi
 erpnext/stock/                  @rohitwaghchaure @mihir-kandoi
-erpnext/subcontracting          @mihir-kandoi
+erpnext/subcontracting/         @mihir-kandoi
+erpnext/projects/               @nishkagosalia
 
 erpnext/controllers/            @ruthra-kumar @rohitwaghchaure @mihir-kandoi
-erpnext/patches/                @ruthra-kumar
+erpnext/patches/                @ruthra-kumar @rohitwaghchaure @mihir-kandoi
 
-.github/                        @ruthra-kumar
+.github/                        @ruthra-kumar @mihir-kandoi
 pyproject.toml                  @ruthra-kumar

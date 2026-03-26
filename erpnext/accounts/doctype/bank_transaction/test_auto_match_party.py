@@ -2,27 +2,20 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.bank_transaction.test_bank_transaction import create_bank_account
+from erpnext.tests.utils import ERPNextTestSuite
 
 IBAN_1 = "DE02000000003716541159"
 IBAN_2 = "DE02500105170137075030"
 
 
-class TestAutoMatchParty(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
+class TestAutoMatchParty(ERPNextTestSuite):
+	def setUp(self):
 		create_bank_account()
 		frappe.db.set_single_value("Accounts Settings", "enable_party_matching", 1)
 		frappe.db.set_single_value("Accounts Settings", "enable_fuzzy_matching", 1)
-		return super().setUpClass()
-
-	@classmethod
-	def tearDownClass(cls):
-		frappe.db.set_single_value("Accounts Settings", "enable_party_matching", 0)
-		frappe.db.set_single_value("Accounts Settings", "enable_fuzzy_matching", 0)
 
 	def test_match_by_account_number(self):
 		create_supplier_for_match(account_no=IBAN_1[11:])

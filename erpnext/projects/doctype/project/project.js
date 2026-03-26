@@ -205,7 +205,7 @@ frappe.ui.form.on("Project", {
 
 	collect_progress: function (frm) {
 		if (frm.doc.collect_progress && !frm.doc.subject) {
-			frm.set_value("subject", __("For project {0}, update your status", [frm.doc.name]));
+			frm.set_value("subject", __("For project - {0}, update your status", [frm.doc.project_name]));
 		}
 	},
 });

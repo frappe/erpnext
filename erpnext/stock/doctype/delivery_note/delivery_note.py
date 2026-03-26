@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_company_address
+from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
@@ -396,6 +397,9 @@ class DeliveryNote(SellingController):
 		)
 
 	def validate_sales_invoice_references(self):
+		if self.is_return:
+			return
+
 		self._validate_dependent_item_fields(
 			"against_sales_invoice", "si_detail", _("References to Sales Invoices are Incomplete")
 		)
@@ -983,6 +987,11 @@ def make_delivery_trip(
 ):
 	if not target_doc:
 		target_doc = frappe.new_doc("Delivery Trip")
+
+	def update_address(source_doc, target_doc, source_parent):
+		target_doc.address = source_doc.shipping_address_name or source_doc.customer_address
+		target_doc.customer_address = source_doc.shipping_address or source_doc.address_display
+
 	doclist = get_mapped_doc(
 		"Delivery Note",
 		source_name,
@@ -992,11 +1001,10 @@ def make_delivery_trip(
 				"on_parent": target_doc,
 				"field_map": {
 					"name": "delivery_note",
-					"shipping_address_name": "address",
-					"shipping_address": "customer_address",
 					"contact_person": "contact",
 					"contact_display": "customer_contact",
 				},
+				"postprocess": update_address,
 			},
 		},
 		ignore_child_tables=True,
@@ -1110,18 +1118,24 @@ def make_shipment(source_name: str, target_doc: str | Document | None = None):
 		# As we are using session user details in the pickup_contact then pickup_contact_person will be session user
 		target.pickup_contact_person = frappe.session.user
 
-		if source.contact_person:
+		contact_person = source.contact_person or get_default_contact("Customer", source.customer)
+		if contact_person:
 			contact = frappe.db.get_value(
-				"Contact", source.contact_person, ["email_id", "phone", "mobile_no"], as_dict=1
+				"Contact", contact_person, ["email_id", "phone", "mobile_no"], as_dict=1
 			)
-			delivery_contact_display = f"{source.contact_display}"
-			if contact:
+
+			delivery_contact_display = source.contact_display or contact_person or ""
+			if contact and not source.contact_display:
 				if contact.email_id:
 					delivery_contact_display += "<br>" + contact.email_id
 				if contact.phone:
 					delivery_contact_display += "<br>" + contact.phone
 				if contact.mobile_no and not contact.phone:
 					delivery_contact_display += "<br>" + contact.mobile_no
+
+			target.delivery_contact_name = contact_person
+			if contact and contact.email_id and not target.delivery_contact_email:
+				target.delivery_contact_email = contact.email_id
 			target.delivery_contact = delivery_contact_display
 
 		if source.shipping_address_name:

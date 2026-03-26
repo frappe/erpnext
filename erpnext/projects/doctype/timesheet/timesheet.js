@@ -260,6 +260,33 @@ frappe.ui.form.on("Timesheet", {
 	parent_project: function (frm) {
 		set_project_in_timelog(frm);
 	},
+
+	employee: function (frm) {
+		if (frm.doc.employee && frm.doc.time_logs) {
+			const selected_employee = frm.doc.employee;
+			frm.doc.time_logs.forEach((row) => {
+				if (row.activity_type) {
+					frappe.call({
+						method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
+						args: {
+							employee: frm.doc.employee,
+							activity_type: row.activity_type,
+							currency: frm.doc.currency,
+						},
+						callback: function (r) {
+							if (r.message) {
+								if (selected_employee !== frm.doc.employee) return;
+								row.billing_rate = r.message["billing_rate"];
+								row.costing_rate = r.message["costing_rate"];
+								frm.refresh_fields("time_logs");
+								calculate_billing_costing_amount(frm, row.doctype, row.name);
+							}
+						},
+					});
+				}
+			});
+		}
+	},
 });
 
 frappe.ui.form.on("Timesheet Detail", {

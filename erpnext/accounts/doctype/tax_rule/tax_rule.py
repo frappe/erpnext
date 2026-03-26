@@ -8,6 +8,8 @@ import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_default_address
 from frappe.model.document import Document
+from frappe.query_builder import DocType
+from frappe.query_builder.functions import IfNull
 from frappe.utils import cstr
 from frappe.utils.nestedset import get_root_of
 
@@ -83,6 +85,8 @@ class TaxRule(Document):
 			frappe.throw(_("Tax Template is mandatory."))
 
 	def validate_filters(self):
+		TaxRule = DocType("Tax Rule")
+
 		filters = {
 			"tax_type": self.tax_type,
 			"customer": self.customer,
@@ -105,33 +109,34 @@ class TaxRule(Document):
 			"company": self.company,
 		}
 
-		conds = ""
-		for d in filters:
-			if conds:
-				conds += " and "
-			conds += f"""ifnull({d}, '') = {frappe.db.escape(cstr(filters[d]))}"""
-
-		if self.from_date and self.to_date:
-			conds += f""" and ((from_date > '{self.from_date}' and from_date < '{self.to_date}') or
-					(to_date > '{self.from_date}' and to_date < '{self.to_date}') or
-					('{self.from_date}' > from_date and '{self.from_date}' < to_date) or
-					('{self.from_date}' = from_date and '{self.to_date}' = to_date))"""
-
-		elif self.from_date and not self.to_date:
-			conds += f""" and to_date > '{self.from_date}'"""
-
-		elif self.to_date and not self.from_date:
-			conds += f""" and from_date < '{self.to_date}'"""
-
-		tax_rule = frappe.db.sql(
-			f"select name, priority \
-			from `tabTax Rule` where {conds} and name != '{self.name}'",
-			as_dict=1,
+		query = (
+			frappe.qb.from_(TaxRule).select(TaxRule.name, TaxRule.priority).where(TaxRule.name != self.name)
 		)
 
-		if tax_rule:
-			if tax_rule[0].priority == self.priority:
-				frappe.throw(_("Tax Rule Conflicts with {0}").format(tax_rule[0].name), ConflictingTaxRule)
+		for field, value in filters.items():
+			query = query.where(IfNull(TaxRule[field], "") == cstr(value))
+
+		if self.from_date and self.to_date:
+			query = query.where(
+				((TaxRule.from_date > self.from_date) & (TaxRule.from_date < self.to_date))
+				| ((TaxRule.to_date > self.from_date) & (TaxRule.to_date < self.to_date))
+				| ((self.from_date > TaxRule.from_date) & (self.from_date < TaxRule.to_date))
+				| ((TaxRule.from_date == self.from_date) & (TaxRule.to_date == self.to_date))
+			)
+
+		elif self.from_date:
+			query = query.where(TaxRule.to_date > self.from_date)
+
+		elif self.to_date:
+			query = query.where(TaxRule.from_date < self.to_date)
+
+		tax_rule = query.run(as_dict=True)
+
+		if tax_rule and tax_rule[0].priority == self.priority:
+			frappe.throw(
+				_("Tax Rule Conflicts with {0}").format(tax_rule[0].name),
+				ConflictingTaxRule,
+			)
 
 
 @frappe.whitelist()

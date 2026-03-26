@@ -8,8 +8,8 @@ permissions:
 
 on:
   schedule:
-    # 9:30 UTC => 3 PM IST Tuesday
-    - cron: "30 9 * * 2"
+    # 9:30 UTC => 3 PM IST
+    - cron: "30 9 * * 1,4"
   workflow_dispatch:
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ["14", "15", "16"]
+        version: ["15", "16"]
 
     steps:
       - uses: octokit/request-action@v2.x

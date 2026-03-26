@@ -2,13 +2,11 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
+
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestPaymentTermsTemplate(IntegrationTestCase):
-	def tearDown(self):
-		frappe.delete_doc("Payment Terms Template", "_Test Payment Terms Template For Test", force=1)
-
+class TestPaymentTermsTemplate(ERPNextTestSuite):
 	def test_create_template(self):
 		template = frappe.get_doc(
 			{

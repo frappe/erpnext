@@ -23,7 +23,7 @@ frappe.ui.form.on("Job Card", {
 			};
 		});
 
-		frm.set_query("item_code", "scrap_items", () => {
+		frm.set_query("item_code", "secondary_items", () => {
 			return {
 				filters: {
 					disabled: 0,
@@ -36,6 +36,14 @@ frappe.ui.form.on("Job Card", {
 			return {
 				filters: {
 					name: ["in", operations],
+				},
+			};
+		});
+
+		frm.set_query("work_order", function () {
+			return {
+				filters: {
+					status: ["not in", ["Cancelled", "Closed", "Stopped"]],
 				},
 			};
 		});
@@ -96,7 +104,7 @@ frappe.ui.form.on("Job Card", {
 			frm.doc.docstatus === 1 &&
 			!frm.doc.is_subcontracted &&
 			(frm.doc.skip_material_transfer || frm.doc.transferred_qty > 0) &&
-			flt(frm.doc.for_quantity) + flt(frm.doc.process_loss_qty) > flt(frm.doc.manufactured_qty)
+			flt(frm.doc.manufactured_qty) + flt(frm.doc.process_loss_qty) < flt(frm.doc.for_quantity)
 		) {
 			frm.add_custom_button(__("Make Stock Entry"), () => {
 				frappe.confirm(
@@ -272,8 +280,6 @@ frappe.ui.form.on("Job Card", {
 
 					is_timer_running = true;
 				}
-
-				frm.trigger("make_dashboard");
 			}
 		}
 
@@ -786,24 +792,10 @@ frappe.ui.form.on("Job Card Time Log", {
 
 		frm.events.set_total_completed_qty(frm);
 	},
-
-	time_in_mins(frm, cdt, cdn) {
-		let d = locals[cdt][cdn];
-		if (d.time_in_mins) {
-			d.to_time = add_mins_to_time(d.from_time, d.time_in_mins);
-			frappe.model.set_value(cdt, cdn, "to_time", d.to_time);
-		}
-	},
 });
 
 function get_seconds_diff(d1, d2) {
 	return moment(d1).diff(d2, "seconds");
-}
-
-function add_mins_to_time(datetime, mins) {
-	let new_date = moment(datetime).add(mins, "minutes");
-
-	return new_date.format("YYYY-MM-DD HH:mm:ss");
 }
 
 function get_last_completed_row(time_logs) {

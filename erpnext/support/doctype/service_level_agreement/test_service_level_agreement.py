@@ -3,42 +3,16 @@
 import datetime
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import flt
 
 from erpnext.support.doctype.issue_priority.test_issue_priority import make_priorities
 from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
 	get_service_level_agreement_fields,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestServiceLevelAgreement(IntegrationTestCase):
-	def setUp(self):
-		self.create_company()
-		frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
-		lead = frappe.qb.DocType("Lead")
-		frappe.qb.from_(lead).delete().where(lead.company == self.company).run()
-
-	def create_company(self):
-		name = "_Test Support SLA"
-		company = None
-		if frappe.db.exists("Company", name):
-			company = frappe.get_doc("Company", name)
-		else:
-			company = frappe.get_doc(
-				{
-					"doctype": "Company",
-					"company_name": name,
-					"country": "India",
-					"default_currency": "INR",
-					"create_chart_of_accounts_based_on": "Standard Template",
-					"chart_of_accounts": "Standard",
-				}
-			)
-			company = company.save()
-
-		self.company = company.name
-
+class TestServiceLevelAgreement(ERPNextTestSuite):
 	def test_service_level_agreement(self):
 		# Default Service Level Agreement
 		create_default_service_level_agreement = create_service_level_agreement(
@@ -219,10 +193,9 @@ class TestServiceLevelAgreement(IntegrationTestCase):
 			doctype=doctype,
 			sla_fulfilled_on=[{"status": "Converted"}],
 		)
-
 		# make lead with default SLA
 		creation = datetime.datetime(2019, 3, 4, 12, 0)
-		lead = make_lead(creation=creation, index=1, company=self.company)
+		lead = make_lead(creation=creation, index=1, company="_Test Support SLA")
 
 		self.assertEqual(lead.service_level_agreement, lead_sla.name)
 		self.assertEqual(lead.response_by, datetime.datetime(2019, 3, 4, 16, 0))
@@ -250,7 +223,7 @@ class TestServiceLevelAgreement(IntegrationTestCase):
 		)
 
 		creation = datetime.datetime(2020, 3, 4, 4, 0)
-		lead = make_lead(creation, index=2, company=self.company)
+		lead = make_lead(creation, index=2, company="_Test Support SLA")
 
 		frappe.flags.current_time = datetime.datetime(2020, 3, 4, 4, 15)
 		lead.reload()
@@ -284,7 +257,7 @@ class TestServiceLevelAgreement(IntegrationTestCase):
 		)
 
 		creation = datetime.datetime(2019, 3, 4, 12, 0)
-		lead = make_lead(creation=creation, index=1, company=self.company)
+		lead = make_lead(creation=creation, index=1, company="_Test Support SLA")
 		self.assertEqual(lead.response_by, datetime.datetime(2019, 3, 4, 16, 0))
 
 		# failed with response time only
@@ -311,7 +284,7 @@ class TestServiceLevelAgreement(IntegrationTestCase):
 
 		# fulfilled with response time only
 		creation = datetime.datetime(2019, 3, 4, 12, 0)
-		lead = make_lead(creation=creation, index=2, company=self.company)
+		lead = make_lead(creation=creation, index=2, company="_Test Support SLA")
 
 		self.assertEqual(lead.service_level_agreement, lead_sla.name)
 		self.assertEqual(lead.response_by, datetime.datetime(2019, 3, 4, 16, 0))
@@ -338,7 +311,7 @@ class TestServiceLevelAgreement(IntegrationTestCase):
 			apply_sla_for_resolution=0,
 		)
 		creation = datetime.datetime(2019, 3, 4, 12, 0)
-		lead = make_lead(creation=creation, index=4, company=self.company)
+		lead = make_lead(creation=creation, index=4, company="_Test Support SLA")
 		applied_sla = frappe.db.get_value("Lead", lead.name, "service_level_agreement")
 		self.assertFalse(applied_sla)
 
@@ -357,10 +330,6 @@ class TestServiceLevelAgreement(IntegrationTestCase):
 		lead.save()
 		applied_sla = frappe.db.get_value("Lead", lead.name, "service_level_agreement")
 		self.assertFalse(applied_sla)
-
-	def tearDown(self):
-		for d in frappe.get_all("Service Level Agreement"):
-			frappe.delete_doc("Service Level Agreement", d.name, force=1)
 
 
 def get_service_level_agreement(

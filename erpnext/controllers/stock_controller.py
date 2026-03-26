@@ -63,6 +63,8 @@ class StockController(AccountsController):
 
 		if not self.get("is_return"):
 			self.validate_inspection()
+
+		self.validate_warehouse_of_sabb()
 		self.validate_serialized_batch()
 		self.clean_serial_nos()
 		self.validate_customer_provided_item()
@@ -74,6 +76,45 @@ class StockController(AccountsController):
 	def on_update(self):
 		super().on_update()
 		self.check_zero_rate()
+
+	def validate_warehouse_of_sabb(self):
+		if self.is_internal_transfer():
+			return
+
+		doc_before_save = self.get_doc_before_save()
+
+		for row in self.items:
+			if not row.get("serial_and_batch_bundle"):
+				continue
+
+			sabb_details = frappe.db.get_value(
+				"Serial and Batch Bundle",
+				row.serial_and_batch_bundle,
+				["type_of_transaction", "warehouse", "has_serial_no"],
+				as_dict=True,
+			)
+			if not sabb_details:
+				continue
+
+			if sabb_details.type_of_transaction != "Outward":
+				continue
+
+			warehouse = row.get("warehouse") or row.get("s_warehouse")
+			if sabb_details.warehouse != warehouse:
+				frappe.throw(
+					_(
+						"Row #{0}: Warehouse {1} does not match with the warehouse {2} in Serial and Batch Bundle {3}."
+					).format(row.idx, warehouse, sabb_details.warehouse, row.serial_and_batch_bundle)
+				)
+
+			if self.doctype == "Stock Reconciliation":
+				continue
+
+			if sabb_details.has_serial_no and doc_before_save and doc_before_save.get("items"):
+				prev_row = doc_before_save.get("items", {"idx": row.idx})
+				if prev_row and prev_row[0].serial_and_batch_bundle != row.serial_and_batch_bundle:
+					sabb_doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
+					sabb_doc.validate_serial_no_status()
 
 	def reset_conversion_factor(self):
 		for row in self.get("items"):
@@ -1394,10 +1435,20 @@ class StockController(AccountsController):
 			elif self.doctype == "Stock Entry" and row.t_warehouse:
 				qi_required = True  # inward stock needs inspection
 
-			if row.get("is_scrap_item"):
+			if row.get("type") or row.get("is_legacy_scrap_item"):
 				continue
 
 			if qi_required:  # validate row only if inspection is required on item level
+				if self.doctype in [
+					"Purchase Receipt",
+					"Purchase Invoice",
+					"Sales Invoice",
+					"Delivery Note",
+				] and frappe.get_single_value(
+					"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
+				):
+					return
+
 				self.validate_qi_presence(row)
 				if self.docstatus == 1:
 					self.validate_qi_submission(row)
@@ -1405,16 +1456,6 @@ class StockController(AccountsController):
 
 	def validate_qi_presence(self, row):
 		"""Check if QI is present on row level. Warn on save and stop on submit if missing."""
-		if self.doctype in [
-			"Purchase Receipt",
-			"Purchase Invoice",
-			"Sales Invoice",
-			"Delivery Note",
-		] and frappe.get_single_value(
-			"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
-		):
-			return
-
 		if not row.quality_inspection:
 			msg = _("Row #{0}: Quality Inspection is required for Item {1}").format(
 				row.idx, frappe.bold(row.item_code)
@@ -2087,7 +2128,9 @@ def check_item_quality_inspection(doctype: str, items: str | list[dict]):
 
 
 @frappe.whitelist()
-def make_quality_inspections(doctype: str, docname: str, items: str | list, inspection_type: str):
+def make_quality_inspections(
+	company: str, doctype: str, docname: str, items: str | list, inspection_type: str
+):
 	if isinstance(items, str):
 		items = json.loads(items)
 
@@ -2106,6 +2149,7 @@ def make_quality_inspections(doctype: str, docname: str, items: str | list, insp
 
 		quality_inspection = frappe.get_doc(
 			{
+				"company": company,
 				"doctype": "Quality Inspection",
 				"inspection_type": inspection_type,
 				"inspected_by": frappe.session.user,
