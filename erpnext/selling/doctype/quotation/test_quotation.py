@@ -1027,13 +1027,14 @@ class TestQuotation(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"allow_pegged_currencies_exchange_rates": True})
 	def test_make_quotation_qar_to_inr(self):
+		date = "2026-01-01"
 		quotation = make_quotation(
 			currency="QAR",
-			transaction_date="2026-06-04",
+			transaction_date="2026-01-01",
 		)
 
 		cache = frappe.cache()
-		key = "currency_exchange_rate_{}:{}:{}".format("2026-06-04", "QAR", "INR")
+		key = "currency_exchange_rate_{}:{}:{}".format(date, "QAR", "INR")
 		value = cache.get(key)
 		expected_rate = flt(value) / 3.64
 
