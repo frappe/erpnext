@@ -12,7 +12,7 @@ from erpnext.setup.doctype.mahi_granites_settings.mahi_granites_settings import 
 
 
 @frappe.whitelist()
-def create_slab(line: str, child_line: str, type: str, job_card_number: str | None = None):
+def create_slab(line: str, child_line: str, type: str, job_card_number: str | None = None, slab_history: list[SlabHistory] | None = None):
 	new_slab: Slab = frappe.new_doc("Slab")  # pyright: ignore[reportAssignmentType]
 	new_slab.line = line
 	new_slab.child_line = child_line
@@ -28,13 +28,16 @@ def create_slab(line: str, child_line: str, type: str, job_card_number: str | No
 	current_stage = ALLOWED_STAGES[0]
 	new_slab.status = current_stage  # pyright: ignore[reportAttributeAccessIssue]
 
+	if slab_history:
+		new_slab.slab_history = slab_history
+
 	# Create the first line item for the slab history as distribution.
-	slab_history: SlabHistory = frappe.new_doc("Slab History")  # pyright: ignore[reportAssignmentType]
-	slab_history.idx = 1
-	slab_history.station = current_stage
-	slab_history.in_time = frappe_utils.now_datetime()
-	slab_history.job_card_number = job_card_number
-	new_slab.slab_history.append(slab_history)
+	slab_history_item: SlabHistory = frappe.new_doc("Slab History")  # pyright: ignore[reportAssignmentType]
+	slab_history_item.idx = len(new_slab.slab_history) + 1
+	slab_history_item.station = current_stage
+	slab_history_item.in_time = frappe_utils.now_datetime()
+	slab_history_item.job_card_number = job_card_number
+	new_slab.slab_history.append(slab_history_item)
 
 	new_slab.save(ignore_permissions=True)
 	return new_slab
