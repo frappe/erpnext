@@ -788,24 +788,10 @@ frappe.ui.form.on("Job Card Time Log", {
 
 		frm.events.set_total_completed_qty(frm);
 	},
-
-	time_in_mins(frm, cdt, cdn) {
-		let d = locals[cdt][cdn];
-		if (d.time_in_mins) {
-			d.to_time = add_mins_to_time(d.from_time, d.time_in_mins);
-			frappe.model.set_value(cdt, cdn, "to_time", d.to_time);
-		}
-	},
 });
 
 function get_seconds_diff(d1, d2) {
 	return moment(d1).diff(d2, "seconds");
-}
-
-function add_mins_to_time(datetime, mins) {
-	let new_date = moment(datetime).add(mins, "minutes");
-
-	return new_date.format("YYYY-MM-DD HH:mm:ss");
 }
 
 function get_last_completed_row(time_logs) {
