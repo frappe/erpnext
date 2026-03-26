@@ -1287,7 +1287,7 @@ class WorkOrder(Document):
 					if d.set_cost_based_on_bom_qty:
 						d.time_in_mins = flt(d.time_in_mins) * flt(flt(qty) / flt(d.batch_size or 1))
 					else:
-						d.time_in_mins = flt(d.time_in_mins) * flt(qty)
+						d.time_in_mins = flt(d.time_in_mins) / flt(qty)
 
 				d.status = "Pending"
 
@@ -1308,7 +1308,7 @@ class WorkOrder(Document):
 
 			for node in bom_traversal:
 				if node.is_bom:
-					operations.extend(_get_operations(node.name, qty=node.exploded_qty / node.bom_qty))
+					operations.extend(_get_operations(node.name, qty=node.bom_qty))
 
 		bom_qty = frappe.get_cached_value("BOM", self.bom_no, "quantity")
 		operations.extend(_get_operations(self.bom_no, qty=bom_qty))
