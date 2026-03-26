@@ -29,6 +29,7 @@ from erpnext.manufacturing.doctype.slab.api import (
 	pause_or_resume_slab_operation,
 )
 from erpnext.manufacturing.doctype.slab.slab import Slab
+from erpnext.manufacturing.doctype.slab_history.slab_history import SlabHistory
 from erpnext.manufacturing.doctype.work_order.work_order import (
 	WorkOrder,
 )
@@ -73,7 +74,8 @@ def start_process(job_card, slab_name="", slab_template="", process_name="operat
 		if parent_line and parent_line != jc.production_line:
 			child_line = jc.production_line
 
-		new_slab = create_slab(parent_line or "", child_line or "", slab_template or "", jc.name)
+		slab_history = _get_mixing_slab_history(jc.name or "")
+		new_slab = create_slab(parent_line or "", child_line or "", slab_template or "", jc.name, slab_history)
 		slab_name = new_slab.name
 		slab_template = new_slab.template
 
@@ -390,3 +392,37 @@ def get_job_card_for_slab(slab_name: str, process_name: str):
 	job_card_data = _get_job_card_for_line_and_process(slab.line, process_name, include_wip=True)
 	job_card = job_card_data["top_job_card"]
 	return job_card
+
+
+def _get_mixing_slab_history(job_card_name: str):
+	# 1. Get the ID of the Mixing Job Card that transferred the material to this distribution using the current job card's stock entry.
+	stock_entry = frappe.get_all("Stock Entry", filters={"job_card": job_card_name}, limit=1, fields=["name", "job_card", "previous_job_card"])
+	if stock_entry:
+		stock_entry = stock_entry[0]
+	else:
+		stock_entry = None
+
+	# 2. Get the time logs of the mixing job card.
+	if stock_entry and stock_entry.previous_job_card:
+		mixing_job_card = frappe.get_doc("Job Card", stock_entry.previous_job_card)
+	else:
+		mixing_job_card = None
+
+	# 3. Append the time logs to the slab.
+	time_logs = []
+	if mixing_job_card:
+		time_logs = frappe.get_all("Job Card Time Log", filters={"parent": mixing_job_card.name}, fields=["from_time", "to_time", "time_in_mins"], order_by="idx asc")
+
+	slab_history = []
+	if time_logs:
+		for i, log in enumerate(time_logs):
+			slab_history_item: SlabHistory = frappe.new_doc("Slab History")  # pyright: ignore[reportAssignmentType]
+			slab_history_item.idx = i + 1
+			slab_history_item.in_time = log.from_time
+			slab_history_item.out_time = log.to_time
+			slab_history_item.total_time_in_minutes = log.time_in_mins
+			slab_history_item.station = MIXING_PROCESS
+			slab_history_item.job_card_number = mixing_job_card.name if mixing_job_card else None
+			slab_history.append(slab_history_item)
+
+	return slab_history

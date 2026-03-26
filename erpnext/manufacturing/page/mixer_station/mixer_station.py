@@ -17,6 +17,7 @@ from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder
 from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry as wo_make_stock_entry
 from erpnext.setup.doctype.employee.api import get_current_user_context
 from erpnext.setup.doctype.mahi_granites_settings.mahi_granites_settings import MahiGranitesSettings
+from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 
 
 @frappe.whitelist()
@@ -353,7 +354,7 @@ def quick_add_raw_materials(job_card, raw_material, qty):
 	jc.flags.ignore_validate = True
 	jc.save(ignore_permissions=True)
 
-	se = frappe.new_doc("Stock Entry")
+	se: StockEntry = frappe.new_doc("Stock Entry")
 	se.job_card = job_card
 	se.work_order = jc.work_order
 	se.purpose = "Material Transfer for Manufacture"

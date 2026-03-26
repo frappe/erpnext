@@ -108,6 +108,7 @@ def transfer_to_next_process(current_job_card, current_work_order, qty=None, pro
 	se.job_card = open_job_card  # pyright: ignore # No job card for inter-process transfer
 	se.company = wo.company
 	se.fg_completed_qty = transfer_qty
+	se.previous_job_card = current_job_card
 
 	se.append(
 		"items",
