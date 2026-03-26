@@ -991,7 +991,10 @@ erpnext.work_order = {
 			max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
 		} else {
 			if (purpose === "Manufacture") {
-				max = flt(frm.doc.material_transferred_for_manufacturing) - flt(frm.doc.produced_qty);
+				max =
+					flt(frm.doc.material_transferred_for_manufacturing) -
+					flt(frm.doc.produced_qty) -
+					flt(frm.doc.process_loss_qty);
 			} else {
 				max = flt(frm.doc.qty) - flt(frm.doc.material_transferred_for_manufacturing);
 			}
