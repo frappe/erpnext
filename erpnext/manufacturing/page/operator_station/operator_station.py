@@ -1,3 +1,4 @@
+from erpnext.manufacturing.doctype.job_card.constants import HIGH_PRIORITY
 from copy import deepcopy
 
 import frappe
@@ -83,6 +84,7 @@ def start_process(job_card, slab_name="", slab_template="", process_name="operat
 
 	jc.reload()
 	jc.job_started = 1
+	jc.priority = HIGH_PRIORITY
 	jc.save(ignore_permissions=True)
 
 	start_machine(process_name, jc.production_line, None)
@@ -167,7 +169,6 @@ def finish_process(job_card, process_name, transfer_materials=True, should_stop_
 	}
 
 	make_time_log(args)
-
 
 	jc.reload()
 	jc.status = "Completed"

@@ -1,6 +1,7 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from erpnext.manufacturing.doctype.job_card.constants import LOW_PRIORITY, TEST_ITEM_PRIORITY
 import json
 
 import frappe
@@ -120,7 +121,17 @@ class WorkOrder(Document):
 		scrap_warehouse: DF.Link | None
 		skip_transfer: DF.Check
 		source_warehouse: DF.Link | None
-		status: DF.Literal["", "Draft", "Submitted", "Not Started", "In Process", "Completed", "Stopped", "Closed", "Cancelled"]
+		status: DF.Literal[
+			"",
+			"Draft",
+			"Submitted",
+			"Not Started",
+			"In Process",
+			"Completed",
+			"Stopped",
+			"Closed",
+			"Cancelled",
+		]
 		stock_uom: DF.Link | None
 		total_operating_cost: DF.Currency
 		transfer_material_against: DF.Literal["", "Work Order", "Job Card"]
@@ -142,14 +153,15 @@ class WorkOrder(Document):
 		else:
 			self.naming_series = f"MFG-WO-{year}-.#####"
 
-
 	def before_insert(self):
 		process_name = None
 		item_name_lower = (self.production_item or "").lower()
 
 		# Strategy A: Try to find a matching process in BOM operations
 		if self.bom_no:
-			bom_ops = frappe.get_all("BOM Operation", filters={"parent": self.bom_no}, fields=["operation"], order_by="idx desc")
+			bom_ops = frappe.get_all(
+				"BOM Operation", filters={"parent": self.bom_no}, fields=["operation"], order_by="idx desc"
+			)
 			for row in bom_ops:
 				if row.operation in ALL_MFG_PROCESSES:
 					process_name = row.operation
@@ -165,15 +177,24 @@ class WorkOrder(Document):
 
 		# Strategy C: Hardcoded fallback common keywords for Mahi stage items
 		if not process_name and item_name_lower:
-			if "pressed slab" in item_name_lower: process_name = "Pressing"
-			elif "heated slab" in item_name_lower: process_name = "Heating"
-			elif "cooled slab" in item_name_lower: process_name = "Cooling"
-			elif "trimmed slab" in item_name_lower: process_name = "Trimming"
-			elif "calibrated slab" in item_name_lower: process_name = "Calibration"
-			elif "polished slab" in item_name_lower: process_name = "Polishing"
-			elif "mixing" in item_name_lower: process_name = "Mixing"
-			elif "distribution" in item_name_lower: process_name = "Distribution"
-			else: process_name = "Quality Check"
+			if "pressed slab" in item_name_lower:
+				process_name = "Pressing"
+			elif "heated slab" in item_name_lower:
+				process_name = "Heating"
+			elif "cooled slab" in item_name_lower:
+				process_name = "Cooling"
+			elif "trimmed slab" in item_name_lower:
+				process_name = "Trimming"
+			elif "calibrated slab" in item_name_lower:
+				process_name = "Calibration"
+			elif "polished slab" in item_name_lower:
+				process_name = "Polishing"
+			elif "mixing" in item_name_lower:
+				process_name = "Mixing"
+			elif "distribution" in item_name_lower:
+				process_name = "Distribution"
+			else:
+				process_name = "Quality Check"
 
 		# Strategy D: Default to Quality Check if it looks like a final FG
 		if not process_name and "fg" in item_name_lower:
@@ -181,13 +202,12 @@ class WorkOrder(Document):
 
 		# 2. Lookup Process Warehouse Map
 		if process_name and self.production_line:
-			wh_map = frappe.db.get_value("Process Warehouse Map", 
+			wh_map = frappe.db.get_value(
+				"Process Warehouse Map",
 				{"process_name": process_name, "production_line": self.production_line},
 				["source_warehouse", "wip_warehouse", "fg_warehouse"],
-				as_dict=1
+				as_dict=1,
 			)
-
-
 			if wh_map:
 				self.source_warehouse = wh_map.source_warehouse
 				self.wip_warehouse = wh_map.wip_warehouse
@@ -196,12 +216,11 @@ class WorkOrder(Document):
 				for row in self.required_items:
 					row.source_warehouse = self.source_warehouse
 
-
 	def after_insert(self):
 		"""Auto-submit Work Order after warehouses are set"""
-		self.load_from_db() 
-		if self.docstatus == 0: 
-			self.submit() 
+		self.load_from_db()
+		if self.docstatus == 0:
+			self.submit()
 			self.update_status()
 
 	def validate(self):
@@ -554,11 +573,16 @@ class WorkOrder(Document):
 
 	def on_submit(self):
 		from erpnext.manufacturing.doctype.manufacturing_process.constants import ALL_MFG_PROCESSES
+
 		item_lower = (self.production_item or "").lower()
-		
+
 		# Skip standard warehouse validation for Mahi manufacturing items
-		is_mahi_item = any(p.lower() in item_lower for p in ALL_MFG_PROCESSES) or "slab" in item_lower or "fg" in item_lower
-		
+		is_mahi_item = (
+			any(p.lower() in item_lower for p in ALL_MFG_PROCESSES)
+			or "slab" in item_lower
+			or "fg" in item_lower
+		)
+
 		if is_mahi_item:
 			pass
 		else:
@@ -760,7 +784,11 @@ class WorkOrder(Document):
 		self.set_operation_start_end_time(row, idx)
 
 		job_card_doc = create_job_card(
-			self, row, auto_create=True, enable_capacity_planning=enable_capacity_planning, production_line=self.production_line
+			self,
+			row,
+			auto_create=True,
+			enable_capacity_planning=enable_capacity_planning,
+			production_line=self.production_line,
 		)
 
 		if enable_capacity_planning and job_card_doc:
@@ -1760,6 +1788,12 @@ def validate_operation_data(row):
 
 
 def create_job_card(work_order, row, auto_create=False, enable_capacity_planning=False, production_line=None):
+	# Determine priority based on is_test_item from the Production Plan
+	is_test_item = False
+	if work_order.production_plan:
+		is_test_item = frappe.db.get_value("Production Plan", work_order.production_plan, "is_test_item")
+	priority = TEST_ITEM_PRIORITY if is_test_item else LOW_PRIORITY
+
 	doc = frappe.new_doc("Job Card")
 	doc.update(
 		{
@@ -1780,6 +1814,7 @@ def create_job_card(work_order, row, auto_create=False, enable_capacity_planning
 			else work_order.source_warehouse or row.get("source_warehouse"),
 			"hour_rate": row.get("hour_rate"),
 			"serial_no": row.get("serial_no"),
+			"priority": priority,
 		}
 	)
 

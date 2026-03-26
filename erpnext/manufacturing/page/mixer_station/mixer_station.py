@@ -1,3 +1,4 @@
+from erpnext.manufacturing.doctype.job_card.constants import HIGH_PRIORITY
 import json
 
 import frappe
@@ -102,12 +103,12 @@ def get_mixer_state(job_card):
 				AND sle.is_cancelled = 0
 			""",
 				(next_wo, jc.production_item),
-			)[0][0] # pyright: ignore
+			)[0][0]  # pyright: ignore
 			or 0,
 			3,
 		)
 
-	prepared_qty = (produced_qty if produced_qty else jc.total_completed_qty) or 0 # pyright: ignore
+	prepared_qty = (produced_qty if produced_qty else jc.total_completed_qty) or 0  # pyright: ignore
 
 	display_qty = flt(prepared_qty - transferred_qty_to_next, 3)
 	bom_qty = flt(next_bom.get("bom_qty", 0), 2)
@@ -127,7 +128,7 @@ def get_mixer_state(job_card):
 		"transferred_qty_to_next": transferred_qty_to_next,
 		"display_qty": display_qty,
 		"transfer_complete": display_qty <= 0.001,
-		"bom_qty": bom_qty
+		"bom_qty": bom_qty,
 	}
 
 
@@ -254,6 +255,7 @@ def start_mixing(job_card):
 	make_time_log(args)
 	jc.reload()
 	jc.job_started = 1
+	jc.priority = HIGH_PRIORITY
 	jc.save(ignore_permissions=True)
 	return {
 		"status": jc.status,
@@ -485,7 +487,7 @@ def get_next_process_bom_qty(mixing_work_order):
 
 
 @frappe.whitelist()
-def get_all_mixers(production_line=None, mixing_queue = None):
+def get_all_mixers(production_line=None, mixing_queue=None):
 	# Check if the current user has the role of Administrator
 	user_roles = frappe.get_roles()
 	is_admin = "Administrator" in user_roles or "Floor Manager" in user_roles
@@ -508,22 +510,33 @@ def get_all_mixers(production_line=None, mixing_queue = None):
 		production_line_names = [line.name for line in production_lines if line.parent_line == parent_line]
 
 	filters = [
-		["workstation_type", '=', "Mixing"],
-		["production_line", 'in', production_line_names if production_line_names else ['']]
+		["workstation_type", "=", "Mixing"],
+		["production_line", "in", production_line_names if production_line_names else [""]],
 	]
 
-	mixers_list = frappe.get_all("Workstation", filters=filters, fields=["name", "production_line"], order_by="name asc")
+	mixers_list = frappe.get_all(
+		"Workstation", filters=filters, fields=["name", "production_line"], order_by="name asc"
+	)
 
 	active_job_cards = frappe.get_all(
 		"Job Card",
-		filters={"job_started": 1, "status": ("!=", "Completed"), "workstation": ("is", "set"), "workstation_type": "Mixing"},
-		fields=["name", "workstation", "workstation_type"]
+		filters={
+			"job_started": 1,
+			"status": ("!=", "Completed"),
+			"workstation": ("is", "set"),
+			"workstation_type": "Mixing",
+		},
+		fields=["name", "workstation", "workstation_type"],
 	)
 
 	active_names = {d.workstation: d.name for d in active_job_cards if d.workstation}
 
 	queue_cards = mixing_queue or get_mixing_queue(production_line)
-	finished_names = {card.get("workstation"): card.get("name") for card in queue_cards if card.get("status") == "Completed" and card.get("workstation")}
+	finished_names = {
+		card.get("workstation"): card.get("name")
+		for card in queue_cards
+		if card.get("status") == "Completed" and card.get("workstation")
+	}
 
 	for m in mixers_list:
 		if m.name in finished_names:

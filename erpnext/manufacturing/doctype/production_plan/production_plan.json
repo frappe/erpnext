@@ -14,6 +14,7 @@
   "posting_date",
   "monthly_production_plan",
   "is_parent_plan",
+  "is_test_item",
   "filters",
   "item_code",
   "customer",
@@ -562,7 +563,7 @@
    "fieldname": "is_parent_plan",
    "fieldtype": "Check",
    "hidden": 1,
-   "label": "is parent plan",
+   "label": "Is parent plan",
    "read_only": 1
   },
   {
@@ -576,13 +577,20 @@
    "label": "Monthly Production Plan",
    "options": "Production Plan",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "This will define the producing item as a test item",
+   "fieldname": "is_test_item",
+   "fieldtype": "Check",
+   "label": "Is Test Item"
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-05 16:33:21.642511",
+ "modified": "2026-03-25 14:33:17.033380",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
