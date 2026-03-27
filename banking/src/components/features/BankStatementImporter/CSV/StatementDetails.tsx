@@ -192,7 +192,7 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                     </div>
                 </div>
 
-                {progress > 0 && <div className='flex flex-col gap-2'><Progress value={progress} max={100} />
+                {progress > 0 && <div className='flex flex-col gap-2'><Progress value={progress} max={100} size="lg" />
                     <span className='text-sm'>{_("Importing {0} transactions", [progress.toString()])}
                     </span>
                 </div>}

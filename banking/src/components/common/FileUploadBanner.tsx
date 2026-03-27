@@ -9,7 +9,7 @@ const FileUploadBanner = ({
         <div className="flex flex-col items-center gap-4">
             <CheckCircle size={48} className="text-ink-green-3" />
             <span className="text-accent-foreground">{_("The document has been created and reconciled. Uploading attachments...")}</span>
-            <Progress value={Math.round(uploadProgress * 100)} />
+            <Progress value={Math.round(uploadProgress * 100)} size="lg" />
         </div>
     </div>
 }

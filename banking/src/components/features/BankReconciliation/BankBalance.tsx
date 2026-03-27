@@ -133,11 +133,14 @@ const ReconcileProgress = () => {
     const progress = (totalCount ? reconciledCount / totalCount : 0) * 100
 
     return <div className="w-[18%] flex flex-col gap-1 items-end">
-        <div>
-            <span className="text-right font-medium text-sm">{_("Your Progress")}: {reconciledCount} / {totalCount} {_("reconciled")}</span>
-        </div>
         <div className="w-full">
-            <Progress value={progress} max={100} />
+            <Progress
+                value={progress}
+                max={100}
+                size="lg"
+                label="Progress"
+                hint
+                hintText={`${reconciledCount} / ${totalCount} ${_("reconciled")}`} />
         </div>
     </div>
 }
