@@ -853,9 +853,10 @@ const VoucherItem = ({ voucher, index }: { voucher: LinkedPayment, index: number
                     </TooltipProvider>
                 </div>
                 <div>
-                    <Button variant='outline' className={
-                        cn(isSuggested || amountMatches ? "bg-green-600 hover:bg-green-700 active:bg-green-600 text-white hover:text-white active:text-white" : "")
-                    } onClick={onClick} disabled={loading}>{loading ? <><Loader2 className="w-4 h-4 animate-spin" /> {_("Reconciling")}...</> : `${_("Reconcile")}`}</Button>
+                    <Button
+                        variant={isSuggested || amountMatches ? "solid" : "outline"}
+                        theme={isSuggested || amountMatches ? "green" : "gray"}
+                        onClick={onClick} disabled={loading}>{loading ? <><Loader2 className="w-4 h-4 animate-spin" /> {_("Reconciling")}...</> : `${_("Reconcile")}`}</Button>
                 </div>
             </div>
 
