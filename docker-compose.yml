@@ -1,0 +1,202 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# ERPNext Fork – Docker Compose
+#
+# Quick start:
+#   docker compose build          # build image from fork source (~10 min)
+#   docker compose up -d          # start all services
+#   # open http://localhost:8080  (or http://erpnext.localhost:8080)
+#
+# Environment variables are read from .env (see that file for all options).
+# ──────────────────────────────────────────────────────────────────────────────
+
+# ── YAML anchors ──────────────────────────────────────────────────────────────
+
+# Shared image / volume / restart config for every app container
+x-app-common: &app-common
+  image: ${ERPNEXT_IMAGE:-erpnext-fork}:${ERPNEXT_VERSION:-latest}
+  build:
+    context: .
+    dockerfile: Dockerfile
+    args:
+      FRAPPE_BRANCH:   ${FRAPPE_BRANCH:-version-17}
+      ERPNEXT_REPO:    ${ERPNEXT_REPO:-https://github.com/fastlog-org/erpnext_test}
+      ERPNEXT_BRANCH:  ${ERPNEXT_BRANCH:-develop}
+      PAYMENTS_BRANCH: ${PAYMENTS_BRANCH:-version-17}
+  volumes:
+    - sites:/home/frappe/frappe-bench/sites
+    - logs:/home/frappe/frappe-bench/logs
+  restart: unless-stopped
+
+# Shared environment variables for every app container
+x-app-env: &app-env
+  DB_HOST:             ${DB_HOST:-db}
+  DB_PORT:             ${DB_PORT:-3306}
+  DB_ROOT_USER:        ${DB_ROOT_USER:-root}
+  DB_ROOT_PASSWORD:    ${DB_ROOT_PASSWORD:-admin}
+  REDIS_CACHE:         ${REDIS_CACHE:-redis-cache:6379}
+  REDIS_QUEUE:         ${REDIS_QUEUE:-redis-queue:6379}
+  REDIS_SOCKETIO:      ${REDIS_SOCKETIO:-redis-socketio:6379}
+  SITE_NAME:           ${SITE_NAME:-erpnext.localhost}
+  ADMIN_PASSWORD:      ${ADMIN_PASSWORD:-admin}
+  GUNICORN_WORKERS:    ${GUNICORN_WORKERS:-2}
+
+# ── Services ──────────────────────────────────────────────────────────────────
+services:
+
+  # ── Infrastructure ──────────────────────────────────────────────────────────
+
+  db:
+    image: mariadb:10.6
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --skip-innodb-read-only-compressed
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
+      MYSQL_DATABASE:      ${DB_NAME:-erpnext}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -hlocalhost -u root -p${DB_ROOT_PASSWORD:-admin} --silent"]
+      interval: 10s
+      timeout:  5s
+      retries:  20
+    restart: unless-stopped
+
+  redis-cache:
+    image: redis:7-alpine
+    volumes:
+      - redis-cache-data:/data
+    restart: unless-stopped
+
+  redis-queue:
+    image: redis:7-alpine
+    volumes:
+      - redis-queue-data:/data
+    restart: unless-stopped
+
+  redis-socketio:
+    image: redis:7-alpine
+    volumes:
+      - redis-socketio-data:/data
+    restart: unless-stopped
+
+  # ── Init containers (run once, then exit) ────────────────────────────────────
+
+  configurator:
+    <<: *app-common
+    command: configurator
+    restart: "no"
+    environment:
+      <<: *app-env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_started
+      redis-queue:
+        condition: service_started
+      redis-socketio:
+        condition: service_started
+
+  create-site:
+    <<: *app-common
+    command: create-site
+    restart: "no"
+    environment:
+      <<: *app-env
+    depends_on:
+      configurator:
+        condition: service_completed_successfully
+
+  # ── Application containers ────────────────────────────────────────────────
+
+  backend:
+    <<: *app-common
+    command: web
+    environment:
+      <<: *app-env
+    depends_on:
+      create-site:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8000/api/method/frappe.ping || exit 1"]
+      interval: 30s
+      timeout:  10s
+      retries:  5
+
+  websocket:
+    <<: *app-common
+    command: socketio
+    environment:
+      <<: *app-env
+    depends_on:
+      create-site:
+        condition: service_completed_successfully
+
+  scheduler:
+    <<: *app-common
+    command: scheduler
+    environment:
+      <<: *app-env
+    depends_on:
+      create-site:
+        condition: service_completed_successfully
+
+  queue-short:
+    <<: *app-common
+    command: worker
+    environment:
+      <<: *app-env
+      WORKER_TYPE: short
+    depends_on:
+      create-site:
+        condition: service_completed_successfully
+
+  queue-default:
+    <<: *app-common
+    command: worker
+    environment:
+      <<: *app-env
+      WORKER_TYPE: default
+    depends_on:
+      create-site:
+        condition: service_completed_successfully
+
+  queue-long:
+    <<: *app-common
+    command: worker
+    environment:
+      <<: *app-env
+      WORKER_TYPE: long
+    depends_on:
+      create-site:
+        condition: service_completed_successfully
+
+  # ── Frontend / reverse proxy ──────────────────────────────────────────────
+
+  frontend:
+    image: nginx:1.25-alpine
+    environment:
+      FRAPPE_SITE_NAME_HEADER: ${FRAPPE_SITE_NAME_HEADER:-erpnext.localhost}
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites:ro
+      - ./docker/nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+      websocket:
+        condition: service_started
+    restart: unless-stopped
+
+# ── Volumes ───────────────────────────────────────────────────────────────────
+volumes:
+  sites:
+  logs:
+  db-data:
+  redis-cache-data:
+  redis-queue-data:
+  redis-socketio-data:

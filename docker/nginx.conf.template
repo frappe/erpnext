@@ -1,0 +1,64 @@
+# Nginx reverse proxy for ERPNext
+# Processed by envsubst at container start – variables come from .env via Docker Compose.
+
+upstream frappe_backend {
+    server backend:8000;
+}
+
+upstream frappe_socketio {
+    server websocket:9000;
+}
+
+server {
+    listen 80;
+    server_name _;
+
+    client_max_body_size 50m;
+
+    # Compression
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+    # ── Static assets built by bench ─────────────────────────────────────────
+    location /assets {
+        root /home/frappe/frappe-bench/sites;
+        try_files $uri =404;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # ── User-uploaded files ───────────────────────────────────────────────────
+    location /files {
+        root /home/frappe/frappe-bench/sites;
+        try_files $uri =404;
+    }
+
+    # ── Internal redirect for private files (X-Accel-Redirect) ───────────────
+    location /private {
+        internal;
+        root /home/frappe/frappe-bench/sites;
+    }
+
+    # ── WebSocket / Socket.IO ─────────────────────────────────────────────────
+    location /socket.io {
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade    $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host       $host;
+        proxy_set_header Origin     $scheme://$http_host;
+        proxy_set_header X-Frappe-Site-Name ${FRAPPE_SITE_NAME_HEADER};
+        proxy_pass http://frappe_socketio;
+    }
+
+    # ── Frappe application ────────────────────────────────────────────────────
+    location / {
+        proxy_http_version 1.1;
+        proxy_set_header Host               $host;
+        proxy_set_header X-Real-IP          $remote_addr;
+        proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto  $scheme;
+        proxy_set_header X-Frappe-Site-Name ${FRAPPE_SITE_NAME_HEADER};
+        proxy_read_timeout 120;
+        proxy_pass http://frappe_backend;
+    }
+}

@@ -1,0 +1,33 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Development override – mounts the local source code instead of building it.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# The local checkout is bind-mounted into the running container so code
+# changes take effect after restarting the backend service (no rebuild needed).
+# ──────────────────────────────────────────────────────────────────────────────
+
+services:
+  backend:
+    volumes:
+      # Overrides the image's /home/frappe/frappe-bench/apps/erpnext
+      # with the local working copy.
+      - .:/home/frappe/frappe-bench/apps/erpnext:ro
+    environment:
+      # Fewer workers in dev for easier log reading
+      GUNICORN_WORKERS: "1"
+    # Auto-reload on code changes (requires geventwebsocket installed)
+    command: >
+      gunicorn
+        --bind 0.0.0.0:8000
+        --workers 1
+        --worker-class gevent
+        --timeout 120
+        --reload
+        frappe.app:application
+
+  # Expose DB port for connecting with an external client (e.g. DBeaver)
+  db:
+    ports:
+      - "3306:3306"
