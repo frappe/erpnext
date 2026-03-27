@@ -68,18 +68,33 @@ services:
     image: redis:7-alpine
     volumes:
       - redis-cache-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout:  3s
+      retries:  5
     restart: unless-stopped
 
   redis-queue:
     image: redis:7-alpine
     volumes:
       - redis-queue-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout:  3s
+      retries:  5
     restart: unless-stopped
 
   redis-socketio:
     image: redis:7-alpine
     volumes:
       - redis-socketio-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout:  3s
+      retries:  5
     restart: unless-stopped
 
   # ── Init containers (run once, then exit) ────────────────────────────────────
@@ -94,11 +109,11 @@ services:
       db:
         condition: service_healthy
       redis-cache:
-        condition: service_started
+        condition: service_healthy
       redis-queue:
-        condition: service_started
+        condition: service_healthy
       redis-socketio:
-        condition: service_started
+        condition: service_healthy
 
   create-site:
     <<: *app-common

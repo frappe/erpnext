@@ -25,7 +25,8 @@ wait_for_redis() {
     local host="${addr%%:*}"
     local port="${addr##*:}"
     echo "Waiting for Redis at ${host}:${port} ..."
-    until (echo PING | nc -w1 "${host}" "${port}") 2>/dev/null | grep -q PONG; do
+    # Use Python (always available) instead of nc to avoid extra package deps
+    until python3 -c "import socket; socket.create_connection(('${host}', ${port}), 2)" 2>/dev/null; do
         sleep 2
     done
     echo "Redis ${host} is ready."

@@ -1,0 +1,14 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# .dockerignore – ERPNext Fork
+#
+# The Dockerfile clones all app source from GitHub at build time,
+# so almost nothing from the local working tree needs to be in the build
+# context. Only the docker/ helper scripts are COPYed from the local repo.
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Exclude everything …
+**
+
+# … except the docker/ helper directory
+!docker/
+!docker/**

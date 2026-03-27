@@ -1,0 +1,17 @@
+[
+  {
+    "url": "https://github.com/frappe/frappe",
+    "branch": "version-17",
+    "description": "Frappe Framework – web framework powering ERPNext"
+  },
+  {
+    "url": "https://github.com/frappe/payments",
+    "branch": "version-17",
+    "description": "Payments app – required dependency of ERPNext"
+  },
+  {
+    "url": "https://github.com/fastlog-org/erpnext_test",
+    "branch": "develop",
+    "description": "ERPNext Fork – this repository (installed as 'erpnext')"
+  }
+]

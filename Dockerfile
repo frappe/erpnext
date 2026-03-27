@@ -58,15 +58,23 @@ RUN bench init \
 WORKDIR /home/frappe/frappe-bench
 
 # Install Payments app (dependency of ERPNext)
-RUN bench get-app payments \
+# Using git clone to guarantee directory name matches app_name ("payments")
+RUN git clone --depth 1 \
         --branch "${PAYMENTS_BRANCH}" \
-        https://github.com/frappe/payments
+        https://github.com/frappe/payments \
+        apps/payments \
+    && ./env/bin/pip install --no-cache-dir -q -e apps/payments \
+    && echo "payments" >> apps.txt
 
-# Install ERPNext from this fork
-# The app directory will be named "erpnext" (matching app_name in hooks.py)
-RUN bench get-app erpnext \
+# Install ERPNext from this fork.
+# Directory is named "erpnext" to match app_name in hooks.py,
+# regardless of the repository name (erpnext_test).
+RUN git clone --depth 1 \
         --branch "${ERPNEXT_BRANCH}" \
-        "${ERPNEXT_REPO}"
+        "${ERPNEXT_REPO}" \
+        apps/erpnext \
+    && ./env/bin/pip install --no-cache-dir -q -e apps/erpnext \
+    && echo "erpnext" >> apps.txt
 
 # Build production frontend assets
 ENV NODE_ENV=production
@@ -116,6 +124,11 @@ RUN ARCH=$(dpkg --print-architecture) \
 
 # Re-create frappe user in the runtime image
 RUN useradd -ms /bin/bash frappe
+
+# Node.js binary – required by the Socket.IO / websocket service.
+# We copy only the node binary; the frappe node_modules are included
+# inside the bench directory copied below.
+COPY --from=builder /usr/local/bin/node /usr/local/bin/node
 
 # Copy the fully-built bench from the builder stage
 COPY --from=builder --chown=frappe:frappe \
