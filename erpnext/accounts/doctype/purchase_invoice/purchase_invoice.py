@@ -57,22 +57,15 @@ class PurchaseInvoice(BuyingController):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from frappe.types import DF
-
 		from erpnext.accounts.doctype.item_wise_tax_detail.item_wise_tax_detail import ItemWiseTaxDetail
 		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
-		from erpnext.accounts.doctype.purchase_invoice_advance.purchase_invoice_advance import (
-			PurchaseInvoiceAdvance,
-		)
+		from erpnext.accounts.doctype.purchase_invoice_advance.purchase_invoice_advance import PurchaseInvoiceAdvance
 		from erpnext.accounts.doctype.purchase_invoice_item.purchase_invoice_item import PurchaseInvoiceItem
-		from erpnext.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import (
-			PurchaseTaxesandCharges,
-		)
+		from erpnext.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import PurchaseTaxesandCharges
 		from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import TaxWithholdingEntry
-		from erpnext.buying.doctype.purchase_receipt_item_supplied.purchase_receipt_item_supplied import (
-			PurchaseReceiptItemSupplied,
-		)
+		from erpnext.buying.doctype.purchase_receipt_item_supplied.purchase_receipt_item_supplied import PurchaseReceiptItemSupplied
+		from frappe.types import DF
 
 		additional_discount_percentage: DF.Float
 		address_display: DF.TextEditor | None
@@ -173,19 +166,7 @@ class PurchaseInvoice(BuyingController):
 		shipping_address: DF.Link | None
 		shipping_address_display: DF.TextEditor | None
 		shipping_rule: DF.Link | None
-		status: DF.Literal[
-			"",
-			"Draft",
-			"Return",
-			"Debit Note Issued",
-			"Submitted",
-			"Paid",
-			"Partly Paid",
-			"Unpaid",
-			"Overdue",
-			"Cancelled",
-			"Internal Transfer",
-		]
+		status: DF.Literal["", "Draft", "Return", "Debit Note Issued", "Submitted", "Paid", "Partly Paid", "Unpaid", "Overdue", "Cancelled", "Internal Transfer"]
 		subscription: DF.Link | None
 		supplied_items: DF.Table[PurchaseReceiptItemSupplied]
 		supplier: DF.Link
@@ -203,7 +184,6 @@ class PurchaseInvoice(BuyingController):
 		taxes_and_charges_deducted: DF.Currency
 		tc_name: DF.Link | None
 		terms: DF.TextEditor | None
-		title: DF.Data | None
 		to_date: DF.Date | None
 		total: DF.Currency
 		total_advance: DF.Currency

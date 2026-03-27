@@ -9,23 +9,20 @@
  "engine": "InnoDB",
  "field_order": [
   "supplier_section",
-  "title",
   "naming_series",
   "supplier",
   "supplier_name",
   "order_confirmation_no",
   "order_confirmation_date",
-  "get_items_from_open_material_requests",
-  "mps",
   "column_break_7",
   "transaction_date",
+  "transaction_time",
   "schedule_date",
   "column_break1",
   "company",
   "is_subcontracted",
   "has_unit_price_items",
   "supplier_warehouse",
-  "amended_from",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -79,16 +76,19 @@
   "taxes_and_charges_deducted",
   "total_taxes_and_charges",
   "totals_section",
-  "base_grand_total",
-  "base_rounding_adjustment",
-  "base_in_words",
-  "base_rounded_total",
-  "column_break4",
   "grand_total",
+  "in_words",
+  "column_break4",
+  "disable_rounded_total",
   "rounding_adjustment",
   "rounded_total",
-  "disable_rounded_total",
-  "in_words",
+  "base_totals_section",
+  "base_grand_total",
+  "base_in_words",
+  "column_break_jkoz",
+  "base_rounding_adjustment",
+  "base_rounded_total",
+  "section_break_tnkm",
   "advance_paid",
   "discount_section",
   "apply_discount_on",
@@ -154,11 +154,13 @@
   "auto_repeat",
   "update_auto_repeat_reference",
   "additional_info_section",
-  "is_internal_supplier",
+  "party_account_currency",
   "represents_company",
   "ref_sq",
+  "amended_from",
   "column_break_74",
-  "party_account_currency",
+  "mps",
+  "is_internal_supplier",
   "inter_company_order_reference",
   "is_old_subcontracting_flow",
   "connections_tab"
@@ -168,17 +170,6 @@
    "fieldname": "supplier_section",
    "fieldtype": "Section Break",
    "options": "fa fa-user"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "{supplier_name}",
-   "fieldname": "title",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Title",
-   "no_copy": 1,
-   "print_hide": 1,
-   "reqd": 1
   },
   {
    "fieldname": "naming_series",
@@ -205,13 +196,6 @@
    "print_hide": 1,
    "reqd": 1,
    "search_index": 1
-  },
-  {
-   "depends_on": "eval:doc.supplier && doc.docstatus===0 && (!(doc.items && doc.items.length) || (doc.items.length==1 && !doc.items[0].item_code))",
-   "description": "Fetch items based on Default Supplier.",
-   "fieldname": "get_items_from_open_material_requests",
-   "fieldtype": "Button",
-   "label": "Get Items from Open Material Requests"
   },
   {
    "bold": 1,
@@ -256,6 +240,7 @@
    "allow_on_submit": 1,
    "fieldname": "schedule_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Required By"
   },
   {
@@ -773,7 +758,7 @@
   {
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
-   "label": "Grand Total (Company Currency)",
+   "label": "Grand Total",
    "no_copy": 1,
    "oldfieldname": "grand_total",
    "oldfieldtype": "Currency",
@@ -785,7 +770,7 @@
    "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
-   "label": "Rounding Adjustment (Company Currency)",
+   "label": "Rounding Adjustment",
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -794,7 +779,7 @@
   {
    "fieldname": "base_in_words",
    "fieldtype": "Data",
-   "label": "In Words (Company Currency)",
+   "label": "In Words",
    "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
@@ -804,7 +789,7 @@
   {
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
-   "label": "Rounded Total (Company Currency)",
+   "label": "Rounded Total",
    "oldfieldname": "rounded_total",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -862,7 +847,7 @@
   {
    "fieldname": "advance_paid",
    "fieldtype": "Currency",
-   "label": "Advance Paid",
+   "label": "Advance Paid (Company Currency)",
    "no_copy": 1,
    "options": "party_account_currency",
    "print_hide": 1,
@@ -1301,8 +1286,29 @@
    "hidden": 1,
    "label": "Item Wise Tax Details",
    "no_copy": 1,
-   "options": "Item Wise Tax Detail",
-   "print_hide": 1
+   "options": "Item Wise Tax Detail"
+  },
+  {
+   "default": "Now",
+   "depends_on": "is_internal_supplier",
+   "fieldname": "transaction_time",
+   "fieldtype": "Time",
+   "label": "Time",
+   "mandatory_depends_on": "is_internal_supplier"
+  },
+  {
+   "fieldname": "base_totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals (Company Currency)",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "column_break_jkoz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_tnkm",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
@@ -1310,7 +1316,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-29 21:22:54.323838",
+ "modified": "2026-03-27 07:40:28.340501",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
