@@ -1277,6 +1277,7 @@ class WorkOrder(Document):
 					"skip_material_transfer",
 					"backflush_from_wip_warehouse",
 					"set_cost_based_on_bom_qty",
+					"quality_inspection_required",
 				],
 				order_by="idx",
 			)

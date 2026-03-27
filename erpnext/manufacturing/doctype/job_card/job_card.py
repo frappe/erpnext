@@ -789,11 +789,13 @@ class JobCard(Document):
 			["action_if_quality_inspection_is_not_submitted", "action_if_quality_inspection_is_rejected"],
 		)
 
-		item = self.finished_good or self.production_item
-		bom_inspection_required = frappe.db.get_value(
-			"BOM", self.semi_fg_bom or self.bom_no, "inspection_required"
+		item = self.finished_good
+		bom_inspection_required = frappe.db.get_value("BOM", self.bom_no, "inspection_required")
+
+		operation_inspection_required = frappe.db.get_value(
+			"Work Order Operation", self.operation_id, "quality_inspection_required"
 		)
-		if bom_inspection_required:
+		if bom_inspection_required and operation_inspection_required:
 			if not self.quality_inspection:
 				frappe.throw(
 					_(
