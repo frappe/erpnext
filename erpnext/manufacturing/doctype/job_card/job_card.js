@@ -278,6 +278,8 @@ frappe.ui.form.on("Job Card", {
 						frm.trigger("complete_job_card");
 					});
 				}
+
+				frm.trigger("make_dashboard");
 			}
 		}
 
