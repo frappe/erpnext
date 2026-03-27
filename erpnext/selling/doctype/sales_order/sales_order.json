@@ -151,7 +151,7 @@
   "loyalty_points",
   "column_break_116",
   "loyalty_amount",
-  "subscription_section",
+  "auto_repeat_section",
   "from_date",
   "to_date",
   "column_break_108",
@@ -1374,18 +1374,6 @@
   },
   {
    "allow_on_submit": 1,
-   "collapsible": 1,
-   "fieldname": "subscription_section",
-   "fieldtype": "Section Break",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Auto Repeat",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
    "fieldname": "from_date",
    "fieldtype": "Date",
    "hide_days": 1,
@@ -1741,6 +1729,18 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Ignore Default Payment Terms Template",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "collapsible": 1,
+   "fieldname": "auto_repeat_section",
+   "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Auto Repeat",
+   "no_copy": 1,
+   "print_hide": 1,
    "read_only": 1
   }
  ],

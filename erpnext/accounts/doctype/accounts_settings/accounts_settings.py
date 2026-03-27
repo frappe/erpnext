@@ -72,6 +72,7 @@ class AccountsSettings(Document):
 		enable_immutable_ledger: DF.Check
 		enable_loyalty_point_program: DF.Check
 		enable_party_matching: DF.Check
+		enable_subscription: DF.Check
 		exchange_gain_loss_posting_date: DF.Literal["Invoice", "Payment", "Reconciliation Date"]
 		fetch_valuation_rate_for_internal_transaction: DF.Check
 		general_ledger_remarks_length: DF.Int
@@ -133,6 +134,10 @@ class AccountsSettings(Document):
 
 		if old_doc.enable_loyalty_point_program != self.enable_loyalty_point_program:
 			toggle_loyalty_point_program_section(not self.enable_loyalty_point_program)
+			clear_cache = True
+
+		if old_doc.enable_subscription != self.enable_subscription:
+			toggle_subscription_sections(not self.enable_subscription)
 			clear_cache = True
 
 		if clear_cache:
@@ -213,6 +218,12 @@ def toggle_loyalty_point_program_section(hide):
 		meta = frappe.get_meta(doctype)
 		if meta.has_field("loyalty_points_redemption"):
 			create_property_setter_for_hiding_field(doctype, "loyalty_points_redemption", hide)
+
+
+def toggle_subscription_sections(hide):
+	subscription_doctypes = frappe.get_hooks("subscription_doctypes")
+	for doctype in subscription_doctypes:
+		create_property_setter_for_hiding_field(doctype, "subscription_section", hide)
 
 
 def create_property_setter_for_hiding_field(doctype, field_name, hide):

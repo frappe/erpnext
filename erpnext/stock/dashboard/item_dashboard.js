@@ -281,8 +281,13 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, stoc
 	}
 
 	dialog.set_primary_action(__("Create Stock Entry"), function () {
-		if (source && (dialog.get_value("qty") == 0 || dialog.get_value("qty") > actual_qty)) {
-			frappe.msgprint(__("Quantity must be greater than zero, and less or equal to {0}", [actual_qty]));
+		if (flt(dialog.get_value("qty")) <= 0) {
+			frappe.msgprint(__("Quantity must be greater than zero"));
+			return;
+		}
+
+		if (source && dialog.get_value("qty") > actual_qty) {
+			frappe.msgprint(__("Quantity must be less than or equal to {0}", [actual_qty]));
 			return;
 		}
 
