@@ -25,17 +25,11 @@ class PartyType(Document):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-<<<<<<< HEAD
-def get_party_type(doctype, txt, searchfield, start, page_len, filters):
-	cond = ""
-	account_type = None
-=======
 def get_party_type(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	PartyType = DocType("Party Type")
 	get_party_type_query = frappe.qb.from_(PartyType).select(PartyType.name).orderby(PartyType.name)
 
 	condition_list = []
->>>>>>> d987688058 (fix: support translated search in get_party_type and refactor raw sql to qb)
 
 	if filters and filters.get("account"):
 		account_type = frappe.db.get_value("Account", filters.get("account"), "account_type")
