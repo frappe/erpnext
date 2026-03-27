@@ -9,7 +9,6 @@
  "engine": "InnoDB",
  "field_order": [
   "supplier_section",
-  "title",
   "naming_series",
   "supplier",
   "supplier_name",
@@ -168,17 +167,6 @@
    "fieldname": "supplier_section",
    "fieldtype": "Section Break",
    "options": "fa fa-user"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "{supplier_name}",
-   "fieldname": "title",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Title",
-   "no_copy": 1,
-   "print_hide": 1,
-   "reqd": 1
   },
   {
    "fieldname": "naming_series",
@@ -1309,7 +1297,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-31 17:19:40.816883",
+ "modified": "2026-03-27 07:10:16.728507",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

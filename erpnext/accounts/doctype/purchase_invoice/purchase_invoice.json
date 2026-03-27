@@ -7,7 +7,6 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
-  "title",
   "naming_series",
   "supplier",
   "supplier_name",
@@ -203,16 +202,6 @@
  ],
  "fields": [
   {
-   "allow_on_submit": 1,
-   "default": "{supplier_name}",
-   "fieldname": "title",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Title",
-   "no_copy": 1,
-   "print_hide": 1
-  },
-  {
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
@@ -382,7 +371,7 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "posting_date",
+   "collapsible_depends_on": "bill_no",
    "fieldname": "supplier_invoice_details",
    "fieldtype": "Section Break",
    "label": "Supplier Invoice"
@@ -1660,7 +1649,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-17 20:44:00.221219",
+ "modified": "2026-03-27 07:11:14.743994",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
@@ -1722,6 +1711,6 @@
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "supplier",
- "title_field": "title",
+ "title_field": "supplier_name",
  "track_changes": 1
 }
