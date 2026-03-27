@@ -135,7 +135,7 @@ const ActionGroupHeader = ({ action }: { action: ActionLogType }) => {
         }
     }, [action])
 
-    return <div className='flex items-center gap-2 text-muted-foreground'>
+    return <div className='flex items-center gap-2 text-ink-gray-5'>
         {action.type === 'match' && <GitCompareIcon className='w-4 h-4' />}
         {action.type === 'payment' && <ReceiptIcon className='w-4 h-4' />}
         {action.type === 'transfer' && <ArrowRightLeftIcon className='w-4 h-4' />}
@@ -175,18 +175,18 @@ const Row = ({ item, index, isLast, action }: { item: ActionLogItem, index: numb
                                 alt={bank?.bank || ''}
                                 className="max-w-10 object-left h-5 object-contain"
                             /> : <LandmarkIcon className='w-4 h-4' />}
-                            <span className='text-sm text-muted-foreground'>{item.bankTransaction.bank_account}</span>
+                            <span className='text-sm text-ink-gray-5'>{item.bankTransaction.bank_account}</span>
                         </div>
                         <Separator orientation='vertical' />
-                        <div className='flex items-center gap-2 text-muted-foreground text-sm' title={_("Transaction Date")}>
+                        <div className='flex items-center gap-2 text-ink-gray-5 text-sm' title={_("Transaction Date")}>
                             <CalendarIcon className='w-4 h-4' />
                             <span className='text-sm'>{formatDate(item.bankTransaction.date, 'Do MMM YYYY')}</span>
                         </div>
                         <Separator orientation='vertical' />
                         <div>
                             <div className='flex items-center gap-1' title={isWithdrawal ? _("Spent") : _("Received")}>
-                                {isWithdrawal ? <ArrowUpRight className="w-5 h-5 text-destructive" /> : <ArrowDownRight className="w-5 h-5 text-green-600" />}
-                                <span className='text-sm text-muted-foreground'>{formatCurrency(amount, currency)}</span>
+                                {isWithdrawal ? <ArrowUpRight className="w-5 h-5 text-ink-red-3" /> : <ArrowDownRight className="w-5 h-5 text-ink-green-3" />}
+                                <span className='text-sm text-ink-gray-5'>{formatCurrency(amount, currency)}</span>
                             </div>
                         </div>
                     </div>
@@ -213,7 +213,7 @@ const Row = ({ item, index, isLast, action }: { item: ActionLogItem, index: numb
 
 const JournalEntryDetails = ({ item, bank }: { item: ActionLogItem, bank?: SelectedBank | null }) => {
 
-    return <div className='flex items-center gap-2 text-muted-foreground justify-end'>
+    return <div className='flex items-center gap-2 text-ink-gray-5 justify-end'>
         <WalletIcon className='w-4 h-4' />
         <JournalEntryAccountsTable item={item} bank={bank} />
     </div>
@@ -269,14 +269,14 @@ const PaymentEntryDetails = ({ item, className }: { item: ActionLogItem, classNa
     const currency = item.bankTransaction.withdrawal && item.bankTransaction.withdrawal > 0 ? (item.voucher.doc as PaymentEntry)?.paid_to_account_currency : (item.voucher.doc as PaymentEntry)?.paid_from_account_currency
 
     return <div className='flex items-center gap-3'>
-        <div className={cn('flex items-center gap-2 text-muted-foreground text-sm', className)}>
+        <div className={cn('flex items-center gap-2 text-ink-gray-5 text-sm', className)}>
             <UserIcon className='w-4 h-4' />
             <span className='text-sm'>{(item.voucher.doc as PaymentEntry).party_name}</span>
         </div>
         <Separator orientation='vertical' />
         <HoverCard>
             <HoverCardTrigger>
-                <div className={cn('flex items-center gap-2 text-muted-foreground text-sm', className)}>
+                <div className={cn('flex items-center gap-2 text-ink-gray-5 text-sm', className)}>
                     <ReceiptTextIcon className='w-4 h-4' />
                     <span className='text-sm cursor-pointer hover:underline underline-offset-4'>{invoices.length === 0 ? _("No invoice linked") : invoices.length === 1 ? _("1 invoice") : _("{} invoices", [invoices.length.toString()])}</span>
                 </div>
@@ -334,7 +334,7 @@ const TransferDetails = ({ item, className }: { item: ActionLogItem, className?:
 
     }, [banks, item])
 
-    return <div className={cn('flex items-center gap-2 text-muted-foreground text-sm', className)}>
+    return <div className={cn('flex items-center gap-2 text-ink-gray-5 text-sm', className)}>
         {bank?.logo ? <img
             src={`/assets/erpnext/banking/${bank.logo}`}
             alt={bank?.bank || ''}
@@ -412,7 +412,7 @@ const CancelActionLogItem = ({ item, type, timestamp, bank }: { item: ActionLogI
                         variant={'ghost'}
                         isIconButton
                         title={_("Cancel")}
-                        className='hover:text-destructive hover:bg-destructive/5 text-muted-foreground hidden group-hover:inline-flex'>
+                        className='hover:text-ink-red-3 hover:bg-destructive/5 text-ink-gray-5 hidden group-hover:inline-flex'>
                         <CircleXIcon className='w-8 h-8' />
                     </Button>
                 </AlertDialogTrigger>

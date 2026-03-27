@@ -264,7 +264,7 @@ const LinkFieldCombobox = ({
                                     <span className="font-medium">
                                         {result.label || result.value}
                                     </span>
-                                    {result.description && <span className="text-xs text-muted-foreground">
+                                    {result.description && <span className="text-xs text-ink-gray-5">
                                         {result.description}
                                     </span>}
                                 </CommandItem>

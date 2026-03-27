@@ -104,7 +104,7 @@ const Difference = () => {
 
     return <StatContainer className="w-fit text-right sm:min-w-56">
         <StatLabel className="text-right">{_("Difference")}</StatLabel>
-        {isLoading ? <Skeleton className="w-[150px] h-9" /> : <StatValue className={isError ? 'text-destructive font-mono' : 'font-mono'}>
+        {isLoading ? <Skeleton className="w-[150px] h-9" /> : <StatValue className={isError ? 'text-ink-red-3 font-mono' : 'font-mono'}>
             {formatCurrency(difference,
                 bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))
             }</StatValue>}
@@ -192,7 +192,7 @@ const ClosingBalanceAsPerStatement = () => {
 
                 </DialogContent>
             </Dialog>
-            {!isDateSame && data?.message.date && <span className="text-xs font-medium text-destructive">{_("As of {0}", [formatDate(data?.message?.date ?? '', 'Do MMM YYYY')])}</span>}
+            {!isDateSame && data?.message.date && <span className="text-xs font-medium text-ink-red-3">{_("As of {0}", [formatDate(data?.message?.date ?? '', 'Do MMM YYYY')])}</span>}
         </div>
     </StatContainer>
 
@@ -316,7 +316,7 @@ const ClosingBalancesList = ({ bankAccount, date }: { bankAccount: SelectedBank 
                         <TableCell className="text-right">
                             <Button
                                 title={_("Delete")}
-                                type='button' isIconButton className="h-fit w-fit p-0 hover:bg-transparent active:bg-transparent hover:text-destructive" variant='ghost' onClick={() => onDelete(item.name)}>
+                                type='button' isIconButton className="h-fit w-fit p-0 hover:bg-transparent active:bg-transparent hover:text-ink-red-3" variant='ghost' onClick={() => onDelete(item.name)}>
                                 <Trash2 />
                             </Button>
                         </TableCell>

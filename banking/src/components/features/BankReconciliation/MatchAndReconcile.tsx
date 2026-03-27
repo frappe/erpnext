@@ -144,7 +144,7 @@ const UnreconciledTransactions = ({ contentHeight }: { contentHeight: number }) 
                 "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
                 "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
             )}>
-                <Search className="w-5 h-5 text-muted-foreground" />
+                <Search className="w-5 h-5 text-ink-gray-5" />
                 <Input
                     placeholder={_("Search")}
                     type='search'
@@ -153,7 +153,7 @@ const UnreconciledTransactions = ({ contentHeight }: { contentHeight: number }) 
                     ref={inputRef}
                     className="border-none px-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0" />
                 <div>
-                    <span className="text-sm text-muted-foreground text-nowrap whitespace-nowrap">{results?.length} {_(results?.length === 1 ? "result" : "results")}</span>
+                    <span className="text-sm text-ink-gray-5 text-nowrap whitespace-nowrap">{results?.length} {_(results?.length === 1 ? "result" : "results")}</span>
                 </div>
             </div>
             <div>
@@ -186,16 +186,16 @@ const UnreconciledTransactions = ({ contentHeight }: { contentHeight: number }) 
             <div>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="min-w-32 h-9 text-left">
-                            {typeFilter === 'All' ? <DollarSign className="w-4 h-4 text-muted-foreground" /> : typeFilter === 'Debits' ? <ArrowUpRight className="w-4 h-4 text-destructive" /> : <ArrowDownRight className="w-4 h-4 text-green-600" />}
+                        <Button variant="outline" size='md' className="min-w-32 text-left">
+                            {typeFilter === 'All' ? <DollarSign className="text-ink-gray-5" /> : typeFilter === 'Debits' ? <ArrowUpRight className="text-ink-red-3" /> : <ArrowDownRight className="text-ink-green-3" />}
                             {_(typeFilter)}
-                            <ChevronDown className="w-4 h-4" />
+                            <ChevronDown className="text-ink-gray-5" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <DropdownMenuItem onClick={() => onTypeFilterChange('All')}><DollarSign /> {_("All")}</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onTypeFilterChange('Debits')}><ArrowUpRight className="text-destructive" /> {_("Debits")}</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onTypeFilterChange('Credits')}><ArrowDownRight className="text-green-600" /> {_("Credits")}</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onTypeFilterChange('Debits')}><ArrowUpRight className="text-ink-red-3" /> {_("Debits")}</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onTypeFilterChange('Credits')}><ArrowDownRight className="text-ink-green-3" /> {_("Credits")}</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
@@ -279,8 +279,8 @@ const UnreconciledTransactionItem = ({ transaction }: { transaction: Unreconcile
     }
 
     return <div className="py-0.5">
-        <div className={cn("border rounded-md m-1 p-2 cursor-pointer transition-[color,box-shadow, bg]",
-            isSelected ? "border-primary bg-primary-foreground outline-ring outline-1" : "border-border outline-none bg-card hover:bg-accent/40"
+        <div className={cn("border rounded-md m-1 p-2 cursor-pointer transition-[color,box-shadow, bg] hover:bg-surface-gray-1",
+            isSelected ? "border-outline-gray-5 bg-surface-gray-1 outline-outline-gray-5 outline-1" : "border-outline-gray-2 outline-none"
         )}
             role='button'
             tabIndex={0}
@@ -290,25 +290,24 @@ const UnreconciledTransactionItem = ({ transaction }: { transaction: Unreconcile
                     <div className="flex items-center gap-1">
                         <span className="font-semibold text-sm">{formatDate(transaction.date)}</span>
                         {transaction.transaction_type &&
-                            <Badge variant='secondary' className="text-xs py-0.5 px-1 rounded-sm bg-secondary">{transaction.transaction_type}</Badge>}
+                            <Badge theme="blue">{transaction.transaction_type}</Badge>}
                         {transaction.reference_number && <Badge
                             title={transaction.reference_number}
-                            className="inline-block max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap bg-primary-foreground rounded-sm text-primary"
+                            className="max-w-[300px] text-ellipsis"
                         >
                             {_("Ref")}: {transaction.reference_number}</Badge>}
 
                         {transaction.matched_rule && <Badge
-                            variant='secondary'
-                            title={_("Matched by rule")}
-                            className="text-xs py-0.5 px-1 rounded-sm bg-primary-foreground text-primary">
+                            theme="violet"
+                            title={_("Matched by rule")}>
                             <ZapIcon className="w-4 h-4" /> {transaction.matched_rule}</Badge>}
                     </div>
                     <span className="text-sm">{transaction.description}</span>
                 </div>
                 <div className="gap-1 flex flex-col items-end min-w-36 h-full text-right">
-                    {isWithdrawal ? <ArrowUpRight className="w-6 h-6 text-destructive" /> : <ArrowDownRight className="w-6 h-6 text-green-600" />}
+                    {isWithdrawal ? <ArrowUpRight className="w-6 h-6 text-ink-red-3" /> : <ArrowDownRight className="w-6 h-6 text-ink-green-3" />}
                     {amount && amount > 0 && <span className="font-semibold font-mono text-base">{formatCurrency(amount, currency)}</span>}
-                    {amount !== transaction.unallocated_amount && <span className="text-xs text-gray-700">{formatCurrency(transaction.unallocated_amount, currency)}<br />{_("Unallocated")}</span>}
+                    {amount !== transaction.unallocated_amount && <span className="text-xs text-ink-gray-5">{formatCurrency(transaction.unallocated_amount, currency)}<br />{_("Unallocated")}</span>}
                 </div>
             </div>
         </div>
@@ -482,7 +481,7 @@ const OptionsForSingleTransaction = ({ transaction, contentHeight }: { transacti
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button
-                                variant='subtle'
+                                variant='outline'
                                 size='md'
                                 aria-label={_("Record a payment entry against a customer or supplier")}
                                 onClick={() => setRecordPaymentModalOpen(true)}>
@@ -556,13 +555,13 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
     const getActionIcon = () => {
         switch (rule.classify_as) {
             case "Bank Entry":
-                return <Landmark className="w-6 h-6" />
+                return <Landmark />
             case "Payment Entry":
                 return <Receipt className="w-6 h-6" />
             case "Transfer":
-                return <ArrowRightLeft className="w-6 h-6" />
+                return <ArrowRightLeft />
             default:
-                return <ZapIcon className="w-6 h-6" />
+                return <ZapIcon />
         }
     }
 
@@ -570,31 +569,31 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
         switch (rule.classify_as) {
             case "Bank Entry":
                 return {
-                    border: "border-blue-200",
-                    bg: "bg-blue-50/30",
-                    text: "text-blue-700",
-                    button: "bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+                    border: "border-outline-blue-3",
+                    bg: "bg-surface-blue-1/50",
+                    text: "text-ink-blue-4",
+                    theme: "blue",
                 }
             case "Payment Entry":
                 return {
-                    border: "border-green-200",
-                    bg: "bg-green-50/30",
-                    text: "text-green-700",
-                    button: "bg-green-600 hover:bg-green-700 text-white border-green-600"
+                    border: "border-outline-green-3",
+                    bg: "bg-surface-green-1/50",
+                    text: "text-ink-green-4",
+                    theme: "green",
                 }
             case "Transfer":
                 return {
-                    border: "border-purple-200",
-                    bg: "bg-purple-50/30",
-                    text: "text-purple-700",
-                    button: "bg-purple-600 hover:bg-purple-700 text-white border-purple-600"
+                    border: "border-outline-violet-3",
+                    bg: "bg-surface-violet-1/50",
+                    text: "text-ink-violet-4",
+                    theme: "violet",
                 }
             default:
                 return {
-                    border: "border-amber-200",
-                    bg: "bg-amber-50/30",
-                    text: "text-amber-700",
-                    button: "bg-amber-600 hover:bg-amber-700 text-white border-amber-600"
+                    border: "border-outline-amber-3",
+                    bg: "bg-surface-amber-1/50",
+                    text: "text-ink-amber-4",
+                    theme: "orange",
                 }
         }
     }
@@ -631,47 +630,49 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
     return (
         <Card className={`border ${styles.border} ${styles.bg} shadow-sm hover:shadow-md transition-all duration-200`}>
             <CardHeader className="pb-0">
-                <CardTitle className="flex items-center gap-3">
-                    <div className={`p-2.5 rounded-lg ${styles.bg} ${styles.text}`}>
-                        {getActionIcon()}
+                <CardTitle className="flex justify-between items-center gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className={`p-2.5 rounded-lg ${styles.bg} ${styles.text}`}>
+                            {getActionIcon()}
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                            <span className="font-semibold text-lg">{rule.rule_name}</span>
+                            <span className="text-sm text-ink-gray-5 font-normal">
+                                {rule.rule_description || _("Rule matched based on transaction description and other criteria.")}
+                            </span>
+                        </div>
                     </div>
-                    <div className="flex flex-col gap-0.5">
-                        <span className="font-semibold text-lg">{rule.rule_name}</span>
-                        <span className="text-sm text-muted-foreground font-normal">
-                            {rule.rule_description || _("Rule matched based on transaction description and other criteria.")}
-                        </span>
+                    <div className="flex items-center gap-0.5">
+                        <Badge size='lg'
+                            theme={rule.classify_as === "Bank Entry" ? "blue" : rule.classify_as === "Payment Entry" ? "green" : rule.classify_as === "Transfer" ? "violet" : "orange"}>
+                            {rule.classify_as}
+                        </Badge>
                     </div>
                 </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 space-y-3">
-                <div className="flex items-center justify-between p-2.5 bg-background/60 rounded-lg border border-border/50">
+                <div className="flex items-center justify-between p-2.5 bg-surface-white rounded-lg border border-border/50">
                     <div className="flex items-center gap-2">
-                        <BadgeCheck className="w-4 h-4 text-green-600" />
-                        <span className="text-sm font-medium text-foreground">{_("Recommended Action")}</span>
+                        <BadgeCheck className="w-4 h-4 text-ink-green-3" />
+                        <span className="text-sm font-medium text-ink-gray-9">{_("Recommended Action")}</span>
                     </div>
-                    <Badge variant="outline" className="text-xs font-medium">
+                    <Badge variant="ghost" theme={styles.theme as "blue" | "green" | "violet" | "orange"}>
                         {_("Priority")} {rule.priority}
                     </Badge>
                 </div>
 
                 <div className="space-y-2">
-                    <div className="flex items-center gap-0.5">
-                        <span className="text-sm font-medium text-foreground">{_("Action Type")}:</span>
-                        <Badge variant='secondary' className={`text-sm font-medium ${styles.text} bg-opacity-10`}>
-                            {rule.classify_as}
-                        </Badge>
-                    </div>
 
                     {rule.account && (
                         <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-foreground">{_("Account")}:</span>
+                            <span className="text-sm font-medium text-ink-gray-9">{_("Account")}:</span>
                             <span className="text-sm">{rule.account}</span>
                         </div>
                     )}
 
                     {rule.party_type && rule.party && (
                         <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-foreground">{_("Party")}:</span>
+                            <span className="text-sm font-medium text-ink-gray-9">{_("Party")}:</span>
                             <span className="text-sm">{rule.party} ({_(rule.party_type)})</span>
                         </div>
                     )}
@@ -680,15 +681,14 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
                 <div className="pt-1">
                     <Button
                         onClick={handleActionClick}
-                        className={`w-full ${styles.button} hover:scale-[1.01] transition-all duration-200 font-medium`}
-                        size="lg"
+                        className={`w-full`}
+                        theme={styles.theme as "blue" | "green" | "violet"}
+                        size="md"
                     >
-                        <div className="flex items-center gap-2">
-                            {getActionIcon()}
-                            <span>{_("Create")} {rule.classify_as}</span>
-                        </div>
+                        {getActionIcon()}
+                        <span>{_("Create")} {rule.classify_as}</span>
                     </Button>
-                    <p className="text-sm text-muted-foreground mt-2 text-center leading-relaxed">
+                    <p className="text-sm text-ink-gray-5 mt-2 text-center leading-relaxed">
                         {getActionDescription()}
                     </p>
                 </div>
@@ -707,7 +707,7 @@ const VouchersForTransaction = ({ transaction, contentHeight }: { transaction: U
 
     if (isLoading) {
         return <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-sm text-ink-gray-5">
                 <Separator className="flex-1" />
                 <span>or</span>
                 <Separator className="flex-1" />
@@ -722,7 +722,7 @@ const VouchersForTransaction = ({ transaction, contentHeight }: { transaction: U
     }
 
     return <div className="relative space-y-2">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm text-ink-gray-5">
             <Separator className="flex-1" />
             <span>or</span>
             <Separator className="flex-1" />
@@ -787,14 +787,14 @@ const VoucherItem = ({ voucher, index }: { voucher: LinkedPayment, index: number
     return <div className="py-1 px-1">
         <div
             className={cn("border outline overflow-hidden relative rounded-md p-2",
-                isSuggested ? "border-amber-500 bg-amber-50/50 outline-amber-500" : "border-border bg-card outline-transparent"
+                isSuggested ? "border-outline-amber-4 bg-surface-amber-1/50 outline-outline-amber-4" : "border-outline-gray-2 outline-transparent"
             )}
         >
 
             <div className="flex justify-between items-end gap-2">
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                        <Badge variant='secondary' className={cn("text-sm rounded-sm", isSuggested ? "bg-amber-100 text-amber-700" : "bg-secondary")}>{_(voucher.doctype)}</Badge>
+                        <Badge size='lg' theme={isSuggested ? "orange" : "gray"}>{_(voucher.doctype)}</Badge>
                         <a target="_blank"
                             href={`/app/${slug(voucher.doctype)}/${voucher.name}`}
                             className="underline underline-offset-2 font-medium"
@@ -841,7 +841,7 @@ const VoucherItem = ({ voucher, index }: { voucher: LinkedPayment, index: number
                                 &nbsp;&nbsp;
                                 <Tooltip>
                                     <TooltipTrigger>
-                                        <Badge className={cn("text-xs rounded-sm", referenceMatchesFull ? "bg-green-600 text-white" : referenceMatchesPartial ? "bg-amber-400 text-white" : "bg-red-500 text-white")}>
+                                        <Badge theme={referenceMatchesFull ? "green" : referenceMatchesPartial ? "orange" : "red"} variant={referenceMatchesFull || referenceMatchesPartial ? "solid" : "outline"}>
                                             {referenceMatchesFull ? `${_("Complete Match")}` : referenceMatchesPartial ? `${_("Partial Match")}` : `${_("No Match")}`}</Badge>
                                     </TooltipTrigger>
                                     <TooltipContent side="top">
@@ -861,7 +861,7 @@ const VoucherItem = ({ voucher, index }: { voucher: LinkedPayment, index: number
 
             <div className="absolute top-0 right-0 flex items-center gap-1 justify-center">
                 {isSuggested && <span
-                    className="bg-amber-500 uppercase font-medium text-white px-3 py-1 rounded-bl-md text-xs rounded-tr-sm">{_("Suggested")}</span>}
+                    className="bg-outline-amber-4 uppercase font-medium text-white px-3 py-1 rounded-bl-md text-xs rounded-tr-sm">{_("Suggested")}</span>}
             </div>
 
         </div>
@@ -872,9 +872,9 @@ const VoucherItem = ({ voucher, index }: { voucher: LinkedPayment, index: number
 const MatchBadge = ({ matchType, label }: { matchType: 'full' | 'partial' | 'none', label: string }) => {
     return <Tooltip>
         <TooltipTrigger>
-            {matchType === 'full' ? <BadgeCheck className="text-white fill-green-600" /> : matchType === 'partial' ?
-                <Badge className="text-white bg-amber-400 rounded-sm">{_("Partial Match")}</Badge> :
-                <XCircle className="text-white fill-red-500" />}
+            {matchType === 'full' ? <BadgeCheck className="text-white fill-surface-green-5" /> : matchType === 'partial' ?
+                <Badge theme="orange" variant="subtle">{_("Partial Match")}</Badge> :
+                <XCircle className="text-ink-red-4 size-4" />}
         </TooltipTrigger>
         <TooltipContent>
             {label}
@@ -902,19 +902,19 @@ const OlderUnreconciledTransactionsBanner = () => {
 
     if (data && data.message.count > 0) {
 
-        return <div className="flex flex-col gap-2">
-            <div className="border border-amber-500 rounded-md p-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
+        return <div className="flex flex-col gap-2 px-1">
+            <div className="border border-outline-amber-3 bg-surface-amber-1/50 rounded-md p-4 flex items-center justify-between">
+                <div className="flex items-center gap-1">
                     <div className="min-w-8">
-                        <AlertCircle className="w-6 h-6 text-amber-600" />
+                        <AlertCircle className="w-6 h-6 text-ink-amber-3" />
                     </div>
                     <div className="flex flex-col gap-0.5">
                         {data.message.count > 1 ? (
-                            <span className="text-sm font-medium text-amber-600">{_("There are {0} unreconciled transactions before {1}.", [data.message.count.toString(), formatDate(dates.fromDate)])}</span>
+                            <span className="text-sm">{_("There are {0} unreconciled transactions before {1}.", [data.message.count.toString(), formatDate(dates.fromDate)])}</span>
                         ) : (
-                            <span className="text-sm font-medium text-amber-600">{_("There is one unreconciled transaction before {0}.", [formatDate(dates.fromDate)])}</span>
+                            <span className="text-sm">{_("There is one unreconciled transaction before {0}.", [formatDate(dates.fromDate)])}</span>
                         )}
-                        <span className="text-sm text-amber-600">{_("The opening balance might not match your bank statement. Would you like to reconcile them?")}</span>
+                        <span className="text-sm">{_("The opening balance might not match your bank statement. Would you like to reconcile them?")}</span>
                     </div>
 
                 </div>
@@ -922,7 +922,6 @@ const OlderUnreconciledTransactionsBanner = () => {
                     <Button
                         size='sm'
                         type='button'
-                        className="shadow-none"
                         onClick={() => setDates({ fromDate: data.message.oldest_date, toDate: dates.toDate })}
                         variant='outline'>
                         <span>{data.message.count > 1 ? _("View older transactions") : _("View older transaction")}</span>

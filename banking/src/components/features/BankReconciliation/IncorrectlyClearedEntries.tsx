@@ -136,7 +136,7 @@ const IncorrectlyClearedEntriesView = () => {
                                 <Button
                                     variant='link'
                                     size="sm"
-                                    className="text-destructive px-0"
+                                    className="text-ink-red-3 px-0"
                                     onClick={() => onClearClick(row.payment_document, row.payment_entry)}>{_("Reset Clearing Date")}</Button>
                             </TableCell>
                         </TableRow>

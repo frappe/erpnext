@@ -156,8 +156,8 @@ const BankRecDateFilter = () => {
                                 <span>
                                     {period.translatedLabel ?? _(period.label)}
                                 </span>
-                                <span className='text-xs text-muted-foreground flex items-center gap-1 text-right whitespace-nowrap font-mono'>
-                                    {formatDate(period.fromDate, period.format)} <ChevronRight className='text-[12px] text-muted-foreground/70' /> {formatDate(period.toDate, period.format)}
+                                <span className='text-xs text-ink-gray-5 flex items-center gap-1 text-right whitespace-nowrap font-mono'>
+                                    {formatDate(period.fromDate, period.format)} <ChevronRight className='text-[12px] text-ink-gray-5/70' /> {formatDate(period.toDate, period.format)}
                                 </span>
                             </CommandItem>
                         ))}
@@ -251,17 +251,17 @@ const EmptyState = ({ onSelect, value }: { onSelect: (fromDate: string, toDate: 
     return <div>
         {dates ?
             <div className='flex gap-2 items-center justify-between cursor-pointer' onClick={() => onClick(dates.fromDate, dates.toDate)}>
-                <span className='text-sm text-muted-foreground max-w-[30%]'>
+                <span className='text-sm text-ink-gray-5 max-w-[30%]'>
                     {value}
                 </span>
-                {isEqual ? <span className='text-xs text-muted-foreground font-mono text-balance flex items-center gap-1'>
+                {isEqual ? <span className='text-xs text-ink-gray-5 font-mono text-balance flex items-center gap-1'>
                     {formatDate(dates.fromDate, 'Do MMM YYYY')}
                 </span> :
-                    <span className='text-xs text-muted-foreground font-mono flex items-center gap-1'>
-                        {formatDate(dates.fromDate, 'Do MMM YY')} <ChevronRight size='16' className='text-muted-foreground/70' /> {formatDate(dates.toDate, 'Do MMM YY')}
+                    <span className='text-xs text-ink-gray-5 font-mono flex items-center gap-1'>
+                        {formatDate(dates.fromDate, 'Do MMM YY')} <ChevronRight size='16' className='text-ink-gray-5/70' /> {formatDate(dates.toDate, 'Do MMM YY')}
                     </span>}
             </div> :
-            <span className='text-sm text-muted-foreground'>
+            <span className='text-sm text-ink-gray-5'>
                 No results found
             </span>
         }

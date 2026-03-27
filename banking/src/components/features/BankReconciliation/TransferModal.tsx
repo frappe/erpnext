@@ -400,8 +400,8 @@ const BankOrCashPicker = ({ bankAccount, onAccountChange, selectedAccount, compa
                     </div>
                 }
                 <div className='flex flex-col gap-1'>
-                    <span className='font-semibold text-sm'>{bank.account_name} {bank.bank_account_no && <span className='text-xs text-muted-foreground'>({bank.bank_account_no})</span>}</span>
-                    <span className='text-xs text-muted-foreground'>{bank.account}</span>
+                    <span className='font-semibold text-sm'>{bank.account_name} {bank.bank_account_no && <span className='text-xs text-ink-gray-5'>({bank.bank_account_no})</span>}</span>
+                    <span className='text-xs text-ink-gray-5'>{bank.account}</span>
                 </div>
             </div>
         ))}
@@ -435,7 +435,7 @@ const CashPicker = ({ company, selectedAccount, setSelectedAccount }: { company:
             </div>
             <div className='flex flex-col gap-1'>
                 <span className='font-semibold text-sm'>Cash</span>
-                <span className='text-xs text-muted-foreground'>{data?.message?.default_cash_account}</span>
+                <span className='text-xs text-ink-gray-5'>{data?.message?.default_cash_account}</span>
             </div>
         </div>
     }
@@ -521,14 +521,14 @@ const RecommendedTransferAccount = ({ transaction, onAccountChange }: { transact
                                 className="h-8 max-w-24 object-contain"
                             />
                         ) : (
-                            <Landmark className={cn("w-8 h-8", isSuggested ? "text-green-600" : "text-purple-600")} />
+                            <Landmark className={cn("w-8 h-8", isSuggested ? "text-ink-green-3" : "text-purple-600")} />
                         )}
                     </div>
                     <div className='flex gap-1'>
                         <div className={cn('flex items-center gap-1 text-right px-0 justify-end py-1 rounded-sm',
-                            isWithdrawal ? 'text-destructive' : 'text-green-600'
+                            isWithdrawal ? 'text-ink-red-3' : 'text-ink-green-3'
                         )}>
-                            {isWithdrawal ? <ArrowUpRight className="w-5 h-5 text-destructive" /> : <ArrowDownRight className="w-5 h-5 text-green-600" />}
+                            {isWithdrawal ? <ArrowUpRight className="w-5 h-5 text-ink-red-3" /> : <ArrowDownRight className="w-5 h-5 text-ink-green-3" />}
                             <span className='text-sm font-semibold uppercase'>{isWithdrawal ? _('Transferred Out') : _('Received')}</span>
                         </div>
                     </div>

@@ -101,7 +101,7 @@ const TransactionTypeSelector = () => {
             render={({ field }) => (
                 <FormItem className="space-y-1">
                     <FormLabel className="text-sm font-medium">
-                        {_("Transaction Type")}<span className="text-destructive">*</span>
+                        {_("Transaction Type")}<span className="text-ink-red-3">*</span>
                     </FormLabel>
                     <FormControl>
                         <RadioGroup
@@ -139,7 +139,7 @@ const TransactionTypeSelector = () => {
                                         "peer-data-[state=checked]:bg-destructive peer-data-[state=checked]:text-white peer-data-[state=checked]:border-destructive peer-data-[state=checked]:hover:bg-destructive peer-data-[state=checked]:hover:text-white"
                                     )}
                                 >
-                                    <ArrowUpRight className="w-5 h-5 peer-data-[state=checked]:text-destructive-foreground" />
+                                    <ArrowUpRight className="w-5 h-5 peer-data-[state=checked]:text-ink-red-3-foreground" />
                                     {_("Withdrawal")}
                                 </FormLabel>
                             </FormItem>
@@ -184,7 +184,7 @@ const DescriptionRules = () => {
 
     return (
         <div className="flex flex-col gap-2 pt-1">
-            <span className="text-sm font-medium">{_("Rules to match against the transaction description")} <span className="text-destructive">*</span></span>
+            <span className="text-sm font-medium">{_("Rules to match against the transaction description")} <span className="text-ink-red-3">*</span></span>
             {fields.map((field, index) => (
                 <div key={field.id} className="flex w-full items-center gap-2">
                     <div className="min-w-36">
@@ -213,7 +213,7 @@ const DescriptionRules = () => {
                     </div>
                     <div>
                         <Button variant="ghost" type='button' isIconButton onClick={() => remove(index)} disabled={fields.length === 1}>
-                            <Trash2 className="w-4 h-4 text-destructive" />
+                            <Trash2 className="w-4 h-4 text-ink-red-3" />
                         </Button>
                     </div>
                 </div>
@@ -388,7 +388,7 @@ const MultipleAccountsSelection = () => {
 
     return <div className="flex flex-col gap-2">
         <div className="flex justify-between gap-2">
-            <Label>{_("Journal Template Accounts")}<span className="text-destructive">*</span></Label>
+            <Label>{_("Journal Template Accounts")}<span className="text-ink-red-3">*</span></Label>
             <Button variant="outline" type="button" onClick={() => setIsConfigureAccountsModalOpen(true)}><Settings /> {_("Configure Accounts")}</Button>
         </div>
 
@@ -418,7 +418,7 @@ const MultipleAccountsSelection = () => {
                         {index === accounts.length - 1 ? <TableCell className="text-right bg-muted" colSpan={2}>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <span className="text-muted-foreground">{_("This is auto computed to balance the journal entry.")}</span>
+                                    <span className="text-ink-gray-5">{_("This is auto computed to balance the journal entry.")}</span>
                                 </TooltipTrigger>
                                 <TooltipContent>
                                     {_("Based on the above entries, the balance amount (debit or credit) will be set for the last row to balance the journal entry.")}
@@ -456,7 +456,7 @@ const AmountFormulaRenderer = ({ value }: { value?: string }) => {
 
         return <Tooltip>
             <TooltipTrigger asChild>
-                <span className={cn("font-mono text-right tabular-nums underline underline-offset-4", isComputationValid ? "" : "text-destructive")}>{value}</span>
+                <span className={cn("font-mono text-right tabular-nums underline underline-offset-4", isComputationValid ? "" : "text-ink-red-3")}>{value}</span>
             </TooltipTrigger>
             <TooltipContent className={isComputationValid ? "" : "bg-destructive"} arrowClassName={isComputationValid ? "" : "bg-destructive fill-destructive"}>
                 <p className="text-sm">
@@ -604,7 +604,7 @@ const ConfigureAccountsModalContent = () => {
                             checked={selectedRows.length > 0 && selectedRows.length === fields.length}
                             onCheckedChange={onSelectAll} /></TableHead>
                         <TableHead>{_("Party")}</TableHead>
-                        <TableHead>{_("Account")} <span className="text-destructive">*</span></TableHead>
+                        <TableHead>{_("Account")} <span className="text-ink-red-3">*</span></TableHead>
                         {/* <TableHead>{_("Cost Center")}</TableHead> */}
                         <TableHead>{_("Remarks")}</TableHead>
                         <TableHead className="text-right">{_("Debit")}</TableHead>
@@ -618,7 +618,7 @@ const ConfigureAccountsModalContent = () => {
                         </TableCell>
                         <TableCell className="align-top">
                         </TableCell>
-                        <TableCell className="align-top text-muted-foreground">
+                        <TableCell className="align-top text-ink-gray-5">
                             <span className="px-2">
                                 Bank GL Account
                             </span>
@@ -627,12 +627,12 @@ const ConfigureAccountsModalContent = () => {
                         </TableCell>
 
                         <TableCell className={"align-top text-right"}>
-                            <span className="text-muted-foreground text-sm">
+                            <span className="text-ink-gray-5 text-sm">
                                 {transaction_type === "Withdrawal" || transaction_type === "Any" ? _("Will be auto-populated") : ""}
                             </span>
                         </TableCell>
                         <TableCell className={"text-right align-top"}>
-                            <span className="text-muted-foreground text-sm">
+                            <span className="text-ink-gray-5 text-sm">
                                 {transaction_type === "Deposit" || transaction_type === "Any" ? _("Will be auto-populated") : ""}
                             </span>
                         </TableCell>

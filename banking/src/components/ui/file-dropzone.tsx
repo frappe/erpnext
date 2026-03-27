@@ -33,18 +33,18 @@ export const FileDropzone = ({ files, setFiles, accept, multiple = true, onDrop,
     return (
         <div {...getRootProps()} className={cn('border border-border border-dashed p-4 rounded-sm bg-muted/20', className)}>
             <input {...getInputProps()} />
-            {files.length === 0 ? <p className='text-sm text-muted-foreground text-center h-8 flex items-center justify-center'>{multiple ? _("Drop some files here, or click to select files") : _("Drop a file here, or click to select a file")}</p> : null}
+            {files.length === 0 ? <p className='text-sm text-ink-gray-5 text-center h-8 flex items-center justify-center'>{multiple ? _("Drop some files here, or click to select files") : _("Drop a file here, or click to select a file")}</p> : null}
             <div className='flex flex-col gap-4'>
                 {files.map(f => <div key={f.name} className='flex justify-between items-center'>
                     <div className='flex items-center gap-2'>
                         <FileTypeIcon fileType={getFileExtension(f.name)} size='sm' />
                         <div className='flex flex-col gap-0.5'>
                             <span className='text-gray-800 text-sm'>{f.name}</span>
-                            <span className='text-muted-foreground text-xs'>{formatBytes(f.size)}</span>
+                            <span className='text-ink-gray-5 text-xs'>{formatBytes(f.size)}</span>
                         </div>
                     </div>
                     <Button type='button' variant='ghost' isIconButton
-                        className='text-muted-foreground hover:text-gray-900 hover:bg-transparent'
+                        className='text-ink-gray-5 hover:text-gray-900 hover:bg-transparent'
                         onClick={(e) => {
                             e.stopPropagation()
                             setFiles?.(files.filter(file => file.name !== f.name))

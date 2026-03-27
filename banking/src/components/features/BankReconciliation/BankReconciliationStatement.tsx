@@ -222,8 +222,8 @@ const SummarySection = ({ data }: { data: { message: QueryReportReturnType } }) 
         </StatContainer>
 
         {(incorrectlyClearedEntriesDebit > 0 || incorrectlyClearedEntriesCredit > 0) && <StatContainer>
-            <StatLabel className="text-destructive">{_("Checks and Deposits incorrectly cleared")}</StatLabel>
-            <StatValue className="text-destructive font-mono">{formatCurrency(incorrectlyClearedEntriesDebit - incorrectlyClearedEntriesCredit)}</StatValue>
+            <StatLabel className="text-ink-red-3">{_("Checks and Deposits incorrectly cleared")}</StatLabel>
+            <StatValue className="text-ink-red-3 font-mono">{formatCurrency(incorrectlyClearedEntriesDebit - incorrectlyClearedEntriesCredit)}</StatValue>
             {/* <div className="" divider={<StackDivider height='20px' />}>
                 {incorrectlyClearedEntriesDebit !== 0 && <StatHelpText>Debit: {formatCurrency(incorrectlyClearedEntriesDebit)}</StatHelpText>}
                 {incorrectlyClearedEntriesCredit !== 0 && <StatHelpText>Credit: {formatCurrency(incorrectlyClearedEntriesCredit)}</StatHelpText>}

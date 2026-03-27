@@ -791,7 +791,7 @@ const DifferenceButton = ({ index, currency }: { index: number, currency: string
                     variant='ghost'
                     onClick={onPayInFull}
                     isIconButton
-                    className="text-muted-foreground">
+                    className="text-ink-gray-5">
                     <AlertCircleIcon />
                 </Button>
             </TooltipTrigger>
@@ -866,8 +866,8 @@ const Summary = ({ currency }: { currency: string }) => {
             <TextComponent>{_("Unallocated")}</TextComponent>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <Button type='button' variant='link' className="p-0 text-destructive underline h-fit" role='button' onClick={() => onAddRow(unallocatedAmount ?? 0)}>
-                        <TextComponent className='text-destructive'>{formatCurrency(unallocatedAmount, currency)}</TextComponent>
+                    <Button type='button' variant='link' className="p-0 text-ink-red-3 underline h-fit" role='button' onClick={() => onAddRow(unallocatedAmount ?? 0)}>
+                        <TextComponent className='text-ink-red-3'>{formatCurrency(unallocatedAmount, currency)}</TextComponent>
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -882,8 +882,8 @@ const Summary = ({ currency }: { currency: string }) => {
             <TextComponent>{_("Difference")}</TextComponent>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <Button type='button' variant='link' className="p-0 text-destructive underline h-fit" role='button' onClick={() => onAddRow(differenceAmount ?? 0)}>
-                        <TextComponent className='text-destructive'>{formatCurrency(differenceAmount, currency)}</TextComponent>
+                    <Button type='button' variant='link' className="p-0 text-ink-red-3 underline h-fit" role='button' onClick={() => onAddRow(differenceAmount ?? 0)}>
+                        <TextComponent className='text-ink-red-3'>{formatCurrency(differenceAmount, currency)}</TextComponent>
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -1107,8 +1107,8 @@ const FetchInvoicesModal = ({ onClose }: { onClose: () => void }) => {
         </Table> : null}
         <div className="flex justify-between items-center">
             <div className="flex gap-2">
-                <span className="text-muted-foreground">Invoices: <span className="text-foreground font-mono font-medium">{selectedInvoices.length}</span></span> /
-                <span className="text-muted-foreground">Total: <span className="text-foreground font-mono font-medium">{formatCurrency(selectedInvoices.reduce((acc, invoice) => acc + invoice.outstanding_amount, 0))}</span></span>
+                <span className="text-ink-gray-5">Invoices: <span className="text-foreground font-mono font-medium">{selectedInvoices.length}</span></span> /
+                <span className="text-ink-gray-5">Total: <span className="text-foreground font-mono font-medium">{formatCurrency(selectedInvoices.reduce((acc, invoice) => acc + invoice.outstanding_amount, 0))}</span></span>
             </div>
             <DialogFooter className="pt-2">
                 <DialogClose asChild>
@@ -1186,10 +1186,10 @@ const OtherChargesSection = ({ currency }: { currency: string }) => {
                         aria-label={_("Select all")}
                         checked={selectedRows.length > 0 && selectedRows.length === fields.length}
                         onCheckedChange={onSelectAll} /></TableHead>
-                    <TableHead>{_("Account")} <span className="text-destructive">*</span></TableHead>
-                    <TableHead>{_("Cost Center")} <span className="text-destructive">*</span></TableHead>
+                    <TableHead>{_("Account")} <span className="text-ink-red-3">*</span></TableHead>
+                    <TableHead>{_("Cost Center")} <span className="text-ink-red-3">*</span></TableHead>
                     <TableHead>{_("Description")}</TableHead>
-                    <TableHead className="text-right">{_("Amount")} <span className="text-destructive">*</span></TableHead>
+                    <TableHead className="text-right">{_("Amount")} <span className="text-ink-red-3">*</span></TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -1284,6 +1284,6 @@ const TotalDeductions = ({ currency }: { currency: string }) => {
 
     const total_deductions = useWatch({ control, name: 'deductions' })?.reduce((acc: number, row: PaymentEntryDeduction) => acc + row.amount, 0) ?? 0
 
-    return <span className={cn("font-mono font-medium", total_deductions !== 0 ? "text-destructive" : "text-muted-foreground")}>({formatCurrency(total_deductions, currency)})</span>
+    return <span className={cn("font-mono font-medium", total_deductions !== 0 ? "text-ink-red-3" : "text-ink-gray-5")}>({formatCurrency(total_deductions, currency)})</span>
 }
 export default RecordPaymentModal

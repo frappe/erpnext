@@ -106,7 +106,7 @@ const SettingsDialogContent = ({ onClose }: { onClose: VoidFunction }) => {
                     name={"google_processor_location"}
                     render={({ field }) => (
                         <FormItem className='flex flex-col'>
-                            <FormLabel>{_("Google Document Processor Location")}<span className="text-destructive">*</span></FormLabel>
+                            <FormLabel>{_("Google Document Processor Location")}<span className="text-ink-red-3">*</span></FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
                                     <SelectTrigger className='w-full'>
@@ -182,7 +182,7 @@ const SettingsDialogContent = ({ onClose }: { onClose: VoidFunction }) => {
 //                 name={"bank_statement_gdoc_processor"}
 //                 render={({ field }) => (
 //                     <FormItem className='flex flex-col'>
-//                         <FormLabel>{_("Bank Statement Processor")}<span className="text-destructive">*</span></FormLabel>
+//                         <FormLabel>{_("Bank Statement Processor")}<span className="text-ink-red-3">*</span></FormLabel>
 //                         <Select onValueChange={field.onChange} value={field.value}>
 //                             <FormControl>
 //                                 <SelectTrigger className='w-full'>

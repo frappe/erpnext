@@ -135,7 +135,7 @@ const BankClearanceSummaryView = () => {
                     <TableCell className="text-right">{formatCurrency(row.amount, bankAccount?.account_currency ?? getCompanyCurrency(companyID))}</TableCell>
                     <TableCell>
                         {row.clearance_date ? <Badge theme="green">
-                            <CheckCircle2 width={16} height={16} />
+                            <CheckCircle2 />
                             {_("Cleared")}</Badge> : <div className="flex items-center gap-2"><Badge theme="red">
                                 <XCircle />
                                 {_("Not Cleared")}</Badge>

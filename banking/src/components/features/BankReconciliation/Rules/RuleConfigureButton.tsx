@@ -280,9 +280,9 @@ const AutoRunRuleItem = () => {
         checked={automaticallyRunRulesOnUnreconciledTransactions}
         onCheckedChange={onAutoClassifyTransactions}>
         {_("Run rules automatically")}
-        {automaticallyRunRulesOnUnreconciledTransactions ? <Badge variant="secondary" className="flex items-center justify-center text-xs font-mono bg-green-50 text-green-600">
+        {automaticallyRunRulesOnUnreconciledTransactions ? <Badge theme="green">
             {_("Enabled")}
-        </Badge> : <Badge variant="secondary" className="flex items-center justify-center text-xs font-mono bg-red-50 text-red-600">
+        </Badge> : <Badge theme="red">
             {_("Disabled")}
         </Badge>}
     </DropdownMenuCheckboxItem>
@@ -322,9 +322,9 @@ const SortableRuleItem = ({
                         className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded"
                         title={_("Drag to reorder")}
                     >
-                        <GripVertical className="w-4 h-4 text-muted-foreground" />
+                        <GripVertical className="w-4 h-4 text-ink-gray-5" />
                     </div>
-                    <Badge variant="secondary" className="w-6 h-6 p-0 flex items-center justify-center text-xs font-mono">
+                    <Badge theme="gray" className="font-mono">
                         {rule.priority}
                     </Badge>
                     <div className="flex flex-col gap-1">
@@ -336,10 +336,10 @@ const SortableRuleItem = ({
                                 {rule.rule_name}
                             </Button>
                             <div title={rule.transaction_type === "Any" ? _("Any") : rule.transaction_type === "Withdrawal" ? _("Withdrawal") : _("Deposit")}>
-                                {rule.transaction_type === "Any" ? <ArrowDownUp className="text-muted-foreground w-4 h-4" /> : rule.transaction_type === "Withdrawal" ? <ArrowUpRight className="text-destructive w-5 h-5" /> : <ArrowDownRight className="text-green-600 w-5 h-5" />}
+                                {rule.transaction_type === "Any" ? <ArrowDownUp className="text-ink-gray-5 w-4 h-4" /> : rule.transaction_type === "Withdrawal" ? <ArrowUpRight className="text-ink-red-3 w-5 h-5" /> : <ArrowDownRight className="text-ink-green-3 w-5 h-5" />}
                             </div>
                         </div>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-sm text-ink-gray-5">
                             {rule.rule_description}
                         </span>
                     </div>

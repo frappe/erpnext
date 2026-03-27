@@ -28,6 +28,7 @@ const buttonVariants = cva(
         green: "focus-visible:shadow-focus-green",
         red: "focus-visible:shadow-focus-red",
         amber: "focus-visible:shadow-focus-amber",
+        violet: "focus-visible:shadow-focus-violet",
       },
       isIconButton: {
         true: "",
@@ -82,6 +83,11 @@ const buttonVariants = cva(
         theme: "red",
         className: "bg-surface-red-5 text-ink-red-1 hover:bg-surface-red-6 active:bg-surface-red-7 disabled:bg-surface-red-2 disabled:text-ink-red-2"
       },
+      {
+        variant: "solid",
+        theme: "violet",
+        className: "bg-surface-violet-5 text-ink-violet-1 hover:bg-surface-violet-6 active:bg-surface-violet-7 disabled:bg-surface-violet-2 disabled:text-ink-violet-2"
+      },
       // Subtle Buttons
       {
         variant: "subtle",
@@ -103,7 +109,11 @@ const buttonVariants = cva(
         theme: "red",
         className: "text-ink-red-4 bg-surface-red-2 hover:bg-surface-red-3 active:bg-surface-red-4 disabled:bg-surface-red-2 disabled:text-ink-red-2"
       },
-
+      {
+        variant: "subtle",
+        theme: "violet",
+        className: "text-ink-violet-4 bg-surface-violet-2 hover:bg-surface-violet-3 active:bg-surface-violet-4 disabled:bg-surface-violet-2 disabled:text-ink-violet-2"
+      },
       // Outline buttons
       {
         variant: "outline",
@@ -129,7 +139,11 @@ const buttonVariants = cva(
         className:
           "text-ink-red-4 border-outline-red-2 hover:border-outline-red-3 active:border-outline-red-4 active:bg-surface-red-4 disabled:bg-surface-red-2 disabled:text-ink-red-2 disabled:border-outline-red-2"
       },
-
+      {
+        variant: "outline",
+        theme: "violet",
+        className: "text-ink-violet-4 border-outline-violet-2 hover:border-outline-violet-3 active:border-outline-violet-4 active:bg-surface-violet-4 disabled:bg-surface-violet-2 disabled:text-ink-violet-2 disabled:border-outline-violet-2"
+      },
       // Ghost buttons
       {
         variant: "ghost",
@@ -155,6 +169,11 @@ const buttonVariants = cva(
         className:
           "text-ink-red-4 hover:bg-surface-red-3 active:bg-surface-red-4 disabled:text-ink-red-2"
       },
+      {
+        variant: "ghost",
+        theme: "violet",
+        className: "text-ink-violet-4 hover:bg-surface-violet-3 active:bg-surface-violet-4 disabled:text-ink-violet-2"
+      },
       //Link buttons
       {
         variant: "link",
@@ -175,6 +194,11 @@ const buttonVariants = cva(
         variant: "link",
         theme: "red",
         className: "text-ink-red-3 hover:text-ink-red-4 active:text-red-4 disabled:text-ink-red-2"
+      },
+      {
+        variant: "link",
+        theme: "violet",
+        className: "text-ink-violet-3 hover:text-ink-violet-4 active:text-ink-violet-4 disabled:text-ink-violet-2"
       }
     ],
     defaultVariants: {

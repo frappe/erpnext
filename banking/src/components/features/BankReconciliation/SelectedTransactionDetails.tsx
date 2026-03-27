@@ -53,19 +53,19 @@ const SelectedTransactionDetails = ({ transaction, showAccount = false, account 
                         </div>
                         <div className='flex flex-col gap-1'>
                             <div className={cn('flex items-center gap-1 text-right px-0 justify-end py-1 rounded-sm',
-                                isWithdrawal ? 'text-destructive' : 'text-green-600'
+                                isWithdrawal ? 'text-ink-red-3' : 'text-ink-green-3'
                             )}>
-                                {isWithdrawal ? <ArrowUpRight className="w-5 h-5 text-destructive" /> : <ArrowDownRight className="w-5 h-5 text-green-600" />}
+                                {isWithdrawal ? <ArrowUpRight className="w-5 h-5 text-ink-red-3" /> : <ArrowDownRight className="w-5 h-5 text-ink-green-3" />}
                                 <span className='text-sm font-semibold uppercase'>{isWithdrawal ? _('Spent') : _('Received')}</span>
                             </div>
                             <span className='font-semibold font-mono text-lg text-right pr-0.5'>{formatCurrency(amount, currency)}</span>
-                            {transaction.unallocated_amount && transaction.unallocated_amount !== amount ? <span className='text-muted-foreground'>{_("Unallocated")}: {formatCurrency(transaction.unallocated_amount)}</span> : null}
+                            {transaction.unallocated_amount && transaction.unallocated_amount !== amount ? <span className='text-ink-gray-5'>{_("Unallocated")}: {formatCurrency(transaction.unallocated_amount)}</span> : null}
                         </div>
                     </div>
                     <div className='flex flex-col gap-1'>
                         <span className='text-sm'>{transaction.description}</span>
-                        {transaction.reference_number ? <span className='text-sm text-muted-foreground'>{_("Ref")}: {transaction.reference_number}</span> : null}
-                        {showAccount && account ? <span className='text-sm text-muted-foreground'>{_("GL Account")}: {account}</span> : null}
+                        {transaction.reference_number ? <span className='text-sm text-ink-gray-5'>{_("Ref")}: {transaction.reference_number}</span> : null}
+                        {showAccount && account ? <span className='text-sm text-ink-gray-5'>{_("GL Account")}: {account}</span> : null}
                     </div>
 
                 </div>

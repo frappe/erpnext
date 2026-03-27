@@ -83,13 +83,13 @@ const BankStatementImporter = () => {
                         {error && <ErrorBanner error={error} />}
                         <div className="py-2 flex flex-col gap-6">
                             <div className="flex flex-col gap-2">
-                                <Label>{_("Company")}<span className="text-destructive">*</span></Label>
+                                <Label>{_("Company")}<span className="text-ink-red-3">*</span></Label>
                                 <div className="min-w-56 w-fit flex flex-col">
                                     <CompanySelector onChange={() => setSelectedBankAccount(null)} />
                                 </div>
                             </div>
                             {selectedCompany && <div className="flex flex-col gap-2">
-                                <Label>{_("Bank Account")}<span className="text-destructive">*</span></Label>
+                                <Label>{_("Bank Account")}<span className="text-ink-red-3">*</span></Label>
                                 <div className="">
                                     <BankPicker className="w-full flex-wrap" size="sm" />
                                 </div>
@@ -98,10 +98,10 @@ const BankStatementImporter = () => {
                             {selectedBankAccount && <div className="flex flex-col gap-4 pr-4">
                                 <div className="flex justify-between">
                                     <div className="flex flex-col gap-2">
-                                        <Label>{_("Bank Statement")}<span className="text-destructive">*</span></Label>
+                                        <Label>{_("Bank Statement")}<span className="text-ink-red-3">*</span></Label>
                                         <p
                                             data-slot="form-description"
-                                            className={cn("text-muted-foreground text-xs")}
+                                            className={cn("text-ink-gray-5 text-xs")}
                                         >
                                             {_("Upload your bank statement file to start the import process. We support CSV, and XLSX files.")}
                                         </p>
@@ -168,27 +168,27 @@ const StatementInstructions = () => {
                     <TableRow>
                         <TableCell>Date/Transaction Date/Value Date</TableCell>
                         <TableCell>{_("Date")}</TableCell>
-                        <TableCell className="text-muted-foreground">{_("The date of the transaction")}</TableCell>
+                        <TableCell className="text-ink-gray-5">{_("The date of the transaction")}</TableCell>
                     </TableRow>
                     <TableRow>
                         <TableCell>Amount</TableCell>
                         <TableCell>{_("Amount")}</TableCell>
-                        <TableCell className="text-muted-foreground">{_('This can contain "CR"/"DR" values or positive/negative values. You could also have a separate column for CR/DR.')}</TableCell>
+                        <TableCell className="text-ink-gray-5">{_('This can contain "CR"/"DR" values or positive/negative values. You could also have a separate column for CR/DR.')}</TableCell>
                     </TableRow>
                     <TableRow>
                         <TableCell>Withdrawal/Deposit</TableCell>
                         <TableCell>{_("Withdrawal")}/{_("Deposit")}</TableCell>
-                        <TableCell className="text-muted-foreground">{_("The withdrawal or deposit amounts - only required if there's no amount column.")}</TableCell>
+                        <TableCell className="text-ink-gray-5">{_("The withdrawal or deposit amounts - only required if there's no amount column.")}</TableCell>
                     </TableRow>
                     <TableRow>
                         <TableCell>Description/Particulars/Remarks/Narration/Detail</TableCell>
                         <TableCell>{_("Description")}</TableCell>
-                        <TableCell className="text-muted-foreground">{_("The description of the transaction")}</TableCell>
+                        <TableCell className="text-ink-gray-5">{_("The description of the transaction")}</TableCell>
                     </TableRow>
                     <TableRow>
                         <TableCell>Reference/Ref/Transaction ID/Cheque/Check</TableCell>
                         <TableCell>{_("Reference")}</TableCell>
-                        <TableCell className="text-muted-foreground">{_("The reference number of the transaction")}</TableCell>
+                        <TableCell className="text-ink-gray-5">{_("The reference number of the transaction")}</TableCell>
                     </TableRow>
                 </TableBody>
             </Table>

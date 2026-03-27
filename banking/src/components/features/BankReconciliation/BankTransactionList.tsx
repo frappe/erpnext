@@ -167,16 +167,21 @@ const BankTransactionListView = () => {
                     <TableCell>{row.transaction_type ? <Badge>{row.transaction_type}</Badge> : null}</TableCell>
                     <TableCell>
                         {(!row.allocated_amount || (row.allocated_amount && row.allocated_amount === 0)) ?
-                            <div className="bg-transparent border border-border flex items-center justify-center gap-1.5 px-2 py-1 text-xs w-fit rounded-md">
-                                <XCircle className="-mt-px text-destructive" size={14} />
-                                {_("Not Reconciled")}</div> :
+                            <Badge theme="red">
+                                <XCircle />
+                                {_("Not Reconciled")}
+                            </Badge>
+                            :
                             (row.allocated_amount && row.allocated_amount > 0 && row.unallocated_amount !== 0) ?
-                                <div className="bg-transparent border border-border flex items-center gap-1.5 px-2 py-1 text-xs w-fit rounded-md">
-                                    <CheckCircle2 size={14} className="-mt-px text-yellow-500 dark:text-yellow-400" />
-                                    {_("Partially Reconciled")}</div> :
-                                <div className="bg-transparent border border-border flex items-center gap-1.5 px-2 py-1 text-xs w-fit rounded-md">
-                                    <CheckCircle2 size={14} className="-mt-px text-green-600 dark:text-green-500" />
-                                    {_("Reconciled")}</div>}
+                                <Badge theme="orange">
+                                    <CheckCircle2 />
+                                    {_("Partially Reconciled")}
+                                </Badge>
+                                :
+                                <Badge theme="green">
+                                    <CheckCircle2 />
+                                    {_("Reconciled")}
+                                </Badge>}
                     </TableCell>
                     <TableCell>
                         <div className="flex gap-2">
@@ -194,7 +199,7 @@ const BankTransactionListView = () => {
                                 variant='link'
                                 onClick={() => onUndo(row)}
                                 size='sm'
-                                className="text-destructive px-0">
+                                className="text-ink-red-3 px-0">
                                 <Undo2 />
                                 {_("Undo")}
                             </Button> : null}
@@ -259,11 +264,11 @@ const Filters = ({
             "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
             "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
         )}>
-            <Search className="w-5 h-5 text-muted-foreground" />
+            <Search className="w-5 h-5 text-ink-gray-5" />
             <Input placeholder={_("Search")} type='search' onChange={onSearchChange} defaultValue={search}
                 className="border-none px-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0" />
             <div>
-                <span className="text-sm text-muted-foreground text-nowrap whitespace-nowrap">{results?.length} {_(results?.length === 1 ? "result" : "results")}</span>
+                <span className="text-sm text-ink-gray-5 text-nowrap whitespace-nowrap">{results?.length} {_(results?.length === 1 ? "result" : "results")}</span>
             </div>
         </div>
         <div className="w-[25%]">
@@ -297,7 +302,7 @@ const Filters = ({
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="min-w-32 w-full h-9 text-left justify-between">
                         <div className="flex gap-2 items-center">
-                            {typeFilter === 'All' ? <DollarSign className="w-4 h-4 text-muted-foreground" /> : typeFilter === 'Debits' ? <ArrowUpRight className="w-4 h-4 text-destructive" /> : <ArrowDownRight className="w-4 h-4 text-green-600" />}
+                            {typeFilter === 'All' ? <DollarSign className="w-4 h-4 text-ink-gray-5" /> : typeFilter === 'Debits' ? <ArrowUpRight className="w-4 h-4 text-ink-red-3" /> : <ArrowDownRight className="w-4 h-4 text-ink-green-3" />}
                             {_(typeFilter)}
                         </div>
                         <ChevronDown className="w-4 h-4" />
@@ -305,8 +310,8 @@ const Filters = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                     <DropdownMenuItem onClick={() => onTypeFilterChange('All')}><DollarSign /> {_("All")}</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onTypeFilterChange('Debits')}><ArrowUpRight className="text-destructive" /> {_("Debits")}</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onTypeFilterChange('Credits')}><ArrowDownRight className="text-green-600" /> {_("Credits")}</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onTypeFilterChange('Debits')}><ArrowUpRight className="text-ink-red-3" /> {_("Debits")}</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onTypeFilterChange('Credits')}><ArrowDownRight className="text-ink-green-3" /> {_("Credits")}</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>
@@ -315,9 +320,9 @@ const Filters = ({
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="min-w-32 w-full h-9 text-left justify-between">
                         <div className="flex gap-2 items-center">
-                            {status === 'All' ? <ListIcon className="w-4 h-4 text-muted-foreground" /> :
-                                status === 'Reconciled' ? <CheckCircle2 className="w-4 h-4 text-green-600" /> :
-                                    status === 'Unreconciled' ? <XCircle className="w-4 h-4 text-destructive" /> :
+                            {status === 'All' ? <ListIcon className="w-4 h-4 text-ink-gray-5" /> :
+                                status === 'Reconciled' ? <CheckCircle2 className="w-4 h-4 text-ink-green-3" /> :
+                                    status === 'Unreconciled' ? <XCircle className="w-4 h-4 text-ink-red-3" /> :
                                         <CheckCircle2 className="w-4 h-4 text-yellow-500" />}
                             {_(status)}
                         </div>
@@ -326,9 +331,9 @@ const Filters = ({
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => setStatus('All')}>{<ListIcon className="w-4 h-4 text-muted-foreground" />} {_("All")}</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setStatus('Reconciled')}>{<CheckCircle2 className="w-4 h-4 text-green-600" />} {_("Reconciled")}</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setStatus('Unreconciled')}>{<XCircle className="w-4 h-4 text-destructive" />} {_("Unreconciled")}</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setStatus('All')}>{<ListIcon className="w-4 h-4 text-ink-gray-5" />} {_("All")}</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setStatus('Reconciled')}>{<CheckCircle2 className="w-4 h-4 text-ink-green-3" />} {_("Reconciled")}</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setStatus('Unreconciled')}>{<XCircle className="w-4 h-4 text-ink-red-3" />} {_("Unreconciled")}</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setStatus('Partially Reconciled')}>{<CheckCircle2 className="w-4 h-4 text-yellow-500" />} {_("Partially Reconciled")}</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>

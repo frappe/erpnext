@@ -97,7 +97,7 @@ const BankPickerItem = ({ bank, size = 'base' }: { bank: SelectedBank, size?: 'b
                 'text-xs': size === 'sm',
             })}>{bank.account_name}</span>
             <span title={_("GL Account")} className={cn("text-ellipsis line-clamp-1", size === 'sm' ? 'text-xs' : "text-sm")}>{bank.account}</span>
-            {bank.last_integration_date && size !== 'sm' && <span className="text-xs text-muted-foreground">{_("Last Synced Transaction")}: {getTimeago(bank.last_integration_date)}</span>}
+            {bank.last_integration_date && size !== 'sm' && <span className="text-xs text-ink-gray-5">{_("Last Synced Transaction")}: {getTimeago(bank.last_integration_date)}</span>}
         </div>
 
         <div className={cn("absolute -top-1 right-0", {

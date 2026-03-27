@@ -29,7 +29,7 @@ const CSVRawDataPreview = ({ data }: { data: GetStatementDetailsResponse }) => {
                             // "hover:bg-yellow-100": isHeaderRow,
                             "bg-green-50": isTransactionRow,
                             "hover:bg-green-50": isTransactionRow,
-                            "text-muted-foreground/70": !isTransactionRow && !isHeaderRow,
+                            "text-ink-gray-5/70": !isTransactionRow && !isHeaderRow,
                         })}>
                         {isHeaderRow ? <TableHead className="bg-yellow-100 hover:bg-yellow-100 text-center">
                             {index + 1}
@@ -68,7 +68,7 @@ const CSVRawDataPreview = ({ data }: { data: GetStatementDetailsResponse }) => {
                                     {
                                         "bg-green-100": isValidColumn && isTransactionRow,
                                         "hover:bg-green-100": isValidColumn && isTransactionRow,
-                                        "text-muted-foreground": !isValidColumn && isTransactionRow,
+                                        "text-ink-gray-5": !isValidColumn && isTransactionRow,
                                     }
                                 )} >
                                     <div className={cn("min-h-5 flex items-center text-xs px-1", {
@@ -100,11 +100,11 @@ const ColumnHeaderIcon = ({ columnType }: { columnType?: StandardColumnTypes }) 
     }
 
     if (columnType === 'Withdrawal') {
-        return <ArrowUpRightIcon className="w-4 h-4 text-destructive" />
+        return <ArrowUpRightIcon className="w-4 h-4 text-ink-red-3" />
     }
 
     if (columnType === 'Deposit') {
-        return <ArrowDownRightIcon className="w-4 h-4 text-green-500" />
+        return <ArrowDownRightIcon className="w-4 h-4 text-ink-green-3" />
     }
 
     if (columnType === 'Balance') {

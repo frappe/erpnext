@@ -47,7 +47,7 @@ export const DataField = ({ name, rules, label, isRequired, formDescription, inp
         rules={rules}
         render={({ field }) => (
             <FormItem className='flex flex-col'>
-                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-destructive">*</span>}</FormLabel>
+                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-ink-red-3">*</span>}</FormLabel>
                 <FormControl>
                     <Input {...field} maxLength={140} aria-readonly={readOnly} readOnly={readOnly} {...inputProps} />
                 </FormControl>
@@ -73,7 +73,7 @@ export const SelectFormField = ({ name, rules, label, isRequired, formDescriptio
         rules={rules}
         render={({ field }) => (
             <FormItem>
-                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-destructive">*</span>}</FormLabel>
+                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-ink-red-3">*</span>}</FormLabel>
                 <FormControl>
                     <Select onValueChange={field.onChange} value={field.value} disabled={disabled || readOnly} aria-readonly={readOnly}>
                         <FormControl>
@@ -185,7 +185,7 @@ export const DateField = ({ name, rules, label, isRequired, formDescription, inp
         rules={rules}
         render={({ field }) => (
             <FormItem className='flex flex-col'>
-                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-destructive">*</span>}</FormLabel>
+                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-ink-red-3">*</span>}</FormLabel>
                 <DatePicker field={field} />
                 {formDescription && <FormDescription>{formDescription}</FormDescription>}
                 <FormMessage />
@@ -209,7 +209,7 @@ export const SmallTextField = ({ name, rules, label, isRequired, formDescription
         rules={rules}
         render={({ field }) => (
             <FormItem className='flex flex-col'>
-                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-destructive">*</span>}</FormLabel>
+                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-ink-red-3">*</span>}</FormLabel>
                 <FormControl>
                     <Textarea {...field} {...inputProps} readOnly={readOnly} aria-readonly={readOnly} />
                 </FormControl>
@@ -234,7 +234,7 @@ export const AccountFormField = (props: AccountFormFieldProps) => {
         rules={props.rules}
         render={({ field }) => (
             <FormItem className='flex flex-col'>
-                <FormLabel className={props.hideLabel ? 'sr-only' : ''}>{props.label}{props.isRequired && <span className="text-destructive">*</span>}</FormLabel>
+                <FormLabel className={props.hideLabel ? 'sr-only' : ''}>{props.label}{props.isRequired && <span className="text-ink-red-3">*</span>}</FormLabel>
                 <AccountsDropdown {...props} value={field.value} onChange={field.onChange} useInForm readOnly={props.readOnly} />
                 {props.formDescription && <FormDescription>{props.formDescription}</FormDescription>}
                 <FormMessage />
@@ -258,7 +258,7 @@ export const PartyTypeFormField = ({ name, rules, label, isRequired, formDescrip
         rules={rules}
         render={({ field }) => (
             <FormItem className='flex flex-col'>
-                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-destructive">*</span>}</FormLabel>
+                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-ink-red-3">*</span>}</FormLabel>
                 <PartyTypeDropdown {...inputProps} value={field.value} onChange={field.onChange} useInForm readOnly={readOnly} />
                 {formDescription && <FormDescription>{formDescription}</FormDescription>}
                 <FormMessage />
@@ -343,7 +343,7 @@ export const CurrencyFormField = ({ name, rules, label, isRequired, formDescript
         rules={rules}
         render={({ field }) => (
             <FormItem className='flex flex-col'>
-                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-destructive">*</span>}</FormLabel>
+                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-ink-red-3">*</span>}</FormLabel>
 
                 <FormControl>
                     <InputGroup>
@@ -373,7 +373,7 @@ export const LinkFormField = ({ name, rules, label, isRequired, formDescription,
         rules={rules}
         render={({ field }) => (
             <FormItem className='flex flex-col'>
-                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-destructive">*</span>}</FormLabel>
+                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-ink-red-3">*</span>}</FormLabel>
                 <LinkFieldCombobox {...inputProps} value={field.value} onChange={field.onChange} useInForm disabled={disabled} readOnly={readOnly} />
                 {formDescription && <FormDescription>{formDescription}</FormDescription>}
                 <FormMessage />

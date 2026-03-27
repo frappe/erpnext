@@ -309,7 +309,7 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                                     <TableCell className='text-right'>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button variant='link' isIconButton asChild className='text-muted-foreground hover:text-black p-0 h-4'>
+                                                <Button variant='link' isIconButton asChild className='text-ink-gray-5 hover:text-black p-0 h-4'>
                                                     <a href={`/app/bank-transaction/${transaction.name}`} target='_blank' rel='noopener noreferrer'>
                                                         <ExternalLinkIcon />
                                                     </a>

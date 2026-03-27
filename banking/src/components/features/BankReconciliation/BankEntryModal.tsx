@@ -693,7 +693,7 @@ const Entries = ({ company, isWithdrawal, currency }: { company: string, isWithd
                                 } : {} : {}}
                                 currency={currency}
                                 leftSlot={index === 0 && !isWithdrawal ? <Tooltip>
-                                    <TooltipTrigger asChild><ArrowDownRight className="text-green-600" /></TooltipTrigger>
+                                    <TooltipTrigger asChild><ArrowDownRight className="text-ink-green-3" /></TooltipTrigger>
                                     <TooltipContent>{_("Bank account debit for deposit")}</TooltipContent>
                                 </Tooltip> : undefined}
                             />
@@ -710,7 +710,7 @@ const Entries = ({ company, isWithdrawal, currency }: { company: string, isWithd
                                 readOnly={index === 0}
                                 currency={currency}
                                 leftSlot={index === 0 && isWithdrawal ? <Tooltip>
-                                    <TooltipTrigger asChild><ArrowUpRight className="text-destructive" /></TooltipTrigger>
+                                    <TooltipTrigger asChild><ArrowUpRight className="text-ink-red-3" /></TooltipTrigger>
                                     <TooltipContent>{_("Bank account credit for withdrawal")}</TooltipContent>
                                 </Tooltip> : undefined}
                             />
@@ -806,8 +806,8 @@ const Summary = ({ currency, addRow }: { currency: string, addRow: () => void })
             <TextComponent>{_("Difference")}</TextComponent>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <Button type='button' variant='link' className="p-0 text-destructive underline h-fit" role='button' onClick={onAddRow}>
-                        <TextComponent className='text-destructive'>{formatCurrency(total, currency)}</TextComponent>
+                    <Button type='button' variant='link' className="p-0 text-ink-red-3 underline h-fit" role='button' onClick={onAddRow}>
+                        <TextComponent className='text-ink-red-3'>{formatCurrency(total, currency)}</TextComponent>
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent>
