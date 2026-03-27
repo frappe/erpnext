@@ -1909,10 +1909,14 @@ def get_stock_ledger_entries(
 	)
 
 
-def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
+def get_sle_by_voucher_detail_no(voucher_detail_no):
 	return frappe.db.get_value(
 		"Stock Ledger Entry",
-		{"voucher_detail_no": voucher_detail_no, "name": ["!=", excluded_sle], "is_cancelled": 0},
+		{
+			"voucher_detail_no": voucher_detail_no,
+			"is_cancelled": 0,
+			"dependant_sle_voucher_detail_no": ("is", "not set"),
+		},
 		["*"],
 		as_dict=1,
 	)

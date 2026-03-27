@@ -508,9 +508,27 @@ class TestWorkOrder(ERPNextTestSuite):
 
 	def test_work_order_material_transferred_qty_with_process_loss(self):
 		stock_entries = []
-		bom = frappe.get_doc(
-			"BOM", {"docstatus": 1, "with_operations": 1, "company": "_Test Company", "has_variants": 0}
+		item_code = make_item("_Test Item For Process Loss", {"is_stock_item": 1}).name
+		rm_item_code = make_item("Test Item For Process Loss RM", {"is_stock_item": 1}).name
+
+		bom = make_bom(
+			item=item_code,
+			raw_materials=[rm_item_code],
+			with_operations=1,
+			do_not_save=True,
 		)
+
+		operation = {
+			"operation": "_Test Operation 1",
+			"workstation": "_Test Workstation 1",
+			"description": "Test Data",
+			"operating_cost": 100,
+			"time_in_mins": 40,
+		}
+
+		bom.append("operations", operation)
+		bom.save()
+		bom.submit()
 
 		work_order = make_wo_order_test_record(
 			item=bom.item,

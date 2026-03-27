@@ -590,6 +590,8 @@ accounting_dimension_doctypes = [
 	"Advance Taxes and Charges",
 ]
 
+subscription_doctypes = ["Sales Invoice", "Purchase Invoice", "Payment Request", "POS Invoice"]
+
 get_matching_queries = (
 	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_matching_queries"
 )
