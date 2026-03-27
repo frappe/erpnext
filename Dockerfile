@@ -76,6 +76,10 @@ RUN git clone --depth 1 \
     && ./env/bin/pip install --no-cache-dir -q -e apps/erpnext \
     && echo "erpnext" >> apps.txt
 
+# Install Node.js dependencies for all apps (payments + erpnext may have
+# their own package.json entries that bench init didn't process).
+RUN bench setup requirements --node
+
 # Build production frontend assets
 ENV NODE_ENV=production
 RUN bench build --production
