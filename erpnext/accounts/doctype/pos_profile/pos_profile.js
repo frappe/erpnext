@@ -16,7 +16,9 @@ frappe.ui.form.on("POS Profile", {
 
 		frm.set_query("print_format", function () {
 			return {
-				filters: [["Print Format", "doc_type", "=", "POS Invoice"]],
+				filters: [
+					["Print Format", "doc_type", "in", ["POS Invoice", "Sales Invoice"]]
+				],
 			};
 		});
 
