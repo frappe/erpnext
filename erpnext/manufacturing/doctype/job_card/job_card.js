@@ -280,6 +280,8 @@ frappe.ui.form.on("Job Card", {
 
 					is_timer_running = true;
 				}
+
+				frm.trigger("make_dashboard");
 			}
 		}
 
