@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-03-22 09:45+0000\n"
-"PO-Revision-Date: 2026-03-23 06:42\n"
+"PO-Revision-Date: 2026-03-27 08:42\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -15053,7 +15053,7 @@ msgstr "Standard Material Begäran Typ"
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Default Operating Cost Account"
-msgstr "Standard Driftskostnad Konto"
+msgstr "Standard Produktion Kostnad Konto"
 
 #. Label of the default_payable_account (Link) field in DocType 'Company'
 #. Label of the default_payable_account (Section Break) field in DocType
@@ -58594,7 +58594,7 @@ msgstr "höger"
 #. Settings'
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "sandbox"
-msgstr "Sandlåda"
+msgstr "Test"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1477
 msgid "sold"

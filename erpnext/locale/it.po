@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-03-22 09:45+0000\n"
-"PO-Revision-Date: 2026-03-23 06:43\n"
+"PO-Revision-Date: 2026-03-27 08:41\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Italian\n"
 "MIME-Version: 1.0\n"
@@ -44514,7 +44514,7 @@ msgstr ""
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/workspace_sidebar/crm.json erpnext/workspace_sidebar/selling.json
 msgid "Sales Analytics"
-msgstr ""
+msgstr "Analisi delle vendite"
 
 #. Label of the sales_team (Table) field in DocType 'Sales Invoice'
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
