@@ -140,6 +140,8 @@
   --shadow-xl: 0px 0px 1px rgba(0, 0, 0, 0.19), 0px 1px 2px rgba(0, 0, 0, 0.07), 0px 6px 15px -5px rgba(0, 0, 0, 0.11);
   --shadow-2xl: 0px 0px 1px rgba(0, 0, 0, 0.2), 0px 1px 3px rgba(0, 0, 0, 0.05), 0px 10px 24px -3px rgba(0, 0, 0, 0.1);
 
+  --shadow-switch: 0px 3px 3px 0px rgba(0, 0, 0, 0.05);
+
   /** Spacing **/
   --spacing-4.5: 1.125rem;
   --spacing-5.5: 1.375rem;
