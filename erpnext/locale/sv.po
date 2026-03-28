@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-03-22 09:45+0000\n"
-"PO-Revision-Date: 2026-03-27 08:42\n"
+"PO-Revision-Date: 2026-03-28 09:27\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -942,7 +942,7 @@ msgstr "<span class=\"h4\"><b>Rapporter &amp; Inställningar</b></span>"
 #. Header text in the Subcontracting Workspace
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "<span class=\"h4\"><b>Subcontracting Inward and Outward</b></span>"
-msgstr "<span class=\"h4\"><b>Underleverantör In och Ut</b></span>"
+msgstr "<span class=\"h4\"><b>Extern & Intern Underleverantör</b></span>"
 
 #. Header text in the ERPNext Settings Workspace
 #: erpnext/setup/workspace/erpnext_settings/erpnext_settings.json
@@ -9540,7 +9540,7 @@ msgstr "Kassa Flöde"
 
 #: erpnext/public/js/financial_statements.js:343
 msgid "Cash Flow Statement"
-msgstr "Kassaflöde Redogörelse"
+msgstr "Kassaflöde Rapport"
 
 #: erpnext/accounts/report/cash_flow/cash_flow.py:178
 msgid "Cash Flow from Financing"
@@ -30159,7 +30159,7 @@ msgstr "Netto Resultat"
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:172
 msgid "Net Profit Ratio"
-msgstr "Netto Omsättningsgrad"
+msgstr "Netto Resultat Förhållande"
 
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:185
 msgid "Net Profit/Loss"
@@ -49835,7 +49835,7 @@ msgstr "Underleverantör Konvertering Faktor"
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Subcontracting Delivery"
-msgstr "Underleverantör Leverans"
+msgstr "Underleverantör Lager Post"
 
 #. Label of the subcontracting_inward_tab (Tab Break) field in DocType 'Selling
 #. Settings'
