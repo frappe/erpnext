@@ -24,13 +24,13 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-  "group/tabs-list text-ink-gray-5 inline-flex w-full items-center justify-start group-data-[orientation=vertical]/tabs:flex-col",
+  "group/tabs-list text-ink-gray-5 inline-flex group-data-[orientation=horizontal]/tabs:w-full group-data-[orientation=vertical]/tabs:w-fit items-center justify-start group-data-[orientation=vertical]/tabs:flex-col",
   {
     variants: {
       variant: {
         subtle: "bg-surface-gray-2 p-px",
         outline: "p-px border border-outline-gray-1",
-        underline: "border-b border-outline-gray-1 gap-6",
+        underline: "group-data-[orientation=horizontal]/tabs:border-b border-outline-gray-1 group-data-[orientation=vertical]/tabs:border-r group-data-[orientation=horizontal]/tabs:gap-6 group-data-[orientation=vertical]/tabs:gap-2",
       },
       size: {
         sm: "group-data-[orientation=horizontal]/tabs:h-7",
@@ -124,15 +124,26 @@ function TabsTrigger({
         // Variant: outline - active - background, text color and shadow applied
         "group-data-[variant=outline]/tabs-list:data-[state=active]:bg-surface-selected group-data-[variant=outline]/tabs-list:data-[state=active]:shadow-active-tab",
 
-        // Variant: underline - no radius
-        "group-data-[variant=underline]/tabs-list:rounded-none group-data-[variant=underline]/tabs-list:px-0 group-data-[variant=underline]/tabs-list:bottom-px",
+        // Variant: underline - horizontal
+        "group-data-[variant=underline]/tabs-list:rounded-none ",
+        // Variant: underline - horizontal - no radius
+        "group-data-[orientation=horizontal]/tabs:group-data-[variant=underline]/tabs-list:px-0",
         // Variant: underline, size: sm
-        "group-data-[variant=underline]/tabs-list:group-data-[size=sm]/tabs-list:py-1.5",
+        "group-data-[orientation=horizontal]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=sm]/tabs-list:py-1.5 group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=sm]/tabs-list:px-1.5",
         // Variant: underline, size: md
-        "group-data-[variant=underline]/tabs-list:group-data-[size=md]/tabs-list:py-[7px] group-data-[variant=underline]/tabs-list:group-data-[size=md]/tabs-list:font-medium",
-        // Variant: underline - active - border applied
-        "group-data-[variant=underline]/tabs-list:border-b group-data-[variant=underline]/tabs-list:border-b-transparent group-data-[variant=underline]/tabs-list:data-[state=active]:border-b-ink-gray-8 ",
+        "group-data-[orientation=horizontal]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=md]/tabs-list:py-[7px] group-data-[variant=underline]/tabs-list:group-data-[size=md]/tabs-list:font-medium",
+        // Variant: underline - horizontal - active - border applied
+        "group-data-[orientation=horizontal]/tabs:group-data-[variant=underline]/tabs-list:border-b group-data-[orientation=horizontal]/tabs:group-data-[variant=underline]/tabs-list:border-b-transparent group-data-[orientation=horizontal]/tabs:group-data-[variant=underline]/tabs-list:data-[state=active]:border-b-ink-gray-8 group-data-[orientation=horizontal]/tabs:group-data-[variant=underline]/tabs-list:bottom-px",
 
+
+        // Variant: underline - Vertical
+        "group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:pl-0",
+        // Variant: underline, size: sm
+        "group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=sm]/tabs-list:py-1.5 group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=sm]/tabs-list:pr-1.5",
+        // Variant: underline, size: md
+        "group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=md]/tabs-list:py-2 group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=md]/tabs-list:pr-2",
+        // Variant: underline - vertical - active - border applied
+        "group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:border-r group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:border-r-transparent group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:data-[state=active]:border-r-ink-gray-8 group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:-right-px",
 
         // "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring focus-visible:ring-[3px] focus-visible:outline-1 group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none",
         // "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent",
@@ -152,7 +163,7 @@ function TabsContent({
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn("flex-1 outline-none", className)}
+      className={cn("flex-1 outline-none group-data-[orientation=vertical]/tabs:px-2 group-data-[orientation=horizontal]/tabs:py-2 group-data-[orientation=vertical]/tabs:h-full", className)}
       {...props}
     />
   )
