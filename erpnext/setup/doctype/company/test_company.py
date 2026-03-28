@@ -199,7 +199,9 @@ class TestCompany(ERPNextTestSuite):
 	def test_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, setup_demo_data
 
-		setup_demo_data()
+		self.load_test_records("Company")
+
+		setup_demo_data(self.globalTestRecords["Company"][0]["company_name"])
 		company_name = frappe.db.get_value("Company", {"name": ("like", "%(Demo)")})
 		self.assertTrue(company_name)
 
