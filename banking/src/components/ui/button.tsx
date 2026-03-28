@@ -31,7 +31,7 @@ const buttonVariants = cva(
         violet: "focus-visible:shadow-focus-violet",
       },
       isIconButton: {
-        true: "",
+        true: "px-0",
         false: ""
       }
     },
@@ -229,7 +229,7 @@ function Button({
       data-variant={variant}
       data-size={size}
       data-theme={theme}
-      className={cn(buttonVariants({ variant, size, theme, className }))}
+      className={cn(buttonVariants({ variant, size, theme, className, isIconButton }))}
       {...props}
     />
   )

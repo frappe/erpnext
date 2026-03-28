@@ -15,7 +15,7 @@ const MatchFilters = () => {
             <Tooltip>
                 <PopoverTrigger asChild>
                     <TooltipTrigger asChild>
-                        <Button size='sm' variant='outline' aria-label={_("Configure match filters for vouchers")}>
+                        <Button size='md' isIconButton variant='outline' aria-label={_("Configure match filters for vouchers")}>
                             <Settings />
                         </Button>
                     </TooltipTrigger>

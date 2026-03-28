@@ -16,6 +16,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { H1 } from "@/components/ui/typography"
 import _ from "@/lib/translate"
 import { useLayoutEffect, useRef, useState } from "react"
+import { AlertTriangleIcon, CheckCircleIcon, ListIcon, ScrollTextIcon, ShuffleIcon } from "lucide-react"
 
 
 const BankReconciliation = () => {
@@ -53,12 +54,12 @@ const BankReconciliation = () => {
                 <BankBalance />
             </div>
             <Tabs defaultValue="Match and Reconcile">
-                <TabsList className="w-full">
-                    <TabsTrigger value="Match and Reconcile">{_("Match and Reconcile")}</TabsTrigger>
-                    <TabsTrigger value="Bank Reconciliation Statement">{_("Bank Reconciliation Statement")}</TabsTrigger>
-                    <TabsTrigger value="Bank Transactions">{_("Bank Transactions")}</TabsTrigger>
-                    <TabsTrigger value="Bank Clearance Summary">{_("Bank Clearance Summary")}</TabsTrigger>
-                    <TabsTrigger value="Incorrectly Cleared Entries">{_("Incorrectly Cleared Entries")}</TabsTrigger>
+                <TabsList>
+                    <TabsTrigger value="Match and Reconcile"><ShuffleIcon /> {_("Match and Reconcile")}</TabsTrigger>
+                    <TabsTrigger value="Bank Reconciliation Statement"><ScrollTextIcon /> {_("Bank Reconciliation Statement")}</TabsTrigger>
+                    <TabsTrigger value="Bank Transactions"><ListIcon />{_("Bank Transactions")}</TabsTrigger>
+                    <TabsTrigger value="Bank Clearance Summary"><CheckCircleIcon />{_("Bank Clearance Summary")}</TabsTrigger>
+                    <TabsTrigger value="Incorrectly Cleared Entries"><AlertTriangleIcon /> {_("Incorrectly Cleared Entries")}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="Match and Reconcile">
                     <MatchAndReconcile contentHeight={remainingHeightAfterTabs} />

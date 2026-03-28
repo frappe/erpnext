@@ -142,6 +142,9 @@
 
   --shadow-switch: 0px 3px 3px 0px rgba(0, 0, 0, 0.05);
 
+  --shadow-active-tab: 0px 2px 5px 0px rgba(0, 0, 0, 0.14), 0px 0px 1.5px 0px rgba(0, 0, 0, 0.16), 0px 0.25px 1.5px 0px rgba(255, 255, 255, 0.08) inset;
+
+
   /** Spacing **/
   --spacing-4.5: 1.125rem;
   --spacing-5.5: 1.375rem;
