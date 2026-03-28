@@ -136,7 +136,7 @@ const TransactionTypeSelector = () => {
                                 <FormLabel
                                     className={cn(
                                         "w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md border cursor-pointer transition-all hover:bg-accent hover:text-accent-foreground",
-                                        "peer-data-[state=checked]:bg-destructive peer-data-[state=checked]:text-white peer-data-[state=checked]:border-destructive peer-data-[state=checked]:hover:bg-destructive peer-data-[state=checked]:hover:text-white"
+                                        "peer-data-[state=checked]:bg-surface-red-5 peer-data-[state=checked]:text-white peer-data-[state=checked]:border-bg-surface-red-5 peer-data-[state=checked]:hover:bg-surface-red-5 peer-data-[state=checked]:hover:text-white"
                                     )}
                                 >
                                     <ArrowUpRight className="w-5 h-5 peer-data-[state=checked]:text-ink-red-3-foreground" />
@@ -212,8 +212,8 @@ const DescriptionRules = () => {
                         />
                     </div>
                     <div>
-                        <Button variant="ghost" type='button' isIconButton onClick={() => remove(index)} disabled={fields.length === 1}>
-                            <Trash2 className="w-4 h-4 text-ink-red-3" />
+                        <Button variant="ghost" theme='red' type='button' isIconButton onClick={() => remove(index)} disabled={fields.length === 1}>
+                            <Trash2 />
                         </Button>
                     </div>
                 </div>
@@ -221,7 +221,7 @@ const DescriptionRules = () => {
 
             <div>
                 <Button variant="outline" type='button' onClick={addRow}>
-                    <PlusCircleIcon className="w-4 h-4" />
+                    <PlusCircleIcon />
                     {_("Add Rule")}
                 </Button>
             </div>
@@ -458,7 +458,7 @@ const AmountFormulaRenderer = ({ value }: { value?: string }) => {
             <TooltipTrigger asChild>
                 <span className={cn("font-mono text-right tabular-nums underline underline-offset-4", isComputationValid ? "" : "text-ink-red-3")}>{value}</span>
             </TooltipTrigger>
-            <TooltipContent className={isComputationValid ? "" : "bg-destructive"} arrowClassName={isComputationValid ? "" : "bg-destructive fill-destructive"}>
+            <TooltipContent className={isComputationValid ? "" : "bg-surface-red-5"} arrowClassName={isComputationValid ? "" : "bg-surface-red-5 fill-surface-red-5"}>
                 <p className="text-sm">
                     {isComputationValid ? _("This is a formula based value.") : _("This is not a valid formula. Check the variable used in the formula.")}
                     <br /><br />

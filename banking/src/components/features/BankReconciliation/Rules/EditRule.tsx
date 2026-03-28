@@ -46,7 +46,7 @@ const EditRule = ({ onClose, ruleID }: Props) => {
 
             <SheetFooter>
                 <SheetClose asChild>
-                    <Button type='button' variant='outline'>
+                    <Button type='button' variant='outline' size='md'>
                         {_("Close")}
                     </Button>
                 </SheetClose>
@@ -91,11 +91,11 @@ const EditRuleForm = ({ rule, onClose, mutate }: { rule: MintBankTransactionRule
                 </div>
 
                 <SheetFooter>
-                    <Button type='submit' disabled={loading}>
+                    <Button type='submit' disabled={loading} size='md'>
                         {_("Save")}
                     </Button>
                     <SheetClose asChild>
-                        <Button type='button' variant='outline' disabled={loading}>
+                        <Button type='button' variant='outline' disabled={loading} size='md'>
                             {_("Close")}
                         </Button>
                     </SheetClose>

@@ -51,11 +51,11 @@ const CreateNewRule = ({ onCreate }: Props) => {
                 </div>
 
                 <SheetFooter>
-                    <Button type='submit' disabled={loading}>
+                    <Button type='submit' size='md' disabled={loading}>
                         {_("Save")}
                     </Button>
                     <SheetClose asChild>
-                        <Button type='button' variant='outline' disabled={loading}>
+                        <Button type='button' size='md' variant='outline' disabled={loading}>
                             {_("Close")}
                         </Button>
                     </SheetClose>

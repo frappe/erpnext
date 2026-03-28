@@ -174,7 +174,7 @@ const ClosingBalanceAsPerStatement = () => {
                 <DialogTrigger>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <div className="flex items-center gap-4 underline cursor-pointer underline-offset-6">
+                            <div className="flex items-center gap-4 underline cursor-pointer underline-offset-6" role="button">
                                 {isLoading ? <Skeleton className="w-[150px] h-9" /> : <StatValue className="font-mono">{formatCurrency(flt(data?.message?.balance, 2), bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))}</StatValue>}
                                 <Edit className="w-4 h-4" />
                             </div>
@@ -262,9 +262,9 @@ const ClosingBalanceForm = ({ defaultBalance, date, bankAccount, onClose }: { de
 
             <DialogFooter>
                 <DialogClose asChild>
-                    <Button variant={'outline'} disabled={loading}>{_("Cancel")}</Button>
+                    <Button variant={'outline'} size='md' disabled={loading}>{_("Cancel")}</Button>
                 </DialogClose>
-                <Button type='submit' disabled={loading}>{_("Save")}</Button>
+                <Button type='submit' size='md' disabled={loading}>{_("Save")}</Button>
             </DialogFooter>
 
             <ClosingBalancesList bankAccount={bankAccount} date={date} />
@@ -319,7 +319,7 @@ const ClosingBalancesList = ({ bankAccount, date }: { bankAccount: SelectedBank 
                         <TableCell className="text-right">
                             <Button
                                 title={_("Delete")}
-                                type='button' isIconButton className="h-fit w-fit p-0 hover:bg-transparent active:bg-transparent hover:text-ink-red-3" variant='ghost' onClick={() => onDelete(item.name)}>
+                                type='button' isIconButton variant='ghost' onClick={() => onDelete(item.name)}>
                                 <Trash2 />
                             </Button>
                         </TableCell>

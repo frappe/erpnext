@@ -258,9 +258,9 @@ const BulkPaymentEntryForm = ({ transactions }: { transactions: UnreconciledTran
 
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button variant={'outline'} disabled={loading}>{_("Cancel")}</Button>
+                        <Button size='md' variant={'outline'} disabled={loading}>{_("Cancel")}</Button>
                     </DialogClose>
-                    <Button type='submit' disabled={loading}>{_("Submit")}</Button>
+                    <Button size='md' type='submit' disabled={loading}>{_("Submit")}</Button>
                 </DialogFooter>
             </div>
         </form>
@@ -1112,9 +1112,9 @@ const FetchInvoicesModal = ({ onClose }: { onClose: () => void }) => {
             </div>
             <DialogFooter className="pt-2">
                 <DialogClose asChild>
-                    <Button variant='ghost' disabled={allocateAmountToReferencesLoading}>Cancel</Button>
+                    <Button variant='outline' size='md' disabled={allocateAmountToReferencesLoading}>Cancel</Button>
                 </DialogClose>
-                <Button onClick={onSelect} disabled={allocateAmountToReferencesLoading}>Select</Button>
+                <Button onClick={onSelect} size='md' disabled={allocateAmountToReferencesLoading}>Select</Button>
             </DialogFooter>
         </div>
 

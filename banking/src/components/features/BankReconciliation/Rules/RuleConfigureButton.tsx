@@ -54,7 +54,7 @@ const RuleConfigureButton = () => {
             <Tooltip>
                 <TooltipTrigger asChild>
                     <SheetTrigger asChild>
-                        <Button isIconButton variant='outline' title={_("Transaction Matching Rules")}>
+                        <Button isIconButton variant='outline' size='md' title={_("Transaction Matching Rules")}>
                             <ZapIcon />
                         </Button>
                     </SheetTrigger>
@@ -66,7 +66,7 @@ const RuleConfigureButton = () => {
             <SheetContent className="min-w-3xl">
                 <SheetHeader>
                     <div className="flex items-center gap-2">
-                        {(selectedRule || isNewRule) && <Button variant='ghost' isIconButton className="p-0" onClick={() => {
+                        {(selectedRule || isNewRule) && <Button variant='ghost' isIconButton onClick={() => {
                             setSelectedRule(null)
                             setIsNewRule(false)
                         }}>
@@ -167,9 +167,9 @@ const RuleList = ({ setSelectedRule, setIsNewRule }: { setSelectedRule: (rule: s
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" disabled={isRunningRules}>
                                 {isRunningRules ? (
-                                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                                    <RefreshCw className="animate-spin" />
                                 ) : (
-                                    <Play className="w-4 h-4 mr-2" />
+                                    <Play />
                                 )}
                                 {isRunningRules ? _("Running...") : _("Run Rules")}
                             </Button>
@@ -205,7 +205,7 @@ const RuleList = ({ setSelectedRule, setIsNewRule }: { setSelectedRule: (rule: s
                 {data && data.length === 0 && <div className="flex flex-col justify-center h-48 gap-4 items-center text-center">
                     {_("No rules found")}
 
-                    <Button type='button' onClick={() => setIsNewRule(true)}>
+                    <Button type='button' onClick={() => setIsNewRule(true)} size='md'>
                         {_("Create a new rule")}
                     </Button>
                 </div>}
@@ -235,11 +235,11 @@ const RuleList = ({ setSelectedRule, setIsNewRule }: { setSelectedRule: (rule: s
                 )}
             </div>
             <SheetFooter>
-                <Button type='button' onClick={() => setIsNewRule(true)}>
+                <Button type='button' onClick={() => setIsNewRule(true)} size='md'>
                     {_("Create a new rule")}
                 </Button>
                 <SheetClose asChild>
-                    <Button type='button' variant='outline'>
+                    <Button type='button' variant='outline' size='md'>
                         {_("Close")}
                     </Button>
                 </SheetClose>

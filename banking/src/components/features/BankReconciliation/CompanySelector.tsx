@@ -41,6 +41,7 @@ const CompanySelector = ({ onChange }: { onChange?: (company: string) => void })
             <Button
                 variant="outline"
                 role="combobox"
+                size='md'
                 aria-expanded={open}
                 className="justify-between"
             >

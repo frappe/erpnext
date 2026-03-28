@@ -44,7 +44,7 @@ const ActionLog = () => {
             <Tooltip>
                 <TooltipTrigger asChild>
                     <DialogTrigger asChild>
-                        <Button variant={'outline'} isIconButton>
+                        <Button variant={'outline'} isIconButton size='md'>
                             <HistoryIcon />
                         </Button>
                     </DialogTrigger>
@@ -61,7 +61,7 @@ const ActionLog = () => {
                 <ActionLogDialogContent />
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button variant={'outline'} onClick={() => setIsOpen(false)}>{_("Close")}</Button>
+                        <Button variant={'outline'} size='md' onClick={() => setIsOpen(false)}>{_("Close")}</Button>
                     </DialogClose>
                 </DialogFooter>
             </DialogContent>
@@ -411,6 +411,7 @@ const CancelActionLogItem = ({ item, type, timestamp, bank }: { item: ActionLogI
                     <Button
                         variant={'ghost'}
                         isIconButton
+                        theme='red'
                         title={_("Cancel")}
                         className='hover:text-ink-red-3 hover:bg-destructive/5 text-ink-gray-5 hidden group-hover:inline-flex'>
                         <CircleXIcon className='w-8 h-8' />
@@ -468,7 +469,7 @@ const CancelActionLogItem = ({ item, type, timestamp, bank }: { item: ActionLogI
                 <AlertDialogCancel disabled={loading}>
                     {_("Close")}
                 </AlertDialogCancel>
-                <Button theme="red" disabled={loading} onClick={onUndo}>
+                <Button theme="red" size='md' disabled={loading} onClick={onUndo}>
                     {loading ? <Loader2Icon className='w-4 h-4 animate-spin' /> : _(("Undo"))}
                 </Button>
             </AlertDialogFooter>

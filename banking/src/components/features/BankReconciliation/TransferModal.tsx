@@ -135,9 +135,9 @@ const BulkInternalTransferForm = ({ transactions }: { transactions: Unreconciled
 
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button variant={'outline'} disabled={loading}>{_("Cancel")}</Button>
+                        <Button size='md' variant={'outline'} disabled={loading}>{_("Cancel")}</Button>
                     </DialogClose>
-                    <Button type='submit' disabled={loading}>{_("Transfer")}</Button>
+                    <Button size='md' type='submit' disabled={loading}>{_("Transfer")}</Button>
                 </DialogFooter>
             </div>
         </form>
@@ -366,9 +366,9 @@ const InternalTransferForm = ({ selectedBankAccount, selectedTransaction }: { se
                 </div>
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button variant={'outline'} disabled={loading}>{_("Cancel")}</Button>
+                        <Button size='md' variant={'outline'} disabled={loading}>{_("Cancel")}</Button>
                     </DialogClose>
-                    <Button type='submit' disabled={loading}>{_("Transfer")}</Button>
+                    <Button size='md' type='submit' disabled={loading}>{_("Transfer")}</Button>
                 </DialogFooter>
             </div>
         </form>
@@ -536,13 +536,11 @@ const RecommendedTransferAccount = ({ transaction, onAccountChange }: { transact
                     <div>
                         <Button
                             onClick={selectTransaction}
-                            className={cn("text-white hover:scale-[1.02] transition-all duration-200 font-medium",
-                                isSuggested ? "bg-green-600 hover:bg-green-700 border-green-600" : "bg-purple-600 hover:bg-purple-700 border-purple-600"
-                            )}
-                            size="sm"
+                            theme={isSuggested ? "green" : "violet"}
+                            size="md"
                             type='button'
                         >
-                            {isSuggested ? <CheckCircle className="w-4 h-4 mr-2" /> : <CheckIcon className="w-4 h-4 mr-2" />}
+                            {isSuggested ? <CheckCircle /> : <CheckIcon />}
                             {isSuggested ? _("Accepted") : _("Use Suggestion")}
                         </Button>
                     </div>

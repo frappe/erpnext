@@ -146,8 +146,6 @@ const BankClearanceSummaryView = () => {
             )}
         />
 
-
-
         {data && data.message.result.length === 0 &&
             <Alert variant='default'>
                 <AlertCircle />
@@ -263,9 +261,9 @@ const ForceClearVoucherForm = ({ voucher, bankAccount, companyID, onClose }: { v
 
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button variant={'outline'} disabled={loading}>{_("Cancel")}</Button>
+                        <Button variant={'outline'} disabled={loading} size='md'>{_("Cancel")}</Button>
                     </DialogClose>
-                    <Button type='submit' disabled={loading}>{_("Submit")}</Button>
+                    <Button type='submit' disabled={loading} size='md'>{_("Submit")}</Button>
                 </DialogFooter>
             </div>
         </form>

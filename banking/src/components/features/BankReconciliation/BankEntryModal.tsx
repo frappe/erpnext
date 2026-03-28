@@ -141,9 +141,9 @@ const BulkBankEntryForm = ({ selectedTransactions }: { selectedTransactions: Unr
 
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button variant={'outline'} disabled={loading}>{_("Cancel")}</Button>
+                        <Button size='md' variant={'outline'} disabled={loading}>{_("Cancel")}</Button>
                     </DialogClose>
-                    <Button type='submit' disabled={loading}>{_("Submit")}</Button>
+                    <Button size='md' type='submit' disabled={loading}>{_("Submit")}</Button>
                 </DialogFooter>
             </div>
         </form>
@@ -440,9 +440,9 @@ const BankEntryForm = ({ selectedTransaction }: { selectedTransaction: Unreconci
 
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button variant={'outline'} disabled={loading}>{_("Cancel")}</Button>
+                        <Button size='md' variant={'outline'} disabled={loading}>{_("Cancel")}</Button>
                     </DialogClose>
-                    <Button type='submit' disabled={loading}>{_("Submit")}</Button>
+                    <Button size='md' type='submit' disabled={loading}>{_("Submit")}</Button>
                 </DialogFooter>
             </div>
         </form>

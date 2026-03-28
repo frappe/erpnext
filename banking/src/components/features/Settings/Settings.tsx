@@ -23,7 +23,7 @@ const Settings = () => {
             <Tooltip>
                 <TooltipTrigger asChild>
                     <DialogTrigger asChild>
-                        <Button variant={'outline'} isIconButton>
+                        <Button variant={'outline'} isIconButton size='md'>
                             <SettingsIcon />
                         </Button>
                     </DialogTrigger>
@@ -140,9 +140,9 @@ const SettingsDialogContent = ({ onClose }: { onClose: VoidFunction }) => {
 
             <DialogFooter className='mt-2'>
                 <DialogClose asChild>
-                    <Button variant={'outline'} disabled={loading}>{_("Close")}</Button>
+                    <Button variant={'outline'} disabled={loading} size='md'>{_("Close")}</Button>
                 </DialogClose>
-                <Button type='submit' disabled={loading}>{_("Save")}</Button>
+                <Button type='submit' disabled={loading} size='md'>{_("Save")}</Button>
             </DialogFooter>
         </form>
     </Form>
