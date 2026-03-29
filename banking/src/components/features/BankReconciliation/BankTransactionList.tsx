@@ -3,7 +3,7 @@ import { MissingFiltersBanner } from "./MissingFiltersBanner"
 import { bankRecDateAtom, bankRecUnreconcileModalAtom, selectedBankAccountAtom } from "./bankRecAtoms"
 import { Paragraph } from "@/components/ui/typography"
 import { formatDate } from "@/lib/date"
-import { Table, TableBody, TableCell, TableHead, TableRow } from "@/components/ui/table"
+import { ListView, type ListViewColumnMeta } from "@/components/ui/list-view"
 import { formatCurrency, getCurrencyFormatInfo } from "@/lib/numbers"
 import { getCompanyCurrency } from "@/lib/company"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -20,9 +20,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { getCurrencySymbol } from "@/lib/currency"
 import { cn } from "@/lib/utils"
 import { useDebounceValue } from "usehooks-ts"
-import { useMemo, useState } from "react"
+import type { ColumnDef } from "@tanstack/react-table"
+import { useCallback, useMemo, useState } from "react"
 import { Link } from "react-router"
-import { TableVirtuoso } from "react-virtuoso"
 
 const BankTransactions = () => {
     const selectedBank = useAtomValue(selectedBankAccountAtom)
@@ -49,9 +49,135 @@ const BankTransactionListView = () => {
 
     const setBankRecUnreconcileModalAtom = useSetAtom(bankRecUnreconcileModalAtom)
 
-    const onUndo = (transaction: BankTransaction) => {
-        setBankRecUnreconcileModalAtom(transaction.name)
-    }
+    const onUndo = useCallback(
+        (transaction: BankTransaction) => {
+            setBankRecUnreconcileModalAtom(transaction.name)
+        },
+        [setBankRecUnreconcileModalAtom],
+    )
+
+    const accountCurrency = useMemo(
+        () => bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ""),
+        [bankAccount?.account_currency, bankAccount?.company],
+    )
+
+    const transactionColumns = useMemo<ColumnDef<BankTransaction, unknown>[]>(
+        () => [
+            {
+                accessorKey: "date",
+                header: _("Date"),
+                size: 112,
+                meta: { tabularNums: true } satisfies ListViewColumnMeta,
+                cell: ({ row }) => formatDate(row.original.date),
+            },
+            {
+                accessorKey: "description",
+                header: _("Description"),
+                size: 250,
+                // meta: { gridWidth: "minmax(0,2fr)" } satisfies ListViewColumnMeta,
+                cell: ({ row }) => row.original.description,
+            },
+            {
+                accessorKey: "reference_number",
+                header: _("Reference #"),
+                size: 128,
+                cell: ({ row }) => row.original.reference_number,
+            },
+            {
+                accessorKey: "withdrawal",
+                header: _("Withdrawal"),
+                size: 120,
+                meta: { align: "right" } satisfies ListViewColumnMeta,
+                cell: ({ row }) => formatCurrency(row.original.withdrawal, accountCurrency),
+            },
+            {
+                accessorKey: "deposit",
+                header: _("Deposit"),
+                size: 120,
+                meta: { align: "right" } satisfies ListViewColumnMeta,
+                cell: ({ row }) => formatCurrency(row.original.deposit, accountCurrency),
+            },
+            {
+                accessorKey: "unallocated_amount",
+                header: _("Unallocated"),
+                size: 120,
+                meta: { align: "right" } satisfies ListViewColumnMeta,
+                cell: ({ row }) => formatCurrency(row.original.unallocated_amount, accountCurrency),
+            },
+            {
+                accessorKey: "transaction_type",
+                header: _("Type"),
+                size: 112,
+                cell: ({ row }) =>
+                    row.original.transaction_type ? <Badge>{row.original.transaction_type}</Badge> : null,
+            },
+            {
+                id: "status",
+                header: _("Status"),
+                size: 168,
+                meta: { truncate: false, truncateTooltip: false } satisfies ListViewColumnMeta,
+                cell: ({ row }) => {
+                    const tx = row.original
+                    if (!tx.allocated_amount || (tx.allocated_amount && tx.allocated_amount === 0)) {
+                        return (
+                            <Badge theme="red">
+                                <XCircle />
+                                {_("Not Reconciled")}
+                            </Badge>
+                        )
+                    }
+                    if (tx.allocated_amount && tx.allocated_amount > 0 && tx.unallocated_amount !== 0) {
+                        return (
+                            <Badge theme="orange">
+                                <CheckCircle2 />
+                                {_("Partially Reconciled")}
+                            </Badge>
+                        )
+                    }
+                    return (
+                        <Badge theme="green">
+                            <CheckCircle2 />
+                            {_("Reconciled")}
+                        </Badge>
+                    )
+                },
+            },
+            {
+                id: "actions",
+                header: _("Actions"),
+                size: 200,
+                enableResizing: false,
+                meta: { truncate: false, truncateTooltip: false } satisfies ListViewColumnMeta,
+                cell: ({ row }) => (
+                    <div className="flex gap-2 items-center">
+                        <Button variant="ghost" asChild size='sm'>
+                            <a
+                                href={`/app/bank-transaction/${row.original.name}`}
+                                target="_blank"
+
+                                rel="noreferrer"
+                            // className="text-ink-gray-8 underline underline-offset-4 inline-flex gap-2"
+                            >
+                                {_("View")} <ExternalLink className="w-4 h-4" />
+                            </a>
+                        </Button>
+                        {row.original.allocated_amount && row.original.allocated_amount > 0 ? (
+                            <Button
+                                variant="ghost"
+                                onClick={() => onUndo(row.original)}
+                                size="sm"
+                                theme='red'
+                            >
+                                <Undo2 />
+                                {_("Undo")}
+                            </Button>
+                        ) : null}
+                    </div>
+                ),
+            },
+        ],
+        [_, accountCurrency, onUndo],
+    )
 
     const [search, setSearch] = useDebounceValue('', 250)
     const [amountFilter, setAmountFilter] = useState<{ value: number, stringValue?: string | number }>({ value: 0, stringValue: '0.00' })
@@ -136,82 +262,18 @@ const BankTransactionListView = () => {
             setStatus={setStatus}
         />}
 
-        <TableVirtuoso
-            data={filteredResults}
-            components={{
-                Table: Table,
-                TableBody: TableBody,
-                TableRow: TableRow,
-            }}
-            fixedHeaderContent={() => (
-                <TableRow>
-                    <TableHead>{_("Date")}</TableHead>
-                    <TableHead>{_("Description")}</TableHead>
-                    <TableHead>{_("Reference #")}</TableHead>
-                    <TableHead className="text-right">{_("Withdrawal")}</TableHead>
-                    <TableHead className="text-right">{_("Deposit")}</TableHead>
-                    <TableHead className="text-right">{_("Unallocated")}</TableHead>
-                    <TableHead>{_("Type")}</TableHead>
-                    <TableHead>{_("Status")}</TableHead>
-                    <TableHead>{_("Actions")}</TableHead>
-                </TableRow>
-            )}
-            itemContent={(_index, row) => (
-                <>
-                    <TableCell>{formatDate(row.date)}</TableCell>
-                    <TableCell className="max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap"><span title={row.description}>{row.description}</span></TableCell>
-                    <TableCell>{row.reference_number}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(row.withdrawal, bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(row.deposit, bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(row.unallocated_amount, bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))}</TableCell>
-                    <TableCell>{row.transaction_type ? <Badge>{row.transaction_type}</Badge> : null}</TableCell>
-                    <TableCell>
-                        {(!row.allocated_amount || (row.allocated_amount && row.allocated_amount === 0)) ?
-                            <Badge theme="red">
-                                <XCircle />
-                                {_("Not Reconciled")}
-                            </Badge>
-                            :
-                            (row.allocated_amount && row.allocated_amount > 0 && row.unallocated_amount !== 0) ?
-                                <Badge theme="orange">
-                                    <CheckCircle2 />
-                                    {_("Partially Reconciled")}
-                                </Badge>
-                                :
-                                <Badge theme="green">
-                                    <CheckCircle2 />
-                                    {_("Reconciled")}
-                                </Badge>}
-                    </TableCell>
-                    <TableCell>
-                        <div className="flex gap-2">
-                            <div>
-                                <Button variant='link' size='sm' asChild>
-                                    <a
-                                        href={`/app/bank-transaction/${row.name}`}
-                                        target="_blank"
-                                        className="underline underline-offset-4"
-                                    >{_("View")} <ExternalLink />
-                                    </a>
-                                </Button>
-                            </div>
-                            {(row.allocated_amount && row.allocated_amount > 0) ? <Button
-                                variant='link'
-                                onClick={() => onUndo(row)}
-                                size='sm'
-                                className="text-ink-red-3 px-0">
-                                <Undo2 />
-                                {_("Undo")}
-                            </Button> : null}
-                        </div>
-                    </TableCell>
-                </>
-            )}
-            style={{ minHeight: 'calc(100vh - 200px)' }}
-            totalCount={filteredResults?.length}
-        />
+        {data && data.message.length > 0 ? (
+            <ListView
+                data={filteredResults}
+                columns={transactionColumns}
+                getRowId={(row) => row.name}
+                maxHeight="calc(100vh - 200px)"
+                scrollAreaClassName="min-h-[calc(100vh-200px)]"
+                emptyState={_("No transactions match the current filters.")}
+            />
+        ) : null}
 
-        {filteredResults.length === 0 &&
+        {filteredResults.length === 0 && data &&
             <Alert variant='default'>
                 <DollarSign />
                 <AlertTitle>{_("No transactions found")}</AlertTitle>

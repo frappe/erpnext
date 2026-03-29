@@ -3,11 +3,12 @@ import { MissingFiltersBanner } from "./MissingFiltersBanner"
 import { bankRecDateAtom, selectedBankAccountAtom } from "./bankRecAtoms"
 import { useCurrentCompany } from "@/hooks/useCurrentCompany"
 import { Paragraph } from "@/components/ui/typography"
-import { useMemo } from "react"
+import type { ColumnDef } from "@tanstack/react-table"
+import { useCallback, useMemo } from "react"
 import { useFrappeGetCall, useFrappePostCall } from "frappe-react-sdk"
 import { QueryReportReturnType } from "@/types/custom/Reports"
 import { formatDate } from "@/lib/date"
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ListView, type ListViewColumnMeta } from "@/components/ui/list-view"
 import { formatCurrency } from "@/lib/numbers"
 import { getCompanyCurrency } from "@/lib/company"
 import { getErrorMessage, slug } from "@/lib/frappe"
@@ -74,20 +75,107 @@ const IncorrectlyClearedEntriesView = () => {
 
     const { call: clearClearingDate } = useFrappePostCall('mint.apis.bank_reconciliation.clear_clearing_date')
 
-    const onClearClick = (voucher_type: string, voucher_name: string) => {
-        clearClearingDate({ voucher_type, voucher_name })
-            .then(() => {
-                toast.success(_('Cleared'), {
-                    duration: 1000
+    const onClearClick = useCallback(
+        (voucher_type: string, voucher_name: string) => {
+            clearClearingDate({ voucher_type, voucher_name })
+                .then(() => {
+                    toast.success(_("Cleared"), {
+                        duration: 1000,
+                    })
+                    mutate()
                 })
-                mutate()
-            }).catch((e) => {
-                toast.error(_("There was an error while performing the action."), {
-                    description: getErrorMessage(e),
-                    duration: 5000
+                .catch((e) => {
+                    toast.error(_("There was an error while performing the action."), {
+                        description: getErrorMessage(e),
+                        duration: 5000,
+                    })
                 })
-            })
-    }
+        },
+        [clearClearingDate, mutate, _],
+    )
+
+    const accountCurrency = useMemo(
+        () => bankAccount?.account_currency ?? getCompanyCurrency(companyID),
+        [bankAccount?.account_currency, companyID],
+    )
+
+    const incorrectlyClearedColumns = useMemo<ColumnDef<IncorrectlyClearedEntry, unknown>[]>(
+        () => [
+            {
+                accessorKey: "payment_document",
+                header: _("Document Type"),
+                size: 128,
+                cell: ({ row }) => _(row.original.payment_document),
+            },
+            {
+                id: "payment_entry",
+                header: _("Payment Document"),
+                size: 160,
+                meta: {
+                    getTooltipText: (r) => {
+                        const x = r as IncorrectlyClearedEntry
+                        return [x.payment_document, x.payment_entry].filter(Boolean).join(" · ") || undefined
+                    },
+                } satisfies ListViewColumnMeta,
+                cell: ({ row }) => (
+                    <a
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-ink-gray-8 block min-w-0 w-full underline underline-offset-4"
+                        href={`/app/${slug(row.original.payment_document)}/${row.original.payment_entry}`}
+                    >
+                        {row.original.payment_entry}
+                    </a>
+                ),
+            },
+            {
+                accessorKey: "debit",
+                header: _("Debit"),
+                size: 120,
+                meta: { align: "right" } satisfies ListViewColumnMeta,
+                cell: ({ row }) => formatCurrency(row.original.debit, accountCurrency),
+            },
+            {
+                accessorKey: "credit",
+                header: _("Credit"),
+                size: 120,
+                meta: { align: "right" } satisfies ListViewColumnMeta,
+                cell: ({ row }) => formatCurrency(row.original.credit, accountCurrency),
+            },
+            {
+                accessorKey: "posting_date",
+                header: _("Posting Date"),
+                size: 118,
+                meta: { tabularNums: true } satisfies ListViewColumnMeta,
+                cell: ({ row }) => formatDate(row.original.posting_date),
+            },
+            {
+                accessorKey: "clearance_date",
+                header: _("Clearance Date"),
+                size: 118,
+                meta: { tabularNums: true } satisfies ListViewColumnMeta,
+                cell: ({ row }) => formatDate(row.original.clearance_date),
+            },
+            {
+                id: "actions",
+                header: _("Actions"),
+                size: 180,
+                enableResizing: false,
+                meta: { truncate: false, truncateTooltip: false } satisfies ListViewColumnMeta,
+                cell: ({ row }) => (
+                    <Button
+                        variant="link"
+                        size="sm"
+                        className="text-ink-red-3 px-0"
+                        onClick={() => onClearClick(row.original.payment_document, row.original.payment_entry)}
+                    >
+                        {_("Reset Clearing Date")}
+                    </Button>
+                ),
+            },
+        ],
+        [_, accountCurrency, onClearClick],
+    )
 
     return <div className="space-y-4 py-2">
 
@@ -109,40 +197,18 @@ const IncorrectlyClearedEntriesView = () => {
 
         {error && <ErrorBanner error={error} />}
 
-        {data && data.message.result.length > 0 &&
-            <Table>
-                <TableCaption>{_("Incorrectly cleared entries as per the report.")}</TableCaption>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-[100px]">{_("Document Type")}</TableHead>
-                        <TableHead>{_("Payment Document")}</TableHead>
-                        <TableHead className="text-right">{_("Debit")}</TableHead>
-                        <TableHead className="text-right">{_("Credit")}</TableHead>
-                        <TableHead>{_("Posting Date")}</TableHead>
-                        <TableHead>{_("Clearance Date")}</TableHead>
-                        <TableHead>{_("Actions")}</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {data.message.result.map((row: IncorrectlyClearedEntry) => (
-                        <TableRow key={row.payment_entry}>
-                            <TableCell>{_(row.payment_document)}</TableCell>
-                            <TableCell><a target="_blank" className="underline underline-offset-4" href={`/app/${slug(row.payment_document)}/${row.payment_entry}`}>{row.payment_entry}</a></TableCell>
-                            <TableCell className="text-right">{formatCurrency(row.debit, bankAccount?.account_currency ?? getCompanyCurrency(companyID))}</TableCell>
-                            <TableCell className="text-right">{formatCurrency(row.credit, bankAccount?.account_currency ?? getCompanyCurrency(companyID))}</TableCell>
-                            <TableCell>{formatDate(row.posting_date)}</TableCell>
-                            <TableCell>{formatDate(row.clearance_date)}</TableCell>
-                            <TableCell>
-                                <Button
-                                    variant='link'
-                                    size="sm"
-                                    className="text-ink-red-3 px-0"
-                                    onClick={() => onClearClick(row.payment_document, row.payment_entry)}>{_("Reset Clearing Date")}</Button>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>}
+        {data && data.message.result.length > 0 && (
+            <div className="space-y-2">
+                <p className="text-ink-gray-5 text-sm">{_("Incorrectly cleared entries as per the report.")}</p>
+                <ListView
+                    data={data.message.result}
+                    columns={incorrectlyClearedColumns}
+                    getRowId={(row) => `${row.payment_entry}-${row.posting_date}`}
+                    maxHeight="min(70vh, 640px)"
+                    emptyState={_("No rows to display.")}
+                />
+            </div>
+        )}
 
         {data && data.message.result.length === 0 &&
             <Alert variant='default'>

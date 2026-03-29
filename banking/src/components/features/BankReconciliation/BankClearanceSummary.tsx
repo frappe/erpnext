@@ -3,11 +3,13 @@ import { MissingFiltersBanner } from "./MissingFiltersBanner"
 import { bankRecDateAtom, SelectedBank, selectedBankAccountAtom } from "./bankRecAtoms"
 import { useCurrentCompany } from "@/hooks/useCurrentCompany"
 import { Paragraph } from "@/components/ui/typography"
-import { useMemo, useState } from "react"
+import type { ColumnDef } from "@tanstack/react-table"
+import { useCallback, useMemo, useState } from "react"
 import { useFrappeGetCall, useFrappePostCall, useSWRConfig } from "frappe-react-sdk"
 import { QueryReportReturnType } from "@/types/custom/Reports"
 import { formatDate } from "@/lib/date"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ListView, type ListViewColumnMeta } from "@/components/ui/list-view"
+import { Table, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { formatCurrency } from "@/lib/numbers"
 import { getCompanyCurrency } from "@/lib/company"
 import { slug } from "@/lib/frappe"
@@ -24,7 +26,6 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Form } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
 import { DateField } from "@/components/ui/form-elements"
-import { TableVirtuoso } from "react-virtuoso"
 
 const BankClearanceSummary = () => {
     const bankAccount = useAtomValue(selectedBankAccountAtom)
@@ -76,12 +77,131 @@ const BankClearanceSummaryView = () => {
 
     const [, copyToClipboard] = useCopyToClipboard()
 
-    const onCopy = (text: string) => {
-        copyToClipboard(text)
-            .then(() => {
+    const onCopy = useCallback(
+        (text: string) => {
+            copyToClipboard(text).then(() => {
                 toast.success(_("Copied to clipboard"))
             })
-    }
+        },
+        [copyToClipboard, _],
+    )
+
+    const accountCurrency = useMemo(
+        () => bankAccount?.account_currency ?? getCompanyCurrency(companyID),
+        [bankAccount?.account_currency, companyID],
+    )
+
+    const clearanceColumns = useMemo<ColumnDef<BankClearanceSummaryEntry, unknown>[]>(
+        () => [
+            {
+                accessorKey: "payment_document_type",
+                header: _("Document Type"),
+                size: 140,
+                cell: ({ row }) => _(row.original.payment_document_type),
+            },
+            {
+                id: "payment_entry",
+                header: _("Payment Document"),
+                size: 160,
+                meta: {
+                    getTooltipText: (r) => {
+                        const x = r as BankClearanceSummaryEntry
+                        return [x.payment_document_type, x.payment_entry].filter(Boolean).join(" · ") || undefined
+                    },
+                } satisfies ListViewColumnMeta,
+                cell: ({ row }) => (
+                    <a
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-ink-gray-8 block min-w-0 w-full underline underline-offset-4"
+                        href={`/app/${slug(row.original.payment_document_type)}/${row.original.payment_entry}`}
+                    >
+                        {row.original.payment_entry}
+                    </a>
+                ),
+            },
+            {
+                accessorKey: "posting_date",
+                header: _("Posting Date"),
+                size: 118,
+                meta: { tabularNums: true } satisfies ListViewColumnMeta,
+                cell: ({ row }) => formatDate(row.original.posting_date),
+            },
+            {
+                accessorKey: "cheque_no",
+                header: _("Cheque/Reference Number"),
+                size: 160,
+                cell: ({ row }) => {
+                    const ref = row.original.cheque_no ?? ""
+                    return (
+                        <Tooltip delayDuration={500}>
+                            <TooltipTrigger asChild>
+                                <button
+                                    type="button"
+                                    className="text-ink-gray-8 hover:underline min-w-0 w-full cursor-pointer truncate text-left underline-offset-4"
+                                    onClick={() => onCopy(ref)}
+                                >
+                                    {ref}
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                {ref}
+                            </TooltipContent>
+                        </Tooltip>
+
+                    )
+                },
+            },
+            {
+                accessorKey: "clearance_date",
+                header: _("Clearance Date"),
+                size: 118,
+                meta: { tabularNums: true } satisfies ListViewColumnMeta,
+                cell: ({ row }) => formatDate(row.original.clearance_date),
+            },
+            {
+                accessorKey: "against",
+                header: _("Against Account"),
+                size: 250,
+            },
+            {
+                accessorKey: "amount",
+                header: _("Amount"),
+                size: 150,
+                meta: { align: "right" } satisfies ListViewColumnMeta,
+                cell: ({ row }) => formatCurrency(row.original.amount, accountCurrency),
+            },
+            {
+                id: "status",
+                header: _("Status"),
+                size: 200,
+                meta: { truncate: false, truncateTooltip: false } satisfies ListViewColumnMeta,
+                cell: ({ row }) => {
+                    const r = row.original
+                    return r.clearance_date ? (
+                        <Badge theme="green">
+                            <CheckCircle2 />
+                            {_("Cleared")}
+                        </Badge>
+                    ) : (
+                        <div className="flex min-w-0 flex-wrap items-center gap-2">
+                            <Badge theme="red">
+                                <XCircle />
+                                {_("Not Cleared")}
+                            </Badge>
+                            <SetClearanceDateButton
+                                voucher={r}
+                                bankAccount={bankAccount}
+                                companyID={companyID}
+                                mutate={mutate}
+                            />
+                        </div>
+                    )
+                },
+            },
+        ],
+        [_, accountCurrency, bankAccount, companyID, mutate, onCopy],
+    )
 
     return <div className="space-y-4 py-2">
 
@@ -95,56 +215,16 @@ const BankClearanceSummaryView = () => {
 
         {error && <ErrorBanner error={error} />}
 
-        <TableVirtuoso
-            data={data?.message.result}
-            style={{ minHeight: 'calc(100vh - 200px)' }}
-            fixedHeaderContent={() => (
-                <TableRow>
-                    <TableHead>{_("Document Type")}</TableHead>
-                    <TableHead>{_("Payment Document")}</TableHead>
-                    <TableHead>{_("Posting Date")}</TableHead>
-                    <TableHead>{_("Cheque/Reference Number")}</TableHead>
-                    <TableHead>{_("Clearance Date")}</TableHead>
-                    <TableHead>{_("Against Account")}</TableHead>
-                    <TableHead className="text-right">{_("Amount")}</TableHead>
-                    <TableHead>{_("Status")}</TableHead>
-                </TableRow>
-            )}
-            components={{
-                Table: Table,
-                TableBody: TableBody,
-                TableRow: TableRow,
-            }}
-            itemContent={(_index, row) => (
-                <>
-                    <TableCell>{_(row.payment_document_type)}</TableCell>
-                    <TableCell><a target="_blank" className="underline underline-offset-4" href={`/app/${slug(row.payment_document_type)}/${row.payment_entry}`}>{row.payment_entry}</a></TableCell>
-                    <TableCell>{formatDate(row.posting_date)}</TableCell>
-                    <TableCell title={row.cheque_no}>
-                        <Tooltip delayDuration={500}>
-                            <TooltipTrigger onClick={() => onCopy(row.cheque_no ?? "")}>
-                                {row.cheque_no?.slice(0, 40)}{row.cheque_no?.length && row.cheque_no?.length > 40 ? "..." : ""}
-                            </TooltipTrigger>
-                            <TooltipContent align='start'>
-                                {_("Copy to clipboard")}
-                            </TooltipContent>
-                        </Tooltip>
-                    </TableCell>
-                    <TableCell>{formatDate(row.clearance_date)}</TableCell>
-                    <TableCell className="max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap" title={row.against}>{row.against}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(row.amount, bankAccount?.account_currency ?? getCompanyCurrency(companyID))}</TableCell>
-                    <TableCell>
-                        {row.clearance_date ? <Badge theme="green">
-                            <CheckCircle2 />
-                            {_("Cleared")}</Badge> : <div className="flex items-center gap-2"><Badge theme="red">
-                                <XCircle />
-                                {_("Not Cleared")}</Badge>
-                            <SetClearanceDateButton voucher={row} bankAccount={bankAccount} companyID={companyID} mutate={mutate} />
-                        </div>}
-                    </TableCell>
-                </>
-            )}
-        />
+        {data && data.message.result.length > 0 ? (
+            <ListView
+                data={data.message.result}
+                columns={clearanceColumns}
+                getRowId={(row) => `${row.payment_entry}-${row.posting_date}`}
+                maxHeight="calc(100vh - 200px)"
+                scrollAreaClassName="min-h-[calc(100vh-200px)]"
+                emptyState={_("No rows to display.")}
+            />
+        ) : null}
 
         {data && data.message.result.length === 0 &&
             <Alert variant='default'>

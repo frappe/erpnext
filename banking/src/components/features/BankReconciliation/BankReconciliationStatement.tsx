@@ -3,11 +3,12 @@ import { MissingFiltersBanner } from "./MissingFiltersBanner"
 import { bankRecDateAtom, selectedBankAccountAtom } from "./bankRecAtoms"
 import { useCurrentCompany } from "@/hooks/useCurrentCompany"
 import { Paragraph } from "@/components/ui/typography"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
+import type { ColumnDef } from "@tanstack/react-table"
 import { useFrappeGetCall } from "frappe-react-sdk"
 import { QueryReportReturnType } from "@/types/custom/Reports"
 import { formatDate } from "@/lib/date"
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ListView, type ListViewColumnMeta } from "@/components/ui/list-view"
 import { formatCurrency } from "@/lib/numbers"
 import { getCompanyCurrency } from "@/lib/company"
 import { slug } from "@/lib/frappe"
@@ -18,7 +19,6 @@ import { StatContainer, StatLabel, StatValue } from "@/components/ui/stats"
 import _ from "@/lib/translate"
 import { toast } from "sonner"
 import { useCopyToClipboard } from "usehooks-ts"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 const BankReconciliationStatement = () => {
     const bankAccount = useAtomValue(selectedBankAccountAtom)
@@ -70,13 +70,124 @@ const BankReconciliationStatementView = () => {
 
     const [, copyToClipboard] = useCopyToClipboard()
 
-    const onCopy = (text: string) => {
-        copyToClipboard(text)
-            .then(() => {
+    const onCopy = useCallback(
+        (text: string) => {
+            copyToClipboard(text).then(() => {
                 toast.success(_("Copied to clipboard"))
             })
-    }
+        },
+        [copyToClipboard, _],
+    )
 
+    const statementColumns = useMemo<ColumnDef<BankClearanceSummaryEntry, unknown>[]>(
+        () => [
+            {
+                accessorKey: "posting_date",
+                header: _("Posting Date"),
+                size: 118,
+                meta: { tabularNums: true } satisfies ListViewColumnMeta,
+                cell: ({ row }) => formatDate(row.original.posting_date),
+            },
+            {
+                accessorKey: "payment_document",
+                header: _("Document Type"),
+                size: 140,
+                cell: ({ row }) => _(row.original.payment_document),
+            },
+            {
+                id: "payment_entry",
+                header: _("Payment Document"),
+                size: 300,
+                meta: {
+                    getTooltipText: (r) => {
+                        const x = r as BankClearanceSummaryEntry
+                        const parts = [x.payment_document, x.payment_entry].filter(Boolean)
+                        return parts.length ? parts.join(" · ") : undefined
+                    },
+                } satisfies ListViewColumnMeta,
+                cell: ({ row }) => {
+                    const { payment_document, payment_entry } = row.original
+                    return payment_document ? (
+                        <a
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-ink-gray-8 block min-w-0 w-full underline underline-offset-4"
+                            href={`/app/${slug(payment_document)}/${payment_entry}`}
+                        >
+                            {payment_entry}
+                        </a>
+                    ) : (
+                        payment_entry
+                    )
+                },
+            },
+            {
+                accessorKey: "debit",
+                header: _("Debit"),
+                size: 112,
+                meta: { align: "right" } satisfies ListViewColumnMeta,
+                cell: ({ row }) => formatCurrency(row.original.debit, row.original.account_currency),
+            },
+            {
+                accessorKey: "credit",
+                header: _("Credit"),
+                size: 112,
+                meta: { align: "right" } satisfies ListViewColumnMeta,
+                cell: ({ row }) => formatCurrency(row.original.credit, row.original.account_currency),
+            },
+            {
+                accessorKey: "against_account",
+                header: _("Against Account"),
+                meta: { gridWidth: "minmax(0,1.25fr)" } satisfies ListViewColumnMeta,
+                cell: ({ row }) => (
+                    <a
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-ink-gray-8 block min-w-0 w-full underline underline-offset-4"
+                        href={`/app/account/${row.original.against_account}`}
+                    >
+                        {row.original.against_account}
+                    </a>
+                ),
+            },
+            {
+                accessorKey: "reference_no",
+                header: _("Reference #"),
+                cell: ({ row }) => {
+                    const ref = row.original.reference_no
+                    return (
+                        <button
+                            type="button"
+                            className="text-ink-gray-8 hover:underline min-w-0 w-full cursor-pointer truncate text-left underline-offset-4"
+                            onClick={() => onCopy(ref)}
+                        >
+                            {ref}
+                        </button>
+                    )
+                },
+            },
+            {
+                accessorKey: "ref_date",
+                header: _("Reference Date"),
+                size: 118,
+                meta: { tabularNums: true } satisfies ListViewColumnMeta,
+                cell: ({ row }) => formatDate(row.original.ref_date),
+            },
+            {
+                accessorKey: "clearance_date",
+                header: _("Clearance Date"),
+                size: 118,
+                meta: { tabularNums: true } satisfies ListViewColumnMeta,
+                cell: ({ row }) => formatDate(row.original.clearance_date),
+            },
+        ],
+        [_, onCopy],
+    )
+
+    const statementRows = useMemo(() => {
+        if (!data?.message.result) return []
+        return data.message.result.filter((row: BankClearanceSummaryEntry) => Boolean(row.payment_entry))
+    }, [data])
 
     return <div className="space-y-4 py-2">
 
@@ -92,56 +203,18 @@ const BankReconciliationStatementView = () => {
 
         {data && <SummarySection data={data} />}
 
-        {data && data.message.result.length > 0 &&
-            <Table>
-                <TableCaption>{_("Bank Reconciliation Statement")}</TableCaption>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>{_("Posting Date")}</TableHead>
-                        <TableHead>{_("Document Type")}</TableHead>
-                        <TableHead>{_("Payment Document")}</TableHead>
-                        <TableHead className="text-right">{_("Debit")}</TableHead>
-                        <TableHead className='text-right'>{_("Credit")}</TableHead>
-                        <TableHead>{_("Against Account")}</TableHead>
-                        <TableHead>{_("Reference #")}</TableHead>
-                        <TableHead>{_("Reference Date")}</TableHead>
-                        <TableHead>{_("Clearance Date")}</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {data.message.result.map((row: BankClearanceSummaryEntry, index) => {
-
-                        if (!row.payment_entry) return <TableRow key={index} />
-
-                        return <TableRow key={row.payment_entry}>
-                            <TableCell>{formatDate(row.posting_date)}</TableCell>
-                            <TableCell>{_(row.payment_document)}</TableCell>
-                            <TableCell>
-                                {row.payment_document ?
-                                    <a target="_blank" className="underline underline-offset-4" href={`/app/${slug(row.payment_document)}/${row.payment_entry}`}>{row.payment_entry}</a>
-                                    :
-                                    row.payment_entry}
-                            </TableCell>
-                            <TableCell className="text-right">{formatCurrency(row.debit, row.account_currency)}</TableCell>
-                            <TableCell className="text-right">{formatCurrency(row.credit, row.account_currency)}</TableCell>
-                            <TableCell className="max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap" title={row.against_account}><a target="_blank" className="underline underline-offset-4" href={`/app/account/${row.against_account}`}>{row.against_account}</a></TableCell>
-                            <TableCell>
-                                <Tooltip delayDuration={500}>
-                                    <TooltipTrigger onClick={() => onCopy(row.reference_no)}>
-                                        {row.reference_no?.slice(0, 40)}{row.reference_no?.length > 40 ? "..." : ""}
-                                    </TooltipTrigger>
-                                    <TooltipContent align='start'>
-                                        {_("Copy to clipboard")}
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TableCell>
-                            <TableCell>{formatDate(row.ref_date)}</TableCell>
-                            <TableCell>{formatDate(row.clearance_date)}</TableCell>
-                        </TableRow>
-                    }
-                    )}
-                </TableBody>
-            </Table>}
+        {data && data.message.result.length > 0 && (
+            <div className="space-y-2">
+                <p className="text-ink-gray-5 text-sm">{_("Bank Reconciliation Statement")}</p>
+                <ListView
+                    data={statementRows}
+                    columns={statementColumns}
+                    getRowId={(row) => row.payment_entry}
+                    maxHeight="min(70vh, 640px)"
+                    emptyState={_("No entries with a payment document in this list.")}
+                />
+            </div>
+        )}
 
         {data && data.message.result.length === 0 &&
             <Alert variant='default'>
