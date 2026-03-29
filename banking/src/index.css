@@ -144,6 +144,8 @@
   --shadow-switch: 0px 3px 3px 0px rgba(0, 0, 0, 0.05);
   --shadow-checkbox-hover: 0px 1px 2px 0px rgba(0, 0, 0, 0.06), 0px 1px 3px 0px rgba(0, 0, 0, 0.1);
 
+  --shadow-textarea-active: 0px 1px 4px 0px rgba(0, 0, 0, 0.1);
+
   /** Spacing **/
   --spacing-4.5: 1.125rem;
   --spacing-5.5: 1.375rem;
