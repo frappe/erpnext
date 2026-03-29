@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-03-22 09:45+0000\n"
-"PO-Revision-Date: 2026-03-28 09:27\n"
+"PO-Revision-Date: 2026-03-29 09:35\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -22955,7 +22955,7 @@ msgstr "Inkludera Standard Finans Register Tillgångar"
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.js:46
 #: erpnext/accounts/report/trial_balance/trial_balance.js:105
 msgid "Include Default FB Entries"
-msgstr "Inkludera Standard Finans Register Poster"
+msgstr "Visa Standard Finans Register Poster"
 
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:90
 msgid "Include Expired"
@@ -57565,7 +57565,7 @@ msgstr "Med Åtgärder"
 #: erpnext/accounts/report/consolidated_trial_balance/consolidated_trial_balance.js:63
 #: erpnext/accounts/report/trial_balance/trial_balance.js:83
 msgid "With Period Closing Entry For Opening Balances"
-msgstr "Med PeriodStängning Post för Öppning Saldon"
+msgstr "Visa Period Stängning Post för Öppning Saldo"
 
 #. Label of the withdrawal (Currency) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
