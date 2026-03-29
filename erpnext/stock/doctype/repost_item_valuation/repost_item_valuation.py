@@ -49,13 +49,8 @@ class RepostItemValuation(Document):
 		posting_time: DF.Time | None
 		recreate_stock_ledgers: DF.Check
 		repost_only_accounting_ledgers: DF.Check
-		reposted_item_code: DF.Link | None
-		reposted_sle_creation: DF.Datetime | None
-		reposted_warehouse: DF.Link | None
 		reposting_data_file: DF.Attach | None
 		reposting_reference: DF.Data | None
-		sle_posting_date: DF.Date | None
-		sle_posting_time: DF.Time | None
 		status: DF.Literal["Queued", "In Progress", "Completed", "Skipped", "Failed", "Cancelled"]
 		total_reposting_count: DF.Int
 		total_vouchers: DF.Int
@@ -268,11 +263,6 @@ class RepostItemValuation(Document):
 		self.total_reposting_count = 0
 		self.total_vouchers = 0
 		self.vouchers_posted = 0
-		self.reposted_item_code = None
-		self.reposted_warehouse = None
-		self.sle_posting_date = None
-		self.sle_posting_time = None
-		self.reposted_sle_creation = None
 		self.clear_attachment()
 		self.db_update()
 
