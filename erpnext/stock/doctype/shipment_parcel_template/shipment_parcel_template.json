@@ -15,21 +15,21 @@
  "fields": [
   {
    "fieldname": "length",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Length (cm)",
    "reqd": 1
   },
   {
    "fieldname": "width",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Width (cm)",
    "reqd": 1
   },
   {
    "fieldname": "height",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Height (cm)",
    "reqd": 1
@@ -52,7 +52,11 @@
   }
  ],
  "links": [],
+<<<<<<< HEAD
  "modified": "2020-09-28 12:51:00.320421",
+=======
+ "modified": "2026-03-29 00:00:00.000000",
+>>>>>>> 6badf00313 (fix: change shipment parcel dimension fields from Int to Float (#53867))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment Parcel Template",
