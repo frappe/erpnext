@@ -114,7 +114,7 @@ function TabsTrigger({
         // Variant: subtle, size: md
         "group-data-[variant=subtle]/tabs-list:group-data-[size=md]/tabs-list:py-1.5 group-data-[variant=subtle]/tabs-list:group-data-[size=md]/tabs-list:px-2.5 group-data-[variant=subtle]/tabs-list:group-data-[size=md]/tabs-list:rounded-[9px]",
         // Variant: subtle - active - background, text color and shadow applied
-        "group-data-[variant=subtle]/tabs-list:data-[state=active]:bg-surface-selected group-data-[variant=subtle]/tabs-list:data-[state=active]:shadow-active-tab",
+        "group-data-[variant=subtle]/tabs-list:data-[state=active]:bg-surface-selected group-data-[variant=subtle]/tabs-list:data-[state=active]:shadow",
 
 
         // Variant: outline, size: sm
@@ -122,7 +122,7 @@ function TabsTrigger({
         // Variant: outline, size: md
         "group-data-[variant=outline]/tabs-list:group-data-[size=md]/tabs-list:py-1.5 group-data-[variant=outline]/tabs-list:group-data-[size=md]/tabs-list:px-2.5 group-data-[variant=outline]/tabs-list:group-data-[size=md]/tabs-list:rounded-[9px]",
         // Variant: outline - active - background, text color and shadow applied
-        "group-data-[variant=outline]/tabs-list:data-[state=active]:bg-surface-selected group-data-[variant=outline]/tabs-list:data-[state=active]:shadow-active-tab",
+        "group-data-[variant=outline]/tabs-list:data-[state=active]:bg-surface-selected group-data-[variant=outline]/tabs-list:data-[state=active]:shadow",
 
         // Variant: underline - horizontal
         "group-data-[variant=underline]/tabs-list:rounded-none ",

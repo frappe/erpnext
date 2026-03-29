@@ -134,16 +134,14 @@
   --radius-2xl: 1.25rem;
 
   /** Shadow **/
-  --shadow-sm: 0px 1px 2px rgba(0, 0, 0, 0.1);
-  --shadow: 0px 0px 1px rgba(0, 0, 0, 0.45), 0px 1px 2px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0px 0px 1px rgba(0, 0, 0, 0.12), 0px 0.5px 2px rgba(0, 0, 0, 0.15), 0px 2px 3px rgba(0, 0, 0, 0.16);
-  --shadow-lg: 0px 0px 1px rgba(0, 0, 0, 0.35), 0px 6px 8px -4px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0px 0px 1px rgba(0, 0, 0, 0.19), 0px 1px 2px rgba(0, 0, 0, 0.07), 0px 6px 15px -5px rgba(0, 0, 0, 0.11);
-  --shadow-2xl: 0px 0px 1px rgba(0, 0, 0, 0.2), 0px 1px 3px rgba(0, 0, 0, 0.05), 0px 10px 24px -3px rgba(0, 0, 0, 0.1);
+  --shadow-sm: var(--elevation-sm);
+  --shadow: var(--elevation-base);
+  --shadow-md: var(--elevation-md);
+  --shadow-lg: var(--elevation-lg);
+  --shadow-xl: var(--elevation-xl);
+  --shadow-2xl: var(--elevation-2xl);
 
   --shadow-switch: 0px 3px 3px 0px rgba(0, 0, 0, 0.05);
-
-  --shadow-active-tab: 0px 2px 5px 0px rgba(0, 0, 0, 0.14), 0px 0px 1.5px 0px rgba(0, 0, 0, 0.16), 0px 0.25px 1.5px 0px rgba(255, 255, 255, 0.08) inset;
 
 
   /** Spacing **/
@@ -820,6 +818,15 @@
   --focus-shadow-red: 0px 0px 0px 2px rgba(250, 156, 157, 0.9);
   --focus-shadow-amber: 0px 0px 0px 2px rgba(255, 218, 124, 0.9);
 
+  /** Elevations **/
+  --elevation-sm: 0px 1px 3px 0px rgba(0, 0, 0, 0.14), 0px 0px 1px 0px rgba(0, 0, 0, 0.14), 0px 0.25px 1.5px 0px rgba(255, 255, 255, 0.08) inset;
+  --elevation-base: 0px 2px 5px 0px rgba(0, 0, 0, 0.14), 0px 0px 1.5px 0px rgba(0, 0, 0, 0.16), 0px 0.25px 1.5px 0px rgba(255, 255, 255, 0.08) inset;
+  --elevation-md: 0px 6px 12px -2px rgba(0, 0, 0, 0.12), 0px 0px 6px 2px rgba(0, 0, 0, 0.03), 0px 0px 1.5px 0px rgba(0, 0, 0, 0.15), 0px 0.25px 1.5px 0px rgba(255, 255, 255, 0.08) inset;
+  --elevation-lg: 0px 18px 22px -6px rgba(0, 0, 0, 0.1), 0px 0px 6px 3px rgba(0, 0, 0, 0.03), 0px 0px 1.5px 0px rgba(0, 0, 0, 0.18);
+  --elevation-xl: 0px 24px 30px -8px rgba(0, 0, 0, 0.1), 0px 0px 10px 2px rgba(0, 0, 0, 0.04), 0px 0px 1px 0px rgba(0, 0, 0, 0.2), 0px 0.25px 2px 0px rgba(255, 255, 255, 0.15) inset;
+  --elevation-2xl: 0px 44px 52px -10px rgba(0, 0, 0, 0.1), 0px 0px 10px 2px rgba(0, 0, 0, 0.03), 0px 0px 1.5px 0px rgba(0, 0, 0, 0.25), 0px 0.1px 2px 0px rgba(255, 255, 255, 0.08) inset;
+
+
 }
 
 .dark {
@@ -1123,6 +1130,15 @@
   --focus-shadow-green: 0px 0px 0px 3px rgba(29, 86, 59, 0.8);
   --focus-shadow-red: 0px 0px 0px 3px rgba(117, 24, 25, 0.8);
   --focus-shadow-amber: 0px 0px 0px 3px rgba(116, 72, 17, 0.8);
+
+  /** Elevations **/
+  --elevation-sm: 0px 1px 3px 0px rgba(0, 0, 0, 0.7), 0px 0px 14px 0px rgba(0, 0, 0, 0.18), 0px 0.5px 0.5px 0.5px rgba(255, 255, 255, 0.03) inset;
+  --elevation-base: 0px 2px 5px 0px rgba(0, 0, 0, 0.6), 0px 0px 14px 0px rgba(0, 0, 0, 0.18), 0px 0.5px 0.5px 0.5px rgba(255, 255, 255, 0.03) inset;
+  --elevation-md: 0px 6px 12px -2px rgba(0, 0, 0, 0.6), 0px 0px 16px 2px rgba(0, 0, 0, 0.2), 0px 0.5px 0.5px 0.5px rgba(255, 255, 255, 0.03) inset;
+  --elevation-lg: 0px 18px 22px -6px rgba(0, 0, 0, 0.1), 0px 0px 6px 3px rgba(0, 0, 0, 0.03), 0px 0px 1.5px 0px rgba(0, 0, 0, 0.18);
+  --elevation-xl: 0px 26px 34px -6px rgba(0, 0, 0, 0.42), 0px 0px 14px 2px rgba(0, 0, 0, 0.12), 0px 0.5px 1.5px 0.5px rgba(255, 255, 255, 0.04) inset;
+  --elevation-2xl: 0px 44px 52px -4px rgba(0, 0, 0, 0.42), 0px 0px 14px 10px rgba(0, 0, 0, 0.12), 0px 0.5px 1.5px 0.5px rgba(255, 255, 255, 0.06) inset;
+
 }
 
 @layer base {
