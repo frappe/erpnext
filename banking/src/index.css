@@ -142,7 +142,7 @@
   --shadow-2xl: var(--elevation-2xl);
 
   --shadow-switch: 0px 3px 3px 0px rgba(0, 0, 0, 0.05);
-
+  --shadow-checkbox-hover: 0px 1px 2px 0px rgba(0, 0, 0, 0.06), 0px 1px 3px 0px rgba(0, 0, 0, 0.1);
 
   /** Spacing **/
   --spacing-4.5: 1.125rem;
@@ -1135,7 +1135,7 @@
   --elevation-sm: 0px 1px 3px 0px rgba(0, 0, 0, 0.7), 0px 0px 14px 0px rgba(0, 0, 0, 0.18), 0px 0.5px 0.5px 0.5px rgba(255, 255, 255, 0.03) inset;
   --elevation-base: 0px 2px 5px 0px rgba(0, 0, 0, 0.6), 0px 0px 14px 0px rgba(0, 0, 0, 0.18), 0px 0.5px 0.5px 0.5px rgba(255, 255, 255, 0.03) inset;
   --elevation-md: 0px 6px 12px -2px rgba(0, 0, 0, 0.6), 0px 0px 16px 2px rgba(0, 0, 0, 0.2), 0px 0.5px 0.5px 0.5px rgba(255, 255, 255, 0.03) inset;
-  --elevation-lg: 0px 18px 22px -6px rgba(0, 0, 0, 0.1), 0px 0px 6px 3px rgba(0, 0, 0, 0.03), 0px 0px 1.5px 0px rgba(0, 0, 0, 0.18);
+  --elevation-lg: 0px 18px 20px -8px rgba(0, 0, 0, 0.52), 0px 0px 16px 0px rgba(0, 0, 0, 0.1), 0px 0.5px 1.5px 0.5px rgba(255, 255, 255, 0.04) inset;
   --elevation-xl: 0px 26px 34px -6px rgba(0, 0, 0, 0.42), 0px 0px 14px 2px rgba(0, 0, 0, 0.12), 0px 0.5px 1.5px 0.5px rgba(255, 255, 255, 0.04) inset;
   --elevation-2xl: 0px 44px 52px -4px rgba(0, 0, 0, 0.42), 0px 0px 14px 10px rgba(0, 0, 0, 0.12), 0px 0.5px 1.5px 0.5px rgba(255, 255, 255, 0.06) inset;
 
