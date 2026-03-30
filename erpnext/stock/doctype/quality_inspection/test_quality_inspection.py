@@ -2,7 +2,6 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import nowdate
 
 from erpnext.controllers.stock_controller import (
@@ -14,9 +13,10 @@ from erpnext.controllers.stock_controller import (
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestQualityInspection(IntegrationTestCase):
+class TestQualityInspection(ERPNextTestSuite):
 	def setUp(self):
 		super().setUp()
 		create_item("_Test Item with QA")
@@ -218,7 +218,7 @@ class TestQualityInspection(IntegrationTestCase):
 		qa.save()
 		self.assertEqual(qa.status, "Accepted")
 
-	@IntegrationTestCase.change_settings("System Settings", {"number_format": "#.###,##"})
+	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#.###,##"})
 	def test_diff_number_format(self):
 		self.assertEqual(frappe.db.get_default("number_format"), "#.###,##")  # sanity check
 

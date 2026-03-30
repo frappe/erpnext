@@ -6,6 +6,7 @@
  "doctype": "DocType",
  "document_type": "Other",
  "engine": "InnoDB",
+ "is_submittable": 1,
  "field_order": [
   "item_code",
   "warehouse",

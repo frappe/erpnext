@@ -5,7 +5,6 @@ import copy
 from collections import defaultdict
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import flt
 
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_subcontracting_order
@@ -31,9 +30,10 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestSubcontractingOrder(IntegrationTestCase):
+class TestSubcontractingOrder(ERPNextTestSuite):
 	def setUp(self):
 		make_subcontracted_items()
 		make_raw_materials()
@@ -460,6 +460,7 @@ class TestSubcontractingOrder(IntegrationTestCase):
 
 		set_backflush_based_on("BOM")
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": True})
 	def test_supplied_qty(self):
 		item_code = "_Test Subcontracted FG Item 5"
 		make_item("Sub Contracted Raw Material 4", {"is_stock_item": 1, "is_sub_contracted_item": 1})
@@ -472,7 +473,7 @@ class TestSubcontractingOrder(IntegrationTestCase):
 		service_items = [
 			{
 				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 1",
+				"item_code": "Subcontracted Service Item 2",
 				"qty": order_qty,
 				"rate": 100,
 				"fg_item": item_code,
@@ -678,6 +679,7 @@ class TestSubcontractingOrder(IntegrationTestCase):
 
 		self.assertEqual(requested_qty, new_requested_qty)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3})
 	def test_subcontracting_order_rm_required_items_for_precision(self):
 		item_code = "Subcontracted Item SA9"
 		raw_materials = ["Subcontracted SRM Item 9"]

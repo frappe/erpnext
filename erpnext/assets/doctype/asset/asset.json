@@ -9,13 +9,13 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
-  "company",
   "item_code",
   "item_name",
   "asset_name",
+  "location",
   "image",
   "column_break_3",
-  "location",
+  "company",
   "asset_category",
   "asset_type",
   "maintenance_required",
@@ -533,7 +533,7 @@
    "fieldtype": "Currency",
    "label": "Net Purchase Amount",
    "mandatory_depends_on": "eval:(doc.asset_type != \"Composite Asset\" || doc.docstatus==1)",
-   "options": "Company:company:default_currency",
+   "options": "currency",
    "read_only_depends_on": "eval: doc.asset_type == \"Composite Asset\""
   },
   {
@@ -626,7 +626,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2026-03-09 17:15:32.819896",
+ "modified": "2026-03-12 16:07:39.543227",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

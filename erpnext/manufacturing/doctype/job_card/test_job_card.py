@@ -5,7 +5,6 @@
 from typing import Literal
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import flt, random_string
 from frappe.utils.data import add_to_date, now, today
 
@@ -26,16 +25,10 @@ from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["UOM"]
-
 
 class TestJobCard(ERPNextTestSuite):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-
 	def setUp(self):
-		self.make_employees()  # used in job card time log
+		self.load_test_records("BOM")
 		self.make_bom_for_jc_tests()
 		self.transfer_material_against: Literal["Work Order", "Job Card"] = "Work Order"
 		self.source_warehouse = None
@@ -71,9 +64,6 @@ class TestJobCard(ERPNextTestSuite):
 				basic_rate=100,
 			)
 
-	def tearDown(self):
-		frappe.db.rollback()
-
 	def test_quality_inspection_mandatory_check(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 
@@ -91,7 +81,12 @@ class TestJobCard(ERPNextTestSuite):
 		cut_bom = create_semi_fg_bom(cut_fg.name, raw.name, inspection_required=1)
 		stitch_bom = create_semi_fg_bom(stitch_fg.name, cut_fg.name, inspection_required=0)
 		final_bom = frappe.new_doc(
-			"BOM", item=final.name, quantity=1, with_operations=1, track_semi_finished_goods=1
+			"BOM",
+			item=final.name,
+			quantity=1,
+			with_operations=1,
+			track_semi_finished_goods=1,
+			company="_Test Company",
 		)
 		final_bom.append("items", {"item_code": raw.name, "qty": 1})
 		final_bom.append(
@@ -101,6 +96,7 @@ class TestJobCard(ERPNextTestSuite):
 				"workstation": "_Test Workstation 1",
 				"bom_no": cut_bom,
 				"skip_material_transfer": 1,
+				"time_in_mins": 60,
 			},
 		)
 		final_bom.append(
@@ -110,6 +106,7 @@ class TestJobCard(ERPNextTestSuite):
 				"workstation": "_Test Workstation 1",
 				"bom_no": stitch_bom,
 				"skip_material_transfer": 1,
+				"time_in_mins": 60,
 			},
 		)
 		final_bom.append(
@@ -120,15 +117,17 @@ class TestJobCard(ERPNextTestSuite):
 				"bom_no": final_bom.name,
 				"is_final_finished_good": 1,
 				"skip_material_transfer": 1,
+				"time_in_mins": 60,
 			},
 		)
 		final_bom.append("items", {"item_code": stitch_fg.name, "qty": 1, "operation_row_id": 3})
 		final_bom.insert()
 		final_bom.submit()
 		work_order = make_work_order(final_bom.name, final.name, 1, variant_items=[], use_multi_level_bom=0)
-		work_order.wip_warehouse = "Work In Progress - WP"
-		work_order.fg_warehouse = "Finished Goods - WP"
-		work_order.scrap_warehouse = "All Warehouses - WP"
+		work_order.company = "_Test Company"
+		work_order.wip_warehouse = "Work In Progress - _TC"
+		work_order.fg_warehouse = "Finished Goods - _TC"
+		work_order.scrap_warehouse = "All Warehouses - _TC"
 		for operation in work_order.operations:
 			operation.time_in_mins = 60
 
@@ -191,7 +190,7 @@ class TestJobCard(ERPNextTestSuite):
 		jc1 = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
 		jc2 = frappe.get_last_doc("Job Card", {"work_order": wo2.name})
 
-		employee = self.employees[0].name
+		employee = frappe.db.get_all("Employee", {"first_name": "_Test Employee"})[0].name
 
 		jc1.append(
 			"time_logs",
@@ -285,7 +284,7 @@ class TestJobCard(ERPNextTestSuite):
 		# transfer was made for 2 fg qty in first transfer Stock Entry
 		self.assertEqual(transfer_entry_2.fg_completed_qty, 0)
 
-	@IntegrationTestCase.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 1})
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 1})
 	def test_job_card_excess_material_transfer(self):
 		"Test transferring more than required RM against Job Card."
 		self.transfer_material_against = "Job Card"
@@ -328,7 +327,7 @@ class TestJobCard(ERPNextTestSuite):
 		# JC is Completed with excess transfer
 		self.assertEqual(job_card.status, "Completed")
 
-	@IntegrationTestCase.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
 	def test_job_card_excess_material_transfer_block(self):
 		self.transfer_material_against = "Job Card"
 		self.source_warehouse = "Stores - _TC"
@@ -351,7 +350,7 @@ class TestJobCard(ERPNextTestSuite):
 		transfer_entry_2.insert()
 		self.assertRaises(JobCardOverTransferError, transfer_entry_2.submit)
 
-	@IntegrationTestCase.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
 	def test_job_card_excess_material_transfer_with_no_reference(self):
 		self.transfer_material_against = "Job Card"
 		self.source_warehouse = "Stores - _TC"
@@ -459,7 +458,7 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(transfer_entry.items[0].item_code, "_Test Item")
 		self.assertEqual(transfer_entry.items[0].qty, 2)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)
 	def test_corrective_costing(self):
@@ -503,7 +502,7 @@ class TestJobCard(ERPNextTestSuite):
 		cost_after_cancel = self.work_order.total_operating_cost
 		self.assertEqual(cost_after_cancel, original_cost)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)
 	def test_if_corrective_jc_ops_cost_is_added_to_manufacture_stock_entry(self):
@@ -891,6 +890,7 @@ class TestJobCard(ERPNextTestSuite):
 
 		def create_bom(raw_material, finished_good, scrap_item, submit=True):
 			bom = frappe.new_doc("BOM")
+			bom.company = "_Test Company"
 			bom.item = finished_good
 			bom.quantity = 1
 			bom.append("items", {"item_code": raw_material, "qty": 1})
@@ -930,6 +930,7 @@ class TestJobCard(ERPNextTestSuite):
 			"bom_no": sfg_bom.name,
 			"finished_good_qty": 1,
 			"sequence_id": 1,
+			"time_in_mins": 60,
 		}
 		operation2 = {
 			"operation": "Test Operation B",
@@ -939,6 +940,7 @@ class TestJobCard(ERPNextTestSuite):
 			"finished_good_qty": 1,
 			"is_final_finished_good": 1,
 			"sequence_id": 2,
+			"time_in_mins": 60,
 		}
 
 		make_workstation(operation1)
@@ -1123,6 +1125,7 @@ def make_wo_with_transfer_against_jc():
 
 def create_semi_fg_bom(semi_fg_item, raw_item, inspection_required):
 	bom = frappe.new_doc("BOM")
+	bom.company = "Wind Power LLC"
 	bom.item = semi_fg_item
 	bom.quantity = 1
 	bom.inspection_required = inspection_required

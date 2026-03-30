@@ -47,7 +47,6 @@
   "column_break_cqdk",
   "valuation_rate",
   "inventory_settings_section",
-  "shelf_life_in_days",
   "end_of_life",
   "default_material_request_type",
   "column_break1",
@@ -64,6 +63,7 @@
   "create_new_batch",
   "batch_number_series",
   "has_expiry_date",
+  "shelf_life_in_days",
   "retain_sample",
   "sample_quantity",
   "column_break_37",
@@ -167,6 +167,7 @@
    "set_only_once": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
    "fieldname": "item_name",
    "fieldtype": "Data",
@@ -333,6 +334,7 @@
    "options": "fa fa-truck"
   },
   {
+   "depends_on": "has_expiry_date",
    "fieldname": "shelf_life_in_days",
    "fieldtype": "Int",
    "label": "Shelf Life In Days",
@@ -342,11 +344,13 @@
   {
    "default": "2099-12-31",
    "depends_on": "is_stock_item",
+   "description": "Defines the date after which the item can no longer be used in transactions or manufacturing",
    "fieldname": "end_of_life",
    "fieldtype": "Date",
    "label": "End of Life",
    "oldfieldname": "end_of_life",
-   "oldfieldtype": "Date"
+   "oldfieldtype": "Date",
+   "show_description_on_click": 1
   },
   {
    "default": "Purchase",
@@ -357,6 +361,7 @@
   },
   {
    "depends_on": "is_stock_item",
+   "documentation_url": "https://docs.frappe.io/erpnext/change-valuation-method",
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Valuation Method",
@@ -465,9 +470,12 @@
   {
    "default": "0",
    "depends_on": "has_batch_no",
+   "description": "Enable to reserve a small sample from each batch for any analysis arising ahead",
+   "documentation_url": "https://docs.frappe.io/erpnext/retain-sample-stock",
    "fieldname": "retain_sample",
    "fieldtype": "Check",
-   "label": "Retain Sample"
+   "label": "Retain Sample",
+   "show_description_on_click": 1
   },
   {
    "depends_on": "eval: (doc.retain_sample && doc.has_batch_no)",
@@ -987,7 +995,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-03-05 16:29:31.653447",
+ "modified": "2026-03-24 15:45:40.207531",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

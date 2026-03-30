@@ -31,10 +31,10 @@
   }
  ],
  "grid_page_length": 50,
- "hide_toolbar": 1,
+ "hide_toolbar": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-02 18:18:34.671062",
+ "modified": "2026-03-16 13:28:20.485964",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription Settings",

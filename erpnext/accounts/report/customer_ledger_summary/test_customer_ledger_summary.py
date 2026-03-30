@@ -1,5 +1,4 @@
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -7,17 +6,15 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.report.customer_ledger_summary.customer_ledger_summary import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestCustomerLedgerSummary(AccountsTestMixin, IntegrationTestCase):
+class TestCustomerLedgerSummary(AccountsTestMixin, ERPNextTestSuite):
 	def setUp(self):
 		self.create_company()
 		self.create_customer()
 		self.create_item()
 		self.clear_old_entries()
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 	def create_sales_invoice(self, do_not_submit=False, **args):
 		si = create_sales_invoice(

@@ -35,14 +35,12 @@ class RepostItemValuation(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		affected_transactions: DF.Code | None
 		allow_negative_stock: DF.Check
 		allow_zero_rate: DF.Check
 		amended_from: DF.Link | None
 		based_on: DF.Literal["Transaction", "Item and Warehouse"]
 		company: DF.Link | None
 		current_index: DF.Int
-		distinct_item_and_warehouse: DF.Code | None
 		error_log: DF.LongText | None
 		gl_reposting_index: DF.Int
 		item_code: DF.Link | None
@@ -55,9 +53,11 @@ class RepostItemValuation(Document):
 		reposting_reference: DF.Data | None
 		status: DF.Literal["Queued", "In Progress", "Completed", "Skipped", "Failed", "Cancelled"]
 		total_reposting_count: DF.Int
+		total_vouchers: DF.Int
 		via_landed_cost_voucher: DF.Check
 		voucher_no: DF.DynamicLink | None
 		voucher_type: DF.Link | None
+		vouchers_posted: DF.Int
 		warehouse: DF.Link | None
 	# end: auto-generated types
 
@@ -261,6 +261,8 @@ class RepostItemValuation(Document):
 		self.items_to_be_repost = None
 		self.gl_reposting_index = 0
 		self.total_reposting_count = 0
+		self.total_vouchers = 0
+		self.vouchers_posted = 0
 		self.clear_attachment()
 		self.db_update()
 
@@ -435,7 +437,7 @@ def repost_sl_entries(doc):
 		)
 	else:
 		repost_future_sle(
-			args=[
+			items_to_be_repost=[
 				frappe._dict(
 					{
 						"item_code": doc.item_code,

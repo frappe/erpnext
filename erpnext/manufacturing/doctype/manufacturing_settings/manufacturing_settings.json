@@ -239,12 +239,12 @@
    "label": "Set Operating Cost / Secondary Items From Sub-assemblies"
   }
  ],
- "hide_toolbar": 1,
+ "hide_toolbar": 0,
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-26 17:06:24.040382",
+ "modified": "2026-03-16 13:28:20.714576",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

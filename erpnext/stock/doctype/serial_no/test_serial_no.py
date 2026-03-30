@@ -7,7 +7,6 @@
 
 import frappe
 from frappe import _dict
-from frappe.tests import IntegrationTestCase
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
@@ -20,13 +19,12 @@ from erpnext.stock.doctype.serial_no.serial_no import *
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Item"]
 
-
-class TestSerialNo(IntegrationTestCase):
-	def tearDown(self):
-		frappe.db.rollback()
+class TestSerialNo(ERPNextTestSuite):
+	def setUp(self):
+		self.load_test_records("Stock Entry")
 
 	def test_cannot_create_direct(self):
 		frappe.delete_doc_if_exists("Serial No", "_TCSER0001")
@@ -36,6 +34,7 @@ class TestSerialNo(IntegrationTestCase):
 		sr.warehouse = "_Test Warehouse - _TC"
 		sr.serial_no = "_TCSER0001"
 		sr.purchase_rate = 10
+		sr.company = "_Test Company"
 		self.assertRaises(SerialNoCannotCreateDirectError, sr.insert)
 
 		sr.warehouse = None
@@ -195,7 +194,12 @@ class TestSerialNo(IntegrationTestCase):
 		for serial_no in serial_nos:
 			if not frappe.db.exists("Serial No", serial_no):
 				frappe.get_doc(
-					{"doctype": "Serial No", "item_code": item_code, "serial_no": serial_no}
+					{
+						"doctype": "Serial No",
+						"item_code": item_code,
+						"serial_no": serial_no,
+						"company": "_Test Company",
+					}
 				).insert()
 
 		make_stock_entry(

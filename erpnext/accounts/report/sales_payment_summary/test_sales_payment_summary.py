@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -10,25 +9,10 @@ from erpnext.accounts.report.sales_payment_summary.sales_payment_summary import 
 	get_mode_of_payment_details,
 	get_mode_of_payments,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Sales Invoice"]
 
-
-class TestSalesPaymentSummary(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		create_records()
-		pes = frappe.get_all("Payment Entry")
-		jes = frappe.get_all("Journal Entry")
-		sis = frappe.get_all("Sales Invoice")
-		for pe in pes:
-			frappe.db.set_value("Payment Entry", pe.name, "docstatus", 2)
-		for je in jes:
-			frappe.db.set_value("Journal Entry", je.name, "docstatus", 2)
-		for si in sis:
-			frappe.db.set_value("Sales Invoice", si.name, "docstatus", 2)
-
+class TestSalesPaymentSummary(ERPNextTestSuite):
 	def test_get_mode_of_payments(self):
 		filters = get_filters()
 
@@ -94,6 +78,7 @@ class TestSalesPaymentSummary(IntegrationTestCase):
 		mopd = get_mode_of_payment_details(filters)
 
 		mopd_values = next(iter(mopd.values()))
+		cc_init_amount = 0
 		for mopd_value in mopd_values:
 			if mopd_value[0] == "Credit Card":
 				cc_init_amount = mopd_value[1]
@@ -110,6 +95,7 @@ class TestSalesPaymentSummary(IntegrationTestCase):
 
 		mopd = get_mode_of_payment_details(filters)
 		mopd_values = next(iter(mopd.values()))
+		cc_final_amount = 0
 		for mopd_value in mopd_values:
 			if mopd_value[0] == "Credit Card":
 				cc_final_amount = mopd_value[1]
@@ -147,41 +133,3 @@ def create_sales_invoice_record(qty=1):
 			],
 		}
 	)
-
-
-def create_records():
-	if frappe.db.exists("Customer", "Prestiga-Biz"):
-		return
-
-	# customer
-	frappe.get_doc(
-		{
-			"customer_group": "_Test Customer Group",
-			"customer_name": "Prestiga-Biz",
-			"customer_type": "Company",
-			"doctype": "Customer",
-			"territory": "_Test Territory",
-		}
-	).insert()
-
-	# item
-	item = frappe.get_doc(
-		{
-			"doctype": "Item",
-			"item_code": "Consulting",
-			"item_name": "Consulting",
-			"item_group": "All Item Groups",
-			"company": "_Test Company",
-			"is_stock_item": 0,
-		}
-	).insert()
-
-	# item price
-	frappe.get_doc(
-		{
-			"doctype": "Item Price",
-			"price_list": "Standard Selling",
-			"item_code": item.item_code,
-			"price_list_rate": 10000,
-		}
-	).insert()

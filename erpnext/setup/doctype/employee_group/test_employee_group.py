@@ -2,12 +2,12 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.setup.doctype.employee.test_employee import make_employee
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestEmployeeGroup(IntegrationTestCase):
+class TestEmployeeGroup(ERPNextTestSuite):
 	pass
 
 

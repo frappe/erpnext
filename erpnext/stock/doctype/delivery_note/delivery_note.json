@@ -149,7 +149,7 @@
   "total_commission",
   "section_break1",
   "sales_team",
-  "subscription_section",
+  "auto_repeat_section",
   "auto_repeat",
   "printing_details",
   "letter_head",
@@ -1118,11 +1118,6 @@
    "oldfieldtype": "Text"
   },
   {
-   "fieldname": "subscription_section",
-   "fieldtype": "Section Break",
-   "label": "Subscription Section"
-  },
-  {
    "fieldname": "auto_repeat",
    "fieldtype": "Link",
    "label": "Auto Repeat",
@@ -1454,6 +1449,11 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "auto_repeat_section",
+   "fieldtype": "Section Break",
+   "label": "Auto Repeat"
+  },
+  {
    "fieldname": "section_break_bxkw",
    "fieldtype": "Section Break"
   },
@@ -1470,7 +1470,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-10 09:24:48.314711",
+ "modified": "2026-03-30 12:02:28.314711",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

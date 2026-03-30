@@ -81,6 +81,7 @@
   "is_default": 1,
   "currency": "USD",
   "item": "_Test FG Item",
+  "company": "_Test Company",
   "quantity": 1.0
  },
  {
@@ -163,6 +164,7 @@
   "currency": "USD",
   "item": "_Test Variant Item",
   "quantity": 1.0,
+  "company": "_Test Company",
   "with_operations": 1
  },
  {
@@ -189,6 +191,7 @@
   "quantity": 1.0,
   "with_operations": 0,
   "fg_based_operating_cost": 1,
+  "company": "_Test Company",
   "operating_cost_per_bom_quantity": 140
  }
 ]

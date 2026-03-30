@@ -45,6 +45,7 @@ class PackedItem(Document):
 		projected_qty: DF.Float
 		qty: DF.Float
 		rate: DF.Currency
+		requested_qty: DF.Float
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None
 		target_warehouse: DF.Link | None
@@ -354,11 +355,19 @@ def update_product_bundle_rate(parent_items_price, pi_row, item_row):
 
 def set_product_bundle_rate_amount(doc, parent_items_price):
 	"Set cumulative rate and amount in bundle item."
+	rate_updated = False
 	for item in doc.get("items"):
 		bundle_rate = parent_items_price.get((item.item_code, item.name))
 		if bundle_rate and bundle_rate != item.rate:
 			item.rate = bundle_rate
 			item.amount = flt(bundle_rate * item.qty)
+			item.margin_rate_or_amount = 0
+			item.discount_percentage = 0
+			item.discount_amount = 0
+			rate_updated = True
+	if rate_updated:
+		doc.calculate_taxes_and_totals()
+		doc.set_total_in_words()
 
 
 def on_doctype_update():

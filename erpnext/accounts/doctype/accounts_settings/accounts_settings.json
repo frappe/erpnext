@@ -16,6 +16,7 @@
   "invoicing_features_section",
   "check_supplier_invoice_uniqueness",
   "automatically_fetch_payment_terms",
+  "enable_subscription",
   "column_break_17",
   "enable_common_party_accounting",
   "allow_multi_currency_invoices_against_single_party_account",
@@ -688,6 +689,13 @@
    "fieldname": "enable_accounting_dimensions",
    "fieldtype": "Check",
    "label": "Enable Accounting Dimensions"
+  },
+  {
+   "default": "1",
+   "description": "Enable Subscription tracking in invoice",
+   "fieldname": "enable_subscription",
+   "fieldtype": "Check",
+   "label": "Enable Subscription"
   }
  ],
  "grid_page_length": 50,

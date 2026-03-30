@@ -1,8 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
 
-from frappe.tests import IntegrationTestCase
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestMonthlyDistribution(IntegrationTestCase):
+class TestMonthlyDistribution(ERPNextTestSuite):
 	pass

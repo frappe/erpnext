@@ -5,7 +5,6 @@ import copy
 from collections import defaultdict
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import cint, flt
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
@@ -23,9 +22,10 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestSubcontractingController(IntegrationTestCase):
+class TestSubcontractingController(ERPNextTestSuite):
 	def setUp(self):
 		make_subcontracted_items()
 		make_raw_materials()
@@ -75,6 +75,7 @@ class TestSubcontractingController(IntegrationTestCase):
 		sco.create_raw_materials_supplied_or_received()
 		self.assertIsNotNone(sco.supplied_items)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
 	def test_sco_with_bom(self):
 		"""
 		- Set backflush based on BOM.
@@ -741,6 +742,7 @@ class TestSubcontractingController(IntegrationTestCase):
 					"doctype": "Serial No",
 					"item_code": "Subcontracted SRM Item 2",
 					"serial_no": serial_no,
+					"company": "_Test Company",
 				}
 			).insert()
 
@@ -1560,7 +1562,7 @@ def make_subcontracted_item(**args):
 				},
 			)
 
-		args.raw_materials = ["_Test FG Item", "Test Extra Item 1"]
+		args.raw_materials = ["_Test Extra Item 1", "Test Extra Item 2"]
 
 	if not frappe.db.get_value("BOM", {"item": args.item_code}, "name"):
 		make_bom(item=args.item_code, raw_materials=args.get("raw_materials"))

@@ -587,7 +587,7 @@ class WorkOrder(Document):
 		if self.docstatus == 0:
 			status = "Draft"
 		elif self.docstatus == 1:
-			if status != "Stopped":
+			if status not in ["Closed", "Stopped"]:
 				status = "Not Started"
 				if flt(self.material_transferred_for_manufacturing) > 0:
 					status = "In Process"
@@ -2068,9 +2068,11 @@ class WorkOrder(Document):
 			if row.item_code not in required_items:
 				additional_items.setdefault(row.item_code, []).append(row)
 
+		self.flags.ignore_validate_update_after_submit = True
+
 		for item_code, rows in additional_items.items():
 			for row in rows:
-				child_row = self.append(
+				self.append(
 					"required_items",
 					{
 						"item_code": item_code,
@@ -2081,15 +2083,13 @@ class WorkOrder(Document):
 						"rate": row.basic_rate,
 						"amount": row.amount,
 						"description": row.description,
-						"docstatus": 1,
 						"is_additional_item": 1,
 						"voucher_detail_reference": row.name,
 					},
 				)
 
-				child_row.insert()
-
-			stock_entry.reload()
+		self.save()
+		stock_entry.reload()
 
 
 @frappe.whitelist()
@@ -2267,10 +2267,13 @@ def make_work_order(
 	bom_no: str,
 	item: str,
 	qty: float = 0,
+	company: str | None = None,
 	project: str | None = None,
 	variant_items: str | list | None = None,
 	use_multi_level_bom: bool | None = None,
 ):
+	from erpnext import get_default_company
+
 	if not frappe.has_permission("Work Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
@@ -2286,6 +2289,7 @@ def make_work_order(
 	wo_doc = frappe.new_doc("Work Order")
 	wo_doc.track_semi_finished_goods = frappe.db.get_value("BOM", bom_no, "track_semi_finished_goods")
 	wo_doc.production_item = item
+	wo_doc.company = company or get_default_company()
 	wo_doc.update(item_details)
 	wo_doc.bom_no = bom_no
 	wo_doc.use_multi_level_bom = cint(use_multi_level_bom)

@@ -5,15 +5,15 @@
 import frappe
 from frappe.query_builder import functions
 from frappe.query_builder.utils import DocType
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, flt, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
+class TestExchangeRateRevaluation(AccountsTestMixin, ERPNextTestSuite):
 	def setUp(self):
 		self.create_company()
 		self.create_usd_receivable_account()
@@ -22,14 +22,13 @@ class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
 		self.clear_old_entries()
 		self.set_system_and_company_settings()
 
-	def tearDown(self):
-		frappe.db.rollback()
-
 	def set_system_and_company_settings(self):
 		# set number and currency precision
 		system_settings = frappe.get_doc("System Settings")
 		system_settings.float_precision = 2
 		system_settings.currency_precision = 2
+		system_settings.language = "en"
+		system_settings.time_zone = "Asia/Kolkata"
 		system_settings.save()
 
 		# Using Exchange Gain/Loss account for unrealized as well.
@@ -37,7 +36,7 @@ class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
 		company_doc.unrealized_exchange_gain_loss_account = company_doc.exchange_gain_loss_account
 		company_doc.save()
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)
@@ -91,7 +90,7 @@ class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
 		)[0]
 		self.assertEqual(acc_balance.balance, 8500.0)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)
@@ -164,7 +163,7 @@ class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(acc_balance.balance, 0.0)
 		self.assertEqual(acc_balance.balance_in_account_currency, 0.0)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)
@@ -259,7 +258,7 @@ class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(flt(acc_balance.balance, precision), 0.0)
 		self.assertEqual(flt(acc_balance.balance_in_account_currency, precision), 0.0)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)

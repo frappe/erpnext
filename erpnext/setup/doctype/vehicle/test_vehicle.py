@@ -2,11 +2,12 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import random_string
 
+from erpnext.tests.utils import ERPNextTestSuite
 
-class TestVehicle(IntegrationTestCase):
+
+class TestVehicle(ERPNextTestSuite):
 	def test_make_vehicle(self):
 		vehicle = frappe.get_doc(
 			{

@@ -1,7 +1,6 @@
-from frappe.tests import IntegrationTestCase
 from frappe.utils.make_random import get_random
 
-from erpnext.tests.utils import ReportFilters, ReportName, execute_script_report
+from erpnext.tests.utils import ERPNextTestSuite, ReportFilters, ReportName, execute_script_report
 
 DEFAULT_FILTERS = {
 	"company": "_Test Company",
@@ -81,7 +80,7 @@ OPTIONAL_FILTERS = {
 }
 
 
-class TestReports(IntegrationTestCase):
+class TestReports(ERPNextTestSuite):
 	def test_execute_all_stock_reports(self):
 		"""Test that all script report in stock modules are executable with supported filters"""
 		for report, filter in REPORT_FILTER_TEST_CASES:

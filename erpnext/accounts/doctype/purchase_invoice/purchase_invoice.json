@@ -182,11 +182,12 @@
   "unrealized_profit_loss_account",
   "subscription_section",
   "subscription",
-  "auto_repeat",
-  "update_auto_repeat_reference",
   "column_break_114",
   "from_date",
   "to_date",
+  "automation_section",
+  "auto_repeat",
+  "update_auto_repeat_reference",
   "printing_settings",
   "letter_head",
   "group_same_items",
@@ -320,7 +321,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Date",
+   "label": "Posting Date",
    "oldfieldname": "posting_date",
    "oldfieldtype": "Date",
    "print_hide": 1,
@@ -390,7 +391,7 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "bill_no",
+   "collapsible_depends_on": "posting_date",
    "fieldname": "supplier_invoice_details",
    "fieldtype": "Section Break",
    "label": "Supplier Invoice"
@@ -1687,6 +1688,12 @@
    "label": "Totals"
   },
   {
+   "collapsible": 1,
+   "fieldname": "automation_section",
+   "fieldtype": "Section Break",
+   "label": "Automation"
+  },
+  {
    "fieldname": "section_break_ecfi",
    "fieldtype": "Section Break"
   }
@@ -1696,7 +1703,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-10 09:05:26.595644",
+ "modified": "2026-03-30 12:01:38.696888",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

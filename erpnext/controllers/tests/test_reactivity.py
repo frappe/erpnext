@@ -1,12 +1,12 @@
 import frappe
 from frappe import qb
-from frappe.tests import IntegrationTestCase
 from frappe.utils import today
 
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestReactivity(AccountsTestMixin, IntegrationTestCase):
+class TestReactivity(AccountsTestMixin, ERPNextTestSuite):
 	def setUp(self):
 		self.create_company()
 		self.create_customer()
@@ -14,9 +14,6 @@ class TestReactivity(AccountsTestMixin, IntegrationTestCase):
 		self.create_usd_receivable_account()
 		self.create_price_list()
 		self.clear_old_entries()
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 	def disable_dimensions(self):
 		res = frappe.db.get_all("Accounting Dimension", filters={"disabled": False})

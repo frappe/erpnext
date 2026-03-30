@@ -2,21 +2,19 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, now
 
-from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestAssetMovement(IntegrationTestCase):
+class TestAssetMovement(ERPNextTestSuite):
 	def setUp(self):
 		frappe.db.set_value(
 			"Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC"
 		)
-		create_asset_data()
-		make_location()
 
 	def test_movement(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
@@ -39,10 +37,6 @@ class TestAssetMovement(IntegrationTestCase):
 
 		if asset.docstatus == 0:
 			asset.submit()
-
-		# check asset movement is created
-		if not frappe.db.exists("Location", "Test Location 2"):
-			frappe.get_doc({"doctype": "Location", "location_name": "Test Location 2"}).insert()
 
 		create_asset_movement(
 			purpose="Transfer",
@@ -122,9 +116,6 @@ class TestAssetMovement(IntegrationTestCase):
 		if asset.docstatus == 0:
 			asset.submit()
 
-		if not frappe.db.exists("Location", "Test Location 2"):
-			frappe.get_doc({"doctype": "Location", "location_name": "Test Location 2"}).insert()
-
 		movement = frappe.get_doc({"doctype": "Asset Movement", "reference_name": pr.name})
 		self.assertRaises(frappe.ValidationError, movement.cancel)
 
@@ -149,9 +140,6 @@ class TestAssetMovement(IntegrationTestCase):
 	def test_movement_transaction_date(self):
 		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
 		asset.save().submit()
-
-		if not frappe.db.exists("Location", "Test Location 2"):
-			frappe.get_doc({"doctype": "Location", "location_name": "Test Location 2"}).insert()
 
 		asset_creation_date = frappe.db.get_value(
 			"Asset Movement",
@@ -197,9 +185,3 @@ def create_asset_movement(**args):
 			movement.submit()
 
 	return movement
-
-
-def make_location():
-	for location in ["Pune", "Mumbai", "Nagpur"]:
-		if not frappe.db.exists("Location", location):
-			frappe.get_doc({"doctype": "Location", "location_name": location}).insert(ignore_permissions=True)

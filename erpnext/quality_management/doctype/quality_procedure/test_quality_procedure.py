@@ -2,12 +2,13 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
+
+from erpnext.tests.utils import ERPNextTestSuite
 
 from .quality_procedure import add_node
 
 
-class TestQualityProcedure(IntegrationTestCase):
+class TestQualityProcedure(ERPNextTestSuite):
 	def test_add_node(self):
 		procedure = create_procedure(
 			{

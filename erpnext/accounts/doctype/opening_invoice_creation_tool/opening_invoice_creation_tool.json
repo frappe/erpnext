@@ -8,9 +8,9 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
-  "create_missing_party",
   "column_break_3",
   "invoice_type",
+  "create_missing_party",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -29,7 +29,7 @@
   },
   {
    "default": "0",
-   "description": "Create missing customer or supplier.",
+   "description": "If party does not exist, create it using the Party Name field.",
    "fieldname": "create_missing_party",
    "fieldtype": "Check",
    "label": "Create Missing Party"
@@ -65,10 +65,10 @@
    "options": "Cost Center"
   },
   {
-    "fieldname": "project",
-    "fieldtype": "Link",
-    "label": "Project",
-    "options": "Project"
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   },
   {
    "collapsible": 1,
@@ -84,7 +84,7 @@
  "hide_toolbar": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-27 13:10:06.564397",
+ "modified": "2026-03-23 00:32:15.600086",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool",
@@ -101,6 +101,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

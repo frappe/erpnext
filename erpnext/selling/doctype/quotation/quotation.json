@@ -113,7 +113,7 @@
   "tc_name",
   "terms",
   "more_info_tab",
-  "subscription_section",
+  "auto_repeat_section",
   "auto_repeat",
   "update_auto_repeat_reference",
   "print_settings",
@@ -816,11 +816,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "subscription_section",
-   "fieldtype": "Section Break",
-   "label": "Auto Repeat"
-  },
-  {
    "fieldname": "auto_repeat",
    "fieldtype": "Link",
    "label": "Auto Repeat",
@@ -1134,6 +1129,11 @@
    "label": "UTM Analytics"
   },
   {
+   "fieldname": "auto_repeat_section",
+   "fieldtype": "Section Break",
+   "label": "Auto Repeat"
+  },
+  {
    "fieldname": "section_break_cojf",
    "fieldtype": "Section Break"
   },
@@ -1150,7 +1150,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-10 09:20:48.449281",
+ "modified": "2026-03-30 12:02:08.449281",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
