@@ -1,6 +1,6 @@
 import frappe
 from frappe.desk.reportview import build_match_conditions
-from frappe.utils import cint, flt
+from frappe.utils import cint, escape_html, flt
 
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_reserved_qty_for_items_and_warehouses as get_reserved_stock_details,
@@ -70,8 +70,10 @@ def get_data(
 	for item in items:
 		item.update(
 			{
-				"item_name": frappe.get_cached_value("Item", item.item_code, "item_name"),
-				"stock_uom": frappe.get_cached_value("Item", item.item_code, "stock_uom"),
+				"item_code": escape_html(item.item_code),
+				"item_name": escape_html(frappe.get_cached_value("Item", item.item_code, "item_name")),
+				"stock_uom": escape_html(frappe.get_cached_value("Item", item.item_code, "stock_uom")),
+				"warehouse": escape_html(item.warehouse),
 				"disable_quick_entry": frappe.get_cached_value("Item", item.item_code, "has_batch_no")
 				or frappe.get_cached_value("Item", item.item_code, "has_serial_no"),
 				"projected_qty": flt(item.projected_qty, precision),
