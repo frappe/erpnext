@@ -169,14 +169,6 @@ website_route_rules = [
 		},
 	},
 	{
-		"from_route": "/purchase-orders/<path:name>",
-		"to_route": "order",
-		"defaults": {
-			"doctype": "Purchase Order",
-			"parents": [{"label": "Purchase Order", "route": "purchase-orders"}],
-		},
-	},
-	{
 		"from_route": "/purchase-invoices",
 		"to_route": "portal",
 		"defaults": {"doctype": "Purchase Invoice"},
