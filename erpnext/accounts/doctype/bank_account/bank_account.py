@@ -115,7 +115,12 @@ def get_default_company_bank_account(company, party_type, party):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def get_bank_account_details(bank_account):
+=======
+def get_bank_account_details(bank_account: str):
+	frappe.has_permission("Bank Account", doc=bank_account, ptype="read", throw=True)
+>>>>>>> 7d7a1efadb (fix(bank_account): added validation to fetch bank account details using `get_bank_account_details` (#53926))
 	return frappe.get_cached_value(
 		"Bank Account", bank_account, ["account", "bank", "bank_account_no"], as_dict=1
 	)
