@@ -701,7 +701,7 @@
    "default": "1",
    "fieldname": "fetch_payment_schedule_in_payment_request",
    "fieldtype": "Check",
-   "label": "Fetch Payment Schedule In Payment Request
+   "label": "Fetch Payment Schedule In Payment Request"
   }
  ],
  "grid_page_length": 50,
