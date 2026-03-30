@@ -1,11 +1,6 @@
 import frappe
-<<<<<<< HEAD
 from frappe.model.db_query import DatabaseQuery
-from frappe.utils import cint, flt
-=======
-from frappe.desk.reportview import build_match_conditions
 from frappe.utils import cint, escape_html, flt
->>>>>>> fa5238ba12 (fix(item_dashboard): escaping `warehouse`, `item_code`, `stock_uom` and `item_name` on `get_data` (#53904))
 
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_reserved_qty_for_items_and_warehouses as get_reserved_stock_details,
