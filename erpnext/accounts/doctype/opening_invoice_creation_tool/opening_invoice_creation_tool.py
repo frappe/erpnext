@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, scrub
 from frappe.model.document import Document
-from frappe.utils import flt, nowdate
+from frappe.utils import escape_html, flt, nowdate
 from frappe.utils.background_jobs import enqueue, is_job_enqueued
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -85,6 +85,11 @@ class OpeningInvoiceCreationTool(Document):
 				doctype, filters=dict(is_opening="Yes", docstatus=1), fields=fields, group_by="company"
 			)
 			prepare_invoice_summary(doctype, invoices)
+
+		invoices_summary_companies = list(invoices_summary.keys())
+
+		for company in invoices_summary_companies:
+			invoices_summary[escape_html(company)] = invoices_summary.pop(company)
 
 		return invoices_summary, max_count
 
