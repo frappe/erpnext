@@ -1,11 +1,6 @@
 import frappe
-<<<<<<< HEAD
 from frappe.model.db_query import DatabaseQuery
-from frappe.utils import flt, nowdate
-=======
-from frappe.desk.reportview import build_match_conditions
 from frappe.utils import escape_html, flt, nowdate
->>>>>>> ddeb9775ed (fix(warehouse_capacity_dashboard): escaping `warehouse`, `item_code` and `company` on `get_data` (#53894))
 
 from erpnext.stock.utils import get_stock_balance
 
