@@ -171,6 +171,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 						target: me.frm,
 						setters: {
 							customer: me.frm.doc.customer,
+							customer_name: me.frm.doc.customer_name,
 						},
 						get_query_filters: {
 							docstatus: 1,
