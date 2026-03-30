@@ -119,13 +119,21 @@ website_context = {
 
 # nosemgrep
 website_route_rules = [
-	{"from_route": "/orders", "to_route": "Sales Order"},
+	{
+		"from_route": "/orders",
+		"to_route": "portal",
+		"defaults": {"doctype": "Sales Order"},
+	},
 	{
 		"from_route": "/orders/<path:name>",
 		"to_route": "order",
 		"defaults": {"doctype": "Sales Order", "parents": [{"label": "Orders", "route": "orders"}]},
 	},
-	{"from_route": "/invoices", "to_route": "Sales Invoice"},
+	{
+		"from_route": "/invoices",
+		"to_route": "portal",
+		"defaults": {"doctype": "Sales Invoice"},
+	},
 	{
 		"from_route": "/invoices/<path:name>",
 		"to_route": "order",
@@ -134,7 +142,11 @@ website_route_rules = [
 			"parents": [{"label": "Invoices", "route": "invoices"}],
 		},
 	},
-	{"from_route": "/supplier-quotations", "to_route": "Supplier Quotation"},
+	{
+		"from_route": "/supplier-quotations",
+		"to_route": "portal",
+		"defaults": {"doctype": "Supplier Quotation"},
+	},
 	{
 		"from_route": "/supplier-quotations/<path:name>",
 		"to_route": "order",
@@ -143,14 +155,10 @@ website_route_rules = [
 			"parents": [{"label": "Supplier Quotation", "route": "supplier-quotations"}],
 		},
 	},
-	{"from_route": "/purchase-orders", "to_route": "Purchase Order"},
 	{
-		"from_route": "/purchase-orders/<path:name>",
-		"to_route": "order",
-		"defaults": {
-			"doctype": "Purchase Order",
-			"parents": [{"label": "Purchase Order", "route": "purchase-orders"}],
-		},
+		"from_route": "/purchase-orders",
+		"to_route": "portal",
+		"defaults": {"doctype": "Purchase Order"},
 	},
 	{
 		"from_route": "/purchase-orders/<path:name>",
@@ -160,7 +168,19 @@ website_route_rules = [
 			"parents": [{"label": "Purchase Order", "route": "purchase-orders"}],
 		},
 	},
-	{"from_route": "/purchase-invoices", "to_route": "Purchase Invoice"},
+	{
+		"from_route": "/purchase-orders/<path:name>",
+		"to_route": "order",
+		"defaults": {
+			"doctype": "Purchase Order",
+			"parents": [{"label": "Purchase Order", "route": "purchase-orders"}],
+		},
+	},
+	{
+		"from_route": "/purchase-invoices",
+		"to_route": "portal",
+		"defaults": {"doctype": "Purchase Invoice"},
+	},
 	{
 		"from_route": "/purchase-invoices/<path:name>",
 		"to_route": "order",
@@ -169,7 +189,11 @@ website_route_rules = [
 			"parents": [{"label": "Purchase Invoice", "route": "purchase-invoices"}],
 		},
 	},
-	{"from_route": "/quotations", "to_route": "Quotation"},
+	{
+		"from_route": "/quotations",
+		"to_route": "portal",
+		"defaults": {"doctype": "Quotation"},
+	},
 	{
 		"from_route": "/quotations/<path:name>",
 		"to_route": "order",
@@ -178,7 +202,11 @@ website_route_rules = [
 			"parents": [{"label": "Quotations", "route": "quotations"}],
 		},
 	},
-	{"from_route": "/shipments", "to_route": "Delivery Note"},
+	{
+		"from_route": "/shipments",
+		"to_route": "portal",
+		"defaults": {"doctype": "Delivery Note"},
+	},
 	{
 		"from_route": "/shipments/<path:name>",
 		"to_route": "order",
@@ -187,7 +215,11 @@ website_route_rules = [
 			"parents": [{"label": "Shipments", "route": "shipments"}],
 		},
 	},
-	{"from_route": "/rfq", "to_route": "Request for Quotation"},
+	{
+		"from_route": "/rfq",
+		"to_route": "portal",
+		"defaults": {"doctype": "Request for Quotation"},
+	},
 	{
 		"from_route": "/rfq/<path:name>",
 		"to_route": "rfq",
@@ -203,8 +235,16 @@ website_route_rules = [
 		"defaults": {"doctype": "Address", "parents": [{"label": "Addresses", "route": "addresses"}]},
 	},
 	{"from_route": "/boms", "to_route": "BOM"},
-	{"from_route": "/timesheets", "to_route": "Timesheet"},
-	{"from_route": "/material-requests", "to_route": "Material Request"},
+	{
+		"from_route": "/timesheets",
+		"to_route": "portal",
+		"defaults": {"doctype": "Timesheet"},
+	},
+	{
+		"from_route": "/material-requests",
+		"to_route": "portal",
+		"defaults": {"doctype": "Material Request"},
+	},
 	{
 		"from_route": "/material-requests/<path:name>",
 		"to_route": "material_request_info",
@@ -213,7 +253,11 @@ website_route_rules = [
 			"parents": [{"label": "Material Request", "route": "material-requests"}],
 		},
 	},
-	{"from_route": "/project", "to_route": "Project"},
+	{
+		"from_route": "/project",
+		"to_route": "portal",
+		"defaults": {"doctype": "Project"},
+	},
 	{"from_route": "/tasks", "to_route": "Task"},
 ]
 
