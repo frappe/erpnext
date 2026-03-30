@@ -689,8 +689,6 @@
    "fieldname": "enable_accounting_dimensions",
    "fieldtype": "Check",
    "label": "Enable Accounting Dimensions"
-<<<<<<< HEAD
-=======
   },
   {
    "default": "1",
@@ -703,11 +701,11 @@
    "default": "1",
    "fieldname": "fetch_payment_schedule_in_payment_request",
    "fieldtype": "Check",
-   "label": "Fetch Payment Schedule In Payment Request"
->>>>>>> 8ec15b537e (feat(Payment Request): Added a toggle for using the payment schedule)
+   "label": "Fetch Payment Schedule In Payment Request
   }
  ],
  "grid_page_length": 50,
+ "hide_toolbar": 0,
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
