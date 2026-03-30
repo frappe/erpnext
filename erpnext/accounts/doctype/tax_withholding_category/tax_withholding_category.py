@@ -252,4 +252,5 @@ class TaxWithholdingDetails:
 
 @allow_regional
 def get_tax_id_for_party(party_type, party):
+	# cannot use tax_id from doc because payment and journal entry do not have tax_id field.\
 	return frappe.db.get_value(party_type, party, "tax_id")
