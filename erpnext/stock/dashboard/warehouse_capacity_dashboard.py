@@ -1,6 +1,11 @@
 import frappe
+<<<<<<< HEAD
 from frappe.model.db_query import DatabaseQuery
 from frappe.utils import flt, nowdate
+=======
+from frappe.desk.reportview import build_match_conditions
+from frappe.utils import escape_html, flt, nowdate
+>>>>>>> ddeb9775ed (fix(warehouse_capacity_dashboard): escaping `warehouse`, `item_code` and `company` on `get_data` (#53894))
 
 from erpnext.stock.utils import get_stock_balance
 
@@ -75,6 +80,9 @@ def get_warehouse_capacity_data(filters, start):
 		balance_qty = get_stock_balance(entry.item_code, entry.warehouse, nowdate()) or 0
 		entry.update(
 			{
+				"warehouse": escape_html(entry.warehouse),
+				"item_code": escape_html(entry.item_code),
+				"company": escape_html(entry.company),
 				"actual_qty": balance_qty,
 				"percent_occupied": flt((flt(balance_qty) / flt(entry.stock_capacity)) * 100, 0),
 			}
