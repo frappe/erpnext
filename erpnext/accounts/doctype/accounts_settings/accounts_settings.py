@@ -73,6 +73,7 @@ class AccountsSettings(Document):
 		enable_loyalty_point_program: DF.Check
 		enable_party_matching: DF.Check
 		exchange_gain_loss_posting_date: DF.Literal["Invoice", "Payment", "Reconciliation Date"]
+		fetch_payment_schedule_in_payment_request: DF.Check
 		fetch_valuation_rate_for_internal_transaction: DF.Check
 		general_ledger_remarks_length: DF.Int
 		ignore_account_closing_balance: DF.Check
