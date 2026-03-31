@@ -1322,7 +1322,7 @@ class WorkOrder(Document):
 	def calculate_time(self):
 		for d in self.get("operations"):
 			if not d.fixed_time:
-				d.time_in_mins = flt(d.time_in_mins) * (flt(self.qty) / flt(d.batch_size))
+				d.time_in_mins = flt(d.time_in_mins) * flt(self.qty)
 
 		self.calculate_operating_cost()
 
