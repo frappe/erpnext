@@ -42,8 +42,12 @@ def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number:
 
 		# 1. Create the slab quality report.
 		_create_slab_quality_report(slab_number, report, shift)
+		if isinstance(report, str):
+			report = frappe.parse_json(report)
+		slab_grade = report.get("grade")
+
 		# 2. Finish the job card and checkout the slab.
-		finish_process(job_card, "Quality Check", False)
+		finish_process(job_card, "Quality Check", False, slab_number=slab_number, slab_grade=slab_grade)
 
 		frappe.db.commit()
 
