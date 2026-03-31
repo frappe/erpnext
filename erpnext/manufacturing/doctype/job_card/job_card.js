@@ -47,6 +47,14 @@ frappe.ui.form.on("Job Card", {
 				},
 			};
 		});
+
+		frm.set_query("work_order", function () {
+			return {
+				filters: {
+					status: ["not in", ["Cancelled", "Closed", "Stopped"]],
+				},
+			};
+		});
 	},
 
 	refresh: function (frm) {
