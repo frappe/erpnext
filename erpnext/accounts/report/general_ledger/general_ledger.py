@@ -693,13 +693,20 @@ def get_columns(filters):
 			"options": "GL Entry",
 			"hidden": 1,
 		},
-		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 120},
+		{
+			"label": _("Posting Date"),
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
+			"width": 120,
+			"sticky": True,
+		},
 		{
 			"label": _("Account"),
 			"fieldname": "account",
 			"fieldtype": "Link",
 			"options": "Account",
 			"width": 180,
+			"sticky": True,
 		},
 		{
 			"label": _("Debit ({0})").format(currency),

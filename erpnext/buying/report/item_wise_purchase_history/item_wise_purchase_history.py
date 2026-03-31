@@ -28,6 +28,7 @@ def get_columns(filters):
 			"fieldname": "item_code",
 			"options": "Item",
 			"width": 120,
+			"sticky": True,
 		},
 		{
 			"label": _("Item Name"),
@@ -41,6 +42,7 @@ def get_columns(filters):
 			"fieldname": "item_group",
 			"options": "Item Group",
 			"width": 120,
+			"sticky": True,
 		},
 		{
 			"label": _("Description"),
