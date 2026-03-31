@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-03-29 09:46+0000\n"
-"PO-Revision-Date: 2026-03-30 10:24\n"
+"PO-Revision-Date: 2026-03-31 10:44\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -58644,7 +58644,7 @@ msgstr ""
 #. Settings'
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "sandbox"
-msgstr "salvadera"
+msgstr ""
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1477
 msgid "sold"
