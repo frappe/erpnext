@@ -31,6 +31,8 @@ frappe.ui.form.on("Job Card", {
 			};
 		});
 
+<<<<<<< HEAD
+=======
 		frm.set_query("operation", "time_logs", () => {
 			let operations = (frm.doc.sub_operations || []).map((d) => d.sub_operation);
 			return {
@@ -59,6 +61,7 @@ frappe.ui.form.on("Job Card", {
 			};
 		});
 
+>>>>>>> d43d308e2f (fix(manufacturing): apply work order status filter in job card (#53766))
 		frm.set_indicator_formatter("sub_operation", function (doc) {
 			if (doc.status == "Pending") {
 				return "red";
