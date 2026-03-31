@@ -748,7 +748,7 @@ def get_columns(filters):
 				"options": "transaction_currency",
 			},
 			{
-				"label": "Transaction Currency",
+				"label": _("Transaction Currency"),
 				"fieldname": "transaction_currency",
 				"fieldtype": "Link",
 				"options": "Currency",
