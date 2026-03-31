@@ -182,6 +182,7 @@ class InventoryDimension(Document):
 				insert_after="inventory_dimension",
 				options=self.reference_document,
 				label=_(label),
+				depends_on="eval:doc.s_warehouse" if doctype == "Stock Entry Detail" else "",
 				search_index=1,
 				reqd=self.reqd,
 				mandatory_depends_on=self.mandatory_depends_on,
@@ -273,7 +274,7 @@ class InventoryDimension(Document):
 		elif doctype != "Stock Entry Detail":
 			display_depends_on = "eval:parent.is_internal_customer == 1"
 		elif doctype == "Stock Entry Detail":
-			display_depends_on = "eval:parent.purpose != 'Material Issue'"
+			display_depends_on = "eval:doc.t_warehouse"
 
 		fieldname = f"{fieldname_start_with}_{self.source_fieldname}"
 		label = f"{label_start_with} {self.dimension_name}"
