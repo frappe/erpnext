@@ -929,6 +929,7 @@ class TestJobCard(ERPNextTestSuite):
 			"bom_no": sfg_bom.name,
 			"finished_good_qty": 1,
 			"sequence_id": 1,
+			"time_in_mins": 30,
 		}
 		operation2 = {
 			"operation": "Test Operation B",
@@ -938,6 +939,7 @@ class TestJobCard(ERPNextTestSuite):
 			"finished_good_qty": 1,
 			"is_final_finished_good": 1,
 			"sequence_id": 2,
+			"time_in_mins": 30,
 		}
 
 		make_workstation(operation1)
