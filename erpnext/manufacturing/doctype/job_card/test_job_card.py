@@ -889,6 +889,7 @@ class TestJobCard(ERPNextTestSuite):
 
 		def create_bom(raw_material, finished_good, scrap_item, submit=True):
 			bom = frappe.new_doc("BOM")
+			bom.company = "_Test Company"
 			bom.item = finished_good
 			bom.quantity = 1
 			bom.append("items", {"item_code": raw_material, "qty": 1})
