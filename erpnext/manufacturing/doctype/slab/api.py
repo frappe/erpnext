@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from frappe import frappe
 from frappe import utils as frappe_utils
@@ -309,7 +309,7 @@ def _generate_batch_number(line: str):
 	now_time = datetime.now()
 	shift_start_hour = shift.start_time.seconds / 3600
 	start_day_factor = 1 if shift.does_span_next_day and now_time.hour < shift_start_hour else 0
-	shift_start_datetime = datetime(today.year, today.month, today.day - start_day_factor) + shift.start_time
+	shift_start_datetime = datetime(today.year, today.month, today.day) - timedelta(days=start_day_factor) + shift.start_time
 	shift_end_datetime = datetime(today.year, today.month, today.day) + shift.end_time
 
 	# If the current time falls in the LAST shift of the day AND is after midnight, subtract 1 from total_days_so_far so that the batch number still reflects that of the previous day.
@@ -356,7 +356,7 @@ def _generate_batch_number(line: str):
 	holiday_count = len(holidays)
 
 	# Calculate A - B
-	total_working_days = total_days_so_far - holiday_count
+	total_working_days = total_days_so_far - holiday_count + 1
 
 	return f"{line}{year_code}/{total_working_days:03d}"
 
