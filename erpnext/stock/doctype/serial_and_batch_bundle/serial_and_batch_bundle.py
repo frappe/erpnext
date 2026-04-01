@@ -1489,6 +1489,7 @@ class SerialandBatchBundle(Document):
 	def on_cancel(self):
 		self.validate_voucher_no_docstatus()
 		self.validate_batch_quantity()
+		self.remove_source_document_no()
 
 	def validate_batch_quantity(self):
 		if not self.has_batch_no:
@@ -1506,6 +1507,43 @@ class SerialandBatchBundle(Document):
 			available_qty = batch_wise_available_qty.get(d.batch_no, 0)
 			if flt(available_qty, precision) < 0:
 				self.throw_negative_batch(d.batch_no, available_qty, precision)
+
+	def remove_source_document_no(self):
+		if not self.has_serial_no and not self.has_batch_no:
+			return
+
+		if self.total_qty <= 0:
+			return
+
+		if self.has_serial_no:
+			serial_nos = [d.serial_no for d in self.entries if d.serial_no]
+			sn_table = frappe.qb.DocType("Serial No")
+			(
+				frappe.qb.update(sn_table)
+				.set(sn_table.reference_doctype, None)
+				.set(sn_table.reference_name, None)
+				.set(sn_table.posting_date, None)
+				.where(
+					(sn_table.name.isin(serial_nos))
+					& (sn_table.reference_doctype == self.voucher_type)
+					& (sn_table.reference_name == self.voucher_no)
+					& (sn_table.posting_date == getdate(self.posting_datetime))
+				)
+			).run()
+
+		if self.has_batch_no:
+			batch_nos = [d.batch_no for d in self.entries if d.batch_no]
+			batch_table = frappe.qb.DocType("Batch")
+			(
+				frappe.qb.update(batch_table)
+				.set(batch_table.reference_doctype, None)
+				.set(batch_table.reference_name, None)
+				.where(
+					(batch_table.name.isin(batch_nos))
+					& (batch_table.reference_doctype == self.voucher_type)
+					& (batch_table.reference_name == self.voucher_no)
+				)
+			).run()
 
 	def throw_negative_batch(self, batch_no, available_qty, precision, posting_datetime=None):
 		from erpnext.stock.stock_ledger import NegativeStockError
