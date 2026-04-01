@@ -1,16 +1,43 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
+import { cva, VariantProps } from "class-variance-authority"
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+const inputVariants = cva(cn("flex w-full min-w-0 transition-all outline-none border border-transparent",
+  "focus-visible:bg-surface-white focus-visible:border-outline-gray-4 focus-visible:shadow-focus-gray",
+  "active:bg-surface-white active:shadow-sm active:border-outline-gray-4",
+  "placeholder:text-ink-gray-4 text-ink-gray-7",
+  "disabled:bg-surface-gray-1 disabled:placeholder:text-ink-gray-3 disabled:text-ink-gray-3 disabled:cursor-not-allowed disabled:pointer-events-none",
+  "aria-readonly:bg-surface-gray-1 aria-readonly:text-ink-gray-6 aria-readonly:pointer-events-none aria-invalid:shadow-focus-red aria-invalid:border-outline-red-3"),
+  {
+    variants: {
+      inputSize: {
+        sm: "text-base rounded py-1.5 px-2 h-7",
+        md: "text-base rounded py-2 px-2.5 h-8",
+        lg: "text-lg rounded-md py-[11px] px-3 h-10",
+      },
+      variant: {
+        subtle: "bg-surface-gray-2 hover:bg-surface-gray-3 aria-invalid:bg-surface-red-1",
+        outline: "bg-surface-white border-outline-gray-2 hover:border-outline-gray-3 active:border-outline-gray-4 disabled:border-outline-gray-2",
+      }
+    },
+    defaultVariants: {
+      inputSize: "md",
+      variant: "subtle"
+    }
+  }
+)
+
+function Input({ className, type, inputSize = "md", variant = "outline", ...props }: React.ComponentProps<"input"> & VariantProps<typeof inputVariants>) {
   return (
     <input
       type={type}
       data-slot="input"
+      data-input-size={inputSize}
+      data-variant={variant}
       className={cn(
-        "file:text-foreground placeholder:text-ink-gray-5 selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+        "file:text-foreground file:inline-flex file:border-0 file:bg-transparent file:text-sm file:font-medium",
+        inputVariants({ inputSize, variant }),
         className
       )}
       {...props}

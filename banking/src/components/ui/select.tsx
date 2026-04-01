@@ -3,6 +3,7 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 import { Select as SelectPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { cva, VariantProps } from "class-variance-authority"
 
 function Select({
   ...props
@@ -22,20 +23,46 @@ function SelectValue({
   return <SelectPrimitive.Value data-slot="select-value" {...props} />
 }
 
+
+const selectVariants = cva(cn("flex w-fit items-center justify-between gap-2 min-w-0 transition-all outline-none border border-transparent whitespace-nowrap",
+  "focus-visible:bg-surface-white focus-visible:border-outline-gray-4 focus-visible:shadow-focus-gray",
+  "active:bg-surface-white active:shadow-sm active:border-outline-gray-4",
+  "placeholder:text-ink-gray-4 text-ink-gray-7",
+  "disabled:bg-surface-gray-1 disabled:placeholder:text-ink-gray-3 disabled:text-ink-gray-3 disabled:cursor-not-allowed disabled:pointer-events-none",
+  "aria-readonly:bg-surface-gray-1 aria-readonly:text-ink-gray-6 aria-readonly:pointer-events-none aria-invalid:shadow-focus-red aria-invalid:border-outline-red-3"),
+  {
+    variants: {
+      inputSize: {
+        sm: "text-base rounded py-1.5 px-2 h-7",
+        md: "text-base rounded py-2 px-2.5 h-8",
+        lg: "text-lg rounded-md py-[11px] px-3 h-10",
+      },
+      variant: {
+        subtle: "bg-surface-gray-2 hover:bg-surface-gray-3 aria-invalid:bg-surface-red-1",
+        outline: "bg-surface-white border-outline-gray-2 hover:border-outline-gray-3 active:border-outline-gray-4 disabled:border-outline-gray-2",
+      }
+    },
+    defaultVariants: {
+      inputSize: "md",
+      variant: "subtle"
+    }
+  }
+)
+
 function SelectTrigger({
   className,
-  size = "default",
+  inputSize = "md",
+  variant = "outline",
   children,
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
-  size?: "sm" | "default"
-}) {
+}: React.ComponentProps<typeof SelectPrimitive.Trigger> & VariantProps<typeof selectVariants>) {
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
-      data-size={size}
+      data-input-size={inputSize}
       className={cn(
-        "border-input data-[placeholder]:text-ink-gray-5 [&_svg:not([class*='text-'])]:text-ink-gray-5 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "border-input data-[placeholder]:text-ink-gray-5 [&_svg:not([class*='text-'])]:text-ink-gray-5 shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        selectVariants({ inputSize, variant }),
         className
       )}
       {...props}
