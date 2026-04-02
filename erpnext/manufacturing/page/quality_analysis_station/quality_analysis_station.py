@@ -1,4 +1,7 @@
-import erpnext.manufacturing.doctype.job_card.job_card_dashboard
+from erpnext.stock.doctype.warehouse.constants import REJECTED_WAREHOUSE
+from erpnext.stock.doctype.warehouse.constants import STANDARD_WAREHOUSE
+from erpnext.stock.doctype.warehouse.constants import PREMIUM_WAREHOUSE
+from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 import json
 
@@ -42,8 +45,15 @@ def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number:
 
 		# 1. Create the slab quality report.
 		_create_slab_quality_report(slab_number, report, shift)
+		if isinstance(report, str):
+			report = frappe.parse_json(report)
+		slab_grade = report.get("grade")
+
 		# 2. Finish the job card and checkout the slab.
-		finish_process(job_card, "Quality Check", False)
+		finish_process(job_card, "Quality Check", False, slab_number=slab_number, slab_grade=slab_grade)
+
+		# 3. Move the slab to specific warehouse based on grade by making a new stock entry - Material Transfer.
+		_make_material_transfer_stock_entry(slab_number, slab_grade, job_card)
 
 		frappe.db.commit()
 
@@ -117,3 +127,50 @@ def _create_slab_quality_report(slab_name: str, report: str | dict, shift: str):
 	slab.save(ignore_permissions=True)
 
 	return doc
+
+
+def _make_material_transfer_stock_entry(slab_number: str, grade: str, job_card: str):
+	work_order = frappe.get_value("Job Card", job_card, "work_order")
+	target_warehouse = frappe.get_value("Work Order", work_order, "fg_warehouse")
+
+	company = frappe.get_value("Job Card", job_card, "company")
+	company_abbr = frappe.get_value("Company", company, "abbr")
+
+	production_item = frappe.get_value("Job Card", job_card, "production_item")
+	item_uom = frappe.get_value("Item", production_item, "stock_uom")
+	if slab_number:
+		parts = slab_number.split("-")
+
+	try:
+		stock_entry: StockEntry = frappe.new_doc("Stock Entry")
+		stock_entry.stock_entry_type = "Material Transfer"
+		stock_entry.company = company
+		stock_entry.slab_grade = grade
+		stock_entry.slab_batch_no = parts[0] if len(parts) > 0 else None
+		stock_entry.slab_serial_no = parts[-1] if len(parts) > 1 else parts[0]
+		stock_entry.from_warehouse = target_warehouse
+
+		if "PRE" in grade:
+			stock_entry.to_warehouse = PREMIUM_WAREHOUSE + " - " + company_abbr
+		elif "STD" in grade:
+			stock_entry.to_warehouse = STANDARD_WAREHOUSE + " - " + company_abbr
+		else:
+			stock_entry.to_warehouse = REJECTED_WAREHOUSE + " - " + company_abbr
+		stock_entry.append(
+			"items",
+			{
+				"item_code": production_item,
+				"qty": 1,
+				"uom": item_uom,
+				"s_warehouse": target_warehouse,
+				"t_warehouse": stock_entry.to_warehouse,
+				"slab_no": slab_number,
+				"to_slab_no": slab_number,
+			},
+		)
+		stock_entry.insert(ignore_permissions=True)
+		stock_entry.submit()
+		return stock_entry
+
+	except Exception:
+		raise
