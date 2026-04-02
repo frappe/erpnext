@@ -1,0 +1,26 @@
+{
+ "content": null,
+ "creation": "2026-04-01 13:38:11.867150",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-04-01 16:18:24.377651",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "calibration-station",
+ "owner": "Administrator",
+ "page_name": "calibration-station",
+ "roles": [
+  {
+   "role": "Administrator"
+  },
+  {
+   "role": "Employee"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Calibration Station"
+}

@@ -6,7 +6,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_bop4",
+  "basic_details_section",
   "amended_from",
   "template",
   "line",
@@ -26,6 +26,10 @@
   "grade",
   "column_break_e1da",
   "quality_assessment",
+  "shipping_details_section",
+  "crate_number",
+  "column_break_txsf",
+  "container_number",
   "export_section",
   "packing_list_number",
   "column_break_cnky",
@@ -36,10 +40,6 @@
   "slab_history"
  ],
  "fields": [
-  {
-   "fieldname": "section_break_bop4",
-   "fieldtype": "Section Break"
-  },
   {
    "fieldname": "amended_from",
    "fieldtype": "Link",
@@ -218,12 +218,38 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Is Paused"
+  },
+  {
+   "fieldname": "basic_details_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Details"
+  },
+  {
+   "fieldname": "shipping_details_section",
+   "fieldtype": "Section Break",
+   "label": "Shipping Details"
+  },
+  {
+   "fieldname": "crate_number",
+   "fieldtype": "Data",
+   "label": "Crate No.",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_txsf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "container_number",
+   "fieldtype": "Data",
+   "label": "Container No.",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-23 16:56:52.709894",
+ "modified": "2026-04-02 17:14:32.970051",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",

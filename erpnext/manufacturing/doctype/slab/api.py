@@ -173,7 +173,7 @@ def get_slabs_in(line: str, current_stage: str) -> list[dict]:
 
 
 @frappe.whitelist()
-def get_slabs_for(line: str, next_stage: str, limit=1, include_current_stage=False) -> list[dict]:
+def get_slabs_for(line: str, next_stage: str, limit=1, include_current_stage=False) -> list[Slab]:
 	include_current_stage = bool(include_current_stage)
 	# Determine valid previous stages based on the next_stage and rules
 	valid_previous_stages = []

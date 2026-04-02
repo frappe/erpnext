@@ -1,7 +1,7 @@
-frappe.pages['cooling-station'].on_page_load = function (wrapper) {
+frappe.pages['calibration-station'].on_page_load = function (wrapper) {
     let page = frappe.ui.make_app_page({
         parent: wrapper,
-        title: 'Cooling Station',
+        title: 'Calibration Station',
         single_column: true
     });
 
@@ -19,7 +19,7 @@ frappe.pages['cooling-station'].on_page_load = function (wrapper) {
     }
 };
 
-frappe.pages['cooling-station'].on_page_show = (wrapper) => {
+frappe.pages['calibration-station'].on_page_show = (wrapper) => {
     load_vue(wrapper);
 };
 
@@ -27,5 +27,5 @@ async function load_vue(wrapper) {
     const $parent = $(wrapper).find('.layout-main-section');
     $parent.empty();
     await frappe.require('queue_station.bundle.js');
-    frappe.queue_station_app = frappe.ui.setup_queue_station($parent, "Cooling");
+    frappe.queue_station_app = frappe.ui.setup_queue_station($parent, "Calibration");
 }

@@ -40,15 +40,15 @@ const visualizerRef = ref(null);
 
 const productionDate = computed(() => {
     if (!selectedSlab.value?.creation) return "";
-    
+
     const dateStr = selectedSlab.value.creation.split(' ')[0];
     const [year, month, day] = dateStr.split('-');
-    
+
     const months = [
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     ];
-    
+
     return `${day} ${months[parseInt(month) - 1]} ${year}`;
 });
 
@@ -73,13 +73,17 @@ const form = reactive({
     // Crack
     crack_front: '',
     crack_back: '',
-    // Others
+    // Grading & Remarks
     bend: null,
+    repair: 'None',
     grade: '',
-    remarks: ''
+    remarks: '',
+    crate_number: '',
+    container_number: ''
 });
 
 const grades = ref([]);
+const repairOptions = ref([]);
 
 const fetchGrades = async () => {
     const r = await frappe.call({
@@ -90,6 +94,15 @@ const fetchGrades = async () => {
     });
     if (r.message && r.message.grades) {
         grades.value = r.message.grades;
+    }
+};
+
+const fetchRepairOptions = async () => {
+    const r = await frappe.call({
+        method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.get_repair_options'
+    });
+    if (r.message && Array.isArray(r.message)) {
+        repairOptions.value = r.message;
     }
 };
 
@@ -143,10 +156,13 @@ function selectSlab(slab) {
         crack_front: null,
         crack_back: null,
         bend: null,
+        repair: 'None',
         grade: '',
-        remarks: ''
+        remarks: '',
+        crate_number: '',
+        container_number: ''
     });
-    
+
     // Clear observations
     observations.value = [];
     newObservation.value = null;
@@ -158,8 +174,8 @@ const confirmAndTag = async () => {
         return;
     }
 
-    if (!form.slab_length || !form.slab_width || !form.slab_thickness || !form.grade) {
-        frappe.msgprint(__('Please fill in all required fields (Length, Width, Thickness, Grade)'));
+    if (!form.slab_length || !form.slab_width || !form.slab_thickness || !form.grade || !form.crate_number) {
+        frappe.msgprint(__('Please fill in all required fields (Length, Width, Thickness, Grade, Crate No.)'));
         return;
     }
 
@@ -231,6 +247,7 @@ onMounted(async () => {
 async function loadData() {
     await get_slab_for_qa(jobCardNumber.value);
     await fetchGrades();
+    await fetchRepairOptions();
 }
 
 onUnmounted(() => {
@@ -304,11 +321,11 @@ const handleMouseMove = (event) => {
     const rect = visualizerRef.value.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-    
+
     // Convert to mm
     const mmX = Math.round(x / slabScale.value);
     const mmY = Math.round(y / slabScale.value);
-    
+
     // Clamp to slab dimensions
     if (mmX >= 0 && mmX <= slabSize.value.length && mmY >= 0 && mmY <= slabSize.value.breadth) {
         hoverCoordinates.value = { x: mmX, y: mmY, visible: true, clientX: event.clientX, clientY: event.clientY };
@@ -326,23 +343,23 @@ const editingObservationIndex = ref(null);
 
 const handleSlabClick = (event) => {
     if (!visualizerRef.value || newObservation.value) return; // Don't start new if one is open
-    
+
     // Clear editing state if clicking elsewhere
     editingObservationIndex.value = null;
-    
+
     const rect = visualizerRef.value.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-    
+
     const mmX = Math.round(x / slabScale.value);
     const mmY = Math.round(y / slabScale.value);
-    
+
     newObservation.value = {
         x: mmX,
         y: mmY,
         text: ''
     };
-    
+
     // Auto-focus input next tick
     setTimeout(() => {
         const input = document.getElementById('obs-input');
@@ -353,7 +370,7 @@ const handleSlabClick = (event) => {
 const editObservation = (index) => {
     editingObservationIndex.value = index;
     newObservation.value = { ...observations.value[index] };
-    
+
     // Auto-focus input next tick
     setTimeout(() => {
         const input = document.getElementById('obs-input');
@@ -505,10 +522,10 @@ onUnmounted(() => {
                         <h5 class="mb-4 border-bottom pb-2">{{ __('Observations') }}</h5>
                         <div class="row">
                             <div class="col-12" v-if="slabSize">
-                                <div class="visualizer-container position-relative mb-3" 
+                                <div class="visualizer-container position-relative mb-3"
                                     ref="visualizerRef"
-                                    :style="{ 
-                                        width: '100%', 
+                                    :style="{
+                                        width: '100%',
                                         maxWidth: '800px',
                                         aspectRatio: `${slabSize.length} / ${slabSize.breadth}`,
                                         outline: '2px solid var(--text-color)',
@@ -519,38 +536,38 @@ onUnmounted(() => {
                                     @mousemove="handleMouseMove"
                                     @mouseleave="handleMouseLeave"
                                     @click="handleSlabClick">
-                                    
+
                                     <!-- Crosshairs & Labels -->
                                     <template v-if="hoverCoordinates.visible && !newObservation">
                                         <!-- Horizontal Line -->
-                                        <div class="crosshair-h" 
+                                        <div class="crosshair-h"
                                             :style="{ top: (hoverCoordinates.y * slabScale) + 'px' }">
                                         </div>
-                                        
+
                                         <!-- Vertical Line -->
-                                        <div class="crosshair-v" 
+                                        <div class="crosshair-v"
                                             :style="{ left: (hoverCoordinates.x * slabScale) + 'px' }">
                                         </div>
-                                        
+
                                         <!-- X Label (Left Distance) -->
                                         <div class="crosshair-label label-x"
-                                            :style="{ 
+                                            :style="{
                                                 top: (hoverCoordinates.y * slabScale) + 'px',
                                                 left: (hoverCoordinates.x * slabScale) + 'px'
                                             }">
                                             {{ hoverCoordinates.x }} mm
                                         </div>
-                                        
+
                                         <!-- Y Label (Top Distance) -->
                                         <div class="crosshair-label label-y"
-                                            :style="{ 
+                                            :style="{
                                                 top: (hoverCoordinates.y * slabScale) + 'px',
                                                 left: (hoverCoordinates.x * slabScale) + 'px'
                                             }">
                                             {{ hoverCoordinates.y }} mm
                                         </div>
                                     </template>
-                                    
+
                                     <!-- Existing Observations -->
                                     <div v-for="(obs, index) in observations" :key="index"
                                         class="obs-marker"
@@ -562,9 +579,9 @@ onUnmounted(() => {
                                         @click.stop="editObservation(index)">
                                         <div class="marker-dot"></div>
                                     </div>
-                                    
+
                                     <!-- New Observation Input -->
-                                    <div v-if="newObservation" 
+                                    <div v-if="newObservation"
                                         class="obs-input-popup p-2 shadow rounded border"
                                         :style="{
                                             left: (newObservation.x * slabScale) + 'px',
@@ -580,14 +597,14 @@ onUnmounted(() => {
                                         <div class="small text-muted mb-1">
                                             {{ newObservation.x }}, {{ newObservation.y }}
                                         </div>
-                                        <input id="obs-input" type="text" v-model="newObservation.text" 
-                                            class="form-control form-control-sm mb-2" 
+                                        <input id="obs-input" type="text" v-model="newObservation.text"
+                                            class="form-control form-control-sm mb-2"
                                             :placeholder="__('Enter observation')"
                                             @keydown.enter="saveObservation"
                                             @keydown.esc="cancelObservation">
                                         <div class="d-flex justify-content-end">
-                                            <button v-if="editingObservationIndex !== null" 
-                                                class="btn btn-xs btn-danger mr-auto" 
+                                            <button v-if="editingObservationIndex !== null"
+                                                class="btn btn-xs btn-danger mr-auto"
                                                 @click="deleteObservation">
                                                 Delete
                                             </button>
@@ -595,7 +612,7 @@ onUnmounted(() => {
                                             <button class="btn btn-xs btn-primary" @click="saveObservation">Save</button>
                                         </div>
                                     </div>
-                                    
+
                                 </div>
                                 <div class="text-center text-muted small mt-2">
                                     {{ __('Click anywhere on the slab to add an observation point.') }}
@@ -606,14 +623,22 @@ onUnmounted(() => {
                             </div>
                         </div>
 
-                        <!-- Others -->
+                        <!-- Grading & Remarks -->
                         <h5 class="mb-4 border-bottom pb-2">{{ __('Grading & Remarks') }}</h5>
                         <div class="row">
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label class="small text-muted">{{ __('Bend (mm)') }}</label>
                                 <input type="number" v-model="form.bend" class="form-control">
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
+                                <label class="small text-muted">{{ __('Repair') }}</label>
+                                <select v-model="form.repair" class="form-control">
+                                    <option v-for="option in repairOptions" :key="option" :value="option">
+                                        {{ __(option) }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
                                 <label class="small text-muted">{{ __('Grade') }}</label>
                                 <select v-model="form.grade" class="form-control" required>
                                     <option value="">{{ __('Select Grade') }}</option>
@@ -622,12 +647,27 @@ onUnmounted(() => {
                                     </option>
                                 </select>
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label class="small text-muted">{{ __('Remarks') }}</label>
                                 <textarea v-model="form.remarks" class="form-control" rows="1"></textarea>
                             </div>
                         </div>
 
+                        <!-- Packing & Shipping Details -->
+                        <h5 class="mb-4 border-bottom pb-2 mt-4">{{ __('Packing & Shipping Details') }}</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="small text-muted">{{ __('Crate No.') }}</label>
+                                <select v-model="form.crate_number" class="form-control" required>
+                                    <option value="">{{ __('Select Crate No.') }}</option>
+                                    <option v-for="n in 12" :key="n" :value="n.toString()">{{ n }}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="small text-muted">{{ __('Container No.') }}</label>
+                                <input type="text" v-model="form.container_number" class="form-control">
+                            </div>
+                        </div>
                         <div class="mt-4 border-top pt-4 d-flex justify-content-end align-items-center">
                             <div class="actions">
                                 <button class="btn btn-primary btn-lg px-5" :disabled="isProcessing" @click="confirmAndTag">

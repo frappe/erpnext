@@ -1,14 +1,9 @@
-from erpnext.stock.doctype.warehouse.constants import REJECTED_WAREHOUSE
-from erpnext.stock.doctype.warehouse.constants import STANDARD_WAREHOUSE
-from erpnext.stock.doctype.warehouse.constants import PREMIUM_WAREHOUSE
-from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
-from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 import json
 
 import frappe
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCard
-from erpnext.manufacturing.doctype.operation.api import get_open_job_cards
+from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 from erpnext.manufacturing.doctype.slab.api import get_slabs_for
 from erpnext.manufacturing.doctype.slab.slab import Slab
 from erpnext.manufacturing.doctype.slab_quality_report.slab_quality_report import SlabQualityReport
@@ -17,14 +12,20 @@ from erpnext.manufacturing.page.operator_station.operator_station import (
 	get_top_job_card_for_process,
 	start_process,
 )
+from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+from erpnext.stock.doctype.warehouse.constants import (
+	PREMIUM_WAREHOUSE,
+	REJECTED_WAREHOUSE,
+	STANDARD_WAREHOUSE,
+)
 
 
 @frappe.whitelist()
 def start_qa_process(slab_number: str):
-	slab: Slab = frappe.get_doc("Slab", slab_number)
+	slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
 	#    1. Get the job card for quality analysis on the given line.
 	job_card_result = get_top_job_card_for_process("Quality Check", slab.line, True)
-	job_card = job_card_result.get("top_job_card")
+	job_card: JobCard = job_card_result.get("top_job_card")  # pyright: ignore[reportAssignmentType]
 	if not job_card:
 		frappe.throw("No Job Card found")
 	job_card_name = job_card.name
@@ -47,7 +48,7 @@ def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number:
 		_create_slab_quality_report(slab_number, report, shift)
 		if isinstance(report, str):
 			report = frappe.parse_json(report)
-		slab_grade = report.get("grade")
+		slab_grade: str | None = report.get("grade")  # pyright: ignore[reportAttributeAccessIssue]
 
 		# 2. Finish the job card and checkout the slab.
 		finish_process(job_card, "Quality Check", False, slab_number=slab_number, slab_grade=slab_grade)
@@ -68,29 +69,19 @@ def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number:
 def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
 	job_card: JobCard | None = None
 	if job_card_number:
-		job_card = frappe.get_doc("Job Card", job_card_number)
+		job_card = frappe.get_doc("Job Card", job_card_number)  # pyright: ignore[reportAssignmentType]
 
-	# Else, get the earliest open job card for the operation.
-	# if not job_card:
-	# 	if line and not isinstance(line, list):
-	# 		child_lines = get_all_child_lines(line)
-	# 		if child_lines:
-	# 			line = child_lines
-
-	# 	job_cards = get_open_job_cards("Quality Check", line, True)
 	child_lines = get_all_child_lines(line)
 	job_card_data = get_top_job_card_for_process("Quality Check", child_lines if child_lines else line, True)
-	# wip_job_cards = [jc for jc in job_cards if jc.status == "Work In Progress"]
-	# job_card = wip_job_cards[0] if wip_job_cards else job_cards[0] if job_cards else None
 	job_card = job_card_data["top_job_card"]
 
 	slab: Slab | None = None
 	if job_card and job_card.slab:
-		slab = frappe.get_doc("Slab", job_card.slab)
+		slab = frappe.get_doc("Slab", job_card.slab)  # pyright: ignore[reportAssignmentType]
 
 	if not slab:
 		# If there are no active job cards, get the earliest finished slab
-		slabs = get_slabs_for(line, next_stage="Quality Check")
+		slabs: list[Slab] = get_slabs_for(line, next_stage="Quality Check")  # pyright: ignore[reportAssignmentType]
 		slab = slabs[0] if slabs else None
 
 	slab_size = None
@@ -105,14 +96,14 @@ def _create_slab_quality_report(slab_name: str, report: str | dict, shift: str):
 	if isinstance(report, str):
 		report = json.loads(report)
 
-	doc: SlabQualityReport = frappe.new_doc("Slab Quality Report")
+	doc: SlabQualityReport = frappe.new_doc("Slab Quality Report")  # pyright: ignore[reportAssignmentType]
 	doc.update(report)
 	doc.shift = shift
 
 	doc.insert(ignore_permissions=True)
 	doc.submit()
 
-	slab: Slab = frappe.get_doc("Slab", slab_name)
+	slab: Slab = frappe.get_doc("Slab", slab_name)  # pyright: ignore[reportAssignmentType]
 	# if slab.status != "Curing" and slab.is_cur_stage_complete:
 	#     raise Exception("Slab is not in curing or is not complete.")
 
@@ -129,20 +120,21 @@ def _create_slab_quality_report(slab_name: str, report: str | dict, shift: str):
 	return doc
 
 
-def _make_material_transfer_stock_entry(slab_number: str, grade: str, job_card: str):
+def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job_card: str):
 	work_order = frappe.get_value("Job Card", job_card, "work_order")
-	target_warehouse = frappe.get_value("Work Order", work_order, "fg_warehouse")
+	target_warehouse: str = frappe.get_value("Work Order", work_order, "fg_warehouse")  # pyright: ignore[reportAssignmentType]
 
-	company = frappe.get_value("Job Card", job_card, "company")
-	company_abbr = frappe.get_value("Company", company, "abbr")
+	company: str = frappe.get_value("Job Card", job_card, "company")  # pyright: ignore[reportAssignmentType]
+	company_abbr: str = frappe.get_value("Company", company, "abbr")  # pyright: ignore[reportAssignmentType]
 
 	production_item = frappe.get_value("Job Card", job_card, "production_item")
 	item_uom = frappe.get_value("Item", production_item, "stock_uom")
+	parts = []
 	if slab_number:
 		parts = slab_number.split("-")
 
 	try:
-		stock_entry: StockEntry = frappe.new_doc("Stock Entry")
+		stock_entry: StockEntry = frappe.new_doc("Stock Entry")  # pyright: ignore[reportAssignmentType]
 		stock_entry.stock_entry_type = "Material Transfer"
 		stock_entry.company = company
 		stock_entry.slab_grade = grade
@@ -150,9 +142,9 @@ def _make_material_transfer_stock_entry(slab_number: str, grade: str, job_card: 
 		stock_entry.slab_serial_no = parts[-1] if len(parts) > 1 else parts[0]
 		stock_entry.from_warehouse = target_warehouse
 
-		if "PRE" in grade:
+		if grade and ("premium" in grade.lower() or "pre" in grade.lower()):
 			stock_entry.to_warehouse = PREMIUM_WAREHOUSE + " - " + company_abbr
-		elif "STD" in grade:
+		elif grade and ("standard" in grade.lower() or "std" in grade.lower()):
 			stock_entry.to_warehouse = STANDARD_WAREHOUSE + " - " + company_abbr
 		else:
 			stock_entry.to_warehouse = REJECTED_WAREHOUSE + " - " + company_abbr
@@ -168,9 +160,18 @@ def _make_material_transfer_stock_entry(slab_number: str, grade: str, job_card: 
 				"to_slab_no": slab_number,
 			},
 		)
+
 		stock_entry.insert(ignore_permissions=True)
 		stock_entry.submit()
 		return stock_entry
 
 	except Exception:
 		raise
+
+
+@frappe.whitelist()
+def get_repair_options():
+	field = frappe.get_meta("Slab Quality Report").get_field("repair")
+	if field and field.options:
+		return [opt.strip() for opt in field.options.split("\n") if opt.strip()]
+	return []

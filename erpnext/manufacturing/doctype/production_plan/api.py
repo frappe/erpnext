@@ -1,8 +1,9 @@
 import frappe
+
 from erpnext.manufacturing.page.mixer_station.mixer_station import get_mixer_state
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def delete_job_cards(production_plan, reason):
 	is_deleted = False
 	deleted_count = 0
@@ -16,12 +17,6 @@ def delete_job_cards(production_plan, reason):
 		fields=["name", "status"],
 		filters={"work_order": ["in", [wo.name for wo in mixing_work_orders]]},
 	)
-
-	# for job_card in mixing_job_cards:
-	# 	if job_card.status == "Completed":
-	# 		mixer_state = get_mixer_state(job_card.name)
-	# 		if not mixer_state["transfer_complete"]:
-	# 			frappe.throw("Job Card {0} is completed but not transferred".format(job_card.name))
 
 	for job_card in mixing_job_cards:
 		if job_card.status == "Open":

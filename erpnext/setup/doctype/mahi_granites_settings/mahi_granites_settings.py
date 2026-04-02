@@ -20,12 +20,12 @@ class MahiGranitesSettings(Document):
 		from erpnext.setup.doctype.sales_invoice_series.sales_invoice_series import SalesInvoiceSeries
 		from frappe.types import DF
 
+		curing_labels: DF.Table[CuringLabel]
 		grades: DF.Table[SlabQualityGrade]
 		max_heating_minutes: DF.Float
 		max_pay_line_amount: DF.Currency
 		mfg_unit: DF.Link
 		min_curing_hours: DF.Float
-		curing_labels: DF.Table[CuringLabel]
 		sales_invoice_patterns: DF.Table[SalesInvoiceSeries]
 		show_job_card_queue_to_mixer_operators: DF.Check
 		slab_seeds: DF.Table[SlabSeed]

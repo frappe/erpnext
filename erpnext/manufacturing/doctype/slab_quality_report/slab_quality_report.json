@@ -18,6 +18,10 @@
   "column_break_dxoj",
   "slab_template",
   "column_break_uqmr",
+  "shipping_details_section",
+  "crate_number",
+  "column_break_ofgg",
+  "container_number",
   "slab_dimensions_section",
   "slab_length",
   "column_break_jlbb",
@@ -38,6 +42,8 @@
   "crack_back",
   "section_break_ueen",
   "bend",
+  "column_break_hmsq",
+  "repair",
   "column_break_0tsh",
   "grade",
   "section_break_8ixs",
@@ -256,13 +262,46 @@
    "hidden": 1,
    "label": "Observations",
    "options": "Slab Quality Observation"
+  },
+  {
+   "fieldname": "column_break_hmsq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "None",
+   "fieldname": "repair",
+   "fieldtype": "Select",
+   "label": "Slab Repair Type",
+   "options": "None\nRecovery\nRepolish\n3cm to 2cm"
+  },
+  {
+   "fieldname": "shipping_details_section",
+   "fieldtype": "Section Break",
+   "label": "Packing & Shipping Details"
+  },
+  {
+   "fieldname": "column_break_ofgg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "crate_number",
+   "fieldtype": "Select",
+   "label": "Crate No.",
+   "options": "\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "container_number",
+   "fieldtype": "Data",
+   "label": "Container No."
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-10 01:39:54.475723",
+ "modified": "2026-04-02 18:34:47.748530",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab Quality Report",
@@ -281,6 +320,15 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1
   }
  ],
  "row_format": "Dynamic",

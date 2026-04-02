@@ -20,6 +20,8 @@ class Slab(Document):
 		batch_number: DF.Data
 		child_line: DF.Link | None
 		consignment_number: DF.Data | None
+		container_number: DF.Data | None
+		crate_number: DF.Data | None
 		created_on: DF.Datetime | None
 		current_job_card: DF.Data | None
 		grade: DF.Link | None
