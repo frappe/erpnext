@@ -1092,16 +1092,16 @@ class TestSerialandBatchBundle(FrappeTestCase):
 			target="_Test Warehouse - _TC",
 		)
 		serial_no = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)[0]
-		self.assertEqual(frappe.get_value("Serial No", serial_no, "reference_name"), se.name)
+		self.assertEqual(frappe.get_value("Serial No", serial_no, "purchase_document_no"), se.name)
 
 		se.cancel()
-		self.assertIsNone(frappe.get_value("Serial No", serial_no, "reference_name"))
+		self.assertIsNone(frappe.get_value("Serial No", serial_no, "purchase_document_no"))
 
 		se1 = frappe.copy_doc(se, ignore_no_copy=False)
 		se1.items[0].serial_no = serial_no
 		se1.submit()
 
-		self.assertEqual(frappe.get_value("Serial No", serial_no, "reference_name"), se1.name)
+		self.assertEqual(frappe.get_value("Serial No", serial_no, "purchase_document_no"), se1.name)
 
 
 def get_batch_from_bundle(bundle):
