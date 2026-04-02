@@ -5,6 +5,7 @@ import ast
 import json
 import math
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from dataclasses import dataclass, field
 from functools import reduce
 from typing import Any, Union
@@ -17,7 +18,6 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, date_diff, flt, getdate
 from pypika.terms import Bracket, LiteralValue
 
-from erpnext import get_company_currency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
@@ -72,6 +72,7 @@ class AccountData:
 	"""Account data across all periods"""
 
 	account: str  # docname
+	company: str = ""
 	account_name: str = ""  # account name
 	account_number: str = ""
 	period_values: dict[str, PeriodValue] = field(default_factory=dict)
@@ -107,6 +108,7 @@ class AccountData:
 	def copy(self):
 		copied = AccountData(
 			account=self.account,
+			company=self.company,
 			account_name=self.account_name,
 			account_number=self.account_number,
 		)
@@ -198,6 +200,53 @@ class FormattingRule:
 		return self.format_properties
 
 
+def get_report_companies(filters: dict[str, Any]) -> list[str]:
+	companies = filters.get("companies")
+
+	if isinstance(companies, str):
+		companies = frappe.parse_json(companies)
+
+	if not companies:
+		companies = [filters.get("company")] if filters.get("company") else []
+	elif not isinstance(companies, list):
+		companies = [companies]
+
+	normalized_companies = []
+	seen_companies = set()
+
+	for company in companies:
+		if company and company not in seen_companies:
+			normalized_companies.append(company)
+			seen_companies.add(company)
+
+	return normalized_companies
+
+
+def get_primary_company(filters: dict[str, Any]) -> str | None:
+	report_companies = get_report_companies(filters)
+	return report_companies[0] if report_companies else None
+
+
+def get_report_currency(filters: dict[str, Any]) -> str | None:
+	report_companies = get_report_companies(filters)
+
+	if not report_companies:
+		return None
+
+	default_currencies = {
+		frappe.get_cached_value("Company", company, "default_currency") for company in report_companies
+	}
+
+	if len(default_currencies) > 1:
+		frappe.throw(
+			_(
+				"Custom Financial Report currently supports multi-company reporting only when all selected companies use the same default currency."
+			)
+		)
+
+	return default_currencies.pop()
+
+
 # ============================================================================
 # REPORT ENGINE
 # ============================================================================
@@ -231,6 +280,12 @@ class FinancialReportEngine:
 		if filters.get("presentation_currency"):
 			frappe.msgprint(_("Currency filters are currently unsupported in Custom Financial Report."))
 
+		if not get_report_companies(filters):
+			frappe.throw(_("Please select either a Company or one or more Companies."))
+
+		# Validate the selected company scope before period generation.
+		get_report_currency(filters)
+
 		# Margin view is dependent on first row being an income account. Hence not supported.
 		# Way to implement this would be using calculated rows with formulas.
 		supported_views = ("Report", "Growth")
@@ -240,6 +295,8 @@ class FinancialReportEngine:
 	def _initialize_context(self, filters: dict[str, Any]) -> ReportContext:
 		template_name = filters.get("report_template")
 		template = frappe.get_doc("Financial Report Template", template_name)
+		primary_company = get_primary_company(filters)
+		report_companies = get_report_companies(filters)
 
 		if not template:
 			frappe.throw(_("Financial Report Template {0} not found").format(template_name))
@@ -255,7 +312,7 @@ class FinancialReportEngine:
 			filters.period_end_date,
 			filters.filter_based_on,
 			filters.periodicity,
-			company=filters.company,
+			company=primary_company,
 		)
 
 		# Support both old and new field names for backward compatibility
@@ -266,12 +323,12 @@ class FinancialReportEngine:
 			filters=filters,
 			period_list=period_list,
 			show_detailed=show_detailed,
-			# TODO: Enhance this to support report currencies
-			# after fixing which exchange rate to use for P&L
-			currency=get_company_currency(filters.company),
+			currency=get_report_currency(filters),
 		)
 		# Add period_keys to context
 		context.raw_data["period_keys"] = [p["key"] for p in period_list]
+		context.raw_data["report_companies"] = report_companies
+		context.raw_data["primary_company"] = primary_company
 		return context
 
 	def collect_financial_data(self, context: ReportContext) -> ReportContext:
@@ -329,16 +386,14 @@ class DataCollector:
 	def __init__(self, filters: dict[str, Any], periods: list[dict]):
 		self.filters = filters
 		self.periods = periods
-		self.company = filters.get("company")
+		self.companies = get_report_companies(filters)
 		self.account_requests = []
-		self.query_builder = FinancialQueryBuilder(filters, periods)
-		self.account_fields = {field.fieldname for field in frappe.get_meta("Account").fields}
 
 	def add_account_request(self, row):
 		self.account_requests.append(
 			{
 				"row": row,
-				"accounts": self._parse_account_filter(self.company, row),
+				"accounts": self._parse_account_filter(self.companies, row),
 				"balance_type": row.balance_type,
 				"reference_code": row.reference_code,
 				"reverse_sign": row.reverse_sign,
@@ -358,8 +413,17 @@ class DataCollector:
 		if not all_accounts:
 			return {"account_data": {}, "summary": {}, "account_details": {}}
 
-		# Fetch balance data for all accounts
-		account_data = self.query_builder.fetch_account_balances(all_accounts)
+		accounts_by_company = defaultdict(list)
+		for account in all_accounts:
+			accounts_by_company[account.company].append(account)
+
+		account_data = {}
+		for company, company_accounts in accounts_by_company.items():
+			company_filters = frappe._dict(dict(self.filters))
+			company_filters.company = company
+			account_data.update(
+				FinancialQueryBuilder(company_filters, self.periods).fetch_account_balances(company_accounts)
+			)
 
 		# Calculate summaries for each request
 		summary = {}
@@ -402,7 +466,7 @@ class DataCollector:
 		return {"account_data": account_data, "summary": summary, "account_details": account_details}
 
 	@staticmethod
-	def _parse_account_filter(company, report_row) -> list[dict]:
+	def _parse_account_filter(companies: list[str], report_row) -> list[dict]:
 		"""
 		Find accounts matching filter criteria.
 
@@ -416,13 +480,13 @@ class DataCollector:
 		account = frappe.qb.DocType("Account")
 		query = (
 			frappe.qb.from_(account)
-			.select(account.name, account.account_name, account.account_number)
+			.select(account.name, account.company, account.account_name, account.account_number)
 			.where(account.disabled == 0)
 			.where(account.is_group == 0)
 		)
 
-		if company:
-			query = query.where(account.company == company)
+		if companies:
+			query = query.where(account.company.isin(companies))
 
 		where_condition = filter_parser.build_condition(report_row, account)
 		if where_condition is None:
@@ -486,7 +550,11 @@ class FinancialQueryBuilder:
 		account_names = list({acc.name for acc in accounts})
 		# NOTE: do not change accounts list as it is used in caller function
 		self.account_meta = {
-			acc.name: {"account_name": acc.account_name, "account_number": acc.account_number}
+			acc.name: {
+				"company": getattr(acc, "company", ""),
+				"account_name": acc.account_name,
+				"account_number": acc.account_number,
+			}
 			for acc in accounts
 		}
 
@@ -1357,7 +1425,7 @@ class DataFormatter:
 			self.context.filters.get("periodicity"),
 			self.context.period_list,
 			self.context.filters.get("accumulated_values") in (1, None),
-			self.context.filters.get("company"),
+			self.context.raw_data.get("primary_company"),
 		)
 
 		return self.formatter.get_columns(self.organizer.section_with_max_segments.segments, base_columns)
@@ -1576,18 +1644,25 @@ class RowFormatterBase(ABC):
 			return getattr(self.context.filters, key, default) or default
 
 		child_accounts = []
+		child_companies = []
 
 		if row_data.account_details:
 			child_accounts = list(row_data.account_details.keys())
+			child_companies = sorted(
+				{account.company for account in row_data.account_details.values() if account.company}
+			)
 
 		display_name = _get_row_data("display_name", "")
+		row_company = _get_row_data("company", "")
 
 		values = {
 			"account": _get_row_data("account", "") or display_name,
 			"account_name": display_name,
 			"acc_name": _get_row_data("account_name", ""),
 			"acc_number": _get_row_data("account_number", ""),
+			"company": row_company or (child_companies[0] if len(child_companies) == 1 else ""),
 			"child_accounts": child_accounts,
+			"child_companies": child_companies,
 			"currency": self.context.currency or "",
 			"indent": _get_row_data("indentation_level", 0),
 			"period_start_date": _get_filter_value("period_start_date", ""),
@@ -1732,6 +1807,7 @@ class DetailRowBuilder:
 			(),
 			{
 				"account": account_data.account,
+				"company": account_data.company,
 				"display_name": display_name,
 				"account_name": acc_name,
 				"account_number": acc_number,

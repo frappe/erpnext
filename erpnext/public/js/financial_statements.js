@@ -5,6 +5,24 @@ function get_filter_value(filter_name) {
 	return frappe.query_report.get_filter_value(filter_name, false);
 }
 
+function get_route_company(filters = {}) {
+	const companies = filters.companies ?? get_filter_value("companies");
+	if (Array.isArray(companies) && companies.length > 0) {
+		return companies[0];
+	}
+
+	return filters.company ?? get_filter_value("company");
+}
+
+function get_custom_report_ledger_company(formatting) {
+	if (formatting.company) {
+		return formatting.company;
+	}
+
+	const child_companies = formatting.child_companies || [];
+	return child_companies.length === 1 ? child_companies[0] : null;
+}
+
 erpnext.financial_statements = {
 	filters: get_filters(),
 	baseData: null,
@@ -91,10 +109,15 @@ erpnext.financial_statements = {
 
 		if (!value) return "";
 
+		const ledgerCompany = get_custom_report_ledger_company(formatting);
+
 		// Link to open ledger
 		const should_link_to_ledger =
-			formatting.is_detail ||
-			(formatting.account_filters && formatting.child_accounts && formatting.child_accounts.length);
+			ledgerCompany &&
+			(formatting.is_detail ||
+				(formatting.account_filters &&
+					formatting.child_accounts &&
+					formatting.child_accounts.length));
 
 		if (should_link_to_ledger) {
 			const glData = {
@@ -105,7 +128,7 @@ erpnext.financial_statements = {
 				from_date: formatting.from_date || formatting.period_start_date,
 				to_date: formatting.to_date || formatting.period_end_date,
 				account_type: formatting.account_type,
-				company: get_filter_value("company"),
+				company: ledgerCompany,
 			};
 
 			column.link_onclick =
@@ -257,7 +280,7 @@ erpnext.financial_statements = {
 
 		frappe.route_options = {
 			account: data.account || data.accounts,
-			company: get_filter_value("company"),
+			company: data.company || get_route_company(),
 			from_date: data.from_date || data.year_start_date,
 			to_date: data.to_date || data.year_end_date,
 			project: project && project.length > 0 ? project[0].get_value() : "",
@@ -311,7 +334,8 @@ erpnext.financial_statements = {
 			report.page.add_custom_menu_item(views_menu, __("Balance Sheet"), function () {
 				var filters = report.get_values();
 				frappe.set_route("query-report", "Balance Sheet", {
-					company: filters.company,
+					company: get_route_company(filters),
+					companies: filters.companies,
 					filter_based_on: filters.filter_based_on,
 					period_start_date: filters.period_start_date,
 					period_end_date: filters.period_end_date,
@@ -327,7 +351,8 @@ erpnext.financial_statements = {
 			report.page.add_custom_menu_item(views_menu, __("Profit and Loss"), function () {
 				var filters = report.get_values();
 				frappe.set_route("query-report", "Profit and Loss Statement", {
-					company: filters.company,
+					company: get_route_company(filters),
+					companies: filters.companies,
 					filter_based_on: filters.filter_based_on,
 					period_start_date: filters.period_start_date,
 					period_end_date: filters.period_end_date,
@@ -343,7 +368,8 @@ erpnext.financial_statements = {
 			report.page.add_custom_menu_item(views_menu, __("Cash Flow Statement"), function () {
 				var filters = report.get_values();
 				frappe.set_route("query-report", "Cash Flow", {
-					company: filters.company,
+					company: get_route_company(filters),
+					companies: filters.companies,
 					filter_based_on: filters.filter_based_on,
 					period_start_date: filters.period_start_date,
 					period_end_date: filters.period_end_date,
@@ -366,7 +392,7 @@ function get_filters() {
 			fieldtype: "Link",
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
-			reqd: 1,
+			mandatory_depends_on: "eval:!doc.report_template || !(doc.companies && doc.companies.length)",
 		},
 		{
 			fieldname: "finance_book",

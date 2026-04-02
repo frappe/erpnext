@@ -16,6 +16,16 @@ frappe.query_reports[BS_REPORT_NAME]["filters"].push(
 		get_query: { filters: { report_type: BS_REPORT_NAME, disabled: 0 } },
 	},
 	{
+		fieldname: "companies",
+		label: __("Companies"),
+		fieldtype: "MultiSelectList",
+		options: "Company",
+		depends_on: "eval:doc.report_template",
+		get_data: function (txt) {
+			return frappe.db.get_link_options("Company", txt);
+		},
+	},
+	{
 		fieldname: "show_account_details",
 		label: __("Account Detail Level"),
 		fieldtype: "Select",
