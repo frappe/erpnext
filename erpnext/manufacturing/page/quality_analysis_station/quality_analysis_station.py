@@ -1,14 +1,8 @@
-from erpnext.stock.doctype.warehouse.constants import REJECTED_WAREHOUSE
-from erpnext.stock.doctype.warehouse.constants import STANDARD_WAREHOUSE
-from erpnext.stock.doctype.warehouse.constants import PREMIUM_WAREHOUSE
-from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
-from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 import json
 
 import frappe
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCard
-from erpnext.manufacturing.doctype.operation.api import get_open_job_cards
 from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 from erpnext.manufacturing.doctype.slab.api import get_slabs_for
 from erpnext.manufacturing.doctype.slab.slab import Slab
@@ -17,6 +11,12 @@ from erpnext.manufacturing.page.operator_station.operator_station import (
 	finish_process,
 	get_top_job_card_for_process,
 	start_process,
+)
+from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+from erpnext.stock.doctype.warehouse.constants import (
+	PREMIUM_WAREHOUSE,
+	REJECTED_WAREHOUSE,
+	STANDARD_WAREHOUSE,
 )
 
 
@@ -48,7 +48,7 @@ def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number:
 		_create_slab_quality_report(slab_number, report, shift)
 		if isinstance(report, str):
 			report = frappe.parse_json(report)
-		slab_grade = report.get("grade")
+		slab_grade: str | None = report.get("grade")  # pyright: ignore[reportAttributeAccessIssue]
 
 		# 2. Finish the job card and checkout the slab.
 		finish_process(job_card, "Quality Check", False, slab_number=slab_number, slab_grade=slab_grade)
@@ -71,18 +71,8 @@ def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
 	if job_card_number:
 		job_card = frappe.get_doc("Job Card", job_card_number)  # pyright: ignore[reportAssignmentType]
 
-	# Else, get the earliest open job card for the operation.
-	# if not job_card:
-	# 	if line and not isinstance(line, list):
-	# 		child_lines = get_all_child_lines(line)
-	# 		if child_lines:
-	# 			line = child_lines
-
-	# 	job_cards = get_open_job_cards("Quality Check", line, True)
 	child_lines = get_all_child_lines(line)
 	job_card_data = get_top_job_card_for_process("Quality Check", child_lines if child_lines else line, True)
-	# wip_job_cards = [jc for jc in job_cards if jc.status == "Work In Progress"]
-	# job_card = wip_job_cards[0] if wip_job_cards else job_cards[0] if job_cards else None
 	job_card = job_card_data["top_job_card"]
 
 	slab: Slab | None = None
@@ -130,20 +120,21 @@ def _create_slab_quality_report(slab_name: str, report: str | dict, shift: str):
 	return doc
 
 
-def _make_material_transfer_stock_entry(slab_number: str, grade: str, job_card: str):
+def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job_card: str):
 	work_order = frappe.get_value("Job Card", job_card, "work_order")
-	target_warehouse = frappe.get_value("Work Order", work_order, "fg_warehouse")
+	target_warehouse: str = frappe.get_value("Work Order", work_order, "fg_warehouse")  # pyright: ignore[reportAssignmentType]
 
-	company = frappe.get_value("Job Card", job_card, "company")
-	company_abbr = frappe.get_value("Company", company, "abbr")
+	company: str = frappe.get_value("Job Card", job_card, "company")  # pyright: ignore[reportAssignmentType]
+	company_abbr: str = frappe.get_value("Company", company, "abbr")  # pyright: ignore[reportAssignmentType]
 
 	production_item = frappe.get_value("Job Card", job_card, "production_item")
 	item_uom = frappe.get_value("Item", production_item, "stock_uom")
+	parts = []
 	if slab_number:
 		parts = slab_number.split("-")
 
 	try:
-		stock_entry: StockEntry = frappe.new_doc("Stock Entry")
+		stock_entry: StockEntry = frappe.new_doc("Stock Entry")  # pyright: ignore[reportAssignmentType]
 		stock_entry.stock_entry_type = "Material Transfer"
 		stock_entry.company = company
 		stock_entry.slab_grade = grade
@@ -169,6 +160,7 @@ def _make_material_transfer_stock_entry(slab_number: str, grade: str, job_card: 
 				"to_slab_no": slab_number,
 			},
 		)
+
 		stock_entry.insert(ignore_permissions=True)
 		stock_entry.submit()
 		return stock_entry
