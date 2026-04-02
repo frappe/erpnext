@@ -63,8 +63,8 @@ const filteredSlabs = computed(() => {
 
 const getThickness = (template) => {
     if (!template) return '';
-    const parts = template.split("-")[-1];
-    return parts;
+	const parts = template.split("-");
+    return parts[parts.length - 2];
 };
 
 const getColorClass = (template) => {
@@ -218,7 +218,7 @@ const unloadToTrimming = (slab) => {
                         <div class="stat-item w-100">
                             <div class="stat-label d-inline-block mr-2 text-muted small text-uppercase">{{
                                 __('Thickness') }}</div>
-                            <div class="stat-value d-inline-block font-weight-bold">{{ getThickness(slab.template) }}mm
+                            <div class="stat-value d-inline-block font-weight-bold">{{ getThickness(slab.template) }}
                             </div>
                         </div>
                     </div>
