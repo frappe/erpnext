@@ -323,6 +323,29 @@ async function loadData() {
 async function fetchQueue(line, station) {
 	try {
 		slabsQueue.value = [];
+		// get the warehouse_name whose production_line is line and warehouse_type is station
+		const warehouse = await frappe.db.get_value(
+			'Warehouse',
+			{
+				production_line: line,
+				warehouse_type: station
+			},
+			['name', 'warehouse_name', 'is_standalone']
+		);
+
+		if (warehouse.message.is_standalone) {
+			const res = await frappe.call({
+				method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_in',
+				args: {
+					line: line,
+					current_stage: station.toLowerCase(),
+				}
+			});
+			if (res.message) {
+				slabsQueue.value = res.message || [];
+			}
+		}
+
 		const result = await frappe.call({
 			method: 'erpnext.manufacturing.doctype.slab.api.get_slabs_for',
 			args: {
@@ -332,7 +355,7 @@ async function fetchQueue(line, station) {
 			}
 		});
 		if (result.message) {
-			slabsQueue.value = result.message || [];
+			slabsQueue.value = slabsQueue.value.concat(result.message);
 		}
 	} catch (e) {
 		console.error('Failed to fetch queue:');
@@ -649,8 +672,11 @@ async function selectSlab(slab) {
 			</div>
 
 			<div v-else>
-				<div v-for="item in slabsQueue" :key="item.name" @click="selectSlab(item)"
-					class="card pointer mb-2 shadow-sm slab-card border-0">
+				<div v-for="item in slabsQueue" :key="item.name"
+					@click="!(processStarted && !jobcardSubmitted) && selectSlab(item)" :class="[
+						'card pointer mb-2 shadow-sm slab-card border-0',
+						(processStarted && !jobcardSubmitted) ? 'btn-disabled-pointer' : ''
+					]">
 					<div class="card-body p-3 border-left-3 d-flex justify-content-between align-items-start"
 						style="height: 5rem">
 						<div>
@@ -735,19 +761,21 @@ async function selectSlab(slab) {
 								<span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
 								<span v-else class="fa fa-check-square-o mr-2"></span>{{ __('Finish Job') }}
 							</button>
-							<button class="btn btn-warning py-3 px-4 mr-5" v-if="isPressing && !isPaused" :disabled="isProcessing"
-								@click="repressSlab">
+							<button class="btn btn-warning py-3 px-4 mr-5" v-if="isPressing && !isPaused"
+								:disabled="isProcessing" @click="repressSlab">
 								<span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
 								<span v-else class="fa fa-retweet mr-1"></span>{{ __('Re-press') }}
 							</button>
-							<button class="btn btn-success py-3 px-4" v-if="isPaused" :disabled="isProcessing" @click="confirmResume">
+							<button class="btn btn-success py-3 px-4" v-if="isPaused" :disabled="isProcessing"
+								@click="confirmResume">
 								<span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1 pr-2"></span>
 								<span v-else class="fa fa-play mr-1 pr-2"></span>{{ __('Resume Job') }}
 							</button>
 							<!-- <button class="btn btn-warning py-3 px-4 mr-5" @click="haltJob">
 							<span class="fa fa-pause-circle-o mr-1"></span>{{ __('Halt Job') }}
 						</button> -->
-							<button class="btn btn-primary py-3 px-4" @click="confirmPause" :disabled="isProcessing" v-if="!isPaused">
+							<button class="btn btn-primary py-3 px-4" @click="confirmPause" :disabled="isProcessing"
+								v-if="!isPaused">
 								<span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1 pr-2"></span>
 								<span v-else class="fa fa-pause mr-2"></span>{{ __('Pause Job') }}
 							</button>
@@ -940,5 +968,9 @@ async function selectSlab(slab) {
 	background-color: #664d03 !important;
 	color: #ffda6a !important;
 	border: 1px solid #664d03;
+}
+
+.btn-disabled-pointer {
+	cursor: not-allowed;
 }
 </style>

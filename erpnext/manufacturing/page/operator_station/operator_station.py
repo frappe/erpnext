@@ -149,7 +149,14 @@ def resume_process(job_card_name):
 
 
 @frappe.whitelist()
-def finish_process(job_card, process_name, transfer_materials=True, should_stop_machine=True):
+def finish_process(
+	job_card,
+	process_name,
+	transfer_materials=True,
+	should_stop_machine=True,
+	slab_number=None,
+	slab_grade=None,
+):
 	"""Complete the Job Card when mixing is finished."""
 
 	if isinstance(transfer_materials, str):
@@ -198,6 +205,16 @@ def finish_process(job_card, process_name, transfer_materials=True, should_stop_
 	fg_item = next((item for item in stock_entry_manufacture.items if item.is_finished_item), None)
 	if fg_item:
 		fg_item.qty = job_card_qty
+
+	if process_name == "Quality Check":
+		stock_entry_manufacture.slab_grade = slab_grade
+		stock_entry_manufacture.slab_serial_no = slab_number.split("-")[-1]
+		stock_entry_manufacture.slab_batch_no = slab_number.split("-")[0]
+
+		for item in stock_entry_manufacture.items:
+			if item.is_finished_item:
+				item.slab_no = slab_number
+				item.to_slab_no = slab_number
 
 	stock_entry_manufacture.fg_completed_qty = job_card_qty
 	stock_entry_manufacture.save()

@@ -26,6 +26,9 @@
   "posting_date",
   "posting_time",
   "column_break_eaoa",
+  "slab_grade",
+  "slab_serial_no",
+  "slab_batch_no",
   "set_posting_time",
   "inspection_required",
   "apply_putaway_rule",
@@ -699,6 +702,21 @@
    "fieldtype": "Data",
    "is_virtual": 1,
    "label": "Last Scanned Warehouse"
+  },
+  {
+   "fieldname": "slab_grade",
+   "fieldtype": "Data",
+   "label": "Slab Grade"
+  },
+  {
+   "fieldname": "slab_serial_no",
+   "fieldtype": "Data",
+   "label": "Slab Serial No"
+  },
+  {
+   "fieldname": "slab_batch_no",
+   "fieldtype": "Data",
+   "label": "Slab Batch No"
   }
  ],
  "icon": "fa fa-file-text",
@@ -706,7 +724,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-04 19:21:03.338958",
+ "modified": "2026-03-31 18:45:48.859934",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

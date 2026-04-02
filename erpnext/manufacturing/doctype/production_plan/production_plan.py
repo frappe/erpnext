@@ -42,25 +42,13 @@ class ProductionPlan(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from erpnext.manufacturing.doctype.material_request_plan_item.material_request_plan_item import (
-			MaterialRequestPlanItem,
-		)
+		from erpnext.manufacturing.doctype.material_request_plan_item.material_request_plan_item import MaterialRequestPlanItem
 		from erpnext.manufacturing.doctype.production_plan_item.production_plan_item import ProductionPlanItem
-		from erpnext.manufacturing.doctype.production_plan_item_reference.production_plan_item_reference import (
-			ProductionPlanItemReference,
-		)
-		from erpnext.manufacturing.doctype.production_plan_material_request.production_plan_material_request import (
-			ProductionPlanMaterialRequest,
-		)
-		from erpnext.manufacturing.doctype.production_plan_material_request_warehouse.production_plan_material_request_warehouse import (
-			ProductionPlanMaterialRequestWarehouse,
-		)
-		from erpnext.manufacturing.doctype.production_plan_sales_order.production_plan_sales_order import (
-			ProductionPlanSalesOrder,
-		)
-		from erpnext.manufacturing.doctype.production_plan_sub_assembly_item.production_plan_sub_assembly_item import (
-			ProductionPlanSubAssemblyItem,
-		)
+		from erpnext.manufacturing.doctype.production_plan_item_reference.production_plan_item_reference import ProductionPlanItemReference
+		from erpnext.manufacturing.doctype.production_plan_material_request.production_plan_material_request import ProductionPlanMaterialRequest
+		from erpnext.manufacturing.doctype.production_plan_material_request_warehouse.production_plan_material_request_warehouse import ProductionPlanMaterialRequestWarehouse
+		from erpnext.manufacturing.doctype.production_plan_sales_order.production_plan_sales_order import ProductionPlanSalesOrder
+		from erpnext.manufacturing.doctype.production_plan_sub_assembly_item.production_plan_sub_assembly_item import ProductionPlanSubAssemblyItem
 		from frappe.types import DF
 
 		amended_from: DF.Link | None
@@ -73,6 +61,7 @@ class ProductionPlan(Document):
 		company: DF.Link
 		consider_minimum_order_qty: DF.Check
 		customer: DF.Link | None
+		deleted_job_card_count: DF.Int
 		for_warehouse: DF.Link | None
 		from_date: DF.Date | None
 		from_delivery_date: DF.Date | None
@@ -97,20 +86,11 @@ class ProductionPlan(Document):
 		posting_date: DF.Date
 		prod_plan_references: DF.Table[ProductionPlanItemReference]
 		project: DF.Link | None
+		reason_for_deletion_of_job_cards: DF.Data | None
 		sales_order_status: DF.Literal["", "To Deliver and Bill", "To Bill", "To Deliver"]
 		sales_orders: DF.Table[ProductionPlanSalesOrder]
 		skip_available_sub_assembly_item: DF.Check
-		status: DF.Literal[
-			"",
-			"Draft",
-			"Submitted",
-			"Not Started",
-			"In Process",
-			"Completed",
-			"Closed",
-			"Cancelled",
-			"Material Requested",
-		]
+		status: DF.Literal["", "Draft", "Submitted", "Not Started", "In Process", "Completed", "Closed", "Cancelled", "Material Requested"]
 		sub_assembly_items: DF.Table[ProductionPlanSubAssemblyItem]
 		sub_assembly_warehouse: DF.Link | None
 		to_date: DF.Date | None
