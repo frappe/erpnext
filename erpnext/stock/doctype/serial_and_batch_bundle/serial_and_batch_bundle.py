@@ -1466,39 +1466,18 @@ class SerialandBatchBundle(Document):
 				self.throw_negative_batch(d.batch_no, available_qty, precision)
 
 	def remove_source_document_no(self):
-		if not self.has_serial_no and not self.has_batch_no:
+		if not self.has_serial_no:
 			return
 
-		if self.total_qty <= 0:
-			return
-
-		if self.has_serial_no:
+		if self.total_qty > 0:
 			serial_nos = [d.serial_no for d in self.entries if d.serial_no]
 			sn_table = frappe.qb.DocType("Serial No")
 			(
 				frappe.qb.update(sn_table)
-				.set(sn_table.reference_doctype, None)
-				.set(sn_table.reference_name, None)
-				.set(sn_table.posting_date, None)
+				.set(sn_table.purchase_document_no, None)
 				.where(
 					(sn_table.name.isin(serial_nos))
-					& (sn_table.reference_doctype == self.voucher_type)
-					& (sn_table.reference_name == self.voucher_no)
-					& (sn_table.posting_date == getdate(self.posting_datetime))
-				)
-			).run()
-
-		if self.has_batch_no:
-			batch_nos = [d.batch_no for d in self.entries if d.batch_no]
-			batch_table = frappe.qb.DocType("Batch")
-			(
-				frappe.qb.update(batch_table)
-				.set(batch_table.reference_doctype, None)
-				.set(batch_table.reference_name, None)
-				.where(
-					(batch_table.name.isin(batch_nos))
-					& (batch_table.reference_doctype == self.voucher_type)
-					& (batch_table.reference_name == self.voucher_no)
+					& (sn_table.purchase_document_no == self.voucher_type)
 				)
 			).run()
 
