@@ -147,7 +147,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-18 23:09:11.488335",
+ "modified": "2026-04-02 18:14:30.693905",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Mahi Granites Settings",
@@ -162,6 +162,13 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Employee",
+   "share": 1
   }
  ],
  "row_format": "Dynamic",
