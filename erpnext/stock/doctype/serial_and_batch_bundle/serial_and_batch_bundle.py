@@ -1476,7 +1476,7 @@ class SerialandBatchBundle(Document):
 				frappe.qb.update(sn_table)
 				.set(sn_table.purchase_document_no, None)
 				.where(
-					(sn_table.name.isin(serial_nos)) & (sn_table.purchase_document_no == self.voucher_type)
+					(sn_table.name.isin(serial_nos)) & (sn_table.purchase_document_no == self.voucher_no)
 				)
 			).run()
 
