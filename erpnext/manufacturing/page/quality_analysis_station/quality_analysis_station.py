@@ -142,9 +142,9 @@ def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job
 		stock_entry.slab_serial_no = parts[-1] if len(parts) > 1 else parts[0]
 		stock_entry.from_warehouse = target_warehouse
 
-		if "PRE" in grade:
+		if grade and ("premium" in grade.lower() or "pre" in grade.lower()):
 			stock_entry.to_warehouse = PREMIUM_WAREHOUSE + " - " + company_abbr
-		elif "STD" in grade:
+		elif grade and ("standard" in grade.lower() or "std" in grade.lower()):
 			stock_entry.to_warehouse = STANDARD_WAREHOUSE + " - " + company_abbr
 		else:
 			stock_entry.to_warehouse = REJECTED_WAREHOUSE + " - " + company_abbr
