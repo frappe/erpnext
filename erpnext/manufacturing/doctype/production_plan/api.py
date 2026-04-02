@@ -2,7 +2,7 @@ import frappe
 from erpnext.manufacturing.page.mixer_station.mixer_station import get_mixer_state
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def delete_job_cards(production_plan, reason):
 	is_deleted = False
 	deleted_count = 0
