@@ -1,11 +1,10 @@
-import erpnext.manufacturing.doctype.job_card.job_card_dashboard
-from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 import json
 
 import frappe
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCard
 from erpnext.manufacturing.doctype.operation.api import get_open_job_cards
+from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 from erpnext.manufacturing.doctype.slab.api import get_slabs_for
 from erpnext.manufacturing.doctype.slab.slab import Slab
 from erpnext.manufacturing.doctype.slab_quality_report.slab_quality_report import SlabQualityReport
@@ -18,10 +17,10 @@ from erpnext.manufacturing.page.operator_station.operator_station import (
 
 @frappe.whitelist()
 def start_qa_process(slab_number: str):
-	slab: Slab = frappe.get_doc("Slab", slab_number)
+	slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
 	#    1. Get the job card for quality analysis on the given line.
 	job_card_result = get_top_job_card_for_process("Quality Check", slab.line, True)
-	job_card = job_card_result.get("top_job_card")
+	job_card: JobCard = job_card_result.get("top_job_card")  # pyright: ignore[reportAssignmentType]
 	if not job_card:
 		frappe.throw("No Job Card found")
 	job_card_name = job_card.name
@@ -58,7 +57,7 @@ def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number:
 def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
 	job_card: JobCard | None = None
 	if job_card_number:
-		job_card = frappe.get_doc("Job Card", job_card_number)
+		job_card = frappe.get_doc("Job Card", job_card_number)  # pyright: ignore[reportAssignmentType]
 
 	# Else, get the earliest open job card for the operation.
 	# if not job_card:
@@ -76,11 +75,11 @@ def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
 
 	slab: Slab | None = None
 	if job_card and job_card.slab:
-		slab = frappe.get_doc("Slab", job_card.slab)
+		slab = frappe.get_doc("Slab", job_card.slab)  # pyright: ignore[reportAssignmentType]
 
 	if not slab:
 		# If there are no active job cards, get the earliest finished slab
-		slabs = get_slabs_for(line, next_stage="Quality Check")
+		slabs: list[Slab] = get_slabs_for(line, next_stage="Quality Check")  # pyright: ignore[reportAssignmentType]
 		slab = slabs[0] if slabs else None
 
 	slab_size = None
@@ -95,14 +94,14 @@ def _create_slab_quality_report(slab_name: str, report: str | dict, shift: str):
 	if isinstance(report, str):
 		report = json.loads(report)
 
-	doc: SlabQualityReport = frappe.new_doc("Slab Quality Report")
+	doc: SlabQualityReport = frappe.new_doc("Slab Quality Report")  # pyright: ignore[reportAssignmentType]
 	doc.update(report)
 	doc.shift = shift
 
 	doc.insert(ignore_permissions=True)
 	doc.submit()
 
-	slab: Slab = frappe.get_doc("Slab", slab_name)
+	slab: Slab = frappe.get_doc("Slab", slab_name)  # pyright: ignore[reportAssignmentType]
 	# if slab.status != "Curing" and slab.is_cur_stage_complete:
 	#     raise Exception("Slab is not in curing or is not complete.")
 
