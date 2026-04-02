@@ -116,3 +116,11 @@ def _create_slab_quality_report(slab_name: str, report: str | dict, shift: str):
 	slab.save(ignore_permissions=True)
 
 	return doc
+
+
+@frappe.whitelist()
+def get_repair_options():
+	field = frappe.get_meta("Slab Quality Report").get_field("repair")
+	if field and field.options:
+		return [opt.strip() for opt in field.options.split("\n") if opt.strip()]
+	return []
