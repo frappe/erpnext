@@ -1475,9 +1475,7 @@ class SerialandBatchBundle(Document):
 			(
 				frappe.qb.update(sn_table)
 				.set(sn_table.purchase_document_no, None)
-				.where(
-					(sn_table.name.isin(serial_nos)) & (sn_table.purchase_document_no == self.voucher_no)
-				)
+				.where((sn_table.name.isin(serial_nos)) & (sn_table.purchase_document_no == self.voucher_no))
 			).run()
 
 	def throw_negative_batch(self, batch_no, available_qty, precision, posting_datetime=None):
