@@ -18,7 +18,7 @@ def create_slab(line: str, child_line: str, type: str, job_card_number: str | No
 	new_slab.child_line = child_line
 	new_slab.template = type
 	new_slab.current_job_card = job_card_number
-	new_slab.batch_number = _generate_batch_number(line)
+	new_slab.batch_number = _generate_slab_batch(line)
 
 	slab_number: int = _get_slab_number(new_slab.batch_number, line)
 	new_slab.number = slab_number
@@ -238,7 +238,7 @@ def get_batch_numbers(include_child_lines=False):
 		if not line.is_group and not include_child_lines:
 			continue
 
-		batch_numbers[line.name] = _generate_batch_number(line.name)
+		batch_numbers[line.name] = _generate_slab_batch(line.name)
 
 	return batch_numbers
 
@@ -273,7 +273,7 @@ def pause_or_resume_slab_operation(slab_number: str, pause: bool):
 	slab.save(ignore_permissions=True)
 
 
-def _generate_batch_number(line: str):
+def _generate_slab_batch(line: str):
 	today = date.today()
 
 	# A: Get the current fiscal year
@@ -290,6 +290,12 @@ def _generate_batch_number(line: str):
 
 	year_code = chr(65 + fiscal_year.year_start_date.year - 2017)  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
 
+	batch_number = _calculate_batch_number_based_on_working_days(today, fiscal_year)
+
+	return f"{line}{year_code}/{batch_number}"
+
+
+def _calculate_batch_number_based_on_working_days(today: date, fiscal_year: FiscalYear):
 	# B: Get total days in the fiscal year until today
 	time_diff = today - fiscal_year.year_start_date  # pyright: ignore[reportOperatorIssue, reportOptionalMemberAccess]
 	total_days_so_far = time_diff.days
@@ -357,8 +363,7 @@ def _generate_batch_number(line: str):
 
 	# Calculate A - B
 	total_working_days = total_days_so_far - holiday_count + 1
-
-	return f"{line}{year_code}/{total_working_days:03d}"
+	return f"{total_working_days:03d}"
 
 
 def _get_slab_number(batch: str, line: str) -> int:
