@@ -15,8 +15,13 @@ from erpnext.manufacturing.page.operator_station.operator_station import (
 
 @frappe.whitelist()
 def get_queue_data(line, station_name: str):
+	# Check if the station is standalone
+	is_warehouse_standalone = frappe.db.get_value("Warehouse", {"mfg_process_type": station_name, "production_line": line }, "is_standalone")
+	# If it is, set the limit to 50, else set it to 1.
+	limit = 50 if is_warehouse_standalone else 1
+
 	# 1. Get Incoming Slabs (Ready for the current station)
-	incoming_slabs = get_slabs_for(line, station_name, limit=50)
+	incoming_slabs = get_slabs_for(line, station_name, limit=limit)
 
 	# 2. Get the current slab queue (Active Job Cards)
 	# Fetch WIP job cards for the current process.
