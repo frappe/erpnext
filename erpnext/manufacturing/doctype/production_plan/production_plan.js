@@ -131,7 +131,7 @@ frappe.ui.form.on("Production Plan", {
 
 			if (frm.doc.status !== "Completed") {
 				frm.add_custom_button(
-					__("Delete Job Cards"),
+					__("Delete Open Job Cards"),
 					() => {
 						frm.trigger("delete_job_cards");
 					}
@@ -220,7 +220,7 @@ frappe.ui.form.on("Production Plan", {
 		}
 		frm.trigger("material_requirement");
 
-		// if (frm.doc.is_parent_plan && frm.doc.docstatus == 1) 
+		// if (frm.doc.is_parent_plan && frm.doc.docstatus == 1)
 		// {
 		// 	frm.add_custom_query_report("DPP", {
 		// 		method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_dpp_list",
@@ -755,7 +755,7 @@ frappe.ui.form.on("Production Plan", {
 					}
 				});
 			},
-			__("Delete Job Cards"),
+			__("Delete Open Job Cards"),
 			__("Delete")
 		);
 	},
