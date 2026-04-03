@@ -21,10 +21,12 @@ frappe.ui.form.on("Promotional Scheme", {
 
 	selling: function (frm) {
 		frm.trigger("set_options_for_applicable_for");
+		frm.set_df_property("buying", "read_only", frm.doc.selling ? 1 : 0);
 	},
 
 	buying: function (frm) {
 		frm.trigger("set_options_for_applicable_for");
+		frm.set_df_property("selling", "read_only", frm.doc.buying ? 1 : 0);
 	},
 
 	set_options_for_applicable_for: function (frm) {

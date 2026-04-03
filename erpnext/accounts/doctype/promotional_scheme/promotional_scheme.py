@@ -145,6 +145,8 @@ class PromotionalScheme(Document):
 	def validate(self):
 		if not self.selling and not self.buying:
 			frappe.throw(_("Either 'Selling' or 'Buying' must be selected"), title=_("Mandatory"))
+		if self.selling and self.buying:
+			frappe.throw(_("Both 'Selling' and 'Buying' cannot be selected at the same time"))
 		if not (self.price_discount_slabs or self.product_discount_slabs):
 			frappe.throw(_("Price or product discount slabs are required"))
 
