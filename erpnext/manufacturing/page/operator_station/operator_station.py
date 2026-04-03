@@ -1,4 +1,3 @@
-from erpnext.manufacturing.doctype.job_card.constants import HIGH_PRIORITY
 from copy import deepcopy
 
 import frappe
@@ -7,6 +6,7 @@ from frappe import utils as frappe_utils
 from frappe.utils import flt
 
 from erpnext.manufacturing.doctype.bom.bom import BOM
+from erpnext.manufacturing.doctype.job_card.constants import HIGH_PRIORITY
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	JobCard,
 	make_time_log,
@@ -208,8 +208,8 @@ def finish_process(
 
 	if process_name == "Quality Check":
 		stock_entry_manufacture.slab_grade = slab_grade
-		stock_entry_manufacture.slab_serial_no = slab_number.split("-")[-1]
-		stock_entry_manufacture.slab_batch_no = slab_number.split("-")[0]
+		stock_entry_manufacture.slab_serial_no = slab_number.split("-")[-1] if slab_number else ""
+		stock_entry_manufacture.slab_batch_no = slab_number.split("-")[0] if slab_number else ""
 
 		for item in stock_entry_manufacture.items:
 			if item.is_finished_item:
