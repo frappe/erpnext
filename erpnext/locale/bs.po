@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-03-29 09:46+0000\n"
-"PO-Revision-Date: 2026-03-30 10:24\n"
+"PO-Revision-Date: 2026-04-04 12:38\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -1040,7 +1040,7 @@ msgstr "Lista Praznika se može dodati kako bi se isključilo brojanje praznika 
 
 #: erpnext/crm/doctype/lead/lead.py:144
 msgid "A Lead requires either a person's name or an organization's name"
-msgstr "Potencijalni Klijent zahtijeva ili ime osobe ili ime organizacije"
+msgstr "Potencijalni Klijent zahtijeva ili ime osobe ili ime poduzeća"
 
 #: erpnext/stock/doctype/packing_slip/packing_slip.py:84
 msgid "A Packing Slip can only be created for Draft Delivery Note."
@@ -2758,7 +2758,7 @@ msgstr "Dodaj ili Oduzmi"
 
 #: erpnext/utilities/activation.py:114
 msgid "Add the rest of your organization as your users. You can also add invite Customers to your portal by adding them from Contacts"
-msgstr "Dodaj ostatak organizacije kao svoje korisnike. Također možete dodati pozvane kupce na svoj portal tako što ćete ih dodati iz kontakata"
+msgstr "Dodaj ostatak poduzeća kao svoje korisnike. Također možete dodati pozvane klijente na svoj portal tako što ćete ih dodati iz kontakata"
 
 #. Label of the get_weekly_off_dates (Button) field in DocType 'Holiday List'
 #. Label of the get_local_holidays (Button) field in DocType 'Holiday List'
@@ -5948,7 +5948,7 @@ msgstr "Najmanje jedna Faktura mora biti odabrana."
 
 #: erpnext/controllers/sales_and_purchase_return.py:168
 msgid "At least one item should be entered with negative quantity in return document"
-msgstr "Najmanje jedan artikal treba upisati sa negativnom količinom u povratnom dokumentu"
+msgstr "Najmanje jedan artikal treba unijeti sa negativnom količinom u povratnom dokumentu"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:531
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:546
@@ -21782,11 +21782,11 @@ msgstr "Ovdje možete zadržati porodične podatke kao što su ime i zanimanje r
 #. Description of the 'Health Details' (Small Text) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Here you can maintain height, weight, allergies, medical concerns etc"
-msgstr "Ovdje možete upisati visinu, težinu, alergije, zdravstvene probleme itd"
+msgstr "Ovdje možete unijeti visinu, težinu, alergije, zdravstvene probleme itd"
 
 #: erpnext/setup/doctype/employee/employee.js:258
 msgid "Here, you can select a senior of this Employee. Based on this, Organization Chart will be populated."
-msgstr "Ovdje možete odabrati starijeg od ovog. Na osnovu toga će se popuniti Organizaciona Šema."
+msgstr "Ovdje možete odabrati starijeg od ovog. Na osnovu toga će se popuniti Šema Poduzeća."
 
 #: erpnext/setup/doctype/holiday_list/holiday_list.js:77
 msgid "Here, your weekly offs are pre-populated based on the previous selections. You can add more rows to also add public and national holidays individually."
@@ -27359,7 +27359,7 @@ msgstr "Starija Polja"
 #. Description of a DocType
 #: erpnext/setup/doctype/company/company.json
 msgid "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization."
-msgstr "Pravno Lice / Podružnica sa posebnim Kontnim Planom koji pripada Organizaciji."
+msgstr "Pravno Lice / Podružnica sa posebnim Kontnim Planom koji pripada Poduzeću."
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:111
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:190
@@ -32441,12 +32441,12 @@ msgstr "Nalozi"
 #: erpnext/desktop_icon/organization.json
 #: erpnext/workspace_sidebar/organization.json
 msgid "Organization"
-msgstr "Organizacija"
+msgstr "Poduzeće"
 
 #. Label of the company_name (Data) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
 msgid "Organization Name"
-msgstr "Naziv Organizacije"
+msgstr "Naziv Poduzeća"
 
 #. Label of the original_item (Link) field in DocType 'BOM Item'
 #. Label of the original_item (Link) field in DocType 'Stock Entry Detail'
@@ -47589,7 +47589,7 @@ msgstr "Postavljanje Računa E-pošte"
 #. Title of the Module Onboarding 'Organization Onboarding'
 #: erpnext/setup/module_onboarding/organization_onboarding/organization_onboarding.json
 msgid "Setup Organization"
-msgstr "Postavljanje Organizacije"
+msgstr "Postavl Poduzeće"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Setup Role Permissions'
@@ -47614,7 +47614,7 @@ msgstr "Postavljanje Skladišta"
 
 #: erpnext/public/js/setup_wizard.js:25
 msgid "Setup your organization"
-msgstr "Postavi svoju organizaciju"
+msgstr "Postavi Poduzeće"
 
 #. Name of a DocType
 #. Label of the section_break_3 (Section Break) field in DocType 'Shareholder'
