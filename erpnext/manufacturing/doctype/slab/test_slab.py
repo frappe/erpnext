@@ -4,7 +4,7 @@ from unittest.mock import patch
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.manufacturing.doctype.slab.api import _generate_batch_number
+from erpnext.manufacturing.doctype.slab.api import _generate_slab_batch
 
 
 class TestSlab(FrappeTestCase):
@@ -81,7 +81,7 @@ class TestSlab(FrappeTestCase):
 		# total_working_days = 336 - 3 = 333
 		# Result = "L1I/333"
 
-		batch_number = _generate_batch_number("L1")
+		batch_number = _generate_slab_batch("L1")
 		self.assertEqual(batch_number, "L1I/333")
 
 
@@ -100,7 +100,7 @@ class TestSlab(FrappeTestCase):
 		# total_working_days = 61 - 1 = 60
 		# Result = "L1J/065"
 
-		batch_number = _generate_batch_number("L1")
+		batch_number = _generate_slab_batch("L1")
 		self.assertEqual(batch_number, "L1J/060")
 
 
@@ -110,7 +110,7 @@ class TestSlab(FrappeTestCase):
 		mock_date.today.return_value = date(2026, 3, 2)
 
 		with self.assertRaises(frappe.exceptions.ValidationError): # The system should throw an error since the given day is a holiday.
-			_generate_batch_number("L1")
+			_generate_slab_batch("L1")
 
 
 	@patch("erpnext.manufacturing.doctype.slab.api.date")
@@ -135,7 +135,7 @@ class TestSlab(FrappeTestCase):
 		# total_working_days = 39 - 1 = 38
 		# Result = "L2J/038"
 
-		batch_number = _generate_batch_number("L2")
+		batch_number = _generate_slab_batch("L2")
 		self.assertEqual(batch_number, "L2I/038")
 
 
@@ -145,7 +145,7 @@ class TestSlab(FrappeTestCase):
 		mock_date.today.return_value = date(2024, 3, 3)
 
 		with self.assertRaises(frappe.exceptions.ValidationError):
-			_generate_batch_number("L1")
+			_generate_slab_batch("L1")
 
 
 	@patch("erpnext.manufacturing.doctype.slab.api.date")
@@ -156,4 +156,4 @@ class TestSlab(FrappeTestCase):
 		self.holiday_lists[0].delete()
 
 		with self.assertRaises(frappe.exceptions.ValidationError):
-			_generate_batch_number("L1")
+			_generate_slab_batch("L1")
