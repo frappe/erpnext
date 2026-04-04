@@ -77,17 +77,17 @@
    "label": "Rack Status"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "racks",
    "fieldtype": "Table",
-   "options": "Oven Rack",
-   "reqd": 1
+   "options": "Oven Rack"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-13 16:54:29.558911",
- "modified_by": "harry.p@gmail.com",
+ "modified": "2026-04-04 21:24:36.112429",
+ "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Oven",
  "naming_rule": "By fieldname",
