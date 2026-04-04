@@ -393,13 +393,17 @@ def _get_batch_number_from_list(today: date, fiscal_year: FiscalYear, create_and
 		fieldname="name",
 	)
 
+	fy_start_date: datetime = fiscal_year.year_start_date  # pyright: ignore[reportAssignmentType]
+	# A buffer date to account for holidays and other non-working days at the start of the fiscal year
+	buffer_date: datetime = fy_start_date + timedelta(days=10)  # pyright: ignore[reportAssignmentType]
+
 	if slab_batch_number:
 		return slab_batch_number.split("-")[-1]
 
 	# If `create_and_get` is True, create a new batch number if one does not exist for today.
 	elif create_and_get:
-		if fiscal_year.year_start_date.strftime("%Y-%m-%d") == today.strftime("%Y-%m-%d"):  # pyright: ignore[reportAttributeAccessIssue]
-			delete_batch_numbers_older_than(today)
+		if fy_start_date.year == today.year and fy_start_date.month == today.month and fy_start_date.day <= today.day and today.day <= buffer_date.day:  # pyright: ignore[reportAttributeAccessIssue]
+			delete_batch_numbers_older_than(fy_start_date.strftime("%Y-%m-%d"))
 
 		slab_batch: SlabBatchNumber = frappe.new_doc("Slab Batch Number")  # pyright: ignore[reportAssignmentType]
 		slab_batch.date = today.strftime("%Y-%m-%d")

@@ -40,22 +40,23 @@ def delete_all_batch_numbers():
 	if not is_first_hour_of_fy:
 		return
 
-	delete_batch_numbers_older_than(year_start_date)
+	delete_batch_numbers_older_than(year_start_date.strftime("%Y-%m-%d"))
 
 
-def delete_batch_numbers_older_than(ref_date: date):
-	batch_numbers_of_previous_year = frappe.db.count("Slab Batch Number", filters={"date": ["<", ref_date.strftime("%Y-%m-%d")]})
-	if not batch_numbers_of_previous_year:
+def delete_batch_numbers_older_than(ref_date: str):
+	batch_number_count_of_previous_year = frappe.db.count("Slab Batch Number", filters={"date": ["<", ref_date]})
+	if not batch_number_count_of_previous_year:
 		return
 
-	frappe.db.sql("DELETE FROM `tabSlab Batch Number` WHERE date < %s", (ref_date.strftime("%Y-%m-%d"),))
+	frappe.db.sql("DELETE FROM `tabSlab Batch Number` WHERE date < %s", (ref_date,))
 
+	batch_number_count_of_current_year = frappe.db.count("Slab Batch Number", filters={"date": [">=", ref_date]})
 	# After deleting the old slabs, reset the naming series counter to 0.
 	batch_prefix = frappe.get_meta("Slab Batch Number").autoname.split(".")[0]  # pyright: ignore[reportAttributeAccessIssue]
 	frappe.db.sql("""
         UPDATE `tabSeries`
         SET `current` = %s
         WHERE `name` = %s
-    """, (0, batch_prefix))
+    """, (batch_number_count_of_current_year, batch_prefix))
 
 	frappe.db.commit()
