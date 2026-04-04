@@ -22,7 +22,7 @@ def create_preliminary_quality_check(slab_name, slab_template, h_bend, v_bend, d
     doc.remarks = remarks
     doc.insert(ignore_permissions=True)
 
-    slab: Slab = frappe.get_doc("Slab", slab_name)
+    slab: Slab = frappe.get_doc("Slab", slab_name)  # pyright: ignore[reportAssignmentType]
 
     last_history_item = next((h for h in slab.slab_history if h.station == "Curing"), None)
     if not last_history_item:

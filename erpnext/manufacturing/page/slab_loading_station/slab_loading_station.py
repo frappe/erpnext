@@ -10,9 +10,9 @@ from erpnext.manufacturing.doctype.slab.slab import Slab
 def unload_slab_to_trimming(slab_number: str):
 
 	try:
-		slab: Slab = frappe.get_doc("Slab", slab_number)
+		slab: Slab = frappe.get_doc("Slab", slab_number) # pyright: ignore[reportAssignmentType]
 
-		last_job_card: JobCard = frappe.get_doc("Job Card", slab.current_job_card)
+		last_job_card: JobCard = frappe.get_doc("Job Card", str(slab.current_job_card)) # pyright: ignore[reportAssignmentType]
 
 		work_order = frappe.get_doc("Work Order", last_job_card.work_order)
 
