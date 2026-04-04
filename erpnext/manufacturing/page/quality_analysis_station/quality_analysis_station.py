@@ -1,11 +1,10 @@
-import json
-
 import frappe
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCard
 from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 from erpnext.manufacturing.doctype.slab.api import get_slabs_for
 from erpnext.manufacturing.doctype.slab.slab import Slab
+from erpnext.manufacturing.doctype.slab_quality_report.api import create_slab_quality_report
 from erpnext.manufacturing.doctype.slab_quality_report.slab_quality_report import SlabQualityReport
 from erpnext.manufacturing.page.operator_station.operator_station import (
 	finish_process,
@@ -44,11 +43,16 @@ def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number:
 	try:
 		frappe.db.begin()
 
-		# 1. Create the slab quality report.
-		_create_slab_quality_report(slab_number, report, shift)
 		if isinstance(report, str):
 			report = frappe.parse_json(report)
 		slab_grade: str | None = report.get("grade")  # pyright: ignore[reportAttributeAccessIssue]
+
+		slab_qc: SlabQualityReport = frappe.new_doc("Slab Quality Report")  # pyright: ignore[reportAssignmentType]
+		slab_qc.update(report)
+		slab_qc.shift = shift
+
+		# 1. Create the slab quality report.
+		create_slab_quality_report(slab_number, slab_qc)
 
 		# 2. Finish the job card and checkout the slab.
 		finish_process(job_card, "Quality Check", False, slab_number=slab_number, slab_grade=slab_grade)
@@ -90,34 +94,6 @@ def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
 		slab_size = frappe.get_doc("Slab Size", slab_size_name)
 
 	return {"slab": slab, "job_card": job_card, "slab_size": slab_size}
-
-
-def _create_slab_quality_report(slab_name: str, report: str | dict, shift: str):
-	if isinstance(report, str):
-		report = json.loads(report)
-
-	doc: SlabQualityReport = frappe.new_doc("Slab Quality Report")  # pyright: ignore[reportAssignmentType]
-	doc.update(report)
-	doc.shift = shift
-
-	doc.insert(ignore_permissions=True)
-	doc.submit()
-
-	slab: Slab = frappe.get_doc("Slab", slab_name)  # pyright: ignore[reportAssignmentType]
-	# if slab.status != "Curing" and slab.is_cur_stage_complete:
-	#     raise Exception("Slab is not in curing or is not complete.")
-
-	last_history_item = next((h for h in slab.slab_history if h.station == "Quality Check"), None)
-	if not last_history_item:
-		raise Exception("Slab is not in quality check.")
-
-	last_history_item.quality_report_name = doc.name
-
-	slab.grade = doc.grade
-	slab.quality_assessment = doc.name
-	slab.save(ignore_permissions=True)
-
-	return doc
 
 
 def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job_card: str):
