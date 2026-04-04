@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-03-29 09:46+0000\n"
-"PO-Revision-Date: 2026-03-30 10:24\n"
+"PO-Revision-Date: 2026-04-04 12:38\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -1046,7 +1046,7 @@ msgstr "Helg Lista kan läggas till för att utesluta dessa dagar för Arbetssta
 
 #: erpnext/crm/doctype/lead/lead.py:144
 msgid "A Lead requires either a person's name or an organization's name"
-msgstr "Potentiell Kund kräver antingen person namn eller organisation namn"
+msgstr "Potentiell Kund kräver antingen person namn eller bolag namn"
 
 #: erpnext/stock/doctype/packing_slip/packing_slip.py:84
 msgid "A Packing Slip can only be created for Draft Delivery Note."
@@ -2333,7 +2333,7 @@ msgstr "Aktiv Status"
 #. Label of a number card in the Subcontracting Workspace
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "Active Subcontracted Items"
-msgstr "Aktiva Underleverantör Artiklar"
+msgstr "Aktiva Artiklar"
 
 #. Label of the activities_tab (Tab Break) field in DocType 'Lead'
 #. Label of the activities_tab (Tab Break) field in DocType 'Opportunity'
@@ -2764,7 +2764,7 @@ msgstr "Lägg till eller Dra av"
 
 #: erpnext/utilities/activation.py:114
 msgid "Add the rest of your organization as your users. You can also add invite Customers to your portal by adding them from Contacts"
-msgstr "Lägg till resten av din organisation som  Användare. Man kan också bjuda in Kunder till din Portal genom att lägga till dem från Kontakter"
+msgstr "Lägg till resten av bolag som Användare. Man kan också bjuda in Kunder till din Portal genom att lägga till dem från Kontakter"
 
 #. Label of the get_weekly_off_dates (Button) field in DocType 'Holiday List'
 #. Label of the get_local_holidays (Button) field in DocType 'Holiday List'
@@ -5975,7 +5975,7 @@ msgstr "Minst en råmaterial artikel måste finnas i lager post för typ {0}"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:25
 msgid "At least one row is required for a financial report template"
-msgstr "Minst en rad erfordras för finansiell rapport mall"
+msgstr "Minst en rad erfordras för finans rapport mall"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:823
 msgid "At least one warehouse is mandatory"
@@ -12797,17 +12797,17 @@ msgstr "Skapa Underleverantör Artikel"
 #. Label of an action in the Onboarding Step 'Create Subcontracting Order'
 #: erpnext/subcontracting/onboarding_step/create_subcontracting_order/create_subcontracting_order.json
 msgid "Create Subcontracting Order"
-msgstr "Skapar Underleverantör Order"
+msgstr "Skapa Order"
 
 #. Title of an Onboarding Step
 #: erpnext/subcontracting/onboarding_step/create_subcontracting_po/create_subcontracting_po.json
 msgid "Create Subcontracting PO"
-msgstr "Skapa Underleverantör Inköp Order"
+msgstr "Skapa Inköp Order"
 
 #. Label of an action in the Onboarding Step 'Create Subcontracting PO'
 #: erpnext/subcontracting/onboarding_step/create_subcontracting_po/create_subcontracting_po.json
 msgid "Create Subcontracting Purchase Order"
-msgstr "Skapar Underleverantör Inköp Order"
+msgstr "Skapar Inköp Order"
 
 #. Title of an Onboarding Step
 #: erpnext/buying/onboarding_step/create_supplier/create_supplier.json
@@ -12988,15 +12988,15 @@ msgstr "Skapar Lager Post...."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1813
 msgid "Creating Subcontracting Inward Order ..."
-msgstr "Skapar Underleverantör Order ..."
+msgstr "Skapar Intern Order ..."
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:512
 msgid "Creating Subcontracting Order ..."
-msgstr "Skapar Underleverantör Order ..."
+msgstr "Skapar Inköp Order ..."
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:698
 msgid "Creating Subcontracting Receipt ..."
-msgstr "Skapar Underleverantör Följesedel ..."
+msgstr "Skapar Följesedel ..."
 
 #: erpnext/setup/doctype/employee/employee.js:85
 msgid "Creating User..."
@@ -13419,7 +13419,7 @@ msgstr "Valuta kan inte ändras efter att poster är skapade med någon annan va
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:232
 msgid "Currency filters are currently unsupported in Custom Financial Report."
-msgstr "Valuta filter stöds för närvarande inte i Anpassad Finansiell Rapport."
+msgstr "Valuta filter stöds för närvarande inte i Anpassad Finans Rapport."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1604
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1672
@@ -13598,7 +13598,7 @@ msgstr "Anpassad API"
 #: erpnext/accounts/report/custom_financial_statement/custom_financial_statement.json
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Custom Financial Statement"
-msgstr "Anpassad Finansiell Rapport"
+msgstr "Anpassad Finans Rapport"
 
 #. Label of the custom_remarks (Check) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
@@ -17969,7 +17969,7 @@ msgstr "Aktivera Lojalitet Poäng Program"
 #. Reposting Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Enable Parallel Reposting"
-msgstr "Aktivera Parallell Bokföring"
+msgstr "Aktivera Parallell Omregistrering"
 
 #. Label of the enable_perpetual_inventory (Check) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -17986,7 +17986,7 @@ msgstr "Aktivera Provisoriskt Bokföring för ej Lager Artiklar"
 #. 'Stock Reposting Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Enable Separate Reposting for GL"
-msgstr "Aktivera Separat Ompostering för Bokföring Register"
+msgstr "Aktivera Separat Omregistrering för Bokföring Register"
 
 #. Label of the enable_serial_and_batch_no_for_item (Check) field in DocType
 #. 'Stock Settings'
@@ -19393,27 +19393,27 @@ msgstr "Ekonomi Ansvarig"
 #. Name of a report
 #: erpnext/accounts/report/financial_ratios/financial_ratios.json
 msgid "Financial Ratios"
-msgstr "Finansiell Nyckeltal"
+msgstr "Finans Nyckeltal"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Financial Report Row"
-msgstr "Finansiell Rapport Rad"
+msgstr "Finans Rapport Rad"
 
 #. Name of a DocType
 #. Label of a Workspace Sidebar Item
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.json
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Financial Report Template"
-msgstr "Finansiell Rapport Mall"
+msgstr "Finans Rapport Mall"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:248
 msgid "Financial Report Template {0} is disabled"
-msgstr "Finansiell Rapport Mall {0} är inaktiverad"
+msgstr "Finans Rapport Mall {0} är inaktiverad"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:245
 msgid "Financial Report Template {0} not found"
-msgstr "Finansiell Rapport Mall {0} hittades inte"
+msgstr "Finans Rapport Mall {0} hittades inte"
 
 #. Name of a Workspace
 #. Label of a Desktop Icon
@@ -19445,7 +19445,7 @@ msgstr "Bokföringsår Start Datum"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Financial reports will be generated using GL Entry doctypes (should be enabled if Period Closing Voucher is not posted for all years sequentially or missing) "
-msgstr "Finansiella Rapporter kommer att genereras med hjälp av Bokföring Poster Doctypes (ska vara aktiverat om Period Stängning Verifikat inte publiceras för alla år i följd eller saknas) "
+msgstr "Finans Rapporter kommer att genereras med hjälp av Bokföring Poster Doctypes (ska vara aktiverat om Period Stängning Verifikat inte publiceras för alla år i följd eller saknas) "
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:878
 #: erpnext/manufacturing/doctype/work_order/work_order.js:893
@@ -21791,7 +21791,7 @@ msgstr "Här kan man ange längd, vikt, allergier, medicinska problem osv"
 
 #: erpnext/setup/doctype/employee/employee.js:258
 msgid "Here, you can select a senior of this Employee. Based on this, Organization Chart will be populated."
-msgstr "Här kan du välja överordnad för Personal. Baserat på detta kommer organisation diagam  att fyllas i."
+msgstr "Här kan du välja överordnade för Personal. Baserat på detta kommer Bolag Diagram att fyllas i."
 
 #: erpnext/setup/doctype/holiday_list/holiday_list.js:77
 msgid "Here, your weekly offs are pre-populated based on the previous selections. You can add more rows to also add public and national holidays individually."
@@ -22319,7 +22319,7 @@ msgstr "Om aktiverad, kommer system bara att validera prissättning regel och in
 #. Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "If enabled, this row's values will be displayed on financial charts"
-msgstr "Om detta är aktiverat visas denna rad värde i finansiella diagram"
+msgstr "Om detta är aktiverat visas denna rad värde i finans diagram"
 
 #. Description of the 'Confirm before resetting posting date' (Check) field in
 #. DocType 'Accounts Settings'
@@ -26451,7 +26451,7 @@ msgstr "Artiklar Erfodrade"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Items To Be Received"
-msgstr "Artiklar som skall Tas emot"
+msgstr "Artiklar att Ta emot"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a report
@@ -26460,7 +26460,7 @@ msgstr "Artiklar som skall Tas emot"
 #: erpnext/stock/report/items_to_be_requested/items_to_be_requested.json
 #: erpnext/workspace_sidebar/buying.json
 msgid "Items To Be Requested"
-msgstr "Inköp Artiklar som ska Begäras"
+msgstr "Inköp Artiklar att Begära"
 
 #. Label of a Card Break in the Selling Workspace
 #: erpnext/selling/workspace/selling/selling.json
@@ -28196,7 +28196,7 @@ msgstr "Skapa Lager Post"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:424
 msgid "Make Subcontracting PO"
-msgstr "Skapa Underleverantör Inköp Order"
+msgstr "Skapa Inköp Order"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:427
 msgid "Make Transfer Entry"
@@ -28578,11 +28578,11 @@ msgstr "Produktion Användare"
 
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.js:106
 msgid "Mapping Subcontracting Inward Order ..."
-msgstr "Mappar Intern Underleverantör Order ..."
+msgstr "Mappar Intern Order ..."
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:153
 msgid "Mapping Subcontracting Order ..."
-msgstr "Mappar Underleverantör Order ..."
+msgstr "Mappar Order ..."
 
 #: erpnext/public/js/utils.js:1046
 msgid "Mapping {0} ..."
@@ -29050,7 +29050,7 @@ msgstr "Material till Leverantör"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Materials To Be Transferred"
-msgstr "Material som ska Överföras"
+msgstr "Råmaterial att Överföra"
 
 #: erpnext/controllers/subcontracting_controller.py:1586
 msgid "Materials are already received against the {0} {1}"
@@ -32296,7 +32296,7 @@ msgstr "Tillval.Kommer att användas att filtrera i olika transaktioner."
 
 #: erpnext/accounts/doctype/account/account_tree.js:165
 msgid "Optional. Used with Financial Report Template"
-msgstr "Valfri. Används med Finansiell Rapport Mall"
+msgstr "Valfri. Används med Finans Rapport Mall"
 
 #: erpnext/selling/report/territory_wise_sales/territory_wise_sales.py:43
 msgid "Order Amount"
@@ -32446,12 +32446,12 @@ msgstr "Order"
 #: erpnext/desktop_icon/organization.json
 #: erpnext/workspace_sidebar/organization.json
 msgid "Organization"
-msgstr "Organisation"
+msgstr "Bolag"
 
 #. Label of the company_name (Data) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
 msgid "Organization Name"
-msgstr "Organisation Namn"
+msgstr "Bolag Namn"
 
 #. Label of the original_item (Link) field in DocType 'BOM Item'
 #. Label of the original_item (Link) field in DocType 'Stock Entry Detail'
@@ -35988,7 +35988,7 @@ msgstr "Uppdatera eller återställ Plaid Länk för Bank {}."
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:43
 msgid "Please review the {0} configuration and complete any required financial setup activities."
-msgstr "Granska {0} konfiguration och slutför alla nödvändiga finansiella installation aktiviteter."
+msgstr "Granska {0} konfiguration och slutför alla nödvändiga finans konfiguration aktiviteter."
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:12
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:28
@@ -36159,7 +36159,7 @@ msgstr "Välj Försäljning Följesedel"
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.py:153
 msgid "Please select a Subcontracting Purchase Order."
-msgstr "Välj Underleverantör Inköp Order."
+msgstr "Välj Inköp Order."
 
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.js:91
 msgid "Please select a Supplier"
@@ -41930,50 +41930,50 @@ msgstr "Bokföring startad i bakgrunden"
 #. Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Data File"
-msgstr "Bokföring av Data Fil"
+msgstr "Omregistering av Data Fil"
 
 #. Label of the reposting_info_section (Section Break) field in DocType 'Repost
 #. Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Item and Warehouse"
-msgstr "Återbokför Artikel och Lager"
+msgstr "Omregistrera Artikel och Lager"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:131
 msgid "Reposting Progress"
-msgstr "Bokföring Framsteg"
+msgstr "Omregistrering Framsteg"
 
 #. Label of the reposting_reference (Data) field in DocType 'Repost Item
 #. Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Reference"
-msgstr "Repostering Referens"
+msgstr "Omregistrering Referens"
 
 #. Label of the vouchers_based_on_item_and_warehouse_section (Section Break)
 #. field in DocType 'Repost Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Vouchers"
-msgstr "Återbokför Verifikat"
+msgstr "Omregistrera Verifikat"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:149
 msgid "Reposting Vouchers Progress"
-msgstr "Återbokför Verifikat Framsteg"
+msgstr "Omregistrering av Verifikat Framsteg"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:216
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:327
 msgid "Reposting entries created: {0}"
-msgstr "Bokföring Poster skapade: {0}"
+msgstr "Omregistrering Poster skapade: {0}"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:123
 msgid "Reposting for Item-Wh Completed {0}%"
-msgstr "Återbokföring för Artikel och Lager Slutfört {0}%"
+msgstr "Omregistrering för Artikel och Lager Slutfört {0}%"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:141
 msgid "Reposting for Vouchers Completed {0}%"
-msgstr "Återbokföring för Verifikat Slutfört {0}%"
+msgstr "Omregistrering för Verifikat Slutfört {0}%"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:109
 msgid "Reposting has been started in the background."
-msgstr "Bokföring startad i bakgrunden."
+msgstr "Omregistrering startad i bakgrunden."
 
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.js:49
 msgid "Reposting in the background."
@@ -46042,7 +46042,7 @@ msgstr "Välj Artiklar att Producera"
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:500
 msgid "Select Items to Receive"
-msgstr "Välj Artiklar att ta emot"
+msgstr "Välj Artiklar att Ta emot"
 
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:87
 msgid "Select Items up to Delivery Date"
@@ -47595,7 +47595,7 @@ msgstr "Konfigurera E-post Konto"
 #. Title of the Module Onboarding 'Organization Onboarding'
 #: erpnext/setup/module_onboarding/organization_onboarding/organization_onboarding.json
 msgid "Setup Organization"
-msgstr "Konfigurera Organisation"
+msgstr "Konfigurera Bolag"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Setup Role Permissions'
@@ -48746,7 +48746,7 @@ msgstr "Starta Sammanslagning"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:105
 msgid "Start Reposting"
-msgstr "Starta Bokföring"
+msgstr "Starta Omregistrering"
 
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:129
 msgid "Start Time can't be greater than or equal to End Time for {0}."
@@ -49264,7 +49264,7 @@ msgstr "Lager Rapporter"
 #: erpnext/workspace_sidebar/erpnext_settings.json
 #: erpnext/workspace_sidebar/stock.json
 msgid "Stock Reposting Settings"
-msgstr "Lager Bokföring Inställningar"
+msgstr "Lager Omregistrering Inställningar"
 
 #. Label of the stock_reservation_tab (Tab Break) field in DocType 'Stock
 #. Settings'
@@ -49811,7 +49811,7 @@ msgstr "Underleverantör Order"
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Subcontract Order Summary"
-msgstr "Underleverantör Order Översikt"
+msgstr "Order Översikt"
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:84
 msgid "Subcontract Return"
@@ -49834,7 +49834,7 @@ msgstr "Underleverantör Artikel"
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "Subcontracted Item To Be Received"
-msgstr "Underleverantör Artikel att Ta Emot"
+msgstr "Artiklar att Ta Emot"
 
 #: erpnext/stock/doctype/material_request/material_request.js:224
 msgid "Subcontracted Purchase Order"
@@ -49859,7 +49859,7 @@ msgstr "Underleverantör Kvantitet"
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "Subcontracted Raw Materials To Be Transferred"
-msgstr "Underleverantör Råmaterial att Överföra"
+msgstr "Råmaterial att Överföra"
 
 #. Label of a Desktop Icon
 #. Option for the 'Type' (Select) field in DocType 'Material Request Plan Item'
@@ -49887,7 +49887,7 @@ msgstr "Underleverantör"
 #: erpnext/subcontracting/doctype/subcontracting_bom/subcontracting_bom.json
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Subcontracting BOM"
-msgstr "Underleverantör Stycklista"
+msgstr "Stycklista"
 
 #. Label of the subcontracting_conversion_factor (Float) field in DocType
 #. 'Subcontracting Inward Order Item'
@@ -49909,7 +49909,7 @@ msgstr "Underleverantör Konvertering Faktor"
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Subcontracting Delivery"
-msgstr "Underleverantör Lager Post"
+msgstr "Lager Post"
 
 #. Label of the subcontracting_inward_tab (Tab Break) field in DocType 'Selling
 #. Settings'
@@ -49936,12 +49936,12 @@ msgstr "Intern Underleverantör"
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "Subcontracting Inward Order"
-msgstr "Intern Underleverantör Order"
+msgstr "Intern Order"
 
 #. Label of a number card in the Subcontracting Workspace
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "Subcontracting Inward Order Count"
-msgstr "Intern Underleverantör Order Antal"
+msgstr "Intern Order Antal"
 
 #. Label of the subcontracting_inward_order_item (Data) field in DocType 'Work
 #. Order'
@@ -49949,22 +49949,22 @@ msgstr "Intern Underleverantör Order Antal"
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_item/subcontracting_inward_order_item.json
 msgid "Subcontracting Inward Order Item"
-msgstr "Intern Underleverantör Order Artikel"
+msgstr "Intern Order Artikel"
 
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_received_item/subcontracting_inward_order_received_item.json
 msgid "Subcontracting Inward Order Received Item"
-msgstr "Intern Underleverantör Order Mottagen Artikel"
+msgstr "Intern Order Mottagen Artikel"
 
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 msgid "Subcontracting Inward Order Secondary Item"
-msgstr "Intern Underleverantör Order Sekundär Artikel"
+msgstr "Intern Order Sekundär Artikel"
 
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_service_item/subcontracting_inward_order_service_item.json
 msgid "Subcontracting Inward Order Service Item"
-msgstr "Intern Underleverantör Order Service Artikel"
+msgstr "Intern Order Service Artikel"
 
 #. Label of the section_break_zwh6 (Section Break) field in DocType 'Selling
 #. Settings'
@@ -50030,12 +50030,12 @@ msgstr "Underleverantör Order {0} skapad"
 #. Label of a Link in the Subcontracting Workspace
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "Subcontracting Outward Order"
-msgstr "Extern Underleverantör Order"
+msgstr "Extern Order"
 
 #. Label of a number card in the Subcontracting Workspace
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "Subcontracting Outward Order Count"
-msgstr "Extern Underleverantör Order Antal"
+msgstr "Extern Order Antal"
 
 #. Label of the purchase_order (Link) field in DocType 'Subcontracting Order'
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
@@ -52226,7 +52226,7 @@ msgstr "Tesla"
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Text displayed on the financial statement (e.g., 'Total Revenue', 'Cash and Cash Equivalents')"
-msgstr "Text som visas i Finansiell Rapport (t.ex. \"Totala Intäkter\", \"Likvida Medel\")"
+msgstr "Text som visas i Finans Rapport (t.ex. \"Totala Intäkter\", \"Likvida Medel\")"
 
 #: erpnext/stock/doctype/packing_slip/packing_slip.py:91
 msgid "The 'From Package No.' field must neither be empty nor it's value less than 1."
@@ -54948,7 +54948,7 @@ msgstr "Typ av dokument för att ändra namn på."
 #. Template'
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.json
 msgid "Type of financial statement this template generates"
-msgstr "Typ av finansiell rapport som denna mall genererar"
+msgstr "Typ av finans rapport som denna mall skapar"
 
 #: erpnext/config/projects.py:61
 msgid "Types of activities for Time Logs"
@@ -55764,7 +55764,7 @@ msgstr "Uppdaterad via 'Tid Logg' (i Minuter)"
 
 #: erpnext/accounts/doctype/account_category/account_category.py:54
 msgid "Updated {0} Financial Report Row(s) with new category name"
-msgstr "Uppdaterad {0} Finansiell Rapport Rad(er) med ny kategori namn"
+msgstr "Uppdaterad {0} Finans Rapport Rad(er) med ny kategori namn"
 
 #: erpnext/projects/doctype/project/project.js:137
 msgid "Updating Costing and Billing fields against this Project..."
@@ -55873,7 +55873,7 @@ msgstr "Använd HTTP Protokoll"
 #. Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Use Item based reposting"
-msgstr "Använd Artikel baserad Bokföring"
+msgstr "Använd Artikel baserad Omregistrering"
 
 #. Label of the use_legacy_js_reactivity (Check) field in DocType 'Selling
 #. Settings'
@@ -55989,7 +55989,7 @@ msgstr "Används för Produktion Plan"
 #. Description of the 'Account Category' (Link) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
 msgid "Used with Financial Report Template"
-msgstr "Används med Finansiell Rapport Mall"
+msgstr "Används med Finans Rapport Mall"
 
 #: erpnext/setup/install.py:195
 msgid "User Forum"
@@ -59095,7 +59095,7 @@ msgstr "{0} varianter skapade."
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:238
 msgid "{0} view is currently unsupported in Custom Financial Report."
-msgstr "{0} vyn stöds för närvarande inte i anpassad finansiell rapport."
+msgstr "{0} vyn stöds för närvarande inte i Anpassad Finans Rapport."
 
 #: erpnext/accounts/doctype/payment_term/payment_term.js:19
 msgid "{0} will be given as discount."
