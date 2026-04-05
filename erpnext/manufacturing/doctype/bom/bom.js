@@ -407,6 +407,7 @@ frappe.ui.form.on("BOM", {
 				reqd: 1,
 				default: 1,
 				onchange: () => {
+					if (!cur_dialog) return;
 					const { quantity, items: rm } = frm.doc;
 					const variant_items_map = rm.reduce((acc, item) => {
 						acc[item.item_code] = item.qty;
