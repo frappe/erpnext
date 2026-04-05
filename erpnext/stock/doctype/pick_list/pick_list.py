@@ -897,13 +897,28 @@ class PickList(TransactionBase):
 					c.db_set("delivered_qty", expected, update_modified=False)
 					updated = True
 
-		if updated:
-			total_picked = sum(flt(item.picked_qty) for item in self.locations)
-			total_delivered = sum(flt(item.delivered_qty) for item in self.locations)
-			if total_picked:
+		total_picked = sum(flt(item.picked_qty) for item in self.locations)
+		total_delivered = sum(flt(item.delivered_qty) for item in self.locations)
+		if total_picked:
+			per_delivered = flt(total_delivered / total_picked * 100)
+			if per_delivered >= 100:
+				delivery_status = "Fully Delivered"
+			elif per_delivered > 0:
+				delivery_status = "Partly Delivered"
+			else:
+				delivery_status = "Not Delivered"
+
+			if (
+				flt(self.per_delivered) != per_delivered
+				or self.delivery_status != delivery_status
+			):
+				self.per_delivered = per_delivered
+				self.delivery_status = delivery_status
 				self.db_set(
-					"per_delivered",
-					flt(total_delivered / total_picked * 100),
+					{
+						"per_delivered": per_delivered,
+						"delivery_status": delivery_status,
+					},
 					update_modified=False,
 				)
 
