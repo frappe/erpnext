@@ -261,8 +261,11 @@ def get_batch_numbers(include_child_lines=False):
 
 
 @frappe.whitelist()
-def get_valid_next_stages(current_stage: str) -> list[str]:
+def get_valid_next_stages(current_stage: str, include_qc = False) -> list[str]:
 	allowed_stages = [stage.lower() for stage in ALLOWED_STAGES]
+	if include_qc:
+		allowed_stages.append("quality check")
+
 	try:
 		current_stage_index = allowed_stages.index(current_stage.lower())
 	except ValueError:
@@ -279,7 +282,7 @@ def get_valid_next_stages(current_stage: str) -> list[str]:
 
 
 @frappe.whitelist()
-def move_slab_iteratively_to(slab_name: str, final_stage: str, obsevation: PreliminaryQualityCheck | OvenOperation | SlabQualityReport | None = None):
+def move_slab_iteratively_to(slab_name: str, final_stage: str, observation: PreliminaryQualityCheck | OvenOperation | SlabQualityReport | None = None, include_qc = False):
 	slab: Slab = frappe.get_doc("Slab", slab_name)  # pyright: ignore[reportAssignmentType]
 	# If the slab's current process is not complete, finish the process
 	from erpnext.manufacturing.page.operator_station.operator_station import (
@@ -302,7 +305,7 @@ def move_slab_iteratively_to(slab_name: str, final_stage: str, obsevation: Preli
 			# Add the default stage observations, if applicable
 			func = obs_creation_func_map.get(slab.status.lower())
 			if func:
-				func(slab, obsevation)
+				func(slab, observation)
 
 			if slab.current_job_card:
 				finish_process(
@@ -315,10 +318,10 @@ def move_slab_iteratively_to(slab_name: str, final_stage: str, obsevation: Preli
 			else:
 				checkout_slab(str(slab.name))
 
-		next_stages = get_valid_next_stages(slab.status)
+		next_stages = get_valid_next_stages(slab.status, include_qc)
 		for stage in next_stages:
 			# Get the name of the top job card for the process
-			top_job_card_name = (get_next_work_item(stage.lower(), slab.line).get('job_card', {}) or {}).get('name')
+			top_job_card_name: str = (get_next_work_item(stage.lower(), slab.line).get('job_card', {}) or {}).get('name') # pyright: ignore[reportAssignmentType]
 
 			if top_job_card_name:
 				start_process(top_job_card_name, slab_name, slab.template, stage.lower())
@@ -328,13 +331,15 @@ def move_slab_iteratively_to(slab_name: str, final_stage: str, obsevation: Preli
 
 				if stage.lower() == "curing":
 					_finish_curing(slab_name)
+				elif stage.lower() == "quality check":
+					_finish_qc(slab_name, observation, top_job_card_name) # pyright: ignore[reportArgumentType]
 				else:
 					checkout_slab(slab_name)
 
 			# Add the default stage observations, if applicable
 			func = obs_creation_func_map.get(stage.lower())
 			if func:
-				func(slab_name, obsevation)
+				func(slab_name, observation)
 
 			if stage.lower() == final_stage:
 				break
@@ -348,6 +353,14 @@ def move_slab_iteratively_to(slab_name: str, final_stage: str, obsevation: Preli
 def _finish_curing(slab_name: str):
 	from erpnext.manufacturing.page.slab_loading_station.slab_loading_station import finish_curing
 	finish_curing(slab_name)
+
+
+def _finish_qc(slab_number: str, slab_qc: SlabQualityReport, job_card: str):
+	from erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station import finish_qc_process
+	# Get Slab Grade
+	mg_settings: MahiGranitesSettings = frappe.get_doc("Mahi Granites Settings") # pyright: ignore[reportAssignmentType]
+	grades = mg_settings.grades
+	finish_qc_process(slab_number, slab_qc, grades[0].name, job_card)
 
 
 def pause_or_resume_slab_operation(slab_number: str, pause: bool):
@@ -660,7 +673,7 @@ def _create_final_qc(slab_name: str, final_qc: SlabQualityReport | None = None):
 
 	final_qc.slab = final_qc.slab or str(slab.name)
 	final_qc.slab_template = final_qc.slab_template or slab.template
-	final_qc.date = frappe_utils.now_datetime()
+	final_qc.date = final_qc.date or frappe_utils.now_datetime()
 	final_qc.job_card = final_qc.job_card or str(slab.last_active_job_card)
 	final_qc.grade = final_qc.grade or grades[0].code
 	final_qc.shift = final_qc.shift or shifts[0].name
@@ -668,5 +681,7 @@ def _create_final_qc(slab_name: str, final_qc: SlabQualityReport | None = None):
 	final_qc.slab_length = final_qc.slab_length or 0
 	final_qc.slab_thickness = final_qc.slab_thickness or 0
 	final_qc.slab_width = final_qc.slab_width or 0
+	final_qc.repair = final_qc.repair or "None"
+	final_qc.crate_number = final_qc.crate_number or ""
 
 	create_slab_quality_report(str(slab.name), final_qc)
