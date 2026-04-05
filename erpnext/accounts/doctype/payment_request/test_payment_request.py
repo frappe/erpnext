@@ -985,8 +985,10 @@ class TestPaymentRequest(ERPNextTestSuite):
 		self.assertFalse(get_return_invoices("Purchase Invoice", pi.name))
 
 		pi_return = make_purchase_invoice(
-			currency="INR", qty=-1, rate=700, is_return=1, return_against=pi.name
+			currency="INR", qty=-1, rate=700, is_return=1, return_against=pi.name, do_not_save=1
 		)
+		pi_return.update_outstanding_for_self = 0
+		pi_return.save()
 		pi_return.submit()
 
 		self.assertTrue(get_return_invoices("Purchase Invoice", pi.name))
