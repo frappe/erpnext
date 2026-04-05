@@ -63,6 +63,13 @@ frappe.ui.form.on("Sales Order", {
 			});
 		}
 	},
+	transaction_date(frm) {
+		prevent_past_delivery_dates(frm);
+		frm.set_value("delivery_date", "");
+		frm.doc.items.forEach((d) => {
+			frappe.model.set_value(d.doctype, d.name, "delivery_date", "");
+		});
+	},
 
 	refresh: function (frm) {
 		frm.fields_dict["items"].grid.update_docfield_property(
