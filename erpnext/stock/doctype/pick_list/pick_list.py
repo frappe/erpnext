@@ -867,6 +867,45 @@ class PickList(TransactionBase):
 
 		return int(flt(min(possible_bundles.values()), precision or 6)) if possible_bundles else 0
 
+	def update_bundle_delivered_qty(self):
+		"""Update delivered_qty on all product bundle component items.
+
+		The Status Updater only links one Delivery Note Item to one Pick List Item
+		per product bundle via the pick_list_item field, leaving sibling components
+		with delivered_qty=0. This method marks all components as delivered when
+		the bundle has been delivered.
+		"""
+		bundle_groups = defaultdict(list)
+		for item in self.locations:
+			if item.product_bundle_item:
+				bundle_groups[item.sales_order_item].append(item)
+
+		if not bundle_groups:
+			return
+
+		updated = False
+		for so_item, components in bundle_groups.items():
+			is_delivered = frappe.db.exists(
+				"Delivery Note Item",
+				{"against_pick_list": self.name, "so_detail": so_item, "docstatus": 1},
+			)
+
+			for c in components:
+				expected = flt(c.picked_qty) if is_delivered else 0
+				if flt(c.delivered_qty) != expected:
+					c.db_set("delivered_qty", expected, update_modified=False)
+					updated = True
+
+		if updated:
+			total_picked = sum(flt(item.picked_qty) for item in self.locations)
+			total_delivered = sum(flt(item.delivered_qty) for item in self.locations)
+			if total_picked:
+				self.db_set(
+					"per_delivered",
+					flt(total_delivered / total_picked * 100),
+					update_modified=False,
+				)
+
 	def has_unreserved_stock(self):
 		if self.purpose == "Delivery":
 			for location in self.locations:
@@ -895,6 +934,7 @@ class PickList(TransactionBase):
 def update_pick_list_status(pick_list):
 	if pick_list:
 		doc = frappe.get_doc("Pick List", pick_list)
+		doc.update_bundle_delivered_qty()
 		doc.run_method("update_status")
 
 

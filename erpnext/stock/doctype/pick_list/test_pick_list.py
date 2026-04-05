@@ -1666,6 +1666,53 @@ class TestPickList(ERPNextTestSuite):
 		stock_entry_2.cancel()
 		stock_entry_3.cancel()
 
+	def test_pick_list_bundle_delivered_status(self):
+		"""Pick List with Product Bundle should show Completed after full delivery."""
+		warehouse = "_Test Warehouse - _TC"
+
+		item_bundle = make_item(properties={"is_stock_item": 0}).name
+		item_a = make_item().name
+		item_b = make_item().name
+		item_c = make_item().name
+
+		make_product_bundle(item_bundle, items=[item_a, item_b, item_c])
+
+		make_stock_entry(item=item_a, to_warehouse=warehouse, qty=10, basic_rate=100)
+		make_stock_entry(item=item_b, to_warehouse=warehouse, qty=10, basic_rate=100)
+		make_stock_entry(item=item_c, to_warehouse=warehouse, qty=10, basic_rate=100)
+
+		so = make_sales_order(item_code=item_bundle, qty=1, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save().submit()
+
+		# All 3 component items should be in pick list
+		bundle_items = [loc for loc in pl.locations if loc.product_bundle_item]
+		self.assertEqual(len(bundle_items), 3)
+
+		# Deliver
+		dn = create_delivery_note(pl.name)
+		dn.submit()
+
+		pl.reload()
+		# All components should have delivered_qty updated
+		for loc in pl.locations:
+			if loc.product_bundle_item:
+				self.assertEqual(loc.delivered_qty, loc.picked_qty)
+
+		self.assertEqual(pl.per_delivered, 100)
+		self.assertEqual(pl.status, "Completed")
+
+		# Cancel DN - should revert
+		dn.cancel()
+		pl.reload()
+
+		for loc in pl.locations:
+			if loc.product_bundle_item:
+				self.assertEqual(loc.delivered_qty, 0)
+
+		self.assertNotEqual(pl.status, "Completed")
+
 	def test_pick_list_with_and_without_so(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item().name
