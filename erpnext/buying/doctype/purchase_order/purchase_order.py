@@ -732,6 +732,7 @@ def make_purchase_receipt(
 		child_filter = d.name in filtered_items if filtered_items else True
 		return child_filter
 
+	source_doc = frappe.get_doc("Purchase Order", source_name)
 	doc = get_mapped_doc(
 		"Purchase Order",
 		source_name,
@@ -765,9 +766,8 @@ def make_purchase_receipt(
 			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
 		target_doc,
-		set_missing_values,
 	)
-
+	set_missing_values(source_doc, doc)
 	return doc
 
 
