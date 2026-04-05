@@ -170,6 +170,7 @@ class WorkOrder(Document):
 		self.set_required_items(reset_only_qty=len(self.get("required_items")))
 		self.validate_operations_sequence()
 
+
 	def validate_operations_sequence(self):
 		if all([not op.sequence_id for op in self.operations]):
 			for op in self.operations:
@@ -1034,9 +1035,14 @@ class WorkOrder(Document):
 	def validate_production_item(self):
 		if frappe.get_cached_value("Item", self.production_item, "has_variants"):
 			frappe.throw(_("Work Order cannot be raised against a Item Template"), ItemHasVariantError)
-
 		if self.production_item:
 			validate_end_of_life(self.production_item)
+			if frappe.db.get_value("Item", self.production_item, "disabled"):
+				frappe.throw(
+					_("Production Item {0} is disabled. Please select an active item.").format(
+						frappe.bold(self.production_item)
+					)
+				)
 
 	def validate_qty(self):
 		if not self.qty > 0:
