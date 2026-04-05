@@ -726,16 +726,24 @@ def get_item_tax_template(ctx, item=None, out: ItemDetails | None = None):
 		item_tax_template = _get_item_tax_template(ctx, item.taxes, out)
 
 	if not item_tax_template:
-		item_group = item.item_group
-		while item_group and not item_tax_template:
-			item_group_doc = frappe.get_cached_doc("Item Group", item_group)
-			item_tax_template = _get_item_tax_template(ctx, item_group_doc.taxes, out)
-			item_group = item_group_doc.parent_item_group
+		item_tax_template = _get_item_tax_template_from_item_group(ctx, item.item_group, out)
 
 	if out and ctx.get("child_doctype") and item_tax_template:
 		out.update(get_fetch_values(ctx.get("child_doctype"), "item_tax_template", item_tax_template))
 
 	return item_tax_template
+
+
+def _get_item_tax_template_from_item_group(ctx, item_group, out=None):
+	from frappe.utils.nestedset import get_ancestors_of
+
+	ancestors = get_ancestors_of("Item Group", item_group)
+	for group in [item_group, *ancestors]:
+		group_doc = frappe.get_cached_doc("Item Group", group)
+		item_tax_template = _get_item_tax_template(ctx, group_doc.taxes, out)
+		if item_tax_template:
+			return item_tax_template
+	return None
 
 
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
