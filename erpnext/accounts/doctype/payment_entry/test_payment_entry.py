@@ -537,6 +537,8 @@ class TestPaymentEntry(FrappeTestCase):
 		si.submit()
 
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC", bank_amount=4700)
+		pe.source_exchange_rate = 50
+		pe.set_amounts()
 		pe.reference_no = si.name
 		pe.reference_date = nowdate()
 
@@ -612,6 +614,8 @@ class TestPaymentEntry(FrappeTestCase):
 		pe = get_payment_entry(
 			"Sales Invoice", si.name, party_amount=20, bank_account="_Test Bank - _TC", bank_amount=900
 		)
+		pe.source_exchange_rate = 50
+		pe.set_amounts()
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
 
