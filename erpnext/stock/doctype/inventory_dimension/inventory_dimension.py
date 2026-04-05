@@ -165,6 +165,16 @@ class InventoryDimension(Document):
 
 	def on_update(self):
 		self.add_custom_fields()
+		if self.has_value_changed("disabled"):
+			self.sync_mandatory_on_custom_fields()
+
+	def get_dimension_specific_fieldnames(self) -> list[str]:
+		return [
+			self.source_fieldname,
+			f"rejected_{self.source_fieldname}",
+			f"to_{self.source_fieldname}",
+			f"from_{self.source_fieldname}",
+		]
 
 	def get_mandatory_for_field(self, doctype: str, fieldname: str) -> dict:
 		no_mandatory = {"reqd": 0, "mandatory_depends_on": ""}
@@ -193,6 +203,33 @@ class InventoryDimension(Document):
 			}
 
 		return no_mandatory
+
+	def sync_mandatory_on_custom_fields(self):
+		hidden = 1 if self.disabled else 0
+
+		filters = {"fieldname": ("in", self.get_dimension_specific_fieldnames())}
+		if not self.apply_to_all_doctypes and self.document_type:
+			filters["dt"] = self.document_type
+
+		custom_fields = frappe.get_all(
+			"Custom Field",
+			fields=["name", "dt", "fieldname"],
+			filters=filters,
+		)
+
+		for cf in custom_fields:
+			mandatory = self.get_mandatory_for_field(cf.dt, cf.fieldname)
+			frappe.db.set_value(
+				"Custom Field",
+				cf.name,
+				{"hidden": hidden, **mandatory},
+			)
+
+		if self.apply_to_all_doctypes:
+			for doctype in get_inventory_documents():
+				frappe.clear_cache(doctype=doctype[0])
+		elif self.document_type:
+			frappe.clear_cache(doctype=self.document_type)
 
 	@staticmethod
 	def get_insert_after_fieldname(doctype):
