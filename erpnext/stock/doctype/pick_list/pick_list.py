@@ -893,6 +893,7 @@ class PickList(TransactionBase):
 			for c in components:
 				expected = flt(c.picked_qty) if is_delivered else 0
 				if flt(c.delivered_qty) != expected:
+					c.delivered_qty = expected
 					c.db_set("delivered_qty", expected, update_modified=False)
 					updated = True
 
