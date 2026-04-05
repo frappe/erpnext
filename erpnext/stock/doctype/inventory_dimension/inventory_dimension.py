@@ -1,7 +1,7 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from typing import Any
+from typing import Any, ClassVar
 
 import frappe
 from frappe import _, bold, scrub
@@ -46,6 +46,26 @@ class InventoryDimension(Document):
 		type_of_transaction: DF.Literal["", "Inward", "Outward", "Both"]
 		validate_negative_stock: DF.Check
 	# end: auto-generated types
+
+	INWARD_ONLY_DOCTYPES: ClassVar[list[str]] = ["Purchase Invoice Item", "Purchase Receipt Item"]
+
+	SOURCE_STOCK_ENTRY_TYPES: ClassVar[list[str]] = [
+		"Material Issue",
+		"Material Transfer",
+		"Repack",
+		"Send to Subcontractor",
+		"Material Transfer for Manufacture",
+		"Material Consumption for Manufacture",
+	]
+	TARGET_STOCK_ENTRY_TYPES: ClassVar[list[str]] = [
+		"Material Receipt",
+		"Material Transfer",
+		"Repack",
+		"Send to Subcontractor",
+		"Material Transfer for Manufacture",
+	]
+	SE_SOURCE_MANDATORY_DEPENDS_ON = f"eval:{SOURCE_STOCK_ENTRY_TYPES}.includes(parent.purpose)"
+	SE_TARGET_MANDATORY_DEPENDS_ON = f"eval:{TARGET_STOCK_ENTRY_TYPES}.includes(parent.purpose)"
 
 	def onload(self):
 		if not self.is_new() and frappe.db.has_column("Stock Ledger Entry", self.target_fieldname):
@@ -146,6 +166,34 @@ class InventoryDimension(Document):
 	def on_update(self):
 		self.add_custom_fields()
 
+	def get_mandatory_for_field(self, doctype: str, fieldname: str) -> dict:
+		no_mandatory = {"reqd": 0, "mandatory_depends_on": ""}
+
+		if self.disabled or not self.reqd:
+			return no_mandatory
+
+		is_source_field = fieldname == self.source_fieldname
+		is_target_field = fieldname == f"to_{self.source_fieldname}"
+
+		if doctype == "Stock Entry Detail":
+			if is_source_field:
+				return {"reqd": 0, "mandatory_depends_on": self.SE_SOURCE_MANDATORY_DEPENDS_ON}
+			if is_target_field:
+				return {"reqd": 0, "mandatory_depends_on": self.SE_TARGET_MANDATORY_DEPENDS_ON}
+
+			return no_mandatory
+
+		if doctype in self.INWARD_ONLY_DOCTYPES and is_source_field:
+			return no_mandatory
+
+		if is_source_field:
+			return {
+				"reqd": self.reqd,
+				"mandatory_depends_on": self.mandatory_depends_on or "",
+			}
+
+		return no_mandatory
+
 	@staticmethod
 	def get_insert_after_fieldname(doctype):
 		return frappe.get_all(
@@ -161,7 +209,7 @@ class InventoryDimension(Document):
 			doctype = self.document_type
 
 		label_start_with = ""
-		if doctype in ["Purchase Invoice Item", "Purchase Receipt Item"]:
+		if doctype in self.INWARD_ONLY_DOCTYPES:
 			label_start_with = "Target"
 		elif doctype in ["Sales Invoice Item", "Delivery Note Item", "Stock Entry Detail"]:
 			label_start_with = "Source"
@@ -169,6 +217,8 @@ class InventoryDimension(Document):
 		label = self.dimension_name
 		if label_start_with:
 			label = f"{label_start_with} {self.dimension_name}"
+
+		mandatory = self.get_mandatory_for_field(doctype, self.source_fieldname)
 
 		dimension_fields = [
 			dict(
@@ -186,12 +236,12 @@ class InventoryDimension(Document):
 				label=_(label),
 				depends_on="eval:doc.s_warehouse" if doctype == "Stock Entry Detail" else "",
 				search_index=1,
-				reqd=self.reqd,
-				mandatory_depends_on=self.mandatory_depends_on,
+				hidden=1 if self.disabled else 0,
+				**mandatory,
 			),
 		]
 
-		if doctype in ["Purchase Invoice Item", "Purchase Receipt Item"]:
+		if doctype in self.INWARD_ONLY_DOCTYPES:
 			dimension_fields.append(
 				dict(
 					fieldname="rejected_" + self.source_fieldname,
@@ -200,6 +250,7 @@ class InventoryDimension(Document):
 					options=self.reference_document,
 					label=_("Rejected " + self.dimension_name),
 					search_index=1,
+					hidden=1 if self.disabled else 0,
 					mandatory_depends_on="eval:doc.rejected_qty > 0",
 				)
 			)
@@ -269,7 +320,7 @@ class InventoryDimension(Document):
 		label_start_with = "Target"
 		display_depends_on = ""
 
-		if doctype in ["Purchase Invoice Item", "Purchase Receipt Item"]:
+		if doctype in self.INWARD_ONLY_DOCTYPES:
 			fieldname_start_with = "from"
 			label_start_with = "Source"
 			display_depends_on = "eval:parent.is_internal_supplier == 1"
@@ -284,6 +335,8 @@ class InventoryDimension(Document):
 		if field_exists(doctype, fieldname):
 			return
 
+		mandatory = self.get_mandatory_for_field(doctype, fieldname)
+
 		dimension_fields.extend(
 			[
 				dict(
@@ -297,7 +350,9 @@ class InventoryDimension(Document):
 					insert_after="inventory_dimension_col_break",
 					options=self.reference_document,
 					label=label,
+					hidden=1 if self.disabled else 0,
 					depends_on=display_depends_on,
+					**mandatory,
 				),
 			]
 		)
