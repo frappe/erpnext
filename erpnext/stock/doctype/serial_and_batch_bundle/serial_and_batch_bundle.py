@@ -400,6 +400,25 @@ class SerialandBatchBundle(Document):
 
 	def set_valuation_rate_for_return_entry(self, return_against, row, save=False, prev_sle=None):
 		if valuation_details := self.get_valuation_rate_for_return_entry(return_against):
+			from erpnext.stock.utils import get_valuation_method
+
+			valuation_method = get_valuation_method(self.item_code, self.company)
+
+			stock_queue = []
+			non_batchwise_batches = []
+			if not self.has_serial_no and valuation_method == "FIFO":
+				non_batchwise_batches = frappe.get_all(
+					"Batch",
+					filters={
+						"name": ("in", [d.batch_no for d in self.entries if d.batch_no]),
+						"use_batchwise_valuation": 0,
+					},
+					pluck="name",
+				)
+
+				if non_batchwise_batches and prev_sle and prev_sle.stock_queue:
+					stock_queue = parse_json(prev_sle.stock_queue)
+
 			for row in self.entries:
 				if valuation_details:
 					self.validate_returned_serial_batch_no(return_against, row, valuation_details)
@@ -421,11 +440,25 @@ class SerialandBatchBundle(Document):
 				row.incoming_rate = flt(valuation_rate)
 				row.stock_value_difference = flt(row.qty) * flt(row.incoming_rate)
 
+				if (
+					non_batchwise_batches
+					and row.batch_no in non_batchwise_batches
+					and row.incoming_rate is not None
+				):
+					if flt(row.qty) > 0:
+						stock_queue.append([row.qty, row.incoming_rate])
+					elif flt(row.qty) < 0:
+						stock_queue = FIFOValuation(stock_queue)
+						stock_queue.remove_stock(qty=abs(row.qty))
+						stock_queue = stock_queue.state
+					row.stock_queue = json.dumps(stock_queue)
+
 				if save:
 					row.db_set(
 						{
 							"incoming_rate": row.incoming_rate,
 							"stock_value_difference": row.stock_value_difference,
+							"stock_queue": row.get("stock_queue"),
 						}
 					)
 
