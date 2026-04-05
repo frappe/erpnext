@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-03-29 09:46+0000\n"
-"PO-Revision-Date: 2026-04-04 12:38\n"
+"PO-Revision-Date: 2026-04-05 12:35\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -12988,7 +12988,7 @@ msgstr "Skapar Lager Post...."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1813
 msgid "Creating Subcontracting Inward Order ..."
-msgstr "Skapar Intern Order ..."
+msgstr "Skapar Underleverantör Order ..."
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:512
 msgid "Creating Subcontracting Order ..."
@@ -27273,7 +27273,7 @@ msgstr "Lär dig Tillgångar"
 #. Label of an action in the Onboarding Step 'Learn Subcontracting'
 #: erpnext/subcontracting/onboarding_step/learn_subcontracting/learn_subcontracting.json
 msgid "Learn Subcontracting"
-msgstr "Lär dig Underentreprenad"
+msgstr "Lär dig om Underleverantör"
 
 #. Description of the 'Enable Common Party Accounting' (Check) field in DocType
 #. 'Accounts Settings'
@@ -38926,7 +38926,7 @@ msgstr "Inköp Ordrar"
 #. Label of a number card in the Buying Workspace
 #: erpnext/buying/workspace/buying/buying.json
 msgid "Purchase Orders Count"
-msgstr "Antal Inköpsordrar"
+msgstr "Inköp Order"
 
 #. Label of the purchase_orders_items_overdue (Check) field in DocType 'Email
 #. Digest'
@@ -49941,7 +49941,7 @@ msgstr "Intern Order"
 #. Label of a number card in the Subcontracting Workspace
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "Subcontracting Inward Order Count"
-msgstr "Intern Order Antal"
+msgstr "Interna Order"
 
 #. Label of the subcontracting_inward_order_item (Data) field in DocType 'Work
 #. Order'
@@ -50035,7 +50035,7 @@ msgstr "Extern Order"
 #. Label of a number card in the Subcontracting Workspace
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "Subcontracting Outward Order Count"
-msgstr "Extern Order Antal"
+msgstr "Externa Order"
 
 #. Label of the purchase_order (Link) field in DocType 'Subcontracting Order'
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
@@ -56701,7 +56701,7 @@ msgstr "Visa Nu"
 #. Description of a report in the Onboarding Step 'View Project Summary'
 #: erpnext/projects/onboarding_step/view_project_summary/view_project_summary.json
 msgid "View Project Summary"
-msgstr "Visa Projekt Översikt"
+msgstr "Projekt Översikt"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'View Purchase Order Analysis'
