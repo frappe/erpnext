@@ -10,7 +10,10 @@ from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
-from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+from erpnext.accounts.doctype.payment_request.payment_request import (
+	get_return_invoices,
+	make_payment_request,
+)
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
@@ -974,3 +977,27 @@ class TestPaymentRequest(ERPNextTestSuite):
 				return_doc=True,
 				schedules=schedules,
 			)
+
+	def test_get_return_invoices_blocks_schedule_for_purchase_return(self):
+		pi = make_purchase_invoice(currency="INR", qty=1, rate=1400)
+		pi.submit()
+
+		self.assertFalse(get_return_invoices("Purchase Invoice", pi.name))
+
+		pi_return = make_purchase_invoice(
+			currency="INR", qty=-1, rate=700, is_return=1, return_against=pi.name
+		)
+		pi_return.submit()
+
+		self.assertTrue(get_return_invoices("Purchase Invoice", pi.name))
+
+		pi.load_from_db()
+		self.assertEqual(pi.outstanding_amount, 700)
+
+		pr = make_payment_request(
+			dt="Purchase Invoice",
+			dn=pi.name,
+			mute_email=1,
+			return_doc=1,
+		)
+		self.assertEqual(pr.grand_total, 700)

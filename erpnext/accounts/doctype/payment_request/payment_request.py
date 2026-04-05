@@ -3,6 +3,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, nowdate
 from frappe.utils.background_jobs import enqueue
@@ -1163,10 +1164,10 @@ def get_available_payment_schedules(reference_doctype: str, reference_name: str)
 
 	if get_existing_payment_entry(reference_name):
 		return []
-
+	if get_return_invoices(reference_doctype, reference_name):
+		return []
 	existing_refs = get_existing_payment_references(reference_name)
 	existing_ids = {r["payment_schedule"] for r in existing_refs if r.get("payment_schedule")}
-
 	return [r for r in ref_doc.payment_schedule if r.name not in existing_ids]
 
 
@@ -1193,3 +1194,20 @@ def get_existing_payment_references(reference_name):
 	).run(as_dict=True)
 
 	return result
+
+
+def get_return_invoices(reference_doctype, reference_name):
+	if reference_doctype not in ("Sales Invoice", "Purchase Invoice"):
+		return False
+
+	doc = frappe.qb.DocType(reference_doctype)
+
+	return_invoices = (
+		frappe.qb.from_(doc)
+		.select(doc.name)
+		.where(doc.docstatus == 1)
+		.where(doc.is_return == 1)
+		.where(doc.return_against == reference_name)
+	).run()
+
+	return bool(return_invoices)
