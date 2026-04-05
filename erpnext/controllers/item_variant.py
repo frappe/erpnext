@@ -82,8 +82,14 @@ def make_variant_based_on_manufacturer(template, manufacturer, manufacturer_part
 
 
 def validate_item_variant_attributes(item, args=None):
+	"""
+	Validates the attributes and their values of a variant item against its template.
+
+	:param item: Item document (Variant)
+	:param args: Dictionary of {attribute: value} to validate. If None, uses item.attributes.
+	"""
 	if isinstance(item, str):
-		item = frappe.get_doc("Item", item)
+		item = frappe.get_cached_doc("Item", item)
 
 	if not args:
 		args = {d.attribute.lower(): d.attribute_value for d in item.attributes}
@@ -156,21 +162,38 @@ def validate_item_attribute_value(attributes_list, attribute, attribute_value, i
 
 
 def get_attribute_values(item):
+	"""
+	Returns valid attribute values and numeric metadata for a variant's template.
+	Rule 32: Utilizes thread-local caching and template-specific filtering to optimize performance.
+	"""
 	if not frappe.flags.attribute_values:
-		attribute_values = {}
-		numeric_values = {}
-		for t in frappe.get_all("Item Attribute Value", fields=["parent", "attribute_value"]):
-			attribute_values.setdefault(t.parent.lower(), []).append(t.attribute_value)
+		frappe.flags.attribute_values = {}
+		frappe.flags.numeric_values = {}
 
-		for t in frappe.get_all(
-			"Item Variant Attribute",
-			fields=["attribute", "from_range", "to_range", "increment"],
-			filters={"numeric_values": 1, "parent": item.variant_of},
-		):
-			numeric_values[t.attribute.lower()] = t
+	if not item.variant_of:
+		return frappe.flags.attribute_values, frappe.flags.numeric_values
 
-		frappe.flags.attribute_values = attribute_values
-		frappe.flags.numeric_values = numeric_values
+	# Only fetch values for the specific attributes needed by this template
+	template_doc = frappe.get_cached_doc("Item", item.variant_of)
+	target_attributes = [d.attribute for d in template_doc.attributes]
+
+	for attr in target_attributes:
+		attr_key = attr.lower()
+		if attr_key not in frappe.flags.attribute_values:
+			# Direct DB query restricted to the template's requirement
+			values = frappe.get_all(
+				"Item Attribute Value", filters={"parent": attr}, pluck="attribute_value"
+			)
+			frappe.flags.attribute_values[attr_key] = values
+
+			# Rule 32: Resolve numeric metadata via cached resolution
+			meta = frappe.get_all(
+				"Item Variant Attribute",
+				fields=["attribute", "from_range", "to_range", "increment"],
+				filters={"numeric_values": 1, "parent": item.variant_of, "attribute": attr},
+			)
+			if meta:
+				frappe.flags.numeric_values[attr_key] = meta[0]
 
 	return frappe.flags.attribute_values, frappe.flags.numeric_values
 
@@ -377,25 +400,19 @@ def make_variant_item_code(template_item_code, template_item_name, variant):
 
 	abbreviations = []
 	for attr in variant.attributes:
-		item_attribute = frappe.db.sql(
-			"""select i.numeric_values, v.abbr
-			from `tabItem Attribute` i left join `tabItem Attribute Value` v
-				on (i.name=v.parent)
-			where i.name=%(attribute)s and (v.attribute_value=%(attribute_value)s or i.numeric_values = 1)""",
-			{"attribute": attr.attribute, "attribute_value": attr.attribute_value},
-			as_dict=True,
-		)
+		# Rule 32: Replaced direct SQL with cached value resolution
+		numeric = frappe.get_cached_value("Item Attribute", attr.attribute, "numeric_values")
+		if numeric:
+			abbr_or_value = cstr(attr.attribute_value)
+		else:
+			abbr_or_value = frappe.get_cached_value(
+				"Item Attribute Value",
+				{"parent": attr.attribute, "attribute_value": attr.attribute_value},
+				"abbr",
+			)
 
-		if not item_attribute:
-			continue
-			# frappe.throw(_('Invalid attribute {0} {1}').format(frappe.bold(attr.attribute),
-			# 	frappe.bold(attr.attribute_value)), title=_('Invalid Attribute'),
-			# 	exc=InvalidItemAttributeValueError)
-
-		abbr_or_value = (
-			cstr(attr.attribute_value) if item_attribute[0].numeric_values else item_attribute[0].abbr
-		)
-		abbreviations.append(abbr_or_value)
+		if abbr_or_value:
+			abbreviations.append(abbr_or_value)
 
 	if abbreviations:
 		variant.item_code = "{}-{}".format(template_item_code, "-".join(abbreviations))

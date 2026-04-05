@@ -27,6 +27,7 @@ from pypika import Order
 
 import erpnext
 from erpnext.controllers.item_variant import (
+	InvalidItemAttributeValueError,
 	ItemVariantExistsError,
 	copy_attributes_to_variant,
 	get_variant,
@@ -50,6 +51,10 @@ class InvalidBarcode(frappe.ValidationError):
 
 
 class DataValidationError(frappe.ValidationError):
+	pass
+
+
+class InvalidVariantError(frappe.ValidationError):
 	pass
 
 
@@ -932,26 +937,96 @@ class Item(Document):
 					attributes.append(d.attribute)
 
 	def validate_variant_attributes(self):
-		if self.is_new() and self.variant_of and self.variant_based_on == "Item Attribute":
-			# remove attributes with no attribute_value set
-			self.attributes = [d for d in self.attributes if cstr(d.attribute_value).strip()]
+		"""Validate if the Item Attributes defined for the variant match the Template."""
+		if self.flags.ignore_variant_validation:
+			return
 
-			args = {}
-			for i, d in enumerate(self.attributes):
-				d.idx = i + 1
-				args[d.attribute] = d.attribute_value
+		# Layer 1 Permission: Doctype-level check before any logic
+		if not frappe.has_permission("Item", ptype="write", doc=None):
+			frappe.throw(_("No permission to validate Item variants"), frappe.PermissionError)
 
+		if not self.variant_of:
+			return
+
+		# Layer 2 Permission & Race Condition Handling
+		try:
+			# Rule: Permission-First Check for the specific template document
+			if not frappe.has_permission("Item", ptype="write", doc=self.variant_of):
+				frappe.throw(
+					_("No permission for Template Item {0}").format(self.variant_of),
+					frappe.PermissionError,
+				)
+
+			# Rule 32: Use cached doc to prevent DB latency spikes during bulk operations
+			template_doc = frappe.get_cached_doc("Item", self.variant_of)
+		except frappe.DoesNotExistError:
+			frappe.throw(_("Template Item {0} does not exist").format(self.variant_of))
+
+		# Rule 25: Lazy metadata resolution for Data Import compatibility
+		effective_based_on = self.variant_based_on or frappe.get_cached_value(
+			"Item", self.variant_of, "variant_based_on"
+		)
+		if effective_based_on != "Item Attribute":
+			return
+
+		# Requirement: Block variant-of-a-variant circular topologies
+		if not template_doc.has_variants:
+			if template_doc.variant_of:
+				msg = _("Item {0} is a variant and cannot be used as a template").format(
+					frappe.bold(self.variant_of)
+				)
+			else:
+				msg = _("Item {0} is not a template").format(frappe.bold(self.variant_of))
+			frappe.throw(msg, InvalidVariantError)
+
+		# Rule 30: Strictly iterate over in-memory attributes to capture unsaved UI mutations
+		self.attributes = [d for d in self.get("attributes") if cstr(d.attribute_value).strip()]
+		for i, d in enumerate(self.attributes):
+			d.idx = i + 1
+
+		args = {d.attribute: d.attribute_value for d in self.attributes}
+
+		template_attr_names = {d.attribute for d in template_doc.attributes}
+		illegal = [a for a in list(args) if a not in template_attr_names]
+
+		if illegal:
+			if self.is_new():
+				# Strict rejection on creation to prevent new corruption
+				frappe.throw(
+					_("Attributes {0} are not defined on template {1}").format(
+						", ".join(frappe.bold(a) for a in illegal),
+						frappe.bold(self.variant_of),
+					),
+					InvalidItemAttributeValueError,
+				)
+			else:
+				# Rule 39: Auto-healing for legacy data on update path
+				for attr_name in illegal:
+					args.pop(attr_name)
+				self.attributes = [d for d in self.attributes if d.attribute not in illegal]
+				frappe.msgprint(
+					_("Removed attributes not defined on template {0}: {1}").format(
+						frappe.bold(self.variant_of),
+						", ".join(frappe.bold(a) for a in illegal),
+					),
+					alert=True,
+				)
+
+		if self.is_new():
+			# Rule 23: Creation-time duplicate check (gated for performance)
 			variant = get_variant(self.variant_of, args, self.name)
 			if variant:
 				frappe.throw(
-					_("Item variant {0} exists with same attributes").format(variant), ItemVariantExistsError
+					_("Item variant {0} exists with same attributes").format(variant),
+					ItemVariantExistsError,
 				)
 
-			validate_item_variant_attributes(self, args)
+		# Rule 32 Compliance: Call the optimized validation
+		validate_item_variant_attributes(self, args)
 
-			# copy variant_of value for each attribute row
-			for d in self.attributes:
-				d.variant_of = self.variant_of
+		# copy variant_of value for each attribute row
+		for d in self.attributes:
+			d.variant_of = self.variant_of
 
 	def cant_change(self):
 		if self.is_new():
