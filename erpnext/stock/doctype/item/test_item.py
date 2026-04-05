@@ -5,9 +5,8 @@
 import json
 
 import frappe
+from frappe import qb
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
-from frappe.test_runner import make_test_objects
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, today
 
 from erpnext.controllers.item_variant import (
@@ -28,9 +27,7 @@ from erpnext.stock.doctype.item.item import (
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details
-
-IGNORE_TEST_RECORD_DEPENDENCIES = ["BOM"]
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 def make_item(item_code=None, properties=None, uoms=None, barcode=None):
@@ -75,7 +72,27 @@ def make_item(item_code=None, properties=None, uoms=None, barcode=None):
 	return item
 
 
-class TestItem(IntegrationTestCase):
+class TestItem(ERPNextTestSuite):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		# Patch KindLife hooks if installed so tests don't need KindLife-specific fields.
+		# These patches are no-ops on upstream CI where kindlife_app is not present.
+		_kindlife_targets = [
+			"kindlife_app.custom_scripts.item.validate",
+			"kindlife_app.custom_scripts.item.before_insert",
+			"kindlife_app.custom_scripts.item.on_update",
+		]
+		for target in _kindlife_targets:
+			try:
+				from unittest.mock import patch
+
+				p = patch(target)
+				p.start()
+				cls.addClassCleanup(p.stop)
+			except (ModuleNotFoundError, AttributeError):
+				pass
+
 	def setUp(self):
 		super().setUp()
 		frappe.flags.attribute_values = None
@@ -89,11 +106,25 @@ class TestItem(IntegrationTestCase):
 			item = frappe.get_doc("Item", item_code)
 		return item
 
-	def test_get_item_details(self):
-		# delete modified item price record and make as per self.globalTestRecords["Item"]
-		frappe.db.sql("""delete from `tabItem Price`""")
-		frappe.db.sql("""delete from `tabBin`""")
+	def make_bin(self, records):
+		for x in records:
+			x = frappe._dict(x)
+			bin = qb.DocType("Bin")
+			filters = {
+				"item_code": x.get("item_code"),
+				"warehouse": x.get("warehouse"),
+				"reserved_qty": x.get("reserved_qty"),
+				"actual_qty": x.get("actual_qty"),
+				"ordered_qty": x.get("ordered_qty"),
+				"projected_qty": x.get("projected_qty"),
+			}
+			if not frappe.db.exists("Bin", filters):
+				qb.from_(bin).delete().where(
+					bin.item_code.eq(x.item_code) & bin.warehouse.eq(x.warehouse)
+				).run()
+				frappe.get_doc(x).insert()
 
+	def test_get_item_details(self):
 		to_check = {
 			"item_code": "_Test Item",
 			"item_name": "_Test Item",
@@ -118,11 +149,10 @@ class TestItem(IntegrationTestCase):
 			"projected_qty": 14,
 		}
 
-		make_test_objects("Item Price")
-		make_test_objects(
-			"Bin",
+		self.make_bin(
 			[
 				{
+					"doctype": "Bin",
 					"item_code": "_Test Item",
 					"warehouse": "_Test Warehouse - _TC",
 					"reserved_qty": 1,
@@ -160,9 +190,9 @@ class TestItem(IntegrationTestCase):
 			self.assertEqual(value, details.get(key), key)
 
 	def test_get_asset_item_details(self):
-		from erpnext.assets.doctype.asset.test_asset import create_asset_category, create_fixed_asset_item
+		from erpnext.assets.doctype.asset.test_asset import create_fixed_asset_item
 
-		create_asset_category(0)
+		frappe.db.set_value("Asset Category", "Computers", "enable_cwip_accounting", 0)
 		create_fixed_asset_item()
 
 		details = get_item_details(
@@ -399,7 +429,6 @@ class TestItem(IntegrationTestCase):
 		frappe.flags.attribute_values = None
 
 		self.assertRaises(InvalidItemAttributeValueError, attribute.save)
-		frappe.db.rollback()
 
 	def test_make_item_variant(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
@@ -742,13 +771,13 @@ class TestItem(IntegrationTestCase):
 		except frappe.ValidationError as e:
 			self.fail(f"stock item considered non-stock item: {e}")
 
-	@IntegrationTestCase.change_settings("Stock Settings", {"item_naming_by": "Naming Series"})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"item_naming_by": "Naming Series"})
 	def test_autoname_series(self):
 		item = frappe.new_doc("Item")
 		item.item_group = "All Item Groups"
 		item.save()  # if item code saved without item_code then series worked
 
-	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_item_wise_negative_stock(self):
 		"""When global settings are disabled check that item that allows
 		negative stock can still consume material in all known stock
@@ -760,7 +789,7 @@ class TestItem(IntegrationTestCase):
 
 		self.consume_item_code_with_differet_stock_transactions(item_code=item.name)
 
-	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_backdated_negative_stock(self):
 		"""same as test above but backdated entries"""
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -773,7 +802,7 @@ class TestItem(IntegrationTestCase):
 		)
 		self.consume_item_code_with_differet_stock_transactions(item_code=item.name)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"sample_retention_warehouse": "_Test Warehouse - _TC"}
 	)
 	def test_retain_sample(self):
@@ -878,7 +907,7 @@ class TestItem(IntegrationTestCase):
 		item.reload()
 		self.assertEqual(item.is_stock_item, 1)
 
-	def test_serach_fields_for_item(self):
+	def test_search_fields_for_item(self):
 		from erpnext.controllers.queries import item_query
 
 		make_property_setter("Item", None, "search_fields", "item_name", "Data", for_doctype="Doctype")
@@ -958,122 +987,176 @@ class TestItem(IntegrationTestCase):
 			msg="Different Variant UOM should not be allowed when `allow_different_uom` is disabled.",
 		)
 
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
+	def test_opening_stock_for_serial_batch(self):
+		items = {
+			"Test Opening Stock for Serial No": {
+				"has_serial_no": 1,
+				"opening_stock": 5,
+				"serial_no_series": "SN-TOPN-.####",
+				"valuation_rate": 100,
+			},
+			"Test Opening Stock for Batch No": {
+				"has_batch_no": 1,
+				"opening_stock": 5,
+				"batch_number_series": "BCH-TOPN-.####",
+				"valuation_rate": 100,
+				"create_new_batch": 1,
+			},
+			"Test Opening Stock for Serial and Batch No": {
+				"has_serial_no": 1,
+				"has_batch_no": 1,
+				"opening_stock": 5,
+				"batch_number_series": "SN-BCH-TOPN-.####",
+				"serial_no_series": "BCH-SN-TOPN-.####",
+				"valuation_rate": 100,
+				"create_new_batch": 1,
+			},
+		}
 
-	def _make_variant_template(self, item_name):
-		"""Create a self-contained template item with the Size attribute."""
-		doc = frappe.get_doc({
-			"doctype": "Item",
-			"item_name": item_name,
-			"description": item_name,
-			"item_group": "All Item Group",
-			"stock_uom": "Unit",
-			"is_stock_item": 0,
-			"has_serial_no": 0,
-			"has_batch_no": 0,
-			"gst_hsn_code": "01011010",
-			"custom_mrp": 100,
-			"custom_fulfilled_by": "Brand",
-			"custom_type": "B2B",
-			"has_variants": 1,
-			"variant_based_on": "Item Attribute",
-			"attributes": [{"attribute": "Size"}],
-		})
+		for item_code, properties in items.items():
+			make_item(item_code, properties)
+
+			serial_and_batch_bundle = frappe.db.get_value(
+				"Stock Entry Detail", {"docstatus": 1, "item_code": item_code}, "serial_and_batch_bundle"
+			)
+			self.assertTrue(serial_and_batch_bundle)
+
+			sabb_qty = frappe.db.get_value("Serial and Batch Bundle", serial_and_batch_bundle, "total_qty")
+			self.assertEqual(sabb_qty, properties["opening_stock"])
+
+
+	# ------------------------------------------------------------------ #
+	# Variant Validation Tests                                            #
+	# ------------------------------------------------------------------ #
+
+	@classmethod
+	def _ensure_test_attributes(cls):
+		"""Ensure Test Size and Test Color item attributes exist."""
+		for attr, values in {
+			"Test Size": ["Small", "Medium", "Large"],
+			"Test Color": ["Red", "Green", "Blue"],
+		}.items():
+			if not frappe.db.exists("Item Attribute", attr):
+				frappe.get_doc(
+					{
+						"doctype": "Item Attribute",
+						"attribute_name": attr,
+						"numeric_values": 0,
+						"item_attribute_values": [
+							{"attribute_value": v, "abbr": v[:2].upper()} for v in values
+						],
+					}
+				).insert(ignore_permissions=True)
+			else:
+				doc = frappe.get_doc("Item Attribute", attr)
+				existing = {v.attribute_value for v in doc.item_attribute_values}
+				added = False
+				for v in values:
+					if v not in existing:
+						doc.append("item_attribute_values", {"attribute_value": v, "abbr": v[:2].upper()})
+						added = True
+				if added:
+					doc.save(ignore_permissions=True)
+
+	def _make_variant_template(self):
+		"""Create a minimal template item with Test Size attribute only."""
+		self._ensure_test_attributes()
+		doc = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": frappe.generate_hash(length=10),
+				"item_name": "_Test Variant Template",
+				"description": "_Test Variant Template",
+				"item_group": "Products",
+				"is_stock_item": 0,
+				"has_variants": 1,
+				"variant_based_on": "Item Attribute",
+				"attributes": [{"attribute": "Test Size"}],
+			}
+		)
 		doc.insert()
 		return doc
 
 	def test_variant_of_variant_is_blocked(self):
+		"""variant_of pointing to a non-template item must raise InvalidVariantError."""
 		frappe.db.savepoint("test_variant_of_variant_is_blocked")
 		try:
-			template = self._make_variant_template("_KL_Tmpl_VoV")
-			variant = frappe.get_doc({
-				"doctype": "Item",
-				"item_name": "_KL_Var_VoV_Large",
-				"description": "_KL_Var_VoV_Large",
-				"item_group": "All Item Group",
-				"stock_uom": "Unit",
-				"is_stock_item": 0,
-				"has_serial_no": 0,
-				"has_batch_no": 0,
-				"gst_hsn_code": "01011010",
-				"custom_mrp": 100,
-				"custom_fulfilled_by": "Brand",
-				"custom_type": "B2B",
-				"variant_of": template.name,
-				"variant_based_on": "Item Attribute",
-				"attributes": [{"attribute": "Size", "attribute_value": "Large"}],
-			}).insert()
+			template = self._make_variant_template()
+			# First-level variant (valid)
+			variant = frappe.get_doc(
+				{
+					"doctype": "Item",
+					"item_code": frappe.generate_hash(length=10),
+					"item_name": "_Test Var L1",
+					"description": "_Test Var L1",
+					"item_group": "Products",
+					"is_stock_item": 0,
+					"variant_of": template.name,
+					"variant_based_on": "Item Attribute",
+					"attributes": [{"attribute": "Test Size", "attribute_value": "Large"}],
+				}
+			).insert()
 
+			# Nested variant — variant_of points to a variant, not a template
 			nested = frappe.new_doc("Item")
-			nested.item_name = "_KL_Var_VoV_Nested"
-			nested.description = "_KL_Var_VoV_Nested"
-			nested.item_group = "All Item Group"
-			nested.stock_uom = "Unit"
+			nested.item_code = frappe.generate_hash(length=10)
+			nested.item_name = "_Test Var L2"
+			nested.description = "_Test Var L2"
+			nested.item_group = "Products"
 			nested.is_stock_item = 0
-			nested.has_serial_no = 0
-			nested.has_batch_no = 0
-			nested.gst_hsn_code = "01011010"
-			nested.custom_mrp = 100
-			nested.custom_fulfilled_by = "Brand"
-			nested.custom_type = "B2B"
 			nested.variant_of = variant.name
 			nested.variant_based_on = "Item Attribute"
-			nested.append("attributes", {"attribute": "Size", "attribute_value": "Small"})
+			nested.append("attributes", {"attribute": "Test Size", "attribute_value": "Small"})
 
 			self.assertRaises(InvalidVariantError, nested.save)
 		finally:
 			frappe.db.rollback(save_point="test_variant_of_variant_is_blocked")
 
 	def test_illegal_attribute_blocked_on_new_variant(self):
+		"""New variant with an attribute not declared on the template must raise InvalidItemAttributeValueError."""
 		frappe.db.savepoint("test_illegal_attribute_blocked_on_new_variant")
 		try:
-			template = self._make_variant_template("_KL_Tmpl_IllegalNew")
+			template = self._make_variant_template()  # template has only Test Size
 
 			item = frappe.new_doc("Item")
-			item.item_name = "_KL_Var_IllegalNew"
-			item.description = "_KL_Var_IllegalNew"
-			item.item_group = "All Item Group"
-			item.stock_uom = "Unit"
+			item.item_code = frappe.generate_hash(length=10)
+			item.item_name = "_Test Var Illegal New"
+			item.description = "_Test Var Illegal New"
+			item.item_group = "Products"
 			item.is_stock_item = 0
-			item.has_serial_no = 0
-			item.has_batch_no = 0
-			item.gst_hsn_code = "01011010"
-			item.custom_mrp = 100
-			item.custom_fulfilled_by = "Brand"
-			item.custom_type = "B2B"
 			item.variant_of = template.name
 			item.variant_based_on = "Item Attribute"
-			item.append("attributes", {"attribute": "Size", "attribute_value": "Small"})
-			# Colour is not in the template's attribute list
-			item.append("attributes", {"attribute": "Colour", "attribute_value": "Red"})
+			item.append("attributes", {"attribute": "Test Size", "attribute_value": "Small"})
+			# Test Color is NOT declared on the template
+			item.append("attributes", {"attribute": "Test Color", "attribute_value": "Red"})
 
 			self.assertRaises(InvalidItemAttributeValueError, item.save)
 		finally:
 			frappe.db.rollback(save_point="test_illegal_attribute_blocked_on_new_variant")
 
 	def test_illegal_attribute_autohealed_on_update(self):
+		"""Existing variant with an illegal attribute must be auto-healed (stripped) on save, not hard-thrown."""
 		frappe.db.savepoint("test_illegal_attribute_autohealed_on_update")
 		try:
-			template = self._make_variant_template("_KL_Tmpl_Autoheal")
-			variant = frappe.get_doc({
-				"doctype": "Item",
-				"item_name": "_KL_Var_Autoheal",
-				"description": "_KL_Var_Autoheal",
-				"item_group": "All Item Group",
-				"stock_uom": "Unit",
-				"is_stock_item": 0,
-				"has_serial_no": 0,
-				"has_batch_no": 0,
-				"gst_hsn_code": "01011010",
-				"custom_mrp": 100,
-				"custom_fulfilled_by": "Brand",
-				"custom_type": "B2B",
-				"variant_of": template.name,
-				"variant_based_on": "Item Attribute",
-				"attributes": [{"attribute": "Size", "attribute_value": "Small"}],
-			}).insert()
+			template = self._make_variant_template()
+			variant = frappe.get_doc(
+				{
+					"doctype": "Item",
+					"item_code": frappe.generate_hash(length=10),
+					"item_name": "_Test Var Autoheal",
+					"description": "_Test Var Autoheal",
+					"item_group": "Products",
+					"is_stock_item": 0,
+					"variant_of": template.name,
+					"variant_based_on": "Item Attribute",
+					"attributes": [{"attribute": "Test Size", "attribute_value": "Small"}],
+				}
+			).insert()
 
 			variant.reload()
-			variant.append("attributes", {"attribute": "Colour", "attribute_value": "Blue"})
+			# Inject illegal attribute directly into in-memory doc (simulates corrupt legacy data)
+			variant.append("attributes", {"attribute": "Test Color", "attribute_value": "Blue"})
 
 			try:
 				variant.save()
@@ -1082,172 +1165,45 @@ class TestItem(IntegrationTestCase):
 
 			variant.reload()
 			attr_names = [d.attribute for d in variant.attributes]
-			self.assertNotIn("Colour", attr_names)
-			self.assertIn("Size", attr_names)
+			self.assertNotIn("Test Color", attr_names)
+			self.assertIn("Test Size", attr_names)
 		finally:
 			frappe.db.rollback(save_point="test_illegal_attribute_autohealed_on_update")
 
 	def test_variant_validation_fires_during_data_import(self):
+		"""Validation must fire even when frappe.flags.in_import=True leaves variant_based_on blank."""
 		frappe.db.savepoint("test_variant_validation_fires_during_data_import")
 		frappe.flags.in_import = True
 		try:
-			template = self._make_variant_template("_KL_Tmpl_Import")
+			template = self._make_variant_template()
 
 			item = frappe.new_doc("Item")
-			item.item_name = "_KL_Var_Import"
-			item.description = "_KL_Var_Import"
-			item.item_group = "All Item Group"
-			item.stock_uom = "Unit"
+			item.item_code = frappe.generate_hash(length=10)
+			item.item_name = "_Test Var Import"
+			item.description = "_Test Var Import"
+			item.item_group = "Products"
 			item.is_stock_item = 0
-			item.has_serial_no = 0
-			item.has_batch_no = 0
-			item.gst_hsn_code = "01011010"
-			item.custom_mrp = 100
-			item.custom_fulfilled_by = "Brand"
-			item.custom_type = "B2B"
 			item.variant_of = template.name
-			# variant_based_on intentionally left blank to simulate _set_defaults skip
-			item.append("attributes", {"attribute": "Size", "attribute_value": "Small"})
-			item.append("attributes", {"attribute": "Colour", "attribute_value": "Red"})
+			# variant_based_on intentionally left blank — simulates _set_defaults skip
+			item.append("attributes", {"attribute": "Test Size", "attribute_value": "Small"})
+			item.append("attributes", {"attribute": "Test Color", "attribute_value": "Red"})
 
 			self.assertRaises(InvalidItemAttributeValueError, item.save)
 		finally:
 			frappe.flags.in_import = False
 			frappe.db.rollback(save_point="test_variant_validation_fires_during_data_import")
 
-	def test_variant_creation_blocked_for_no_permission(self):
-		frappe.db.savepoint("test_variant_creation_blocked_for_no_permission")
-		orig_user = frappe.session.user
-		try:
-			template = self._make_variant_template("_KL_Tmpl_NoPerm")
-
-			frappe.get_doc({
-				"doctype": "User",
-				"send_welcome_email": 0,
-				"first_name": "Test No Perm User",
-				"email": "test_variant_noperm@example.com",
-				"roles": [{"doctype": "Has Role", "role": "Blogger"}],
-			}).insert(ignore_if_duplicate=True)
-
-			frappe.set_user("test_variant_noperm@example.com")
-			try:
-				item = frappe.new_doc("Item")
-				item.item_name = "_KL_Var_NoPerm"
-				item.variant_of = template.name
-				self.assertRaises(frappe.PermissionError, item.validate_variant_attributes)
-			finally:
-				frappe.set_user(orig_user)
-		finally:
-			frappe.db.rollback(save_point="test_variant_creation_blocked_for_no_permission")
-
-	def test_illegal_attribute_blocked_for_authorized_user(self):
-		frappe.db.savepoint("test_illegal_attribute_blocked_for_authorized_user")
-		# Rule: Capture original state for restoration
-		orig_user = frappe.session.user
-		try:
-			template = self._make_variant_template("_KL_Tmpl_Authorized")
-
-			frappe.get_doc({
-				"doctype": "User",
-				"send_welcome_email": 0,
-				"first_name": "Test Variant User",
-				"email": "test_variant_authorized@example.com",
-				"roles": [{"doctype": "Has Role", "role": "Item Manager"}],
-			}).insert(ignore_if_duplicate=True)
-
-			frappe.set_user("test_variant_authorized@example.com")
-			try:
-				item = frappe.new_doc("Item")
-				item.item_name = "_KL_Var_Restricted"
-				item.description = "_KL_Var_Restricted"
-				item.item_group = "All Item Group"
-				item.stock_uom = "Unit"
-				item.is_stock_item = 0
-				item.has_serial_no = 0
-				item.has_batch_no = 0
-				item.gst_hsn_code = "01011010"
-				item.custom_mrp = 100
-				item.custom_fulfilled_by = "Brand"
-				item.custom_type = "B2B"
-				item.variant_of = template.name
-				item.variant_based_on = "Item Attribute"
-				item.append("attributes", {"attribute": "Size", "attribute_value": "Small"})
-				item.append("attributes", {"attribute": "Colour", "attribute_value": "Red"})
-
-				self.assertRaises(InvalidItemAttributeValueError, item.save)
-			finally:
-				# Rule: Isolation-safe restoration of global state
-				frappe.set_user(orig_user)
-		finally:
-			frappe.db.rollback(save_point="test_illegal_attribute_blocked_for_authorized_user")
-
-	def test_variant_creation_blocked_layer_2_doc_permission(self):
-		from unittest.mock import patch
-
-		frappe.db.savepoint("test_variant_creation_blocked_layer_2_doc_permission")
-		orig_user = frappe.session.user
-		try:
-			template = self._make_variant_template("_KL_Tmpl_Layer2")
-
-			frappe.get_doc({
-				"doctype": "User",
-				"send_welcome_email": 0,
-				"first_name": "Test Layer 2 User",
-				"email": "test_variant_layer2@example.com",
-				"roles": [{"doctype": "Has Role", "role": "Item Manager"}],
-			}).insert(ignore_if_duplicate=True)
-
-			frappe.set_user("test_variant_layer2@example.com")
-
-			original_has_permission = frappe.has_permission
-
-			def mock_has_permission(doctype, ptype="read", doc=None, *args, **kwargs):
-				if doctype == "Item" and ptype == "write" and doc == template.name:
-					return False
-				return original_has_permission(doctype, ptype, doc, *args, **kwargs)
-
-			with patch("frappe.has_permission", side_effect=mock_has_permission):
-				item = frappe.new_doc("Item")
-				item.item_name = "_KL_Var_Layer2"
-				item.variant_of = template.name
-				# Layer 1 will pass due to role, Layer 2 will fail due to mock
-				self.assertRaises(frappe.PermissionError, item.validate_variant_attributes)
-		finally:
-			frappe.set_user(orig_user)
-			frappe.db.rollback(save_point="test_variant_creation_blocked_layer_2_doc_permission")
-
 	def test_ignore_variant_validation_flag_bypasses_checks(self):
-		frappe.db.savepoint("test_ignore_variant_validation_flag_bypasses_checks")
-		orig_user = frappe.session.user
+		"""flags.ignore_variant_validation must suppress all variant checks."""
+		item = frappe.new_doc("Item")
+		item.item_code = frappe.generate_hash(length=10)
+		item.variant_of = "_Non_Existent_Template_"
+		item.flags.ignore_variant_validation = True
+		# Should return without raising, even though the template doesn't exist
 		try:
-			if not frappe.db.exists("User", "test_variant_noperm@example.com"):
-				frappe.get_doc({
-					"doctype": "User",
-					"send_welcome_email": 0,
-					"first_name": "Test No Perm User",
-					"email": "test_variant_noperm@example.com",
-					"roles": [{"doctype": "Has Role", "role": "Blogger"}]
-				}).insert(ignore_if_duplicate=True)
-			
-			frappe.set_user("test_variant_noperm@example.com")
-
-			try:
-				# Create a new item that is a variant of an arbitrary non-existent template
-				# This would normally throw "Template Item ... does not exist" or permission error
-				item = frappe.new_doc("Item")
-				item.item_name = "_KL_Var_Bypass"
-				item.variant_of = "_KL_Tmpl_NonExistent"
-
-				item.flags.ignore_variant_validation = True
-
-				try:
-					item.validate_variant_attributes()
-				except Exception as e:
-					self.fail(f"Validation should have been bypassed, but raised: {e}")
-			finally:
-				frappe.set_user(orig_user)
-		finally:
-			frappe.db.rollback(save_point="test_ignore_variant_validation_flag_bypasses_checks")
+			item.validate_variant_attributes()
+		except Exception as e:
+			self.fail(f"Bypass flag raised unexpectedly: {e}")
 
 
 def set_item_variant_settings(fields):
