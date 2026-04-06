@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import formatdate, get_link_to_form
 
+from erpnext import get_region
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import get_tax_details_query
 
 
@@ -21,6 +22,7 @@ class VATAuditReport:
 		self.doctypes = ["Purchase Invoice", "Sales Invoice"]
 
 	def run(self):
+		self.validate_company_region()
 		self.get_sa_vat_accounts()
 		self.get_columns()
 		for doctype in self.doctypes:
@@ -42,6 +44,14 @@ class VATAuditReport:
 				self.get_data(doctype)
 
 		return self.columns, self.data
+
+	def validate_company_region(self):
+		if self.filters.company and get_region(self.filters.company) != "South Africa":
+			frappe.throw(
+				_(
+					"The company {0} is not in South Africa. VAT Audit Report is only available for companies in South Africa."
+				).format(frappe.bold(self.filters.company))
+			)
 
 	def get_sa_vat_accounts(self):
 		self.sa_vat_accounts = frappe.get_all(
