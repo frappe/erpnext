@@ -40,6 +40,8 @@ purchase_doctypes = [
 	"Purchase Invoice",
 ]
 
+NOT_APPLICABLE_TAX = "N/A"
+
 
 def _preprocess_ctx(ctx):
 	if not ctx.price_list:
@@ -834,8 +836,6 @@ def is_within_valid_range(ctx: ItemDetailsCtx, tax) -> bool:
 
 @frappe.whitelist()
 def get_item_tax_map(*, doc: str | dict | Document, tax_template: str | None = None, as_json: bool = True):
-	from erpnext.controllers.taxes_and_totals import NOT_APPLICABLE_TAX
-
 	doc = parse_json(doc)
 	item_tax_map = {}
 	for t in (t for t in (doc.get("taxes") or []) if not t.get("set_by_item_tax_template")):

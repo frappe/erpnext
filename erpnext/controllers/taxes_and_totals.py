@@ -20,13 +20,12 @@ from erpnext.controllers.accounts_controller import (
 )
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.stock.get_item_details import (
+	NOT_APPLICABLE_TAX,
 	ItemDetailsCtx,
 	_get_item_tax_template,
 	get_item_tax_map,
 )
 from erpnext.utilities.regional import temporary_flag
-
-NOT_APPLICABLE_TAX = "N/A"
 
 
 class calculate_taxes_and_totals:
