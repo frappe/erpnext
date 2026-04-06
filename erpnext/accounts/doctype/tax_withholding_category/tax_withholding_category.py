@@ -128,6 +128,7 @@ class TaxWithholdingDetails:
 		self.party_type = party_type
 		self.party = party
 		self.company = company
+		self.tax_id = get_tax_id_for_party(self.party_type, self.party)
 
 	def get(self) -> list:
 		"""
@@ -161,6 +162,7 @@ class TaxWithholdingDetails:
 				disable_cumulative_threshold=doc.disable_cumulative_threshold,
 				disable_transaction_threshold=doc.disable_transaction_threshold,
 				taxable_amount=0,
+				tax_id=self.tax_id,
 			)
 
 			# ldc (only if valid based on posting date)
@@ -181,17 +183,13 @@ class TaxWithholdingDetails:
 		if self.party_type != "Supplier":
 			return ldc_details
 
-		# NOTE: This can be a configurable option
-		# To check if filter by tax_id is needed
-		tax_id = get_tax_id_for_party(self.party_type, self.party)
-
 		# ldc details
-		ldc_records = self.get_valid_ldc_records(tax_id)
+		ldc_records = self.get_valid_ldc_records(self.tax_id)
 		if not ldc_records:
 			return ldc_details
 
 		ldc_names = [ldc.name for ldc in ldc_records]
-		ldc_utilization_map = self.get_ldc_utilization_by_category(ldc_names, tax_id)
+		ldc_utilization_map = self.get_ldc_utilization_by_category(ldc_names, self.tax_id)
 
 		# map
 		for ldc in ldc_records:
@@ -254,4 +252,5 @@ class TaxWithholdingDetails:
 
 @allow_regional
 def get_tax_id_for_party(party_type, party):
-	return None
+	# cannot use tax_id from doc because payment and journal entry do not have tax_id field.\
+	return frappe.db.get_value(party_type, party, "tax_id")
