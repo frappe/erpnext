@@ -121,7 +121,6 @@ class TaxWithholdingDetails:
 		party_type: str,
 		party: str,
 		company: str,
-		tax_id: str | None = None,
 	):
 		self.tax_withholding_categories = tax_withholding_categories
 		self.tax_withholding_group = tax_withholding_group
@@ -129,7 +128,7 @@ class TaxWithholdingDetails:
 		self.party_type = party_type
 		self.party = party
 		self.company = company
-		self.tax_id = tax_id
+		self.tax_id = get_tax_id_for_party(self.party_type, self.party)
 
 	def get(self) -> list:
 		"""
@@ -163,6 +162,7 @@ class TaxWithholdingDetails:
 				disable_cumulative_threshold=doc.disable_cumulative_threshold,
 				disable_transaction_threshold=doc.disable_transaction_threshold,
 				taxable_amount=0,
+				tax_id=self.tax_id,
 			)
 
 			# ldc (only if valid based on posting date)

@@ -346,7 +346,6 @@ class TaxWithholdingEntry(Document):
 
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
 	TaxWithholdingDetails,
-	get_tax_id_for_party,
 )
 
 
@@ -367,7 +366,6 @@ class TaxWithholdingController:
 			self.party_type,
 			self.party,
 			self.doc.company,
-			self.tax_id,
 		).get()
 
 	def _get_category_names(self):
@@ -380,7 +378,6 @@ class TaxWithholdingController:
 		return category_names
 
 	def calculate(self):
-		self.tax_id = get_tax_id_for_party(self.party_type, self.party)
 		self.category_details = self._get_category_details()
 
 		self._update_taxable_amounts()
@@ -651,8 +648,8 @@ class TaxWithholdingController:
 		# NOTE: This can be a configurable option
 		# To check if filter by tax_id is needed
 		query = (
-			query.where(entry.tax_id == self.tax_id)
-			if self.tax_id
+			query.where(entry.tax_id == category.tax_id)
+			if category.tax_id
 			else query.where(entry.party == self.party)
 		)
 
@@ -693,7 +690,7 @@ class TaxWithholdingController:
 				"company": self.doc.company,
 				"party_type": self.party_type,
 				"party": self.party,
-				"tax_id": self.tax_id,
+				"tax_id": category.tax_id,
 				"tax_withholding_category": category.name,
 				"tax_withholding_group": category.tax_withholding_group,
 				"tax_rate": category.tax_rate,
@@ -1060,7 +1057,7 @@ class TaxWithholdingController:
 				"party_type": self.party_type,
 				"party": self.party,
 				"company": self.doc.company,
-				"tax_id": self.tax_id,
+				"tax_id": category.tax_id,
 			}
 		)
 		return entry
