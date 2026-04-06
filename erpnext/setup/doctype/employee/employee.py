@@ -301,7 +301,7 @@ class Employee(NestedSet):
 			frappe.throw(_("User {0} does not exist").format(self.user_id))
 
 		if self.status != "Active" and enabled or self.status == "Active" and enabled == 0:
-			frappe.set_value("User", self.user_id, "enabled", not enabled)
+			frappe.db.set_value("User", self.user_id, "enabled", not enabled)
 
 	def validate_duplicate_user_id(self):
 		Employee = frappe.qb.DocType("Employee")
