@@ -3,7 +3,7 @@
  "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
- "creation": "2013-05-21 16:16:39",
+ "creation": "2026-04-06 14:10:33.384946",
  "doctype": "DocType",
  "document_type": "Document",
  "editable_grid": 1,
@@ -11,7 +11,6 @@
  "field_order": [
   "supplier_section",
   "column_break0",
-  "title",
   "naming_series",
   "supplier",
   "supplier_name",
@@ -170,16 +169,6 @@
    "oldfieldtype": "Column Break",
    "print_width": "50%",
    "width": "50%"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "{supplier_name}",
-   "fieldname": "title",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Title",
-   "no_copy": 1,
-   "print_hide": 1
   },
   {
    "fieldname": "naming_series",
@@ -1303,7 +1292,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 17:15:28.602690",
+ "modified": "2026-04-06 14:11:29.630333",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
@@ -1371,6 +1360,6 @@
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "supplier",
- "title_field": "title",
+ "title_field": "supplier_name",
  "track_changes": 1
 }

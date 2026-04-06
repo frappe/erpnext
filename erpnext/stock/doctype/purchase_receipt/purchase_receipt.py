@@ -149,7 +149,6 @@ class PurchaseReceipt(BuyingController):
 		taxes_and_charges_deducted: DF.Currency
 		tc_name: DF.Link | None
 		terms: DF.TextEditor | None
-		title: DF.Data | None
 		total: DF.Currency
 		total_net_weight: DF.Float
 		total_qty: DF.Float
