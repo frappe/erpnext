@@ -2477,10 +2477,13 @@ def get_currency_data(outstanding_refdocs: list, company: str | None = None) -> 
 
 	for doctype in ["Sales Invoice", "Purchase Invoice", "Sales Order", "Purchase Order"]:
 		refdoc = [x.voucher_no for x in outstanding_refdocs if x.voucher_type == doctype]
+		if len(refdoc) == 0:
+			continue
 		for x in frappe.db.get_all(
 			doctype,
 			filters={"name": ["in", refdoc]},
 			fields=["name", "currency", "conversion_rate", "party_account_currency"],
+			ignore_ifnull=True,
 		):
 			exc_rates[x.name] = frappe._dict(
 				conversion_rate=x.conversion_rate,
