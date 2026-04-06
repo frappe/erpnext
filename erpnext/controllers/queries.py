@@ -392,7 +392,7 @@ def get_delivery_notes_to_be_billed(
 			`tabDelivery Note`.docstatus = 1
 			and status not in ('Stopped', 'Closed') {fcond}
 			and (
-				(`tabDelivery Note`.is_return = 0 and `tabDelivery Note`.per_billed < 100)
+				(`tabDelivery Note`.is_return = {is_return} and `tabDelivery Note`.per_billed < 100)
 				or (`tabDelivery Note`.grand_total = 0 and `tabDelivery Note`.per_billed < 100)
 				or (
 					`tabDelivery Note`.is_return = 1
@@ -404,6 +404,7 @@ def get_delivery_notes_to_be_billed(
 			fields=", ".join([f"`tabDelivery Note`.{f}" for f in fields]),
 			key=searchfield,
 			fcond=get_filters_cond(doctype, filters, []),
+			is_return=filters.get("is_return"),
 			mcond=get_match_cond(doctype),
 			start=start,
 			page_len=page_len,
