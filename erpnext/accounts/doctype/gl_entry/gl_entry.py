@@ -76,7 +76,7 @@ class GLEntry(Document):
 		Temporarily name doc for fast insertion
 		name will be changed using autoname options (in a scheduled job)
 		"""
-		self.name = frappe.generate_hash(txt="", length=10)
+		self.name = frappe.generate_hash(txt="", length=15)
 		if self.meta.autoname == "hash":
 			self.to_rename = 0
 
