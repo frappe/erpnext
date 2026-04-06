@@ -4,7 +4,7 @@
 
 When importing a CSV without a `company_field` column or with empty values, the system uses smart auto-detection:
 
-### Priority Order:
+### Priority Order
 
 1. **"company" field** (most common convention)
    - Check if a field named `company` exists that links to Company DocType
