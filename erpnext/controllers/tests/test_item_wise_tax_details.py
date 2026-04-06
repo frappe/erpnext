@@ -300,7 +300,7 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		detail = doc.item_wise_tax_details[0]
 		self.assertEqual(detail.amount, tax.base_tax_amount_after_discount_amount)
 
-	@change_settings("Buying Settings", {"allow_multiple_items": 1})
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_not_applicable_tax_in_item_tax_template(self):
 		"""Test that items with 'not applicable' tax don't contribute to net amount of that tax."""
 		template_7pct = frappe.get_doc(
