@@ -3563,7 +3563,7 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		self.setup_party_with_category("Supplier", "Test TDS Supplier2", "Cumulative Threshold TDS")
 
 		with patch(
-			"erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry.get_tax_id_for_party",
+			"erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category.get_tax_id_for_party",
 			return_value="AAAPL1234C",
 		):
 			pi1 = create_purchase_invoice(supplier="Test TDS Supplier1", rate=20000)
