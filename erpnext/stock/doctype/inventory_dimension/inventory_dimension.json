@@ -162,7 +162,8 @@
    "description": "To apply condition on parent field use parent.field_name and to apply condition on child table use doc.field_name. Here field_name could be based on the actual column name of the respective field.",
    "fieldname": "mandatory_depends_on",
    "fieldtype": "Small Text",
-   "label": "Mandatory Depends On"
+   "label": "Mandatory Depends On",
+   "read_only_depends_on": "reqd"
   },
   {
    "fieldname": "conditional_mandatory_section",
@@ -188,7 +189,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-07 15:51:29.329064",
+ "modified": "2026-04-06 15:07:32.767433",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Dimension",

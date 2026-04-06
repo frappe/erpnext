@@ -59,10 +59,22 @@ class InventoryDimension(Document):
 			"Stock Ledger Entry", filters={self.target_fieldname: ("is", "set"), "is_cancelled": 0}, limit=1
 		)
 
+	def before_validate(self):
+		if not self.disabled and self.mandatory_depends_on and self.reqd:
+			self.reqd = 0
+			frappe.msgprint(
+				_(
+					"Warning: An Inventory Dimension can not be mandatory and have a mandatory dependency at the same time. Mandatory field has been unchecked."
+				),
+				alert=True,
+				indicator="orange",
+			)
+
 	def validate(self):
 		self.validate_reference_document()
 
 	def before_save(self):
+		self.show_disable_warning()
 		self.do_not_update_document()
 		self.reset_value()
 		self.set_source_and_target_fieldname()
@@ -71,6 +83,16 @@ class InventoryDimension(Document):
 	def set_type_of_transaction(self):
 		if self.apply_to_all_doctypes:
 			self.type_of_transaction = "Both"
+
+	def show_disable_warning(self):
+		if self.disabled and (self.reqd or self.mandatory_depends_on):
+			frappe.msgprint(
+				_(
+					"Warning: Disabling Inventory Dimensions will still keep the fields mandatory. If you wish to make the fields <b>not</b> mandatory, you will need to delete this Inventory Dimension instead."
+				),
+				alert=True,
+				indicator="orange",
+			)
 
 	def do_not_update_document(self):
 		if self.is_new() or not self.has_stock_ledger():
@@ -187,7 +209,9 @@ class InventoryDimension(Document):
 				depends_on="eval:doc.s_warehouse" if doctype == "Stock Entry Detail" else "",
 				search_index=1,
 				reqd=self.reqd,
-				mandatory_depends_on=self.mandatory_depends_on,
+				mandatory_depends_on="eval:doc.s_warehouse"
+				if doctype == "Stock Entry Detail"
+				else self.mandatory_depends_on,
 			),
 		]
 
@@ -268,6 +292,7 @@ class InventoryDimension(Document):
 		fieldname_start_with = "to"
 		label_start_with = "Target"
 		display_depends_on = ""
+		mandatory_depends_on = ""
 
 		if doctype in ["Purchase Invoice Item", "Purchase Receipt Item"]:
 			fieldname_start_with = "from"
@@ -277,6 +302,7 @@ class InventoryDimension(Document):
 			display_depends_on = "eval:parent.is_internal_customer == 1"
 		elif doctype == "Stock Entry Detail":
 			display_depends_on = "eval:doc.t_warehouse"
+			mandatory_depends_on = "eval:doc.t_warehouse"
 
 		fieldname = f"{fieldname_start_with}_{self.source_fieldname}"
 		label = f"{label_start_with} {self.dimension_name}"
@@ -298,6 +324,8 @@ class InventoryDimension(Document):
 					options=self.reference_document,
 					label=label,
 					depends_on=display_depends_on,
+					reqd=self.reqd,
+					mandatory_depends_on=mandatory_depends_on or self.mandatory_depends_on,
 				),
 			]
 		)
