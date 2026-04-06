@@ -8,9 +8,8 @@
  "field_order": [
   "dimension_details_tab",
   "dimension_name",
-  "reference_document",
   "column_break_4",
-  "disabled",
+  "reference_document",
   "field_mapping_section",
   "source_fieldname",
   "column_break_9",
@@ -94,12 +93,6 @@
    "label": "Apply to All Inventory Documents"
   },
   {
-   "default": "0",
-   "fieldname": "disabled",
-   "fieldtype": "Check",
-   "label": "Disabled"
-  },
-  {
    "fieldname": "target_fieldname",
    "fieldtype": "Data",
    "label": "Target Fieldname (Stock Ledger Entry)",
@@ -162,8 +155,7 @@
    "description": "To apply condition on parent field use parent.field_name and to apply condition on child table use doc.field_name. Here field_name could be based on the actual column name of the respective field.",
    "fieldname": "mandatory_depends_on",
    "fieldtype": "Small Text",
-   "label": "Mandatory Depends On",
-   "read_only_depends_on": "reqd"
+   "label": "Mandatory Depends On"
   },
   {
    "fieldname": "conditional_mandatory_section",
@@ -189,7 +181,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-06 15:07:32.767433",
+ "modified": "2026-04-07 10:46:33.877978",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Dimension",
