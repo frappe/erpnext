@@ -26,16 +26,6 @@ class VATAuditReport:
 		self.get_sa_vat_accounts()
 		self.get_columns()
 		for doctype in self.doctypes:
-			self.select_columns = """
-			name as voucher_no,
-			posting_date, remarks"""
-			columns = (
-				", supplier as party, credit_to as account"
-				if doctype == "Purchase Invoice"
-				else ", customer as party, debit_to as account"
-			)
-			self.select_columns += columns
-
 			self.get_invoice_data(doctype)
 
 			if self.invoices:
@@ -64,27 +54,38 @@ class VATAuditReport:
 			frappe.throw(_("Please set VAT Accounts in {0}").format(link_to_settings))
 
 	def get_invoice_data(self, doctype):
-		conditions = self.get_conditions()
 		self.invoices = frappe._dict()
-
-		invoice_data = frappe.db.sql(
-			f"""
-			SELECT
-				{self.select_columns}
-			FROM
-				`tab{doctype}`
-			WHERE
-				docstatus = 1 {conditions}
-				and is_opening = 'No'
-			ORDER BY
-				posting_date DESC
-			""",
-			self.filters,
-			as_dict=1,
+		invoice_doctype = frappe.qb.DocType(doctype)
+		party_field = invoice_doctype.supplier if doctype == "Purchase Invoice" else invoice_doctype.customer
+		account_field = (
+			invoice_doctype.credit_to if doctype == "Purchase Invoice" else invoice_doctype.debit_to
 		)
 
-		for d in invoice_data:
-			self.invoices.setdefault(d.voucher_no, d)
+		query = (
+			frappe.qb.from_(invoice_doctype)
+			.select(
+				invoice_doctype.name.as_("voucher_no"),
+				invoice_doctype.posting_date,
+				invoice_doctype.remarks,
+				party_field.as_("party"),
+				account_field.as_("account"),
+			)
+			.where(invoice_doctype.docstatus == 1)
+			.where(invoice_doctype.is_opening == "No")
+			.orderby(invoice_doctype.posting_date, order=frappe.qb.desc)
+		)
+
+		if self.filters.get("company"):
+			query = query.where(invoice_doctype.company == self.filters.company)
+		if self.filters.get("from_date"):
+			query = query.where(invoice_doctype.posting_date >= self.filters.from_date)
+		if self.filters.get("to_date"):
+			query = query.where(invoice_doctype.posting_date <= self.filters.to_date)
+
+		invoice_data = query.run(as_dict=True)
+
+		for row in invoice_data:
+			self.invoices.setdefault(row.voucher_no, row)
 
 	def get_invoice_items(self, doctype):
 		self.invoice_items = frappe._dict()
@@ -136,18 +137,6 @@ class VATAuditReport:
 			self.items_based_on_tax_rate[parent][row.rate]["tax_amount"] += row.amount
 			self.items_based_on_tax_rate[parent][row.rate]["net_amount"] += row.taxable_amount
 			self.items_based_on_tax_rate[parent][row.rate]["gross_amount"] += row.amount + row.taxable_amount
-
-	def get_conditions(self):
-		conditions = ""
-		for opts in (
-			("company", " and company=%(company)s"),
-			("from_date", " and posting_date>=%(from_date)s"),
-			("to_date", " and posting_date<=%(to_date)s"),
-		):
-			if self.filters.get(opts[0]):
-				conditions += opts[1]
-
-		return conditions
 
 	def get_data(self, doctype):
 		consolidated_data = self.get_consolidated_data(doctype)
