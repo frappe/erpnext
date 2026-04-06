@@ -725,39 +725,77 @@ frappe.ui.form.on("Production Plan", {
 	},
 
 	delete_job_cards(frm) {
-		frappe.prompt(
-			{
-				fieldname: "reason_for_deletion_of_job_cards",
-				label: __("Reason for Deletion"),
-				fieldtype: "Data",
-				reqd: 1,
-			},
-			(values) => {
-				frappe.call({
-					method: "erpnext.manufacturing.doctype.production_plan.api.delete_job_cards",
-					args: {
-						production_plan: frm.doc.name,
-						reason: values.reason_for_deletion_of_job_cards,
-					},
-					callback: function (r) {
-						if (!r.exc) {
-							let count = r.message.deleted_count;
-							let reason = r.message.reason;
+		frappe.db.get_list("Production Line", {
+			filters: { parent_line: ["!=", null], is_group: 0, is_active: 1 },
+			fields: ["name", "line_name"]
+		}).then(data => {
+			let fields = [
+				{
+					fieldname: "reason_for_deletion_of_job_cards",
+					label: __("Reason for Deletion"),
+					fieldtype: "Data",
+					reqd: 1,
+				},
+				{
+					fieldname: "delete_all_job_cards",
+					label: __("Delete All Open Job Cards"),
+					fieldtype: "Check",
+					default: 1,
+				},
+				{
+					fieldname: "production_line",
+					label: __("Production Line"),
+					fieldtype: "Select",
+					options: data.map(d => ({ label: d.line_name, value: d.name })),
+					hidden: 1,
+				},
+			];
+			let d = frappe.prompt(
+				fields,
+				(values) => {
+					frappe.call({
+						method: "erpnext.manufacturing.doctype.production_plan.api.delete_job_cards",
+						args: {
+							production_plan: frm.doc.name,
+							reason: values.reason_for_deletion_of_job_cards,
+							delete_all_job_cards: values.delete_all_job_cards,
+							production_line: values.production_line,
+						},
+						callback: function (r) {
+							if (!r.exc) {
+								let count = r.message.deleted_count;
+								let reason = r.message.reason;
 
-							frappe.msgprint(
-								`${count} remaining job card${count > 1 ? 's' : ''} were deleted from this production plan with the reason: "${reason}"`
-							);
-							frm.set_value("reason_for_deletion_of_job_cards", reason);
-							frm.set_value("deleted_job_card_count", count);
+								frappe.msgprint(
+									`${count} remaining job card${count > 1 ? 's' : ''} were deleted from this production plan ${values.delete_all_job_cards ? 'all' : 'selected'} with the reason: "${reason}"`
+								);
+								frm.set_value("reason_for_deletion_of_job_cards", reason);
+								frm.set_value("deleted_job_card_count", count);
 
-							frm.reload_doc();
+								frm.reload_doc();
+							}
 						}
-					}
-				});
-			},
-			__("Delete Open Job Cards"),
-			__("Delete")
-		);
+					});
+				},
+				__("Delete Open Job Cards"),
+				__("Delete")
+			);
+
+			// ✅ Attach change listener manually
+			d.fields_dict.delete_all_job_cards.df.onchange = () => {
+				let delete_all = d.get_value("delete_all_job_cards");
+
+				if (delete_all) {
+					d.set_value("production_line", "");
+				}
+
+				d.set_df_property(
+					"production_line",
+					"hidden",
+					delete_all ? 1 : 0
+				);
+			};
+		});
 	},
 
 	create_daily_production_plan(frm) {
