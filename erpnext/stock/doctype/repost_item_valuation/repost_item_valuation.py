@@ -83,10 +83,7 @@ class RepostItemValuation(Document):
 		self.validate_recreate_stock_ledgers()
 
 	def validate_update_stock(self):
-		if (
-			self.voucher_type in ["Sales Invoice", "Purchase Invoice"]
-			and not self.repost_only_accounting_ledgers
-		):
+		if self.voucher_type in ["Sales Invoice", "Purchase Invoice"]:
 			update_stock = frappe.get_value(self.voucher_type, self.voucher_no, "update_stock")
 			if not update_stock:
 				msg = _(
