@@ -7,7 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "customer_section",
-  "title",
   "naming_series",
   "customer",
   "customer_name",
@@ -224,18 +223,6 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "options": "fa fa-user"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "{customer_name}",
-   "fieldname": "title",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Title",
-   "no_copy": 1,
-   "print_hide": 1
   },
   {
    "bold": 1,
@@ -2200,7 +2187,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-02-05 20:43:44.732805",
+ "modified": "2026-04-06 16:48:08.432729",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
@@ -2253,7 +2240,7 @@
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer",
- "title_field": "title",
+ "title_field": "customer_name",
  "track_changes": 1,
  "track_seen": 1
 }
