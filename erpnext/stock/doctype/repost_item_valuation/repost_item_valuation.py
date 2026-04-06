@@ -74,6 +74,7 @@ class RepostItemValuation(Document):
 
 	def validate(self):
 		self.set_company()
+		self.validate_update_stock()
 		self.validate_period_closing_voucher()
 		self.set_status(write=False)
 		self.reset_field_values()
@@ -81,6 +82,25 @@ class RepostItemValuation(Document):
 		self.reset_recreate_stock_ledgers()
 		self.validate_recreate_stock_ledgers()
 
+<<<<<<< HEAD
+=======
+	def reset_repost_only_accounting_ledgers(self):
+		if self.repost_only_accounting_ledgers and self.based_on != "Transaction":
+			self.repost_only_accounting_ledgers = 0
+
+	def validate_update_stock(self):
+		if (
+			self.voucher_type in ["Sales Invoice", "Purchase Invoice"]
+			and not self.repost_only_accounting_ledgers
+		):
+			update_stock = frappe.get_value(self.voucher_type, self.voucher_no, "update_stock")
+			if not update_stock:
+				msg = _(
+					"Since {0} has 'Update Stock' disabled, you cannot create repost item valuation against it"
+				).format(get_link_to_form(self.voucher_type, self.voucher_no))
+				frappe.throw(msg)
+
+>>>>>>> 66780543bd (fix: transactions where update stock is 0 should not create SLEs (#54035))
 	def validate_recreate_stock_ledgers(self):
 		if not self.recreate_stock_ledgers:
 			return
