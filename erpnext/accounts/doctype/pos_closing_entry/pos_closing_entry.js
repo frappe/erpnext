@@ -56,7 +56,7 @@ frappe.ui.form.on("POS Closing Entry", {
 		}
 	},
 
-	pos_opening_entry(frm) {
+	reload_invoices: function (frm) {
 		if (
 			frm.doc.pos_opening_entry &&
 			frm.doc.period_start_date &&
@@ -71,6 +71,18 @@ frappe.ui.form.on("POS Closing Entry", {
 				() => frappe.dom.unfreeze(),
 			]);
 		}
+	},
+
+	pos_opening_entry(frm) {
+		frm.trigger("reload_invoices");
+	},
+
+	period_start_date(frm) {
+		frm.trigger("reload_invoices");
+	},
+
+	period_end_date(frm) {
+		frm.trigger("reload_invoices");
 	},
 
 	set_opening_amounts(frm) {
