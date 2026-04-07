@@ -20,28 +20,28 @@
 						"root_type": "Asset",
 						"account_type": "Cash"
 					},
-					"Cash in Bank - BPI Mandaluyong": {
-						"account_number": "1102",
-						"is_group": 0,
-						"root_type": "Asset",
-						"account_type": "Cash"
-					},
-					"Cash in Bank - Citibank": {
-						"account_number": "1103",
-						"is_group": 0,
-						"root_type": "Asset",
-						"account_type": "Cash"
-					}
-				},
-				"Petty Cash Fund": {
-					"account_number": "1200",
-					"is_group": 1,
-					"root_type": "Asset",
 					"Petty Cash Fund": {
 						"account_number": "1201",
 						"is_group": 0,
 						"root_type": "Asset",
 						"account_type": "Cash"
+					}
+				},
+				"Bank": {
+					"account_number": "1110",
+					"is_group": 1,
+					"root_type": "Asset",
+					"Cash in Bank - BPI Mandaluyong": {
+						"account_number": "1102",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Bank"
+					},
+					"Cash in Bank - Citibank": {
+						"account_number": "1103",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Bank"
 					}
 				},
 				"Advances to Officers & Employees": {
@@ -608,6 +608,12 @@
 				"is_group": 0,
 				"root_type": "Expense",
 				"account_type": "Stock Adjustment"
+			},
+			"Expenses Included In Valuation": {
+				"account_number": "5603",
+				"is_group": 0,
+				"root_type": "Expense",
+				"account_type": "Expenses Included In Valuation"
 			},
 			"Depreciation": {
 				"account_number": "5018",
