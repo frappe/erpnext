@@ -39,7 +39,7 @@
   "clearance_date",
   "column_break_oizh",
   "user_remark",
-  "subscription_section",
+  "auto_repeat_section",
   "auto_repeat",
   "tax_withholding_tab",
   "section_tax_withholding_entry",
@@ -476,11 +476,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "subscription_section",
-   "fieldtype": "Section Break",
-   "label": "Subscription"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "auto_repeat",
    "fieldtype": "Link",
@@ -651,6 +646,11 @@
    "fieldname": "tax_withholding_tab",
    "fieldtype": "Tab Break",
    "label": "Tax Withholding"
+  },
+  {
+   "fieldname": "auto_repeat_section",
+   "fieldtype": "Section Break",
+   "label": "Auto Repeat"
   }
  ],
  "icon": "fa fa-file-text",

@@ -15,7 +15,7 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestAdvancePaymentLedgerEntry(AccountsTestMixin, ERPNextTestSuite):
+class TestAdvancePaymentLedgerEntry(ERPNextTestSuite, AccountsTestMixin):
 	"""
 	Integration tests for AdvancePaymentLedgerEntry.
 	Use this class for testing interactions between multiple components.

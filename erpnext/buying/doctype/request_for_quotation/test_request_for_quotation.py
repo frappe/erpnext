@@ -9,7 +9,6 @@ from frappe.tests import change_settings
 from frappe.utils import nowdate
 
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
-	RequestforQuotation,
 	create_supplier_quotation,
 	get_pdf,
 	make_supplier_quotation_from_rfq,
@@ -250,7 +249,7 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		self.assertEqual(sq.items[0].item_code, rfq.items[0].item_code)
 
 
-def make_request_for_quotation(**args) -> "RequestforQuotation":
+def make_request_for_quotation(**args):
 	"""
 	:param supplier_data: List containing supplier data
 	"""

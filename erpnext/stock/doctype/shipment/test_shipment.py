@@ -177,7 +177,7 @@ def create_shipment_customer(customer_name):
 	customer = frappe.new_doc("Customer")
 	customer.customer_name = customer_name
 	customer.customer_type = "Company"
-	customer.customer_group = "All Customer Groups"
+	customer.customer_group = "Individual"
 	customer.territory = "All Territories"
 	customer.insert()
 	return customer

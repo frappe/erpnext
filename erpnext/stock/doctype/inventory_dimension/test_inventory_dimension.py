@@ -21,9 +21,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestInventoryDimension(ERPNextTestSuite):
-	def setUp(self):
-		prepare_test_data()
-
 	def test_validate_inventory_dimension(self):
 		# Can not be child doc
 		inv_dim1 = create_inventory_dimension(
@@ -76,6 +73,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 		self.assertFalse(custom_field)
 
 	def test_inventory_dimension(self):
+		create_warehouse("Shelf Warehouse")
 		warehouse = "Shelf Warehouse - _TC"
 		item_code = "_Test Item"
 
@@ -553,28 +551,6 @@ def get_voucher_sl_entries(voucher_no, fields):
 	return frappe.get_all(
 		"Stock Ledger Entry", filters={"voucher_no": voucher_no}, fields=fields, order_by="creation"
 	)
-
-
-def prepare_test_data():
-	for shelf in ["Shelf 1", "Shelf 2"]:
-		if not frappe.db.exists("Shelf", shelf):
-			frappe.get_doc({"doctype": "Shelf", "shelf_name": shelf}).insert(ignore_permissions=True)
-
-	create_warehouse("Shelf Warehouse")
-
-	for rack in ["Rack 1", "Rack 2"]:
-		if not frappe.db.exists("Rack", rack):
-			frappe.get_doc({"doctype": "Rack", "rack_name": rack}).insert(ignore_permissions=True)
-
-	create_warehouse("Rack Warehouse")
-
-	for site in ["Site 1", "Site 2"]:
-		if not frappe.db.exists("Inv Site", site):
-			frappe.get_doc({"doctype": "Inv Site", "site_name": site}).insert(ignore_permissions=True)
-
-	for store in ["Store 1", "Store 2"]:
-		if not frappe.db.exists("Store", store):
-			frappe.get_doc({"doctype": "Store", "store_name": store}).insert(ignore_permissions=True)
 
 
 def create_inventory_dimension(**args):

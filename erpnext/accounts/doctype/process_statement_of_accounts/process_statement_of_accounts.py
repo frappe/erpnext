@@ -566,10 +566,10 @@ def send_emails(document_name: str, from_scheduler: bool = False, posting_date: 
 			new_from_date = add_months(new_to_date, -1 * doc.filter_duration)
 			doc.add_comment("Comment", "Emails sent on: " + frappe.utils.format_datetime(frappe.utils.now()))
 			if doc.report == "General Ledger":
-				doc.db_set("to_date", new_to_date, commit=True)
-				doc.db_set("from_date", new_from_date, commit=True)
+				frappe.db.set_value(doc.doctype, doc.name, "to_date", new_to_date)
+				frappe.db.set_value(doc.doctype, doc.name, "from_date", new_from_date)
 			else:
-				doc.db_set("posting_date", new_to_date, commit=True)
+				frappe.db.set_value(doc.doctype, doc.name, "posting_date", new_to_date)
 		return True
 	else:
 		return False

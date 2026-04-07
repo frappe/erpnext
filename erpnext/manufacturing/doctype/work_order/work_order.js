@@ -244,13 +244,16 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	toggle_items_editable(frm) {
-		if (!frm.doc.__onload?.allow_editing_items) {
-			frm.set_df_property("required_items", "cannot_delete_rows", true);
-			frm.set_df_property("required_items", "cannot_add_rows", true);
-			frm.fields_dict["required_items"].grid.update_docfield_property("item_code", "read_only", 1);
-			frm.fields_dict["required_items"].grid.update_docfield_property("required_qty", "read_only", 1);
-			frm.fields_dict["required_items"].grid.refresh();
-		}
+		let allow_edit = true;
+		if (!frm.doc.__onload?.allow_editing_items) allow_edit = false;
+
+		frm.set_df_property("required_items", "cannot_delete_rows", !allow_edit);
+		frm.set_df_property("required_items", "cannot_add_rows", !allow_edit);
+
+		const grid = frm.fields_dict["required_items"].grid;
+		grid.update_docfield_property("item_code", "read_only", !allow_edit);
+		grid.update_docfield_property("required_qty", "read_only", !allow_edit);
+		grid.refresh();
 	},
 
 	hide_reserve_stock_button(frm) {

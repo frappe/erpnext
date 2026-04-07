@@ -14,7 +14,6 @@ class TestTrialBalance(ERPNextTestSuite):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.utils import get_fiscal_year
 
-		self.company = create_company()
 		create_cost_center(
 			cost_center_name="Test Cost Center",
 			company="Trial Balance Company",
@@ -26,7 +25,16 @@ class TestTrialBalance(ERPNextTestSuite):
 			parent_account="Temporary Accounts - TBC",
 		)
 		self.fiscal_year = get_fiscal_year(today(), company="Trial Balance Company")[0]
-		create_accounting_dimension()
+		dim = frappe.get_doc("Accounting Dimension", "Branch")
+		dim.append(
+			"dimension_defaults",
+			{
+				"company": "Trial Balance Company",
+				"automatically_post_balancing_accounting_entry": 1,
+				"offsetting_account": "Offsetting - TBC",
+			},
+		)
+		dim.save()
 
 	def test_offsetting_entries_for_accounting_dimensions(self):
 		"""
@@ -45,7 +53,7 @@ class TestTrialBalance(ERPNextTestSuite):
 		branch2.insert(ignore_if_duplicate=True)
 
 		si = create_sales_invoice(
-			company=self.company,
+			company="Trial Balance Company",
 			debit_to="Debtors - TBC",
 			cost_center="Test Cost Center - TBC",
 			income_account="Sales - TBC",
@@ -57,60 +65,7 @@ class TestTrialBalance(ERPNextTestSuite):
 		si.submit()
 
 		filters = frappe._dict(
-			{"company": self.company, "fiscal_year": self.fiscal_year, "branch": ["Location 1"]}
+			{"company": "Trial Balance Company", "fiscal_year": self.fiscal_year, "branch": ["Location 1"]}
 		)
 		total_row = execute(filters)[1][-1]
 		self.assertEqual(total_row["debit"], total_row["credit"])
-
-
-def create_company(**args):
-	args = frappe._dict(args)
-	company = frappe.get_doc(
-		{
-			"doctype": "Company",
-			"company_name": args.company_name or "Trial Balance Company",
-			"country": args.country or "India",
-			"default_currency": args.currency or "INR",
-			"parent_company": args.get("parent_company"),
-			"is_group": args.get("is_group"),
-		}
-	)
-	company.insert(ignore_if_duplicate=True)
-	return company.name
-
-
-def create_accounting_dimension(**args):
-	args = frappe._dict(args)
-	document_type = args.document_type or "Branch"
-	if frappe.db.exists("Accounting Dimension", document_type):
-		accounting_dimension = frappe.get_doc("Accounting Dimension", document_type)
-		accounting_dimension.disabled = 0
-	else:
-		accounting_dimension = frappe.new_doc("Accounting Dimension")
-		accounting_dimension.document_type = document_type
-		accounting_dimension.insert()
-
-	accounting_dimension.set("dimension_defaults", [])
-	accounting_dimension.append(
-		"dimension_defaults",
-		{
-			"company": args.company or "Trial Balance Company",
-			"automatically_post_balancing_accounting_entry": 1,
-			"offsetting_account": args.offsetting_account or "Offsetting - TBC",
-		},
-	)
-	accounting_dimension.save()
-
-
-def disable_dimension(**args):
-	args = frappe._dict(args)
-	document_type = args.document_type or "Branch"
-	dimension = frappe.get_doc("Accounting Dimension", document_type)
-	dimension.disabled = 1
-	dimension.save()
-
-
-def clear_dimension_defaults(dimension_name):
-	accounting_dimension = frappe.get_doc("Accounting Dimension", dimension_name)
-	accounting_dimension.dimension_defaults = []
-	accounting_dimension.save()

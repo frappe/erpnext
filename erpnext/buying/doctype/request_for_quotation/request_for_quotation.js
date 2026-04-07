@@ -100,6 +100,7 @@ frappe.ui.form.on("Request for Quotation", {
 								fieldname: "print_format",
 								options: "Print Format",
 								placeholder: "Standard",
+								default: frappe.get_meta("Request for Quotation").default_print_format || "",
 								get_query: () => {
 									return {
 										filters: {

@@ -180,12 +180,28 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 		self.assertEqual(last_sle_after_landed_cost.stock_value - last_sle.stock_value, 50.0)
 
 	def test_lcv_validates_company(self):
+		from erpnext import is_perpetual_inventory_enabled
+		from erpnext.accounts.doctype.account.test_account import create_account
 		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import (
 			IncorrectCompanyValidationError,
 		)
 
 		company_a = "_Test Company"
 		company_b = "_Test Company with perpetual inventory"
+
+		srbnb = create_account(
+			account_name="Stock Received But Not Billed",
+			account_type="Stock Received But Not Billed",
+			parent_account="Stock Liabilities - _TC",
+			company=company_a,
+			account_currency="INR",
+		)
+
+		epi = is_perpetual_inventory_enabled(company_a)
+		company_doc = frappe.get_doc("Company", company_a)
+		company_doc.enable_perpetual_inventory = 1
+		company_doc.stock_received_but_not_billed = srbnb
+		company_doc.save()
 
 		pr = make_purchase_receipt(
 			company=company_a,
@@ -211,6 +227,9 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 		lcv.save()
 		distribute_landed_cost_on_items(lcv)
 		lcv.submit()
+
+		frappe.db.set_value("Company", company_a, "enable_perpetual_inventory", epi)
+		frappe.local.enable_perpetual_inventory = {}
 
 	def test_landed_cost_voucher_for_zero_purchase_rate(self):
 		"Test impact of LCV on future stock balances."

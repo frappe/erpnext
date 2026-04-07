@@ -96,7 +96,7 @@ def get_stock_value_on(
 @frappe.whitelist()
 def get_stock_balance(
 	item_code: str,
-	warehouse: str,
+	warehouse: str | None,
 	posting_date: DateTimeLikeObject | None = None,
 	posting_time: DateTimeLikeObject | datetime.timedelta | None = None,
 	with_valuation_rate: bool = False,

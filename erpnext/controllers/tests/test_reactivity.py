@@ -2,35 +2,17 @@ import frappe
 from frappe import qb
 from frappe.utils import today
 
-from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestReactivity(AccountsTestMixin, ERPNextTestSuite):
-	def setUp(self):
-		self.create_company()
-		self.create_customer()
-		self.create_item()
-		self.create_usd_receivable_account()
-		self.create_price_list()
-		self.clear_old_entries()
-
-	def disable_dimensions(self):
-		res = frappe.db.get_all("Accounting Dimension", filters={"disabled": False})
-		for x in res:
-			dim = frappe.get_doc("Accounting Dimension", x.name)
-			dim.disabled = True
-			dim.save()
-
+class TestReactivity(ERPNextTestSuite):
 	def test_01_basic_item_details(self):
-		self.disable_dimensions()
-
 		# set Item Price
 		frappe.get_doc(
 			{
 				"doctype": "Item Price",
-				"item_code": self.item,
-				"price_list": self.price_list,
+				"item_code": "_Test Item",
+				"price_list": "Standard Selling",
 				"price_list_rate": 90,
 				"selling": True,
 				"rate": 90,
@@ -41,18 +23,18 @@ class TestReactivity(AccountsTestMixin, ERPNextTestSuite):
 		si = frappe.get_doc(
 			{
 				"doctype": "Sales Invoice",
-				"company": self.company,
-				"customer": self.customer,
-				"debit_to": self.debit_to,
+				"company": "_Test Company",
+				"customer": "_Test Customer",
+				"debit_to": "Debtors - _TC",
 				"posting_date": today(),
-				"cost_center": self.cost_center,
+				"cost_center": "Main - _TC",
 				"currency": "INR",
 				"conversion_rate": 1,
-				"selling_price_list": self.price_list,
+				"selling_price_list": "Standard Selling",
 			}
 		)
 		itm = si.append("items")
-		itm.item_code = self.item
+		itm.item_code = "_Test Item"
 		si.process_item_selection(itm.idx)
 		self.assertEqual(itm.rate, 90)
 

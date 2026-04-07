@@ -63,6 +63,58 @@ class TestEmployee(ERPNextTestSuite):
 		self.assertEqual(qb_employee_list, employee_list)
 		frappe.set_user("Administrator")
 
+	def test_create_user_automatically(self):
+		def get_new_employee(email: str, create_user_permission: int):
+			return frappe.get_doc(
+				{
+					"doctype": "Employee",
+					"first_name": "Test Auto User 1",
+					"company": "_Test Company",
+					"date_of_birth": "2000-05-08",
+					"date_of_joining": "2013-01-01",
+					"gender": "Female",
+					"personal_email": email,
+					"status": "Active",
+					"create_user_automatically": 1,
+					"create_user_permission": create_user_permission,
+				}
+			).insert()
+
+		employee1 = get_new_employee("test_auto_user1@example.com", True)
+		user = frappe.db.get_value("User", "test_auto_user1@example.com")
+		self.assertTrue(user)
+		self.assertEqual(employee1.user_id, user)
+
+		# Verify user permissions are created
+		self.assertTrue(
+			frappe.db.exists(
+				"User Permission", {"allow": "Employee", "for_value": employee1.name, "user": user}
+			)
+		)
+		self.assertTrue(
+			frappe.db.exists(
+				"User Permission", {"allow": "Company", "for_value": employee1.company, "user": user}
+			)
+		)
+
+		# Test disabled create_user_permission
+		employee2 = get_new_employee("test_auto_user2@example.com", False)
+		user2 = frappe.db.get_value("User", "test_auto_user2@example.com")
+		self.assertTrue(user2)
+		self.assertEqual(employee2.user_id, user2)
+
+		# Verify user permissions are not created
+		self.assertFalse(
+			frappe.db.exists(
+				"User Permission", {"allow": "Employee", "for_value": employee2.name, "user": user2}
+			)
+		)
+		self.assertFalse(
+			frappe.db.exists(
+				"User Permission", {"allow": "Company", "for_value": employee2.company, "user": user2}
+			)
+		)
+
 
 def make_employee(user, company=None, **kwargs):
 	if not frappe.db.get_value("User", user):

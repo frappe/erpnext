@@ -55,7 +55,6 @@
   },
   {
    "columns": 2,
-   "depends_on": "eval:!doc.workstation_type",
    "fieldname": "workstation",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -297,7 +296,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-17 15:33:28.495850",
+ "modified": "2026-03-31 17:09:48.771834",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",

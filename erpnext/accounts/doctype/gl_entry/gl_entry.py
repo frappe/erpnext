@@ -489,4 +489,5 @@ def rename_temporarily_named_docs(doctype):
 				for hook in frappe.get_hooks(hook_type):
 					frappe.call(hook, newname=newname, oldname=oldname)
 
-		frappe.db.commit()
+		if not frappe.in_test:
+			frappe.db.commit()

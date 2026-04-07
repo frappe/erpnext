@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import json
 from math import ceil
 
 import frappe

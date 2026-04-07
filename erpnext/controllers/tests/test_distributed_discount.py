@@ -1,10 +1,9 @@
-from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestTaxesAndTotals(AccountsTestMixin, ERPNextTestSuite):
+class TestTaxesAndTotals(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_distributed_discount_amount(self):
 		so = make_sales_order(do_not_save=1)
