@@ -1,6 +1,5 @@
 pull_request_rules:
   - name: Auto-close PRs on stable branch
-    conditions:
       - and:
           - and:
               - author!=surajshetty3416
