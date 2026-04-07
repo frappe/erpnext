@@ -6,7 +6,7 @@ from collections import defaultdict
 
 import frappe
 from frappe.tests import timeout
-from frappe.utils import add_days, add_months, add_to_date, cint, flt, now, today
+from frappe.utils import add_days, add_months, add_to_date, cint, flt, now, nowdate, nowtime, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 from erpnext.manufacturing.doctype.job_card.job_card import make_stock_entry as make_stock_entry_from_jc
@@ -2419,7 +2419,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		stock_entry.submit()
 
-	def test_disassembly_order_with_qty_behavior(self):
+	def test_disassembly_order_with_qty_from_wo_behavior(self):
 		# Create raw material and FG item
 		raw_item = make_item("Test Raw for Disassembly", {"is_stock_item": 1}).name
 		fg_item = make_item("Test FG for Disassembly", {"is_stock_item": 1}).name
@@ -2459,27 +2459,9 @@ class TestWorkOrder(ERPNextTestSuite):
 		se_for_manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", wo.qty))
 		se_for_manufacture.submit()
 
-		# Simulate a disassembly stock entry
+		# Disassembly via WO required_items path (no source_stock_entry)
 		disassemble_qty = 4
 		stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", disassemble_qty))
-		stock_entry.append(
-			"items",
-			{
-				"item_code": fg_item,
-				"qty": disassemble_qty,
-				"s_warehouse": wo.fg_warehouse,
-			},
-		)
-
-		for bom_item in bom.items:
-			stock_entry.append(
-				"items",
-				{
-					"item_code": bom_item.item_code,
-					"qty": (bom_item.qty / bom.quantity) * disassemble_qty,
-					"t_warehouse": wo.source_warehouse,
-				},
-			)
 
 		wo.reload()
 		stock_entry.save()
@@ -2494,7 +2476,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			f"Expected FG qty {disassemble_qty}, found {finished_good_entry.qty}",
 		)
 
-		# Assert raw materials
+		# Assert raw materials - qty scaled from WO required_items
 		for item in stock_entry.items:
 			if item.item_code == fg_item:
 				continue
@@ -2518,10 +2500,35 @@ class TestWorkOrder(ERPNextTestSuite):
 			f"Work Order disassembled_qty mismatch: expected {disassemble_qty}, got {wo.disassembled_qty}",
 		)
 
+		# Second disassembly: explicitly linked to manufacture SE — verifies SE-linked path
+		# (first disassembly auto-set source_stock_entry since there's only one manufacture entry)
+		disassemble_qty_2 = 2
+		stock_entry_2 = frappe.get_doc(
+			make_stock_entry(
+				wo.name, "Disassemble", disassemble_qty_2, source_stock_entry=se_for_manufacture.name
+			)
+		)
+		stock_entry_2.save()
+		stock_entry_2.submit()
+
+		# All rows must trace back to se_for_manufacture
+		for item in stock_entry_2.items:
+			self.assertEqual(item.against_stock_entry, se_for_manufacture.name)
+			self.assertTrue(item.ste_detail)
+
+		# RM qty scaled from the manufacture SE rows
+		rm_row = next((i for i in stock_entry_2.items if i.item_code == raw_item), None)
+		expected_rm_qty = (bom.items[0].qty / bom.quantity) * disassemble_qty_2
+		self.assertAlmostEqual(rm_row.qty, expected_rm_qty, places=3)
+
+		wo.reload()
+		self.assertEqual(wo.disassembled_qty, disassemble_qty + disassemble_qty_2)
+
 	def test_disassembly_with_multiple_manufacture_entries(self):
 		"""
 		Test that disassembly does not create duplicate items when manufacturing
-		is done in multiple batches (multiple manufacture stock entries).
+		is done in multiple batches (multiple manufacture stock entries), including
+		secondary/scrap items.
 
 		Scenario:
 		1. Create Work Order for 10 units
@@ -2530,11 +2537,19 @@ class TestWorkOrder(ERPNextTestSuite):
 		4. Create Disassembly for 4 units
 		5. Verify no duplicate items in the disassembly stock entry
 		"""
-		# Create RM and FG item
+		# Create RM, scrap and FG item
 		raw_item1 = make_item("Test Raw for Multi Batch Disassembly 1", {"is_stock_item": 1}).name
 		raw_item2 = make_item("Test Raw for Multi Batch Disassembly 2", {"is_stock_item": 1}).name
+		scrap_item = make_item("Test Scrap for Multi Batch Disassembly", {"is_stock_item": 1}).name
 		fg_item = make_item("Test FG for Multi Batch Disassembly", {"is_stock_item": 1}).name
-		bom = make_bom(item=fg_item, quantity=1, raw_materials=[raw_item1, raw_item2], rm_qty=2)
+		bom = make_bom(
+			item=fg_item,
+			quantity=1,
+			raw_materials=[raw_item1, raw_item2],
+			rm_qty=2,
+			scrap_items=[scrap_item],
+			scrap_qty=10,
+		)
 
 		# Create WO
 		wo = make_wo_order_test_record(production_item=fg_item, qty=10, bom_no=bom.name, status="Not Started")
@@ -2609,7 +2624,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			f"Found duplicate items in disassembly stock entry: {duplicates}",
 		)
 
-		expected_items = 3  # FG item + 2 raw materials
+		expected_items = 4  # FG item + 2 raw materials + 1 scrap item
 		self.assertEqual(
 			len(stock_entry.items),
 			expected_items,
@@ -2619,6 +2634,17 @@ class TestWorkOrder(ERPNextTestSuite):
 		# FG item qty
 		fg_item_row = next((i for i in stock_entry.items if i.item_code == fg_item), None)
 		self.assertEqual(fg_item_row.qty, disassemble_qty)
+
+		# Secondary/Scrap item: should be taken from scrap warehouse in disassembly
+		scrap_row = next((i for i in stock_entry.items if i.item_code == scrap_item), None)
+		self.assertIsNotNone(scrap_row)
+		self.assertEqual(scrap_row.type, "Scrap")
+		self.assertTrue(scrap_row.s_warehouse)
+		self.assertFalse(scrap_row.t_warehouse)
+		self.assertEqual(scrap_row.s_warehouse, wo.scrap_warehouse)
+		# BOM has scrap_qty=10/FG but also process_loss_per=10%, so actual scrap per FG = 9
+		# Total produced = 9*3 + 9*7 = 90, disassemble 4/10 → 36
+		self.assertEqual(scrap_row.qty, 36)
 
 		# RM quantities
 		for bom_item in bom.items:
@@ -2631,19 +2657,57 @@ class TestWorkOrder(ERPNextTestSuite):
 				msg=f"Raw material {bom_item.item_code} qty mismatch",
 			)
 
+		# -- BOM-path disassembly (no source_stock_entry, no work_order) --
+
+		make_stock_entry_test_record(
+			item_code=scrap_item,
+			purpose="Material Receipt",
+			target=wo.fg_warehouse,
+			qty=50,
+			basic_rate=10,
+		)
+
+		bom_disassemble_qty = 2
+		bom_se = frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"stock_entry_type": "Disassemble",
+				"purpose": "Disassemble",
+				"from_bom": 1,
+				"bom_no": bom.name,
+				"fg_completed_qty": bom_disassemble_qty,
+				"from_warehouse": wo.fg_warehouse,
+				"to_warehouse": wo.wip_warehouse,
+				"company": wo.company,
+				"posting_date": nowdate(),
+				"posting_time": nowtime(),
+			}
+		)
+		bom_se.get_items()
+		bom_se.save()
+		bom_se.submit()
+
+		bom_scrap_row = next((i for i in bom_se.items if i.item_code == scrap_item), None)
+		self.assertIsNotNone(bom_scrap_row, "Scrap item must appear in BOM-path disassembly")
+		# Without fix 3: qty = 10 * 2 = 20; with fix 3 (process_loss_per=10%): qty = 9 * 2 = 18
+		self.assertEqual(
+			bom_scrap_row.qty,
+			18,
+			f"BOM-path disassembly must apply process_loss_per; expected 18, got {bom_scrap_row.qty}",
+		)
+
 	def test_disassembly_with_additional_rm_not_in_bom(self):
 		"""
-		Test that disassembly correctly handles additional raw materials that were
-		manually added during manufacturing (not part of the BOM).
+		Test that SE-linked disassembly includes additional raw materials
+		that were manually added during manufacturing (not part of the BOM).
 
 		Scenario:
 		1. Create Work Order for 10 units with 2 raw materials in BOM
 		2. Transfer raw materials for manufacture
 		3. Manufacture in 2 parts (3 units, then 7 units)
 		4. In each manufacture entry, manually add an extra consumable item
-		   (not in BOM) in proportion to the manufactured qty
-		5. Create Disassembly for 4 units
-		6. Verify that the additional RM is included in disassembly with proportional qty
+		5. Disassemble 3 units linked to first manufacture entry
+		6. Verify additional RM is included with correct proportional qty from SE1
 		"""
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import (
 			make_stock_entry as make_stock_entry_test_record,
@@ -2679,9 +2743,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		se_for_material_transfer.save()
 		se_for_material_transfer.submit()
 
-		# First Manufacture Entry - 3 units
+		# First Manufacture Entry - 3 units with additional RM
 		se_manufacture1 = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
-		# Additional RM
 		se_manufacture1.append(
 			"items",
 			{
@@ -2694,9 +2757,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		se_manufacture1.save()
 		se_manufacture1.submit()
 
-		# Second Manufacture Entry - 7 units
+		# Second Manufacture Entry - 7 units with additional RM
 		se_manufacture2 = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 7))
-		# AAdditional RM
 		se_manufacture2.append(
 			"items",
 			{
@@ -2712,13 +2774,15 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.reload()
 		self.assertEqual(wo.produced_qty, 10)
 
-		# Disassembly for 4 units
-		disassemble_qty = 4
-		stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", disassemble_qty))
+		# Disassemble 3 units linked to first manufacture entry
+		disassemble_qty = 3
+		stock_entry = frappe.get_doc(
+			make_stock_entry(wo.name, "Disassemble", disassemble_qty, source_stock_entry=se_manufacture1.name)
+		)
 		stock_entry.save()
 		stock_entry.submit()
 
-		# No duplicate
+		# No duplicates
 		item_counts = {}
 		for item in stock_entry.items:
 			item_code = item.item_code
@@ -2731,16 +2795,15 @@ class TestWorkOrder(ERPNextTestSuite):
 			f"Found duplicate items in disassembly stock entry: {duplicates}",
 		)
 
-		# Additional RM qty
+		# Additional RM should be included — qty proportional to SE1 (3 units -> 3 additional RM)
 		additional_rm_row = next((i for i in stock_entry.items if i.item_code == additional_rm), None)
 		self.assertIsNotNone(
 			additional_rm_row,
 			f"Additional raw material {additional_rm} not found in disassembly",
 		)
 
-		# intentional full reversal as not part of BOM
-		# eg: dies or consumables used during manufacturing
-		expected_additional_rm_qty = 3 + 7
+		# SE1 had 3 additional RM for 3 manufactured units, disassembling all 3
+		expected_additional_rm_qty = 3
 		self.assertAlmostEqual(
 			additional_rm_row.qty,
 			expected_additional_rm_qty,
@@ -2748,7 +2811,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			msg=f"Additional RM qty mismatch: expected {expected_additional_rm_qty}, got {additional_rm_row.qty}",
 		)
 
-		# RM qty
+		# BOM RM qty — scaled from SE1's rows
 		for bom_item in bom.items:
 			expected_qty = (bom_item.qty / bom.quantity) * disassemble_qty
 			rm_row = next((i for i in stock_entry.items if i.item_code == bom_item.item_code), None)
@@ -2764,11 +2827,288 @@ class TestWorkOrder(ERPNextTestSuite):
 		fg_item_row = next((i for i in stock_entry.items if i.item_code == fg_item), None)
 		self.assertEqual(fg_item_row.qty, disassemble_qty)
 
+		# FG + 2 BOM RM + 1 additional RM = 4 items
 		expected_items = 4
 		self.assertEqual(
 			len(stock_entry.items),
 			expected_items,
 			f"Expected {expected_items} items, found {len(stock_entry.items)}",
+		)
+
+		# Verify traceability
+		for item in stock_entry.items:
+			self.assertEqual(item.against_stock_entry, se_manufacture1.name)
+			self.assertTrue(item.ste_detail)
+
+	def test_disassembly_auto_sets_source_stock_entry(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		raw_item = make_item("Test Raw Auto Set Disassembly", {"is_stock_item": 1}).name
+		fg_item = make_item("Test FG Auto Set Disassembly", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, quantity=1, raw_materials=[raw_item], rm_qty=2)
+
+		wo = make_wo_order_test_record(production_item=fg_item, qty=5, bom_no=bom.name, status="Not Started")
+
+		make_stock_entry_test_record(
+			item_code=raw_item, purpose="Material Receipt", target=wo.wip_warehouse, qty=50, basic_rate=100
+		)
+
+		se_transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", wo.qty))
+		for item in se_transfer.items:
+			item.s_warehouse = wo.wip_warehouse
+		se_transfer.save()
+		se_transfer.submit()
+
+		se_manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", wo.qty))
+		se_manufacture.submit()
+
+		# Disassemble without specifying source_stock_entry
+		stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", 3))
+		stock_entry.save()
+
+		# source_stock_entry should be auto-set since only one manufacture entry
+		self.assertEqual(stock_entry.source_stock_entry, se_manufacture.name)
+
+		# All items should have against_stock_entry linked
+		for item in stock_entry.items:
+			self.assertEqual(item.against_stock_entry, se_manufacture.name)
+			self.assertTrue(item.ste_detail)
+
+		stock_entry.submit()
+
+	def test_disassembly_batch_tracked_items(self):
+		from erpnext.stock.doctype.batch.batch import make_batch
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		wip_wh = "_Test Warehouse - _TC"
+
+		rm_item = make_item(
+			"Test Batch RM for Disassembly SB",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TBRD-RM-.###",
+			},
+		).name
+		fg_item = make_item(
+			"Test Batch FG for Disassembly SB",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TBRD-FG-.###",
+			},
+		).name
+
+		bom = make_bom(item=fg_item, quantity=1, raw_materials=[rm_item], rm_qty=2)
+		wo = make_wo_order_test_record(
+			production_item=fg_item,
+			qty=6,
+			bom_no=bom.name,
+			skip_transfer=1,
+			source_warehouse=wip_wh,
+			status="Not Started",
+		)
+
+		# Two separate RM receipts → two distinct batches (batch_1, batch_2)
+		rm_receipt_1 = make_stock_entry_test_record(
+			item_code=rm_item, purpose="Material Receipt", target=wip_wh, qty=6, basic_rate=100
+		)
+		rm_batch_1 = get_batch_from_bundle(
+			frappe.db.get_value(
+				"Stock Entry Detail",
+				{"parent": rm_receipt_1.name, "item_code": rm_item},
+				"serial_and_batch_bundle",
+			)
+		)
+
+		rm_receipt_2 = make_stock_entry_test_record(
+			item_code=rm_item, purpose="Material Receipt", target=wip_wh, qty=6, basic_rate=100
+		)
+		rm_batch_2 = get_batch_from_bundle(
+			frappe.db.get_value(
+				"Stock Entry Detail",
+				{"parent": rm_receipt_2.name, "item_code": rm_item},
+				"serial_and_batch_bundle",
+			)
+		)
+
+		self.assertNotEqual(rm_batch_1, rm_batch_2, "Two receipts must create two distinct RM batches")
+
+		fg_batch_1 = make_batch(frappe._dict(item=fg_item))
+		fg_batch_2 = make_batch(frappe._dict(item=fg_item))
+
+		# Manufacture entry 1 — 3 FG using batch_1 RM/FG
+		se_manufacture_1 = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
+		for row in se_manufacture_1.items:
+			if row.item_code == rm_item:
+				row.batch_no = rm_batch_1
+				row.use_serial_batch_fields = 1
+			elif row.item_code == fg_item:
+				row.batch_no = fg_batch_1
+				row.use_serial_batch_fields = 1
+		se_manufacture_1.save()
+		se_manufacture_1.submit()
+
+		# Manufacture entry 2 — 3 FG using batch_2 RM/FG
+		se_manufacture_2 = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
+		for row in se_manufacture_2.items:
+			if row.item_code == rm_item:
+				row.batch_no = rm_batch_2
+				row.use_serial_batch_fields = 1
+			elif row.item_code == fg_item:
+				row.batch_no = fg_batch_2
+				row.use_serial_batch_fields = 1
+		se_manufacture_2.save()
+		se_manufacture_2.submit()
+
+		# Disassemble 2 units from SE_1 only — must use SE_1's batches, not SE_2's
+		disassemble_qty = 2
+		stock_entry = frappe.get_doc(
+			make_stock_entry(
+				wo.name, "Disassemble", disassemble_qty, source_stock_entry=se_manufacture_1.name
+			)
+		)
+		stock_entry.save()
+		stock_entry.submit()
+
+		# FG row: must use fg_batch_1 exclusively (fg_batch_2 must not appear)
+		fg_row = next((i for i in stock_entry.items if i.item_code == fg_item), None)
+		self.assertIsNotNone(fg_row)
+		self.assertTrue(fg_row.serial_and_batch_bundle, "FG row must have a serial_and_batch_bundle")
+		self.assertEqual(get_batch_from_bundle(fg_row.serial_and_batch_bundle), fg_batch_1)
+		self.assertNotEqual(get_batch_from_bundle(fg_row.serial_and_batch_bundle), fg_batch_2)
+
+		# RM row: must use rm_batch_1 exclusively (rm_batch_2 must not appear)
+		rm_row = next((i for i in stock_entry.items if i.item_code == rm_item), None)
+		self.assertIsNotNone(rm_row)
+		self.assertTrue(rm_row.serial_and_batch_bundle, "RM row must have a serial_and_batch_bundle")
+		self.assertEqual(get_batch_from_bundle(rm_row.serial_and_batch_bundle), rm_batch_1)
+		self.assertNotEqual(get_batch_from_bundle(rm_row.serial_and_batch_bundle), rm_batch_2)
+
+		# RM qty: 2 FG disassembled x 2 RM per FG = 4
+		self.assertAlmostEqual(rm_row.qty, 4.0, places=3)
+
+	def test_disassembly_serial_tracked_items(self):
+		from frappe.model.naming import make_autoname
+
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		wip_wh = "_Test Warehouse - _TC"
+
+		rm_item = make_item(
+			"Test Serial RM for Disassembly SB",
+			{"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TSRD-RM-.####"},
+		).name
+		fg_item = make_item(
+			"Test Serial FG for Disassembly SB",
+			{"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TSRD-FG-.####"},
+		).name
+
+		bom = make_bom(item=fg_item, quantity=1, raw_materials=[rm_item], rm_qty=2)
+		wo = make_wo_order_test_record(
+			production_item=fg_item,
+			qty=6,
+			bom_no=bom.name,
+			skip_transfer=1,
+			source_warehouse=wip_wh,
+			status="Not Started",
+		)
+
+		# Two separate RM receipts → two disjoint sets of serial numbers
+		rm_receipt_1 = make_stock_entry_test_record(
+			item_code=rm_item, purpose="Material Receipt", target=wip_wh, qty=6, basic_rate=100
+		)
+		rm_serials_1 = get_serial_nos_from_bundle(
+			frappe.db.get_value(
+				"Stock Entry Detail",
+				{"parent": rm_receipt_1.name, "item_code": rm_item},
+				"serial_and_batch_bundle",
+			)
+		)
+		self.assertEqual(len(rm_serials_1), 6)
+
+		rm_receipt_2 = make_stock_entry_test_record(
+			item_code=rm_item, purpose="Material Receipt", target=wip_wh, qty=6, basic_rate=100
+		)
+		rm_serials_2 = get_serial_nos_from_bundle(
+			frappe.db.get_value(
+				"Stock Entry Detail",
+				{"parent": rm_receipt_2.name, "item_code": rm_item},
+				"serial_and_batch_bundle",
+			)
+		)
+		self.assertEqual(len(rm_serials_2), 6)
+		self.assertFalse(
+			set(rm_serials_1) & set(rm_serials_2), "Two receipts must produce disjoint RM serial sets"
+		)
+
+		# Pre-generate two sets of FG serial numbers
+		series = frappe.db.get_value("Item", fg_item, "serial_no_series")
+		fg_serials_1 = [make_autoname(series) for _ in range(3)]
+		fg_serials_2 = [make_autoname(series) for _ in range(3)]
+
+		# Manufacture entry 1 — consumes rm_serials_1, produces fg_serials_1
+		se_manufacture_1 = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
+		for row in se_manufacture_1.items:
+			if row.item_code == rm_item:
+				row.serial_no = "\n".join(rm_serials_1)
+				row.use_serial_batch_fields = 1
+			elif row.item_code == fg_item:
+				row.serial_no = "\n".join(fg_serials_1)
+				row.use_serial_batch_fields = 1
+		se_manufacture_1.save()
+		se_manufacture_1.submit()
+
+		# Manufacture entry 2 — consumes rm_serials_2, produces fg_serials_2
+		se_manufacture_2 = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
+		for row in se_manufacture_2.items:
+			if row.item_code == rm_item:
+				row.serial_no = "\n".join(rm_serials_2)
+				row.use_serial_batch_fields = 1
+			elif row.item_code == fg_item:
+				row.serial_no = "\n".join(fg_serials_2)
+				row.use_serial_batch_fields = 1
+		se_manufacture_2.save()
+		se_manufacture_2.submit()
+
+		# Disassemble 2 units from SE_1 only — must use SE_1's serials, not SE_2's
+		disassemble_qty = 2
+		stock_entry = frappe.get_doc(
+			make_stock_entry(
+				wo.name, "Disassemble", disassemble_qty, source_stock_entry=se_manufacture_1.name
+			)
+		)
+		stock_entry.save()
+		stock_entry.submit()
+
+		# FG row: 2 serials consumed — must be subset of fg_serials_1, disjoint from fg_serials_2
+		fg_row = next((i for i in stock_entry.items if i.item_code == fg_item), None)
+		self.assertIsNotNone(fg_row)
+		self.assertTrue(fg_row.serial_and_batch_bundle, "FG row must have a serial_and_batch_bundle")
+		fg_dasm_serials = get_serial_nos_from_bundle(fg_row.serial_and_batch_bundle)
+		self.assertEqual(len(fg_dasm_serials), disassemble_qty)
+		self.assertTrue(set(fg_dasm_serials).issubset(set(fg_serials_1)))
+		self.assertFalse(
+			set(fg_dasm_serials) & set(fg_serials_2), "Disassembly must not use SE_2's FG serials"
+		)
+
+		# RM row: 4 serials returned (2 FG x 2 RM each) — subset of rm_serials_1, disjoint from rm_serials_2
+		rm_row = next((i for i in stock_entry.items if i.item_code == rm_item), None)
+		self.assertIsNotNone(rm_row)
+		self.assertTrue(rm_row.serial_and_batch_bundle, "RM row must have a serial_and_batch_bundle")
+		rm_dasm_serials = get_serial_nos_from_bundle(rm_row.serial_and_batch_bundle)
+		self.assertEqual(len(rm_dasm_serials), disassemble_qty * 2)
+		self.assertTrue(set(rm_dasm_serials).issubset(set(rm_serials_1)))
+		self.assertFalse(
+			set(rm_dasm_serials) & set(rm_serials_2), "Disassembly must not use SE_2's RM serials"
 		)
 
 	def test_components_alternate_item_for_bom_based_manufacture_entry(self):
