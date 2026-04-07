@@ -95,6 +95,7 @@
   "ordered_qty",
   "planned_qty",
   "production_plan_qty",
+  "requested_qty",
   "column_break_69",
   "work_order_qty",
   "delivered_qty",
@@ -342,7 +343,8 @@
    "fieldname": "discount_amount",
    "fieldtype": "Currency",
    "label": "Discount Amount",
-   "options": "currency"
+   "options": "currency",
+   "print_hide": 1
   },
   {
    "depends_on": "eval:doc.margin_type && doc.price_list_rate && doc.margin_rate_or_amount",
@@ -502,12 +504,14 @@
   {
    "fieldname": "weight_per_unit",
    "fieldtype": "Float",
-   "label": "Weight Per Unit"
+   "label": "Weight Per Unit",
+   "print_hide": 1
   },
   {
    "fieldname": "total_weight",
    "fieldtype": "Float",
    "label": "Total Weight",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -531,7 +535,7 @@
    "depends_on": "eval:doc.delivered_by_supplier!=1",
    "fieldname": "warehouse",
    "fieldtype": "Link",
-   "label": "Delivery Warehouse",
+   "label": "Source Warehouse",
    "oldfieldname": "reserved_warehouse",
    "oldfieldtype": "Link",
    "options": "Warehouse",
@@ -821,6 +825,7 @@
    "label": "Rate of Stock UOM",
    "no_copy": 1,
    "options": "currency",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -829,6 +834,7 @@
    "fieldname": "grant_commission",
    "fieldtype": "Check",
    "label": "Grant Commission",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -836,6 +842,7 @@
    "fieldtype": "Float",
    "label": "Picked Qty (in Stock UOM)",
    "no_copy": 1,
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -909,6 +916,7 @@
    "fieldtype": "Float",
    "label": "Production Plan Qty",
    "no_copy": 1,
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -925,7 +933,8 @@
    "fieldname": "distributed_discount_amount",
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
-   "options": "currency"
+   "options": "currency",
+   "print_hide": 1
   },
   {
    "allow_on_submit": 1,
@@ -994,6 +1003,7 @@
    "label": "Subcontracted Quantity",
    "no_copy": 1,
    "non_negative": 1,
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -1009,14 +1019,23 @@
    "fieldname": "fg_item_qty",
    "fieldtype": "Float",
    "label": "Finished Good Qty",
-   "mandatory_depends_on": "eval:parent.is_subcontracted"
+   "mandatory_depends_on": "eval:parent.is_subcontracted",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "requested_qty",
+   "fieldtype": "Float",
+   "label": "Requested Qty",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-13 10:57:43.378448",
+ "modified": "2026-02-22 16:40:00.200328",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

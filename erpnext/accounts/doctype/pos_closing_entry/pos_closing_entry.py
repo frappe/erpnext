@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 
+from datetime import datetime
+
 import frappe
 from frappe import _
 from frappe.query_builder import DocType
@@ -252,13 +254,13 @@ class POSClosingEntry(StatusUpdater):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
+def get_cashiers(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	cashiers_list = frappe.get_all("POS Profile User", filters=filters, fields=["user"], as_list=1)
 	return [c for c in cashiers_list]
 
 
 @frappe.whitelist()
-def get_invoices(start, end, pos_profile, user):
+def get_invoices(start: str | datetime, end: str | datetime, pos_profile: str, user: str):
 	invoice_doctype = frappe.db.get_single_value("POS Settings", "invoice_type")
 
 	sales_inv_query = build_invoice_query("Sales Invoice", user, pos_profile, start, end)

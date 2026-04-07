@@ -4,13 +4,13 @@ from contextlib import contextmanager
 from datetime import date, timedelta
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import getdate
 
 from erpnext.setup.doctype.holiday_list.holiday_list import local_country_name
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestHolidayList(IntegrationTestCase):
+class TestHolidayList(ERPNextTestSuite):
 	def test_holiday_list(self):
 		today_date = getdate()
 		test_holiday_dates = [today_date - timedelta(days=5), today_date - timedelta(days=4)]

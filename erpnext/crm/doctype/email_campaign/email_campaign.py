@@ -204,8 +204,22 @@ def send_mail(entry, email_campaign):
 
 # called from hooks on doc_event Email Unsubscribe
 def unsubscribe_recipient(unsubscribe, method):
-	if unsubscribe.reference_doctype == "Email Campaign":
-		frappe.db.set_value("Email Campaign", unsubscribe.reference_name, "status", "Unsubscribed")
+	if unsubscribe.reference_doctype != "Email Campaign":
+		return
+
+	email_campaign = frappe.get_doc("Email Campaign", unsubscribe.reference_name)
+
+	if email_campaign.email_campaign_for == "Email Group":
+		if unsubscribe.email:
+			frappe.db.set_value(
+				"Email Group Member",
+				{"email_group": email_campaign.recipient, "email": unsubscribe.email},
+				"unsubscribed",
+				1,
+			)
+	else:
+		# For Lead or Contact
+		frappe.db.set_value("Email Campaign", email_campaign.name, "status", "Unsubscribed")
 
 
 # called through hooks to update email campaign status daily

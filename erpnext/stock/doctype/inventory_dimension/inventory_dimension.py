@@ -1,6 +1,8 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from typing import Any
+
 import frappe
 from frappe import _, bold, scrub
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
@@ -182,6 +184,7 @@ class InventoryDimension(Document):
 				insert_after="inventory_dimension",
 				options=self.reference_document,
 				label=_(label),
+				depends_on="eval:doc.s_warehouse" if doctype == "Stock Entry Detail" else "",
 				search_index=1,
 				reqd=self.reqd,
 				mandatory_depends_on=self.mandatory_depends_on,
@@ -273,7 +276,7 @@ class InventoryDimension(Document):
 		elif doctype != "Stock Entry Detail":
 			display_depends_on = "eval:parent.is_internal_customer == 1"
 		elif doctype == "Stock Entry Detail":
-			display_depends_on = "eval:parent.purpose != 'Material Issue'"
+			display_depends_on = "eval:doc.t_warehouse"
 
 		fieldname = f"{fieldname_start_with}_{self.source_fieldname}"
 		label = f"{label_start_with} {self.dimension_name}"
@@ -306,7 +309,12 @@ def field_exists(doctype, fieldname) -> str or None:
 
 @frappe.whitelist()
 def get_inventory_documents(
-	doctype=None, txt=None, searchfield=None, start=None, page_len=None, filters=None
+	doctype: Any | None = None,
+	txt: str | None = None,
+	searchfield: str | None = None,
+	start: int | None = None,
+	page_len: int | None = None,
+	filters: dict | None = None,
 ):
 	and_filters = [["DocField", "parent", "not in", ["Batch", "Serial No", "Item Price"]]]
 	or_filters = [
@@ -395,13 +403,13 @@ def get_inventory_dimensions():
 
 
 @frappe.whitelist()
-def delete_dimension(dimension):
+def delete_dimension(dimension: str):
 	doc = frappe.get_doc("Inventory Dimension", dimension)
 	doc.delete()
 
 
 @frappe.whitelist()
-def get_parent_fields(child_doctype, dimension_name):
+def get_parent_fields(child_doctype: str, dimension_name: str):
 	parent_doctypes = frappe.get_all("DocField", fields=["parent"], filters={"options": child_doctype})
 
 	fields = []

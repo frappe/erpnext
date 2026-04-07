@@ -19,7 +19,7 @@ frappe.ui.form.on("Purchase Receipt", {
 
 		frm.set_query("wip_composite_asset", "items", function () {
 			return {
-				filters: { is_composite_asset: 1, docstatus: 0 },
+				filters: { asset_type: "Composite Asset", docstatus: 0 },
 			};
 		});
 
@@ -364,6 +364,15 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 
 	apply_putaway_rule() {
 		if (this.frm.doc.apply_putaway_rule) erpnext.apply_putaway_rule(this.frm);
+	}
+
+	items_add(doc, cdt, cdn) {
+		const row = frappe.get_doc(cdt, cdn);
+		this.frm.script_manager.copy_from_first_row("items", row, [
+			"expense_account",
+			"cost_center",
+			"project",
+		]);
 	}
 };
 

@@ -13,19 +13,7 @@ def add_default_params(func, doctype):
 	return partial(func, doctype=doctype, txt="", searchfield="name", start=0, page_len=20, filters=None)
 
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "BOM", "Account"]
-
-
 class TestQueries(ERPNextTestSuite):
-	# All tests are based on self.globalTestRecords[doctype]
-
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		cls.make_employees()
-		cls.make_leads()
-		cls.make_projects()
-
 	def assert_nested_in(self, item, container):
 		self.assertIn(item, [vals for tuples in container for vals in tuples])
 
@@ -96,6 +84,8 @@ class TestQueries(ERPNextTestSuite):
 		self.assertGreaterEqual(frappe.db.count("UOM", {"enabled": 1}), 10)
 
 	def test_employee_query_with_user_permissions(self):
+		employee = frappe.db.get_all("Employee", {"first_name": "_Test Employee"})[0].name
+
 		# party field is a dynamic link field in Payment Entry doctype with ignore_user_permissions=0
 		ps = make_property_setter(
 			doctype="Payment Entry",
@@ -110,7 +100,7 @@ class TestQueries(ERPNextTestSuite):
 			{
 				"user": user.name,
 				"doctype": "Employee",
-				"docname": self.employees[0].name,
+				"docname": employee,
 				"is_default": 1,
 				"apply_to_all_doctypes": 1,
 				"applicable_doctypes": [],
@@ -118,7 +108,7 @@ class TestQueries(ERPNextTestSuite):
 			}
 		)
 
-		with self.set_user(user.name):
+		with ERPNextTestSuite.set_user(self, user.name):
 			params = {
 				"doctype": "Employee",
 				"txt": "",

@@ -8,6 +8,7 @@ from frappe.query_builder import functions as fn
 from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
 from frappe.utils.xlsxutils import handle_html
+from pypika.terms import Bracket, LiteralValue, Order
 
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
 from erpnext.accounts.report.utils import get_values_for_columns
@@ -32,6 +33,10 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 		return columns, [], None, None, None, 0
 
 	itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency)
+	default_taxes = {}
+	for tax in tax_columns:
+		default_taxes[f"{tax}_rate"] = 0
+		default_taxes[f"{tax}_amount"] = 0
 
 	mode_of_payments = get_mode_of_payments(set(d.parent for d in item_list))
 	so_dn_map = get_delivery_notes_against_sales_order(item_list)
@@ -89,6 +94,9 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 
 		total_tax = 0
 		total_other_charges = 0
+
+		row.update(default_taxes.copy())
+
 		for tax, details in itemised_tax.get(d.name, {}).items():
 			row.update(
 				{
@@ -390,20 +398,21 @@ def apply_conditions(query, si, sii, sip, filters, additional_conditions=None):
 
 
 def apply_order_by_conditions(doctype, query, filters):
-	invoice = f"`tab{doctype}`"
-	invoice_item = f"`tab{doctype} Item`"
+	invoice = frappe.qb.DocType(doctype)
+	invoice_item = frappe.qb.DocType(f"{doctype} Item")
 
 	if not filters.get("group_by"):
-		query += f" order by {invoice}.posting_date desc, {invoice_item}.item_group desc"
+		query = query.orderby(invoice.posting_date, order=Order.desc)
+		query = query.orderby(invoice_item.item_group, order=Order.desc)
 	elif filters.get("group_by") == "Invoice":
-		query += f" order by {invoice_item}.parent desc"
+		query = query.orderby(invoice_item.parent, order=Order.desc)
 	elif filters.get("group_by") == "Item":
-		query += f" order by {invoice_item}.item_code"
+		query = query.orderby(invoice_item.item_code)
 	elif filters.get("group_by") == "Item Group":
-		query += f" order by {invoice_item}.item_group"
+		query = query.orderby(invoice_item.item_group)
 	elif filters.get("group_by") in ("Customer", "Customer Group", "Territory", "Supplier"):
 		filter_field = frappe.scrub(filters.get("group_by"))
-		query += f" order by {filter_field} desc"
+		query = query.orderby(filter_field, order=Order.desc)
 
 	return query
 
@@ -481,15 +490,12 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 
 	from frappe.desk.reportview import build_match_conditions
 
-	query, params = query.walk()
-	match_conditions = build_match_conditions(doctype)
-
-	if match_conditions:
-		query += " and " + match_conditions
+	if match_conditions := build_match_conditions(doctype):
+		query = query.where(Bracket(LiteralValue(match_conditions)))
 
 	query = apply_order_by_conditions(doctype, query, filters)
 
-	return frappe.db.sql(query, params, as_dict=True)
+	return query.run(as_dict=True)
 
 
 def get_delivery_notes_against_sales_order(item_list):

@@ -31,7 +31,7 @@ def update_itemised_tax_data(doc):
 
 
 @frappe.whitelist()
-def export_invoices(filters=None):
+def export_invoices(filters: str | None = None):
 	frappe.has_permission("Sales Invoice", throw=True)
 
 	invoices = frappe.get_all(
@@ -359,7 +359,7 @@ def prepare_and_attach_invoice(doc, replace=False):
 
 
 @frappe.whitelist()
-def generate_single_invoice(docname):
+def generate_single_invoice(docname: str):
 	doc = frappe.get_doc("Sales Invoice", docname)
 	frappe.has_permission("Sales Invoice", doc=doc, throw=True)
 

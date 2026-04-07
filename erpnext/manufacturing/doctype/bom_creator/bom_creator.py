@@ -203,7 +203,9 @@ class BOMCreator(Document):
 					self,
 				)
 			else:
-				row.rate = flt(self.get_raw_material_cost(row.item_code) * row.conversion_factor)
+				row.rate = flt(
+					self.get_raw_material_cost(row.item_code) / flt(row.qty or 1) * row.conversion_factor
+				)
 
 			row.amount = flt(row.rate) * flt(row.qty)
 			amount += flt(row.amount)
@@ -356,7 +358,6 @@ class BOMCreator(Document):
 				{
 					"bom_no": bom_no,
 					"allow_alternative_item": 1,
-					"allow_scrap_items": not item.get("is_phantom_item"),
 					"include_item_in_manufacturing": 1,
 				}
 			)
@@ -376,12 +377,12 @@ class BOMCreator(Document):
 		return False
 
 	@frappe.whitelist()
-	def get_default_bom(self, item_code) -> str:
+	def get_default_bom(self, item_code: str):
 		return frappe.get_cached_value("Item", item_code, "default_bom")
 
 
 @frappe.whitelist()
-def get_children(doctype=None, parent=None, **kwargs):
+def get_children(doctype: str | None = None, parent: str | None = None, **kwargs):
 	if isinstance(kwargs, str):
 		kwargs = frappe.parse_json(kwargs)
 
@@ -561,7 +562,10 @@ def delete_node(**kwargs):
 
 
 @frappe.whitelist()
-def edit_bom_creator(doctype, docname, data, parent):
+def edit_bom_creator(doctype: str, docname: str, data: str | dict, parent: str):
+	if not frappe.has_permission(doctype=doctype, ptype="write", parent_doctype="BOM Creator"):
+		frappe.throw(_("You do not have permission to edit this document"), frappe.PermissionError)
+
 	if isinstance(data, str):
 		data = frappe.parse_json(data)
 

@@ -126,7 +126,7 @@ class CallLog(Document):
 
 
 @frappe.whitelist()
-def add_call_summary_and_call_type(call_log, summary, call_type):
+def add_call_summary_and_call_type(call_log: str, summary: str, call_type: str):
 	doc = frappe.get_doc("Call Log", call_log)
 	doc.type_of_call = call_type
 	doc.save()
@@ -190,7 +190,9 @@ def link_existing_conversations(doc, state):
 					call_log = frappe.get_doc("Call Log", log)
 					call_log.add_link(link_type=doc.doctype, link_name=doc.name)
 					call_log.save(ignore_permissions=True)
-				frappe.db.commit()
+
+				if not frappe.in_test:
+					frappe.db.commit()
 	except Exception:
 		frappe.log_error(title=_("Error during caller information update"))
 

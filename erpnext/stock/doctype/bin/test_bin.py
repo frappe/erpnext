@@ -2,13 +2,13 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.utils import _create_bin
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestBin(IntegrationTestCase):
+class TestBin(ERPNextTestSuite):
 	def test_concurrent_inserts(self):
 		"""Ensure no duplicates are possible in case of concurrent inserts"""
 		item_code = "_TestConcurrentBin"
@@ -25,8 +25,6 @@ class TestBin(IntegrationTestCase):
 		# util method should handle it
 		bin = _create_bin(item_code, warehouse)
 		self.assertEqual(bin.item_code, item_code)
-
-		frappe.db.rollback()
 
 	def test_index_exists(self):
 		indexes = frappe.db.sql("show index from tabBin where Non_unique = 0", as_dict=1)

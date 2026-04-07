@@ -280,14 +280,16 @@
    "depends_on": "price_list_rate",
    "fieldname": "discount_percentage",
    "fieldtype": "Percent",
-   "label": "Discount on Price List Rate (%)"
+   "label": "Discount on Price List Rate (%)",
+   "print_hide": 1
   },
   {
    "depends_on": "price_list_rate",
    "fieldname": "discount_amount",
    "fieldtype": "Currency",
    "label": "Discount Amount",
-   "options": "currency"
+   "options": "currency",
+   "print_hide": 1
   },
   {
    "fieldname": "col_break3",
@@ -428,6 +430,7 @@
    "fieldname": "weight_per_unit",
    "fieldtype": "Float",
    "label": "Weight Per Unit",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -763,6 +766,7 @@
    "label": "Rate of Stock UOM",
    "no_copy": 1,
    "options": "currency",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -779,6 +783,7 @@
    "fieldtype": "Float",
    "label": "Available Qty at Company",
    "no_copy": 1,
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -878,7 +883,8 @@
    "fieldname": "fg_item_qty",
    "fieldtype": "Float",
    "label": "Finished Good Qty",
-   "mandatory_depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow"
+   "mandatory_depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
+   "print_hide": 1
   },
   {
    "depends_on": "eval:parent.is_internal_supplier",
@@ -923,7 +929,8 @@
    "fieldname": "distributed_discount_amount",
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
-   "options": "currency"
+   "options": "currency",
+   "print_hide": 1
   },
   {
    "allow_on_submit": 1,
@@ -934,6 +941,7 @@
    "label": "Subcontracted Quantity",
    "no_copy": 1,
    "non_negative": 1,
+   "print_hide": 1,
    "read_only": 1
   }
  ],
@@ -942,7 +950,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-30 16:51:56.761673",
+ "modified": "2025-11-30 16:51:57.761673",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

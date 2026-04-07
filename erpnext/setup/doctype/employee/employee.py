@@ -8,7 +8,7 @@ from frappe.permissions import (
 	get_doc_permissions,
 	remove_user_permission,
 )
-from frappe.utils import cstr, getdate, today, validate_email_address
+from frappe.utils import cint, cstr, getdate, today, validate_email_address
 from frappe.utils.nestedset import NestedSet
 
 from erpnext.utilities.transaction_base import delete_events
@@ -23,6 +23,94 @@ class InactiveEmployeeStatusError(frappe.ValidationError):
 
 
 class Employee(NestedSet):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.setup.doctype.employee_education.employee_education import EmployeeEducation
+		from erpnext.setup.doctype.employee_external_work_history.employee_external_work_history import (
+			EmployeeExternalWorkHistory,
+		)
+		from erpnext.setup.doctype.employee_internal_work_history.employee_internal_work_history import (
+			EmployeeInternalWorkHistory,
+		)
+
+		attendance_device_id: DF.Data | None
+		bank_ac_no: DF.Data | None
+		bank_name: DF.Data | None
+		bio: DF.TextEditor | None
+		blood_group: DF.Literal["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+		branch: DF.Link | None
+		cell_number: DF.Data | None
+		company: DF.Link
+		company_email: DF.Data | None
+		contract_end_date: DF.Date | None
+		create_user_automatically: DF.Check
+		create_user_permission: DF.Check
+		ctc: DF.Currency
+		current_accommodation_type: DF.Literal["", "Rented", "Owned"]
+		current_address: DF.SmallText | None
+		date_of_birth: DF.Date
+		date_of_issue: DF.Date | None
+		date_of_joining: DF.Date
+		date_of_retirement: DF.Date | None
+		department: DF.Link | None
+		designation: DF.Link | None
+		education: DF.Table[EmployeeEducation]
+		emergency_phone_number: DF.Data | None
+		employee: DF.Data | None
+		employee_name: DF.Data | None
+		employee_number: DF.Data | None
+		encashment_date: DF.Date | None
+		external_work_history: DF.Table[EmployeeExternalWorkHistory]
+		family_background: DF.SmallText | None
+		feedback: DF.SmallText | None
+		final_confirmation_date: DF.Date | None
+		first_name: DF.Data
+		gender: DF.Link
+		health_details: DF.SmallText | None
+		held_on: DF.Date | None
+		holiday_list: DF.Link | None
+		iban: DF.Data | None
+		image: DF.AttachImage | None
+		internal_work_history: DF.Table[EmployeeInternalWorkHistory]
+		last_name: DF.Data | None
+		leave_encashed: DF.Literal["", "Yes", "No"]
+		lft: DF.Int
+		marital_status: DF.Literal["", "Single", "Married", "Divorced", "Widowed"]
+		middle_name: DF.Data | None
+		naming_series: DF.Literal["HR-EMP-"]
+		new_workplace: DF.Data | None
+		notice_number_of_days: DF.Int
+		old_parent: DF.Data | None
+		passport_number: DF.Data | None
+		permanent_accommodation_type: DF.Literal["", "Rented", "Owned"]
+		permanent_address: DF.SmallText | None
+		person_to_be_contacted: DF.Data | None
+		personal_email: DF.Data | None
+		place_of_issue: DF.Data | None
+		prefered_contact_email: DF.Literal["", "Company Email", "Personal Email", "User ID"]
+		prefered_email: DF.Data | None
+		reason_for_leaving: DF.SmallText | None
+		relation: DF.Data | None
+		relieving_date: DF.Date | None
+		reports_to: DF.Link | None
+		resignation_letter_date: DF.Date | None
+		rgt: DF.Int
+		salary_currency: DF.Link | None
+		salary_mode: DF.Literal["", "Bank", "Cash", "Cheque"]
+		salutation: DF.Link | None
+		scheduled_confirmation_date: DF.Date | None
+		status: DF.Literal["Active", "Inactive", "Suspended", "Left"]
+		unsubscribed: DF.Check
+		user_id: DF.Link | None
+		valid_upto: DF.Date | None
+	# end: auto-generated types
+
 	nsm_parent_field = "reports_to"
 
 	def autoname(self):
@@ -72,6 +160,16 @@ class Employee(NestedSet):
 			self.validate_for_enabled_user_id(data.get("enabled", 0))
 			self.validate_duplicate_user_id()
 
+	def validate_auto_user_creation(self):
+		if self.create_user_automatically and not (
+			self.prefered_email or self.company_email or self.personal_email
+		):
+			frappe.throw(
+				_("Company or Personal Email is mandatory when 'Create User Automatically' is enabled"),
+				frappe.MandatoryError,
+				title=_("Auto User Creation Error"),
+			)
+
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
 
@@ -82,6 +180,22 @@ class Employee(NestedSet):
 			self.update_user()
 			self.update_user_permissions()
 		self.reset_employee_emails_cache()
+
+	def before_insert(self):
+		self.validate_auto_user_creation()
+
+	def after_insert(self):
+		if not self.create_user_automatically:
+			return
+
+		if self.user_id:
+			return
+
+		create_user(
+			employee=self.name,
+			email=self.prefered_email or self.company_email or self.personal_email,
+			create_user_permission=self.create_user_permission,
+		)
 
 	def update_user_permissions(self):
 		if not self.has_value_changed("user_id") and not self.has_value_changed("create_user_permission"):
@@ -183,13 +297,11 @@ class Employee(NestedSet):
 				throw(_("Please enter relieving date."))
 
 	def validate_for_enabled_user_id(self, enabled):
-		if self.status != "Active":
-			return
-
 		if enabled is None:
 			frappe.throw(_("User {0} does not exist").format(self.user_id))
-		if enabled == 0:
-			frappe.throw(_("User {0} is disabled").format(self.user_id), EmployeeUserDisabledError)
+
+		if self.status != "Active" and enabled or self.status == "Active" and enabled == 0:
+			frappe.db.set_value("User", self.user_id, "enabled", not enabled)
 
 	def validate_duplicate_user_id(self):
 		Employee = frappe.qb.DocType("Employee")
@@ -304,7 +416,7 @@ def is_holiday(employee, date=None, raise_exception=True, only_non_weekly=False,
 
 
 @frappe.whitelist()
-def deactivate_sales_person(status=None, employee=None):
+def deactivate_sales_person(status: str | None = None, employee: str | None = None):
 	if status == "Left":
 		sales_person = frappe.db.get_value("Sales Person", {"Employee": employee})
 		if sales_person:
@@ -312,10 +424,17 @@ def deactivate_sales_person(status=None, employee=None):
 
 
 @frappe.whitelist()
-def create_user(employee, user=None, email=None):
+def create_user(employee: str, email: str | None = None, create_user_permission: int = 0) -> str:
 	emp = frappe.get_doc("Employee", employee)
+	if emp.user_id:
+		frappe.throw(_("Employee {0} already has a linked user").format(emp.name))
 
+	if not email:
+		frappe.throw(_("Email is required to create a user"))
+
+	email = validate_email_address(email, True)
 	employee_name = emp.employee_name.split(" ")
+	first_name = employee_name[0]
 	middle_name = last_name = ""
 
 	if len(employee_name) >= 3:
@@ -324,16 +443,10 @@ def create_user(employee, user=None, email=None):
 	elif len(employee_name) == 2:
 		last_name = employee_name[1]
 
-	first_name = employee_name[0]
-
-	if email:
-		emp.prefered_email = email
-
 	user = frappe.new_doc("User")
 	user.update(
 		{
-			"name": emp.employee_name,
-			"email": emp.prefered_email,
+			"email": email,
 			"enabled": 1,
 			"first_name": first_name,
 			"middle_name": middle_name,
@@ -344,9 +457,18 @@ def create_user(employee, user=None, email=None):
 			"bio": emp.bio,
 		}
 	)
+	emp.db_set("user_id", email)
+	user.append_roles("Employee")
 	user.insert()
+
 	emp.user_id = user.name
+	emp.create_user_permission = cint(create_user_permission)
 	emp.save()
+
+	if cint(create_user_permission):
+		add_user_permission("Employee", emp.name, user.name)
+		add_user_permission("Company", emp.company, user.name)
+
 	return user.name
 
 
@@ -384,7 +506,13 @@ def get_employee_emails(employee_list):
 
 
 @frappe.whitelist()
-def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False):
+def get_children(
+	doctype: str,
+	parent: str | None = None,
+	company: str | None = None,
+	is_root: bool = False,
+	is_tree: bool = False,
+):
 	filters = [["status", "=", "Active"]]
 	if company and company != "All Companies":
 		filters.append(["company", "=", company])
@@ -428,3 +556,59 @@ def has_upload_permission(doc, ptype="read", user=None):
 	if get_doc_permissions(doc, user=user, ptype=ptype).get(ptype):
 		return True
 	return doc.user_id == user
+
+
+@frappe.whitelist()
+def get_contact_details(employee: str) -> dict:
+	"""
+	Returns basic contact details for the given employee.
+
+	Email is selected based on the following priority:
+	1. Prefered Email
+	2. Company Email
+	3. Personal Email
+	4. User ID
+	"""
+	if not employee:
+		frappe.throw(msg=_("Employee is required"), title=_("Missing Parameter"))
+
+	frappe.has_permission("Employee", "read", employee, throw=True)
+
+	return _get_contact_details(employee)
+
+
+def _get_contact_details(employee: str) -> dict:
+	contact_data = frappe.db.get_value(
+		"Employee",
+		employee,
+		[
+			"employee_name",
+			"prefered_email",
+			"company_email",
+			"personal_email",
+			"user_id",
+			"cell_number",
+			"designation",
+			"department",
+		],
+		as_dict=True,
+	)
+
+	if not contact_data:
+		frappe.throw(msg=_("Employee {0} not found").format(employee), title=_("Not Found"))
+
+	# Email with priority
+	employee_email = (
+		contact_data.get("prefered_email")
+		or contact_data.get("company_email")
+		or contact_data.get("personal_email")
+		or contact_data.get("user_id")
+	)
+
+	return {
+		"contact_display": contact_data.get("employee_name"),
+		"contact_email": employee_email,
+		"contact_mobile": contact_data.get("cell_number"),
+		"contact_designation": contact_data.get("designation"),
+		"contact_department": contact_data.get("department"),
+	}

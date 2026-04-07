@@ -1,0 +1,23 @@
+{
+ "action": "View Report",
+ "action_label": "View Sales Order Analysis",
+ "creation": "2026-02-23 20:23:26.469799",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-24 16:57:14.075341",
+ "modified_by": "Administrator",
+ "name": "View Sales Order Analysis",
+ "owner": "Administrator",
+ "reference_report": "Sales Order Analysis",
+ "report_description": "View Sales Order Analysis",
+ "report_reference_doctype": "Sales Order",
+ "report_type": "Script Report",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "View Sales Order Analysis",
+ "validate_action": 1
+}

@@ -1,0 +1,20 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Bill of Materials",
+ "creation": "2026-02-20 13:31:41.740588",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-23 20:38:57.652419",
+ "modified_by": "Administrator",
+ "name": "Create Bill of Materials",
+ "owner": "Administrator",
+ "reference_document": "BOM",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Create Bill of Materials",
+ "validate_action": 1
+}

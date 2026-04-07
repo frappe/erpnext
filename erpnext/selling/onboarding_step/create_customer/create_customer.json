@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Customer",
+ "creation": "2026-02-20 13:38:17.043231",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "form_tour": "Customer Form Tour",
+ "idx": 1,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-24 16:57:14.111070",
+ "modified_by": "Administrator",
+ "name": "Create Customer",
+ "owner": "Administrator",
+ "reference_document": "Customer",
+ "show_form_tour": 1,
+ "show_full_form": 1,
+ "title": "Create Customer",
+ "validate_action": 1
+}

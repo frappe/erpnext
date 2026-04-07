@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.utils import flt
+from pypika.terms import Bracket, LiteralValue
 
 import erpnext
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (
@@ -31,6 +32,7 @@ def _execute(filters=None, additional_table_columns=None):
 
 	item_list = get_items(filters, additional_table_columns)
 	aii_account_map = get_aii_accounts()
+	default_taxes = {}
 	if item_list:
 		itemised_tax, tax_columns = get_tax_accounts(
 			item_list,
@@ -39,6 +41,9 @@ def _execute(filters=None, additional_table_columns=None):
 			doctype="Purchase Invoice",
 			tax_doctype="Purchase Taxes and Charges",
 		)
+		for tax in tax_columns:
+			default_taxes[f"{tax}_rate"] = 0
+			default_taxes[f"{tax}_amount"] = 0
 
 	po_pr_map = get_purchase_receipts_against_purchase_order(item_list)
 
@@ -86,6 +91,7 @@ def _execute(filters=None, additional_table_columns=None):
 
 		total_tax = 0
 		total_other_charges = 0
+		row.update(default_taxes.copy())
 		for tax, details in itemised_tax.get(d.name, {}).items():
 			row.update(
 				{
@@ -361,15 +367,12 @@ def get_items(filters, additional_table_columns):
 
 	from frappe.desk.reportview import build_match_conditions
 
-	query, params = query.walk()
-	match_conditions = build_match_conditions(doctype)
-
-	if match_conditions:
-		query += " and " + match_conditions
+	if match_conditions := build_match_conditions(doctype):
+		query = query.where(Bracket(LiteralValue(match_conditions)))
 
 	query = apply_order_by_conditions(doctype, query, filters)
 
-	return frappe.db.sql(query, params, as_dict=True)
+	return query.run(as_dict=True)
 
 
 def get_aii_accounts():

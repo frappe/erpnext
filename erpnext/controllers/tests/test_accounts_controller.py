@@ -5,7 +5,6 @@
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, getdate, nowdate
 from frappe.utils.data import getdate as convert_to_date
 
@@ -20,6 +19,7 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 )
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 def make_customer(customer_name, currency=None):
@@ -51,7 +51,7 @@ def make_supplier(supplier_name, currency=None):
 		return supplier_name
 
 
-class TestAccountsController(IntegrationTestCase):
+class TestAccountsController(ERPNextTestSuite):
 	"""
 	Test Exchange Gain/Loss booking on various scenarios.
 	Test Cases are numbered for better organization
@@ -72,9 +72,7 @@ class TestAccountsController(IntegrationTestCase):
 		self.create_item()
 		self.create_parties()
 		self.clear_old_entries()
-
-	def tearDown(self):
-		frappe.db.rollback()
+		frappe.flags.is_reverse_depr_entry = False
 
 	def create_company(self):
 		company_name = "_Test Company"
@@ -810,9 +808,7 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertEqual(exc_je_for_si, [])
 		self.assertEqual(exc_je_for_pe, [])
 
-	@IntegrationTestCase.change_settings(
-		"Stock Settings", {"allow_internal_transfer_at_arms_length_price": 1}
-	)
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_internal_transfer_at_arms_length_price": 1})
 	def test_16_internal_transfer_at_arms_length_price(self):
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -873,7 +869,7 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertEqual(pi.items[0].rate, arms_length_price)
 		self.assertEqual(pi.items[0].valuation_rate, 100)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings", {"exchange_gain_loss_posting_date": "Reconciliation Date"}
 	)
 	def test_17_gain_loss_posting_date_for_normal_payment(self):
@@ -936,9 +932,9 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertEqual(exc_je_for_si, [])
 		self.assertEqual(exc_je_for_pe, [])
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
-		{"add_taxes_from_item_tax_template": 0, "add_taxes_from_taxes_and_charges_template": 1},
+		{"add_taxes_from_taxes_and_charges_template": 1, "add_taxes_from_item_tax_template": 0},
 	)
 	def test_18_fetch_taxes_based_on_taxes_and_charges_template(self):
 		# Create a Sales Taxes and Charges Template
@@ -968,7 +964,7 @@ class TestAccountsController(IntegrationTestCase):
 
 		self.assertEqual(sinv.total_taxes_and_charges, 4.5)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"add_taxes_from_item_tax_template": 1, "add_taxes_from_taxes_and_charges_template": 0},
 	)
@@ -1571,25 +1567,10 @@ class TestAccountsController(IntegrationTestCase):
 
 		frappe.db.set_value("Company", self.company, "cost_center", cc)
 
-	def setup_dimensions(self):
-		# create dimension
-		from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
-			create_dimension,
-		)
-
-		create_dimension()
-		# make it non-mandatory
-		loc = frappe.get_doc("Accounting Dimension", "Location")
-		for x in loc.dimension_defaults:
-			x.mandatory_for_bs = False
-			x.mandatory_for_pl = False
-		loc.save()
-
 	def test_90_dimensions_filter(self):
 		"""
 		Test workings of dimension filters
 		"""
-		self.setup_dimensions()
 		rate_in_account_currency = 1
 
 		# Invoices
@@ -1657,7 +1638,6 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertEqual(len(pr.payments), 1)
 
 	def test_91_cr_note_should_inherit_dimension(self):
-		self.setup_dimensions()
 		rate_in_account_currency = 1
 
 		# Invoice
@@ -1702,7 +1682,6 @@ class TestAccountsController(IntegrationTestCase):
 
 	def test_92_dimension_inhertiance_exc_gain_loss(self):
 		# Sales Invoice in Foreign Currency
-		self.setup_dimensions()
 		rate_in_account_currency = 1
 		dpt = "Research & Development - _TC"
 
@@ -1738,7 +1717,6 @@ class TestAccountsController(IntegrationTestCase):
 		)
 
 	def test_93_dimension_inheritance_on_advance(self):
-		self.setup_dimensions()
 		dpt = "Research & Development - _TC"
 
 		adv = self.create_payment_entry(amount=1, source_exc_rate=85)
@@ -2479,11 +2457,11 @@ class TestAccountsController(IntegrationTestCase):
 		po.items[0].delivered_by_supplier = 1
 		po.save()
 
-	@IntegrationTestCase.change_settings("Global Defaults", {"use_posting_datetime_for_naming_documents": 1})
+	@ERPNextTestSuite.change_settings("Global Defaults", {"use_posting_datetime_for_naming_documents": 1})
 	def test_document_naming_rule_based_on_posting_date(self):
 		frappe.new_doc(
 			"Document Naming Rule", document_type="Sales Invoice", prefix="SI-.MM.-.YYYY.-"
-		).submit()
+		).insert()
 
 		si = create_sales_invoice(do_not_save=True)
 		si.set_posting_time = 1

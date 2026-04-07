@@ -166,6 +166,7 @@
    "default": "0",
    "fieldname": "is_group",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Is Group"
   },
   {
@@ -187,7 +188,6 @@
    "fieldname": "parent_company",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
-   "in_list_view": 1,
    "label": "Parent Company",
    "options": "Company"
   },
@@ -245,6 +245,7 @@
    "fieldname": "default_currency",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_list_view": 1,
    "label": "Default Currency",
    "options": "Currency",
    "reqd": 1
@@ -468,6 +469,7 @@
    "default": "1",
    "fieldname": "enable_perpetual_inventory",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Enable Perpetual Inventory"
   },
   {
@@ -940,7 +942,6 @@
    "description": "Accounting entries are frozen up to this date. Only users with the specified role can create or modify entries before this date.",
    "fieldname": "accounts_frozen_till_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "Accounts Frozen Till Date"
   },
   {
@@ -955,7 +956,6 @@
   {
    "fieldname": "role_allowed_for_frozen_entries",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Roles Allowed to Set and Edit Frozen Account Entries",
    "options": "Role"
   },
@@ -970,7 +970,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2025-11-16 16:51:27.624096",
+ "modified": "2026-03-09 17:15:33.819426",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

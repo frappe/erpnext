@@ -32,6 +32,7 @@
   {
    "fieldname": "purpose",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Purpose",
    "options": "\nIssue\nReceipt\nTransfer\nTransfer and Issue",
    "reqd": 1
@@ -97,7 +98,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-05-30 17:01:55.864353",
+ "modified": "2026-03-09 17:19:02.087333",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement",

@@ -4,6 +4,7 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.query_builder import DocType
 
 
 class PartyType(Document):
@@ -24,29 +25,36 @@ class PartyType(Document):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_party_type(doctype, txt, searchfield, start, page_len, filters):
-	cond = ""
-	account_type = None
+def get_party_type(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	PartyType = DocType("Party Type")
+	get_party_type_query = frappe.qb.from_(PartyType).select(PartyType.name).orderby(PartyType.name)
+
+	condition_list = []
 
 	if filters and filters.get("account"):
 		account_type = frappe.db.get_value("Account", filters.get("account"), "account_type")
 		if account_type:
 			if account_type in ["Receivable", "Payable"]:
 				# Include Employee regardless of its configured account_type, but still respect the text filter
-				cond = "and (account_type = %(account_type)s or name = 'Employee')"
+				condition_list.append(
+					(PartyType.account_type == account_type) | (PartyType.name == "Employee")
+				)
 			else:
-				cond = "and account_type = %(account_type)s"
+				condition_list.append(PartyType.account_type == account_type)
 
-	# Build parameters dictionary
-	params = {"txt": "%" + txt + "%", "start": start, "page_len": page_len}
-	if account_type:
-		params["account_type"] = account_type
+	for condition in condition_list:
+		get_party_type_query = get_party_type_query.where(condition)
 
-	result = frappe.db.sql(
-		f"""select name from `tabParty Type`
-        where `{searchfield}` LIKE %(txt)s {cond}
-        order by name limit %(page_len)s offset %(start)s""",
-		params,
-	)
+	if frappe.local.lang == "en":
+		get_party_type_query = get_party_type_query.where(getattr(PartyType, searchfield).like(f"%{txt}%"))
+		get_party_type_query = get_party_type_query.limit(page_len)
+		get_party_type_query = get_party_type_query.offset(start)
+
+		result = get_party_type_query.run()
+	else:
+		result = get_party_type_query.run()
+		test_str = txt.lower()
+		result = [row for row in result if test_str in frappe._(row[0]).lower()]
+		result = result[start : start + page_len]
 
 	return result or []

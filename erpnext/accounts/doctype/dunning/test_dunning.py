@@ -4,37 +4,20 @@ import json
 
 import frappe
 from frappe.model import mapper
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, nowdate, today
 
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
-	unlink_payment_on_cancel_of_invoice,
-)
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	create_dunning as create_dunning_from_sales_invoice,
 )
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice_against_cost_center,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Company", "Cost Center"]
 
-
-class TestDunning(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		create_dunning_type("First Notice", fee=0.0, interest=0.0, is_default=1)
-		create_dunning_type("Second Notice", fee=10.0, interest=10.0, is_default=0)
-		unlink_payment_on_cancel_of_invoice()
-
-	@classmethod
-	def tearDownClass(cls):
-		unlink_payment_on_cancel_of_invoice(0)
-		super().tearDownClass()
-
+class TestDunning(ERPNextTestSuite):
 	def test_dunning_without_fees(self):
 		dunning = create_dunning(overdue_days=20)
 

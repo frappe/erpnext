@@ -161,6 +161,17 @@
    "type": "Link"
   },
   {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Sales Taxes",
+   "link_to": "Sales Taxes and Charges Template",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
    "child": 0,
    "collapsible": 1,
    "icon": "lock-keyhole-open",
@@ -277,9 +288,10 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-23 16:43:27.989825",
+ "modified": "2026-02-23 22:20:51.043478",
  "modified_by": "Administrator",
  "module": "Accounts",
+ "module_onboarding": "Accounting Onboarding",
  "name": "Accounts Setup",
  "owner": "Administrator",
  "standard": 1,

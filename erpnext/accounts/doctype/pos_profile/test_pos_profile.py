@@ -2,19 +2,18 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import cint
 
 from erpnext.accounts.doctype.pos_profile.pos_profile import (
 	get_child_nodes,
 )
 from erpnext.stock.get_item_details import get_pos_profile
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Item"]
 
-
-class TestPOSProfile(IntegrationTestCase):
+class TestPOSProfile(ERPNextTestSuite):
 	def test_pos_profile(self):
+		frappe.set_user("Administrator")
 		make_pos_profile()
 
 		pos_profile = get_pos_profile("_Test Company") or {}
@@ -35,8 +34,6 @@ class TestPOSProfile(IntegrationTestCase):
 
 			self.assertEqual(len(items), products_count[0][0])
 			self.assertEqual(len(customers), customers_count[0][0])
-
-		frappe.db.sql("delete from `tabPOS Profile`")
 
 	def test_disabled_pos_profile_creation(self):
 		make_pos_profile(name="_Test POS Profile 001", disabled=1)

@@ -324,10 +324,8 @@ def get_conditions(filters):
 
 	from frappe.desk.reportview import build_match_conditions
 
-	match_conditions = build_match_conditions("GL Entry")
-
-	if match_conditions:
-		conditions.append(match_conditions)
+	if match_conditions := build_match_conditions("GL Entry"):
+		conditions.append(f"({match_conditions})")
 
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
@@ -678,13 +676,20 @@ def get_columns(filters):
 			"options": "GL Entry",
 			"hidden": 1,
 		},
-		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 120},
+		{
+			"label": _("Posting Date"),
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
+			"width": 120,
+			"sticky": True,
+		},
 		{
 			"label": _("Account"),
 			"fieldname": "account",
 			"fieldtype": "Link",
 			"options": "Account",
 			"width": 180,
+			"sticky": True,
 		},
 		{
 			"label": _("Debit ({0})").format(currency),
@@ -726,7 +731,7 @@ def get_columns(filters):
 				"options": "transaction_currency",
 			},
 			{
-				"label": "Transaction Currency",
+				"label": _("Transaction Currency"),
 				"fieldname": "transaction_currency",
 				"fieldtype": "Link",
 				"options": "Currency",

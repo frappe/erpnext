@@ -7,7 +7,9 @@ import json
 import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_company_address
+from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.desk.notifications import clear_doctype_notifications
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder import DocType
@@ -395,6 +397,9 @@ class DeliveryNote(SellingController):
 		)
 
 	def validate_sales_invoice_references(self):
+		if self.is_return:
+			return
+
 		self._validate_dependent_item_fields(
 			"against_sales_invoice", "si_detail", _("References to Sales Invoices are Incomplete")
 		)
@@ -846,7 +851,9 @@ def get_returned_qty_map(delivery_note):
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None, args=None):
+def make_sales_invoice(
+	source_name: str, target_doc: str | Document | None = None, args: dict | str | None = None
+):
 	if args is None:
 		args = {}
 	if isinstance(args, str):
@@ -975,9 +982,16 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 
 
 @frappe.whitelist()
-def make_delivery_trip(source_name, target_doc=None, kwargs=None):
+def make_delivery_trip(
+	source_name: str, target_doc: str | Document | None = None, kwargs: dict | None = None
+):
 	if not target_doc:
 		target_doc = frappe.new_doc("Delivery Trip")
+
+	def update_address(source_doc, target_doc, source_parent):
+		target_doc.address = source_doc.shipping_address_name or source_doc.customer_address
+		target_doc.customer_address = source_doc.shipping_address or source_doc.address_display
+
 	doclist = get_mapped_doc(
 		"Delivery Note",
 		source_name,
@@ -987,11 +1001,10 @@ def make_delivery_trip(source_name, target_doc=None, kwargs=None):
 				"on_parent": target_doc,
 				"field_map": {
 					"name": "delivery_note",
-					"shipping_address_name": "address",
-					"shipping_address": "customer_address",
 					"contact_person": "contact",
 					"contact_display": "customer_contact",
 				},
+				"postprocess": update_address,
 			},
 		},
 		ignore_child_tables=True,
@@ -1001,7 +1014,9 @@ def make_delivery_trip(source_name, target_doc=None, kwargs=None):
 
 
 @frappe.whitelist()
-def make_installation_note(source_name, target_doc=None, kwargs=None):
+def make_installation_note(
+	source_name: str, target_doc: str | Document | None = None, kwargs: dict | None = None
+):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.installed_qty)
 		target.serial_no = obj.serial_no
@@ -1029,7 +1044,7 @@ def make_installation_note(source_name, target_doc=None, kwargs=None):
 
 
 @frappe.whitelist()
-def make_packing_slip(source_name, target_doc=None):
+def make_packing_slip(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 
@@ -1084,7 +1099,7 @@ def make_packing_slip(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_shipment(source_name, target_doc=None):
+def make_shipment(source_name: str, target_doc: str | Document | None = None):
 	def postprocess(source, target):
 		user = frappe.db.get_value(
 			"User", frappe.session.user, ["email", "full_name", "phone", "mobile_no"], as_dict=1
@@ -1103,18 +1118,24 @@ def make_shipment(source_name, target_doc=None):
 		# As we are using session user details in the pickup_contact then pickup_contact_person will be session user
 		target.pickup_contact_person = frappe.session.user
 
-		if source.contact_person:
+		contact_person = source.contact_person or get_default_contact("Customer", source.customer)
+		if contact_person:
 			contact = frappe.db.get_value(
-				"Contact", source.contact_person, ["email_id", "phone", "mobile_no"], as_dict=1
+				"Contact", contact_person, ["email_id", "phone", "mobile_no"], as_dict=1
 			)
-			delivery_contact_display = f"{source.contact_display}"
-			if contact:
+
+			delivery_contact_display = source.contact_display or contact_person or ""
+			if contact and not source.contact_display:
 				if contact.email_id:
 					delivery_contact_display += "<br>" + contact.email_id
 				if contact.phone:
 					delivery_contact_display += "<br>" + contact.phone
 				if contact.mobile_no and not contact.phone:
 					delivery_contact_display += "<br>" + contact.mobile_no
+
+			target.delivery_contact_name = contact_person
+			if contact and contact.email_id and not target.delivery_contact_email:
+				target.delivery_contact_email = contact.email_id
 			target.delivery_contact = delivery_contact_display
 
 		if source.shipping_address_name:
@@ -1159,20 +1180,20 @@ def make_shipment(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_sales_return(source_name, target_doc=None):
+def make_sales_return(source_name: str, target_doc: str | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Delivery Note", source_name, target_doc)
 
 
 @frappe.whitelist()
-def update_delivery_note_status(docname, status):
+def update_delivery_note_status(docname: str, status: str):
 	dn = frappe.get_lazy_doc("Delivery Note", docname)
 	dn.update_status(status)
 
 
 @frappe.whitelist()
-def make_inter_company_purchase_receipt(source_name, target_doc=None):
+def make_inter_company_purchase_receipt(source_name: str, target_doc: str | Document | None = None):
 	return make_inter_company_transaction("Delivery Note", source_name, target_doc)
 
 

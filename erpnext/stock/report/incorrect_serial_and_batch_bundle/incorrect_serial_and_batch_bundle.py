@@ -134,7 +134,7 @@ def get_linked_cancelled_sabb(filters):
 
 
 @frappe.whitelist()
-def fix_sabb_entries(selected_rows):
+def fix_sabb_entries(selected_rows: str | list):
 	if isinstance(selected_rows, str):
 		selected_rows = frappe.parse_json(selected_rows)
 

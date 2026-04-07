@@ -125,7 +125,7 @@ class BlanketOrder(Document):
 
 
 @frappe.whitelist()
-def make_order(source_name):
+def make_order(source_name: str):
 	doctype = frappe.flags.args.doctype
 
 	def update_doc(source_doc, target_doc, source_parent):

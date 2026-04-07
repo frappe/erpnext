@@ -303,10 +303,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	}
 
-	onload_post_render() {
-		this.frm.get_field("accounts").grid.set_multiple_add("account");
-	}
-
 	load_defaults() {
 		//this.frm.show_print_first = true;
 		if (this.frm.doc.__islocal && this.frm.doc.company) {

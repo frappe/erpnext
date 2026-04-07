@@ -99,7 +99,7 @@ def identify_is_group(child):
 
 
 @frappe.whitelist()
-def get_chart(chart_template, existing_company=None):
+def get_chart(chart_template: str | None, existing_company: str | None = None):
 	chart = {}
 	if existing_company:
 		return get_account_tree_from_existing_company(existing_company)
@@ -132,7 +132,7 @@ def get_chart(chart_template, existing_company=None):
 
 
 @frappe.whitelist()
-def get_charts_for_country(country, with_standard=False):
+def get_charts_for_country(country: str, with_standard: bool = False):
 	charts = []
 
 	def _get_chart_name(content):
@@ -225,7 +225,7 @@ def build_account_tree(tree, parent, all_accounts):
 
 
 @frappe.whitelist()
-def validate_bank_account(coa, bank_account):
+def validate_bank_account(coa: str, bank_account: str):
 	accounts = []
 	chart = get_chart(coa)
 
@@ -244,7 +244,9 @@ def validate_bank_account(coa, bank_account):
 
 
 @frappe.whitelist()
-def build_tree_from_json(chart_template, chart_data=None, from_coa_importer=False):
+def build_tree_from_json(
+	chart_template: str, chart_data: dict | None = None, from_coa_importer: bool = False
+):
 	"""get chart template from its folder and parse the json to be rendered as tree"""
 	chart = chart_data or get_chart(chart_template)
 

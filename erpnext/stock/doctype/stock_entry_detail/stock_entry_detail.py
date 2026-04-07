@@ -26,6 +26,7 @@ class StockEntryDetail(Document):
 		basic_rate: DF.Currency
 		batch_no: DF.Link | None
 		bom_no: DF.Link | None
+		bom_secondary_item: DF.Data | None
 		conversion_factor: DF.Float
 		cost_center: DF.Link | None
 		customer_provided_item_cost: DF.Currency
@@ -34,7 +35,7 @@ class StockEntryDetail(Document):
 		has_item_scanned: DF.Check
 		image: DF.Attach | None
 		is_finished_item: DF.Check
-		is_scrap_item: DF.Check
+		is_legacy_scrap_item: DF.Check
 		item_code: DF.Link
 		item_group: DF.Data | None
 		item_name: DF.Data | None
@@ -66,6 +67,7 @@ class StockEntryDetail(Document):
 		t_warehouse: DF.Link | None
 		transfer_qty: DF.Float
 		transferred_qty: DF.Float
+		type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
 		uom: DF.Link
 		use_serial_batch_fields: DF.Check
 		valuation_rate: DF.Currency

@@ -193,17 +193,6 @@
    "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
-   "label": "Project Profitability",
-   "link_to": "Project Profitability",
-   "link_type": "Report",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
    "label": "Delayed Tasks Summary",
    "link_to": "Delayed Tasks Summary",
    "link_type": "Report",
@@ -223,9 +212,10 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-10 00:06:13.151947",
+ "modified": "2026-02-23 22:49:54.941187",
  "modified_by": "Administrator",
  "module": "Projects",
+ "module_onboarding": "Projects Onboarding",
  "name": "Projects",
  "owner": "Administrator",
  "standard": 1,

@@ -649,7 +649,7 @@ class GrossProfitGenerator:
 						new_row = row
 						self.set_average_based_on_payment_term_portion(new_row, row, invoice_portion)
 					else:
-						new_row.qty += flt(row.qty)
+						new_row.qty = flt((new_row.qty + row.qty), self.float_precision)
 						self.set_average_based_on_payment_term_portion(new_row, row, invoice_portion, True)
 
 				new_row = self.set_average_rate(new_row)
@@ -659,11 +659,17 @@ class GrossProfitGenerator:
 					if i == 0:
 						new_row = row
 					else:
-						new_row.qty += flt(row.qty)
-						new_row.buying_amount += flt(row.buying_amount, self.currency_precision)
-						new_row.base_amount += flt(row.base_amount, self.currency_precision)
+						new_row.qty = flt((new_row.qty + row.qty), self.float_precision)
+						new_row.buying_amount = flt(
+							(new_row.buying_amount + row.buying_amount), self.currency_precision
+						)
+						new_row.base_amount = flt(
+							(new_row.base_amount + row.base_amount), self.currency_precision
+						)
 						if self.filters.get("group_by") == "Sales Person":
-							new_row.allocated_amount += flt(row.allocated_amount, self.currency_precision)
+							new_row.allocated_amount = flt(
+								(new_row.allocated_amount + row.allocated_amount), self.currency_precision
+							)
 				new_row = self.set_average_rate(new_row)
 				self.grouped_data.append(new_row)
 

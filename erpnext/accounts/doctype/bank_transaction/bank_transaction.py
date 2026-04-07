@@ -139,6 +139,8 @@ class BankTransaction(Document):
 		self.set_status()
 
 	def on_cancel(self):
+		self.ignore_linked_doctypes = ["GL Entry"]
+
 		for payment_entry in self.payment_entries:
 			self.delink_payment_entry(payment_entry)
 
@@ -373,11 +375,12 @@ def get_clearance_details(transaction, payment_entry, bt_allocations, gl_entries
 			("unallocated_amount", "bank_account"),
 			as_dict=True,
 		)
+		bt_bank_account = frappe.db.get_value("Bank Account", bt.bank_account, "account")
 
-		if bt.bank_account != gl_bank_account:
+		if bt_bank_account != gl_bank_account:
 			frappe.throw(
 				_("Bank Account {} in Bank Transaction {} is not matching with Bank Account {}").format(
-					bt.bank_account, payment_entry.payment_entry, gl_bank_account
+					bt_bank_account, payment_entry.payment_entry, gl_bank_account
 				)
 			)
 

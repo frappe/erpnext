@@ -152,7 +152,7 @@ class RepostAccountingLedger(Document):
 
 
 @frappe.whitelist()
-def start_repost(account_repost_doc=str) -> None:
+def start_repost(account_repost_doc: str | None = None) -> None:
 	from erpnext.accounts.general_ledger import make_reverse_gl_entries
 
 	frappe.flags.through_repost_accounting_ledger = True
@@ -286,7 +286,9 @@ def validate_docs_for_voucher_types(doc_voucher_types):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_repost_allowed_types(doctype, txt, searchfield, start, page_len, filters):
+def get_repost_allowed_types(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
 	filters = {"allowed": True}
 
 	if txt:

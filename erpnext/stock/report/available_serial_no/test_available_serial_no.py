@@ -2,15 +2,15 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, today
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestStockLedgerReeport(IntegrationTestCase):
+class TestStockLedgerReeport(ERPNextTestSuite):
 	def setUp(self) -> None:
 		item = create_item("_Test Item with Serial No", is_stock_item=1)
 		item.has_serial_no = 1
@@ -23,9 +23,6 @@ class TestStockLedgerReeport(IntegrationTestCase):
 			to_date=add_days(today(), 30),
 			item_code="_Test Item With Serial No",
 		)
-
-	def tearDown(self) -> None:
-		frappe.db.rollback()
 
 	def test_available_serial_no(self):
 		report = frappe.get_doc("Report", "Available Serial No")

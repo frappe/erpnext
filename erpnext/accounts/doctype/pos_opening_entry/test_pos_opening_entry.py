@@ -3,34 +3,20 @@
 
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestPOSOpeningEntry(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		frappe.db.sql("delete from `tabPOS Opening Entry`")
-		cls.enterClassContext(cls.change_settings("POS Settings", {"invoice_type": "POS Invoice"}))
-
-	@classmethod
-	def tearDownClass(cls):
-		frappe.db.sql("delete from `tabPOS Opening Entry`")
-
+class TestPOSOpeningEntry(ERPNextTestSuite):
 	def setUp(self):
-		# Make stock available for POS Sales
-		frappe.db.sql("delete from `tabPOS Opening Entry`")
+		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
 		make_stock_entry(target="_Test Warehouse - _TC", qty=2, basic_rate=100)
 		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
 
 		self.init_user_and_profile = init_user_and_profile
-
-	def tearDown(self):
-		frappe.set_user("Administrator")
-		frappe.db.sql("delete from `tabPOS Profile`")
 
 	def test_pos_opening_entry(self):
 		test_user, pos_profile = self.init_user_and_profile()
@@ -60,7 +46,9 @@ class TestPOSOpeningEntry(IntegrationTestCase):
 		self.assertEqual(opening_entry_1.status, "Open")
 		self.assertEqual(opening_entry_1.user, test_user.name)
 
-		cashier_user = create_user("test_cashier@example.com", "Accounts Manager", "Sales Manager")
+		cashier_user = create_user(
+			"test_cashier@example.com", "Accounts Manager", "Sales Manager", "Stock User", "System Manager"
+		)
 		frappe.set_user(cashier_user.name)
 
 		pos_profile2 = make_pos_profile(name="_Test POS Profile 2")

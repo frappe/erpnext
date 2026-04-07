@@ -15,7 +15,7 @@ from frappe.database.operator_map import OPERATOR_MAP
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, date_diff, flt, getdate
-from pypika.terms import LiteralValue
+from pypika.terms import Bracket, LiteralValue
 
 from erpnext import get_company_currency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -732,7 +732,7 @@ class FinancialQueryBuilder:
 		user_conditions = build_match_conditions(doctype)
 
 		if user_conditions:
-			query = query.where(LiteralValue(user_conditions))
+			query = query.where(Bracket(LiteralValue(user_conditions)))
 
 		return query.run(as_dict=True)
 

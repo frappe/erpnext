@@ -38,6 +38,7 @@
   "allow_internal_transfer_at_arms_length_price",
   "validate_material_transfer_warehouses",
   "serial_and_batch_item_settings_tab",
+  "enable_serial_and_batch_no_for_item",
   "section_break_7",
   "allow_existing_serial_no",
   "do_not_use_batchwise_valuation",
@@ -48,9 +49,8 @@
   "use_serial_batch_fields",
   "do_not_update_serial_batch_on_creation_of_auto_bundle",
   "allow_negative_stock_for_batch",
-  "serial_and_batch_bundle_section",
-  "set_serial_and_batch_bundle_naming_based_on_naming_series",
   "section_break_gnhq",
+  "set_serial_and_batch_bundle_naming_based_on_naming_series",
   "use_naming_series",
   "column_break_wslv",
   "naming_series_prefix",
@@ -74,10 +74,6 @@
   "auto_indent",
   "column_break_27",
   "reorder_email_notify",
-  "inter_warehouse_transfer_settings_section",
-  "allow_from_dn",
-  "column_break_31",
-  "allow_from_pr",
   "stock_closing_tab",
   "control_historical_stock_transactions_section",
   "stock_frozen_upto",
@@ -158,6 +154,7 @@
    "label": "Convert Item Description to Clean HTML in Transactions"
   },
   {
+   "depends_on": "enable_serial_and_batch_no_for_item",
    "fieldname": "section_break_7",
    "fieldtype": "Section Break",
    "label": "Serial & Batch Item Settings"
@@ -225,23 +222,6 @@
    "label": "Naming Series Prefix"
   },
   {
-   "fieldname": "inter_warehouse_transfer_settings_section",
-   "fieldtype": "Section Break",
-   "label": "Inter Warehouse Transfer Settings"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_from_dn",
-   "fieldtype": "Check",
-   "label": "Allow Material Transfer from Delivery Note to Sales Invoice"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_from_pr",
-   "fieldtype": "Check",
-   "label": "Allow Material Transfer from Purchase Receipt to Purchase Invoice"
-  },
-  {
    "description": "If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.",
    "fieldname": "role_allowed_to_create_edit_back_dated_transactions",
    "fieldtype": "Link",
@@ -286,10 +266,6 @@
   },
   {
    "fieldname": "column_break_27",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_31",
    "fieldtype": "Column Break"
   },
   {
@@ -456,7 +432,7 @@
   },
   {
    "default": "0",
-   "description": "If enabled, the item rate won't adjust to the valuation rate during internal transfers, but accounting will still use the valuation rate.",
+   "description": "If enabled, the item rate won't adjust to the valuation rate during internal transfers, but accounting will still use the valuation rate. This will allow the user to specify a different rate for printing or taxation purposes.",
    "fieldname": "allow_internal_transfer_at_arms_length_price",
    "fieldtype": "Check",
    "label": "Allow Internal Transfers at Arm's Length Price"
@@ -488,17 +464,13 @@
    "label": "Auto Reserve Stock"
   },
   {
-   "fieldname": "serial_and_batch_bundle_section",
-   "fieldtype": "Section Break",
-   "label": "Serial and Batch Bundle"
-  },
-  {
    "default": "0",
    "fieldname": "set_serial_and_batch_bundle_naming_based_on_naming_series",
    "fieldtype": "Check",
    "label": "Set Serial and Batch Bundle Naming Based on Naming Series"
   },
   {
+   "depends_on": "enable_serial_and_batch_no_for_item",
    "fieldname": "section_break_gnhq",
    "fieldtype": "Section Break"
   },
@@ -554,15 +526,20 @@
    "fieldname": "allow_negative_stock_for_batch",
    "fieldtype": "Check",
    "label": "Allow Negative Stock for Batch"
+  },
+  {
+   "fieldname": "enable_serial_and_batch_no_for_item",
+   "fieldtype": "Check",
+   "label": "Enable Serial / Batch No for Item"
   }
  ],
- "hide_toolbar": 1,
+ "hide_toolbar": 0,
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-16 10:36:59.921491",
+ "modified": "2026-03-27 22:39:16.812184",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

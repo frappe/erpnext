@@ -2,8 +2,10 @@
 # See license.txt
 
 # import frappe
-from frappe.tests import IntegrationTestCase
 
 
-class TestRepostPaymentLedger(IntegrationTestCase):
+from erpnext.tests.utils import ERPNextTestSuite
+
+
+class TestRepostPaymentLedger(ERPNextTestSuite):
 	pass

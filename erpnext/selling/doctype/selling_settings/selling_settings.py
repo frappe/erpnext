@@ -41,7 +41,7 @@ class SellingSettings(Document):
 		blanket_order_allowance: DF.Float
 		cust_master_name: DF.Literal["Customer Name", "Naming Series", "Auto Name"]
 		customer_group: DF.Link | None
-		deliver_scrap_items: DF.Check
+		deliver_secondary_items: DF.Check
 		dn_required: DF.Literal["No", "Yes"]
 		dont_reserve_sales_order_qty_on_sales_return: DF.Check
 		editable_bundle_item_rates: DF.Check

@@ -190,6 +190,7 @@
    "fieldtype": "Float",
    "label": "Received Qty",
    "no_copy": 1,
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -206,7 +207,8 @@
   {
    "fieldname": "rejected_qty",
    "fieldtype": "Float",
-   "label": "Rejected Qty"
+   "label": "Rejected Qty",
+   "print_hide": 1
   },
   {
    "depends_on": "eval:doc.uom != doc.stock_uom",
@@ -226,6 +228,7 @@
    "fieldtype": "Link",
    "label": "UOM",
    "options": "UOM",
+   "print_hide": 1,
    "reqd": 1
   },
   {
@@ -261,14 +264,16 @@
    "depends_on": "price_list_rate",
    "fieldname": "discount_percentage",
    "fieldtype": "Percent",
-   "label": "Discount on Price List Rate (%)"
+   "label": "Discount on Price List Rate (%)",
+   "print_hide": 1
   },
   {
    "depends_on": "price_list_rate",
    "fieldname": "discount_amount",
    "fieldtype": "Currency",
    "label": "Discount Amount",
-   "options": "currency"
+   "options": "currency",
+   "print_hide": 1
   },
   {
    "fieldname": "col_break3",
@@ -401,12 +406,14 @@
   {
    "fieldname": "weight_per_unit",
    "fieldtype": "Float",
-   "label": "Weight Per Unit"
+   "label": "Weight Per Unit",
+   "print_hide": 1
   },
   {
    "fieldname": "total_weight",
    "fieldtype": "Float",
    "label": "Total Weight",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -417,7 +424,8 @@
    "fieldname": "weight_uom",
    "fieldtype": "Link",
    "label": "Weight UOM",
-   "options": "UOM"
+   "options": "UOM",
+   "print_hide": 1
   },
   {
    "depends_on": "eval:parent.update_stock",
@@ -429,7 +437,8 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "Accepted Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "print_hide": 1
   },
   {
    "fieldname": "rejected_warehouse",
@@ -674,7 +683,8 @@
    "fieldname": "asset_location",
    "fieldtype": "Link",
    "label": "Asset Location",
-   "options": "Location"
+   "options": "Location",
+   "print_hide": 1
   },
   {
    "fieldname": "po_detail",
@@ -796,6 +806,7 @@
    "fieldtype": "Link",
    "label": "Asset Category",
    "options": "Asset Category",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -828,6 +839,7 @@
    "label": "Rate of Stock UOM",
    "no_copy": 1,
    "options": "currency",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -866,6 +878,7 @@
    "fieldtype": "Currency",
    "label": "Rate With Margin",
    "options": "currency",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -892,7 +905,8 @@
    "default": "1",
    "fieldname": "apply_tds",
    "fieldtype": "Check",
-   "label": "Consider for Tax Withholding"
+   "label": "Consider for Tax Withholding",
+   "print_hide": 1
   },
   {
    "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
@@ -918,7 +932,8 @@
    "fieldname": "wip_composite_asset",
    "fieldtype": "Link",
    "label": "WIP Composite Asset",
-   "options": "Asset"
+   "options": "Asset",
+   "print_hide": 1
   },
   {
    "depends_on": "eval:doc.use_serial_batch_fields === 0 && doc.docstatus === 0",
@@ -930,7 +945,8 @@
    "default": "0",
    "fieldname": "use_serial_batch_fields",
    "fieldtype": "Check",
-   "label": "Use Serial No / Batch Fields"
+   "label": "Use Serial No / Batch Fields",
+   "print_hide": 1
   },
   {
    "depends_on": "eval:!doc.is_fixed_asset && doc.use_serial_batch_fields === 1 && parent.update_stock === 1",
@@ -977,7 +993,8 @@
    "fieldname": "distributed_discount_amount",
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
-   "options": "currency"
+   "options": "currency",
+   "print_hide": 1
   },
   {
    "fieldname": "tax_withholding_category",
@@ -991,7 +1008,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-15 21:07:49.455930",
+ "modified": "2026-03-25 18:03:33.522195",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
