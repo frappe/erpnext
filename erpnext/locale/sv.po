@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-05 09:49+0000\n"
-"PO-Revision-Date: 2026-04-06 12:44\n"
+"PO-Revision-Date: 2026-04-07 12:49\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -2242,7 +2242,7 @@ msgstr "Åtgärd om Kvalitet Kontroll är Avvisad"
 #. Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Action If Same Rate is Not Maintained"
-msgstr "Åtgärd om Marginal inte Bibehålls"
+msgstr "Åtgärd om Samma Marginal inte Bibehålls"
 
 #: erpnext/quality_management/doctype/quality_review/quality_review_list.js:7
 msgid "Action Initialised"
@@ -2300,13 +2300,13 @@ msgstr "Åtgärd om Årsbudget Överskridits på Ackumulerad Kostnad"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Action if Same Rate is Not Maintained Throughout  Internal Transaction"
-msgstr "Åtgärd om Samma Marginal inte bibehålls under hela interna Transaktionen"
+msgstr "Åtgärd om Samma Marginal inte bibehålls vid Intern Transaktion"
 
 #. Label of the maintain_same_rate_action (Select) field in DocType 'Selling
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Action if Same Rate is Not Maintained Throughout Sales Cycle"
-msgstr "Åtgärd om samma Marginal inte bibehålls under Försäljning"
+msgstr "Åtgärd om Samma Marginal inte bibehålls vid Försäljning"
 
 #. Label of the action_on_new_invoice (Select) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
@@ -49800,7 +49800,7 @@ msgstr "Underleverantör Stycklista"
 #: erpnext/buying/report/subcontracted_item_to_be_received/subcontracted_item_to_be_received.py:22
 #: erpnext/buying/report/subcontracted_raw_materials_to_be_transferred/subcontracted_raw_materials_to_be_transferred.py:22
 msgid "Subcontract Order"
-msgstr "Underleverantör Order"
+msgstr "Order"
 
 #. Name of a report
 #. Label of a Link in the Manufacturing Workspace
@@ -49821,7 +49821,7 @@ msgstr "Underleverantör Retur"
 #: erpnext/buying/report/subcontract_order_summary/subcontract_order_summary.py:136
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Subcontracted Item"
-msgstr "Underleverantör Artikel"
+msgstr "Artikel"
 
 #. Name of a report
 #. Label of a Link in the Buying Workspace
@@ -49838,7 +49838,7 @@ msgstr "Artiklar att Ta Emot"
 
 #: erpnext/stock/doctype/material_request/material_request.js:224
 msgid "Subcontracted Purchase Order"
-msgstr "Underleverantör Inköp Order"
+msgstr "Inköp Order"
 
 #. Label of the subcontracted_qty (Float) field in DocType 'Purchase Order
 #. Item'
@@ -49846,7 +49846,7 @@ msgstr "Underleverantör Inköp Order"
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Subcontracted Quantity"
-msgstr "Underleverantör Kvantitet"
+msgstr "Kvantitet"
 
 #. Name of a report
 #. Label of a Link in the Buying Workspace
@@ -49896,7 +49896,7 @@ msgstr "Stycklista"
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_item/subcontracting_inward_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgid "Subcontracting Conversion Factor"
-msgstr "Underleverantör Konvertering Faktor"
+msgstr "Konvertering Faktor"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
@@ -49999,7 +49999,7 @@ msgstr "Underleverantör Order"
 #. DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Subcontracting Order (Draft) will be auto-created on submission of Purchase Order."
-msgstr "Underleverantör Order (Utkast) kommer att skapas automatiskt vid godkännande av Inköp Order."
+msgstr "Order (Utkast) kommer att skapas automatiskt vid godkännande av Inköp Order."
 
 #. Name of a DocType
 #. Label of the subcontracting_order_item (Data) field in DocType
@@ -50008,22 +50008,22 @@ msgstr "Underleverantör Order (Utkast) kommer att skapas automatiskt vid godkä
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Subcontracting Order Item"
-msgstr "Underleverantör Order Artikel"
+msgstr "Order Artikel"
 
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_order_service_item/subcontracting_order_service_item.json
 msgid "Subcontracting Order Service Item"
-msgstr "Underleverantör Order Service Artikel"
+msgstr "Order Service Artikel"
 
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:235
 #: erpnext/subcontracting/doctype/subcontracting_order_supplied_item/subcontracting_order_supplied_item.json
 msgid "Subcontracting Order Supplied Item"
-msgstr "Underleverantör Order Levererad Artikel"
+msgstr "Order Levererad Artikel"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:935
 msgid "Subcontracting Order {0} created."
-msgstr "Underleverantör Order {0} skapad"
+msgstr "Order {0} skapad."
 
 #. Label of a chart in the Subcontracting Workspace
 #. Label of a Card Break in the Subcontracting Workspace
@@ -50093,7 +50093,7 @@ msgstr "Underleverantör Retur"
 #. Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Subcontracting Sales Order"
-msgstr "Underleverantör Försäljning Order"
+msgstr "Försäljning Order"
 
 #. Label of the subcontract (Tab Break) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
