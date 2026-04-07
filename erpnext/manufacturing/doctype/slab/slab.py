@@ -18,6 +18,7 @@ class Slab(Document):
 		from erpnext.manufacturing.doctype.slab_history.slab_history import SlabHistory
 
 		amended_from: DF.Link | None
+		batch_code: DF.Data | None
 		batch_number: DF.Data
 		child_line: DF.Link | None
 		consignment_number: DF.Data | None

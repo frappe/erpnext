@@ -266,7 +266,7 @@ def start_mixing(job_card):
 
 
 @frappe.whitelist()
-def finish_mixing(job_card, completed_qty):
+def finish_mixing(job_card):
 	"""Complete the Job Card when mixing is finished."""
 	jc = frappe.get_doc("Job Card", job_card)
 	job_card_qty = flt(jc.for_quantity or 0, 3)

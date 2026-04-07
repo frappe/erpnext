@@ -101,27 +101,23 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Slab",
-   "options": "Slab",
-   "reqd": 1
+   "options": "Slab"
   },
   {
    "fieldname": "slab_color",
    "fieldtype": "Link",
    "label": "Slab Color",
-   "options": "Slab Template",
-   "reqd": 1
+   "options": "Slab Template"
   },
   {
    "fieldname": "upper_shelf_temp",
    "fieldtype": "Float",
-   "label": "Upper Shelf Temperature (in \u00b0C)",
-   "reqd": 1
+   "label": "Upper Shelf Temperature (in \u00b0C)"
   },
   {
    "fieldname": "lower_shelf_temp",
    "fieldtype": "Float",
-   "label": "Lower Shelf Temperature (in \u00b0C)",
-   "reqd": 1
+   "label": "Lower Shelf Temperature (in \u00b0C)"
   },
   {
    "fieldname": "column_break_7tua",
@@ -144,50 +140,42 @@
   {
    "fieldname": "top_left_vertex",
    "fieldtype": "Float",
-   "label": "Top Left Vertex (1)",
-   "reqd": 1
+   "label": "Top Left Vertex (1)"
   },
   {
    "fieldname": "top_edge_center",
    "fieldtype": "Float",
-   "label": "Top Edge Centre (2)",
-   "reqd": 1
+   "label": "Top Edge Centre (2)"
   },
   {
    "fieldname": "top_right_vertex",
    "fieldtype": "Float",
-   "label": "Top Right Vertex (3)",
-   "reqd": 1
+   "label": "Top Right Vertex (3)"
   },
   {
    "fieldname": "right_edge_centre",
    "fieldtype": "Float",
-   "label": "Right Edge Centre (4)",
-   "reqd": 1
+   "label": "Right Edge Centre (4)"
   },
   {
    "fieldname": "bottom_right_vertex",
    "fieldtype": "Float",
-   "label": "Bottom Right Vertex (5)",
-   "reqd": 1
+   "label": "Bottom Right Vertex (5)"
   },
   {
    "fieldname": "bottom_edge_centre",
    "fieldtype": "Float",
-   "label": "Bottom Edge Centre (6)",
-   "reqd": 1
+   "label": "Bottom Edge Centre (6)"
   },
   {
    "fieldname": "bottom_left_vertex",
    "fieldtype": "Float",
-   "label": "Bottom Left Vertex (7)",
-   "reqd": 1
+   "label": "Bottom Left Vertex (7)"
   },
   {
    "fieldname": "left_edge_centre",
    "fieldtype": "Float",
-   "label": "Left Edge Centre (8)",
-   "reqd": 1
+   "label": "Left Edge Centre (8)"
   },
   {
    "fieldname": "slab_curing_section",
@@ -197,8 +185,7 @@
   {
    "fieldname": "in_time",
    "fieldtype": "Datetime",
-   "label": "In Time",
-   "reqd": 1
+   "label": "In Time"
   },
   {
    "fieldname": "column_break_wks3",
@@ -254,7 +241,8 @@
   {
    "fieldname": "slab_top_temp",
    "fieldtype": "Float",
-   "label": "Slab Top Temperature (in \u00b0C)"
+   "label": "Slab Top Temperature (in \u00b0C)",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_zbq7",
@@ -263,7 +251,8 @@
   {
    "fieldname": "slab_bottom_temp",
    "fieldtype": "Float",
-   "label": "Slab Bottom Temperature (in \u00b0C)"
+   "label": "Slab Bottom Temperature (in \u00b0C)",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_ayzd",
@@ -292,8 +281,7 @@
    "fieldname": "oven_rack",
    "fieldtype": "Link",
    "label": "Rack",
-   "options": "Oven Rack",
-   "reqd": 1
+   "options": "Oven Rack"
   },
   {
    "fieldname": "column_break_kkfc",
@@ -310,11 +298,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-05 19:01:01.870642",
+ "modified": "2026-04-06 23:47:21.220499",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Oven Operation",
- "naming_rule": "Expression",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

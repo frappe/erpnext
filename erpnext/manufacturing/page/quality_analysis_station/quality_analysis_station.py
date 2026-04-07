@@ -54,7 +54,7 @@ def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number:
 		# 1. Create the slab quality report.
 		create_slab_quality_report(slab_number, slab_qc)
 		# Then,
-		finish_qc_process(slab_number, slab_qc, slab_grade, job_card)
+		finish_qc_process(slab_number, slab_grade, job_card)
 
 		frappe.db.commit()
 
@@ -149,10 +149,10 @@ def get_repair_options():
 	return []
 
 
-def finish_qc_process(slab_number: str, slab_qc: SlabQualityReport, slab_grade: str | None, job_card: str):
+def finish_qc_process(slab_number: str, slab_grade: str | None, job_card: str, publish_slab_event=True):
 
 	# 2. Finish the job card and checkout the slab.
-	finish_process(job_card, "Quality Check", False, slab_number=slab_number, slab_grade=slab_grade)
+	finish_process(job_card, "Quality Check", False, slab_number=slab_number, slab_grade=slab_grade, publish_slab_event=publish_slab_event)
 
 	# 3. Move the slab to specific warehouse based on grade by making a new stock entry - Material Transfer.
 	_make_material_transfer_stock_entry(slab_number, slab_grade, job_card)

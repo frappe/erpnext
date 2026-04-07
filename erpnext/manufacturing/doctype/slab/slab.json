@@ -12,6 +12,7 @@
   "line",
   "child_line",
   "batch_number",
+  "batch_code",
   "number",
   "serial_number",
   "column_break_mfbp",
@@ -146,6 +147,13 @@
    "reqd": 1
   },
   {
+   "fieldname": "batch_code",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Batch Code",
+   "read_only": 1
+  },
+  {
    "fieldname": "serial_number",
    "fieldtype": "Data",
    "label": "Serial Number",
@@ -249,7 +257,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-02 17:14:32.970051",
+ "modified": "2026-04-05 16:10:26.027902",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",
