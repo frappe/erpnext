@@ -1295,6 +1295,7 @@ class TestFilterExpressionParser(FinancialReportTemplateTestCase):
 				self.data_source = "Account Data"
 				self.idx = 1
 				self.reverse_sign = 0
+				self.advanced_filtering = True
 
 		return MockReportRow(formula, reference_code)
 

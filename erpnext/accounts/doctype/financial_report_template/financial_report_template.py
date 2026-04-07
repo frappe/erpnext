@@ -32,6 +32,19 @@ class FinancialReportTemplate(Document):
 		template_name: DF.Data
 	# end: auto-generated types
 
+	def before_validate(self):
+		self.clear_hidden_fields()
+
+	def clear_hidden_fields(self):
+		style_data_sources = {"Blank Line", "Column Break", "Section Break"}
+
+		for row in self.rows:
+			if row.data_source != "Account Data":
+				row.balance_type = None
+
+			if row.data_source in style_data_sources:
+				row.calculation_formula = None
+
 	def validate(self):
 		validator = TemplateValidator(self)
 		result = validator.validate()
