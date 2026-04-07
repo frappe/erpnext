@@ -67,6 +67,8 @@ class HolidayList(Document):
 				},
 			)
 
+		self.db_update_all()
+
 	@frappe.whitelist()
 	def get_supported_countries(self):
 		from holidays.utils import list_supported_countries

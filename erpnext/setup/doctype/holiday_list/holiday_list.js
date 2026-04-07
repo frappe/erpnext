@@ -3,17 +3,13 @@
 
 frappe.ui.form.on("Holiday List", {
 	refresh: function (frm) {
-		if (frm.doc.holidays) {
-			frm.set_value("total_holidays", frm.doc.holidays.length);
-		}
-
 		frm.call("get_supported_countries").then((r) => {
 			frm.subdivisions_by_country = r.message.subdivisions_by_country;
 			frm.fields_dict.country.set_data(
 				r.message.countries.sort((a, b) => a.label.localeCompare(b.label))
 			);
 
-			if (frm.doc.country) {
+			if (frm.doc.country && frm.is_new()) {
 				frm.trigger("set_subdivisions");
 			}
 		});
