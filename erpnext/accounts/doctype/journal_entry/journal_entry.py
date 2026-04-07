@@ -353,12 +353,11 @@ class JournalEntry(AccountsController):
 					frappe.throw(_("Account {0} should be of type Expense").format(d.account))
 
 	def validate_stock_accounts(self):
-<<<<<<< HEAD
-		if self.voucher_type == "Periodic Accounting Entry":
-			# Skip validation for periodic accounting entry
-=======
-		if not erpnext.is_perpetual_inventory_enabled(self.company):
->>>>>>> 3bc9190795 (fix: skip validate_stock_accounts when perpetual inventory is disabled)
+		if (
+			not erpnext.is_perpetual_inventory_enabled(self.company)
+			or self.voucher_type == "Periodic Accounting Entry"
+		):
+			# Skip validation for periodic accounting entry and Perpetual Inventory Disabled Company.
 			return
 
 		stock_accounts = get_stock_accounts(self.company, accounts=self.accounts)
