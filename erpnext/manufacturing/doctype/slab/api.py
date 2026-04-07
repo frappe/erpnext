@@ -7,7 +7,10 @@ from frappe.query_builder.functions import Count
 
 from erpnext.accounts.doctype.fiscal_year.fiscal_year import FiscalYear
 from erpnext.manufacturing.doctype.slab.slab import ALLOWED_STAGES, Slab
+from erpnext.manufacturing.doctype.slab_batch_number.api import delete_batch_numbers_older_than
+from erpnext.manufacturing.doctype.slab_batch_number.slab_batch_number import SlabBatchNumber
 from erpnext.manufacturing.doctype.slab_history.slab_history import SlabHistory
+from erpnext.setup.doctype.attendance_shift.attendance_shift import AttendanceShift
 from erpnext.setup.doctype.mahi_granites_settings.mahi_granites_settings import MahiGranitesSettings
 
 
@@ -18,7 +21,7 @@ def create_slab(line: str, child_line: str, type: str, job_card_number: str | No
 	new_slab.child_line = child_line
 	new_slab.template = type
 	new_slab.current_job_card = job_card_number
-	new_slab.batch_number = _generate_batch_number(line)
+	new_slab.batch_number = _generate_slab_batch(line, create_and_get=True)
 
 	slab_number: int = _get_slab_number(new_slab.batch_number, line)
 	new_slab.number = slab_number
@@ -238,7 +241,7 @@ def get_batch_numbers(include_child_lines=False):
 		if not line.is_group and not include_child_lines:
 			continue
 
-		batch_numbers[line.name] = _generate_batch_number(line.name)
+		batch_numbers[line.name] = _generate_slab_batch(line.name)
 
 	return batch_numbers
 
@@ -273,7 +276,7 @@ def pause_or_resume_slab_operation(slab_number: str, pause: bool):
 	slab.save(ignore_permissions=True)
 
 
-def _generate_batch_number(line: str):
+def _generate_slab_batch(line: str, create_and_get: bool = False):
 	today = date.today()
 
 	# A: Get the current fiscal year
@@ -290,6 +293,12 @@ def _generate_batch_number(line: str):
 
 	year_code = chr(65 + fiscal_year.year_start_date.year - 2017)  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
 
+	batch_number = _get_batch_number_from_list(today, fiscal_year, create_and_get)
+
+	return f"{line}{year_code}/{batch_number}"
+
+
+def _calculate_batch_number_based_on_working_days(today: date, fiscal_year: FiscalYear):
 	# B: Get total days in the fiscal year until today
 	time_diff = today - fiscal_year.year_start_date  # pyright: ignore[reportOperatorIssue, reportOptionalMemberAccess]
 	total_days_so_far = time_diff.days
@@ -357,9 +366,53 @@ def _generate_batch_number(line: str):
 
 	# Calculate A - B
 	total_working_days = total_days_so_far - holiday_count + 1
+	return f"{total_working_days:03d}"
 
-	return f"{line}{year_code}/{total_working_days:03d}"
+def _get_batch_number_from_list(today: date, fiscal_year: FiscalYear, create_and_get: bool = False) -> str:
 
+	attendance_shifts: list[AttendanceShift] = frappe.db.get_all(
+		"Attendance Shift",
+		fields=["name", "start_time", "end_time", "does_span_next_day"],
+		limit=1,
+		order_by="start_time DESC",
+	)
+
+	last_shift = attendance_shifts[0] if attendance_shifts else None
+	if not last_shift:
+		raise frappe.ValidationError("No attendance shifts found.")
+
+	now_time = datetime.now()
+	shift_end_hour = last_shift.end_time.seconds / 3600  # pyright: ignore[reportAttributeAccessIssue]
+	start_day_factor = 1 if last_shift.does_span_next_day and now_time.hour < shift_end_hour else 0
+	today -= timedelta(days=start_day_factor)
+
+	# Get today's batch number.
+	slab_batch_number: str = frappe.db.get_value(  # pyright: ignore[reportAssignmentType]
+		"Slab Batch Number",
+		filters={"date": today.strftime("%Y-%m-%d")},
+		fieldname="name",
+	)
+
+	fy_start_date: datetime = fiscal_year.year_start_date  # pyright: ignore[reportAssignmentType]
+	# A buffer date to account for holidays and other non-working days at the start of the fiscal year
+	buffer_date: datetime = fy_start_date + timedelta(days=10)  # pyright: ignore[reportAssignmentType]
+
+	if slab_batch_number:
+		return slab_batch_number.split("-")[-1]
+
+	# If `create_and_get` is True, create a new batch number if one does not exist for today.
+	elif create_and_get:
+		if fy_start_date.year == today.year and fy_start_date.month == today.month and fy_start_date.day <= today.day and today.day <= buffer_date.day:  # pyright: ignore[reportAttributeAccessIssue]
+			delete_batch_numbers_older_than(fy_start_date.strftime("%Y-%m-%d"))
+
+		slab_batch: SlabBatchNumber = frappe.new_doc("Slab Batch Number")  # pyright: ignore[reportAssignmentType]
+		slab_batch.date = today.strftime("%Y-%m-%d")
+		slab_batch.save(ignore_permissions=True)
+		return str(slab_batch.name).split("-")[-1]
+
+	# Else, throw an exception if one does not exist.
+	frappe.throw("No batch number found for today.", ValidationError)
+	return ""
 
 def _get_slab_number(batch: str, line: str) -> int:
 	today = date.today()
@@ -375,7 +428,7 @@ def _get_slab_number(batch: str, line: str) -> int:
 		(
 			seed.seed
 			for seed in mahi_granites_settings.slab_seeds
-			if seed.line == line and seed.seed_month and seed.seed_month.strftime("%Y-%m-%d") == month_start
+			if seed.line == line and seed.seed_month and seed.seed_month.strftime("%Y-%m-%d") == month_start  # pyright: ignore[reportAttributeAccessIssue]
 		),
 		0,
 	)  # pyright: ignore
