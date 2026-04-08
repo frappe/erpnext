@@ -386,20 +386,6 @@ def get_document_wise_inventory_dimensions(doctype) -> dict:
 		frappe.local.document_wise_inventory_dimensions[doctype] = dimensions
 
 	return frappe.local.document_wise_inventory_dimensions[doctype]
-=======
-	return frappe.get_all(
-		"Inventory Dimension",
-		fields=[
-			"name",
-			"source_fieldname",
-			"condition",
-			"target_fieldname",
-			"type_of_transaction",
-			"fetch_from_parent",
-		],
-		or_filters={"document_type": doctype, "apply_to_all_doctypes": 1},
-	)
->>>>>>> 6e44b8913e (fix: inventory dimensions should not be mandatory unnecesarily (#54064))
 
 
 @frappe.whitelist()
@@ -423,20 +409,6 @@ def get_inventory_dimensions():
 		frappe.local.inventory_dimensions = dimensions
 
 	return frappe.local.inventory_dimensions
-=======
-	return frappe.get_all(
-		"Inventory Dimension",
-		fields=[
-			"target_fieldname as fieldname",
-			"source_fieldname",
-			"reference_document as doctype",
-			"validate_negative_stock",
-			"name as dimension_name",
-		],
-		order_by="creation",
-		distinct=True,
-	)
->>>>>>> 6e44b8913e (fix: inventory dimensions should not be mandatory unnecesarily (#54064))
 
 
 @frappe.whitelist()
