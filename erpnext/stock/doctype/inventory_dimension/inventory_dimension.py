@@ -364,7 +364,6 @@ def get_evaluated_inventory_dimension(doc, sl_dict, parent_doc=None):
 
 
 def get_document_wise_inventory_dimensions(doctype) -> dict:
-<<<<<<< HEAD
 	if not hasattr(frappe.local, "document_wise_inventory_dimensions"):
 		frappe.local.document_wise_inventory_dimensions = {}
 
@@ -390,7 +389,6 @@ def get_document_wise_inventory_dimensions(doctype) -> dict:
 
 @frappe.whitelist()
 def get_inventory_dimensions():
-<<<<<<< HEAD
 	if not hasattr(frappe.local, "inventory_dimensions"):
 		frappe.local.inventory_dimensions = {}
 
