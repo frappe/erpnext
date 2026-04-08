@@ -71,10 +71,9 @@ def get_uploaded_genericode_file() -> tuple[bytes, str | None, str | None]:
 	if file_url and not is_local_file_url(file_url):
 		raise RemoteGenericodeUrlNotAllowedError
 
-	if file_url:
-		file_path = frappe.utils.file_manager.get_file_path(file_url)
-		with open(file_path, mode="rb") as file:
-			content = file.read()
+	if content is None and file_url:
+		file_doc = frappe.get_doc("File", {"file_url": file_url})
+		content = file_doc.get_content(encodings=())
 
 	return content, file_name, file_url
 
