@@ -78,6 +78,20 @@ class TestCodeListImport(IntegrationTestCase):
 
 		mock_get.assert_not_called()
 
+	def test_import_genericode_rejects_file_scheme_url(self):
+		self.set_upload_context(
+			file_name="trusted.xml",
+			file_url="file:///tmp/trusted.xml",
+		)
+
+		with patch("erpnext.edi.doctype.code_list.code_list_import.requests.get") as mock_get:
+			with self.assertRaisesRegex(
+				frappe.ValidationError, "Importing Code Lists from remote URLs is not allowed."
+			):
+				code_list_import.import_genericode()
+
+		mock_get.assert_not_called()
+
 	def test_import_genericode_from_trusted_url(self):
 		response = Mock()
 		response.content = SAMPLE_GENERICODE

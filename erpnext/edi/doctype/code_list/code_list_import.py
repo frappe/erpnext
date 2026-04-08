@@ -8,7 +8,7 @@ from frappe.utils import escape_html
 from lxml import etree
 
 GENERICODE_FETCH_TIMEOUT = 15
-URL_PREFIXES = ("http://", "https://")
+LOCAL_FILE_PREFIXES = ("/files/", "/private/files/")
 
 
 class RemoteGenericodeUrlNotAllowedError(Exception):
@@ -68,7 +68,7 @@ def get_uploaded_genericode_file() -> tuple[bytes, str | None, str | None]:
 	file_name = frappe.local.uploaded_filename
 	file_url = frappe.local.uploaded_file_url
 
-	if file_url and file_url.startswith(URL_PREFIXES):
+	if file_url and not is_local_file_url(file_url):
 		raise RemoteGenericodeUrlNotAllowedError
 
 	if file_url:
@@ -77,6 +77,14 @@ def get_uploaded_genericode_file() -> tuple[bytes, str | None, str | None]:
 			content = file.read()
 
 	return content, file_name, file_url
+
+
+def is_local_file_url(file_url: str | None) -> bool:
+	if not file_url:
+		return False
+
+	parsed = urlsplit(file_url.strip())
+	return not parsed.scheme and not parsed.netloc and parsed.path.startswith(LOCAL_FILE_PREFIXES)
 
 
 def fetch_genericode_from_url(url: str) -> bytes:
