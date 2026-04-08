@@ -99,7 +99,8 @@ def import_genericode(code_list: str, file_name: str, column_map: dict, filters:
 	# Construct the XPath expression
 	xpath_expr = ".//SimpleCodeList/Row"
 	filter_conditions = [
-		f"Value[@ColumnRef='{column_ref}']/SimpleValue='{value}'" for column_ref, value in filters.items()
+		f"Value[@ColumnRef='{column_ref}']/SimpleValue='{value}'"
+		for column_ref, value in (filters or {}).items()
 	]
 	if filter_conditions:
 		xpath_expr += "[" + " and ".join(filter_conditions) + "]"
