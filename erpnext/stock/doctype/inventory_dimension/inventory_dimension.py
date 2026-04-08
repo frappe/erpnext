@@ -378,7 +378,6 @@ def get_document_wise_inventory_dimensions(doctype) -> dict:
 				"type_of_transaction",
 				"fetch_from_parent",
 			],
-			filters={"disabled": 0},
 			or_filters={"document_type": doctype, "apply_to_all_doctypes": 1},
 		)
 
@@ -401,7 +400,6 @@ def get_inventory_dimensions():
 				"reference_document as doctype",
 				"validate_negative_stock",
 			],
-			filters={"disabled": 0},
 		)
 
 		frappe.local.inventory_dimensions = dimensions
