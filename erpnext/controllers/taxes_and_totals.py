@@ -167,8 +167,11 @@ class calculate_taxes_and_totals:
 			bill_for_rejected_quantity_in_purchase_invoice = frappe.get_single_value(
 				"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
 			)
+
+			do_not_round_fields = ["valuation_rate", "incoming_rate"]
+
 			for item in self.doc.items:
-				self.doc.round_floats_in(item)
+				self.doc.round_floats_in(item, do_not_round_fields=do_not_round_fields)
 
 				if item.discount_percentage == 100:
 					item.rate = 0.0

@@ -634,11 +634,11 @@ class SellingController(StockController):
 							if allow_at_arms_length_price:
 								continue
 
-							rate = flt(
-								flt(d.incoming_rate, d.precision("incoming_rate")) * d.conversion_factor,
-								d.precision("rate"),
-							)
-							if d.rate != rate:
+							rate = flt(flt(d.incoming_rate) * flt(d.conversion_factor or 1.0))
+
+							if flt(d.rate, d.precision("incoming_rate")) != flt(
+								rate, d.precision("incoming_rate")
+							):
 								d.rate = rate
 								frappe.msgprint(
 									_(

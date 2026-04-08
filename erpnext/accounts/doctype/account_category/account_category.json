@@ -26,8 +26,13 @@
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2025-10-15 03:19:47.171349",
+ "links": [
+  {
+   "link_doctype": "Account",
+   "link_fieldname": "account_category"
+  }
+ ],
+ "modified": "2026-02-23 01:19:49.589393",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Category",

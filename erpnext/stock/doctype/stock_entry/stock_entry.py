@@ -3932,9 +3932,12 @@ def get_operating_cost_per_unit(work_order=None, bom_no=None):
 
 		for d in work_order.get("operations"):
 			if flt(d.completed_qty):
-				operating_cost_per_unit += flt(
-					d.actual_operating_cost - get_consumed_operating_cost(work_order.name, bom_no)
-				) / flt(d.completed_qty - work_order.produced_qty)
+				if not (remaining_qty := flt(d.completed_qty - work_order.produced_qty)):
+					continue
+				operating_cost_per_unit += (
+					flt(d.actual_operating_cost - get_consumed_operating_cost(work_order.name, bom_no))
+					/ remaining_qty
+				)
 			elif work_order.qty:
 				operating_cost_per_unit += flt(d.planned_operating_cost) / flt(work_order.qty)
 

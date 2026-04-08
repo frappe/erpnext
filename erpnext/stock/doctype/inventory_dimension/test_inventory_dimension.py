@@ -210,9 +210,9 @@ class TestInventoryDimension(ERPNextTestSuite):
 		doc = create_inventory_dimension(
 			reference_document="Pallet",
 			type_of_transaction="Outward",
-			dimension_name="Pallet",
+			dimension_name="Pallet 75",
 			apply_to_all_doctypes=0,
-			document_type="Stock Entry Detail",
+			document_type="Delivery Note Item",
 		)
 
 		doc.reqd = 1
@@ -220,7 +220,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 
 		self.assertTrue(
 			frappe.db.get_value(
-				"Custom Field", {"fieldname": "pallet", "dt": "Stock Entry Detail", "reqd": 1}, "name"
+				"Custom Field", {"fieldname": "pallet_75", "dt": "Delivery Note Item", "reqd": 1}, "name"
 			)
 		)
 
