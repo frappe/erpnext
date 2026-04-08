@@ -58,10 +58,6 @@ class InventoryDimension(Document):
 			"Stock Ledger Entry", filters={self.target_fieldname: ("is", "set"), "is_cancelled": 0}, limit=1
 		)
 
-	def before_validate(self):
-		if self.apply_to_all_doctypes and self.mandatory_depends_on:
-			self.mandatory_depends_on = ""
-
 	def validate(self):
 		self.validate_reference_document()
 
@@ -124,6 +120,7 @@ class InventoryDimension(Document):
 	def reset_value(self):
 		if self.apply_to_all_doctypes:
 			self.type_of_transaction = ""
+			self.mandatory_depends_on = ""
 
 			self.istable = 0
 			for field in ["document_type", "condition"]:
@@ -188,7 +185,9 @@ class InventoryDimension(Document):
 				label=_(label),
 				depends_on="eval:doc.s_warehouse" if doctype == "Stock Entry Detail" else "",
 				search_index=1,
-				reqd=self.reqd,
+				reqd=1
+				if self.reqd and not self.mandatory_depends_on and doctype != "Stock Entry Detail"
+				else 0,
 				mandatory_depends_on="eval:doc.s_warehouse"
 				if self.reqd and doctype == "Stock Entry Detail"
 				else self.mandatory_depends_on,
@@ -308,7 +307,7 @@ class InventoryDimension(Document):
 		)
 
 
-def field_exists(doctype, fieldname) -> str or None:
+def field_exists(doctype, fieldname) -> str | None:
 	return frappe.db.get_value("DocField", {"parent": doctype, "fieldname": fieldname}, "name")
 
 
