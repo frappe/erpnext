@@ -1,21 +1,23 @@
 import frappe
 
-from erpnext.manufacturing.page.mixer_station.mixer_station import get_mixer_state
-
 
 @frappe.whitelist(allow_guest=True)
-def delete_job_cards(production_plan, reason, delete_all_job_cards, production_line=None):
+def delete_job_cards(production_plan, reason, delete_all_job_cards, production_line=None, item_code=None):
 	is_deleted = False
 	deleted_count = 0
+	line_name = None
 
 	filters = {
 		"production_plan": production_plan,
 		"production_item": ["like", "%Mixing%"],
 	}
 
-	if delete_all_job_cards != 1 and production_line:
-		filters["production_line"] = production_line
-		line_name = frappe.db.get_value("Production Line", production_line, "line_name")
+	if delete_all_job_cards != 1:
+		if production_line:
+			filters["production_line"] = production_line
+			line_name = frappe.db.get_value("Production Line", production_line, "line_name")
+		if item_code:
+			filters["production_item"] = item_code
 
 	mixing_work_orders = frappe.get_all(
 		"Work Order",
@@ -43,7 +45,10 @@ def delete_job_cards(production_plan, reason, delete_all_job_cards, production_l
 		{"reason_for_deletion_of_job_cards": reason, "deleted_job_card_count": deleted_count},
 	)
 
-	message = f"""{deleted_count} job card{"s" if deleted_count > 1 else ""} were deleted from this production plan from {line_name or "All Production Lines"} with the reason: "{reason}" """
+	message = f"""{deleted_count} job card{"s" if deleted_count > 1 else ""} were deleted from this production plan from {line_name or "All Production Lines"} """
+	if item_code:
+		message += f"for item {item_code} "
+	message += f"""with the reason: "{reason}" """
 
 	doc = frappe.get_doc("Production Plan", production_plan)
 	doc.add_comment("Comment", message)

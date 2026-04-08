@@ -749,6 +749,13 @@ frappe.ui.form.on("Production Plan", {
 					options: data.map(d => ({ label: d.line_name, value: d.name })),
 					hidden: 1,
 				},
+				{
+					fieldname: "item_name",
+					label: __("Item Name"),
+					fieldtype: "Select",
+					options: [],
+					hidden: 1,
+				}
 			];
 			let d = frappe.prompt(
 				fields,
@@ -760,6 +767,7 @@ frappe.ui.form.on("Production Plan", {
 							reason: values.reason_for_deletion_of_job_cards,
 							delete_all_job_cards: values.delete_all_job_cards,
 							production_line: values.production_line,
+							item_code: values.item_name,
 						},
 						callback: function (r) {
 							if (!r.exc) {
@@ -781,19 +789,42 @@ frappe.ui.form.on("Production Plan", {
 				__("Delete")
 			);
 
-			// ✅ Attach change listener manually
+			// ✅ Toggle visibility based on "Delete All"
 			d.fields_dict.delete_all_job_cards.df.onchange = () => {
 				let delete_all = d.get_value("delete_all_job_cards");
 
 				if (delete_all) {
 					d.set_value("production_line", "");
+					d.set_value("item_name", "");
 				}
 
-				d.set_df_property(
-					"production_line",
-					"hidden",
-					delete_all ? 1 : 0
-				);
+				d.set_df_property("production_line", "hidden", delete_all ? 1 : 0);
+				d.set_df_property("item_name", "hidden", delete_all ? 1 : 0);
+			};
+
+			// ✅ Update Item Name options when Production Line changes
+			d.fields_dict.production_line.df.onchange = () => {
+				let production_line = d.get_value("production_line");
+				if (!production_line) {
+					d.set_df_property("item_name", "options", []);
+					return;
+				}
+
+				frappe.db.get_list("Work Order", {
+					filters: {
+						production_plan: frm.doc.name,
+						production_line: production_line,
+						fg_warehouse: ["like", "%Finished Goods%"]
+					},
+					fields: ["production_item", "item_name"],
+					distinct: 1
+				}).then(items => {
+					let options = items.map(i => ({ label: i.item_name || i.production_item, value: i.production_item }));
+					d.set_df_property("item_name", "options", options);
+					if (options.length > 0) {
+						d.set_value("item_name", options[0].value);
+					}
+				});
 			};
 		});
 	},
