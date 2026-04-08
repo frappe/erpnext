@@ -188,6 +188,7 @@ class InventoryDimension(Document):
 				label=_(label),
 				depends_on="eval:doc.s_warehouse" if doctype == "Stock Entry Detail" else "",
 				search_index=1,
+				reqd=self.reqd,
 				mandatory_depends_on="eval:doc.s_warehouse"
 				if self.reqd and doctype == "Stock Entry Detail"
 				else self.mandatory_depends_on,

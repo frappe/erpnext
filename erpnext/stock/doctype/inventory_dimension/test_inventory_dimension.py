@@ -237,16 +237,13 @@ class TestInventoryDimension(ERPNextTestSuite):
 			document_type="Stock Entry Detail",
 		)
 
+		doc.mandatory_depends_on = "t_warehouse"
 		doc.save()
 
 		self.assertTrue(
 			frappe.db.get_value(
 				"Custom Field",
-				{
-					"fieldname": "pallet",
-					"dt": "Stock Entry Detail",
-					"mandatory_depends_on": "eval:doc.s_warehouse",
-				},
+				{"fieldname": "pallet", "dt": "Stock Entry Detail", "mandatory_depends_on": "t_warehouse"},
 				"name",
 			)
 		)
