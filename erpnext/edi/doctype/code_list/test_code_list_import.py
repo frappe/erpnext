@@ -101,10 +101,9 @@ class TestCodeListImport(IntegrationTestCase):
 			"erpnext.edi.doctype.code_list.code_list_import.requests.get",
 			return_value=response,
 		) as mock_get:
-			with self.disable_global_search():
-				import_result = code_list_import.import_genericode_from_url(
-					"https://example.com/codelists/trusted.xml"
-				)
+			import_result = code_list_import.import_genericode_from_url(
+				"https://example.com/codelists/trusted.xml"
+			)
 
 		self.assert_import_response(import_result)
 		mock_get.assert_called_once_with(
@@ -127,8 +126,7 @@ class TestCodeListImport(IntegrationTestCase):
 	def test_import_genericode_from_uploaded_file_returns_metadata(self):
 		self.set_upload_context(content=SAMPLE_GENERICODE, file_name="uploaded_genericode.xml")
 
-		with self.disable_global_search():
-			import_result = code_list_import.import_genericode()
+		import_result = code_list_import.import_genericode()
 
 		self.assert_import_response(import_result)
 
@@ -136,18 +134,17 @@ class TestCodeListImport(IntegrationTestCase):
 		self.assertEqual(file_doc.file_name, "uploaded_genericode.xml")
 
 	def test_import_genericode_from_local_file_url(self):
-		with self.disable_global_search():
-			source_file = frappe.get_doc(
-				{
-					"doctype": "File",
-					"file_name": "library_genericode.xml",
-					"content": SAMPLE_GENERICODE,
-					"is_private": 1,
-				}
-			).insert()
-			self.set_upload_context(file_name=source_file.file_name, file_url=source_file.file_url)
+		source_file = frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": "library_genericode.xml",
+				"content": SAMPLE_GENERICODE,
+				"is_private": 1,
+			}
+		).insert()
+		self.set_upload_context(file_name=source_file.file_name, file_url=source_file.file_url)
 
-			import_result = code_list_import.import_genericode()
+		import_result = code_list_import.import_genericode()
 
 		self.assert_import_response(import_result)
 
@@ -162,11 +159,6 @@ class TestCodeListImport(IntegrationTestCase):
 		frappe.local.uploaded_file = content
 		frappe.local.uploaded_file_url = file_url
 		frappe.local.uploaded_filename = file_name
-
-	@contextmanager
-	def disable_global_search(self):
-		with patch("frappe.model.document.update_global_search", return_value=None):
-			yield
 
 	def assert_import_response(self, import_result):
 		self.assertEqual(
