@@ -2,18 +2,22 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import datetime
+from zoneinfo import ZoneInfo
+
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.naming import NamingSeries
 from frappe.query_builder import Interval
-from frappe.query_builder.functions import Count, CurDate, UnixTimestamp
+from frappe.query_builder.functions import Count, CurDate
 from frappe.utils import (
 	cint,
 	cstr,
 	flt,
 	formatdate,
 	get_link_to_form,
+	get_system_timezone,
 	getdate,
 	now_datetime,
 	nowtime,
@@ -1140,15 +1144,29 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 	"""get timeline data based on Stock Ledger Entry. This is displayed as heatmap on the item page."""
 
 	sle = frappe.qb.DocType("Stock Ledger Entry")
+	system_time_zone = get_system_timezone()
 
-	return dict(
+	raw_timeline_rows = (
 		frappe.qb.from_(sle)
-		.select(UnixTimestamp(sle.posting_date), Count("*"))
+		.select(sle.posting_date, Count("*"))
 		.where(sle.item_code == name)
 		.where(sle.posting_date > CurDate() - Interval(years=1))
 		.groupby(sle.posting_date)
 		.run()
 	)
+	timeline_data = {}
+
+	for posting_date, count in raw_timeline_rows:
+		normalized_timestamp = int(
+			datetime.datetime.combine(
+				posting_date,
+				datetime.time.min,
+				ZoneInfo(system_time_zone),
+			).timestamp()
+		)
+		timeline_data[normalized_timestamp] = count
+
+	return timeline_data
 
 
 def validate_end_of_life(item_code, end_of_life=None, disabled=None):
