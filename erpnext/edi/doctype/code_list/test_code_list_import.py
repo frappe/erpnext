@@ -133,6 +133,28 @@ class TestCodeListImport(IntegrationTestCase):
 		file_doc = frappe.get_doc("File", import_result["file"])
 		self.assertEqual(file_doc.file_name, "uploaded_genericode.xml")
 
+	def test_process_genericode_import_reads_file_doc_content(self):
+		self.set_upload_context(content=SAMPLE_GENERICODE, file_name="uploaded_genericode.xml")
+
+		import_result = code_list_import.import_genericode()
+		count = code_list_import.process_genericode_import(
+			code_list_name=import_result["code_list"],
+			file_name=import_result["file"],
+			code_column="code",
+			title_column="name",
+		)
+
+		self.assertEqual(count, 3)
+		self.assertEqual(frappe.db.count("Common Code", {"code_list": import_result["code_list"]}), 3)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Common Code",
+				{"code_list": import_result["code_list"], "common_code": "A"},
+				"title",
+			),
+			"Alpha",
+		)
+
 	def test_import_genericode_from_local_file_url(self):
 		source_file = frappe.get_doc(
 			{
