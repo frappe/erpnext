@@ -152,6 +152,7 @@
    "label": "Conditional Rule Examples"
   },
   {
+   "depends_on": "eval:!doc.apply_to_all_doctypes",
    "description": "To apply condition on parent field use parent.field_name and to apply condition on child table use doc.field_name. Here field_name could be based on the actual column name of the respective field.",
    "fieldname": "mandatory_depends_on",
    "fieldtype": "Small Text",
@@ -181,7 +182,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-07 10:46:33.877978",
+ "modified": "2026-04-08 10:10:16.884388",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Dimension",

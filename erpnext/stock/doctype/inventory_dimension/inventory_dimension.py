@@ -58,6 +58,10 @@ class InventoryDimension(Document):
 			"Stock Ledger Entry", filters={self.target_fieldname: ("is", "set"), "is_cancelled": 0}, limit=1
 		)
 
+	def before_validate(self):
+		if self.apply_to_all_doctypes and self.mandatory_depends_on:
+			self.mandatory_depends_on = ""
+
 	def validate(self):
 		self.validate_reference_document()
 
@@ -184,9 +188,8 @@ class InventoryDimension(Document):
 				label=_(label),
 				depends_on="eval:doc.s_warehouse" if doctype == "Stock Entry Detail" else "",
 				search_index=1,
-				reqd=self.reqd,
 				mandatory_depends_on="eval:doc.s_warehouse"
-				if doctype == "Stock Entry Detail"
+				if self.reqd and doctype == "Stock Entry Detail"
 				else self.mandatory_depends_on,
 			),
 		]
@@ -298,9 +301,7 @@ class InventoryDimension(Document):
 					options=self.reference_document,
 					label=label,
 					depends_on=display_depends_on,
-					mandatory_depends_on="eval:doc.t_warehouse"
-					if doctype == "Stock Entry Detail"
-					else self.mandatory_depends_on,
+					mandatory_depends_on=display_depends_on if self.reqd else self.mandatory_depends_on,
 				),
 			]
 		)
