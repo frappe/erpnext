@@ -168,13 +168,17 @@ frappe.ui.form.on("Production Plan", {
 						);
 					}
 					else {
-						frm.add_custom_button(
-							__("Work Order / Subcontract PO"),
-							() => {
-								frm.trigger("make_work_order");
-							},
-							__("Create")
-						);
+						if (!frm.doc.is_work_order_created) {
+							frm.add_custom_button(
+								__("Work Order / Subcontract PO"),
+								async () => {
+									await frm.set_value("is_work_order_created", 1);
+									await frm.save("Update");
+									frm.trigger("make_work_order");
+								},
+								__("Create")
+							);
+						}
 					}
 				}
 

@@ -16,6 +16,7 @@
   "reason_for_deletion_of_job_cards",
   "is_parent_plan",
   "is_test_item",
+  "is_work_order_created",
   "filters",
   "item_code",
   "customer",
@@ -600,13 +601,22 @@
    "fieldtype": "Int",
    "hidden": 1,
    "label": "Deleted Job Card Count"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "is_work_order_created",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Work Order Created",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-02 16:21:53.946808",
+ "modified": "2026-04-08 16:30:13.353002",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
