@@ -2,7 +2,8 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import flt
+from frappe.tests.utils import change_settings
+from frappe.utils import add_days, flt
 
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	DependencyResolver,
@@ -1667,6 +1668,85 @@ class TestFilterExpressionParser(FinancialReportTemplateTestCase):
 
 
 class TestFinancialQueryBuilder(FinancialReportTemplateTestCase):
+	@change_settings("Accounts Settings", {"use_legacy_controller_for_pcv": 1})
+	def test_pcv_excluded_from_movement_but_included_in_closing(self):
+		company = "_Test Company"
+		sales_account = "Sales - _TC"
+		cash_account = "_Test Cash - _TC"
+		posting_date = "2023-10-15"
+		fiscal_year = get_fiscal_year(posting_date, company=company)
+		period_start = fiscal_year[1]
+		period_end = fiscal_year[2]
+		period_key = "fy_period"
+
+		jv = make_journal_entry(
+			account1=cash_account,
+			account2=sales_account,
+			amount=5000,
+			posting_date=posting_date,
+			company=company,
+			submit=True,
+		)
+
+		pcv = None
+		prior_year_pcvs = []
+
+		try:
+			closing_account = get_closing_account(company)
+			prior_year_pcvs = create_missing_prior_year_pcvs(company, fiscal_year[1], closing_account)
+
+			pcv = create_pcv(
+				transaction_date=period_end,
+				period_start_date=period_start,
+				period_end_date=period_end,
+				company=company,
+				fiscal_year=fiscal_year[0],
+				cost_center="_Test Cost Center - _TC",
+				closing_account_head=closing_account,
+				remarks="Test PCV movement exclusion",
+			)
+
+			filters = frappe._dict(
+				{
+					"company": company,
+					"from_fiscal_year": fiscal_year[0],
+					"to_fiscal_year": fiscal_year[0],
+					"period_start_date": period_start,
+					"period_end_date": period_end,
+					"filter_based_on": "Date Range",
+					"periodicity": "Quarterly",
+				}
+			)
+
+			periods = [{"key": period_key, "from_date": period_start, "to_date": period_end}]
+
+			qb = FinancialQueryBuilder(filters, periods)
+			accounts = [
+				frappe._dict({"name": sales_account, "account_name": "Sales", "account_number": ""}),
+				frappe._dict(
+					{
+						"name": closing_account,
+						"account_name": frappe.db.get_value("Account", closing_account, "account_name"),
+						"account_number": "",
+					}
+				),
+			]
+			balances = qb.fetch_account_balances(accounts)
+
+			sales_q4 = balances.get(sales_account).get_period(period_key)
+			self.assertEqual(sales_q4.movement, -5000.0)
+			self.assertEqual(sales_q4.closing, 0.0)
+
+			# Net movement should always exclude PCV entries, including the transfer account.
+			closing_q4 = balances.get(closing_account).get_period(period_key)
+			self.assertEqual(closing_q4.movement, 0.0)
+			self.assertEqual(closing_q4.closing - closing_q4.opening, -5000.0)
+
+		finally:
+			cleanup_pcvs(pcv=pcv, prior_year_pcvs=prior_year_pcvs)
+
+			jv.cancel()
+
 	def test_fetch_balances_with_journal_entries(self):
 		company = "_Test Company"
 		cash_account = "_Test Cash - _TC"
@@ -1766,6 +1846,7 @@ class TestFinancialQueryBuilder(FinancialReportTemplateTestCase):
 			jv_nov.cancel()
 			jv_oct.cancel()
 
+	@change_settings("Accounts Settings", {"use_legacy_controller_for_pcv": 1})
 	def test_opening_balance_from_previous_period_closing(self):
 		company = "_Test Company"
 		cash_account = "_Test Cash - _TC"
@@ -1784,44 +1865,28 @@ class TestFinancialQueryBuilder(FinancialReportTemplateTestCase):
 		)
 
 		pcv = None
+		prior_year_pcvs = []
 		jv_2024 = None
-		original_pcv_setting = frappe.db.get_single_value(
-			"Accounts Settings", "use_legacy_controller_for_pcv"
-		)
 
 		try:
 			# Create Period Closing Voucher for 2023
 			# This will create Account Closing Balance entries
-			closing_account = frappe.db.get_value(
-				"Account",
-				{
-					"company": company,
-					"root_type": "Liability",
-					"is_group": 0,
-					"account_type": ["not in", ["Payable", "Receivable"]],
-				},
-				"name",
-			)
+			closing_account = get_closing_account(company)
 
 			fy_2023 = get_fiscal_year(posting_date_2023, company=company)
 
-			frappe.db.set_single_value("Accounts Settings", "use_legacy_controller_for_pcv", 1)
+			prior_year_pcvs = create_missing_prior_year_pcvs(company, fy_2023[1], closing_account)
 
-			pcv = frappe.get_doc(
-				{
-					"doctype": "Period Closing Voucher",
-					"transaction_date": "2023-12-31",
-					"period_start_date": fy_2023[1],
-					"period_end_date": fy_2023[2],
-					"company": company,
-					"fiscal_year": fy_2023[0],
-					"cost_center": "_Test Cost Center - _TC",
-					"closing_account_head": closing_account,
-					"remarks": "Test Period Closing",
-				}
+			pcv = create_pcv(
+				transaction_date="2023-12-31",
+				period_start_date=fy_2023[1],
+				period_end_date=fy_2023[2],
+				company=company,
+				fiscal_year=fy_2023[0],
+				cost_center="_Test Cost Center - _TC",
+				closing_account_head=closing_account,
+				remarks="Test Period Closing",
 			)
-			pcv.insert()
-			pcv.submit()
 			pcv.reload()
 
 			# Now create a small transaction in 2024 to ensure the account appears
@@ -1934,17 +1999,9 @@ class TestFinancialQueryBuilder(FinancialReportTemplateTestCase):
 
 		finally:
 			# Clean up
-			frappe.db.set_single_value(
-				"Accounts Settings", "use_legacy_controller_for_pcv", original_pcv_setting or 0
-			)
-
 			if jv_2024:
 				jv_2024.cancel()
-
-			if pcv:
-				pcv.reload()
-				if pcv.docstatus == 1:
-					pcv.cancel()
+			cleanup_pcvs(pcv=pcv, prior_year_pcvs=prior_year_pcvs)
 
 			jv_2023.cancel()
 
@@ -2021,3 +2078,79 @@ class TestFinancialQueryBuilder(FinancialReportTemplateTestCase):
 
 		finally:
 			jv.cancel()
+
+
+def get_closing_account(company):
+	return frappe.db.get_value(
+		"Account",
+		{
+			"company": company,
+			"root_type": "Liability",
+			"is_group": 0,
+			"account_type": ["not in", ["Payable", "Receivable"]],
+		},
+		"name",
+	)
+
+
+def create_pcv(*, do_not_save=False, do_not_submit=False, **pcv_fields):
+	pcv = frappe.get_doc({"doctype": "Period Closing Voucher", **pcv_fields})
+	if not do_not_save:
+		pcv.insert()
+		if not do_not_submit:
+			pcv.submit()
+	return pcv
+
+
+def create_missing_prior_year_pcvs(company, current_fy_start_date, closing_account):
+	created_pcvs = []
+	prior_fiscal_years = []
+	previous_fy_date = add_days(current_fy_start_date, -1)
+
+	for _ in range(10):
+		previous_fy = get_fiscal_year(previous_fy_date, company=company, boolean=True)
+		if not previous_fy:
+			break
+
+		previous_fy_name, previous_fy_start, previous_fy_end = previous_fy
+		prior_fiscal_years.append((previous_fy_name, previous_fy_start, previous_fy_end))
+		previous_fy_date = add_days(previous_fy_start, -1)
+
+	for previous_fy_name, previous_fy_start, previous_fy_end in reversed(prior_fiscal_years):
+		previous_fy_closed = frappe.db.exists(
+			"Period Closing Voucher",
+			{
+				"docstatus": 1,
+				"company": company,
+				"period_end_date": ("between", [previous_fy_start, previous_fy_end]),
+			},
+		)
+		if previous_fy_closed:
+			continue
+
+		previous_fy_pcv = create_pcv(
+			transaction_date=previous_fy_end,
+			period_start_date=previous_fy_start,
+			period_end_date=previous_fy_end,
+			company=company,
+			fiscal_year=previous_fy_name,
+			cost_center="_Test Cost Center - _TC",
+			closing_account_head=closing_account,
+			remarks="Test setup prior year closing",
+		)
+		created_pcvs.append(previous_fy_pcv)
+
+	return created_pcvs
+
+
+def cleanup_pcvs(pcv=None, prior_year_pcvs=None):
+	if pcv and frappe.db.exists("Period Closing Voucher", pcv.name):
+		pcv.reload()
+		if pcv.docstatus == 1:
+			pcv.cancel()
+
+	for previous_fy_pcv in reversed(prior_year_pcvs or []):
+		if frappe.db.exists("Period Closing Voucher", previous_fy_pcv.name):
+			previous_fy_pcv.reload()
+			if previous_fy_pcv.docstatus == 1:
+				previous_fy_pcv.cancel()

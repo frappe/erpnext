@@ -632,6 +632,18 @@ class FinancialQueryBuilder:
 			)
 			query = query.select(Sum(period_condition).as_(period["key"]))
 
+			pcv_period_condition = (
+				Case()
+				.when(
+					(gl_table.posting_date >= period["from_date"])
+					& (gl_table.posting_date <= period["to_date"])
+					& (gl_table.voucher_type == "Period Closing Voucher"),
+					gl_table.debit - gl_table.credit,
+				)
+				.else_(0)
+			)
+			query = query.select(Sum(pcv_period_condition).as_(f"{period['key']}__pcv"))
+
 		query = self._apply_standard_filters(query, gl_table)
 		return self._execute_with_permissions(query, "GL Entry")
 
@@ -654,8 +666,12 @@ class FinancialQueryBuilder:
 
 			for period in self.periods:
 				period_key = period["key"]
-				movement = gl_movement.get(period_key, 0.0)
-				closing_balance = current_balance + movement
+				total_movement = gl_movement.get(period_key, 0.0)
+				pcv_movement = gl_movement.get(f"{period_key}__pcv", 0.0)
+				closing_balance = current_balance + total_movement
+
+				# Net/period movement should exclude PCV entries.
+				movement = total_movement - flt(pcv_movement)
 
 				account_data.add_period(PeriodValue(period_key, current_balance, closing_balance, movement))
 
@@ -680,12 +696,6 @@ class FinancialQueryBuilder:
 				account_data.unaccumulate_values()
 
 	def _apply_standard_filters(self, query, table, doctype: str = "GL Entry"):
-		if self.filters.get("ignore_closing_entries"):
-			if doctype == "GL Entry":
-				query = query.where(table.voucher_type != "Period Closing Voucher")
-			else:
-				query = query.where(table.is_period_closing_voucher_entry == 0)
-
 		if self.filters.get("project"):
 			projects = self.filters.get("project")
 			if isinstance(projects, str):
