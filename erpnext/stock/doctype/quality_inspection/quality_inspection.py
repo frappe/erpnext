@@ -374,7 +374,7 @@ def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page
 	if not from_doctype or not frappe.db.exists("DocType", from_doctype):
 		return []
 
-	mcond = get_match_cond(parent_doctype) if parent_doctype else get_match_cond(from_doctype)
+	mcond = get_match_cond(parent_doctype or from_doctype)
 	cond, qi_condition = "", "and (quality_inspection is null or quality_inspection = '')"
 
 	if filters.get("parent"):
