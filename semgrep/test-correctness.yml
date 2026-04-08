@@ -10,9 +10,15 @@ rules:
   languages: [python]
   severity: ERROR
 - id: Dont-override-teardown
-  pattern: |
-    def tearDown(...):
-      ...
+  patterns:
+  - pattern: |
+      def tearDown(...):
+        ...
+  - pattern-not: |
+      def tearDown(...):
+        ...
+        super().tearDown()
+        ...
   message: ERPNextTestSuite forces rollback on each tearDown, which ensures idempotency. Don't override tearDown.
   languages: [python]
   severity: ERROR
