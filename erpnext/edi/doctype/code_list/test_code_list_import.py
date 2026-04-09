@@ -1,14 +1,13 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-from contextlib import contextmanager
 from unittest.mock import Mock, patch
 
 import frappe
 import requests
-from frappe.tests import IntegrationTestCase
 
 from erpnext.edi.doctype.code_list import code_list_import
+from erpnext.tests.utils import ERPNextTestSuite
 
 SAMPLE_GENERICODE = b"""<?xml version="1.0" encoding="UTF-8"?>
 <CodeList>
@@ -50,20 +49,7 @@ SAMPLE_GENERICODE = b"""<?xml version="1.0" encoding="UTF-8"?>
 """
 
 
-class TestCodeListImport(IntegrationTestCase):
-	def setUp(self):
-		self.original_form_dict = frappe._dict(getattr(frappe.local, "form_dict", {}) or {})
-		self.original_uploaded_file = getattr(frappe.local, "uploaded_file", None)
-		self.original_uploaded_file_url = getattr(frappe.local, "uploaded_file_url", None)
-		self.original_uploaded_filename = getattr(frappe.local, "uploaded_filename", None)
-
-	def tearDown(self):
-		frappe.local.form_dict = self.original_form_dict
-		frappe.local.uploaded_file = self.original_uploaded_file
-		frappe.local.uploaded_file_url = self.original_uploaded_file_url
-		frappe.local.uploaded_filename = self.original_uploaded_filename
-		super().tearDown()
-
+class TestCodeListImport(ERPNextTestSuite):
 	def test_import_genericode_rejects_remote_file_url(self):
 		self.set_upload_context(
 			file_name="trusted.xml",
@@ -177,10 +163,19 @@ class TestCodeListImport(IntegrationTestCase):
 		file_url: str | None = None,
 		docname: str | None = None,
 	):
+		attrs = ("form_dict", "uploaded_file", "uploaded_file_url", "uploaded_filename")
+		originals = {attr: getattr(frappe.local, attr, None) for attr in attrs}
+
 		frappe.local.form_dict = frappe._dict(doctype="Code List", docname=docname)
 		frappe.local.uploaded_file = content
 		frappe.local.uploaded_file_url = file_url
 		frappe.local.uploaded_filename = file_name
+
+		def restore():
+			for attr, value in originals.items():
+				setattr(frappe.local, attr, value)
+
+		self.addCleanup(restore)
 
 	def assert_import_response(self, import_result):
 		self.assertEqual(
