@@ -129,7 +129,7 @@
    "options": "Gender"
   },
   {
-   "default": "Company",
+   "default": "Personne Physique",
    "fieldname": "customer_type",
    "fieldtype": "Select",
    "label": "Customer Type",
