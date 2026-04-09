@@ -364,16 +364,11 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-<<<<<<< HEAD
-def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters, as_dict):
-	doctype = "Delivery Note"
-=======
 def get_delivery_notes_to_be_billed(
 	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, as_dict: bool = False
 ):
 	DeliveryNote = frappe.qb.DocType("Delivery Note")
 
->>>>>>> ef454822d7 (fix(sales invoice): toggle Get Items From button based on is_return and POS view (#52594))
 	fields = get_fields(doctype, ["name", "customer", "posting_date"])
 
 	original_dn = (
