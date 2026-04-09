@@ -34,7 +34,6 @@ class InventoryDimension(Document):
 		apply_to_all_doctypes: DF.Check
 		condition: DF.Code | None
 		dimension_name: DF.Data
-		disabled: DF.Check
 		document_type: DF.Link | None
 		fetch_from_parent: DF.Literal[None]
 		istable: DF.Check
@@ -78,7 +77,6 @@ class InventoryDimension(Document):
 
 		old_doc = self._doc_before_save
 		allow_to_edit_fields = [
-			"disabled",
 			"fetch_from_parent",
 			"type_of_transaction",
 			"condition",
@@ -122,6 +120,7 @@ class InventoryDimension(Document):
 	def reset_value(self):
 		if self.apply_to_all_doctypes:
 			self.type_of_transaction = ""
+			self.mandatory_depends_on = ""
 
 			self.istable = 0
 			for field in ["document_type", "condition"]:
@@ -186,8 +185,12 @@ class InventoryDimension(Document):
 				label=_(label),
 				depends_on="eval:doc.s_warehouse" if doctype == "Stock Entry Detail" else "",
 				search_index=1,
-				reqd=self.reqd,
-				mandatory_depends_on=self.mandatory_depends_on,
+				reqd=1
+				if self.reqd and not self.mandatory_depends_on and doctype != "Stock Entry Detail"
+				else 0,
+				mandatory_depends_on="eval:doc.s_warehouse"
+				if self.reqd and doctype == "Stock Entry Detail"
+				else self.mandatory_depends_on,
 			),
 		]
 
@@ -298,12 +301,13 @@ class InventoryDimension(Document):
 					options=self.reference_document,
 					label=label,
 					depends_on=display_depends_on,
+					mandatory_depends_on=display_depends_on if self.reqd else self.mandatory_depends_on,
 				),
 			]
 		)
 
 
-def field_exists(doctype, fieldname) -> str or None:
+def field_exists(doctype, fieldname) -> str | None:
 	return frappe.db.get_value("DocField", {"parent": doctype, "fieldname": fieldname}, "name")
 
 
@@ -379,7 +383,6 @@ def get_document_wise_inventory_dimensions(doctype) -> dict:
 			"type_of_transaction",
 			"fetch_from_parent",
 		],
-		filters={"disabled": 0},
 		or_filters={"document_type": doctype, "apply_to_all_doctypes": 1},
 	)
 
@@ -396,7 +399,6 @@ def get_inventory_dimensions():
 			"validate_negative_stock",
 			"name as dimension_name",
 		],
-		filters={"disabled": 0},
 		order_by="creation",
 		distinct=True,
 	)
