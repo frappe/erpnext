@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-05 09:49+0000\n"
-"PO-Revision-Date: 2026-04-07 12:49\n"
+"PO-Revision-Date: 2026-04-09 12:51\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -11457,7 +11457,7 @@ msgstr "Konsoliderad Kredit Faktura"
 #: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Consolidated Financial Statement"
-msgstr "Koncern Finans Rapport"
+msgstr "Konsoliderad Finans Rapport"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
@@ -24946,7 +24946,7 @@ msgstr "Utfärdade Artiklar mot Arbetsorder"
 #: erpnext/support/doctype/support_settings/support_settings.json
 #: erpnext/support/workspace/support/support.json
 msgid "Issues"
-msgstr "Ärenden"
+msgstr "Ärende"
 
 #. Label of the issuing_date (Date) field in DocType 'Driver'
 #. Label of the issuing_date (Date) field in DocType 'Driving License Category'
@@ -31710,11 +31710,11 @@ msgstr "Öppna Formulär Vy"
 #. Label of the issue (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "Open Issues"
-msgstr "Öppna Ärenden"
+msgstr "Öppna Ärende"
 
 #: erpnext/setup/doctype/email_digest/templates/default.html:46
 msgid "Open Issues "
-msgstr "Öppna Ärenden "
+msgstr "Öppna Ärende"
 
 #: erpnext/manufacturing/doctype/bom/bom_item_preview.html:28
 #: erpnext/manufacturing/doctype/work_order/work_order_preview.html:28
@@ -41853,12 +41853,12 @@ msgstr "Rapporterar Till"
 #: erpnext/workspace_sidebar/invoicing.json
 #: erpnext/workspace_sidebar/payments.json
 msgid "Repost Accounting Ledger"
-msgstr "Bokför om Bokföring Register"
+msgstr "Omboka Bokföring Register"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/repost_accounting_ledger_items/repost_accounting_ledger_items.json
 msgid "Repost Accounting Ledger Items"
-msgstr "Bokför om Bokföring Register Poster"
+msgstr "Omboka Bokföring Register Poster"
 
 #. Name of a DocType
 #. Label of a Workspace Sidebar Item
@@ -41866,12 +41866,12 @@ msgstr "Bokför om Bokföring Register Poster"
 #: erpnext/workspace_sidebar/accounts_setup.json
 #: erpnext/workspace_sidebar/erpnext_settings.json
 msgid "Repost Accounting Ledger Settings"
-msgstr "Bokför om Bokföring Register Poster Inställningar"
+msgstr "Bokföring Register Post Inställningar för Ombokning"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/repost_allowed_types/repost_allowed_types.json
 msgid "Repost Allowed Types"
-msgstr "Bokför om Tillåtna Typer"
+msgstr "Omboka Tillåtna Typer"
 
 #. Label of the repost_error_log (Long Text) field in DocType 'Repost Payment
 #. Ledger'
@@ -41894,7 +41894,7 @@ msgstr "Omvärdering av Artikel har startats om för valda misslyckade poster."
 #. Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Repost Only Accounting Ledgers"
-msgstr "Bokför om endast Bokföring Register"
+msgstr "Omboka endast Bokföring Register"
 
 #. Name of a DocType
 #. Label of a Workspace Sidebar Item
@@ -41902,17 +41902,17 @@ msgstr "Bokför om endast Bokföring Register"
 #: erpnext/workspace_sidebar/invoicing.json
 #: erpnext/workspace_sidebar/payments.json
 msgid "Repost Payment Ledger"
-msgstr "Bokför om Betalning Register"
+msgstr "Omboka Betalning Register"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/repost_payment_ledger_items/repost_payment_ledger_items.json
 msgid "Repost Payment Ledger Items"
-msgstr "Bokför om Betalning Register Poster"
+msgstr "Omboka Betalning Register Poster"
 
 #. Label of the repost_status (Select) field in DocType 'Repost Payment Ledger'
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
 msgid "Repost Status"
-msgstr "Bokför om Status"
+msgstr "Omboka Status"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:149
 msgid "Repost has started in the background"
@@ -41920,7 +41920,7 @@ msgstr "Bokföring startad i bakgrunden"
 
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.js:40
 msgid "Repost in background"
-msgstr "Bokför om i bakgrunden"
+msgstr "Omboka i bakgrunden"
 
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.py:118
 msgid "Repost started in the background"
@@ -41930,17 +41930,17 @@ msgstr "Bokföring startad i bakgrunden"
 #. Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Data File"
-msgstr "Omregistering av Data Fil"
+msgstr "Ombokning av Data Fil"
 
 #. Label of the reposting_info_section (Section Break) field in DocType 'Repost
 #. Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Item and Warehouse"
-msgstr "Omregistrera Artikel och Lager"
+msgstr "Ombokning av Artikel och Lager"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:131
 msgid "Reposting Progress"
-msgstr "Omregistrering Framsteg"
+msgstr "Ombokning Framsteg"
 
 #. Label of the reposting_reference (Data) field in DocType 'Repost Item
 #. Valuation'
@@ -41952,11 +41952,11 @@ msgstr "Omregistrering Referens"
 #. field in DocType 'Repost Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Vouchers"
-msgstr "Omregistrera Verifikat"
+msgstr "Ombokning Verifikat"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:149
 msgid "Reposting Vouchers Progress"
-msgstr "Omregistrering av Verifikat Framsteg"
+msgstr "Ombokning av Verifikat Framsteg"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:216
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:327
@@ -41969,11 +41969,11 @@ msgstr "Omregistrering för Artikel och Lager Slutfört {0}%"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:141
 msgid "Reposting for Vouchers Completed {0}%"
-msgstr "Omregistrering för Verifikat Slutfört {0}%"
+msgstr "Ombokning för Verifikat Slutfört {0}%"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:109
 msgid "Reposting has been started in the background."
-msgstr "Omregistrering startad i bakgrunden."
+msgstr "Ombokning startad i bakgrunden."
 
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.js:49
 msgid "Reposting in the background."
@@ -48746,7 +48746,7 @@ msgstr "Starta Sammanslagning"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:105
 msgid "Start Reposting"
-msgstr "Starta Omregistrering"
+msgstr "Starta Ombokning"
 
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:129
 msgid "Start Time can't be greater than or equal to End Time for {0}."
@@ -49264,7 +49264,7 @@ msgstr "Lager Rapporter"
 #: erpnext/workspace_sidebar/erpnext_settings.json
 #: erpnext/workspace_sidebar/stock.json
 msgid "Stock Reposting Settings"
-msgstr "Lager Omregistrering Inställningar"
+msgstr "Lager Ombokning Inställningar"
 
 #. Label of the stock_reservation_tab (Tab Break) field in DocType 'Stock
 #. Settings'
@@ -52694,7 +52694,7 @@ msgstr "Det finns inkonsekvenser mellan pris, antal aktier och beräknad belopp"
 
 #: erpnext/accounts/doctype/account/account.py:203
 msgid "There are ledger entries against this account. Changing {0} to non-{1} in live system will cause incorrect output in 'Accounts {2}' report"
-msgstr "Det finns bokföring register aposter mot detta konto. Om du ändrar {0} till icke-{1} i system kommer det att orsaka felaktig utdata i \"Konton {2}\" rapporten "
+msgstr "Det finns bokföring register poster mot detta konto. Om du ändrar {0} till ej {1} i system kommer det att orsaka felaktig utdata i \"Konto {2}\" rapport"
 
 #: erpnext/utilities/bulk_transaction.py:69
 msgid "There are no Failed transactions"
@@ -55818,7 +55818,7 @@ msgstr "Brådskande"
 
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.js:36
 msgid "Use 'Repost in background' button to trigger background job. Job can only be triggered when document is in Queued or Failed status."
-msgstr "Använd knapp \"Bokför om i bakgrunden\" för att utlösa bakgrund jobb. Jobb kan bara utlösas när dokument har status 'I Kö' eller 'Misslyckad'."
+msgstr "Använd knapp \"Omboka i bakgrunden\" för att utlösa bakgrund jobb. Jobb kan bara utlösas när dokument har status 'I Kö' eller 'Misslyckad'."
 
 #. Description of the 'Advanced Filtering' (Check) field in DocType 'Financial
 #. Report Row'
@@ -55874,7 +55874,7 @@ msgstr "Använd HTTP Protokoll"
 #. Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Use Item based reposting"
-msgstr "Använd Artikel baserad Omregistrering"
+msgstr "Använd Artikel baserad Ombokning"
 
 #. Label of the use_legacy_js_reactivity (Check) field in DocType 'Selling
 #. Settings'
@@ -56129,7 +56129,7 @@ msgstr "Giltig Från"
 
 #: erpnext/regional/doctype/lower_deduction_certificate/lower_deduction_certificate.py:45
 msgid "Valid From date not in Fiscal Year {0}"
-msgstr "Giltig Från Datum inte under Bokföringsår {0}"
+msgstr "Giltig Från Datum inte inom Bokföringsår {0}"
 
 #: erpnext/accounts/doctype/cost_center_allocation/cost_center_allocation.py:82
 msgid "Valid From must be after {0} as last GL Entry against the cost center {1} posted on this date"
@@ -58266,7 +58266,7 @@ msgstr "Du kan inte lösa in mer än {0}."
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:189
 msgid "You cannot repost item valuation before {}"
-msgstr "Du kan inte bokföra om artikel värdering före {}"
+msgstr "Du kan inte omboka artikel värdering före {}"
 
 #: erpnext/accounts/doctype/subscription/subscription.py:719
 msgid "You cannot restart a Subscription that is not cancelled."
@@ -58364,7 +58364,7 @@ msgstr "Din Order är ute för Leverans!"
 
 #: erpnext/templates/pages/help.html:52
 msgid "Your tickets"
-msgstr "Dina Ärenden"
+msgstr "Dina Ärende"
 
 #. Label of the youtube_video_id (Data) field in DocType 'Video'
 #: erpnext/utilities/doctype/video/video.json
@@ -59222,7 +59222,7 @@ msgstr "{0} {1} måste godkännas"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:275
 msgid "{0} {1} not allowed to be reposted. Modify {2} to enable reposting."
-msgstr "{0} {1} får inte bokföras om. Ändra {2} för att kunna bokföra om."
+msgstr "{0} {1} får inte omboka. Ändra {2} för att kunna omboka."
 
 #: erpnext/buying/utils.py:116
 msgid "{0} {1} status is {2}"
