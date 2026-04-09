@@ -147,7 +147,7 @@
   "total_commission",
   "section_break1",
   "sales_team",
-  "subscription_section",
+  "auto_repeat_section",
   "auto_repeat",
   "printing_details",
   "letter_head",
@@ -1116,11 +1116,6 @@
    "oldfieldtype": "Text"
   },
   {
-   "fieldname": "subscription_section",
-   "fieldtype": "Section Break",
-   "label": "Subscription Section"
-  },
-  {
    "fieldname": "auto_repeat",
    "fieldtype": "Link",
    "label": "Auto Repeat",
@@ -1450,6 +1445,11 @@
   {
    "fieldname": "column_break_ydwe",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "auto_repeat_section",
+   "fieldtype": "Section Break",
+   "label": "Auto Repeat"
   }
  ],
  "icon": "fa fa-truck",

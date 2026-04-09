@@ -13,7 +13,7 @@ from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestExchangeRateRevaluation(AccountsTestMixin, ERPNextTestSuite):
+class TestExchangeRateRevaluation(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
 		self.create_company()
 		self.create_usd_receivable_account()

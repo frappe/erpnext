@@ -2421,12 +2421,11 @@ class TestStockEntry(ERPNextTestSuite):
 		Unit test case to check the document naming rule with company condition
 		For Quality Inspection, when created from Stock Entry.
 		"""
-		from erpnext.accounts.report.trial_balance.test_trial_balance import create_company
 		from erpnext.controllers.stock_controller import make_quality_inspections
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		# create a separate company to handle document naming rule with company condition
-		qc_company = create_company(company_name="Test Quality Company")
+		qc_company = "Test Quality Company"
 
 		# create document naming rule based on that for Quality Inspection Doctype
 		qc_naming_rule = frappe.new_doc(

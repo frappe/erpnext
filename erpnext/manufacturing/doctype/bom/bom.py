@@ -991,12 +991,14 @@ class BOM(WebsiteGenerator):
 					hour_rate / flt(self.conversion_rate) if self.conversion_rate and hour_rate else hour_rate
 				)
 
-		if row.hour_rate and row.time_in_mins:
+		if row.hour_rate:
 			row.base_hour_rate = flt(row.hour_rate) * flt(self.conversion_rate)
-			row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
-			row.base_operating_cost = flt(row.operating_cost) * flt(self.conversion_rate)
-			row.cost_per_unit = row.operating_cost / (row.batch_size or 1.0)
-			row.base_cost_per_unit = row.base_operating_cost / (row.batch_size or 1.0)
+
+			if row.time_in_mins:
+				row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
+				row.base_operating_cost = flt(row.operating_cost) * flt(self.conversion_rate)
+				row.cost_per_unit = row.operating_cost / (row.batch_size or 1.0)
+				row.base_cost_per_unit = row.base_operating_cost / (row.batch_size or 1.0)
 
 		if update_hour_rate:
 			row.db_update()
@@ -1245,6 +1247,12 @@ class BOM(WebsiteGenerator):
 						_(
 							"Row {0}: Workstation or Workstation Type is mandatory for an operation {1}"
 						).format(d.idx, d.operation)
+					)
+				if not d.time_in_mins or d.time_in_mins <= 0:
+					frappe.throw(
+						_("Row {0}: Operation time should be greater than 0 for operation {1}").format(
+							d.idx, d.operation
+						)
 					)
 
 	def get_tree_representation(self) -> BOMTree:
@@ -1607,13 +1615,14 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=
 	if work_order and not job_card:
 		table = "exploded_items" if work_order.get("use_multi_level_bom") else "items"
 
-	items = {}
+	items = frappe._dict()
 	for d in bom.get(table):
 		# Phantom item is exploded, so its cost is considered via its components
 		if d.get("is_phantom_item"):
 			continue
 
-		items.setdefault(d.item_code, d.amount)
+		items.setdefault(d.item_code, 0)
+		items[d.item_code] += flt(d.amount)
 
 	non_stock_items = frappe.get_all(
 		"Item",

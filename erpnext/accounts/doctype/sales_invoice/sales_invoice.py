@@ -1102,9 +1102,6 @@ class SalesInvoice(SellingController):
 				if self.po_date:
 					self.remarks += " " + _("dated {0}").format(formatdate(self.po_date))
 
-			else:
-				self.remarks = _("No Remarks")
-
 	def validate_auto_set_posting_time(self):
 		# Don't auto set the posting date and time if invoice is amended
 		if self.is_new() and self.amended_from:
@@ -2778,7 +2775,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				"doctype": target_doctype,
 				"postprocess": update_details,
 				"set_target_warehouse": "set_from_warehouse",
-				"field_no_map": ["taxes_and_charges", "set_warehouse", "shipping_address"],
+				"field_no_map": ["taxes_and_charges", "set_warehouse", "shipping_address", "cost_center"],
 			},
 			doctype + " Item": item_field_map,
 		},

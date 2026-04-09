@@ -62,7 +62,6 @@ welcome_email = "erpnext.setup.utils.welcome_email"
 # setup wizard
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
-setup_wizard_complete = "erpnext.setup.setup_wizard.setup_wizard.setup_demo"
 
 after_install = "erpnext.setup.install.after_install"
 
@@ -589,6 +588,8 @@ accounting_dimension_doctypes = [
 	"Asset Depreciation Schedule",
 	"Advance Taxes and Charges",
 ]
+
+subscription_doctypes = ["Sales Invoice", "Purchase Invoice", "Payment Request", "POS Invoice"]
 
 get_matching_queries = (
 	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_matching_queries"

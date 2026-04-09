@@ -10,7 +10,6 @@
  "field_order": [
   "supplier_section",
   "company",
-  "title",
   "naming_series",
   "supplier",
   "supplier_name",
@@ -148,7 +147,7 @@
   "column_break_86",
   "select_print_heading",
   "language",
-  "subscription_section",
+  "auto_repeat_section",
   "from_date",
   "to_date",
   "column_break_97",
@@ -171,17 +170,6 @@
    "fieldname": "supplier_section",
    "fieldtype": "Section Break",
    "options": "fa fa-user"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "{supplier_name}",
-   "fieldname": "title",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Title",
-   "no_copy": 1,
-   "print_hide": 1,
-   "reqd": 1
   },
   {
    "fieldname": "naming_series",
@@ -1026,12 +1014,6 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "subscription_section",
-   "fieldtype": "Section Break",
-   "label": "Auto Repeat"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "from_date",
    "fieldtype": "Date",
@@ -1321,6 +1303,12 @@
    "fieldtype": "Time",
    "label": "Time",
    "mandatory_depends_on": "is_internal_supplier"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "auto_repeat_section",
+   "fieldtype": "Section Break",
+   "label": "Auto Repeat"
   }
  ],
  "grid_page_length": 50,
@@ -1328,7 +1316,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 17:15:29.184682",
+ "modified": "2026-03-25 11:46:18.748951",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

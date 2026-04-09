@@ -19,6 +19,21 @@ frappe.ui.form.on("BOM", {
 			};
 		});
 
+		frm.set_query("workstation", "operations", function (doc, cdt, cdn) {
+			let row = locals[cdt][cdn];
+			let filters = {
+				disabled: 0,
+			};
+
+			if (row.workstation_type) {
+				filters.workstation_type = row.workstation_type;
+			}
+
+			return {
+				filters: filters,
+			};
+		});
+
 		frm.set_query("operation", "items", function () {
 			if (!frm.doc.operations?.length) {
 				frappe.throw(__("Please add Operations first."));
@@ -123,7 +138,16 @@ frappe.ui.form.on("BOM", {
 	},
 
 	toggle_fields_for_semi_finished_goods(frm) {
-		let fields = ["finished_good", "finished_good_qty", "bom_no"];
+		let fields = [
+			"finished_good",
+			"finished_good_qty",
+			"bom_no",
+			"skip_material_transfer",
+			"wip_warehouse",
+			"fg_warehouse",
+			"is_subcontracted",
+			"is_final_finished_good",
+		];
 
 		fields.forEach((field) => {
 			frm.fields_dict["operations"].grid.update_docfield_property(
@@ -131,9 +155,21 @@ frappe.ui.form.on("BOM", {
 				"read_only",
 				!frm.doc.track_semi_finished_goods
 			);
+
+			frm.fields_dict["operations"].grid.update_docfield_property(
+				field,
+				"in_list_view",
+				frm.doc.track_semi_finished_goods
+			);
+
+			frm.fields_dict["operations"].grid.update_docfield_property(
+				field,
+				"hidden",
+				!frm.doc.track_semi_finished_goods
+			);
 		});
 
-		refresh_field("operations");
+		frm.fields_dict["operations"].grid.reset_grid();
 	},
 
 	with_operations: function (frm) {
@@ -172,6 +208,8 @@ frappe.ui.form.on("BOM", {
 
 	refresh(frm) {
 		frm.toggle_enable("item", frm.doc.__islocal);
+
+		frm.trigger("toggle_fields_for_semi_finished_goods");
 
 		frm.set_indicator_formatter("item_code", function (doc) {
 			if (doc.original_item) {
@@ -369,6 +407,7 @@ frappe.ui.form.on("BOM", {
 				reqd: 1,
 				default: 1,
 				onchange: () => {
+					if (!cur_dialog) return;
 					const { quantity, items: rm } = frm.doc;
 					const variant_items_map = rm.reduce((acc, item) => {
 						acc[item.item_code] = item.qty;
@@ -864,6 +903,11 @@ frappe.ui.form.on("BOM Operation", "workstation", function (frm, cdt, cdn) {
 frappe.ui.form.on("BOM Operation", "workstation_type", function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (!d.workstation_type) return;
+
+	if (d.workstation) {
+		frappe.model.set_value(cdt, cdn, "workstation", "");
+	}
+
 	frappe.call({
 		method: "frappe.client.get",
 		args: {

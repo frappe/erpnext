@@ -31,7 +31,8 @@ def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False,
 	for d in item_warehouses:
 		try:
 			repost_stock(d[0], d[1], allow_zero_rate, only_actual, only_bin, allow_negative_stock)
-			frappe.db.commit()
+			if not frappe.in_test:
+				frappe.db.commit()
 		except Exception:
 			frappe.db.rollback()
 

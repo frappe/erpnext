@@ -9,9 +9,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAccountingDimension(ERPNextTestSuite):
-	def setUp(self):
-		create_dimension()
-
 	def test_dimension_against_sales_invoice(self):
 		si = create_sales_invoice(do_not_save=1)
 
@@ -76,63 +73,3 @@ class TestAccountingDimension(ERPNextTestSuite):
 
 		si.save()
 		self.assertRaises(frappe.ValidationError, si.submit)
-
-
-def create_dimension():
-	frappe.set_user("Administrator")
-
-	if not frappe.db.exists("Accounting Dimension", {"document_type": "Department"}):
-		dimension = frappe.get_doc(
-			{
-				"doctype": "Accounting Dimension",
-				"document_type": "Department",
-			}
-		)
-		dimension.append(
-			"dimension_defaults",
-			{
-				"company": "_Test Company",
-				"reference_document": "Department",
-				"default_dimension": "_Test Department - _TC",
-			},
-		)
-		dimension.insert()
-		dimension.save()
-	else:
-		dimension = frappe.get_doc("Accounting Dimension", "Department")
-		dimension.disabled = 0
-		dimension.save()
-
-	if not frappe.db.exists("Accounting Dimension", {"document_type": "Location"}):
-		dimension1 = frappe.get_doc(
-			{
-				"doctype": "Accounting Dimension",
-				"document_type": "Location",
-			}
-		)
-
-		dimension1.append(
-			"dimension_defaults",
-			{
-				"company": "_Test Company",
-				"reference_document": "Location",
-				"default_dimension": "Block 1",
-			},
-		)
-
-		dimension1.insert()
-		dimension1.save()
-	else:
-		dimension1 = frappe.get_doc("Accounting Dimension", "Location")
-		dimension1.disabled = 0
-		dimension1.save()
-
-
-def disable_dimension():
-	dimension1 = frappe.get_doc("Accounting Dimension", "Department")
-	dimension1.disabled = 1
-	dimension1.save()
-
-	dimension2 = frappe.get_doc("Accounting Dimension", "Location")
-	dimension2.disabled = 1
-	dimension2.save()

@@ -19,8 +19,7 @@ class TestManufacturingReports(ERPNextTestSuite):
 		self.REPORT_FILTER_TEST_CASES: list[tuple[ReportName, ReportFilters]] = [
 			("BOM Explorer", {"bom": self.last_bom}),
 			("BOM Operations Time", {}),
-			("BOM Stock Calculated", {"bom": self.last_bom, "qty_to_make": 2}),
-			("BOM Stock Report", {"bom": self.last_bom, "qty_to_produce": 2}),
+			("BOM Stock Analysis", {"bom": self.last_bom, "_optional": ["warehouse"]}),
 			("Cost of Poor Quality Report", {"item": "_Test Item", "serial_no": "00"}),
 			("Downtime Analysis", {}),
 			(

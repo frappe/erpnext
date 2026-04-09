@@ -207,6 +207,7 @@
    "fieldtype": "Link",
    "label": "Stock UOM",
    "options": "UOM",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -310,7 +311,8 @@
    "fieldname": "discount_amount",
    "fieldtype": "Currency",
    "label": "Discount Amount",
-   "options": "currency"
+   "options": "currency",
+   "print_hide": 1
   },
   {
    "depends_on": "eval:doc.margin_type && doc.price_list_rate && doc.margin_rate_or_amount",
@@ -853,6 +855,7 @@
    "fieldtype": "Currency",
    "label": "Rate of Stock UOM",
    "no_copy": 1,
+   "print_hide": 1,
    "options": "currency",
    "read_only": 1
   },
@@ -869,6 +872,7 @@
    "fieldname": "grant_commission",
    "fieldtype": "Check",
    "label": "Grant Commission",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -926,7 +930,8 @@
    "default": "0",
    "fieldname": "use_serial_batch_fields",
    "fieldtype": "Check",
-   "label": "Use Serial No / Batch Fields"
+   "label": "Use Serial No / Batch Fields",
+   "print_hide": 1
   },
   {
    "depends_on": "eval:doc.use_serial_batch_fields === 1 && parent.update_stock === 1",
@@ -941,7 +946,8 @@
    "fieldname": "distributed_discount_amount",
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
-   "options": "currency"
+   "options": "currency",
+   "print_hide": 1
   },
   {
    "fieldname": "available_quantity_section",
@@ -1010,7 +1016,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-23 14:37:14.853941",
+ "modified": "2026-02-24 14:37:16.853941",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

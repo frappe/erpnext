@@ -87,6 +87,7 @@ class TestJobCard(ERPNextTestSuite):
 			with_operations=1,
 			track_semi_finished_goods=1,
 			company="_Test Company",
+			inspection_required=1,
 		)
 		final_bom.append("items", {"item_code": raw.name, "qty": 1})
 		final_bom.append(
@@ -96,6 +97,8 @@ class TestJobCard(ERPNextTestSuite):
 				"workstation": "_Test Workstation 1",
 				"bom_no": cut_bom,
 				"skip_material_transfer": 1,
+				"time_in_mins": 60,
+				"quality_inspection_required": 1,
 			},
 		)
 		final_bom.append(
@@ -105,6 +108,7 @@ class TestJobCard(ERPNextTestSuite):
 				"workstation": "_Test Workstation 1",
 				"bom_no": stitch_bom,
 				"skip_material_transfer": 1,
+				"time_in_mins": 60,
 			},
 		)
 		final_bom.append(
@@ -115,6 +119,7 @@ class TestJobCard(ERPNextTestSuite):
 				"bom_no": final_bom.name,
 				"is_final_finished_good": 1,
 				"skip_material_transfer": 1,
+				"time_in_mins": 60,
 			},
 		)
 		final_bom.append("items", {"item_code": stitch_fg.name, "qty": 1, "operation_row_id": 3})
@@ -131,6 +136,15 @@ class TestJobCard(ERPNextTestSuite):
 		work_order.submit()
 		job_card = frappe.get_all("Job Card", filters={"work_order": work_order.name, "operation": "Cutting"})
 		job_card_doc = frappe.get_doc("Job Card", job_card[0].name)
+		job_card_doc.append(
+			"time_logs",
+			{
+				"from_time": "2024-01-01 08:00:00",
+				"to_time": "2024-01-01 09:00:00",
+				"time_in_mins": 60,
+				"completed_qty": 1,
+			},
+		)
 		self.assertRaises(frappe.ValidationError, job_card_doc.submit)
 
 	def test_job_card_operations(self):
@@ -927,6 +941,7 @@ class TestJobCard(ERPNextTestSuite):
 			"bom_no": sfg_bom.name,
 			"finished_good_qty": 1,
 			"sequence_id": 1,
+			"time_in_mins": 60,
 		}
 		operation2 = {
 			"operation": "Test Operation B",
@@ -936,6 +951,7 @@ class TestJobCard(ERPNextTestSuite):
 			"finished_good_qty": 1,
 			"is_final_finished_good": 1,
 			"sequence_id": 2,
+			"time_in_mins": 60,
 		}
 
 		make_workstation(operation1)

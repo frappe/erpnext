@@ -248,12 +248,7 @@ def get_item_warehouse_combinations(filters: dict | None = None) -> dict:
 			bin.warehouse,
 			item.valuation_method,
 		)
-		.where(
-			(item.is_stock_item == 1)
-			& (item.has_serial_no == 0)
-			& (warehouse.is_group == 0)
-			& (warehouse.company == filters.company)
-		)
+		.where((item.is_stock_item == 1) & (warehouse.is_group == 0) & (warehouse.company == filters.company))
 	)
 
 	if filters.item_code:

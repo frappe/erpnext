@@ -214,10 +214,11 @@
   "language",
   "subscription_section",
   "subscription",
-  "from_date",
-  "auto_repeat",
   "column_break_140",
+  "from_date",
   "to_date",
+  "automation_section",
+  "auto_repeat",
   "update_auto_repeat_reference",
   "utm_analytics_section",
   "utm_source",
@@ -2321,6 +2322,12 @@
   {
    "fieldname": "column_break_rdks",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "automation_section",
+   "fieldtype": "Section Break",
+   "label": "Automation"
   }
  ],
  "grid_page_length": 50,

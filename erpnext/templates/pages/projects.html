@@ -82,11 +82,11 @@
     <div class="project-attachments">
       {% for attachment in doc.attachments %}
         <div class="attachment">
-          <a class="no-decoration attachment-link" href="{{ attachment.file_url }}" target="blank">
+          <a class="no-decoration attachment-link" href="{{ attachment.file_url|e }}" target="blank">
             <div class="row">
               <div class="col-xs-9">
                 <span class="indicator red file-name">
-                  {{ attachment.file_name }}</span>
+                  {{ attachment.file_name|e }}</span>
               </div>
               <div class="col-xs-3">
                 <span class="pull-right file-size">{{ attachment.file_size }}</span>
@@ -101,8 +101,8 @@
 </div>
 
 <script>
-  { % include "frappe/public/js/frappe/provide.js" % }
-  { % include "frappe/public/js/frappe/form/formatters.js" % }
+  {% include "frappe/public/js/frappe/provide.js" %}
+  {% include "frappe/public/js/frappe/form/formatters.js" %}
  </script>
 
 {% endblock %}
