@@ -122,7 +122,7 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval:doc.customer_type == 'Individual'",
+   "depends_on": "eval:doc.customer_type == 'Personne Physique'",
    "fieldname": "gender",
    "fieldtype": "Link",
    "label": "Gender",
