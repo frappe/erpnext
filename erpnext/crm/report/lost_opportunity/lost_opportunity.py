@@ -117,7 +117,7 @@ def get_join(filters):
 		join = """JOIN `tabOpportunity Lost Reason Detail`
 			ON `tabOpportunity Lost Reason Detail`.parenttype = 'Opportunity' and
 			`tabOpportunity Lost Reason Detail`.parent = `tabOpportunity`.name and
-			`tabOpportunity Lost Reason Detail`.lost_reason = '{}'
-			""".format(filters.get("lost_reason"))
+			`tabOpportunity Lost Reason Detail`.lost_reason=%(lost_reason)s
+			"""
 
 	return join
