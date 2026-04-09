@@ -153,6 +153,7 @@ frappe.ui.form.on("Timesheet", {
 	},
 
 	exchange_rate: function (frm) {
+		frm.refresh_field("exchange_rate");
 		$.each(frm.doc.time_logs, function (i, d) {
 			calculate_billing_costing_amount(frm, d.doctype, d.name);
 		});
