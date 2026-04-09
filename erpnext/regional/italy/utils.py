@@ -250,7 +250,7 @@ def sales_invoice_validate(doc):
 	# Validate customer details
 	customer = frappe.get_doc("Customer", doc.customer)
 
-	if customer.customer_type == "Individual":
+	if customer.customer_type == "Personne Physique":
 		doc.customer_fiscal_code = customer.fiscal_code
 		if not doc.customer_fiscal_code:
 			frappe.throw(
