@@ -459,8 +459,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				reference_name: frm.doc.name,
 			},
 		});
+		const value = await frappe.db.get_single_value(
+			"Accounts Settings",
+			"fetch_payment_schedule_in_payment_request"
+		);
 
-		if (!schedules.length) {
+		if (!value || !schedules.length) {
 			this.make_payment_request();
 			return;
 		}

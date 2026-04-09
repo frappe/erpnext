@@ -16,7 +16,7 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestTaxWithholdingDetails(AccountsTestMixin, ERPNextTestSuite):
+class TestTaxWithholdingDetails(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
 		self.create_company()
 		self.clear_old_entries()

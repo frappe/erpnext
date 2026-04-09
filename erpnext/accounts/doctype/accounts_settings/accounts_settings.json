@@ -66,6 +66,7 @@
   "payment_options_section",
   "enable_loyalty_point_program",
   "column_break_ctam",
+  "fetch_payment_schedule_in_payment_request",
   "invoicing_settings_tab",
   "accounts_transactions_settings_section",
   "over_billing_allowance",
@@ -696,16 +697,21 @@
    "fieldname": "enable_subscription",
    "fieldtype": "Check",
    "label": "Enable Subscription"
+  },
+  {
+   "default": "1",
+   "fieldname": "fetch_payment_schedule_in_payment_request",
+   "fieldtype": "Check",
+   "label": "Fetch Payment Schedule In Payment Request"
   }
  ],
  "grid_page_length": 50,
- "hide_toolbar": 0,
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-27 01:04:09.415288",
+ "modified": "2026-03-30 07:32:58.182018",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

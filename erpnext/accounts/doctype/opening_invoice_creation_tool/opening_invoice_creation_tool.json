@@ -7,10 +7,11 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_break_ynel",
   "company",
+  "create_missing_party",
   "column_break_3",
   "invoice_type",
-  "create_missing_party",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -25,11 +26,11 @@
    "in_list_view": 1,
    "label": "Company",
    "options": "Company",
+   "remember_last_selected_value": 1,
    "reqd": 1
   },
   {
    "default": "0",
-   "description": "If party does not exist, create it using the Party Name field.",
    "fieldname": "create_missing_party",
    "fieldtype": "Check",
    "label": "Create Missing Party"
@@ -79,12 +80,17 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ynel",
+   "fieldtype": "Section Break",
+   "hide_border": 1
   }
  ],
  "hide_toolbar": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-23 00:32:15.600086",
+ "modified": "2026-03-31 01:47:20.360352",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool",

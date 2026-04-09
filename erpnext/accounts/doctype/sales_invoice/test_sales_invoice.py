@@ -2887,7 +2887,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.submit()
 
 		# Check if adjustment entry is created
-		self.assertTrue(
+		self.assertFalse(
 			frappe.db.exists(
 				"GL Entry",
 				{

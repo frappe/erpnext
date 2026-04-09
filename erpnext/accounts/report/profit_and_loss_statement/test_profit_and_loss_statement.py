@@ -12,7 +12,7 @@ from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestProfitAndLossStatement(AccountsTestMixin, ERPNextTestSuite):
+class TestProfitAndLossStatement(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
 		self.create_company()
 		self.create_customer()

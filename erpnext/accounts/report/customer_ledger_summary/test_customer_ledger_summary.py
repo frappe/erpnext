@@ -9,7 +9,7 @@ from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestCustomerLedgerSummary(AccountsTestMixin, ERPNextTestSuite):
+class TestCustomerLedgerSummary(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
 		self.create_company()
 		self.create_customer()

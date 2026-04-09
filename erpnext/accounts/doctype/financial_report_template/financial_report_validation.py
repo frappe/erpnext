@@ -67,8 +67,8 @@ class ValidationResult:
 		self.warnings.append(issue)
 
 	def notify_user(self) -> None:
-		warnings = "<br><br>".join(str(w) for w in self.warnings)
-		errors = "<br><br>".join(str(e) for e in self.issues)
+		warnings = "<br><br>".join(str(w) for w in self.warnings if w)
+		errors = "<br><br>".join(str(e) for e in self.issues if e)
 
 		if warnings:
 			frappe.msgprint(warnings, title=_("Warnings"), indicator="orange")
@@ -96,9 +96,8 @@ class TemplateValidator:
 			result.merge(validator.validate(self.template))
 
 		# Run row-level validations
-		account_fields = {field.fieldname for field in frappe.get_meta("Account").fields}
 		for row in self.template.rows:
-			result.merge(self.formula_validator.validate(row, account_fields))
+			result.merge(self.formula_validator.validate(row))
 
 		return result
 
@@ -380,7 +379,8 @@ class AccountFilterValidator(Validator):
 	"""Validates account filter expressions used in Account Data rows"""
 
 	def __init__(self, account_fields: set | None = None):
-		self.account_fields = account_fields or set(frappe.get_meta("Account")._valid_columns)
+		self.account_meta = frappe.get_meta("Account")
+		self.account_fields = account_fields or set(self.account_meta._valid_columns)
 
 	def validate(self, row) -> ValidationResult:
 		result = ValidationResult()
@@ -400,7 +400,11 @@ class AccountFilterValidator(Validator):
 
 		try:
 			filter_config = json.loads(row.calculation_formula)
-			error = self._validate_filter_structure(filter_config, self.account_fields)
+			error = self._validate_filter_structure(
+				filter_config,
+				self.account_fields,
+				row.advanced_filtering,
+			)
 
 			if error:
 				result.add_error(
@@ -422,7 +426,12 @@ class AccountFilterValidator(Validator):
 
 		return result
 
-	def _validate_filter_structure(self, filter_config, account_fields: set) -> str | None:
+	def _validate_filter_structure(
+		self,
+		filter_config,
+		account_fields: set,
+		advanced_filtering: bool = False,
+	) -> str | None:
 		# simple condition: [field, operator, value]
 		if isinstance(filter_config, list):
 			if len(filter_config) != 3:
@@ -433,8 +442,10 @@ class AccountFilterValidator(Validator):
 			if not isinstance(field, str) or not isinstance(operator, str):
 				return "Field and operator must be strings"
 
+			display = (field if advanced_filtering else self.account_meta.get_label(field)) or field
+
 			if field not in account_fields:
-				return f"Field '{field}' is not a valid account field"
+				return f"Field '{display}' is not a valid Account field"
 
 			if operator.casefold() not in OPERATOR_MAP:
 				return f"Invalid operator '{operator}'"
@@ -457,7 +468,7 @@ class AccountFilterValidator(Validator):
 
 			# recursive
 			for condition in conditions:
-				error = self._validate_filter_structure(condition, account_fields)
+				error = self._validate_filter_structure(condition, account_fields, advanced_filtering)
 				if error:
 					return error
 		else:
@@ -473,7 +484,7 @@ class FormulaValidator(Validator):
 		self.calculation_validator = CalculationFormulaValidator(reference_codes)
 		self.account_filter_validator = AccountFilterValidator()
 
-	def validate(self, row, account_fields: set) -> ValidationResult:
+	def validate(self, row) -> ValidationResult:
 		result = ValidationResult()
 
 		if not row.calculation_formula:
@@ -483,9 +494,6 @@ class FormulaValidator(Validator):
 			return self.calculation_validator.validate(row)
 
 		elif row.data_source == "Account Data":
-			# Update account fields if provided
-			if account_fields:
-				self.account_filter_validator.account_fields = account_fields
 			return self.account_filter_validator.validate(row)
 
 		elif row.data_source == "Custom API":

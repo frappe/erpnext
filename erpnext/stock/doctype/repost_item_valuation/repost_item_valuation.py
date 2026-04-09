@@ -80,8 +80,10 @@ class RepostItemValuation(Document):
 		repost(self)
 
 	def validate(self):
+		self.set_default_posting_time()
 		self.reset_repost_only_accounting_ledgers()
 		self.set_company()
+		self.validate_update_stock()
 		self.validate_period_closing_voucher()
 		self.set_status(write=False)
 		self.reset_field_values()
@@ -89,9 +91,28 @@ class RepostItemValuation(Document):
 		self.reset_recreate_stock_ledgers()
 		self.validate_recreate_stock_ledgers()
 
+	def set_default_posting_time(self):
+		if not self.posting_time:
+			self.posting_time = nowtime()
+
+		if not self.posting_date:
+			frappe.throw(_("Posting date is required"))
+
 	def reset_repost_only_accounting_ledgers(self):
 		if self.repost_only_accounting_ledgers and self.based_on != "Transaction":
 			self.repost_only_accounting_ledgers = 0
+
+	def validate_update_stock(self):
+		if (
+			self.voucher_type in ["Sales Invoice", "Purchase Invoice"]
+			and not self.repost_only_accounting_ledgers
+		):
+			update_stock = frappe.get_value(self.voucher_type, self.voucher_no, "update_stock")
+			if not update_stock:
+				msg = _(
+					"Since {0} has 'Update Stock' disabled, you cannot create repost item valuation against it"
+				).format(get_link_to_form(self.voucher_type, self.voucher_no))
+				frappe.throw(msg)
 
 	def validate_recreate_stock_ledgers(self):
 		if not self.recreate_stock_ledgers:

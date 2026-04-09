@@ -70,9 +70,7 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 			});
 		});
 
-		if (frm.doc.create_missing_party) {
-			frm.set_df_property("party", "fieldtype", "Data", frm.doc.name, "invoices");
-		}
+		frm.trigger("update_party_labels");
 	},
 
 	setup_company_filters: function (frm) {
@@ -127,7 +125,9 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 			frappe.model.set_value(row.doctype, row.name, "party", "");
 			frappe.model.set_value(row.doctype, row.name, "party_name", "");
 		});
+		frm.clear_table("invoices");
 		frm.refresh_fields();
+		frm.trigger("update_party_labels");
 	},
 
 	make_dashboard: function (frm) {
@@ -174,6 +174,32 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 			frm.fields_dict["invoices"].grid.update_docfield_property("party_name", "read_only", 1);
 		}
 		frm.refresh_field("invoices");
+	},
+
+	update_party_labels: function (frm) {
+		let is_sales = frm.doc.invoice_type == "Sales";
+
+		frm.fields_dict["invoices"].grid.update_docfield_property(
+			"party",
+			"label",
+			is_sales ? "Customer ID" : "Supplier ID"
+		);
+		frm.fields_dict["invoices"].grid.update_docfield_property(
+			"party_name",
+			"label",
+			is_sales ? "Customer Name" : "Supplier Name"
+		);
+
+		frm.set_df_property(
+			"create_missing_party",
+			"description",
+			is_sales
+				? __("If party does not exist, create it using the Customer Name field.")
+				: __("If party does not exist, create it using the Supplier Name field.")
+		);
+
+		frm.refresh_field("invoices");
+		frm.refresh_field("create_missing_party");
 	},
 });
 

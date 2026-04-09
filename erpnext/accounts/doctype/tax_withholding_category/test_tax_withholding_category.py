@@ -2,6 +2,7 @@
 # See license.txt
 
 import datetime
+from unittest.mock import patch
 
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
@@ -3540,6 +3541,47 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		entry = pi.tax_withholding_entries[0]
 		entry.withholding_amount = 5001  # Should be 5000 (10% of 50000)
 		self.assertRaisesRegex(frappe.ValidationError, "Withholding Amount.*does not match", pi.save)
+
+	def test_tax_id_is_set_in_all_generated_entries_from_party_doctype(self):
+		self.setup_party_with_category("Supplier", "Test TDS Supplier3", "New TDS Category")
+		frappe.db.set_value("Supplier", "Test TDS Supplier3", "tax_id", "ABCTY1234D")
+
+		pi = create_purchase_invoice(supplier="Test TDS Supplier3", rate=40000)
+		pi.submit()
+
+		entries = frappe.get_all(
+			"Tax Withholding Entry",
+			filters={"parenttype": "Purchase Invoice", "parent": pi.name},
+			fields=["name", "tax_id"],
+		)
+
+		self.assertTrue(entries)
+		self.assertTrue(all(entry.tax_id == "ABCTY1234D" for entry in entries))
+
+	def test_threshold_considers_two_parties_with_same_tax_id_with_overrided_hook(self):
+		self.setup_party_with_category("Supplier", "Test TDS Supplier1", "Cumulative Threshold TDS")
+		self.setup_party_with_category("Supplier", "Test TDS Supplier2", "Cumulative Threshold TDS")
+
+		with patch(
+			"erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category.get_tax_id_for_party",
+			return_value="AAAPL1234C",
+		):
+			pi1 = create_purchase_invoice(supplier="Test TDS Supplier1", rate=20000)
+			pi1.submit()
+
+			pi2 = create_purchase_invoice(supplier="Test TDS Supplier2", rate=20000)
+
+			pi2.submit()
+
+		entries = frappe.get_all(
+			"Tax Withholding Entry",
+			filters={"parenttype": "Purchase Invoice", "parent": pi2.name},
+			fields=["status", "withholding_amount"],
+		)
+
+		self.assertEqual(len(entries), 1)
+		self.assertEqual(entries[0].status, "Settled")
+		self.assertEqual(entries[0].withholding_amount, 2000.0)
 
 
 def create_purchase_invoice(**args):
