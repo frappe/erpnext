@@ -135,7 +135,7 @@
    "label": "Customer Type",
    "oldfieldname": "customer_type",
    "oldfieldtype": "Select",
-   "options": "Company\nIndividual\nPartnership",
+   "options": "Personne Physique\nPersonne Morale\nPersonne physique commerçante\nProfession libérale\nAmbassade et Organisation Internationale",
    "reqd": 1
   },
   {
