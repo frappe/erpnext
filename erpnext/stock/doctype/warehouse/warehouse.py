@@ -74,8 +74,7 @@ class Warehouse(NestedSet):
 		self.warn_about_multiple_warehouse_account()
 
 	def on_update(self):
-		if self.is_new() or self.has_value_changed("parent_warehouse"):
-			self.update_nsm_model()
+		self.update_nsm_model()
 
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
