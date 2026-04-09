@@ -166,17 +166,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				);
 			}
 		}
-<<<<<<< HEAD
-
-		// Show buttons only when pos view is active
-		if (cint(doc.docstatus == 0) && cur_frm.page.current_view_name !== "pos" && !doc.is_return) {
-			this.frm.cscript.sales_order_btn();
-			this.frm.cscript.delivery_note_btn();
-			this.frm.cscript.quotation_btn();
-		}
-=======
 		this.toggle_get_items();
->>>>>>> ef454822d7 (fix(sales invoice): toggle Get Items From button based on is_return and POS view (#52594))
 
 		this.set_default_print_format();
 		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
@@ -691,8 +681,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 		this.calculate_taxes_and_totals();
 	}
-<<<<<<< HEAD
-=======
 
 	apply_tds(frm) {
 		this.frm.clear_table("tax_withholding_entries");
@@ -701,7 +689,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 	is_return() {
 		this.toggle_get_items();
 	}
->>>>>>> ef454822d7 (fix(sales invoice): toggle Get Items From button based on is_return and POS view (#52594))
 };
 
 // for backward compatibility: combine new and previous states
