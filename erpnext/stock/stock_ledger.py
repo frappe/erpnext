@@ -267,16 +267,10 @@ def update_args_in_repost_item_valuation(
 	items_to_be_repost,
 	repost_affected_transaction,
 	item_wh_wise_last_posted_sle=None,
-	only_affected_transaction=False,
 ):
 	file_name = ""
-	has_file = False
-
 	if not item_wh_wise_last_posted_sle:
 		item_wh_wise_last_posted_sle = {}
-
-	if doc.reposting_data_file:
-		has_file = True
 
 	if doc.reposting_data_file:
 		file_name = get_reposting_file_name(doc.doctype, doc.name)
@@ -292,15 +286,14 @@ def update_args_in_repost_item_valuation(
 		file_name,
 	)
 
-	if not only_affected_transaction or not has_file:
-		doc.db_set(
-			{
-				"current_index": index,
-				"items_to_be_repost": frappe.as_json(items_to_be_repost),
-				"total_reposting_count": len(items_to_be_repost),
-				"reposting_data_file": doc.reposting_data_file,
-			}
-		)
+	doc.db_set(
+		{
+			"current_index": index,
+			"items_to_be_repost": frappe.as_json(items_to_be_repost),
+			"total_reposting_count": len(items_to_be_repost),
+			"reposting_data_file": doc.reposting_data_file,
+		}
+	)
 
 	if not frappe.in_test:
 		frappe.db.commit()
@@ -584,13 +577,9 @@ class update_entries_after:
 				self.update_bin()
 		else:
 			self.item_wh_wise_last_posted_sle = self.get_item_wh_wise_last_posted_sle()
-			_item_wh_sle = self.sort_sles(self.item_wh_wise_last_posted_sle.values())
-
-			while _item_wh_sle:
-				self.initialize_reposting()
-				sle_dict = _item_wh_sle.pop(0)
-				self.repost_stock_ledgers(sle_dict)
-
+			item_wh_sles = self.sort_sles(self.item_wh_wise_last_posted_sle.values())
+			self.initialize_reposting()
+			self.repost_stock_ledgers(item_wh_sles)
 			self.update_bin()
 			self.reset_vouchers_and_idx()
 			self.update_data_in_repost()
@@ -625,8 +614,19 @@ class update_entries_after:
 			)
 		}
 
-	def repost_stock_ledgers(self, sle_dict=None):
-		self._sles = self.get_future_entries_to_repost(sle_dict)
+	def _get_future_entries_to_repost(self, item_wh_sles):
+		sles = []
+
+		for sle in item_wh_sles:
+			if (sle.item_code, sle.warehouse) not in self.distinct_dependant_item_wh:
+				self.distinct_dependant_item_wh.add((sle.item_code, sle.warehouse))
+
+			sles.extend(self.get_future_entries_to_repost(sle))
+
+		return self.sort_sles(sles)
+
+	def repost_stock_ledgers(self, item_wh_sles=None):
+		self._sles = self._get_future_entries_to_repost(item_wh_sles)
 
 		if not isinstance(self._sles, deque):
 			self._sles = deque(self._sles)
@@ -634,10 +634,13 @@ class update_entries_after:
 		i = 0
 		while self._sles:
 			sle = self._sles.popleft()
-			i += 1
+			if (sle.item_code, sle.warehouse) not in self.distinct_dependant_item_wh:
+				self.distinct_dependant_item_wh.add((sle.item_code, sle.warehouse))
+
 			if sle.name in self.distinct_sles:
 				continue
 
+			i += 1
 			item_wh_key = (sle.item_code, sle.warehouse)
 			if item_wh_key not in self.prev_sle_dict:
 				self.prev_sle_dict[item_wh_key] = get_previous_sle_of_current_voucher(sle)
@@ -651,7 +654,7 @@ class update_entries_after:
 				self.include_dependant_sle_in_reposting(sle)
 				self.update_item_wh_wise_last_posted_sle(sle)
 
-			if i % 1000 == 0:
+			if i % 2000 == 0:
 				self.update_data_in_repost(len(self._sles), i)
 
 	def sort_sles(self, sles):
@@ -733,7 +736,6 @@ class update_entries_after:
 			self.items_to_be_repost,
 			self.repost_affected_transaction,
 			self.item_wh_wise_last_posted_sle,
-			only_affected_transaction=True,
 		)
 
 		if not frappe.in_test:
@@ -988,6 +990,9 @@ class update_entries_after:
 		if flt(old_stock_value_difference, self.currency_precision) == flt(
 			sle.stock_value_difference, self.currency_precision
 		):
+			return
+
+		if not cint(erpnext.is_perpetual_inventory_enabled(sle.company)):
 			return
 
 		if self.args.item_code != sle.item_code or self.args.warehouse != sle.warehouse:

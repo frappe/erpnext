@@ -518,9 +518,23 @@ class TestWorkOrder(ERPNextTestSuite):
 			do_not_save=True,
 		)
 
+		operation_name = "_Test Custom Operation"
+		workstation_name = "_Test Custom Workstation"
+
+		if not frappe.db.exists("Workstation", workstation_name):
+			doc = frappe.new_doc("Workstation")
+			doc.workstation_name = workstation_name
+			doc.save()
+
+		if not frappe.db.exists("Operation", operation_name):
+			doc = frappe.new_doc("Operation")
+			doc.name = operation_name
+			doc.workstation = workstation_name
+			doc.save()
+
 		operation = {
-			"operation": "_Test Operation 1",
-			"workstation": "_Test Workstation 1",
+			"operation": operation_name,
+			"workstation": workstation_name,
 			"description": "Test Data",
 			"operating_cost": 100,
 			"time_in_mins": 40,
