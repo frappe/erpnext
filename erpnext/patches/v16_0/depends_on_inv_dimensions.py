@@ -40,28 +40,45 @@ def get_display_depends_on(doctype):
 
 def execute():
 	for dimension in get_inventory_dimensions():
-		frappe.set_value(
-			"Custom Field",
-			{"fieldname": dimension.source_fieldname, "dt": "Stock Entry Detail"},
-			"depends_on",
-			"eval:doc.s_warehouse",
-		)
-		frappe.set_value(
-			"Custom Field",
-			{"fieldname": dimension.source_fieldname, "dt": "Stock Entry Detail", "reqd": 1},
-			{"mandatory_depends_on": "eval:doc.s_warehouse", "reqd": 0},
-		)
-		frappe.set_value(
+		if frappe.db.exists(
+			"Custom Field", {"fieldname": dimension.source_fieldname, "dt": "Stock Entry Detail"}
+		):
+			frappe.set_value(
+				"Custom Field",
+				{"fieldname": dimension.source_fieldname, "dt": "Stock Entry Detail"},
+				"depends_on",
+				"eval:doc.s_warehouse",
+			)
+		if frappe.db.exists(
+			"Custom Field", {"fieldname": dimension.source_fieldname, "dt": "Stock Entry Detail", "reqd": 1}
+		):
+			frappe.set_value(
+				"Custom Field",
+				{"fieldname": dimension.source_fieldname, "dt": "Stock Entry Detail", "reqd": 1},
+				{"mandatory_depends_on": "eval:doc.s_warehouse", "reqd": 0},
+			)
+		if frappe.db.exists(
 			"Custom Field",
 			{
 				"fieldname": f"to_{dimension.fieldname}",
 				"dt": "Stock Entry Detail",
 				"depends_on": "eval:parent.purpose != 'Material Issue'",
 			},
-			"depends_on",
-			"eval:doc.t_warehouse",
-		)
-		if display_depends_on := get_display_depends_on(dimension.doctype):
+		):
+			frappe.set_value(
+				"Custom Field",
+				{
+					"fieldname": f"to_{dimension.fieldname}",
+					"dt": "Stock Entry Detail",
+					"depends_on": "eval:parent.purpose != 'Material Issue'",
+				},
+				"depends_on",
+				"eval:doc.t_warehouse",
+			)
+		if (display_depends_on := get_display_depends_on(dimension.doctype)) and frappe.db.exists(
+			"Custom Field",
+			{"fieldname": dimension.fieldname, "dt": dimension.doctype},
+		):
 			frappe.set_value(
 				"Custom Field",
 				{"fieldname": dimension.fieldname, "dt": dimension.doctype},
