@@ -5,6 +5,7 @@ import frappe
 import requests
 from frappe import _
 from frappe.utils import escape_html
+from frappe.utils.file_manager import save_file
 from lxml import etree
 
 GENERICODE_FETCH_TIMEOUT = 15
@@ -22,14 +23,13 @@ class CodeListSelectionMismatchError(Exception):
 @frappe.whitelist()
 def import_genericode():
 	try:
-		content, file_name, file_url = get_uploaded_genericode_file()
+		content, file_name = get_uploaded_genericode_file()
 
 		return import_genericode_content(
 			doctype=frappe.form_dict.doctype,
 			docname=frappe.form_dict.docname,
 			content=content,
 			file_name=file_name,
-			file_url=file_url,
 		)
 	except RemoteGenericodeUrlNotAllowedError:
 		frappe.throw(
@@ -59,23 +59,25 @@ def import_genericode_from_url(
 		docname=docname,
 		content=content,
 		file_name=file_name,
-		file_url=None,
 	)
 
 
-def get_uploaded_genericode_file() -> tuple[bytes, str | None, str | None]:
-	content = frappe.local.uploaded_file
+def get_uploaded_genericode_file() -> tuple[bytes, str | None]:
+	uploaded_data = frappe.local.uploaded_file
 	file_name = frappe.local.uploaded_filename
-	file_url = frappe.local.uploaded_file_url
+	if uploaded_data and file_name:
+		return uploaded_data, file_name
 
-	if file_url and not is_local_file_url(file_url):
+	file_url = frappe.local.uploaded_file_url
+	if not file_url:
+		raise frappe.ValidationError(_("No file uploaded or URL provided."))
+
+	if not is_local_file_url(file_url):
 		raise RemoteGenericodeUrlNotAllowedError
 
-	if content is None and file_url:
-		file_doc = frappe.get_doc("File", {"file_url": file_url})
-		content = file_doc.get_content(encodings=())
-
-	return content, file_name, file_url
+	file_doc = frappe.get_doc("File", {"file_url": file_url})
+	file_doc.check_permission("read")
+	return file_doc.get_content(encodings=()), file_name
 
 
 def is_local_file_url(file_url: str | None) -> bool:
@@ -97,7 +99,6 @@ def import_genericode_content(
 	docname: str | None,
 	content: bytes,
 	file_name: str | None,
-	file_url: str | None,
 ):
 	root = parse_genericode_content(content)
 
@@ -117,12 +118,12 @@ def import_genericode_content(
 	code_list.from_genericode(root)
 	code_list.save()
 
-	file_doc = attach_import_file(
-		doctype=doctype,
-		docname=code_list.name,
-		file_name=file_name,
-		file_url=file_url,
+	file_doc = save_file(
+		fname=file_name,
 		content=content,
+		dt=doctype,
+		dn=code_list.name,
+		is_private=1,
 	)
 
 	# Get available columns and example values
@@ -146,28 +147,6 @@ def parse_genericode_content(content: bytes):
 		no_network=True,
 	)
 	return etree.fromstring(content, parser=parser)
-
-
-def attach_import_file(
-	doctype: str,
-	docname: str,
-	file_name: str | None,
-	file_url: str | None,
-	content: bytes,
-):
-	# Attach the file and provide a recoverable identifier.
-	return frappe.get_doc(
-		{
-			"doctype": "File",
-			"attached_to_doctype": doctype,
-			"attached_to_name": docname,
-			"folder": frappe.db.get_value("File", {"is_attachments_folder": 1}),
-			"file_name": file_name or "genericode.xml",
-			"file_url": file_url,
-			"is_private": 1,
-			"content": content,
-		}
-	).save()
 
 
 @frappe.whitelist()
