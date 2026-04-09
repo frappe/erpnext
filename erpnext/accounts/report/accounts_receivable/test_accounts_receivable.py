@@ -120,12 +120,12 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 
 		report = execute(filters)
 
-		expected_data = [[100, 30, "No Remarks"], [100, 50, "No Remarks"], [100, 20, "No Remarks"]]
+		expected_data = [[100, 30], [100, 50], [100, 20]]
 
 		for i in range(3):
 			row = report[1][i - 1]
-			self.assertEqual(expected_data[i - 1], [row.invoice_grand_total, row.invoiced, row.remarks])
-
+			self.assertEqual(expected_data[i - 1], [row.invoice_grand_total, row.invoiced])
+			self.assertFalse(row.get("remarks"))
 		# check invoice grand total, invoiced, paid and outstanding column's value after payment
 		self.create_payment_entry(si.name)
 		report = execute(filters)
@@ -178,11 +178,11 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 
 		report = execute(filters)
 
-		expected_data = [[100, 30, "No Remarks"], [100, 50, "No Remarks"], [100, 20, "No Remarks"]]
+		expected_data = [[100, 30], [100, 50], [100, 20]]
 
 		for i in range(3):
 			row = report[1][i - 1]
-			self.assertEqual(expected_data[i - 1], [row.invoice_grand_total, row.invoiced, row.remarks])
+			self.assertEqual(expected_data[i - 1], [row.invoice_grand_total, row.invoiced])
 
 		# check invoice grand total, invoiced, paid and outstanding column's value after credit note
 		cr_note = self.create_credit_note(si.name, do_not_submit=True)
@@ -225,9 +225,10 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		report = execute(filters)
 		row = report[1][0]
 
-		expected_data = [8000, 8000, "No Remarks"]  # Data in company currency
+		expected_data = [8000, 8000]  # Data in company currency
 
-		self.assertEqual(expected_data, [row.invoice_grand_total, row.invoiced, row.remarks])
+		self.assertEqual(expected_data, [row.invoice_grand_total, row.invoiced])
+		self.assertFalse(row.get("remarks"))
 
 		# CASE 2: Transaction currency and party account currency are the same
 		self.create_customer(
@@ -258,18 +259,20 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		report = execute(filters)
 		row = report[1][0]
 
-		expected_data = [100, 100, "No Remarks"]  # Data in Part Account Currency
+		expected_data = [100, 100]  # Data in Part Account Currency
 
-		self.assertEqual(expected_data, [row.invoice_grand_total, row.invoiced, row.remarks])
+		self.assertEqual(expected_data, [row.invoice_grand_total, row.invoiced])
+		self.assertFalse(row.get("remarks"))
 
 		# View in Company currency
 		filters.pop("in_party_currency")
 		report = execute(filters)
 		row = report[1][0]
 
-		expected_data = [8000, 8000, "No Remarks"]  # Data in Company Currency
+		expected_data = [8000, 8000]  # Data in Company Currency
 
-		self.assertEqual(expected_data, [row.invoice_grand_total, row.invoiced, row.remarks])
+		self.assertEqual(expected_data, [row.invoice_grand_total, row.invoiced])
+		self.assertFalse(row.get("remarks"))
 
 	def test_accounts_receivable_with_partial_payment(self):
 		filters = {
@@ -285,11 +288,12 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 
 		report = execute(filters)
 
-		expected_data = [[200, 60, "No Remarks"], [200, 100, "No Remarks"], [200, 40, "No Remarks"]]
+		expected_data = [[200, 60], [200, 100], [200, 40]]
 
 		for i in range(3):
 			row = report[1][i - 1]
-			self.assertEqual(expected_data[i - 1], [row.invoice_grand_total, row.invoiced, row.remarks])
+			self.assertEqual(expected_data[i - 1], [row.invoice_grand_total, row.invoiced])
+			self.assertFalse(row.get("remarks"))
 
 		# check invoice grand total, invoiced, paid and outstanding column's value after payment
 		self.create_payment_entry(si.name)
@@ -348,11 +352,12 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 
 		report = execute(filters)
 
-		expected_data = [100, 100, "No Remarks"]
+		expected_data = [100, 100]
 
 		self.assertEqual(len(report[1]), 1)
 		row = report[1][0]
-		self.assertEqual(expected_data, [row.invoice_grand_total, row.invoiced, row.remarks])
+		self.assertEqual(expected_data, [row.invoice_grand_total, row.invoiced])
+		self.assertFalse(row.get("remarks"))
 
 		# check invoice grand total, invoiced, paid and outstanding column's value after payment
 		self.create_payment_entry(si.name)

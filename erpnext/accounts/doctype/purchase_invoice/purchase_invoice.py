@@ -333,9 +333,6 @@ class PurchaseInvoice(BuyingController):
 				if self.bill_date:
 					self.remarks += " " + _("dated {0}").format(formatdate(self.bill_date))
 
-			else:
-				self.remarks = _("No Remarks")
-
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
 			self.credit_to = get_party_account("Supplier", self.supplier, self.company)

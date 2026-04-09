@@ -237,6 +237,8 @@ def repost_future_sle(
 
 	index = get_current_index(doc) or 0
 	while index < len(items_to_be_repost):
+		validate_item_warehouse(items_to_be_repost[index])
+
 		obj = update_entries_after(
 			{
 				"item_code": items_to_be_repost[index].get("item_code"),

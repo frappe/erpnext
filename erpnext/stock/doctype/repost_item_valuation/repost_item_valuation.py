@@ -80,6 +80,7 @@ class RepostItemValuation(Document):
 		repost(self)
 
 	def validate(self):
+		self.set_default_posting_time()
 		self.reset_repost_only_accounting_ledgers()
 		self.set_company()
 		self.validate_update_stock()
@@ -89,6 +90,13 @@ class RepostItemValuation(Document):
 		self.validate_accounts_freeze()
 		self.reset_recreate_stock_ledgers()
 		self.validate_recreate_stock_ledgers()
+
+	def set_default_posting_time(self):
+		if not self.posting_time:
+			self.posting_time = nowtime()
+
+		if not self.posting_date:
+			frappe.throw(_("Posting date is required"))
 
 	def reset_repost_only_accounting_ledgers(self):
 		if self.repost_only_accounting_ledgers and self.based_on != "Transaction":
