@@ -16,7 +16,7 @@ def get_inventory_dimensions():
 	)
 
 
-def get_display_depends_on(doctype):
+def get_display_depends_on(doctype, fieldname):
 	if doctype not in [
 		"Stock Entry Detail",
 		"Sales Invoice Item",
@@ -24,18 +24,20 @@ def get_display_depends_on(doctype):
 		"Purchase Invoice Item",
 		"Purchase Receipt Item",
 	]:
-		return
+		return None, None
 
+	fieldname_start_with = "to"
 	display_depends_on = ""
 
 	if doctype in ["Purchase Invoice Item", "Purchase Receipt Item"]:
 		display_depends_on = "eval:parent.is_internal_supplier == 1"
+		fieldname_start_with = "from"
 	elif doctype != "Stock Entry Detail":
 		display_depends_on = "eval:parent.is_internal_customer == 1"
 	elif doctype == "Stock Entry Detail":
 		display_depends_on = "eval:doc.t_warehouse"
 
-	return display_depends_on
+	return f"{fieldname_start_with}_{fieldname}", display_depends_on
 
 
 def execute():
@@ -75,13 +77,13 @@ def execute():
 				"depends_on",
 				"eval:doc.t_warehouse",
 			)
-		if (display_depends_on := get_display_depends_on(dimension.doctype)) and frappe.db.exists(
-			"Custom Field",
-			{"fieldname": dimension.fieldname, "dt": dimension.doctype},
+		fieldname, display_depends_on = get_display_depends_on(dimension.doctype, dimension.fieldname)
+		if display_depends_on and frappe.db.exists(
+			"Custom Field", {"fieldname": fieldname, "dt": dimension.doctype}
 		):
 			frappe.set_value(
 				"Custom Field",
-				{"fieldname": dimension.fieldname, "dt": dimension.doctype},
+				{"fieldname": fieldname, "dt": dimension.doctype},
 				"mandatory_depends_on",
 				display_depends_on if dimension.reqd else dimension.mandatory_depends_on,
 			)
