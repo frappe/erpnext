@@ -9,16 +9,17 @@ rules:
   message: DB truncation does implict commit which breaks test idempotency.
   languages: [python]
   severity: ERROR
-- id: Dont-override-teardown
+- id: Dont-override-teardown-in-ERPNextTestSuite-subclass
   patterns:
-  - pattern: |
-      def tearDown(...):
-        ...
-  - pattern-not: |
-      def tearDown(...):
-        ...
-        super().tearDown()
-        ...
+    - pattern: |
+        class $CLASS(ERPNextTestSuite, ...):
+            ...
+    - pattern-inside: |
+        class $CLASS(...):
+            ...
+    - pattern: |
+        def tearDown(self, ...):
+            ...
   message: ERPNextTestSuite forces rollback on each tearDown, which ensures idempotency. Don't override tearDown.
   languages: [python]
   severity: ERROR
