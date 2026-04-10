@@ -25,6 +25,8 @@
   "apply_putaway_rule",
   "is_return",
   "return_against",
+  "section_break_zwvg",
+  "title",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -169,6 +171,14 @@
    "oldfieldtype": "Column Break",
    "print_width": "50%",
    "width": "50%"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   },
   {
    "fieldname": "naming_series",
@@ -1285,6 +1295,10 @@
   {
    "fieldname": "column_break_ugyv",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_zwvg",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
