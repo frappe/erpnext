@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-05 09:49+0000\n"
-"PO-Revision-Date: 2026-04-09 12:51\n"
+"PO-Revision-Date: 2026-04-10 13:45\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -14955,7 +14955,7 @@ msgstr "Standardna Grupa Klijenta"
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Default Deferred Expense Account"
-msgstr "Standard Račun Odgođenih Troškova (Kupovina)"
+msgstr "Standard Račun Odgođenih Troškova"
 
 #. Label of the default_deferred_revenue_account (Link) field in DocType
 #. 'Company'
