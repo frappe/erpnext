@@ -799,6 +799,17 @@ class GrossProfitGenerator:
 				return self.calculate_buying_amount_from_sle(
 					row, my_sle, parenttype, parent, item_row, item_code
 				)
+			elif row.delivered_by_supplier and (
+				po_detail := frappe.get_value(
+					"Purchase Order Item", {"sales_order_item": row.so_detail, "docstatus": 1}
+				)
+			):
+				if rate := frappe.get_all(
+					"Purchase Invoice Item",
+					{"po_detail": po_detail, "docstatus": 1},
+					[{"SUM": "base_net_rate", "as": "rate"}],
+				)[0].rate:
+					return flt(row.qty) * rate
 			elif row.sales_order and row.so_detail:
 				incoming_amount = self.get_buying_amount_from_so_dn(row.sales_order, row.so_detail, item_code)
 				if incoming_amount:
@@ -951,6 +962,7 @@ class GrossProfitGenerator:
 			SalesInvoice.is_return,
 			SalesInvoiceItem.cost_center,
 			SalesInvoiceItem.serial_and_batch_bundle,
+			SalesInvoiceItem.delivered_by_supplier,
 		)
 
 		if self.filters.group_by == "Sales Person":
