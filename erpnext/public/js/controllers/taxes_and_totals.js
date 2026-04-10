@@ -540,7 +540,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		var current_net_amount = 0.0;
 
 		if (tax_rate === NOT_APPLICABLE_TAX) {
-			return current_tax_amount;
+			return [current_net_amount, current_tax_amount];
 		}
 
 		// To set row_id by default as previous row.
