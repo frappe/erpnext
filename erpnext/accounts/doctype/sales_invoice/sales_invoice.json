@@ -33,6 +33,8 @@
   "is_created_using_pos",
   "pos_closing_entry",
   "has_subcontracted",
+  "section_break_sgnf",
+  "title",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -2328,6 +2330,18 @@
    "fieldname": "automation_section",
    "fieldtype": "Section Break",
    "label": "Automation"
+  },
+  {
+   "fieldname": "section_break_sgnf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "grid_page_length": 50,
@@ -2341,7 +2355,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-03-09 17:15:30.931929",
+ "modified": "2026-03-30 12:17:16.201016",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

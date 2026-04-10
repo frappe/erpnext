@@ -22,6 +22,8 @@
   "is_return",
   "issue_credit_note",
   "return_against",
+  "section_break_bxkw",
+  "title",
   "accounting_dimensions_section",
   "cost_center",
   "column_break_18",
@@ -1450,13 +1452,25 @@
    "fieldname": "auto_repeat_section",
    "fieldtype": "Section Break",
    "label": "Auto Repeat"
+  },
+  {
+   "fieldname": "section_break_bxkw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 17:15:27.932956",
+ "modified": "2026-03-30 12:19:56.889644",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

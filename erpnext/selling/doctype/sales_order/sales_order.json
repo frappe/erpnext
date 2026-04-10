@@ -26,6 +26,8 @@
   "has_unit_price_items",
   "is_subcontracted",
   "amended_from",
+  "section_break_umok",
+  "title",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -1742,6 +1744,18 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_umok",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "grid_page_length": 50,
@@ -1749,7 +1763,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-04 18:04:05.873483",
+ "modified": "2026-03-30 12:19:27.522646",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

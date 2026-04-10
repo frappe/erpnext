@@ -64,6 +64,7 @@ class RequestforQuotation(BuyingController):
 		suppliers: DF.Table[RequestforQuotationSupplier]
 		tc_name: DF.Link | None
 		terms: DF.TextEditor | None
+		title: DF.Data | None
 		transaction_date: DF.Date
 		use_html: DF.Check
 		vendor: DF.Link | None
