@@ -560,7 +560,10 @@ def _make_customer(source_name, ignore_permissions=False):
 	if quotation.quotation_to == "Customer":
 		return frappe.get_doc("Customer", quotation.party_name)
 	elif quotation.quotation_to == "CRM Deal":
-		return frappe.get_doc("Customer", {"crm_deal": quotation.party_name})
+		customer_name = frappe.db.exists("Customer", {"crm_deal": quotation.party_name})
+		if customer_name:
+			return frappe.get_doc("Customer", customer_name)
+		return None
 
 	# Check if a Customer already exists for the Lead or Prospect.
 	existing_customer = None
