@@ -13,10 +13,10 @@ import Settings from "@/components/features/Settings/Settings"
 import ActionLog from "@/components/features/ActionLog/ActionLog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { H1 } from "@/components/ui/typography"
 import _ from "@/lib/translate"
 import { useLayoutEffect, useRef, useState } from "react"
-import { AlertTriangleIcon, CheckCircleIcon, ListIcon, ScrollTextIcon, ShuffleIcon } from "lucide-react"
+import { AlertTriangleIcon, CheckCircleIcon, HomeIcon, ListIcon, ScrollTextIcon, ShuffleIcon } from "lucide-react"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 
 
 const BankReconciliation = () => {
@@ -37,8 +37,22 @@ const BankReconciliation = () => {
         <div className="p-4 flex flex-col gap-4">
             <div ref={ref} className="flex flex-col gap-4">
                 <div className="flex justify-between">
-                    <div className="flex items-center gap-4">
-                        <H1 className="text-2xl tracking-normal font-bold">{_("Banking")}</H1>
+                    <div className="flex items-center gap-6">
+                        <Breadcrumb>
+                            <BreadcrumbList>
+                                <BreadcrumbItem>
+                                    <a href="/desk" className="text-ink-gray-7">
+                                        <HomeIcon size={16} strokeWidth={1.5} />
+                                    </a>
+                                </BreadcrumbItem>
+                                <BreadcrumbSeparator />
+                                <BreadcrumbItem>
+                                    <BreadcrumbPage>
+                                        {_("Banking")}
+                                    </BreadcrumbPage>
+                                </BreadcrumbItem>
+                            </BreadcrumbList>
+                        </Breadcrumb>
                         <CompanySelector />
                     </div>
                     <div className="flex items-center gap-2">

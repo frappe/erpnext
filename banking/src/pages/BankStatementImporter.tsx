@@ -10,7 +10,7 @@ import ErrorBanner from "@/components/ui/error-banner"
 import { FileDropzone } from "@/components/ui/file-dropzone"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { H1, H3, Paragraph } from "@/components/ui/typography"
+import { H3, Paragraph } from "@/components/ui/typography"
 import { useCurrentCompany } from "@/hooks/useCurrentCompany"
 import { formatDate } from "@/lib/date"
 import { flt, formatCurrency } from "@/lib/numbers"
@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils"
 import { MintBankStatementImportLog } from "@/types/Mint/MintBankStatementImportLog"
 import { useFrappeFileUpload, useFrappeGetDocList } from "frappe-react-sdk"
 import { useAtom, useAtomValue } from "jotai"
-import { ListIcon, Loader2Icon } from "lucide-react"
+import { HomeIcon, ListIcon, Loader2Icon } from "lucide-react"
 import { useState } from "react"
 import { Link } from "react-router"
 
@@ -53,21 +53,26 @@ const BankStatementImporter = () => {
     }
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col pt-1.5">
             <div className="flex gap-2 items-baseline p-4">
-                <H1 className="text-2xl tracking-normal font-bold">{_("Banking")}</H1>
                 <Breadcrumb>
                     <BreadcrumbList>
                         <BreadcrumbItem>
-                            <BreadcrumbLink asChild className="text-base font-medium tracking-tight text-balance">
+                            <a href="/desk" className="text-ink-gray-7">
+                                <HomeIcon size={16} strokeWidth={1.5} />
+                            </a>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                            <BreadcrumbLink asChild>
                                 <Link to="/">
-                                    {_("Bank Reconciliation")}
+                                    {_("Banking")}
                                 </Link>
                             </BreadcrumbLink>
                         </BreadcrumbItem>
                         <BreadcrumbSeparator />
                         <BreadcrumbItem>
-                            <BreadcrumbPage className="text-base font-medium tracking-tight text-balance">{_("Import Bank Statement")}</BreadcrumbPage>
+                            <BreadcrumbPage>{_("Import Bank Statement")}</BreadcrumbPage>
                         </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>
