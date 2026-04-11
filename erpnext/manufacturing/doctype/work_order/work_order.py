@@ -2663,7 +2663,7 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 			"sequence_id": row.get("sequence_id"),
 			"hour_rate": row.get("hour_rate"),
 			"serial_no": row.get("serial_no"),
-			"time_required": (row.get("time_in_mins") / work_order.qty) * qty,
+			"time_required": (row.get("time_in_mins", 0) / work_order.qty) * qty,
 			"source_warehouse": row.get("source_warehouse") or work_order.get("source_warehouse"),
 			"target_warehouse": row.get("fg_warehouse") or work_order.get("fg_warehouse"),
 			"wip_warehouse": work_order.wip_warehouse or row.get("wip_warehouse")
