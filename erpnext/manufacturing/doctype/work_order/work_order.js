@@ -419,6 +419,7 @@ frappe.ui.form.on("Work Order", {
 						sequence_id: data.sequence_id,
 						skip_material_transfer: data.skip_material_transfer,
 						backflush_from_wip_warehouse: data.backflush_from_wip_warehouse,
+						time_in_mins: data.time_in_mins,
 					});
 				}
 			}
