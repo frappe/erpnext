@@ -383,7 +383,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(si.net_total, 3859.65)
 		self.assertEqual(si.grand_total, 4900.00)
 
-	@change_settings("System Settings", {"number_format": "#,###"})
+	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###"})
 	def test_inclusive_tax_zero_decimal_currency(self):
 		"""Tax-included prices in zero-decimal currencies (e.g. JPY) must not produce
 		net + tax != gross due to double rounding of the net amount."""
@@ -409,7 +409,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(si.taxes[0].tax_amount, 4545)
 		self.assertEqual(si.grand_total, 50000)
 
-	@change_settings("System Settings", {"number_format": "#,###"})
+	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###"})
 	def test_inclusive_tax_zero_decimal_currency_multiple_items(self):
 		"""Multiple items with tax-included prices in zero-decimal currency."""
 		si = create_sales_invoice(qty=1, rate=50000, do_not_save=True)
@@ -450,7 +450,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(si.taxes[0].tax_amount, 7273)
 		self.assertEqual(si.grand_total, 80000)
 
-	@change_settings("System Settings", {"number_format": "#,###"})
+	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###"})
 	def test_inclusive_tax_zero_decimal_currency_many_items(self):
 		"""Test with 10 items (mixed 10% and 5% tax) to verify tolerance of 1 is sufficient."""
 		si = create_sales_invoice(qty=1, rate=50000, do_not_save=True)
