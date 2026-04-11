@@ -159,10 +159,18 @@ def create_customer(customer_data=None):
 	try:
 		customer_name = frappe.db.exists("Customer", {"customer_name": customer_data.get("customer_name")})
 		if not customer_name:
-			customer = frappe.get_doc({"doctype": "Customer", **customer_data}).insert(
+			customer_doc_data = dict(customer_data)
+			industry = customer_doc_data.get("industry")
+			if industry and not frappe.db.exists("Industry Type", industry):
+				frappe.get_doc({"doctype": "Industry Type", "industry": industry}).insert(
+					ignore_permissions=True
+				)
+			customer = frappe.get_doc({"doctype": "Customer", **customer_doc_data}).insert(
 				ignore_permissions=True
 			)
 			customer_name = customer.name
+			elif customer_data.get("crm_deal"):
+			frappe.db.set_value("Customer", customer_name, "crm_deal", customer_data["crm_deal"])
 
 		contacts = json.loads(customer_data.get("contacts"))
 		create_contacts(contacts, customer_name, "Customer", customer_name)
