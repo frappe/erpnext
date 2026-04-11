@@ -39,8 +39,8 @@ Running a business is a complex task - handling invoices, tracking stock, managi
 - **Accounting**: All the tools you need to manage cash flow in one place, right from recording transactions to summarizing and analyzing financial reports.
 - **Order Management**: Track inventory levels, replenish stock, and manage sales orders, customers, suppliers, shipments, deliverables, and order fulfillment.
 - **Manufacturing**: Simplifies the production cycle, helps track material consumption, exhibits capacity planning, handles subcontracting, and more!
-- **Asset Management**: From purchase to perishment, IT infrastructure to equipment. Cover every branch of your organization, all in one centralized system.
-- **Projects**: Delivery both internal and external Projects on time, budget and Profitability. Track tasks, timesheets, and issues by project.
+- **Asset Management**: From purchase to disposal, IT infrastructure to equipment. Cover every branch of your organization, all in one centralized system.
+- **Projects**: Deliver both internal and external projects on time, budget and profitability. Track tasks, timesheets, and issues by project.
 
 <details open>
 
@@ -164,9 +164,9 @@ To setup the repository locally follow the steps mentioned below:
 ## Contributing
 
 1. [Issue Guidelines](https://github.com/frappe/erpnext/wiki/Issue-Guidelines)
-1. [Report Security Vulnerabilities](https://erpnext.com/security)
-1. [Pull Request Requirements](https://github.com/frappe/erpnext/wiki/Contribution-Guidelines)
-2. [Translations](https://crowdin.com/project/frappe)
+2. [Report Security Vulnerabilities](https://erpnext.com/security)
+3. [Pull Request Requirements](https://github.com/frappe/erpnext/wiki/Contribution-Guidelines)
+4. [Translations](https://crowdin.com/project/frappe)
 
 
 ## Logo and Trademark Policy

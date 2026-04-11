@@ -41,7 +41,7 @@ frappe.ui.form.on("Asset Movement", {
 			});
 	},
 
-	onload: (frm) => {
+	refresh: (frm) => {
 		frm.trigger("set_required_fields");
 	},
 

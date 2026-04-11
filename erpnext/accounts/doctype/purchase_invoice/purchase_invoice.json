@@ -27,6 +27,8 @@
   "update_billed_amount_in_purchase_receipt",
   "apply_tds",
   "amended_from",
+  "section_break_ecfi",
+  "title",
   "supplier_invoice_details",
   "bill_no",
   "column_break_15",
@@ -209,6 +211,14 @@
   "connections_tab"
  ],
  "fields": [
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
+  },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -1682,6 +1692,10 @@
    "fieldname": "automation_section",
    "fieldtype": "Section Break",
    "label": "Automation"
+  },
+  {
+   "fieldname": "section_break_ecfi",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
@@ -1689,7 +1703,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-25 11:45:38.696888",
+ "modified": "2026-03-30 12:16:40.157755",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

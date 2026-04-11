@@ -32,18 +32,11 @@
   "total_reposting_count",
   "current_index",
   "gl_reposting_index",
+  "reposting_data_file",
   "vouchers_based_on_item_and_warehouse_section",
   "total_vouchers",
   "column_break_yqwo",
-  "vouchers_posted",
-  "last_sle_posted_section",
-  "reposted_item_code",
-  "reposted_warehouse",
-  "reposting_data_file",
-  "column_break_miwc",
-  "sle_posting_date",
-  "sle_posting_time",
-  "reposted_sle_creation"
+  "vouchers_posted"
  ],
  "fields": [
   {
@@ -236,6 +229,7 @@
   {
    "fieldname": "vouchers_based_on_item_and_warehouse_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Reposting Vouchers"
   },
   {
@@ -257,52 +251,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "last_sle_posted_section",
-   "fieldtype": "Section Break",
-   "label": "Last SLE Posted"
-  },
-  {
-   "fieldname": "reposted_item_code",
-   "fieldtype": "Link",
-   "label": "Reposted Item Code",
-   "no_copy": 1,
-   "options": "Item",
-   "read_only": 1
-  },
-  {
-   "fieldname": "reposted_warehouse",
-   "fieldtype": "Link",
-   "label": "Reposted Warehouse",
-   "no_copy": 1,
-   "options": "Warehouse",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_miwc",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "reposted_sle_creation",
-   "fieldtype": "Datetime",
-   "label": "Reposted SLE Creation",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "sle_posting_date",
-   "fieldtype": "Date",
-   "label": "SLE Posting Date",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "sle_posting_time",
-   "fieldtype": "Time",
-   "label": "SLE Posting Time",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "reposting_data_file",
    "fieldtype": "Attach",
    "label": "Reposting Data File",
@@ -314,7 +262,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-26 13:52:51.895504",
+ "modified": "2026-03-27 18:59:58.637964",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",

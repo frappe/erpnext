@@ -135,6 +135,7 @@ def get_columns(filters: Filters) -> list[dict]:
 			"fieldtype": "Link",
 			"options": "Item",
 			"width": 100,
+			"sticky": "True",
 		},
 		{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 100},
 		{"label": _("Description"), "fieldname": "description", "fieldtype": "Data", "width": 200},
@@ -162,6 +163,7 @@ def get_columns(filters: Filters) -> list[dict]:
 				"fieldtype": "Link",
 				"options": "Warehouse",
 				"width": 100,
+				"sticky": "True",
 			}
 		]
 

@@ -23,6 +23,8 @@
   "is_subcontracted",
   "has_unit_price_items",
   "supplier_warehouse",
+  "section_break_zymg",
+  "title",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -170,6 +172,14 @@
    "fieldname": "supplier_section",
    "fieldtype": "Section Break",
    "options": "fa fa-user"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   },
   {
    "fieldname": "naming_series",
@@ -1309,6 +1319,10 @@
    "fieldname": "auto_repeat_section",
    "fieldtype": "Section Break",
    "label": "Auto Repeat"
+  },
+  {
+   "fieldname": "section_break_zymg",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
@@ -1316,7 +1330,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-25 11:46:18.748951",
+ "modified": "2026-03-30 12:17:43.342204",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
