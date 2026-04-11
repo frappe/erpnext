@@ -2,12 +2,12 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestFinanceBook(IntegrationTestCase):
+class TestFinanceBook(ERPNextTestSuite):
 	def test_finance_book(self):
 		finance_book = create_finance_book()
 

@@ -20,7 +20,6 @@ from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, new_line_se
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
-from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.stock_balance import get_indented_qty, update_bin_qty
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
@@ -98,7 +97,16 @@ class MaterialRequest(BuyingController):
 				"join_field": "sales_order_item",
 				"target_ref_field": "stock_qty",
 				"source_field": "stock_qty",
-			}
+			},
+			{
+				"source_dt": "Material Request Item",
+				"target_dt": "Packed Item",
+				"target_field": "requested_qty",
+				"target_parent_dt": "Sales Order",
+				"join_field": "packed_item",
+				"target_ref_field": "qty",
+				"source_field": "qty",
+			},
 		]
 
 	def check_if_already_pulled(self):
@@ -505,17 +513,6 @@ def make_purchase_order(
 
 	def postprocess(source, target_doc):
 		target_doc.is_subcontracted = is_subcontracted
-		if frappe.flags.args and frappe.flags.args.default_supplier:
-			# items only for given default supplier
-			supplier_items = []
-			for d in target_doc.items:
-				if is_subcontracted and not d.item_code:
-					continue
-				default_supplier = get_item_defaults(d.item_code, target_doc.company).get("default_supplier")
-				if frappe.flags.args.default_supplier == default_supplier:
-					supplier_items.append(d)
-			target_doc.items = supplier_items
-
 		set_missing_values(source, target_doc)
 
 	def select_item(d):
@@ -695,39 +692,6 @@ def get_material_requests_based_on_supplier(
 	material_requests = query.run(as_dict=True)
 
 	return material_requests
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def get_default_supplier_query(
-	doctype: Any, txt: str, searchfield: str, start: int, page_len: int, filters: dict
-):
-	doc = frappe.get_doc("Material Request", filters.get("doc"))
-	item_list = []
-	for d in doc.items:
-		item_list.append(d.item_code)
-
-	supplier = frappe.qb.DocType("Supplier")
-	item_default = frappe.qb.DocType("Item Default")
-	query = (
-		frappe.qb.from_(supplier)
-		.left_join(item_default)
-		.on(supplier.name == item_default.default_supplier)
-		.select(item_default.default_supplier)
-		.where(
-			(item_default.parent.isin(item_list))
-			& (item_default.default_supplier.notnull())
-			& (supplier[searchfield].like(f"%{txt}%"))
-		)
-		.offset(start)
-		.limit(page_len)
-	)
-
-	meta = frappe.get_meta("Supplier")
-	if meta.show_title_field_in_link and meta.title_field:
-		query = query.select(supplier[meta.title_field])
-
-	return query.run(as_dict=False)
 
 
 @frappe.whitelist()

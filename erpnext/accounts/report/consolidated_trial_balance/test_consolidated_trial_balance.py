@@ -3,35 +3,20 @@
 
 import frappe
 from frappe import _
-from frappe.tests import IntegrationTestCase
 from frappe.utils import flt, today
 
 from erpnext.accounts.report.consolidated_trial_balance.consolidated_trial_balance import execute
 from erpnext.setup.utils import get_exchange_rate
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 class ForeignCurrencyTranslationReserveNotFoundError(frappe.ValidationError):
 	pass
 
 
-class TestConsolidatedTrialBalance(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		from erpnext.accounts.report.trial_balance.test_trial_balance import create_company
+class TestConsolidatedTrialBalance(ERPNextTestSuite):
+	def setUp(self):
 		from erpnext.accounts.utils import get_fiscal_year
-
-		# Group Company
-		create_company(company_name="Parent Group Company India", is_group=1)
-
-		create_company(company_name="Child Company India", parent_company="Parent Group Company India")
-
-		# Child Company with different currency
-		create_company(
-			company_name="Child Company US",
-			country="United States",
-			currency="USD",
-			parent_company="Parent Group Company India",
-		)
 
 		create_journal_entry(
 			company="Parent Group Company India",
@@ -48,7 +33,7 @@ class TestConsolidatedTrialBalance(IntegrationTestCase):
 			company="Child Company US", acc1="Marketing Expenses - CCU", acc2="Cash - CCU", amount=1000
 		)
 
-		cls.fiscal_year = get_fiscal_year(today(), company="Parent Group Company India")[0]
+		self.fiscal_year = get_fiscal_year(today(), company="Parent Group Company India")[0]
 
 	def test_single_company_report(self):
 		filters = frappe._dict({"company": ["Parent Group Company India"], "fiscal_year": self.fiscal_year})

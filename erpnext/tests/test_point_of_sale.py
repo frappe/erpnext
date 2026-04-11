@@ -1,15 +1,14 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
-from frappe.tests import IntegrationTestCase
-
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.selling.page.point_of_sale.point_of_sale import get_items
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestPointOfSale(IntegrationTestCase):
+class TestPointOfSale(ERPNextTestSuite):
 	def test_item_search(self):
 		"""
 		Test Stock and Service Item Search.

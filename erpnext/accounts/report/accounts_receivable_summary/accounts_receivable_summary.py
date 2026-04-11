@@ -149,6 +149,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			fieldtype="Dynamic Link",
 			options="party_type",
 			width=180,
+			sticky=(self.party_naming_by not in ["Naming Series", "Auto Name"]),
 		)
 
 		if self.party_naming_by == "Naming Series":
@@ -156,6 +157,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				label=_("Supplier Name") if self.account_type == "Payable" else _("Customer Name"),
 				fieldname="party_name",
 				fieldtype="Data",
+				sticky=True,
 			)
 
 		credit_debit_label = "Credit Note" if self.account_type == "Receivable" else "Debit Note"

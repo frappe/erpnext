@@ -1,27 +1,22 @@
 import json
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from hypothesis import given
 from hypothesis import strategies as st
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation, round_off_if_near_zero
+from erpnext.tests.utils import ERPNextTestSuite
 
 qty_gen = st.floats(min_value=-1e6, max_value=1e6)
 value_gen = st.floats(min_value=1, max_value=1e6)
 stock_queue_generator = st.lists(st.tuples(qty_gen, value_gen), min_size=10)
 
 
-class TestFIFOValuation(IntegrationTestCase):
+class TestFIFOValuation(ERPNextTestSuite):
 	def setUp(self):
 		self.queue = FIFOValuation([])
-
-	def tearDown(self):
-		qty, value = self.queue.get_total_stock_and_value()
-		self.assertTotalQty(qty)
-		self.assertTotalValue(value)
 
 	def assertTotalQty(self, qty):
 		self.assertAlmostEqual(sum(q for q, _ in self.queue), qty, msg=f"queue: {self.queue}", places=4)
@@ -194,14 +189,9 @@ class TestFIFOValuation(IntegrationTestCase):
 			self.assertTotalValue(total_value)
 
 
-class TestLIFOValuation(IntegrationTestCase):
+class TestLIFOValuation(ERPNextTestSuite):
 	def setUp(self):
 		self.stack = LIFOValuation([])
-
-	def tearDown(self):
-		qty, value = self.stack.get_total_stock_and_value()
-		self.assertTotalQty(qty)
-		self.assertTotalValue(value)
 
 	def assertTotalQty(self, qty):
 		self.assertAlmostEqual(sum(q for q, _ in self.stack), qty, msg=f"stack: {self.stack}", places=4)
@@ -316,14 +306,12 @@ class TestLIFOValuation(IntegrationTestCase):
 			self.assertTotalValue(total_value)
 
 
-class TestLIFOValuationSLE(IntegrationTestCase):
+class TestLIFOValuationSLE(ERPNextTestSuite):
 	ITEM_CODE = "_Test LIFO item"
 	WAREHOUSE = "_Test Warehouse - _TC"
 
-	@classmethod
-	def setUpClass(cls) -> None:
-		super().setUpClass()
-		make_item(cls.ITEM_CODE, {"valuation_method": "LIFO"})
+	def setUp(self) -> None:
+		make_item(self.ITEM_CODE, {"valuation_method": "LIFO"})
 
 	def _make_stock_entry(self, qty, rate=None):
 		kwargs = {

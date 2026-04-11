@@ -457,7 +457,7 @@ class BuyingController(SubcontractingController):
 						get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
 					)
 
-				net_rate = item.base_net_amount
+				net_rate = item.qty * item.base_net_rate
 				if item.sales_incoming_rate:  # for internal transfer
 					net_rate = item.qty * item.sales_incoming_rate
 
@@ -503,11 +503,15 @@ class BuyingController(SubcontractingController):
 			if d.category not in ["Valuation", "Valuation and Total"]:
 				continue
 
+			amount = flt(d.base_tax_amount_after_discount_amount) * (
+				-1 if d.get("add_deduct_tax") == "Deduct" else 1
+			)
+
 			if d.charge_type == "On Net Total":
-				total_valuation_amount += flt(d.base_tax_amount_after_discount_amount)
+				total_valuation_amount += amount
 				tax_accounts.append(d.account_head)
 			else:
-				total_actual_tax_amount += flt(d.base_tax_amount_after_discount_amount)
+				total_actual_tax_amount += amount
 
 		return tax_accounts, total_valuation_amount, total_actual_tax_amount
 
@@ -1092,12 +1096,10 @@ class BuyingController(SubcontractingController):
 			}
 		)
 		for dimension in accounting_dimensions[0]:
-			asset.update(
-				{
-					dimension["fieldname"]: self.get(dimension["fieldname"])
-					or dimension.get("default_dimension")
-				}
-			)
+			fieldname = dimension["fieldname"]
+			default_dimension = accounting_dimensions[1].get(self.company, {}).get(fieldname)
+			if not asset.get(fieldname):
+				asset.update({fieldname: row.get(fieldname) or self.get(fieldname) or default_dimension})
 
 		asset.flags.ignore_validate = True
 		asset.flags.ignore_mandatory = True

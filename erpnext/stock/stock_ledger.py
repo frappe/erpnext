@@ -4,6 +4,7 @@
 import copy
 import gzip
 import json
+from collections import deque
 
 import frappe
 from frappe import _, bold, scrub
@@ -14,6 +15,7 @@ from frappe.utils import (
 	cint,
 	flt,
 	format_date,
+	get_datetime,
 	get_link_to_form,
 	getdate,
 	now,
@@ -75,9 +77,6 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 		future_sle_exists(args, sl_entries)
 
 		for sle in sl_entries:
-			if sle.serial_no and not via_landed_cost_voucher:
-				validate_serial_no(sle)
-
 			if cancelled:
 				sle["actual_qty"] = -flt(sle.get("actual_qty"))
 
@@ -158,35 +157,6 @@ def get_args_for_future_sle(row):
 	)
 
 
-def validate_serial_no(sle):
-	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-
-	for sn in get_serial_nos(sle.serial_no):
-		args = copy.deepcopy(sle)
-		args.serial_no = sn
-		args.warehouse = ""
-
-		vouchers = []
-		for row in get_stock_ledger_entries(args, ">"):
-			voucher_type = frappe.bold(row.voucher_type)
-			voucher_no = frappe.bold(get_link_to_form(row.voucher_type, row.voucher_no))
-			vouchers.append(f"{voucher_type} {voucher_no}")
-
-		if vouchers:
-			serial_no = frappe.bold(sn)
-			msg = (
-				f"""The serial no {serial_no} has been used in the future transactions so you need to cancel them first.
-				The list of the transactions are as below."""
-				+ "<br><br><ul><li>"
-			)
-
-			msg += "</li><li>".join(vouchers)
-			msg += "</li></ul>"
-
-			title = "Cannot Submit" if not sle.get("is_cancelled") else "Cannot Cancel"
-			frappe.throw(_(msg), title=_(title), exc=SerialNoExistsInFutureTransaction)
-
-
 def validate_cancellation(kargs):
 	if kargs[0].get("is_cancelled"):
 		repost_entry = frappe.db.get_value(
@@ -242,145 +212,90 @@ def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 
 
 def repost_future_sle(
-	args=None,
+	items_to_be_repost=None,
 	voucher_type=None,
 	voucher_no=None,
 	allow_negative_stock=None,
 	via_landed_cost_voucher=False,
 	doc=None,
 ):
-	if not args:
-		args = []  # set args to empty list if None to avoid enumerate error
-
 	reposting_data = {}
+	if not items_to_be_repost:
+		items_to_be_repost = get_items_to_be_repost(
+			voucher_type=voucher_type, voucher_no=voucher_no, doc=doc, reposting_data=reposting_data
+		)
+
 	if doc and doc.reposting_data_file:
 		reposting_data = get_reposting_data(doc.reposting_data_file)
 
-	items_to_be_repost = get_items_to_be_repost(
-		voucher_type=voucher_type, voucher_no=voucher_no, doc=doc, reposting_data=reposting_data
+	repost_affected_transaction = get_affected_transactions(doc, reposting_data) or set()
+	resume_item_wh_wise_last_posted_sle = (
+		get_item_wh_wise_last_posted_sle_from_reposting_data(doc, reposting_data) or {}
 	)
-	if items_to_be_repost:
-		args = items_to_be_repost
+	if not items_to_be_repost:
+		return
 
-	distinct_item_warehouses = get_distinct_item_warehouse(args, doc, reposting_data=reposting_data)
-	affected_transactions = get_affected_transactions(doc, reposting_data=reposting_data)
-
-	i = get_current_index(doc) or 0
-	while i < len(args):
-		validate_item_warehouse(args[i])
+	index = get_current_index(doc) or 0
+	while index < len(items_to_be_repost):
+		validate_item_warehouse(items_to_be_repost[index])
 
 		obj = update_entries_after(
 			{
-				"item_code": args[i].get("item_code"),
-				"warehouse": args[i].get("warehouse"),
-				"posting_date": args[i].get("posting_date"),
-				"posting_time": args[i].get("posting_time"),
-				"creation": args[i].get("creation"),
-				"distinct_item_warehouses": distinct_item_warehouses,
-				"items_to_be_repost": args,
-				"current_index": i,
+				"item_code": items_to_be_repost[index].get("item_code"),
+				"warehouse": items_to_be_repost[index].get("warehouse"),
+				"posting_date": items_to_be_repost[index].get("posting_date"),
+				"posting_time": items_to_be_repost[index].get("posting_time"),
+				"creation": items_to_be_repost[index].get("creation"),
+				"current_idx": index,
+				"items_to_be_repost": items_to_be_repost,
+				"repost_doc": doc,
+				"repost_affected_transaction": repost_affected_transaction,
+				"item_wh_wise_last_posted_sle": resume_item_wh_wise_last_posted_sle,
 			},
 			allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
-		affected_transactions.update(obj.affected_transactions)
 
-		key = (args[i].get("item_code"), args[i].get("warehouse"))
-		if distinct_item_warehouses.get(key):
-			distinct_item_warehouses[key].reposting_status = True
+		index += 1
 
-		if obj.new_items_found:
-			for _item_wh, data in distinct_item_warehouses.items():
-				if ("args_idx" not in data and not data.reposting_status) or (
-					data.sle_changed and data.reposting_status
-				):
-					data.args_idx = len(args)
-					args.append(data.sle)
-				elif data.sle_changed and not data.reposting_status:
-					args[data.args_idx] = data.sle
-
-				data.sle_changed = False
-		i += 1
-
-		if doc:
-			update_args_in_repost_item_valuation(
-				doc, i, args, distinct_item_warehouses, affected_transactions
-			)
+		resume_item_wh_wise_last_posted_sle = {}
+		repost_affected_transaction.update(obj.repost_affected_transaction)
+		update_args_in_repost_item_valuation(doc, index, items_to_be_repost, repost_affected_transaction)
 
 
-def get_reposting_data(file_path) -> dict:
-	file_name = frappe.db.get_value(
-		"File",
+def update_args_in_repost_item_valuation(
+	doc,
+	index,
+	items_to_be_repost,
+	repost_affected_transaction,
+	item_wh_wise_last_posted_sle=None,
+):
+	file_name = ""
+	if not item_wh_wise_last_posted_sle:
+		item_wh_wise_last_posted_sle = {}
+
+	if doc.reposting_data_file:
+		file_name = get_reposting_file_name(doc.doctype, doc.name)
+		# frappe.delete_doc("File", file_name, ignore_permissions=True, delete_permanently=True)
+
+	doc.reposting_data_file = create_json_gz_file(
 		{
-			"file_url": file_path,
-			"attached_to_field": "reposting_data_file",
+			"repost_affected_transaction": repost_affected_transaction,
+			"item_wh_wise_last_posted_sle": {str(k): v for k, v in item_wh_wise_last_posted_sle.items()}
+			or {},
 		},
-		"name",
+		doc,
+		file_name,
 	)
 
-	if not file_name:
-		return frappe._dict()
-
-	attached_file = frappe.get_doc("File", file_name)
-
-	content = attached_file.get_content()
-	if isinstance(content, str):
-		content = content.encode("utf-8")
-
-	try:
-		data = gzip.decompress(content)
-	except Exception:
-		return frappe._dict()
-
-	if data := json.loads(data.decode("utf-8")):
-		data = data
-
-	return parse_json(data)
-
-
-def validate_item_warehouse(args):
-	for field in ["item_code", "warehouse", "posting_date", "posting_time"]:
-		if args.get(field) in [None, ""]:
-			validation_msg = f"The field {frappe.unscrub(field)} is required for the reposting"
-			frappe.throw(_(validation_msg))
-
-
-def update_args_in_repost_item_valuation(doc, index, args, distinct_item_warehouses, affected_transactions):
-	if not doc.items_to_be_repost:
-		file_name = ""
-		if doc.reposting_data_file:
-			file_name = get_reposting_file_name(doc.doctype, doc.name)
-			# frappe.delete_doc("File", file_name, ignore_permissions=True, delete_permanently=True)
-
-		doc.reposting_data_file = create_json_gz_file(
-			{
-				"items_to_be_repost": args,
-				"distinct_item_and_warehouse": {str(k): v for k, v in distinct_item_warehouses.items()},
-				"affected_transactions": affected_transactions,
-			},
-			doc,
-			file_name,
-		)
-
-		doc.db_set(
-			{
-				"current_index": index,
-				"total_reposting_count": len(args),
-				"reposting_data_file": doc.reposting_data_file,
-			}
-		)
-
-	else:
-		doc.db_set(
-			{
-				"items_to_be_repost": json.dumps(args, default=str),
-				"distinct_item_and_warehouse": json.dumps(
-					{str(k): v for k, v in distinct_item_warehouses.items()}, default=str
-				),
-				"current_index": index,
-				"affected_transactions": frappe.as_json(affected_transactions),
-			}
-		)
+	doc.db_set(
+		{
+			"current_index": index,
+			"items_to_be_repost": frappe.as_json(items_to_be_repost),
+			"total_reposting_count": len(items_to_be_repost),
+			"reposting_data_file": doc.reposting_data_file,
+		}
+	)
 
 	if not frappe.in_test:
 		frappe.db.commit()
@@ -389,9 +304,8 @@ def update_args_in_repost_item_valuation(doc, index, args, distinct_item_warehou
 		"item_reposting_progress",
 		{
 			"name": doc.name,
-			"items_to_be_repost": json.dumps(args, default=str),
 			"current_index": index,
-			"total_reposting_count": len(args),
+			"total_reposting_count": len(items_to_be_repost),
 		},
 		doctype=doc.doctype,
 		docname=doc.name,
@@ -448,23 +362,27 @@ def create_file(doc, compressed_content):
 	return _file.file_url
 
 
-def get_items_to_be_repost(voucher_type=None, voucher_no=None, doc=None, reposting_data=None):
-	if not reposting_data and doc and doc.reposting_data_file:
-		reposting_data = get_reposting_data(doc.reposting_data_file)
+def validate_item_warehouse(args):
+	for field in ["item_code", "warehouse", "posting_date", "posting_time"]:
+		if args.get(field) in [None, ""]:
+			validation_msg = f"The field {frappe.unscrub(field)} is required for the reposting"
+			frappe.throw(_(validation_msg))
 
+
+def get_items_to_be_repost(voucher_type=None, voucher_no=None, doc=None, reposting_data=None):
 	if reposting_data and reposting_data.items_to_be_repost:
 		return reposting_data.items_to_be_repost
 
 	items_to_be_repost = []
 
 	if doc and doc.items_to_be_repost:
-		items_to_be_repost = json.loads(doc.items_to_be_repost) or []
+		items_to_be_repost = json.loads(doc.items_to_be_repost)
 
 	if not items_to_be_repost and voucher_type and voucher_no:
 		items_to_be_repost = frappe.db.get_all(
 			"Stock Ledger Entry",
 			filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
-			fields=["item_code", "warehouse", "posting_date", "posting_time", "creation"],
+			fields=["item_code", "warehouse", "posting_date", "posting_time", "creation", "posting_datetime"],
 			order_by="creation asc",
 			group_by="item_code, warehouse",
 		)
@@ -472,51 +390,54 @@ def get_items_to_be_repost(voucher_type=None, voucher_no=None, doc=None, reposti
 	return items_to_be_repost or []
 
 
-def get_distinct_item_warehouse(args=None, doc=None, reposting_data=None):
-	if not reposting_data and doc and doc.reposting_data_file:
-		reposting_data = get_reposting_data(doc.reposting_data_file)
-
-	if reposting_data and reposting_data.distinct_item_and_warehouse:
-		return parse_distinct_items_and_warehouses(reposting_data.distinct_item_and_warehouse)
-
-	distinct_item_warehouses = {}
-
-	if doc and doc.distinct_item_and_warehouse:
-		distinct_item_warehouses = json.loads(doc.distinct_item_and_warehouse)
-		distinct_item_warehouses = {
-			frappe.safe_eval(k): frappe._dict(v) for k, v in distinct_item_warehouses.items()
-		}
-	else:
-		for i, d in enumerate(args):
-			distinct_item_warehouses.setdefault(
-				(d.item_code, d.warehouse), frappe._dict({"reposting_status": False, "sle": d, "args_idx": i})
-			)
-
-	return distinct_item_warehouses
-
-
-def parse_distinct_items_and_warehouses(distinct_items_and_warehouses):
-	new_dict = frappe._dict({})
-
-	# convert string keys to tuple
-	for k, v in distinct_items_and_warehouses.items():
-		new_dict[frappe.safe_eval(k)] = frappe._dict(v)
-
-	return new_dict
-
-
 def get_affected_transactions(doc, reposting_data=None) -> set[tuple[str, str]]:
 	if not reposting_data and doc and doc.reposting_data_file:
 		reposting_data = get_reposting_data(doc.reposting_data_file)
 
-	if reposting_data and reposting_data.affected_transactions:
-		return {tuple(transaction) for transaction in reposting_data.affected_transactions}
+	if reposting_data and reposting_data.repost_affected_transaction:
+		return {tuple(transaction) for transaction in reposting_data.repost_affected_transaction}
 
-	if not doc.affected_transactions:
-		return set()
+	return set()
 
-	transactions = frappe.parse_json(doc.affected_transactions)
-	return {tuple(transaction) for transaction in transactions}
+
+def get_item_wh_wise_last_posted_sle_from_reposting_data(doc, reposting_data=None):
+	if not reposting_data and doc and doc.reposting_data_file:
+		reposting_data = get_reposting_data(doc.reposting_data_file)
+
+	if reposting_data and reposting_data.item_wh_wise_last_posted_sle:
+		return frappe._dict(reposting_data.item_wh_wise_last_posted_sle)
+
+	return frappe._dict()
+
+
+def get_reposting_data(file_path) -> dict:
+	file_name = frappe.db.get_value(
+		"File",
+		{
+			"file_url": file_path,
+			"attached_to_field": "reposting_data_file",
+		},
+		"name",
+	)
+
+	if not file_name:
+		return frappe._dict()
+
+	attached_file = frappe.get_doc("File", file_name)
+
+	content = attached_file.get_content()
+	if isinstance(content, str):
+		content = content.encode("utf-8")
+
+	try:
+		data = gzip.decompress(content)
+	except Exception:
+		return frappe._dict()
+
+	if data := json.loads(data.decode("utf-8")):
+		data = data
+
+	return parse_json(data)
 
 
 def get_current_index(doc=None):
@@ -552,6 +473,10 @@ class update_entries_after:
 		self.allow_zero_rate = allow_zero_rate
 		self.via_landed_cost_voucher = via_landed_cost_voucher
 		self.item_code = args.get("item_code")
+		self.stock_ledgers_to_repost = []
+		self.current_idx = args.get("current_idx", 0)
+		self.repost_doc = args.get("repost_doc") or None
+		self.items_to_be_repost = args.get("items_to_be_repost") or None
 
 		self.allow_negative_stock = allow_negative_stock or is_negative_stock_allowed(
 			item_code=self.item_code
@@ -561,17 +486,20 @@ class update_entries_after:
 		if self.args.sle_id:
 			self.args["name"] = self.args.sle_id
 
+		self.prev_sle_dict = frappe._dict({})
 		self.company = frappe.get_cached_value("Warehouse", self.args.warehouse, "company")
 		self.set_precision()
 		self.valuation_method = get_valuation_method(self.item_code, self.company)
+		self.repost_affected_transaction = args.get("repost_affected_transaction") or set()
 
 		self.new_items_found = False
-		self.distinct_item_warehouses = args.get("distinct_item_warehouses", frappe._dict())
-		self.affected_transactions: set[tuple[str, str]] = set()
 		self.reserved_stock = self.get_reserved_stock()
 
 		self.data = frappe._dict()
-		self.initialize_previous_data(self.args)
+
+		if not self.repost_doc or not self.args.get("item_wh_wise_last_posted_sle"):
+			self.initialize_previous_data(self.args)
+
 		self.build()
 
 	def get_reserved_stock(self):
@@ -621,7 +549,14 @@ class update_entries_after:
 		"""
 		self.data.setdefault(args.warehouse, frappe._dict())
 		warehouse_dict = self.data[args.warehouse]
+
+		if self.stock_ledgers_to_repost:
+			return
+
 		previous_sle = get_previous_sle_of_current_voucher(args)
+		if previous_sle:
+			self.prev_sle_dict[(args.get("item_code"), args.get("warehouse"))] = previous_sle
+
 		warehouse_dict.previous_sle = previous_sle
 
 		for key in ("qty_after_transaction", "valuation_rate", "stock_value"):
@@ -643,27 +578,191 @@ class update_entries_after:
 			if not future_sle_exists(self.args):
 				self.update_bin()
 		else:
-			entries_to_fix = self.get_future_entries_to_fix()
-
-			i = 0
-			while i < len(entries_to_fix):
-				sle = entries_to_fix[i]
-				i += 1
-
-				self.process_sle(sle)
-				self.update_bin_data(sle)
-
-				if sle.dependant_sle_voucher_detail_no:
-					entries_to_fix = self.get_dependent_entries_to_fix(entries_to_fix, sle)
-					if sle.voucher_type == "Stock Entry" and is_repack_entry(sle.voucher_no):
-						# for repack entries, we need to repost both source and target warehouses
-						self.update_distinct_item_warehouses_for_repack(sle)
+			self.item_wh_wise_last_posted_sle = self.get_item_wh_wise_last_posted_sle()
+			item_wh_sles = self.sort_sles(self.item_wh_wise_last_posted_sle.values())
+			self.initialize_reposting()
+			self.repost_stock_ledgers(item_wh_sles)
+			self.update_bin()
+			self.reset_vouchers_and_idx()
+			self.update_data_in_repost()
 
 		if self.exceptions:
 			self.raise_exceptions()
 
-	def update_distinct_item_warehouses_for_repack(self, sle):
-		sles = (
+	def initialize_reposting(self):
+		self._sles = []
+		self.distinct_sles = set()
+		self.distinct_dependant_item_wh = set()
+		self.prev_sle_dict = frappe._dict({})
+
+	def get_item_wh_wise_last_posted_sle(self):
+		if self.args and self.args.get("item_wh_wise_last_posted_sle"):
+			_sles = {}
+			for key, sle in self.args.get("item_wh_wise_last_posted_sle").items():
+				_sles[frappe.safe_eval(key)] = frappe._dict(sle)
+
+			return _sles
+
+		return {
+			(self.args.item_code, self.args.warehouse): frappe._dict(
+				{
+					"item_code": self.args.item_code,
+					"warehouse": self.args.warehouse,
+					"posting_datetime": get_combine_datetime(self.args.posting_date, self.args.posting_time),
+					"posting_date": self.args.posting_date,
+					"posting_time": self.args.posting_time,
+					"creation": self.args.creation,
+				}
+			)
+		}
+
+	def _get_future_entries_to_repost(self, item_wh_sles):
+		sles = []
+
+		for sle in item_wh_sles:
+			if (sle.item_code, sle.warehouse) not in self.distinct_dependant_item_wh:
+				self.distinct_dependant_item_wh.add((sle.item_code, sle.warehouse))
+
+			sles.extend(self.get_future_entries_to_repost(sle))
+
+		return self.sort_sles(sles)
+
+	def repost_stock_ledgers(self, item_wh_sles=None):
+		self._sles = self._get_future_entries_to_repost(item_wh_sles)
+
+		if not isinstance(self._sles, deque):
+			self._sles = deque(self._sles)
+
+		i = 0
+		while self._sles:
+			sle = self._sles.popleft()
+			if (sle.item_code, sle.warehouse) not in self.distinct_dependant_item_wh:
+				self.distinct_dependant_item_wh.add((sle.item_code, sle.warehouse))
+
+			if sle.name in self.distinct_sles:
+				continue
+
+			i += 1
+			item_wh_key = (sle.item_code, sle.warehouse)
+			if item_wh_key not in self.prev_sle_dict:
+				self.prev_sle_dict[item_wh_key] = get_previous_sle_of_current_voucher(sle)
+
+			self.repost_stock_ledger_entry(sle)
+
+			# To avoid duplicate reposting of same sle in case of multiple dependant sle
+			self.distinct_sles.add(sle.name)
+
+			if sle.dependant_sle_voucher_detail_no:
+				self.include_dependant_sle_in_reposting(sle)
+				self.update_item_wh_wise_last_posted_sle(sle)
+
+			if i % 2000 == 0:
+				self.update_data_in_repost(len(self._sles), i)
+
+	def sort_sles(self, sles):
+		return sorted(
+			sles,
+			key=lambda d: (
+				get_datetime(d.posting_datetime),
+				get_datetime(d.creation),
+			),
+		)
+
+	def include_dependant_sle_in_reposting(self, sle):
+		repost_dependant_sle = False
+		if sle.voucher_type == "Stock Entry" and is_repack_entry(sle.voucher_no):
+			repack_sles = self.get_sles_for_repack(sle)
+			for repack_sle in repack_sles:
+				if (repack_sle.item_code, repack_sle.warehouse) in self.distinct_dependant_item_wh:
+					continue
+
+				repost_dependant_sle = True
+				self.distinct_dependant_item_wh.add((repack_sle.item_code, repack_sle.warehouse))
+				self._sles.extend(self.get_future_entries_to_repost(repack_sle))
+		else:
+			dependant_sles = get_sle_by_voucher_detail_no(sle.dependant_sle_voucher_detail_no)
+			for depend_sle in dependant_sles:
+				if (depend_sle.item_code, depend_sle.warehouse) in self.distinct_dependant_item_wh:
+					continue
+
+				repost_dependant_sle = True
+				self.distinct_dependant_item_wh.add((depend_sle.item_code, depend_sle.warehouse))
+				self._sles.extend(self.get_future_entries_to_repost(depend_sle))
+
+		if repost_dependant_sle:
+			self._sles = deque(self.sort_sles(self._sles))
+
+	def repost_stock_ledger_entry(self, sle):
+		if isinstance(sle, dict):
+			sle = frappe._dict(sle)
+
+		self.process_sle(sle)
+		self.update_item_wh_wise_last_posted_sle(sle)
+
+	def update_item_wh_wise_last_posted_sle(self, sle):
+		if not self._sles:
+			self.item_wh_wise_last_posted_sle = frappe._dict()
+			return
+
+		self.item_wh_wise_last_posted_sle[(sle.item_code, sle.warehouse)] = frappe._dict(
+			{
+				"item_code": sle.item_code,
+				"warehouse": sle.warehouse,
+				"posting_date": sle.posting_date,
+				"posting_time": sle.posting_time,
+				"posting_datetime": sle.posting_datetime
+				or get_combine_datetime(sle.posting_date, sle.posting_time),
+				"creation": sle.creation,
+			}
+		)
+
+	def reset_vouchers_and_idx(self):
+		self.stock_ledgers_to_repost = []
+		self.prev_sle_dict = frappe._dict()
+		self.item_wh_wise_last_posted_sle = frappe._dict()
+
+	def update_data_in_repost(self, total_sles=None, index=None):
+		if not self.repost_doc:
+			return
+
+		values_to_update = {
+			"total_vouchers": cint(total_sles) + cint(index),
+			"vouchers_posted": index or 0,
+		}
+
+		self.repost_doc.db_set(values_to_update)
+
+		update_args_in_repost_item_valuation(
+			self.repost_doc,
+			self.current_idx,
+			self.items_to_be_repost,
+			self.repost_affected_transaction,
+			self.item_wh_wise_last_posted_sle,
+		)
+
+		if not frappe.in_test:
+			# To maintain the state of the reposting, so if timeout happens, it can be resumed from the last posted voucher
+			frappe.db.commit()  # nosemgrep
+
+		self.publish_real_time_progress(total_sles=total_sles, index=index)
+
+	def publish_real_time_progress(self, total_sles=None, index=None):
+		frappe.publish_realtime(
+			"item_reposting_progress",
+			{
+				"name": self.repost_doc.name,
+				"total_vouchers": cint(total_sles) + cint(index),
+				"vouchers_posted": index or 0,
+			},
+			doctype=self.repost_doc.doctype,
+			docname=self.repost_doc.name,
+		)
+
+	def get_future_entries_to_repost(self, kwargs):
+		return get_stock_ledger_entries(kwargs, ">=", "asc", for_update=True, check_serial_no=False)
+
+	def get_sles_for_repack(self, sle):
+		return (
 			frappe.get_all(
 				"Stock Ledger Entry",
 				filters={
@@ -671,15 +770,19 @@ class update_entries_after:
 					"voucher_no": sle.voucher_no,
 					"actual_qty": (">", 0),
 					"is_cancelled": 0,
-					"voucher_detail_no": ("!=", sle.dependant_sle_voucher_detail_no),
+					"dependant_sle_voucher_detail_no": ("!=", sle.dependant_sle_voucher_detail_no),
 				},
-				fields=["*"],
+				fields=[
+					"item_code",
+					"warehouse",
+					"posting_date",
+					"posting_time",
+					"posting_datetime",
+					"creation",
+				],
 			)
 			or []
 		)
-
-		for dependant_sle in sles:
-			self.update_distinct_item_warehouses(dependant_sle)
 
 	def has_stock_reco_with_serial_batch(self, sle):
 		if (
@@ -691,32 +794,10 @@ class update_entries_after:
 		return False
 
 	def process_sle_against_current_timestamp(self):
-		sl_entries = self.get_sle_against_current_voucher()
+		sl_entries = get_sle_against_current_voucher(self.args)
 		for sle in sl_entries:
 			sle["timestamp"] = sle.posting_datetime
 			self.process_sle(sle)
-
-	def get_sle_against_current_voucher(self):
-		self.args["posting_datetime"] = get_combine_datetime(self.args.posting_date, self.args.posting_time)
-		doctype = frappe.qb.DocType("Stock Ledger Entry")
-
-		query = (
-			frappe.qb.from_(doctype)
-			.select("*")
-			.where(
-				(doctype.item_code == self.args.item_code)
-				& (doctype.warehouse == self.args.warehouse)
-				& (doctype.is_cancelled == 0)
-				& (doctype.posting_datetime == self.args.posting_datetime)
-			)
-			.orderby(doctype.creation, order=Order.asc)
-			.for_update()
-		)
-
-		if not self.args.get("cancelled"):
-			query = query.where(doctype.creation == self.args.creation)
-
-		return query.run(as_dict=True)
 
 	def get_future_entries_to_fix(self):
 		# includes current entry!
@@ -726,78 +807,8 @@ class update_entries_after:
 
 		return list(self.get_sle_after_datetime(args))
 
-	def get_dependent_entries_to_fix(self, entries_to_fix, sle):
-		dependant_sle = get_sle_by_voucher_detail_no(
-			sle.dependant_sle_voucher_detail_no, excluded_sle=sle.name
-		)
-
-		if not dependant_sle:
-			return entries_to_fix
-		elif dependant_sle.item_code == self.item_code and dependant_sle.warehouse == self.args.warehouse:
-			return entries_to_fix
-		elif dependant_sle.item_code != self.item_code:
-			self.update_distinct_item_warehouses(dependant_sle)
-			return entries_to_fix
-		elif dependant_sle.item_code == self.item_code and dependant_sle.warehouse in self.data:
-			return entries_to_fix
-		else:
-			self.initialize_previous_data(dependant_sle)
-			self.update_distinct_item_warehouses(dependant_sle)
-			return entries_to_fix
-
-	def update_distinct_item_warehouses(self, dependant_sle):
-		key = (dependant_sle.item_code, dependant_sle.warehouse)
-		val = frappe._dict({"sle": dependant_sle})
-
-		if key not in self.distinct_item_warehouses:
-			self.distinct_item_warehouses[key] = val
-			self.new_items_found = True
-		else:
-			existing_sle = self.distinct_item_warehouses[key].get("sle", {})
-			if getdate(existing_sle.get("posting_date")) > getdate(dependant_sle.posting_date):
-				self.distinct_item_warehouses[key] = val
-				self.new_items_found = True
-			elif (
-				dependant_sle.actual_qty > 0
-				and dependant_sle.voucher_type == "Stock Entry"
-				and is_transfer_stock_entry(dependant_sle.voucher_no)
-			):
-				if self.distinct_item_warehouses[key].get("transfer_entry_to_repost"):
-					return
-
-				val["transfer_entry_to_repost"] = True
-				self.distinct_item_warehouses[key] = val
-				self.new_items_found = True
-
-	def is_dependent_voucher_reposted(self, dependant_sle) -> bool:
-		# Return False if the dependent voucher is not reposted
-
-		if self.args.items_to_be_repost and self.args.current_index:
-			index = self.args.current_index
-			while index < len(self.args.items_to_be_repost):
-				if (
-					self.args.items_to_be_repost[index].get("item_code") == dependant_sle.item_code
-					and self.args.items_to_be_repost[index].get("warehouse") == dependant_sle.warehouse
-				):
-					if getdate(self.args.items_to_be_repost[index].get("posting_date")) > getdate(
-						dependant_sle.posting_date
-					):
-						self.args.items_to_be_repost[index]["posting_date"] = dependant_sle.posting_date
-
-					return False
-
-				index += 1
-
-		return True
-
-	def get_dependent_voucher_detail_nos(self, key):
-		if "dependent_voucher_detail_nos" not in self.distinct_item_warehouses[key]:
-			self.distinct_item_warehouses[key].dependent_voucher_detail_nos = []
-
-		return self.distinct_item_warehouses[key].dependent_voucher_detail_nos
-
 	def validate_previous_sle_qty(self, sle):
-		previous_sle = self.data[sle.warehouse].previous_sle
+		previous_sle = self.prev_sle_dict.get((sle.item_code, sle.warehouse))
 		if previous_sle and previous_sle.get("qty_after_transaction") < 0 and sle.get("actual_qty") > 0:
 			frappe.msgprint(
 				_(
@@ -816,10 +827,32 @@ class update_entries_after:
 
 	def process_sle(self, sle):
 		# previous sle data for this warehouse
-		self.wh_data = self.data[sle.warehouse]
+		key = (sle.item_code, sle.warehouse)
+		if key not in self.prev_sle_dict:
+			prev_sle = get_previous_sle_of_current_voucher(sle)
+			if prev_sle:
+				self.prev_sle_dict[key] = prev_sle
+
+		if not self.prev_sle_dict.get(key):
+			self.prev_sle_dict[key] = frappe._dict(
+				{
+					"qty_after_transaction": 0.0,
+					"valuation_rate": 0.0,
+					"stock_value": 0.0,
+					"prev_stock_value": 0.0,
+					"stock_queue": [],
+				}
+			)
+
+		self.wh_data = self.prev_sle_dict.get(key)
+
+		if self.wh_data.stock_queue and isinstance(self.wh_data.stock_queue, str):
+			self.wh_data.stock_queue = json.loads(self.wh_data.stock_queue)
+
+		if not self.wh_data.prev_stock_value:
+			self.wh_data.prev_stock_value = self.wh_data.stock_value
 
 		self.validate_previous_sle_qty(sle)
-		self.affected_transactions.add((sle.voucher_type, sle.voucher_no))
 
 		if (sle.serial_no and not self.via_landed_cost_voucher) or not cint(self.allow_negative_stock):
 			# validate negative stock for serialized items, fifo valuation
@@ -921,11 +954,17 @@ class update_entries_after:
 		sle.stock_value = self.wh_data.stock_value
 		sle.stock_queue = json.dumps(self.wh_data.stock_queue)
 
+		old_stock_value_difference = sle.stock_value_difference
+
 		sle.stock_value_difference = stock_value_difference
+
 		if (
 			sle.is_adjustment_entry
 			and flt(sle.qty_after_transaction, self.flt_precision) == 0
-			and flt(sle.stock_value, self.currency_precision) != 0
+			and (
+				flt(sle.stock_value, self.currency_precision) != 0
+				or flt(sle.stock_value_difference, self.currency_precision) == 0
+			)
 		):
 			sle.stock_value_difference = (
 				get_stock_value_difference(
@@ -943,10 +982,23 @@ class update_entries_after:
 		sle.modified = now()
 		frappe.get_doc(sle).db_update()
 
+		self.prev_sle_dict[key] = sle
+
 		if not self.args.get("sle_id") or (
 			sle.serial_and_batch_bundle and sle.auto_created_serial_and_batch_bundle
 		):
 			self.update_outgoing_rate_on_transaction(sle)
+
+		if flt(old_stock_value_difference, self.currency_precision) == flt(
+			sle.stock_value_difference, self.currency_precision
+		):
+			return
+
+		if not cint(erpnext.is_perpetual_inventory_enabled(sle.company)):
+			return
+
+		if self.args.item_code != sle.item_code or self.args.warehouse != sle.warehouse:
+			self.repost_affected_transaction.add((sle.voucher_type, sle.voucher_no))
 
 	def get_serialized_values(self, sle):
 		from erpnext.stock.serial_batch_bundle import SerialNoValuation
@@ -1018,34 +1070,6 @@ class update_entries_after:
 					sabb_doc.voucher_detail_no = None
 					sabb_doc.voucher_no = None
 					sabb_doc.cancel()
-
-		if sle.serial_and_batch_bundle and frappe.get_cached_value("Item", sle.item_code, "has_serial_no"):
-			self.update_serial_no_status(sle)
-
-	def update_serial_no_status(self, sle):
-		from erpnext.stock.serial_batch_bundle import get_serial_nos
-
-		serial_nos = get_serial_nos(sle.serial_and_batch_bundle)
-		if not serial_nos:
-			return
-
-		warehouse = None
-		status = "Inactive"
-
-		if sle.actual_qty > 0:
-			warehouse = sle.warehouse
-			status = "Active"
-
-		sn_table = frappe.qb.DocType("Serial No")
-
-		query = (
-			frappe.qb.update(sn_table)
-			.set(sn_table.warehouse, warehouse)
-			.set(sn_table.status, status)
-			.where(sn_table.name.isin(serial_nos))
-		)
-
-		query.run()
 
 	def calculate_valuation_for_serial_batch_bundle(self, sle):
 		if not frappe.db.exists("Serial and Batch Bundle", sle.serial_and_batch_bundle):
@@ -1725,13 +1749,40 @@ class update_entries_after:
 
 	def update_bin(self):
 		# update bin for each warehouse
-		for warehouse, data in self.data.items():
-			bin_name = get_or_make_bin(self.item_code, warehouse)
+		for (item_code, warehouse), data in self.prev_sle_dict.items():
+			bin_name = get_or_make_bin(item_code, warehouse)
 
-			updated_values = {"actual_qty": data.qty_after_transaction, "stock_value": data.stock_value}
+			updated_values = {
+				"actual_qty": flt(data.qty_after_transaction),
+				"stock_value": flt(data.stock_value),
+			}
 			if data.valuation_rate is not None:
-				updated_values["valuation_rate"] = data.valuation_rate
+				updated_values["valuation_rate"] = flt(data.valuation_rate)
+
 			frappe.db.set_value("Bin", bin_name, updated_values, update_modified=True)
+
+
+def get_sle_against_current_voucher(kwargs):
+	kwargs["posting_datetime"] = get_combine_datetime(kwargs.posting_date, kwargs.posting_time)
+	doctype = frappe.qb.DocType("Stock Ledger Entry")
+
+	query = (
+		frappe.qb.from_(doctype)
+		.select("*")
+		.where(
+			(doctype.item_code == kwargs.item_code)
+			& (doctype.warehouse == kwargs.warehouse)
+			& (doctype.is_cancelled == 0)
+			& (doctype.posting_datetime == kwargs.posting_datetime)
+		)
+		.orderby(doctype.creation, order=Order.asc)
+		.for_update()
+	)
+
+	if not kwargs.get("cancelled"):
+		query = query.where(doctype.creation == kwargs.creation)
+
+	return query.run(as_dict=True)
 
 
 def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_voucher=False):
@@ -1778,7 +1829,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 	return sle[0] if sle else frappe._dict()
 
 
-def get_previous_sle(args, for_update=False, extra_cond=None):
+def get_previous_sle(args, for_update=False, extra_cond=None, for_report=False):
 	"""
 	get the last sle on or before the current time-bucket,
 	to get actual qty before transaction, this function
@@ -1794,7 +1845,7 @@ def get_previous_sle(args, for_update=False, extra_cond=None):
 	"""
 	args["name"] = args.get("sle", None) or ""
 	sle = get_stock_ledger_entries(
-		args, "<=", "desc", "limit 1", for_update=for_update, extra_cond=extra_cond
+		args, "<=", "desc", "limit 1", for_update=for_update, extra_cond=extra_cond, for_report=for_report
 	)
 	return sle and sle[0] or {}
 
@@ -1808,6 +1859,7 @@ def get_stock_ledger_entries(
 	debug=False,
 	check_serial_no=True,
 	extra_cond=None,
+	for_report=False,
 ):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 	conditions = f" and posting_datetime {operator} %(posting_datetime)s"
@@ -1862,7 +1914,7 @@ def get_stock_ledger_entries(
 	if extra_cond:
 		conditions += f"{extra_cond}"
 
-	if previous_sle.get("project"):
+	if for_report and previous_sle.get("project"):
 		conditions += " and project = %(project)s"
 
 	# nosemgrep
@@ -1885,23 +1937,15 @@ def get_stock_ledger_entries(
 	)
 
 
-def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
-	return frappe.db.get_value(
+def get_sle_by_voucher_detail_no(voucher_detail_no):
+	return frappe.get_all(
 		"Stock Ledger Entry",
-		{"voucher_detail_no": voucher_detail_no, "name": ["!=", excluded_sle], "is_cancelled": 0},
-		[
-			"item_code",
-			"warehouse",
-			"actual_qty",
-			"qty_after_transaction",
-			"posting_date",
-			"posting_time",
-			"voucher_detail_no",
-			"posting_datetime as timestamp",
-			"voucher_type",
-			"voucher_no",
-		],
-		as_dict=1,
+		filters={
+			"voucher_detail_no": voucher_detail_no,
+			"is_cancelled": 0,
+			"dependant_sle_voucher_detail_no": ("is", "not set"),
+		},
+		fields=["item_code", "warehouse", "posting_date", "posting_time", "posting_datetime", "creation"],
 	)
 
 
@@ -2042,7 +2086,6 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 		where
 			item_code = %(item_code)s
 			and warehouse = %(warehouse)s
-			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
 			and (
 				posting_datetime > %(posting_datetime)s

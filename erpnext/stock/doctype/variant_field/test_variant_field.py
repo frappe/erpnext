@@ -1,8 +1,8 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-from frappe.tests import IntegrationTestCase
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestVariantField(IntegrationTestCase):
+class TestVariantField(ERPNextTestSuite):
 	pass

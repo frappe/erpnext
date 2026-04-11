@@ -57,11 +57,14 @@ class RequestforQuotation(BuyingController):
 		select_print_heading: DF.Link | None
 		send_attached_files: DF.Check
 		send_document_print: DF.Check
+		shipping_address: DF.Link | None
+		shipping_address_display: DF.TextEditor | None
 		status: DF.Literal["", "Draft", "Submitted", "Cancelled"]
 		subject: DF.Data
 		suppliers: DF.Table[RequestforQuotationSupplier]
 		tc_name: DF.Link | None
 		terms: DF.TextEditor | None
+		title: DF.Data | None
 		transaction_date: DF.Date
 		use_html: DF.Check
 		vendor: DF.Link | None
@@ -284,7 +287,7 @@ class RequestforQuotation(BuyingController):
 			}
 		)
 		user.save(ignore_permissions=True)
-		update_password_link = user.reset_password()
+		update_password_link = user._reset_password()
 
 		return user, update_password_link
 

@@ -28,8 +28,9 @@
   "status",
   "erpnext_user",
   "user_id",
-  "create_user",
   "create_user_permission",
+  "column_break_xwnm",
+  "create_user_automatically",
   "company_details_section",
   "company",
   "department",
@@ -39,19 +40,11 @@
   "reports_to",
   "column_break_18",
   "branch",
-  "employment_details",
-  "scheduled_confirmation_date",
-  "column_break_32",
-  "final_confirmation_date",
-  "contract_end_date",
-  "col_break_22",
-  "notice_number_of_days",
-  "date_of_retirement",
   "contact_details",
   "cell_number",
   "column_break_40",
-  "personal_email",
   "company_email",
+  "personal_email",
   "column_break4",
   "prefered_contact_email",
   "prefered_email",
@@ -101,6 +94,14 @@
   "external_work_history",
   "history_in_company",
   "internal_work_history",
+  "employment_details",
+  "scheduled_confirmation_date",
+  "column_break_32",
+  "final_confirmation_date",
+  "contract_end_date",
+  "col_break_22",
+  "notice_number_of_days",
+  "date_of_retirement",
   "exit",
   "resignation_letter_date",
   "relieving_date",
@@ -273,6 +274,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.__islocal",
    "fieldname": "erpnext_user",
    "fieldtype": "Section Break",
    "label": "User Details"
@@ -286,18 +288,21 @@
    "options": "User"
   },
   {
-   "depends_on": "eval:(!doc.user_id)",
-   "fieldname": "create_user",
-   "fieldtype": "Button",
-   "label": "Create User"
-  },
-  {
    "default": "1",
-   "depends_on": "user_id",
+   "depends_on": "eval:doc.user_id || doc.create_user_automatically",
    "description": "This will restrict user access to other employee records",
    "fieldname": "create_user_permission",
    "fieldtype": "Check",
    "label": "Create User Permission"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.__islocal && !doc.user_id",
+   "description": "Creates a User account for this employee using the Preferred, Company, or Personal email.",
+   "fieldname": "create_user_automatically",
+   "fieldtype": "Check",
+   "label": "Create User Automatically",
+   "set_only_once": 1
   },
   {
    "allow_in_quick_entry": 1,
@@ -348,6 +353,7 @@
   {
    "fieldname": "department",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Department",
    "oldfieldname": "department",
@@ -377,6 +383,7 @@
   {
    "fieldname": "branch",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Branch",
    "oldfieldname": "branch",
    "oldfieldtype": "Link",
@@ -600,7 +607,7 @@
    "collapsible": 1,
    "fieldname": "exit",
    "fieldtype": "Tab Break",
-   "label": "Employee Exit",
+   "label": "Exit",
    "oldfieldtype": "Section Break"
   },
   {
@@ -816,6 +823,10 @@
    "fieldtype": "Data",
    "label": "IBAN",
    "options": "IBAN"
+  },
+  {
+   "fieldname": "column_break_xwnm",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
@@ -823,7 +834,7 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2025-08-29 11:52:12.819878",
+ "modified": "2026-03-23 15:26:05.149280",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",

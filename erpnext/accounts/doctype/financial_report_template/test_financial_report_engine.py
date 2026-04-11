@@ -16,12 +16,6 @@ from erpnext.accounts.doctype.financial_report_template.test_financial_report_te
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.utils import get_currency_precision, get_fiscal_year
 
-# On IntegrationTestCase, the doctype test records and all
-# link-field test record dependencies are recursively loaded
-# Use these module variables to add/remove to/from that list
-EXTRA_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
-IGNORE_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
-
 
 class TestDependencyResolver(FinancialReportTemplateTestCase):
 	"""Test cases for DependencyResolver class"""
@@ -1298,6 +1292,7 @@ class TestFilterExpressionParser(FinancialReportTemplateTestCase):
 				self.data_source = "Account Data"
 				self.idx = 1
 				self.reverse_sign = 0
+				self.advanced_filtering = True
 
 		return MockReportRow(formula, reference_code)
 

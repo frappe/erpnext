@@ -2,10 +2,11 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
+
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestQualityGoal(IntegrationTestCase):
+class TestQualityGoal(ERPNextTestSuite):
 	def test_quality_goal(self):
 		# no code, just a basic sanity check
 		goal = get_quality_goal()

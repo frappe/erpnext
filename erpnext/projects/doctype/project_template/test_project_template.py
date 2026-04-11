@@ -2,12 +2,12 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.projects.doctype.task.test_task import create_task
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestProjectTemplate(IntegrationTestCase):
+class TestProjectTemplate(ERPNextTestSuite):
 	pass
 
 

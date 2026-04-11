@@ -2,13 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import now_datetime
 
-IGNORE_TEST_RECORD_DEPENDENCIES = ["Company"]
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestFiscalYear(IntegrationTestCase):
+class TestFiscalYear(ERPNextTestSuite):
 	def test_extra_year(self):
 		if frappe.db.exists("Fiscal Year", "_Test Fiscal Year 2000"):
 			frappe.delete_doc("Fiscal Year", "_Test Fiscal Year 2000")
