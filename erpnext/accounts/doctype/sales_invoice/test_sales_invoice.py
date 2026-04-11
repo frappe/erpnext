@@ -383,7 +383,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(si.net_total, 3859.65)
 		self.assertEqual(si.grand_total, 4900.00)
 
-	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###"})
+	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###", "currency_precision": 0})
 	def test_inclusive_tax_zero_decimal_currency(self):
 		"""Tax-included prices in zero-decimal currencies (e.g. JPY) must not produce
 		net + tax != gross due to double rounding of the net amount."""
@@ -409,14 +409,15 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(si.taxes[0].tax_amount, 4545)
 		self.assertEqual(si.grand_total, 50000)
 
-	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###"})
+	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###", "currency_precision": 0})
 	def test_inclusive_tax_zero_decimal_currency_multiple_items(self):
 		"""Multiple items with tax-included prices in zero-decimal currency."""
 		si = create_sales_invoice(qty=1, rate=50000, do_not_save=True)
+		create_item("_Test Inclusive Tax Item 2")
 		si.append(
 			"items",
 			{
-				"item_code": "_Test Item",
+				"item_code": "_Test Inclusive Tax Item 2",
 				"warehouse": "_Test Warehouse - _TC",
 				"qty": 1,
 				"rate": 30000,
@@ -450,7 +451,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(si.taxes[0].tax_amount, 7273)
 		self.assertEqual(si.grand_total, 80000)
 
-	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###"})
+	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###", "currency_precision": 0})
 	def test_inclusive_tax_zero_decimal_currency_many_items(self):
 		"""Test with 10 items (mixed 10% and 5% tax) to verify tolerance of 1 is sufficient."""
 		si = create_sales_invoice(qty=1, rate=50000, do_not_save=True)
@@ -458,20 +459,21 @@ class TestSalesInvoice(ERPNextTestSuite):
 		# Add 9 more items - mix of amounts and tax rates
 		# Using similar amounts to maximize same-direction rounding
 		item_configs = [
-			(50100, None),  # 10% (default)
-			(50200, '{"_Test Account Service Tax - _TC": 5}'),  # 5% override
-			(50300, None),  # 10%
-			(50400, '{"_Test Account Service Tax - _TC": 5}'),  # 5%
-			(50500, None),  # 10%
-			(50600, '{"_Test Account Service Tax - _TC": 5}'),  # 5%
-			(50700, None),  # 10%
-			(50800, None),  # 10%
-			(50900, '{"_Test Account Service Tax - _TC": 5}'),  # 5%
+			("_Test Inclusive Tax Item 2", 50100, None),  # 10% (default)
+			("_Test Inclusive Tax Item 3", 50200, '{"_Test Account Service Tax - _TC": 5}'),  # 5%
+			("_Test Inclusive Tax Item 4", 50300, None),  # 10%
+			("_Test Inclusive Tax Item 5", 50400, '{"_Test Account Service Tax - _TC": 5}'),  # 5%
+			("_Test Inclusive Tax Item 6", 50500, None),  # 10%
+			("_Test Inclusive Tax Item 7", 50600, '{"_Test Account Service Tax - _TC": 5}'),  # 5%
+			("_Test Inclusive Tax Item 8", 50700, None),  # 10%
+			("_Test Inclusive Tax Item 9", 50800, None),  # 10%
+			("_Test Inclusive Tax Item 10", 50900, '{"_Test Account Service Tax - _TC": 5}'),  # 5%
 		]
 
-		for rate, item_tax_rate in item_configs:
+		for item_code, rate, item_tax_rate in item_configs:
+			create_item(item_code)
 			item_dict = {
-				"item_code": "_Test Item",
+				"item_code": item_code,
 				"warehouse": "_Test Warehouse - _TC",
 				"qty": 1,
 				"rate": rate,
