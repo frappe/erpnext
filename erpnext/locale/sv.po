@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-05 09:49+0000\n"
-"PO-Revision-Date: 2026-04-10 13:45\n"
+"PO-Revision-Date: 2026-04-11 13:54\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -42587,7 +42587,7 @@ msgstr "Svar Efter"
 #. Label of the response (Section Break) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "Response Details"
-msgstr "Svar Information"
+msgstr "Svarsdetaljer"
 
 #. Label of the response_key_list (Data) field in DocType 'Support Settings'
 #: erpnext/support/doctype/support_settings/support_settings.json
