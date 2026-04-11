@@ -1,5 +1,5 @@
 
-export interface MintBankStatementImportLog{
+export interface BankStatementImportLog{
 	name: string
 	creation: string
 	modified: string

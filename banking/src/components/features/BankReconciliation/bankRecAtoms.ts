@@ -1,7 +1,8 @@
 import { BankAccount } from "@/types/Accounts/BankAccount";
 import { getDatesForTimePeriod } from "@/lib/date";
 import { atom } from "jotai";
-import { atomFamily, atomWithStorage, createJSONStorage } from "jotai/utils";
+import { atomWithStorage, createJSONStorage } from "jotai/utils";
+import { atomFamily } from 'jotai-family'
 import { UnreconciledTransaction } from "./utils";
 import { BankTransaction } from "@/types/Accounts/BankTransaction";
 import { PaymentEntry } from "@/types/Accounts/PaymentEntry";
@@ -13,7 +14,7 @@ export interface SelectedBank extends Pick<BankAccount, 'name' | 'bank' | 'is_cr
 }
 export const selectedBankAccountAtom = atom<SelectedBank | null>(null)
 
-export const bankRecDateAtom = atomWithStorage<{ fromDate: string, toDate: string }>("mint-bank-rec-date", {
+export const bankRecDateAtom = atomWithStorage<{ fromDate: string, toDate: string }>("bank-rec-date", {
     fromDate: getDatesForTimePeriod('This Month').fromDate,
     toDate: getDatesForTimePeriod('This Month').toDate
 })
@@ -38,7 +39,7 @@ export const bankRecRecordJournalEntryModalAtom = atom(false)
 
 export const bankRecUnreconcileModalAtom = atom<string>('')
 
-export const bankRecMatchFilters = atomWithStorage<string[]>('mint-bank-rec-match-filters', ['payment_entry', 'journal_entry'])
+export const bankRecMatchFilters = atomWithStorage<string[]>('bank-rec-match-filters', ['payment_entry', 'journal_entry'])
 
 export const bankRecSearchText = atom<string>('')
 export const bankRecAmountFilter = atom<{ value: number, stringValue?: string | number }>({
@@ -74,6 +75,6 @@ export interface ActionLogItem {
 
 const actionLogStorage = createJSONStorage<ActionLog[]>(() => sessionStorage)
 
-export const bankRecActionLog = atomWithStorage<ActionLog[]>('mint-bank-rec-action-log', [], actionLogStorage, {
+export const bankRecActionLog = atomWithStorage<ActionLog[]>('bank-rec-action-log', [], actionLogStorage, {
     getOnInit: true,
 })

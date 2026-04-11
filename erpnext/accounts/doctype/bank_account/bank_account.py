@@ -33,6 +33,7 @@ class BankAccount(Document):
 		iban: DF.Data | None
 		integration_id: DF.Data | None
 		is_company_account: DF.Check
+		is_credit_card: DF.Check
 		is_default: DF.Check
 		last_integration_date: DF.Date | None
 		mask: DF.Data | None
@@ -49,6 +50,9 @@ class BankAccount(Document):
 
 	def on_trash(self):
 		delete_contact_and_address("Bank Account", self.name)
+
+		# Delete all bank balances
+		frappe.db.delete("Bank Account Balance", filters={"bank_account": self.name})
 
 	def validate(self):
 		self.validate_is_company_account()

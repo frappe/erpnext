@@ -16,7 +16,7 @@ import { formatDate } from "@/lib/date"
 import { flt, formatCurrency } from "@/lib/numbers"
 import _ from "@/lib/translate"
 import { cn } from "@/lib/utils"
-import { MintBankStatementImportLog } from "@/types/Mint/MintBankStatementImportLog"
+import { BankStatementImportLog } from "@/types/Accounts/BankStatementImportLog"
 import { useFrappeFileUpload, useFrappeGetDocList } from "frappe-react-sdk"
 import { useAtom, useAtomValue } from "jotai"
 import { HomeIcon, ListIcon, Loader2Icon } from "lucide-react"
@@ -210,7 +210,7 @@ const StatementImportLog = () => {
 
     const bankAccount = useAtomValue(selectedBankAccountAtom)
 
-    const { data, error } = useFrappeGetDocList<MintBankStatementImportLog>("Mint Bank Statement Import Log", {
+    const { data, error } = useFrappeGetDocList<BankStatementImportLog>("Bank Statement Import Log", {
         fields: ["name", "file", "number_of_transactions", "start_date", "end_date", "closing_balance", "creation"],
         filters: [["bank_account", "=", bankAccount?.name ?? ""]],
         orderBy: {

@@ -3,7 +3,7 @@ import ErrorBanner from "@/components/ui/error-banner"
 import { Form } from "@/components/ui/form"
 import { SheetClose, SheetFooter } from "@/components/ui/sheet"
 import _ from "@/lib/translate"
-import { MintBankTransactionRule } from "@/types/Mint/MintBankTransactionRule"
+import { BankTransactionRule } from "@/types/Accounts/BankTransactionRule"
 import { useFrappeGetDoc, useFrappeUpdateDoc } from "frappe-react-sdk"
 import { toast } from "sonner"
 import { RuleForm } from "./RuleForm"
@@ -17,7 +17,7 @@ type Props = {
 
 const EditRule = ({ onClose, ruleID }: Props) => {
 
-    const { data: rule, isValidating, error, mutate } = useFrappeGetDoc<MintBankTransactionRule>("Mint Bank Transaction Rule", ruleID, undefined, {
+    const { data: rule, isValidating, error, mutate } = useFrappeGetDoc<BankTransactionRule>("Bank Transaction Rule", ruleID, undefined, {
         revalidateOnMount: true
     })
 
@@ -63,18 +63,18 @@ const EditRule = ({ onClose, ruleID }: Props) => {
 
 }
 
-const EditRuleForm = ({ rule, onClose, mutate }: { rule: MintBankTransactionRule, onClose: VoidFunction, mutate: VoidFunction }) => {
+const EditRuleForm = ({ rule, onClose, mutate }: { rule: BankTransactionRule, onClose: VoidFunction, mutate: VoidFunction }) => {
 
-    const form = useForm<MintBankTransactionRule>({
+    const form = useForm<BankTransactionRule>({
         defaultValues: {
             ...rule,
         }
     })
 
-    const { updateDoc, loading, error } = useFrappeUpdateDoc<MintBankTransactionRule>()
+    const { updateDoc, loading, error } = useFrappeUpdateDoc<BankTransactionRule>()
 
-    const onSubmit = (data: MintBankTransactionRule) => {
-        updateDoc("Mint Bank Transaction Rule", rule.name, data)
+    const onSubmit = (data: BankTransactionRule) => {
+        updateDoc("Bank Transaction Rule", rule.name, data)
             .then(() => {
                 toast.success(_("Rule updated."))
                 mutate()

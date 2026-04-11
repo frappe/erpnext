@@ -10,7 +10,7 @@ import { BANK_LOGOS } from './logos'
 import { getErrorMessage } from '@/lib/frappe'
 import { useCurrentCompany } from '@/hooks/useCurrentCompany'
 import _ from '@/lib/translate'
-import { MintBankTransactionRule } from '@/types/Mint/MintBankTransactionRule'
+import { BankTransactionRule } from '@/types/Accounts/BankTransactionRule'
 import { useRef } from 'react'
 import type { DebouncedState } from 'usehooks-ts'
 import { useDebounceCallback } from 'usehooks-ts'
@@ -81,7 +81,7 @@ export const useGetAccountClosingBalanceAsPerStatement = (swrConfig: SWRConfigur
     })
 }
 
-export type UnreconciledTransaction = Pick<BankTransaction, 'name' | 'matched_rule' | 'date' | 'withdrawal' | 'deposit' | 'currency' | 'description' | 'status' | 'transaction_type' | 'reference_number' | 'party_type' | 'party' | 'bank_account' | 'company' | 'unallocated_amount'>
+export type UnreconciledTransaction = Pick<BankTransaction, 'name' | 'matched_transaction_rule' | 'date' | 'withdrawal' | 'deposit' | 'currency' | 'description' | 'status' | 'transaction_type' | 'reference_number' | 'party_type' | 'party' | 'bank_account' | 'company' | 'unallocated_amount'>
 
 
 export const useGetUnreconciledTransactions = () => {
@@ -338,8 +338,8 @@ export const useIsTransactionWithdrawal = (transaction: UnreconciledTransaction)
 
 export const useGetRuleForTransaction = (transaction: UnreconciledTransaction) => {
 
-    return useFrappeGetDoc<MintBankTransactionRule>('Mint Bank Transaction Rule', transaction.matched_rule,
-        transaction.matched_rule ? undefined : null, {
+    return useFrappeGetDoc<BankTransactionRule>('Bank Transaction Rule', transaction.matched_transaction_rule,
+        transaction.matched_transaction_rule ? undefined : null, {
         revalidateOnFocus: false,
         revalidateIfStale: false
     }

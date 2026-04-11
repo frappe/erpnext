@@ -4,7 +4,7 @@ import { Form } from "@/components/ui/form"
 import { SheetClose, SheetFooter } from "@/components/ui/sheet"
 import { useCurrentCompany } from "@/hooks/useCurrentCompany"
 import _ from "@/lib/translate"
-import { MintBankTransactionRule } from "@/types/Mint/MintBankTransactionRule"
+import { BankTransactionRule } from "@/types/Accounts/BankTransactionRule"
 import { useFrappeCreateDoc } from "frappe-react-sdk"
 import { toast } from "sonner"
 import { RuleForm } from "./RuleForm"
@@ -18,7 +18,7 @@ const CreateNewRule = ({ onCreate }: Props) => {
 
     const currentCompany = useCurrentCompany()
 
-    const form = useForm<MintBankTransactionRule>({
+    const form = useForm<BankTransactionRule>({
         defaultValues: {
             rule_name: "",
             company: currentCompany,
@@ -32,10 +32,10 @@ const CreateNewRule = ({ onCreate }: Props) => {
         }
     })
 
-    const { createDoc, loading, error } = useFrappeCreateDoc<MintBankTransactionRule>()
+    const { createDoc, loading, error } = useFrappeCreateDoc<BankTransactionRule>()
 
-    const onSubmit = (data: MintBankTransactionRule) => {
-        createDoc("Mint Bank Transaction Rule", data)
+    const onSubmit = (data: BankTransactionRule) => {
+        createDoc("Bank Transaction Rule", data)
             .then(() => {
                 toast.success(_("Rule created successfully"))
                 onCreate()

@@ -297,10 +297,10 @@ const UnreconciledTransactionItem = ({ transaction }: { transaction: Unreconcile
                         >
                             {_("Ref")}: {transaction.reference_number}</Badge>}
 
-                        {transaction.matched_rule && <Badge
+                        {transaction.matched_transaction_rule && <Badge
                             theme="violet"
                             title={_("Matched by rule")}>
-                            <ZapIcon className="w-4 h-4" /> {transaction.matched_rule}</Badge>}
+                            <ZapIcon className="w-4 h-4" /> {transaction.matched_transaction_rule}</Badge>}
                     </div>
                     <span className="text-sm">{transaction.description}</span>
                 </div>
@@ -536,7 +536,7 @@ const OptionsForSingleTransaction = ({ transaction, contentHeight }: { transacti
                 <MatchFilters />
             </div>
         </TooltipProvider>
-        {transaction.matched_rule && <RuleAction transaction={transaction} />}
+        {transaction.matched_transaction_rule && <RuleAction transaction={transaction} />}
         <VouchersForTransaction transaction={transaction} contentHeight={contentHeight} />
     </div>
 }

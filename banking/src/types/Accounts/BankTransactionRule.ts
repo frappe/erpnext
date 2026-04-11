@@ -1,7 +1,7 @@
-import { MintBankTransactionDescriptionRules } from './MintBankTransactionDescriptionRules'
-import { MintTransactionRuleAccounts } from './MintTransactionRuleAccounts'
+import { BankTransactionRuleDescriptionConditions } from './BankTransactionRuleDescriptionConditions'
+import { BankTransactionRuleAccounts } from './BankTransactionRuleAccounts'
 
-export interface MintBankTransactionRule{
+export interface BankTransactionRule{
 	name: string
 	creation: string
 	modified: string
@@ -26,18 +26,18 @@ export interface MintBankTransactionRule{
 	rule_description?: string
 	/**	Company : Link - Company	*/
 	company: string
-	/**	Description Rules : Table - Mint Bank Transaction Description Rules	*/
-	description_rules: MintBankTransactionDescriptionRules[]
+	/**	Description Rules : Table - Bank Transaction Rule Description Conditions	*/
+	description_rules: BankTransactionRuleDescriptionConditions[]
 	/**	Classify As : Select	*/
 	classify_as: "Bank Entry" | "Payment Entry" | "Transfer"
 	/**	Account : Link - Account	*/
 	account?: string
 	/**	Bank Entry Type : Select	*/
 	bank_entry_type?: "Single Account" | "Multiple Accounts"
-	/**	Party Type : Link - Party Type	*/
+	/**	Party Type : Link - DocType	*/
 	party_type?: string
 	/**	Party : Dynamic Link	*/
 	party?: string
-	/**	Accounts : Table - Mint Transaction Rule Accounts	*/
-	accounts?: MintTransactionRuleAccounts[]
+	/**	Accounts : Table - Bank Transaction Rule Accounts	*/
+	accounts?: BankTransactionRuleAccounts[]
 }

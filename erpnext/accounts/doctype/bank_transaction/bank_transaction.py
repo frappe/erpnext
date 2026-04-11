@@ -34,6 +34,8 @@ class BankTransaction(Document):
 		description: DF.SmallText | None
 		excluded_fee: DF.Currency
 		included_fee: DF.Currency
+		is_rule_evaluated: DF.Check
+		matched_transaction_rule: DF.Link | None
 		naming_series: DF.Literal["ACC-BTN-.YYYY.-"]
 		party: DF.DynamicLink | None
 		party_type: DF.Link | None

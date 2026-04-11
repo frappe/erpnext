@@ -12,8 +12,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { H4, Paragraph } from "@/components/ui/typography"
 import _ from "@/lib/translate"
 import { cn } from "@/lib/utils"
-import { MintBankTransactionRule } from "@/types/Mint/MintBankTransactionRule"
-import { MintTransactionRuleAccounts } from "@/types/Mint/MintTransactionRuleAccounts"
+import { BankTransactionRule } from "@/types/Accounts/BankTransactionRule"
+import { BankTransactionRuleAccounts } from "@/types/Accounts/BankTransactionRuleAccounts"
 import { FrappeConfig, FrappeContext } from "frappe-react-sdk"
 import { ArrowDownRight, ArrowDownUp, ArrowRightLeftIcon, ArrowUpRight, LandmarkIcon, Plus, PlusCircleIcon, ReceiptIcon, Settings, Trash2 } from "lucide-react"
 import { ChangeEvent, useCallback, useContext, useMemo, useRef, useState } from "react"
@@ -72,7 +72,7 @@ export const RuleForm = ({ isEdit = false }: { isEdit?: boolean }) => {
 
 const CompanySelector = () => {
 
-    const { setValue } = useFormContext<MintBankTransactionRule>()
+    const { setValue } = useFormContext<BankTransactionRule>()
 
     return <LinkFormField
         name='company'
@@ -92,7 +92,7 @@ const CompanySelector = () => {
 /** Component to render a radio group as a toggle group with options for All, Withdrawal, Deposit */
 const TransactionTypeSelector = () => {
 
-    const { control } = useFormContext<MintBankTransactionRule>()
+    const { control } = useFormContext<BankTransactionRule>()
 
     return (
         <FormField
@@ -170,7 +170,7 @@ const TransactionTypeSelector = () => {
 
 const DescriptionRules = () => {
 
-    const { control } = useFormContext<MintBankTransactionRule>()
+    const { control } = useFormContext<BankTransactionRule>()
 
     const { fields, append, remove } = useFieldArray({
         control,
@@ -232,7 +232,7 @@ const DescriptionRules = () => {
 
 const RuleAction = () => {
 
-    const { control } = useFormContext<MintBankTransactionRule>()
+    const { control } = useFormContext<BankTransactionRule>()
 
     const classify_as = useWatch({ control, name: "classify_as" })
     const party_type = useWatch({ control, name: "party_type" })
@@ -322,7 +322,7 @@ const RuleAction = () => {
 
 const PartyField = () => {
 
-    const { control, setValue } = useFormContext<MintBankTransactionRule>()
+    const { control, setValue } = useFormContext<BankTransactionRule>()
 
     const party_type = useWatch({
         control,
@@ -375,7 +375,7 @@ const PartyField = () => {
 const MultipleAccountsSelection = () => {
 
 
-    const { control } = useFormContext<MintBankTransactionRule>()
+    const { control } = useFormContext<BankTransactionRule>()
 
     const accounts = useWatch({
         control,
@@ -486,7 +486,7 @@ const ConfigureAccountsModal = ({ open, onClose }: { open: boolean, onClose: () 
 
 const ConfigureAccountsModalContent = () => {
 
-    const { control, getValues, setValue } = useFormContext<MintBankTransactionRule>()
+    const { control, getValues, setValue } = useFormContext<BankTransactionRule>()
 
     const { call } = useContext(FrappeContext) as FrappeConfig
 
@@ -571,7 +571,7 @@ const ConfigureAccountsModalContent = () => {
             debit: '',
             credit: '',
             user_remark: ''
-        } as MintTransactionRuleAccounts, {
+        } as BankTransactionRuleAccounts, {
             focusName: `accounts.${fields.length}.account`
         })
     }
@@ -778,7 +778,7 @@ const ConfigureAccountsModalContent = () => {
 
 const PartyRowField = ({ index, onChange }: { index: number, onChange: (value: string, index: number) => void }) => {
 
-    const { control } = useFormContext<MintBankTransactionRule>()
+    const { control } = useFormContext<BankTransactionRule>()
 
     const party_type = useWatch({
         control,

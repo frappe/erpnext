@@ -17,6 +17,7 @@
   "is_default",
   "is_company_account",
   "company",
+  "is_credit_card",
   "section_break_11",
   "party_type",
   "column_break_14",
@@ -209,6 +210,13 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "default": "0",
+   "description": "If checked, journal entries made using bank reconciliation will be of type \"Credit Card Entry\"",
+   "fieldname": "is_credit_card",
+   "fieldtype": "Check",
+   "label": "Is Credit Card"
   }
  ],
  "grid_page_length": 50,
@@ -254,7 +262,7 @@
    "link_fieldname": "default_bank_account"
   }
  ],
- "modified": "2026-01-20 00:46:16.633364",
+ "modified": "2026-04-11 19:46:27.609994",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",

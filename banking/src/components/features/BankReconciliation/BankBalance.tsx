@@ -21,7 +21,7 @@ import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { useContext, useState } from "react"
 import { Separator } from "@/components/ui/separator"
-import { MintBankStatementBalance } from "@/types/Mint/MintBankStatementBalance"
+import { BankAccountBalance } from "@/types/Accounts/BankAccountBalance"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { toast } from "sonner"
 import ErrorBanner from "@/components/ui/error-banner"
@@ -274,7 +274,7 @@ const ClosingBalanceForm = ({ defaultBalance, date, bankAccount, onClose }: { de
 
 const ClosingBalancesList = ({ bankAccount, date }: { bankAccount: SelectedBank | null, date: string }) => {
 
-    const { data, mutate } = useFrappeGetDocList<MintBankStatementBalance>("Mint Bank Statement Balance", {
+    const { data, mutate } = useFrappeGetDocList<BankAccountBalance>("Bank Account Balance", {
         filters: [["bank_account", "=", bankAccount?.name ?? ''], ["date", "<=", date]],
         orderBy: {
             field: "date",
@@ -287,7 +287,7 @@ const ClosingBalancesList = ({ bankAccount, date }: { bankAccount: SelectedBank 
     const { db } = useContext(FrappeContext) as FrappeConfig
 
     const onDelete = (name: string) => {
-        toast.promise(db.deleteDoc("Mint Bank Statement Balance", name).then(() => {
+        toast.promise(db.deleteDoc("Bank Account Balance", name).then(() => {
             mutate()
         }), {
             loading: _("Deleting closing balance..."),

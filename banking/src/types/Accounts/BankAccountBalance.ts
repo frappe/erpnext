@@ -1,5 +1,5 @@
 
-export interface MintBankTransactionDescriptionRules{
+export interface BankAccountBalance{
 	name: string
 	creation: string
 	modified: string
@@ -10,8 +10,10 @@ export interface MintBankTransactionDescriptionRules{
 	parentfield?: string
 	parenttype?: string
 	idx?: number
-	/**	Check : Select	*/
-	check: "Contains" | "Starts With" | "Ends With" | "Regex"
-	/**	Value : Small Text	*/
-	value: string
+	/**	Bank Account : Link - Bank Account	*/
+	bank_account: string
+	/**	Date : Date	*/
+	date: string
+	/**	Balance : Currency	*/
+	balance: number
 }

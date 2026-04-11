@@ -4,7 +4,7 @@ import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHe
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import _ from "@/lib/translate"
-import { MintBankTransactionRule } from "@/types/Mint/MintBankTransactionRule"
+import { BankTransactionRule } from "@/types/Accounts/BankTransactionRule"
 import { FrappeConfig, FrappeContext, useFrappeGetCall, useFrappeGetDocList, useFrappePostCall } from "frappe-react-sdk"
 import { ArrowDownRight, ArrowDownUp, ArrowLeftIcon, ArrowUpRight, MoreVertical, Trash2, GripVertical, Play, RefreshCw, ZapIcon } from "lucide-react"
 import { useContext, useState } from "react"
@@ -88,7 +88,7 @@ const RuleConfigureButton = () => {
 
 const RuleList = ({ setSelectedRule, setIsNewRule }: { setSelectedRule: (rule: string) => void, setIsNewRule: (isNewRule: boolean) => void }) => {
 
-    const { data, error, isLoading, mutate } = useFrappeGetDocList<MintBankTransactionRule>("Mint Bank Transaction Rule", {
+    const { data, error, isLoading, mutate } = useFrappeGetDocList<BankTransactionRule>("Bank Transaction Rule", {
         fields: ["name", "rule_name", "rule_description", "transaction_type", "priority"],
         orderBy: {
             field: 'priority',
@@ -108,7 +108,7 @@ const RuleList = ({ setSelectedRule, setIsNewRule }: { setSelectedRule: (rule: s
     )
 
     const onDeleteRule = (ruleID: string) => {
-        toast.promise(db.deleteDoc("Mint Bank Transaction Rule", ruleID).then(() => {
+        toast.promise(db.deleteDoc("Bank Transaction Rule", ruleID).then(() => {
             mutate()
         }), {
             loading: _("Deleting rule..."),
@@ -142,7 +142,7 @@ const RuleList = ({ setSelectedRule, setIsNewRule }: { setSelectedRule: (rule: s
             const updatePromises = newData.map((rule, index) => {
                 const newPriority = index + 1
                 if (rule.priority !== newPriority) {
-                    return db.setValue("Mint Bank Transaction Rule", rule.name, "priority", newPriority)
+                    return db.setValue("Bank Transaction Rule", rule.name, "priority", newPriority)
                 }
                 return Promise.resolve()
             })
@@ -252,15 +252,15 @@ const AutoRunRuleItem = () => {
 
     const { db } = useContext(FrappeContext) as FrappeConfig
 
-    const { data: mintSetting, mutate: setAutomaticallyRunRulesOnUnreconciledTransactions } = useFrappeGetCall("frappe.client.get_single_value", {
-        "doctype": "Mint Settings",
+    const { data: accountsSetting, mutate: setAutomaticallyRunRulesOnUnreconciledTransactions } = useFrappeGetCall("frappe.client.get_single_value", {
+        "doctype": "Accounts Settings",
         "field": "automatically_run_rules_on_unreconciled_transactions"
     })
 
-    const automaticallyRunRulesOnUnreconciledTransactions = mintSetting?.message ? true : false
+    const automaticallyRunRulesOnUnreconciledTransactions = accountsSetting?.message ? true : false
 
     const onAutoClassifyTransactions = (checked: boolean) => {
-        toast.promise(db.setValue("Mint Settings", "Mint Settings", "automatically_run_rules_on_unreconciled_transactions", checked ? 1 : 0).then(() => {
+        toast.promise(db.setValue("Accounts Settings", "Accounts Settings", "automatically_run_rules_on_unreconciled_transactions", checked ? 1 : 0).then(() => {
             setAutomaticallyRunRulesOnUnreconciledTransactions({
                 message: {
                     automatically_run_rules_on_unreconciled_transactions: checked ? 1 : 0,
@@ -293,7 +293,7 @@ const SortableRuleItem = ({
     setSelectedRule,
     onDeleteRule
 }: {
-    rule: MintBankTransactionRule
+    rule: BankTransactionRule
     setSelectedRule: (rule: string) => void
     onDeleteRule: (ruleID: string) => void
 }) => {

@@ -1,5 +1,5 @@
 
-export interface MintTransactionRuleAccounts{
+export interface BankTransactionRuleAccounts{
 	name: string
 	creation: string
 	modified: string

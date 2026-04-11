@@ -1,11 +1,11 @@
-# Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
+# import frappe
 from frappe.model.document import Document
 
 
-class BankTransactionPayments(Document):
+class BankTransactionRuleDescriptionConditions(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -14,14 +14,11 @@ class BankTransactionPayments(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		allocated_amount: DF.Currency
-		clearance_date: DF.Date | None
+		check: DF.Literal["Contains", "Starts With", "Ends With", "Regex"]
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		payment_document: DF.Link
-		payment_entry: DF.DynamicLink
-		reconciliation_type: DF.Literal["Matched", "Voucher Created"]
+		value: DF.SmallText
 	# end: auto-generated types
 
 	pass

@@ -11,14 +11,14 @@ export interface BankTransaction{
 	parentfield?: string
 	parenttype?: string
 	idx?: number
-	/**	Is Rule Evaluated : Check	*/
-	is_rule_evaluated?: 0 | 1
-	/**	Matched Rule : Link - Mint Bank Transaction Rule	*/
-	matched_rule?: string
 	/**	Series : Select	*/
 	naming_series: "ACC-BTN-.YYYY.-"
 	/**	Date : Date	*/
 	date?: string
+	/**	Is Rule Evaluated : Check	*/
+	is_rule_evaluated?: 0 | 1
+	/**	Matched Transaction Rule : Link - Bank Transaction Rule	*/
+	matched_transaction_rule?: string
 	/**	Status : Select	*/
 	status?: "" | "Pending" | "Settled" | "Unreconciled" | "Reconciled" | "Cancelled"
 	/**	Bank Account : Link - Bank Account	*/
@@ -35,7 +35,7 @@ export interface BankTransaction{
 	currency?: string
 	/**	Description : Small Text	*/
 	description?: string
-	/**	Reference Number : Data	*/
+	/**	Reference Number : Small Text	*/
 	reference_number?: string
 	/**	Transaction ID : Data	*/
 	transaction_id?: string
@@ -57,4 +57,8 @@ export interface BankTransaction{
 	bank_party_account_number?: string
 	/**	Party IBAN (Bank Statement) : Data	*/
 	bank_party_iban?: string
+	/**	Included Fee : Currency	*/
+	included_fee?: number
+	/**	Excluded Fee : Currency - On save, the Excluded Fee will be converted to an Included Fee.	*/
+	excluded_fee?: number
 }
