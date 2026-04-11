@@ -187,6 +187,37 @@ class TestBankTransaction(ERPNextTestSuite):
 			vouchers=vouchers,
 		)
 
+	def test_reconcile_voucher_with_different_bank_transaction(self):
+		bank_transaction_1 = frappe.get_doc(
+			"Bank Transaction",
+			dict(description="1512567 BG/000002918 OPSKATTUZWXXX AT776000000098709837 Herr G"),
+		)
+		payment = frappe.get_doc("Payment Entry", dict(party="Mr G", paid_amount=1200))
+		vouchers = json.dumps(
+			[
+				{
+					"payment_doctype": "Payment Entry",
+					"payment_name": payment.name,
+					"amount": bank_transaction_1.unallocated_amount,
+				}
+			]
+		)
+		reconcile_vouchers(bank_transaction_1.name, vouchers)
+
+		bank_transaction_2 = frappe.get_doc(
+			"Bank Transaction",
+			dict(description="1512567 BG/000003025 OPSKATTUZWXXX AT776000000098709849 Herr G"),
+		)
+		bank_transaction_2.append(
+			"payment_entries",
+			{
+				"payment_document": "Payment Entry",
+				"payment_entry": payment.name,
+				"allocated_amount": 0.0,
+			},
+		)
+		self.assertRaises(frappe.ValidationError, bank_transaction_2.save)
+
 	# Raise an error if debitor transaction vs debitor payment
 	def test_clear_sales_invoice(self):
 		bank_transaction = frappe.get_doc(
