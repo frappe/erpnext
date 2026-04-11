@@ -31,7 +31,7 @@ const BankReconciliation = () => {
         }
     }, [])
 
-    const remainingHeightAfterTabs = window.innerHeight - headerHeight - 324
+    const remainingHeightAfterTabs = window.innerHeight - headerHeight - 290
 
     return (
         <div className="p-4 flex flex-col gap-4">
@@ -50,7 +50,7 @@ const BankReconciliation = () => {
                         <BankRecDateFilter />
                     </div>
                 </div>
-                <BankPicker />
+                <BankPicker size="sm" />
                 <BankBalance />
             </div>
             <Tabs defaultValue="Match and Reconcile">
