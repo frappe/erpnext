@@ -2019,6 +2019,92 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertRaises(frappe.DoesNotExistError, frappe.get_doc, pe.doctype, pe.name)
 		self.assertRaises(frappe.DoesNotExistError, frappe.get_doc, "Journal Entry", jv[0])
 
+	def test_outstanding_orders_split_by_payment_terms(self):
+		create_payment_terms_template()
+
+		so = make_sales_order(do_not_save=1, qty=1, rate=200)
+		so.payment_terms_template = "Test Receivable Template"
+		so.save().submit()
+
+		args = {
+			"posting_date": nowdate(),
+			"company": so.company,
+			"party_type": "Customer",
+			"payment_type": "Receive",
+			"party": so.customer,
+			"party_account": "Debtors - _TC",
+			"get_orders_to_be_billed": True,
+		}
+
+		references = get_outstanding_reference_documents(args)
+
+		self.assertEqual(len(references), 2)
+		self.assertEqual(references[0].voucher_no, so.name)
+		self.assertEqual(references[1].voucher_no, so.name)
+		self.assertEqual(references[0].payment_term, "Basic Amount Receivable")
+		self.assertEqual(references[1].payment_term, "Tax Receivable")
+
+	def test_outstanding_orders_no_split_when_allocate_disabled(self):
+		create_payment_terms_template()
+
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		template.allocate_payment_based_on_payment_terms = 0
+		template.save()
+
+		so = make_sales_order(do_not_save=1, qty=1, rate=200)
+		so.payment_terms_template = "Test Receivable Template"
+		so.save().submit()
+
+		args = {
+			"posting_date": nowdate(),
+			"company": so.company,
+			"party_type": "Customer",
+			"payment_type": "Receive",
+			"party": so.customer,
+			"party_account": "Debtors - _TC",
+			"get_orders_to_be_billed": True,
+		}
+
+		references = get_outstanding_reference_documents(args)
+
+		self.assertEqual(len(references), 1)
+		self.assertIsNone(references[0].payment_term)
+
+		template.allocate_payment_based_on_payment_terms = 1
+		template.save()
+
+	def test_outstanding_multicurrency_sales_order_split(self):
+		create_payment_terms_template()
+
+		so = make_sales_order(
+			customer="_Test Customer USD",
+			currency="USD",
+			qty=1,
+			rate=100,
+			do_not_submit=True,
+		)
+		so.payment_terms_template = "Test Receivable Template"
+		so.conversion_rate = 50
+		so.save().submit()
+
+		args = {
+			"posting_date": nowdate(),
+			"company": so.company,
+			"party_type": "Customer",
+			"payment_type": "Receive",
+			"party": so.customer,
+			"party_account": "Debtors - _TC",
+			"get_orders_to_be_billed": True,
+		}
+
+		references = get_outstanding_reference_documents(args)
+
+		# Should split without throwing currency errors
+		self.assertEqual(len(references), 2)
+		for ref in references:
+			self.assertEqual(ref.voucher_no, so.name)
+			self.assertIsNotNone(ref.payment_term)
+
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")

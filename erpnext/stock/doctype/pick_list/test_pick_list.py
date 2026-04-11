@@ -1050,6 +1050,53 @@ class TestPickList(ERPNextTestSuite):
 		pl = create_pick_list(so.name)
 		self.assertFalse(pl.locations)
 
+	def test_pick_list_warehouse_for_work_order(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.work_order import create_pick_list, make_work_order
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		# Create Warehouses for Work Order
+		source_warehouse = create_warehouse("_Test WO Warehouse")
+		wip_warehouse = create_warehouse("_Test WIP Warehouse", company="_Test Company")
+		fg_warehouse = create_warehouse("_Test Finished Goods Warehouse", company="_Test Company")
+
+		# Create Finished Good Item
+		fg_item = make_item("Test Work Order Finished Good Item", properties={"is_stock_item": 1}).name
+
+		# Create Raw Material Item
+		rm_item = make_item("Test Work Order Raw Material Item", properties={"is_stock_item": 1}).name
+
+		# Create BOM
+		bom = make_bom(item=fg_item, rate=100, raw_materials=[rm_item])
+
+		# Create Inward entry for Raw Material
+		make_stock_entry(item=rm_item, to_warehouse=wip_warehouse, qty=10)
+		make_stock_entry(item=rm_item, to_warehouse=source_warehouse, qty=10)
+
+		# Create Work Order
+		wo = make_work_order(item=fg_item, qty=5, bom_no=bom.name, company="_Test Company")
+		wo.required_items[0].source_warehouse = source_warehouse
+		wo.fg_warehouse = fg_warehouse
+		wo.skip_transfer = True
+		wo.submit()
+
+		# Create Pick List
+		pl = create_pick_list(wo.name, for_qty=wo.qty)
+
+		# System prioritises the Source Warehouse
+		self.assertEqual(pl.locations[0].warehouse, source_warehouse)
+		self.assertEqual(pl.locations[0].item_code, rm_item)
+		self.assertEqual(pl.locations[0].qty, 5)
+
+		# Create Outward Entry from Source Warehouse
+		make_stock_entry(item=rm_item, from_warehouse=source_warehouse, qty=10)
+		pl.set_item_locations()
+
+		# System should pick other available warehouses
+		self.assertEqual(pl.locations[0].warehouse, wip_warehouse)
+		self.assertEqual(pl.locations[0].item_code, rm_item)
+		self.assertEqual(pl.locations[0].qty, 5)
+
 	def test_pick_list_validation_for_serial_no(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(

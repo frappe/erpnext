@@ -183,7 +183,7 @@
    "depends_on": "eval:doc.is_a_subscription",
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
-   "label": "Subscription Section"
+   "label": "Subscription"
   },
   {
    "fieldname": "subscription_plans",
@@ -478,7 +478,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-13 12:53:00.963274",
+ "modified": "2026-02-27 19:11:03.308896",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",

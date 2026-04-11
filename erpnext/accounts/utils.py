@@ -1615,6 +1615,10 @@ def parse_naming_series_variable(doc, variable):
 
 	else:
 		data = {"YY": "%y", "YYYY": "%Y", "MM": "%m", "DD": "%d", "JJJ": "%j"}
+
+		if doc and doc.doctype in ["Batch", "Serial No"] and doc.reference_doctype and doc.reference_name:
+			doc = frappe.get_doc(doc.reference_doctype, doc.reference_name)
+
 		date = (
 			(
 				getdate(doc.get("posting_date") or doc.get("transaction_date") or doc.get("posting_datetime"))

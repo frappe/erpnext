@@ -160,7 +160,7 @@ class PurchaseOrder(BuyingController):
 		taxes_and_charges_deducted: DF.Currency
 		tc_name: DF.Link | None
 		terms: DF.TextEditor | None
-		title: DF.Data
+		title: DF.Data | None
 		to_date: DF.Date | None
 		total: DF.Currency
 		total_net_weight: DF.Float
@@ -785,7 +785,8 @@ def make_purchase_invoice_from_portal(purchase_order_name: str):
 	if frappe.session.user not in frappe.get_all("Portal User", {"parent": doc.supplier}, pluck="user"):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 	doc.save()
-	frappe.db.commit()
+	if not frappe.in_test:
+		frappe.db.commit()
 	frappe.response["type"] = "redirect"
 	frappe.response.location = "/purchase-invoices/" + doc.name
 
@@ -807,18 +808,18 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		target.set_payment_schedule()
 		target.credit_to = get_party_account("Supplier", source.supplier, source.company)
 
+	def get_billed_qty(po_item_name):
+		from frappe.query_builder.functions import Sum
+
+		table = frappe.qb.DocType("Purchase Invoice Item")
+		query = (
+			frappe.qb.from_(table)
+			.select(Sum(table.qty).as_("qty"))
+			.where((table.docstatus == 1) & (table.po_detail == po_item_name))
+		)
+		return query.run(pluck="qty")[0] or 0
+
 	def update_item(obj, target, source_parent):
-		def get_billed_qty(po_item_name):
-			from frappe.query_builder.functions import Sum
-
-			table = frappe.qb.DocType("Purchase Invoice Item")
-			query = (
-				frappe.qb.from_(table)
-				.select(Sum(table.qty).as_("qty"))
-				.where((table.docstatus == 1) & (table.po_detail == po_item_name))
-			)
-			return query.run(pluck="qty")[0] or 0
-
 		billed_qty = flt(get_billed_qty(obj.name))
 		target.qty = flt(obj.qty) - billed_qty
 
@@ -858,7 +859,11 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 				"wip_composite_asset": "wip_composite_asset",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount))
+			"condition": lambda doc: (
+				doc.base_amount == 0
+				or abs(doc.billed_amt) < abs(doc.amount)
+				or doc.qty > flt(get_billed_qty(doc.name))
+			)
 			and select_item(doc),
 		},
 		"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
@@ -894,7 +899,7 @@ def get_list_context(context=None):
 
 @frappe.whitelist()
 def update_status(status: str, name: str):
-	po = frappe.get_lazy_doc("Purchase Order", name, check_permission="write")
+	po = frappe.get_lazy_doc("Purchase Order", name, check_permission="submit")
 	po.update_status(status)
 	po.update_delivered_qty_in_sales_order()
 

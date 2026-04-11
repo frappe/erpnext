@@ -1083,7 +1083,9 @@ class TestMaterialRequest(ERPNextTestSuite):
 
 		pl.locations[0].qty = 2
 		pl.locations[0].stock_qty = 2
-		self.assertRaises(frappe.ValidationError, pl.submit)
+
+		# System should allow picking qty for excess transfer
+		pl.submit()
 
 	def test_mr_status_with_partial_and_excess_end_transit(self):
 		material_request = make_material_request(

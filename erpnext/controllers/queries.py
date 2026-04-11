@@ -11,7 +11,7 @@ from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.permissions import has_permission
 from frappe.query_builder import Criterion, CustomFunction
 from frappe.query_builder.functions import Concat, Locate, Sum
-from frappe.utils import cint, nowdate, today, unique
+from frappe.utils import nowdate, today, unique
 from pypika import Order
 
 import erpnext
@@ -379,39 +379,42 @@ def get_project_name(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_delivery_notes_to_be_billed(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, as_dict: bool
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, as_dict: bool = False
 ):
-	doctype = "Delivery Note"
+	DeliveryNote = frappe.qb.DocType("Delivery Note")
+
 	fields = get_fields(doctype, ["name", "customer", "posting_date"])
 
-	return frappe.db.sql(
-		"""
-		select {fields}
-		from `tabDelivery Note`
-		where `tabDelivery Note`.`{key}` like {txt} and
-			`tabDelivery Note`.docstatus = 1
-			and status not in ('Stopped', 'Closed') {fcond}
-			and (
-				(`tabDelivery Note`.is_return = 0 and `tabDelivery Note`.per_billed < 100)
-				or (`tabDelivery Note`.grand_total = 0 and `tabDelivery Note`.per_billed < 100)
-				or (
-					`tabDelivery Note`.is_return = 1
-					and return_against in (select name from `tabDelivery Note` where per_billed < 100)
+	original_dn = (
+		frappe.qb.from_(DeliveryNote)
+		.select(DeliveryNote.name)
+		.where((DeliveryNote.docstatus == 1) & (DeliveryNote.is_return == 0) & (DeliveryNote.per_billed > 0))
+	)
+
+	query = (
+		frappe.qb.from_(DeliveryNote)
+		.select(*[DeliveryNote[f] for f in fields])
+		.where(
+			(DeliveryNote.docstatus == 1)
+			& (DeliveryNote.status.notin(["Stopped", "Closed"]))
+			& (DeliveryNote[searchfield].like(f"%{txt}%"))
+			& (
+				((DeliveryNote.is_return == 0) & (DeliveryNote.per_billed < 100))
+				| ((DeliveryNote.grand_total == 0) & (DeliveryNote.per_billed < 100))
+				| (
+					(DeliveryNote.is_return == 1)
+					& (DeliveryNote.per_billed < 100)
+					& (DeliveryNote.return_against.isin(original_dn))
 				)
 			)
-			{mcond} order by `tabDelivery Note`.`{key}` asc limit {page_len} offset {start}
-	""".format(
-			fields=", ".join([f"`tabDelivery Note`.{f}" for f in fields]),
-			key=searchfield,
-			fcond=get_filters_cond(doctype, filters, []),
-			mcond=get_match_cond(doctype),
-			start=start,
-			page_len=page_len,
-			txt="%(txt)s",
-		),
-		{"txt": ("%%%s%%" % txt)},
-		as_dict=as_dict,
+		)
 	)
+	if filters and isinstance(filters, dict):
+		for key, value in filters.items():
+			query = query.where(DeliveryNote[key] == value)
+
+	query = query.orderby(DeliveryNote[searchfield], order=Order.asc).limit(page_len).offset(start)
+	return query.run(as_dict=as_dict)
 
 
 @frappe.whitelist()
@@ -1036,3 +1039,26 @@ def get_item_uom_query(doctype: str, txt: str, searchfield: str, start: int, pag
 		limit_page_length=page_len,
 		as_list=1,
 	)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_warehouse_address(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	table = frappe.qb.DocType(doctype)
+	child_table = frappe.qb.DocType("Dynamic Link")
+
+	query = (
+		frappe.qb.from_(table)
+		.inner_join(child_table)
+		.on((table.name == child_table.parent) & (child_table.parenttype == doctype))
+		.select(table.name)
+		.where(
+			(child_table.link_name == filters.get("warehouse"))
+			& (table.disabled == 0)
+			& (child_table.link_doctype == "Warehouse")
+			& (table.name.like(f"%{txt}%"))
+		)
+		.offset(start)
+		.limit(page_len)
+	)
+	return query.run(as_list=1)

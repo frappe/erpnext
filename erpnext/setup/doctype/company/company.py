@@ -926,7 +926,7 @@ def update_transactions_annual_history(company, commit=False):
 	transactions_history = get_all_transactions_annual_history(company)
 	frappe.db.set_value("Company", company, "transactions_annual_history", json.dumps(transactions_history))
 
-	if commit:
+	if commit and not frappe.in_test:
 		frappe.db.commit()
 
 
@@ -935,7 +935,9 @@ def cache_companies_monthly_sales_history():
 	for company in companies:
 		update_company_monthly_sales(company)
 		update_transactions_annual_history(company)
-	frappe.db.commit()
+
+	if not frappe.in_test:
+		frappe.db.commit()
 
 
 @frappe.whitelist()

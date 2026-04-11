@@ -102,8 +102,8 @@ class PaymentRequest(Document):
 		subscription_plans: DF.Table[SubscriptionPlanDetail]
 		swift_number: DF.ReadOnly | None
 		transaction_date: DF.Date | None
-
 	# end: auto-generated types
+
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
 
@@ -750,7 +750,8 @@ def make_payment_request(**args):
 			pr.submit()
 
 	if args.order_type == "Shopping Cart":
-		frappe.db.commit()
+		if not frappe.in_test:
+			frappe.db.commit()
 		frappe.local.response["type"] = "redirect"
 		frappe.local.response["location"] = pr.get_payment_url()
 

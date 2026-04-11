@@ -14,6 +14,7 @@ from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.item.test_item import create_item, make_item
+from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	SerialNoDuplicateError,
@@ -32,6 +33,40 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	def setUp(self):
 		frappe.local.future_sle = {}
 		self.load_test_records("Purchase Receipt")
+
+	def test_purchase_receipt_skips_validation(self):
+		"""
+		Test that validation is skipped when over delivery receipt allowance is reduced after PO submission
+		and PR can be submitted with higher qty than MR.
+		"""
+		item = create_item("Test item for validation")
+		mr = frappe.new_doc("Material Request")
+		mr.material_request_type = "Purchase"
+		mr.company = "_Test Company"
+		mr.price_list = "_Test Price List"
+		mr.append(
+			"items",
+			{
+				"item_code": item.name,
+				"item_name": item.item_name,
+				"item_group": item.item_group,
+				"schedule_date": add_days(today(), 1),
+				"qty": 100,
+				"uom": item.stock_uom,
+			},
+		)
+		mr.insert()
+		mr.submit()
+		frappe.db.set_value("Item", item.name, "over_delivery_receipt_allowance", 200)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items[0].qty = 300
+		po.save()
+		po.submit()
+		frappe.db.set_value("Item", item.name, "over_delivery_receipt_allowance", 20)
+		pr = make_purchase_receipt(qty=300, item_code=item.name, do_not_save=True)
+		pr.save()
+		pr.submit()
 
 	def test_purchase_receipt_qty(self):
 		pr = make_purchase_receipt(qty=0, rejected_qty=0, do_not_save=True)
@@ -1204,6 +1239,65 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			self.assertEqual(gle.credit, expected_gle[i][2])
 
 		pr.cancel()
+
+	def test_item_valuation_with_deduct_valuation_and_total_tax(self):
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			qty=5,
+			rate=100,
+			do_not_save=1,
+		)
+
+		pr.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"add_deduct_tax": "Deduct",
+				"account_head": "_Test Account Shipping Charges - TCP1",
+				"category": "Valuation and Total",
+				"cost_center": "Main - TCP1",
+				"description": "Valuation Discount",
+				"tax_amount": 20,
+			},
+		)
+
+		pr.insert()
+
+		self.assertAlmostEqual(pr.items[0].item_tax_amount, -20.0, places=2)
+		self.assertAlmostEqual(pr.items[0].valuation_rate, 96.0, places=2)
+
+		pr.delete()
+
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			qty=5,
+			rate=100,
+			do_not_save=1,
+		)
+
+		pr.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"add_deduct_tax": "Deduct",
+				"account_head": "_Test Account Shipping Charges - TCP1",
+				"category": "Valuation and Total",
+				"cost_center": "Main - TCP1",
+				"description": "Valuation Discount",
+				"rate": 10,
+			},
+		)
+
+		pr.insert()
+
+		self.assertAlmostEqual(pr.items[0].item_tax_amount, -50.0, places=2)
+		self.assertAlmostEqual(pr.items[0].valuation_rate, 90.0, places=2)
+
+		pr.delete()
 
 	def test_po_to_pi_and_po_to_pr_worflow_full(self):
 		"""Test following behaviour:
@@ -4512,7 +4606,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual(srbnb_cost, 1500)
 
-	def test_valuation_rate_for_rejected_materials_withoout_accepted_materials(self):
+	def test_valuation_rate_for_rejected_materials_without_accepted_materials(self):
 		item = make_item("Test Item with Rej Material Valuation WO Accepted", {"is_stock_item": 1})
 		company = "_Test Company with perpetual inventory"
 
@@ -5325,6 +5419,97 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			self.assertEqual(row.warehouse, "_Test Warehouse 1 - _TC")
 			self.assertEqual(row.incoming_rate, 100)
 
+	def test_bill_for_rejected_quantity_in_purchase_invoice(self):
+		item_code = make_item("Test Rejected Qty", {"is_stock_item": 1}).name
+
+		with self.change_settings("Buying Settings", {"bill_for_rejected_quantity_in_purchase_invoice": 0}):
+			pr = make_purchase_receipt(
+				item_code=item_code,
+				qty=10,
+				rejected_qty=2,
+				rate=10,
+				warehouse="_Test Warehouse - _TC",
+			)
+
+			self.assertEqual(pr.total_qty, 10)
+			self.assertEqual(pr.total, 100)
+
+		with self.change_settings("Buying Settings", {"bill_for_rejected_quantity_in_purchase_invoice": 1}):
+			pr = make_purchase_receipt(
+				item_code=item_code,
+				qty=10,
+				rejected_qty=2,
+				rate=10,
+				warehouse="_Test Warehouse - _TC",
+			)
+
+			self.assertEqual(pr.total_qty, 12)
+			self.assertEqual(pr.total, 120)
+
+	def test_different_exchange_rate_in_pr_and_pi(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		original_value = frappe.db.get_single_value(
+			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
+		)
+
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 1)
+
+		party_account = create_account(
+			account_name="USD Party Account Creditors",
+			parent_account="Accounts Payable - TCP1",
+			account_type="Payable",
+			company="_Test Company with perpetual inventory",
+			account_currency="USD",
+		)
+
+		supplier = create_supplier(
+			supplier_name="_Test USD Supplier New 1", default_currency="USD", party_account=party_account
+		).name
+		item_code = make_item("Test Item for Different Exchange Rate", {"is_stock_item": 1}).name
+
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=1,
+			currency="USD",
+			conversion_rate=80,
+			rate=100,
+			company="_Test Company with perpetual inventory",
+			warehouse=frappe.get_value(
+				"Warehouse", {"company": "_Test Company with perpetual inventory"}, "name"
+			),
+			supplier=supplier,
+		)
+
+		self.assertEqual(pr.currency, "USD")
+		self.assertEqual(pr.conversion_rate, 80)
+
+		gl_entries = get_gl_entries(pr.doctype, pr.name)
+		self.assertTrue(len(gl_entries) == 2)
+		for row in gl_entries:
+			amount = row.credit or row.debit
+			self.assertEqual(amount, 8000.0)
+
+		pi = make_purchase_invoice(pr.name)
+		pi.conversion_rate = 90
+		pi.currency = "USD"
+
+		pi.save()
+		pi.submit()
+
+		gl_entries = get_gl_entries(pi.doctype, pi.name)
+		self.assertTrue(len(gl_entries) == 2)
+
+		accounts = ["USD Party Account Creditors - TCP1", "Stock Received But Not Billed - TCP1"]
+		for row in gl_entries:
+			amount = row.credit or row.debit
+			self.assertEqual(amount, 9000.0)
+			self.assertTrue(row.account in accounts)
+
+		frappe.db.set_single_value(
+			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", original_value
+		)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -5494,6 +5679,9 @@ def make_purchase_receipt(**args):
 	pr.is_return = args.is_return
 	pr.return_against = args.return_against
 	pr.apply_putaway_rule = args.apply_putaway_rule
+
+	if args.get("conversion_rate") is not None:
+		pr.conversion_rate = args.conversion_rate
 
 	qty = args.qty if args.qty is not None else 5
 	rejected_qty = args.rejected_qty or 0

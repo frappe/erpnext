@@ -15,21 +15,21 @@
  "fields": [
   {
    "fieldname": "length",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Length (cm)",
    "reqd": 1
   },
   {
    "fieldname": "width",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Width (cm)",
    "reqd": 1
   },
   {
    "fieldname": "height",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Height (cm)",
    "reqd": 1
@@ -52,7 +52,7 @@
   }
  ],
  "links": [],
- "modified": "2024-03-27 13:10:41.521126",
+ "modified": "2026-03-29 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment Parcel Template",

@@ -9,8 +9,6 @@
  "field_order": [
   "naming_series",
   "company",
-  "billing_address",
-  "billing_address_display",
   "vendor",
   "column_break1",
   "transaction_date",
@@ -18,6 +16,8 @@
   "status",
   "has_unit_price_items",
   "amended_from",
+  "section_break_trpf",
+  "title",
   "suppliers_section",
   "suppliers",
   "items_section",
@@ -43,7 +43,13 @@
   "select_print_heading",
   "letter_head",
   "more_info",
-  "opportunity"
+  "opportunity",
+  "address_and_contact_tab",
+  "billing_address",
+  "billing_address_display",
+  "column_break_czul",
+  "shipping_address",
+  "shipping_address_display"
  ],
  "fields": [
   {
@@ -346,6 +352,39 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Use HTML"
+  },
+  {
+   "fieldname": "address_and_contact_tab",
+   "fieldtype": "Tab Break",
+   "label": "Address & Contact"
+  },
+  {
+   "fieldname": "column_break_czul",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shipping_address",
+   "fieldtype": "Link",
+   "label": "Company Shipping Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "shipping_address_display",
+   "fieldtype": "Text Editor",
+   "label": "Shipping Address Details",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_trpf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "grid_page_length": 50,
@@ -353,7 +392,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 17:15:29.774614",
+ "modified": "2026-03-30 12:18:08.451201",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",
@@ -423,5 +462,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "company"
 }

@@ -26,6 +26,8 @@
   "has_unit_price_items",
   "is_subcontracted",
   "amended_from",
+  "section_break_umok",
+  "title",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -151,7 +153,7 @@
   "loyalty_points",
   "column_break_116",
   "loyalty_amount",
-  "subscription_section",
+  "auto_repeat_section",
   "from_date",
   "to_date",
   "column_break_108",
@@ -1374,18 +1376,6 @@
   },
   {
    "allow_on_submit": 1,
-   "collapsible": 1,
-   "fieldname": "subscription_section",
-   "fieldtype": "Section Break",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Auto Repeat",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
    "fieldname": "from_date",
    "fieldtype": "Date",
    "hide_days": 1,
@@ -1742,6 +1732,30 @@
    "hidden": 1,
    "label": "Ignore Default Payment Terms Template",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "collapsible": 1,
+   "fieldname": "auto_repeat_section",
+   "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Auto Repeat",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_umok",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "grid_page_length": 50,
@@ -1749,7 +1763,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-04 18:04:05.873483",
+ "modified": "2026-03-30 12:19:27.522646",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

@@ -74,10 +74,6 @@
   "auto_indent",
   "column_break_27",
   "reorder_email_notify",
-  "inter_warehouse_transfer_settings_section",
-  "allow_from_dn",
-  "column_break_31",
-  "allow_from_pr",
   "stock_closing_tab",
   "control_historical_stock_transactions_section",
   "stock_frozen_upto",
@@ -226,23 +222,6 @@
    "label": "Naming Series Prefix"
   },
   {
-   "fieldname": "inter_warehouse_transfer_settings_section",
-   "fieldtype": "Section Break",
-   "label": "Inter Warehouse Transfer Settings"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_from_dn",
-   "fieldtype": "Check",
-   "label": "Allow Material Transfer from Delivery Note to Sales Invoice"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_from_pr",
-   "fieldtype": "Check",
-   "label": "Allow Material Transfer from Purchase Receipt to Purchase Invoice"
-  },
-  {
    "description": "If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.",
    "fieldname": "role_allowed_to_create_edit_back_dated_transactions",
    "fieldtype": "Link",
@@ -287,10 +266,6 @@
   },
   {
    "fieldname": "column_break_27",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_31",
    "fieldtype": "Column Break"
   },
   {
@@ -564,7 +539,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-16 13:28:19.254641",
+ "modified": "2026-03-27 22:39:16.812184",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

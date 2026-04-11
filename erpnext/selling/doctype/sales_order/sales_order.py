@@ -181,6 +181,7 @@ class SalesOrder(SellingController):
 		tc_name: DF.Link | None
 		terms: DF.TextEditor | None
 		territory: DF.Link | None
+		title: DF.Data | None
 		to_date: DF.Date | None
 		total: DF.Currency
 		total_commission: DF.Currency
@@ -1815,7 +1816,7 @@ def make_work_orders(items: str, sales_order: str, company: str, project: str | 
 
 @frappe.whitelist()
 def update_status(status: str, name: str):
-	so = frappe.get_doc("Sales Order", name, check_permission="write")
+	so = frappe.get_doc("Sales Order", name, check_permission="submit")
 	so.update_status(status)
 
 

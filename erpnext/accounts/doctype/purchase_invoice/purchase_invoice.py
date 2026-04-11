@@ -334,9 +334,6 @@ class PurchaseInvoice(BuyingController):
 				if self.bill_date:
 					self.remarks += " " + _("dated {0}").format(formatdate(self.bill_date))
 
-			else:
-				self.remarks = _("No Remarks")
-
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
 			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
@@ -618,12 +615,13 @@ class PurchaseInvoice(BuyingController):
 		frappe.db.set_value(self.doctype, self.name, "against_expense_account", self.against_expense_account)
 
 	def po_required(self):
-		if frappe.db.get_single_value("Buying Settings", "po_required") == "Yes":
-			if frappe.get_value(
+		if (
+			frappe.db.get_single_value("Buying Settings", "po_required") == "Yes"
+			and not self.is_internal_transfer()
+			and not frappe.get_value(
 				"Supplier", self.supplier, "allow_purchase_invoice_creation_without_purchase_order"
-			):
-				return
-
+			)
+		):
 			for d in self.get("items"):
 				if not d.purchase_order:
 					msg = _("Purchase Order Required for item {}").format(frappe.bold(d.item_code))
@@ -984,6 +982,10 @@ class PurchaseInvoice(BuyingController):
 		if provisional_accounting_for_non_stock_items:
 			self.get_provisional_accounts()
 
+		adjust_incoming_rate = frappe.db.get_single_value(
+			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
+		)
+
 		for item in self.get("items"):
 			if flt(item.base_net_amount) or (self.get("update_stock") and item.valuation_rate):
 				if item.item_code:
@@ -1162,7 +1164,11 @@ class PurchaseInvoice(BuyingController):
 						)
 
 						# check if the exchange rate has changed
-						if item.get("purchase_receipt") and self.auto_accounting_for_stock:
+						if (
+							not adjust_incoming_rate
+							and item.get("purchase_receipt")
+							and self.auto_accounting_for_stock
+						):
 							if (
 								exchange_rate_map[item.purchase_receipt]
 								and self.conversion_rate != exchange_rate_map[item.purchase_receipt]
@@ -1199,6 +1205,7 @@ class PurchaseInvoice(BuyingController):
 										item=item,
 									)
 								)
+
 			if (
 				self.auto_accounting_for_stock
 				and self.is_opening == "No"

@@ -615,7 +615,12 @@ class ProductionPlan(Document):
 				None,
 			):
 				item.db_set("sub_assembly_item_reference", reference)
-			elif self.reserve_stock and item.main_item_code and item.from_bom:
+			elif (
+				self.reserve_stock
+				and item.main_item_code
+				and item.from_bom
+				and item.main_item_code != frappe.get_cached_value("BOM", item.from_bom, "item")
+			):
 				frappe.throw(
 					_(
 						"Sub assembly item references are missing. Please fetch the sub assemblies and raw materials again."
@@ -1783,8 +1788,10 @@ def get_items_for_material_requests(
 			)
 
 		sales_order = data.get("sales_order")
+		qty_precision = frappe.get_precision("Material Request Plan Item", "quantity")
 
 		for key, details in item_details.items():
+			details.qty = flt(details.qty, qty_precision)
 			so_item_details.setdefault(sales_order, frappe._dict())
 			if key in so_item_details.get(sales_order, {}):
 				so_item_details[sales_order][key]["qty"] = so_item_details[sales_order][key].get(

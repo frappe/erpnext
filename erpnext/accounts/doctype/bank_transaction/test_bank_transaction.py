@@ -382,7 +382,7 @@ def add_vouchers(gl_account="_Test Bank - _TC"):
 		frappe.get_doc(
 			{
 				"doctype": "Customer",
-				"customer_group": "All Customer Groups",
+				"customer_group": "Individual",
 				"customer_type": "Company",
 				"customer_name": "Poore Simon's",
 			}
@@ -413,7 +413,7 @@ def add_vouchers(gl_account="_Test Bank - _TC"):
 		frappe.get_doc(
 			{
 				"doctype": "Customer",
-				"customer_group": "All Customer Groups",
+				"customer_group": "Individual",
 				"customer_type": "Company",
 				"customer_name": "Fayva",
 			}

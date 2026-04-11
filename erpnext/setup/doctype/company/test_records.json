@@ -180,5 +180,39 @@
 		"default_currency": "ZAR",
 		"doctype": "Company",
 		"create_chart_of_accounts_based_on": "Standard Template"
+	},
+	{
+		"abbr": "_TOIC",
+		"company_name": "_Test Opening Invoice Company",
+		"country": "Pakistan",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"create_chart_of_accounts_based_on": "Standard Template"
+	},
+	{
+		"abbr": "TBC",
+		"company_name": "Trial Balance Company",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"create_chart_of_accounts_based_on": "Standard Template"
+	},
+	{
+		"abbr": "_TSS",
+		"company_name": "_Test Support SLA",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"chart_of_accounts": "Standard",
+		"create_chart_of_accounts_based_on": "Standard Template"
+	},
+	{
+		"abbr": "TQC",
+		"company_name": "Test Quality Company",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"chart_of_accounts": "Standard",
+		"create_chart_of_accounts_based_on": "Standard Template"
 	}
 ]

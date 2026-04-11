@@ -110,49 +110,23 @@ class Warehouse(NestedSet):
 	def warn_about_multiple_warehouse_account(self):
 		"If Warehouse value is split across multiple accounts, warn."
 
-		def get_accounts_where_value_is_booked(name):
-			sle = frappe.qb.DocType("Stock Ledger Entry")
-			gle = frappe.qb.DocType("GL Entry")
-			ac = frappe.qb.DocType("Account")
-
-			return (
-				frappe.qb.from_(sle)
-				.join(gle)
-				.on(sle.voucher_no == gle.voucher_no)
-				.join(ac)
-				.on(ac.name == gle.account)
-				.select(gle.account)
-				.distinct()
-				.where((sle.warehouse == name) & (ac.account_type == "Stock"))
-				.orderby(sle.creation)
-				.run(as_dict=True)
-			)
-
-		if self.is_new():
+		if not frappe.db.count("Stock Ledger Entry", {"warehouse": self.name}):
 			return
 
-		old_wh_account = frappe.db.get_value("Warehouse", self.name, "account")
+		doc_before_save = self.get_doc_before_save()
+		old_wh_account = doc_before_save.account if doc_before_save else None
 
-		# WH account is being changed or set get all accounts against which wh value is booked
-		if self.account != old_wh_account:
-			accounts = get_accounts_where_value_is_booked(self.name)
-			accounts = [d.account for d in accounts]
+		if self.is_new() or (self.account and old_wh_account == self.account):
+			return
 
-			if not accounts or (len(accounts) == 1 and self.account in accounts):
-				# if same singular account has stock value booked ignore
-				return
-
-			warning = _("Warehouse's Stock Value has already been booked in the following accounts:")
-			account_str = "<br>" + ", ".join(frappe.bold(ac) for ac in accounts)
-			reason = "<br><br>" + _(
-				"Booking stock value across multiple accounts will make it harder to track stock and account value."
-			)
-
-			frappe.msgprint(
-				warning + account_str + reason,
-				title=_("Multiple Warehouse Accounts"),
-				indicator="orange",
-			)
+		frappe.msgprint(
+			title=_("Warning: Account changed for warehouse"),
+			indicator="orange",
+			msg=_(
+				"Stock entries exist with the old account. Changing the account may lead to a mismatch between the warehouse closing balance and the account closing balance. The overall closing balance will still match, but not for the specific account."
+			),
+			alert=True,
+		)
 
 	def check_if_sle_exists(self, non_cancelled_only=False):
 		filters = {"warehouse": self.name}
