@@ -481,20 +481,26 @@ def create_supplier_quotation(doc: str | Document | dict):
 	if isinstance(doc, str):
 		doc = json.loads(doc)
 
+	supplier = doc.get("supplier")
+	if frappe.session.user not in frappe.get_all(
+		"Portal User", {"parent": supplier}, pluck="user"
+	):
+		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+
 	try:
 		sq_doc = frappe.get_doc(
 			{
 				"doctype": "Supplier Quotation",
-				"supplier": doc.get("supplier"),
+				"supplier": supplier,
 				"terms": doc.get("terms"),
 				"company": doc.get("company"),
 				"currency": doc.get("currency")
-				or get_party_account_currency("Supplier", doc.get("supplier"), doc.get("company")),
+				or get_party_account_currency("Supplier", supplier, doc.get("company")),
 				"buying_price_list": doc.get("buying_price_list")
 				or frappe.db.get_single_value("Buying Settings", "buying_price_list"),
 			}
 		)
-		add_items(sq_doc, doc.get("supplier"), doc.get("items"))
+		add_items(sq_doc, supplier, doc.get("items"))
 		sq_doc.flags.ignore_permissions = True
 		sq_doc.run_method("set_missing_values")
 		sq_doc.save()
