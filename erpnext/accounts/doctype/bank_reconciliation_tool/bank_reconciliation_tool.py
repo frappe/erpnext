@@ -48,13 +48,17 @@ class BankReconciliationTool(Document):
 
 @frappe.whitelist()
 def get_bank_transactions(
-	bank_account: str, from_date: str | date | None = None, to_date: str | date | None = None
+	bank_account: str,
+	from_date: str | date | None = None,
+	to_date: str | date | None = None,
+	all_transactions: bool = False,
 ):
 	# returns bank transactions for a bank account
 	filters = []
 	filters.append(["bank_account", "=", bank_account])
 	filters.append(["docstatus", "=", 1])
-	filters.append(["unallocated_amount", ">", 0.0])
+	if not all_transactions:
+		filters.append(["unallocated_amount", ">", 0.0])
 	if to_date:
 		filters.append(["date", "<=", to_date])
 	if from_date:
@@ -67,13 +71,17 @@ def get_bank_transactions(
 			"withdrawal",
 			"currency",
 			"description",
+			"transaction_type",
 			"name",
 			"bank_account",
 			"company",
+			"allocated_amount",
 			"unallocated_amount",
 			"reference_number",
 			"party_type",
 			"party",
+			"status",
+			"matched_transaction_rule",
 		],
 		filters=filters,
 		order_by="date",
@@ -294,7 +302,7 @@ def create_journal_entry_bts(
 		]
 	)
 
-	return reconcile_vouchers(bank_transaction_name, vouchers)
+	return reconcile_vouchers(bank_transaction_name, vouchers, is_new_voucher=True)
 
 
 @frappe.whitelist()
@@ -371,7 +379,581 @@ def create_payment_entry_bts(
 			}
 		]
 	)
-	return reconcile_vouchers(bank_transaction_name, vouchers)
+	return reconcile_vouchers(bank_transaction_name, vouchers, is_new_voucher=True)
+
+
+# APIs for new bank reconciliation tool (/banking)
+
+
+@frappe.whitelist(methods=["GET"])
+def get_older_unreconciled_transactions(bank_account: str, from_date: str):
+	"""
+	Get number of unreconciled transactions before a given date for a bank account
+	"""
+	count = frappe.db.count(
+		"Bank Transaction",
+		filters={
+			"bank_account": bank_account,
+			"date": ["<", from_date],
+			"docstatus": 1,
+			"unallocated_amount": [">", 0.0],
+		},
+	)
+
+	if count > 0:
+		oldest_transaction = frappe.db.get_list(
+			"Bank Transaction",
+			filters={
+				"bank_account": bank_account,
+				"date": ["<", from_date],
+				"docstatus": 1,
+				"unallocated_amount": [">", 0.0],
+			},
+			fields=["date"],
+			order_by="date",
+			limit=1,
+		)
+
+		return {"count": count, "oldest_date": oldest_transaction[0].date}
+	return {"count": 0, "oldest_date": None}
+
+
+@frappe.whitelist()
+def update_clearance_date(
+	payment_document: str, payment_entry: str, account: str, clearance_date: str | None
+):
+	"""
+	Update the clearance date of a voucher
+	"""
+
+	if not clearance_date:
+		clearance_date = None
+
+	# Check for permissions
+	frappe.has_permission("Bank Clearance", ptype="write", throw=True)
+
+	if payment_document == "Sales Invoice":
+		frappe.db.set_value(
+			"Sales Invoice Payment",
+			{"parent": payment_entry, "account": account, "amount": [">", 0]},
+			"clearance_date",
+			clearance_date,
+		)
+
+	else:
+		frappe.db.set_value(payment_document, payment_entry, "clearance_date", clearance_date)
+
+
+@frappe.whitelist()
+def clear_clearing_date(voucher_type: str, voucher_name: str):
+	"""
+	Clear the clearing date of a voucher
+	"""
+	# using db_set to trigger notification
+	payment_entry = frappe.get_doc(voucher_type, voucher_name)
+
+	if payment_entry.has_permission("write"):
+		payment_entry.db_set("clearance_date", None)
+
+
+@frappe.whitelist(methods=["POST"])
+def create_bulk_internal_transfer(bank_transaction_names: list[str | int], bank_account: str):
+	"""
+	Create an internal transfer for multiple bank transactions
+	"""
+	output = []
+
+	for bank_transaction_name in bank_transaction_names:
+		bank_transaction = frappe.db.get_value(
+			"Bank Transaction",
+			bank_transaction_name,
+			["name", "withdrawal", "bank_account", "date", "reference_number", "description"],
+			as_dict=True,
+		)
+
+		transaction_account = frappe.get_cached_value(
+			"Bank Account", bank_transaction.bank_account, "account"
+		)
+
+		is_withdrawal = bank_transaction.withdrawal > 0.0
+
+		if is_withdrawal:
+			paid_from = transaction_account
+			paid_to = bank_account
+		else:
+			paid_from = bank_account
+			paid_to = transaction_account
+
+		reference_no = (bank_transaction.reference_number or bank_transaction.description or "")[:140]
+
+		final_transaction = create_internal_transfer(
+			bank_transaction_name=bank_transaction.name,
+			posting_date=bank_transaction.date,
+			reference_date=bank_transaction.date,
+			reference_no=reference_no,
+			paid_from=paid_from,
+			paid_to=paid_to,
+		)
+
+		output.append(final_transaction)
+
+	return output
+
+
+@frappe.whitelist()
+def create_internal_transfer(
+	bank_transaction_name: str | int,
+	posting_date: str | date,
+	reference_date: str | date,
+	reference_no: str,
+	paid_from: str,
+	paid_to: str,
+	custom_remarks: bool = False,
+	remarks: str | None = None,
+	mirror_transaction_name: str | int | None = None,
+	dimensions: dict | None = None,
+):
+	"""
+	Create an internal transfer payment entry
+	"""
+
+	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
+
+	bank_account = frappe.get_cached_value("Bank Account", bank_transaction.bank_account, "account")
+	company = frappe.get_cached_value("Account", bank_account, "company")
+
+	is_withdrawal = bank_transaction.withdrawal > 0.0
+
+	pe = frappe.new_doc("Payment Entry")
+
+	pe.company = company
+	pe.payment_type = "Internal Transfer"
+	pe.posting_date = posting_date
+	pe.reference_date = reference_date
+	pe.reference_no = reference_no
+	pe.custom_remarks = custom_remarks
+	pe.paid_amount = bank_transaction.unallocated_amount
+	pe.received_amount = bank_transaction.unallocated_amount
+
+	# TODO: Support multi-currency transactions
+	pe.target_exchange_rate = 1.0
+
+	if custom_remarks:
+		pe.remarks = remarks
+
+	if dimensions:
+		pe.update(dimensions)
+
+	if is_withdrawal:
+		pe.paid_to = paid_to
+		pe.paid_from = bank_account
+	else:
+		pe.paid_from = paid_from
+		pe.paid_to = bank_account
+
+	pe.insert()
+	pe.submit()
+
+	vouchers = json.dumps(
+		[
+			{
+				"payment_doctype": "Payment Entry",
+				"payment_name": pe.name,
+				"amount": bank_transaction.unallocated_amount,
+			}
+		]
+	)
+
+	transaction_id = reconcile_vouchers(bank_transaction_name, vouchers, is_new_voucher=True)
+
+	if mirror_transaction_name:
+		# Reconcile the mirror transaction
+		reconcile_vouchers(mirror_transaction_name, vouchers, is_new_voucher=False)
+
+	return {
+		"transaction": transaction_id,
+		"payment_entry": pe,
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def create_bulk_bank_entry_and_reconcile(bank_transactions: list[str | int], account: str):
+	"""
+	Create bank entries for all transactions and reconcile them
+	"""
+
+	output = []
+
+	for bank_transaction in bank_transactions:
+		transactions_details = frappe.db.get_value(
+			"Bank Transaction",
+			bank_transaction,
+			[
+				"name",
+				"deposit",
+				"withdrawal",
+				"bank_account",
+				"currency",
+				"unallocated_amount",
+				"date",
+				"reference_number",
+				"description",
+			],
+			as_dict=True,
+		)
+
+		is_credit_card = frappe.get_cached_value(
+			"Bank Account", transactions_details.bank_account, "is_credit_card"
+		)
+
+		# Check Number will be limited to 140 characters
+		cheque_no = (transactions_details.reference_number or transactions_details.description or "")[:140]
+
+		is_withdrawal = transactions_details.withdrawal > 0.0
+
+		entries = []
+
+		gl_account = frappe.get_cached_value("Bank Account", transactions_details.bank_account, "account")
+
+		if is_withdrawal:
+			entries.append(
+				{
+					"account": gl_account,
+					"bank_account": transactions_details.bank_account,
+					"credit_in_account_currency": transactions_details.unallocated_amount,
+					"credit": transactions_details.unallocated_amount,
+					"debit_in_account_currency": 0,
+					"debit": 0,
+				}
+			)
+
+			entries.append(
+				{
+					"account": account,
+					"credit": 0,
+					"debit": transactions_details.unallocated_amount,
+				}
+			)
+		else:
+			entries.append(
+				{
+					"account": gl_account,
+					"bank_account": transactions_details.bank_account,
+					"debit_in_account_currency": transactions_details.unallocated_amount,
+					"debit": transactions_details.unallocated_amount,
+					"credit_in_account_currency": 0,
+					"credit": 0,
+				}
+			)
+
+			entries.append(
+				{
+					"account": account,
+					"debit": 0,
+					"credit": transactions_details.unallocated_amount,
+				}
+			)
+
+		final_transaction = create_bank_entry_and_reconcile(
+			bank_transaction_name=bank_transaction,
+			cheque_date=transactions_details.date,
+			posting_date=transactions_details.date,
+			cheque_no=cheque_no,
+			user_remark=transactions_details.description,
+			entries=entries,
+			voucher_type=("Credit Card Entry" if is_credit_card else "Bank Entry"),
+		)
+
+		output.append(final_transaction)
+
+	return output
+
+
+@frappe.whitelist(methods=["POST"])
+def create_bank_entry_and_reconcile(
+	bank_transaction_name: str | int,
+	cheque_date: str | date,
+	posting_date: str | date,
+	cheque_no: str,
+	entries: list,
+	user_remark: str | None = None,
+	voucher_type: str = "Bank Entry",
+	dimensions: dict | None = None,
+):
+	"""
+	Create a bank entry and reconcile it with the bank transaction
+	"""
+	# Create a new journal entry based on the bank transaction
+	bank_transaction = frappe.db.get_values(
+		"Bank Transaction",
+		bank_transaction_name,
+		fieldname=["name", "deposit", "withdrawal", "bank_account", "currency", "unallocated_amount"],
+		as_dict=True,
+	)[0]
+
+	bank_account = frappe.get_cached_value("Bank Account", bank_transaction.bank_account, "account")
+	company = frappe.get_cached_value("Account", bank_account, "company")
+
+	default_cost_center = get_default_cost_center(company)
+
+	bank_entry = frappe.get_doc(
+		{
+			"doctype": "Journal Entry",
+			"voucher_type": voucher_type,
+			"company": company,
+			"cheque_date": cheque_date,
+			"posting_date": posting_date,
+			"cheque_no": cheque_no,
+			"user_remark": user_remark,
+		}
+	)
+
+	if not dimensions:
+		dimensions = {}
+
+	for entry in entries:
+		# Check if this account is a Income or Expense Account
+		# If it is, and no cost center is added, select the company default cost center
+		cost_center = entry.get("cost_center")
+
+		if not cost_center:
+			report_type = frappe.get_cached_value("Account", entry["account"], "report_type")
+			if report_type == "Profit and Loss":
+				# Cost center is required
+				cost_center = default_cost_center
+
+		bank_entry.append(
+			"accounts",
+			{
+				"account": entry["account"],
+				# TODO: Multi currency support
+				"debit_in_account_currency": entry.get("debit"),
+				"credit_in_account_currency": entry.get("credit"),
+				"debit": entry.get("debit"),
+				"credit": entry.get("credit"),
+				"party_type": entry.get("party_type") if entry.get("party") else None,
+				"party": entry.get("party"),
+				"user_remark": entry.get("user_remark"),
+				**entry,
+				"cost_center": cost_center,
+			},
+		)
+
+	bank_entry.insert()
+	bank_entry.submit()
+
+	if bank_transaction.deposit > 0.0:
+		paid_amount = bank_transaction.deposit
+	else:
+		paid_amount = bank_transaction.withdrawal
+
+	transaction = reconcile_vouchers(
+		bank_transaction_name,
+		json.dumps(
+			[
+				{
+					"payment_doctype": "Journal Entry",
+					"payment_name": bank_entry.name,
+					"amount": paid_amount,
+				}
+			]
+		),
+		is_new_voucher=True,
+	)
+
+	return {
+		"transaction": transaction,
+		"journal_entry": bank_entry,
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def create_bulk_payment_entry_and_reconcile(
+	bank_transaction_names: list[str | int],
+	party_type: str,
+	party: str | int,
+	account: str,
+	mode_of_payment: str | None = None,
+):
+	"""
+	Create a payment entry and reconcile it with the bank transaction
+	"""
+
+	output = []
+
+	for bank_transaction_name in bank_transaction_names:
+		bank_transaction = frappe.db.get_value(
+			"Bank Transaction",
+			bank_transaction_name,
+			[
+				"name",
+				"deposit",
+				"withdrawal",
+				"bank_account",
+				"currency",
+				"unallocated_amount",
+				"date",
+				"reference_number",
+				"description",
+			],
+			as_dict=True,
+		)
+
+		transaction_account = frappe.get_cached_value(
+			"Bank Account", bank_transaction.bank_account, "account"
+		)
+
+		is_withdrawal = bank_transaction.withdrawal > 0.0
+
+		if is_withdrawal:
+			paid_from = transaction_account
+			paid_to = account
+		else:
+			paid_from = account
+			paid_to = transaction_account
+
+		payment_entry_doc = frappe.get_doc(
+			{
+				"doctype": "Payment Entry",
+				"payment_type": "Pay" if is_withdrawal else "Receive",
+				"bank_account": bank_transaction.bank_account,
+				"company": bank_transaction.company,
+				"mode_of_payment": mode_of_payment,
+				"party_type": party_type,
+				"party": party,
+				"paid_from": paid_from,
+				"paid_to": paid_to,
+				"paid_amount": bank_transaction.unallocated_amount,
+				"base_paid_amount": bank_transaction.unallocated_amount,
+				"received_amount": bank_transaction.unallocated_amount,
+				"base_received_amount": bank_transaction.unallocated_amount,
+				"target_exchange_rate": 1,
+				"source_exchange_rate": 1,
+				"reference_date": bank_transaction.date,
+				"posting_date": bank_transaction.date,
+				"reference_no": (bank_transaction.reference_number or bank_transaction.description or "")[
+					:140
+				],
+			}
+		)
+
+		payment_entry_doc.insert()
+		payment_entry_doc.submit()
+
+		final_transaction = reconcile_vouchers(
+			bank_transaction_name,
+			json.dumps(
+				[
+					{
+						"payment_doctype": "Payment Entry",
+						"payment_name": payment_entry_doc.name,
+						"amount": payment_entry_doc.paid_amount,
+					}
+				]
+			),
+			is_new_voucher=True,
+		)
+
+		output.append(
+			{
+				"transaction": final_transaction,
+				"payment_entry": payment_entry_doc,
+			}
+		)
+
+	return output
+
+
+@frappe.whitelist(methods=["POST"])
+def create_payment_entry_and_reconcile(bank_transaction_name: str | int, payment_entry_doc: dict):
+	"""
+	Create a payment entry and reconcile it with the bank transaction
+	"""
+	payment_entry = frappe.get_doc(
+		{
+			**payment_entry_doc,
+			"doctype": "Payment Entry",
+		}
+	)
+	payment_entry.insert()
+	payment_entry.submit()
+	transaction = reconcile_vouchers(
+		bank_transaction_name,
+		json.dumps(
+			[
+				{
+					"payment_doctype": "Payment Entry",
+					"payment_name": payment_entry.name,
+					"amount": payment_entry.paid_amount,
+				}
+			]
+		),
+		is_new_voucher=True,
+	)
+
+	return {
+		"transaction": transaction,
+		"payment_entry": payment_entry,
+	}
+
+
+@frappe.whitelist(methods=["GET"])
+def search_for_transfer_transaction(transaction_id: str | int):
+	"""
+	When users try to create a transfer, we could help them by searching for the mirror transaction.
+
+	So for a withdrawal of 1000, we could search for a deposit of 1000 on the same date.
+
+	If the mirror transaction is found, we return the bank account and account details.
+	"""
+	company, withdrawal, deposit, date, bank_account = frappe.db.get_value(
+		"Bank Transaction", transaction_id, ["company", "withdrawal", "deposit", "date", "bank_account"]
+	)
+
+	days = frappe.db.get_single_value("Accounts Settings", "transfer_match_days")
+
+	if not days:
+		days = 3
+
+	min_date = frappe.utils.add_days(date, -days)
+	max_date = frappe.utils.add_days(date, days)
+	mirror_tx = frappe.db.get_list(
+		"Bank Transaction",
+		filters={
+			"company": company,
+			"date": ["between", [min_date, max_date]],
+			"withdrawal": deposit,
+			"bank_account": ["!=", bank_account],
+			"deposit": withdrawal,
+			"docstatus": 1,
+			"status": "Unreconciled",
+		},
+		fields=[
+			"name",
+			"bank_account",
+			"reference_number",
+			"date",
+			"description",
+			"withdrawal",
+			"deposit",
+			"currency",
+		],
+	)
+
+	if len(mirror_tx) == 1:
+		return {
+			"name": mirror_tx[0].name,
+			"reference_number": mirror_tx[0].reference_number,
+			"description": mirror_tx[0].description,
+			"currency": mirror_tx[0].currency,
+			"withdrawal": mirror_tx[0].withdrawal,
+			"deposit": mirror_tx[0].deposit,
+			"date": mirror_tx[0].date,
+			"bank_account": mirror_tx[0].bank_account,
+			"account": frappe.get_cached_value("Bank Account", mirror_tx[0].bank_account, "account"),
+		}
+
+	return None
 
 
 @frappe.whitelist()
@@ -476,11 +1058,11 @@ def get_auto_reconcile_message(partially_reconciled, reconciled):
 
 
 @frappe.whitelist()
-def reconcile_vouchers(bank_transaction_name: str, vouchers: str):
+def reconcile_vouchers(bank_transaction_name: str | int, vouchers: str, is_new_voucher: bool = False):
 	# updated clear date of all the vouchers based on the bank transaction
 	vouchers = json.loads(vouchers)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
-	transaction.add_payment_entries(vouchers)
+	transaction.add_payment_entries(vouchers, is_new_voucher)
 	transaction.validate_duplicate_references()
 	transaction.allocate_payment_entries()
 	transaction.update_allocated_amount()

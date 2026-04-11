@@ -17,6 +17,7 @@ import _ from "@/lib/translate"
 import { useLayoutEffect, useRef, useState } from "react"
 import { AlertTriangleIcon, CheckCircleIcon, HomeIcon, ListIcon, ScrollTextIcon, ShuffleIcon } from "lucide-react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { Badge } from "@/components/ui/badge"
 
 
 const BankReconciliation = () => {
@@ -48,7 +49,10 @@ const BankReconciliation = () => {
                                 <BreadcrumbSeparator />
                                 <BreadcrumbItem>
                                     <BreadcrumbPage>
-                                        {_("Banking")}
+                                        <div className="flex gap-1 items-center">
+                                            {_("Banking")} <Badge theme="violet" variant="subtle">{_("Beta")}</Badge>
+                                        </div>
+
                                     </BreadcrumbPage>
                                 </BreadcrumbItem>
                             </BreadcrumbList>

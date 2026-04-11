@@ -75,7 +75,7 @@ const BulkInternalTransferForm = ({ transactions }: { transactions: Unreconciled
 
     const setIsOpen = useSetAtom(bankRecTransferModalAtom)
 
-    const { call: createPaymentEntry, loading, error } = useFrappePostCall<{ message: { transaction: BankTransaction, payment_entry: PaymentEntry }[] }>('mint.apis.bank_reconciliation.create_bulk_internal_transfer')
+    const { call: createPaymentEntry, loading, error } = useFrappePostCall<{ message: { transaction: BankTransaction, payment_entry: PaymentEntry }[] }>('erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_bulk_internal_transfer')
 
     const onReconcile = useRefreshUnreconciledTransactions()
     const addToActionLog = useUpdateActionLog()
@@ -181,7 +181,7 @@ const InternalTransferForm = ({ selectedBankAccount, selectedTransaction }: { se
 
     const onReconcile = useRefreshUnreconciledTransactions()
 
-    const { call: createPaymentEntry, loading, error, isCompleted } = useFrappePostCall<{ message: { transaction: BankTransaction, payment_entry: PaymentEntry } }>('mint.apis.bank_reconciliation.create_internal_transfer')
+    const { call: createPaymentEntry, loading, error, isCompleted } = useFrappePostCall<{ message: { transaction: BankTransaction, payment_entry: PaymentEntry } }>('erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_internal_transfer')
 
     const setBankRecUnreconcileModalAtom = useSetAtom(bankRecUnreconcileModalAtom)
     const addToActionLog = useUpdateActionLog()
@@ -452,7 +452,7 @@ const RecommendedTransferAccount = ({ transaction, onAccountChange }: { transact
     const paid_from = watch('paid_from')
     const paid_to = watch('paid_to')
 
-    const { data } = useFrappeGetCall('mint.apis.bank_reconciliation.search_for_transfer_transaction', {
+    const { data } = useFrappeGetCall('erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.search_for_transfer_transaction', {
         transaction_id: transaction.name
     }, undefined, {
         revalidateOnFocus: false,

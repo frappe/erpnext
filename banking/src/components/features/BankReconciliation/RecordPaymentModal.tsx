@@ -23,7 +23,7 @@ import { PaymentEntry } from "@/types/Accounts/PaymentEntry"
 import { H4 } from "@/components/ui/typography"
 import { usePaymentEntryCalculations } from "@/hooks/usePaymentEntryCalculations"
 import { MissingFiltersBanner } from "./MissingFiltersBanner"
-import { formatDate } from "@/lib/date"
+import { formatDate, today } from "@/lib/date"
 import { slug } from "@/lib/frappe"
 import MarkdownRenderer from "@/components/ui/markdown"
 import { Separator } from "@/components/ui/separator"
@@ -93,7 +93,7 @@ const BulkPaymentEntryForm = ({ transactions }: { transactions: UnreconciledTran
         mode_of_payment: PaymentEntry['mode_of_payment']
     }>()
 
-    const { call: createPaymentEntry, loading, error } = useFrappePostCall<{ message: { transaction: BankTransaction, payment_entry: PaymentEntry }[] }>('mint.apis.bank_reconciliation.create_bulk_payment_entry_and_reconcile')
+    const { call: createPaymentEntry, loading, error } = useFrappePostCall<{ message: { transaction: BankTransaction, payment_entry: PaymentEntry }[] }>('erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_bulk_payment_entry_and_reconcile')
 
     const onReconcile = useRefreshUnreconciledTransactions()
 
@@ -156,10 +156,11 @@ const BulkPaymentEntryForm = ({ transactions }: { transactions: UnreconciledTran
     const onPartyChange = (event: ChangeEvent<HTMLInputElement>) => {
         // Fetch the party and account
         if (event.target.value) {
-            call.get('mint.apis.bank_reconciliation.get_party_details', {
+            call.get('erpnext.accounts.doctype.payment_entry.payment_entry.get_party_details', {
                 company: company,
                 party_type: party_type,
-                party: event.target.value
+                party: event.target.value,
+                date: today()
             }).then((res) => {
                 form.setValue('party_name', res.message.party_name)
                 form.setValue('account', res.message.party_account)
@@ -316,7 +317,7 @@ const PaymentEntryForm = ({ selectedTransaction, selectedBankAccount }: { select
 
     }, [rule, setUnpaidInvoiceOpen])
 
-    const { call: createPaymentEntry, loading, error, isCompleted } = useFrappePostCall<{ message: { transaction: BankTransaction, payment_entry: PaymentEntry } }>('mint.apis.bank_reconciliation.create_payment_entry_and_reconcile')
+    const { call: createPaymentEntry, loading, error, isCompleted } = useFrappePostCall<{ message: { transaction: BankTransaction, payment_entry: PaymentEntry } }>('erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_and_reconcile')
 
     const setBankRecUnreconcileModalAtom = useSetAtom(bankRecUnreconcileModalAtom)
 
@@ -532,10 +533,11 @@ const PartyField = () => {
     const onChange = (event: ChangeEvent<HTMLInputElement>) => {
         // Fetch the party and account
         if (event.target.value) {
-            call.get('mint.apis.bank_reconciliation.get_party_details', {
+            call.get('erpnext.accounts.doctype.payment_entry.payment_entry.get_party_details', {
                 company: company,
                 party_type: party_type,
-                party: event.target.value
+                party: event.target.value,
+                date: today()
             }).then((res) => {
                 setValue('party_name', res.message.party_name)
                 if (type === 'Pay') {

@@ -26,6 +26,7 @@ import { BankTransaction } from "@/types/Accounts/BankTransaction"
 import FileUploadBanner from "@/components/common/FileUploadBanner"
 import { Label } from "@/components/ui/label"
 import { FileDropzone } from "@/components/ui/file-dropzone"
+import { useGetAccounts } from "@/components/common/AccountsDropdown"
 
 const BankEntryModal = () => {
 
@@ -79,7 +80,7 @@ const BulkBankEntryForm = ({ selectedTransactions }: { selectedTransactions: Unr
         }
     })
 
-    const { call, loading, error } = useFrappePostCall<{ message: { transaction: BankTransaction, journal_entry: JournalEntry }[] }>('mint.apis.bank_reconciliation.create_bulk_bank_entry_and_reconcile')
+    const { call, loading, error } = useFrappePostCall<{ message: { transaction: BankTransaction, journal_entry: JournalEntry }[] }>('erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_bulk_bank_entry_and_reconcile')
 
     const onReconcile = useRefreshUnreconciledTransactions()
     const addToActionLog = useUpdateActionLog()
@@ -296,7 +297,7 @@ const BankEntryForm = ({ selectedTransaction }: { selectedTransaction: Unreconci
 
     const onReconcile = useRefreshUnreconciledTransactions()
 
-    const { call: createBankEntry, loading, error, isCompleted } = useFrappePostCall<{ message: { transaction: BankTransaction, journal_entry: JournalEntry } }>('mint.apis.bank_reconciliation.create_bank_entry_and_reconcile')
+    const { call: createBankEntry, loading, error, isCompleted } = useFrappePostCall<{ message: { transaction: BankTransaction, journal_entry: JournalEntry } }>('erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_bank_entry_and_reconcile')
 
     const setBankRecUnreconcileModalAtom = useSetAtom(bankRecUnreconcileModalAtom)
     const addToActionLog = useUpdateActionLog()
@@ -456,8 +457,6 @@ const Entries = ({ company, isWithdrawal, currency }: { company: string, isWithd
 
     const { call } = useContext(FrappeContext) as FrappeConfig
 
-    const costCenterMapRef = useRef<Record<string, string>>({})
-
     const partyMapRef = useRef<Record<string, string>>({})
 
     const onPartyChange = (value: string, index: number) => {
@@ -480,22 +479,20 @@ const Entries = ({ company, isWithdrawal, currency }: { company: string, isWithd
         }
     }
 
+    const { data: accounts } = useGetAccounts()
+
     const onAccountChange = (value: string, index: number) => {
         // If it's an income or expense account, get the default cost center
         if (value) {
-            if (costCenterMapRef.current[value]) {
-                setValue(`entries.${index}.cost_center`, costCenterMapRef.current[value])
-            } else {
-                call.get('mint.apis.bank_reconciliation.get_account_defaults', {
-                    account: value
-                }).then((result: { message: string }) => {
-                    costCenterMapRef.current[value] = result.message
-                    setValue(`entries.${index}.cost_center`, result.message)
-                })
+            const account = accounts?.find((acc) => acc.name === value)
+            if (account && account.report_type === "Profit and Loss") {
+                // Set the default company cost center
+                setValue(`entries.${index}.cost_center`, getCompanyCostCenter(company) ?? '')
+                return
             }
-        } else {
-            setValue(`entries.${index}.cost_center`, '')
         }
+
+        setValue(`entries.${index}.cost_center`, '')
     }
 
     const { fields, append, remove } = useFieldArray({

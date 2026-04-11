@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 
+import datetime
+
 import frappe
 from frappe import _
 from frappe.contacts.address_and_contact import (
@@ -10,6 +12,7 @@ from frappe.contacts.address_and_contact import (
 )
 from frappe.model.document import Document
 from frappe.utils import comma_and, get_link_to_form
+from pypika import Order
 
 
 class BankAccount(Document):
@@ -124,3 +127,85 @@ def get_bank_account_details(bank_account: str):
 	return frappe.get_cached_value(
 		"Bank Account", bank_account, ["account", "bank", "bank_account_no"], as_dict=1
 	)
+
+
+@frappe.whitelist(methods=["GET"])
+def get_list(company: str, show_disabled: bool = False):
+	"""
+	Returns a list of bank accounts for a company - with the account currency
+
+	@param company: The company to get the bank accounts for
+	@param show_disabled: Whether to show disabled bank accounts
+	@return: A list of bank accounts
+	"""
+
+	frappe.has_permission("Bank Account", ptype="read", throw=True)
+
+	bank_account = frappe.qb.DocType("Bank Account")
+	account = frappe.qb.DocType("Account")
+
+	query = (
+		frappe.qb.from_(bank_account)
+		.join(account)
+		.on(bank_account.account == account.name)
+		.select(
+			bank_account.name,
+			account.account_currency,
+			bank_account.account,
+			bank_account.company,
+			bank_account.account_name,
+			bank_account.is_default,
+			bank_account.bank,
+			bank_account.account_type,
+			bank_account.account_subtype,
+			bank_account.bank_account_no,
+			bank_account.last_integration_date,
+			bank_account.is_credit_card,
+		)
+		.where(bank_account.is_company_account == 1)
+		.where(bank_account.company == company)
+		.orderby(bank_account.is_default, order=Order.desc)
+	)
+
+	if not show_disabled:
+		query = query.where(bank_account.disabled == 0)
+
+	return query.run(as_dict=True)
+
+
+@frappe.whitelist(methods=["GET"])
+def get_closing_balance_as_per_statement(bank_account: str, date: str):
+	"""
+	Get the closing balance as per statement for a bank account and date
+	"""
+	latest_balance = frappe.get_list(
+		"Bank Account Balance",
+		filters={"bank_account": bank_account, "date": ["<=", date]},
+		fields=["balance", "date"],
+		order_by="date desc",
+		limit=1,
+	)
+
+	if latest_balance:
+		return {"balance": latest_balance[0].balance, "date": latest_balance[0].date}
+	return {"balance": 0, "date": None}
+
+
+@frappe.whitelist()
+def set_closing_balance_as_per_statement(bank_account: str, date: str | datetime.date, balance: float):
+	"""
+	Set the closing balance as per statement for a bank account and date
+	"""
+
+	existing = frappe.db.exists("Bank Account Balance", {"bank_account": bank_account, "date": date})
+
+	if existing:
+		doc = frappe.get_doc("Bank Account Balance", existing)
+		doc.balance = balance
+		doc.save()
+	else:
+		doc = frappe.new_doc("Bank Account Balance")
+		doc.bank_account = bank_account
+		doc.date = date
+		doc.balance = balance
+		doc.save()

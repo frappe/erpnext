@@ -49,7 +49,7 @@ const BankTransactionUnreconcileModalContent = () => {
 
     const { data: transaction, error } = useFrappeGetDoc<BankTransaction>('Bank Transaction', unreconcileModal)
 
-    const { call, loading, error: unreconcileError } = useFrappePostCall('mint.apis.bank_reconciliation.unreconcile_transaction')
+    const { call, loading, error: unreconcileError } = useFrappePostCall('erpnext.accounts.doctype.bank_transaction.bank_transaction.unreconcile_transaction')
 
     const onUnreconcile = (event: React.MouseEvent<HTMLButtonElement>) => {
         call({

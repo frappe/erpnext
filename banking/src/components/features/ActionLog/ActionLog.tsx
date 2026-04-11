@@ -355,7 +355,7 @@ const CancelActionLogItem = ({ item, type, timestamp, bank }: { item: ActionLogI
 
     const [isOpen, setIsOpen] = useState(false)
 
-    const { call, loading, error } = useFrappePostCall('mint.apis.bank_reconciliation.undo_reconciliation_action')
+    const { call, loading, error } = useFrappePostCall('erpnext.accounts.doctype.bank_transaction.bank_transaction.unreconcile_transaction_entry')
     const { mutate } = useSWRConfig()
     const actionLog = useSetAtom(bankRecActionLog)
     const dates = useAtomValue(bankRecDateAtom)

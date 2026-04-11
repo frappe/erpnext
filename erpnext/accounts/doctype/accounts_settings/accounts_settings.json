@@ -715,7 +715,7 @@
    "non_negative": 1
   },
   {
-   "default": "0",
+   "default": "1",
    "description": "If enabled, rule matching algorithm will run every hour",
    "fieldname": "automatically_run_rules_on_unreconciled_transactions",
    "fieldtype": "Check",
@@ -728,7 +728,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-11 18:47:33.134819",
+ "modified": "2026-04-11 22:09:25.969928",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

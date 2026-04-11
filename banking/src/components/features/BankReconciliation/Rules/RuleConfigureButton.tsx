@@ -98,7 +98,7 @@ const RuleList = ({ setSelectedRule, setIsNewRule }: { setSelectedRule: (rule: s
     })
 
     const { db } = useContext(FrappeContext) as FrappeConfig
-    const { call: runRuleEvaluation, loading: isRunningRules } = useFrappePostCall('mint.apis.rules.run_rule_evaluation')
+    const { call: runRuleEvaluation, loading: isRunningRules } = useFrappePostCall('erpnext.accounts.doctype.bank_transaction_rule.bank_transaction_rule.run_rule_evaluation')
 
     const sensors = useSensors(
         useSensor(PointerSensor),

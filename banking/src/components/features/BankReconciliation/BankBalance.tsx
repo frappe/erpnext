@@ -213,7 +213,7 @@ const ClosingBalanceForm = ({ defaultBalance, date, bankAccount, onClose }: { de
 
     const setValue = useSetAtom(bankRecClosingBalanceAtom(bankAccount?.name ?? ''))
 
-    const { call, loading, error } = useFrappePostCall("mint.apis.bank_account.set_closing_balance_as_per_statement")
+    const { call, loading, error } = useFrappePostCall("erpnext.accounts.doctype.bank_account.bank_account.set_closing_balance_as_per_statement")
 
     const onSubmit = (data: { balance: number }) => {
         if (data.balance) {

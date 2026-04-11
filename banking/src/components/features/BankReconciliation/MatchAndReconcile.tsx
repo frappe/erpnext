@@ -894,7 +894,7 @@ const OlderUnreconciledTransactionsBanner = () => {
             count: number,
             oldest_date: string
         }
-    }>("mint.apis.transactions.get_older_unreconciled_transactions", {
+    }>("erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_older_unreconciled_transactions", {
         bank_account: selectedBank?.name,
         from_date: dates.fromDate,
     }, undefined, {

@@ -178,3 +178,7 @@ export const formatDate = (date?: string | Date, format?: string) => {
 export const toDate = (date: string, format: string = "YYYY-MM-DD") => {
     return dayjs(date, format).toDate()
 }
+
+export const today = () => {
+    return dayjs().format(FRAPPE_DATE_FORMAT)
+}

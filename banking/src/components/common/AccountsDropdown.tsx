@@ -185,7 +185,7 @@ interface Account {
     parent_account: string
 }
 
-const useGetAccounts = (root_type?: ('Asset' | 'Liability' | 'Equity' | 'Income' | 'Expense')[], report_type?: 'Balance Sheet' | 'Profit and Loss', account_type?: string[], company?: string,
+export const useGetAccounts = (root_type?: ('Asset' | 'Liability' | 'Equity' | 'Income' | 'Expense')[], report_type?: 'Balance Sheet' | 'Profit and Loss', account_type?: string[], company?: string,
     filterFunction?: (account: Account) => boolean) => {
 
     const currentCompany = useCurrentCompany()

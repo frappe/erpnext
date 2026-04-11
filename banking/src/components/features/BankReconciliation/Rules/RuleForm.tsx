@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { H4, Paragraph } from "@/components/ui/typography"
+import { today } from "@/lib/date"
 import _ from "@/lib/translate"
 import { cn } from "@/lib/utils"
 import { BankTransactionRule } from "@/types/Accounts/BankTransactionRule"
@@ -336,10 +337,11 @@ const PartyField = () => {
     const onChange = (event: ChangeEvent<HTMLInputElement>) => {
         // Fetch the party and account
         if (event.target.value) {
-            call.get('mint.apis.bank_reconciliation.get_party_details', {
+            call.get('erpnext.accounts.doctype.payment_entry.payment_entry.get_party_details', {
                 company: company,
                 party_type: party_type,
-                party: event.target.value
+                party: event.target.value,
+                date: today()
             }).then((res) => {
                 setValue('account', res.message.party_account)
             })
@@ -513,24 +515,6 @@ const ConfigureAccountsModalContent = () => {
             setValue(`accounts.${index}.account`, '')
         }
     }
-
-    // const onAccountChange = (value: string, index: number) => {
-    //     // If it's an income or expense account, get the default cost center
-    //     if (value) {
-    //         if (costCenterMapRef.current[value]) {
-    //             setValue(`accounts.${index}.cost_center`, costCenterMapRef.current[value])
-    //         } else {
-    //             call.get('mint.apis.bank_reconciliation.get_account_defaults', {
-    //                 account: value
-    //             }).then((result: { message: string }) => {
-    //                 costCenterMapRef.current[value] = result.message
-    //                 setValue(`accounts.${index}.cost_center`, result.message)
-    //             })
-    //         }
-    //     } else {
-    //         setValue(`accounts.${index}.cost_center`, '')
-    //     }
-    // }
 
     const transaction_type = useWatch({
         name: 'transaction_type',
