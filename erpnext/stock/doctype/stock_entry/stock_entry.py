@@ -1413,6 +1413,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if d.s_warehouse:
 				self.total_outgoing_value += flt(d.amount)
 
+		if not self.total_incoming_value and self.total_additional_costs:
+			self.total_incoming_value = self.total_additional_costs
+
 		self.value_difference = self.total_incoming_value - self.total_outgoing_value
 
 	def set_total_amount(self):
