@@ -72,7 +72,10 @@ def make_item(item_code=None, properties=None, uoms=None, barcode=None):
 
 
 class TestItem(ERPNextTestSuite):
+	"""Test Suite for the Item DocType and its variant validation logic."""
+
 	def setUp(self):
+		"""Initialize test data and state before each test execution."""
 		super().setUp()
 		frappe.flags.attribute_values = None
 

@@ -977,16 +977,15 @@ class Item(Document):
 			return
 
 		template_doc = frappe.get_cached_doc("Item", self.variant_of)
+		if template_doc.variant_of:
+			frappe.throw(
+				_("Item {0} is a variant and cannot be used as a template").format(
+					frappe.bold(self.variant_of)
+				)
+			)
 
 		if not template_doc.has_variants:
-			if template_doc.variant_of:
-				frappe.throw(
-					_("Item {0} is a variant and cannot be used as a template").format(
-						frappe.bold(self.variant_of)
-					)
-				)
-			else:
-				frappe.throw(_("Item {0} is not a template").format(frappe.bold(self.variant_of)))
+			frappe.throw(_("Item {0} is not a template").format(frappe.bold(self.variant_of)))
 
 		# remove attributes with no attribute_value set
 		self.attributes = [d for d in self.attributes if cstr(d.attribute_value).strip()]
@@ -1010,13 +1009,12 @@ class Item(Document):
 				title=_("Invalid Attributes"),
 			)
 
-		if self.is_new():
-			variant = get_variant(self.variant_of, args, self.name)
-			if variant:
-				frappe.throw(
-					_("Item variant {0} exists with same attributes").format(variant),
-					ItemVariantExistsError,
-				)
+		variant = get_variant(self.variant_of, args, self.name)
+		if variant:
+			frappe.throw(
+				_("Item variant {0} exists with same attributes").format(variant),
+				ItemVariantExistsError,
+			)
 
 		validate_item_variant_attributes(self, args)
 
