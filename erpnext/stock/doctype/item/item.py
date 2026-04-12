@@ -970,8 +970,10 @@ class Item(Document):
 		if frappe.flags.ignore_variant_validation:
 			return
 
-		if not self.variant_based_on and self.variant_of:
-			self.variant_based_on = frappe.get_cached_value("Item", self.variant_of, "variant_based_on")
+		if self.variant_of and (not self.variant_based_on or self.variant_based_on == "Item Attribute"):
+			val = frappe.get_cached_value("Item", self.variant_of, "variant_based_on")
+			if val:
+				self.variant_based_on = val
 
 		if not self.variant_of or self.variant_based_on != "Item Attribute":
 			return

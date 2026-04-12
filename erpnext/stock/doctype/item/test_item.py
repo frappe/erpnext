@@ -1021,7 +1021,7 @@ class TestItem(ERPNextTestSuite):
 
 			self.assertTrue(frappe.db.exists("Item", variant.item_code))
 		finally:
-			frappe.flags.ignore_variant_validation = False
+			frappe.flags.ignore_variant_validation = None
 
 	def test_variant_based_on_fallback(self):
 		"""Templates variant_based_on is used as fallback if null."""
