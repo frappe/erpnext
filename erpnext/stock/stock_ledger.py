@@ -1071,34 +1071,6 @@ class update_entries_after:
 					sabb_doc.voucher_no = None
 					sabb_doc.cancel()
 
-		if sle.serial_and_batch_bundle and frappe.get_cached_value("Item", sle.item_code, "has_serial_no"):
-			self.update_serial_no_status(sle)
-
-	def update_serial_no_status(self, sle):
-		from erpnext.stock.serial_batch_bundle import get_serial_nos
-
-		serial_nos = get_serial_nos(sle.serial_and_batch_bundle)
-		if not serial_nos:
-			return
-
-		warehouse = None
-		status = "Inactive"
-
-		if sle.actual_qty > 0:
-			warehouse = sle.warehouse
-			status = "Active"
-
-		sn_table = frappe.qb.DocType("Serial No")
-
-		query = (
-			frappe.qb.update(sn_table)
-			.set(sn_table.warehouse, warehouse)
-			.set(sn_table.status, status)
-			.where(sn_table.name.isin(serial_nos))
-		)
-
-		query.run()
-
 	def calculate_valuation_for_serial_batch_bundle(self, sle):
 		if not frappe.db.exists("Serial and Batch Bundle", sle.serial_and_batch_bundle):
 			return

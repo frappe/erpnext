@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-05 09:49+0000\n"
-"PO-Revision-Date: 2026-04-07 12:49\n"
+"PO-Revision-Date: 2026-04-11 13:54\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -4820,7 +4820,7 @@ msgstr "Fel uppstod för vissa artiklar när Material Begäran skapades baserat 
 
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.html:124
 msgid "Analysis Chart"
-msgstr "Analys Diagram"
+msgstr "Statistik Diagram"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:4
 msgid "Analyst"
@@ -5724,7 +5724,7 @@ msgstr "Tillgång Värde Justering kan inte bokföras före illgång inköpdatum
 #: erpnext/assets/dashboard_fixtures.py:56
 #: erpnext/assets/workspace/assets/assets.json
 msgid "Asset Value Analytics"
-msgstr "Tillgång Värde Analys"
+msgstr "Tillgång Värde"
 
 #: erpnext/assets/doctype/asset/asset.py:278
 msgid "Asset cancelled"
@@ -6795,7 +6795,7 @@ msgstr "Stycklista Sekundär Artikel Referens"
 #. Name of a report
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.json
 msgid "BOM Stock Analysis"
-msgstr "Stycklista Lager Analys"
+msgstr "Stycklista Lager Statistik"
 
 #. Label of a Link in the Manufacturing Workspace
 #. Label of a Workspace Sidebar Item
@@ -11457,7 +11457,7 @@ msgstr "Konsoliderad Kredit Faktura"
 #: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Consolidated Financial Statement"
-msgstr "Koncern Finans Rapport"
+msgstr "Konsoliderad Finans Rapport"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
@@ -15695,7 +15695,7 @@ msgstr "Försäljning Följesedel Packad Artikel"
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/stock.json
 msgid "Delivery Note Trends"
-msgstr "Försäljning Följesedel Trender"
+msgstr "Försäljning Följesedel Statistik"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1405
 msgid "Delivery Note {0} is not submitted"
@@ -24869,7 +24869,7 @@ msgstr "Ärende"
 #. Name of a report
 #: erpnext/support/report/issue_analytics/issue_analytics.json
 msgid "Issue Analytics"
-msgstr "Ärende Analys"
+msgstr "Ärende Statistik"
 
 #. Label of the issue_credit_note (Check) field in DocType 'Delivery Note'
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
@@ -24946,7 +24946,7 @@ msgstr "Utfärdade Artiklar mot Arbetsorder"
 #: erpnext/support/doctype/support_settings/support_settings.json
 #: erpnext/support/workspace/support/support.json
 msgid "Issues"
-msgstr "Ärenden"
+msgstr "Ärende"
 
 #. Label of the issuing_date (Date) field in DocType 'Driver'
 #. Label of the issuing_date (Date) field in DocType 'Driving License Category'
@@ -26576,7 +26576,7 @@ msgstr "Jobbkort"
 
 #: erpnext/manufacturing/dashboard_fixtures.py:167
 msgid "Job Card Analysis"
-msgstr "Jobbkort Analys"
+msgstr "Jobbkort Statistik"
 
 #. Name of a DocType
 #. Label of the job_card_item (Data) field in DocType 'Material Request Item'
@@ -27049,7 +27049,7 @@ msgstr "Senaste Synkronisering Datum"
 
 #: erpnext/manufacturing/dashboard_fixtures.py:138
 msgid "Last Month Downtime Analysis"
-msgstr "Förra Månaden Driftstopp Analys"
+msgstr "Förra Månaden Driftstopp Statistik"
 
 #: erpnext/selling/report/inactive_customers/inactive_customers.py:81
 msgid "Last Order Amount"
@@ -30058,7 +30058,7 @@ msgstr "Naturgas"
 #: erpnext/setup/setup_wizard/data/sales_stage.txt:3
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:439
 msgid "Needs Analysis"
-msgstr "Behöver Analys"
+msgstr "Behöv Statistik"
 
 #. Name of a report
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.json
@@ -31710,11 +31710,11 @@ msgstr "Öppna Formulär Vy"
 #. Label of the issue (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "Open Issues"
-msgstr "Öppna Ärenden"
+msgstr "Öppna Ärende"
 
 #: erpnext/setup/doctype/email_digest/templates/default.html:46
 msgid "Open Issues "
-msgstr "Öppna Ärenden "
+msgstr "Öppna Ärende"
 
 #: erpnext/manufacturing/doctype/bom/bom_item_preview.html:28
 #: erpnext/manufacturing/doctype/work_order/work_order_preview.html:28
@@ -34064,7 +34064,7 @@ msgstr "Pausad"
 #. Option for the 'Payment Type' (Select) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Pay"
-msgstr "Utbetalning"
+msgstr "Betala"
 
 #: erpnext/templates/pages/order.html:43
 msgctxt "Amount"
@@ -34819,7 +34819,7 @@ msgstr "Väntande Belopp"
 #: erpnext/selling/doctype/sales_order/sales_order.js:1645
 #: erpnext/selling/report/pending_so_items_for_purchase_request/pending_so_items_for_purchase_request.py:45
 msgid "Pending Qty"
-msgstr "Väntar på Kvantitet"
+msgstr "Väntande Kvantitet"
 
 #: erpnext/buying/report/subcontracted_item_to_be_received/subcontracted_item_to_be_received.py:55
 #: erpnext/buying/report/subcontracted_raw_materials_to_be_transferred/subcontracted_raw_materials_to_be_transferred.py:45
@@ -34944,7 +34944,7 @@ msgstr "Procentandel tillåten över Order Kvantitet. Till exempel: Om Order är
 #: erpnext/setup/setup_wizard/data/sales_stage.txt:6
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:442
 msgid "Perception Analysis"
-msgstr "Uppfattning Analys"
+msgstr "Uppfattning Statistik"
 
 #: erpnext/assets/report/fixed_asset_register/fixed_asset_register.js:60
 msgid "Period Based On"
@@ -37994,7 +37994,7 @@ msgstr "Produktion"
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
 #: erpnext/workspace_sidebar/manufacturing.json
 msgid "Production Analytics"
-msgstr "Produktion Analys"
+msgstr "Produktion Statistik"
 
 #. Label of the production_capacity (Int) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -38185,7 +38185,7 @@ msgstr "Resultat"
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Profitability Analysis"
-msgstr "Resultat Analys"
+msgstr "Resultat Statistik"
 
 #: erpnext/projects/doctype/task/task.py:156
 #, python-format
@@ -38622,7 +38622,7 @@ msgstr "Inköp Belopp"
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/workspace_sidebar/buying.json
 msgid "Purchase Analytics"
-msgstr "Inköp Analys"
+msgstr "Inköp Statistik"
 
 #. Label of the purchase_date (Date) field in DocType 'Asset'
 #: erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py:211
@@ -38747,7 +38747,7 @@ msgstr "Inköp Faktura Artikel"
 #: erpnext/workspace_sidebar/buying.json
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Purchase Invoice Trends"
-msgstr "Inköp Faktura Trender"
+msgstr "Inköp Faktura Statistik"
 
 #: erpnext/assets/doctype/asset/asset.py:337
 msgid "Purchase Invoice cannot be made against an existing asset {0}"
@@ -38834,7 +38834,7 @@ msgstr "Inköp Order Belopp (Bolag Valuta)"
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/buying.json
 msgid "Purchase Order Analysis"
-msgstr "Inköp Order Analys"
+msgstr "Inköp Order Statistik"
 
 #: erpnext/buying/report/procurement_tracker/procurement_tracker.py:76
 msgid "Purchase Order Date"
@@ -38901,7 +38901,7 @@ msgstr "Inköp Order Erfodras för Artikel {}"
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/workspace_sidebar/buying.json
 msgid "Purchase Order Trends"
-msgstr "Inköp Order Diagram"
+msgstr "Inköp Order Statistik"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1589
 msgid "Purchase Order already created for all Sales Order items"
@@ -39049,12 +39049,12 @@ msgstr "Inköp Följesedel Erfodras för Artikel {}"
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/stock.json
 msgid "Purchase Receipt Trends"
-msgstr "Inköp Följesedel Diagram"
+msgstr "Inköp Följesedel Statistik"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/buying.json
 msgid "Purchase Receipt Trends "
-msgstr "Inköp Följesedel Diagram "
+msgstr "Inköp Följesedel Statistik "
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:358
 msgid "Purchase Receipt doesn't have any Item for which Retain Sample is enabled."
@@ -39663,7 +39663,7 @@ msgstr "Kvalitet Kontroll"
 
 #: erpnext/manufacturing/dashboard_fixtures.py:108
 msgid "Quality Inspection Analysis"
-msgstr "Kvalitet Kontroll Analys"
+msgstr "Kvalitet Kontroll Statistik"
 
 #. Name of a DocType
 #: erpnext/stock/doctype/quality_inspection_parameter/quality_inspection_parameter.json
@@ -40177,7 +40177,7 @@ msgstr "Försäljning Offert Till"
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/workspace_sidebar/selling.json
 msgid "Quotation Trends"
-msgstr "Försäljning Offert Trender"
+msgstr "Försäljning Offert Statistik"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:486
 msgid "Quotation {0} is cancelled"
@@ -40930,7 +40930,7 @@ msgstr "Fordringar"
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.js:153
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.js:171
 msgid "Receive"
-msgstr "Inbetalning"
+msgstr "Ta Emot"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
@@ -41853,12 +41853,12 @@ msgstr "Rapporterar Till"
 #: erpnext/workspace_sidebar/invoicing.json
 #: erpnext/workspace_sidebar/payments.json
 msgid "Repost Accounting Ledger"
-msgstr "Bokför om Bokföring Register"
+msgstr "Omboka Bokföring Register"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/repost_accounting_ledger_items/repost_accounting_ledger_items.json
 msgid "Repost Accounting Ledger Items"
-msgstr "Bokför om Bokföring Register Poster"
+msgstr "Omboka Bokföring Register Poster"
 
 #. Name of a DocType
 #. Label of a Workspace Sidebar Item
@@ -41866,12 +41866,12 @@ msgstr "Bokför om Bokföring Register Poster"
 #: erpnext/workspace_sidebar/accounts_setup.json
 #: erpnext/workspace_sidebar/erpnext_settings.json
 msgid "Repost Accounting Ledger Settings"
-msgstr "Bokför om Bokföring Register Poster Inställningar"
+msgstr "Bokföring Register Post Inställningar för Ombokning"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/repost_allowed_types/repost_allowed_types.json
 msgid "Repost Allowed Types"
-msgstr "Bokför om Tillåtna Typer"
+msgstr "Omboka Tillåtna Typer"
 
 #. Label of the repost_error_log (Long Text) field in DocType 'Repost Payment
 #. Ledger'
@@ -41894,7 +41894,7 @@ msgstr "Omvärdering av Artikel har startats om för valda misslyckade poster."
 #. Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Repost Only Accounting Ledgers"
-msgstr "Bokför om endast Bokföring Register"
+msgstr "Omboka endast Bokföring Register"
 
 #. Name of a DocType
 #. Label of a Workspace Sidebar Item
@@ -41902,17 +41902,17 @@ msgstr "Bokför om endast Bokföring Register"
 #: erpnext/workspace_sidebar/invoicing.json
 #: erpnext/workspace_sidebar/payments.json
 msgid "Repost Payment Ledger"
-msgstr "Bokför om Betalning Register"
+msgstr "Omboka Betalning Register"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/repost_payment_ledger_items/repost_payment_ledger_items.json
 msgid "Repost Payment Ledger Items"
-msgstr "Bokför om Betalning Register Poster"
+msgstr "Omboka Betalning Register Poster"
 
 #. Label of the repost_status (Select) field in DocType 'Repost Payment Ledger'
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
 msgid "Repost Status"
-msgstr "Bokför om Status"
+msgstr "Omboka Status"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:149
 msgid "Repost has started in the background"
@@ -41920,7 +41920,7 @@ msgstr "Bokföring startad i bakgrunden"
 
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.js:40
 msgid "Repost in background"
-msgstr "Bokför om i bakgrunden"
+msgstr "Omboka i bakgrunden"
 
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.py:118
 msgid "Repost started in the background"
@@ -41930,17 +41930,17 @@ msgstr "Bokföring startad i bakgrunden"
 #. Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Data File"
-msgstr "Omregistering av Data Fil"
+msgstr "Ombokning av Data Fil"
 
 #. Label of the reposting_info_section (Section Break) field in DocType 'Repost
 #. Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Item and Warehouse"
-msgstr "Omregistrera Artikel och Lager"
+msgstr "Ombokning av Artikel och Lager"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:131
 msgid "Reposting Progress"
-msgstr "Omregistrering Framsteg"
+msgstr "Ombokning Framsteg"
 
 #. Label of the reposting_reference (Data) field in DocType 'Repost Item
 #. Valuation'
@@ -41952,11 +41952,11 @@ msgstr "Omregistrering Referens"
 #. field in DocType 'Repost Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Vouchers"
-msgstr "Omregistrera Verifikat"
+msgstr "Ombokning Verifikat"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:149
 msgid "Reposting Vouchers Progress"
-msgstr "Omregistrering av Verifikat Framsteg"
+msgstr "Ombokning av Verifikat Framsteg"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:216
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:327
@@ -41969,11 +41969,11 @@ msgstr "Omregistrering för Artikel och Lager Slutfört {0}%"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:141
 msgid "Reposting for Vouchers Completed {0}%"
-msgstr "Omregistrering för Verifikat Slutfört {0}%"
+msgstr "Ombokning för Verifikat Slutfört {0}%"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:109
 msgid "Reposting has been started in the background."
-msgstr "Omregistrering startad i bakgrunden."
+msgstr "Ombokning startad i bakgrunden."
 
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.js:49
 msgid "Reposting in the background."
@@ -42587,7 +42587,7 @@ msgstr "Svar Efter"
 #. Label of the response (Section Break) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "Response Details"
-msgstr "Svar Information"
+msgstr "Svarsdetaljer"
 
 #. Label of the response_key_list (Data) field in DocType 'Support Settings'
 #: erpnext/support/doctype/support_settings/support_settings.json
@@ -44705,7 +44705,7 @@ msgstr "Försäljning Konto"
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/workspace_sidebar/crm.json erpnext/workspace_sidebar/selling.json
 msgid "Sales Analytics"
-msgstr "Försäljning Analys"
+msgstr "Försäljning Statistik"
 
 #. Label of the sales_team (Table) field in DocType 'Sales Invoice'
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
@@ -44861,7 +44861,7 @@ msgstr "Försäljning Faktura Transaktioner"
 #: erpnext/workspace_sidebar/financial_reports.json
 #: erpnext/workspace_sidebar/selling.json
 msgid "Sales Invoice Trends"
-msgstr "Försäljning Faktura Trender"
+msgstr "Försäljning Faktura Statistik"
 
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:184
 msgid "Sales Invoice does not have Payments"
@@ -45002,7 +45002,7 @@ msgstr "Försäljning Order"
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/selling.json
 msgid "Sales Order Analysis"
-msgstr "Försäljning Order Analys"
+msgstr "Försäljning Order Statistik"
 
 #. Label of the sales_order_date (Date) field in DocType 'Production Plan Sales
 #. Order'
@@ -45083,7 +45083,7 @@ msgstr "Försäljning Order Status"
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/workspace_sidebar/selling.json
 msgid "Sales Order Trends"
-msgstr "Försäljning Order Trender"
+msgstr "Försäljning Order Statistik"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:284
 msgid "Sales Order required for Item {0}"
@@ -45336,7 +45336,7 @@ msgstr "Försäljning"
 #: erpnext/crm/report/sales_pipeline_analytics/sales_pipeline_analytics.json
 #: erpnext/crm/workspace/crm/crm.json erpnext/workspace_sidebar/crm.json
 msgid "Sales Pipeline Analytics"
-msgstr "Försäljning Analys"
+msgstr "Försäljning Statistik"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:157
 msgid "Sales Pipeline by Stage"
@@ -48746,7 +48746,7 @@ msgstr "Starta Sammanslagning"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:105
 msgid "Start Reposting"
-msgstr "Starta Omregistrering"
+msgstr "Starta Ombokning"
 
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:129
 msgid "Start Time can't be greater than or equal to End Time for {0}."
@@ -48895,7 +48895,7 @@ msgstr "Lager Åldrande"
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/stock.json
 msgid "Stock Analytics"
-msgstr "Lager Analys"
+msgstr "Lager Statistik"
 
 #. Label of the stock_asset_account (Link) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
@@ -49264,7 +49264,7 @@ msgstr "Lager Rapporter"
 #: erpnext/workspace_sidebar/erpnext_settings.json
 #: erpnext/workspace_sidebar/stock.json
 msgid "Stock Reposting Settings"
-msgstr "Lager Omregistrering Inställningar"
+msgstr "Lager Ombokning Inställningar"
 
 #. Label of the stock_reservation_tab (Tab Break) field in DocType 'Stock
 #. Settings'
@@ -50911,7 +50911,7 @@ msgstr "Leverantör(er)"
 #: erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.json
 #: erpnext/workspace_sidebar/buying.json
 msgid "Supplier-Wise Sales Analytics"
-msgstr "Inköp Analys per Leverantör"
+msgstr "Inköp Statistik per Leverantör"
 
 #. Label of the suppliers (Table) field in DocType 'Request for Quotation'
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.json
@@ -52694,7 +52694,7 @@ msgstr "Det finns inkonsekvenser mellan pris, antal aktier och beräknad belopp"
 
 #: erpnext/accounts/doctype/account/account.py:203
 msgid "There are ledger entries against this account. Changing {0} to non-{1} in live system will cause incorrect output in 'Accounts {2}' report"
-msgstr "Det finns bokföring register aposter mot detta konto. Om du ändrar {0} till icke-{1} i system kommer det att orsaka felaktig utdata i \"Konton {2}\" rapporten "
+msgstr "Det finns bokföring register poster mot detta konto. Om du ändrar {0} till ej {1} i system kommer det att orsaka felaktig utdata i \"Konto {2}\" rapport"
 
 #: erpnext/utilities/bulk_transaction.py:69
 msgid "There are no Failed transactions"
@@ -53098,7 +53098,7 @@ msgstr "Tidrapporter"
 
 #: erpnext/selling/report/sales_order_analysis/sales_order_analysis.py:324
 msgid "Time Taken to Deliver"
-msgstr "Tid som tagits att Leverera"
+msgstr "Tid det tar att Leverera"
 
 #. Label of a Card Break in the Projects Workspace
 #: erpnext/config/projects.py:50
@@ -54324,7 +54324,7 @@ msgstr "Totalt Visningar"
 #. Label of a number card in the Stock Workspace
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Total Warehouses"
-msgstr "Antal Lager"
+msgstr "Lager Antal"
 
 #. Label of the total_weight (Float) field in DocType 'POS Invoice Item'
 #. Label of the total_weight (Float) field in DocType 'Purchase Invoice Item'
@@ -55194,7 +55194,7 @@ msgstr "URL kan bara vara sträng"
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "UTM Analytics"
-msgstr "UTM Analys"
+msgstr "UTM Statistik"
 
 #. Option for the 'Data Fetch Method' (Select) field in DocType 'Accounts
 #. Settings'
@@ -55818,7 +55818,7 @@ msgstr "Brådskande"
 
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.js:36
 msgid "Use 'Repost in background' button to trigger background job. Job can only be triggered when document is in Queued or Failed status."
-msgstr "Använd knapp \"Bokför om i bakgrunden\" för att utlösa bakgrund jobb. Jobb kan bara utlösas när dokument har status 'I Kö' eller 'Misslyckad'."
+msgstr "Använd knapp \"Omboka i bakgrunden\" för att utlösa bakgrund jobb. Jobb kan bara utlösas när dokument har status 'I Kö' eller 'Misslyckad'."
 
 #. Description of the 'Advanced Filtering' (Check) field in DocType 'Financial
 #. Report Row'
@@ -55874,7 +55874,7 @@ msgstr "Använd HTTP Protokoll"
 #. Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Use Item based reposting"
-msgstr "Använd Artikel baserad Omregistrering"
+msgstr "Använd Artikel baserad Ombokning"
 
 #. Label of the use_legacy_js_reactivity (Check) field in DocType 'Selling
 #. Settings'
@@ -56129,7 +56129,7 @@ msgstr "Giltig Från"
 
 #: erpnext/regional/doctype/lower_deduction_certificate/lower_deduction_certificate.py:45
 msgid "Valid From date not in Fiscal Year {0}"
-msgstr "Giltig Från Datum inte under Bokföringsår {0}"
+msgstr "Giltig Från Datum inte inom Bokföringsår {0}"
 
 #: erpnext/accounts/doctype/cost_center_allocation/cost_center_allocation.py:82
 msgid "Valid From must be after {0} as last GL Entry against the cost center {1} posted on this date"
@@ -56710,14 +56710,14 @@ msgstr "Projekt Översikt"
 #. Analysis'
 #: erpnext/buying/onboarding_step/view_purchase_order_analysis/view_purchase_order_analysis.json
 msgid "View Purchase Order Analysis"
-msgstr "Visa Inköp Order Analys"
+msgstr "Visa Inköp Order Statistik"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'View Sales Order Analysis'
 #. Description of a report in the Onboarding Step 'View Sales Order Analysis'
 #: erpnext/selling/onboarding_step/view_sales_order_analysis/view_sales_order_analysis.json
 msgid "View Sales Order Analysis"
-msgstr "Visa Försäljning Order Analys"
+msgstr "Visa Försäljning Order Statistik"
 
 #. Label of an action in the Onboarding Step 'View Stock Balance Report'
 #: erpnext/stock/onboarding_step/view_stock_balance_report/view_stock_balance_report.json
@@ -57740,7 +57740,7 @@ msgstr "Arbetsorder / Underleverantör Inköp Order"
 
 #: erpnext/manufacturing/dashboard_fixtures.py:93
 msgid "Work Order Analysis"
-msgstr "Arbetsorder Analys"
+msgstr "Arbetsorder Statistik"
 
 #. Name of a report
 #. Label of a Link in the Manufacturing Workspace
@@ -57771,7 +57771,7 @@ msgstr "Arbetsorder Kvantitet"
 
 #: erpnext/manufacturing/dashboard_fixtures.py:152
 msgid "Work Order Qty Analysis"
-msgstr "Arbetsorder Kvantitet Analys"
+msgstr "Arbetsorder Kvantitet Statistik"
 
 #. Name of a report
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.json
@@ -58266,7 +58266,7 @@ msgstr "Du kan inte lösa in mer än {0}."
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:189
 msgid "You cannot repost item valuation before {}"
-msgstr "Du kan inte bokföra om artikel värdering före {}"
+msgstr "Du kan inte omboka artikel värdering före {}"
 
 #: erpnext/accounts/doctype/subscription/subscription.py:719
 msgid "You cannot restart a Subscription that is not cancelled."
@@ -58364,7 +58364,7 @@ msgstr "Din Order är ute för Leverans!"
 
 #: erpnext/templates/pages/help.html:52
 msgid "Your tickets"
-msgstr "Dina Ärenden"
+msgstr "Dina Ärende"
 
 #. Label of the youtube_video_id (Data) field in DocType 'Video'
 #: erpnext/utilities/doctype/video/video.json
@@ -59222,7 +59222,7 @@ msgstr "{0} {1} måste godkännas"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:275
 msgid "{0} {1} not allowed to be reposted. Modify {2} to enable reposting."
-msgstr "{0} {1} får inte bokföras om. Ändra {2} för att kunna bokföra om."
+msgstr "{0} {1} får inte omboka. Ändra {2} för att kunna omboka."
 
 #: erpnext/buying/utils.py:116
 msgid "{0} {1} status is {2}"
