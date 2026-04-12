@@ -200,7 +200,24 @@ class BankTransaction(Document):
 
 		for payment_entry in list(self.payment_entries):
 			if payment_entry.allocated_amount != 0:
-				self.clear_linked_payment_entry(payment_entry, clearance_date=getdate(self.date))
+				allocable_amount, should_clear, clearance_date = get_clearance_details(
+					self,
+					payment_entry,
+					pe_bt_allocations.get((payment_entry.payment_document, payment_entry.payment_entry))
+					or {},
+					gl_entries.get((payment_entry.payment_document, payment_entry.payment_entry)) or {},
+					gl_bank_account,
+				)
+				if payment_entry.allocated_amount > allocable_amount:
+					frappe.throw(
+						_("Voucher {0} is over-allocated by {1}").format(
+							frappe.bold(payment_entry.payment_entry),
+							abs(allocable_amount),
+						)
+					)
+
+				if payment_entry.allocated_amount == allocable_amount and should_clear:
+					self.clear_linked_payment_entry(payment_entry, clearance_date=clearance_date)
 				continue
 
 			allocable_amount, should_clear, clearance_date = get_clearance_details(
@@ -211,8 +228,13 @@ class BankTransaction(Document):
 				gl_bank_account,
 			)
 
-			if allocable_amount < 0:
-				frappe.throw(_("Voucher {0} is over-allocated by {1}").format(allocable_amount))
+			if payment_entry.allocated_amount > allocable_amount:
+				frappe.throw(
+					_("Voucher {0} is over-allocated by {1}").format(
+						frappe.bold(payment_entry.payment_entry),
+						abs(allocable_amount),
+					)
+				)
 
 			if remaining_amount <= 0:
 				self.remove(payment_entry)
