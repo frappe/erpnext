@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-05 09:49+0000\n"
-"PO-Revision-Date: 2026-04-06 12:45\n"
+"PO-Revision-Date: 2026-04-10 13:45\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -8427,7 +8427,7 @@ msgstr "Proračunski Iznos"
 
 #: erpnext/accounts/doctype/budget/budget.py:82
 msgid "Budget Amount can not be {0}."
-msgstr "Iznos Budžeta ne može biti {0}."
+msgstr "Iznos Proračuna ne može biti {0}."
 
 #. Label of the budget_detail (Section Break) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -8439,17 +8439,17 @@ msgstr "Detalji Proračuna"
 #: erpnext/accounts/doctype/budget/budget.json
 #: erpnext/accounts/doctype/budget_distribution/budget_distribution.json
 msgid "Budget Distribution"
-msgstr "Raspodjela Budžeta"
+msgstr "Raspodjela Proračuna"
 
 #. Label of the budget_distribution_total (Currency) field in DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "Budget Distribution Total"
-msgstr "Ukupna Raspodjela Budžeta"
+msgstr "Ukupna Raspodjela Proračuna"
 
 #. Label of the budget_end_date (Date) field in DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "Budget End Date"
-msgstr "Datum završetka budžeta"
+msgstr "Datum Završetka Proračuna"
 
 #: erpnext/accounts/doctype/budget/budget.py:568
 #: erpnext/accounts/doctype/budget/budget.py:570
@@ -8460,7 +8460,7 @@ msgstr "Proračun Prkoračen"
 
 #: erpnext/accounts/doctype/budget/budget.py:227
 msgid "Budget Limit Exceeded"
-msgstr "Budžetsko Ograničenje Prekoračeno"
+msgstr "Ograničenje Proračuna Prekoračeno"
 
 #: erpnext/accounts/doctype/cost_center/cost_center_tree.js:61
 msgid "Budget List"
@@ -8469,12 +8469,12 @@ msgstr "Proračunska Lista"
 #. Label of the budget_start_date (Date) field in DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "Budget Start Date"
-msgstr "Datum početka budžeta"
+msgstr "Datum Početka Proračuna"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/budget.json
 msgid "Budget Variance"
-msgstr "Budžetsko Odstupanje"
+msgstr "Odstupanje Proračuna"
 
 #. Name of a report
 #. Label of a Link in the Invoicing Workspace
@@ -14955,7 +14955,7 @@ msgstr "Standardna Grupa Klijenta"
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Default Deferred Expense Account"
-msgstr "Standard Račun Odgođenih Troškova (Kupovina)"
+msgstr "Standard Račun Odgođenih Troškova"
 
 #. Label of the default_deferred_revenue_account (Link) field in DocType
 #. 'Company'
@@ -17377,7 +17377,7 @@ msgstr "Sistem"
 #: erpnext/setup/workspace/erpnext_settings/erpnext_settings.json
 #: erpnext/workspace_sidebar/erpnext_settings.json
 msgid "ERPNext Settings"
-msgstr "Postavke Sistema"
+msgstr "Postavke"
 
 #. Label of the user_id (Data) field in DocType 'Employee Group Table'
 #: erpnext/setup/doctype/employee_group_table/employee_group_table.json
@@ -30564,7 +30564,7 @@ msgstr "Novi datum izlaska bi trebao biti u budućnosti"
 
 #: erpnext/accounts/doctype/budget/budget.js:91
 msgid "New revised budget created successfully"
-msgstr "Novi revidirani budžet uspješno kreiran"
+msgstr "Novi revidirani proračun uspješno kreiran"
 
 #: erpnext/templates/pages/projects.html:37
 msgid "New task"
@@ -43024,7 +43024,7 @@ msgstr "Recenzije"
 
 #: erpnext/accounts/doctype/budget/budget.js:37
 msgid "Revise Budget"
-msgstr "Revidiraj Budžet"
+msgstr "Revidiraj Proračun"
 
 #. Label of the revision_of (Data) field in DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
@@ -48552,7 +48552,7 @@ msgstr "Navedi uslove za izračunavanje iznosa pošiljke"
 
 #: erpnext/accounts/doctype/budget/budget.py:215
 msgid "Spending for Account {0} ({1}) between {2} and {3} has already exceeded the new allocated budget. Spent: {4}, Budget: {5}"
-msgstr "Potrošnja za Račun {0} ({1}) između {2} i {3} je već premašila novi dodijeljeni budžet. Potrošeno: {4}, Budžet: {5}"
+msgstr "Potrošnja za Račun {0} ({1}) između {2} i {3} je već premašila novi dodijeljeni proračun. Potrošeno: {4}, Proračun: {5}"
 
 #: erpnext/assets/doctype/asset/asset.js:690
 #: erpnext/stock/doctype/batch/batch.js:102
@@ -50905,7 +50905,7 @@ msgstr "Dobavljač(i)"
 #: erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.json
 #: erpnext/workspace_sidebar/buying.json
 msgid "Supplier-Wise Sales Analytics"
-msgstr "Analiya Prodaje naspram Dobavljača"
+msgstr "Analiza Prodaje naspram Dobavljača"
 
 #. Label of the suppliers (Table) field in DocType 'Request for Quotation'
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.json
@@ -54368,7 +54368,7 @@ msgstr "Ukupan procenat doprinosa treba da bude jednak 100"
 
 #: erpnext/accounts/doctype/budget/budget.py:361
 msgid "Total distributed amount {0} must be equal to Budget Amount {1}"
-msgstr "Ukupni raspodjeljeni iznos {0} mora biti jednak iznosu budžeta {1}"
+msgstr "Ukupni raspodjeljeni iznos {0} mora biti jednak Iznosu Proračuna {1}"
 
 #: erpnext/accounts/doctype/budget/budget.py:368
 msgid "Total distribution percent must equal 100 (currently {0})"
