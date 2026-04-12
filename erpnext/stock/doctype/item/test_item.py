@@ -1004,6 +1004,144 @@ class TestItem(ERPNextTestSuite):
 			sabb_qty = frappe.db.get_value("Serial and Batch Bundle", serial_and_batch_bundle, "total_qty")
 			self.assertEqual(sabb_qty, properties["opening_stock"])
 
+	def test_ignore_variant_validation_flag(self):
+		"""Validation should be skipped when the ignore flag is set."""
+		frappe.flags.ignore_variant_validation = True
+		try:
+			variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
+			variant.item_code = "_Test-Ignore-Flag-Item"
+			frappe.delete_doc_if_exists("Item", variant.item_code)
+
+			variant.set("attributes", [])
+			variant.append("attributes", {"attribute": "Test Size", "attribute_value": "Massive"})
+			variant.insert()
+
+			self.assertTrue(frappe.db.exists("Item", variant.item_code))
+		finally:
+			frappe.flags.ignore_variant_validation = False
+
+	def test_variant_based_on_fallback(self):
+		"""Templates variant_based_on is used as fallback if null."""
+		variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
+		variant.item_code = f"_Test-Fallback-{frappe.generate_hash(4)}"
+		variant.variant_based_on = None
+		variant.insert()
+
+		self.assertEqual(variant.reload().variant_based_on, "Item Attribute")
+
+	def test_manufacturer_variant_validation_skip(self):
+		"""Validation is skipped for variants based on Manufacturer."""
+		template_name = f"_Test-Mfr-Tmpl-{frappe.generate_hash(4)}"
+		template = make_item(template_name, {"has_variants": 1, "variant_based_on": "Manufacturer"})
+
+		variant = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": f"_Test-Mfr-Var-{frappe.generate_hash(4)}",
+				"variant_of": template.name,
+				"variant_based_on": "Manufacturer",
+				"item_group": "Products",
+			}
+		)
+		variant.save()
+		self.assertTrue(frappe.db.exists("Item", variant.name))
+
+	def test_missing_template(self):
+		"""Verify that a non-existent template raises error."""
+		variant = frappe.get_doc(
+			{"doctype": "Item", "variant_of": "Non Existent Item", "variant_based_on": "Item Attribute"}
+		)
+		self.assertRaises(frappe.DoesNotExistError, variant.validate_variant_attributes)
+
+	def test_non_template_variant(self):
+		"""Check that an item not marked as template cant have variants."""
+		template = make_item(f"_Test-Not-Tmpl-{frappe.generate_hash(4)}", {"has_variants": 0})
+		variant = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": f"_Test-Not-Var-{frappe.generate_hash(4)}",
+				"variant_of": template.name,
+				"variant_based_on": "Item Attribute",
+			}
+		)
+		variant.append("attributes", {"attribute": "Test Size", "attribute_value": "Large"})
+
+		with self.assertRaises(frappe.ValidationError):
+			variant.save()
+
+	def test_variant_of_variant_not_allowed(self):
+		"""A variant should not be used as a template."""
+		template = make_item(
+			f"_Test-Tmpl-{frappe.generate_hash(4)}",
+			{
+				"has_variants": 1,
+				"variant_based_on": "Item Attribute",
+				"attributes": [{"attribute": "Test Size"}],
+			},
+		)
+		v1 = create_variant(template.name, {"Test Size": "Large"})
+		v1.item_code = f"_Test-V1-{frappe.generate_hash(4)}"
+		v1.save()
+
+		v2 = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": f"_Test-V2-{frappe.generate_hash(4)}",
+				"variant_of": v1.name,
+				"variant_based_on": "Item Attribute",
+			}
+		)
+		v2.append("attributes", {"attribute": "Test Size", "attribute_value": "Extra Large"})
+
+		with self.assertRaises(frappe.ValidationError):
+			v2.save()
+
+	def test_illegal_attributes(self):
+		"""Attributes not defined in the template should be rejected."""
+		template = make_item(
+			f"_Test-Attr-Tmpl-{frappe.generate_hash(4)}",
+			{
+				"has_variants": 1,
+				"variant_based_on": "Item Attribute",
+				"attributes": [{"attribute": "Test Size"}],
+			},
+		)
+		variant = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": f"_Test-Illegal-Attr-{frappe.generate_hash(4)}",
+				"variant_of": template.name,
+				"variant_based_on": "Item Attribute",
+			}
+		)
+		variant.append("attributes", {"attribute": "Test Size", "attribute_value": "Large"})
+		variant.append("attributes", {"attribute": "Color", "attribute_value": "Red"})
+
+		self.assertRaises(frappe.ValidationError, variant.save)
+
+	def test_update_illegal_attributes(self):
+		"""Illegal attributes added during update should be caught."""
+		variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
+		variant.item_code = f"_Test-Illegal-Update-{frappe.generate_hash(4)}"
+		variant.save()
+
+		variant.append("attributes", {"attribute": "Test Item Length", "attribute_value": "10"})
+		with self.assertRaises(frappe.ValidationError):
+			variant.validate_variant_attributes()
+
+	def test_duplicate_variant(self):
+		"""Reject duplicate variants with identical attributes."""
+		from erpnext.controllers.item_variant import ItemVariantExistsError
+
+		variant1 = create_variant("_Test Variant Item", {"Test Size": "Small"})
+		variant1.item_code = f"_Test-Duplicate-1-{frappe.generate_hash(4)}"
+		variant1.save()
+
+		variant2 = create_variant("_Test Variant Item", {"Test Size": "Small"})
+		variant2.item_code = f"_Test-Duplicate-2-{frappe.generate_hash(4)}"
+
+		self.assertRaises(ItemVariantExistsError, variant2.save)
+
 
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc("Item Variant Settings")

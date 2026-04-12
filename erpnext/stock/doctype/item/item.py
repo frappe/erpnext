@@ -966,26 +966,63 @@ class Item(Document):
 					attributes.append(d.attribute)
 
 	def validate_variant_attributes(self):
-		if self.is_new() and self.variant_of and self.variant_based_on == "Item Attribute":
-			# remove attributes with no attribute_value set
-			self.attributes = [d for d in self.attributes if cstr(d.attribute_value).strip()]
+		"""Validate variant attributes against template"""
+		if frappe.flags.ignore_variant_validation:
+			return
 
-			args = {}
-			for i, d in enumerate(self.attributes):
-				d.idx = i + 1
-				args[d.attribute] = d.attribute_value
+		if not self.variant_based_on and self.variant_of:
+			self.variant_based_on = frappe.get_cached_value("Item", self.variant_of, "variant_based_on")
 
+		if not self.variant_of or self.variant_based_on != "Item Attribute":
+			return
+
+		template_doc = frappe.get_cached_doc("Item", self.variant_of)
+
+		if not template_doc.has_variants:
+			if template_doc.variant_of:
+				frappe.throw(
+					_("Item {0} is a variant and cannot be used as a template").format(
+						frappe.bold(self.variant_of)
+					)
+				)
+			else:
+				frappe.throw(_("Item {0} is not a template").format(frappe.bold(self.variant_of)))
+
+		# remove attributes with no attribute_value set
+		self.attributes = [d for d in self.attributes if cstr(d.attribute_value).strip()]
+
+		args = {}
+		for i, d in enumerate(self.attributes):
+			d.idx = i + 1
+			args[d.attribute] = d.attribute_value
+
+		template_attr_names = {d.attribute for d in template_doc.attributes}
+		illegal = [a for a in args if a not in template_attr_names]
+
+		if illegal:
+			frappe.throw(
+				_(
+					"Attributes {0} are not defined on the Item Template {1}. Please remove them from the Attributes table."
+				).format(
+					", ".join(frappe.bold(a) for a in illegal),
+					frappe.bold(self.variant_of),
+				),
+				title=_("Invalid Attributes"),
+			)
+
+		if self.is_new():
 			variant = get_variant(self.variant_of, args, self.name)
 			if variant:
 				frappe.throw(
-					_("Item variant {0} exists with same attributes").format(variant), ItemVariantExistsError
+					_("Item variant {0} exists with same attributes").format(variant),
+					ItemVariantExistsError,
 				)
 
-			validate_item_variant_attributes(self, args)
+		validate_item_variant_attributes(self, args)
 
-			# copy variant_of value for each attribute row
-			for d in self.attributes:
-				d.variant_of = self.variant_of
+		# copy variant_of value for each attribute row
+		for d in self.attributes:
+			d.variant_of = self.variant_of
 
 	def cant_change(self):
 		if self.is_new():
