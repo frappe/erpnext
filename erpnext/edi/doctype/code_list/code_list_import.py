@@ -1,48 +1,106 @@
 import json
+from urllib.parse import urlsplit
 
 import frappe
 import requests
 from frappe import _
 from frappe.utils import escape_html
+from frappe.utils.file_manager import save_file
 from lxml import etree
 
-URL_PREFIXES = ("http://", "https://")
+GENERICODE_FETCH_TIMEOUT = 15
+LOCAL_FILE_PREFIXES = ("/files/", "/private/files/")
+
+
+class RemoteGenericodeUrlNotAllowedError(Exception):
+	pass
+
+
+class CodeListSelectionMismatchError(Exception):
+	pass
 
 
 @frappe.whitelist()
 def import_genericode():
-	doctype = frappe.form_dict.doctype
-	docname = frappe.form_dict.docname
-	content = frappe.local.uploaded_file
-
-	# recover the content, if it's a link
-	if (file_url := frappe.local.uploaded_file_url) and file_url.startswith(URL_PREFIXES):
-		try:
-			# If it's a URL, fetch the content and make it a local file (for durable audit)
-			response = requests.get(frappe.local.uploaded_file_url)
-			response.raise_for_status()
-			frappe.local.uploaded_file = content = response.content
-			frappe.local.uploaded_filename = frappe.local.uploaded_file_url.split("/")[-1]
-			frappe.local.uploaded_file_url = None
-		except Exception as e:
-			frappe.throw(f"<pre>{e!s}</pre>", title=_("Fetching Error"))
-
-	if file_url := frappe.local.uploaded_file_url:
-		file_path = frappe.utils.file_manager.get_file_path(file_url)
-		with open(file_path.encode(), mode="rb") as f:
-			content = f.read()
-
-	# Parse the xml content
-	parser = etree.XMLParser(
-		remove_blank_text=True,
-		resolve_entities=False,
-		load_dtd=False,
-		no_network=True,
-	)
 	try:
-		root = etree.fromstring(content, parser=parser)
-	except Exception as e:
-		frappe.throw(f"<pre>{e!s}</pre>", title=_("Parsing Error"))
+		content, file_name = get_uploaded_genericode_file()
+
+		return import_genericode_content(
+			doctype=frappe.form_dict.doctype,
+			docname=frappe.form_dict.docname,
+			content=content,
+			file_name=file_name,
+		)
+	except RemoteGenericodeUrlNotAllowedError:
+		frappe.throw(
+			_("Importing Code Lists from remote URLs is not allowed."),
+			title=_("Invalid Upload"),
+		)
+	except CodeListSelectionMismatchError:
+		frappe.throw(_("The uploaded file does not match the selected Code List."))
+	except etree.XMLSyntaxError:
+		frappe.throw(
+			_("The uploaded file could not be parsed as a genericode XML document."),
+			title=_("Parsing Error"),
+		)
+
+
+def import_genericode_from_url(
+	url: str,
+	doctype: str = "Code List",
+	docname: str | None = None,
+):
+	"""Import a Code List from a trusted backend URL."""
+	content = fetch_genericode_from_url(url)
+	file_name = urlsplit(url).path.rsplit("/", 1)[-1] or "genericode.xml"
+
+	return import_genericode_content(
+		doctype=doctype,
+		docname=docname,
+		content=content,
+		file_name=file_name,
+	)
+
+
+def get_uploaded_genericode_file() -> tuple[bytes, str | None]:
+	uploaded_data = frappe.local.uploaded_file
+	file_name = frappe.local.uploaded_filename
+	if uploaded_data and file_name:
+		return uploaded_data, file_name
+
+	file_url = frappe.local.uploaded_file_url
+	if not file_url:
+		raise frappe.ValidationError(_("No file uploaded or URL provided."))
+
+	if not is_local_file_url(file_url):
+		raise RemoteGenericodeUrlNotAllowedError
+
+	file_doc = frappe.get_doc("File", {"file_url": file_url})
+	file_doc.check_permission("read")
+	return file_doc.get_content(encodings=()), file_name
+
+
+def is_local_file_url(file_url: str | None) -> bool:
+	if not file_url:
+		return False
+
+	parsed = urlsplit(file_url.strip())
+	return not parsed.scheme and not parsed.netloc and parsed.path.startswith(LOCAL_FILE_PREFIXES)
+
+
+def fetch_genericode_from_url(url: str) -> bytes:
+	response = requests.get(url, timeout=GENERICODE_FETCH_TIMEOUT)
+	response.raise_for_status()
+	return response.content
+
+
+def import_genericode_content(
+	doctype: str,
+	docname: str | None,
+	content: bytes,
+	file_name: str | None,
+):
+	root = parse_genericode_content(content)
 
 	# Extract the name (CanonicalVersionUri) from the parsed XML
 	name = root.find(".//CanonicalVersionUri").text
@@ -51,7 +109,7 @@ def import_genericode():
 	if frappe.db.exists(doctype, docname):
 		code_list = frappe.get_doc(doctype, docname)
 		if code_list.name != name:
-			frappe.throw(_("The uploaded file does not match the selected Code List."))
+			raise CodeListSelectionMismatchError
 	else:
 		# Create a new Code List document with the extracted name
 		code_list = frappe.new_doc(doctype)
@@ -60,19 +118,13 @@ def import_genericode():
 	code_list.from_genericode(root)
 	code_list.save()
 
-	# Attach the file and provide a recoverable identifier
-	file_doc = frappe.get_doc(
-		{
-			"doctype": "File",
-			"attached_to_doctype": "Code List",
-			"attached_to_name": code_list.name,
-			"folder": frappe.db.get_value("File", {"is_attachments_folder": 1}),
-			"file_name": frappe.local.uploaded_filename,
-			"file_url": frappe.local.uploaded_file_url,
-			"is_private": 1,
-			"content": content,
-		}
-	).save()
+	file_doc = save_file(
+		fname=file_name,
+		content=content,
+		dt=doctype,
+		dn=code_list.name,
+		is_private=1,
+	)
 
 	# Get available columns and example values
 	columns, example_values, filterable_columns = get_genericode_columns_and_examples(root)
@@ -85,6 +137,16 @@ def import_genericode():
 		"example_values": example_values,
 		"filterable_columns": filterable_columns,
 	}
+
+
+def parse_genericode_content(content: bytes):
+	parser = etree.XMLParser(
+		remove_blank_text=True,
+		resolve_entities=False,
+		load_dtd=False,
+		no_network=True,
+	)
+	return etree.fromstring(content, parser=parser)
 
 
 @frappe.whitelist()
