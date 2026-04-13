@@ -633,7 +633,7 @@ class calculate_taxes_and_totals:
 					self.doc.grand_total, self.doc.currency, self.doc.precision("rounded_total")
 				)
 
-				# rounding adjustment should always be the difference vetween grand and rounded total
+				# rounding adjustment should always be the difference between grand and rounded total
 				self.doc.rounding_adjustment = flt(
 					self.doc.rounded_total - self.doc.grand_total, self.doc.precision("rounding_adjustment")
 				)
