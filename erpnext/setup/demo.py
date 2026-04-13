@@ -7,7 +7,7 @@ from random import randint
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, getdate
+from frappe.utils import add_days, get_url_to_form, getdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.utils import get_fiscal_year
@@ -16,21 +16,44 @@ from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
 
 
-def setup_demo_data():
+def setup_demo_data(company_name):
 	from frappe.utils.telemetry import capture
 
 	capture("demo_data_creation_started", "erpnext")
 	try:
-		company = create_demo_company()
+		frappe.db.savepoint("demo_data")
+		company = create_demo_company(company_name)
 		process_masters()
 		make_transactions(company)
-		frappe.cache.delete_keys("bootinfo")
-		frappe.publish_realtime("demo_data_complete")
+		capture("demo_data_creation_completed", "erpnext")
+		frappe.clear_messages()
 	except Exception:
-		frappe.log_error("Failed to create demo data")
+		frappe.db.rollback(save_point="demo_data")
+		error_log = frappe.log_error("Failed to create demo data")
+		log_demo_data_failed_notification(error_log)
 		capture("demo_data_creation_failed", "erpnext", properties={"exception": frappe.get_traceback()})
-		raise
-	capture("demo_data_creation_completed", "erpnext")
+
+
+def log_demo_data_failed_notification(error_log):
+	from frappe.core.doctype.role.role import get_users
+	from frappe.desk.doctype.notification_log.notification_log import make_notification_logs
+
+	frappe.msgprint(
+		_("Demo data creation failed. Check notifications for more info."),
+		alert=True,
+		indicator="red",
+		realtime=True,
+	)
+
+	users = get_users("System Manager")
+
+	notif_log_doc = {
+		"subject": _("Demo Data creation failed."),
+		"type": "Alert",
+		"link": get_url_to_form("Error Log", error_log.name),
+	}
+
+	make_notification_logs(notif_log_doc, users)
 
 
 @frappe.whitelist()
@@ -56,21 +79,8 @@ def clear_demo_data():
 		)
 
 
-def create_demo_company():
-	if frappe.flags.in_test:
-		hash = frappe.generate_hash(length=3)
-		company_doc = frappe._dict(
-			{
-				"company_name": "Test Company" + " " + hash,
-				"abbr": "TC" + hash,
-				"default_currency": "INR",
-				"country": "India",
-				"chart_of_accounts": "Standard",
-			}
-		)
-	else:
-		company = frappe.db.get_all("Company")[0].name
-		company_doc = frappe.get_doc("Company", company).as_dict()
+def create_demo_company(company):
+	company_doc = frappe.get_doc("Company", company).as_dict()
 
 	# Make a dummy company
 	new_company = frappe.new_doc("Company")

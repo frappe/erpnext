@@ -9,29 +9,25 @@ from frappe.utils import add_days, nowdate, today
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries, make_purchase_receipt
 from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestRepostAccountingLedger(AccountsTestMixin, ERPNextTestSuite):
+class TestRepostAccountingLedger(ERPNextTestSuite):
 	def setUp(self):
-		self.create_company()
-		self.create_customer()
-		self.create_item()
 		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
 		update_repost_settings()
 
 	def test_01_basic_functions(self):
 		si = create_sales_invoice(
-			item=self.item,
-			company=self.company,
-			customer=self.customer,
-			debit_to=self.debit_to,
-			parent_cost_center=self.cost_center,
-			cost_center=self.cost_center,
+			item="_Test Item",
+			company="_Test Company",
+			customer="_Test Customer",
+			debit_to="Debtors - _TC",
+			parent_cost_center="Main - _TC",
+			cost_center="Main - _TC",
 			rate=100,
 		)
 
@@ -48,7 +44,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, ERPNextTestSuite):
 
 		# Test Validation Error
 		ral = frappe.new_doc("Repost Accounting Ledger")
-		ral.company = self.company
+		ral.company = "_Test Company"
 		ral.delete_cancelled_entries = True
 		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
 		ral.append(
@@ -65,7 +61,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, ERPNextTestSuite):
 		ral.save()
 
 		# manually set an incorrect debit amount in DB
-		gle = frappe.db.get_all("GL Entry", filters={"voucher_no": si.name, "account": self.debit_to})
+		gle = frappe.db.get_all("GL Entry", filters={"voucher_no": si.name, "account": "Debtors - _TC"})
 		frappe.db.set_value("GL Entry", gle[0], "debit", 90)
 
 		gl = qb.DocType("GL Entry")
@@ -94,23 +90,23 @@ class TestRepostAccountingLedger(AccountsTestMixin, ERPNextTestSuite):
 
 	def test_02_deferred_accounting_valiations(self):
 		si = create_sales_invoice(
-			item=self.item,
-			company=self.company,
-			customer=self.customer,
-			debit_to=self.debit_to,
-			parent_cost_center=self.cost_center,
-			cost_center=self.cost_center,
+			item="_Test Item",
+			company="_Test Company",
+			customer="_Test Customer",
+			debit_to="Debtors - _TC",
+			parent_cost_center="Main - _TC",
+			cost_center="Main - _TC",
 			rate=100,
 			do_not_submit=True,
 		)
 		si.items[0].enable_deferred_revenue = True
-		si.items[0].deferred_revenue_account = self.deferred_revenue
+		si.items[0].deferred_revenue_account = "Deferred Revenue - _TC"
 		si.items[0].service_start_date = nowdate()
 		si.items[0].service_end_date = add_days(nowdate(), 90)
 		si.save().submit()
 
 		ral = frappe.new_doc("Repost Accounting Ledger")
-		ral.company = self.company
+		ral.company = "_Test Company"
 		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
 		self.assertRaises(frappe.ValidationError, ral.save)
 
@@ -118,35 +114,35 @@ class TestRepostAccountingLedger(AccountsTestMixin, ERPNextTestSuite):
 	def test_04_pcv_validation(self):
 		# Clear old GL entries so PCV can be submitted.
 		gl = frappe.qb.DocType("GL Entry")
-		qb.from_(gl).delete().where(gl.company == self.company).run()
+		qb.from_(gl).delete().where(gl.company == "_Test Company").run()
 
 		si = create_sales_invoice(
-			item=self.item,
-			company=self.company,
-			customer=self.customer,
-			debit_to=self.debit_to,
-			parent_cost_center=self.cost_center,
-			cost_center=self.cost_center,
+			item="_Test Item",
+			company="_Test Company",
+			customer="_Test Customer",
+			debit_to="Debtors - _TC",
+			parent_cost_center="Main - _TC",
+			cost_center="Main - _TC",
 			rate=100,
 		)
-		fy = get_fiscal_year(today(), company=self.company)
+		fy = get_fiscal_year(today(), company="_Test Company")
 		pcv = frappe.get_doc(
 			{
 				"doctype": "Period Closing Voucher",
 				"transaction_date": today(),
 				"period_start_date": fy[1],
 				"period_end_date": today(),
-				"company": self.company,
+				"company": "_Test Company",
 				"fiscal_year": fy[0],
-				"cost_center": self.cost_center,
-				"closing_account_head": self.retained_earnings,
+				"cost_center": "Main - _TC",
+				"closing_account_head": "Retained Earnings - _TC",
 				"remarks": "test",
 			}
 		)
 		pcv.save().submit()
 
 		ral = frappe.new_doc("Repost Accounting Ledger")
-		ral.company = self.company
+		ral.company = "_Test Company"
 		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
 		self.assertRaises(frappe.ValidationError, ral.save)
 
@@ -156,12 +152,12 @@ class TestRepostAccountingLedger(AccountsTestMixin, ERPNextTestSuite):
 
 	def test_03_deletion_flag_and_preview_function(self):
 		si = create_sales_invoice(
-			item=self.item,
-			company=self.company,
-			customer=self.customer,
-			debit_to=self.debit_to,
-			parent_cost_center=self.cost_center,
-			cost_center=self.cost_center,
+			item="_Test Item",
+			company="_Test Company",
+			customer="_Test Customer",
+			debit_to="Debtors - _TC",
+			parent_cost_center="Main - _TC",
+			cost_center="Main - _TC",
 			rate=100,
 		)
 
@@ -170,7 +166,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, ERPNextTestSuite):
 
 		# with deletion flag set
 		ral = frappe.new_doc("Repost Accounting Ledger")
-		ral.company = self.company
+		ral.company = "_Test Company"
 		ral.delete_cancelled_entries = True
 		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
 		ral.append("vouchers", {"voucher_type": pe.doctype, "voucher_no": pe.name})
@@ -181,12 +177,12 @@ class TestRepostAccountingLedger(AccountsTestMixin, ERPNextTestSuite):
 
 	def test_05_without_deletion_flag(self):
 		si = create_sales_invoice(
-			item=self.item,
-			company=self.company,
-			customer=self.customer,
-			debit_to=self.debit_to,
-			parent_cost_center=self.cost_center,
-			cost_center=self.cost_center,
+			item="_Test Item",
+			company="_Test Company",
+			customer="_Test Customer",
+			debit_to="Debtors - _TC",
+			parent_cost_center="Main - _TC",
+			cost_center="Main - _TC",
 			rate=100,
 		)
 
@@ -195,7 +191,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, ERPNextTestSuite):
 
 		# without deletion flag set
 		ral = frappe.new_doc("Repost Accounting Ledger")
-		ral.company = self.company
+		ral.company = "_Test Company"
 		ral.delete_cancelled_entries = False
 		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
 		ral.append("vouchers", {"voucher_type": pe.doctype, "voucher_no": pe.name})
@@ -210,16 +206,16 @@ class TestRepostAccountingLedger(AccountsTestMixin, ERPNextTestSuite):
 		provisional_account = create_account(
 			account_name="Provision Account",
 			parent_account="Current Liabilities - _TC",
-			company=self.company,
+			company="_Test Company",
 		)
 
 		another_provisional_account = create_account(
 			account_name="Another Provision Account",
 			parent_account="Current Liabilities - _TC",
-			company=self.company,
+			company="_Test Company",
 		)
 
-		company = frappe.get_doc("Company", self.company)
+		company = frappe.get_doc("Company", "_Test Company")
 		company.enable_provisional_accounting_for_non_stock_items = 1
 		company.default_provisional_account = provisional_account
 		company.save()
@@ -229,7 +225,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, ERPNextTestSuite):
 
 		item = make_item(properties={"is_stock_item": 0})
 
-		pr = make_purchase_receipt(company=self.company, item_code=item.name, rate=1000.0, qty=1.0)
+		pr = make_purchase_receipt(company="_Test Company", item_code=item.name, rate=1000.0, qty=1.0)
 		pr_gl_entries = get_gl_entries(pr.doctype, pr.name, skip_cancelled=True)
 		expected_pr_gles = [
 			{"account": provisional_account, "debit": 0.0, "credit": 1000.0, "cost_center": test_cc},
@@ -246,7 +242,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, ERPNextTestSuite):
 		)
 
 		repost_doc = frappe.new_doc("Repost Accounting Ledger")
-		repost_doc.company = self.company
+		repost_doc.company = "_Test Company"
 		repost_doc.delete_cancelled_entries = True
 		repost_doc.append("vouchers", {"voucher_type": pr.doctype, "voucher_no": pr.name})
 		repost_doc.save().submit()

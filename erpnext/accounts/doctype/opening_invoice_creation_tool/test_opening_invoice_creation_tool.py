@@ -180,7 +180,7 @@ def make_customer(customer=None):
 		{
 			"doctype": "Customer",
 			"customer_name": customer_name,
-			"customer_group": "All Customer Groups",
+			"customer_group": "Individual",
 			"customer_type": "Company",
 			"territory": "All Territories",
 		}

@@ -789,27 +789,27 @@ class JobCard(Document):
 			["action_if_quality_inspection_is_not_submitted", "action_if_quality_inspection_is_rejected"],
 		)
 
-		item = self.finished_good or self.production_item
-		bom_inspection_required = frappe.db.get_value(
-			"BOM", self.semi_fg_bom or self.bom_no, "inspection_required"
+		bom_inspection_required = frappe.get_value("BOM", self.bom_no, "inspection_required")
+		operation_inspection_required = frappe.get_value(
+			"Work Order Operation", self.operation_id, "quality_inspection_required"
 		)
-		if bom_inspection_required:
+		if bom_inspection_required and operation_inspection_required:
 			if not self.quality_inspection:
 				frappe.throw(
 					_(
 						"Quality Inspection is required for the item {0} before completing the job card {1}"
-					).format(get_link_to_form("Item", item), bold(self.name))
+					).format(get_link_to_form("Item", self.finished_good), bold(self.name))
 				)
-			qa_status, docstatus = frappe.db.get_value(
+
+			qa_status, docstatus = frappe.get_value(
 				"Quality Inspection", self.quality_inspection, ["status", "docstatus"]
 			)
-
 			if docstatus != 1:
 				if action_submit == "Stop":
 					frappe.throw(
 						_("Quality Inspection {0} is not submitted for the item: {1}").format(
 							get_link_to_form("Quality Inspection", self.quality_inspection),
-							get_link_to_form("Item", item),
+							get_link_to_form("Item", self.finished_good),
 						),
 						title=_("Inspection Submission"),
 						exc=QualityInspectionNotSubmittedError,
@@ -818,7 +818,7 @@ class JobCard(Document):
 					frappe.msgprint(
 						_("Quality Inspection {0} is not submitted for the item: {1}").format(
 							get_link_to_form("Quality Inspection", self.quality_inspection),
-							get_link_to_form("Item", item),
+							get_link_to_form("Item", self.finished_good),
 						),
 						alert=True,
 						indicator="orange",
@@ -828,7 +828,7 @@ class JobCard(Document):
 					frappe.throw(
 						_("Quality Inspection {0} is rejected for the item: {1}").format(
 							get_link_to_form("Quality Inspection", self.quality_inspection),
-							get_link_to_form("Item", item),
+							get_link_to_form("Item", self.finished_good),
 						),
 						title=_("Inspection Rejected"),
 						exc=QualityInspectionRejectedError,
@@ -837,7 +837,7 @@ class JobCard(Document):
 					frappe.msgprint(
 						_("Quality Inspection {0} is rejected for the item: {1}").format(
 							get_link_to_form("Quality Inspection", self.quality_inspection),
-							get_link_to_form("Item", item),
+							get_link_to_form("Item", self.finished_good),
 						),
 						alert=True,
 						indicator="orange",

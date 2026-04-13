@@ -1980,6 +1980,14 @@ class BootStrapTestData:
 			["_Test Payable", "Current Liabilities", 0, "Payable", None],
 			["_Test Receivable USD", "Current Assets", 0, "Receivable", "USD"],
 			["_Test Payable USD", "Current Liabilities", 0, "Payable", "USD"],
+			# Deferred Account
+			["Deferred Revenue", "Current Liabilities", 0, None, None],
+			["Deferred Expense", "Current Assets", 0, None, None],
+			# Bank
+			["HDFC", "Bank Accounts", 0, "Bank", None],
+			# Advance Account
+			["Advance Received", "Current Liabilities", 0, "Receivable", None],
+			["Advance Paid", "Current Assets", 0, "Payable", None],
 			# Loyalty Account
 			["Loyalty", "Direct Expenses", 0, "Expense Account", None],
 		]

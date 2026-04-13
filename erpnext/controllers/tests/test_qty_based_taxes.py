@@ -67,7 +67,7 @@ class TestTaxes(ERPNextTestSuite):
 			{
 				"doctype": "Customer",
 				"customer_name": uuid4(),
-				"customer_group": "All Customer Groups",
+				"customer_group": "Individual",
 			}
 		).insert()
 		self.supplier = frappe.get_doc(

@@ -226,6 +226,7 @@ class SalesInvoice(SellingController):
 		terms: DF.TextEditor | None
 		territory: DF.Link | None
 		timesheets: DF.Table[SalesInvoiceTimesheet]
+		title: DF.Data | None
 		to_date: DF.Date | None
 		total: DF.Currency
 		total_advance: DF.Currency
@@ -1101,9 +1102,6 @@ class SalesInvoice(SellingController):
 				self.remarks = _("Against Customer Order {0}").format(self.po_no)
 				if self.po_date:
 					self.remarks += " " + _("dated {0}").format(formatdate(self.po_date))
-
-			else:
-				self.remarks = _("No Remarks")
 
 	def validate_auto_set_posting_time(self):
 		# Don't auto set the posting date and time if invoice is amended

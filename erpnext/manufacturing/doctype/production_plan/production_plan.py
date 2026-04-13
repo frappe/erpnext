@@ -1788,8 +1788,10 @@ def get_items_for_material_requests(
 			)
 
 		sales_order = data.get("sales_order")
+		qty_precision = frappe.get_precision("Material Request Plan Item", "quantity")
 
 		for key, details in item_details.items():
+			details.qty = flt(details.qty, qty_precision)
 			so_item_details.setdefault(sales_order, frappe._dict())
 			if key in so_item_details.get(sales_order, {}):
 				so_item_details[sales_order][key]["qty"] = so_item_details[sales_order][key].get(

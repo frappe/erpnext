@@ -106,6 +106,7 @@ def get_columns():
 			"fieldtype": "Link",
 			"options": "Item",
 			"width": 140,
+			"sticky": "True",
 		},
 		{"label": _("Item Name"), "fieldname": "item_name", "width": 100},
 		{"label": _("Description"), "fieldname": "description", "width": 200},
@@ -129,6 +130,7 @@ def get_columns():
 			"fieldtype": "Link",
 			"options": "Warehouse",
 			"width": 120,
+			"sticky": "True",
 		},
 		{
 			"label": _("UOM"),

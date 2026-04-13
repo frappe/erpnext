@@ -291,6 +291,30 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		# ordered qty should decrease (back to initial) on row deletion
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
 
+	def test_discount_amount_partial_purchase_receipt(self):
+		po = create_purchase_order(qty=4, rate=100, do_not_save=1)
+		po.apply_discount_on = "Grand Total"
+		po.discount_amount = 120
+		po.save()
+		po.submit()
+
+		self.assertEqual(po.grand_total, 280)
+
+		pr1 = make_purchase_receipt(po.name)
+		pr1.items[0].qty = 3
+		pr1.save()
+		pr1.submit()
+
+		self.assertEqual(pr1.discount_amount, 120)
+		self.assertEqual(pr1.grand_total, 180)
+
+		pr2 = make_purchase_receipt(po.name)
+		pr2.save()
+		pr2.submit()
+
+		self.assertEqual(pr2.discount_amount, 0)
+		self.assertEqual(pr2.grand_total, 100)
+
 	def test_update_child_perm(self):
 		po = create_purchase_order(item_code="_Test Item", qty=4)
 
@@ -1383,6 +1407,34 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(pi_1.status, "Paid")
 		self.assertEqual(pi_2.status, "Paid")
 		self.assertEqual(po.status, "Completed")
+
+	def test_purchase_order_over_billing_missing_item(self):
+		item1 = make_item(
+			"_Test Item for Overbilling",
+		).name
+
+		item2 = make_item(
+			"_Test Item for Overbilling 2",
+		).name
+
+		po = create_purchase_order(qty=10, rate=1000, item_code=item1, do_not_save=1)
+		po.append("items", {"item_code": item2, "qty": 5, "rate": 20, "warehouse": "_Test Warehouse - _TC"})
+		po.taxes = []
+		po.insert()
+		po.submit()
+
+		pi1 = make_pi_from_po(po.name)
+		pi1.items[0].qty = 8
+		pi1.items[0].rate = 1250
+		pi1.remove(pi1.items[1])
+		pi1.insert()
+		pi1.submit()
+
+		self.assertEqual(pi1.grand_total, 10000.0)
+		self.assertTrue(len(pi1.items) == 1)
+
+		pi2 = make_pi_from_po(po.name)
+		self.assertEqual(len(pi2.items), 2)
 
 
 def create_po_for_sc_testing():
