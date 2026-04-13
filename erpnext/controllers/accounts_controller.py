@@ -4371,6 +4371,15 @@ def get_missing_company_details(doctype: str, docname: str):
 
 	address_display_list = get_address_display_list("Company", company)
 	address_line = address_display_list[0].get("address_line1") if address_display_list else ""
+	needs_new_company_address = not address_line
+
+	if needs_new_company_address and not frappe.has_permission("Address", "create", throw=False):
+		frappe.msgprint(
+			_(
+				"Company Address is missing. You don't have permission to create an Address. Please contact your System Manager."
+			)
+		)
+		return
 
 	required_fields.append(company_address)
 	required_fields.append(address_line)
@@ -4393,6 +4402,18 @@ def get_missing_company_details(doctype: str, docname: str):
 def update_company_master_and_address(current_doctype: str, name: str, company: str, details: dict | str):
 	from frappe.utils import validate_email_address
 
+	if not frappe.has_permission(current_doctype, "write", doc=name, throw=False):
+		frappe.throw(
+			_("You don't have permission to update this document. Please contact your System Manager."),
+			title=_("Insufficient Permissions"),
+		)
+
+	if not frappe.has_permission("Company", "write", doc=company, throw=False):
+		frappe.throw(
+			_("You don't have permission to update Company details. Please contact your System Manager."),
+			title=_("Insufficient Permissions"),
+		)
+
 	if isinstance(details, str):
 		details = frappe.parse_json(details)
 
@@ -4407,6 +4428,13 @@ def update_company_master_and_address(current_doctype: str, name: str, company: 
 
 	company_address = details.get("company_address")
 	if details.get("address_line1"):
+		if not frappe.has_permission("Address", "create", throw=False):
+			frappe.throw(
+				_(
+					"You don't have permission to create a Company Address. Please contact your System Manager."
+				),
+				title=_("Insufficient Permissions"),
+			)
 		address_doc = frappe.get_doc(
 			{
 				"doctype": "Address",

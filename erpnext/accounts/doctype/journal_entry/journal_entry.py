@@ -1553,34 +1553,41 @@ def get_payment_entry(ref_doc, args):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_against_jv(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+def get_against_jv(
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+):
 	if not frappe.db.has_column("Journal Entry", searchfield):
 		return []
 
-	return frappe.db.sql(
-		f"""
-		SELECT jv.name, jv.posting_date, jv.user_remark
-		FROM `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail
-		WHERE jv_detail.parent = jv.name
-			AND jv_detail.account = %(account)s
-			AND IFNULL(jv_detail.party, '') = %(party)s
-			AND (
-				jv_detail.reference_type IS NULL
-				OR jv_detail.reference_type = ''
-			)
-			AND jv.docstatus = 1
-			AND jv.`{searchfield}` LIKE %(txt)s
-		ORDER BY jv.name DESC
-		LIMIT %(limit)s offset %(offset)s
-		""",
-		dict(
-			account=filters.get("account"),
-			party=cstr(filters.get("party")),
-			txt=f"%{txt}%",
-			offset=start,
-			limit=page_len,
-		),
+	JournalEntry = frappe.qb.DocType("Journal Entry")
+	JournalEntryAccount = frappe.qb.DocType("Journal Entry Account")
+
+	query = (
+		frappe.qb.from_(JournalEntry)
+		.join(JournalEntryAccount)
+		.on(JournalEntryAccount.parent == JournalEntry.name)
+		.select(JournalEntry.name, JournalEntry.posting_date, JournalEntry.user_remark)
+		.where(JournalEntryAccount.account == filters.get("account"))
+		.where(JournalEntryAccount.reference_type.isnull() | (JournalEntryAccount.reference_type == ""))
+		.where(JournalEntry.docstatus == 1)
+		.where(JournalEntry[searchfield].like(f"%{txt}%"))
+		.orderby(JournalEntry.name, order=frappe.qb.desc)
+		.limit(page_len)
+		.offset(start)
 	)
+
+	party = filters.get("party")
+	if party:
+		query = query.where(JournalEntryAccount.party == party)
+	else:
+		query = query.where(JournalEntryAccount.party.isnull() | (JournalEntryAccount.party == ""))
+
+	return query.run()
 
 
 @frappe.whitelist()
