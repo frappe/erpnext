@@ -341,7 +341,7 @@ class StatusUpdater(Document):
 					item_details.extend(self.fetch_items_with_pending_qty(args, "item_code", regular_items))
 
 				# Query production plan items with production_item field
-				if pp_items:
+				if pp_items and args.get("target_dt") in ["Production Plan Sub Assembly Item"]:
 					item_details.extend(self.fetch_items_with_pending_qty(args, "production_item", pp_items))
 
 				item_lookup = {item.name: item for item in item_details}
