@@ -16,7 +16,7 @@ class SubOperation(Document):
 		from frappe.types import DF
 
 		description: DF.SmallText | None
-		operation: DF.Link | None
+		operation: DF.Link
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
