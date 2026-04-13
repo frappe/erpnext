@@ -34,6 +34,42 @@ class TestBankTransactionFees(ERPNextTestSuite):
 
 		bt.validate_included_fee()
 
+	def test_zero_net_included_fee_stays_unallocated(self):
+		"""A fee on a zero-net statement row still needs manual reconciliation."""
+		bt = frappe.new_doc("Bank Transaction")
+		bt.deposit = 0
+		bt.withdrawal = 0
+		bt.included_fee = 5
+
+		bt.update_allocated_amount()
+
+		self.assertEqual(bt.allocated_amount, 0)
+		self.assertEqual(bt.unallocated_amount, 5)
+
+	def test_zero_net_included_fee_reduces_with_allocations(self):
+		"""Manual allocations should reduce the fee-backed reconciliation amount."""
+		bt = frappe.new_doc("Bank Transaction")
+		bt.deposit = 0
+		bt.withdrawal = 0
+		bt.included_fee = 5
+		bt.append("payment_entries", {"allocated_amount": 2})
+
+		bt.update_allocated_amount()
+
+		self.assertEqual(bt.allocated_amount, 2)
+		self.assertEqual(bt.unallocated_amount, 3)
+
+	def test_included_fee_does_not_change_non_zero_net_reconciliation_amount(self):
+		"""A fee should not inflate the reconciliation amount when cash already moved."""
+		bt = frappe.new_doc("Bank Transaction")
+		bt.deposit = 10
+		bt.withdrawal = 0
+		bt.included_fee = 999
+
+		bt.update_allocated_amount()
+
+		self.assertEqual(bt.unallocated_amount, 10)
+
 	def test_excluded_fee_noop_when_zero(self):
 		"""When there is no excluded fee to apply, the amounts should remain
 		unchanged."""

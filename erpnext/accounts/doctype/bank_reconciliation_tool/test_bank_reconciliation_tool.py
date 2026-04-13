@@ -96,3 +96,32 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		# assert API output post reconciliation
 		transactions = get_bank_transactions(self.bank_account, from_date, to_date)
 		self.assertEqual(len(transactions), 0)
+
+	def test_zero_net_included_fee_remains_available_for_reconciliation(self):
+		from_date = add_days(today(), -1)
+		to_date = today()
+
+		bank_transaction = (
+			frappe.get_doc(
+				{
+					"doctype": "Bank Transaction",
+					"date": to_date,
+					"deposit": 0,
+					"withdrawal": 0,
+					"included_fee": 5,
+					"bank_account": self.bank_account,
+					"currency": "INR",
+				}
+			)
+			.save()
+			.submit()
+		)
+		bank_transaction.reload()
+
+		self.assertEqual(bank_transaction.status, "Unreconciled")
+		self.assertEqual(bank_transaction.unallocated_amount, 5)
+
+		transactions = get_bank_transactions(self.bank_account, from_date, to_date)
+		self.assertEqual(len(transactions), 1)
+		self.assertEqual(transactions[0].name, bank_transaction.name)
+		self.assertEqual(transactions[0].unallocated_amount, 5)

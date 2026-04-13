@@ -106,10 +106,19 @@ class BankTransaction(Document):
 		allocated_amount = (
 			sum(p.allocated_amount for p in self.payment_entries) if self.payment_entries else 0.0
 		)
-		unallocated_amount = abs(flt(self.withdrawal) - flt(self.deposit)) - allocated_amount
+		unallocated_amount = self.get_reconciliation_amount() - allocated_amount
 
 		self.allocated_amount = flt(allocated_amount, self.precision("allocated_amount"))
 		self.unallocated_amount = flt(unallocated_amount, self.precision("unallocated_amount"))
+
+	def get_reconciliation_amount(self):
+		amount = abs(flt(self.withdrawal) - flt(self.deposit))
+
+		# A zero-net statement row with an included fee still needs manual reconciliation.
+		if amount == 0 and flt(self.included_fee) > 0:
+			return flt(self.included_fee)
+
+		return amount
 
 	def delink_old_payment_entries(self):
 		if self.flags.updating_linked_bank_transaction:
