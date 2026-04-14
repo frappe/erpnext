@@ -663,4 +663,22 @@ default_log_clearing_doctypes = {
 export_python_type_annotations = True
 
 fields_for_group_similar_items = ["qty", "amount"]
-fixtures = ["Workspace"]
+fixtures = [
+	"Workspace",
+	{
+		"dt": "Custom Field",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Stock Entry Detail-inventory_dimension",
+					"Stock Entry Detail-inventory_dimension_col_break",
+					"Stock Entry Detail-slab_no",
+					"Stock Entry Detail-to_slab_no",
+					"Stock Ledger Entry-slab",
+				],
+			]
+		],
+	},
+]

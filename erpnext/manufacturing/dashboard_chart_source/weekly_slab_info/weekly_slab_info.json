@@ -1,0 +1,13 @@
+{
+ "creation": "2026-04-06 17:19:07.347561",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart Source",
+ "idx": 0,
+ "modified": "2026-04-06 17:20:55.105222",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Weekly Slab Info",
+ "owner": "Administrator",
+ "source_name": "Weekly Slab Info",
+ "timeseries": 0
+}

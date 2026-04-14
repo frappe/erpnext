@@ -168,13 +168,17 @@ frappe.ui.form.on("Production Plan", {
 						);
 					}
 					else {
-						frm.add_custom_button(
-							__("Work Order / Subcontract PO"),
-							() => {
-								frm.trigger("make_work_order");
-							},
-							__("Create")
-						);
+						if (!frm.doc.is_work_order_created) {
+							frm.add_custom_button(
+								__("Work Order / Subcontract PO"),
+								async () => {
+									await frm.set_value("is_work_order_created", 1);
+									await frm.save("Update");
+									frm.trigger("make_work_order");
+								},
+								__("Create")
+							);
+						}
 					}
 				}
 
@@ -725,39 +729,108 @@ frappe.ui.form.on("Production Plan", {
 	},
 
 	delete_job_cards(frm) {
-		frappe.prompt(
-			{
-				fieldname: "reason_for_deletion_of_job_cards",
-				label: __("Reason for Deletion"),
-				fieldtype: "Data",
-				reqd: 1,
-			},
-			(values) => {
-				frappe.call({
-					method: "erpnext.manufacturing.doctype.production_plan.api.delete_job_cards",
-					args: {
-						production_plan: frm.doc.name,
-						reason: values.reason_for_deletion_of_job_cards,
-					},
-					callback: function (r) {
-						if (!r.exc) {
-							let count = r.message.deleted_count;
-							let reason = r.message.reason;
+		frappe.db.get_list("Production Line", {
+			filters: { parent_line: ["!=", null], is_group: 0, is_active: 1 },
+			fields: ["name", "line_name"]
+		}).then(data => {
+			let fields = [
+				{
+					fieldname: "reason_for_deletion_of_job_cards",
+					label: __("Reason for Deletion"),
+					fieldtype: "Data",
+					reqd: 1,
+				},
+				{
+					fieldname: "delete_all_job_cards",
+					label: __("Delete All Open Job Cards"),
+					fieldtype: "Check",
+					default: 1,
+				},
+				{
+					fieldname: "production_line",
+					label: __("Production Line"),
+					fieldtype: "Select",
+					options: data.map(d => ({ label: d.line_name, value: d.name })),
+					hidden: 1,
+				},
+				{
+					fieldname: "item_name",
+					label: __("Item Name"),
+					fieldtype: "Select",
+					options: [],
+					hidden: 1,
+				}
+			];
+			let d = frappe.prompt(
+				fields,
+				(values) => {
+					frappe.call({
+						method: "erpnext.manufacturing.doctype.production_plan.api.delete_job_cards",
+						args: {
+							production_plan: frm.doc.name,
+							reason: values.reason_for_deletion_of_job_cards,
+							delete_all_job_cards: values.delete_all_job_cards,
+							production_line: values.production_line,
+							item_code: values.item_name,
+						},
+						callback: function (r) {
+							if (!r.exc) {
+								let count = r.message.deleted_count;
+								let reason = r.message.reason;
 
-							frappe.msgprint(
-								`${count} remaining job card${count > 1 ? 's' : ''} were deleted from this production plan with the reason: "${reason}"`
-							);
-							frm.set_value("reason_for_deletion_of_job_cards", reason);
-							frm.set_value("deleted_job_card_count", count);
+								frappe.msgprint(
+									`${count} remaining job card${count > 1 ? 's' : ''} were deleted from this production plan ${values.delete_all_job_cards ? 'all' : 'selected'} with the reason: "${reason}"`
+								);
+								frm.set_value("reason_for_deletion_of_job_cards", reason);
+								frm.set_value("deleted_job_card_count", count);
 
-							frm.reload_doc();
+								frm.reload_doc();
+							}
 						}
+					});
+				},
+				__("Delete Open Job Cards"),
+				__("Delete")
+			);
+
+			// ✅ Toggle visibility based on "Delete All"
+			d.fields_dict.delete_all_job_cards.df.onchange = () => {
+				let delete_all = d.get_value("delete_all_job_cards");
+
+				if (delete_all) {
+					d.set_value("production_line", "");
+					d.set_value("item_name", "");
+				}
+
+				d.set_df_property("production_line", "hidden", delete_all ? 1 : 0);
+				d.set_df_property("item_name", "hidden", delete_all ? 1 : 0);
+			};
+
+			// ✅ Update Item Name options when Production Line changes
+			d.fields_dict.production_line.df.onchange = () => {
+				let production_line = d.get_value("production_line");
+				if (!production_line) {
+					d.set_df_property("item_name", "options", []);
+					return;
+				}
+
+				frappe.db.get_list("Work Order", {
+					filters: {
+						production_plan: frm.doc.name,
+						production_line: production_line,
+						fg_warehouse: ["like", "%Finished Goods%"]
+					},
+					fields: ["production_item", "item_name"],
+					distinct: 1
+				}).then(items => {
+					let options = items.map(i => ({ label: i.item_name || i.production_item, value: i.production_item }));
+					d.set_df_property("item_name", "options", options);
+					if (options.length > 0) {
+						d.set_value("item_name", options[0].value);
 					}
 				});
-			},
-			__("Delete Open Job Cards"),
-			__("Delete")
-		);
+			};
+		});
 	},
 
 	create_daily_production_plan(frm) {
