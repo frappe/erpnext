@@ -41,36 +41,6 @@ class TestLocation(ERPNextTestSuite):
 
 		self.created_locations = []
 
-	def tearDown(self):
-		"""
-		Roll back database changes and restore ancestor location states after each test.
-		"""
-		frappe.db.rollback()
-
-		for ancestor_name, snapshot in self.ancestor_snapshots.items():
-			if frappe.db.exists("Location", ancestor_name):
-				frappe.db.set_value(
-					"Location",
-					ancestor_name,
-					{
-						"area": snapshot["area"],
-						"location": snapshot["location"],
-					},
-					update_modified=False,
-				)
-
-		for name in reversed(self.created_locations):
-			if frappe.db.exists("Location", name):
-				frappe.delete_doc(
-					"Location",
-					name,
-					force=True,
-					ignore_permissions=True,
-				)
-
-		# some of the code under test commit internally
-		frappe.db.commit()  # nosemgrep
-
 	def create_location(
 		self,
 		location_name,
