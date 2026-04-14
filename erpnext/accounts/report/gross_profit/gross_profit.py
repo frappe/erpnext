@@ -578,7 +578,11 @@ class GrossProfitGenerator:
 
 			# get buying rate
 			if flt(row.qty):
-				row.buying_rate = flt(row.buying_amount / flt(row.qty), self.float_precision)
+				row.buying_rate = (
+					flt(row.buying_amount / flt(row.qty), self.float_precision)
+					if not row.delivered_by_supplier
+					else None
+				)
 				row.base_rate = flt(row.base_amount / flt(row.qty), self.float_precision)
 			else:
 				if self.is_not_invoice_row(row):
@@ -630,7 +634,8 @@ class GrossProfitGenerator:
 						returned_item_row.qty += row.qty
 						returned_item_row.base_amount += row.base_amount
 
-			row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
+			if not row.delivered_by_supplier:
+				row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
 
 	def get_average_rate_based_on_group_by(self):
 		for key in list(self.grouped):
@@ -799,6 +804,26 @@ class GrossProfitGenerator:
 				return self.calculate_buying_amount_from_sle(
 					row, my_sle, parenttype, parent, item_row, item_code
 				)
+			elif (
+				row.delivered_by_supplier
+				and row.so_detail
+				and (
+					po_details := frappe.get_all(
+						"Purchase Order Item",
+						filters={"sales_order_item": row.so_detail, "docstatus": 1},
+						pluck="name",
+					)
+				)
+			):
+				from frappe.query_builder.functions import Sum
+
+				table = frappe.qb.DocType("Purchase Invoice Item")
+				query = (
+					frappe.qb.from_(table)
+					.select(Sum(table.stock_qty * table.base_net_rate))
+					.where((table.po_detail.isin(po_details)) & (table.docstatus == 1))
+				)
+				return flt(query.run()[0][0])
 			elif row.sales_order and row.so_detail:
 				incoming_amount = self.get_buying_amount_from_so_dn(row.sales_order, row.so_detail, item_code)
 				if incoming_amount:
@@ -951,6 +976,7 @@ class GrossProfitGenerator:
 			SalesInvoice.is_return,
 			SalesInvoiceItem.cost_center,
 			SalesInvoiceItem.serial_and_batch_bundle,
+			SalesInvoiceItem.delivered_by_supplier,
 		)
 
 		if self.filters.group_by == "Sales Person":
