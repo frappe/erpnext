@@ -499,7 +499,7 @@
   {
    "fieldname": "select_items_to_manufacture_in_line_3_section",
    "fieldtype": "Section Break",
-   "label": "Select Items to Manufacture in Line 3"
+   "label": "Select Items to Manufacture in Calacatta Mixer 3"
   },
   {
    "default": "0",
@@ -533,7 +533,7 @@
    "depends_on": "eval:doc.get_items_from && doc.docstatus == 0",
    "fieldname": "get_items_line_3",
    "fieldtype": "Button",
-   "label": "Get Finished Goods for Manufacture in Line 3"
+   "label": "Get Finished Goods for Manufacture in Calacatta Mixer 3"
   },
   {
    "depends_on": "eval:doc.get_items_from && doc.docstatus == 0",
@@ -544,12 +544,12 @@
   {
    "fieldname": "select_items_to_manufacture_in_line_1_section",
    "fieldtype": "Section Break",
-   "label": "Select Items to Manufacture in Line 1"
+   "label": "Select Items to Manufacture in Calacatta Mixer 1"
   },
   {
    "fieldname": "select_items_to_manufacture_in_line_2_section",
    "fieldtype": "Section Break",
-   "label": "Select Items to Manufacture in Line 2"
+   "label": "Select Items to Manufacture in Calacatta Mixer 2"
   },
   {
    "default": "0",
