@@ -2554,9 +2554,6 @@ class AccountsController(TransactionBase):
 		advance_amount = 0
 		base_advance_amount = 0
 
-		advance_amount = 0
-		base_advance_amount = 0
-
 		if self.get("total_advance"):
 			if party_account_currency == self.company_currency:
 				base_advance_amount = flt(self.get("total_advance"))
@@ -2645,22 +2642,6 @@ class AccountsController(TransactionBase):
 				)
 				self.ignore_default_payment_terms_template = 1
 
-		if advance_amount and self.get("payment_schedule"):
-			for d in self.get("payment_schedule"):
-				if advance_amount <= 0:
-					break
-
-				deduct = min(d.payment_amount, advance_amount)
-				base_deduct = min(d.base_payment_amount, base_advance_amount)
-
-				d.payment_amount -= deduct
-				d.base_payment_amount -= base_deduct
-				d.outstanding = d.payment_amount
-				d.base_outstanding = d.base_payment_amount
-
-				advance_amount -= deduct
-				base_advance_amount -= base_deduct
-			
 	def get_order_details(self):
 		if not self.get("items"):
 			return None, None, None
