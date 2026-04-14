@@ -195,7 +195,7 @@ function show_accounts_tree(template_rows, has_selection) {
 				label: "Tip",
 				options: `
 					<div class="alert alert-success" role="alert">
-							Tip: Select report lines to view their accounts
+							${__("Tip: Select report lines to view their accounts")}
 					</div>
 				`,
 				depends_on: has_selection ? "eval: false" : "eval: true",
@@ -387,8 +387,8 @@ function update_formula_description(frm, data_source) {
 				<h6 ${subtitle_style}>${__("Method Signature:")}</h6>
 				<div ${code_style}>
 					<pre ${pre_style}>${__(
-            "def get_custom_data(filters, periods, row): <br>&nbsp; # filters: dict — report filters (company, period, etc.) <br>&nbsp; # periods: list[dict] — period definitions <br>&nbsp; # row: dict — the current report row <br><br>&nbsp; return [1000.0, 1200.0, 1150.0]  # one value per period"
-          )}
+			"def get_custom_data(filters, periods, row): <br>&nbsp; # filters: dict — report filters (company, period, etc.) <br>&nbsp; # periods: list[dict] — period definitions <br>&nbsp; # row: dict — the current report row <br><br>&nbsp; return [1000.0, 1200.0, 1150.0]  # one value per period"
+		)}
           </pre>
 				</div>
 
