@@ -18,7 +18,15 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestLocation(ERPNextTestSuite):
+	"""
+	Integration tests for the Location doctype, covering area calculations, GeoJSON handling,
+	ancestor/child relationships, and feature management in ERPNext assets.
+	"""
+
 	def setUp(self):
+		"""
+		Set up test preconditions by snapshotting ancestor locations and initializing created locations list.
+		"""
 		self.ancestor_snapshots = {}
 		for location in ["Basil Farm", "Division 1", "Field 1", "Block 1", "Test Location Area"]:
 			if frappe.db.exists("Location", location):
@@ -34,6 +42,9 @@ class TestLocation(ERPNextTestSuite):
 		self.created_locations = []
 
 	def tearDown(self):
+		"""
+		Roll back database changes and restore ancestor location states after each test.
+		"""
 		frappe.db.rollback()
 
 		for ancestor_name, snapshot in self.ancestor_snapshots.items():
@@ -72,7 +83,7 @@ class TestLocation(ERPNextTestSuite):
 		location_geojson=None,
 	):
 		"""
-		Helper function to create location document
+		Helper function to create a Location document for testing.
 		"""
 		doc = frappe.get_doc(
 			{
@@ -95,6 +106,9 @@ class TestLocation(ERPNextTestSuite):
 		return doc
 
 	def test_calculate_location_area_polygon(self):
+		"""
+		Test area calculation for a polygon GeoJSON location.
+		"""
 		geojson = json.dumps(
 			{
 				"type": "FeatureCollection",
@@ -116,6 +130,9 @@ class TestLocation(ERPNextTestSuite):
 		self.assertGreater(location.area, 0)
 
 	def test_calculate_location_area_circle(self):
+		"""
+		Test area calculation for a circular GeoJSON location.
+		"""
 		geojson = json.dumps(
 			{
 				"type": "FeatureCollection",
@@ -135,6 +152,9 @@ class TestLocation(ERPNextTestSuite):
 		self.assertAlmostEqual(location.area, expected_area, places=2)
 
 	def test_get_location_features(self):
+		"""
+		Test extraction of features from a valid GeoJSON location.
+		"""
 		geojson = json.dumps(
 			{
 				"type": "FeatureCollection",
@@ -155,6 +175,9 @@ class TestLocation(ERPNextTestSuite):
 		self.assertEqual(features[0]["type"], "Feature")
 
 	def test_get_location_features_nested_json(self):
+		"""
+		Test extraction of features when features are stored as a JSON string.
+		"""
 		geojson = json.dumps(
 			{
 				"type": "FeatureCollection",
@@ -178,12 +201,18 @@ class TestLocation(ERPNextTestSuite):
 		self.assertEqual(features[0]["type"], "Feature")
 
 	def test_get_location_features_empty(self):
+		"""
+		Test that an empty location returns an empty features list.
+		"""
 		location = self.create_location("_Test Location")
 		features = location.get_location_features()
 
 		self.assertEqual(features, [])
 
 	def test_set_location_features(self):
+		"""
+		Test setting new features for a location and retrieving them.
+		"""
 		location = self.create_location("_Test Location")
 
 		new_features = [
@@ -202,6 +231,9 @@ class TestLocation(ERPNextTestSuite):
 		self.assertEqual(features[0]["properties"]["test"], "value")
 
 	def test_add_child_property(self):
+		"""
+		Test that child property is added to location features.
+		"""
 		geojson = json.dumps(
 			{
 				"type": "FeatureCollection",
@@ -225,6 +257,9 @@ class TestLocation(ERPNextTestSuite):
 		self.assertEqual(feature["properties"]["feature_of"], location.location_name)
 
 	def test_feature_separator(self):
+		"""
+		Test separation of child and non-child features by feature_seperator.
+		"""
 		geojson = json.dumps(
 			{
 				"type": "FeatureCollection",
@@ -250,6 +285,9 @@ class TestLocation(ERPNextTestSuite):
 		self.assertEqual(len(non_child_features), 1)
 
 	def test_update_ancestor_location_features(self):
+		"""
+		Test updating ancestor location features when a child is added.
+		"""
 		parent = self.create_location("_Test Parent Location", is_group=1)
 
 		child_geojson = json.dumps(
@@ -279,6 +317,9 @@ class TestLocation(ERPNextTestSuite):
 		self.assertTrue(parent_features[0]["properties"]["child_feature"])
 
 	def test_update_ancestor_features_with_discarded_features(self):
+		"""
+		Test that ancestor features are updated when child features are changed/discarded.
+		"""
 		parent = self.create_location("_Test Parent Location 2", is_group=1)
 
 		initial_geojson = json.dumps(
@@ -331,6 +372,9 @@ class TestLocation(ERPNextTestSuite):
 		self.assertEqual({feature["properties"]["id"] for feature in final_features}, {"feature3"})
 
 	def test_remove_ancestor_location_features(self):
+		"""
+		Test removal of ancestor features when a child location is deleted.
+		"""
 		parent = self.create_location("_Test Parent Location 3", is_group=1)
 
 		child1_geojson = json.dumps(
@@ -388,6 +432,9 @@ class TestLocation(ERPNextTestSuite):
 		)
 
 	def test_compute_area_polygon(self):
+		"""
+		Test compute_area for a polygon feature.
+		"""
 		features = [
 			{
 				"geometry": {
@@ -402,6 +449,9 @@ class TestLocation(ERPNextTestSuite):
 		self.assertGreater(area, 0)
 
 	def test_compute_area_circle(self):
+		"""
+		Test compute_area for a circle feature.
+		"""
 		radius = 100
 		features = [
 			{
@@ -415,31 +465,49 @@ class TestLocation(ERPNextTestSuite):
 		self.assertAlmostEqual(area, expected_area, places=2)
 
 	def test_compute_area_empty(self):
+		"""
+		Test compute_area returns 0 for empty features.
+		"""
 		area = compute_area([])
 		self.assertEqual(area, 0.0)
 
 	def test_polygon_area(self):
+		"""
+		Test _polygon_area for a valid polygon.
+		"""
 		coords = [[[0, 0], [0, 10], [10, 10], [10, 0], [0, 0]], [[2, 2], [2, 4], [4, 4], [4, 2], [2, 2]]]
 
 		area = _polygon_area(coords)
 		self.assertGreater(area, 0)
 
 	def test_polygon_area_empty(self):
+		"""
+		Test _polygon_area returns 0 for empty coordinates.
+		"""
 		area = _polygon_area([])
 		self.assertEqual(area, 0)
 
 	def test_ring_area(self):
+		"""
+		Test _ring_area for a valid ring.
+		"""
 		coords = [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]]
 
 		area = _ring_area(coords)
 		self.assertIsInstance(area, float)
 
 	def test_ring_area_small_polygon(self):
+		"""
+		Test _ring_area returns 0 for a small polygon (less than 3 points).
+		"""
 		coords = [[0, 0], [1, 1]]
 		area = _ring_area(coords)
 		self.assertEqual(area, 0.0)
 
 	def test_get_children_root(self):
+		"""
+		Test get_children returns root locations when parent is None.
+		"""
 		root_location = self.create_location("_Test Root Location 1", is_group=1)
 
 		children = get_children(doctype="Location", parent=None)
@@ -449,6 +517,9 @@ class TestLocation(ERPNextTestSuite):
 		self.assertIn(root_location.name, child_names)
 
 	def test_get_children_with_translated_root(self):
+		"""
+		Test get_children handles translated root location names.
+		"""
 		with patch("erpnext.assets.doctype.location.location._") as mock_translate:
 			mock_translate.side_effect = lambda x: "Todas las ubicaciones" if x == "All Locations" else x
 
@@ -462,6 +533,9 @@ class TestLocation(ERPNextTestSuite):
 			self.assertEqual(children_translated, children_empty)
 
 	def test_get_children_with_parent(self):
+		"""
+		Test get_children returns correct children for a given parent location.
+		"""
 		parent = self.create_location("_Test Parent Location 4", is_group=1)
 		child1 = self.create_location("_Test Child Location 1", parent_location=parent.name)
 		child2 = self.create_location("_Test Child Location 2", parent_location=parent.name, is_group=1)
@@ -480,6 +554,9 @@ class TestLocation(ERPNextTestSuite):
 				self.assertEqual(child["expandable"], 1)
 
 	def test_get_children_all_locations(self):
+		"""
+		Test get_children returns root locations when parent is 'All Locations'.
+		"""
 		root_location = self.create_location("_Test Root Location 2", is_group=1)
 
 		children = get_children(doctype="Location", parent="All Locations")
@@ -489,6 +566,9 @@ class TestLocation(ERPNextTestSuite):
 		self.assertIn(root_location.name, child_names)
 
 	def test_add_node(self):
+		"""
+		Test add_node creates a new Location node.
+		"""
 		frappe.local.form_dict = frappe._dict(
 			{
 				"doctype": "Location",
@@ -504,6 +584,9 @@ class TestLocation(ERPNextTestSuite):
 		self.assertTrue(frappe.db.exists("Location", {"location_name": "_Test New Node Location"}))
 
 	def test_add_node_with_all_locations_parent(self):
+		"""
+		Test add_node with 'All Locations' as parent sets parent_location to None.
+		"""
 		frappe.local.form_dict = frappe._dict(
 			{
 				"doctype": "Location",
@@ -520,6 +603,9 @@ class TestLocation(ERPNextTestSuite):
 		self.assertIsNone(location.parent_location)
 
 	def test_nested_set_lft_rgt(self):
+		"""
+		Test nested set left and right values for parent and child locations.
+		"""
 		parent = self.create_location("_Test Nested Parent", is_group=1)
 		child = self.create_location("_Test Nested Child", parent_location=parent.name)
 
@@ -531,6 +617,9 @@ class TestLocation(ERPNextTestSuite):
 		self.assertLess(child.rgt, parent.rgt)
 
 	def test_validate_if_child_exists_on_trash(self):
+		"""
+		Test that deleting a parent with children raises ValidationError.
+		"""
 		parent = self.create_location("_Test Parent To Delete", is_group=1)
 		self.create_location("_Test Child Preventing Delete", parent_location=parent.name)
 
@@ -538,6 +627,9 @@ class TestLocation(ERPNextTestSuite):
 			parent.delete()
 
 	def test_location_area_aggregation(self):
+		"""
+		Test that area aggregation for locations is correct and features are properly ordered.
+		"""
 		locations = ["Basil Farm", "Division 1", "Field 1", "Block 1"]
 		area = 0
 		formatted_locations = []
@@ -564,6 +656,9 @@ class TestLocation(ERPNextTestSuite):
 		self.assertEqual(area, test_location.get("area"))
 
 	def test_on_doctype_update(self):
+		"""
+		Test on_doctype_update creates the correct indexes for Location doctype.
+		"""
 		on_doctype_update()
 
 		result = frappe.db.sql(
