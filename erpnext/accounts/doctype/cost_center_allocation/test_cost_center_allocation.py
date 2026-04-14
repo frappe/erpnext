@@ -3,7 +3,6 @@
 
 import frappe
 from frappe.query_builder.functions import Sum
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
@@ -15,9 +14,10 @@ from erpnext.accounts.doctype.cost_center_allocation.cost_center_allocation impo
 	WrongPercentageAllocation,
 )
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestCostCenterAllocation(IntegrationTestCase):
+class TestCostCenterAllocation(ERPNextTestSuite):
 	def setUp(self):
 		cost_centers = [
 			"Main Cost Center 1",
@@ -190,7 +190,7 @@ class TestCostCenterAllocation(IntegrationTestCase):
 		coa2.cancel()
 		jv.cancel()
 
-	@IntegrationTestCase.change_settings("System Settings", {"rounding_method": "Commercial Rounding"})
+	@ERPNextTestSuite.change_settings("System Settings", {"rounding_method": "Commercial Rounding"})
 	def test_debit_credit_on_cost_center_allocation_for_commercial_rounding(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 

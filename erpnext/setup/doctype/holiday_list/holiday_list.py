@@ -109,7 +109,7 @@ class HolidayList(Document):
 			)
 
 	def sort_holidays(self):
-		self.holidays.sort(key=lambda x: getdate(x.holiday_date))
+		self.holidays.sort(key=lambda x: (x.weekly_off, getdate(x.holiday_date)))
 		for i in range(len(self.holidays)):
 			self.holidays[i].idx = i + 1
 

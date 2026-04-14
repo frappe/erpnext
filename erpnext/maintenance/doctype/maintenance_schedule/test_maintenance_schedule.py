@@ -2,7 +2,6 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import format_date
 from frappe.utils.data import add_days, formatdate, today
 
@@ -12,13 +11,12 @@ from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule impor
 )
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestMaintenanceSchedule(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		cls.make_sales_person()
+class TestMaintenanceSchedule(ERPNextTestSuite):
+	def setUp(self):
+		self.load_test_records("Stock Entry")
 
 	@classmethod
 	def make_sales_person(cls):
@@ -142,8 +140,6 @@ class TestMaintenanceSchedule(IntegrationTestCase):
 		serial_nos = get_serial_nos_from_schedule(mvi.item_name, ms.name)
 		self.assertEqual(serial_nos, ["TEST001", "TEST002"])
 
-		frappe.db.rollback()
-
 	def test_schedule_with_serials(self):
 		# Checks whether serials are automatically updated when changing in items table.
 		# Also checks if other fields trigger generate schdeule if changed in items table.
@@ -159,7 +155,7 @@ class TestMaintenanceSchedule(IntegrationTestCase):
 		self.assertFalse(ms.validate_items_table_change())
 		# After Save
 		ms.items[0].serial_no = "TEST001"
-		ms.items[0].sales_person = self.sales_person[0].name
+		ms.items[0].sales_person = "_Test Sales Person"
 		ms.items[0].no_of_visits = 2
 		self.assertTrue(ms.validate_items_table_change())
 		ms.save()
@@ -171,8 +167,6 @@ class TestMaintenanceSchedule(IntegrationTestCase):
 		self.assertEqual(len(ms.schedules), 1)
 		ms.save()
 		self.assertEqual(len(ms.schedules), 2)
-
-		frappe.db.rollback()
 
 
 def make_serial_item_with_serial(self, item_code):

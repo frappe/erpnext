@@ -5,7 +5,6 @@
 import copy
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, cint, flt, nowtime, today
 
 import erpnext
@@ -40,9 +39,10 @@ from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order im
 from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 	BOMQuantityError,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestSubcontractingReceipt(IntegrationTestCase):
+class TestSubcontractingReceipt(ERPNextTestSuite):
 	def setUp(self):
 		make_subcontracted_items()
 		make_raw_materials()
@@ -206,7 +206,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 
 		# stock raw materials in a warehouse before transfer
 		make_stock_entry(
-			target="_Test Warehouse - _TC", item_code="Test Extra Item 1", qty=10, basic_rate=100
+			target="_Test Warehouse - _TC", item_code="_Test Extra Item 1", qty=10, basic_rate=100
 		)
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test FG Item", qty=1, basic_rate=100)
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="Test Extra Item 2", qty=1, basic_rate=100)
@@ -496,13 +496,13 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 			self.assertEqual(expected_values[gle.account][0], gle.debit)
 			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
-	@IntegrationTestCase.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
 	def test_subcontracting_receipt_with_zero_service_cost(self):
 		warehouse = "Stores - TCP1"
 		service_items = [
 			{
 				"warehouse": warehouse,
-				"item_code": "Subcontracted Service Item 7",
+				"item_code": "Subcontracted Service Item 6",
 				"qty": 10,
 				"rate": 0,
 				"fg_item": "Subcontracted Item SA7",
@@ -596,6 +596,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 
 		scr.items[0].qty = 6  # Accepted Qty
 		scr.items[0].rejected_qty = 4
+		scr.set_missing_values()
 		scr.save()
 
 		# consumed_qty should be (accepted_qty * qty_consumed_per_unit) = (6 * 1) = 6
@@ -616,6 +617,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		for item in scr.supplied_items:
 			self.assertFalse(item.available_qty_for_consumption)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": True})
 	def test_supplied_items_consumed_qty_for_similar_finished_goods(self):
 		"""
 		Test that supplied raw material consumption is calculated correctly
@@ -1152,7 +1154,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		# ValidationError should not be raised as `Inspection Required before Purchase` is disabled
 		scr2.submit()
 
-	def test_scrap_items_for_subcontracting_receipt(self):
+	def test_secondary_items_for_subcontracting_receipt(self):
 		set_backflush_based_on("BOM")
 
 		fg_item = "Subcontracted Item SA1"
@@ -1164,9 +1166,9 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		]
 
 		# Create Scrap Items
-		scrap_item_1 = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
-		scrap_item_2 = make_item(properties={"is_stock_item": 1, "valuation_rate": 20}).name
-		scrap_items = [scrap_item_1, scrap_item_2]
+		secondary_item_1 = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		secondary_item_2 = make_item(properties={"is_stock_item": 1, "valuation_rate": 20}).name
+		secondary_items = [secondary_item_1, secondary_item_2]
 
 		service_items = [
 			{
@@ -1185,13 +1187,14 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		)
 		for idx, item in enumerate(bom.items):
 			item.qty = 1 * (idx + 1)
-		for idx, item in enumerate(scrap_items):
+		for idx, item in enumerate(secondary_items):
 			bom.append(
-				"scrap_items",
+				"secondary_items",
 				{
 					"item_code": item,
 					"stock_qty": 1 * (idx + 1),
 					"rate": 10 * (idx + 1),
+					"is_legacy": 1,
 				},
 			)
 		bom.save()
@@ -1214,12 +1217,13 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		# Create Subcontracting Receipt
 		scr = make_subcontracting_receipt(sco.name)
 		scr.save()
-		scr.get_scrap_items()
+		scr.get_secondary_items()
 
-		# Test - 1: Scrap Items should be fetched from BOM in items table with `is_scrap_item` = 1
-		scr_scrap_items = set([item.item_code for item in scr.items if item.is_scrap_item])
+		scr_secondary_items = set(
+			[item.item_code for item in scr.items if item.type or item.is_legacy_scrap_item]
+		)
 		self.assertEqual(len(scr.items), 3)  # 1 FG Item + 2 Scrap Items
-		self.assertEqual(scr_scrap_items, set(scrap_items))
+		self.assertEqual(scr_secondary_items, set(secondary_items))
 
 		scr.submit()
 
@@ -1288,6 +1292,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		serial_batch_bundle = frappe.get_doc(
 			{
 				"doctype": "Serial and Batch Bundle",
+				"company": sco.company,
 				"item_code": fg_item,
 				"warehouse": sco.items[0].warehouse,
 				"has_batch_no": 1,
@@ -1438,7 +1443,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		sr.reload()
 		self.assertEqual(sr.items[0].rejected_qty, 2)  # Should remain the same
 
-	@IntegrationTestCase.change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
 	def test_auto_create_purchase_receipt(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
@@ -1502,7 +1507,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 
 		self.assertEqual(pr_details[0]["total_taxes_and_charges"], 60)
 
-	@IntegrationTestCase.change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
 	def test_auto_create_purchase_receipt_with_no_reference_of_po_item(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
@@ -2000,8 +2005,8 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 
 		self.assertRaises(BOMQuantityError, scr.submit)
 
-	@IntegrationTestCase.change_settings("Buying Settings", {"over_transfer_allowance": 20})
-	@IntegrationTestCase.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 20})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"over_transfer_allowance": 20})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 20})
 	def test_over_receipt(self):
 		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
 

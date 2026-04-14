@@ -2297,6 +2297,16 @@ class AccountsController(TransactionBase):
 
 		return stock_items
 
+	def get_asset_items(self):
+		asset_items = []
+		item_codes = list(set(item.item_code for item in self.get("items")))
+		if item_codes:
+			asset_items = frappe.db.get_values(
+				"Item", {"name": ["in", item_codes], "is_fixed_asset": 1}, pluck="name", cache=True
+			)
+
+		return asset_items
+
 	def calculate_total_advance_from_ledger(self):
 		adv = frappe.qb.DocType("Advance Payment Ledger Entry")
 		return (
@@ -4335,6 +4345,8 @@ def get_missing_company_details(doctype: str, docname: str):
 	company = frappe.db.get_value(doctype, docname, "company")
 	if doctype in ["Purchase Order", "Purchase Invoice"]:
 		company_address = frappe.db.get_value(doctype, docname, "billing_address")
+	elif doctype in ["Request for Quotation"]:
+		company_address = frappe.db.get_value(doctype, docname, "shipping_address")
 	else:
 		company_address = frappe.db.get_value(doctype, docname, "company_address")
 
@@ -4366,6 +4378,15 @@ def get_missing_company_details(doctype: str, docname: str):
 
 	address_display_list = get_address_display_list("Company", company)
 	address_line = address_display_list[0].get("address_line1") if address_display_list else ""
+	needs_new_company_address = not address_line
+
+	if needs_new_company_address and not frappe.has_permission("Address", "create", throw=False):
+		frappe.msgprint(
+			_(
+				"Company Address is missing. You don't have permission to create an Address. Please contact your System Manager."
+			)
+		)
+		return
 
 	required_fields.append(company_address)
 	required_fields.append(address_line)
@@ -4388,6 +4409,18 @@ def get_missing_company_details(doctype: str, docname: str):
 def update_company_master_and_address(current_doctype: str, name: str, company: str, details: dict | str):
 	from frappe.utils import validate_email_address
 
+	if not frappe.has_permission(current_doctype, "write", doc=name, throw=False):
+		frappe.throw(
+			_("You don't have permission to update this document. Please contact your System Manager."),
+			title=_("Insufficient Permissions"),
+		)
+
+	if not frappe.has_permission("Company", "write", doc=company, throw=False):
+		frappe.throw(
+			_("You don't have permission to update Company details. Please contact your System Manager."),
+			title=_("Insufficient Permissions"),
+		)
+
 	if isinstance(details, str):
 		details = frappe.parse_json(details)
 
@@ -4402,6 +4435,13 @@ def update_company_master_and_address(current_doctype: str, name: str, company: 
 
 	company_address = details.get("company_address")
 	if details.get("address_line1"):
+		if not frappe.has_permission("Address", "create", throw=False):
+			frappe.throw(
+				_(
+					"You don't have permission to create a Company Address. Please contact your System Manager."
+				),
+				title=_("Insufficient Permissions"),
+			)
 		address_doc = frappe.get_doc(
 			{
 				"doctype": "Address",
@@ -4434,6 +4474,8 @@ def update_doc_company_address(current_doctype, docname, company_address, detail
 		"Sales Invoice": ("company_address", "company_address_display"),
 		"Delivery Note": ("company_address", "company_address_display"),
 		"POS Invoice": ("company_address", "company_address_display"),
+		"Quotation": ("company_address", "company_address_display"),
+		"Request for Quotation": ("shipping_address", "shipping_address_display"),
 	}
 
 	address_field, display_field = address_field_map.get(

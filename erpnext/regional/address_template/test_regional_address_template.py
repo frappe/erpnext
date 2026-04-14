@@ -1,8 +1,7 @@
-from unittest import TestCase
-
 import frappe
 
 from erpnext.regional.address_template.setup import get_address_templates, update_address_template
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 def ensure_country(country):
@@ -14,7 +13,7 @@ def ensure_country(country):
 		return c
 
 
-class TestRegionalAddressTemplate(TestCase):
+class TestRegionalAddressTemplate(ERPNextTestSuite):
 	def test_get_address_templates(self):
 		"""Get the countries and paths from the templates directory."""
 		templates = get_address_templates()

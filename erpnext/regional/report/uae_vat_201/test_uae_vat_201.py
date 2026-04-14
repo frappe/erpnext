@@ -1,5 +1,3 @@
-from unittest import TestCase
-
 import frappe
 
 import erpnext
@@ -15,18 +13,11 @@ from erpnext.regional.report.uae_vat_201.uae_vat_201 import (
 	get_zero_rated_total,
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse_account
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Territory", "Customer Group", "Supplier Group", "Item"]
 
-
-class TestUaeVat201(TestCase):
+class TestUaeVat201(ERPNextTestSuite):
 	def setUp(self):
-		frappe.set_user("Administrator")
-
-		frappe.db.sql("delete from `tabSales Invoice` where company='_Test Company UAE VAT'")
-		frappe.db.sql("delete from `tabPurchase Invoice` where company='_Test Company UAE VAT'")
-
-		make_company("_Test Company UAE VAT", "_TCUV")
 		set_vat_accounts()
 
 		make_customer()
@@ -63,6 +54,9 @@ class TestUaeVat201(TestCase):
 		self.assertEqual(get_standard_rated_expenses_total(filters), 250)
 		self.assertEqual(get_standard_rated_expenses_tax(filters), 1)
 
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": True}
+	)
 	def test_uae_vat_201_report_with_foreign_transaction(self):
 		pi = make_purchase_invoice(
 			company="_Test Company UAE VAT",
@@ -93,31 +87,6 @@ class TestUaeVat201(TestCase):
 		filters = {"company": "_Test Company UAE VAT"}
 		self.assertEqual(get_standard_rated_expenses_total(filters), 917.5)
 		self.assertEqual(get_standard_rated_expenses_tax(filters), 50)
-
-
-def make_company(company_name, abbr):
-	if not frappe.db.exists("Company", company_name):
-		company = frappe.get_doc(
-			{
-				"doctype": "Company",
-				"company_name": company_name,
-				"abbr": abbr,
-				"default_currency": "AED",
-				"country": "United Arab Emirates",
-				"create_chart_of_accounts_based_on": "Standard Template",
-			}
-		)
-		company.insert()
-	else:
-		company = frappe.get_doc("Company", company_name)
-
-	company.create_default_warehouses()
-
-	if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": company.name}):
-		company.create_default_cost_center()
-
-	company.save()
-	return company
 
 
 def set_vat_accounts():

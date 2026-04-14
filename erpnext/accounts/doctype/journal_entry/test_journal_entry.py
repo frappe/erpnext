@@ -2,19 +2,20 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import StockAccountInvalidTransaction
 from erpnext.exceptions import InvalidAccountCurrency
 from erpnext.selling.doctype.customer.test_customer import make_customer, set_credit_limit
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestJournalEntry(IntegrationTestCase):
-	@IntegrationTestCase.change_settings(
-		"Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1}
-	)
+class TestJournalEntry(ERPNextTestSuite):
+	def setUp(self):
+		self.load_test_records("Journal Entry")
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_journal_entry_with_against_jv(self):
 		jv_invoice = frappe.copy_doc(self.globalTestRecords["Journal Entry"][2])
 		base_jv = frappe.copy_doc(self.globalTestRecords["Journal Entry"][0])
@@ -149,7 +150,6 @@ class TestJournalEntry(IntegrationTestCase):
 
 		if account_bal == stock_bal:
 			self.assertRaises(StockAccountInvalidTransaction, jv.save)
-			frappe.db.rollback()
 		else:
 			jv.submit()
 			jv.cancel()

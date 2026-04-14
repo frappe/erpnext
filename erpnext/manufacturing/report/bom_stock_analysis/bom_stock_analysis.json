@@ -1,0 +1,31 @@
+{
+ "add_total_row": 0,
+ "add_translate_data": 0,
+ "columns": [],
+ "creation": "2026-03-23 15:42:06.064606",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": null,
+ "modified": "2026-03-23 15:48:56.933892",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM Stock Analysis",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "BOM",
+ "report_name": "BOM Stock Analysis",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Manufacturing Manager"
+  },
+  {
+   "role": "Manufacturing User"
+  }
+ ],
+ "timeout": 0
+}

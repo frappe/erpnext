@@ -10,6 +10,7 @@ erpnext.edi.import_genericode = function (listview_or_form) {
 		method: "erpnext.edi.doctype.code_list.code_list_import.import_genericode",
 		doctype: doctype,
 		docname: docname,
+		allow_web_link: false,
 		allow_toggle_private: false,
 		allow_take_photo: false,
 		on_success: function (_file_doc, r) {

@@ -3,7 +3,6 @@
 
 
 from frappe.permissions import add_user_permission, remove_user_permission
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, cstr, flt, get_time, getdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -37,6 +36,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 def get_sle(**args):
@@ -55,10 +55,10 @@ def get_sle(**args):
 	)
 
 
-class TestStockEntry(IntegrationTestCase):
-	def tearDown(self):
-		frappe.db.rollback()
-		frappe.set_user("Administrator")
+class TestStockEntry(ERPNextTestSuite):
+	def setUp(self):
+		self.load_test_records("Stock Entry")
+		frappe.local.flags.dont_execute_stock_reposts = False
 
 	def test_stock_entry_qty(self):
 		item_code = "_Test Item 2"
@@ -648,6 +648,7 @@ class TestStockEntry(IntegrationTestCase):
 				doc = frappe.new_doc("Serial No")
 				doc.serial_no = serial_no
 				doc.item_code = "_Test Serialized Item"
+				doc.company = "_Test Company"
 				doc.insert(ignore_permissions=True)
 
 		se = frappe.copy_doc(self.globalTestRecords["Stock Entry"][0])
@@ -865,7 +866,7 @@ class TestStockEntry(IntegrationTestCase):
 		fg_cost = next(filter(lambda x: x.item_code == "_Test FG Item 2", stock_entry.get("items"))).amount
 		self.assertEqual(fg_cost, flt(rm_cost + bom_operation_cost + work_order.additional_operating_cost, 2))
 
-	@IntegrationTestCase.change_settings("Manufacturing Settings", {"material_consumption": 1})
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_work_order_manufacture_with_material_consumption(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import (
 			make_stock_entry as _make_stock_entry,
@@ -907,8 +908,8 @@ class TestStockEntry(IntegrationTestCase):
 			if d.s_warehouse:
 				rm_cost += d.amount
 		fg_cost = next(filter(lambda x: x.item_code == "_Test FG Item", s.get("items"))).amount
-		scrap_cost = next(filter(lambda x: x.is_scrap_item, s.get("items"))).amount
-		self.assertEqual(fg_cost, flt(rm_cost - scrap_cost, 2))
+		secondary_item_cost = next(filter(lambda x: x.type or x.is_legacy_scrap_item, s.get("items"))).amount
+		self.assertEqual(fg_cost, flt(rm_cost - secondary_item_cost, 2))
 
 		# When Stock Entry has only FG + Scrap
 		s.items.pop(0)
@@ -987,15 +988,15 @@ class TestStockEntry(IntegrationTestCase):
 
 		self.assertRaises(frappe.ValidationError, ste.submit)
 
-	def test_quality_check_for_scrap_item(self):
+	def test_quality_check_for_secondary_item(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import (
 			make_stock_entry as _make_stock_entry,
 		)
 
-		scrap_item = "_Test Scrap Item 1"
-		make_item(scrap_item, {"is_stock_item": 1, "is_purchase_item": 0})
+		secondary_item = "_Test Scrap Item 1"
+		make_item(secondary_item, {"is_stock_item": 1, "is_purchase_item": 0})
 
-		bom_name = frappe.db.get_value("BOM Scrap Item", {"docstatus": 1}, "parent")
+		bom_name = frappe.db.get_value("BOM Secondary Item", {"docstatus": 1}, "parent")
 		production_item = frappe.db.get_value("BOM", bom_name, "item")
 
 		work_order = frappe.new_doc("Work Order")
@@ -1025,18 +1026,18 @@ class TestStockEntry(IntegrationTestCase):
 					basic_rate=row.basic_rate or 100,
 				)
 
-			if row.is_scrap_item:
-				row.item_code = scrap_item
-				row.uom = frappe.db.get_value("Item", scrap_item, "stock_uom")
-				row.stock_uom = frappe.db.get_value("Item", scrap_item, "stock_uom")
+			if row.type or row.is_legacy_scrap_item:
+				row.item_code = secondary_item
+				row.uom = frappe.db.get_value("Item", secondary_item, "stock_uom")
+				row.stock_uom = frappe.db.get_value("Item", secondary_item, "stock_uom")
 
 		stock_entry.inspection_required = 1
 		stock_entry.save()
 
-		self.assertTrue([row.item_code for row in stock_entry.items if row.is_scrap_item])
+		self.assertTrue([row.item_code for row in stock_entry.items if row.type or row.is_legacy_scrap_item])
 
 		for row in stock_entry.items:
-			if not row.is_scrap_item:
+			if not row.type and not row.is_legacy_scrap_item:
 				qc = frappe.get_doc(
 					{
 						"doctype": "Quality Inspection",
@@ -1056,7 +1057,7 @@ class TestStockEntry(IntegrationTestCase):
 		stock_entry.reload()
 		stock_entry.submit()
 		for row in stock_entry.items:
-			if row.is_scrap_item:
+			if row.type or row.is_legacy_scrap_item:
 				self.assertFalse(row.quality_inspection)
 			else:
 				self.assertTrue(row.quality_inspection)
@@ -1292,7 +1293,7 @@ class TestStockEntry(IntegrationTestCase):
 		self.assertEqual(se.items[0].expense_account, "_Test Account Cost for Goods Sold - _TC")
 		self.assertEqual(se.items[1].expense_account, "_Test Account Cost for Goods Sold - _TC")
 
-	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_future_negative_sle(self):
 		# Initialize item, batch, warehouse, opening qty
 		item_code = "_Test Future Neg Item"
@@ -1335,7 +1336,7 @@ class TestStockEntry(IntegrationTestCase):
 
 		self.assertRaises(NegativeStockError, create_stock_entries, sequence_of_entries)
 
-	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_future_negative_sle_batch(self):
 		from erpnext.stock.doctype.batch.test_batch import TestBatch
 
@@ -1463,7 +1464,7 @@ class TestStockEntry(IntegrationTestCase):
 		self.assertEqual(se.items[0].item_name, item.item_name)
 		self.assertEqual(se.items[0].stock_uom, item.stock_uom)
 
-	@IntegrationTestCase.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+	@ERPNextTestSuite.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_reposting_for_depedent_warehouse(self):
 		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_sl_entries
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -2041,6 +2042,7 @@ class TestStockEntry(IntegrationTestCase):
 				"abbr": "_TPC",
 				"default_currency": "INR",
 				"enable_perpetual_inventory": 0,
+				"country": "India",
 			}
 		).insert(ignore_permissions=True)
 
@@ -2325,7 +2327,7 @@ class TestStockEntry(IntegrationTestCase):
 		se.save()
 		se.submit()
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"sample_retention_warehouse": "_Test Warehouse 1 - _TC"}
 	)
 	def test_sample_retention_stock_entry(self):
@@ -2365,7 +2367,7 @@ class TestStockEntry(IntegrationTestCase):
 		self.assertEqual(target_sabb.entries[0].batch_no, batch)
 		self.assertEqual([entry.serial_no for entry in target_sabb.entries], serial_nos[:2])
 
-	@IntegrationTestCase.change_settings("Manufacturing Settings", {"material_consumption": 0})
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 0})
 	def test_raw_material_missing_validation(self):
 		stock_entry = make_stock_entry(
 			item_code="_Test Item",
@@ -2383,7 +2385,7 @@ class TestStockEntry(IntegrationTestCase):
 			stock_entry.save,
 		)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings",
 		{
 			"material_consumption": 1,
@@ -2400,10 +2402,14 @@ class TestStockEntry(IntegrationTestCase):
 		rm_item1 = make_item("_Battery", properties={"is_stock_item": 1}).name
 		warehouse = "Stores - WP"
 		bom_no = make_bom(item=fg_item, raw_materials=[rm_item1]).name
-		make_stock_entry(item_code=rm_item1, target=warehouse, qty=5, rate=10, purpose="Material Receipt")
+		se = make_stock_entry(
+			item_code=rm_item1, target=warehouse, qty=5, rate=10, purpose="Material Receipt"
+		)
 
 		work_order = make_work_order(bom_no, fg_item, 5)
+		work_order.company = se.company
 		work_order.skip_transfer = 1
+		work_order.source_warehouse = warehouse
 		work_order.fg_warehouse = warehouse
 		work_order.submit()
 
@@ -2415,12 +2421,11 @@ class TestStockEntry(IntegrationTestCase):
 		Unit test case to check the document naming rule with company condition
 		For Quality Inspection, when created from Stock Entry.
 		"""
-		from erpnext.accounts.report.trial_balance.test_trial_balance import create_company
 		from erpnext.controllers.stock_controller import make_quality_inspections
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		# create a separate company to handle document naming rule with company condition
-		qc_company = create_company(company_name="Test Quality Company")
+		qc_company = "Test Quality Company"
 
 		# create document naming rule based on that for Quality Inspection Doctype
 		qc_naming_rule = frappe.new_doc(
@@ -2457,6 +2462,35 @@ class TestStockEntry(IntegrationTestCase):
 
 		# delete naming rule
 		frappe.delete_doc("Document Naming Rule", qc_naming_rule.name)
+
+	def test_co_by_product(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		frappe.set_value("UOM", "Nos", "must_be_whole_number", 0)
+
+		fg_item = make_item("FG Item", properties={"is_stock_item": 1}).name
+		rm_item = make_item("RM Item", properties={"is_stock_item": 1}).name
+		scrap_item = make_item("Scrap Item", properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=5, rate=10, purpose="Material Receipt")
+
+		bom_no = make_bom(
+			item=fg_item, raw_materials=[rm_item], scrap_items=[scrap_item], process_loss_percentage=10
+		).name
+		se = make_stock_entry(item_code=fg_item, qty=5, purpose="Manufacture", do_not_save=True)
+		se.from_bom = 1
+		se.bom_no = bom_no
+		se.fg_completed_qty = 5
+		se.from_warehouse = warehouse
+		se.to_warehouse = "_Test Warehouse 1 - _TC"
+		se.get_items()
+		se.save()
+		se.reload()
+
+		self.assertEqual(se.items[1].qty, 4.5)
+		self.assertEqual(se.items[1].amount, 45)
+		self.assertEqual(se.items[2].qty, 4.5)
+		self.assertEqual(se.items[2].amount, 5)
 
 
 def make_serialized_item(self, **args):

@@ -4,6 +4,7 @@
  "creation": "2024-10-16 16:57:12.085072",
  "doctype": "DocType",
  "engine": "InnoDB",
+ "is_submittable": 1,
  "field_order": [
   "company",
   "voucher_type",

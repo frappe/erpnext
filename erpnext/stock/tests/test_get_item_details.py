@@ -1,12 +1,10 @@
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.stock.get_item_details import get_item_details
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Customer", "Supplier", "Item", "Price List", "Item Price"]
 
-
-class TestGetItemDetail(IntegrationTestCase):
+class TestGetItemDetail(ERPNextTestSuite):
 	def test_get_item_detail_purchase_order(self):
 		args = frappe._dict(
 			{

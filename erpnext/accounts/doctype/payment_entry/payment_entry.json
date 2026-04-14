@@ -89,6 +89,7 @@
   "remarks",
   "base_in_words",
   "is_opening",
+  "title",
   "column_break_16",
   "letter_head",
   "print_heading",
@@ -96,10 +97,9 @@
   "bank_account_no",
   "payment_order",
   "in_words",
-  "subscription_section",
-  "auto_repeat",
   "amended_from",
-  "title"
+  "auto_repeat_section",
+  "auto_repeat"
  ],
  "fields": [
   {
@@ -504,11 +504,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "subscription_section",
-   "fieldtype": "Section Break",
-   "label": "Subscription Section"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "auto_repeat",
    "fieldtype": "Link",
@@ -781,6 +776,11 @@
    "fieldname": "override_tax_withholding_entries",
    "fieldtype": "Check",
    "label": "Edit Tax Withholding Entries"
+  },
+  {
+   "fieldname": "auto_repeat_section",
+   "fieldtype": "Section Break",
+   "label": "Auto Repeat"
   }
  ],
  "grid_page_length": 50,

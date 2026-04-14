@@ -2,10 +2,11 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
+
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestIssuePriority(IntegrationTestCase):
+class TestIssuePriority(ERPNextTestSuite):
 	def test_priorities(self):
 		make_priorities()
 		priorities = frappe.get_list("Issue Priority")

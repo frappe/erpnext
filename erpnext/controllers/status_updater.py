@@ -267,8 +267,8 @@ class StatusUpdater(Document):
 		self.global_amount_allowance = None
 
 		for args in self.status_updater:
-			if "target_ref_field" not in args:
-				# if target_ref_field is not specified, the programmer does not want to validate qty / amount
+			if "target_ref_field" not in args or args.get("validate_qty") is False:
+				# if target_ref_field is not specified or validate_qty is explicitly set to False, skip validation
 				continue
 
 			items_to_validate = []
@@ -341,7 +341,7 @@ class StatusUpdater(Document):
 					item_details.extend(self.fetch_items_with_pending_qty(args, "item_code", regular_items))
 
 				# Query production plan items with production_item field
-				if pp_items:
+				if pp_items and args.get("target_dt") in ["Production Plan Sub Assembly Item"]:
 					item_details.extend(self.fetch_items_with_pending_qty(args, "production_item", pp_items))
 
 				item_lookup = {item.name: item for item in item_details}
@@ -444,7 +444,10 @@ class StatusUpdater(Document):
 		):
 			return
 
-		if args["source_dt"] != "Pick List Item" and args["target_dt"] != "Quotation Item":
+		if args["source_dt"] != "Pick List Item" and args["target_dt"] not in [
+			"Quotation Item",
+			"Packed Item",
+		]:
 			if qty_or_amount == "qty":
 				action_msg = _(
 					'To allow over receipt / delivery, update "Over Receipt/Delivery Allowance" in Stock Settings or the Item.'

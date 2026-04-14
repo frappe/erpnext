@@ -173,6 +173,7 @@ class POSInvoice(SalesInvoice):
 		terms: DF.TextEditor | None
 		territory: DF.Link | None
 		timesheets: DF.Table[SalesInvoiceTimesheet]
+		title: DF.Data | None
 		to_date: DF.Date | None
 		total: DF.Currency
 		total_advance: DF.Currency
@@ -867,11 +868,16 @@ class POSInvoice(SalesInvoice):
 
 		idx = self.payments[-1].idx if self.payments else -1
 
+		self.reload()
+		self.flags.ignore_validate_update_after_submit = True
+
 		for d in payments:
 			idx += 1
 			payment = create_payments_on_invoice(self, idx, frappe._dict(d))
 			paid_amount += flt(payment.amount)
-			payment.submit()
+			self.append("payments", payment)
+
+		self.save()
 
 		paid_amount = flt(flt(paid_amount), self.precision("paid_amount"))
 		base_paid_amount = flt(flt(paid_amount * self.conversion_rate), self.precision("base_paid_amount"))

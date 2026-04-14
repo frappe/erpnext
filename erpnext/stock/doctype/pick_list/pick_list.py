@@ -30,6 +30,15 @@ from erpnext.stock.serial_batch_bundle import (
 )
 from erpnext.utilities.transaction_base import TransactionBase
 
+
+class MissingWarehouseValidationError(frappe.ValidationError):
+	pass
+
+
+class IncorrectWarehouseValidationError(frappe.ValidationError):
+	pass
+
+
 # TODO: Prioritize SO or WO group warehouse
 
 
@@ -79,6 +88,7 @@ class PickList(TransactionBase):
 				"join_field": "material_request_item",
 				"target_ref_field": "stock_qty",
 				"source_field": "stock_qty",
+				"validate_qty": False,
 			}
 		]
 
@@ -110,6 +120,7 @@ class PickList(TransactionBase):
 
 		if self.get("locations"):
 			self.validate_sales_order_percentage()
+			self.validate_warehouses()
 
 	def validate_stock_qty(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -152,6 +163,31 @@ class PickList(TransactionBase):
 						"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} in the warehouse {4}."
 					).format(row.idx, row.picked_qty, bold(row.item_code), bin_qty, bold(row.warehouse)),
 					title=_("Insufficient Stock"),
+				)
+
+	def validate_warehouses(self):
+		for location in self.locations:
+			if not location.warehouse:
+				frappe.throw(
+					_("Row {0}: Warehouse is required").format(location.idx),
+					title=_("Missing Warehouse"),
+					exc=MissingWarehouseValidationError,
+				)
+
+			company = frappe.get_cached_value("Warehouse", location.warehouse, "company")
+
+			if company != self.company:
+				frappe.throw(
+					_(
+						"Row {0}: Warehouse {1} is linked to company {2}. Please select a warehouse belonging to company {3}."
+					).format(
+						location.idx,
+						frappe.bold(location.warehouse),
+						frappe.bold(company),
+						frappe.bold(self.company),
+					),
+					title=_("Incorrect Warehouse"),
+					exc=IncorrectWarehouseValidationError,
 				)
 
 	def check_serial_no_status(self):
@@ -489,8 +525,26 @@ class PickList(TransactionBase):
 		self.item_location_map = frappe._dict()
 
 		from_warehouses = [self.parent_warehouse] if self.parent_warehouse else []
-		if self.parent_warehouse:
-			from_warehouses.extend(get_descendants_of("Warehouse", self.parent_warehouse))
+
+		if self.work_order:
+			root_warehouse = frappe.db.get_value(
+				"Warehouse", {"company": self.company, "parent_warehouse": ["IS", "NOT SET"], "is_group": 1}
+			)
+
+			from_warehouses = [root_warehouse]
+
+		if from_warehouses:
+			from_warehouses.extend(get_descendants_of("Warehouse", from_warehouses[0]))
+
+		item_warehouse_dict = frappe._dict()
+		if self.work_order:
+			item_warehouse_list = frappe.get_all(
+				"Work Order Item",
+				filters={"parent": self.work_order},
+				fields=["item_code", "source_warehouse"],
+			)
+			if item_warehouse_list:
+				item_warehouse_dict = {item.item_code: item.source_warehouse for item in item_warehouse_list}
 
 		# Create replica before resetting, to handle empty table on update after submit.
 		locations_replica = self.get("locations")
@@ -508,6 +562,13 @@ class PickList(TransactionBase):
 		len_idx = len(self.get("locations")) or 0
 		for item_doc in items:
 			item_code = item_doc.item_code
+			priority_warehouses = []
+
+			if self.work_order and item_warehouse_dict.get(item_code):
+				source_warehouse = item_warehouse_dict.get(item_code)
+				priority_warehouses = [source_warehouse]
+				priority_warehouses.extend(get_descendants_of("Warehouse", source_warehouse))
+				from_warehouses = list(dict.fromkeys(priority_warehouses + from_warehouses))
 
 			self.item_location_map.setdefault(
 				item_code,
@@ -518,6 +579,7 @@ class PickList(TransactionBase):
 					self.company,
 					picked_item_details=picked_items_details.get(item_code),
 					consider_rejected_warehouses=self.consider_rejected_warehouses,
+					priority_warehouses=priority_warehouses,
 				),
 			)
 
@@ -935,6 +997,7 @@ def get_available_item_locations(
 	ignore_validation=False,
 	picked_item_details=None,
 	consider_rejected_warehouses=False,
+	priority_warehouses=None,
 ):
 	locations = []
 
@@ -960,6 +1023,7 @@ def get_available_item_locations(
 		locations = get_available_item_locations_for_batched_item(
 			item_code,
 			from_warehouses,
+			company,
 			consider_rejected_warehouses=consider_rejected_warehouses,
 		)
 	else:
@@ -974,7 +1038,7 @@ def get_available_item_locations(
 		locations = filter_locations_by_picked_materials(locations, picked_item_details)
 
 	if locations:
-		locations = get_locations_based_on_required_qty(locations, required_qty)
+		locations = get_locations_based_on_required_qty(locations, required_qty, priority_warehouses)
 
 	if not ignore_validation:
 		validate_picked_materials(item_code, required_qty, locations, picked_item_details)
@@ -982,8 +1046,13 @@ def get_available_item_locations(
 	return locations
 
 
-def get_locations_based_on_required_qty(locations, required_qty):
+def get_locations_based_on_required_qty(locations, required_qty, priority_warehouses):
 	filtered_locations = []
+
+	if priority_warehouses:
+		priority_locations = [loc for loc in locations if loc.warehouse in priority_warehouses]
+		fallback_locations = [loc for loc in locations if loc.warehouse not in priority_warehouses]
+		locations = priority_locations + fallback_locations
 
 	for location in locations:
 		if location.qty >= required_qty:
@@ -1060,6 +1129,7 @@ def get_available_item_locations_for_serial_and_batched_item(
 	locations = get_available_item_locations_for_batched_item(
 		item_code,
 		from_warehouses,
+		company,
 		consider_rejected_warehouses=consider_rejected_warehouses,
 	)
 
@@ -1140,6 +1210,7 @@ def get_available_item_locations_for_serialized_item(
 def get_available_item_locations_for_batched_item(
 	item_code,
 	from_warehouses,
+	company,
 	consider_rejected_warehouses=False,
 ):
 	locations = []
@@ -1148,6 +1219,7 @@ def get_available_item_locations_for_batched_item(
 			{
 				"item_code": item_code,
 				"warehouse": from_warehouses,
+				"company": company,
 				"based_on": frappe.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
 			}
 		)

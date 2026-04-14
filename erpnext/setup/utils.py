@@ -4,43 +4,10 @@
 import frappe
 from frappe import _
 from frappe.utils import add_days, flt, get_datetime_str, nowdate
-from frappe.utils.data import DateTimeLikeObject, now_datetime
+from frappe.utils.data import DateTimeLikeObject
 from frappe.utils.nestedset import get_root_of
 
 from erpnext import get_default_company
-
-
-def before_tests():
-	frappe.clear_cache()
-	# complete setup if missing
-	from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
-
-	if not frappe.db.a_row_exists("Company"):
-		current_year = now_datetime().year
-		setup_complete(
-			{
-				"currency": "USD",
-				"full_name": "Test User",
-				"company_name": "Wind Power LLC",
-				"timezone": "America/New_York",
-				"company_abbr": "WP",
-				"industry": "Manufacturing",
-				"country": "United States",
-				"fy_start_date": f"{current_year}-01-01",
-				"fy_end_date": f"{current_year}-12-31",
-				"language": "english",
-				"company_tagline": "Testing",
-				"email": "test@erpnext.com",
-				"password": "test",
-				"chart_of_accounts": "Standard",
-			}
-		)
-
-	_enable_all_roles_for_admin()
-
-	set_defaults_for_tests()
-
-	frappe.db.commit()
 
 
 def get_pegged_currencies():

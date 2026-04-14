@@ -2,30 +2,23 @@
 # See license.txt
 
 import datetime
+from unittest.mock import patch
 
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_months, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Supplier Group", "Customer Group"]
 
-
-class TestTaxWithholdingCategory(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
+class TestTaxWithholdingCategory(ERPNextTestSuite):
+	def setUp(self):
 		# create relevant supplier, etc
 		create_records()
 		create_tax_withholding_category_records()
-		make_pan_no_field()
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 	def validate_tax_withholding_entries(self, doctype, docname, expected_entries):
 		"""Validate tax withholding entries for a document"""
@@ -1036,6 +1029,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 		self.cleanup_invoices(invoices)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
 	def test_tds_calculation_on_net_total_partial_tds(self):
 		self.setup_party_with_category("Supplier", "Test TDS Supplier4", "Cumulative Threshold TDS")
 		invoices = []
@@ -2049,7 +2043,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.assertEqual(pi2.taxes, [])
 		self.assertEqual(payment.taxes[0].tax_amount, 6000)
 
-	@IntegrationTestCase.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
 	def test_tds_payment_entry_cancellation(self):
 		"""
 		Test payment entry cancellation clears withholding references from matched entries
@@ -2227,7 +2221,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.validate_tax_withholding_entries("Purchase Invoice", pi1.name, expected_entries)
 		self.cleanup_invoices(invoices)
 
-	@IntegrationTestCase.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
 	def test_tds_purchase_invoice_cancellation(self):
 		"""
 		Test that after cancellation, new documents get automatically adjusted against remaining entries
@@ -3548,6 +3542,47 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		entry.withholding_amount = 5001  # Should be 5000 (10% of 50000)
 		self.assertRaisesRegex(frappe.ValidationError, "Withholding Amount.*does not match", pi.save)
 
+	def test_tax_id_is_set_in_all_generated_entries_from_party_doctype(self):
+		self.setup_party_with_category("Supplier", "Test TDS Supplier3", "New TDS Category")
+		frappe.db.set_value("Supplier", "Test TDS Supplier3", "tax_id", "ABCTY1234D")
+
+		pi = create_purchase_invoice(supplier="Test TDS Supplier3", rate=40000)
+		pi.submit()
+
+		entries = frappe.get_all(
+			"Tax Withholding Entry",
+			filters={"parenttype": "Purchase Invoice", "parent": pi.name},
+			fields=["name", "tax_id"],
+		)
+
+		self.assertTrue(entries)
+		self.assertTrue(all(entry.tax_id == "ABCTY1234D" for entry in entries))
+
+	def test_threshold_considers_two_parties_with_same_tax_id_with_overrided_hook(self):
+		self.setup_party_with_category("Supplier", "Test TDS Supplier1", "Cumulative Threshold TDS")
+		self.setup_party_with_category("Supplier", "Test TDS Supplier2", "Cumulative Threshold TDS")
+
+		with patch(
+			"erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category.get_tax_id_for_party",
+			return_value="AAAPL1234C",
+		):
+			pi1 = create_purchase_invoice(supplier="Test TDS Supplier1", rate=20000)
+			pi1.submit()
+
+			pi2 = create_purchase_invoice(supplier="Test TDS Supplier2", rate=20000)
+
+			pi2.submit()
+
+		entries = frappe.get_all(
+			"Tax Withholding Entry",
+			filters={"parenttype": "Purchase Invoice", "parent": pi2.name},
+			fields=["status", "withholding_amount"],
+		)
+
+		self.assertEqual(len(entries), 1)
+		self.assertEqual(entries[0].status, "Settled")
+		self.assertEqual(entries[0].withholding_amount, 2000.0)
+
 
 def create_purchase_invoice(**args):
 	# return sales invoice doc object
@@ -4004,18 +4039,3 @@ def create_lower_deduction_certificate(
 				"certificate_limit": limit,
 			}
 		).insert()
-
-
-def make_pan_no_field():
-	pan_field = {
-		"Supplier": [
-			{
-				"fieldname": "pan",
-				"label": "PAN",
-				"fieldtype": "Data",
-				"translatable": 0,
-			}
-		]
-	}
-
-	create_custom_fields(pan_field, update=1)

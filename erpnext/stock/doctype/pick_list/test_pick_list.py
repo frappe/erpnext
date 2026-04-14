@@ -3,7 +3,6 @@
 
 import frappe
 from frappe import _dict
-from frappe.tests import IntegrationTestCase
 
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
@@ -21,11 +20,10 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Sales Invoice", "Stock Entry", "Batch"]
 
-
-class TestPickList(IntegrationTestCase):
+class TestPickList(ERPNextTestSuite):
 	def test_pick_list_picks_warehouse_for_each_item(self):
 		item_code = make_item().name
 		try:
@@ -211,6 +209,7 @@ class TestPickList(IntegrationTestCase):
 						"qty": 1000,
 						"stock_qty": 1000,
 						"conversion_factor": 1,
+						"warehouse": "_Test Warehouse - _TC",
 						"sales_order": so.name,
 						"sales_order_item": so.items[0].name,
 					}
@@ -267,6 +266,129 @@ class TestPickList(IntegrationTestCase):
 
 		pr1.cancel()
 		pr2.cancel()
+
+	def test_pick_list_warehouse_for_batched_item(self):
+		"""
+		Test that pick list respects company based warehouse assignment for batched items.
+
+		This test verifies that when creating a pick list for a batched item,
+		the system correctly identifies and assigns the appropriate warehouse
+		based on the company.
+		"""
+		from erpnext.stock.doctype.batch.test_batch import make_new_batch
+
+		batch_company = frappe.get_doc(
+			{
+				"doctype": "Company",
+				"company_name": "Batch Company",
+				"default_currency": "INR",
+				"country": "India",
+			}
+		)
+		batch_company.insert()
+
+		batch_warehouse = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "Batch Warehouse",
+				"company": batch_company.name,
+			}
+		)
+		batch_warehouse.insert()
+
+		batch_item = frappe.db.exists("Item", "Batch Warehouse Item")
+		if not batch_item:
+			batch_item = create_item("Batch Warehouse Item")
+			batch_item.has_batch_no = 1
+			batch_item.create_new_batch = 1
+			batch_item.save()
+		else:
+			batch_item = frappe.get_doc("Item", "Batch Warehouse Item")
+
+		batch_no = make_new_batch(item_code=batch_item.name, batch_id="B-WH-ITEM-001")
+
+		make_stock_entry(
+			item_code=batch_item.name,
+			qty=5,
+			company=batch_company.name,
+			to_warehouse=batch_warehouse.name,
+			batch_no=batch_no.name,
+			rate=100.0,
+		)
+		make_stock_entry(
+			item_code=batch_item.name,
+			qty=5,
+			to_warehouse="_Test Warehouse - _TC",
+			batch_no=batch_no.name,
+			rate=100.0,
+		)
+
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": batch_company.name,
+				"purpose": "Material Transfer",
+				"locations": [
+					{
+						"item_code": batch_item.name,
+						"qty": 10,
+						"stock_qty": 10,
+						"conversion_factor": 1,
+					}
+				],
+			}
+		)
+
+		pick_list.set_item_locations()
+		self.assertEqual(len(pick_list.locations), 1)
+		self.assertEqual(pick_list.locations[0].qty, 5)
+		self.assertEqual(pick_list.locations[0].batch_no, batch_no.name)
+		self.assertEqual(pick_list.locations[0].warehouse, batch_warehouse.name)
+
+	def test_pick_list_warehouse_validation(self):
+		"""check if the warehouse validations are triggered"""
+		from erpnext.stock.doctype.pick_list.pick_list import (
+			IncorrectWarehouseValidationError,
+			MissingWarehouseValidationError,
+		)
+
+		warehouse_item = create_item("Warehouse Item")
+		temp_company = frappe.get_doc(
+			{
+				"doctype": "Company",
+				"company_name": "Temp Company",
+				"default_currency": "INR",
+				"country": "India",
+			}
+		).insert()
+		temp_warehouse = frappe.get_doc(
+			{"doctype": "Warehouse", "warehouse_name": "Temp Warehouse", "company": temp_company.name}
+		).insert()
+
+		make_stock_entry(item_code=warehouse_item.name, qty=10, rate=100.0, to_warehouse=temp_warehouse.name)
+
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": temp_company.name,
+				"purpose": "Material Transfer",
+				"pick_manually": 1,
+				"locations": [
+					{
+						"item_code": warehouse_item.name,
+						"qty": 5,
+						"stock_qty": 5,
+						"conversion_factor": 1,
+					}
+				],
+			}
+		)
+
+		self.assertRaises(MissingWarehouseValidationError, pick_list.insert)
+		pick_list.locations[0].warehouse = "_Test Warehouse - _TC"
+		self.assertRaises(IncorrectWarehouseValidationError, pick_list.insert)
+		pick_list.locations[0].warehouse = temp_warehouse.name
+		pick_list.insert()
 
 	def test_pick_list_for_batched_and_serialised_item(self):
 		# check if oldest batch no and serial nos are picked
@@ -398,6 +520,7 @@ class TestPickList(IntegrationTestCase):
 		self.assertEqual(pick_list.locations[1].qty, 5)
 		self.assertEqual(pick_list.locations[1].sales_order_item, sales_order.items[0].name)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_pick_list_for_items_with_multiple_UOM(self):
 		item_code = make_item(
 			uoms=[
@@ -927,6 +1050,53 @@ class TestPickList(IntegrationTestCase):
 		pl = create_pick_list(so.name)
 		self.assertFalse(pl.locations)
 
+	def test_pick_list_warehouse_for_work_order(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.work_order import create_pick_list, make_work_order
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		# Create Warehouses for Work Order
+		source_warehouse = create_warehouse("_Test WO Warehouse")
+		wip_warehouse = create_warehouse("_Test WIP Warehouse", company="_Test Company")
+		fg_warehouse = create_warehouse("_Test Finished Goods Warehouse", company="_Test Company")
+
+		# Create Finished Good Item
+		fg_item = make_item("Test Work Order Finished Good Item", properties={"is_stock_item": 1}).name
+
+		# Create Raw Material Item
+		rm_item = make_item("Test Work Order Raw Material Item", properties={"is_stock_item": 1}).name
+
+		# Create BOM
+		bom = make_bom(item=fg_item, rate=100, raw_materials=[rm_item])
+
+		# Create Inward entry for Raw Material
+		make_stock_entry(item=rm_item, to_warehouse=wip_warehouse, qty=10)
+		make_stock_entry(item=rm_item, to_warehouse=source_warehouse, qty=10)
+
+		# Create Work Order
+		wo = make_work_order(item=fg_item, qty=5, bom_no=bom.name, company="_Test Company")
+		wo.required_items[0].source_warehouse = source_warehouse
+		wo.fg_warehouse = fg_warehouse
+		wo.skip_transfer = True
+		wo.submit()
+
+		# Create Pick List
+		pl = create_pick_list(wo.name, for_qty=wo.qty)
+
+		# System prioritises the Source Warehouse
+		self.assertEqual(pl.locations[0].warehouse, source_warehouse)
+		self.assertEqual(pl.locations[0].item_code, rm_item)
+		self.assertEqual(pl.locations[0].qty, 5)
+
+		# Create Outward Entry from Source Warehouse
+		make_stock_entry(item=rm_item, from_warehouse=source_warehouse, qty=10)
+		pl.set_item_locations()
+
+		# System should pick other available warehouses
+		self.assertEqual(pl.locations[0].warehouse, wip_warehouse)
+		self.assertEqual(pl.locations[0].item_code, rm_item)
+		self.assertEqual(pl.locations[0].qty, 5)
+
 	def test_pick_list_validation_for_serial_no(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(
@@ -1262,6 +1432,7 @@ class TestPickList(IntegrationTestCase):
 
 		frappe.db.set_single_value("Stock Settings", "over_picking_allowance", 0)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_ignore_pricing_rule_in_pick_list(self):
 		frappe.flags.print_stmt = False
 		warehouse = "_Test Warehouse - _TC"
@@ -1363,6 +1534,7 @@ class TestPickList(IntegrationTestCase):
 		for loc in pl.locations:
 			self.assertEqual(loc.batch_no, batch2)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_multiple_pick_lists_delivery_note(self):
 		from erpnext.stock.doctype.pick_list.pick_list import create_dn_for_pick_lists
 
@@ -1449,6 +1621,7 @@ class TestPickList(IntegrationTestCase):
 		stock_entry_2.cancel()
 		stock_entry_3.cancel()
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_packed_item_multiple_times_in_so(self):
 		frappe.db.delete("Item Price")
 		warehouse_1 = "_Test Warehouse - _TC"

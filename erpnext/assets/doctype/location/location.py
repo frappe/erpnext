@@ -78,7 +78,7 @@ class Location(NestedSet):
 		location = json.loads(self.location)
 		location["features"] = features
 
-		self.db_set("location", json.dumps(location), commit=True)
+		self.db_set("location", json.dumps(location))
 
 	def update_ancestor_location_features(self):
 		self_features = set(self.add_child_property())
@@ -106,7 +106,7 @@ class Location(NestedSet):
 				ancestor_features[index] = json.loads(feature)
 
 			ancestor_doc.set_location_features(features=ancestor_features)
-			ancestor_doc.db_set("area", ancestor_doc.area + self.area_difference, commit=True)
+			ancestor_doc.db_set("area", ancestor_doc.area + self.area_difference)
 
 	def remove_ancestor_location_features(self):
 		for ancestor in self.get_ancestors():
@@ -117,7 +117,7 @@ class Location(NestedSet):
 				ancestor_features[index] = json.loads(feature)
 
 			ancestor_doc.set_location_features(features=ancestor_features)
-			ancestor_doc.db_set("area", ancestor_doc.area - self.area, commit=True)
+			ancestor_doc.db_set("area", ancestor_doc.area - self.area)
 
 	def add_child_property(self):
 		features = self.get_location_features()

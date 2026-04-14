@@ -3,19 +3,15 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase
+
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestTransactionDeletionRecord(IntegrationTestCase):
+class TestTransactionDeletionRecord(ERPNextTestSuite):
 	def setUp(self):
 		# Clear all deletion cache flags from previous tests
 		self._clear_all_deletion_cache_flags()
 		create_company("Dunder Mifflin Paper Co")
-
-	def tearDown(self):
-		# Clean up all deletion cache flags after each test
-		self._clear_all_deletion_cache_flags()
-		frappe.db.rollback()
 
 	def _clear_all_deletion_cache_flags(self):
 		"""Clear all deletion_running_doctype:* cache keys"""
@@ -384,7 +380,9 @@ class TestTransactionDeletionRecord(IntegrationTestCase):
 
 
 def create_company(company_name):
-	company = frappe.get_doc({"doctype": "Company", "company_name": company_name, "default_currency": "INR"})
+	company = frappe.get_doc(
+		{"doctype": "Company", "company_name": company_name, "default_currency": "INR", "country": "India"}
+	)
 	company.insert(ignore_if_duplicate=True)
 
 

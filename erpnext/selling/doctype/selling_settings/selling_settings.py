@@ -41,7 +41,7 @@ class SellingSettings(Document):
 		blanket_order_allowance: DF.Float
 		cust_master_name: DF.Literal["Customer Name", "Naming Series", "Auto Name"]
 		customer_group: DF.Link | None
-		deliver_scrap_items: DF.Check
+		deliver_secondary_items: DF.Check
 		dn_required: DF.Literal["No", "Yes"]
 		dont_reserve_sales_order_qty_on_sales_return: DF.Check
 		editable_bundle_item_rates: DF.Check
@@ -93,10 +93,10 @@ class SellingSettings(Document):
 
 		self.validate_fallback_to_default_price_list()
 
-		if old_doc.enable_tracking_sales_commissions != self.enable_tracking_sales_commissions:
+		if old_doc and old_doc.enable_tracking_sales_commissions != self.enable_tracking_sales_commissions:
 			toggle_tracking_sales_commissions_section(not self.enable_tracking_sales_commissions)
 
-		if old_doc.enable_utm != self.enable_utm:
+		if old_doc and old_doc.enable_utm != self.enable_utm:
 			toggle_utm_analytics_section(not self.enable_utm)
 
 	def validate_fallback_to_default_price_list(self):

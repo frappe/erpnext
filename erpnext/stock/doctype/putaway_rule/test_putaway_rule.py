@@ -2,7 +2,6 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.stock.doctype.batch.test_batch import make_new_batch
 from erpnext.stock.doctype.item.test_item import make_item
@@ -14,9 +13,10 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestPutawayRule(IntegrationTestCase):
+class TestPutawayRule(ERPNextTestSuite):
 	def setUp(self):
 		if not frappe.db.exists("Item", "_Rice"):
 			make_item(

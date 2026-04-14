@@ -1615,12 +1615,16 @@ def parse_naming_series_variable(doc, variable):
 
 	else:
 		data = {"YY": "%y", "YYYY": "%Y", "MM": "%m", "DD": "%d", "JJJ": "%j"}
+
+		if doc and doc.doctype in ["Batch", "Serial No"] and doc.reference_doctype and doc.reference_name:
+			doc = frappe.get_doc(doc.reference_doctype, doc.reference_name)
+
 		date = (
 			(
 				getdate(doc.get("posting_date") or doc.get("transaction_date") or doc.get("posting_datetime"))
 				or now_datetime()
 			)
-			if frappe.get_single_value("Global Defaults", "use_posting_datetime_for_naming_documents")
+			if doc and frappe.get_single_value("Global Defaults", "use_posting_datetime_for_naming_documents")
 			else now_datetime()
 		)
 		return date.strftime(data[variable]) if variable in data else determine_consecutive_week_number(date)
@@ -2142,6 +2146,7 @@ def create_payment_ledger_entry(
 				if is_immutable_ledger_enabled():
 					ple.delinked = 0
 					ple.posting_date = frappe.form_dict.get("posting_date") or getdate()
+				ple.flags.ignore_links = True
 
 			ple.flags.ignore_permissions = 1
 			ple.flags.adv_adj = adv_adj

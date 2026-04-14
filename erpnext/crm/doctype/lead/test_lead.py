@@ -10,19 +10,16 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestLead(ERPNextTestSuite):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		cls.make_leads()
-
 	def test_make_customer(self):
 		from erpnext.crm.doctype.lead.lead import make_customer
 
+		lead = frappe.db.get_all("Lead", {"lead_name": "_Test Lead"})[0].name
+
 		frappe.delete_doc_if_exists("Customer", "_Test Lead")
 
-		customer = make_customer(self.leads[0].name)
+		customer = make_customer(lead)
 		self.assertEqual(customer.doctype, "Customer")
-		self.assertEqual(customer.lead_name, self.leads[0].name)
+		self.assertEqual(customer.lead_name, lead)
 
 		customer.company = "_Test Company"
 		customer.customer_group = "_Test Customer Group"
@@ -46,9 +43,10 @@ class TestLead(ERPNextTestSuite):
 	def test_make_customer_from_organization(self):
 		from erpnext.crm.doctype.lead.lead import make_customer
 
-		customer = make_customer(self.leads[1].name)
+		lead = frappe.db.get_all("Lead", {"lead_name": "_Test Lead 1"})[0].name
+		customer = make_customer(lead)
 		self.assertEqual(customer.doctype, "Customer")
-		self.assertEqual(customer.lead_name, self.leads[1].name)
+		self.assertEqual(customer.lead_name, lead)
 
 		customer.company = "_Test Company"
 		customer.customer_group = "_Test Customer Group"
@@ -125,6 +123,7 @@ class TestLead(ERPNextTestSuite):
 		create_todo("followup", "Lead", lead.name)
 
 		opportunity = make_opportunity(lead.name)
+		opportunity.company = "_Test Company"
 		opportunity.save()
 
 		self.assertEqual(opportunity.get("party_name"), lead.name)

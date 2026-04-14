@@ -390,11 +390,20 @@ def get_columns(filters):
 				"width": 100,
 			},
 			{
+				"label": _("Serial and Batch Bundle"),
+				"fieldname": "serial_and_batch_bundle",
+				"fieldtype": "Link",
+				"options": "Serial and Batch Bundle",
+				"width": 150,
+				"hidden": not filters.get("segregate_serial_batch_bundle"),
+			},
+			{
 				"label": _("Batch"),
 				"fieldname": "batch_no",
 				"fieldtype": "Link",
 				"options": "Batch",
 				"width": 100,
+				"hidden": not filters.get("segregate_serial_batch_bundle"),
 			},
 			{
 				"label": _("Serial No"),
@@ -402,13 +411,7 @@ def get_columns(filters):
 				"fieldtype": "Link",
 				"options": "Serial No",
 				"width": 100,
-			},
-			{
-				"label": _("Serial and Batch Bundle"),
-				"fieldname": "serial_and_batch_bundle",
-				"fieldtype": "Link",
-				"options": "Serial and Batch Bundle",
-				"width": 100,
+				"hidden": not filters.get("segregate_serial_batch_bundle"),
 			},
 			{
 				"label": _("Project"),
@@ -688,6 +691,7 @@ def get_opening_balance(filters, columns, sl_entries, inv_dimension_wise_value=N
 			"posting_time": "00:00:00",
 			"project": project,
 		},
+		for_report=True,
 	)
 
 	# check if any SLEs are actually Opening Stock Reconciliation

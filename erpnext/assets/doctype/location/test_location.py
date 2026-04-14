@@ -5,7 +5,6 @@ import math
 from unittest.mock import patch
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.assets.doctype.location.location import (
 	_polygon_area,
@@ -15,9 +14,10 @@ from erpnext.assets.doctype.location.location import (
 	get_children,
 	on_doctype_update,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestLocation(IntegrationTestCase):
+class TestLocation(ERPNextTestSuite):
 	def setUp(self):
 		self.ancestor_snapshots = {}
 		for location in ["Basil Farm", "Division 1", "Field 1", "Block 1", "Test Location Area"]:

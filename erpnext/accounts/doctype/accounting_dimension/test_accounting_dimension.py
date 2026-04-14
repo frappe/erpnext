@@ -2,18 +2,13 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Cost Center", "Location", "Warehouse", "Department"]
 
-
-class TestAccountingDimension(IntegrationTestCase):
-	def setUp(self):
-		create_dimension()
-
+class TestAccountingDimension(ERPNextTestSuite):
 	def test_dimension_against_sales_invoice(self):
 		si = create_sales_invoice(do_not_save=1)
 
@@ -78,68 +73,3 @@ class TestAccountingDimension(IntegrationTestCase):
 
 		si.save()
 		self.assertRaises(frappe.ValidationError, si.submit)
-
-	def tearDown(self):
-		disable_dimension()
-		frappe.flags.accounting_dimensions_details = None
-		frappe.flags.dimension_filter_map = None
-
-
-def create_dimension():
-	frappe.set_user("Administrator")
-
-	if not frappe.db.exists("Accounting Dimension", {"document_type": "Department"}):
-		dimension = frappe.get_doc(
-			{
-				"doctype": "Accounting Dimension",
-				"document_type": "Department",
-			}
-		)
-		dimension.append(
-			"dimension_defaults",
-			{
-				"company": "_Test Company",
-				"reference_document": "Department",
-				"default_dimension": "_Test Department - _TC",
-			},
-		)
-		dimension.insert()
-		dimension.save()
-	else:
-		dimension = frappe.get_doc("Accounting Dimension", "Department")
-		dimension.disabled = 0
-		dimension.save()
-
-	if not frappe.db.exists("Accounting Dimension", {"document_type": "Location"}):
-		dimension1 = frappe.get_doc(
-			{
-				"doctype": "Accounting Dimension",
-				"document_type": "Location",
-			}
-		)
-
-		dimension1.append(
-			"dimension_defaults",
-			{
-				"company": "_Test Company",
-				"reference_document": "Location",
-				"default_dimension": "Block 1",
-			},
-		)
-
-		dimension1.insert()
-		dimension1.save()
-	else:
-		dimension1 = frappe.get_doc("Accounting Dimension", "Location")
-		dimension1.disabled = 0
-		dimension1.save()
-
-
-def disable_dimension():
-	dimension1 = frappe.get_doc("Accounting Dimension", "Department")
-	dimension1.disabled = 1
-	dimension1.save()
-
-	dimension2 = frappe.get_doc("Accounting Dimension", "Location")
-	dimension2.disabled = 1
-	dimension2.save()
