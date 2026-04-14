@@ -15,6 +15,7 @@
   "supplier_name",
   "gender",
   "column_break0",
+  "company",
   "supplier_group",
   "country",
   "is_transporter",
@@ -504,6 +505,16 @@
   {
    "fieldname": "column_break_oxjw",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "description": "The company usually this supplier transacts with. If left empty, every user with or without permission to this company can see this supplier.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "For Company",
+   "options": "Company"
   }
  ],
  "grid_page_length": 50,
@@ -517,7 +528,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-03-09 17:15:25.465759",
+ "modified": "2026-04-14 21:43:01.737339",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

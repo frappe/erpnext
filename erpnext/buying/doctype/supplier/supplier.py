@@ -42,6 +42,7 @@ class Supplier(TransactionBase):
 		allow_purchase_invoice_creation_without_purchase_order: DF.Check
 		allow_purchase_invoice_creation_without_purchase_receipt: DF.Check
 		companies: DF.Table[AllowedToTransactWith]
+		company: DF.Link | None
 		country: DF.Link | None
 		customer_numbers: DF.Table[CustomerNumberAtSupplier]
 		default_bank_account: DF.Link | None

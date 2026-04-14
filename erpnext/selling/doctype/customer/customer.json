@@ -16,6 +16,7 @@
   "customer_name",
   "gender",
   "column_break0",
+  "company",
   "customer_group",
   "territory",
   "image",
@@ -627,6 +628,16 @@
    "fieldname": "supplier_numbers_section",
    "fieldtype": "Section Break",
    "label": "Supplier Numbers"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "description": "The company usually this customer transacts with. If left empty, every user with or without permission to this company can see this customer.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "For Company",
+   "options": "Company"
   }
  ],
  "icon": "fa fa-user",
@@ -640,7 +651,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-03-09 17:15:26.040050",
+ "modified": "2026-04-14 21:40:05.860609",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
