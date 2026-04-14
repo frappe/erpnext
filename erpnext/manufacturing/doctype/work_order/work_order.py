@@ -1284,15 +1284,13 @@ class WorkOrder(Document):
 
 			for d in data:
 				if not d.fixed_time:
+					if frappe.get_value("Operation", d.operation, "create_job_card_based_on_batch_size"):
+						qty = d.batch_size
+
 					if exploded:
 						d.time_in_mins *= flt(qty)
 					else:
 						d.time_in_mins /= flt(qty)
-
-					if d.set_cost_based_on_bom_qty:
-						from math import ceil
-
-						d.time_in_mins = flt(d.time_in_mins) * ceil(qty / (d.batch_size or 1))
 
 				d.status = "Pending"
 
