@@ -24,7 +24,10 @@
   "min_curing_hours",
   "curing_labels",
   "quality_section",
-  "grades"
+  "grades",
+  "shipping_tab",
+  "packing_settings_section",
+  "maximum_crates_per_container"
  ],
  "fields": [
   {
@@ -141,13 +144,30 @@
    "fieldname": "show_job_card_queue_to_mixer_operators",
    "fieldtype": "Check",
    "label": "Show Job Card Queue to Mixer Operators"
+  },
+  {
+   "fieldname": "shipping_tab",
+   "fieldtype": "Tab Break",
+   "label": "Packing & Shipping"
+  },
+  {
+   "fieldname": "packing_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Packing Settings"
+  },
+  {
+   "default": "8",
+   "fieldname": "maximum_crates_per_container",
+   "fieldtype": "Int",
+   "label": "Maximum Crates Per Container",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-02 18:14:30.693905",
+ "modified": "2026-04-15 00:07:51.252678",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Mahi Granites Settings",

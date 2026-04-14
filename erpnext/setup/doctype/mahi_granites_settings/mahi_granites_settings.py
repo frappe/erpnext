@@ -24,6 +24,7 @@ class MahiGranitesSettings(Document):
 		grades: DF.Table[SlabQualityGrade]
 		max_heating_minutes: DF.Float
 		max_pay_line_amount: DF.Currency
+		maximum_crates_per_container: DF.Int
 		mfg_unit: DF.Link
 		min_curing_hours: DF.Float
 		sales_invoice_patterns: DF.Table[SalesInvoiceSeries]
