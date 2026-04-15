@@ -9,7 +9,7 @@ def delete_job_cards(production_plan, reason, delete_all_job_cards, production_l
 
 	filters = {
 		"production_plan": production_plan,
-		"production_item": ["like", "%Mixing%"],
+		"wip_warehouse": ["like", "%Mixing%"],
 	}
 
 	if delete_all_job_cards != 1:
@@ -17,7 +17,7 @@ def delete_job_cards(production_plan, reason, delete_all_job_cards, production_l
 			filters["production_line"] = production_line
 			line_name = frappe.db.get_value("Production Line", production_line, "line_name")
 		if item_code:
-			filters["production_item"] = item_code
+			filters["production_item"] = ["like", f"%{item_code}%"]
 
 	mixing_work_orders = frappe.get_all(
 		"Work Order",
@@ -27,14 +27,18 @@ def delete_job_cards(production_plan, reason, delete_all_job_cards, production_l
 	mixing_job_cards = frappe.get_all(
 		"Job Card",
 		fields=["name", "status"],
-		filters={"work_order": ["in", [wo.name for wo in mixing_work_orders]]},
+		filters={
+			"work_order": ["in", [wo.name for wo in mixing_work_orders]],
+			"operation": ["like", "%Mixing%"],
+			"status": "Open",
+		},
 	)
 
+	deleted_count = len(mixing_job_cards)
+
 	for job_card in mixing_job_cards:
-		if job_card.status == "Open":
-			frappe.delete_doc("Job Card", job_card.name)
-			is_deleted = True
-			deleted_count += 1
+		frappe.delete_doc("Job Card", job_card.name)
+		is_deleted = True
 
 	if not is_deleted:
 		frappe.throw("No Open Job Cards found to delete")
