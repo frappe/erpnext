@@ -94,16 +94,6 @@ class AccountData:
 	def has_periods(self) -> bool:
 		return len(self.period_values) > 0
 
-	def accumulate_values(self) -> None:
-		for period_value in self.period_values.values():
-			period_value.movement += period_value.opening
-			# closing is accumulated by default
-
-	def unaccumulate_values(self) -> None:
-		for period_value in self.period_values.values():
-			period_value.closing -= period_value.opening
-			# movement is unaccumulated by default
-
 	def copy(self):
 		copied = AccountData(
 			account=self.account,
@@ -351,6 +341,7 @@ class DataCollector:
 
 		# Get all accounts
 		all_accounts = []
+		should_accumulate = bool(self.filters.get("accumulated_values"))
 
 		for request in self.account_requests:
 			all_accounts.extend(request["accounts"])
@@ -388,6 +379,10 @@ class DataCollector:
 					account_obj.reverse_values()
 
 				account_values = account_obj.get_ordered_values(period_keys, balance_type)
+				if should_accumulate:
+					account_values = self._accumulate_and_set_period_values(
+						account_obj, period_keys, account_values, balance_type
+					)
 
 				# Add to totals
 				for i, value in enumerate(account_values):
@@ -400,6 +395,27 @@ class DataCollector:
 			account_details[ref_code] = request_account_details
 
 		return {"account_data": account_data, "summary": summary, "account_details": account_details}
+
+	@staticmethod
+	def _accumulate_and_set_period_values(
+		account_data: AccountData, period_keys: list[str], values: list[float], balance_type: str
+	) -> list[float]:
+		"""Accumulate a series and sync detail rows for the selected balance type."""
+		cumulative = 0.0
+		result = []
+		for index, period_key in enumerate(period_keys):
+			value = values[index] if index < len(values) else 0.0
+			cumulative += flt(value)
+			result.append(cumulative)
+			if period_value := account_data.get_period(period_key):
+				if balance_type == "Opening Balance":
+					period_value.opening = cumulative
+				elif balance_type == "Closing Balance":
+					period_value.closing = cumulative
+				elif balance_type == "Period Movement (Debits - Credits)":
+					period_value.movement = cumulative
+
+		return result
 
 	@staticmethod
 	def _parse_account_filter(company, report_row) -> list[dict]:
@@ -493,7 +509,6 @@ class FinancialQueryBuilder:
 		balances_data = self._get_opening_balances(account_names)
 		gl_data = self._get_gl_movements(account_names)
 		self._calculate_running_balances(balances_data, gl_data)
-		self._handle_balance_accumulation(balances_data)
 
 		return balances_data
 
@@ -676,24 +691,6 @@ class FinancialQueryBuilder:
 				account_data.add_period(PeriodValue(period_key, current_balance, closing_balance, movement))
 
 				current_balance = closing_balance
-
-	def _handle_balance_accumulation(self, balances_data):
-		for account_data in balances_data.values():
-			account_data: AccountData
-
-			accumulated_values = self.filters.get("accumulated_values")
-
-			if accumulated_values is None:
-				# respect user setting if not in filters
-				# closing = accumulated
-				# movement = unaccumulated
-				continue
-
-			# for legacy reports
-			elif accumulated_values:
-				account_data.accumulate_values()
-			else:
-				account_data.unaccumulate_values()
 
 	def _apply_standard_filters(self, query, table, doctype: str = "GL Entry"):
 		if self.filters.get("project"):

@@ -6,6 +6,7 @@ from frappe.tests.utils import change_settings
 from frappe.utils import add_days, flt
 
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+	DataCollector,
 	DependencyResolver,
 	FilterExpressionParser,
 	FinancialQueryBuilder,
@@ -2078,6 +2079,84 @@ class TestFinancialQueryBuilder(FinancialReportTemplateTestCase):
 
 		finally:
 			jv.cancel()
+
+
+class TestAccumulatedValues(FinancialReportTemplateTestCase):
+	"""Test cases for post-fetch, balance-type based accumulation"""
+
+	def test_accumulate_and_set_period_values_helper_series(self):
+		"""Merged helper should return cumulative values from fetched series."""
+		from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+			AccountData,
+		)
+
+		account_data = AccountData(account="Series Account", account_name="Series", account_number="1000")
+		input_values = [100.0, 200.0, -50.0, 0.0]
+		period_keys = ["2024_jan", "2024_feb", "2024_mar", "2024_apr"]
+
+		output_values = DataCollector._accumulate_and_set_period_values(
+			account_data, period_keys, input_values, "Period Movement (Debits - Credits)"
+		)
+
+		self.assertEqual(input_values, [100.0, 200.0, -50.0, 0.0], "Input must remain unchanged")
+		self.assertEqual(output_values, [100.0, 300.0, 250.0, 250.0], "Cumulative series mismatch")
+
+	def test_accumulate_and_set_period_values_for_movement(self):
+		"""Merged helper should sync accumulated movement to detail rows."""
+		from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+			AccountData,
+			PeriodValue,
+		)
+
+		account_data = AccountData(account="Detail Account", account_name="Detail", account_number="1001")
+		account_data.add_period(PeriodValue("2024_jan", opening=0, closing=0, movement=100))
+		account_data.add_period(PeriodValue("2024_feb", opening=0, closing=0, movement=200))
+		account_data.add_period(PeriodValue("2024_mar", opening=0, closing=0, movement=300))
+
+		period_keys = ["2024_jan", "2024_feb", "2024_mar"]
+		accumulated = DataCollector._accumulate_and_set_period_values(
+			account_data, period_keys, [100, 200, 300], "Period Movement (Debits - Credits)"
+		)
+
+		self.assertEqual(accumulated, [100, 300, 600])
+		self.assertEqual(account_data.get_period("2024_jan").movement, 100)
+		self.assertEqual(account_data.get_period("2024_feb").movement, 300)
+		self.assertEqual(account_data.get_period("2024_mar").movement, 600)
+
+	def test_accumulate_and_set_period_values_for_opening_and_closing(self):
+		"""Merged helper should apply accumulation to opening and closing values."""
+		from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+			AccountData,
+			PeriodValue,
+		)
+
+		period_keys = ["2024_jan", "2024_feb", "2024_mar"]
+
+		opening_data = AccountData(account="Open Account", account_name="Open", account_number="1001")
+		opening_data.add_period(PeriodValue("2024_jan", opening=10, closing=0, movement=0))
+		opening_data.add_period(PeriodValue("2024_feb", opening=20, closing=0, movement=0))
+		opening_data.add_period(PeriodValue("2024_mar", opening=30, closing=0, movement=0))
+		opening_accumulated = DataCollector._accumulate_and_set_period_values(
+			opening_data, period_keys, [10, 20, 30], "Opening Balance"
+		)
+
+		self.assertEqual(opening_accumulated, [10, 30, 60])
+		self.assertEqual(opening_data.get_period("2024_jan").opening, 10)
+		self.assertEqual(opening_data.get_period("2024_feb").opening, 30)
+		self.assertEqual(opening_data.get_period("2024_mar").opening, 60)
+
+		closing_data = AccountData(account="Close Account", account_name="Close", account_number="1002")
+		closing_data.add_period(PeriodValue("2024_jan", opening=0, closing=100, movement=0))
+		closing_data.add_period(PeriodValue("2024_feb", opening=0, closing=200, movement=0))
+		closing_data.add_period(PeriodValue("2024_mar", opening=0, closing=300, movement=0))
+		closing_accumulated = DataCollector._accumulate_and_set_period_values(
+			closing_data, period_keys, [100, 200, 300], "Closing Balance"
+		)
+
+		self.assertEqual(closing_accumulated, [100, 300, 600])
+		self.assertEqual(closing_data.get_period("2024_jan").closing, 100)
+		self.assertEqual(closing_data.get_period("2024_feb").closing, 300)
+		self.assertEqual(closing_data.get_period("2024_mar").closing, 600)
 
 
 def get_closing_account(company):
