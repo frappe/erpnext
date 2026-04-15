@@ -99,9 +99,10 @@ def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job
 	company: str = frappe.get_value("Job Card", job_card, "company")  # pyright: ignore[reportAssignmentType]
 	company_abbr: str = frappe.get_value("Company", company, "abbr")  # pyright: ignore[reportAssignmentType]
 
-	production_item = frappe.get_value("Job Card", job_card, "production_item")
+	production_item: str = frappe.get_value("Job Card", job_card, "production_item")  # pyright: ignore[reportAssignmentType]
 	item_uom = frappe.get_value("Item", production_item, "stock_uom")
 	parts = []
+	is_std_slab = False
 	if slab_number:
 		parts = slab_number.split("-")
 
@@ -118,6 +119,7 @@ def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job
 			stock_entry.to_warehouse = PREMIUM_WAREHOUSE + " - " + company_abbr
 		elif grade and ("standard" in grade.lower() or "std" in grade.lower()):
 			stock_entry.to_warehouse = STANDARD_WAREHOUSE + " - " + company_abbr
+			is_std_slab = True
 		else:
 			stock_entry.to_warehouse = REJECTED_WAREHOUSE + " - " + company_abbr
 		stock_entry.append(
@@ -135,10 +137,20 @@ def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job
 
 		stock_entry.insert(ignore_permissions=True)
 		stock_entry.submit()
+		# This will temporarily add the standard item's name to the slab while doing the stock entry on the BOM item's name.
+		if is_std_slab:
+			stock_entry.items[0].item_code += " (STD)"
 		return stock_entry
 
 	except Exception:
 		raise
+
+
+def _update_item_on_slab(item_code: str, slab_number: str):
+	slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
+	slab.reload()
+	slab.stock_item = item_code
+	slab.save(ignore_permissions=True)
 
 
 @frappe.whitelist()
@@ -155,4 +167,7 @@ def finish_qc_process(slab_number: str, slab_grade: str | None, job_card: str, p
 	finish_process(job_card, "Quality Check", False, slab_number=slab_number, slab_grade=slab_grade, publish_slab_event=publish_slab_event)
 
 	# 3. Move the slab to specific warehouse based on grade by making a new stock entry - Material Transfer.
-	_make_material_transfer_stock_entry(slab_number, slab_grade, job_card)
+	stock_entry = _make_material_transfer_stock_entry(slab_number, slab_grade, job_card)
+
+	# 4. Update the name of the stock item on the slab.
+	_update_item_on_slab(str(stock_entry.items[0].item_code), slab_number)

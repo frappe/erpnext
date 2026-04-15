@@ -18,6 +18,7 @@
   "column_break_mfbp",
   "created_on",
   "current_job_card",
+  "stock_item",
   "status",
   "is_cur_stage_complete",
   "is_paused",
@@ -252,12 +253,19 @@
    "fieldtype": "Data",
    "label": "Container No.",
    "read_only": 1
+  },
+  {
+   "fieldname": "stock_item",
+   "fieldtype": "Link",
+   "label": "Stock Item",
+   "options": "Item",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-05 16:10:26.027902",
+ "modified": "2026-04-15 01:45:11.876785",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",

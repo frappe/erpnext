@@ -39,6 +39,7 @@ class Slab(Document):
 		shipping_date: DF.Date | None
 		slab_history: DF.Table[SlabHistory]
 		status: DF.Literal["Distribution", "Pressing", "Re-Pressing", "Heating", "Cooling", "Curing", "Trimming", "Calibration", "Polishing", "Quality Check", "Packed", "Shipped", "Discarded"]
+		stock_item: DF.Link | None
 		template: DF.Link
 	# end: auto-generated types
 
