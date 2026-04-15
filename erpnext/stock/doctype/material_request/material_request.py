@@ -58,6 +58,7 @@ class MaterialRequest(BuyingController):
 		naming_series: DF.Literal["MAT-MR-.YYYY.-"]
 		per_ordered: DF.Percent
 		per_received: DF.Percent
+		per_returned: DF.Percent
 		scan_barcode: DF.Data | None
 		schedule_date: DF.Date | None
 		select_print_heading: DF.Link | None
@@ -76,6 +77,8 @@ class MaterialRequest(BuyingController):
 			"Issued",
 			"Transferred",
 			"Received",
+			"Returned",
+			"Partially Returned",
 		]
 		tc_name: DF.Link | None
 		terms: DF.TextEditor | None
@@ -175,6 +178,8 @@ class MaterialRequest(BuyingController):
 				"Issued",
 				"Transferred",
 				"Received",
+				"Returned",
+				"Partially Returned",
 			],
 		)
 
@@ -451,8 +456,9 @@ def set_missing_values(source, target_doc):
 def update_item(obj, target, source_parent):
 	target.conversion_factor = obj.conversion_factor
 
-	qty = obj.ordered_qty or obj.received_qty
+	qty = (obj.ordered_qty - obj.returned_qty) or obj.received_qty
 	target.qty = flt(flt(obj.stock_qty) - flt(qty)) / target.conversion_factor
+
 	target.stock_qty = target.qty * target.conversion_factor
 	if getdate(target.schedule_date) < getdate(nowdate()):
 		target.schedule_date = None
@@ -519,7 +525,7 @@ def make_purchase_order(
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
 
-		qty = d.ordered_qty or d.received_qty
+		qty = (d.ordered_qty - d.returned_qty) or d.received_qty
 
 		return qty < d.stock_qty and child_filter
 

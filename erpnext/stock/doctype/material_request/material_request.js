@@ -149,6 +149,18 @@ frappe.ui.form.on("Material Request", {
 				frm.add_custom_button(__("Stop"), () => frm.events.update_status(frm, "Stopped"));
 			}
 
+			const is_pending = frm.doc.items.every(
+				(item) => item.stock_qty > item.ordered_qty - item.returned_qty
+			);
+			if (frm.doc.material_request_type === "Purchase" && is_pending) {
+				frm.add_custom_button(
+					__("Purchase Order"),
+					() => frm.events.make_purchase_order(frm),
+					__("Create")
+				);
+				frm.page.set_inner_btn_group_as_primary(__("Create"));
+			}
+
 			if (flt(frm.doc.per_ordered, precision) < 100) {
 				let add_create_pick_list_button = () => {
 					if (frm.doc.items.some((item) => item.stock_qty - item.picked_qty > 0)) {
@@ -192,12 +204,6 @@ frappe.ui.form.on("Material Request", {
 				}
 
 				if (frm.doc.material_request_type === "Purchase") {
-					frm.add_custom_button(
-						__("Purchase Order"),
-						() => frm.events.make_purchase_order(frm),
-						__("Create")
-					);
-
 					frm.add_custom_button(
 						__("Request for Quotation"),
 						() => frm.events.make_request_for_quotation(frm),

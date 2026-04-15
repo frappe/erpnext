@@ -183,6 +183,7 @@ class PurchaseOrder(BuyingController):
 				"target_ref_field": "stock_qty",
 				"source_field": "stock_qty",
 				"percent_join_field": "material_request",
+				"validate_qty": False,
 			}
 		]
 

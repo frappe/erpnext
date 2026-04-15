@@ -53,6 +53,7 @@ class MaterialRequestItem(Document):
 		received_qty: DF.Float
 		reorder_level: DF.Float
 		reorder_qty: DF.Float
+		returned_qty: DF.Float
 		sales_order: DF.Link | None
 		sales_order_item: DF.Data | None
 		schedule_date: DF.Date
