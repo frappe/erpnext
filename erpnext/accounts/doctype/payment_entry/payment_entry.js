@@ -1771,13 +1771,39 @@ frappe.ui.form.on("Payment Entry Reference", {
 							frappe.model.set_value(cdt, cdn, field, value);
 						});
 
-						let allocated_amount =
-							frm.doc.unallocated_amount > row.outstanding_amount
-								? row.outstanding_amount
-								: frm.doc.unallocated_amount;
+						let existing_prs = (frm.doc.references || [])
+							.filter((r) => r.name !== row.name && r.payment_request)
+							.map((r) => r.payment_request);
 
-						frappe.model.set_value(cdt, cdn, "allocated_amount", allocated_amount);
-						frm.refresh_fields();
+						frappe.call({
+							method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_best_fit_payment_request",
+							args: {
+								reference_doctype: row.reference_doctype,
+								reference_name: row.reference_name,
+								unallocated_amount: frm.doc.unallocated_amount,
+								existing_payment_requests: existing_prs,
+							},
+							callback: function (pr) {
+								let allocated_amount = Math.min(
+									flt(row.outstanding_amount),
+									flt(frm.doc.unallocated_amount)
+								);
+
+								if (pr.message) {
+									frappe.model.set_value(
+										cdt,
+										cdn,
+										"payment_request",
+										pr.message.payment_request
+									);
+									let pr_outstanding = flt(pr.message.outstanding_amount);
+									allocated_amount = Math.min(allocated_amount, pr_outstanding);
+								}
+
+								frappe.model.set_value(cdt, cdn, "allocated_amount", allocated_amount);
+								frm.refresh_fields();
+							},
+						});
 					}
 				},
 			});

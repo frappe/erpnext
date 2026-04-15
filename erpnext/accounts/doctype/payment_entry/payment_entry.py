@@ -2863,6 +2863,63 @@ def get_reference_details(
 
 
 @frappe.whitelist()
+def get_best_fit_payment_request(
+	reference_doctype: str,
+	reference_name: str,
+	unallocated_amount: float | None = None,
+	existing_payment_requests: list | str | None = None,
+):
+	"""
+	Return the best-fit open Payment Request for a given reference.
+	Called from the JS reference_name handler to auto-populate the PR field.
+	"""
+	if isinstance(existing_payment_requests, str):
+		existing_payment_requests = frappe.parse_json(existing_payment_requests)
+
+	if unallocated_amount is not None:
+		unallocated_amount = flt(unallocated_amount)
+
+	PR = frappe.qb.DocType("Payment Request")
+	open_prs = (
+		frappe.qb.from_(PR)
+		.select(PR.name, PR.outstanding_amount)
+		.where(PR.reference_doctype == reference_doctype)
+		.where(PR.reference_name == reference_name)
+		.where(PR.status != "Paid")
+		.where(PR.docstatus == 1)
+		.where(PR.outstanding_amount > 0)
+		.orderby(Coalesce(PR.transaction_date, PR.creation), order=frappe.qb.asc)
+	).run(as_dict=True)
+
+	if not open_prs:
+		return None
+
+	if existing_payment_requests:
+		open_prs = [pr for pr in open_prs if pr.name not in existing_payment_requests]
+
+	if not open_prs:
+		return None
+
+	selected = None
+
+	if unallocated_amount:
+		selected = next((pr for pr in open_prs if pr.outstanding_amount == unallocated_amount), None)
+
+		if not selected:
+			fitting = [pr for pr in open_prs if pr.outstanding_amount <= unallocated_amount]
+			if fitting:
+				selected = max(fitting, key=lambda pr: pr.outstanding_amount)
+
+	if not selected:
+		selected = open_prs[0]
+
+	return {
+		"payment_request": selected.name,
+		"outstanding_amount": selected.outstanding_amount,
+	}
+
+
+@frappe.whitelist()
 def get_payment_entry(
 	dt: str,
 	dn: str,
