@@ -32,11 +32,11 @@
   "crate_number",
   "column_break_txsf",
   "container_number",
-  "export_section",
+  "column_break_neqa",
   "packing_list_number",
-  "column_break_cnky",
-  "consignment_number",
-  "column_break_il7r",
+  "shipment_section_2",
+  "shipment_number",
+  "column_break_tpms",
   "shipping_date",
   "slab_history_section",
   "slab_history"
@@ -109,17 +109,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "export_section",
-   "fieldtype": "Section Break",
-   "label": "Export"
-  },
-  {
-   "fieldname": "consignment_number",
-   "fieldtype": "Data",
-   "label": "Consignment Number",
-   "read_only": 1
-  },
-  {
    "fieldname": "shipping_date",
    "fieldtype": "Date",
    "label": "Shipping Date",
@@ -135,10 +124,6 @@
    "fieldtype": "Table",
    "options": "Slab History",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_il7r",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "batch_number",
@@ -207,13 +192,10 @@
   },
   {
    "fieldname": "packing_list_number",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Packing List Number",
+   "options": "Packing List",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_cnky",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "child_line",
@@ -236,7 +218,7 @@
   {
    "fieldname": "shipping_details_section",
    "fieldtype": "Section Break",
-   "label": "Shipping Details"
+   "label": "Shipping & Export"
   },
   {
    "fieldname": "crate_number",
@@ -260,12 +242,31 @@
    "label": "Stock Item",
    "options": "Item",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_neqa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shipment_section_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "shipment_number",
+   "fieldtype": "Link",
+   "label": "Shipment Number",
+   "options": "Shipment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_tpms",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-15 01:45:11.876785",
+ "modified": "2026-04-15 16:26:23.173463",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",
