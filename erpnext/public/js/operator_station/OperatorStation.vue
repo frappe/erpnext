@@ -637,7 +637,8 @@ async function selectSlab(slab) {
 			method: 'erpnext.manufacturing.page.operator_station.operator_station.get_job_card_for_slab',
 			args: {
 				slab_name: slab.name,
-				process_name: currentStation.value
+				process_name: currentStation.value,
+				item_code: slab.template
 			}
 		});
 

@@ -193,7 +193,12 @@ def get_recent_job_card(operation, production_line=None):
 
 @frappe.whitelist()
 def get_open_job_cards(
-	process, line=None, include_wip=True, include_material_transferred=True, include_paused=True
+	process,
+	line=None,
+	include_wip=True,
+	include_material_transferred=True,
+	include_paused=True,
+	item_code=None,
 ):
 	is_mixing = process == "Mixing"
 	if is_mixing:
@@ -233,6 +238,9 @@ def get_open_job_cards(
 			filters["production_line"] = ["in", line]
 		else:
 			filters["production_line"] = line
+
+	if item_code:
+		filters["production_item"] = ["like", f"%{item_code}%"]
 
 	limit = (
 		9999999

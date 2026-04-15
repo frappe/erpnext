@@ -40,7 +40,7 @@ def load_slab_into_oven(oven_op: str, line: str, job_card_name: str, slab_templa
 
 	if not job_card_name:
 		jc: JobCard = get_top_job_card_for_process(
-			"Heating", child_lines if child_lines else line, include_wip=False
+			"Heating", child_lines if child_lines else line, include_wip=False, item_code=slab_template
 		)
 		job_card_name = jc.name
 

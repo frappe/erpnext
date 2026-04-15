@@ -24,7 +24,7 @@ from erpnext.stock.doctype.warehouse.constants import (
 def start_qa_process(slab_number: str):
 	slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
 	#    1. Get the job card for quality analysis on the given line.
-	job_card_result = get_top_job_card_for_process("Quality Check", slab.line, True)
+	job_card_result = get_top_job_card_for_process("Quality Check", slab.line, True, item_code=slab.template)
 	job_card: JobCard = job_card_result.get("top_job_card")  # pyright: ignore[reportAssignmentType]
 	if not job_card:
 		frappe.throw("No Job Card found")

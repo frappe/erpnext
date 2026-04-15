@@ -76,7 +76,9 @@ def start_process(job_card, slab_name="", slab_template="", process_name="operat
 			child_line = jc.production_line
 
 		slab_history = _get_mixing_slab_history(jc.name or "")
-		new_slab = create_slab(parent_line or "", child_line or "", slab_template or "", jc.name, slab_history)
+		new_slab = create_slab(
+			parent_line or "", child_line or "", slab_template or "", jc.name, slab_history
+		)
 		slab_name = new_slab.name
 		slab_template = new_slab.template
 
@@ -347,10 +349,10 @@ def set_machine_status(status: str, station: str, line_name: str | None, machine
 	machine.reload()
 
 
-def _get_job_card_for_line_and_process(line_name: str, process: str, include_wip=True):
+def _get_job_card_for_line_and_process(line_name: str, process: str, include_wip=True, item_code=None):
 	child_lines = get_all_child_lines(line_name) or []
 	job_card_data = get_top_job_card_for_process(
-		process, child_lines if child_lines else line_name, include_wip
+		process, child_lines if child_lines else line_name, include_wip, item_code=item_code
 	)
 	return job_card_data
 
@@ -382,13 +384,17 @@ def get_next_work_item(process, line="", include_wip=True):
 	}
 
 
-def get_top_job_card_for_process(process, line: str | list = "", include_wip=True, include_paused=True):
+def get_top_job_card_for_process(
+	process, line: str | list = "", include_wip=True, include_paused=True, item_code=None
+):
 	if line and not isinstance(line, list):
 		child_lines = get_all_child_lines(line)
 		if child_lines:
 			line = child_lines
 
-	job_cards = get_open_job_cards(process, line, include_wip, include_paused=include_paused)
+	job_cards = get_open_job_cards(
+		process, line, include_wip, include_paused=include_paused, item_code=item_code
+	)
 	return {
 		"top_job_card": job_cards[0] if job_cards else None,
 		"available_job_cards_count": len(job_cards),
@@ -405,16 +411,23 @@ def update_slab_number_on_job_card(job_card_name, slab_name, slab_template):
 
 
 @frappe.whitelist()
-def get_job_card_for_slab(slab_name: str, process_name: str):
+def get_job_card_for_slab(slab_name: str, process_name: str, item_code):
 	slab: Slab = frappe.get_doc("Slab", slab_name)  # pyright: ignore[reportAssignmentType]
-	job_card_data = _get_job_card_for_line_and_process(slab.line, process_name, include_wip=True)
+	job_card_data = _get_job_card_for_line_and_process(
+		slab.line, process_name, include_wip=True, item_code=item_code
+	)
 	job_card = job_card_data["top_job_card"]
 	return job_card
 
 
 def _get_mixing_slab_history(job_card_name: str):
 	# 1. Get the ID of the Mixing Job Card that transferred the material to this distribution using the current job card's stock entry.
-	stock_entry = frappe.get_all("Stock Entry", filters={"job_card": job_card_name}, limit=1, fields=["name", "job_card", "previous_job_card"])
+	stock_entry = frappe.get_all(
+		"Stock Entry",
+		filters={"job_card": job_card_name},
+		limit=1,
+		fields=["name", "job_card", "previous_job_card"],
+	)
 	if stock_entry:
 		stock_entry = stock_entry[0]
 	else:
@@ -429,7 +442,12 @@ def _get_mixing_slab_history(job_card_name: str):
 	# 3. Append the time logs to the slab.
 	time_logs = []
 	if mixing_job_card:
-		time_logs = frappe.get_all("Job Card Time Log", filters={"parent": mixing_job_card.name}, fields=["from_time", "to_time", "time_in_mins"], order_by="idx asc")
+		time_logs = frappe.get_all(
+			"Job Card Time Log",
+			filters={"parent": mixing_job_card.name},
+			fields=["from_time", "to_time", "time_in_mins"],
+			order_by="idx asc",
+		)
 
 	slab_history = []
 	if time_logs:
