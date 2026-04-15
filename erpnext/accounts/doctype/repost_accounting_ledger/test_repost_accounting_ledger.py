@@ -203,6 +203,11 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 	def test_06_repost_purchase_receipt(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
 
+		if not frappe.db.set_value("Company", "_Test Company", "service_expense_account"):
+			frappe.db.set_value(
+				"Company", "_Test Company", "service_expense_account", "Marketing Expenses - _TC"
+			)
+
 		provisional_account = create_account(
 			account_name="Provision Account",
 			parent_account="Current Liabilities - _TC",

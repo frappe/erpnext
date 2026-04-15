@@ -784,18 +784,17 @@ class calculate_taxes_and_totals:
 		if self.doc.meta.get_field("rounded_total"):
 			if self.doc.is_rounded_total_disabled():
 				self.doc.rounded_total = 0
-				self.doc.base_rounded_total = 0
 				self.doc.rounding_adjustment = 0
-				return
 
-			self.doc.rounded_total = round_based_on_smallest_currency_fraction(
-				self.doc.grand_total, self.doc.currency, self.doc.precision("rounded_total")
-			)
+			else:
+				self.doc.rounded_total = round_based_on_smallest_currency_fraction(
+					self.doc.grand_total, self.doc.currency, self.doc.precision("rounded_total")
+				)
 
-			# rounding adjustment should always be the difference vetween grand and rounded total
-			self.doc.rounding_adjustment = flt(
-				self.doc.rounded_total - self.doc.grand_total, self.doc.precision("rounding_adjustment")
-			)
+				# rounding adjustment should always be the difference between grand and rounded total
+				self.doc.rounding_adjustment = flt(
+					self.doc.rounded_total - self.doc.grand_total, self.doc.precision("rounding_adjustment")
+				)
 
 			self._set_in_company_currency(self.doc, ["rounding_adjustment", "rounded_total"])
 
