@@ -674,26 +674,12 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 	set_rounded_total() {
 		var disable_rounded_total = 0;
-		if(frappe.meta.get_docfield(this.frm.doc.doctype, "disable_rounded_total", this.frm.doc.name)) {
+		if (frappe.meta.get_docfield(this.frm.doc.doctype, "disable_rounded_total", this.frm.doc.name)) {
 			disable_rounded_total = this.frm.doc.disable_rounded_total;
 		} else if (frappe.sys_defaults.disable_rounded_total) {
 			disable_rounded_total = frappe.sys_defaults.disable_rounded_total;
 		}
 
-<<<<<<< HEAD
-		if (cint(disable_rounded_total)) {
-			this.frm.doc.rounded_total = 0;
-			this.frm.doc.base_rounded_total = 0;
-			this.frm.doc.rounding_adjustment = 0;
-			return;
-		}
-
-		if(frappe.meta.get_docfield(this.frm.doc.doctype, "rounded_total", this.frm.doc.name)) {
-			this.frm.doc.rounded_total = round_based_on_smallest_currency_fraction(this.frm.doc.grand_total,
-				this.frm.doc.currency, precision("rounded_total"));
-			this.frm.doc.rounding_adjustment = flt(this.frm.doc.rounded_total - this.frm.doc.grand_total,
-				precision("rounding_adjustment"));
-=======
 		if (frappe.meta.get_docfield(this.frm.doc.doctype, "rounded_total", this.frm.doc.name)) {
 			if (cint(disable_rounded_total)) {
 				this.frm.doc.rounded_total = 0;
@@ -702,14 +688,13 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				this.frm.doc.rounded_total = round_based_on_smallest_currency_fraction(
 					this.frm.doc.grand_total,
 					this.frm.doc.currency,
-					precision("rounded_total")
+					precision("rounded_total"),
 				);
 				this.frm.doc.rounding_adjustment = flt(
 					this.frm.doc.rounded_total - this.frm.doc.grand_total,
-					precision("rounding_adjustment")
+					precision("rounding_adjustment"),
 				);
 			}
->>>>>>> f8d278b733 (fix: reset base_rounded_total when rounded_total resets)
 
 			this.set_in_company_currency(this.frm.doc, ["rounding_adjustment", "rounded_total"]);
 		}
