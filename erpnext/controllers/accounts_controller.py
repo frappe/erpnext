@@ -1768,6 +1768,7 @@ class AccountsController(TransactionBase):
 									arg.get("referenced_row"),
 									arg.get("cost_center"),
 									dimensions_dict,
+									arg.get("project"),
 								)
 								frappe.msgprint(
 									_("Exchange Gain/Loss amount has been booked through {0}").format(
@@ -1852,6 +1853,7 @@ class AccountsController(TransactionBase):
 							d.idx,
 							self.cost_center,
 							dimensions_dict,
+							self.project,
 						)
 						frappe.msgprint(
 							_("Exchange Gain/Loss amount has been booked through {0}").format(
