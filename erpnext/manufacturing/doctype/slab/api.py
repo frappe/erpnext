@@ -19,7 +19,7 @@ from erpnext.manufacturing.doctype.slab_quality_report.slab_quality_report impor
 from erpnext.setup.doctype.attendance_shift.attendance_shift import AttendanceShift
 from erpnext.setup.doctype.mahi_granites_settings.mahi_granites_settings import MahiGranitesSettings
 
-STAGES_TO_SKIP_IN_AUTO_MOVE = ["Re-Pressing", "Packed", "Shipped", "Discarded", "Quality Check"]
+STAGES_TO_SKIP_IN_AUTO_MOVE = ["Re-Pressing", "Packed", "Shipped", "Discarded", "Quality Check", "Rejected"]
 
 
 @frappe.whitelist()

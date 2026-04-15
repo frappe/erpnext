@@ -4,7 +4,7 @@
 # import frappe
 from frappe.model.document import Document
 
-ALLOWED_STAGES = ["Distribution", "Pressing", "Re-Pressing", "Heating", "Cooling", "Curing", "Trimming", "Calibration", "Polishing", "Quality Check", "Packed", "Shipped", "Discarded"]
+ALLOWED_STAGES = ["Distribution", "Pressing", "Re-Pressing", "Heating", "Cooling", "Curing", "Trimming", "Calibration", "Polishing", "Quality Check", "Packed", "Shipped", "Discarded", "Rejected"]
 
 class Slab(Document):
 	# begin: auto-generated types
@@ -38,7 +38,7 @@ class Slab(Document):
 		shipment_number: DF.Link | None
 		shipping_date: DF.Date | None
 		slab_history: DF.Table[SlabHistory]
-		status: DF.Literal["Distribution", "Pressing", "Re-Pressing", "Heating", "Cooling", "Curing", "Trimming", "Calibration", "Polishing", "Quality Check", "Packed", "Shipped", "Discarded"]
+		status: DF.Literal["Distribution", "Pressing", "Re-Pressing", "Heating", "Cooling", "Curing", "Trimming", "Calibration", "Polishing", "Quality Check", "Packed", "Shipped", "Discarded", "Rejected"]
 		stock_item: DF.Link | None
 		template: DF.Link
 	# end: auto-generated types

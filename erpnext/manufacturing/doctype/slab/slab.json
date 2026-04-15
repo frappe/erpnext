@@ -68,7 +68,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Distribution\nPressing\nRe-Pressing\nHeating\nCooling\nCuring\nTrimming\nCalibration\nPolishing\nQuality Check\nPacked\nShipped\nDiscarded",
+   "options": "Distribution\nPressing\nRe-Pressing\nHeating\nCooling\nCuring\nTrimming\nCalibration\nPolishing\nQuality Check\nPacked\nShipped\nDiscarded\nRejected",
    "read_only": 1,
    "reqd": 1
   },
@@ -266,7 +266,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-15 16:26:23.173463",
+ "modified": "2026-04-15 16:30:51.011019",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",
@@ -352,6 +352,10 @@
   {
    "color": "Red",
    "title": "Discarded"
+  },
+  {
+   "color": "Red",
+   "title": "Rejected"
   }
  ]
 }
