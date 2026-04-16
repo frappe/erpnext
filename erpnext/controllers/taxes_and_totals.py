@@ -1289,7 +1289,8 @@ def get_itemised_tax(doc, with_tax_account=False):
 		)
 
 		tax_info.tax_amount += flt(row.amount, precision)
-		tax_info.taxable_amount += flt(row.taxable_amount, precision)
+		conversion_rate = doc.conversion_rate or 1
+		tax_info.taxable_amount += flt(row.taxable_amount / conversion_rate, precision)
 
 		if with_tax_account:
 			tax_info.tax_account = tax.account_head

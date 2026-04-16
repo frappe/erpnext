@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-12 09:47+0000\n"
-"PO-Revision-Date: 2026-04-13 13:57\n"
+"PO-Revision-Date: 2026-04-15 14:00\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Croatian\n"
 "MIME-Version: 1.0\n"
@@ -9242,7 +9242,7 @@ msgstr "Nije moguće onemogućiti {0} jer to može dovesti do netočne procjene 
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:711
 msgid "Cannot disassemble more than produced quantity."
-msgstr "Ne može se rastaviti više od proizvedene količine."
+msgstr "Ne može se demontirati više od proizvedene količine."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:928
 msgid "Cannot disassemble {0} qty against Stock Entry {1}. Only {2} qty available to disassemble."
