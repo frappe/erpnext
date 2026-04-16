@@ -1,4 +1,5 @@
 import frappe
+from frappe.utils.data import nowdate
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCard
 from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
@@ -13,9 +14,7 @@ from erpnext.manufacturing.page.operator_station.operator_station import (
 )
 from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 from erpnext.stock.doctype.warehouse.constants import (
-	PREMIUM_WAREHOUSE,
 	REJECTED_WAREHOUSE,
-	STANDARD_WAREHOUSE,
 )
 
 
@@ -102,44 +101,71 @@ def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job
 	production_item: str = frappe.get_value("Job Card", job_card, "production_item")  # pyright: ignore[reportAssignmentType]
 	item_uom = frappe.get_value("Item", production_item, "stock_uom")
 	parts = []
-	is_std_slab = False
 	if slab_number:
 		parts = slab_number.split("-")
 
 	try:
 		stock_entry: StockEntry = frappe.new_doc("Stock Entry")  # pyright: ignore[reportAssignmentType]
-		stock_entry.stock_entry_type = "Material Transfer"
+		stock_entry.stock_entry_type = ""
 		stock_entry.company = company
+		stock_entry.posting_date = nowdate()
 		stock_entry.slab_grade = grade
 		stock_entry.slab_batch_no = parts[0] if len(parts) > 0 else None
 		stock_entry.slab_serial_no = parts[-1] if len(parts) > 1 else parts[0]
-		stock_entry.from_warehouse = target_warehouse
 
-		if grade and ("premium" in grade.lower() or "pre" in grade.lower()):
-			stock_entry.to_warehouse = PREMIUM_WAREHOUSE + " - " + company_abbr
-		elif grade and ("standard" in grade.lower() or "std" in grade.lower()):
-			stock_entry.to_warehouse = STANDARD_WAREHOUSE + " - " + company_abbr
-			is_std_slab = True
-		else:
+		if grade and ("standard" in grade.lower() or "std" in grade.lower()):
+			std_prod_item_name = production_item + " (STD)"
+			does_std_prod_item_exist = frappe.db.exists("Item", std_prod_item_name)
+			if not does_std_prod_item_exist:
+				raise Exception(f"Item {std_prod_item_name} not found")
+
+			stock_entry.stock_entry_type = "Repack"
+			stock_entry.append(
+				"items",
+				{
+					"item_code": production_item,
+					"qty": 1,
+					"uom": item_uom,
+					"s_warehouse": target_warehouse,
+					"slab_no": slab_number,
+					"to_slab_no": slab_number,
+				},
+			)
+
+			stock_entry.append(
+				"items",
+				{
+					"item_code": std_prod_item_name,
+					"qty": 1,
+					"uom": item_uom,
+					"t_warehouse": target_warehouse,
+					"slab_no": slab_number,
+					"to_slab_no": slab_number,
+					"is_finished_item": 1,
+				},
+			)
+
+		elif grade and ("reject" in grade.lower() or "rej" in grade.lower()):
+			stock_entry.stock_entry_type = "Material Transfer"
+			stock_entry.from_warehouse = target_warehouse
 			stock_entry.to_warehouse = REJECTED_WAREHOUSE + " - " + company_abbr
-		stock_entry.append(
-			"items",
-			{
-				"item_code": production_item,
-				"qty": 1,
-				"uom": item_uom,
-				"s_warehouse": target_warehouse,
-				"t_warehouse": stock_entry.to_warehouse,
-				"slab_no": slab_number,
-				"to_slab_no": slab_number,
-			},
-		)
+			stock_entry.append(
+				"items",
+				{
+					"item_code": production_item,
+					"qty": 1,
+					"uom": item_uom,
+					"s_warehouse": target_warehouse,
+					"t_warehouse": stock_entry.to_warehouse,
+					"slab_no": slab_number,
+					"to_slab_no": slab_number,
+				},
+			)
 
-		stock_entry.insert(ignore_permissions=True)
-		stock_entry.submit()
-		# This will temporarily add the standard item's name to the slab while doing the stock entry on the BOM item's name.
-		if is_std_slab:
-			stock_entry.items[0].item_code += " (STD)"
+		if stock_entry.stock_entry_type:
+			stock_entry.insert(ignore_permissions=True)
+			stock_entry.submit()
+
 		return stock_entry
 
 	except Exception:
@@ -170,4 +196,4 @@ def finish_qc_process(slab_number: str, slab_grade: str | None, job_card: str, p
 	stock_entry = _make_material_transfer_stock_entry(slab_number, slab_grade, job_card)
 
 	# 4. Update the name of the stock item on the slab.
-	_update_item_on_slab(str(stock_entry.items[0].item_code), slab_number)
+	_update_item_on_slab(str(stock_entry.items[-1].item_code), slab_number)
