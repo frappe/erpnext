@@ -258,7 +258,7 @@
    "fieldname": "shipment_number",
    "fieldtype": "Link",
    "label": "Shipment Number",
-   "options": "Shipment",
+   "options": "Slab Shipment",
    "read_only": 1
   },
   {
@@ -283,7 +283,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-16 16:23:19.277646",
+ "modified": "2026-04-16 19:07:52.907912",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",
