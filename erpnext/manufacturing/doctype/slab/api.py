@@ -703,6 +703,5 @@ def _create_final_qc(slab_name: str, final_qc: SlabQualityReport | None = None):
 	final_qc.slab_thickness = final_qc.slab_thickness or 0
 	final_qc.slab_width = final_qc.slab_width or 0
 	final_qc.repair = final_qc.repair or "None"
-	final_qc.crate_number = final_qc.crate_number or ""
 
 	create_slab_quality_report(str(slab.name), final_qc)
