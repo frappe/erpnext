@@ -19,7 +19,7 @@ from erpnext.manufacturing.doctype.slab_quality_report.slab_quality_report impor
 from erpnext.setup.doctype.attendance_shift.attendance_shift import AttendanceShift
 from erpnext.setup.doctype.mahi_granites_settings.mahi_granites_settings import MahiGranitesSettings
 
-STAGES_TO_SKIP_IN_AUTO_MOVE = ["Re-Pressing", "Packed", "Shipped", "Discarded", "Quality Check"]
+STAGES_TO_SKIP_IN_AUTO_MOVE = ["Re-Pressing", "Packed", "Shipped", "Discarded", "Quality Check", "Rejected"]
 
 
 @frappe.whitelist()
@@ -703,6 +703,5 @@ def _create_final_qc(slab_name: str, final_qc: SlabQualityReport | None = None):
 	final_qc.slab_thickness = final_qc.slab_thickness or 0
 	final_qc.slab_width = final_qc.slab_width or 0
 	final_qc.repair = final_qc.repair or "None"
-	final_qc.crate_number = final_qc.crate_number or ""
 
 	create_slab_quality_report(str(slab.name), final_qc)
