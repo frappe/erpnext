@@ -1802,7 +1802,7 @@ def make_work_orders(items, sales_order, company, project=None):
 	return [p.name for p in out]
 
 
-def make_production_plan(source_name: str, target_doc: str | Document | None = None):
+def make_production_plan(source_name, target_doc):
 	sales_order = frappe.get_doc("Sales Order", source_name)
 
 	production_plan = frappe.new_doc(
