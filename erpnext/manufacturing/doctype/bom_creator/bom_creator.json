@@ -283,6 +283,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.is_phantom",
    "fieldname": "section_break_xvld",
    "fieldtype": "Section Break",
    "label": "Operations Routing"
@@ -310,7 +311,7 @@
    "link_fieldname": "bom_creator"
   }
  ],
- "modified": "2026-04-16 17:39:38.232864",
+ "modified": "2026-04-16 20:43:30.820781",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
