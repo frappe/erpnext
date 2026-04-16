@@ -14,6 +14,7 @@ from erpnext.manufacturing.page.operator_station.operator_station import (
 )
 from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 from erpnext.stock.doctype.warehouse.constants import (
+	FINISHED_GOODS_WAREHOUSE,
 	REJECTED_WAREHOUSE,
 )
 
@@ -93,7 +94,7 @@ def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
 
 def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job_card: str):
 	work_order = frappe.get_value("Job Card", job_card, "work_order")
-	target_warehouse: str = frappe.get_value("Work Order", work_order, "fg_warehouse")  # pyright: ignore[reportAssignmentType]
+	slab_fg_warehouse: str = frappe.get_value("Work Order", work_order, "fg_warehouse")  # pyright: ignore[reportAssignmentType]
 
 	company: str = frappe.get_value("Job Card", job_card, "company")  # pyright: ignore[reportAssignmentType]
 	company_abbr: str = frappe.get_value("Company", company, "abbr")  # pyright: ignore[reportAssignmentType]
@@ -106,65 +107,53 @@ def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job
 
 	try:
 		stock_entry: StockEntry = frappe.new_doc("Stock Entry")  # pyright: ignore[reportAssignmentType]
-		stock_entry.stock_entry_type = ""
+		stock_entry.stock_entry_type = "Material Transfer"
 		stock_entry.company = company
 		stock_entry.posting_date = nowdate()
 		stock_entry.slab_grade = grade
 		stock_entry.slab_batch_no = parts[0] if len(parts) > 0 else None
 		stock_entry.slab_serial_no = parts[-1] if len(parts) > 1 else parts[0]
+		source_item_name = production_item
+		target_item_name = production_item
+		source_warehouse = slab_fg_warehouse
+		target_warehouse = f"{FINISHED_GOODS_WAREHOUSE} - {company_abbr}"
 
 		if grade and ("standard" in grade.lower() or "std" in grade.lower()):
-			std_prod_item_name = production_item + " (STD)"
-			does_std_prod_item_exist = frappe.db.exists("Item", std_prod_item_name)
-			if not does_std_prod_item_exist:
-				raise Exception(f"Item {std_prod_item_name} not found")
-
 			stock_entry.stock_entry_type = "Repack"
-			stock_entry.append(
-				"items",
-				{
-					"item_code": production_item,
-					"qty": 1,
-					"uom": item_uom,
-					"s_warehouse": target_warehouse,
-					"slab_no": slab_number,
-					"to_slab_no": slab_number,
-				},
-			)
-
-			stock_entry.append(
-				"items",
-				{
-					"item_code": std_prod_item_name,
-					"qty": 1,
-					"uom": item_uom,
-					"t_warehouse": target_warehouse,
-					"slab_no": slab_number,
-					"to_slab_no": slab_number,
-					"is_finished_item": 1,
-				},
-			)
+			target_item_name = f"{production_item} (STD)"
+			if not frappe.db.exists("Item", target_item_name):
+				raise Exception(f"Item {target_item_name} not found")
 
 		elif grade and ("reject" in grade.lower() or "rej" in grade.lower()):
-			stock_entry.stock_entry_type = "Material Transfer"
-			stock_entry.from_warehouse = target_warehouse
-			stock_entry.to_warehouse = REJECTED_WAREHOUSE + " - " + company_abbr
-			stock_entry.append(
-				"items",
-				{
-					"item_code": production_item,
-					"qty": 1,
-					"uom": item_uom,
-					"s_warehouse": target_warehouse,
-					"t_warehouse": stock_entry.to_warehouse,
-					"slab_no": slab_number,
-					"to_slab_no": slab_number,
-				},
-			)
+			target_warehouse = f"{REJECTED_WAREHOUSE} - {company_abbr}"
 
-		if stock_entry.stock_entry_type:
-			stock_entry.insert(ignore_permissions=True)
-			stock_entry.submit()
+		stock_entry.append(
+			"items",
+			{
+				"item_code": source_item_name,
+				"s_warehouse": source_warehouse,
+				"qty": 1,
+				"uom": item_uom,
+				"slab_no": slab_number,
+				"to_slab_no": slab_number,
+			},
+		)
+
+		stock_entry.append(
+			"items",
+			{
+				"item_code": target_item_name,
+				"t_warehouse": target_warehouse,
+				"qty": 1,
+				"uom": item_uom,
+				"slab_no": slab_number,
+				"to_slab_no": slab_number,
+				"is_finished_item": 1,
+			},
+		)
+
+		stock_entry.insert(ignore_permissions=True)
+		stock_entry.submit()
 
 		return stock_entry
 
