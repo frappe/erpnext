@@ -1752,6 +1752,7 @@ frappe.ui.form.on("Payment Entry Reference", {
 
 	reference_name: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
+		let row_allocated_amount = row.allocated_amount ? flt(row.allocated_amount) : 0;
 		if (row.reference_name && row.reference_doctype) {
 			return frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_reference_details",
@@ -1780,13 +1781,13 @@ frappe.ui.form.on("Payment Entry Reference", {
 							args: {
 								reference_doctype: row.reference_doctype,
 								reference_name: row.reference_name,
-								unallocated_amount: frm.doc.unallocated_amount,
+								unallocated_amount: frm.doc.unallocated_amount + row_allocated_amount,
 								existing_payment_requests: existing_prs,
 							},
 							callback: function (pr) {
 								let allocated_amount = Math.min(
 									flt(row.outstanding_amount),
-									flt(frm.doc.unallocated_amount)
+									flt(frm.doc.unallocated_amount + row_allocated_amount)
 								);
 
 								if (pr.message) {

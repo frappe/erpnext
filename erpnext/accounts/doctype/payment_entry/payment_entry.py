@@ -2872,6 +2872,9 @@ def get_best_fit_payment_request(
 	"""
 	Return the best-fit open Payment Request for a given reference.
 	Called from the JS reference_name handler to auto-populate the PR field.
+
+	Reuses get_open_payment_requests_for_references for the DB query,
+	then applies best-fit selection: exact match > largest fitting > FIFO oldest.
 	"""
 	if isinstance(existing_payment_requests, str):
 		existing_payment_requests = frappe.parse_json(existing_payment_requests)
@@ -2879,20 +2882,19 @@ def get_best_fit_payment_request(
 	if unallocated_amount is not None:
 		unallocated_amount = flt(unallocated_amount)
 
-	PR = frappe.qb.DocType("Payment Request")
-	open_prs = (
-		frappe.qb.from_(PR)
-		.select(PR.name, PR.outstanding_amount)
-		.where(PR.reference_doctype == reference_doctype)
-		.where(PR.reference_name == reference_name)
-		.where(PR.status != "Paid")
-		.where(PR.docstatus == 1)
-		.where(PR.outstanding_amount > 0)
-		.orderby(Coalesce(PR.transaction_date, PR.creation), order=frappe.qb.asc)
-	).run(as_dict=True)
+	ref_row = frappe._dict(reference_doctype=reference_doctype, reference_name=reference_name)
+	pr_map = get_open_payment_requests_for_references([ref_row], skip_allocated_amount_check=True)
 
-	if not open_prs:
+	if not pr_map:
 		return None
+
+	# pr_map is {(doctype, name): {pr_name: outstanding, ...}}
+	pr_dict = pr_map.get((reference_doctype, reference_name))
+	if not pr_dict:
+		return None
+
+	# Convert to list of dicts
+	open_prs = [frappe._dict(name=name, outstanding_amount=amt) for name, amt in pr_dict.items()]
 
 	if existing_payment_requests:
 		open_prs = [pr for pr in open_prs if pr.name not in existing_payment_requests]
@@ -3089,7 +3091,7 @@ def get_payment_entry(
 	return pe
 
 
-def get_open_payment_requests_for_references(references=None):
+def get_open_payment_requests_for_references(references=None, skip_allocated_amount_check=False):
 	"""
 	Fetch all unpaid Payment Requests for the references. \n
 	        - Each reference can have multiple Payment Requests. \n
@@ -3102,7 +3104,9 @@ def get_open_payment_requests_for_references(references=None):
 	refs = {
 		(row.reference_doctype, row.reference_name)
 		for row in references
-		if row.reference_doctype and row.reference_name and row.allocated_amount
+		if row.reference_doctype
+		and row.reference_name
+		and (skip_allocated_amount_check or row.allocated_amount)
 	}
 
 	if not refs:
