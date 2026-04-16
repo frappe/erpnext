@@ -79,7 +79,7 @@ frappe.ui.form.on("BOM Creator", {
 					reqd: 1,
 					default: 1.0,
 				},
-				{ fieldtype: "Section Break" },
+				{ fieldtype: "Section Break", depends_on: "eval:!doc.is_phantom" },
 				{
 					label: __("Currency"),
 					fieldtype: "Link",
@@ -96,7 +96,7 @@ frappe.ui.form.on("BOM Creator", {
 					reqd: 1,
 					default: 1.0,
 				},
-				{ fieldtype: "Section Break" },
+				{ fieldtype: "Section Break", depends_on: "eval:!doc.is_phantom" },
 				{
 					label: __("Routing"),
 					fieldtype: "Link",
