@@ -149,8 +149,8 @@ frappe.ui.form.on("Material Request", {
 				frm.add_custom_button(__("Stop"), () => frm.events.update_status(frm, "Stopped"));
 			}
 
-			const is_pending = frm.doc.items.every(
-				(item) => item.stock_qty > item.ordered_qty - item.returned_qty
+			const is_pending = frm.doc.items.some(
+				(item) => item.ordered_qty - item.returned_qty < item.stock_qty
 			);
 			if (frm.doc.material_request_type === "Purchase" && is_pending) {
 				frm.add_custom_button(

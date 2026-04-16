@@ -1143,6 +1143,58 @@ class TestMaterialRequest(ERPNextTestSuite):
 		se.save()
 		se.submit()
 
+	def test_purchase_return(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+
+		mr = make_material_request()
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.submit()
+
+		pr = make_purchase_receipt(po.name)
+		pr.items[0].qty = 8
+		pr.submit()
+
+		return_pr = make_purchase_return(pr.name)
+		return_pr.items[0].qty = -2
+		return_pr.submit()
+
+		mr.reload()
+		self.assertEqual(mr.per_ordered, 100)
+		self.assertEqual(mr.per_received, 80)
+		self.assertEqual(mr.per_returned, 20)
+
+		po = make_purchase_order(mr.name)
+		self.assertEqual(po.items[0].qty, 2)
+
+	def test_purchase_invoice_return(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+
+		mr = make_material_request()
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.submit()
+
+		pi = make_purchase_invoice(po.name)
+		pi.update_stock = 1
+		pi.items[0].qty = 8
+		pi.submit()
+
+		return_pi = make_debit_note(pi.name)
+		return_pi.items[0].received_qty = -2
+		return_pi.items[0].qty = -2
+		return_pi.submit()
+
+		mr.reload()
+		self.assertEqual(mr.per_ordered, 100)
+		self.assertEqual(mr.per_received, 80)
+		self.assertEqual(mr.per_returned, 20)
+
+		po = make_purchase_order(mr.name)
+		self.assertEqual(po.items[0].qty, 2)
+
 
 def get_in_transit_warehouse(company):
 	if not frappe.db.exists("Warehouse Type", "Transit"):

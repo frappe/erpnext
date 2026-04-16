@@ -77,8 +77,6 @@ class MaterialRequest(BuyingController):
 			"Issued",
 			"Transferred",
 			"Received",
-			"Returned",
-			"Partially Returned",
 		]
 		tc_name: DF.Link | None
 		terms: DF.TextEditor | None
@@ -178,8 +176,6 @@ class MaterialRequest(BuyingController):
 				"Issued",
 				"Transferred",
 				"Received",
-				"Returned",
-				"Partially Returned",
 			],
 		)
 
@@ -458,7 +454,6 @@ def update_item(obj, target, source_parent):
 
 	qty = (obj.ordered_qty - obj.returned_qty) or obj.received_qty
 	target.qty = flt(flt(obj.stock_qty) - flt(qty)) / target.conversion_factor
-
 	target.stock_qty = target.qty * target.conversion_factor
 	if getdate(target.schedule_date) < getdate(nowdate()):
 		target.schedule_date = None

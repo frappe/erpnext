@@ -198,6 +198,32 @@ class PurchaseReceipt(BuyingController):
 				"target_ref_field": "qty",
 				"overflow_type": "receipt",
 			},
+			{
+				"source_dt": "Purchase Receipt Item",
+				"target_dt": "Material Request Item",
+				"join_field": "material_request_item",
+				"target_field": "returned_qty",
+				"target_parent_dt": "Material Request",
+				"target_parent_field": "per_returned",
+				"target_ref_field": "stock_qty",
+				"source_field": "-1 * stock_qty",
+				"percent_join_field": "material_request",
+				"validate_qty": False,
+				"extra_cond": "and stock_qty < 0",
+			},
+			{
+				"source_dt": "Purchase Receipt Item",
+				"target_dt": "Material Request Item",
+				"join_field": "material_request_item",
+				"target_field": "received_qty",
+				"target_parent_dt": "Material Request",
+				"target_parent_field": "per_received",
+				"target_ref_field": "stock_qty",
+				"source_field": "stock_qty",
+				"percent_join_field": "material_request",
+				"validate_qty": False,
+				"extra_cond": "and stock_qty > 0",
+			},
 		]
 
 		if cint(self.is_return):
@@ -228,36 +254,7 @@ class PurchaseReceipt(BuyingController):
 						"source_field": "-1 * received_stock_qty",
 						"percent_join_field_parent": "return_against",
 					},
-					{
-						"source_dt": "Purchase Receipt Item",
-						"target_dt": "Material Request Item",
-						"join_field": "material_request_item",
-						"target_field": "returned_qty",
-						"target_parent_dt": "Material Request",
-						"target_parent_field": "per_returned",
-						"target_ref_field": "stock_qty",
-						"source_field": "-1 * stock_qty",
-						"percent_join_field": "material_request",
-						"validate_qty": False,
-						"extra_cond": "and stock_qty < 0",
-					},
 				]
-			)
-		else:
-			self.status_updater.append(
-				{
-					"source_dt": "Purchase Receipt Item",
-					"target_dt": "Material Request Item",
-					"join_field": "material_request_item",
-					"target_field": "received_qty",
-					"target_parent_dt": "Material Request",
-					"target_parent_field": "per_received",
-					"target_ref_field": "stock_qty",
-					"source_field": "stock_qty",
-					"percent_join_field": "material_request",
-					"validate_qty": False,
-					"extra_cond": "and stock_qty > 0",
-				}
 			)
 
 	def before_validate(self):
