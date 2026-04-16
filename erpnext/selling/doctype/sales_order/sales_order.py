@@ -1802,10 +1802,6 @@ def make_work_orders(items, sales_order, company, project=None):
 	return [p.name for p in out]
 
 
-@frappe.whitelist()
-<<<<<<< HEAD
-def update_status(status, name):
-=======
 def make_production_plan(source_name: str, target_doc: str | Document | None = None):
 	sales_order = frappe.get_doc("Sales Order", source_name)
 
@@ -1837,8 +1833,7 @@ def make_production_plan(source_name: str, target_doc: str | Document | None = N
 
 
 @frappe.whitelist()
-def update_status(status: str, name: str):
->>>>>>> 97efd51fb8 (feat: add option to create production plan from sales order (#53662))
+def update_status(status, name):
 	so = frappe.get_doc("Sales Order", name, check_permission="submit")
 	so.update_status(status)
 
