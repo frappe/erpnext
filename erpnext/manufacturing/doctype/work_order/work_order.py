@@ -1252,7 +1252,7 @@ class WorkOrder(Document):
 	def set_work_order_operations(self):
 		"""Fetch operations from BOM and set in 'Work Order'"""
 
-		def _get_operations(bom_no, qty=1):
+		def _get_operations(bom_no, qty=1, exploded=False):
 			data = frappe.get_all(
 				"BOM Operation",
 				filters={"parent": bom_no},
@@ -1284,10 +1284,13 @@ class WorkOrder(Document):
 
 			for d in data:
 				if not d.fixed_time:
-					if d.set_cost_based_on_bom_qty:
-						d.time_in_mins = flt(d.time_in_mins) * flt(flt(qty) / flt(d.batch_size or 1))
+					if frappe.get_value("Operation", d.operation, "create_job_card_based_on_batch_size"):
+						qty = d.batch_size
+
+					if exploded:
+						d.time_in_mins *= flt(qty)
 					else:
-						d.time_in_mins = flt(d.time_in_mins) * flt(qty)
+						d.time_in_mins /= flt(qty)
 
 				d.status = "Pending"
 
@@ -1308,7 +1311,9 @@ class WorkOrder(Document):
 
 			for node in bom_traversal:
 				if node.is_bom:
-					operations.extend(_get_operations(node.name, qty=node.exploded_qty / node.bom_qty))
+					operations.extend(
+						_get_operations(node.name, qty=node.exploded_qty / node.bom_qty, exploded=True)
+					)
 
 		bom_qty = frappe.get_cached_value("BOM", self.bom_no, "quantity")
 		operations.extend(_get_operations(self.bom_no, qty=bom_qty))
@@ -1322,7 +1327,7 @@ class WorkOrder(Document):
 	def calculate_time(self):
 		for d in self.get("operations"):
 			if not d.fixed_time:
-				d.time_in_mins = flt(d.time_in_mins) * (flt(self.qty) / flt(d.batch_size))
+				d.time_in_mins = flt(d.time_in_mins) * flt(self.qty)
 
 		self.calculate_operating_cost()
 
@@ -2639,6 +2644,7 @@ def validate_operation_data(row):
 
 def create_job_card(work_order, row, enable_capacity_planning=False, auto_create=False):
 	doc = frappe.new_doc("Job Card")
+	qty = row.job_card_qty or work_order.get("qty", 0)
 	doc.update(
 		{
 			"work_order": work_order.name,
@@ -2647,7 +2653,7 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 			"workstation": row.get("workstation"),
 			"operation_row_id": cint(row.idx),
 			"posting_date": nowdate(),
-			"for_quantity": row.job_card_qty or work_order.get("qty", 0),
+			"for_quantity": qty,
 			"operation_id": row.get("name"),
 			"bom_no": work_order.bom_no,
 			"project": work_order.project,
@@ -2655,7 +2661,7 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 			"sequence_id": row.get("sequence_id"),
 			"hour_rate": row.get("hour_rate"),
 			"serial_no": row.get("serial_no"),
-			"time_required": row.get("time_in_mins"),
+			"time_required": (row.get("time_in_mins", 0) / work_order.qty) * qty,
 			"source_warehouse": row.get("source_warehouse") or work_order.get("source_warehouse"),
 			"target_warehouse": row.get("fg_warehouse") or work_order.get("fg_warehouse"),
 			"wip_warehouse": work_order.wip_warehouse or row.get("wip_warehouse")

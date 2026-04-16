@@ -433,7 +433,7 @@
    "depends_on": "eval:doc.is_stock_item",
    "fieldname": "serial_nos_and_batches",
    "fieldtype": "Section Break",
-   "label": "Serial Nos and Batches"
+   "label": "Serial Nos / Batches"
   },
   {
    "default": "0",
@@ -995,7 +995,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-03-24 15:45:40.207531",
+ "modified": "2026-04-14 13:37:00.183583",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

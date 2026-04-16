@@ -28,6 +28,7 @@ from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 )
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
+	get_sales_orders,
 )
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -1812,6 +1813,37 @@ def make_work_orders(items: str, sales_order: str, company: str, project: str | 
 		out.append(work_order)
 
 	return [p.name for p in out]
+
+
+@frappe.whitelist()
+def make_production_plan(source_name: str, target_doc: str | Document | None = None):
+	sales_order = frappe.get_doc("Sales Order", source_name)
+
+	production_plan = frappe.new_doc(
+		"Production Plan",
+		company=sales_order.company,
+		get_items_from="Sales Order",
+		posting_date=nowdate(),
+	)
+
+	open_so = [data.name for data in get_sales_orders(production_plan)]
+	if sales_order.name not in open_so:
+		frappe.throw(_("Sales Order {0} is not available for production").format(sales_order.name))
+
+	production_plan.append(
+		"sales_orders",
+		{
+			"sales_order": sales_order.name,
+			"sales_order_date": sales_order.transaction_date,
+			"customer": sales_order.customer,
+			"grand_total": sales_order.base_grand_total,
+		},
+	)
+	production_plan.get_items()
+	if not production_plan.get("po_items"):
+		frappe.throw(_("Sales Order {0} is not available for production").format(sales_order.name))
+
+	return production_plan
 
 
 @frappe.whitelist()

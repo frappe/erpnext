@@ -2,7 +2,15 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Accounts Settings", {
-	refresh: function (frm) {},
+	refresh: function (frm) {
+		frm.set_query("document_type", "repost_allowed_types", function (doc, cdt, cdn) {
+			return {
+				filters: {
+					name: ["in", frappe.boot.sysdefaults.repost_allowed_doctypes],
+				},
+			};
+		});
+	},
 	enable_immutable_ledger: function (frm) {
 		if (!frm.doc.enable_immutable_ledger) {
 			return;
