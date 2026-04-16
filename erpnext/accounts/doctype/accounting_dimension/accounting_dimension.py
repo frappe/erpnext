@@ -82,18 +82,15 @@ class AccountingDimension(Document):
 			else:
 				frappe.throw(_("Company {0} is added more than once").format(frappe.bold(default.company)))
 
-<<<<<<< HEAD
-	def after_insert(self):
-		if frappe.flags.in_test:
-=======
 	def on_update(self):
-		if frappe.in_test:
->>>>>>> ee067e6015 (fix: move make_dimension_in_accounting_doctypes from after_insert to on_update)
+		if frappe.flags.in_test:
 			make_dimension_in_accounting_doctypes(doc=self)
 		else:
 			frappe.enqueue(
 				make_dimension_in_accounting_doctypes, doc=self, queue="long", enqueue_after_commit=True
 			)
+		frappe.flags.accounting_dimensions = None
+		frappe.flags.accounting_dimensions_details = None
 
 	def on_trash(self):
 		if frappe.flags.in_test:
@@ -107,10 +104,6 @@ class AccountingDimension(Document):
 
 		if not self.fieldname:
 			self.fieldname = scrub(self.label)
-
-	def on_update(self):
-		frappe.flags.accounting_dimensions = None
-		frappe.flags.accounting_dimensions_details = None
 
 
 def make_dimension_in_accounting_doctypes(doc, doclist=None):
