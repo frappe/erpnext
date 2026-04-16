@@ -13,6 +13,7 @@
   "details_tab",
   "section_break_ylsl",
   "item_code",
+  "is_phantom",
   "item_name",
   "item_group",
   "column_break_ikj7",
@@ -291,6 +292,13 @@
    "fieldtype": "Link",
    "label": "Routing",
    "options": "Routing"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_phantom",
+   "fieldtype": "Check",
+   "label": "Is Phantom Item",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
@@ -302,7 +310,7 @@
    "link_fieldname": "bom_creator"
   }
  ],
- "modified": "2024-11-25 16:41:03.047835",
+ "modified": "2026-04-16 17:39:38.232864",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
@@ -336,6 +344,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",

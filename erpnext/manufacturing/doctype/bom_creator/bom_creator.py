@@ -52,6 +52,7 @@ class BOMCreator(Document):
 		currency: DF.Link
 		default_warehouse: DF.Link | None
 		error_log: DF.Text | None
+		is_phantom: DF.Check
 		item_code: DF.Link
 		item_group: DF.Link | None
 		item_name: DF.Data | None
@@ -77,6 +78,7 @@ class BOMCreator(Document):
 		self.set_rate_for_items()
 
 	def validate(self):
+		self.validate_finished_good()
 		self.validate_items()
 		self.validate_duplicate_item()
 
@@ -101,6 +103,15 @@ class BOMCreator(Document):
 				)
 			else:
 				item_map[key] = row.idx
+
+	def validate_finished_good(self):
+		is_stock_item = frappe.get_cached_value("Item", self.item_code, "is_stock_item")
+		if is_stock_item and self.is_phantom:
+			frappe.throw(_("Phantom BOM cannot be created for stock item {0}.").format(self.item_code))
+		elif not is_stock_item and not self.is_phantom:
+			frappe.throw(
+				_("Non-phantom BOM cannot be created for non-stock item {0}.").format(self.item_code)
+			)
 
 	def validate_items(self):
 		for row in self.items:
@@ -334,10 +345,12 @@ class BOMCreator(Document):
 			}
 		)
 
-		if row.item_code == self.item_code and (self.routing or self.has_operations()):
-			bom.routing = self.routing
-			bom.with_operations = 1
-			bom.transfer_material_against = "Work Order"
+		if row.item_code == self.item_code:
+			bom.is_phantom_bom = self.is_phantom
+			if not self.is_phantom and (self.routing or self.has_operations()):
+				bom.routing = self.routing
+				bom.with_operations = 1
+				bom.transfer_material_against = "Work Order"
 
 		for field in BOM_FIELDS:
 			if self.get(field):
