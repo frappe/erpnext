@@ -19,19 +19,19 @@ class OvenOperation(Document):
 		bottom_left_vertex: DF.Float
 		bottom_right_vertex: DF.Float
 		date: DF.Datetime
-		in_time: DF.Datetime
+		in_time: DF.Datetime | None
 		job_card: DF.Data
 		left_edge_centre: DF.Float
 		lower_shelf_temp: DF.Float
 		out_time: DF.Datetime | None
 		oven: DF.Link
-		oven_rack: DF.Link
+		oven_rack: DF.Link | None
 		remarks: DF.Text | None
 		right_edge_centre: DF.Float
 		shift: DF.Link
-		slab: DF.Link
+		slab: DF.Link | None
 		slab_bottom_temp: DF.Float
-		slab_color: DF.Link
+		slab_color: DF.Link | None
 		slab_top_temp: DF.Float
 		top_edge_center: DF.Float
 		top_left_vertex: DF.Float

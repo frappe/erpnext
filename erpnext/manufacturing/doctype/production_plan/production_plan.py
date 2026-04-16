@@ -73,6 +73,7 @@ class ProductionPlan(Document):
 		is_monthly_production_plan: DF.Check
 		is_parent_plan: DF.Check
 		is_test_item: DF.Check
+		is_work_order_created: DF.Check
 		item_code: DF.Link | None
 		material_requests: DF.Table[ProductionPlanMaterialRequest]
 		monthly_production_plan: DF.Link | None

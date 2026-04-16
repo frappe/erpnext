@@ -114,7 +114,7 @@ const submitCuring = () => {
         isProcessing.value = true;
         try {
             await frappe.call({
-                method: 'erpnext.manufacturing.doctype.preliminary_quality_check.api.create_preliminary_quality_check',
+                method: 'erpnext.manufacturing.doctype.preliminary_quality_check.api.move_slab_to_curing',
                 args: {
                     slab_name: selectedSlab.value.name,
                     slab_template: selectedSlab.value.template,

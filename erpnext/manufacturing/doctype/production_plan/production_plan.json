@@ -16,6 +16,7 @@
   "reason_for_deletion_of_job_cards",
   "is_parent_plan",
   "is_test_item",
+  "is_work_order_created",
   "filters",
   "item_code",
   "customer",
@@ -498,7 +499,7 @@
   {
    "fieldname": "select_items_to_manufacture_in_line_3_section",
    "fieldtype": "Section Break",
-   "label": "Select Items to Manufacture in Line 3"
+   "label": "Select Items to Manufacture in Calacatta Mixer 3"
   },
   {
    "default": "0",
@@ -532,7 +533,7 @@
    "depends_on": "eval:doc.get_items_from && doc.docstatus == 0",
    "fieldname": "get_items_line_3",
    "fieldtype": "Button",
-   "label": "Get Finished Goods for Manufacture in Line 3"
+   "label": "Get Finished Goods for Manufacture in Calacatta Mixer 3"
   },
   {
    "depends_on": "eval:doc.get_items_from && doc.docstatus == 0",
@@ -543,12 +544,12 @@
   {
    "fieldname": "select_items_to_manufacture_in_line_1_section",
    "fieldtype": "Section Break",
-   "label": "Select Items to Manufacture in Line 1"
+   "label": "Select Items to Manufacture in Calacatta Mixer 1"
   },
   {
    "fieldname": "select_items_to_manufacture_in_line_2_section",
    "fieldtype": "Section Break",
-   "label": "Select Items to Manufacture in Line 2"
+   "label": "Select Items to Manufacture in Calacatta Mixer 2"
   },
   {
    "default": "0",
@@ -600,13 +601,22 @@
    "fieldtype": "Int",
    "hidden": 1,
    "label": "Deleted Job Card Count"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "is_work_order_created",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Work Order Created",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-02 16:21:53.946808",
+ "modified": "2026-04-08 16:30:13.353002",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

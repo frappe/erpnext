@@ -13,10 +13,12 @@ class Slab(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from erpnext.manufacturing.doctype.slab_history.slab_history import SlabHistory
 		from frappe.types import DF
 
+		from erpnext.manufacturing.doctype.slab_history.slab_history import SlabHistory
+
 		amended_from: DF.Link | None
+		batch_code: DF.Data | None
 		batch_number: DF.Data
 		child_line: DF.Link | None
 		consignment_number: DF.Data | None
@@ -39,4 +41,16 @@ class Slab(Document):
 		status: DF.Literal["Distribution", "Pressing", "Re-Pressing", "Heating", "Cooling", "Curing", "Trimming", "Calibration", "Polishing", "Quality Check", "Packed", "Shipped", "Discarded"]
 		template: DF.Link
 	# end: auto-generated types
-	pass
+
+
+	@property
+	def last_active_job_card(self):
+		if self.current_job_card:
+			return self.current_job_card
+
+		# Get the last slab history item that has a job card associated
+		for history in reversed(self.slab_history):
+			if history.job_card_number:
+				return history.job_card_number
+
+		return None

@@ -6,24 +6,41 @@ from frappe.exceptions import ValidationError
 from frappe.query_builder.functions import Count
 
 from erpnext.accounts.doctype.fiscal_year.fiscal_year import FiscalYear
+from erpnext.manufacturing.doctype.oven_operation.oven_operation import OvenOperation
+from erpnext.manufacturing.doctype.preliminary_quality_check.preliminary_quality_check import (
+	PreliminaryQualityCheck,
+)
 from erpnext.manufacturing.doctype.slab.slab import ALLOWED_STAGES, Slab
 from erpnext.manufacturing.doctype.slab_batch_number.api import delete_batch_numbers_older_than
 from erpnext.manufacturing.doctype.slab_batch_number.slab_batch_number import SlabBatchNumber
 from erpnext.manufacturing.doctype.slab_history.slab_history import SlabHistory
+from erpnext.manufacturing.doctype.slab_quality_report.api import create_slab_quality_report
+from erpnext.manufacturing.doctype.slab_quality_report.slab_quality_report import SlabQualityReport
 from erpnext.setup.doctype.attendance_shift.attendance_shift import AttendanceShift
 from erpnext.setup.doctype.mahi_granites_settings.mahi_granites_settings import MahiGranitesSettings
 
+STAGES_TO_SKIP_IN_AUTO_MOVE = ["Re-Pressing", "Packed", "Shipped", "Discarded", "Quality Check"]
+
 
 @frappe.whitelist()
-def create_slab(line: str, child_line: str, type: str, job_card_number: str | None = None, slab_history: list[SlabHistory] | None = None):
+def create_slab(
+	line: str,
+	child_line: str,
+	type: str,
+	job_card_number: str | None = None,
+	slab_history: list[SlabHistory] | None = None,
+	slab_number: int = 0,
+	batch_number: str | None = None,
+):
 	new_slab: Slab = frappe.new_doc("Slab")  # pyright: ignore[reportAssignmentType]
 	new_slab.line = line
 	new_slab.child_line = child_line
 	new_slab.template = type
 	new_slab.current_job_card = job_card_number
-	new_slab.batch_number = _generate_slab_batch(line, create_and_get=True)
+	new_slab.batch_number = batch_number or _generate_slab_batch(line, create_and_get=True)
+	new_slab.batch_code = new_slab.batch_number.split('/')[-1]
 
-	slab_number: int = _get_slab_number(new_slab.batch_number, line)
+	slab_number = slab_number or _get_slab_number(new_slab.batch_number, line)
 	new_slab.number = slab_number
 	new_slab.serial_number = f"{slab_number:04d}"
 
@@ -47,7 +64,7 @@ def create_slab(line: str, child_line: str, type: str, job_card_number: str | No
 
 
 @frappe.whitelist()
-def checkout_slab(slab_number: str):
+def checkout_slab(slab_number: str, publish_event=True):
 	slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
 
 	# Get the last item in slab history
@@ -71,7 +88,8 @@ def checkout_slab(slab_number: str):
 
 	slab.save(ignore_permissions=True)
 
-	frappe.publish_realtime("slab_checkout", slab)
+	if publish_event:
+		frappe.publish_realtime("slab_checkout", slab)
 
 
 @frappe.whitelist()
@@ -99,6 +117,7 @@ def move_slab_to(
 	next_stage: str,
 	job_card_number: str | None = None,
 	checkout_and_move=False,
+	publish_event=True,
 ):
 	checkout_and_move = bool(checkout_and_move)
 	# Validation: Check if the given stage is valid.
@@ -130,7 +149,7 @@ def move_slab_to(
 
 	slab.status = next_stage  # pyright: ignore[reportAttributeAccessIssue]
 	slab.is_cur_stage_complete = False
-	slab.current_job_card = job_card_number or slab.current_job_card
+	slab.current_job_card = job_card_number
 	slab.status = ALLOWED_STAGES[next_stage_index]  # pyright: ignore[reportAttributeAccessIssue]
 	# if next_stage.lower() != "trimming":
 	# 	next_job_card_info = find_next_job_card(job_card_number or slab.slab_history[-1].job_card_number)
@@ -145,7 +164,9 @@ def move_slab_to(
 	slab.slab_history.append(slab_history)
 
 	slab.save(ignore_permissions=True)
-	frappe.publish_realtime("slab_move", slab)
+
+	if publish_event:
+		frappe.publish_realtime("slab_move", slab)
 
 
 @frappe.whitelist()
@@ -246,6 +267,122 @@ def get_batch_numbers(include_child_lines=False):
 	return batch_numbers
 
 
+@frappe.whitelist()
+def get_valid_next_stages(current_stage: str, include_qc = False) -> list[str]:
+	stages_to_skip = [stage if stage.lower() != "quality check" or not include_qc else None for stage in STAGES_TO_SKIP_IN_AUTO_MOVE]
+	allowed_stages = [stage.lower() for stage in ALLOWED_STAGES]
+
+	try:
+		current_stage_index = allowed_stages.index(current_stage.lower())
+	except ValueError:
+		return []
+
+	valid_stages = []
+	for idx, stage in enumerate(ALLOWED_STAGES):
+		if idx <= current_stage_index or (stage in stages_to_skip):
+			continue
+
+		valid_stages.append(stage)
+
+	return valid_stages
+
+
+@frappe.whitelist()
+def move_slab_iteratively_to(slab_name: str, final_stage: str, observations: list[PreliminaryQualityCheck | OvenOperation | SlabQualityReport] | None = None, include_qc = False):
+	slab: Slab = frappe.get_doc("Slab", slab_name)  # pyright: ignore[reportAssignmentType]
+	# If the slab's current process is not complete, finish the process
+	from erpnext.manufacturing.page.operator_station.operator_station import (
+		finish_process,
+		get_next_work_item,
+		start_process,
+	)
+
+	obs_creation_func_map = {
+		"curing": _create_preliminary_qc,
+		"heating": _create_oven_operation_params,
+		"quality check": _create_final_qc,
+	}
+
+	doctype_map = {
+		"curing": "Preliminary Quality Check",
+		"heating": "Oven Operation",
+		"quality check": "Slab Quality Report",
+	}
+
+	def get_observation_for_stage(stage: str):
+		if not observations:
+			return None
+		dt = doctype_map.get(stage.lower())
+		if dt:
+			return next((o for o in observations if o and getattr(o, "doctype", None) == dt), None)
+		return None
+
+	try:
+		frappe.db.begin()
+
+		# If the current stage of the slab is not complete yet, finish it before proceeding.
+		if not slab.is_cur_stage_complete:
+			# Add the default stage observations, if applicable
+			func = obs_creation_func_map.get(slab.status.lower())
+			if func:
+				func(slab_name, get_observation_for_stage(slab.status.lower()))
+
+			if slab.current_job_card:
+				finish_process(
+					slab.current_job_card, slab.status.lower(), transfer_materials=slab.status.lower() != "cooling", should_stop_machine=False
+				)
+
+			elif slab.status.lower() == "curing":
+				_finish_curing(slab_name)
+
+			else:
+				checkout_slab(str(slab.name), publish_event=False)
+
+		next_stages = get_valid_next_stages(slab.status, include_qc)
+		for stage in next_stages:
+			# Get the name of the top job card for the process
+			top_job_card_name: str = (get_next_work_item(stage.lower(), slab.line).get('job_card', {}) or {}).get('name') # pyright: ignore[reportAssignmentType]
+
+			if top_job_card_name:
+				start_process(top_job_card_name, slab_name, slab.template, stage.lower(), publish_slab_event=False)
+				if stage.lower() != "quality check":
+					finish_process(top_job_card_name, stage.lower(), transfer_materials=stage.lower() != "cooling", should_stop_machine=False, publish_slab_event=False)
+				else:
+					qc_obs = get_observation_for_stage(stage.lower())
+					_finish_qc(slab_name, qc_obs, top_job_card_name) # pyright: ignore[reportArgumentType]
+			else:
+				move_slab_to(slab_name, stage)
+
+				if stage.lower() == "curing":
+					_finish_curing(slab_name)
+				else:
+					checkout_slab(slab_name, publish_event=False)
+
+			# Add the default stage observations, if applicable
+			func = obs_creation_func_map.get(stage.lower())
+			if func:
+				func(slab_name, get_observation_for_stage(stage.lower()))
+
+			if stage.lower() == final_stage.lower():
+				break
+
+		frappe.db.commit()
+
+	except Exception:
+		frappe.db.rollback()
+
+
+def _finish_curing(slab_name: str):
+	from erpnext.manufacturing.page.slab_loading_station.slab_loading_station import finish_curing
+	finish_curing(slab_name)
+
+
+def _finish_qc(slab_number: str, slab_qc: SlabQualityReport, job_card: str):
+	from erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station import finish_qc_process
+	# Get Slab Grade
+	finish_qc_process(slab_number, slab_qc.grade, job_card, publish_slab_event=False)
+
+
 def pause_or_resume_slab_operation(slab_number: str, pause: bool):
 	# Get the slab document
 	slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
@@ -318,7 +455,9 @@ def _calculate_batch_number_based_on_working_days(today: date, fiscal_year: Fisc
 	now_time = datetime.now()
 	shift_start_hour = shift.start_time.seconds / 3600
 	start_day_factor = 1 if shift.does_span_next_day and now_time.hour < shift_start_hour else 0
-	shift_start_datetime = datetime(today.year, today.month, today.day) - timedelta(days=start_day_factor) + shift.start_time
+	shift_start_datetime = (
+		datetime(today.year, today.month, today.day) - timedelta(days=start_day_factor) + shift.start_time
+	)
 	shift_end_datetime = datetime(today.year, today.month, today.day) + shift.end_time
 
 	# If the current time falls in the LAST shift of the day AND is after midnight, subtract 1 from total_days_so_far so that the batch number still reflects that of the previous day.
@@ -368,6 +507,7 @@ def _calculate_batch_number_based_on_working_days(today: date, fiscal_year: Fisc
 	total_working_days = total_days_so_far - holiday_count + 1
 	return f"{total_working_days:03d}"
 
+
 def _get_batch_number_from_list(today: date, fiscal_year: FiscalYear, create_and_get: bool = False) -> str:
 
 	attendance_shifts: list[AttendanceShift] = frappe.db.get_all(
@@ -402,7 +542,12 @@ def _get_batch_number_from_list(today: date, fiscal_year: FiscalYear, create_and
 
 	# If `create_and_get` is True, create a new batch number if one does not exist for today.
 	elif create_and_get:
-		if fy_start_date.year == today.year and fy_start_date.month == today.month and fy_start_date.day <= today.day and today.day <= buffer_date.day:  # pyright: ignore[reportAttributeAccessIssue]
+		if (
+			fy_start_date.year == today.year
+			and fy_start_date.month == today.month
+			and fy_start_date.day <= today.day
+			and today.day <= buffer_date.day
+		):  # pyright: ignore[reportAttributeAccessIssue]
 			delete_batch_numbers_older_than(fy_start_date.strftime("%Y-%m-%d"))
 
 		slab_batch: SlabBatchNumber = frappe.new_doc("Slab Batch Number")  # pyright: ignore[reportAssignmentType]
@@ -413,6 +558,7 @@ def _get_batch_number_from_list(today: date, fiscal_year: FiscalYear, create_and
 	# Else, throw an exception if one does not exist.
 	frappe.throw("No batch number found for today.", ValidationError)
 	return ""
+
 
 def _get_slab_number(batch: str, line: str) -> int:
 	today = date.today()
@@ -445,3 +591,118 @@ def _get_slab_number(batch: str, line: str) -> int:
 	) + 1
 
 	return slab_count or 0
+
+
+def _create_preliminary_qc(slab_name: str, preliminary_qc: PreliminaryQualityCheck | None = None):
+	slab: Slab = frappe.get_doc("Slab", slab_name)  # pyright: ignore[reportAssignmentType]
+	curing_history_item = next((item for item in slab.slab_history if item.station == "Curing"), None)
+	if curing_history_item and not preliminary_qc and curing_history_item.preliminary_qc:
+		preliminary_qc = frappe.get_doc("Preliminary Quality Check", str(curing_history_item.preliminary_qc))  # pyright: ignore[reportAssignmentType]
+
+	if not preliminary_qc:
+		preliminary_qc = frappe.new_doc("Preliminary Quality Check")  # pyright: ignore[reportAssignmentType]
+		if not preliminary_qc:
+			raise Exception("Preliminary Quality Check could not be created.")
+
+	preliminary_qc.slab = preliminary_qc.slab or str(slab.name)
+	preliminary_qc.slab_template = preliminary_qc.slab_template or slab.template
+	preliminary_qc.h_bend = preliminary_qc.h_bend or 0
+	preliminary_qc.v_bend = preliminary_qc.v_bend or 0
+	preliminary_qc.d1_bend = preliminary_qc.d1_bend or 0
+	preliminary_qc.d2_bend = preliminary_qc.d2_bend or 0
+
+	from erpnext.manufacturing.doctype.preliminary_quality_check.api import create_preliminary_quality_check
+	create_preliminary_quality_check(str(slab.name), preliminary_qc)
+
+
+def _create_oven_operation_params(slab_name: str, oven_params: OvenOperation | None = None):
+	slab: Slab = frappe.get_doc("Slab", slab_name)  # pyright: ignore[reportAssignmentType]
+	heating_slab_history_item = next((h for h in slab.slab_history if h.station == "Heating"), None)
+	if heating_slab_history_item and not oven_params and heating_slab_history_item.oven_params:
+		oven_params = frappe.get_doc("Oven Operation", str(heating_slab_history_item.oven_params))  # pyright: ignore[reportAssignmentType]
+
+	if not oven_params:
+		oven_params = frappe.new_doc("Oven Operation") # pyright: ignore[reportAssignmentType]
+		if not oven_params:
+			raise Exception("Oven Operation could not be created.")
+
+	oven_params.slab = oven_params.slab or str(slab.name)
+	oven_params.slab_color = oven_params.slab_color or slab.template
+	oven_params.job_card = oven_params.job_card or str(slab.last_active_job_card)
+
+	oven_name = frappe.get_value("Oven", {"line": slab.line}, "name")
+	oven_racks = frappe.get_list("Oven Rack", filters={"parent": oven_name}, fields=["name"])
+
+	# Auto-assign an idle rack if available
+	oven_params.oven = oven_params.oven or str(oven_name)
+	oven_params.oven_rack = oven_params.oven_rack or oven_racks[0].name
+
+	now = frappe_utils.now_datetime()
+	shifts = frappe.get_list("Attendance Shift", fields=["name"])
+
+	oven_params.date = oven_params.date or now
+	oven_params.shift = oven_params.shift or (shifts[0].name if shifts else "")
+
+	oven_params.in_time = oven_params.in_time or now
+	oven_params.out_time = oven_params.out_time or now
+	oven_params.total_time_in_minutes = oven_params.total_time_in_minutes or 0
+
+	oven_params.slab_top_temp = oven_params.slab_top_temp or 0
+	oven_params.slab_bottom_temp = oven_params.slab_bottom_temp or 0
+	oven_params.upper_shelf_temp = oven_params.upper_shelf_temp or 0
+	oven_params.lower_shelf_temp = oven_params.lower_shelf_temp or 0
+
+	oven_params.top_left_vertex = oven_params.top_left_vertex or 0
+	oven_params.top_edge_center = oven_params.top_edge_center or 0
+	oven_params.top_right_vertex = oven_params.top_right_vertex or 0
+	oven_params.right_edge_centre = oven_params.right_edge_centre or 0
+	oven_params.bottom_right_vertex = oven_params.bottom_right_vertex or 0
+	oven_params.bottom_edge_centre = oven_params.bottom_edge_centre or 0
+	oven_params.bottom_left_vertex = oven_params.bottom_left_vertex or 0
+	oven_params.left_edge_centre = oven_params.left_edge_centre or 0
+
+	if not oven_params.name:
+		oven_params.insert(ignore_permissions=True)
+		oven_params.submit()
+	else:
+		oven_params.save(ignore_permissions=True)
+
+	heating_slab_history_item = next((h for h in slab.slab_history if h.station == "Heating"), None)
+	if heating_slab_history_item and not heating_slab_history_item.oven_params:
+		heating_slab_history_item.oven_params = oven_params.name
+		slab.save(ignore_permissions=True)
+
+
+def _create_final_qc(slab_name: str, final_qc: SlabQualityReport | None = None):
+	slab: Slab = frappe.get_doc("Slab", slab_name)  # pyright: ignore[reportAssignmentType]
+	slab.reload()
+	quality_check_slab_history_item = next((item for item in slab.slab_history if item.station == "Quality Check"), None)
+	if quality_check_slab_history_item and not final_qc and quality_check_slab_history_item.quality_report_name:
+		final_qc = frappe.get_doc("Slab Quality Report", str(quality_check_slab_history_item.quality_report_name))  # pyright: ignore[reportAssignmentType]
+
+	if not final_qc:
+		# If the slab quality report is not provided, create one with default values.
+		final_qc = frappe.new_doc("Slab Quality Report") # pyright: ignore[reportAssignmentType]
+		if not final_qc:
+			raise Exception("Slab Quality Report could not be created.")
+
+	# Get Slab Grade
+	mg_settings: MahiGranitesSettings = frappe.get_doc("Mahi Granites Settings") # pyright: ignore[reportAssignmentType]
+	grades = mg_settings.grades
+	# Get Attendance Shift
+	shifts = frappe.get_list("Attendance Shift", fields=["name"])
+
+	final_qc.slab = final_qc.slab or str(slab.name)
+	final_qc.slab_template = final_qc.slab_template or slab.template
+	final_qc.date = final_qc.date or frappe_utils.now_datetime()
+	final_qc.job_card = final_qc.job_card or str(slab.last_active_job_card)
+	final_qc.grade = final_qc.grade or grades[0].code
+	final_qc.shift = final_qc.shift or shifts[0].name
+	final_qc.bend = final_qc.bend or 0
+	final_qc.slab_length = final_qc.slab_length or 0
+	final_qc.slab_thickness = final_qc.slab_thickness or 0
+	final_qc.slab_width = final_qc.slab_width or 0
+	final_qc.repair = final_qc.repair or "None"
+	final_qc.crate_number = final_qc.crate_number or ""
+
+	create_slab_quality_report(str(slab.name), final_qc)

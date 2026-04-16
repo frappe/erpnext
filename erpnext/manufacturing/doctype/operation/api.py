@@ -193,7 +193,7 @@ def get_recent_job_card(operation, production_line=None):
 
 @frappe.whitelist()
 def get_open_job_cards(
-	process, line=None, include_wip=True, include_material_transferred=True, include_paused=True
+	process, line=None, include_wip=True, include_material_transferred=True, include_paused=True, slab_template="", limit = 0
 ):
 	is_mixing = process == "Mixing"
 	if is_mixing:
@@ -228,13 +228,16 @@ def get_open_job_cards(
 			"workstation": ws_query,
 		}
 
+	if slab_template:
+		filters["production_item"] = ["like", f"{slab_template} - %"]
+
 	if line:
 		if isinstance(line, list):
 			filters["production_line"] = ["in", line]
 		else:
 			filters["production_line"] = line
 
-	limit = (
+	limit = limit or (
 		9999999
 		if not is_mixing
 		or frappe.get_single_value("Mahi Granites Settings", "show_job_card_queue_to_mixer_operators")
@@ -257,6 +260,7 @@ def get_open_job_cards(
 			"started_time",
 			"creation",
 			"modified",
+			"production_line",
 		],
 		order_by="priority asc, status asc, creation asc",
 		ignore_permissions=True,
