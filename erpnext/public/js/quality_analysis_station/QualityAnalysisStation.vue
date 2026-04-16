@@ -52,6 +52,11 @@ const productionDate = computed(() => {
     return `${day} ${months[parseInt(month) - 1]} ${year}`;
 });
 
+const target_slab_thickness = computed(() => {
+    if (!selectedSlab.value?.template) return "";
+    return selectedSlab.value.template.split('-')[2].trim();
+});
+
 const form = reactive({
     // Basic Details (Auto-filled)
     date: '',
@@ -437,7 +442,7 @@ onUnmounted(() => {
                                     <span class="fa fa-arrows-v mr-2"></span>{{ __('Target Thickness') }}
                                 </div>
                                 <div class="meta-value h5 mb-0 font-weight-bold">
-                                    {{ selectedSlab.template.split('-').pop().trim() }}
+                                    {{ target_slab_thickness }}
                                 </div>
                             </div>
                         </div>
