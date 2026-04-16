@@ -773,6 +773,19 @@ erpnext.work_order = {
 				);
 			}
 
+			const needs_mr = doc.required_items.some(
+				(item) => item.required_qty > item.available_qty_at_source_warehouse
+			);
+			if (needs_mr) {
+				frm.add_custom_button(
+					__("Material Request"),
+					function () {
+						erpnext.work_order.create_material_request(frm);
+					},
+					__("Create")
+				);
+			}
+
 			erpnext.work_order.setup_stock_reservation(frm);
 
 			if (!frm.doc.track_semi_finished_goods) {
@@ -1195,6 +1208,17 @@ erpnext.work_order = {
 					frm.set_value("status", r.message);
 					frm.reload_doc();
 				}
+			},
+		});
+	},
+
+	create_material_request: function (frm) {
+		frm.call({
+			doc: frm.doc,
+			method: "make_material_request",
+			callback: function (r) {
+				const doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			},
 		});
 	},

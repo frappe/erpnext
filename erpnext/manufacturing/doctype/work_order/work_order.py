@@ -2097,6 +2097,31 @@ class WorkOrder(Document):
 		self.save()
 		stock_entry.reload()
 
+	@frappe.whitelist()
+	def make_material_request(self):
+		def set_qty(source, target, _):
+			target.qty = source.required_qty - source.available_qty_at_source_warehouse
+
+		return get_mapped_doc(
+			self.doctype,
+			self.name,
+			{
+				self.doctype: {
+					"doctype": "Material Request",
+					"validation": {"docstatus": ["=", 1]},
+				},
+				"Work Order Item": {
+					"doctype": "Material Request Item",
+					"field_map": {
+						"item_code": "item_code",
+						"stock_uom": "uom",
+						"source_warehouse": "warehouse",
+					},
+					"postprocess": set_qty,
+				},
+			},
+		)
+
 
 @frappe.whitelist()
 def make_stock_reservation_entries(
