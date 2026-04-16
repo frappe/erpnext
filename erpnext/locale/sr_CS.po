@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-12 09:47+0000\n"
-"PO-Revision-Date: 2026-04-12 13:56\n"
+"PO-Revision-Date: 2026-04-15 14:01\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Serbian (Latin)\n"
 "MIME-Version: 1.0\n"
@@ -9252,7 +9252,7 @@ msgstr "Nije moguće demontirati više od proizvedene količine."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:928
 msgid "Cannot disassemble {0} qty against Stock Entry {1}. Only {2} qty available to disassemble."
-msgstr ""
+msgstr "Nije moguće demontirati količinu {0} iz unosa zaliha {1}. Dostupno je samo {2} za demontažu."
 
 #: erpnext/setup/doctype/company/company.py:222
 msgid "Cannot enable Item-wise Inventory Account, as there are existing Stock Ledger Entries for the company {0} with Warehouse-wise Inventory Account. Please cancel the stock transactions first and try again."
@@ -18455,7 +18455,7 @@ msgstr "Uloga za odobravanje izuzetaka budžeta"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:935
 msgid "Excess Disassembly"
-msgstr ""
+msgstr "Prekomerna demontaža"
 
 #: erpnext/manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.js:55
 msgid "Excess Materials Consumed"
@@ -32295,7 +32295,7 @@ msgstr "Optimizuj rutu"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1017
 msgid "Optional. Select a specific manufacture entry to reverse."
-msgstr ""
+msgstr "Opciono. Izaberite konkretan unos proizvodnje koji želite da poništite."
 
 #: erpnext/accounts/doctype/account/account_tree.js:178
 msgid "Optional. Sets company's default currency, if not specified."
@@ -36943,7 +36943,7 @@ msgstr "Datum i vreme knjiženja su obavezni"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:99
 msgid "Posting date is required"
-msgstr ""
+msgstr "Datum knjiženja je obavezan"
 
 #: erpnext/controllers/sales_and_purchase_return.py:66
 msgid "Posting timestamp must be after {0}"
@@ -39508,7 +39508,7 @@ msgstr "Količina za isporuku"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:379
 msgid "Qty to Disassemble"
-msgstr ""
+msgstr "Količina za demontažu"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:374
 msgid "Qty to Fetch"
@@ -48319,7 +48319,7 @@ msgstr "Pošto su {0} stavke sa brojem serije/šarže, nije moguće omogućiti '
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:112
 msgid "Since {0} has 'Update Stock' disabled, you cannot create repost item valuation against it"
-msgstr ""
+msgstr "Pošto je za {0} isključena opcija 'Ažuriraj zalihe', nije moguće kreirati ponovno knjiženje vrednovanja stavki"
 
 #. Option for the 'Marital Status' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -48476,20 +48476,20 @@ msgstr "Lokacija izvora"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1014
 msgid "Source Manufacture Entry"
-msgstr ""
+msgstr "Izvorni unos proizvodnje"
 
 #. Label of the source_stock_entry (Link) field in DocType 'Stock Entry'
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Source Stock Entry (Manufacture)"
-msgstr ""
+msgstr "Izvorni unos zaliha (proizvodnja)"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:916
 msgid "Source Stock Entry {0} belongs to Work Order {1}, not {2}. Please use a manufacture entry from the same Work Order."
-msgstr ""
+msgstr "Izvorni unos zaliha {0} pripada radnom nalogu {1}, a ne {2}. Molimo Vas da koristite unos proizvodnje iz istog radnog naloga."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2374
 msgid "Source Stock Entry {0} has no finished goods quantity"
-msgstr ""
+msgstr "Izvorni unos zaliha {0} nema količinu gotovih proizvoda"
 
 #. Label of the source_type (Select) field in DocType 'Support Search Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
@@ -49685,7 +49685,7 @@ msgstr "Zalihe se ne mogu ažurirati za ulaznu fakturu {0} jer je za ovu transak
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:125
 msgid "Stock entries exist with the old account. Changing the account may lead to a mismatch between the warehouse closing balance and the account closing balance. The overall closing balance will still match, but not for the specific account."
-msgstr ""
+msgstr "Postoje unosi zaliha sa starim računom. Promena računa može dovesti do neslaganja između završnog stanja skladišta i završnog stanja na računu. Ukupno završno stanje će se i dalje poklapati, ali ne i za konkretan račun."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1131
 msgid "Stock has been unreserved for work order {0}."
@@ -57337,7 +57337,7 @@ msgstr "Upozorenje!"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:123
 msgid "Warning: Account changed for warehouse"
-msgstr ""
+msgstr "Upozorenje: Račun je promenjen za skladište"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1322
 msgid "Warning: Another {0} # {1} exists against stock entry {2}"
@@ -57809,7 +57809,7 @@ msgstr "Stavka radnog naloga"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:919
 msgid "Work Order Mismatch"
-msgstr ""
+msgstr "Neusklađenost radnog naloga"
 
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
@@ -57871,7 +57871,7 @@ msgstr "Radni nalog {0} je kreiran"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2390
 msgid "Work Order {0} has no produced qty"
-msgstr ""
+msgstr "Radni nalog {0} nema proizvedenu količinu"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:956
 msgid "Work Order {0}: Job Card not found for the operation {1}"
