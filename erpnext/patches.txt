@@ -475,3 +475,4 @@ erpnext.patches.v16_0.co_by_product_patch
 erpnext.patches.v16_0.update_requested_qty_packed_item
 erpnext.patches.v16_0.remove_payables_receivables_workspace
 erpnext.patches.v16_0.depends_on_inv_dimensions
+erpnext.patches.v16_0.merge_repost_settings_to_accounts_settings
