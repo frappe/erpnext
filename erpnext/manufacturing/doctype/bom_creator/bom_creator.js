@@ -64,6 +64,13 @@ frappe.ui.form.on("BOM Creator", {
 					options: "Item",
 					reqd: 1,
 				},
+				{
+					label: __("Is Phantom BOM"),
+					fieldtype: "Check",
+					fieldname: "is_phantom",
+					default: 0,
+					change: toggle_filter,
+				},
 				{ fieldtype: "Column Break" },
 				{
 					label: __("Quantity"),
@@ -99,14 +106,39 @@ frappe.ui.form.on("BOM Creator", {
 			],
 			primary_action_label: __("Create"),
 			primary_action: (values) => {
-				values.doctype = frm.doc.doctype;
-				frappe.db.insert(values).then((doc) => {
-					frappe.set_route("Form", doc.doctype, doc.name);
+				frappe.db.get_value("Item", values.item_code, "is_stock_item").then((r) => {
+					if (r.message) {
+						if (r.message.is_stock_item && values.is_phantom) {
+							frappe.throw(
+								__("Phantom BOM cannot be created for stock item {0}.", [values.item_code])
+							);
+						} else if (!r.message.is_stock_item && !values.is_phantom) {
+							frappe.throw(
+								__("Non-phantom BOM cannot be created for non-stock item {0}.", [
+									values.item_code,
+								])
+							);
+						} else {
+							values.doctype = frm.doc.doctype;
+							frappe.db.insert(values).then((doc) => {
+								frappe.set_route("Form", doc.doctype, doc.name);
+							});
+						}
+					}
 				});
 			},
 		});
 
-		dialog.fields_dict.item_code.get_query = "erpnext.controllers.queries.item_query";
+		function toggle_filter() {
+			dialog.fields_dict.item_code.get_query = {
+				query: "erpnext.controllers.queries.item_query",
+				filters: {
+					is_stock_item: !dialog.fields_dict.is_phantom.value,
+				},
+			};
+		}
+		toggle_filter();
+
 		dialog.show();
 	},
 

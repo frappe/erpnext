@@ -52,6 +52,7 @@ class BOMCreator(Document):
 		currency: DF.Link
 		default_warehouse: DF.Link | None
 		error_log: DF.Text | None
+		is_phantom: DF.Check
 		item_code: DF.Link
 		item_group: DF.Link | None
 		item_name: DF.Data | None
@@ -334,10 +335,12 @@ class BOMCreator(Document):
 			}
 		)
 
-		if row.item_code == self.item_code and (self.routing or self.has_operations()):
-			bom.routing = self.routing
-			bom.with_operations = 1
-			bom.transfer_material_against = "Work Order"
+		if row.item_code == self.item_code:
+			bom.is_phantom_bom = self.is_phantom
+			if self.routing or self.has_operations():
+				bom.routing = self.routing
+				bom.with_operations = 1
+				bom.transfer_material_against = "Work Order"
 
 		for field in BOM_FIELDS:
 			if self.get(field):
