@@ -5,7 +5,9 @@
 import frappe
 from frappe import _
 from frappe.utils import DateTimeLikeObject, getdate, today
+
 from erpnext.accounts.utils import get_fiscal_year
+
 
 def get_columns(filters, trans):
 	validate_filters(filters)
@@ -46,9 +48,9 @@ def get_columns(filters, trans):
 
 def validate_filters(filters):
 	if not filters.get("fiscal_year"):
-		filters.setdefault("fiscal_year", get_fiscal_year(today())[0])
+		filters["fiscal_year"] = get_fiscal_year(today())[0]
 	if not filters.get("company"):
-		filters.setdefault("company", frappe.db.get_default("company"))
+		filters["company"] = frappe.db.get_default("company")
 	for f in ["Fiscal Year", "Based On", "Period", "Company"]:
 		if not filters.get(f.lower().replace(" ", "_")):
 			frappe.throw(_("{0} is mandatory").format(_(f)))
