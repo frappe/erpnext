@@ -7,8 +7,8 @@ frappe.pages['operator-station'].on_page_load = function (wrapper) {
         'distribution': { title: 'Distribution Station', process: 'distribution' },
         'pressing': { title: 'Pressing Station', process: 'pressing' },
         'trimming': { title: 'Trimming Station', process: 'trimming' },
-        'polishing': { title: 'Polishing Station', process: 'polishing' },
-        'calibration': { title: 'Calibration Station', process: 'calibration' },
+        // 'polishing': { title: 'Polishing Station', process: 'polishing' },
+        // 'calibration': { title: 'Calibration Station', process: 'calibration' },
         'operator': { title: 'Operator Station', process: 'operator' }
     }
 
@@ -41,8 +41,8 @@ frappe.pages['operator-station'].on_page_show = (wrapper) => {
         'distribution': { title: 'Distribution Station', process: 'distribution' },
         'pressing': { title: 'Pressing Station', process: 'pressing' },
         'trimming': { title: 'Trimming Station', process: 'trimming' },
-        'polishing': { title: 'Polishing Station', process: 'polishing' },
-        'calibration': { title: 'Calibration Station', process: 'calibration' },
+        // 'polishing': { title: 'Polishing Station', process: 'polishing' },
+        // 'calibration': { title: 'Calibration Station', process: 'calibration' },
         'operator': { title: 'Operator Station', process: 'operator' }
     }
     let config = station_map[station.toLowerCase()] || station_map['operator']
