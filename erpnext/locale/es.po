@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-12 09:47+0000\n"
-"PO-Revision-Date: 2026-04-12 13:56\n"
+"PO-Revision-Date: 2026-04-17 14:36\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -10069,7 +10069,7 @@ msgstr ""
 
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:264
 msgid "Clear Link"
-msgstr ""
+msgstr "Limpiar enlace"
 
 #. Label of the clear_notifications_status (Select) field in DocType
 #. 'Transaction Deletion Record'
@@ -20476,7 +20476,7 @@ msgstr ""
 #: erpnext/stock/report/reserved_stock/reserved_stock.js:103
 #: erpnext/stock/report/reserved_stock/reserved_stock.py:164
 msgid "From Voucher No"
-msgstr ""
+msgstr "Del número de comprobante"
 
 #. Label of the from_voucher_type (Select) field in DocType 'Stock Reservation
 #. Entry'
@@ -52683,7 +52683,7 @@ msgstr "El valor {0} ya está asignado a un artículo existente {1}."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1239
 msgid "The warehouse where you store finished Items before they are shipped."
-msgstr ""
+msgstr "El almacén donde se guardan los artículos terminados antes de enviarlos."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1232
 msgid "The warehouse where you store your raw materials. Each required item can have a separate source warehouse. Group warehouse also can be selected as source warehouse. On submission of the Work Order, the raw materials will be reserved in these warehouses for production usage."
