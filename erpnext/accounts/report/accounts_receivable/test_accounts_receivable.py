@@ -1204,3 +1204,25 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 
 		self.assertEqual(len(report[1]), 2)
 		self.assertEqual([si.name, payment_term1.payment_term_name], [row.voucher_no, row.payment_term])
+
+	def test_project_filter(self):
+		project = frappe.get_doc(
+			{"doctype": "Project", "project_name": "_Test AR Project", "company": self.company}
+		).insert()
+
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si.project = project.name
+		si.save().submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"project": [project.name],
+		}
+
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		row = report[0]
+		self.assertEqual(row.project, project.name)
+		self.assertEqual(row.invoiced, 100.0)
