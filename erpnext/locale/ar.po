@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-12 09:47+0000\n"
-"PO-Revision-Date: 2026-04-12 13:55\n"
+"PO-Revision-Date: 2026-04-17 14:36\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Arabic\n"
 "MIME-Version: 1.0\n"
@@ -34,11 +34,11 @@ msgstr ""
 
 #: erpnext/selling/doctype/quotation/quotation.js:82
 msgid " Address"
-msgstr ""
+msgstr " العنوان"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:611
 msgid " Amount"
-msgstr ""
+msgstr " مبلغ"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:114
 msgid " BOM"
@@ -61,12 +61,12 @@ msgstr ""
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:196
 msgid " Item"
-msgstr ""
+msgstr " سلعة"
 
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.py:151
 #: erpnext/selling/report/sales_analytics/sales_analytics.py:128
 msgid " Name"
-msgstr ""
+msgstr " الاسم"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:144
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:185
@@ -75,7 +75,7 @@ msgstr " عنصر شبح"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:602
 msgid " Rate"
-msgstr ""
+msgstr " سعر السلعة المفردة"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:122
 msgid " Raw Material"
@@ -113,7 +113,7 @@ msgstr ""
 
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.py:148
 msgid "# In Stock"
-msgstr ""
+msgstr "# في المخزن"
 
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.py:141
 msgid "# Req'd Items"
@@ -138,7 +138,7 @@ msgstr ""
 #. Label of the per_billed (Percent) field in DocType 'Purchase Order'
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "% Billed"
-msgstr ""
+msgstr "% تمت الفوترة"
 
 #. Label of the percent_complete_method (Select) field in DocType 'Project'
 #: erpnext/projects/doctype/project/project.json
@@ -181,7 +181,7 @@ msgstr ""
 #: erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:283
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:337
 msgid "% Of Grand Total"
-msgstr ""
+msgstr "% من المجموع الإجمالي"
 
 #. Label of the per_ordered (Percent) field in DocType 'Material Request'
 #: erpnext/stock/doctype/material_request/material_request.json
@@ -340,7 +340,7 @@ msgstr "لا يمكن التحقق من ' تحديث المخزون ' لبيع �
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:72
 msgid "'{0}' account is already used by {1}. Use another account."
-msgstr ""
+msgstr "{0} الحساب مستخدم بواسطة{1} استخدم حساب آخر."
 
 #: erpnext/accounts/doctype/pos_settings/pos_settings.py:44
 msgid "'{0}' has been already added."
@@ -601,7 +601,7 @@ msgstr ""
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:117
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "90 Above"
-msgstr ""
+msgstr "أكثر من 90"
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1340
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1341
@@ -1089,7 +1089,7 @@ msgstr "الاسم المختصر إلزامي"
 
 #: erpnext/stock/doctype/item_attribute/item_attribute.py:112
 msgid "Abbreviation: {0} must appear only once"
-msgstr ""
+msgstr "الاختصار: يجب أن يظهر {0} مرة واحدة فقط"
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1337
 msgid "Above"
@@ -1098,7 +1098,7 @@ msgstr "فوق"
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:116
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:364
 msgid "Above 120 Days"
-msgstr ""
+msgstr "فوق 120 يوما"
 
 #. Name of a role
 #: erpnext/setup/doctype/department/department.json
@@ -2343,7 +2343,7 @@ msgstr "الفعلي وقت الانتهاء"
 
 #: erpnext/accounts/report/budget_variance_report/budget_variance_report.py:471
 msgid "Actual Expense"
-msgstr ""
+msgstr "المصروفات الفعلية"
 
 #: erpnext/accounts/doctype/budget/budget.py:599
 msgid "Actual Expenses"
@@ -12586,7 +12586,7 @@ msgstr "إنشاء عميل محتمل"
 #. Label of an action in the Onboarding Step 'Create Purchase Invoice'
 #: erpnext/buying/onboarding_step/create_purchase_invoice/create_purchase_invoice.json
 msgid "Create Purchase Invoice"
-msgstr ""
+msgstr "إنشاء فاتورة شراء"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Purchase Order'
@@ -12724,7 +12724,7 @@ msgstr "إنشاء الجدول الزمني"
 #. Label of an action in the Onboarding Step 'Create Transfer Entry'
 #: erpnext/stock/onboarding_step/create_transfer_entry/create_transfer_entry.json
 msgid "Create Transfer Entry"
-msgstr ""
+msgstr "إنشاء قيد تحويل"
 
 #: erpnext/setup/doctype/employee/employee.js:50
 #: erpnext/setup/doctype/employee/employee.js:52
@@ -12787,7 +12787,7 @@ msgstr "إنشاء عروض مسعرة للزبائن"
 #. Label of an action in the Onboarding Step 'Create Delivery Note'
 #: erpnext/selling/onboarding_step/create_delivery_note/create_delivery_note.json
 msgid "Create delivery note"
-msgstr ""
+msgstr "إنشاء إيصال التسليم"
 
 #. Label of the create_pr_in_draft_status (Check) field in DocType 'Accounts
 #. Settings'
