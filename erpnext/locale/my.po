@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-12 09:47+0000\n"
-"PO-Revision-Date: 2026-04-15 14:01\n"
+"PO-Revision-Date: 2026-04-17 14:36\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Burmese\n"
 "MIME-Version: 1.0\n"
@@ -3359,7 +3359,7 @@ msgstr ""
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Against Income Account"
-msgstr ""
+msgstr "ဝင်ငွေအကောင့်နှင့် ဆန့်ကျင်ဘက်"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:739
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:777
@@ -5207,7 +5207,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1091
 msgid "As there are sufficient Sub Assembly Items, Work Order is not required for Warehouse {0}."
-msgstr ""
+msgstr "Sub Assembly Items များ လုံလောက်စွာရှိသောကြောင့် Warehouse {0}အတွက် Work Order မလိုအပ်ပါ။"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1839
 msgid "As there are sufficient raw materials, Material Request is not required for Warehouse {0}."
@@ -7454,7 +7454,7 @@ msgstr ""
 #. Label of the sb_batch (Section Break) field in DocType 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
 msgid "Batch Details"
-msgstr ""
+msgstr "အသုတ်အသေးစိတ်အချက်အလက်များ"
 
 #: erpnext/stock/doctype/batch/batch.py:218
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:469
@@ -7857,7 +7857,7 @@ msgstr ""
 #. Label of the billing_details (Section Break) field in DocType 'Timesheet'
 #: erpnext/projects/doctype/timesheet/timesheet.json
 msgid "Billing Details"
-msgstr ""
+msgstr "ငွေတောင်းခံလွှာအသေးစိတ်အချက်အလက်များ"
 
 #. Label of the billing_email (Data) field in DocType 'Process Statement Of
 #. Accounts Customer'
@@ -13429,7 +13429,7 @@ msgstr ""
 #. Label of the current_state (Select) field in DocType 'Share Balance'
 #: erpnext/accounts/doctype/share_balance/share_balance.json
 msgid "Current State"
-msgstr ""
+msgstr "လက်ရှိအခြေအနေ"
 
 #: erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py:210
 msgid "Current Status"
@@ -14837,7 +14837,7 @@ msgstr ""
 #: erpnext/setup/doctype/company/company.json
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "Default Currency"
-msgstr ""
+msgstr "မူရင်းငွေကြေး"
 
 #. Label of the customer_group (Link) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
@@ -16230,7 +16230,7 @@ msgstr ""
 
 #: erpnext/controllers/accounts_controller.py:901
 msgid "Disabled pricing rules since this {} is an internal transfer"
-msgstr ""
+msgstr "ဤ {} သည် အတွင်းပိုင်းလွှဲပြောင်းမှုဖြစ်သောကြောင့် ဈေးနှုန်းစည်းမျဉ်းများကို ပိတ်ထားသည်"
 
 #: erpnext/controllers/accounts_controller.py:915
 msgid "Disabled tax included prices since this {} is an internal transfer"
@@ -18324,7 +18324,7 @@ msgstr ""
 #. Description of the 'Batch Number Series' (Data) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings."
-msgstr ""
+msgstr "ဥပမာ- ABCD။#####။ စီးရီးကို သတ်မှတ်ထားပြီး အသုတ်နံပါတ်ကို ငွေပေးငွေယူများတွင် မဖော်ပြထားပါက၊ ဤစီးရီးအပေါ်အခြေခံ၍ အလိုအလျောက် အသုတ်နံပါတ်ကို ဖန်တီးပါမည်။ ဤပစ္စည်းအတွက် အသုတ်နံပါတ်ကို အမြဲတမ်း ရှင်းရှင်းလင်းလင်း ဖော်ပြလိုပါက၊ ၎င်းကို ဗလာထားခဲ့ပါ။ မှတ်ချက်- ဤဆက်တင်သည် စတော့ဆက်တင်များတွင် Naming Series Prefix ထက် ဦးစားပေးမည်ဖြစ်သည်။"
 
 #: erpnext/stock/stock_ledger.py:2321
 msgid "Example: Serial No {0} reserved in {1}."
@@ -19704,7 +19704,7 @@ msgstr ""
 #. Label of the details_tab (Tab Break) field in DocType 'Plant Floor'
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.json
 msgid "Floor"
-msgstr ""
+msgstr "ကြမ်းပြင်"
 
 #. Label of the floor_name (Data) field in DocType 'Plant Floor'
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.json
@@ -20365,7 +20365,7 @@ msgstr ""
 #: erpnext/stock/report/reserved_stock/reserved_stock.js:103
 #: erpnext/stock/report/reserved_stock/reserved_stock.py:164
 msgid "From Voucher No"
-msgstr ""
+msgstr "ဘောက်ချာနံပါတ်မှ"
 
 #. Label of the from_voucher_type (Select) field in DocType 'Stock Reservation
 #. Entry'
@@ -20613,7 +20613,7 @@ msgstr ""
 #. Label of the disposal_account (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Gain/Loss Account on Asset Disposal"
-msgstr ""
+msgstr "ပိုင်ဆိုင်မှုရောင်းချမှုအပေါ် အမြတ်/အရှုံးအကောင့်"
 
 #. Description of the 'Gain/Loss already booked' (Currency) field in DocType
 #. 'Exchange Rate Revaluation'
@@ -23707,7 +23707,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:147
 msgid "Invalid Amount"
-msgstr ""
+msgstr "မမှန်ကန်သော ပမာဏ"
 
 #: erpnext/controllers/item_variant.py:134
 msgid "Invalid Attribute"
@@ -23774,7 +23774,7 @@ msgstr ""
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:327
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:332
 msgid "Invalid Formula"
-msgstr ""
+msgstr "ဖော်မြူလာ မမှန်ကန်ပါ"
 
 #: erpnext/selling/report/lost_quotations/lost_quotations.py:65
 msgid "Invalid Group By"
@@ -24323,7 +24323,7 @@ msgstr ""
 #. Label of the is_corrective_operation (Check) field in DocType 'Operation'
 #: erpnext/manufacturing/doctype/operation/operation.json
 msgid "Is Corrective Operation"
-msgstr ""
+msgstr "ပြုပြင်မှုလုပ်ဆောင်ချက်ဖြစ်သည်"
 
 #. Label of the is_cumulative (Check) field in DocType 'Pricing Rule'
 #. Label of the is_cumulative (Check) field in DocType 'Promotional Scheme'
@@ -24770,7 +24770,7 @@ msgstr ""
 #. Label of the complaint_date (Date) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Issue Date"
-msgstr ""
+msgstr "ထုတ်ပြန်ရက်စွဲ"
 
 #: erpnext/stock/doctype/material_request/material_request.js:180
 msgid "Issue Material"
@@ -26190,7 +26190,7 @@ msgstr ""
 
 #: erpnext/assets/doctype/asset/asset.py:346
 msgid "Item {0} has been disabled"
-msgstr ""
+msgstr "ပစ္စည်း {0} ကို ပိတ်ထားသည်"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:793
 msgid "Item {0} has no Serial No. Only serialized items can have delivery based on Serial No"
@@ -28259,7 +28259,7 @@ msgstr ""
 #. Description of the 'Material Request' (Link) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Manufacture against Material Request"
-msgstr ""
+msgstr "ပစ္စည်းတောင်းဆိုမှုနှင့် ဆန့်ကျင်၍ ထုတ်လုပ်ခြင်း"
 
 #. Label of a number card in the Manufacturing Workspace
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
@@ -30441,7 +30441,7 @@ msgstr ""
 #. Label of the new_workplace (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "New Workplace"
-msgstr ""
+msgstr "အလုပ်ခွင်အသစ်"
 
 #: erpnext/selling/doctype/customer/customer.py:405
 msgid "New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}"
@@ -31939,7 +31939,7 @@ msgstr ""
 #. Label of the operation_row_id (Int) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Operation Row ID"
-msgstr ""
+msgstr "လည်ပတ်မှုတန်း ID"
 
 #. Label of the operation_row_id (Int) field in DocType 'Work Order Item'
 #: erpnext/manufacturing/doctype/work_order_item/work_order_item.json
@@ -33557,7 +33557,7 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt_list.js:23
 msgid "Partly Billed"
-msgstr ""
+msgstr "တစ်စိတ်တစ်ပိုင်း ငွေတောင်းခံလွှာတင်ပြီး"
 
 #. Option for the 'Delivery Status' (Select) field in DocType 'Sales Order'
 #. Option for the 'Status' (Select) field in DocType 'Pick List'
@@ -33753,7 +33753,7 @@ msgstr ""
 #. Name of a DocType
 #: erpnext/accounts/doctype/party_link/party_link.json
 msgid "Party Link"
-msgstr ""
+msgstr "ပါတီလင့်ခ်"
 
 #: erpnext/controllers/sales_and_purchase_return.py:49
 msgid "Party Mismatch"
@@ -33779,7 +33779,7 @@ msgstr ""
 #. Label of the bank_party_name (Data) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
 msgid "Party Name/Account Holder (Bank Statement)"
-msgstr ""
+msgstr "ပါတီအမည်/အကောင့်ပိုင်ရှင် (ဘဏ်စာရင်းရှင်းတမ်း)"
 
 #. Label of the party_not_required (Check) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
@@ -36092,7 +36092,7 @@ msgstr ""
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:135
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.js:73
 msgid "Please select a row to create a Reposting Entry"
-msgstr ""
+msgstr "ပြန်လည်တင်ခြင်း မှတ်တမ်းတစ်ခု ဖန်တီးရန် အတန်းတစ်တန်း ရွေးချယ်ပါ။"
 
 #: erpnext/accounts/report/purchase_register/purchase_register.py:35
 msgid "Please select a supplier for fetching payments."
@@ -37631,7 +37631,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_item/subcontracting_inward_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Process Loss Qty"
-msgstr ""
+msgstr "လုပ်ငန်းစဉ်ဆုံးရှုံးမှုပမာဏ"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:346
 msgid "Process Loss Quantity"
@@ -39291,7 +39291,7 @@ msgstr ""
 #. Label of the qty_to_produce (Float) field in DocType 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
 msgid "Qty To Produce"
-msgstr ""
+msgstr "ထုတ်လုပ်ရန် ပမာဏ"
 
 #: erpnext/manufacturing/report/quality_inspection_summary/quality_inspection_summary.py:56
 msgid "Qty Wise Chart"
@@ -39931,7 +39931,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/job_card/job_card.js:469
 #: erpnext/manufacturing/doctype/workstation/workstation.js:303
 msgid "Quantity should be greater than 0"
-msgstr ""
+msgstr "ပမာဏသည် ၀ ထက် ပိုများသင့်သည်"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:346
 msgid "Quantity to Manufacture"
@@ -40283,7 +40283,7 @@ msgstr ""
 #. Batch Entry'
 #: erpnext/stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 msgid "Rate Section"
-msgstr ""
+msgstr "အဆင့်သတ်မှတ်ချက်ကဏ္ဍ"
 
 #. Label of the rate_with_margin (Currency) field in DocType 'POS Invoice Item'
 #. Label of the rate_with_margin (Currency) field in DocType 'Purchase Invoice
@@ -41316,7 +41316,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:739
 msgid "References {0} of type {1} had no outstanding amount left before submitting the Payment Entry. Now they have a negative outstanding amount."
-msgstr ""
+msgstr "{1} အမျိုးအစား ရည်ညွှန်းချက် {0} တွင် ငွေပေးချေမှုမှတ်တမ်း တင်သွင်းခြင်းမပြုမီ ပေးရန်ကျန်ငွေ မရှိပါ။ ယခုအခါ ၎င်းတို့တွင် ပေးရန်ကျန်ငွေ အနုတ်လက္ခဏာ ရှိပါသည်။"
 
 #. Label of the referral_code (Data) field in DocType 'Sales Partner'
 #: erpnext/setup/doctype/sales_partner/sales_partner.json
@@ -42962,7 +42962,7 @@ msgstr ""
 #. Option for the 'Status' (Select) field in DocType 'Call Log'
 #: erpnext/telephony/doctype/call_log/call_log.json
 msgid "Ringing"
-msgstr ""
+msgstr "မြည်နေသည်"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -43391,7 +43391,7 @@ msgstr ""
 
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:253
 msgid "Row #{0}: Consumed Asset {1} cannot be cancelled"
-msgstr ""
+msgstr "တန်း #{0}: သုံးစွဲပြီးသော ပိုင်ဆိုင်မှု {1} ကို ပယ်ဖျက်၍မရပါ။"
 
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:235
 msgid "Row #{0}: Consumed Asset {1} cannot be the same as the Target Asset"
@@ -43636,7 +43636,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1052
 msgid "Row #{0}: Please select the Sub Assembly Warehouse"
-msgstr ""
+msgstr "တန်း #{0}: Sub Assembly Warehouse ကို ရွေးချယ်ပါ။"
 
 #: erpnext/stock/doctype/item/item.py:556
 msgid "Row #{0}: Please set reorder quantity"
@@ -44803,7 +44803,7 @@ msgstr ""
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:155
 msgid "Sales Opportunities by Medium"
-msgstr ""
+msgstr "Medium အလိုက် ရောင်းချမှု အခွင့်အလမ်းများ"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:151
 msgid "Sales Opportunities by Source"
@@ -45120,7 +45120,7 @@ msgstr ""
 #. Label of the sales_partner_type (Data) field in DocType 'Sales Partner Type'
 #: erpnext/selling/doctype/sales_partner_type/sales_partner_type.json
 msgid "Sales Partner Type"
-msgstr ""
+msgstr "ရောင်းချမှုမိတ်ဖက်အမျိုးအစား"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -46365,7 +46365,7 @@ msgstr ""
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Serial & Batch Item"
-msgstr ""
+msgstr "စီးရီးလိုက်နှင့် အသုတ်လိုက်ပစ္စည်း"
 
 #. Label of the section_break_7 (Section Break) field in DocType 'Stock
 #. Settings'
@@ -48534,7 +48534,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Square Inch"
-msgstr ""
+msgstr "စတုရန်းလက်မ"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -51197,7 +51197,7 @@ msgstr ""
 #. Name of a DocType
 #: erpnext/projects/doctype/task_type/task_type.json
 msgid "Task Type"
-msgstr ""
+msgstr "လုပ်ငန်းအမျိုးအစား"
 
 #. Option for the '% Complete Method' (Select) field in DocType 'Project'
 #: erpnext/projects/doctype/project/project.json
@@ -51849,7 +51849,7 @@ msgstr ""
 #. Label of the template_title (Data) field in DocType 'Journal Entry Template'
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.json
 msgid "Template Title"
-msgstr ""
+msgstr "ပုံစံခေါင်းစဉ်"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice_list.js:29
 msgid "Temporarily on Hold"
@@ -52147,7 +52147,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/packing_slip/packing_slip.py:91
 msgid "The 'From Package No.' field must neither be empty nor it's value less than 1."
-msgstr ""
+msgstr "'From Package No.' အကွက်သည် ဗလာဖြစ်ရမည် သို့မဟုတ် ၎င်း၏တန်ဖိုးသည် ၁ ထက်နည်းရမည် မဟုတ်ပါ။"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:415
 msgid "The Access to Request for Quotation From Portal is Disabled. To Allow Access, Enable it in Portal Settings."
@@ -52562,7 +52562,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1239
 msgid "The warehouse where you store finished Items before they are shipped."
-msgstr ""
+msgstr "ပို့ဆောင်ခြင်းမပြုမီ ပြီးစီးသွားသောပစ္စည်းများကို သိမ်းဆည်းထားသည့် ဂိုဒေါင်။"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1232
 msgid "The warehouse where you store your raw materials. Each required item can have a separate source warehouse. Group warehouse also can be selected as source warehouse. On submission of the Work Order, the raw materials will be reserved in these warehouses for production usage."
@@ -53578,7 +53578,7 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Total Advance"
-msgstr ""
+msgstr "စုစုပေါင်းကြိုတင်ငွေ"
 
 #. Label of the total_allocated_amount (Currency) field in DocType 'Payment
 #. Entry'
@@ -58271,7 +58271,7 @@ msgstr ""
 #. Name of a report
 #: erpnext/utilities/report/youtube_interactions/youtube_interactions.json
 msgid "YouTube Interactions"
-msgstr ""
+msgstr "YouTube အပြန်အလှန်ဆက်သွယ်မှုများ"
 
 #: erpnext/www/book_appointment/index.html:49
 msgid "Your Name (required)"
