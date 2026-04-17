@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-12 09:47+0000\n"
-"PO-Revision-Date: 2026-04-12 13:55\n"
+"PO-Revision-Date: 2026-04-17 14:35\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
@@ -5234,7 +5234,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1091
 msgid "As there are sufficient Sub Assembly Items, Work Order is not required for Warehouse {0}."
-msgstr ""
+msgstr "Comme il y a suffisamment d'articles de sous-assemblage, l'ordre de travail n'est pas requis pour l'entrepôt {0}."
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1839
 msgid "As there are sufficient raw materials, Material Request is not required for Warehouse {0}."
@@ -6183,7 +6183,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/employee/employee.py:170
 msgid "Auto User Creation Error"
-msgstr ""
+msgstr "Erreur de création automatique d'utilisateur"
 
 #. Description of the 'Close Replied Opportunity After Days' (Int) field in
 #. DocType 'CRM Settings'
@@ -12436,7 +12436,7 @@ msgstr "Créer un Plan Comptable Basé Sur"
 #. Label of an action in the Onboarding Step 'Create Customer'
 #: erpnext/selling/onboarding_step/create_customer/create_customer.json
 msgid "Create Customer"
-msgstr ""
+msgstr "Créer un Client"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Delivery Note'
@@ -12496,7 +12496,7 @@ msgstr "Créer des factures"
 #: erpnext/selling/onboarding_step/create_item/create_item.json
 #: erpnext/stock/onboarding_step/create_item/create_item.json
 msgid "Create Item"
-msgstr ""
+msgstr "Créer un Article"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:206
 msgid "Create Job Card"
@@ -12605,7 +12605,7 @@ msgstr "Créer Format d'Impression"
 #. Label of an action in the Onboarding Step 'Create Project'
 #: erpnext/projects/onboarding_step/create_project/create_project.json
 msgid "Create Project"
-msgstr ""
+msgstr "Créer un Projet"
 
 #: erpnext/crm/doctype/lead/lead_list.js:8
 msgid "Create Prospect"
@@ -12615,7 +12615,7 @@ msgstr "Créer un prospect"
 #. Label of an action in the Onboarding Step 'Create Purchase Invoice'
 #: erpnext/buying/onboarding_step/create_purchase_invoice/create_purchase_invoice.json
 msgid "Create Purchase Invoice"
-msgstr ""
+msgstr "Créer une Facture d'Achat"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Purchase Order'
@@ -12633,7 +12633,7 @@ msgstr "Créer des Commandes d'Achat"
 #. Label of an action in the Onboarding Step 'Create Purchase Receipt'
 #: erpnext/stock/onboarding_step/create_purchase_receipt/create_purchase_receipt.json
 msgid "Create Purchase Receipt"
-msgstr ""
+msgstr "Créer un Reçu d'Achat"
 
 #: erpnext/utilities/activation.py:88
 msgid "Create Quotation"
@@ -12722,7 +12722,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: erpnext/buying/onboarding_step/create_supplier/create_supplier.json
 msgid "Create Supplier"
-msgstr ""
+msgstr "Créer un Fournisseur"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:181
 msgid "Create Supplier Quotation"
@@ -12788,7 +12788,7 @@ msgstr "Créer des variantes"
 #. Label of an action in the Onboarding Step 'Setup Warehouse'
 #: erpnext/stock/onboarding_step/setup_warehouse/setup_warehouse.json
 msgid "Create Warehouses"
-msgstr ""
+msgstr "Créer des Magasins"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Work Order'
@@ -12816,7 +12816,7 @@ msgstr "Créer les propositions client"
 #. Label of an action in the Onboarding Step 'Create Delivery Note'
 #: erpnext/selling/onboarding_step/create_delivery_note/create_delivery_note.json
 msgid "Create delivery note"
-msgstr ""
+msgstr "Créer un bon de livraison"
 
 #. Label of the create_pr_in_draft_status (Check) field in DocType 'Accounts
 #. Settings'
@@ -12827,7 +12827,7 @@ msgstr "Créer en Statut Brouillon"
 #. Label of an action in the Onboarding Step 'Create Supplier'
 #: erpnext/buying/onboarding_step/create_supplier/create_supplier.json
 msgid "Create supplier"
-msgstr ""
+msgstr "Créer un fournisseur"
 
 #: erpnext/public/js/bulk_transaction_processing.js:14
 msgid "Create {0} {1} ?"
@@ -16257,7 +16257,7 @@ msgstr ""
 
 #: erpnext/controllers/accounts_controller.py:901
 msgid "Disabled pricing rules since this {} is an internal transfer"
-msgstr ""
+msgstr "Règles de tarification désactivées car {} est un transfert interne"
 
 #: erpnext/controllers/accounts_controller.py:915
 msgid "Disabled tax included prices since this {} is an internal transfer"
@@ -17723,7 +17723,7 @@ msgstr "L'employé ne peut pas rendre de compte à lui-même."
 
 #: erpnext/setup/doctype/employee/employee.py:573
 msgid "Employee is required"
-msgstr ""
+msgstr "Employé requis"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:109
 msgid "Employee is required while issuing Asset {0}"
@@ -17744,7 +17744,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/employee/employee.py:598
 msgid "Employee {0} not found"
-msgstr ""
+msgstr "Employé {0} introuvable"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:351
 msgid "Employees"
@@ -19731,7 +19731,7 @@ msgstr "Gestionnaire de Flotte"
 #. Label of the details_tab (Tab Break) field in DocType 'Plant Floor'
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.json
 msgid "Floor"
-msgstr ""
+msgstr "Étage"
 
 #. Label of the floor_name (Data) field in DocType 'Plant Floor'
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.json
@@ -20392,7 +20392,7 @@ msgstr ""
 #: erpnext/stock/report/reserved_stock/reserved_stock.js:103
 #: erpnext/stock/report/reserved_stock/reserved_stock.py:164
 msgid "From Voucher No"
-msgstr ""
+msgstr "Depuis le n° de bon"
 
 #. Label of the from_voucher_type (Select) field in DocType 'Stock Reservation
 #. Entry'
@@ -23734,7 +23734,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:147
 msgid "Invalid Amount"
-msgstr ""
+msgstr "Montant Invalide"
 
 #: erpnext/controllers/item_variant.py:134
 msgid "Invalid Attribute"
@@ -23801,7 +23801,7 @@ msgstr ""
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:327
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:332
 msgid "Invalid Formula"
-msgstr ""
+msgstr "Formule invalide"
 
 #: erpnext/selling/report/lost_quotations/lost_quotations.py:65
 msgid "Invalid Group By"
@@ -24350,7 +24350,7 @@ msgstr ""
 #. Label of the is_corrective_operation (Check) field in DocType 'Operation'
 #: erpnext/manufacturing/doctype/operation/operation.json
 msgid "Is Corrective Operation"
-msgstr ""
+msgstr "Est une opération corrective"
 
 #. Label of the is_cumulative (Check) field in DocType 'Pricing Rule'
 #. Label of the is_cumulative (Check) field in DocType 'Promotional Scheme'
@@ -31966,7 +31966,7 @@ msgstr "ID de l'Opération"
 #. Label of the operation_row_id (Int) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Operation Row ID"
-msgstr ""
+msgstr "ID de ligne d'opération"
 
 #. Label of the operation_row_id (Int) field in DocType 'Work Order Item'
 #: erpnext/manufacturing/doctype/work_order_item/work_order_item.json
@@ -33806,7 +33806,7 @@ msgstr "Nom du Tiers"
 #. Label of the bank_party_name (Data) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
 msgid "Party Name/Account Holder (Bank Statement)"
-msgstr ""
+msgstr "Nom du tiers/titulaire du compte (relevé bancaire)"
 
 #. Label of the party_not_required (Check) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
@@ -36119,7 +36119,7 @@ msgstr ""
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:135
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.js:73
 msgid "Please select a row to create a Reposting Entry"
-msgstr ""
+msgstr "Veuillez sélectionner une ligne pour créer une écriture de recomptabilisation"
 
 #: erpnext/accounts/report/purchase_register/purchase_register.py:35
 msgid "Please select a supplier for fetching payments."
@@ -37658,7 +37658,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_item/subcontracting_inward_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Process Loss Qty"
-msgstr ""
+msgstr "Quantité de perte de processus"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:346
 msgid "Process Loss Quantity"
@@ -39318,7 +39318,7 @@ msgstr ""
 #. Label of the qty_to_produce (Float) field in DocType 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
 msgid "Qty To Produce"
-msgstr ""
+msgstr "Quantité à produire"
 
 #: erpnext/manufacturing/report/quality_inspection_summary/quality_inspection_summary.py:56
 msgid "Qty Wise Chart"
@@ -40310,7 +40310,7 @@ msgstr "Taux de TDS selon le certificat"
 #. Batch Entry'
 #: erpnext/stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 msgid "Rate Section"
-msgstr ""
+msgstr "Section tarifaire"
 
 #. Label of the rate_with_margin (Currency) field in DocType 'POS Invoice Item'
 #. Label of the rate_with_margin (Currency) field in DocType 'Purchase Invoice
@@ -41343,7 +41343,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:739
 msgid "References {0} of type {1} had no outstanding amount left before submitting the Payment Entry. Now they have a negative outstanding amount."
-msgstr ""
+msgstr "Les références {0} de type {1} n'avaient aucun montant en cours avant la soumission de l'écriture de paiement. Maintenant elles ont un montant en cours négatif."
 
 #. Label of the referral_code (Data) field in DocType 'Sales Partner'
 #: erpnext/setup/doctype/sales_partner/sales_partner.json
@@ -43418,7 +43418,7 @@ msgstr ""
 
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:253
 msgid "Row #{0}: Consumed Asset {1} cannot be cancelled"
-msgstr ""
+msgstr "Ligne #{0} : L'actif consommé {1} ne peut pas être annulé"
 
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:235
 msgid "Row #{0}: Consumed Asset {1} cannot be the same as the Target Asset"
@@ -43663,7 +43663,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1052
 msgid "Row #{0}: Please select the Sub Assembly Warehouse"
-msgstr ""
+msgstr "Ligne #{0} : Veuillez sélectionner l'entrepôt de sous-assemblage"
 
 #: erpnext/stock/doctype/item/item.py:556
 msgid "Row #{0}: Please set reorder quantity"
@@ -44830,7 +44830,7 @@ msgstr ""
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:155
 msgid "Sales Opportunities by Medium"
-msgstr ""
+msgstr "Opportunités de vente par support"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:151
 msgid "Sales Opportunities by Source"
@@ -46392,7 +46392,7 @@ msgstr ""
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Serial & Batch Item"
-msgstr ""
+msgstr "Article série et lot"
 
 #. Label of the section_break_7 (Section Break) field in DocType 'Stock
 #. Settings'
@@ -47511,7 +47511,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Setup Email Account'
 #: erpnext/setup/onboarding_step/setup_email_account/setup_email_account.json
 msgid "Setup Email Account"
-msgstr ""
+msgstr "Configurer un Compte de Messagerie"
 
 #. Title of the Module Onboarding 'Organization Onboarding'
 #: erpnext/setup/module_onboarding/organization_onboarding/organization_onboarding.json
@@ -48561,7 +48561,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Square Inch"
-msgstr ""
+msgstr "Pouce carré"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -52589,7 +52589,7 @@ msgstr "La valeur {0} est déjà attribuée à un élément existant {1}."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1239
 msgid "The warehouse where you store finished Items before they are shipped."
-msgstr ""
+msgstr "L'entrepôt où vous stockez les articles finis avant qu'ils soient expédiés."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1232
 msgid "The warehouse where you store your raw materials. Each required item can have a separate source warehouse. Group warehouse also can be selected as source warehouse. On submission of the Work Order, the raw materials will be reserved in these warehouses for production usage."
@@ -59282,7 +59282,7 @@ msgstr ""
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1402
 msgid "{0}: {1} does not exist"
-msgstr ""
+msgstr "{0} : {1} n'existe pas"
 
 #: erpnext/accounts/party.py:79
 msgid "{0}: {1} does not exists"
