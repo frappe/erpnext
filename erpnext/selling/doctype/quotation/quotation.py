@@ -188,7 +188,7 @@ class Quotation(SellingController):
 		)
 
 		for row in self._items:
-			if row.name not in ordered_items or row.qty > ordered_items[row.name]:
+			if row.name not in ordered_items or row.stock_qty > ordered_items[row.name]:
 				return "Partially Ordered"
 
 		return "Ordered"
