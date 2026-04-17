@@ -1405,6 +1405,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	make_raw_material_request_dialog(r) {
 		var me = this;
+		r.message.forEach((item) => (item.__checked = 1));
 		var fields = [
 			{ fieldtype: "Check", fieldname: "include_exploded_items", label: __("Include Exploded Items") },
 			{
@@ -1415,7 +1416,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			{
 				fieldtype: "Table",
 				fieldname: "items",
-				description: __("Select BOM, Qty and For Warehouse"),
+				description: __("Finished Goods"),
+				cannot_delete_rows: true,
 				fields: [
 					{
 						fieldtype: "Read Only",
