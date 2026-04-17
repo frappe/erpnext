@@ -471,7 +471,7 @@ function ListViewInner<TData>({
                                             className={cn(
                                                 "flex min-w-0 items-center overflow-hidden text-sm",
                                                 cellIndex === leadDataColumnIndex
-                                                    ? "text-ink-gray-9"
+                                                    ? "text-ink-gray-8"
                                                     : "text-ink-gray-7",
                                                 alignClass(meta),
                                                 tabularNumsClass(meta),

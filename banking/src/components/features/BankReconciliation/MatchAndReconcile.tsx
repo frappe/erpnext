@@ -654,7 +654,7 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
                 <div className="flex items-center justify-between p-2.5 bg-surface-white rounded-lg border border-border/50">
                     <div className="flex items-center gap-2">
                         <BadgeCheck className="w-4 h-4 text-ink-green-3" />
-                        <span className="text-sm font-medium text-ink-gray-9">{_("Recommended Action")}</span>
+                        <span className="text-sm font-medium text-ink-gray-8">{_("Recommended Action")}</span>
                     </div>
                     <Badge variant="ghost" theme={styles.theme as "blue" | "green" | "violet" | "orange"}>
                         {_("Priority")} {rule.priority}
@@ -665,14 +665,14 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
 
                     {rule.account && (
                         <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-ink-gray-9">{_("Account")}:</span>
+                            <span className="text-sm font-medium text-ink-gray-8">{_("Account")}:</span>
                             <span className="text-sm">{rule.account}</span>
                         </div>
                     )}
 
                     {rule.party_type && rule.party && (
                         <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-ink-gray-9">{_("Party")}:</span>
+                            <span className="text-sm font-medium text-ink-gray-8">{_("Party")}:</span>
                             <span className="text-sm">{rule.party} ({_(rule.party_type)})</span>
                         </div>
                     )}

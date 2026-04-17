@@ -9,5 +9,5 @@ export const StatLabel = ({ children, className }: { children: React.ReactNode, 
 }
 
 export const StatValue = ({ children, className }: { children: React.ReactNode, className?: string }) => {
-    return <span className={cn("text-xl text-ink-gray-9 font-semibold tabular-nums", className)}>{children}</span>
+    return <span className={cn("text-xl text-ink-gray-8 font-semibold tabular-nums", className)}>{children}</span>
 }

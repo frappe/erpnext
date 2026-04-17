@@ -178,7 +178,7 @@ const buttonVariants = cva(
       {
         variant: "link",
         theme: "gray",
-        className: "text-ink-gray-8 hover:text-ink-gray-9 active:text-ink-gray-9 disabled:text-ink-gray-4"
+        className: "text-ink-gray-8 hover:text-ink-gray-8 active:text-ink-gray-8 disabled:text-ink-gray-4"
       },
       {
         variant: "link",
