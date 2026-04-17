@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-12 09:47+0000\n"
-"PO-Revision-Date: 2026-04-12 13:55\n"
+"PO-Revision-Date: 2026-04-17 14:36\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Hungarian\n"
 "MIME-Version: 1.0\n"
@@ -61,12 +61,12 @@ msgstr ""
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:196
 msgid " Item"
-msgstr ""
+msgstr " Tétel"
 
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.py:151
 #: erpnext/selling/report/sales_analytics/sales_analytics.py:128
 msgid " Name"
-msgstr ""
+msgstr " Név"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:144
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:185
@@ -75,7 +75,7 @@ msgstr ""
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:602
 msgid " Rate"
-msgstr ""
+msgstr " Ár"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:122
 msgid " Raw Material"
@@ -113,7 +113,7 @@ msgstr ""
 
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.py:148
 msgid "# In Stock"
-msgstr ""
+msgstr "# Készleten"
 
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.py:141
 msgid "# Req'd Items"
@@ -138,7 +138,7 @@ msgstr ""
 #. Label of the per_billed (Percent) field in DocType 'Purchase Order'
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "% Billed"
-msgstr ""
+msgstr "% Számlázott"
 
 #. Label of the percent_complete_method (Select) field in DocType 'Project'
 #: erpnext/projects/doctype/project/project.json
@@ -166,7 +166,7 @@ msgstr "% Kiszállítva"
 #: erpnext/manufacturing/doctype/bom/bom.js:1019
 #, python-format
 msgid "% Finished Item Quantity"
-msgstr ""
+msgstr "% Kész termék mennyisége"
 
 #. Label of the per_installed (Percent) field in DocType 'Delivery Note'
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
@@ -181,12 +181,12 @@ msgstr ""
 #: erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:283
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:337
 msgid "% Of Grand Total"
-msgstr ""
+msgstr "% a teljes összegből"
 
 #. Label of the per_ordered (Percent) field in DocType 'Material Request'
 #: erpnext/stock/doctype/material_request/material_request.json
 msgid "% Ordered"
-msgstr ""
+msgstr "% Megrendelt"
 
 #. Label of the per_picked (Percent) field in DocType 'Sales Order'
 #: erpnext/selling/doctype/sales_order/sales_order.json
@@ -340,7 +340,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:72
 msgid "'{0}' account is already used by {1}. Use another account."
-msgstr ""
+msgstr "A '{0}' fiókot már használja {1}. Használjon másik fiókot."
 
 #: erpnext/accounts/doctype/pos_settings/pos_settings.py:44
 msgid "'{0}' has been already added."
@@ -522,7 +522,7 @@ msgstr ""
 #. Task'
 #: erpnext/assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 msgid "2 Yearly"
-msgstr ""
+msgstr "2  évente"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -537,7 +537,7 @@ msgstr ""
 #. Task'
 #: erpnext/assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 msgid "3 Yearly"
-msgstr ""
+msgstr "3 évente"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:113
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:361
@@ -547,7 +547,7 @@ msgstr ""
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "30 mins"
-msgstr ""
+msgstr "30 perc"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:115
 msgid "30-60"
@@ -578,7 +578,7 @@ msgstr "51-200"
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "6 hrs"
-msgstr ""
+msgstr "6 óra"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:114
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:362
@@ -601,7 +601,7 @@ msgstr ""
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:117
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "90 Above"
-msgstr ""
+msgstr "90-nél több"
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1340
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1341
@@ -674,7 +674,11 @@ msgid "<h3>About Product Bundle</h3>\n\n"
 "<p>The package <b>Item</b> will have <code>Is Stock Item</code> as <b>No</b> and <code>Is Sales Item</code> as <b>Yes</b>.</p>\n"
 "<h4>Example:</h4>\n"
 "<p>If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Product Bundle Item.</p>"
-msgstr ""
+msgstr "<h3>A termékcsomagról</h3>\n\n"
+"<p><b>Elemek</b> csoportjának egy másik <b>elembe</b> történő összevonása. Ez akkor hasznos, ha bizonyos <b>Tételeket</b> csomagba gyűjt, és a csomagolt <b>Tételekből</b> tart készletet, nem pedig az összesített <b>Tételből</b>.</p>\n"
+"<p>A <b>csomagelemnek</b> az <code>egy készleten lévő raktárelem</code>értéke <b>Nem</b>, <code>a készleten lévő értékesítési tétel</code> értéke pedig <b>Igen</b>.</p>\n"
+"<h4>Példa:</h4>\n"
+"<p>Ha laptopokat és hátizsákokat külön-külön értékesít, és ha a vásárló mindkettőt megvásárolja, akkor a laptop + hátizsák egy új termékcsomagelem lesz.</p>"
 
 #. Content of the 'Help' (HTML) field in DocType 'Currency Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
@@ -1089,7 +1093,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/item_attribute/item_attribute.py:112
 msgid "Abbreviation: {0} must appear only once"
-msgstr ""
+msgstr "Rövidítés: {0} csak egyszer szerepelhet"
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1337
 msgid "Above"
@@ -1098,7 +1102,7 @@ msgstr ""
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:116
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:364
 msgid "Above 120 Days"
-msgstr ""
+msgstr "Több mint 120 nap"
 
 #. Name of a role
 #: erpnext/setup/doctype/department/department.json
@@ -1956,7 +1960,7 @@ msgstr ""
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:166
 #: erpnext/accounts/report/accounts_payable_summary/accounts_payable_summary.json
 msgid "Accounts Payable Summary"
-msgstr ""
+msgstr "A beszállítók felé fizetendő kötelezettségeink összefoglalása"
 
 #. Option for the 'Write Off Based On' (Select) field in DocType 'Journal
 #. Entry'
@@ -2343,7 +2347,7 @@ msgstr ""
 
 #: erpnext/accounts/report/budget_variance_report/budget_variance_report.py:471
 msgid "Actual Expense"
-msgstr ""
+msgstr "Tényleges kiadás"
 
 #: erpnext/accounts/doctype/budget/budget.py:599
 msgid "Actual Expenses"
@@ -2361,7 +2365,7 @@ msgstr ""
 #. Operation'
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Actual Operation Time"
-msgstr ""
+msgstr "Aktuális üzemidő"
 
 #: erpnext/accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.py:456
 msgid "Actual Posting"
@@ -2380,7 +2384,7 @@ msgstr ""
 #: erpnext/stock/report/product_bundle_balance/product_bundle_balance.py:95
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:143
 msgid "Actual Qty"
-msgstr ""
+msgstr "Aktuális menny."
 
 #. Label of the actual_qty (Float) field in DocType 'Stock Entry Detail'
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -2395,7 +2399,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:201
 msgid "Actual Qty is mandatory"
-msgstr ""
+msgstr "Tényleges Mennyiség ami kötelező"
 
 #: erpnext/manufacturing/doctype/plant_floor/stock_summary_template.html:37
 #: erpnext/stock/dashboard/item_dashboard_list.html:28
@@ -2833,7 +2837,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Additional Discount Amount (Company Currency)"
-msgstr ""
+msgstr "További kedvezmény összege (Vállalat pénznemében)"
 
 #: erpnext/controllers/taxes_and_totals.py:837
 msgid "Additional Discount Amount ({discount_amount}) cannot exceed the total before such discount ({total_before_discount})"
@@ -3231,11 +3235,11 @@ msgstr ""
 #. Advance'
 #: erpnext/accounts/doctype/sales_invoice_advance/sales_invoice_advance.json
 msgid "Advance amount"
-msgstr ""
+msgstr "Előleg összege"
 
 #: erpnext/controllers/taxes_and_totals.py:974
 msgid "Advance amount cannot be greater than {0} {1}"
-msgstr ""
+msgstr "Előleg összege nem lehet nagyobb, mint {0} {1}"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:877
 msgid "Advance paid against {0} {1} cannot be greater than Grand Total {2}"
@@ -3357,7 +3361,7 @@ msgstr ""
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Against Income Account"
-msgstr ""
+msgstr "Elleni jövedelem számla"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:739
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:777
@@ -5205,7 +5209,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1091
 msgid "As there are sufficient Sub Assembly Items, Work Order is not required for Warehouse {0}."
-msgstr ""
+msgstr "Mivel elegendő részösszeállítási tétel van, a {0} raktárhoz nem szükséges munkamegrendelés."
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1839
 msgid "As there are sufficient raw materials, Material Request is not required for Warehouse {0}."
@@ -7452,7 +7456,7 @@ msgstr ""
 #. Label of the sb_batch (Section Break) field in DocType 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
 msgid "Batch Details"
-msgstr ""
+msgstr "A tétel részletei"
 
 #: erpnext/stock/doctype/batch/batch.py:218
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:469
@@ -7855,7 +7859,7 @@ msgstr ""
 #. Label of the billing_details (Section Break) field in DocType 'Timesheet'
 #: erpnext/projects/doctype/timesheet/timesheet.json
 msgid "Billing Details"
-msgstr ""
+msgstr "Számlázási adatok"
 
 #. Label of the billing_email (Data) field in DocType 'Process Statement Of
 #. Accounts Customer'
@@ -13427,7 +13431,7 @@ msgstr ""
 #. Label of the current_state (Select) field in DocType 'Share Balance'
 #: erpnext/accounts/doctype/share_balance/share_balance.json
 msgid "Current State"
-msgstr ""
+msgstr "Jelenlegi állapot"
 
 #: erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py:210
 msgid "Current Status"
@@ -14835,7 +14839,7 @@ msgstr ""
 #: erpnext/setup/doctype/company/company.json
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "Default Currency"
-msgstr ""
+msgstr "Alapértelmezett pénznem"
 
 #. Label of the customer_group (Link) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
@@ -18322,7 +18326,7 @@ msgstr ""
 #. Description of the 'Batch Number Series' (Data) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings."
-msgstr ""
+msgstr "Példa: ABCD. #####. Ha sorozatot állít be, és a tétel nem szerepel a tranzakciókban, akkor a sorozaton alapuló automatikus tételszám kerül létrehozásra. Ha mindig erről a tételr köteg számról szeretné kifejezetten megemlíteni a tételszámot, hagyja üresen. Megjegyzés: ez a beállítás elsőbbséget élvez a készletbeállítások között az elnevezési sorozat előtag felett a leltár beállításoknál."
 
 #: erpnext/stock/stock_ledger.py:2321
 msgid "Example: Serial No {0} reserved in {1}."
@@ -20611,7 +20615,7 @@ msgstr ""
 #. Label of the disposal_account (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Gain/Loss Account on Asset Disposal"
-msgstr ""
+msgstr "Nyereség/Veszteség számla a Vagyontárgy eltávolításán"
 
 #. Description of the 'Gain/Loss already booked' (Currency) field in DocType
 #. 'Exchange Rate Revaluation'
@@ -24768,7 +24772,7 @@ msgstr ""
 #. Label of the complaint_date (Date) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Issue Date"
-msgstr ""
+msgstr "Probléma dátuma"
 
 #: erpnext/stock/doctype/material_request/material_request.js:180
 msgid "Issue Material"
@@ -26188,7 +26192,7 @@ msgstr ""
 
 #: erpnext/assets/doctype/asset/asset.py:346
 msgid "Item {0} has been disabled"
-msgstr ""
+msgstr "Tétel {0} ,le lett tiltva"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:793
 msgid "Item {0} has no Serial No. Only serialized items can have delivery based on Serial No"
@@ -28257,7 +28261,7 @@ msgstr ""
 #. Description of the 'Material Request' (Link) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Manufacture against Material Request"
-msgstr ""
+msgstr "Előállítás az Anyag igénylésre"
 
 #. Label of a number card in the Manufacturing Workspace
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
@@ -30439,7 +30443,7 @@ msgstr ""
 #. Label of the new_workplace (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "New Workplace"
-msgstr ""
+msgstr "Új munkahely"
 
 #: erpnext/selling/doctype/customer/customer.py:405
 msgid "New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}"
@@ -33555,7 +33559,7 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt_list.js:23
 msgid "Partly Billed"
-msgstr ""
+msgstr "Részben számlázott"
 
 #. Option for the 'Delivery Status' (Select) field in DocType 'Sales Order'
 #. Option for the 'Status' (Select) field in DocType 'Pick List'
@@ -33751,7 +33755,7 @@ msgstr ""
 #. Name of a DocType
 #: erpnext/accounts/doctype/party_link/party_link.json
 msgid "Party Link"
-msgstr ""
+msgstr "Hivatkozás az üzleti partnerre"
 
 #: erpnext/controllers/sales_and_purchase_return.py:49
 msgid "Party Mismatch"
@@ -33777,7 +33781,7 @@ msgstr ""
 #. Label of the bank_party_name (Data) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
 msgid "Party Name/Account Holder (Bank Statement)"
-msgstr ""
+msgstr "Üzleti partner neve/számlatulajdonos (bankszámlakivonat)"
 
 #. Label of the party_not_required (Check) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
@@ -35883,7 +35887,7 @@ msgstr ""
 
 #: erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.js:49
 msgid "Please save first"
-msgstr ""
+msgstr "Kérjük, először mentse"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:866
 msgid "Please save the Sales Order before adding a delivery schedule."
@@ -36090,7 +36094,7 @@ msgstr ""
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:135
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.js:73
 msgid "Please select a row to create a Reposting Entry"
-msgstr ""
+msgstr "Kérjük, válasszon ki egy sort az újrakönyvelési bejegyzés létrehozásához"
 
 #: erpnext/accounts/report/purchase_register/purchase_register.py:35
 msgid "Please select a supplier for fetching payments."
@@ -38021,7 +38025,7 @@ msgstr ""
 
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:116
 msgid "Profit This Year"
-msgstr ""
+msgstr "Nyereség ebben az évben"
 
 #. Option for the 'Report Type' (Select) field in DocType 'Account'
 #. Option for the 'Report Type' (Select) field in DocType 'Process Period
@@ -39188,7 +39192,7 @@ msgstr ""
 #: erpnext/templates/form_grid/stock_entry_grid.html:10
 #: erpnext/templates/generators/bom.html:50 erpnext/templates/pages/rfq.html:40
 msgid "Qty"
-msgstr ""
+msgstr "Menny."
 
 #: erpnext/templates/pages/order.html:178
 msgid "Qty "
@@ -39929,7 +39933,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/job_card/job_card.js:469
 #: erpnext/manufacturing/doctype/workstation/workstation.js:303
 msgid "Quantity should be greater than 0"
-msgstr ""
+msgstr "Mennyiség nagyobbnak kell lennie, mint 0"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:346
 msgid "Quantity to Manufacture"
@@ -42960,7 +42964,7 @@ msgstr ""
 #. Option for the 'Status' (Select) field in DocType 'Call Log'
 #: erpnext/telephony/doctype/call_log/call_log.json
 msgid "Ringing"
-msgstr ""
+msgstr "gyűrűzés"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -43814,7 +43818,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:459
 msgid "Row #{0}: Status must be {1} for Invoice Discounting {2}"
-msgstr ""
+msgstr "{0} sor: Az állapotnak {1} kell lennie, ha a számlát diszkontáljuk. {2}"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:403
 msgid "Row #{0}: Stock cannot be reserved for Item {1} against a disabled Batch {2}."
@@ -45118,7 +45122,7 @@ msgstr ""
 #. Label of the sales_partner_type (Data) field in DocType 'Sales Partner Type'
 #: erpnext/selling/doctype/sales_partner_type/sales_partner_type.json
 msgid "Sales Partner Type"
-msgstr ""
+msgstr "Vevői partner típusa"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -51195,7 +51199,7 @@ msgstr ""
 #. Name of a DocType
 #: erpnext/projects/doctype/task_type/task_type.json
 msgid "Task Type"
-msgstr ""
+msgstr "Feladat típusa"
 
 #. Option for the '% Complete Method' (Select) field in DocType 'Project'
 #: erpnext/projects/doctype/project/project.json
@@ -51847,7 +51851,7 @@ msgstr ""
 #. Label of the template_title (Data) field in DocType 'Journal Entry Template'
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.json
 msgid "Template Title"
-msgstr ""
+msgstr "Sablon címe"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice_list.js:29
 msgid "Temporarily on Hold"
@@ -52145,7 +52149,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/packing_slip/packing_slip.py:91
 msgid "The 'From Package No.' field must neither be empty nor it's value less than 1."
-msgstr ""
+msgstr "A 'Csomagból száma' mezőnek sem üres, sem kisebb mint 1 érték nem lehet."
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:415
 msgid "The Access to Request for Quotation From Portal is Disabled. To Allow Access, Enable it in Portal Settings."
@@ -52727,7 +52731,7 @@ msgstr ""
 
 #: erpnext/controllers/status_updater.py:463
 msgid "This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?"
-msgstr ""
+msgstr "Ez a dokumentum túlcsordult ennyivel {0} {1} erre a tételre {4}. Létrehoz egy másik {3}  ugyanazon {2} helyett?"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:487
 msgid "This field is used to set the 'Customer'."
@@ -53576,7 +53580,7 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Total Advance"
-msgstr ""
+msgstr "Összes előleg"
 
 #. Label of the total_allocated_amount (Currency) field in DocType 'Payment
 #. Entry'
@@ -53797,7 +53801,7 @@ msgstr ""
 
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:118
 msgid "Total Expense This Year"
-msgstr ""
+msgstr "Teljes költség ebben az évben"
 
 #: erpnext/accounts/doctype/budget/budget.py:574
 msgid "Total Expenses booked through"
@@ -53839,7 +53843,7 @@ msgstr ""
 
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:117
 msgid "Total Income This Year"
-msgstr ""
+msgstr "Teljes jövedelem ebben az évben"
 
 #. Label of the total_incoming_value (Currency) field in DocType 'Stock Entry'
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
@@ -58269,7 +58273,7 @@ msgstr ""
 #. Name of a report
 #: erpnext/utilities/report/youtube_interactions/youtube_interactions.json
 msgid "YouTube Interactions"
-msgstr ""
+msgstr "YouTube-interakciók"
 
 #: erpnext/www/book_appointment/index.html:49
 msgid "Your Name (required)"
