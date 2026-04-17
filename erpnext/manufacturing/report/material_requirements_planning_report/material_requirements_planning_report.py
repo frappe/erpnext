@@ -77,9 +77,11 @@ class MaterialRequirementsPlanningReport:
 				(so.docstatus == 1)
 				& (so.status.notin(["Closed", "Completed", "Stopped"]))
 				& (so_item.docstatus == 1)
-				& (so_item.item_code.isin(items))
 			)
 		)
+
+		if items:
+			query = query.where(so_item.item_code.isin(items))
 
 		if self.filters.get("warehouse"):
 			warehouses = [self.filters.get("warehouse")]
