@@ -130,12 +130,12 @@
   },
   {
    "default": "Company",
-   "fieldname": "Personne Physique",
+   "fieldname": "customer_type",
    "fieldtype": "Select",
    "label": "Customer Type",
    "oldfieldname": "customer_type",
    "oldfieldtype": "Select",
-   "options": "Personne Physique\nPersonne Morale\nPersonne physique Commerçante\nProfession libérale\nAmbassade et Organisation Internationale",
+   "options": "Personne Physique\nPersonne Morale\nPersonne physique Commerçante\nProfession Libérale\nAmbassade et Organisation Internationale",
    "reqd": 1
   },
   {
