@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-12 09:47+0000\n"
-"PO-Revision-Date: 2026-04-15 14:00\n"
+"PO-Revision-Date: 2026-04-17 14:36\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -6171,7 +6171,7 @@ msgstr "خطای تنظیمات مالیات خودکار"
 
 #: erpnext/setup/doctype/employee/employee.py:170
 msgid "Auto User Creation Error"
-msgstr ""
+msgstr "خطای ایجاد خودکار کاربر"
 
 #. Description of the 'Close Replied Opportunity After Days' (Int) field in
 #. DocType 'CRM Settings'
@@ -6699,7 +6699,7 @@ msgstr ""
 #. Name of a report
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.json
 msgid "BOM Stock Analysis"
-msgstr ""
+msgstr "تحلیل موجودی BOM"
 
 #. Label of a Link in the Manufacturing Workspace
 #. Label of a Workspace Sidebar Item
@@ -7962,7 +7962,7 @@ msgstr "بیوتکنولوژی"
 
 #: erpnext/setup/doctype/employee/employee.js:156
 msgid "Birthday"
-msgstr ""
+msgstr "تولد"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
@@ -11012,7 +11012,7 @@ msgstr "شرکت دارایی {0} و سند خرید {1} مطابقت ندارد
 
 #: erpnext/setup/doctype/employee/employee.py:168
 msgid "Company or Personal Email is mandatory when 'Create User Automatically' is enabled"
-msgstr ""
+msgstr "وقتی گزینه «ایجاد خودکار کاربر» فعال باشد، ایمیل شرکتی یا شخصی الزامی است"
 
 #. Description of the 'Registration Details' (Code) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -12393,19 +12393,19 @@ msgstr "بس"
 #. Label of an action in the Onboarding Step 'Create Asset Category'
 #: erpnext/assets/onboarding_step/create_asset_category/create_asset_category.json
 msgid "Create Asset Category"
-msgstr ""
+msgstr "ایجاد دسته‌بندی دارایی"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Asset Item'
 #: erpnext/assets/onboarding_step/create_asset_item/create_asset_item.json
 msgid "Create Asset Item"
-msgstr ""
+msgstr "ایجاد آیتم دارایی"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Asset Location'
 #: erpnext/assets/onboarding_step/create_asset_location/create_asset_location.json
 msgid "Create Asset Location"
-msgstr ""
+msgstr "ایجاد مکان دارایی"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Bill of Materials'
@@ -12424,7 +12424,7 @@ msgstr "ایجاد نمودار حساب بر اساس"
 #. Label of an action in the Onboarding Step 'Create Customer'
 #: erpnext/selling/onboarding_step/create_customer/create_customer.json
 msgid "Create Customer"
-msgstr ""
+msgstr "ایجاد مشتری"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Delivery Note'
@@ -12453,7 +12453,7 @@ msgstr "ایجاد رکوردهای کارمندان."
 #. Label of an action in the Onboarding Step 'Create Existing Asset'
 #: erpnext/assets/onboarding_step/create_existing_asset/create_existing_asset.json
 msgid "Create Existing Asset"
-msgstr ""
+msgstr "ایجاد دارایی موجود"
 
 #. Label of an action in the Onboarding Step 'Create Finished Goods'
 #: erpnext/manufacturing/onboarding_step/create_finished_goods/create_finished_goods.json
@@ -12484,7 +12484,7 @@ msgstr "ایجاد فاکتورها"
 #: erpnext/selling/onboarding_step/create_item/create_item.json
 #: erpnext/stock/onboarding_step/create_item/create_item.json
 msgid "Create Item"
-msgstr ""
+msgstr "ایجاد آیتم"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:206
 msgid "Create Job Card"
@@ -12551,12 +12551,12 @@ msgstr "ایجاد سرنخ جدید"
 #. Label of an action in the Onboarding Step 'Create Operations'
 #: erpnext/manufacturing/onboarding_step/create_operations/create_operations.json
 msgid "Create Operation"
-msgstr ""
+msgstr "ایجاد عملیات"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/create_operations/create_operations.json
 msgid "Create Operations"
-msgstr ""
+msgstr "ایجاد عملیات"
 
 #: erpnext/crm/doctype/lead/lead.js:161
 msgid "Create Opportunity"
@@ -12579,7 +12579,7 @@ msgstr ""
 
 #: erpnext/public/js/controllers/transaction.js:517
 msgid "Create Payment Request"
-msgstr ""
+msgstr "ایجاد درخواست پرداخت"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:800
 msgid "Create Pick List"
@@ -12593,7 +12593,7 @@ msgstr "قالب چاپ ایجاد کنید"
 #. Label of an action in the Onboarding Step 'Create Project'
 #: erpnext/projects/onboarding_step/create_project/create_project.json
 msgid "Create Project"
-msgstr ""
+msgstr "ایجاد پروژه"
 
 #: erpnext/crm/doctype/lead/lead_list.js:8
 msgid "Create Prospect"
@@ -12603,7 +12603,7 @@ msgstr "ایجاد مشتری بالقوه"
 #. Label of an action in the Onboarding Step 'Create Purchase Invoice'
 #: erpnext/buying/onboarding_step/create_purchase_invoice/create_purchase_invoice.json
 msgid "Create Purchase Invoice"
-msgstr ""
+msgstr "ایجاد فاکتور خرید"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Purchase Order'
@@ -12621,7 +12621,7 @@ msgstr "ایجاد سفارش‌های خرید"
 #. Label of an action in the Onboarding Step 'Create Purchase Receipt'
 #: erpnext/stock/onboarding_step/create_purchase_receipt/create_purchase_receipt.json
 msgid "Create Purchase Receipt"
-msgstr ""
+msgstr "ایجاد رسید خرید"
 
 #: erpnext/utilities/activation.py:88
 msgid "Create Quotation"
@@ -12631,7 +12631,7 @@ msgstr "پیش‌فاکتور ایجاد کنید"
 #: erpnext/manufacturing/onboarding_step/create_raw_materials/create_raw_materials.json
 #: erpnext/subcontracting/onboarding_step/create_raw_materials/create_raw_materials.json
 msgid "Create Raw Material"
-msgstr ""
+msgstr "ایجاد ماده خام"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/create_raw_materials/create_raw_materials.json
@@ -12678,7 +12678,7 @@ msgstr "برای کمک به برنامه‌ریزی کار و تحویل به �
 #. Label of an action in the Onboarding Step 'Create Service Item'
 #: erpnext/subcontracting/onboarding_step/create_service_item/create_service_item.json
 msgid "Create Service Item"
-msgstr ""
+msgstr "ایجاد آیتم سرویس"
 
 #: erpnext/stock/dashboard/item_dashboard.js:283
 #: erpnext/stock/doctype/material_request/material_request.js:478
@@ -12710,7 +12710,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: erpnext/buying/onboarding_step/create_supplier/create_supplier.json
 msgid "Create Supplier"
-msgstr ""
+msgstr "ایجاد تأمین‌کننده"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:181
 msgid "Create Supplier Quotation"
@@ -12741,7 +12741,7 @@ msgstr "جدول زمانی ایجاد کنید"
 #. Label of an action in the Onboarding Step 'Create Transfer Entry'
 #: erpnext/stock/onboarding_step/create_transfer_entry/create_transfer_entry.json
 msgid "Create Transfer Entry"
-msgstr ""
+msgstr "ایجاد ثبت انتقال"
 
 #: erpnext/setup/doctype/employee/employee.js:50
 #: erpnext/setup/doctype/employee/employee.js:52
@@ -12752,7 +12752,7 @@ msgstr "ایجاد کاربر"
 #. Label of the create_user_automatically (Check) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Create User Automatically"
-msgstr ""
+msgstr "ایجاد خودکار کاربر"
 
 #. Label of the create_user_permission (Check) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.js:65
@@ -12776,13 +12776,13 @@ msgstr "ایجاد گونه‌ها"
 #. Label of an action in the Onboarding Step 'Setup Warehouse'
 #: erpnext/stock/onboarding_step/setup_warehouse/setup_warehouse.json
 msgid "Create Warehouses"
-msgstr ""
+msgstr "ایجاد انبارها"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Work Order'
 #: erpnext/manufacturing/onboarding_step/create_work_order/create_work_order.json
 msgid "Create Work Order"
-msgstr ""
+msgstr "ایجاد دستور کار"
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:10
 msgid "Create Workstation"
@@ -12804,7 +12804,7 @@ msgstr "ایجاد پیش‌فاکتورهای مشتری"
 #. Label of an action in the Onboarding Step 'Create Delivery Note'
 #: erpnext/selling/onboarding_step/create_delivery_note/create_delivery_note.json
 msgid "Create delivery note"
-msgstr ""
+msgstr "ایجاد یادداشت تحویل"
 
 #. Label of the create_pr_in_draft_status (Check) field in DocType 'Accounts
 #. Settings'
@@ -12815,7 +12815,7 @@ msgstr "ایجاد در وضعیت پیش‌نویس"
 #. Label of an action in the Onboarding Step 'Create Supplier'
 #: erpnext/buying/onboarding_step/create_supplier/create_supplier.json
 msgid "Create supplier"
-msgstr ""
+msgstr "ایجاد تأمین‌کننده"
 
 #: erpnext/public/js/bulk_transaction_processing.js:14
 msgid "Create {0} {1} ?"
@@ -12902,7 +12902,7 @@ msgstr "ایجاد کاربر..."
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:36
 msgid "Creating demo data"
-msgstr ""
+msgstr "ایجاد داده‌های آزمایشی"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:305
 msgid "Creating {} out of {} {}"
@@ -15331,7 +15331,7 @@ msgstr "حذف ثبت‌های دفتر لغو شده"
 #. Type: Action
 #: erpnext/hooks.py erpnext/public/js/utils/demo.js:5
 msgid "Delete Demo Data"
-msgstr ""
+msgstr "حذف داده‌های آزمایشی"
 
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.js:66
 msgid "Delete Dimension"
@@ -15726,7 +15726,7 @@ msgstr "شرکت دمو"
 
 #: erpnext/setup/demo.py:51
 msgid "Demo Data creation failed."
-msgstr ""
+msgstr "ایجاد داده‌های آزمایشی ناموفق بود."
 
 #: erpnext/public/js/utils/demo.js:25
 msgid "Demo data cleared"
@@ -15734,7 +15734,7 @@ msgstr "داده‌های نمایشی پاک شد"
 
 #: erpnext/setup/demo.py:42
 msgid "Demo data creation failed. Check notifications for more info."
-msgstr ""
+msgstr "ایجاد داده‌های آزمایشی ناموفق بود. برای اطلاعات بیشتر، اعلان‌ها را بررسی کنید."
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:18
 msgid "Department Stores"
@@ -17523,11 +17523,11 @@ msgstr "ایمیل به تامین کننده ارسال شد {0}"
 
 #: erpnext/setup/doctype/employee/employee.py:433
 msgid "Email is required to create a user"
-msgstr ""
+msgstr "برای ایجاد کاربر، ایمیل الزامی است"
 
 #: erpnext/setup/doctype/employee/employee.js:72
 msgid "Email is required to create a user."
-msgstr ""
+msgstr "برای ایجاد کاربر، ایمیل الزامی است."
 
 #: erpnext/stock/doctype/shipment/shipment.js:174
 msgid "Email or Phone/Mobile of the Contact are mandatory to continue."
@@ -17713,7 +17713,7 @@ msgstr "کارمند نمی‌تواند به خودش گزارش دهد."
 
 #: erpnext/setup/doctype/employee/employee.py:573
 msgid "Employee is required"
-msgstr ""
+msgstr "کارمند الزامی است"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:109
 msgid "Employee is required while issuing Asset {0}"
@@ -17721,7 +17721,7 @@ msgstr "هنگام صدور دارایی {0} به کارمند نیاز است"
 
 #: erpnext/setup/doctype/employee/employee.py:430
 msgid "Employee {0} already has a linked user"
-msgstr ""
+msgstr "کارمند {0} از قبل یک کاربر لینک شده دارد"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:92
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:113
@@ -17734,7 +17734,7 @@ msgstr "کارمند {0} در حال حاضر روی ایستگاه کاری د�
 
 #: erpnext/setup/doctype/employee/employee.py:598
 msgid "Employee {0} not found"
-msgstr ""
+msgstr "کارمند {0} یافت نشد"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:351
 msgid "Employees"
@@ -17909,13 +17909,13 @@ msgstr "فعال کردن رزرو موجودی"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Subscription"
-msgstr ""
+msgstr "فعال سازی اشتراک"
 
 #. Description of the 'Enable Subscription' (Check) field in DocType 'Accounts
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Subscription tracking in invoice"
-msgstr ""
+msgstr "فعال کردن ردیابی اشتراک در فاکتور"
 
 #. Label of the enable_utm (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
@@ -18956,7 +18956,7 @@ msgstr "تأیید اعتبار کلید API انجام نشد."
 #: erpnext/setup/setup_wizard/setup_wizard.py:37
 #: erpnext/setup/setup_wizard/setup_wizard.py:38
 msgid "Failed to create demo data"
-msgstr ""
+msgstr "ایجاد داده‌های آزمایشی ناموفق بود"
 
 #: erpnext/setup/demo.py:77
 msgid "Failed to erase demo data, please delete the demo company manually."
@@ -18981,7 +18981,7 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:26
 msgid "Failed to set defaults"
-msgstr ""
+msgstr "تنظیم پیش‌فرض‌ها ناموفق بود"
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:21
 #: erpnext/setup/setup_wizard/setup_wizard.py:22
@@ -22600,7 +22600,7 @@ msgstr "درون‌بُرد داده‌ها"
 
 #: erpnext/setup/doctype/employee/employee_list.js:16
 msgid "Import Employees"
-msgstr ""
+msgstr "درون‌برد کارمندان"
 
 #: erpnext/edi/doctype/code_list/code_list.js:7
 #: erpnext/edi/doctype/code_list/code_list_list.js:3
@@ -23144,7 +23144,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:197
 msgid "Incorrect Account"
-msgstr ""
+msgstr "حساب نادرست"
 
 #. Name of a report
 #: erpnext/stock/report/incorrect_balance_qty_after_transaction/incorrect_balance_qty_after_transaction.json
@@ -23161,7 +23161,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:145
 msgid "Incorrect Company"
-msgstr ""
+msgstr "شرکت نادرست"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1080
 msgid "Incorrect Component Quantity"
@@ -23716,7 +23716,7 @@ msgstr "حساب نامعتبر"
 
 #: erpnext/accounts/report/budget_variance_report/budget_variance_report.py:418
 msgid "Invalid Accounting Dimension"
-msgstr ""
+msgstr "ابعاد حسابداری نامعتبر"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:400
 #: erpnext/accounts/doctype/payment_request/payment_request.py:1006
@@ -23767,7 +23767,7 @@ msgstr "مرکز هزینه نامعتبر است"
 
 #: erpnext/selling/doctype/customer/customer.py:369
 msgid "Invalid Customer Group"
-msgstr ""
+msgstr "گروه مشتری نامعتبر"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:419
 msgid "Invalid Delivery Date"
@@ -25771,7 +25771,7 @@ msgstr "نام آیتم"
 
 #: erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py:412
 msgid "Item Name is required."
-msgstr ""
+msgstr "نام آیتم الزامی است."
 
 #. Label of the item_naming_by (Select) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
@@ -28438,7 +28438,7 @@ msgstr "تنظیمات تولید"
 #. Title of the Module Onboarding 'Manufacturing Onboarding'
 #: erpnext/manufacturing/module_onboarding/manufacturing_onboarding/manufacturing_onboarding.json
 msgid "Manufacturing Setup"
-msgstr ""
+msgstr "راه‌اندازی تولید"
 
 #. Label of the manufacturing_time_in_mins (Int) field in DocType 'Item Lead
 #. Time'
@@ -28826,7 +28826,7 @@ msgstr "نوع درخواست مواد"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:1124
 msgid "Material Request already created for the ordered quantity"
-msgstr ""
+msgstr "درخواست مواد از قبل برای مقدار سفارش داده شده ایجاد شده است"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:1847
 msgid "Material Request not created, as quantity for Raw Materials already available."
@@ -29063,7 +29063,7 @@ msgstr "حداکثر مبلغ پرداختی"
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.py:82
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.py:151
 msgid "Maximum Producible Items"
-msgstr ""
+msgstr "حداکثر آیتم‌های قابل تولید"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:4108
 msgid "Maximum Samples - {0} can be retained for Batch {1} and Item {2}."
@@ -33754,7 +33754,7 @@ msgstr "طرف IBAN (صورتحساب بانکی)"
 #. Tool Item'
 #: erpnext/accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
 msgid "Party ID"
-msgstr ""
+msgstr "شناسه طرف"
 
 #. Label of the section_break_7 (Section Break) field in DocType 'Pricing Rule'
 #. Label of the section_break_8 (Section Break) field in DocType 'Promotional
@@ -34450,7 +34450,7 @@ msgstr ""
 
 #: erpnext/public/js/controllers/transaction.js:482
 msgid "Payment Schedules"
-msgstr ""
+msgstr "زمان‌بندی‌های پرداخت"
 
 #: erpnext/accounts/print_format/sales_invoice_print/sales_invoice_print.html:123
 msgid "Payment Status"
@@ -36147,7 +36147,7 @@ msgstr "لطفا حداقل یک ردیف با مقدار متفاوت انتخ�
 
 #: erpnext/public/js/controllers/transaction.js:524
 msgid "Please select at least one schedule."
-msgstr ""
+msgstr "لطفاً حداقل یک زمان‌بندی را انتخاب کنید."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1303
 msgid "Please select atleast one item to continue"
@@ -38310,7 +38310,7 @@ msgstr "تنظیمات پروژه ها"
 #. Title of the Module Onboarding 'Projects Onboarding'
 #: erpnext/projects/module_onboarding/projects_onboarding/projects_onboarding.json
 msgid "Projects Setup"
-msgstr ""
+msgstr "راه‌اندازی پروژه‌ها"
 
 #. Name of a role
 #: erpnext/projects/doctype/activity_cost/activity_cost.json
@@ -39925,11 +39925,11 @@ msgstr "مقدار مورد نیاز است"
 
 #: erpnext/stock/dashboard/item_dashboard.js:285
 msgid "Quantity must be greater than zero"
-msgstr ""
+msgstr "مقدار باید بزرگتر از صفر باشد"
 
 #: erpnext/stock/dashboard/item_dashboard.js:290
 msgid "Quantity must be less than or equal to {0}"
-msgstr ""
+msgstr "مقدار باید کمتر یا مساوی {0} باشد"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1098
 #: erpnext/stock/doctype/pick_list/pick_list.js:206
@@ -42894,13 +42894,13 @@ msgstr "مرور"
 #. Label of an action in the Onboarding Step 'Review Accounts Settings'
 #: erpnext/accounts/onboarding_step/review_accounts_settings/review_accounts_settings.json
 msgid "Review Accounts Settings"
-msgstr ""
+msgstr "بازبینی تنظیمات حساب‌ها"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review Buying Settings'
 #: erpnext/buying/onboarding_step/review_buying_settings/review_buying_settings.json
 msgid "Review Buying Settings"
-msgstr ""
+msgstr "بازبینی تنظیمات خرید"
 
 #. Title of an Onboarding Step
 #: erpnext/accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
@@ -42916,13 +42916,13 @@ msgstr "تاریخ بازنگری"
 #. Label of an action in the Onboarding Step 'Review Manufacturing Settings'
 #: erpnext/manufacturing/onboarding_step/review_manufacturing_settings/review_manufacturing_settings.json
 msgid "Review Manufacturing Settings"
-msgstr ""
+msgstr "بازبینی تنظیمات تولید"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review Selling Settings'
 #: erpnext/selling/onboarding_step/review_selling_settings/review_selling_settings.json
 msgid "Review Selling Settings"
-msgstr ""
+msgstr "بازبینی تنظیمات فروش"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review Stock Settings'
@@ -42934,7 +42934,7 @@ msgstr "مرور تنظیمات موجودی"
 #. Label of an action in the Onboarding Step 'Review System Settings'
 #: erpnext/setup/onboarding_step/review_system_settings/review_system_settings.json
 msgid "Review System Settings"
-msgstr ""
+msgstr "بازبینی تنظیمات سیستم"
 
 #. Label of a Card Break in the Quality Workspace
 #: erpnext/quality_management/workspace/quality/quality.json
@@ -43756,7 +43756,7 @@ msgstr ""
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:541
 msgid "Row #{0}: Secondary Item Qty cannot be zero"
-msgstr ""
+msgstr "ردیف #{0}: مقدار آیتم ثانویه نمی‌تواند صفر باشد"
 
 #: erpnext/controllers/selling_controller.py:296
 msgid "Row #{0}: Selling rate for item {1} is lower than its {2}.\n"
@@ -43932,7 +43932,7 @@ msgstr "ردیف #{0}: {1} از {2} باید {3} باشد. لطفاً {1} را �
 
 #: erpnext/controllers/accounts_controller.py:3905
 msgid "Row #{0}:Quantity for Item {1} cannot be zero."
-msgstr ""
+msgstr "ردیف #{0}: مقدار برای آیتم {1} نمی‌تواند صفر باشد."
 
 #: erpnext/buying/utils.py:106
 msgid "Row #{1}: Warehouse is mandatory for stock Item {0}"
@@ -44352,11 +44352,11 @@ msgstr "ردیف {0}: ضریب تبدیل UOM اجباری است"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:172
 msgid "Row {0}: Warehouse is required"
-msgstr ""
+msgstr "ردیف {0}: انبار الزامی است"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:181
 msgid "Row {0}: Warehouse {1} is linked to company {2}. Please select a warehouse belonging to company {3}."
-msgstr ""
+msgstr "ردیف {0}: انبار {1} به شرکت {2} متصل است. لطفاً انباری را انتخاب کنید که متعلق به شرکت {3} باشد."
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1247
 #: erpnext/manufacturing/doctype/work_order/work_order.py:415
@@ -45738,12 +45738,12 @@ msgstr "ایمیل دوم"
 #. Label of the item_code (Link) field in DocType 'Job Card Secondary Item'
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "Secondary Item Code"
-msgstr ""
+msgstr "کد آیتم ثانویه"
 
 #. Label of the item_name (Data) field in DocType 'Job Card Secondary Item'
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "Secondary Item Name"
-msgstr ""
+msgstr "نام آیتم ثانویه"
 
 #. Label of the secondary_items (Table) field in DocType 'BOM'
 #. Label of the secondary_items_tab (Tab Break) field in DocType 'BOM'
@@ -45755,7 +45755,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Secondary Items"
-msgstr ""
+msgstr "آیتم‌های ثانویه"
 
 #. Label of the secondary_items_cost (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
@@ -47396,7 +47396,7 @@ msgstr "اگر مشتری یک شرکت مدیریت دولتی است، این 
 #. Settings'
 #: erpnext/support/doctype/support_settings/support_settings.json
 msgid "Set this value to 0 to disable the feature."
-msgstr ""
+msgstr "این مقدار را روی ۰ تنظیم کنید تا این ویژگی غیرفعال شود."
 
 #: erpnext/assets/doctype/asset/asset.py:901
 msgid "Set {0} in asset category {1} for company {2}"
@@ -58775,7 +58775,7 @@ msgstr "{0} دارایی قابل انتقال نیست"
 
 #: erpnext/controllers/trends.py:60
 msgid "{0} can be either {1} or {2}."
-msgstr ""
+msgstr "{0} می‌تواند یا {1} یا {2} باشد."
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:279
 msgid "{0} can not be negative"
