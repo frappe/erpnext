@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import _ from '@/lib/translate'
-import { Settings } from 'lucide-react'
+import { FilterIcon } from 'lucide-react'
 import { bankRecMatchFilters } from './bankRecAtoms'
 import { useAtom } from 'jotai'
 import { Switch } from '@/components/ui/switch'
@@ -16,7 +16,7 @@ const MatchFilters = () => {
                 <PopoverTrigger asChild>
                     <TooltipTrigger asChild>
                         <Button size='md' isIconButton variant='outline' aria-label={_("Configure match filters for vouchers")}>
-                            <Settings />
+                            <FilterIcon />
                         </Button>
                     </TooltipTrigger>
                 </PopoverTrigger>

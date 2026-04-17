@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import _ from "@/lib/translate"
+import { selectedBankAccountAtom } from "./bankRecAtoms"
 
 const CompanySelector = ({ onChange }: { onChange?: (company: string) => void }) => {
     const [open, setOpen] = useState(false)
@@ -27,10 +28,12 @@ const CompanySelector = ({ onChange }: { onChange?: (company: string) => void })
     const options = window.frappe?.boot?.docs?.filter((doc: Record<string, any>) => doc.doctype === ":Company").map((company: Record<string, any>) => company.name) || []
 
     const setSelectedCompany = useSetAtom(selectedCompanyAtom)
+    const setSelectedBankAccount = useSetAtom(selectedBankAccountAtom)
     const selectedCompany = useCurrentCompany()
 
     const handleSelectCompany = (company: string) => {
         setSelectedCompany(company)
+        setSelectedBankAccount(null)
         setSearchQuery("")
         setOpen(false)
         onChange?.(company)
