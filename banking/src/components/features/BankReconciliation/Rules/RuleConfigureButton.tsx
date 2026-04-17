@@ -324,7 +324,7 @@ const SortableRuleItem = ({
                     >
                         <GripVertical className="w-4 h-4 text-ink-gray-5" />
                     </div>
-                    <Badge theme="gray" className="font-mono">
+                    <Badge theme="gray" className="font-numeric">
                         {rule.priority}
                     </Badge>
                     <div className="flex flex-col gap-1">

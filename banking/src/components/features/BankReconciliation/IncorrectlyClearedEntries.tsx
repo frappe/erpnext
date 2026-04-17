@@ -122,7 +122,7 @@ const IncorrectlyClearedEntriesView = () => {
                         target="_blank"
                         rel="noreferrer"
                         className="text-ink-gray-8 block min-w-0 w-full underline underline-offset-4"
-                        href={`/app/${slug(row.original.payment_document)}/${row.original.payment_entry}`}
+                        href={`/desk/${slug(row.original.payment_document)}/${row.original.payment_entry}`}
                     >
                         {row.original.payment_entry}
                     </a>

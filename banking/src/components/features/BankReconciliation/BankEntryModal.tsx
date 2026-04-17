@@ -787,7 +787,7 @@ const Summary = ({ currency, addRow }: { currency: string, addRow: () => void })
     }, [addRow])
 
     const TextComponent = ({ className, children }: { className?: string, children: React.ReactNode }) => {
-        return <span className={cn("w-32 text-right font-medium text-sm font-mono", className)}>{children}</span>
+        return <span className={cn("w-32 text-right font-medium text-sm font-numeric", className)}>{children}</span>
     }
 
     return <div className="flex flex-col gap-2 items-end">

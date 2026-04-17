@@ -33,7 +33,7 @@ const SelectedTransactionsTable = () => {
                         <TableCell className="max-w-96 text-ellipsis overflow-hidden" title={transaction.description}>{transaction.description}</TableCell>
                         <TableCell className="text-right flex items-center justify-end gap-1">
                             {transaction.withdrawal && transaction.withdrawal > 0 ? <ArrowUpRight className="w-4 h-4 text-ink-red-3" /> : <ArrowDownRight className="w-4 h-4 text-ink-green-3" />}
-                            <span className="font-mono font-medium">
+                            <span className="font-numeric font-medium">
                                 {formatCurrency(transaction.unallocated_amount, transaction.currency ?? '')}
                             </span>
                         </TableCell>

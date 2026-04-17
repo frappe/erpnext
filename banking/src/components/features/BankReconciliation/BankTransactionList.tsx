@@ -88,21 +88,21 @@ const BankTransactionListView = () => {
                 header: _("Withdrawal"),
                 size: 120,
                 meta: { align: "right" } satisfies ListViewColumnMeta,
-                cell: ({ row }) => formatCurrency(row.original.withdrawal, accountCurrency),
+                cell: ({ row }) => <span className="font-numeric">{formatCurrency(row.original.withdrawal, accountCurrency)}</span>,
             },
             {
                 accessorKey: "deposit",
                 header: _("Deposit"),
                 size: 120,
                 meta: { align: "right" } satisfies ListViewColumnMeta,
-                cell: ({ row }) => formatCurrency(row.original.deposit, accountCurrency),
+                cell: ({ row }) => <span className="font-numeric">{formatCurrency(row.original.deposit, accountCurrency)}</span>,
             },
             {
                 accessorKey: "unallocated_amount",
                 header: _("Unallocated"),
                 size: 120,
                 meta: { align: "right" } satisfies ListViewColumnMeta,
-                cell: ({ row }) => formatCurrency(row.original.unallocated_amount, accountCurrency),
+                cell: ({ row }) => <span className="font-numeric">{formatCurrency(row.original.unallocated_amount, accountCurrency)}</span>,
             },
             {
                 accessorKey: "transaction_type",
@@ -152,7 +152,7 @@ const BankTransactionListView = () => {
                     <div className="flex gap-2 items-center">
                         <Button variant="ghost" asChild size='sm'>
                             <a
-                                href={`/app/bank-transaction/${row.original.name}`}
+                                href={`/desk/bank-transaction/${row.original.name}`}
                                 target="_blank"
 
                                 rel="noreferrer"

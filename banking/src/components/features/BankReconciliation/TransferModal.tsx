@@ -532,7 +532,7 @@ const RecommendedTransferAccount = ({ transaction, onAccountChange }: { transact
                             <span className='text-sm font-semibold uppercase'>{isWithdrawal ? _('Transferred Out') : _('Received')}</span>
                         </div>
                     </div>
-                    <span className='font-semibold font-mono text-lg text-right pr-0.5'>{formatCurrency(amount, currency)}</span>
+                    <span className='font-semibold font-numeric text-lg text-right pr-0.5'>{formatCurrency(amount, currency)}</span>
                     <div>
                         <Button
                             onClick={selectTransaction}

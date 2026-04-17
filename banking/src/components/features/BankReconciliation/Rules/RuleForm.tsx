@@ -427,8 +427,8 @@ const MultipleAccountsSelection = () => {
                                 </TooltipContent>
                             </Tooltip>
                         </TableCell> : <>
-                            <TableCell className="font-mono text-right"><AmountFormulaRenderer value={account.debit} /></TableCell>
-                            <TableCell className="font-mono text-right"><AmountFormulaRenderer value={account.credit} /></TableCell>
+                            <TableCell className="font-numeric text-right"><AmountFormulaRenderer value={account.debit} /></TableCell>
+                            <TableCell className="font-numeric text-right"><AmountFormulaRenderer value={account.credit} /></TableCell>
                         </>}
                     </TableRow>
                 ))}
@@ -458,7 +458,7 @@ const AmountFormulaRenderer = ({ value }: { value?: string }) => {
 
         return <Tooltip>
             <TooltipTrigger asChild>
-                <span className={cn("font-mono text-right tabular-nums underline underline-offset-4", isComputationValid ? "" : "text-ink-red-3")}>{value}</span>
+                <span className={cn("font-numeric text-right tabular-nums underline underline-offset-4", isComputationValid ? "" : "text-ink-red-3")}>{value}</span>
             </TooltipTrigger>
             <TooltipContent className={isComputationValid ? "" : "bg-surface-red-5"} arrowClassName={isComputationValid ? "" : "bg-surface-red-5 fill-surface-red-5"}>
                 <p className="text-sm">
@@ -470,7 +470,7 @@ const AmountFormulaRenderer = ({ value }: { value?: string }) => {
         </Tooltip>
     }
 
-    return <span className="font-mono text-right tabular-nums">{value}</span>
+    return <span className="font-numeric text-right tabular-nums">{value}</span>
 }
 
 const ConfigureAccountsModal = ({ open, onClose }: { open: boolean, onClose: () => void }) => {
@@ -744,7 +744,7 @@ const ConfigureAccountsModalContent = () => {
                     <br />
                     <span className="font-medium">{_("Example")}:</span>
                     <br />
-                    <span className="font-mono text-sm">
+                    <span className="font-numeric text-sm">
                         transaction_amount * 0.25
                     </span>
                     <br />

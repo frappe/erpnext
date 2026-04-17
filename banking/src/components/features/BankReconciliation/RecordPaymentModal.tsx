@@ -717,7 +717,7 @@ const InvoicesSection = ({ currency }: { currency: string }) => {
                             <a
                                 target="_blank"
                                 className="underline underline-offset-2"
-                                href={`/app/${slug(field.reference_doctype)}/${field.reference_name}`}>{field.reference_doctype}: {field.reference_name}</a>
+                                href={`/desk/${slug(field.reference_doctype)}/${field.reference_name}`}>{field.reference_doctype}: {field.reference_name}</a>
                         </TableCell>
                         <TableCell>
                             {field.bill_no ?? "-"}
@@ -851,7 +851,7 @@ const Summary = ({ currency }: { currency: string }) => {
     }, [setUnallocatedAmount, getValues, setValue])
 
     const TextComponent = ({ className, children }: { className?: string, children: React.ReactNode }) => {
-        return <span className={cn("w-32 text-right font-medium text-sm font-mono", className)}>{children}</span>
+        return <span className={cn("w-32 text-right font-medium text-sm font-numeric", className)}>{children}</span>
     }
 
     return <div className="flex flex-col gap-2 items-end">
@@ -1089,7 +1089,7 @@ const FetchInvoicesModal = ({ onClose }: { onClose: () => void }) => {
                             <a
                                 target="_blank"
                                 className="underline underline-offset-2"
-                                href={`/app/${slug(ref.voucher_type)}/${ref.voucher_no}`}>{ref.voucher_no}</a>
+                                href={`/desk/${slug(ref.voucher_type)}/${ref.voucher_no}`}>{ref.voucher_no}</a>
                         </TableCell>
                         <TableCell>
                             {ref.bill_no ?? "-"}
@@ -1109,8 +1109,8 @@ const FetchInvoicesModal = ({ onClose }: { onClose: () => void }) => {
         </Table> : null}
         <div className="flex justify-between items-center">
             <div className="flex gap-2">
-                <span className="text-ink-gray-5">Invoices: <span className="text-foreground font-mono font-medium">{selectedInvoices.length}</span></span> /
-                <span className="text-ink-gray-5">Total: <span className="text-foreground font-mono font-medium">{formatCurrency(selectedInvoices.reduce((acc, invoice) => acc + invoice.outstanding_amount, 0))}</span></span>
+                <span className="text-ink-gray-5">Invoices: <span className="text-foreground font-numeric font-medium">{selectedInvoices.length}</span></span> /
+                <span className="text-ink-gray-5">Total: <span className="text-foreground font-numeric font-medium">{formatCurrency(selectedInvoices.reduce((acc, invoice) => acc + invoice.outstanding_amount, 0))}</span></span>
             </div>
             <DialogFooter className="pt-2">
                 <DialogClose asChild>
@@ -1286,6 +1286,6 @@ const TotalDeductions = ({ currency }: { currency: string }) => {
 
     const total_deductions = useWatch({ control, name: 'deductions' })?.reduce((acc: number, row: PaymentEntryDeduction) => acc + row.amount, 0) ?? 0
 
-    return <span className={cn("font-mono font-medium", total_deductions !== 0 ? "text-ink-red-3" : "text-ink-gray-5")}>({formatCurrency(total_deductions, currency)})</span>
+    return <span className={cn("font-numeric font-medium", total_deductions !== 0 ? "text-ink-red-3" : "text-ink-gray-5")}>({formatCurrency(total_deductions, currency)})</span>
 }
 export default RecordPaymentModal

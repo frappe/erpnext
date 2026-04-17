@@ -194,7 +194,7 @@ const Row = ({ item, index, isLast, action }: { item: ActionLogItem, index: numb
                 <div className='flex justify-end items-center gap-2'>
                     <div className='text-right flex flex-col gap-2'>
                         <a
-                            href={`/app/${slug(item.voucher.reference_doctype)}/${item.voucher.reference_name}`}
+                            href={`/desk/${slug(item.voucher.reference_doctype)}/${item.voucher.reference_name}`}
                             target='_blank'
                             className='underline underline-offset-4'>
                             {["Payment Entry", "Journal Entry"].includes(item.voucher.reference_doctype) ? "" : _("{} :", [item.voucher.reference_doctype])} {item.voucher.reference_name}
@@ -248,8 +248,8 @@ const JournalEntryAccountsTable = ({ item, bank }: { item: ActionLogItem, bank?:
                             {accounts.map((account) => (
                                 <TableRow key={account.account}>
                                     <TableCell>{account.account}</TableCell>
-                                    <TableCell className='text-right font-mono'>{formatCurrency(account.debit ?? 0, account.account_currency ?? '')}</TableCell>
-                                    <TableCell className='text-right font-mono'>{formatCurrency(account.credit ?? 0, account.account_currency ?? '')}</TableCell>
+                                    <TableCell className='text-right font-numeric'>{formatCurrency(account.debit ?? 0, account.account_currency ?? '')}</TableCell>
+                                    <TableCell className='text-right font-numeric'>{formatCurrency(account.credit ?? 0, account.account_currency ?? '')}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -296,11 +296,11 @@ const PaymentEntryDetails = ({ item, className }: { item: ActionLogItem, classNa
                             </TableHeader>
                             <TableBody>
                                 <TableRow>
-                                    <TableCell><a href={`/app/${slug(invoice.reference_doctype)}/${invoice.reference_name}`} target='_blank' className='underline underline-offset-4'>{invoice.reference_doctype}: {invoice.reference_name}</a></TableCell>
+                                    <TableCell><a href={`/desk/${slug(invoice.reference_doctype)}/${invoice.reference_name}`} target='_blank' className='underline underline-offset-4'>{invoice.reference_doctype}: {invoice.reference_name}</a></TableCell>
                                     <TableCell>{invoice.bill_no ?? "-"}</TableCell>
                                     <TableCell>{formatDate(invoice.due_date)}</TableCell>
-                                    <TableCell className='text-right font-mono'>{formatCurrency(invoice.total_amount, currency ?? '')}</TableCell>
-                                    <TableCell className='text-right font-mono'>{formatCurrency(invoice.allocated_amount, currency ?? '')}</TableCell>
+                                    <TableCell className='text-right font-numeric'>{formatCurrency(invoice.total_amount, currency ?? '')}</TableCell>
+                                    <TableCell className='text-right font-numeric'>{formatCurrency(invoice.allocated_amount, currency ?? '')}</TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>
@@ -441,7 +441,7 @@ const CancelActionLogItem = ({ item, type, timestamp, bank }: { item: ActionLogI
                     </TableRow>
                     <TableRow>
                         <TableHead>{_("Voucher Name")}</TableHead>
-                        <TableCell><a href={`/app/${slug(item.voucher.reference_doctype)}/${item.voucher.reference_name}`} target='_blank' className='underline underline-offset-4'>{item.voucher.reference_name}</a></TableCell>
+                        <TableCell><a href={`/desk/${slug(item.voucher.reference_doctype)}/${item.voucher.reference_name}`} target='_blank' className='underline underline-offset-4'>{item.voucher.reference_name}</a></TableCell>
                     </TableRow>
                     <TableRow>
                         <TableHead>{_("Posting Date")}</TableHead>

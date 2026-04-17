@@ -114,7 +114,7 @@ const BankClearanceSummaryView = () => {
                         target="_blank"
                         rel="noreferrer"
                         className="text-ink-gray-8 block min-w-0 w-full underline underline-offset-4"
-                        href={`/app/${slug(row.original.payment_document_type)}/${row.original.payment_entry}`}
+                        href={`/desk/${slug(row.original.payment_document_type)}/${row.original.payment_entry}`}
                     >
                         {row.original.payment_entry}
                     </a>
@@ -169,7 +169,7 @@ const BankClearanceSummaryView = () => {
                 header: _("Amount"),
                 size: 150,
                 meta: { align: "right" } satisfies ListViewColumnMeta,
-                cell: ({ row }) => formatCurrency(row.original.amount, accountCurrency),
+                cell: ({ row }) => <span className="font-numeric">{formatCurrency(row.original.amount, accountCurrency)}</span>,
             },
             {
                 id: "status",
@@ -311,7 +311,7 @@ const ForceClearVoucherForm = ({ voucher, bankAccount, companyID, onClose }: { v
                             <TableRow>
                                 <TableHead>{_("Payment Document")}</TableHead>
                                 <TableCell><a target="_blank" className="underline underline-offset-4"
-                                    href={`/app/${slug(voucher.payment_document_type)}/${voucher.payment_entry}`}>{_(voucher.payment_document_type)} : {voucher.payment_entry}</a></TableCell>
+                                    href={`/desk/${slug(voucher.payment_document_type)}/${voucher.payment_entry}`}>{_(voucher.payment_document_type)} : {voucher.payment_entry}</a></TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableHead>{_("Posting Date")}</TableHead>
@@ -327,7 +327,7 @@ const ForceClearVoucherForm = ({ voucher, bankAccount, companyID, onClose }: { v
                             </TableRow>
                             <TableRow>
                                 <TableHead>{_("Against Account")}</TableHead>
-                                <TableCell><a target="_blank" className="underline underline-offset-4" href={`/app/account/${voucher.against}`}>{voucher.against}</a></TableCell>
+                                <TableCell><a target="_blank" className="underline underline-offset-4" href={`/desk/account/${voucher.against}`}>{voucher.against}</a></TableCell>
                             </TableRow>
                         </TableHeader>
                     </Table>

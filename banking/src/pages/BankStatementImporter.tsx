@@ -246,7 +246,7 @@ const StatementImportLog = () => {
                                 <TableCell>{formatDate(item.creation, 'Do MMM YYYY')}</TableCell>
                                 <TableCell>{formatDate(item.start_date, 'Do MMM YYYY')} to {formatDate(item.end_date, 'Do MMM YYYY')}</TableCell>
                                 <TableCell className="text-right">{item.number_of_transactions}</TableCell>
-                                <TableCell className="text-right font-mono">{formatCurrency(flt(item.closing_balance, 2))}</TableCell>
+                                <TableCell className="text-right font-numeric">{formatCurrency(flt(item.closing_balance, 2))}</TableCell>
                                 <TableCell><a
                                     href={item.file}
                                     target="_blank" className="underline underline-offset-4">{item.file.split('/').pop()}</a></TableCell>

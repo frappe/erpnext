@@ -58,7 +58,7 @@ const SelectedTransactionDetails = ({ transaction, showAccount = false, account 
                                 {isWithdrawal ? <ArrowUpRight className="w-5 h-5 text-ink-red-3" /> : <ArrowDownRight className="w-5 h-5 text-ink-green-3" />}
                                 <span className='text-sm font-semibold uppercase'>{isWithdrawal ? _('Spent') : _('Received')}</span>
                             </div>
-                            <span className='font-semibold font-mono text-lg text-right pr-0.5'>{formatCurrency(amount, currency)}</span>
+                            <span className='font-semibold font-numeric text-lg text-right pr-0.5'>{formatCurrency(amount, currency)}</span>
                             {transaction.unallocated_amount && transaction.unallocated_amount !== amount ? <span className='text-ink-gray-5'>{_("Unallocated")}: {formatCurrency(transaction.unallocated_amount)}</span> : null}
                         </div>
                     </div>

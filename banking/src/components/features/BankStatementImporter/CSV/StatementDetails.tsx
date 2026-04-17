@@ -159,7 +159,7 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                         </TableRow>
                         <TableRow>
                             <TableHead className='bg-muted/70'>{_("Closing Balance as of {}", [formatDate(data.statement_end_date, "Do MMMM YYYY")])}</TableHead>
-                            <TableCell className='font-mono'>{formatCurrency(flt(data.closing_balance, 2))}</TableCell>
+                            <TableCell className='font-numeric'>{formatCurrency(flt(data.closing_balance, 2))}</TableCell>
                         </TableRow>
                         <TableRow>
                             <TableHead className='bg-muted/70'>
@@ -226,13 +226,13 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                                     <TableCell>{formatDate(transaction.date)}</TableCell>
                                     <TableCell>{transaction.description}</TableCell>
                                     <TableCell>{transaction.reference_number ? transaction.reference_number : "-"}</TableCell>
-                                    <TableCell className='text-right font-mono'>{formatCurrency(transaction.withdrawal, transaction.currency)}</TableCell>
-                                    <TableCell className='text-right font-mono'>{formatCurrency(transaction.deposit, transaction.currency)}</TableCell>
+                                    <TableCell className='text-right font-numeric'>{formatCurrency(transaction.withdrawal, transaction.currency)}</TableCell>
+                                    <TableCell className='text-right font-numeric'>{formatCurrency(transaction.deposit, transaction.currency)}</TableCell>
                                     <TableCell className='text-right'>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
                                                 <Button variant='link' isIconButton asChild className='text-ink-gray-5 hover:text-black p-0 h-4'>
-                                                    <a href={`/app/bank-transaction/${transaction.name}`} target='_blank' rel='noopener noreferrer'>
+                                                    <a href={`/desk/bank-transaction/${transaction.name}`} target='_blank' rel='noopener noreferrer'>
                                                         <ExternalLinkIcon />
                                                     </a>
                                                 </Button>
@@ -282,8 +282,8 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                                     <TableCell>{formatDate(transaction.date)}</TableCell>
                                     <TableCell className='max-w-[200px] w-fit overflow-hidden text-ellipsis'>{transaction.description}</TableCell>
                                     <TableCell className='max-w-[100px] w-fit overflow-hidden text-ellipsis'>{transaction.reference}</TableCell>
-                                    <TableCell className='text-right font-mono'>{formatCurrency(transaction.withdrawal, data.currency)}</TableCell>
-                                    <TableCell className='text-right font-mono'>{formatCurrency(transaction.deposit, data.currency)}</TableCell>
+                                    <TableCell className='text-right font-numeric'>{formatCurrency(transaction.withdrawal, data.currency)}</TableCell>
+                                    <TableCell className='text-right font-numeric'>{formatCurrency(transaction.deposit, data.currency)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

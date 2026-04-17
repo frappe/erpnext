@@ -231,7 +231,7 @@ const LinkFieldCombobox = ({
                         {linkTitle || placeholder}
 
                         <div className="flex items-center gap-1">
-                            {value && <a href={`/app/${slug(doctype)}/${value}`} target="_blank" className="group-hover:block hidden">
+                            {value && <a href={`/desk/${slug(doctype)}/${value}`} target="_blank" className="group-hover:block hidden">
                                 <ExternalLink className="h-4 w-4 shrink-0 opacity-50" />
                             </a>}
                             <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -270,7 +270,7 @@ const LinkFieldCombobox = ({
                                 </CommandItem>
                             ))}
                             {userCanCreate && <CommandItem asChild>
-                                <a href={`/app/${slug(doctype)}/new-${slug(doctype)}-1`}
+                                <a href={`/desk/${slug(doctype)}/new-${slug(doctype)}-1`}
                                     target="_blank"
                                     className="hover:underline underline-offset-4 cursor-pointer flex justify-between items-center">
                                     {_("Create New {0}", [doctype])}

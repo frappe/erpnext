@@ -157,7 +157,7 @@ const BankRecDateFilter = () => {
                                 <span>
                                     {period.translatedLabel ?? _(period.label)}
                                 </span>
-                                <span className='text-xs text-ink-gray-5 flex items-center gap-1 text-right whitespace-nowrap font-mono'>
+                                <span className='text-xs text-ink-gray-5 flex items-center gap-1 text-right whitespace-nowrap font-numeric'>
                                     {formatDate(period.fromDate, period.format)} <ChevronRight className='text-[12px] text-ink-gray-5/70' /> {formatDate(period.toDate, period.format)}
                                 </span>
                             </CommandItem>
@@ -255,10 +255,10 @@ const EmptyState = ({ onSelect, value }: { onSelect: (fromDate: string, toDate: 
                 <span className='text-sm text-ink-gray-5 max-w-[30%]'>
                     {value}
                 </span>
-                {isEqual ? <span className='text-xs text-ink-gray-5 font-mono text-balance flex items-center gap-1'>
+                {isEqual ? <span className='text-xs text-ink-gray-5 font-numeric text-balance flex items-center gap-1'>
                     {formatDate(dates.fromDate, 'Do MMM YYYY')}
                 </span> :
-                    <span className='text-xs text-ink-gray-5 font-mono flex items-center gap-1'>
+                    <span className='text-xs text-ink-gray-5 font-numeric flex items-center gap-1'>
                         {formatDate(dates.fromDate, 'Do MMM YY')} <ChevronRight size='16' className='text-ink-gray-5/70' /> {formatDate(dates.toDate, 'Do MMM YY')}
                     </span>}
             </div> :

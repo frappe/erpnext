@@ -91,7 +91,7 @@ const BankTransactionUnreconcileModalContent = () => {
                                 <a className="underline underline-offset-4"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    href={`/app/${slug(voucher.payment_document as string)}/${voucher.payment_entry}`}
+                                    href={`/desk/${slug(voucher.payment_document as string)}/${voucher.payment_entry}`}
                                 >
                                     {`${_(voucher.payment_document)}: ${voucher.payment_entry}`}
                                 </a>
