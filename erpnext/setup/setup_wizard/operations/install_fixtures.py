@@ -390,6 +390,9 @@ def add_uom_data():
 		open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_data.json")).read()
 	)
 	for d in uoms:
+		if d.get("category") and not frappe.db.exists("UOM Category", d.get("category")):
+			frappe.get_doc({"doctype": "UOM Category", "category_name": d.get("category")}).db_insert()
+
 		if not frappe.db.exists("UOM", d.get("uom_name")):
 			doc = frappe.new_doc("UOM")
 			doc.update(d)
@@ -402,9 +405,6 @@ def add_uom_data():
 		).read()
 	)
 	for d in uom_conversions:
-		if not frappe.db.exists("UOM Category", d.get("category")):
-			frappe.get_doc({"doctype": "UOM Category", "category_name": d.get("category")}).db_insert()
-
 		if not frappe.db.exists(
 			"UOM Conversion Factor",
 			{"from_uom": d.get("from_uom"), "to_uom": d.get("to_uom")},
