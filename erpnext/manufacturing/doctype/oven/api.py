@@ -35,14 +35,10 @@ def load_slab_into_oven(oven_op: str, line: str, job_card_name: str, slab_templa
 	rack_name = new_oven_operation.oven_rack
 	slab_name = new_oven_operation.slab
 	oven_rack: OvenRack = frappe.get_doc("Oven Rack", rack_name)
-	# slab: Slab = frappe.get_doc("Slab", slab_name)
-	child_lines = get_all_child_lines(line)
 
-	if not job_card_name:
-		jc: JobCard = get_top_job_card_for_process(
-			"Heating", child_lines if child_lines else line, include_wip=False, item_code=slab_template
-		)
-		job_card_name = jc.name
+	job_card_data = _get_oven_job_card_(line, include_wip=False, item_code=slab_template)
+
+	job_card_name = job_card_data.name
 
 	now_date_time = frappe.utils.now_datetime()
 
@@ -144,3 +140,11 @@ def unload_slab_from_oven(rack_name: str, slab_name: str, slab_template: str, va
 		raise
 
 	return {"rack": rack}
+
+
+def _get_oven_job_card_(line: str, include_wip=True, item_code=None):
+	child_lines = get_all_child_lines(line)
+	jc_data: JobCard = get_top_job_card_for_process(
+		"Heating", child_lines if child_lines else line, include_wip=include_wip, item_code=item_code
+	)
+	return jc_data["top_job_card"]
