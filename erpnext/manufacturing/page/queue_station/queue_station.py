@@ -24,6 +24,7 @@ def get_queue_data(line, station_name: str):
 
 	# 1. Get Incoming Slabs (Ready for the current station)
 	incoming_slabs = get_slabs_for(line, station_name, limit=limit)
+	incoming_slabs.sort(key=lambda x: (x.get("modified"), x.get("name")))
 
 	# 2. Get the current slab queue (Active Job Cards)
 	# Fetch WIP job cards for the current process.
@@ -38,6 +39,8 @@ def get_queue_data(line, station_name: str):
 		include_wip=True,
 		include_material_transferred=False,  # Explicitly exclude
 	)
+
+	slabs_queue.sort(key=lambda x: (x.get("started_time") or x.get("creation"), x.get("name")))
 
 	return {"incoming_slabs": incoming_slabs, "slabs_queue": slabs_queue}
 
