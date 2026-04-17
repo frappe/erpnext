@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-12 09:47+0000\n"
-"PO-Revision-Date: 2026-04-12 13:55\n"
+"PO-Revision-Date: 2026-04-17 14:36\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Czech\n"
 "MIME-Version: 1.0\n"
@@ -34,11 +34,11 @@ msgstr ""
 
 #: erpnext/selling/doctype/quotation/quotation.js:82
 msgid " Address"
-msgstr ""
+msgstr "Adresa"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:611
 msgid " Amount"
-msgstr ""
+msgstr "Částka"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:114
 msgid " BOM"
@@ -61,12 +61,12 @@ msgstr ""
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:196
 msgid " Item"
-msgstr ""
+msgstr " Položka"
 
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.py:151
 #: erpnext/selling/report/sales_analytics/sales_analytics.py:128
 msgid " Name"
-msgstr ""
+msgstr "Název"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:144
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:185
@@ -75,7 +75,7 @@ msgstr ""
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:602
 msgid " Rate"
-msgstr ""
+msgstr "Sazba"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:122
 msgid " Raw Material"
@@ -113,7 +113,7 @@ msgstr ""
 
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.py:148
 msgid "# In Stock"
-msgstr ""
+msgstr "# Skladem"
 
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.py:141
 msgid "# Req'd Items"
@@ -138,7 +138,7 @@ msgstr ""
 #. Label of the per_billed (Percent) field in DocType 'Purchase Order'
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "% Billed"
-msgstr ""
+msgstr "% Účtováno"
 
 #. Label of the percent_complete_method (Select) field in DocType 'Project'
 #: erpnext/projects/doctype/project/project.json
@@ -166,7 +166,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/bom/bom.js:1019
 #, python-format
 msgid "% Finished Item Quantity"
-msgstr ""
+msgstr "% Množství hotové položky"
 
 #. Label of the per_installed (Percent) field in DocType 'Delivery Note'
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
@@ -181,12 +181,12 @@ msgstr ""
 #: erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:283
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:337
 msgid "% Of Grand Total"
-msgstr ""
+msgstr "% z celkové částky"
 
 #. Label of the per_ordered (Percent) field in DocType 'Material Request'
 #: erpnext/stock/doctype/material_request/material_request.json
 msgid "% Ordered"
-msgstr ""
+msgstr "% Objednáno"
 
 #. Label of the per_picked (Percent) field in DocType 'Sales Order'
 #: erpnext/selling/doctype/sales_order/sales_order.json
@@ -340,7 +340,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:72
 msgid "'{0}' account is already used by {1}. Use another account."
-msgstr ""
+msgstr "Účet {0} již používá {1}. Použijte jiný účet."
 
 #: erpnext/accounts/doctype/pos_settings/pos_settings.py:44
 msgid "'{0}' has been already added."
@@ -522,7 +522,7 @@ msgstr ""
 #. Task'
 #: erpnext/assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 msgid "2 Yearly"
-msgstr ""
+msgstr "2 Ročně"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -537,7 +537,7 @@ msgstr ""
 #. Task'
 #: erpnext/assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 msgid "3 Yearly"
-msgstr ""
+msgstr "3 Ročně"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:113
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:361
@@ -547,7 +547,7 @@ msgstr ""
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "30 mins"
-msgstr ""
+msgstr "30 minut"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:115
 msgid "30-60"
@@ -578,7 +578,7 @@ msgstr ""
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "6 hrs"
-msgstr ""
+msgstr "6 hodin"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:114
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:362
@@ -601,7 +601,7 @@ msgstr ""
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:117
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "90 Above"
-msgstr ""
+msgstr "90 a více"
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1340
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1341
@@ -674,7 +674,11 @@ msgid "<h3>About Product Bundle</h3>\n\n"
 "<p>The package <b>Item</b> will have <code>Is Stock Item</code> as <b>No</b> and <code>Is Sales Item</code> as <b>Yes</b>.</p>\n"
 "<h4>Example:</h4>\n"
 "<p>If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Product Bundle Item.</p>"
-msgstr ""
+msgstr "<h3>O balíčku produktů</h3>\n\n"
+"<p>Agregujte skupinu <b>položek</b> do jiné <b>položky</b>. To je užitečné, pokud sdružujete určité <b>položky</b> do balíčku a udržujete si zásoby balených <b>položek</b> a nikoli agregované <b>položky</b>.</p>\n"
+"<p>Balíček <b>Položka</b> bude mít <code>Je skladová položka</code> jako <b>Ne</b> a <code>Je prodejní položka</code> jako <b>Ano</b>.</p>\n"
+"<h4>Příklad:</h4>\n"
+"<p>Pokud prodáváte notebooky a batohy samostatně a máte speciální cenu, pokud si zákazník koupí obojí, pak bude notebook + batoh novým produktovým balíčkem.</p>"
 
 #. Content of the 'Help' (HTML) field in DocType 'Currency Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
@@ -1089,7 +1093,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/item_attribute/item_attribute.py:112
 msgid "Abbreviation: {0} must appear only once"
-msgstr ""
+msgstr "Zkratka: {0} se smí vyskytovat pouze jednou"
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1337
 msgid "Above"
@@ -1098,7 +1102,7 @@ msgstr ""
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:116
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:364
 msgid "Above 120 Days"
-msgstr ""
+msgstr "Nad 120 dní"
 
 #. Name of a role
 #: erpnext/setup/doctype/department/department.json
@@ -1956,7 +1960,7 @@ msgstr ""
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:166
 #: erpnext/accounts/report/accounts_payable_summary/accounts_payable_summary.json
 msgid "Accounts Payable Summary"
-msgstr ""
+msgstr "Souhrn závazků"
 
 #. Option for the 'Write Off Based On' (Select) field in DocType 'Journal
 #. Entry'
@@ -2343,7 +2347,7 @@ msgstr ""
 
 #: erpnext/accounts/report/budget_variance_report/budget_variance_report.py:471
 msgid "Actual Expense"
-msgstr ""
+msgstr "Skutečný náklad"
 
 #: erpnext/accounts/doctype/budget/budget.py:599
 msgid "Actual Expenses"
@@ -2361,7 +2365,7 @@ msgstr ""
 #. Operation'
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Actual Operation Time"
-msgstr ""
+msgstr "Skutečný čas operace"
 
 #: erpnext/accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.py:456
 msgid "Actual Posting"
@@ -2380,7 +2384,7 @@ msgstr ""
 #: erpnext/stock/report/product_bundle_balance/product_bundle_balance.py:95
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:143
 msgid "Actual Qty"
-msgstr ""
+msgstr "Skutečné množství"
 
 #. Label of the actual_qty (Float) field in DocType 'Stock Entry Detail'
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -2395,7 +2399,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:201
 msgid "Actual Qty is mandatory"
-msgstr ""
+msgstr "Skutečné množství je povinné"
 
 #: erpnext/manufacturing/doctype/plant_floor/stock_summary_template.html:37
 #: erpnext/stock/dashboard/item_dashboard_list.html:28
@@ -2833,7 +2837,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Additional Discount Amount (Company Currency)"
-msgstr ""
+msgstr "Částka dodatečné slevy (měna společnosti)"
 
 #: erpnext/controllers/taxes_and_totals.py:837
 msgid "Additional Discount Amount ({discount_amount}) cannot exceed the total before such discount ({total_before_discount})"
@@ -3231,11 +3235,11 @@ msgstr ""
 #. Advance'
 #: erpnext/accounts/doctype/sales_invoice_advance/sales_invoice_advance.json
 msgid "Advance amount"
-msgstr ""
+msgstr "Částka zálohy"
 
 #: erpnext/controllers/taxes_and_totals.py:974
 msgid "Advance amount cannot be greater than {0} {1}"
-msgstr ""
+msgstr "Částka zálohy nemůže být větší než {0} {1}"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:877
 msgid "Advance paid against {0} {1} cannot be greater than Grand Total {2}"
@@ -3357,7 +3361,7 @@ msgstr ""
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Against Income Account"
-msgstr ""
+msgstr "Proti výnosovému účtu"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:739
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:777
@@ -5205,7 +5209,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1091
 msgid "As there are sufficient Sub Assembly Items, Work Order is not required for Warehouse {0}."
-msgstr ""
+msgstr "Protože je k dispozici dostatek dílčích sestav, výrobní příkaz není pro sklad {0} vyžadován."
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1839
 msgid "As there are sufficient raw materials, Material Request is not required for Warehouse {0}."
@@ -12376,19 +12380,19 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Asset Category'
 #: erpnext/assets/onboarding_step/create_asset_category/create_asset_category.json
 msgid "Create Asset Category"
-msgstr ""
+msgstr "Vytvořit kategorii majetku"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Asset Item'
 #: erpnext/assets/onboarding_step/create_asset_item/create_asset_item.json
 msgid "Create Asset Item"
-msgstr ""
+msgstr "Vytvořit položku majetku"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Asset Location'
 #: erpnext/assets/onboarding_step/create_asset_location/create_asset_location.json
 msgid "Create Asset Location"
-msgstr ""
+msgstr "Vytvořit umístění majetku"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Bill of Materials'
@@ -12407,7 +12411,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Customer'
 #: erpnext/selling/onboarding_step/create_customer/create_customer.json
 msgid "Create Customer"
-msgstr ""
+msgstr "Vytvořit zákazníka"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Delivery Note'
@@ -12436,7 +12440,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Existing Asset'
 #: erpnext/assets/onboarding_step/create_existing_asset/create_existing_asset.json
 msgid "Create Existing Asset"
-msgstr ""
+msgstr "Vytvořit existující majetek"
 
 #. Label of an action in the Onboarding Step 'Create Finished Goods'
 #: erpnext/manufacturing/onboarding_step/create_finished_goods/create_finished_goods.json
@@ -12467,7 +12471,7 @@ msgstr ""
 #: erpnext/selling/onboarding_step/create_item/create_item.json
 #: erpnext/stock/onboarding_step/create_item/create_item.json
 msgid "Create Item"
-msgstr ""
+msgstr "Vytvořit položku"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:206
 msgid "Create Job Card"
@@ -12534,12 +12538,12 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Operations'
 #: erpnext/manufacturing/onboarding_step/create_operations/create_operations.json
 msgid "Create Operation"
-msgstr ""
+msgstr "Vytvořit operaci"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/create_operations/create_operations.json
 msgid "Create Operations"
-msgstr ""
+msgstr "Vytvořit operace"
 
 #: erpnext/crm/doctype/lead/lead.js:161
 msgid "Create Opportunity"
@@ -12562,7 +12566,7 @@ msgstr ""
 
 #: erpnext/public/js/controllers/transaction.js:517
 msgid "Create Payment Request"
-msgstr ""
+msgstr "Vytvořit žádost o platbu"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:800
 msgid "Create Pick List"
@@ -12576,7 +12580,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Project'
 #: erpnext/projects/onboarding_step/create_project/create_project.json
 msgid "Create Project"
-msgstr ""
+msgstr "Vytvořit projekt"
 
 #: erpnext/crm/doctype/lead/lead_list.js:8
 msgid "Create Prospect"
@@ -12586,7 +12590,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Purchase Invoice'
 #: erpnext/buying/onboarding_step/create_purchase_invoice/create_purchase_invoice.json
 msgid "Create Purchase Invoice"
-msgstr ""
+msgstr "Vytvořit přijatou fakturu"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Purchase Order'
@@ -12604,7 +12608,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Purchase Receipt'
 #: erpnext/stock/onboarding_step/create_purchase_receipt/create_purchase_receipt.json
 msgid "Create Purchase Receipt"
-msgstr ""
+msgstr "Vytvořit příjemku"
 
 #: erpnext/utilities/activation.py:88
 msgid "Create Quotation"
@@ -12614,7 +12618,7 @@ msgstr ""
 #: erpnext/manufacturing/onboarding_step/create_raw_materials/create_raw_materials.json
 #: erpnext/subcontracting/onboarding_step/create_raw_materials/create_raw_materials.json
 msgid "Create Raw Material"
-msgstr ""
+msgstr "Vytvořit surovinu"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/create_raw_materials/create_raw_materials.json
@@ -12661,7 +12665,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Service Item'
 #: erpnext/subcontracting/onboarding_step/create_service_item/create_service_item.json
 msgid "Create Service Item"
-msgstr ""
+msgstr "Vytvořit servisní položku"
 
 #: erpnext/stock/dashboard/item_dashboard.js:283
 #: erpnext/stock/doctype/material_request/material_request.js:478
@@ -12693,7 +12697,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: erpnext/buying/onboarding_step/create_supplier/create_supplier.json
 msgid "Create Supplier"
-msgstr ""
+msgstr "Vytvořit dodavatele"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:181
 msgid "Create Supplier Quotation"
@@ -12724,7 +12728,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Transfer Entry'
 #: erpnext/stock/onboarding_step/create_transfer_entry/create_transfer_entry.json
 msgid "Create Transfer Entry"
-msgstr ""
+msgstr "Vytvořit převodní doklad"
 
 #: erpnext/setup/doctype/employee/employee.js:50
 #: erpnext/setup/doctype/employee/employee.js:52
@@ -12759,13 +12763,13 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Setup Warehouse'
 #: erpnext/stock/onboarding_step/setup_warehouse/setup_warehouse.json
 msgid "Create Warehouses"
-msgstr ""
+msgstr "Vytvořit sklady"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Work Order'
 #: erpnext/manufacturing/onboarding_step/create_work_order/create_work_order.json
 msgid "Create Work Order"
-msgstr ""
+msgstr "Vytvořit výrobní příkaz"
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:10
 msgid "Create Workstation"
@@ -12787,7 +12791,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Delivery Note'
 #: erpnext/selling/onboarding_step/create_delivery_note/create_delivery_note.json
 msgid "Create delivery note"
-msgstr ""
+msgstr "Vytvořit dodací list"
 
 #. Label of the create_pr_in_draft_status (Check) field in DocType 'Accounts
 #. Settings'
@@ -12798,7 +12802,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Supplier'
 #: erpnext/buying/onboarding_step/create_supplier/create_supplier.json
 msgid "Create supplier"
-msgstr ""
+msgstr "Vytvořit dodavatele"
 
 #: erpnext/public/js/bulk_transaction_processing.js:14
 msgid "Create {0} {1} ?"
@@ -13427,7 +13431,7 @@ msgstr ""
 #. Label of the current_state (Select) field in DocType 'Share Balance'
 #: erpnext/accounts/doctype/share_balance/share_balance.json
 msgid "Current State"
-msgstr ""
+msgstr "Aktuální stav"
 
 #: erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py:210
 msgid "Current Status"
@@ -16228,7 +16232,7 @@ msgstr ""
 
 #: erpnext/controllers/accounts_controller.py:901
 msgid "Disabled pricing rules since this {} is an internal transfer"
-msgstr ""
+msgstr "Pravidla cen byla zakázána, protože {} je interní převod"
 
 #: erpnext/controllers/accounts_controller.py:915
 msgid "Disabled tax included prices since this {} is an internal transfer"
@@ -17694,7 +17698,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/employee/employee.py:573
 msgid "Employee is required"
-msgstr ""
+msgstr "Zaměstnanec je povinný"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:109
 msgid "Employee is required while issuing Asset {0}"
@@ -17715,7 +17719,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/employee/employee.py:598
 msgid "Employee {0} not found"
-msgstr ""
+msgstr "Zaměstnanec {0} nebyl nalezen"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:351
 msgid "Employees"
@@ -17878,7 +17882,7 @@ msgstr ""
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Enable Serial / Batch No for Item"
-msgstr ""
+msgstr "Povolit sériové / šaržové číslo pro položku"
 
 #. Label of the enable_stock_reservation (Check) field in DocType 'Stock
 #. Settings'
@@ -18322,7 +18326,7 @@ msgstr ""
 #. Description of the 'Batch Number Series' (Data) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings."
-msgstr ""
+msgstr "Příklad: ABCD.#####. Pokud je nastavena řada a v transakcích není uvedeno číslo šarže, bude na jejím základě automaticky vytvořeno číslo šarže. Pokud chcete pro tuto položku vždy uvádět číslo šarže ručně, ponechte toto pole prázdné. Poznámka: toto nastavení má přednost před prefixem číselné řady v nastavení skladu."
 
 #: erpnext/stock/stock_ledger.py:2321
 msgid "Example: Serial No {0} reserved in {1}."
@@ -19702,7 +19706,7 @@ msgstr ""
 #. Label of the details_tab (Tab Break) field in DocType 'Plant Floor'
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.json
 msgid "Floor"
-msgstr ""
+msgstr "Podlaží"
 
 #. Label of the floor_name (Data) field in DocType 'Plant Floor'
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.json
@@ -19915,7 +19919,7 @@ msgstr ""
 
 #: erpnext/projects/doctype/project/project.js:208
 msgid "For project - {0}, update your status"
-msgstr ""
+msgstr "U projektu - {0} aktualizujte svůj stav"
 
 #. Description of the 'Parent Warehouse' (Link) field in DocType 'Master
 #. Production Schedule'
@@ -20363,7 +20367,7 @@ msgstr ""
 #: erpnext/stock/report/reserved_stock/reserved_stock.js:103
 #: erpnext/stock/report/reserved_stock/reserved_stock.py:164
 msgid "From Voucher No"
-msgstr ""
+msgstr "Od čísla dokladu"
 
 #. Label of the from_voucher_type (Select) field in DocType 'Stock Reservation
 #. Entry'
@@ -20611,7 +20615,7 @@ msgstr ""
 #. Label of the disposal_account (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Gain/Loss Account on Asset Disposal"
-msgstr ""
+msgstr "Účet zisku/ztráty při vyřazení majetku"
 
 #. Description of the 'Gain/Loss already booked' (Currency) field in DocType
 #. 'Exchange Rate Revaluation'
@@ -23124,7 +23128,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:197
 msgid "Incorrect Account"
-msgstr ""
+msgstr "Nesprávný účet"
 
 #. Name of a report
 #: erpnext/stock/report/incorrect_balance_qty_after_transaction/incorrect_balance_qty_after_transaction.json
@@ -23141,7 +23145,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:145
 msgid "Incorrect Company"
-msgstr ""
+msgstr "Nesprávná společnost"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1080
 msgid "Incorrect Component Quantity"
@@ -23696,7 +23700,7 @@ msgstr ""
 
 #: erpnext/accounts/report/budget_variance_report/budget_variance_report.py:418
 msgid "Invalid Accounting Dimension"
-msgstr ""
+msgstr "Neplatná účetní dimenze"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:400
 #: erpnext/accounts/doctype/payment_request/payment_request.py:1006
@@ -23705,7 +23709,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:147
 msgid "Invalid Amount"
-msgstr ""
+msgstr "Neplatná částka"
 
 #: erpnext/controllers/item_variant.py:134
 msgid "Invalid Attribute"
@@ -23772,7 +23776,7 @@ msgstr ""
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:327
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:332
 msgid "Invalid Formula"
-msgstr ""
+msgstr "Neplatný vzorec"
 
 #: erpnext/selling/report/lost_quotations/lost_quotations.py:65
 msgid "Invalid Group By"
@@ -24321,7 +24325,7 @@ msgstr ""
 #. Label of the is_corrective_operation (Check) field in DocType 'Operation'
 #: erpnext/manufacturing/doctype/operation/operation.json
 msgid "Is Corrective Operation"
-msgstr ""
+msgstr "Je opravná operace"
 
 #. Label of the is_cumulative (Check) field in DocType 'Pricing Rule'
 #. Label of the is_cumulative (Check) field in DocType 'Promotional Scheme'
@@ -25751,7 +25755,7 @@ msgstr ""
 
 #: erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py:412
 msgid "Item Name is required."
-msgstr ""
+msgstr "Název položky je povinný."
 
 #. Label of the item_naming_by (Select) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
@@ -26188,7 +26192,7 @@ msgstr ""
 
 #: erpnext/assets/doctype/asset/asset.py:346
 msgid "Item {0} has been disabled"
-msgstr ""
+msgstr "Položka {0} byla zakázána"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:793
 msgid "Item {0} has no Serial No. Only serialized items can have delivery based on Serial No"
@@ -28257,7 +28261,7 @@ msgstr ""
 #. Description of the 'Material Request' (Link) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Manufacture against Material Request"
-msgstr ""
+msgstr "Vyrobit podle požadavku na materiál"
 
 #. Label of a number card in the Manufacturing Workspace
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
@@ -28418,7 +28422,7 @@ msgstr ""
 #. Title of the Module Onboarding 'Manufacturing Onboarding'
 #: erpnext/manufacturing/module_onboarding/manufacturing_onboarding/manufacturing_onboarding.json
 msgid "Manufacturing Setup"
-msgstr ""
+msgstr "Nastavení výroby"
 
 #. Label of the manufacturing_time_in_mins (Int) field in DocType 'Item Lead
 #. Time'
@@ -30439,7 +30443,7 @@ msgstr ""
 #. Label of the new_workplace (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "New Workplace"
-msgstr ""
+msgstr "Nové pracoviště"
 
 #: erpnext/selling/doctype/customer/customer.py:405
 msgid "New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}"
@@ -31937,7 +31941,7 @@ msgstr ""
 #. Label of the operation_row_id (Int) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Operation Row ID"
-msgstr ""
+msgstr "ID řádku operace"
 
 #. Label of the operation_row_id (Int) field in DocType 'Work Order Item'
 #: erpnext/manufacturing/doctype/work_order_item/work_order_item.json
@@ -33555,7 +33559,7 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt_list.js:23
 msgid "Partly Billed"
-msgstr ""
+msgstr "Částečně vyfakturováno"
 
 #. Option for the 'Delivery Status' (Select) field in DocType 'Sales Order'
 #. Option for the 'Status' (Select) field in DocType 'Pick List'
@@ -33751,7 +33755,7 @@ msgstr ""
 #. Name of a DocType
 #: erpnext/accounts/doctype/party_link/party_link.json
 msgid "Party Link"
-msgstr ""
+msgstr "Odkaz na protistranu"
 
 #: erpnext/controllers/sales_and_purchase_return.py:49
 msgid "Party Mismatch"
@@ -33777,7 +33781,7 @@ msgstr ""
 #. Label of the bank_party_name (Data) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
 msgid "Party Name/Account Holder (Bank Statement)"
-msgstr ""
+msgstr "Název protistrany / majitel účtu (bankovní výpis)"
 
 #. Label of the party_not_required (Check) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
@@ -34429,7 +34433,7 @@ msgstr ""
 
 #: erpnext/public/js/controllers/transaction.js:482
 msgid "Payment Schedules"
-msgstr ""
+msgstr "Platební plány"
 
 #: erpnext/accounts/print_format/sales_invoice_print/sales_invoice_print.html:123
 msgid "Payment Status"
@@ -35883,7 +35887,7 @@ msgstr ""
 
 #: erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.js:49
 msgid "Please save first"
-msgstr ""
+msgstr "Nejprve prosím uložte"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:866
 msgid "Please save the Sales Order before adding a delivery schedule."
@@ -36090,7 +36094,7 @@ msgstr ""
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:135
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.js:73
 msgid "Please select a row to create a Reposting Entry"
-msgstr ""
+msgstr "Vyberte prosím řádek pro vytvoření záznamu přeúčtování"
 
 #: erpnext/accounts/report/purchase_register/purchase_register.py:35
 msgid "Please select a supplier for fetching payments."
@@ -36126,7 +36130,7 @@ msgstr ""
 
 #: erpnext/public/js/controllers/transaction.js:524
 msgid "Please select at least one schedule."
-msgstr ""
+msgstr "Vyberte prosím alespoň jeden plán."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1303
 msgid "Please select atleast one item to continue"
@@ -37629,7 +37633,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_item/subcontracting_inward_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Process Loss Qty"
-msgstr ""
+msgstr "Množství ztráty procesu"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:346
 msgid "Process Loss Quantity"
@@ -38021,7 +38025,7 @@ msgstr ""
 
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:116
 msgid "Profit This Year"
-msgstr ""
+msgstr "Zisk v tomto roce"
 
 #. Option for the 'Report Type' (Select) field in DocType 'Account'
 #. Option for the 'Report Type' (Select) field in DocType 'Process Period
@@ -38289,7 +38293,7 @@ msgstr ""
 #. Title of the Module Onboarding 'Projects Onboarding'
 #: erpnext/projects/module_onboarding/projects_onboarding/projects_onboarding.json
 msgid "Projects Setup"
-msgstr ""
+msgstr "Nastavení projektů"
 
 #. Name of a role
 #: erpnext/projects/doctype/activity_cost/activity_cost.json
@@ -39188,7 +39192,7 @@ msgstr ""
 #: erpnext/templates/form_grid/stock_entry_grid.html:10
 #: erpnext/templates/generators/bom.html:50 erpnext/templates/pages/rfq.html:40
 msgid "Qty"
-msgstr ""
+msgstr "Množství"
 
 #: erpnext/templates/pages/order.html:178
 msgid "Qty "
@@ -39289,7 +39293,7 @@ msgstr ""
 #. Label of the qty_to_produce (Float) field in DocType 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
 msgid "Qty To Produce"
-msgstr ""
+msgstr "Množství k výrobě"
 
 #: erpnext/manufacturing/report/quality_inspection_summary/quality_inspection_summary.py:56
 msgid "Qty Wise Chart"
@@ -39929,7 +39933,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/job_card/job_card.js:469
 #: erpnext/manufacturing/doctype/workstation/workstation.js:303
 msgid "Quantity should be greater than 0"
-msgstr ""
+msgstr "Množství musí být větší než 0"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:346
 msgid "Quantity to Manufacture"
@@ -40281,7 +40285,7 @@ msgstr ""
 #. Batch Entry'
 #: erpnext/stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 msgid "Rate Section"
-msgstr ""
+msgstr "Sekce sazby"
 
 #. Label of the rate_with_margin (Currency) field in DocType 'POS Invoice Item'
 #. Label of the rate_with_margin (Currency) field in DocType 'Purchase Invoice
@@ -41314,7 +41318,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:739
 msgid "References {0} of type {1} had no outstanding amount left before submitting the Payment Entry. Now they have a negative outstanding amount."
-msgstr ""
+msgstr "Reference {0} typu {1} neměly před odesláním platebního záznamu žádnou zbývající neuhrazenou částku. Nyní mají zápornou neuhrazenou částku."
 
 #. Label of the referral_code (Data) field in DocType 'Sales Partner'
 #: erpnext/setup/doctype/sales_partner/sales_partner.json
@@ -42873,13 +42877,13 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Review Accounts Settings'
 #: erpnext/accounts/onboarding_step/review_accounts_settings/review_accounts_settings.json
 msgid "Review Accounts Settings"
-msgstr ""
+msgstr "Zkontrolovat nastavení účtů"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review Buying Settings'
 #: erpnext/buying/onboarding_step/review_buying_settings/review_buying_settings.json
 msgid "Review Buying Settings"
-msgstr ""
+msgstr "Zkontrolovat nastavení nákupu"
 
 #. Title of an Onboarding Step
 #: erpnext/accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
@@ -42895,13 +42899,13 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Review Manufacturing Settings'
 #: erpnext/manufacturing/onboarding_step/review_manufacturing_settings/review_manufacturing_settings.json
 msgid "Review Manufacturing Settings"
-msgstr ""
+msgstr "Zkontrolovat nastavení výroby"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review Selling Settings'
 #: erpnext/selling/onboarding_step/review_selling_settings/review_selling_settings.json
 msgid "Review Selling Settings"
-msgstr ""
+msgstr "Zkontrolovat nastavení prodeje"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review Stock Settings'
@@ -42913,7 +42917,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Review System Settings'
 #: erpnext/setup/onboarding_step/review_system_settings/review_system_settings.json
 msgid "Review System Settings"
-msgstr ""
+msgstr "Zkontrolovat systémová nastavení"
 
 #. Label of a Card Break in the Quality Workspace
 #: erpnext/quality_management/workspace/quality/quality.json
@@ -42960,7 +42964,7 @@ msgstr ""
 #. Option for the 'Status' (Select) field in DocType 'Call Log'
 #: erpnext/telephony/doctype/call_log/call_log.json
 msgid "Ringing"
-msgstr ""
+msgstr "Vyzvánění"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -43389,7 +43393,7 @@ msgstr ""
 
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:253
 msgid "Row #{0}: Consumed Asset {1} cannot be cancelled"
-msgstr ""
+msgstr "Řádek č. {0}: Spotřebovaný majetek {1} nelze zrušit"
 
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:235
 msgid "Row #{0}: Consumed Asset {1} cannot be the same as the Target Asset"
@@ -43634,7 +43638,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1052
 msgid "Row #{0}: Please select the Sub Assembly Warehouse"
-msgstr ""
+msgstr "Řádek č. {0}: Vyberte prosím sklad podsestavy"
 
 #: erpnext/stock/doctype/item/item.py:556
 msgid "Row #{0}: Please set reorder quantity"
@@ -43814,7 +43818,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:459
 msgid "Row #{0}: Status must be {1} for Invoice Discounting {2}"
-msgstr ""
+msgstr "Řádek č. {0}: Stav musí být pro diskont faktury {2} nastaven na {1}"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:403
 msgid "Row #{0}: Stock cannot be reserved for Item {1} against a disabled Batch {2}."
@@ -43911,7 +43915,7 @@ msgstr ""
 
 #: erpnext/controllers/accounts_controller.py:3905
 msgid "Row #{0}:Quantity for Item {1} cannot be zero."
-msgstr ""
+msgstr "Řádek č. {0}: Množství pro položku {1} nemůže být nula."
 
 #: erpnext/buying/utils.py:106
 msgid "Row #{1}: Warehouse is mandatory for stock Item {0}"
@@ -44801,7 +44805,7 @@ msgstr ""
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:155
 msgid "Sales Opportunities by Medium"
-msgstr ""
+msgstr "Obchodní příležitosti podle média"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:151
 msgid "Sales Opportunities by Source"
@@ -45118,7 +45122,7 @@ msgstr ""
 #. Label of the sales_partner_type (Data) field in DocType 'Sales Partner Type'
 #: erpnext/selling/doctype/sales_partner_type/sales_partner_type.json
 msgid "Sales Partner Type"
-msgstr ""
+msgstr "Typ obchodního partnera"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -46261,7 +46265,7 @@ msgstr ""
 #. Title of the Module Onboarding 'Selling Onboarding'
 #: erpnext/selling/module_onboarding/selling_onboarding/selling_onboarding.json
 msgid "Selling Setup"
-msgstr ""
+msgstr "Nastavení prodeje"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:214
 msgid "Selling must be checked, if Applicable For is selected as {0}"
@@ -46363,7 +46367,7 @@ msgstr ""
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Serial & Batch Item"
-msgstr ""
+msgstr "Položka série a šarže"
 
 #. Label of the section_break_7 (Section Break) field in DocType 'Stock
 #. Settings'
@@ -47476,18 +47480,18 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Setup Company'
 #: erpnext/setup/onboarding_step/setup_company/setup_company.json
 msgid "Setup Company"
-msgstr ""
+msgstr "Nastavit společnost"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Setup Email Account'
 #: erpnext/setup/onboarding_step/setup_email_account/setup_email_account.json
 msgid "Setup Email Account"
-msgstr ""
+msgstr "Nastavit e-mailový účet"
 
 #. Title of the Module Onboarding 'Organization Onboarding'
 #: erpnext/setup/module_onboarding/organization_onboarding/organization_onboarding.json
 msgid "Setup Organization"
-msgstr ""
+msgstr "Nastavit organizaci"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Setup Role Permissions'
@@ -47508,7 +47512,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: erpnext/stock/onboarding_step/setup_warehouse/setup_warehouse.json
 msgid "Setup Warehouse"
-msgstr ""
+msgstr "Nastavit sklad"
 
 #: erpnext/public/js/setup_wizard.js:25
 msgid "Setup your organization"
@@ -48532,7 +48536,7 @@ msgstr ""
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Square Inch"
-msgstr ""
+msgstr "Čtvereční palec"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -51195,7 +51199,7 @@ msgstr ""
 #. Name of a DocType
 #: erpnext/projects/doctype/task_type/task_type.json
 msgid "Task Type"
-msgstr ""
+msgstr "Typ úkolu"
 
 #. Option for the '% Complete Method' (Select) field in DocType 'Project'
 #: erpnext/projects/doctype/project/project.json
@@ -51847,7 +51851,7 @@ msgstr ""
 #. Label of the template_title (Data) field in DocType 'Journal Entry Template'
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.json
 msgid "Template Title"
-msgstr ""
+msgstr "Nadpis šablony"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice_list.js:29
 msgid "Temporarily on Hold"
@@ -52145,7 +52149,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/packing_slip/packing_slip.py:91
 msgid "The 'From Package No.' field must neither be empty nor it's value less than 1."
-msgstr ""
+msgstr "Pole „Od čísla balíku“ nesmí být prázdné ani mít hodnotu menší než 1."
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:415
 msgid "The Access to Request for Quotation From Portal is Disabled. To Allow Access, Enable it in Portal Settings."
@@ -52560,7 +52564,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1239
 msgid "The warehouse where you store finished Items before they are shipped."
-msgstr ""
+msgstr "Sklad, kde uchováváte hotové položky před jejich expedicí."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1232
 msgid "The warehouse where you store your raw materials. Each required item can have a separate source warehouse. Group warehouse also can be selected as source warehouse. On submission of the Work Order, the raw materials will be reserved in these warehouses for production usage."
@@ -52727,7 +52731,7 @@ msgstr ""
 
 #: erpnext/controllers/status_updater.py:463
 msgid "This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?"
-msgstr ""
+msgstr "Tento dokument překračuje limit o {0} {1} pro položku {4}. Vytváříte další {3} vůči stejnému {2}?"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:487
 msgid "This field is used to set the 'Customer'."
@@ -53576,7 +53580,7 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Total Advance"
-msgstr ""
+msgstr "Celkem záloh"
 
 #. Label of the total_allocated_amount (Currency) field in DocType 'Payment
 #. Entry'
@@ -53797,7 +53801,7 @@ msgstr ""
 
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:118
 msgid "Total Expense This Year"
-msgstr ""
+msgstr "Celkové náklady v tomto roce"
 
 #: erpnext/accounts/doctype/budget/budget.py:574
 msgid "Total Expenses booked through"
@@ -53839,7 +53843,7 @@ msgstr ""
 
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:117
 msgid "Total Income This Year"
-msgstr ""
+msgstr "Celkové příjmy v tomto roce"
 
 #. Label of the total_incoming_value (Currency) field in DocType 'Stock Entry'
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
@@ -58269,7 +58273,7 @@ msgstr ""
 #. Name of a report
 #: erpnext/utilities/report/youtube_interactions/youtube_interactions.json
 msgid "YouTube Interactions"
-msgstr ""
+msgstr "Interakce na YouTube"
 
 #: erpnext/www/book_appointment/index.html:49
 msgid "Your Name (required)"
@@ -59253,7 +59257,7 @@ msgstr ""
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1402
 msgid "{0}: {1} does not exist"
-msgstr ""
+msgstr "{0}: {1} neexistuje"
 
 #: erpnext/accounts/party.py:79
 msgid "{0}: {1} does not exists"
