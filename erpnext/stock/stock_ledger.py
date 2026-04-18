@@ -159,23 +159,23 @@ def get_args_for_future_sle(row):
 
 def validate_cancellation(kargs):
 	if kargs[0].get("is_cancelled"):
-		repost_entry = frappe.db.get_value(
+		repost_entries = frappe.get_all(
 			"Repost Item Valuation",
-			{
+			filters={
 				"voucher_type": kargs[0].voucher_type,
 				"voucher_no": kargs[0].voucher_no,
 				"docstatus": 1,
 				"recreate_stock_ledgers": 0,
+				"status": ["in", ["Queued", "In Progress"]],
 			},
-			["name", "status"],
-			as_dict=1,
+			fields=["name", "status"],
 		)
 
-		if repost_entry:
+		for repost_entry in repost_entries:
 			if repost_entry.status == "In Progress":
 				frappe.throw(
 					_(
-						"Cannot cancel the transaction. Reposting of item valuation on submission is not completed yet."
+						"Cannot cancel the transaction. Reposting of item valuation on submission is currently In Progress."
 					)
 				)
 			if repost_entry.status == "Queued":
@@ -379,13 +379,24 @@ def get_items_to_be_repost(voucher_type=None, voucher_no=None, doc=None, reposti
 		items_to_be_repost = json.loads(doc.items_to_be_repost)
 
 	if not items_to_be_repost and voucher_type and voucher_no:
-		items_to_be_repost = frappe.db.get_all(
-			"Stock Ledger Entry",
-			filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
-			fields=["item_code", "warehouse", "posting_date", "posting_time", "creation", "posting_datetime"],
-			order_by="creation asc",
-			group_by="item_code, warehouse",
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		from frappe.query_builder.functions import Min
+
+		query = (
+			frappe.qb.from_(sle)
+			.select(
+				sle.item_code,
+				sle.warehouse,
+				Min(sle.posting_date).as_("posting_date"),
+				Min(sle.posting_time).as_("posting_time"),
+				Min(sle.creation).as_("creation"),
+				Min(sle.posting_datetime).as_("posting_datetime"),
+			)
+			.where((sle.voucher_type == voucher_type) & (sle.voucher_no == voucher_no))
+			.groupby(sle.item_code, sle.warehouse)
+			.orderby("creation", order=frappe.query_builder.Order.asc)
 		)
+		items_to_be_repost = query.run(as_dict=True)
 
 	return items_to_be_repost or []
 
@@ -505,11 +516,17 @@ class update_entries_after:
 	def get_reserved_stock(self):
 		sre = frappe.qb.DocType("Stock Reservation Entry")
 		posting_datetime = get_combine_datetime(self.args.posting_date, self.args.posting_time)
+		from frappe.query_builder.functions import Coalesce, Sum
+
 		query = (
 			frappe.qb.from_(sre)
 			.select(
-				Sum(sre.reserved_qty)
-				- (Sum(sre.delivered_qty) + Sum(sre.transferred_qty) + Sum(sre.consumed_qty))
+				Coalesce(Sum(sre.reserved_qty), 0)
+				- (
+					Coalesce(Sum(sre.delivered_qty), 0)
+					+ Coalesce(Sum(sre.transferred_qty), 0)
+					+ Coalesce(Sum(sre.consumed_qty), 0)
+				)
 			)
 			.where(
 				(sre.item_code == self.item_code)
