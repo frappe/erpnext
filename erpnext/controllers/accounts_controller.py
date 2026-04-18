@@ -2557,15 +2557,27 @@ class AccountsController(TransactionBase):
 		if self.get("total_advance"):
 			if party_account_currency == self.company_currency:
 				base_advance_amount = flt(self.get("total_advance"))
-				advance_amount = base_advance_amount
+				advance_amount = flt(
+					base_advance_amount / self.get("conversion_rate"), self.precision("grand_total")
+				)
 			else:
 				advance_amount = flt(self.get("total_advance"))
 				base_advance_amount = flt(
 					advance_amount * self.get("conversion_rate"), self.precision("base_grand_total")
 				)
 
-			grand_total = flt(grand_total - advance_amount, self.precision("grand_total"))
-			base_grand_total = flt(base_grand_total - base_advance_amount, self.precision("base_grand_total"))
+			if party_account_currency == self.company_currency:
+				base_grand_total = flt(
+					base_grand_total - base_advance_amount, self.precision("base_grand_total")
+				)
+				grand_total = flt(
+					base_grand_total / self.get("conversion_rate"), self.precision("grand_total")
+				)
+			else:
+				grand_total = flt(grand_total - advance_amount, self.precision("grand_total"))
+				base_grand_total = flt(
+					grand_total * self.get("conversion_rate"), self.precision("base_grand_total")
+				)
 
 		if not self.get("payment_schedule") and not self.get("ignore_default_payment_terms_template"):
 			if (
@@ -2612,6 +2624,9 @@ class AccountsController(TransactionBase):
 			and po_or_so
 			and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
 		):
+			remaining_advance_amount = advance_amount
+			remaining_base_advance_amount = base_advance_amount
+
 			for d in self.get("payment_schedule"):
 				if d.invoice_portion:
 					row_amount = flt(
@@ -2622,9 +2637,20 @@ class AccountsController(TransactionBase):
 						d.precision("base_payment_amount"),
 					)
 
-					d.payment_amount = flt(min(row_amount, grand_total), d.precision("payment_amount"))
+					allocated_advance = min(row_amount, remaining_advance_amount)
+					allocated_base_advance = min(row_base_amount, remaining_base_advance_amount)
+
+					remaining_advance_amount = flt(
+						remaining_advance_amount - allocated_advance, self.precision("grand_total")
+					)
+					remaining_base_advance_amount = flt(
+						remaining_base_advance_amount - allocated_base_advance,
+						self.precision("base_grand_total"),
+					)
+
+					d.payment_amount = flt(row_amount - allocated_advance, d.precision("payment_amount"))
 					d.base_payment_amount = flt(
-						min(row_base_amount, base_grand_total), d.precision("base_payment_amount")
+						row_base_amount - allocated_base_advance, d.precision("base_payment_amount")
 					)
 					d.outstanding = d.payment_amount
 					d.base_outstanding = d.base_payment_amount
@@ -2636,7 +2662,7 @@ class AccountsController(TransactionBase):
 					d.base_outstanding = d.base_payment_amount
 
 		else:
-			if po_or_so:
+			if po_or_so and not self.get("ignore_default_payment_terms_template"):
 				self.fetch_payment_terms_from_order(
 					po_or_so, doctype, grand_total, base_grand_total, automatically_fetch_payment_terms
 				)
