@@ -599,7 +599,7 @@ class WorkOrder(Document):
 		else:
 			status = "Cancelled"
 
-		if (
+		if self.docstatus == 1 and (
 			self.skip_transfer
 			and self.produced_qty
 			and self.qty > (flt(self.produced_qty) + flt(self.process_loss_qty))
