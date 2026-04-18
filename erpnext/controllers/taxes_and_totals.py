@@ -19,7 +19,17 @@ from erpnext.controllers.accounts_controller import (
 	validate_inclusive_tax,
 	validate_taxes_and_charges,
 )
+<<<<<<< HEAD
 from erpnext.stock.get_item_details import _get_item_tax_template, get_item_tax_map
+=======
+from erpnext.deprecation_dumpster import deprecated
+from erpnext.stock.get_item_details import (
+	NOT_APPLICABLE_TAX,
+	ItemDetailsCtx,
+	_get_item_tax_template,
+	get_item_tax_map,
+)
+>>>>>>> 453fe376ab (feat: add support for 'not applicable' tax in item tax templates (#50898))
 from erpnext.utilities.regional import temporary_flag
 
 
@@ -349,6 +359,9 @@ class calculate_taxes_and_totals:
 		if cint(tax.included_in_print_rate):
 			tax_rate = self._get_tax_rate(tax, item_tax_map)
 
+			if tax_rate == NOT_APPLICABLE_TAX:
+				return current_tax_fraction, inclusive_tax_amount_per_qty
+
 			if tax.charge_type == "On Net Total":
 				current_tax_fraction = tax_rate / 100.0
 
@@ -373,9 +386,12 @@ class calculate_taxes_and_totals:
 
 	def _get_tax_rate(self, tax, item_tax_map):
 		if tax.account_head in item_tax_map:
-			return flt(item_tax_map.get(tax.account_head), self.doc.precision("rate", tax))
-		else:
-			return tax.rate
+			rate = item_tax_map[tax.account_head]
+			if rate == NOT_APPLICABLE_TAX:
+				return NOT_APPLICABLE_TAX
+			return flt(rate, self.doc.precision("rate", tax))
+
+		return tax.rate
 
 	def calculate_net_total(self):
 		self.doc.total_qty = (
@@ -523,6 +539,9 @@ class calculate_taxes_and_totals:
 	def get_current_tax_amount(self, item, tax, item_tax_map):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)
 		current_tax_amount = 0.0
+
+		if tax_rate == NOT_APPLICABLE_TAX:
+			return current_net_amount, current_tax_amount
 
 		if tax.charge_type == "Actual":
 			# distribute the tax amount proportionally to each item row

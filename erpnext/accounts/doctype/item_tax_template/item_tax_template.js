@@ -47,3 +47,12 @@ frappe.ui.form.on("Item Tax Template", {
 		});
 	},
 });
+
+frappe.ui.form.on("Item Tax Template Detail", {
+	not_applicable: function (frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (row.not_applicable) {
+			frappe.model.set_value(cdt, cdn, "tax_rate", 0);
+		}
+	},
+});

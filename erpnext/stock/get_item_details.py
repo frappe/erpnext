@@ -33,6 +33,8 @@ purchase_doctypes = [
 	"Purchase Invoice",
 ]
 
+NOT_APPLICABLE_TAX = "N/A"
+
 
 @frappe.whitelist()
 def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=True):
@@ -770,8 +772,16 @@ def get_item_tax_map(company, item_tax_template, as_json=True):
 	if item_tax_template:
 		template = frappe.get_cached_doc("Item Tax Template", item_tax_template)
 		for d in template.taxes:
+<<<<<<< HEAD
 			if frappe.get_cached_value("Account", d.tax_type, "company") == company:
 				item_tax_map[d.tax_type] = d.tax_rate
+=======
+			if frappe.get_cached_value("Account", d.tax_type, "company") == doc.get("company"):
+				if d.get("not_applicable"):
+					item_tax_map[d.tax_type] = NOT_APPLICABLE_TAX
+				else:
+					item_tax_map[d.tax_type] = d.tax_rate
+>>>>>>> 453fe376ab (feat: add support for 'not applicable' tax in item tax templates (#50898))
 
 	return json.dumps(item_tax_map) if as_json else item_tax_map
 
