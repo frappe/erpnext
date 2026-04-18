@@ -28,7 +28,7 @@
     "jotai": "^2.18.0",
     "jotai-family": "^1.0.1",
     "lodash.isplainobject": "^4.0.6",
-    "lucide-react": "^0.575.0",
+    "lucide-react": "^1.8.0",
     "next-themes": "^0.4.6",
     "radix-ui": "^1.4.3",
     "react": "^19.2.0",

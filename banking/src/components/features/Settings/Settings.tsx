@@ -13,6 +13,7 @@ import _ from '@/lib/translate'
 import { LandmarkIcon, ListIcon, SettingsIcon, SlidersVerticalIcon, ZapIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Preferences } from './Preferences'
+import MatchingRules from './MatchingRules'
 
 const Settings = () => {
 
@@ -65,7 +66,9 @@ const Settings = () => {
                     <SettingsPanel value="preferences">
                         <Preferences />
                     </SettingsPanel>
-                    <SettingsPanel value="rules" />
+                    <SettingsPanel value="rules">
+                        <MatchingRules />
+                    </SettingsPanel>
                     <SettingsPanel value="bank-accounts" />
                     <SettingsPanel value="masters" />
                 </SettingsPanels>

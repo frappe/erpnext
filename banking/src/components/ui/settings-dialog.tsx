@@ -63,7 +63,7 @@ function SettingsDialog({
     const contextValue = React.useMemo(() => ({ onClose }), [onClose])
 
     return (
-        <DialogContent className={cn("min-w-5xl p-0", contentClassName)}>
+        <DialogContent className={cn("min-w-5xl p-0", contentClassName)} showCloseButton={false}>
             <SettingsDialogContext.Provider value={contextValue}>
                 <TabsPrimitive.Root
                     data-slot="settings-dialog"
@@ -110,11 +110,12 @@ function SettingsTabGroup({
     return (
         <div data-slot="settings-tab-group" className={className} {...props}>
             {header && (
-                <div className="h-7.5 px-2 py-[7px] my-[3px] flex cursor-default gap-1.5 text-xs font-regular text-ink-gray-5 transition-all duration-300 ease-in-out sticky top-0 z-10 bg-surface-menu-bar">
+                <div className="h-7.5 px-2 py-[7px] my-[3px] flex cursor-default gap-1.5 text-xs font-medium text-ink-gray-5 transition-all duration-300 ease-in-out sticky top-0 z-10 bg-surface-menu-bar">
                     <span>{header}</span>
                 </div>
             )}
             <nav className="space-y-[3px] px-1">{children}</nav>
+            <div className="mb-0.5 mt-[5px]"></div>
         </div>
     )
 }

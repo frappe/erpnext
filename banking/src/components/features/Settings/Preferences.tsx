@@ -37,7 +37,7 @@ export const Preferences = () => {
 
         <SettingsPanelHeader>
             <SettingsPanelTitle>{_("Preferences")}</SettingsPanelTitle>
-            <SettingsPanelDescription>{_("Configure default settings for the banking module")}</SettingsPanelDescription>
+            <SettingsPanelDescription>{_("Configure settings for the banking module")}</SettingsPanelDescription>
         </SettingsPanelHeader>
         <SettingsPanelContent>
 

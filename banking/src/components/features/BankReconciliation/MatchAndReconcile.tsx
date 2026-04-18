@@ -39,11 +39,11 @@ const MatchAndReconcile = ({ contentHeight }: { contentHeight: number }) => {
     const selectedBank = useAtomValue(selectedBankAccountAtom)
 
     if (!selectedBank) {
-        return <Empty className="bg-muted/30 h-64">
+        return <Empty>
+            <EmptyMedia>
+                <LandmarkIcon />
+            </EmptyMedia>
             <EmptyHeader>
-                <EmptyMedia variant="icon">
-                    <LandmarkIcon />
-                </EmptyMedia>
                 <EmptyTitle>{_("Select a bank account to reconcile")}</EmptyTitle>
             </EmptyHeader>
         </Empty>
@@ -224,17 +224,17 @@ const UnreconciledTransactions = ({ contentHeight }: { contentHeight: number }) 
 
 const NoTransactionsFoundBanner = ({ text, description, onClearFilters }: { text: string, description?: string, onClearFilters?: () => void }) => {
 
-    return <Empty className="h-64">
+    return <Empty>
+        <EmptyMedia>
+            <ListIcon />
+        </EmptyMedia>
         <EmptyHeader>
-            <EmptyMedia variant="icon">
-                <ListIcon />
-            </EmptyMedia>
             <EmptyTitle>{text}</EmptyTitle>
             {description && <EmptyDescription>{description}</EmptyDescription>}
         </EmptyHeader>
         <EmptyContent>
-            {onClearFilters ? <Button type='button' size='sm' variant='outline' onClick={onClearFilters}>Clear Filters</Button> :
-                <Button type='button' asChild size='sm' variant='outline'>
+            {onClearFilters ? <Button type='button' size='sm' variant='subtle' onClick={onClearFilters}>Clear Filters</Button> :
+                <Button type='button' asChild size='sm' variant='subtle'>
                     <Link to="/statement-importer">
                         {_("Import Bank Statement")}
                     </Link>
@@ -322,11 +322,11 @@ const VouchersSection = ({ contentHeight }: { contentHeight: number }) => {
 
 
     if (selectedTransactions.length === 0) {
-        return <Empty className="h-64 my-4">
+        return <Empty>
+            <EmptyMedia>
+                <ReceiptIcon />
+            </EmptyMedia>
             <EmptyHeader>
-                <EmptyMedia variant="icon">
-                    <ReceiptIcon />
-                </EmptyMedia>
                 <EmptyTitle>{_("Select a transaction to match and reconcile with vouchers")}</EmptyTitle>
             </EmptyHeader>
         </Empty>
@@ -727,11 +727,12 @@ const VouchersForTransaction = ({ transaction, contentHeight }: { transaction: U
             <span>or</span>
             <Separator className="flex-1" />
         </div>
-        {vouchers?.message.length === 0 && <Empty className="h-64 my-4">
+        {vouchers?.message.length === 0 && <Empty className="my-4">
+            <EmptyMedia>
+                <ReceiptIcon />
+            </EmptyMedia>
             <EmptyHeader>
-                <EmptyMedia variant="icon">
-                    <ReceiptIcon />
-                </EmptyMedia>
+
                 <EmptyTitle>{_("No vouchers found for this transaction")}</EmptyTitle>
             </EmptyHeader>
         </Empty>}

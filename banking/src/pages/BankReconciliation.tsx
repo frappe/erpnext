@@ -43,7 +43,7 @@ const BankReconciliation = () => {
                             <BreadcrumbList>
                                 <BreadcrumbItem>
                                     <a href="/desk" className="text-ink-gray-7">
-                                        <HomeIcon size={16} strokeWidth={1.5} />
+                                        <HomeIcon size={16} />
                                     </a>
                                 </BreadcrumbItem>
                                 <BreadcrumbSeparator />
