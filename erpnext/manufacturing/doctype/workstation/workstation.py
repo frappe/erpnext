@@ -115,9 +115,7 @@ class Workstation(Document):
 
 	@frappe.whitelist()
 	def set_data_based_on_workstation_type(self):
-		if self.workstation_costs:
-			return
-
+		self.workstation_costs = []
 		if self.workstation_type:
 			data = frappe.get_all(
 				"Workstation Cost",
