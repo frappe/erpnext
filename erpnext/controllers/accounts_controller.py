@@ -181,7 +181,7 @@ class AccountsController(TransactionBase):
 		if not get_meta(self.doctype).has_field("outstanding_amount"):
 			return
 
-		if self.get("is_return") and self.return_against and not self.get("is_pos"):
+		if self.get("is_return") and self.return_against and not (self.get("is_pos") or self.get("is_paid")):
 			against_voucher_outstanding = frappe.get_value(
 				self.doctype, self.return_against, "outstanding_amount"
 			)

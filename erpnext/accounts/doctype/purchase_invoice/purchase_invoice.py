@@ -853,7 +853,9 @@ class PurchaseInvoice(BuyingController):
 		if update_outstanding == "No":
 			update_voucher_outstanding(
 				voucher_type=self.doctype,
-				voucher_no=self.return_against if cint(self.is_return) and self.return_against else self.name,
+				voucher_no=self.return_against
+				if (cint(self.is_return) and self.return_against)
+				else self.name,
 				account=self.credit_to,
 				party_type="Supplier",
 				party=self.supplier,
@@ -1547,6 +1549,9 @@ class PurchaseInvoice(BuyingController):
 	def make_payment_gl_entries(self, gl_entries):
 		# Make Cash GL Entries
 		if cint(self.is_paid) and self.cash_bank_account and self.paid_amount:
+			against_voucher = self.name
+			if self.is_return and self.return_against and not self.update_outstanding_for_self:
+				against_voucher = self.return_against
 			bank_account_currency = get_account_currency(self.cash_bank_account)
 			# CASH, make payment entries
 			gl_entries.append(
@@ -1561,9 +1566,7 @@ class PurchaseInvoice(BuyingController):
 						if self.party_account_currency == self.company_currency
 						else self.paid_amount,
 						"debit_in_transaction_currency": self.paid_amount,
-						"against_voucher": self.return_against
-						if cint(self.is_return) and self.return_against
-						else self.name,
+						"against_voucher": against_voucher,
 						"against_voucher_type": self.doctype,
 						"cost_center": self.cost_center,
 						"project": self.project,
