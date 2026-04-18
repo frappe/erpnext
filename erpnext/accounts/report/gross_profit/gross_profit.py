@@ -774,7 +774,28 @@ class GrossProfitGenerator:
 		# IMP NOTE
 		# stock_ledger_entries should already be filtered by item_code and warehouse and
 		# sorted by posting_date desc, posting_time desc
-		if item_code in self.non_stock_items and (row.project or row.cost_center):
+		if (
+			row.delivered_by_supplier
+			and row.so_detail
+			and (
+				po_details := frappe.get_all(
+					"Purchase Order Item",
+					filters={"sales_order_item": row.so_detail, "docstatus": 1},
+					pluck="name",
+				)
+			)
+		):
+			from frappe.query_builder.functions import Sum
+
+			table = frappe.qb.DocType("Purchase Invoice Item")
+			query = (
+				frappe.qb.from_(table)
+				.select(Sum(table.stock_qty * table.base_net_rate))
+				.where((table.po_detail.isin(po_details)) & (table.docstatus == 1))
+			)
+			return flt(query.run()[0][0])
+
+		elif item_code in self.non_stock_items and (row.project or row.cost_center):
 			# Issue 6089-Get last purchasing rate for non-stock item
 			item_rate = self.get_last_purchase_rate(item_code, row)
 			return flt(row.qty) * item_rate
@@ -804,26 +825,6 @@ class GrossProfitGenerator:
 				return self.calculate_buying_amount_from_sle(
 					row, my_sle, parenttype, parent, item_row, item_code
 				)
-			elif (
-				row.delivered_by_supplier
-				and row.so_detail
-				and (
-					po_details := frappe.get_all(
-						"Purchase Order Item",
-						filters={"sales_order_item": row.so_detail, "docstatus": 1},
-						pluck="name",
-					)
-				)
-			):
-				from frappe.query_builder.functions import Sum
-
-				table = frappe.qb.DocType("Purchase Invoice Item")
-				query = (
-					frappe.qb.from_(table)
-					.select(Sum(table.stock_qty * table.base_net_rate))
-					.where((table.po_detail.isin(po_details)) & (table.docstatus == 1))
-				)
-				return flt(query.run()[0][0])
 			elif row.sales_order and row.so_detail:
 				incoming_amount = self.get_buying_amount_from_so_dn(row.sales_order, row.so_detail, item_code)
 				if incoming_amount:
