@@ -85,6 +85,7 @@ class QualityInspection(Document):
 		self.validate_inspection_required()
 		self.set_child_row_reference()
 		self.set_company()
+		self.validate_reference_type()
 
 	def set_company(self):
 		if self.reference_type and self.reference_name:
@@ -259,6 +260,26 @@ class QualityInspection(Document):
 					self.modified,
 				)
 
+	def validate_reference_type(self):
+		valid_reference_types = {
+			"Incoming": ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt", "Stock Entry"],
+			"Outgoing": ["Delivery Note", "Sales Invoice", "Stock Entry"],
+			"In Process": ["Job Card", "Stock Entry"],
+		}
+
+		if self.inspection_type and self.reference_type:
+			allowed = valid_reference_types.get(self.inspection_type, [])
+			if self.reference_type not in allowed:
+				frappe.throw(
+					_(
+						"Reference Type {0} is not valid for Inspection Type {1}. Allowed types are: {2}"
+					).format(
+						frappe.bold(self.reference_type),
+						frappe.bold(self.inspection_type),
+						", ".join(allowed),
+					)
+				)
+
 	def inspect_and_set_status(self):
 		for reading in self.readings:
 			if not reading.manual_inspection:  # dont auto set status if manual
@@ -282,7 +303,7 @@ class QualityInspection(Document):
 		if not cint(reading.numeric):
 			reading_value = reading.get("reading_value") or ""
 			value = reading.get("value") or ""
-			result = reading_value == value
+			result = reading_value.strip().lower() == value.strip().lower()
 		else:
 			# numeric readings
 			result = self.min_max_criteria_passed(reading)
@@ -477,3 +498,13 @@ def parse_float(num: str) -> float:
 		num = num.replace("#$", ".")
 
 	return flt(num)
+
+
+@frappe.whitelist()
+def get_reference_type_options(inspection_type: str) -> list:
+	options = {
+		"Incoming": ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt", "Stock Entry"],
+		"Outgoing": ["Delivery Note", "Sales Invoice", "Stock Entry"],
+		"In Process": ["Job Card", "Stock Entry"],
+	}
+	return options.get(inspection_type, [])

@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.cscript.refresh = cur_frm.cscript.inspection_type;
+// cur_frm.cscript.refresh = cur_frm.cscript.inspection_type;
 
 frappe.ui.form.on("Quality Inspection", {
 	onload(frm) {
@@ -75,6 +75,9 @@ frappe.ui.form.on("Quality Inspection", {
 	refresh: function (frm) {
 		// Ignore cancellation of reference doctype on cancel all.
 		frm.ignore_doctypes_on_cancel_all = [frm.doc.reference_type, "Serial and Batch Bundle"];
+		if (frm.doc.inspection_type) {
+			frm.trigger("inspection_type");
+		}
 	},
 
 	item_code: function (frm) {
@@ -96,6 +99,28 @@ frappe.ui.form.on("Quality Inspection", {
 				doc: frm.doc,
 				callback: function () {
 					refresh_field("readings");
+				},
+			});
+		}
+	},
+	inspection_type: function (frm) {
+		// Clear the reference_type when inspection_type changes
+		frm.set_value("reference_type", "");
+		frm.set_value("reference_name", "");
+
+		if (frm.doc.inspection_type) {
+			// Call the whitelisted Python function
+			frappe.call({
+				method: "erpnext.stock.doctype.quality_inspection.quality_inspection.get_reference_type_options",
+				args: {
+					inspection_type: frm.doc.inspection_type,
+				},
+				callback: function (r) {
+					if (r.message) {
+						// Set the dropdown options dynamically
+						frm.set_df_property("reference_type", "options", ["", ...r.message].join("\n"));
+						frm.refresh_field("reference_type");
+					}
 				},
 			});
 		}
