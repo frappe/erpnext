@@ -120,8 +120,9 @@ class Workstation(Document):
 				return
 
 			for field in fields:
-				if self.get(field):
-					continue
+				# if self.get(field):
+				# 	continue
+				
 
 				if value := data.get(field):
 					self.set(field, value)
