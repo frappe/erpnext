@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button"
 import ErrorBanner from "@/components/ui/error-banner"
 import { Form } from "@/components/ui/form"
-import { SheetClose, SheetFooter } from "@/components/ui/sheet"
 import _ from "@/lib/translate"
 import { BankTransactionRule } from "@/types/Accounts/BankTransactionRule"
 import { FrappeError, useFrappeGetDoc, useFrappeUpdateDoc } from "frappe-react-sdk"
@@ -63,14 +62,6 @@ const EditRule = ({ onClose, ruleID }: Props) => {
 
             {error && <div className="px-4 flex flex-col gap-4 h-full">
                 <ErrorBanner error={error} />
-
-                <SheetFooter>
-                    <SheetClose asChild>
-                        <Button type='button' variant='outline' size='md'>
-                            {_("Close")}
-                        </Button>
-                    </SheetClose>
-                </SheetFooter>
             </div>}
             {rule && <EditRuleForm rule={rule} onSubmit={onSubmit} error={updateError} />}
         </SettingsPanelContent>
