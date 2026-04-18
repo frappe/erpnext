@@ -372,6 +372,25 @@ def move_slab_iteratively_to(slab_name: str, final_stage: str, observations: lis
 		frappe.db.rollback()
 
 
+def move_slab_to_and_checkout(
+	slab_number: str,
+	next_stage: str,
+	job_card_number: str | None = None,
+	checkout_and_move=False,
+	publish_event=True,
+):
+	move_slab_to(slab_number, next_stage, job_card_number, checkout_and_move, publish_event)
+	checkout_slab(slab_number, publish_event)
+
+
+def reset_slab_to(slab_number: str, prev_stage: str):
+	slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
+	slab.reload()
+	last_history_item = slab.slab_history[-1] if slab.slab_history else None
+	if last_history_item and last_history_item.station == prev_stage:
+		slab.remove(last_history_item)
+
+
 def _finish_curing(slab_name: str):
 	from erpnext.manufacturing.page.slab_loading_station.slab_loading_station import finish_curing
 	finish_curing(slab_name)
