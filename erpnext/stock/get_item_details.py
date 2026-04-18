@@ -40,6 +40,8 @@ purchase_doctypes = [
 	"Purchase Invoice",
 ]
 
+NOT_APPLICABLE_TAX = "N/A"
+
 
 def _preprocess_ctx(ctx):
 	if not ctx.price_list:
@@ -843,7 +845,10 @@ def get_item_tax_map(*, doc: str | dict | Document, tax_template: str | None = N
 		template = frappe.get_cached_doc("Item Tax Template", tax_template)
 		for d in template.taxes:
 			if frappe.get_cached_value("Account", d.tax_type, "company") == doc.get("company"):
-				item_tax_map[d.tax_type] = d.tax_rate
+				if d.get("not_applicable"):
+					item_tax_map[d.tax_type] = NOT_APPLICABLE_TAX
+				else:
+					item_tax_map[d.tax_type] = d.tax_rate
 
 	return json.dumps(item_tax_map) if as_json else item_tax_map
 

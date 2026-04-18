@@ -27,7 +27,14 @@ class ItemTaxTemplate(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.set_zero_rate_for_not_applicable_tax()
 		self.validate_tax_accounts()
+
+	def set_zero_rate_for_not_applicable_tax(self):
+		"""Ensure tax_rate is 0 for any row marked as not applicable."""
+		for row in self.get("taxes"):
+			if row.not_applicable:
+				row.tax_rate = 0
 
 	def autoname(self):
 		if self.company and self.title:
