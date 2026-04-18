@@ -3284,10 +3284,12 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 		bundle_match = serial_batch_entry.serial_no.isin(serial_nos)
 
 		padded_serial_no = Concat_ws("", "\n", stock_ledger_entry.serial_no, "\n")
-		direct_match = None
-		for sn in serial_nos:
-			cond = Locate(f"\n{sn}\n", padded_serial_no) > 0
-			direct_match = cond if direct_match is None else (direct_match | cond)
+		conds = [Locate(f"\n{sn}\n", padded_serial_no) > 0 for sn in serial_nos]
+		while len(conds) > 1:
+			conds = [
+				conds[i] | conds[i + 1] if i + 1 < len(conds) else conds[i] for i in range(0, len(conds), 2)
+			]
+		direct_match = conds[0] if conds else None
 
 		query = query.where(bundle_match | direct_match)
 
