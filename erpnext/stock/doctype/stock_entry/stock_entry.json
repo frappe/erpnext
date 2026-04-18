@@ -32,9 +32,7 @@
   "cb1",
   "fg_completed_qty",
   "get_items",
-  "section_break_7qsm",
   "process_loss_percentage",
-  "column_break_e92r",
   "process_loss_qty",
   "section_break_jwgn",
   "from_warehouse",
@@ -671,27 +669,18 @@
    "oldfieldtype": "Section Break"
   },
   {
-   "collapsible": 1,
-   "depends_on": "eval: doc.fg_completed_qty > 0 && in_list([\"Manufacture\", \"Repack\"], doc.purpose)",
-   "fieldname": "section_break_7qsm",
-   "fieldtype": "Section Break",
-   "label": "Process Loss"
-  },
-  {
    "depends_on": "eval: doc.fg_completed_qty > 0 && in_list([\"Manufacture\", \"Repack\"], doc.purpose)",
    "fieldname": "process_loss_qty",
    "fieldtype": "Float",
-   "label": "Process Loss Qty"
-  },
-  {
-   "fieldname": "column_break_e92r",
-   "fieldtype": "Column Break"
+   "label": "Process Loss Qty",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.from_bom && doc.fg_completed_qty",
    "fieldname": "process_loss_percentage",
    "fieldtype": "Percent",
-   "label": "% Process Loss"
+   "label": "% Process Loss",
+   "read_only": 1
   },
   {
    "fieldname": "items_section",

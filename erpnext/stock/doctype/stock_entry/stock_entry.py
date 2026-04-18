@@ -2808,6 +2808,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return
 
 		precision = self.precision("process_loss_qty")
+		job_card_process_loss = False
 		if self.work_order:
 			data = frappe.get_all(
 				"Work Order Operation",
@@ -2816,6 +2817,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			)
 
 			if data and data[0].process_loss_qty:
+				job_card_process_loss = True
 				process_loss_qty = data[0].process_loss_qty
 				if flt(self.process_loss_qty, precision) != flt(process_loss_qty, precision):
 					self.process_loss_qty = flt(process_loss_qty, precision)
@@ -2824,18 +2826,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 						_("The Process Loss Qty has reset as per job cards Process Loss Qty"), alert=True
 					)
 
-		if not self.process_loss_percentage and not self.process_loss_qty:
-			self.process_loss_percentage = frappe.get_cached_value(
-				"BOM", self.bom_no, "process_loss_percentage"
-			)
+		self.process_loss_percentage = (
+			frappe.get_cached_value("BOM", self.bom_no, "process_loss_percentage") or 0.0
+		)
 
-		if self.process_loss_percentage and not self.process_loss_qty:
+		if not job_card_process_loss and self.process_loss_percentage:
 			self.process_loss_qty = flt(
 				(flt(self.fg_completed_qty) * flt(self.process_loss_percentage)) / 100
-			)
-		elif self.process_loss_qty and not self.process_loss_percentage:
-			self.process_loss_percentage = flt(
-				(flt(self.process_loss_qty) / flt(self.fg_completed_qty)) * 100
 			)
 
 	def set_work_order_details(self):
@@ -3892,6 +3889,10 @@ def get_work_order_details(work_order: str, company: str):
 		"wip_warehouse": work_order.wip_warehouse,
 		"fg_warehouse": work_order.fg_warehouse,
 		"fg_completed_qty": pending_qty_to_produce,
+		"process_loss_percentage": frappe.get_cached_value(
+			"BOM", work_order.bom_no, "process_loss_percentage"
+		)
+		or 0.0,
 	}
 
 

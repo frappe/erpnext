@@ -1413,6 +1413,13 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	}
 
 	fg_completed_qty() {
+		this.frm.set_value(
+			"process_loss_qty",
+			flt(
+				(this.frm.doc.fg_completed_qty * (this.frm.doc.process_loss_percentage || 0)) / 100,
+				precision("process_loss_qty", this.frm.doc)
+			)
+		);
 		if (!this.frm.doc.job_card) {
 			this.get_items();
 		}
@@ -1441,6 +1448,20 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		}
 	}
 
+	bom_no() {
+		if (this.frm.doc.bom_no) {
+			frappe.db.get_value("BOM", this.frm.doc.bom_no, "process_loss_percentage").then((r) => {
+				if (r && r.message) {
+					this.frm.set_value("process_loss_percentage", r.message.process_loss_percentage || 0);
+				}
+				this.fg_completed_qty();
+			});
+		} else {
+			this.frm.set_value("process_loss_percentage", 0);
+			this.fg_completed_qty();
+		}
+	}
+
 	work_order() {
 		var me = this;
 		this.toggle_enable_bom();
@@ -1457,7 +1478,13 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			callback: function (r) {
 				if (!r.exc) {
 					$.each(
-						["from_bom", "bom_no", "fg_completed_qty", "use_multi_level_bom"],
+						[
+							"from_bom",
+							"bom_no",
+							"fg_completed_qty",
+							"use_multi_level_bom",
+							"process_loss_percentage",
+						],
 						function (i, field) {
 							me.frm.set_value(field, r.message[field]);
 						}
