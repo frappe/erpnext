@@ -1,5 +1,5 @@
 
-export interface AccountsSettings{
+export interface AccountsSettings {
 	name: string
 	creation: string
 	modified: string
@@ -9,7 +9,7 @@ export interface AccountsSettings{
 	parent?: string
 	parentfield?: string
 	parenttype?: string
-	idx?: number
+	idx: number
 	/**	Enable Audit Trail : Check - In accordance with <a href="https://egazette.gov.in/WriteReadData/2021/226081.pdf" target="_blank" rel="noopener noreferrer"> MCA Notification dated 24-03-2021</a>, enabling this feature will ensure that each change made to the books of account gets recorded. Once enabled, this feature cannot be disabled.	*/
 	enable_audit_trail?: 0 | 1
 	/**	Unlink Payment on Cancellation of Invoice : Check	*/
