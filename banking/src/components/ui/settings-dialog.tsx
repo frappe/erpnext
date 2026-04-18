@@ -211,13 +211,13 @@ function SettingsPanelHeader({
     return (
         <div
             data-slot="dialog-header"
-            className={cn("flex justify-between px-2 text-ink-gray-7", className)}
+            className={cn("flex justify-between items-start px-2 text-ink-gray-7", className)}
             {...props}
         >
-            <div className="flex flex-col gap-1 w-9/12">
+            <div className="flex flex-col gap-1 w-full">
                 {children}
             </div>
-            <div className="flex item-center space-x-2 w-3/12 justify-end">
+            <div className="flex item-center space-x-2 w-fit justify-end">
                 {actions}
             </div>
         </div>

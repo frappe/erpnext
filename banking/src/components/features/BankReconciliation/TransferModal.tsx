@@ -25,6 +25,7 @@ import { Label } from '@/components/ui/label'
 import { FileDropzone } from '@/components/ui/file-dropzone'
 import FileUploadBanner from '@/components/common/FileUploadBanner'
 import { BankTransaction } from '@/types/Accounts/BankTransaction'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 const TransferModal = () => {
 
@@ -264,6 +265,15 @@ const InternalTransferForm = ({ selectedBankAccount, selectedTransaction }: { se
             onClose()
         })
     }
+
+
+    useHotkeys('meta+s', () => {
+        form.handleSubmit(onSubmit)()
+    }, {
+        enabled: true,
+        preventDefault: true,
+        enableOnFormTags: true
+    })
 
     const onAccountChange = (account: string, is_mirror: boolean = false) => {
         //If the transaction is a withdrawal, set the paid to to the selected account - since this is the account where the money is deposited into

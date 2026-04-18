@@ -27,6 +27,7 @@ import FileUploadBanner from "@/components/common/FileUploadBanner"
 import { Label } from "@/components/ui/label"
 import { FileDropzone } from "@/components/ui/file-dropzone"
 import { useGetAccounts } from "@/components/common/AccountsDropdown"
+import { useHotkeys } from "react-hotkeys-hook"
 
 const BankEntryModal = () => {
 
@@ -383,6 +384,15 @@ const BankEntryForm = ({ selectedTransaction }: { selectedTransaction: Unreconci
             onClose()
         })
     }
+
+
+    useHotkeys('meta+s', () => {
+        form.handleSubmit(onSubmit)()
+    }, {
+        enabled: true,
+        preventDefault: true,
+        enableOnFormTags: true
+    })
 
     if (isUploading && isCompleted) {
         return <FileUploadBanner uploadProgress={uploadProgress} />

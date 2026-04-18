@@ -1164,17 +1164,22 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-outline-gray-modals outline-outline-gray-modals/50;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-surface-white text-ink-gray-8;
   }
 }
 
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.lucide {
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 

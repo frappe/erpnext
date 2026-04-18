@@ -8,7 +8,6 @@ import BankTransactionUnreconcileModal from "@/components/features/BankReconcili
 import CompanySelector from "@/components/features/BankReconciliation/CompanySelector"
 import IncorrectlyClearedEntries from "@/components/features/BankReconciliation/IncorrectlyClearedEntries"
 import MatchAndReconcile from "@/components/features/BankReconciliation/MatchAndReconcile"
-import RuleConfigureButton from "@/components/features/BankReconciliation/Rules/RuleConfigureButton"
 import Settings from "@/components/features/Settings/Settings"
 import ActionLog from "@/components/features/ActionLog/ActionLog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -61,7 +60,6 @@ const BankReconciliation = () => {
                     </div>
                     <div className="flex items-center gap-2">
                         <TooltipProvider>
-                            <RuleConfigureButton />
                             <Settings />
                             <ActionLog />
                         </TooltipProvider>

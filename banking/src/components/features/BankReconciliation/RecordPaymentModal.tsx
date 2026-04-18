@@ -35,6 +35,7 @@ import { Label } from "@/components/ui/label"
 import { FileDropzone } from "@/components/ui/file-dropzone"
 import { BankTransaction } from "@/types/Accounts/BankTransaction"
 import FileUploadBanner from "@/components/common/FileUploadBanner"
+import { useHotkeys } from "react-hotkeys-hook"
 
 const RecordPaymentModal = () => {
 
@@ -402,6 +403,15 @@ const PaymentEntryForm = ({ selectedTransaction, selectedBankAccount }: { select
             onClose()
         })
     }
+
+
+    useHotkeys('meta+s', () => {
+        form.handleSubmit(onSubmit)()
+    }, {
+        enabled: true,
+        preventDefault: true,
+        enableOnFormTags: true
+    })
 
     if (isUploading && isCompleted) {
         return <FileUploadBanner uploadProgress={uploadProgress} />
