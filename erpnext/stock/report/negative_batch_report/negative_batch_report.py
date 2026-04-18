@@ -90,43 +90,60 @@ def get_data(filters) -> list[dict]:
 	batch_negative_data = []
 
 	flt_precision = frappe.db.get_default("float_precision") or 2
+	distinct_batches = set()
 	for company in companies:
-		for batch in batches:
-			_c, data = stock_ledger_execute(
-				frappe._dict(
-					{
-						"company": company,
-						"batch_no": batch,
-						"from_date": add_to_date(today(), years=-12),
-						"to_date": today(),
-						"segregate_serial_batch_bundle": 1,
-						"warehouse": filters.get("warehouse"),
-						"valuation_field_type": "Currency",
-					}
-				)
-			)
-
-			previous_qty = 0
-			for row in data:
-				if flt(row.get("qty_after_transaction"), flt_precision) < 0:
-					batch_negative_data.append(
+		warehouses = get_warehouses(filters, company)
+		for warehouse in warehouses:
+			for batch in batches:
+				_c, data = stock_ledger_execute(
+					frappe._dict(
 						{
-							"posting_date": row.get("date"),
-							"batch_no": row.get("batch_no"),
-							"item_code": row.get("item_code"),
-							"item_name": row.get("item_name"),
-							"warehouse": row.get("warehouse"),
-							"actual_qty": row.get("actual_qty"),
-							"qty_after_transaction": row.get("qty_after_transaction"),
-							"previous_qty": previous_qty,
-							"voucher_type": row.get("voucher_type"),
-							"voucher_no": row.get("voucher_no"),
+							"company": company,
+							"batch_no": batch,
+							"from_date": add_to_date(today(), years=-12),
+							"to_date": today(),
+							"segregate_serial_batch_bundle": 1,
+							"warehouse": warehouse,
+							"valuation_field_type": "Currency",
 						}
 					)
+				)
 
-				previous_qty = row.get("qty_after_transaction")
+				previous_qty = 0
+				for row in data:
+					key = (row.get("warehouse"), batch)
+					if key in distinct_batches:
+						continue
+
+					if flt(row.get("qty_after_transaction"), flt_precision) < 0:
+						batch_negative_data.append(
+							{
+								"posting_date": row.get("date"),
+								"batch_no": row.get("batch_no"),
+								"item_code": row.get("item_code"),
+								"item_name": row.get("item_name"),
+								"warehouse": row.get("warehouse"),
+								"actual_qty": row.get("actual_qty"),
+								"qty_after_transaction": row.get("qty_after_transaction"),
+								"previous_qty": previous_qty,
+								"voucher_type": row.get("voucher_type"),
+								"voucher_no": row.get("voucher_no"),
+							}
+						)
+
+						distinct_batches.add(key)
+
+					previous_qty = row.get("qty_after_transaction")
 
 	return batch_negative_data
+
+
+def get_warehouses(filters, company):
+	warehouse_filters = {"company": company, "disabled": 0}
+	if filters.get("warehouse"):
+		warehouse_filters["name"] = filters["warehouse"]
+
+	return frappe.get_all("Warehouse", pluck="name", filters=warehouse_filters)
 
 
 def get_batches(filters):

@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-12 09:47+0000\n"
-"PO-Revision-Date: 2026-04-12 13:56\n"
+"PO-Revision-Date: 2026-04-13 13:56\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -9252,7 +9252,7 @@ msgstr "Kan inte demontera mer än producerad kvantitet."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:928
 msgid "Cannot disassemble {0} qty against Stock Entry {1}. Only {2} qty available to disassemble."
-msgstr ""
+msgstr "Kan inte demontera {0} mot lager post {1}. Endast {2} tillgängligt för demontering."
 
 #: erpnext/setup/doctype/company/company.py:222
 msgid "Cannot enable Item-wise Inventory Account, as there are existing Stock Ledger Entries for the company {0} with Warehouse-wise Inventory Account. Please cancel the stock transactions first and try again."
@@ -18454,7 +18454,7 @@ msgstr "Godkännande Roll för Undantag i Budget"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:935
 msgid "Excess Disassembly"
-msgstr ""
+msgstr "Överskrid Demontering"
 
 #: erpnext/manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.js:55
 msgid "Excess Materials Consumed"
@@ -32293,7 +32293,7 @@ msgstr "Optimera Sökväg"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1017
 msgid "Optional. Select a specific manufacture entry to reverse."
-msgstr ""
+msgstr "Valfritt. Välj specifik produktion post att återföra."
 
 #: erpnext/accounts/doctype/account/account_tree.js:178
 msgid "Optional. Sets company's default currency, if not specified."
@@ -36942,7 +36942,7 @@ msgstr "Registrering Datum och Tid erfordras"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:99
 msgid "Posting date is required"
-msgstr ""
+msgstr "Registrering datum erfordras"
 
 #: erpnext/controllers/sales_and_purchase_return.py:66
 msgid "Posting timestamp must be after {0}"
@@ -39507,7 +39507,7 @@ msgstr "Kvantitet att Leverera"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:379
 msgid "Qty to Disassemble"
-msgstr ""
+msgstr "Kvantitet att demontera"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:374
 msgid "Qty to Fetch"
@@ -48319,7 +48319,7 @@ msgstr "Eftersom {0} är Serienummer/Partinummer artiklar kan du inte aktivera \
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:112
 msgid "Since {0} has 'Update Stock' disabled, you cannot create repost item valuation against it"
-msgstr ""
+msgstr "Eftersom {0} har \"Uppdatera Lager\" inaktiverat kan du inte skapa omregistrering av artikel värdering"
 
 #. Option for the 'Marital Status' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -48476,20 +48476,20 @@ msgstr "Hämt Plats"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1014
 msgid "Source Manufacture Entry"
-msgstr ""
+msgstr "Från Produktion Post"
 
 #. Label of the source_stock_entry (Link) field in DocType 'Stock Entry'
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Source Stock Entry (Manufacture)"
-msgstr ""
+msgstr "Från Produktion Post (Produktion)"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:916
 msgid "Source Stock Entry {0} belongs to Work Order {1}, not {2}. Please use a manufacture entry from the same Work Order."
-msgstr ""
+msgstr "Från Lager Post {0} tillhör arbetsorder {1}, inte {2}. Använd produktion post från samma Arbetsorder."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2374
 msgid "Source Stock Entry {0} has no finished goods quantity"
-msgstr ""
+msgstr "Från Lager Post {0} har inte färdig artikel kvantitet"
 
 #. Label of the source_type (Select) field in DocType 'Support Search Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
@@ -49685,7 +49685,7 @@ msgstr "Lager kan inte uppdateras för Inköp Faktura {0} eftersom ett Inköp F�
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:125
 msgid "Stock entries exist with the old account. Changing the account may lead to a mismatch between the warehouse closing balance and the account closing balance. The overall closing balance will still match, but not for the specific account."
-msgstr ""
+msgstr "Lager poster finns mot gamal konto. Att ändra konto kan leda till avvikelse mellan lager saldo och konto stängning saldo. Total stängning saldo kommer fortfarande att stämma, men inte för specifik konto."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1131
 msgid "Stock has been unreserved for work order {0}."
@@ -57338,7 +57338,7 @@ msgstr "Varning!"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:123
 msgid "Warning: Account changed for warehouse"
-msgstr ""
+msgstr "Varning: Konto ändrat för lager"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1322
 msgid "Warning: Another {0} # {1} exists against stock entry {2}"
@@ -57810,7 +57810,7 @@ msgstr "Arbetsorder Artikel"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:919
 msgid "Work Order Mismatch"
-msgstr ""
+msgstr "Avvikande Arbetsorder"
 
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
@@ -57872,7 +57872,7 @@ msgstr "Arbetsorder {0} skapad"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2390
 msgid "Work Order {0} has no produced qty"
-msgstr ""
+msgstr "Arbetsorder {0} har inte producerad kvantitet"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:956
 msgid "Work Order {0}: Job Card not found for the operation {1}"

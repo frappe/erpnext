@@ -22,6 +22,7 @@ def after_install():
 		frappe.get_doc({"doctype": "Role", "role_name": "Analytics"}).insert()
 
 	set_single_defaults()
+	setup_repost_defaults()
 	create_print_setting_custom_fields()
 	create_marketing_campaign_custom_fields()
 	create_custom_company_links()
@@ -72,6 +73,13 @@ def set_single_defaults():
 				pass
 
 	setup_currency_exchange()
+
+
+def setup_repost_defaults():
+	accounts_settings = frappe.get_doc("Accounts Settings")
+	for x in frappe.get_hooks("repost_allowed_doctypes"):
+		accounts_settings.append("repost_allowed_types", {"document_type": x})
+	accounts_settings.save()
 
 
 def setup_currency_exchange():
