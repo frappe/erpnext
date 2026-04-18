@@ -115,6 +115,12 @@ class Workstation(Document):
 
 	@frappe.whitelist()
 	def set_data_based_on_workstation_type(self):
+		if not self.workstation_type:
+			return
+
+		old_type = self.get_doc_before_save() and self.get_doc_before_save().get("workstation_type")
+		if old_type == self.workstation_type and self.workstation_costs:
+			return
 		self.workstation_costs = []
 		if self.workstation_type:
 			data = frappe.get_all(
