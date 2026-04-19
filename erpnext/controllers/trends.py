@@ -4,13 +4,9 @@
 
 import frappe
 from frappe import _
-<<<<<<< HEAD
-from frappe.utils import getdate
-=======
 from frappe.utils import DateTimeLikeObject, getdate, today
 
 from erpnext.accounts.utils import get_fiscal_year
->>>>>>> d61b5fd5f6 (fix(dashboard-trends): set default fiscal year and company before val… (#54339))
 
 
 def get_columns(filters, trans):
