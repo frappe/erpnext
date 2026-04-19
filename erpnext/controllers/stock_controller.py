@@ -269,14 +269,15 @@ class StockController(AccountsController):
 		)
 
 		is_asset_pr = any(d.get("is_fixed_asset") for d in self.get("items"))
-
-		if (
+		need_inventory_map = (self.get_stock_items() or self.get("packed_items")) and (
 			cint(erpnext.is_perpetual_inventory_enabled(self.company))
-			or provisional_accounting_for_non_stock_items
-			or is_asset_pr
-		):
+		)
+
+		inventory_account_map = frappe._dict()
+		if need_inventory_map:
 			inventory_account_map = self.get_inventory_account_map()
 
+		if need_inventory_map or provisional_accounting_for_non_stock_items or is_asset_pr:
 			if self.docstatus == 1:
 				if not gl_entries:
 					gl_entries = (
