@@ -522,6 +522,8 @@ class SellingController(StockController):
 			return
 		if self.doctype == "POS Invoice":
 			return
+		if self.doctype == "Quotation":
+			return
 
 		for d in self.get('items'):
 			if self.doctype == "Sales Invoice":
