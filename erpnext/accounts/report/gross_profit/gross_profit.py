@@ -769,7 +769,32 @@ class GrossProfitGenerator:
 		# IMP NOTE
 		# stock_ledger_entries should already be filtered by item_code and warehouse and
 		# sorted by posting_date desc, posting_time desc
+<<<<<<< HEAD
 		if item_code in self.non_stock_items and (row.project or row.cost_center):
+=======
+		if (
+			row.delivered_by_supplier
+			and row.so_detail
+			and (
+				po_details := frappe.get_all(
+					"Purchase Order Item",
+					filters={"sales_order_item": row.so_detail, "docstatus": 1},
+					pluck="name",
+				)
+			)
+		):
+			from frappe.query_builder.functions import Sum
+
+			table = frappe.qb.DocType("Purchase Invoice Item")
+			query = (
+				frappe.qb.from_(table)
+				.select(Sum(table.qty * table.base_net_rate))
+				.where((table.po_detail.isin(po_details)) & (table.docstatus == 1))
+			)
+			return flt(query.run()[0][0])
+
+		elif item_code in self.non_stock_items and (row.project or row.cost_center):
+>>>>>>> d6b379b936 (fix: use qty instead of stock qty dropship gross profit report (#54389))
 			# Issue 6089-Get last purchasing rate for non-stock item
 			item_rate = self.get_last_purchase_rate(item_code, row)
 			return flt(row.qty) * item_rate
