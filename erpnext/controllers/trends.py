@@ -50,7 +50,7 @@ def validate_filters(filters):
 	if not filters.get("fiscal_year"):
 		filters["fiscal_year"] = get_fiscal_year(today())[0]
 	if not filters.get("company"):
-		filters["company"] = frappe.db.get_default("company")
+		filters["company"] = frappe.defaults.get_user_default("Company")
 	for f in ["Fiscal Year", "Based On", "Period", "Company"]:
 		if not filters.get(f.lower().replace(" ", "_")):
 			frappe.throw(_("{0} is mandatory").format(_(f)))
