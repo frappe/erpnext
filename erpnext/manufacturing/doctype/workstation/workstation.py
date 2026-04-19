@@ -82,7 +82,9 @@ class Workstation(Document):
 				)
 
 	def before_save(self):
-		self.set_data_based_on_workstation_type()
+		if self.has_value_changed("workstation_type"):
+			self.set_data_based_on_workstation_type()
+
 		self.set_hour_rate()
 		self.set_total_working_hours()
 		self.disabled_workstation()
@@ -112,9 +114,6 @@ class Workstation(Document):
 
 	@frappe.whitelist()
 	def set_data_based_on_workstation_type(self):
-		if self.workstation_costs:
-			return
-
 		if self.workstation_type:
 			data = frappe.get_all(
 				"Workstation Cost",
@@ -122,6 +121,9 @@ class Workstation(Document):
 				filters={"parent": self.workstation_type, "parenttype": "Workstation Type"},
 				order_by="idx",
 			)
+
+			if data:
+				self.workstation_costs = []
 
 			for row in data:
 				self.append(
