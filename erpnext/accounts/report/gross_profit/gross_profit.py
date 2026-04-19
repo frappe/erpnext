@@ -790,7 +790,7 @@ class GrossProfitGenerator:
 			table = frappe.qb.DocType("Purchase Invoice Item")
 			query = (
 				frappe.qb.from_(table)
-				.select(Sum(table.stock_qty * table.base_net_rate))
+				.select(Sum(table.qty * table.base_net_rate))
 				.where((table.po_detail.isin(po_details)) & (table.docstatus == 1))
 			)
 			return flt(query.run()[0][0])
