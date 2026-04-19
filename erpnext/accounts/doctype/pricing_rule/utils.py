@@ -661,7 +661,7 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 	if pricing_rule.is_recursive:
 		transaction_qty = sum(
 			[
-				row.qty
+				flt(row.qty)
 				for row in doc.items
 				if not row.is_free_item
 				and row.item_code == args.item_code

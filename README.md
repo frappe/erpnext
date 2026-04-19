@@ -4,9 +4,9 @@
 	<img src="./erpnext/public/images/v16/erpnext.svg" alt="ERPNext Logo" height="80px" width="80px"/>
     </a>
     <h2>ERPNext</h2>
-    <p align="center">
+    <div align="center">
         <p>Powerful, Intuitive and Open-Source ERP</p>
-    </p>
+    </div>
 
 [![Learn on Frappe School](https://img.shields.io/badge/Frappe%20School-Learn%20ERPNext-blue?style=flat-square)](https://frappe.school)<br><br>
 [![CI](https://github.com/frappe/erpnext/actions/workflows/server-tests-mariadb.yml/badge.svg?event=schedule)](https://github.com/frappe/erpnext/actions/workflows/server-tests-mariadb.yml)
@@ -15,7 +15,7 @@
 </div>
 
 <div align="center">
-	<img src="./erpnext/public/images/v16/hero_image.png"/>
+	<img src="./erpnext/public/images/v16/hero_image.png" alt="ERPNext Hero Image"/>
 </div>
 
 <div align="center">
@@ -66,7 +66,7 @@ You can try [Frappe Cloud](https://frappecloud.com), a simple, user-friendly, an
 It handles installation, setup, upgrades, monitoring, maintenance, and support of your Frappe deployments. It is a fully featured developer platform with an ability to manage and control multiple Frappe deployments.
 
 <div>
-	<a href="https://erpnext-demo.frappe.cloud/app/home" target="_blank">
+	<a href="https://erpnext-demo.frappe.cloud/app/home" target="_blank" rel="noopener noreferrer">
 		<picture>
 			<source media="(prefers-color-scheme: dark)" srcset="https://frappe.io/files/try-on-fc-white.png">
 			<img src="https://frappe.io/files/try-on-fc-black.png" alt="Try on Frappe Cloud" height="28" />
