@@ -1,7 +1,6 @@
 # Copyright (c) 2019, Frappe Technologies and contributors
 # For license information, please see license.txt
 
-
 import csv
 import json
 import re
@@ -150,7 +149,48 @@ def start_import(data_import, bank_account, import_file_path, google_sheets_url,
 	import_file = ImportFile("Bank Transaction", file=file, import_type="Insert New Records")
 
 	data = parse_data_from_template(import_file.raw_data)
-	# Importer expects 'Data Import' class, which has 'payload_count' attribute
+
+	# ✅ DUPLICATE CHECK START
+	headers = data[0]
+
+	def get_index(field):
+		return headers.index(field) if field in headers else None
+
+	idx_date = get_index("Date")
+	idx_deposit = get_index("Deposit")
+	idx_withdrawal = get_index("Withdrawal")
+	idx_ref = get_index("Reference Number")
+
+	for row in data[1:]:
+		date = row[idx_date] if idx_date is not None else None
+		deposit = row[idx_deposit] or 0 if idx_deposit is not None else 0
+		withdrawal = row[idx_withdrawal] or 0 if idx_withdrawal is not None else 0
+		ref = row[idx_ref] if idx_ref is not None else ""
+
+		existing = frappe.db.exists(
+			"Bank Transaction",
+			{
+				"date": date,
+				"bank_account": bank_account,
+				"deposit": deposit,
+				"withdrawal": withdrawal,
+				"reference_number": ref,
+				"docstatus": ["!=", 2],
+			},
+		)
+
+		if existing:
+			frappe.throw(f"""
+Duplicate Found!
+
+Date: {date}
+Amount: {deposit or withdrawal}
+Reference: {ref}
+
+Already Exists: {existing}
+""")
+	# ✅ DUPLICATE CHECK END
+
 	if not data_import.get("payload_count"):
 		data_import.payload_count = len(data) - 1
 
@@ -213,7 +253,6 @@ def write_files(import_file, data):
 
 
 def write_xlsx(data, sheet_name, wb=None, column_widths=None, file_path=None):
-	# from xlsx utils with changes
 	column_widths = column_widths or []
 	if wb is None:
 		wb = openpyxl.Workbook(write_only=True)
@@ -294,11 +333,7 @@ def upload_bank_statement(**args):
 	bsi = frappe.new_doc("Bank Statement Import")
 
 	if args.company:
-		bsi.update(
-			{
-				"company": args.company,
-			}
-		)
+		bsi.update({"company": args.company})
 
 	if args.bank_account:
 		bsi.update({"bank_account": args.bank_account})

@@ -54,6 +54,7 @@ class BankTransaction(Document):
 		self.validate_included_fee()
 		self.validate_duplicate_references()
 		self.validate_currency()
+		self.check_duplicate_transaction()
 
 	def validate_currency(self):
 		"""
@@ -98,6 +99,36 @@ class BankTransaction(Document):
 					)
 				)
 			references.add(reference)
+
+	def check_duplicate_transaction(self):
+		"""Prevent duplicate bank transactions"""
+
+		existing = frappe.db.exists(
+			"Bank Transaction",
+			{
+				"date": self.date,
+				"bank_account": self.bank_account,
+				"deposit": self.deposit or 0,
+				"withdrawal": self.withdrawal or 0,
+				"reference_number": self.reference_number or "",
+				"docstatus": ["!=", 2],
+				"name": ["!=", self.name],
+			},
+		)
+
+		if existing:
+			frappe.throw(
+				_("Duplicate Bank Transaction Found:<br><br>"
+				"Date: {0}<br>"
+				"Amount: {1}<br>"
+				"Reference: {2}<br><br>"
+				"Already Exists: {3}").format(
+					self.date,
+					self.deposit or self.withdrawal,
+					self.reference_number,
+					existing,
+				)
+			)
 
 	def update_allocated_amount(self):
 		allocated_amount = (
