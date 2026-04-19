@@ -103,29 +103,41 @@ class BankTransaction(Document):
 	def check_duplicate_transaction(self):
 		"""Prevent duplicate bank transactions"""
 
-		existing = frappe.db.exists(
-			"Bank Transaction",
-			{
-				"date": self.date,
-				"bank_account": self.bank_account,
-				"deposit": self.deposit or 0,
-				"withdrawal": self.withdrawal or 0,
-				"reference_number": self.reference_number or "",
-				"docstatus": ["!=", 2],
-				"name": ["!=", self.name],
-			},
-		)
+		# Base filters (always required)
+		filters = {
+			"date": self.date,
+			"bank_account": self.bank_account,
+			"docstatus": ["!=", 2],
+			"name": ["!=", self.name],
+		}
+
+		# Primary check → reference number (most reliable)
+		if self.reference_number:
+			filters["reference_number"] = self.reference_number
+
+		else:
+			# Fallback → amount-based matching
+			filters["deposit"] = self.deposit or 0
+			filters["withdrawal"] = self.withdrawal or 0
+
+			# Additional safety → description (to reduce false positives)
+			if self.description:
+				filters["description"] = self.description
+
+		existing = frappe.db.exists("Bank Transaction", filters)
 
 		if existing:
 			frappe.throw(
-				_("Duplicate Bank Transaction Found:<br><br>"
-				"Date: {0}<br>"
-				"Amount: {1}<br>"
-				"Reference: {2}<br><br>"
-				"Already Exists: {3}").format(
+				_(
+					"Duplicate Bank Transaction Found:<br><br>"
+					"Date: {0}<br>"
+					"Amount: {1}<br>"
+					"Reference: {2}<br><br>"
+					"Already Exists: {3}"
+				).format(
 					self.date,
 					self.deposit or self.withdrawal,
-					self.reference_number,
+					self.reference_number or "N/A",
 					existing,
 				)
 			)

@@ -150,7 +150,7 @@ def start_import(data_import, bank_account, import_file_path, google_sheets_url,
 
 	data = parse_data_from_template(import_file.raw_data)
 
-	# ✅ DUPLICATE CHECK START
+	# DUPLICATE CHECK START
 	headers = data[0]
 
 	def get_index(field):
@@ -160,37 +160,47 @@ def start_import(data_import, bank_account, import_file_path, google_sheets_url,
 	idx_deposit = get_index("Deposit")
 	idx_withdrawal = get_index("Withdrawal")
 	idx_ref = get_index("Reference Number")
+	idx_desc = get_index("Description")
 
 	for row in data[1:]:
 		date = row[idx_date] if idx_date is not None else None
 		deposit = row[idx_deposit] or 0 if idx_deposit is not None else 0
 		withdrawal = row[idx_withdrawal] or 0 if idx_withdrawal is not None else 0
 		ref = row[idx_ref] if idx_ref is not None else ""
+		desc = row[idx_desc] if idx_desc is not None else None
 
-		existing = frappe.db.exists(
-			"Bank Transaction",
-			{
-				"date": date,
-				"bank_account": bank_account,
-				"deposit": deposit,
-				"withdrawal": withdrawal,
-				"reference_number": ref,
-				"docstatus": ["!=", 2],
-			},
-		)
+		filters = {
+			"date": date,
+			"bank_account": bank_account,
+			"docstatus": ["!=", 2],
+		}
+
+		# Primary condition: reference number
+		if ref:
+			filters["reference_number"] = ref
+		else:
+			# Fallback: amount
+			filters["deposit"] = deposit
+			filters["withdrawal"] = withdrawal
+
+			# Additional safeguard: description
+			if desc:
+				filters["description"] = desc
+
+		existing = frappe.db.exists("Bank Transaction", filters)
 
 		if existing:
 			frappe.throw(f"""
-Duplicate Found!
+	Duplicate Bank Transaction Found
 
-Date: {date}
-Amount: {deposit or withdrawal}
-Reference: {ref}
+	Date: {date}
+	Amount: {deposit or withdrawal}
+	Reference: {ref or "N/A"}
+	Description: {desc or "N/A"}
 
-Already Exists: {existing}
-""")
-	# ✅ DUPLICATE CHECK END
-
+	Already Exists: {existing}
+	""")
+	# DUPLICATE CHECK END
 	if not data_import.get("payload_count"):
 		data_import.payload_count = len(data) - 1
 
