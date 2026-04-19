@@ -19,7 +19,7 @@ Welcome to ERPNext issue tracker! Before creating an issue, please heed the foll
 
 Please keep in mind that we get many requests and we can't possibly work on all of them, we prioritize development based on the goals of the product and organization. Feature requests are still welcome as it helps us in research when we do decide to work on the requested feature. 
 
-If you're in urgent need OF a feature, please try the following channels to get paid developments done quickly:
+If you're in urgent need of a feature, please try the following channels to get paid developments done quickly:
 1. Certified ERPNext partners: https://erpnext.com/partners 
 2. Developer community on ERPNext forums: https://discuss.frappe.io/c/framework/5  
 3. Telegram group for ERPNext/Frappe development work: https://t.me/erpnext_opps 
