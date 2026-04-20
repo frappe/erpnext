@@ -195,6 +195,30 @@ class TestPaymentEntry(ERPNextTestSuite):
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 100)
 
+	def test_reference_outstanding_amount_on_advance_pull(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+
+		so = make_sales_order(qty=1, rate=1000)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_amount = pe.received_amount = 500
+		pe.references[0].allocated_amount = 500
+		pe.insert()
+		pe.submit()
+
+		so.reload()
+		self.assertEqual(so.advance_paid, 500)
+
+		si = make_sales_invoice(so.name)
+		si.allocate_advances_automatically = 1
+		si.save()
+		self.assertEqual(si.get("advances")[0].allocated_amount, 500)
+		self.assertEqual(si.get("advances")[0].reference_name, pe.name)
+		si.submit()
+
+		pe.load_from_db()
+		self.assertEqual(pe.references[0].reference_name, si.name)
+		self.assertEqual(pe.references[0].outstanding_amount, si.outstanding_amount)
+
 	def test_payment_entry_against_pi(self):
 		pi = make_purchase_invoice(
 			supplier="_Test Supplier USD",
