@@ -57,6 +57,24 @@ def get_daily_finished_goods_item_code_summary():
 	return result
 
 
+@frappe.whitelist()
+def get_daily_slabs_batch_no_summary():
+	today = frappe_utils.today()
+
+	result = frappe.db.sql(
+		"""
+        SELECT batch_number, COUNT(*) AS cnt
+        FROM `tabSlab`
+        WHERE DATE(creation) = %s
+        GROUP BY batch_number
+        ORDER BY cnt DESC, batch_number ASC
+    """,
+		(today,),
+		as_dict=True,
+	)
+	return result
+
+
 # Weekly Number cards
 @frappe.whitelist()
 def get_total_no_of_slabs_weekly():
@@ -116,6 +134,26 @@ def get_weekly_finished_goods_item_code_summary():
 	return result
 
 
+@frappe.whitelist()
+def get_weekly_slabs_batch_no_summary():
+	start_date = frappe_utils.get_first_day_of_week(frappe_utils.today())
+	end_date = frappe_utils.get_last_day_of_week(frappe_utils.today())
+
+	result = frappe.db.sql(
+		"""
+        SELECT batch_number, COUNT(*) AS cnt
+        FROM `tabSlab`
+        WHERE DATE(creation) BETWEEN %s AND %s
+		AND status='Quality Check'
+        GROUP BY batch_number
+        ORDER BY cnt DESC, batch_number ASC
+    """,
+		(start_date, end_date),
+		as_dict=True,
+	)
+	return result
+
+
 # For Monthly Number cards
 @frappe.whitelist()
 def get_total_no_of_slabs_monthly():
@@ -172,4 +210,24 @@ def get_finished_goods_item_code_summary():
 		as_dict=True,
 	)
 
+	return result
+
+
+@frappe.whitelist()
+def get_monthly_slabs_batch_no_summary():
+	start_date = frappe_utils.get_first_day(frappe_utils.today())
+	end_date = frappe_utils.get_last_day(frappe_utils.today())
+
+	result = frappe.db.sql(
+		"""
+        SELECT batch_number, COUNT(*) AS cnt
+        FROM `tabSlab`
+        WHERE DATE(creation) BETWEEN %s AND %s
+		AND status='Quality Check'
+        GROUP BY batch_number
+        ORDER BY cnt DESC, batch_number ASC
+    """,
+		(start_date, end_date),
+		as_dict=True,
+	)
 	return result
