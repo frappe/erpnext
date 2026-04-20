@@ -23,11 +23,32 @@
     "parenttype": "Workspace"
    }
   ],
-  "content": "[{\"id\":\"92CSiC8v7y\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Daily Slabs Info</b></span>\",\"col\":12}},{\"id\":\"czqqV3Lfc2\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Daily Slab Report\",\"col\":12}},{\"id\":\"ZjdZLN8oVI\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total No of Slabs (Daily)\",\"col\":4}},{\"id\":\"_ucw86atOF\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Cost of Slabs (Daily)\",\"col\":4}},{\"id\":\"SIPDnh5wv_\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Daily Color Code Summary\",\"col\":8}},{\"id\":\"daNlfPAiqP\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"NIU5_MdHfa\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Weekly Slabs Info</b></span>\",\"col\":12}},{\"id\":\"GPz2pS1ep-\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Weekly Slab Report\",\"col\":12}},{\"id\":\"r0-Pd3TZJn\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total No of Slabs (Weekly)\",\"col\":4}},{\"id\":\"caLMXWPwUF\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Cost of Slabs (Weekly)\",\"col\":4}},{\"id\":\"ygMA_tOsKV\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Weekly Color Code Summary\",\"col\":8}},{\"id\":\"3Ygsf8oNPe\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"6dlT0ytsuF\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Monthly Slabs Info</b></span>\",\"col\":12}},{\"id\":\"KXW-XtSEP2\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Monthly Slab Report\",\"col\":12}},{\"id\":\"Vy7BXzRqF3\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total No of Slabs (Monthly)\",\"col\":4}},{\"id\":\"7-SNpx1pRg\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Cost of Slabs (Monthly)\",\"col\":4}},{\"id\":\"soQAckgqpC\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Monthly Color Code Summary\",\"col\":8}}]",
+  "content": "[{\"id\":\"92CSiC8v7y\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Daily Slabs Info</b></span>\",\"col\":12}},{\"id\":\"czqqV3Lfc2\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Daily Slab Report\",\"col\":12}},{\"id\":\"ZjdZLN8oVI\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total No of Slabs (Daily)\",\"col\":4}},{\"id\":\"_ucw86atOF\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Cost of Slabs (Daily)\",\"col\":4}},{\"id\":\"SIPDnh5wv_\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Daily Color Code Summary\",\"col\":8}},{\"id\":\"Uw-NLfeZTC\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Daily Batch No Summary\",\"col\":8}},{\"id\":\"daNlfPAiqP\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"NIU5_MdHfa\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Weekly Slabs Info</b></span>\",\"col\":12}},{\"id\":\"GPz2pS1ep-\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Weekly Slab Report\",\"col\":12}},{\"id\":\"r0-Pd3TZJn\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total No of Slabs (Weekly)\",\"col\":4}},{\"id\":\"caLMXWPwUF\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Cost of Slabs (Weekly)\",\"col\":4}},{\"id\":\"ygMA_tOsKV\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Weekly Color Code Summary\",\"col\":8}},{\"id\":\"OPZBh8PO8S\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Weekly Batch No Summary\",\"col\":8}},{\"id\":\"3Ygsf8oNPe\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"6dlT0ytsuF\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Monthly Slabs Info</b></span>\",\"col\":12}},{\"id\":\"KXW-XtSEP2\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Monthly Slab Report\",\"col\":12}},{\"id\":\"Vy7BXzRqF3\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total No of Slabs (Monthly)\",\"col\":4}},{\"id\":\"7-SNpx1pRg\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Cost of Slabs (Monthly)\",\"col\":4}},{\"id\":\"soQAckgqpC\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Monthly Color Code Summary\",\"col\":8}},{\"id\":\"aK-LWkq26M\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Monthly Batch No Summary\",\"col\":8}}]",
   "custom_blocks": [
+   {
+    "custom_block_name": "Monthly Batch No Summary",
+    "label": "Monthly Batch No Summary",
+    "parent": "Manufacturing Dashboard",
+    "parentfield": "custom_blocks",
+    "parenttype": "Workspace"
+   },
+   {
+    "custom_block_name": "Weekly Batch No Summary",
+    "label": "Weekly Batch No Summary",
+    "parent": "Manufacturing Dashboard",
+    "parentfield": "custom_blocks",
+    "parenttype": "Workspace"
+   },
    {
     "custom_block_name": "Daily Color Code Summary",
     "label": "Daily Color Code Summary",
+    "parent": "Manufacturing Dashboard",
+    "parentfield": "custom_blocks",
+    "parenttype": "Workspace"
+   },
+   {
+    "custom_block_name": "Daily Batch No Summary",
+    "label": "Daily Batch No Summary",
     "parent": "Manufacturing Dashboard",
     "parentfield": "custom_blocks",
     "parenttype": "Workspace"
@@ -56,7 +77,7 @@
   "is_hidden": 0,
   "label": "Manufacturing Dashboard",
   "links": [],
-  "modified": "2026-04-07 19:19:07.906977",
+  "modified": "2026-04-20 10:17:57.295872",
   "module": null,
   "name": "Manufacturing Dashboard",
   "number_cards": [
