@@ -124,34 +124,32 @@ class VATAuditReport:
 			.where(tax_doctype.parenttype == doctype)
 			.where(tax_doctype.docstatus == 1)
 			.where(tax_doctype.parent.isin(list(self.invoices.keys())))
+			.where(tax_doctype.account_head.isin(self.sa_vat_accounts))
 			.orderby(tax_doctype.account_head)
 			.run(as_dict=True)
 		)
 
 		for tax_detail in self.tax_details:
-			if tax_detail.item_wise_tax_detail:
-				try:
-					if tax_detail.account_head in self.sa_vat_accounts:
-						item_wise_tax_detail = json.loads(tax_detail.item_wise_tax_detail)
-					else:
-						continue
-					for item, taxes in item_wise_tax_detail.items():
-						is_zero_rated = (
-							self.invoice_items.get(tax_detail.parent).get(item).get("is_zero_rated")
-						)
-						# to skip items with non-zero tax rate in multiple rows
-						if taxes[0] == 0 and not is_zero_rated:
-							continue
-						tax_rate = self.get_item_amount_map(tax_detail.parent, item, taxes)
+			if not tax_detail.item_wise_tax_detail:
+				continue
 
-						if tax_rate is not None:
-							rate_based_dict = self.items_based_on_tax_rate.setdefault(
-								tax_detail.parent, {}
-							).setdefault(tax_rate, [])
-							if item not in rate_based_dict:
-								rate_based_dict.append(item)
-				except ValueError:
+			try:
+				item_wise_tax_detail = json.loads(tax_detail.item_wise_tax_detail)
+			except ValueError:
+				continue
+
+			parent_items = self.invoice_items.get(tax_detail.parent, {})
+			parent_tax_rates = self.items_based_on_tax_rate.setdefault(tax_detail.parent, {})
+
+			for item, taxes in item_wise_tax_detail.items():
+				is_zero_rated = parent_items.get(item, {}).get("is_zero_rated")
+				# to skip items with non-zero tax rate in multiple rows
+				if taxes[0] == 0 and not is_zero_rated:
 					continue
+
+				tax_rate = self.get_item_amount_map(tax_detail.parent, item, taxes)
+				if tax_rate is not None:
+					parent_tax_rates.setdefault(tax_rate, set()).add(item)
 
 	def get_item_amount_map(self, parent, item, taxes):
 		net_amount = self.invoice_items.get(parent).get(item).get("net_amount")
