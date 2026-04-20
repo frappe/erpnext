@@ -149,7 +149,9 @@ class VATAuditReport:
 
 				tax_rate = self.get_item_amount_map(tax_detail.parent, item, taxes)
 				if tax_rate is not None:
-					parent_tax_rates.setdefault(tax_rate, set()).add(item)
+					rate_based_dict = parent_tax_rates.setdefault(tax_rate, [])
+					if item not in rate_based_dict:
+						rate_based_dict.append(item)
 
 	def get_item_amount_map(self, parent, item, taxes):
 		item_details = self.invoice_items.get(parent, {}).get(item)
