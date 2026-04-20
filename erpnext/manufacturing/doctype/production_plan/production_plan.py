@@ -914,7 +914,7 @@ class ProductionPlan(Document):
 
 		frappe.enqueue(
 			self.create_all_work_orders_and_job_cards_for_production_plan,
-			queue="short",
+			queue="long",
 			user=frappe.session.user if frappe.session else None,
 		)
 
@@ -956,9 +956,12 @@ class ProductionPlan(Document):
 				user=user,
 			)
 
-		self.make_work_order_for_finished_goods(wo_list, default_warehouses, items_data)
-		self.make_work_order_for_subassembly_items(wo_list, subcontracted_po, default_warehouses)
-		self.make_subcontracted_purchase_order(subcontracted_po, po_list)
+		try:
+			self.make_work_order_for_finished_goods(wo_list, default_warehouses, items_data)
+			self.make_work_order_for_subassembly_items(wo_list, subcontracted_po, default_warehouses)
+			self.make_subcontracted_purchase_order(subcontracted_po, po_list)
+		except Exception:
+			frappe.log_error(title="Error while creating work orders", message=frappe.get_traceback())
 
 		if user:
 			frappe.publish_realtime(
@@ -2450,8 +2453,8 @@ def update_child_item_production(mpp_name):
                 SELECT COALESCE(SUM(p.produced_qty), 0)
                 FROM `tabProduction Plan Item` p
                 JOIN `tabProduction Plan` d ON p.parent = d.name
-                WHERE d.monthly_production_plan = %s 
-                AND p.item_code = %s 
+                WHERE d.monthly_production_plan = %s
+                AND p.item_code = %s
                 AND DATE(p.planned_start_date) = DATE(%s)
                 AND p.parentfield = %s
             """,
