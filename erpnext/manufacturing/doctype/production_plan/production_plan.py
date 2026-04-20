@@ -42,13 +42,25 @@ class ProductionPlan(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from erpnext.manufacturing.doctype.material_request_plan_item.material_request_plan_item import MaterialRequestPlanItem
+		from erpnext.manufacturing.doctype.material_request_plan_item.material_request_plan_item import (
+			MaterialRequestPlanItem,
+		)
 		from erpnext.manufacturing.doctype.production_plan_item.production_plan_item import ProductionPlanItem
-		from erpnext.manufacturing.doctype.production_plan_item_reference.production_plan_item_reference import ProductionPlanItemReference
-		from erpnext.manufacturing.doctype.production_plan_material_request.production_plan_material_request import ProductionPlanMaterialRequest
-		from erpnext.manufacturing.doctype.production_plan_material_request_warehouse.production_plan_material_request_warehouse import ProductionPlanMaterialRequestWarehouse
-		from erpnext.manufacturing.doctype.production_plan_sales_order.production_plan_sales_order import ProductionPlanSalesOrder
-		from erpnext.manufacturing.doctype.production_plan_sub_assembly_item.production_plan_sub_assembly_item import ProductionPlanSubAssemblyItem
+		from erpnext.manufacturing.doctype.production_plan_item_reference.production_plan_item_reference import (
+			ProductionPlanItemReference,
+		)
+		from erpnext.manufacturing.doctype.production_plan_material_request.production_plan_material_request import (
+			ProductionPlanMaterialRequest,
+		)
+		from erpnext.manufacturing.doctype.production_plan_material_request_warehouse.production_plan_material_request_warehouse import (
+			ProductionPlanMaterialRequestWarehouse,
+		)
+		from erpnext.manufacturing.doctype.production_plan_sales_order.production_plan_sales_order import (
+			ProductionPlanSalesOrder,
+		)
+		from erpnext.manufacturing.doctype.production_plan_sub_assembly_item.production_plan_sub_assembly_item import (
+			ProductionPlanSubAssemblyItem,
+		)
 		from frappe.types import DF
 
 		amended_from: DF.Link | None
@@ -91,7 +103,17 @@ class ProductionPlan(Document):
 		sales_order_status: DF.Literal["", "To Deliver and Bill", "To Bill", "To Deliver"]
 		sales_orders: DF.Table[ProductionPlanSalesOrder]
 		skip_available_sub_assembly_item: DF.Check
-		status: DF.Literal["", "Draft", "Submitted", "Not Started", "In Process", "Completed", "Closed", "Cancelled", "Material Requested"]
+		status: DF.Literal[
+			"",
+			"Draft",
+			"Submitted",
+			"Not Started",
+			"In Process",
+			"Completed",
+			"Closed",
+			"Cancelled",
+			"Material Requested",
+		]
 		sub_assembly_items: DF.Table[ProductionPlanSubAssemblyItem]
 		sub_assembly_warehouse: DF.Link | None
 		to_date: DF.Date | None
@@ -809,9 +831,9 @@ class ProductionPlan(Document):
 		mapping = {
 			"po_items_mono_line": "Mono Line",
 			"po_items_multi_line": "Multi Line",
-			"po_items_line_1": "Culcutta Line 1",
-			"po_items_line_2": "Culcutta Line 2",
-			"po_items_line_3": "Culcutta Line 3",
+			"po_items_line_1": "Calacatta Mixer 1",
+			"po_items_line_2": "Calacatta Mixer 2",
+			"po_items_line_3": "Calacatta Mixer 3",
 		}
 
 		line_name = mapping.get(field_name)
