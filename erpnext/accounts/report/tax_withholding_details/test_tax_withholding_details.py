@@ -116,14 +116,19 @@ class TestTaxWithholdingDetails(ERPNextTestSuite, AccountsTestMixin):
 		tds_category = "TDS - Additional Column"
 		create_tax_category(tds_category, rate=10, account="TDS - _TC")
 		inv = make_purchase_invoice(rate=1000, do_not_submit=True)
+		inv.apply_tds = 1
 		inv.tax_withholding_category = tds_category
+		inv.items[0].tax_withholding_category = tds_category
+		inv.items[0].apply_tds = 1
 		inv.submit()
+
+		field_name = "tax_deduction_basis"
 
 		additional_table_columns = [
 			{
-				"label": "Round Off Tax Amount",
-				"fieldname": "round_off_tax_amount",
-				"fieldtype": "Check",
+				"label": "Tax Deduction Basis",
+				"fieldname": field_name,
+				"fieldtype": "Data",
 				"width": 140,
 				"_doctype": "Tax Withholding Category",
 			}
@@ -137,12 +142,12 @@ class TestTaxWithholdingDetails(ERPNextTestSuite, AccountsTestMixin):
 
 		columns, data = _execute(filters, additional_table_columns)
 
-		self.assertTrue(any(col.get("fieldname") == "round_off_tax_amount" for col in columns))
+		self.assertTrue(any(col.get("fieldname") == field_name for col in columns))
 
 		invoice_row = next((row for row in data if row.get("ref_no") == inv.name), None)
 		self.assertIsNotNone(invoice_row)
-		expected_value = frappe.db.get_value("Tax Withholding Category", tds_category, "round_off_tax_amount")
-		self.assertEqual(invoice_row.get("round_off_tax_amount"), expected_value)
+		expected_value = frappe.db.get_value("Tax Withholding Category", tds_category, field_name)
+		self.assertEqual(invoice_row.get(field_name), expected_value)
 
 	def check_expected_values(self, result, expected_values):
 		for i in range(len(result)):
