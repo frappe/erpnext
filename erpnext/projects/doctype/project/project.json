@@ -480,7 +480,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-03-09 17:15:24.426294",
+ "modified": "2026-04-14 18:17:40.676750",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
@@ -524,6 +524,14 @@
    "role": "Employee",
    "select": 1,
    "share": 1
+  },
+  {
+   "role": "HR User",
+   "select": 1
+  },
+  {
+   "role": "HR Manager",
+   "select": 1
   }
  ],
  "quick_entry": 1,
