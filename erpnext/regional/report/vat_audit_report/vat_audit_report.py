@@ -152,7 +152,11 @@ class VATAuditReport:
 					parent_tax_rates.setdefault(tax_rate, set()).add(item)
 
 	def get_item_amount_map(self, parent, item, taxes):
-		net_amount = self.invoice_items.get(parent).get(item).get("net_amount")
+		item_details = self.invoice_items.get(parent, {}).get(item)
+		if not item_details:
+			return None
+
+		net_amount = item_details.get("net_amount", 0)
 		tax_rate = taxes[0]
 		tax_amount = taxes[1]
 		gross_amount = net_amount + tax_amount
