@@ -30,11 +30,14 @@
   "quality_assessment",
   "shipping_details_section",
   "crate_number",
-  "column_break_txsf",
-  "container_number",
   "column_break_neqa",
   "packing_list_number",
+  "column_break_ykcn",
+  "packing_date",
   "shipment_section_2",
+  "column_break_txsf",
+  "container_number",
+  "column_break_vawu",
   "shipment_number",
   "column_break_tpms",
   "shipping_date",
@@ -255,18 +258,32 @@
    "fieldname": "shipment_number",
    "fieldtype": "Link",
    "label": "Shipment Number",
-   "options": "Shipment",
+   "options": "Slab Shipment",
    "read_only": 1
   },
   {
    "fieldname": "column_break_tpms",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ykcn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "packing_date",
+   "fieldtype": "Date",
+   "label": "Packing Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_vawu",
    "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-15 16:30:51.011019",
+ "modified": "2026-04-16 19:07:52.907912",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",

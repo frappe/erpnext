@@ -27,7 +27,10 @@
   "grades",
   "shipping_tab",
   "packing_settings_section",
-  "maximum_crates_per_container"
+  "maximum_crates_per_container",
+  "export_compliance_section",
+  "annex_d_addr",
+  "column_break_zcbd"
  ],
  "fields": [
   {
@@ -161,13 +164,27 @@
    "fieldtype": "Int",
    "label": "Maximum Crates Per Container",
    "reqd": 1
+  },
+  {
+   "fieldname": "export_compliance_section",
+   "fieldtype": "Section Break",
+   "label": "Export Compliance"
+  },
+  {
+   "fieldname": "annex_d_addr",
+   "fieldtype": "Small Text",
+   "label": "Annexure-D Address"
+  },
+  {
+   "fieldname": "column_break_zcbd",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-15 00:07:51.252678",
+ "modified": "2026-04-16 22:59:41.437010",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Mahi Granites Settings",

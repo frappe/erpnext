@@ -38,7 +38,7 @@ def create_slab(
 	new_slab.template = type
 	new_slab.current_job_card = job_card_number
 	new_slab.batch_number = batch_number or _generate_slab_batch(line, create_and_get=True)
-	new_slab.batch_code = new_slab.batch_number.split('/')[-1]
+	new_slab.batch_code = new_slab.batch_number.split("/")[-1]
 
 	slab_number = slab_number or _get_slab_number(new_slab.batch_number, line)
 	new_slab.number = slab_number
@@ -268,8 +268,11 @@ def get_batch_numbers(include_child_lines=False):
 
 
 @frappe.whitelist()
-def get_valid_next_stages(current_stage: str, include_qc = False) -> list[str]:
-	stages_to_skip = [stage if stage.lower() != "quality check" or not include_qc else None for stage in STAGES_TO_SKIP_IN_AUTO_MOVE]
+def get_valid_next_stages(current_stage: str, include_qc=False) -> list[str]:
+	stages_to_skip = [
+		stage if stage.lower() != "quality check" or not include_qc else None
+		for stage in STAGES_TO_SKIP_IN_AUTO_MOVE
+	]
 	allowed_stages = [stage.lower() for stage in ALLOWED_STAGES]
 
 	try:
@@ -288,7 +291,12 @@ def get_valid_next_stages(current_stage: str, include_qc = False) -> list[str]:
 
 
 @frappe.whitelist()
-def move_slab_iteratively_to(slab_name: str, final_stage: str, observations: list[PreliminaryQualityCheck | OvenOperation | SlabQualityReport] | None = None, include_qc = False):
+def move_slab_iteratively_to(
+	slab_name: str,
+	final_stage: str,
+	observations: list[PreliminaryQualityCheck | OvenOperation | SlabQualityReport] | None = None,
+	include_qc=False,
+):
 	slab: Slab = frappe.get_doc("Slab", slab_name)  # pyright: ignore[reportAssignmentType]
 	# If the slab's current process is not complete, finish the process
 	from erpnext.manufacturing.page.operator_station.operator_station import (
@@ -329,7 +337,10 @@ def move_slab_iteratively_to(slab_name: str, final_stage: str, observations: lis
 
 			if slab.current_job_card:
 				finish_process(
-					slab.current_job_card, slab.status.lower(), transfer_materials=slab.status.lower() != "cooling", should_stop_machine=False
+					slab.current_job_card,
+					slab.status.lower(),
+					transfer_materials=slab.status.lower() != "cooling",
+					should_stop_machine=False,
 				)
 
 			elif slab.status.lower() == "curing":
@@ -341,15 +352,25 @@ def move_slab_iteratively_to(slab_name: str, final_stage: str, observations: lis
 		next_stages = get_valid_next_stages(slab.status, include_qc)
 		for stage in next_stages:
 			# Get the name of the top job card for the process
-			top_job_card_name: str = (get_next_work_item(stage.lower(), slab.line).get('job_card', {}) or {}).get('name') # pyright: ignore[reportAssignmentType]
+			top_job_card_name: str = (
+				get_next_work_item(stage.lower(), slab.line).get("job_card", {}) or {}
+			).get("name")  # pyright: ignore[reportAssignmentType]
 
 			if top_job_card_name:
-				start_process(top_job_card_name, slab_name, slab.template, stage.lower(), publish_slab_event=False)
+				start_process(
+					top_job_card_name, slab_name, slab.template, stage.lower(), publish_slab_event=False
+				)
 				if stage.lower() != "quality check":
-					finish_process(top_job_card_name, stage.lower(), transfer_materials=stage.lower() != "cooling", should_stop_machine=False, publish_slab_event=False)
+					finish_process(
+						top_job_card_name,
+						stage.lower(),
+						transfer_materials=stage.lower() != "cooling",
+						should_stop_machine=False,
+						publish_slab_event=False,
+					)
 				else:
 					qc_obs = get_observation_for_stage(stage.lower())
-					_finish_qc(slab_name, qc_obs, top_job_card_name) # pyright: ignore[reportArgumentType]
+					_finish_qc(slab_name, qc_obs, top_job_card_name)  # pyright: ignore[reportArgumentType]
 			else:
 				move_slab_to(slab_name, stage)
 
@@ -372,13 +393,34 @@ def move_slab_iteratively_to(slab_name: str, final_stage: str, observations: lis
 		frappe.db.rollback()
 
 
+def move_slab_to_and_checkout(
+	slab_number: str,
+	next_stage: str,
+	job_card_number: str | None = None,
+	checkout_and_move=False,
+	publish_event=True,
+):
+	move_slab_to(slab_number, next_stage, job_card_number, checkout_and_move, publish_event)
+	checkout_slab(slab_number, publish_event)
+
+
+def reset_slab_to(slab_number: str, prev_stage: str):
+	slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
+	slab.reload()
+	last_history_item = slab.slab_history[-1] if slab.slab_history else None
+	if last_history_item and last_history_item.station == prev_stage:
+		slab.remove(last_history_item)
+
+
 def _finish_curing(slab_name: str):
 	from erpnext.manufacturing.page.slab_loading_station.slab_loading_station import finish_curing
+
 	finish_curing(slab_name)
 
 
 def _finish_qc(slab_number: str, slab_qc: SlabQualityReport, job_card: str):
 	from erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station import finish_qc_process
+
 	# Get Slab Grade
 	finish_qc_process(slab_number, slab_qc.grade, job_card, publish_slab_event=False)
 
@@ -612,6 +654,7 @@ def _create_preliminary_qc(slab_name: str, preliminary_qc: PreliminaryQualityChe
 	preliminary_qc.d2_bend = preliminary_qc.d2_bend or 0
 
 	from erpnext.manufacturing.doctype.preliminary_quality_check.api import create_preliminary_quality_check
+
 	create_preliminary_quality_check(str(slab.name), preliminary_qc)
 
 
@@ -622,7 +665,7 @@ def _create_oven_operation_params(slab_name: str, oven_params: OvenOperation | N
 		oven_params = frappe.get_doc("Oven Operation", str(heating_slab_history_item.oven_params))  # pyright: ignore[reportAssignmentType]
 
 	if not oven_params:
-		oven_params = frappe.new_doc("Oven Operation") # pyright: ignore[reportAssignmentType]
+		oven_params = frappe.new_doc("Oven Operation")  # pyright: ignore[reportAssignmentType]
 		if not oven_params:
 			raise Exception("Oven Operation could not be created.")
 
@@ -676,18 +719,26 @@ def _create_oven_operation_params(slab_name: str, oven_params: OvenOperation | N
 def _create_final_qc(slab_name: str, final_qc: SlabQualityReport | None = None):
 	slab: Slab = frappe.get_doc("Slab", slab_name)  # pyright: ignore[reportAssignmentType]
 	slab.reload()
-	quality_check_slab_history_item = next((item for item in slab.slab_history if item.station == "Quality Check"), None)
-	if quality_check_slab_history_item and not final_qc and quality_check_slab_history_item.quality_report_name:
-		final_qc = frappe.get_doc("Slab Quality Report", str(quality_check_slab_history_item.quality_report_name))  # pyright: ignore[reportAssignmentType]
+	quality_check_slab_history_item = next(
+		(item for item in slab.slab_history if item.station == "Quality Check"), None
+	)
+	if (
+		quality_check_slab_history_item
+		and not final_qc
+		and quality_check_slab_history_item.quality_report_name
+	):
+		final_qc = frappe.get_doc(
+			"Slab Quality Report", str(quality_check_slab_history_item.quality_report_name)
+		)  # pyright: ignore[reportAssignmentType]
 
 	if not final_qc:
 		# If the slab quality report is not provided, create one with default values.
-		final_qc = frappe.new_doc("Slab Quality Report") # pyright: ignore[reportAssignmentType]
+		final_qc = frappe.new_doc("Slab Quality Report")  # pyright: ignore[reportAssignmentType]
 		if not final_qc:
 			raise Exception("Slab Quality Report could not be created.")
 
 	# Get Slab Grade
-	mg_settings: MahiGranitesSettings = frappe.get_doc("Mahi Granites Settings") # pyright: ignore[reportAssignmentType]
+	mg_settings: MahiGranitesSettings = frappe.get_doc("Mahi Granites Settings")  # pyright: ignore[reportAssignmentType]
 	grades = mg_settings.grades
 	# Get Attendance Shift
 	shifts = frappe.get_list("Attendance Shift", fields=["name"])

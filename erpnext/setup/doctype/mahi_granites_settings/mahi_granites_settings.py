@@ -20,6 +20,7 @@ class MahiGranitesSettings(Document):
 		from erpnext.setup.doctype.sales_invoice_series.sales_invoice_series import SalesInvoiceSeries
 		from frappe.types import DF
 
+		annex_d_addr: DF.SmallText | None
 		curing_labels: DF.Table[CuringLabel]
 		grades: DF.Table[SlabQualityGrade]
 		max_heating_minutes: DF.Float

@@ -32,6 +32,7 @@ class Slab(Document):
 		is_repressed: DF.Check
 		line: DF.Link
 		number: DF.Int
+		packing_date: DF.Date | None
 		packing_list_number: DF.Link | None
 		quality_assessment: DF.Link | None
 		serial_number: DF.Data
