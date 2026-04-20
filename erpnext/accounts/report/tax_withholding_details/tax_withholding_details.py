@@ -8,11 +8,14 @@ from frappe.query_builder.functions import IfNull
 
 def execute(filters=None):
 	"""Generate Tax Withholding Details report"""
-	validate_filters(filters)
+	return _execute(filters)
 
+
+def _execute(filters=None, additional_table_columns=None):
+	validate_filters(filters)
 	# Process and format data
-	data = get_tax_withholding_data(filters)
-	columns = get_columns(filters)
+	data = get_tax_withholding_data(filters, additional_table_columns)
+	columns = get_columns(filters, additional_table_columns)
 
 	return columns, data
 
@@ -28,10 +31,10 @@ def validate_filters(filters):
 		frappe.throw(_("From Date must be before To Date"))
 
 
-def get_tax_withholding_data(filters):
+def get_tax_withholding_data(filters, additional_table_columns=None):
 	"""Process entries into final report format"""
 	data = []
-	entries = get_tax_withholding_entries(filters)
+	entries = get_tax_withholding_entries(filters, additional_table_columns)
 	if not entries:
 		return data
 
@@ -46,8 +49,8 @@ def get_tax_withholding_data(filters):
 		party_info = party_details.get((entry.party_type, entry.party), {})
 
 		row = {
-			"section_code": entry.tax_withholding_category,
-			"entity_type": party_info.get("entity_type"),
+			"tax_withholding_category": entry.tax_withholding_category,
+			"party_entity_type": party_info.get("party_entity_type"),
 			"rate": entry.tax_rate,
 			"total_amount": entry.taxable_amount,
 			"grand_total": doc_details.get("grand_total", 0),
@@ -66,10 +69,15 @@ def get_tax_withholding_data(filters):
 			"party": entry.party,
 			"party_type": entry.party_type,
 		}
+		if additional_table_columns:
+			for col in additional_table_columns:
+				if col.get("_doctype") == "Tax Withholding Category":
+					row[col["fieldname"]] = entry.get(col["fieldname"])
+
 		data.append(row)
 
-	# Sort by section code and transaction date
-	data.sort(key=lambda x: (x["section_code"] or "", x["transaction_date"] or ""))
+	# Sort by tax_withholding_category and transaction date
+	data.sort(key=lambda x: (x["tax_withholding_category"] or "", x["transaction_date"] or ""))
 	return data
 
 
@@ -92,9 +100,13 @@ def get_party_details(entries):
 		fields = [doctype.name]
 
 		if party_type == "Supplier":
-			fields.extend([doctype.supplier_type.as_("entity_type"), doctype.supplier_name.as_("party_name")])
+			fields.extend(
+				[doctype.supplier_type.as_("party_entity_type"), doctype.supplier_name.as_("party_name")]
+			)
 		elif party_type == "Customer":
-			fields.extend([doctype.customer_type.as_("entity_type"), doctype.customer_name.as_("party_name")])
+			fields.extend(
+				[doctype.customer_type.as_("party_entity_type"), doctype.customer_name.as_("party_name")]
+			)
 
 		query = frappe.qb.from_(doctype).select(*fields).where(doctype.name.isin(party_set))
 		party_details = query.run(as_dict=True)
@@ -105,16 +117,23 @@ def get_party_details(entries):
 	return party_map
 
 
-def get_columns(filters):
+def get_columns(filters, additional_table_columns=None):
 	"""Generate report columns based on filters"""
-	columns = [
+	tax_withholding_category_column = [
 		{
-			"label": _("Section Code"),
+			"label": _("Tax Withholding Category"),
 			"options": "Tax Withholding Category",
-			"fieldname": "section_code",
+			"fieldname": "tax_withholding_category",
 			"fieldtype": "Link",
-			"width": 90,
+			"width": 180,
 		},
+	]
+
+	if additional_table_columns:
+		tax_withholding_category_column += additional_table_columns
+
+	columns = [
+		*tax_withholding_category_column,
 		{"label": _("Tax Id"), "fieldname": "tax_id", "fieldtype": "Data", "width": 60},
 		{
 			"label": _(f"{filters.get('party_type', 'Party')} Name"),
@@ -130,8 +149,8 @@ def get_columns(filters):
 			"width": 180,
 		},
 		{
-			"label": _("Entity Type"),
-			"fieldname": "entity_type",
+			"label": _(f"{filters.get('party_type', 'Party')} Type"),
+			"fieldname": "party_entity_type",
 			"fieldtype": "Data",
 			"width": 100,
 		},
@@ -214,8 +233,9 @@ def get_columns(filters):
 	return columns
 
 
-def get_tax_withholding_entries(filters):
+def get_tax_withholding_entries(filters, additional_table_columns=None):
 	twe = frappe.qb.DocType("Tax Withholding Entry")
+	twc = frappe.qb.DocType("Tax Withholding Category")
 	query = (
 		frappe.qb.from_(twe)
 		.select(
@@ -253,6 +273,15 @@ def get_tax_withholding_entries(filters):
 
 	if filters.get("party"):
 		query = query.where(twe.party == filters.get("party"))
+
+	if additional_table_columns:
+		twc_fields = [
+			twc[col["fieldname"]].as_(col["fieldname"])
+			for col in additional_table_columns
+			if col.get("_doctype") == "Tax Withholding Category" and col.get("fieldname")
+		]
+		if twc_fields:
+			query = query.join(twc).on(twc.name == twe.tax_withholding_category).select(*twc_fields)
 
 	return query.run(as_dict=True)
 

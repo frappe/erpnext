@@ -10,7 +10,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.doctype.tax_withholding_category.test_tax_withholding_category import (
 	create_tax_withholding_category,
 )
-from erpnext.accounts.report.tax_withholding_details.tax_withholding_details import execute
+from erpnext.accounts.report.tax_withholding_details.tax_withholding_details import _execute, execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.tests.utils import ERPNextTestSuite
@@ -112,13 +112,47 @@ class TestTaxWithholdingDetails(ERPNextTestSuite, AccountsTestMixin):
 		]
 		self.check_expected_values(result, expected_values)
 
+	def test_additional_tax_withholding_category_column(self):
+		tds_category = "TDS - Additional Column"
+		create_tax_category(tds_category, rate=10, account="TDS - _TC")
+		inv = make_purchase_invoice(rate=1000, do_not_submit=True)
+		inv.tax_withholding_category = tds_category
+		inv.submit()
+
+		additional_table_columns = [
+			{
+				"label": "Round Off Tax Amount",
+				"fieldname": "round_off_tax_amount",
+				"fieldtype": "Check",
+				"width": 140,
+				"_doctype": "Tax Withholding Category",
+			}
+		]
+		filters = frappe._dict(
+			company="_Test Company",
+			party_type="Supplier",
+			from_date=today(),
+			to_date=today(),
+		)
+
+		columns, data = _execute(filters, additional_table_columns)
+
+		self.assertTrue(any(col.get("fieldname") == "round_off_tax_amount" for col in columns))
+
+		for row in data:
+			if row.get("ref_no") == inv.name:
+				expected_value = frappe.db.get_value(
+					"Tax Withholding Category", row.get("tax_withholding_category"), "round_off_tax_amount"
+				)
+				self.assertEqual(row.get("round_off_tax_amount"), expected_value)
+
 	def check_expected_values(self, result, expected_values):
 		for i in range(len(result)):
 			voucher = frappe._dict(result[i])
 			voucher_expected_values = expected_values[i]
 			voucher_actual_values = (
 				voucher.ref_no,
-				voucher.section_code,
+				voucher.tax_withholding_category,
 				voucher.rate,
 				voucher.base_total,
 				voucher.tax_amount,
