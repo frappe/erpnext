@@ -139,12 +139,10 @@ class TestTaxWithholdingDetails(ERPNextTestSuite, AccountsTestMixin):
 
 		self.assertTrue(any(col.get("fieldname") == "round_off_tax_amount" for col in columns))
 
-		for row in data:
-			if row.get("ref_no") == inv.name:
-				expected_value = frappe.db.get_value(
-					"Tax Withholding Category", row.get("tax_withholding_category"), "round_off_tax_amount"
-				)
-				self.assertEqual(row.get("round_off_tax_amount"), expected_value)
+		invoice_row = next((row for row in data if row.get("ref_no") == inv.name), None)
+		self.assertIsNotNone(invoice_row)
+		expected_value = frappe.db.get_value("Tax Withholding Category", tds_category, "round_off_tax_amount")
+		self.assertEqual(invoice_row.get("round_off_tax_amount"), expected_value)
 
 	def check_expected_values(self, result, expected_values):
 		for i in range(len(result)):
