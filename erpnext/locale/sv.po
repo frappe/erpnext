@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-19 09:48+0000\n"
-"PO-Revision-Date: 2026-04-19 15:06\n"
+"PO-Revision-Date: 2026-04-20 15:22\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -2326,7 +2326,7 @@ msgstr "Åtgärder Utförda"
 #: erpnext/stock/doctype/item/item.js:413
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Activate Serial / Batch No for Item"
-msgstr ""
+msgstr "Aktivera Serie / Parti Nummer för Artikel"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.py:55
 msgid "Active Leads"
@@ -3399,7 +3399,7 @@ msgstr "Flygindustri"
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.js:20
 msgid "After save, please refresh the page to apply the changes."
-msgstr ""
+msgstr "Uppdatera sidan efter att du har sparat för att ändringarna ska gälla."
 
 #. Label of the against (Text) field in DocType 'GL Entry'
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
@@ -9905,7 +9905,7 @@ msgstr "Kontrollera om material överföring post inte erfordras"
 #: erpnext/accounts/doctype/item_tax_template_detail/item_tax_template_detail.json
 #, python-format
 msgid "Check if this tax is not applicable to items (distinct from 0% rate)"
-msgstr ""
+msgstr "Aktivera om denna moms sats inte gäller för artiklar (till skillnad från 0 % moms sats)"
 
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.py:58
 msgid "Check row {0} for account {1}: Party Type is only allowed for Receivable or Payable accounts"
@@ -10987,7 +10987,7 @@ msgstr "Bolag Adress Namn"
 
 #: erpnext/controllers/accounts_controller.py:4382
 msgid "Company Address is missing. You don't have permission to create an Address. Please contact your System Manager."
-msgstr ""
+msgstr "Bolag adress saknas. Du har inte behörighet att skapa adress. Kontakta din Systemansvarig."
 
 #: erpnext/controllers/accounts_controller.py:4370
 msgid "Company Address is missing. You don't have permission to update it. Please contact your System Manager."
@@ -11173,7 +11173,7 @@ msgstr "Bolag{0} har lagts till mer än en gång"
 
 #: erpnext/regional/doctype/south_africa_vat_settings/south_africa_vat_settings.py:33
 msgid "Company {0} is not in South Africa."
-msgstr ""
+msgstr "Bolag {0} är inte registrerad i Sydafrika."
 
 #: erpnext/setup/setup_wizard/operations/taxes_setup.py:14
 msgid "Company {} does not exist yet. Taxes setup aborted."
@@ -18020,7 +18020,7 @@ msgstr "Aktivera Separat Omregistrering för Bokföring Register"
 
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:122
 msgid "Enable Serial / Batch Bundle"
-msgstr ""
+msgstr "Aktivera Serie / Parti Paket"
 
 #. Label of the enable_stock_reservation (Check) field in DocType 'Stock
 #. Settings'
@@ -22780,7 +22780,7 @@ msgstr "Importerade {0} DocTypes"
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:36
 msgid "Importing Code Lists from remote URLs is not allowed."
-msgstr ""
+msgstr "Det är inte tillåtet att importera Kod Listor från fjär URL."
 
 #: erpnext/edi/doctype/common_code/common_code.py:111
 msgid "Importing Common Codes"
@@ -24033,7 +24033,7 @@ msgstr "Ogiltig från och till lager"
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:37
 msgid "Invalid Upload"
-msgstr ""
+msgstr "Ogiltig Uppladdning"
 
 #: erpnext/controllers/item_variant.py:151
 msgid "Invalid Value"
@@ -30837,7 +30837,7 @@ msgstr "Ingen personal var schemalagd för oväntad samtal"
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:73
 msgid "No file uploaded or URL provided."
-msgstr ""
+msgstr "Ingen fil har laddats upp eller URL inte angiven."
 
 #: erpnext/controllers/subcontracting_controller.py:1393
 msgid "No item available for transfer."
@@ -31028,7 +31028,7 @@ msgstr "Inga rader med noll dokument antal hittades"
 
 #: erpnext/stock/doctype/batch/batch.js:76
 msgid "No stock available for this batch."
-msgstr ""
+msgstr "Inget lager tillgängligt för denna parti."
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:809
 msgid "No stock ledger entries were created. Please set the quantity or valuation rate for the items properly and try again."
@@ -31102,7 +31102,7 @@ msgstr "Ej Nollvärde"
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.js:117
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:113
 msgid "Non-phantom BOM cannot be created for non-stock item {0}."
-msgstr ""
+msgstr "Ej Fantom Stycklista kan inte skapas för ej lagerförd artikel {0}."
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:561
 msgid "None of the items have any change in quantity or value."
@@ -35199,7 +35199,7 @@ msgstr "Bensin"
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.js:113
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:110
 msgid "Phantom BOM cannot be created for stock item {0}."
-msgstr ""
+msgstr "Fantom Stycklista kan inte skapas för lagerförd artikel {0}."
 
 #: erpnext/manufacturing/doctype/bom/bom_item_preview.html:16
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:321
@@ -35696,7 +35696,7 @@ msgstr "Välj antingen Med Åtgärder eller Färdig Artikel Baserad Åtgärd Kos
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:150
 msgid "Please check the 'Activate Serial and Batch No for Item' checkbox in the {0} to make Serial and Batch Bundle for the item."
-msgstr ""
+msgstr "Välj 'Aktivera Serie och Parti Nummer för Artikel' i {0} för att skapa Serie och Parti Paket för artikel."
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:562
 msgid "Please check the error message and take necessary actions to fix the error and then restart the reposting again."
@@ -41937,7 +41937,7 @@ msgstr "Rapporterar Till"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Repost"
-msgstr ""
+msgstr "Omboka"
 
 #. Name of a DocType
 #. Label of a Workspace Sidebar Item
@@ -43738,7 +43738,7 @@ msgstr "Rad #{0}: Artikel {1} finns inte på lager i lager {2}."
 
 #: erpnext/controllers/stock_controller.py:153
 msgid "Row #{0}: Item {1} has zero rate but '{2}' is not enabled."
-msgstr ""
+msgstr "Rad #{0}: Artikel {1} är inte prissatt men '{2}' är inte aktiverad."
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:457
 msgid "Row #{0}: Item {1} in warehouse {2}: Available {3}, Needed {4}."
@@ -45186,7 +45186,7 @@ msgstr "Försäljning Order {0} finns redan mot Kund Inköp Order {1}. För att 
 #: erpnext/selling/doctype/sales_order/sales_order.py:1831
 #: erpnext/selling/doctype/sales_order/sales_order.py:1844
 msgid "Sales Order {0} is not available for production"
-msgstr ""
+msgstr "Försäljning Order {0} är inte tillgänglig för produktion"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1397
 msgid "Sales Order {0} is not submitted"
@@ -46841,7 +46841,7 @@ msgstr "Serie Nummer. / Parti Nummer."
 #. Label of the serial_nos_and_batches (Section Break) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Serial Nos / Batches"
-msgstr ""
+msgstr "Serie Nummer / Partier"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1958
 msgid "Serial Nos are created successfully"
@@ -52424,7 +52424,7 @@ msgstr "Serie och Parti Paket {0} är inte giltigt för denna transaktion. \"Typ
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:17
 msgid "The Stock Entry of type 'Manufacture' is known as backflush. Raw materials being consumed to manufacture finished goods is known as backflushing. <br><br> When creating Manufacture Entry, raw-material items are backflushed based on BOM of production item. If you want raw-material items to be backflushed based on Material Transfer entry made against that Work Order instead, then you can set it under this field."
-msgstr "Lager Post av typ 'Produktion' kallas retroaktivt hämtning. Råmaterial som förbrukas för att producera färdiga artiklar kallas retroaktivt hämtning.<br><br> När man skapar Produktion Post hämtas Råmaterial Artiklar retroaktivt baserat på Produktion Artikel Stycklista. Om Råmaterial Artiklar ska retroaktivt hämtas baserat på Överföring Poster som skapas mot Arbetsorder istället, ange det under detta fält."
+msgstr "Lager Post av typ 'Produktion' kallas retroaktivt hämtning. Råmaterial som förbrukas för att producera färdiga artiklar kallas retroaktivt hämtning.<br><br> När Produktion Post skapas hämtas Råmaterial Artiklar retroaktivt baserat på Produktion Artikel Stycklista. Om Råmaterial Artiklar ska retroaktivt hämtas baserat på Överföring Poster som skapas mot Arbetsorder istället, ange det under detta fält."
 
 #. Description of the 'Closing Account Head' (Link) field in DocType 'Period
 #. Closing Voucher'
@@ -52446,7 +52446,7 @@ msgstr "Parti {0} är redan reserverad i {1} {2}. Därför kan vi inte gå vidar
 
 #: erpnext/regional/report/vat_audit_report/vat_audit_report.py:41
 msgid "The company {0} is not in South Africa. VAT Audit Report is only available for companies in South Africa."
-msgstr ""
+msgstr "Bolag {0} är inte registrerad i Sydafrika. Momsrevision rapport är endast tillgänglig för bolag i Sydafrika."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1320
 msgid "The completed quantity {0} of an operation {1} cannot be greater than the completed quantity {2} of a previous operation {3}."
@@ -52735,7 +52735,7 @@ msgstr "Totalt Utfärdad / Överföring Kvantitet {0} i Material Begäran {1} ka
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:43
 msgid "The uploaded file could not be parsed as a genericode XML document."
-msgstr ""
+msgstr "Den uppladdade filen kunde inte tolkas som allmän XML dokument."
 
 #: erpnext/accounts/doctype/bank_statement_import/bank_statement_import.py:153
 msgid "The uploaded file does not appear to be in valid MT940 format."
@@ -55589,7 +55589,7 @@ msgstr "Ej Avstämda Poster"
 
 #: erpnext/public/js/utils/unreconcile.js:175
 msgid "Unreconciled successfully"
-msgstr ""
+msgstr "Avstämning ångrad"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:945
 #: erpnext/selling/doctype/sales_order/sales_order.js:122
@@ -58436,15 +58436,15 @@ msgstr "Du har inte tillräckligt med poäng för att lösa in"
 
 #: erpnext/controllers/accounts_controller.py:4437
 msgid "You don't have permission to create a Company Address. Please contact your System Manager."
-msgstr ""
+msgstr "Du har inte behörighet att skapa bolag adress. Kontakta Systemansvarig."
 
 #: erpnext/controllers/accounts_controller.py:4417
 msgid "You don't have permission to update Company details. Please contact your System Manager."
-msgstr ""
+msgstr "Du har inte behörighet att uppdatera bolag detaljer. Kontakta Systemansvarig."
 
 #: erpnext/controllers/accounts_controller.py:4411
 msgid "You don't have permission to update this document. Please contact your System Manager."
-msgstr ""
+msgstr "Du har inte behörighet att uppdatera detta dokument. Kontakta Systemansvarig."
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:291
 msgid "You had {} errors while creating opening invoices. Check {} for more details"
@@ -59363,7 +59363,7 @@ msgstr "{0} {1} måste godkännas"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:274
 msgid "{0} {1} not allowed to be reposted. You can enable it by adding it '{2}' table in {3}."
-msgstr ""
+msgstr "{0} {1} får inte bokas om. Du kan aktivera det genom att lägga till tabell '{2}' i {3}."
 
 #: erpnext/buying/utils.py:116
 msgid "{0} {1} status is {2}"
