@@ -133,6 +133,7 @@ class SubcontractingReceipt(SubcontractingController):
 			self.set_expense_account_for_subcontracted_items(default_expense_account)
 
 	def validate(self):
+		self.store_supplied_items_inventory_dimension_values()
 		self.reset_supplied_items()
 		self.validate_posting_time()
 
@@ -160,6 +161,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		self.set_supplied_items_expense_account()
 		self.set_supplied_items_cost_center()
+		self.set_supplied_items_inventory_dimensions()
 
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
@@ -342,6 +344,43 @@ class SubcontractingReceipt(SubcontractingController):
 				self.supplied_items = []
 			else:
 				self.update_rate_for_supplied_items()
+
+	def store_supplied_items_inventory_dimension_values(self):
+		from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+
+		inv_dimension_fields = [dim.fieldname for dim in get_inventory_dimensions()]
+		if not inv_dimension_fields:
+			return
+
+		items_bom = {(item.item_code, item.subcontracting_order): item.bom for item in self.items}
+		self.supplied_items_inv_dim = frappe._dict()
+
+		for item in self.supplied_items:
+			dim_values = {field: item.get(field) for field in inv_dimension_fields if item.get(field)}
+			if not dim_values:
+				continue
+
+			bom = items_bom.get((item.main_item_code, item.subcontracting_order))
+			key = (item.rm_item_code, bom, item.subcontracting_order)
+			if item.batch_no:
+				key += (item.batch_no,)
+
+			self.supplied_items_inv_dim[key] = dim_values
+
+	def set_supplied_items_inventory_dimensions(self):
+		if not getattr(self, "supplied_items_inv_dim", None):
+			return
+
+		items_bom = {(item.item_code, item.subcontracting_order): item.bom for item in self.items}
+
+		for item in self.supplied_items:
+			bom = items_bom.get((item.main_item_code, item.subcontracting_order))
+			key = (item.rm_item_code, bom, item.subcontracting_order)
+			key = (*key, item.batch_no) if item.batch_no else key
+
+			dim_values = self.supplied_items_inv_dim.get(key)
+			if dim_values:
+				item.update(dim_values)
 
 	@frappe.whitelist()
 	def get_secondary_items(self, recalculate_rate: bool | None = False):
