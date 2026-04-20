@@ -18,10 +18,6 @@
   "column_break_dxoj",
   "slab_template",
   "column_break_uqmr",
-  "shipping_details_section",
-  "crate_number",
-  "column_break_ofgg",
-  "container_number",
   "slab_dimensions_section",
   "slab_length",
   "column_break_jlbb",
@@ -273,35 +269,13 @@
    "fieldtype": "Select",
    "label": "Slab Repair Type",
    "options": "None\nRecovery\nRepolish\n3cm to 2cm"
-  },
-  {
-   "fieldname": "shipping_details_section",
-   "fieldtype": "Section Break",
-   "label": "Packing & Shipping Details"
-  },
-  {
-   "fieldname": "column_break_ofgg",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "crate_number",
-   "fieldtype": "Select",
-   "label": "Crate No.",
-   "options": "\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "container_number",
-   "fieldtype": "Data",
-   "label": "Container No."
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-02 18:34:47.748530",
+ "modified": "2026-04-16 12:19:16.351335",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab Quality Report",

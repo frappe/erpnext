@@ -311,7 +311,7 @@ class BOM(WebsiteGenerator):
 			parts = base_item_code.split("-")
 
 			slab_colour = f"{parts[0]}-{parts[1]}"
-			thickness = parts[2].upper()
+			thickness = parts[2].lower()
 			slab_size = parts[3]
 
 			slab_color = frappe.db.exists("Slab Colour", slab_colour)

@@ -1,11 +1,12 @@
 import json
+
 import frappe
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCard
-from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 from erpnext.manufacturing.doctype.oven.oven import Oven
 from erpnext.manufacturing.doctype.oven_operation.oven_operation import OvenOperation
 from erpnext.manufacturing.doctype.oven_rack.oven_rack import OvenRack
+from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 from erpnext.manufacturing.doctype.slab.slab import Slab
 from erpnext.manufacturing.doctype.slab_history.slab_history import SlabHistory
 from erpnext.manufacturing.page.operator_station.operator_station import (
@@ -29,7 +30,7 @@ def get_oven_from_line(line: str):
 def load_slab_into_oven(oven_op: str, line: str, job_card_name: str, slab_template: str):
 	oven_operation = json.loads(oven_op)
 
-	new_oven_operation: OvenOperation = frappe.new_doc("Oven Operation")
+	new_oven_operation: OvenOperation = frappe.new_doc("Oven Operation")  # pyright: ignore[reportAssignmentType]
 	new_oven_operation.update(oven_operation)
 
 	rack_name = new_oven_operation.oven_rack
@@ -40,20 +41,20 @@ def load_slab_into_oven(oven_op: str, line: str, job_card_name: str, slab_templa
 
 	job_card_name = job_card_data.name
 
-	now_date_time = frappe.utils.now_datetime()
+	now_date_time = frappe.utils.now_datetime()  # pyright: ignore
 
 	try:
 		frappe.db.begin()
 
 		# Start the Job Card
 		start_process(job_card_name, slab_name, slab_template, "Heating")
-		slab: Slab = frappe.get_doc("Slab", slab_name)
+		slab: Slab = frappe.get_doc("Slab", slab_name)  # pyright: ignore[reportAssignmentType]
 
 		new_oven_operation.in_time = now_date_time
 		new_oven_operation.job_card = job_card_name
 		new_oven_operation.save()
 
-		heating_slab_history_item: SlabHistory = [h for h in slab.slab_history if h.station == "Heating"][0]
+		heating_slab_history_item: SlabHistory = next(h for h in slab.slab_history if h.station == "Heating")
 
 		if heating_slab_history_item.out_time is not None:
 			raise Exception("Slab is in an invalid state")
@@ -72,7 +73,7 @@ def load_slab_into_oven(oven_op: str, line: str, job_card_name: str, slab_templa
 		frappe.db.rollback()
 		raise
 
-	oven_rack = frappe.get_doc("Oven Rack", rack_name)
+	oven_rack = frappe.get_doc("Oven Rack", rack_name)  # pyright: ignore[reportAssignmentType]
 	return oven_rack
 
 
@@ -82,17 +83,19 @@ def unload_slab_from_oven(rack_name: str, slab_name: str, slab_template: str, va
 	data = json.loads(values)
 
 	# Find active operation for this rack
-	op_name = frappe.db.get_value(
-		"Oven Operation",
-		{"oven_rack": rack_name, "slab": slab_name, "slab_color": slab_template, "docstatus": 0},
-		"name",
+	op_name = str(
+		frappe.db.get_value(
+			"Oven Operation",
+			{"oven_rack": rack_name, "slab": slab_name, "slab_color": slab_template, "docstatus": 0},
+			"name",
+		)
 	)
 	if not op_name:
 		frappe.throw("No active operation found for this rack")
 
-	op: OvenOperation = frappe.get_doc("Oven Operation", op_name)
+	op: OvenOperation = frappe.get_doc("Oven Operation", op_name)  # pyright: ignore[reportAssignmentType]
 
-	now = frappe.utils.now_datetime()
+	now = frappe.utils.now_datetime()  # pyright: ignore
 	op.out_time = now
 	op.slab_top_temp = data.get("slab_top_temp")
 	op.slab_bottom_temp = data.get("slab_bottom_temp")
@@ -100,11 +103,11 @@ def unload_slab_from_oven(rack_name: str, slab_name: str, slab_template: str, va
 
 	# Calculate total time
 	if op.in_time and op.out_time:
-		duration = op.out_time - op.in_time
-		op.total_time = duration.total_seconds() / 60
+		duration = op.out_time - op.in_time  # pyright: ignore
+		op.total_time = duration.total_seconds() / 60  # pyright: ignore
 
 	# Reset Rack
-	rack: OvenRack = frappe.get_doc("Oven Rack", rack_name)
+	rack: OvenRack = frappe.get_doc("Oven Rack", rack_name)  # pyright: ignore[reportAssignmentType]
 	rack.status = "Idle"
 	rack.current_slab = None
 	rack.current_slab_template = None
@@ -121,7 +124,7 @@ def unload_slab_from_oven(rack_name: str, slab_name: str, slab_template: str, va
 		if op.job_card:
 			finish_process(op.job_card, "Heating", should_stop_machine=False)
 			# Check if any of the racks in the oven are in use
-			oven: Oven = frappe.get_doc("Oven", rack.parent)
+			oven: Oven = frappe.get_doc("Oven", rack.parent)  # pyright: ignore[reportAssignmentType]
 
 			# Stop the oven only if all the racks are idle.
 			is_in_use = False

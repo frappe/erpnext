@@ -14,16 +14,17 @@ class SlabQualityReport(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from erpnext.manufacturing.doctype.slab_quality_observation.slab_quality_observation import SlabQualityObservation
 		from frappe.types import DF
+
+		from erpnext.manufacturing.doctype.slab_quality_observation.slab_quality_observation import (
+			SlabQualityObservation,
+		)
 
 		amended_from: DF.Link | None
 		bend: DF.Float
-		container_number: DF.Data | None
 		contamination: DF.Data | None
 		crack_back: DF.Data | None
 		crack_front: DF.Data | None
-		crate_number: DF.Literal["", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
 		date: DF.Date
 		filler_spot: DF.Data | None
 		grade: DF.Link
@@ -53,6 +54,4 @@ class SlabQualityReport(Document):
 
 	def update_shipping_details_on_slab(self):
 		slab: Slab = frappe.get_doc("Slab", self.slab)  # pyright: ignore[reportAssignmentType]
-		slab.crate_number = self.crate_number
-		slab.container_number = self.container_number
 		slab.save(ignore_permissions=True)

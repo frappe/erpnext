@@ -16,6 +16,6 @@ class SlabTemplate(Document):
 
 		colour_code: DF.Link
 		size: DF.Link
-		thickness: DF.Literal["3CM", "2CM"]
+		thickness: DF.Literal["3cm", "2cm"]
 	# end: auto-generated types
 	pass

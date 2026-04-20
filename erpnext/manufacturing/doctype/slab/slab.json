@@ -12,11 +12,13 @@
   "line",
   "child_line",
   "batch_number",
+  "batch_code",
   "number",
   "serial_number",
   "column_break_mfbp",
   "created_on",
   "current_job_card",
+  "stock_item",
   "status",
   "is_cur_stage_complete",
   "is_paused",
@@ -30,11 +32,11 @@
   "crate_number",
   "column_break_txsf",
   "container_number",
-  "export_section",
+  "column_break_neqa",
   "packing_list_number",
-  "column_break_cnky",
-  "consignment_number",
-  "column_break_il7r",
+  "shipment_section_2",
+  "shipment_number",
+  "column_break_tpms",
   "shipping_date",
   "slab_history_section",
   "slab_history"
@@ -66,7 +68,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Distribution\nPressing\nRe-Pressing\nHeating\nCooling\nCuring\nTrimming\nCalibration\nPolishing\nQuality Check\nPacked\nShipped\nDiscarded",
+   "options": "Distribution\nPressing\nRe-Pressing\nHeating\nCooling\nCuring\nTrimming\nCalibration\nPolishing\nQuality Check\nPacked\nShipped\nDiscarded\nRejected",
    "read_only": 1,
    "reqd": 1
   },
@@ -107,17 +109,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "export_section",
-   "fieldtype": "Section Break",
-   "label": "Export"
-  },
-  {
-   "fieldname": "consignment_number",
-   "fieldtype": "Data",
-   "label": "Consignment Number",
-   "read_only": 1
-  },
-  {
    "fieldname": "shipping_date",
    "fieldtype": "Date",
    "label": "Shipping Date",
@@ -135,15 +126,18 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_il7r",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "batch_number",
    "fieldtype": "Data",
    "label": "Batch Number",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "batch_code",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Batch Code",
+   "read_only": 1
   },
   {
    "fieldname": "serial_number",
@@ -198,13 +192,10 @@
   },
   {
    "fieldname": "packing_list_number",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Packing List Number",
+   "options": "Packing List",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_cnky",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "child_line",
@@ -227,7 +218,7 @@
   {
    "fieldname": "shipping_details_section",
    "fieldtype": "Section Break",
-   "label": "Shipping Details"
+   "label": "Shipping & Export"
   },
   {
    "fieldname": "crate_number",
@@ -244,12 +235,38 @@
    "fieldtype": "Data",
    "label": "Container No.",
    "read_only": 1
+  },
+  {
+   "fieldname": "stock_item",
+   "fieldtype": "Link",
+   "label": "Stock Item",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_neqa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shipment_section_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "shipment_number",
+   "fieldtype": "Link",
+   "label": "Shipment Number",
+   "options": "Shipment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_tpms",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-02 17:14:32.970051",
+ "modified": "2026-04-15 16:30:51.011019",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",
@@ -335,6 +352,10 @@
   {
    "color": "Red",
    "title": "Discarded"
+  },
+  {
+   "color": "Red",
+   "title": "Rejected"
   }
  ]
 }

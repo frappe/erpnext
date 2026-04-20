@@ -43,7 +43,16 @@ from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 
 
 @frappe.whitelist()
-def start_process(job_card, slab_name="", slab_template="", process_name="operator"):
+def start_process(
+	job_card,
+	slab_name="",
+	slab_template="",
+	process_name="operator",
+	slab_number=0,
+	slab_batch_number="",
+	should_start_machine=True,
+	publish_slab_event=True,
+):
 	"""Start the Job Card when mixing starts."""
 
 	jc: JobCard = frappe.get_doc("Job Card", job_card)  # pyright: ignore[reportAssignmentType]
@@ -64,11 +73,15 @@ def start_process(job_card, slab_name="", slab_template="", process_name="operat
 			slab_number=slab_name,
 			next_stage=process_name.lower(),
 			job_card_number=jc.name,
+			publish_event=publish_slab_event,
 		)
 
 	else:
 		if not process_name or process_name.lower() != DISTRIBUTION_PROCESS.lower():
 			raise Exception("Cannot create a new slab outside distribution")
+
+		if not slab_template:
+			raise Exception("Cannot create a slab without a template")
 
 		parent_line = get_parent_line(jc.production_line or "")
 		child_line = ""
@@ -77,7 +90,13 @@ def start_process(job_card, slab_name="", slab_template="", process_name="operat
 
 		slab_history = _get_mixing_slab_history(jc.name or "")
 		new_slab = create_slab(
-			parent_line or "", child_line or "", slab_template or "", jc.name, slab_history
+			parent_line or "",
+			child_line or "",
+			slab_template or "",
+			jc.name,
+			slab_history,
+			slab_number,
+			slab_batch_number,
 		)
 		slab_name = new_slab.name
 		slab_template = new_slab.template
@@ -89,7 +108,8 @@ def start_process(job_card, slab_name="", slab_template="", process_name="operat
 	jc.priority = HIGH_PRIORITY
 	jc.save(ignore_permissions=True)
 
-	start_machine(process_name, jc.production_line, None)
+	if should_start_machine:
+		start_machine(process_name, jc.production_line, None)
 
 	return {
 		"status": jc.status,
@@ -158,6 +178,7 @@ def finish_process(
 	should_stop_machine=True,
 	slab_number=None,
 	slab_grade=None,
+	publish_slab_event=True,
 ):
 	"""Complete the Job Card when mixing is finished."""
 
@@ -226,7 +247,7 @@ def finish_process(
 	wo_status = wo.get_status()
 
 	if jc.slab:
-		checkout_slab(jc.slab)
+		checkout_slab(jc.slab, publish_event=publish_slab_event)
 
 	if transfer_materials:
 		transfer_to_next_process(job_card, work_order, job_card_qty, mixer_number=jc.mixer_number)

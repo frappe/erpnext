@@ -4,7 +4,7 @@
 # import frappe
 from frappe.model.document import Document
 
-ALLOWED_STAGES = ["Distribution", "Pressing", "Re-Pressing", "Heating", "Cooling", "Curing", "Trimming", "Calibration", "Polishing", "Quality Check", "Packed", "Shipped", "Discarded"]
+ALLOWED_STAGES = ["Distribution", "Pressing", "Re-Pressing", "Heating", "Cooling", "Curing", "Trimming", "Calibration", "Polishing", "Quality Check", "Packed", "Shipped", "Discarded", "Rejected"]
 
 class Slab(Document):
 	# begin: auto-generated types
@@ -13,13 +13,14 @@ class Slab(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from erpnext.manufacturing.doctype.slab_history.slab_history import SlabHistory
 		from frappe.types import DF
 
+		from erpnext.manufacturing.doctype.slab_history.slab_history import SlabHistory
+
 		amended_from: DF.Link | None
+		batch_code: DF.Data | None
 		batch_number: DF.Data
 		child_line: DF.Link | None
-		consignment_number: DF.Data | None
 		container_number: DF.Data | None
 		crate_number: DF.Data | None
 		created_on: DF.Datetime | None
@@ -31,12 +32,26 @@ class Slab(Document):
 		is_repressed: DF.Check
 		line: DF.Link
 		number: DF.Int
-		packing_list_number: DF.Data | None
+		packing_list_number: DF.Link | None
 		quality_assessment: DF.Link | None
 		serial_number: DF.Data
+		shipment_number: DF.Link | None
 		shipping_date: DF.Date | None
 		slab_history: DF.Table[SlabHistory]
-		status: DF.Literal["Distribution", "Pressing", "Re-Pressing", "Heating", "Cooling", "Curing", "Trimming", "Calibration", "Polishing", "Quality Check", "Packed", "Shipped", "Discarded"]
+		status: DF.Literal["Distribution", "Pressing", "Re-Pressing", "Heating", "Cooling", "Curing", "Trimming", "Calibration", "Polishing", "Quality Check", "Packed", "Shipped", "Discarded", "Rejected"]
+		stock_item: DF.Link | None
 		template: DF.Link
 	# end: auto-generated types
-	pass
+
+
+	@property
+	def last_active_job_card(self):
+		if self.current_job_card:
+			return self.current_job_card
+
+		# Get the last slab history item that has a job card associated
+		for history in reversed(self.slab_history):
+			if history.job_card_number:
+				return history.job_card_number
+
+		return None

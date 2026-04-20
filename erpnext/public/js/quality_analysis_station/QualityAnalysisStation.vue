@@ -52,6 +52,11 @@ const productionDate = computed(() => {
     return `${day} ${months[parseInt(month) - 1]} ${year}`;
 });
 
+const target_slab_thickness = computed(() => {
+    if (!selectedSlab.value?.template) return "";
+    return selectedSlab.value.template.split('-')[2].trim();
+});
+
 const form = reactive({
     // Basic Details (Auto-filled)
     date: '',
@@ -78,8 +83,6 @@ const form = reactive({
     repair: 'None',
     grade: '',
     remarks: '',
-    crate_number: '',
-    container_number: ''
 });
 
 const grades = ref([]);
@@ -159,8 +162,6 @@ function selectSlab(slab) {
         repair: 'None',
         grade: '',
         remarks: '',
-        crate_number: '',
-        container_number: ''
     });
 
     // Clear observations
@@ -174,8 +175,8 @@ const confirmAndTag = async () => {
         return;
     }
 
-    if (!form.slab_length || !form.slab_width || !form.slab_thickness || !form.grade || !form.crate_number) {
-        frappe.msgprint(__('Please fill in all required fields (Length, Width, Thickness, Grade, Crate No.)'));
+    if (!form.slab_length || !form.slab_width || !form.slab_thickness || !form.grade) {
+        frappe.msgprint(__('Please fill in all required fields (Length, Width, Thickness, Grade)'));
         return;
     }
 
@@ -441,7 +442,7 @@ onUnmounted(() => {
                                     <span class="fa fa-arrows-v mr-2"></span>{{ __('Target Thickness') }}
                                 </div>
                                 <div class="meta-value h5 mb-0 font-weight-bold">
-                                    {{ selectedSlab.template.split('-').pop().trim() }}
+                                    {{ target_slab_thickness }}
                                 </div>
                             </div>
                         </div>
@@ -653,21 +654,6 @@ onUnmounted(() => {
                             </div>
                         </div>
 
-                        <!-- Packing & Shipping Details -->
-                        <h5 class="mb-4 border-bottom pb-2 mt-4">{{ __('Packing & Shipping Details') }}</h5>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="small text-muted">{{ __('Crate No.') }}</label>
-                                <select v-model="form.crate_number" class="form-control" required>
-                                    <option value="">{{ __('Select Crate No.') }}</option>
-                                    <option v-for="n in 12" :key="n" :value="n.toString()">{{ n }}</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="small text-muted">{{ __('Container No.') }}</label>
-                                <input type="text" v-model="form.container_number" class="form-control">
-                            </div>
-                        </div>
                         <div class="mt-4 border-top pt-4 d-flex justify-content-end align-items-center">
                             <div class="actions">
                                 <button class="btn btn-primary btn-lg px-5" :disabled="isProcessing" @click="confirmAndTag">
