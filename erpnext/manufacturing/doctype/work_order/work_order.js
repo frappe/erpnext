@@ -242,6 +242,11 @@ frappe.ui.form.on("Work Order", {
 		frm.trigger("hide_reserve_stock_button");
 		frm.trigger("toggle_items_editable");
 		frm.trigger("set_fg_warehouse_mandatory");
+		frm.trigger("toggle_hide_fields");
+	},
+
+	toggle_hide_fields(frm) {
+		frm.toggle_display("operations", frm.doc?.operations && frm.doc.operations.length > 0);
 	},
 
 	skip_transfer(frm) {
@@ -638,6 +643,8 @@ frappe.ui.form.on("Work Order", {
 				if (r.message["set_scrap_wh_mandatory"]) {
 					frm.toggle_reqd("scrap_warehouse", true);
 				}
+
+				frm.trigger("toggle_hide_fields");
 			},
 		});
 	},

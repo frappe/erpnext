@@ -162,6 +162,10 @@ class WorkOrder(Document):
 			frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"),
 		)
 
+		if self.bom_no:
+			if based_on := frappe.get_cached_value("BOM", self.bom_no, "backflush_based_on"):
+				self.set_onload("backflush_raw_materials_based_on", based_on)
+
 	def show_create_job_card_button(self):
 		operation_details = frappe._dict(
 			frappe.get_all(

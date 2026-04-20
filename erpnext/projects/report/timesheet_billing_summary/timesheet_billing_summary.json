@@ -1,5 +1,6 @@
 {
  "add_total_row": 1,
+ "add_translate_data": 0,
  "columns": [],
  "creation": "2023-10-10 23:53:43.692067",
  "disabled": 0,
@@ -8,9 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "letter_head": "ALYF GmbH",
- "letterhead": null,
- "modified": "2023-10-11 00:58:30.639078",
+ "modified": "2026-04-20 16:55:11.807564",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet Billing Summary",
@@ -38,5 +37,6 @@
   {
    "role": "Employee Self Service"
   }
- ]
+ ],
+ "timeout": 0
 }

@@ -118,6 +118,7 @@ class BOM(WebsiteGenerator):
 
 		allow_alternative_item: DF.Check
 		amended_from: DF.Link | None
+		backflush_based_on: DF.Literal["", "BOM", "Material Transferred for Manufacture"]
 		base_operating_cost: DF.Currency
 		base_raw_material_cost: DF.Currency
 		base_secondary_items_cost: DF.Currency
@@ -1999,3 +2000,16 @@ def get_secondary_items_from_sub_assemblies(bom_no, company, qty, secondary_item
 		get_secondary_items_from_sub_assemblies(row.bom_no, company, qty, secondary_items)
 
 	return secondary_items
+
+
+def get_backflush_based_on(bom_no):
+	backflush_based_on = None
+	if bom_no:
+		backflush_based_on = frappe.get_cached_value("BOM", bom_no, "backflush_based_on")
+
+	if not backflush_based_on:
+		backflush_based_on = frappe.db.get_single_value(
+			"Manufacturing Settings", "backflush_raw_materials_based_on"
+		)
+
+	return backflush_based_on

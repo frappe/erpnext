@@ -196,6 +196,7 @@ class BootStrapTestData:
 		self.make_finance_book()
 		self.make_leads()
 		self.make_sales_person()
+		self.make_sales_partner()
 		self.make_activity_type()
 		self.make_address()
 		self.make_contact()
@@ -614,6 +615,29 @@ class BootStrapTestData:
 			},
 		]
 		self.make_records(["sales_person_name"], records)
+
+	def make_sales_partner(self):
+		records = [
+			{
+				"doctype": "Sales Partner",
+				"partner_name": "_Test Sales Partner India - 1",
+				"commission_rate": 7,
+				"territory": "_Test Territory India",
+			},
+			{
+				"doctype": "Sales Partner",
+				"partner_name": "_Test Sales Partner India - 2",
+				"commission_rate": 5,
+				"territory": "_Test Territory India",
+			},
+			{
+				"doctype": "Sales Partner",
+				"partner_name": "_Test Sales Partner Global - 1",
+				"commission_rate": 8,
+				"territory": "_Test Territory Rest Of The World",
+			},
+		]
+		self.make_records(["partner_name"], records)
 
 	def make_leads(self):
 		records = [
