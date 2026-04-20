@@ -14,7 +14,7 @@ from erpnext.selling.doctype.customer.customer import (
 	get_customer_outstanding,
 	parse_full_name,
 )
-from erpnext.tests.utils import ERPNextTestSuite, create_test_contact_and_address
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestCustomer(ERPNextTestSuite):
@@ -70,8 +70,6 @@ class TestCustomer(ERPNextTestSuite):
 			"contact_phone": "+91 0000000000",
 			"customer_name": "_Test Customer",
 		}
-
-		create_test_contact_and_address()
 
 		frappe.db.set_value(
 			"Contact", "_Test Contact for _Test Customer-_Test Customer", "is_primary_contact", 1

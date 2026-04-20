@@ -10,7 +10,7 @@ from erpnext.stock.doctype.delivery_trip.delivery_trip import (
 	get_contact_and_address,
 	notify_customers,
 )
-from erpnext.tests.utils import ERPNextTestSuite, create_test_contact_and_address
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestDeliveryTrip(ERPNextTestSuite):
@@ -19,7 +19,6 @@ class TestDeliveryTrip(ERPNextTestSuite):
 		driver = create_driver()
 		create_vehicle()
 		create_delivery_notification()
-		create_test_contact_and_address()
 		address = create_address(driver)
 
 		self.delivery_trip = create_delivery_trip(driver, address, company="_Test Company")
