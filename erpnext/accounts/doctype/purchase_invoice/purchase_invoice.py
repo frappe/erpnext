@@ -291,6 +291,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_expense_account()
 		self.set_against_expense_account()
 		self.validate_write_off_account()
+		self.validate_write_off_cost_center()
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount")
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
@@ -660,6 +661,27 @@ class PurchaseInvoice(BuyingController):
 		if self.write_off_amount and not self.write_off_account:
 			throw(_("Please enter Write Off Account"))
 
+		if not self.write_off_account:
+			return
+
+		doc = frappe.db.get_value(
+			"Account", self.write_off_account, ["report_type", "is_group", "company"], as_dict=True
+		)
+
+		if not doc or doc.report_type != "Profit and Loss" or doc.is_group or doc.company != self.company:
+			throw(_("Please enter a valid Write Off Account"))
+
+	def validate_write_off_cost_center(self):
+		if not self.write_off_cost_center:
+			return
+
+		doc = frappe.db.get_value(
+			"Cost Center", self.write_off_cost_center, ["is_group", "company"], as_dict=True
+		)
+
+		if not doc or doc.is_group or doc.company != self.company:
+			throw(_("Please enter a valid Write Off Cost Center"))
+
 	def check_prev_docstatus(self):
 		for d in self.get("items"):
 			if d.purchase_order:
@@ -740,6 +762,7 @@ class PurchaseInvoice(BuyingController):
 
 	def validate_for_repost(self):
 		self.validate_write_off_account()
+		self.validate_write_off_cost_center()
 		self.validate_expense_account()
 		validate_docs_for_voucher_types(["Purchase Invoice"])
 		validate_docs_for_deferred_accounting([], [self.name])
