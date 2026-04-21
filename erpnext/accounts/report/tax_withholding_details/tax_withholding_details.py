@@ -220,8 +220,7 @@ def get_tax_withholding_entries(filters):
 			IfNull(twe.lower_deduction_certificate, "").as_("lower_deduction_certificate"),
 			IfNull(twe.withholding_doctype, "").as_("withholding_doctype"),
 			IfNull(twe.withholding_name, "").as_("withholding_name"),
-			twe.withholding_date,
-			twe.status,
+			twe.withholding_date.as_("transaction_date"),
 		)
 		.where(twe.docstatus == 1)
 		.where(twe.withholding_date >= filters.from_date)
