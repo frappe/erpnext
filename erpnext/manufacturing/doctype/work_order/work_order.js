@@ -241,6 +241,16 @@ frappe.ui.form.on("Work Order", {
 		frm.trigger("allow_alternative_item");
 		frm.trigger("hide_reserve_stock_button");
 		frm.trigger("toggle_items_editable");
+		frm.trigger("set_fg_warehouse_mandatory");
+		frm.trigger("toggle_hide_fields");
+	},
+
+	toggle_hide_fields(frm) {
+		frm.toggle_display("operations", frm.doc?.operations && frm.doc.operations.length > 0);
+	},
+
+	skip_transfer(frm) {
+		frm.trigger("set_fg_warehouse_mandatory");
 	},
 
 	toggle_items_editable(frm) {
@@ -275,6 +285,11 @@ frappe.ui.form.on("Work Order", {
 		let has_reserved_stock = frm.doc.required_items.some((item) => flt(item.stock_reserved_qty) > 0);
 
 		return has_reserved_stock;
+	},
+
+	set_fg_warehouse_mandatory(frm) {
+		let mandatory = frm.doc.skip_transfer === 1 || frm.doc.track_semi_finished_goods === 1 ? false : true;
+		frm.toggle_reqd("fg_warehouse", mandatory);
 	},
 
 	add_custom_button_to_return_components: function (frm) {
@@ -628,6 +643,8 @@ frappe.ui.form.on("Work Order", {
 				if (r.message["set_scrap_wh_mandatory"]) {
 					frm.toggle_reqd("scrap_warehouse", true);
 				}
+
+				frm.trigger("toggle_hide_fields");
 			},
 		});
 	},

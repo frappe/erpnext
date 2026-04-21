@@ -523,7 +523,7 @@ class TestJournalEntry(ERPNextTestSuite):
 		jv = frappe.new_doc("Journal Entry")
 		jv.posting_date = nowdate()
 		jv.company = "_Test Company"
-		jv.user_remark = "test"
+		jv.remark = "test"
 		jv.extend(
 			"accounts",
 			[
@@ -592,6 +592,14 @@ class TestJournalEntry(ERPNextTestSuite):
 
 		self.assertEqual(jv.pay_to_recd_from, "_Test Receiver 2")
 
+	def test_custom_remark(self):
+		# When custom_remark is enabled, remark should not be auto-overwritten on save
+		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, save=False)
+		jv.custom_remark = 1
+		jv.remark = "My custom remark text"
+		jv.insert()
+		self.assertEqual(jv.remark, "My custom remark text")
+
 	def test_credit_limit_for_customer(self):
 		customer = make_customer("_Test New Customer")
 		set_credit_limit("_Test New Customer", "_Test Company", 50)
@@ -620,7 +628,7 @@ def make_journal_entry(
 	jv = frappe.new_doc("Journal Entry")
 	jv.posting_date = posting_date or nowdate()
 	jv.company = company or "_Test Company"
-	jv.user_remark = "test"
+	jv.remark = "test"
 	jv.multi_currency = 1
 	jv.set(
 		"accounts",

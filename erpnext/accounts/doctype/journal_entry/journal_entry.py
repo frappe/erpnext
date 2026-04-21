@@ -62,6 +62,7 @@ class JournalEntry(AccountsController):
 		cheque_no: DF.Data | None
 		clearance_date: DF.Date | None
 		company: DF.Link
+		custom_remark: DF.Check
 		difference: DF.Currency
 		due_date: DF.Date | None
 		finance_book: DF.Link | None
@@ -1027,8 +1028,8 @@ class JournalEntry(AccountsController):
 		if self.flags.skip_remarks_creation:
 			return
 
-		if self.user_remark:
-			r.append(_("Note: {0}").format(self.user_remark))
+		if self.get("custom_remark"):
+			return
 
 		if self.cheque_no:
 			if self.cheque_date:
@@ -1571,7 +1572,7 @@ def get_against_jv(
 		frappe.qb.from_(JournalEntry)
 		.join(JournalEntryAccount)
 		.on(JournalEntryAccount.parent == JournalEntry.name)
-		.select(JournalEntry.name, JournalEntry.posting_date, JournalEntry.user_remark)
+		.select(JournalEntry.name, JournalEntry.posting_date, JournalEntry.remark)
 		.where(JournalEntryAccount.account == filters.get("account"))
 		.where(JournalEntryAccount.reference_type.isnull() | (JournalEntryAccount.reference_type == ""))
 		.where(JournalEntry.docstatus == 1)

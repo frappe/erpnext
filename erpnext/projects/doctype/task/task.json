@@ -423,7 +423,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2026-03-04 11:47:10.454548",
+ "modified": "2026-04-09 19:12:27.153143",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
@@ -439,6 +439,20 @@
    "read": 1,
    "report": 1,
    "role": "Projects User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "role": "HR User",
+   "select": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "read": 1,
+   "role": "HR Manager",
    "share": 1,
    "write": 1
   }

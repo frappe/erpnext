@@ -2066,14 +2066,14 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 				if not pending_qty:
 					pending_qty = stock_qty * overproduction_percentage_for_sales_order
 
-				if pending_qty > 0 and i.item_code not in product_bundle_parents:
+				if pending_qty > 0 and i.item_code not in product_bundle_parents and bom:
 					items.append(
 						dict(
 							name=i.name,
 							item_code=i.item_code,
 							item_name=i.item_name,
 							description=i.description,
-							bom=bom or "",
+							bom=bom,
 							warehouse=i.warehouse,
 							pending_qty=pending_qty,
 							required_qty=pending_qty if for_raw_material_request else 0,

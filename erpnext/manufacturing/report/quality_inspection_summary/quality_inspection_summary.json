@@ -1,15 +1,16 @@
 {
  "add_total_row": 0,
+ "add_translate_data": 0,
+ "columns": [],
  "creation": "2020-04-26 18:23:53.475110",
- "disable_prepared_report": 0,
  "disabled": 0,
  "docstatus": 0,
  "doctype": "Report",
+ "filters": [],
  "idx": 0,
  "is_standard": "Yes",
  "json": "{}",
- "letter_head": "Gadgets International",
- "modified": "2020-04-26 18:24:50.529940",
+ "modified": "2026-04-20 16:55:11.903547",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Quality Inspection Summary",
@@ -28,5 +29,6 @@
   {
    "role": "Stock Manager"
   }
- ]
+ ],
+ "timeout": 0
 }

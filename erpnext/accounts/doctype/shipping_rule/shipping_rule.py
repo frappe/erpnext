@@ -58,6 +58,11 @@ class ShippingRule(Document):
 		self.validate_overlapping_shipping_rule_conditions()
 
 	def validate_from_to_values(self):
+		if self.calculate_based_on == "Fixed":
+			if self.conditions:
+				self.set("conditions", [])
+			return
+
 		zero_to_values = []
 
 		for d in self.get("conditions"):
