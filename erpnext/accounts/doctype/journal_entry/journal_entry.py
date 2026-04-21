@@ -161,6 +161,8 @@ class JournalEntry(AccountsController):
 
 		if self.is_new() or not self.title:
 			self.title = self.get_title()
+		if self.reversal_of:
+			check_reverse_entry_exists(source_name=self.reversal_of, exclude_name=self.name)
 
 	def validate_advance_accounts(self):
 		journal_accounts = set([x.account for x in self.accounts])
@@ -1788,13 +1790,7 @@ def make_inter_company_journal_entry(name: str, voucher_type: str, company: str)
 
 @frappe.whitelist()
 def make_reverse_journal_entry(source_name: str, target_doc: str | Document | None = None):
-	existing_reverse = frappe.db.exists("Journal Entry", {"reversal_of": source_name, "docstatus": 1})
-	if existing_reverse:
-		frappe.throw(
-			_("A Reverse Journal Entry {0} already exists for this Journal Entry.").format(
-				get_link_to_form("Journal Entry", existing_reverse)
-			)
-		)
+	check_reverse_entry_exists(source_name)
 
 	from frappe.model.mapper import get_mapped_doc
 
@@ -1825,3 +1821,16 @@ def make_reverse_journal_entry(source_name: str, target_doc: str | Document | No
 	)
 
 	return doclist
+
+
+def check_reverse_entry_exists(source_name: str, exclude_name: str | None = None):
+	filters = {"reversal_of": source_name, "docstatus": ["!=", 2]}
+	if exclude_name:
+		filters["name"] = ["!=", exclude_name]
+	existing_reverse = frappe.db.exists("Journal Entry", filters)
+	if existing_reverse:
+		frappe.throw(
+			_("A Reverse Journal Entry {0} already exists for this Journal Entry.").format(
+				get_link_to_form("Journal Entry", existing_reverse)
+			)
+		)
