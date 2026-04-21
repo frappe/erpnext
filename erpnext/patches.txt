@@ -478,3 +478,4 @@ erpnext.patches.v16_0.depends_on_inv_dimensions
 erpnext.patches.v16_0.uom_category
 erpnext.patches.v16_0.merge_repost_settings_to_accounts_settings
 erpnext.patches.v16_0.set_root_type_in_account_categories
+erpnext.patches.v16_0.scr_inv_dimension
