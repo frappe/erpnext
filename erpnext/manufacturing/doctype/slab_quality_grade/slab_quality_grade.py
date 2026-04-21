@@ -14,11 +14,9 @@ class SlabQualityGrade(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		amended_from: DF.Link | None
 		code: DF.Data
 		color: DF.Color
 		grade_name: DF.Data
-		parent: DF.Data
-		parentfield: DF.Data
-		parenttype: DF.Data
 	# end: auto-generated types
 	pass
