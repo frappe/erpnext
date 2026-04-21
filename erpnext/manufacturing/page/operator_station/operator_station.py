@@ -238,6 +238,8 @@ def finish_process(
 			if item.is_finished_item:
 				item.slab_no = slab_number
 				item.to_slab_no = slab_number
+				item.slab_quality_grade = slab_grade
+				item.to_slab_grade = slab_grade
 
 	stock_entry_manufacture.fg_completed_qty = job_card_qty
 	stock_entry_manufacture.save()

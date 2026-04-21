@@ -198,7 +198,9 @@ def get_open_job_cards(
 	include_wip=True,
 	include_material_transferred=True,
 	include_paused=True,
-	item_code=None,, slab_template="", limit = 0
+	item_code=None,
+	slab_template="",
+	limit=0,
 ):
 	is_mixing = process == "Mixing"
 	if is_mixing:
