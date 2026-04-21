@@ -1190,15 +1190,16 @@ def make_delivery_note(
 		for item in target.items:
 			if not item.so_detail:
 				continue
-			if item.so_detail in so_detail_map:
-				existing = so_detail_map[item.so_detail]
+			key = (item.so_detail, item.warehouse)
+			if key in so_detail_map:
+				existing = so_detail_map[key]
 				remaining = flt(item.qty) - flt(existing.qty)
 				if remaining > 0:
 					existing.qty = flt(existing.qty) + remaining
 					has_partial_merge = True
 				items_to_remove.append(item)
 			else:
-				so_detail_map[item.so_detail] = item
+				so_detail_map[key] = item
 		for item in items_to_remove:
 			target.remove(item)
 		if items_to_remove:
