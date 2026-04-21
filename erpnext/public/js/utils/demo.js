@@ -2,7 +2,7 @@ frappe.provide("erpnext.demo");
 
 $(document).on("desktop_screen", function (event, data) {
 	data.desktop.add_menu_item({
-		label: __("Clear Demo Data"),
+		label: __("Delete Demo Data"),
 		icon: "trash",
 		condition: function () {
 			return frappe.boot.sysdefaults.demo_company;

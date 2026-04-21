@@ -450,7 +450,114 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			},
 		});
 	}
+	make_payment_request_with_schedule = async function () {
+		let frm = this.frm;
+		const { message: schedules } = await frappe.call({
+			method: "erpnext.accounts.doctype.payment_request.payment_request.get_available_payment_schedules",
+			args: {
+				reference_doctype: frm.doctype,
+				reference_name: frm.doc.name,
+			},
+		});
+		const value = await frappe.db.get_single_value(
+			"Accounts Settings",
+			"fetch_payment_schedule_in_payment_request"
+		);
 
+		if (!value || !schedules.length) {
+			this.make_payment_request();
+			return;
+		}
+		if (!schedules || !schedules.length) {
+			frappe.msgprint(__("No pending payment schedules available."));
+			return;
+		}
+		schedules.forEach((schedule) => (schedule.__checked = 1));
+
+		const dialog = new frappe.ui.Dialog({
+			title: __("Select Payment Schedule"),
+			fields: [
+				{
+					fieldtype: "Table",
+					fieldname: "payment_schedules",
+					label: __("Payment Schedules"),
+					cannot_add_rows: true,
+					cannot_delete_rows: true,
+					in_place_edit: false,
+					data: schedules,
+					fields: [
+						{
+							fieldtype: "Data",
+							fieldname: "name",
+							label: __("Schedule Name"),
+							read_only: 1,
+						},
+						{
+							fieldtype: "Data",
+							fieldname: "payment_term",
+							label: __("Payment Term"),
+							in_list_view: 1,
+							read_only: 1,
+						},
+						{
+							fieldtype: "Date",
+							fieldname: "due_date",
+							label: __("Due Date"),
+							in_list_view: 1,
+							read_only: 1,
+						},
+						{
+							fieldtype: "Currency",
+							fieldname: "payment_amount",
+							label: __("Amount"),
+							in_list_view: 1,
+							read_only: 1,
+						},
+					],
+				},
+			],
+			primary_action_label: __("Create Payment Request"),
+			primary_action: async () => {
+				const values = dialog.get_values();
+				const selected = values.payment_schedules.filter((r) => r.__checked);
+
+				if (!selected.length) {
+					frappe.show_alert({
+						message: __("Please select at least one schedule."),
+						indicator: "orange",
+					});
+					return;
+				}
+				dialog.hide();
+				let me = this;
+				const payment_request_type = ["Sales Order", "Sales Invoice"].includes(this.frm.doc.doctype)
+					? "Inward"
+					: "Outward";
+				const { message: pr_name } = await frappe.call({
+					method: "erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
+					args: {
+						dt: me.frm.doc.doctype,
+						dn: me.frm.doc.name,
+						recipient_id: me.frm.doc.contact_email,
+						payment_request_type: payment_request_type,
+						party_type: payment_request_type == "Outward" ? "Supplier" : "Customer",
+						party: payment_request_type == "Outward" ? me.frm.doc.supplier : me.frm.doc.customer,
+						party_name:
+							payment_request_type == "Outward"
+								? me.frm.doc.supplier_name
+								: me.frm.doc.customer_name,
+						reference_doctype: frm.doctype,
+						reference_name: frm.docname,
+						schedules: selected,
+					},
+				});
+				frappe.model.sync(pr_name);
+				frappe.set_route("Form", "Payment Request", pr_name.name);
+			},
+		});
+
+		dialog.show();
+	};
 	onload_post_render() {
 		if (
 			this.frm.doc.__islocal &&
@@ -481,6 +588,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.validate_has_items();
 		erpnext.utils.view_serial_batch_nos(this.frm);
 		this.set_route_options_for_new_doc();
+		erpnext.toggle_serial_batch_fields(this.frm);
 	}
 
 	set_route_options_for_new_doc() {
@@ -1208,6 +1316,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (this.frm.doc.transaction_date) {
 			this.frm.transaction_date = this.frm.doc.transaction_date;
 			frappe.ui.form.trigger(this.frm.doc.doctype, "currency");
+			this.recalculate_terms();
 		}
 	}
 
@@ -1747,7 +1856,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				"base_operating_cost",
 				"base_raw_material_cost",
 				"base_total_cost",
-				"base_scrap_material_cost",
+				"base_secondary_items_cost",
 				"base_totals_section",
 			],
 			company_currency
@@ -1765,7 +1874,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				"paid_amount",
 				"write_off_amount",
 				"operating_cost",
-				"scrap_material_cost",
+				"secondary_items_cost",
 				"raw_material_cost",
 				"total_cost",
 				"totals_section",
@@ -1806,7 +1915,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				"base_operating_cost",
 				"base_raw_material_cost",
 				"base_total_cost",
-				"base_scrap_material_cost",
+				"base_secondary_items_cost",
 				"base_rounding_adjustment",
 			],
 			this.frm.doc.currency != company_currency
@@ -1871,11 +1980,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 		}
 
-		if (this.frm.doc.scrap_items && this.frm.doc.scrap_items.length > 0) {
-			this.frm.set_currency_labels(["rate", "amount"], this.frm.doc.currency, "scrap_items");
-			this.frm.set_currency_labels(["base_rate", "base_amount"], company_currency, "scrap_items");
+		if (this.frm.doc.secondary_items && this.frm.doc.secondary_items.length > 0) {
+			this.frm.set_currency_labels(["rate", "amount"], this.frm.doc.currency, "secondary_items");
+			this.frm.set_currency_labels(["base_rate", "base_amount"], company_currency, "secondary_items");
 
-			var item_grid = this.frm.fields_dict["scrap_items"].grid;
+			var item_grid = this.frm.fields_dict["secondary_items"].grid;
 			$.each(["base_rate", "base_amount"], function (i, fname) {
 				if (frappe.meta.get_docfield(item_grid.doctype, fname))
 					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
@@ -2862,6 +2971,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				frappe.call({
 					method: "erpnext.controllers.stock_controller.make_quality_inspections",
 					args: {
+						company: me.frm.doc.company,
 						doctype: me.frm.doc.doctype,
 						docname: me.frm.doc.name,
 						items: selected_data,

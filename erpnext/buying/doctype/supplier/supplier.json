@@ -178,6 +178,7 @@
    "default": "Company",
    "fieldname": "supplier_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Supplier Type",
    "options": "Company\nIndividual\nPartnership",
    "reqd": 1
@@ -238,6 +239,7 @@
    "fieldname": "default_currency",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_list_view": 1,
    "label": "Billing Currency",
    "no_copy": 1,
    "options": "Currency"
@@ -515,7 +517,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-02-08 20:28:01.101808",
+ "modified": "2026-03-09 17:15:25.465759",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

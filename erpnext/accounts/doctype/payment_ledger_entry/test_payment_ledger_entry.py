@@ -3,7 +3,6 @@
 
 import frappe
 from frappe import qb
-from frappe.tests import IntegrationTestCase
 from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -11,18 +10,16 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_pay
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestPaymentLedgerEntry(IntegrationTestCase):
+class TestPaymentLedgerEntry(ERPNextTestSuite):
 	def setUp(self):
 		self.ple = qb.DocType("Payment Ledger Entry")
 		self.create_company()
 		self.create_item()
 		self.create_customer()
 		self.clear_old_entries()
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 	def create_company(self):
 		company_name = "_Test Payment Ledger"
@@ -445,7 +442,7 @@ class TestPaymentLedgerEntry(IntegrationTestCase):
 		self.assertEqual(pl_entries_for_crnote[0], expected_values[0])
 		self.assertEqual(pl_entries_for_crnote[1], expected_values[1])
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"unlink_payment_on_cancellation_of_invoice": 1, "delete_linked_ledger_entries": 1},
 	)
@@ -474,7 +471,7 @@ class TestPaymentLedgerEntry(IntegrationTestCase):
 		si.delete()
 		self.assertRaises(frappe.DoesNotExistError, frappe.get_doc, si.doctype, si.name)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"unlink_payment_on_cancellation_of_invoice": 1, "delete_linked_ledger_entries": 1},
 	)
@@ -507,7 +504,7 @@ class TestPaymentLedgerEntry(IntegrationTestCase):
 		si.delete()
 		self.assertRaises(frappe.DoesNotExistError, frappe.get_doc, si.doctype, si.name)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{
 			"unlink_payment_on_cancellation_of_invoice": 1,

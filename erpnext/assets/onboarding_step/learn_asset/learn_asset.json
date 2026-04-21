@@ -1,0 +1,20 @@
+{
+ "action": "View Docs",
+ "action_label": "Learn Asset",
+ "creation": "2026-02-23 21:00:47.254648",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-26 10:44:59.557156",
+ "modified_by": "Administrator",
+ "name": "Learn Asset",
+ "owner": "Administrator",
+ "path": "https://docs.frappe.io/erpnext/assets/introduction",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Learn Asset",
+ "validate_action": 1
+}

@@ -22,6 +22,7 @@ def after_install():
 		frappe.get_doc({"doctype": "Role", "role_name": "Analytics"}).insert()
 
 	set_single_defaults()
+	setup_repost_defaults()
 	create_print_setting_custom_fields()
 	create_marketing_campaign_custom_fields()
 	create_custom_company_links()
@@ -35,6 +36,7 @@ def after_install():
 	update_roles()
 	make_default_operations()
 	update_pegged_currencies()
+	set_default_print_formats()
 	create_letter_head()
 	frappe.db.commit()
 
@@ -71,6 +73,13 @@ def set_single_defaults():
 				pass
 
 	setup_currency_exchange()
+
+
+def setup_repost_defaults():
+	accounts_settings = frappe.get_doc("Accounts Settings")
+	for x in frappe.get_hooks("repost_allowed_doctypes"):
+		accounts_settings.append("repost_allowed_types", {"document_type": x})
+	accounts_settings.save()
 
 
 def setup_currency_exchange():
@@ -301,6 +310,37 @@ def update_pegged_currencies():
 	doc.save()
 
 
+def set_default_print_formats():
+	default_map = {
+		"Sales Order": "Sales Order with Item Image",
+		"Sales Invoice": "Sales Invoice with Item Image",
+		"Delivery Note": "Delivery Note with Item Image",
+		"Purchase Order": "Purchase Order with Item Image",
+		"Purchase Invoice": "Purchase Invoice with Item Image",
+		"POS Invoice": "POS Invoice with Item Image",
+		"Quotation": "Quotation with Item Image",
+		"Request for Quotation": "Request for Quotation with Item Image",
+	}
+
+	for doctype, print_format in default_map.items():
+		if frappe.get_meta(doctype).default_print_format:
+			continue
+
+		if not frappe.db.exists("Print Format", print_format):
+			continue
+
+		frappe.make_property_setter(
+			{
+				"doctype": doctype,
+				"doctype_or_field": "DocType",
+				"property": "default_print_format",
+				"value": print_format,
+				"property_type": "Link",
+			},
+			validate_fields_for_doctype=False,
+		)
+
+
 def create_letter_head():
 	base_path = frappe.get_app_path("erpnext", "accounts", "letterhead")
 
@@ -318,6 +358,8 @@ def create_letter_head():
 					"letter_head_name": name,
 					"source": "HTML",
 					"content": content,
+					"is_default": 1 if name == "Company Letterhead - Grey" else 0,
+					"letter_head_for": "Report",
 				}
 			)
 			doc.insert(ignore_permissions=True)

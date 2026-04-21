@@ -2,9 +2,9 @@ import json
 
 import frappe
 from frappe.query_builder.functions import Timestamp
-from frappe.tests import IntegrationTestCase
 
 from erpnext.stock.utils import scan_barcode
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 class StockTestMixin:
@@ -70,7 +70,7 @@ class StockTestMixin:
 				self.assertEqual(exp_value, act_value, msg=f"{k} doesn't match \n{exp_gle}\n{act_gle}")
 
 
-class TestStockUtilities(IntegrationTestCase, StockTestMixin):
+class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 	def test_barcode_scanning(self):
 		simple_item = self.make_item(properties={"barcodes": [{"barcode": "12399"}]})
 		self.assertEqual(scan_barcode("12399")["item_code"], simple_item.name)
@@ -86,7 +86,10 @@ class TestStockUtilities(IntegrationTestCase, StockTestMixin):
 
 		serial_item = self.make_item(properties={"has_serial_no": 1})
 		serial = frappe.get_doc(
-			doctype="Serial No", item_code=serial_item.name, serial_no=frappe.generate_hash()
+			doctype="Serial No",
+			item_code=serial_item.name,
+			serial_no=frappe.generate_hash(),
+			company="_Test Company",
 		).insert()
 
 		serial_scan = scan_barcode(serial.name)

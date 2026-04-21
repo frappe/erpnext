@@ -2,14 +2,13 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import cstr, flt, getdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.assets.doctype.asset.depreciation import (
 	post_depreciation_entries,
 )
-from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 	get_depr_schedule,
@@ -18,12 +17,10 @@ from erpnext.assets.doctype.asset_repair.test_asset_repair import create_asset_r
 from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
 	make_asset_value_adjustment,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestAssetDepreciationSchedule(IntegrationTestCase):
-	def setUp(self):
-		create_asset_data()
-
+class TestAssetDepreciationSchedule(ERPNextTestSuite):
 	def test_throw_error_if_another_asset_depr_schedule_exist(self):
 		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, submit=1)
 
@@ -815,7 +812,6 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 	def test_depreciation_on_return_of_sold_asset(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
-		create_asset_data()
 		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, submit=1)
 		post_depreciation_entries(getdate("2021-09-30"))
 

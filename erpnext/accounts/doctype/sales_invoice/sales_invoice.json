@@ -33,6 +33,8 @@
   "is_created_using_pos",
   "pos_closing_entry",
   "has_subcontracted",
+  "section_break_sgnf",
+  "title",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -78,21 +80,23 @@
   "column_break_47",
   "total_taxes_and_charges",
   "totals_section",
+  "use_company_roundoff_cost_center",
   "grand_total",
-  "rounding_adjustment",
   "in_words",
   "column_break5",
-  "rounded_total",
   "disable_rounded_total",
-  "total_advance",
-  "outstanding_amount",
-  "use_company_roundoff_cost_center",
+  "rounding_adjustment",
+  "rounded_total",
   "base_totals_section",
   "base_grand_total",
-  "base_rounding_adjustment",
   "base_in_words",
   "column_break_xjag",
+  "base_rounding_adjustment",
   "base_rounded_total",
+  "section_break_vacb",
+  "total_advance",
+  "column_break_rdks",
+  "outstanding_amount",
   "section_tax_withholding_entry",
   "tax_withholding_group",
   "ignore_tax_withholding_threshold",
@@ -212,10 +216,11 @@
   "language",
   "subscription_section",
   "subscription",
-  "from_date",
-  "auto_repeat",
   "column_break_140",
+  "from_date",
   "to_date",
+  "automation_section",
+  "auto_repeat",
   "update_auto_repeat_reference",
   "utm_analytics_section",
   "utm_source",
@@ -269,6 +274,7 @@
    "oldfieldtype": "Link",
    "options": "Customer",
    "print_hide": 1,
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -378,7 +384,9 @@
    "fieldtype": "Date",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Posting Date",
    "no_copy": 1,
    "oldfieldname": "posting_date",
    "oldfieldtype": "Date",
@@ -412,6 +420,7 @@
    "fieldtype": "Date",
    "hide_days": 1,
    "hide_seconds": 1,
+   "in_list_view": 1,
    "label": "Payment Due Date",
    "no_copy": 1,
    "oldfieldname": "due_date",
@@ -797,8 +806,7 @@
    "hide_seconds": 1,
    "label": "Time Sheets",
    "options": "Sales Invoice Timesheet",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "default": "0",
@@ -1637,6 +1645,7 @@
    "fieldtype": "Select",
    "hide_days": 1,
    "hide_seconds": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
    "length": 30,
@@ -2307,6 +2316,32 @@
    "fieldname": "utm_analytics_section",
    "fieldtype": "Section Break",
    "label": "UTM Analytics"
+  },
+  {
+   "fieldname": "section_break_vacb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_rdks",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "automation_section",
+   "fieldtype": "Section Break",
+   "label": "Automation"
+  },
+  {
+   "fieldname": "section_break_sgnf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "grid_page_length": 50,
@@ -2320,7 +2355,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-02-10 11:59:07.819903",
+ "modified": "2026-03-30 12:17:16.201016",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

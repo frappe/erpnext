@@ -58,7 +58,9 @@ def create_prospect_against_crm_deal():
 		)
 		pass
 
-	create_contacts(json.loads(doc.contacts), prospect.company_name, "Prospect", prospect_name)
+	if doc.contacts and len(doc.contacts):
+		create_contacts(json.loads(doc.contacts), prospect.company_name, "Prospect", prospect_name)
+
 	create_address("Prospect", prospect_name, doc.address)
 	frappe.response["message"] = prospect_name
 
@@ -149,7 +151,7 @@ def contact_exists(email, mobile_no):
 
 
 @frappe.whitelist()
-def create_customer(customer_data=None):
+def create_customer(customer_data: dict | None = None):
 	if not customer_data:
 		customer_data = frappe.form_dict
 

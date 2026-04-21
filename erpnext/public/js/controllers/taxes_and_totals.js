@@ -1,6 +1,8 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+const NOT_APPLICABLE_TAX = "N/A";
+
 erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	setup() {
 		this.fetch_round_off_accounts();
@@ -191,6 +193,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				tax.item_wise_tax_detail = {};
 			}
 			var tax_fields = [
+				"net_amount",
 				"total",
 				"tax_amount_after_discount_amount",
 				"tax_amount_for_current_item",
@@ -298,6 +301,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		if (cint(tax.included_in_print_rate)) {
 			var tax_rate = this._get_tax_rate(tax, item_tax_map);
 
+			if (tax_rate === NOT_APPLICABLE_TAX) {
+				return [current_tax_fraction, inclusive_tax_amount_per_qty];
+			}
+
 			if (tax.charge_type == "On Net Total") {
 				current_tax_fraction = tax_rate / 100.0;
 			} else if (tax.charge_type == "On Previous Row Amount") {
@@ -321,9 +328,14 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	_get_tax_rate(tax, item_tax_map) {
-		return Object.keys(item_tax_map).indexOf(tax.account_head) != -1
-			? flt(item_tax_map[tax.account_head], precision("rate", tax))
-			: tax.rate;
+		if (tax.account_head in item_tax_map) {
+			let rate = item_tax_map[tax.account_head];
+			if (rate === NOT_APPLICABLE_TAX) {
+				return NOT_APPLICABLE_TAX;
+			}
+			return flt(rate, precision("rate", tax));
+		}
+		return tax.rate;
 	}
 
 	calculate_net_total() {
@@ -367,6 +379,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 
 			$.each(item_tax_map, function (tax, rate) {
+				if (rate === NOT_APPLICABLE_TAX) {
+					return;
+				}
+
 				let found = (me.frm.doc.taxes || []).find((d) => d.account_head === tax);
 				if (!found) {
 					let child = frappe.model.add_child(me.frm.doc, "taxes");
@@ -400,9 +416,14 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
 			$.each(doc.taxes, function (i, tax) {
 				// tax_amount represents the amount of tax for the current step
-				var current_tax_amount = me.get_current_tax_amount(item, tax, item_tax_map);
+				var [current_net_amount, current_tax_amount] = me.get_current_tax_amount(
+					item,
+					tax,
+					item_tax_map
+				);
 				if (frappe.flags.round_row_wise_tax) {
 					current_tax_amount = flt(current_tax_amount, precision("tax_amount", tax));
+					current_net_amount = flt(current_net_amount, precision("net_amount", tax));
 				}
 
 				// Adjust divisional loss to the last item
@@ -419,6 +440,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 					!(me.discount_amount_applied && me.frm.doc.apply_discount_on == "Grand Total")
 				) {
 					tax.tax_amount += current_tax_amount;
+					tax.net_amount += current_net_amount;
 				}
 
 				// store tax_amount for current item as it will be used for
@@ -480,7 +502,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 		for (const [i, tax] of doc.taxes.entries()) {
 			me.round_off_totals(tax);
-			me.set_in_company_currency(tax, ["tax_amount", "tax_amount_after_discount_amount"]);
+			me.set_in_company_currency(tax, ["tax_amount", "tax_amount_after_discount_amount", "net_amount"]);
 
 			me.round_off_base_values(tax);
 
@@ -516,6 +538,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		var tax_rate = this._get_tax_rate(tax, item_tax_map);
 		var current_tax_amount = 0.0;
 		var current_net_amount = 0.0;
+
+		if (tax_rate === NOT_APPLICABLE_TAX) {
+			return [current_net_amount, current_tax_amount];
+		}
 
 		// To set row_id by default as previous row.
 		if (["On Previous Row Amount", "On Previous Row Total"].includes(tax.charge_type)) {
@@ -555,7 +581,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			current_tax_amount = tax_rate * item.qty;
 		}
 
-		return current_tax_amount;
+		return [current_net_amount, current_tax_amount];
 	}
 
 	round_off_totals(tax) {
@@ -565,6 +591,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		}
 
 		tax.tax_amount = flt(tax.tax_amount, precision("tax_amount", tax));
+		tax.net_amount = flt(tax.net_amount, precision("net_amount", tax));
 		tax.tax_amount_after_discount_amount = flt(
 			tax.tax_amount_after_discount_amount,
 			precision("tax_amount", tax)
@@ -622,6 +649,12 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 					me.grand_total_diff = diff;
 				} else {
 					me.grand_total_diff = 0;
+				}
+
+				// Apply rounding adjustment to grand_total_for_distributing_discount
+				// to prevent precision errors during discount distribution
+				if (me.grand_total_for_distributing_discount && !me.discount_amount_applied) {
+					me.grand_total_for_distributing_discount += me.grand_total_diff;
 				}
 			}
 		}
@@ -702,23 +735,21 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			disable_rounded_total = frappe.sys_defaults.disable_rounded_total;
 		}
 
-		if (cint(disable_rounded_total)) {
-			this.frm.doc.rounded_total = 0;
-			this.frm.doc.base_rounded_total = 0;
-			this.frm.doc.rounding_adjustment = 0;
-			return;
-		}
-
 		if (frappe.meta.get_docfield(this.frm.doc.doctype, "rounded_total", this.frm.doc.name)) {
-			this.frm.doc.rounded_total = round_based_on_smallest_currency_fraction(
-				this.frm.doc.grand_total,
-				this.frm.doc.currency,
-				precision("rounded_total")
-			);
-			this.frm.doc.rounding_adjustment = flt(
-				this.frm.doc.rounded_total - this.frm.doc.grand_total,
-				precision("rounding_adjustment")
-			);
+			if (cint(disable_rounded_total)) {
+				this.frm.doc.rounded_total = 0;
+				this.frm.doc.rounding_adjustment = 0;
+			} else {
+				this.frm.doc.rounded_total = round_based_on_smallest_currency_fraction(
+					this.frm.doc.grand_total,
+					this.frm.doc.currency,
+					precision("rounded_total")
+				);
+				this.frm.doc.rounding_adjustment = flt(
+					this.frm.doc.rounded_total - this.frm.doc.grand_total,
+					precision("rounding_adjustment")
+				);
+			}
 
 			this.set_in_company_currency(this.frm.doc, ["rounding_adjustment", "rounded_total"]);
 		}

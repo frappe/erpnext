@@ -152,7 +152,7 @@ class RepostAccountingLedger(Document):
 
 
 @frappe.whitelist()
-def start_repost(account_repost_doc=str) -> None:
+def start_repost(account_repost_doc: str | None = None) -> None:
 	from erpnext.accounts.general_ledger import make_reverse_gl_entries
 
 	frappe.flags.through_repost_accounting_ledger = True
@@ -217,7 +217,6 @@ def get_allowed_types_from_settings(child_doc: bool = False):
 		x.document_type
 		for x in frappe.db.get_all(
 			"Repost Allowed Types",
-			filters={"allowed": True},
 			fields=["document_type"],
 			distinct=True,
 		)
@@ -272,23 +271,22 @@ def validate_docs_for_voucher_types(doc_voucher_types):
 	if disallowed_types := voucher_types.difference(allowed_types):
 		message = "are" if len(disallowed_types) > 1 else "is"
 		frappe.throw(
-			_("{0} {1} not allowed to be reposted. Modify {2} to enable reposting.").format(
+			_(
+				"{0} {1} not allowed to be reposted. You can enable it by adding it '{2}' table in {3}."
+			).format(
 				frappe.bold(comma_and(list(disallowed_types))),
 				message,
-				frappe.bold(
-					frappe.utils.get_link_to_form(
-						"Repost Accounting Ledger Settings", "Repost Accounting Ledger Settings"
-					)
-				),
+				frappe.bold("Allowed Doctype"),
+				frappe.utils.get_link_to_form("Accounts Settings"),
 			)
 		)
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_repost_allowed_types(doctype, txt, searchfield, start, page_len, filters):
-	filters = {"allowed": True}
-
+def get_repost_allowed_types(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
 	if txt:
 		filters.update({"document_type": ("like", f"%{txt}%")})
 

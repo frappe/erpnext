@@ -57,7 +57,7 @@ def validate_columns(data):
 
 
 @frappe.whitelist()
-def validate_company(company):
+def validate_company(company: str):
 	parent_company, allow_account_creation_against_child_company = frappe.get_cached_value(
 		"Company", company, ["parent_company", "allow_account_creation_against_child_company"]
 	)
@@ -74,7 +74,7 @@ def validate_company(company):
 
 
 @frappe.whitelist()
-def import_coa(file_name, company):
+def import_coa(file_name: str, company: str):
 	# delete existing data for accounts
 	unset_existing_data(company)
 
@@ -159,7 +159,9 @@ def generate_data_from_excel(file_doc, extension, as_dict=False):
 
 
 @frappe.whitelist()
-def get_coa(doctype, parent, is_root=False, file_name=None, for_validate=0):
+def get_coa(
+	doctype: str, parent: str, is_root: bool = False, file_name: str | None = None, for_validate: int = 0
+):
 	"""called by tree view (to fetch node's children)"""
 
 	file_doc, extension = get_file(file_name)
@@ -307,7 +309,7 @@ def build_response_as_excel(writer):
 
 
 @frappe.whitelist()
-def download_template(file_type, template_type, company):
+def download_template(file_type: str, template_type: str, company: str):
 	writer = get_template(template_type, company)
 
 	if file_type == "CSV":
@@ -361,7 +363,7 @@ def get_sample_template(writer, company):
 
 
 @frappe.whitelist()
-def validate_accounts(file_doc, extension):
+def validate_accounts(file_doc: Document, extension: str):
 	if extension == "csv":
 		accounts = generate_data_from_csv(file_doc, as_dict=True)
 	else:

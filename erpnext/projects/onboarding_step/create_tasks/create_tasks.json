@@ -1,0 +1,20 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Task",
+ "creation": "2026-02-23 22:45:36.152388",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-23 22:45:44.116610",
+ "modified_by": "Administrator",
+ "name": "Create Tasks",
+ "owner": "Administrator",
+ "reference_document": "Task",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Create Tasks",
+ "validate_action": 1
+}

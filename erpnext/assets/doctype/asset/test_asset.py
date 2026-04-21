@@ -2,7 +2,6 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -36,21 +35,14 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	make_purchase_invoice as make_invoice,
 )
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class AssetSetup(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
+class AssetSetup(ERPNextTestSuite):
+	def setUp(self):
 		set_depreciation_settings_in_company()
-		create_asset_data()
 		enable_cwip_accounting("Computers")
 		make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
-		frappe.db.sql("delete from `tabTax Rule`")
-
-	@classmethod
-	def tearDownClass(cls):
-		frappe.db.rollback()
 
 
 class TestAsset(AssetSetup):
@@ -911,17 +903,8 @@ class TestAsset(AssetSetup):
 
 
 class TestDepreciationMethods(AssetSetup):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-
-		cls._old_float_precision = frappe.db.get_single_value("System Settings", "float_precision")
+	def setUp(self):
 		frappe.db.set_single_value("System Settings", "float_precision", 2)
-
-	@classmethod
-	def tearDownClass(cls):
-		frappe.db.set_single_value("System Settings", "float_precision", cls._old_float_precision)
-		super().tearDownClass()
 
 	def test_schedule_for_straight_line_method(self):
 		asset = create_asset(
@@ -1991,30 +1974,8 @@ def get_gl_entries(doctype, docname):
 	)
 
 
-def create_asset_data():
-	if not frappe.db.exists("Asset Category", "Computers"):
-		create_asset_category()
-
-	if not frappe.db.exists("Item", "Macbook Pro"):
-		create_fixed_asset_item()
-
-	if not frappe.db.exists("Location", "Test Location"):
-		frappe.get_doc({"doctype": "Location", "location_name": "Test Location"}).insert()
-
-	if not frappe.db.exists("Finance Book", "Test Finance Book 1"):
-		frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "Test Finance Book 1"}).insert()
-
-	if not frappe.db.exists("Finance Book", "Test Finance Book 2"):
-		frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "Test Finance Book 2"}).insert()
-
-	if not frappe.db.exists("Finance Book", "Test Finance Book 3"):
-		frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "Test Finance Book 3"}).insert()
-
-
 def create_asset(**args):
 	args = frappe._dict(args)
-
-	create_asset_data()
 
 	asset = frappe.get_doc(
 		{

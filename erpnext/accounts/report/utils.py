@@ -147,7 +147,12 @@ def get_appropriate_company(filters):
 
 
 @frappe.whitelist()
-def get_invoiced_item_gross_margin(sales_invoice=None, item_code=None, company=None, with_item_data=False):
+def get_invoiced_item_gross_margin(
+	sales_invoice: str | None = None,
+	item_code: str | None = None,
+	company: str | None = None,
+	with_item_data: bool = False,
+):
 	from erpnext.accounts.report.gross_profit.gross_profit import GrossProfitGenerator
 
 	sales_invoice = sales_invoice or frappe.form_dict.get("sales_invoice")

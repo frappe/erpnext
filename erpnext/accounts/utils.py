@@ -3,6 +3,7 @@
 
 
 from collections import defaultdict
+from datetime import date, datetime
 from json import loads
 from typing import TYPE_CHECKING, Optional
 
@@ -60,15 +61,15 @@ OUTSTANDING_DOCTYPES = frozenset(["Sales Invoice", "Purchase Invoice", "Fees"])
 
 @frappe.whitelist()
 def get_fiscal_year(
-	date=None,
-	fiscal_year=None,
-	label="Date",
-	verbose=1,
-	company=None,
-	as_dict=False,
-	boolean=None,
-	raise_on_missing=True,
-	truncate=False,
+	date: str | datetime | None = None,
+	fiscal_year: str | None = None,
+	label: str = "Date",
+	verbose: int = 1,
+	company: str | None = None,
+	as_dict: bool = False,
+	boolean: str | bool | None = None,
+	raise_on_missing: bool = True,
+	truncate: bool = False,
 ):
 	if isinstance(raise_on_missing, str):
 		raise_on_missing = loads(raise_on_missing)
@@ -93,14 +94,14 @@ def get_fiscal_year(
 
 
 def get_fiscal_years(
-	transaction_date=None,
-	fiscal_year=None,
-	label="Date",
-	verbose=1,
-	company=None,
-	as_dict=False,
-	boolean=None,
-	raise_on_missing=True,
+	transaction_date: str | None = None,
+	fiscal_year: str | None = None,
+	label: str = "Date",
+	verbose: int = 1,
+	company: str | None = None,
+	as_dict: bool = False,
+	boolean: str | None = None,
+	raise_on_missing: bool = True,
 ):
 	if transaction_date:
 		transaction_date = getdate(transaction_date)
@@ -171,7 +172,7 @@ def _get_fiscal_years(company=None):
 
 
 @frappe.whitelist()
-def get_fiscal_year_filter_field(company=None):
+def get_fiscal_year_filter_field(company: str | None = None):
 	field = {"fieldtype": "Select", "options": [], "operator": "Between", "query_value": True}
 	fiscal_years = get_fiscal_years(company=company)
 	for fiscal_year in fiscal_years:
@@ -199,18 +200,18 @@ def validate_fiscal_year(date, fiscal_year, company, label="Date", doc=None):
 
 @frappe.whitelist()
 def get_balance_on(
-	account=None,
-	date=None,
-	party_type=None,
-	party=None,
-	company=None,
-	in_account_currency=True,
-	cost_center=None,
-	ignore_account_permission=False,
-	account_type=None,
-	start_date=None,
-	finance_book=None,
-	include_default_fb_balances=False,
+	account: str | None = None,
+	date: str | date | None = None,
+	party_type: str | None = None,
+	party: str | None = None,
+	company: str | None = None,
+	in_account_currency: bool = True,
+	cost_center: str | None = None,
+	ignore_account_permission: bool = False,
+	account_type: str | None = None,
+	start_date: str | None = None,
+	finance_book: str | None = None,
+	include_default_fb_balances: bool = False,
 ):
 	if not account and frappe.form_dict.get("account"):
 		account = frappe.form_dict.get("account")
@@ -437,7 +438,7 @@ def get_count_on(account, fieldname, date):
 
 
 @frappe.whitelist()
-def add_ac(args=None):
+def add_ac(args: frappe._dict | None = None):
 	from frappe.desk.treeview import make_tree_args
 
 	if not args:
@@ -469,7 +470,7 @@ def add_ac(args=None):
 
 
 @frappe.whitelist()
-def add_cc(args=None):
+def add_cc(args: frappe._dict | None = None):
 	from frappe.desk.treeview import make_tree_args
 
 	if not args:
@@ -500,7 +501,8 @@ def _build_dimensions_dict_for_exc_gain_loss(
 	dimensions_dict = frappe._dict()
 	if entry and active_dimensions:
 		for dim in active_dimensions:
-			dimensions_dict[dim.fieldname] = entry.get(dim.fieldname)
+			if entry_dimension := entry.get(dim.fieldname):
+				dimensions_dict[dim.fieldname] = entry_dimension
 	return dimensions_dict
 
 
@@ -1153,7 +1155,7 @@ def remove_ref_doc_link_from_pe(
 
 
 @frappe.whitelist()
-def get_company_default(company, fieldname, ignore_validation=False):
+def get_company_default(company: str, fieldname: str, ignore_validation: bool = False):
 	value = frappe.get_cached_value("Company", company, fieldname)
 
 	if not ignore_validation and not value:
@@ -1338,7 +1340,9 @@ def get_companies():
 
 
 @frappe.whitelist()
-def get_children(doctype, parent, company, is_root=False, include_disabled=False):
+def get_children(
+	doctype: str, parent: str, company: str, is_root: bool = False, include_disabled: bool = False
+):
 	if isinstance(include_disabled, str):
 		include_disabled = loads(include_disabled)
 	from erpnext.accounts.report.financial_statements import sort_accounts
@@ -1371,7 +1375,12 @@ def get_children(doctype, parent, company, is_root=False, include_disabled=False
 
 
 @frappe.whitelist()
-def get_account_balances(accounts, company, finance_book=None, include_default_fb_balances=False):
+def get_account_balances(
+	accounts: str | list,
+	company: str,
+	finance_book: str | None = None,
+	include_default_fb_balances: bool = False,
+):
 	if isinstance(accounts, str):
 		accounts = loads(accounts)
 
@@ -1403,6 +1412,78 @@ def get_account_balances(accounts, company, finance_book=None, include_default_f
 			)
 
 	return accounts
+
+
+@frappe.whitelist()
+def get_account_balances_coa(company: str, include_default_fb_balances: bool = False):
+	company_currency = frappe.get_cached_value("Company", company, "default_currency")
+
+	Account = DocType("Account")
+	account_list = (
+		frappe.qb.from_(Account)
+		.select(Account.name, Account.parent_account, Account.account_currency)
+		.where(Account.company == company)
+		.orderby(Account.lft)
+		.run(as_dict=True)
+	)
+
+	account_balances_cc = {account.get("name"): 0 for account in account_list}
+
+	account_balances_ac = {account.get("name"): 0 for account in account_list}
+
+	GLEntry = DocType("GL Entry")
+	precision = get_currency_precision()
+	get_ledger_balances_query = (
+		frappe.qb.from_(GLEntry)
+		.select(
+			GLEntry.account,
+			(Sum(Round(GLEntry.debit, precision)) - Sum(Round(GLEntry.credit, precision))).as_("balance"),
+			(
+				Sum(Round(GLEntry.debit_in_account_currency, precision))
+				- Sum(Round(GLEntry.credit_in_account_currency, precision))
+			).as_("balance_in_account_currency"),
+		)
+		.groupby(GLEntry.account)
+	)
+
+	condition_list = [GLEntry.company == company, GLEntry.is_cancelled == 0]
+
+	default_finance_book = None
+
+	if include_default_fb_balances:
+		default_finance_book = frappe.get_cached_value("Company", company, "default_finance_book")
+
+	if default_finance_book:
+		condition_list.append(
+			(GLEntry.finance_book == default_finance_book) | (GLEntry.finance_book.isnull())
+		)
+
+	for condition in condition_list:
+		get_ledger_balances_query = get_ledger_balances_query.where(condition)
+
+	ledger_balances = get_ledger_balances_query.run(as_dict=True)
+
+	for ledger_entry in ledger_balances:
+		account_balances_cc[ledger_entry.get("account")] = ledger_entry.get("balance")
+		account_balances_ac[ledger_entry.get("account")] = ledger_entry.get("balance_in_account_currency")
+
+	for account in reversed(account_list):
+		parent = account.get("parent_account")
+		if parent:
+			account_balances_cc[parent] += account_balances_cc.get(account.get("name"))
+
+	accounts_data = [
+		{
+			"value": account.get("name"),
+			"company_currency": company_currency,
+			"balance": account_balances_cc.get(account.get("name")),
+			"account_currency": account.get("account_currency"),
+			"balance_in_account_currency": account_balances_ac.get(account.get("name")),
+		}
+		for account in account_list
+	]
+
+	return accounts_data
 
 
 def create_payment_gateway_account(gateway, payment_channel="Email", company=None):
@@ -1464,7 +1545,9 @@ def create_payment_gateway_account(gateway, payment_channel="Email", company=Non
 
 
 @frappe.whitelist()
-def update_cost_center(docname, cost_center_name, cost_center_number, company, merge):
+def update_cost_center(
+	docname: str, cost_center_name: str, cost_center_number: str, company: str, merge: bool
+):
 	"""
 	Renames the document by adding the number as a prefix to the current name and updates
 	all transaction where it was present.
@@ -1532,19 +1615,23 @@ def parse_naming_series_variable(doc, variable):
 
 	else:
 		data = {"YY": "%y", "YYYY": "%Y", "MM": "%m", "DD": "%d", "JJJ": "%j"}
+
+		if doc and doc.doctype in ["Batch", "Serial No"] and doc.reference_doctype and doc.reference_name:
+			doc = frappe.get_doc(doc.reference_doctype, doc.reference_name)
+
 		date = (
 			(
 				getdate(doc.get("posting_date") or doc.get("transaction_date") or doc.get("posting_datetime"))
 				or now_datetime()
 			)
-			if frappe.get_single_value("Global Defaults", "use_posting_datetime_for_naming_documents")
+			if doc and frappe.get_single_value("Global Defaults", "use_posting_datetime_for_naming_documents")
 			else now_datetime()
 		)
 		return date.strftime(data[variable]) if variable in data else determine_consecutive_week_number(date)
 
 
 @frappe.whitelist()
-def get_coa(doctype, parent, is_root=None, chart=None):
+def get_coa(doctype: str, parent: str, is_root: bool | None = None, chart: str | None = None):
 	from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
 		build_tree_from_json,
 	)
@@ -2059,6 +2146,7 @@ def create_payment_ledger_entry(
 				if is_immutable_ledger_enabled():
 					ple.delinked = 0
 					ple.posting_date = frappe.form_dict.get("posting_date") or getdate()
+				ple.flags.ignore_links = True
 
 			ple.flags.ignore_permissions = 1
 			ple.flags.adv_adj = adv_adj

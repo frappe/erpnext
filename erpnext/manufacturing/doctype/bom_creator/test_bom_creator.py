@@ -4,16 +4,16 @@
 import random
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.manufacturing.doctype.bom_creator.bom_creator import (
 	add_item,
 	add_sub_assembly,
 )
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestBOMCreator(IntegrationTestCase):
+class TestBOMCreator(ERPNextTestSuite):
 	def setUp(self) -> None:
 		create_items()
 

@@ -2,11 +2,13 @@
 # For license information, please see license.txt
 
 
+from typing import Any
+
 import frappe
 from frappe import _, throw
 from frappe.desk.form import assign_to
 from frappe.model.document import Document
-from frappe.utils import add_days, add_months, add_years, getdate, nowdate
+from frappe.utils import DateTimeLikeObject, add_days, add_months, add_years, getdate, nowdate
 
 
 class AssetMaintenance(Document):
@@ -90,7 +92,11 @@ def assign_tasks(asset_maintenance_name, assign_to_member, maintenance_task, nex
 
 @frappe.whitelist()
 def calculate_next_due_date(
-	periodicity, start_date=None, end_date=None, last_completion_date=None, next_due_date=None
+	periodicity: str,
+	start_date: DateTimeLikeObject | None = None,
+	end_date: DateTimeLikeObject | None = None,
+	last_completion_date: DateTimeLikeObject | None = None,
+	next_due_date: DateTimeLikeObject | None = None,
 ):
 	if not start_date and not last_completion_date:
 		start_date = frappe.utils.now()
@@ -164,19 +170,30 @@ def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_team_members(doctype, txt, searchfield, start, page_len, filters):
+def get_team_members(
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict[str, Any],
+) -> list[tuple[str]]:
 	return frappe.db.get_values(
-		"Maintenance Team Member", {"parent": filters.get("maintenance_team")}, "team_member"
+		"Maintenance Team Member",
+		{"parent": filters.get("maintenance_team")},
+		"team_member",
 	)
 
 
 @frappe.whitelist()
-def get_maintenance_log(asset_name):
+def get_maintenance_log(asset_name: str):
 	return frappe.db.sql(
 		"""
         select maintenance_status, count(asset_name) as count, asset_name
         from `tabAsset Maintenance Log`
-        where asset_name=%s group by maintenance_status""",
-		(asset_name),
+        where asset_name=%s
+        group by maintenance_status
+        """,
+		(asset_name,),
 		as_dict=1,
 	)

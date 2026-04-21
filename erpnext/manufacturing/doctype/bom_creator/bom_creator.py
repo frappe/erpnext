@@ -52,6 +52,7 @@ class BOMCreator(Document):
 		currency: DF.Link
 		default_warehouse: DF.Link | None
 		error_log: DF.Text | None
+		is_phantom: DF.Check
 		item_code: DF.Link
 		item_group: DF.Link | None
 		item_name: DF.Data | None
@@ -77,6 +78,7 @@ class BOMCreator(Document):
 		self.set_rate_for_items()
 
 	def validate(self):
+		self.validate_finished_good()
 		self.validate_items()
 		self.validate_duplicate_item()
 
@@ -101,6 +103,15 @@ class BOMCreator(Document):
 				)
 			else:
 				item_map[key] = row.idx
+
+	def validate_finished_good(self):
+		is_stock_item = frappe.get_cached_value("Item", self.item_code, "is_stock_item")
+		if is_stock_item and self.is_phantom:
+			frappe.throw(_("Phantom BOM cannot be created for stock item {0}.").format(self.item_code))
+		elif not is_stock_item and not self.is_phantom:
+			frappe.throw(
+				_("Non-phantom BOM cannot be created for non-stock item {0}.").format(self.item_code)
+			)
 
 	def validate_items(self):
 		for row in self.items:
@@ -203,7 +214,9 @@ class BOMCreator(Document):
 					self,
 				)
 			else:
-				row.rate = flt(self.get_raw_material_cost(row.item_code) * row.conversion_factor)
+				row.rate = flt(
+					self.get_raw_material_cost(row.item_code) / flt(row.qty or 1) * row.conversion_factor
+				)
 
 			row.amount = flt(row.rate) * flt(row.qty)
 			amount += flt(row.amount)
@@ -332,10 +345,12 @@ class BOMCreator(Document):
 			}
 		)
 
-		if row.item_code == self.item_code and (self.routing or self.has_operations()):
-			bom.routing = self.routing
-			bom.with_operations = 1
-			bom.transfer_material_against = "Work Order"
+		if row.item_code == self.item_code:
+			bom.is_phantom_bom = self.is_phantom
+			if not self.is_phantom and (self.routing or self.has_operations()):
+				bom.routing = self.routing
+				bom.with_operations = 1
+				bom.transfer_material_against = "Work Order"
 
 		for field in BOM_FIELDS:
 			if self.get(field):
@@ -356,7 +371,6 @@ class BOMCreator(Document):
 				{
 					"bom_no": bom_no,
 					"allow_alternative_item": 1,
-					"allow_scrap_items": not item.get("is_phantom_item"),
 					"include_item_in_manufacturing": 1,
 				}
 			)
@@ -376,12 +390,12 @@ class BOMCreator(Document):
 		return False
 
 	@frappe.whitelist()
-	def get_default_bom(self, item_code) -> str:
+	def get_default_bom(self, item_code: str):
 		return frappe.get_cached_value("Item", item_code, "default_bom")
 
 
 @frappe.whitelist()
-def get_children(doctype=None, parent=None, **kwargs):
+def get_children(doctype: str | None = None, parent: str | None = None, **kwargs):
 	if isinstance(kwargs, str):
 		kwargs = frappe.parse_json(kwargs)
 
@@ -561,7 +575,10 @@ def delete_node(**kwargs):
 
 
 @frappe.whitelist()
-def edit_bom_creator(doctype, docname, data, parent):
+def edit_bom_creator(doctype: str, docname: str, data: str | dict, parent: str):
+	if not frappe.has_permission(doctype=doctype, ptype="write", parent_doctype="BOM Creator"):
+		frappe.throw(_("You do not have permission to edit this document"), frappe.PermissionError)
+
 	if isinstance(data, str):
 		data = frappe.parse_json(data)
 

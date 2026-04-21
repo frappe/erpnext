@@ -3,7 +3,6 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_to_date, nowdate
 
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
@@ -11,6 +10,7 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 def create_product_bundle(
@@ -40,18 +40,16 @@ def create_product_bundle(
 	return bundle, components
 
 
-class TestPackedItem(IntegrationTestCase):
+class TestPackedItem(ERPNextTestSuite):
 	"Test impact on Packed Items table in various scenarios."
 
-	@classmethod
-	def setUpClass(cls) -> None:
-		super().setUpClass()
-		cls.warehouse = "_Test Warehouse - _TC"
+	def setUp(self) -> None:
+		self.warehouse = "_Test Warehouse - _TC"
 
-		cls.bundle, cls.bundle_items = create_product_bundle(warehouse=cls.warehouse)
-		cls.bundle2, cls.bundle2_items = create_product_bundle(warehouse=cls.warehouse)
+		self.bundle, self.bundle_items = create_product_bundle(warehouse=self.warehouse)
+		self.bundle2, self.bundle2_items = create_product_bundle(warehouse=self.warehouse)
 
-		cls.normal_item = make_item().name
+		self.normal_item = make_item().name
 
 	def test_adding_bundle_item(self):
 		"Test impact on packed items if bundle item row is added."
@@ -78,6 +76,7 @@ class TestPackedItem(IntegrationTestCase):
 
 		self.assertEqual(len(so.packed_items), 0)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_recurring_bundle_item(self):
 		"Test impact on packed items if same bundle item is added and removed."
 		so_items = []
@@ -116,7 +115,7 @@ class TestPackedItem(IntegrationTestCase):
 		self.assertEqual(so.packed_items[1].qty, 4)
 		self.assertEqual(so.packed_items[3].qty, 12)
 
-	@IntegrationTestCase.change_settings("Selling Settings", {"editable_bundle_item_rates": 1})
+	@ERPNextTestSuite.change_settings("Selling Settings", {"editable_bundle_item_rates": 1})
 	def test_bundle_item_cumulative_price(self):
 		"Test if Bundle Item rate is cumulative from packed items."
 		so = make_sales_order(item_code=self.bundle, qty=2, do_not_submit=True)
@@ -128,6 +127,7 @@ class TestPackedItem(IntegrationTestCase):
 		self.assertEqual(so.items[0].rate, 700)
 		self.assertEqual(so.items[0].amount, 1400)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_newly_mapped_doc_packed_items(self):
 		"Test impact on packed items in newly mapped DN from SO."
 		so_items = []

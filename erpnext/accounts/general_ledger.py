@@ -429,6 +429,8 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.flags.adv_adj = adv_adj
 	gle.flags.update_outstanding = update_outstanding or "Yes"
 	gle.flags.notify_update = False
+	if gle.is_cancelled:
+		gle.flags.ignore_links = True
 	gle.submit()
 
 	if (

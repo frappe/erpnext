@@ -28,28 +28,30 @@ frappe.query_reports["Stock Qty vs Batch Qty"] = {
 		},
 	],
 	onload: function (report) {
-		report.page.add_inner_button(__("Update Batch Qty"), function () {
-			let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
-			let selected_rows = indexes
-				.map((i) => frappe.query_report.data[i])
-				.filter((row) => row.difference != 0);
+		if (frappe.model.can_write("Batch")) {
+			report.page.add_inner_button(__("Update Batch Qty"), function () {
+				let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
+				let selected_rows = indexes
+					.map((i) => frappe.query_report.data[i])
+					.filter((row) => row.difference != 0);
 
-			if (selected_rows.length) {
-				frappe.call({
-					method: "erpnext.stock.report.stock_qty_vs_batch_qty.stock_qty_vs_batch_qty.update_batch_qty",
-					args: {
-						selected_batches: selected_rows,
-					},
-					callback: function (r) {
-						if (!r.exc) {
-							report.refresh();
-						}
-					},
-				});
-			} else {
-				frappe.msgprint(__("Please select at least one row with difference value"));
-			}
-		});
+				if (selected_rows.length) {
+					frappe.call({
+						method: "erpnext.stock.report.stock_qty_vs_batch_qty.stock_qty_vs_batch_qty.update_batch_qty",
+						args: {
+							selected_batches: selected_rows,
+						},
+						callback: function (r) {
+							if (!r.exc) {
+								report.refresh();
+							}
+						},
+					});
+				} else {
+					frappe.msgprint(__("Please select at least one row with difference value"));
+				}
+			});
+		}
 	},
 
 	formatter: function (value, row, column, data, default_formatter) {

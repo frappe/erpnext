@@ -2,9 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from datetime import timedelta
+
 import frappe
 from frappe import _, bold, json, msgprint
 from frappe.utils import add_to_date, cint, cstr, flt, now
+from frappe.utils.data import DateTimeLikeObject
 
 import erpnext
 from erpnext.accounts.utils import get_company_default
@@ -16,6 +19,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_available_serial_nos,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
 from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_stock_balance
 
 
@@ -240,6 +244,7 @@ class StockReconciliation(StockController):
 				serial_and_batch_bundle = frappe.get_doc(
 					{
 						"doctype": "Serial and Batch Bundle",
+						"company": self.company,
 						"item_code": item.item_code,
 						"warehouse": item.warehouse,
 						"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
@@ -522,12 +527,12 @@ class StockReconciliation(StockController):
 				if abs(difference_amount) > 0:
 					return True
 
-			float_precision = frappe.db.get_default("float_precision") or 3
-			item_dict["rate"] = flt(item_dict.get("rate"), float_precision)
-			item.valuation_rate = flt(item.valuation_rate, float_precision) if item.valuation_rate else None
+			rate_precision = item.precision("valuation_rate")
+			rate = flt(item_dict.get("rate"), rate_precision)
+			valuation_rate = flt(item.valuation_rate, rate_precision) if item.valuation_rate else None
 			if (
 				(item.qty is None or item.qty == item_dict.get("qty"))
-				and (item.valuation_rate is None or item.valuation_rate == item_dict.get("rate"))
+				and (valuation_rate is None or valuation_rate == rate)
 				and (not item.serial_no or (item.serial_no == item_dict.get("serial_nos")))
 			):
 				return False
@@ -1007,9 +1012,9 @@ class StockReconciliation(StockController):
 
 	def set_total_qty_and_amount(self):
 		for d in self.get("items"):
-			d.amount = flt(d.qty, d.precision("qty")) * flt(d.valuation_rate, d.precision("valuation_rate"))
-			d.current_amount = flt(d.current_qty, d.precision("current_qty")) * flt(
-				d.current_valuation_rate, d.precision("current_valuation_rate")
+			d.amount = flt(flt(d.qty) * flt(d.valuation_rate), d.precision("amount"))
+			d.current_amount = flt(
+				flt(d.current_qty) * flt(d.current_valuation_rate), d.precision("current_amount")
 			)
 
 			d.quantity_difference = flt(d.qty) - flt(d.current_qty)
@@ -1260,7 +1265,14 @@ def get_batch_qty_for_stock_reco(
 
 
 @frappe.whitelist()
-def get_items(warehouse, posting_date, posting_time, company, item_code=None, ignore_empty_stock=False):
+def get_items(
+	warehouse: str,
+	posting_date: DateTimeLikeObject,
+	posting_time: DateTimeLikeObject,
+	company: str,
+	item_code: str | None = None,
+	ignore_empty_stock: bool | str | int = False,
+):
 	ignore_empty_stock = cint(ignore_empty_stock)
 	items = []
 	if item_code and warehouse:
@@ -1426,13 +1438,13 @@ def get_itemwise_batch(warehouse, posting_date, company, item_code=None):
 def get_stock_balance_for(
 	item_code: str,
 	warehouse: str,
-	posting_date,
-	posting_time,
+	posting_date: DateTimeLikeObject,
+	posting_time: DateTimeLikeObject | timedelta,
 	batch_no: str | None = None,
 	with_valuation_rate: bool = True,
-	inventory_dimensions_dict=None,
-	row=None,
-	company=None,
+	inventory_dimensions_dict: dict | None = None,
+	row: StockReconciliationItem | str | dict | None = None,
+	company: str | None = None,
 ):
 	frappe.has_permission("Stock Reconciliation", "write", throw=True)
 
@@ -1519,7 +1531,7 @@ def get_stock_balance_for(
 
 
 @frappe.whitelist()
-def get_difference_account(purpose, company):
+def get_difference_account(purpose: str, company: str):
 	if purpose == "Stock Reconciliation":
 		account = get_company_default(company, "stock_adjustment_account")
 	else:

@@ -16,6 +16,7 @@
   "invoicing_features_section",
   "check_supplier_invoice_uniqueness",
   "automatically_fetch_payment_terms",
+  "enable_subscription",
   "column_break_17",
   "enable_common_party_accounting",
   "allow_multi_currency_invoices_against_single_party_account",
@@ -62,9 +63,12 @@
   "reconciliation_queue_size",
   "column_break_resa",
   "exchange_gain_loss_posting_date",
+  "repost_section",
+  "repost_allowed_types",
   "payment_options_section",
   "enable_loyalty_point_program",
   "column_break_ctam",
+  "fetch_payment_schedule_in_payment_request",
   "invoicing_settings_tab",
   "accounts_transactions_settings_section",
   "over_billing_allowance",
@@ -205,7 +209,7 @@
    "description": "Payment Terms from orders will be fetched into the invoices as is",
    "fieldname": "automatically_fetch_payment_terms",
    "fieldtype": "Check",
-   "label": "Automatically Fetch Payment Terms from Order"
+   "label": "Automatically Fetch Payment Terms from Order/Quotation"
   },
   {
    "description": "The percentage you are allowed to bill more against the amount ordered. For example, if the order value is $100 for an item and tolerance is set as 10%, then you are allowed to bill up to $110 ",
@@ -688,16 +692,39 @@
    "fieldname": "enable_accounting_dimensions",
    "fieldtype": "Check",
    "label": "Enable Accounting Dimensions"
+  },
+  {
+   "default": "1",
+   "description": "Enable Subscription tracking in invoice",
+   "fieldname": "enable_subscription",
+   "fieldtype": "Check",
+   "label": "Enable Subscription"
+  },
+  {
+   "default": "1",
+   "fieldname": "fetch_payment_schedule_in_payment_request",
+   "fieldtype": "Check",
+   "label": "Fetch Payment Schedule In Payment Request"
+  },
+  {
+   "fieldname": "repost_section",
+   "fieldtype": "Section Break",
+   "label": "Repost"
+  },
+  {
+   "fieldname": "repost_allowed_types",
+   "fieldtype": "Table",
+   "label": "Allowed Doctypes",
+   "options": "Repost Allowed Types"
   }
  ],
  "grid_page_length": 50,
- "hide_toolbar": 0,
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-04 17:15:38.609327",
+ "modified": "2026-04-13 15:30:28.729627",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

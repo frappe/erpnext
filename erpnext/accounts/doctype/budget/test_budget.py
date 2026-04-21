@@ -17,12 +17,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestBudget(ERPNextTestSuite):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		cls.make_monthly_distribution()
-		cls.make_projects()
-
 	def setUp(self):
 		frappe.db.set_single_value("Accounts Settings", "use_legacy_budget_controller", False)
 		self.company = "_Test Company"

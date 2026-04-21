@@ -141,7 +141,7 @@ class ProductionPlan(Document):
 				row.from_warehouse = ""
 
 	@frappe.whitelist()
-	def validate_sales_orders(self, sales_order=None):
+	def validate_sales_orders(self, sales_order: str | None = None):
 		sales_orders = []
 
 		if sales_order:
@@ -615,7 +615,12 @@ class ProductionPlan(Document):
 				None,
 			):
 				item.db_set("sub_assembly_item_reference", reference)
-			elif self.reserve_stock and item.main_item_code and item.from_bom:
+			elif (
+				self.reserve_stock
+				and item.main_item_code
+				and item.from_bom
+				and item.main_item_code != frappe.get_cached_value("BOM", item.from_bom, "item")
+			):
 				frappe.throw(
 					_(
 						"Sub assembly item references are missing. Please fetch the sub assemblies and raw materials again."
@@ -679,7 +684,7 @@ class ProductionPlan(Document):
 			frappe.delete_doc("Work Order", d.name)
 
 	@frappe.whitelist()
-	def set_status(self, close=None, update_bin=False):
+	def set_status(self, close: bool | None = None, update_bin: bool = False):
 		self.status = {0: "Draft", 1: "Submitted", 2: "Cancelled"}.get(self.docstatus)
 
 		if close:
@@ -730,6 +735,7 @@ class ProductionPlan(Document):
 				"description": d.description,
 				"stock_uom": d.stock_uom,
 				"company": self.company,
+				"source_warehouse": frappe.get_value("BOM", d.bom_no, "default_source_warehouse"),
 				"fg_warehouse": d.warehouse,
 				"production_plan": self.name,
 				"production_plan_item": d.name,
@@ -806,6 +812,7 @@ class ProductionPlan(Document):
 				continue
 
 			work_order_data = {
+				"source_warehouse": frappe.get_value("BOM", row.bom_no, "default_source_warehouse"),
 				"wip_warehouse": default_warehouses.get("wip_warehouse"),
 				"fg_warehouse": default_warehouses.get("fg_warehouse"),
 				"scrap_warehouse": default_warehouses.get("scrap_warehouse"),
@@ -1033,7 +1040,7 @@ class ProductionPlan(Document):
 			msgprint(_("No material request created"))
 
 	@frappe.whitelist()
-	def get_sub_assembly_items(self, manufacturing_type=None):
+	def get_sub_assembly_items(self, manufacturing_type: str | None = None):
 		"Fetch sub assembly items and optionally combine them."
 		self.sub_assembly_items = []
 		sub_assembly_items_store = []  # temporary store to process all subassembly items
@@ -1198,7 +1205,7 @@ class ProductionPlan(Document):
 
 
 @frappe.whitelist()
-def download_raw_materials(doc, warehouses=None):
+def download_raw_materials(doc: str | dict | Document, warehouses: str | list | None = None):
 	if isinstance(doc, str):
 		doc = frappe._dict(json.loads(doc))
 
@@ -1578,7 +1585,9 @@ def get_sales_orders(self):
 
 
 @frappe.whitelist()
-def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
+def get_bin_details(
+	row: str | dict, company: str, for_warehouse: str | None = None, all_warehouse: bool = False
+):
 	if isinstance(row, str):
 		row = frappe._dict(json.loads(row))
 
@@ -1613,7 +1622,7 @@ def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
 
 
 @frappe.whitelist()
-def get_so_details(sales_order):
+def get_so_details(sales_order: str):
 	return frappe.db.get_value(
 		"Sales Order", sales_order, ["transaction_date", "customer", "grand_total"], as_dict=1
 	)
@@ -1636,7 +1645,11 @@ def get_warehouse_list(warehouses):
 
 
 @frappe.whitelist()
-def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_data=None):
+def get_items_for_material_requests(
+	doc: str | frappe._dict | Document,
+	warehouses: str | list | None = None,
+	get_parent_warehouse_data: bool | int | None = None,
+):
 	if isinstance(doc, str):
 		doc = frappe._dict(json.loads(doc))
 
@@ -1775,8 +1788,10 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 			)
 
 		sales_order = data.get("sales_order")
+		qty_precision = frappe.get_precision("Material Request Plan Item", "quantity")
 
 		for key, details in item_details.items():
+			details.qty = flt(details.qty, qty_precision)
 			so_item_details.setdefault(sales_order, frappe._dict())
 			if key in so_item_details.get(sales_order, {}):
 				so_item_details[sales_order][key]["qty"] = so_item_details[sales_order][key].get(
@@ -1889,13 +1904,13 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 
 
 @frappe.whitelist()
-def get_item_data(item_code):
+def get_item_data(item_code: str):
 	item_details = get_item_details(item_code)
 
 	return {
 		"bom_no": item_details.get("bom_no"),
 		"stock_uom": item_details.get("stock_uom"),
-		# 		"description": item_details.get("description")
+		"description": item_details.get("description"),
 	}
 
 
@@ -1911,6 +1926,7 @@ def get_sub_assembly_items(
 	skip_available_sub_assembly_item=False,
 ):
 	data = get_bom_children(parent=bom_no)
+	precision = frappe.get_precision("Production Plan Sub Assembly Item", "qty")
 	for d in data:
 		if d.expandable:
 			parent_item_code = frappe.get_cached_value("BOM", bom_no, "item")
@@ -1950,8 +1966,8 @@ def get_sub_assembly_items(
 							"is_sub_contracted_item": d.is_sub_contracted_item,
 							"bom_level": indent,
 							"indent": indent,
-							"stock_qty": stock_qty,
-							"required_qty": required_qty,
+							"stock_qty": flt(stock_qty, precision),
+							"required_qty": flt(required_qty, precision),
 							"projected_qty": bin_details[d.item_code][0].get("projected_qty", 0)
 							if bin_details.get(d.item_code)
 							else 0,
@@ -2097,16 +2113,16 @@ def get_raw_materials_of_sub_assembly_items(
 
 	for item in query.run(as_dict=True):
 		key = (item.item_code, item.bom_no)
-		if item.is_phantom_item:
-			sub_assembly_items[key] += item.get("qty")
+		existing_key = (item.item_code, item.bom_no or item.main_bom)
 
-		if (item.bom_no and key not in sub_assembly_items) or (
-			(item.item_code, item.bom_no or item.main_bom) in existing_sub_assembly_items
-		):
+		if item.bom_no and not item.is_phantom_item and key not in sub_assembly_items:
+			continue
+
+		if not item.is_phantom_item and existing_key in existing_sub_assembly_items:
 			continue
 
 		if item.bom_no:
-			planned_qty = flt(sub_assembly_items[key])
+			recursion_qty = flt(item.get("qty")) if item.is_phantom_item else flt(sub_assembly_items[key])
 			get_raw_materials_of_sub_assembly_items(
 				existing_sub_assembly_items,
 				item_details,
@@ -2114,9 +2130,10 @@ def get_raw_materials_of_sub_assembly_items(
 				item.bom_no,
 				include_non_stock_items,
 				sub_assembly_items,
-				planned_qty=planned_qty,
+				planned_qty=recursion_qty,
 			)
-			existing_sub_assembly_items.add((item.item_code, item.bom_no or item.main_bom))
+			if not item.is_phantom_item:
+				existing_sub_assembly_items.add(existing_key)
 		else:
 			if not item.conversion_factor and item.purchase_uom:
 				item.conversion_factor = get_uom_conversion_factor(item.item_code, item.purchase_uom)
@@ -2130,7 +2147,14 @@ def get_raw_materials_of_sub_assembly_items(
 
 
 @frappe.whitelist()
-def sales_order_query(doctype=None, txt=None, searchfield=None, start=None, page_len=None, filters=None):
+def sales_order_query(
+	doctype: str | None = None,
+	txt: str | None = None,
+	searchfield: str | None = None,
+	start: int | None = None,
+	page_len: int | None = None,
+	filters: dict | None = None,
+):
 	frappe.has_permission("Production Plan", throw=True)
 
 	if not filters:
@@ -2201,7 +2225,9 @@ def get_reserved_qty_for_sub_assembly(item_code, warehouse):
 
 
 @frappe.whitelist()
-def make_stock_reservation_entries(doc, items=None, table_name=None, notify=False):
+def make_stock_reservation_entries(
+	doc: str | Document, items: str | list | None = None, table_name: str | None = None, notify: bool = False
+):
 	if isinstance(doc, str):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Production Plan", doc.get("name"))
@@ -2238,7 +2264,7 @@ def make_stock_reservation_entries(doc, items=None, table_name=None, notify=Fals
 
 
 @frappe.whitelist()
-def cancel_stock_reservation_entries(doc, sre_list):
+def cancel_stock_reservation_entries(doc: str | Document, sre_list: str | list):
 	if isinstance(doc, str):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Production Plan", doc.get("name"))

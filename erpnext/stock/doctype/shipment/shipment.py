@@ -114,19 +114,19 @@ class Shipment(Document):
 
 
 @frappe.whitelist()
-def get_address_name(ref_doctype, docname):
+def get_address_name(ref_doctype: str, docname: str):
 	# Return address name
 	return get_party_shipping_address(ref_doctype, docname)
 
 
 @frappe.whitelist()
-def get_contact_name(ref_doctype, docname):
+def get_contact_name(ref_doctype: str, docname: str):
 	# Return address name
 	return get_default_contact(ref_doctype, docname)
 
 
 @frappe.whitelist()
-def get_company_contact(user):
+def get_company_contact(user: str):
 	contact = frappe.db.get_value(
 		"User",
 		user,

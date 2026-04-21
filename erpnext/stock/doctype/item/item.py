@@ -794,6 +794,19 @@ class Item(Document):
 					{"company": defaults.get("company"), "default_warehouse": defaults.default_warehouse},
 				)
 
+		if not self.taxes and item_group.taxes:
+			for tax in item_group.taxes:
+				self.append(
+					"taxes",
+					{
+						"item_tax_template": tax.item_tax_template,
+						"tax_category": tax.tax_category,
+						"valid_from": tax.valid_from,
+						"minimum_net_rate": tax.minimum_net_rate,
+						"maximum_net_rate": tax.maximum_net_rate,
+					},
+				)
+
 	def update_variants(self):
 		if self.flags.dont_update_variants or frappe.db.get_single_value(
 			"Item Variant Settings", "do_not_update_variants"
@@ -1341,7 +1354,7 @@ def set_item_default(item_code, company, fieldname, value):
 
 
 @frappe.whitelist()
-def get_item_details(item_code, company=None):
+def get_item_details(item_code: str, company: str | None = None):
 	out = frappe._dict()
 	if company:
 		out = get_item_defaults(item_code, company) or frappe._dict()
@@ -1353,7 +1366,7 @@ def get_item_details(item_code, company=None):
 
 
 @frappe.whitelist()
-def get_uom_conv_factor(uom, stock_uom):
+def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 	"""Get UOM conversion factor from uom to stock_uom
 	e.g. uom = "Kg", stock_uom = "Gram" then returns 1000.0
 	"""
@@ -1399,7 +1412,7 @@ def get_uom_conv_factor(uom, stock_uom):
 
 
 @frappe.whitelist()
-def get_item_attribute(parent, attribute_value=""):
+def get_item_attribute(parent: str, attribute_value: str = ""):
 	"""Used for providing auto-completions in child table."""
 	if not frappe.has_permission("Item"):
 		frappe.throw(_("No Permission"))

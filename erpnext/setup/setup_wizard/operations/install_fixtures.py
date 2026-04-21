@@ -23,7 +23,7 @@ def read_lines(filename: str) -> list[str]:
 	return (Path(__file__).parent.parent / "data" / filename).read_text().splitlines()
 
 
-def install(country=None):
+def get_preset_records(country=None):
 	records = [
 		# ensure at least an empty Address Template exists for this Country
 		{"doctype": "Address Template", "country": country},
@@ -316,6 +316,11 @@ def install(country=None):
 		{"doctype": "Workstation Operating Component", "component_name": _("Rent")},
 		{"doctype": "Workstation Operating Component", "component_name": _("Wages")},
 	]
+	return records
+
+
+def install(country=None):
+	records = get_preset_records(country)
 
 	for doctype, title_field, filename in (
 		("Designation", "designation_name", "designation.txt"),
@@ -385,6 +390,9 @@ def add_uom_data():
 		open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_data.json")).read()
 	)
 	for d in uoms:
+		if d.get("category") and not frappe.db.exists("UOM Category", d.get("category")):
+			frappe.get_doc({"doctype": "UOM Category", "category_name": d.get("category")}).db_insert()
+
 		if not frappe.db.exists("UOM", d.get("uom_name")):
 			doc = frappe.new_doc("UOM")
 			doc.update(d)
@@ -397,9 +405,6 @@ def add_uom_data():
 		).read()
 	)
 	for d in uom_conversions:
-		if not frappe.db.exists("UOM Category", d.get("category")):
-			frappe.get_doc({"doctype": "UOM Category", "category_name": d.get("category")}).db_insert()
-
 		if not frappe.db.exists(
 			"UOM Conversion Factor",
 			{"from_uom": d.get("from_uom"), "to_uom": d.get("to_uom")},
@@ -426,9 +431,9 @@ def add_market_segments():
 	make_records(records)
 
 
-def add_sale_stages():
+def get_sale_stages():
 	# Sale Stages
-	records = [
+	return [
 		{"doctype": "Sales Stage", "stage_name": _("Prospecting")},
 		{"doctype": "Sales Stage", "stage_name": _("Qualification")},
 		{"doctype": "Sales Stage", "stage_name": _("Needs Analysis")},
@@ -438,6 +443,10 @@ def add_sale_stages():
 		{"doctype": "Sales Stage", "stage_name": _("Proposal/Price Quote")},
 		{"doctype": "Sales Stage", "stage_name": _("Negotiation/Review")},
 	]
+
+
+def add_sale_stages():
+	records = get_sale_stages()
 	for sales_stage in records:
 		frappe.get_doc(sales_stage).db_insert()
 

@@ -1,0 +1,22 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create supplier",
+ "creation": "2026-02-19 10:53:56.936107",
+ "description": "",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "form_tour": "Supplier Form Tour",
+ "idx": 2,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-25 16:58:56.375824",
+ "modified_by": "Administrator",
+ "name": "Create Supplier",
+ "owner": "Administrator",
+ "reference_document": "Supplier",
+ "show_form_tour": 1,
+ "show_full_form": 1,
+ "title": "Create Supplier",
+ "validate_action": 1
+}

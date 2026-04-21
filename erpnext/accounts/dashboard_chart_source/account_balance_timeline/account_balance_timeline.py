@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import add_to_date, formatdate, get_link_to_form, getdate, nowdate
+from frappe.utils import add_to_date, formatdate, getdate, nowdate
 from frappe.utils.dashboard import cache_source
 from frappe.utils.dateutils import get_from_date_from_timespan, get_period_ending
 from frappe.utils.nestedset import get_descendants_of
@@ -13,15 +13,15 @@ from frappe.utils.nestedset import get_descendants_of
 @frappe.whitelist()
 @cache_source
 def get(
-	chart_name=None,
-	chart=None,
-	no_cache=None,
-	filters=None,
-	from_date=None,
-	to_date=None,
-	timespan=None,
-	time_interval=None,
-	heatmap_year=None,
+	chart_name: str | None = None,
+	chart: str | dict | None = None,
+	no_cache: bool | None = None,
+	filters: str | dict | None = None,
+	from_date: str | None = None,
+	to_date: str | None = None,
+	timespan: str | None = None,
+	time_interval: str | None = None,
+	heatmap_year: str | None = None,
 ):
 	if chart_name:
 		chart = frappe.get_doc("Dashboard Chart", chart_name)
@@ -37,21 +37,14 @@ def get(
 	filters = frappe.parse_json(filters) or frappe.parse_json(chart.filters_json)
 
 	account = filters.get("account")
-	filters.get("company")
+	company = filters.get("company")
 
-	if not account and chart_name:
-		frappe.throw(
-			_("Account is not set for the dashboard chart {0}").format(
-				get_link_to_form("Dashboard Chart", chart_name)
-			)
-		)
-
-	if not frappe.db.exists("Account", account) and chart_name:
-		frappe.throw(
-			_("Account {0} does not exists in the dashboard chart {1}").format(
-				account, get_link_to_form("Dashboard Chart", chart_name)
-			)
-		)
+	if not company and not account:
+		frappe.throw(_("Company and account filters not set!"))
+	if not company:
+		frappe.throw(_("Company filter not set!"))
+	if not account:
+		frappe.throw(_("Account filter not set!"))
 
 	if not to_date:
 		to_date = nowdate()

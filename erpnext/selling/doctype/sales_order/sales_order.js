@@ -18,6 +18,7 @@ frappe.ui.form.on("Sales Order", {
 			Project: "Project",
 			"Payment Entry": "Payment",
 			"Work Order": "Work Order",
+			"Production Plan": "Production Plan",
 		};
 		frm.add_fetch("customer", "tax_id", "tax_id");
 
@@ -26,7 +27,7 @@ frappe.ui.form.on("Sales Order", {
 			let color;
 			if (!doc.qty && frm.doc.has_unit_price_items) {
 				color = "yellow";
-			} else if (doc.stock_qty <= doc.delivered_qty) {
+			} else if (doc.stock_qty <= doc.actual_qty) {
 				color = "green";
 			} else {
 				color = "orange";
@@ -55,6 +56,20 @@ frappe.ui.form.on("Sales Order", {
 
 		frm.set_df_property("packed_items", "cannot_add_rows", true);
 		frm.set_df_property("packed_items", "cannot_delete_rows", true);
+	},
+	delivery_date(frm) {
+		if (frm.doc.delivery_date) {
+			frm.doc.items.forEach((d) => {
+				frappe.model.set_value(d.doctype, d.name, "delivery_date", frm.doc.delivery_date);
+			});
+		}
+	},
+	transaction_date(frm) {
+		prevent_past_delivery_dates(frm);
+		frm.set_value("delivery_date", "");
+		frm.doc.items.forEach((d) => {
+			frappe.model.set_value(d.doctype, d.name, "delivery_date", "");
+		});
 	},
 
 	refresh: function (frm) {
@@ -158,7 +173,7 @@ frappe.ui.form.on("Sales Order", {
 				});
 			}
 		}
-
+		prevent_past_delivery_dates(frm);
 		// Hide `Reserve Stock` field description in submitted or cancelled Sales Order.
 		if (frm.doc.docstatus > 0) {
 			frm.set_df_property("reserve_stock", "description", null);
@@ -236,13 +251,6 @@ frappe.ui.form.on("Sales Order", {
 			"Unreconcile Payment Entries",
 			"Delivery Schedule Item",
 		];
-	},
-
-	delivery_date: function (frm) {
-		$.each(frm.doc.items || [], function (i, d) {
-			if (!d.delivery_date) d.delivery_date = frm.doc.delivery_date;
-		});
-		refresh_field("items");
 	},
 
 	create_stock_reservation_entries(frm) {
@@ -1052,6 +1060,14 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 								__("Create")
 							);
 						}
+
+						if (frappe.model.can_create("Production Plan") && !doc.is_subcontracted) {
+							this.frm.add_custom_button(
+								__("Production Plan"),
+								() => this.make_production_plan(),
+								__("Create")
+							);
+						}
 					}
 
 					// sales invoice
@@ -1150,7 +1166,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				if (flt(doc.per_billed) < 100 + frappe.boot.sysdefaults.over_billing_allowance) {
 					this.frm.add_custom_button(
 						__("Payment Request"),
-						() => this.make_payment_request(),
+						() => this.make_payment_request_with_schedule(),
 						__("Create")
 					);
 
@@ -1332,6 +1348,13 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		});
 	}
 
+	make_production_plan() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_production_plan",
+			frm: this.frm,
+		});
+	}
+
 	order_type() {
 		this.toggle_delivery_date();
 	}
@@ -1382,6 +1405,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	make_raw_material_request_dialog(r) {
 		var me = this;
+		r.message.forEach((item) => (item.__checked = 1));
 		var fields = [
 			{ fieldtype: "Check", fieldname: "include_exploded_items", label: __("Include Exploded Items") },
 			{
@@ -1392,7 +1416,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			{
 				fieldtype: "Table",
 				fieldname: "items",
-				description: __("Select BOM, Qty and For Warehouse"),
+				description: __("Finished Goods"),
+				cannot_delete_rows: true,
 				fields: [
 					{
 						fieldtype: "Read Only",
@@ -1816,3 +1841,11 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 };
 
 extend_cscript(cur_frm.cscript, new erpnext.selling.SalesOrderController({ frm: cur_frm }));
+
+function prevent_past_delivery_dates(frm) {
+	if (frm.doc.transaction_date) {
+		frm.fields_dict["delivery_date"].datepicker?.update({
+			minDate: new Date(frm.doc.transaction_date),
+		});
+	}
+}

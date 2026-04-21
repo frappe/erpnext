@@ -17,6 +17,7 @@ class StockRepostingSettings(Document):
 		from frappe.types import DF
 
 		enable_parallel_reposting: DF.Check
+		enable_separate_reposting_for_gl: DF.Check
 		end_time: DF.Time | None
 		item_based_reposting: DF.Check
 		limit_reposting_timeslot: DF.Check

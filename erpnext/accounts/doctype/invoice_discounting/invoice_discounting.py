@@ -317,7 +317,7 @@ class InvoiceDiscounting(AccountsController):
 
 
 @frappe.whitelist()
-def get_invoices(filters):
+def get_invoices(filters: str):
 	filters = frappe._dict(json.loads(filters))
 	cond = []
 	if filters.customer:

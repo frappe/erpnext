@@ -26,8 +26,6 @@ class StockSettings(Document):
 		action_if_quality_inspection_is_not_submitted: DF.Literal["Stop", "Warn"]
 		action_if_quality_inspection_is_rejected: DF.Literal["Stop", "Warn"]
 		allow_existing_serial_no: DF.Check
-		allow_from_dn: DF.Check
-		allow_from_pr: DF.Check
 		allow_internal_transfer_at_arms_length_price: DF.Check
 		allow_negative_stock: DF.Check
 		allow_negative_stock_for_batch: DF.Check
@@ -47,6 +45,7 @@ class StockSettings(Document):
 		disable_serial_no_and_batch_selector: DF.Check
 		do_not_update_serial_batch_on_creation_of_auto_bundle: DF.Check
 		do_not_use_batchwise_valuation: DF.Check
+		enable_serial_and_batch_no_for_item: DF.Check
 		enable_stock_reservation: DF.Check
 		item_group: DF.Link | None
 		item_naming_by: DF.Literal["Item Code", "Naming Series"]
@@ -82,6 +81,7 @@ class StockSettings(Document):
 			"default_warehouse",
 			"set_qty_in_transactions_based_on_serial_no_input",
 			"use_serial_batch_fields",
+			"enable_serial_and_batch_no_for_item",
 			"set_serial_and_batch_bundle_naming_based_on_naming_series",
 		]:
 			frappe.db.set_default(key, self.get(key, ""))
@@ -104,6 +104,7 @@ class StockSettings(Document):
 			)
 
 		self.validate_warehouses()
+		self.validate_serial_and_batch_no_settings()
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
 		self.validate_pending_reposts()
@@ -111,6 +112,41 @@ class StockSettings(Document):
 		self.validate_auto_insert_price_list_rate_if_missing()
 		self.change_precision_for_for_sales()
 		self.change_precision_for_purchase()
+		self.validate_do_not_use_batchwise_valuation()
+
+	def validate_do_not_use_batchwise_valuation(self):
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+		if not frappe.get_all("Serial and Batch Bundle", filters={"docstatus": 1}, limit=1, pluck="name"):
+			return
+
+		if doc_before_save.do_not_use_batchwise_valuation and not self.do_not_use_batchwise_valuation:
+			frappe.throw(
+				_("Cannot disable {0} as it may lead to incorrect stock valuation.").format(
+					frappe.bold(_("Do Not Use Batchwise Valuation"))
+				)
+			)
+
+	def validate_serial_and_batch_no_settings(self):
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+		if doc_before_save.enable_serial_and_batch_no_for_item == self.enable_serial_and_batch_no_for_item:
+			return
+
+		if (
+			doc_before_save.enable_serial_and_batch_no_for_item
+			and not self.enable_serial_and_batch_no_for_item
+		):
+			if frappe.get_all("Serial and Batch Bundle", filters={"docstatus": 1}, limit=1, pluck="name"):
+				frappe.throw(
+					_(
+						"Cannot disable Serial and Batch No for Item, as there are existing records for serial / batch."
+					)
+				)
 
 	def validate_warehouses(self):
 		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
@@ -223,9 +259,6 @@ class StockSettings(Document):
 				)
 			)
 
-	def on_update(self):
-		self.toggle_warehouse_field_for_inter_warehouse_transfer()
-
 	def change_precision_for_for_sales(self):
 		doc_before_save = self.get_doc_before_save()
 		if doc_before_save and (
@@ -276,47 +309,13 @@ class StockSettings(Document):
 				validate_fields_for_doctype=False,
 			)
 
-	def toggle_warehouse_field_for_inter_warehouse_transfer(self):
-		make_property_setter(
-			"Sales Invoice Item",
-			"target_warehouse",
-			"hidden",
-			1 - cint(self.allow_from_dn),
-			"Check",
-			validate_fields_for_doctype=False,
-		)
-		make_property_setter(
-			"Delivery Note Item",
-			"target_warehouse",
-			"hidden",
-			1 - cint(self.allow_from_dn),
-			"Check",
-			validate_fields_for_doctype=False,
-		)
-		make_property_setter(
-			"Purchase Invoice Item",
-			"from_warehouse",
-			"hidden",
-			1 - cint(self.allow_from_pr),
-			"Check",
-			validate_fields_for_doctype=False,
-		)
-		make_property_setter(
-			"Purchase Receipt Item",
-			"from_warehouse",
-			"hidden",
-			1 - cint(self.allow_from_pr),
-			"Check",
-			validate_fields_for_doctype=False,
-		)
-
 
 def clean_all_descriptions():
 	for item in frappe.get_all("Item", ["name", "description"]):
 		if item.description:
 			clean_description = clean_html(item.description)
-		if item.description != clean_description:
-			frappe.db.set_value("Item", item.name, "description", clean_description)
+			if item.description != clean_description:
+				frappe.db.set_value("Item", item.name, "description", clean_description)
 
 
 @frappe.whitelist()

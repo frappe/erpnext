@@ -4,7 +4,9 @@
 
 import frappe
 from frappe import _
-from frappe.utils import getdate
+from frappe.utils import DateTimeLikeObject, getdate, today
+
+from erpnext.accounts.utils import get_fiscal_year
 
 
 def get_columns(filters, trans):
@@ -45,6 +47,10 @@ def get_columns(filters, trans):
 
 
 def validate_filters(filters):
+	if not filters.get("fiscal_year"):
+		filters["fiscal_year"] = get_fiscal_year(today())[0]
+	if not filters.get("company"):
+		filters["company"] = frappe.defaults.get_user_default("Company")
 	for f in ["Fiscal Year", "Based On", "Period", "Company"]:
 		if not filters.get(f.lower().replace(" ", "_")):
 			frappe.throw(_("{0} is mandatory").format(_(f)))
@@ -54,6 +60,14 @@ def validate_filters(filters):
 
 	if filters.get("based_on") == filters.get("group_by"):
 		frappe.throw(_("'Based On' and 'Group By' can not be same"))
+
+	if filters.get("period_based_on") and filters.period_based_on not in ["bill_date", "posting_date"]:
+		frappe.throw(
+			msg=_("{0} can be either {1} or {2}.").format(
+				frappe.bold("Period based On"), frappe.bold("Posting Date"), frappe.bold("Billing Date")
+			),
+			title=_("Invalid Filter"),
+		)
 
 
 def get_data(filters, conditions):
@@ -303,8 +317,10 @@ def get_period_wise_query(bet_dates, trans_date, query_details):
 	return query_details
 
 
-@frappe.whitelist(allow_guest=True)
-def get_period_date_ranges(period, fiscal_year=None, year_start_date=None):
+@frappe.whitelist()
+def get_period_date_ranges(
+	period: str, fiscal_year: str | None = None, year_start_date: DateTimeLikeObject | None = None
+):
 	from dateutil.relativedelta import relativedelta
 
 	if not year_start_date:

@@ -4,7 +4,10 @@
 
 import frappe
 from frappe import _
-from frappe.utils import getdate, nowdate
+from frappe.query_builder import Case
+from frappe.query_builder.custom import ConstantColumn
+from frappe.utils import getdate
+from pypika import Order
 
 
 def execute(filters=None):
@@ -48,17 +51,6 @@ def get_columns():
 	return columns
 
 
-def get_conditions(filters):
-	conditions = ""
-
-	if filters.get("from_date"):
-		conditions += " and posting_date>=%(from_date)s"
-	if filters.get("to_date"):
-		conditions += " and posting_date<=%(to_date)s"
-
-	return conditions
-
-
 def get_entries(filters):
 	entries = []
 
@@ -73,41 +65,90 @@ def get_entries(filters):
 
 	return sorted(
 		entries,
-		key=lambda k: k[2].strftime("%H%M%S") or getdate(nowdate()),
+		key=lambda k: getdate(k[2]),
 	)
 
 
 def get_entries_for_bank_clearance_summary(filters):
 	entries = []
 
-	conditions = get_conditions(filters)
+	je = frappe.qb.DocType("Journal Entry")
+	jea = frappe.qb.DocType("Journal Entry Account")
 
-	journal_entries = frappe.db.sql(
-		f"""SELECT
-			"Journal Entry", jv.name, jv.posting_date, jv.cheque_no,
-			jv.clearance_date, jvd.against_account, jvd.debit - jvd.credit
-		FROM
-			`tabJournal Entry Account` jvd, `tabJournal Entry` jv
-		WHERE
-			jvd.parent = jv.name and jv.docstatus=1 and jvd.account = %(account)s {conditions}
-			order by posting_date DESC, jv.name DESC""",
-		filters,
-		as_list=1,
-	)
+	journal_entries = (
+		frappe.qb.from_(jea)
+		.inner_join(je)
+		.on(jea.parent == je.name)
+		.select(
+			ConstantColumn("Journal Entry").as_("payment_document"),
+			je.name.as_("payment_entry"),
+			je.posting_date,
+			je.cheque_no,
+			je.clearance_date,
+			jea.against_account,
+			jea.debit_in_account_currency - jea.credit_in_account_currency,
+		)
+		.where(
+			(jea.account == filters.account)
+			& (je.docstatus == 1)
+			& (je.posting_date >= filters.from_date)
+			& (je.posting_date <= filters.to_date)
+			& ((je.is_opening == "No") | (je.is_opening.isnull()))
+		)
+		.orderby(je.posting_date, order=Order.desc)
+		.orderby(je.name, order=Order.desc)
+	).run(as_list=True)
 
-	payment_entries = frappe.db.sql(
-		f"""SELECT
-			"Payment Entry", name, posting_date, reference_no, clearance_date, party,
-			if(paid_from=%(account)s, ((paid_amount * -1) - total_taxes_and_charges) , received_amount)
-		FROM
-			`tabPayment Entry`
-		WHERE
-			docstatus=1 and (paid_from = %(account)s or paid_to = %(account)s) {conditions}
-			order by posting_date DESC, name DESC""",
-		filters,
-		as_list=1,
-	)
+	pe = frappe.qb.DocType("Payment Entry")
+	payment_entries = (
+		frappe.qb.from_(pe)
+		.select(
+			ConstantColumn("Payment Entry").as_("payment_document"),
+			pe.name.as_("payment_entry"),
+			pe.posting_date,
+			pe.reference_no.as_("cheque_no"),
+			pe.clearance_date,
+			pe.party.as_("against_account"),
+			Case()
+			.when(
+				(pe.paid_from == filters.account),
+				((pe.paid_amount * -1) - pe.total_taxes_and_charges),
+			)
+			.else_(pe.received_amount),
+		)
+		.where((pe.paid_from == filters.account) | (pe.paid_to == filters.account))
+		.where(
+			(pe.docstatus == 1)
+			& (pe.posting_date >= filters.from_date)
+			& (pe.posting_date <= filters.to_date)
+		)
+		.orderby(pe.posting_date, order=Order.desc)
+		.orderby(pe.name, order=Order.desc)
+	).run(as_list=True)
 
-	entries = journal_entries + payment_entries
+	pi = frappe.qb.DocType("Purchase Invoice")
+	purchase_invoices = (
+		frappe.qb.from_(pi)
+		.select(
+			ConstantColumn("Purchase Invoice").as_("payment_document"),
+			pi.name.as_("payment_entry"),
+			pi.posting_date,
+			pi.bill_no.as_("cheque_no"),
+			pi.clearance_date,
+			pi.supplier.as_("against_account"),
+			(pi.paid_amount * -1).as_("amount"),
+		)
+		.where(
+			(pi.docstatus == 1)
+			& (pi.is_paid == 1)
+			& (pi.cash_bank_account == filters.account)
+			& (pi.posting_date >= filters.from_date)
+			& (pi.posting_date <= filters.to_date)
+		)
+		.orderby(pi.posting_date, order=Order.desc)
+		.orderby(pi.name, order=Order.desc)
+	).run(as_list=True)
+
+	entries = journal_entries + payment_entries + purchase_invoices
 
 	return entries

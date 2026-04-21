@@ -2,7 +2,6 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import flt
 
 from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
@@ -24,9 +23,10 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestItemAlternative(IntegrationTestCase):
+class TestItemAlternative(ERPNextTestSuite):
 	def setUp(self):
 		super().setUp()
 		make_items()

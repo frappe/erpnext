@@ -1,15 +1,14 @@
 # Copyright (c) 2020, Frappe Technologies and Contributors
 # See license.txt
 
-import unittest
-
 from erpnext.accounts.doctype.bank_statement_import.bank_statement_import import (
 	is_mt940_format,
 	preprocess_mt940_content,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestBankStatementImport(unittest.TestCase):
+class TestBankStatementImport(ERPNextTestSuite):
 	"""Unit tests for Bank Statement Import functions"""
 
 	def test_preprocess_mt940_content_with_long_statement_number(self):

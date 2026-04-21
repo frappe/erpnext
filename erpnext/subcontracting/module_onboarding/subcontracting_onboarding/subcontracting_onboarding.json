@@ -1,0 +1,47 @@
+{
+ "allow_roles": [
+  {
+   "role": "Purchase Manager"
+  },
+  {
+   "role": "Purchase User"
+  },
+  {
+   "role": "Purchase Master Manager"
+  }
+ ],
+ "creation": "2026-02-23 22:35:59.372486",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "idx": 1,
+ "is_complete": 0,
+ "modified": "2026-02-25 16:59:55.409759",
+ "modified_by": "Administrator",
+ "module": "Subcontracting",
+ "name": "Subcontracting Onboarding",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Learn Subcontracting"
+  },
+  {
+   "step": "Create Service Item"
+  },
+  {
+   "step": "Create Subcontracted Item"
+  },
+  {
+   "step": "Create Raw Materials"
+  },
+  {
+   "step": "Create Bill of Materials"
+  },
+  {
+   "step": "Create Subcontracting PO"
+  },
+  {
+   "step": "Create Subcontracting Order"
+  }
+ ],
+ "title": "Subcontracting Setup"
+}

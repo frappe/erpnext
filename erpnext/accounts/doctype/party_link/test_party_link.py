@@ -2,8 +2,8 @@
 # See license.txt
 # import frappe
 
-from frappe.tests import IntegrationTestCase
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestPartyLink(IntegrationTestCase):
+class TestPartyLink(ERPNextTestSuite):
 	pass
