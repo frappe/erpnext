@@ -425,6 +425,18 @@ class WorkOrder(Document):
 		if self.production_plan_sub_assembly_item:
 			return
 
+		production_item = self.production_item
+
+		if self.material_request_item and (
+			mr_plan_item := frappe.get_value(
+				"Material Request Item", self.material_request_item, "material_request_plan_item"
+			)
+		):
+			if main_item_code := frappe.get_value(
+				"Material Request Plan Item", mr_plan_item, "main_item_code"
+			):
+				production_item = main_item_code
+
 		if self.sales_order:
 			self.check_sales_order_on_hold_or_close()
 
@@ -445,8 +457,8 @@ class WorkOrder(Document):
 					& (SalesOrder.docstatus == 1)
 					& (SalesOrder.name == self.sales_order)
 					& (
-						(SalesOrderItem.item_code == self.production_item)
-						| (ProductBundleItem.item_code == self.production_item)
+						(SalesOrderItem.item_code == production_item)
+						| (ProductBundleItem.item_code == production_item)
 					)
 				)
 				.run(as_dict=1)
@@ -465,7 +477,7 @@ class WorkOrder(Document):
 						& (SalesOrder.skip_delivery_note == 0)
 						& (SalesOrderItem.item_code == PackedItem.parent_item)
 						& (SalesOrder.docstatus == 1)
-						& (PackedItem.item_code == self.production_item)
+						& (PackedItem.item_code == production_item)
 					)
 					.run(as_dict=1)
 				)
