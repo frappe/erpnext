@@ -1897,13 +1897,11 @@ def get_xlsx_styles(metadata: XLSXMetadata) -> dict | None:
 		return builder.register_style({"align": "left", "indent": indent})
 
 	# column level styling of currency columns
-	company_currency_style = fieldtype_formats["Currency"]
-
 	for col_idx, col in metadata.column_map.items():
 		if col.get("fieldtype") != "Currency":
 			continue
 
-		builder.style_column(col_idx, company_currency_style)
+		builder.style_column(col_idx, fieldtype_formats["Currency"])
 
 	# cell level styling
 	for row_idx, row in metadata.row_map.items():
