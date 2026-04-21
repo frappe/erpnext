@@ -124,7 +124,7 @@ class TestTaxWithholdingDetails(ERPNextTestSuite, AccountsTestMixin):
 			voucher_expected_values = expected_values[i]
 			voucher_actual_values = (
 				voucher.ref_no,
-				voucher.section_code,
+				voucher.tax_withholding_category,
 				voucher.rate,
 				voucher.base_total,
 				voucher.tax_amount,

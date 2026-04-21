@@ -46,8 +46,8 @@ def get_tax_withholding_data(filters):
 		party_info = party_details.get((entry.party_type, entry.party), {})
 
 		row = {
-			"section_code": entry.tax_withholding_category,
-			"entity_type": party_info.get("entity_type"),
+			"tax_withholding_category": entry.tax_withholding_category,
+			"party_entity_type": party_info.get("party_entity_type"),
 			"rate": entry.tax_rate,
 			"total_amount": entry.taxable_amount,
 			"grand_total": doc_details.get("grand_total", 0),
@@ -70,7 +70,11 @@ def get_tax_withholding_data(filters):
 
 	# Sort by section code, transaction date, then withholding_name for deterministic ordering
 	data.sort(
-		key=lambda x: (x["section_code"] or "", x["transaction_date"] or "", x["withholding_name"] or "")
+		key=lambda x: (
+			x["tax_withholding_category"] or "",
+			x["transaction_date"] or "",
+			x["withholding_name"] or "",
+		)
 	)
 	return data
 
@@ -94,9 +98,13 @@ def get_party_details(entries):
 		fields = [doctype.name]
 
 		if party_type == "Supplier":
-			fields.extend([doctype.supplier_type.as_("entity_type"), doctype.supplier_name.as_("party_name")])
+			fields.extend(
+				[doctype.supplier_type.as_("party_entity_type"), doctype.supplier_name.as_("party_name")]
+			)
 		elif party_type == "Customer":
-			fields.extend([doctype.customer_type.as_("entity_type"), doctype.customer_name.as_("party_name")])
+			fields.extend(
+				[doctype.customer_type.as_("party_entity_type"), doctype.customer_name.as_("party_name")]
+			)
 
 		query = frappe.qb.from_(doctype).select(*fields).where(doctype.name.isin(party_set))
 		party_details = query.run(as_dict=True)
@@ -113,7 +121,7 @@ def get_columns(filters):
 		{
 			"label": _("Section Code"),
 			"options": "Tax Withholding Category",
-			"fieldname": "section_code",
+			"fieldname": "tax_withholding_category",
 			"fieldtype": "Link",
 			"width": 90,
 		},
@@ -133,7 +141,7 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Entity Type"),
-			"fieldname": "entity_type",
+			"fieldname": "party_entity_type",
 			"fieldtype": "Data",
 			"width": 100,
 		},
