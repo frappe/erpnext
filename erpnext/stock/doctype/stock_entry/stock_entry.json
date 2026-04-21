@@ -706,17 +706,20 @@
   {
    "fieldname": "slab_grade",
    "fieldtype": "Data",
-   "label": "Slab Grade"
+   "label": "Slab Grade",
+   "read_only": 1
   },
   {
    "fieldname": "slab_serial_no",
    "fieldtype": "Data",
-   "label": "Slab Serial No"
+   "label": "Slab Serial No",
+   "read_only": 1
   },
   {
    "fieldname": "slab_batch_no",
    "fieldtype": "Data",
-   "label": "Slab Batch No"
+   "label": "Slab Batch No",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -724,7 +727,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-31 18:45:48.859934",
+ "modified": "2026-04-21 17:23:30.595790",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
