@@ -152,6 +152,8 @@ class JournalEntry(AccountsController):
 			self.apply_tax_withholding()
 		if self.is_new() or not self.title:
 			self.title = self.get_title()
+		if self.reversal_of:
+			check_reverse_entry_exists(source_name=self.reversal_of, exclude_name=self.name)
 
 	def validate_advance_accounts(self):
 		journal_accounts = set([x.account for x in self.accounts])
@@ -1866,7 +1868,9 @@ def make_inter_company_journal_entry(name, voucher_type, company):
 
 
 @frappe.whitelist()
-def make_reverse_journal_entry(source_name, target_doc=None):
+def make_reverse_journal_entry(source_name: str, target_doc: str | None = None):
+	check_reverse_entry_exists(source_name)
+
 	from frappe.model.mapper import get_mapped_doc
 
 	def post_process(source, target):
@@ -1896,3 +1900,16 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 	)
 
 	return doclist
+
+
+def check_reverse_entry_exists(source_name: str, exclude_name: str | None = None):
+	filters = {"reversal_of": source_name, "docstatus": ["!=", 2]}
+	if exclude_name:
+		filters["name"] = ["!=", exclude_name]
+	existing_reverse = frappe.db.exists("Journal Entry", filters)
+	if existing_reverse:
+		frappe.throw(
+			_("A Reverse Journal Entry {0} already exists for this Journal Entry.").format(
+				get_link_to_form("Journal Entry", existing_reverse)
+			)
+		)
