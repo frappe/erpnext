@@ -677,6 +677,9 @@ fixtures = [
 					"Stock Entry Detail-slab_no",
 					"Stock Entry Detail-to_slab_no",
 					"Stock Ledger Entry-slab",
+					"Stock Ledger Entry-slab_quality_grade",
+					"Stock Entry Detail-slab_quality_grade",
+					"Stock Entry Detail-to_slab_grade",
 				],
 			]
 		],
