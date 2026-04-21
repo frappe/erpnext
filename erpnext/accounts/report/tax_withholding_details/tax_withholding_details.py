@@ -172,13 +172,14 @@ def get_tax_withholding_category_details(additional_table_columns=None):
 
 
 def _get_twc_additional_columns(additional_table_columns):
-	category_fields = [
+	if not additional_table_columns:
+		return []
+
+	return [
 		col.get("fieldname")
 		for col in additional_table_columns
 		if col.get("_doctype") == "Tax Withholding Category" and col.get("fieldname")
 	]
-
-	return category_fields
 
 
 def get_party_pan_map(party_type, party_names):
