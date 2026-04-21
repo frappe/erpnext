@@ -217,6 +217,9 @@ class TestJournalEntry(unittest.TestCase):
 		rjv.posting_date = nowdate()
 		rjv.submit()
 
+		# check duplicate reverse entry creation
+		self.assertRaises(frappe.ValidationError, make_reverse_journal_entry, jv.name)
+
 		self.voucher_no = rjv.name
 
 		self.fields = [
