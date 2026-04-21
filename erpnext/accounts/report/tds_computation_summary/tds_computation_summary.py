@@ -2,6 +2,7 @@ import frappe
 from frappe import _
 
 from erpnext.accounts.report.tax_withholding_details.tax_withholding_details import (
+	_get_twc_additional_columns,
 	get_tax_withholding_data,
 )
 from erpnext.accounts.utils import get_fiscal_year
@@ -37,6 +38,7 @@ def validate_filters(filters):
 
 def group_by_party_and_category(data, filters, additional_table_columns=None):
 	party_category_wise_map = {}
+	twc_additional_columns = _get_twc_additional_columns(additional_table_columns)
 
 	for row in data:
 		key = (row.get("party"), row.get("tax_withholding_category"))
@@ -51,8 +53,8 @@ def group_by_party_and_category(data, filters, additional_table_columns=None):
 			"total_amount": 0.0,
 			"tax_amount": 0.0,
 		}
-		if additional_table_columns:
-			for col in additional_table_columns:
+		if twc_additional_columns:
+			for col in twc_additional_columns:
 				default_row[col["fieldname"]] = row.get(col["fieldname"])
 
 		party_category_wise_map.setdefault(key, default_row)

@@ -35,6 +35,8 @@ def get_tax_withholding_data(filters, additional_table_columns=None):
 	"""Process entries into final report format"""
 	data = []
 	entries = get_tax_withholding_entries(filters, additional_table_columns)
+	twc_additional_columns = _get_twc_additional_columns(additional_table_columns)
+
 	if not entries:
 		return data
 
@@ -69,10 +71,9 @@ def get_tax_withholding_data(filters, additional_table_columns=None):
 			"party": entry.party,
 			"party_type": entry.party_type,
 		}
-		if additional_table_columns:
-			for col in additional_table_columns:
-				if col.get("_doctype") == "Tax Withholding Category":
-					row[col["fieldname"]] = entry.get(col["fieldname"])
+		if twc_additional_columns:
+			for col in twc_additional_columns:
+				row[col["fieldname"]] = entry.get(col["fieldname"])
 
 		data.append(row)
 
@@ -275,15 +276,23 @@ def get_tax_withholding_entries(filters, additional_table_columns=None):
 		query = query.where(twe.party == filters.get("party"))
 
 	if additional_table_columns:
-		twc_fields = [
-			twc[col["fieldname"]].as_(col["fieldname"])
-			for col in additional_table_columns
-			if col.get("_doctype") == "Tax Withholding Category" and col.get("fieldname")
-		]
+		twc_fields = _get_twc_additional_columns(additional_table_columns)
+		twc_fields = [twc[col["fieldname"]].as_(col["fieldname"]) for col in twc_fields]
 		if twc_fields:
 			query = query.join(twc).on(twc.name == twe.tax_withholding_category).select(*twc_fields)
 
 	return query.run(as_dict=True)
+
+
+def _get_twc_additional_columns(additional_table_columns):
+	if not additional_table_columns:
+		return []
+
+	return [
+		col
+		for col in additional_table_columns
+		if col.get("_doctype") == "Tax Withholding Category" and col.get("fieldname")
+	]
 
 
 def get_additional_doc_info(entries):
