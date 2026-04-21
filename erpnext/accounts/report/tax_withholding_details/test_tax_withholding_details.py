@@ -40,7 +40,7 @@ class TestTaxWithholdingDetails(ERPNextTestSuite, AccountsTestMixin):
 
 		expected_values = [
 			[jv.name, "TCS", 0.075, 1000.75, 0.75, 1000.75],
-			["", "TCS", 0.075, 0, 0.75, 0],
+			["", "TCS", 0.075, None, 0.75, None],
 			[si.name, "TCS", 0.075, 1000.0, 0.75, 1000.75],
 		]
 		self.check_expected_values(result, expected_values)
