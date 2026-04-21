@@ -106,8 +106,8 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 
 				row.update(
 					{
-						"section_code": tax_withholding_category or "",
-						"entity_type": party_map.get(party, {}).get(party_type),
+						"tax_withholding_category": tax_withholding_category or "",
+						"party_entity_type": party_map.get(party, {}).get(party_type),
 						"rate": rate,
 						"total_amount": total_amount,
 						"grand_total": grand_total,
@@ -127,7 +127,11 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 				else:
 					entries[key] = row
 	out = list(entries.values())
+<<<<<<< HEAD:erpnext/accounts/report/tds_payable_monthly/tds_payable_monthly.py
 	out.sort(key=lambda x: (x["section_code"], x["transaction_date"]))
+=======
+	out.sort(key=lambda x: (x["tax_withholding_category"], x["transaction_date"], x["ref_no"]))
+>>>>>>> 7630c01e40 (refactor: use consistent report column names):erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py
 
 	return out
 
@@ -179,7 +183,7 @@ def get_columns(filters):
 		{
 			"label": _("Section Code"),
 			"options": "Tax Withholding Category",
-			"fieldname": "section_code",
+			"fieldname": "tax_withholding_category",
 			"fieldtype": "Link",
 			"width": 90,
 		},
@@ -208,7 +212,7 @@ def get_columns(filters):
 
 	columns.extend(
 		[
-			{"label": _("Entity Type"), "fieldname": "entity_type", "fieldtype": "Data", "width": 100},
+			{"label": _("Entity Type"), "fieldname": "party_entity_type", "fieldtype": "Data", "width": 100},
 		]
 	)
 	if filters.party_type == "Supplier":
