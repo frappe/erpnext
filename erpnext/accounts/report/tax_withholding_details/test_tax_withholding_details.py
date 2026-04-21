@@ -118,12 +118,9 @@ class TestTaxWithholdingDetails(AccountsTestMixin, FrappeTestCase):
 		inv = make_purchase_invoice(rate=1000, do_not_submit=True)
 		inv.apply_tds = 1
 		inv.tax_withholding_category = tds_category
-		inv.items[0].tax_withholding_category = tds_category
-		inv.items[0].apply_tds = 1
 		inv.submit()
 
 		field_name = "category_name"
-
 		additional_table_columns = [
 			{
 				"label": "Category Name",
@@ -133,6 +130,7 @@ class TestTaxWithholdingDetails(AccountsTestMixin, FrappeTestCase):
 				"_doctype": "Tax Withholding Category",
 			}
 		]
+
 		filters = frappe._dict(
 			company="_Test Company",
 			party_type="Supplier",
