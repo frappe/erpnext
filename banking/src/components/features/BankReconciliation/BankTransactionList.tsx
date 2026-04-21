@@ -6,7 +6,6 @@ import { formatDate } from "@/lib/date"
 import { ListView, type ListViewColumnMeta } from "@/components/ui/list-view"
 import { formatCurrency, getCurrencyFormatInfo } from "@/lib/numbers"
 import { getCompanyCurrency } from "@/lib/company"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { ArrowDownRight, ArrowUpRight, CheckCircle2, ChevronDown, DollarSign, ExternalLink, ImportIcon, ListIcon, Search, Undo2, XCircle } from "lucide-react"
 import ErrorBanner from "@/components/ui/error-banner"
 import { Badge } from "@/components/ui/badge"
@@ -23,6 +22,7 @@ import { useDebounceValue } from "usehooks-ts"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useCallback, useMemo, useState } from "react"
 import { Link } from "react-router"
+import { Empty, EmptyTitle, EmptyHeader, EmptyMedia, EmptyDescription } from "@/components/ui/empty"
 
 const BankTransactions = () => {
     const selectedBank = useAtomValue(selectedBankAccountAtom)
@@ -274,13 +274,15 @@ const BankTransactionListView = () => {
         ) : null}
 
         {filteredResults.length === 0 && data &&
-            <Alert variant='default'>
-                <DollarSign />
-                <AlertTitle>{_("No transactions found")}</AlertTitle>
-                <AlertDescription>
-                    {_("There are no transactions in the system for the selected bank account and dates that match the filters.")}
-                </AlertDescription>
-            </Alert>
+            <Empty>
+                <EmptyMedia>
+                    <ListIcon />
+                </EmptyMedia>
+                <EmptyHeader>
+                    <EmptyTitle>{_("No bank transactions found")}</EmptyTitle>
+                    <EmptyDescription>{_("There are no transactions in the system for the selected bank account and dates that match the filters.")}</EmptyDescription>
+                </EmptyHeader>
+            </Empty>
         }
 
 

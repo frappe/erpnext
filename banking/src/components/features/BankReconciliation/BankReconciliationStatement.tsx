@@ -12,13 +12,13 @@ import { ListView, type ListViewColumnMeta } from "@/components/ui/list-view"
 import { formatCurrency } from "@/lib/numbers"
 import { getCompanyCurrency } from "@/lib/company"
 import { slug } from "@/lib/frappe"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
+import { ScrollTextIcon } from "lucide-react"
 import ErrorBanner from "@/components/ui/error-banner"
 import { StatContainer, StatLabel, StatValue } from "@/components/ui/stats"
 import _ from "@/lib/translate"
 import { toast } from "sonner"
 import { useCopyToClipboard } from "usehooks-ts"
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 
 const BankReconciliationStatement = () => {
     const bankAccount = useAtomValue(selectedBankAccountAtom)
@@ -217,13 +217,15 @@ const BankReconciliationStatementView = () => {
         )}
 
         {data && data.message.result.length === 0 &&
-            <Alert variant='default'>
-                <AlertCircle />
-                <AlertTitle>{_("No entries found")}</AlertTitle>
-                <AlertDescription>
-                    {_("There are no accounting entries in the system for the selected account and dates.")}
-                </AlertDescription>
-            </Alert>
+            <Empty>
+                <EmptyMedia>
+                    <ScrollTextIcon />
+                </EmptyMedia>
+                <EmptyHeader>
+                    <EmptyTitle>{_("No entries found")}</EmptyTitle>
+                    <EmptyDescription>{_("There are no accounting entries in the system for the selected account and dates.")}</EmptyDescription>
+                </EmptyHeader>
+            </Empty>
         }
 
 

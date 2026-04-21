@@ -14,10 +14,10 @@ import { getCompanyCurrency } from "@/lib/company"
 import { getErrorMessage, slug } from "@/lib/frappe"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { PartyPopper } from "lucide-react"
 import ErrorBanner from "@/components/ui/error-banner"
 import _ from "@/lib/translate"
+import { Empty, EmptyTitle, EmptyDescription, EmptyMedia, EmptyHeader } from "@/components/ui/empty"
 
 const IncorrectlyClearedEntries = () => {
     const companyID = useCurrentCompany()
@@ -211,13 +211,15 @@ const IncorrectlyClearedEntriesView = () => {
         )}
 
         {data && data.message.result.length === 0 &&
-            <Alert variant='default'>
-                <PartyPopper />
-                <AlertTitle>{_("It's all good!")}</AlertTitle>
-                <AlertDescription>
-                    {_("There are no entries in the system where the clearance date is before the posting date.")}
-                </AlertDescription>
-            </Alert>
+            <Empty>
+                <EmptyMedia>
+                    <PartyPopper />
+                </EmptyMedia>
+                <EmptyHeader>
+                    <EmptyTitle>{_("It's all good!")}</EmptyTitle>
+                    <EmptyDescription>{_("There are no entries in the system where the clearance date is before the posting date.")}</EmptyDescription>
+                </EmptyHeader>
+            </Empty>
         }
 
 

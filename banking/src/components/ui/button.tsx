@@ -88,6 +88,11 @@ const buttonVariants = cva(
         theme: "violet",
         className: "bg-surface-violet-5 text-ink-violet-1 hover:bg-surface-violet-6 active:bg-surface-violet-7 disabled:bg-surface-violet-2 disabled:text-ink-violet-2"
       },
+      {
+        variant: "solid",
+        theme: "amber",
+        className: "bg-surface-amber-5 text-ink-amber-1 hover:bg-surface-amber-6 active:bg-surface-amber-7 disabled:bg-surface-amber-2 disabled:text-ink-amber-2"
+      },
       // Subtle Buttons
       {
         variant: "subtle",
@@ -113,6 +118,11 @@ const buttonVariants = cva(
         variant: "subtle",
         theme: "violet",
         className: "text-ink-violet-4 bg-surface-violet-2 hover:bg-surface-violet-3 active:bg-surface-violet-4 disabled:bg-surface-violet-2 disabled:text-ink-violet-2"
+      },
+      {
+        variant: "subtle",
+        theme: "amber",
+        className: "text-ink-amber-4 bg-surface-amber-2 hover:bg-surface-amber-3 active:bg-surface-amber-4 disabled:bg-surface-amber-2 disabled:text-ink-amber-2"
       },
       // Outline buttons
       {
@@ -144,6 +154,11 @@ const buttonVariants = cva(
         theme: "violet",
         className: "text-ink-violet-4 border-outline-violet-2 hover:border-outline-violet-3 active:border-outline-violet-4 active:bg-surface-violet-4 disabled:bg-surface-violet-2 disabled:text-ink-violet-2 disabled:border-outline-violet-2"
       },
+      {
+        variant: "outline",
+        theme: "amber",
+        className: "text-ink-amber-4 border-outline-amber-2 hover:border-outline-amber-3 active:border-outline-amber-4 active:bg-surface-amber-4 disabled:bg-surface-amber-2 disabled:text-ink-amber-2 disabled:border-outline-amber-2"
+      },
       // Ghost buttons
       {
         variant: "ghost",
@@ -174,6 +189,11 @@ const buttonVariants = cva(
         theme: "violet",
         className: "text-ink-violet-4 hover:bg-surface-violet-3 active:bg-surface-violet-4 disabled:text-ink-violet-2"
       },
+      {
+        variant: "ghost",
+        theme: "amber",
+        className: "text-ink-amber-4 hover:bg-surface-amber-3 active:bg-surface-amber-4 disabled:text-ink-amber-2"
+      },
       //Link buttons
       {
         variant: "link",
@@ -199,6 +219,11 @@ const buttonVariants = cva(
         variant: "link",
         theme: "violet",
         className: "text-ink-violet-3 hover:text-ink-violet-4 active:text-ink-violet-4 disabled:text-ink-violet-2"
+      },
+      {
+        variant: "link",
+        theme: "amber",
+        className: "text-ink-amber-3 hover:text-ink-amber-4 active:text-ink-amber-4 disabled:text-ink-amber-2"
       }
     ],
     defaultVariants: {

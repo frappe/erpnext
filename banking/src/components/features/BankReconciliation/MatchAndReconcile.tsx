@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator"
 import Fuse from 'fuse.js'
 import { getSearchResults, LinkedPayment, UnreconciledTransaction, useGetRuleForTransaction, useGetUnreconciledTransactions, useGetVouchersForTransaction, useIsTransactionWithdrawal, useReconcileTransaction, useTransactionSearch } from "./utils"
 import { Input } from "@/components/ui/input"
-import { AlertCircle, ArrowDownRight, ArrowRightIcon, ArrowRightLeft, ArrowUpRight, BadgeCheck, ChevronDown, DollarSign, Landmark, LandmarkIcon, ListIcon, Loader2, Receipt, ReceiptIcon, Search, User, XCircle, ZapIcon } from "lucide-react"
+import { AlertCircleIcon, ArrowDownRight, ArrowRightIcon, ArrowRightLeft, ArrowUpRight, BadgeCheck, ChevronDown, DollarSign, Landmark, LandmarkIcon, ListIcon, Loader2, Receipt, ReceiptIcon, Search, User, XCircle, ZapIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
@@ -34,6 +34,7 @@ import { Kbd, KbdGroup } from "@/components/ui/kbd"
 import { useFrappeGetCall } from "frappe-react-sdk"
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Link } from "react-router"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 const MatchAndReconcile = ({ contentHeight }: { contentHeight: number }) => {
     const selectedBank = useAtomValue(selectedBankAccountAtom)
@@ -904,34 +905,32 @@ const OlderUnreconciledTransactionsBanner = () => {
 
     if (data && data.message.count > 0) {
 
-        return <div className="flex flex-col gap-2 px-1">
-            <div className="border border-outline-amber-3 bg-surface-amber-1/50 rounded-md p-4 flex items-center justify-between">
-                <div className="flex items-center gap-1">
-                    <div className="min-w-8">
-                        <AlertCircle className="w-6 h-6 text-ink-amber-3" />
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                        {data.message.count > 1 ? (
-                            <span className="text-sm">{_("There are {0} unreconciled transactions before {1}.", [data.message.count.toString(), formatDate(dates.fromDate)])}</span>
-                        ) : (
-                            <span className="text-sm">{_("There is one unreconciled transaction before {0}.", [formatDate(dates.fromDate)])}</span>
-                        )}
-                        <span className="text-sm">{_("The opening balance might not match your bank statement. Would you like to reconcile them?")}</span>
-                    </div>
-
+        return <Alert theme='gray' variant='subtle'>
+            <AlertCircleIcon />
+            <div className="flex justify-between items-center">
+                <div>
+                    <AlertTitle> {data.message.count > 1 ? (
+                        <span>{_("There are {0} unreconciled transactions before {1}.", [data.message.count.toString(), formatDate(dates.fromDate)])}</span>
+                    ) : (
+                        <span>{_("There is one unreconciled transaction before {0}.", [formatDate(dates.fromDate)])}</span>
+                    )}</AlertTitle>
+                    <AlertDescription className="flex justify-between">
+                        {_("The opening balance might not match your bank statement. Would you like to reconcile them?")}
+                    </AlertDescription>
                 </div>
-                <div className="flex items-center gap-2 w-fit pl-4">
+                <div>
                     <Button
                         size='sm'
                         type='button'
-                        onClick={() => setDates({ fromDate: data.message.oldest_date, toDate: dates.toDate })}
-                        variant='outline'>
+                        theme='gray'
+                        variant='outline'
+                        onClick={() => setDates({ fromDate: data.message.oldest_date, toDate: dates.toDate })}>
                         <span>{data.message.count > 1 ? _("View older transactions") : _("View older transaction")}</span>
                         <ArrowRightIcon className="w-4 h-4" />
                     </Button>
                 </div>
             </div>
-        </div>
+        </Alert>
     }
 
     return null

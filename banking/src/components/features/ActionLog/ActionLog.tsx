@@ -25,7 +25,7 @@ import { toast } from 'sonner'
 import { getErrorMessage } from '@/lib/frappe'
 import ErrorBanner from '@/components/ui/error-banner'
 import SelectedTransactionDetails from '../BankReconciliation/SelectedTransactionDetails'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 
 const ActionLog = () => {
 
@@ -94,13 +94,15 @@ const ActionLogDialogContent = () => {
             </div>
         ))}
 
-        {actionLog.length === 0 && <Alert variant='default'>
-            <HistoryIcon />
-            <AlertTitle>{_("No reconciliation actions found")}</AlertTitle>
-            <AlertDescription>
-                {_("You have not performed any reconciliations in this session yet.")}
-            </AlertDescription>
-        </Alert>}
+        {actionLog.length === 0 && <Empty>
+            <EmptyMedia>
+                <HistoryIcon />
+            </EmptyMedia>
+            <EmptyHeader>
+                <EmptyTitle>{_("No reconciliation actions found")}</EmptyTitle>
+                <EmptyDescription>{_("You have not performed any reconciliations in this session yet.")}</EmptyDescription>
+            </EmptyHeader>
+        </Empty>}
     </div>
 }
 

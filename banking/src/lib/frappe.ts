@@ -12,6 +12,11 @@ export const getErrorMessage = (error?: FrappeError | null): string => {
     return messages.map(m => m.message).join('\n')
 }
 
+/**
+ * Standard function to parse the error messages from the FrappeError object
+ * @param error The FrappeError object to parse
+ * @returns An array of ParsedErrorMessage objects
+ */
 export const getErrorMessages = (error?: FrappeError | null): ParsedErrorMessage[] => {
     if (!error) return []
     let eMessages: ParsedErrorMessage[] = error?._server_messages ? JSON.parse(error?._server_messages) : []

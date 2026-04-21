@@ -13,8 +13,7 @@ import { Table, TableCell, TableHead, TableHeader, TableRow } from "@/components
 import { formatCurrency } from "@/lib/numbers"
 import { getCompanyCurrency } from "@/lib/company"
 import { slug } from "@/lib/frappe"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, CheckCircle2, XCircle } from "lucide-react"
+import { CheckCircle2, ReceiptTextIcon, XCircle } from "lucide-react"
 import ErrorBanner from "@/components/ui/error-banner"
 import { Badge } from "@/components/ui/badge"
 import _ from "@/lib/translate"
@@ -26,6 +25,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Form } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
 import { DateField } from "@/components/ui/form-elements"
+import { Empty, EmptyMedia, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 
 const BankClearanceSummary = () => {
     const bankAccount = useAtomValue(selectedBankAccountAtom)
@@ -226,14 +226,16 @@ const BankClearanceSummaryView = () => {
             />
         ) : null}
 
-        {data && data.message.result.length === 0 &&
-            <Alert variant='default'>
-                <AlertCircle />
-                <AlertTitle>No entries found</AlertTitle>
-                <AlertDescription>
-                    There are no accounting entries in the system for the selected account and dates.
-                </AlertDescription>
-            </Alert>
+        {data && data.message.result.length == 0 &&
+            <Empty>
+                <EmptyMedia>
+                    <ReceiptTextIcon />
+                </EmptyMedia>
+                <EmptyHeader>
+                    <EmptyTitle>{_("No entries found")}</EmptyTitle>
+                    <EmptyDescription>{_("There are no accounting entries in the system for the selected account and dates.")}</EmptyDescription>
+                </EmptyHeader>
+            </Empty>
         }
 
 
