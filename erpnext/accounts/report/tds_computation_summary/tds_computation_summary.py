@@ -9,6 +9,10 @@ from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
+	return _execute(filters)
+
+
+def _execute(filters=None, additional_table_columns=None):
 	if filters.get("party_type") == "Customer":
 		party_naming_by = frappe.db.get_single_value("Selling Settings", "cust_master_name")
 	else:
@@ -18,15 +22,15 @@ def execute(filters=None):
 
 	validate_filters(filters)
 
-	columns = get_columns(filters)
+	columns = get_columns(filters, additional_table_columns)
 	(
 		tds_accounts,
 		tax_category_map,
 		net_total_map,
 	) = get_tds_docs(filters)
 
-	res = get_result(filters, tds_accounts, tax_category_map, net_total_map)
-	final_result = group_by_party_and_category(res, filters)
+	res = get_result(filters, tds_accounts, tax_category_map, net_total_map, additional_table_columns)
+	final_result = group_by_party_and_category(res, filters, additional_table_columns)
 
 	return columns, final_result
 
@@ -44,32 +48,32 @@ def validate_filters(filters):
 	filters["fiscal_year"] = from_year
 
 
-def group_by_party_and_category(data, filters):
+def group_by_party_and_category(data, filters, additional_table_columns=None):
 	party_category_wise_map = {}
 
 	for row in data:
-		party_category_wise_map.setdefault(
-			(row.get("party"), row.get("section_code")),
-			{
-				"pan": row.get("pan"),
-				"tax_id": row.get("tax_id"),
-				"party": row.get("party"),
-				"party_name": row.get("party_name"),
-				"section_code": row.get("section_code"),
-				"entity_type": row.get("entity_type"),
-				"rate": row.get("rate"),
-				"total_amount": 0.0,
-				"tax_amount": 0.0,
-			},
-		)
+		key = (row.get("party"), row.get("tax_withholding_category"))
+		default_row = {
+			"pan": row.get("pan"),
+			"tax_id": row.get("tax_id"),
+			"party": row.get("party"),
+			"party_name": row.get("party_name"),
+			"tax_withholding_category": row.get("tax_withholding_category"),
+			"party_entity_type": row.get("party_entity_type"),
+			"rate": row.get("rate"),
+			"total_amount": 0.0,
+			"tax_amount": 0.0,
+		}
 
-		party_category_wise_map.get((row.get("party"), row.get("section_code")))["total_amount"] += row.get(
-			"total_amount", 0.0
-		)
+		if additional_table_columns:
+			for col in additional_table_columns:
+				default_row[col.get("fieldname")] = row.get(col.get("fieldname"))
 
-		party_category_wise_map.get((row.get("party"), row.get("section_code")))["tax_amount"] += row.get(
-			"tax_amount", 0.0
-		)
+		party_category_wise_map.setdefault(key, default_row)
+
+		party_category_wise_map.get(key)["total_amount"] += row.get("total_amount", 0.0)
+
+		party_category_wise_map.get(key)["tax_amount"] += row.get("tax_amount", 0.0)
 
 	final_result = get_final_result(party_category_wise_map)
 
@@ -84,7 +88,7 @@ def get_final_result(party_category_wise_map):
 	return out
 
 
-def get_columns(filters):
+def get_columns(filters, additional_table_columns=None):
 	pan = "pan" if frappe.db.has_column(filters.party_type, "pan") else "tax_id"
 	columns = [
 		{"label": _(frappe.unscrub(pan)), "fieldname": pan, "fieldtype": "Data", "width": 90},
@@ -107,16 +111,24 @@ def get_columns(filters):
 			}
 		)
 
+	if additional_table_columns:
+		columns.extend(additional_table_columns)
+
 	columns.extend(
 		[
 			{
-				"label": _("Section Code"),
+				"label": _("Tax Withholding Category"),
 				"options": "Tax Withholding Category",
-				"fieldname": "section_code",
+				"fieldname": "tax_withholding_category",
 				"fieldtype": "Link",
 				"width": 180,
 			},
-			{"label": _("Entity Type"), "fieldname": "entity_type", "fieldtype": "Data", "width": 180},
+			{
+				"label": _(f"{filters.get('party_type', 'Party')} Type"),
+				"fieldname": "party_entity_type",
+				"fieldtype": "Data",
+				"width": 180,
+			},
 			{
 				"label": _("TDS Rate %") if filters.get("party_type") == "Supplier" else _("TCS Rate %"),
 				"fieldname": "rate",
