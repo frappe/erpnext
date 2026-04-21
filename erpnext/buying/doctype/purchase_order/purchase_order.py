@@ -717,6 +717,39 @@ def make_purchase_receipt(
 
 	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
 
+	def post_process(source, target):
+		po_detail_map = {}
+		items_to_remove = []
+		has_partial_merge = False
+		for item in target.items:
+			if not item.purchase_order_item:
+				continue
+			if item.purchase_order_item in po_detail_map:
+				existing = po_detail_map[item.purchase_order_item]
+				remaining = flt(item.qty) - flt(existing.qty)
+				if remaining > 0:
+					existing.qty = flt(existing.qty) + remaining
+					has_partial_merge = True
+				items_to_remove.append(item)
+			else:
+				po_detail_map[item.purchase_order_item] = item
+		for item in items_to_remove:
+			target.remove(item)
+		if items_to_remove:
+			if has_partial_merge:
+				frappe.msgprint(
+					_("Duplicate items were merged into existing rows in the Items table."),
+					indicator="blue",
+				)
+			else:
+				frappe.msgprint(
+					_("All items from {0} {1} are already fully added in the items table").format(
+						source.doctype, source.name
+					),
+					indicator="blue",
+				)
+		set_missing_values(source, target)
+
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
 
@@ -766,7 +799,7 @@ def make_purchase_receipt(
 			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
 		target_doc,
-		set_missing_values,
+		post_process,
 	)
 
 	return doc
@@ -798,6 +831,39 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		args = json.loads(args)
 
 	def postprocess(source, target):
+		po_detail_map = {}
+		items_to_remove = []
+		has_partial_merge = False
+		for item in target.items:
+			if not item.po_detail:
+				continue
+			if item.po_detail in po_detail_map:
+				existing = po_detail_map[item.po_detail]
+				remaining = flt(item.qty) - flt(existing.qty)
+				if remaining > 0:
+					existing.qty = flt(existing.qty) + remaining
+					has_partial_merge = True
+				items_to_remove.append(item)
+			else:
+				po_detail_map[item.po_detail] = item
+
+		for item in items_to_remove:
+			target.remove(item)
+
+		if items_to_remove:
+			if has_partial_merge:
+				frappe.msgprint(
+					_("Duplicate items were merged into existing rows in the Items table."),
+					indicator="blue",
+				)
+			else:
+				frappe.msgprint(
+					_("All items from {0} {1} are already fully added in the items table").format(
+						source.doctype, source.name
+					),
+					indicator="blue",
+				)
+
 		target.flags.ignore_permissions = ignore_permissions
 		set_missing_values(source, target)
 

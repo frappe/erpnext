@@ -158,6 +158,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 							per_billed: ["<", 99.99],
 							company: me.frm.doc.company,
 						},
+						cur_items: me.frm.doc.items,
 						allow_child_item_selection: true,
 						child_fieldname: "items",
 						child_columns: ["item_code", "item_name", "qty", "amount", "billed_amt"],
@@ -183,6 +184,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 							company: me.frm.doc.company,
 							is_return: 0,
 						},
+						cur_items: me.frm.doc.items,
 						allow_child_item_selection: true,
 						child_fieldname: "items",
 						child_columns: ["item_code", "item_name", "qty", "amount", "billed_amt"],
@@ -721,6 +723,24 @@ frappe.ui.form.on("Purchase Invoice", {
 					if (response) frm.set_value("credit_to", response.message);
 				},
 			});
+		}
+	},
+});
+
+frappe.ui.form.on("Purchase Invoice Item", {
+	item_code: function (frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (row.po_detail) {
+			frappe.model.set_value(row.doctype, row.name, "po_detail", null);
+		}
+		if (row.purchase_order) {
+			frappe.model.set_value(row.doctype, row.name, "purchase_order", null);
+		}
+		if (row.pr_detail) {
+			frappe.model.set_value(row.doctype, row.name, "pr_detail", null);
+		}
+		if (row.purchase_receipt) {
+			frappe.model.set_value(row.doctype, row.name, "purchase_receipt", null);
 		}
 	},
 });

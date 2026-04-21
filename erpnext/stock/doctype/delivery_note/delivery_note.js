@@ -179,6 +179,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 							company: me.frm.doc.company,
 							project: me.frm.doc.project || undefined,
 						},
+						cur_items: me.frm.doc.items,
 						allow_child_item_selection: true,
 						child_fieldname: "items",
 						child_columns: ["item_code", "item_name", "qty", "delivered_qty"],
@@ -454,6 +455,15 @@ frappe.ui.form.on("Delivery Note", {
 		// unhide expense_account and cost_center if perpetual inventory is enabled in the company
 		var aii_enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company);
 		frm.fields_dict["items"].grid.set_column_disp(["expense_account", "cost_center"], aii_enabled);
+	},
+});
+
+frappe.ui.form.on("Delivery Note Item", {
+	item_code: function (frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (row.so_detail) {
+			frappe.model.set_value(row.doctype, row.name, "so_detail", null);
+		}
 	},
 });
 

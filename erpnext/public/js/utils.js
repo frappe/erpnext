@@ -1118,7 +1118,82 @@ erpnext.utils.map_current_doc = function (opts) {
 					frappe.msgprint(__("Please select {0}", [opts.source_doctype]));
 					return;
 				}
+				if (opts.cur_items) {
+					const doctype_fieldname_map = {
+						"Sales Order": "sales_order",
+						"Purchase Order": "purchase_order",
+						"Delivery Note": "delivery_note",
+						"Purchase Receipt": "purchase_receipt",
+						"Purchase Invoice": "purchase_invoice",
+					};
+					const link_field = doctype_fieldname_map[opts.source_doctype];
+					if (link_field) {
+						const items_present = opts.cur_items.map((item) => item[link_field]).filter(Boolean);
+						const duplicates = values.filter((value) => items_present.includes(value));
+						if (duplicates.length > 0) {
+							let item_qty_map = {};
+							opts.cur_items
+								.filter((item) => duplicates.includes(item[link_field]))
+								.forEach((item) => {
+									const key = item[link_field] + ":" + item.item_code;
+									item_qty_map[key] = (item_qty_map[key] || 0) + flt(item.qty);
+								});
 
+							let fully_added = [];
+							let checked = 0;
+							duplicates.forEach((src) => {
+								frappe.model.with_doc(opts.source_doctype, src, function () {
+									const source_doc = frappe.model.get_doc(opts.source_doctype, src);
+									let source_qty_map = {};
+									(source_doc.items || []).forEach((row) => {
+										const key = src + ":" + row.item_code;
+										source_qty_map[key] = (source_qty_map[key] || 0) + flt(row.qty);
+									});
+									let has_remaining = false;
+									for (const key of Object.keys(source_qty_map)) {
+										if (flt(source_qty_map[key]) > flt(item_qty_map[key] || 0)) {
+											has_remaining = true;
+											break;
+										}
+									}
+									if (!has_remaining) {
+										fully_added.push(src);
+									}
+									checked++;
+									if (checked === duplicates.length) {
+										if (fully_added.length > 0) {
+											frappe.msgprint(
+												__(
+													"All items from {0} {1} are already fully added in the items table",
+													[opts.source_doctype, fully_added.join(", ")]
+												)
+											);
+										}
+										const remaining_values = values.filter(
+											(v) => !fully_added.includes(v)
+										);
+										if (remaining_values.length > 0) {
+											opts.source_name = [...new Set(remaining_values)];
+											if (
+												opts.allow_child_item_selection ||
+												["Purchase Receipt", "Delivery Note", "Pick List"].includes(
+													opts.source_doctype
+												)
+											) {
+												opts.args = args;
+											}
+											d.dialog.hide();
+											_map();
+										} else {
+											d.dialog.hide();
+										}
+									}
+								});
+							});
+							return;
+						}
+					}
+				}
 				opts.source_name = Array.isArray(values) ? [...new Set(values)] : values;
 
 				if (

@@ -2012,6 +2012,36 @@ def make_purchase_receipt(
 		args = json.loads(args)
 
 	def post_parent_process(source_parent, target_parent):
+		pi_detail_map = {}
+		items_to_remove = []
+		has_partial_merge = False
+		for item in target_parent.items:
+			if not item.purchase_invoice_item:
+				continue
+			if item.purchase_invoice_item in pi_detail_map:
+				existing = pi_detail_map[item.purchase_invoice_item]
+				remaining = flt(item.qty) - flt(existing.qty)
+				if remaining > 0:
+					existing.qty = flt(existing.qty) + remaining
+					has_partial_merge = True
+				items_to_remove.append(item)
+			else:
+				pi_detail_map[item.purchase_invoice_item] = item
+		for item in items_to_remove:
+			target_parent.remove(item)
+		if items_to_remove:
+			if has_partial_merge:
+				frappe.msgprint(
+					_("Duplicate items were merged into existing rows in the Items table."),
+					indicator="blue",
+				)
+			else:
+				frappe.msgprint(
+					_("All items from {0} {1} are already fully added in the items table").format(
+						source_parent.doctype, source_parent.name
+					),
+					indicator="blue",
+				)
 		remove_items_with_zero_qty(target_parent)
 		set_missing_values(source_parent, target_parent)
 

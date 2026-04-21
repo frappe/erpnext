@@ -1487,6 +1487,40 @@ def make_purchase_invoice(
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
+		detail_map = {}
+		items_to_remove = []
+		has_partial_merge = False
+		for item in target.get("items", []):
+			key = item.pr_detail or item.po_detail
+			if not key:
+				continue
+			if key in detail_map:
+				existing = detail_map[key]
+				remaining = flt(item.qty) - flt(existing.qty)
+				if remaining > 0:
+					existing.qty = flt(existing.qty) + remaining
+					has_partial_merge = True
+				items_to_remove.append(item)
+			else:
+				detail_map[key] = item
+
+		for item in items_to_remove:
+			target.remove(item)
+
+		if items_to_remove:
+			if has_partial_merge:
+				frappe.msgprint(
+					_("Duplicate items were merged into existing rows in the Items table."),
+					indicator="blue",
+				)
+			else:
+				frappe.msgprint(
+					_("All items from {0} {1} are already fully added in the items table").format(
+						source.doctype, source.name
+					),
+					indicator="blue",
+				)
+
 		if len(target.get("items")) == 0:
 			frappe.throw(_("All items have already been Invoiced/Returned"))
 

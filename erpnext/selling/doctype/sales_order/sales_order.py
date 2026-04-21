@@ -1183,6 +1183,38 @@ def make_delivery_note(
 	# 0 qty is accepted, as the qty is uncertain for some items
 	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
 
+	def post_process(source, target):
+		so_detail_map = {}
+		items_to_remove = []
+		has_partial_merge = False
+		for item in target.items:
+			if not item.so_detail:
+				continue
+			if item.so_detail in so_detail_map:
+				existing = so_detail_map[item.so_detail]
+				remaining = flt(item.qty) - flt(existing.qty)
+				if remaining > 0:
+					existing.qty = flt(existing.qty) + remaining
+					has_partial_merge = True
+				items_to_remove.append(item)
+			else:
+				so_detail_map[item.so_detail] = item
+		for item in items_to_remove:
+			target.remove(item)
+		if items_to_remove:
+			if has_partial_merge:
+				frappe.msgprint(
+					_("Duplicate items were merged into existing rows in the Items table."),
+					indicator="blue",
+				)
+			else:
+				frappe.msgprint(
+					_("All items from {0} {1} are already fully added in the items table").format(
+						source.doctype, source.name
+					),
+					indicator="blue",
+				)
+
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
 
@@ -1320,6 +1352,8 @@ def make_delivery_note(
 		del target_doc
 		return
 
+	post_process(so, target_doc)
+
 	# Should be called after mapping items.
 	set_missing_values(so, target_doc)
 
@@ -1330,8 +1364,8 @@ def make_delivery_note(
 def make_sales_invoice(
 	source_name: str,
 	target_doc: str | Document | None = None,
-	ignore_permissions: bool = False,
 	args: str | dict | None = None,
+	ignore_permissions: bool = False,
 ):
 	if args is None:
 		args = {}
@@ -1345,6 +1379,39 @@ def make_sales_invoice(
 		return has_unit_price_items and source.qty == 0
 
 	def postprocess(source, target):
+		so_detail_map = {}
+		items_to_remove = []
+		has_partial_merge = False
+		for item in target.items:
+			if not item.so_detail:
+				continue
+			if item.so_detail in so_detail_map:
+				existing = so_detail_map[item.so_detail]
+				remaining = flt(item.qty) - flt(existing.qty)
+				if remaining > 0:
+					existing.qty = flt(existing.qty) + remaining
+					has_partial_merge = True
+				items_to_remove.append(item)
+			else:
+				so_detail_map[item.so_detail] = item
+
+		for item in items_to_remove:
+			target.remove(item)
+
+		if items_to_remove:
+			if has_partial_merge:
+				frappe.msgprint(
+					_("Duplicate items were merged into existing rows in the Items table."),
+					indicator="blue",
+				)
+			else:
+				frappe.msgprint(
+					_("All items from {0} {1} are already fully added in the items table").format(
+						source.doctype, source.name
+					),
+					indicator="blue",
+				)
+
 		set_missing_values(source, target)
 		# Get the advance paid Journal Entries in Sales Invoice Advance
 		if target.get("allocate_advances_automatically"):

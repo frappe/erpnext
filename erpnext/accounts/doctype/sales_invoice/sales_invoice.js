@@ -368,6 +368,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					get_query_filters: filters,
 					allow_child_item_selection: true,
 					child_fieldname: "items",
+					cur_items: me.frm.doc.items,
 					child_columns: ["item_code", "item_name", "qty", "amount", "billed_amt"],
 				});
 			},
@@ -438,6 +439,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 							filters: filters,
 						};
 					},
+					cur_items: me.frm.doc.items,
 					allow_child_item_selection: true,
 					child_fieldname: "items",
 					child_columns: ["item_code", "item_name", "qty", "amount", "billed_amt"],
@@ -1158,6 +1160,24 @@ frappe.ui.form.on("Sales Invoice", {
 
 		frm.set_df_property("update_stock", "read_only", frm.doc.has_subcontracted);
 		frm.toggle_display("update_stock", !frm.doc.has_subcontracted);
+	},
+});
+
+frappe.ui.form.on("Sales Invoice Item", {
+	item_code(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (row.sales_order) {
+			frappe.model.set_value(row.doctype, row.name, "sales_order", null);
+		}
+		if (row.so_detail) {
+			frappe.model.set_value(row.doctype, row.name, "so_detail", null);
+		}
+		if (row.dn_detail) {
+			frappe.model.set_value(row.doctype, row.name, "dn_detail", null);
+		}
+		if (row.delivery_note) {
+			frappe.model.set_value(row.doctype, row.name, "delivery_note", null);
+		}
 	},
 });
 

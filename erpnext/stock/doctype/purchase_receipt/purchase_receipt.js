@@ -136,6 +136,7 @@ frappe.ui.form.on("Purchase Receipt", {
 							company: frm.doc.company,
 							update_stock: 0,
 						},
+						cur_items: frm.doc.items,
 						allow_child_item_selection: true,
 						child_fieldname: "items",
 						child_columns: ["item_code", "item_name", "qty", "received_qty"],
@@ -154,6 +155,24 @@ frappe.ui.form.on("Purchase Receipt", {
 	toggle_display_account_head: function (frm) {
 		var enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company);
 		frm.fields_dict["items"].grid.set_column_disp(["cost_center"], enabled);
+	},
+});
+
+frappe.ui.form.on("Purchase Receipt Item", {
+	item_code: function (frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (row.purchase_invoice) {
+			frappe.model.set_value(cdt, cdn, "purchase_invoice", null);
+		}
+		if (row.purchase_invoice_item) {
+			frappe.model.set_value(cdt, cdn, "purchase_invoice_item", null);
+		}
+		if (row.purchase_order) {
+			frappe.model.set_value(cdt, cdn, "purchase_order", null);
+		}
+		if (row.purchase_order_item) {
+			frappe.model.set_value(cdt, cdn, "purchase_order_item", null);
+		}
 	},
 });
 
@@ -236,6 +255,7 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 								per_received: ["<", 99.99],
 								company: me.frm.doc.company,
 							},
+							cur_items: me.frm.doc.items,
 							allow_child_item_selection: true,
 							child_fieldname: "items",
 							child_columns: ["item_code", "item_name", "qty", "received_qty"],
