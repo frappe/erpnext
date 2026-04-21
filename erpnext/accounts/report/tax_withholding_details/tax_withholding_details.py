@@ -150,7 +150,7 @@ def get_result(filters, tds_accounts, tax_category_map, net_total_map, additiona
 				else:
 					entries[key] = row
 	out = list(entries.values())
-	out.sort(key=lambda x: (x["section_code"], x["transaction_date"], x["ref_no"]))
+	out.sort(key=lambda x: (x["tax_withholding_category"], x["transaction_date"], x["ref_no"]))
 
 	return out
 
