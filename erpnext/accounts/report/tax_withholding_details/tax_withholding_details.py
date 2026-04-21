@@ -49,6 +49,7 @@ def get_result(filters, tds_accounts, tax_category_map, net_total_map, additiona
 	gle_map = get_gle_map(net_total_map)
 	precision = get_currency_precision()
 	twc = get_tax_withholding_category_details(additional_table_columns)
+	twc_additional_columns = _get_twc_additional_columns(additional_table_columns)
 
 	entries = {}
 	for (voucher_type, name), details in gle_map.items():
@@ -142,9 +143,8 @@ def get_result(filters, tds_accounts, tax_category_map, net_total_map, additiona
 
 				if tax_withholding_category:
 					if twc_details := twc.get(tax_withholding_category, {}):
-						for col in additional_table_columns or []:
-							if col.get("_doctype") == "Tax Withholding Category":
-								row[col.get("fieldname")] = twc_details.get(col.get("fieldname"))
+						for col in twc_additional_columns or []:
+							row[col] = twc_details.get(col)
 
 				key = entry.voucher_no
 				if key in entries:
@@ -161,11 +161,7 @@ def get_tax_withholding_category_details(additional_table_columns=None):
 	if not additional_table_columns:
 		return {}
 
-	category_fields = [
-		col.get("fieldname")
-		for col in additional_table_columns
-		if col.get("_doctype") == "Tax Withholding Category" and col.get("fieldname")
-	]
+	category_fields = _get_twc_additional_columns(additional_table_columns)
 
 	if not category_fields:
 		return {}
@@ -173,6 +169,16 @@ def get_tax_withholding_category_details(additional_table_columns=None):
 	rows = frappe.get_all("Tax Withholding Category", fields=["name", *category_fields])
 
 	return {row["name"]: row for row in rows}
+
+
+def _get_twc_additional_columns(additional_table_columns):
+	category_fields = [
+		col.get("fieldname")
+		for col in additional_table_columns
+		if col.get("_doctype") == "Tax Withholding Category" and col.get("fieldname")
+	]
+
+	return category_fields
 
 
 def get_party_pan_map(party_type, party_names):
