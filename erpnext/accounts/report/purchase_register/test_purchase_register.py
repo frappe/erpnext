@@ -5,6 +5,7 @@ import frappe
 from frappe.utils import add_months, today
 
 from erpnext.accounts.report.purchase_register.purchase_register import execute
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -23,6 +24,52 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(first_row.voucher_no, pi.name)
 		self.assertEqual(first_row.payable_account, "Creditors - _TC6")
 		self.assertEqual(first_row.net_total, 1000)
+		self.assertEqual(first_row.total_tax, 100)
+		self.assertEqual(first_row.grand_total, 1100)
+
+	def test_purchase_register_ignores_tax_rows_from_other_doctype(self):
+		frappe.db.sql("delete from `tabPurchase Invoice` where company='_Test Company 6'")
+		frappe.db.sql("delete from `tabGL Entry` where company='_Test Company 6'")
+
+		filters = frappe._dict(company="_Test Company 6", from_date=add_months(today(), -1), to_date=today())
+
+		pi = make_purchase_invoice()
+
+		# Real workflow setup: create a Purchase Receipt tax row in the same shared child table.
+		pr = make_purchase_receipt(
+			company="_Test Company 6",
+			supplier="_Test Supplier",
+			item="_Test Item",
+			warehouse="_Test Warehouse - _TC6",
+			cost_center="_Test Cost Center - _TC6",
+			do_not_save=1,
+			do_not_submit=1,
+			qty=1,
+			rate=1000,
+		)
+		pr.append(
+			"taxes",
+			{
+				"account_head": "GST - _TC6",
+				"cost_center": "_Test Cost Center - _TC6",
+				"add_deduct_tax": "Add",
+				"category": "Valuation and Total",
+				"charge_type": "Actual",
+				"description": "PR Tax",
+				"tax_amount": 100.0,
+				"rate": 100,
+			},
+		)
+		pr.insert()
+		pr.submit()
+
+		# Mimic custom naming collision across doctypes (same parent value in shared child table).
+		frappe.rename_doc("Purchase Receipt", pr.name, pi.name, force=True)
+
+		report_results = execute(filters)
+		first_row = frappe._dict(report_results[1][0])
+
+		self.assertEqual(first_row.voucher_no, pi.name)
 		self.assertEqual(first_row.total_tax, 100)
 		self.assertEqual(first_row.grand_total, 1100)
 

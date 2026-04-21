@@ -196,6 +196,7 @@ class ReceivablePayableReport:
 			and ple.against_voucher_type in self.advance_payment_doctypes
 		):
 			self.voucher_balance[key].cost_center = ple.cost_center
+			self.voucher_balance[key].project = ple.project
 
 		self.get_invoices(ple)
 
@@ -362,6 +363,7 @@ class ReceivablePayableReport:
 			posting_date,
 			account_currency,
 			cost_center,
+			project,
 			sum(invoiced) `invoiced`,
 			sum(paid) `paid`,
 			sum(credit_note) `credit_note`,
@@ -390,6 +392,7 @@ class ReceivablePayableReport:
 				"credit_note_in_account_currency",
 				"outstanding_in_account_currency",
 				"cost_center",
+				"project",
 			]:
 				_d[field] = x.get(field)
 
@@ -931,6 +934,7 @@ class ReceivablePayableReport:
 				ple.against_voucher_no,
 				ple.party_type,
 				ple.cost_center,
+				ple.project,
 				ple.party,
 				ple.posting_date,
 				ple.due_date,
@@ -997,6 +1001,9 @@ class ReceivablePayableReport:
 
 		if self.filters.cost_center:
 			self.get_cost_center_conditions()
+
+		if self.filters.project:
+			self.qb_selection_filter.append(self.ple.project.isin(self.filters.project))
 
 		self.add_accounting_dimensions_filters()
 
@@ -1240,6 +1247,7 @@ class ReceivablePayableReport:
 			)
 
 		self.add_column(label=_("Cost Center"), fieldname="cost_center", fieldtype="Data")
+		self.add_column(label=_("Project"), fieldname="project", fieldtype="Link", options="Project")
 		self.add_column(label=_("Voucher Type"), fieldname="voucher_type", fieldtype="Data")
 		self.add_column(
 			label=_("Voucher No"),
@@ -1423,6 +1431,7 @@ class InitSQLProceduresForAR:
 		posting_date date,
 		account_currency {_varchar_type},
 		cost_center {_varchar_type},
+		project {_varchar_type},
 		invoiced {_currency_type},
 		paid {_currency_type},
 		credit_note {_currency_type},
@@ -1442,6 +1451,7 @@ class InitSQLProceduresForAR:
 		against_voucher_no {_varchar_type},
 		party_type {_varchar_type},
 		cost_center {_varchar_type},
+		project {_varchar_type},
 		party {_varchar_type},
 		posting_date date,
 		due_date date,
@@ -1457,7 +1467,7 @@ class InitSQLProceduresForAR:
 	begin
 		if not exists (select name from `{_voucher_balance_name}` where name = sha1(concat_ws(',', ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party)))
 		then
-			insert into `{_voucher_balance_name}` values (sha1(concat_ws(',', ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party)), ple.voucher_type, ple.voucher_no, ple.party, ple.account, ple.posting_date, ple.account_currency, ple.cost_center, 0, 0, 0, 0, 0, 0);
+			insert into `{_voucher_balance_name}` values (sha1(concat_ws(',', ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party)), ple.voucher_type, ple.voucher_no, ple.party, ple.account, ple.posting_date, ple.account_currency, ple.cost_center, ple.project, 0, 0, 0, 0, 0, 0);
 		end if;
 	end;
 	"""
@@ -1499,7 +1509,7 @@ class InitSQLProceduresForAR:
 
 		end if;
 
-		insert into `{_voucher_balance_name}` values (sha1(concat_ws(',', ple.account, ple.voucher_type, ple.voucher_no, ple.party)), ple.against_voucher_type, ple.against_voucher_no, ple.party, ple.account, ple.posting_date, ple.account_currency,'', invoiced, paid, 0, invoiced_in_account_currency, paid_in_account_currency, 0);
+		insert into `{_voucher_balance_name}` values (sha1(concat_ws(',', ple.account, ple.voucher_type, ple.voucher_no, ple.party)), ple.against_voucher_type, ple.against_voucher_no, ple.party, ple.account, ple.posting_date, ple.account_currency,'', '', invoiced, paid, 0, invoiced_in_account_currency, paid_in_account_currency, 0);
 	end;
 	"""
 

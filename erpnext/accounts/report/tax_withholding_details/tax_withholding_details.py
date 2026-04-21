@@ -68,8 +68,10 @@ def get_tax_withholding_data(filters):
 		}
 		data.append(row)
 
-	# Sort by section code and transaction date
-	data.sort(key=lambda x: (x["section_code"] or "", x["transaction_date"] or ""))
+	# Sort by section code, transaction date, then withholding_name for deterministic ordering
+	data.sort(
+		key=lambda x: (x["section_code"] or "", x["transaction_date"] or "", x["withholding_name"] or "")
+	)
 	return data
 
 
