@@ -331,7 +331,6 @@ const ovenOperation = ref({});
 
 function prepareOvenOperation() {
     if (!ovenData.value || !selectedSlab.value || !targetRack.value) return;
-    debugger;
     ovenOperation.value = {
         doctype: 'Oven Operation',
         oven: ovenData.value.name,
@@ -340,8 +339,6 @@ function prepareOvenOperation() {
         slab: selectedSlab.value?.name,
         slab_color: selectedSlab.value?.template,
         oven_rack: targetRack.value.name,
-        slab_top_temp: ovenTemps.value.upper,
-        slab_bottom_temp: ovenTemps.value.lower,
         upper_shelf_temp: ovenTemps.value.upper,
         lower_shelf_temp: ovenTemps.value.lower,
         top_left_vertex: measurements.value.tl,
@@ -526,7 +523,7 @@ frappe.realtime.on('slab_checkout', async (slab) => {
 
             <div class="d-flex justify-content-end pt-4">
                 <button class="btn btn-secondary mr-2" :disabled="isProcessing" @click="closeModal">{{ __('Cancel')
-                    }}</button>
+                }}</button>
                 <button class="btn btn-primary" :disabled="isProcessing" @click="confirmLoad">
                     <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></span>
                     {{ __('Load Slab') }}

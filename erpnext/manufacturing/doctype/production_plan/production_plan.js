@@ -729,18 +729,10 @@ frappe.ui.form.on("Production Plan", {
 	},
 
 	delete_job_cards(frm) {
-		console.log("clicked");
-		debugger;
-		frappe.call({
-			method: "ping",
-			callback: r => console.log("OK")
-		})
 		frappe.db.get_list("Production Line", {
 			filters: { is_group: 0, is_active: 1 },
 			fields: ["name", "line_name"]
 		}).then(data => {
-			console.log("DATA:", data);
-			console.log("Entered");
 			let fields = [
 				{
 					fieldname: "reason_for_deletion_of_job_cards",
