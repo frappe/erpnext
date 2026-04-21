@@ -118,6 +118,7 @@ class BOM(WebsiteGenerator):
 
 		allow_alternative_item: DF.Check
 		amended_from: DF.Link | None
+		backflush_based_on: DF.Literal["", "BOM", "Material Transferred for Manufacture"]
 		base_operating_cost: DF.Currency
 		base_raw_material_cost: DF.Currency
 		base_secondary_items_cost: DF.Currency
@@ -1594,15 +1595,10 @@ def get_children(parent: str | None = None, is_root: bool = False, **filters):
 def add_additional_cost(stock_entry, work_order, job_card=None):
 	# Add non stock items cost in the additional cost
 	stock_entry.additional_costs = []
-	company_account = frappe.db.get_value(
+	expense_account = frappe.get_value(
 		"Company",
 		work_order.company,
-		["default_expense_account", "default_operating_cost_account"],
-		as_dict=1,
-	)
-
-	expense_account = (
-		company_account.default_operating_cost_account or company_account.default_expense_account
+		"default_operating_cost_account",
 	)
 	add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=job_card)
 	add_operations_cost(stock_entry, work_order, expense_account, job_card=job_card)
@@ -1685,7 +1681,7 @@ def add_operating_cost_component_wise(
 
 			per_unit_cost = flt(actual_cp_operating_cost) / flt(row.completed_qty - work_order.produced_qty)
 
-			if per_unit_cost and expense_account:
+			if per_unit_cost:
 				stock_entry.append(
 					"additional_costs",
 					{
@@ -2004,3 +2000,16 @@ def get_secondary_items_from_sub_assemblies(bom_no, company, qty, secondary_item
 		get_secondary_items_from_sub_assemblies(row.bom_no, company, qty, secondary_items)
 
 	return secondary_items
+
+
+def get_backflush_based_on(bom_no):
+	backflush_based_on = None
+	if bom_no:
+		backflush_based_on = frappe.get_cached_value("BOM", bom_no, "backflush_based_on")
+
+	if not backflush_based_on:
+		backflush_based_on = frappe.db.get_single_value(
+			"Manufacturing Settings", "backflush_raw_materials_based_on"
+		)
+
+	return backflush_based_on

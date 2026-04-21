@@ -413,9 +413,9 @@ class TestJournalEntry(ERPNextTestSuite):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 
 		# Configure Repost Accounting Ledger for JVs
-		settings = frappe.get_doc("Repost Accounting Ledger Settings")
-		if not [x for x in settings.allowed_types if x.document_type == "Journal Entry"]:
-			settings.append("allowed_types", {"document_type": "Journal Entry", "allowed": True})
+		settings = frappe.get_doc("Accounts Settings")
+		if "Journal Entry" not in [x.document_type for x in settings.repost_allowed_types]:
+			settings.append("repost_allowed_types", {"document_type": "Journal Entry"})
 		settings.save()
 
 		# Create JV with defaut cost center - _Test Cost Center
@@ -523,7 +523,7 @@ class TestJournalEntry(ERPNextTestSuite):
 		jv = frappe.new_doc("Journal Entry")
 		jv.posting_date = nowdate()
 		jv.company = "_Test Company"
-		jv.user_remark = "test"
+		jv.remark = "test"
 		jv.extend(
 			"accounts",
 			[
@@ -592,6 +592,14 @@ class TestJournalEntry(ERPNextTestSuite):
 
 		self.assertEqual(jv.pay_to_recd_from, "_Test Receiver 2")
 
+	def test_custom_remark(self):
+		# When custom_remark is enabled, remark should not be auto-overwritten on save
+		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, save=False)
+		jv.custom_remark = 1
+		jv.remark = "My custom remark text"
+		jv.insert()
+		self.assertEqual(jv.remark, "My custom remark text")
+
 	def test_credit_limit_for_customer(self):
 		customer = make_customer("_Test New Customer")
 		set_credit_limit("_Test New Customer", "_Test Company", 50)
@@ -620,7 +628,7 @@ def make_journal_entry(
 	jv = frappe.new_doc("Journal Entry")
 	jv.posting_date = posting_date or nowdate()
 	jv.company = company or "_Test Company"
-	jv.user_remark = "test"
+	jv.remark = "test"
 	jv.multi_currency = 1
 	jv.set(
 		"accounts",

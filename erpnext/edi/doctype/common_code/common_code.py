@@ -9,6 +9,8 @@ from frappe.model.document import Document
 from frappe.utils.data import get_link_to_form
 from lxml import etree
 
+from erpnext.edi.doctype.code_list.code_list_import import parse_genericode_content
+
 
 class CommonCode(Document):
 	# begin: auto-generated types
@@ -86,15 +88,15 @@ def simple_hash(input_string, length=6):
 
 def import_genericode(code_list: str, file_name: str, column_map: dict, filters: dict | None = None):
 	"""Import genericode file and create Common Code entries"""
-	file_path = frappe.utils.file_manager.get_file_path(file_name)
-	parser = etree.XMLParser(remove_blank_text=True)
-	tree = etree.parse(file_path, parser=parser)
-	root = tree.getroot()
+	file_doc = frappe.get_doc("File", file_name)
+	file_doc.check_permission("read")
+	root = parse_genericode_content(file_doc.get_content(encodings=()))
 
 	# Construct the XPath expression
 	xpath_expr = ".//SimpleCodeList/Row"
 	filter_conditions = [
-		f"Value[@ColumnRef='{column_ref}']/SimpleValue='{value}'" for column_ref, value in filters.items()
+		f"Value[@ColumnRef='{column_ref}']/SimpleValue='{value}'"
+		for column_ref, value in (filters or {}).items()
 	]
 	if filter_conditions:
 		xpath_expr += "[" + " and ".join(filter_conditions) + "]"
@@ -102,7 +104,7 @@ def import_genericode(code_list: str, file_name: str, column_map: dict, filters:
 	elements = root.xpath(xpath_expr)
 	total_elements = len(elements)
 	for i, xml_element in enumerate(elements, start=1):
-		common_code: "CommonCode" = frappe.new_doc("Common Code")
+		common_code: CommonCode = frappe.new_doc("Common Code")
 		common_code.code_list = code_list
 		common_code.from_genericode(column_map, xml_element)
 		common_code.save()

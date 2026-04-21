@@ -970,7 +970,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2026-03-09 17:15:33.819426",
+ "modified": "2026-04-17 17:11:46.586135",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
@@ -1030,6 +1030,16 @@
   {
    "role": "Auditor",
    "select": 1
+  },
+  {
+   "role": "HR User",
+   "select": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "write": 1
   }
  ],
  "row_format": "Dynamic",

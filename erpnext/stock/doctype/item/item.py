@@ -794,6 +794,19 @@ class Item(Document):
 					{"company": defaults.get("company"), "default_warehouse": defaults.default_warehouse},
 				)
 
+		if not self.taxes and item_group.taxes:
+			for tax in item_group.taxes:
+				self.append(
+					"taxes",
+					{
+						"item_tax_template": tax.item_tax_template,
+						"tax_category": tax.tax_category,
+						"valid_from": tax.valid_from,
+						"minimum_net_rate": tax.minimum_net_rate,
+						"maximum_net_rate": tax.maximum_net_rate,
+					},
+				)
+
 	def update_variants(self):
 		if self.flags.dont_update_variants or frappe.db.get_single_value(
 			"Item Variant Settings", "do_not_update_variants"

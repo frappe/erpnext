@@ -18,6 +18,7 @@ frappe.ui.form.on("Sales Order", {
 			Project: "Project",
 			"Payment Entry": "Payment",
 			"Work Order": "Work Order",
+			"Production Plan": "Production Plan",
 		};
 		frm.add_fetch("customer", "tax_id", "tax_id");
 
@@ -1059,6 +1060,14 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 								__("Create")
 							);
 						}
+
+						if (frappe.model.can_create("Production Plan") && !doc.is_subcontracted) {
+							this.frm.add_custom_button(
+								__("Production Plan"),
+								() => this.make_production_plan(),
+								__("Create")
+							);
+						}
 					}
 
 					// sales invoice
@@ -1339,6 +1348,13 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		});
 	}
 
+	make_production_plan() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_production_plan",
+			frm: this.frm,
+		});
+	}
+
 	order_type() {
 		this.toggle_delivery_date();
 	}
@@ -1389,6 +1405,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	make_raw_material_request_dialog(r) {
 		var me = this;
+		r.message.forEach((item) => (item.__checked = 1));
 		var fields = [
 			{ fieldtype: "Check", fieldname: "include_exploded_items", label: __("Include Exploded Items") },
 			{
@@ -1399,7 +1416,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			{
 				fieldtype: "Table",
 				fieldname: "items",
-				description: __("Select BOM, Qty and For Warehouse"),
+				description: __("Finished Goods"),
+				cannot_delete_rows: true,
 				fields: [
 					{
 						fieldtype: "Read Only",

@@ -1,4 +1,4 @@
-### Introduction (first timers)
+### Introduction (for first timers)
 
 Thank you for your interest in raising an Issue with ERPNext. An Issue could mean a bug report or a request for a missing feature. By raising a bug report, you are contributing to the development of ERPNext and this is the first step of participating in the community. Bug reports are very helpful for developers as they quickly fix the issue before other users start facing it.
 
@@ -10,7 +10,7 @@ The Issue list is not the right place to ask a question or start a general discu
 
 ### Reply and Closing Policy
 
-If your issue is not clear or does not meet the guidelines, then it will be closed. If it is closed, please supply the information asked and re-open it.
+If your issue is not clear or does not meet the guidelines, then it will be closed. If it is closed, please supply the requested information and re-open it.
 
 ### General Issue Guidelines
 
@@ -23,14 +23,14 @@ If your issue is not clear or does not meet the guidelines, then it will be clos
 1. **Steps to Reproduce:** The bug report must have a list of steps needed to reproduce a bug. If we cannot reproduce it, then we cannot solve it.
 2. **Version Number:** Please add the version number in your report. Often a bug is fixed in the latest version.
 3. **Clear Title:** Add a clear subject to your bug report like "Unable to submit Purchase Order without Basic Rate" instead of just "Cannot Submit".
-4. **Screenshots:** Screenshots are a great way of communicating issues. Try adding annotations or using LiceCAP to take a screencast in `gif`.
+4. **Screenshots:** Screenshots are a great way of communicating issues. Try adding annotations or using LICEcap to take a screencast in `.gif` format.
 
 ### Feature Request Guidelines
 
-1. **Clarity:** Clearly specify how you want the feature to behave. Don't just say "I would like multiple PDF formats", say that "Ability to add multiple print formats for customers with different languages".
+1. **Clarity:** Clearly specify how you want the feature to behave. Don't just say "I would like multiple PDF formats", instead say "Ability to add multiple print formats for customers with different languages".
 2. **Solution:** Try to identify what the feature should look like.
 3. **Mockups:** Mockups are a great way to explain your requirement.
 
-### What if my Issue is closed
+### What if my issue is closed
 
 Don't worry, take the feedback, supply the correct information and re-open it!

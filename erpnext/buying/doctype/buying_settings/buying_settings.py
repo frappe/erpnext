@@ -18,6 +18,7 @@ class BuyingSettings(Document):
 		from frappe.types import DF
 
 		allow_multiple_items: DF.Check
+		allow_negative_rates_for_items: DF.Check
 		allow_zero_qty_in_purchase_order: DF.Check
 		allow_zero_qty_in_request_for_quotation: DF.Check
 		allow_zero_qty_in_supplier_quotation: DF.Check

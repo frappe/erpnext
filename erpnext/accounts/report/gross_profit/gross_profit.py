@@ -578,7 +578,11 @@ class GrossProfitGenerator:
 
 			# get buying rate
 			if flt(row.qty):
-				row.buying_rate = flt(row.buying_amount / flt(row.qty), self.float_precision)
+				row.buying_rate = (
+					flt(row.buying_amount / flt(row.qty), self.float_precision)
+					if not row.delivered_by_supplier
+					else None
+				)
 				row.base_rate = flt(row.base_amount / flt(row.qty), self.float_precision)
 			else:
 				if self.is_not_invoice_row(row):
@@ -630,7 +634,8 @@ class GrossProfitGenerator:
 						returned_item_row.qty += row.qty
 						returned_item_row.base_amount += row.base_amount
 
-			row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
+			if not row.delivered_by_supplier:
+				row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
 
 	def get_average_rate_based_on_group_by(self):
 		for key in list(self.grouped):
@@ -769,7 +774,28 @@ class GrossProfitGenerator:
 		# IMP NOTE
 		# stock_ledger_entries should already be filtered by item_code and warehouse and
 		# sorted by posting_date desc, posting_time desc
-		if item_code in self.non_stock_items and (row.project or row.cost_center):
+		if (
+			row.delivered_by_supplier
+			and row.so_detail
+			and (
+				po_details := frappe.get_all(
+					"Purchase Order Item",
+					filters={"sales_order_item": row.so_detail, "docstatus": 1},
+					pluck="name",
+				)
+			)
+		):
+			from frappe.query_builder.functions import Sum
+
+			table = frappe.qb.DocType("Purchase Invoice Item")
+			query = (
+				frappe.qb.from_(table)
+				.select(Sum(table.qty * table.base_net_rate))
+				.where((table.po_detail.isin(po_details)) & (table.docstatus == 1))
+			)
+			return flt(query.run()[0][0])
+
+		elif item_code in self.non_stock_items and (row.project or row.cost_center):
 			# Issue 6089-Get last purchasing rate for non-stock item
 			item_rate = self.get_last_purchase_rate(item_code, row)
 			return flt(row.qty) * item_rate
@@ -951,6 +977,7 @@ class GrossProfitGenerator:
 			SalesInvoice.is_return,
 			SalesInvoiceItem.cost_center,
 			SalesInvoiceItem.serial_and_batch_bundle,
+			SalesInvoiceItem.delivered_by_supplier,
 		)
 
 		if self.filters.group_by == "Sales Person":

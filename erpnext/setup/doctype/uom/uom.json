@@ -13,6 +13,7 @@
   "common_code",
   "description",
   "column_break_obth",
+  "category",
   "enabled",
   "must_be_whole_number"
  ],
@@ -60,12 +61,21 @@
   {
    "fieldname": "column_break_obth",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Category",
+   "options": "UOM Category"
   }
  ],
  "icon": "fa fa-compass",
  "idx": 1,
  "links": [],
- "modified": "2025-08-21 18:59:27.900209",
+ "modified": "2026-04-14 21:20:16.983514",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "UOM",
