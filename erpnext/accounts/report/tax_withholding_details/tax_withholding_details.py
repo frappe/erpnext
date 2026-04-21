@@ -11,10 +11,6 @@ from erpnext.accounts.utils import get_currency_precision
 
 
 def execute(filters=None):
-	return _execute(filters)
-
-
-def _execute(filters=None, additional_table_columns=None):
 	if filters.get("party_type") == "Customer":
 		party_naming_by = frappe.db.get_single_value("Selling Settings", "cust_master_name")
 	else:
@@ -29,9 +25,9 @@ def _execute(filters=None, additional_table_columns=None):
 		net_total_map,
 	) = get_tds_docs(filters)
 
-	columns = get_columns(filters, additional_table_columns)
+	columns = get_columns(filters)
 
-	res = get_result(filters, tds_accounts, tax_category_map, net_total_map, additional_table_columns)
+	res = get_result(filters, tds_accounts, tax_category_map, net_total_map)
 	return columns, res
 
 
@@ -42,14 +38,12 @@ def validate_filters(filters):
 		frappe.throw(_("From Date must be before To Date"))
 
 
-def get_result(filters, tds_accounts, tax_category_map, net_total_map, additional_table_columns=None):
+def get_result(filters, tds_accounts, tax_category_map, net_total_map):
 	party_names = {v.party for v in net_total_map.values() if v.party}
 	party_map = get_party_pan_map(filters.get("party_type"), party_names)
 	tax_rate_map = get_tax_rate_map(filters)
 	gle_map = get_gle_map(net_total_map)
 	precision = get_currency_precision()
-	twc = get_tax_withholding_category_details(additional_table_columns)
-	twc_additional_columns = _get_twc_additional_columns(additional_table_columns)
 
 	entries = {}
 	for (voucher_type, name), details in gle_map.items():
@@ -125,8 +119,8 @@ def get_result(filters, tds_accounts, tax_category_map, net_total_map, additiona
 
 				row.update(
 					{
-						"tax_withholding_category": tax_withholding_category or "",
-						"party_entity_type": party_map.get(party, {}).get(party_type),
+						"section_code": tax_withholding_category or "",
+						"entity_type": party_map.get(party, {}).get(party_type),
 						"rate": rate,
 						"total_amount": total_amount,
 						"grand_total": grand_total,
@@ -141,45 +135,15 @@ def get_result(filters, tds_accounts, tax_category_map, net_total_map, additiona
 					}
 				)
 
-				if tax_withholding_category:
-					if twc_details := twc.get(tax_withholding_category, {}):
-						for col in twc_additional_columns or []:
-							row[col] = twc_details.get(col)
-
 				key = entry.voucher_no
 				if key in entries:
 					entries[key]["tax_amount"] += tax_amount
 				else:
 					entries[key] = row
 	out = list(entries.values())
-	out.sort(key=lambda x: (x["tax_withholding_category"], x["transaction_date"], x["ref_no"]))
+	out.sort(key=lambda x: (x["section_code"], x["transaction_date"], x["ref_no"]))
 
 	return out
-
-
-def get_tax_withholding_category_details(additional_table_columns=None):
-	if not additional_table_columns:
-		return {}
-
-	category_fields = _get_twc_additional_columns(additional_table_columns)
-
-	if not category_fields:
-		return {}
-
-	rows = frappe.get_all("Tax Withholding Category", fields=["name", *category_fields])
-
-	return {row["name"]: row for row in rows}
-
-
-def _get_twc_additional_columns(additional_table_columns):
-	if not additional_table_columns:
-		return []
-
-	return [
-		col.get("fieldname")
-		for col in additional_table_columns
-		if col.get("_doctype") == "Tax Withholding Category" and col.get("fieldname")
-	]
 
 
 def get_party_pan_map(party_type, party_names):
@@ -237,21 +201,18 @@ def get_gle_map(net_total_map):
 	return gle_map
 
 
-def get_columns(filters, additional_table_columns=None):
+def get_columns(filters):
 	pan = "pan" if frappe.db.has_column(filters.party_type, "pan") else "tax_id"
 	columns = [
 		{
-			"label": _("Tax Withholding Category"),
+			"label": _("Section Code"),
 			"options": "Tax Withholding Category",
-			"fieldname": "tax_withholding_category",
+			"fieldname": "section_code",
 			"fieldtype": "Link",
-			"width": 180,
+			"width": 90,
 		},
 		{"label": _(frappe.unscrub(pan)), "fieldname": pan, "fieldtype": "Data", "width": 60},
 	]
-
-	if additional_table_columns:
-		columns.extend(additional_table_columns)
 
 	if filters.naming_series == "Naming Series":
 		columns.append(
@@ -275,12 +236,7 @@ def get_columns(filters, additional_table_columns=None):
 
 	columns.extend(
 		[
-			{
-				"label": _(f"{filters.get('party_type', 'Party')} Type"),
-				"fieldname": "party_entity_type",
-				"fieldtype": "Data",
-				"width": 100,
-			},
+			{"label": _("Entity Type"), "fieldname": "entity_type", "fieldtype": "Data", "width": 100},
 		]
 	)
 	if filters.party_type == "Supplier":

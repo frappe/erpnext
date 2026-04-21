@@ -11,7 +11,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.doctype.tax_withholding_category.test_tax_withholding_category import (
 	create_tax_withholding_category,
 )
-from erpnext.accounts.report.tax_withholding_details.tax_withholding_details import _execute, execute
+from erpnext.accounts.report.tax_withholding_details.tax_withholding_details import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year
 
@@ -112,49 +112,13 @@ class TestTaxWithholdingDetails(AccountsTestMixin, FrappeTestCase):
 		]
 		self.check_expected_values(result, expected_values)
 
-	def test_additional_tax_withholding_category_column(self):
-		tds_category = "TDS - Additional Column"
-		create_tax_category(tds_category, rate=10, account="TDS - _TC", cumulative_threshold=1)
-		inv = make_purchase_invoice(rate=1000, do_not_submit=True)
-		inv.apply_tds = 1
-		inv.tax_withholding_category = tds_category
-		inv.submit()
-
-		field_name = "category_name"
-		expected_value = "Additional Column Display Name"
-		frappe.db.set_value("Tax Withholding Category", tds_category, field_name, expected_value)
-
-		additional_table_columns = [
-			{
-				"label": "Category Name",
-				"fieldname": field_name,
-				"fieldtype": "Data",
-				"width": 140,
-				"_doctype": "Tax Withholding Category",
-			}
-		]
-
-		filters = frappe._dict(
-			company="_Test Company",
-			party_type="Supplier",
-			from_date=today(),
-			to_date=today(),
-		)
-
-		columns, data = _execute(filters, additional_table_columns)
-
-		self.assertTrue(any(col.get("fieldname") == field_name for col in columns))
-		invoice_row = next((row for row in data if row.get("ref_no") == inv.name), None)
-		self.assertIsNotNone(invoice_row)
-		self.assertEqual(invoice_row.get(field_name), expected_value)
-
 	def check_expected_values(self, result, expected_values):
 		for i in range(len(result)):
 			voucher = frappe._dict(result[i])
 			voucher_expected_values = expected_values[i]
 			voucher_actual_values = (
 				voucher.ref_no,
-				voucher.tax_withholding_category,
+				voucher.section_code,
 				voucher.rate,
 				voucher.base_tax_withholding_net_total,
 				voucher.base_total,
