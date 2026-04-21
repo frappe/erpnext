@@ -140,9 +140,11 @@ def get_result(filters, tds_accounts, tax_category_map, net_total_map, additiona
 					}
 				)
 
-				if tax_withholding_category and twc:
-					for fieldname, value in twc.get(tax_withholding_category, {}).items():
-						row[fieldname] = value
+				if tax_withholding_category:
+					if twc_details := twc.get(tax_withholding_category, {}):
+						for col in additional_table_columns or []:
+							if col.get("_doctype") == "Tax Withholding Category":
+								row[col.get("fieldname")] = twc_details.get(col.get("fieldname"))
 
 				key = entry.voucher_no
 				if key in entries:

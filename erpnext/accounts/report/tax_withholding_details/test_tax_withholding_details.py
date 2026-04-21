@@ -114,13 +114,16 @@ class TestTaxWithholdingDetails(AccountsTestMixin, FrappeTestCase):
 
 	def test_additional_tax_withholding_category_column(self):
 		tds_category = "TDS - Additional Column"
-		create_tax_category(tds_category, rate=10, account="TDS - _TC")
+		create_tax_category(tds_category, rate=10, account="TDS - _TC", cumulative_threshold=1)
 		inv = make_purchase_invoice(rate=1000, do_not_submit=True)
 		inv.apply_tds = 1
 		inv.tax_withholding_category = tds_category
 		inv.submit()
 
 		field_name = "category_name"
+		expected_value = "Additional Column Display Name"
+		frappe.db.set_value("Tax Withholding Category", tds_category, field_name, expected_value)
+
 		additional_table_columns = [
 			{
 				"label": "Category Name",
@@ -143,7 +146,6 @@ class TestTaxWithholdingDetails(AccountsTestMixin, FrappeTestCase):
 		self.assertTrue(any(col.get("fieldname") == field_name for col in columns))
 		invoice_row = next((row for row in data if row.get("ref_no") == inv.name), None)
 		self.assertIsNotNone(invoice_row)
-		expected_value = frappe.db.get_value("Tax Withholding Category", tds_category, field_name)
 		self.assertEqual(invoice_row.get(field_name), expected_value)
 
 	def check_expected_values(self, result, expected_values):
