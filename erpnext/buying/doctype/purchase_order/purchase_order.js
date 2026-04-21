@@ -428,7 +428,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 						);
 					}
 
-					if (frappe.model.can_create("Payment Request") && flt(doc.per_billed) < 100) {
+					if (flt(doc.per_billed) < 100 && frappe.boot.user.in_create.includes("Payment Request")) {
 						this.frm.add_custom_button(
 							__("Payment Request"),
 							function () {
