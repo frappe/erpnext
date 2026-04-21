@@ -39,34 +39,9 @@ def get_tax_withholding_data(filters):
 	party_details = get_party_details(entries)
 
 	for entry in entries:
-		doc_details = frappe._dict()
-		if entry.taxable_name:
-			doc_details = doc_info.get((entry.taxable_doctype, entry.taxable_name), {})
-
+		doc_details = doc_info.get((entry.transaction_type, entry.ref_no), {}) if entry.ref_no else {}
 		party_info = party_details.get((entry.party_type, entry.party), {})
-
-		row = {
-			"tax_withholding_category": entry.tax_withholding_category,
-			"party_entity_type": party_info.get("party_entity_type"),
-			"rate": entry.tax_rate,
-			"total_amount": entry.taxable_amount,
-			"grand_total": doc_details.get("grand_total", 0),
-			"base_total": doc_details.get("base_total", 0),
-			"tax_amount": entry.withholding_amount,
-			"transaction_date": entry.withholding_date,
-			"transaction_type": entry.taxable_doctype,
-			"ref_no": entry.taxable_name,
-			"taxable_date": entry.taxable_date,
-			"supplier_invoice_no": doc_details.get("bill_no"),
-			"supplier_invoice_date": doc_details.get("bill_date"),
-			"withholding_doctype": entry.withholding_doctype,
-			"withholding_name": entry.withholding_name,
-			"party_name": party_info.get("party_name"),
-			"tax_id": entry.tax_id,
-			"party": entry.party,
-			"party_type": entry.party_type,
-		}
-		data.append(row)
+		data.append({**entry, **doc_details, **party_info})
 
 	# Sort by section code, transaction date, then withholding_name for deterministic ordering
 	data.sort(
@@ -110,7 +85,7 @@ def get_party_details(entries):
 		party_details = query.run(as_dict=True)
 
 		for party in party_details:
-			party_map[(party_type, party.name)] = party
+			party_map[(party_type, party.pop("name"))] = party
 
 	return party_map
 
@@ -235,11 +210,11 @@ def get_tax_withholding_entries(filters):
 			IfNull(twe.tax_id, "").as_("tax_id"),
 			twe.tax_withholding_category,
 			IfNull(twe.tax_withholding_group, "").as_("tax_withholding_group"),
-			twe.taxable_amount,
-			twe.tax_rate,
-			twe.withholding_amount,
-			IfNull(twe.taxable_doctype, "").as_("taxable_doctype"),
-			IfNull(twe.taxable_name, "").as_("taxable_name"),
+			twe.taxable_amount.as_("total_amount"),
+			twe.tax_rate.as_("rate"),
+			twe.withholding_amount.as_("tax_amount"),
+			IfNull(twe.taxable_doctype, "").as_("transaction_type"),
+			IfNull(twe.taxable_name, "").as_("ref_no"),
 			twe.taxable_date,
 			IfNull(twe.under_withheld_reason, "").as_("under_withheld_reason"),
 			IfNull(twe.lower_deduction_certificate, "").as_("lower_deduction_certificate"),
@@ -279,8 +254,8 @@ def get_additional_doc_info(entries):
 
 	# Group documents by type
 	for entry in entries:
-		if entry.taxable_name and entry.taxable_doctype in docs_by_type:
-			docs_by_type[entry.taxable_doctype].add(entry.taxable_name)
+		if entry.ref_no and entry.transaction_type in docs_by_type:
+			docs_by_type[entry.transaction_type].add(entry.ref_no)
 
 	for doctype_name, voucher_set in docs_by_type.items():
 		if voucher_set:
@@ -295,7 +270,14 @@ def _fetch_doc_info(doctype_name, voucher_set, doc_info):
 
 	# Add doctype-specific fields
 	if doctype_name == "Purchase Invoice":
-		fields.extend([doctype.grand_total, doctype.base_total, doctype.bill_no, doctype.bill_date])
+		fields.extend(
+			[
+				doctype.grand_total,
+				doctype.base_total,
+				doctype.bill_no.as_("supplier_invoice_no"),
+				doctype.bill_date.as_("supplier_invoice_date"),
+			]
+		)
 	elif doctype_name == "Sales Invoice":
 		fields.extend([doctype.grand_total, doctype.base_total])
 	elif doctype_name == "Payment Entry":
@@ -311,4 +293,4 @@ def _fetch_doc_info(doctype_name, voucher_set, doc_info):
 	entries = query.run(as_dict=True)
 
 	for entry in entries:
-		doc_info[(doctype_name, entry.name)] = entry
+		doc_info[(doctype_name, entry.pop("name"))] = entry
