@@ -94,7 +94,7 @@ def get_columns(filters):
 			"width": 180,
 		},
 		{
-			"label": _("Entity Type"),
+			"label": _(f"{filters.get('party_type', 'Party')} Type"),
 			"fieldname": "party_entity_type",
 			"fieldtype": "Data",
 			"width": 180,
