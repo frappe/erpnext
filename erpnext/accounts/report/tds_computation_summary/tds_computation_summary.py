@@ -49,25 +49,25 @@ def group_by_party_and_category(data, filters):
 
 	for row in data:
 		party_category_wise_map.setdefault(
-			(row.get("party"), row.get("section_code")),
+			(row.get("party"), row.get("tax_withholding_category")),
 			{
 				"pan": row.get("pan"),
 				"tax_id": row.get("tax_id"),
 				"party": row.get("party"),
 				"party_name": row.get("party_name"),
-				"section_code": row.get("section_code"),
-				"entity_type": row.get("entity_type"),
+				"tax_withholding_category": row.get("tax_withholding_category"),
+				"party_entity_type": row.get("party_entity_type"),
 				"rate": row.get("rate"),
 				"total_amount": 0.0,
 				"tax_amount": 0.0,
 			},
 		)
 
-		party_category_wise_map.get((row.get("party"), row.get("section_code")))["total_amount"] += row.get(
+		party_category_wise_map.get((row.get("party"), row.get("tax_withholding_category")))["total_amount"] += row.get(
 			"total_amount", 0.0
 		)
 
-		party_category_wise_map.get((row.get("party"), row.get("section_code")))["tax_amount"] += row.get(
+		party_category_wise_map.get((row.get("party"), row.get("tax_withholding_category")))["tax_amount"] += row.get(
 			"tax_amount", 0.0
 		)
 
@@ -112,11 +112,11 @@ def get_columns(filters):
 			{
 				"label": _("Section Code"),
 				"options": "Tax Withholding Category",
-				"fieldname": "section_code",
+				"fieldname": "tax_withholding_category",
 				"fieldtype": "Link",
 				"width": 180,
 			},
-			{"label": _("Entity Type"), "fieldname": "entity_type", "fieldtype": "Data", "width": 180},
+			{"label": _("Entity Type"), "fieldname": "party_entity_type", "fieldtype": "Data", "width": 180},
 			{
 				"label": _("TDS Rate %") if filters.get("party_type") == "Supplier" else _("TCS Rate %"),
 				"fieldname": "rate",

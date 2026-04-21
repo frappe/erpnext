@@ -118,7 +118,7 @@ class TestTaxWithholdingDetails(AccountsTestMixin, FrappeTestCase):
 			voucher_expected_values = expected_values[i]
 			voucher_actual_values = (
 				voucher.ref_no,
-				voucher.section_code,
+				voucher.tax_withholding_category,
 				voucher.rate,
 				voucher.base_tax_withholding_net_total,
 				voucher.base_total,
