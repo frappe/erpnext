@@ -20,6 +20,8 @@
   "disabled",
   "allow_alternative_item",
   "is_stock_item",
+  "is_purchase_item",
+  "is_sales_item",
   "has_variants",
   "is_fixed_asset",
   "auto_create_assets",
@@ -36,11 +38,12 @@
   "over_billing_allowance",
   "image",
   "section_break_11",
-  "description",
   "brand",
+  "description",
   "unit_of_measure_conversion",
   "uoms",
-  "dashboard_tab",
+  "stock_levels_tab",
+  "stock_levels_html",
   "inventory_section",
   "inventory_valuation_section",
   "valuation_method",
@@ -69,8 +72,6 @@
   "column_break_37",
   "has_serial_no",
   "serial_no_series",
-  "defaults_tab",
-  "item_defaults",
   "variants_section",
   "variant_of",
   "variant_based_on",
@@ -82,11 +83,12 @@
   "column_break_9s9o",
   "enable_deferred_revenue",
   "no_of_months",
+  "section_break_wfkx",
+  "item_defaults",
   "purchasing_tab",
   "purchase_uom",
   "min_order_qty",
   "safety_stock",
-  "is_purchase_item",
   "purchase_details_cb",
   "lead_time_days",
   "last_purchase_rate",
@@ -94,7 +96,7 @@
   "customer",
   "supplier_details",
   "delivered_by_supplier",
-  "column_break2",
+  "section_break_ylma",
   "supplier_items",
   "foreign_trade_details",
   "country_of_origin",
@@ -103,7 +105,6 @@
   "sales_details",
   "sales_uom",
   "grant_commission",
-  "is_sales_item",
   "column_break3",
   "max_discount",
   "customer_details",
@@ -129,10 +130,11 @@
   "production_capacity",
   "total_projected_qty",
   "section_break_xili",
-  "customer_code",
-  "column_break_vipt",
   "default_manufacturer_part_no",
-  "default_item_manufacturer"
+  "default_item_manufacturer",
+  "column_break_vipt",
+  "customer_code",
+  "dashboard_tab"
  ],
  "fields": [
   {
@@ -223,13 +225,13 @@
    "allow_in_quick_entry": 1,
    "bold": 1,
    "default": "1",
-   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "is_stock_item",
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Maintain Stock",
    "oldfieldname": "is_stock_item",
-   "oldfieldtype": "Select"
+   "oldfieldtype": "Select",
+   "read_only_depends_on": "eval:doc.is_fixed_asset"
   },
   {
    "default": "1",
@@ -253,7 +255,7 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval:doc.__islocal",
+   "depends_on": "eval:doc.__islocal && doc.is_sales_item",
    "fieldname": "standard_rate",
    "fieldtype": "Currency",
    "label": "Standard Selling Rate"
@@ -263,7 +265,8 @@
    "default": "0",
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
-   "label": "Is Fixed Asset"
+   "label": "Is Fixed Asset",
+   "read_only_depends_on": "eval:doc.is_stock_item"
   },
   {
    "allow_in_quick_entry": 1,
@@ -611,10 +614,10 @@
    "options": "Customer"
   },
   {
-   "collapsible": 1,
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "supplier_details",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "label": "Supplier Details"
   },
   {
@@ -625,15 +628,9 @@
    "print_hide": 1
   },
   {
-   "fieldname": "column_break2",
-   "fieldtype": "Column Break",
-   "oldfieldtype": "Column Break",
-   "width": "50%"
-  },
-  {
    "fieldname": "supplier_items",
    "fieldtype": "Table",
-   "label": "Supplier Items",
+   "label": "Item Supplier",
    "options": "Item Supplier"
   },
   {
@@ -716,11 +713,9 @@
    "label": "No of Months (Expense)"
   },
   {
-   "collapsible": 1,
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "customer_details",
-   "fieldtype": "Section Break",
-   "label": "Customer Details"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "customer_items",
@@ -834,7 +829,7 @@
    "depends_on": "is_fixed_asset",
    "fieldname": "auto_create_assets",
    "fieldtype": "Check",
-   "label": "Auto Create Assets on Purchase"
+   "label": "Auto create assets on purchase"
   },
   {
    "fieldname": "default_item_manufacturer",
@@ -857,7 +852,7 @@
   },
   {
    "default": "0",
-   "depends_on": "auto_create_assets",
+   "depends_on": "eval: doc.is_fixed_asset && doc.auto_create_assets",
    "fieldname": "is_grouped_asset",
    "fieldtype": "Check",
    "label": "Create Grouped Asset"
@@ -893,7 +888,7 @@
   {
    "fieldname": "dashboard_tab",
    "fieldtype": "Tab Break",
-   "label": "Dashboard",
+   "label": "Connections",
    "show_dashboard": 1
   },
   {
@@ -915,11 +910,6 @@
    "fieldname": "production_capacity",
    "fieldtype": "Int",
    "label": "Production Capacity"
-  },
-  {
-   "fieldname": "defaults_tab",
-   "fieldtype": "Tab Break",
-   "label": "Defaults"
   },
   {
    "fieldname": "section_break_znra",
@@ -988,6 +978,25 @@
   {
    "fieldname": "column_break_vipt",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stock_levels_tab",
+   "fieldtype": "Tab Break",
+   "label": "Stock Levels"
+  },
+  {
+   "fieldname": "stock_levels_html",
+   "fieldtype": "HTML",
+   "label": "Stock Levels HTML",
+   "options": "<div id='stock-levels-placeholder'></div>"
+  },
+  {
+   "fieldname": "section_break_wfkx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_ylma",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-tag",
@@ -995,7 +1004,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-04-14 13:37:00.183583",
+ "modified": "2026-04-22 02:10:00.931777",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
