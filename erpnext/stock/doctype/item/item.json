@@ -40,11 +40,9 @@
   "section_break_11",
   "brand",
   "description",
-  "unit_of_measure_conversion",
-  "uoms",
-  "stock_levels_tab",
-  "stock_levels_html",
   "inventory_section",
+  "stock_levels_section",
+  "stock_levels_html",
   "inventory_valuation_section",
   "valuation_method",
   "column_break_cqdk",
@@ -76,6 +74,15 @@
   "variant_of",
   "variant_based_on",
   "attributes",
+  "uom_tab",
+  "units_of_measure_section",
+  "purchase_uom",
+  "sales_uom",
+  "column_break_wdwi",
+  "unit_of_measure_conversion",
+  "uom_conversion_details_column",
+  "uom_help_html",
+  "uoms",
   "accounting",
   "deferred_accounting_section",
   "enable_deferred_expense",
@@ -85,8 +92,15 @@
   "no_of_months",
   "section_break_wfkx",
   "item_defaults",
+  "item_tax_section_break",
+  "section_break_oilf",
+  "column_break_aytr",
+  "taxes",
+  "section_break_fxqz",
+  "purchase_tax_withholding_category",
+  "column_break_ltlb",
+  "sales_tax_withholding_category",
   "purchasing_tab",
-  "purchase_uom",
   "min_order_qty",
   "safety_stock",
   "purchase_details_cb",
@@ -103,25 +117,11 @@
   "column_break_59",
   "customs_tariff_number",
   "sales_details",
-  "sales_uom",
   "grant_commission",
   "column_break3",
   "max_discount",
   "customer_details",
   "customer_items",
-  "item_tax_section_break",
-  "section_break_oilf",
-  "column_break_aytr",
-  "taxes",
-  "section_break_fxqz",
-  "purchase_tax_withholding_category",
-  "column_break_ltlb",
-  "sales_tax_withholding_category",
-  "quality_tab",
-  "inspection_required_before_purchase",
-  "inspection_required_before_delivery",
-  "column_break_pxjh",
-  "quality_inspection_template",
   "manufacturing",
   "include_item_in_manufacturing",
   "is_sub_contracted_item",
@@ -134,6 +134,11 @@
   "default_item_manufacturer",
   "column_break_vipt",
   "customer_code",
+  "quality_tab",
+  "inspection_required_before_purchase",
+  "inspection_required_before_delivery",
+  "column_break_pxjh",
+  "quality_inspection_template",
   "dashboard_tab"
  ],
  "fields": [
@@ -210,21 +215,26 @@
   },
   {
    "default": "0",
+   "description": "Disabled items cannot be selected in any transaction.",
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled",
-   "search_index": 1
+   "search_index": 1,
+   "show_description_on_click": 1
   },
   {
    "default": "0",
+   "description": "Allow substituting this item with an alternative from the Item Alternative list when stock is unavailable.",
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
-   "label": "Allow Alternative Item"
+   "label": "Allow Alternative Item",
+   "show_description_on_click": 1
   },
   {
    "allow_in_quick_entry": 1,
    "bold": 1,
    "default": "1",
+   "description": "ERPNext will make a stock ledger entry for each transaction of this item. Keep unchecked for non-stock or service items.",
    "fieldname": "is_stock_item",
    "fieldtype": "Check",
    "in_list_view": 1,
@@ -236,6 +246,7 @@
   {
    "default": "1",
    "depends_on": "eval:!doc.is_fixed_asset",
+   "description": "Enable for raw material items used in BOM. Uncheck for additional services like 'washing' used in manufacturing.",
    "fieldname": "include_item_in_manufacturing",
    "fieldtype": "Check",
    "label": "Include Item In Manufacturing"
@@ -263,6 +274,7 @@
   {
    "allow_in_quick_entry": 1,
    "default": "0",
+   "description": "Enable if this item is a company asset like machinery or furniture.",
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
    "label": "Is Fixed Asset",
@@ -416,16 +428,12 @@
    "options": "Item Reorder"
   },
   {
-   "collapsible": 1,
    "fieldname": "unit_of_measure_conversion",
-   "fieldtype": "Section Break",
-   "label": "Units of Measure"
+   "fieldtype": "Section Break"
   },
   {
-   "description": "Will also apply for variants",
    "fieldname": "uoms",
    "fieldtype": "Table",
-   "label": "UOMs",
    "oldfieldname": "uom_conversion_details",
    "oldfieldtype": "Table",
    "options": "UOM Conversion Detail"
@@ -441,15 +449,18 @@
   {
    "default": "0",
    "depends_on": "eval:doc.is_stock_item",
+   "description": "Track this item in batches. Cannot be changed after a stock transaction exists.",
    "fieldname": "has_batch_no",
    "fieldtype": "Check",
    "label": "Has Batch No",
    "oldfieldname": "has_batch_no",
-   "oldfieldtype": "Select"
+   "oldfieldtype": "Select",
+   "show_description_on_click": 1
   },
   {
    "default": "0",
    "depends_on": "has_batch_no",
+   "description": "Batch number will be auto-created in format AAAA.00001 if not specified in transactions. Leave blank to always enter batch numbers manually.",
    "fieldname": "create_new_batch",
    "fieldtype": "Check",
    "label": "Automatically Create New Batch"
@@ -466,6 +477,7 @@
   {
    "default": "0",
    "depends_on": "has_batch_no",
+   "description": "Batch number will be created based on expiry date. Expiry dates can be set in the Batch master.",
    "fieldname": "has_expiry_date",
    "fieldtype": "Check",
    "label": "Has Expiry Date"
@@ -494,11 +506,13 @@
   {
    "default": "0",
    "depends_on": "eval:doc.is_stock_item",
+   "description": "Track each unit with a unique serial number for warranty and return tracking. Cannot be changed after a stock transaction exists.",
    "fieldname": "has_serial_no",
    "fieldtype": "Check",
    "label": "Has Serial No",
    "oldfieldname": "has_serial_no",
-   "oldfieldtype": "Select"
+   "oldfieldtype": "Select",
+   "show_description_on_click": 1
   },
   {
    "depends_on": "has_serial_no",
@@ -550,11 +564,14 @@
   },
   {
    "default": "1",
+   "description": "Allow this item to be used in purchase transactions.",
    "fieldname": "is_purchase_item",
    "fieldtype": "Check",
-   "label": "Allow Purchase"
+   "label": "Allow Purchase",
+   "show_description_on_click": 1
   },
   {
+   "depends_on": "eval: doc.is_purchase_item",
    "fieldname": "purchase_uom",
    "fieldtype": "Link",
    "label": "Default Purchase Unit of Measure",
@@ -563,7 +580,7 @@
   {
    "default": "0.00",
    "depends_on": "is_stock_item",
-   "description": "Minimum quantity should be as per Stock UOM",
+   "description": "Minimum quantity should be as per Stock UOM\n\n",
    "fieldname": "min_order_qty",
    "fieldtype": "Float",
    "label": "Minimum Order Qty",
@@ -572,6 +589,7 @@
    "oldfieldtype": "Currency"
   },
   {
+   "description": "Minimum stock level to maintain as a buffer. Used to calculate recommended reorder level: Reorder Level = Safety Stock + (Average Daily Consumption \u00d7 Lead Time).",
    "fieldname": "safety_stock",
    "fieldtype": "Float",
    "label": "Safety Stock",
@@ -591,6 +609,7 @@
    "oldfieldtype": "Int"
   },
   {
+   "description": "The rate at which this item was last purchased via a Purchase Invoice. Auto-updated by the system.",
    "fieldname": "last_purchase_rate",
    "fieldtype": "Float",
    "label": "Last Purchase Rate",
@@ -602,6 +621,7 @@
   },
   {
    "default": "0",
+   "description": "Enable if this item is provided by a customer and received via Stock Entry. Customer field becomes mandatory.",
    "fieldname": "is_customer_provided_item",
    "fieldtype": "Check",
    "label": "Is Customer Provided Item"
@@ -622,6 +642,7 @@
   },
   {
    "default": "0",
+   "description": "Enable for drop shipping - supplier delivers directly to the customer without passing through your warehouse.",
    "fieldname": "delivered_by_supplier",
    "fieldtype": "Check",
    "label": "Delivered by Supplier (Drop Ship)",
@@ -657,6 +678,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval: doc.is_sales_item",
    "fieldname": "sales_details",
    "fieldtype": "Tab Break",
    "label": "Sales",
@@ -664,6 +686,7 @@
    "options": "fa fa-tag"
   },
   {
+   "depends_on": "eval: doc.is_sales_item",
    "fieldname": "sales_uom",
    "fieldtype": "Link",
    "label": "Default Sales Unit of Measure",
@@ -671,9 +694,11 @@
   },
   {
    "default": "1",
+   "description": "Allow this item to be used in sales transactions.",
    "fieldname": "is_sales_item",
    "fieldtype": "Check",
-   "label": "Allow Sales"
+   "label": "Allow Sales",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "column_break3",
@@ -682,6 +707,7 @@
    "width": "50%"
   },
   {
+   "description": "Maximum discount % allowed when selling this item. Eg: if set to 20%, a discount greater than 20% cannot be applied in sales transactions.",
    "fieldname": "max_discount",
    "fieldtype": "Float",
    "label": "Max Discount (%)",
@@ -690,6 +716,7 @@
   },
   {
    "default": "0",
+   "description": "Expense for this item will be recognized over a period of months. Eg: prepaid insurance or annual software license",
    "fieldname": "enable_deferred_revenue",
    "fieldtype": "Check",
    "label": "Enable Deferred Revenue"
@@ -702,6 +729,7 @@
   },
   {
    "default": "0",
+   "description": "Income from this item will be recognized over a period of months instead of all at once. Eg: annual subscription paid upfront.",
    "fieldname": "enable_deferred_expense",
    "fieldtype": "Check",
    "label": "Enable Deferred Expense"
@@ -743,17 +771,21 @@
   },
   {
    "default": "0",
+   "description": "A quality inspection must be completed before generating a Purchase Receipt for this item.",
    "fieldname": "inspection_required_before_purchase",
    "fieldtype": "Check",
    "label": "Inspection Required before Purchase",
    "oldfieldname": "inspection_required",
-   "oldfieldtype": "Select"
+   "oldfieldtype": "Select",
+   "show_description_on_click": 1
   },
   {
    "default": "0",
+   "description": "A quality inspection must be completed before generating a Delivery Note for this item.",
    "fieldname": "inspection_required_before_delivery",
    "fieldtype": "Check",
-   "label": "Inspection Required before Delivery"
+   "label": "Inspection Required before Delivery",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "quality_inspection_template",
@@ -784,6 +816,7 @@
   },
   {
    "default": "0",
+   "description": "Enable if a vendor manufactures this item for you. You can choose to provide them raw materials using the default BOM.",
    "fieldname": "is_sub_contracted_item",
    "fieldtype": "Check",
    "label": "Is Subcontracted Item",
@@ -812,6 +845,7 @@
   },
   {
    "depends_on": "eval:!doc.__islocal && !doc.is_fixed_asset",
+   "description": "Percentage by which over-delivery or over-receipt is allowed against a Sales/Purchase Order for this item. If not set, value from Stock Settings will be used.",
    "fieldname": "over_delivery_receipt_allowance",
    "fieldtype": "Float",
    "label": "Over Delivery/Receipt Allowance (%)",
@@ -820,6 +854,7 @@
   },
   {
    "depends_on": "eval:!doc.__islocal && !doc.is_fixed_asset",
+   "description": "Percentage by which over-billing is allowed against a Sales/Purchase Order for this item. If not set, value from Accounts Settings will be used.",
    "fieldname": "over_billing_allowance",
    "fieldtype": "Float",
    "label": "Over Billing Allowance (%)"
@@ -827,6 +862,7 @@
   {
    "default": "0",
    "depends_on": "is_fixed_asset",
+   "description": "Automatically creates Asset records when this item is received via Purchase Receipt.",
    "fieldname": "auto_create_assets",
    "fieldtype": "Check",
    "label": "Auto create assets on purchase"
@@ -846,19 +882,24 @@
   },
   {
    "default": "1",
+   "description": "If disabled, sales from this item will be excluded from Sales Person and Sales Partner commission calculations.",
    "fieldname": "grant_commission",
    "fieldtype": "Check",
-   "label": "Grant Commission"
+   "label": "Grant Commission",
+   "show_description_on_click": 1
   },
   {
    "default": "0",
    "depends_on": "eval: doc.is_fixed_asset && doc.auto_create_assets",
+   "description": "Creates a single grouped asset instead of individual assets when purchased in bulk.",
    "fieldname": "is_grouped_asset",
    "fieldtype": "Check",
-   "label": "Create Grouped Asset"
+   "label": "Create Grouped Asset",
+   "show_description_on_click": 1
   },
   {
    "default": "0",
+   "description": "Allow stock to go below zero for this item, even if negative stock is disabled in Stock Settings.",
    "fieldname": "allow_negative_stock",
    "fieldtype": "Check",
    "label": "Allow Negative Stock"
@@ -869,6 +910,7 @@
    "label": "Inventory Settings"
   },
   {
+   "depends_on": "eval: doc.is_purchase_item",
    "fieldname": "purchasing_tab",
    "fieldtype": "Tab Break",
    "label": "Purchasing"
@@ -980,11 +1022,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "stock_levels_tab",
-   "fieldtype": "Tab Break",
-   "label": "Stock Levels"
-  },
-  {
    "fieldname": "stock_levels_html",
    "fieldtype": "HTML",
    "label": "Stock Levels HTML",
@@ -997,6 +1034,35 @@
   {
    "fieldname": "section_break_ylma",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "uom_tab",
+   "fieldtype": "Tab Break",
+   "label": "UOM"
+  },
+  {
+   "fieldname": "column_break_wdwi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stock_levels_section",
+   "fieldtype": "Section Break",
+   "label": "Stock Levels"
+  },
+  {
+   "fieldname": "units_of_measure_section",
+   "fieldtype": "Section Break",
+   "label": "Units of Measure"
+  },
+  {
+   "fieldname": "uom_conversion_details_column",
+   "fieldtype": "Column Break",
+   "label": "UOM Conversion Details"
+  },
+  {
+   "fieldname": "uom_help_html",
+   "fieldtype": "HTML",
+   "options": "<div style='margin-bottom:10px; color: var(--text-muted);'>Define alternate units for this item. Eg: 1 Box = 12 Nos, set conversion factor as 12. (Will also apply for variants) <a href='https://docs.frappe.io/erpnext/uom' target='_blank'>Learn more \u2192</a></div>"
   }
  ],
  "icon": "fa fa-tag",
@@ -1004,7 +1070,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-04-22 02:10:00.931777",
+ "modified": "2026-04-23 02:19:06.451024",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
