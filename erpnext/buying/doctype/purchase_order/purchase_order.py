@@ -802,6 +802,11 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		set_missing_values(source, target)
 
 		# Get the advance paid Journal Entries in Purchase Invoice Advance
+		advance, allocated = frappe.db.get_value(
+			"Buying Settings", None, ["auto_allocate_advance_payment", "fetch_only_allocated_advance_payment"]
+		)
+		target.allocate_advances_automatically = advance
+		target.only_include_allocated_payments = allocated
 		if target.get("allocate_advances_automatically"):
 			target.set_advances()
 

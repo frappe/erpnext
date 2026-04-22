@@ -888,6 +888,16 @@ def make_sales_invoice(
 		if target.company_address:
 			target.update(get_fetch_values("Sales Invoice", "company_address", target.company_address))
 
+		advance, allocated = frappe.db.get_value(
+			"Selling Settings",
+			None,
+			["auto_allocate_advance_payment", "fetch_only_allocated_advance_payment"],
+		)
+		target.allocate_advances_automatically = advance
+		target.only_include_allocated_payments = allocated
+		if target.get("allocate_advances_automatically"):
+			target.set_advances()
+
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = to_make_invoice_qty_map[source_doc.name]
 		target_doc._old_name = source_doc.name

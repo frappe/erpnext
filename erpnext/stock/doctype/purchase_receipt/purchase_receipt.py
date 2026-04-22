@@ -1501,6 +1501,14 @@ def make_purchase_invoice(
 		doc.run_method("calculate_taxes_and_totals")
 		doc.set_payment_schedule()
 
+		advance, allocated = frappe.db.get_value(
+			"Buying Settings", None, ["auto_allocate_advance_payment", "fetch_only_allocated_advance_payment"]
+		)
+		target.allocate_advances_automatically = advance
+		target.only_include_allocated_payments = allocated
+		if target.get("allocate_advances_automatically"):
+			target.set_advances()
+
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty, returned_qty = get_pending_qty(source_doc)
 		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):

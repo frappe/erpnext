@@ -41,6 +41,8 @@
   "allow_zero_qty_in_quotation",
   "allow_zero_qty_in_sales_order",
   "set_zero_rate_for_expired_batch",
+  "auto_allocate_advance_payment",
+  "fetch_only_allocated_advance_payment",
   "section_break_avhb",
   "enable_utm",
   "experimental_section",
@@ -320,16 +322,30 @@
    "fieldname": "deliver_secondary_items",
    "fieldtype": "Check",
    "label": "Deliver Secondary Items"
+  },
+  {
+   "default": "0",
+   "description": "Automatically fetches and allocates available advance payments when creating an Sales invoice from a Sales Order/Delivery Note",
+   "fieldname": "auto_allocate_advance_payment",
+   "fieldtype": "Check",
+   "label": "Auto Allocate Advance Payment"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.auto_allocate_advance_payment==1",
+   "description": "Retrieves advance payments that have been allocated to Sales Order, excluding unallocated payments.",
+   "fieldname": "fetch_only_allocated_advance_payment",
+   "fieldtype": "Check",
+   "label": "Fetch Only Allocated Advance Payment"
   }
  ],
  "grid_page_length": 50,
- "hide_toolbar": 0,
  "icon": "fa fa-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-16 13:28:18.988883",
+ "modified": "2026-04-16 16:51:53.201084",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
