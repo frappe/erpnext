@@ -31,17 +31,8 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 	def setUp(self):
-		items = create_items()
+		create_items()
 		reset("Stock Entry")
-
-		# delete SLE and BINs for all items
-		frappe.db.sql(
-			"delete from `tabStock Ledger Entry` where item_code in (%s)" % (", ".join(["%s"] * len(items))),
-			items,
-		)
-		frappe.db.sql(
-			"delete from `tabBin` where item_code in (%s)" % (", ".join(["%s"] * len(items))), items
-		)
 
 	def test_item_cost_reposting(self):
 		company = "_Test Company"

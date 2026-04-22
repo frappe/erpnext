@@ -755,7 +755,7 @@ class POSInvoice(SalesInvoice):
 		return profile
 
 	@frappe.whitelist()
-	def set_missing_values(self, for_validate: bool = False):
+	def set_missing_values(self, for_validate: bool | None = False):
 		profile = self.set_pos_fields(for_validate)
 
 		if not self.debit_to:
@@ -1027,7 +1027,7 @@ def get_pos_reserved_qty_from_table(child_table, item_code, warehouse):
 
 
 @frappe.whitelist()
-def make_sales_return(source_name: str, target_doc: Document | None = None):
+def make_sales_return(source_name: str, target_doc: Document | str | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("POS Invoice", source_name, target_doc)

@@ -14,7 +14,6 @@ class TestActivityCost(ERPNextTestSuite):
 			"Activity Type", filters={"activity_type": "_Test Activity Type 1"}
 		)[0].name
 
-		frappe.db.sql("delete from `tabActivity Cost`")
 		activity_cost1 = frappe.new_doc("Activity Cost")
 		activity_cost1.update(
 			{
@@ -28,4 +27,3 @@ class TestActivityCost(ERPNextTestSuite):
 		activity_cost1.insert()
 		activity_cost2 = frappe.copy_doc(activity_cost1)
 		self.assertRaises(DuplicationError, activity_cost2.insert)
-		frappe.db.sql("delete from `tabActivity Cost`")

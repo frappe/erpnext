@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-19 09:48+0000\n"
-"PO-Revision-Date: 2026-04-19 15:06\n"
+"PO-Revision-Date: 2026-04-21 15:19\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Serbian (Cyrillic)\n"
 "MIME-Version: 1.0\n"
@@ -2326,7 +2326,7 @@ msgstr "Извршене радње"
 #: erpnext/stock/doctype/item/item.js:413
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Activate Serial / Batch No for Item"
-msgstr ""
+msgstr "Активирај број серије / шарже за ставку"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.py:55
 msgid "Active Leads"
@@ -3399,7 +3399,7 @@ msgstr "Ваздухопловство"
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.js:20
 msgid "After save, please refresh the page to apply the changes."
-msgstr ""
+msgstr "Након чувања, освежите страницу како би се примениле измене."
 
 #. Label of the against (Text) field in DocType 'GL Entry'
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
@@ -9905,7 +9905,7 @@ msgstr "Проверите да ли унос преноса материјал�
 #: erpnext/accounts/doctype/item_tax_template_detail/item_tax_template_detail.json
 #, python-format
 msgid "Check if this tax is not applicable to items (distinct from 0% rate)"
-msgstr ""
+msgstr "Проверите да ли се овај порез не примењује на ставке (различито од стопе 0%)"
 
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.py:58
 msgid "Check row {0} for account {1}: Party Type is only allowed for Receivable or Payable accounts"
@@ -10987,7 +10987,7 @@ msgstr "Назив адресе компаније"
 
 #: erpnext/controllers/accounts_controller.py:4382
 msgid "Company Address is missing. You don't have permission to create an Address. Please contact your System Manager."
-msgstr ""
+msgstr "Адреса компаније недостаје. Немате дозволу да креирате адресу. Молимо Вас да се обратите систем менаџеру."
 
 #: erpnext/controllers/accounts_controller.py:4370
 msgid "Company Address is missing. You don't have permission to update it. Please contact your System Manager."
@@ -11173,7 +11173,7 @@ msgstr "Компанија {0} је додата више пута"
 
 #: erpnext/regional/doctype/south_africa_vat_settings/south_africa_vat_settings.py:33
 msgid "Company {0} is not in South Africa."
-msgstr ""
+msgstr "Компанија {0} није у Јужној Африци."
 
 #: erpnext/setup/setup_wizard/operations/taxes_setup.py:14
 msgid "Company {} does not exist yet. Taxes setup aborted."
@@ -18020,7 +18020,7 @@ msgstr "Омогући одвојено поновно књижење за гл�
 
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:122
 msgid "Enable Serial / Batch Bundle"
-msgstr ""
+msgstr "Омогући пакет серије / шарже"
 
 #. Label of the enable_stock_reservation (Check) field in DocType 'Stock
 #. Settings'
@@ -22781,7 +22781,7 @@ msgstr "Увезено {0} DocType"
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:36
 msgid "Importing Code Lists from remote URLs is not allowed."
-msgstr ""
+msgstr "Увоз листа шифара са удаљених URL адреса није дозвољен."
 
 #: erpnext/edi/doctype/common_code/common_code.py:111
 msgid "Importing Common Codes"
@@ -24034,7 +24034,7 @@ msgstr "Неважеће изворно и циљно складиште"
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:37
 msgid "Invalid Upload"
-msgstr ""
+msgstr "Неважеће отпремање"
 
 #: erpnext/controllers/item_variant.py:151
 msgid "Invalid Value"
@@ -30839,7 +30839,7 @@ msgstr "Ниједно запослено лице није у распоред�
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:73
 msgid "No file uploaded or URL provided."
-msgstr ""
+msgstr "Није отпремљен фајл нити је унет URL."
 
 #: erpnext/controllers/subcontracting_controller.py:1393
 msgid "No item available for transfer."
@@ -31030,7 +31030,7 @@ msgstr "Нису пронађени редови са нултим бројем 
 
 #: erpnext/stock/doctype/batch/batch.js:76
 msgid "No stock available for this batch."
-msgstr ""
+msgstr "Нема доступних залиха за ову шаржу."
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:809
 msgid "No stock ledger entries were created. Please set the quantity or valuation rate for the items properly and try again."
@@ -31104,7 +31104,7 @@ msgstr "Нема нула"
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.js:117
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:113
 msgid "Non-phantom BOM cannot be created for non-stock item {0}."
-msgstr ""
+msgstr "Није могуће креирати саставницу која није виртуелна за ставку ван залиха {0}."
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:561
 msgid "None of the items have any change in quantity or value."
@@ -35200,7 +35200,7 @@ msgstr "Бензин"
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.js:113
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:110
 msgid "Phantom BOM cannot be created for stock item {0}."
-msgstr ""
+msgstr "Није могуће креирати виртуелну саставницу за ставку на залихама {0}."
 
 #: erpnext/manufacturing/doctype/bom/bom_item_preview.html:16
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:321
@@ -35697,7 +35697,7 @@ msgstr "Молимо Вас да проверите оперативне тро�
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:150
 msgid "Please check the 'Activate Serial and Batch No for Item' checkbox in the {0} to make Serial and Batch Bundle for the item."
-msgstr ""
+msgstr "Молимо Вас да означите опцију 'Активирај број серије и шарже за ставку' у документу {0} како бисте омогућили пакет серије / шарже за ту ставку."
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:562
 msgid "Please check the error message and take necessary actions to fix the error and then restart the reposting again."
@@ -41938,7 +41938,7 @@ msgstr "Одговара"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Repost"
-msgstr ""
+msgstr "Поновно књижење"
 
 #. Name of a DocType
 #. Label of a Workspace Sidebar Item
@@ -43739,7 +43739,7 @@ msgstr "Ред #{0}: Ставка {1} нема залиха у складишт�
 
 #: erpnext/controllers/stock_controller.py:153
 msgid "Row #{0}: Item {1} has zero rate but '{2}' is not enabled."
-msgstr ""
+msgstr "Ред #{0}: Ставка {1} има стопу нула, али опција '{2}' није омогућена."
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:457
 msgid "Row #{0}: Item {1} in warehouse {2}: Available {3}, Needed {4}."
@@ -45186,7 +45186,7 @@ msgstr "Продајна поруџбина {0} већ постоји за на�
 #: erpnext/selling/doctype/sales_order/sales_order.py:1831
 #: erpnext/selling/doctype/sales_order/sales_order.py:1844
 msgid "Sales Order {0} is not available for production"
-msgstr ""
+msgstr "Продајна поруџбина {0} није доступна за производњу"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1397
 msgid "Sales Order {0} is not submitted"
@@ -46841,7 +46841,7 @@ msgstr "Бројеви серије / Бројеви шарже"
 #. Label of the serial_nos_and_batches (Section Break) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Serial Nos / Batches"
-msgstr ""
+msgstr "Бројеви серија / шарже"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1958
 msgid "Serial Nos are created successfully"
@@ -52445,7 +52445,7 @@ msgstr "Шаржа {0} је већ резервисана у {1} {2}. Дакле
 
 #: erpnext/regional/report/vat_audit_report/vat_audit_report.py:41
 msgid "The company {0} is not in South Africa. VAT Audit Report is only available for companies in South Africa."
-msgstr ""
+msgstr "Компанија {0} није у Јужној Африци. Извештај о ПДВ ревизији доступан је само за компаније у Јужној Африци."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1320
 msgid "The completed quantity {0} of an operation {1} cannot be greater than the completed quantity {2} of a previous operation {3}."
@@ -52734,7 +52734,7 @@ msgstr "Укупна количина издавања / преноса {0} у �
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:43
 msgid "The uploaded file could not be parsed as a genericode XML document."
-msgstr ""
+msgstr "Отпремљени фајл није могуће обрадити као XML документ са генеричким кодом."
 
 #: erpnext/accounts/doctype/bank_statement_import/bank_statement_import.py:153
 msgid "The uploaded file does not appear to be in valid MT940 format."
@@ -55588,7 +55588,7 @@ msgstr "Неусклађени уноси"
 
 #: erpnext/public/js/utils/unreconcile.js:175
 msgid "Unreconciled successfully"
-msgstr ""
+msgstr "Успешно поништено усклађивање"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:945
 #: erpnext/selling/doctype/sales_order/sales_order.js:122
@@ -58435,15 +58435,15 @@ msgstr "Немате довољно поена да бисте их искори
 
 #: erpnext/controllers/accounts_controller.py:4437
 msgid "You don't have permission to create a Company Address. Please contact your System Manager."
-msgstr ""
+msgstr "Немате дозволу да креирате адресу компаније. Молимо Вас да се обратите систем менаџеру."
 
 #: erpnext/controllers/accounts_controller.py:4417
 msgid "You don't have permission to update Company details. Please contact your System Manager."
-msgstr ""
+msgstr "Немате дозволу да ажурирате податке о компанији. Молимо Вас да се обратите систем менаџеру."
 
 #: erpnext/controllers/accounts_controller.py:4411
 msgid "You don't have permission to update this document. Please contact your System Manager."
-msgstr ""
+msgstr "Немате дозволу да ажурирате овај документ. Молимо Вас да се обратите систем менаџеру."
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:291
 msgid "You had {} errors while creating opening invoices. Check {} for more details"
@@ -59362,7 +59362,7 @@ msgstr "{0} {1} мора бити поднето"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:274
 msgid "{0} {1} not allowed to be reposted. You can enable it by adding it '{2}' table in {3}."
-msgstr ""
+msgstr "За {0} {1} није дозвољено поновно књижење. Можете га омогућити додавањем у табелу '{2}' у документу {3}."
 
 #: erpnext/buying/utils.py:116
 msgid "{0} {1} status is {2}"

@@ -22,7 +22,6 @@ class TestAssetCapitalization(ERPNextTestSuite):
 	def setUp(self):
 		set_depreciation_settings_in_company()
 		create_asset_capitalization_data()
-		frappe.db.sql("delete from `tabTax Rule`")
 
 	def test_capitalization_with_perpetual_inventory(self):
 		company = "_Test Company with perpetual inventory"
