@@ -8,10 +8,11 @@ from erpnext.accounts.utils import get_fiscal_year
 
 
 class TDSComputationSummaryReport(TaxWithholdingDetailsReport):
-	GROUP_BY_FIELDS = ("party", "tax_withholding_category")
+	GROUP_BY_FIELDS = ("party_type", "party", "tax_withholding_category")
 	CARRY_OVER_FIELDS = (
 		"tax_id",
 		"party",
+		"party_type",
 		"party_name",
 		"tax_withholding_category",
 		"party_entity_type",
