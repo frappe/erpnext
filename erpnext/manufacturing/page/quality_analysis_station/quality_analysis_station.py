@@ -116,13 +116,9 @@ def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job
 		source_warehouse = slab_fg_warehouse
 		target_warehouse = f"Finished Goods - {company_abbr}"
 
-		if grade and ("standard" in grade.lower() or "std" in grade.lower()):
-			stock_entry.stock_entry_type = "Repack"
-			target_item_name = f"{production_item} (STD)"
-			if not frappe.db.exists("Item", target_item_name):
-				raise Exception(f"Item {target_item_name} not found")
 
-		elif grade and ("reject" in grade.lower() or "rej" in grade.lower()):
+
+		if grade and ("reject" in grade.lower() or "rej" in grade.lower()):
 			is_reject = True
 			target_warehouse = f"Rejected Slabs - {company_abbr}"
 
