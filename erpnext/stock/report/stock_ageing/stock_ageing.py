@@ -612,5 +612,5 @@ class FIFOSlots:
 			sr_item = frappe.db.get_value(
 				"Stock Reconciliation Item", row.voucher_detail_no, ["current_qty", "qty"], as_dict=True
 			)
-			if sr_item.qty and sr_item.current_qty:
+			if sr_item and sr_item.qty and sr_item.current_qty:
 				self.stock_reco_voucher_wise_count[row.voucher_detail_no] = sr_item.current_qty
