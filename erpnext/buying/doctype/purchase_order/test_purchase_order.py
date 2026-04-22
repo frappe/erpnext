@@ -767,8 +767,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		"Accounts Settings", {"unlink_advance_payment_on_cancelation_of_order": 1}
 	)
 	def test_advance_payment_entry_unlink_against_purchase_order(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
-
 		po_doc = create_purchase_order()
 
 		pe = get_payment_entry("Purchase Order", po_doc.name, bank_account="_Test Bank - _TC")
@@ -823,8 +821,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		company_doc.save()
 
 		po_doc = create_purchase_order(supplier=supplier)
-
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
 		pe = get_payment_entry("Purchase Order", po_doc.name)
 		pe.save().submit()
@@ -1206,7 +1202,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 	def test_purchase_order_advance_payment_status(self):
 		frappe.flags.is_reverse_depr_entry = False
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
 		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 
 		po = create_purchase_order()
@@ -1435,6 +1431,61 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		pi2 = make_pi_from_po(po.name)
 		self.assertEqual(len(pi2.items), 2)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"auto_allocate_advance_payment": 1, "fetch_only_allocated_advance_payment": 0}
+	)
+	def test_auto_allocate_advance_payment_from_purchase_order(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+
+		po = create_purchase_order(rate=1000)
+
+		pe1 = get_payment_entry("Purchase Order", po.name)
+
+		pe1.paid_amount = 500
+		pe1.received_amount = 500
+		pe1.references[0].allocated_amount = 500
+		pe1.insert().submit()
+
+		pe2 = get_payment_entry("Purchase Order", po.name)
+		pe2.paid_amount = 100
+		pe2.received_amount = 100
+		pe2.references = []
+		pe2.insert().submit()
+
+		pi = make_purchase_invoice(po.name)
+
+		references = [d.reference_name for d in pi.advances]
+
+		self.assertIn(pe1.name, references)
+		self.assertIn(pe2.name, references)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"auto_allocate_advance_payment": 1, "fetch_only_allocated_advance_payment": 1}
+	)
+	def test_auto_allocate_fetches_only_allocated_advances(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+
+		po = create_purchase_order(rate=1000)
+
+		pe1 = get_payment_entry("Purchase Order", po.name)
+		pe1.paid_amount = 500
+		pe1.received_amount = 500
+		pe1.references[0].allocated_amount = 500
+		pe1.insert().submit()
+
+		pe2 = get_payment_entry("Purchase Order", po.name)
+		pe2.paid_amount = 100
+		pe2.received_amount = 100
+		pe2.references = []
+		pe2.insert().submit()
+
+		pi = make_purchase_invoice(po.name)
+
+		references = [d.reference_name for d in pi.advances]
+
+		self.assertIn(pe1.name, references)
+		self.assertNotIn(pe2.name, references)
 
 
 def create_po_for_sc_testing():
