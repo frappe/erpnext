@@ -4,6 +4,7 @@ from frappe import frappe
 from frappe import utils as frappe_utils
 from frappe.exceptions import ValidationError
 from frappe.query_builder.functions import Count
+from frappe.types import DF
 
 from erpnext.accounts.doctype.fiscal_year.fiscal_year import FiscalYear
 from erpnext.manufacturing.doctype.oven_operation.oven_operation import OvenOperation
@@ -404,12 +405,18 @@ def move_slab_to_and_checkout(
 	checkout_slab(slab_number, publish_event)
 
 
-def reset_slab_to(slab_number: str, prev_stage: str):
+def reset_slab_to(slab_number: str, prev_stage: DF.Literal["Distribution", "Pressing", "Re-Pressing", "Heating", "Cooling", "Curing", "Trimming", "Calibration", "Polishing", "Quality Check", "Packed", "Shipped", "Discarded", "Rejected"]):
 	slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
 	slab.reload()
-	last_history_item = slab.slab_history[-1] if slab.slab_history else None
-	if last_history_item and last_history_item.station == prev_stage:
-		slab.remove(last_history_item)
+
+	for i in range(len(slab.slab_history) - 1, -1, -1):
+		if slab.slab_history[i].station == prev_stage:
+			break
+
+		slab.slab_history.pop(i)
+
+	slab.status = prev_stage
+	slab.save(ignore_permissions=True)
 
 
 def _finish_curing(slab_name: str):
