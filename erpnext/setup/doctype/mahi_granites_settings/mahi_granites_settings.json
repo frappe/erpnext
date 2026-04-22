@@ -23,11 +23,11 @@
   "curing_section",
   "min_curing_hours",
   "curing_labels",
-  "quality_section",
-  "grades",
   "shipping_tab",
   "packing_settings_section",
   "maximum_crates_per_container",
+  "column_break_ttum",
+  "slab_sales_allowance",
   "export_compliance_section",
   "annex_d_addr",
   "column_break_zcbd"
@@ -78,18 +78,6 @@
    "fieldname": "max_heating_minutes",
    "fieldtype": "Float",
    "label": "Maximum Heating Time (in minutes)"
-  },
-  {
-   "fieldname": "quality_section",
-   "fieldtype": "Section Break",
-   "label": "Quality"
-  },
-  {
-   "fieldname": "grades",
-   "fieldtype": "Table",
-   "label": "Allowed Grades",
-   "options": "Slab Quality Grade",
-   "reqd": 1
   },
   {
    "fieldname": "general_tab",
@@ -178,13 +166,25 @@
   {
    "fieldname": "column_break_zcbd",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ttum",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "20",
+   "description": "The value that should be subtracted from the standard length and width of a slab while creating a Sales Invoice.",
+   "fieldname": "slab_sales_allowance",
+   "fieldtype": "Int",
+   "label": "Sales Allowance (in mm)",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-16 22:59:41.437010",
+ "modified": "2026-04-22 22:18:26.120663",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Mahi Granites Settings",

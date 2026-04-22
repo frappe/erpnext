@@ -15,14 +15,12 @@ class MahiGranitesSettings(Document):
 
 	if TYPE_CHECKING:
 		from erpnext.manufacturing.doctype.curing_label.curing_label import CuringLabel
-		from erpnext.manufacturing.doctype.slab_quality_grade.slab_quality_grade import SlabQualityGrade
 		from erpnext.manufacturing.doctype.slab_seed.slab_seed import SlabSeed
 		from erpnext.setup.doctype.sales_invoice_series.sales_invoice_series import SalesInvoiceSeries
 		from frappe.types import DF
 
 		annex_d_addr: DF.SmallText | None
 		curing_labels: DF.Table[CuringLabel]
-		grades: DF.Table[SlabQualityGrade]
 		max_heating_minutes: DF.Float
 		max_pay_line_amount: DF.Currency
 		maximum_crates_per_container: DF.Int
@@ -30,6 +28,7 @@ class MahiGranitesSettings(Document):
 		min_curing_hours: DF.Float
 		sales_invoice_patterns: DF.Table[SalesInvoiceSeries]
 		show_job_card_queue_to_mixer_operators: DF.Check
+		slab_sales_allowance: DF.Int
 		slab_seeds: DF.Table[SlabSeed]
 	# end: auto-generated types
 	pass
