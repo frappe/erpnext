@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import _ from "@/lib/translate"
 import { BankTransactionRule } from "@/types/Accounts/BankTransactionRule"
 import { FrappeConfig, FrappeContext, useFrappeGetCall, useFrappeGetDocList, useFrappePostCall } from "frappe-react-sdk"
-import { ArrowDownRight, ArrowDownUp, ArrowUpRight, MoreVertical, Trash2, GripVertical, Play, RefreshCw, ZapIcon } from "lucide-react"
+import { ArrowDownRight, ArrowDownUp, ArrowUpRight, MoreVertical, Trash2, GripVertical, Play, RefreshCw, ZapIcon, CalendarSyncIcon } from "lucide-react"
 import { useContext, useState } from "react"
 import { toast } from "sonner"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu"
@@ -75,14 +75,13 @@ export const RunRulesButton = () => {
                 {isRunningRules ? _("Running...") : _("Run Rules")}
             </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="start">
             <DropdownMenuItem onClick={() => handleRunRules(false)} disabled={isRunningRules} title={_("Run rules on unreconciled transactions that haven't been evaluated yet")}>
-                <Play className="w-4 h-4 mr-2" />
+                <Play />
                 {_("Run on new transactions")}
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleRunRules(true)} disabled={isRunningRules} title={_("Force re-evaluate all unreconciled transactions, even if they were previously evaluated")}>
-                <RefreshCw className="w-4 h-4 mr-2" />
+                <RefreshCw />
                 {_("Force evaluate all")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -122,12 +121,8 @@ const AutoRunRuleItem = () => {
     return <DropdownMenuCheckboxItem
         checked={automaticallyRunRulesOnUnreconciledTransactions}
         onCheckedChange={onAutoClassifyTransactions}>
+        <CalendarSyncIcon />
         {_("Run rules automatically")}
-        {automaticallyRunRulesOnUnreconciledTransactions ? <Badge theme="green">
-            {_("Enabled")}
-        </Badge> : <Badge theme="red">
-            {_("Disabled")}
-        </Badge>}
     </DropdownMenuCheckboxItem>
 }
 

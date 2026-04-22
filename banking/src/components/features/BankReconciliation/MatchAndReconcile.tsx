@@ -907,14 +907,14 @@ const OlderUnreconciledTransactionsBanner = () => {
 
         return <Alert theme='gray' variant='subtle'>
             <AlertCircleIcon />
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-1.5">
                 <div>
                     <AlertTitle> {data.message.count > 1 ? (
                         <span>{_("There are {0} unreconciled transactions before {1}.", [data.message.count.toString(), formatDate(dates.fromDate)])}</span>
                     ) : (
                         <span>{_("There is one unreconciled transaction before {0}.", [formatDate(dates.fromDate)])}</span>
                     )}</AlertTitle>
-                    <AlertDescription className="flex justify-between">
+                    <AlertDescription className="flex justify-between text-balance">
                         {_("The opening balance might not match your bank statement. Would you like to reconcile them?")}
                     </AlertDescription>
                 </div>
@@ -926,7 +926,7 @@ const OlderUnreconciledTransactionsBanner = () => {
                         variant='outline'
                         onClick={() => setDates({ fromDate: data.message.oldest_date, toDate: dates.toDate })}>
                         <span>{data.message.count > 1 ? _("View older transactions") : _("View older transaction")}</span>
-                        <ArrowRightIcon className="w-4 h-4" />
+                        <ArrowRightIcon />
                     </Button>
                 </div>
             </div>
