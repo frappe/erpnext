@@ -6,11 +6,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_months, today
 
 from erpnext.accounts.report.purchase_register.purchase_register import execute
-<<<<<<< HEAD
-=======
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.tests.utils import ERPNextTestSuite
->>>>>>> 3aeb7d6b01 (fix(purchase_register): filter tax rows by parenttype in invoice tax map query)
 
 
 class TestPurchaseRegister(FrappeTestCase):
