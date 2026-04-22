@@ -49,7 +49,7 @@
    "reqd": 1
   },
   {
-   "default": "Today",
+   "default": "Now",
    "fieldname": "period_end_date",
    "fieldtype": "Datetime",
    "in_list_view": 1,
@@ -261,11 +261,11 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2025-06-14 02:38:14.962291",
+ "modified": "2026-04-22 14:10:10.094718",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
