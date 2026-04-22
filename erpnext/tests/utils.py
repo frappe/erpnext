@@ -225,7 +225,7 @@ class BootStrapTestData:
 
 	def update_system_settings(self):
 		system_settings = frappe.get_doc("System Settings")
-		system_settings.time_zone = "Pacific/Kiritimati"
+		system_settings.time_zone = "Asia/Kolkata"
 		system_settings.language = "en"
 		system_settings.currency_precision = system_settings.float_precision = 2
 		system_settings.rounding_method = "Banker's Rounding"
