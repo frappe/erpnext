@@ -41,6 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
+      TZ: 'Asia/Kolkata'
       NODE_ENV: "production"
       WITH_COVERAGE: ${{ github.event_name != 'pull_request' }}
 
@@ -56,6 +57,7 @@ jobs:
       mysql:
         image: mariadb:10.6
         env:
+          TZ: 'Asia/Kolkata'
           MARIADB_ROOT_PASSWORD: 'root'
         ports:
           - 3306:3306
