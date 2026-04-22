@@ -325,8 +325,8 @@ class BOM(WebsiteGenerator):
 			if not slab_size:
 				frappe.throw("Slab Size does not exist")
 
-			if thickness not in ["2CM", "3CM"]:
-				frappe.throw("Slab Thickness should be either 2CM or 3CM")
+			if thickness not in ["2cm", "3cm"]:
+				frappe.throw("Slab Thickness should be either 2cm or 3cm")
 
 			slab_doc = frappe.new_doc("Slab Template")
 			slab_doc.colour_code = slab_color
