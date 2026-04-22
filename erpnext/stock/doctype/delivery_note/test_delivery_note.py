@@ -2882,6 +2882,67 @@ class TestDeliveryNote(ERPNextTestSuite):
 		dn.items[0].stock_qty = 2
 		dn.save()
 
+	@ERPNextTestSuite.change_settings(
+		"Selling Settings", {"auto_allocate_advance_payment": 1, "fetch_only_allocated_advance_payment": 0}
+	)
+	def test_auto_allocate_advance_payment_from_sales_order(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+
+		so = make_sales_order(rate=1000)
+
+		pe1 = get_payment_entry("Sales Order", so.name)
+		pe1.paid_amount = 500
+		pe1.received_amount = 500
+		pe1.references[0].allocated_amount = 500
+		pe1.insert().submit()
+
+		pe2 = get_payment_entry("Sales Order", so.name)
+		pe2.paid_amount = 100
+		pe2.received_amount = 100
+		pe2.references = []
+		pe2.insert().submit()
+
+		dn = make_delivery_note(so.name)
+		dn.insert().submit()
+		si = make_sales_invoice(dn.name)
+
+		references = [d.reference_name for d in si.advances]
+
+		self.assertIn(pe1.name, references)
+		self.assertIn(pe2.name, references)
+
+	@ERPNextTestSuite.change_settings(
+		"Selling Settings", {"auto_allocate_advance_payment": 1, "fetch_only_allocated_advance_payment": 1}
+	)
+	def test_auto_allocate_fetches_only_allocated_advances(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+
+		so = make_sales_order(rate=1000)
+
+		pe1 = get_payment_entry("Sales Order", so.name)
+		pe1.paid_amount = 500
+		pe1.received_amount = 500
+		pe1.references[0].allocated_amount = 500
+		pe1.insert().submit()
+
+		pe2 = get_payment_entry("Sales Order", so.name)
+		pe2.paid_amount = 100
+		pe2.received_amount = 100
+		pe2.references = []
+		pe2.insert().submit()
+
+		dn = make_delivery_note(so.name)
+		dn.insert().submit()
+
+		si = make_sales_invoice(dn.name)
+
+		references = [d.reference_name for d in si.advances]
+
+		self.assertIn(pe1.name, references)
+		self.assertNotIn(pe2.name, references)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
