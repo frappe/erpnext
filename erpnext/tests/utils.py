@@ -151,6 +151,7 @@ class BootStrapTestData:
 		frappe.db.commit()  # nosemgrep
 
 	def make_master_data(self):
+		self.update_system_settings()
 		self.make_fiscal_year()
 		self.make_holiday_list()
 		self.make_company()
@@ -203,7 +204,6 @@ class BootStrapTestData:
 		self.update_support_settings()
 		self.update_selling_settings()
 		self.update_stock_settings()
-		self.update_system_settings()
 
 		frappe.db.commit()  # nosemgrep
 
@@ -225,7 +225,7 @@ class BootStrapTestData:
 
 	def update_system_settings(self):
 		system_settings = frappe.get_doc("System Settings")
-		system_settings.time_zone = "Asia/Kolkata"
+		system_settings.time_zone = "Pacific/Kiritimati"
 		system_settings.language = "en"
 		system_settings.currency_precision = system_settings.float_precision = 2
 		system_settings.rounding_method = "Banker's Rounding"
