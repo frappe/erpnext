@@ -44,7 +44,6 @@ class TestCompany(ERPNextTestSuite):
 			for prop, val in acc_property.items():
 				self.assertEqual(acc.get(prop), val)
 
-		self.delete_mode_of_payment("COA from Existing Company")
 		frappe.delete_doc("Company", "COA from Existing Company")
 
 	def test_coa_based_on_country_template(self):
@@ -95,15 +94,7 @@ class TestCompany(ERPNextTestSuite):
 
 						self.assertTrue(has_matching_accounts, msg=error_message)
 				finally:
-					self.delete_mode_of_payment(template)
 					frappe.delete_doc("Company", template)
-
-	def delete_mode_of_payment(self, company):
-		frappe.db.sql(
-			""" delete from `tabMode of Payment Account`
-			where company =%s """,
-			(company),
-		)
 
 	def test_basic_tree(self, records=None):
 		self.load_test_records("Company")

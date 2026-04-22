@@ -60,7 +60,7 @@ def _preprocess_ctx(ctx):
 def get_item_details(
 	ctx: ItemDetailsCtx | str,
 	doc: Document | str | None = None,
-	for_validate: bool = False,
+	for_validate: bool | None = False,
 	overwrite_warehouse: bool = True,
 ):
 	"""

@@ -2105,6 +2105,37 @@ class TestPaymentEntry(ERPNextTestSuite):
 			self.assertEqual(ref.voucher_no, so.name)
 			self.assertIsNotNone(ref.payment_term)
 
+	def test_project_name_in_exchange_gain_loss_entry(self):
+		si = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=50,
+			do_not_submit=True,
+		)
+		from erpnext.projects.doctype.project.test_project import make_project
+
+		si.project = make_project({"project_name": "_Test Project for Exchange Gain Loss Entry"}).name
+
+		si.submit()
+
+		pe = get_payment_entry("Sales Invoice", si.name)
+
+		pe.source_exchange_rate = 100
+
+		pe.insert()
+		pe.submit()
+
+		rows = frappe.get_all(
+			"Journal Entry Account",
+			or_filters=[{"reference_name": pe.name}, {"reference_name": si.name}],
+			fields=["project"],
+		)
+		self.assertEqual(len(rows), 2)
+
+		self.assertEqual(rows[0].project, si.project)
+		self.assertEqual(rows[1].project, si.project)
+
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")
