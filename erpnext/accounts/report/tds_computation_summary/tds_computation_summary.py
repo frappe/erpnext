@@ -63,13 +63,13 @@ def group_by_party_and_category(data, filters):
 			},
 		)
 
-		party_category_wise_map.get((row.get("party"), row.get("tax_withholding_category")))["total_amount"] += row.get(
-			"total_amount", 0.0
-		)
+		party_category_wise_map.get((row.get("party"), row.get("tax_withholding_category")))[
+			"total_amount"
+		] += row.get("total_amount", 0.0)
 
-		party_category_wise_map.get((row.get("party"), row.get("tax_withholding_category")))["tax_amount"] += row.get(
-			"tax_amount", 0.0
-		)
+		party_category_wise_map.get((row.get("party"), row.get("tax_withholding_category")))[
+			"tax_amount"
+		] += row.get("tax_amount", 0.0)
 
 	final_result = get_final_result(party_category_wise_map)
 
@@ -110,13 +110,18 @@ def get_columns(filters):
 	columns.extend(
 		[
 			{
-				"label": _("Section Code"),
+				"label": _("Tax Withholding Category"),
 				"options": "Tax Withholding Category",
 				"fieldname": "tax_withholding_category",
 				"fieldtype": "Link",
 				"width": 180,
 			},
-			{"label": _("Entity Type"), "fieldname": "party_entity_type", "fieldtype": "Data", "width": 180},
+			{
+				"label": _(f"{filters.get('party_type', 'Party')} Type"),
+				"fieldname": "party_entity_type",
+				"fieldtype": "Data",
+				"width": 180,
+			},
 			{
 				"label": _("TDS Rate %") if filters.get("party_type") == "Supplier" else _("TCS Rate %"),
 				"fieldname": "rate",
