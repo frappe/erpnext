@@ -15,7 +15,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestPricingRule(ERPNextTestSuite):
 	def setUp(self):
-		delete_existing_pricing_rules()
 		setup_pricing_rule_data()
 		self.enterClassContext(self.change_settings("Selling Settings", validate_selling_price=0))
 
@@ -1582,16 +1581,6 @@ def setup_pricing_rule_data():
 		frappe.get_doc(
 			{"doctype": "UTM Campaign", "description": "_Test Campaign", "name": "_Test Campaign"}
 		).insert()
-
-
-def delete_existing_pricing_rules():
-	for doctype in [
-		"Pricing Rule",
-		"Pricing Rule Item Code",
-		"Pricing Rule Item Group",
-		"Pricing Rule Brand",
-	]:
-		frappe.db.sql(f"delete from `tab{doctype}`")
 
 
 def make_item_price(item, price_list_name, item_price):

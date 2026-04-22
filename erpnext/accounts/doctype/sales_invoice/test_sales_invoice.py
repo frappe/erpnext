@@ -2025,10 +2025,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 		)
 
 	def test_multiple_uom_in_selling(self):
-		frappe.db.sql(
-			"""delete from `tabItem Price`
-			where price_list='_Test Price List' and item_code='_Test Item'"""
-		)
 		item_price = frappe.new_doc("Item Price")
 		item_price.price_list = "_Test Price List"
 		item_price.item_code = "_Test Item"

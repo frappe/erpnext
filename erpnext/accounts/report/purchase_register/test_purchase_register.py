@@ -11,9 +11,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestPurchaseRegister(ERPNextTestSuite):
 	def test_purchase_register(self):
-		frappe.db.sql("delete from `tabPurchase Invoice` where company='_Test Company 6'")
-		frappe.db.sql("delete from `tabGL Entry` where company='_Test Company 6'")
-
 		filters = frappe._dict(company="_Test Company 6", from_date=add_months(today(), -1), to_date=today())
 
 		pi = make_purchase_invoice()
@@ -28,9 +25,6 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(first_row.grand_total, 1100)
 
 	def test_purchase_register_ignores_tax_rows_from_other_doctype(self):
-		frappe.db.sql("delete from `tabPurchase Invoice` where company='_Test Company 6'")
-		frappe.db.sql("delete from `tabGL Entry` where company='_Test Company 6'")
-
 		filters = frappe._dict(company="_Test Company 6", from_date=add_months(today(), -1), to_date=today())
 
 		pi = make_purchase_invoice()
@@ -74,9 +68,6 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(first_row.grand_total, 1100)
 
 	def test_purchase_register_ledger_view(self):
-		frappe.db.sql("delete from `tabPurchase Invoice` where company='_Test Company 6'")
-		frappe.db.sql("delete from `tabGL Entry` where company='_Test Company 6'")
-
 		filters = frappe._dict(
 			company="_Test Company 6",
 			from_date=add_months(today(), -1),

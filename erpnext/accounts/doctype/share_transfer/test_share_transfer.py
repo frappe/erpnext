@@ -9,8 +9,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestShareTransfer(ERPNextTestSuite):
 	def setUp(self):
-		frappe.db.sql("delete from `tabShare Transfer`")
-		frappe.db.sql("delete from `tabShare Balance`")
 		share_transfers = [
 			{
 				"doctype": "Share Transfer",

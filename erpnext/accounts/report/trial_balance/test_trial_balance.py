@@ -42,9 +42,6 @@ class TestTrialBalance(ERPNextTestSuite):
 		"""
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		frappe.db.sql("delete from `tabSales Invoice` where company='Trial Balance Company'")
-		frappe.db.sql("delete from `tabGL Entry` where company='Trial Balance Company'")
-
 		branch1 = frappe.new_doc("Branch")
 		branch1.branch = "Location 1"
 		branch1.insert(ignore_if_duplicate=True)
