@@ -179,6 +179,14 @@ class Item(Document):
 			for default in self.item_defaults or [frappe._dict()]:
 				self.add_price(default.default_price_list)
 
+			frappe.msgprint(
+				_("Item Price created at rate {0}").format(
+					frappe.format(self.standard_rate, {"fieldtype": "Currency"})
+				),
+				indicator="green",
+				alert=True,
+			)
+
 		if self.opening_stock:
 			if self.opening_stock > 10000 and self.has_serial_no:
 				frappe.enqueue(
