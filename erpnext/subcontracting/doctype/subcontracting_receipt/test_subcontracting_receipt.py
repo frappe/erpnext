@@ -2002,6 +2002,80 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		self.assertRaises(BOMQuantityError, scr.submit)
 
+<<<<<<< HEAD
+=======
+	@ERPNextTestSuite.change_settings("Buying Settings", {"over_transfer_allowance": 20})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 20})
+	def test_over_receipt(self):
+		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+
+		set_backflush_based_on("BOM")
+
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		rm_items[0]["qty"] = 2
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		ste_dict = make_rm_stock_entry(sco.name)
+		doc = frappe.get_doc(ste_dict)
+		self.assertEqual(doc.items[0].qty, 0)
+		doc.items[0].qty = 2
+		doc.submit()
+
+		frappe.flags["args"] = {"items": [{"name": sco.items[0].name, "qty": 2}]}
+		scr = make_subcontracting_receipt(sco.name)
+		self.assertEqual(scr.items[0].qty, 2)
+		scr.submit()
+		frappe.flags["args"].pop("items", None)
+
+	def test_inventory_dimensions(self):
+		"""
+		The subcontracting controller resets the supplied items table on each save causing the inventory dimensions to be lost.
+		This test ensures that the inventory dimensions are retained on each save.
+		"""
+		from erpnext.stock.doctype.inventory_dimension.test_inventory_dimension import (
+			create_inventory_dimension,
+		)
+
+		inventory_dimension = create_inventory_dimension(
+			apply_to_all_doctypes=1,
+			dimension_name="Inv Site",
+			reference_document="Inv Site",
+			document_type="Inv Site",
+		)
+
+		inventory_dimension.reqd = 1
+		inventory_dimension.save()
+
+		set_backflush_based_on("BOM")
+
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].inv_site = "Site 1"
+		scr.save()
+
+		scr.supplied_items[0].inv_site = "Site 1"
+		scr.save()
+
+		self.assertEqual(scr.supplied_items[0].inv_site, "Site 1")
+
+		inventory_dimension.reqd = 0
+		inventory_dimension.save()
+
+>>>>>>> 0e20e35842 (fix: preserve inventory dimensions when raw materials are reset (#54440))
 
 def make_return_subcontracting_receipt(**args):
 	args = frappe._dict(args)
