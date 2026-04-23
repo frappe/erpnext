@@ -5,9 +5,9 @@ from unittest.mock import Mock, patch
 
 import frappe
 import requests
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.edi.doctype.code_list import code_list_import
-from erpnext.tests.utils import ERPNextTestSuite
 
 SAMPLE_GENERICODE = b"""<?xml version="1.0" encoding="UTF-8"?>
 <CodeList>
@@ -49,7 +49,7 @@ SAMPLE_GENERICODE = b"""<?xml version="1.0" encoding="UTF-8"?>
 """
 
 
-class TestCodeListImport(ERPNextTestSuite):
+class TestCodeListImport(FrappeTestCase):
 	def test_import_genericode_rejects_remote_file_url(self):
 		self.set_upload_context(
 			file_name="trusted.xml",
