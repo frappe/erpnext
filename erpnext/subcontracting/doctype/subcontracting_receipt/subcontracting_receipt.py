@@ -319,19 +319,18 @@ class SubcontractingReceipt(SubcontractingController):
 	def set_supplied_items_inventory_dimensions(self):
 		if hasattr(self, "inventory_dimensions") and (inventory_dimensions := get_inventory_dimensions()):
 			for item in self.supplied_items:
+				key = (
+					item.reference_name,
+					item.rm_item_code,
+					item.main_item_code,
+					item.batch_no,
+					item.serial_no,
+				)
+
 				for dimension in inventory_dimensions:
-					item.set(
-						dimension.source_fieldname,
-						self.inventory_dimensions.get(dimension.source_fieldname, {}).get(
-							(
-								item.reference_name,
-								item.rm_item_code,
-								item.main_item_code,
-								item.batch_no,
-								item.serial_no,
-							)
-						),
-					)
+					dimension_values = self.inventory_dimensions.get(dimension.source_fieldname, {})
+					if key in dimension_values:
+						item.set(dimension.source_fieldname, dimension_values[key])
 
 	def set_supplied_items_expense_account(self):
 		for item in self.supplied_items:

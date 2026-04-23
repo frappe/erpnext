@@ -5,9 +5,20 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_in
 
 def execute():
 	for dimension in get_inventory_dimensions():
-		custom_field = frappe.get_doc(
+		if frappe.db.exists(
 			"Custom Field",
-			{"fieldname": dimension.source_fieldname, "dt": "Subcontracting Receipt Supplied Item"},
-		)
-		if custom_field:
-			custom_field.db_set({"reqd": 0, "mandatory_depends_on": "eval:doc.reference_name"})
+			{
+				"fieldname": dimension.source_fieldname,
+				"dt": "Subcontracting Receipt Supplied Item",
+				"reqd": 1,
+			},
+		):
+			frappe.set_value(
+				"Custom Field",
+				{
+					"fieldname": dimension.source_fieldname,
+					"dt": "Subcontracting Receipt Supplied Item",
+					"reqd": 1,
+				},
+				{"reqd": 0, "mandatory_depends_on": "eval:doc.reference_name"},
+			)
