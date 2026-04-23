@@ -3183,6 +3183,38 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
+	apply_tds(frm) {
+		var me = this;
+		me.frm.clear_table("tax_withholding_entries");
+		$.each(this.frm.doc.items || [], function (i, item) {
+			item.apply_tds = me.frm.doc.apply_tds;
+		});
+		me.frm.refresh_field("items");
+	}
+
+	/**
+	 * Called on party (customer/supplier) change to update tax_withholding_category
+	 */
+	update_item_tax_withholding_categories(party_category) {
+		var me = this;
+		var item_codes = [...new Set((this.frm.doc.items || []).map((i) => i.item_code).filter(Boolean))];
+		if (!item_codes.length) return;
+
+		frappe.call({
+			method: "erpnext.stock.get_item_details.get_item_tax_withholding_categories",
+			args: { item_codes: item_codes, doctype: me.frm.doc.doctype },
+			callback: function (r) {
+				if (r.exc || !r.message) return;
+				var item_categories = r.message;
+				$.each(me.frm.doc.items || [], function (i, item) {
+					// Item master takes priority; fall back to party-level category
+					item.tax_withholding_category = item_categories[item.item_code] || party_category || null;
+				});
+				me.frm.refresh_field("items");
+			},
+		});
+	}
+
 	against_blanket_order(doc, cdt, cdn) {
 		var item = locals[cdt][cdn];
 		if (!item.against_blanket_order) {

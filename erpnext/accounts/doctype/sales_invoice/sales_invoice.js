@@ -474,9 +474,11 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				),
 			},
 			function () {
-				me.frm.doc.apply_tds =
-					me.frm.tax_withholding_category || me.frm.tax_withholding_group ? 1 : 0;
-				me.frm.clear_table("tax_withholding_entries");
+				me.update_item_tax_withholding_categories(me.frm.tax_withholding_category);
+				me.frm.set_value(
+					"apply_tds",
+					me.frm.tax_withholding_category || me.frm.tax_withholding_group ? 1 : 0
+				);
 				me.apply_pricing_rule();
 			}
 		);
@@ -692,10 +694,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		}
 
 		this.calculate_taxes_and_totals();
-	}
-
-	apply_tds(frm) {
-		this.frm.clear_table("tax_withholding_entries");
 	}
 
 	is_return() {

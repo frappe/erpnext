@@ -363,9 +363,11 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			},
 			function () {
 				me.apply_pricing_rule();
-				me.frm.doc.apply_tds =
-					me.frm.tax_withholding_category || me.frm.tax_withholding_group ? 1 : 0;
-				me.frm.clear_table("tax_withholding_entries");
+				me.update_item_tax_withholding_categories(me.frm.tax_withholding_category);
+				me.frm.set_value(
+					"apply_tds",
+					me.frm.tax_withholding_category || me.frm.tax_withholding_group ? 1 : 0
+				);
 
 				// while duplicating, don't change payment terms
 				if (me.frm.doc.__run_link_triggers === false) {
@@ -374,11 +376,6 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 				}
 			}
 		);
-	}
-
-	apply_tds(frm) {
-		var me = this;
-		me.frm.clear_table("tax_withholding_entries");
 	}
 
 	credit_to() {
