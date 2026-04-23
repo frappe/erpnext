@@ -2002,7 +2002,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		self.assertRaises(BOMQuantityError, scr.submit)
 
-
 	def test_inventory_dimensions(self):
 		"""
 		The subcontracting controller resets the supplied items table on each save causing the inventory dimensions to be lost.
