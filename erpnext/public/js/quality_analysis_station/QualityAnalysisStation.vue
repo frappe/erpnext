@@ -91,6 +91,7 @@ const repairOptions = ref([]);
 const fetchGrades = async () => {
 	const list = await frappe.db.get_list('Slab Quality Grade', {
 		fields: ['name', 'code', 'color'],
+		order_by: 'code asc',
 	});
 
 	if (list && list.length) {
