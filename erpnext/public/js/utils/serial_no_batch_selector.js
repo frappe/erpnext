@@ -106,10 +106,12 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			},
 			get_query: () => {
 				return {
-					filters: {
-						is_group: 0,
-						company: this.frm.doc.company,
-					},
+					query: "erpnext.controllers.queries.warehouse_query",
+					filters: [
+						["Bin", "item_code", "=", this.item.item_code],
+						["Warehouse", "is_group", "=", 0],
+						["Warehouse", "company", "=", this.frm.doc.company],
+					],
 				};
 			},
 		});
