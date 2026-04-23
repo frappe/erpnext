@@ -3191,6 +3191,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		$.each(this.frm.doc.items || [], function (i, item) {
 			item.apply_tds = me.frm.doc.apply_tds;
 		});
+		me.frm.refresh_field("tax_withholding_entries");
 		me.frm.refresh_field("items");
 	}
 
