@@ -3183,7 +3183,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
-	apply_tds(frm) {
+	apply_tds(doc, cdt, cdn) {
+		if (!["Purchase Invoice", "Sales Invoice"].includes(cdt)) return;
+
 		var me = this;
 		me.frm.clear_table("tax_withholding_entries");
 		$.each(this.frm.doc.items || [], function (i, item) {
