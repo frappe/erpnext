@@ -16,6 +16,7 @@ from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_default_cost_center, get_default_expense_account
 from erpnext.stock.stock_ledger import get_valuation_rate
@@ -120,6 +121,7 @@ class SubcontractingReceipt(SubcontractingController):
 		)
 
 	def before_validate(self):
+		self.save_inventory_dimensions()
 		super().before_validate()
 		self.validate_items_qty()
 		self.set_items_bom()
@@ -160,6 +162,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		self.set_supplied_items_expense_account()
 		self.set_supplied_items_cost_center()
+		self.set_supplied_items_inventory_dimensions()
 
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
@@ -313,6 +316,22 @@ class SubcontractingReceipt(SubcontractingController):
 					self.company,
 				)
 
+	def set_supplied_items_inventory_dimensions(self):
+		if hasattr(self, "inventory_dimensions") and (inventory_dimensions := get_inventory_dimensions()):
+			for item in self.supplied_items:
+				key = (
+					item.reference_name,
+					item.rm_item_code,
+					item.main_item_code,
+					item.batch_no,
+					item.serial_no,
+				)
+
+				for dimension in inventory_dimensions:
+					dimension_values = self.inventory_dimensions.get(dimension.source_fieldname, {})
+					if key in dimension_values:
+						item.set(dimension.source_fieldname, dimension_values[key])
+
 	def set_supplied_items_expense_account(self):
 		for item in self.supplied_items:
 			if not item.expense_account:
@@ -328,6 +347,19 @@ class SubcontractingReceipt(SubcontractingController):
 					get_item_group_defaults(item.rm_item_code, self.company),
 					get_brand_defaults(item.rm_item_code, self.company),
 				)
+
+	def save_inventory_dimensions(self):
+		if inventory_dimensions := get_inventory_dimensions():
+			if not getattr(self, "inventory_dimensions", None):
+				self.inventory_dimensions = {}
+
+			for dimension in inventory_dimensions:
+				self.inventory_dimensions[dimension.source_fieldname] = {
+					(d.reference_name, d.rm_item_code, d.main_item_code, d.batch_no, d.serial_no): d.get(
+						dimension.source_fieldname
+					)
+					for d in self.supplied_items
+				}
 
 	def reset_supplied_items(self):
 		if (
