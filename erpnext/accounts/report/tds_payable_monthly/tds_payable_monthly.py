@@ -209,7 +209,7 @@ def get_columns(filters):
 	columns.extend(
 		[
 			{
-				"label": _(f"{filters.get('party_type', 'Party')} Type"),
+				"label": _("{0} Type").format(_(filters.get("party_type", "Party"))),
 				"fieldname": "party_entity_type",
 				"fieldtype": "Data",
 				"width": 100,
