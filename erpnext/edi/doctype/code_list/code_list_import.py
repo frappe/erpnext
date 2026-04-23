@@ -77,7 +77,19 @@ def get_uploaded_genericode_file() -> tuple[bytes, str | None]:
 
 	file_doc = frappe.get_doc("File", {"file_url": file_url})
 	file_doc.check_permission("read")
-	return file_doc.get_content(encodings=()), file_name
+	return read_file_bytes(file_doc), file_name
+
+
+def read_file_bytes(file_doc) -> bytes:
+	"""Return the raw bytes of a File document.
+
+	v15's `File.get_content` eagerly decodes to utf-8 and returns `str` for text
+	files, but `lxml.etree.fromstring` needs bytes when the XML declares an encoding.
+	"""
+	content = file_doc.get_content()
+	if isinstance(content, str):
+		content = content.encode("utf-8")
+	return content
 
 
 def is_local_file_url(file_url: str | None) -> bool:

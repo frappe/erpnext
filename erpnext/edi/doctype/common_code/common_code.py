@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from frappe.utils.data import get_link_to_form
 from lxml import etree
 
-from erpnext.edi.doctype.code_list.code_list_import import parse_genericode_content
+from erpnext.edi.doctype.code_list.code_list_import import parse_genericode_content, read_file_bytes
 
 
 class CommonCode(Document):
@@ -90,7 +90,7 @@ def import_genericode(code_list: str, file_name: str, column_map: dict, filters:
 	"""Import genericode file and create Common Code entries"""
 	file_doc = frappe.get_doc("File", file_name)
 	file_doc.check_permission("read")
-	root = parse_genericode_content(file_doc.get_content(encodings=()))
+	root = parse_genericode_content(read_file_bytes(file_doc))
 
 	# Construct the XPath expression
 	xpath_expr = ".//SimpleCodeList/Row"
