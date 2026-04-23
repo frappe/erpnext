@@ -871,7 +871,7 @@ def make_sales_invoice(
 		items_to_remove = []
 		has_partial_merge = False
 		for item in target.items:
-			key = item.so_detail or item.dn_detail
+			key = item.dn_detail or item.so_detail
 			if not key:
 				continue
 			if key in detail_map:
@@ -892,7 +892,7 @@ def make_sales_invoice(
 					_("Duplicate items were merged into existing rows in the Items table."),
 					indicator="blue",
 				)
-			else:
+			elif len(detail_map) == len(items_to_remove):
 				frappe.msgprint(
 					_("All items from {0} {1} are already fully added in the items table").format(
 						source.doctype, source.name

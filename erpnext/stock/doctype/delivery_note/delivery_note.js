@@ -464,6 +464,9 @@ frappe.ui.form.on("Delivery Note Item", {
 		if (row.so_detail) {
 			frappe.model.set_value(row.doctype, row.name, "so_detail", null);
 		}
+		if (row.against_sales_order) {
+			frappe.model.set_value(row.doctype, row.name, "against_sales_order", null);
+		}
 	},
 });
 

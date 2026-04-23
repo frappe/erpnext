@@ -1208,7 +1208,7 @@ def make_delivery_note(
 					_("Duplicate items were merged into existing rows in the Items table."),
 					indicator="blue",
 				)
-			else:
+			elif len(so_detail_map) == len(items_to_remove):
 				frappe.msgprint(
 					_("All items from {0} {1} are already fully added in the items table").format(
 						source.doctype, source.name
@@ -1405,7 +1405,7 @@ def make_sales_invoice(
 					_("Duplicate items were merged into existing rows in the Items table."),
 					indicator="blue",
 				)
-			else:
+			elif len(so_detail_map) == len(items_to_remove):
 				frappe.msgprint(
 					_("All items from {0} {1} are already fully added in the items table").format(
 						source.doctype, source.name

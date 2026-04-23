@@ -158,24 +158,6 @@ frappe.ui.form.on("Purchase Receipt", {
 	},
 });
 
-frappe.ui.form.on("Purchase Receipt Item", {
-	item_code: function (frm, cdt, cdn) {
-		let row = locals[cdt][cdn];
-		if (row.purchase_invoice) {
-			frappe.model.set_value(cdt, cdn, "purchase_invoice", null);
-		}
-		if (row.purchase_invoice_item) {
-			frappe.model.set_value(cdt, cdn, "purchase_invoice_item", null);
-		}
-		if (row.purchase_order) {
-			frappe.model.set_value(cdt, cdn, "purchase_order", null);
-		}
-		if (row.purchase_order_item) {
-			frappe.model.set_value(cdt, cdn, "purchase_order_item", null);
-		}
-	},
-});
-
 erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extends (
 	erpnext.buying.BuyingController
 ) {
@@ -449,6 +431,18 @@ frappe.ui.form.on("Purchase Receipt", "is_subcontracted", function (frm) {
 frappe.ui.form.on("Purchase Receipt Item", {
 	item_code: function (frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
+		if (d.purchase_invoice) {
+			frappe.model.set_value(cdt, cdn, "purchase_invoice", null);
+		}
+		if (d.purchase_invoice_item) {
+			frappe.model.set_value(cdt, cdn, "purchase_invoice_item", null);
+		}
+		if (d.purchase_order) {
+			frappe.model.set_value(cdt, cdn, "purchase_order", null);
+		}
+		if (d.purchase_order_item) {
+			frappe.model.set_value(cdt, cdn, "purchase_order_item", null);
+		}
 		frappe.db.get_value("Item", { name: d.item_code }, "sample_quantity", (r) => {
 			frappe.model.set_value(cdt, cdn, "sample_quantity", r.sample_quantity);
 			validate_sample_quantity(frm, cdt, cdn);
