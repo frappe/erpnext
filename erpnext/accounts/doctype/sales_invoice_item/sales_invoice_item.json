@@ -1000,6 +1000,7 @@
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
+   "mandatory_depends_on": "eval:doc.apply_tds",
    "options": "Tax Withholding Category",
    "print_hide": 1
   },

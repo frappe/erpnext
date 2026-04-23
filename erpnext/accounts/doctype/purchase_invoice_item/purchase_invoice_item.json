@@ -999,6 +999,7 @@
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
+   "mandatory_depends_on": "eval:doc.apply_tds",
    "options": "Tax Withholding Category",
    "print_hide": 1
   }
@@ -1007,7 +1008,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-07 15:40:45.687554",
+ "modified": "2026-04-23 15:24:07.707385",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
