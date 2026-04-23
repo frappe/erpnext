@@ -433,10 +433,4 @@ erpnext.patches.v15_0.replace_http_with_https_in_sales_partner
 erpnext.patches.v16_0.add_portal_redirects
 erpnext.patches.v16_0.update_order_qty_and_requested_qty_based_on_mr_and_po
 erpnext.patches.v16_0.depends_on_inv_dimensions
-<<<<<<< HEAD
-=======
-erpnext.patches.v16_0.uom_category
-erpnext.patches.v16_0.merge_repost_settings_to_accounts_settings
-erpnext.patches.v16_0.set_root_type_in_account_categories
 erpnext.patches.v16_0.scr_inv_dimension
->>>>>>> 0e20e35842 (fix: preserve inventory dimensions when raw materials are reset (#54440))
