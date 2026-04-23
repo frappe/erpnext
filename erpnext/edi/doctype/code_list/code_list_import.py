@@ -22,37 +22,6 @@ class CodeListSelectionMismatchError(Exception):
 
 @frappe.whitelist()
 def import_genericode():
-<<<<<<< HEAD
-	doctype = "Code List"
-	docname = frappe.form_dict.docname
-	content = frappe.local.uploaded_file
-
-	# recover the content, if it's a link
-	if (file_url := frappe.local.uploaded_file_url) and file_url.startswith(URL_PREFIXES):
-		try:
-			# If it's a URL, fetch the content and make it a local file (for durable audit)
-			response = requests.get(frappe.local.uploaded_file_url)
-			response.raise_for_status()
-			frappe.local.uploaded_file = content = response.content
-			frappe.local.uploaded_filename = frappe.local.uploaded_file_url.split("/")[-1]
-			frappe.local.uploaded_file_url = None
-		except Exception as e:
-			frappe.throw(f"<pre>{e!s}</pre>", title=_("Fetching Error"))
-
-	if file_url := frappe.local.uploaded_file_url:
-		file_path = frappe.utils.file_manager.get_file_path(file_url)
-		with open(file_path.encode(), mode="rb") as f:
-			content = f.read()
-
-	# Parse the xml content
-	parser = etree.XMLParser(
-		remove_blank_text=True,
-		resolve_entities=False,
-		load_dtd=False,
-		no_network=True,
-	)
-=======
->>>>>>> 8a72d7fafe (fix(edi): restrict Code List imports to files and trusted backend URLs (#54137))
 	try:
 		content, file_name = get_uploaded_genericode_file()
 
