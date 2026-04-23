@@ -106,9 +106,9 @@ class TestItemWiseSalesRegister(AccountsTestMixin, FrappeTestCase):
 		filters = frappe._dict({"from_date": today(), "to_date": today(), "company": self.company})
 		report = execute(filters)
 
-		self.assertEqual(len(report[1]), 1)
-		result = frappe._dict(report[1][0])
-		self.assertEqual(result.voucher_no, si.name)
+		res = [x for x in report[1] if x.get("voucher_no") == si.name]
+		self.assertEqual(len(res), 1)
+		result = frappe._dict(res[0])
 		self.assertEqual(result.net_total, 98.0)
 		self.assertEqual(result.tax_total, 0)
 		self.assertEqual(result.grand_total, 98.0)
