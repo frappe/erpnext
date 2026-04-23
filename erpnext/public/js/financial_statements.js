@@ -455,6 +455,7 @@ function get_filters() {
 			label: __("Currency"),
 			fieldtype: "Select",
 			options: erpnext.get_presentation_currency_list(),
+			depends_on: "eval: !doc.report_template",
 		},
 		{
 			fieldname: "cost_center",

@@ -6,7 +6,7 @@ import json
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from functools import reduce
+from functools import cache, reduce
 from typing import Any, Union
 
 import frappe
@@ -15,6 +15,7 @@ from frappe.database.operator_map import OPERATOR_MAP
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, date_diff, flt, getdate
+from frappe.utils.xlsxutils import XLSXMetadata, XLSXStyleBuilder
 from pypika.terms import Bracket, LiteralValue
 
 from erpnext import get_company_currency
@@ -37,6 +38,9 @@ from erpnext.accounts.report.financial_statements import (
 	get_period_list,
 )
 from erpnext.accounts.utils import get_children, get_currency_precision
+
+DEFAULT_BULLET_PREFIX = "• "
+SEGMENT_PREFIX = "seg_"
 
 # ============================================================================
 # DATA MODELS
@@ -141,7 +145,7 @@ class SegmentData:
 
 	@property
 	def id(self) -> str:
-		return f"seg_{self.index}"
+		return f"{SEGMENT_PREFIX}{self.index}"
 
 
 @dataclass
@@ -1392,7 +1396,8 @@ class FormattingEngine:
 				condition=lambda rd: getattr(rd.row, "italic_text", False), format_properties={"italic": True}
 			),
 			FormattingRule(
-				condition=lambda rd: rd.is_detail_row, format_properties={"is_detail": True, "prefix": "• "}
+				condition=lambda rd: rd.is_detail_row,
+				format_properties={"is_detail": True, "prefix": DEFAULT_BULLET_PREFIX},
 			),
 			FormattingRule(
 				condition=lambda rd: getattr(rd.row, "warn_if_negative", False),
@@ -1838,3 +1843,124 @@ class GrowthViewTransformer:
 			return 0.0
 		else:
 			return flt(((current_value - previous_value) / abs(previous_value)) * 100, 2)
+
+
+# ============================================================================
+# XLSX EXPORT STYLING
+# ============================================================================
+
+
+def get_xlsx_styles(metadata: XLSXMetadata) -> dict | None:
+	"""
+	Generate XLSX styles for financial report templates.
+
+	NOTE: Currently only custom report generated with "Report Template" filter will have styles applied.
+	"""
+	# skip styling
+	if not metadata.filters.get("report_template"):
+		return
+
+	builder = XLSXStyleBuilder(metadata, default_styling=False)
+	builder.apply_default_styles(currency_formatting=False)
+
+	# currency is fixed for all columns (only if report template filter is applied)
+	currency = get_company_currency(metadata.filters.get("company"))
+
+	styles = {
+		"bold": builder.register_style({"bold": True}),
+		"italic": builder.register_style({"italic": True}),
+		"warning": builder.register_style({"font_color": "#dc3545"}),  # text-danger
+	}
+
+	fieldtype_formats = {
+		"Int": builder.register_style({"num_format": "General"}),
+		"Float": builder.register_style({"num_format": builder.get_number_format("Float")}),
+		"Percent": builder.register_style({"num_format": builder.get_number_format("Percent")}),
+		"Currency": builder.register_style({"num_format": builder.get_number_format("Currency", currency)}),
+	}
+
+	# quick access for hot loop
+	style_cell = builder.style_cell
+
+	@cache
+	def get_color_style(color: str) -> int:
+		return builder.register_style({"font_color": color})
+
+	@cache
+	def get_prefix_style(prefix: str) -> int:
+		prefix = f"{prefix or DEFAULT_BULLET_PREFIX}@"
+
+		return builder.register_style({"num_format": prefix})
+
+	@cache
+	def get_indent_style(indent: int) -> int:
+		return builder.register_style({"align": "left", "indent": indent})
+
+	# column level styling of currency columns
+	for col_idx, col in metadata.column_map.items():
+		if col.get("fieldtype") != "Currency":
+			continue
+
+		builder.style_column(col_idx, fieldtype_formats["Currency"])
+
+	# cell level styling
+	for row_idx, row in metadata.row_map.items():
+		# skip total row
+		if metadata.has_total_row and row_idx == builder.last_row_index:
+			continue
+
+		is_segmented = (row.get("_segment_info", {}).get("total_segments", 1) or 1) > 1
+		segment_values = row.get("segment_values", {}) or {}
+
+		for col_idx, col in metadata.column_map.items():
+			fieldname = col.get("fieldname")
+			is_account = fieldname == "account"
+
+			# determine formatting bucket
+			if is_segmented and fieldname.startswith(SEGMENT_PREFIX):
+				formatting = row.copy()
+
+				_, seg_idx, seg_fieldname = fieldname.split("_", 2)
+				is_account = seg_fieldname == "account"
+				formatting.update(segment_values.get(f"{SEGMENT_PREFIX}{seg_idx}", {}) or {})
+			else:
+				formatting = row  # default formatting bucket.
+
+			if not is_account and formatting.get("is_blank_line"):
+				continue
+
+			col_fieldtype = col.get("fieldtype")
+			cell_fieldtype = formatting.get("fieldtype") or col_fieldtype
+			cell_value = row.get(fieldname)
+
+			if cell_value in (None, ""):
+				continue
+
+			# account column and other fieldtype styling
+			if is_account:
+				if formatting.get("is_detail") or (prefix := formatting.get("prefix")):
+					style_cell(row_idx, col_idx, get_prefix_style(prefix))
+
+				# custom indentation (different segment might have different indentation levels)
+				if is_segmented and (indent := formatting.get("indent")) and indent > 0:
+					style_cell(row_idx, col_idx, get_indent_style(indent))
+			else:
+				if col_fieldtype != cell_fieldtype and cell_fieldtype in fieldtype_formats:
+					style_cell(row_idx, col_idx, fieldtype_formats[cell_fieldtype])
+
+			# text styles
+			for style_key in ("bold", "italic"):
+				if formatting.get(style_key):
+					style_cell(row_idx, col_idx, styles[style_key])
+
+			# color styles
+			if (
+				formatting.get("warn_if_negative")
+				and cell_fieldtype in frappe.model.numeric_fieldtypes
+				and flt(cell_value) < 0
+			):
+				style_cell(row_idx, col_idx, styles["warning"])
+			elif color := formatting.get("color"):
+				style_cell(row_idx, col_idx, get_color_style(color))
+
+	return builder.result
