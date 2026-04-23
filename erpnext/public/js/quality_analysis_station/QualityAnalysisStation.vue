@@ -89,14 +89,12 @@ const grades = ref([]);
 const repairOptions = ref([]);
 
 const fetchGrades = async () => {
-    const r = await frappe.call({
-        method: 'frappe.client.get',
-        args: {
-            doctype: 'Mahi Granites Settings'
-        }
-    });
-    if (r.message && r.message.grades) {
-        grades.value = r.message.grades;
+	const list = await frappe.db.get_list('Slab Quality Grade', {
+		fields: ['name', 'code', 'color'],
+	});
+
+	if (list && list.length) {
+		grades.value = list;
     }
 };
 
@@ -643,8 +641,8 @@ onUnmounted(() => {
                                 <label class="small text-muted">{{ __('Grade') }}</label>
                                 <select v-model="form.grade" class="form-control" required>
                                     <option value="">{{ __('Select Grade') }}</option>
-                                    <option v-for="g in grades" :key="g.name" :value="g.name">
-                                        {{ g.grade_name }}
+                                    <option v-for="g in grades" :key="g.code" :value="g.code">
+                                        {{ g.code }}
                                     </option>
                                 </select>
                             </div>
