@@ -425,9 +425,6 @@ frappe.ui.form.on("Subcontracting Receipt Item", {
 		set_missing_values(frm);
 	},
 
-<<<<<<< HEAD
-	items_delete: (frm) => {
-=======
 	before_items_remove(frm, cdt, cdn) {
 		const filtered_rows = frm.doc.supplied_items.filter((item) => item.reference_name !== cdn);
 		frm.doc.supplied_items = filtered_rows;
@@ -435,7 +432,6 @@ frappe.ui.form.on("Subcontracting Receipt Item", {
 	},
 
 	items_delete(frm) {
->>>>>>> 0e20e35842 (fix: preserve inventory dimensions when raw materials are reset (#54440))
 		set_missing_values(frm);
 	},
 
