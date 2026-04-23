@@ -1104,6 +1104,8 @@ class AccountsController(TransactionBase):
 					):
 						if not item.get("tax_withholding_category") and ret.get("tax_withholding_category"):
 							item.set("tax_withholding_category", ret.get("tax_withholding_category"))
+							apply_tds = ret.get("apply_tds") if ret.get("apply_tds") is not None else 1
+							item.set("apply_tds", apply_tds)
 
 					# Double check for cost center
 					# Items add via promotional scheme may not have cost center set

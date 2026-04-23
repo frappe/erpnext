@@ -95,6 +95,7 @@ def get_item_details(
 
 	if doc:
 		ctx.transaction_date = doc.get("transaction_date") or doc.get("posting_date")
+		ctx.apply_tds = doc.get("apply_tds")
 
 		if doc.get("doctype") == "Purchase Invoice":
 			ctx.bill_date = doc.get("bill_date")
@@ -1394,6 +1395,8 @@ def get_tax_withholding_category(ctx: ItemDetailsCtx, item_doc, out: ItemDetails
 		)
 
 	out.tax_withholding_category = tax_withholding_category
+	if ctx.get("apply_tds") is not None:
+		out.apply_tds = ctx.get("apply_tds")
 
 
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
