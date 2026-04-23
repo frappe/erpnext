@@ -309,7 +309,7 @@ class Item(Document):
 		):
 			return
 
-		if not self.valuation_rate and not self.standard_rate and not self.is_customer_provided_item:
+		if self.valuation_rate is None and not self.is_customer_provided_item:
 			frappe.throw(_("Valuation Rate is mandatory if Opening Stock entered"))
 
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -334,13 +334,37 @@ class Item(Document):
 					item_code=self.name,
 					target=default_warehouse,
 					qty=self.opening_stock,
-					rate=self.valuation_rate or self.standard_rate,
+					rate=self.valuation_rate,
 					company=default.company,
 					posting_date=getdate(),
 					posting_time=nowtime(),
+					do_not_save=True,
 				)
 
+				if self.valuation_rate == 0:
+					for item in stock_entry.items:
+						item.allow_zero_valuation_rate = 1
+
+				stock_entry.insert()
+				stock_entry.submit()
+				stock_entry.load_from_db()
 				stock_entry.add_comment("Comment", _("Opening Stock"))
+
+				stock_entry_link = frappe.utils.get_link_to_form("Stock Entry", stock_entry.name)
+				if self.valuation_rate == 0:
+					frappe.msgprint(
+						_("Opening Stock entry created with zero valuation rate: {0}").format(
+							stock_entry_link
+						),
+						indicator="orange",
+						alert=True,
+					)
+				else:
+					frappe.msgprint(
+						_("Opening Stock entry created: {0}").format(stock_entry_link),
+						indicator="green",
+						alert=True,
+					)
 
 	def validate_fixed_asset(self):
 		if self.is_fixed_asset:
