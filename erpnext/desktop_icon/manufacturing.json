@@ -10,11 +10,10 @@
  "label": "Manufacturing",
  "link_to": "Manufacturing",
  "link_type": "Workspace Sidebar",
- "modified": "2026-01-01 20:07:01.246693",
+ "modified": "2026-04-23 15:49:25.039036",
  "modified_by": "Administrator",
  "name": "Manufacturing",
  "owner": "Administrator",
- "parent_icon": "ERPNext",
  "restrict_removal": 0,
  "roles": [],
  "standard": 1
