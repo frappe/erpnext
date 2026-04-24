@@ -642,6 +642,7 @@ class TaxWithholdingController:
 			.where(entry.tax_withholding_category == category.name)
 			.where(entry.company == self.doc.company)
 			.where(entry.docstatus == 1)
+			.where(entry.taxable_date.between(category.from_date, category.to_date))
 			.groupby(entry.status)
 		)
 
