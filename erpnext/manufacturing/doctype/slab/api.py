@@ -390,8 +390,9 @@ def move_slab_iteratively_to(
 
 		frappe.db.commit()
 
-	except Exception:
+	except Exception as e:
 		frappe.db.rollback()
+		raise e
 
 
 def move_slab_to_and_checkout(
@@ -745,8 +746,7 @@ def _create_final_qc(slab_name: str, final_qc: SlabQualityReport | None = None):
 			raise Exception("Slab Quality Report could not be created.")
 
 	# Get Slab Grade
-	mg_settings: MahiGranitesSettings = frappe.get_doc("Mahi Granites Settings")  # pyright: ignore[reportAssignmentType]
-	grades = mg_settings.grades
+	grades = frappe.get_list("Slab Quality Grade", fields=["code", "name"])
 	# Get Attendance Shift
 	shifts = frappe.get_list("Attendance Shift", fields=["name"])
 
