@@ -63,7 +63,7 @@ const PartyTypeDropdown = ({ value, onChange, readOnly, disabled, type, hideOpti
     return (
         <Select onValueChange={onSelect} value={value} disabled={disabled}>
             {useInForm ? <FormControl>
-                <SelectTrigger tabIndex={0} disabled={disabled || readOnly} {...triggerProps}>
+                <SelectTrigger tabIndex={0} aria-readonly={readOnly} disabled={disabled || readOnly} {...triggerProps}>
                     <SelectValue placeholder={_("Type")} aria-readonly={readOnly} {...valueProps} />
                 </SelectTrigger>
             </FormControl> : <SelectTrigger tabIndex={0} {...triggerProps}>

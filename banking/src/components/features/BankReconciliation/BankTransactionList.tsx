@@ -231,7 +231,7 @@ const BankTransactionListView = () => {
 
     }, [data, search, amountFilter, typeFilter, status])
 
-    return <div className="space-y-4 py-2">
+    return <div className="space-y-2 py-2">
 
         <div className="flex gap-2 justify-between items-center">
             <Paragraph className="text-sm">
@@ -240,7 +240,7 @@ const BankTransactionListView = () => {
                 }} />
             </Paragraph>
 
-            <Button size='sm' variant='outline' asChild>
+            <Button size='md' variant='subtle' asChild>
                 <Link to="/statement-importer">
                     <ImportIcon />
                     {_("Import Bank Statement")}
@@ -364,7 +364,7 @@ const Filters = ({
         <div className="w-[25%]">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="min-w-32 w-full h-9 text-left justify-between">
+                    <Button variant="outline" size='md' className="min-w-32 w-full text-left justify-between">
                         <div className="flex gap-2 items-center">
                             {typeFilter === 'All' ? <DollarSign className="w-4 h-4 text-ink-gray-5" /> : typeFilter === 'Debits' ? <ArrowUpRight className="w-4 h-4 text-ink-red-3" /> : <ArrowDownRight className="w-4 h-4 text-ink-green-3" />}
                             {_(typeFilter)}
@@ -382,7 +382,7 @@ const Filters = ({
         <div className="w-[25%]">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="min-w-32 w-full h-9 text-left justify-between">
+                    <Button variant="outline" size='md' className="min-w-32 w-full text-left justify-between">
                         <div className="flex gap-2 items-center">
                             {status === 'All' ? <ListIcon className="w-4 h-4 text-ink-gray-5" /> :
                                 status === 'Reconciled' ? <CheckCircle2 className="w-4 h-4 text-ink-green-3" /> :

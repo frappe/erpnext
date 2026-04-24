@@ -32,7 +32,7 @@ const SelectedTransactionDetails = ({ transaction, showAccount = false, account 
     const currency = transaction.currency || getCompanyCurrency(transaction.company ?? '')
 
     return (
-        <Card className='rounded-md py-4'>
+        <Card className='py-4'>
             <CardContent className='px-4'>
                 <div className='flex flex-col gap-2'>
                     <div className='flex justify-between'>
