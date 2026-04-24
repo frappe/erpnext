@@ -367,58 +367,63 @@ class QualityInspection(Document):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page_len: int, filters: dict):
-	from frappe.desk.reportview import get_match_cond
+	reference_doctype = filters.get("reference_doctype")
 
-	from_doctype = cstr(filters.get("from"))
-	parent_doctype = cstr(filters.get("parent_doctype"))
-	if not from_doctype or not frappe.db.exists("DocType", from_doctype):
+	if not reference_doctype:
 		return []
-
-	mcond = get_match_cond(parent_doctype or from_doctype)
-	cond, qi_condition = "", "and (quality_inspection is null or quality_inspection = '')"
-
-	if filters.get("parent"):
-		if (
-			from_doctype in ["Purchase Invoice Item", "Purchase Receipt Item"]
-			and filters.get("inspection_type") != "In Process"
-		):
-			cond = """and item_code in (select name from `tabItem` where
-				inspection_required_before_purchase = 1)"""
-		elif (
-			from_doctype in ["Sales Invoice Item", "Delivery Note Item"]
-			and filters.get("inspection_type") != "In Process"
-		):
-			cond = """and item_code in (select name from `tabItem` where
-				inspection_required_before_delivery = 1)"""
-		elif from_doctype == "Stock Entry Detail":
-			cond = """and s_warehouse is null"""
-
-		if from_doctype in ["Supplier Quotation Item"]:
-			qi_condition = ""
-
-		return frappe.db.sql(
-			f"""
-				SELECT distinct item_code, item_name
-				FROM `tab{from_doctype}`
-				WHERE parent=%(parent)s and docstatus < 2 and item_code like %(txt)s
-				{qi_condition} {cond} {mcond}
-				ORDER BY item_code limit {cint(page_len)} offset {cint(start)}
-			""",
-			{"parent": filters.get("parent"), "txt": "%%%s%%" % txt},
+	elif reference_doctype == "Job Card":
+		production_item, item_name = frappe.get_value(
+			"Job Card", filters.get("reference_name"), ["production_item", "item_name"]
 		)
+		return ((production_item, item_name),)
+	else:
+		my_filters = [
+			["items.parent", "=", filters.get("reference_name")],
+			"and",
+			["items.item_code", "like", f"%{txt}%"],
+			"and",
+			["docstatus", "<", 2],
+			"and",
+			["items.quality_inspection", "is", "not set"],
+		]
 
-	elif filters.get("reference_name"):
-		return frappe.db.sql(
-			f"""
-				SELECT production_item
-				FROM `tab{from_doctype}`
-				WHERE name = %(reference_name)s and docstatus < 2 and production_item like %(txt)s
-				{qi_condition} {cond} {mcond}
-				ORDER BY production_item
-				limit {cint(page_len)} offset {cint(start)}
-			""",
-			{"reference_name": filters.get("reference_name"), "txt": "%%%s%%" % txt},
-		)
+		if reference_doctype == "Stock Entry":
+			my_filters.extend(
+				[
+					"and",
+					["items.t_warehouse", "is", "not set"],
+				]
+			)
+		elif filters.get("inspection_type") != "In Process":
+			my_filters.extend(
+				[
+					"and",
+					[
+						"items.item_code",
+						"in",
+						frappe.get_list(
+							"Item",
+							filters={
+								"inspection_required_before_purchase"
+								if filters.get("inspection_type") == "Incoming"
+								else "inspection_required_before_delivery": 1
+							},
+							pluck="name",
+						),
+					],
+				]
+			)
+
+		return frappe.get_query(
+			reference_doctype,
+			fields=["items.item_code, items.item_name"],
+			filters=my_filters,
+			offset=start,
+			limit=page_len,
+			order_by="items.item_code",
+			ignore_permissions=False,
+			distinct=True,
+		).run()
 
 
 @frappe.whitelist()
