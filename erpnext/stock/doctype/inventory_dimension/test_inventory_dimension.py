@@ -1,5 +1,6 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+import copy
 
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
@@ -544,6 +545,52 @@ class TestInventoryDimension(ERPNextTestSuite):
 		dn_doc.items[0].rack = "Rack 1"
 		dn_doc.save()
 		self.assertRaises(InventoryDimensionNegativeStockError, dn_doc.submit)
+
+	def test_inventory_dimension_after_save(self):
+		"""
+		The subcontracting controller resets the supplied items table on each save causing the inventory dimensions to be lost.
+		This test ensures that the inventory dimensions are retained on each save.
+		"""
+		from erpnext.controllers.tests.test_subcontracting_controller import set_backflush_based_on
+		from erpnext.subcontracting.doctype.subcontracting_receipt.test_subcontracting_receipt import (
+			get_rm_items,
+			get_subcontracting_order,
+			make_stock_in_entry,
+			make_stock_transfer_entry,
+			make_subcontracting_receipt,
+		)
+
+		inventory_dimension = create_inventory_dimension(
+			apply_to_all_doctypes=1,
+			dimension_name="Inv Site",
+			reference_document="Inv Site",
+			document_type="Inv Site",
+		)
+
+		inventory_dimension.reqd = 1
+		inventory_dimension.save()
+
+		set_backflush_based_on("BOM")
+
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].inv_site = "Site 1"
+		scr.save()
+
+		scr.supplied_items[0].inv_site = "Site 1"
+		scr.save()
+
+		self.assertEqual(scr.supplied_items[0].inv_site, "Site 1")
+
+		inventory_dimension.reqd = 0
+		inventory_dimension.save()
 
 
 def get_voucher_sl_entries(voucher_no, fields):
