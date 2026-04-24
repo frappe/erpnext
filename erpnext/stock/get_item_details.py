@@ -1405,13 +1405,12 @@ def get_item_tax_withholding_categories(item_codes: list | str, doctype: str) ->
 	Return a mapping of {item_code: tax_withholding_category} from the Item master.
 	"""
 	item_codes = frappe.parse_json(item_codes)
-	frappe.has_permission("Item", throw=True)
 	field = (
 		"sales_tax_withholding_category" if doctype in sales_doctypes else "purchase_tax_withholding_category"
 	)
 
 	return frappe._dict(
-		frappe.get_all(
+		frappe.get_list(
 			"Item",
 			filters={"name": ["in", item_codes]},
 			fields=["name", field],
