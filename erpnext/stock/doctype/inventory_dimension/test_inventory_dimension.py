@@ -234,6 +234,7 @@ class TestInventoryDimension(FrappeTestCase):
 			)
 		)
 
+		doc.load_from_db
 		doc.reqd = 0
 		doc.save()
 
