@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-19 09:48+0000\n"
-"PO-Revision-Date: 2026-04-19 15:06\n"
+"PO-Revision-Date: 2026-04-24 15:54\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Italian\n"
 "MIME-Version: 1.0\n"
@@ -18800,7 +18800,7 @@ msgstr ""
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:81
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:140
 msgid "Expenses"
-msgstr ""
+msgstr "Note spese"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
