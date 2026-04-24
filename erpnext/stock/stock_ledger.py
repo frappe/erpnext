@@ -955,6 +955,9 @@ class update_entries_after:
 		if not self.wh_data.qty_after_transaction:
 			self.wh_data.stock_value = 0.0
 
+		if sle.actual_qty < 0:
+			sle.incoming_rate = 0
+
 		stock_value_difference = self.wh_data.stock_value - self.wh_data.prev_stock_value
 		self.wh_data.prev_stock_value = self.wh_data.stock_value
 
