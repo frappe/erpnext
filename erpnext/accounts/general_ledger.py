@@ -35,7 +35,8 @@ def make_gl_entries(
 ):
 	if gl_map:
 		if (
-			not cint(frappe.get_single_value("Accounts Settings", "use_legacy_budget_controller"))
+			not cancel
+			and not cint(frappe.get_single_value("Accounts Settings", "use_legacy_budget_controller"))
 			and gl_map[0].voucher_type != "Period Closing Voucher"
 		):
 			bud_val = BudgetValidation(gl_map=gl_map)

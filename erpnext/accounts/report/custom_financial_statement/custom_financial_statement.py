@@ -3,6 +3,7 @@
 
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	FinancialReportEngine,
+	get_xlsx_styles,  #! DO NOT REMOVE - hook for styling
 )
 
 

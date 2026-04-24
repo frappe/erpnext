@@ -169,6 +169,13 @@ class InventoryDimension(Document):
 		if label_start_with:
 			label = f"{label_start_with} {self.dimension_name}"
 
+		mandatory_depends_on = self.mandatory_depends_on
+		if self.reqd:
+			if doctype == "Stock Entry Detail":
+				mandatory_depends_on = "eval:doc.s_warehouse"
+			elif doctype == "Subcontracting Receipt Supplied Item":
+				mandatory_depends_on = "eval:doc.reference_name"
+
 		dimension_fields = [
 			dict(
 				fieldname="inventory_dimension",
@@ -186,11 +193,11 @@ class InventoryDimension(Document):
 				depends_on="eval:doc.s_warehouse" if doctype == "Stock Entry Detail" else "",
 				search_index=1,
 				reqd=1
-				if self.reqd and not self.mandatory_depends_on and doctype != "Stock Entry Detail"
+				if self.reqd
+				and not self.mandatory_depends_on
+				and doctype not in ["Stock Entry Detail", "Subcontracting Receipt Supplied Item"]
 				else 0,
-				mandatory_depends_on="eval:doc.s_warehouse"
-				if self.reqd and doctype == "Stock Entry Detail"
-				else self.mandatory_depends_on,
+				mandatory_depends_on=mandatory_depends_on,
 			),
 		]
 

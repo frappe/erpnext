@@ -46,8 +46,8 @@ frappe.ui.form.on("Period Closing Voucher", {
 				function () {
 					frappe.route_options = {
 						voucher_no: frm.doc.name,
-						from_date: frm.doc.posting_date,
-						to_date: moment(frm.doc.modified).format("YYYY-MM-DD"),
+						from_date: frm.doc.period_start_date,
+						to_date: frm.doc.period_end_date,
 						company: frm.doc.company,
 						categorize_by: "",
 						show_cancelled_entries: frm.doc.docstatus === 2,
