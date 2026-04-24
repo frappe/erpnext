@@ -704,7 +704,9 @@ def get_item_tax_info(
 
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
-def get_item_tax_template(ctx: ItemDetailsCtx, item: Document | None = None, out: ItemDetails | None = None):
+def get_item_tax_template(
+	ctx: ItemDetailsCtx | str, item: Document | None = None, out: ItemDetails | None = None
+):
 	"""
 	Determines item_tax template from item or parent item groups.
 
