@@ -28,7 +28,7 @@ const inputVariants = cva(cn("flex w-full min-w-0 transition-all outline-none bo
   }
 )
 
-function Input({ className, type, inputSize = "md", variant = "outline", ...props }: React.ComponentProps<"input"> & VariantProps<typeof inputVariants>) {
+function Input({ className, type, inputSize = "md", variant = "subtle", ...props }: React.ComponentProps<"input"> & VariantProps<typeof inputVariants>) {
   return (
     <input
       type={type}

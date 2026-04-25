@@ -237,7 +237,7 @@ const JournalEntryAccountsTable = ({ item, bank }: { item: ActionLogItem, bank?:
                 <HoverCardTrigger>
                     <span className='text-sm cursor-pointer hover:underline underline-offset-4'>{_("Split across {} accounts", [accounts.length.toString()])}</span>
                 </HoverCardTrigger>
-                <HoverCardContent className='w-full' align='end'>
+                <HoverCardContent className='w-full p-2' align='end'>
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -283,7 +283,7 @@ const PaymentEntryDetails = ({ item, className }: { item: ActionLogItem, classNa
                     <span className='text-sm cursor-pointer hover:underline underline-offset-4'>{invoices.length === 0 ? _("No invoice linked") : invoices.length === 1 ? _("1 invoice") : _("{} invoices", [invoices.length.toString()])}</span>
                 </div>
             </HoverCardTrigger>
-            <HoverCardContent className='w-full' align='end'>
+            <HoverCardContent className='w-full p-2' align='end'>
                 <div className='flex flex-col gap-2'>
                     {invoices.map((invoice) => (
                         <Table>

@@ -69,11 +69,11 @@ const ClosingBalance = () => {
                 </StatLabel>
                 <HoverCard openDelay={100}>
                     <HoverCardTrigger>
-                        <Info size='14px' className="text-secondary-foreground/80" />
+                        <Info className="size-3.5 text-ink-gray-6 -mt-px" />
                     </HoverCardTrigger>
                     <HoverCardContent className="w-96" align="start" side="right">
                         <H4 className="text-base">{_("Closing balance as per system")}</H4>
-                        <Paragraph className="mt-2 text-sm">
+                        <Paragraph className="mt-2 text-p-sm">
                             {_("This is what the system expects the closing balance to be in your bank statement.")}
                             <br />
                             {_("It takes into account all the transactions that have been posted and subtracts the transactions that have not cleared yet.")}
@@ -184,7 +184,7 @@ const ClosingBalanceAsPerStatement = () => {
                         </TooltipContent>
                     </Tooltip>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="min-w-xl">
                     <ClosingBalanceForm
                         defaultBalance={data?.message?.balance ?? 0}
                         date={dates.toDate}

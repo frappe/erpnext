@@ -52,7 +52,7 @@ const selectVariants = cva(cn("flex w-fit items-center justify-between gap-2 min
 function SelectTrigger({
   className,
   inputSize = "md",
-  variant = "outline",
+  variant = "subtle",
   children,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & VariantProps<typeof selectVariants>) {

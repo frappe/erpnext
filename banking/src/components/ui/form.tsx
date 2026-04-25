@@ -78,7 +78,7 @@ function FormItem({ className, ...props }: React.ComponentProps<"div">) {
         <FormItemContext.Provider value={{ id }}>
             <div
                 data-slot="form-item"
-                className={cn("grid gap-2", className)}
+                className={cn("grid gap-1.5", className)}
                 {...props}
             />
         </FormItemContext.Provider>
@@ -95,10 +95,18 @@ function FormLabel({
         <Label
             data-slot="form-label"
             data-error={!!error}
-            className={cn("data-[error=true]:text-ink-red-3", className)}
+            className={className}
             htmlFor={formItemId}
             {...props}
         />
+    )
+}
+
+function FormRequiredIndicator({ className, ...props }: React.ComponentProps<"span">) {
+    return (
+        <span className={cn("text-ink-red-2", className)} {...props}>
+            *
+        </span>
     )
 }
 
@@ -127,7 +135,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
         <p
             data-slot="form-description"
             id={formDescriptionId}
-            className={cn("text-ink-gray-5 text-p-sm", className)}
+            className={cn("text-ink-gray-5 text-p-base", className)}
             {...props}
         />
     )
@@ -145,7 +153,7 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
         <p
             data-slot="form-message"
             id={formMessageId}
-            className={cn("text-ink-red-3 text-sm", className)}
+            className={cn("text-ink-red-4 text-p-base", className)}
             {...props}
         >
             {body}
@@ -162,4 +170,5 @@ export {
     FormDescription,
     FormMessage,
     FormField,
+    FormRequiredIndicator,
 }

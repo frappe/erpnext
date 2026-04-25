@@ -1,5 +1,5 @@
 import { FieldValues, RegisterOptions, useFormContext } from "react-hook-form"
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField } from "@/components/ui/form"
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, FormRequiredIndicator, useFormField } from "@/components/ui/form"
 import _ from "@/lib/translate"
 import { Input } from "./input"
 import { ComponentProps, FocusEventHandler, useCallback, useState } from "react"
@@ -47,7 +47,7 @@ export const DataField = ({ name, rules, label, isRequired, formDescription, inp
         rules={rules}
         render={({ field }) => (
             <FormItem className='flex flex-col'>
-                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-ink-red-3">*</span>}</FormLabel>
+                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <FormRequiredIndicator />}</FormLabel>
                 <FormControl>
                     <Input {...field} maxLength={140} aria-readonly={readOnly} readOnly={readOnly} {...inputProps} />
                 </FormControl>
@@ -73,7 +73,7 @@ export const SelectFormField = ({ name, rules, label, isRequired, formDescriptio
         rules={rules}
         render={({ field }) => (
             <FormItem>
-                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-ink-red-3">*</span>}</FormLabel>
+                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <FormRequiredIndicator />}</FormLabel>
                 <FormControl>
                     <Select onValueChange={field.onChange} value={field.value} disabled={disabled || readOnly} aria-readonly={readOnly}>
                         <FormControl>
@@ -112,7 +112,7 @@ export const DateField = ({ name, rules, label, isRequired, formDescription, inp
 
         return <div className="relative flex gap-2">
             <FormControl>
-                <Input className="bg-background pr-10"
+                <Input className="pr-10"
                     name={field.name}
                     onBlur={() => {
                         setValue(formatDate(field.value))
@@ -185,7 +185,7 @@ export const DateField = ({ name, rules, label, isRequired, formDescription, inp
         rules={rules}
         render={({ field }) => (
             <FormItem className='flex flex-col'>
-                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-ink-red-3">*</span>}</FormLabel>
+                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <FormRequiredIndicator />}</FormLabel>
                 <DatePicker field={field} />
                 {formDescription && <FormDescription>{formDescription}</FormDescription>}
                 <FormMessage />
@@ -209,7 +209,7 @@ export const SmallTextField = ({ name, rules, label, isRequired, formDescription
         rules={rules}
         render={({ field }) => (
             <FormItem className='flex flex-col'>
-                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-ink-red-3">*</span>}</FormLabel>
+                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <FormRequiredIndicator />}</FormLabel>
                 <FormControl>
                     <Textarea {...field} {...inputProps} readOnly={readOnly} aria-readonly={readOnly} />
                 </FormControl>
@@ -234,7 +234,7 @@ export const AccountFormField = (props: AccountFormFieldProps) => {
         rules={props.rules}
         render={({ field }) => (
             <FormItem className='flex flex-col'>
-                <FormLabel className={props.hideLabel ? 'sr-only' : ''}>{props.label}{props.isRequired && <span className="text-ink-red-3">*</span>}</FormLabel>
+                <FormLabel className={props.hideLabel ? 'sr-only' : ''}>{props.label}{props.isRequired && <FormRequiredIndicator />}</FormLabel>
                 <AccountsDropdown {...props} value={field.value} onChange={field.onChange} useInForm readOnly={props.readOnly} />
                 {props.formDescription && <FormDescription>{props.formDescription}</FormDescription>}
                 <FormMessage />
@@ -258,7 +258,7 @@ export const PartyTypeFormField = ({ name, rules, label, isRequired, formDescrip
         rules={rules}
         render={({ field }) => (
             <FormItem className='flex flex-col'>
-                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-ink-red-3">*</span>}</FormLabel>
+                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <FormRequiredIndicator />}</FormLabel>
                 <PartyTypeDropdown {...inputProps} value={field.value} onChange={field.onChange} useInForm readOnly={readOnly} />
                 {formDescription && <FormDescription>{formDescription}</FormDescription>}
                 <FormMessage />
@@ -343,7 +343,7 @@ export const CurrencyFormField = ({ name, rules, label, isRequired, formDescript
         rules={rules}
         render={({ field }) => (
             <FormItem className='flex flex-col'>
-                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-ink-red-3">*</span>}</FormLabel>
+                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <FormRequiredIndicator />}</FormLabel>
 
                 <FormControl>
                     <InputGroup>

@@ -400,9 +400,8 @@ const OptionsForMultipleTransactions = ({ transactions }: { transactions: Unreco
             <CardContent>
                 <SelectedTransactionsTable />
 
-                <CardAction className="mt-4">
+                <CardAction className="mt-4 justify-self-start">
                     <div className="flex gap-3 justify-center">
-
                         <TooltipProvider>
                             <div className="flex gap-4 justify-center">
                                 <Tooltip>
@@ -441,7 +440,7 @@ const OptionsForMultipleTransactions = ({ transactions }: { transactions: Unreco
                                     </TooltipContent>
                                 </Tooltip>
 
-                                <Tooltip >
+                                <Tooltip>
                                     <TooltipTrigger asChild>
                                         <Button
                                             variant='outline'

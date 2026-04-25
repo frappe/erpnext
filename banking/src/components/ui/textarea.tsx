@@ -24,7 +24,7 @@ const textareaVariants = cva("flex field-sizing-content w-full transition-all fo
   }
 )
 
-function Textarea({ inputSize = "md", variant = "outline", className, ...props }: React.ComponentProps<"textarea"> & VariantProps<typeof textareaVariants>) {
+function Textarea({ inputSize = "md", variant = "subtle", className, ...props }: React.ComponentProps<"textarea"> & VariantProps<typeof textareaVariants>) {
   return (
     <textarea
       data-slot="textarea"
