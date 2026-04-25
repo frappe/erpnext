@@ -279,9 +279,9 @@ const UnreconciledTransactionItem = ({ transaction }: { transaction: Unreconcile
         }
     }
 
-    return <div className="py-0.5">
-        <div className={cn("border rounded-md m-1 p-2 cursor-pointer transition-[color,box-shadow, bg] hover:bg-surface-gray-1",
-            isSelected ? "border-outline-gray-5 bg-surface-gray-1 outline-outline-gray-5 outline-1" : "border-outline-gray-2 outline-none"
+    return <div className="py-1">
+        <div className={cn("border outline rounded-md p-2 mx-0.5 cursor-pointer transition-[color,box-shadow, bg] hover:bg-surface-gray-1",
+            isSelected ? "bg-surface-gray-1 border-outline-gray-5 outline-outline-gray-5" : "border-outline-gray-2 outline-none"
         )}
             role='button'
             tabIndex={0}
@@ -289,7 +289,7 @@ const UnreconciledTransactionItem = ({ transaction }: { transaction: Unreconcile
             <div className="flex justify-between items-start w-full">
                 <div className="space-y-1">
                     <div className="flex items-center gap-1">
-                        <span className="font-semibold text-sm">{formatDate(transaction.date)}</span>
+                        <span className="font-medium text-sm">{formatDate(transaction.date)}</span>
                         {transaction.transaction_type &&
                             <Badge theme="blue">{transaction.transaction_type}</Badge>}
                         {transaction.reference_number && <Badge
@@ -306,9 +306,9 @@ const UnreconciledTransactionItem = ({ transaction }: { transaction: Unreconcile
                     <span className="text-sm">{transaction.description}</span>
                 </div>
                 <div className="gap-1 flex flex-col items-end min-w-36 h-full text-right">
-                    {isWithdrawal ? <ArrowUpRight className="w-6 h-6 text-ink-red-3" /> : <ArrowDownRight className="w-6 h-6 text-ink-green-3" />}
+                    {isWithdrawal ? <ArrowUpRight className="size-5 text-ink-red-3" /> : <ArrowDownRight className="size-5 text-ink-green-3" />}
                     {amount && amount > 0 && <span className="font-semibold font-numeric text-base">{formatCurrency(amount, currency)}</span>}
-                    {amount !== transaction.unallocated_amount && <span className="text-xs text-ink-gray-5">{formatCurrency(transaction.unallocated_amount, currency)}<br />{_("Unallocated")}</span>}
+                    {amount !== transaction.unallocated_amount && <span className="text-xs leading-normal text-ink-gray-5">{formatCurrency(transaction.unallocated_amount, currency)} {_("Unallocated")}</span>}
                 </div>
             </div>
         </div>
@@ -788,61 +788,52 @@ const VoucherItem = ({ voucher, index }: { voucher: LinkedPayment, index: number
     return <div className="py-1 px-1">
         <div
             className={cn("border outline overflow-hidden relative rounded-md p-2",
-                isSuggested ? "border-outline-amber-4 bg-surface-amber-1/50 outline-outline-amber-4" : "border-outline-gray-2 outline-transparent"
+                isSuggested ? "border-outline-green-4 bg-surface-green-1/40 outline-outline-green-4" : "border-outline-gray-2 outline-transparent"
             )}
         >
 
             <div className="flex justify-between items-end gap-2">
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                        <Badge size='lg' theme={isSuggested ? "orange" : "gray"}>{_(voucher.doctype)}</Badge>
+                        <Badge size='md'>{_(voucher.doctype)}</Badge>
                         <a target="_blank"
                             href={`/desk/${slug(voucher.doctype)}/${voucher.name}`}
-                            className="underline underline-offset-2 font-medium"
+                            className="underline underline-offset-2 text-base"
                         >{voucher.name}</a>
                     </div>
-                    {voucher.party && voucher.party_type && <div className="flex items-center gap-2">
+                    {voucher.party && voucher.party_type && <div className="flex items-center gap-1.5 text-base">
                         <User size='18px' />
                         <span>{_(voucher.party_type)}</span>
                         <a target="_blank"
                             href={`/desk/${slug(voucher.party_type)}/${voucher.party}`}
-                            className="underline underline-offset-2 font-medium"
+                            className="underline underline-offset-2"
                         >{voucher.party}</a>
                     </div>}
                     <TooltipProvider>
-                        <div className="flex items-center gap-1">
-                            <span>{_("Amount")}: <span className="font-bold font-numeric">{formatCurrency(voucher.paid_amount, voucher.currency)}</span></span>
-                            {amountMatches ?
-                                <MatchBadge matchType="full" label={_("Amount matches the selected transaction")} />
-                                :
-                                <MatchBadge matchType="none" label={_("Amount does not match the selected transaction")} />
-                            }
-                        </div>
-                        <div className="flex gap-2 h-6">
-
-                            <div className="flex items-center gap-1">
-                                <span>{_("Posted On")}: <span className="font-bold">{formatDate(voucher.posting_date)}</span></span>
-                                <MatchBadge
-                                    matchType={postingDateMatches ? "full" : "none"}
-                                    label={postingDateMatches ? _("Posting date matches the transaction date") : _("Posting date does not match the transaction date")}
-                                />
+                        <div className="flex items-start gap-8 py-0.5">
+                            <div className="flex flex-col gap-1 min-w-24">
+                                <div className="text-xs text-ink-gray-6">{_("Amount")}</div>
+                                <div className="text-base font-medium flex items-center gap-1">{formatCurrency(voucher.paid_amount, voucher.currency)} {amountMatches ? <MatchBadge matchType="full" label={_("Amount matches the selected transaction")} /> : <MatchBadge matchType="none" label={_("Amount does not match the selected transaction")} />}</div>
                             </div>
-                            {voucher.reference_date && <Separator orientation="vertical" className="h-4" />}
-                            {voucher.reference_date && <div className="flex items-center gap-1">
-                                <span>{_("Reference Date")}: <span className="font-bold">{formatDate(voucher.reference_date)}</span></span>
-                                <MatchBadge
-                                    matchType={referenceDateMatches ? "full" : "none"}
-                                    label={referenceDateMatches ? `${_("Reference date matches the transaction date")}` : `${_("Reference date does not match the transaction date")}`}
-                                />
+
+                            <div className="flex flex-col gap-1 min-w-24">
+                                <div className="text-xs text-ink-gray-6">{_("Posted On")}</div>
+                                <div className="text-base font-medium flex items-center gap-1">{formatDate(voucher.posting_date)} {postingDateMatches ? <MatchBadge matchType="full" label={_("Posting date matches the selected transaction")} /> : <MatchBadge matchType="none" label={_("Posting date does not match the selected transaction")} />}</div>
+                            </div>
+
+                            {voucher.reference_date && <div className="flex flex-col gap-1 min-w-24">
+                                <div className="text-xs text-ink-gray-6">{_("Reference Date")}</div>
+                                <div className="text-base font-medium flex items-center gap-1">{formatDate(voucher.reference_date)} {referenceDateMatches ? <MatchBadge matchType="full" label={_("Reference date matches the selected transaction")} /> : <MatchBadge matchType="none" label={_("Reference date does not match the selected transaction")} />}</div>
                             </div>}
+
                         </div>
                         {voucher.reference_no && <div className="flex items-start gap-1">
-                            <span className="font-medium">
+                            <span className="text-base">
                                 {voucher.reference_no}
                                 &nbsp;&nbsp;
                                 <Tooltip>
                                     <TooltipTrigger>
-                                        <Badge theme={referenceMatchesFull ? "green" : referenceMatchesPartial ? "orange" : "red"} variant={referenceMatchesFull || referenceMatchesPartial ? "solid" : "outline"}>
+                                        <Badge theme={referenceMatchesFull ? "green" : referenceMatchesPartial ? "orange" : "red"} variant={referenceMatchesFull || referenceMatchesPartial ? "subtle" : "outline"}>
                                             {referenceMatchesFull ? `${_("Complete Match")}` : referenceMatchesPartial ? `${_("Partial Match")}` : `${_("No Match")}`}</Badge>
                                     </TooltipTrigger>
                                     <TooltipContent side="top">
@@ -861,10 +852,11 @@ const VoucherItem = ({ voucher, index }: { voucher: LinkedPayment, index: number
                 </div>
             </div>
 
-            <div className="absolute top-0 right-0 flex items-center gap-1 justify-center">
-                {isSuggested && <span
-                    className="bg-outline-amber-4 uppercase font-medium text-white px-3 py-1 rounded-bl-md text-xs rounded-tr-sm">{_("Suggested")}</span>}
-            </div>
+            {isSuggested && <div className="absolute top-1.5 right-2 flex items-center gap-1 justify-center">
+                <Badge theme="green" variant="subtle" size='md'>{_("Suggested")}</Badge>
+                {/* {isSuggested && <span
+                    className="bg-outline-amber-4 uppercase font-medium text-white px-3 py-1 rounded-bl-md text-xs rounded-tr-sm">{_("Suggested")}</span>} */}
+            </div>}
 
         </div>
     </div>
@@ -874,7 +866,7 @@ const VoucherItem = ({ voucher, index }: { voucher: LinkedPayment, index: number
 const MatchBadge = ({ matchType, label }: { matchType: 'full' | 'partial' | 'none', label: string }) => {
     return <Tooltip>
         <TooltipTrigger>
-            {matchType === 'full' ? <BadgeCheck className="text-white fill-surface-green-5" /> : matchType === 'partial' ?
+            {matchType === 'full' ? <BadgeCheck className="text-white fill-surface-green-5 size-4" /> : matchType === 'partial' ?
                 <Badge theme="orange" variant="subtle">{_("Partial Match")}</Badge> :
                 <XCircle className="text-ink-red-4 size-4" />}
         </TooltipTrigger>
