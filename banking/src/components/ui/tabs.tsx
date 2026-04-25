@@ -145,10 +145,6 @@ function TabsTrigger({
         // Variant: underline - vertical - active - border applied
         "group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:border-r group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:border-r-transparent group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:data-[state=active]:border-r-ink-gray-8 group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:-right-px",
 
-        // "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring focus-visible:ring-[3px] focus-visible:outline-1 group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none",
-        // "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent",
-        // "data-[state=active]:bg-background data-[state=active]:text-foreground",
-        // "after:bg-foreground after:absolute after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100",
         className
       )}
       {...props}
