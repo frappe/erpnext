@@ -144,12 +144,12 @@ const BankRecDateFilter = () => {
                 </Button>
             </PopoverTrigger>
 
-            <PopoverContent className="w-84 p-0" align='start'>
+            <PopoverContent className="w-84 p-1" align='start'>
                 <Command>
 
                     <CommandInput placeholder="e.g. Last 3 weeks" onValueChange={setValue} value={value} />
                     <CommandList className='max-h-fit'>
-                        <CommandEmpty className='text-left p-2 hover:bg-muted'>
+                        <CommandEmpty className='text-left p-2 hover:bg-surface-gray-1'>
                             <EmptyState onSelect={handleTimePeriodChange} value={value} />
                         </CommandEmpty>
                         {timePeriodOptions.map((period) => (
@@ -157,7 +157,7 @@ const BankRecDateFilter = () => {
                                 <span>
                                     {period.translatedLabel ?? _(period.label)}
                                 </span>
-                                <span className='text-xs text-ink-gray-5 flex items-center gap-1 text-right whitespace-nowrap font-numeric'>
+                                <span className='text-xs text-ink-gray-5 flex items-center gap-1 text-right whitespace-nowrap'>
                                     {formatDate(period.fromDate, period.format)} <ChevronRight className='text-[12px] text-ink-gray-5/70' /> {formatDate(period.toDate, period.format)}
                                 </span>
                             </CommandItem>
@@ -255,11 +255,11 @@ const EmptyState = ({ onSelect, value }: { onSelect: (fromDate: string, toDate: 
                 <span className='text-sm text-ink-gray-5 max-w-[30%]'>
                     {value}
                 </span>
-                {isEqual ? <span className='text-xs text-ink-gray-5 font-numeric text-balance flex items-center gap-1'>
+                {isEqual ? <span className='text-xs text-ink-gray-5 text-balance flex items-center gap-1'>
                     {formatDate(dates.fromDate, 'Do MMM YYYY')}
                 </span> :
-                    <span className='text-xs text-ink-gray-5 font-numeric flex items-center gap-1'>
-                        {formatDate(dates.fromDate, 'Do MMM YY')} <ChevronRight size='16' className='text-ink-gray-5/70' /> {formatDate(dates.toDate, 'Do MMM YY')}
+                    <span className='text-xs text-ink-gray-5 flex items-center gap-1'>
+                        {formatDate(dates.fromDate, 'Do MMM YY')} <ChevronRight size='16' className='text-ink-gray-5' /> {formatDate(dates.toDate, 'Do MMM YY')}
                     </span>}
             </div> :
             <span className='text-sm text-ink-gray-5'>
