@@ -6,7 +6,7 @@ import { canCreateDocument } from "@/lib/permissions";
 import { useDebounceValue } from "usehooks-ts";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { FormControl } from "../ui/form";
-import { ChevronsUpDownIcon, ExternalLink } from "lucide-react";
+import { ChevronDownIcon, ExternalLink } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
@@ -99,7 +99,8 @@ export interface LinkFieldComboboxProps {
     /** If true, the component will be wrapped in a FormControl component */
     useInForm?: boolean,
     /** Button Class name */
-    buttonClassName?: string
+    buttonClassName?: string,
+    size?: 'sm' | 'md' | 'lg',
 }
 const LinkFieldCombobox = ({
     doctype,
@@ -116,7 +117,8 @@ const LinkFieldCombobox = ({
     searchAPIPath = "frappe.desk.search.search_link",
     limit,
     useInForm,
-    buttonClassName
+    buttonClassName,
+    size = 'md'
 }: LinkFieldComboboxProps) => {
 
     const pageLimit = useMemo(() => limit || getSystemDefault('link_field_results_limit') || 20, [limit])
@@ -213,43 +215,48 @@ const LinkFieldCombobox = ({
 
     const items = filterFn ? data?.message?.slice(0, 50).filter((item) => filterFn(item, searchInput)) : data?.message
 
+    const buttonProps = {
+        variant: "subtle",
+        type: 'button',
+        size: size,
+        role: "combobox",
+        "data-state": open ? "open" : "closed",
+        ref: buttonRef,
+        tabIndex: 0,
+        disabled: disabled || readOnly,
+        ariaExpanded: open,
+        ariaReadonly: readOnly,
+        className: cn("w-full justify-between font-normal group border border-transparent outline-none",
+            "data-[state=open]:bg-surface-white data-[state=open]:border-outline-gray-4 data-[state=open]:shadow-sm",
+            readOnly ? "bg-muted" : "",
+            // Placeholder and value styling
+            linkTitle ? "text-ink-gray-7" : "text-ink-gray-4",
+            buttonClassName)
+    } as const
+
     return (
         <Popover open={open} onOpenChange={onOpenChange} modal={true}>
             <PopoverTrigger asChild>
                 {useInForm ? <FormControl>
-                    <Button
-                        variant="outline"
-                        role="combobox"
-                        ref={buttonRef}
-                        tabIndex={0}
-                        disabled={disabled || readOnly}
-                        aria-expanded={open}
-                        aria-readonly={readOnly}
-                        className={cn("w-full justify-between font-normal group",
-                            readOnly ? "bg-muted" : ""
-                            , buttonClassName)}>
+                    <Button {...buttonProps}>
                         {linkTitle || placeholder}
 
                         <div className="flex items-center gap-1">
                             {value && <a href={`/desk/${slug(doctype)}/${value}`} target="_blank" className="group-hover:block hidden">
-                                <ExternalLink className="h-4 w-4 shrink-0 opacity-50" />
+                                <ExternalLink className="size-4 shrink-0 opacity-50" />
                             </a>}
-                            <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            <ChevronDownIcon className="ml-2 size-4 shrink-0" />
                         </div>
                     </Button>
                 </FormControl>
-                    : <Button
-                        variant="outline"
-                        role="combobox"
-                        ref={buttonRef}
-                        disabled={disabled}
-                        aria-expanded={open}
-                        className={cn("w-full justify-between font-normal",
-                            readOnly ? "bg-muted" : ""
-                            , buttonClassName)}>
-                        {value || placeholder}
-
-                        <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    : <Button {...buttonProps}>
+                        {linkTitle || placeholder}
+                        <div className="flex items-center gap-1">
+                            {value && <a href={`/desk/${slug(doctype)}/${value}`} target="_blank" className="group-hover:block hidden">
+                                <ExternalLink className="size-4 shrink-0 opacity-50" />
+                            </a>}
+                            <ChevronDownIcon className="ml-2 size-4 shrink-0" />
+                        </div>
                     </Button>}
             </PopoverTrigger>
             <PopoverContent className="p-0" style={{ minWidth: width }} align="start">

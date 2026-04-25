@@ -373,7 +373,7 @@ export const LinkFormField = ({ name, rules, label, isRequired, formDescription,
         rules={rules}
         render={({ field }) => (
             <FormItem className='flex flex-col'>
-                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <span className="text-ink-red-3">*</span>}</FormLabel>
+                <FormLabel className={hideLabel ? 'sr-only' : ''}>{label}{isRequired && <FormRequiredIndicator />}</FormLabel>
                 <LinkFieldCombobox {...inputProps} value={field.value} onChange={field.onChange} useInForm disabled={disabled} readOnly={readOnly} />
                 {formDescription && <FormDescription>{formDescription}</FormDescription>}
                 <FormMessage />
