@@ -33,16 +33,20 @@ const CompanySelector = ({ onChange }: { onChange?: (company: string) => void })
 
     const handleSelectCompany = (company: string) => {
         setSelectedCompany(company)
-        setSelectedBankAccount(null)
         setSearchQuery("")
         setOpen(false)
-        onChange?.(company)
+        // Only reset bank account if the company is changed
+        if (selectedCompany !== company) {
+            setSelectedBankAccount(null)
+            onChange?.(company)
+        }
     }
 
     return (<Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
             <Button
                 variant="outline"
+                type='button'
                 role="combobox"
                 size='md'
                 aria-expanded={open}
@@ -52,11 +56,11 @@ const CompanySelector = ({ onChange }: { onChange?: (company: string) => void })
                     <Building2 />
                     {selectedCompany}
                 </div>
-                <ChevronDown className="opacity-50" />
+                <ChevronDown className="text-ink-gray-4" />
             </Button>
         </PopoverTrigger>
         <PopoverContent className="min-w-56 w-fit p-0">
-            <Command>
+            <Command value={selectedCompany}>
                 {options.length > 5 && <CommandInput placeholder={_("Search company...")} className="h-9" />}
                 <CommandList>
                     <CommandEmpty>{_("No company found.")}</CommandEmpty>

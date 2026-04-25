@@ -28,7 +28,7 @@ const BankStatementImporter = () => {
 
     const selectedCompany = useCurrentCompany()
 
-    const [selectedBankAccount, setSelectedBankAccount] = useAtom(selectedBankAccountAtom)
+    const [selectedBankAccount] = useAtom(selectedBankAccountAtom)
 
     const [files, setFiles] = useState<File[]>([])
 
@@ -90,7 +90,7 @@ const BankStatementImporter = () => {
                             <div className="flex flex-col gap-2">
                                 <Label>{_("Company")}<span className="text-ink-red-3">*</span></Label>
                                 <div className="min-w-56 w-fit flex flex-col">
-                                    <CompanySelector onChange={() => setSelectedBankAccount(null)} />
+                                    <CompanySelector />
                                 </div>
                             </div>
                             {selectedCompany && <div className="flex flex-col gap-2">
@@ -256,7 +256,7 @@ const StatementImportLog = () => {
                 </Table>)
                 : <Empty>
                     <EmptyHeader>
-                        <EmptyMedia variant="icon">
+                        <EmptyMedia>
                             <ListIcon />
                         </EmptyMedia>
                         <EmptyTitle>{_("No bank statements imported yet")}</EmptyTitle>
