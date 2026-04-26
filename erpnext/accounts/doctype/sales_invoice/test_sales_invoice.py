@@ -566,6 +566,43 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(si.taxes[1].tax_amount, 226.25)
 		self.assertEqual(si.grand_total, 50000.55)
 
+	def test_inclusive_tax_with_decimal_value_on_previous_row_amount_non_inclusive(self):
+		"""Non-inclusive previous-row tax should be added after inclusive tax extraction."""
+		si = create_sales_invoice(qty=1, rate=10000.04, do_not_save=True)
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Tax 10%",
+				"rate": 10,
+				"included_in_print_rate": 1,
+			},
+		)
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Previous Row Amount",
+				"account_head": "_Test Account Education Cess - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Cess 5% on Tax 10%",
+				"rate": 5,
+				"row_id": 1,
+				"included_in_print_rate": 0,
+			},
+		)
+		si.insert()
+
+		# Only the first tax is inclusive:
+		# 10,000.04 / 1.10 = 9,090.94545... → net rounds to 9,090.95
+		# Inclusive tax = 909.09, restoring the original gross of 10,000.04
+		# The non-inclusive previous-row tax is added afterward: 5% of 909.09 = 45.45
+		self.assertEqual(si.items[0].net_amount, 9090.95)
+		self.assertEqual(si.taxes[0].tax_amount, 909.09)
+		self.assertEqual(si.taxes[1].tax_amount, 45.45)
+		self.assertEqual(si.grand_total, 10045.49)
+
 	def test_inclusive_tax_with_decimal_value_on_previous_row_total(self):
 		"""Inclusive tax with decimal value and On Previous Row Total must not double-round net amount."""
 		si = create_sales_invoice(qty=1, rate=50000.55, do_not_save=True)
