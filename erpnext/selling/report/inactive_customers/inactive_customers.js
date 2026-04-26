@@ -4,6 +4,12 @@
 frappe.query_reports["Inactive Customers"] = {
 	filters: [
 		{
+			fieldname: "company",
+			label: __("Company"),
+			fieldtype: "Link",
+			options: "Company",
+		},
+		{
 			fieldname: "days_since_last_order",
 			label: __("Days Since Last Order"),
 			fieldtype: "Int",

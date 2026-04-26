@@ -4,81 +4,171 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case, DocType, Order
+from frappe.query_builder import functions as fn
+from frappe.query_builder.utils import QueryBuilder
 from frappe.utils import cint
+from pypika.terms import Term
+
+from erpnext import get_company_currency
 
 
 def execute(filters=None):
 	if not filters:
 		filters = {}
 
-	days_since_last_order = filters.get("days_since_last_order")
-	doctype = filters.get("doctype")
-
-	if cint(days_since_last_order) <= 0:
-		frappe.throw(_("'Days Since Last Order' must be greater than or equal to zero"))
-
-	columns = get_columns()
-	customers = get_sales_details(doctype)
-
-	data = []
-	for cust in customers:
-		if cint(cust[8]) >= cint(days_since_last_order):
-			cust.insert(7, get_last_sales_amt(cust[0], doctype))
-			data.append(cust)
-	return columns, data
+	return InactiveCustomersReport(filters).run()
 
 
-def get_sales_details(doctype):
-	cond = """sum(so.base_net_total) as 'total_order_considered',
-			max(so.posting_date) as 'last_order_date',
-			DATEDIFF(CURRENT_DATE, max(so.posting_date)) as 'days_since_last_order' """
-	if doctype == "Sales Order":
-		cond = """sum(if(so.status = "Stopped",
-				so.base_net_total * so.per_delivered/100,
-				so.base_net_total)) as 'total_order_considered',
-			max(so.transaction_date) as 'last_order_date',
-			DATEDIFF(CURRENT_DATE, max(so.transaction_date)) as 'days_since_last_order'"""
+class InactiveCustomersReport:
+	filters: dict
+	query: QueryBuilder
+	data: list
+	columns: list
+	date_field: str
 
-	return frappe.db.sql(
-		f"""select
-			cust.name,
-			cust.customer_name,
-			cust.territory,
-			cust.customer_group,
-			count(distinct(so.name)) as 'num_of_order',
-			sum(base_net_total) as 'total_order_value', {cond}
-		from `tabCustomer` cust, `tab{doctype}` so
-		where cust.name = so.customer and so.docstatus = 1
-		group by cust.name
-		order by 'days_since_last_order' desc """,
-		as_list=1,
-	)
+	def __init__(self, filters):
+		self.filters = filters
+		self.columns = []
 
+	def run(self):
+		self.validate_filters()
+		self.prepare_columns()
+		self.get_data()
 
-def get_last_sales_amt(customer, doctype):
-	cond = "posting_date"
-	if doctype == "Sales Order":
-		cond = "transaction_date"
-	res = frappe.db.sql(
-		f"""select base_net_total from `tab{doctype}`
-		where customer = %s and docstatus = 1 order by {cond} desc
-		limit 1""",
-		customer,
-	)
+		return self.columns, self.data
 
-	return res and res[0][0] or 0
+	def validate_filters(self):
+		# Mandatory filters.
+		filters = {"days_since_last_order": _("Days Since Last Order"), "doctype": _("DocType")}
+		for fieldname, label in filters.items():
+			if not self.filters.get(fieldname):
+				frappe.throw(_("{0} is a required filter.").format(frappe.bold(label)))
 
+			if fieldname == "days_since_last_order" and cint(self.filters.get(fieldname)) < 0:
+				frappe.throw(_("{0} must be greater than zero.").format(frappe.bold(label)))
 
-def get_columns():
-	return [
-		_("Customer") + ":Link/Customer:120",
-		_("Customer Name") + ":Data:120",
-		_("Territory") + "::120",
-		_("Customer Group") + "::120",
-		_("Number of Order") + "::120",
-		_("Total Order Value") + ":Currency:120",
-		_("Total Order Considered") + ":Currency:160",
-		_("Last Order Amount") + ":Currency:160",
-		_("Last Order Date") + ":Date:160",
-		_("Days Since Last Order") + "::160",
-	]
+			if fieldname == "doctype" and self.filters.get(fieldname) not in ["Sales Invoice", "Sales Order"]:
+				frappe.throw(_("{0} can be either Sales Invoice or Sales Order.").format(label))
+
+	def prepare_columns(self):
+		self.make_column(_("Customer"), "customer", "Link", options="Customer", width=200)
+
+		if frappe.get_single_value("Selling Settings", "cust_master_name") != "Customer Name":
+			self.make_column(_("Customer Name"), "customer_name", width=200)
+
+		self.make_column(_("Company"), "company", "Link", options="Company", width=200)
+
+		self.make_column(_("Territory"), "territory", "Link", options="Territory")
+
+		self.make_column(_("Customer Group"), "customer_group", "Link", options="Customer Group")
+
+		self.make_column(_("Number of Order"), "num_of_order", "Int")
+
+		self.make_column(_("Currency"), "currency", "Link", options="Currency", hidden=1)
+
+		self.make_column(_("Total Order Value"), "total_order_value", "Currency", 120, "currency")
+
+		self.make_column(_("Total Order Considered"), "total_order_considered", "Currency", 120, "currency")
+
+		self.make_column(
+			_("Last Order"), "last_order", "Link", options=self.filters.get("doctype"), width=200
+		)
+
+		self.make_column(_("Last Order Amount"), "last_order_amount", "Currency", 160, "currency")
+
+		self.make_column(_("Last Order Date"), "last_order_date", "Date")
+
+		self.make_column(_("Days Since Last Order"), "days_since_last_order", "Int")
+
+	def make_column(
+		self,
+		label: str,
+		fieldname: str,
+		fieldtype: str = "Data",
+		width: int = 140,
+		options: str = "",
+		hidden: int = 0,
+	):
+		self.columns.append(
+			dict(
+				label=label,
+				fieldname=fieldname,
+				fieldtype=fieldtype,
+				options=options,
+				width=width,
+				hidden=hidden,
+			)
+		)
+
+	def get_data(self):
+		self._build_query_and_get_data()
+		self._insert_last_sales_amt_and_company_currency()
+
+	def _build_query_and_get_data(self):
+		Customer = DocType("Customer")
+		SalesDocType = DocType(self.filters.get("doctype"))
+
+		self.date_field = (
+			"posting_date" if self.filters.get("doctype") == "Sales Invoice" else "transaction_date"
+		)
+
+		days_since_last_order = fn.CurDate() - fn.Max(fn.Field(self.date_field, table=SalesDocType))
+
+		sum_terms = SalesDocType.base_net_total
+		if self.filters.get("doctype") == "Sales Order":
+			sum_terms = (
+				Case()
+				.when(
+					SalesDocType.status == "Stopped",
+					SalesDocType.base_net_total * SalesDocType.per_delivered / 100,
+				)
+				.else_(sum_terms)
+			)
+
+		self.query = (
+			frappe.qb.from_(Customer)
+			.join(SalesDocType)
+			.on((Customer.name == SalesDocType.customer) & (SalesDocType.docstatus == 1))
+			.select(
+				Customer.name.as_("customer"),
+				Customer.customer_name,
+				Customer.territory,
+				Customer.customer_group,
+				SalesDocType.company,
+				fn.Count(SalesDocType.name, "num_of_order"),
+				fn.Sum(SalesDocType.base_net_total, "total_order_value"),
+				fn.Sum(sum_terms, "total_order_considered"),
+				fn.Max(fn.Field(self.date_field, table=SalesDocType), "last_order_date"),
+				days_since_last_order.as_("days_since_last_order"),
+			)
+			.groupby(Customer.name, SalesDocType.company)
+			.having(days_since_last_order >= self.filters.get("days_since_last_order"))
+			.orderby(Term("days_since_last_order"), order=Order.desc)
+		)
+
+		if self.filters.get("company"):
+			self.query = self.query.where(SalesDocType.company == self.filters.get("company"))
+
+		self.data = self.query.run(as_dict=1)
+
+	def _insert_last_sales_amt_and_company_currency(self):
+		for d in self.data:
+			d.update({"currency": get_company_currency(d.get("company"))})
+			d.update(self._get_last_sales_details(d.get("customer")))
+
+	def _get_last_sales_details(self, customer):
+		filters = {"customer": customer, "docstatus": 1}
+
+		if self.filters.get("doctype") == "Sales Invoice":
+			filters.update({"is_return": 0})
+
+		last_sales_amount = frappe.get_all(
+			self.filters.get("doctype"),
+			fields=["name as last_order", "base_net_total as last_order_amount"],
+			filters=filters,
+			order_by=f"{self.date_field} desc",
+			limit=1,
+		)
+
+		return last_sales_amount[0] if last_sales_amount else {}
