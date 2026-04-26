@@ -40,6 +40,28 @@
   "section_break_11",
   "brand",
   "description",
+  "accounting",
+  "section_break_wfkx",
+  "item_defaults",
+  "deferred_accounting_section",
+  "enable_deferred_expense",
+  "no_of_months_exp",
+  "column_break_9s9o",
+  "enable_deferred_revenue",
+  "no_of_months",
+  "uom_tab",
+  "unit_of_measure_conversion",
+  "uom_conversion_details_column",
+  "uom_help_html",
+  "uoms",
+  "item_tax_section_break",
+  "section_break_oilf",
+  "column_break_aytr",
+  "taxes",
+  "section_break_fxqz",
+  "purchase_tax_withholding_category",
+  "column_break_ltlb",
+  "sales_tax_withholding_category",
   "inventory_section",
   "stock_levels_section",
   "stock_levels_html",
@@ -74,33 +96,8 @@
   "variant_of",
   "variant_based_on",
   "attributes",
-  "uom_tab",
-  "units_of_measure_section",
-  "purchase_uom",
-  "sales_uom",
-  "column_break_wdwi",
-  "unit_of_measure_conversion",
-  "uom_conversion_details_column",
-  "uom_help_html",
-  "uoms",
-  "accounting",
-  "deferred_accounting_section",
-  "enable_deferred_expense",
-  "no_of_months_exp",
-  "column_break_9s9o",
-  "enable_deferred_revenue",
-  "no_of_months",
-  "section_break_wfkx",
-  "item_defaults",
-  "item_tax_section_break",
-  "section_break_oilf",
-  "column_break_aytr",
-  "taxes",
-  "section_break_fxqz",
-  "purchase_tax_withholding_category",
-  "column_break_ltlb",
-  "sales_tax_withholding_category",
   "purchasing_tab",
+  "purchase_uom",
   "min_order_qty",
   "safety_stock",
   "purchase_details_cb",
@@ -117,6 +114,7 @@
   "column_break_59",
   "customs_tariff_number",
   "sales_details",
+  "sales_uom",
   "grant_commission",
   "column_break3",
   "max_discount",
@@ -254,6 +252,7 @@
   {
    "bold": 1,
    "depends_on": "eval:(doc.__islocal&&doc.is_stock_item && !doc.has_serial_no && !doc.has_batch_no)",
+   "description": "Used to create an opening Stock Entry with the Valuation Rate when the item is saved",
    "fieldname": "opening_stock",
    "fieldtype": "Float",
    "label": "Opening Stock"
@@ -267,6 +266,7 @@
   {
    "bold": 1,
    "depends_on": "eval:doc.__islocal && doc.is_sales_item",
+   "description": "Used to create an Item Price with the selling rate when the item is saved",
    "fieldname": "standard_rate",
    "fieldtype": "Currency",
    "label": "Standard Selling Rate"
@@ -621,7 +621,7 @@
   },
   {
    "default": "0",
-   "description": "Enable if this item is provided by a customer and received via Stock Entry. Customer field becomes mandatory.",
+   "description": "Enable if this item is provided by a customer and received via Stock Entry.",
    "fieldname": "is_customer_provided_item",
    "fieldtype": "Check",
    "label": "Is Customer Provided Item"
@@ -882,7 +882,7 @@
   },
   {
    "default": "1",
-   "description": "If disabled, sales from this item will be excluded from Sales Person and Sales Partner commission calculations.",
+   "description": "If enabled, sales from this item will be included in Sales Person and Sales Partner commission calculations",
    "fieldname": "grant_commission",
    "fieldtype": "Check",
    "label": "Grant Commission",
@@ -1025,7 +1025,7 @@
    "fieldname": "stock_levels_html",
    "fieldtype": "HTML",
    "label": "Stock Levels HTML",
-   "options": "<div id='stock-levels-placeholder'></div>"
+   "options": "<div id=\"stock-levels-placeholder\"></div>"
   },
   {
    "fieldname": "section_break_wfkx",
@@ -1041,18 +1041,10 @@
    "label": "UOM"
   },
   {
-   "fieldname": "column_break_wdwi",
-   "fieldtype": "Column Break"
-  },
-  {
+   "depends_on": "eval: !doc.__islocal && doc.is_stock_item",
    "fieldname": "stock_levels_section",
    "fieldtype": "Section Break",
    "label": "Stock Levels"
-  },
-  {
-   "fieldname": "units_of_measure_section",
-   "fieldtype": "Section Break",
-   "label": "Units of Measure"
   },
   {
    "fieldname": "uom_conversion_details_column",
@@ -1062,7 +1054,7 @@
   {
    "fieldname": "uom_help_html",
    "fieldtype": "HTML",
-   "options": "<div style='margin-bottom:10px; color: var(--text-muted);'>Define alternate units for this item. Eg: 1 Box = 12 Nos, set conversion factor as 12. (Will also apply for variants) <a href='https://docs.frappe.io/erpnext/uom' target='_blank'>Learn more \u2192</a></div>"
+   "options": "<div style=\"margin-bottom:10px; color: var(--gray-500) !important;\">Define alternate units for this item. Eg: 1 Box = 12 Nos, set conversion factor as 12. (Will also apply for variants) <a href=\"https://docs.frappe.io/erpnext/uom\" target=\"_blank\">Learn more &#8594;</a></div>"
   }
  ],
  "icon": "fa fa-tag",
@@ -1070,7 +1062,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-04-23 02:19:06.451024",
+ "modified": "2026-04-27 02:15:02.064950",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
