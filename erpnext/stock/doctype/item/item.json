@@ -743,7 +743,8 @@
   {
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "customer_details",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Customer Details"
   },
   {
    "fieldname": "customer_items",
@@ -1062,7 +1063,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-04-27 02:15:02.064950",
+ "modified": "2026-04-27 16:03:38.940472",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
