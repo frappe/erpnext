@@ -730,7 +730,7 @@ frappe.ui.form.on("Production Plan", {
 
 	delete_job_cards(frm) {
 		frappe.db.get_list("Production Line", {
-			filters: { is_group: 0, is_active: 1 },
+			filters: { is_group: 0, is_active: 1, parent_line: 'L2' },
 			fields: ["name", "line_name"]
 		}).then(data => {
 			let fields = [
@@ -794,8 +794,7 @@ frappe.ui.form.on("Production Plan", {
 				__("Delete")
 			);
 
-			// ✅ Toggle visibility based on "Delete All"
-			d.fields_dict.delete_all_job_cards.df.onchange = () => {
+			let toggle_fields = () => {
 				let delete_all = d.get_value("delete_all_job_cards");
 
 				if (delete_all) {
@@ -806,6 +805,9 @@ frappe.ui.form.on("Production Plan", {
 				d.set_df_property("production_line", "hidden", delete_all ? 1 : 0);
 				d.set_df_property("item_name", "hidden", delete_all ? 1 : 0);
 			};
+
+			d.fields_dict.delete_all_job_cards.df.onchange = toggle_fields;
+			toggle_fields();
 
 			// ✅ Update Item Name options when Production Line changes
 			d.fields_dict.production_line.df.onchange = () => {
