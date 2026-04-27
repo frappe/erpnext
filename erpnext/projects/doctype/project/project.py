@@ -362,11 +362,15 @@ class Project(Document):
 
 		for user in self.users:
 			if user.welcome_email_sent == 0:
-				# check if the linked User is enabled
-				if frappe.db.get_value("User", user.user, "enabled"):
-					# send project collaboration invitation email
+		for user in self.users:
+			if user.welcome_email_sent == 0:
+				# fetch enabled flag and canonical email in one query
+				user_info = frappe.db.get_value(
+					"User", user.user, ["enabled", "email"], as_dict=True
+				)
+				if user_info and user_info.enabled and user_info.email:
 					frappe.sendmail(
-						user.email,
+						recipients=[user_info.email],
 						subject=_("Project Collaboration Invitation"),
 						content=content,
 					)
