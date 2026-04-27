@@ -411,8 +411,15 @@ def repost(doc):
 			message = message.get("message")
 
 		status = "Failed"
-		# If failed because of timeout, set status to In Progress
-		if traceback and ("timeout" in traceback.lower() or "Deadlock found" in traceback):
+		# If failed because of a recoverable error (timeout, deadlock), set status to In Progress
+		# so the scheduler automatically retries instead of leaving it permanently failed.
+		# NOTE: isinstance check comes first because the traceback string matching is unreliable
+		# when SIGALRM kills the process mid-C-extension (JobTimeoutException may not appear
+		# in the traceback if the exception handler itself was interrupted).
+		traceback_lower = traceback.lower() if traceback else ""
+		if isinstance(e, RecoverableErrors) or (
+			traceback_lower and ("timeout" in traceback_lower or "deadlock found" in traceback_lower)
+		):
 			status = "In Progress"
 
 		if traceback:
