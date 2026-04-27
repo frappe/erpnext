@@ -119,7 +119,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:parent.doctype !== \"Sales Order\"",
+   "depends_on": "eval:!['Sales Order', 'Quotation'].includes(parent.doctype)",
    "fieldname": "section_break_9",
    "fieldtype": "Section Break"
   },
@@ -286,7 +286,7 @@
    "label": "Use Serial No / Batch Fields"
   },
   {
-   "depends_on": "eval:doc.use_serial_batch_fields === 1 && parent.doctype !== \"Sales Order\"",
+   "depends_on": "eval:doc.use_serial_batch_fields === 1 && !['Sales Order', 'Quotation'].includes(parent.doctype)",
    "fieldname": "section_break_bgys",
    "fieldtype": "Section Break"
   },
@@ -315,7 +315,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-27 13:00:22.949296",
+ "modified": "2026-04-27 14:12:53.236906",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packed Item",
