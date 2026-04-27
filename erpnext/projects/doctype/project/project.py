@@ -362,12 +362,15 @@ class Project(Document):
 
 		for user in self.users:
 			if user.welcome_email_sent == 0:
-				frappe.sendmail(
-					user.user,
-					subject=_("Project Collaboration Invitation"),
-					content=content,
-				)
-				user.welcome_email_sent = 1
+				# check if the linked User is enabled
+				if frappe.db.get_value("User", user.user, "enabled"):
+					# send project collaboration invitation email
+					frappe.sendmail(
+						user.email,
+						subject=_("Project Collaboration Invitation"),
+						content=content,
+					)
+					user.welcome_email_sent = 1
 
 
 def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
