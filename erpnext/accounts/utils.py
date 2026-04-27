@@ -2737,12 +2737,12 @@ PRE_SUBMIT_DOCTYPE_CONFIG = {
 	"Delivery Note": {
 		"check_prev_docstatus": True,
 		"check_credit_limit": True,
+		"check_packed_qty": True,
 	},
 	"Purchase Receipt": {
 		"check_prev_docstatus": True,
 	},
 	"Sales Order": {
-		"check_prev_docstatus": True,
 		"check_credit_limit": True,
 	},
 }
@@ -2767,10 +2767,13 @@ def _run_pre_submit_checks(doc, cfg):
 	if cfg.get("check_credit_limit"):
 		_check_credit_limit_warn(doc)
 
+	if cfg.get("check_packed_qty"):
+		_check_packed_qty_warn(doc)
+
 
 def _check_prev_docstatus(doc):
 	try:
-		if doc.get("check_prev_docstatus"):
+		if hasattr(doc, "check_prev_docstatus"):
 			doc.check_prev_docstatus()
 	except Exception as e:
 		frappe.msgprint(str(e), title=_("Pre-Submit Warning"), indicator="orange")
@@ -2825,5 +2828,17 @@ def _check_credit_limit_warn(doc):
 		frappe.msgprint(
 			_("Credit limit warning — submission may be blocked: {0}").format(str(e)),
 			title=_("Pre-Submit Warning: Credit Limit"),
+			indicator="orange",
+		)
+
+
+def _check_packed_qty_warn(doc):
+	try:
+		if hasattr(doc, "validate_packed_qty"):
+			doc.validate_packed_qty()
+	except frappe.ValidationError as e:
+		frappe.msgprint(
+			str(e),
+			title=_("Pre-Submit Warning: Packed Qty"),
 			indicator="orange",
 		)

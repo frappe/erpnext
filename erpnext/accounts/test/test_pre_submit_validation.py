@@ -1,9 +1,14 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from unittest.mock import patch
+
 import frappe
 
-from erpnext.accounts.utils import _check_credit_limit_warn
+from erpnext.accounts.utils import (
+	_check_credit_limit_warn,
+	_check_packed_qty_warn,
+)
 from erpnext.selling.doctype.customer.test_customer import (
 	get_customer_dict,
 	set_credit_limit,
@@ -222,4 +227,48 @@ class TestCreditLimitWarnDeliveryNote(_CreditLimitBase):
 		"""
 		dn = self._make_dn(OVER, bypass=True, against_sales_invoice="SINV-TEST-0001")
 		_check_credit_limit_warn(dn)
+		self.assertFalse(_get_orange_warnings())
+
+
+# ---------------------------------------------------------------------------
+# Packed Qty
+# ---------------------------------------------------------------------------
+
+
+class TestPackedQtyWarn(ERPNextTestSuite):
+	def setUp(self):
+		frappe.message_log.clear()
+
+	def _make_dn(self):
+		dn = frappe.new_doc("Delivery Note")
+		dn.company = COMPANY
+		dn.customer = "_Test Customer"
+		dn.append(
+			"items",
+			{"item_code": "_Test Item", "qty": 2, "rate": 100, "amount": 200, "base_amount": 200},
+		)
+		return dn
+
+	def test_no_warning_for_new_doc(self):
+		"""New doc has no packing slip in DB, so validate_packed_qty is skipped."""
+		dn = self._make_dn()
+		_check_packed_qty_warn(dn)
+		self.assertFalse(_get_orange_warnings())
+
+	def test_warns_when_packed_qty_mismatches(self):
+		"""When validate_packed_qty raises, an orange warning is produced."""
+		dn = self._make_dn()
+		with patch.object(
+			dn,
+			"validate_packed_qty",
+			side_effect=frappe.ValidationError("Packed Qty must be equal to qty"),
+		):
+			_check_packed_qty_warn(dn)
+		self.assertTrue(_get_orange_warnings())
+
+	def test_no_warning_when_packed_qty_matches(self):
+		"""When validate_packed_qty passes silently, no warning is produced."""
+		dn = self._make_dn()
+		with patch.object(dn, "validate_packed_qty", return_value=None):
+			_check_packed_qty_warn(dn)
 		self.assertFalse(_get_orange_warnings())
