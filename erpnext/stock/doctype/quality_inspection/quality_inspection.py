@@ -360,13 +360,8 @@ class QualityInspection(Document):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-<<<<<<< HEAD
 def item_query(doctype, txt, searchfield, start, page_len, filters):
-	from frappe.desk.reportview import get_match_cond
-=======
-def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page_len: int, filters: dict):
 	reference_doctype = filters.get("reference_doctype")
->>>>>>> be2a4b7b2a (refactor: quality inspection item query (#54511))
 
 	if not reference_doctype:
 		return []
