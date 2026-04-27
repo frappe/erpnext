@@ -828,7 +828,7 @@ const VoucherItem = ({ voucher, index }: { voucher: LinkedPayment, index: number
 
                         </div>
                         {voucher.reference_no && <div className="flex items-start gap-1">
-                            <span className="text-base">
+                            <span className="text-p-base">
                                 {voucher.reference_no}
                                 &nbsp;&nbsp;
                                 <Tooltip>
