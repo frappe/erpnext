@@ -15,7 +15,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Order
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
+from frappe.utils import cint, flt, get_link_to_form, getdate, new_line_sep, nowdate
 
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
@@ -249,15 +249,8 @@ class MaterialRequest(BuyingController):
 
 		self.set_status(update=True, status="Cancelled")
 
-	def check_modified_date(self):
-		mod_db = frappe.db.sql("""select modified from `tabMaterial Request` where name = %s""", self.name)
-		date_diff = frappe.db.sql(f"""select TIMEDIFF('{mod_db[0][0]}', '{cstr(self.modified)}')""")
-
-		if date_diff and date_diff[0][0]:
-			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(_(self.doctype), self.name))
-
 	def update_status(self, status):
-		self.check_modified_date()
+		self.check_if_latest()
 		self.status_can_change(status)
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
