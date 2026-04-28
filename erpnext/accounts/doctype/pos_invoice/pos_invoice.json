@@ -187,7 +187,7 @@
   "subscription_section",
   "from_date",
   "to_date",
-  "column_break_140",
+  "auto_repeat_section",
   "auto_repeat",
   "update_auto_repeat_reference",
   "against_income_account"
@@ -1462,7 +1462,7 @@
   {
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
-   "label": "Subscription Section"
+   "label": "Subscription"
   },
   {
    "allow_on_submit": 1,
@@ -1479,10 +1479,6 @@
    "label": "To Date",
    "no_copy": 1,
    "print_hide": 1
-  },
-  {
-   "fieldname": "column_break_140",
-   "fieldtype": "Column Break"
   },
   {
    "allow_on_submit": 1,
@@ -1619,12 +1615,17 @@
   {
    "fieldname": "column_break_bhao",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "auto_repeat_section",
+   "fieldtype": "Section Break",
+   "label": "Auto Repeat"
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-10 14:23:07.181782",
+ "modified": "2026-03-02 07:32:47.667810",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

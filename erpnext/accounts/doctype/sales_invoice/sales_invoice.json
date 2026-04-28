@@ -91,9 +91,9 @@
   "column_break_xjag",
   "base_rounding_adjustment",
   "base_rounded_total",
-  "section_break_vacb",
+  "section_break_pxwz",
   "total_advance",
-  "column_break_rdks",
+  "column_break_iaso",
   "outstanding_amount",
   "section_tax_withholding_entry",
   "tax_withholding_group",
@@ -199,6 +199,7 @@
   "unrealized_profit_loss_account",
   "against_income_account",
   "commission_section",
+  "column_break_rdiw",
   "sales_partner",
   "amount_eligible_for_commission",
   "column_break10",
@@ -214,12 +215,14 @@
   "language",
   "subscription_section",
   "subscription",
-  "from_date",
-  "auto_repeat",
   "column_break_140",
+  "from_date",
   "to_date",
+  "automation_section",
+  "auto_repeat",
   "update_auto_repeat_reference",
   "utm_analytics_section",
+  "column_break_rdke",
   "utm_source",
   "utm_medium",
   "column_break_ixxw",
@@ -2305,14 +2308,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "section_break_vacb",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_rdks",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_ixxw",
    "fieldtype": "Column Break"
   },
@@ -2321,6 +2316,28 @@
    "fieldname": "utm_analytics_section",
    "fieldtype": "Section Break",
    "label": "UTM Analytics"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "automation_section",
+   "fieldtype": "Section Break",
+   "label": "Automation"
+  },
+  {
+   "fieldname": "section_break_pxwz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_rdke",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_rdiw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_iaso",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -2334,7 +2351,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-03-09 17:15:30.931929",
+ "modified": "2026-04-28 12:39:53.267755",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

@@ -147,7 +147,7 @@
   "column_break_86",
   "select_print_heading",
   "language",
-  "subscription_section",
+  "auto_repeat_section",
   "from_date",
   "to_date",
   "column_break_97",
@@ -1014,12 +1014,6 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "subscription_section",
-   "fieldtype": "Section Break",
-   "label": "Auto Repeat"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "from_date",
    "fieldtype": "Date",
@@ -1309,6 +1303,12 @@
    "fieldtype": "Time",
    "label": "Time",
    "mandatory_depends_on": "is_internal_supplier"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "auto_repeat_section",
+   "fieldtype": "Section Break",
+   "label": "Auto Repeat"
   }
  ],
  "grid_page_length": 50,

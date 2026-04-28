@@ -180,11 +180,12 @@
   "unrealized_profit_loss_account",
   "subscription_section",
   "subscription",
-  "auto_repeat",
-  "update_auto_repeat_reference",
   "column_break_114",
   "from_date",
   "to_date",
+  "automation_section",
+  "auto_repeat",
+  "update_auto_repeat_reference",
   "printing_settings",
   "letter_head",
   "group_same_items",
@@ -1675,6 +1676,12 @@
    "fieldname": "totals_section",
    "fieldtype": "Section Break",
    "label": "Totals"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "automation_section",
+   "fieldtype": "Section Break",
+   "label": "Automation"
   }
  ],
  "grid_page_length": 50,
