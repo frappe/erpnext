@@ -2308,22 +2308,20 @@ def get_outstanding_reference_documents(args: str | dict, validate: bool = False
 	# Get positive outstanding sales /purchase invoices
 	condition = ""
 	if args.get("voucher_type") and args.get("voucher_no"):
-		condition = " and voucher_type={} and voucher_no={}".format(
-			frappe.db.escape(args["voucher_type"]), frappe.db.escape(args["voucher_no"])
-		)
+		condition = f" and voucher_type={frappe.db.escape(args['voucher_type'])} and voucher_no={frappe.db.escape(args['voucher_no'])}"
 		common_filter.append(ple.voucher_type == args["voucher_type"])
 		common_filter.append(ple.voucher_no == args["voucher_no"])
 
 	# Add cost center condition
 	if args.get("cost_center"):
-		condition += " and cost_center='%s'" % args.get("cost_center")
+		condition += f" and cost_center={frappe.db.escape(args.get('cost_center'))}"
 		accounting_dimensions_filter.append(ple.cost_center == args.get("cost_center"))
 
 	# dynamic dimension filters
 	active_dimensions = get_dimensions()[0]
 	for dim in active_dimensions:
 		if args.get(dim.fieldname):
-			condition += f" and {dim.fieldname}='{args.get(dim.fieldname)}'"
+			condition += f" and {dim.fieldname}={frappe.db.escape(args.get(dim.fieldname))}"
 			accounting_dimensions_filter.append(ple[dim.fieldname] == args.get(dim.fieldname))
 
 	date_fields_dict = {
@@ -2333,17 +2331,15 @@ def get_outstanding_reference_documents(args: str | dict, validate: bool = False
 
 	for fieldname, date_fields in date_fields_dict.items():
 		if args.get(date_fields[0]) and args.get(date_fields[1]):
-			condition += " and {} between '{}' and '{}'".format(
-				fieldname, args.get(date_fields[0]), args.get(date_fields[1])
-			)
+			condition += f" and {fieldname} between {frappe.db.escape(args.get(date_fields[0]))} and {frappe.db.escape(args.get(date_fields[1]))}"
 			posting_and_due_date.append(ple[fieldname][args.get(date_fields[0]) : args.get(date_fields[1])])
 		elif args.get(date_fields[0]):
 			# if only from date is supplied
-			condition += f" and {fieldname} >= '{args.get(date_fields[0])}'"
+			condition += f" and {fieldname} >= {frappe.db.escape(args.get(date_fields[0]))}"
 			posting_and_due_date.append(ple[fieldname].gte(args.get(date_fields[0])))
 		elif args.get(date_fields[1]):
 			# if only to date is supplied
-			condition += f" and {fieldname} <= '{args.get(date_fields[1])}'"
+			condition += f" and {fieldname} <= {frappe.db.escape(args.get(date_fields[1]))}"
 			posting_and_due_date.append(ple[fieldname].lte(args.get(date_fields[1])))
 
 	if args.get("company"):
@@ -2563,7 +2559,7 @@ def get_orders_to_be_billed(
 	active_dimensions = get_dimensions(True)[0]
 	for dim in active_dimensions:
 		if filters.get(dim.fieldname):
-			condition += f" and {dim.fieldname}='{filters.get(dim.fieldname)}'"
+			condition += f" and {dim.fieldname}={frappe.db.escape(filters.get(dim.fieldname))}"
 
 	if party_account_currency == company_currency:
 		grand_total_field = "base_grand_total"
