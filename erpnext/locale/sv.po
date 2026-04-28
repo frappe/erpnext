@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-26 09:49+0000\n"
-"PO-Revision-Date: 2026-04-27 16:51\n"
+"PO-Revision-Date: 2026-04-28 17:16\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -2306,7 +2306,7 @@ msgstr "Åtgärd om Samma Marginal inte bibehålls vid Intern Transaktion"
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Action if same rate is not maintained throughout sales cycle"
-msgstr "Åtgärd om samma pris inte bibehålls under hela försäljning period"
+msgstr "Åtgärd om samma marginal inte bibehålls under hela försäljning period"
 
 #. Label of the action_on_new_invoice (Select) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
