@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import datetime
 from collections import defaultdict
 from json import loads
 from typing import TYPE_CHECKING, Optional
@@ -31,6 +30,7 @@ from frappe.utils import (
 	nowdate,
 )
 from frappe.utils.caching import site_cache
+from frappe.utils.data import DateTimeLikeObject
 from pypika import Order
 from pypika.functions import Coalesce
 from pypika.terms import ExistsCriterion
@@ -61,7 +61,7 @@ OUTSTANDING_DOCTYPES = frozenset(["Sales Invoice", "Purchase Invoice", "Fees"])
 
 @frappe.whitelist()
 def get_fiscal_year(
-	date: str | datetime.datetime | None = None,
+	date: DateTimeLikeObject | None = None,
 	fiscal_year: str | None = None,
 	label: str = "Date",
 	verbose: int = 1,
@@ -201,7 +201,7 @@ def validate_fiscal_year(date, fiscal_year, company, label="Date", doc=None):
 @frappe.whitelist()
 def get_balance_on(
 	account: str | None = None,
-	date: str | datetime.date | None = None,
+	date: DateTimeLikeObject | None = None,
 	party_type: str | None = None,
 	party: str | None = None,
 	company: str | None = None,
