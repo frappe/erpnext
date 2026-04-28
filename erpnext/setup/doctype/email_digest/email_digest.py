@@ -158,10 +158,7 @@ class EmailDigest(Document):
 		context.quote = {"text": quote[0], "author": quote[1]}
 
 		if self.get("purchase_orders_items_overdue"):
-			(
-				context.purchase_order_list,
-				context.purchase_orders_items_overdue_list,
-			) = self.get_purchase_orders_items_overdue_list()
+			context.purchase_orders_items_overdue_map = self.get_purchase_orders_items_overdue_list()
 
 		if not context:
 			return None
@@ -860,30 +857,42 @@ class EmailDigest(Document):
 			return fmt_money(value, currency=self.currency)
 
 	def get_purchase_orders_items_overdue_list(self):
-		fields_po = "distinct `tabPurchase Order Item`.parent as po"
-		fields_poi = (
-			"`tabPurchase Order Item`.parent, `tabPurchase Order Item`.schedule_date, item_code,"
-			"received_qty, qty - received_qty as missing_qty, rate, amount"
+		po = frappe.qb.DocType("Purchase Order")
+		poi = frappe.qb.DocType("Purchase Order Item")
+
+		query = (
+			frappe.qb.from_(poi)
+			.select(
+				poi.parent,
+				poi.schedule_date,
+				poi.item_code,
+				poi.received_qty,
+				(poi.qty - poi.received_qty).as_("missing_qty"),
+				poi.rate,
+				poi.amount,
+				po.currency,
+			)
+			.inner_join(po)
+			.on(po.name == poi.parent)
+			.where(po.status != "Closed")
+			.where(poi.docstatus == 1)
+			.where(poi.schedule_date < today())
+			.where(poi.received_qty < poi.qty)
+			.where(po.company == self.company)
+			.orderby(poi.parent, order=frappe.qb.desc)
+			.orderby(poi.idx)
 		)
 
-		sql_po = f"""select {fields_po} from `tabPurchase Order Item`
-			left join `tabPurchase Order` on `tabPurchase Order`.name = `tabPurchase Order Item`.parent
-			where status<>'Closed' and `tabPurchase Order Item`.docstatus=1 and CURRENT_DATE > `tabPurchase Order Item`.schedule_date
-			and received_qty < qty order by `tabPurchase Order Item`.parent DESC,
-			`tabPurchase Order Item`.schedule_date DESC"""
+		items_by_parent = frappe._dict()
 
-		sql_poi = f"""select {fields_poi} from `tabPurchase Order Item`
-			left join `tabPurchase Order` on `tabPurchase Order`.name = `tabPurchase Order Item`.parent
-			where status<>'Closed' and `tabPurchase Order Item`.docstatus=1 and CURRENT_DATE > `tabPurchase Order Item`.schedule_date
-			and received_qty < qty order by `tabPurchase Order Item`.idx"""
-		purchase_order_list = frappe.db.sql(sql_po, as_dict=True)
-		purchase_order_items_overdue_list = frappe.db.sql(sql_poi, as_dict=True)
+		for row in query.run(as_dict=True):
+			row.link = get_url_to_form("Purchase Order", row.parent)
+			row.rate = fmt_money(row.rate, 2, row.currency)
+			row.amount = fmt_money(row.amount, 2, row.currency)
 
-		for t in purchase_order_items_overdue_list:
-			t.link = get_url_to_form("Purchase Order", t.parent)
-			t.rate = fmt_money(t.rate, 2, t.currency)
-			t.amount = fmt_money(t.amount, 2, t.currency)
-		return purchase_order_list, purchase_order_items_overdue_list
+			items_by_parent.setdefault(row.parent, []).append(row)
+
+		return items_by_parent
 
 
 def send():
