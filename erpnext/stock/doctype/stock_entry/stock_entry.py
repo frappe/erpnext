@@ -148,7 +148,6 @@ class StockEntry(StockController):
 		use_multi_level_bom: DF.Check
 		value_difference: DF.Currency
 		work_order: DF.Link | None
-		previous_job_card: DF.Link | None
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
