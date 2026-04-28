@@ -73,11 +73,22 @@ class SalesPartnerSummaryReportTestMixin(FrappeTestCase):
 		)
 
 		if doctype == "POS Invoice":
-			POSInvoiceTestMixin.setUp(self)
+			from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
+				set_default_account_for_mode_of_payment,
+			)
 
+			make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=800, basic_rate=100)
+			frappe.db.sql("delete from `tabTax Rule`")
+
+			from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import (
+				init_user_and_profile,
+			)
 			from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
 
-			pos_opening_entry = create_opening_entry(self.pos_profile, self.test_user.name, get_obj=1)
+			self.test_user, self.pos_profile = init_user_and_profile()
+			pos_opening_entry = create_opening_entry(self.pos_profile, self.test_user, get_obj=1)
+			mode_of_payment = frappe.get_doc("Mode of Payment", "Bank Draft")
+			set_default_account_for_mode_of_payment(mode_of_payment, "_Test Company", "_Test Bank - _TC")
 
 		self.transaction_doc_with_7pc_commision()
 		self.transaction_doc_with_5pc_commission()
