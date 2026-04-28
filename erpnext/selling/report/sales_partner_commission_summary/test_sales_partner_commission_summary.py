@@ -4,16 +4,16 @@
 import frappe
 from frappe import _
 from frappe.desk.query_report import run
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils.data import comma_or
 
 from erpnext.selling.report.sales_partner_commission_summary.sales_partner_commission_summary import (
 	SALES_TRANSACTION_DOCTYPES,
 )
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-from erpnext.tests.utils import ERPNextTestSuite
 
 
-class SalesPartnerSummaryReportTestMixin(ERPNextTestSuite):
+class SalesPartnerSummaryReportTestMixin(FrappeTestCase):
 	def assert_doctype_filters(self):
 		self.filters["doctype"] = "Purchase Invoice"
 
