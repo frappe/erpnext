@@ -141,14 +141,15 @@ const UnreconciledTransactions = ({ contentHeight }: { contentHeight: number }) 
     return <div className="space-y-1">
         <div className="flex py-2 w-full gap-2">
             <label className="sr-only">{_("Search transactions")}</label>
-            <div className={cn("flex items-center gap-2 w-full rounded-md dark:bg-input/30 border-input border bg-transparent px-2 text-base shadow-xs transition-[color,box-shadow] outline-none",
-                "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
+            <div className={cn("flex items-center gap-2 w-full rounded-md border-outline-gray-2 border bg-transparent px-2 text-base shadow-xs transition-[color,box-shadow] outline-none",
+                "focus-within:border-outline-gray-1 focus-within:ring-outline-gray-1/50 focus-within:ring-[3px]",
                 "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
             )}>
                 <Search className="w-5 h-5 text-ink-gray-5" />
                 <Input
                     placeholder={_("Search")}
                     type='search'
+                    variant='outline'
                     onChange={onSearchChange}
                     defaultValue={search}
                     ref={inputRef}
@@ -181,6 +182,8 @@ const UnreconciledTransactions = ({ contentHeight }: { contentHeight: number }) 
                         })
                         onFilterChange()
                     }}
+                    // @ts-expect-error - CurrencyInputProps doesn't have a variant prop but Input does
+                    variant={"outline"}
                     customInput={Input}
                 />
             </div>
@@ -390,8 +393,8 @@ const OptionsForMultipleTransactions = ({ transactions }: { transactions: Unreco
             <CardHeader>
                 <CardTitle>
                     <div className="flex items-center justify-between">
-                        <span className="text-lg">{transactions.length} {_(transactions.length === 1 ? _("transaction selected") : _("transactions selected"))}</span>
-                        <span className="text-lg font-semibold font-numeric">
+                        <span className="text-md font-medium">{transactions.length} {_(transactions.length === 1 ? _("transaction selected") : _("transactions selected"))}</span>
+                        <span className="text-md font-medium font-numeric">
                             {formatCurrency(transactions.reduce((acc, transaction) => acc + (transaction.unallocated_amount ?? 0), 0), transactions[0].currency ?? '')}
                         </span>
                     </div>
@@ -400,7 +403,7 @@ const OptionsForMultipleTransactions = ({ transactions }: { transactions: Unreco
             <CardContent>
                 <SelectedTransactionsTable />
 
-                <CardAction className="mt-4 justify-self-start">
+                <CardAction className="mt-4 justify-self-center">
                     <div className="flex gap-3 justify-center">
                         <TooltipProvider>
                             <div className="flex gap-4 justify-center">
@@ -651,7 +654,7 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
                 </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 space-y-3">
-                <div className="flex items-center justify-between p-2.5 bg-surface-white rounded-lg border border-border/50">
+                <div className="flex items-center justify-between p-2.5 bg-surface-white rounded-lg border border-outline-gray-1">
                     <div className="flex items-center gap-2">
                         <BadgeCheck className="w-4 h-4 text-ink-green-3" />
                         <span className="text-sm font-medium text-ink-gray-8">{_("Recommended Action")}</span>

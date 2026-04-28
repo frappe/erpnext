@@ -97,7 +97,7 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                         <ChevronLeftIcon />
                         {_("Back")}
                     </Button>
-                    <Button onClick={onImport} disabled={loading} size='sm' type='button'>
+                    <Button onClick={onImport} disabled={loading || data.final_transactions?.length === 0} size='sm' type='button'>
                         {loading ? <Loader2Icon className='size-4 animate-spin' /> : null}
                         {loading ? _("Importing...") : _("Import {0} transactions", [data.final_transactions?.length?.toString() || "0"])}</Button>
                 </div>
@@ -124,15 +124,15 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                 <Table>
                     <TableBody>
                         <TableRow>
-                            <TableHead className='bg-muted/70'>{_("Bank Account")}</TableHead>
+                            <TableHead>{_("Bank Account")}</TableHead>
                             <TableCell>
                                 <div className='flex items-center gap-2'>
                                     {bank?.logo ? <img
                                         src={`/assets/erpnext/banking/${bank.logo}`}
                                         alt={bank.bank || bank.name || ''}
-                                        className="max-w-24 object-left h-8 object-contain"
-                                    /> : <div className="rounded-md flex items-center h-8 gap-2">
-                                        <Landmark size={'30px'} />
+                                        className="max-w-24 object-left h-6 object-contain"
+                                    /> : <div className="rounded-md flex items-center h-6 gap-2">
+                                        <Landmark size={'24px'} />
                                         <H4 className="text-base mb-0">{bank?.bank}</H4>
                                     </div>}
                                     <span className="tracking-tight text-sm font-medium">{bank?.account_name}</span>
@@ -141,7 +141,7 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                             </TableCell>
                         </TableRow>
                         <TableRow>
-                            <TableHead className='bg-muted/70'>{_("Statement File")}</TableHead>
+                            <TableHead>{_("Statement File")}</TableHead>
                             <TableCell>
                                 <div className='flex items-center gap-2'>
                                     <FileTypeIcon fileType={getFileExtension(data.file_name)} size='md' showBackground={false} />
@@ -150,19 +150,19 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                             </TableCell>
                         </TableRow>
                         <TableRow>
-                            <TableHead className='bg-muted/70'>{_("Transaction Dates")}</TableHead>
+                            <TableHead>{_("Transaction Dates")}</TableHead>
                             <TableCell>{_("{0} to {1}", [formatDate(data.statement_start_date, "Do MMMM YYYY"), formatDate(data.statement_end_date, "Do MMMM YYYY")])}</TableCell>
                         </TableRow>
                         <TableRow>
-                            <TableHead className='bg-muted/70'>{_("Number of Transactions")}</TableHead>
+                            <TableHead>{_("Number of Transactions")}</TableHead>
                             <TableCell>{data.transaction_rows.length}</TableCell>
                         </TableRow>
                         <TableRow>
-                            <TableHead className='bg-muted/70'>{_("Closing Balance as of {}", [formatDate(data.statement_end_date, "Do MMMM YYYY")])}</TableHead>
+                            <TableHead>{_("Closing Balance as of {}", [formatDate(data.statement_end_date, "Do MMMM YYYY")])}</TableHead>
                             <TableCell className='font-numeric'>{formatCurrency(flt(data.closing_balance, 2))}</TableCell>
                         </TableRow>
                         <TableRow>
-                            <TableHead className='bg-muted/70'>
+                            <TableHead>
                                 <div className='flex items-center gap-2'>
                                     {_("Detected Amount Format")} <Tooltip>
                                         <TooltipTrigger><InfoIcon size={16} /></TooltipTrigger>
@@ -175,7 +175,7 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                             <TableCell>{AMOUNT_FORMAT_LABEL_MAP[data.amount_format as keyof typeof AMOUNT_FORMAT_LABEL_MAP]}</TableCell>
                         </TableRow>
                         <TableRow>
-                            <TableHead className='bg-muted/70'>
+                            <TableHead>
                                 <div className='flex items-center gap-2'>
                                     {_("Detected Date Format")}
                                     <Tooltip>
@@ -206,7 +206,7 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                         <Paragraph className='text-sm'>{_("We've found {0} existing transactions in the system that conflict with the transactions in the statement file. Are you sure you want to proceed with the import?", [data.conflicting_transactions.length.toString()])}</Paragraph>
                     )}
                 </div>
-                <div className='max-h-[400px] overflow-scroll border border-border rounded-md pb-2'>
+                <div className='max-h-[400px] overflow-scroll pb-2'>
                     <Table>
                         <TableCaption>{_("Existing transactions in the system belonging to the same bank account and date range")}</TableCaption>
                         <TableHeader>
@@ -262,7 +262,7 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                         <Paragraph className='text-sm'>{_("{0} transactions will be imported into the system. Please review the details below and click the 'Import' button to proceed.", [data.final_transactions?.length?.toString() || "0"])}</Paragraph>
                     )}
                 </div>
-                <div className='max-h-[400px] overflow-scroll border border-border rounded-md pb-2'>
+                <div className='max-h-[400px] overflow-scroll pb-2'>
                     <Table>
                         <TableCaption>{_("Transactions to be imported into the system")}</TableCaption>
                         <TableHeader>

@@ -15,7 +15,7 @@ const CSVRawDataPreview = ({ data }: { data: GetStatementDetailsResponse }) => {
 
     // Loop over the contents of the CSV file and show a preview - highlight the header row and the transaction rows
     return (
-        <Table>
+        <Table containerClassName="rounded-none">
             <TableBody>
                 {data.data.map((row, index) => {
 
@@ -31,7 +31,7 @@ const CSVRawDataPreview = ({ data }: { data: GetStatementDetailsResponse }) => {
                             "hover:bg-green-50": isTransactionRow,
                             "text-ink-gray-5/70": !isTransactionRow && !isHeaderRow,
                         })}>
-                        {isHeaderRow ? <TableHead className="bg-yellow-100 hover:bg-yellow-100 text-center">
+                        {isHeaderRow ? <TableHead className="bg-yellow-100 hover:bg-yellow-100 text-center font-semibold text-ink-gray-8">
                             {index + 1}
                         </TableHead> :
                             <TableCell className="text-center px-1 py-0.5">
@@ -46,9 +46,9 @@ const CSVRawDataPreview = ({ data }: { data: GetStatementDetailsResponse }) => {
 
                             if (isHeaderRow) {
                                 return <TableHead key={cellIndex} className={cn("max-w-[250px] w-fit overflow-hidden text-ellipsis py-0.5",
-                                    isValidColumn ? "bg-yellow-100 hover:bg-yellow-100" : "bg-muted",
+                                    isValidColumn ? "bg-yellow-100 hover:bg-yellow-100" : "bg-surface-gray-2",
                                 )}>
-                                    <div className={cn("flex items-center text-xs gap-1 px-1", {
+                                    <div className={cn("flex items-center text-xs gap-1 px-1 text-ink-gray-8 font-medium", {
                                         "justify-end": isAmountColumn && isValidColumn
                                     })}>
                                         {columnType && <Tooltip>

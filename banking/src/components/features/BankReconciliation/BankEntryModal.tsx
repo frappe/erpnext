@@ -617,7 +617,7 @@ const Entries = ({ company, isWithdrawal, currency }: { company: string, isWithd
             </TableHeader>
             <TableBody>
                 {fields.map((field, index) => (
-                    <TableRow key={field.id} className={index === 0 ? 'bg-muted/70 cursor-not-allowed' : ''} title={index === 0 ? _("This is the bank account entry. You cannot edit it.") : ''}>
+                    <TableRow key={field.id} className={index === 0 ? 'bg-surface-gray-1 cursor-not-allowed' : ''} title={index === 0 ? _("This is the bank account entry. You cannot edit it.") : ''}>
                         <TableCell>
                             <Checkbox
                                 checked={selectedRows.includes(index)}

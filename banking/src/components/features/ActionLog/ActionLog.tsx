@@ -166,10 +166,10 @@ const Row = ({ item, index, isLast, action }: { item: ActionLogItem, index: numb
     const currency = item.bankTransaction.currency || getCompanyCurrency(item.bankTransaction.company ?? '')
 
     return <div className='flex items-center gap-2 group'>
-        <div className={cn('p-3.5 group-hover:bg-accent border-l border-r border-t w-full', isLast ? 'rounded-b-sm border-b' : '', index === 0 ? 'rounded-t-sm' : '')}>
+        <div className={cn('p-3.5 group-hover:bg-surface-gray-1 border-l border-r border-t w-full', isLast ? 'rounded-b border-b' : '', index === 0 ? 'rounded-t' : '')}>
             <div className='flex justify-between items-center'>
                 <div className='flex flex-col gap-2'>
-                    <p>{item.bankTransaction.description}</p>
+                    <p className='text-p-base'>{item.bankTransaction.description}</p>
                     <div className='flex items-center gap-3'>
                         <div className='flex gap-2 items-center'>
                             {bank?.logo ? <img
@@ -198,7 +198,7 @@ const Row = ({ item, index, isLast, action }: { item: ActionLogItem, index: numb
                         <a
                             href={`/desk/${slug(item.voucher.reference_doctype)}/${item.voucher.reference_name}`}
                             target='_blank'
-                            className='underline underline-offset-4'>
+                            className='underline underline-offset-4 text-base'>
                             {["Payment Entry", "Journal Entry"].includes(item.voucher.reference_doctype) ? "" : _("{} :", [item.voucher.reference_doctype])} {item.voucher.reference_name}
                         </a>
                         {item.voucher.reference_doctype === "Payment Entry" && item.voucher.doc && <PaymentEntryDetails item={item} />}
@@ -452,13 +452,13 @@ const CancelActionLogItem = ({ item, type, timestamp, bank }: { item: ActionLogI
                     {type === 'transfer' && item.voucher.doc && <TableRow>
                         <TableHead>{_("Transfer Account")}</TableHead>
                         <TableCell>
-                            <TransferDetails item={item} className='text-accent-foreground' />
+                            <TransferDetails item={item} className='text-ink-gray-8' />
                         </TableCell>
                     </TableRow>}
                     {type === 'payment' && item.voucher.doc && <TableRow>
                         <TableHead>{_("Payment Details")}</TableHead>
                         <TableCell>
-                            <PaymentEntryDetails item={item} className='text-accent-foreground' />
+                            <PaymentEntryDetails item={item} className='text-ink-gray-8' />
                         </TableCell>
                     </TableRow>}
                     {type === 'bank_entry' && item.voucher.doc && <TableRow>

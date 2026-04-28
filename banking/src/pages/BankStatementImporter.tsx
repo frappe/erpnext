@@ -133,6 +133,7 @@ const BankStatementImporter = () => {
                             <div className="flex justify-end px-4">
                                 <Button
                                     onClick={onUpload}
+                                    size='md'
                                     disabled={files.length === 0 || loading || !selectedBankAccount || !selectedCompany}>
                                     {loading ? <Loader2Icon className="size-4 animate-spin" /> : null}
                                     {loading ? _("Uploading...") : _("Upload")}
@@ -140,7 +141,7 @@ const BankStatementImporter = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="w-[48%] border-l border-border pl-4">
+                    <div className="w-[48%] border-l border-outline-gray-2 pl-4">
                         {selectedBankAccount && <StatementImportLog />}
                     </div>
 

@@ -228,7 +228,7 @@ const LinkFieldCombobox = ({
         ariaReadonly: readOnly,
         className: cn("w-full justify-between font-normal group border border-transparent outline-none",
             "data-[state=open]:bg-surface-white data-[state=open]:border-outline-gray-4 data-[state=open]:shadow-sm",
-            readOnly ? "bg-muted" : "",
+            readOnly ? "bg-surface-gray-1" : "",
             // Placeholder and value styling
             linkTitle ? "text-ink-gray-7" : "text-ink-gray-4",
             buttonClassName)

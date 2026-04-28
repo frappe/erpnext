@@ -324,12 +324,12 @@ const Filters = ({
 
     return <div className="flex py-2 w-full gap-2">
         <label className="sr-only">{_("Search transactions")}</label>
-        <div className={cn("flex items-center gap-2 w-full rounded-md dark:bg-input/30 border-input border bg-transparent px-2 text-base shadow-xs transition-[color,box-shadow] outline-none",
-            "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
+        <div className={cn("flex items-center gap-2 w-full rounded-md border-outline-gray-2 border bg-transparent px-2 text-base shadow-xs transition-[color,box-shadow] outline-none",
+            "",
             "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
         )}>
             <Search className="w-5 h-5 text-ink-gray-5" />
-            <Input placeholder={_("Search")} type='search' onChange={onSearchChange} defaultValue={search}
+            <Input placeholder={_("Search")} type='search' onChange={onSearchChange} variant='outline' defaultValue={search}
                 className="border-none px-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0" />
             <div>
                 <span className="text-sm text-ink-gray-5 text-nowrap whitespace-nowrap">{results?.length} {_(results?.length === 1 ? "result" : "results")}</span>
@@ -358,6 +358,8 @@ const Filters = ({
                         stringValue: newValue
                     })
                 }}
+                // @ts-expect-error - CurrencyInputProps doesn't have a variant prop but Input does
+                variant={"outline"}
                 customInput={Input}
             />
         </div>

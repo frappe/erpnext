@@ -127,7 +127,7 @@ const AccountsDropdown = ({ root_type, report_type, account_type, value, onChang
                         aria-readonly={readOnly}
                         aria-expanded={open}
                         className={cn("w-full justify-between font-normal",
-                            readOnly ? "bg-muted pointer-events-none" : ""
+                            readOnly ? "bg-surface-gray-1 pointer-events-none" : ""
                             , buttonClassName)}>
                         {value || _('Select Account')}
 
@@ -143,7 +143,7 @@ const AccountsDropdown = ({ root_type, report_type, account_type, value, onChang
                         disabled={disabled}
                         aria-expanded={open}
                         className={cn("w-full justify-between font-normal",
-                            readOnly ? "bg-muted" : ""
+                            readOnly ? "bg-surface-gray-1" : ""
                         )}>
                         {value || _('Select Account')}
 

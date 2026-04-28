@@ -31,7 +31,7 @@ const BankReconciliation = () => {
         }
     }, [])
 
-    const remainingHeightAfterTabs = window.innerHeight - headerHeight - 290
+    const remainingHeightAfterTabs = window.innerHeight - headerHeight - 270
 
     return (
         <div className="p-4 flex flex-col gap-4">

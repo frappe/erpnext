@@ -22,16 +22,8 @@
 
 @theme inline {
   --color-*: initial;
-  --color-foreground: var(--foreground);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-muted: var(--muted);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
 
+  /** ----- Espresso Design System ----- **/
   --font-sans: "InterVariable", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-sans--font-optical-sizing: auto;
   --font-sans--font-variation-settings: "opsz" 24;
@@ -40,7 +32,6 @@
   --font-numeric--font-optical-sizing: auto;
   --font-numeric--font-variation-settings: "opsz" 24;
 
-  /** ----- Espresso Design System ----- **/
 
   /** Font Sizes - Web **/
   --text-2xs: 0.6875rem;
@@ -476,15 +467,6 @@
 }
 
 :root {
-  --foreground: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.97 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
 
   /** Espresso Design System Colors - TODO: Convert these to oklch colors later when Espresso supports it
   950 and 900 are the same in light mode
@@ -811,16 +793,6 @@
 }
 
 .dark {
-  --foreground: oklch(0.985 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.269 0 0);
-
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
 
   /** Espresso Design System Colors - TODO: Convert these to oklch colors later when Espresso supports it **/
   --gray-50: #F8F8F8;

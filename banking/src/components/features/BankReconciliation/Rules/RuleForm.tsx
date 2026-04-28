@@ -119,8 +119,8 @@ const TransactionTypeSelector = () => {
                                 </FormControl>
                                 <FormLabel
                                     className={cn(
-                                        "w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md border cursor-pointer transition-all hover:bg-accent hover:text-accent-foreground",
-                                        "peer-data-[state=checked]:bg-surface-gray-7 peer-data-[state=checked]:text-primary-foreground peer-data-[state=checked]:border-outline-gray-5 peer-data-[state=checked]:hover:bg-surface-gray-7 peer-data-[state=checked]:hover:text-primary-foreground"
+                                        "w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md border cursor-pointer transition-all hover:bg-surface-gray-1 hover:text-ink-gray-8",
+                                        "peer-data-[state=checked]:bg-surface-gray-7 peer-data-[state=checked]:text-white peer-data-[state=checked]:border-outline-gray-5 peer-data-[state=checked]:hover:bg-surface-gray-7 peer-data-[state=checked]:hover:text-white"
                                     )}
                                 >
                                     <ArrowDownUp className="w-5 h-5" />
@@ -136,11 +136,11 @@ const TransactionTypeSelector = () => {
                                 </FormControl>
                                 <FormLabel
                                     className={cn(
-                                        "w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md border cursor-pointer transition-all hover:bg-accent hover:text-accent-foreground",
+                                        "w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md border cursor-pointer transition-all hover:bg-surface-gray-1 hover:text-ink-gray-8",
                                         "peer-data-[state=checked]:bg-surface-red-5 peer-data-[state=checked]:text-white peer-data-[state=checked]:border-bg-surface-red-5 peer-data-[state=checked]:hover:bg-surface-red-5 peer-data-[state=checked]:hover:text-white"
                                     )}
                                 >
-                                    <ArrowUpRight className="w-5 h-5 peer-data-[state=checked]:text-ink-red-3-foreground" />
+                                    <ArrowUpRight className="w-5 h-5 peer-data-[state=checked]:text-ink-red-3" />
                                     {_("Withdrawal")}
                                 </FormLabel>
                             </FormItem>
@@ -153,7 +153,7 @@ const TransactionTypeSelector = () => {
                                 </FormControl>
                                 <FormLabel
                                     className={cn(
-                                        "w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md border cursor-pointer transition-all hover:bg-accent hover:text-accent-foreground",
+                                        "w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md border cursor-pointer transition-all hover:bg-surface-gray-1 hover:text-ink-gray-8",
                                         "peer-data-[state=checked]:bg-green-600 peer-data-[state=checked]:text-white peer-data-[state=checked]:border-green-600 peer-data-[state=checked]:hover:bg-green-600 peer-data-[state=checked]:hover:text-white"
                                     )}
                                 >
@@ -254,7 +254,7 @@ const RuleAction = () => {
 
     return (
         <div className="flex flex-col gap-4">
-            <H4 className="text-base font-medium text-foreground">{_("If rule matches, then:")}</H4>
+            <H4 className="text-base text-ink-gray-7">{_("If rule matches, then:")}</H4>
 
             <SelectFormField
                 name='classify_as'
@@ -417,7 +417,7 @@ const MultipleAccountsSelection = () => {
                 {accounts.map((account, index) => (
                     <TableRow key={index}>
                         <TableCell>{account.account}</TableCell>
-                        {index === accounts.length - 1 ? <TableCell className="text-right bg-muted" colSpan={2}>
+                        {index === accounts.length - 1 ? <TableCell className="text-right bg-surface-gray-1" colSpan={2}>
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <span className="text-ink-gray-5">{_("This is auto computed to balance the journal entry.")}</span>
@@ -596,7 +596,7 @@ const ConfigureAccountsModalContent = () => {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    <TableRow className="bg-muted/70 cursor-not-allowed" title={_("This is the row for the bank account. It will be auto populated based on the bank transaction.")}>
+                    <TableRow className="bg-surface-gray-1 cursor-not-allowed" title={_("This is the row for the bank account. It will be auto populated based on the bank transaction.")}>
                         <TableCell>
                             <Checkbox disabled />
                         </TableCell>
@@ -736,9 +736,9 @@ const ConfigureAccountsModalContent = () => {
             </div>
 
             <div className="flex flex-col gap-2">
-                <H4 className="text-base font-medium text-foreground">{_("Help")}</H4>
+                <H4 className="text-base text-ink-gray-7">{_("Help")}</H4>
 
-                <Paragraph className="text-sm">{(_("You can set up the rule to split the transaction across multiple accounts."))}
+                <Paragraph className="text-p-sm">{(_("You can set up the rule to split the transaction across multiple accounts."))}
                     <br />{_("You can also add credit or debit values to pre-fill - these support both static values (like 200) or formulas (like transaction_amount * 0.25).")}
                     <br />
                     <br />

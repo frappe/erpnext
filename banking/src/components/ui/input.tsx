@@ -36,7 +36,7 @@ function Input({ className, type, inputSize = "md", variant = "subtle", ...props
       data-input-size={inputSize}
       data-variant={variant}
       className={cn(
-        "file:text-foreground file:inline-flex file:border-0 file:bg-transparent file:text-sm file:font-medium",
+        "file:text-ink-gray-8 file:inline-flex file:border-0 file:bg-transparent file:text-sm file:font-medium",
         inputVariants({ inputSize, variant }),
         className
       )}
