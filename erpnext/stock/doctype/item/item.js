@@ -128,8 +128,15 @@ frappe.ui.form.on("Item", {
 	refresh: function (frm) {
 		frm.trigger("toggle_has_serial_batch_fields");
 
+		if (frappe.defaults.get_default("item_naming_by") != "Naming Series" || frm.doc.variant_of) {
+			frm.toggle_display("naming_series", false);
+		} else {
+			erpnext.toggle_naming_series();
+		}
+
+		frm.toggle_display(["standard_rate"], frappe.model.can_create("Item Price"));
+
 		if (frm.is_new()) {
-			frm.toggle_display(["standard_rate"], frappe.model.can_create("Item Price"));
 			frm.toggle_display("disabled", false);
 			return;
 		}
@@ -248,12 +255,6 @@ frappe.ui.form.on("Item", {
 			);
 		}
 
-		if (frappe.defaults.get_default("item_naming_by") != "Naming Series" || frm.doc.variant_of) {
-			frm.toggle_display("naming_series", false);
-		} else {
-			erpnext.toggle_naming_series();
-		}
-
 		erpnext.item.edit_prices_button(frm);
 		erpnext.item.toggle_attributes(frm);
 
@@ -293,8 +294,6 @@ frappe.ui.form.on("Item", {
 				},
 			};
 		});
-
-		frm.toggle_display(["standard_rate"], frappe.model.can_create("Item Price"));
 	},
 
 	validate: function (frm) {
