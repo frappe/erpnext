@@ -8,7 +8,8 @@ const inputVariants = cva(cn("flex w-full min-w-0 transition-all outline-none bo
   "active:bg-surface-white active:shadow-sm active:border-outline-gray-4",
   "placeholder:text-ink-gray-4 text-ink-gray-7",
   "disabled:bg-surface-gray-1 disabled:placeholder:text-ink-gray-3 disabled:text-ink-gray-3 disabled:cursor-not-allowed disabled:pointer-events-none",
-  "aria-readonly:bg-surface-gray-1 aria-readonly:text-ink-gray-6 aria-readonly:pointer-events-none aria-invalid:shadow-focus-red aria-invalid:border-outline-red-3"),
+  "aria-readonly:bg-surface-gray-1 aria-readonly:text-ink-gray-6 aria-readonly:pointer-events-none aria-invalid:shadow-focus-red aria-invalid:border-outline-red-3",
+  "in-data-[slot=input-group]:border-transparent! in-data-[slot=input-group]:focus-visible:shadow-none! in-data-[slot=input-group]:bg-transparent!"),
   {
     variants: {
       inputSize: {

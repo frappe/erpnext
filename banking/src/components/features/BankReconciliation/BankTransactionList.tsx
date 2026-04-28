@@ -17,12 +17,12 @@ import { Input } from "@/components/ui/input"
 import CurrencyInput from "react-currency-input-field"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { getCurrencySymbol } from "@/lib/currency"
-import { cn } from "@/lib/utils"
 import { useDebounceValue } from "usehooks-ts"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useCallback, useMemo, useState } from "react"
 import { Link } from "react-router"
 import { Empty, EmptyTitle, EmptyHeader, EmptyMedia, EmptyDescription } from "@/components/ui/empty"
+import { InputGroup, InputGroupAddon } from "@/components/ui/input-group"
 
 const BankTransactions = () => {
     const selectedBank = useAtomValue(selectedBankAccountAtom)
@@ -149,7 +149,7 @@ const BankTransactionListView = () => {
                 enableResizing: false,
                 meta: { truncate: false, truncateTooltip: false } satisfies ListViewColumnMeta,
                 cell: ({ row }) => (
-                    <div className="flex gap-2 items-center">
+                    <div className="flex gap-2 pl-0.5 items-center">
                         <Button variant="ghost" asChild size='sm'>
                             <a
                                 href={`/desk/bank-transaction/${row.original.name}`}
@@ -323,18 +323,19 @@ const Filters = ({
     const decimalSeparator = formatInfo.decimal_str || "."
 
     return <div className="flex py-2 w-full gap-2">
-        <label className="sr-only">{_("Search transactions")}</label>
-        <div className={cn("flex items-center gap-2 w-full rounded-md border-outline-gray-2 border bg-transparent px-2 text-base shadow-xs transition-[color,box-shadow] outline-none",
-            "",
-            "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
-        )}>
-            <Search className="w-5 h-5 text-ink-gray-5" />
-            <Input placeholder={_("Search")} type='search' onChange={onSearchChange} variant='outline' defaultValue={search}
+        <InputGroup variant='outline'>
+            <label className="sr-only">{_("Search transactions")}</label>
+            <InputGroupAddon>
+                <Search className="w-4 h-4 text-ink-gray-5" />
+            </InputGroupAddon>
+            <Input
+                placeholder={_("Search")} type='search' onChange={onSearchChange} variant='outline' defaultValue={search}
                 className="border-none px-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0" />
-            <div>
+            <InputGroupAddon align='inline-end'>
                 <span className="text-sm text-ink-gray-5 text-nowrap whitespace-nowrap">{results?.length} {_(results?.length === 1 ? "result" : "results")}</span>
-            </div>
-        </div>
+            </InputGroupAddon>
+        </InputGroup>
+
         <div className="w-[25%]">
             <label className="sr-only">{_("Filter by amount")}</label>
             <CurrencyInput

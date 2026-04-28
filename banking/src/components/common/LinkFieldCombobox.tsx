@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
 import _ from "@/lib/translate";
 import ErrorBanner from "../ui/error-banner";
+import MarkdownRenderer from "../ui/markdown";
 
 export interface ResultItem {
     value: string,
@@ -224,8 +225,8 @@ const LinkFieldCombobox = ({
         ref: buttonRef,
         tabIndex: 0,
         disabled: disabled || readOnly,
-        ariaExpanded: open,
-        ariaReadonly: readOnly,
+        "aria-expanded": open,
+        "aria-readonly": readOnly,
         className: cn("w-full justify-between font-normal group border border-transparent outline-none",
             "data-[state=open]:bg-surface-white data-[state=open]:border-outline-gray-4 data-[state=open]:shadow-sm",
             readOnly ? "bg-surface-gray-1" : "",
@@ -272,7 +273,7 @@ const LinkFieldCombobox = ({
                                         {result.label || result.value}
                                     </span>
                                     {result.description && <span className="text-xs text-ink-gray-5">
-                                        {result.description}
+                                        <MarkdownRenderer content={result.description} />
                                     </span>}
                                 </CommandItem>
                             ))}

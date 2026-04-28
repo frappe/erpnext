@@ -19,7 +19,7 @@ import { getCurrencySymbol } from "@/lib/currency"
 import { getCurrencyFormatInfo } from "@/lib/numbers"
 import LinkFieldCombobox, { LinkFieldComboboxProps } from "../common/LinkFieldCombobox"
 import { Select, SelectContent, SelectTrigger, SelectValue } from "./select"
-import { InputGroup, InputGroupAddon, InputGroupInput } from "./input-group"
+import { InputGroup, InputGroupAddon } from "./input-group"
 
 interface FormElementProps {
     name: string,
@@ -151,7 +151,7 @@ export const DateField = ({ name, rules, label, isRequired, formDescription, inp
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button
-                        id="date-picker"
+                        id="date-picker-button"
                         variant="ghost"
                         className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
                     >
@@ -332,7 +332,7 @@ export const CurrencyFormField = ({ name, rules, label, isRequired, formDescript
                 const newValue = isDecimal ? v : values?.float ?? ''
                 field.onChange(newValue)
             }}
-            customInput={InputGroupInput}
+            customInput={Input}
         />
     }
 

@@ -35,6 +35,7 @@ import { useFrappeGetCall } from "frappe-react-sdk"
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Link } from "react-router"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { InputGroup, InputGroupAddon, InputGroupText } from "@/components/ui/input-group"
 
 const MatchAndReconcile = ({ contentHeight }: { contentHeight: number }) => {
     const selectedBank = useAtomValue(selectedBankAccountAtom)
@@ -140,24 +141,24 @@ const UnreconciledTransactions = ({ contentHeight }: { contentHeight: number }) 
 
     return <div className="space-y-1">
         <div className="flex py-2 w-full gap-2">
-            <label className="sr-only">{_("Search transactions")}</label>
-            <div className={cn("flex items-center gap-2 w-full rounded-md border-outline-gray-2 border bg-transparent px-2 text-base shadow-xs transition-[color,box-shadow] outline-none",
-                "focus-within:border-outline-gray-1 focus-within:ring-outline-gray-1/50 focus-within:ring-[3px]",
-                "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
-            )}>
-                <Search className="w-5 h-5 text-ink-gray-5" />
+
+            <InputGroup variant='outline'>
+                <label className="sr-only">{_("Search transactions")}</label>
+                <InputGroupAddon>
+                    <Search className="w-4 h-4 text-ink-gray-5" />
+                </InputGroupAddon>
                 <Input
                     placeholder={_("Search")}
-                    type='search'
+                    // type='search'
                     variant='outline'
                     onChange={onSearchChange}
                     defaultValue={search}
                     ref={inputRef}
-                    className="border-none px-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0" />
-                <div>
-                    <span className="text-sm text-ink-gray-5 text-nowrap whitespace-nowrap">{results?.length} {_(results?.length === 1 ? "result" : "results")}</span>
-                </div>
-            </div>
+                />
+                <InputGroupAddon align='inline-end'>
+                    <InputGroupText>{results?.length} {_(results?.length === 1 ? "result" : "results")}</InputGroupText>
+                </InputGroupAddon>
+            </InputGroup>
             <div>
                 <label className="sr-only">{_("Filter by amount")}</label>
                 <CurrencyInput
@@ -176,11 +177,18 @@ const UnreconciledTransactions = ({ contentHeight }: { contentHeight: number }) 
                         // Check if the value ends with a decimal or a decimal with trailing zeroes
                         const isDecimal = v?.endsWith(decimalSeparator) || v?.endsWith(decimalSeparator + '0')
                         const newValue = isDecimal ? v : values?.float ?? ''
-                        setAmountFilter({
+                        const nextAmountFilter = {
                             value: Number(newValue),
                             stringValue: newValue
-                        })
-                        onFilterChange()
+                        }
+                        const hasAmountFilterChanged = amountFilter.value !== nextAmountFilter.value || amountFilter.stringValue !== nextAmountFilter.stringValue
+
+                        setAmountFilter(nextAmountFilter)
+
+                        // `onValueChange` also fires on blur; avoid clearing selected transaction unless filter value actually changed.
+                        if (hasAmountFilterChanged) {
+                            onFilterChange()
+                        }
                     }}
                     // @ts-expect-error - CurrencyInputProps doesn't have a variant prop but Input does
                     variant={"outline"}

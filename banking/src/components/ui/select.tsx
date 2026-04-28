@@ -29,7 +29,9 @@ const selectVariants = cva(cn("flex w-fit items-center justify-between gap-2 min
   "active:bg-surface-white active:shadow-sm active:border-outline-gray-4 data-[state=open]:border-outline-gray-4",
   "placeholder:text-ink-gray-4 text-ink-gray-7",
   "disabled:bg-surface-gray-1 disabled:placeholder:text-ink-gray-3 disabled:text-ink-gray-3 disabled:cursor-not-allowed disabled:pointer-events-none",
-  "aria-readonly:bg-surface-gray-1 aria-readonly:text-ink-gray-6 aria-readonly:pointer-events-none aria-invalid:shadow-focus-red aria-invalid:border-outline-red-3"),
+  "aria-readonly:bg-surface-gray-1 aria-readonly:text-ink-gray-6 aria-readonly:pointer-events-none aria-invalid:shadow-focus-red aria-invalid:border-outline-red-3",
+  // Disable most styles inside an input group
+  "in-data-[slot=input-group]:border-transparent! in-data-[slot=input-group]:focus-visible:shadow-none! in-data-[slot=input-group]:bg-transparent!"),
   {
     variants: {
       inputSize: {
