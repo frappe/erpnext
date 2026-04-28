@@ -58,19 +58,7 @@ GL_REPOSTING_CHUNK = 100
 
 @frappe.whitelist()
 def get_fiscal_year(
-<<<<<<< HEAD
 	date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False, boolean=False
-=======
-	date: DateTimeLikeObject | None = None,
-	fiscal_year: str | None = None,
-	label: str = "Date",
-	verbose: int = 1,
-	company: str | None = None,
-	as_dict: bool = False,
-	boolean: str | bool | None = None,
-	raise_on_missing: bool = True,
-	truncate: bool = False,
->>>>>>> d1a80d40c4 (fix: avoid double reduction of pe reference outstanding (#54193))
 ):
 	if isinstance(boolean, str):
 		boolean = loads(boolean)
@@ -191,7 +179,6 @@ def validate_fiscal_year(date, fiscal_year, company, label="Date", doc=None):
 
 @frappe.whitelist()
 def get_balance_on(
-<<<<<<< HEAD
 	account=None,
 	date=None,
 	party_type=None,
@@ -202,20 +189,6 @@ def get_balance_on(
 	ignore_account_permission=False,
 	account_type=None,
 	start_date=None,
-=======
-	account: str | None = None,
-	date: DateTimeLikeObject | None = None,
-	party_type: str | None = None,
-	party: str | None = None,
-	company: str | None = None,
-	in_account_currency: bool = True,
-	cost_center: str | None = None,
-	ignore_account_permission: bool = False,
-	account_type: str | None = None,
-	start_date: str | None = None,
-	finance_book: str | None = None,
-	include_default_fb_balances: bool = False,
->>>>>>> d1a80d40c4 (fix: avoid double reduction of pe reference outstanding (#54193))
 ):
 	if not account and frappe.form_dict.get("account"):
 		account = frappe.form_dict.get("account")
