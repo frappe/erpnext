@@ -18,20 +18,24 @@
   "stock_uom",
   "column_break0",
   "disabled",
-  "allow_alternative_item",
   "is_stock_item",
-  "is_purchase_item",
-  "is_sales_item",
-  "has_variants",
   "is_fixed_asset",
   "auto_create_assets",
   "is_grouped_asset",
   "asset_category",
   "asset_naming_series",
+  "section_break_zlmj",
+  "is_sales_item",
+  "allow_alternative_item",
+  "has_variants",
+  "column_break_kpmi",
+  "is_purchase_item",
+  "is_customer_provided_item",
+  "customer",
   "section_break_gjns",
-  "opening_stock",
-  "column_break_ixrh",
   "standard_rate",
+  "column_break_ixrh",
+  "opening_stock",
   "section_break_znra",
   "over_delivery_receipt_allowance",
   "column_break_wugd",
@@ -103,8 +107,6 @@
   "purchase_details_cb",
   "lead_time_days",
   "last_purchase_rate",
-  "is_customer_provided_item",
-  "customer",
   "supplier_details",
   "delivered_by_supplier",
   "section_break_ylma",
@@ -266,7 +268,7 @@
   {
    "bold": 1,
    "depends_on": "eval:doc.__islocal && doc.is_sales_item",
-   "description": "Used to create an Item Price with the selling rate when the item is saved",
+   "description": "Creates an Item Price automatically when the item is saved",
    "fieldname": "standard_rate",
    "fieldtype": "Currency",
    "label": "Standard Selling Rate"
@@ -537,7 +539,8 @@
    "fieldname": "has_variants",
    "fieldtype": "Check",
    "in_standard_filter": 1,
-   "label": "Has Variants"
+   "label": "Has Variants",
+   "show_description_on_click": 1
   },
   {
    "default": "Item Attribute",
@@ -568,6 +571,7 @@
    "fieldname": "is_purchase_item",
    "fieldtype": "Check",
    "label": "Allow Purchase",
+   "read_only_depends_on": "eval: doc.is_customer_provided_item",
    "show_description_on_click": 1
   },
   {
@@ -624,7 +628,9 @@
    "description": "Enable if this item is provided by a customer and received via Stock Entry.",
    "fieldname": "is_customer_provided_item",
    "fieldtype": "Check",
-   "label": "Is Customer Provided Item"
+   "label": "Is Customer Provided Item",
+   "read_only_depends_on": "eval: doc.is_purchase_item",
+   "show_description_on_click": 1
   },
   {
    "depends_on": "eval:doc.is_customer_provided_item",
@@ -863,7 +869,6 @@
   {
    "default": "0",
    "depends_on": "is_fixed_asset",
-   "description": "Automatically creates Asset records when this item is received via Purchase Receipt.",
    "fieldname": "auto_create_assets",
    "fieldtype": "Check",
    "label": "Auto create assets on purchase"
@@ -1056,6 +1061,15 @@
    "fieldname": "uom_help_html",
    "fieldtype": "HTML",
    "options": "<div style=\"margin-bottom:10px; color: var(--gray-500) !important;\">Define alternate units for this item. Eg: 1 Box = 12 Nos, set conversion factor as 12. (Will also apply for variants) <a href=\"https://docs.frappe.io/erpnext/uom\" target=\"_blank\">Learn more &#8594;</a></div>"
+  },
+  {
+   "fieldname": "section_break_zlmj",
+   "fieldtype": "Section Break",
+   "label": "Item Attributes"
+  },
+  {
+   "fieldname": "column_break_kpmi",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-tag",
@@ -1063,7 +1077,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-04-27 16:03:38.940472",
+ "modified": "2026-04-28 17:31:47.613279",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
