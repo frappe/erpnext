@@ -382,9 +382,9 @@ class ProductionPlan(Document):
 		items = items_query.run(as_dict=True)
 
 		for item in items:
-			item.pending_qty = (
-				flt(item.qty) - max(item.work_order_qty, item.delivered_qty, 0)
-			) * item.conversion_factor
+			item.pending_qty = flt(item.qty) - max(
+				item.work_order_qty, flt(item.delivered_qty) * item.conversion_factor, 0
+			)
 
 		pi = frappe.qb.DocType("Packed Item")
 
