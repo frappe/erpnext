@@ -28,7 +28,6 @@ from frappe.utils import (
 	nowdate,
 )
 from frappe.utils.caching import site_cache
-from frappe.utils.data import DateTimeLikeObject
 from pypika import Order
 from pypika.functions import Coalesce
 from pypika.terms import ExistsCriterion
