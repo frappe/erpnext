@@ -393,8 +393,8 @@ const BankOrCashPicker = ({ bankAccount, onAccountChange, selectedAccount, compa
     return <div className='grid grid-cols-4 gap-4'>
         {banks.map((bank) => (
             <div
-                className={cn('border p-2 rounded-md flex items-center gap-2 cursor-pointer outline-[0.5px] transition-all duration-200',
-                    selectedAccount === bank.account ? 'border-blue-500 bg-blue-50 outline-blue-500 hover:bg-blue-100/70' : 'border-gray-200 outline-gray-200 hover:bg-gray-50'
+                className={cn('border p-2 rounded-md flex items-center gap-2 cursor-pointer outline-[0.5px] transition-all duration-200 hover:bg-surface-gray-1',
+                    selectedAccount === bank.account ? 'border-outline-gray-5 outline-outline-gray-5 bg-surface-gray-1' : 'border-outline-gray-2 outline-outline-gray-2'
                 )}
                 role='button'
                 key={bank.account}
@@ -499,18 +499,18 @@ const RecommendedTransferAccount = ({ transaction, onAccountChange }: { transact
 
         return (<div className='pb-2'>
             <div className={cn("flex justify-between items-start gap-3 p-3 border rounded-lg shadow-sm",
-                isSuggested ? "border-green-200 bg-green-50/30" : "border-purple-200 bg-purple-50/30")}>
-                <div className='px-1'>
+                isSuggested ? "border-outline-green-4 bg-surface-green-1" : "border-outline-violet-2 bg-violet-50")}>
+                <div>
                     <div className='flex flex-col gap-3'>
                         <div className={cn("flex items-center gap-2 shrink-0",
-                            isSuggested ? "text-green-700" : "text-purple-700"
+                            isSuggested ? "text-ink-green-4" : "text-ink-violet-4"
                         )}>
                             <BadgeCheck className="w-4 h-4" />
                             <span className="text-sm font-medium">{_("Suggested Transfer to {0}", [data.message.account])}</span>
                         </div>
                         <div className='flex flex-col gap-1'>
-                            <span className='text-sm'>{_("The system found a mirror transaction ({0}) in another account with the same amount and date.", [data.message.name])}</span>
-                            <span className='text-sm'>{_("Accepting the suggestion will reconcile both transactions.")}</span>
+                            <span className='text-p-sm'>{_("The system found a mirror transaction ({0}) in another account with the same amount and date.", [data.message.name])}</span>
+                            <span className='text-p-sm'>{_("Accepting the suggestion will reconcile both transactions.")}</span>
                         </div>
 
                         <div className='flex flex-col gap-1.5'>
@@ -543,7 +543,7 @@ const RecommendedTransferAccount = ({ transaction, onAccountChange }: { transact
                         </div>
                     </div>
                     <span className='font-semibold font-numeric text-lg text-right pr-0.5'>{formatCurrency(amount, currency)}</span>
-                    <div>
+                    <div className='pt-1'>
                         <Button
                             onClick={selectTransaction}
                             theme={isSuggested ? "green" : "violet"}

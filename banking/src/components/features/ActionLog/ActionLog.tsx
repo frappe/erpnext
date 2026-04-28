@@ -78,7 +78,7 @@ const ActionLogDialogContent = () => {
             <div key={action.timestamp} className='flex flex-col gap-1'>
                 <ActionGroupHeader action={action} />
                 <div>
-                    <div className='ml-2 border-l border-l-gray-300 py-1'>
+                    <div className='ml-2 border-l border-l-outline-gray-2 py-1'>
                         <div className='ml-5'>
                             {action.items.map((item, index) => (
                                 <Row

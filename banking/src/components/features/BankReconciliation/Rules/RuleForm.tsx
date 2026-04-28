@@ -154,7 +154,7 @@ const TransactionTypeSelector = () => {
                                 <FormLabel
                                     className={cn(
                                         "w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md border cursor-pointer transition-all hover:bg-surface-gray-1 hover:text-ink-gray-8",
-                                        "peer-data-[state=checked]:bg-green-600 peer-data-[state=checked]:text-white peer-data-[state=checked]:border-green-600 peer-data-[state=checked]:hover:bg-green-600 peer-data-[state=checked]:hover:text-white"
+                                        "peer-data-[state=checked]:bg-surface-green-5 peer-data-[state=checked]:text-white peer-data-[state=checked]:border-surface-green-5 peer-data-[state=checked]:hover:bg-surface-green-5 peer-data-[state=checked]:hover:text-white"
                                     )}
                                 >
                                     <ArrowDownRight className="w-5 h-5 peer-data-[state=checked]:text-white" />

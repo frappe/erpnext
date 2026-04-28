@@ -212,11 +212,23 @@ const BankTransactionListView = () => {
                 if (status === 'Reconciled' && transaction.status !== 'Reconciled') {
                     return false
                 }
-                if (status === 'Unreconciled' && (!transaction.allocated_amount || (transaction.allocated_amount && transaction.allocated_amount === 0))) {
-                    return false
+                if (status === 'Unreconciled') {
+                    if (transaction.status === 'Reconciled') {
+                        return false
+                    }
+                    // Filter out partially reconciled transactions
+                    if (transaction.allocated_amount && transaction.allocated_amount > 0 && transaction.unallocated_amount !== 0) {
+                        return false
+                    }
                 }
-                if (status === 'Partially Reconciled' && transaction.allocated_amount && transaction.allocated_amount > 0 && transaction.unallocated_amount !== 0) {
-                    return false
+                if (status === 'Partially Reconciled') {
+
+                    if (transaction.status === 'Reconciled') {
+                        return false
+                    }
+                    if ((transaction.allocated_amount ?? 0) === 0) {
+                        return false
+                    }
                 }
 
             }
@@ -269,21 +281,17 @@ const BankTransactionListView = () => {
                 getRowId={(row) => row.name}
                 maxHeight="calc(100vh - 200px)"
                 scrollAreaClassName="min-h-[calc(100vh-200px)]"
-                emptyState={_("No transactions match the current filters.")}
+                emptyState={<Empty>
+                    <EmptyMedia>
+                        <ListIcon />
+                    </EmptyMedia>
+                    <EmptyHeader>
+                        <EmptyTitle>{_("No bank transactions found")}</EmptyTitle>
+                        <EmptyDescription>{_("There are no transactions in the system for the selected bank account and dates that match the filters.")}</EmptyDescription>
+                    </EmptyHeader>
+                </Empty>}
             />
         ) : null}
-
-        {filteredResults.length === 0 && data &&
-            <Empty>
-                <EmptyMedia>
-                    <ListIcon />
-                </EmptyMedia>
-                <EmptyHeader>
-                    <EmptyTitle>{_("No bank transactions found")}</EmptyTitle>
-                    <EmptyDescription>{_("There are no transactions in the system for the selected bank account and dates that match the filters.")}</EmptyDescription>
-                </EmptyHeader>
-            </Empty>
-        }
 
 
     </div>
