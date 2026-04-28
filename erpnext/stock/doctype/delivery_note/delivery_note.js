@@ -372,6 +372,15 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 		});
 	}
 
+	items_add(doc, cdt, cdn) {
+		const row = frappe.get_doc(cdt, cdn);
+		if (doc.project) {
+			frappe.model.set_value(cdt, cdn, "project", doc.project);
+		} else {
+			this.frm.script_manager.copy_from_first_row("items", row, ["project"]);
+		}
+	}
+
 	make_sales_invoice() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
