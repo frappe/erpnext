@@ -241,8 +241,7 @@
   {
    "fieldname": "slab_top_temp",
    "fieldtype": "Float",
-   "label": "Slab Top Temperature (in \u00b0C)",
-   "reqd": 1
+   "label": "Slab Top Temperature (in \u00b0C)"
   },
   {
    "fieldname": "column_break_zbq7",
@@ -251,8 +250,7 @@
   {
    "fieldname": "slab_bottom_temp",
    "fieldtype": "Float",
-   "label": "Slab Bottom Temperature (in \u00b0C)",
-   "reqd": 1
+   "label": "Slab Bottom Temperature (in \u00b0C)"
   },
   {
    "fieldname": "section_break_ayzd",
@@ -298,7 +296,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-06 23:47:21.220499",
+ "modified": "2026-04-21 15:06:40.519075",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Oven Operation",

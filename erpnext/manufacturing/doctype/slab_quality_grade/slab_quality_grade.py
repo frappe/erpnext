@@ -17,8 +17,5 @@ class SlabQualityGrade(Document):
 		code: DF.Data
 		color: DF.Color
 		grade_name: DF.Data
-		parent: DF.Data
-		parentfield: DF.Data
-		parenttype: DF.Data
 	# end: auto-generated types
 	pass

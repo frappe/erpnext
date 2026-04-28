@@ -110,9 +110,9 @@ frappe.ui.form.on("Slab Quality Report", {
 
         if (!frm.doc.grade) return;
 
-        frappe.db.get_doc('Mahi Granites Settings').then(settings_doc => {
-            if (settings_doc && settings_doc.grades) {
-                const grade_entry = settings_doc.grades.find(d => d.name == frm.doc.grade || d.grade_name == frm.doc.grade);
+		frappe.db.get_list('Slab Quality Grade', { fields: ['code', 'name', 'color'] }).then(grades => {
+            if (grades && grades.length) {
+                const grade_entry = grades.find(d => d.name == frm.doc.grade || d.grade_name == frm.doc.grade);
                 $wrapper.find('.control-input')[0].style.display = 'block';
                 if (grade_entry && grade_entry.color) {
                     $(`
