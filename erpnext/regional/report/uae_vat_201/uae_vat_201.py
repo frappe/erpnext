@@ -5,10 +5,26 @@
 import frappe
 from frappe import _
 
+# Per-execution memoization cache for the helper functions below.
+# Cleared at the start of every execute() call so each report run gets
+# fresh data; within a single run, repeated calls reuse the result.
+_cache = {}
+
+
+def _cached(fn):
+	def wrapper(filters, *args, **kwargs):
+		key = (fn.__name__, tuple(sorted((filters or {}).items())))
+		if key not in _cache:
+			_cache[key] = fn(filters, *args, **kwargs)
+		return _cache[key]
+
+	return wrapper
+
 
 def execute(filters=None):
+	_cache.clear()
 	columns = get_columns()
-	data, emirates, amounts_by_emirate = get_data(filters)
+	data = get_data(filters)
 	return columns, data
 
 
@@ -35,23 +51,198 @@ def get_columns():
 def get_data(filters=None):
 	"""Returns the list of dictionaries. Each dictionary is a row in the datatable and chart data."""
 	data = []
-	emirates, amounts_by_emirate = append_vat_on_sales(data, filters)
+	amounts_by_emirate = append_vat_on_sales(data, filters)
 	append_vat_on_expenses(data, filters)
-	return data, emirates, amounts_by_emirate
+	net_vat_due(data, filters, amounts_by_emirate)
+
+	final_data = []
+	for i in range(0, len(data)):
+		if data[i].get("legend") == "Standard rated supplies in Abu Dhabi":
+			legend_link = f"""
+			<a href= "/app/query-report/UAE%20VAT%20Register?company={filters.get("company")}&from_date={filters.get("from_date")}&to_date={filters.get("to_date")}&doc_type=Sales%20Invoice&vat=Abu%20Dhabi&category=Standard">{data[i].get("legend")}</a>
+			"""
+			final_data.append(
+				{
+					"no": data[i].get("no"),
+					"legend": legend_link,
+					"amount": data[i].get("amount"),
+					"vat_amount": data[i].get("vat_amount"),
+				}
+			)
+		elif data[i].get("legend") == "Standard rated supplies in Dubai":
+			company = frappe.defaults.get_user_default("Company")
+			company_filters = [
+				["Dynamic Link", "link_doctype", "=", "Company"],
+				["Dynamic Link", "link_name", "=", company],
+				["Address", "is_your_company_address", "=", 1],
+			]
+			company_fields = [
+				"name",
+				"address_line1",
+				"address_line2",
+				"city",
+				"state",
+				"country",
+				"emirate",
+			]
+			address = frappe.get_all("Address", filters=company_filters, fields=company_fields)
+
+			if address:
+				if address[0].get("emirate"):
+					name = "Standard rated supplies in" + " " + address[0].get("emirate")
+				else:
+					name = "Standard rated supplies in Dubai"
+			else:
+				name = "Standard rated supplies in Dubai"
+
+			legend_link = f"""
+			<a href= "/app/query-report/UAE%20VAT%20Register?company={filters.get("company")}&from_date={filters.get("from_date")}&to_date={filters.get("to_date")}&doc_type=Sales%20Invoice&vat=Dubai&category=Standard">{name}</a>
+			"""
+			final_data.append(
+				{
+					"no": data[i].get("no"),
+					"legend": legend_link,
+					"amount": data[i].get("amount"),
+					"vat_amount": data[i].get("vat_amount"),
+				}
+			)
+
+		elif data[i].get("legend") == "Standard rated supplies in Sharjah":
+			legend_link = f"""
+			<a href= "/app/query-report/UAE%20VAT%20Register?company={filters.get("company")}&from_date={filters.get("from_date")}&to_date={filters.get("to_date")}&doc_type=Sales%20Invoice&vat=Sharjah&category=Standard">{data[i].get("legend")}</a>
+			"""
+			final_data.append(
+				{
+					"no": data[i].get("no"),
+					"legend": legend_link,
+					"amount": data[i].get("amount"),
+					"vat_amount": data[i].get("vat_amount"),
+				}
+			)
+		elif data[i].get("legend") == "Standard rated supplies in Ajman":
+			legend_link = f"""
+			<a href= "/app/query-report/UAE%20VAT%20Register?company={filters.get("company")}&from_date={filters.get("from_date")}&to_date={filters.get("to_date")}&doc_type=Sales%20Invoice&vat=Ajman&category=Standard">{data[i].get("legend")}</a>
+			"""
+			final_data.append(
+				{
+					"no": data[i].get("no"),
+					"legend": legend_link,
+					"amount": data[i].get("amount"),
+					"vat_amount": data[i].get("vat_amount"),
+				}
+			)
+		elif data[i].get("legend") == "Standard rated supplies in Umm Al Quwain":
+			legend_link = f"""
+			<a href= "/app/query-report/UAE%20VAT%20Register?company={filters.get("company")}&from_date={filters.get("from_date")}&to_date={filters.get("to_date")}&doc_type=Sales%20Invoice&vat=Umm%20Al%20Quwain&category=Standard">{data[i].get("legend")}</a>
+			"""
+			final_data.append(
+				{
+					"no": data[i].get("no"),
+					"legend": legend_link,
+					"amount": data[i].get("amount"),
+					"vat_amount": data[i].get("vat_amount"),
+				}
+			)
+		elif data[i].get("legend") == "Standard rated supplies in Ras Al Khaimah":
+			legend_link = f"""
+			<a href= "/app/query-report/UAE%20VAT%20Register?company={filters.get("company")}&from_date={filters.get("from_date")}&to_date={filters.get("to_date")}&doc_type=Sales%20Invoice&vat=Ras%20Al%20Khaimah&category=Standard">{data[i].get("legend")}</a>
+			"""
+			final_data.append(
+				{
+					"no": data[i].get("no"),
+					"legend": legend_link,
+					"amount": data[i].get("amount"),
+					"vat_amount": data[i].get("vat_amount"),
+				}
+			)
+		elif data[i].get("legend") == "Standard rated supplies in Fujairah":
+			legend_link = f"""
+			<a href= "/app/query-report/UAE%20VAT%20Register?company={filters.get("company")}&from_date={filters.get("from_date")}&to_date={filters.get("to_date")}&doc_type=Sales%20Invoice&vat=Fujairah&category=Standard">{data[i].get("legend")}</a>
+			"""
+			final_data.append(
+				{
+					"no": data[i].get("no"),
+					"legend": legend_link,
+					"amount": data[i].get("amount"),
+					"vat_amount": data[i].get("vat_amount"),
+				}
+			)
+		elif data[i].get("legend") == "Supplies subject to the reverse charge provision":
+			legend_link = f"""
+			<a href= "/app/query-report/UAE%20VAT%20Register?company={filters.get("company")}&from_date={filters.get("from_date")}&to_date={filters.get("to_date")}&doc_type=Purchase%20Invoice&reverse_charge=Y">{data[i].get("legend")}</a>
+			"""
+			final_data.append(
+				{
+					"no": data[i].get("no"),
+					"legend": legend_link,
+					"amount": data[i].get("amount"),
+					"vat_amount": data[i].get("vat_amount"),
+				}
+			)
+		elif data[i].get("legend") == "Zero Rated":
+			legend_link = f"""
+			<a href= "/app/query-report/UAE%20VAT%20Register?company={filters.get("company")}&from_date={filters.get("from_date")}&to_date={filters.get("to_date")}&doc_type=Sales%20Invoice&category=Zero%20Rated">{data[i].get("legend")}</a>
+			"""
+			final_data.append(
+				{
+					"no": data[i].get("no"),
+					"legend": legend_link,
+					"amount": data[i].get("amount"),
+					"vat_amount": data[i].get("vat_amount"),
+				}
+			)
+		elif data[i].get("legend") == "Exempt Supplies":
+			legend_link = f"""
+			<a href= "/app/query-report/UAE%20VAT%20Register?company={filters.get("company")}&from_date={filters.get("from_date")}&to_date={filters.get("to_date")}&doc_type=Sales%20Invoice&category=Exempt%20Rated">{data[i].get("legend")}</a>
+			"""
+			final_data.append(
+				{
+					"no": data[i].get("no"),
+					"legend": legend_link,
+					"amount": data[i].get("amount"),
+					"vat_amount": data[i].get("vat_amount"),
+				}
+			)
+		elif data[i].get("legend") == "Standard Rated Expenses":
+			legend_link = f"""
+			<a href= "/app/query-report/UAE%20VAT%20Register?company={filters.get("company")}&from_date={filters.get("from_date")}&to_date={filters.get("to_date")}&doc_type=Purchase%20Invoice">{data[i].get("legend")}</a>
+			"""
+			final_data.append(
+				{
+					"no": data[i].get("no"),
+					"legend": legend_link,
+					"amount": data[i].get("amount"),
+					"vat_amount": data[i].get("vat_amount"),
+				}
+			)
+		else:
+			final_data.append(
+				{
+					"no": data[i].get("no"),
+					"legend": data[i].get("legend"),
+					"amount": data[i].get("amount"),
+					"vat_amount": data[i].get("vat_amount"),
+				}
+			)
+
+	return final_data
 
 
 def append_vat_on_sales(data, filters):
 	"""Appends Sales and All Other Outputs."""
 	append_data(data, "", _("VAT on Sales and All Other Outputs"), "", "")
 
-	emirates, amounts_by_emirate = standard_rated_expenses_emiratewise(data, filters)
+	amounts_by_emirate = standard_rated_expenses_emiratewise(data, filters)
+
+	si_amount = amounts_by_emirate[1]
+	si_vat = amounts_by_emirate[2]
 
 	append_data(
 		data,
 		"2",
 		_("Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme"),
-		frappe.format((-1) * get_tourist_tax_return_total(filters), "Currency"),
-		frappe.format((-1) * get_tourist_tax_return_tax(filters), "Currency"),
+		format_currency_signed((-1) * get_tourist_tax_return_total(filters)),
+		format_currency_signed((-1) * get_tourist_tax_return_tax(filters)),
 	)
 
 	append_data(
@@ -66,9 +257,27 @@ def append_vat_on_sales(data, filters):
 
 	append_data(data, "5", _("Exempt Supplies"), frappe.format(get_exempt_total(filters), "Currency"), "-")
 
+	append_data(
+		data,
+		"8",
+		_("Total"),
+		frappe.format(
+			(-1) * get_tourist_tax_return_total(filters)
+			+ get_reverse_charge_total(filters)
+			+ get_zero_rated_total(filters)
+			+ get_exempt_total(filters)
+			+ sum(si_amount),
+			"Currency",
+		),
+		frappe.format(
+			(-1) * get_tourist_tax_return_tax(filters) + get_reverse_charge_tax(filters) + sum(si_vat),
+			"Currency",
+		),
+	)
+
 	append_data(data, "", "", "", "")
 
-	return emirates, amounts_by_emirate
+	return amounts_by_emirate
 
 
 def standard_rated_expenses_emiratewise(data, filters):
@@ -85,16 +294,21 @@ def standard_rated_expenses_emiratewise(data, filters):
 			"vat_amount": frappe.format(vat, "Currency"),
 		}
 	amounts_by_emirate = append_emiratewise_expenses(data, emirates, amounts_by_emirate)
-	return emirates, amounts_by_emirate
+	return amounts_by_emirate
 
 
 def append_emiratewise_expenses(data, emirates, amounts_by_emirate):
 	"""Append emiratewise standard rated expenses and vat."""
+	s_amount = []
+	v_amount = []
 	for no, emirate in enumerate(emirates, 97):
 		if emirate in amounts_by_emirate:
 			amounts_by_emirate[emirate]["no"] = _("1{0}").format(chr(no))
 			amounts_by_emirate[emirate]["legend"] = _("Standard rated supplies in {0}").format(emirate)
 			data.append(amounts_by_emirate[emirate])
+
+			s_amount.append(amounts_by_emirate[emirate].get("raw_amount") or 0)
+			v_amount.append(amounts_by_emirate[emirate].get("raw_vat_amount") or 0)
 		else:
 			append_data(
 				data,
@@ -103,7 +317,7 @@ def append_emiratewise_expenses(data, emirates, amounts_by_emirate):
 				frappe.format(0, "Currency"),
 				frappe.format(0, "Currency"),
 			)
-	return amounts_by_emirate
+	return amounts_by_emirate, s_amount, v_amount
 
 
 def append_vat_on_expenses(data, filters):
@@ -124,12 +338,77 @@ def append_vat_on_expenses(data, filters):
 		frappe.format(get_reverse_charge_recoverable_tax(filters), "Currency"),
 	)
 
+	append_data(
+		data,
+		"11",
+		_("Total"),
+		frappe.format(
+			get_standard_rated_expenses_total(filters) + get_reverse_charge_recoverable_total(filters),
+			"Currency",
+		),
+		frappe.format(
+			get_standard_rated_expenses_tax(filters) + get_reverse_charge_recoverable_tax(filters),
+			"Currency",
+		),
+	)
+
+
+def net_vat_due(data, filters, amounts_by_emirate):
+	si_vat = amounts_by_emirate[2]
+
+	append_data(data, "", "", "", "")
+	append_data(data, "", _("Net VAT Due"), "", "")
+	append_data(
+		data,
+		"12",
+		_("Total value of due tax for the period"),
+		frappe.format(0.00, "Currency"),
+		frappe.format(
+			sum(si_vat) + (-1) * get_tourist_tax_return_tax(filters) + get_reverse_charge_tax(filters),
+			"Currency",
+		),
+	)
+	append_data(
+		data,
+		"13",
+		_("Total value of recoverable tax for the period "),
+		frappe.format(0.00, "Currency"),
+		frappe.format(
+			get_standard_rated_expenses_tax(filters) + get_reverse_charge_recoverable_tax(filters),
+			"Currency",
+		),
+	)
+
+	# Calculate payable tax: Due Tax - Recoverable Tax
+	due_tax = sum(si_vat) + (-1) * get_tourist_tax_return_tax(filters) + get_reverse_charge_tax(filters)
+	recoverable_tax = get_standard_rated_expenses_tax(filters) + get_reverse_charge_recoverable_tax(filters)
+	payable_tax = due_tax - recoverable_tax
+
+	append_data(
+		data,
+		"14",
+		_("Payable tax for the period"),
+		frappe.format(0.00, "Currency"),
+		frappe.format(payable_tax, "Currency"),
+	)
+
 
 def append_data(data, no, legend, amount, vat_amount):
 	"""Returns data with appended value."""
 	data.append({"no": no, "legend": legend, "amount": amount, "vat_amount": vat_amount})
 
 
+def format_currency_signed(value):
+	"""Format a number as currency, placing the minus sign *before* the currency symbol
+	when negative (e.g. "-د.إ 5,000.00" rather than "د.إ -5,000.00")."""
+	if value is None:
+		value = 0
+	if value < 0:
+		return "-" + frappe.format(abs(value), "Currency")
+	return frappe.format(value, "Currency")
+
+
+@_cached
 def get_total_emiratewise(filters):
 	"""Returns Emiratewise Amount and Taxes."""
 	conditions = get_conditions(filters)
@@ -143,7 +422,7 @@ def get_total_emiratewise(filters):
 			on
 				i.parent = s.name
 			where
-				s.docstatus = 1 and i.is_exempt != 1 and i.is_zero_rated != 1
+				s.docstatus = 1 and  i.is_exempt != 1 and i.is_zero_rated != 1
 				{conditions}
 			group by
 				s.vat_emirate;
@@ -166,11 +445,12 @@ def get_filters(filters):
 		query_filters.append(["company", "=", filters["company"]])
 	if filters.get("from_date"):
 		query_filters.append(["posting_date", ">=", filters["from_date"]])
-	if filters.get("from_date"):
+	if filters.get("to_date"):
 		query_filters.append(["posting_date", "<=", filters["to_date"]])
 	return query_filters
 
 
+@_cached
 def get_reverse_charge_total(filters):
 	"""Returns the sum of the total of each Purchase invoice made."""
 	query_filters = get_filters(filters)
@@ -181,7 +461,7 @@ def get_reverse_charge_total(filters):
 			frappe.db.get_all(
 				"Purchase Invoice",
 				filters=query_filters,
-				fields=[{"SUM": "base_total"}],
+				fields=["sum(base_net_total)"],
 				as_list=True,
 				limit=1,
 			)[0][0]
@@ -191,9 +471,15 @@ def get_reverse_charge_total(filters):
 		return 0
 
 
+@_cached
 def get_reverse_charge_tax(filters):
 	"""Returns the sum of the tax of each Purchase invoice made."""
 	conditions = get_conditions_join(filters)
+
+	# Handle missing company filter
+	if not filters.get("company"):
+		return 0
+
 	return (
 		frappe.db.sql(
 			f"""
@@ -214,6 +500,7 @@ def get_reverse_charge_tax(filters):
 	)
 
 
+@_cached
 def get_reverse_charge_recoverable_total(filters):
 	"""Returns the sum of the total of each Purchase invoice made with recoverable reverse charge."""
 	query_filters = get_filters(filters)
@@ -225,7 +512,7 @@ def get_reverse_charge_recoverable_total(filters):
 			frappe.db.get_all(
 				"Purchase Invoice",
 				filters=query_filters,
-				fields=[{"SUM": "base_total"}],
+				fields=["sum(base_net_total)"],
 				as_list=True,
 				limit=1,
 			)[0][0]
@@ -235,9 +522,15 @@ def get_reverse_charge_recoverable_total(filters):
 		return 0
 
 
+@_cached
 def get_reverse_charge_recoverable_tax(filters):
 	"""Returns the sum of the tax of each Purchase invoice made."""
 	conditions = get_conditions_join(filters)
+
+	# Handle missing company filter
+	if not filters.get("company"):
+		return 0
+
 	return (
 		frappe.db.sql(
 			f"""
@@ -274,6 +567,7 @@ def get_conditions_join(filters):
 	return conditions
 
 
+@_cached
 def get_standard_rated_expenses_total(filters):
 	"""Returns the sum of the total of each Purchase invoice made with recoverable reverse charge."""
 	query_filters = get_filters(filters)
@@ -284,7 +578,7 @@ def get_standard_rated_expenses_total(filters):
 			frappe.db.get_all(
 				"Purchase Invoice",
 				filters=query_filters,
-				fields=[{"SUM": "base_total"}],
+				fields=["sum(base_net_total)"],
 				as_list=True,
 				limit=1,
 			)[0][0]
@@ -294,6 +588,7 @@ def get_standard_rated_expenses_total(filters):
 		return 0
 
 
+@_cached
 def get_standard_rated_expenses_tax(filters):
 	"""Returns the sum of the tax of each Purchase invoice made."""
 	query_filters = get_filters(filters)
@@ -304,7 +599,7 @@ def get_standard_rated_expenses_tax(filters):
 			frappe.db.get_all(
 				"Purchase Invoice",
 				filters=query_filters,
-				fields=[{"SUM": "recoverable_standard_rated_expenses"}],
+				fields=["sum(recoverable_standard_rated_expenses)"],
 				as_list=True,
 				limit=1,
 			)[0][0]
@@ -314,6 +609,7 @@ def get_standard_rated_expenses_tax(filters):
 		return 0
 
 
+@_cached
 def get_tourist_tax_return_total(filters):
 	"""Returns the sum of the total of each Sales invoice with non zero tourist_tax_return."""
 	query_filters = get_filters(filters)
@@ -322,7 +618,7 @@ def get_tourist_tax_return_total(filters):
 	try:
 		return (
 			frappe.db.get_all(
-				"Sales Invoice", filters=query_filters, fields=[{"SUM": "base_total"}], as_list=True, limit=1
+				"Sales Invoice", filters=query_filters, fields=["sum(base_net_total)"], as_list=True, limit=1
 			)[0][0]
 			or 0
 		)
@@ -330,6 +626,7 @@ def get_tourist_tax_return_total(filters):
 		return 0
 
 
+@_cached
 def get_tourist_tax_return_tax(filters):
 	"""Returns the sum of the tax of each Sales invoice with non zero tourist_tax_return."""
 	query_filters = get_filters(filters)
@@ -340,7 +637,7 @@ def get_tourist_tax_return_tax(filters):
 			frappe.db.get_all(
 				"Sales Invoice",
 				filters=query_filters,
-				fields=[{"SUM": "tourist_tax_return"}],
+				fields=["sum(tourist_tax_return)"],
 				as_list=True,
 				limit=1,
 			)[0][0]
@@ -350,6 +647,7 @@ def get_tourist_tax_return_tax(filters):
 		return 0
 
 
+@_cached
 def get_zero_rated_total(filters):
 	"""Returns the sum of each Sales Invoice Item Amount which is zero rated."""
 	conditions = get_conditions(filters)
@@ -375,6 +673,7 @@ def get_zero_rated_total(filters):
 		return 0
 
 
+@_cached
 def get_exempt_total(filters):
 	"""Returns the sum of each Sales Invoice Item Amount which is Vat Exempt."""
 	conditions = get_conditions(filters)

@@ -200,6 +200,14 @@ def make_custom_fields():
 				print_hide=1,
 			),
 		],
+		"Company": [
+			dict(
+				fieldname="company_name_in_arabic",
+				label="Company Name in Arabic",
+				fieldtype="Data",
+				insert_after="company_name",
+			),
+		],
 		"Customer": [
 			dict(
 				fieldname="customer_name_in_arabic",
