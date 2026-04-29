@@ -62,6 +62,16 @@ export const slug = (name?: string) => {
     return name?.toLowerCase().replace(/ /g, "-") ?? "";
 }
 
+export const scrub = (txt?: string) => {
+    return (txt || "").replace(/ /g, "_").toLowerCase(); // use
+}
+
+export const unscrub = (txt?: string) => {
+    return (txt || "").replace(/-|_/g, " ").replace(/\w*/g, function (keywords) {
+        return keywords.charAt(0).toUpperCase() + keywords.substring(1).toLowerCase();
+    });
+}
+
 export const getSystemDefault = (fieldName: string, fallback?: string) => {
     return window.frappe?.boot?.sysdefaults?.[fieldName] ?? fallback
 }
