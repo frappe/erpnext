@@ -748,12 +748,6 @@ cur_frm.cscript.update_status = function (label, status) {
 	});
 };
 
-cur_frm.fields_dict["items"].grid.get_field("project").get_query = function (doc, cdt, cdn) {
-	return {
-		filters: [["Project", "status", "not in", "Completed, Cancelled"]],
-	};
-};
-
 if (cur_frm.doc.is_old_subcontracting_flow) {
 	cur_frm.fields_dict["items"].grid.get_field("bom").get_query = function (doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
