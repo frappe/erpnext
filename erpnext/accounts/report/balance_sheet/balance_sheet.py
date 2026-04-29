@@ -14,6 +14,7 @@ from erpnext.accounts.report.financial_statements import (
 	compute_growth_view_data,
 	get_columns,
 	get_data,
+	get_dimension_period_list,
 	get_filtered_list_for_consolidated_report,
 	get_period_list,
 )
@@ -23,15 +24,24 @@ def execute(filters=None):
 	if filters and filters.report_template:
 		return FinancialReportEngine().execute(filters)
 
-	period_list = get_period_list(
-		filters.from_fiscal_year,
-		filters.to_fiscal_year,
-		filters.period_start_date,
-		filters.period_end_date,
-		filters.filter_based_on,
-		filters.periodicity,
-		company=filters.company,
-	)
+	if filters and filters.get("group_by_dimension"):
+		period_list = get_dimension_period_list(filters)
+		# Growth view assumes ordered time periods; not meaningful across dims.
+		if filters.get("selected_view") == "Growth":
+			filters["selected_view"] = "Report"
+	else:
+		period_list = get_period_list(
+			filters.from_fiscal_year,
+			filters.to_fiscal_year,
+			filters.period_start_date,
+			filters.period_end_date,
+			filters.filter_based_on,
+			filters.periodicity,
+			company=filters.company,
+		)
+
+	if not period_list:
+		return [], [], None, None, None, None
 
 	filters.period_start_date = period_list[0]["year_start_date"]
 

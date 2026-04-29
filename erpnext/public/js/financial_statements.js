@@ -359,6 +359,16 @@ erpnext.financial_statements = {
 			});
 		}
 	},
+
+	get_accounting_dimension_options: function () {
+		let options = ["", "Cost Center", "Project"];
+		frappe.db.get_list("Accounting Dimension", { fields: ["document_type"] }).then((res) => {
+			res.forEach((dimension) => {
+				options.push(dimension.document_type);
+			});
+		});
+		return options;
+	},
 };
 
 function get_filters() {

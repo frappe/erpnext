@@ -15,10 +15,135 @@ from pypika.terms import Bracket, ExistsCriterion, LiteralValue
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
+	get_dimension_fieldname,
 	get_dimension_with_children,
 )
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
 from erpnext.accounts.utils import get_fiscal_year, get_zero_cutoff
+
+# ---------------------------------------------------------------------------
+# Dimension-as-column axis helpers
+#
+# When `filters.group_by_dimension` is set, the engine produces a synthetic
+# `period_list` where each entry represents a dimension value (Cost Center,
+# Project or any Accounting Dimension) instead of a date bucket. Each entry
+# carries `dim_field` and `dim_value` so downstream aggregation can branch.
+# This is the single source of truth for both period-mode and dimension-mode
+# columns; reports themselves need only swap the period_list builder.
+# ---------------------------------------------------------------------------
+
+
+# TODO: can use existing utility?
+def get_dimension_date_range(filters):
+	"""Resolve the (from_date, to_date) used as the single time bucket in dim mode."""
+	if filters.get("filter_based_on") == "Fiscal Year":
+		fy_data = get_fiscal_year_data(filters.get("from_fiscal_year"), filters.get("to_fiscal_year"))
+		return getdate(fy_data["year_start_date"]), getdate(fy_data["year_end_date"])
+
+	return getdate(filters.get("period_start_date")), getdate(filters.get("period_end_date"))
+
+
+def get_dimension_values(filters):
+	"""Return (fieldname, [values]) for the chosen grouping dimension.
+
+	Values are sourced from GL Entry within the report's date range, intersected
+	with any row-level filter on the same field, so empty columns are avoided.
+	"""
+	dim_doctype = filters.get("group_by_dimension")
+	if not dim_doctype:
+		return None, []
+
+	fieldname = get_dimension_fieldname(dim_doctype)
+	from_date, to_date = get_dimension_date_range(filters)
+
+	gl = frappe.qb.DocType("GL Entry")
+	query = (
+		frappe.qb.from_(gl)
+		.select(gl[fieldname])
+		.distinct()
+		.where(gl.company == filters.get("company"))
+		.where(gl.is_cancelled == 0)
+		.where(gl.posting_date <= to_date)
+	)
+
+	# For P&L-like reports the lower bound matters; for BS-like cumulative
+	# reports we still use it as a heuristic to avoid columns for long-dead
+	# dimension values. Users wanting full history can widen the range.
+	if from_date:
+		query = query.where(gl.posting_date >= from_date)
+
+	# Row filters narrow the visible column set (independent stacking).
+	if filters.get("cost_center"):
+		ccs = get_cost_centers_with_children(filters.get("cost_center"))
+		query = query.where(gl.cost_center.isin(ccs))
+
+	if filters.get("project"):
+		projects = filters.get("project")
+		if not isinstance(projects, list):
+			projects = frappe.parse_json(projects)
+		query = query.where(gl.project.isin(projects))
+
+	for dimension in get_accounting_dimensions(as_list=False):
+		if filters.get(dimension.fieldname):
+			value = filters.get(dimension.fieldname)
+			if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
+				value = get_dimension_with_children(dimension.document_type, value)
+			query = query.where(gl[dimension.fieldname].isin(value))
+
+	rows = query.run()
+	values = sorted({(r[0] or "") for r in rows})  # ? sorted by with why?
+	return fieldname, values
+
+
+def get_dimension_period_list(filters):
+	"""Return a period_list-shaped axis where each entry is a dimension value.
+
+	The returned list is consumed by the same downstream pipeline as the
+	period-based axis, but each entry carries `dim_field`/`dim_value`. Empty
+	list means no GL data exists for the chosen dimension within the range.
+	"""
+	fieldname, values = get_dimension_values(filters)
+	if not fieldname:
+		return []
+
+	from_date, to_date = get_dimension_date_range(filters)
+	company = filters.get("company")
+	fy = get_fiscal_year(to_date, company=company) if company else None
+
+	unassigned_label = _("No {0}").format(filters.get("group_by_dimension"))
+
+	period_list = []
+	used_keys = set()
+	for index, value in enumerate(values):
+		label = value or unassigned_label
+		key = frappe.scrub(label)
+		if key in used_keys:
+			key = f"{key}_{index}"
+		used_keys.add(key)
+
+		period_list.append(
+			frappe._dict(
+				{
+					"key": key,
+					"label": label,
+					"from_date": from_date,
+					"to_date": to_date,
+					"year_start_date": from_date,
+					"year_end_date": to_date,
+					"to_date_fiscal_year": fy[0] if fy else None,
+					"from_date_fiscal_year_start_date": fy[1] if fy else from_date,
+					"dim_field": fieldname,
+					"dim_value": value or "",
+				}
+			)
+		)
+
+	return period_list
+
+
+def is_dimension_axis(period_list) -> bool:
+	"""True if the provided period_list is a dimension-grouped axis."""
+	return bool(period_list) and bool(period_list[0].get("dim_field"))
 
 
 def get_period_list(
@@ -234,6 +359,8 @@ def calculate_values(
 	accumulated_values,
 	ignore_accumulated_values_for_fy,
 ):
+	dim_mode = is_dimension_axis(period_list)
+
 	for entries in gl_entries_by_account.values():
 		for entry in entries:
 			d = accounts_by_name.get(entry.account)
@@ -244,14 +371,30 @@ def calculate_values(
 					raise_exception=1,
 				)
 			for period in period_list:
-				# check if posting date is within the period
+				if dim_mode:
+					# Dimension axis: bucket by dim value, all dates already
+					# constrained by the SQL query (BS unbounded, P&L bounded).
+					entry_dim = entry.get(period.dim_field) or ""
+					if entry_dim != (period.dim_value or ""):
+						continue
+					if entry.posting_date > period.to_date:
+						continue
+					d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
+					continue
 
+				# check if posting date is within the period
 				if entry.posting_date <= period.to_date:
 					if (accumulated_values or entry.posting_date >= period.from_date) and (
 						not ignore_accumulated_values_for_fy
 						or entry.fiscal_year == period.to_date_fiscal_year
 					):
 						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
+
+			if dim_mode:
+				# In dim mode each column already represents a cumulative slice
+				# (dim-value across all dates up to to_date). Adding a separate
+				# scalar `opening_balance` would double-count those entries.
+				continue
 
 			if entry.posting_date < period_list[0].year_start_date:
 				d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
@@ -448,9 +591,13 @@ def set_gl_entries_by_account(
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	gl_entries = []
 
+	# Period Closing Voucher rolls up balances without dimension attribution,
+	# so when grouping by dimension we must read raw GL entries only.
+	dim_mode = bool(filters and filters.get("group_by_dimension"))
+
 	# For balance sheet
 	ignore_closing_balances = frappe.get_single_value("Accounts Settings", "ignore_account_closing_balance")
-	if not from_date and not ignore_closing_balances:
+	if not from_date and not ignore_closing_balances and not dim_mode:
 		last_period_closing_voucher = frappe.db.get_all(
 			"Period Closing Voucher",
 			filters={
@@ -533,6 +680,12 @@ def get_accounting_entries(
 		)
 		.where(gl_entry.company == filters.company)
 	)
+
+	# When grouping by an accounting dimension, expose the dimension fieldname
+	# on each row so `calculate_values` can bucket entries by dim value.
+	if filters and filters.get("group_by_dimension") and doctype == "GL Entry" and not group_by_account:
+		dim_field = get_dimension_fieldname(filters["group_by_dimension"])
+		query = query.select(gl_entry[dim_field])
 
 	if not ignore_reporting_currency:
 		query = query.select(
@@ -709,17 +862,16 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None, ca
 				"width": 150,
 			}
 		)
-	if periodicity != "Yearly":
-		if not accumulated_values:
-			columns.append(
-				{
-					"fieldname": "total",
-					"label": _("Total"),
-					"fieldtype": "Currency",
-					"width": 150,
-					"options": "currency",
-				}
-			)
+	if is_dimension_axis(period_list) or (periodicity != "Yearly" and not accumulated_values):
+		columns.append(
+			{
+				"fieldname": "total",
+				"label": _("Total"),
+				"fieldtype": "Currency",
+				"width": 150,
+				"options": "currency",
+			}
+		)
 
 	return columns
 

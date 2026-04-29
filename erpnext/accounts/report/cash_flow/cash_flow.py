@@ -18,8 +18,10 @@ from erpnext.accounts.report.financial_statements import (
 	get_columns,
 	get_cost_centers_with_children,
 	get_data,
+	get_dimension_period_list,
 	get_filtered_list_for_consolidated_report,
 	get_period_list,
+	is_dimension_axis,
 	set_gl_entries_by_account,
 )
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
@@ -32,15 +34,21 @@ def execute(filters=None):
 	if filters and filters.report_template:
 		return FinancialReportEngine().execute(filters)
 
-	period_list = get_period_list(
-		filters.from_fiscal_year,
-		filters.to_fiscal_year,
-		filters.period_start_date,
-		filters.period_end_date,
-		filters.filter_based_on,
-		filters.periodicity,
-		company=filters.company,
-	)
+	if filters and filters.get("group_by_dimension"):
+		period_list = get_dimension_period_list(filters)
+	else:
+		period_list = get_period_list(
+			filters.from_fiscal_year,
+			filters.to_fiscal_year,
+			filters.period_start_date,
+			filters.period_end_date,
+			filters.filter_based_on,
+			filters.periodicity,
+			company=filters.company,
+		)
+
+	if not period_list:
+		return [], [], None, None, None
 
 	cash_flow_sections = get_cash_flow_accounts()
 
@@ -135,8 +143,15 @@ def execute(filters=None):
 		data, data, _("Net Change in Cash"), period_list, company_currency, summary_data, filters
 	)
 
-	if filters.show_opening_and_closing_balance:
+	if filters.show_opening_and_closing_balance and not is_dimension_axis(period_list):
 		show_opening_and_closing_balance(data, period_list, company_currency, net_change_in_cash, filters)
+	elif filters.show_opening_and_closing_balance:
+		# TODO: Need to handle dimension axis case?
+		frappe.msgprint(
+			_("Opening & Closing balance is not shown when grouping by dimension."),
+			indicator="orange",
+			alert=True,
+		)
 
 	columns = get_columns(
 		filters.periodicity,
@@ -192,6 +207,9 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 		filters.start_date = start_date
 		filters.end_date = period["to_date"]
 		filters.account_type = account_type
+		# Per-column dimension scoping; cleared when not in dim mode.
+		filters.dim_field = period.get("dim_field")
+		filters.dim_value = period.get("dim_value")
 
 		amount = get_account_type_based_gl_data(company, filters)
 
@@ -201,6 +219,8 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 		total += amount
 		data.setdefault(period["key"], amount)
 
+	filters.dim_field = None
+	filters.dim_value = None
 	data["total"] = total
 	return data
 
@@ -224,6 +244,19 @@ def get_account_type_based_gl_data(company, filters=None):
 	if filters.get("cost_center"):
 		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
 		cond += " and cost_center in %(cost_center)s"
+
+	if filters.get("dim_field"):
+		# Filter the column by the active dimension value (including the
+		# synthetic "(Unassigned)" bucket when the entry has no value).
+		import re
+
+		dim_field = filters.dim_field
+		if not re.match(r"^[a-z_][a-z0-9_]*$", dim_field or ""):
+			frappe.throw(_("Invalid dimension field: {0}").format(dim_field))
+		if filters.get("dim_value"):
+			cond += f" and `{dim_field}` = %(dim_value)s"
+		else:
+			cond += f" and (`{dim_field}` = '' or `{dim_field}` is null)"
 
 	gl_sum = frappe.db.sql_list(
 		f"""
