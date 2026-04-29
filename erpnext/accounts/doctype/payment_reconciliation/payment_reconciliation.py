@@ -39,35 +39,34 @@ class PaymentReconciliation(Document):
 		from erpnext.accounts.doctype.payment_reconciliation_allocation.payment_reconciliation_allocation import (
 			PaymentReconciliationAllocation,
 		)
-		from erpnext.accounts.doctype.payment_reconciliation_invoice.payment_reconciliation_invoice import (
-			PaymentReconciliationInvoice,
-		)
-		from erpnext.accounts.doctype.payment_reconciliation_payment.payment_reconciliation_payment import (
-			PaymentReconciliationPayment,
+		from erpnext.accounts.doctype.payment_reconciliation_entry.payment_reconciliation_entry import (
+			PaymentReconciliationEntry,
 		)
 
 		allocation: DF.Table[PaymentReconciliationAllocation]
 		bank_cash_account: DF.Link | None
 		company: DF.Link
 		cost_center: DF.Link | None
+		currency: DF.Link | None
+		currency_filter: DF.Link | None
 		default_advance_account: DF.Link | None
-		from_invoice_date: DF.Date | None
-		from_payment_date: DF.Date | None
-		invoice_limit: DF.Int
-		invoice_name: DF.Data | None
-		invoices: DF.Table[PaymentReconciliationInvoice]
-		maximum_invoice_amount: DF.Currency
-		maximum_payment_amount: DF.Currency
-		minimum_invoice_amount: DF.Currency
-		minimum_payment_amount: DF.Currency
+		difference_amount: DF.Currency
+		filter_payables: DF.Data | None
+		filter_receivables: DF.Data | None
+		from_date: DF.Date | None
+		max_amount: DF.Currency
+		min_amount: DF.Currency
 		party: DF.DynamicLink
 		party_type: DF.Link
-		payment_limit: DF.Int
-		payment_name: DF.Data | None
-		payments: DF.Table[PaymentReconciliationPayment]
-		receivable_payable_account: DF.Link
-		to_invoice_date: DF.Date | None
-		to_payment_date: DF.Date | None
+		payable_limit: DF.Int
+		payables: DF.Table[PaymentReconciliationEntry]
+		project: DF.Link | None
+		receivable_limit: DF.Int
+		receivable_payable_account: DF.Link | None
+		receivables: DF.Table[PaymentReconciliationEntry]
+		to_date: DF.Date | None
+		total_invoice_amount: DF.Currency
+		total_payment_amount: DF.Currency
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
