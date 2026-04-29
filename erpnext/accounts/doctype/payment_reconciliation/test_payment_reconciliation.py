@@ -9,6 +9,7 @@ from frappe.utils.data import getdate as convert_to_date
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import Classifier
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
@@ -3052,3 +3053,32 @@ def make_period_closing_voucher(company, cost_center, posting_date=None, submit=
 		pcv.submit()
 
 	return pcv
+
+
+class TestClassifier(ERPNextTestSuite):
+	def test_sales_invoice_regular_is_receivable(self):
+		# SI posts Dr to Debtors → +ve PLE amount on Receivable account
+		self.assertEqual(Classifier.classify("Receivable", 1000.0), "Receivable")
+
+	def test_sales_invoice_credit_note_is_payable(self):
+		# CN (SI is_return=1) posts Cr to Debtors → -ve PLE amount on Receivable account
+		self.assertEqual(Classifier.classify("Receivable", -500.0), "Payable")
+
+	def test_purchase_invoice_regular_is_payable(self):
+		# PI posts Cr to Creditors → +ve PLE amount on Payable account
+		self.assertEqual(Classifier.classify("Payable", 1000.0), "Payable")
+
+	def test_purchase_invoice_debit_note_is_receivable(self):
+		# DN (PI is_return=1) posts Dr to Creditors → -ve PLE amount on Payable account
+		self.assertEqual(Classifier.classify("Payable", -500.0), "Receivable")
+
+	def test_unsupported_account_type_throws(self):
+		for bad in ("Asset", "Bank", "Cash", "Equity", "", None):
+			with self.assertRaises(frappe.ValidationError):
+				Classifier.classify(bad, 100.0)
+
+	def test_zero_amount_throws(self):
+		with self.assertRaises(frappe.ValidationError):
+			Classifier.classify("Receivable", 0)
+		with self.assertRaises(frappe.ValidationError):
+			Classifier.classify("Payable", 0.0)
