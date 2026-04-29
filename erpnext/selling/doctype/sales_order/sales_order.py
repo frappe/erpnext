@@ -533,6 +533,7 @@ class SalesOrder(SellingController):
 		self.update_reserved_qty()
 		self.notify_update()
 		clear_doctype_notifications(self)
+		self.update_blanket_order()
 
 	def update_reserved_qty(self, so_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
