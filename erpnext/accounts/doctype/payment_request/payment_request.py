@@ -96,9 +96,9 @@ class PaymentRequest(Document):
 		party_account_currency: DF.Link | None
 		party_name: DF.Data | None
 		party_type: DF.Link | None
-		payment_account: DF.ReadOnly | None
+		payment_account: DF.Link | None
 		payment_channel: DF.Literal["", "Email", "Phone", "Other"]
-		payment_gateway: DF.ReadOnly | None
+		payment_gateway: DF.Link | None
 		payment_gateway_account: DF.Link | None
 		payment_order: DF.Link | None
 		payment_reference: DF.Table[PaymentReference]
@@ -198,13 +198,16 @@ class PaymentRequest(Document):
 			frappe.throw(_("Transaction currency must be same as Payment Gateway currency"))
 
 	def validate_subscription_details(self):
+		if "payments" not in frappe.get_installed_apps():
+			return
+
 		if self.is_a_subscription:
 			amount = 0
 			for subscription_plan in self.subscription_plans:
-				payment_gateway = frappe.db.get_value(
-					"Subscription Plan", subscription_plan.plan, "payment_gateway"
+				payment_gateway_account = frappe.db.get_value(
+					"Subscription Plan", subscription_plan.plan, "payment_gateway_account"
 				)
-				if payment_gateway != self.payment_gateway_account:
+				if payment_gateway_account != self.payment_gateway_account:
 					frappe.throw(
 						_(
 							"The payment gateway account in plan {0} is different from the payment gateway account in this payment request"
@@ -404,6 +407,9 @@ class PaymentRequest(Document):
 		}
 
 	def request_phone_payment(self):
+		if "payments" not in frappe.get_installed_apps():
+			return
+
 		controller = _get_payment_gateway_controller(self.payment_gateway)
 		request_amount = self.get_request_amount()
 
@@ -452,6 +458,9 @@ class PaymentRequest(Document):
 		si.submit()
 
 	def payment_gateway_validation(self):
+		if "payments" not in frappe.get_installed_apps():
+			return False
+
 		try:
 			controller = _get_payment_gateway_controller(self.payment_gateway)
 			if hasattr(controller, "on_payment_request_submission"):
@@ -467,10 +476,16 @@ class PaymentRequest(Document):
 			return False
 
 	def set_payment_request_url(self):
+		if "payments" not in frappe.get_installed_apps():
+			return
+
 		if self.payment_account and self.payment_gateway and self.payment_gateway_validation():
 			self.payment_url = self.get_payment_url()
 
 	def get_payment_url(self):
+		if "payments" not in frappe.get_installed_apps():
+			return False
+
 		if self.reference_doctype != "Fees":
 			data = frappe.db.get_value(
 				self.reference_doctype, self.reference_name, ["company", "customer_name"], as_dict=1
@@ -757,7 +772,7 @@ def make_payment_request(**args):
 	if not args.get("company"):
 		args.company = ref_doc.company
 
-	gateway_account = get_gateway_details(args) or frappe._dict()
+	gateway_account = get_payment_gateway_account_details(args) or frappe._dict()
 
 	# Schedule-based PRs are allowed only if no Payment Entry exists for this document.
 	# Any existing Payment Entry forces legacy (amount-based) flow.
@@ -877,10 +892,6 @@ def make_payment_request(**args):
 
 		pr.update(
 			{
-				"payment_gateway_account": gateway_account.get("name"),
-				"payment_gateway": gateway_account.get("payment_gateway"),
-				"payment_account": gateway_account.get("payment_account"),
-				"payment_channel": gateway_account.get("payment_channel"),
 				"payment_request_type": args.get("payment_request_type"),
 				"currency": ref_doc.currency,
 				"party_account_currency": party_account_currency,
@@ -908,6 +919,17 @@ def make_payment_request(**args):
 				"phone_number": args.get("phone_number") if args.get("phone_number") else None,
 			}
 		)
+
+		# specific fields to payments app
+		if "payments" in frappe.get_installed_apps():
+			pr.update(
+				{
+					"payment_gateway": gateway_account.get("payment_gateway"),
+					"payment_gateway_account": gateway_account.get("name"),
+					"payment_account": gateway_account.get("payment_account"),
+					"payment_channel": gateway_account.get("payment_channel"),
+				}
+			)
 
 		if selected_payment_schedules:
 			apply_payment_references(pr, payment_reference)
@@ -1102,19 +1124,19 @@ def get_existing_payment_request_amount(ref_doc, statuses: list | None = None) -
 	return os_amount_in_transaction_currency
 
 
-def get_gateway_details(args):  # nosemgrep
+def get_payment_gateway_account_details(args):  # nosemgrep
 	"""
-	Return gateway and payment account of default payment gateway
+	Fetch details of the default or specified Payment Gateway Account
 	"""
-	gateway_account = args.get("payment_gateway_account", {"is_default": 1, "company": args.company})
-	return get_payment_gateway_account(gateway_account)
+	if "payments" not in frappe.get_installed_apps():
+		return
 
+	filter = args.get("payment_gateway_account", {"is_default": 1, "company": args.company})
 
-def get_payment_gateway_account(filter):
 	return frappe.db.get_value(
 		"Payment Gateway Account",
 		filter,
-		["name", "payment_gateway", "payment_account", "payment_channel", "message"],
+		["name", "payment_account", "payment_channel", "message"],
 		as_dict=1,
 	)
 

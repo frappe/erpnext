@@ -48,23 +48,24 @@
   "email_to",
   "subject",
   "column_break_9",
-  "payment_gateway_account",
   "status",
   "make_sales_invoice",
   "section_break_10",
   "message",
   "message_examples",
   "mute_email",
-  "section_break_7",
+  "payment_gateway_details",
   "payment_gateway",
+  "payment_gateway_account",
   "payment_account",
   "payment_channel",
-  "payment_order",
-  "amended_from",
   "column_break_pnyv",
   "payment_url",
-  "column_break_iiuv",
-  "phone_number"
+  "phone_number",
+  "section_break_jfix",
+  "amended_from",
+  "column_break_ruax",
+  "payment_order"
  ],
  "fields": [
   {
@@ -299,13 +300,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval: doc.payment_request_type == 'Inward'",
-   "fieldname": "payment_gateway_account",
-   "fieldtype": "Link",
-   "label": "Payment Gateway Account",
-   "options": "Payment Gateway Account"
-  },
-  {
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -363,24 +357,17 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "doc.payment_gateway_account",
    "depends_on": "eval: doc.payment_request_type == 'Inward'",
-   "fieldname": "section_break_7",
-   "fieldtype": "Section Break",
-   "label": "Payment Gateway Details"
-  },
-  {
-   "fetch_from": "payment_gateway_account.payment_gateway",
    "fieldname": "payment_gateway",
-   "fieldtype": "Read Only",
-   "label": "Payment Gateway"
+   "fieldtype": "Link",
+   "label": "Payment Gateway",
+   "options": "Payment Gateway"
   },
   {
-   "fetch_from": "payment_gateway_account.payment_account",
    "fieldname": "payment_account",
-   "fieldtype": "Read Only",
+   "fieldtype": "Link",
    "label": "Payment Account",
+   "options": "Account",
    "read_only": 1
   },
   {
@@ -453,10 +440,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_iiuv",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "phone_number",
    "fieldtype": "Data",
    "label": "Phone Number"
@@ -471,6 +454,28 @@
    "label": "Payment Reference",
    "options": "Payment Reference",
    "read_only": 1
+  },
+  {
+   "fieldname": "payment_gateway_account",
+   "fieldtype": "Link",
+   "label": "Payment Gateway Account",
+   "options": "Payment Gateway Account"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "doc.payment_gateway",
+   "depends_on": "eval: doc.payment_request_type == 'Inward'",
+   "fieldname": "payment_gateway_details",
+   "fieldtype": "Section Break",
+   "label": "Payment Gateway Details"
+  },
+  {
+   "fieldname": "section_break_jfix",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ruax",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -478,7 +483,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-27 19:11:03.308896",
+ "modified": "2026-04-29 00:54:51.353583",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",

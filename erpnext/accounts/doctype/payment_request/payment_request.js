@@ -1,5 +1,4 @@
 cur_frm.add_fetch("payment_gateway_account", "payment_account", "payment_account");
-cur_frm.add_fetch("payment_gateway_account", "payment_gateway", "payment_gateway");
 cur_frm.add_fetch("payment_gateway_account", "message", "message");
 
 frappe.ui.form.on("Payment Request", {
@@ -13,7 +12,8 @@ frappe.ui.form.on("Payment Request", {
 		frm.set_query("payment_gateway_account", function () {
 			return {
 				filters: {
-					company: frm.doc.company,
+					parent: frm.doc.payment_gateway,
+					parenttype: "Payment Gateway",
 				},
 			};
 		});
@@ -82,6 +82,7 @@ frappe.ui.form.on("Payment Request", "refresh", function (frm) {
 });
 
 frappe.ui.form.on("Payment Request", "is_a_subscription", function (frm) {
+	frm.toggle_reqd("payment_gateway", frm.doc.is_a_subscription);
 	frm.toggle_reqd("payment_gateway_account", frm.doc.is_a_subscription);
 	frm.toggle_reqd("subscription_plans", frm.doc.is_a_subscription);
 
