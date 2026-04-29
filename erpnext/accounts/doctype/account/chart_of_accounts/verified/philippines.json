@@ -20,18 +20,24 @@
 						"is_group": 0,
 						"root_type": "Asset",
 						"account_type": "Cash"
-					}
-				},
-				"Petty Cash Fund": {
-					"account_number": "1200",
-					"is_group": 1,
-					"root_type": "Asset",
-					"account_type": "Cash",
-					"Petty Cash Fund": {
-						"account_number": "1201",
-						"is_group": 0,
+					},
+					"Bank Accounts": {
+						"account_number": "1102",
+						"is_group": 1,
 						"root_type": "Asset",
-						"account_type": "Cash"
+						"account_type": "Bank"
+					},
+					"Petty Cash Fund": {
+						"account_number": "1200",
+						"is_group": 1,
+						"root_type": "Asset",
+						"account_type": "Cash",
+						"Petty Cash Fund": {
+							"account_number": "1201",
+							"is_group": 0,
+							"root_type": "Asset",
+							"account_type": "Cash"
+						}
 					}
 				},
 				"Advances to Officers & Employees": {
@@ -112,18 +118,14 @@
 					"Finished Goods Inventory": {
 						"account_number": "1531",
 						"is_group": 0,
-						"root_type": "Asset"
+						"root_type": "Asset",
+						"account_type": "Stock"
 					},
 					"Inventory in Transit": {
 						"account_number": "1532",
 						"is_group": 0,
-						"root_type": "Asset"
-					},
-					"Stock In Hand": {
-						"account_number": "1550",
-						"is_group": 0,
 						"root_type": "Asset",
-						"account_type": "Stock"
+						"account_type": "Stock Adjustment"
 					}
 				},
 				"Prepayments": {
@@ -164,27 +166,32 @@
 					"Land": {
 						"account_number": "1701",
 						"is_group": 0,
-						"root_type": "Asset"
+						"root_type": "Asset",
+						"account_type": "Fixed Asset"
 					},
 					"Buildings & Improvements": {
 						"account_number": "1702",
 						"is_group": 0,
-						"root_type": "Asset"
+						"root_type": "Asset",
+						"account_type": "Fixed Asset"
 					},
 					"Delivery & Trans Equipment": {
 						"account_number": "1703",
 						"is_group": 0,
-						"root_type": "Asset"
+						"root_type": "Asset",
+						"account_type": "Fixed Asset"
 					},
 					"Furniture & Fixtures": {
 						"account_number": "1704",
 						"is_group": 0,
-						"root_type": "Asset"
+						"root_type": "Asset",
+						"account_type": "Fixed Asset"
 					},
 					"Machinery & Equipment": {
 						"account_number": "1705",
 						"is_group": 0,
-						"root_type": "Asset"
+						"root_type": "Asset",
+						"account_type": "Fixed Asset"
 					}
 				},
 				"Accum Depr. - Property, Plants and Equipment": {
@@ -399,7 +406,8 @@
 				"Customer Deposits": {
 					"account_number": "2500",
 					"is_group": 0,
-					"root_type": "Liability"
+					"root_type": "Liability",
+					"account_type": "Payable"
 				}
 			},
 			"Non Current Liabilities": {
@@ -555,16 +563,6 @@
 						"is_group": 0,
 						"root_type": "Income"
 					}
-				},
-				"Exchange Gain": {
-					"account_number": "6030",
-					"is_group": 0,
-					"root_type": "Income"
-				},
-				"Gain/Loss on Asset Disposal": {
-					"account_number": "6031",
-					"is_group": 0,
-					"root_type": "Income"
 				}
 			}
 		},
@@ -572,84 +570,8 @@
 			"account_number": "5000",
 			"is_group": 1,
 			"root_type": "Expense",
-			"Direct Labor": {
-				"account_number": "5400",
-				"is_group": 0,
-				"root_type": "Expense"
-			},
-			"Factory Overhead": {
-				"account_number": "5500",
-				"is_group": 0,
-				"root_type": "Expense"
-			},
-			"Cost Of Sales": {
-				"account_number": "5600",
-				"is_group": 0,
-				"root_type": "Expense"
-			},
-			"Cost of Goods Sold": {
-				"account_number": "5601",
-				"is_group": 0,
-				"root_type": "Expense",
-				"account_type": "Cost of Goods Sold"
-			},
-			"Stock Adjustment": {
-				"account_number": "5602",
-				"is_group": 0,
-				"root_type": "Expense",
-				"account_type": "Stock Adjustment"
-			},
-			"Expenses Included In Valuation": {
-				"account_number": "5603",
-				"is_group": 0,
-				"root_type": "Expense",
-				"account_type": "Expenses Included In Valuation"
-			},
-			"Depreciation": {
-				"account_number": "5018",
-				"is_group": 0,
-				"root_type": "Expense",
-				"account_type": "Depreciation"
-			},
-			"Other Expenses": {
-				"account_number": "6200",
-				"is_group": 1,
-				"root_type": "Expense",
-				"Bank Charges": {
-					"account_number": "6201",
-					"is_group": 0,
-					"root_type": "Expense"
-				},
-				"Interest Expenses Bank": {
-					"account_number": "6202",
-					"is_group": 0,
-					"root_type": "Expense"
-				},
-				"Write Off": {
-					"account_number": "6203",
-					"is_group": 0,
-					"root_type": "Expense"
-				},
-				"Round Off": {
-					"account_number": "6205",
-					"is_group": 0,
-					"root_type": "Expense",
-					"account_type": "Round Off"
-				},
-				"Exchange Loss": {
-					"account_number": "6204",
-					"is_group": 0,
-					"root_type": "Expense"
-				}
-			},
-			"Provision For Income Tax": {
-				"account_number": "6300",
-				"is_group": 0,
-				"root_type": "Expense",
-				"account_type": "Tax"
-			},
-			"OPERATING EXPENSES (Revenue Expenditures)": {
-				"account_number": "5001",
+			"Operating Expenses": {
+				"account_number": "5100",
 				"is_group": 1,
 				"root_type": "Expense",
 				"Salaries, Wages": {
@@ -730,7 +652,8 @@
 				"Depreciation Expenses": {
 					"account_number": "5116",
 					"is_group": 0,
-					"root_type": "Expense"
+					"root_type": "Expense",
+					"account_type": "Depreciation"
 				},
 				"Donation & Contribution": {
 					"account_number": "5117",
@@ -893,6 +816,24 @@
 					"is_group": 0,
 					"root_type": "Expense"
 				}
+			},
+			"Stock Adjustment": {
+				"account_number": "5200",
+				"is_group": 0,
+				"root_type": "Expense",
+				"account_type": "Stock Adjustment"
+			},
+			"Round Off": {
+				"account_number": "5300",
+				"is_group": 0,
+				"root_type": "Expense",
+				"account_type": "Round Off"
+			},
+			"Expenses Included In Valuation": {
+				"account_number": "5400",
+				"is_group": 0,
+				"root_type": "Expense",
+				"account_type": "Expenses Included In Valuation"
 			}
 		}
 	}
