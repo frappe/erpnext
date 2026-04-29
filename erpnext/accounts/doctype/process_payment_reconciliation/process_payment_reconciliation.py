@@ -25,18 +25,20 @@ class ProcessPaymentReconciliation(Document):
 		cost_center: DF.Link | None
 		default_advance_account: DF.Link | None
 		error_log: DF.LongText | None
+		from_date: DF.Date | None
 		from_invoice_date: DF.Date | None
 		from_payment_date: DF.Date | None
 		party: DF.DynamicLink
 		party_type: DF.Link
-		receivable_payable_account: DF.Link
+		receivable_payable_account: DF.Link | None
 		status: DF.Literal[
 			"", "Queued", "Running", "Paused", "Completed", "Partially Reconciled", "Failed", "Cancelled"
 		]
+		to_date: DF.Date | None
 		to_invoice_date: DF.Date | None
 		to_payment_date: DF.Date | None
-
 	# end: auto-generated types
+
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
 
