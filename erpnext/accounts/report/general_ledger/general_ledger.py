@@ -277,11 +277,10 @@ def get_conditions(filters):
 	if filters.get("categorize_by") == "Categorize by Party" and not filters.get("party_type"):
 		conditions.append("party_type in ('Customer', 'Supplier')")
 
-	if filters.get("party_type"):
-		conditions.append("party_type=%(party_type)s")
-
 	if filters.get("party"):
-		conditions.append("party in %(party)s")
+		conditions.append(build_common_party_condition(filters))
+	elif filters.get("party_type"):
+		conditions.append("party_type=%(party_type)s")
 
 	if not (
 		filters.get("account")
@@ -343,6 +342,44 @@ def get_conditions(filters):
 						conditions.append(f"{dimension.fieldname} in %({dimension.fieldname})s")
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
+
+
+def get_linked_parties(party_list: list, party_type: str) -> dict:
+	parties_by_type = {party_type: list(party_list)}
+
+	party_link_dt = frappe.qb.DocType("Party Link")
+	links = (
+		frappe.qb.from_(party_link_dt)
+		.select(
+			party_link_dt.primary_role,
+			party_link_dt.primary_party,
+			party_link_dt.secondary_role,
+			party_link_dt.secondary_party,
+		)
+		.where(
+			(party_link_dt.secondary_party.isin(party_list)) | (party_link_dt.primary_party.isin(party_list))
+		)
+		.run(as_dict=True)
+	)
+
+	for link in links:
+		if link.secondary_party in party_list and link.secondary_role == party_type:
+			parties_by_type.setdefault(link.primary_role, []).append(link.primary_party)
+		elif link.primary_party in party_list and link.primary_role == party_type:
+			parties_by_type.setdefault(link.secondary_role, []).append(link.secondary_party)
+
+	return parties_by_type
+
+
+def build_common_party_condition(filters):
+	parties_by_type = get_linked_parties(list(filters.get("party")), filters.get("party_type"))
+
+	parts = []
+	for ptype, p_list in parties_by_type.items():
+		escaped_parties = ", ".join(frappe.db.escape(p) for p in p_list)
+		parts.append(f"(party_type = {frappe.db.escape(ptype)} AND party IN ({escaped_parties}))")
+
+	return "(" + " OR ".join(parts) + ")"
 
 
 def get_party_name_map():
