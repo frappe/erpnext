@@ -28,6 +28,8 @@
   "filler_spot",
   "column_break_2uin",
   "contamination",
+  "column_break_yoap",
+  "shade",
   "paper_deep_section",
   "paper_deep_front",
   "column_break_0ycf",
@@ -41,7 +43,12 @@
   "column_break_hmsq",
   "repair",
   "column_break_0tsh",
+  "recovery_type",
+  "repolish_type",
+  "recalibration_type",
+  "section_break_dtsr",
   "grade",
+  "column_break_bblv",
   "section_break_8ixs",
   "remarks",
   "section_break_jbcr",
@@ -232,11 +239,12 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval: doc.repair && doc.repair == 'None';",
    "fieldname": "grade",
    "fieldtype": "Link",
    "label": "Grade",
-   "options": "Slab Quality Grade",
-   "reqd": 1
+   "mandatory_depends_on": "eval: doc.repair && doc.repair == 'None';",
+   "options": "Slab Quality Grade"
   },
   {
    "fieldname": "section_break_8ixs",
@@ -264,18 +272,58 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "None",
    "fieldname": "repair",
    "fieldtype": "Select",
    "label": "Slab Repair Type",
-   "options": "None\nRecovery\nRepolish\n3cm to 2cm"
+   "options": "\nNone\nRecovery\nRepolish\nRecalibration"
+  },
+  {
+   "depends_on": "eval: doc.repair && doc.repair == 'Recovery';",
+   "fieldname": "recovery_type",
+   "fieldtype": "Select",
+   "label": "Recovery Type",
+   "options": "\nFilm Contamination\nForeign Contamination\nGrit Contamination\nPigment Contamination\nPinhole Repair\nCavity\nOther"
+  },
+  {
+   "depends_on": "eval: doc.repair && doc.repair == 'Repolish';",
+   "fieldname": "repolish_type",
+   "fieldtype": "Select",
+   "label": "Repolish Type",
+   "mandatory_depends_on": "eval: doc.repair && doc.repair == 'Repolish';",
+   "options": "\nRecovery Slab\nHead Mark\nWaves\nEdge Polish\nDull Polish\nOther"
+  },
+  {
+   "fieldname": "section_break_dtsr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_bblv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_yoap",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shade",
+   "fieldtype": "Select",
+   "label": "Shade",
+   "options": "\nShade 1\nShade 2\nShade 3"
+  },
+  {
+   "depends_on": "eval: doc.repair && doc.repair == 'Recalibration';",
+   "fieldname": "recalibration_type",
+   "fieldtype": "Select",
+   "label": "Recalibration Type",
+   "mandatory_depends_on": "eval: doc.repair && doc.repair == 'Recalibration';",
+   "options": "\n3cm to 2cm\n1mm"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-16 12:19:16.351335",
+ "modified": "2026-04-29 22:51:58.318216",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab Quality Report",

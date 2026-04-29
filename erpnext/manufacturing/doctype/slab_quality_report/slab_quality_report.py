@@ -27,13 +27,17 @@ class SlabQualityReport(Document):
 		crack_front: DF.Data | None
 		date: DF.Date
 		filler_spot: DF.Data | None
-		grade: DF.Link
+		grade: DF.Link | None
 		job_card: DF.Link
 		observations: DF.Table[SlabQualityObservation]
 		paper_deep_back: DF.Data | None
 		paper_deep_front: DF.Data | None
+		recalibration_type: DF.Literal["", "3cm to 2cm", "1mm"]
+		recovery_type: DF.Literal["", "Film Contamination", "Foreign Contamination", "Grit Contamination", "Pigment Contamination", "Pinhole Repair", "Cavity", "Other"]
 		remarks: DF.Text | None
-		repair: DF.Literal["None", "Recovery", "Repolish", "3cm to 2cm"]
+		repair: DF.Literal["", "None", "Recovery", "Repolish", "Recalibration"]
+		repolish_type: DF.Literal["", "Recovery Slab", "Head Mark", "Waves", "Edge Polish", "Dull Polish", "Other"]
+		shade: DF.Literal["", "Shade 1", "Shade 2", "Shade 3"]
 		shift: DF.Link
 		slab: DF.Link
 		slab_length: DF.Float

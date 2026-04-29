@@ -172,10 +172,20 @@ def _update_item_and_status_on_slab(item_code: str, slab_number: str, is_rejecte
 
 @frappe.whitelist()
 def get_repair_options():
-	field = frappe.get_meta("Slab Quality Report").get_field("repair")
-	if field and field.options:
-		return [opt.strip() for opt in field.options.split("\n") if opt.strip()]
-	return []
+	meta = frappe.get_meta("Slab Quality Report")
+
+	def get_options(fieldname):
+		field = meta.get_field(fieldname)
+		if field and field.options:
+			return [opt.strip() for opt in field.options.split("\n") if opt.strip()]
+		return []
+
+	return {
+		"repair": get_options("repair"),
+		"recovery_type": get_options("recovery_type"),
+		"repolish_type": get_options("repolish_type"),
+		"recalibration_type": get_options("recalibration_type"),
+	}
 
 
 def finish_qc_process(slab_number: str, slab_grade: str | None, job_card: str, publish_slab_event=True):
