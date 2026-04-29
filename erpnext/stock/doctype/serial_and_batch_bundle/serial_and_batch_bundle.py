@@ -8,11 +8,10 @@ from collections import Counter, defaultdict
 
 import frappe
 import frappe.query_builder
-import frappe.query_builder.functions
 from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
-from frappe.query_builder.functions import Concat_ws, Locate, Sum
+from frappe.query_builder.functions import Concat_ws, Sum
 from frappe.utils import (
 	cint,
 	cstr,
@@ -3358,21 +3357,20 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 		serial_nos = [serial_nos]
 
 	if serial_nos:
+		import re
+
+		escaped_serial_nos = [re.escape(sn) for sn in serial_nos if sn]
+		regex_pattern = r"\n(" + "|".join(escaped_serial_nos) + r")\n"
+
 		query = (
 			query.left_join(serial_batch_entry)
 			.on(stock_ledger_entry.serial_and_batch_bundle == serial_batch_entry.parent)
+			.where(
+				serial_batch_entry.serial_no.isin(serial_nos)
+				| Concat_ws("", "\n", stock_ledger_entry.serial_no, "\n").regexp(regex_pattern)
+			)
 			.distinct()
 		)
-
-		bundle_match = serial_batch_entry.serial_no.isin(serial_nos)
-
-		padded_serial_no = Concat_ws("", "\n", stock_ledger_entry.serial_no, "\n")
-		direct_match = None
-		for sn in serial_nos:
-			cond = Locate(f"\n{sn}\n", padded_serial_no) > 0
-			direct_match = cond if direct_match is None else (direct_match | cond)
-
-		query = query.where(bundle_match | direct_match)
 
 	if kwargs.ignore_voucher_detail_no:
 		query = query.where(stock_ledger_entry.voucher_detail_no != kwargs.ignore_voucher_detail_no)
