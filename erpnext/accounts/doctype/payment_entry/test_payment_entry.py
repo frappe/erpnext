@@ -8,11 +8,13 @@ from frappe.utils import add_days, flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
+	get_best_fit_payment_request,
 	get_outstanding_reference_documents,
 	get_party_details,
 	get_payment_entry,
 	get_reference_details,
 )
+from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 	make_purchase_invoice,
 	make_purchase_invoice_against_cost_center,
@@ -2104,6 +2106,163 @@ class TestPaymentEntry(ERPNextTestSuite):
 		for ref in references:
 			self.assertEqual(ref.voucher_no, so.name)
 			self.assertIsNotNone(ref.payment_term)
+
+	def test_best_fit_payment_request_exact_match(self):
+		pi = make_purchase_invoice(qty=10, rate=500)
+
+		pr1 = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1, return_doc=1)
+		pr1.grand_total = 200
+		pr1.submit()
+		frappe.db.set_value("Payment Request", pr1.name, "outstanding_amount", 200)
+
+		pr_exact = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1, return_doc=1)
+		pr_exact.grand_total = 500
+		pr_exact.submit()
+		frappe.db.set_value("Payment Request", pr_exact.name, "outstanding_amount", 500)
+
+		pr3 = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1, return_doc=1)
+		pr3.grand_total = 300
+		pr3.submit()
+		frappe.db.set_value("Payment Request", pr3.name, "outstanding_amount", 300)
+
+		result = get_best_fit_payment_request(
+			reference_doctype="Purchase Invoice",
+			reference_name=pi.name,
+			unallocated_amount=500,
+		)
+
+		self.assertIsNotNone(result)
+		self.assertEqual(result.payment_request, pr_exact.name)
+		self.assertEqual(flt(result.outstanding_amount), 500)
+
+	def test_best_fit_payment_request_largest_fitting(self):
+		pi = make_purchase_invoice(qty=10, rate=500)
+
+		pr1 = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1, return_doc=1)
+		pr1.grand_total = 200
+		pr1.submit()
+		frappe.db.set_value("Payment Request", pr1.name, "outstanding_amount", 200)
+
+		pr_largest_fit = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1, return_doc=1)
+		pr_largest_fit.grand_total = 400
+		pr_largest_fit.submit()
+		frappe.db.set_value("Payment Request", pr_largest_fit.name, "outstanding_amount", 400)
+
+		pr3 = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1, return_doc=1)
+		pr3.grand_total = 700
+		pr3.submit()
+		frappe.db.set_value("Payment Request", pr3.name, "outstanding_amount", 700)
+
+		result = get_best_fit_payment_request(
+			reference_doctype="Purchase Invoice",
+			reference_name=pi.name,
+			unallocated_amount=500,
+		)
+
+		self.assertIsNotNone(result)
+		self.assertEqual(result.payment_request, pr_largest_fit.name)
+		self.assertEqual(flt(result.outstanding_amount), 400)
+
+	def test_best_fit_payment_request_oldest_fallback(self):
+		pi = make_purchase_invoice(qty=10, rate=500)
+
+		pr_oldest = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1, return_doc=1)
+		pr_oldest.grand_total = 700
+		pr_oldest.submit()
+		frappe.db.set_value("Payment Request", pr_oldest.name, "outstanding_amount", 700)
+
+		pr2 = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1, return_doc=1)
+		pr2.grand_total = 800
+		pr2.submit()
+		frappe.db.set_value("Payment Request", pr2.name, "outstanding_amount", 800)
+
+		result = get_best_fit_payment_request(
+			reference_doctype="Purchase Invoice",
+			reference_name=pi.name,
+			unallocated_amount=500,
+		)
+
+		self.assertIsNotNone(result)
+		self.assertEqual(result.payment_request, pr_oldest.name)
+		self.assertEqual(flt(result.outstanding_amount), 700)
+
+	def test_best_fit_payment_request_no_open_prs(self):
+		pi = make_purchase_invoice(qty=10, rate=500)
+
+		result = get_best_fit_payment_request(
+			reference_doctype="Purchase Invoice",
+			reference_name=pi.name,
+			unallocated_amount=500,
+		)
+
+		self.assertIsNone(result)
+
+	def test_best_fit_payment_request_unallocated_zero(self):
+		pi = make_purchase_invoice(qty=10, rate=500)
+
+		pr_oldest = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1, return_doc=1)
+		pr_oldest.grand_total = 300
+		pr_oldest.submit()
+		frappe.db.set_value("Payment Request", pr_oldest.name, "outstanding_amount", 300)
+
+		pr2 = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1, return_doc=1)
+		pr2.grand_total = 500
+		pr2.submit()
+		frappe.db.set_value("Payment Request", pr2.name, "outstanding_amount", 500)
+
+		result = get_best_fit_payment_request(
+			reference_doctype="Purchase Invoice",
+			reference_name=pi.name,
+			unallocated_amount=0,
+		)
+
+		self.assertIsNotNone(result)
+		self.assertEqual(result.payment_request, pr_oldest.name)
+
+	def test_best_fit_payment_request_excludes_existing_prs(self):
+		pi = make_purchase_invoice(qty=10, rate=500)
+
+		pr_already_used = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1, return_doc=1)
+		pr_already_used.grand_total = 500
+		pr_already_used.submit()
+		frappe.db.set_value("Payment Request", pr_already_used.name, "outstanding_amount", 500)
+
+		pr_candidate = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1, return_doc=1)
+		pr_candidate.grand_total = 500
+		pr_candidate.submit()
+		frappe.db.set_value("Payment Request", pr_candidate.name, "outstanding_amount", 500)
+
+		result = get_best_fit_payment_request(
+			reference_doctype="Purchase Invoice",
+			reference_name=pi.name,
+			unallocated_amount=500,
+			existing_prs=[pr_already_used.name],
+		)
+
+		self.assertIsNotNone(result)
+		self.assertEqual(result.payment_request, pr_candidate.name)
+
+	def test_best_fit_payment_request_all_prs_excluded(self):
+		pi = make_purchase_invoice(qty=10, rate=500)
+
+		pr1 = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1, return_doc=1)
+		pr1.grand_total = 500
+		pr1.submit()
+		frappe.db.set_value("Payment Request", pr1.name, "outstanding_amount", 500)
+
+		pr2 = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1, return_doc=1)
+		pr2.grand_total = 300
+		pr2.submit()
+		frappe.db.set_value("Payment Request", pr2.name, "outstanding_amount", 300)
+
+		result = get_best_fit_payment_request(
+			reference_doctype="Purchase Invoice",
+			reference_name=pi.name,
+			unallocated_amount=500,
+			existing_prs=[pr1.name, pr2.name],
+		)
+
+		self.assertIsNone(result)
 
 
 def create_payment_entry(**args):
