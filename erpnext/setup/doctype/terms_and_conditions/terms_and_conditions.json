@@ -11,6 +11,8 @@
  "field_order": [
   "title",
   "disabled",
+  "column_break_ofhb",
+  "copy_attachments_to_transaction",
   "applicable_modules_section",
   "selling",
   "buying",
@@ -72,12 +74,26 @@
   {
    "fieldname": "section_break_7",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ofhb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "copy_attachments_to_transaction",
+   "fieldtype": "Check",
+   "label": "Copy Attachments to Transaction"
   }
  ],
  "icon": "icon-legal",
  "idx": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-01-30 12:47:52.325531",
+=======
+ "modified": "2026-04-29 22:51:49.285298",
+>>>>>>> c543d15f3c (feat: copy terms attachments to transactions (#53403))
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Terms and Conditions",
