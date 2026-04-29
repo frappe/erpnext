@@ -1,51 +1,114 @@
-<!-- Modified on 25-11-2024
--->
-
 <style type="text/css">
-    /* General styles for both screen display and print */
     body, html {
-        margin-top: 10;
+        margin-top: 10px;
         padding: 0;
         width: 100%;
-        height: auto; /* Allow content to expand */
-        font-family: Arial, sans-serif; /* Example font */
+        height: auto;
+        font-family: Inter, sans-serif;
+        font-size: 14px;
+        line-height: 21px;
+        color: #171717;
     }
 
-    /* Ensure consistent letter spacing across all media */
     .title-letter-spacing {
-        letter-spacing: .2rem;
+		font-size: 15px;
+		font-weight: 600;
+		color: #171717;
     }
 
-    /* Styles specific to printing and PDF generation */
+    .report-table table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+    }
+
+    .report-table thead th {
+        background: #f8f8f8;
+        text-align: center;
+		font-size: 14px;
+        font-weight: 500;
+        color: #7c7c7c;
+        border-top: 1px solid #ededed;
+        border-bottom: 1px solid #ededed;
+        padding: 6px 8px;
+    }
+
+    .report-table tbody td {
+        padding: 6px 8px;
+        border-top: 1px solid #ededed;
+        border-bottom: 1px solid #ededed;
+        vertical-align: top;
+        word-wrap: break-word;
+        font-size: 14px;
+    }
+
+    .report-table thead th:first-child {
+        border-left: 1px solid #ededed;
+    }
+
+    .report-table thead th:last-child {
+        border-right: 1px solid #ededed;
+    }
+
+    .report-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .date-col {
+        white-space: nowrap;
+    }
+
+    .text-center { text-align: center; }
+    .text-left { text-align: left; }
+    .text-right { text-align: right; font-variant-numeric: tabular-nums; }
+
+    .text-bold { font-weight: 700; }
+
+    .report-meta {
+        margin: 10px 0 14px;
+        padding: 8px 10px;
+        color: #171717;
+		font-size: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .report-meta .left,
+    .report-meta .right {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .report-meta .filter-row {
+        margin-bottom: 4px;
+        line-height: 1.5;
+    }
+
+    .report-meta strong {
+        color: #7c7c7c;
+        font-weight: 500;
+    }
+
+    .report-subtitle {
+        margin: 10px 0 14px;
+    }
+
     @media print {
-        /* Set page size and margins for printing */
         @page {
-            size: A4; /* Use fixed A4 page size */
+            size: A4;
             margin-top: 10mm;
         }
-
-        /* Force a page break before elements with the class "page-break" */
-        .page-break {
-            page-break-before: always;
-            margin-top: 10mm; /* Add some space after the break */
-        }
-
-        /* Ensure table headers repeat on each printed page */
         thead {
             display: table-header-group;
         }
-
-        /* Ensure table footers repeat on each printed page */
         tfoot {
             display: table-footer-group;
         }
-
-        th, td {
-            padding: 1px;
-            border: 1px solid black; /* Example border for clarity */
+        tr {
+            page-break-inside: avoid;
         }
-
-        /* Hide elements that should not appear in print (optional) */
         .no-print {
             display: none !important;
         }
@@ -53,129 +116,154 @@
 </style>
 
 <br>
-<div style="font-family:Arial">
-	<div>
-		<div class="title-letter-spacing" style="text-align:center; font-size:15px; text-decoration:underline;">
-			<b>
-				{%= __("STATEMENT OF ACCOUNTS") %}<br>
-				{% if (filters.party_name) { %}
-					<br>{%= filters.party_name %}
-				{% } else if (filters.party && filters.party.length) { %}
-					<br>{%= filters.party %}
-				{% } else if (filters.account) { %}
-					<br>{%= filters.account %}
-				{% } else { %}
-					<br>{%= __("All Parties ") %}
-				{% } %}
-			</b>
+
+<div>
+
+    <div class="text-center" style="margin-bottom: 12px;">
+        <div class="title-letter-spacing">
+            {%= __("Statement Of Accounts") %}
+        </div>
+    </div>
+
+    {% if (subtitle && subtitle.trim()) { %}
+        <div class="report-subtitle">
+            {{ subtitle }}
+        </div>
+    {% } else { %}
+       <div class="report-meta">
+			<div class="left">
+				<div class="filter-row">
+					<strong>{%= __("Customer") %}:</strong>
+					{%=
+						(filters.party.length && filters.party.join(", ")) || filters.party_name || "All Parties"
+					%}
+				</div>
+			</div>
+
+			<div class="right text-right">
+				<div class="filter-row">
+					<strong>{%= __("Statement Period") %}:</strong>
+					{%= __("{0} to {1}", [
+						frappe.datetime.str_to_user(filters.from_date),
+						frappe.datetime.str_to_user(filters.to_date)
+					]) %}
+				</div>
+			</div>
 		</div>
-		<div style="text-align:center; font-size:13px;">
-			<b>
-				{%= __("{0} to {1}", [frappe.datetime.str_to_user(filters.from_date), frappe.datetime.str_to_user(filters.to_date)]) %}<br><br>
-			</b>
-		</div>
-	</div>
-	<div class="show-filters">
-			{% if subtitle %}
-				{{ subtitle }}
-				<hr>
-			{% endif %}
-	</div>
-	<table style="width:100%; font-size: 11px">
-		<thead>
-			<tr class="title-letter-spacing" style="text-align: center; font-weight:bold">
-				<td style="border: 1.5px solid black; width: 7em">{%= __("Date").toLocaleUpperCase() %}</td>
-				<td style="border: 1.5px solid black">{%= __("Particulars").toLocaleUpperCase() %}</td>
-				{% if(filters.show_remarks) { %}
-						<td style="border: 1.5px solid black">{%= __("Remarks").toLocaleUpperCase() %}</td>
-				{% } %}
-				<td style="border: 1.5px solid black; width: 9em">{%= __("Debit").toLocaleUpperCase() %}</td>
-				<td style="border: 1.5px solid black; width: 9em">{%= __("Credit").toLocaleUpperCase() %}</td>
-				<td style="border: 1.5px solid black; width: 10.2em">{%= __("Balance").toLocaleUpperCase() %}</td>
-			</tr>
-		</thead>
-		<tbody>
-			{% for(var i=0, l=data.length; i<l; i++) { %}
-				<tr style="border-bottom: 1px solid black">
-					{% if(data[i].posting_date) { %}
-						<td style="text-align: center; border: 1px dotted black">
-							{%= frappe.datetime.str_to_user(data[i].posting_date) %}
-						</td>
-						<td style="border-right: 1px dotted black">
-							{%= data[i].voucher_type %} {%= data[i].voucher_no %}
-							{% if(!(filters.party || filters.account)) { %}
-								{%= data[i].party || data[i].account %}
-							{% } %}<br>
-							{% if(data[i].bill_no) { %}
-								{%= __("Supplier Invoice No") %}: {%= data[i].bill_no %}
-							{% } %}
-						</td>
-						{% if(filters.show_remarks) { %}
-						<td style="border-right: 1px dotted black; font-size: 10px">
-								{% if(data[i].remarks != "No Remarks" && data[i].remarks != "") { %}
-									{%= __("Remarks") %}: {%= data[i].remarks %}<br>
-								{% } %}
-						</td>
-						{% } %}
-						<td style="text-align: right; border-right: 1px dotted black">
-							{% if data[i].debit != 0 %}
-								{%= format_currency(data[i].debit, filters.presentation_currency) %}
-							{% } %}
-						</td>
-						<td style="text-align: right; border-right: 1px dotted black">
-							{% if data[i].credit != 0 %}
-								{%= format_currency(data[i].credit, filters.presentation_currency) %}
-							{% } %}
-						</td>
-					{% } else { %}
-						<td style="text-align: center; border: 1px dotted black">
-							{% if(i == 0) { %}
+    {% } %}
+
+    <div class="report-table">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 8em; text-align: left;">{%= __("Date") %}</th>
+                    <th style="text-align: left;">{%= __("Voucher Details") %}</th>
+
+                    {% if(filters.show_remarks) { %}
+                        <th style="text-align: left;">{%= __("Remarks") %}</th>
+                    {% } %}
+
+                    <th style="width: 10em; text-align: right;">{%= __("Debit") %}</th>
+                    <th style="width: 10em; text-align: right;">{%= __("Credit") %}</th>
+                    <th style="width: 10em; text-align: right;">{%= __("Balance") %}</th>
+                </tr>
+            </thead>
+
+            <tbody>
+				{% for(var i=0, l=data.length; i<l; i++) { %}
+					{% var row = data[i]; %}
+					{% var is_entry = row.posting_date; %}
+					{% var is_last = i == l-1; %}
+					{% var is_second_last = i == l-2; %}
+
+					<tr>
+
+						<td class="text-left date-col">
+							{% if(is_entry) { %}
+								{%= frappe.datetime.str_to_user(row.posting_date) %}
+							{% } else if(i == 0) { %}
 								{%= frappe.datetime.str_to_user(filters.from_date) %}
 							{% } %}
 						</td>
-						<td style="text-align: left; border-right: 1px dotted black"><b>
-							{% if(i == l-2) { %}
-								{%= __("Total") %}
+
+						<td class="{% if(!is_entry) { %}text-left text-bold{% } %}">
+							{% if(is_entry) { %}
+
+								{%= row.voucher_type %} {%= row.voucher_no %}
+
+								{% if(!(filters.party || filters.account)) { %}
+									<div style="margin-top: 2px;">
+										{%= row.party || row.account %}
+									</div>
+								{% } %}
+
+								{% if(row.bill_no) { %}
+									<div style="margin-top: 2px;">
+										{%= __("Supplier Invoice No") %}: {%= row.bill_no %}
+									</div>
+								{% } %}
+
 							{% } else { %}
-								{% if(i == l-1) { %}
+
+								{% if(is_second_last) { %}
+									{%= __("Total") %}
+								{% } else if(is_last) { %}
 									{%= __("Closing [Opening + Total] ") %}
 								{% } else { %}
-									{%= frappe.format(data[i].account, {fieldtype: "Link"}) || "&nbsp;" %}
+									{%= frappe.format(row.account, {fieldtype: "Link"}) || "&nbsp;" %}
 								{% } %}
-							{% } %}</b>
-						</td>
-						{% if(filters.show_remarks) { %} <td style="text-align: left; border-right: 1px dotted black"></td>{% } %}
-						<td style="text-align: right; border-right: 1px dotted black">
-							{% if(i != 0){ %}
-								{% if(i != l-1){ %}
-									{%= data[i].account && format_currency(data[i].debit, filters.presentation_currency) %}
-								{% } %}
+
 							{% } %}
 						</td>
-						<td style="text-align: right; border-right: 1px dotted black">
-							{% if(i != 0){ %}
-								{% if(i != l-1){ %}
-									{%= data[i].account && format_currency(data[i].credit, filters.presentation_currency) %}
-								{% } %}
+
+						{% if(filters.show_remarks) { %}
+						<td class="text-left">
+							{% if(is_entry && row.remarks && row.remarks != "No Remarks") { %}
+								{%= row.remarks %}
 							{% } %}
 						</td>
-					{% } %}
-						{% if(i == l-1) { %}
-							<td style="text-align: right; font-weight:bold; border-right: 1px dotted black">
-								{%= format_currency(data[i].balance, filters.presentation_currency) %}
-								{% if(data[i].balance < 0){ %}Cr{% } %}
-								{% if(data[i].balance > 0){ %}Dr{% } %}
-							</td>
-						{% } else { %}
-							<td style="text-align: right; border-right: 1px dotted black">
-								{% if(i != l-2) { %}
-									{%= format_currency(data[i].balance, filters.presentation_currency) %}
-								{% } %}
-							</td>
 						{% } %}
-				</tr>
-			{% endfor%}
-		</tbody>
-	</table>
-	<p class="text-right text-muted">{%= __("Printed on {0}", [frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string())]) %}</p>
+
+						<td class="text-right">
+							{% if(is_entry) { %}
+								{% if(row.debit != 0) { %}
+									{%= format_currency(row.debit, filters.presentation_currency) %}
+								{% } %}
+							{% } else if(i != 0 && !is_last) { %}
+								{%= row.account && format_currency(row.debit, filters.presentation_currency) %}
+							{% } %}
+						</td>
+
+						<td class="text-right">
+							{% if(is_entry) { %}
+								{% if(row.credit != 0) { %}
+									{%= format_currency(row.credit, filters.presentation_currency) %}
+								{% } %}
+							{% } else if(i != 0 && !is_last) { %}
+								{%= row.account && format_currency(row.credit, filters.presentation_currency) %}
+							{% } %}
+						</td>
+
+						<td class="text-right {% if(is_last) { %}text-bold{% } %}">
+							{% if(is_last) { %}
+								{%= format_currency(row.balance, filters.presentation_currency) %}
+								{% if(row.balance < 0) { %} Cr{% } %}
+								{% if(row.balance > 0) { %} Dr{% } %}
+							{% } else { %}
+								{%= format_currency(row.balance, filters.presentation_currency) %}
+							{% } %}
+						</td>
+
+					</tr>
+				{% } %}
+			</tbody>
+        </table>
+    </div>
+
+    <p class="text-right">
+        {%= __("Printed on {0}", [
+            frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string())
+        ]) %}
+    </p>
+
 </div>

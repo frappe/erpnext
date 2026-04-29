@@ -55,11 +55,13 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Default price list for buying or selling this item",
    "fieldname": "default_price_list",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Default Price List",
-   "options": "Price List"
+   "options": "Price List",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "purchase_defaults",
@@ -67,12 +69,15 @@
    "label": "Purchase Defaults"
   },
   {
+   "description": "Cost center used for tracking purchase expenses for this item",
    "fieldname": "buying_cost_center",
    "fieldtype": "Link",
    "label": "Default Buying Cost Center",
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "show_description_on_click": 1
   },
   {
+   "description": "This supplier will be auto-selected in new purchase transactions",
    "fieldname": "default_supplier",
    "fieldtype": "Link",
    "label": "Default Supplier",
@@ -83,10 +88,12 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Account where the cost of this item will be debited on purchase",
    "fieldname": "expense_account",
    "fieldtype": "Link",
    "label": "Default Expense Account",
-   "options": "Account"
+   "options": "Account",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "selling_defaults",
@@ -94,20 +101,24 @@
    "label": "Sales Defaults"
   },
   {
+   "description": "Cost center used for tracking sales revenue for this item",
    "fieldname": "selling_cost_center",
    "fieldtype": "Link",
    "label": "Default Selling Cost Center",
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
   },
   {
+   "description": "Account where revenue from selling this item will be credited",
    "fieldname": "income_account",
    "fieldtype": "Link",
    "label": "Default Income Account",
-   "options": "Account"
+   "options": "Account",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "default_discount_account",
@@ -116,6 +127,7 @@
    "options": "Account"
   },
   {
+   "description": "Provisional liability account used for service items before invoice is received",
    "fieldname": "default_provisional_account",
    "fieldtype": "Link",
    "label": "Default Provisional Account (Service)",
@@ -128,17 +140,21 @@
   },
   {
    "depends_on": "eval: parent.enable_deferred_expense",
+   "description": "When you pay for something upfront (like annual insurance), the cost is held here and recognized gradually over time",
    "fieldname": "deferred_expense_account",
    "fieldtype": "Link",
    "label": "Deferred Expense Account",
-   "options": "Account"
+   "options": "Account",
+   "show_description_on_click": 1
   },
   {
    "depends_on": "eval: parent.enable_deferred_revenue",
+   "description": "Revenue received in advance (e.g. annual subscription) is held here and recognized gradually over time",
    "fieldname": "deferred_revenue_account",
    "fieldtype": "Link",
    "label": "Deferred Revenue Account",
-   "options": "Account"
+   "options": "Account",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "column_break_kwad",
@@ -154,28 +170,35 @@
    "label": "Cost of Goods Sold"
   },
   {
+   "description": "Account where cost of goods sold will be posted when this item is sold",
    "fieldname": "default_cogs_account",
    "fieldtype": "Link",
    "label": "Default COGS Account",
-   "options": "Account"
+   "options": "Account",
+   "show_description_on_click": 1
   },
   {
+   "description": "Account to record additional purchase expenses like freight or customs for this item",
    "fieldname": "purchase_expense_account",
    "fieldtype": "Link",
    "label": "Purchase Expense Account",
-   "options": "Account"
+   "options": "Account",
+   "show_description_on_click": 1
   },
   {
+   "description": "Used to balance the books when recording extra purchase costs like freight or customs",
    "fieldname": "purchase_expense_contra_account",
    "fieldtype": "Link",
    "label": "Purchase Expense Contra Account",
    "options": "Account"
   },
   {
+   "description": "Stock account where inventory value for this item will be tracked",
    "fieldname": "default_inventory_account",
    "fieldtype": "Link",
    "label": "Default Inventory Account",
-   "options": "Account"
+   "options": "Account",
+   "show_description_on_click": 1
   },
   {
    "fetch_from": "default_inventory_account.account_currency",
@@ -188,7 +211,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2025-10-21 10:50:46.144721",
+ "modified": "2026-04-27 01:49:01.396845",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Default",

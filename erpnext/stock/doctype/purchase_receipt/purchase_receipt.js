@@ -368,11 +368,13 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 
 	items_add(doc, cdt, cdn) {
 		const row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("items", row, [
-			"expense_account",
-			"cost_center",
-			"project",
-		]);
+		const field_copy = ["expense_account", "cost_center"];
+		if (doc.project) {
+			frappe.model.set_value(cdt, cdn, "project", doc.project);
+		} else {
+			field_copy.push("project");
+		}
+		this.frm.script_manager.copy_from_first_row("items", row, field_copy);
 	}
 };
 

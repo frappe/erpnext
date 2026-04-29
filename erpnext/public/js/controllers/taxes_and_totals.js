@@ -1,6 +1,8 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+const NOT_APPLICABLE_TAX = "N/A";
+
 erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	setup() {
 		this.fetch_round_off_accounts();
@@ -299,6 +301,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		if (cint(tax.included_in_print_rate)) {
 			var tax_rate = this._get_tax_rate(tax, item_tax_map);
 
+			if (tax_rate === NOT_APPLICABLE_TAX) {
+				return [current_tax_fraction, inclusive_tax_amount_per_qty];
+			}
+
 			if (tax.charge_type == "On Net Total") {
 				current_tax_fraction = tax_rate / 100.0;
 			} else if (tax.charge_type == "On Previous Row Amount") {
@@ -322,9 +328,14 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	_get_tax_rate(tax, item_tax_map) {
-		return Object.keys(item_tax_map).indexOf(tax.account_head) != -1
-			? flt(item_tax_map[tax.account_head], precision("rate", tax))
-			: tax.rate;
+		if (tax.account_head in item_tax_map) {
+			let rate = item_tax_map[tax.account_head];
+			if (rate === NOT_APPLICABLE_TAX) {
+				return NOT_APPLICABLE_TAX;
+			}
+			return flt(rate, precision("rate", tax));
+		}
+		return tax.rate;
 	}
 
 	calculate_net_total() {
@@ -368,6 +379,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 
 			$.each(item_tax_map, function (tax, rate) {
+				if (rate === NOT_APPLICABLE_TAX) {
+					return;
+				}
+
 				let found = (me.frm.doc.taxes || []).find((d) => d.account_head === tax);
 				if (!found) {
 					let child = frappe.model.add_child(me.frm.doc, "taxes");
@@ -523,6 +538,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		var tax_rate = this._get_tax_rate(tax, item_tax_map);
 		var current_tax_amount = 0.0;
 		var current_net_amount = 0.0;
+
+		if (tax_rate === NOT_APPLICABLE_TAX) {
+			return [current_net_amount, current_tax_amount];
+		}
 
 		// To set row_id by default as previous row.
 		if (["On Previous Row Amount", "On Previous Row Total"].includes(tax.charge_type)) {

@@ -200,7 +200,6 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		)
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
-		frappe.db.sql("delete from `tabPOS Invoice`")
 		item_doc = make_item(
 			"_Test Item With Batch FOR POS Merge Test",
 			properties={

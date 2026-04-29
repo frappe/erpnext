@@ -165,9 +165,6 @@ class TestBOM(ERPNextTestSuite):
 	def test_bom_cost_multi_uom_multi_currency_based_on_price_list(self):
 		frappe.db.set_value("Price List", "_Test Price List", "price_not_uom_dependent", 1)
 		for item_code, rate in (("_Test Item", 3600), ("_Test Item Home Desktop Manufactured", 3000)):
-			frappe.db.sql(
-				"delete from `tabItem Price` where price_list='_Test Price List' and item_code=%s", item_code
-			)
 			item_price = frappe.new_doc("Item Price")
 			item_price.price_list = "_Test Price List"
 			item_price.item_code = item_code

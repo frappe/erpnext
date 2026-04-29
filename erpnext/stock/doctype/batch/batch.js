@@ -72,7 +72,8 @@ frappe.ui.form.on("Batch", {
 					consider_negative_batches: 1,
 				},
 				callback: (r) => {
-					if (!r.message) {
+					if (!r.message || r.message.length === 0) {
+						frm.dashboard.add_comment(__("No stock available for this batch."), "Blue", true);
 						return;
 					}
 

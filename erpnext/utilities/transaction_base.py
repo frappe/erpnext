@@ -9,7 +9,7 @@ from frappe.utils import cint, flt, get_time, now_datetime
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.controllers.status_updater import StatusUpdater
-from erpnext.stock.get_item_details import get_item_details
+from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX, get_item_details
 from erpnext.stock.utils import get_incoming_rate
 
 
@@ -367,6 +367,9 @@ class TransactionBase(StatusUpdater):
 		):
 			item_tax_template = frappe.json.loads(item_details.item_tax_rate)
 			for tax_head, _rate in item_tax_template.items():
+				if _rate == NOT_APPLICABLE_TAX:
+					continue
+
 				found = [x for x in self.taxes if x.account_head == tax_head]
 				if not found:
 					self.append("taxes", {"charge_type": "On Net Total", "account_head": tax_head, "rate": 0})

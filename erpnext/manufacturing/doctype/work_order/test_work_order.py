@@ -4240,6 +4240,66 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(wo_order.operations[0].time_in_mins, 72)
 		self.assertEqual(wo_order.operations[1].time_in_mins, 240)
 
+	def test_backflush_based_on_in_bom(self):
+		raw_material_1 = make_item(item_code="BOM RM 1", properties={"is_stock_item": 1}).name
+		raw_material_2 = make_item(item_code="BOM RM 2", properties={"is_stock_item": 1}).name
+		fg_item = make_item(item_code="BOM FG 1", properties={"is_stock_item": 1}).name
+
+		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
+
+		backflush_based_on = frappe.db.get_single_value(
+			"Manufacturing Settings", "backflush_raw_materials_based_on"
+		)
+		self.assertEqual(backflush_based_on, "BOM")
+
+		for item_code in [raw_material_1, raw_material_2]:
+			test_stock_entry.make_stock_entry(
+				item_code=item_code, target="Stores - _TC", qty=1, basic_rate=100
+			)
+
+		bom = make_bom(
+			item=fg_item,
+			quantity=1,
+			raw_materials=[raw_material_1],
+			backflush_based_on="Material Transferred for Manufacture",
+		)
+
+		wo_order = make_wo_order_test_record(item=fg_item, qty=1, source_warehouse="Stores - _TC")
+
+		self.assertEqual(bom.name, wo_order.bom_no)
+		backflush_based_on = frappe.db.get_value("BOM", wo_order.bom_no, "backflush_based_on")
+		self.assertEqual(backflush_based_on, "Material Transferred for Manufacture")
+
+		material_transfer_entry = frappe.get_doc(
+			make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 1)
+		)
+		material_transfer_entry.save()
+
+		# Add second raw material in the material transfer entry which is not in the BOM to simulate backflush based on material transfer scenario
+		material_transfer_entry.append(
+			"items",
+			{
+				"item_code": raw_material_2,
+				"item_name": raw_material_2,
+				"item_group": frappe.get_value("Item", raw_material_2, "item_group"),
+				"uom": frappe.get_value("Item", raw_material_2, "stock_uom"),
+				"conversion_factor": 1,
+				"s_warehouse": "Stores - _TC",
+				"t_warehouse": material_transfer_entry.items[0].t_warehouse,
+				"qty": 1,
+			},
+		)
+
+		material_transfer_entry.submit()
+
+		manufacture_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 1))
+		manufacture_entry.save()
+
+		self.assertEqual(len(manufacture_entry.items), 3)
+		for row in manufacture_entry.items:
+			if row.s_warehouse:
+				self.assertIn(row.item_code, [raw_material_1, raw_material_2])
+
 
 def get_reserved_entries(voucher_no, warehouse=None):
 	doctype = frappe.qb.DocType("Stock Reservation Entry")

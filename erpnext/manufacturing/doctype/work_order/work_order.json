@@ -15,7 +15,6 @@
   "column_break1",
   "qty",
   "sales_order",
-  "track_semi_finished_goods",
   "reserve_stock",
   "section_break_vrpa",
   "max_producible_qty",
@@ -86,6 +85,7 @@
   "product_bundle_item",
   "section_break_ynih",
   "status",
+  "track_semi_finished_goods",
   "column_break_cvuw",
   "amended_from",
   "connections_tab"
@@ -608,6 +608,7 @@
    "fetch_from": "bom_no.track_semi_finished_goods",
    "fieldname": "track_semi_finished_goods",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Track Semi Finished Goods",
    "read_only": 1
   },
@@ -705,7 +706,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-16 10:15:28.708688",
+ "modified": "2026-04-17 13:42:12.374055",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

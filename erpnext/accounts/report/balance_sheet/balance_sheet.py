@@ -8,6 +8,7 @@ from frappe.utils import cint, flt
 
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	FinancialReportEngine,
+	get_xlsx_styles,  #! DO NOT REMOVE - hook for styling
 )
 from erpnext.accounts.report.financial_statements import (
 	compute_growth_view_data,

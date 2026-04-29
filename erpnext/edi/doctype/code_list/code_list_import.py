@@ -26,7 +26,7 @@ def import_genericode():
 		content, file_name = get_uploaded_genericode_file()
 
 		return import_genericode_content(
-			doctype=frappe.form_dict.doctype,
+			doctype="Code List",
 			docname=frappe.form_dict.docname,
 			content=content,
 			file_name=file_name,

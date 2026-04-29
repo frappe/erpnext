@@ -280,7 +280,8 @@ def update_repost_settings():
 		"Journal Entry",
 		"Purchase Receipt",
 	]
-	repost_settings = frappe.get_doc("Repost Accounting Ledger Settings")
-	for x in allowed_types:
-		repost_settings.append("allowed_types", {"document_type": x, "allowed": True})
-		repost_settings.save()
+	settings = frappe.get_doc("Accounts Settings")
+	for _type in allowed_types:
+		if _type not in [x.document_type for x in settings.repost_allowed_types]:
+			settings.append("repost_allowed_types", {"document_type": _type})
+	settings.save()

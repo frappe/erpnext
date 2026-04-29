@@ -2256,9 +2256,9 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 	def test_repost_accounting_entries(self):
 		# update repost settings
-		settings = frappe.get_doc("Repost Accounting Ledger Settings")
-		if not [x for x in settings.allowed_types if x.document_type == "Purchase Invoice"]:
-			settings.append("allowed_types", {"document_type": "Purchase Invoice", "allowed": True})
+		settings = frappe.get_doc("Accounts Settings")
+		if "Purchase Invoice" not in [x.document_type for x in settings.repost_allowed_types]:
+			settings.append("repost_allowed_types", {"document_type": "Purchase Invoice"})
 		settings.save()
 
 		pi = make_purchase_invoice(

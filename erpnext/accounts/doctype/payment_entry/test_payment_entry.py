@@ -197,6 +197,30 @@ class TestPaymentEntry(ERPNextTestSuite):
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 100)
 
+	def test_reference_outstanding_amount_on_advance_pull(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+
+		so = make_sales_order(qty=1, rate=1000)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_amount = pe.received_amount = 500
+		pe.references[0].allocated_amount = 500
+		pe.insert()
+		pe.submit()
+
+		so.reload()
+		self.assertEqual(so.advance_paid, 500)
+
+		si = make_sales_invoice(so.name)
+		si.allocate_advances_automatically = 1
+		si.save()
+		self.assertEqual(si.get("advances")[0].allocated_amount, 500)
+		self.assertEqual(si.get("advances")[0].reference_name, pe.name)
+		si.submit()
+
+		pe.load_from_db()
+		self.assertEqual(pe.references[0].reference_name, si.name)
+		self.assertEqual(pe.references[0].outstanding_amount, si.outstanding_amount)
+
 	def test_payment_entry_against_pi(self):
 		pi = make_purchase_invoice(
 			supplier="_Test Supplier USD",
@@ -2263,6 +2287,37 @@ class TestPaymentEntry(ERPNextTestSuite):
 		)
 
 		self.assertIsNone(result)
+
+	def test_project_name_in_exchange_gain_loss_entry(self):
+		si = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=50,
+			do_not_submit=True,
+		)
+		from erpnext.projects.doctype.project.test_project import make_project
+
+		si.project = make_project({"project_name": "_Test Project for Exchange Gain Loss Entry"}).name
+
+		si.submit()
+
+		pe = get_payment_entry("Sales Invoice", si.name)
+
+		pe.source_exchange_rate = 100
+
+		pe.insert()
+		pe.submit()
+
+		rows = frappe.get_all(
+			"Journal Entry Account",
+			or_filters=[{"reference_name": pe.name}, {"reference_name": si.name}],
+			fields=["project"],
+		)
+		self.assertEqual(len(rows), 2)
+
+		self.assertEqual(rows[0].project, si.project)
+		self.assertEqual(rows[1].project, si.project)
 
 
 def create_payment_entry(**args):

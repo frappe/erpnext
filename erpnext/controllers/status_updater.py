@@ -272,6 +272,12 @@ class StatusUpdater(Document):
 				continue
 
 			items_to_validate = []
+			selling_negative_rate_allowed = frappe.get_single_value(
+				"Selling Settings", "allow_negative_rates_for_items"
+			)
+			buying_negative_rate_allowed = frappe.get_single_value(
+				"Buying Settings", "allow_negative_rates_for_items"
+			)
 
 			# get unique transactions to update
 			for d in self.get_all_children():
@@ -281,7 +287,12 @@ class StatusUpdater(Document):
 				if hasattr(d, "qty") and d.qty > 0 and self.get("is_return"):
 					frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
 
-				if not frappe.get_single_value("Selling Settings", "allow_negative_rates_for_items"):
+				if (
+					not selling_negative_rate_allowed and self.doctype in ["Sales Invoice", "Delivery Note"]
+				) or (
+					not buying_negative_rate_allowed
+					and self.doctype in ["Purchase Invoice", "Purchase Receipt"]
+				):
 					if hasattr(d, "item_code") and hasattr(d, "rate") and flt(d.rate) < 0:
 						frappe.throw(
 							_(
@@ -289,7 +300,11 @@ class StatusUpdater(Document):
 							).format(
 								frappe.bold(d.item_code),
 								frappe.bold(_("`Allow Negative rates for Items`")),
-								get_link_to_form("Selling Settings", "Selling Settings"),
+								get_link_to_form(
+									"Selling Settings"
+									if self.doctype in ["Sales Invoice", "Delivery Note"]
+									else "Buying Settings"
+								),
 							),
 						)
 

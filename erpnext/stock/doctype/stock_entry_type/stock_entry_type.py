@@ -114,6 +114,10 @@ class ManufactureEntry:
 				"Manufacturing Settings", "backflush_raw_materials_based_on"
 			)
 
+			if self.bom_no:
+				if based_on := frappe.get_cached_value("BOM", self.bom_no, "backflush_based_on"):
+					backflush_based_on = based_on
+
 			available_serial_batches = frappe._dict({})
 			if backflush_based_on != "BOM":
 				available_serial_batches = self.get_transferred_serial_batches()
