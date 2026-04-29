@@ -23,18 +23,46 @@ class PaymentReconciliationAllocation(Document):
 		difference_amount: DF.Currency
 		exchange_rate: DF.Float
 		gain_loss_posting_date: DF.Date | None
-		invoice_number: DF.DynamicLink
-		invoice_type: DF.Link
-		is_advance: DF.Data | None
+		is_advance: DF.Check
+		is_cross_account: DF.Check
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		reference_name: DF.DynamicLink
-		reference_row: DF.Data | None
-		reference_type: DF.Link
+		payable_account: DF.Link | None
+		payable_party: DF.DynamicLink | None
+		payable_party_type: DF.Link | None
+		payable_voucher_no: DF.DynamicLink
+		payable_voucher_row: DF.Data | None
+		payable_voucher_type: DF.Link
+		receivable_account: DF.Link | None
+		receivable_party: DF.DynamicLink | None
+		receivable_party_type: DF.Link | None
+		receivable_voucher_no: DF.DynamicLink
+		receivable_voucher_row: DF.Data | None
+		receivable_voucher_type: DF.Link
 		unreconciled_amount: DF.Currency
 	# end: auto-generated types
 
+	def load_from_db(self):
+		pass
+
+	def db_insert(self, *args, **kwargs):
+		pass
+
+	def db_update(self, *args, **kwargs):
+		pass
+
+	def delete(self):
+		pass
+
 	@staticmethod
 	def get_list(args):
+		pass
+
+	@staticmethod
+	def get_count(args):
+		pass
+
+	@staticmethod
+	def get_stats(args):
 		pass
