@@ -2330,16 +2330,19 @@ def get_outstanding_reference_documents(args: str | dict, validate: bool = False
 	}
 
 	for fieldname, date_fields in date_fields_dict.items():
+		from_date = frappe.db.escape(str(args.get(date_fields[0]))) if args.get(date_fields[0]) else None
+		to_date = frappe.db.escape(str(args.get(date_fields[1]))) if args.get(date_fields[1]) else None
+
 		if args.get(date_fields[0]) and args.get(date_fields[1]):
-			condition += f" and {fieldname} between {frappe.db.escape(args.get(date_fields[0]))} and {frappe.db.escape(args.get(date_fields[1]))}"
+			condition += f" and {fieldname} between {from_date} and {to_date}"
 			posting_and_due_date.append(ple[fieldname][args.get(date_fields[0]) : args.get(date_fields[1])])
 		elif args.get(date_fields[0]):
 			# if only from date is supplied
-			condition += f" and {fieldname} >= {frappe.db.escape(args.get(date_fields[0]))}"
+			condition += f" and {fieldname} >= {from_date}"
 			posting_and_due_date.append(ple[fieldname].gte(args.get(date_fields[0])))
 		elif args.get(date_fields[1]):
 			# if only to date is supplied
-			condition += f" and {fieldname} <= {frappe.db.escape(args.get(date_fields[1]))}"
+			condition += f" and {fieldname} <= {to_date}"
 			posting_and_due_date.append(ple[fieldname].lte(args.get(date_fields[1])))
 
 	if args.get("company"):
