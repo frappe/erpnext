@@ -97,14 +97,9 @@ class PaymentRequest(Document):
 		party_name: DF.Data | None
 		party_type: DF.Link | None
 		payment_account: DF.Link | None
-		payment_channel: DF.Literal["", "Email", "Phone", "Other"]
-		payment_gateway: DF.Link | None
-		payment_gateway_account: DF.Link | None
 		payment_order: DF.Link | None
 		payment_reference: DF.Table[PaymentReference]
 		payment_request_type: DF.Literal["Outward", "Inward"]
-		payment_url: DF.Data | None
-		phone_number: DF.Data | None
 		print_format: DF.Literal[None]
 		project: DF.Link | None
 		reference_doctype: DF.Link | None
@@ -195,7 +190,7 @@ class PaymentRequest(Document):
 		if self.payment_account and ref_doc.currency != frappe.get_cached_value(
 			"Account", self.payment_account, "account_currency"
 		):
-			frappe.throw(_("Transaction currency must be same as Payment Gateway currency"))
+			frappe.throw(_("Transaction currency must be same as Payment Account currency"))
 
 	def validate_subscription_details(self):
 		if "payments" not in frappe.get_installed_apps():
@@ -252,15 +247,16 @@ class PaymentRequest(Document):
 		elif self.payment_request_type == "Inward":
 			self.status = "Requested"
 
-		if self.payment_request_type == "Inward" and self.payment_gateway:
-			if _is_v2_gateway(self.payment_gateway):
+		if self.payment_request_type == "Inward":
+			if self.payment_gateway and _is_v2_gateway(self.payment_gateway):
 				# New PaymentController flow (v2 gateways)
 				self._process_v2_gateway()
 			elif self.payment_channel == "Phone":
 				# Legacy v1 phone payment - phone payments do not generate email/link
 				# communications as the payment is initiated directly via phone channel
-				self.request_phone_payment()
-				return
+				if hasattr(self, "payment_channel") and self.payment_channel == "Phone":
+					self.request_phone_payment()
+					return
 			else:
 				# Legacy v1 URL payment
 				self.set_payment_request_url()
@@ -518,7 +514,7 @@ class PaymentRequest(Document):
 		)
 
 	def set_as_paid(self):
-		if self.payment_channel == "Phone":
+		if hasattr(self, "payment_channel") and self.payment_channel == "Phone":
 			self.db_set({"status": "Paid", "outstanding_amount": 0})
 
 		else:
@@ -650,7 +646,7 @@ class PaymentRequest(Document):
 
 		context = {
 			"doc": frappe.get_doc(self.reference_doctype, self.reference_name),
-			"payment_url": self.payment_url,
+			"payment_url": self.payment_url if hasattr(self, "payment_url") else "",
 			"payment_request": self,
 		}
 
@@ -826,7 +822,9 @@ def make_payment_request(**args):
 	if selected_payment_schedules and not has_payment_entry:
 		grand_total = sum(row.get("payment_amount") for row in selected_payment_schedules)
 	else:
-		grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
+		grand_total = get_amount(
+			ref_doc, args.get("payment_account") or gateway_account.get("payment_account")
+		)
 
 	if not grand_total:
 		frappe.throw(_("Payment Entry is already created"))
@@ -916,7 +914,7 @@ def make_payment_request(**args):
 					or args.order_type == "Shopping Cart"  # compat for webshop app
 					or gateway_account.get("payment_channel", "Email") != "Email"
 				),
-				"phone_number": args.get("phone_number") if args.get("phone_number") else None,
+				"payment_account": args.get("payment_account") or gateway_account.get("payment_account"),
 			}
 		)
 
@@ -925,9 +923,9 @@ def make_payment_request(**args):
 			pr.update(
 				{
 					"payment_gateway": gateway_account.get("payment_gateway"),
-					"payment_gateway_account": gateway_account.get("name"),
-					"payment_account": gateway_account.get("payment_account"),
+					"payment_gateway_account": gateway_account.get("gateway_name"),
 					"payment_channel": gateway_account.get("payment_channel"),
+					"phone_number": args.get("phone_number"),
 				}
 			)
 

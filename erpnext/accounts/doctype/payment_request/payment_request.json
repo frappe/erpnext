@@ -19,6 +19,7 @@
   "column_break_4",
   "reference_doctype",
   "reference_name",
+  "make_sales_invoice",
   "payment_reference_section",
   "payment_reference",
   "transaction_details",
@@ -43,25 +44,18 @@
   "cost_center",
   "dimension_col_break",
   "project",
-  "recipient_and_message",
+  "payment_details_section",
+  "payment_account",
+  "recipient_details",
   "print_format",
   "email_to",
   "subject",
   "column_break_9",
   "status",
-  "make_sales_invoice",
-  "section_break_10",
+  "message_details",
   "message",
   "message_examples",
   "mute_email",
-  "payment_gateway_details",
-  "payment_gateway",
-  "payment_gateway_account",
-  "payment_account",
-  "payment_channel",
-  "column_break_pnyv",
-  "payment_url",
-  "phone_number",
   "section_break_jfix",
   "amended_from",
   "column_break_ruax",
@@ -271,13 +265,6 @@
    "options": "Project"
   },
   {
-   "depends_on": "eval: doc.payment_request_type == 'Inward'",
-   "fieldname": "recipient_and_message",
-   "fieldtype": "Section Break",
-   "label": "Recipient Message And Payment Details"
-  },
-  {
-   "depends_on": "eval: doc.payment_channel == \"Email\" || (!doc.payment_channel)",
    "fieldname": "print_format",
    "fieldtype": "Select",
    "label": "Print Format"
@@ -289,7 +276,6 @@
    "label": "To"
   },
   {
-   "depends_on": "eval: doc.payment_channel == \"Email\" || (!doc.payment_channel)",
    "fieldname": "subject",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -319,18 +305,11 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: doc.payment_request_type == 'Inward' || doc.payment_channel == \"Email\" || (!doc.payment_channel)",
-   "fieldname": "section_break_10",
-   "fieldtype": "Section Break"
-  },
-  {
-   "depends_on": "eval: doc.payment_channel == \"Email\" || (!doc.payment_channel)",
    "fieldname": "message",
    "fieldtype": "Text",
    "label": "Message"
   },
   {
-   "depends_on": "eval: doc.payment_channel == \"Email\" || (!doc.payment_channel)",
    "fieldname": "message_examples",
    "fieldtype": "HTML",
    "label": "Message Examples",
@@ -347,37 +326,6 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
-  },
-  {
-   "fieldname": "payment_url",
-   "fieldtype": "Data",
-   "label": "Payment URL",
-   "length": 500,
-   "options": "URL",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval: doc.payment_request_type == 'Inward'",
-   "fieldname": "payment_gateway",
-   "fieldtype": "Link",
-   "label": "Payment Gateway",
-   "options": "Payment Gateway"
-  },
-  {
-   "fieldname": "payment_account",
-   "fieldtype": "Link",
-   "label": "Payment Account",
-   "options": "Account",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval: doc.payment_channel==\"Phone\"",
-   "fetch_from": "payment_gateway_account.payment_channel",
-   "fieldname": "payment_channel",
-   "fieldtype": "Select",
-   "label": "Payment Channel",
-   "options": "\nEmail\nPhone\nOther",
-   "read_only": 1
   },
   {
    "fieldname": "payment_order",
@@ -423,10 +371,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_pnyv",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "party_account_currency",
    "fieldtype": "Link",
    "label": "Party Account Currency",
@@ -440,11 +384,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "phone_number",
-   "fieldtype": "Data",
-   "label": "Phone Number"
-  },
-  {
    "fieldname": "payment_reference_section",
    "fieldtype": "Section Break"
   },
@@ -456,26 +395,35 @@
    "read_only": 1
   },
   {
-   "fieldname": "payment_gateway_account",
-   "fieldtype": "Link",
-   "label": "Payment Gateway Account",
-   "options": "Payment Gateway Account"
-  },
-  {
-   "collapsible": 1,
-   "collapsible_depends_on": "doc.payment_gateway",
-   "depends_on": "eval: doc.payment_request_type == 'Inward'",
-   "fieldname": "payment_gateway_details",
-   "fieldtype": "Section Break",
-   "label": "Payment Gateway Details"
-  },
-  {
    "fieldname": "section_break_jfix",
    "fieldtype": "Section Break"
   },
   {
    "fieldname": "column_break_ruax",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: !doc.payment_channel ? doc.payment_request_type == \"Inward\" : doc.payment_channel == \"Email\"",
+   "fieldname": "recipient_details",
+   "fieldtype": "Section Break",
+   "label": "Recipient Details"
+  },
+  {
+   "depends_on": "eval: !doc.payment_channel ? doc.payment_request_type == \"Inward\" : doc.payment_channel == \"Email\"",
+   "fieldname": "message_details",
+   "fieldtype": "Section Break",
+   "label": "Message Details"
+  },
+  {
+   "fieldname": "payment_details_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Details"
+  },
+  {
+   "fieldname": "payment_account",
+   "fieldtype": "Link",
+   "label": "Payment Account",
+   "options": "Account"
   }
  ],
  "grid_page_length": 50,
@@ -483,7 +431,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-29 00:54:51.353583",
+ "modified": "2026-04-29 20:28:38.207170",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",

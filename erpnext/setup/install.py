@@ -43,6 +43,9 @@ def after_install():
 	toggle_hidden_fields()
 	frappe.db.commit()
 
+	if "payments" in frappe.get_installed_apps():
+		frappe.get_attr("payments.utils.make_custom_fields_erpnext")()
+
 
 def make_default_operations():
 	for operation in ["Assembly"]:
