@@ -1148,11 +1148,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-04-07 15:41:47.032889",
-=======
  "modified": "2026-04-29 16:01:34.154697",
->>>>>>> 060defcc2b (fix: dont show serial/batch button when PR is submitted (#54642))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
