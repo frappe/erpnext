@@ -25,13 +25,14 @@ erpnext.buying = {
 					};
 				});
 
-				this.frm.set_query("project", function (doc) {
-					return {
-						filters: {
-							company: doc.company,
-						},
-					};
-				});
+			this.frm.set_query("project", function (doc) {
+				return {
+					query: "erpnext.controllers.queries.get_project_name",
+					filters: {
+						company: doc.company,
+					},
+				};
+			});
 
 				if (
 					this.frm.doc.__islocal &&
