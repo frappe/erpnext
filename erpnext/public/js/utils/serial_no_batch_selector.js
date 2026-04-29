@@ -87,7 +87,16 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	}
 
 	get_dialog_fields() {
-		let fields = [];
+		let fields = [
+			{
+				fieldname: "item_code",
+				read_only: 1,
+				fieldtype: "Link",
+				options: "Item",
+				label: __("Item Code"),
+				default: this.item.item_code,
+			},
+		];
 
 		fields.push({
 			fieldtype: "Link",

@@ -148,17 +148,6 @@
    "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
-   "label": "Inactive Customers",
-   "link_to": "Inactive Customers",
-   "link_type": "Report",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
    "label": "Campaign Efficiency",
    "link_to": "Campaign Efficiency",
    "link_type": "Report",
@@ -485,7 +474,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-10 00:06:13.192366",
+ "modified": "2026-04-28 14:11:15.910719",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",

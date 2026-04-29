@@ -13,6 +13,45 @@ from erpnext.stock.deprecated_serial_batch import (
 )
 from erpnext.stock.valuation import round_off_if_near_zero
 
+CONSUMED_SERIAL_NO_STOCK_ENTRY_PURPOSES = (
+	"Manufacture",
+	"Material Issue",
+	"Repack",
+	"Material Consumption for Manufacture",
+)
+INACTIVE_SERIAL_NO_STOCK_ENTRY_PURPOSES = ("Disassemble", "Material Receipt")
+
+
+def get_serial_no_status(sle):
+	warehouse = sle.warehouse if sle.actual_qty > 0 else None
+	if warehouse:
+		return "Active"
+
+	status = get_status_for_serial_nos(sle)
+	if sle.voucher_type == "Stock Entry" and sle.actual_qty < 0:
+		purpose = frappe.get_cached_value("Stock Entry", sle.voucher_no, "purpose")
+		if purpose in INACTIVE_SERIAL_NO_STOCK_ENTRY_PURPOSES:
+			status = "Inactive"
+
+	return status
+
+
+def get_status_for_serial_nos(sle):
+	status = "Inactive"
+	if sle.actual_qty < 0:
+		status = "Delivered"
+		if sle.voucher_type == "Stock Entry":
+			purpose = frappe.get_cached_value("Stock Entry", sle.voucher_no, "purpose")
+			if purpose in CONSUMED_SERIAL_NO_STOCK_ENTRY_PURPOSES:
+				status = "Consumed"
+
+		if sle.is_cancelled == 1 and (
+			sle.voucher_type in ["Purchase Invoice", "Purchase Receipt"] or status == "Consumed"
+		):
+			status = "Inactive"
+
+	return status
+
 
 class SerialBatchBundle:
 	def __init__(self, **kwargs):
@@ -427,25 +466,7 @@ class SerialBatchBundle:
 		self.update_serial_no_status_warehouse(self.sle, serial_nos)
 
 	def get_status_for_serial_nos(self, sle):
-		status = "Inactive"
-		if sle.actual_qty < 0:
-			status = "Delivered"
-			if sle.voucher_type == "Stock Entry":
-				purpose = frappe.get_cached_value("Stock Entry", sle.voucher_no, "purpose")
-				if purpose in [
-					"Manufacture",
-					"Material Issue",
-					"Repack",
-					"Material Consumption for Manufacture",
-				]:
-					status = "Consumed"
-
-			if sle.is_cancelled == 1 and (
-				sle.voucher_type in ["Purchase Invoice", "Purchase Receipt"] or status == "Consumed"
-			):
-				status = "Inactive"
-
-		return status
+		return get_status_for_serial_nos(sle)
 
 	def update_serial_no_status_warehouse(self, sle, serial_nos):
 		warehouse = sle.warehouse if sle.actual_qty > 0 else None
@@ -453,18 +474,11 @@ class SerialBatchBundle:
 		if isinstance(serial_nos, str):
 			serial_nos = [serial_nos]
 
-		status = "Active"
-		if not warehouse:
-			status = self.get_status_for_serial_nos(sle)
+		status = get_serial_no_status(sle)
 
 		customer = None
 		if sle.voucher_type in ["Sales Invoice", "Delivery Note"] and sle.actual_qty < 0:
 			customer = frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "customer")
-
-		if sle.voucher_type in ["Stock Entry"] and sle.actual_qty < 0:
-			purpose = frappe.get_cached_value("Stock Entry", sle.voucher_no, "purpose")
-			if purpose in ["Disassemble", "Material Receipt"]:
-				status = "Inactive"
 
 		sn_table = frappe.qb.DocType("Serial No")
 

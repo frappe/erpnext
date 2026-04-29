@@ -226,14 +226,38 @@ class FinancialReportEngine:
 		return context.get_result()
 
 	def _validate_filters(self, filters: dict[str, Any]) -> None:
-		required_filters = ["report_template", "period_start_date", "period_end_date"]
+		filter_labels = {
+			"report_template": _("Report Template"),
+			"filter_based_on": _("Filter Based On"),
+			"period_start_date": _("Start Date"),
+			"period_end_date": _("End Date"),
+			"from_fiscal_year": _("Start Year"),
+			"to_fiscal_year": _("End Year"),
+		}
+
+		required_filters_by_basis = {
+			"Date Range": ("period_start_date", "period_end_date"),
+			"Fiscal Year": ("from_fiscal_year", "to_fiscal_year"),
+		}
+
+		required_filters = ["report_template", "filter_based_on"]
+		required_filters.extend(required_filters_by_basis.get(filters.get("filter_based_on"), ()))
 
 		for filter_key in required_filters:
 			if not filters.get(filter_key):
-				frappe.throw(_("Missing required filter: {0}").format(filter_key))
+				frappe.throw(
+					title=_("Missing Required Filter"),
+					msg=_("Missing required filter: {0}").format(
+						frappe.bold(filter_labels.get(filter_key, filter_key))
+					),
+				)
 
 		if filters.get("presentation_currency"):
-			frappe.msgprint(_("Currency filters are currently unsupported in Custom Financial Report."))
+			frappe.msgprint(
+				title=_("Unsupported Feature"),
+				msg=_("Currency filters are currently unsupported in Custom Financial Report."),
+				indicator="orange",
+			)
 
 		# Margin view is dependent on first row being an income account. Hence not supported.
 		# Way to implement this would be using calculated rows with formulas.
@@ -468,6 +492,7 @@ class FinancialQueryBuilder:
 		self.periods = periods
 		self.company = filters.get("company")
 		self.account_meta = {}  # {name: {account_name, account_number}}
+		self.ignore_opening_entries = False
 
 	def fetch_account_balances(self, accounts: list[dict]) -> dict[str, AccountData]:
 		"""
@@ -505,6 +530,8 @@ class FinancialQueryBuilder:
 		"""
 		Return opening balances for *all accounts* defaulting to zero.
 		"""
+		self.ignore_opening_entries = False
+
 		if frappe.get_single_value("Accounts Settings", "ignore_account_closing_balance"):
 			return self._get_opening_balances_from_gl(accounts)
 
@@ -524,9 +551,9 @@ class FinancialQueryBuilder:
 		if last_closing_voucher:
 			closing_voucher = last_closing_voucher[0]
 			closing_data = self._get_closing_balances(accounts, closing_voucher.name)
+			self.ignore_opening_entries = True  # Else it will double count
 
-			if sum(closing_data.values()) != 0.0:
-				return self._rebase_closing_balances(closing_data, closing_voucher.period_end_date)
+			return self._rebase_closing_balances(closing_data, closing_voucher.period_end_date)
 
 		return self._get_opening_balances_from_gl(accounts)
 
@@ -620,7 +647,12 @@ class FinancialQueryBuilder:
 			.groupby(gl_table.account)
 		)
 
-		if not frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting"):
+		ignore_is_opening = frappe.get_single_value(
+			"Accounts Settings", "ignore_is_opening_check_for_reporting"
+		)
+		if self.ignore_opening_entries and not ignore_is_opening:
+			# This filter here applies to all accounts (BS & PL)
+			# However, in legacy query, this filter only applies to BS accounts
 			query = query.where(gl_table.is_opening == "No")
 
 		# Add period-specific columns
@@ -684,11 +716,18 @@ class FinancialQueryBuilder:
 				account_data.unaccumulate_values()
 
 	def _apply_standard_filters(self, query, table, doctype: str = "GL Entry"):
-		if self.filters.get("ignore_closing_entries"):
-			if doctype == "GL Entry":
-				query = query.where(table.voucher_type != "Period Closing Voucher")
-			else:
-				query = query.where(table.is_period_closing_voucher_entry == 0)
+		# Exclude PCV-generated entries except those posted to a closing-account-head
+		# so BS retained earnings survive while P&L reversal entries are filtered out
+		pcv = frappe.qb.DocType("Period Closing Voucher")
+		closing_heads = frappe.qb.from_(pcv).select(pcv.closing_account_head).where(pcv.docstatus == 1)
+
+		if doctype == "GL Entry":
+			is_pcv = table.voucher_type == "Period Closing Voucher"
+		else:
+			# Account Closing Balance
+			is_pcv = table.is_period_closing_voucher_entry == 1
+
+		query = query.where(~is_pcv | table.account.isin(closing_heads))
 
 		if self.filters.get("project"):
 			projects = self.filters.get("project")

@@ -461,7 +461,17 @@ class BuyingController(SubcontractingController):
 						get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
 					)
 
-				net_rate = item.qty * item.base_net_rate
+				net_rate = (
+					flt(
+						(item.base_net_amount / item.received_qty) * item.qty,
+						item.precision("base_net_amount"),
+					)
+					if item.received_qty
+					and frappe.get_single_value(
+						"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
+					)
+					else item.base_net_amount
+				)
 				if item.sales_incoming_rate:  # for internal transfer
 					net_rate = item.qty * item.sales_incoming_rate
 
