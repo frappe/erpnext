@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 
+import re
 from datetime import timedelta
 
 import frappe
@@ -246,17 +247,13 @@ def get_account_type_based_gl_data(company, filters=None):
 		cond += " and cost_center in %(cost_center)s"
 
 	if filters.get("dim_field"):
-		# Filter the column by the active dimension value (including the
-		# synthetic "(Unassigned)" bucket when the entry has no value).
-		import re
-
+		# Filter the column by the active dimension value. NULL/empty
+		# dim entries are excluded by design (see `get_dimension_values`)
+		# to avoid leaking entries the user shouldn't see.
 		dim_field = filters.dim_field
 		if not re.match(r"^[a-z_][a-z0-9_]*$", dim_field or ""):
 			frappe.throw(_("Invalid dimension field: {0}").format(dim_field))
-		if filters.get("dim_value"):
-			cond += f" and `{dim_field}` = %(dim_value)s"
-		else:
-			cond += f" and (`{dim_field}` = '' or `{dim_field}` is null)"
+		cond += f" and `{dim_field}` = %(dim_value)s"
 
 	gl_sum = frappe.db.sql_list(
 		f"""

@@ -91,7 +91,7 @@ def get_dimension_values(filters):
 			query = query.where(gl[dimension.fieldname].isin(value))
 
 	rows = query.run()
-	values = sorted({(r[0] or "") for r in rows})  # ? sorted by with why?
+	values = sorted({r[0] for r in rows if r[0]})
 	return fieldname, values
 
 
@@ -110,13 +110,10 @@ def get_dimension_period_list(filters):
 	company = filters.get("company")
 	fy = get_fiscal_year(to_date, company=company) if company else None
 
-	unassigned_label = _("No {0}").format(filters.get("group_by_dimension"))
-
 	period_list = []
 	used_keys = set()
 	for index, value in enumerate(values):
-		label = value or unassigned_label
-		key = frappe.scrub(label)
+		key = frappe.scrub(value)
 		if key in used_keys:
 			key = f"{key}_{index}"
 		used_keys.add(key)
@@ -125,7 +122,7 @@ def get_dimension_period_list(filters):
 			frappe._dict(
 				{
 					"key": key,
-					"label": label,
+					"label": value,
 					"from_date": from_date,
 					"to_date": to_date,
 					"year_start_date": from_date,
@@ -133,7 +130,7 @@ def get_dimension_period_list(filters):
 					"to_date_fiscal_year": fy[0] if fy else None,
 					"from_date_fiscal_year_start_date": fy[1] if fy else from_date,
 					"dim_field": fieldname,
-					"dim_value": value or "",
+					"dim_value": value,
 				}
 			)
 		)
@@ -374,8 +371,9 @@ def calculate_values(
 				if dim_mode:
 					# Dimension axis: bucket by dim value, all dates already
 					# constrained by the SQL query (BS unbounded, P&L bounded).
-					entry_dim = entry.get(period.dim_field) or ""
-					if entry_dim != (period.dim_value or ""):
+					# Entries with NULL/empty dim values are filtered out at
+					# the period_list source, so equality is safe here.
+					if entry.get(period.dim_field) != period.dim_value:
 						continue
 					if entry.posting_date > period.to_date:
 						continue
