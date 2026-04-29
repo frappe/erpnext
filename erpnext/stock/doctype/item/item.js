@@ -73,6 +73,7 @@ frappe.ui.form.on("Item", {
 			},
 		};
 	},
+
 	onload: function (frm) {
 		erpnext.item.setup_queries(frm);
 		if (frm.doc.variant_of) {
@@ -87,21 +88,60 @@ frappe.ui.form.on("Item", {
 	toggle_has_serial_batch_fields(frm) {
 		let hide_fields = cint(frappe.user_defaults?.enable_serial_and_batch_no_for_item) === 0 ? 1 : 0;
 
-		frm.toggle_display(["serial_no_series", "batch_number_series", "create_new_batch"], !hide_fields);
+		frm.toggle_display(
+			[
+				"serial_no_series",
+				"batch_number_series",
+				"create_new_batch",
+				"has_expiry_date",
+				"retain_sample",
+			],
+			!hide_fields
+		);
 		frm.toggle_enable(["has_serial_no", "has_batch_no"], !hide_fields);
 
 		if (hide_fields) {
-			let description = __(
-				"To enable the Serial No and Batch No feature, please check the 'Enable Serial / Batch No for Item' checkbox in Stock Settings."
-			);
+			let header = frm.fields_dict["serial_nos_and_batches"].wrapper;
+			let wrapper = header.find(".section-head.collapsible");
 
-			frm.set_df_property("has_serial_no", "description", description);
-			frm.set_df_property("has_batch_no", "description", description);
+			render_serial_batch_banner(wrapper);
+
+			if (!wrapper.data("banner-handler-added")) {
+				wrapper.data("banner-handler-added", true);
+
+				wrapper.on("click", function () {
+					setTimeout(() => {
+						let isCollapsed = $(this).hasClass("collapsed");
+
+						wrapper.find(".custom-serial-batch-banner").toggleClass("hidden", isCollapsed);
+					}, 10);
+				});
+			}
+
+			// Button action
+			wrapper.find(".go-to-settings").on("click", function () {
+				frappe.set_route("Form", "Stock Settings");
+			});
 		}
 	},
 
 	refresh: function (frm) {
 		frm.trigger("toggle_has_serial_batch_fields");
+
+		if (frappe.defaults.get_default("item_naming_by") != "Naming Series" || frm.doc.variant_of) {
+			frm.toggle_display("naming_series", false);
+		} else {
+			erpnext.toggle_naming_series();
+		}
+
+		frm.toggle_display(["standard_rate"], frappe.model.can_create("Item Price"));
+
+		if (frm.is_new()) {
+			frm.toggle_display("disabled", false);
+			return;
+		}
+
+		frm.toggle_display("disabled", true);
 
 		if (frm.doc.is_stock_item) {
 			frm.add_custom_button(
@@ -205,8 +245,6 @@ frappe.ui.form.on("Item", {
 					__("Create")
 				);
 			}
-
-			// frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 		if (frm.doc.variant_of) {
 			frm.set_intro(
@@ -215,12 +253,6 @@ frappe.ui.form.on("Item", {
 				]),
 				true
 			);
-		}
-
-		if (frappe.defaults.get_default("item_naming_by") != "Naming Series" || frm.doc.variant_of) {
-			frm.toggle_display("naming_series", false);
-		} else {
-			erpnext.toggle_naming_series();
 		}
 
 		erpnext.item.edit_prices_button(frm);
@@ -262,8 +294,6 @@ frappe.ui.form.on("Item", {
 				},
 			};
 		});
-
-		frm.toggle_display(["standard_rate"], frappe.model.can_create("Item Price"));
 	},
 
 	validate: function (frm) {
@@ -371,6 +401,63 @@ var set_customer_group = function (frm, cdt, cdn) {
 	});
 	return true;
 };
+
+function render_serial_batch_banner(wrapper) {
+	let hiddenClass = "";
+	if (wrapper.hasClass("collapsed")) {
+		hiddenClass = "hidden";
+	}
+
+	wrapper.find(".custom-serial-batch-banner").remove();
+
+	let banner_html = `
+		<div class="custom-serial-batch-banner ${hiddenClass}">
+			<div class="banner-content">
+				<span class="banner-icon">${frappe.utils.icon("solid-warning", "lg", "", "padding-bottom:2px")}</span>
+				<span class="banner-text">
+					${__("To use Serial / Batch feature, enable {0} in {1}.", [
+						`<b>${__("Activate Serial / Batch No for Item")}</b>`,
+						`<a class="go-to-settings" style="text-decoration: underline;">${__(
+							"Stock Settings"
+						)}</a>`,
+					])}
+				</span>
+			</div>
+		</div>
+		<style>
+			.custom-serial-batch-banner {
+				background-color: var(--amber-50);
+				border: 1px solid var(--amber-50);
+				border-radius: 8px;
+				padding: 12px 16px;
+				margin-top: 16px;
+			}
+
+			.custom-serial-batch-banner .banner-content {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+
+			.custom-serial-batch-banner .banner-icon {
+				font-size: 18px;
+			}
+
+			.custom-serial-batch-banner .banner-text {
+				flex: 1;
+				font-size: 14px;
+				color: var(--gray-800);
+			}
+
+			.custom-serial-batch-banner .btn {
+				white-space: nowrap;
+			}
+		</style>
+	`;
+
+	// Insert banner at top of section
+	wrapper.append(banner_html);
+}
 
 $.extend(erpnext.item, {
 	setup_queries: function (frm) {
@@ -580,10 +667,10 @@ $.extend(erpnext.item, {
 	make_dashboard: function (frm) {
 		if (frm.doc.__islocal) return;
 
-		// Show Stock Levels only if is_stock_item
 		if (frm.doc.is_stock_item) {
 			frappe.require("item-dashboard.bundle.js", function () {
-				const section = frm.dashboard.add_section("", __("Stock Levels"));
+				const section = frm.fields_dict["stock_levels_html"].$wrapper;
+
 				erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
 					parent: section,
 					item_code: frm.doc.name,

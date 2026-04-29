@@ -648,7 +648,7 @@ $.extend(erpnext.journal_entry, {
 					reqd: 1,
 					default: frm.doc.posting_date,
 				},
-				{ fieldtype: "Small Text", fieldname: "user_remark", label: __("User Remark") },
+				{ fieldtype: "Small Text", fieldname: "remark", label: __("Remark") },
 				{
 					fieldtype: "Select",
 					fieldname: "naming_series",
@@ -665,8 +665,14 @@ $.extend(erpnext.journal_entry, {
 			var values = dialog.get_values();
 
 			frm.set_value("posting_date", values.posting_date);
-			frm.set_value("user_remark", values.user_remark);
 			frm.set_value("naming_series", values.naming_series);
+			if (values.remark) {
+				frm.set_value("custom_remark", 1);
+				frm.set_value("remark", values.remark);
+			} else {
+				frm.set_value("custom_remark", 0);
+				frm.set_value("remark", "");
+			}
 
 			// clear table is used because there might've been an error while adding child
 			// and cleanup didn't happen

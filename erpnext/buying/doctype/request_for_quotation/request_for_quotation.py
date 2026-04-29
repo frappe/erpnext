@@ -481,6 +481,11 @@ def create_supplier_quotation(doc: str | Document | dict):
 	if isinstance(doc, str):
 		doc = json.loads(doc)
 
+	if frappe.session.user not in frappe.get_all(
+		"Portal User", {"parent": doc.get("supplier")}, pluck="user"
+	):
+		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+
 	try:
 		sq_doc = frappe.get_doc(
 			{

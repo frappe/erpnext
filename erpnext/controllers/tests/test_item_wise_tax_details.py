@@ -299,3 +299,238 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		tax = doc.taxes[0]
 		detail = doc.item_wise_tax_details[0]
 		self.assertEqual(detail.amount, tax.base_tax_amount_after_discount_amount)
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_not_applicable_tax_in_item_tax_template(self):
+		"""Test that items with 'not applicable' tax don't contribute to net amount of that tax."""
+		template_7pct = frappe.get_doc(
+			{
+				"doctype": "Item Tax Template",
+				"title": "_Test VAT 7% Template",
+				"company": "_Test Company",
+				"taxes": [
+					{
+						"tax_type": "_Test Account VAT - _TC",
+						"tax_rate": 7,
+					},
+					{
+						"tax_type": "_Test Account Service Tax - _TC",
+						"tax_rate": 0,
+						"not_applicable": 1,
+					},
+				],
+			}
+		).insert(ignore_if_duplicate=True)
+
+		template_19pct = frappe.get_doc(
+			{
+				"doctype": "Item Tax Template",
+				"title": "_Test VAT 19% Template",
+				"company": "_Test Company",
+				"taxes": [
+					{
+						"tax_type": "_Test Account VAT - _TC",
+						"tax_rate": 0,
+					},
+					{
+						"tax_type": "_Test Account Service Tax - _TC",
+						"tax_rate": 19,
+					},
+				],
+			}
+		).insert(ignore_if_duplicate=True)
+
+		self.doc.items[0].item_tax_template = template_7pct.name
+
+		self.doc.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 1,
+				"rate": 100,
+				"income_account": "Sales - _TC",
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"item_tax_template": template_19pct.name,
+			},
+		)
+
+		self.doc.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account VAT - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT 7%",
+				"rate": 7,
+			},
+		)
+
+		self.doc.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT 19%",
+				"rate": 19,
+			},
+		)
+
+		self.doc.save()
+
+		# VAT 7%: Both items contribute (Item 2 has 0% rate, not "not applicable")
+		self.assertEqual(self.doc.taxes[0].net_amount, 200.0)
+		# Service Tax 19%: Only Item 2 contributes (Item 1 has not_applicable)
+		self.assertEqual(self.doc.taxes[1].net_amount, 100.0)
+
+		expected_values = [
+			{
+				"item_row": self.doc.items[0].name,
+				"tax_row": self.doc.taxes[0].name,
+				"rate": 7.0,
+				"amount": 7.0,
+				"taxable_amount": 100.0,
+			},
+			{
+				"item_row": self.doc.items[1].name,
+				"tax_row": self.doc.taxes[0].name,
+				"rate": 0.0,
+				"amount": 0.0,
+				"taxable_amount": 100.0,
+			},
+			{
+				"item_row": self.doc.items[1].name,
+				"tax_row": self.doc.taxes[1].name,
+				"rate": 19.0,
+				"amount": 19.0,
+				"taxable_amount": 100.0,
+			},
+		]
+
+		actual_values = [
+			{
+				"item_row": row.item_row,
+				"tax_row": row.tax_row,
+				"rate": row.rate,
+				"amount": row.amount,
+				"taxable_amount": row.taxable_amount,
+			}
+			for row in self.doc.item_wise_tax_details
+		]
+
+		self.assertEqual(actual_values, expected_values)
+
+	def test_not_applicable_tax_in_item_tax_template_with_different_items(self):
+		"""Test that items with 'not applicable' tax don't contribute to net amount of that tax."""
+		template_7pct = frappe.get_doc(
+			{
+				"doctype": "Item Tax Template",
+				"title": "_Test VAT 7% Template",
+				"company": "_Test Company",
+				"taxes": [
+					{
+						"tax_type": "_Test Account VAT - _TC",
+						"tax_rate": 7,
+					},
+					{
+						"tax_type": "_Test Account Service Tax - _TC",
+						"tax_rate": 0,
+						"not_applicable": 1,
+					},
+				],
+			}
+		).insert(ignore_if_duplicate=True)
+
+		template_19pct = frappe.get_doc(
+			{
+				"doctype": "Item Tax Template",
+				"title": "_Test VAT 19% Template",
+				"company": "_Test Company",
+				"taxes": [
+					{
+						"tax_type": "_Test Account VAT - _TC",
+						"tax_rate": 0,
+						"not_applicable": 1,
+					},
+					{
+						"tax_type": "_Test Account Service Tax - _TC",
+						"tax_rate": 19,
+					},
+				],
+			}
+		).insert(ignore_if_duplicate=True)
+
+		self.doc.items[0].item_tax_template = template_7pct.name
+
+		self.doc.append(
+			"items",
+			{
+				"item_code": "_Test Item 2",
+				"qty": 1,
+				"rate": 100,
+				"income_account": "Sales - _TC",
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"item_tax_template": template_19pct.name,
+			},
+		)
+
+		self.doc.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account VAT - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT 7%",
+				"rate": 0,
+			},
+		)
+
+		self.doc.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT 19%",
+				"rate": 0,
+			},
+		)
+
+		self.doc.save()
+
+		# VAT 7%: Only Item 1 contributes (Item 2 has not_applicable)
+		self.assertEqual(self.doc.taxes[0].net_amount, 100.0)
+		# Service Tax 19%: Only Item 2 contributes (Item 1 has not_applicable)
+		self.assertEqual(self.doc.taxes[1].net_amount, 100.0)
+
+		expected_values = [
+			{
+				"item_row": self.doc.items[0].name,
+				"tax_row": self.doc.taxes[0].name,
+				"rate": 7.0,
+				"amount": 7.0,
+				"taxable_amount": 100.0,
+			},
+			{
+				"item_row": self.doc.items[1].name,
+				"tax_row": self.doc.taxes[1].name,
+				"rate": 19.0,
+				"amount": 19.0,
+				"taxable_amount": 100.0,
+			},
+		]
+
+		actual_values = [
+			{
+				"item_row": row.item_row,
+				"tax_row": row.tax_row,
+				"rate": row.rate,
+				"amount": row.amount,
+				"taxable_amount": row.taxable_amount,
+			}
+			for row in self.doc.item_wise_tax_details
+		]
+
+		self.assertEqual(actual_values, expected_values)

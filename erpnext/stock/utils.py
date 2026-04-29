@@ -12,6 +12,7 @@ from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate, nowdate
 from frappe.utils.data import DateTimeLikeObject
 
 import erpnext
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_available_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
@@ -124,11 +125,19 @@ def get_stock_balance(
 	}
 
 	extra_cond = ""
+
 	if inventory_dimensions_dict:
+		inventory_dimensions_fieldname = [d.get("fieldname") for d in get_inventory_dimensions()]
+
 		for field, value in inventory_dimensions_dict.items():
-			column = frappe.utils.sanitize_column(field)
+			if field not in inventory_dimensions_fieldname:
+				frappe.throw(
+					_("{0} is not a valid {1} fieldname.").format(
+						frappe.bold(field), frappe.bold("Inventory Dimension")
+					)
+				)
 			args[field] = value
-			extra_cond += f" and {column} = %({field})s"
+			extra_cond += f" and {field} = %({field})s"
 
 	last_entry = get_previous_sle(args, extra_cond=extra_cond)
 

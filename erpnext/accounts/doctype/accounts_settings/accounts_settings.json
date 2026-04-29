@@ -63,6 +63,8 @@
   "reconciliation_queue_size",
   "column_break_resa",
   "exchange_gain_loss_posting_date",
+  "repost_section",
+  "repost_allowed_types",
   "payment_options_section",
   "enable_loyalty_point_program",
   "column_break_ctam",
@@ -703,6 +705,17 @@
    "fieldname": "fetch_payment_schedule_in_payment_request",
    "fieldtype": "Check",
    "label": "Fetch Payment Schedule In Payment Request"
+  },
+  {
+   "fieldname": "repost_section",
+   "fieldtype": "Section Break",
+   "label": "Repost"
+  },
+  {
+   "fieldname": "repost_allowed_types",
+   "fieldtype": "Table",
+   "label": "Allowed Doctypes",
+   "options": "Repost Allowed Types"
   }
  ],
  "grid_page_length": 50,
@@ -711,7 +724,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-30 07:32:58.182018",
+ "modified": "2026-04-13 15:30:28.729627",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

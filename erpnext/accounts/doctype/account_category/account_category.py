@@ -21,6 +21,7 @@ class AccountCategory(Document):
 
 		account_category_name: DF.Data
 		description: DF.SmallText | None
+		root_type: DF.Literal["", "Asset", "Liability", "Income", "Expense", "Equity"]
 	# end: auto-generated types
 
 	def after_rename(self, old_name, new_name, merge):

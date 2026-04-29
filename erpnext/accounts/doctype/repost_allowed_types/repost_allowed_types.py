@@ -14,7 +14,6 @@ class RepostAllowedTypes(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		allowed: DF.Check
 		document_type: DF.Link | None
 		parent: DF.Data
 		parentfield: DF.Data

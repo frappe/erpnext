@@ -217,7 +217,6 @@ def get_allowed_types_from_settings(child_doc: bool = False):
 		x.document_type
 		for x in frappe.db.get_all(
 			"Repost Allowed Types",
-			filters={"allowed": True},
 			fields=["document_type"],
 			distinct=True,
 		)
@@ -272,14 +271,13 @@ def validate_docs_for_voucher_types(doc_voucher_types):
 	if disallowed_types := voucher_types.difference(allowed_types):
 		message = "are" if len(disallowed_types) > 1 else "is"
 		frappe.throw(
-			_("{0} {1} not allowed to be reposted. Modify {2} to enable reposting.").format(
+			_(
+				"{0} {1} not allowed to be reposted. You can enable it by adding it '{2}' table in {3}."
+			).format(
 				frappe.bold(comma_and(list(disallowed_types))),
 				message,
-				frappe.bold(
-					frappe.utils.get_link_to_form(
-						"Repost Accounting Ledger Settings", "Repost Accounting Ledger Settings"
-					)
-				),
+				frappe.bold("Allowed Doctype"),
+				frappe.utils.get_link_to_form("Accounts Settings"),
 			)
 		)
 
@@ -289,8 +287,6 @@ def validate_docs_for_voucher_types(doc_voucher_types):
 def get_repost_allowed_types(
 	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
 ):
-	filters = {"allowed": True}
-
 	if txt:
 		filters.update({"document_type": ("like", f"%{txt}%")})
 

@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "naming_series:",
- "creation": "2018-07-09 17:23:29.518745",
+ "creation": "2026-03-31 21:06:16.282931",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -452,7 +452,6 @@
    "show_dashboard": 1
   },
   {
-   "depends_on": "expected_start_date",
    "fieldname": "scheduled_time_section",
    "fieldtype": "Section Break",
    "label": "Scheduled Time"
@@ -628,7 +627,7 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-26 15:13:56.767070",
+ "modified": "2026-03-31 21:06:48.987740",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

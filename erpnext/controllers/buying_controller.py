@@ -18,7 +18,11 @@ from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
-from erpnext.stock.get_item_details import get_conversion_factor, get_item_defaults
+from erpnext.stock.get_item_details import (
+	NOT_APPLICABLE_TAX,
+	get_conversion_factor,
+	get_item_defaults,
+)
 from erpnext.stock.utils import get_incoming_rate
 
 
@@ -457,7 +461,17 @@ class BuyingController(SubcontractingController):
 						get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
 					)
 
-				net_rate = item.qty * item.base_net_rate
+				net_rate = (
+					flt(
+						(item.base_net_amount / item.received_qty) * item.qty,
+						item.precision("base_net_amount"),
+					)
+					if item.received_qty
+					and frappe.get_single_value(
+						"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
+					)
+					else item.base_net_amount
+				)
 				if item.sales_incoming_rate:  # for internal transfer
 					net_rate = item.qty * item.sales_incoming_rate
 
@@ -521,6 +535,9 @@ class BuyingController(SubcontractingController):
 			tax_details = json.loads(item.item_tax_rate)
 			for account, rate in tax_details.items():
 				if account not in tax_accounts:
+					continue
+
+				if rate == NOT_APPLICABLE_TAX:
 					continue
 
 				net_rate = item.base_net_amount

@@ -6,6 +6,7 @@ import frappe
 from frappe import _, msgprint
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
 from frappe.model.document import Document
+from frappe.query_builder import functions as fn
 from frappe.utils import cstr
 
 
@@ -41,72 +42,116 @@ class SMSCenter(Document):
 
 	@frappe.whitelist()
 	def create_receiver_list(self):
-		rec, where_clause = "", ""
-		if self.send_to == "All Customer Contact":
-			where_clause = " and dl.link_doctype = 'Customer'"
-			if self.customer:
-				where_clause += (
-					" and dl.link_name = '%s'" % self.customer.replace("'", "'")
-					or " and ifnull(dl.link_name, '') != ''"
-				)
-		if self.send_to == "All Supplier Contact":
-			where_clause = " and dl.link_doctype = 'Supplier'"
-			if self.supplier:
-				where_clause += (
-					" and dl.link_name = '%s'" % self.supplier.replace("'", "'")
-					or " and ifnull(dl.link_name, '') != ''"
-				)
-		if self.send_to == "All Sales Partner Contact":
-			where_clause = " and dl.link_doctype = 'Sales Partner'"
-			if self.sales_partner:
-				where_clause += (
-					"and dl.link_name = '%s'" % self.sales_partner.replace("'", "'")
-					or " and ifnull(dl.link_name, '') != ''"
-				)
+		query = None
+
+		if self.send_to == "":
+			return
+
 		if self.send_to in [
 			"All Contact",
 			"All Customer Contact",
 			"All Supplier Contact",
 			"All Sales Partner Contact",
 		]:
-			rec = frappe.db.sql(
-				"""select CONCAT(ifnull(c.first_name,''), ' ', ifnull(c.last_name,'')),
-				c.mobile_no from `tabContact` c, `tabDynamic Link` dl  where ifnull(c.mobile_no,'')!='' and
-				c.docstatus != 2 and dl.parent = c.name%s"""
-				% where_clause
-			)
+			query = self.get_contact_query_for_all_contacts()
 
 		elif self.send_to == "All Lead (Open)":
-			rec = frappe.db.sql(
-				"""select lead_name, mobile_no from `tabLead` where
-				ifnull(mobile_no,'')!='' and docstatus != 2 and status='Open'"""
-			)
+			query = self.get_contact_query_for_all_open_leads()
 
 		elif self.send_to == "All Employee (Active)":
-			where_clause = (
-				self.department and " and department = '%s'" % self.department.replace("'", "'") or ""
-			)
-			where_clause += self.branch and " and branch = '%s'" % self.branch.replace("'", "'") or ""
-
-			rec = frappe.db.sql(
-				"""select employee_name, cell_number from
-				`tabEmployee` where status = 'Active' and docstatus < 2 and
-				ifnull(cell_number,'')!='' %s"""
-				% where_clause
-			)
+			query = self.get_contact_query_for_all_active_employee()
 
 		elif self.send_to == "All Sales Person":
-			rec = frappe.db.sql(
-				"""select sales_person_name,
-				tabEmployee.cell_number from `tabSales Person` left join tabEmployee
-				on `tabSales Person`.employee = tabEmployee.name
-				where ifnull(tabEmployee.cell_number,'')!=''"""
-			)
+			query = self.get_contact_query_for_all_sales_person()
+
+		rec = query.run(as_list=1)
 
 		rec_list = ""
 		for d in rec:
 			rec_list += d[0] + " - " + d[1] + "\n"
 		self.receiver_list = rec_list
+
+	def get_contact_query_for_all_contacts(self):
+		Contact = frappe.qb.DocType("Contact")
+		DynamicLink = frappe.qb.DocType("Dynamic Link")
+		query = (
+			frappe.qb.from_(Contact)
+			.join(DynamicLink)
+			.on(DynamicLink.parent == Contact.name)
+			.select(
+				fn.Concat(fn.IfNull(Contact.first_name, ""), " ", fn.IfNull(Contact.last_name, "")),
+				Contact.mobile_no,
+			)
+			.where((fn.IfNull(Contact.mobile_no, "") != "") & (Contact.docstatus != 2))
+		)
+
+		if self.send_to == "All Customer Contact":
+			query = query.where(DynamicLink.link_doctype == "Customer")
+			query = (
+				query.where(DynamicLink.link_name == self.customer)
+				if self.customer
+				else query.where(fn.IfNull(DynamicLink.link_name, "") != "")
+			)
+
+		elif self.send_to == "All Supplier Contact":
+			query = query.where(DynamicLink.link_doctype == "Supplier")
+			query = (
+				query.where(DynamicLink.link_name == self.supplier)
+				if self.supplier
+				else query.where(fn.IfNull(DynamicLink.link_name, "") != "")
+			)
+
+		elif self.send_to == "All Sales Partner Contact":
+			query = query.where(DynamicLink.link_doctype == "Sales Partner")
+			query = (
+				query.where(DynamicLink.link_name == self.sales_partner)
+				if self.sales_partner
+				else query.where(fn.IfNull(DynamicLink.link_name, "") != "")
+			)
+		return query
+
+	def get_contact_query_for_all_open_leads(self):
+		Lead = frappe.qb.DocType("Lead")
+		query = (
+			frappe.qb.from_(Lead)
+			.select(Lead.lead_name, Lead.mobile)
+			.where((fn.IfNull(Lead.mobile_no, "") != "") & (Lead.docstatus != 2) & (Lead.status == "Open"))
+		)
+		return query
+
+	def get_contact_query_for_all_active_employee(self):
+		Employee = frappe.qb.DocType("Employee")
+		query = (
+			frappe.qb.from_(Employee)
+			.select(Employee.employee_name, Employee.cell_number)
+			.where(
+				(Employee.status == "Active")
+				& (Employee.docstatus != 2)
+				& (fn.IfNull(Employee.cell_number, "") != "")
+			)
+		)
+
+		if self.department:
+			query = query.where(Employee.department == self.department)
+
+		if self.branch:
+			query = query.where(Employee.branch == self.branch)
+
+		return query
+
+	def get_contact_query_for_all_sales_person(self):
+		SalesPerson = frappe.qb.DocType("Sales Person")
+		Employee = frappe.qb.DocType("Employee")
+
+		query = (
+			frappe.qb.from_(SalesPerson)
+			.left_join(Employee)
+			.on(SalesPerson.employee == Employee.name)
+			.select(SalesPerson.sales_person_name, Employee.cell_number)
+			.where(fn.IfNull(Employee.cell_number, "") != "")
+		)
+
+		return query
 
 	def get_receiver_nos(self):
 		receiver_nos = []

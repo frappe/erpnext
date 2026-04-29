@@ -24,6 +24,7 @@
   "allow_zero_qty_in_supplier_quotation",
   "use_transaction_date_exchange_rate",
   "allow_zero_qty_in_request_for_quotation",
+  "allow_negative_rates_for_items",
   "column_break_12",
   "maintain_same_rate",
   "allow_multiple_items",
@@ -279,6 +280,12 @@
    "fieldname": "validate_consumed_qty",
    "fieldtype": "Check",
    "label": "Validate Consumed Qty (as per BOM)"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_negative_rates_for_items",
+   "fieldtype": "Check",
+   "label": "Allow Negative rates for Items"
   }
  ],
  "grid_page_length": 50,
@@ -288,7 +295,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-16 13:28:19.432589",
+ "modified": "2026-04-15 16:07:35.484787",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",

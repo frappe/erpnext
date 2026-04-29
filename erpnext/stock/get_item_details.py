@@ -40,6 +40,8 @@ purchase_doctypes = [
 	"Purchase Invoice",
 ]
 
+NOT_APPLICABLE_TAX = "N/A"
+
 
 def _preprocess_ctx(ctx):
 	if not ctx.price_list:
@@ -58,7 +60,7 @@ def _preprocess_ctx(ctx):
 def get_item_details(
 	ctx: ItemDetailsCtx | str,
 	doc: Document | str | None = None,
-	for_validate: bool = False,
+	for_validate: bool | None = False,
 	overwrite_warehouse: bool = True,
 ):
 	"""
@@ -702,7 +704,9 @@ def get_item_tax_info(
 
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
-def get_item_tax_template(ctx: ItemDetailsCtx, item: Document | None = None, out: ItemDetails | None = None):
+def get_item_tax_template(
+	ctx: ItemDetailsCtx | str, item: Document | None = None, out: ItemDetails | None = None
+):
 	"""
 	Determines item_tax template from item or parent item groups.
 
@@ -731,16 +735,24 @@ def get_item_tax_template(ctx: ItemDetailsCtx, item: Document | None = None, out
 		item_tax_template = _get_item_tax_template(ctx, item.taxes, out)
 
 	if not item_tax_template:
-		item_group = item.item_group
-		while item_group and not item_tax_template:
-			item_group_doc = frappe.get_cached_doc("Item Group", item_group)
-			item_tax_template = _get_item_tax_template(ctx, item_group_doc.taxes, out)
-			item_group = item_group_doc.parent_item_group
+		item_tax_template = _get_item_tax_template_from_item_group(ctx, item.item_group, out)
 
 	if out and ctx.get("child_doctype") and item_tax_template:
 		out.update(get_fetch_values(ctx.get("child_doctype"), "item_tax_template", item_tax_template))
 
 	return item_tax_template
+
+
+def _get_item_tax_template_from_item_group(ctx, item_group, out=None):
+	from frappe.utils.nestedset import get_ancestors_of
+
+	ancestors = get_ancestors_of("Item Group", item_group)
+	for group in [item_group, *ancestors]:
+		group_doc = frappe.get_cached_doc("Item Group", group)
+		item_tax_template = _get_item_tax_template(ctx, group_doc.taxes, out)
+		if item_tax_template:
+			return item_tax_template
+	return None
 
 
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
@@ -843,7 +855,10 @@ def get_item_tax_map(*, doc: str | dict | Document, tax_template: str | None = N
 		template = frappe.get_cached_doc("Item Tax Template", tax_template)
 		for d in template.taxes:
 			if frappe.get_cached_value("Account", d.tax_type, "company") == doc.get("company"):
-				item_tax_map[d.tax_type] = d.tax_rate
+				if d.get("not_applicable"):
+					item_tax_map[d.tax_type] = NOT_APPLICABLE_TAX
+				else:
+					item_tax_map[d.tax_type] = d.tax_rate
 
 	return json.dumps(item_tax_map) if as_json else item_tax_map
 

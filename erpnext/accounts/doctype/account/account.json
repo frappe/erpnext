@@ -203,7 +203,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-08-02 06:26:44.657146",
+ "modified": "2026-04-14 18:14:42.202065",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
@@ -256,6 +256,14 @@
    "role": "Accounts Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "HR User",
+   "select": 1
+  },
+  {
+   "role": "HR Manager",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

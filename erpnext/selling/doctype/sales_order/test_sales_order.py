@@ -8,7 +8,7 @@ import frappe
 import frappe.permissions
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.tests import change_settings
-from frappe.utils import add_days, flt, nowdate, today
+from frappe.utils import add_days, flt, getdate, nowdate, today
 
 from erpnext.controllers.accounts_controller import InvalidQtyError, get_due_date, update_child_qty_rate
 from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
@@ -24,6 +24,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 	create_pick_list,
 	make_delivery_note,
 	make_material_request,
+	make_production_plan,
 	make_raw_material_request,
 	make_sales_invoice,
 	make_work_orders,
@@ -212,6 +213,26 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		self.assertEqual(dn.doctype, "Delivery Note")
 		self.assertEqual(len(dn.get("items")), len(so.get("items")))
+
+	def test_make_production_plan(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		fg_item = make_item("Test PP FG Item", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, rate=100, raw_materials=["_Test Item"])
+
+		so = make_sales_order(item_code=fg_item, do_not_submit=True)
+		self.assertRaises(frappe.ValidationError, make_production_plan, so.name)
+
+		so.submit()
+		pp = make_production_plan(so.name)
+
+		self.assertEqual(pp.doctype, "Production Plan")
+		self.assertGreater(len(pp.get("po_items")), 0)
+		self.assertEqual(pp.get("po_items")[0].sales_order, so.name)
+		self.assertEqual(pp.get("sales_orders")[0].sales_order, so.name)
+		self.assertEqual(getdate(pp.get("sales_orders")[0].sales_order_date), getdate(so.transaction_date))
+		self.assertEqual(pp.get("sales_orders")[0].customer, so.customer)
+		self.assertEqual(pp.get("sales_orders")[0].grand_total, so.base_grand_total)
 
 	def test_make_sales_invoice(self):
 		so = make_sales_order(do_not_submit=True)
@@ -2787,7 +2808,6 @@ def make_sales_order(**args):
 		)
 
 	so.delivery_date = add_days(so.transaction_date, 10)
-
 	if not args.do_not_save:
 		so.insert()
 		if not args.do_not_submit:

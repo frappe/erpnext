@@ -82,7 +82,7 @@ class AccountingDimension(Document):
 			else:
 				frappe.throw(_("Company {0} is added more than once").format(frappe.bold(default.company)))
 
-	def after_insert(self):
+	def on_update(self):
 		if frappe.in_test:
 			make_dimension_in_accounting_doctypes(doc=self)
 		else:

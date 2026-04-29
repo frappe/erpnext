@@ -556,6 +556,16 @@ class update_entries_after:
 		previous_sle = get_previous_sle_of_current_voucher(args)
 		if previous_sle:
 			self.prev_sle_dict[(args.get("item_code"), args.get("warehouse"))] = previous_sle
+		else:
+			self.prev_sle_dict[(args.get("item_code"), args.get("warehouse"))] = frappe._dict(
+				{
+					"qty_after_transaction": 0.0,
+					"valuation_rate": 0.0,
+					"stock_value": 0.0,
+					"prev_stock_value": 0.0,
+					"stock_queue": [],
+				}
+			)
 
 		warehouse_dict.previous_sle = previous_sle
 
@@ -944,6 +954,9 @@ class update_entries_after:
 		self.wh_data.stock_value = flt(self.wh_data.stock_value, self.currency_precision)
 		if not self.wh_data.qty_after_transaction:
 			self.wh_data.stock_value = 0.0
+
+		if sle.actual_qty < 0:
+			sle.incoming_rate = 0
 
 		stock_value_difference = self.wh_data.stock_value - self.wh_data.prev_stock_value
 		self.wh_data.prev_stock_value = self.wh_data.stock_value

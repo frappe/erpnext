@@ -69,8 +69,10 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.get_item_details import (
+	NOT_APPLICABLE_TAX,
 	ItemDetailsCtx,
 	_get_item_tax_template,
+	_get_item_tax_template_from_item_group,
 	get_conversion_factor,
 	get_item_details,
 	get_item_tax_map,
@@ -1768,6 +1770,7 @@ class AccountsController(TransactionBase):
 									arg.get("referenced_row"),
 									arg.get("cost_center"),
 									dimensions_dict,
+									arg.get("project"),
 								)
 								frappe.msgprint(
 									_("Exchange Gain/Loss amount has been booked through {0}").format(
@@ -1852,6 +1855,7 @@ class AccountsController(TransactionBase):
 							d.idx,
 							self.cost_center,
 							dimensions_dict,
+							self.project,
 						)
 						frappe.msgprint(
 							_("Exchange Gain/Loss amount has been booked through {0}").format(
@@ -3681,7 +3685,12 @@ def set_child_tax_template_and_map(item, child_item, parent_doc):
 		}
 	)
 
-	child_item.item_tax_template = _get_item_tax_template(ctx, item.taxes)
+	item_tax_template = _get_item_tax_template(ctx, item.taxes)
+
+	if not item_tax_template:
+		item_tax_template = _get_item_tax_template_from_item_group(ctx, item.item_group)
+
+	child_item.item_tax_template = item_tax_template
 	child_item.item_tax_rate = get_item_tax_map(
 		doc=parent_doc,
 		tax_template=child_item.item_tax_template,
@@ -3696,8 +3705,11 @@ def add_taxes_from_tax_template(child_item, parent_doc, db_insert=True):
 
 	if child_item.get("item_tax_rate") and add_taxes_from_item_tax_template:
 		tax_map = json.loads(child_item.get("item_tax_rate"))
-		for tax_type in tax_map:
-			tax_rate = flt(tax_map[tax_type])
+		for tax_type, tax_rate in tax_map.items():
+			if tax_rate == NOT_APPLICABLE_TAX:
+				continue
+
+			tax_rate = flt(tax_rate)
 			taxes = parent_doc.get("taxes") or []
 			# add new row for tax head only if missing
 			found = any(tax.account_head == tax_type for tax in taxes)
@@ -4371,6 +4383,15 @@ def get_missing_company_details(doctype: str, docname: str):
 
 	address_display_list = get_address_display_list("Company", company)
 	address_line = address_display_list[0].get("address_line1") if address_display_list else ""
+	needs_new_company_address = not address_line
+
+	if needs_new_company_address and not frappe.has_permission("Address", "create", throw=False):
+		frappe.msgprint(
+			_(
+				"Company Address is missing. You don't have permission to create an Address. Please contact your System Manager."
+			)
+		)
+		return
 
 	required_fields.append(company_address)
 	required_fields.append(address_line)
@@ -4393,6 +4414,18 @@ def get_missing_company_details(doctype: str, docname: str):
 def update_company_master_and_address(current_doctype: str, name: str, company: str, details: dict | str):
 	from frappe.utils import validate_email_address
 
+	if not frappe.has_permission(current_doctype, "write", doc=name, throw=False):
+		frappe.throw(
+			_("You don't have permission to update this document. Please contact your System Manager."),
+			title=_("Insufficient Permissions"),
+		)
+
+	if not frappe.has_permission("Company", "write", doc=company, throw=False):
+		frappe.throw(
+			_("You don't have permission to update Company details. Please contact your System Manager."),
+			title=_("Insufficient Permissions"),
+		)
+
 	if isinstance(details, str):
 		details = frappe.parse_json(details)
 
@@ -4407,6 +4440,13 @@ def update_company_master_and_address(current_doctype: str, name: str, company: 
 
 	company_address = details.get("company_address")
 	if details.get("address_line1"):
+		if not frappe.has_permission("Address", "create", throw=False):
+			frappe.throw(
+				_(
+					"You don't have permission to create a Company Address. Please contact your System Manager."
+				),
+				title=_("Insufficient Permissions"),
+			)
 		address_doc = frappe.get_doc(
 			{
 				"doctype": "Address",
