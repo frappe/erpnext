@@ -86,7 +86,7 @@ def validate_return_against(doc):
 def validate_returned_items(doc):
 	valid_items = frappe._dict()
 
-	select_fields = "item_code, qty, stock_qty, rate, parenttype, conversion_factor, name"
+	select_fields = "item_code, qty, stock_qty, net_rate, parenttype, conversion_factor, name"
 	if doc.doctype != "Purchase Invoice":
 		select_fields += ",serial_no, batch_no"
 
@@ -141,9 +141,9 @@ def validate_returned_items(doc):
 				validate_quantity(doc, key, d, ref, valid_items, already_returned_items)
 
 				if (
-					ref.rate
-					and flt(d.rate) > ref.rate
-					and doc.doctype in ("Delivery Note", "Sales Invoice")
+					ref.net_rate
+					and flt(d.net_rate) > ref.net_rate
+					and doc.doctype in ("Delivery Note", "Sales Invoice", "POS Invoice")
 					and get_valuation_method(ref.item_code, doc.company) != "Moving Average"
 				):
 					frappe.throw(
@@ -241,7 +241,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 		frappe._dict(
 			{
 				"qty": 0,
-				"rate": 0,
+				"net_rate": 0,
 				"stock_qty": 0,
 				"rejected_qty": 0,
 				"received_qty": 0,
@@ -254,8 +254,8 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	item_dict = valid_items[key]
 	item_dict["qty"] += ref_item_row.qty
 	item_dict["stock_qty"] += ref_item_row.get("stock_qty", 0)
-	if ref_item_row.get("rate", 0) > item_dict["rate"]:
-		item_dict["rate"] = ref_item_row.get("rate", 0)
+	if ref_item_row.get("net_rate", 0) > item_dict["net_rate"]:
+		item_dict["net_rate"] = ref_item_row.get("net_rate", 0)
 
 	if ref_item_row.parenttype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 		item_dict["received_qty"] += ref_item_row.received_qty
