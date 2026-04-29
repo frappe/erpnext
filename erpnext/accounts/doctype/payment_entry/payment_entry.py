@@ -2868,7 +2868,12 @@ def get_best_fit_payment_request(
 	"""
 	Return the best-fit open Payment Request for a given reference.
 	"""
-	frappe.has_permission("Payment Entry", ptype="write", throw=True)
+	if not (
+		frappe.has_permission("Payment Entry", ptype="write")
+		or frappe.has_permission("Payment Entry", ptype="create")
+	):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
 	frappe.has_permission("Payment Request", ptype="read", throw=True)
 
 	unallocated_amount = flt(unallocated_amount)

@@ -1771,6 +1771,9 @@ frappe.ui.form.on("Payment Entry Reference", {
 						$.each(r.message, function (field, value) {
 							frappe.model.set_value(cdt, cdn, field, value);
 						});
+
+						frappe.model.set_value(cdt, cdn, "payment_request", null);
+
 						if (row.outstanding_amount == 0) {
 							frappe.model.set_value(cdt, cdn, "allocated_amount", 0);
 							return;
