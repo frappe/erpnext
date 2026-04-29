@@ -27,6 +27,61 @@ from erpnext.accounts.utils import (
 )
 
 
+class Classifier:
+	"""Classifies a PLE/voucher row as Receivable or Payable based on account direction.
+
+	The rule is universal across all voucher types (Sales Invoice, Purchase Invoice,
+	Payment Entry, Journal Entry) and across regular vs return/advance variants:
+
+	    Receivable account + positive amount  →  Receivable  (owed to us)
+	    Receivable account + negative amount  →  Payable     (we owe back)
+	    Payable    account + positive amount  →  Payable     (we owe)
+	    Payable    account + negative amount  →  Receivable  (owed back to us)
+
+	Worked cases:
+	    Sales Invoice (regular):       Receivable account, +ve  →  Receivable
+	    Sales Invoice (return / CN):   Receivable account, -ve  →  Payable
+	    Purchase Invoice (regular):    Payable    account, +ve  →  Payable
+	    Purchase Invoice (return / DN):Payable    account, -ve  →  Receivable
+	    Payment Entry (Receive):       Receivable account, -ve  →  Payable
+	    Payment Entry (Pay):           Payable    account, -ve  →  Receivable
+	    Journal Entry Dr to party:     party account,      +ve  →  Receivable
+	    Journal Entry Cr to party:     party account,      -ve  →  Payable
+
+	"""
+
+	RECEIVABLE = "Receivable"
+	PAYABLE = "Payable"
+
+	@staticmethod
+	def classify(account_type: str, amount: float) -> str:
+		"""Return "Receivable" or "Payable" for an entry.
+
+		Args:
+		        account_type: Account doctype's `account_type`. Must be "Receivable" or "Payable".
+		        amount: PLE amount (signed; positive = balance in the account's natural direction).
+		"""
+		if account_type not in (Classifier.RECEIVABLE, Classifier.PAYABLE):
+			frappe.throw(_("Unsupported account type {0}").format(account_type))
+
+		if not amount:
+			frappe.throw(_("Cannot classify entry with zero amount."))
+
+		positive = amount > 0
+		if account_type == Classifier.RECEIVABLE:
+			return Classifier.RECEIVABLE if positive else Classifier.PAYABLE
+		else:  # Payable
+			return Classifier.PAYABLE if positive else Classifier.RECEIVABLE
+
+	@staticmethod
+	def is_receivable(account_type: str, amount: float) -> bool:
+		return Classifier.classify(account_type, amount) == Classifier.RECEIVABLE
+
+	@staticmethod
+	def is_payable(account_type: str, amount: float) -> bool:
+		return Classifier.classify(account_type, amount) == Classifier.PAYABLE
+
+
 class PaymentReconciliation(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
