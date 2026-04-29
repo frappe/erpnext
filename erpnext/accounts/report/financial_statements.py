@@ -64,6 +64,9 @@ def get_dimension_values(filters):
 		.where(gl.company == filters.get("company"))
 		.where(gl.is_cancelled == 0)
 		.where(gl.posting_date <= to_date)
+		.where(gl[fieldname].isnotnull())
+		.where(gl[fieldname] != "")
+		.orderby(gl[fieldname])
 	)
 
 	# For P&L-like reports the lower bound matters; for BS-like cumulative
@@ -90,9 +93,7 @@ def get_dimension_values(filters):
 				value = get_dimension_with_children(dimension.document_type, value)
 			query = query.where(gl[dimension.fieldname].isin(value))
 
-	rows = query.run()
-	values = sorted({r[0] for r in rows if r[0]})
-	return fieldname, values
+	return fieldname, query.run(pluck=True)
 
 
 def get_dimension_period_list(filters):
