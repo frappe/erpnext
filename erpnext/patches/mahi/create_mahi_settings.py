@@ -29,7 +29,6 @@ def set_default_mfg_settings(mahi_settings: MahiGranitesSettings):
 	mahi_settings.max_heating_minutes = 90
 	mahi_settings.min_curing_hours = 24
 	mahi_settings.curing_labels = get_default_curing_labels()
-	mahi_settings.grades = get_default_quality_grades()
 	return mahi_settings
 
 
@@ -52,17 +51,17 @@ def get_default_quality_grades():
 	default_grade_items = [
 		{
 			"grade_name": "Premium",
-			"code": "PRE",
+			"code": "Premium",
 			"color": "#29CD42"
 		},
 		{
 			"grade_name": "Standard",
-			"code": "STD",
+			"code": "Standard",
 			"color": "#4F9DD9"
 		},
 		{
 			"grade_name": "Reject",
-			"code": "REJ",
+			"code": "Reject",
 			"color": "#CB2929"
 		}
 	]
