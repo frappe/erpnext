@@ -106,8 +106,6 @@ class PaymentReconciliation(Document):
 		currency_filter: DF.Link | None
 		default_advance_account: DF.Link | None
 		difference_amount: DF.Currency
-		filter_payables: DF.Data | None
-		filter_receivables: DF.Data | None
 		from_date: DF.Date | None
 		max_amount: DF.Currency
 		min_amount: DF.Currency

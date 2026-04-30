@@ -29,10 +29,8 @@
   "dimension_col_break",
   "project",
   "entries_section",
-  "filter_receivables",
   "receivables",
   "column_break_entries",
-  "filter_payables",
   "payables",
   "totals_section",
   "total_invoice_amount",
@@ -197,11 +195,6 @@
    "label": "Unreconciled Entries"
   },
   {
-   "fieldname": "filter_receivables",
-   "fieldtype": "Data",
-   "label": "Filter Receivables"
-  },
-  {
    "fieldname": "receivables",
    "fieldtype": "Table",
    "label": "Receivables",
@@ -210,11 +203,6 @@
   {
    "fieldname": "column_break_entries",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "filter_payables",
-   "fieldtype": "Data",
-   "label": "Filter Payables"
   },
   {
    "fieldname": "payables",
