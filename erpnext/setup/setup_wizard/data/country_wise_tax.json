@@ -3119,7 +3119,8 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
-								"tax_rate": 19.00
+								"not_applicable": 1,
+								"tax_rate": 0.00
 							},
 							{
 								"tax_type": {
