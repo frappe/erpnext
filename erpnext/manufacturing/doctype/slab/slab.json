@@ -24,6 +24,10 @@
   "is_paused",
   "is_repressed",
   "is_prematurely_checked_out",
+  "is_recovered",
+  "is_repolished",
+  "is_recalibrated",
+  "updated_template",
   "quality_section",
   "grade",
   "column_break_e1da",
@@ -172,6 +176,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.is_repressed;",
    "fieldname": "is_repressed",
    "fieldtype": "Check",
    "label": "Is Re-pressed",
@@ -188,6 +193,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.is_prematurely_checked_out;",
    "fieldname": "is_prematurely_checked_out",
    "fieldtype": "Check",
    "label": "Is Prematurely Moved Out of Curing",
@@ -278,12 +284,43 @@
   {
    "fieldname": "column_break_vawu",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_recovered;",
+   "fieldname": "is_recovered",
+   "fieldtype": "Check",
+   "label": "Is Recovered",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_repolished;",
+   "fieldname": "is_repolished",
+   "fieldtype": "Check",
+   "label": "Is Repolished",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_recalibrated;",
+   "fieldname": "is_recalibrated",
+   "fieldtype": "Check",
+   "label": "Is Recalibrated",
+   "read_only": 1
+  },
+  {
+   "fieldname": "updated_template",
+   "fieldtype": "Link",
+   "label": "Updated Template",
+   "options": "Slab Template",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-16 19:07:52.907912",
+ "modified": "2026-04-30 14:05:50.951307",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",

@@ -29,6 +29,9 @@ class Slab(Document):
 		is_cur_stage_complete: DF.Check
 		is_paused: DF.Check
 		is_prematurely_checked_out: DF.Check
+		is_recalibrated: DF.Check
+		is_recovered: DF.Check
+		is_repolished: DF.Check
 		is_repressed: DF.Check
 		line: DF.Link
 		number: DF.Int
@@ -42,6 +45,7 @@ class Slab(Document):
 		status: DF.Literal["Distribution", "Pressing", "Re-Pressing", "Heating", "Cooling", "Curing", "Trimming", "Calibration", "Polishing", "Quality Check", "Packed", "Shipped", "Discarded", "Rejected"]
 		stock_item: DF.Link | None
 		template: DF.Link
+		updated_template: DF.Link | None
 	# end: auto-generated types
 
 

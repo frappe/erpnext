@@ -1,0 +1,176 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "REC-{quality_report}-.##",
+ "creation": "2026-04-30 13:26:02.527259",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_ul7n",
+  "amended_from",
+  "quality_report",
+  "column_break_sumw",
+  "slab",
+  "slab_template",
+  "rework_performed",
+  "pinholes",
+  "column_break_waes",
+  "contamination",
+  "column_break_yhjg",
+  "film_contamination",
+  "column_break_xatz",
+  "porasity",
+  "column_break_kqgv",
+  "epoxy_applied",
+  "observations_section",
+  "visualizer_preview",
+  "observations"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_ul7n",
+   "fieldtype": "Section Break",
+   "label": "Slab & QC Details"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Slab Recovery Report",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "quality_report",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Quality Report",
+   "options": "Slab Quality Report",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_sumw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "quality_report.slab",
+   "fetch_if_empty": 1,
+   "fieldname": "slab",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Slab",
+   "options": "Slab",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "quality_report.slab_template",
+   "fetch_if_empty": 1,
+   "fieldname": "slab_template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Slab Template",
+   "options": "Slab Template",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rework_performed",
+   "fieldtype": "Section Break",
+   "label": "Re-work Performed"
+  },
+  {
+   "default": "0",
+   "fieldname": "pinholes",
+   "fieldtype": "Check",
+   "label": "Pinholes"
+  },
+  {
+   "fieldname": "column_break_waes",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "contamination",
+   "fieldtype": "Check",
+   "label": "Contamination"
+  },
+  {
+   "fieldname": "column_break_yhjg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "film_contamination",
+   "fieldtype": "Check",
+   "label": "Film Contamination"
+  },
+  {
+   "fieldname": "column_break_xatz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "porasity",
+   "fieldtype": "Check",
+   "label": "Porasity"
+  },
+  {
+   "fieldname": "column_break_kqgv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "epoxy_applied",
+   "fieldtype": "Check",
+   "label": "Epoxy Applied"
+  },
+  {
+   "fieldname": "observations_section",
+   "fieldtype": "Section Break",
+   "label": "Observations"
+  },
+  {
+   "fieldname": "visualizer_preview",
+   "fieldtype": "HTML",
+   "label": "Visualizer Preview"
+  },
+  {
+   "fieldname": "observations",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "options": "Slab Quality Observation",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-04-30 13:34:59.443540",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Slab Recovery Report",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

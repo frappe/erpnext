@@ -20,10 +20,10 @@ def start_qa_process(slab_number: str):
 	slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
 	#    1. Get the job card for quality analysis on the given line.
 	job_card_result = get_top_job_card_for_process("Quality Check", slab.line, True)
-	job_card: JobCard = job_card_result.get("top_job_card")  # pyright: ignore[reportAssignmentType]
+	job_card: JobCard | None = job_card_result.get("top_job_card")  # pyright: ignore[reportAssignmentType]
 	if not job_card:
 		frappe.throw("No Job Card found")
-	job_card_name = job_card.name
+	job_card_name = job_card.name if job_card else ""
 	#    2. Start the job card.
 	#    3. Move the slab to quality check.
 	start_process(
@@ -59,7 +59,6 @@ def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number:
 	except Exception:
 		frappe.db.rollback()
 		raise
-
 
 @frappe.whitelist()
 def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
@@ -189,12 +188,31 @@ def get_repair_options():
 
 
 def finish_qc_process(slab_number: str, slab_grade: str | None, job_card: str, publish_slab_event=True):
-
 	# 2. Finish the job card and checkout the slab.
 	finish_process(job_card, "Quality Check", False, slab_number=slab_number, slab_grade=slab_grade, publish_slab_event=publish_slab_event)
 
-	# 3. Move the slab to specific warehouse based on grade by making a new stock entry - Material Transfer.
-	stock_entry, is_reject = _make_material_transfer_stock_entry(slab_number, slab_grade, job_card)
+	if slab_grade:
+		# 3. Move the slab to specific warehouse based on grade by making a new stock entry - Material Transfer.
+		stock_entry, is_reject = _make_material_transfer_stock_entry(slab_number, slab_grade, job_card)
 
-	# 4. Update the name of the stock item on the slab.
-	_update_item_and_status_on_slab(str(stock_entry.items[-1].item_code), slab_number, is_reject)
+		# 4. Update the name of the stock item on the slab.
+		_update_item_and_status_on_slab(str(stock_entry.items[-1].item_code), slab_number, is_reject)
+	else:
+		_make_repack_stock_entry()
+		_make_repair_job_cards()
+		_make_repair_logs()
+
+
+def _make_repack_stock_entry():
+	# TODO: This needs to be implmented for repolish and recalibration.
+	pass
+
+
+def _make_repair_job_cards():
+	# TODO: This needs to be implmented for repolish and recalibration.
+	pass
+
+
+def _make_repair_logs():
+	# TODO: This needs to be implmented for repolish and recalibration.
+	pass

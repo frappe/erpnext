@@ -19,9 +19,11 @@ class SlabQualityReport(Document):
 		from erpnext.manufacturing.doctype.slab_quality_observation.slab_quality_observation import (
 			SlabQualityObservation,
 		)
+		from erpnext.manufacturing.doctype.slab_repair_record.slab_repair_record import SlabRepairRecord
 
 		amended_from: DF.Link | None
 		bend: DF.Float
+		colour: DF.Literal["#007BFF", "#33CC33", "#A020F0", "#FF8C00", "#00CED1", "#FFD700", "#E6194B", "#800000", "#008080", "#F032E6", "#808000", "#9E2A3A"]
 		contamination: DF.Data | None
 		crack_back: DF.Data | None
 		crack_front: DF.Data | None
@@ -36,6 +38,7 @@ class SlabQualityReport(Document):
 		recovery_type: DF.Literal["", "Film Contamination", "Foreign Contamination", "Grit Contamination", "Pigment Contamination", "Pinhole Repair", "Cavity", "Other"]
 		remarks: DF.Text | None
 		repair: DF.Literal["", "None", "Recovery", "Repolish", "Recalibration"]
+		repair_history: DF.Table[SlabRepairRecord]
 		repolish_type: DF.Literal["", "Recovery Slab", "Head Mark", "Waves", "Edge Polish", "Dull Polish", "Other"]
 		shade: DF.Literal["", "Shade 1", "Shade 2", "Shade 3"]
 		shift: DF.Link

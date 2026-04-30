@@ -13,6 +13,7 @@
   "shift",
   "column_break_xwqk",
   "job_card",
+  "colour",
   "slab_details_section",
   "slab",
   "column_break_dxoj",
@@ -42,18 +43,18 @@
   "bend",
   "column_break_hmsq",
   "repair",
+  "grade",
   "column_break_0tsh",
   "recovery_type",
   "repolish_type",
   "recalibration_type",
-  "section_break_dtsr",
-  "grade",
-  "column_break_bblv",
   "section_break_8ixs",
   "remarks",
   "section_break_jbcr",
   "visualizer_preview",
-  "observations"
+  "observations",
+  "repair_history_section",
+  "repair_history"
  ],
  "fields": [
   {
@@ -293,14 +294,6 @@
    "options": "\nRecovery Slab\nHead Mark\nWaves\nEdge Polish\nDull Polish\nOther"
   },
   {
-   "fieldname": "section_break_dtsr",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_bblv",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_yoap",
    "fieldtype": "Column Break"
   },
@@ -317,13 +310,32 @@
    "label": "Recalibration Type",
    "mandatory_depends_on": "eval: doc.repair && doc.repair == 'Recalibration';",
    "options": "\n3cm to 2cm\n1mm"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "#007BFF",
+   "fieldname": "colour",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Colour",
+   "options": "#007BFF\n#33CC33\n#A020F0\n#FF8C00\n#00CED1\n#FFD700\n#E6194B\n#800000\n#008080\n#F032E6\n#808000\n#9E2A3A"
+  },
+  {
+   "fieldname": "repair_history_section",
+   "fieldtype": "Section Break",
+   "label": "Repair History"
+  },
+  {
+   "fieldname": "repair_history",
+   "fieldtype": "Table",
+   "options": "Slab Repair Record"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-29 22:51:58.318216",
+ "modified": "2026-04-30 13:22:03.232775",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab Quality Report",
