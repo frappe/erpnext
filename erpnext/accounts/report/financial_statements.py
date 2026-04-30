@@ -790,14 +790,14 @@ def compute_margin_view_data(data, columns, accumulated_values):
 			curr_value = row.get(curr_period)
 
 			if base_value is None or curr_value is None:
-				data[row_idx][curr_period] = "N/A"
+				data[row_idx][curr_period] = None
 				continue
 
 			if base_value == 0:
 				if curr_value == 0:
 					data[row_idx][curr_period] = 0
 				else:
-					data[row_idx][curr_period] = "N/A"
+					data[row_idx][curr_period] = None
 				continue
 
 			margin_percent = round((curr_value / base_value) * 100, 2)
