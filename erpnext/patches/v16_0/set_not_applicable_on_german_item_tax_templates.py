@@ -46,7 +46,7 @@ def execute():
 	an explicit 0% rate). For each German company, this patch looks up the
 	historical defaults for its Chart of Accounts and sets
 	`not_applicable = 1` on detail rows that still match those defaults
-	(same template title, same tax account, rate still 0, flag still unset),
+	(same template title, same zero-rate tax account set, flag still unset),
 	leaving any user-customised rows untouched.
 	"""
 	companies = frappe.get_all(
@@ -67,14 +67,20 @@ def execute():
 				pluck="name",
 			)
 			for itt_name in itt_names:
-				details = frappe.get_all(
+				zero_rate_details = frappe.get_all(
 					"Item Tax Template Detail",
-					filters={"parent": itt_name, "tax_rate": 0, "not_applicable": 0},
-					fields=["name", "tax_type"],
+					filters={"parent": itt_name, "tax_rate": 0},
+					fields=["name", "tax_type", "not_applicable"],
 				)
-				for d in details:
-					account_name = frappe.get_cached_value("Account", d.tax_type, "account_name")
-					if account_name in target_accounts:
+				zero_rate_accounts_by_detail = {
+					d.name: frappe.get_cached_value("Account", d.tax_type, "account_name")
+					for d in zero_rate_details
+				}
+				if set(zero_rate_accounts_by_detail.values()) != target_accounts:
+					continue
+
+				for d in zero_rate_details:
+					if not d.not_applicable:
 						frappe.db.set_value(
 							"Item Tax Template Detail",
 							d.name,
