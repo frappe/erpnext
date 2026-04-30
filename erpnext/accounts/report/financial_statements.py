@@ -795,7 +795,7 @@ def compute_margin_view_data(data, columns, accumulated_values):
 
 			if base_value == 0:
 				if curr_value == 0:
-					data[row_idx][curr_period] = ""
+					data[row_idx][curr_period] = 0
 				else:
 					data[row_idx][curr_period] = "N/A"
 				continue
