@@ -47,15 +47,3 @@ class SlabQualityReport(Document):
 	# end: auto-generated types
 	pass
 
-
-	def before_save(self):
-		self.update_shipping_details_on_slab()
-
-
-	def before_update_after_submit(self):
-		self.update_shipping_details_on_slab()
-
-
-	def update_shipping_details_on_slab(self):
-		slab: Slab = frappe.get_doc("Slab", self.slab)  # pyright: ignore[reportAssignmentType]
-		slab.save(ignore_permissions=True)
