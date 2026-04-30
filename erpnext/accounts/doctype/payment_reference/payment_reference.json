@@ -1,0 +1,88 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-02 17:50:08.648006",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "payment_term",
+  "column_break_lnjp",
+  "payment_schedule",
+  "section_break_fjhh",
+  "description",
+  "section_break_mjlv",
+  "due_date",
+  "column_break_qghl",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "payment_term",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Payment Term",
+   "options": "Payment Term"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_fjhh",
+   "fieldtype": "Section Break",
+   "label": "Description"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Description"
+  },
+  {
+   "fieldname": "section_break_mjlv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Due Date"
+  },
+  {
+   "fieldname": "column_break_qghl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "precision": "2"
+  },
+  {
+   "fieldname": "column_break_lnjp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payment_schedule",
+   "fieldtype": "Link",
+   "label": "Payment Schedule",
+   "options": "Payment Schedule",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-19 02:21:36.455830",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Payment Reference",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

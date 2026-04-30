@@ -48,7 +48,7 @@ def get_asset_finance_books_map():
 			asset.docstatus,
 			asset.name,
 			asset.opening_accumulated_depreciation,
-			asset.gross_purchase_amount,
+			asset.net_purchase_amount,
 			asset.opening_number_of_booked_depreciations,
 		)
 		.where(asset.docstatus < 2)

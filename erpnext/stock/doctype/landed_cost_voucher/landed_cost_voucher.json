@@ -16,8 +16,10 @@
   "get_items_from_purchase_receipts",
   "items",
   "sec_break1",
+  "vendor_invoices",
   "taxes",
   "section_break_9",
+  "total_vendor_invoices_cost",
   "total_taxes_and_charges",
   "col_break1",
   "distribute_charges_based_on",
@@ -49,24 +51,24 @@
   {
    "fieldname": "purchase_receipts",
    "fieldtype": "Table",
-   "label": "Purchase Receipts",
+   "label": "Vouchers",
    "options": "Landed Cost Purchase Receipt",
    "reqd": 1
   },
   {
    "fieldname": "purchase_receipt_items",
    "fieldtype": "Section Break",
-   "label": "Purchase Receipt Items"
+   "label": "Items"
   },
   {
    "fieldname": "get_items_from_purchase_receipts",
    "fieldtype": "Button",
-   "label": "Get Items From Purchase Receipts"
+   "label": "Get Items"
   },
   {
    "fieldname": "items",
    "fieldtype": "Table",
-   "label": "Purchase Receipt Items",
+   "label": "Receipt Items",
    "no_copy": 1,
    "options": "Landed Cost Item",
    "reqd": 1
@@ -79,7 +81,7 @@
   {
    "fieldname": "taxes",
    "fieldtype": "Table",
-   "label": "Taxes and Charges",
+   "label": "Landed Cost",
    "options": "Landed Cost Taxes and Charges",
    "reqd": 1
   },
@@ -90,7 +92,7 @@
   {
    "fieldname": "total_taxes_and_charges",
    "fieldtype": "Currency",
-   "label": "Total Taxes and Charges (Company Currency)",
+   "label": "Total Landed Cost (Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1,
    "reqd": 1
@@ -139,16 +141,33 @@
    "fieldname": "section_break_5",
    "fieldtype": "Section Break",
    "hide_border": 1
+  },
+  {
+   "fieldname": "vendor_invoices",
+   "fieldtype": "Table",
+   "label": "Vendor Invoices",
+   "options": "Landed Cost Vendor Invoice"
+  },
+  {
+   "fieldname": "total_vendor_invoices_cost",
+   "fieldtype": "Currency",
+   "label": "Total Vendor Invoices Cost (Company Currency)",
+   "options": "Company:company:default_currency",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
+ "grid_page_length": 50,
  "icon": "icon-usd",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:09:59.624249",
+ "modified": "2025-08-27 00:41:53.537375",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Voucher",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -165,6 +184,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",

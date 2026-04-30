@@ -7,6 +7,7 @@ from operator import itemgetter
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Count
 from frappe.utils import cint, date_diff, flt, get_datetime
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -52,7 +53,7 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 		range_values = get_range_age(filters, fifo_queue, to_date, item_dict)
 
 		check_and_replace_valuations_if_moving_average(
-			range_values, details.valuation_method, details.valuation_rate
+			range_values, details.valuation_method, details.valuation_rate, filters.get("company")
 		)
 
 		row = [details.name, details.item_name, details.description, details.item_group, details.brand]
@@ -76,10 +77,12 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 	return data
 
 
-def check_and_replace_valuations_if_moving_average(range_values, item_valuation_method, valuation_rate):
+def check_and_replace_valuations_if_moving_average(
+	range_values, item_valuation_method, valuation_rate, company
+):
 	if item_valuation_method == "Moving Average" or (
 		not item_valuation_method
-		and frappe.db.get_single_value("Stock Settings", "valuation_method") == "Moving Average"
+		and frappe.get_cached_value("Company", company, "valuation_method") == "Moving Average"
 	):
 		for i in range(0, len(range_values), 2):
 			range_values[i + 1] = range_values[i] * valuation_rate
@@ -132,6 +135,7 @@ def get_columns(filters: Filters) -> list[dict]:
 			"fieldtype": "Link",
 			"options": "Item",
 			"width": 100,
+			"sticky": "True",
 		},
 		{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 100},
 		{"label": _("Description"), "fieldname": "description", "fieldtype": "Data", "width": 200},
@@ -159,6 +163,7 @@ def get_columns(filters: Filters) -> list[dict]:
 				"fieldtype": "Link",
 				"options": "Warehouse",
 				"width": 100,
+				"sticky": "True",
 			}
 		]
 
@@ -238,15 +243,12 @@ class FIFOSlots:
 		Returns dict of the foll.g structure:
 		Key = Item A / (Item A, Warehouse A)
 		Key: {
-		        'details' -> Dict: ** item details **,
-		        'fifo_queue' -> List: ** list of lists containing entries/slots for existing stock,
-		                consumed/updated and maintained via FIFO. **
+		                'details' -> Dict: ** item details **,
+		                'fifo_queue' -> List: ** list of lists containing entries/slots for existing stock,
+		                                consumed/updated and maintained via FIFO. **
 		}
 		"""
-
-		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-			get_serial_nos_from_bundle,
-		)
+		from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
 
 		stock_ledger_entries = self.sle
 
@@ -254,16 +256,33 @@ class FIFOSlots:
 		if stock_ledger_entries is None:
 			bundle_wise_serial_nos = self.__get_bundle_wise_serial_nos()
 
+		# prepare single sle voucher detail lookup
+		self.prepare_stock_reco_voucher_wise_count()
+
 		with frappe.db.unbuffered_cursor():
 			if stock_ledger_entries is None:
 				stock_ledger_entries = self.__get_stock_ledger_entries()
 
 			for d in stock_ledger_entries:
 				key, fifo_queue, transferred_item_key = self.__init_key_stores(d)
+				prev_balance_qty = self.item_details[key].get("qty_after_transaction", 0)
 
-				if d.voucher_type == "Stock Reconciliation":
+				if d.voucher_type == "Stock Reconciliation" and (
+					not d.batch_no or d.serial_no or d.serial_and_batch_bundle
+				):
+					if d.voucher_detail_no in self.stock_reco_voucher_wise_count:
+						# for legacy recon with single sle has qty_after_transaction and stock_value_difference without outward entry
+						# for exisitng handle emptying the existing queue and details.
+						d.stock_value_difference = flt(d.qty_after_transaction * d.valuation_rate)
+						d.actual_qty = d.qty_after_transaction
+						self.item_details[key]["qty_after_transaction"] = 0
+						self.item_details[key]["total_qty"] = 0
+						fifo_queue.clear()
+					else:
+						d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
+
+				elif d.voucher_type == "Stock Reconciliation":
 					# get difference in qty shift as actual qty
-					prev_balance_qty = self.item_details[key].get("qty_after_transaction", 0)
 					d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
 
 				serial_nos = get_serial_nos(d.serial_no) if d.serial_no else []
@@ -271,14 +290,23 @@ class FIFOSlots:
 					if bundle_wise_serial_nos:
 						serial_nos = bundle_wise_serial_nos.get(d.serial_and_batch_bundle) or []
 					else:
-						serial_nos = get_serial_nos_from_bundle(d.serial_and_batch_bundle) or []
+						serial_nos = sorted(get_serial_nos_from_bundle(d.serial_and_batch_bundle)) or []
 
+				serial_nos = self.uppercase_serial_nos(serial_nos)
 				if d.actual_qty > 0:
 					self.__compute_incoming_stock(d, fifo_queue, transferred_item_key, serial_nos)
 				else:
 					self.__compute_outgoing_stock(d, fifo_queue, transferred_item_key, serial_nos)
 
 				self.__update_balances(d, key)
+
+				# handle serial nos misconsumption
+				if d.has_serial_no:
+					qty_after = cint(self.item_details[key]["qty_after_transaction"])
+					if qty_after <= 0:
+						fifo_queue.clear()
+					elif len(fifo_queue) > qty_after:
+						fifo_queue[:] = fifo_queue[:qty_after]
 
 			# Note that stock_ledger_entries is an iterator, you can not reuse it like a list
 			del stock_ledger_entries
@@ -288,6 +316,10 @@ class FIFOSlots:
 			self.item_details = self.__aggregate_details_by_item(self.item_details)
 
 		return self.item_details
+
+	def uppercase_serial_nos(self, serial_nos):
+		"Convert serial nos to uppercase for uniformity."
+		return [sn.upper() for sn in serial_nos]
 
 	def __init_key_stores(self, row: dict) -> tuple:
 		"Initialise keys and FIFO Queue."
@@ -402,7 +434,6 @@ class FIFOSlots:
 
 	def __update_balances(self, row: dict, key: tuple | str):
 		self.item_details[key]["qty_after_transaction"] = row.qty_after_transaction
-
 		if "total_qty" not in self.item_details[key]:
 			self.item_details[key]["total_qty"] = row.actual_qty
 		else:
@@ -458,6 +489,7 @@ class FIFOSlots:
 				sle.posting_date,
 				sle.voucher_type,
 				sle.voucher_no,
+				sle.voucher_detail_no,
 				sle.serial_no,
 				sle.batch_no,
 				sle.qty_after_transaction,
@@ -492,6 +524,7 @@ class FIFOSlots:
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		entry = frappe.qb.DocType("Serial and Batch Entry")
 
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
 		query = (
 			frappe.qb.from_(bundle)
 			.join(entry)
@@ -501,7 +534,7 @@ class FIFOSlots:
 				(bundle.docstatus == 1)
 				& (entry.serial_no.isnotnull())
 				& (bundle.company == self.filters.get("company"))
-				& (bundle.posting_date <= self.filters.get("to_date"))
+				& (bundle.posting_datetime <= to_date)
 			)
 		)
 
@@ -553,3 +586,36 @@ class FIFOSlots:
 		warehouse_results = [x[0] for x in warehouse_results]
 
 		return sle_query.where(sle.warehouse.isin(warehouse_results))
+
+	def prepare_stock_reco_voucher_wise_count(self):
+		self.stock_reco_voucher_wise_count = frappe._dict()
+
+		doctype = frappe.qb.DocType("Stock Ledger Entry")
+		item = frappe.qb.DocType("Item")
+
+		query = (
+			frappe.qb.from_(doctype)
+			.inner_join(item)
+			.on(doctype.item_code == item.name)
+			.select(doctype.voucher_detail_no, Count(doctype.name).as_("count"))
+			.where(
+				(doctype.voucher_type == "Stock Reconciliation")
+				& (doctype.docstatus < 2)
+				& (doctype.is_cancelled == 0)
+			)
+			.groupby(doctype.voucher_detail_no)
+		)
+
+		data = query.run(as_dict=True)
+		if not data:
+			return
+
+		for row in data:
+			if row.count != 1:
+				continue
+
+			sr_item = frappe.db.get_value(
+				"Stock Reconciliation Item", row.voucher_detail_no, ["current_qty", "qty"], as_dict=True
+			)
+			if sr_item and sr_item.qty and sr_item.current_qty:
+				self.stock_reco_voucher_wise_count[row.voucher_detail_no] = sr_item.current_qty

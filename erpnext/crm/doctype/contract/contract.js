@@ -29,4 +29,10 @@ frappe.ui.form.on("Contract", {
 			});
 		}
 	},
+	party_name: function (frm) {
+		let field = frm.doc.party_type.toLowerCase() + "_name";
+		frappe.db.get_value(frm.doc.party_type, frm.doc.party_name, field, (r) => {
+			frm.set_value("party_full_name", r[field]);
+		});
+	},
 });

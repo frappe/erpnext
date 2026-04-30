@@ -5,7 +5,6 @@
 from unittest.mock import MagicMock, call
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_to_date, now, nowdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -19,12 +18,10 @@ from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.stock.utils import PendingRepostingError
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestRepostItemValuation(IntegrationTestCase, StockTestMixin):
-	def tearDown(self):
-		frappe.flags.dont_execute_stock_reposts = False
-
+class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 	def test_repost_time_slot(self):
 		repost_settings = frappe.get_doc("Stock Reposting Settings")
 
@@ -195,7 +192,7 @@ class TestRepostItemValuation(IntegrationTestCase, StockTestMixin):
 
 		riv.set_status("Skipped")
 
-	@IntegrationTestCase.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+	@ERPNextTestSuite.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_prevention_of_cancelled_transaction_riv(self):
 		frappe.flags.dont_execute_stock_reposts = True
 
@@ -356,6 +353,7 @@ class TestRepostItemValuation(IntegrationTestCase, StockTestMixin):
 		riv = frappe.get_doc(
 			doctype="Repost Item Valuation",
 			item_code="_Test Item",
+			company="_Test Company",
 			warehouse="_Test Warehouse - _TC",
 			based_on="Item and Warehouse",
 			posting_date=today,
@@ -363,17 +361,17 @@ class TestRepostItemValuation(IntegrationTestCase, StockTestMixin):
 		)
 		riv.flags.dont_run_in_test = True  # keep it queued
 
-		accounts_settings = frappe.get_doc("Accounts Settings")
-		accounts_settings.acc_frozen_upto = today
-		accounts_settings.frozen_accounts_modifier = ""
-		accounts_settings.save()
+		company = frappe.get_doc("Company", "_Test Company")
+		company.accounts_frozen_till_date = today
+		company.role_allowed_for_frozen_entries = ""
+		company.save()
 
 		self.assertRaises(frappe.ValidationError, riv.save)
 
-		accounts_settings.acc_frozen_upto = ""
-		accounts_settings.save()
+		company.accounts_frozen_till_date = ""
+		company.save()
 
-	@IntegrationTestCase.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+	@ERPNextTestSuite.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_create_repost_entry_for_cancelled_document(self):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
@@ -425,13 +423,13 @@ class TestRepostItemValuation(IntegrationTestCase, StockTestMixin):
 		item_code = make_item("_Test Remove Attached File Item", properties={"is_stock_item": 1})
 
 		make_purchase_receipt(
-			item_code=item_code,
+			item_code=item_code.name,
 			qty=1,
 			rate=100,
 		)
 
 		pr1 = make_purchase_receipt(
-			item_code=item_code,
+			item_code=item_code.name,
 			qty=1,
 			rate=100,
 			posting_date=add_days(today(), days=-1),

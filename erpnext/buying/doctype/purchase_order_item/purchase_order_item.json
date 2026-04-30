@@ -26,7 +26,7 @@
   "quantity_and_rate",
   "qty",
   "stock_uom",
-  "subcontracted_quantity",
+  "subcontracted_qty",
   "col_break2",
   "uom",
   "conversion_factor",
@@ -55,7 +55,6 @@
   "pricing_rules",
   "stock_uom_rate",
   "is_free_item",
-  "apply_tds",
   "section_break_29",
   "net_rate",
   "net_amount",
@@ -281,14 +280,16 @@
    "depends_on": "price_list_rate",
    "fieldname": "discount_percentage",
    "fieldtype": "Percent",
-   "label": "Discount on Price List Rate (%)"
+   "label": "Discount on Price List Rate (%)",
+   "print_hide": 1
   },
   {
    "depends_on": "price_list_rate",
    "fieldname": "discount_amount",
    "fieldtype": "Currency",
    "label": "Discount Amount",
-   "options": "currency"
+   "options": "currency",
+   "print_hide": 1
   },
   {
    "fieldname": "col_break3",
@@ -429,6 +430,7 @@
    "fieldname": "weight_per_unit",
    "fieldtype": "Float",
    "label": "Weight Per Unit",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -764,6 +766,7 @@
    "label": "Rate of Stock UOM",
    "no_copy": 1,
    "options": "currency",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -780,6 +783,7 @@
    "fieldtype": "Float",
    "label": "Available Qty at Company",
    "no_copy": 1,
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -830,6 +834,7 @@
    "fieldname": "production_plan",
    "fieldtype": "Link",
    "label": "Production Plan",
+   "no_copy": 1,
    "options": "Production Plan",
    "print_hide": 1,
    "read_only": 1
@@ -878,7 +883,8 @@
    "fieldname": "fg_item_qty",
    "fieldtype": "Float",
    "label": "Finished Good Qty",
-   "mandatory_depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow"
+   "mandatory_depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
+   "print_hide": 1
   },
   {
    "depends_on": "eval:parent.is_internal_supplier",
@@ -897,12 +903,6 @@
   {
    "fieldname": "column_break_54",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "1",
-   "fieldname": "apply_tds",
-   "fieldtype": "Check",
-   "label": "Apply TDS"
   },
   {
    "fieldname": "wip_composite_asset",
@@ -929,16 +929,19 @@
    "fieldname": "distributed_discount_amount",
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
-   "options": "currency"
+   "options": "currency",
+   "print_hide": 1
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
-   "fieldname": "subcontracted_quantity",
+   "fieldname": "subcontracted_qty",
    "fieldtype": "Float",
    "label": "Subcontracted Quantity",
    "no_copy": 1,
    "non_negative": 1,
+   "print_hide": 1,
    "read_only": 1
   }
  ],
@@ -947,7 +950,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-03-13 17:27:43.468602",
+ "modified": "2025-11-30 16:51:57.761673",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

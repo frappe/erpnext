@@ -5,6 +5,7 @@ import inspect
 
 import frappe
 from frappe import _, qb
+from frappe.desk.form.linked_with import get_child_tables_of_doctypes
 from frappe.model.document import Document
 from frappe.utils.data import comma_and
 
@@ -97,6 +98,9 @@ class RepostAccountingLedger(Document):
 			doc = frappe.get_doc(x.voucher_type, x.voucher_no)
 			if doc.doctype in ["Payment Entry", "Journal Entry"]:
 				gle_map = doc.build_gl_map()
+			elif doc.doctype == "Purchase Receipt":
+				inventory_account_map = doc.get_inventory_account_map()
+				gle_map = doc.get_gl_entries(inventory_account_map)
 			else:
 				gle_map = doc.get_gl_entries()
 
@@ -108,6 +112,10 @@ class RepostAccountingLedger(Document):
 	@frappe.whitelist()
 	def generate_preview(self):
 		from erpnext.accounts.report.general_ledger.general_ledger import get_columns as get_gl_columns
+
+		if not self.vouchers:
+			frappe.msgprint(_("Add vouchers to generate preview."))
+			return
 
 		gl_columns = []
 		gl_data = []
@@ -136,6 +144,7 @@ class RepostAccountingLedger(Document):
 				account_repost_doc=self.name,
 				is_async=True,
 				job_name=job_name,
+				enqueue_after_commit=True,
 			)
 			frappe.msgprint(_("Repost has started in the background"))
 		else:
@@ -143,7 +152,7 @@ class RepostAccountingLedger(Document):
 
 
 @frappe.whitelist()
-def start_repost(account_repost_doc=str) -> None:
+def start_repost(account_repost_doc: str | None = None) -> None:
 	from erpnext.accounts.general_ledger import make_reverse_gl_entries
 
 	frappe.flags.through_repost_accounting_ledger = True
@@ -164,11 +173,15 @@ def start_repost(account_repost_doc=str) -> None:
 					frappe.db.delete(
 						"Payment Ledger Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name}
 					)
+					frappe.db.delete(
+						"Advance Payment Ledger Entry",
+						filters={"voucher_type": doc.doctype, "voucher_no": doc.name},
+					)
 
 				if doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
 					if not repost_doc.delete_cancelled_entries:
 						doc.docstatus = 2
-						doc.make_gl_entries_on_cancel()
+						doc.make_gl_entries_on_cancel(from_repost=True)
 
 					doc.docstatus = 1
 					if doc.doctype == "Sales Invoice":
@@ -176,6 +189,14 @@ def start_repost(account_repost_doc=str) -> None:
 					else:
 						doc.force_set_against_expense_account()
 					doc.make_gl_entries()
+
+				elif doc.doctype == "Purchase Receipt":
+					if not repost_doc.delete_cancelled_entries:
+						doc.docstatus = 2
+						doc.make_gl_entries_on_cancel(from_repost=True)
+
+					doc.docstatus = 1
+					doc.make_gl_entries(from_repost=True)
 
 				elif doc.doctype in ["Payment Entry", "Journal Entry", "Expense Claim"]:
 					if not repost_doc.delete_cancelled_entries:
@@ -191,13 +212,31 @@ def start_repost(account_repost_doc=str) -> None:
 						doc.make_gl_entries()
 
 
-def get_allowed_types_from_settings():
-	return [
+def get_allowed_types_from_settings(child_doc: bool = False):
+	repost_docs = [
 		x.document_type
 		for x in frappe.db.get_all(
-			"Repost Allowed Types", filters={"allowed": True}, fields=["distinct(document_type)"]
+			"Repost Allowed Types",
+			fields=["document_type"],
+			distinct=True,
 		)
 	]
+	result = repost_docs
+
+	if repost_docs and child_doc:
+		result.extend(get_child_docs(repost_docs))
+
+	return result
+
+
+def get_child_docs(doc: list) -> list:
+	child_doc = []
+	doc = get_child_tables_of_doctypes(doc)
+	for child_list in doc.values():
+		for child in child_list:
+			if child.get("child_table"):
+				child_doc.append(child["child_table"])
+	return child_doc
 
 
 def validate_docs_for_deferred_accounting(sales_docs, purchase_docs):
@@ -232,28 +271,31 @@ def validate_docs_for_voucher_types(doc_voucher_types):
 	if disallowed_types := voucher_types.difference(allowed_types):
 		message = "are" if len(disallowed_types) > 1 else "is"
 		frappe.throw(
-			_("{0} {1} not allowed to be reposted. Modify {2} to enable reposting.").format(
+			_(
+				"{0} {1} not allowed to be reposted. You can enable it by adding it '{2}' table in {3}."
+			).format(
 				frappe.bold(comma_and(list(disallowed_types))),
 				message,
-				frappe.bold(
-					frappe.utils.get_link_to_form(
-						"Repost Accounting Ledger Settings", "Repost Accounting Ledger Settings"
-					)
-				),
+				frappe.bold("Allowed Doctype"),
+				frappe.utils.get_link_to_form("Accounts Settings"),
 			)
 		)
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_repost_allowed_types(doctype, txt, searchfield, start, page_len, filters):
-	filters = {"allowed": True}
-
+def get_repost_allowed_types(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
 	if txt:
 		filters.update({"document_type": ("like", f"%{txt}%")})
 
 	if allowed_types := frappe.db.get_all(
-		"Repost Allowed Types", filters=filters, fields=["distinct(document_type)"], as_list=1
+		"Repost Allowed Types",
+		filters=filters,
+		fields=["document_type"],
+		as_list=1,
+		distinct=True,
 	):
 		return allowed_types
 	return []

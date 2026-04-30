@@ -42,7 +42,7 @@ def get_timezones():
 
 
 @frappe.whitelist(allow_guest=True)
-def get_appointment_slots(date, timezone):
+def get_appointment_slots(date: str, timezone: str):
 	# Convert query to local timezones
 	format_string = "%Y-%m-%d %H:%M:%S"
 	query_start_time = datetime.datetime.strptime(date + " 00:00:00", format_string)
@@ -92,7 +92,7 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 
 
 @frappe.whitelist(allow_guest=True)
-def create_appointment(date, time, tz, contact):
+def create_appointment(date: str, time: str, tz: str, contact: str):
 	format_string = "%Y-%m-%d %H:%M:%S"
 	scheduled_time = datetime.datetime.strptime(date + " " + time, format_string)
 	# Strip tzinfo from datetime objects since it's handled by the doctype

@@ -74,7 +74,7 @@ class OpportunitySummaryBySalesStage:
 		}[self.filters.get("based_on")]
 
 		data_based_on = {
-			"Number": "count(name) as count",
+			"Number": {"COUNT": "*", "as": "count"},
 			"Amount": "opportunity_amount as amount",
 		}[self.filters.get("data_based_on")]
 
@@ -153,10 +153,14 @@ class OpportunitySummaryBySalesStage:
 			}[self.filters.get("based_on")]
 
 			if self.filters.get("based_on") == "Opportunity Owner":
-				if d.get(based_on) == "[]" or d.get(based_on) is None or d.get(based_on) == "Not Assigned":
+				value = d.get(based_on)
+				if not value or value in ["[]", "null", "Not Assigned"]:
 					assignments = ["Not Assigned"]
 				else:
-					assignments = json.loads(d.get(based_on))
+					try:
+						assignments = json.loads(value)
+					except json.JSONDecodeError:
+						assignments = ["Not Assigned"]
 
 				sales_stage = d.get("sales_stage")
 				count = d.get(data_based_on)

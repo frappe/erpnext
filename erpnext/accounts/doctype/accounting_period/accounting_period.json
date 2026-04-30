@@ -11,6 +11,8 @@
   "end_date",
   "column_break_4",
   "company",
+  "disabled",
+  "exempted_role",
   "section_break_7",
   "closed_documents"
  ],
@@ -18,7 +20,6 @@
   {
    "fieldname": "period_name",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Period Name",
    "reqd": 1,
    "unique": 1
@@ -50,6 +51,13 @@
    "reqd": 1
   },
   {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Disabled"
+  },
+  {
    "fieldname": "section_break_7",
    "fieldtype": "Section Break"
   },
@@ -59,13 +67,22 @@
    "label": "Closed Documents",
    "options": "Closed Document",
    "reqd": 1
+  },
+  {
+   "description": "Role allowed to bypass period restrictions.",
+   "fieldname": "exempted_role",
+   "fieldtype": "Link",
+   "label": "Exempted Role",
+   "link_filters": "[[\"Role\",\"disabled\",\"=\",0]]",
+   "options": "Role"
   }
  ],
  "links": [],
- "modified": "2024-03-27 13:05:57.388109",
+ "modified": "2026-03-09 17:15:33.577217",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Period",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -105,6 +122,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

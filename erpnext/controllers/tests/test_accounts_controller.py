@@ -2,12 +2,9 @@
 # For license information, please see license.txt
 
 
-from datetime import datetime
-
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, getdate, nowdate
 from frappe.utils.data import getdate as convert_to_date
 
@@ -16,9 +13,13 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_pay
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
-from erpnext.buying.doctype.purchase_order.test_purchase_order import prepare_data_for_internal_transfer
+from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+	create_purchase_order,
+	prepare_data_for_internal_transfer,
+)
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 def make_customer(customer_name, currency=None):
@@ -50,7 +51,7 @@ def make_supplier(supplier_name, currency=None):
 		return supplier_name
 
 
-class TestAccountsController(IntegrationTestCase):
+class TestAccountsController(ERPNextTestSuite):
 	"""
 	Test Exchange Gain/Loss booking on various scenarios.
 	Test Cases are numbered for better organization
@@ -71,9 +72,7 @@ class TestAccountsController(IntegrationTestCase):
 		self.create_item()
 		self.create_parties()
 		self.clear_old_entries()
-
-	def tearDown(self):
-		frappe.db.rollback()
+		frappe.flags.is_reverse_depr_entry = False
 
 	def create_company(self):
 		company_name = "_Test Company"
@@ -809,9 +808,7 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertEqual(exc_je_for_si, [])
 		self.assertEqual(exc_je_for_pe, [])
 
-	@IntegrationTestCase.change_settings(
-		"Stock Settings", {"allow_internal_transfer_at_arms_length_price": 1}
-	)
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_internal_transfer_at_arms_length_price": 1})
 	def test_16_internal_transfer_at_arms_length_price(self):
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -872,7 +869,7 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertEqual(pi.items[0].rate, arms_length_price)
 		self.assertEqual(pi.items[0].valuation_rate, 100)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings", {"exchange_gain_loss_posting_date": "Reconciliation Date"}
 	)
 	def test_17_gain_loss_posting_date_for_normal_payment(self):
@@ -935,7 +932,10 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertEqual(exc_je_for_si, [])
 		self.assertEqual(exc_je_for_pe, [])
 
-	@IntegrationTestCase.change_settings("Accounts Settings", {"add_taxes_from_item_tax_template": 1})
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"add_taxes_from_taxes_and_charges_template": 1, "add_taxes_from_item_tax_template": 0},
+	)
 	def test_18_fetch_taxes_based_on_taxes_and_charges_template(self):
 		# Create a Sales Taxes and Charges Template
 		if not frappe.db.exists("Sales Taxes and Charges Template", "_Test Tax - _TC"):
@@ -963,6 +963,30 @@ class TestAccountsController(IntegrationTestCase):
 		sinv.insert()
 
 		self.assertEqual(sinv.total_taxes_and_charges, 4.5)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"add_taxes_from_item_tax_template": 1, "add_taxes_from_taxes_and_charges_template": 0},
+	)
+	def test_19_fetch_taxes_based_on_item_tax_template_template(self):
+		# Create a Sales Invoice
+		sinv = frappe.new_doc("Sales Invoice")
+		sinv.customer = self.customer
+		sinv.company = self.company
+		sinv.currency = "INR"
+		sinv.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 1,
+				"rate": 50,
+				"item_tax_template": "_Test Account Excise Duty @ 10 - _TC",
+			},
+		)
+		sinv.insert()
+
+		self.assertEqual(sinv.taxes[0].account_head, "_Test Account Excise Duty - _TC")
+		self.assertEqual(sinv.total_taxes_and_charges, 5)
 
 	def test_20_journal_against_sales_invoice(self):
 		# Invoice in Foreign Currency
@@ -1543,25 +1567,10 @@ class TestAccountsController(IntegrationTestCase):
 
 		frappe.db.set_value("Company", self.company, "cost_center", cc)
 
-	def setup_dimensions(self):
-		# create dimension
-		from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
-			create_dimension,
-		)
-
-		create_dimension()
-		# make it non-mandatory
-		loc = frappe.get_doc("Accounting Dimension", "Location")
-		for x in loc.dimension_defaults:
-			x.mandatory_for_bs = False
-			x.mandatory_for_pl = False
-		loc.save()
-
 	def test_90_dimensions_filter(self):
 		"""
 		Test workings of dimension filters
 		"""
-		self.setup_dimensions()
 		rate_in_account_currency = 1
 
 		# Invoices
@@ -1629,7 +1638,6 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertEqual(len(pr.payments), 1)
 
 	def test_91_cr_note_should_inherit_dimension(self):
-		self.setup_dimensions()
 		rate_in_account_currency = 1
 
 		# Invoice
@@ -1674,7 +1682,6 @@ class TestAccountsController(IntegrationTestCase):
 
 	def test_92_dimension_inhertiance_exc_gain_loss(self):
 		# Sales Invoice in Foreign Currency
-		self.setup_dimensions()
 		rate_in_account_currency = 1
 		dpt = "Research & Development - _TC"
 
@@ -1710,7 +1717,6 @@ class TestAccountsController(IntegrationTestCase):
 		)
 
 	def test_93_dimension_inheritance_on_advance(self):
-		self.setup_dimensions()
 		dpt = "Research & Development - _TC"
 
 		adv = self.create_payment_entry(amount=1, source_exc_rate=85)
@@ -2235,3 +2241,236 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertRaises(frappe.ValidationError, si.save)
 		si.contact_person = customer_contact.name
 		si.save()
+
+	def test_discount_amount_not_mapped_repeatedly_for_sales_transactions(self):
+		"""
+		Test that additional discount amount is not copied repeatedly
+		when creating multiple delivery notes from a single sales order with discount_amount set
+		"""
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		# Create a sales order with discount amount
+		so = make_sales_order(qty=10, rate=100, do_not_submit=True)
+		so.apply_discount_on = "Net Total"
+		so.discount_amount = 100
+		so.save()
+		so.submit()
+
+		# Create first delivery note from sales order (partial qty)
+		dn1 = make_delivery_note(so.name)
+		dn1.items[0].qty = 5
+		dn1.save()
+		dn1.submit()
+
+		# First delivery note should have full discount amount
+		self.assertEqual(dn1.discount_amount, 100)
+		self.assertEqual(dn1.grand_total, 400)
+
+		# Create second delivery note from the same sales order (remaining qty)
+		dn2 = make_delivery_note(so.name)
+		dn2.items[0].qty = 5
+		dn2.save()
+		dn2.submit()
+
+		# Second delivery note should have discount_amount set to 0
+		# because discount was already fully applied in first delivery note
+		self.assertEqual(dn2.discount_amount, 0)
+		self.assertEqual(dn2.grand_total, 500)
+
+	def test_discount_amount_not_mapped_repeatedly_for_purchase_transactions(self):
+		"""
+		Test that additional discount amount is not copied repeatedly
+		when creating multiple purchase receipts from a single purchase order with discount_amount set
+		"""
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		# Create a purchase order with discount amount
+		po = create_purchase_order(qty=10, rate=100, do_not_submit=True)
+		po.apply_discount_on = "Net Total"
+		po.discount_amount = 100
+		po.save()
+		po.submit()
+
+		# Create first purchase receipt from purchase order (partial qty)
+		pr1 = make_purchase_receipt(po.name)
+		pr1.items[0].qty = 5
+		pr1.save()
+		pr1.submit()
+
+		# First purchase receipt should have full discount amount
+		self.assertEqual(pr1.discount_amount, 100)
+		self.assertEqual(pr1.grand_total, 400)
+
+		# Create second purchase receipt from the same purchase order (remaining qty)
+		pr2 = make_purchase_receipt(po.name)
+		pr2.items[0].qty = 5
+		pr2.save()
+		pr2.submit()
+
+		# Second purchase receipt should have discount_amount set to 0
+		# because discount was already fully applied in first purchase receipt
+		self.assertEqual(pr2.discount_amount, 0)
+		self.assertEqual(pr2.grand_total, 500)
+
+	def test_discount_amount_partial_application_in_mapped_transactions(self):
+		"""
+		Test that discount amount is partially applied when some discount
+		has already been used in previous mapped transactions
+		"""
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		# Create a sales order with discount amount
+		so = make_sales_order(qty=10, rate=100, do_not_submit=True)
+		so.apply_discount_on = "Net Total"
+		so.discount_amount = 200
+		so.save()
+		so.submit()
+
+		self.assertEqual(so.discount_amount, 200)
+		self.assertEqual(so.grand_total, 800)
+
+		# Create first invoice with partial discount (manually set lower discount)
+		si1 = make_sales_invoice(so.name)
+		si1.items[0].qty = 5
+		si1.discount_amount = 50  # Partial discount application
+		si1.save()
+		si1.submit()
+
+		self.assertEqual(si1.discount_amount, 50)
+		self.assertEqual(si1.grand_total, 450)
+
+		# Create second invoice from the same sales order
+		si2 = make_sales_invoice(so.name)
+		si2.items[0].qty = 5
+		si2.save()
+		si2.submit()
+
+		# Second invoice should have remaining discount (200 - 50 = 150)
+		self.assertEqual(si2.discount_amount, 150)
+		self.assertEqual(si2.grand_total, 350)
+
+	def test_discount_amount_not_mapped_when_percentage_is_set(self):
+		"""
+		Test that discount amount is not adjusted when additional_discount_percentage
+		is set in the source document (as it will be recalculated based on percentage)
+		"""
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		# Create a sales order with discount percentage instead of amount
+		so = make_sales_order(qty=10, rate=100, do_not_submit=True)
+		so.apply_discount_on = "Net Total"
+		so.additional_discount_percentage = 10  # 10% discount
+		so.save()
+		so.submit()
+
+		self.assertEqual(so.discount_amount, 100)  # 10% of 1000
+		self.assertEqual(so.grand_total, 900)
+
+		# Create delivery note from sales order
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 5
+		dn.save()
+
+		# Delivery note should have discount amount recalculated based on percentage
+		# and not affected by the repeated mapping logic
+		self.assertEqual(dn.additional_discount_percentage, 10)
+		self.assertEqual(dn.discount_amount, 50)  # 10% of 500
+
+	def test_discount_amount_for_multiple_returns(self):
+		"""
+		Test that discount amount is correctly adjusted when multiple return invoices
+		are created against the same original invoice to prevent over-returning discount
+		"""
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+
+		# Create original sales invoice with discount
+		si = create_sales_invoice(qty=10, rate=100, do_not_submit=True)
+		si.apply_discount_on = "Net Total"
+		si.discount_amount = 100
+		si.save()
+		si.submit()
+
+		# Create first return - Frappe will copy full discount by default, we need to adjust it
+		return_si_1 = make_sales_return(si.name)
+		return_si_1.items[0].qty = -6  # Return 6 out of 10 items
+		# Manually set discount to match the proportion (60% of discount)
+		return_si_1.discount_amount = -60
+		return_si_1.save()
+		return_si_1.submit()
+
+		self.assertEqual(return_si_1.discount_amount, -60)
+
+		# Create second return for remaining items
+		return_si_2 = make_sales_return(si.name)
+		return_si_2.items[0].qty = -4  # Return remaining 4 out of 10 items
+		return_si_2.save()
+
+		# Second return should only get remaining discount (100 - 60 = 40)
+		self.assertEqual(return_si_2.discount_amount, -40)
+
+	def test_company_linked_address(self):
+		from erpnext.crm.doctype.prospect.test_prospect import make_address
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		company_address = make_address(
+			address_title="Company", address_type="Shipping", address_line1="100", city="Mumbai"
+		)
+		company_address.append("links", {"link_doctype": "Company", "link_name": "_Test Company"})
+		company_address.save()
+
+		customer_shipping = make_address(
+			address_title="Customer", address_type="Shipping", address_line1="10"
+		)
+		customer_shipping.append("links", {"link_doctype": "Customer", "link_name": "_Test Customer"})
+		customer_shipping.save()
+
+		supplier_billing = make_address(address_title="Supplier", address_line1="2", city="Ahmedabad")
+		supplier_billing.append("links", {"link_doctype": "Supplier", "link_name": "_Test Supplier"})
+		supplier_billing.save()
+
+		po = create_purchase_order(do_not_save=True)
+		po.shipping_address = customer_shipping.name
+		self.assertRaises(frappe.ValidationError, po.save)
+		po.shipping_address = company_address.name
+		po.save()
+
+		po.billing_address = supplier_billing.name
+		self.assertRaises(frappe.ValidationError, po.save)
+		po.billing_address = company_address.name
+		po.reload()
+		po.save()
+
+		si = make_sales_order(do_not_save=1, do_not_submit=1)
+		si.dispatch_address_name = supplier_billing.name
+		self.assertRaises(frappe.ValidationError, si.save)
+		si.items[0].delivered_by_supplier = 1
+		si.items[0].supplier = "_Test Supplier"
+		si.save()
+
+		po = create_purchase_order(do_not_save=True)
+		po.shipping_address = customer_shipping.name
+		self.assertRaises(frappe.ValidationError, po.save)
+		po.items[0].delivered_by_supplier = 1
+		po.save()
+
+	@ERPNextTestSuite.change_settings("Global Defaults", {"use_posting_datetime_for_naming_documents": 1})
+	def test_document_naming_rule_based_on_posting_date(self):
+		frappe.new_doc(
+			"Document Naming Rule", document_type="Sales Invoice", prefix="SI-.MM.-.YYYY.-"
+		).insert()
+
+		si = create_sales_invoice(do_not_save=True)
+		si.set_posting_time = 1
+		si.posting_date = "2025-12-31"
+		si.save()
+		self.assertEqual(si.name, "SI-12-2025-00001")
+
+		si = create_sales_invoice(do_not_save=True)
+		si.set_posting_time = 1
+		si.posting_date = "2026-01-01"
+		si.save()
+		self.assertEqual(si.name, "SI-01-2026-00002")

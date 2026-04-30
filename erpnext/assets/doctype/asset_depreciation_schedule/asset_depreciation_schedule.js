@@ -31,7 +31,7 @@ frappe.ui.form.on("Depreciation Schedule", {
 			frappe.call({
 				method: "erpnext.assets.doctype.asset.depreciation.make_depreciation_entry",
 				args: {
-					asset_depr_schedule_name: frm.doc.name,
+					depr_schedule_name: frm.doc.name,
 					date: row.schedule_date,
 				},
 				debounce: 1000,

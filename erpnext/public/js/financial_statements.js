@@ -1,48 +1,218 @@
 frappe.provide("erpnext.financial_statements");
 
+function get_filter_value(filter_name) {
+	// not warn when the filter is missing
+	return frappe.query_report.get_filter_value(filter_name, false);
+}
+
 erpnext.financial_statements = {
 	filters: get_filters(),
 	baseData: null,
-	formatter: function (value, row, column, data, default_formatter, filter) {
-		if (
-			frappe.query_report.get_filter_value("selected_view") == "Growth" &&
-			data &&
-			column.colIndex >= 3
-		) {
-			const growthPercent = data[column.fieldname];
 
-			if (growthPercent == undefined) return "NA"; //making this not applicable for undefined/null values
+	get_pdf_format: function (report, custom_format) {
+		// If report template is selected, use default pdf formatting
+		return get_filter_value("report_template") ? null : custom_format;
+	},
+
+	formatter: function (value, row, column, data, default_formatter, filter) {
+		const report_params = [value, row, column, data, default_formatter, filter];
+		// Growth/Margin
+		if (erpnext.financial_statements._is_special_view(column, data))
+			return erpnext.financial_statements._format_special_view(...report_params);
+
+		if (get_filter_value("report_template"))
+			return erpnext.financial_statements._format_custom_report(...report_params);
+		else return erpnext.financial_statements._format_standard_report(...report_params);
+	},
+
+	_is_special_view: function (column, data) {
+		if (!data) return false;
+		const view = get_filter_value("selected_view");
+		return (view === "Growth" && column.colIndex >= 3) || (view === "Margin" && column.colIndex >= 2);
+	},
+
+	_format_custom_report: function (value, row, column, data, default_formatter, filter) {
+		const columnInfo = erpnext.financial_statements._parse_column_info(column.fieldname, data);
+		const formatting = erpnext.financial_statements._get_formatting_for_column(data, columnInfo);
+
+		if (columnInfo.isAccount) {
+			return erpnext.financial_statements._format_custom_account_column(
+				value,
+				data,
+				formatting,
+				column,
+				default_formatter,
+				row
+			);
+		} else {
+			return erpnext.financial_statements._format_custom_value_column(
+				value,
+				data,
+				formatting,
+				column,
+				default_formatter,
+				row
+			);
+		}
+	},
+
+	_parse_column_info: function (fieldname, data) {
+		const valueMatch = fieldname.match(/^(?:seg_(\d+)_)?(.+)$/);
+
+		const periodKeys = data._segment_info?.period_keys || [];
+		const baseName = valueMatch ? valueMatch[2] : fieldname;
+		const isPeriodColumn = periodKeys.includes(baseName);
+
+		return {
+			isAccount: baseName === "account", // DO NOT USE `name_field` ! This can be overridden in some reports!
+			isPeriod: isPeriodColumn,
+			segmentIndex: valueMatch && valueMatch[1] ? parseInt(valueMatch[1]) : null,
+			fieldname: baseName,
+		};
+	},
+
+	_get_formatting_for_column: function (data, columnInfo) {
+		let formatting = {};
+
+		if (columnInfo.segmentIndex !== null && data.segment_values)
+			formatting = data.segment_values[`seg_${columnInfo.segmentIndex}`] || {};
+		else formatting = data;
+
+		return formatting;
+	},
+
+	_format_custom_account_column: function (value, data, formatting, column, default_formatter, row) {
+		// account name to display in the report
+		// 1. section_name for sections
+		// 2. account_name for accounts
+		// 3. formatting.account_name for segments
+		// 4. value as last fallback
+		value = data.section_name || data.account_name || formatting.account_name || value;
+
+		if (!value) return "";
+
+		// Link to open ledger
+		const should_link_to_ledger =
+			formatting.is_detail ||
+			(formatting.account_filters && formatting.child_accounts && formatting.child_accounts.length);
+
+		if (should_link_to_ledger) {
+			const glData = {
+				account:
+					Array.isArray(formatting.child_accounts) && formatting.child_accounts.length
+						? formatting.child_accounts
+						: formatting.account ?? value,
+				from_date: formatting.from_date || formatting.period_start_date,
+				to_date: formatting.to_date || formatting.period_end_date,
+				account_type: formatting.account_type,
+				company: get_filter_value("company"),
+			};
+
+			column.link_onclick =
+				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(glData) + ")";
+
+			value = default_formatter(value, row, column, data);
+		}
+
+		let formattedValue = String(value);
+
+		// Prefix
+		if (formatting.is_detail || formatting.prefix)
+			formattedValue = (formatting.prefix || "• ") + formattedValue;
+
+		// Indent
+		if (data._segment_info && data._segment_info.total_segments === 1) {
+			column.is_tree = true;
+		} else if (formatting.indent && formatting.indent > 0) {
+			const indent = "&nbsp;".repeat(formatting.indent * 4);
+			formattedValue = indent + formattedValue;
+		}
+
+		// Style
+		return erpnext.financial_statements._style_custom_value(formattedValue, formatting, null);
+	},
+
+	_format_custom_value_column: function (value, data, formatting, column, default_formatter, row) {
+		if (formatting.is_blank_line) return "";
+
+		const col = { ...column };
+		col.fieldtype = formatting.fieldtype || col.fieldtype;
+		// Avoid formatting as currency
+		if (col.fieldtype === "Float") col.options = null;
+
+		let formattedValue = default_formatter(value, row, col, data);
+		return erpnext.financial_statements._style_custom_value(formattedValue, formatting, value);
+	},
+
+	_style_custom_value(formatted_value, formatting, value) {
+		const styles = [];
+
+		if (formatting.bold) styles.push("font-weight: bold");
+		if (formatting.italic) styles.push("font-style: italic");
+
+		if (formatting.warn_if_negative && typeof value === "number" && value < 0) {
+			styles.push("color: #dc3545"); // text-danger
+		} else if (formatting.color) {
+			styles.push(`color: ${formatting.color}`);
+		}
+
+		if (styles.length === 0) return formatted_value;
+
+		const style_string = styles.join("; ");
+
+		// formatted value contains HTML tags/elements
+		if (/<[^>]+>/.test(formatted_value)) {
+			const temp_div = document.createElement("div");
+			temp_div.innerHTML = formatted_value;
+
+			// parse HTML and inject styles into the first element
+			const first_element = temp_div.querySelector("*");
+
+			if (first_element) {
+				const existing_style = first_element.getAttribute("style") || "";
+				first_element.setAttribute(
+					"style",
+					existing_style ? `${existing_style}; ${style_string}` : style_string
+				);
+				return temp_div.innerHTML;
+			}
+		}
+
+		return `<span style="${style_string}">${formatted_value}</span>`;
+	},
+
+	_format_special_view: function (value, row, column, data, default_formatter) {
+		const selectedView = get_filter_value("selected_view");
+
+		if (selectedView === "Growth") {
+			const growthPercent = data[column.fieldname];
+			if (growthPercent === undefined) return "NA";
+			if (growthPercent === "") return "";
 
 			if (column.fieldname === "total") {
 				value = $(`<span>${growthPercent}</span>`);
 			} else {
 				value = $(`<span>${(growthPercent >= 0 ? "+" : "") + growthPercent + "%"}</span>`);
-
 				if (growthPercent < 0) {
 					value = $(value).addClass("text-danger");
 				} else {
 					value = $(value).addClass("text-success");
 				}
 			}
-			value = $(value).wrap("<p></p>").parent().html();
+			return $(value).wrap("<p></p>").parent().html();
+		} else {
+			const marginPercent = data[column.fieldname];
+			if (marginPercent === undefined) return "NA";
 
-			return value;
-		} else if (frappe.query_report.get_filter_value("selected_view") == "Margin" && data) {
-			if (column.colIndex >= 2) {
-				const marginPercent = data[column.fieldname];
-
-				if (marginPercent == undefined) return "NA"; //making this not applicable for undefined/null values
-
-				value = $(`<span>${marginPercent + "%"}</span>`);
-				if (marginPercent < 0) value = $(value).addClass("text-danger");
-				else value = $(value).addClass("text-success");
-				value = $(value).wrap("<p></p>").parent().html();
-				return value;
-			}
+			value = $(`<span>${marginPercent + "%"}</span>`);
+			if (marginPercent < 0) value = $(value).addClass("text-danger");
+			else value = $(value).addClass("text-success");
+			return $(value).wrap("<p></p>").parent().html();
 		}
+	},
 
-		if (data && column.fieldname == "account") {
-			// first column
+	_format_standard_report: function (value, row, column, data, default_formatter, filter) {
+		if (data && column.fieldname == erpnext.financial_statements.name_field) {
 			value = data.section_name || data.account_name || value;
 
 			if (filter && filter?.text && filter?.type == "contains") {
@@ -60,7 +230,10 @@ erpnext.financial_statements = {
 
 		value = default_formatter(value, row, column, data);
 
-		if (data && !data.parent_account && !data.parent_section) {
+		if (
+			data &&
+			((!data.parent_account && !data.parent_section) || data.is_group_account || data.is_group)
+		) {
 			value = $(`<span>${value}</span>`);
 
 			var $value = $(value).css("font-weight", "bold");
@@ -75,17 +248,34 @@ erpnext.financial_statements = {
 	},
 	open_general_ledger: function (data) {
 		if (!data.account && !data.accounts) return;
-		let project = $.grep(frappe.query_report.filters, function (e) {
+		let filters = frappe.query_report.filters;
+
+		let project = $.grep(filters, function (e) {
 			return e.df.fieldname == "project";
+		});
+
+		let cost_center = $.grep(filters, function (e) {
+			return e.df.fieldname == "cost_center";
 		});
 
 		frappe.route_options = {
 			account: data.account || data.accounts,
-			company: frappe.query_report.get_filter_value("company"),
+			company: get_filter_value("company"),
 			from_date: data.from_date || data.year_start_date,
 			to_date: data.to_date || data.year_end_date,
-			project: project && project.length > 0 ? project[0].$input.val() : "",
+			project: project && project.length > 0 ? project[0].get_value() : "",
+			cost_center: cost_center && cost_center.length > 0 ? cost_center[0].get_value() : "",
 		};
+
+		filters.forEach((f) => {
+			if (f.df.fieldtype == "MultiSelectList") {
+				if (f.df.fieldname in frappe.route_options) return;
+				let value = f.get_value();
+				if (value && value.length > 0) {
+					frappe.route_options[f.df.fieldname] = value;
+				}
+			}
+		});
 
 		let report = "General Ledger";
 
@@ -108,7 +298,7 @@ erpnext.financial_statements = {
 		let fiscal_year = erpnext.utils.get_fiscal_year(frappe.datetime.get_today());
 		var filters = report.get_values();
 
-		if (!filters.period_start_date || !filters.period_end_date) {
+		if (fiscal_year && (!filters.period_start_date || !filters.period_end_date)) {
 			frappe.model.with_doc("Fiscal Year", fiscal_year, function (r) {
 				var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
 				frappe.query_report.set_filter_value({
@@ -123,17 +313,49 @@ erpnext.financial_statements = {
 
 			report.page.add_custom_menu_item(views_menu, __("Balance Sheet"), function () {
 				var filters = report.get_values();
-				frappe.set_route("query-report", "Balance Sheet", { company: filters.company });
+				frappe.set_route("query-report", "Balance Sheet", {
+					company: filters.company,
+					filter_based_on: filters.filter_based_on,
+					period_start_date: filters.period_start_date,
+					period_end_date: filters.period_end_date,
+					from_fiscal_year: filters.from_fiscal_year,
+					to_fiscal_year: filters.to_fiscal_year,
+					periodicity: filters.periodicity,
+					presentation_currency: filters.presentation_currency,
+					cost_center: filters.cost_center,
+					project: filters.project,
+				});
 			});
 
 			report.page.add_custom_menu_item(views_menu, __("Profit and Loss"), function () {
 				var filters = report.get_values();
-				frappe.set_route("query-report", "Profit and Loss Statement", { company: filters.company });
+				frappe.set_route("query-report", "Profit and Loss Statement", {
+					company: filters.company,
+					filter_based_on: filters.filter_based_on,
+					period_start_date: filters.period_start_date,
+					period_end_date: filters.period_end_date,
+					from_fiscal_year: filters.from_fiscal_year,
+					to_fiscal_year: filters.to_fiscal_year,
+					periodicity: filters.periodicity,
+					presentation_currency: filters.presentation_currency,
+					cost_center: filters.cost_center,
+					project: filters.project,
+				});
 			});
 
 			report.page.add_custom_menu_item(views_menu, __("Cash Flow Statement"), function () {
 				var filters = report.get_values();
-				frappe.set_route("query-report", "Cash Flow", { company: filters.company });
+				frappe.set_route("query-report", "Cash Flow", {
+					company: filters.company,
+					filter_based_on: filters.filter_based_on,
+					period_start_date: filters.period_start_date,
+					period_end_date: filters.period_end_date,
+					from_fiscal_year: filters.from_fiscal_year,
+					to_fiscal_year: filters.to_fiscal_year,
+					periodicity: filters.periodicity,
+					cost_center: filters.cost_center,
+					project: filters.project,
+				});
 			});
 		}
 	},
@@ -163,7 +385,7 @@ function get_filters() {
 			default: ["Fiscal Year"],
 			reqd: 1,
 			on_change: function () {
-				let filter_based_on = frappe.query_report.get_filter_value("filter_based_on");
+				let filter_based_on = get_filter_value("filter_based_on");
 				frappe.query_report.toggle_filter_display(
 					"from_fiscal_year",
 					filter_based_on === "Date Range"
@@ -200,16 +422,16 @@ function get_filters() {
 			label: __("Start Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			reqd: 1,
 			depends_on: "eval:doc.filter_based_on == 'Fiscal Year'",
+			mandatory_depends_on: "eval:doc.filter_based_on == 'Fiscal Year'",
 		},
 		{
 			fieldname: "to_fiscal_year",
 			label: __("End Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			reqd: 1,
 			depends_on: "eval:doc.filter_based_on == 'Fiscal Year'",
+			mandatory_depends_on: "eval:doc.filter_based_on == 'Fiscal Year'",
 		},
 		{
 			fieldname: "periodicity",
@@ -233,6 +455,7 @@ function get_filters() {
 			label: __("Currency"),
 			fieldtype: "Select",
 			options: erpnext.get_presentation_currency_list(),
+			depends_on: "eval: !doc.report_template",
 		},
 		{
 			fieldname: "cost_center",
@@ -240,7 +463,7 @@ function get_filters() {
 			fieldtype: "MultiSelectList",
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Cost Center", txt, {
-					company: frappe.query_report.get_filter_value("company"),
+					company: get_filter_value("company"),
 				});
 			},
 			options: "Cost Center",
@@ -251,7 +474,7 @@ function get_filters() {
 			fieldtype: "MultiSelectList",
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Project", txt, {
-					company: frappe.query_report.get_filter_value("company"),
+					company: get_filter_value("company"),
 				});
 			},
 			options: "Project",

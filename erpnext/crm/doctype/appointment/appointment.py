@@ -120,7 +120,8 @@ class Appointment(Document):
 		self.auto_assign()
 		self.create_calendar_event()
 		self.save(ignore_permissions=True)
-		frappe.db.commit()
+		if not frappe.in_test:
+			frappe.db.commit()
 
 	def create_lead_and_link(self):
 		# Return if already linked

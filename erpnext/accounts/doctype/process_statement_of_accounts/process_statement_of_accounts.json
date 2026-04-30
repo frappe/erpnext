@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2020-05-22 16:46:18.712954",
  "doctype": "DocType",
@@ -12,7 +13,7 @@
   "posting_date",
   "company",
   "account",
-  "group_by",
+  "categorize_by",
   "cost_center",
   "territory",
   "ignore_exchange_rate_revaluation_journals",
@@ -27,6 +28,7 @@
   "sales_person",
   "show_remarks",
   "based_on_payment_terms",
+  "show_future_payments",
   "section_break_3",
   "customer_collection",
   "collection_name",
@@ -37,6 +39,7 @@
   "column_break_17",
   "customers",
   "preferences",
+  "print_format",
   "orientation",
   "include_break",
   "include_ageing",
@@ -67,7 +70,7 @@
    "fieldname": "frequency",
    "fieldtype": "Select",
    "label": "Frequency",
-   "options": "Weekly\nMonthly\nQuarterly"
+   "options": "Daily\nWeekly\nBiweekly\nMonthly\nQuarterly"
   },
   {
    "fieldname": "company",
@@ -78,18 +81,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:(doc.enable_auto_email == 0 && doc.report == 'General Ledger');",
+   "depends_on": "eval:(!doc.enable_auto_email && doc.report == 'General Ledger');",
    "fieldname": "from_date",
    "fieldtype": "Date",
    "label": "From Date",
-   "mandatory_depends_on": "eval:doc.frequency == '';"
+   "mandatory_depends_on": "eval:(!doc.enable_auto_email && doc.report == \"General Ledger\") "
   },
   {
-   "depends_on": "eval:(doc.enable_auto_email == 0 && doc.report == 'General Ledger');",
+   "depends_on": "eval:(!doc.enable_auto_email && doc.report == 'General Ledger');",
    "fieldname": "to_date",
    "fieldtype": "Date",
    "label": "To Date",
-   "mandatory_depends_on": "eval:doc.frequency == '';"
+   "mandatory_depends_on": "eval:(!doc.enable_auto_email && doc.report == \"General Ledger\") "
   },
   {
    "fieldname": "cost_center",
@@ -173,14 +176,6 @@
    "fieldname": "start_date",
    "fieldtype": "Date",
    "label": "Start Date"
-  },
-  {
-   "default": "Group by Voucher (Consolidated)",
-   "depends_on": "eval:(doc.report == 'General Ledger');",
-   "fieldname": "group_by",
-   "fieldtype": "Select",
-   "label": "Group By",
-   "options": "\nGroup by Voucher\nGroup by Voucher (Consolidated)"
   },
   {
    "depends_on": "eval: (doc.report == 'General Ledger');",
@@ -338,7 +333,8 @@
    "depends_on": "eval:(doc.report == 'Accounts Receivable');",
    "fieldname": "posting_date",
    "fieldtype": "Date",
-   "label": "Posting Date"
+   "label": "Posting Date",
+   "mandatory_depends_on": "eval:(doc.report == 'Accounts Receivable');"
   },
   {
    "depends_on": "eval: (doc.report == 'Accounts Receivable');",
@@ -384,7 +380,7 @@
    "default": "0",
    "fieldname": "ignore_exchange_rate_revaluation_journals",
    "fieldtype": "Check",
-   "label": "Ignore Exchange Rate Revaluation Journals"
+   "label": "Ignore Exchange Rate Revaluation and Gain / Loss Journals"
   },
   {
    "default": "0",
@@ -397,10 +393,31 @@
    "fieldname": "show_remarks",
    "fieldtype": "Check",
    "label": "Show Remarks"
+  },
+  {
+   "default": "Categorize by Voucher (Consolidated)",
+   "depends_on": "eval:(doc.report == 'General Ledger');",
+   "fieldname": "categorize_by",
+   "fieldtype": "Select",
+   "label": "Categorize By",
+   "options": "\nCategorize by Voucher\nCategorize by Voucher (Consolidated)"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:(doc.report == 'Accounts Receivable');",
+   "fieldname": "show_future_payments",
+   "fieldtype": "Check",
+   "label": "Show Future Payments"
+  },
+  {
+   "fieldname": "print_format",
+   "fieldtype": "Link",
+   "label": "Print Format",
+   "options": "Print Format"
   }
  ],
  "links": [],
- "modified": "2024-12-11 12:11:13.543134",
+ "modified": "2025-10-07 12:19:20.719898",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",
@@ -432,6 +449,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

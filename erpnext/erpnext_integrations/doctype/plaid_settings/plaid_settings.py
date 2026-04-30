@@ -51,7 +51,7 @@ def get_plaid_configuration():
 
 
 @frappe.whitelist()
-def add_institution(token, response):
+def add_institution(token: str, response: str):
 	response = json.loads(response)
 
 	plaid = PlaidConnector()
@@ -79,7 +79,7 @@ def add_institution(token, response):
 
 
 @frappe.whitelist()
-def add_bank_accounts(response, bank, company):
+def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
 	try:
 		response = json.loads(response)
 	except TypeError:
@@ -334,7 +334,7 @@ def enqueue_synchronization():
 
 
 @frappe.whitelist()
-def get_link_token_for_update(access_token):
+def get_link_token_for_update(access_token: str):
 	plaid = PlaidConnector(access_token)
 	return plaid.get_link_token(update_mode=True)
 
@@ -354,7 +354,7 @@ def get_company(bank_account_name):
 
 
 @frappe.whitelist()
-def update_bank_account_ids(response):
+def update_bank_account_ids(response: str):
 	data = json.loads(response)
 	institution_name = data["institution"]["name"]
 	bank = frappe.get_doc("Bank", institution_name).as_dict()

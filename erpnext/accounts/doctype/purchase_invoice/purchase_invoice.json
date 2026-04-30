@@ -8,7 +8,6 @@
  "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
-  "title",
   "naming_series",
   "supplier",
   "supplier_name",
@@ -27,8 +26,9 @@
   "update_billed_amount_in_purchase_order",
   "update_billed_amount_in_purchase_receipt",
   "apply_tds",
-  "tax_withholding_category",
   "amended_from",
+  "section_break_ecfi",
+  "title",
   "supplier_invoice_details",
   "bill_no",
   "column_break_15",
@@ -48,6 +48,7 @@
   "ignore_pricing_rule",
   "sec_warehouse",
   "scan_barcode",
+  "last_scanned_warehouse",
   "col_break_warehouse",
   "update_stock",
   "set_warehouse",
@@ -63,11 +64,10 @@
   "column_break_50",
   "base_total",
   "base_net_total",
+  "claimed_landed_cost_amount",
   "column_break_28",
   "total",
   "net_total",
-  "tax_withholding_net_total",
-  "base_tax_withholding_net_total",
   "taxes_section",
   "tax_category",
   "taxes_and_charges",
@@ -86,30 +86,38 @@
   "taxes_and_charges_added",
   "taxes_and_charges_deducted",
   "total_taxes_and_charges",
-  "section_break_49",
+  "totals_section",
+  "use_company_roundoff_cost_center",
+  "grand_total",
+  "in_words",
+  "column_break8",
+  "disable_rounded_total",
+  "rounding_adjustment",
+  "rounded_total",
+  "base_totals_section",
   "base_grand_total",
+  "base_in_words",
+  "column_break_hcca",
   "base_rounding_adjustment",
   "base_rounded_total",
-  "base_in_words",
-  "column_break8",
-  "grand_total",
-  "rounding_adjustment",
-  "use_company_roundoff_cost_center",
-  "rounded_total",
-  "in_words",
+  "section_break_ttrv",
   "total_advance",
+  "column_break_peap",
   "outstanding_amount",
-  "disable_rounded_total",
+  "section_tax_withholding_entry",
+  "tax_withholding_group",
+  "ignore_tax_withholding_threshold",
+  "override_tax_withholding_entries",
+  "tax_withholding_entries",
   "section_break_44",
   "apply_discount_on",
   "base_discount_amount",
   "column_break_46",
   "additional_discount_percentage",
   "discount_amount",
-  "tax_withheld_vouchers_section",
-  "tax_withheld_vouchers",
   "sec_tax_breakup",
   "other_charges_calculation",
+  "item_wise_tax_details",
   "pricing_rule_details",
   "pricing_rules",
   "raw_materials_supplied",
@@ -127,7 +135,6 @@
   "only_include_allocated_payments",
   "get_advances",
   "advances",
-  "advance_tax",
   "write_off",
   "write_off_amount",
   "base_write_off_amount",
@@ -144,8 +151,10 @@
   "contact_mobile",
   "contact_email",
   "company_shipping_address_section",
-  "shipping_address",
+  "dispatch_address",
+  "dispatch_address_display",
   "column_break_126",
+  "shipping_address",
   "shipping_address_display",
   "company_billing_address_section",
   "billing_address",
@@ -173,11 +182,12 @@
   "unrealized_profit_loss_account",
   "subscription_section",
   "subscription",
-  "auto_repeat",
-  "update_auto_repeat_reference",
   "column_break_114",
   "from_date",
   "to_date",
+  "automation_section",
+  "auto_repeat",
+  "update_auto_repeat_reference",
   "printing_settings",
   "letter_head",
   "group_same_items",
@@ -203,10 +213,8 @@
  "fields": [
   {
    "allow_on_submit": 1,
-   "default": "{supplier_name}",
    "fieldname": "title",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Title",
    "no_copy": 1,
    "print_hide": 1
@@ -258,6 +266,7 @@
   {
    "fieldname": "due_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Due Date",
    "oldfieldname": "due_date",
    "oldfieldtype": "Date"
@@ -281,7 +290,7 @@
    "default": "0",
    "fieldname": "apply_tds",
    "fieldtype": "Check",
-   "label": "Apply Tax Withholding Amount",
+   "label": "Consider for Tax Withholding",
    "print_hide": 1
   },
   {
@@ -311,7 +320,8 @@
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Date",
+   "in_standard_filter": 1,
+   "label": "Posting Date",
    "oldfieldname": "posting_date",
    "oldfieldtype": "Date",
    "print_hide": 1,
@@ -319,6 +329,7 @@
    "search_index": 1
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -380,7 +391,7 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "bill_no",
+   "collapsible_depends_on": "posting_date",
    "fieldname": "supplier_invoice_details",
    "fieldtype": "Section Break",
    "label": "Supplier Invoice"
@@ -388,6 +399,8 @@
   {
    "fieldname": "bill_no",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Supplier Invoice No",
    "oldfieldname": "bill_no",
    "oldfieldtype": "Data",
@@ -601,6 +614,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.items.every((item) => !item.pr_detail)",
    "fieldname": "update_stock",
    "fieldtype": "Check",
    "label": "Update Stock",
@@ -878,14 +892,9 @@
    "print_hide": 1
   },
   {
-   "fieldname": "section_break_49",
-   "fieldtype": "Section Break",
-   "label": "Totals"
-  },
-  {
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
-   "label": "Grand Total (Company Currency)",
+   "label": "Grand Total",
    "oldfieldname": "grand_total",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -896,7 +905,7 @@
    "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
-   "label": "Rounding Adjustment (Company Currency)",
+   "label": "Rounding Adjustment",
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -906,7 +915,7 @@
    "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
-   "label": "Rounded Total (Company Currency)",
+   "label": "Rounded Total",
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -915,7 +924,7 @@
   {
    "fieldname": "base_in_words",
    "fieldtype": "Data",
-   "label": "In Words (Company Currency)",
+   "label": "In Words",
    "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
@@ -1353,14 +1362,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "tax_withholding_category",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Tax Withholding Category",
-   "options": "Tax Withholding Category",
-   "print_hide": 1
-  },
-  {
    "fieldname": "billing_address",
    "fieldtype": "Link",
    "label": "Select Billing Address",
@@ -1450,14 +1451,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "advance_tax",
-   "fieldtype": "Table",
-   "hidden": 1,
-   "label": "Advance Tax",
-   "options": "Advance Tax",
-   "read_only": 1
-  },
-  {
    "fieldname": "subscription",
    "fieldtype": "Link",
    "label": "Subscription",
@@ -1469,42 +1462,6 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Is Old Subcontracting Flow",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "depends_on": "apply_tds",
-   "fieldname": "tax_withholding_net_total",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "Tax Withholding Net Total",
-   "no_copy": 1,
-   "options": "currency",
-   "read_only": 1
-  },
-  {
-   "depends_on": "apply_tds",
-   "fieldname": "base_tax_withholding_net_total",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "Base Tax Withholding Net Total",
-   "no_copy": 1,
-   "options": "Company:company:default_currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "collapsible_depends_on": "tax_withheld_vouchers",
-   "fieldname": "tax_withheld_vouchers_section",
-   "fieldtype": "Section Break",
-   "label": "Tax Withheld Vouchers"
-  },
-  {
-   "fieldname": "tax_withheld_vouchers",
-   "fieldtype": "Table",
-   "label": "Tax Withheld Vouchers",
-   "no_copy": 1,
-   "options": "Tax Withheld Vouchers",
    "read_only": 1
   },
   {
@@ -1548,7 +1505,7 @@
   {
    "fieldname": "company_shipping_address_section",
    "fieldtype": "Section Break",
-   "label": "Company Shipping Address"
+   "label": "Shipping Address"
   },
   {
    "fieldname": "column_break_126",
@@ -1635,13 +1592,118 @@
    "fieldtype": "Data",
    "label": "Sender",
    "options": "Email"
+  },
+  {
+   "fieldname": "dispatch_address_display",
+   "fieldtype": "Text Editor",
+   "label": "Dispatch Address",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "dispatch_address",
+   "fieldtype": "Link",
+   "label": "Select Dispatch Address ",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
+  },
+  {
+   "fieldname": "claimed_landed_cost_amount",
+   "fieldtype": "Currency",
+   "label": "Claimed Landed Cost Amount (Company Currency)",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_wise_tax_details",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Item Wise Tax Details",
+   "no_copy": 1,
+   "options": "Item Wise Tax Detail"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.apply_tds && doc.docstatus == 0",
+   "depends_on": "eval: doc.apply_tds",
+   "fieldname": "section_tax_withholding_entry",
+   "fieldtype": "Section Break",
+   "label": "Tax Withholding Entry"
+  },
+  {
+   "fieldname": "tax_withholding_group",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Group",
+   "options": "Tax Withholding Group",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "tax_withholding_entries",
+   "fieldtype": "Table",
+   "label": "Tax Withholding Entries",
+   "options": "Tax Withholding Entry",
+   "read_only_depends_on": "eval: !doc.override_tax_withholding_entries"
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_tax_withholding_threshold",
+   "fieldtype": "Check",
+   "label": "Ignore Tax Withholding Threshold"
+  },
+  {
+   "default": "0",
+   "fieldname": "override_tax_withholding_entries",
+   "fieldtype": "Check",
+   "label": "Edit Tax Withholding Entries"
+  },
+  {
+   "fieldname": "column_break_hcca",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ttrv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_peap",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "base_totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals (Company Currency)"
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "automation_section",
+   "fieldtype": "Section Break",
+   "label": "Automation"
+  },
+  {
+   "fieldname": "section_break_ecfi",
+   "fieldtype": "Section Break"
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-01-14 11:39:04.564610",
+ "modified": "2026-03-30 12:16:40.157755",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
@@ -1696,6 +1758,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "posting_date, supplier, bill_no, base_grand_total, outstanding_amount",
  "sender_field": "sender",
  "show_name_in_global_search": 1,
@@ -1703,6 +1766,6 @@
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "supplier",
- "title_field": "title",
+ "title_field": "supplier_name",
  "track_changes": 1
 }

@@ -1,14 +1,13 @@
 # Copyright (c) 2021, Wahni Green Technologies Pvt. Ltd. and Contributors
 # See license.txt
-import unittest
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.ledger_merge.ledger_merge import start_merge
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestLedgerMerge(IntegrationTestCase):
+class TestLedgerMerge(ERPNextTestSuite):
 	def test_merge_success(self):
 		if not frappe.db.exists("Account", "Indirect Expenses - _TC"):
 			acc = frappe.new_doc("Account")
@@ -101,16 +100,3 @@ class TestLedgerMerge(IntegrationTestCase):
 
 		self.assertFalse(frappe.db.exists("Account", "Indirect Test Income - _TC"))
 		self.assertTrue(frappe.db.exists("Account", "Administrative Test Income - _TC"))
-
-	def tearDown(self):
-		for entry in frappe.db.get_all("Ledger Merge"):
-			frappe.delete_doc("Ledger Merge", entry.name)
-
-		test_accounts = [
-			"Indirect Test Expenses - _TC",
-			"Administrative Test Expenses - _TC",
-			"Indirect Test Income - _TC",
-			"Administrative Test Income - _TC",
-		]
-		for account in test_accounts:
-			frappe.delete_doc_if_exists("Account", account)

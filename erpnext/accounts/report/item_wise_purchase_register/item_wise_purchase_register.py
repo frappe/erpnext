@@ -5,18 +5,18 @@
 import frappe
 from frappe import _
 from frappe.utils import flt
-from pypika import Order
+from pypika.terms import Bracket, LiteralValue
 
 import erpnext
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (
 	add_sub_total_row,
 	add_total_row,
-	apply_group_by_conditions,
+	apply_order_by_conditions,
 	get_grand_total,
 	get_group_by_and_display_fields,
 	get_tax_accounts,
 )
-from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
+from erpnext.accounts.report.utils import get_values_for_columns
 
 
 def execute(filters=None):
@@ -32,6 +32,7 @@ def _execute(filters=None, additional_table_columns=None):
 
 	item_list = get_items(filters, additional_table_columns)
 	aii_account_map = get_aii_accounts()
+	default_taxes = {}
 	if item_list:
 		itemised_tax, tax_columns = get_tax_accounts(
 			item_list,
@@ -40,16 +41,9 @@ def _execute(filters=None, additional_table_columns=None):
 			doctype="Purchase Invoice",
 			tax_doctype="Purchase Taxes and Charges",
 		)
-
-		scrubbed_tax_fields = {}
-
 		for tax in tax_columns:
-			scrubbed_tax_fields.update(
-				{
-					tax + " Rate": frappe.scrub(tax + " Rate"),
-					tax + " Amount": frappe.scrub(tax + " Amount"),
-				}
-			)
+			default_taxes[f"{tax}_rate"] = 0
+			default_taxes[f"{tax}_amount"] = 0
 
 	po_pr_map = get_purchase_receipts_against_purchase_order(item_list)
 
@@ -96,15 +90,19 @@ def _execute(filters=None, additional_table_columns=None):
 		}
 
 		total_tax = 0
-		for tax in tax_columns:
-			item_tax = itemised_tax.get(d.name, {}).get(tax, {})
+		total_other_charges = 0
+		row.update(default_taxes.copy())
+		for tax, details in itemised_tax.get(d.name, {}).items():
 			row.update(
 				{
-					scrubbed_tax_fields[tax + " Rate"]: item_tax.get("tax_rate", 0),
-					scrubbed_tax_fields[tax + " Amount"]: item_tax.get("tax_amount", 0),
+					f"{tax}_rate": details.get("tax_rate", 0),
+					f"{tax}_amount": details.get("tax_amount", 0),
 				}
 			)
-			total_tax += flt(item_tax.get("tax_amount"))
+			if details.get("is_other_charges"):
+				total_other_charges += flt(details.get("tax_amount"))
+			else:
+				total_tax += flt(details.get("tax_amount"))
 
 		row.update(
 			{"total_tax": total_tax, "total": d.base_net_amount + total_tax, "currency": company_currency}
@@ -178,7 +176,7 @@ def get_columns(additional_table_columns, filters):
 				"fieldname": "invoice",
 				"fieldtype": "Link",
 				"options": "Purchase Invoice",
-				"width": 120,
+				"width": 150,
 			},
 			{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 120},
 		]
@@ -305,19 +303,13 @@ def apply_conditions(query, pi, pii, filters):
 	if filters.get("item_group"):
 		query = query.where(pii.item_group == filters.get("item_group"))
 
-	if not filters.get("group_by"):
-		query = query.orderby(pi.posting_date, order=Order.desc)
-		query = query.orderby(pii.item_group, order=Order.desc)
-	else:
-		query = apply_group_by_conditions(query, pi, pii, filters)
-
 	return query
 
 
 def get_items(filters, additional_table_columns):
 	doctype = "Purchase Invoice"
-	pi = frappe.qb.DocType(doctype)
-	pii = frappe.qb.DocType(f"{doctype} Item")
+	pi = frappe.qb.DocType("Purchase Invoice")
+	pii = frappe.qb.DocType("Purchase Invoice Item")
 	Item = frappe.qb.DocType("Item")
 	query = (
 		frappe.qb.from_(pi)
@@ -337,6 +329,7 @@ def get_items(filters, additional_table_columns):
 			pi.unrealized_profit_loss_account,
 			pii.item_code,
 			pii.description,
+			pii.item_name,
 			pii.item_group,
 			pii.item_name.as_("pi_item_name"),
 			pii.item_group.as_("pi_item_group"),
@@ -371,6 +364,13 @@ def get_items(filters, additional_table_columns):
 				query = query.select(pi[column.get("fieldname")])
 
 	query = apply_conditions(query, pi, pii, filters)
+
+	from frappe.desk.reportview import build_match_conditions
+
+	if match_conditions := build_match_conditions(doctype):
+		query = query.where(Bracket(LiteralValue(match_conditions)))
+
+	query = apply_order_by_conditions(doctype, query, filters)
 
 	return query.run(as_dict=True)
 

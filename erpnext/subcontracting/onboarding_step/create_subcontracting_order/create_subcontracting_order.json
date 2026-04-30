@@ -1,0 +1,20 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Subcontracting Order",
+ "creation": "2026-02-23 22:34:00.983907",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-23 22:34:00.983907",
+ "modified_by": "Administrator",
+ "name": "Create Subcontracting Order",
+ "owner": "Administrator",
+ "reference_document": "Subcontracting Order",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Create Subcontracting Order",
+ "validate_action": 1
+}

@@ -1,12 +1,12 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-import unittest
 
 import frappe
-from frappe.tests import IntegrationTestCase
+
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestIssuePriority(IntegrationTestCase):
+class TestIssuePriority(ERPNextTestSuite):
 	def test_priorities(self):
 		make_priorities()
 		priorities = frappe.get_list("Issue Priority")

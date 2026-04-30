@@ -51,55 +51,29 @@ class BankAccount(Document):
 		delete_contact_and_address("Bank Account", self.name)
 
 	def validate(self):
-		self.validate_company()
-		self.validate_iban()
-		self.validate_account()
+		self.validate_is_company_account()
 		self.update_default_bank_account()
 
+	def validate_is_company_account(self):
+		if self.is_company_account:
+			if not self.company:
+				frappe.throw(_("Company is mandatory for company account"))
+
+			if not self.account:
+				frappe.throw(_("Company Account is mandatory"))
+
+			self.validate_account()
+
 	def validate_account(self):
-		if self.account:
-			if accounts := frappe.db.get_all(
-				"Bank Account", filters={"account": self.account, "name": ["!=", self.name]}, as_list=1
-			):
-				frappe.throw(
-					_("'{0}' account is already used by {1}. Use another account.").format(
-						frappe.bold(self.account),
-						frappe.bold(comma_and([get_link_to_form(self.doctype, x[0]) for x in accounts])),
-					)
+		if accounts := frappe.db.get_all(
+			"Bank Account", filters={"account": self.account, "name": ["!=", self.name]}, as_list=1
+		):
+			frappe.throw(
+				_("'{0}' account is already used by {1}. Use another account.").format(
+					frappe.bold(self.account),
+					frappe.bold(comma_and([get_link_to_form(self.doctype, x[0]) for x in accounts])),
 				)
-
-	def validate_company(self):
-		if self.is_company_account and not self.company:
-			frappe.throw(_("Company is mandatory for company account"))
-
-	def validate_iban(self):
-		"""
-		Algorithm: https://en.wikipedia.org/wiki/International_Bank_Account_Number#Validating_the_IBAN
-		"""
-		# IBAN field is optional
-		if not self.iban:
-			return
-
-		def encode_char(c):
-			# Position in the alphabet (A=1, B=2, ...) plus nine
-			return str(9 + ord(c) - 64)
-
-		# remove whitespaces, upper case to get the right number from ord()
-		iban = "".join(self.iban.split(" ")).upper()
-
-		# Move country code and checksum from the start to the end
-		flipped = iban[4:] + iban[:4]
-
-		# Encode characters as numbers
-		encoded = [encode_char(c) if ord(c) >= 65 and ord(c) <= 90 else c for c in flipped]
-
-		try:
-			to_check = int("".join(encoded))
-		except ValueError:
-			frappe.throw(_("IBAN is not valid"))
-
-		if to_check % 97 != 1:
-			frappe.throw(_("IBAN is not valid"))
+			)
 
 	def update_default_bank_account(self):
 		if self.is_default and not self.disabled:
@@ -109,21 +83,13 @@ class BankAccount(Document):
 					"party_type": self.party_type,
 					"party": self.party,
 					"is_company_account": self.is_company_account,
+					"company": self.company,
 					"is_default": 1,
 					"disabled": 0,
 				},
 				"is_default",
 				0,
 			)
-
-
-@frappe.whitelist()
-def make_bank_account(doctype, docname):
-	doc = frappe.new_doc("Bank Account")
-	doc.party_type = doctype
-	doc.party = docname
-
-	return doc
 
 
 def get_party_bank_account(party_type, party):
@@ -149,7 +115,8 @@ def get_default_company_bank_account(company, party_type, party):
 
 
 @frappe.whitelist()
-def get_bank_account_details(bank_account):
+def get_bank_account_details(bank_account: str):
+	frappe.has_permission("Bank Account", doc=bank_account, ptype="read", throw=True)
 	return frappe.get_cached_value(
 		"Bank Account", bank_account, ["account", "bank", "bank_account_no"], as_dict=1
 	)

@@ -1,12 +1,12 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-import unittest
 
 import frappe
-from frappe.tests import IntegrationTestCase
+
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestSellingSettings(IntegrationTestCase):
+class TestSellingSettings(ERPNextTestSuite):
 	def test_defaults_populated(self):
 		# Setup default values are not populated on migrate, this test checks
 		# if setup was completed correctly

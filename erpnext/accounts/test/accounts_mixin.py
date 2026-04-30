@@ -5,7 +5,9 @@ from erpnext.stock.doctype.item.test_item import create_item
 
 
 class AccountsTestMixin:
-	def create_customer(self, customer_name="_Test Customer", currency=None):
+	def create_customer(
+		self, customer_name="_Test Customer", currency=None, default_account=None, company=None
+	):
 		if not frappe.db.exists("Customer", customer_name):
 			customer = frappe.new_doc("Customer")
 			customer.customer_name = customer_name
@@ -13,9 +15,28 @@ class AccountsTestMixin:
 
 			if currency:
 				customer.default_currency = currency
+			if company and default_account:
+				customer.append(
+					"accounts",
+					{
+						"company": company,
+						"account": default_account,
+					},
+				)
 			customer.save()
 			self.customer = customer.name
 		else:
+			if company and default_account:
+				customer = frappe.get_doc("Customer", customer_name)
+				customer.accounts = []
+				customer.append(
+					"accounts",
+					{
+						"company": company,
+						"account": default_account,
+					},
+				)
+				customer.save()
 			self.customer = customer_name
 
 	def create_supplier(self, supplier_name="_Test Supplier", currency=None):
@@ -91,6 +112,7 @@ class AccountsTestMixin:
 					"attribute_name": "bank",
 					"account_name": "HDFC",
 					"parent_account": "Bank Accounts - " + abbr,
+					"account_type": "Bank",
 				}
 			),
 			frappe._dict(
@@ -207,23 +229,3 @@ class AccountsTestMixin:
 		]
 		for doctype in doctype_list:
 			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()
-
-	def create_price_list(self):
-		pl_name = "Mixin Price List"
-		if not frappe.db.exists("Price List", pl_name):
-			self.price_list = (
-				frappe.get_doc(
-					{
-						"doctype": "Price List",
-						"currency": "INR",
-						"enabled": True,
-						"selling": True,
-						"buying": True,
-						"price_list_name": pl_name,
-					}
-				)
-				.insert()
-				.name
-			)
-		else:
-			self.price_list = frappe.get_doc("Price List", pl_name).name

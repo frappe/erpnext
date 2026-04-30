@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.email.inbox import link_communication_to_document
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import DocType, Interval
 from frappe.query_builder.functions import Now
@@ -128,6 +129,7 @@ class Opportunity(TransactionBase, CRMNote):
 				link_communications(self.opportunity_from, self.party_name, self)
 
 	def validate(self):
+		self.set_opportunity_type()
 		self.make_new_lead_if_required()
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
@@ -151,6 +153,10 @@ class Opportunity(TransactionBase, CRMNote):
 					self.set(field, value)
 				except Exception:
 					continue
+
+	def set_opportunity_type(self):
+		if self.is_new() and not self.opportunity_type:
+			self.opportunity_type = _("Sales")
 
 	def set_exchange_rate(self):
 		company_currency = frappe.get_cached_value("Company", self.company, "default_currency")
@@ -256,7 +262,9 @@ class Opportunity(TransactionBase, CRMNote):
 			self.party_name = lead_name
 
 	@frappe.whitelist()
-	def declare_enquiry_lost(self, lost_reasons_list, competitors, detailed_reason=None):
+	def declare_enquiry_lost(
+		self, lost_reasons_list: list, competitors: list, detailed_reason: str | None = None
+	):
 		if not self.has_active_quotation():
 			self.status = "Lost"
 			self.lost_reasons = []
@@ -357,7 +365,7 @@ class Opportunity(TransactionBase, CRMNote):
 
 
 @frappe.whitelist()
-def get_item_details(item_code):
+def get_item_details(item_code: str):
 	item = frappe.db.sql(
 		"""select item_name, stock_uom, image, description, item_group, brand
 		from `tabItem` where name = %s""",
@@ -375,7 +383,7 @@ def get_item_details(item_code):
 
 
 @frappe.whitelist()
-def make_quotation(source_name, target_doc=None):
+def make_quotation(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 
@@ -428,7 +436,7 @@ def make_quotation(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_request_for_quotation(source_name, target_doc=None):
+def make_request_for_quotation(source_name: str, target_doc: str | Document | None = None):
 	def update_item(obj, target, source_parent):
 		target.conversion_factor = 1.0
 
@@ -450,7 +458,7 @@ def make_request_for_quotation(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_customer(source_name, target_doc=None):
+def make_customer(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		target.opportunity_name = source.name
 
@@ -474,7 +482,7 @@ def make_customer(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_supplier_quotation(source_name, target_doc=None):
+def make_supplier_quotation(source_name: str, target_doc: str | Document | None = None):
 	doclist = get_mapped_doc(
 		"Opportunity",
 		source_name,
@@ -489,7 +497,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def set_multiple_status(names, status):
+def set_multiple_status(names: str | list[str], status: str):
 	names = json.loads(names)
 	for name in names:
 		opp = frappe.get_doc("Opportunity", name)
@@ -519,7 +527,9 @@ def auto_close_opportunity():
 
 
 @frappe.whitelist()
-def make_opportunity_from_communication(communication, company, ignore_communication_links=False):
+def make_opportunity_from_communication(
+	communication: str, company: str, ignore_communication_links: bool = False
+):
 	from erpnext.crm.doctype.lead.lead import make_lead_from_communication
 
 	doc = frappe.get_doc("Communication", communication)

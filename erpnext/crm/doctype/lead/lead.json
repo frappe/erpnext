@@ -52,13 +52,12 @@
   "country",
   "column_break2",
   "contact_html",
-  "section_break_analytics",
+  "utm_analytics_section",
   "utm_source",
-  "utm_content",
+  "utm_medium",
   "column_break_gkxo",
   "utm_campaign",
-  "column_break_gqka",
-  "utm_medium",
+  "utm_content",
   "qualification_tab",
   "qualification_status",
   "column_break_64",
@@ -486,7 +485,7 @@
   {
    "fieldname": "state",
    "fieldtype": "Data",
-   "label": "State"
+   "label": "State/Province"
   },
   {
    "fieldname": "country",
@@ -502,10 +501,6 @@
   },
   {
    "fieldname": "column_break_gkxo",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_gqka",
    "fieldtype": "Column Break"
   },
   {
@@ -537,16 +532,18 @@
    "options": "UTM Campaign"
   },
   {
-   "fieldname": "section_break_analytics",
+   "collapsible": 1,
+   "fieldname": "utm_analytics_section",
    "fieldtype": "Section Break",
    "label": "Analytics"
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2025-01-31 13:40:08.094759",
+ "modified": "2026-02-10 14:36:37.157961",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -605,6 +602,7 @@
    "role": "Sales User"
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "lead_name,lead_owner,status",
  "sender_field": "email_id",
  "sender_name_field": "lead_name",

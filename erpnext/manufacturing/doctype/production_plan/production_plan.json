@@ -11,6 +11,7 @@
   "get_items_from",
   "column_break1",
   "posting_date",
+  "reserve_stock",
   "filters",
   "item_code",
   "customer",
@@ -23,6 +24,7 @@
   "from_delivery_date",
   "to_delivery_date",
   "sales_orders_detail",
+  "combine_items",
   "get_sales_orders",
   "sales_orders",
   "material_request_detail",
@@ -30,16 +32,14 @@
   "material_requests",
   "select_items_to_manufacture_section",
   "get_items",
-  "combine_items",
   "po_items",
   "section_break_25",
   "prod_plan_references",
   "section_break_24",
-  "combine_sub_items",
   "sub_assembly_warehouse",
-  "section_break_ucc4",
-  "skip_available_sub_assembly_item",
   "column_break_igxl",
+  "skip_available_sub_assembly_item",
+  "combine_sub_items",
   "get_sub_assembly_items",
   "section_break_g4ip",
   "sub_assembly_items",
@@ -215,7 +215,8 @@
   {
    "fieldname": "material_request_planning",
    "fieldtype": "Section Break",
-   "label": "Material Request Planning"
+   "hide_border": 1,
+   "label": "For Raw Materials"
   },
   {
    "default": "1",
@@ -230,11 +231,11 @@
    "label": "Include Subcontracted Items"
   },
   {
-   "default": "0",
-   "description": "If enabled, the system will create material requests even if the stock exists in the 'Raw Materials Warehouse'.",
+   "default": "1",
+   "description": "If enabled, formula for <b>Required Qty</b>: <br>\nRequired Qty (BOM) - <a href=\"https://docs.frappe.io/erpnext/user/manual/en/projected-quantity\">Projected Qty</a>. <br> This helps avoid over-ordering.",
    "fieldname": "ignore_existing_ordered_qty",
    "fieldtype": "Check",
-   "label": "Ignore Available Stock"
+   "label": "Consider Projected Qty in Calculation (RM)"
   },
   {
    "fieldname": "column_break_25",
@@ -249,7 +250,7 @@
   {
    "fieldname": "get_items_for_mr",
    "fieldtype": "Button",
-   "label": "Get Raw Materials for Purchase"
+   "label": "Get Items for Purchase Only"
   },
   {
    "fieldname": "section_break_27",
@@ -314,7 +315,7 @@
   {
    "fieldname": "for_warehouse",
    "fieldtype": "Link",
-   "label": "Raw Materials Warehouse",
+   "label": "For Warehouse",
    "options": "Warehouse"
   },
   {
@@ -375,11 +376,13 @@
    "label": "Get Sub Assembly Items"
   },
   {
+   "depends_on": "eval:doc.get_items_from == 'Sales Order'",
    "fieldname": "from_delivery_date",
    "fieldtype": "Date",
    "label": "From Delivery Date"
   },
   {
+   "depends_on": "eval:doc.get_items_from == 'Sales Order'",
    "fieldname": "to_delivery_date",
    "fieldtype": "Date",
    "label": "To Delivery Date"
@@ -391,9 +394,10 @@
    "label": "Consolidate Sub Assembly Items"
   },
   {
+   "description": "If items in stock, proceed with Material Transfer or Purchase.",
    "fieldname": "transfer_materials",
    "fieldtype": "Button",
-   "label": "Get Raw Materials for Transfer"
+   "label": "Get Items for Purchase / Transfer"
   },
   {
    "collapsible": 1,
@@ -402,16 +406,11 @@
    "label": "Preview Required Materials"
   },
   {
-   "default": "0",
-   "description": "If this checkbox is enabled, then the system won\u2019t run the MRP for the available sub-assembly items.",
+   "default": "1",
+   "description": "If enabled, formula for <b>Qty to Order</b>: <br>\nRequired Qty (BOM) - <a href=\"https://docs.frappe.io/erpnext/user/manual/en/projected-quantity\">Projected Qty</a>. <br> This helps avoid over-ordering.",
    "fieldname": "skip_available_sub_assembly_item",
    "fieldtype": "Check",
-   "label": "Skip Available Sub Assembly Items"
-  },
-  {
-   "fieldname": "section_break_ucc4",
-   "fieldtype": "Column Break",
-   "hide_border": 1
+   "label": "Consider Projected Qty in Calculation"
   },
   {
    "fieldname": "section_break_g4ip",
@@ -422,11 +421,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "When a parent warehouse is chosen, the system conducts stock checks against the associated child warehouses",
+   "description": "When a parent warehouse is chosen, the system conducts Project Qty checks against the associated child warehouses",
    "fieldname": "sub_assembly_warehouse",
    "fieldtype": "Link",
    "label": "Sub Assembly Warehouse",
-   "mandatory_depends_on": "eval:doc.skip_available_sub_assembly_item === 1",
    "options": "Warehouse"
   },
   {
@@ -434,13 +432,20 @@
    "fieldname": "consider_minimum_order_qty",
    "fieldtype": "Check",
    "label": "Consider Minimum Order Qty"
+  },
+  {
+   "default": "0",
+   "fieldname": "reserve_stock",
+   "fieldtype": "Check",
+   "label": "Reserve Stock"
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-01-10 17:47:52.207209",
+ "modified": "2025-08-12 19:48:09.302503",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
@@ -461,6 +466,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": []

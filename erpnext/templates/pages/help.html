@@ -8,7 +8,7 @@
 	<form action="/search_help" style="display: flex;">
 	<input name='q' class='form-control' type='text'
 		style='max-width: 400px; display: inline-block; margin-right: 10px;'
-		value='{{ frappe.form_dict.q or ''}}'
+		value='{{ (frappe.form_dict.q or '') | e }}'
 		{% if not frappe.form_dict.q%}placeholder="{{ _("What do you need help with?") }}"{% endif %}>
 	<input type='submit'
 		class='btn btn-sm btn-light btn-search' value="{{ _("Search") }}">

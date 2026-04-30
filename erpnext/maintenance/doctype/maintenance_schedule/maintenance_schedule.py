@@ -405,9 +405,11 @@ class MaintenanceSchedule(TransactionBase):
 		delete_events(self.doctype, self.name)
 
 	@frappe.whitelist()
-	def get_pending_data(self, data_type, s_date=None, item_name=None):
+	def get_pending_data(self, data_type: str, s_date: str | None = None, item_name: str | None = None):
 		if data_type == "date":
 			dates = ""
+			if not item_name:
+				frappe.throw(_("Item Name is required."))
 			for schedule in self.schedules:
 				if schedule.item_name == item_name and schedule.completion_status == "Pending":
 					dates = dates + "\n" + formatdate(schedule.scheduled_date, "dd-MM-yyyy")
@@ -421,6 +423,8 @@ class MaintenanceSchedule(TransactionBase):
 						break
 			return items
 		elif data_type == "id":
+			if not s_date:
+				frappe.throw(_("Scheduled Date is required."))
 			for schedule in self.schedules:
 				if schedule.item_name == item_name and s_date == formatdate(
 					schedule.scheduled_date, "dd-mm-yyyy"
@@ -429,12 +433,10 @@ class MaintenanceSchedule(TransactionBase):
 
 
 @frappe.whitelist()
-def get_serial_nos_from_schedule(item_code, schedule=None):
-	serial_nos = []
-	if schedule:
-		serial_nos = frappe.db.get_value(
-			"Maintenance Schedule Item", {"parent": schedule, "item_code": item_code}, "serial_no"
-		)
+def get_serial_nos_from_schedule(item_code: str, schedule: str):
+	serial_nos = frappe.db.get_value(
+		"Maintenance Schedule Item", {"parent": schedule, "item_code": item_code}, "serial_no"
+	)
 
 	if serial_nos:
 		serial_nos = get_serial_nos(serial_nos)
@@ -443,7 +445,12 @@ def get_serial_nos_from_schedule(item_code, schedule=None):
 
 
 @frappe.whitelist()
-def make_maintenance_visit(source_name, target_doc=None, item_name=None, s_id=None):
+def make_maintenance_visit(
+	source_name: str,
+	target_doc: str | dict | None = None,
+	item_name: str | None = None,
+	s_id: str | None = None,
+):
 	from frappe.model.mapper import get_mapped_doc
 
 	def condition(doc):

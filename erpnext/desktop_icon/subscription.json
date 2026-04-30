@@ -1,0 +1,21 @@
+{
+ "app": "erpnext",
+ "creation": "2026-01-23 11:00:23.344237",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "monitor-check",
+ "icon_type": "Link",
+ "idx": 8,
+ "label": "Subscription",
+ "link_to": "Subscription",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-01-23 14:39:37.830722",
+ "modified_by": "Administrator",
+ "name": "Subscription",
+ "owner": "Administrator",
+ "parent_icon": "Accounting",
+ "restrict_removal": 0,
+ "roles": [],
+ "standard": 1
+}

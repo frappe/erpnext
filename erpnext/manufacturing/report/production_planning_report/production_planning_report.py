@@ -113,6 +113,13 @@ class ProductionPlanReport:
 		self.orders = query.run(as_dict=True)
 
 	def get_raw_materials(self):
+		"""Retrieve raw materials and source warehouses for production orders.
+
+		This method collects BOM or Work Order items depending on the selected
+		filter and updates `self.raw_materials_dict`, `self.warehouses`,
+		and `self.item_codes` accordingly.
+		"""
+
 		if not self.orders:
 			return
 		self.warehouses = [d.warehouse for d in self.orders]
@@ -135,7 +142,7 @@ class ProductionPlanReport:
 				)
 				or []
 			)
-			self.warehouses.extend([d.source_warehouse for d in raw_materials])
+			self.warehouses.extend([d.warehouse for d in raw_materials])
 
 		else:
 			bom_nos = []
@@ -223,7 +230,12 @@ class ProductionPlanReport:
 
 		purchased_items = frappe.get_all(
 			"Purchase Order Item",
-			fields=["item_code", "min(schedule_date) as arrival_date", "qty as arrival_qty", "warehouse"],
+			fields=[
+				"item_code",
+				{"MIN": "schedule_date", "as": "arrival_date"},
+				"qty as arrival_qty",
+				"warehouse",
+			],
 			filters={
 				"item_code": ("in", self.item_codes),
 				"warehouse": ("in", self.warehouses),

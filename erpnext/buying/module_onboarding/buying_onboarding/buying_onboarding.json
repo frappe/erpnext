@@ -1,0 +1,41 @@
+{
+ "allow_roles": [
+  {
+   "role": "Purchase Manager"
+  },
+  {
+   "role": "Purchase User"
+  }
+ ],
+ "creation": "2026-02-19 10:53:58.761773",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2026-02-25 16:59:28.328912",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Buying Onboarding",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Create Supplier"
+  },
+  {
+   "step": "Create Item"
+  },
+  {
+   "step": "Create Purchase Order"
+  },
+  {
+   "step": "Create Purchase Invoice"
+  },
+  {
+   "step": "View Purchase Order Analysis"
+  },
+  {
+   "step": "Review Buying Settings"
+  }
+ ],
+ "title": "Buying Setup"
+}

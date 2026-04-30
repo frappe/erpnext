@@ -46,6 +46,7 @@ class PaymentLedger:
 						against_voucher_no=ple.against_voucher_no,
 						amount=ple.amount,
 						currency=ple.account_currency,
+						company=ple.company,
 					)
 
 					if self.filters.include_account_currency:
@@ -77,6 +78,7 @@ class PaymentLedger:
 					against_voucher_no="Outstanding:",
 					amount=total,
 					currency=voucher_data[0].currency,
+					company=voucher_data[0].company,
 				)
 
 				if self.filters.include_account_currency:
@@ -85,7 +87,12 @@ class PaymentLedger:
 				voucher_data.append(entry)
 
 				# empty row
-				voucher_data.append(frappe._dict())
+				voucher_data.append(
+					frappe._dict(
+						currency=voucher_data[0].currency,
+						company=voucher_data[0].company,
+					)
+				)
 				self.data.extend(voucher_data)
 
 	def build_conditions(self):
@@ -130,7 +137,6 @@ class PaymentLedger:
 		)
 
 	def get_columns(self):
-		company_currency = frappe.get_cached_value("Company", self.filters.get("company"), "default_currency")
 		options = None
 		self.columns.append(
 			dict(
@@ -195,7 +201,7 @@ class PaymentLedger:
 				label=_("Amount"),
 				fieldname="amount",
 				fieldtype="Currency",
-				options=company_currency,
+				options="Company:company:default_currency",
 				width="100",
 			)
 		)

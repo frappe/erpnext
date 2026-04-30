@@ -1,0 +1,23 @@
+{
+ "action": "View Report",
+ "action_label": "View Stock Balance Report",
+ "creation": "2026-02-20 13:52:54.499787",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-20 13:52:54.499787",
+ "modified_by": "Administrator",
+ "name": "View Stock Balance Report",
+ "owner": "Administrator",
+ "reference_report": "Stock Balance",
+ "report_description": "View Stock Balance Report",
+ "report_reference_doctype": "Stock Ledger Entry",
+ "report_type": "Script Report",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "View Stock Balance Report",
+ "validate_action": 1
+}

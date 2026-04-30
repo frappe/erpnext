@@ -201,7 +201,7 @@ def get_columns():
 def get_data(filters=None):
 	filters = frappe._dict(filters or {})
 	item_warehouse_map = get_item_warehouse_combinations(filters)
-	valuation_method = frappe.db.get_single_value("Stock Settings", "valuation_method")
+	valuation_method = frappe.get_cached_value("Company", filters.get("company"), "valuation_method")
 
 	data = []
 	if item_warehouse_map:
@@ -248,12 +248,7 @@ def get_item_warehouse_combinations(filters: dict | None = None) -> dict:
 			bin.warehouse,
 			item.valuation_method,
 		)
-		.where(
-			(item.is_stock_item == 1)
-			& (item.has_serial_no == 0)
-			& (warehouse.is_group == 0)
-			& (warehouse.company == filters.company)
-		)
+		.where((item.is_stock_item == 1) & (warehouse.is_group == 0) & (warehouse.company == filters.company))
 	)
 
 	if filters.item_code:

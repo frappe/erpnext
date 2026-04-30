@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Existing Asset",
+ "creation": "2026-02-23 20:54:25.961869",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 3,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-23 22:31:48.789836",
+ "modified_by": "Administrator",
+ "name": "Create Existing Asset",
+ "owner": "Administrator",
+ "reference_document": "Asset",
+ "route_options": "{\n    \"asset_type\": \"Existing Asset\"\n}",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Create Existing Asset",
+ "validate_action": 1
+}

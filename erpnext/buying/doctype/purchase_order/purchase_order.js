@@ -12,7 +12,6 @@ erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Purchase Order", {
 	setup: function (frm) {
-		frm.ignore_doctypes_on_cancel_all = ["Unreconcile Payment", "Unreconcile Payment Entries"];
 		if (frm.doc.is_old_subcontracting_flow) {
 			frm.set_query("reserve_warehouse", "supplied_items", function () {
 				return {
@@ -26,7 +25,15 @@ frappe.ui.form.on("Purchase Order", {
 		}
 
 		frm.set_indicator_formatter("item_code", function (doc) {
-			return doc.qty <= doc.received_qty ? "green" : "orange";
+			let color;
+			if (!doc.qty && frm.doc.has_unit_price_items) {
+				color = "yellow";
+			} else if (doc.qty <= doc.received_qty) {
+				color = "green";
+			} else {
+				color = "orange";
+			}
+			return color;
 		});
 
 		frm.set_query("expense_account", "items", function () {
@@ -51,6 +58,19 @@ frappe.ui.form.on("Purchase Order", {
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
+	schedule_date(frm) {
+		if (frm.doc.schedule_date) {
+			frm.doc.items.forEach((d) => {
+				frappe.model.set_value(d.doctype, d.name, "schedule_date", frm.doc.schedule_date);
+			});
+		}
+	},
+
+	transaction_date(frm) {
+		erpnext.buying.prevent_past_schedule_dates(frm);
+		frm.set_value("schedule_date", "");
+	},
+
 	refresh: function (frm) {
 		if (frm.doc.is_old_subcontracting_flow) {
 			frm.trigger("get_materials_from_supplier");
@@ -63,31 +83,11 @@ frappe.ui.form.on("Purchase Order", {
 				}
 			});
 		}
-	},
 
-	supplier: function (frm) {
-		// Do not update if inter company reference is there as the details will already be updated
-		if (frm.updating_party_details || frm.doc.inter_company_invoice_reference) return;
-
-		if (frm.doc.__onload && frm.doc.__onload.load_after_mapping) return;
-
-		erpnext.utils.get_party_details(
-			frm,
-			"erpnext.accounts.party.get_party_details",
-			{
-				posting_date: frm.doc.transaction_date,
-				bill_date: frm.doc.bill_date,
-				party: frm.doc.supplier,
-				party_type: "Supplier",
-				account: frm.doc.credit_to,
-				price_list: frm.doc.buying_price_list,
-				fetch_payment_terms_template: cint(!frm.doc.ignore_default_payment_terms_template),
-			},
-			function () {
-				frm.set_df_property("apply_tds", "read_only", frm.supplier_tds ? 0 : 1);
-				frm.set_df_property("tax_withholding_category", "hidden", frm.supplier_tds ? 0 : 1);
-			}
-		);
+		if (frm.doc.docstatus == 0) {
+			erpnext.set_unit_price_items_note(frm);
+		}
+		erpnext.buying.prevent_past_schedule_dates(frm);
 	},
 
 	get_materials_from_supplier: function (frm) {
@@ -128,18 +128,13 @@ frappe.ui.form.on("Purchase Order", {
 	},
 
 	onload: function (frm) {
+		var ignore_list = ["Unreconcile Payment", "Unreconcile Payment Entries"];
+		frm.ignore_doctypes_on_cancel_all = Object.hasOwn(frm, "ignore_doctypes_on_cancel_all")
+			? frm.ignore_doctypes_on_cancel_all.concat(ignore_list)
+			: ignore_list;
 		set_schedule_date(frm);
 		if (!frm.doc.transaction_date) {
 			frm.set_value("transaction_date", frappe.datetime.get_today());
-		}
-
-		if (frm.doc.__onload && frm.doc.supplier) {
-			if (frm.is_new()) {
-				frm.doc.apply_tds = frm.doc.__onload.supplier_tds ? 1 : 0;
-			}
-			if (!frm.doc.__onload.supplier_tds) {
-				frm.set_df_property("apply_tds", "read_only", 1);
-			}
 		}
 
 		erpnext.queries.setup_queries(frm, "Warehouse", function () {
@@ -149,14 +144,6 @@ frappe.ui.form.on("Purchase Order", {
 		// On cancel and amending a purchase order with advance payment, reset advance paid amount
 		if (frm.is_new()) {
 			frm.set_value("advance_paid", 0);
-		}
-	},
-
-	apply_tds: function (frm) {
-		if (!frm.doc.apply_tds) {
-			frm.set_value("tax_withholding_category", "");
-		} else {
-			frm.set_value("tax_withholding_category", frm.supplier_tds);
 		}
 	},
 
@@ -288,6 +275,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 	erpnext.buying.BuyingController
 ) {
 	setup() {
+		this.setup_accounting_dimension_triggers();
 		this.frm.custom_make_buttons = {
 			"Purchase Receipt": "Purchase Receipt",
 			"Purchase Invoice": "Purchase Invoice",
@@ -406,7 +394,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 									);
 								}
 							} else {
-								if (!doc.items.every((item) => item.qty == item.subcontracted_quantity)) {
+								if (!doc.items.every((item) => item.qty == item.subcontracted_qty)) {
 									this.frm.add_custom_button(
 										__("Subcontracting Order"),
 										() => {
@@ -440,7 +428,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 						this.frm.add_custom_button(
 							__("Payment Request"),
 							function () {
-								me.make_payment_request();
+								me.make_payment_request_with_schedule();
 							},
 							__("Create")
 						);
@@ -452,8 +440,8 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 						if (internal) {
 							let button_label =
 								me.frm.doc.company === me.frm.doc.represents_company
-									? "Internal Sales Order"
-									: "Inter Company Sales Order";
+									? __("Internal Sales Order")
+									: __("Inter Company Sales Order");
 
 							me.frm.add_custom_button(
 								button_label,
@@ -471,37 +459,6 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 		} else if (doc.docstatus === 0) {
 			this.frm.cscript.add_from_mappers();
 		}
-	}
-
-	onload() {
-		this.frm.set_query("supplier", function () {
-			return {
-				filters: {
-					is_transporter: 0,
-				},
-			};
-		});
-	}
-
-	get_items_from_open_material_requests() {
-		erpnext.utils.map_current_doc({
-			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
-			args: {
-				supplier: this.frm.doc.supplier,
-			},
-			source_doctype: "Material Request",
-			source_name: this.frm.doc.supplier,
-			target: this.frm,
-			setters: {
-				company: this.frm.doc.company,
-			},
-			get_query_filters: {
-				docstatus: ["!=", 2],
-				supplier: this.frm.doc.supplier,
-			},
-			get_query_method:
-				"erpnext.stock.doctype.material_request.material_request.get_material_requests_based_on_supplier",
-		});
 	}
 
 	validate() {
@@ -577,7 +534,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					},
 					allow_child_item_selection: true,
 					child_fieldname: "items",
-					child_columns: ["item_code", "qty", "ordered_qty"],
+					child_columns: ["item_code", "item_name", "qty", "ordered_qty"],
 				});
 			},
 			__("Get Items From")
@@ -598,6 +555,9 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 						docstatus: 1,
 						status: ["not in", ["Stopped", "Expired"]],
 					},
+					allow_child_item_selection: true,
+					child_fieldname: "items",
+					child_columns: ["item_code", "item_name", "qty", "rate", "amount"],
 				});
 			},
 			__("Get Items From")
@@ -700,12 +660,20 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 	}
 
 	items_add(doc, cdt, cdn) {
-		var row = frappe.get_doc(cdt, cdn);
-		if (doc.schedule_date) {
-			row.schedule_date = doc.schedule_date;
-			refresh_field("schedule_date", cdn, "items");
+		const row = frappe.get_doc(cdt, cdn);
+		const field_copy = [];
+		if (doc.project) {
+			frappe.model.set_value(cdt, cdn, "project", doc.project);
 		} else {
-			this.frm.script_manager.copy_from_first_row("items", row, ["schedule_date"]);
+			field_copy.push("project");
+		}
+		if (doc.schedule_date) {
+			frappe.model.set_value(cdt, cdn, "schedule_date", doc.schedule_date);
+		} else {
+			field_copy.push("schedule_date");
+		}
+		if (field_copy.length) {
+			this.frm.script_manager.copy_from_first_row("items", row, field_copy);
 		}
 	}
 
@@ -764,10 +732,6 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 	items_on_form_rendered() {
 		set_schedule_date(this.frm);
 	}
-
-	schedule_date() {
-		set_schedule_date(this.frm);
-	}
 };
 
 // for backward compatibility: combine new and previous states
@@ -782,12 +746,6 @@ cur_frm.cscript.update_status = function (label, status) {
 			cur_frm.reload_doc();
 		},
 	});
-};
-
-cur_frm.fields_dict["items"].grid.get_field("project").get_query = function (doc, cdt, cdn) {
-	return {
-		filters: [["Project", "status", "not in", "Completed, Cancelled"]],
-	};
 };
 
 if (cur_frm.doc.is_old_subcontracting_flow) {

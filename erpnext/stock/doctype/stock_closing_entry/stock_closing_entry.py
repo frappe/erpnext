@@ -5,7 +5,6 @@ import json
 
 import frappe
 from frappe import _
-from frappe.core.doctype.prepared_report.prepared_report import create_json_gz_file
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
 from frappe.utils import add_days, get_date_str, get_link_to_form, nowtime, parse_json
@@ -27,9 +26,12 @@ class StockClosingEntry(Document):
 		company: DF.Link | None
 		from_date: DF.Date | None
 		naming_series: DF.Literal["CBAL-.#####"]
-		status: DF.Literal["Draft", "Queued", "In Progress", "Completed", "Failed", "Canceled"]
+		status: DF.Literal["Draft", "Queued", "In Progress", "Completed", "Failed", "Cancelled"]
 		to_date: DF.Date | None
 	# end: auto-generated types
+
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
 
 	def before_save(self):
 		self.set_status()
@@ -37,7 +39,7 @@ class StockClosingEntry(Document):
 	def set_status(self, save=False):
 		self.status = "Queued"
 		if self.docstatus == 2:
-			self.status = "Canceled"
+			self.status = "Cancelled"
 
 		if self.docstatus == 0:
 			self.status = "Draft"

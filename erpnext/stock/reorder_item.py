@@ -2,12 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import json
 from math import ceil
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, cint, flt, nowdate
+from frappe.utils import add_days, cint, escape_html, flt, nowdate
 
 import erpnext
 
@@ -60,6 +59,7 @@ def _reorder_item():
 		else:
 			projected_qty = flt(item_warehouse_projected_qty.get(kwargs.item_code, {}).get(kwargs.warehouse))
 
+		original_reorder_qty = reorder_qty
 		if (reorder_level or reorder_qty) and projected_qty <= reorder_level:
 			deficiency = reorder_level - projected_qty
 			if deficiency > reorder_qty:
@@ -73,6 +73,9 @@ def _reorder_item():
 					"warehouse": kwargs.warehouse,
 					"reorder_qty": reorder_qty,
 					"item_details": kwargs.item_details,
+					"projected_on_hand": projected_qty,
+					"reorder_level": reorder_level,
+					"original_reorder_qty": original_reorder_qty,
 				}
 			)
 
@@ -219,15 +222,6 @@ def create_material_request(material_requests):
 	mr_list = []
 	exceptions_list = []
 
-	def _log_exception(mr):
-		if frappe.local.message_log:
-			exceptions_list.extend(frappe.local.message_log)
-			frappe.local.message_log = []
-		else:
-			exceptions_list.append(frappe.get_traceback(with_context=True))
-
-		mr.log_error("Unable to create material request")
-
 	company_wise_mr = frappe._dict({})
 	for request_type in material_requests:
 		for company in material_requests[request_type]:
@@ -240,6 +234,7 @@ def create_material_request(material_requests):
 				mr.update(
 					{
 						"company": company,
+						"auto_created_via_reorder": 1,
 						"transaction_date": nowdate(),
 						"material_request_type": "Material Transfer"
 						if request_type == "Transfer"
@@ -285,6 +280,9 @@ def create_material_request(material_requests):
 							"description": item.description,
 							"item_group": item.item_group,
 							"brand": item.brand,
+							"reorder_qty": d.original_reorder_qty,
+							"projected_on_hand": d.projected_on_hand,
+							"reorder_level": d.reorder_level,
 						},
 					)
 
@@ -297,8 +295,9 @@ def create_material_request(material_requests):
 
 				company_wise_mr.setdefault(company, []).append(mr)
 
-			except Exception:
-				_log_exception(mr)
+			except Exception as exception:
+				exceptions_list.append(exception)
+				mr.log_error("Unable to create material request")
 
 	if company_wise_mr:
 		if getattr(frappe.local, "reorder_email_notify", None) is None:
@@ -383,10 +382,7 @@ def notify_errors(exceptions_list):
 
 	for exception in exceptions_list:
 		try:
-			exception = json.loads(exception)
-			error_message = """<div class='small text-muted'>{}</div><br>""".format(
-				_(exception.get("message"))
-			)
+			error_message = f"<div class='small text-muted'>{escape_html(str(exception))}</div><br>"
 			content += error_message
 		except Exception:
 			pass

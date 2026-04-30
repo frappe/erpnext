@@ -15,6 +15,7 @@
   "sourced_by_supplier",
   "bom_created",
   "is_subcontracted",
+  "is_phantom_item",
   "operation_section",
   "operation",
   "column_break_cbnk",
@@ -115,7 +116,8 @@
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Rate"
+   "label": "Rate",
+   "options": "currency"
   },
   {
    "columns": 1,
@@ -158,6 +160,7 @@
    "fieldname": "amount",
    "fieldtype": "Currency",
    "label": "Amount",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -180,13 +183,15 @@
    "fieldname": "base_amount",
    "fieldtype": "Currency",
    "hidden": 1,
-   "label": "Base Amount"
+   "label": "Base Amount",
+   "options": "Company:company:default_currency"
   },
   {
    "fieldname": "base_rate",
    "fieldtype": "Currency",
    "hidden": 1,
-   "label": "Base Rate"
+   "label": "Base Rate",
+   "options": "Company:company:default_currency"
   },
   {
    "default": "0",
@@ -225,6 +230,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval:!doc.is_phantom_item",
    "fieldname": "operation_section",
    "fieldtype": "Section Break",
    "label": "Operation"
@@ -241,21 +247,30 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.is_phantom_item",
    "fieldname": "is_subcontracted",
    "fieldtype": "Check",
    "label": "Is Subcontracted",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_phantom_item",
+   "fieldtype": "Check",
+   "label": "Is Phantom Item",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-11-25 18:13:34.542391",
+ "modified": "2025-11-05 21:15:55.187671",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator Item",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

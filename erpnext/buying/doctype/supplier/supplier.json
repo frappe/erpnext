@@ -11,11 +11,12 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "supplier_type",
   "supplier_name",
-  "country",
+  "gender",
   "column_break0",
   "supplier_group",
-  "supplier_type",
+  "country",
   "is_transporter",
   "image",
   "defaults_section",
@@ -23,22 +24,12 @@
   "default_bank_account",
   "column_break_10",
   "default_price_list",
-  "internal_supplier_section",
-  "is_internal_supplier",
-  "represents_company",
-  "column_break_16",
-  "companies",
   "column_break2",
   "supplier_details",
   "column_break_30",
   "website",
   "language",
-  "dashboard_tab",
-  "tax_tab",
-  "tax_id",
-  "column_break_27",
-  "tax_category",
-  "tax_withholding_category",
+  "customer_numbers",
   "contact_and_address_tab",
   "address_contacts",
   "address_html",
@@ -52,19 +43,32 @@
   "supplier_primary_contact",
   "mobile_no",
   "email_id",
+  "tax_tab",
+  "tax_id",
+  "tax_category",
+  "column_break_27",
+  "tax_withholding_category",
+  "tax_withholding_group",
   "accounting_tab",
   "payment_terms",
   "default_accounts_section",
   "accounts",
+  "internal_supplier_section",
+  "is_internal_supplier",
+  "represents_company",
+  "column_break_16",
+  "companies",
   "settings_tab",
   "allow_purchase_invoice_creation_without_purchase_order",
   "allow_purchase_invoice_creation_without_purchase_receipt",
   "column_break_54",
-  "is_frozen",
   "disabled",
+  "is_frozen",
+  "rfq_and_purchase_order_settings_section",
   "warn_rfqs",
-  "warn_pos",
   "prevent_rfqs",
+  "column_break_oxjw",
+  "warn_pos",
   "prevent_pos",
   "block_supplier_section",
   "on_hold",
@@ -73,7 +77,7 @@
   "release_date",
   "portal_users_tab",
   "portal_users",
-  "column_break_1mqv"
+  "dashboard_tab"
  ],
  "fields": [
   {
@@ -165,6 +169,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Supplier Group",
+   "link_filters": "[[\"Supplier Group\",\"is_group\",\"=\",0]]",
    "oldfieldname": "supplier_type",
    "oldfieldtype": "Link",
    "options": "Supplier Group"
@@ -173,6 +178,7 @@
    "default": "Company",
    "fieldname": "supplier_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Supplier Type",
    "options": "Company\nIndividual\nPartnership",
    "reqd": 1
@@ -233,6 +239,7 @@
    "fieldname": "default_currency",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_list_view": 1,
    "label": "Billing Currency",
    "no_copy": 1,
    "options": "Currency"
@@ -381,7 +388,7 @@
   },
   {
    "fieldname": "primary_address",
-   "fieldtype": "Text",
+   "fieldtype": "Text Editor",
    "label": "Primary Address",
    "read_only": 1
   },
@@ -395,7 +402,7 @@
   {
    "fieldname": "dashboard_tab",
    "fieldtype": "Tab Break",
-   "label": "Dashboard",
+   "label": "Connections",
    "show_dashboard": 1
   },
   {
@@ -427,7 +434,7 @@
    "collapsible": 1,
    "fieldname": "internal_supplier_section",
    "fieldtype": "Section Break",
-   "label": "Internal Supplier"
+   "label": "Internal Supplier Accounting"
   },
   {
    "fieldname": "column_break_16",
@@ -467,14 +474,39 @@
    "options": "Portal User"
   },
   {
-   "fieldname": "column_break_1mqv",
+   "fieldname": "column_break_mglr",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_mglr",
+   "fieldname": "customer_numbers",
+   "fieldtype": "Table",
+   "label": "Customer Numbers",
+   "options": "Customer Number At Supplier"
+  },
+  {
+   "fieldname": "tax_withholding_group",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Group",
+   "options": "Tax Withholding Group"
+  },
+  {
+   "depends_on": "eval:doc.supplier_type == 'Individual'",
+   "fieldname": "gender",
+   "fieldtype": "Link",
+   "label": "Gender",
+   "options": "Gender"
+  },
+  {
+   "fieldname": "rfq_and_purchase_order_settings_section",
+   "fieldtype": "Section Break",
+   "label": "RFQ and Purchase Order Settings"
+  },
+  {
+   "fieldname": "column_break_oxjw",
    "fieldtype": "Column Break"
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-user",
  "idx": 370,
  "image_field": "image",
@@ -485,7 +517,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2024-05-08 18:02:57.342931",
+ "modified": "2026-03-09 17:15:25.465759",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
@@ -544,6 +576,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "search_fields": "supplier_group",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

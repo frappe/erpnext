@@ -1,0 +1,20 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create delivery note",
+ "creation": "2026-02-20 13:42:13.571273",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 3,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-23 17:38:50.095742",
+ "modified_by": "Administrator",
+ "name": "Create Delivery Note",
+ "owner": "Administrator",
+ "reference_document": "Delivery Note",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Create Delivery Note",
+ "validate_action": 1
+}

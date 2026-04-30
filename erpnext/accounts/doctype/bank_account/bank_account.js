@@ -42,8 +42,4 @@ frappe.ui.form.on("Bank Account", {
 			});
 		}
 	},
-
-	is_company_account: function (frm) {
-		frm.set_df_property("account", "reqd", frm.doc.is_company_account);
-	},
 });

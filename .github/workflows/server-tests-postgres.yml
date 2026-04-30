@@ -6,11 +6,17 @@ on:
       - '**.js'
       - '**.md'
       - '**.html'
+      - 'crowdin.yml'
+      - '.coderabbit.yml'
+      - '.mergify.yml'
     types: [opened, labelled, synchronize, reopened]
 
 concurrency:
   group: server-postgres-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -41,25 +47,25 @@ jobs:
     steps:
 
       - name: Clone
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
+          python-version: '3.14'
 
       - name: Check for valid Python & Merge Conflicts
         run: |
-          python -m compileall -f "${GITHUB_WORKSPACE}"
+          python -m compileall -fq "${GITHUB_WORKSPACE}"
           if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
               then echo "Found merge conflicts"
               exit 1
           fi
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 18
+          node-version: 24
           check-latest: true
 
       - name: Add to Hosts
@@ -88,7 +94,7 @@ jobs:
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
 
       - uses: actions/cache@v4
         id: yarn-cache

@@ -1,6 +1,5 @@
 import frappe
 from frappe import qb
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -8,15 +7,13 @@ from erpnext.accounts.report.general_and_payment_ledger_comparison.general_and_p
 	execute,
 )
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestGeneralAndPaymentLedger(IntegrationTestCase, AccountsTestMixin):
+class TestGeneralAndPaymentLedger(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
 		self.create_company()
 		self.cleanup()
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 	def cleanup(self):
 		doctypes = []

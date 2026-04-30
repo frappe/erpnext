@@ -610,10 +610,19 @@ body[data-route="pos"] {
 .frappe-control[data-fieldname="address_display"] .ql-editor,
 .frappe-control[data-fieldname="shipping_address_display"] .ql-editor,
 .frappe-control[data-fieldname="shipping_address"] .ql-editor,
+.frappe-control[data-fieldname="dispatch_address_display"] .ql-editor,
 .frappe-control[data-fieldname="dispatch_address"] .ql-editor,
 .frappe-control[data-fieldname="source_address_display"] .ql-editor,
 .frappe-control[data-fieldname="target_address_display"] .ql-editor,
 .frappe-control[data-fieldname="billing_address_display"] .ql-editor,
 .frappe-control[data-fieldname="company_address_display"] .ql-editor {
 	white-space: normal;
+}
+
+.btn-clear-last-scanned-warehouse {
+	position: absolute;
+	right: 8px;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 1;
 }

@@ -9,6 +9,14 @@ frappe.ui.form.on("Payment Request", {
 				query: "erpnext.setup.doctype.party_type.party_type.get_party_type",
 			};
 		});
+
+		frm.set_query("payment_gateway_account", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+				},
+			};
+		});
 	},
 });
 
@@ -96,4 +104,30 @@ frappe.ui.form.on("Payment Request", "is_a_subscription", function (frm) {
 			},
 		});
 	}
+});
+
+frappe.ui.form.on("Payment Request", "calculate_total_amount_by_selected_rows", function (frm) {
+	if (frm.doc.docstatus !== 0) {
+		frappe.msgprint(__("Cannot fetch selected rows for submitted Payment Request"));
+		return;
+	}
+	const selected = frm.get_selected()?.payment_reference || [];
+	if (!selected.length) {
+		frappe.throw(__("No rows selected"));
+	}
+	let total = 0;
+	selected.forEach((name) => {
+		const row = frm.doc.payment_reference.find((d) => d.name === name);
+		if (row) {
+			row.manually_selected = 1;
+
+			total += row.amount;
+		}
+	});
+	frm.doc.payment_reference.forEach((row) => {
+		row.auto_selected = 0;
+	});
+	frm.set_value("grand_total", total);
+	frm.refresh_field("grand_total");
+	frm.save();
 });

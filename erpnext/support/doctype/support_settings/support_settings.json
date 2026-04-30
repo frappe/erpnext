@@ -37,9 +37,11 @@
   },
   {
    "default": "7",
+   "description": "Set this value to 0 to disable the feature.",
    "fieldname": "close_issue_after_days",
    "fieldtype": "Int",
-   "label": "Close Issue After Days"
+   "label": "Close Issue After Days",
+   "non_negative": 1
   },
   {
    "fieldname": "portal_sb",
@@ -153,9 +155,11 @@
    "label": "Greetings Section"
   }
  ],
+ "grid_page_length": 50,
+ "hide_toolbar": 0,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-27 13:10:50.989111",
+ "modified": "2026-03-16 16:33:45.859541",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support Settings",
@@ -173,6 +177,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

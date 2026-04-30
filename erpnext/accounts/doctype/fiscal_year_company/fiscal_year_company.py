@@ -14,7 +14,7 @@ class FiscalYearCompany(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		company: DF.Link | None
+		company: DF.Link
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

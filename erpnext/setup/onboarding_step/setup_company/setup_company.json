@@ -1,0 +1,21 @@
+{
+ "action": "Go to Page",
+ "action_label": "Setup Company",
+ "creation": "2026-02-20 11:12:50.373049",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 1,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-23 21:10:17.680053",
+ "modified_by": "Administrator",
+ "name": "Setup Company",
+ "owner": "Administrator",
+ "path": "company",
+ "reference_document": "Company",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Setup Company",
+ "validate_action": 1
+}

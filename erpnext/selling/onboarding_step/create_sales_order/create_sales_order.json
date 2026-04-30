@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Sales Order",
+ "creation": "2026-02-20 13:41:48.164961",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "form_tour": "",
+ "idx": 1,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-24 16:57:29.877286",
+ "modified_by": "Administrator",
+ "name": "Create Sales Order",
+ "owner": "Administrator",
+ "reference_document": "Sales Order",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Create Sales Order",
+ "validate_action": 1
+}

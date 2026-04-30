@@ -1,5 +1,5 @@
 {% $.each(data, (company, summary) => { %}
-<h6 style="margin: 15px 0px -10px 0px;"><a class="company-link"> {{ company }}</a></h6>
+<div style="margin: 15px 0px -10px 0px;"> {{ company }}</div>
 
 <table class="table table-bordered small">
 	<thead>
@@ -23,7 +23,7 @@
 			<td class="text-right">
 				{{ format_currency(summary[doctype].outstanding_amount, summary.currency, 2) }}
 			</td>
-		</div>
+		</tr>
 		{% endif %}
 		{% }); %}
 	</tbody>

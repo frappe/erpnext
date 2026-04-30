@@ -16,6 +16,7 @@ class Holiday(Document):
 
 		description: DF.TextEditor
 		holiday_date: DF.Date
+		is_half_day: DF.Check
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

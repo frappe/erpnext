@@ -1,6 +1,5 @@
 import frappe
 from frappe import qb
-from frappe.tests import IntegrationTestCase
 from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -11,9 +10,10 @@ from erpnext.accounts.report.deferred_revenue_and_expense.deferred_revenue_and_e
 )
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
+class TestDeferredRevenueAndExpense(ERPNextTestSuite, AccountsTestMixin):
 	maxDiff = None
 
 	def clear_old_entries(self):
@@ -67,10 +67,7 @@ class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 		self.setup_deferred_accounts_and_items()
 		self.clear_old_entries()
 
-	def tearDown(self):
-		frappe.db.rollback()
-
-	@IntegrationTestCase.change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
 	def test_deferred_revenue(self):
 		self.create_item("_Test Internet Subscription", 0, self.warehouse, self.company)
 		item = frappe.get_doc("Item", self.item)
@@ -101,20 +98,18 @@ class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 		si.submit()
 
 		pda = frappe.get_doc(
-			dict(
-				doctype="Process Deferred Accounting",
-				posting_date=nowdate(),
-				start_date="2021-05-01",
-				end_date="2021-08-01",
-				type="Income",
-				company=self.company,
-			)
+			doctype="Process Deferred Accounting",
+			posting_date=nowdate(),
+			start_date="2021-05-01",
+			end_date="2021-08-01",
+			type="Income",
+			company=self.company,
 		)
 		pda.insert()
 		pda.submit()
 
 		# execute report
-		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01"))
+		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01")[0])
 		self.filters = frappe._dict(
 			{
 				"company": self.company,
@@ -139,7 +134,7 @@ class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 		]
 		self.assertEqual(report.period_total, expected)
 
-	@IntegrationTestCase.change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
 	def test_deferred_expense(self):
 		self.create_item("_Test Office Desk", 0, self.warehouse, self.company)
 		item = frappe.get_doc("Item", self.item)
@@ -173,20 +168,18 @@ class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 		pi.submit()
 
 		pda = frappe.get_doc(
-			dict(
-				doctype="Process Deferred Accounting",
-				posting_date=nowdate(),
-				start_date="2021-05-01",
-				end_date="2021-08-01",
-				type="Expense",
-				company=self.company,
-			)
+			doctype="Process Deferred Accounting",
+			posting_date=nowdate(),
+			start_date="2021-05-01",
+			end_date="2021-08-01",
+			type="Expense",
+			company=self.company,
 		)
 		pda.insert()
 		pda.submit()
 
 		# execute report
-		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01"))
+		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01")[0])
 		self.filters = frappe._dict(
 			{
 				"company": self.company,
@@ -211,7 +204,7 @@ class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 		]
 		self.assertEqual(report.period_total, expected)
 
-	@IntegrationTestCase.change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
 	def test_zero_months(self):
 		self.create_item("_Test Internet Subscription", 0, self.warehouse, self.company)
 		item = frappe.get_doc("Item", self.item)
@@ -240,20 +233,18 @@ class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 		si.submit()
 
 		pda = frappe.get_doc(
-			dict(
-				doctype="Process Deferred Accounting",
-				posting_date=nowdate(),
-				start_date="2021-05-01",
-				end_date="2021-08-01",
-				type="Income",
-				company=self.company,
-			)
+			doctype="Process Deferred Accounting",
+			posting_date=nowdate(),
+			start_date="2021-05-01",
+			end_date="2021-08-01",
+			type="Income",
+			company=self.company,
 		)
 		pda.insert()
 		pda.submit()
 
 		# execute report
-		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01"))
+		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01")[0])
 		self.filters = frappe._dict(
 			{
 				"company": self.company,
@@ -278,7 +269,7 @@ class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 		]
 		self.assertEqual(report.period_total, expected)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"book_deferred_entries_based_on": "Months", "book_deferred_entries_via_journal_entry": 0},
 	)
@@ -326,7 +317,7 @@ class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 		pda.submit()
 
 		# execute report
-		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2022-01-31"))
+		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2022-01-31")[0])
 		self.filters = frappe._dict(
 			{
 				"company": self.company,

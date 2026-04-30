@@ -17,6 +17,7 @@ def get_data():
 			"Quotation": ["items", "prevdoc_docname"],
 			"BOM": ["items", "bom_no"],
 			"Blanket Order": ["items", "blanket_order"],
+			"Purchase Order": ["items", "purchase_order"],
 		},
 		"transactions": [
 			{
@@ -28,5 +29,7 @@ def get_data():
 			{"label": _("Manufacturing"), "items": ["Work Order", "BOM", "Blanket Order"]},
 			{"label": _("Reference"), "items": ["Quotation", "Auto Repeat", "Stock Reservation Entry"]},
 			{"label": _("Payment"), "items": ["Payment Entry", "Payment Request", "Journal Entry"]},
+			{"label": _("Schedule"), "items": ["Delivery Schedule Item"]},
+			{"label": _("Subcontracting Inward"), "items": ["Subcontracting Inward Order"]},
 		],
 	}

@@ -22,10 +22,12 @@ class OpeningInvoiceCreationToolItem(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		party: DF.DynamicLink
+		party: DF.DynamicLink | None
+		party_name: DF.Data | None
 		party_type: DF.Link | None
 		posting_date: DF.Date | None
 		qty: DF.Data | None
+		supplier_invoice_date: DF.Date | None
 		temporary_opening_account: DF.Link | None
 	# end: auto-generated types
 

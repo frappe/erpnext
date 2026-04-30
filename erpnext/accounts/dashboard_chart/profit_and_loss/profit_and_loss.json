@@ -1,7 +1,7 @@
 {
  "chart_name": "Profit and Loss",
  "chart_type": "Report",
- "creation": "2020-07-17 11:25:34.448572",
+ "creation": "2025-04-01 20:38:16.986176",
  "docstatus": 0,
  "doctype": "Dashboard Chart",
  "dynamic_filters_json": "{\"company\":\"frappe.defaults.get_user_default(\\\"Company\\\")\",\"from_fiscal_year\":\"erpnext.utils.get_fiscal_year()\",\"to_fiscal_year\":\"erpnext.utils.get_fiscal_year()\"}",
@@ -9,7 +9,7 @@
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
- "modified": "2023-07-19 13:08:56.470390",
+ "modified": "2025-12-19 12:37:31.673782",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Profit and Loss",
@@ -17,8 +17,9 @@
  "owner": "Administrator",
  "report_name": "Profit and Loss Statement",
  "roles": [],
+ "show_values_over_chart": 1,
  "timeseries": 0,
- "type": "Bar",
+ "type": "Line",
  "use_report_chart": 1,
  "y_axis": []
 }

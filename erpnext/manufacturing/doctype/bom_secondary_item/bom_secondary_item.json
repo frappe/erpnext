@@ -1,0 +1,232 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-02-25 12:44:21.760154",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "type",
+  "rate",
+  "column_break_gres",
+  "is_legacy",
+  "section_break_sbnk",
+  "item_code",
+  "item_name",
+  "uom",
+  "column_break_atlf",
+  "qty",
+  "stock_uom",
+  "conversion_factor",
+  "stock_qty",
+  "section_break_yith",
+  "image",
+  "description",
+  "column_break_wsra",
+  "image_nygv",
+  "section_break_ielf",
+  "cost_allocation_per",
+  "process_loss_per",
+  "column_break_gtbl",
+  "cost",
+  "base_cost",
+  "process_loss_qty"
+ ],
+ "fields": [
+  {
+   "depends_on": "eval:!doc.is_legacy",
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "mandatory_depends_on": "eval:!doc.is_legacy",
+   "options": "\nCo-Product\nBy-Product\nScrap\nAdditional Finished Good"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "cost",
+   "fieldtype": "Currency",
+   "label": "Cost",
+   "no_copy": 1,
+   "non_negative": 1,
+   "options": "currency",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_sbnk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_atlf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "UOM",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "Conversion Factor",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:!doc.is_legacy",
+   "fieldname": "section_break_ielf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_gtbl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_yith",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "item_code.image",
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Image",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_wsra",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stock_qty",
+   "fieldtype": "Float",
+   "label": "Stock Qty",
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "cost_allocation_per",
+   "fieldtype": "Percent",
+   "label": "Cost Allocation %",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "process_loss_per",
+   "fieldtype": "Percent",
+   "label": "Process Loss %",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description"
+  },
+  {
+   "depends_on": "image",
+   "fieldname": "image_nygv",
+   "fieldtype": "Image",
+   "options": "image",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "base_cost",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Base Cost (Company Currency)",
+   "no_copy": 1,
+   "non_negative": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_gres",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "is_legacy",
+   "fieldname": "is_legacy",
+   "fieldtype": "Check",
+   "label": "Is Legacy",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.is_legacy",
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "label": "Rate",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "process_loss_qty",
+   "fieldtype": "Float",
+   "label": "Process Loss Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1,
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-11 12:12:29.208031",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM Secondary Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

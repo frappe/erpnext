@@ -1,0 +1,35 @@
+{
+ "allow_roles": [
+  {
+   "role": "Projects Manager"
+  },
+  {
+   "role": "Projects User"
+  }
+ ],
+ "creation": "2026-02-23 22:48:31.160647",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2026-02-25 16:59:59.005097",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Projects Onboarding",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Create Project"
+  },
+  {
+   "step": "Create Tasks"
+  },
+  {
+   "step": "Create Timesheet"
+  },
+  {
+   "step": "View Project Summary"
+  }
+ ],
+ "title": "Projects Setup"
+}

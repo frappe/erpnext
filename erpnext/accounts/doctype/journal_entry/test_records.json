@@ -1,0 +1,94 @@
+[
+	{
+		"cheque_date": "2013-03-14",
+		"cheque_no": "33",
+		"company": "_Test Company",
+		"doctype": "Journal Entry",
+		"accounts": [
+			{
+				"account": "Debtors - _TC",
+				"party_type": "Customer",
+				"party": "_Test Customer",
+				"credit_in_account_currency": 400.0,
+				"debit_in_account_currency": 0.0,
+				"doctype": "Journal Entry Account",
+				"parentfield": "accounts",
+				"cost_center": "_Test Cost Center - _TC"
+			},
+			{
+				"account": "_Test Bank - _TC",
+				"credit_in_account_currency": 0.0,
+				"debit_in_account_currency": 400.0,
+				"doctype": "Journal Entry Account",
+				"parentfield": "accounts",
+				"cost_center": "_Test Cost Center - _TC"
+			}
+		],
+		"naming_series": "_T-Journal Entry-",
+		"posting_date": "2013-02-14",
+		"user_remark": "test",
+		"voucher_type": "Bank Entry"
+	},
+
+	{
+		"cheque_date": "2013-02-14",
+		"cheque_no": "33",
+		"company": "_Test Company",
+		"doctype": "Journal Entry",
+		"accounts": [
+			{
+				"account": "_Test Payable - _TC",
+				"party_type": "Supplier",
+				"party": "_Test Supplier",
+				"credit_in_account_currency": 0.0,
+				"debit_in_account_currency": 400.0,
+				"doctype": "Journal Entry Account",
+				"parentfield": "accounts",
+				"cost_center": "_Test Cost Center - _TC"
+			},
+			{
+				"account": "_Test Bank - _TC",
+				"credit_in_account_currency": 400.0,
+				"debit_in_account_currency": 0.0,
+				"doctype": "Journal Entry Account",
+				"parentfield": "accounts",
+				"cost_center": "_Test Cost Center - _TC"
+			}
+		],
+		"naming_series": "_T-Journal Entry-",
+		"posting_date": "2013-02-14",
+		"user_remark": "test",
+		"voucher_type": "Bank Entry"
+	},
+
+	{
+		"cheque_date": "2013-02-14",
+		"cheque_no": "33",
+		"company": "_Test Company",
+		"doctype": "Journal Entry",
+		"accounts": [
+			{
+				"account": "Debtors - _TC",
+				"party_type": "Customer",
+				"party": "_Test Customer",
+				"credit_in_account_currency": 0.0,
+				"debit_in_account_currency": 400.0,
+				"doctype": "Journal Entry Account",
+				"parentfield": "accounts",
+				"cost_center": "_Test Cost Center - _TC"
+			},
+			{
+				"account": "Sales - _TC",
+				"credit_in_account_currency": 400.0,
+				"debit_in_account_currency": 0.0,
+				"doctype": "Journal Entry Account",
+				"parentfield": "accounts",
+				"cost_center": "_Test Cost Center - _TC"
+			}
+		],
+		"naming_series": "_T-Journal Entry-",
+		"posting_date": "2013-02-14",
+		"user_remark": "test",
+		"voucher_type": "Bank Entry"
+	}
+]

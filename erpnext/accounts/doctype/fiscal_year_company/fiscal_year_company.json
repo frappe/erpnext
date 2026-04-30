@@ -15,18 +15,20 @@
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:09:44.659251",
+ "modified": "2026-02-20 23:02:26.193606",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Fiscal Year Company",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

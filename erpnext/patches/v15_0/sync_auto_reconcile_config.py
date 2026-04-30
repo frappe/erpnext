@@ -11,7 +11,7 @@ def execute():
 	frappe.db.set_single_value("Accounts Settings", "reconciliation_queue_size", 5)
 
 	# Create Scheduler Event record if it doesn't exist
-	if frappe.reload_doc("core", "doctype", "scheduler_event"):
+	if frappe.reload_doc("core", "doctype", "scheduler_event", force=True):
 		method = "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.trigger_reconciliation_for_queued_docs"
 		if not frappe.db.get_all(
 			"Scheduler Event", {"scheduled_against": "Process Payment Reconciliation", "method": method}

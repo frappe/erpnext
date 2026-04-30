@@ -73,14 +73,19 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	get_upper_section_html(doc) {
 		const { status } = doc;
 		let indicator_color = "";
+		const is_customer_naming_by_customer_name = frappe.sys_defaults.cust_master_name !== "Customer Name";
 
 		["Paid", "Consolidated"].includes(status) && (indicator_color = "green");
-		status === "Draft" && (indicator_color = "red");
-		status === "Return" && (indicator_color = "grey");
+		["Partly Paid", "Overdue"].includes(status) && (indicator_color = "yellow");
+		["Draft", "Unpaid"].includes(status) && (indicator_color = "red");
+		["Credit Note Issued", "Return"].includes(status) && (indicator_color = "grey");
 
 		return `<div class="left-section">
-					<div class="customer-name">${doc.customer}</div>
-					<div class="customer-email">${this.customer_email}</div>
+					<div class="customer-section">
+						<div class="customer-name">${doc.customer_name}</div>
+						${is_customer_naming_by_customer_name ? `<div class="customer-code">${doc.customer}</div>` : ""}
+						<div class="customer-email">${this.customer_email}</div>
+					</div>
 					<div class="cashier">${__("Sold by")}: ${doc.owner}</div>
 				</div>
 				<div class="right-section">
@@ -117,9 +122,10 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 		async function get_returned_qty() {
 			const r = await frappe.call({
-				method: "erpnext.controllers.sales_and_purchase_return.get_pos_invoice_item_returned_qty",
+				method: "erpnext.controllers.sales_and_purchase_return.get_invoice_item_returned_qty",
 				args: {
-					pos_invoice: doc.name,
+					doctype: doc.doctype,
+					invoice: doc.name,
 					customer: doc.customer,
 					item_row_name: item_data.name,
 				},
@@ -158,15 +164,9 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 		let taxes_html = doc.taxes
 			.map((t) => {
-				// if tax rate is 0, don't print it.
-				const description = /[0-9]+/.test(t.description)
-					? t.description
-					: t.rate != 0
-					? `${t.description} @ ${t.rate}%`
-					: t.description;
 				return `
 				<div class="tax-row">
-					<div class="tax-label">${description}</div>
+					<div class="tax-label">${t.description}</div>
 					<div class="tax-value">${format_currency(t.tax_amount_after_discount_amount, doc.currency)}</div>
 				</div>
 			`;
@@ -192,7 +192,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 	bind_events() {
 		this.$summary_container.on("click", ".return-btn", async () => {
-			const r = await this.is_pos_invoice_returnable(this.doc.name);
+			const r = await this.is_invoice_returnable(this.doc.doctype, this.doc.name);
 			if (!r) {
 				frappe.msgprint({
 					title: __("Invalid Return"),
@@ -201,21 +201,21 @@ erpnext.PointOfSale.PastOrderSummary = class {
 				});
 				return;
 			}
-			this.events.process_return(this.doc.name);
+			this.events.process_return(this.doc.doctype, this.doc.name);
 			this.toggle_component(false);
 			this.$component.find(".no-summary-placeholder").css("display", "flex");
 			this.$summary_wrapper.css("display", "none");
 		});
 
 		this.$summary_container.on("click", ".edit-btn", () => {
-			this.events.edit_order(this.doc.name);
+			this.events.edit_order(this.doc.doctype, this.doc.name);
 			this.toggle_component(false);
 			this.$component.find(".no-summary-placeholder").css("display", "flex");
 			this.$summary_wrapper.css("display", "none");
 		});
 
 		this.$summary_container.on("click", ".delete-btn", () => {
-			this.events.delete_order(this.doc.name);
+			this.events.delete_order(this.doc.doctype, this.doc.name);
 			this.show_summary_placeholder();
 		});
 
@@ -241,6 +241,10 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 		this.$summary_container.on("click", ".print-btn", () => {
 			this.print_receipt();
+		});
+
+		this.$summary_container.on("click", ".open-btn", () => {
+			this.events.open_in_form_view(this.doc.doctype, this.doc.name);
 		});
 	}
 
@@ -360,7 +364,14 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		return [
 			{ condition: this.doc.docstatus === 0, visible_btns: ["Edit Order", "Delete Order"] },
 			{
-				condition: !this.doc.is_return && this.doc.docstatus === 1,
+				condition: ["Partly Paid", "Overdue", "Unpaid"].includes(this.doc.status),
+				visible_btns: ["Print Receipt", "Email Receipt", "Open in Form View"],
+			},
+			{
+				condition:
+					!this.doc.is_return &&
+					this.doc.docstatus === 1 &&
+					!["Partly Paid", "Overdue", "Unpaid"].includes(this.doc.status),
 				visible_btns: ["Print Receipt", "Email Receipt", "Return"],
 			},
 			{
@@ -458,14 +469,16 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	}
 
 	toggle_component(show) {
+		this.$component.css("grid-column", "span 6 / span 6");
 		show ? this.$component.css("display", "flex") : this.$component.css("display", "none");
 	}
 
-	async is_pos_invoice_returnable(invoice) {
+	async is_invoice_returnable(doctype, invoice) {
 		const r = await frappe.call({
-			method: "erpnext.controllers.sales_and_purchase_return.is_pos_invoice_returnable",
+			method: "erpnext.controllers.sales_and_purchase_return.is_invoice_returnable",
 			args: {
-				pos_invoice: invoice,
+				doctype: doctype,
+				invoice: invoice,
 			},
 		});
 		return r.message;

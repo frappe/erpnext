@@ -1,8 +1,4 @@
-import unittest
-
-from frappe.tests import IntegrationTestCase
-
-from erpnext.tests.utils import ReportFilters, ReportName, execute_script_report
+from erpnext.tests.utils import ERPNextTestSuite, ReportFilters, ReportName, execute_script_report
 
 DEFAULT_FILTERS = {
 	"company": "_Test Company",
@@ -14,8 +10,8 @@ DEFAULT_FILTERS = {
 
 
 REPORT_FILTER_TEST_CASES: list[tuple[ReportName, ReportFilters]] = [
-	("General Ledger", {"group_by": "Group by Voucher (Consolidated)"}),
-	("General Ledger", {"group_by": "Group by Voucher (Consolidated)", "include_dimensions": 1}),
+	("General Ledger", {"categorize_by": "Categorize by Voucher (Consolidated)"}),
+	("General Ledger", {"categorize_by": "Categorize by Voucher (Consolidated)", "include_dimensions": 1}),
 	("Accounts Payable", {"range": "30, 60, 90, 120"}),
 	("Accounts Receivable", {"range": "30, 60, 90, 120"}),
 	("Consolidated Financial Statement", {"report": "Balance Sheet"}),
@@ -36,7 +32,7 @@ REPORT_FILTER_TEST_CASES: list[tuple[ReportName, ReportFilters]] = [
 OPTIONAL_FILTERS = {}
 
 
-class TestReports(IntegrationTestCase):
+class TestReports(ERPNextTestSuite):
 	def test_execute_all_accounts_reports(self):
 		"""Test that all script report in stock modules are executable with supported filters"""
 		for report, filter in REPORT_FILTER_TEST_CASES:

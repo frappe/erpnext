@@ -2,12 +2,12 @@ from typing import Any
 
 import frappe
 from frappe import _dict
-from frappe.tests import IntegrationTestCase
 from frappe.utils import today
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.report.stock_balance.stock_balance import execute
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 def stock_balance(filters):
@@ -15,7 +15,7 @@ def stock_balance(filters):
 	return [_dict(row) for row in execute(filters)[1]]
 
 
-class TestStockBalance(IntegrationTestCase):
+class TestStockBalance(ERPNextTestSuite):
 	# ----------- utils
 
 	def setUp(self):
@@ -23,14 +23,11 @@ class TestStockBalance(IntegrationTestCase):
 		self.filters = _dict(
 			{
 				"company": "_Test Company",
-				"item_code": self.item.name,
+				"item_code": [self.item.name],
 				"from_date": "2020-01-01",
 				"to_date": str(today()),
 			}
 		)
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 	def assertPartialDictEq(self, expected: dict[str, Any], actual: dict[str, Any]):
 		for k, v in expected.items():
@@ -106,6 +103,7 @@ class TestStockBalance(IntegrationTestCase):
 		)
 		self.assertInvariants(rows)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3, "currency_precision": 3})
 	def test_opening_balance(self):
 		self.generate_stock_ledger(
 			self.item.name,
@@ -165,6 +163,6 @@ class TestStockBalance(IntegrationTestCase):
 		variant.save()
 
 		self.generate_stock_ledger(variant.name, [_dict(qty=5, rate=10)])
-		rows = stock_balance(self.filters.update({"show_variant_attributes": 1, "item_code": variant.name}))
+		rows = stock_balance(self.filters.update({"show_variant_attributes": 1, "item_code": [variant.name]}))
 		self.assertPartialDictEq(attributes, rows[0])
 		self.assertInvariants(rows)

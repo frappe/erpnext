@@ -1,18 +1,13 @@
-import unittest
-
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import getdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.account_balance.account_balance import execute
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestAccountBalance(IntegrationTestCase):
+class TestAccountBalance(ERPNextTestSuite):
 	def test_account_balance(self):
-		frappe.db.sql("delete from `tabSales Invoice` where company='_Test Company 2'")
-		frappe.db.sql("delete from `tabGL Entry` where company='_Test Company 2'")
-
 		filters = {
 			"company": "_Test Company 2",
 			"report_date": getdate(),
@@ -36,6 +31,16 @@ class TestAccountBalance(IntegrationTestCase):
 			},
 			{
 				"account": "Indirect Income - _TC2",
+				"currency": "EUR",
+				"balance": 0.0,
+			},
+			{
+				"account": "Interest Income - _TC2",
+				"currency": "EUR",
+				"balance": 0.0,
+			},
+			{
+				"account": "Interest on Fixed Deposits - _TC2",
 				"currency": "EUR",
 				"balance": 0.0,
 			},

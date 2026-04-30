@@ -1,46 +1,23 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+import json
+
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.model import mapper
 from frappe.utils import add_days, nowdate, today
 
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
-	unlink_payment_on_cancel_of_invoice,
-)
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	create_dunning as create_dunning_from_sales_invoice,
 )
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice_against_cost_center,
 )
-
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Company", "Cost Center"]
-
-
-class UnitTestDunning(UnitTestCase):
-	"""
-	Unit tests for Dunning.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestDunning(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		create_dunning_type("First Notice", fee=0.0, interest=0.0, is_default=1)
-		create_dunning_type("Second Notice", fee=10.0, interest=10.0, is_default=0)
-		unlink_payment_on_cancel_of_invoice()
-
-	@classmethod
-	def tearDownClass(cls):
-		unlink_payment_on_cancel_of_invoice(0)
-		super().tearDownClass()
-
+class TestDunning(ERPNextTestSuite):
 	def test_dunning_without_fees(self):
 		dunning = create_dunning(overdue_days=20)
 
@@ -76,6 +53,36 @@ class TestDunning(IntegrationTestCase):
 
 		dunning.reload()
 		self.assertEqual(dunning.status, "Resolved")
+
+	def test_fetch_overdue_payments(self):
+		"""
+		Create SI with overdue payment. Check if overdue payment is fetched in Dunning.
+		"""
+		si1 = create_sales_invoice_against_cost_center(
+			posting_date=add_days(today(), -1 * 6),
+			qty=1,
+			rate=100,
+		)
+
+		si2 = create_sales_invoice_against_cost_center(
+			posting_date=add_days(today(), -1 * 6),
+			qty=1,
+			rate=300,
+		)
+
+		dunning = create_dunning_from_sales_invoice(si1.name)
+		dunning.overdue_payments = []
+
+		method = "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_dunning"
+		updated_dunning = mapper.map_docs(method, json.dumps([si1.name, si2.name]), dunning)
+
+		self.assertEqual(len(updated_dunning.overdue_payments), 2)
+
+		self.assertEqual(updated_dunning.overdue_payments[0].sales_invoice, si1.name)
+		self.assertEqual(updated_dunning.overdue_payments[0].outstanding, si1.outstanding_amount)
+
+		self.assertEqual(updated_dunning.overdue_payments[1].sales_invoice, si2.name)
+		self.assertEqual(updated_dunning.overdue_payments[1].outstanding, si2.outstanding_amount)
 
 	def test_dunning_and_payment_against_partially_due_invoice(self):
 		"""
@@ -113,6 +120,64 @@ class TestDunning(IntegrationTestCase):
 		dunning.reload()
 
 		self.assertEqual(sales_invoice.status, "Overdue")
+		self.assertEqual(dunning.status, "Unresolved")
+
+	def test_dunning_resolution_from_credit_note(self):
+		"""
+		Test that dunning is resolved when a credit note is issued against the original invoice.
+		"""
+		sales_invoice = create_sales_invoice_against_cost_center(
+			posting_date=add_days(today(), -10), qty=1, rate=100
+		)
+		dunning = create_dunning_from_sales_invoice(sales_invoice.name)
+		dunning.submit()
+
+		self.assertEqual(dunning.status, "Unresolved")
+
+		credit_note = frappe.copy_doc(sales_invoice)
+		credit_note.is_return = 1
+		credit_note.return_against = sales_invoice.name
+		credit_note.update_outstanding_for_self = 0
+
+		for item in credit_note.items:
+			item.qty = -item.qty
+
+		credit_note.save()
+		credit_note.submit()
+
+		dunning.reload()
+		self.assertEqual(dunning.status, "Resolved")
+
+		credit_note.cancel()
+		dunning.reload()
+		self.assertEqual(dunning.status, "Unresolved")
+
+	def test_dunning_not_affected_by_standalone_credit_note(self):
+		"""
+		Test that dunning is NOT resolved when a credit note has update_outstanding_for_self checked.
+		"""
+		sales_invoice = create_sales_invoice_against_cost_center(
+			posting_date=add_days(today(), -10), qty=1, rate=100
+		)
+		dunning = create_dunning_from_sales_invoice(sales_invoice.name)
+		dunning.submit()
+
+		self.assertEqual(dunning.status, "Unresolved")
+
+		credit_note = frappe.copy_doc(sales_invoice)
+		credit_note.is_return = 1
+		credit_note.return_against = sales_invoice.name
+		credit_note.update_outstanding_for_self = 1
+
+		for item in credit_note.items:
+			item.qty = -item.qty
+
+		credit_note.save()
+
+		credit_note = frappe.get_doc("Sales Invoice", credit_note.name)
+		credit_note.submit()
+
+		dunning.reload()
 		self.assertEqual(dunning.status, "Unresolved")
 
 

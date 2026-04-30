@@ -2,19 +2,11 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class UnitTestWorkstationType(UnitTestCase):
-	"""
-	Unit tests for WorkstationType.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestWorkstationType(IntegrationTestCase):
+class TestWorkstationType(ERPNextTestSuite):
 	pass
 
 

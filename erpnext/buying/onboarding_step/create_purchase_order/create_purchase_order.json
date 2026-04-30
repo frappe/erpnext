@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Purchase Order",
+ "creation": "2026-02-19 12:13:44.068135",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "form_tour": "",
+ "idx": 2,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-25 16:58:56.379480",
+ "modified_by": "Administrator",
+ "name": "Create Purchase Order",
+ "owner": "Administrator",
+ "reference_document": "Purchase Order",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Create Purchase Order",
+ "validate_action": 1
+}

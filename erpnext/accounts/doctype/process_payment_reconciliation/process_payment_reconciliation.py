@@ -35,7 +35,10 @@ class ProcessPaymentReconciliation(Document):
 		]
 		to_invoice_date: DF.Date | None
 		to_payment_date: DF.Date | None
+
 	# end: auto-generated types
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
 
 	def validate(self):
 		self.validate_receivable_payable_account()
@@ -142,7 +145,7 @@ def trigger_job_for_doc(docname: str | None = None):
 	if not docname:
 		return
 
-	if not frappe.db.get_single_value("Accounts Settings", "auto_reconcile_payments"):
+	if not frappe.get_single_value("Accounts Settings", "auto_reconcile_payments"):
 		frappe.throw(
 			_("Auto Reconciliation of Payments has been disabled. Enable it through {0}").format(
 				get_link_to_form("Accounts Settings", "Accounts Settings")
@@ -190,7 +193,7 @@ def trigger_reconciliation_for_queued_docs():
 	Will be called from Cron Job
 	Fetch queued docs and start reconciliation process for each one
 	"""
-	if not frappe.db.get_single_value("Accounts Settings", "auto_reconcile_payments"):
+	if not frappe.get_single_value("Accounts Settings", "auto_reconcile_payments"):
 		frappe.msgprint(
 			_("Auto Reconciliation of Payments has been disabled. Enable it through {0}").format(
 				get_link_to_form("Accounts Settings", "Accounts Settings")
@@ -210,7 +213,7 @@ def trigger_reconciliation_for_queued_docs():
 
 		docs_to_trigger = []
 		unique_filters = set()
-		queue_size = frappe.db.get_single_value("Accounts Settings", "reconciliation_queue_size") or 5
+		queue_size = frappe.get_single_value("Accounts Settings", "reconciliation_queue_size") or 5
 
 		fields = ["company", "party_type", "party", "receivable_payable_account", "default_advance_account"]
 
@@ -412,8 +415,9 @@ def reconcile(doc: None | str = None) -> None:
 					for x in allocations:
 						pr.append("allocation", x)
 
+					skip_ref_details_update_for_pe = check_multi_currency(pr)
 					# reconcile
-					pr.reconcile_allocations(skip_ref_details_update_for_pe=True)
+					pr.reconcile_allocations(skip_ref_details_update_for_pe=skip_ref_details_update_for_pe)
 
 					# If Payment Entry, update details only for newly linked references
 					# This is for performance
@@ -499,6 +503,37 @@ def reconcile(doc: None | str = None) -> None:
 				frappe.db.set_value("Process Payment Reconciliation Log", log, "status", "Reconciled")
 				frappe.db.set_value("Process Payment Reconciliation Log", log, "reconciled", True)
 				frappe.db.set_value("Process Payment Reconciliation", doc, "status", "Completed")
+
+
+def check_multi_currency(pr_doc):
+	GL = frappe.qb.DocType("GL Entry")
+	Account = frappe.qb.DocType("Account")
+
+	def get_account_currency(voucher_type, voucher_no):
+		currency = (
+			frappe.qb.from_(GL)
+			.join(Account)
+			.on(GL.account == Account.name)
+			.select(Account.account_currency)
+			.where(
+				(GL.voucher_type == voucher_type)
+				& (GL.voucher_no == voucher_no)
+				& (Account.account_type.isin(["Payable", "Receivable"]))
+			)
+			.limit(1)
+		).run(as_dict=True)
+
+		return currency[0].account_currency if currency else None
+
+	for allocation in pr_doc.allocation:
+		reference_currency = get_account_currency(allocation.reference_type, allocation.reference_name)
+
+		invoice_currency = get_account_currency(allocation.invoice_type, allocation.invoice_number)
+
+		if reference_currency != invoice_currency:
+			return True
+
+	return False
 
 
 @frappe.whitelist()

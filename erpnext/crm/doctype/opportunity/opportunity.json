@@ -44,13 +44,12 @@
   "column_break_17",
   "opportunity_amount",
   "base_opportunity_amount",
-  "section_break_analytics",
+  "utm_analytics_section",
   "utm_source",
-  "utm_content",
+  "utm_medium",
   "column_break_emai",
   "utm_campaign",
-  "column_break_whcu",
-  "utm_medium",
+  "utm_content",
   "more_info",
   "company",
   "transaction_date",
@@ -157,7 +156,6 @@
    "no_copy": 1
   },
   {
-   "default": "Sales",
    "fieldname": "opportunity_type",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -600,7 +598,7 @@
   {
    "fieldname": "state",
    "fieldtype": "Data",
-   "label": "State"
+   "label": "State/Province"
   },
   {
    "fieldname": "country",
@@ -614,49 +612,47 @@
   },
   {
    "fieldname": "utm_source",
-   "print_hide": 1,
    "fieldtype": "Link",
    "label": "Source",
    "oldfieldname": "source",
    "oldfieldtype": "Select",
-   "options": "UTM Source"
+   "options": "UTM Source",
+   "print_hide": 1
   },
   {
    "fieldname": "utm_campaign",
-   "print_hide": 1,
    "fieldtype": "Link",
    "label": "Campaign",
    "oldfieldname": "campaign",
    "oldfieldtype": "Link",
-   "options": "UTM Campaign"
-  },
-  {
-   "fieldname": "section_break_analytics",
-   "fieldtype": "Section Break",
-   "label": "Analytics"
-  },
-  {
-   "fieldname": "column_break_whcu",
-   "fieldtype": "Column Break"
+   "options": "UTM Campaign",
+   "print_hide": 1
   },
   {
    "fieldname": "utm_medium",
-   "print_hide": 1,
    "fieldtype": "Link",
    "label": "Medium",
-   "options": "UTM Medium"
+   "options": "UTM Medium",
+   "print_hide": 1
   },
   {
    "fieldname": "utm_content",
-   "print_hide": 1,
    "fieldtype": "Data",
-   "label": "Content"
+   "label": "Content",
+   "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "utm_analytics_section",
+   "fieldtype": "Section Break",
+   "label": "Analytics"
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2024-08-20 04:12:29.095761",
+ "modified": "2026-02-10 14:36:01.387984",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
@@ -688,6 +684,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "status,transaction_date,party_name,opportunity_type,territory,company",
  "sender_field": "contact_email",
  "show_name_in_global_search": 1,

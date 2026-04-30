@@ -9,7 +9,7 @@ frappe.ui.form.on("Quality Inspection", {
 	},
 
 	set_default_company(frm) {
-		if (!frm.doc.company) {
+		if (frm.doc.docstatus === 0 && !frm.doc.company) {
 			frm.set_value("company", frappe.defaults.get_default("company"));
 		}
 	},
@@ -48,25 +48,14 @@ frappe.ui.form.on("Quality Inspection", {
 
 		// item code based on GRN/DN
 		frm.set_query("item_code", function (doc) {
-			let doctype = doc.reference_type;
-
-			if (doc.reference_type !== "Job Card") {
-				doctype =
-					doc.reference_type == "Stock Entry" ? "Stock Entry Detail" : doc.reference_type + " Item";
-			}
-
 			if (doc.reference_type && doc.reference_name) {
-				let filters = {
-					from: doctype,
-					inspection_type: doc.inspection_type,
-				};
-
-				if (doc.reference_type == doctype) filters["reference_name"] = doc.reference_name;
-				else filters["parent"] = doc.reference_name;
-
 				return {
 					query: "erpnext.stock.doctype.quality_inspection.quality_inspection.item_query",
-					filters: filters,
+					filters: {
+						reference_doctype: doc.reference_type,
+						reference_name: doc.reference_name,
+						inspection_type: doc.inspection_type,
+					},
 				};
 			}
 		});

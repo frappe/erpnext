@@ -1,0 +1,218 @@
+[
+	{
+		"abbr": "_TC",
+		"company_name": "_Test Company",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"domain": "Manufacturing",
+		"chart_of_accounts": "Standard",
+		"default_holiday_list": "_Test Holiday List",
+		"enable_perpetual_inventory": 0,
+		"allow_account_creation_against_child_company": 1
+	},
+	{
+		"abbr": "_TC1",
+		"company_name": "_Test Company 1",
+		"country": "United States",
+		"default_currency": "USD",
+		"doctype": "Company",
+		"domain": "Retail",
+		"chart_of_accounts": "Standard",
+		"default_holiday_list": "_Test Holiday List",
+		"enable_perpetual_inventory": 0
+	},
+	{
+		"abbr": "_TC2",
+		"company_name": "_Test Company 2",
+		"default_currency": "EUR",
+		"country": "Germany",
+		"doctype": "Company",
+		"domain": "Retail",
+		"chart_of_accounts": "Standard",
+		"default_holiday_list": "_Test Holiday List",
+		"enable_perpetual_inventory": 0
+	},
+	{
+		"abbr": "_TC3",
+		"company_name": "_Test Company 3",
+		"is_group": 1,
+		"country": "Pakistan",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"domain": "Manufacturing",
+		"chart_of_accounts": "Standard",
+		"default_holiday_list": "_Test Holiday List",
+		"enable_perpetual_inventory": 0
+	},
+	{
+		"abbr": "_TC4",
+		"company_name": "_Test Company 4",
+		"parent_company": "_Test Company 3",
+		"is_group": 1,
+		"country": "Pakistan",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"domain": "Manufacturing",
+		"chart_of_accounts": "Standard",
+		"default_holiday_list": "_Test Holiday List",
+		"enable_perpetual_inventory": 0
+	},
+	{
+		"abbr": "_TC5",
+		"company_name": "_Test Company 5",
+		"parent_company": "_Test Company 4",
+		"country": "Pakistan",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"domain": "Manufacturing",
+		"chart_of_accounts": "Standard",
+		"default_holiday_list": "_Test Holiday List",
+		"enable_perpetual_inventory": 0
+	},
+	{
+		"abbr": "TCP1",
+		"company_name": "_Test Company with perpetual inventory",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"domain": "Manufacturing",
+		"chart_of_accounts": "Standard",
+		"default_holiday_list": "_Test Holiday List",
+		"enable_perpetual_inventory": 1
+	},
+	{
+		"abbr": "_TC6",
+		"company_name": "_Test Company 6",
+		"is_group": 1,
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"domain": "Manufacturing",
+		"chart_of_accounts": "Standard",
+		"default_holiday_list": "_Test Holiday List",
+		"enable_perpetual_inventory": 0
+	},
+	{
+		"abbr": "_TC7",
+		"company_name": "_Test Company 7",
+		"parent_company": "_Test Company 6",
+		"is_group": 1,
+		"country": "United States",
+		"default_currency": "USD",
+		"doctype": "Company",
+		"domain": "Manufacturing",
+		"chart_of_accounts": "Standard",
+		"default_holiday_list": "_Test Holiday List",
+		"enable_perpetual_inventory": 0
+	},
+	{
+		"doctype": "Company",
+		"default_currency": "USD",
+		"full_name": "Test User",
+		"company_name": "Wind Power LLC",
+		"timezone": "America/New_York",
+		"abbr": "WP",
+		"industry": "Manufacturing",
+		"country": "United States",
+		"language": "english",
+		"company_tagline": "Testing",
+		"email": "test@erpnext.com",
+		"password": "test",
+		"chart_of_accounts": "Standard"
+	},
+	{
+		"abbr": "PGCI",
+		"company_name": "Parent Group Company India",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"domain": "Manufacturing",
+		"chart_of_accounts": "Standard",
+		"default_holiday_list": "_Test Holiday List",
+		"enable_perpetual_inventory": 0,
+		"is_group": 1
+	},
+	{
+		"abbr": "CCI",
+		"company_name": "Child Company India",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"domain": "Manufacturing",
+		"chart_of_accounts": "Standard",
+		"default_holiday_list": "_Test Holiday List",
+		"enable_perpetual_inventory": 0,
+		"parent_company": "Parent Group Company India"
+	},
+	{
+		"abbr": "CCU",
+		"company_name": "Child Company US",
+		"country": "United States",
+		"default_currency": "USD",
+		"doctype": "Company",
+		"domain": "Manufacturing",
+		"chart_of_accounts": "Standard",
+		"default_holiday_list": "_Test Holiday List",
+		"enable_perpetual_inventory": 0,
+		"parent_company": "Parent Group Company India"
+	},
+	{
+		"abbr": "BT",
+		"company_name": "Best Test",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"chart_of_accounts": "Standard"
+	},
+	{
+		"abbr": "_TCUV",
+		"company_name": "_Test Company UAE VAT",
+		"country": "United Arab Emirates",
+		"default_currency": "AED",
+		"doctype": "Company",
+		"create_chart_of_accounts_based_on": "Standard Template"
+	},
+	{
+		"abbr": "_TCSV",
+		"company_name": "_Test Company SA VAT",
+		"country": "South Africa",
+		"default_currency": "ZAR",
+		"doctype": "Company",
+		"create_chart_of_accounts_based_on": "Standard Template"
+	},
+	{
+		"abbr": "_TOIC",
+		"company_name": "_Test Opening Invoice Company",
+		"country": "Pakistan",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"create_chart_of_accounts_based_on": "Standard Template"
+	},
+	{
+		"abbr": "TBC",
+		"company_name": "Trial Balance Company",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"create_chart_of_accounts_based_on": "Standard Template"
+	},
+	{
+		"abbr": "_TSS",
+		"company_name": "_Test Support SLA",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"chart_of_accounts": "Standard",
+		"create_chart_of_accounts_based_on": "Standard Template"
+	},
+	{
+		"abbr": "TQC",
+		"company_name": "Test Quality Company",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"chart_of_accounts": "Standard",
+		"create_chart_of_accounts_based_on": "Standard Template"
+	}
+]

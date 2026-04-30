@@ -32,5 +32,6 @@ def get_data():
 			{"label": _("Manufacture"), "items": ["Production Plan", "Work Order", "Item Manufacturer"]},
 			{"label": _("Traceability"), "items": ["Serial No", "Batch"]},
 			{"label": _("Stock Movement"), "items": ["Stock Entry", "Stock Reconciliation"]},
+			{"label": _("Lead Time"), "items": ["Item Lead Time"]},
 		],
 	}

@@ -1,0 +1,22 @@
+{
+ "action": "Go to Page",
+ "action_label": "Setup Sales Taxes",
+ "creation": "2026-02-22 18:30:18.750391",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "form_tour": "",
+ "idx": 1,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-23 22:44:42.373227",
+ "modified_by": "Administrator",
+ "name": "Setup Sales taxes",
+ "owner": "Administrator",
+ "path": "/desk/sales-taxes-and-charges-template",
+ "reference_document": "Sales Taxes and Charges Template",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Setup Sales taxes",
+ "validate_action": 1
+}

@@ -67,13 +67,13 @@ class PartyLink(Document):
 
 
 @frappe.whitelist()
-def create_party_link(primary_role, primary_party, secondary_party):
+def create_party_link(primary_role: str, primary_party: str, secondary_party: str):
 	party_link = frappe.new_doc("Party Link")
 	party_link.primary_role = primary_role
 	party_link.primary_party = primary_party
 	party_link.secondary_role = "Customer" if primary_role == "Supplier" else "Supplier"
 	party_link.secondary_party = secondary_party
 
-	party_link.save(ignore_permissions=True)
+	party_link.save()
 
 	return party_link

@@ -59,7 +59,7 @@ class PaymentOrder(Document):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_mop_query(doctype, txt, searchfield, start, page_len, filters):
+def get_mop_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	return frappe.db.sql(
 		""" select mode_of_payment from `tabPayment Order Reference`
 		where parent = %(parent)s and mode_of_payment like %(txt)s
@@ -70,7 +70,7 @@ def get_mop_query(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_supplier_query(doctype, txt, searchfield, start, page_len, filters):
+def get_supplier_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	return frappe.db.sql(
 		""" select supplier from `tabPayment Order Reference`
 		where parent = %(parent)s and supplier like %(txt)s and
@@ -81,7 +81,7 @@ def get_supplier_query(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def make_payment_records(name, supplier, mode_of_payment=None):
+def make_payment_records(name: str, supplier: str, mode_of_payment: str | None = None):
 	doc = frappe.get_doc("Payment Order", name)
 	make_journal_entry(doc, supplier, mode_of_payment)
 

@@ -118,7 +118,7 @@ class Issue(Document):
 		communication.save()
 
 	@frappe.whitelist()
-	def split_issue(self, subject, communication_id):
+	def split_issue(self, subject: str, communication_id: str):
 		# Bug: Pressing enter doesn't send subject
 		from copy import deepcopy
 
@@ -199,7 +199,7 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, ord
 		customer = contact_doc.get_link_for("Customer")
 
 	ignore_permissions = False
-	if is_website_user():
+	if is_website_user() and user != "Guest":
 		if not filters:
 			filters = {}
 
@@ -216,19 +216,25 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, ord
 
 
 @frappe.whitelist()
-def set_multiple_status(names, status):
+def set_multiple_status(names: str, status: str):
 	for name in json.loads(names):
 		frappe.db.set_value("Issue", name, "status", status)
 
 
 @frappe.whitelist()
-def set_status(name, status):
+def set_status(name: str, status: str):
 	frappe.db.set_value("Issue", name, "status", status)
 
 
 def auto_close_tickets():
-	"""Auto-close replied support tickets after 7 days"""
-	auto_close_after_days = frappe.db.get_single_value("Support Settings", "close_issue_after_days") or 7
+	"""
+	Auto-close replied support tickets as defined on `close_issue_after_days` in Support Settings.
+	Disables the feature if `close_issue_after_days` is set to 0.
+	"""
+	auto_close_after_days = frappe.db.get_single_value("Support Settings", "close_issue_after_days")
+
+	if not auto_close_after_days:
+		return
 
 	table = frappe.qb.DocType("Issue")
 	issues = (
@@ -261,12 +267,12 @@ def update_issue(contact, method):
 
 
 @frappe.whitelist()
-def make_task(source_name, target_doc=None):
+def make_task(source_name: str, target_doc: str | Document | None = None):
 	return get_mapped_doc("Issue", source_name, {"Issue": {"doctype": "Task"}}, target_doc)
 
 
 @frappe.whitelist()
-def make_issue_from_communication(communication, ignore_communication_links=False):
+def make_issue_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
 
 	doc = frappe.get_doc("Communication", communication)
@@ -310,7 +316,7 @@ def is_first_response(issue):
 
 
 def calculate_first_response_time(issue, first_responded_on):
-	issue_creation_date = issue.service_level_agreement_creation or issue.creation
+	issue_creation_date = get_datetime(issue.service_level_agreement_creation or issue.creation)
 	issue_creation_time = get_time_in_seconds(issue_creation_date)
 	first_responded_on_in_seconds = get_time_in_seconds(first_responded_on)
 	support_hours = frappe.get_cached_doc(

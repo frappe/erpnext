@@ -1,0 +1,41 @@
+{
+ "allow_roles": [
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Sales User"
+  }
+ ],
+ "creation": "2026-02-20 13:37:52.144254",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "idx": 1,
+ "is_complete": 0,
+ "modified": "2026-02-25 16:59:32.154164",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Selling Onboarding",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Create Customer"
+  },
+  {
+   "step": "Create Item"
+  },
+  {
+   "step": "Create Sales Order"
+  },
+  {
+   "step": "Create Sales Invoice"
+  },
+  {
+   "step": "View Sales Order Analysis"
+  },
+  {
+   "step": "Review Selling Settings"
+  }
+ ],
+ "title": "Selling Setup"
+}

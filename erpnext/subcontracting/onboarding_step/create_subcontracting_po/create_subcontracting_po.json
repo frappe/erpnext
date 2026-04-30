@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Subcontracting Purchase Order",
+ "creation": "2026-02-23 22:41:57.634121",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-23 22:41:57.634121",
+ "modified_by": "Administrator",
+ "name": "Create Subcontracting PO",
+ "owner": "Administrator",
+ "reference_document": "Purchase Order",
+ "route_options": "{\n    \"is_subcontracted\": 1\n}",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Create Subcontracting PO",
+ "validate_action": 1
+}

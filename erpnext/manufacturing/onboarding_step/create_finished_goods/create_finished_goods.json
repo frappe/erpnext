@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Finished Good",
+ "creation": "2026-02-23 20:34:23.487974",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 2,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-23 22:46:41.661631",
+ "modified_by": "Administrator",
+ "name": "Create Finished Goods",
+ "owner": "Administrator",
+ "reference_document": "Item",
+ "route_options": "{\n    \"item_group\": \"Products\"\n}",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Create Finished Goods",
+ "validate_action": 1
+}

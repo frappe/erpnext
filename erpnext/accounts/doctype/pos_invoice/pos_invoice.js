@@ -14,6 +14,7 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 	}
 
 	company() {
+		erpnext.utils.set_letter_head(this.frm);
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
 		this.frm.set_value("set_warehouse", "");
 		this.frm.set_value("taxes_and_charges", "");
@@ -54,6 +55,16 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 		});
 
 		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
+
+		if (this.frm.doc.pos_profile) {
+			frappe.db
+				.get_value("POS Profile", this.frm.doc.pos_profile, "set_grand_total_to_default_mop")
+				.then((r) => {
+					if (!r.exc) {
+						this.frm.set_default_payment = r.message.set_grand_total_to_default_mop;
+					}
+				});
+		}
 	}
 
 	onload_post_render(frm) {
@@ -66,6 +77,13 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 
 		if (doc.docstatus == 1 && !doc.is_return) {
 			this.frm.add_custom_button(__("Return"), this.make_sales_return.bind(this), __("Create"));
+			if (["Partly Paid", "Overdue", "Unpaid"].includes(doc.status)) {
+				this.frm.add_custom_button(
+					__("Payment"),
+					this.collect_outstanding_payment.bind(this),
+					__("Create")
+				);
+			}
 			this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 
@@ -112,6 +130,7 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 						this.frm.meta.default_print_format = r.message.print_format || "";
 						this.frm.doc.campaign = r.message.campaign;
 						this.frm.allow_print_before_pay = r.message.allow_print_before_pay;
+						this.frm.set_default_payment = r.message.set_default_payment;
 					}
 					this.frm.script_manager.trigger("update_stock");
 					this.calculate_taxes_and_totals();
@@ -209,6 +228,138 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 			method: "erpnext.accounts.doctype.pos_invoice.pos_invoice.make_sales_return",
 			frm: this.frm,
 		});
+	}
+
+	async collect_outstanding_payment() {
+		const total_amount = flt(this.frm.doc.rounded_total) | flt(this.frm.doc.grand_total);
+		const paid_amount = flt(this.frm.doc.paid_amount);
+		const outstanding_amount = flt(this.frm.doc.outstanding_amount);
+		const me = this;
+
+		const table_fields = [
+			{
+				fieldname: "mode_of_payment",
+				fieldtype: "Link",
+				in_list_view: 1,
+				label: __("Mode of Payment"),
+				options: "Mode of Payment",
+				reqd: 1,
+			},
+			{
+				fieldname: "amount",
+				fieldtype: "Currency",
+				in_list_view: 1,
+				label: __("Amount"),
+				options: this.frm.doc.currency,
+				reqd: 1,
+				onchange: function () {
+					dialog.fields_dict.payments.df.data.some((d) => {
+						if (d.idx == this.doc.idx) {
+							d.amount = this.value === null ? 0 : this.value;
+							dialog.fields_dict.payments.grid.refresh();
+							return true;
+						}
+					});
+
+					let amount = 0;
+					for (let d of dialog.fields_dict.payments.df.data) {
+						amount += d.amount;
+					}
+
+					let change_amount = total_amount - (paid_amount + amount);
+
+					dialog.fields_dict.outstanding_amount.set_value(
+						outstanding_amount - amount < 0 ? 0 : outstanding_amount - amount
+					);
+					dialog.fields_dict.paid_amount.set_value(paid_amount + amount);
+					dialog.fields_dict.change_amount.set_value(change_amount < 0 ? change_amount * -1 : 0);
+				},
+			},
+		];
+		const payment_method_data = await this.fetch_pos_payment_methods();
+		const dialog = new frappe.ui.Dialog({
+			title: __("Collect Outstanding Amount"),
+			fields: [
+				{
+					fieldname: "payments",
+					fieldtype: "Table",
+					label: __("Payments"),
+					cannot_add_rows: false,
+					in_place_edit: true,
+					reqd: 1,
+					data: payment_method_data,
+					fields: table_fields,
+				},
+				{
+					fieldname: "section_break_1",
+					fieldtype: "Section Break",
+				},
+				{
+					fieldname: "outstanding_amount",
+					fieldtype: "Currency",
+					label: __("Outstanding Amount"),
+					read_only: 1,
+					default: outstanding_amount,
+				},
+				{
+					fieldname: "column_break_1",
+					fieldtype: "Column Break",
+				},
+				{
+					fieldname: "paid_amount",
+					fieldtype: "Currency",
+					label: __("Paid Amount"),
+					read_only: 1,
+					default: paid_amount,
+				},
+				{
+					fieldname: "change_amount",
+					fieldtype: "Currency",
+					label: __("Change Amount"),
+					read_only: 1,
+					default: 0,
+				},
+			],
+			primary_action_label: __("Submit"),
+			primary_action(values) {
+				dialog.hide();
+				me.frm.call({
+					doc: me.frm.doc,
+					method: "update_payments",
+					args: {
+						payments: values.payments.filter((d) => d.amount != 0),
+					},
+					freeze: true,
+					callback: function (r) {
+						if (!r.exc) {
+							frappe.show_alert({
+								message: __("Payments updated."),
+								indicator: "green",
+							});
+							me.frm.reload_doc();
+						} else {
+							frappe.show_alert({
+								message: __("Payments could not be updated."),
+								indicator: "red",
+							});
+						}
+					},
+				});
+			},
+		});
+		dialog.show();
+	}
+
+	async fetch_pos_payment_methods() {
+		const pos_profile = this.frm.doc.pos_profile;
+		if (!pos_profile) return;
+		const pos_profile_doc = await frappe.db.get_doc("POS Profile", pos_profile);
+		const data = [];
+		pos_profile_doc.payments.forEach((pay) => {
+			const { mode_of_payment } = pay;
+			data.push({ mode_of_payment, amount: 0 });
+		});
+		return data;
 	}
 };
 
@@ -320,6 +471,18 @@ frappe.ui.form.on("POS Invoice", {
 							});
 					}, 60000);
 				});
+		});
+	},
+});
+
+frappe.ui.form.on("Sales Invoice Payment", {
+	mode_of_payment: function (frm) {
+		frappe.call({
+			doc: frm.doc,
+			method: "set_account_for_mode_of_payment",
+			callback: function (r) {
+				refresh_field("payments");
+			},
 		});
 	},
 });

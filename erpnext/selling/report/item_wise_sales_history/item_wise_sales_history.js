@@ -54,7 +54,7 @@ frappe.query_reports["Item-wise Sales History"] = {
 		value = default_formatter(value, row, column, data);
 		let format_fields = ["delivered_quantity", "billed_amount"];
 
-		if (in_list(format_fields, column.fieldname) && data && data[column.fieldname] > 0) {
+		if (format_fields.includes(column.fieldname) && data && data[column.fieldname] > 0) {
 			value = "<span style='color:green;'>" + value + "</span>";
 		}
 		return value;

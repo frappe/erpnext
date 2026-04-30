@@ -17,7 +17,6 @@ class PurchaseReceiptItem(Document):
 		allow_zero_valuation_rate: DF.Check
 		amount: DF.Currency
 		amount_difference_with_purchase_invoice: DF.Currency
-		apply_tds: DF.Check
 		asset_category: DF.Link | None
 		asset_location: DF.Link | None
 		barcode: DF.Data | None

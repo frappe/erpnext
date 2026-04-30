@@ -22,7 +22,9 @@
   "exchange_gain_loss",
   "account",
   "payment_request",
-  "payment_request_outstanding"
+  "payment_request_outstanding",
+  "advance_voucher_type",
+  "advance_voucher_no"
  ],
  "fields": [
   {
@@ -36,7 +38,7 @@
    "search_index": 1
   },
   {
-   "columns": 2,
+   "columns": 4,
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "in_global_search": 1,
@@ -47,8 +49,10 @@
    "search_index": 1
   },
   {
+   "columns": 2,
    "fieldname": "due_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Due Date",
    "read_only": 1
   },
@@ -66,7 +70,7 @@
   {
    "columns": 2,
    "fieldname": "total_amount",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Grand Total",
    "print_hide": 1,
@@ -75,7 +79,7 @@
   {
    "columns": 2,
    "fieldname": "outstanding_amount",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Outstanding",
    "read_only": 1
@@ -83,7 +87,7 @@
   {
    "columns": 2,
    "fieldname": "allocated_amount",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Allocated"
   },
@@ -151,18 +155,35 @@
    "fieldtype": "Date",
    "label": "Reconcile Effect On",
    "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "advance_voucher_type",
+   "fieldtype": "Link",
+   "label": "Advance Voucher Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "advance_voucher_no",
+   "fieldtype": "Dynamic Link",
+   "label": "Advance Voucher No",
+   "options": "advance_voucher_type",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-01-13 15:56:18.895082",
+ "modified": "2026-01-05 14:18:03.286224",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Reference",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

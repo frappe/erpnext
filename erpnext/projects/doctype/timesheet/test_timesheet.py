@@ -1,23 +1,79 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import datetime
-import unittest
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_to_date, now_datetime, nowdate
 
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError, make_sales_invoice
 from erpnext.setup.doctype.employee.test_employee import make_employee
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestTimesheet(IntegrationTestCase):
-	def setUp(self):
-		frappe.db.delete("Timesheet")
+class TestTimesheet(ERPNextTestSuite):
+	def test_timesheet_post_update(self):
+		frappe.get_doc(
+			{
+				"doctype": "Property Setter",
+				"doctype_or_field": "DocField",
+				"doc_type": "Timesheet",
+				"field_name": "time_logs",
+				"property": "allow_on_submit",
+				"property_type": "Check",
+				"value": "1",
+			}
+		).insert(ignore_permissions=True)
+
+		task = create_task("Test Task 1")
+
+		timesheet = frappe.new_doc("Timesheet")
+		timesheet.append(
+			"time_logs",
+			{
+				"task": task.name,
+				"from_time": now_datetime(),
+				"to_time": now_datetime() + datetime.timedelta(hours=1),
+				"company": "_Test Company",
+			},
+		)
+
+		timesheet.save()
+		timesheet.submit()
+		task.reload()
+		self.assertEqual(task.actual_time, 1)
+		timesheet.append(
+			"time_logs",
+			{
+				"task": task.name,
+				"from_time": now_datetime(),
+				"to_time": now_datetime() + datetime.timedelta(hours=2),
+				"hours": 2,
+			},
+		)
+
+		timesheet.save()
+		task.reload()
+		self.assertEqual(task.actual_time, 3)
+
+		frappe.db.delete(
+			"Property Setter",
+			{"doc_type": "Timesheet", "field_name": "time_logs", "property": "allow_on_submit"},
+		)
+
+	def test_timesheet_base_amount(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
+
+		self.assertEqual(timesheet.time_logs[0].base_billing_rate, 50)
+		self.assertEqual(timesheet.time_logs[0].base_costing_rate, 20)
+		self.assertEqual(timesheet.time_logs[0].base_billing_amount, 100)
+		self.assertEqual(timesheet.time_logs[0].base_costing_amount, 40)
 
 	def test_timesheet_billing_amount(self):
-		emp = make_employee("test_employee_6@salary.com")
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
 
 		self.assertEqual(timesheet.total_hours, 2)
@@ -27,7 +83,7 @@ class TestTimesheet(IntegrationTestCase):
 		self.assertEqual(timesheet.total_billable_amount, 100)
 
 	def test_timesheet_billing_amount_not_billable(self):
-		emp = make_employee("test_employee_6@salary.com")
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		timesheet = make_timesheet(emp, simulate=True, is_billable=0)
 
 		self.assertEqual(timesheet.total_hours, 2)
@@ -37,7 +93,7 @@ class TestTimesheet(IntegrationTestCase):
 		self.assertEqual(timesheet.total_billable_amount, 0)
 
 	def test_sales_invoice_from_timesheet(self):
-		emp = make_employee("test_employee_6@salary.com")
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
 		sales_invoice = make_sales_invoice(timesheet.name, "_Test Item", "_Test Customer", currency="INR")
@@ -53,9 +109,9 @@ class TestTimesheet(IntegrationTestCase):
 		self.assertEqual(item.qty, 2.00)
 		self.assertEqual(item.rate, 50.00)
 
-	@IntegrationTestCase.change_settings("Projects Settings", {"fetch_timesheet_in_sales_invoice": 1})
+	@ERPNextTestSuite.change_settings("Projects Settings", {"fetch_timesheet_in_sales_invoice": 1})
 	def test_timesheet_billing_based_on_project(self):
-		emp = make_employee("test_employee_6@salary.com")
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		project = frappe.get_value("Project", {"project_name": "_Test Project"})
 
 		timesheet = make_timesheet(
@@ -71,7 +127,7 @@ class TestTimesheet(IntegrationTestCase):
 		self.assertEqual(ts.time_logs[0].sales_invoice, sales_invoice.name)
 
 	def test_timesheet_time_overlap(self):
-		emp = make_employee("test_employee_6@salary.com")
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 
 		settings = frappe.get_single("Projects Settings")
 		initial_setting = settings.ignore_employee_time_overlap
@@ -107,12 +163,27 @@ class TestTimesheet(IntegrationTestCase):
 		settings.ignore_employee_time_overlap = 1
 		settings.save()
 		timesheet.save()  # should not throw an error
+		timesheet.submit()  # should not throw an error
+		settings.ignore_employee_time_overlap = 0
+		settings.save()
+
+		timesheet.append(
+			"time_logs",
+			{
+				"billable": 1,
+				"activity_type": "_Test Activity Type",
+				"from_time": now_datetime(),
+				"to_time": now_datetime() + datetime.timedelta(hours=3),
+				"company": "_Test Company",
+			},
+		)
+		self.assertRaises(frappe.ValidationError, timesheet.submit)
 
 		settings.ignore_employee_time_overlap = initial_setting
 		settings.save()
 
 	def test_timesheet_not_overlapping_with_continuous_timelogs(self):
-		emp = make_employee("test_employee_6@salary.com")
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 
 		update_activity_type("_Test Activity Type")
 		timesheet = frappe.new_doc("Timesheet")
@@ -141,7 +212,7 @@ class TestTimesheet(IntegrationTestCase):
 		timesheet.save()  # should not throw an error
 
 	def test_to_time(self):
-		emp = make_employee("test_employee_6@salary.com")
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		from_time = now_datetime()
 
 		timesheet = frappe.new_doc("Timesheet")
@@ -192,6 +263,60 @@ class TestTimesheet(IntegrationTestCase):
 		ts.calculate_percentage_billed()
 		self.assertEqual(ts.per_billed, 100)
 
+	def test_partial_billing_and_return(self):
+		"""
+		Test Timesheet status transitions during partial billing, full billing,
+		sales return, and return cancellation.
+
+		Scenario:
+		1. Create a Timesheet with two billable time logs.
+		2. Create a Sales Invoice billing only one time log → Timesheet becomes Partially Billed.
+		3. Create another Sales Invoice billing the remaining time log → Timesheet becomes Billed.
+		4. Create a Sales Return against the second invoice → Timesheet reverts to Partially Billed.
+		5. Cancel the Sales Return → Timesheet returns to Billed status.
+
+		This test ensures Timesheet status is recalculated correctly
+		across billing and return lifecycle events.
+		"""
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1, do_not_submit=True)
+		timesheet_detail = timesheet.append("time_logs", {})
+		timesheet_detail.is_billable = 1
+		timesheet_detail.activity_type = "_Test Activity Type"
+		timesheet_detail.from_time = timesheet.time_logs[0].to_time + datetime.timedelta(minutes=1)
+		timesheet_detail.hours = 2
+		timesheet_detail.to_time = timesheet_detail.from_time + datetime.timedelta(
+			hours=timesheet_detail.hours
+		)
+		timesheet.save().submit()
+
+		sales_invoice = make_sales_invoice(timesheet.name, "_Test Item", "_Test Customer", currency="INR")
+		sales_invoice.due_date = nowdate()
+		sales_invoice.timesheets.pop()
+		sales_invoice.submit()
+
+		timesheet_status = frappe.get_value("Timesheet", timesheet.name, "status")
+		self.assertEqual(timesheet_status, "Partially Billed")
+
+		sales_invoice2 = make_sales_invoice(timesheet.name, "_Test Item", "_Test Customer", currency="INR")
+		sales_invoice2.due_date = nowdate()
+		sales_invoice2.submit()
+
+		timesheet_status = frappe.get_value("Timesheet", timesheet.name, "status")
+		self.assertEqual(timesheet_status, "Billed")
+
+		sales_return = make_sales_return(sales_invoice2.name).submit()
+		timesheet_status = frappe.get_value("Timesheet", timesheet.name, "status")
+		self.assertEqual(timesheet_status, "Partially Billed")
+
+		sales_return.load_from_db()
+		sales_return.cancel()
+
+		timesheet.load_from_db()
+		self.assertEqual(timesheet.time_logs[1].sales_invoice, sales_invoice2.name)
+		self.assertEqual(timesheet.status, "Billed")
+
 
 def make_timesheet(
 	employee,
@@ -201,11 +326,15 @@ def make_timesheet(
 	project=None,
 	task=None,
 	company=None,
+	currency=None,
+	exchange_rate=None,
+	do_not_submit=False,
 ):
 	update_activity_type(activity_type)
 	timesheet = frappe.new_doc("Timesheet")
 	timesheet.employee = employee
 	timesheet.company = company or "_Test Company"
+	timesheet.exchange_rate = exchange_rate
 	timesheet_detail = timesheet.append("time_logs", {})
 	timesheet_detail.is_billable = is_billable
 	timesheet_detail.activity_type = activity_type
@@ -214,6 +343,7 @@ def make_timesheet(
 	timesheet_detail.to_time = timesheet_detail.from_time + datetime.timedelta(hours=timesheet_detail.hours)
 	timesheet_detail.project = project
 	timesheet_detail.task = task
+	timesheet_detail.currency = currency
 
 	for data in timesheet.get("time_logs"):
 		if simulate:
@@ -227,7 +357,8 @@ def make_timesheet(
 		else:
 			timesheet.save(ignore_permissions=True)
 
-	timesheet.submit()
+	if not do_not_submit:
+		timesheet.submit()
 
 	return timesheet
 
@@ -235,4 +366,5 @@ def make_timesheet(
 def update_activity_type(activity_type):
 	activity_type = frappe.get_doc("Activity Type", activity_type)
 	activity_type.billing_rate = 50.0
+	activity_type.costing_rate = 20.0
 	activity_type.save(ignore_permissions=True)

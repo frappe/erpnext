@@ -3,15 +3,17 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.query_builder import functions
+from frappe.query_builder.utils import DocType
 from frappe.utils import add_days, flt, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
+class TestExchangeRateRevaluation(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
 		self.create_company()
 		self.create_usd_receivable_account()
@@ -20,14 +22,13 @@ class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
 		self.clear_old_entries()
 		self.set_system_and_company_settings()
 
-	def tearDown(self):
-		frappe.db.rollback()
-
 	def set_system_and_company_settings(self):
 		# set number and currency precision
 		system_settings = frappe.get_doc("System Settings")
 		system_settings.float_precision = 2
 		system_settings.currency_precision = 2
+		system_settings.language = "en"
+		system_settings.time_zone = "Asia/Kolkata"
 		system_settings.save()
 
 		# Using Exchange Gain/Loss account for unrealized as well.
@@ -35,7 +36,7 @@ class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
 		company_doc.unrealized_exchange_gain_loss_account = company_doc.exchange_gain_loss_account
 		company_doc.save()
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)
@@ -81,14 +82,15 @@ class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(je.total_debit, 8500.0)
 		self.assertEqual(je.total_credit, 8500.0)
 
+		gl = DocType("GL Entry")
 		acc_balance = frappe.db.get_all(
 			"GL Entry",
 			filters={"account": self.debtors_usd, "is_cancelled": 0},
-			fields=["sum(debit)-sum(credit) as balance"],
+			fields=[(functions.Sum(gl.debit) - functions.Sum(gl.credit)).as_("balance")],
 		)[0]
 		self.assertEqual(acc_balance.balance, 8500.0)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)
@@ -146,19 +148,22 @@ class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(je.total_debit, 500.0)
 		self.assertEqual(je.total_credit, 500.0)
 
+		gl = DocType("GL Entry")
 		acc_balance = frappe.db.get_all(
 			"GL Entry",
 			filters={"account": self.debtors_usd, "is_cancelled": 0},
 			fields=[
-				"sum(debit)-sum(credit) as balance",
-				"sum(debit_in_account_currency)-sum(credit_in_account_currency) as balance_in_account_currency",
+				(functions.Sum(gl.debit) - functions.Sum(gl.credit)).as_("balance"),
+				(
+					functions.Sum(gl.debit_in_account_currency) - functions.Sum(gl.credit_in_account_currency)
+				).as_("balance_in_account_currency"),
 			],
 		)[0]
 		# account shouldn't have balance in base and account currency
 		self.assertEqual(acc_balance.balance, 0.0)
 		self.assertEqual(acc_balance.balance_in_account_currency, 0.0)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)
@@ -193,12 +198,15 @@ class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
 		pe.references = []
 		pe.save().submit()
 
+		gl = DocType("GL Entry")
 		acc_balance = frappe.db.get_all(
 			"GL Entry",
 			filters={"account": self.debtors_usd, "is_cancelled": 0},
 			fields=[
-				"sum(debit)-sum(credit) as balance",
-				"sum(debit_in_account_currency)-sum(credit_in_account_currency) as balance_in_account_currency",
+				(functions.Sum(gl.debit) - functions.Sum(gl.credit)).as_("balance"),
+				(
+					functions.Sum(gl.debit_in_account_currency) - functions.Sum(gl.credit_in_account_currency)
+				).as_("balance_in_account_currency"),
 			],
 		)[0]
 		# account should have balance only in account currency
@@ -235,19 +243,22 @@ class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(flt(je.total_debit, precision), 0.0)
 		self.assertEqual(flt(je.total_credit, precision), 0.0)
 
+		gl = DocType("GL Entry")
 		acc_balance = frappe.db.get_all(
 			"GL Entry",
 			filters={"account": self.debtors_usd, "is_cancelled": 0},
 			fields=[
-				"sum(debit)-sum(credit) as balance",
-				"sum(debit_in_account_currency)-sum(credit_in_account_currency) as balance_in_account_currency",
+				(functions.Sum(gl.debit) - functions.Sum(gl.credit)).as_("balance"),
+				(
+					functions.Sum(gl.debit_in_account_currency) - functions.Sum(gl.credit_in_account_currency)
+				).as_("balance_in_account_currency"),
 			],
 		)[0]
 		# account shouldn't have balance in base and account currency post revaluation
 		self.assertEqual(flt(acc_balance.balance, precision), 0.0)
 		self.assertEqual(flt(acc_balance.balance_in_account_currency, precision), 0.0)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)

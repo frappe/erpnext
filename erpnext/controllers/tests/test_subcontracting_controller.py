@@ -5,8 +5,7 @@ import copy
 from collections import defaultdict
 
 import frappe
-from frappe.tests import IntegrationTestCase
-from frappe.utils import cint
+from frappe.utils import cint, flt
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.controllers.subcontracting_controller import (
@@ -23,9 +22,10 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestSubcontractingController(IntegrationTestCase):
+class TestSubcontractingController(ERPNextTestSuite):
 	def setUp(self):
 		make_subcontracted_items()
 		make_raw_materials()
@@ -72,9 +72,10 @@ class TestSubcontractingController(IntegrationTestCase):
 	def test_create_raw_materials_supplied(self):
 		sco = get_subcontracting_order()
 		sco.supplied_items = None
-		sco.create_raw_materials_supplied()
+		sco.create_raw_materials_supplied_or_received()
 		self.assertIsNotNone(sco.supplied_items)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
 	def test_sco_with_bom(self):
 		"""
 		- Set backflush based on BOM.
@@ -500,8 +501,8 @@ class TestSubcontractingController(IntegrationTestCase):
 		scr1.items[0].qty = 2
 		add_second_row_in_scr(scr1)
 		scr1.flags.ignore_mandatory = True
-		scr1.save()
 		scr1.set_missing_values()
+		scr1.save()
 		scr1.submit()
 
 		for _key, value in get_supplied_items(scr1).items():
@@ -512,8 +513,8 @@ class TestSubcontractingController(IntegrationTestCase):
 		scr2.items[0].qty = 2
 		add_second_row_in_scr(scr2)
 		scr2.flags.ignore_mandatory = True
-		scr2.save()
 		scr2.set_missing_values()
+		scr2.save()
 		scr2.submit()
 
 		for _key, value in get_supplied_items(scr2).items():
@@ -522,8 +523,8 @@ class TestSubcontractingController(IntegrationTestCase):
 		scr3 = make_subcontracting_receipt(sco.name)
 		scr3.items[0].qty = 2
 		scr3.flags.ignore_mandatory = True
-		scr3.save()
 		scr3.set_missing_values()
+		scr3.save()
 		scr3.submit()
 
 		for _key, value in get_supplied_items(scr3).items():
@@ -741,6 +742,7 @@ class TestSubcontractingController(IntegrationTestCase):
 					"doctype": "Serial No",
 					"item_code": "Subcontracted SRM Item 2",
 					"serial_no": serial_no,
+					"company": "_Test Company",
 				}
 			).insert()
 
@@ -778,9 +780,8 @@ class TestSubcontractingController(IntegrationTestCase):
 				row.serial_no = "ABC"
 				break
 
-		bundle.save()
+		self.assertRaises(frappe.ValidationError, bundle.save)
 
-		self.assertRaises(frappe.ValidationError, scr1.save)
 		bundle.load_from_db()
 		for row in bundle.entries:
 			if row.idx == 1:
@@ -1141,6 +1142,76 @@ class TestSubcontractingController(IntegrationTestCase):
 			itemwise_details.get(doc.items[0].item_code)["serial_no"][5:6],
 		)
 
+	def test_phantom_bom_explosion(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_tree_for_phantom_bom_tests
+
+		expected = create_tree_for_phantom_bom_tests()
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 11",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": "Top Level Parent",
+				"fg_item_qty": 5,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=True)
+		sco.items[0].include_exploded_items = 0
+		sco.save()
+		sco.submit()
+		sco.reload()
+
+		self.assertEqual([item.rm_item_code for item in sco.supplied_items], expected)
+
+	def test_co_by_product(self):
+		frappe.set_value("UOM", "Nos", "must_be_whole_number", 0)
+
+		fg_item = make_item("FG Item", properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		rm_item = make_item("RM Item", properties={"is_stock_item": 1}).name
+		scrap_item = make_item("Scrap Item", properties={"is_stock_item": 1}).name
+		make_bom(
+			item=fg_item, raw_materials=[rm_item], scrap_items=[scrap_item], process_loss_percentage=10
+		).name
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 11",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr1 = make_subcontracting_receipt(sco.name)
+		scr1.get_secondary_items()
+		scr1.save()
+
+		self.assertEqual(scr1.items[0].received_qty, 5)
+		self.assertEqual(scr1.items[0].process_loss_qty, 0.5)
+		self.assertEqual(scr1.items[0].qty, 4.5)
+		self.assertEqual(scr1.items[0].rate, 200)
+		self.assertEqual(scr1.items[0].amount, 900)
+
+		self.assertEqual(scr1.items[1].item_code, scrap_item)
+		self.assertEqual(scr1.items[1].received_qty, 5)
+		self.assertEqual(scr1.items[1].process_loss_qty, 0.5)
+		self.assertEqual(scr1.items[1].qty, 4.5)
+		self.assertEqual(flt(scr1.items[1].rate, 3), 11.111)
+		self.assertEqual(scr1.items[1].amount, 50)
+
+		frappe.set_value("UOM", "Nos", "must_be_whole_number", 1)
+
 
 def add_second_row_in_scr(scr):
 	item_dict = {}
@@ -1308,6 +1379,12 @@ def make_subcontracted_items():
 		"Subcontracted Item SA7": {},
 		"Subcontracted Item SA8": {},
 		"Subcontracted Item SA9": {"stock_uom": "Litre"},
+		"Subcontracted Item SA10": {
+			"has_batch_no": 1,
+			"create_new_batch": 1,
+			"batch_number_series": "SBAT.####",
+		},
+		"Top Level Parent": {},
 	}
 
 	for item, properties in sub_contracted_items.items():
@@ -1329,6 +1406,7 @@ def make_raw_materials():
 		"Subcontracted SRM Item 5": {"has_serial_no": 1, "serial_no_series": "SRIID.####"},
 		"Subcontracted SRM Item 8": {},
 		"Subcontracted SRM Item 9": {"stock_uom": "Litre"},
+		"Subcontracted SRM Item 10": {},
 	}
 
 	for item, properties in raw_materials.items():
@@ -1357,6 +1435,8 @@ def make_service_items():
 		"Subcontracted Service Item 7": {},
 		"Subcontracted Service Item 8": {},
 		"Subcontracted Service Item 9": {},
+		"Subcontracted Service Item 10": {},
+		"Subcontracted Service Item 11": {},
 	}
 
 	for item, properties in service_items.items():
@@ -1381,6 +1461,8 @@ def make_bom_for_subcontracted_items():
 		"Subcontracted Item SA6": ["Subcontracted SRM Item 3"],
 		"Subcontracted Item SA7": ["Subcontracted SRM Item 1"],
 		"Subcontracted Item SA8": ["Subcontracted SRM Item 8"],
+		"Subcontracted Item SA10": ["Subcontracted SRM Item 10"],
+		"Subcontracted Service Item 11": ["Top Level Parent"],
 	}
 
 	for item_code, raw_materials in boms.items():
@@ -1480,7 +1562,7 @@ def make_subcontracted_item(**args):
 				},
 			)
 
-		args.raw_materials = ["_Test FG Item", "Test Extra Item 1"]
+		args.raw_materials = ["_Test Extra Item 1", "Test Extra Item 2"]
 
 	if not frappe.db.get_value("BOM", {"item": args.item_code}, "name"):
 		make_bom(item=args.item_code, raw_materials=args.get("raw_materials"))

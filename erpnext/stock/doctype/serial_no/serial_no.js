@@ -33,6 +33,6 @@ frappe.ui.form.on("Serial No", {
 				posting_time: frappe.datetime.now_time(),
 			};
 			frappe.set_route("query-report", "Serial No Ledger");
-		}).addClass("btn-primary");
+		});
 	},
 });

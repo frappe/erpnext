@@ -1,16 +1,14 @@
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days
 
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.selling.report.sales_order_analysis.sales_order_analysis import execute
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Sales Order", "Item", "Sales Invoice", "Delivery Note"]
 
-
-class TestSalesOrderAnalysis(IntegrationTestCase):
+class TestSalesOrderAnalysis(ERPNextTestSuite):
 	def create_sales_order(self, transaction_date, do_not_save=False, do_not_submit=False):
 		item = create_item(item_code="_Test Excavator", is_stock_item=0)
 		so = make_sales_order(
@@ -161,6 +159,12 @@ class TestSalesOrderAnalysis(IntegrationTestCase):
 				self.assertEqual(data[0][key], val)
 
 	def test_05_all_so_status(self):
+		transaction_date = "2021-06-01"
+		item1, so1 = self.create_sales_order(transaction_date)
+		item2, so2 = self.create_sales_order(transaction_date)
+
+		self.create_sales_invoice(so2)
+
 		columns, data, message, chart = execute(
 			{
 				"company": "_Test Company",
@@ -168,8 +172,7 @@ class TestSalesOrderAnalysis(IntegrationTestCase):
 				"to_date": "2021-06-30",
 			}
 		)
-		# SO's from first 4 test cases should be in output
-		self.assertEqual(len(data), 4)
+		self.assertEqual(len(data), 2)
 
 	def test_06_so_pending_delivery_with_multiple_delivery_notes(self):
 		transaction_date = "2021-06-01"

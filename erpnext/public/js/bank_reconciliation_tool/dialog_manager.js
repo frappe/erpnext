@@ -362,6 +362,21 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 					"eval:doc.action=='Create Voucher' && doc.document_type=='Payment Entry'",
 			},
 			{
+				fieldname: "bank_account",
+				fieldtype: "Link",
+				label: "Company Bank Account",
+				options: "Bank Account",
+				depends_on: "eval:doc.party",
+				get_query: function () {
+					return {
+						filters: {
+							is_company_account: 1,
+							company: this.company,
+						},
+					};
+				},
+			},
+			{
 				fieldname: "project",
 				fieldtype: "Link",
 				label: "Project",
@@ -511,6 +526,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				mode_of_payment: values.mode_of_payment,
 				project: values.project,
 				cost_center: values.cost_center,
+				company_bank_account: values?.bank_account || this?.bank_account,
 			},
 			callback: (response) => {
 				const alert_string = __("Bank Transaction {0} added as Payment Entry", [
@@ -582,6 +598,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 					project: values.project,
 					cost_center: values.cost_center,
 					allow_edit: true,
+					company_bank_account: values?.bank_account || this?.bank_account,
 				},
 				callback: (r) => {
 					const doc = frappe.model.sync(r.message);

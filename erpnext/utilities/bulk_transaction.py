@@ -7,7 +7,9 @@ from frappe.utils import get_link_to_form, today
 
 
 @frappe.whitelist()
-def transaction_processing(data, from_doctype, to_doctype, args=None):
+def transaction_processing(
+	data: str | list, from_doctype: str, to_doctype: str, args: str | frappe._dict | None = None
+):
 	frappe.has_permission(from_doctype, "read", throw=True)
 	frappe.has_permission(to_doctype, "create", throw=True)
 
@@ -19,9 +21,30 @@ def transaction_processing(data, from_doctype, to_doctype, args=None):
 	if isinstance(args, str):
 		args = frappe._dict(json.loads(args))
 
+	skipped_records = [d for d in deserialized_data if d.get("status") in ("On Hold", "Closed")]
+
+	deserialized_data = [d for d in deserialized_data if d.get("status") not in ("On Hold", "Closed")]
+
 	length_of_data = len(deserialized_data)
 
-	frappe.msgprint(_("Started a background job to create {1} {0}").format(to_doctype, length_of_data))
+	skipped_msg = ""
+
+	if skipped_records:
+		skipped_msg = _("{0} creation for the following records will be skipped.").format(to_doctype)
+
+		skipped_msg += (
+			"<br><br><ul>"
+			+ "".join(_("<li>{}</li>").format(frappe.bold(row.get("name"))) for row in skipped_records)
+			+ "</ul>"
+		)
+
+	if not length_of_data:
+		frappe.msgprint(skipped_msg)
+		return
+
+	frappe.msgprint(
+		_("Started a background job to create {1} {0}. {2}").format(to_doctype, length_of_data, skipped_msg)
+	)
 	frappe.enqueue(
 		job,
 		deserialized_data=deserialized_data,

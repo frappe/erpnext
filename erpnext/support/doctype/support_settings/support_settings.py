@@ -14,9 +14,7 @@ class SupportSettings(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.support.doctype.support_search_source.support_search_source import (
-			SupportSearchSource,
-		)
+		from erpnext.support.doctype.support_search_source.support_search_source import SupportSearchSource
 
 		allow_resetting_service_level_agreement: DF.Check
 		close_issue_after_days: DF.Int

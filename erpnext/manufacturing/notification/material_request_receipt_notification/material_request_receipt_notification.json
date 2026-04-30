@@ -2,6 +2,7 @@
  "attach_print": 0,
  "channel": "Email",
  "condition": "doc.status == \"Received\" or doc.status == \"Partially Received\"",
+ "condition_type": "Python",
  "creation": "2019-04-29 11:53:23.981418",
  "days_in_advance": 0,
  "docstatus": 0,
@@ -11,16 +12,18 @@
  "event": "Value Change",
  "idx": 0,
  "is_standard": 1,
+ "message": "<p><b>{{ _(\"Material Request Type\") }}</b>: {{ doc.material_request_type }}<br>\n<b>{{ _(\"Company\") }}</b>: {{ doc.company }}</p>\n\n<h3>{{ _(\"Order Summary\") }}</h3>\n\n<table border=2 >\n    <tr align=\"center\">\n        <th>{{ _(\"Item Name\") }}</th>\n        <th>{{ _(\"Received Quantity\") }}</th>\n    </tr>\n    {% for item in doc.items %}\n        {% if frappe.utils.flt(item.received_qty, 2) > 0.0 %}\n            <tr align=\"center\">\n                <td>{{ item.item_code }}</td>\n                <td>{{ frappe.utils.flt(item.received_qty, 2) }}</td>\n            </tr>\n        {% endif %}\n    {% endfor %}\n</table>\n",
  "message_type": "HTML",
  "method": "",
- "modified": "2023-11-17 08:53:29.525296",
+ "minutes_offset": 0,
+ "modified": "2026-02-23 17:41:43.982194",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Request Receipt Notification",
  "owner": "Administrator",
  "recipients": [
   {
-   "receiver_by_document_field": "requested_by"
+   "receiver_by_document_field": "owner"
   }
  ],
  "send_system_notification": 0,

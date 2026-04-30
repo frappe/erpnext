@@ -8,7 +8,13 @@ on:
       - '**.md'
       - '**.html'
       - '**.csv'
+      - 'crowdin.yml'
+      - '.coderabbit.yml'
+      - '.mergify.yml'
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: patch-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
@@ -23,7 +29,7 @@ jobs:
 
     services:
       mysql:
-        image: mariadb:10.6
+        image: mariadb:11.8
         env:
           MARIADB_ROOT_PASSWORD: 'root'
         ports:
@@ -32,25 +38,28 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Check for valid Python & Merge Conflicts
         run: |
-          python -m compileall -f "${GITHUB_WORKSPACE}"
+          python -m compileall -fq "${GITHUB_WORKSPACE}"
           if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
               then echo "Found merge conflicts"
               exit 1
           fi
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: |
+            3.11
+            3.13
+            3.14
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 18
+          node-version: 24
           check-latest: true
 
       - name: Add to Hosts
@@ -79,7 +88,7 @@ jobs:
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
 
       - uses: actions/cache@v4
         id: yarn-cache
@@ -104,8 +113,8 @@ jobs:
           jq 'del(.install_apps)' ~/frappe-bench/sites/test_site/site_config.json > tmp.json
           mv tmp.json ~/frappe-bench/sites/test_site/site_config.json
 
-          wget https://erpnext.com/files/v13-erpnext.sql.gz
-          bench --site test_site --force restore ~/frappe-bench/v13-erpnext.sql.gz
+          wget https://frappe.io/files/erpnext-v14.sql.gz
+          bench --site test_site --force restore ~/frappe-bench/erpnext-v14.sql.gz
 
           git -C "apps/frappe" remote set-url upstream https://github.com/frappe/frappe.git
           git -C "apps/erpnext" remote set-url upstream https://github.com/frappe/erpnext.git
@@ -126,15 +135,15 @@ jobs:
             # Resetup env and install apps
             pgrep honcho | xargs kill
             rm -rf ~/frappe-bench/env
-            bench -v setup env
+            bench -v setup env --python python$2
             bench pip install -e ./apps/erpnext
             bench start &>> ~/frappe-bench/bench_start.log &
 
             bench --site test_site migrate
           }
 
-          update_to_version 14
-          update_to_version 15
+          update_to_version 15 3.13
+          update_to_version 16 3.14
 
           echo "Updating to latest version"
           git -C "apps/frappe" fetch --depth 1 upstream "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"

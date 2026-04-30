@@ -1,0 +1,13 @@
+{
+ "creation": "2025-12-18 21:50:03.410111",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart Source",
+ "idx": 0,
+ "modified": "2025-12-18 21:50:03.410111",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Value by Item Group",
+ "owner": "Administrator",
+ "source_name": "Stock Value by Item Group",
+ "timeseries": 0
+}

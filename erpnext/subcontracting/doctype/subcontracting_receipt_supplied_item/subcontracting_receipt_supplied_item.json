@@ -33,7 +33,11 @@
   "section_break_zwnh",
   "serial_no",
   "column_break_qibi",
-  "batch_no"
+  "batch_no",
+  "accounting_details_section",
+  "expense_account",
+  "accounting_dimensions_section",
+  "cost_center"
  ],
  "fields": [
   {
@@ -103,7 +107,7 @@
   {
    "fieldname": "stock_uom",
    "fieldtype": "Link",
-   "label": "Stock Uom",
+   "label": "Stock UOM",
    "options": "UOM",
    "read_only": 1
   },
@@ -231,18 +235,43 @@
    "fieldname": "add_serial_batch_bundle",
    "fieldtype": "Button",
    "label": "Add Serial / Batch Bundle"
+  },
+  {
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Expense Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "depends_on": "eval:cint(erpnext.is_perpetual_inventory_enabled(parent.company))",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "print_hide": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-30 10:26:27.237371",
+ "modified": "2025-05-27 12:33:58.772638",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Supplied Item",
  "naming_rule": "Autoincrement",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

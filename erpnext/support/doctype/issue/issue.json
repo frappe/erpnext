@@ -233,6 +233,8 @@
    "options": "Project"
   },
   {
+   "fetch_from": "email_account.company",
+   "fetch_if_empty": 1,
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -391,7 +393,7 @@
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2025-02-18 21:18:52.797745",
+ "modified": "2026-04-09 19:14:57.692236",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
@@ -408,9 +410,18 @@
    "role": "Support Team",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "HR Manager",
+   "select": 1
+  },
+  {
+   "role": "HR User",
+   "select": 1
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "search_fields": "status,customer,subject,raised_by",
  "sender_field": "raised_by",
  "sort_field": "creation",

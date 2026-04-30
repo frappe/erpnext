@@ -5,9 +5,8 @@
 import json
 
 import frappe
+from frappe import qb
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
-from frappe.test_runner import make_test_objects
-from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, today
 
 from erpnext.controllers.item_variant import (
@@ -27,9 +26,7 @@ from erpnext.stock.doctype.item.item import (
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details
-
-IGNORE_TEST_RECORD_DEPENDENCIES = ["BOM"]
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 def make_item(item_code=None, properties=None, uoms=None, barcode=None):
@@ -74,16 +71,7 @@ def make_item(item_code=None, properties=None, uoms=None, barcode=None):
 	return item
 
 
-class UnitTestItem(UnitTestCase):
-	"""
-	Unit tests for Item.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestItem(IntegrationTestCase):
+class TestItem(ERPNextTestSuite):
 	def setUp(self):
 		super().setUp()
 		frappe.flags.attribute_values = None
@@ -97,11 +85,25 @@ class TestItem(IntegrationTestCase):
 			item = frappe.get_doc("Item", item_code)
 		return item
 
-	def test_get_item_details(self):
-		# delete modified item price record and make as per self.globalTestRecords["Item"]
-		frappe.db.sql("""delete from `tabItem Price`""")
-		frappe.db.sql("""delete from `tabBin`""")
+	def make_bin(self, records):
+		for x in records:
+			x = frappe._dict(x)
+			bin = qb.DocType("Bin")
+			filters = {
+				"item_code": x.get("item_code"),
+				"warehouse": x.get("warehouse"),
+				"reserved_qty": x.get("reserved_qty"),
+				"actual_qty": x.get("actual_qty"),
+				"ordered_qty": x.get("ordered_qty"),
+				"projected_qty": x.get("projected_qty"),
+			}
+			if not frappe.db.exists("Bin", filters):
+				qb.from_(bin).delete().where(
+					bin.item_code.eq(x.item_code) & bin.warehouse.eq(x.warehouse)
+				).run()
+				frappe.get_doc(x).insert()
 
+	def test_get_item_details(self):
 		to_check = {
 			"item_code": "_Test Item",
 			"item_name": "_Test Item",
@@ -126,11 +128,10 @@ class TestItem(IntegrationTestCase):
 			"projected_qty": 14,
 		}
 
-		make_test_objects("Item Price")
-		make_test_objects(
-			"Bin",
+		self.make_bin(
 			[
 				{
+					"doctype": "Bin",
 					"item_code": "_Test Item",
 					"warehouse": "_Test Warehouse - _TC",
 					"reserved_qty": 1,
@@ -168,9 +169,9 @@ class TestItem(IntegrationTestCase):
 			self.assertEqual(value, details.get(key), key)
 
 	def test_get_asset_item_details(self):
-		from erpnext.assets.doctype.asset.test_asset import create_asset_category, create_fixed_asset_item
+		from erpnext.assets.doctype.asset.test_asset import create_fixed_asset_item
 
-		create_asset_category(0)
+		frappe.db.set_value("Asset Category", "Computers", "enable_cwip_accounting", 0)
 		create_fixed_asset_item()
 
 		details = get_item_details(
@@ -314,6 +315,7 @@ class TestItem(IntegrationTestCase):
 						"company": "_Test Company",
 						"default_warehouse": "_Test Warehouse 2 - _TC",  # no override
 						"expense_account": "_Test Account Stock Expenses - _TC",  # override brand default
+						"default_cogs_account": "_Test Account Cost for Goods Sold - _TC",  # override brand default
 						"buying_cost_center": "_Test Write Off Cost Center - _TC",  # override item group default
 					}
 				],
@@ -324,7 +326,7 @@ class TestItem(IntegrationTestCase):
 			"item_code": "Test Item With Defaults",
 			"warehouse": "_Test Warehouse 2 - _TC",  # from item
 			"income_account": "_Test Account Sales - _TC",  # from brand
-			"expense_account": "_Test Account Stock Expenses - _TC",  # from item
+			"expense_account": "_Test Account Cost for Goods Sold - _TC",  # from item
 			"cost_center": "_Test Cost Center 2 - _TC",  # from item group
 		}
 		sales_item_details = get_item_details(
@@ -406,7 +408,6 @@ class TestItem(IntegrationTestCase):
 		frappe.flags.attribute_values = None
 
 		self.assertRaises(InvalidItemAttributeValueError, attribute.save)
-		frappe.db.rollback()
 
 	def test_make_item_variant(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
@@ -457,11 +458,6 @@ class TestItem(IntegrationTestCase):
 
 		frappe.delete_doc_if_exists("Item", "_Test Numeric Template Item")
 		frappe.delete_doc_if_exists("Item Attribute", "Test Item Length")
-
-		frappe.db.sql(
-			"""delete from `tabItem Variant Attribute`
-			where attribute='Test Item Length' """
-		)
 
 		frappe.flags.attribute_values = None
 
@@ -606,7 +602,6 @@ class TestItem(IntegrationTestCase):
 
 	def test_add_item_barcode(self):
 		# Clean up
-		frappe.db.sql("""delete from `tabItem Barcode`""")
 		item_code = "Test Item Barcode"
 		if frappe.db.exists("Item", item_code):
 			frappe.delete_doc("Item", item_code)
@@ -749,13 +744,13 @@ class TestItem(IntegrationTestCase):
 		except frappe.ValidationError as e:
 			self.fail(f"stock item considered non-stock item: {e}")
 
-	@IntegrationTestCase.change_settings("Stock Settings", {"item_naming_by": "Naming Series"})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"item_naming_by": "Naming Series"})
 	def test_autoname_series(self):
 		item = frappe.new_doc("Item")
 		item.item_group = "All Item Groups"
 		item.save()  # if item code saved without item_code then series worked
 
-	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_item_wise_negative_stock(self):
 		"""When global settings are disabled check that item that allows
 		negative stock can still consume material in all known stock
@@ -767,7 +762,7 @@ class TestItem(IntegrationTestCase):
 
 		self.consume_item_code_with_differet_stock_transactions(item_code=item.name)
 
-	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_backdated_negative_stock(self):
 		"""same as test above but backdated entries"""
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -780,7 +775,7 @@ class TestItem(IntegrationTestCase):
 		)
 		self.consume_item_code_with_differet_stock_transactions(item_code=item.name)
 
-	@IntegrationTestCase.change_settings(
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"sample_retention_warehouse": "_Test Warehouse - _TC"}
 	)
 	def test_retain_sample(self):
@@ -819,13 +814,6 @@ class TestItem(IntegrationTestCase):
 		self.assertTrue(get_data(item_code="_Test Item"))
 		self.assertTrue(get_data(warehouse="_Test Warehouse - _TC"))
 		self.assertTrue(get_data(item_group="All Item Groups"))
-
-	def test_empty_description(self):
-		item = make_item(properties={"description": "<p></p>"})
-		self.assertEqual(item.description, item.item_name)
-		item.description = ""
-		item.save()
-		self.assertEqual(item.description, item.item_name)
 
 	def test_item_type_field_change(self):
 		"""Check if critical fields like `is_stock_item`, `has_batch_no` are not changed if transactions exist."""
@@ -892,7 +880,7 @@ class TestItem(IntegrationTestCase):
 		item.reload()
 		self.assertEqual(item.is_stock_item, 1)
 
-	def test_serach_fields_for_item(self):
+	def test_search_fields_for_item(self):
 		from erpnext.controllers.queries import item_query
 
 		make_property_setter("Item", None, "search_fields", "item_name", "Data", for_doctype="Doctype")
@@ -971,6 +959,44 @@ class TestItem(IntegrationTestCase):
 			"must be same as in Template" in str(ve.exception),
 			msg="Different Variant UOM should not be allowed when `allow_different_uom` is disabled.",
 		)
+
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
+	def test_opening_stock_for_serial_batch(self):
+		items = {
+			"Test Opening Stock for Serial No": {
+				"has_serial_no": 1,
+				"opening_stock": 5,
+				"serial_no_series": "SN-TOPN-.####",
+				"valuation_rate": 100,
+			},
+			"Test Opening Stock for Batch No": {
+				"has_batch_no": 1,
+				"opening_stock": 5,
+				"batch_number_series": "BCH-TOPN-.####",
+				"valuation_rate": 100,
+				"create_new_batch": 1,
+			},
+			"Test Opening Stock for Serial and Batch No": {
+				"has_serial_no": 1,
+				"has_batch_no": 1,
+				"opening_stock": 5,
+				"batch_number_series": "SN-BCH-TOPN-.####",
+				"serial_no_series": "BCH-SN-TOPN-.####",
+				"valuation_rate": 100,
+				"create_new_batch": 1,
+			},
+		}
+
+		for item_code, properties in items.items():
+			make_item(item_code, properties)
+
+			serial_and_batch_bundle = frappe.db.get_value(
+				"Stock Entry Detail", {"docstatus": 1, "item_code": item_code}, "serial_and_batch_bundle"
+			)
+			self.assertTrue(serial_and_batch_bundle)
+
+			sabb_qty = frappe.db.get_value("Serial and Batch Bundle", serial_and_batch_bundle, "total_qty")
+			self.assertEqual(sabb_qty, properties["opening_stock"])
 
 
 def set_item_variant_settings(fields):

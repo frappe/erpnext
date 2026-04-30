@@ -1,23 +1,15 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
-
 import frappe
 
-from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
-	create_dimension,
-	disable_dimension,
-)
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.exceptions import InvalidAccountDimensionError, MandatoryAccountDimensionError
+from erpnext.tests.utils import ERPNextTestSuite
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Location", "Cost Center", "Department"]
 
-
-class TestAccountingDimensionFilter(unittest.TestCase):
+class TestAccountingDimensionFilter(ERPNextTestSuite):
 	def setUp(self):
-		create_dimension()
 		create_accounting_dimension_filter()
 		self.invoice_list = []
 
@@ -43,17 +35,6 @@ class TestAccountingDimensionFilter(unittest.TestCase):
 
 		self.assertRaises(MandatoryAccountDimensionError, si.submit)
 		self.invoice_list.append(si)
-
-	def tearDown(self):
-		disable_dimension_filter()
-		disable_dimension()
-		frappe.flags.accounting_dimensions_details = None
-		frappe.flags.dimension_filter_map = None
-
-		for si in self.invoice_list:
-			si.load_from_db()
-			if si.docstatus == 1:
-				si.cancel()
 
 
 def create_accounting_dimension_filter():

@@ -41,6 +41,8 @@ frappe.ui.form.on("Delivery Trip", {
 	},
 
 	refresh: function (frm) {
+		frm.ignore_doctypes_on_cancel_all = ["Delivery Note"];
+
 		if (frm.doc.docstatus == 1 && frm.doc.delivery_stops.length > 0) {
 			frm.add_custom_button(__("Notify Customers via Email"), function () {
 				frm.trigger("notify_customers");
@@ -208,7 +210,12 @@ frappe.ui.form.on("Delivery Stop", {
 				args: { address_dict: row.address },
 				callback: function (r) {
 					if (r.message) {
-						frappe.model.set_value(cdt, cdn, "customer_address", r.message);
+						frappe.model.set_value(
+							cdt,
+							cdn,
+							"customer_address",
+							frappe.utils.html2text(r.message)
+						);
 					}
 				},
 			});

@@ -1,6 +1,6 @@
 import frappe
-from frappe.model.db_query import DatabaseQuery
-from frappe.utils import cint, flt
+from frappe.desk.reportview import build_match_conditions
+from frappe.utils import cint, escape_html, flt
 
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_reserved_qty_for_items_and_warehouses as get_reserved_stock_details,
@@ -9,7 +9,12 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 
 @frappe.whitelist()
 def get_data(
-	item_code=None, warehouse=None, item_group=None, start=0, sort_by="actual_qty", sort_order="desc"
+	item_code: str | None = None,
+	warehouse: str | None = None,
+	item_group: str | None = None,
+	start: int = 0,
+	sort_by: str = "actual_qty",
+	sort_order: str = "desc",
 ):
 	"""Return data to render the item dashboard"""
 	filters = []
@@ -30,7 +35,7 @@ def get_data(
 		filters.append(["item_code", "in", items])
 	try:
 		# check if user has any restrictions based on user permissions on warehouse
-		if DatabaseQuery("Warehouse", user=frappe.session.user).build_match_conditions():
+		if build_match_conditions("Warehouse", user=frappe.session.user):
 			filters.append(["warehouse", "in", [w.name for w in frappe.get_list("Warehouse")]])
 	except frappe.PermissionError:
 		# user does not have access on warehouse
@@ -70,8 +75,10 @@ def get_data(
 	for item in items:
 		item.update(
 			{
-				"item_name": frappe.get_cached_value("Item", item.item_code, "item_name"),
-				"stock_uom": frappe.get_cached_value("Item", item.item_code, "stock_uom"),
+				"item_code": escape_html(item.item_code),
+				"item_name": escape_html(frappe.get_cached_value("Item", item.item_code, "item_name")),
+				"stock_uom": escape_html(frappe.get_cached_value("Item", item.item_code, "stock_uom")),
+				"warehouse": escape_html(item.warehouse),
 				"disable_quick_entry": frappe.get_cached_value("Item", item.item_code, "has_batch_no")
 				or frappe.get_cached_value("Item", item.item_code, "has_serial_no"),
 				"projected_qty": flt(item.projected_qty, precision),

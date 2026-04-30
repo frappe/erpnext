@@ -25,25 +25,37 @@ frappe.listview_settings["Purchase Order"] = {
 				return [
 					__("To Receive and Bill"),
 					"orange",
-					"per_received,<,100|per_billed,<,100|status,!=,Closed",
+					"per_received,<,100|per_billed,<,100|status,!=,Closed|docstatus,=,1",
 				];
 			} else {
-				return [__("To Receive"), "orange", "per_received,<,100|per_billed,=,100|status,!=,Closed"];
+				return [
+					__("To Receive"),
+					"orange",
+					"per_received,<,100|per_billed,=,100|status,!=,Closed|docstatus,=,1",
+				];
 			}
 		} else if (flt(doc.per_received) >= 100 && flt(doc.per_billed) < 100 && doc.status !== "Closed") {
-			return [__("To Bill"), "orange", "per_received,=,100|per_billed,<,100|status,!=,Closed"];
+			return [
+				__("To Bill"),
+				"orange",
+				"per_received,=,100|per_billed,<,100|status,!=,Closed|docstatus,=,1",
+			];
 		} else if (flt(doc.per_received) >= 100 && flt(doc.per_billed) == 100 && doc.status !== "Closed") {
-			return [__("Completed"), "green", "per_received,=,100|per_billed,=,100|status,!=,Closed"];
+			return [
+				__("Completed"),
+				"green",
+				"per_received,=,100|per_billed,=,100|status,!=,Closed|docstatus,=,1",
+			];
 		}
 	},
 	onload: function (listview) {
 		var method = "erpnext.buying.doctype.purchase_order.purchase_order.close_or_unclose_purchase_orders";
 
-		listview.page.add_menu_item(__("Close"), function () {
+		listview.page.add_action_item(__("Close"), function () {
 			listview.call_for_selected_items(method, { status: "Closed" });
 		});
 
-		listview.page.add_menu_item(__("Reopen"), function () {
+		listview.page.add_action_item(__("Reopen"), function () {
 			listview.call_for_selected_items(method, { status: "Submitted" });
 		});
 

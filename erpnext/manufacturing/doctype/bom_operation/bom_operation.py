@@ -35,6 +35,7 @@ class BOMOperation(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		quality_inspection_required: DF.Check
 		sequence_id: DF.Int
 		set_cost_based_on_bom_qty: DF.Check
 		skip_material_transfer: DF.Check

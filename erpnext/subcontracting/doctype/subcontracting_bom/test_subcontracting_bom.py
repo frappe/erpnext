@@ -2,19 +2,11 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class UnitTestSubcontractingBom(UnitTestCase):
-	"""
-	Unit tests for SubcontractingBom.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestSubcontractingBOM(IntegrationTestCase):
+class TestSubcontractingBOM(ERPNextTestSuite):
 	pass
 
 

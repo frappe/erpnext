@@ -1,0 +1,143 @@
+name: Individual
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: server-individual-tests-lightmode-develop
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+    - name: Clone
+      uses: actions/checkout@v6
+    - id: set-matrix
+      run: |
+        # Use grep and find to get the list of test files
+        matrix=$(find . -path '*/test_*.py' | xargs grep -l 'def test_' | sort | awk '{
+            # Remove ./ prefix, file extension, and replace / with .
+            gsub(/^\.\//, "", $0)
+            gsub(/\.py$/, "", $0)
+            gsub(/\//, ".", $0)
+            # Add to array
+            tests[NR] = $0
+        }
+        END {
+            # Start JSON array
+            printf "{\n  \"include\": [\n"
+            # Loop through array and create JSON objects
+            for (i=1; i<=NR; i++) {
+                printf "    {\"test\": \"%s\"}", tests[i]
+                if (i < NR) printf ","
+                printf "\n"
+            }
+            # Close JSON array
+            printf "  ]\n}"
+        }')
+
+        # Output the matrix
+        echo "matrix=$(echo "$matrix" | jq -c)" >> $GITHUB_OUTPUT
+
+        # For debugging (optional)
+        echo "Generated matrix:"
+        echo "$matrix"
+  test:
+    needs: discover
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      NODE_ENV: "production"
+
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.discover.outputs.matrix)}}
+      max-parallel: 14
+
+    name: Test
+
+    services:
+      mysql:
+        image: mariadb:10.6
+        env:
+          MARIADB_ROOT_PASSWORD: 'root'
+        ports:
+          - 3306:3306
+        options: --health-cmd="mariadb-admin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          check-latest: true
+
+      - name: Add to Hosts
+        run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            ${{ runner.os }}-
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v4
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install
+        run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
+        env:
+          DB: mariadb
+          TYPE: server
+          FRAPPE_USER: ${{ github.event.inputs.user }}
+          FRAPPE_BRANCH: ${{ github.event.inputs.branch }}
+
+      - name: Run Tests
+        run: |
+          site_name=$(echo "${{matrix.test}}" | sed -e 's/.*\.\(test_.*$\)/\1/')
+          echo "$site_name"
+          mkdir ~/frappe-bench/sites/$site_name
+          cp -r "${GITHUB_WORKSPACE}/.github/helper/site_config_mariadb.json" ~/frappe-bench/sites/$site_name/site_config.json
+          cd ~/frappe-bench/
+          bench --site $site_name reinstall --yes
+          bench --site $site_name set-config allow_tests true
+          bench --site $site_name run-tests --module ${{ matrix.test }} --lightmode
+

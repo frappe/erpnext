@@ -7,7 +7,7 @@ from frappe import _, msgprint
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, getdate
-from pypika import Order
+from pypika.terms import Bracket, LiteralValue, Order
 
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.report.utils import (
@@ -439,7 +439,6 @@ def get_invoices(filters, additional_query_columns):
 			si.company,
 		)
 		.where(si.docstatus == 1)
-		.orderby(si.posting_date, si.name, order=Order.desc)
 	)
 
 	if additional_query_columns:
@@ -457,8 +456,15 @@ def get_invoices(filters, additional_query_columns):
 		filters, query, doctype="Sales Invoice", child_doctype="Sales Invoice Item"
 	)
 
-	invoices = query.run(as_dict=True)
-	return invoices
+	from frappe.desk.reportview import build_match_conditions
+
+	if match_conditions := build_match_conditions("Sales Invoice"):
+		query = query.where(Bracket(LiteralValue(match_conditions)))
+
+	query = query.orderby("posting_date", order=Order.desc)
+	query = query.orderby("name", order=Order.desc)
+
+	return query.run(as_dict=True)
 
 
 def get_conditions(filters, query, doctype):

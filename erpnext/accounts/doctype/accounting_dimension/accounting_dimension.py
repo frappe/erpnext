@@ -82,8 +82,8 @@ class AccountingDimension(Document):
 			else:
 				frappe.throw(_("Company {0} is added more than once").format(frappe.bold(default.company)))
 
-	def after_insert(self):
-		if frappe.flags.in_test:
+	def on_update(self):
+		if frappe.in_test:
 			make_dimension_in_accounting_doctypes(doc=self)
 		else:
 			frappe.enqueue(
@@ -91,7 +91,7 @@ class AccountingDimension(Document):
 			)
 
 	def on_trash(self):
-		if frappe.flags.in_test:
+		if frappe.in_test:
 			delete_accounting_dimension(doc=self)
 		else:
 			frappe.enqueue(delete_accounting_dimension, doc=self, queue="long", enqueue_after_commit=True)
@@ -103,25 +103,19 @@ class AccountingDimension(Document):
 		if not self.fieldname:
 			self.fieldname = scrub(self.label)
 
-	def on_update(self):
-		frappe.flags.accounting_dimensions = None
-		frappe.flags.accounting_dimensions_details = None
-
 
 def make_dimension_in_accounting_doctypes(doc, doclist=None):
 	if not doclist:
 		doclist = get_doctypes_with_dimensions()
-
 	doc_count = len(get_accounting_dimensions())
 	count = 0
-	repostable_doctypes = get_allowed_types_from_settings()
+	repostable_doctypes = get_allowed_types_from_settings(child_doc=True)
 
 	for doctype in doclist:
 		if (doc_count + 1) % 2 == 0:
 			insert_after_field = "dimension_col_break"
 		else:
 			insert_after_field = "accounting_dimensions_section"
-
 		df = {
 			"fieldname": doc.fieldname,
 			"label": doc.label,
@@ -212,8 +206,8 @@ def delete_accounting_dimension(doc):
 
 
 @frappe.whitelist()
-def disable_dimension(doc):
-	if frappe.flags.in_test:
+def disable_dimension(doc: str):
+	if frappe.in_test:
 		toggle_disabling(doc=doc)
 	else:
 		frappe.enqueue(toggle_disabling, doc=doc)
@@ -243,34 +237,26 @@ def get_doctypes_with_dimensions():
 	return frappe.get_hooks("accounting_dimension_doctypes")
 
 
-def get_accounting_dimensions(as_list=True, filters=None):
-	if not filters:
-		filters = {"disabled": 0}
-
-	if frappe.flags.accounting_dimensions is None:
-		frappe.flags.accounting_dimensions = frappe.get_all(
-			"Accounting Dimension",
-			fields=["label", "fieldname", "disabled", "document_type"],
-			filters=filters,
-		)
+def get_accounting_dimensions(as_list=True):
+	accounting_dimensions = frappe.get_all(
+		"Accounting Dimension",
+		fields=["label", "fieldname", "disabled", "document_type"],
+		filters={"disabled": 0},
+	)
 
 	if as_list:
-		return [d.fieldname for d in frappe.flags.accounting_dimensions]
+		return [d.fieldname for d in accounting_dimensions]
 	else:
-		return frappe.flags.accounting_dimensions
+		return accounting_dimensions
 
 
 def get_checks_for_pl_and_bs_accounts():
-	if frappe.flags.accounting_dimensions_details is None:
-		# nosemgrep
-		frappe.flags.accounting_dimensions_details = frappe.db.sql(
-			"""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
+	return frappe.db.sql(
+		"""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
 			FROM `tabAccounting Dimension`p ,`tabAccounting Dimension Detail` c
 			WHERE p.name = c.parent AND p.disabled = 0""",
-			as_dict=1,
-		)
-
-	return frappe.flags.accounting_dimensions_details
+		as_dict=1,
+	)
 
 
 def get_dimension_with_children(doctype, dimensions):
@@ -288,7 +274,7 @@ def get_dimension_with_children(doctype, dimensions):
 
 
 @frappe.whitelist()
-def get_dimensions(with_cost_center_and_project=False):
+def get_dimensions(with_cost_center_and_project: str | bool = False):
 	c = frappe.qb.DocType("Accounting Dimension Detail")
 	p = frappe.qb.DocType("Accounting Dimension")
 	dimension_filters = (
@@ -311,8 +297,8 @@ def get_dimensions(with_cost_center_and_project=False):
 	if with_cost_center_and_project:
 		dimension_filters.extend(
 			[
-				{"fieldname": "cost_center", "document_type": "Cost Center"},
-				{"fieldname": "project", "document_type": "Project"},
+				frappe._dict({"fieldname": "cost_center", "document_type": "Cost Center"}),
+				frappe._dict({"fieldname": "project", "document_type": "Project"}),
 			]
 		)
 

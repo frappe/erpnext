@@ -21,6 +21,7 @@ class TermsandConditions(Document):
 		from frappe.types import DF
 
 		buying: DF.Check
+		copy_attachments_to_transaction: DF.Check
 		disabled: DF.Check
 		selling: DF.Check
 		terms: DF.TextEditor | None
@@ -35,7 +36,7 @@ class TermsandConditions(Document):
 
 
 @frappe.whitelist()
-def get_terms_and_conditions(template_name, doc):
+def get_terms_and_conditions(template_name: str, doc: str | dict):
 	if isinstance(doc, str):
 		doc = json.loads(doc)
 

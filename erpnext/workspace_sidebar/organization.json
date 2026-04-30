@@ -1,0 +1,102 @@
+{
+ "app": "erpnext",
+ "creation": "2026-02-24 17:39:43.793115",
+ "docstatus": 0,
+ "doctype": "Workspace Sidebar",
+ "header_icon": "organization",
+ "idx": 1,
+ "items": [
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "organization",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Company",
+   "link_to": "Company",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "book-text",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Letter Head",
+   "link_to": "Letter Head",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "file-user",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Department",
+   "link_to": "Department",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "book-user",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Branch",
+   "link_to": "Branch",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "users",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "User",
+   "link_to": "User",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "user-round-check",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Role Permissions",
+   "link_to": "permission-manager",
+   "link_type": "Page",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "mail",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Email Account",
+   "link_to": "Email Account",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-02-24 18:08:00.796746",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "module_onboarding": "Organization Onboarding",
+ "name": "Organization",
+ "owner": "Administrator",
+ "standard": 1,
+ "title": "Organization"
+}

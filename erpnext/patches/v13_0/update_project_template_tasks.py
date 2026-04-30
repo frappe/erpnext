@@ -30,15 +30,13 @@ def execute():
 			if task.subject:
 				replace_tasks = True
 				new_task = frappe.get_doc(
-					dict(
-						doctype="Task",
-						subject=task.subject,
-						start=task.start,
-						duration=task.duration,
-						task_weight=task.task_weight,
-						description=task.description,
-						is_template=1,
-					)
+					doctype="Task",
+					subject=task.subject,
+					start=task.start,
+					duration=task.duration,
+					task_weight=task.task_weight,
+					description=task.description,
+					is_template=1,
 				).insert()
 				new_tasks.append(new_task)
 

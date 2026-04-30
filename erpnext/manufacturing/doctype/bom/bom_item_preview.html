@@ -12,7 +12,10 @@
 				{{ __("Description") }}
 			</h4>
 			<div style="padding-top: 10px;">
-				{{ data.description }}
+				{% if data.is_phantom_item %}
+					<p><b>{{ __("Phantom Item") }}</b></p>
+				{% endif %}
+				<p>{{ data.description }}</p>
 			</div>
 			<hr style="margin: 15px -15px;">
 			<p>

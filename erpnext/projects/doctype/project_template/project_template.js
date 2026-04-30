@@ -19,6 +19,13 @@ frappe.ui.form.on("Project Template", {
 frappe.ui.form.on("Project Template Task", {
 	task: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
+
+		if (!row.task) {
+			row.subject = null;
+			refresh_field("tasks");
+			return;
+		}
+
 		frappe.db.get_value("Task", row.task, "subject", (value) => {
 			row.subject = value.subject;
 			refresh_field("tasks");

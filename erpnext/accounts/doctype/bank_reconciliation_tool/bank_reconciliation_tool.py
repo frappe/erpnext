@@ -1,14 +1,15 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
 import json
+from datetime import date
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
-from frappe.utils import cint, flt
+from frappe.query_builder.functions import Sum
+from frappe.utils import cint, create_batch, flt
 
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_total_allocated_amount
@@ -46,7 +47,9 @@ class BankReconciliationTool(Document):
 
 
 @frappe.whitelist()
-def get_bank_transactions(bank_account, from_date=None, to_date=None):
+def get_bank_transactions(
+	bank_account: str, from_date: str | date | None = None, to_date: str | date | None = None
+):
 	# returns bank transactions for a bank account
 	filters = []
 	filters.append(["bank_account", "=", bank_account])
@@ -56,7 +59,7 @@ def get_bank_transactions(bank_account, from_date=None, to_date=None):
 		filters.append(["date", "<=", to_date])
 	if from_date:
 		filters.append(["date", ">=", from_date])
-	transactions = frappe.get_all(
+	transactions = frappe.get_list(
 		"Bank Transaction",
 		fields=[
 			"date",
@@ -79,8 +82,9 @@ def get_bank_transactions(bank_account, from_date=None, to_date=None):
 
 
 @frappe.whitelist()
-def get_account_balance(bank_account, till_date, company):
+def get_account_balance(bank_account: str, till_date: str | date, company: str):
 	# returns account balance till the specified date
+	frappe.has_permission("Bank Account", "read", bank_account, throw=True)
 	account = frappe.db.get_value("Bank Account", bank_account, "account")
 	filters = frappe._dict(
 		{
@@ -105,7 +109,9 @@ def get_account_balance(bank_account, till_date, company):
 
 
 @frappe.whitelist()
-def update_bank_transaction(bank_transaction_name, reference_number, party_type=None, party=None):
+def update_bank_transaction(
+	bank_transaction_name: str, reference_number: str, party_type: str | None = None, party: str | None = None
+):
 	# updates bank transaction based on the new parameters provided by the user from Vouchers
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	bank_transaction.reference_number = reference_number
@@ -134,16 +140,16 @@ def update_bank_transaction(bank_transaction_name, reference_number, party_type=
 
 @frappe.whitelist()
 def create_journal_entry_bts(
-	bank_transaction_name,
-	reference_number=None,
-	reference_date=None,
-	posting_date=None,
-	entry_type=None,
-	second_account=None,
-	mode_of_payment=None,
-	party_type=None,
-	party=None,
-	allow_edit=None,
+	bank_transaction_name: str,
+	reference_number: str | None = None,
+	reference_date: str | None = None,
+	posting_date: str | date | None = None,
+	entry_type: str | None = None,
+	second_account: str | None = None,
+	mode_of_payment: str | None = None,
+	party_type: str | None = None,
+	party: str | None = None,
+	allow_edit: bool | None = None,
 ):
 	# Create a new journal entry based on the bank transaction
 	bank_transaction = frappe.db.get_values(
@@ -293,16 +299,17 @@ def create_journal_entry_bts(
 
 @frappe.whitelist()
 def create_payment_entry_bts(
-	bank_transaction_name,
-	reference_number=None,
-	reference_date=None,
-	party_type=None,
-	party=None,
-	posting_date=None,
-	mode_of_payment=None,
-	project=None,
-	cost_center=None,
-	allow_edit=None,
+	bank_transaction_name: str,
+	reference_number: str | None = None,
+	reference_date: str | None = None,
+	party_type: str | None = None,
+	party: str | None = None,
+	posting_date: str | None = None,
+	mode_of_payment: str | None = None,
+	project: str | None = None,
+	cost_center: str | None = None,
+	allow_edit: bool | None = None,
+	company_bank_account: str | None = None,
 ):
 	# Create a new payment entry based on the bank transaction
 	bank_transaction = frappe.db.get_values(
@@ -344,6 +351,9 @@ def create_payment_entry_bts(
 	pe.project = project
 	pe.cost_center = cost_center
 
+	if company_bank_account:
+		pe.bank_account = company_bank_account
+
 	pe.validate()
 
 	if allow_edit:
@@ -366,28 +376,27 @@ def create_payment_entry_bts(
 
 @frappe.whitelist()
 def auto_reconcile_vouchers(
-	bank_account,
-	from_date=None,
-	to_date=None,
-	filter_by_reference_date=None,
-	from_reference_date=None,
-	to_reference_date=None,
+	bank_account: str,
+	from_date: str | date | None = None,
+	to_date: str | date | None = None,
+	filter_by_reference_date: bool | None = None,
+	from_reference_date: bool | None = None,
+	to_reference_date: str | None = None,
 ):
-	frappe.flags.auto_reconcile_vouchers = True
-
 	bank_transactions = get_bank_transactions(bank_account)
 
 	if len(bank_transactions) > 10:
-		frappe.enqueue(
-			method="erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.start_auto_reconcile",
-			queue="long",
-			bank_transactions=bank_transactions,
-			from_date=from_date,
-			to_date=to_date,
-			filter_by_reference_date=filter_by_reference_date,
-			from_reference_date=from_reference_date,
-			to_reference_date=to_reference_date,
-		)
+		for bank_transaction_batch in create_batch(bank_transactions, 1000):
+			frappe.enqueue(
+				method="erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.start_auto_reconcile",
+				queue="long",
+				bank_transactions=bank_transaction_batch,
+				from_date=from_date,
+				to_date=to_date,
+				filter_by_reference_date=filter_by_reference_date,
+				from_reference_date=from_reference_date,
+				to_reference_date=to_reference_date,
+			)
 		frappe.msgprint(_("Auto Reconciliation has started in the background"))
 	else:
 		start_auto_reconcile(
@@ -403,11 +412,13 @@ def auto_reconcile_vouchers(
 def start_auto_reconcile(
 	bank_transactions, from_date, to_date, filter_by_reference_date, from_reference_date, to_reference_date
 ):
+	frappe.flags.auto_reconcile_vouchers = True
+
 	reconciled, partially_reconciled = set(), set()
 	for transaction in bank_transactions:
 		linked_payments = get_linked_payments(
 			transaction.name,
-			["payment_entry", "journal_entry"],
+			["payment_entry", "journal_entry", "sales_invoice"],
 			from_date,
 			to_date,
 			filter_by_reference_date,
@@ -465,7 +476,7 @@ def get_auto_reconcile_message(partially_reconciled, reconciled):
 
 
 @frappe.whitelist()
-def reconcile_vouchers(bank_transaction_name, vouchers):
+def reconcile_vouchers(bank_transaction_name: str, vouchers: str):
 	# updated clear date of all the vouchers based on the bank transaction
 	vouchers = json.loads(vouchers)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
@@ -481,13 +492,13 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 
 @frappe.whitelist()
 def get_linked_payments(
-	bank_transaction_name,
-	document_types=None,
-	from_date=None,
-	to_date=None,
-	filter_by_reference_date=None,
-	from_reference_date=None,
-	to_reference_date=None,
+	bank_transaction_name: str,
+	document_types: str | list[str] | None = None,
+	from_date: str | date | None = None,
+	to_date: str | date | None = None,
+	filter_by_reference_date: bool | None = None,
+	from_reference_date: bool | None = None,
+	to_reference_date: str | None = None,
 ):
 	# get all matching payments for a bank transaction
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
@@ -517,14 +528,21 @@ def subtract_allocations(gl_account, vouchers):
 	voucher_allocated_amounts = get_total_allocated_amount(voucher_docs)
 
 	for voucher in vouchers:
-		rows = voucher_allocated_amounts.get((voucher.get("doctype"), voucher.get("name"))) or []
-		filtered_row = list(filter(lambda row: row.get("gl_account") == gl_account, rows))
-
-		if amount := None if not filtered_row else filtered_row[0]["total"]:
+		if amount := get_allocated_amount(voucher_allocated_amounts, voucher, gl_account):
 			voucher["paid_amount"] -= amount
 
 		copied.append(voucher)
 	return copied
+
+
+def get_allocated_amount(voucher_allocated_amounts, voucher, gl_account):
+	if not (voucher_details := voucher_allocated_amounts.get((voucher.get("doctype"), voucher.get("name")))):
+		return
+
+	if not (row := voucher_details.get(gl_account)):
+		return
+
+	return row.get("total")
 
 
 def check_matching(
@@ -657,7 +675,7 @@ def get_matching_queries(
 		queries.append(query)
 
 	if transaction.deposit > 0.0 and "sales_invoice" in document_types:
-		query = get_si_matching_query(exact_match, currency, common_filters)
+		query = get_si_matching_query(exact_match, currency, common_filters, transaction)
 		queries.append(query)
 
 	if transaction.withdrawal > 0.0:
@@ -796,26 +814,20 @@ def get_je_matching_query(
 	je = frappe.qb.DocType("Journal Entry")
 	jea = frappe.qb.DocType("Journal Entry Account")
 
-	ref_condition = je.cheque_no == transaction.reference_number
-	ref_rank = frappe.qb.terms.Case().when(ref_condition, 1).else_(0)
-
 	amount_field = f"{cr_or_dr}_in_account_currency"
-	amount_equality = getattr(jea, amount_field) == transaction.unallocated_amount
-	amount_rank = frappe.qb.terms.Case().when(amount_equality, 1).else_(0)
 
 	filter_by_date = je.posting_date.between(from_date, to_date)
 	if cint(filter_by_reference_date):
 		filter_by_date = je.cheque_date.between(from_reference_date, to_reference_date)
 
-	query = (
+	subquery = (
 		frappe.qb.from_(jea)
 		.join(je)
 		.on(jea.parent == je.name)
 		.select(
-			(ref_rank + amount_rank + 1).as_("rank"),
+			Sum(getattr(jea, amount_field)).as_("paid_amount"),
 			ConstantColumn("Journal Entry").as_("doctype"),
 			je.name,
-			getattr(jea, amount_field).as_("paid_amount"),
 			je.cheque_no.as_("reference_no"),
 			je.cheque_date.as_("reference_date"),
 			je.pay_to_recd_from.as_("party"),
@@ -827,21 +839,37 @@ def get_je_matching_query(
 		.where(je.voucher_type != "Opening Entry")
 		.where(je.clearance_date.isnull())
 		.where(jea.account == common_filters.bank_account)
-		.where(amount_equality if exact_match else getattr(jea, amount_field) > 0.0)
 		.where(filter_by_date)
+		.groupby(je.name)
 		.orderby(je.cheque_date if cint(filter_by_reference_date) else je.posting_date)
 	)
 
 	if frappe.flags.auto_reconcile_vouchers is True:
-		query = query.where(ref_condition)
+		subquery = subquery.where(je.cheque_no == transaction.reference_number)
+
+	ref_rank = frappe.qb.terms.Case().when(subquery.reference_no == transaction.reference_number, 1).else_(0)
+	amount_equality = subquery.paid_amount == transaction.unallocated_amount
+	amount_rank = frappe.qb.terms.Case().when(amount_equality, 1).else_(0)
+
+	query = (
+		frappe.qb.from_(subquery)
+		.select(
+			"*",
+			(ref_rank + amount_rank + 1).as_("rank"),
+		)
+		.where(amount_equality if exact_match else subquery.paid_amount > 0.0)
+	)
 
 	return query
 
 
-def get_si_matching_query(exact_match, currency, common_filters):
+def get_si_matching_query(exact_match, currency, common_filters, transaction):
 	# get matching sales invoice query
 	si = frappe.qb.DocType("Sales Invoice")
 	sip = frappe.qb.DocType("Sales Invoice Payment")
+
+	ref_condition = sip.reference_no == transaction.reference_number
+	ref_rank = frappe.qb.terms.Case().when(ref_condition, 1).else_(0)
 
 	amount_equality = sip.amount == common_filters.amount
 	amount_rank = frappe.qb.terms.Case().when(amount_equality, 1).else_(0)
@@ -855,11 +883,11 @@ def get_si_matching_query(exact_match, currency, common_filters):
 		.join(si)
 		.on(sip.parent == si.name)
 		.select(
-			(party_rank + amount_rank + 1).as_("rank"),
+			(ref_rank + party_rank + amount_rank + 1).as_("rank"),
 			ConstantColumn("Sales Invoice").as_("doctype"),
 			si.name,
 			sip.amount.as_("paid_amount"),
-			ConstantColumn("").as_("reference_no"),
+			sip.reference_no,
 			ConstantColumn("").as_("reference_date"),
 			si.customer.as_("party"),
 			ConstantColumn("Customer").as_("party_type"),
@@ -872,6 +900,9 @@ def get_si_matching_query(exact_match, currency, common_filters):
 		.where(amount_condition)
 		.where(si.currency == currency)
 	)
+
+	if frappe.flags.auto_reconcile_vouchers is True:
+		query = query.where(ref_condition)
 
 	return query
 

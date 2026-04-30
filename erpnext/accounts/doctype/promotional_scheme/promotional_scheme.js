@@ -21,10 +21,12 @@ frappe.ui.form.on("Promotional Scheme", {
 
 	selling: function (frm) {
 		frm.trigger("set_options_for_applicable_for");
+		frm.toggle_enable("buying", !frm.doc.selling);
 	},
 
 	buying: function (frm) {
 		frm.trigger("set_options_for_applicable_for");
+		frm.toggle_enable("selling", !frm.doc.buying);
 	},
 
 	set_options_for_applicable_for: function (frm) {
@@ -46,7 +48,7 @@ frappe.ui.form.on("Promotional Scheme", {
 
 		set_field_options("applicable_for", options.join("\n"));
 
-		if (!in_list(options, applicable_for)) applicable_for = null;
+		if (!options.includes(applicable_for)) applicable_for = null;
 		frm.set_value("applicable_for", applicable_for);
 	},
 

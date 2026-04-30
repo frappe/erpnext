@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe import _
 
 from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 from erpnext.manufacturing.doctype.routing.test_routing import create_routing, setup_bom
@@ -10,20 +10,10 @@ from erpnext.manufacturing.doctype.workstation.workstation import (
 	WorkstationHolidayError,
 	check_if_within_operating_hours,
 )
-
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Warehouse"]
-
-
-class UnitTestWorkstation(UnitTestCase):
-	"""
-	Unit tests for Workstation.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestWorkstation(IntegrationTestCase):
+class TestWorkstation(ERPNextTestSuite):
 	def test_validate_timings(self):
 		check_if_within_operating_hours(
 			"_Test Workstation 1", "Operation 1", "2013-02-02 11:00:00", "2013-02-02 19:00:00"
@@ -84,14 +74,22 @@ class TestWorkstation(IntegrationTestCase):
 		bom_doc = setup_bom(item_code="_Testing Item", routing=routing_doc.name, currency="INR")
 		w1 = frappe.get_doc("Workstation", "_Test Workstation A")
 		# resets values
-		w1.hour_rate_rent = 300
-		w1.hour_rate_labour = 0
+		for row in w1.workstation_costs:
+			if row.operating_component == _("Rent"):
+				row.operating_cost = 300
+				break
+
 		w1.save()
 		bom_doc.update_cost()
 		bom_doc.reload()
 		self.assertEqual(w1.hour_rate, 300)
 		self.assertEqual(bom_doc.operations[0].hour_rate, 300)
-		w1.hour_rate_rent = 250
+
+		for row in w1.workstation_costs:
+			if row.operating_component == _("Rent"):
+				row.operating_cost = 250
+				break
+
 		w1.save()
 		# updating after setting new rates in workstations
 		bom_doc.update_cost()
@@ -111,8 +109,24 @@ def make_workstation(*args, **kwargs):
 	workstation_name = args.workstation_name or args.workstation
 	if not frappe.db.exists("Workstation", workstation_name):
 		doc = frappe.get_doc({"doctype": "Workstation", "workstation_name": workstation_name})
-		doc.hour_rate_rent = args.get("hour_rate_rent")
-		doc.hour_rate_labour = args.get("hour_rate_labour")
+		if args.get("hour_rate_rent"):
+			doc.append(
+				"workstation_costs",
+				{
+					"operating_component": _("Rent"),
+					"operating_cost": args.get("hour_rate_rent"),
+				},
+			)
+
+		if args.get("hour_rate_labour"):
+			doc.append(
+				"workstation_costs",
+				{
+					"operating_component": _("Wages"),
+					"operating_cost": args.get("hour_rate_labour"),
+				},
+			)
+
 		doc.workstation_type = args.get("workstation_type")
 		doc.insert()
 

@@ -36,6 +36,7 @@ class WorkOrderOperation(Document):
 		planned_operating_cost: DF.Currency
 		planned_start_time: DF.Datetime | None
 		process_loss_qty: DF.Float
+		quality_inspection_required: DF.Check
 		sequence_id: DF.Int
 		skip_material_transfer: DF.Check
 		source_warehouse: DF.Link | None

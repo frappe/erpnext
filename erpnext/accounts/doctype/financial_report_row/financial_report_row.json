@@ -1,0 +1,187 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-06 09:39:46.503678",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "reference_code",
+  "display_name",
+  "indentation_level",
+  "data_source",
+  "balance_type",
+  "column_break_hxqu",
+  "fieldtype",
+  "color",
+  "bold_text",
+  "italic_text",
+  "hidden_calculation",
+  "hide_when_empty",
+  "reverse_sign",
+  "include_in_charts",
+  "section_break_ornw",
+  "column_break_asfe",
+  "advanced_filtering",
+  "filters_editor",
+  "calculation_formula",
+  "section_break_pvro",
+  "formula_description"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "description": "Code to reference this line in formulas (e.g., REV100, EXP200, ASSET100)",
+   "fieldname": "reference_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Line Reference"
+  },
+  {
+   "description": "Text displayed on the financial statement (e.g., 'Total Revenue', 'Cash and Cash Equivalents')",
+   "fieldname": "display_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Display Name"
+  },
+  {
+   "columns": 1,
+   "description": "Indentation level: 0 = Main heading, 1 = Sub-category, 2 = Individual accounts, etc.",
+   "fieldname": "indentation_level",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Indent Level"
+  },
+  {
+   "description": "How this line gets its data",
+   "fieldname": "data_source",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Data Source",
+   "options": "\nAccount Data\nCalculated Amount\nCustom API\nBlank Line\nColumn Break\nSection Break"
+  },
+  {
+   "depends_on": "eval:doc.data_source == 'Account Data'",
+   "description": "Opening Balance = Start of period, Closing Balance = End of period, Period Movement = Net change during period",
+   "fieldname": "balance_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Balance Type",
+   "mandatory_depends_on": "eval:doc.data_source == 'Account Data'",
+   "options": "\nOpening Balance\nClosing Balance\nPeriod Movement (Debits - Credits)"
+  },
+  {
+   "fieldname": "column_break_hxqu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Bold text for emphasis (totals, major headings)",
+   "fieldname": "bold_text",
+   "fieldtype": "Check",
+   "label": "Bold Text"
+  },
+  {
+   "default": "0",
+   "description": "Italic text for subtotals or notes",
+   "fieldname": "italic_text",
+   "fieldtype": "Check",
+   "label": "Italic Text"
+  },
+  {
+   "default": "0",
+   "description": "Calculate but don't show on final report",
+   "fieldname": "hidden_calculation",
+   "fieldtype": "Check",
+   "label": "Hidden Line (Internal Use Only)"
+  },
+  {
+   "default": "0",
+   "description": "Hide this line if amount is zero",
+   "fieldname": "hide_when_empty",
+   "fieldtype": "Check",
+   "label": "Hide If Zero"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "description": "Show negative values as positive (for expenses in P&L)",
+   "fieldname": "reverse_sign",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Reverse Sign"
+  },
+  {
+   "fieldname": "section_break_ornw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval: (doc.data_source === \"Account Data\" && doc.advanced_filtering) || [\"Calculated Amount\", \"Custom API\"].includes(doc.data_source);\n",
+   "fieldname": "calculation_formula",
+   "fieldtype": "Code",
+   "label": "Formula or Account Filter",
+   "mandatory_depends_on": "eval:doc.data_source != 'Blank Line' && doc.data_source != 'Column Break' && doc.data_source != 'Section Break'"
+  },
+  {
+   "fieldname": "formula_description",
+   "fieldtype": "HTML"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, this row's values will be displayed on financial charts",
+   "fieldname": "include_in_charts",
+   "fieldtype": "Check",
+   "label": "Include in Charts"
+  },
+  {
+   "description": "Color to highlight values (e.g., red for exceptions)",
+   "fieldname": "color",
+   "fieldtype": "Color",
+   "label": "Color"
+  },
+  {
+   "description": "How to format and present values in the financial report (only if different from column fieldtype)",
+   "fieldname": "fieldtype",
+   "fieldtype": "Select",
+   "label": "Value Type",
+   "options": "\nCurrency\nFloat\nInt\nPercent"
+  },
+  {
+   "depends_on": "eval: doc.data_source === \"Account Data\" && !doc.advanced_filtering",
+   "fieldname": "filters_editor",
+   "fieldtype": "HTML"
+  },
+  {
+   "depends_on": "eval: ![\"Blank Line\", \"Column Break\", \"Section Break\"].includes(doc.data_source);",
+   "fieldname": "column_break_asfe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.data_source === \"Account Data\"",
+   "description": "Use <strong>Python</strong> filters to get Accounts",
+   "fieldname": "advanced_filtering",
+   "fieldtype": "Check",
+   "label": "Advanced Filtering",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "section_break_pvro",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-10-14 09:23:27.208072",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Financial Report Row",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

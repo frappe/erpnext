@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from typing import Any
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -56,9 +58,13 @@ class QualityInspection(Document):
 		remarks: DF.Text | None
 		report_date: DF.Date
 		sample_size: DF.Float
-		status: DF.Literal["", "Accepted", "Rejected"]
+		status: DF.Literal["", "Accepted", "Rejected", "Cancelled"]
 		verified_by: DF.Data | None
+
 	# end: auto-generated types
+	def on_discard(self):
+		self.update_qc_reference()
+		self.db_set("status", "Cancelled")
 
 	def validate(self):
 		if not self.readings and self.item_code:
@@ -97,53 +103,32 @@ class QualityInspection(Document):
 		if self.reference_type == "Stock Entry":
 			doctype = "Stock Entry Detail"
 
-		child_row_references = frappe.get_all(
-			doctype,
-			filters={"parent": self.reference_name, "item_code": self.item_code},
-			pluck="name",
-		)
+		child_doc = frappe.qb.DocType(doctype)
+		qi_doc = frappe.qb.DocType("Quality Inspection")
 
-		if not child_row_references:
-			return
+		child_row_references = (
+			frappe.qb.from_(child_doc)
+			.left_join(qi_doc)
+			.on(child_doc.name == qi_doc.child_row_reference)
+			.select(child_doc.name)
+			.where(
+				(child_doc.item_code == self.item_code)
+				& (child_doc.parent == self.reference_name)
+				& (child_doc.docstatus < 2)
+				& (qi_doc.name.isnull())
+			)
+			.orderby(child_doc.idx)
+		).run(pluck=True)
 
-		if len(child_row_references) == 1:
+		if len(child_row_references):
 			self.child_row_reference = child_row_references[0]
-		else:
-			self.distribute_child_row_reference(child_row_references)
-
-	def distribute_child_row_reference(self, child_row_references):
-		quality_inspections = frappe.get_all(
-			"Quality Inspection",
-			filters={
-				"reference_name": self.reference_name,
-				"item_code": self.item_code,
-				"docstatus": ("<", 2),
-			},
-			fields=["name", "child_row_reference", "docstatus"],
-			order_by="child_row_reference desc",
-		)
-
-		for row in quality_inspections:
-			if not child_row_references:
-				break
-
-			if row.child_row_reference and row.child_row_reference in child_row_references:
-				child_row_references.remove(row.child_row_reference)
-				continue
-
-			if row.docstatus == 1:
-				continue
-
-			if row.name == self.name:
-				self.child_row_reference = child_row_references[0]
-			else:
-				frappe.db.set_value(
-					"Quality Inspection", row.name, "child_row_reference", child_row_references[0]
-				)
-
-			child_row_references.remove(child_row_references[0])
 
 	def validate_inspection_required(self):
+		if frappe.db.get_single_value(
+			"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
+		):
+			return
+
 		if self.reference_type in ["Purchase Receipt", "Purchase Invoice"] and not frappe.get_cached_value(
 			"Item", self.item_code, "inspection_required_before_purchase"
 		):
@@ -181,6 +166,9 @@ class QualityInspection(Document):
 			child = self.append("readings", {})
 			child.update(d)
 			child.status = "Accepted"
+			child.parameter_group = frappe.get_value(
+				"Quality Inspection Parameter", d.specification, "parameter_group"
+			)
 
 	@frappe.whitelist()
 	def get_quality_inspection_template(self):
@@ -194,8 +182,20 @@ class QualityInspection(Document):
 		self.quality_inspection_template = template
 		self.get_item_specification_details()
 
+	def on_update(self):
+		action_if_qi_in_draft = frappe.db.get_single_value(
+			"Stock Settings", "action_if_quality_inspection_is_not_submitted"
+		)
+
+		if not action_if_qi_in_draft or action_if_qi_in_draft == "Warn":
+			self.update_qc_reference()
+
 	def on_submit(self):
-		self.update_qc_reference()
+		if (
+			frappe.db.get_single_value("Stock Settings", "action_if_quality_inspection_is_not_submitted")
+			== "Stop"
+		):
+			self.update_qc_reference()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = "Serial and Batch Bundle"
@@ -203,15 +203,15 @@ class QualityInspection(Document):
 		self.update_qc_reference()
 
 	def on_trash(self):
-		self.update_qc_reference()
+		self.update_qc_reference(remove_reference=True)
 
 	def validate_readings_status_mandatory(self):
 		for reading in self.readings:
 			if not reading.status:
 				frappe.throw(_("Row #{0}: Status is mandatory").format(reading.idx))
 
-	def update_qc_reference(self):
-		quality_inspection = self.name if self.docstatus == 1 else ""
+	def update_qc_reference(self, remove_reference=False):
+		quality_inspection = self.name if self.docstatus < 2 and not remove_reference else ""
 
 		if self.reference_type == "Job Card":
 			if self.reference_name:
@@ -241,7 +241,7 @@ class QualityInspection(Document):
 					)
 				)
 
-				if self.batch_no and self.docstatus == 1:
+				if self.batch_no and self.docstatus < 2:
 					query = query.where(child_doc.batch_no == self.batch_no)
 
 				if self.docstatus == 2:  # if cancel, then remove qi link wherever same name
@@ -280,7 +280,9 @@ class QualityInspection(Document):
 
 	def set_status_based_on_acceptance_values(self, reading):
 		if not cint(reading.numeric):
-			result = reading.get("reading_value") == reading.get("value")
+			reading_value = reading.get("reading_value") or ""
+			value = reading.get("value") or ""
+			result = reading_value == value
 		else:
 			# numeric readings
 			result = self.min_max_criteria_passed(reading)
@@ -289,9 +291,11 @@ class QualityInspection(Document):
 
 	def min_max_criteria_passed(self, reading):
 		"""Determine whether all readings fall in the acceptable range."""
+		has_reading = False
 		for i in range(1, 11):
 			reading_value = reading.get("reading_" + str(i))
 			if reading_value is not None and reading_value.strip():
+				has_reading = True
 				result = (
 					flt(reading.get("min_value"))
 					<= parse_float(reading_value)
@@ -299,7 +303,7 @@ class QualityInspection(Document):
 				)
 				if not result:
 					return False
-		return True
+		return has_reading
 
 	def set_status_based_on_acceptance_formula(self, reading):
 		if not reading.acceptance_formula:
@@ -362,79 +366,88 @@ class QualityInspection(Document):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_query(doctype, txt, searchfield, start, page_len, filters):
-	from frappe.desk.reportview import get_match_cond
+def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page_len: int, filters: dict):
+	reference_doctype = filters.get("reference_doctype")
 
-	from_doctype = cstr(filters.get("from"))
-	if not from_doctype or not frappe.db.exists("DocType", from_doctype):
+	if not reference_doctype:
 		return []
-
-	mcond = get_match_cond(from_doctype)
-	cond, qi_condition = "", "and (quality_inspection is null or quality_inspection = '')"
-
-	if filters.get("parent"):
-		if (
-			from_doctype in ["Purchase Invoice Item", "Purchase Receipt Item"]
-			and filters.get("inspection_type") != "In Process"
-		):
-			cond = """and item_code in (select name from `tabItem` where
-				inspection_required_before_purchase = 1)"""
-		elif (
-			from_doctype in ["Sales Invoice Item", "Delivery Note Item"]
-			and filters.get("inspection_type") != "In Process"
-		):
-			cond = """and item_code in (select name from `tabItem` where
-				inspection_required_before_delivery = 1)"""
-		elif from_doctype == "Stock Entry Detail":
-			cond = """and s_warehouse is null"""
-
-		if from_doctype in ["Supplier Quotation Item"]:
-			qi_condition = ""
-
-		return frappe.db.sql(
-			f"""
-				SELECT item_code
-				FROM `tab{from_doctype}`
-				WHERE parent=%(parent)s and docstatus < 2 and item_code like %(txt)s
-				{qi_condition} {cond} {mcond}
-				ORDER BY item_code limit {cint(page_len)} offset {cint(start)}
-			""",
-			{"parent": filters.get("parent"), "txt": "%%%s%%" % txt},
+	elif reference_doctype == "Job Card":
+		production_item, item_name = frappe.get_value(
+			"Job Card", filters.get("reference_name"), ["production_item", "item_name"]
 		)
+		return ((production_item, item_name),)
+	else:
+		my_filters = [
+			["items.parent", "=", filters.get("reference_name")],
+			"and",
+			["items.item_code", "like", f"%{txt}%"],
+			"and",
+			["docstatus", "<", 2],
+			"and",
+			["items.quality_inspection", "is", "not set"],
+		]
 
-	elif filters.get("reference_name"):
-		return frappe.db.sql(
-			f"""
-				SELECT production_item
-				FROM `tab{from_doctype}`
-				WHERE name = %(reference_name)s and docstatus < 2 and production_item like %(txt)s
-				{qi_condition} {cond} {mcond}
-				ORDER BY production_item
-				limit {cint(page_len)} offset {cint(start)}
-			""",
-			{"reference_name": filters.get("reference_name"), "txt": "%%%s%%" % txt},
-		)
+		if reference_doctype == "Stock Entry":
+			my_filters.extend(
+				[
+					"and",
+					["items.t_warehouse", "is", "not set"],
+				]
+			)
+		elif filters.get("inspection_type") != "In Process":
+			my_filters.extend(
+				[
+					"and",
+					[
+						"items.item_code",
+						"in",
+						frappe.get_list(
+							"Item",
+							filters={
+								"inspection_required_before_purchase"
+								if filters.get("inspection_type") == "Incoming"
+								else "inspection_required_before_delivery": 1
+							},
+							pluck="name",
+						),
+					],
+				]
+			)
+
+		return frappe.get_query(
+			reference_doctype,
+			fields=["items.item_code, items.item_name"],
+			filters=my_filters,
+			offset=start,
+			limit=page_len,
+			order_by="items.item_code",
+			ignore_permissions=False,
+			distinct=True,
+		).run()
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def quality_inspection_query(doctype, txt, searchfield, start, page_len, filters):
+def quality_inspection_query(
+	doctype: Any, txt: str | None, searchfield: Any, start: int, page_len: int, filters: dict
+):
 	return frappe.get_all(
 		"Quality Inspection",
 		limit_start=start,
 		limit_page_length=page_len,
 		filters={
-			"docstatus": 1,
+			"docstatus": ("<", 2),
 			"name": ("like", "%%%s%%" % txt),
 			"item_code": filters.get("item_code"),
 			"reference_name": ("in", [filters.get("reference_name", ""), ""]),
+			"child_row_reference": ("in", [filters.get("child_row_reference", ""), ""]),
 		},
 		as_list=1,
 	)
 
 
 @frappe.whitelist()
-def make_quality_inspection(source_name, target_doc=None):
+def make_quality_inspection(source_name: str, target_doc: Document | str | None = None):
 	def postprocess(source, doc):
 		doc.inspected_by = frappe.session.user
 		doc.get_quality_inspection_template()

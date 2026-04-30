@@ -31,8 +31,8 @@ rfq = class rfq {
 		var me = this;
 		$('.rfq-items').on("change", ".rfq-qty", function(){
 			me.idx = parseFloat($(this).attr('data-idx'));
-			me.qty = parseFloat($(this).val()) || 0;
-			me.rate = parseFloat($(repl('.rfq-rate[data-idx=%(idx)s]',{'idx': me.idx})).val());
+			me.qty = parseFloat(flt($(this).val())) || 0;
+			me.rate = parseFloat(flt($(repl('.rfq-rate[data-idx=%(idx)s]',{'idx': me.idx})).val()));
 			me.update_qty_rate();
 			$(this).val(format_number(me.qty, doc.number_format, 2));
 		})
@@ -42,8 +42,8 @@ rfq = class rfq {
 		var me = this;
 		$(".rfq-items").on("change", ".rfq-rate", function(){
 			me.idx = parseFloat($(this).attr('data-idx'));
-			me.rate = parseFloat($(this).val()) || 0;
-			me.qty = parseFloat($(repl('.rfq-qty[data-idx=%(idx)s]',{'idx': me.idx})).val());
+			me.rate = parseFloat(flt($(this).val())) || 0;
+			me.qty = parseFloat(flt($(repl('.rfq-qty[data-idx=%(idx)s]',{'idx': me.idx})).val()));
 			me.update_qty_rate();
 			$(this).val(format_number(me.rate, doc.number_format, 2));
 		})

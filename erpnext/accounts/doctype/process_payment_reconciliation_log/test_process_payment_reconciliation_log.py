@@ -2,17 +2,10 @@
 # See license.txt
 
 # import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
 
 
-class UnitTestProcessPaymentReconciliationLog(UnitTestCase):
-	"""
-	Unit tests for ProcessPaymentReconciliationLog.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestProcessPaymentReconciliationLog(IntegrationTestCase):
+class TestProcessPaymentReconciliationLog(ERPNextTestSuite):
 	pass

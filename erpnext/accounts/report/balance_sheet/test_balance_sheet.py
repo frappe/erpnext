@@ -2,22 +2,17 @@
 # MIT License. See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 from frappe.utils.data import today
 
 from erpnext.accounts.report.balance_sheet.balance_sheet import execute
+from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company 6"
 COMPANY_SHORT_NAME = "_TC6"
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Company"]
 
-
-class TestBalanceSheet(IntegrationTestCase):
+class TestBalanceSheet(ERPNextTestSuite):
 	def test_balance_sheet(self):
-		frappe.db.sql(f"delete from `tabJournal Entry` where company='{COMPANY}'")
-		frappe.db.sql(f"delete from `tabGL Entry` where company='{COMPANY}'")
-
 		create_account("VAT Liabilities", f"Duties and Taxes - {COMPANY_SHORT_NAME}", COMPANY)
 		create_account("Advance VAT Paid", f"Duties and Taxes - {COMPANY_SHORT_NAME}", COMPANY)
 		create_account("My Bank", f"Bank Accounts - {COMPANY_SHORT_NAME}", COMPANY)

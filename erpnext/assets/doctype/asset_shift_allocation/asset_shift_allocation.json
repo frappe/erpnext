@@ -12,6 +12,7 @@
   "finance_book",
   "amended_from",
   "depreciation_schedule_section",
+  "column_break_jomc",
   "depreciation_schedule"
  ],
  "fields": [
@@ -57,7 +58,9 @@
    "fieldname": "depreciation_schedule",
    "fieldtype": "Table",
    "label": "Depreciation Schedule",
-   "options": "Depreciation Schedule"
+   "no_copy": 1,
+   "options": "Depreciation Schedule",
+   "read_only": 1
   },
   {
    "fieldname": "naming_series",
@@ -65,12 +68,16 @@
    "label": "Naming Series",
    "options": "ACC-ASA-.YYYY.-",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_jomc",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:06:35.732191",
+ "modified": "2025-01-10 16:25:31.397325",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Shift Allocation",

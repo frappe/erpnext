@@ -16,12 +16,15 @@
   "stock_uom",
   "price_list_defaults_section",
   "auto_insert_price_list_rate_if_missing",
+  "update_price_list_based_on",
   "column_break_12",
   "update_existing_price_list_rate",
   "conversion_factor_section",
   "allow_to_edit_stock_uom_qty_for_sales",
   "column_break_lznj",
   "allow_to_edit_stock_uom_qty_for_purchase",
+  "section_break_ylhd",
+  "allow_uom_with_conversion_rate_defined_in_item",
   "stock_validations_tab",
   "section_break_9",
   "over_delivery_receipt_allowance",
@@ -33,19 +36,9 @@
   "show_barcode_field",
   "clean_description_html",
   "allow_internal_transfer_at_arms_length_price",
-  "quality_inspection_settings_section",
-  "action_if_quality_inspection_is_not_submitted",
-  "column_break_23",
-  "action_if_quality_inspection_is_rejected",
-  "stock_reservation_tab",
-  "enable_stock_reservation",
-  "auto_reserve_stock",
-  "column_break_rx3e",
-  "allow_partial_reservation",
-  "auto_reserve_stock_for_sales_order_on_purchase",
-  "serial_and_batch_reservation_section",
-  "auto_reserve_serial_and_batch",
+  "validate_material_transfer_warehouses",
   "serial_and_batch_item_settings_tab",
+  "enable_serial_and_batch_no_for_item",
   "section_break_7",
   "allow_existing_serial_no",
   "do_not_use_batchwise_valuation",
@@ -55,21 +48,32 @@
   "disable_serial_no_and_batch_selector",
   "use_serial_batch_fields",
   "do_not_update_serial_batch_on_creation_of_auto_bundle",
-  "serial_and_batch_bundle_section",
-  "set_serial_and_batch_bundle_naming_based_on_naming_series",
+  "allow_negative_stock_for_batch",
   "section_break_gnhq",
+  "set_serial_and_batch_bundle_naming_based_on_naming_series",
   "use_naming_series",
   "column_break_wslv",
   "naming_series_prefix",
+  "stock_reservation_tab",
+  "enable_stock_reservation",
+  "auto_reserve_stock",
+  "column_break_rx3e",
+  "allow_partial_reservation",
+  "auto_reserve_stock_for_sales_order_on_purchase",
+  "serial_and_batch_reservation_section",
+  "auto_reserve_serial_and_batch",
+  "quality_tab",
+  "quality_inspection_settings_section",
+  "action_if_quality_inspection_is_not_submitted",
+  "column_break_23",
+  "action_if_quality_inspection_is_rejected",
+  "section_break_uiau",
+  "allow_to_make_quality_inspection_after_purchase_or_delivery",
   "stock_planning_tab",
   "auto_material_request",
   "auto_indent",
   "column_break_27",
   "reorder_email_notify",
-  "inter_warehouse_transfer_settings_section",
-  "allow_from_dn",
-  "column_break_31",
-  "allow_from_pr",
   "stock_closing_tab",
   "control_historical_stock_transactions_section",
   "stock_frozen_upto",
@@ -150,6 +154,7 @@
    "label": "Convert Item Description to Clean HTML in Transactions"
   },
   {
+   "depends_on": "enable_serial_and_batch_no_for_item",
    "fieldname": "section_break_7",
    "fieldtype": "Section Break",
    "label": "Serial & Batch Item Settings"
@@ -217,23 +222,6 @@
    "label": "Naming Series Prefix"
   },
   {
-   "fieldname": "inter_warehouse_transfer_settings_section",
-   "fieldtype": "Section Break",
-   "label": "Inter Warehouse Transfer Settings"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_from_dn",
-   "fieldtype": "Check",
-   "label": "Allow Material Transfer from Delivery Note to Sales Invoice"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_from_pr",
-   "fieldtype": "Check",
-   "label": "Allow Material Transfer from Purchase Receipt to Purchase Invoice"
-  },
-  {
    "description": "If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.",
    "fieldname": "role_allowed_to_create_edit_back_dated_transactions",
    "fieldtype": "Link",
@@ -278,10 +266,6 @@
   },
   {
    "fieldname": "column_break_27",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_31",
    "fieldtype": "Column Break"
   },
   {
@@ -448,14 +432,13 @@
   },
   {
    "default": "0",
-   "description": "If enabled, the item rate won't adjust to the valuation rate during internal transfers, but accounting will still use the valuation rate.",
+   "description": "If enabled, the item rate won't adjust to the valuation rate during internal transfers, but accounting will still use the valuation rate. This will allow the user to specify a different rate for printing or taxation purposes.",
    "fieldname": "allow_internal_transfer_at_arms_length_price",
    "fieldtype": "Check",
    "label": "Allow Internal Transfers at Arm's Length Price"
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.valuation_method === \"Moving Average\"",
    "description": "If enabled, the system will use the moving average valuation method to calculate the valuation rate for the batched items and will not consider the individual batch-wise incoming rate.",
    "fieldname": "do_not_use_batchwise_valuation",
    "fieldtype": "Check",
@@ -481,23 +464,74 @@
    "label": "Auto Reserve Stock"
   },
   {
-   "fieldname": "serial_and_batch_bundle_section",
-   "fieldtype": "Section Break",
-   "label": "Serial and Batch Bundle"
-  },
-  {
    "default": "0",
    "fieldname": "set_serial_and_batch_bundle_naming_based_on_naming_series",
    "fieldtype": "Check",
    "label": "Set Serial and Batch Bundle Naming Based on Naming Series"
   },
   {
+   "depends_on": "enable_serial_and_batch_no_for_item",
    "fieldname": "section_break_gnhq",
    "fieldtype": "Section Break"
   },
   {
    "fieldname": "column_break_wslv",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ylhd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the system will allow selecting UOMs in sales and purchase transactions only if the conversion rate is set in the item master.",
+   "fieldname": "allow_uom_with_conversion_rate_defined_in_item",
+   "fieldtype": "Check",
+   "label": "Allow UOM with Conversion Rate Defined in Item"
+  },
+  {
+   "fieldname": "quality_tab",
+   "fieldtype": "Tab Break",
+   "label": "Quality"
+  },
+  {
+   "fieldname": "section_break_uiau",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_to_make_quality_inspection_after_purchase_or_delivery",
+   "fieldtype": "Check",
+   "label": "Allow to Make Quality Inspection after Purchase / Delivery"
+  },
+  {
+   "default": "Rate",
+   "depends_on": "eval: doc.auto_insert_price_list_rate_if_missing",
+   "fieldname": "update_price_list_based_on",
+   "fieldtype": "Select",
+   "label": "Update Price List Based On",
+   "mandatory_depends_on": "eval: doc.auto_insert_price_list_rate_if_missing",
+   "options": "Rate\nPrice List Rate"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the source and target warehouse in the Material Transfer Stock Entry must be different else an error will be thrown. If inventory dimensions are present, same source and target warehouse can be allowed but atleast any one of the inventory dimension fields must be different.",
+   "fieldname": "validate_material_transfer_warehouses",
+   "fieldtype": "Check",
+   "label": "Validate Material Transfer Warehouses"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the system will allow negative stock entries for the batch. But, this may lead to incorrect valuation rates, so it is recommended to avoid using this option. The system will permit negative stock only when it is caused by backdated entries and will validate and block negative stock in all other cases.",
+   "fieldname": "allow_negative_stock_for_batch",
+   "fieldtype": "Check",
+   "label": "Allow Negative Stock for Batch"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_serial_and_batch_no_for_item",
+   "fieldtype": "Check",
+   "label": "Activate Serial / Batch No for Item"
   }
  ],
  "icon": "icon-cog",
@@ -505,7 +539,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-02-28 15:08:35.938840",
+ "modified": "2026-04-14 13:51:49.545114",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
@@ -526,6 +560,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],

@@ -1,0 +1,20 @@
+{
+ "action": "Go to Page",
+ "action_label": "Create Warehouses",
+ "creation": "2026-02-20 13:51:56.762299",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 3,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-23 22:44:19.352448",
+ "modified_by": "Administrator",
+ "name": "Setup Warehouse",
+ "owner": "Administrator",
+ "path": "Tree/Warehouse",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Setup Warehouse",
+ "validate_action": 1
+}

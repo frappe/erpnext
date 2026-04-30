@@ -1,6 +1,7 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from datetime import date
 
 import frappe
 from frappe import _, qb
@@ -134,7 +135,8 @@ class ExchangeRateRevaluation(Document):
 		accounts = self.get_accounts_data()
 		if accounts:
 			for acc in accounts:
-				self.append("accounts", acc)
+				if acc.get("gain_loss"):
+					self.append("accounts", acc)
 
 	@frappe.whitelist()
 	def get_accounts_data(self):
@@ -251,7 +253,7 @@ class ExchangeRateRevaluation(Document):
 		company_currency = erpnext.get_company_currency(company)
 		precision = get_field_precision(
 			frappe.get_meta("Exchange Rate Revaluation Account").get_field("new_balance_in_base_currency"),
-			company_currency,
+			currency=company_currency,
 		)
 
 		if account_details:
@@ -613,7 +615,12 @@ def calculate_exchange_rate_using_last_gle(company, account, party_type, party):
 
 @frappe.whitelist()
 def get_account_details(
-	company, posting_date, account, party_type=None, party=None, rounding_loss_allowance: float | None = None
+	company: str,
+	posting_date: str | date,
+	account: str,
+	party_type: str | None = None,
+	party: str | None = None,
+	rounding_loss_allowance: float = 0.0,
 ):
 	if not (company and posting_date):
 		frappe.throw(_("Company and Posting Date is mandatory"))

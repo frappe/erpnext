@@ -27,11 +27,7 @@ def execute():
 				table.qty,
 				parent.conversion_rate,
 			)
-			.where(
-				(table.amount_difference_with_purchase_invoice != 0)
-				& (table.docstatus == 1)
-				& (parent.company == company)
-			)
+			.where((table.docstatus == 1) & (parent.company == company))
 		)
 
 		posting_date = "2024-04-01"
@@ -116,6 +112,7 @@ def get_billed_qty_against_purchase_receipt(pr_names):
 		frappe.qb.from_(table)
 		.select(table.pr_detail, Sum(table.qty).as_("qty"))
 		.where((table.pr_detail.isin(pr_names)) & (table.docstatus == 1))
+		.groupby(table.pr_detail)
 	)
 	invoice_data = query.run(as_list=1)
 

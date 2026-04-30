@@ -14,7 +14,7 @@ def execute():
 				"item_code",
 				"purchase_invoice",
 				"purchase_receipt",
-				"gross_purchase_amount",
+				"net_purchase_amount",
 				"asset_quantity",
 				"purchase_invoice_item",
 				"purchase_receipt_item",
@@ -28,7 +28,7 @@ def execute():
 					"Purchase Invoice Item",
 					asset.purchase_invoice,
 					asset.item_code,
-					asset.gross_purchase_amount,
+					asset.net_purchase_amount,
 					asset.asset_quantity,
 				)
 				frappe.db.set_value("Asset", asset.name, "purchase_invoice_item", purchase_invoice_item)
@@ -39,7 +39,7 @@ def execute():
 					"Purchase Receipt Item",
 					asset.purchase_receipt,
 					asset.item_code,
-					asset.gross_purchase_amount,
+					asset.net_purchase_amount,
 					asset.asset_quantity,
 				)
 				frappe.db.set_value("Asset", asset.name, "purchase_receipt_item", purchase_receipt_item)

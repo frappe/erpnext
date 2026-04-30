@@ -45,7 +45,7 @@ class PricingRule(Document):
 		apply_discount_on: DF.Literal["Grand Total", "Net Total"]
 		apply_discount_on_rate: DF.Check
 		apply_multiple_pricing_rules: DF.Check
-		apply_on: DF.Literal["", "Item Code", "Item Group", "Brand", "Transaction"]
+		apply_on: DF.Literal["Item Code", "Item Group", "Brand", "Transaction"]
 		apply_recursion_over: DF.Float
 		apply_rule_on_other: DF.Literal["", "Item Code", "Item Group", "Brand"]
 		brands: DF.Table[PricingRuleBrand]
@@ -169,7 +169,7 @@ class PricingRule(Document):
 
 		tocheck = frappe.scrub(self.get("applicable_for", ""))
 		if tocheck and not self.get(tocheck):
-			throw(_("{0} is required").format(self.meta.get_label(tocheck)), frappe.MandatoryError)
+			throw(_("{0} is required").format(_(self.meta.get_label(tocheck))), frappe.MandatoryError)
 
 		if self.apply_rule_on_other:
 			o_field = "other_" + frappe.scrub(self.apply_rule_on_other)
@@ -320,7 +320,7 @@ class PricingRule(Document):
 
 
 @frappe.whitelist()
-def apply_pricing_rule(args, doc=None):
+def apply_pricing_rule(args: str | dict, doc: str | dict | Document | None = None):
 	"""
 	args = {
 	        "items": [{"doctype": "", "name": "", "item_code": "", "brand": "", "item_group": ""}, ...],
@@ -346,8 +346,7 @@ def apply_pricing_rule(args, doc=None):
 
 	args = frappe._dict(args)
 
-	if not args.transaction_type:
-		set_transaction_type(args)
+	set_transaction_type(args)
 
 	# list of dictionaries
 	out = []
@@ -452,7 +451,7 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 					get_pricing_rule_items(pricing_rule, other_items=fetch_other_item) or []
 				)
 
-			if pricing_rule.coupon_code_based == 1:
+			if pricing_rule.get("coupon_code_based") == 1:
 				if not args.coupon_code:
 					continue
 				coupon_code = frappe.db.get_value(
@@ -618,7 +617,12 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 
 
 @frappe.whitelist()
-def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None, rate=None):
+def remove_pricing_rule_for_item(
+	pricing_rules: str | None,
+	item_details: str | frappe._dict,
+	item_code: str | None = None,
+	rate: float | None = None,
+):
 	from erpnext.accounts.doctype.pricing_rule.utils import (
 		get_applied_pricing_rules,
 		get_pricing_rule_items,
@@ -666,7 +670,7 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None, ra
 
 
 @frappe.whitelist()
-def remove_pricing_rules(item_list):
+def remove_pricing_rules(item_list: str | list):
 	if isinstance(item_list, str):
 		item_list = json.loads(item_list)
 
@@ -683,39 +687,28 @@ def remove_pricing_rules(item_list):
 	return out
 
 
-def set_transaction_type(args):
-	if args.transaction_type:
+def set_transaction_type(pricing_ctx: frappe._dict) -> None:
+	if pricing_ctx.transaction_type in ["buying", "selling"]:
 		return
-	if args.doctype in ("Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
-		args.transaction_type = "selling"
-	elif args.doctype in (
+	if pricing_ctx.doctype in ("Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
+		pricing_ctx.transaction_type = "selling"
+	elif pricing_ctx.doctype in (
 		"Material Request",
 		"Supplier Quotation",
 		"Purchase Order",
 		"Purchase Receipt",
 		"Purchase Invoice",
 	):
-		args.transaction_type = "buying"
-	elif args.customer:
-		args.transaction_type = "selling"
+		pricing_ctx.transaction_type = "buying"
+	elif pricing_ctx.customer:
+		pricing_ctx.transaction_type = "selling"
 	else:
-		args.transaction_type = "buying"
-
-
-@frappe.whitelist()
-def make_pricing_rule(doctype, docname):
-	doc = frappe.new_doc("Pricing Rule")
-	doc.applicable_for = doctype
-	doc.set(frappe.scrub(doctype), docname)
-	doc.selling = 1 if doctype == "Customer" else 0
-	doc.buying = 1 if doctype == "Supplier" else 0
-
-	return doc
+		pricing_ctx.transaction_type = "buying"
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_item_uoms(doctype, txt, searchfield, start, page_len, filters):
+def get_item_uoms(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	items = [filters.get("value")]
 	if filters.get("apply_on") != "Item Code":
 		field = frappe.scrub(filters.get("apply_on"))
@@ -724,6 +717,7 @@ def get_item_uoms(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.get_all(
 		"UOM Conversion Detail",
 		filters={"parent": ("in", items), "uom": ("like", f"{txt}%")},
-		fields=["distinct uom"],
+		fields=["uom"],
 		as_list=1,
+		distinct=True,
 	)

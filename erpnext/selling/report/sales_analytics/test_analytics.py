@@ -3,16 +3,14 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.selling.report.sales_analytics.sales_analytics import execute
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestAnalytics(IntegrationTestCase):
+class TestAnalytics(ERPNextTestSuite):
 	def test_sales_analytics(self):
-		frappe.db.sql("delete from `tabSales Order` where company='_Test Company 2'")
-
 		create_sales_orders()
 
 		self.compare_result_for_customer()

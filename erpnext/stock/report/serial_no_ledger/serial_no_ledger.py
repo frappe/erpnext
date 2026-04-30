@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as get_serial_nos_from_sle
+from erpnext.stock.serial_batch_bundle import get_serial_no_status
 from erpnext.stock.stock_ledger import get_stock_ledger_entries
 
 BUYING_VOUCHER_TYPES = ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]
@@ -111,7 +112,7 @@ def get_data(filters):
 				"posting_time": row.posting_time,
 				"voucher_type": row.voucher_type,
 				"voucher_no": row.voucher_no,
-				"status": "Active" if row.actual_qty > 0 else "Delivered",
+				"status": get_serial_no_status(row),
 				"company": row.company,
 				"warehouse": row.warehouse,
 				"qty": 1 if row.actual_qty > 0 else -1,

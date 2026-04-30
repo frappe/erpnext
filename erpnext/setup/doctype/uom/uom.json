@@ -13,6 +13,7 @@
   "common_code",
   "description",
   "column_break_obth",
+  "category",
   "enabled",
   "must_be_whole_number"
  ],
@@ -60,12 +61,21 @@
   {
    "fieldname": "column_break_obth",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Category",
+   "options": "UOM Category"
   }
  ],
  "icon": "fa fa-compass",
  "idx": 1,
  "links": [],
- "modified": "2024-03-27 13:10:57.375141",
+ "modified": "2026-04-14 21:20:16.983514",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "UOM",
@@ -98,9 +108,28 @@
    "read": 1,
    "report": 1,
    "role": "Stock User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "ASC",

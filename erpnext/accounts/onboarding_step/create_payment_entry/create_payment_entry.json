@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Payment Entry",
+ "creation": "2026-02-23 19:22:12.005360",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-23 20:19:56.482245",
+ "modified_by": "Administrator",
+ "name": "Create Payment Entry",
+ "owner": "Administrator",
+ "reference_document": "Payment Entry",
+ "route_options": "{\n    \"payment_type\": \"Receive\",\n    \"party_type\": \"Customer\"\n}",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Create Payment Entry",
+ "validate_action": 1
+}

@@ -4,9 +4,10 @@
 from collections import OrderedDict
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.document import Document
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, sbool
+from pypika.terms import ValueWrapper
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
 
@@ -29,6 +30,7 @@ BOM_ITEM_FIELDS = [
 	"conversion_factor",
 	"do_not_explode",
 	"operation",
+	"is_phantom_item",
 ]
 
 
@@ -50,6 +52,7 @@ class BOMCreator(Document):
 		currency: DF.Link
 		default_warehouse: DF.Link | None
 		error_log: DF.Text | None
+		is_phantom: DF.Check
 		item_code: DF.Link
 		item_group: DF.Link | None
 		item_name: DF.Data | None
@@ -75,7 +78,40 @@ class BOMCreator(Document):
 		self.set_rate_for_items()
 
 	def validate(self):
+		self.validate_finished_good()
 		self.validate_items()
+		self.validate_duplicate_item()
+
+	def validate_duplicate_item(self):
+		# If same items added multiple times under same parent, raise error
+		item_map = {}
+		for row in self.items:
+			if not row.fg_reference_id:
+				continue
+
+			key = (row.item_code, row.fg_reference_id)
+			if key in item_map:
+				parent_item_code = next(
+					item.item_code for item in self.items if item.name == row.fg_reference_id
+				)
+
+				frappe.throw(
+					_(
+						"Item {0} added multiple times under the same parent item {1} at rows {2} and {3}"
+					).format(bold(row.item_code), bold(parent_item_code), item_map[key], row.idx),
+					title=_("Duplicate Item Under Same Parent"),
+				)
+			else:
+				item_map[key] = row.idx
+
+	def validate_finished_good(self):
+		is_stock_item = frappe.get_cached_value("Item", self.item_code, "is_stock_item")
+		if is_stock_item and self.is_phantom:
+			frappe.throw(_("Phantom BOM cannot be created for stock item {0}.").format(self.item_code))
+		elif not is_stock_item and not self.is_phantom:
+			frappe.throw(
+				_("Non-phantom BOM cannot be created for non-stock item {0}.").format(self.item_code)
+			)
 
 	def validate_items(self):
 		for row in self.items:
@@ -124,10 +160,6 @@ class BOMCreator(Document):
 	def on_cancel(self):
 		self.set_status(True)
 
-	def set_conversion_factor(self):
-		for row in self.items:
-			row.conversion_factor = 1.0
-
 	def before_submit(self):
 		self.validate_fields()
 		self.set_status()
@@ -158,10 +190,11 @@ class BOMCreator(Document):
 		amount = self.get_raw_material_cost()
 		self.raw_material_cost = amount
 
-	def get_raw_material_cost(self, fg_item=None, amount=0):
+	def get_raw_material_cost(self, fg_item=None):
 		if not fg_item:
 			fg_item = self.item_code
 
+		amount = 0
 		for row in self.items:
 			if row.fg_item != fg_item:
 				continue
@@ -180,14 +213,12 @@ class BOMCreator(Document):
 					},
 					self,
 				)
-
-				row.amount = flt(row.rate) * flt(row.qty)
-
 			else:
-				row.amount = 0.0
-				row.amount = self.get_raw_material_cost(row.item_code, row.amount)
-				row.rate = flt(row.amount) / (flt(row.qty) * flt(row.conversion_factor))
+				row.rate = flt(
+					self.get_raw_material_cost(row.item_code) / flt(row.qty or 1) * row.conversion_factor
+				)
 
+			row.amount = flt(row.rate) * flt(row.qty)
 			amount += flt(row.amount)
 
 		return amount
@@ -198,6 +229,11 @@ class BOMCreator(Document):
 			row.is_expandable = 0
 			if row.item_code in fg_items:
 				row.is_expandable = 1
+
+	def set_conversion_factor(self):
+		for row in self.items:
+			if not row.conversion_factor:
+				row.conversion_factor = 1.0
 
 	def validate_fields(self):
 		fields = {
@@ -255,6 +291,13 @@ class BOMCreator(Document):
 			if not row.fg_reference_id and production_item_wise_rm.get((row.fg_item, row.fg_reference_id)):
 				frappe.throw(_("Please set Parent Row No for item {0}").format(row.fg_item))
 
+			key = (row.fg_item, row.fg_reference_id)
+			if key not in production_item_wise_rm:
+				production_item_wise_rm.setdefault(
+					key,
+					frappe._dict({"items": [], "bom_no": "", "fg_item_data": row}),
+				)
+
 			production_item_wise_rm[(row.fg_item, row.fg_reference_id)]["items"].append(row)
 
 		reverse_tree = OrderedDict(reversed(list(production_item_wise_rm.items())))
@@ -298,13 +341,16 @@ class BOMCreator(Document):
 				"allow_alternative_item": 1,
 				"bom_creator": self.name,
 				"bom_creator_item": bom_creator_item,
+				"is_phantom_bom": row.get("is_phantom_item"),
 			}
 		)
 
-		if row.item_code == self.item_code and (self.routing or self.has_operations()):
-			bom.routing = self.routing
-			bom.with_operations = 1
-			bom.transfer_material_against = "Work Order"
+		if row.item_code == self.item_code:
+			bom.is_phantom_bom = self.is_phantom
+			if not self.is_phantom and (self.routing or self.has_operations()):
+				bom.routing = self.routing
+				bom.with_operations = 1
+				bom.transfer_material_against = "Work Order"
 
 		for field in BOM_FIELDS:
 			if self.get(field):
@@ -325,7 +371,6 @@ class BOMCreator(Document):
 				{
 					"bom_no": bom_no,
 					"allow_alternative_item": 1,
-					"allow_scrap_items": 1,
 					"include_item_in_manufacturing": 1,
 				}
 			)
@@ -345,12 +390,12 @@ class BOMCreator(Document):
 		return False
 
 	@frappe.whitelist()
-	def get_default_bom(self, item_code) -> str:
+	def get_default_bom(self, item_code: str):
 		return frappe.get_cached_value("Item", item_code, "default_bom")
 
 
 @frappe.whitelist()
-def get_children(doctype=None, parent=None, **kwargs):
+def get_children(doctype: str | None = None, parent: str | None = None, **kwargs):
 	if isinstance(kwargs, str):
 		kwargs = frappe.parse_json(kwargs)
 
@@ -359,11 +404,12 @@ def get_children(doctype=None, parent=None, **kwargs):
 
 	fields = [
 		"item_code as value",
+		"item_name as title",
 		"is_expandable as expandable",
 		"parent as parent_id",
 		"qty",
 		"idx",
-		"'BOM Creator Item' as doctype",
+		ValueWrapper("BOM Creator Item").as_("doctype"),
 		"name",
 		"uom",
 		"rate",
@@ -448,12 +494,16 @@ def add_sub_assembly(**kwargs):
 				"is_expandable": 1,
 				"stock_uom": item_info.stock_uom,
 				"operation": bom_item.operation,
+				"is_phantom_item": sbool(kwargs.phantom),
 			},
 		)
 
 		parent_row_no = item_row.idx
 		name = ""
 	else:
+		if sbool(kwargs.phantom):
+			parent_row = next(item for item in doc.items if item.name == kwargs.fg_reference_id)
+			parent_row.db_set("is_phantom_item", 1)
 		parent_row_no = get_parent_row_no(doc, kwargs.fg_reference_id)
 
 	for row in bom_item.get("items"):
@@ -492,7 +542,12 @@ def get_parent_row_no(doc, name):
 		if row.name == name:
 			return row.idx
 
-	frappe.msgprint(_("Parent Row No not found for {0}").format(name))
+	if name == doc.name:
+		return None
+
+	frappe.msgprint(_("Parent Row No not found for {0}").format(name), alert=True)
+
+	return None
 
 
 @frappe.whitelist()
@@ -520,7 +575,10 @@ def delete_node(**kwargs):
 
 
 @frappe.whitelist()
-def edit_bom_creator(doctype, docname, data, parent):
+def edit_bom_creator(doctype: str, docname: str, data: str | dict, parent: str):
+	if not frappe.has_permission(doctype=doctype, ptype="write", parent_doctype="BOM Creator"):
+		frappe.throw(_("You do not have permission to edit this document"), frappe.PermissionError)
+
 	if isinstance(data, str):
 		data = frappe.parse_json(data)
 

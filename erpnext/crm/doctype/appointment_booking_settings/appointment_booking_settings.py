@@ -17,9 +17,7 @@ class AppointmentBookingSettings(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from frappe.automation.doctype.assignment_rule_user.assignment_rule_user import (
-			AssignmentRuleUser,
-		)
+		from frappe.automation.doctype.assignment_rule_user.assignment_rule_user import AssignmentRuleUser
 		from frappe.types import DF
 
 		from erpnext.crm.doctype.appointment_booking_slots.appointment_booking_slots import (

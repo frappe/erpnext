@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import flt
 from rapidfuzz import fuzz, process
+from rapidfuzz.utils import default_process
 
 
 class AutoMatchParty:
@@ -25,7 +26,7 @@ class AutoMatchParty:
 			deposit=self.deposit,
 		).match()
 
-		fuzzy_matching_enabled = frappe.db.get_single_value("Accounts Settings", "enable_fuzzy_matching")
+		fuzzy_matching_enabled = frappe.get_single_value("Accounts Settings", "enable_fuzzy_matching")
 		if not result and fuzzy_matching_enabled:
 			result = AutoMatchbyPartyNameDescription(
 				bank_party_name=self.bank_party_name, description=self.description, deposit=self.deposit
@@ -132,6 +133,7 @@ class AutoMatchbyPartyNameDescription:
 			query=self.get(field),
 			choices={row.get("name"): row.get("party_name") for row in names},
 			scorer=fuzz.token_set_ratio,
+			processor=default_process,
 		)
 		party_name, skip = self.process_fuzzy_result(result)
 

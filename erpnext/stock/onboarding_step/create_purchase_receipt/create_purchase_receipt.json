@@ -1,0 +1,20 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Purchase Receipt",
+ "creation": "2026-02-20 11:45:17.070361",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 8,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-23 20:46:16.048231",
+ "modified_by": "Administrator",
+ "name": "Create Purchase Receipt",
+ "owner": "Administrator",
+ "reference_document": "Purchase Receipt",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Create Purchase Receipt",
+ "validate_action": 1
+}

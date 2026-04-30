@@ -1,0 +1,21 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-17 20:55:11.841426",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "project",
+ "icon_type": "Link",
+ "idx": 1,
+ "label": "Projects",
+ "link_to": "Projects",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-01-01 20:07:01.226383",
+ "modified_by": "Administrator",
+ "name": "Projects",
+ "owner": "Administrator",
+ "parent_icon": "ERPNext",
+ "restrict_removal": 0,
+ "roles": [],
+ "standard": 1
+}

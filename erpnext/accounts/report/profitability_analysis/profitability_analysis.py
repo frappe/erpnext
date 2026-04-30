@@ -3,7 +3,8 @@
 
 
 import frappe
-from frappe import _
+from frappe import _, qb
+from frappe.query_builder import Criterion
 from frappe.utils import cstr, flt
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
@@ -12,6 +13,7 @@ from erpnext.accounts.report.financial_statements import (
 	filter_out_zero_value_rows,
 )
 from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
+from erpnext.accounts.utils import get_zero_cutoff
 
 value_fields = ("income", "expense", "gross_profit_loss")
 
@@ -32,11 +34,19 @@ def execute(filters=None):
 
 def get_accounts_data(based_on, company):
 	if based_on == "Cost Center":
-		return frappe.db.sql(
-			"""select name, parent_cost_center as parent_account, cost_center_name as account_name, lft, rgt
-			from `tabCost Center` where company=%s order by name""",
-			company,
-			as_dict=True,
+		cc = qb.DocType("Cost Center")
+		return (
+			qb.from_(cc)
+			.select(
+				cc.name,
+				cc.parent_cost_center.as_("parent_account"),
+				cc.cost_center_name.as_("account_name"),
+				cc.lft,
+				cc.rgt,
+			)
+			.where(cc.company.eq(company))
+			.orderby(cc.name)
+			.run(as_dict=True)
 		)
 	elif based_on == "Project":
 		return frappe.get_all("Project", fields=["name"], filters={"company": company}, order_by="name")
@@ -149,7 +159,7 @@ def prepare_data(accounts, filters, total_row, parent_children_map, based_on):
 		for key in value_fields:
 			row[key] = flt(d.get(key, 0.0), 3)
 
-			if abs(row[key]) >= 0.005:
+			if abs(row[key]) >= get_zero_cutoff(company_currency):
 				# ignore zero values
 				has_value = True
 
@@ -205,27 +215,38 @@ def set_gl_entries_by_account(
 	company, from_date, to_date, based_on, gl_entries_by_account, ignore_closing_entries=False
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
-	additional_conditions = []
+	gl = qb.DocType("GL Entry")
+	acc = qb.DocType("Account")
+
+	conditions = []
+	conditions.append(gl.company.eq(company))
+	conditions.append(gl[based_on].notnull())
+	conditions.append(gl.is_cancelled.eq(0))
+
+	if from_date and to_date:
+		conditions.append(gl.posting_date.between(from_date, to_date))
+	elif from_date and not to_date:
+		conditions.append(gl.posting_date.gte(from_date))
+	elif not from_date and to_date:
+		conditions.append(gl.posting_date.lte(to_date))
 
 	if ignore_closing_entries:
-		additional_conditions.append("and voucher_type !='Period Closing Voucher'")
+		conditions.append(gl.voucher_type.ne("Period Closing Voucher"))
 
-	if from_date:
-		additional_conditions.append("and posting_date >= %(from_date)s")
-
-	gl_entries = frappe.db.sql(
-		"""select posting_date, {based_on} as based_on, debit, credit,
-		is_opening, (select root_type from `tabAccount` where name = account) as type
-		from `tabGL Entry` where company=%(company)s
-		{additional_conditions}
-		and posting_date <= %(to_date)s
-		and {based_on} is not null
-		and is_cancelled = 0
-		order by {based_on}, posting_date""".format(
-			additional_conditions="\n".join(additional_conditions), based_on=based_on
-		),
-		{"company": company, "from_date": from_date, "to_date": to_date},
-		as_dict=True,
+	root_subquery = qb.from_(acc).select(acc.root_type).where(acc.name.eq(gl.account))
+	gl_entries = (
+		qb.from_(gl)
+		.select(
+			gl.posting_date,
+			gl[based_on].as_("based_on"),
+			gl.debit,
+			gl.credit,
+			gl.is_opening,
+			root_subquery.as_("type"),
+		)
+		.where(Criterion.all(conditions))
+		.orderby(gl[based_on], gl.posting_date)
+		.run(as_dict=True)
 	)
 
 	for entry in gl_entries:

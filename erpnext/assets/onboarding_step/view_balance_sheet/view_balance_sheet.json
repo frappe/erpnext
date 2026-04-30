@@ -1,0 +1,23 @@
+{
+ "action": "View Report",
+ "action_label": "View Balance Sheet",
+ "creation": "2026-02-23 19:22:57.651194",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-23 22:44:39.178107",
+ "modified_by": "Administrator",
+ "name": "View Balance Sheet",
+ "owner": "Administrator",
+ "reference_report": "Balance Sheet",
+ "report_description": "View Balance Sheet",
+ "report_reference_doctype": "GL Entry",
+ "report_type": "Script Report",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "View Balance Sheet",
+ "validate_action": 1
+}

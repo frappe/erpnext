@@ -1,0 +1,22 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-17 13:19:04.275668",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "getting-started",
+ "icon_type": "Link",
+ "idx": 6,
+ "label": "Subcontracting",
+ "link_to": "Subcontracting",
+ "link_type": "Workspace Sidebar",
+ "logo_url": "/assets/erpnext/desktop_icons/subcontracting.svg",
+ "modified": "2026-01-01 20:07:01.323508",
+ "modified_by": "Administrator",
+ "name": "Subcontracting",
+ "owner": "Administrator",
+ "parent_icon": "",
+ "restrict_removal": 0,
+ "roles": [],
+ "standard": 1
+}

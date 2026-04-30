@@ -2,16 +2,16 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.report.item_shortage_report.item_shortage_report import (
 	execute as item_shortage_report,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestItemShortageReport(IntegrationTestCase):
+class TestItemShortageReport(ERPNextTestSuite):
 	def test_item_shortage_report(self):
 		item = make_item().name
 		so = make_sales_order(item_code=item)

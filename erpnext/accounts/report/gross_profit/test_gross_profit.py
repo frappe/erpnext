@@ -1,18 +1,18 @@
 import frappe
 from frappe import qb
-from frappe.tests import IntegrationTestCase
-from frappe.utils import flt, nowdate
+from frappe.utils import add_days, flt, get_first_day, get_last_day, nowdate
 
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note, make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.gross_profit.gross_profit import execute
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestGrossProfit(IntegrationTestCase):
+class TestGrossProfit(ERPNextTestSuite):
 	def setUp(self):
 		self.create_company()
 		self.create_item()
@@ -20,9 +20,6 @@ class TestGrossProfit(IntegrationTestCase):
 		self.create_customer()
 		self.create_sales_invoice()
 		self.clear_old_entries()
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 	def create_company(self):
 		company_name = "_Test Gross Profit"
@@ -391,11 +388,11 @@ class TestGrossProfit(IntegrationTestCase):
 		report_output = {k: v for k, v in gp_entry[0].items() if k in expected_entry}
 		self.assertEqual(report_output, expected_entry)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
 	def test_crnote_against_invoice_with_multiple_instances_of_same_item(self):
 		"""
 		Item Qty for Sales Invoices with multiple instances of same item go in the -ve. Ideally, the credit noteshould cancel out the invoice items.
 		"""
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
 
 		# Invoice with an item added twice
 		sinv = self.create_sales_invoice(qty=1, rate=100, posting_date=nowdate(), do_not_submit=True)
@@ -445,10 +442,15 @@ class TestGrossProfit(IntegrationTestCase):
 			qty=-1, rate=100, posting_date=nowdate(), do_not_save=True, do_not_submit=True
 		)
 		sinv.is_return = 1
+		sinv.items[0].allow_zero_valuation_rate = 1
 		sinv = sinv.save().submit()
 
 		filters = frappe._dict(
-			company=self.company, from_date=nowdate(), to_date=nowdate(), group_by="Invoice"
+			company=self.company,
+			from_date=nowdate(),
+			to_date=nowdate(),
+			group_by="Invoice",
+			include_returned_invoices=1,
 		)
 
 		columns, data = execute(filters=filters)
@@ -467,7 +469,7 @@ class TestGrossProfit(IntegrationTestCase):
 			"selling_amount": -100.0,
 			"buying_amount": 0.0,
 			"gross_profit": -100.0,
-			"gross_profit_%": 100.0,
+			"gross_profit_%": -100.0,
 		}
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
 		report_output = {k: v for k, v in gp_entry[0].items() if k in expected_entry}
@@ -642,3 +644,130 @@ class TestGrossProfit(IntegrationTestCase):
 		self.assertEqual(total.buying_amount, 0.0)
 		self.assertEqual(total.gross_profit, 100.0)
 		self.assertEqual(total.get("gross_profit_%"), 100.0)
+
+	def test_profit_for_later_period_return(self):
+		month_start_date, month_end_date = get_first_day(nowdate()), get_last_day(nowdate())
+
+		sales_inv_date = month_start_date
+		return_inv_date = add_days(month_end_date, 1)
+
+		# create sales invoice on month start date
+		sinv = self.create_sales_invoice(qty=1, rate=100, do_not_save=True, do_not_submit=True)
+		sinv.set_posting_time = 1
+		sinv.posting_date = sales_inv_date
+		sinv.save().submit()
+
+		# create credit note on next month start date
+		cr_note = make_sales_return(sinv.name)
+		cr_note.set_posting_time = 1
+		cr_note.posting_date = return_inv_date
+		cr_note.save().submit()
+
+		# apply filters for invoiced period
+		filters = frappe._dict(
+			company=self.company, from_date=month_start_date, to_date=month_start_date, group_by="Invoice"
+		)
+
+		_, data = execute(filters=filters)
+		total = data[-1]
+
+		self.assertEqual(total.selling_amount, 100.0)
+		self.assertEqual(total.buying_amount, 0.0)
+		self.assertEqual(total.gross_profit, 100.0)
+		self.assertEqual(total.get("gross_profit_%"), 100.0)
+
+		# extend filters upto returned period
+		filters.update({"to_date": return_inv_date})
+
+		_, data = execute(filters=filters)
+		total = data[-1]
+
+		self.assertEqual(total.selling_amount, 0.0)
+		self.assertEqual(total.buying_amount, 0.0)
+		self.assertEqual(total.gross_profit, 0.0)
+		self.assertEqual(total.get("gross_profit_%"), 0.0)
+
+		# apply filters only on returned period
+		filters.update({"from_date": return_inv_date, "to_date": return_inv_date})
+		_, data = execute(filters=filters)
+		total = data[-1]
+
+		self.assertEqual(total.selling_amount, -100.0)
+		self.assertEqual(total.buying_amount, 0.0)
+		self.assertEqual(total.gross_profit, -100.0)
+		self.assertEqual(total.get("gross_profit_%"), -100.0)
+
+	def test_sales_person_wise_gross_profit(self):
+		sales_person = make_sales_person("_Test Sales Person")
+
+		posting_date = get_first_day(nowdate())
+		qty = 10
+		rate = 100
+
+		sinv = self.create_sales_invoice(qty=qty, rate=rate, do_not_save=True, do_not_submit=True)
+		sinv.set_posting_time = 1
+		sinv.posting_date = posting_date
+		sinv.append(
+			"sales_team",
+			{
+				"sales_person": sales_person.name,
+				"allocated_percentage": 100,
+				"allocated_amount": 1000.0,
+				"commission_rate": 5,
+				"incentives": 5,
+			},
+		)
+		sinv.save().submit()
+
+		filters = frappe._dict(
+			company=self.company, from_date=posting_date, to_date=posting_date, group_by="Sales Person"
+		)
+
+		_, data = execute(filters=filters)
+		total = data[-1]
+
+		self.assertEqual(total[5], 1000.0)
+		self.assertEqual(total[6], 0.0)
+		self.assertEqual(total[7], 1000.0)
+		self.assertEqual(total[8], 100.0)
+
+	def test_drop_ship(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item("_Test Drop Ship Item", properties={"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		so = make_sales_order(item=item.name, qty=10, rate=100)
+		po = make_purchase_order(so.name, selected_items=[so.items[0]])[0]
+		po.items[0].rate = 80
+		po.supplier = "_Test Supplier"
+		po.submit()
+		make_purchase_invoice(po.name).submit()
+		si = make_sales_invoice(so.name).submit()
+
+		filters = frappe._dict(
+			company=si.company, from_date=si.posting_date, to_date=si.posting_date, group_by="Invoice"
+		)
+
+		_, data = execute(filters=filters)
+		self.assertEqual(data[1].buying_amount, 800)
+		self.assertIsNone(data[1].buying_rate)
+		self.assertEqual(data[1]["gross_profit_%"], 20)
+
+
+def make_sales_person(sales_person_name="_Test Sales Person"):
+	if not frappe.db.exists("Sales Person", {"sales_person_name": sales_person_name}):
+		sales_person_doc = frappe.get_doc(
+			{
+				"doctype": "Sales Person",
+				"is_group": 0,
+				"parent_sales_person": "Sales Team",
+				"sales_person_name": sales_person_name,
+			}
+		).insert(ignore_permissions=True)
+	else:
+		sales_person_doc = frappe.get_doc("Sales Person", {"sales_person_name": sales_person_name})
+
+	return sales_person_doc

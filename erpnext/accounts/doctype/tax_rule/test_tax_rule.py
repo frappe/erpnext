@@ -1,27 +1,17 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-import unittest
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule, get_tax_template
 from erpnext.crm.doctype.opportunity.opportunity import make_quotation
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestTaxRule(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		frappe.db.set_single_value("Shopping Cart Settings", "enabled", 0)
-
-	@classmethod
-	def tearDownClass(cls):
-		frappe.db.sql("delete from `tabTax Rule`")
-
+class TestTaxRule(ERPNextTestSuite):
 	def setUp(self):
-		frappe.db.sql("delete from `tabTax Rule`")
+		frappe.db.set_single_value("Shopping Cart Settings", "enabled", 0)
 
 	def test_conflict(self):
 		tax_rule1 = make_tax_rule(

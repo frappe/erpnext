@@ -9,14 +9,15 @@
  "field_order": [
   "naming_series",
   "company",
-  "billing_address",
-  "billing_address_display",
   "vendor",
   "column_break1",
   "transaction_date",
   "schedule_date",
   "status",
+  "has_unit_price_items",
   "amended_from",
+  "section_break_trpf",
+  "title",
   "suppliers_section",
   "suppliers",
   "items_section",
@@ -29,7 +30,10 @@
   "send_attached_files",
   "send_document_print",
   "sec_break_email_2",
+  "subject",
+  "use_html",
   "message_for_supplier",
+  "mfs_html",
   "terms_section_break",
   "incoterm",
   "named_place",
@@ -39,13 +43,18 @@
   "select_print_heading",
   "letter_head",
   "more_info",
-  "opportunity"
+  "opportunity",
+  "address_and_contact_tab",
+  "billing_address",
+  "billing_address_display",
+  "column_break_czul",
+  "shipping_address",
+  "shipping_address_display"
  ],
  "fields": [
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "in_list_view": 1,
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
@@ -73,6 +82,7 @@
    "fieldname": "vendor",
    "fieldtype": "Link",
    "hidden": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Supplier",
    "no_copy": 1,
@@ -91,6 +101,7 @@
    "fieldname": "transaction_date",
    "fieldtype": "Date",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Date",
    "oldfieldname": "transaction_date",
    "oldfieldtype": "Date",
@@ -125,6 +136,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.suppliers.some((item) => item.send_email)",
    "fieldname": "supplier_response_section",
    "fieldtype": "Section Break",
    "label": "Email Details"
@@ -138,14 +150,13 @@
   },
   {
    "allow_on_submit": 1,
-   "fetch_from": "email_template.response",
-   "fetch_if_empty": 1,
+   "default": "Please supply the specified items at the best possible rates",
+   "depends_on": "eval:doc.use_html == 0",
    "fieldname": "message_for_supplier",
    "fieldtype": "Text Editor",
-   "in_list_view": 1,
    "label": "Message for Supplier",
-   "print_hide": 1,
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.use_html == 0",
+   "print_hide": 1
   },
   {
    "collapsible": 1,
@@ -220,6 +231,8 @@
   {
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
    "oldfieldname": "status",
@@ -250,7 +263,7 @@
    "label": "Preview Email"
   },
   {
-   "depends_on": "eval:!doc.__islocal",
+   "depends_on": "eval:doc.suppliers.some((item) => item.send_email)",
    "fieldname": "sec_break_email_2",
    "fieldtype": "Section Break",
    "hide_border": 1
@@ -258,6 +271,7 @@
   {
    "fieldname": "schedule_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Required Date"
   },
   {
@@ -306,13 +320,79 @@
    "fieldtype": "Text Editor",
    "label": "Billing Address Details",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "has_unit_price_items",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Unit Price Items",
+   "no_copy": 1
+  },
+  {
+   "default": "Request for Quotation",
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Subject",
+   "not_nullable": 1,
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.use_html == 1",
+   "fieldname": "mfs_html",
+   "fieldtype": "Code",
+   "label": "Message for Supplier",
+   "mandatory_depends_on": "eval:doc.use_html == 1",
+   "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "use_html",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Use HTML"
+  },
+  {
+   "fieldname": "address_and_contact_tab",
+   "fieldtype": "Tab Break",
+   "label": "Address & Contact"
+  },
+  {
+   "fieldname": "column_break_czul",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shipping_address",
+   "fieldtype": "Link",
+   "label": "Company Shipping Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "shipping_address_display",
+   "fieldtype": "Text Editor",
+   "label": "Shipping Address Details",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_trpf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-shopping-cart",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:33.030915",
+ "modified": "2026-03-30 12:18:08.451201",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",
@@ -377,9 +457,11 @@
    "role": "All"
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "status, transaction_date",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "company"
 }

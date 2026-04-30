@@ -1,10 +1,10 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import datetime
-import unittest
 
 import frappe
-from frappe.tests import IntegrationTestCase
+
+from erpnext.tests.utils import ERPNextTestSuite
 
 LEAD_EMAIL = "test_appointment_lead@example.com"
 
@@ -26,13 +26,9 @@ def create_test_appointment():
 	return test_appointment
 
 
-class TestAppointment(IntegrationTestCase):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		frappe.db.delete("Lead", {"email_id": LEAD_EMAIL})
-
+class TestAppointment(ERPNextTestSuite):
 	def setUp(self):
+		frappe.db.delete("Lead", {"email_id": LEAD_EMAIL})
 		self.test_appointment = create_test_appointment()
 		self.test_appointment.set_verified(self.test_appointment.customer_email)
 

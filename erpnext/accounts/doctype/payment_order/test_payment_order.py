@@ -3,7 +3,6 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import getdate
 
 from erpnext.accounts.doctype.bank_transaction.test_bank_transaction import (
@@ -15,18 +14,10 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	make_payment_order,
 )
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class UnitTestPaymentOrder(UnitTestCase):
-	"""
-	Unit tests for PaymentOrder.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestPaymentOrder(IntegrationTestCase):
+class TestPaymentOrder(ERPNextTestSuite):
 	def setUp(self):
 		# generate and use a uniq hash identifier for 'Bank Account' and it's linked GL 'Account' to avoid validation error
 		uniq_identifier = frappe.generate_hash(length=10)
@@ -34,9 +25,6 @@ class TestPaymentOrder(IntegrationTestCase):
 		self.bank_account = create_bank_account(
 			gl_account=self.gl_account, bank_account_name="Checking Account " + uniq_identifier
 		)
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 	def test_payment_order_creation_against_payment_entry(self):
 		purchase_invoice = make_purchase_invoice()
@@ -59,12 +47,10 @@ class TestPaymentOrder(IntegrationTestCase):
 
 def create_payment_order_against_payment_entry(ref_doc, order_type, bank_account):
 	payment_order = frappe.get_doc(
-		dict(
-			doctype="Payment Order",
-			company="_Test Company",
-			payment_order_type=order_type,
-			company_bank_account=bank_account,
-		)
+		doctype="Payment Order",
+		company="_Test Company",
+		payment_order_type=order_type,
+		company_bank_account=bank_account,
 	)
 	doc = make_payment_order(ref_doc.name, payment_order)
 	doc.save()

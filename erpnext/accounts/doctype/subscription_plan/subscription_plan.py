@@ -1,6 +1,7 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from datetime import date
 
 import frappe
 from dateutil import relativedelta
@@ -43,7 +44,13 @@ class SubscriptionPlan(Document):
 
 @frappe.whitelist()
 def get_plan_rate(
-	plan, quantity=1, customer=None, start_date=None, end_date=None, prorate_factor=1, party=None
+	plan: str,
+	quantity: int = 1,
+	customer: str | None = None,
+	start_date: str | date | None = None,
+	end_date: str | date | None = None,
+	prorate_factor: float = 1,
+	party: str | None = None,
 ):
 	plan = frappe.get_doc("Subscription Plan", plan)
 	if plan.price_determination == "Fixed Rate":

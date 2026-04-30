@@ -2,15 +2,14 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
 	execute,
 )
-from erpnext.tests.utils import if_lending_app_installed
+from erpnext.tests.utils import ERPNextTestSuite, if_lending_app_installed
 
 
-class TestBankReconciliationStatement(IntegrationTestCase):
+class TestBankReconciliationStatement(ERPNextTestSuite):
 	@if_lending_app_installed
 	def test_loan_entries_in_bank_reco_statement(self):
 		from lending.loan_management.doctype.loan.test_loan import create_loan_accounts

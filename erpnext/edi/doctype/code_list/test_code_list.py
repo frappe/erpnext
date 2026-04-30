@@ -2,8 +2,8 @@
 # See license.txt
 
 # import frappe
-from frappe.tests.utils import FrappeTestCase
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestCodeList(FrappeTestCase):
+class TestCodeList(ERPNextTestSuite):
 	pass

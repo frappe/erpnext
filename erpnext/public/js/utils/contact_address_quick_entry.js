@@ -23,6 +23,7 @@ frappe.ui.form.ContactAddressQuickEntryForm = class ContactAddressQuickEntryForm
 			mobile_number: "mobile_no",
 			map_to_first_name: "first_name",
 			map_to_last_name: "last_name",
+			country_address: "country",
 		};
 
 		Object.entries(map_field_names).forEach(([fieldname, new_fieldname]) => {
@@ -38,19 +39,19 @@ frappe.ui.form.ContactAddressQuickEntryForm = class ContactAddressQuickEntryForm
 			{
 				fieldtype: "Section Break",
 				label: __("Primary Contact Details"),
-				collapsible: 1,
+				collapsible: 0,
 			},
 			{
 				label: __("First Name"),
 				fieldname: "map_to_first_name",
 				fieldtype: "Data",
-				depends_on: "eval:doc.customer_type=='Company'",
+				depends_on: "eval:doc.customer_type=='Company' || doc.supplier_type=='Company'",
 			},
 			{
 				label: __("Last Name"),
 				fieldname: "map_to_last_name",
 				fieldtype: "Data",
-				depends_on: "eval:doc.customer_type=='Company'",
+				depends_on: "eval:doc.customer_type=='Company' || doc.supplier_type=='Company'",
 			},
 
 			{
@@ -70,12 +71,13 @@ frappe.ui.form.ContactAddressQuickEntryForm = class ContactAddressQuickEntryForm
 			{
 				fieldtype: "Section Break",
 				label: __("Primary Address Details"),
-				collapsible: 1,
+				collapsible: 0,
 			},
 			{
 				label: __("Address Line 1"),
 				fieldname: "address_line1",
 				fieldtype: "Data",
+				mandatory_depends_on: "eval:doc.city || doc.country_address",
 			},
 			{
 				label: __("Address Line 2"),
@@ -94,23 +96,19 @@ frappe.ui.form.ContactAddressQuickEntryForm = class ContactAddressQuickEntryForm
 				label: __("City"),
 				fieldname: "city",
 				fieldtype: "Data",
+				mandatory_depends_on: "eval:doc.country_address || doc.address_line1",
 			},
 			{
-				label: __("State"),
+				label: __("State/Province"),
 				fieldname: "state",
 				fieldtype: "Data",
 			},
 			{
 				label: __("Country"),
-				fieldname: "country",
+				fieldname: "country_address",
 				fieldtype: "Link",
 				options: "Country",
-			},
-			{
-				label: __("Customer POS Id"),
-				fieldname: "customer_pos_id",
-				fieldtype: "Data",
-				hidden: 1,
+				mandatory_depends_on: "eval:doc.city || doc.address_line1",
 			},
 		];
 

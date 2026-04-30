@@ -51,7 +51,7 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 			let stock_uom = unescape(element.attr("data-stock-uom"));
 
 			if (disable_quick_entry) {
-				open_stock_entry(item, warehouse, entry_type);
+				open_stock_entry(item, warehouse, entry_type, stock_uom);
 			} else {
 				if (action === "Add") {
 					let rate = unescape($(this).attr("data-rate"));
@@ -66,7 +66,7 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 			}
 		}
 
-		function open_stock_entry(item, warehouse, entry_type) {
+		function open_stock_entry(item, warehouse, entry_type, stock_uom) {
 			frappe.model.with_doctype("Stock Entry", function () {
 				var doc = frappe.model.get_new_doc("Stock Entry");
 				if (entry_type) {
@@ -75,6 +75,9 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 
 				var row = frappe.model.add_child(doc, "items");
 				row.item_code = item;
+				row.uom = stock_uom;
+				row.stock_uom = stock_uom;
+				row.conversion_factor = 1;
 
 				if (entry_type === "Material Transfer") {
 					row.s_warehouse = warehouse;
@@ -278,8 +281,13 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, stoc
 	}
 
 	dialog.set_primary_action(__("Create Stock Entry"), function () {
-		if (source && (dialog.get_value("qty") == 0 || dialog.get_value("qty") > actual_qty)) {
-			frappe.msgprint(__("Quantity must be greater than zero, and less or equal to {0}", [actual_qty]));
+		if (flt(dialog.get_value("qty")) <= 0) {
+			frappe.msgprint(__("Quantity must be greater than zero"));
+			return;
+		}
+
+		if (source && dialog.get_value("qty") > actual_qty) {
+			frappe.msgprint(__("Quantity must be less than or equal to {0}", [actual_qty]));
 			return;
 		}
 

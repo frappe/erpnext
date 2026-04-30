@@ -35,7 +35,7 @@ def correct_value_for_assets_with_manual_depr_entries():
 		.on(company.name == asset.company)
 		.select(
 			asset.name.as_("asset_name"),
-			asset.gross_purchase_amount.as_("gross_purchase_amount"),
+			asset.net_purchase_amount.as_("net_purchase_amount"),
 			asset.opening_accumulated_depreciation.as_("opening_accumulated_depreciation"),
 			Sum(gle.debit).as_("depr_amount"),
 		)
@@ -51,7 +51,7 @@ def correct_value_for_assets_with_manual_depr_entries():
 		asset_details_and_depr_amount_map.asset_name == asset.name
 	).set(
 		asset.value_after_depreciation,
-		asset_details_and_depr_amount_map.gross_purchase_amount
+		asset_details_and_depr_amount_map.net_purchase_amount
 		- asset_details_and_depr_amount_map.opening_accumulated_depreciation
 		- asset_details_and_depr_amount_map.depr_amount,
 	).run()
@@ -74,7 +74,7 @@ def correct_value_for_assets_with_auto_depr(fb_name=None):
 		.on(company.name == asset.company)
 		.select(
 			asset.name.as_("asset_name"),
-			asset.gross_purchase_amount.as_("gross_purchase_amount"),
+			asset.net_purchase_amount.as_("net_purchase_amount"),
 			asset.opening_accumulated_depreciation.as_("opening_accumulated_depreciation"),
 			Sum(gle.debit).as_("depr_amount"),
 		)
@@ -101,7 +101,7 @@ def correct_value_for_assets_with_auto_depr(fb_name=None):
 		.on(asset_details_and_depr_amount_map.asset_name == afb.parent)
 		.set(
 			afb.value_after_depreciation,
-			asset_details_and_depr_amount_map.gross_purchase_amount
+			asset_details_and_depr_amount_map.net_purchase_amount
 			- asset_details_and_depr_amount_map.opening_accumulated_depreciation
 			- asset_details_and_depr_amount_map.depr_amount,
 		)

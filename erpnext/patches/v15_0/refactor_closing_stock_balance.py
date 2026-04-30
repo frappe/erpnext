@@ -9,6 +9,9 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 
 
 def execute():
+	if not frappe.db.has_table("Closing Stock Balance"):
+		return
+
 	add_inventory_dimensions_to_stock_closing_balance()
 	create_stock_closing_entries()
 

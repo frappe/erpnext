@@ -20,6 +20,53 @@ frappe.ui.form.on("Journal Entry", {
 			"Unreconcile Payment Entries",
 			"Bank Transaction",
 		];
+
+		frm.trigger("set_queries");
+	},
+
+	set_queries(frm) {
+		frm.set_query("periodic_entry_difference_account", function () {
+			return {
+				filters: {
+					is_group: 0,
+					company: frm.doc.company,
+				},
+			};
+		});
+
+		frm.set_query("stock_asset_account", function () {
+			return {
+				filters: {
+					is_group: 0,
+					account_type: "Stock",
+					company: frm.doc.company,
+				},
+			};
+		});
+
+		frm.set_query("project", "accounts", function (doc, cdt, cdn) {
+			let row = frappe.get_doc(cdt, cdn);
+			let filters = {
+				company: doc.company,
+			};
+			if (row.party_type == "Customer") {
+				filters.customer = row.party;
+			}
+			return {
+				query: "erpnext.controllers.queries.get_project_name",
+				filters,
+			};
+		});
+	},
+
+	get_balance_for_periodic_accounting(frm) {
+		frm.call({
+			method: "get_balance_for_periodic_accounting",
+			doc: frm.doc,
+			callback: function (r) {
+				refresh_field("accounts");
+			},
+		});
 	},
 
 	refresh: function (frm) {
@@ -35,7 +82,7 @@ frappe.ui.form.on("Journal Entry", {
 						to_date: moment(frm.doc.modified).format("YYYY-MM-DD"),
 						company: frm.doc.company,
 						finance_book: frm.doc.finance_book,
-						group_by: "",
+						categorize_by: "",
 						show_cancelled_entries: frm.doc.docstatus === 2,
 					};
 					frappe.set_route("query-report", "General Ledger");
@@ -78,6 +125,12 @@ frappe.ui.form.on("Journal Entry", {
 		}
 
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
+
+		if (frm.doc.voucher_type !== "Exchange Gain Or Loss") {
+			$.each(frm.doc.accounts || [], function (i, row) {
+				erpnext.journal_entry.set_exchange_rate(frm, row.doctype, row.name);
+			});
+		}
 	},
 	before_save: function (frm) {
 		if (frm.doc.docstatus == 0 && !frm.doc.is_system_generated) {
@@ -163,6 +216,8 @@ frappe.ui.form.on("Journal Entry", {
 		});
 
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		erpnext.utils.set_letter_head(frm);
+		frm.clear_table("tax_withholding_entries");
 	},
 
 	voucher_type: function (frm) {
@@ -213,12 +268,30 @@ frappe.ui.form.on("Journal Entry", {
 			});
 		}
 	},
+
+	apply_tds: function (frm) {
+		frm.clear_table("tax_withholding_entries");
+	},
 });
 
 var update_jv_details = function (doc, r) {
 	$.each(r, function (i, d) {
 		var row = frappe.model.add_child(doc, "Journal Entry Account", "accounts");
-		frappe.model.set_value(row.doctype, row.name, "account", d.account);
+		const {
+			idx,
+			name,
+			owner,
+			parent,
+			parenttype,
+			parentfield,
+			creation,
+			modified,
+			modified_by,
+			doctype,
+			docstatus,
+			...fields
+		} = d;
+		frappe.model.set_value(row.doctype, row.name, fields);
 	});
 	refresh_field("accounts");
 };
@@ -228,10 +301,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 		this.load_defaults();
 		this.setup_queries();
 		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
-	}
-
-	onload_post_render() {
-		this.frm.get_field("accounts").grid.set_multiple_add("account");
 	}
 
 	load_defaults() {
@@ -579,7 +648,7 @@ $.extend(erpnext.journal_entry, {
 					reqd: 1,
 					default: frm.doc.posting_date,
 				},
-				{ fieldtype: "Small Text", fieldname: "user_remark", label: __("User Remark") },
+				{ fieldtype: "Small Text", fieldname: "remark", label: __("Remark") },
 				{
 					fieldtype: "Select",
 					fieldname: "naming_series",
@@ -596,8 +665,14 @@ $.extend(erpnext.journal_entry, {
 			var values = dialog.get_values();
 
 			frm.set_value("posting_date", values.posting_date);
-			frm.set_value("user_remark", values.user_remark);
 			frm.set_value("naming_series", values.naming_series);
+			if (values.remark) {
+				frm.set_value("custom_remark", 1);
+				frm.set_value("remark", values.remark);
+			} else {
+				frm.set_value("custom_remark", 0);
+				frm.set_value("remark", "");
+			}
 
 			// clear table is used because there might've been an error while adding child
 			// and cleanup didn't happen
@@ -682,6 +757,8 @@ $.extend(erpnext.journal_entry, {
 					}
 				},
 			});
+		} else {
+			erpnext.journal_entry.clear_fields(frm, dt, dn);
 		}
 	},
 	set_amount_on_last_row: function (frm, dt, dn) {
@@ -705,5 +782,14 @@ $.extend(erpnext.journal_entry, {
 			}
 		}
 		refresh_field("accounts");
+	},
+	clear_fields: function (frm, dt, dn) {
+		let row = locals[dt][dn];
+
+		row.party_type = null;
+		row.party = null;
+		row.bank_account = null;
+
+		frm.refresh_field("accounts");
 	},
 });

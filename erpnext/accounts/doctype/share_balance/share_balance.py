@@ -14,7 +14,7 @@ class ShareBalance(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		amount: DF.Int
+		amount: DF.Currency
 		current_state: DF.Literal["", "Issued", "Purchased"]
 		from_no: DF.Int
 		is_company: DF.Check
@@ -22,7 +22,7 @@ class ShareBalance(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		rate: DF.Int
+		rate: DF.Currency
 		share_type: DF.Link
 		to_no: DF.Int
 	# end: auto-generated types

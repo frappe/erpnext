@@ -1,0 +1,44 @@
+{
+ "allow_roles": [
+  {
+   "role": "Manufacturing Manager"
+  },
+  {
+   "role": "Manufacturing User"
+  }
+ ],
+ "creation": "2026-02-20 13:31:02.066000",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2026-02-25 16:59:39.508221",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Manufacturing Onboarding",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Create Raw Materials"
+  },
+  {
+   "step": "Create Finished Goods"
+  },
+  {
+   "step": "Create Operations"
+  },
+  {
+   "step": "Create Bill of Materials"
+  },
+  {
+   "step": "Create Work Order"
+  },
+  {
+   "step": "View Work Order Summary Report"
+  },
+  {
+   "step": "Review Manufacturing Settings"
+  }
+ ],
+ "title": "Manufacturing Setup"
+}

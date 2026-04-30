@@ -8,4 +8,14 @@ frappe.ui.form.on("Payment Gateway Account", {
 			frm.set_df_property("payment_gateway", "read_only", 1);
 		}
 	},
+
+	setup(frm) {
+		frm.set_query("payment_account", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+				},
+			};
+		});
+	},
 });

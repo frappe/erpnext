@@ -18,6 +18,9 @@ def get_data():
 			"Purchase Order": ["items", "purchase_order"],
 			"Project": ["items", "project"],
 		},
+		"internal_and_external_links": {
+			"Purchase Invoice": ["items", "purchase_invoice"],
+		},
 		"transactions": [
 			{
 				"label": _("Related"),

@@ -1,10 +1,12 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from datetime import date
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt, today
 
 
@@ -55,21 +57,29 @@ def get_loyalty_details(
 	if not expiry_date:
 		expiry_date = today()
 
-	condition = ""
-	if company:
-		condition = " and company=%s " % frappe.db.escape(company)
-	if not include_expired_entry:
-		condition += " and expiry_date>='%s' " % expiry_date
+	LoyaltyPointEntry = frappe.qb.DocType("Loyalty Point Entry")
 
-	loyalty_point_details = frappe.db.sql(
-		f"""select sum(loyalty_points) as loyalty_points,
-		sum(purchase_amount) as total_spent from `tabLoyalty Point Entry`
-		where customer=%s and loyalty_program=%s and posting_date <= %s
-		{condition}
-		group by customer""",
-		(customer, loyalty_program, expiry_date),
-		as_dict=1,
+	query = (
+		frappe.qb.from_(LoyaltyPointEntry)
+		.select(
+			Sum(LoyaltyPointEntry.loyalty_points).as_("loyalty_points"),
+			Sum(LoyaltyPointEntry.purchase_amount).as_("total_spent"),
+		)
+		.where(
+			(LoyaltyPointEntry.customer == customer)
+			& (LoyaltyPointEntry.loyalty_program == loyalty_program)
+			& (LoyaltyPointEntry.posting_date <= expiry_date)
+		)
+		.groupby(LoyaltyPointEntry.customer)
 	)
+
+	if company:
+		query = query.where(LoyaltyPointEntry.company == company)
+
+	if not include_expired_entry:
+		query = query.where(LoyaltyPointEntry.expiry_date >= expiry_date)
+
+	loyalty_point_details = query.run(as_dict=True)
 
 	if loyalty_point_details:
 		return loyalty_point_details[0]
@@ -79,13 +89,13 @@ def get_loyalty_details(
 
 @frappe.whitelist()
 def get_loyalty_program_details_with_points(
-	customer,
-	loyalty_program=None,
-	expiry_date=None,
-	company=None,
-	silent=False,
-	include_expired_entry=False,
-	current_transaction_amount=0,
+	customer: str,
+	loyalty_program: str | None = None,
+	expiry_date: str | date | None = None,
+	company: str | None = None,
+	silent: bool = False,
+	include_expired_entry: bool = False,
+	current_transaction_amount: int | float = 0,
 ):
 	lp_details = get_loyalty_program_details(customer, loyalty_program, company=company, silent=silent)
 	loyalty_program = frappe.get_doc("Loyalty Program", loyalty_program)
@@ -110,12 +120,12 @@ def get_loyalty_program_details_with_points(
 
 @frappe.whitelist()
 def get_loyalty_program_details(
-	customer,
-	loyalty_program=None,
-	expiry_date=None,
-	company=None,
-	silent=False,
-	include_expired_entry=False,
+	customer: str,
+	loyalty_program: str | None = None,
+	expiry_date: str | date | None = None,
+	company: str | None = None,
+	silent: bool = False,
+	include_expired_entry: bool = False,
 ):
 	lp_details = frappe._dict()
 
@@ -137,7 +147,7 @@ def get_loyalty_program_details(
 
 
 @frappe.whitelist()
-def get_redeemption_factor(loyalty_program=None, customer=None):
+def get_redeemption_factor(loyalty_program: str | None = None, customer: str | None = None):
 	customer_loyalty_program = None
 	if not loyalty_program:
 		customer_loyalty_program = frappe.db.get_value("Customer", customer, "loyalty_program")
@@ -178,8 +188,9 @@ def validate_loyalty_points(ref_doc, points_to_redeem):
 
 		loyalty_amount = flt(points_to_redeem * loyalty_program_details.conversion_factor)
 
-		if loyalty_amount > ref_doc.rounded_total:
-			frappe.throw(_("You can't redeem Loyalty Points having more value than the Rounded Total."))
+		total_amount = ref_doc.grand_total if ref_doc.is_rounded_total_disabled() else ref_doc.rounded_total
+		if loyalty_amount > total_amount:
+			frappe.throw(_("You can't redeem Loyalty Points having more value than the Total Amount."))
 
 		if not ref_doc.loyalty_amount and ref_doc.loyalty_amount != loyalty_amount:
 			ref_doc.loyalty_amount = loyalty_amount

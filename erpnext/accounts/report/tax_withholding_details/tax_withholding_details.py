@@ -1,259 +1,266 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull
 
 
-def execute(filters=None):
-	if filters.get("party_type") == "Customer":
-		party_naming_by = frappe.db.get_single_value("Selling Settings", "cust_master_name")
-	else:
-		party_naming_by = frappe.db.get_single_value("Buying Settings", "supp_master_name")
+class TaxWithholdingDetailsReport:
+	party_types = ("Customer", "Supplier")
+	document_types = ("Purchase Invoice", "Sales Invoice", "Payment Entry", "Journal Entry")
 
-	filters["naming_series"] = party_naming_by
+	def __init__(self, filters=None):
+		self.filters = frappe._dict(filters or {})
+		self.entries = []
+		self.doc_info = {}
+		self.party_details = {}
 
-	validate_filters(filters)
-	(
-		tds_docs,
-		tds_accounts,
-		tax_category_map,
-		journal_entry_party_map,
-		net_total_map,
-	) = get_tds_docs(filters)
+	@classmethod
+	def execute(cls, filters=None):
+		return cls(filters).run()
 
-	columns = get_columns(filters)
+	def run(self):
+		self.validate_filters()
+		return self.get_columns(), self.get_data()
 
-	res = get_result(
-		filters, tds_docs, tds_accounts, tax_category_map, journal_entry_party_map, net_total_map
-	)
-	return columns, res
+	def validate_filters(self):
+		if not self.filters.from_date or not self.filters.to_date:
+			frappe.throw(_("From Date and To Date are required"))
 
+		if self.filters.from_date > self.filters.to_date:
+			frappe.throw(_("From Date must be before To Date"))
 
-def validate_filters(filters):
-	"""Validate if dates are properly set"""
-	if filters.from_date > filters.to_date:
-		frappe.throw(_("From Date must be before To Date"))
+	def get_data(self):
+		self.entries = self.get_entries_query().run(as_dict=True)
+		if not self.entries:
+			return []
 
+		self.doc_info = self.fetch_additional_doc_info()
+		self.party_details = self.fetch_party_details()
+		return self.build_rows()
 
-def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_party_map, net_total_map):
-	party_map = get_party_pan_map(filters.get("party_type"))
-	tax_rate_map = get_tax_rate_map(filters)
-	gle_map = get_gle_map(tds_docs)
+	def build_rows(self):
+		rows = []
+		for entry in self.entries:
+			doc_details = (
+				self.doc_info.get((entry.transaction_type, entry.ref_no), {}) if entry.ref_no else {}
+			)
+			party_info = self.party_details.get((entry.party_type, entry.party), {})
+			rows.append({**entry, **doc_details, **party_info})
 
-	out = []
-	for name, details in gle_map.items():
-		for entry in details:
-			tax_amount, total_amount, grand_total, base_total = 0, 0, 0, 0
-			tax_withholding_category, rate = None, None
-			bill_no, bill_date = "", ""
-			party = entry.party or entry.against
-			posting_date = entry.posting_date
-			voucher_type = entry.voucher_type
+		rows.sort(
+			key=lambda x: (
+				x["tax_withholding_category"] or "",
+				x["transaction_date"] or "",
+				x["withholding_name"] or "",
+			)
+		)
+		return rows
 
-			if voucher_type == "Journal Entry":
-				party_list = journal_entry_party_map.get(name)
-				if party_list:
-					party = party_list[0]
+	def get_entries_query(self):
+		twe = frappe.qb.DocType("Tax Withholding Entry")
+		query = (
+			frappe.qb.from_(twe)
+			.select(
+				twe.party_type,
+				twe.party,
+				IfNull(twe.tax_id, "").as_("tax_id"),
+				twe.tax_withholding_category,
+				twe.taxable_amount.as_("total_amount"),
+				twe.tax_rate.as_("rate"),
+				twe.withholding_amount.as_("tax_amount"),
+				IfNull(twe.taxable_doctype, "").as_("transaction_type"),
+				IfNull(twe.taxable_name, "").as_("ref_no"),
+				twe.taxable_date,
+				IfNull(twe.withholding_doctype, "").as_("withholding_doctype"),
+				IfNull(twe.withholding_name, "").as_("withholding_name"),
+				twe.withholding_date.as_("transaction_date"),
+			)
+			.where(twe.docstatus == 1)
+			.where(twe.withholding_date >= self.filters.from_date)
+			.where(twe.withholding_date <= self.filters.to_date)
+			.where(IfNull(twe.withholding_name, "") != "")
+			.where(twe.status != "Duplicate")
+		)
 
-			if entry.account in tds_accounts.keys():
-				tax_amount += entry.credit - entry.debit
-				# infer tax withholding category from the account if it's the single account for this category
-				tax_withholding_category = tds_accounts.get(entry.account)
-				# or else the consolidated value from the voucher document
-				if not tax_withholding_category:
-					tax_withholding_category = tax_category_map.get((voucher_type, name))
-				# or else from the party default
-				if not tax_withholding_category:
-					tax_withholding_category = party_map.get(party, {}).get("tax_withholding_category")
+		if self.filters.company:
+			query = query.where(twe.company == self.filters.company)
+		if self.filters.party_type:
+			query = query.where(twe.party_type == self.filters.party_type)
+		if self.filters.party:
+			query = query.where(twe.party == self.filters.party)
 
-				rate = tax_rate_map.get(tax_withholding_category)
-			if net_total_map.get((voucher_type, name)):
-				if voucher_type == "Journal Entry" and tax_amount and rate:
-					# back calcalute total amount from rate and tax_amount
-					base_total = min(tax_amount / (rate / 100), net_total_map.get((voucher_type, name))[0])
-					total_amount = grand_total = base_total
-				elif voucher_type == "Purchase Invoice":
-					total_amount, grand_total, base_total, bill_no, bill_date = net_total_map.get(
-						(voucher_type, name)
-					)
-				else:
-					total_amount, grand_total, base_total = net_total_map.get((voucher_type, name))
-			else:
-				total_amount += entry.credit
+		return query
 
-			if tax_amount:
-				if party_map.get(party, {}).get("party_type") == "Supplier":
-					party_name = "supplier_name"
-					party_type = "supplier_type"
-				else:
-					party_name = "customer_name"
-					party_type = "customer_type"
+	def fetch_party_details(self):
+		parties_by_type = {pt: set() for pt in self.party_types}
+		for entry in self.entries:
+			if entry.party_type in parties_by_type and entry.party:
+				parties_by_type[entry.party_type].add(entry.party)
 
-				row = {
-					"pan" if frappe.db.has_column(filters.party_type, "pan") else "tax_id": party_map.get(
-						party, {}
-					).get("pan"),
-					"party": party_map.get(party, {}).get("name"),
-				}
+		party_map = {}
+		for party_type, party_set in parties_by_type.items():
+			if not party_set:
+				continue
 
-				if filters.naming_series == "Naming Series":
-					row["party_name"] = party_map.get(party, {}).get(party_name)
+			query = self.get_party_query(party_type, party_set)
+			if query is None:
+				continue
 
-				row.update(
-					{
-						"section_code": tax_withholding_category or "",
-						"entity_type": party_map.get(party, {}).get(party_type),
-						"rate": rate,
-						"total_amount": total_amount,
-						"grand_total": grand_total,
-						"base_total": base_total,
-						"tax_amount": tax_amount,
-						"transaction_date": posting_date,
-						"transaction_type": voucher_type,
-						"ref_no": name,
-						"supplier_invoice_no": bill_no,
-						"supplier_invoice_date": bill_date,
-					}
-				)
-				out.append(row)
+			for row in query.run(as_dict=True):
+				party_map[(party_type, row.pop("name"))] = row
 
-	out.sort(key=lambda x: x["section_code"])
+		return party_map
 
-	return out
+	def get_party_query(self, party_type, party_set):
+		doctype = frappe.qb.DocType(party_type)
+		fields = [doctype.name]
 
-
-def get_party_pan_map(party_type):
-	party_map = frappe._dict()
-
-	fields = ["name", "tax_withholding_category"]
-	if party_type == "Supplier":
-		fields += ["supplier_type", "supplier_name"]
-	else:
-		fields += ["customer_type", "customer_name"]
-
-	if frappe.db.has_column(party_type, "pan"):
-		fields.append("pan")
-
-	party_details = frappe.db.get_all(party_type, fields=fields)
-
-	for party in party_details:
-		party.party_type = party_type
-		party_map[party.name] = party
-
-	return party_map
-
-
-def get_gle_map(documents):
-	# create gle_map of the form
-	# {"purchase_invoice": list of dict of all gle created for this invoice}
-	gle_map = {}
-
-	gle = frappe.db.get_all(
-		"GL Entry",
-		{"voucher_no": ["in", documents], "is_cancelled": 0},
-		["credit", "debit", "account", "voucher_no", "posting_date", "voucher_type", "against", "party"],
-	)
-
-	for d in gle:
-		if d.voucher_no not in gle_map:
-			gle_map[d.voucher_no] = [d]
+		if party_type == "Supplier":
+			fields.extend(
+				[
+					doctype.supplier_type.as_("party_entity_type"),
+					doctype.supplier_name.as_("party_name"),
+				]
+			)
+		elif party_type == "Customer":
+			fields.extend(
+				[
+					doctype.customer_type.as_("party_entity_type"),
+					doctype.customer_name.as_("party_name"),
+				]
+			)
 		else:
-			gle_map[d.voucher_no].append(d)
+			return None
 
-	return gle_map
+		return frappe.qb.from_(doctype).select(*fields).where(doctype.name.isin(party_set))
 
+	def fetch_additional_doc_info(self):
+		docs_by_type = {dt: set() for dt in self.document_types}
+		for entry in self.entries:
+			if entry.ref_no and entry.transaction_type in docs_by_type:
+				docs_by_type[entry.transaction_type].add(entry.ref_no)
 
-def get_columns(filters):
-	pan = "pan" if frappe.db.has_column(filters.party_type, "pan") else "tax_id"
-	columns = [
-		{
-			"label": _("Section Code"),
-			"options": "Tax Withholding Category",
-			"fieldname": "section_code",
-			"fieldtype": "Link",
-			"width": 90,
-		},
-		{"label": _(frappe.unscrub(pan)), "fieldname": pan, "fieldtype": "Data", "width": 60},
-	]
+		doc_info = {}
+		for doctype_name, voucher_set in docs_by_type.items():
+			if not voucher_set:
+				continue
 
-	if filters.naming_series == "Naming Series":
-		columns.append(
+			query = self.get_doc_info_query(doctype_name, voucher_set)
+			if query is None:
+				continue
+
+			for row in query.run(as_dict=True):
+				doc_info[(doctype_name, row.pop("name"))] = row
+
+		return doc_info
+
+	def get_doc_info_query(self, doctype_name, voucher_set):
+		if doctype_name == "Purchase Invoice":
+			get_doc_fields = self.get_purchase_invoice_fields
+		elif doctype_name == "Sales Invoice":
+			get_doc_fields = self.get_sales_invoice_fields
+		elif doctype_name == "Payment Entry":
+			get_doc_fields = self.get_payment_entry_fields
+		elif doctype_name == "Journal Entry":
+			get_doc_fields = self.get_journal_entry_fields
+		else:
+			return None
+
+		doctype = frappe.qb.DocType(doctype_name)
+		fields = [doctype.name, *get_doc_fields(doctype)]
+		return frappe.qb.from_(doctype).select(*fields).where(doctype.name.isin(voucher_set))
+
+	def get_purchase_invoice_fields(self, doctype):
+		return [
+			doctype.grand_total,
+			doctype.base_total,
+			doctype.bill_no.as_("supplier_invoice_no"),
+			doctype.bill_date.as_("supplier_invoice_date"),
+		]
+
+	def get_sales_invoice_fields(self, doctype):
+		return [doctype.grand_total, doctype.base_total]
+
+	def get_payment_entry_fields(self, doctype):
+		return [
+			doctype.paid_amount_after_tax.as_("grand_total"),
+			doctype.base_paid_amount.as_("base_total"),
+		]
+
+	def get_journal_entry_fields(self, doctype):
+		return [doctype.total_debit.as_("grand_total"), doctype.total_debit.as_("base_total")]
+
+	def get_columns(self):
+		party_type = self.filters.get("party_type", "Party")
+		return [
 			{
-				"label": _(filters.party_type + " Name"),
+				"label": _("Tax Withholding Category"),
+				"options": "Tax Withholding Category",
+				"fieldname": "tax_withholding_category",
+				"fieldtype": "Link",
+				"width": 90,
+			},
+			{"label": _("Tax Id"), "fieldname": "tax_id", "fieldtype": "Data", "width": 60},
+			{
+				"label": _(f"{party_type} Name"),
 				"fieldname": "party_name",
 				"fieldtype": "Data",
 				"width": 180,
-			}
-		)
-	else:
-		columns.append(
+			},
 			{
-				"label": _(filters.get("party_type")),
+				"label": _(party_type),
 				"fieldname": "party",
 				"fieldtype": "Dynamic Link",
 				"options": "party_type",
 				"width": 180,
-			}
-		)
-
-	columns.extend(
-		[
-			{"label": _("Entity Type"), "fieldname": "entity_type", "fieldtype": "Data", "width": 100},
-		]
-	)
-	if filters.party_type == "Supplier":
-		columns.extend(
-			[
-				{
-					"label": _("Supplier Invoice No"),
-					"fieldname": "supplier_invoice_no",
-					"fieldtype": "Data",
-					"width": 120,
-				},
-				{
-					"label": _("Supplier Invoice Date"),
-					"fieldname": "supplier_invoice_date",
-					"fieldtype": "Date",
-					"width": 120,
-				},
-			]
-		)
-
-	columns.extend(
-		[
-			{
-				"label": _("TDS Rate %") if filters.get("party_type") == "Supplier" else _("TCS Rate %"),
-				"fieldname": "rate",
-				"fieldtype": "Percent",
-				"width": 60,
 			},
 			{
-				"label": _("Total Amount"),
+				"label": _(f"{party_type} Type"),
+				"fieldname": "party_entity_type",
+				"fieldtype": "Data",
+				"width": 100,
+			},
+			{
+				"label": _("Supplier Invoice No"),
+				"fieldname": "supplier_invoice_no",
+				"fieldtype": "Data",
+				"width": 120,
+			},
+			{
+				"label": _("Supplier Invoice Date"),
+				"fieldname": "supplier_invoice_date",
+				"fieldtype": "Date",
+				"width": 120,
+			},
+			{"label": _("Tax Rate %"), "fieldname": "rate", "fieldtype": "Percent", "width": 60},
+			{
+				"label": _("Taxable Amount"),
 				"fieldname": "total_amount",
-				"fieldtype": "Float",
+				"fieldtype": "Currency",
 				"width": 120,
 			},
+			{"label": _("Tax Amount"), "fieldname": "tax_amount", "fieldtype": "Currency", "width": 120},
 			{
-				"label": _("Base Total"),
+				"label": _("Grand Total (Company Currency)"),
 				"fieldname": "base_total",
-				"fieldtype": "Float",
-				"width": 120,
+				"fieldtype": "Currency",
+				"width": 150,
 			},
 			{
-				"label": _("TDS Amount") if filters.get("party_type") == "Supplier" else _("TCS Amount"),
-				"fieldname": "tax_amount",
-				"fieldtype": "Float",
-				"width": 120,
-			},
-			{
-				"label": _("Grand Total"),
+				"label": _("Grand Total (Transaction Currency)"),
 				"fieldname": "grand_total",
-				"fieldtype": "Float",
-				"width": 120,
+				"fieldtype": "Currency",
+				"width": 170,
 			},
-			{"label": _("Transaction Type"), "fieldname": "transaction_type", "width": 130},
+			{"label": _("Reference Date"), "fieldname": "taxable_date", "fieldtype": "Date", "width": 100},
+			{
+				"label": _("Transaction Type"),
+				"fieldname": "transaction_type",
+				"fieldtype": "Data",
+				"width": 130,
+			},
 			{
 				"label": _("Reference No."),
 				"fieldname": "ref_no",
@@ -267,184 +274,14 @@ def get_columns(filters):
 				"fieldtype": "Date",
 				"width": 100,
 			},
+			{
+				"label": _("Withholding Document"),
+				"fieldname": "withholding_name",
+				"fieldtype": "Dynamic Link",
+				"options": "withholding_doctype",
+				"width": 150,
+			},
 		]
-	)
-
-	return columns
 
 
-def get_tds_docs(filters):
-	tds_documents = []
-	purchase_invoices = []
-	sales_invoices = []
-	payment_entries = []
-	journal_entries = []
-	tax_category_map = frappe._dict()
-	net_total_map = frappe._dict()
-	journal_entry_party_map = frappe._dict()
-	bank_accounts = frappe.get_all("Account", {"is_group": 0, "account_type": "Bank"}, pluck="name")
-
-	_tds_accounts = frappe.get_all(
-		"Tax Withholding Account",
-		{"company": filters.get("company")},
-		["account", "parent"],
-	)
-	tds_accounts = {}
-	for tds_acc in _tds_accounts:
-		# if it turns out not to be the only tax withholding category, then don't include in the map
-		if tds_acc["account"] in tds_accounts:
-			tds_accounts[tds_acc["account"]] = None
-		else:
-			tds_accounts[tds_acc["account"]] = tds_acc["parent"]
-
-	tds_docs = get_tds_docs_query(filters, bank_accounts, list(tds_accounts.keys())).run(as_dict=True)
-
-	for d in tds_docs:
-		if d.voucher_type == "Purchase Invoice":
-			purchase_invoices.append(d.voucher_no)
-		if d.voucher_type == "Sales Invoice":
-			sales_invoices.append(d.voucher_no)
-		elif d.voucher_type == "Payment Entry":
-			payment_entries.append(d.voucher_no)
-		elif d.voucher_type == "Journal Entry":
-			journal_entries.append(d.voucher_no)
-
-		tds_documents.append(d.voucher_no)
-
-	if purchase_invoices:
-		get_doc_info(purchase_invoices, "Purchase Invoice", tax_category_map, net_total_map)
-
-	if sales_invoices:
-		get_doc_info(sales_invoices, "Sales Invoice", tax_category_map, net_total_map)
-
-	if payment_entries:
-		get_doc_info(payment_entries, "Payment Entry", tax_category_map, net_total_map)
-
-	if journal_entries:
-		journal_entry_party_map = get_journal_entry_party_map(journal_entries)
-		get_doc_info(journal_entries, "Journal Entry", tax_category_map, net_total_map)
-
-	return (
-		tds_documents,
-		tds_accounts,
-		tax_category_map,
-		journal_entry_party_map,
-		net_total_map,
-	)
-
-
-def get_tds_docs_query(filters, bank_accounts, tds_accounts):
-	if not tds_accounts:
-		frappe.throw(
-			_("No {0} Accounts found for this company.").format(frappe.bold(_("Tax Withholding"))),
-			title=_("Accounts Missing Error"),
-		)
-	gle = frappe.qb.DocType("GL Entry")
-	query = (
-		frappe.qb.from_(gle)
-		.select("voucher_no", "voucher_type", "against", "party")
-		.where(gle.is_cancelled == 0)
-	)
-
-	if filters.get("from_date"):
-		query = query.where(gle.posting_date >= filters.get("from_date"))
-	if filters.get("to_date"):
-		query = query.where(gle.posting_date <= filters.get("to_date"))
-
-	if filters.get("party"):
-		party = [filters.get("party")]
-		jv_condition = gle.against.isin(party) | (
-			(gle.voucher_type == "Journal Entry") & (gle.party == filters.get("party"))
-		)
-	else:
-		party = frappe.get_all(filters.get("party_type"), pluck="name")
-		jv_condition = gle.against.isin(party) | (
-			(gle.voucher_type == "Journal Entry")
-			& ((gle.party_type == filters.get("party_type")) | (gle.party_type == ""))
-		)
-
-	query.where((gle.account.isin(tds_accounts) & jv_condition) | gle.party.isin(party))
-	if bank_accounts:
-		query = query.where(
-			gle.against.notin(bank_accounts) & (gle.account.isin(tds_accounts) & jv_condition)
-			| gle.party.isin(party)
-		)
-
-	return query
-
-
-def get_journal_entry_party_map(journal_entries):
-	journal_entry_party_map = {}
-	for d in frappe.db.get_all(
-		"Journal Entry Account",
-		{
-			"parent": ("in", journal_entries),
-			"party_type": ("in", ("Supplier", "Customer")),
-			"party": ("is", "set"),
-		},
-		["parent", "party"],
-	):
-		if d.parent not in journal_entry_party_map:
-			journal_entry_party_map[d.parent] = []
-		journal_entry_party_map[d.parent].append(d.party)
-
-	return journal_entry_party_map
-
-
-def get_doc_info(vouchers, doctype, tax_category_map, net_total_map=None):
-	common_fields = ["name"]
-	fields_dict = {
-		"Purchase Invoice": [
-			"tax_withholding_category",
-			"base_tax_withholding_net_total",
-			"grand_total",
-			"base_total",
-			"bill_no",
-			"bill_date",
-		],
-		"Sales Invoice": ["base_net_total", "grand_total", "base_total"],
-		"Payment Entry": [
-			"tax_withholding_category",
-			"paid_amount",
-			"paid_amount_after_tax",
-			"base_paid_amount",
-		],
-		"Journal Entry": ["tax_withholding_category", "total_debit"],
-	}
-
-	entries = frappe.get_all(
-		doctype, filters={"name": ("in", vouchers)}, fields=common_fields + fields_dict[doctype]
-	)
-
-	for entry in entries:
-		tax_category_map[(doctype, entry.name)] = entry.tax_withholding_category
-		if doctype == "Purchase Invoice":
-			value = [
-				entry.base_tax_withholding_net_total,
-				entry.grand_total,
-				entry.base_total,
-				entry.bill_no,
-				entry.bill_date,
-			]
-		elif doctype == "Sales Invoice":
-			value = [entry.base_net_total, entry.grand_total, entry.base_total]
-		elif doctype == "Payment Entry":
-			value = [entry.paid_amount, entry.paid_amount_after_tax, entry.base_paid_amount]
-		else:
-			value = [entry.total_debit] * 3
-
-		net_total_map[(doctype, entry.name)] = value
-
-
-def get_tax_rate_map(filters):
-	rate_map = frappe.get_all(
-		"Tax Withholding Rate",
-		filters={
-			"from_date": ("<=", filters.get("from_date")),
-			"to_date": (">=", filters.get("to_date")),
-		},
-		fields=["parent", "tax_withholding_rate"],
-		as_list=1,
-	)
-
-	return frappe._dict(rate_map)
+execute = TaxWithholdingDetailsReport.execute

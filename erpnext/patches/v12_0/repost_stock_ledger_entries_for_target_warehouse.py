@@ -8,7 +8,7 @@ import frappe
 def execute():
 	warehouse_perm = frappe.get_all(
 		"User Permission",
-		fields=["count(*) as p_count", "is_default", "user"],
+		fields=[{"COUNT": "*", "as": "p_count"}, "is_default", "user"],
 		filters={"allow": "Warehouse"},
 		group_by="user",
 	)

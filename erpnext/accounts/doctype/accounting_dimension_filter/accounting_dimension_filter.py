@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe import _, scrub
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -17,17 +17,16 @@ class AccountingDimensionFilter(Document):
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.allowed_dimension.allowed_dimension import AllowedDimension
-		from erpnext.accounts.doctype.applicable_on_account.applicable_on_account import (
-			ApplicableOnAccount,
-		)
+		from erpnext.accounts.doctype.applicable_on_account.applicable_on_account import ApplicableOnAccount
 
-		accounting_dimension: DF.Literal
+		accounting_dimension: DF.Literal[None]
 		accounts: DF.Table[ApplicableOnAccount]
 		allow_or_restrict: DF.Literal["Allow", "Restrict"]
 		apply_restriction_on_values: DF.Check
 		company: DF.Link
 		dimensions: DF.Table[AllowedDimension]
 		disabled: DF.Check
+		fieldname: DF.Data | None
 	# end: auto-generated types
 
 	def before_save(self):
@@ -37,6 +36,10 @@ class AccountingDimensionFilter(Document):
 			self.set("dimensions", [])
 
 	def validate(self):
+		self.fieldname = frappe.db.get_value(
+			"Accounting Dimension", {"document_type": self.accounting_dimension}, "fieldname"
+		) or frappe.scrub(self.accounting_dimension)  # scrub to handle default accounting dimension
+
 		self.validate_applicable_accounts()
 
 	def validate_applicable_accounts(self):
@@ -66,39 +69,34 @@ class AccountingDimensionFilter(Document):
 
 
 def get_dimension_filter_map():
-	if not frappe.flags.get("dimension_filter_map"):
-		filters = frappe.db.sql(
-			"""
-			SELECT
-				a.applicable_on_account, d.dimension_value, p.accounting_dimension,
-				p.allow_or_restrict, a.is_mandatory
-			FROM
-				`tabApplicable On Account` a,
-				`tabAccounting Dimension Filter` p
-			LEFT JOIN `tabAllowed Dimension` d ON d.parent = p.name
-			WHERE
-				p.name = a.parent
-				AND p.disabled = 0
-		""",
-			as_dict=1,
+	filters = frappe.db.sql(
+		"""
+		SELECT
+			a.applicable_on_account, d.dimension_value, p.accounting_dimension,
+			p.allow_or_restrict, p.fieldname, a.is_mandatory
+		FROM
+			`tabApplicable On Account` a,
+			`tabAccounting Dimension Filter` p
+		LEFT JOIN `tabAllowed Dimension` d ON d.parent = p.name
+		WHERE
+			p.name = a.parent
+			AND p.disabled = 0
+	""",
+		as_dict=1,
+	)
+
+	dimension_filter_map = {}
+
+	for f in filters:
+		build_map(
+			dimension_filter_map,
+			f.fieldname,
+			f.applicable_on_account,
+			f.dimension_value,
+			f.allow_or_restrict,
+			f.is_mandatory,
 		)
-
-		dimension_filter_map = {}
-
-		for f in filters:
-			f.fieldname = scrub(f.accounting_dimension)
-
-			build_map(
-				dimension_filter_map,
-				f.fieldname,
-				f.applicable_on_account,
-				f.dimension_value,
-				f.allow_or_restrict,
-				f.is_mandatory,
-			)
-		frappe.flags.dimension_filter_map = dimension_filter_map
-
-	return frappe.flags.dimension_filter_map
+	return dimension_filter_map
 
 
 def build_map(map_object, dimension, account, filter_value, allow_or_restrict, is_mandatory):

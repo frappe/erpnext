@@ -3,7 +3,7 @@
  "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
- "creation": "2013-05-24 19:29:08",
+ "creation": "2026-01-29 21:18:32.391385",
  "doctype": "DocType",
  "document_type": "Document",
  "editable_grid": 1,
@@ -20,7 +20,10 @@
   "column_break1",
   "order_type",
   "company",
+  "has_unit_price_items",
   "amended_from",
+  "section_break_cojf",
+  "title",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -31,6 +34,7 @@
   "ignore_pricing_rule",
   "items_section",
   "scan_barcode",
+  "last_scanned_warehouse",
   "items",
   "sec_break23",
   "total_qty",
@@ -55,18 +59,20 @@
   "base_total_taxes_and_charges",
   "column_break_42",
   "total_taxes_and_charges",
-  "totals",
-  "base_grand_total",
-  "base_rounding_adjustment",
-  "base_rounded_total",
-  "base_in_words",
-  "column_break3",
+  "totals_section",
   "grand_total",
-  "rounding_adjustment",
-  "rounded_total",
-  "disable_rounded_total",
   "in_words",
-  "section_break_44",
+  "column_break_vyhp",
+  "rounded_total",
+  "rounding_adjustment",
+  "disable_rounded_total",
+  "base_totals_section",
+  "base_grand_total",
+  "base_in_words",
+  "column_break_bffp",
+  "base_rounded_total",
+  "base_rounding_adjustment",
+  "additional_discount_section",
   "apply_discount_on",
   "base_discount_amount",
   "coupon_code",
@@ -76,6 +82,7 @@
   "referral_sales_partner",
   "sec_tax_breakup",
   "other_charges_calculation",
+  "item_wise_tax_details",
   "bundle_items_section",
   "packed_items",
   "pricing_rule_details",
@@ -106,7 +113,7 @@
   "tc_name",
   "terms",
   "more_info_tab",
-  "subscription_section",
+  "auto_repeat_section",
   "auto_repeat",
   "update_auto_repeat_reference",
   "print_settings",
@@ -120,19 +127,20 @@
   "competitors",
   "column_break_117",
   "order_lost_reason",
+  "utm_analytics_section",
+  "utm_source",
+  "utm_medium",
+  "column_break_fozg",
+  "utm_campaign",
+  "utm_content",
   "additional_info_section",
   "status",
   "customer_group",
   "territory",
   "column_break_108",
-  "utm_source",
-  "utm_campaign",
-  "utm_medium",
-  "utm_content",
-  "column_break4",
   "opportunity",
-  "supplier_quotation",
   "enq_det",
+  "supplier_quotation",
   "connections_tab"
  ],
  "fields": [
@@ -209,6 +217,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Company",
    "oldfieldname": "company",
    "oldfieldtype": "Link",
@@ -584,12 +593,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "section_break_44",
-   "fieldtype": "Section Break",
-   "label": "Additional Discount"
-  },
-  {
    "fieldname": "coupon_code",
    "fieldtype": "Link",
    "label": "Coupon Code",
@@ -635,17 +638,9 @@
    "print_hide": 1
   },
   {
-   "fieldname": "totals",
-   "fieldtype": "Section Break",
-   "label": "Totals",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-money",
-   "print_hide": 1
-  },
-  {
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
-   "label": "Grand Total (Company Currency)",
+   "label": "Grand Total",
    "oldfieldname": "grand_total",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -657,7 +652,7 @@
    "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
-   "label": "Rounding Adjustment (Company Currency)",
+   "label": "Rounding Adjustment",
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -666,7 +661,7 @@
   {
    "fieldname": "base_in_words",
    "fieldtype": "Data",
-   "label": "In Words (Company Currency)",
+   "label": "In Words",
    "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
@@ -676,20 +671,13 @@
   {
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
-   "label": "Rounded Total (Company Currency)",
+   "label": "Rounded Total",
    "oldfieldname": "rounded_total",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1,
    "width": "200px"
-  },
-  {
-   "fieldname": "column_break3",
-   "fieldtype": "Column Break",
-   "oldfieldtype": "Column Break",
-   "print_hide": 1,
-   "width": "50%"
   },
   {
    "fieldname": "grand_total",
@@ -828,11 +816,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "subscription_section",
-   "fieldtype": "Section Break",
-   "label": "Auto Repeat"
-  },
-  {
    "fieldname": "auto_repeat",
    "fieldtype": "Link",
    "label": "Auto Repeat",
@@ -858,13 +841,6 @@
    "oldfieldname": "order_lost_reason",
    "oldfieldtype": "Small Text",
    "print_hide": 1
-  },
-  {
-   "fieldname": "column_break4",
-   "fieldtype": "Column Break",
-   "oldfieldtype": "Column Break",
-   "print_hide": 1,
-   "width": "50%"
   },
   {
    "default": "Draft",
@@ -909,6 +885,7 @@
    "fieldname": "lost_reasons",
    "fieldtype": "Table MultiSelect",
    "label": "Lost Reasons",
+   "no_copy": 1,
    "options": "Quotation Lost Reason Detail",
    "read_only": 1
   },
@@ -1089,13 +1066,91 @@
    "label": "Company Contact Person",
    "options": "Contact",
    "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "has_unit_price_items",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Unit Price Items",
+   "no_copy": 1
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
+  },
+  {
+   "fieldname": "item_wise_tax_details",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Item Wise Tax Details",
+   "no_copy": 1,
+   "options": "Item Wise Tax Detail",
+   "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "additional_discount_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Discount"
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-money",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "base_totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals (Company Currency)"
+  },
+  {
+   "fieldname": "column_break_vyhp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_bffp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_fozg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "utm_analytics_section",
+   "fieldtype": "Section Break",
+   "label": "UTM Analytics"
+  },
+  {
+   "fieldname": "auto_repeat_section",
+   "fieldtype": "Section Break",
+   "label": "Auto Repeat"
+  },
+  {
+   "fieldname": "section_break_cojf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-01-06 15:00:08.774925",
+ "modified": "2026-03-30 12:19:04.589592",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
@@ -1186,6 +1241,7 @@
    "role": "Maintenance User"
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "status,transaction_date,party_name,order_type",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

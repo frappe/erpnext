@@ -29,6 +29,9 @@ def get_data(report_filters):
 		if d.consumed_qty and d.consumed_qty > d.required_qty:
 			d.extra_consumed_qty = d.consumed_qty - d.required_qty
 
+		if d.is_additional_item:
+			d.extra_consumed_qty = d.consumed_qty
+
 		if d.extra_consumed_qty or not report_filters.show_extra_consumed_materials:
 			wo_items.setdefault((d.name, d.production_item), []).append(d)
 
@@ -81,6 +84,7 @@ def get_fields():
 		"`tabWork Order Item`.`required_qty`",
 		"`tabWork Order Item`.`transferred_qty`",
 		"`tabWork Order Item`.`consumed_qty`",
+		"`tabWork Order Item`.`is_additional_item`",
 		"`tabWork Order`.`status`",
 		"`tabWork Order`.`name`",
 		"`tabWork Order`.`production_item`",

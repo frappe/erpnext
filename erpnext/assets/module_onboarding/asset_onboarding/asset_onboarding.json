@@ -1,0 +1,44 @@
+{
+ "allow_roles": [
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Quality Manager"
+  }
+ ],
+ "creation": "2026-02-23 20:56:50.917521",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2026-02-26 10:45:47.970714",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Asset Onboarding",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Learn Asset"
+  },
+  {
+   "step": "Create Asset Category"
+  },
+  {
+   "step": "Create Asset Item"
+  },
+  {
+   "step": "Create Asset Location"
+  },
+  {
+   "step": "Create Existing Asset"
+  },
+  {
+   "step": "View Balance Sheet"
+  }
+ ],
+ "title": "Assets Setup"
+}

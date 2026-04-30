@@ -1,0 +1,20 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Sales Invoice",
+ "creation": "2026-02-20 13:42:38.439574",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 2,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-02-23 22:16:40.931428",
+ "modified_by": "Administrator",
+ "name": "Create Sales Invoice",
+ "owner": "Administrator",
+ "reference_document": "Sales Invoice",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Create Sales Invoice",
+ "validate_action": 1
+}

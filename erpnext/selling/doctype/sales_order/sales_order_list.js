@@ -26,10 +26,18 @@ frappe.listview_settings["Sales Order"] = {
 		} else if (!doc.skip_delivery_note && flt(doc.per_delivered) < 100) {
 			if (frappe.datetime.get_diff(doc.delivery_date) < 0) {
 				// not delivered & overdue
-				return [__("Overdue"), "red", "per_delivered,<,100|delivery_date,<,Today|status,!=,Closed"];
+				return [
+					__("Overdue"),
+					"red",
+					"per_delivered,<,100|delivery_date,<,Today|status,!=,Closed|docstatus,=,1",
+				];
 			} else if (flt(doc.grand_total) === 0) {
 				// not delivered (zeroount order)
-				return [__("To Deliver"), "orange", "per_delivered,<,100|grand_total,=,0|status,!=,Closed"];
+				return [
+					__("To Deliver"),
+					"orange",
+					"per_delivered,<,100|grand_total,=,0|status,!=,Closed|docstatus,=,1",
+				];
 			} else if (flt(doc.per_billed) < 100) {
 				// not delivered & not billed
 				return [
@@ -55,11 +63,11 @@ frappe.listview_settings["Sales Order"] = {
 	onload: function (listview) {
 		var method = "erpnext.selling.doctype.sales_order.sales_order.close_or_unclose_sales_orders";
 
-		listview.page.add_menu_item(__("Close"), function () {
+		listview.page.add_action_item(__("Close"), function () {
 			listview.call_for_selected_items(method, { status: "Closed" });
 		});
 
-		listview.page.add_menu_item(__("Re-open"), function () {
+		listview.page.add_action_item(__("Re-open"), function () {
 			listview.call_for_selected_items(method, { status: "Submitted" });
 		});
 

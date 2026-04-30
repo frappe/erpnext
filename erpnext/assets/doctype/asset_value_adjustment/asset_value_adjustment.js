@@ -45,6 +45,9 @@ frappe.ui.form.on("Asset Value Adjustment", {
 
 	asset: function (frm) {
 		frm.trigger("set_acc_dimension");
+		if (frm.doc.asset) {
+			frm.trigger("set_current_asset_value");
+		}
 	},
 
 	finance_book: function (frm) {

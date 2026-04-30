@@ -1,0 +1,21 @@
+{
+ "app": "erpnext",
+ "bg_color": "blue",
+ "creation": "2026-01-27 17:37:55.824821",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon_type": "Link",
+ "idx": 3,
+ "label": "Accounts Setup",
+ "link_to": "Accounts Setup",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-01-27 18:34:57.092350",
+ "modified_by": "Administrator",
+ "name": "Accounts Setup",
+ "owner": "Administrator",
+ "parent_icon": "Accounting",
+ "restrict_removal": 0,
+ "roles": [],
+ "standard": 1
+}

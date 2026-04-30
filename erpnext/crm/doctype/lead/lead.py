@@ -10,8 +10,10 @@ from frappe.contacts.address_and_contact import (
 from frappe.contacts.doctype.address.address import get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.email.inbox import link_communication_to_document
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import comma_and, get_link_to_form, has_gravatar, validate_email_address
+from frappe.utils.data import DateTimeLikeObject
 
 from erpnext.accounts.party import set_taxes
 from erpnext.controllers.selling_controller import SellingController
@@ -240,7 +242,7 @@ class Lead(SellingController, CRMNote):
 		return frappe.db.get_value("Quotation", {"party_name": self.name, "docstatus": 1, "status": "Lost"})
 
 	@frappe.whitelist()
-	def create_prospect_and_contact(self, data):
+	def create_prospect_and_contact(self, data: dict):
 		data = frappe._dict(data)
 		if data.create_contact:
 			self.create_contact()
@@ -314,7 +316,7 @@ class Lead(SellingController, CRMNote):
 
 
 @frappe.whitelist()
-def make_customer(source_name, target_doc=None):
+def make_customer(source_name: str, target_doc: str | Document | None = None):
 	return _make_customer(source_name, target_doc)
 
 
@@ -327,7 +329,8 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 			target.customer_type = "Individual"
 			target.customer_name = source.lead_name
 
-		target.customer_group = frappe.db.get_default("Customer Group")
+		if not target.customer_group:
+			target.customer_group = frappe.db.get_default("Customer Group")
 
 		address = get_default_address("Lead", source.name)
 		contact = get_default_contact("Lead", source.name)
@@ -360,7 +363,7 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 
 
 @frappe.whitelist()
-def make_opportunity(source_name, target_doc=None):
+def make_opportunity(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -390,7 +393,7 @@ def make_opportunity(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_quotation(source_name, target_doc=None):
+def make_quotation(source_name: str, target_doc: str | Document | None = None):
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -441,7 +444,12 @@ def _set_missing_values(source, target):
 
 
 @frappe.whitelist()
-def get_lead_details(lead, posting_date=None, company=None):
+def get_lead_details(
+	lead: str,
+	posting_date: DateTimeLikeObject | None = None,
+	company: str | None = None,
+	doctype: str | None = None,
+):
 	if not lead:
 		return {}
 
@@ -463,7 +471,7 @@ def get_lead_details(lead, posting_date=None, company=None):
 		}
 	)
 
-	set_address_details(out, lead, "Lead", company=company)
+	set_address_details(out, lead, "Lead", doctype=doctype, company=company)
 
 	taxes_and_charges = set_taxes(
 		None,
@@ -480,7 +488,7 @@ def get_lead_details(lead, posting_date=None, company=None):
 
 
 @frappe.whitelist()
-def make_lead_from_communication(communication, ignore_communication_links=False):
+def make_lead_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
 
 	doc = frappe.get_doc("Communication", communication)
@@ -529,7 +537,7 @@ def get_lead_with_phone_number(number):
 
 
 @frappe.whitelist()
-def add_lead_to_prospect(lead, prospect):
+def add_lead_to_prospect(lead: str, prospect: str):
 	prospect = frappe.get_doc("Prospect", prospect)
 	prospect.append("leads", {"lead": lead})
 	prospect.save(ignore_permissions=True)

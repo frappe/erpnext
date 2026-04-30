@@ -3,12 +3,17 @@
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
-from erpnext.stock.stock_balance import update_bin_qty
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	StockReservation,
+	has_reserved_stock,
+)
+from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
 from erpnext.stock.utils import get_bin
 
 
@@ -50,8 +55,10 @@ class SubcontractingOrder(SubcontractingController):
 		letter_head: DF.Link | None
 		naming_series: DF.Literal["SC-ORD-.YYYY.-"]
 		per_received: DF.Percent
+		production_plan: DF.Data | None
 		project: DF.Link | None
 		purchase_order: DF.Link
+		reserve_stock: DF.Check
 		schedule_date: DF.Date | None
 		select_print_heading: DF.Link | None
 		service_items: DF.Table[SubcontractingOrderServiceItem]
@@ -72,6 +79,7 @@ class SubcontractingOrder(SubcontractingController):
 		supplied_items: DF.Table[SubcontractingOrderSuppliedItem]
 		supplier: DF.Link
 		supplier_address: DF.Link | None
+		supplier_currency: DF.Link | None
 		supplier_name: DF.Data
 		supplier_warehouse: DF.Link
 		title: DF.Data | None
@@ -81,28 +89,26 @@ class SubcontractingOrder(SubcontractingController):
 		transaction_date: DF.Date
 	# end: auto-generated types
 
-	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
-
-		self.status_updater = [
-			{
-				"source_dt": "Subcontracting Order Item",
-				"target_dt": "Material Request Item",
-				"join_field": "material_request_item",
-				"target_field": "ordered_qty",
-				"target_parent_dt": "Material Request",
-				"target_parent_field": "per_ordered",
-				"target_ref_field": "stock_qty",
-				"source_field": "qty",
-				"percent_join_field": "material_request",
-			}
-		]
-
 	def onload(self):
 		self.set_onload(
 			"over_transfer_allowance",
 			frappe.db.get_single_value("Buying Settings", "over_transfer_allowance"),
 		)
+		self.set_onload(
+			"over_delivery_receipt_allowance",
+			frappe.get_single_value("Stock Settings", "over_delivery_receipt_allowance"),
+		)
+		self.set_onload(
+			"backflush_based_on",
+			frappe.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on"),
+		)
+
+		if self.reserve_stock:
+			if self.has_unreserved_stock():
+				self.set_onload("has_unreserved_stock", True)
+
+			if has_reserved_stock(self.doctype, self.name):
+				self.set_onload("has_reserved_stock", True)
 
 	def before_validate(self):
 		super().before_validate()
@@ -117,12 +123,11 @@ class SubcontractingOrder(SubcontractingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def on_submit(self):
-		self.update_prevdoc_status()
 		self.update_status()
 		self.update_subcontracted_quantity_in_po()
+		self.reserve_raw_materials()
 
 	def on_cancel(self):
-		self.update_prevdoc_status()
 		self.update_status()
 		self.update_subcontracted_quantity_in_po(cancel=True)
 
@@ -187,7 +192,7 @@ class SubcontractingOrder(SubcontractingController):
 		for item in self.get("items"):
 			bom = frappe.get_doc("BOM", item.bom)
 			rm_cost = sum(flt(rm_item.amount) for rm_item in bom.items)
-			item.rm_cost_per_qty = rm_cost / flt(bom.quantity)
+			item.rm_cost_per_qty = flt(rm_cost / flt(bom.quantity), item.precision("rm_cost_per_qty"))
 
 	def calculate_items_qty_and_amount(self):
 		total_qty = total = 0
@@ -211,33 +216,13 @@ class SubcontractingOrder(SubcontractingController):
 			):
 				item_wh_list.append([item.item_code, item.warehouse])
 		for item_code, warehouse in item_wh_list:
-			update_bin_qty(item_code, warehouse, {"ordered_qty": self.get_ordered_qty(item_code, warehouse)})
+			update_bin_qty(item_code, warehouse, {"ordered_qty": get_ordered_qty(item_code, warehouse)})
 
-	@staticmethod
-	def get_ordered_qty(item_code, warehouse):
-		table = frappe.qb.DocType("Subcontracting Order")
-		child = frappe.qb.DocType("Subcontracting Order Item")
-
-		query = (
-			frappe.qb.from_(table)
-			.inner_join(child)
-			.on(table.name == child.parent)
-			.select((child.qty - child.received_qty) * child.conversion_factor)
-			.where(
-				(table.docstatus == 1)
-				& (child.item_code == item_code)
-				& (child.warehouse == warehouse)
-				& (child.qty > child.received_qty)
-				& (table.status != "Completed")
-			)
-		)
-
-		query = query.run()
-
-		return flt(query[0][0]) if query else 0
-
-	def update_reserved_qty_for_subcontracting(self):
+	def update_reserved_qty_for_subcontracting(self, sco_item_rows=None):
 		for item in self.supplied_items:
+			if sco_item_rows and item.reference_name not in sco_item_rows:
+				continue
+
 			if item.rm_item_code:
 				stock_bin = get_bin(item.rm_item_code, item.reserve_warehouse)
 				stock_bin.update_reserved_qty_for_sub_contracting()
@@ -249,14 +234,18 @@ class SubcontractingOrder(SubcontractingController):
 			if si.fg_item:
 				item = frappe.get_doc("Item", si.fg_item)
 
-				po_item = frappe.get_doc("Purchase Order Item", si.purchase_order_item)
-				available_qty = po_item.qty - po_item.subcontracted_quantity
+				qty, subcontracted_qty, fg_item_qty, production_plan_sub_assembly_item = frappe.db.get_value(
+					"Purchase Order Item",
+					si.purchase_order_item,
+					["qty", "subcontracted_qty", "fg_item_qty", "production_plan_sub_assembly_item"],
+				)
+				available_qty = flt(qty) - flt(subcontracted_qty)
 
 				if available_qty == 0:
 					continue
 
 				si.qty = available_qty
-				conversion_factor = po_item.qty / po_item.fg_item_qty
+				conversion_factor = flt(qty) / flt(fg_item_qty)
 				si.fg_item_qty = flt(
 					available_qty / conversion_factor, frappe.get_precision("Purchase Order Item", "qty")
 				)
@@ -284,6 +273,7 @@ class SubcontractingOrder(SubcontractingController):
 						"purchase_order_item": si.purchase_order_item,
 						"material_request": si.material_request,
 						"material_request_item": si.material_request_item,
+						"production_plan_sub_assembly_item": production_plan_sub_assembly_item,
 					}
 				)
 			else:
@@ -299,7 +289,7 @@ class SubcontractingOrder(SubcontractingController):
 
 		self.set_missing_values()
 
-	def update_status(self, status=None, update_modified=True):
+	def update_status(self, status=None, update_modified=True, update_bin=True):
 		if self.status == "Closed" and self.status != status:
 			check_on_hold_or_closed_status("Purchase Order", self.purchase_order)
 
@@ -329,32 +319,137 @@ class SubcontractingOrder(SubcontractingController):
 			self.db_set("status", status, update_modified=update_modified)
 
 		self.update_requested_qty()
-		self.update_ordered_qty_for_subcontracting()
-		self.update_reserved_qty_for_subcontracting()
+		if update_bin:
+			self.update_ordered_qty_for_subcontracting()
+			self.update_reserved_qty_for_subcontracting()
 
 	def update_subcontracted_quantity_in_po(self, cancel=False):
 		for service_item in self.service_items:
-			doc = frappe.get_doc("Purchase Order Item", service_item.purchase_order_item)
-			doc.subcontracted_quantity = (
-				(doc.subcontracted_quantity + service_item.qty)
-				if not cancel
-				else (doc.subcontracted_quantity - service_item.qty)
+			subcontracted_qty = flt(
+				frappe.db.get_value(
+					"Purchase Order Item", service_item.purchase_order_item, "subcontracted_qty"
+				)
 			)
-			doc.save()
+
+			subcontracted_qty = (
+				(subcontracted_qty + service_item.qty)
+				if not cancel
+				else (subcontracted_qty - service_item.qty)
+			)
+
+			frappe.db.set_value(
+				"Purchase Order Item",
+				service_item.purchase_order_item,
+				"subcontracted_qty",
+				subcontracted_qty,
+			)
+
+	@frappe.whitelist()
+	def reserve_raw_materials(self, items: list | None = None, stock_entry: str | None = None):
+		if self.reserve_stock:
+			item_dict = {}
+
+			if items:
+				item_dict = {d["name"]: d for d in items}
+				items = [item for item in self.supplied_items if item.name in item_dict]
+
+			reservation_items = []
+			is_transfer = False
+			for item in items or self.supplied_items:
+				data = frappe._dict(
+					{
+						"voucher_no": self.name,
+						"voucher_type": self.doctype,
+						"voucher_detail_no": item.name,
+						"item_code": item.rm_item_code,
+						"warehouse": item_dict.get(item.name, {}).get("warehouse", item.reserve_warehouse),
+						"stock_qty": item_dict.get(item.name, {}).get("qty_to_reserve", item.required_qty),
+					}
+				)
+
+				if stock_entry:
+					data.update(
+						{
+							"from_voucher_no": stock_entry,
+							"from_voucher_type": "Stock Entry",
+							"from_voucher_detail_no": item_dict[item.name]["reference_voucher_detail_no"],
+							"serial_and_batch_bundles": item_dict[item.name]["serial_and_batch_bundles"],
+						}
+					)
+				elif self.production_plan:
+					fg_item = next(i for i in self.items if i.name == item.reference_name)
+					if production_plan_sub_assembly_item := fg_item.production_plan_sub_assembly_item:
+						from_voucher_detail_no, reserved_qty = frappe.get_value(
+							"Material Request Plan Item",
+							{
+								"parent": self.production_plan,
+								"item_code": item.rm_item_code,
+								"warehouse": item.reserve_warehouse,
+								"sub_assembly_item_reference": production_plan_sub_assembly_item,
+								"docstatus": 1,
+							},
+							["name", "stock_reserved_qty"],
+						)
+						if flt(item.stock_reserved_qty) < reserved_qty:
+							is_transfer = True
+							data.update(
+								{
+									"from_voucher_no": self.production_plan,
+									"from_voucher_type": "Production Plan",
+									"from_voucher_detail_no": from_voucher_detail_no,
+								}
+							)
+
+				reservation_items.append(data)
+
+			sre = StockReservation(self, items=reservation_items, notify=True)
+			if is_transfer:
+				sre.transfer_reservation_entries_to(
+					self.production_plan, from_doctype="Production Plan", to_doctype="Subcontracting Order"
+				)
+			else:
+				if sre.make_stock_reservation_entries():
+					frappe.msgprint(_("Stock Reservation Entries created"), alert=True, indicator="blue")
+
+	def has_unreserved_stock(self) -> bool:
+		for item in self.get("supplied_items"):
+			if item.required_qty - flt(item.supplied_qty) - flt(item.stock_reserved_qty) > 0:
+				return True
+
+		return False
+
+	@frappe.whitelist()
+	def cancel_stock_reservation_entries(self, sre_list: list | None = None, notify: bool = True):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			cancel_stock_reservation_entries,
+		)
+
+		cancel_stock_reservation_entries(
+			voucher_type=self.doctype, voucher_no=self.name, sre_list=sre_list, notify=notify
+		)
 
 
 @frappe.whitelist()
-def make_subcontracting_receipt(source_name, target_doc=None):
-	return get_mapped_subcontracting_receipt(source_name, target_doc)
+def make_subcontracting_receipt(source_name: str, target_doc: Document | str | None = None):
+	items = frappe.flags.args.get("items") if frappe.flags.args else None
+	return get_mapped_subcontracting_receipt(source_name, target_doc, items=items)
 
 
-def get_mapped_subcontracting_receipt(source_name, target_doc=None):
+def get_mapped_subcontracting_receipt(source_name, target_doc=None, items=None):
 	def update_item(source, target, source_parent):
 		target.purchase_order = source_parent.purchase_order
 		target.purchase_order_item = source.purchase_order_item
-		target.qty = flt(source.qty) - flt(source.received_qty)
+		target.qty = items.get(source.name) or (flt(source.qty) - flt(source.received_qty))
+		target.received_qty = target.qty
+		if process_loss_per := frappe.get_value("BOM", source.bom, "process_loss_percentage"):
+			target.process_loss_qty = flt(
+				target.qty * (process_loss_per / 100), target.precision("process_loss_qty")
+			)
+			target.qty -= target.process_loss_qty
+
 		target.amount = (flt(source.qty) - flt(source.received_qty)) * flt(source.rate)
 
+	items = {item["name"]: item["qty"] for item in items} if items else {}
 	target_doc = get_mapped_doc(
 		"Subcontracting Order",
 		source_name,
@@ -377,7 +472,9 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 					"bom": "bom",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty),
+				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty)
+				if not items
+				else doc.name in items,
 			},
 		},
 		target_doc,
@@ -387,7 +484,7 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def update_subcontracting_order_status(sco, status=None):
+def update_subcontracting_order_status(sco: str | Document, status: str | None = None):
 	if isinstance(sco, str):
 		sco = frappe.get_doc("Subcontracting Order", sco)
 

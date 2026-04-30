@@ -28,15 +28,10 @@ frappe.ui.form.on("Request for Quotation", {
 				is_group: 0,
 			},
 		}));
-	},
 
-	onload: function (frm) {
-		if (!frm.doc.message_for_supplier) {
-			frm.set_value(
-				"message_for_supplier",
-				__("Please supply the specified items at the best possible rates")
-			);
-		}
+		frm.set_indicator_formatter("item_code", function (doc) {
+			return !doc.qty && frm.doc.has_unit_price_items ? "yellow" : "";
+		});
 	},
 
 	refresh: function (frm, cdt, cdn) {
@@ -105,6 +100,7 @@ frappe.ui.form.on("Request for Quotation", {
 								fieldname: "print_format",
 								options: "Print Format",
 								placeholder: "Standard",
+								default: frappe.get_meta("Request for Quotation").default_print_format || "",
 								get_query: () => {
 									return {
 										filters: {
@@ -154,7 +150,29 @@ frappe.ui.form.on("Request for Quotation", {
 			);
 
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
+
+			frm.add_custom_button(
+				__("Supplier Quotation Comparison"),
+				function () {
+					frm.trigger("show_supplier_quotation_comparison");
+				},
+				__("View")
+			);
 		}
+
+		if (frm.doc.docstatus === 0) {
+			erpnext.set_unit_price_items_note(frm);
+		}
+	},
+
+	show_supplier_quotation_comparison(frm) {
+		frappe.route_options = {
+			company: frm.doc.company,
+			from_date: moment(frm.doc.transaction_date).format("YYYY-MM-DD"),
+			to_date: moment(new Date()).format("YYYY-MM-DD"),
+			request_for_quotation: frm.doc.name,
+		};
+		frappe.set_route("query-report", "Supplier Quotation Comparison");
 	},
 
 	make_supplier_quotation: function (frm) {
@@ -217,6 +235,32 @@ frappe.ui.form.on("Request for Quotation", {
 			});
 		}
 		refresh_field("items");
+	},
+
+	email_template(frm) {
+		if (frm.doc.email_template) {
+			frappe.db
+				.get_value("Email Template", frm.doc.email_template, [
+					"use_html",
+					"response",
+					"response_html",
+					"subject",
+				])
+				.then((r) => {
+					if (r.message.use_html) {
+						frm.set_value({
+							mfs_html: r.message.response_html,
+							use_html: 1,
+						});
+					} else {
+						frm.set_value({
+							message_for_supplier: r.message.response,
+							use_html: 0,
+						});
+					}
+					frm.set_value("subject", r.message.subject);
+				});
+		}
 	},
 	preview: (frm) => {
 		let dialog = new frappe.ui.Dialog({
@@ -521,7 +565,10 @@ erpnext.buying.RequestforQuotationController = class RequestforQuotationControll
 				} else if (args.supplier_group) {
 					frappe.db
 						.get_list("Supplier", {
-							filters: { supplier_group: args.supplier_group },
+							filters: {
+								supplier_group: args.supplier_group,
+								disabled: 0,
+							},
 							limit: 100,
 							order_by: "name",
 						})

@@ -32,14 +32,15 @@ class PurchaseTaxesandCharges(Document):
 		]
 		cost_center: DF.Link | None
 		description: DF.SmallText
+		dont_recompute_tax: DF.Check
 		included_in_paid_amount: DF.Check
 		included_in_print_rate: DF.Check
 		is_tax_withholding_account: DF.Check
-		item_wise_tax_detail: DF.Code | None
 		net_amount: DF.Currency
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		project: DF.Link | None
 		rate: DF.Float
 		row_id: DF.Data | None
 		set_by_item_tax_template: DF.Check

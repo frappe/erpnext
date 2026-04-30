@@ -1,15 +1,15 @@
 import frappe
-from frappe.tests import IntegrationTestCase
+
+from erpnext.tests.utils import ERPNextTestSuite
 
 INDEXED_FIELDS = {
 	"Bin": ["item_code"],
 	"GL Entry": ["voucher_no", "posting_date", "company", "party"],
 	"Purchase Order Item": ["item_code"],
-	"Stock Ledger Entry": ["warehouse"],
 }
 
 
-class TestPerformance(IntegrationTestCase):
+class TestPerformance(ERPNextTestSuite):
 	def test_ensure_indexes(self):
 		# These fields are not explicitly indexed BUT they are prefix in some
 		# other composite index. If those are removed this test should be

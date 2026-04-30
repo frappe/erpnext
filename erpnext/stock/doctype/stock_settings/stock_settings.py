@@ -26,13 +26,14 @@ class StockSettings(Document):
 		action_if_quality_inspection_is_not_submitted: DF.Literal["Stop", "Warn"]
 		action_if_quality_inspection_is_rejected: DF.Literal["Stop", "Warn"]
 		allow_existing_serial_no: DF.Check
-		allow_from_dn: DF.Check
-		allow_from_pr: DF.Check
 		allow_internal_transfer_at_arms_length_price: DF.Check
 		allow_negative_stock: DF.Check
+		allow_negative_stock_for_batch: DF.Check
 		allow_partial_reservation: DF.Check
 		allow_to_edit_stock_uom_qty_for_purchase: DF.Check
 		allow_to_edit_stock_uom_qty_for_sales: DF.Check
+		allow_to_make_quality_inspection_after_purchase_or_delivery: DF.Check
+		allow_uom_with_conversion_rate_defined_in_item: DF.Check
 		auto_create_serial_and_batch_bundle_for_outward: DF.Check
 		auto_indent: DF.Check
 		auto_insert_price_list_rate_if_missing: DF.Check
@@ -44,6 +45,7 @@ class StockSettings(Document):
 		disable_serial_no_and_batch_selector: DF.Check
 		do_not_update_serial_batch_on_creation_of_auto_bundle: DF.Check
 		do_not_use_batchwise_valuation: DF.Check
+		enable_serial_and_batch_no_for_item: DF.Check
 		enable_stock_reservation: DF.Check
 		item_group: DF.Link | None
 		item_naming_by: DF.Literal["Item Code", "Naming Series"]
@@ -63,8 +65,10 @@ class StockSettings(Document):
 		stock_frozen_upto_days: DF.Int
 		stock_uom: DF.Link | None
 		update_existing_price_list_rate: DF.Check
+		update_price_list_based_on: DF.Literal["Rate", "Price List Rate"]
 		use_naming_series: DF.Check
 		use_serial_batch_fields: DF.Check
+		validate_material_transfer_warehouses: DF.Check
 		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO"]
 	# end: auto-generated types
 
@@ -77,6 +81,7 @@ class StockSettings(Document):
 			"default_warehouse",
 			"set_qty_in_transactions_based_on_serial_no_input",
 			"use_serial_batch_fields",
+			"enable_serial_and_batch_no_for_item",
 			"set_serial_and_batch_bundle_naming_based_on_naming_series",
 		]:
 			frappe.db.set_default(key, self.get(key, ""))
@@ -99,28 +104,49 @@ class StockSettings(Document):
 			)
 
 		self.validate_warehouses()
+		self.validate_serial_and_batch_no_settings()
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
 		self.validate_pending_reposts()
 		self.validate_stock_reservation()
+		self.validate_auto_insert_price_list_rate_if_missing()
 		self.change_precision_for_for_sales()
 		self.change_precision_for_purchase()
-		self.validate_use_batch_wise_valuation()
+		self.validate_do_not_use_batchwise_valuation()
 
-	def validate_use_batch_wise_valuation(self):
-		if not self.do_not_use_batchwise_valuation:
+	def validate_do_not_use_batchwise_valuation(self):
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
 			return
 
-		if self.valuation_method == "FIFO":
-			frappe.throw(_("Cannot disable batch wise valuation for FIFO valuation method."))
+		if not frappe.get_all("Serial and Batch Bundle", filters={"docstatus": 1}, limit=1, pluck="name"):
+			return
 
-		if frappe.get_all(
-			"Item", filters={"valuation_method": "FIFO", "is_stock_item": 1, "has_batch_no": 1}, limit=1
+		if doc_before_save.do_not_use_batchwise_valuation and not self.do_not_use_batchwise_valuation:
+			frappe.throw(
+				_("Cannot disable {0} as it may lead to incorrect stock valuation.").format(
+					frappe.bold(_("Do Not Use Batchwise Valuation"))
+				)
+			)
+
+	def validate_serial_and_batch_no_settings(self):
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+		if doc_before_save.enable_serial_and_batch_no_for_item == self.enable_serial_and_batch_no_for_item:
+			return
+
+		if (
+			doc_before_save.enable_serial_and_batch_no_for_item
+			and not self.enable_serial_and_batch_no_for_item
 		):
-			frappe.throw(_("Can't disable batch wise valuation for items with FIFO valuation method."))
-
-		if frappe.get_all("Batch", filters={"use_batchwise_valuation": 1}, limit=1):
-			frappe.throw(_("Can't disable batch wise valuation for active batches."))
+			if frappe.get_all("Serial and Batch Bundle", filters={"docstatus": 1}, limit=1, pluck="name"):
+				frappe.throw(
+					_(
+						"Cannot disable Serial and Batch No for Item, as there are existing records for serial / batch."
+					)
+				)
 
 	def validate_warehouses(self):
 		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
@@ -134,7 +160,11 @@ class StockSettings(Document):
 				)
 
 	def cant_change_valuation_method(self):
-		previous_valuation_method = self.get_doc_before_save().get("valuation_method")
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+		previous_valuation_method = doc_before_save.get("valuation_method")
 
 		if previous_valuation_method and previous_valuation_method != self.valuation_method:
 			# check if there are any stock ledger entries against items
@@ -158,7 +188,7 @@ class StockSettings(Document):
 			# changed to text
 			frappe.enqueue(
 				"erpnext.stock.doctype.stock_settings.stock_settings.clean_all_descriptions",
-				now=frappe.flags.in_test,
+				now=frappe.in_test,
 				enqueue_after_commit=True,
 			)
 
@@ -173,7 +203,7 @@ class StockSettings(Document):
 			self.auto_reserve_stock = 0
 
 		# Skip validation for tests
-		if frappe.flags.in_test:
+		if frappe.in_test:
 			return
 
 		# Change in value of `Allow Negative Stock`
@@ -198,26 +228,6 @@ class StockSettings(Document):
 						)
 					)
 
-				else:
-					# Don't allow if there are negative stock
-					from frappe.query_builder.functions import Round
-
-					precision = frappe.db.get_single_value("System Settings", "float_precision") or 3
-					bin = frappe.qb.DocType("Bin")
-					bin_with_negative_stock = (
-						frappe.qb.from_(bin)
-						.select(bin.name)
-						.where(Round(bin.actual_qty, precision) < 0)
-						.limit(1)
-					).run()
-
-					if bin_with_negative_stock:
-						frappe.throw(
-							_("As there are negative stock, you can not enable {0}.").format(
-								frappe.bold(_("Stock Reservation"))
-							)
-						)
-
 			# Enable -> Disable
 			else:
 				# Don't allow if there are open Stock Reservation Entries
@@ -232,8 +242,22 @@ class StockSettings(Document):
 						)
 					)
 
-	def on_update(self):
-		self.toggle_warehouse_field_for_inter_warehouse_transfer()
+	def validate_auto_insert_price_list_rate_if_missing(self):
+		if (
+			self.auto_insert_price_list_rate_if_missing
+			and self.has_value_changed("auto_insert_price_list_rate_if_missing")
+			and frappe.get_single_value("Selling Settings", "fallback_to_default_price_list")
+		):
+			selling_meta = frappe.get_meta("Selling Settings")
+			frappe.msgprint(
+				_(
+					"You have enabled {0} and {1} in {2}. This can lead to prices from the default price list being inserted in the transaction price list."
+				).format(
+					"<i>{}</i>".format(_(self.meta.get_label("auto_insert_price_list_rate_if_missing"))),
+					"<i>{}</i>".format(_(selling_meta.get_label("fallback_to_default_price_list"))),
+					frappe.bold(_("Selling Settings")),
+				)
+			)
 
 	def change_precision_for_for_sales(self):
 		doc_before_save = self.get_doc_before_save()
@@ -285,47 +309,13 @@ class StockSettings(Document):
 				validate_fields_for_doctype=False,
 			)
 
-	def toggle_warehouse_field_for_inter_warehouse_transfer(self):
-		make_property_setter(
-			"Sales Invoice Item",
-			"target_warehouse",
-			"hidden",
-			1 - cint(self.allow_from_dn),
-			"Check",
-			validate_fields_for_doctype=False,
-		)
-		make_property_setter(
-			"Delivery Note Item",
-			"target_warehouse",
-			"hidden",
-			1 - cint(self.allow_from_dn),
-			"Check",
-			validate_fields_for_doctype=False,
-		)
-		make_property_setter(
-			"Purchase Invoice Item",
-			"from_warehouse",
-			"hidden",
-			1 - cint(self.allow_from_pr),
-			"Check",
-			validate_fields_for_doctype=False,
-		)
-		make_property_setter(
-			"Purchase Receipt Item",
-			"from_warehouse",
-			"hidden",
-			1 - cint(self.allow_from_pr),
-			"Check",
-			validate_fields_for_doctype=False,
-		)
-
 
 def clean_all_descriptions():
 	for item in frappe.get_all("Item", ["name", "description"]):
 		if item.description:
 			clean_description = clean_html(item.description)
-		if item.description != clean_description:
-			frappe.db.set_value("Item", item.name, "description", clean_description)
+			if item.description != clean_description:
+				frappe.db.set_value("Item", item.name, "description", clean_description)
 
 
 @frappe.whitelist()

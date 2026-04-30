@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.document import Document
 from frappe.utils import (
 	add_days,
@@ -19,6 +19,7 @@ from frappe.utils import (
 	time_diff_in_seconds,
 	to_timedelta,
 )
+from frappe.utils.data import DateTimeLikeObject
 
 from erpnext.support.doctype.issue.issue import get_holidays
 
@@ -44,6 +45,7 @@ class Workstation(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.manufacturing.doctype.workstation_cost.workstation_cost import WorkstationCost
 		from erpnext.manufacturing.doctype.workstation_working_hour.workstation_working_hour import (
 			WorkstationWorkingHour,
 		)
@@ -52,10 +54,6 @@ class Workstation(Document):
 		disabled: DF.Check
 		holiday_list: DF.Link | None
 		hour_rate: DF.Currency
-		hour_rate_consumable: DF.Currency
-		hour_rate_electricity: DF.Currency
-		hour_rate_labour: DF.Currency
-		hour_rate_rent: DF.Currency
 		off_status_image: DF.AttachImage | None
 		on_status_image: DF.AttachImage | None
 		plant_floor: DF.Link | None
@@ -64,12 +62,30 @@ class Workstation(Document):
 		total_working_hours: DF.Float
 		warehouse: DF.Link | None
 		working_hours: DF.Table[WorkstationWorkingHour]
+		workstation_costs: DF.Table[WorkstationCost]
 		workstation_name: DF.Data
 		workstation_type: DF.Link | None
 	# end: auto-generated types
 
+	def validate(self):
+		self.validate_duplicate_operating_component()
+
+	def validate_duplicate_operating_component(self):
+		components = []
+		for row in self.workstation_costs:
+			if row.operating_component not in components:
+				components.append(row.operating_component)
+			else:
+				frappe.throw(
+					_("Duplicate Operating Component {0} found in Operating Components").format(
+						bold(row.operating_component)
+					)
+				)
+
 	def before_save(self):
-		self.set_data_based_on_workstation_type()
+		if self.has_value_changed("workstation_type"):
+			self.set_data_based_on_workstation_type()
+
 		self.set_hour_rate()
 		self.set_total_working_hours()
 		self.disabled_workstation()
@@ -88,43 +104,37 @@ class Workstation(Document):
 				self.total_working_hours += row.hours
 
 	def validate_working_hours(self, row):
-		if not (row.start_time and row.end_time):
-			frappe.throw(_("Row #{0}: Start Time and End Time are required").format(row.idx))
-
 		if get_time(row.start_time) >= get_time(row.end_time):
 			frappe.throw(_("Row #{0}: Start Time must be before End Time").format(row.idx))
 
 	def set_hour_rate(self):
-		self.hour_rate = (
-			flt(self.hour_rate_labour)
-			+ flt(self.hour_rate_electricity)
-			+ flt(self.hour_rate_consumable)
-			+ flt(self.hour_rate_rent)
-		)
+		self.hour_rate = 0.0
+		for row in self.workstation_costs:
+			if row.operating_cost:
+				self.hour_rate += flt(row.operating_cost)
 
 	@frappe.whitelist()
 	def set_data_based_on_workstation_type(self):
 		if self.workstation_type:
-			fields = [
-				"hour_rate_labour",
-				"hour_rate_electricity",
-				"hour_rate_consumable",
-				"hour_rate_rent",
-				"hour_rate",
-				"description",
-			]
+			data = frappe.get_all(
+				"Workstation Cost",
+				fields=["operating_component", "operating_cost", "idx"],
+				filters={"parent": self.workstation_type, "parenttype": "Workstation Type"},
+				order_by="idx",
+			)
 
-			data = frappe.get_cached_value("Workstation Type", self.workstation_type, fields, as_dict=True)
+			if data:
+				self.workstation_costs = []
 
-			if not data:
-				return
-
-			for field in fields:
-				if self.get(field):
-					continue
-
-				if value := data.get(field):
-					self.set(field, value)
+			for row in data:
+				self.append(
+					"workstation_costs",
+					{
+						"operating_component": row.operating_component,
+						"operating_cost": row.operating_cost,
+						"idx": row.idx,
+					},
+				)
 
 	def on_update(self):
 		self.validate_overlap_for_operation_timings()
@@ -200,7 +210,7 @@ class Workstation(Document):
 		return schedule_date
 
 	@frappe.whitelist()
-	def start_job(self, job_card, from_time, employee):
+	def start_job(self, job_card: str, from_time: DateTimeLikeObject, employee: str):
 		doc = frappe.get_doc("Job Card", job_card)
 		doc.append("time_logs", {"from_time": from_time, "employee": employee})
 		doc.save(ignore_permissions=True)
@@ -208,7 +218,7 @@ class Workstation(Document):
 		return doc
 
 	@frappe.whitelist()
-	def complete_job(self, job_card, qty, to_time):
+	def complete_job(self, job_card: str, qty: float, to_time: DateTimeLikeObject):
 		doc = frappe.get_doc("Job Card", job_card)
 		for row in doc.time_logs:
 			if not row.to_time:
@@ -223,7 +233,7 @@ class Workstation(Document):
 
 
 @frappe.whitelist()
-def get_job_cards(workstation, job_card=None):
+def get_job_cards(workstation: str):
 	if frappe.has_permission("Job Card", "read"):
 		jc_data = frappe.get_all(
 			"Job Card",
@@ -254,6 +264,7 @@ def get_job_cards(workstation, job_card=None):
 				"status": ["not in", ["Completed", "Stopped"]],
 			},
 			order_by="expected_start_date, expected_end_date",
+			limit=10,
 		)
 
 		job_cards = [row.name for row in jc_data]
@@ -306,7 +317,7 @@ def get_status_color(status):
 
 
 @frappe.whitelist()
-def get_raw_materials(job_card):
+def get_raw_materials(job_card: str):
 	raw_materials = frappe.get_all(
 		"Job Card",
 		fields=[
@@ -380,10 +391,18 @@ def get_time_logs(job_cards):
 
 
 @frappe.whitelist()
-def get_default_holiday_list():
-	return frappe.get_cached_value(
-		"Company", frappe.defaults.get_user_default("Company"), "default_holiday_list"
-	)
+def get_default_holiday_list(company: str | None = None):
+	if company:
+		if not frappe.has_permission("Company", "read"):
+			return []
+
+		if not frappe.db.exists("Company", company):
+			return []
+
+	if not company:
+		company = frappe.defaults.get_user_default("Company")
+
+	return frappe.get_cached_value("Company", company, "default_holiday_list")
 
 
 def check_if_within_operating_hours(workstation, operation, from_datetime, to_datetime):
@@ -499,7 +518,7 @@ def get_color_map():
 
 
 @frappe.whitelist()
-def update_job_card(job_card, method, **kwargs):
+def update_job_card(job_card: str, method: str, **kwargs):
 	if isinstance(kwargs, dict):
 		kwargs = frappe._dict(kwargs)
 
@@ -509,13 +528,12 @@ def update_job_card(job_card, method, **kwargs):
 	if kwargs.qty and isinstance(kwargs.qty, str):
 		kwargs.qty = flt(kwargs.qty)
 
-	print(method)
 	doc = frappe.get_doc("Job Card", job_card)
 	doc.run_method(method, **kwargs)
 
 
 @frappe.whitelist()
-def validate_job_card(job_card, status):
+def validate_job_card(job_card: str, status: str):
 	job_card_details = frappe.db.get_value("Job Card", job_card, ["status", "for_quantity"], as_dict=1)
 
 	current_status = job_card_details.status

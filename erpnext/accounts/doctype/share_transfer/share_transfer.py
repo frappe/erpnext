@@ -342,14 +342,14 @@ class ShareTransfer(Document):
 
 @frappe.whitelist()
 def make_jv_entry(
-	company,
-	account,
-	amount,
-	payment_account,
-	credit_applicant_type,
-	credit_applicant,
-	debit_applicant_type,
-	debit_applicant,
+	company: str,
+	account: str,
+	amount: float,
+	payment_account: str,
+	credit_applicant_type: str,
+	credit_applicant: str,
+	debit_applicant_type: str,
+	debit_applicant: str,
 ):
 	journal_entry = frappe.new_doc("Journal Entry")
 	journal_entry.voucher_type = "Journal Entry"

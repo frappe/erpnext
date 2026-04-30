@@ -30,8 +30,7 @@
    "label": "Payment Entry",
    "oldfieldname": "voucher_id",
    "oldfieldtype": "Link",
-   "options": "payment_document",
-   "width": "50"
+   "options": "payment_document"
   },
   {
    "columns": 2,
@@ -69,7 +68,7 @@
    "read_only": 1
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "cheque_number",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -79,8 +78,10 @@
    "read_only": 1
   },
   {
+   "columns": 2,
    "fieldname": "cheque_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Cheque Date",
    "oldfieldname": "cheque_date",
    "oldfieldtype": "Date",
@@ -96,16 +97,18 @@
    "oldfieldtype": "Date"
   }
  ],
+ "grid_page_length": 50,
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:06:37.609319",
+ "modified": "2025-12-17 14:33:45.913311",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Clearance Detail",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": []

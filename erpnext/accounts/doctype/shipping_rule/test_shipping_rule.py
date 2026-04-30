@@ -1,18 +1,20 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-import unittest
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.shipping_rule.shipping_rule import (
 	FromGreaterThanToError,
 	ManyBlankToValuesError,
 	OverlappingConditionError,
 )
+from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestShippingRule(IntegrationTestCase):
+class TestShippingRule(ERPNextTestSuite):
+	def setUp(self):
+		self.load_test_records("Shipping Rule")
+
 	def test_from_greater_than_to(self):
 		shipping_rule = frappe.copy_doc(self.globalTestRecords["Shipping Rule"][0])
 		shipping_rule.name = self.globalTestRecords["Shipping Rule"][0].get("name")
@@ -86,5 +88,5 @@ def create_shipping_rule(shipping_rule_type, shipping_rule_name):
 		},
 	)
 	sr.insert(ignore_permissions=True)
-	sr.submit()
+
 	return sr

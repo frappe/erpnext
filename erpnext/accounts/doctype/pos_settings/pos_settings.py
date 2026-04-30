@@ -21,10 +21,17 @@ class POSSettings(Document):
 		from erpnext.accounts.doctype.pos_search_fields.pos_search_fields import POSSearchFields
 
 		invoice_fields: DF.Table[POSField]
+		invoice_type: DF.Literal["Sales Invoice", "POS Invoice"]
 		pos_search_fields: DF.Table[POSSearchFields]
+		post_change_gl_entries: DF.Check
 	# end: auto-generated types
 
 	def validate(self):
+		old_doc = self.get_doc_before_save()
+
+		if old_doc.invoice_type != self.invoice_type:
+			self.validate_invoice_type()
+
 		self.validate_invoice_fields()
 
 	def validate_invoice_fields(self):
@@ -36,3 +43,15 @@ class POSSettings(Document):
 				frappe.throw(
 					title=_("Duplicate POS Fields"), msg=_("'{0}' has been already added.").format(field)
 				)
+
+	def validate_invoice_type(self):
+		pos_opening_entries_count = frappe.db.count(
+			"POS Opening Entry", filters={"docstatus": 1, "status": "Open"}
+		)
+		if pos_opening_entries_count:
+			frappe.throw(
+				_("{0} cannot be changed with opened Opening Entries.").format(
+					frappe.bold(_("Invoice Type"))
+				),
+				title=_("Invoice Document Type Selection Error"),
+			)

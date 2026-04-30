@@ -52,7 +52,7 @@ frappe.query_reports["Financial Ratios"] = {
 		},
 	],
 	formatter: function (value, row, column, data, default_formatter) {
-		let heading_ratios = ["Liquidity Ratios", "Solvency Ratios", "Turnover Ratios"];
+		let heading_ratios = [__("Liquidity Ratios"), __("Solvency Ratios"), __("Turnover Ratios")];
 
 		if (heading_ratios.includes(value)) {
 			value = $(`<span>${value}</span>`);
@@ -60,7 +60,7 @@ frappe.query_reports["Financial Ratios"] = {
 			value = $value.wrap("<p></p>").parent().html();
 		}
 
-		if (heading_ratios.includes(row[1].content) && column.fieldtype == "Float") {
+		if (heading_ratios.includes(row[1]?.content) && column.fieldtype == "Float") {
 			column.fieldtype = "Data";
 		}
 

@@ -10,12 +10,8 @@
  "engine": "InnoDB",
  "field_order": [
   "workstation_type",
-  "over_heads",
-  "hour_rate_electricity",
-  "hour_rate_consumable",
-  "column_break_5",
-  "hour_rate_rent",
-  "hour_rate_labour",
+  "section_break_auzm",
+  "workstation_costs",
   "section_break_8",
   "hour_rate",
   "description_tab",
@@ -31,44 +27,6 @@
    "oldfieldtype": "Data",
    "reqd": 1,
    "unique": 1
-  },
-  {
-   "fieldname": "over_heads",
-   "fieldtype": "Section Break",
-   "label": "Operating Costs",
-   "oldfieldtype": "Section Break"
-  },
-  {
-   "description": "per hour",
-   "fieldname": "hour_rate_electricity",
-   "fieldtype": "Currency",
-   "label": "Electricity Cost",
-   "oldfieldname": "hour_rate_electricity",
-   "oldfieldtype": "Currency"
-  },
-  {
-   "description": "per hour",
-   "fieldname": "hour_rate_consumable",
-   "fieldtype": "Currency",
-   "label": "Consumable Cost",
-   "oldfieldname": "hour_rate_consumable",
-   "oldfieldtype": "Currency"
-  },
-  {
-   "description": "per hour",
-   "fieldname": "hour_rate_rent",
-   "fieldtype": "Currency",
-   "label": "Rent Cost",
-   "oldfieldname": "hour_rate_rent",
-   "oldfieldtype": "Currency"
-  },
-  {
-   "description": "Wages per hour",
-   "fieldname": "hour_rate_labour",
-   "fieldtype": "Currency",
-   "label": "Wages",
-   "oldfieldname": "hour_rate_labour",
-   "oldfieldtype": "Currency"
   },
   {
    "description": "per hour",
@@ -89,10 +47,6 @@
    "width": "300px"
   },
   {
-   "fieldname": "column_break_5",
-   "fieldtype": "Column Break"
-  },
-  {
    "collapsible": 1,
    "fieldname": "description_tab",
    "fieldtype": "Tab Break",
@@ -101,11 +55,22 @@
   {
    "fieldname": "section_break_8",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_auzm",
+   "fieldtype": "Section Break",
+   "label": "Operating Costs (Per Hour)"
+  },
+  {
+   "fieldname": "workstation_costs",
+   "fieldtype": "Table",
+   "label": "Operating Components Cost",
+   "options": "Workstation Cost"
   }
  ],
  "icon": "icon-wrench",
  "links": [],
- "modified": "2024-03-27 13:11:00.946367",
+ "modified": "2025-08-19 12:06:56.683558",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation Type",
@@ -125,6 +90,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "ASC",

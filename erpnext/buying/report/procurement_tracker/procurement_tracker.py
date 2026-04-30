@@ -51,7 +51,7 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Requestor"),
-			"options": "Employee",
+			"options": "User",
 			"fieldname": "requestor",
 			"fieldtype": "Link",
 			"width": 140,
@@ -165,7 +165,7 @@ def get_data(filters):
 				"cost_center": po.cost_center,
 				"project": po.project,
 				"requesting_site": po.warehouse,
-				"requestor": po.owner,
+				"requestor": mr_record.get("owner", po.owner),
 				"material_request_no": po.material_request,
 				"item_code": po.item_code,
 				"quantity": flt(po.qty),

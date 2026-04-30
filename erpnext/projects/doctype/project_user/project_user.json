@@ -12,6 +12,7 @@
   "full_name",
   "welcome_email_sent",
   "view_attachments",
+  "hide_timesheets",
   "section_break_5",
   "project_status"
  ],
@@ -63,6 +64,13 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "View attachments"
+  },
+  {
+   "columns": 2,
+   "default": "0",
+   "fieldname": "hide_timesheets",
+   "fieldtype": "Check",
+   "label": "Hide timesheets"
   },
   {
    "fieldname": "section_break_5",

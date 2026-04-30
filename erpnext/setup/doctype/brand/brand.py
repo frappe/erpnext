@@ -2,8 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import copy
-
 import frappe
 from frappe.model.document import Document
 
@@ -35,7 +33,7 @@ def get_brand_defaults(item, company):
 
 		for d in brand.brand_defaults or []:
 			if d.company == company:
-				row = copy.deepcopy(d.as_dict())
+				row = d.as_dict(no_private_properties=True)
 				row.pop("name")
 				return row
 

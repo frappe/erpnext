@@ -1,0 +1,21 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-17 20:55:11.876996",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 1,
+ "icon": "crm",
+ "icon_type": "Link",
+ "idx": 1,
+ "label": "CRM",
+ "link_to": "CRM",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-01-06 14:54:05.112927",
+ "modified_by": "Administrator",
+ "name": "CRM",
+ "owner": "Administrator",
+ "parent_icon": "ERPNext",
+ "restrict_removal": 0,
+ "roles": [],
+ "standard": 1
+}

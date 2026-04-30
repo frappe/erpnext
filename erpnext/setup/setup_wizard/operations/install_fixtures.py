@@ -15,14 +15,7 @@ from frappe.utils import cstr, getdate
 
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from erpnext.regional.address_template.setup import set_up_address_templates
-
-
-def _(x, *args, **kwargs):
-	"""Redefine the translation function to return the string as is.
-
-	We want to create english records but still mark the strings as translatable.
-	The respective DocTypes have 'Translate Link Fields' enabled."""
-	return x
+from erpnext.setup.utils import identity as _
 
 
 def read_lines(filename: str) -> list[str]:
@@ -30,7 +23,7 @@ def read_lines(filename: str) -> list[str]:
 	return (Path(__file__).parent.parent / "data" / filename).read_text().splitlines()
 
 
-def install(country=None):
+def get_preset_records(country=None):
 	records = [
 		# ensure at least an empty Address Template exists for this Country
 		{"doctype": "Address Template", "country": country},
@@ -120,6 +113,30 @@ def install(country=None):
 			"doctype": "Stock Entry Type",
 			"name": _("Material Consumption for Manufacture"),
 			"purpose": "Material Consumption for Manufacture",
+			"is_standard": 1,
+		},
+		{
+			"doctype": "Stock Entry Type",
+			"name": _("Receive from Customer"),
+			"purpose": "Receive from Customer",
+			"is_standard": 1,
+		},
+		{
+			"doctype": "Stock Entry Type",
+			"name": _("Return Raw Material to Customer"),
+			"purpose": "Return Raw Material to Customer",
+			"is_standard": 1,
+		},
+		{
+			"doctype": "Stock Entry Type",
+			"name": _("Subcontracting Delivery"),
+			"purpose": "Subcontracting Delivery",
+			"is_standard": 1,
+		},
+		{
+			"doctype": "Stock Entry Type",
+			"name": _("Subcontracting Return"),
+			"purpose": "Subcontracting Return",
 			"is_standard": 1,
 		},
 		# territory: with two default territories, one for home country and one named Rest of the World
@@ -273,8 +290,6 @@ def install(country=None):
 		{"doctype": "Issue Priority", "name": _("Low")},
 		{"doctype": "Issue Priority", "name": _("Medium")},
 		{"doctype": "Issue Priority", "name": _("High")},
-		{"doctype": "Email Account", "email_id": "sales@example.com", "append_to": "Opportunity"},
-		{"doctype": "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
 		{"doctype": "Party Type", "party_type": "Customer", "account_type": "Receivable"},
 		{"doctype": "Party Type", "party_type": "Supplier", "account_type": "Payable"},
 		{"doctype": "Party Type", "party_type": "Employee", "account_type": "Payable"},
@@ -296,7 +311,16 @@ def install(country=None):
 		{"doctype": "Market Segment", "market_segment": _("Upper Income")},
 		# Warehouse Type
 		{"doctype": "Warehouse Type", "name": "Transit"},
+		{"doctype": "Workstation Operating Component", "component_name": _("Electricity")},
+		{"doctype": "Workstation Operating Component", "component_name": _("Consumables")},
+		{"doctype": "Workstation Operating Component", "component_name": _("Rent")},
+		{"doctype": "Workstation Operating Component", "component_name": _("Wages")},
 	]
+	return records
+
+
+def install(country=None):
+	records = get_preset_records(country)
 
 	for doctype, title_field, filename in (
 		("Designation", "designation_name", "designation.txt"),
@@ -366,10 +390,13 @@ def add_uom_data():
 		open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_data.json")).read()
 	)
 	for d in uoms:
+		if d.get("category") and not frappe.db.exists("UOM Category", d.get("category")):
+			frappe.get_doc({"doctype": "UOM Category", "category_name": d.get("category")}).db_insert()
+
 		if not frappe.db.exists("UOM", d.get("uom_name")):
 			doc = frappe.new_doc("UOM")
 			doc.update(d)
-			doc.save()
+			doc.insert(ignore_permissions=True)
 
 	# bootstrap uom conversion factors
 	uom_conversions = json.loads(
@@ -378,9 +405,6 @@ def add_uom_data():
 		).read()
 	)
 	for d in uom_conversions:
-		if not frappe.db.exists("UOM Category", d.get("category")):
-			frappe.get_doc({"doctype": "UOM Category", "category_name": d.get("category")}).db_insert()
-
 		if not frappe.db.exists(
 			"UOM Conversion Factor",
 			{"from_uom": d.get("from_uom"), "to_uom": d.get("to_uom")},
@@ -407,9 +431,9 @@ def add_market_segments():
 	make_records(records)
 
 
-def add_sale_stages():
+def get_sale_stages():
 	# Sale Stages
-	records = [
+	return [
 		{"doctype": "Sales Stage", "stage_name": _("Prospecting")},
 		{"doctype": "Sales Stage", "stage_name": _("Qualification")},
 		{"doctype": "Sales Stage", "stage_name": _("Needs Analysis")},
@@ -419,6 +443,10 @@ def add_sale_stages():
 		{"doctype": "Sales Stage", "stage_name": _("Proposal/Price Quote")},
 		{"doctype": "Sales Stage", "stage_name": _("Negotiation/Review")},
 	]
+
+
+def add_sale_stages():
+	records = get_sale_stages()
 	for sales_stage in records:
 		frappe.get_doc(sales_stage).db_insert()
 
@@ -483,14 +511,19 @@ def install_defaults(args=None):  # nosemgrep
 	create_bank_account(args)
 
 
-def set_global_defaults(args):
+def set_global_defaults(kwargs):
 	global_defaults = frappe.get_doc("Global Defaults", "Global Defaults")
+	company = frappe.db.get_value(
+		"Company",
+		{"company_name": kwargs.get("company_name")},
+		"name",
+	)
 
 	global_defaults.update(
 		{
-			"default_currency": args.get("currency"),
-			"default_company": args.get("company_name"),
-			"country": args.get("country"),
+			"default_currency": kwargs.get("currency"),
+			"default_company": company,
+			"country": kwargs.get("country"),
 		}
 	)
 
@@ -505,13 +538,17 @@ def update_stock_settings():
 	stock_settings.stock_uom = "Nos"
 	stock_settings.auto_indent = 1
 	stock_settings.auto_insert_price_list_rate_if_missing = 1
+	stock_settings.update_price_list_based_on = "Rate"
 	stock_settings.set_qty_in_transactions_based_on_serial_no_input = 1
+	stock_settings.flags.ignore_permissions = True
 	stock_settings.save()
 
 
-def create_bank_account(args):
+def create_bank_account(args, demo=False):
 	if not args.get("bank_account"):
-		args["bank_account"] = _("Bank Account")
+		if not demo:
+			return
+		args["bank_account"] = _("Demo Bank Account")
 
 	company_name = args.get("company_name")
 	bank_account_group = frappe.db.get_value(
@@ -544,7 +581,7 @@ def create_bank_account(args):
 			return doc
 
 		except RootNotEditable:
-			frappe.throw(_("Bank account cannot be named as {0}").format(args.get("bank_account")))
+			frappe.throw(frappe._("Bank account cannot be named as {0}").format(args.get("bank_account")))
 		except frappe.DuplicateEntryError:
 			# bank account same as a CoA entry
 			pass

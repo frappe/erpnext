@@ -120,12 +120,12 @@ class BlanketOrder(Document):
 
 	def validate_item_qty(self):
 		for d in self.items:
-			if d.qty < 0:
+			if flt(d.qty) < 0:
 				frappe.throw(_("Row {0}: Quantity cannot be negative.").format(d.idx))
 
 
 @frappe.whitelist()
-def make_order(source_name):
+def make_order(source_name: str):
 	doctype = frappe.flags.args.doctype
 
 	def update_doc(source_doc, target_doc, source_parent):

@@ -147,9 +147,9 @@ def get_gl_data(filters, period_list, years):
 
 def add_liquidity_ratios(data, years, current_asset, current_liability, quick_asset):
 	precision = frappe.db.get_single_value("System Settings", "float_precision")
-	data.append({"ratio": "Liquidity Ratios"})
+	data.append({"ratio": _("Liquidity Ratios")})
 
-	ratio_data = [["Current Ratio", current_asset], ["Quick Ratio", quick_asset]]
+	ratio_data = [[_("Current Ratio"), current_asset], [_("Quick Ratio"), quick_asset]]
 
 	for d in ratio_data:
 		row = {
@@ -165,16 +165,16 @@ def add_solvency_ratios(
 	data, years, total_asset, total_liability, net_sales, cogs, total_income, total_expense
 ):
 	precision = frappe.db.get_single_value("System Settings", "float_precision")
-	data.append({"ratio": "Solvency Ratios"})
+	data.append({"ratio": _("Solvency Ratios")})
 
-	debt_equity_ratio = {"ratio": "Debt Equity Ratio"}
-	gross_profit_ratio = {"ratio": "Gross Profit Ratio"}
-	net_profit_ratio = {"ratio": "Net Profit Ratio"}
-	return_on_asset_ratio = {"ratio": "Return on Asset Ratio"}
-	return_on_equity_ratio = {"ratio": "Return on Equity Ratio"}
+	debt_equity_ratio = {"ratio": _("Debt Equity Ratio")}
+	gross_profit_ratio = {"ratio": _("Gross Profit Ratio")}
+	net_profit_ratio = {"ratio": _("Net Profit Ratio")}
+	return_on_asset_ratio = {"ratio": _("Return on Asset Ratio")}
+	return_on_equity_ratio = {"ratio": _("Return on Equity Ratio")}
 
 	for year in years:
-		profit_after_tax = flt(total_income.get(year)) + flt(total_expense.get(year))
+		profit_after_tax = flt(total_income.get(year)) - flt(total_expense.get(year))
 		share_holder_fund = flt(total_asset.get(year)) - flt(total_liability.get(year))
 
 		debt_equity_ratio[year] = calculate_ratio(total_liability.get(year), share_holder_fund, precision)
@@ -195,11 +195,11 @@ def add_solvency_ratios(
 
 def add_turnover_ratios(data, years, period_list, filters, total_asset, net_sales, cogs, direct_expense):
 	precision = frappe.db.get_single_value("System Settings", "float_precision")
-	data.append({"ratio": "Turnover Ratios"})
+	data.append({"ratio": _("Turnover Ratios")})
 
 	avg_data = {}
 	for d in ["Receivable", "Payable", "Stock"]:
-		avg_data[frappe.scrub(d)] = avg_ratio_balance("Receivable", period_list, precision, filters)
+		avg_data[frappe.scrub(d)] = avg_ratio_balance(d, period_list, precision, filters)
 
 	avg_debtors, avg_creditors, avg_stock = (
 		avg_data.get("receivable"),
@@ -208,10 +208,10 @@ def add_turnover_ratios(data, years, period_list, filters, total_asset, net_sale
 	)
 
 	ratio_data = [
-		["Fixed Asset Turnover Ratio", net_sales, total_asset],
-		["Debtor Turnover Ratio", net_sales, avg_debtors],
-		["Creditor Turnover Ratio", direct_expense, avg_creditors],
-		["Inventory Turnover Ratio", cogs, avg_stock],
+		[_("Fixed Asset Turnover Ratio"), net_sales, total_asset],
+		[_("Debtor Turnover Ratio"), net_sales, avg_debtors],
+		[_("Creditor Turnover Ratio"), direct_expense, avg_creditors],
+		[_("Inventory Turnover Ratio"), cogs, avg_stock],
 	]
 	for ratio in ratio_data:
 		row = {

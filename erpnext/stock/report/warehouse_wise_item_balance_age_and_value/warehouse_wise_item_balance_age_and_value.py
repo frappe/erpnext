@@ -106,7 +106,10 @@ def get_columns(filters):
 
 def validate_filters(filters):
 	if not (filters.get("item_code") or filters.get("warehouse")):
-		sle_count = flt(frappe.qb.from_("Stock Ledger Entry").select(Count("name")).run()[0][0])
+		table = frappe.qb.DocType("Stock Ledger Entry")
+		sle_count = flt(
+			frappe.qb.from_(table).select(Count(table.name)).where(table.is_cancelled == 0).run()[0][0]
+		)
 		if sle_count > 500000:
 			frappe.throw(_("Please set filter based on Item or Warehouse"))
 

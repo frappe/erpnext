@@ -1,0 +1,47 @@
+{
+ "allow_roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Manufacturing Manager"
+  },
+  {
+   "role": "Stock Manager"
+  }
+ ],
+ "creation": "2026-02-24 18:03:53.158438",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2026-02-24 18:07:36.808560",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Organization Onboarding",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Setup Company"
+  },
+  {
+   "step": "Invite Users"
+  },
+  {
+   "step": "Setup Email Account"
+  },
+  {
+   "step": "Setup Role Permissions"
+  },
+  {
+   "step": "Review System Settings"
+  }
+ ],
+ "title": "Setup Organization"
+}

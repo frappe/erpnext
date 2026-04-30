@@ -1,5 +1,5 @@
 exclude: 'node_modules|.git'
-default_stages: [commit]
+default_stages: [pre-commit]
 fail_fast: false
 
 
@@ -32,8 +32,6 @@ repos:
                 cypress/.*|
                 .*node_modules.*|
                 .*boilerplate.*|
-                erpnext/public/js/controllers/.*|
-                erpnext/templates/pages/order.js|
                 erpnext/templates/includes/.*
             )$
 

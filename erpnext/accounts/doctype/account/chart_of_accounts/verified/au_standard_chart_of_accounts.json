@@ -1,0 +1,817 @@
+{
+	"country_code": "au",
+	"name": "Australia - Chart of Accounts with Account Numbers",
+	"tree": {
+		"Assets": {
+			"Current Assets": {
+				"Cash On Hand": {
+					"Cash On Hand": {
+						"account_number": "11010",
+						"account_type": "Cash"
+					},
+					"account_number": "110",
+					"is_group": 1
+				},
+				"Cash at Bank": {
+					"Every Day Bank Account": {
+						"account_number": "11510",
+						"account_type": "Bank"
+					},
+					"Business Savings Account": {
+						"account_number": "11520"
+					},
+					"Business Term Deposit": {
+						"account_number": "11530"
+					},
+					"account_number": "115",
+					"is_group": 1
+				},
+				"Trade Receivables": {
+					"Trade Debtors": {
+						"account_number": "12010",
+						"account_type": "Receivable"
+					},
+					"Provision for Doubtful Debts": {
+						"account_number": "12020"
+					},
+					"Sundry Debtors": {
+						"account_number": "12030"
+					},
+					"Debtor Refund": {
+						"account_number": "12040"
+					},
+					"account_number": "120",
+					"is_group": 1
+				},
+				"Inventory": {
+					"Stock On Hand": {
+						"account_number": "13010",
+						"account_type": "Stock"
+					},
+					"WIP - Work In Progress - Manufacturing": {
+						"account_number": "13020"
+					},
+					"account_number": "130",
+					"is_group": 1
+				},
+				"Prepayments": {
+					"Prepayments": {
+						"account_number": "14010"
+					},
+					"Provisional Tax Paid": {
+						"account_number": "14020"
+					},
+					"account_number": "140",
+					"is_group": 1
+				},
+				"account_number": "11",
+				"is_group": 1
+			},
+			"Non Current Assets": {
+				"Plant & Equipment": {
+					"Plant & Equipment": {
+						"account_number": "16010",
+						"account_type": "Fixed Asset"
+					},
+					"Accumulated Depreciation Plant & Equipment": {
+						"account_number": "16020",
+						"account_type": "Accumulated Depreciation"
+					},
+					"account_number": "160",
+					"is_group": 1
+				},
+				"Motor Vehicle": {
+					"Motor Vehicle": {
+						"account_number": "16110",
+						"account_type": "Fixed Asset"
+					},
+					"Accumulated Depreciation Motor Vehicle": {
+						"account_number": "16120",
+						"account_type": "Accumulated Depreciation"
+					},
+					"account_number": "161",
+					"is_group": 1
+				},
+				"Office Equipment": {
+					"Office Furniture & Equipment": {
+						"account_number": "16210",
+						"account_type": "Fixed Asset"
+					},
+					"Accumulated Depreciation Office Furniture & Equipment": {
+						"account_number": "16220",
+						"account_type": "Accumulated Depreciation"
+					},
+					"account_number": "162",
+					"is_group": 1
+				},
+				"Computer Equipment": {
+					"Computer Equipment": {
+						"account_number": "16310",
+						"account_type": "Fixed Asset"
+					},
+					"Accumulated Depreciation Computer Equipment": {
+						"account_number": "16320",
+						"account_type": "Accumulated Depreciation"
+					},
+					"account_number": "163",
+					"is_group": 1
+				},
+				"Building": {
+					"Buildings": {
+						"account_number": "16410",
+						"account_type": "Fixed Asset"
+					},
+					"Accumulated Depreciation Buildings": {
+						"account_number": "16420",
+						"account_type": "Accumulated Depreciation"
+					},
+					"CWIP - Construction Work In Progress": {
+						"account_number": "16430",
+						"account_type": "Capital Work in Progress"
+					},
+					"Accumulated Depreciation - Others": {
+						"account_number": "16440",
+						"account_type": "Accumulated Depreciation"
+					},
+					"account_number": "164",
+					"is_group": 1
+				},
+				"Related Party": {
+					"Loan to Party 1": {
+						"account_number": "17010"
+					},
+					"account_number": "170",
+					"is_group": 1
+				},
+				"Investments & Unlisted Entities": {
+					"Investment - Entity 1": {
+						"account_number": "17510"
+					},
+					"account_number": "175",
+					"is_group": 1
+				},
+				"Intagible Assets": {
+					"Goodwill": {
+						"account_number": "18010"
+					},
+					"Opening Balance Temporary ": {
+						"account_number": "18090",
+						"account_type": "Temporary"
+					},
+					"account_number": "180",
+					"is_group": 1
+				},
+				"account_number": "16",
+				"is_group": 1
+			},
+			"account_number": "1",
+			"root_type": "Asset"
+		},
+		"Liabilities": {
+			"Current Liabilities": {
+				"Trade Payables - Current": {
+					"Trade Creditors": {
+						"account_number": "21010",
+						"account_type": "Payable"
+					},
+					"Goods Received Not Invoiced": {
+						"account_number": "21050",
+						"account_type": "Stock Received But Not Billed"
+					},
+					"Service Received Not Invoiced": {
+						"account_number": "21060"
+					},
+					"Asset Received Not Invoiced": {
+						"account_number": "21070",
+						"account_type": "Asset Received But Not Billed"
+					},
+					"account_number": "210",
+					"is_group": 1
+				},
+				"Other Payables - Current": {
+					"Accrued Expenses": {
+						"account_number": "21510"
+					},
+					"Payroll - Wages Clearing": {
+						"account_number": "21550"
+					},
+					"Payroll - Superannuation Deductions": {
+						"account_number": "21555"
+					},
+					"Payroll - Misc Deductions": {
+						"account_number": "21560"
+					},
+					"Payroll - Withholding Tax Payable": {
+						"account_number": "21565"
+					},
+					"account_number": "215",
+					"is_group": 1
+				},
+				"GST": {
+					"GST Payments to ATO": {
+						"account_number": "22030"
+					},
+					"Provision for PAYG Tax": {
+						"account_number": "22040"
+					},
+					"account_number": "220",
+					"account_type": "Tax",
+					"is_group": 1
+				},
+				"Interest & Non Bearing Liabilities - Current": {
+					"Credit Card - VISA": {
+						"account_number": "22510"
+					},
+					"account_number": "225",
+					"is_group": 1
+				},
+				"Bank Overdraft": {
+					"Bank Overdraft  Cash at Bank": {
+						"account_number": "23010"
+					},
+					"account_number": "230",
+					"is_group": 1
+				},
+				"Trade Finance": {
+					"Trade Finance": {
+						"account_number": "23510"
+					},
+					"account_number": "235",
+					"is_group": 1
+				},
+				"Lease Liabilities": {
+					"Finance Lease - Current": {
+						"account_number": "24010"
+					},
+					"account_number": "240",
+					"is_group": 1
+				},
+				"Provisions": {
+					"Provision for Long Service Leave": {
+						"account_number": "24510"
+					},
+					"Provision for Holiday Pay": {
+						"account_number": "24520"
+					},
+					"account_number": "245",
+					"is_group": 1
+				},
+				"account_number": "21",
+				"is_group": 1
+			},
+			"Non Current Liabilities": {
+				"Trade & Other Payables - Non Current": {
+					"Loan Account - Party 1": {
+						"account_number": "25010"
+					},
+					"account_number": "250",
+					"is_group": 1
+				},
+				"Interest & Non Bearing Liabilities - Non Current": {
+					"Non Current Liability - Director Loan": {
+						"account_number": "25510"
+					},
+					"account_number": "255",
+					"is_group": 1
+				},
+				"Bank Loans - Non Current": {
+					"Bank Loan 1 - Non Current": {
+						"account_number": "26010"
+					},
+					"account_number": "260",
+					"is_group": 1
+				},
+				"Lease Liabilities - Non Current": {
+					"Finance Lease - Non Current": {
+						"account_number": "27010"
+					},
+					"account_number": "270",
+					"is_group": 1
+				},
+				"Provisions - Non Current": {
+					"Provision for Long Service Leave": {
+						"account_number": "27510"
+					},
+					"Provision for Holiday Pay": {
+						"account_number": "27520"
+					},
+					"account_number": "275",
+					"is_group": 1
+				},
+				"account_number": "25",
+				"is_group": 1
+			},
+			"account_number": "2",
+			"root_type": "Liability"
+		},
+		"Equity": {
+			"Equity": {
+				"Owner's/Shareholder's Equity": {
+					"Owner's/Shareholders Capital": {
+						"account_number": "31010",
+						"account_type": "Equity"
+					},
+					"Owner's/Shareholders Drawings": {
+						"account_number": "31020",
+						"account_type": "Equity"
+					},
+					"account_number": "310",
+					"is_group": 1
+				},
+				"Earnings": {
+					"Current Year Earnings": {
+						"account_number": "35010",
+						"account_type": "Equity"
+					},
+					"Retained Earnings": {
+						"account_number": "35020",
+						"account_type": "Equity"
+					},
+					"account_number": "350",
+					"is_group": 1
+				},
+				"account_number": "31",
+				"is_group": 1
+			},
+			"account_number": "3",
+			"root_type": "Equity"
+		},
+		"Revenue": {
+			"Revenue": {
+				"Sales Revenue": {
+					"Sales Income": {
+						"account_number": "41010",
+						"account_type": "Income Account"
+					},
+					"Freight Income": {
+						"account_number": "41020",
+						"account_type": "Income Account"
+					},
+					"Other Income": {
+						"account_number": "41030",
+						"account_type": "Income Account"
+					},
+					"Service Income": {
+						"account_number": "41040",
+						"account_type": "Income Account"
+					},
+					"account_number": "410",
+					"is_group": 1
+				},
+				"Other Revenue": {
+					"Commission Received": {
+						"account_number": "42010"
+					},
+					"Discounts Received": {
+						"account_number": "42020"
+					},
+					"Interest received": {
+						"account_number": "42030"
+					},
+					"Profit/Loss on Sales of Assets": {
+						"account_number": "42040"
+					},
+					"Rent Received": {
+						"account_number": "42050"
+					},
+					"Sundry Income": {
+						"account_number": "42060"
+					},
+					"account_number": "420",
+					"is_group": 1
+				},
+				"account_number": "41",
+				"is_group": 1
+			},
+			"account_number": "4",
+			"root_type": "Income"
+		},
+		"Cost of Goods": {
+			"Cost of Goods": {
+				"Cost of Goods Sold": {
+					"Cost of Goods Sold": {
+						"account_number": "51010",
+						"account_type": "Cost of Goods Sold"
+					},
+					"Freight Expenses (sales related)": {
+						"account_number": "51020"
+					},
+					"Discounts Given": {
+						"account_number": "51030"
+					},
+					"Subcontracting Charges": {
+						"account_number": "51040"
+					},
+					"account_number": "510",
+					"is_group": 1
+				},
+				"Other COGS": {
+					"Purchases - Miscellaneous": {
+						"account_number": "52010"
+					},
+					"Duty & Customs Fees": {
+						"account_number": "52020",
+						"account_type": "Tax"
+					},
+					"Freight Inwards": {
+						"account_number": "52030",
+						"account_type": "Chargeable"
+					},
+					"Stock Adjustment": {
+						"account_number": "52040",
+						"account_type": "Stock Adjustment"
+					},
+					"Stock Wirte Off": {
+						"account_number": "52050",
+						"account_type": "Stock Adjustment"
+					},
+					"Stock Valuation Expenses": {
+						"account_number": "52060",
+						"account_type": "Expenses Included In Valuation"
+					},
+					"Asset Valuation Expenses": {
+						"account_number": "52070",
+						"account_type": "Expenses Included In Asset Valuation"
+					},
+					"account_number": "520",
+					"is_group": 1
+				},
+				"account_number": "51",
+				"is_group": 1
+			},
+			"account_number": "5",
+			"root_type": "Expense"
+		},
+		"Expenses": {
+			"Fixed Expenses": {
+				"Payroll & Related Expenses": {
+					"Salaries & Wages": {
+						"account_number": "61010"
+					},
+					"Superannuation": {
+						"account_number": "61015"
+					},
+					"Staff Amenities - GST Paid": {
+						"account_number": "61020"
+					},
+					"Staff Amenities - GST Free": {
+						"account_number": "61025"
+					},
+					"Staff Recruitment": {
+						"account_number": "61030"
+					},
+					"Staff Training": {
+						"account_number": "61035"
+					},
+					"Fringe Benefits Tax": {
+						"account_number": "61040"
+					},
+					"Payroll Tax": {
+						"account_number": "61045"
+					},
+					"Workers Compensation": {
+						"account_number": "61050"
+					},
+					"Long Service Leave": {
+						"account_number": "61060"
+					},
+					"Mileage Reimbursement": {
+						"account_number": "61070"
+					},
+					"Overtime": {
+						"account_number": "61080"
+					},
+					"Worksafe Insurance": {
+						"account_number": "61090"
+					},
+					"account_number": "610",
+					"is_group": 1
+				},
+				"Depreciation Expenses": {
+					"Depreciation - Plant & Equipment": {
+						"account_number": "62010",
+						"account_type": "Depreciation"
+					},
+					"Depreciation - Motor Vehicle": {
+						"account_number": "62020",
+						"account_type": "Depreciation"
+					},
+					"Depreciation - Office Equipment": {
+						"account_number": "62030",
+						"account_type": "Depreciation"
+					},
+					"Depreciation - Computer Equipment": {
+						"account_number": "62040",
+						"account_type": "Depreciation"
+					},
+					"Depreciation - Building": {
+						"account_number": "62050",
+						"account_type": "Depreciation"
+					},
+					"Depreciation - Others": {
+						"account_number": "62510",
+						"account_type": "Depreciation"
+					},
+					"account_number": "620",
+					"is_group": 1
+				},
+				"account_number": "61",
+				"is_group": 1
+			},
+			"Accrued Expenses": {
+				"Accrued Expenses": {
+					"Accrued Expenses - Salaries & Wages": {
+						"account_number": "63010"
+					},
+					"Accrued Expenses - Interest": {
+						"account_number": "63020"
+					},
+					"account_number": "630",
+					"is_group": 1
+				},
+				"account_number": "63",
+				"is_group": 1
+			},
+			"Operating Expenses": {
+				"General and Administrative Expenses": {
+					"Low Value Assets less than $300": {
+						"account_number": "64010"
+					},
+					"Office Supplies": {
+						"account_number": "64020"
+					},
+					"Postage & Courier": {
+						"account_number": "64025"
+					},
+					"Printing & Stationery": {
+						"account_number": "64030"
+					},
+					"Registration Fees / Filing Fees": {
+						"account_number": "64040"
+					},
+					"Travel & Accommodation - Local": {
+						"account_number": "64050"
+					},
+					"Travel & Accommodation - Overseas": {
+						"account_number": "64060"
+					},
+					"Relocation Costs": {
+						"account_number": "64070"
+					},
+					"Hire Charges": {
+						"account_number": "64080"
+					},
+					"Repairs & Maintenance": {
+						"account_number": "64210"
+					},
+					"Cleaning Expenses": {
+						"account_number": "64215"
+					},
+					"Uniforms": {
+						"account_number": "64220"
+					},
+					"Security": {
+						"account_number": "64225"
+					},
+					"Subscriptions & Licences": {
+						"account_number": "64510"
+					},
+					"Software Expenses": {
+						"account_number": "64515"
+					},
+					"Marketing Expenses": {
+						"account_number": "64520"
+					},
+					"Advertising Expenses": {
+						"account_number": "64525"
+					},
+					"Website Hosting & Domain Expenses": {
+						"account_number": "64530"
+					},
+					"Computer Repairs / Supplies": {
+						"account_number": "64540"
+					},
+					"Conferences": {
+						"account_number": "64550"
+					},
+					"Consultancy /Contract Services": {
+						"account_number": "64560"
+					},
+					"Training Services": {
+						"account_number": "64570"
+					},
+					"Workshop Supplies": {
+						"account_number": "64580"
+					},
+					"Consumables": {
+						"account_number": "64585"
+					},
+					"Entertainment Expenses - Deductible": {
+						"account_number": "64810"
+					},
+					"Entertainment Expenses - Non Deductible": {
+						"account_number": "64820"
+					},
+					"Amortisation Of Goodwill": {
+						"account_number": "64910"
+					},
+					"General / Miscellaneous Expenses": {
+						"account_number": "64915",
+						"account_type": "Chargeable"
+					},
+					"Donations": {
+						"account_number": "64920"
+					},
+					"Client Gifts": {
+						"account_number": "64930"
+					},
+					"Employee Gifts": {
+						"account_number": "64935"
+					},
+					"account_number": "640",
+					"is_group": 1
+				},
+				"Occupancy Expenses": {
+					"Rental Expenses": {
+						"account_number": "65010"
+					},
+					"Property Insurance": {
+						"account_number": "65020"
+					},
+					"Electricity Expenses": {
+						"account_number": "65030"
+					},
+					"Water Rates": {
+						"account_number": "65040"
+					},
+					"Gas Expenses": {
+						"account_number": "65050"
+					},
+					"Property Taxes": {
+						"account_number": "65060"
+					},
+					"Rates": {
+						"account_number": "65070"
+					},
+					"account_number": "650",
+					"is_group": 1
+				},
+				"Communication & Vehicle Expenses": {
+					"Internet Expenses": {
+						"account_number": "66010"
+					},
+					"Mobile Telephone": {
+						"account_number": "66020"
+					},
+					"Telephone Expenses": {
+						"account_number": "66030"
+					},
+					"Motor Vehicle - Fuel Expenses": {
+						"account_number": "66040"
+					},
+					"Motor Vehicle - Parking & Tolls": {
+						"account_number": "66050"
+					},
+					"Motor Vehicle - Registration & Insurance": {
+						"account_number": "66060"
+					},
+					"Motor Vehicle - Service & Repairs": {
+						"account_number": "66070"
+					},
+					"Taxi": {
+						"account_number": "66080"
+					},
+					"account_number": "660",
+					"is_group": 1
+				},
+				"account_number": "64",
+				"is_group": 1
+			},
+			"Non-Operating Expenses": {
+				"Finance Costs": {
+					"Interest - Bank Loans": {
+						"account_number": "67010"
+					},
+					"Interest - Finance Leases": {
+						"account_number": "67020"
+					},
+					"Interest  - Other Loans": {
+						"account_number": "67025"
+					},
+					"Insurance": {
+						"account_number": "67030"
+					},
+					"Bank Charges": {
+						"account_number": "67050"
+					},
+					"Rounding off": {
+						"account_number": "67055",
+						"account_type": "Round Off"
+					},
+					"Audit Fees": {
+						"account_number": "67060"
+					},
+					"Accounting Fees": {
+						"account_number": "67070"
+					},
+					"Legal Fees": {
+						"account_number": "67080"
+					},
+					"Management Fees": {
+						"account_number": "67090"
+					},
+					"account_number": "670",
+					"is_group": 1
+				},
+				"Other Costs": {
+					"Doubtful Debts": {
+						"account_number": "67510"
+					},
+					"Fines": {
+						"account_number": "67520"
+					},
+					"Debt Collection": {
+						"account_number": "67530"
+					},
+					"Bad Debts": {
+						"account_number": "67540"
+					},
+					"account_number": "675",
+					"is_group": 1
+				},
+				"account_number": "67",
+				"is_group": 1
+			},
+			"Variable Expenses": {
+				"Variable Expenses": {
+					"Bonus & Commissions Paid": {
+						"account_number": "68010"
+					},
+					"Bonus & Commissions To be Paid": {
+						"account_number": "68020"
+					},
+					"Warranty Claims": {
+						"account_number": "68030"
+					},
+					"account_number": "680",
+					"is_group": 1
+				},
+				"account_number": "68",
+				"is_group": 1
+			},
+			"account_number": "6",
+			"root_type": "Expense"
+		},
+		"Other Income": {
+			"Other Income": {
+				"Interest Income": {
+					"Interest Income": {
+						"account_number": "71010"
+					},
+					"account_number": "710",
+					"is_group": 1
+				},
+				"Asset Disposal Income": {
+					"Gain on Asset Disposal": {
+						"account_number": "73010"
+					},
+					"account_number": "730",
+					"is_group": 1
+				},
+				"account_number": "71",
+				"is_group": 1
+			},
+			"account_number": "7",
+			"root_type": "Income"
+		},
+		"Other Expenses": {
+			"Other Expenses": {
+				"Income Tax Expenses": {
+					"Income Tax Expenses": {
+						"account_number": "81010"
+					},
+					"account_number": "810",
+					"is_group": 1
+				},
+				"Foreign Exchange Gain/Loss": {
+					"Exchange Loss/Gain - Realized": {
+						"account_number": "82010"
+					},
+					"account_number": "820",
+					"is_group": 1
+				},
+				"Asset Disposal Expenses": {
+					"Loss on Asset Disposal": {
+						"account_number": "83010"
+					},
+					"account_number": "830",
+					"is_group": 1
+				},
+				"account_number": "81",
+				"is_group": 1
+			},
+			"account_number": "8",
+			"root_type": "Expense"
+		}
+	}
+}

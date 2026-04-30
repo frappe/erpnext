@@ -1,19 +1,19 @@
 import frappe
-from frappe.model.db_query import DatabaseQuery
-from frappe.utils import flt, nowdate
+from frappe.desk.reportview import build_match_conditions
+from frappe.utils import escape_html, flt, nowdate
 
 from erpnext.stock.utils import get_stock_balance
 
 
 @frappe.whitelist()
 def get_data(
-	item_code=None,
-	warehouse=None,
-	parent_warehouse=None,
-	company=None,
-	start=0,
-	sort_by="stock_capacity",
-	sort_order="desc",
+	item_code: str | None = None,
+	warehouse: str | None = None,
+	parent_warehouse: str | None = None,
+	company: str | None = None,
+	start: int = 0,
+	sort_by: str = "stock_capacity",
+	sort_order: str = "desc",
 ):
 	"""Return data to render the warehouse capacity dashboard."""
 	filters = get_filters(item_code, warehouse, parent_warehouse, company)
@@ -54,7 +54,7 @@ def get_filters(item_code=None, warehouse=None, parent_warehouse=None, company=N
 def get_warehouse_filter_based_on_permissions(filters):
 	try:
 		# check if user has any restrictions based on user permissions on warehouse
-		if DatabaseQuery("Warehouse", user=frappe.session.user).build_match_conditions():
+		if build_match_conditions("Warehouse", user=frappe.session.user):
 			filters.append(["warehouse", "in", [w.name for w in frappe.get_list("Warehouse")]])
 		return False, filters
 	except frappe.PermissionError:
@@ -75,6 +75,9 @@ def get_warehouse_capacity_data(filters, start):
 		balance_qty = get_stock_balance(entry.item_code, entry.warehouse, nowdate()) or 0
 		entry.update(
 			{
+				"warehouse": escape_html(entry.warehouse),
+				"item_code": escape_html(entry.item_code),
+				"company": escape_html(entry.company),
 				"actual_qty": balance_qty,
 				"percent_occupied": flt((flt(balance_qty) / flt(entry.stock_capacity)) * 100, 0),
 			}
