@@ -203,6 +203,7 @@ class OpeningInvoiceCreationTool(Document):
 					"description": row.item_name or "Opening Invoice Item",
 					income_expense_account_field: row.temporary_opening_account,
 					"cost_center": cost_center,
+					"project": row.get("project") or self.get("project"),
 				}
 			)
 

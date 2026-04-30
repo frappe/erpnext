@@ -78,6 +78,15 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 			return {
 				filters: {
 					company: doc.company,
+					is_group: 0,
+				},
+			};
+		});
+
+		frm.set_query("project", "invoices", function (doc, cdt, cdn) {
+			return {
+				filters: {
+					company: doc.company,
 				},
 			};
 		});
@@ -86,6 +95,7 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 			return {
 				filters: {
 					company: doc.company,
+					is_group: 0,
 				},
 			};
 		});
