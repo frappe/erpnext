@@ -2,7 +2,6 @@
 # For license information, please see license.txt
 
 
-import re
 from datetime import timedelta
 
 import frappe
@@ -147,7 +146,6 @@ def execute(filters=None):
 	if filters.show_opening_and_closing_balance and not is_dimension_axis(period_list):
 		show_opening_and_closing_balance(data, period_list, company_currency, net_change_in_cash, filters)
 	elif filters.show_opening_and_closing_balance:
-		# TODO: Need to handle dimension axis case?
 		frappe.msgprint(
 			_("Opening & Closing balance is not shown when grouping by dimension."),
 			indicator="orange",
@@ -208,7 +206,6 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 		filters.start_date = start_date
 		filters.end_date = period["to_date"]
 		filters.account_type = account_type
-		# Per-column dimension scoping; cleared when not in dim mode.
 		filters.dim_field = period.get("dim_field")
 		filters.dim_value = period.get("dim_value")
 
@@ -220,8 +217,6 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 		total += amount
 		data.setdefault(period["key"], amount)
 
-	filters.dim_field = None
-	filters.dim_value = None
 	data["total"] = total
 	return data
 
@@ -246,14 +241,8 @@ def get_account_type_based_gl_data(company, filters=None):
 		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
 		cond += " and cost_center in %(cost_center)s"
 
-	if filters.get("dim_field"):
-		# Filter the column by the active dimension value. NULL/empty
-		# dim entries are excluded by design (see `get_dimension_values`)
-		# to avoid leaking entries the user shouldn't see.
-		dim_field = filters.dim_field
-		if not re.match(r"^[a-z_][a-z0-9_]*$", dim_field or ""):
-			frappe.throw(_("Invalid dimension field: {0}").format(dim_field))
-		cond += f" and `{dim_field}` = %(dim_value)s"
+	if filters.get("dim_field") and filters.get("dim_value"):
+		cond += f" and `{filters.dim_field}` = %(dim_value)s"
 
 	gl_sum = frappe.db.sql_list(
 		f"""
