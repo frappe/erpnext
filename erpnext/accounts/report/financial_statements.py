@@ -34,6 +34,8 @@ from erpnext.accounts.utils import get_fiscal_year, get_zero_cutoff
 
 
 # TODO: can use existing utility?
+# TODO: See get_period_list and check the data...
+# TODO: filters.get(FIELDNAME) -> filters.FIELDNAME
 def get_dimension_date_range(filters):
 	"""Resolve the (from_date, to_date) used as the single time bucket in dim mode."""
 	if filters.get("filter_based_on") == "Fiscal Year":
@@ -43,10 +45,11 @@ def get_dimension_date_range(filters):
 	return getdate(filters.get("period_start_date")), getdate(filters.get("period_end_date"))
 
 
-def get_dimension_values(filters):
-	"""Return (fieldname, [values]) for the chosen grouping dimension.
+def get_dimensions(filters: frappe._dict) -> tuple[str | None, list]:
+	"""
+	- Return (fieldname, [dimensions]) for the chosen grouping dimension.
 
-	Values are sourced from GL Entry within the report's date range, intersected
+	Dimensions are sourced from GL Entry within the report's date range, intersected
 	with any row-level filter on the same field, so empty columns are avoided.
 	"""
 	dim_doctype = filters.get("group_by_dimension")
@@ -61,7 +64,7 @@ def get_dimension_values(filters):
 		frappe.qb.from_(gl)
 		.select(gl[fieldname])
 		.distinct()
-		.where(gl.company == filters.get("company"))
+		.where(gl.company == filters.company)
 		.where(gl.is_cancelled == 0)
 		.where(gl.posting_date <= to_date)
 		.where(gl[fieldname].isnotnull())
@@ -93,47 +96,72 @@ def get_dimension_values(filters):
 				value = get_dimension_with_children(dimension.document_type, value)
 			query = query.where(gl[dimension.fieldname].isin(value))
 
+	# return list of dimensions for the fieldname(eg: cost_center -> ["CC1", "CC2", ...])
 	return fieldname, query.run(pluck=True)
 
 
-def get_dimension_period_list(filters):
-	"""Return a period_list-shaped axis where each entry is a dimension value.
+DIM_COLUMN_SOFT_CAP = 50
 
-	The returned list is consumed by the same downstream pipeline as the
-	period-based axis, but each entry carries `dim_field`/`dim_value`. Empty
-	list means no GL data exists for the chosen dimension within the range.
+
+def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
+	"""Return a period_list-shaped axis = cross-product of (dim_value * time bucket).
+
+	Each entry carries `dim_field`/`dim_value` plus the full set of date fields
+	produced by `get_period_list`, so the same downstream pipeline (calculate_values,
+	get_columns, prepare_data, cash_flow.get_account_type_based_data) handles it.
+	Ordering is dim-major: all periods of dim 1, then all periods of dim 2, ...
 	"""
-	fieldname, values = get_dimension_values(filters)
-	if not fieldname:
+	fieldname, dimensions = get_dimensions(filters)
+	if not fieldname or not dimensions:
 		return []
 
-	from_date, to_date = get_dimension_date_range(filters)
-	company = filters.get("company")
-	fy = get_fiscal_year(to_date, company=company) if company else None
+	period_buckets = get_period_list(
+		filters.from_fiscal_year,
+		filters.to_fiscal_year,
+		filters.period_start_date,
+		filters.period_end_date,
+		filters.filter_based_on,
+		filters.periodicity,
+		accumulated_values=filters.accumulated_values,
+		company=filters.company,
+	)
+
+	if not period_buckets:
+		return []
 
 	period_list = []
-	used_keys = set()
-	for index, value in enumerate(values):
-		key = frappe.scrub(value)
-		if key in used_keys:
-			key = f"{key}_{index}"
-		used_keys.add(key)
 
-		period_list.append(
-			frappe._dict(
+	# Guard against rare collisions where two distinct dimension values
+	# `frappe.scrub()` to the same key (e.g. "CC-A" and "CC A") and would
+	# otherwise overwrite each other's column.
+	used_keys = set()
+
+	for dimension in dimensions:
+		dim_key_base = frappe.scrub(dimension)
+		for period in period_buckets:
+			key = f"{dim_key_base}__{period.key}"
+			if key in used_keys:
+				key = f"{key}_{len(used_keys)}"
+			used_keys.add(key)
+
+			cell = frappe._dict(period)  # inherit all date fields
+			cell.update(
 				{
 					"key": key,
-					"label": value,
-					"from_date": from_date,
-					"to_date": to_date,
-					"year_start_date": from_date,
-					"year_end_date": to_date,
-					"to_date_fiscal_year": fy[0] if fy else None,
-					"from_date_fiscal_year_start_date": fy[1] if fy else from_date,
+					"label": f"{dimension} - {period.label}",
 					"dim_field": fieldname,
-					"dim_value": value,
+					"dim_value": dimension,
 				}
 			)
+			period_list.append(cell)
+
+	if len(period_list) > DIM_COLUMN_SOFT_CAP:
+		frappe.msgprint(
+			_(
+				"Group by Dimension produced {0} columns. Consider narrowing the date range, periodicity, or row filters for readability."
+			).format(len(period_list)),
+			indicator="orange",
+			alert=True,
 		)
 
 	return period_list
@@ -156,8 +184,29 @@ def get_period_list(
 	reset_period_on_fy_change=True,
 	ignore_fiscal_year=False,
 ):
-	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
-	Periodicity can be (Yearly, Quarterly, Monthly)"""
+	"""
+	Generate a list of time buckets between the provided from/to fiscal year or date range,
+	based on the periodicity.
+
+	- Periodicity can be: Yearly, Half-Yearly, Quarterly, Monthly
+
+	Example output:
+
+	```
+	[
+	    {
+	        from_date: datetime.date(2026, 4, 1),
+	        to_date: datetime.date(2027, 3, 31),
+	        to_date_fiscal_year: "2026-2027",
+	        from_date_fiscal_year_start_date: datetime.date(2026, 4, 1),
+	        key: "mar_2027",
+	        label: "2026-2027",
+	        year_start_date: datetime.date(2026, 4, 1),
+	        year_end_date: datetime.date(2027, 3, 31),
+	    },
+	]
+	```
+	"""
 
 	if filter_based_on == "Fiscal Year":
 		fiscal_year = get_fiscal_year_data(from_fiscal_year, to_fiscal_year)
@@ -369,19 +418,14 @@ def calculate_values(
 					raise_exception=1,
 				)
 			for period in period_list:
-				if dim_mode:
-					# Dimension axis: bucket by dim value, all dates already
-					# constrained by the SQL query (BS unbounded, P&L bounded).
-					# Entries with NULL/empty dim values are filtered out at
-					# the period_list source, so equality is safe here.
-					if entry.get(period.dim_field) != period.dim_value:
-						continue
-					if entry.posting_date > period.to_date:
-						continue
-					d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
+				# Dimension axis: skip cells whose dim_value doesn't match this entry.
+				# (NULL/empty dim entries are filtered out at the period_list source.)
+				if dim_mode and entry.get(period.dim_field) != period.dim_value:
 					continue
 
-				# check if posting date is within the period
+				# Bucket entry into this column if posting_date falls in the time window.
+				# accumulated_values=True (BS) ignores from_date → cumulative ≤ to_date.
+				# accumulated_values=False (P&L) bounds each cell by from_date..to_date.
 				if entry.posting_date <= period.to_date:
 					if (accumulated_values or entry.posting_date >= period.from_date) and (
 						not ignore_accumulated_values_for_fy
