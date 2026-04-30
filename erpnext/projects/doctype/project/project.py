@@ -364,9 +364,7 @@ class Project(Document):
 			# process only users who haven't received the welcome email yet
 			if user.welcome_email_sent == 0:
 				# fetch canonical User data (enabled status + latest email)
-				user_info = frappe.db.get_value(
-					"User", user.user, ["enabled", "email"], as_dict=True
-				)
+				user_info = frappe.db.get_value("User", user.user, ["enabled", "email"], as_dict=True)
 				# send email only if user is enabled and has a valid email
 				if user_info and user_info.enabled and user_info.email:
 					frappe.sendmail(
