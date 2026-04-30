@@ -1,7 +1,41 @@
-import json
-from pathlib import Path
-
 import frappe
+
+# Snapshot of the relevant German defaults when this migration was written.
+# Migration patches must not read mutable setup data, otherwise future edits to
+# country_wise_tax.json would change what this patch does on sites that have not
+# run it yet.
+NOT_APPLICABLE_7_PERCENT_ACCOUNTS = frozenset(
+	{
+		"Umsatzsteuer 7 %",
+		"Umsatzsteuer aus innergemeinschaftlichem Erwerb",
+		"Umsatzsteuer nach § 13b UStG",
+		"Abziehbare Vorsteuer 7 %",
+		"Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
+		"Abziehbare Vorsteuer nach § 13b UStG",
+	}
+)
+
+NOT_APPLICABLE_19_PERCENT_ACCOUNTS = frozenset(
+	{
+		"Umsatzsteuer 19 %",
+		"Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
+		"Umsatzsteuer nach § 13b UStG 19 %",
+		"Abziehbare Vorsteuer 19 %",
+		"Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
+		"Abziehbare Vorsteuer nach § 13b UStG 19 %",
+	}
+)
+
+GERMAN_ITEM_TAX_TEMPLATE_NOT_APPLICABLE_ACCOUNTS = {
+	chart: {
+		"19 %": NOT_APPLICABLE_7_PERCENT_ACCOUNTS,
+		"7 %": NOT_APPLICABLE_19_PERCENT_ACCOUNTS,
+		"0 %": NOT_APPLICABLE_7_PERCENT_ACCOUNTS
+		| NOT_APPLICABLE_19_PERCENT_ACCOUNTS
+		| frozenset({"Entstandene Einfuhrumsatzsteuer"}),
+	}
+	for chart in ("SKR03 mit Kontonummern", "SKR04 mit Kontonummern")
+}
 
 
 def execute():
@@ -10,18 +44,11 @@ def execute():
 	Before the `not_applicable` flag existed, German default templates used
 	`tax_rate: 0` to mean "this tax does not apply to the item" (as opposed to
 	an explicit 0% rate). For each German company, this patch looks up the
-	defaults for its Chart of Accounts in `country_wise_tax.json` and sets
+	historical defaults for its Chart of Accounts and sets
 	`not_applicable = 1` on detail rows that still match those defaults
 	(same template title, same tax account, rate still 0, flag still unset),
 	leaving any user-customised rows untouched.
 	"""
-	json_path = (
-		Path(frappe.get_app_path("erpnext")) / "setup" / "setup_wizard" / "data" / "country_wise_tax.json"
-	)
-	germany_charts = json.loads(json_path.read_text()).get("Germany", {}).get("chart_of_accounts", {})
-	if not germany_charts:
-		return
-
 	companies = frappe.get_all(
 		"Company",
 		filters={"country": "Germany"},
@@ -29,20 +56,14 @@ def execute():
 	)
 
 	for company in companies:
-		chart = germany_charts.get(company.chart_of_accounts) or germany_charts.get("*")
+		chart = GERMAN_ITEM_TAX_TEMPLATE_NOT_APPLICABLE_ACCOUNTS.get(company.chart_of_accounts)
 		if not chart:
 			continue
 
-		for tmpl in chart.get("item_tax_templates", []):
-			target_accounts = {
-				tax["tax_type"]["account_name"] for tax in tmpl.get("taxes", []) if tax.get("not_applicable")
-			}
-			if not target_accounts:
-				continue
-
+		for template_title, target_accounts in chart.items():
 			itt_names = frappe.get_all(
 				"Item Tax Template",
-				filters={"company": company.name, "title": tmpl["title"]},
+				filters={"company": company.name, "title": template_title},
 				pluck="name",
 			)
 			for itt_name in itt_names:
