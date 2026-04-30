@@ -1,0 +1,1153 @@
+{
+    "country_code": "be",
+    "name": "België - Minimum genormaliseerd algemeen rekeningstelsel voor verenigingen en stichtingen",
+    "tree": {
+        "KLASSE 1 : VERENIGINGSFONDS EN STICHTINGSFONDS": {
+            "root_type": "Equity",
+            "Herwaarderingsmeerwaarden op immateriële vaste activa": {
+                "account_number": "120",
+                "account_type": "Equity"
+            },
+            "Herwaarderingsmeerwaarden op materiële vaste activa": {
+                "account_number": "121",
+                "account_type": "Equity"
+            },
+            "Herwaarderingsmeerwaarden op financiële vaste activa": {
+                "account_number": "122",
+                "account_type": "Equity"
+            },
+            "Terugneming van waardeverminderingen op geldbeleggingen": {
+                "account_number": "124",
+                "account_type": "Equity"
+            },
+            "Fondsen bestemd voor investeringen": {
+                "account_number": "130",
+                "account_type": "Equity"
+            },
+            "Fondsen bestemd voor sociaal passief": {
+                "account_number": "131",
+                "account_type": "Equity"
+            },
+            "Belastingvrije reserves": {
+                "account_number": "132",
+                "account_type": "Equity"
+            },
+            "Andere bestemde fondsen en andere reserves": {
+                "account_number": "139",
+                "account_type": "Equity"
+            }
+        },
+        "KLASSE 1 : VOORZIENINGEN, UITGESTELDE BELASTINGEN EN SCHULDEN OP MEER DAN ÉÉN JAAR": {
+            "root_type": "Liability",
+            "Voorzieningen voor pensioenen en soortgelijke verplichtingen": {
+                "account_number": "160"
+            },
+            "Voorzieningen voor belastingen": {
+                "account_number": "161"
+            },
+            "Voorzieningen voor grote herstellingswerken en grote onderhoudswerken": {
+                "account_number": "162"
+            },
+            "Voorzieningen voor milieuverplichtingen": {
+                "account_number": "163"
+            },
+            "Voorzieningen voor terug te betalen subsidies, legaten en schenkingen met terugnemingsrecht": {
+                "account_number": "167"
+            },
+            "Uitgestelde belastingen": {
+                "account_number": "168"
+            },
+            "Achtergestelde leningen": {
+                "account_number": "170"
+            },
+            "Niet achtergestelde obligatieleningen": {
+                "account_number": "171"
+            },
+            "Leasingschulden en soortgelijke schulden": {
+                "account_number": "172"
+            },
+            "Kredietinstellingen": {
+                "Schulden op rekening": {
+                    "account_number": "1730"
+                },
+                "Promessen": {
+                    "account_number": "1731"
+                },
+                "Acceptkredieten": {
+                    "account_number": "1732"
+                },
+                "account_number": "173"
+            },
+            "Overige leningen": {
+                "account_number": "174"
+            },
+            "Handelsschulden": {
+                "Leveranciers": {
+                    "account_number": "1750"
+                },
+                "Te betalen wissels": {
+                    "account_number": "1751"
+                },
+                "account_number": "175"
+            },
+            "Vooruitbetalingen op bestellingen": {
+                "account_number": "176"
+            },
+            "Borgtochten in contanten": {
+                "account_number": "178"
+            },
+            "Overige schulden": {
+                "Rentedragend": {
+                    "account_number": "1790"
+                },
+                "Niet-rentedragend of gekoppeld aan een abnormaal lage rente": {
+                    "account_number": "1791"
+                },
+                "account_number": "179"
+            }
+        },
+        "KLASSE 2 : OPRICHTINGSKOSTEN, VASTE ACTIVA EN VORDERINGEN OP MEER DAN ÉÉN JAAR": {
+            "root_type": "Asset",
+            "Kosten van oprichting": {
+                "account_number": "200",
+                "account_type": "Fixed Asset"
+            },
+            "Kosten bij uitgifte van leningen": {
+                "account_number": "201",
+                "account_type": "Fixed Asset"
+            },
+            "Overige oprichtingskosten": {
+                "account_number": "202",
+                "account_type": "Fixed Asset"
+            },
+            "Herstructureringskosten": {
+                "account_number": "204",
+                "account_type": "Fixed Asset"
+            },
+            "Kosten van onderzoek en ontwikkeling": {
+                "account_number": "210",
+                "account_type": "Fixed Asset"
+            },
+            "Concessies, octrooien, licenties, knowhow, merken en soortgelijke rechten": {
+                "account_number": "211",
+                "account_type": "Fixed Asset"
+            },
+            "Goodwill": {
+                "account_number": "212",
+                "account_type": "Fixed Asset"
+            },
+            "Vooruitbetalingen": {
+                "account_number": "213",
+                "account_type": "Fixed Asset"
+            },
+            "Terreinen": {
+                "account_number": "220",
+                "account_type": "Fixed Asset"
+            },
+            "Gebouwen": {
+                "account_number": "221",
+                "account_type": "Fixed Asset"
+            },
+            "Bebouwde terreinen": {
+                "account_number": "222",
+                "account_type": "Fixed Asset"
+            },
+            "Overige zakelijke rechten op onroerende goederen": {
+                "account_number": "223",
+                "account_type": "Fixed Asset"
+            },
+            "Terreinen en gebouwen": {
+                "account_number": "250",
+                "account_type": "Fixed Asset"
+            },
+            "Installaties, machines en uitrusting": {
+                "account_number": "251",
+                "account_type": "Fixed Asset"
+            },
+            "Meubilair en rollend materieel": {
+                "account_number": "252",
+                "account_type": "Fixed Asset"
+            },
+            "Deelnemingen in verbonden vennootschappen": {
+                "Aanschaffingswaarde": {
+                    "account_number": "2800",
+                    "account_type": "Fixed Asset"
+                },
+                "Nog te storten bedragen (-)": {
+                    "account_number": "2801",
+                    "account_type": "Fixed Asset"
+                },
+                "Geboekte meerwaarden": {
+                    "account_number": "2808",
+                    "account_type": "Fixed Asset"
+                },
+                "Geboekte waardeverminderingen (-)": {
+                    "account_number": "2809",
+                    "account_type": "Fixed Asset"
+                },
+                "account_number": "280",
+                "account_type": "Fixed Asset"
+            },
+            "Vorderingen op verbonden entiteiten": {
+                "Vorderingen op rekening": {
+                    "account_number": "2810",
+                    "account_type": "Fixed Asset"
+                },
+                "Te innen wissels": {
+                    "account_number": "2811",
+                    "account_type": "Fixed Asset"
+                },
+                "Vastrentende effecten": {
+                    "account_number": "2812",
+                    "account_type": "Fixed Asset"
+                },
+                "Dubieuze debiteuren": {
+                    "account_number": "2817",
+                    "account_type": "Fixed Asset"
+                },
+                "Geboekte waardeverminderingen (-)": {
+                    "account_number": "2819",
+                    "account_type": "Fixed Asset"
+                },
+                "account_number": "281",
+                "account_type": "Fixed Asset"
+            },
+            "Deelnemingen in vennootschappen waarmee een deelnemingsverhouding bestaat": {
+                "Aanschaffingswaarde": {
+                    "account_number": "2820",
+                    "account_type": "Fixed Asset"
+                },
+                "Nog te storten bedragen (-)": {
+                    "account_number": "2821",
+                    "account_type": "Fixed Asset"
+                },
+                "Geboekte meerwaarden": {
+                    "account_number": "2828",
+                    "account_type": "Fixed Asset"
+                },
+                "Geboekte waardeverminderingen (-)": {
+                    "account_number": "2829",
+                    "account_type": "Fixed Asset"
+                },
+                "account_number": "282",
+                "account_type": "Fixed Asset"
+            },
+            "Vorderingen op vennootschappen waarmee een deelnemingsverhouding bestaat": {
+                "Vorderingen op rekening": {
+                    "account_number": "2830",
+                    "account_type": "Fixed Asset"
+                },
+                "Te innen wissels": {
+                    "account_number": "2831",
+                    "account_type": "Fixed Asset"
+                },
+                "Vastrentende effecten": {
+                    "account_number": "2832",
+                    "account_type": "Fixed Asset"
+                },
+                "Dubieuze debiteuren": {
+                    "account_number": "2837",
+                    "account_type": "Fixed Asset"
+                },
+                "Geboekte waardeverminderingen (-)": {
+                    "account_number": "2839",
+                    "account_type": "Fixed Asset"
+                },
+                "account_number": "283",
+                "account_type": "Fixed Asset"
+            },
+            "Andere aandelen": {
+                "Aanschaffingswaarde": {
+                    "account_number": "2840",
+                    "account_type": "Fixed Asset"
+                },
+                "Nog te storten bedragen (-)": {
+                    "account_number": "2841",
+                    "account_type": "Fixed Asset"
+                },
+                "Geboekte meerwaarden": {
+                    "account_number": "2848",
+                    "account_type": "Fixed Asset"
+                },
+                "Geboekte waardeverminderingen (-)": {
+                    "account_number": "2849",
+                    "account_type": "Fixed Asset"
+                },
+                "account_number": "284",
+                "account_type": "Fixed Asset"
+            },
+            "Overige vorderingen": {
+                "Vorderingen op rekening": {
+                    "account_number": "2910",
+                    "account_type": "Receivable"
+                },
+                "Te innen wissels": {
+                    "account_number": "2911",
+                    "account_type": "Receivable"
+                },
+                "Te ontvangen subsidies": {
+                    "account_number": "2912",
+                    "account_type": "Receivable"
+                },
+                "Niet-rentedragende vorderingen of gekoppeld aan een abnormaal lage rente": {
+                    "account_number": "2915",
+                    "account_type": "Receivable"
+                },
+                "Dubieuze debiteuren": {
+                    "account_number": "2916",
+                    "account_type": "Receivable"
+                },
+                "Geboekte waardeverminderingen (-)": {
+                    "account_number": "2919",
+                    "account_type": "Receivable"
+                },
+                "account_number": "291",
+                "account_type": "Receivable"
+            },
+            "Borgtochten betaald in contanten": {
+                "account_number": "288",
+                "account_type": "Fixed Asset"
+            },
+            "Handelsvorderingen": {
+                "Handelsdebiteuren": {
+                    "account_number": "2900",
+                    "account_type": "Receivable"
+                },
+                "Te innen wissels": {
+                    "account_number": "2901",
+                    "account_type": "Receivable"
+                },
+                "Vooruitbetalingen": {
+                    "account_number": "2906",
+                    "account_type": "Receivable"
+                },
+                "Dubieuze debiteuren": {
+                    "account_number": "2907",
+                    "account_type": "Receivable"
+                },
+                "Geboekte waardeverminderingen (-)": {
+                    "account_number": "2909",
+                    "account_type": "Receivable"
+                },
+                "account_number": "290",
+                "account_type": "Receivable"
+            }
+        },
+        "KLASSE 3 : VOORRADEN EN BESTELLINGEN IN UITVOERING": {
+            "root_type": "Asset",
+            "Grondstoffen": {
+                "Aanschaffingswaarde": {
+                    "account_number": "300",
+                    "account_type": "Stock"
+                },
+                "Geboekte waardeverminderingen (-)": {
+                    "account_number": "309",
+                    "account_type": "Stock"
+                },
+                "account_number": "30",
+                "account_type": "Stock"
+            },
+            "Aanschaffingswaarde": {
+                "account_number": "370",
+                "account_type": "Stock"
+            },
+            "Geboekte waardeverminderingen (-)": {
+                "account_number": "379",
+                "account_type": "Stock"
+            },
+            "Vooruitbetalingen": {
+                "account_number": "360",
+                "account_type": "Stock"
+            },
+            "Toegerekende winst": {
+                "account_number": "371",
+                "account_type": "Stock"
+            }
+        },
+        "KLASSE 4 : VORDERINGEN OP TEN HOOGSTE ÉÉN JAAR": {
+            "root_type": "Asset",
+            "Handelsdebiteuren": {
+                "account_number": "400",
+                "account_type": "Receivable"
+            },
+            "Te innen wissels": {
+                "account_number": "401",
+                "account_type": "Receivable"
+            },
+            "Te innen opbrengsten": {
+                "account_number": "414",
+                "account_type": "Receivable"
+            },
+            "Vooruitbetalingen": {
+                "account_number": "406",
+                "account_type": "Receivable"
+            },
+            "Dubieuze debiteuren": {
+                "account_number": "417",
+                "account_type": "Receivable"
+            },
+            "Geboekte waardeverminderingen (-)": {
+                "account_number": "419",
+                "account_type": "Receivable"
+            },
+            "Terug te vorderen btw": {
+                "account_number": "411",
+                "account_type": "Tax"
+            },
+            "Terug te vorderen belastingen en voorheffingen": {
+                "tot 4127 Andere Belgische belastingen": {
+                    "account_number": "4125",
+                    "account_type": "Receivable"
+                },
+                "Buitenlandse belastingen": {
+                    "account_number": "4128",
+                    "account_type": "Receivable"
+                },
+                "account_number": "412",
+                "account_type": "Receivable"
+            },
+            "Te ontvangen subsidies": {
+                "account_number": "413",
+                "account_type": "Receivable"
+            },
+            "Niet-rentedragende vorderingen of gekoppeld aan een abnormaal lage rente": {
+                "account_number": "415",
+                "account_type": "Receivable"
+            },
+            "Diverse vorderingen": {
+                "account_number": "416",
+                "account_type": "Receivable"
+            },
+            "Borgtochten betaald in contanten": {
+                "account_number": "418",
+                "account_type": "Receivable"
+            }
+        },
+        "KLASSE 4 : SCHULDEN OP TEN HOOGSTE ÉÉN JAAR": {
+            "root_type": "Liability",
+            "Kredietinstellingen – Leningen op rekening met vaste termijn": {
+                "account_number": "430"
+            },
+            "Kredietinstellingen – Promessen": {
+                "account_number": "431"
+            },
+            "Kredietinstellingen – Acceptkredieten": {
+                "account_number": "432"
+            },
+            "Kredietinstellingen – Schulden op rekening-courant": {
+                "account_number": "433"
+            },
+            "Overige leningen": {
+                "account_number": "439"
+            },
+            "Leveranciers": {
+                "account_number": "440",
+                "account_type": "Payable"
+            },
+            "Te betalen wissels": {
+                "account_number": "441",
+                "account_type": "Payable"
+            },
+            "Te ontvangen facturen": {
+                "account_number": "444",
+                "account_type": "Payable"
+            },
+            "Geraamd bedrag der belastingschulden": {
+                "tot 4507 Andere Belgische belastingen": {
+                    "account_number": "4505",
+                    "account_type": "Payable"
+                },
+                "Buitenlandse belastingen": {
+                    "account_number": "4508",
+                    "account_type": "Payable"
+                },
+                "account_number": "450",
+                "account_type": "Payable"
+            },
+            "Te betalen btw": {
+                "account_number": "451",
+                "account_type": "Tax"
+            },
+            "Te betalen belastingen en taksen": {
+                "tot 4527 Andere Belgische belastingen": {
+                    "account_number": "4525",
+                    "account_type": "Payable"
+                },
+                "Buitenlandse belastingen": {
+                    "account_number": "4528",
+                    "account_type": "Payable"
+                },
+                "account_number": "452",
+                "account_type": "Payable"
+            },
+            "Ingehouden voorheffingen": {
+                "account_number": "453",
+                "account_type": "Payable"
+            },
+            "Rijksdienst voor Sociale Zekerheid": {
+                "account_number": "454",
+                "account_type": "Payable"
+            },
+            "Bezoldigingen": {
+                "account_number": "455",
+                "account_type": "Payable"
+            },
+            "Vakantiegeld": {
+                "account_number": "456",
+                "account_type": "Payable"
+            },
+            "Andere sociale schulden": {
+                "account_number": "459",
+                "account_type": "Payable"
+            },
+            "Vervallen obligaties en coupons": {
+                "account_number": "480"
+            },
+            "Terug te betalen subsidies": {
+                "account_number": "483"
+            },
+            "Borgtochten ontvangen in contanten": {
+                "account_number": "488"
+            },
+            "Andere diverse schulden": {
+                "Rentedragend": {
+                    "account_number": "4890"
+                },
+                "Niet-rentedragend of gekoppeld aan een abnormaal lage rente": {
+                    "account_number": "4891"
+                },
+                "account_number": "489"
+            },
+            "Over te dragen kosten": {
+                "account_number": "490"
+            },
+            "Verkregen opbrengsten": {
+                "account_number": "491"
+            },
+            "Toe te rekenen kosten": {
+                "account_number": "492"
+            },
+            "Over te dragen opbrengsten": {
+                "account_number": "493"
+            },
+            "Wachtrekeningen": {
+                "account_number": "499"
+            }
+        },
+        "KLASSE 5 : GELDBELEGGINGEN EN LIQUIDE MIDDELEN": {
+            "root_type": "Asset",
+            "Aanschaffingswaarde": {
+                "account_number": "520"
+            },
+            "Geboekte waardeverminderingen (-)": {
+                "account_number": "539"
+            },
+            "Nog te storten bedragen (-)": {
+                "account_number": "511"
+            },
+            "Op meer dan één jaar": {
+                "account_number": "530"
+            },
+            "Op meer dan een maand en op ten hoogste één jaar": {
+                "account_number": "531"
+            },
+            "Op ten hoogste één maand": {
+                "account_number": "532"
+            },
+            "tot 577 Kassen-contanten": {
+                "account_number": "570",
+                "account_type": "Cash"
+            },
+            "Kassen-zegels": {
+                "account_number": "578",
+                "account_type": "Cash"
+            },
+            "Bank": {
+                "account_number": "5500",
+                "account_type": "Bank"
+            }
+        },
+        "KLASSE 6 : KOSTEN": {
+            "root_type": "Expense",
+            "Aankopen van grondstoffen": {
+                "account_number": "600",
+                "account_type": "Expense Account"
+            },
+            "Aankopen van hulpstoffen": {
+                "account_number": "601",
+                "account_type": "Expense Account"
+            },
+            "Aankopen van diensten, werk en studies": {
+                "account_number": "602",
+                "account_type": "Expense Account"
+            },
+            "Algemene onderaannemingen": {
+                "account_number": "603",
+                "account_type": "Expense Account"
+            },
+            "Aankopen van handelsgoederen": {
+                "account_number": "604",
+                "account_type": "Expense Account"
+            },
+            "Aankopen van onroerende goederen bestemd voor verkoop": {
+                "account_number": "605",
+                "account_type": "Expense Account"
+            },
+            "Ontvangen kortingen, ristorno's en rabatten (-)": {
+                "account_number": "608",
+                "account_type": "Expense Account"
+            },
+            "Voorraadwijzigingen": {
+                "van grondstoffen": {
+                    "account_number": "6090",
+                    "account_type": "Expense Account"
+                },
+                "van hulpstoffen": {
+                    "account_number": "6091",
+                    "account_type": "Expense Account"
+                },
+                "van handelsgoederen": {
+                    "account_number": "6094",
+                    "account_type": "Expense Account"
+                },
+                "van gekochte onroerende goederen, bestemd voor verkoop": {
+                    "account_number": "6095",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "609",
+                "account_type": "Expense Account"
+            },
+            "Uitzendpersoneel en personen die ter beschikking worden gesteld van de vereniging of stichting": {
+                "account_number": "617",
+                "account_type": "Expense Account"
+            },
+            "Bezoldigingen, premies voor buitenwettelijke verzekeringen, ouderdoms- en overlevingspensioenen van bestuurders die niet worden toegekend krachtens een arbeidscontract": {
+                "account_number": "618",
+                "account_type": "Expense Account"
+            },
+            "Bezoldigingen en rechtstreekse sociale voordelen": {
+                "Bestuurders of zaakvoerders": {
+                    "account_number": "6200",
+                    "account_type": "Expense Account"
+                },
+                "Directiepersoneel": {
+                    "account_number": "6201",
+                    "account_type": "Expense Account"
+                },
+                "Bedienden": {
+                    "account_number": "6202",
+                    "account_type": "Expense Account"
+                },
+                "Arbeiders": {
+                    "account_number": "6203",
+                    "account_type": "Expense Account"
+                },
+                "Andere personeelsleden": {
+                    "account_number": "6204",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "620",
+                "account_type": "Expense Account"
+            },
+            "Werkgeversbijdragen voor sociale verzekeringen": {
+                "account_number": "621",
+                "account_type": "Expense Account"
+            },
+            "Werkgeverspremies voor buitenwettelijke verzekeringen": {
+                "account_number": "622",
+                "account_type": "Expense Account"
+            },
+            "Andere personeelskosten": {
+                "account_number": "623",
+                "account_type": "Expense Account"
+            },
+            "Ouderdoms- en overlevingspensioenen": {
+                "Bestuurders of zaakvoerders": {
+                    "account_number": "6240",
+                    "account_type": "Expense Account"
+                },
+                "Personeel": {
+                    "account_number": "6241",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "624",
+                "account_type": "Expense Account"
+            },
+            "Afschrijvingen en waardeverminderingen op vaste activa toevoeging": {
+                "Afschrijvingen op oprichtingskosten": {
+                    "account_number": "6300",
+                    "account_type": "Depreciation"
+                },
+                "Afschrijvingen op immateriële vaste activa": {
+                    "account_number": "6301",
+                    "account_type": "Depreciation"
+                },
+                "Afschrijvingen op materiële vaste activa": {
+                    "account_number": "6302",
+                    "account_type": "Depreciation"
+                },
+                "Waardeverminderingen op immateriële vaste activa": {
+                    "account_number": "6308",
+                    "account_type": "Depreciation"
+                },
+                "Waardeverminderingen op materiële vaste activa": {
+                    "account_number": "6309",
+                    "account_type": "Depreciation"
+                },
+                "account_number": "630",
+                "account_type": "Depreciation"
+            },
+            "Waardeverminderingen op voorraden": {
+                "Toevoeging": {
+                    "account_number": "6310",
+                    "account_type": "Depreciation"
+                },
+                "Terugneming (-)": {
+                    "account_number": "6311",
+                    "account_type": "Depreciation"
+                },
+                "account_number": "631",
+                "account_type": "Depreciation"
+            },
+            "Waardeverminderingen op bestellingen in uitvoering": {
+                "Toevoeging": {
+                    "account_number": "6320",
+                    "account_type": "Depreciation"
+                },
+                "Terugneming (-)": {
+                    "account_number": "6321",
+                    "account_type": "Depreciation"
+                },
+                "account_number": "632",
+                "account_type": "Depreciation"
+            },
+            "Waardeverminderingen op handelsvorderingen op meer dan één jaar": {
+                "Toevoeging": {
+                    "account_number": "6330",
+                    "account_type": "Depreciation"
+                },
+                "Terugneming (-)": {
+                    "account_number": "6331",
+                    "account_type": "Depreciation"
+                },
+                "account_number": "633",
+                "account_type": "Depreciation"
+            },
+            "Waardeverminderingen op handelsvorderingen op ten hoogste één jaar": {
+                "Toevoeging": {
+                    "account_number": "6340",
+                    "account_type": "Depreciation"
+                },
+                "Terugneming (-)": {
+                    "account_number": "6341",
+                    "account_type": "Depreciation"
+                },
+                "account_number": "634",
+                "account_type": "Depreciation"
+            },
+            "Voorzieningen voor pensioenen en soortgelijke verplichtingen": {
+                "Toevoeging": {
+                    "account_number": "6350",
+                    "account_type": "Depreciation"
+                },
+                "Besteding en terugneming (-)": {
+                    "account_number": "6351",
+                    "account_type": "Depreciation"
+                },
+                "account_number": "635",
+                "account_type": "Depreciation"
+            },
+            "Voorzieningen voor grote herstellingswerken en grote onderhoudswerken": {
+                "Toevoeging": {
+                    "account_number": "6360",
+                    "account_type": "Depreciation"
+                },
+                "Besteding en terugneming (-)": {
+                    "account_number": "6361",
+                    "account_type": "Depreciation"
+                },
+                "account_number": "636",
+                "account_type": "Depreciation"
+            },
+            "Voorzieningen voor milieuverplichtingen": {
+                "Toevoeging": {
+                    "account_number": "6370",
+                    "account_type": "Depreciation"
+                },
+                "Besteding en terugneming (-)": {
+                    "account_number": "6371",
+                    "account_type": "Depreciation"
+                },
+                "account_number": "637",
+                "account_type": "Depreciation"
+            },
+            "Voorzieningen voor terug te betalen subsidies en legaten en voor schenkingen met terugnemingsrecht": {
+                "Toevoeging": {
+                    "account_number": "6380",
+                    "account_type": "Expense Account"
+                },
+                "Besteding en terugneming (-)": {
+                    "account_number": "6381",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "638",
+                "account_type": "Expense Account"
+            },
+            "Voorzieningen voor andere risico’s en kosten": {
+                "Toevoeging": {
+                    "account_number": "6390",
+                    "account_type": "Expense Account"
+                },
+                "Besteding en terugneming (-)": {
+                    "account_number": "6391",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "639",
+                "account_type": "Expense Account"
+            },
+            "Bedrijfsbelastingen": {
+                "account_number": "640",
+                "account_type": "Expense Account"
+            },
+            "Minderwaarden op de courante realisatie van materiële vaste activa": {
+                "account_number": "641",
+                "account_type": "Expense Account"
+            },
+            "Minderwaarden op de realisatie van handelsvorderingen": {
+                "account_number": "642",
+                "account_type": "Expense Account"
+            },
+            "Schenkingen": {
+                "account_number": "643",
+                "account_type": "Expense Account"
+            },
+            "Als herstructureringskosten geactiveerde bedrijfskosten (-)": {
+                "account_number": "649",
+                "account_type": "Expense Account"
+            },
+            "Kosten van schulden": {
+                "Rente, commissies en kosten verbonden aan schulden": {
+                    "account_number": "6500",
+                    "account_type": "Expense Account"
+                },
+                "Afschrijving van kosten bij uitgifte van leningen en van disagio": {
+                    "account_number": "6501",
+                    "account_type": "Expense Account"
+                },
+                "Geactiveerde intercalaire interesten (-)": {
+                    "account_number": "6502",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "650",
+                "account_type": "Expense Account"
+            },
+            "Waardeverminderingen op vlottende activa": {
+                "Toevoeging": {
+                    "account_number": "6510",
+                    "account_type": "Expense Account"
+                },
+                "Terugneming (-)": {
+                    "account_number": "6511",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "651",
+                "account_type": "Expense Account"
+            },
+            "Minderwaarden op verwezenlijking van vlottende activa": {
+                "account_number": "652",
+                "account_type": "Expense Account"
+            },
+            "Discontokosten op vorderingen": {
+                "account_number": "653",
+                "account_type": "Expense Account"
+            },
+            "Wisselresultaten": {
+                "account_number": "654",
+                "account_type": "Expense Account"
+            },
+            "Resultaten uit de omrekening van vreemde valuta": {
+                "account_number": "655",
+                "account_type": "Expense Account"
+            },
+            "Voorzieningen van financiële aard": {
+                "Toevoeging": {
+                    "account_number": "6560",
+                    "account_type": "Expense Account"
+                },
+                "Besteding en terugneming (-)": {
+                    "account_number": "6561",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "656",
+                "account_type": "Expense Account"
+            },
+            "Als herstructureringskosten geactiveerde financiële kosten (-)": {
+                "account_number": "659",
+                "account_type": "Expense Account"
+            },
+            "Niet-recurrente afschrijvingen en waardeverminderingen (toevoeging)": {
+                "op oprichtingskosten": {
+                    "account_number": "6600",
+                    "account_type": "Expense Account"
+                },
+                "op immateriële vaste activa": {
+                    "account_number": "6601",
+                    "account_type": "Expense Account"
+                },
+                "op materiële vaste activa": {
+                    "account_number": "6602",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "660",
+                "account_type": "Expense Account"
+            },
+            "Waardeverminderingen op vaste financiële activa (toevoeging)": {
+                "account_number": "661",
+                "account_type": "Expense Account"
+            },
+            "Voorzieningen voor niet-recurrente risico's en kosten": {
+                "Voorzieningen voor niet-recurrente bedrijfsrisico’s en kosten": {
+                    "Toevoeging": {
+                        "account_number": "66200",
+                        "account_type": "Expense Account"
+                    },
+                    "Bestedingen (-)": {
+                        "account_number": "66201",
+                        "account_type": "Expense Account"
+                    },
+                    "account_number": "6620",
+                    "account_type": "Expense Account"
+                },
+                "Voorzieningen voor niet-recurrente financiële risico’s en kosten": {
+                    "Toevoeging": {
+                        "account_number": "66210",
+                        "account_type": "Expense Account"
+                    },
+                    "Besteding (-)": {
+                        "account_number": "66211",
+                        "account_type": "Expense Account"
+                    },
+                    "account_number": "6621",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "662",
+                "account_type": "Expense Account"
+            },
+            "Minderwaarden op de realisatie van vaste activa": {
+                "Minderwaarden op de realisatie van immateriële en materiële vaste activa": {
+                    "account_number": "6630",
+                    "account_type": "Expense Account"
+                },
+                "Minderwaarden op de realisatie van financiële vaste activa": {
+                    "account_number": "6631",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "663",
+                "account_type": "Expense Account"
+            },
+            "Andere niet-recurrente financiële kosten": {
+                "account_number": "668",
+                "account_type": "Expense Account"
+            },
+            "Belgische belastingen op het resultaat van het boekjaar": {
+                "Verschuldigde of gestorte belastingen en voorheffingen": {
+                    "account_number": "6700",
+                    "account_type": "Expense Account"
+                },
+                "Geactiveerde overschotten van betaalde belastingen en voorheffingen (–)": {
+                    "account_number": "6701",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "670",
+                "account_type": "Expense Account"
+            },
+            "Buitenlandse belastingen op het resultaat van vorige boekjaren": {
+                "account_number": "673",
+                "account_type": "Expense Account"
+            },
+            "Overboeking naar de uitgestelde belastingen": {
+                "account_number": "680",
+                "account_type": "Expense Account"
+            },
+            "Overboeking naar de belastingvrije reserve": {
+                "account_number": "689",
+                "account_type": "Expense Account"
+            },
+            "Overgedragen negatief resultaat van het vorig boekjaar": {
+                "account_number": "690",
+                "account_type": "Expense Account"
+            },
+            "Overboeking naar de bestemde fondsen en andere reserves": {
+                "account_number": "691",
+                "account_type": "Expense Account"
+            },
+            "Over te dragen positief resultaat": {
+                "account_number": "692",
+                "account_type": "Expense Account"
+            },
+            "Als herstructureringskosten geactiveerde niet-recurrente bedrijfskosten (-)": {
+                "account_number": "6690",
+                "account_type": "Expense Account"
+            },
+            "Als herstructureringskosten geactiveerde niet-recurrente financiële kosten (-)": {
+                "account_number": "6691",
+                "account_type": "Expense Account"
+            },
+            "Verschuldigde of gestorte belastingsupplementen": {
+                "account_number": "6710",
+                "account_type": "Expense Account"
+            },
+            "Geraamde belastingsupplementen": {
+                "account_number": "6711",
+                "account_type": "Expense Account"
+            },
+            "Gevormde fiscale voorzieningen": {
+                "account_number": "6712",
+                "account_type": "Expense Account"
+            }
+        },
+        "KLASSE 7 : OPBRENGSTEN": {
+            "root_type": "Income",
+            "Lidgeld, schenkingen, legaten en subsidies": {
+                "Lidgelden": {
+                    "account_number": "730",
+                    "account_type": "Income Account"
+                },
+                "Schenkingen": {
+                    "account_number": "731",
+                    "account_type": "Income Account"
+                },
+                "Legaten": {
+                    "account_number": "732",
+                    "account_type": "Income Account"
+                },
+                "Subsidies": {
+                    "account_number": "733",
+                    "account_type": "Income Account"
+                },
+                "account_number": "73",
+                "account_type": "Income Account"
+            },
+            "Toegekende kortingen, ristorno's en rabatten (-)": {
+                "account_number": "708",
+                "account_type": "Income Account"
+            },
+            "In de voorraad goederen in bewerking": {
+                "account_number": "712",
+                "account_type": "Income Account"
+            },
+            "In de voorraad gereed product": {
+                "account_number": "713",
+                "account_type": "Income Account"
+            },
+            "In de voorraad onroerende goederen bestemd voor verkoop": {
+                "account_number": "715",
+                "account_type": "Income Account"
+            },
+            "In de bestellingen in uitvoering": {
+                "Aanschaffingswaarde": {
+                    "account_number": "7170",
+                    "account_type": "Income Account"
+                },
+                "Toegerekende winst": {
+                    "account_number": "7171",
+                    "account_type": "Income Account"
+                },
+                "account_number": "717",
+                "account_type": "Income Account"
+            },
+            "Meerwaarden op de courante realisatie van materiële vaste activa": {
+                "account_number": "741",
+                "account_type": "Income Account"
+            },
+            "Meerwaarden op de realisatie van handelsvorderingen": {
+                "account_number": "742",
+                "account_type": "Income Account"
+            },
+            "Opbrengsten uit financiële vaste activa": {
+                "account_number": "750",
+                "account_type": "Income Account"
+            },
+            "Opbrengsten uit vlottende activa": {
+                "account_number": "751",
+                "account_type": "Income Account"
+            },
+            "Meerwaarden op de realisatie van vlottende activa": {
+                "account_number": "752",
+                "account_type": "Income Account"
+            },
+            "Wisselresultaten": {
+                "account_number": "754",
+                "account_type": "Income Account"
+            },
+            "Resultaten uit de omrekening van vreemde valuta": {
+                "account_number": "755",
+                "account_type": "Income Account"
+            },
+            "Terugneming van afschrijvingen en waardeverminderingen": {
+                "op immateriële vaste activa": {
+                    "account_number": "7600",
+                    "account_type": "Income Account"
+                },
+                "op materiële vaste activa": {
+                    "account_number": "7601",
+                    "account_type": "Income Account"
+                },
+                "account_number": "760",
+                "account_type": "Income Account"
+            },
+            "Terugneming van waardeverminderingen op financiële vaste activa": {
+                "account_number": "761",
+                "account_type": "Income Account"
+            },
+            "Terugneming van voorzieningen voor niet-recurrente risico's en kosten": {
+                "Terugneming van voorzieningen voor niet-recurrente bedrijfsrisico’s en kosten": {
+                    "account_number": "7620",
+                    "account_type": "Income Account"
+                },
+                "Terugneming van voorzieningen voor niet-recurrente financiële risico’s en kosten": {
+                    "account_number": "7621",
+                    "account_type": "Income Account"
+                },
+                "account_number": "762",
+                "account_type": "Income Account"
+            },
+            "Meerwaarden op de realisatie van vaste activa": {
+                "Meerwaarde op de realisatie van immateriële en materiële vaste activa": {
+                    "account_number": "7630",
+                    "account_type": "Income Account"
+                },
+                "Meerwaarde op de realisatie van financiële vaste activa": {
+                    "account_number": "7631",
+                    "account_type": "Income Account"
+                },
+                "account_number": "763",
+                "account_type": "Income Account"
+            },
+            "Andere niet-recurrente financiële opbrengsten": {
+                "account_number": "769",
+                "account_type": "Income Account"
+            },
+            "Onttrekking aan de uitgestelde belastingen": {
+                "account_number": "780",
+                "account_type": "Income Account"
+            },
+            "Onttrekking aan de belastingvrije reserves": {
+                "account_number": "789",
+                "account_type": "Income Account"
+            },
+            "Overgedragen positief resultaat van het vorige boekjaar": {
+                "account_number": "790",
+                "account_type": "Income Account"
+            },
+            "Andere reserves": {
+                "account_number": "791",
+                "account_type": "Income Account"
+            },
+            "Over te dragen negatief resultaat": {
+                "account_number": "792",
+                "account_type": "Income Account"
+            }
+        }
+    }
+}
