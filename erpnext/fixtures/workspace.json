@@ -13803,7 +13803,7 @@
     "parenttype": "Workspace"
    }
   ],
-  "content": "[{\"id\":\"2J5JqDTMTD\",\"type\":\"header\",\"data\":{\"text\":\"<span style=\\\"font-size: 24px;\\\"><b>Forecasting</b></span>\",\"col\":12}},{\"id\":\"rfoKBonOwp\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h3\\\">Bank Balances</span>\",\"col\":12}},{\"id\":\"Tgy-LyxDh7\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"ICICI Bank\",\"col\":4}},{\"id\":\"aFJNTAxUYA\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"UBI\",\"col\":4}},{\"id\":\"IIQdv-3Zde\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"HDFC\",\"col\":4}},{\"id\":\"vDDB0QBNyl\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h3\\\">Today's forecast</span>\",\"col\":12}},{\"id\":\"ZlQscneJtC\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Weekly Finance Forecast\",\"col\":12}},{\"id\":\"cLEbGy-hC-\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Payments Due\",\"col\":4}},{\"id\":\"2RUMocIxqb\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Vendor Advances Due\",\"col\":4}},{\"id\":\"MdA-urmvvV\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"EMI & Bank Charges Due\",\"col\":4}},{\"id\":\"zYPFADu38Z\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Factory Indents\",\"col\":4}},{\"id\":\"O6NnAehbq9\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Payroll\",\"col\":4}},{\"id\":\"6exJl19Xe-\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Others\",\"col\":4}},{\"id\":\"Q_SHRa7RXs\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Receivables Due\",\"col\":4}},{\"id\":\"1wQ3Sl94vh\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"GST Refunds Due\",\"col\":4}},{\"id\":\"SC3TSz1zgj\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"MlwR048hqM\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h3\\\">This month's forecast</span>\",\"col\":12}},{\"id\":\"SSWh9bTJoI\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Total Finance Forecast\",\"col\":12}},{\"id\":\"WiZqn2oZgB\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Payments Due\",\"col\":4}},{\"id\":\"tOY5Zw3r17\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Vendor Advances Due\",\"col\":4}},{\"id\":\"oODx_NBR6i\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"EMI & Bank Charges Due\",\"col\":4}},{\"id\":\"MAZDCmLQIW\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Receivables Due\",\"col\":4}},{\"id\":\"ic45x5eAGd\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"GST Refunds Due\",\"col\":4}}]",
+  "content": "[{\"id\":\"2J5JqDTMTD\",\"type\":\"header\",\"data\":{\"text\":\"<span style=\\\"font-size: 24px;\\\"><b>Forecasting</b></span>\",\"col\":12}},{\"id\":\"rfoKBonOwp\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h3\\\">Bank Balances</span>\",\"col\":12}},{\"id\":\"Tgy-LyxDh7\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"ICICI Bank\",\"col\":4}},{\"id\":\"aFJNTAxUYA\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"UBI\",\"col\":4}},{\"id\":\"IIQdv-3Zde\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"HDFC\",\"col\":4}},{\"id\":\"vDDB0QBNyl\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h3\\\">Today's forecast</span>\",\"col\":12}},{\"id\":\"ZlQscneJtC\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Weekly Finance Forecast\",\"col\":12}},{\"id\":\"cLEbGy-hC-\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Weekly Payments Due\",\"col\":4}},{\"id\":\"2RUMocIxqb\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Vendor Advances Due\",\"col\":4}},{\"id\":\"MdA-urmvvV\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Weekly EMI & Bank Charges Due\",\"col\":4}},{\"id\":\"Q_SHRa7RXs\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Weekly Receivables Due\",\"col\":4}},{\"id\":\"zYPFADu38Z\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Factory Indents\",\"col\":4}},{\"id\":\"1wQ3Sl94vh\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"GST Refunds Due\",\"col\":4}},{\"id\":\"6exJl19Xe-\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Others\",\"col\":4}},{\"id\":\"SC3TSz1zgj\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"MlwR048hqM\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h3\\\">This month's forecast</span>\",\"col\":12}},{\"id\":\"SSWh9bTJoI\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Total Finance Forecast\",\"col\":12}},{\"id\":\"WiZqn2oZgB\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Overall Payments Due\",\"col\":4}},{\"id\":\"tOY5Zw3r17\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Vendor Advances Due\",\"col\":4}},{\"id\":\"oODx_NBR6i\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Overall EMI & Bank Charges Due\",\"col\":4}},{\"id\":\"MAZDCmLQIW\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Overall Receivables Due\",\"col\":4}},{\"id\":\"O6NnAehbq9\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Payroll\",\"col\":4}},{\"id\":\"ic45x5eAGd\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"GST Refunds Due\",\"col\":4}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -13814,13 +13814,41 @@
   "is_hidden": 0,
   "label": "Administration",
   "links": [],
-  "modified": "2025-09-12 22:31:15.652122",
+  "modified": "2026-04-29 15:14:06.017012",
   "module": null,
   "name": "Administration",
   "number_cards": [
    {
+    "label": "Weekly EMI & Bank Charges Due",
+    "number_card_name": "Weekly EMI & Bank Charges Due",
+    "parent": "Administration",
+    "parentfield": "number_cards",
+    "parenttype": "Workspace"
+   },
+   {
+    "label": "Weekly Payments Due",
+    "number_card_name": "Weekly Invoices Due",
+    "parent": "Administration",
+    "parentfield": "number_cards",
+    "parenttype": "Workspace"
+   },
+   {
     "label": "ICICI Bank",
     "number_card_name": "IDBI Bank",
+    "parent": "Administration",
+    "parentfield": "number_cards",
+    "parenttype": "Workspace"
+   },
+   {
+    "label": "Overall EMI & Bank Charges Due",
+    "number_card_name": "Overall EMI & Bank Charges Due",
+    "parent": "Administration",
+    "parentfield": "number_cards",
+    "parenttype": "Workspace"
+   },
+   {
+    "label": "Weekly Receivables Due",
+    "number_card_name": "Weekly Receivables Due",
     "parent": "Administration",
     "parentfield": "number_cards",
     "parenttype": "Workspace"
@@ -13833,8 +13861,22 @@
     "parenttype": "Workspace"
    },
    {
+    "label": "Overall Payments Due",
+    "number_card_name": "Overall Invoice Due",
+    "parent": "Administration",
+    "parentfield": "number_cards",
+    "parenttype": "Workspace"
+   },
+   {
     "label": "UBI",
     "number_card_name": "UBI Bank",
+    "parent": "Administration",
+    "parentfield": "number_cards",
+    "parenttype": "Workspace"
+   },
+   {
+    "label": "Overall Receivables Due",
+    "number_card_name": "Overall Receivables Due",
     "parent": "Administration",
     "parentfield": "number_cards",
     "parenttype": "Workspace"
@@ -13847,29 +13889,8 @@
     "parenttype": "Workspace"
    },
    {
-    "label": "Payments Due",
-    "number_card_name": "Overall Invoice Due",
-    "parent": "Administration",
-    "parentfield": "number_cards",
-    "parenttype": "Workspace"
-   },
-   {
     "label": "Vendor Advances Due",
     "number_card_name": "Overall Vendor Advances Due",
-    "parent": "Administration",
-    "parentfield": "number_cards",
-    "parenttype": "Workspace"
-   },
-   {
-    "label": "EMI & Bank Charges Due",
-    "number_card_name": "Overall EMI & Bank Charges Due",
-    "parent": "Administration",
-    "parentfield": "number_cards",
-    "parenttype": "Workspace"
-   },
-   {
-    "label": "Receivables Due",
-    "number_card_name": "Overall Receivables Due",
     "parent": "Administration",
     "parentfield": "number_cards",
     "parenttype": "Workspace"
