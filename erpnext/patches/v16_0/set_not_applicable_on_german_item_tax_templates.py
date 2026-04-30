@@ -139,9 +139,22 @@ GERMAN_ITEM_TAX_TEMPLATE_NOT_APPLICABLE_ACCOUNTS = {
 }
 
 
-def get_account_identifier(account, identifier_field):
-	identifier, root_type = frappe.get_cached_value("Account", account, [identifier_field, "root_type"])
-	return identifier, root_type
+def update_account_cache(accounts, account_cache):
+	missing_accounts = set(accounts) - set(account_cache)
+	if not missing_accounts:
+		return
+
+	for account in frappe.get_all(
+		"Account",
+		filters={"name": ("in", tuple(sorted(missing_accounts)))},
+		fields=["name", "account_name", "account_number", "root_type"],
+	):
+		account_cache[account.name] = account
+
+
+def get_account_identifier(account, identifier_field, account_cache):
+	cached_account = account_cache[account]
+	return cached_account.get(identifier_field), cached_account.root_type
 
 
 def execute():
@@ -160,6 +173,7 @@ def execute():
 		filters={"country": "Germany"},
 		fields=["name", "chart_of_accounts"],
 	)
+	account_cache = {}
 
 	for company in companies:
 		chart = GERMAN_ITEM_TAX_TEMPLATE_NOT_APPLICABLE_ACCOUNTS.get(company.chart_of_accounts)
@@ -179,8 +193,10 @@ def execute():
 					filters={"parent": itt_name, "tax_rate": 0},
 					fields=["name", "tax_type", "not_applicable"],
 				)
+				update_account_cache((d.tax_type for d in zero_rate_details), account_cache)
 				zero_rate_accounts_by_detail = {
-					d.name: get_account_identifier(d.tax_type, identifier_field) for d in zero_rate_details
+					d.name: get_account_identifier(d.tax_type, identifier_field, account_cache)
+					for d in zero_rate_details
 				}
 				if set(zero_rate_accounts_by_detail.values()) != target_accounts:
 					continue
