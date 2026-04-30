@@ -186,6 +186,7 @@
    "read_only": 1
   },
   {
+   "description": "Basis for tax calculation",
    "fieldname": "net_amount",
    "fieldtype": "Currency",
    "label": "Net Amount",
@@ -193,6 +194,7 @@
    "read_only": 1
   },
   {
+   "description": "Basis for tax calculation",
    "fieldname": "base_net_amount",
    "fieldtype": "Currency",
    "label": "Net Amount (Company Currency)",
@@ -203,7 +205,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-30 23:08:17.881616",
+ "modified": "2026-05-01 00:38:53.368737",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Advance Taxes and Charges",
