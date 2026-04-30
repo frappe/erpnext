@@ -1847,6 +1847,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				"base_net_total",
 				"base_total_taxes_and_charges",
 				"base_discount_amount",
+				"base_grand_total",
+				"base_rounding_adjustment",
+				"base_rounded_total",
 				"base_taxes_and_charges_added",
 				"base_taxes_and_charges_deducted",
 				"total_amount_to_pay",
@@ -1858,6 +1861,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				"base_total_cost",
 				"base_secondary_items_cost",
 				"base_totals_section",
+				"loyalty_amount",
+				"total_commission",
+				"amount_eligible_for_commission",
+				"claimed_landed_cost_amount",
 			],
 			company_currency
 		);
@@ -1868,19 +1875,31 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				"net_total",
 				"total_taxes_and_charges",
 				"discount_amount",
+				"grand_total",
+				"rounding_adjustment",
+				"rounded_total",
 				"taxes_and_charges_added",
 				"taxes_and_charges_deducted",
 				"tax_withholding_net_total",
 				"paid_amount",
 				"write_off_amount",
+				"change_amount",
 				"operating_cost",
 				"secondary_items_cost",
 				"raw_material_cost",
 				"total_cost",
 				"totals_section",
+				"total_billing_amount",
 			],
 			this.frm.doc.currency
 		);
+
+		if (this.frm.doc.party_account_currency) {
+			this.frm.set_currency_labels(
+				["total_advance", "outstanding_amount"],
+				this.frm.doc.party_account_currency
+			);
+		}
 
 		this.frm.set_df_property(
 			"conversion_rate",
@@ -1993,13 +2012,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		if (this.frm.doc.taxes && this.frm.doc.taxes.length > 0) {
 			this.frm.set_currency_labels(
-				["tax_amount", "total", "tax_amount_after_discount"],
+				["tax_amount", "total", "tax_amount_after_discount_amount", "net_amount"],
 				this.frm.doc.currency,
 				"taxes"
 			);
 
 			this.frm.set_currency_labels(
-				["base_tax_amount", "base_total", "base_tax_amount_after_discount"],
+				["base_tax_amount", "base_total", "base_tax_amount_after_discount_amount", "base_net_amount"],
 				company_currency,
 				"taxes"
 			);
@@ -2025,6 +2044,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				"base_amount",
 				"base_net_amount",
 				"base_rate_with_margin",
+				"incoming_rate",
 			],
 			company_currency,
 			"items"
@@ -2039,6 +2059,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				"net_amount",
 				"stock_uom_rate",
 				"rate_with_margin",
+				"discount_amount",
+				"distributed_discount_amount",
 			],
 			this.frm.doc.currency,
 			"items"
