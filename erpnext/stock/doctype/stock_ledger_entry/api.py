@@ -33,7 +33,10 @@ def get_total_cost_slab_daily():
 	""",
 		(today,),
 	)
-	return result[0][0] or 0
+	return {
+		"value": result[0][0] or 0,
+		"fieldtype": "Currency",
+	}
 
 
 @frappe.whitelist()
@@ -109,7 +112,10 @@ def get_total_cost_slab_weekly():
 	""",
 		(start_date, end_date),
 	)
-	return result[0][0] or 0
+	return {
+		"value": result[0][0] or 0,
+		"fieldtype": "Currency",
+	}
 
 
 @frappe.whitelist()
@@ -188,7 +194,10 @@ def get_total_cost_slab_monthly():
 	""",
 		(start_date, end_date),
 	)
-	return result[0][0] or 0
+	return {
+		"value": result[0][0] or 0,
+		"fieldtype": "Currency",
+	}
 
 
 @frappe.whitelist()
