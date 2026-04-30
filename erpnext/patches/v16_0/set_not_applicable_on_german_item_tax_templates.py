@@ -4,82 +4,144 @@ import frappe
 # Migration patches must not read mutable setup data, otherwise future edits to
 # country_wise_tax.json would change what this patch does on sites that have not
 # run it yet.
-NOT_APPLICABLE_7_PERCENT_ACCOUNTS = frozenset(
+#
+# For numbered charts, compare account_number + root_type because Account.account_name
+# is not unique within a company.
+SKR04_NOT_APPLICABLE_7_PERCENT_ACCOUNT_IDS = frozenset(
 	{
-		"Umsatzsteuer 7 %",
-		"Umsatzsteuer aus innergemeinschaftlichem Erwerb",
-		"Umsatzsteuer nach § 13b UStG",
-		"Abziehbare Vorsteuer 7 %",
-		"Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
-		"Abziehbare Vorsteuer nach § 13b UStG",
+		("3801", "Liability"),
+		("3802", "Liability"),
+		("3835", "Liability"),
+		("1401", "Asset"),
+		("1402", "Asset"),
+		("1541", "Asset"),
 	}
 )
 
-NOT_APPLICABLE_19_PERCENT_ACCOUNTS = frozenset(
+SKR04_NOT_APPLICABLE_19_PERCENT_ACCOUNT_IDS = frozenset(
 	{
-		"Umsatzsteuer 19 %",
-		"Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
-		"Umsatzsteuer nach § 13b UStG 19 %",
-		"Abziehbare Vorsteuer 19 %",
-		"Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
-		"Abziehbare Vorsteuer nach § 13b UStG 19 %",
+		("3806", "Liability"),
+		("3804", "Liability"),
+		("3837", "Liability"),
+		("1406", "Asset"),
+		("1404", "Asset"),
+		("1540", "Asset"),
 	}
 )
 
-NOT_APPLICABLE_7_PERCENT_ACCOUNTS_WITH_NUMBERS = frozenset(
+SKR03_NOT_APPLICABLE_7_PERCENT_ACCOUNT_IDS = frozenset(
 	{
-		"Umsatzsteuer 7 %",
-		"Umsatzsteuer aus innergemeinschaftlichen Erwerb 7 %",
-		"Umsatzsteuer nach § 13b UStG 7%",
-		"Abziehbare Vorsteuer 7 %",
-		"Abziehbare Vorsteuer aus innergemeinschaftlichen Erwerb 7 %",
-		"Abziehbare Vorsteuer nach § 13b UStG 7%",
+		("1771", "Liability"),
+		("1772", "Liability"),
+		("1785", "Liability"),
+		("1571", "Asset"),
+		("1572", "Asset"),
+		("1541", "Asset"),
 	}
 )
 
-NOT_APPLICABLE_19_PERCENT_ACCOUNTS_WITH_NUMBERS = frozenset(
+SKR03_NOT_APPLICABLE_19_PERCENT_ACCOUNT_IDS = frozenset(
 	{
-		"Umsatzsteuer 19 %",
-		"Umsatzsteuer aus innergemeinschaftlichen Erwerb 19 %",
-		"Umsatzsteuer nach § 13b UStG 19%",
-		"Abziehbare Vorsteuer 19 %",
-		"Abziehbare Vorsteuer aus innergemeinschaftlichen Erwerb 19 %",
-		"Abziehbare Vorsteuer nach § 13b UStG 19%",
+		("1776", "Liability"),
+		("1774", "Liability"),
+		("1787", "Liability"),
+		("1576", "Asset"),
+		("1574", "Asset"),
+		("1540", "Asset"),
 	}
 )
 
-NOT_APPLICABLE_IMPORT_TAX_ACCOUNT = frozenset({"Entstandene Einfuhrumsatzsteuer"})
+STANDARD_NOT_APPLICABLE_7_PERCENT_ACCOUNT_LABELS = frozenset(
+	{
+		("Umsatzsteuer 7 %", "Liability"),
+		("Umsatzsteuer aus innergemeinschaftlichem Erwerb", "Liability"),
+		("Umsatzsteuer nach § 13b UStG", "Liability"),
+		("Abziehbare Vorsteuer 7 %", "Asset"),
+		("Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb", "Asset"),
+		("Abziehbare Vorsteuer nach § 13b UStG", "Asset"),
+	}
+)
+
+STANDARD_NOT_APPLICABLE_19_PERCENT_ACCOUNT_LABELS = frozenset(
+	{
+		("Umsatzsteuer 19 %", "Liability"),
+		("Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %", "Liability"),
+		("Umsatzsteuer nach § 13b UStG 19 %", "Liability"),
+		("Abziehbare Vorsteuer 19 %", "Asset"),
+		("Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %", "Asset"),
+		("Abziehbare Vorsteuer nach § 13b UStG 19 %", "Asset"),
+	}
+)
+
+STANDARD_WITH_NUMBERS_NOT_APPLICABLE_7_PERCENT_ACCOUNT_IDS = frozenset(
+	{
+		("2321", "Liability"),
+		("2331", "Liability"),
+		("2341", "Liability"),
+		("1521", "Asset"),
+		("1531", "Asset"),
+		("1541", "Asset"),
+	}
+)
+
+STANDARD_WITH_NUMBERS_NOT_APPLICABLE_19_PERCENT_ACCOUNT_IDS = frozenset(
+	{
+		("2320", "Liability"),
+		("2330", "Liability"),
+		("2340", "Liability"),
+		("1520", "Asset"),
+		("1530", "Asset"),
+		("1540", "Asset"),
+	}
+)
 
 GERMAN_ITEM_TAX_TEMPLATE_NOT_APPLICABLE_ACCOUNTS = {
 	"SKR03 mit Kontonummern": {
-		"19 %": NOT_APPLICABLE_7_PERCENT_ACCOUNTS,
-		"7 %": NOT_APPLICABLE_19_PERCENT_ACCOUNTS,
-		"0 %": NOT_APPLICABLE_7_PERCENT_ACCOUNTS
-		| NOT_APPLICABLE_19_PERCENT_ACCOUNTS
-		| NOT_APPLICABLE_IMPORT_TAX_ACCOUNT,
+		"identifier_field": "account_number",
+		"templates": {
+			"19 %": SKR03_NOT_APPLICABLE_7_PERCENT_ACCOUNT_IDS,
+			"7 %": SKR03_NOT_APPLICABLE_19_PERCENT_ACCOUNT_IDS,
+			"0 %": SKR03_NOT_APPLICABLE_7_PERCENT_ACCOUNT_IDS
+			| SKR03_NOT_APPLICABLE_19_PERCENT_ACCOUNT_IDS
+			| frozenset({("1588", "Asset")}),
+		},
 	},
 	"SKR04 mit Kontonummern": {
-		"19 %": NOT_APPLICABLE_7_PERCENT_ACCOUNTS,
-		"7 %": NOT_APPLICABLE_19_PERCENT_ACCOUNTS,
-		"0 %": NOT_APPLICABLE_7_PERCENT_ACCOUNTS
-		| NOT_APPLICABLE_19_PERCENT_ACCOUNTS
-		| NOT_APPLICABLE_IMPORT_TAX_ACCOUNT,
+		"identifier_field": "account_number",
+		"templates": {
+			"19 %": SKR04_NOT_APPLICABLE_7_PERCENT_ACCOUNT_IDS,
+			"7 %": SKR04_NOT_APPLICABLE_19_PERCENT_ACCOUNT_IDS,
+			"0 %": SKR04_NOT_APPLICABLE_7_PERCENT_ACCOUNT_IDS
+			| SKR04_NOT_APPLICABLE_19_PERCENT_ACCOUNT_IDS
+			| frozenset({("1433", "Asset")}),
+		},
 	},
 	"Standard": {
-		"19 %": NOT_APPLICABLE_7_PERCENT_ACCOUNTS,
-		"7 %": NOT_APPLICABLE_19_PERCENT_ACCOUNTS,
-		"0%": NOT_APPLICABLE_7_PERCENT_ACCOUNTS
-		| NOT_APPLICABLE_19_PERCENT_ACCOUNTS
-		| NOT_APPLICABLE_IMPORT_TAX_ACCOUNT,
+		"identifier_field": "account_name",
+		"templates": {
+			"19 %": STANDARD_NOT_APPLICABLE_7_PERCENT_ACCOUNT_LABELS,
+			"7 %": STANDARD_NOT_APPLICABLE_19_PERCENT_ACCOUNT_LABELS,
+			"0%": STANDARD_NOT_APPLICABLE_7_PERCENT_ACCOUNT_LABELS
+			| STANDARD_NOT_APPLICABLE_19_PERCENT_ACCOUNT_LABELS
+			| frozenset({("Entstandene Einfuhrumsatzsteuer", "Asset")}),
+		},
 	},
 	"Standard with Numbers": {
-		"19%": NOT_APPLICABLE_7_PERCENT_ACCOUNTS_WITH_NUMBERS,
-		"7%": NOT_APPLICABLE_19_PERCENT_ACCOUNTS_WITH_NUMBERS,
-		"0 %": NOT_APPLICABLE_7_PERCENT_ACCOUNTS_WITH_NUMBERS
-		| NOT_APPLICABLE_19_PERCENT_ACCOUNTS_WITH_NUMBERS
-		| NOT_APPLICABLE_IMPORT_TAX_ACCOUNT,
+		"identifier_field": "account_number",
+		"templates": {
+			"19%": STANDARD_WITH_NUMBERS_NOT_APPLICABLE_7_PERCENT_ACCOUNT_IDS,
+			"7%": STANDARD_WITH_NUMBERS_NOT_APPLICABLE_19_PERCENT_ACCOUNT_IDS,
+			"0 %": STANDARD_WITH_NUMBERS_NOT_APPLICABLE_7_PERCENT_ACCOUNT_IDS
+			| STANDARD_WITH_NUMBERS_NOT_APPLICABLE_19_PERCENT_ACCOUNT_IDS
+			| frozenset({("1550", "Asset")}),
+		},
 	},
 }
+
+
+def get_account_identifier(account, identifier_field):
+	identifier, root_type = frappe.get_cached_value("Account", account, [identifier_field, "root_type"])
+	return identifier, root_type
 
 
 def execute():
@@ -90,7 +152,7 @@ def execute():
 	an explicit 0% rate). For each German company, this patch looks up the
 	historical defaults for its Chart of Accounts and sets
 	`not_applicable = 1` on detail rows that still match those defaults
-	(same template title, same zero-rate tax account set, flag still unset),
+	(same template title, same zero-rate tax account identifier set, flag still unset),
 	leaving any user-customised rows untouched.
 	"""
 	companies = frappe.get_all(
@@ -104,7 +166,8 @@ def execute():
 		if not chart:
 			continue
 
-		for template_title, target_accounts in chart.items():
+		identifier_field = chart["identifier_field"]
+		for template_title, target_accounts in chart["templates"].items():
 			itt_names = frappe.get_all(
 				"Item Tax Template",
 				filters={"company": company.name, "title": template_title},
@@ -117,8 +180,7 @@ def execute():
 					fields=["name", "tax_type", "not_applicable"],
 				)
 				zero_rate_accounts_by_detail = {
-					d.name: frappe.get_cached_value("Account", d.tax_type, "account_name")
-					for d in zero_rate_details
+					d.name: get_account_identifier(d.tax_type, identifier_field) for d in zero_rate_details
 				}
 				if set(zero_rate_accounts_by_detail.values()) != target_accounts:
 					continue
