@@ -36,6 +36,7 @@ from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year, update_voucher_outstanding
 from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
+from erpnext.buying.doctype.purchase_order.purchase_order import merge_and_remove_duplicate_items
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.accounts_controller import merge_taxes, validate_account_head
 from erpnext.controllers.buying_controller import BuyingController
@@ -2012,36 +2013,7 @@ def make_purchase_receipt(
 		args = json.loads(args)
 
 	def post_parent_process(source_parent, target_parent):
-		pi_detail_map = {}
-		items_to_remove = []
-		has_partial_merge = False
-		for item in target_parent.items:
-			if not item.purchase_invoice_item:
-				continue
-			if item.purchase_invoice_item in pi_detail_map:
-				existing = pi_detail_map[item.purchase_invoice_item]
-				remaining = flt(item.qty) - flt(existing.qty)
-				if remaining > 0:
-					existing.qty = flt(existing.qty) + remaining
-					has_partial_merge = True
-				items_to_remove.append(item)
-			else:
-				pi_detail_map[item.purchase_invoice_item] = item
-		for item in items_to_remove:
-			target_parent.remove(item)
-		if items_to_remove:
-			if has_partial_merge:
-				frappe.msgprint(
-					_("Duplicate items were merged into existing rows in the Items table."),
-					indicator="blue",
-				)
-			elif len(pi_detail_map) == len(items_to_remove):
-				frappe.msgprint(
-					_("All items from {0} {1} are already fully added in the items table").format(
-						source_parent.doctype, source_parent.name
-					),
-					indicator="blue",
-				)
+		merge_and_remove_duplicate_items(source_parent, target_parent, "purchase_invoice_item")
 		remove_items_with_zero_qty(target_parent)
 		set_missing_values(source_parent, target_parent)
 

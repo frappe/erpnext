@@ -22,6 +22,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	validate_inter_company_party,
 )
 from erpnext.accounts.party import get_party_account
+from erpnext.buying.doctype.purchase_order.purchase_order import merge_and_remove_duplicate_items
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
@@ -1380,39 +1381,7 @@ def make_sales_invoice(
 		return has_unit_price_items and source.qty == 0
 
 	def postprocess(source, target):
-		so_detail_map = {}
-		items_to_remove = []
-		has_partial_merge = False
-		for item in target.items:
-			if not item.so_detail:
-				continue
-			if item.so_detail in so_detail_map:
-				existing = so_detail_map[item.so_detail]
-				remaining = flt(item.qty) - flt(existing.qty)
-				if remaining > 0:
-					existing.qty = flt(existing.qty) + remaining
-					has_partial_merge = True
-				items_to_remove.append(item)
-			else:
-				so_detail_map[item.so_detail] = item
-
-		for item in items_to_remove:
-			target.remove(item)
-
-		if items_to_remove:
-			if has_partial_merge:
-				frappe.msgprint(
-					_("Duplicate items were merged into existing rows in the Items table."),
-					indicator="blue",
-				)
-			elif len(so_detail_map) == len(items_to_remove):
-				frappe.msgprint(
-					_("All items from {0} {1} are already fully added in the items table").format(
-						source.doctype, source.name
-					),
-					indicator="blue",
-				)
-
+		merge_and_remove_duplicate_items(source, target, "so_detail")
 		set_missing_values(source, target)
 		# Get the advance paid Journal Entries in Sales Invoice Advance
 		if target.get("allocate_advances_automatically"):

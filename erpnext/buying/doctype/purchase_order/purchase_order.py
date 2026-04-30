@@ -706,6 +706,42 @@ def set_missing_values(source, target):
 	target.run_method("set_use_serial_batch_fields")
 
 
+def merge_and_remove_duplicate_items(source, target, source_item_field1, source_item_field2=None):
+	seen_items = {}
+	items_to_remove = []
+	has_partial_merge = False
+	for item in target.items:
+		key = item.get(source_item_field1)
+		if not key and source_item_field2:
+			key = item.get(source_item_field2)
+		if not key:
+			continue
+		if key in seen_items:
+			existing = seen_items[key]
+			remaining = flt(item.qty) - flt(existing.qty)
+			if remaining > 0:
+				existing.qty = flt(existing.qty) + remaining
+				has_partial_merge = True
+			items_to_remove.append(item)
+		else:
+			seen_items[key] = item
+	for item in items_to_remove:
+		target.remove(item)
+	if items_to_remove:
+		if has_partial_merge:
+			frappe.msgprint(
+				_("Duplicate items were merged into existing rows in the Items table."),
+				indicator="blue",
+			)
+		elif len(seen_items) == len(items_to_remove):
+			frappe.msgprint(
+				_("All items from {0} {1} are already fully added in the items table").format(
+					source.doctype, source.name
+				),
+				indicator="blue",
+			)
+
+
 @frappe.whitelist()
 def make_purchase_receipt(
 	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
@@ -718,36 +754,7 @@ def make_purchase_receipt(
 	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
 
 	def post_process(source, target):
-		po_detail_map = {}
-		items_to_remove = []
-		has_partial_merge = False
-		for item in target.items:
-			if not item.purchase_order_item:
-				continue
-			if item.purchase_order_item in po_detail_map:
-				existing = po_detail_map[item.purchase_order_item]
-				remaining = flt(item.qty) - flt(existing.qty)
-				if remaining > 0:
-					existing.qty = flt(existing.qty) + remaining
-					has_partial_merge = True
-				items_to_remove.append(item)
-			else:
-				po_detail_map[item.purchase_order_item] = item
-		for item in items_to_remove:
-			target.remove(item)
-		if items_to_remove:
-			if has_partial_merge:
-				frappe.msgprint(
-					_("Duplicate items were merged into existing rows in the Items table."),
-					indicator="blue",
-				)
-			elif len(po_detail_map) == len(items_to_remove):
-				frappe.msgprint(
-					_("All items from {0} {1} are already fully added in the items table").format(
-						source.doctype, source.name
-					),
-					indicator="blue",
-				)
+		merge_and_remove_duplicate_items(source, target, "purchase_order_item")
 		set_missing_values(source, target)
 
 	def is_unit_price_row(source):
@@ -831,39 +838,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		args = json.loads(args)
 
 	def postprocess(source, target):
-		po_detail_map = {}
-		items_to_remove = []
-		has_partial_merge = False
-		for item in target.items:
-			if not item.po_detail:
-				continue
-			if item.po_detail in po_detail_map:
-				existing = po_detail_map[item.po_detail]
-				remaining = flt(item.qty) - flt(existing.qty)
-				if remaining > 0:
-					existing.qty = flt(existing.qty) + remaining
-					has_partial_merge = True
-				items_to_remove.append(item)
-			else:
-				po_detail_map[item.po_detail] = item
-
-		for item in items_to_remove:
-			target.remove(item)
-
-		if items_to_remove:
-			if has_partial_merge:
-				frappe.msgprint(
-					_("Duplicate items were merged into existing rows in the Items table."),
-					indicator="blue",
-				)
-			elif len(po_detail_map) == len(items_to_remove):
-				frappe.msgprint(
-					_("All items from {0} {1} are already fully added in the items table").format(
-						source.doctype, source.name
-					),
-					indicator="blue",
-				)
-
+		merge_and_remove_duplicate_items(source, target, "po_detail")
 		target.flags.ignore_permissions = ignore_permissions
 		set_missing_values(source, target)
 

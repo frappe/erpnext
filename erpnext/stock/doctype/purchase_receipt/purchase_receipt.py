@@ -16,6 +16,7 @@ from pypika import functions as fn
 import erpnext
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
+from erpnext.buying.doctype.purchase_order.purchase_order import merge_and_remove_duplicate_items
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.accounts_controller import merge_taxes
 from erpnext.controllers.buying_controller import BuyingController
@@ -1487,39 +1488,7 @@ def make_purchase_invoice(
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
-		detail_map = {}
-		items_to_remove = []
-		has_partial_merge = False
-		for item in target.get("items", []):
-			key = item.pr_detail or item.po_detail
-			if not key:
-				continue
-			if key in detail_map:
-				existing = detail_map[key]
-				remaining = flt(item.qty) - flt(existing.qty)
-				if remaining > 0:
-					existing.qty = flt(existing.qty) + remaining
-					has_partial_merge = True
-				items_to_remove.append(item)
-			else:
-				detail_map[key] = item
-
-		for item in items_to_remove:
-			target.remove(item)
-
-		if items_to_remove:
-			if has_partial_merge:
-				frappe.msgprint(
-					_("Duplicate items were merged into existing rows in the Items table."),
-					indicator="blue",
-				)
-			elif len(detail_map) == len(items_to_remove):
-				frappe.msgprint(
-					_("All items from {0} {1} are already fully added in the items table").format(
-						source.doctype, source.name
-					),
-					indicator="blue",
-				)
+		merge_and_remove_duplicate_items(source, target, "pr_detail", "po_detail")
 
 		if len(target.get("items")) == 0:
 			frappe.throw(_("All items have already been Invoiced/Returned"))
