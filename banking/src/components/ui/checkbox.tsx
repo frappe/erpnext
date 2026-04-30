@@ -13,7 +13,7 @@ function Checkbox({
     <CheckboxPrimitive.Root
       data-slot="checkbox"
       className={cn(
-        "peer border data-[state=checked]:text-ink-white shrink-0 transition-shadow outline-none",
+        "peer border data-[state=checked]:text-ink-white shrink-0 transition-shadow outline-none align-middle",
         "rounded-[4px]",
         "border-ink-gray-4 data-[state=checked]:bg-ink-gray-8 data-[state=checked]:border-ink-gray-8",
         // Hover state

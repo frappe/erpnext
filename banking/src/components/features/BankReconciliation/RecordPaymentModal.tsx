@@ -1117,7 +1117,7 @@ const FetchInvoicesModal = ({ onClose }: { onClose: () => void }) => {
                 ))}
             </TableBody>
         </Table> : null}
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center sticky bottom-0 bg-surface-modal">
             <div className="flex gap-2">
                 <span className="text-ink-gray-5">Invoices: <span className="text-ink-gray-8 font-numeric font-medium">{selectedInvoices.length}</span></span> /
                 <span className="text-ink-gray-5">Total: <span className="text-ink-gray-8 font-numeric font-medium">{formatCurrency(selectedInvoices.reduce((acc, invoice) => acc + invoice.outstanding_amount, 0))}</span></span>
