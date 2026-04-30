@@ -80,13 +80,19 @@ const form = reactive({
     crack_back: '',
     // Grading & Remarks
     bend: null,
-    repair: 'None',
+    repair: '',
+    recovery_type: '',
+    repolish_type: '',
+    recalibration_type: '',
     grade: '',
     remarks: '',
 });
 
 const grades = ref([]);
 const repairOptions = ref([]);
+const recoveryOptions = ref([]);
+const repolishOptions = ref([]);
+const recalibrationOptions = ref([]);
 
 const fetchGrades = async () => {
 	const list = await frappe.db.get_list('Slab Quality Grade', {
@@ -103,8 +109,11 @@ const fetchRepairOptions = async () => {
     const r = await frappe.call({
         method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.get_repair_options'
     });
-    if (r.message && Array.isArray(r.message)) {
-        repairOptions.value = r.message;
+    if (r.message && typeof r.message === 'object') {
+        repairOptions.value = r.message.repair || [];
+        recoveryOptions.value = r.message.recovery_type || [];
+        repolishOptions.value = r.message.repolish_type || [];
+        recalibrationOptions.value = r.message.recalibration_type || [];
     }
 };
 
@@ -158,7 +167,10 @@ function selectSlab(slab) {
         crack_front: null,
         crack_back: null,
         bend: null,
-        repair: 'None',
+        repair: '',
+        recovery_type: '',
+        repolish_type: '',
+        recalibration_type: '',
         grade: '',
         remarks: '',
     });
@@ -168,14 +180,45 @@ function selectSlab(slab) {
     newObservation.value = null;
 }
 
+function handleRepairChange() {
+    form.recovery_type = '';
+    form.repolish_type = '';
+    form.recalibration_type = '';
+    form.grade = '';
+}
 
 const confirmAndTag = async () => {
     if (!selectedSlab.value) {
         return;
     }
 
-    if (!form.slab_length || !form.slab_width || !form.slab_thickness || !form.grade) {
-        frappe.msgprint(__('Please fill in all required fields (Length, Width, Thickness, Grade)'));
+    if (!form.slab_length || !form.slab_width || !form.slab_thickness) {
+        frappe.msgprint(__('Please fill in all required fields (Length, Width, Thickness)'));
+        return;
+    }
+
+    if (!form.repair) {
+        frappe.msgprint(__('Please select a Repair type'));
+        return;
+    }
+
+    if (form.repair === 'None' && !form.grade) {
+        frappe.msgprint(__('Please select Grade since Repair is None'));
+        return;
+    }
+
+    if (form.repair === 'Recovery' && !form.recovery_type) {
+        frappe.msgprint(__('Please select Recovery Type'));
+        return;
+    }
+
+    if (form.repair === 'Repolish' && !form.repolish_type) {
+        frappe.msgprint(__('Please select Repolish Type'));
+        return;
+    }
+
+    if (form.repair === 'Recalibration' && !form.recalibration_type) {
+        frappe.msgprint(__('Please select Recalibration Type'));
         return;
     }
 
@@ -631,19 +674,47 @@ onUnmounted(() => {
                                 <input type="number" v-model="form.bend" class="form-control">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="small text-muted">{{ __('Repair') }}</label>
-                                <select v-model="form.repair" class="form-control">
+                                <label class="small text-muted">{{ __('Repair') }}<span class="text-danger">*</span></label>
+                                <select v-model="form.repair" class="form-control" required @change="handleRepairChange">
+                                    <option value="">{{ __('Select Repair') }}</option>
                                     <option v-for="option in repairOptions" :key="option" :value="option">
                                         {{ __(option) }}
                                     </option>
                                 </select>
                             </div>
-                            <div class="col-md-3 mb-3">
-                                <label class="small text-muted">{{ __('Grade') }}</label>
-                                <select v-model="form.grade" class="form-control" required>
+                            <div class="col-md-3 mb-3" v-if="form.repair === 'None'">
+                                <label class="small text-muted">{{ __('Grade') }}<span class="text-danger">*</span></label>
+                                <select v-model="form.grade" class="form-control" :required="form.repair === 'None'">
                                     <option value="">{{ __('Select Grade') }}</option>
                                     <option v-for="g in grades" :key="g.code" :value="g.code">
                                         {{ g.code }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3" v-if="form.repair === 'Recovery'">
+                                <label class="small text-muted">{{ __('Recovery Type') }}<span class="text-danger">*</span></label>
+                                <select v-model="form.recovery_type" class="form-control" :required="form.repair === 'Recovery'">
+                                    <option value="">{{ __('Select Recovery Type') }}</option>
+                                    <option v-for="option in recoveryOptions" :key="option" :value="option">
+                                        {{ __(option) }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3" v-if="form.repair === 'Repolish'">
+                                <label class="small text-muted">{{ __('Repolish Type') }}<span class="text-danger">*</span></label>
+                                <select v-model="form.repolish_type" class="form-control" :required="form.repair === 'Repolish'">
+                                    <option value="">{{ __('Select Repolish Type') }}</option>
+                                    <option v-for="option in repolishOptions" :key="option" :value="option">
+                                        {{ __(option) }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3" v-if="form.repair === 'Recalibration'">
+                                <label class="small text-muted">{{ __('Recalibration Type') }}<span class="text-danger">*</span></label>
+                                <select v-model="form.recalibration_type" class="form-control" :required="form.repair === 'Recalibration'">
+                                    <option value="">{{ __('Select Recalibration Type') }}</option>
+                                    <option v-for="option in recalibrationOptions" :key="option" :value="option">
+                                        {{ __(option) }}
                                     </option>
                                 </select>
                             </div>
