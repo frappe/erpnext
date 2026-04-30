@@ -479,8 +479,5 @@ erpnext.patches.v16_0.merge_repost_settings_to_accounts_settings
 erpnext.patches.v16_0.set_root_type_in_account_categories
 erpnext.patches.v16_0.scr_inv_dimension
 erpnext.patches.v16_0.packed_item_inv_dimen
-<<<<<<< HEAD
 erpnext.patches.v16_0.fix_titles
-=======
 erpnext.patches.v16_0.set_not_applicable_on_german_item_tax_templates
->>>>>>> 25be38e23c (fix: Backfill `not_applicable` on Item Tax Template Details for German companies (#54682))
