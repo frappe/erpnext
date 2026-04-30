@@ -3,7 +3,6 @@
 
 
 from collections import defaultdict
-from datetime import date, datetime
 from json import loads
 from typing import TYPE_CHECKING, Optional
 
@@ -31,6 +30,7 @@ from frappe.utils import (
 	nowdate,
 )
 from frappe.utils.caching import site_cache
+from frappe.utils.data import DateTimeLikeObject
 from pypika import Order
 from pypika.functions import Coalesce
 from pypika.terms import ExistsCriterion
@@ -61,7 +61,7 @@ OUTSTANDING_DOCTYPES = frozenset(["Sales Invoice", "Purchase Invoice", "Fees"])
 
 @frappe.whitelist()
 def get_fiscal_year(
-	date: str | datetime | None = None,
+	date: DateTimeLikeObject | None = None,
 	fiscal_year: str | None = None,
 	label: str = "Date",
 	verbose: int = 1,
@@ -201,7 +201,7 @@ def validate_fiscal_year(date, fiscal_year, company, label="Date", doc=None):
 @frappe.whitelist()
 def get_balance_on(
 	account: str | None = None,
-	date: str | date | None = None,
+	date: DateTimeLikeObject | None = None,
 	party_type: str | None = None,
 	party: str | None = None,
 	company: str | None = None,
@@ -547,7 +547,7 @@ def reconcile_against_document(
 					skip_ref_details_update_for_pe=skip_ref_details_update_for_pe,
 					dimensions_dict=dimensions_dict,
 				)
-				if referenced_row.get("outstanding_amount"):
+				if referenced_row.get("outstanding_amount") and entry.get("outstanding_amount") is None:
 					referenced_row.outstanding_amount -= flt(entry.allocated_amount)
 
 				reposting_rows.append(referenced_row)

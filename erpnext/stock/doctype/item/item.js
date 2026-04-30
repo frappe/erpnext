@@ -73,6 +73,7 @@ frappe.ui.form.on("Item", {
 			},
 		};
 	},
+
 	onload: function (frm) {
 		erpnext.item.setup_queries(frm);
 		if (frm.doc.variant_of) {
@@ -126,6 +127,21 @@ frappe.ui.form.on("Item", {
 
 	refresh: function (frm) {
 		frm.trigger("toggle_has_serial_batch_fields");
+
+		if (frappe.defaults.get_default("item_naming_by") != "Naming Series" || frm.doc.variant_of) {
+			frm.toggle_display("naming_series", false);
+		} else {
+			erpnext.toggle_naming_series();
+		}
+
+		frm.toggle_display(["standard_rate"], frappe.model.can_create("Item Price"));
+
+		if (frm.is_new()) {
+			frm.toggle_display("disabled", false);
+			return;
+		}
+
+		frm.toggle_display("disabled", true);
 
 		if (frm.doc.is_stock_item) {
 			frm.add_custom_button(
@@ -229,8 +245,6 @@ frappe.ui.form.on("Item", {
 					__("Create")
 				);
 			}
-
-			// frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 		if (frm.doc.variant_of) {
 			frm.set_intro(
@@ -239,12 +253,6 @@ frappe.ui.form.on("Item", {
 				]),
 				true
 			);
-		}
-
-		if (frappe.defaults.get_default("item_naming_by") != "Naming Series" || frm.doc.variant_of) {
-			frm.toggle_display("naming_series", false);
-		} else {
-			erpnext.toggle_naming_series();
 		}
 
 		erpnext.item.edit_prices_button(frm);
@@ -286,8 +294,6 @@ frappe.ui.form.on("Item", {
 				},
 			};
 		});
-
-		frm.toggle_display(["standard_rate"], frappe.model.can_create("Item Price"));
 	},
 
 	validate: function (frm) {
@@ -661,10 +667,10 @@ $.extend(erpnext.item, {
 	make_dashboard: function (frm) {
 		if (frm.doc.__islocal) return;
 
-		// Show Stock Levels only if is_stock_item
 		if (frm.doc.is_stock_item) {
 			frappe.require("item-dashboard.bundle.js", function () {
-				const section = frm.dashboard.add_section("", __("Stock Levels"));
+				const section = frm.fields_dict["stock_levels_html"].$wrapper;
+
 				erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
 					parent: section,
 					item_code: frm.doc.name,

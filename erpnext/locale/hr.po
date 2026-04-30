@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-26 09:49+0000\n"
-"PO-Revision-Date: 2026-04-27 16:51\n"
+"PO-Revision-Date: 2026-04-28 17:16\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Croatian\n"
 "MIME-Version: 1.0\n"
@@ -2300,7 +2300,7 @@ msgstr "Radnja ako se ista stopa ne održava tijekom cijele interne transakcije"
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Action if same rate is not maintained throughout sales cycle"
-msgstr ""
+msgstr "Radnja ako se ista stopa marže ne održava tijekom cijelog prodajnog ciklusa"
 
 #. Label of the action_on_new_invoice (Select) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
@@ -3368,7 +3368,7 @@ msgstr "Predujam Uplate dodijeljene naspran Naloga biće samo preuzete"
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Advanced Features"
-msgstr ""
+msgstr "Napredne Značajke"
 
 #. Label of the advanced_filtering (Check) field in DocType 'Financial Report
 #. Row'
@@ -4149,7 +4149,7 @@ msgstr "Dopusti Narudžbenicu s Nultom Količinom"
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow Quotation with zero quantity"
-msgstr ""
+msgstr "Dopusti Ponudu s nultom količinom"
 
 #. Label of the allow_rename_attribute_value (Check) field in DocType 'Item
 #. Variant Settings'
@@ -4193,13 +4193,13 @@ msgstr "Dozvoli Kreiranje Prodajne Fakture bez Prodajnog Naloga"
 #. in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow Sales Order creation for expired Quotation"
-msgstr ""
+msgstr "Dopusti izradu Prodajnog Naloga za isteklu Ponudu"
 
 #. Label of the allow_zero_qty_in_sales_order (Check) field in DocType 'Selling
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow Sales Order with zero quantity"
-msgstr ""
+msgstr "Dopusti Prodajni Nalog s nultom količinom"
 
 #. Label of the allow_stale (Check) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
@@ -4273,13 +4273,13 @@ msgstr "Dozvoli Nultu Stopu Vrednovanja"
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow delivery of overproduced quantity"
-msgstr ""
+msgstr "Dopusti isporuku prekomjerno proizvedene količine"
 
 #. Label of the editable_price_list_rate (Check) field in DocType 'Selling
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow editing Price List rate in transactions"
-msgstr ""
+msgstr "Dopusti uređivanje cijene Cjenika u transakcijama"
 
 #. Label of the allow_existing_serial_no (Check) field in DocType 'Stock
 #. Settings'
@@ -4303,25 +4303,25 @@ msgstr "Dozvoli viševalutne fakture naspram računa jedne stranke "
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow multiple Sales Orders against a customer's Purchase Order"
-msgstr ""
+msgstr "Dopusti više Prodajnih Nalogs naspram Kupovnog Naloga Klijenta"
 
 #. Label of the allow_negative_rates_for_items (Check) field in DocType
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow negative rates for Items"
-msgstr ""
+msgstr "Dopusti negativne cijene za Artikle"
 
 #. Description of the 'Zero-Quantity Line Items' (Section Break) field in
 #. DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow sales transactions with zero quantities if the rate is fixed but the quantities are not. e.g. Rate Contracts"
-msgstr ""
+msgstr "Dopusti prodajne transakcije s nultim količinama ako je cijena fiksna, ali količine nisu. Npr. Ugovori o cijeni"
 
 #. Label of the allow_multiple_items (Check) field in DocType 'Selling
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow same Item to be added multiple times in a transaction"
-msgstr ""
+msgstr "Dopusti dodavanje istog artikla više puta u transakciji"
 
 #. Label of the allow_to_edit_stock_uom_qty_for_purchase (Check) field in
 #. DocType 'Stock Settings'
@@ -6666,7 +6666,7 @@ msgstr "Alat Poređenja Sastavnica"
 #. Label of the bom_conf_tab (Tab Break) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "BOM Configuration"
-msgstr ""
+msgstr "Konfiguracija Sastavnice"
 
 #. Label of the bom_created (Check) field in DocType 'BOM Creator Item'
 #: erpnext/manufacturing/doctype/bom_creator_item/bom_creator_item.json
@@ -8185,7 +8185,7 @@ msgstr "Cijena po Ugovornom Nalogu"
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Blanket Orders"
-msgstr ""
+msgstr "Okvirni Nalozi"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:109
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:260
@@ -8813,7 +8813,7 @@ msgstr "Izračunaj procijenjeno vrijeme dolaska"
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Calculate Product Bundle price based on child Item's rates"
-msgstr ""
+msgstr "Obračunaj cijenu Artikal Paketa na osnovu cijena podređenih artikala"
 
 #. Description of the 'Hidden Line (Internal Use Only)' (Check) field in
 #. DocType 'Financial Report Row'
@@ -11557,7 +11557,7 @@ msgstr "Potrošni materijal"
 #. 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Consume Components"
-msgstr ""
+msgstr "Konzumirane Komponente"
 
 #. Option for the 'Status' (Select) field in DocType 'Serial No'
 #: erpnext/stock/doctype/serial_no/serial_no.json
@@ -11897,7 +11897,7 @@ msgstr "Kontroliši Prijašnje Transakcije Zaliha"
 #. Description of the 'Based On' (Select) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Controls how raw materials are consumed during the ‘Manufacture’ stock entry."
-msgstr ""
+msgstr "Kontrolira kako se sirovine troše tijekom unosa zaliha 'Proizvodnje'."
 
 #. Label of the conversion_factor (Float) field in DocType 'Loyalty Program'
 #. Label of the conversion_factor (Float) field in DocType 'Purchase Order Item
@@ -12093,7 +12093,7 @@ msgstr "Raspodjela Troškova %"
 #. DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Cost Allocation / Process Loss"
-msgstr ""
+msgstr "Raspodjela Troškova / Gubitak Procesa"
 
 #. Label of the cost_center (Link) field in DocType 'Account Closing Balance'
 #. Label of the cost_center (Link) field in DocType 'Advance Taxes and Charges'
@@ -13659,7 +13659,7 @@ msgstr "Prilagođeno Financijsko Izvješće"
 #. Label of the custom_remark (Check) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 msgid "Custom Remark"
-msgstr ""
+msgstr "Prilagođena Napomena"
 
 #. Label of the custom_remarks (Check) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
@@ -15555,7 +15555,7 @@ msgstr "Opcije Razdjelnika"
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Deliver secondary Items"
-msgstr ""
+msgstr "Dostavi sekundarne artikle"
 
 #. Option for the 'Status' (Select) field in DocType 'Purchase Order'
 #. Option for the 'Status' (Select) field in DocType 'Serial No'
@@ -17010,7 +17010,7 @@ msgstr "Želiš li podnijeti unos zaliha?"
 #: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:50
 #: erpnext/selling/report/sales_partner_commission_summary/test_sales_partner_commission_summary.py:22
 msgid "DocType can be one of them {0}"
-msgstr ""
+msgstr "DocType može biti jedan od {0}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:182
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:447
@@ -17099,7 +17099,7 @@ msgstr "Ne preračunavaj PDV"
 #. DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Don't reserve Sales Order qty on sales return"
-msgstr ""
+msgstr "Ne rezerviraj količinu prodajnog naloga pri povratu prodaje"
 
 #. Label of the doors (Int) field in DocType 'Vehicle'
 #: erpnext/setup/doctype/vehicle/vehicle.json
@@ -18099,13 +18099,13 @@ msgstr "Omogućite troškovni centar, projekte i druge prilagođene knjigovodstv
 #. in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable cut-off date on creating bulk Delivery Notes"
-msgstr ""
+msgstr "Omogući krajnji rok za izradu skupnih Otpremnica"
 
 #. Label of the enable_discount_accounting (Check) field in DocType 'Selling
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable discount accounting for selling"
-msgstr ""
+msgstr "Omogući knjigovodstvo prodajnog popusta"
 
 #. Description of the 'Consider Rejected Warehouses' (Check) field in DocType
 #. 'Pick List'
@@ -18128,13 +18128,13 @@ msgstr "Omogući ovu opciju za izračunavanje dnevne amortizacije uzimajući u o
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable this option to permit the use of negative rates for items in sales transactions. This setting is useful for applying substantial discounts, processing refunds or returns, and handling special promotional pricing."
-msgstr ""
+msgstr "Omogućite ovu opciju kako biste dopustili upotrebu negativnih cijena za artikle u prodajnim transakcijama. Ova postavka je korisna za primjenu značajnih popusta, obradu povrata novca ili vraćanje robe te za rukovanje posebnim promotivnim cijenama."
 
 #. Description of the 'Validate selling price for Item against purchase or
 #. valuation rate' (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable this to block transactions where the selling price is less than the purchase or valuation rate"
-msgstr ""
+msgstr "Omogućite ovo kako biste blokirali transakcije u kojima je prodajna cijena manja od nabavne cijene ili procjene"
 
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.js:34
 msgid "Enable to apply SLA on every {0}"
@@ -18194,7 +18194,12 @@ msgid "Enabling this will do the following:\n"
 "<li>Calculate the prices of all <a href=\"/desk/product-bundle\" rel=\"noopener noreferrer\">Product Bundles</a> in the Items table, based on the prices of its child Items, specified in the Packed/Bundle Items table. </li>\n"
 "</ul>\n"
 "Note: If this is enabled, updating the rate of the Product Bundle in the Items table will not change its price. It will get reset to the price based on its Child Items on saving the doc."
-msgstr ""
+msgstr "Omogućavanjem ove opcije učinit ćete sljedeće:\n"
+"<ul style=\"padding-left:16px\">\n"
+"<li>Stupac cijene svih tablica Pakiranih/Paketiranih Artikala učinit će se uredljivim.</li>\n"
+"<li>Izračunajte cijene svih <a href=\"/desk/product-bundle\" rel=\"noopener noreferrer\">Paketa Artikala</a> u tablici Artikala, na temelju cijena podređenih Artikala, navedenih u tablici Pakiranih/Paketiranih Artikala. </li>\n"
+"</ul>\n"
+"Napomena: Ako je ova opcija omogućena, ažuriranje cijene Paketa Artikala u tablici Artikala neće promijeniti njegovu cijenu. Prilikom spremanja dokumenta, cijena će se resetirati na temelju podređenih artikala."
 
 #. Label of the encashment_date (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -21956,7 +21961,7 @@ msgstr "Sakrij Simbol Valute"
 #. Label of the hide_tax_id (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Hide Customer's Tax ID from sales transactions"
-msgstr ""
+msgstr "Sakrijte porezni ID Klijenta iz prodajnih transakcija"
 
 #. Label of the hide_when_empty (Check) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
@@ -22100,7 +22105,7 @@ msgstr "Koliko Često?"
 #. Description of the 'Quantity (Output Qty)' (Float) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "How many units of the final product this BOM makes."
-msgstr ""
+msgstr "Koliko jedinica konačnog proizvoda proizvodi ova Sastavnica."
 
 #. Description of the 'Update frequency of Project' (Select) field in DocType
 #. 'Buying Settings'
@@ -22112,7 +22117,7 @@ msgstr "Koliko često treba ažurirati Projekat od Ukupnih Troškova Kupovine?"
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "How often should sales data be updated in Company/Project?"
-msgstr ""
+msgstr "Koliko često treba ažurirati podatke o prodaji u Tvrtki/Projektu?"
 
 #. Description of the 'Data Source' (Select) field in DocType 'Financial Report
 #. Row'
@@ -22492,7 +22497,7 @@ msgstr "Ako se i dalje primjenjuje više pravila o cijenama, od korisnika se tra
 #. field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "If no Item Price is found for an item in the Price List set in the transaction, prices from the Default Price List will be fetched."
-msgstr ""
+msgstr "Ako se za artikl u cjeniku postavljenom u transakciji ne pronađe cijena, preuzeti će se cijene iz zadanog cjenika."
 
 #. Description of the 'Automatically Add Taxes from Taxes and Charges Template'
 #. (Check) field in DocType 'Accounts Settings'
@@ -24621,7 +24626,7 @@ msgstr "Standard Jezik"
 #. Label of the dn_required (Select) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Is Delivery Note required to create Sales Invoice?"
-msgstr ""
+msgstr "Je li Otpremnica potrebna za izradu Prodajne Fakture?"
 
 #. Label of the is_discounted (Check) field in DocType 'POS Invoice'
 #. Label of the is_discounted (Check) field in DocType 'Sales Invoice'
@@ -24903,7 +24908,7 @@ msgstr "Povrat (Debit Faktura)"
 #. Label of the so_required (Select) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Is Sales Order required to create Sales Invoice/Delivery Note?"
-msgstr ""
+msgstr "Je li Prodajni Nalog obavezan za izradu Prodajne Fakture/Otpremnice?"
 
 #. Label of the is_short_year (Check) field in DocType 'Fiscal Year'
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.json
@@ -28079,7 +28084,7 @@ msgstr "Održavanje Zaliha"
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Maintain same rate throughout sales cycle"
-msgstr ""
+msgstr "Održavaj istu stopu marže tijekom cijelog prodajnog ciklusa"
 
 #. Group in Asset's connections
 #. Label of a Card Break in the Assets Workspace
@@ -30006,7 +30011,7 @@ msgstr "Duže/Kraće od 12 mjeseci."
 #. field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Most Customers have a unique Tax ID that is fetched into selling transactions. Enable this setting if you do not want Customer Tax IDs to appear in sales transactions."
-msgstr ""
+msgstr "Većina klijenata ima jedinstveni porezni broj koji se koristi u prodajnim transakcijama. Omogućite ovu postavku ako ne želite da se porezni brojevi klijenata pojavljuju u prodajnim transakcijama."
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:32
 msgid "Motion Picture & Video"
@@ -36341,7 +36346,7 @@ msgstr "Odaberi Radni Nalog."
 
 #: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:53
 msgid "Please select a company."
-msgstr ""
+msgstr "Odaberi Tvrtku."
 
 #: erpnext/setup/doctype/holiday_list/holiday_list.py:89
 msgid "Please select a country"
@@ -37245,7 +37250,7 @@ msgstr "Preventivno Održavanje"
 #. field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Prevents the automatic reservation of stock quantities from sales orders when processing sales returns."
-msgstr ""
+msgstr "Sprječava automatsku rezervaciju količina zaliha iz prodajnih naloga prilikom obrade povrata prodaje."
 
 #. Label of the preview (Button) field in DocType 'Request for Quotation'
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:267
@@ -40116,7 +40121,7 @@ msgstr "Količina (A - B)"
 #. Label of the quantity (Float) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Quantity (Output Qty)"
-msgstr ""
+msgstr "Količina (Izlazna količina)"
 
 #. Label of the quantity_difference (Read Only) field in DocType 'Stock
 #. Reconciliation Item'
@@ -43302,7 +43307,7 @@ msgstr "Uloga koja ima dopuštenje zaobilaziti ograničenja razdoblja."
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Role allowed to override stop action"
-msgstr ""
+msgstr "Uloga kojoj je dopušteno poništavanje radnje zaustavljanja"
 
 #. Label of the role_to_notify_on_depreciation_failure (Link) field in DocType
 #. 'Accounts Settings'
@@ -47621,7 +47626,7 @@ msgstr "Postavi ime polja iz kojeg želite da preuzmete podatke iz nadređenog o
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Set incoming rate as zero for expired Batch"
-msgstr ""
+msgstr "Postavi nabavnu cjenu na nulu za isteklu Šaržu"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:1021
 msgid "Set quantity of process loss item:"
@@ -49005,11 +49010,11 @@ msgstr "Početni položaj od gornje ivice"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.html:124
 msgid "Statement Of Accounts"
-msgstr ""
+msgstr "Izvod Računa"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.html:145
 msgid "Statement Period"
-msgstr ""
+msgstr "Razdoblje Izvoda"
 
 #. Label of the status_details (Section Break) field in DocType 'Service Level
 #. Agreement'
@@ -52587,7 +52592,7 @@ msgstr "Polja Od Dioničara i Za Dioničara ne mogu biti prazna"
 #. Description of the 'Item to Manufacture' (Link) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "The final item that will be produced using this BOM."
-msgstr ""
+msgstr "Konačni artikal koja će se proizvesti pomoću ove Sastavnice."
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:40
 msgid "The fiscal year has been automatically created in a Disabled state to maintain consistency with the previous fiscal year's status."
@@ -52647,7 +52652,7 @@ msgstr "Sljedeći {0} su kreirani: {1}"
 #. Company/Project?' (Select) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "The frequency at which project progress and company transaction details will be updated. Set it to daily or monthly if you post a lot of transactions."
-msgstr ""
+msgstr "Učestalost ažuriranja napretka projekta i detalja transakcija tvrtke. Postavite na dnevno ili mjesečno ako objavljujete puno transakcija."
 
 #. Description of the 'Gross Weight' (Float) field in DocType 'Packing Slip'
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -53034,7 +53039,7 @@ msgstr "Ova radnja će prekinuti vezu ovog računa sa bilo kojom eksternom uslug
 #. (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "This allows creation of sales orders from quotations that have passed their expiration date, providing flexibility in processing orders despite outdated quotes."
-msgstr ""
+msgstr "Ovo omogućuje izradu prodajnih naloga iz ponuda kojima je istekao rok valjanosti, pružajući fleksibilnost u obradi naloga unatoč zastarjelim ponudama."
 
 #: erpnext/assets/doctype/asset/asset.py:433
 msgid "This asset category is marked as non-depreciable. Please disable depreciation calculation or choose a different category."
@@ -55550,7 +55555,7 @@ msgstr "Jedinica"
 #. Label of the uom (Link) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Unit Of Measure"
-msgstr ""
+msgstr "Jedinica"
 
 #: erpnext/controllers/accounts_controller.py:4100
 msgid "Unit Price"
@@ -56213,7 +56218,7 @@ msgstr "Koristi za Košaricu"
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Use prices from Default Price List as fallback"
-msgstr ""
+msgstr "Koristite cijene iz zadanog Cjenika kao rezervu"
 
 #. Label of the used (Int) field in DocType 'Coupon Code'
 #: erpnext/accounts/doctype/coupon_code/coupon_code.json
@@ -56471,7 +56476,7 @@ msgstr "Potvrdi Zalihe na Spremi"
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Validate selling price for Item against purchase or valuation rate"
-msgstr ""
+msgstr "Potvrdi prodajnu cijenu artikla u odnosu na nabavnu ili procjene"
 
 #. Label of the validity_details_section (Section Break) field in DocType
 #. 'Lower Deduction Certificate'
@@ -57077,7 +57082,7 @@ msgstr "Detaljna Referenca Verifikata"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.html:160
 msgid "Voucher Details"
-msgstr ""
+msgstr "Detalji Verifikata"
 
 #. Label of the voucher_no (Dynamic Link) field in DocType 'Advance Payment
 #. Ledger Entry'
@@ -57518,7 +57523,7 @@ msgstr "Upozori pri novim Zahtjevima za Ponudu"
 #. in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Warn or stop if Item rate is changed in Delivery Notes and Sales Invoices generated from a Sales Order."
-msgstr ""
+msgstr "Upozori ili zaustavi ako se cijena artikla promijeni u otpremnicama i prodajnim fakturama stvorenim iz prodajnog naloga."
 
 #: erpnext/projects/doctype/timesheet_detail/timesheet_detail.py:134
 msgid "Warning - Row {0}: Billing Hours are more than Actual Hours"
@@ -57819,7 +57824,7 @@ msgstr "Kada kreirate artikal, unosom vrijednosti za ovo polje automatski će se
 #. (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "When enabled, it adds a cutoff date filter to Delivery Notes created in bulk from Sales Orders. This allows you to process orders only with a transaction date up to the specified cutoff date, which is useful for period-end processing and batch fulfillment."
-msgstr ""
+msgstr "Kada je omogućeno, dodaje filter krajnjeg datuma otpremnicama izrađenim skupno iz prodajnih naloga. To vam omogućuje obradu naloga s datumom transakcije do navedenog krajnjeg datuma, što je korisno za obradu na kraju razdoblja i ispunjavanje Šarži."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:308
 msgid "When there are multiple finished goods ({0}) in a Repack stock entry, the basic rate for all finished goods must be set manually. To set rate manually, enable the checkbox 'Set Basic Rate Manually' in the respective finished good row."
@@ -58673,7 +58678,7 @@ msgstr "Nulta Količina"
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Zero-Quantity Line Items"
-msgstr ""
+msgstr "Artikli Nulte Količine"
 
 #. Label of the zip_file (Attach) field in DocType 'Import Supplier Invoice'
 #: erpnext/regional/doctype/import_supplier_invoice/import_supplier_invoice.json
