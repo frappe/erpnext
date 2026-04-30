@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestFixture/Resources.schema.json
+resources:
+  item_widget:
+    kind: item
+    id: WIDGET-1
+    attr:
+      owner: item.mgr@acme.test
+      item_group: Products
+      disabled: false
+      is_stock_item: true
+
+  se_draft_acme:
+    kind: stock_entry
+    id: STE-001
+    attr:
+      company: Acme
+      owner: stock.user@acme.test
+      docstatus: 0
+      purpose: Material Issue
+
+  se_submitted_acme:
+    kind: stock_entry
+    id: STE-002
+    attr:
+      company: Acme
+      owner: stock.user@acme.test
+      docstatus: 1
+      purpose: Material Issue
+
+  se_other_company:
+    kind: stock_entry
+    id: STE-003
+    attr:
+      company: Globex
+      owner: stock@globex.test
+      docstatus: 0
+      purpose: Material Issue

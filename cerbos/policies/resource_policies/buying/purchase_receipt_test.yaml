@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: PurchaseReceiptPolicyTest
+tests:
+  - name: Stock User can submit purchase receipts
+    input:
+      principals: [stock_user]
+      resources: [pr_draft]
+      actions: [create, read, write, submit]
+    expected:
+      - principal: stock_user
+        resource: pr_draft
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW
+
+  - name: Purchase User can also submit purchase receipts
+    input:
+      principals: [purchase_user]
+      resources: [pr_draft]
+      actions: [submit]
+    expected:
+      - principal: purchase_user
+        resource: pr_draft
+        actions:
+          submit: EFFECT_ALLOW
+
+  - name: Sales User has no access to purchase receipts
+    input:
+      principals: [sales_user]
+      resources: [pr_draft]
+      actions: [read]
+    expected:
+      - principal: sales_user
+        resource: pr_draft
+        actions:
+          read: EFFECT_DENY

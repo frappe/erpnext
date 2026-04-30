@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: ExpenseClaimPolicyTest
+tests:
+  - name: Employee can submit own draft expense claim
+    input:
+      principals: [employee_alice]
+      resources: [expense_alice_draft]
+      actions: [create, read, write, submit]
+    expected:
+      - principal: employee_alice
+        resource: expense_alice_draft
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW
+
+  - name: Configured expense approver can approve
+    input:
+      principals: [manager_carol_leave_approver]
+      resources: [expense_alice_draft]
+      actions: [read, write, submit]
+    expected:
+      - principal: manager_carol_leave_approver
+        resource: expense_alice_draft
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW
+
+  - name: Employee cannot edit a submitted expense claim
+    input:
+      principals: [employee_alice]
+      resources: [expense_alice_submitted]
+      actions: [write]
+    expected:
+      - principal: employee_alice
+        resource: expense_alice_submitted
+        actions:
+          write: EFFECT_DENY

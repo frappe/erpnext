@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: StockEntryPolicyTest
+tests:
+  - name: Stock User can submit stock entries in their company
+    input:
+      principals: [stock_user]
+      resources: [se_draft_acme]
+      actions: [create, read, write, submit]
+    expected:
+      - principal: stock_user
+        resource: se_draft_acme
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW
+
+  - name: Manufacturing User can also submit stock entries
+    input:
+      principals: [manufacturing_user]
+      resources: [se_draft_acme]
+      actions: [submit]
+    expected:
+      - principal: manufacturing_user
+        resource: se_draft_acme
+        actions:
+          submit: EFFECT_ALLOW
+
+  - name: Cross-company stock user denied
+    input:
+      principals: [other_company_stock_user]
+      resources: [se_draft_acme]
+      actions: [read, write]
+    expected:
+      - principal: other_company_stock_user
+        resource: se_draft_acme
+        actions:
+          read: EFFECT_DENY
+          write: EFFECT_DENY
+
+  - name: Submitted stock entry is locked from edits
+    input:
+      principals: [stock_manager]
+      resources: [se_submitted_acme]
+      actions: [write, cancel]
+    expected:
+      - principal: stock_manager
+        resource: se_submitted_acme
+        actions:
+          write: EFFECT_DENY
+          cancel: EFFECT_ALLOW
+
+  - name: Sales User has no access to stock entries
+    input:
+      principals: [sales_user]
+      resources: [se_draft_acme]
+      actions: [read]
+    expected:
+      - principal: sales_user
+        resource: se_draft_acme
+        actions:
+          read: EFFECT_DENY

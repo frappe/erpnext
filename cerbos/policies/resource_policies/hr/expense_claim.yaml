@@ -1,0 +1,73 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/Policy.schema.json
+apiVersion: api.cerbos.dev/v1
+resourcePolicy:
+  version: default
+  resource: expense_claim
+  schemas:
+    principalSchema:
+      ref: cerbos:///principal.json
+    resourceSchema:
+      ref: cerbos:///resources/expense_claim.json
+  importDerivedRoles:
+    - erpnext_common_roles
+  variables:
+    import:
+      - erpnext_common_vars
+  rules:
+    - actions: ["create", "read", "write", "delete", "submit", "cancel", "amend", "print", "email", "export", "share", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["System Manager"]
+      condition:
+        match:
+          expr: V.is_in_company
+
+    - actions: ["create", "read", "write", "delete", "submit", "cancel", "amend", "print", "email", "export", "share", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["HR Manager"]
+      condition:
+        match:
+          expr: V.is_in_company
+
+    - actions: ["create", "read", "write", "submit", "cancel", "amend", "print", "email", "export", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["HR User", "Accounts Manager", "Accounts User"]
+      condition:
+        match:
+          expr: V.is_in_company
+
+    # Employees: file expense claims for themselves only.
+    - actions: ["create", "read", "write", "submit", "print"]
+      effect: EFFECT_ALLOW
+      derivedRoles: [employee_self]
+
+    - actions: ["cancel"]
+      effect: EFFECT_ALLOW
+      derivedRoles: [employee_self]
+      condition:
+        match:
+          expr: R.attr.approval_status == "Draft"
+
+    - actions: ["read", "write", "submit", "print"]
+      effect: EFFECT_ALLOW
+      derivedRoles: [expense_approver_for_employee]
+
+    - actions: ["write", "delete"]
+      effect: EFFECT_DENY
+      roles: ["*"]
+      condition:
+        match:
+          expr: V.is_submitted
+
+    - actions: ["submit", "cancel"]
+      effect: EFFECT_DENY
+      roles: ["*"]
+      condition:
+        match:
+          expr: V.is_cancelled
+
+    - actions: ["amend"]
+      effect: EFFECT_DENY
+      roles: ["*"]
+      condition:
+        match:
+          expr: "!V.is_cancelled"

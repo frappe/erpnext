@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: QuotationPolicyTest
+tests:
+  - name: Sales User can submit quotations in their company
+    input:
+      principals: [sales_user]
+      resources: [quotation_draft]
+      actions: [create, read, write, submit]
+    expected:
+      - principal: sales_user
+        resource: quotation_draft
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW
+
+  - name: Customer portal user can read own quotation
+    input:
+      principals: [customer_portal_user]
+      resources: [quotation_draft]
+      actions: [read, write]
+    expected:
+      - principal: customer_portal_user
+        resource: quotation_draft
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_DENY
+
+  - name: Customer portal user denied for another customer's quotation
+    input:
+      principals: [other_customer_portal_user]
+      resources: [quotation_draft]
+      actions: [read]
+    expected:
+      - principal: other_customer_portal_user
+        resource: quotation_draft
+        actions:
+          read: EFFECT_DENY
+
+  - name: Submitted quotation cannot be edited
+    input:
+      principals: [sales_manager]
+      resources: [quotation_submitted_other]
+      actions: [write, cancel]
+    expected:
+      - principal: sales_manager
+        resource: quotation_submitted_other
+        actions:
+          write: EFFECT_DENY
+          cancel: EFFECT_ALLOW

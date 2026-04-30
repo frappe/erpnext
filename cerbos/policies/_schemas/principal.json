@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["company", "allowed_companies", "user_type"],
+  "properties": {
+    "user_type": {
+      "type": "string",
+      "enum": ["System User", "Website User"]
+    },
+    "company": {
+      "type": "string",
+      "description": "Default company for the user"
+    },
+    "allowed_companies": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Companies the user is permitted to access"
+    },
+    "employee": {
+      "type": "string",
+      "description": "Linked Employee record id, if any"
+    },
+    "customer": {
+      "type": "string",
+      "description": "Linked Customer record id (portal users)"
+    },
+    "supplier": {
+      "type": "string",
+      "description": "Linked Supplier record id (portal users)"
+    },
+    "department": { "type": "string" },
+    "territory": { "type": "string" },
+    "leave_approver_for": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Employee ids whose leave this user can approve"
+    },
+    "expense_approver_for": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Employee ids whose expenses this user can approve"
+    }
+  }
+}

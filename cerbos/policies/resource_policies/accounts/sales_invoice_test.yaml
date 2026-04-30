@@ -1,0 +1,128 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: SalesInvoicePolicyTest
+description: Tests for the Sales Invoice resource policy
+
+tests:
+  - name: Accounts User can create/read/write/submit a draft invoice in their company
+    input:
+      principals: [accounts_user]
+      resources: [sinv_draft_acme]
+      actions: [create, read, write, submit, print]
+    expected:
+      - principal: accounts_user
+        resource: sinv_draft_acme
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW
+          print: EFFECT_ALLOW
+
+  - name: Accounts User cannot delete (no delete permission for that role)
+    input:
+      principals: [accounts_user]
+      resources: [sinv_draft_acme]
+      actions: [delete]
+    expected:
+      - principal: accounts_user
+        resource: sinv_draft_acme
+        actions:
+          delete: EFFECT_DENY
+
+  - name: Accounts Manager can cancel a submitted invoice
+    input:
+      principals: [accounts_manager]
+      resources: [sinv_submitted_acme]
+      actions: [cancel, write]
+    expected:
+      - principal: accounts_manager
+        resource: sinv_submitted_acme
+        actions:
+          cancel: EFFECT_ALLOW
+          write: EFFECT_DENY
+
+  - name: Submitted invoices cannot be edited even by System Manager
+    input:
+      principals: [system_manager]
+      resources: [sinv_submitted_acme]
+      actions: [write, delete]
+    expected:
+      - principal: system_manager
+        resource: sinv_submitted_acme
+        actions:
+          write: EFFECT_DENY
+          delete: EFFECT_DENY
+
+  - name: Cancelled invoice can be amended but not re-submitted
+    input:
+      principals: [accounts_manager]
+      resources: [sinv_cancelled_acme]
+      actions: [amend, submit, cancel]
+    expected:
+      - principal: accounts_manager
+        resource: sinv_cancelled_acme
+        actions:
+          amend: EFFECT_ALLOW
+          submit: EFFECT_DENY
+          cancel: EFFECT_DENY
+
+  - name: Region lock blocks deletion of submitted invoice in Nepal
+    input:
+      principals: [system_manager]
+      resources: [sinv_submitted_nepal]
+      actions: [delete]
+    expected:
+      - principal: system_manager
+        resource: sinv_submitted_nepal
+        actions:
+          delete: EFFECT_DENY
+
+  - name: Customer portal user can read their own invoice
+    input:
+      principals: [customer_portal_user]
+      resources: [sinv_draft_acme]
+      actions: [read, print, write]
+    expected:
+      - principal: customer_portal_user
+        resource: sinv_draft_acme
+        actions:
+          read: EFFECT_ALLOW
+          print: EFFECT_ALLOW
+          write: EFFECT_DENY
+
+  - name: Customer portal user cannot read another customer's invoice
+    input:
+      principals: [customer_portal_user]
+      resources: [sinv_other_customer]
+      actions: [read]
+    expected:
+      - principal: customer_portal_user
+        resource: sinv_other_customer
+        actions:
+          read: EFFECT_DENY
+
+  - name: Other-company Accounts User cannot access Acme invoices
+    input:
+      principals: [other_company_acct_user]
+      resources: [sinv_draft_acme]
+      actions: [read, write, submit]
+    expected:
+      - principal: other_company_acct_user
+        resource: sinv_draft_acme
+        actions:
+          read: EFFECT_DENY
+          write: EFFECT_DENY
+          submit: EFFECT_DENY
+
+  - name: Sales User has read-only visibility into invoices
+    input:
+      principals: [sales_user]
+      resources: [sinv_draft_acme]
+      actions: [read, write, submit]
+    expected:
+      - principal: sales_user
+        resource: sinv_draft_acme
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_DENY
+          submit: EFFECT_DENY

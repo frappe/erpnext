@@ -1,0 +1,61 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestFixture/Principals.schema.json
+principals:
+  system_manager:
+    id: "sysmgr@acme.test"
+    roles: [System Manager]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  projects_manager:
+    id: "pm@acme.test"
+    roles: [Projects Manager]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  projects_user:
+    id: "pu@acme.test"
+    roles: [Projects User]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  employee_alice:
+    id: "alice@acme.test"
+    roles: [Employee, Employee Self Service]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+      employee: EMP-0001
+
+  employee_bob:
+    id: "bob@acme.test"
+    roles: [Employee, Employee Self Service]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+      employee: EMP-0002
+
+  customer_portal_user:
+    id: "alice@bigco.test"
+    roles: [Customer]
+    attr:
+      user_type: Website User
+      company: Acme
+      allowed_companies: []
+      customer: BigCo
+
+  other_customer_portal_user:
+    id: "x@smallcorp.test"
+    roles: [Customer]
+    attr:
+      user_type: Website User
+      company: Acme
+      allowed_companies: []
+      customer: SmallCorp

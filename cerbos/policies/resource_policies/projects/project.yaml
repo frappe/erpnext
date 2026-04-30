@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/Policy.schema.json
+apiVersion: api.cerbos.dev/v1
+resourcePolicy:
+  version: default
+  resource: project
+  schemas:
+    principalSchema:
+      ref: cerbos:///principal.json
+    resourceSchema:
+      ref: cerbos:///resources/project.json
+  importDerivedRoles:
+    - erpnext_common_roles
+  variables:
+    import:
+      - erpnext_common_vars
+  rules:
+    - actions: ["create", "read", "write", "delete", "print", "email", "export", "share", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["System Manager", "Projects Manager"]
+      condition:
+        match:
+          expr: V.is_in_company
+
+    - actions: ["create", "read", "write", "print", "email", "export", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["Projects User"]
+      condition:
+        match:
+          expr: V.is_in_company
+
+    # Internal staff: read projects within their company.
+    - actions: ["read", "print"]
+      effect: EFFECT_ALLOW
+      roles: ["Employee", "Employee Self Service", "HR Manager", "HR User", "Accounts Manager", "Accounts User"]
+      condition:
+        match:
+          expr: V.is_in_company
+
+    # Customer portal: project belongs to their Customer.
+    # Mirrors get_project_list scoping by linked customer.
+    - actions: ["read", "print"]
+      effect: EFFECT_ALLOW
+      derivedRoles: [customer_portal_self]

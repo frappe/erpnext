@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["company", "docstatus", "owner", "supplier"],
+  "properties": {
+    "company": { "type": "string" },
+    "owner": { "type": "string" },
+    "docstatus": { "type": "integer", "enum": [0, 1, 2] },
+    "supplier": { "type": "string" },
+    "is_return": { "type": "boolean" }
+  }
+}

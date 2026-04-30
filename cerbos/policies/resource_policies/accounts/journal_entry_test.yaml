@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: JournalEntryPolicyTest
+description: Tests for the Journal Entry resource policy
+
+tests:
+  - name: Accounts User can submit but cannot cancel journal entries
+    input:
+      principals: [accounts_user]
+      resources: [je_draft_acme]
+      actions: [submit, cancel]
+    expected:
+      - principal: accounts_user
+        resource: je_draft_acme
+        actions:
+          submit: EFFECT_ALLOW
+          cancel: EFFECT_DENY
+
+  - name: Accounts Manager can cancel submitted journal entries
+    input:
+      principals: [accounts_manager]
+      resources: [je_submitted_acme]
+      actions: [cancel, write]
+    expected:
+      - principal: accounts_manager
+        resource: je_submitted_acme
+        actions:
+          cancel: EFFECT_ALLOW
+          write: EFFECT_DENY

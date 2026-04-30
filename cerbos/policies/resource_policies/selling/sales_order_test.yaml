@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: SalesOrderPolicyTest
+tests:
+  - name: Sales User can submit a sales order in their company
+    input:
+      principals: [sales_user]
+      resources: [so_draft]
+      actions: [create, read, write, submit]
+    expected:
+      - principal: sales_user
+        resource: so_draft
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW
+
+  - name: Stock User can read SOs (fulfilment) but not write
+    input:
+      principals: [stock_user]
+      resources: [so_draft]
+      actions: [read, write]
+    expected:
+      - principal: stock_user
+        resource: so_draft
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_DENY
+
+  - name: Cross-company sales user cannot access another company's SO
+    input:
+      principals: [other_company_sales_user]
+      resources: [so_draft]
+      actions: [read, write]
+    expected:
+      - principal: other_company_sales_user
+        resource: so_draft
+        actions:
+          read: EFFECT_DENY
+          write: EFFECT_DENY
+
+  - name: Customer portal can read their own SO
+    input:
+      principals: [customer_portal_user]
+      resources: [so_draft]
+      actions: [read]
+    expected:
+      - principal: customer_portal_user
+        resource: so_draft
+        actions:
+          read: EFFECT_ALLOW
+
+  - name: Submitted SO is locked from edits but can be cancelled
+    input:
+      principals: [sales_manager]
+      resources: [so_submitted]
+      actions: [write, cancel]
+    expected:
+      - principal: sales_manager
+        resource: so_submitted
+        actions:
+          write: EFFECT_DENY
+          cancel: EFFECT_ALLOW

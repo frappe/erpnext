@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["company", "owner"],
+  "properties": {
+    "company": { "type": "string" },
+    "owner": { "type": "string" },
+    "user_id": { "type": "string", "description": "User account linked to this Employee" },
+    "department": { "type": "string" },
+    "status": { "type": "string", "enum": ["Active", "Inactive", "Suspended", "Left"] }
+  }
+}

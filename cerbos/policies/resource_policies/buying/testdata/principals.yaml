@@ -1,0 +1,75 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestFixture/Principals.schema.json
+principals:
+  system_manager:
+    id: "sysmgr@acme.test"
+    roles: [System Manager]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  purchase_manager:
+    id: "purch.mgr@acme.test"
+    roles: [Purchase Manager]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  purchase_user:
+    id: "purch.user@acme.test"
+    roles: [Purchase User]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  purchase_master_manager:
+    id: "pmm@acme.test"
+    roles: [Purchase Master Manager]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  stock_user:
+    id: "stock.user@acme.test"
+    roles: [Stock User]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  accounts_user:
+    id: "acct.user@acme.test"
+    roles: [Accounts User]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  sales_user:
+    id: "sales.user@acme.test"
+    roles: [Sales User]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  supplier_portal_user:
+    id: "bob@megasupply.test"
+    roles: [Supplier]
+    attr:
+      user_type: Website User
+      company: Acme
+      allowed_companies: []
+      supplier: "MegaSupply"
+
+  other_supplier_portal_user:
+    id: "dave@smallsupply.test"
+    roles: [Supplier]
+    attr:
+      user_type: Website User
+      company: Acme
+      allowed_companies: []
+      supplier: "SmallSupply"

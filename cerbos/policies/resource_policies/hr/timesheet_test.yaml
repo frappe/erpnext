@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: TimesheetPolicyTest
+tests:
+  - name: Employee can file and submit own timesheet
+    input:
+      principals: [employee_alice]
+      resources: [ts_alice_draft]
+      actions: [create, read, write, submit]
+    expected:
+      - principal: employee_alice
+        resource: ts_alice_draft
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW
+
+  - name: Employee can read submitted own timesheet but not edit
+    input:
+      principals: [employee_alice]
+      resources: [ts_alice_submitted]
+      actions: [read, write]
+    expected:
+      - principal: employee_alice
+        resource: ts_alice_submitted
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_DENY
+
+  - name: Other employee cannot read someone else's timesheet
+    input:
+      principals: [employee_bob]
+      resources: [ts_alice_draft]
+      actions: [read]
+    expected:
+      - principal: employee_bob
+        resource: ts_alice_draft
+        actions:
+          read: EFFECT_DENY
+
+  - name: HR Manager can fully manage timesheets
+    input:
+      principals: [hr_manager]
+      resources: [ts_alice_draft]
+      actions: [read, write, submit, cancel, delete]
+    expected:
+      - principal: hr_manager
+        resource: ts_alice_draft
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW
+          cancel: EFFECT_ALLOW
+          delete: EFFECT_ALLOW

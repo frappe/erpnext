@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: PaymentEntryPolicyTest
+description: Tests for the Payment Entry resource policy
+
+tests:
+  - name: Accounts Manager full lifecycle on draft payment entry
+    input:
+      principals: [accounts_manager]
+      resources: [pe_draft_acme]
+      actions: [create, read, write, submit]
+    expected:
+      - principal: accounts_manager
+        resource: pe_draft_acme
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW
+
+  - name: Region lock blocks deletion of submitted PE in Nepal
+    input:
+      principals: [system_manager]
+      resources: [pe_submitted_nepal]
+      actions: [delete]
+    expected:
+      - principal: system_manager
+        resource: pe_submitted_nepal
+        actions:
+          delete: EFFECT_DENY
+
+  - name: Sales User has no access to payment entries
+    input:
+      principals: [sales_user]
+      resources: [pe_draft_acme]
+      actions: [read, write]
+    expected:
+      - principal: sales_user
+        resource: pe_draft_acme
+        actions:
+          read: EFFECT_DENY
+          write: EFFECT_DENY

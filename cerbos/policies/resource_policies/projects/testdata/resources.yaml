@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestFixture/Resources.schema.json
+resources:
+  proj_bigco:
+    kind: project
+    id: PROJ-001
+    attr:
+      company: Acme
+      owner: pm@acme.test
+      customer: BigCo
+      status: Open
+
+  proj_internal:
+    kind: project
+    id: PROJ-002
+    attr:
+      company: Acme
+      owner: pm@acme.test
+      customer: Acme
+      status: Open
+
+  task_assigned_to_alice:
+    kind: task
+    id: TASK-001
+    attr:
+      owner: pm@acme.test
+      project: PROJ-001
+      status: Open
+      assigned_to: ["alice@acme.test"]
+
+  task_owned_by_bob:
+    kind: task
+    id: TASK-002
+    attr:
+      owner: bob@acme.test
+      project: PROJ-001
+      status: Open
+      assigned_to: []

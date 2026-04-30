@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/Policy.schema.json
+apiVersion: api.cerbos.dev/v1
+resourcePolicy:
+  version: default
+  resource: task
+  schemas:
+    principalSchema:
+      ref: cerbos:///principal.json
+    resourceSchema:
+      ref: cerbos:///resources/task.json
+  rules:
+    - actions: ["create", "read", "write", "delete", "print", "email", "export", "share", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["System Manager", "Projects Manager"]
+
+    - actions: ["create", "read", "write", "print", "email", "export", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["Projects User"]
+
+    # Document creator can edit their own task.
+    - actions: ["read", "write", "print"]
+      effect: EFFECT_ALLOW
+      roles: ["Employee", "Employee Self Service"]
+      condition:
+        match:
+          expr: R.attr.owner == P.id
+
+    # Assignees (ToDo-assigned) can read/update their tasks.
+    - actions: ["read", "write", "print"]
+      effect: EFFECT_ALLOW
+      roles: ["Employee", "Employee Self Service", "Projects User"]
+      condition:
+        match:
+          expr: has(R.attr.assigned_to) && P.id in R.attr.assigned_to

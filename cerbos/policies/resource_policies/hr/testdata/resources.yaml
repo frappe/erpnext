@@ -1,0 +1,96 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestFixture/Resources.schema.json
+resources:
+  emp_alice:
+    kind: employee
+    id: EMP-0001
+    attr:
+      company: Acme
+      owner: hr.user@acme.test
+      user_id: alice@acme.test
+      department: Engineering
+      status: Active
+
+  emp_bob:
+    kind: employee
+    id: EMP-0002
+    attr:
+      company: Acme
+      owner: hr.user@acme.test
+      user_id: bob@acme.test
+      department: Sales
+      status: Active
+
+  leave_alice_open:
+    kind: leave_application
+    id: LA-001
+    attr:
+      company: Acme
+      owner: alice@acme.test
+      docstatus: 0
+      employee: EMP-0001
+      status: Open
+      leave_approver: carol@acme.test
+
+  leave_alice_approved:
+    kind: leave_application
+    id: LA-002
+    attr:
+      company: Acme
+      owner: alice@acme.test
+      docstatus: 1
+      employee: EMP-0001
+      status: Approved
+      leave_approver: carol@acme.test
+
+  leave_bob_open:
+    kind: leave_application
+    id: LA-003
+    attr:
+      company: Acme
+      owner: bob@acme.test
+      docstatus: 0
+      employee: EMP-0002
+      status: Open
+      leave_approver: hr.user@acme.test
+
+  expense_alice_draft:
+    kind: expense_claim
+    id: EXP-001
+    attr:
+      company: Acme
+      owner: alice@acme.test
+      docstatus: 0
+      employee: EMP-0001
+      approval_status: Draft
+      expense_approver: carol@acme.test
+
+  expense_alice_submitted:
+    kind: expense_claim
+    id: EXP-002
+    attr:
+      company: Acme
+      owner: alice@acme.test
+      docstatus: 1
+      employee: EMP-0001
+      approval_status: Approved
+      expense_approver: carol@acme.test
+
+  ts_alice_draft:
+    kind: timesheet
+    id: TS-001
+    attr:
+      company: Acme
+      owner: alice@acme.test
+      docstatus: 0
+      employee: EMP-0001
+      customer: BigCo
+
+  ts_alice_submitted:
+    kind: timesheet
+    id: TS-002
+    attr:
+      company: Acme
+      owner: alice@acme.test
+      docstatus: 1
+      employee: EMP-0001
+      customer: BigCo

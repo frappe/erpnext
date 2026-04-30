@@ -304,6 +304,48 @@ sounds = [
 
 has_upload_permission = {"Employee": "erpnext.setup.doctype.employee.employee.has_upload_permission"}
 
+# --- Cerbos authorization ----------------------------------------------------
+# Permission decisions for the doctypes below are delegated to a Cerbos PDP.
+# Policies live under ``cerbos/policies/``; Python wiring lives in
+# ``erpnext/cerbos_authz/``. See ``cerbos/README.md`` for setup instructions.
+has_permission = {
+	"Sales Invoice":      "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Purchase Invoice":   "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Payment Entry":      "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Journal Entry":      "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Customer":           "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Quotation":          "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Sales Order":        "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Delivery Note":      "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Supplier":           "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Purchase Order":     "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Purchase Receipt":   "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Item":               "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Stock Entry":        "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Employee":           "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Leave Application":  "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Expense Claim":      "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Timesheet":          "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Project":            "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+	"Task":               "erpnext.cerbos_authz.hooks.cerbos_has_permission",
+}
+
+# Restrict list-view queries for portal users to documents linked to their
+# Customer / Supplier party. Internal users continue to use Frappe's User
+# Permission row scoping.
+permission_query_conditions = {
+	"Sales Invoice":      "erpnext.cerbos_authz.hooks.cerbos_permission_query_conditions",
+	"Purchase Invoice":   "erpnext.cerbos_authz.hooks.cerbos_permission_query_conditions",
+	"Quotation":          "erpnext.cerbos_authz.hooks.cerbos_permission_query_conditions",
+	"Sales Order":        "erpnext.cerbos_authz.hooks.cerbos_permission_query_conditions",
+	"Delivery Note":      "erpnext.cerbos_authz.hooks.cerbos_permission_query_conditions",
+	"Purchase Order":     "erpnext.cerbos_authz.hooks.cerbos_permission_query_conditions",
+	"Purchase Receipt":   "erpnext.cerbos_authz.hooks.cerbos_permission_query_conditions",
+	"Project":            "erpnext.cerbos_authz.hooks.cerbos_permission_query_conditions",
+	"Timesheet":          "erpnext.cerbos_authz.hooks.cerbos_permission_query_conditions",
+}
+# --- end Cerbos authorization ------------------------------------------------
+
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",

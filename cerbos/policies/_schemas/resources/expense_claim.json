@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["company", "docstatus", "owner", "employee"],
+  "properties": {
+    "company": { "type": "string" },
+    "owner": { "type": "string" },
+    "docstatus": { "type": "integer", "enum": [0, 1, 2] },
+    "employee": { "type": "string" },
+    "approval_status": { "type": "string", "enum": ["Draft", "Approved", "Rejected"] },
+    "expense_approver": { "type": "string" }
+  }
+}

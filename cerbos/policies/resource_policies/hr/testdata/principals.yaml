@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestFixture/Principals.schema.json
+principals:
+  system_manager:
+    id: "sysmgr@acme.test"
+    roles: [System Manager]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  hr_manager:
+    id: "hr.mgr@acme.test"
+    roles: [HR Manager]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  hr_user:
+    id: "hr.user@acme.test"
+    roles: [HR User]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  accounts_user:
+    id: "acct.user@acme.test"
+    roles: [Accounts User]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  employee_alice:
+    id: "alice@acme.test"
+    roles: [Employee, Employee Self Service]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+      employee: EMP-0001
+
+  employee_bob:
+    id: "bob@acme.test"
+    roles: [Employee, Employee Self Service]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+      employee: EMP-0002
+
+  manager_carol_leave_approver:
+    id: "carol@acme.test"
+    roles: [Employee, Employee Self Service]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+      employee: EMP-0003
+      leave_approver_for: ["EMP-0001"]
+      expense_approver_for: ["EMP-0001"]
+
+  guest_user:
+    id: "guest@elsewhere.test"
+    roles: [Customer]
+    attr:
+      user_type: Website User
+      company: Acme
+      allowed_companies: []

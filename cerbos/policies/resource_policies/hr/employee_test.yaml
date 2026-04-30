@@ -1,0 +1,61 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: EmployeePolicyTest
+tests:
+  - name: HR User can manage employees in their company (no delete)
+    input:
+      principals: [hr_user]
+      resources: [emp_alice]
+      actions: [create, read, write, delete]
+    expected:
+      - principal: hr_user
+        resource: emp_alice
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          delete: EFFECT_DENY
+
+  - name: HR Manager can delete employees
+    input:
+      principals: [hr_manager]
+      resources: [emp_alice]
+      actions: [delete]
+    expected:
+      - principal: hr_manager
+        resource: emp_alice
+        actions:
+          delete: EFFECT_ALLOW
+
+  - name: Employee can read their own employee record
+    input:
+      principals: [employee_alice]
+      resources: [emp_alice]
+      actions: [read, write]
+    expected:
+      - principal: employee_alice
+        resource: emp_alice
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_DENY
+
+  - name: Employee cannot read another employee's record
+    input:
+      principals: [employee_alice]
+      resources: [emp_bob]
+      actions: [read]
+    expected:
+      - principal: employee_alice
+        resource: emp_bob
+        actions:
+          read: EFFECT_DENY
+
+  - name: Accounts User has no access to employee records
+    input:
+      principals: [accounts_user]
+      resources: [emp_alice]
+      actions: [read]
+    expected:
+      - principal: accounts_user
+        resource: emp_alice
+        actions:
+          read: EFFECT_DENY

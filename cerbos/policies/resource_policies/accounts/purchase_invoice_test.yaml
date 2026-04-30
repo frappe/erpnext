@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: PurchaseInvoicePolicyTest
+description: Tests for the Purchase Invoice resource policy
+
+tests:
+  - name: Accounts User creates and submits draft purchase invoice
+    input:
+      principals: [accounts_user]
+      resources: [pinv_draft_acme]
+      actions: [create, read, write, submit]
+    expected:
+      - principal: accounts_user
+        resource: pinv_draft_acme
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW
+
+  - name: Submitted invoice cannot be edited
+    input:
+      principals: [accounts_manager]
+      resources: [pinv_submitted_acme]
+      actions: [write, cancel]
+    expected:
+      - principal: accounts_manager
+        resource: pinv_submitted_acme
+        actions:
+          write: EFFECT_DENY
+          cancel: EFFECT_ALLOW
+
+  - name: Supplier portal can read their own invoice only
+    input:
+      principals: [supplier_portal_user]
+      resources: [pinv_draft_acme, pinv_other_supplier]
+      actions: [read]
+    expected:
+      - principal: supplier_portal_user
+        resource: pinv_draft_acme
+        actions:
+          read: EFFECT_ALLOW
+      - principal: supplier_portal_user
+        resource: pinv_other_supplier
+        actions:
+          read: EFFECT_DENY
+
+  - name: Customer portal user has no access to purchase invoices
+    input:
+      principals: [customer_portal_user]
+      resources: [pinv_draft_acme]
+      actions: [read]
+    expected:
+      - principal: customer_portal_user
+        resource: pinv_draft_acme
+        actions:
+          read: EFFECT_DENY
+
+  - name: Purchase User has read-only visibility
+    input:
+      principals: [purchase_user]
+      resources: [pinv_draft_acme]
+      actions: [read, write]
+    expected:
+      - principal: purchase_user
+        resource: pinv_draft_acme
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_DENY

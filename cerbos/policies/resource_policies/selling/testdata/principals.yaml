@@ -1,0 +1,75 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestFixture/Principals.schema.json
+principals:
+  system_manager:
+    id: "sysmgr@acme.test"
+    roles: [System Manager]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  sales_manager:
+    id: "sales.mgr@acme.test"
+    roles: [Sales Manager]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  sales_user:
+    id: "sales.user@acme.test"
+    roles: [Sales User]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  sales_master_manager:
+    id: "smm@acme.test"
+    roles: [Sales Master Manager]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  accounts_user:
+    id: "acct.user@acme.test"
+    roles: [Accounts User]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  stock_user:
+    id: "stock.user@acme.test"
+    roles: [Stock User]
+    attr:
+      user_type: System User
+      company: Acme
+      allowed_companies: ["Acme"]
+
+  customer_portal_user:
+    id: "alice@bigco.test"
+    roles: [Customer]
+    attr:
+      user_type: Website User
+      company: Acme
+      allowed_companies: []
+      customer: "BigCo"
+
+  other_customer_portal_user:
+    id: "carol@smallcorp.test"
+    roles: [Customer]
+    attr:
+      user_type: Website User
+      company: Acme
+      allowed_companies: []
+      customer: "SmallCorp"
+
+  other_company_sales_user:
+    id: "sales@globex.test"
+    roles: [Sales User]
+    attr:
+      user_type: System User
+      company: Globex
+      allowed_companies: ["Globex"]

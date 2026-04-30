@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestFixture/Resources.schema.json
+resources:
+  customer_bigco:
+    kind: customer
+    id: BigCo
+    attr:
+      owner: sales.user@acme.test
+      territory: India
+      customer_group: Commercial
+      disabled: false
+
+  quotation_draft:
+    kind: quotation
+    id: QTN-001
+    attr:
+      company: Acme
+      owner: sales.user@acme.test
+      docstatus: 0
+      customer: BigCo
+      territory: India
+      status: Draft
+
+  quotation_submitted_other:
+    kind: quotation
+    id: QTN-002
+    attr:
+      company: Acme
+      owner: sales.user@acme.test
+      docstatus: 1
+      customer: SmallCorp
+      territory: India
+      status: Open
+
+  so_draft:
+    kind: sales_order
+    id: SO-001
+    attr:
+      company: Acme
+      owner: sales.user@acme.test
+      docstatus: 0
+      customer: BigCo
+      status: Draft
+
+  so_submitted:
+    kind: sales_order
+    id: SO-002
+    attr:
+      company: Acme
+      owner: sales.user@acme.test
+      docstatus: 1
+      customer: BigCo
+      status: To Deliver
+
+  so_other_company:
+    kind: sales_order
+    id: SO-003
+    attr:
+      company: Globex
+      owner: sales@globex.test
+      docstatus: 0
+      customer: BigCo
+      status: Draft
+
+  dn_draft:
+    kind: delivery_note
+    id: DN-001
+    attr:
+      company: Acme
+      owner: stock.user@acme.test
+      docstatus: 0
+      customer: BigCo
+      is_return: false

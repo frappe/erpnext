@@ -1,0 +1,25 @@
+# Cerbos PDP configuration for ERPNext
+# Mounted at /config/cerbos.yaml inside the container.
+server:
+  httpListenAddr: ":3592"
+  grpcListenAddr: ":3593"
+  metricsEnabled: true
+  playgroundEnabled: false
+
+storage:
+  driver: disk
+  disk:
+    directory: /policies
+    watchForChanges: true
+
+audit:
+  enabled: true
+  accessLogsEnabled: true
+  decisionLogsEnabled: true
+  backend: local
+  local:
+    storagePath: /audit
+    retentionPeriod: 168h
+
+schema:
+  enforcement: reject

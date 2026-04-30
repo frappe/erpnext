@@ -1,0 +1,121 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestFixture/Resources.schema.json
+resources:
+  # --- Sales Invoices ---
+  sinv_draft_acme:
+    kind: sales_invoice
+    id: SINV-001
+    attr:
+      company: Acme
+      owner: acct.user@acme.test
+      docstatus: 0
+      customer: BigCo
+      country: India
+
+  sinv_submitted_acme:
+    kind: sales_invoice
+    id: SINV-002
+    attr:
+      company: Acme
+      owner: acct.user@acme.test
+      docstatus: 1
+      customer: BigCo
+      country: India
+
+  sinv_cancelled_acme:
+    kind: sales_invoice
+    id: SINV-003
+    attr:
+      company: Acme
+      owner: acct.user@acme.test
+      docstatus: 2
+      customer: BigCo
+      country: India
+
+  sinv_submitted_nepal:
+    kind: sales_invoice
+    id: SINV-004
+    attr:
+      company: Acme
+      owner: acct.user@acme.test
+      docstatus: 1
+      customer: BigCo
+      country: Nepal
+
+  sinv_other_customer:
+    kind: sales_invoice
+    id: SINV-005
+    attr:
+      company: Acme
+      owner: acct.user@acme.test
+      docstatus: 0
+      customer: SmallCorp
+      country: India
+
+  # --- Purchase Invoices ---
+  pinv_draft_acme:
+    kind: purchase_invoice
+    id: PINV-001
+    attr:
+      company: Acme
+      owner: acct.user@acme.test
+      docstatus: 0
+      supplier: MegaSupply
+      country: India
+
+  pinv_submitted_acme:
+    kind: purchase_invoice
+    id: PINV-002
+    attr:
+      company: Acme
+      owner: acct.user@acme.test
+      docstatus: 1
+      supplier: MegaSupply
+      country: India
+
+  pinv_other_supplier:
+    kind: purchase_invoice
+    id: PINV-003
+    attr:
+      company: Acme
+      owner: acct.user@acme.test
+      docstatus: 0
+      supplier: SmallSupply
+      country: India
+
+  # --- Payment Entries ---
+  pe_draft_acme:
+    kind: payment_entry
+    id: PE-001
+    attr:
+      company: Acme
+      owner: acct.user@acme.test
+      docstatus: 0
+      payment_type: Receive
+      country: India
+
+  pe_submitted_nepal:
+    kind: payment_entry
+    id: PE-002
+    attr:
+      company: Acme
+      owner: acct.user@acme.test
+      docstatus: 1
+      payment_type: Receive
+      country: Nepal
+
+  # --- Journal Entries ---
+  je_draft_acme:
+    kind: journal_entry
+    id: JE-001
+    attr:
+      company: Acme
+      owner: acct.user@acme.test
+      docstatus: 0
+
+  je_submitted_acme:
+    kind: journal_entry
+    id: JE-002
+    attr:
+      company: Acme
+      owner: acct.user@acme.test
+      docstatus: 1

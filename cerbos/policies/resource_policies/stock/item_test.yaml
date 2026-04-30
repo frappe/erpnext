@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: ItemPolicyTest
+tests:
+  - name: Item Manager has full access
+    input:
+      principals: [item_manager]
+      resources: [item_widget]
+      actions: [create, read, write, delete]
+    expected:
+      - principal: item_manager
+        resource: item_widget
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          delete: EFFECT_ALLOW
+
+  - name: Stock Manager can write but not delete
+    input:
+      principals: [stock_manager]
+      resources: [item_widget]
+      actions: [write, delete]
+    expected:
+      - principal: stock_manager
+        resource: item_widget
+        actions:
+          write: EFFECT_ALLOW
+          delete: EFFECT_DENY
+
+  - name: Sales User has read-only catalog access
+    input:
+      principals: [sales_user]
+      resources: [item_widget]
+      actions: [read, write]
+    expected:
+      - principal: sales_user
+        resource: item_widget
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_DENY
+
+  - name: Customer portal cannot access items directly
+    input:
+      principals: [customer_portal_user]
+      resources: [item_widget]
+      actions: [read]
+    expected:
+      - principal: customer_portal_user
+        resource: item_widget
+        actions:
+          read: EFFECT_DENY

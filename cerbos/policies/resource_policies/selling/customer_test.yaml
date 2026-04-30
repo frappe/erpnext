@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: CustomerPolicyTest
+description: Tests for the Customer resource policy
+
+tests:
+  - name: Sales User can manage customers (no delete)
+    input:
+      principals: [sales_user]
+      resources: [customer_bigco]
+      actions: [create, read, write, delete]
+    expected:
+      - principal: sales_user
+        resource: customer_bigco
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          delete: EFFECT_DENY
+
+  - name: Sales Master Manager can delete customers
+    input:
+      principals: [sales_master_manager]
+      resources: [customer_bigco]
+      actions: [delete]
+    expected:
+      - principal: sales_master_manager
+        resource: customer_bigco
+        actions:
+          delete: EFFECT_ALLOW
+
+  - name: Accounts User has read-only access to customers
+    input:
+      principals: [accounts_user]
+      resources: [customer_bigco]
+      actions: [read, write]
+    expected:
+      - principal: accounts_user
+        resource: customer_bigco
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_DENY

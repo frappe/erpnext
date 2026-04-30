@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: DeliveryNotePolicyTest
+tests:
+  - name: Stock User can submit delivery notes in their company
+    input:
+      principals: [stock_user]
+      resources: [dn_draft]
+      actions: [create, read, write, submit]
+    expected:
+      - principal: stock_user
+        resource: dn_draft
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW
+
+  - name: Customer portal can read own delivery note
+    input:
+      principals: [customer_portal_user]
+      resources: [dn_draft]
+      actions: [read, write]
+    expected:
+      - principal: customer_portal_user
+        resource: dn_draft
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_DENY
+
+  - name: Sales User can also create delivery notes
+    input:
+      principals: [sales_user]
+      resources: [dn_draft]
+      actions: [create, write, submit]
+    expected:
+      - principal: sales_user
+        resource: dn_draft
+        actions:
+          create: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW

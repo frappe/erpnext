@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/Policy.schema.json
+apiVersion: api.cerbos.dev/v1
+resourcePolicy:
+  version: default
+  resource: supplier
+  schemas:
+    principalSchema:
+      ref: cerbos:///principal.json
+    resourceSchema:
+      ref: cerbos:///resources/supplier.json
+  rules:
+    - actions: ["create", "read", "write", "delete", "print", "email", "export", "share", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["System Manager", "Purchase Master Manager"]
+
+    - actions: ["create", "read", "write", "print", "email", "export", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["Purchase Manager", "Purchase User"]
+
+    - actions: ["read", "print", "export", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["Accounts User", "Accounts Manager", "Stock User", "Stock Manager"]

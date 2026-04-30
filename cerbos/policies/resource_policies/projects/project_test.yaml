@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: ProjectPolicyTest
+tests:
+  - name: Projects Manager has full access in their company
+    input:
+      principals: [projects_manager]
+      resources: [proj_bigco]
+      actions: [create, read, write, delete]
+    expected:
+      - principal: projects_manager
+        resource: proj_bigco
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          delete: EFFECT_ALLOW
+
+  - name: Customer portal can read their own project
+    input:
+      principals: [customer_portal_user]
+      resources: [proj_bigco]
+      actions: [read, write]
+    expected:
+      - principal: customer_portal_user
+        resource: proj_bigco
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_DENY
+
+  - name: Other-customer portal user cannot read project
+    input:
+      principals: [other_customer_portal_user]
+      resources: [proj_bigco]
+      actions: [read]
+    expected:
+      - principal: other_customer_portal_user
+        resource: proj_bigco
+        actions:
+          read: EFFECT_DENY
+
+  - name: Internal Employee can read projects in their company
+    input:
+      principals: [employee_alice]
+      resources: [proj_internal]
+      actions: [read, write]
+    expected:
+      - principal: employee_alice
+        resource: proj_internal
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_DENY

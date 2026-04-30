@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: TaskPolicyTest
+tests:
+  - name: Projects User has full lifecycle on tasks
+    input:
+      principals: [projects_user]
+      resources: [task_assigned_to_alice]
+      actions: [create, read, write]
+    expected:
+      - principal: projects_user
+        resource: task_assigned_to_alice
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+
+  - name: Assignee can read and write their assigned task
+    input:
+      principals: [employee_alice]
+      resources: [task_assigned_to_alice]
+      actions: [read, write]
+    expected:
+      - principal: employee_alice
+        resource: task_assigned_to_alice
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+
+  - name: Non-assignee employee cannot read task
+    input:
+      principals: [employee_bob]
+      resources: [task_assigned_to_alice]
+      actions: [read, write]
+    expected:
+      - principal: employee_bob
+        resource: task_assigned_to_alice
+        actions:
+          read: EFFECT_DENY
+          write: EFFECT_DENY
+
+  - name: Document owner can read/write own task
+    input:
+      principals: [employee_bob]
+      resources: [task_owned_by_bob]
+      actions: [read, write]
+    expected:
+      - principal: employee_bob
+        resource: task_owned_by_bob
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW

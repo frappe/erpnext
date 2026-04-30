@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/Policy.schema.json
+apiVersion: api.cerbos.dev/v1
+resourcePolicy:
+  version: default
+  resource: item
+  schemas:
+    principalSchema:
+      ref: cerbos:///principal.json
+    resourceSchema:
+      ref: cerbos:///resources/item.json
+  rules:
+    - actions: ["create", "read", "write", "delete", "print", "email", "export", "share", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["System Manager", "Item Manager"]
+
+    - actions: ["create", "read", "write", "print", "email", "export", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["Stock Manager", "Sales Manager", "Purchase Manager"]
+
+    # Operational roles need read-only catalog visibility.
+    - actions: ["read", "print", "export", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["Stock User", "Sales User", "Purchase User", "Accounts User", "Accounts Manager", "Manufacturing User", "Manufacturing Manager"]

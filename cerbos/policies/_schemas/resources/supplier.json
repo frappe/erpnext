@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["owner"],
+  "properties": {
+    "owner": { "type": "string" },
+    "supplier_group": { "type": "string" },
+    "disabled": { "type": "boolean" }
+  }
+}

@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: SupplierPolicyTest
+tests:
+  - name: Purchase User can manage suppliers (no delete)
+    input:
+      principals: [purchase_user]
+      resources: [supplier_megasupply]
+      actions: [create, read, write, delete]
+    expected:
+      - principal: purchase_user
+        resource: supplier_megasupply
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          delete: EFFECT_DENY
+
+  - name: Purchase Master Manager can delete suppliers
+    input:
+      principals: [purchase_master_manager]
+      resources: [supplier_megasupply]
+      actions: [delete]
+    expected:
+      - principal: purchase_master_manager
+        resource: supplier_megasupply
+        actions:
+          delete: EFFECT_ALLOW
+
+  - name: Sales User has no access to suppliers
+    input:
+      principals: [sales_user]
+      resources: [supplier_megasupply]
+      actions: [read]
+    expected:
+      - principal: sales_user
+        resource: supplier_megasupply
+        actions:
+          read: EFFECT_DENY

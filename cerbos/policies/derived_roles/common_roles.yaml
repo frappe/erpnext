@@ -1,0 +1,80 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/Policy.schema.json
+apiVersion: api.cerbos.dev/v1
+derivedRoles:
+  name: erpnext_common_roles
+  definitions:
+    # Document creator (Frappe's `owner` field == user id who created the doc).
+    - name: doc_owner
+      parentRoles: ["*"]
+      condition:
+        match:
+          expr: R.attr.owner == P.id
+
+    # Portal Customer accessing documents linked to their Customer record.
+    - name: customer_portal_self
+      parentRoles:
+        - Customer
+      condition:
+        match:
+          all:
+            of:
+              - expr: P.attr.user_type == "Website User"
+              - expr: has(P.attr.customer)
+              - expr: has(R.attr.customer)
+              - expr: R.attr.customer == P.attr.customer
+
+    # Portal Supplier accessing documents linked to their Supplier record.
+    - name: supplier_portal_self
+      parentRoles:
+        - Supplier
+      condition:
+        match:
+          all:
+            of:
+              - expr: P.attr.user_type == "Website User"
+              - expr: has(P.attr.supplier)
+              - expr: has(R.attr.supplier)
+              - expr: R.attr.supplier == P.attr.supplier
+
+    # Employee accessing their own HR document (employee == user.employee).
+    - name: employee_self
+      parentRoles:
+        - Employee
+        - Employee Self Service
+      condition:
+        match:
+          all:
+            of:
+              - expr: has(P.attr.employee)
+              - expr: has(R.attr.employee)
+              - expr: R.attr.employee == P.attr.employee
+
+    # The configured leave approver for the resource's employee.
+    - name: leave_approver_for_employee
+      parentRoles:
+        - HR User
+        - HR Manager
+        - Employee
+        - Employee Self Service
+      condition:
+        match:
+          any:
+            of:
+              - expr: has(R.attr.leave_approver) && R.attr.leave_approver == P.id
+              - expr: has(P.attr.leave_approver_for) && has(R.attr.employee) && R.attr.employee in P.attr.leave_approver_for
+
+    # The configured expense approver for the resource's employee.
+    - name: expense_approver_for_employee
+      parentRoles:
+        - HR User
+        - HR Manager
+        - Accounts User
+        - Accounts Manager
+        - Employee
+        - Employee Self Service
+      condition:
+        match:
+          any:
+            of:
+              - expr: has(R.attr.expense_approver) && R.attr.expense_approver == P.id
+              - expr: has(P.attr.expense_approver_for) && has(R.attr.employee) && R.attr.employee in P.attr.expense_approver_for

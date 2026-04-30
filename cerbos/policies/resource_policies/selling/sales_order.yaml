@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/Policy.schema.json
+apiVersion: api.cerbos.dev/v1
+resourcePolicy:
+  version: default
+  resource: sales_order
+  schemas:
+    principalSchema:
+      ref: cerbos:///principal.json
+    resourceSchema:
+      ref: cerbos:///resources/sales_order.json
+  importDerivedRoles:
+    - erpnext_common_roles
+  variables:
+    import:
+      - erpnext_common_vars
+  rules:
+    - actions: ["create", "read", "write", "delete", "submit", "cancel", "amend", "print", "email", "export", "share", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["System Manager"]
+      condition:
+        match:
+          expr: V.is_in_company
+
+    - actions: ["create", "read", "write", "submit", "cancel", "amend", "print", "email", "export", "share", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["Sales Manager"]
+      condition:
+        match:
+          expr: V.is_in_company
+
+    - actions: ["create", "read", "write", "submit", "cancel", "amend", "print", "email", "export", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["Sales User"]
+      condition:
+        match:
+          expr: V.is_in_company
+
+    # Stock teams need to see Sales Orders for fulfilment planning.
+    - actions: ["read", "print", "report", "export"]
+      effect: EFFECT_ALLOW
+      roles: ["Stock User", "Stock Manager", "Accounts User", "Accounts Manager"]
+      condition:
+        match:
+          expr: V.is_in_company
+
+    - actions: ["read", "print"]
+      effect: EFFECT_ALLOW
+      derivedRoles: [customer_portal_self]
+
+    - actions: ["write", "delete"]
+      effect: EFFECT_DENY
+      roles: ["*"]
+      condition:
+        match:
+          expr: V.is_submitted
+
+    - actions: ["submit", "cancel"]
+      effect: EFFECT_DENY
+      roles: ["*"]
+      condition:
+        match:
+          expr: V.is_cancelled
+
+    - actions: ["amend"]
+      effect: EFFECT_DENY
+      roles: ["*"]
+      condition:
+        match:
+          expr: "!V.is_cancelled"

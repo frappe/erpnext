@@ -1,0 +1,89 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/Policy.schema.json
+apiVersion: api.cerbos.dev/v1
+resourcePolicy:
+  version: default
+  resource: sales_invoice
+  schemas:
+    principalSchema:
+      ref: cerbos:///principal.json
+    resourceSchema:
+      ref: cerbos:///resources/sales_invoice.json
+  importDerivedRoles:
+    - erpnext_common_roles
+  variables:
+    import:
+      - erpnext_common_vars
+  rules:
+    # System Manager has full access within allowed companies.
+    - actions: ["create", "read", "write", "delete", "submit", "cancel", "amend", "print", "email", "export", "share", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["System Manager"]
+      condition:
+        match:
+          expr: V.is_in_company
+
+    # Accounts Manager: full lifecycle within company.
+    - actions: ["create", "read", "write", "submit", "cancel", "amend", "print", "email", "export", "share", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["Accounts Manager"]
+      condition:
+        match:
+          expr: V.is_in_company
+
+    # Accounts User: full lifecycle except cross-company; cannot delete.
+    - actions: ["create", "read", "write", "submit", "cancel", "amend", "print", "email", "export", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["Accounts User"]
+      condition:
+        match:
+          expr: V.is_in_company
+
+    # Sales Manager / Sales User: read & report on invoices for their company
+    # (visibility into the AR cycle), no write.
+    - actions: ["read", "print", "email", "export", "report"]
+      effect: EFFECT_ALLOW
+      roles: ["Sales Manager", "Sales User"]
+      condition:
+        match:
+          expr: V.is_in_company
+
+    # Customer portal: read their own invoices.
+    - actions: ["read", "print"]
+      effect: EFFECT_ALLOW
+      derivedRoles: [customer_portal_self]
+
+    # Region lock: even with permission, deletion of submitted invoices is
+    # blocked in regulated regions (Nepal). Mirrors regional.check_deletion_permission.
+    - actions: ["delete"]
+      effect: EFFECT_DENY
+      roles: ["*"]
+      condition:
+        match:
+          all:
+            of:
+              - expr: V.region_locks_deletion
+              - expr: R.attr.docstatus != 0
+
+    # Submitted/cancelled docs cannot be edited or deleted (Frappe invariant).
+    - actions: ["write", "delete"]
+      effect: EFFECT_DENY
+      roles: ["*"]
+      condition:
+        match:
+          expr: V.is_submitted
+
+    # Cancelled documents cannot be re-submitted or re-cancelled.
+    - actions: ["submit", "cancel"]
+      effect: EFFECT_DENY
+      roles: ["*"]
+      condition:
+        match:
+          expr: V.is_cancelled
+
+    # Amend is only meaningful for cancelled documents.
+    - actions: ["amend"]
+      effect: EFFECT_DENY
+      roles: ["*"]
+      condition:
+        match:
+          expr: "!V.is_cancelled"

@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/Policy.schema.json
+apiVersion: api.cerbos.dev/v1
+exportVariables:
+  name: erpnext_common_vars
+  definitions:
+    # Frappe docstatus: 0 = Draft, 1 = Submitted, 2 = Cancelled.
+    is_draft: R.attr.docstatus == 0
+    is_submitted: R.attr.docstatus == 1
+    is_cancelled: R.attr.docstatus == 2
+    # Region-locked deletion: ERPNext blocks deletion of submitted Sales Invoices
+    # / Payment Entries in regulated regions like Nepal.
+    region_locks_deletion: has(R.attr.country) && R.attr.country == "Nepal"
+    # Company-scope check used everywhere a rule is gated by Frappe's
+    # User Permission row-scoping by Company.
+    is_in_company: R.attr.company in P.attr.allowed_companies

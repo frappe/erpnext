@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["owner"],
+  "properties": {
+    "owner": { "type": "string" },
+    "project": { "type": "string" },
+    "status": { "type": "string" },
+    "assigned_to": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

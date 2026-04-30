@@ -1,0 +1,32 @@
+# Cerbos PDP for ERPNext authorization.
+#
+# Run from the cerbos/ directory:
+#   docker compose up -d
+#
+# Cerbos listens on:
+#   - http://localhost:3592   (REST/health)
+#   - localhost:3593          (gRPC, used by the Python SDK)
+#
+# Policies are mounted from ./policies and watched for changes,
+# so edits picked up live without restart.
+services:
+  cerbos:
+    image: ghcr.io/cerbos/cerbos:latest
+    container_name: erpnext-cerbos-pdp
+    command: ["server", "--config=/config/cerbos.yaml"]
+    ports:
+      - "3592:3592"
+      - "3593:3593"
+    volumes:
+      - ./config:/config:ro
+      - ./policies:/policies:ro
+      - cerbos-audit:/audit
+    healthcheck:
+      test: ["CMD", "/cerbos", "healthcheck", "--insecure"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  cerbos-audit:

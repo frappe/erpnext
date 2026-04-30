@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/Policy.schema.json
+apiVersion: api.cerbos.dev/v1
+resourcePolicy:
+  version: default
+  resource: employee
+  schemas:
+    principalSchema:
+      ref: cerbos:///principal.json
+    resourceSchema:
+      ref: cerbos:///resources/employee.json
+  importDerivedRoles:
+    - erpnext_common_roles
+  rules:
+    - actions: ["create", "read", "write", "delete", "print", "email", "export", "share", "report"]
+      effect: EFFECT_ALLOW
+      condition:
+        match:
+          expr: R.attr.company in P.attr.allowed_companies
+      roles: ["System Manager"]
+
+    - actions: ["create", "read", "write", "delete", "print", "email", "export", "share", "report"]
+      effect: EFFECT_ALLOW
+      condition:
+        match:
+          expr: R.attr.company in P.attr.allowed_companies
+      roles: ["HR Manager"]
+
+    - actions: ["create", "read", "write", "print", "email", "export", "report"]
+      effect: EFFECT_ALLOW
+      condition:
+        match:
+          expr: R.attr.company in P.attr.allowed_companies
+      roles: ["HR User"]
+
+    # Self-service: an employee can read their own Employee record and upload
+    # files (mirrors employee.has_upload_permission: doc.user_id == user).
+    - actions: ["read", "print"]
+      effect: EFFECT_ALLOW
+      roles: ["Employee", "Employee Self Service"]
+      condition:
+        match:
+          any:
+            of:
+              - expr: has(R.attr.user_id) && R.attr.user_id == P.id
+              - expr: has(P.attr.employee) && P.attr.employee == R.id

@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestFixture/Resources.schema.json
+resources:
+  supplier_megasupply:
+    kind: supplier
+    id: MegaSupply
+    attr:
+      owner: purch.user@acme.test
+      supplier_group: Goods
+      disabled: false
+
+  po_draft:
+    kind: purchase_order
+    id: PO-001
+    attr:
+      company: Acme
+      owner: purch.user@acme.test
+      docstatus: 0
+      supplier: MegaSupply
+      status: Draft
+
+  po_submitted:
+    kind: purchase_order
+    id: PO-002
+    attr:
+      company: Acme
+      owner: purch.user@acme.test
+      docstatus: 1
+      supplier: MegaSupply
+      status: To Receive
+
+  po_other_supplier:
+    kind: purchase_order
+    id: PO-003
+    attr:
+      company: Acme
+      owner: purch.user@acme.test
+      docstatus: 0
+      supplier: SmallSupply
+      status: Draft
+
+  pr_draft:
+    kind: purchase_receipt
+    id: PR-001
+    attr:
+      company: Acme
+      owner: stock.user@acme.test
+      docstatus: 0
+      supplier: MegaSupply
+      is_return: false

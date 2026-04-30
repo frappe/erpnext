@@ -24,6 +24,9 @@ dependencies = [
 
     # MT940 parser for bank statements
     "mt-940>=4.26.0",
+
+    # Cerbos PDP client for the authorization integration in cerbos_authz/.
+    "cerbos~=0.13",
 ]
 
 [build-system]

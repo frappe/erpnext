@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: PurchaseOrderPolicyTest
+tests:
+  - name: Purchase User can submit POs in their company
+    input:
+      principals: [purchase_user]
+      resources: [po_draft]
+      actions: [create, read, write, submit]
+    expected:
+      - principal: purchase_user
+        resource: po_draft
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW
+
+  - name: Submitted PO is locked from edits
+    input:
+      principals: [purchase_manager]
+      resources: [po_submitted]
+      actions: [write, cancel]
+    expected:
+      - principal: purchase_manager
+        resource: po_submitted
+        actions:
+          write: EFFECT_DENY
+          cancel: EFFECT_ALLOW
+
+  - name: Supplier portal sees own PO only
+    input:
+      principals: [supplier_portal_user]
+      resources: [po_draft, po_other_supplier]
+      actions: [read]
+    expected:
+      - principal: supplier_portal_user
+        resource: po_draft
+        actions:
+          read: EFFECT_ALLOW
+      - principal: supplier_portal_user
+        resource: po_other_supplier
+        actions:
+          read: EFFECT_DENY
+
+  - name: Stock User has read-only access to POs
+    input:
+      principals: [stock_user]
+      resources: [po_draft]
+      actions: [read, write]
+    expected:
+      - principal: stock_user
+        resource: po_draft
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_DENY

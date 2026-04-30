@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/TestSuite.schema.json
+name: LeaveApplicationPolicyTest
+tests:
+  - name: Employee can file and submit own leave application
+    input:
+      principals: [employee_alice]
+      resources: [leave_alice_open]
+      actions: [create, read, write, submit]
+    expected:
+      - principal: employee_alice
+        resource: leave_alice_open
+        actions:
+          create: EFFECT_ALLOW
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW
+
+  - name: Employee can cancel own Open leave but not Approved leave
+    input:
+      principals: [employee_alice]
+      resources: [leave_alice_open, leave_alice_approved]
+      actions: [cancel]
+    expected:
+      - principal: employee_alice
+        resource: leave_alice_open
+        actions:
+          cancel: EFFECT_ALLOW
+      - principal: employee_alice
+        resource: leave_alice_approved
+        actions:
+          cancel: EFFECT_DENY
+
+  - name: Employee cannot read another employee's leave
+    input:
+      principals: [employee_alice]
+      resources: [leave_bob_open]
+      actions: [read]
+    expected:
+      - principal: employee_alice
+        resource: leave_bob_open
+        actions:
+          read: EFFECT_DENY
+
+  - name: Configured leave approver can approve leave
+    input:
+      principals: [manager_carol_leave_approver]
+      resources: [leave_alice_open]
+      actions: [read, write, submit]
+    expected:
+      - principal: manager_carol_leave_approver
+        resource: leave_alice_open
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW
+
+  - name: HR Manager can manage all leave applications
+    input:
+      principals: [hr_manager]
+      resources: [leave_bob_open]
+      actions: [read, write, submit, delete]
+    expected:
+      - principal: hr_manager
+        resource: leave_bob_open
+        actions:
+          read: EFFECT_ALLOW
+          write: EFFECT_ALLOW
+          submit: EFFECT_ALLOW
+          delete: EFFECT_ALLOW
