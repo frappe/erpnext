@@ -26,15 +26,59 @@ NOT_APPLICABLE_19_PERCENT_ACCOUNTS = frozenset(
 	}
 )
 
+NOT_APPLICABLE_7_PERCENT_ACCOUNTS_WITH_NUMBERS = frozenset(
+	{
+		"Umsatzsteuer 7 %",
+		"Umsatzsteuer aus innergemeinschaftlichen Erwerb 7 %",
+		"Umsatzsteuer nach § 13b UStG 7%",
+		"Abziehbare Vorsteuer 7 %",
+		"Abziehbare Vorsteuer aus innergemeinschaftlichen Erwerb 7 %",
+		"Abziehbare Vorsteuer nach § 13b UStG 7%",
+	}
+)
+
+NOT_APPLICABLE_19_PERCENT_ACCOUNTS_WITH_NUMBERS = frozenset(
+	{
+		"Umsatzsteuer 19 %",
+		"Umsatzsteuer aus innergemeinschaftlichen Erwerb 19 %",
+		"Umsatzsteuer nach § 13b UStG 19%",
+		"Abziehbare Vorsteuer 19 %",
+		"Abziehbare Vorsteuer aus innergemeinschaftlichen Erwerb 19 %",
+		"Abziehbare Vorsteuer nach § 13b UStG 19%",
+	}
+)
+
+NOT_APPLICABLE_IMPORT_TAX_ACCOUNT = frozenset({"Entstandene Einfuhrumsatzsteuer"})
+
 GERMAN_ITEM_TAX_TEMPLATE_NOT_APPLICABLE_ACCOUNTS = {
-	chart: {
+	"SKR03 mit Kontonummern": {
 		"19 %": NOT_APPLICABLE_7_PERCENT_ACCOUNTS,
 		"7 %": NOT_APPLICABLE_19_PERCENT_ACCOUNTS,
 		"0 %": NOT_APPLICABLE_7_PERCENT_ACCOUNTS
 		| NOT_APPLICABLE_19_PERCENT_ACCOUNTS
-		| frozenset({"Entstandene Einfuhrumsatzsteuer"}),
-	}
-	for chart in ("SKR03 mit Kontonummern", "SKR04 mit Kontonummern")
+		| NOT_APPLICABLE_IMPORT_TAX_ACCOUNT,
+	},
+	"SKR04 mit Kontonummern": {
+		"19 %": NOT_APPLICABLE_7_PERCENT_ACCOUNTS,
+		"7 %": NOT_APPLICABLE_19_PERCENT_ACCOUNTS,
+		"0 %": NOT_APPLICABLE_7_PERCENT_ACCOUNTS
+		| NOT_APPLICABLE_19_PERCENT_ACCOUNTS
+		| NOT_APPLICABLE_IMPORT_TAX_ACCOUNT,
+	},
+	"Standard": {
+		"19 %": NOT_APPLICABLE_7_PERCENT_ACCOUNTS,
+		"7 %": NOT_APPLICABLE_19_PERCENT_ACCOUNTS,
+		"0%": NOT_APPLICABLE_7_PERCENT_ACCOUNTS
+		| NOT_APPLICABLE_19_PERCENT_ACCOUNTS
+		| NOT_APPLICABLE_IMPORT_TAX_ACCOUNT,
+	},
+	"Standard with Numbers": {
+		"19%": NOT_APPLICABLE_7_PERCENT_ACCOUNTS_WITH_NUMBERS,
+		"7%": NOT_APPLICABLE_19_PERCENT_ACCOUNTS_WITH_NUMBERS,
+		"0 %": NOT_APPLICABLE_7_PERCENT_ACCOUNTS_WITH_NUMBERS
+		| NOT_APPLICABLE_19_PERCENT_ACCOUNTS_WITH_NUMBERS
+		| NOT_APPLICABLE_IMPORT_TAX_ACCOUNT,
+	},
 }
 
 
