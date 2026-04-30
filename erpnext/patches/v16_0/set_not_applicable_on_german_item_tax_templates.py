@@ -153,7 +153,10 @@ def update_account_cache(accounts, account_cache):
 
 
 def get_account_identifier(account, identifier_field, account_cache):
-	cached_account = account_cache[account]
+	cached_account = account_cache.get(account)
+	if not cached_account:
+		return None
+
 	return cached_account.get(identifier_field), cached_account.root_type
 
 
@@ -198,6 +201,9 @@ def execute():
 					d.name: get_account_identifier(d.tax_type, identifier_field, account_cache)
 					for d in zero_rate_details
 				}
+				if any(identifier is None for identifier in zero_rate_accounts_by_detail.values()):
+					continue
+
 				if set(zero_rate_accounts_by_detail.values()) != target_accounts:
 					continue
 
