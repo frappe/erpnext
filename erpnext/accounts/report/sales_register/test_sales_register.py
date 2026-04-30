@@ -1,9 +1,10 @@
 import frappe
-from frappe.utils import getdate, today
+from frappe.utils import flt, getdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.sales_register.sales_register import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.selling.doctype.customer.test_customer import make_customer
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -249,3 +250,49 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		}
 		result_output = {k: v for k, v in filtered_output[0].items() if k in expected_result}
 		self.assertDictEqual(result_output, expected_result)
+
+	def test_currency_conversion(self):
+		usd_debtors = frappe.get_doc(
+			{
+				"doctype": "Account",
+				"account_name": "USD Debtors",
+				"parent_account": "Accounts Receivable - _TC",
+				"company": "_Test Company",
+				"account_type": "Receivable",
+				"root_type": "Asset",
+				"report_type": "Balance Sheet",
+				"account_currency": "USD",
+			}
+		).insert()
+		foreign_invoice = create_sales_invoice(
+			customer="_Test Customer",
+			currency="USD",
+			conversion_rate=80,
+			qty=1,
+			rate=100,
+			debit_to=usd_debtors.name,
+		)
+		foreign_invoice.db_set("outstanding_amount", 100.236)
+		make_customer("_Test Customer2")
+		local_invoice = create_sales_invoice(
+			customer="_Test Customer2", currency="INR", conversion_rate=1, qty=1, rate=200
+		)
+		local_invoice.db_set("outstanding_amount", 200.456)
+		columns, data, *_ = execute(frappe._dict({"company": foreign_invoice.company}))
+		outstanding_precision = 2
+		for row in data:
+			if row.get("invoice") == foreign_invoice.name:
+				expected_value = flt(
+					foreign_invoice.outstanding_amount * (foreign_invoice.conversion_rate or 1),
+					outstanding_precision,
+				)
+				self.assertEqual(row.get("outstanding_amount"), expected_value)
+				self.assertEqual(
+					row.get("outstanding_amount"), round(row.get("outstanding_amount"), outstanding_precision)
+				)
+			if row.get("invoice") == local_invoice.name:
+				expected_value = flt(
+					local_invoice.outstanding_amount * (local_invoice.conversion_rate or 1),
+					outstanding_precision,
+				)
+				self.assertEqual(row.get("outstanding_amount"), expected_value)
