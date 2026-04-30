@@ -559,12 +559,6 @@ cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function 
 	};
 };
 
-cur_frm.fields_dict["items"].grid.get_field("project").get_query = function (doc, cdt, cdn) {
-	return {
-		filters: [["Project", "status", "not in", "Completed, Cancelled"]],
-	};
-};
-
 frappe.ui.form.on("Purchase Invoice", {
 	setup: function (frm) {
 		frm.custom_make_buttons = {

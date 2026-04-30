@@ -9,8 +9,10 @@
   "customer_defaults_tab",
   "customer_defaults_section",
   "cust_master_name",
-  "customer_group",
+  "naming_series_details",
+  "configure",
   "column_break_4",
+  "customer_group",
   "territory",
   "item_price_tab",
   "item_price_settings_section",
@@ -57,7 +59,9 @@
   "section_break_zwh6",
   "allow_delivery_of_overproduced_qty",
   "column_break_mla9",
-  "deliver_secondary_items"
+  "deliver_secondary_items",
+  "default_naming_tab",
+  "transaction_naming_html"
  ],
  "fields": [
   {
@@ -279,7 +283,7 @@
   {
    "fieldname": "item_price_tab",
    "fieldtype": "Tab Break",
-   "label": "Item Price"
+   "label": "Pricing"
   },
   {
    "fieldname": "transaction_tab",
@@ -377,6 +381,29 @@
    "fieldname": "blanket_orders_section",
    "fieldtype": "Section Break",
    "label": "Blanket Orders"
+  },
+  {
+   "fieldname": "configure",
+   "fieldtype": "Button",
+   "hidden": 1,
+   "label": "Configure Series"
+  },
+  {
+   "fieldname": "naming_series_details",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "is_virtual": 1,
+   "label": "Naming Series options",
+   "read_only": 1
+  },
+  {
+   "fieldname": "default_naming_tab",
+   "fieldtype": "Tab Break",
+   "label": "Document Naming"
+  },
+  {
+   "fieldname": "transaction_naming_html",
+   "fieldtype": "HTML"
   }
  ],
  "grid_page_length": 50,
@@ -385,7 +412,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-21 21:29:32.890098",
+ "modified": "2026-04-29 11:05:48.836362",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
