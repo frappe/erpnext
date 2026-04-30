@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-04-26 09:49+0000\n"
-"PO-Revision-Date: 2026-04-28 17:16\n"
+"PO-Revision-Date: 2026-04-30 17:22\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -3432,7 +3432,7 @@ msgstr "Mot Konto"
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Against Blanket Order"
-msgstr "Mot Avtal Order"
+msgstr "Mot Ramavtal Order"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1102
 msgid "Against Customer Order {0}"
@@ -8160,7 +8160,7 @@ msgstr "Tom Rad"
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/workspace_sidebar/selling.json
 msgid "Blanket Order"
-msgstr "Avtal Order"
+msgstr "Ramavtal Order"
 
 #. Label of the blanket_order_allowance (Float) field in DocType 'Buying
 #. Settings'
@@ -8169,12 +8169,12 @@ msgstr "Avtal Order"
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Blanket Order Allowance (%)"
-msgstr "Avtal Order Tillåtelse (%)"
+msgstr "Ramavtal Order Tillåtelse (%)"
 
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/blanket_order_item/blanket_order_item.json
 msgid "Blanket Order Item"
-msgstr "Avtal Order Artikel"
+msgstr "Ramavtal Order Artikel"
 
 #. Label of the blanket_order_rate (Currency) field in DocType 'Purchase Order
 #. Item'
@@ -8185,7 +8185,7 @@ msgstr "Avtal Order Artikel"
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Blanket Order Rate"
-msgstr "Avtal Order Värde"
+msgstr "Ramavtal Order Värde"
 
 #. Label of the blanket_orders_section (Section Break) field in DocType
 #. 'Selling Settings'
@@ -23992,7 +23992,7 @@ msgstr "Ogiltig Streck/QR Kod. Det finns ingen Artikel med denna Streck/QR Kod."
 
 #: erpnext/public/js/controllers/transaction.js:3212
 msgid "Invalid Blanket Order for the selected Customer and Item"
-msgstr "Ogiltig Avtal Order för vald Kund och Artikel"
+msgstr "Ogiltig Ramavtal Order för vald Kund och Artikel"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:500
 msgid "Invalid CSV format. Expected column: doctype_name"
@@ -26431,7 +26431,7 @@ msgstr "Artikel {0} kan inte läggas till som underenhet av sig själv"
 
 #: erpnext/manufacturing/doctype/blanket_order/blanket_order.py:197
 msgid "Item {0} cannot be ordered more than {1} against Blanket Order {2}."
-msgstr "Artikel {0} kan inte skapas order för mer än {1} mot Avtal Order {2}."
+msgstr "Artikel {0} kan inte skapas order för mer än {1} mot Ramavtal Order {2}."
 
 #: erpnext/assets/doctype/asset/asset.py:344
 #: erpnext/stock/doctype/item/item.py:671
@@ -35097,13 +35097,13 @@ msgstr "Procentuell Tilldelning ska vara lika med 100 %"
 #. 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Percentage you are allowed to order beyond the Blanket Order quantity."
-msgstr "Procentandel tillåten för order utöver Avtal Order Kvantitet."
+msgstr "Procentandel tillåten för order utöver Ramavtal Order Kvantitet."
 
 #. Description of the 'Blanket Order Allowance (%)' (Float) field in DocType
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Percentage you are allowed to sell beyond the Blanket Order quantity."
-msgstr "Procentandel tillåten för försäljning utöver Avtal Order Kvantitet."
+msgstr "Procentandel tillåten för försäljning utöver Ramavtal Order Kvantitet."
 
 #. Description of the 'Over Transfer Allowance (%)' (Float) field in DocType
 #. 'Buying Settings'
