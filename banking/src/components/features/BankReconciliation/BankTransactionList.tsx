@@ -149,7 +149,7 @@ const BankTransactionListView = () => {
                 enableResizing: false,
                 meta: { truncate: false, truncateTooltip: false } satisfies ListViewColumnMeta,
                 cell: ({ row }) => (
-                    <div className="flex gap-2 pl-0.5 items-center">
+                    <div className="flex gap-2 ps-0.5 items-center">
                         <Button variant="ghost" asChild size='sm'>
                             <a
                                 href={`/desk/bank-transaction/${row.original.name}`}

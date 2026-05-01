@@ -639,7 +639,7 @@ const Entries = ({ company, isWithdrawal, currency }: { company: string, isWithd
                                     inputProps={{
                                         type: isWithdrawal ? 'Payable' : 'Receivable',
                                         triggerProps: {
-                                            className: 'rounded-r-none',
+                                            className: 'rounded-e-none',
                                             tabIndex: -1
                                         },
                                         readOnly: index === 0,
@@ -757,7 +757,7 @@ const PartyField = ({ index, onChange, readOnly }: { index: number, onChange: (v
             isRequired
             inputProps={{
                 disabled: true,
-                className: 'rounded-l-none border-l-0 min-w-64'
+                className: 'rounded-s-none border-s-0 min-w-64'
             }}
             hideLabel
         />
@@ -773,7 +773,7 @@ const PartyField = ({ index, onChange, readOnly }: { index: number, onChange: (v
         }}
         hideLabel
         readOnly={readOnly}
-        buttonClassName="rounded-l-none border-l-0 min-w-64"
+        buttonClassName="rounded-s-none border-s-0 min-w-64"
         doctype={party_type}
 
     />

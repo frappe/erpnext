@@ -37,7 +37,7 @@ const BankPicker = ({ className, size = 'base' }: { className?: string, size?: '
     }
     return (
         <div
-            className={cn("flex gap-3 items-stretch w-full overflow-x-auto bank-picker-scrollbar pr-4",
+            className={cn("flex gap-3 items-stretch w-full overflow-x-auto bank-picker-scrollbar pe-4",
                 banks?.length > 4 ? 'pb-2' : '', className,
             )}
             style={{

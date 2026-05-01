@@ -4,6 +4,7 @@ import re
 import frappe
 import frappe.sessions
 from frappe import _
+from frappe.utils.jinja_globals import is_rtl
 
 no_cache = 1
 
@@ -22,6 +23,9 @@ def get_context(context):
 	context.app_name = (
 		frappe.get_website_settings("app_name") or frappe.get_system_settings("app_name") or "ERPNext"
 	)
+
+	context.layout_direction = "rtl" if is_rtl() else "ltr"
+	context.lang = frappe.local.lang
 
 	return context
 

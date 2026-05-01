@@ -143,7 +143,7 @@ function TabsTrigger({
         // Variant: underline, size: md
         "group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=md]/tabs-list:py-2 group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=md]/tabs-list:pr-2",
         // Variant: underline - vertical - active - border applied
-        "group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:border-r group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:border-r-transparent group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:data-[state=active]:border-r-ink-gray-8 group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:-right-px",
+        "group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:border-r group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:border-e-transparent group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:data-[state=active]:border-e-ink-gray-8 group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:-right-px",
 
         className
       )}

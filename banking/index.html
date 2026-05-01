@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ lang }}" dir="{{layout_direction}}">
 
 <head>
   <meta charset="UTF-8" />
@@ -29,6 +29,7 @@
     if (!window.frappe) window.frappe = {};
 
     frappe.boot = JSON.parse({{ boot }});
+    frappe.boot.layout_direction = "{{ layout_direction }}";
     frappe._messages = frappe.boot["__messages"];
   </script>
   <script type="module" src="/src/main.tsx"></script>

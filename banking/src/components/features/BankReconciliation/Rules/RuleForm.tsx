@@ -642,7 +642,7 @@ const ConfigureAccountsModalContent = () => {
                                         inputProps={{
                                             type: isWithdrawal ? 'Payable' : 'Receivable',
                                             triggerProps: {
-                                                className: 'rounded-r-none',
+                                                className: 'rounded-e-none',
                                                 tabIndex: -1
                                             },
                                         }} />
@@ -776,7 +776,7 @@ const PartyRowField = ({ index, onChange }: { index: number, onChange: (value: s
             isRequired
             inputProps={{
                 disabled: true,
-                className: 'rounded-l-none border-l-0 min-w-64'
+                className: 'rounded-s-none border-s-0 min-w-64'
             }}
             hideLabel
         />
@@ -791,7 +791,7 @@ const PartyRowField = ({ index, onChange }: { index: number, onChange: (value: s
             },
         }}
         hideLabel
-        buttonClassName="rounded-l-none border-l-0 min-w-64"
+        buttonClassName="rounded-s-none border-s-0 min-w-64"
         doctype={party_type}
 
     />

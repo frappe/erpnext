@@ -100,7 +100,7 @@ const BankStatementImporter = () => {
                                 </div>
                             </div>
                             }
-                            {selectedBankAccount && <div className="flex flex-col gap-4 pr-4">
+                            {selectedBankAccount && <div className="flex flex-col gap-4 pe-4">
                                 <div className="flex justify-between">
                                     <div className="flex flex-col gap-2">
                                         <Label>{_("Bank Statement")}<span className="text-ink-red-3">*</span></Label>
@@ -141,7 +141,7 @@ const BankStatementImporter = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="w-[48%] border-l border-outline-gray-2 pl-4">
+                    <div className="w-[48%] border-s border-outline-gray-2 ps-4">
                         {selectedBankAccount && <StatementImportLog />}
                     </div>
 

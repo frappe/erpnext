@@ -78,7 +78,7 @@ const ActionLogDialogContent = () => {
             <div key={action.timestamp} className='flex flex-col gap-1'>
                 <ActionGroupHeader action={action} />
                 <div>
-                    <div className='ml-2 border-l border-l-outline-gray-2 py-1'>
+                    <div className='ml-2 border-s border-s-outline-gray-2 py-1'>
                         <div className='ml-5'>
                             {action.items.map((item, index) => (
                                 <Row
@@ -166,7 +166,7 @@ const Row = ({ item, index, isLast, action }: { item: ActionLogItem, index: numb
     const currency = item.bankTransaction.currency || getCompanyCurrency(item.bankTransaction.company ?? '')
 
     return <div className='flex items-center gap-2 group'>
-        <div className={cn('p-3.5 group-hover:bg-surface-gray-1 border-l border-r border-t w-full', isLast ? 'rounded-b border-b' : '', index === 0 ? 'rounded-t' : '')}>
+        <div className={cn('p-3.5 group-hover:bg-surface-gray-1 border-s border-e border-t w-full', isLast ? 'rounded-b border-b' : '', index === 0 ? 'rounded-t' : '')}>
             <div className='flex justify-between items-center'>
                 <div className='flex flex-col gap-2'>
                     <p className='text-p-base'>{item.bankTransaction.description}</p>

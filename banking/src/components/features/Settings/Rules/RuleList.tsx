@@ -259,7 +259,7 @@ const SortableRuleItem = ({
 
     return (
         <li ref={setNodeRef} style={style}>
-            <div className={cn("flex justify-between items-center py-2 my-0.5 h-full hover:bg-surface-gray-1 pr-2 rounded", isDropdownOpen && "bg-surface-gray-1")}>
+            <div className={cn("flex justify-between items-center py-2 my-0.5 h-full hover:bg-surface-gray-1 pe-2 rounded", isDropdownOpen && "bg-surface-gray-1")}>
                 <div className="flex items-center gap-2">
                     <div
                         {...attributes}

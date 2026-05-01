@@ -863,7 +863,7 @@ const VoucherItem = ({ voucher, index }: { voucher: LinkedPayment, index: number
                 </div>
             </div>
 
-            {isSuggested && <div className="absolute top-1.5 right-2 flex items-center gap-1 justify-center">
+            {isSuggested && <div className="absolute top-1.5 right-2 rtl:left-2 flex items-center gap-1 justify-center">
                 <Badge theme="green" variant="subtle" size='md'>{_("Suggested")}</Badge>
                 {/* {isSuggested && <span
                     className="bg-outline-amber-4 uppercase font-medium text-white px-3 py-1 rounded-bl-md text-xs rounded-tr-sm">{_("Suggested")}</span>} */}

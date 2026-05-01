@@ -136,7 +136,7 @@ const BankRecDateFilter = () => {
                     variant={'outline'}
                     aria-expanded={open}
                     size='md'
-                    className='rounded-r-none border-r-0'
+                    className='rounded-e-none border-e-0'
                     role="combobox">
                     {timePeriodOptions.find((period) => period.label === timePeriod)?.translatedLabel ?? _(timePeriod)}
 
@@ -170,7 +170,7 @@ const BankRecDateFilter = () => {
 
         <Popover>
             <PopoverTrigger asChild>
-                <Button variant={'outline'} className='rounded-l-none' size='md'>
+                <Button variant={'outline'} className='rounded-s-none' size='md'>
                     {formatDate(bankRecDate.fromDate)} - {formatDate(bankRecDate.toDate)}
                 </Button>
             </PopoverTrigger>
