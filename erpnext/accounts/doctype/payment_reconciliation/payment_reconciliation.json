@@ -16,12 +16,11 @@
   "filters_section",
   "from_date",
   "min_amount",
-  "to_receive_limit",
   "column_break_filters_1",
   "to_date",
   "max_amount",
-  "to_pay_limit",
   "column_break_filters_2",
+  "fetch_limit",
   "currency_filter",
   "bank_cash_account",
   "accounting_dimensions_section",
@@ -117,13 +116,6 @@
    "label": "Minimum Amount"
   },
   {
-   "default": "50",
-   "description": "System will fetch all entries if limit is zero.",
-   "fieldname": "to_receive_limit",
-   "fieldtype": "Int",
-   "label": "To Receive Limit"
-  },
-  {
    "fieldname": "column_break_filters_1",
    "fieldtype": "Column Break"
   },
@@ -138,15 +130,15 @@
    "label": "Maximum Amount"
   },
   {
-   "default": "50",
-   "description": "System will fetch all entries if limit is zero.",
-   "fieldname": "to_pay_limit",
-   "fieldtype": "Int",
-   "label": "To Pay Limit"
-  },
-  {
    "fieldname": "column_break_filters_2",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "50",
+   "description": "Maximum entries to fetch per table. Zero means no cap.",
+   "fieldname": "fetch_limit",
+   "fieldtype": "Int",
+   "label": "Fetch Limit"
   },
   {
    "description": "Restrict both tables to one currency.",

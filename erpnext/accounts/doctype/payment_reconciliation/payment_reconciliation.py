@@ -373,6 +373,7 @@ class PaymentReconciliation(Document):
 		currency_filter: DF.Link | None
 		default_advance_account: DF.Link | None
 		difference_amount: DF.Currency
+		fetch_limit: DF.Int
 		from_date: DF.Date | None
 		max_amount: DF.Currency
 		min_amount: DF.Currency
@@ -382,9 +383,7 @@ class PaymentReconciliation(Document):
 		receivable_payable_account: DF.Link | None
 		to_date: DF.Date | None
 		to_pay: DF.Table[PaymentReconciliationEntry]
-		to_pay_limit: DF.Int
 		to_receive: DF.Table[PaymentReconciliationEntry]
-		to_receive_limit: DF.Int
 		total_invoice_amount: DF.Currency
 		total_payment_amount: DF.Currency
 	# end: auto-generated types
@@ -415,8 +414,7 @@ class PaymentReconciliation(Document):
 				"to_date": None,
 				"min_amount": None,
 				"max_amount": None,
-				"to_receive_limit": 50,
-				"to_pay_limit": 50,
+				"fetch_limit": 50,
 				"cost_center": None,
 				"project": None,
 			}
@@ -485,10 +483,11 @@ class PaymentReconciliation(Document):
 			)
 
 	def _apply_post_filters(self):
-		if self.to_receive_limit and len(self.to_receive) > self.to_receive_limit:
-			self.to_receive = self.to_receive[: self.to_receive_limit]
-		if self.to_pay_limit and len(self.to_pay) > self.to_pay_limit:
-			self.to_pay = self.to_pay[: self.to_pay_limit]
+		limit = self.fetch_limit
+		if limit and len(self.to_receive) > limit:
+			self.to_receive = self.to_receive[:limit]
+		if limit and len(self.to_pay) > limit:
+			self.to_pay = self.to_pay[:limit]
 
 	def get_difference_amount(self, payment_entry, invoice, allocated_amount):
 		party_account_defaults = frappe.get_cached_value(
