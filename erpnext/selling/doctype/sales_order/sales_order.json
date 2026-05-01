@@ -847,6 +847,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Loyalty Amount",
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1480,6 +1481,7 @@
    "fieldname": "amount_eligible_for_commission",
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -1763,7 +1765,11 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2026-04-28 06:30:35.902868",
+=======
+ "modified": "2026-05-01 02:37:30.937916",
+>>>>>>> c120cc7ed1 (fix: add missing fields in set_currency_labels (#54689))
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

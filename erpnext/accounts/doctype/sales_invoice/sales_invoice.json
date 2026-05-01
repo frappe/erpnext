@@ -1152,6 +1152,7 @@
    "hide_seconds": 1,
    "label": "Rounding Adjustment",
    "no_copy": 1,
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1164,6 +1165,7 @@
    "label": "Rounded Total",
    "oldfieldname": "rounded_total",
    "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -2365,7 +2367,11 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
+<<<<<<< HEAD
  "modified": "2026-04-28 13:08:19.849783",
+=======
+ "modified": "2026-05-01 02:37:29.742764",
+>>>>>>> c120cc7ed1 (fix: add missing fields in set_currency_labels (#54689))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

@@ -870,10 +870,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 										me.apply_rule_on_other_items({ key: item });
 									}
 								},
-								() => {
-									var company_currency = me.get_company_currency();
-									me.update_item_grid_labels(company_currency);
-								},
 							]);
 						}
 					},
@@ -1824,63 +1820,51 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		if (
 			this._last_currency === this.frm.doc.currency &&
-			this._last_price_list_currency === this.frm.doc.price_list_currency
+			this._last_price_list_currency === this.frm.doc.price_list_currency &&
+			this._last_party_account_currency === this.frm.doc.party_account_currency &&
+			this._last_company_currency === company_currency
 		) {
 			return;
 		}
 
 		this._last_currency = this.frm.doc.currency;
 		this._last_price_list_currency = this.frm.doc.price_list_currency;
+		this._last_party_account_currency = this.frm.doc.party_account_currency;
+		this._last_company_currency = company_currency;
 
 		this.change_form_labels(company_currency);
 		this.change_grid_labels(company_currency);
 		this.frm.refresh_fields();
 	}
 
+	get_currency_label_options(company_currency) {
+		return {
+			currency: this.frm.doc.currency,
+			"Company:company:default_currency": company_currency,
+			party_account_currency: this.frm.doc.party_account_currency,
+		};
+	}
+
+	set_currency_labels_from_options(currency_options, parentfield) {
+		const doctype = parentfield ? this.frm.fields_dict[parentfield].grid.doctype : this.frm.doc.doctype;
+		const docfields = frappe.meta.get_docfields(doctype);
+
+		Object.entries(currency_options).forEach(([options, currency]) => {
+			const fields = docfields
+				.filter((df) => df.fieldtype === "Currency" && df.options === options)
+				.map((df) => df.fieldname);
+
+			this.frm.set_currency_labels(fields, currency, parentfield);
+		});
+	}
+
 	change_form_labels(company_currency) {
 		let me = this;
+		const currency_options = this.get_currency_label_options(company_currency);
 
-		this.frm.set_currency_labels(
-			[
-				"advance_paid",
-				"base_total",
-				"base_net_total",
-				"base_total_taxes_and_charges",
-				"base_discount_amount",
-				"base_taxes_and_charges_added",
-				"base_taxes_and_charges_deducted",
-				"total_amount_to_pay",
-				"base_paid_amount",
-				"base_write_off_amount",
-				"base_change_amount",
-				"base_operating_cost",
-				"base_raw_material_cost",
-				"base_total_cost",
-				"base_secondary_items_cost",
-				"base_totals_section",
-			],
-			company_currency
-		);
-
-		this.frm.set_currency_labels(
-			[
-				"total",
-				"net_total",
-				"total_taxes_and_charges",
-				"discount_amount",
-				"taxes_and_charges_added",
-				"taxes_and_charges_deducted",
-				"tax_withholding_net_total",
-				"paid_amount",
-				"write_off_amount",
-				"operating_cost",
-				"secondary_items_cost",
-				"raw_material_cost",
-				"total_cost",
-				"totals_section",
-			],
-			this.frm.doc.currency
-		);
+		this.set_currency_labels_from_options(currency_options);
+		this.frm.set_currency_labels(["totals_section"], this.frm.doc.currency);
+		this.frm.set_currency_labels(["base_totals_section"], company_currency);
 
 		this.frm.set_currency_labels(
 			["outstanding_amount", "total_advance"],
@@ -1961,23 +1945,25 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	change_grid_labels(company_currency) {
 		var me = this;
-
-		this.update_item_grid_labels(company_currency);
+		const currency_options = this.get_currency_label_options(company_currency);
 
 		this.toggle_item_grid_columns(company_currency);
 
-		if (this.frm.doc.operations && this.frm.doc.operations.length > 0) {
-			this.frm.set_currency_labels(
-				["operating_cost", "hour_rate"],
-				this.frm.doc.currency,
-				"operations"
-			);
-			this.frm.set_currency_labels(
-				["base_operating_cost", "base_hour_rate"],
-				company_currency,
-				"operations"
-			);
+		for (const child_table of [
+			"items",
+			"operations",
+			"secondary_items",
+			"taxes",
+			"advances",
+			"payment_schedule",
+			"sales_team",
+		]) {
+			if (this.frm.fields_dict[child_table]) {
+				this.set_currency_labels_from_options(currency_options, child_table);
+			}
+		}
 
+		if (this.frm.doc.operations && this.frm.doc.operations.length > 0) {
 			var item_grid = this.frm.fields_dict["operations"].grid;
 			$.each(["base_operating_cost", "base_hour_rate"], function (i, fname) {
 				if (frappe.meta.get_docfield(item_grid.doctype, fname))
@@ -1986,9 +1972,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		if (this.frm.doc.secondary_items && this.frm.doc.secondary_items.length > 0) {
-			this.frm.set_currency_labels(["rate", "amount"], this.frm.doc.currency, "secondary_items");
-			this.frm.set_currency_labels(["base_rate", "base_amount"], company_currency, "secondary_items");
-
 			var item_grid = this.frm.fields_dict["secondary_items"].grid;
 			$.each(["base_rate", "base_amount"], function (i, fname) {
 				if (frappe.meta.get_docfield(item_grid.doctype, fname))
@@ -1996,74 +1979,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 		}
 
-		if (this.frm.doc.taxes && this.frm.doc.taxes.length > 0) {
-			this.frm.set_currency_labels(
-				["tax_amount", "total", "tax_amount_after_discount"],
-				this.frm.doc.currency,
-				"taxes"
-			);
-
-			this.frm.set_currency_labels(
-				["base_tax_amount", "base_total", "base_tax_amount_after_discount"],
-				company_currency,
-				"taxes"
-			);
-		}
-
-		if (this.frm.doc.advances && this.frm.doc.advances.length > 0) {
-			this.frm.set_currency_labels(
-				["advance_amount", "allocated_amount"],
-				this.frm.doc.party_account_currency,
-				"advances"
-			);
-		}
-
 		this.update_payment_schedule_grid_labels(company_currency);
-	}
-
-	update_item_grid_labels(company_currency) {
-		this.frm.set_currency_labels(
-			[
-				"base_rate",
-				"base_net_rate",
-				"base_price_list_rate",
-				"base_amount",
-				"base_net_amount",
-				"base_rate_with_margin",
-			],
-			company_currency,
-			"items"
-		);
-
-		this.frm.set_currency_labels(
-			[
-				"rate",
-				"net_rate",
-				"price_list_rate",
-				"amount",
-				"net_amount",
-				"stock_uom_rate",
-				"rate_with_margin",
-			],
-			this.frm.doc.currency,
-			"items"
-		);
 	}
 
 	update_payment_schedule_grid_labels(company_currency) {
 		const me = this;
 		if (this.frm.doc.payment_schedule && this.frm.doc.payment_schedule.length > 0) {
-			this.frm.set_currency_labels(
-				["base_payment_amount", "base_outstanding", "base_paid_amount"],
-				company_currency,
-				"payment_schedule"
-			);
-			this.frm.set_currency_labels(
-				["payment_amount", "outstanding", "paid_amount"],
-				this.frm.doc.currency,
-				"payment_schedule"
-			);
-
 			var schedule_grid = this.frm.fields_dict["payment_schedule"].grid;
 			$.each(["base_payment_amount", "base_outstanding", "base_paid_amount"], function (i, fname) {
 				if (frappe.meta.get_docfield(schedule_grid.doctype, fname))
