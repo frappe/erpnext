@@ -32,7 +32,8 @@ export const RuleForm = ({ isEdit = false }: { isEdit?: boolean }) => {
                 maxLength: 140,
                 disabled: isEdit,
                 placeholder: _("Bank Charges, Salary, etc."),
-                autoFocus: true
+                autoFocus: true,
+                className: "dark:disabled:bg-surface-gray-2"
             }}
             rules={{
                 required: _("Rule name is required")
