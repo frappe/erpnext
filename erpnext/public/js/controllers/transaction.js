@@ -1948,9 +1948,20 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		this.toggle_item_grid_columns(company_currency);
 
-		if (this.frm.doc.operations && this.frm.doc.operations.length > 0) {
-			this.set_currency_labels_from_options(currency_options, "operations");
+		for (const child_table of [
+			"operations",
+			"secondary_items",
+			"taxes",
+			"advances",
+			"payment_schedule",
+			"sales_team",
+		]) {
+			if (this.frm.fields_dict[child_table]) {
+				this.set_currency_labels_from_options(currency_options, child_table);
+			}
+		}
 
+		if (this.frm.doc.operations && this.frm.doc.operations.length > 0) {
 			var item_grid = this.frm.fields_dict["operations"].grid;
 			$.each(["base_operating_cost", "base_hour_rate"], function (i, fname) {
 				if (frappe.meta.get_docfield(item_grid.doctype, fname))
@@ -1959,21 +1970,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		if (this.frm.doc.secondary_items && this.frm.doc.secondary_items.length > 0) {
-			this.set_currency_labels_from_options(currency_options, "secondary_items");
-
 			var item_grid = this.frm.fields_dict["secondary_items"].grid;
 			$.each(["base_rate", "base_amount"], function (i, fname) {
 				if (frappe.meta.get_docfield(item_grid.doctype, fname))
 					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
 			});
-		}
-
-		if (this.frm.doc.taxes && this.frm.doc.taxes.length > 0) {
-			this.set_currency_labels_from_options(currency_options, "taxes");
-		}
-
-		if (this.frm.doc.advances && this.frm.doc.advances.length > 0) {
-			this.set_currency_labels_from_options(currency_options, "advances");
 		}
 
 		this.update_payment_schedule_grid_labels(currency_options, company_currency);
@@ -1986,8 +1987,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	update_payment_schedule_grid_labels(currency_options, company_currency) {
 		const me = this;
 		if (this.frm.doc.payment_schedule && this.frm.doc.payment_schedule.length > 0) {
-			this.set_currency_labels_from_options(currency_options, "payment_schedule");
-
 			var schedule_grid = this.frm.fields_dict["payment_schedule"].grid;
 			$.each(["base_payment_amount", "base_outstanding", "base_paid_amount"], function (i, fname) {
 				if (frappe.meta.get_docfield(schedule_grid.doctype, fname))
