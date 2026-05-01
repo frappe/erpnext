@@ -34,7 +34,10 @@ def get_context(context):
 def get_context_for_dev():
 	if not frappe.conf.developer_mode:
 		frappe.throw(_("This method is only meant for developer mode"))
-	return json.loads(get_boot())
+	return {
+		"boot": json.loads(get_boot()),
+		"layout_direction": "rtl" if is_rtl() else "ltr",
+	}
 
 
 def get_boot():
