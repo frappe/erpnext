@@ -173,7 +173,7 @@ const Row = ({ item, index, isLast, action }: { item: ActionLogItem, index: numb
                     <div className='flex items-center gap-3'>
                         <div className='flex gap-2 items-center'>
                             {bank?.logo ? <img
-                                src={`/assets/erpnext/banking/${bank?.logo}`}
+                                src={`/assets/erpnext/images/bank-logos/${bank?.logo}`}
                                 alt={bank?.bank || ''}
                                 className="max-w-10 object-left h-5 object-contain"
                             /> : <LandmarkIcon className='w-4 h-4' />}
@@ -338,7 +338,7 @@ const TransferDetails = ({ item, className }: { item: ActionLogItem, className?:
 
     return <div className={cn('flex items-center gap-2 text-ink-gray-5 text-sm', className)}>
         {bank?.logo ? <img
-            src={`/assets/erpnext/banking/${bank.logo}`}
+            src={`/assets/erpnext/images/bank-logos/${bank.logo}`}
             alt={bank?.bank || ''}
             className="object-left h-5 object-contain"
         /> : <LandmarkIcon className='w-4 h-4' />}

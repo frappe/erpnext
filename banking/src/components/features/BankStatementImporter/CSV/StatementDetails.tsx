@@ -128,7 +128,7 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                             <TableCell>
                                 <div className='flex items-center gap-2'>
                                     {bank?.logo ? <img
-                                        src={`/assets/erpnext/banking/${bank.logo}`}
+                                        src={`/assets/erpnext/images/bank-logos/${bank.logo}`}
                                         alt={bank.bank || bank.name || ''}
                                         className="max-w-24 object-left h-6 object-contain"
                                     /> : <div className="rounded-md flex items-center h-6 gap-2">

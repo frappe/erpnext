@@ -402,7 +402,7 @@ const BankOrCashPicker = ({ bankAccount, onAccountChange, selectedAccount, compa
             >
                 {bank.logo ?
                     <img
-                        src={`/assets/erpnext/banking/${bank.logo}`}
+                        src={`/assets/erpnext/images/bank-logos/${bank.logo}`}
                         alt={bank.bank || ''}
                         className='w-12 h-12 object-contain'
                     /> : <div className='flex items-center justify-center h-10 w-10'>
@@ -526,7 +526,7 @@ const RecommendedTransferAccount = ({ transaction, onAccountChange }: { transact
                     <div className="flex items-center gap-2">
                         {bank?.logo ? (
                             <img
-                                src={`/assets/erpnext/banking/${bank.logo}`}
+                                src={`/assets/erpnext/images/bank-logos/${bank.logo}`}
                                 alt={bank.bank}
                                 className="h-8 max-w-24 object-contain"
                             />

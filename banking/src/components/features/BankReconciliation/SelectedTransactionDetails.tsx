@@ -38,7 +38,7 @@ const SelectedTransactionDetails = ({ transaction, showAccount = false, account 
                     <div className='flex justify-between'>
                         <div className='flex flex-col gap-2'>
                             <div className='flex flex-col'> {bank?.logo ? <img
-                                src={`/assets/erpnext/banking/${bank.logo}`}
+                                src={`/assets/erpnext/images/bank-logos/${bank.logo}`}
                                 alt={bank.bank}
                                 className="max-w-20 object-left h-10 object-contain"
                             /> :
