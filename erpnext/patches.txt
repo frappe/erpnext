@@ -433,6 +433,7 @@ erpnext.patches.v15_0.replace_http_with_https_in_sales_partner
 erpnext.patches.v16_0.add_portal_redirects
 erpnext.patches.v16_0.update_order_qty_and_requested_qty_based_on_mr_and_po
 erpnext.patches.v16_0.depends_on_inv_dimensions
+<<<<<<< HEAD
 erpnext.patches.v16_0.clear_procedures_from_receivable_report
 erpnext.patches.v16_0.migrate_address_contact_custom_fields
 erpnext.patches.v15_0.set_main_item_code_in_material_request_plan_item
@@ -450,3 +451,12 @@ erpnext.patches.v16_0.merge_seeded_item_group_root
 erpnext.patches.v16_0.remove_frappe_crm_custom_fields
 erpnext.patches.v16_0.append_fieldname_to_pos_search_fields
 erpnext.patches.v16_0.add_transaction_roles_to_sms_settings
+=======
+erpnext.patches.v16_0.uom_category
+erpnext.patches.v16_0.merge_repost_settings_to_accounts_settings
+erpnext.patches.v16_0.set_root_type_in_account_categories
+erpnext.patches.v16_0.scr_inv_dimension
+erpnext.patches.v16_0.packed_item_inv_dimen
+erpnext.patches.v16_0.fix_titles
+erpnext.patches.v16_0.set_not_applicable_on_german_item_tax_templates
+>>>>>>> a22d773 (fix: Backfill `not_applicable` on Item Tax Template Details for German companies (backport #54682) (#54686))
