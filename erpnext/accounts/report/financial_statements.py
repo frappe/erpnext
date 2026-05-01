@@ -23,7 +23,7 @@ from erpnext.accounts.report.utils import convert_to_presentation_currency, get_
 from erpnext.accounts.utils import get_fiscal_year, get_zero_cutoff
 
 
-def get_report_date_range(filters: frappe._dict) -> tuple[datetime.date | None, datetime.date | None]:
+def get_report_date_range(filters: frappe._dict) -> tuple[datetime.date, datetime.date]:
 	"""
 	Resolve `from_date`, `to_date` from filters, including validation.
 	"""
@@ -35,19 +35,16 @@ def get_report_date_range(filters: frappe._dict) -> tuple[datetime.date | None, 
 	validate_dates(filters.period_start_date, filters.period_end_date)
 	return getdate(filters.period_start_date), getdate(filters.period_end_date)
 
-
+# TODO: Handle permission for dimension
 def get_dimensions(filters: frappe._dict) -> tuple[str | None, list]:
 	"""
-	- Return (fieldname, [dimensions]) for the chosen grouping dimension.
-
-	Dimensions are sourced from GL Entry within the report's date range, intersected
-	with any row-level filter on the same field, so empty columns are avoided.
+	Return (fieldname, [dimensions]) for the chosen grouping dimension.
 	"""
-	dim_doctype = filters.get("group_by_dimension")
-	if not dim_doctype:
+	if not filters.group_by_dimension:
 		return None, []
 
-	fieldname = get_dimension_fieldname(dim_doctype)
+	# GL entry fieldname for the dimension
+	fieldname = get_dimension_fieldname(filters.group_by_dimension)
 	from_date, to_date = get_report_date_range(filters)
 
 	gl = frappe.qb.DocType("GL Entry")
@@ -58,34 +55,35 @@ def get_dimensions(filters: frappe._dict) -> tuple[str | None, list]:
 		.where(gl.company == filters.company)
 		.where(gl.is_cancelled == 0)
 		.where(gl.posting_date <= to_date)
+		.where(gl.posting_date >= from_date)
 		.where(gl[fieldname].isnotnull())
 		.where(gl[fieldname] != "")
 		.orderby(gl[fieldname])
 	)
 
-	# For P&L-like reports the lower bound matters; for BS-like cumulative
-	# reports we still use it as a heuristic to avoid columns for long-dead
-	# dimension values. Users wanting full history can widen the range.
-	if from_date:
-		query = query.where(gl.posting_date >= from_date)
-
-	# Row filters narrow the visible column set (independent stacking).
-	if filters.get("cost_center"):
-		ccs = get_cost_centers_with_children(filters.get("cost_center"))
+	if filters.cost_center:
+		ccs = get_cost_centers_with_children(filters.cost_center)
 		query = query.where(gl.cost_center.isin(ccs))
 
-	if filters.get("project"):
-		projects = filters.get("project")
+	if filters.project:
+		projects = filters.project
 		if not isinstance(projects, list):
 			projects = frappe.parse_json(projects)
+
 		query = query.where(gl.project.isin(projects))
 
 	for dimension in get_accounting_dimensions(as_list=False):
-		if filters.get(dimension.fieldname):
-			value = filters.get(dimension.fieldname)
-			if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-				value = get_dimension_with_children(dimension.document_type, value)
-			query = query.where(gl[dimension.fieldname].isin(value))
+		value = filters.get(dimension.fieldname)
+		if not value:
+			continue
+
+		if isinstance(value, str):
+			value = frappe.parse_json(value)
+
+		if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
+			value = get_dimension_with_children(dimension.document_type, value)
+
+		query = query.where(gl[dimension.fieldname].isin(value))
 
 	# return list of dimensions for the fieldname(eg: cost_center -> ["CC1", "CC2", ...])
 	return fieldname, query.run(pluck=True)
