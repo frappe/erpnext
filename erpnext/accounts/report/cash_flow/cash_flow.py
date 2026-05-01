@@ -206,8 +206,8 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 		filters.start_date = start_date
 		filters.end_date = period["to_date"]
 		filters.account_type = account_type
-		filters.dim_field = period.get("dim_field")
-		filters.dim_value = period.get("dim_value")
+		filters.dimension_field = period.get("dimension_field")
+		filters.dimension_value = period.get("dimension_value")
 
 		amount = get_account_type_based_gl_data(company, filters)
 
@@ -241,8 +241,8 @@ def get_account_type_based_gl_data(company, filters=None):
 		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
 		cond += " and cost_center in %(cost_center)s"
 
-	if filters.get("dim_field") and filters.get("dim_value"):
-		cond += f" and `{filters.dim_field}` = %(dim_value)s"
+	if filters.get("dimension_field") and filters.get("dimension_value"):
+		cond += f" and `{filters.dimension_field}` = %(dimension_value)s"
 
 	gl_sum = frappe.db.sql_list(
 		f"""

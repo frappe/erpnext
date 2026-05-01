@@ -91,12 +91,41 @@ def get_dimensions(filters: frappe._dict) -> tuple[str | None, list]:
 
 
 def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
-	"""Return a period_list-shaped axis = cross-product of (dim_value * time bucket).
+	"""
+	Return a period_list-shaped axis = cross-product of (dimension_value * time bucket).
 
-	Each entry carries `dim_field`/`dim_value` plus the full set of date fields
-	produced by `get_period_list`, so the same downstream pipeline (calculate_values,
-	get_columns, prepare_data, cash_flow.get_account_type_based_data) handles it.
-	Ordering is dim-major: all periods of dim 1, then all periods of dim 2, ...
+	Example:
+
+	```
+	[
+	    {
+	        "dimension_field": "cost_center",
+	        "dimension_value": "Center - ATD",
+	        "from_date": "2026-04-01",
+	        "from_date_fiscal_year_start_date": "2026-04-01",
+	        "key": "center___atd_mar_2027",
+	        "label": "Center - ATD - 2026-2027",
+			"period_key": "mar_2027",
+	        "to_date": "2027-03-31",
+	        "to_date_fiscal_year": "2026-2027",
+	        "year_end_date": "2027-03-31",
+	        "year_start_date": "2026-04-01",
+	    },
+	    {
+	        "dimension_field": "cost_center",
+	        "dimension_value": "Main - ATD",
+	        "from_date": "2026-04-01",
+	        "from_date_fiscal_year_start_date": "2026-04-01",
+	        "key": "main___atd_mar_2027",
+	        "label": "Main - ATD - 2026-2027",
+			"period_key": "mar_2027",
+	        "to_date": "2027-03-31",
+	        "to_date_fiscal_year": "2026-2027",
+	        "year_end_date": "2027-03-31",
+	        "year_start_date": "2026-04-01",
+	    },
+	]
+	```
 	"""
 	fieldname, dimensions = get_dimensions(filters)
 	if not fieldname or not dimensions:
@@ -126,18 +155,20 @@ def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
 	for dimension in dimensions:
 		dim_key_base = frappe.scrub(dimension)
 		for period in period_buckets:
-			key = f"{dim_key_base}__{period.key}"
+			key = f"{dim_key_base}_{period.key}"
+
 			if key in used_keys:
 				key = f"{key}_{len(used_keys)}"
 			used_keys.add(key)
 
-			cell = frappe._dict(period)  # inherit all date fields
+			cell = frappe._dict(period)
 			cell.update(
 				{
 					"key": key,
 					"label": f"{dimension} - {period.label}",
-					"dim_field": fieldname,
-					"dim_value": dimension,
+					"dimension_field": fieldname,
+					"dimension_value": dimension,
+					"period_key": period.key,  # for easy lookup
 				}
 			)
 			period_list.append(cell)
@@ -145,9 +176,9 @@ def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
 	return period_list
 
 
-def is_dimension_axis(period_list) -> bool:
+def is_dimension_axis(period_list: list[dict]) -> bool:
 	"""True if the provided period_list is a dimension-grouped axis."""
-	return bool(period_list) and bool(period_list[0].get("dim_field"))
+	return bool(period_list) and bool(period_list[0].get("dimension_field"))
 
 
 def get_period_list(
@@ -398,9 +429,9 @@ def calculate_values(
 					raise_exception=1,
 				)
 			for period in period_list:
-				# Dimension axis: skip cells whose dim_value doesn't match this entry.
+				# Dimension axis: skip cells whose dimension_value doesn't match this entry.
 				# (NULL/empty dim entries are filtered out at the period_list source.)
-				if dim_mode and entry.get(period.dim_field) != period.dim_value:
+				if dim_mode and entry.get(period.dimension_field) != period.dimension_value:
 					continue
 
 				# Bucket entry into this column if posting_date falls in the time window.
@@ -707,8 +738,8 @@ def get_accounting_entries(
 	# When grouping by an accounting dimension, expose the dimension fieldname
 	# on each row so `calculate_values` can bucket entries by dim value.
 	if filters and filters.get("group_by_dimension") and doctype == "GL Entry" and not group_by_account:
-		dim_field = get_dimension_fieldname(filters["group_by_dimension"])
-		query = query.select(gl_entry[dim_field])
+		dimension_field = get_dimension_fieldname(filters["group_by_dimension"])
+		query = query.select(gl_entry[dimension_field])
 
 	if not ignore_reporting_currency:
 		query = query.select(
