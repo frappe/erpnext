@@ -1150,6 +1150,7 @@
    "hide_seconds": 1,
    "label": "Rounding Adjustment",
    "no_copy": 1,
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1162,6 +1163,7 @@
    "label": "Rounded Total",
    "oldfieldname": "rounded_total",
    "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -2355,7 +2357,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-03-30 12:17:16.201016",
+ "modified": "2026-05-01 02:37:29.742764",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
