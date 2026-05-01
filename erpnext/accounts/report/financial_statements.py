@@ -46,8 +46,9 @@ def get_dimensions(filters: frappe._dict) -> tuple[str | None, list]:
 
 	# GL entry fieldname for the dimension
 	fieldname = get_dimension_fieldname(filters.group_by_dimension)
-	from_date, to_date = get_report_date_range(filters)
+	_, to_date = get_report_date_range(filters)
 
+	# NOTE: Ignoring from_date because dimensions should be included even if they have no activity in the period.
 	gl = frappe.qb.DocType("GL Entry")
 	query = (
 		frappe.qb.from_(gl)
@@ -56,7 +57,6 @@ def get_dimensions(filters: frappe._dict) -> tuple[str | None, list]:
 		.where(gl.company == filters.company)
 		.where(gl.is_cancelled == 0)
 		.where(gl.posting_date <= to_date)
-		.where(gl.posting_date >= from_date)
 		.where(gl[fieldname].isnotnull())
 		.where(gl[fieldname] != "")
 		.orderby(gl[fieldname])
