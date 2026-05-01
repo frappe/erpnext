@@ -95,6 +95,9 @@ def validate_filters(filters, account_details):
 def validate_party(filters):
 	party_type, party = filters.get("party_type"), filters.get("party")
 
+	if party and not party_type:
+		frappe.throw(_("Please select a Party Type before selecting a Party."))
+
 	if party and party_type:
 		for d in party:
 			if not frappe.db.exists(party_type, d):
