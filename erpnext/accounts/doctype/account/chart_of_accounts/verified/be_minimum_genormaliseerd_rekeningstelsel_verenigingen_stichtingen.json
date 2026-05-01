@@ -276,33 +276,29 @@
                 "account_number": "284",
                 "account_type": "Fixed Asset"
             },
-            "Overige vorderingen": {
+            "Overige vorderingen (285)": {
                 "Vorderingen op rekening": {
-                    "account_number": "2910",
-                    "account_type": "Receivable"
+                    "account_number": "2850",
+                    "account_type": "Fixed Asset"
                 },
                 "Te innen wissels": {
-                    "account_number": "2911",
-                    "account_type": "Receivable"
+                    "account_number": "2851",
+                    "account_type": "Fixed Asset"
                 },
-                "Te ontvangen subsidies": {
-                    "account_number": "2912",
-                    "account_type": "Receivable"
-                },
-                "Niet-rentedragende vorderingen of gekoppeld aan een abnormaal lage rente": {
-                    "account_number": "2915",
-                    "account_type": "Receivable"
+                "Vastrentende effecten": {
+                    "account_number": "2852",
+                    "account_type": "Fixed Asset"
                 },
                 "Dubieuze debiteuren": {
-                    "account_number": "2916",
-                    "account_type": "Receivable"
+                    "account_number": "2857",
+                    "account_type": "Fixed Asset"
                 },
                 "Geboekte waardeverminderingen (-)": {
-                    "account_number": "2919",
-                    "account_type": "Receivable"
+                    "account_number": "2859",
+                    "account_type": "Fixed Asset"
                 },
-                "account_number": "291",
-                "account_type": "Receivable"
+                "account_number": "285",
+                "account_type": "Fixed Asset"
             },
             "Borgtochten betaald in contanten": {
                 "account_number": "288",
@@ -331,6 +327,34 @@
                 },
                 "account_number": "290",
                 "account_type": "Receivable"
+            },
+            "Overige vorderingen (291)": {
+                "Vorderingen op rekening": {
+                    "account_number": "2910",
+                    "account_type": "Receivable"
+                },
+                "Te innen wissels": {
+                    "account_number": "2911",
+                    "account_type": "Receivable"
+                },
+                "Te ontvangen subsidies": {
+                    "account_number": "2912",
+                    "account_type": "Receivable"
+                },
+                "Niet-rentedragende vorderingen of gekoppeld aan een abnormaal lage rente": {
+                    "account_number": "2915",
+                    "account_type": "Receivable"
+                },
+                "Dubieuze debiteuren": {
+                    "account_number": "2916",
+                    "account_type": "Receivable"
+                },
+                "Geboekte waardeverminderingen (-)": {
+                    "account_number": "2919",
+                    "account_type": "Receivable"
+                },
+                "account_number": "291",
+                "account_type": "Receivable"
             }
         },
         "KLASSE 3 : VOORRADEN EN BESTELLINGEN IN UITVOERING": {
@@ -347,20 +371,64 @@
                 "account_number": "30",
                 "account_type": "Stock"
             },
-            "Aanschaffingswaarde": {
-                "account_number": "370",
+            "Aanschaffingswaarde (310)": {
+                "account_number": "310",
                 "account_type": "Stock"
             },
-            "Geboekte waardeverminderingen (-)": {
-                "account_number": "379",
+            "Geboekte waardeverminderingen (-) (319)": {
+                "account_number": "319",
+                "account_type": "Stock"
+            },
+            "Aanschaffingswaarde (320)": {
+                "account_number": "320",
+                "account_type": "Stock"
+            },
+            "Geboekte waardeverminderingen (-) (329)": {
+                "account_number": "329",
+                "account_type": "Stock"
+            },
+            "Aanschaffingswaarde (330)": {
+                "account_number": "330",
+                "account_type": "Stock"
+            },
+            "Geboekte waardeverminderingen (-) (339)": {
+                "account_number": "339",
+                "account_type": "Stock"
+            },
+            "Aanschaffingswaarde (340)": {
+                "account_number": "340",
+                "account_type": "Stock"
+            },
+            "Geboekte waardeverminderingen (-) (349)": {
+                "account_number": "349",
+                "account_type": "Stock"
+            },
+            "Aanschaffingswaarde (350)": {
+                "account_number": "350",
+                "account_type": "Stock"
+            },
+            "Geboekte waardeverminderingen (-) (359)": {
+                "account_number": "359",
                 "account_type": "Stock"
             },
             "Vooruitbetalingen": {
                 "account_number": "360",
                 "account_type": "Stock"
             },
+            "Geboekte waardeverminderingen (-) (369)": {
+                "account_number": "369",
+                "account_type": "Stock"
+            },
+            "Aanschaffingswaarde (370)": {
+                "account_number": "370",
+                "account_type": "Stock"
+            },
             "Toegerekende winst": {
                 "account_number": "371",
+                "account_type": "Stock"
+            },
+            "Geboekte waardeverminderingen (-) (379)": {
+                "account_number": "379",
                 "account_type": "Stock"
             }
         },
@@ -374,20 +442,20 @@
                 "account_number": "401",
                 "account_type": "Receivable"
             },
-            "Te innen opbrengsten": {
-                "account_number": "414",
+            "Te innen opbrengsten (404)": {
+                "account_number": "404",
                 "account_type": "Receivable"
             },
             "Vooruitbetalingen": {
                 "account_number": "406",
                 "account_type": "Receivable"
             },
-            "Dubieuze debiteuren": {
-                "account_number": "417",
+            "Dubieuze debiteuren (407)": {
+                "account_number": "407",
                 "account_type": "Receivable"
             },
-            "Geboekte waardeverminderingen (-)": {
-                "account_number": "419",
+            "Geboekte waardeverminderingen (-) (409)": {
+                "account_number": "409",
                 "account_type": "Receivable"
             },
             "Terug te vorderen btw": {
@@ -410,6 +478,10 @@
                 "account_number": "413",
                 "account_type": "Receivable"
             },
+            "Te innen opbrengsten (414)": {
+                "account_number": "414",
+                "account_type": "Receivable"
+            },
             "Niet-rentedragende vorderingen of gekoppeld aan een abnormaal lage rente": {
                 "account_number": "415",
                 "account_type": "Receivable"
@@ -418,8 +490,16 @@
                 "account_number": "416",
                 "account_type": "Receivable"
             },
+            "Dubieuze debiteuren (417)": {
+                "account_number": "417",
+                "account_type": "Receivable"
+            },
             "Borgtochten betaald in contanten": {
                 "account_number": "418",
+                "account_type": "Receivable"
+            },
+            "Geboekte waardeverminderingen (-) (419)": {
+                "account_number": "419",
                 "account_type": "Receivable"
             }
         },
@@ -536,14 +616,34 @@
         },
         "KLASSE 5 : GELDBELEGGINGEN EN LIQUIDE MIDDELEN": {
             "root_type": "Asset",
-            "Aanschaffingswaarde": {
-                "account_number": "520"
+            "Kredietinstellingen": {
+                "Bank": {
+                    "account_number": "5500",
+                    "account_type": "Bank"
+                },
+                "account_number": "55",
+                "account_type": "Bank"
             },
-            "Geboekte waardeverminderingen (-)": {
-                "account_number": "539"
+            "Aanschaffingswaarde (500)": {
+                "account_number": "500"
+            },
+            "Geboekte waardeverminderingen (-) (509)": {
+                "account_number": "509"
+            },
+            "Aanschaffingswaarde (510)": {
+                "account_number": "510"
             },
             "Nog te storten bedragen (-)": {
                 "account_number": "511"
+            },
+            "Geboekte waardeverminderingen (-) (519)": {
+                "account_number": "519"
+            },
+            "Aanschaffingswaarde (520)": {
+                "account_number": "520"
+            },
+            "Geboekte waardeverminderingen (-) (529)": {
+                "account_number": "529"
             },
             "Op meer dan één jaar": {
                 "account_number": "530"
@@ -554,6 +654,9 @@
             "Op ten hoogste één maand": {
                 "account_number": "532"
             },
+            "Geboekte waardeverminderingen (-) (539)": {
+                "account_number": "539"
+            },
             "tot 577 Kassen-contanten": {
                 "account_number": "570",
                 "account_type": "Cash"
@@ -561,10 +664,6 @@
             "Kassen-zegels": {
                 "account_number": "578",
                 "account_type": "Cash"
-            },
-            "Bank": {
-                "account_number": "5500",
-                "account_type": "Bank"
             }
         },
         "KLASSE 6 : KOSTEN": {
@@ -956,6 +1055,10 @@
                 },
                 "Geactiveerde overschotten van betaalde belastingen en voorheffingen (–)": {
                     "account_number": "6701",
+                    "account_type": "Expense Account"
+                },
+                "Geraamde belastingen": {
+                    "account_number": "6702",
                     "account_type": "Expense Account"
                 },
                 "account_number": "670",

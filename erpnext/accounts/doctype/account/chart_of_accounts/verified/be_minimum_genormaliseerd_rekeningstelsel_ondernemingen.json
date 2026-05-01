@@ -1253,7 +1253,11 @@
                     "account_type": "Expense Account"
                 },
                 "Minderwaarden op de realisatie van vaste activa": {
-                    "Minderwaarde op de realisatie van immateriële en materiële vaste activa": {
+                    "Minderwaarde op de realisatie van immateriële en materiële vaste activa (6630)": {
+                        "account_number": "6630",
+                        "account_type": "Expense Account"
+                    },
+                    "Minderwaarde op de realisatie van immateriële en materiële vaste activa (6631)": {
                         "account_number": "6631",
                         "account_type": "Expense Account"
                     },
@@ -1443,7 +1447,7 @@
                     "account_number": "751",
                     "account_type": "Income Account"
                 },
-                "Meerwaarden op de [...] realisatie van vlottende activa": {
+                "Meerwaarden op de realisatie van vlottende activa": {
                     "account_number": "752",
                     "account_type": "Income Account"
                 },
