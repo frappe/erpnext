@@ -6,6 +6,7 @@ import BankReconciliation from '@/pages/BankReconciliation'
 import { TooltipProvider } from './components/ui/tooltip'
 import BankStatementImporter from '@/pages/BankStatementImporter'
 import { LucideProvider } from 'lucide-react'
+import { ThemeProvider } from './components/ui/theme-provider'
 
 function App() {
 	useEffect(() => {
@@ -35,16 +36,21 @@ function App() {
 					}}
 					socketPort={import.meta.env.VITE_SOCKET_PORT}
 					siteName={window.frappe?.boot?.sitename ?? import.meta.env.VITE_SITE_NAME}>
-					{window.frappe?.boot?.user?.name && window.frappe?.boot?.user?.name !== 'Guest' &&
-						<BrowserRouter basename={import.meta.env.VITE_BASE_NAME ? `/${import.meta.env.VITE_BASE_NAME}` : ''}>
-							<Routes>
-								<Route index element={<BankReconciliation />} />
-								<Route path="/statement-importer" element={<BankStatementImporter />} />
-								<Route path="*" element={<Navigate to="/" />} />
-							</Routes>
-						</BrowserRouter>
-					}
-					<Toaster richColors theme='light' />
+					<ThemeProvider
+					// defaultTheme={window.frappe?.boot?.desk_theme ?? "Automatic"}
+					>
+						{window.frappe?.boot?.user?.name && window.frappe?.boot?.user?.name !== 'Guest' &&
+							<BrowserRouter basename={import.meta.env.VITE_BASE_NAME ? `/${import.meta.env.VITE_BASE_NAME}` : ''}>
+
+								<Routes>
+									<Route index element={<BankReconciliation />} />
+									<Route path="/statement-importer" element={<BankStatementImporter />} />
+									<Route path="*" element={<Navigate to="/" />} />
+								</Routes>
+							</BrowserRouter>
+						}
+						<Toaster richColors />
+					</ThemeProvider>
 				</FrappeProvider>
 			</TooltipProvider>
 		</LucideProvider>
