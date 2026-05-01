@@ -1825,7 +1825,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (
 			this._last_currency === this.frm.doc.currency &&
 			this._last_price_list_currency === this.frm.doc.price_list_currency &&
-			this._last_party_account_currency === this.frm.doc.party_account_currency
+			this._last_party_account_currency === this.frm.doc.party_account_currency &&
+			this._last_company_currency === company_currency
 		) {
 			return;
 		}
@@ -1833,6 +1834,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this._last_currency = this.frm.doc.currency;
 		this._last_price_list_currency = this.frm.doc.price_list_currency;
 		this._last_party_account_currency = this.frm.doc.party_account_currency;
+		this._last_company_currency = company_currency;
 
 		this.change_form_labels(company_currency);
 		this.change_grid_labels(company_currency);
