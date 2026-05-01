@@ -35,6 +35,7 @@ def get_report_date_range(filters: frappe._dict) -> tuple[datetime.date, datetim
 	validate_dates(filters.period_start_date, filters.period_end_date)
 	return getdate(filters.period_start_date), getdate(filters.period_end_date)
 
+
 # TODO: Handle permission for dimension
 def get_dimensions(filters: frappe._dict) -> tuple[str | None, list]:
 	"""
@@ -89,9 +90,6 @@ def get_dimensions(filters: frappe._dict) -> tuple[str | None, list]:
 	return fieldname, query.run(pluck=True)
 
 
-DIM_COLUMN_SOFT_CAP = 50
-
-
 def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
 	"""Return a period_list-shaped axis = cross-product of (dim_value * time bucket).
 
@@ -143,15 +141,6 @@ def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
 				}
 			)
 			period_list.append(cell)
-
-	if len(period_list) > DIM_COLUMN_SOFT_CAP:
-		frappe.msgprint(
-			_(
-				"Group by Dimension produced {0} columns. Consider narrowing the date range, periodicity, or row filters for readability."
-			).format(len(period_list)),
-			indicator="orange",
-			alert=True,
-		)
 
 	return period_list
 
