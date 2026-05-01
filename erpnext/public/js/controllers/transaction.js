@@ -1932,10 +1932,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	should_show_base_currency_field(field_key, df, show) {
 		if (!Object.prototype.hasOwnProperty.call(this._base_currency_field_visibility, field_key)) {
-			this._base_currency_field_visibility[field_key] = cint(df.hidden);
+			this._base_currency_field_visibility[field_key] = {
+				originalHidden: cint(df.hidden) === 1,
+			};
 		}
 
-		return show && !this._base_currency_field_visibility[field_key];
+		return show && this._base_currency_field_visibility[field_key].originalHidden !== true;
 	}
 
 	change_form_labels(company_currency) {
