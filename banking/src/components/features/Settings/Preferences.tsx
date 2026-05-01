@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { SettingsPanelDescription, SettingsPanelHeader, SettingsPanelTitle, SettingsPanelContent } from "@/components/ui/settings-dialog"
 import { Switch } from "@/components/ui/switch"
+import { useTheme } from "@/components/ui/theme-provider"
 import _ from "@/lib/translate"
 import { AccountsSettings } from "@/types/Accounts/AccountsSettings"
 import { useFrappeGetDoc, useFrappeUpdateDoc } from "frappe-react-sdk"
@@ -50,6 +51,8 @@ export const Preferences = () => {
 
                 <div className="flex flex-col flex-1">
 
+                    <ThemeSwitcher />
+
                     <div className="flex justify-between items-center gap-8 py-3">
                         <div className="flex flex-col">
                             <Label htmlFor="transfer_match_days" className="text-p-base text-ink-gray-6">{_("Number of days to match transfers")}</Label>
@@ -86,6 +89,7 @@ export const Preferences = () => {
                         <div className="flex justify-end">
                             <Switch
                                 id="automatically_run_rules_on_unreconciled_transactions"
+                                className="dark:disabled:bg-surface-gray-2"
                                 disabled={isLoading}
                                 checked={accountsSettings?.automatically_run_rules_on_unreconciled_transactions === 1}
                                 onCheckedChange={(checked) => onUpdate("automatically_run_rules_on_unreconciled_transactions", checked ? 1 : 0)}
@@ -106,6 +110,7 @@ export const Preferences = () => {
                         <div className="flex justify-end">
                             <Switch
                                 id="enable_party_matching"
+                                className="dark:disabled:bg-surface-gray-2"
                                 disabled={isLoading}
                                 checked={accountsSettings?.enable_party_matching === 1}
                                 onCheckedChange={(checked) => onUpdate("enable_party_matching", checked ? 1 : 0)}
@@ -126,6 +131,7 @@ export const Preferences = () => {
                         <div className="flex justify-end">
                             <Switch
                                 id="enable_fuzzy_matching"
+                                className="dark:disabled:bg-surface-gray-2"
                                 disabled={accountsSettings?.enable_party_matching !== 1 || isLoading}
                                 checked={accountsSettings?.enable_fuzzy_matching === 1}
                                 onCheckedChange={(checked) => onUpdate("enable_fuzzy_matching", checked ? 1 : 0)}
@@ -151,4 +157,105 @@ export const Preferences = () => {
             </div>
         </SettingsPanelContent>
     </>
+}
+
+
+const ThemeSwitcher = () => {
+
+    const { theme, setTheme } = useTheme()
+
+    const themeCards: Array<{ value: "Light" | "Dark" | "Automatic", label: string }> = [
+        {
+            value: "Light",
+            label: _("Light"),
+        },
+        {
+            value: "Dark",
+            label: _("Dark"),
+        },
+        {
+            value: "Automatic",
+            label: _("System"),
+        },
+    ]
+
+    return <div className="flex flex-col gap-3 pb-3">
+        <div className="flex flex-col">
+            <Label className="text-p-base text-ink-gray-6">{_("Theme")}</Label>
+            <p className="text-p-sm text-ink-gray-5">
+                {_("Switch between light, dark, or system theme")}
+            </p>
+        </div>
+        <div className="flex gap-3 max-lg:flex-col">
+            {themeCards.map((option) => {
+                const selected = theme === option.value
+
+                return (
+                    <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setTheme(option.value)}
+                        aria-pressed={selected}
+                        className={`flex-1 basis-0 min-w-0 overflow-hidden rounded-lg border cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-blue-4 ${selected ? "border-outline-gray-5" : "border-outline-gray-modals hover:border-outline-gray-4"}`}
+                    >
+                        {option.value === "Automatic" ? (
+                            <div className="flex w-full min-w-0">
+                                <ThemePreviewWindow theme="light" roundedClass="rounded-tl-[10.5px]" />
+                                <ThemePreviewWindow theme="dark" roundedClass="rounded-tr-[10.5px]" />
+                            </div>
+                        ) : (
+                            <ThemePreviewWindow theme={option.value === "Light" ? "light" : "dark"} roundedClass="rounded-t-[10.5px]" />
+                        )}
+                        <div className="flex items-center justify-between px-3 py-2 border-t border-outline-gray-modals">
+                            <div className="text-base text-ink-gray-7">{option.label}</div>
+                            <span className={`rounded-full size-3.5 ${selected ? "border-4 border-outline-gray-5" : "border border-outline-gray-4"}`} />
+                        </div>
+                    </button>
+                )
+            })}
+        </div>
+    </div>
+
+}
+
+const ThemePreviewWindow = ({ theme, roundedClass }: { theme: "light" | "dark", roundedClass: string }) => {
+    const isLight = theme === "light"
+    const frameClass = isLight ? "bg-white border-gray-100" : "bg-gray-900 border-gray-800"
+    const subtleSurfaceClass = isLight ? "bg-gray-50" : "bg-gray-800"
+    const mutedLineClass = isLight ? "bg-gray-200" : "bg-gray-700"
+    const mutedLineStrongClass = isLight ? "bg-gray-300" : "bg-gray-600"
+    const dividerClass = isLight ? "border-gray-100" : "border-gray-800"
+    const cardClass = isLight ? "bg-white border-gray-200" : "bg-gray-900 border-gray-700"
+
+    return <div className={`flex flex-1 min-w-0 pl-5 pt-3.5 ${isLight ? "bg-surface-gray-2" : "bg-surface-gray-3"} ${roundedClass}`}>
+        <div className={`w-full rounded-tl-sm border ${frameClass}`}>
+            <div className={`flex gap-[3px] py-[3px] px-1 border-b ${dividerClass}`}>
+                <div className="size-1.5 bg-[#FF5F57] rounded-full" />
+                <div className="size-1.5 bg-[#FEBC2D] rounded-full" />
+                <div className="size-1.5 bg-[#28C840] rounded-full" />
+            </div>
+            <div className="p-1.5">
+                <div className={`flex items-center gap-1.5 p-1 rounded-sm border ${subtleSurfaceClass} ${dividerClass}`}>
+                    <div className={`h-2 w-8 rounded-full ${mutedLineStrongClass}`} />
+                    <div className={`h-2 w-6 rounded-full ${mutedLineClass}`} />
+                    <div className={`h-2 w-7 rounded-full ml-auto ${mutedLineClass}`} />
+                </div>
+                <div className="grid grid-cols-2 gap-1 mt-1.5">
+                    <div className={`rounded-sm border p-1 ${cardClass}`}>
+                        <div className={`h-1.5 w-full rounded-full ${mutedLineStrongClass}`} />
+                        <div className={`h-1.5 w-4/5 rounded-full mt-1 ${mutedLineClass}`} />
+                        <div className={`h-1.5 w-3/5 rounded-full mt-1 ${mutedLineClass}`} />
+                    </div>
+                    <div className={`rounded-sm border p-1 ${cardClass}`}>
+                        <div className="flex items-center justify-between gap-1">
+                            <div className={`h-1.5 w-2/5 rounded-full ${mutedLineStrongClass}`} />
+                            {/* <div className={`h-2.5 w-5 rounded-sm border ${chipClass}`} /> */}
+                        </div>
+                        <div className={`h-1.5 w-full rounded-full mt-1 ${mutedLineClass}`} />
+                        <div className={`h-1.5 w-3/4 rounded-full mt-1 ${mutedLineClass}`} />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 }

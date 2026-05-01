@@ -696,7 +696,7 @@ const Entries = ({ company, isWithdrawal, currency }: { company: string, isWithd
                                 hideLabel
                                 readOnly={index === 0}
                                 style={index === 0 ? !isWithdrawal ? {
-                                    color: "black",
+                                    color: "var(--color-ink-gray-8)",
                                 } : {} : {}}
                                 currency={currency}
                                 leftSlot={index === 0 && !isWithdrawal ? <Tooltip>
@@ -709,7 +709,7 @@ const Entries = ({ company, isWithdrawal, currency }: { company: string, isWithd
                             <CurrencyFormField
                                 name={`entries.${index}.credit`}
                                 style={index === 0 && isWithdrawal ? {
-                                    color: "black",
+                                    color: "var(--color-ink-gray-8)",
                                 } : {}}
                                 label={_("Credit")}
                                 isRequired

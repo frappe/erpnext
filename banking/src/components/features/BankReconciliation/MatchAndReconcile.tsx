@@ -595,7 +595,7 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
             case "Transfer":
                 return {
                     border: "border-outline-violet-3",
-                    bg: "bg-surface-violet-1/50",
+                    bg: "bg-surface-violet-2/50",
                     text: "text-ink-violet-4",
                     theme: "violet",
                 }
@@ -875,7 +875,7 @@ const VoucherItem = ({ voucher, index }: { voucher: LinkedPayment, index: number
 const MatchBadge = ({ matchType, label }: { matchType: 'full' | 'partial' | 'none', label: string }) => {
     return <Tooltip>
         <TooltipTrigger>
-            {matchType === 'full' ? <BadgeCheck className="text-white fill-surface-green-5 size-4" /> : matchType === 'partial' ?
+            {matchType === 'full' ? <BadgeCheck className="text-ink-white fill-surface-green-5 size-4" /> : matchType === 'partial' ?
                 <Badge theme="orange" variant="subtle">{_("Partial Match")}</Badge> :
                 <XCircle className="text-ink-red-4 size-4" />}
         </TooltipTrigger>

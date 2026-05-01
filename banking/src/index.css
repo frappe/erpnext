@@ -410,8 +410,7 @@
   --color-surface-blue-6: var(--surface-blue-6);
   --color-surface-blue-7: var(--surface-blue-7);
 
-  --color-surface-orange-1: var(--surface-orange-1);
-  --color-surface-violet-1: var(--surface-violet-1);
+  --color-surface-orange-2: var(--surface-orange-2);
   --color-surface-violet-2: var(--surface-violet-2);
   --color-surface-violet-3: var(--surface-violet-3);
   --color-surface-violet-4: var(--surface-violet-4);
@@ -420,7 +419,6 @@
   --color-surface-violet-7: var(--surface-violet-7);
   --color-surface-cyan-1: var(--surface-cyan-1);
   --color-surface-cyan-2: var(--surface-cyan-2);
-  --color-surface-pink-1: var(--surface-pink-1);
 
   --color-surface-menu-bar: var(--surface-menu-bar);
   --color-surface-cards: var(--surface-cards);
@@ -726,7 +724,6 @@
 
   --surface-orange-2: var(--orange-100);
 
-  --surface-violet-1: var(--violet-50);
   --surface-violet-2: var(--violet-100);
   --surface-violet-3: var(--violet-200);
   --surface-violet-4: var(--violet-300);
@@ -735,7 +732,6 @@
   --surface-violet-7: var(--violet-800);
 
   --surface-cyan-2: var(--cyan-100);
-  --surface-pink-1: var(--pink-100);
 
   --surface-menu-bar: var(--gray-50);
   --surface-cards: var(--white);
@@ -987,44 +983,60 @@
   --ink-blue-link: var(--blue-500);
 
   /** Surface Colors - used for backgrounds **/
-  --surface-white: var(--gray-900);
-  --surface-gray-1: var(--gray-700);
-  --surface-gray-2: var(--gray-650);
+  --surface-white: var(--gray-950);
+  --surface-gray-1: var(--gray-800);
+  --surface-gray-2: var(--gray-700);
   --surface-gray-3: var(--gray-600);
   --surface-gray-4: var(--gray-500);
   --surface-gray-5: var(--gray-200);
   --surface-gray-6: var(--gray-100);
   --surface-gray-7: var(--gray-50);
 
-  --surface-red-1: var(--red-900);
-  --surface-red-2: var(--red-900-90);
-  --surface-red-3: var(--red-800-90);
+  --surface-red-1: var(--red-950);
+  --surface-red-2: var(--red-900);
+  --surface-red-3: var(--red-800);
   --surface-red-4: var(--red-700);
-  --surface-red-5: var(--red-400);
-  --surface-red-6: var(--red-500);
+  --surface-red-5: var(--red-500);
+  --surface-red-6: var(--red-400);
   --surface-red-7: var(--red-600);
 
-  --surface-green-1: var(--green-900);
-  --surface-green-2: var(--green-800);
-  --surface-green-3: var(--green-400);
+  --surface-green-1: var(--green-950);
+  --surface-green-2: var(--green-900);
+  --surface-green-3: var(--green-800);
+  --surface-green-4: var(--green-700);
+  --surface-green-5: var(--green-500);
+  --surface-green-6: var(--green-400);
+  --surface-green-7: var(--green-600);
 
-  --surface-amber-1: var(--amber-900);
-  --surface-amber-2: var(--amber-800);
-  --surface-amber-3: var(--amber-400);
+  --surface-amber-1: var(--amber-950);
+  --surface-amber-2: var(--amber-900);
+  --surface-amber-3: var(--amber-800);
+  --surface-amber-4: var(--amber-700);
+  --surface-amber-5: var(--amber-500);
+  --surface-amber-6: var(--amber-400);
+  --surface-amber-7: var(--amber-600);
 
-  --surface-blue-1: var(--blue-900);
-  --surface-blue-2: var(--blue-800);
-  --surface-blue-3: var(--blue-400);
+  --surface-blue-1: var(--blue-950);
+  --surface-blue-2: var(--blue-900);
+  --surface-blue-3: var(--blue-800);
+  --surface-blue-4: var(--blue-700);
+  --surface-blue-5: var(--blue-500);
+  --surface-blue-6: var(--blue-400);
+  --surface-blue-7: var(--blue-600);
 
-  --surface-orange-1: var(--orange-900-80);
-  --surface-violet-1: var(--violet-900);
-  --surface-cyan-1: var(--cyan-900);
-  --surface-pink-1: var(--pink-900-80);
+  --surface-orange-2: var(--orange-900);
+  --surface-violet-2: var(--violet-900);
+  --surface-violet-3: var(--violet-800);
+  --surface-violet-4: var(--violet-700);
+  --surface-violet-5: var(--violet-500);
+  --surface-violet-6: var(--violet-400);
+  --surface-violet-7: var(--violet-600);
+  --surface-cyan-2: var(--cyan-900);
 
-  --surface-menu-bar: var(--gray-900);
-  --surface-cards: var(--gray-800);
-  --surface-modal: var(--gray-700);
-  --surface-selected: var(--gray-500);
+  --surface-menu-bar: var(--gray-950);
+  --surface-cards: var(--gray-900);
+  --surface-modal: var(--gray-800);
+  --surface-selected: var(--gray-600);
 
   /** Outline Colors - used for borders/outlines **/
   --outline-white: var(--gray-950);

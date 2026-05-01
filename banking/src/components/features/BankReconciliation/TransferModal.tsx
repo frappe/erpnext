@@ -501,7 +501,7 @@ const RecommendedTransferAccount = ({ transaction, onAccountChange }: { transact
 
         return (<div className='pb-2'>
             <div className={cn("flex justify-between items-start gap-3 p-3 border rounded-lg shadow-sm",
-                isSuggested ? "border-outline-green-4 bg-surface-green-1" : "border-outline-violet-2 bg-violet-50")}>
+                isSuggested ? "border-outline-green-4 bg-surface-green-1" : "border-outline-violet-2 bg-surface-violet-2/50")}>
                 <div>
                     <div className='flex flex-col gap-3'>
                         <div className={cn("flex items-center gap-2 shrink-0",

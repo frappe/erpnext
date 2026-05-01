@@ -37,7 +37,7 @@ const EditRule = ({ onClose, ruleID }: Props) => {
         <SettingsPanelHeader
             actions={
                 <div className="flex items-center gap-2">
-                    <Button variant='outline' size='md' onClick={() => onClose()}>{_("Cancel")}</Button>
+                    <Button variant='outline' size='md' type='button' onClick={() => onClose()}>{_("Cancel")}</Button>
                     <Button type='submit' form='rule-form' size='md' disabled={isValidating || loading}>
                         {_("Save")}
                     </Button>

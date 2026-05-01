@@ -22,6 +22,9 @@ const inputGroupVariants = cva(cn("group/input-group relative flex w-full items-
   // Error state.
   "has-[[data-slot][aria-invalid=true]]:shadow-focus-red has-[[data-slot][aria-invalid=true]]:border-outline-red-3",
 
+  // Read only state
+  "has-[[data-slot][aria-readonly=true]]:bg-surface-gray-1 has-[[data-slot][aria-readonly=true]]:text-ink-gray-6 has-[[data-slot][aria-readonly=true]]:pointer-events-none",
+
 ),
   {
     variants: {

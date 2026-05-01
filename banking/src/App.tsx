@@ -37,7 +37,7 @@ function App() {
 					socketPort={import.meta.env.VITE_SOCKET_PORT}
 					siteName={window.frappe?.boot?.sitename ?? import.meta.env.VITE_SITE_NAME}>
 					<ThemeProvider
-					// defaultTheme={window.frappe?.boot?.desk_theme ?? "Automatic"}
+						defaultTheme={window.frappe?.boot?.desk_theme ?? "Automatic"}
 					>
 						{window.frappe?.boot?.user?.name && window.frappe?.boot?.user?.name !== 'Guest' &&
 							<BrowserRouter basename={import.meta.env.VITE_BASE_NAME ? `/${import.meta.env.VITE_BASE_NAME}` : ''}>
